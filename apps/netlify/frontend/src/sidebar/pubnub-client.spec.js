@@ -1,7 +1,8 @@
 import 'setimmediate';
 import PubNub from 'pubnub';
 import { createPubSub } from '../../src/sidebar/pubnub-client';
-jest.mock('pubnub');
+import { vi } from 'vitest';
+vi.mock('pubnub');
 
 const timetoken = '15641267505310000000';
 const timetoken2 = '15641267509990000000';
@@ -22,12 +23,12 @@ describe('pubnub-client', () => {
 
   beforeEach(() => {
     pubNubMock = {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      subscribe: jest.fn(),
-      unsubscribe: jest.fn(),
-      publish: jest.fn(() => Promise.resolve('PUBNUB PUBLISH RESULT')),
-      history: jest.fn(() => Promise.resolve('PUBNUB HISTORY RESULT')),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      subscribe: vi.fn(),
+      unsubscribe: vi.fn(),
+      publish: vi.fn(() => Promise.resolve('PUBNUB PUBLISH RESULT')),
+      history: vi.fn(() => Promise.resolve('PUBNUB HISTORY RESULT')),
     };
 
     PubNub.mockImplementationOnce(() => pubNubMock);
@@ -35,9 +36,13 @@ describe('pubnub-client', () => {
 
   describe('start', () => {
     it('creates a PubNub instance', () => {
-      const pubsub = createPubSub('channel', (x) => x, jest.requireActual('pubnub'));
-
+      const pubsub = createPubSub(
+        'channel',
+        (x) => x,
+        PubNub.mockImplementationOnce(() => pubNubMock)
+      );
       expect(pubsub.start).not.toThrow();
+      vi.resetAllMocks();
     });
 
     it('registers a listener and subscribes to a channel', () => {
@@ -114,7 +119,7 @@ describe('pubnub-client', () => {
   describe('addListener', () => {
     it('registers a function to be called on message', () => {
       const pubsub = createPubSub('channel', (x) => x);
-      const listener = jest.fn();
+      const listener = vi.fn();
       pubsub.addListener(listener);
       pubsub.start();
       const onMessage = pubNubMock.addListener.mock.calls[0][0].message;
@@ -130,7 +135,7 @@ describe('pubnub-client', () => {
 
     it('calls registered listener with a normalized message', () => {
       const pubsub = createPubSub('channel', normalizeFn);
-      const listener = jest.fn();
+      const listener = vi.fn();
       pubsub.addListener(listener);
       pubsub.start();
       const onMessage = pubNubMock.addListener.mock.calls[0][0].message;
@@ -147,7 +152,7 @@ describe('pubnub-client', () => {
 
     it('does not call registered listener for an invalid message', () => {
       const pubsub = createPubSub('channel', (x) => x);
-      const listener = jest.fn();
+      const listener = vi.fn();
       pubsub.addListener(listener);
       pubsub.start();
       const onMessage = pubNubMock.addListener.mock.calls[0][0].message;
