@@ -180,10 +180,6 @@ export default class Config extends Component<ConfigProps, ConfigState> {
     });
   };
 
-  selectTab = (tabId: string): void => {
-    this.setState({ currentTab: tabId });
-  };
-
   render() {
     const { currentTab } = this.state;
 
