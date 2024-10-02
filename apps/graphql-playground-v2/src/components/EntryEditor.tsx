@@ -1,5 +1,5 @@
 import React from 'react';
-import { Note } from '@contentful/forma-36-react-components';
+import { Note } from '@contentful/f36-components';
 import { EditorAppSDK } from '@contentful/app-sdk';
 
 interface EditorProps {
@@ -8,7 +8,7 @@ interface EditorProps {
 
 const Entry = (props: EditorProps) => {
   return (
-    <Note noteType="warning" style={{ margin: '1em' }}>
+    <Note variant="warning" style={{ margin: '1em' }}>
       GraphQL playground is not supported in the Entry editor location.
     </Note>
   );

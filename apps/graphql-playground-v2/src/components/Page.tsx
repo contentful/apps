@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { Card, Note } from '@contentful/forma-36-react-components';
 import { GraphiqlView } from './GraphiqlView';
 import { Workbench } from '@contentful/f36-workbench';
 import { useQuery } from '@tanstack/react-query';
-import { Modal, ModalContent } from '@contentful/f36-components';
+import { Card, Modal, ModalContent, Note } from '@contentful/f36-components';
 
 interface PageProps {
   sdk: PageAppSDK;
@@ -54,7 +53,7 @@ const Page = (props: PageProps) => {
     </Workbench>
   ) : (
     <Card style={{ margin: '1em' }}>
-      <Note noteType="warning">
+      <Note variant="warning">
         To use GraphQL playground. Please define the CPA installation parameter in your app
         configuration.
       </Note>

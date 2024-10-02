@@ -1,5 +1,5 @@
 import React from 'react';
-import { Note } from '@contentful/forma-36-react-components';
+import { Note } from '@contentful/f36-components';
 import { FieldAppSDK } from '@contentful/app-sdk';
 
 interface FieldProps {
@@ -8,7 +8,7 @@ interface FieldProps {
 
 const Field = (prop: FieldProps) => {
   return (
-    <Note noteType="warning" style={{ margin: '1em' }}>
+    <Note variant="warning" style={{ margin: '1em' }}>
       GraphQL playground is not supported in the Entry field location.
     </Note>
   );
