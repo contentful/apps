@@ -189,7 +189,7 @@ jobs:
       - checkout
       - run:
           name: Install dependencies
-          command: cd examples/javascript && npm ci
+          command: cd examples/javascript && npm i
       - run:
           name: Build
           command: cd examples/javascript && npm run build
