@@ -7,8 +7,9 @@ import {
   Skeleton,
   Subheading,
   Text,
+  TextLink,
 } from '@contentful/f36-components';
-import { CycleIcon } from '@contentful/f36-icons';
+import { CycleIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import {
   WebhookCallDetailsProps,
   WebhookCallRequest,
@@ -18,6 +19,8 @@ import AppActionCard from '../components/AppActionCard';
 import EmptyFishbowl from '../components/EmptyFishbowl';
 import useGetAppActions from '../hooks/useGetAppActions';
 import tokens from '@contentful/f36-tokens';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { PageAppSDK } from '@contentful/app-sdk';
 
 export interface ActionResultData extends WebhookCallDetailsProps {
   request: WebhookCallRequest & { function?: string };
@@ -36,6 +39,13 @@ const Page = () => {
   useEffect(() => {
     getAllAppActions();
   }, [getAllAppActions]);
+
+  const sdk = useSDK<PageAppSDK>();
+
+  const hostname = sdk.hostnames.webapp;
+  const orgId = sdk.ids.organization;
+  const appId = sdk.ids.app;
+  const appActionsUrl = `https://${hostname}/account/organizations/${orgId}/apps/definitions/${appId}/actions`;
 
   const renderAppActionList = () => {
     if (loading) {
@@ -70,6 +80,14 @@ const Page = () => {
           <br />
           Navigate to your app's definition in the Contentful Web App and create a new App Action.
         </Text>
+        <TextLink
+          href={appActionsUrl}
+          target="_blank"
+          rel="noopener noreferer"
+          icon={<ExternalLinkIcon />}
+          alignIcon="end">
+          Go to app definition
+        </TextLink>
       </Flex>
     );
   };
