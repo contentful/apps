@@ -166,9 +166,7 @@ const AppActionCard = (props: Props) => {
         <Box marginTop="spacingS">
           <Paragraph style={{ fontWeight: tokens.fontWeightDemiBold }}>Parameters</Paragraph>
           {(action as { parameters: any[] }).parameters.map((parameter) => (
-            <FormControl
-              isRequired={parameter.required}
-              style={{ marginBottom: '6px', marginTop: '4px' }}>
+            <FormControl isRequired={parameter.required} key={`${action.sys.id}-${parameter.id}`}>
               <FormControl.Label>{parameter.name || parameter.id}</FormControl.Label>
               {renderParameterInput(parameter, action.sys.id)}
             </FormControl>
@@ -177,7 +175,7 @@ const AppActionCard = (props: Props) => {
           {actionResults
             .filter((result) => result.actionId === action.sys.id)
             .map((result) => (
-              <ActionResult actionResult={result} />
+              <ActionResult actionResult={result} key={`${result.timestamp}`} />
             ))}
         </Box>
       ) : null}
