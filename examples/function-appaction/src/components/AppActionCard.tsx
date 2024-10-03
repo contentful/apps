@@ -2,11 +2,11 @@ import { PageAppSDK } from '@contentful/app-sdk';
 import {
   Box,
   Button,
-  Card,
   Checkbox,
   Flex,
   FormControl,
-  Pill,
+  Paragraph,
+  Subheading,
   Text,
   TextInput,
 } from '@contentful/f36-components';
@@ -15,6 +15,7 @@ import { AppActionProps } from 'contentful-management';
 import { useState } from 'react';
 import { ActionResultType } from '../locations/Page';
 import ActionResult from './ActionResult';
+import tokens from '@contentful/f36-tokens';
 
 interface Props {
   action: AppActionProps;
@@ -117,48 +118,70 @@ const AppActionCard = (props: Props) => {
     }
   };
 
-  return (
-    <Card key={action.sys.id}>
-      <Flex flexDirection="column" justifyContent="space-between" style={{ height: '100%' }}>
-        <Box>
-          <Pill style={{ float: 'right' }} label={action.category} />
-          <Text fontSize="fontSizeL">{action.name}</Text>
-          <Text as="h6" fontSize="fontSizeS">
-            {action.description}
-          </Text>
-          <small>
-            Created at <b>{new Date(action.sys.createdAt).toLocaleString()}</b>
-          </small>
-        </Box>
-        {(action as { parameters: any[] }).parameters.map((parameter) => (
-          <FormControl
-            isRequired={parameter.required}
-            isInvalid={parameter.required && !actionParameters[action.sys.id]?.[parameter.id]}
-            style={{ marginBottom: '6px', marginTop: '4px' }}>
-            <FormControl.Label>{parameter.name || parameter.id}</FormControl.Label>
-            {renderParameterInput(parameter, action.sys.id)}
-          </FormControl>
-        ))}
-        <Button
-          isDisabled={
-            !actionParameters[action.sys.id] ||
-            Object.values(actionParameters[action.sys.id]).some((value) => !value)
-          }
-          isFullWidth
-          variant="secondary"
-          onClick={() => callAction(action)}
-          isLoading={loadingAction === action.sys.id}
-          style={{ marginTop: '8px' }}>
-          Call Action
-        </Button>
+  const isButtonDisabled = () => {
+    const requiredParameters =
+      'parameters' in action ? action.parameters?.filter((param) => param.required) : [];
 
-        {actionResults
-          .filter((result) => result.actionId === action.sys.id)
-          .map((result) => (
-            <ActionResult actionResult={result} />
-          ))}
+    const hasEmptyRequiredParameters = requiredParameters.find((param) => {
+      const paramValue = actionParameters[action.sys.id]?.[param.id];
+      if (!paramValue) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+
+    return Boolean(hasEmptyRequiredParameters);
+  };
+
+  return (
+    <Box
+      style={{
+        height: 'auto',
+        margin: `${tokens.spacingL} auto`,
+        maxWidth: '900px',
+        backgroundColor: tokens.colorWhite,
+        borderRadius: '6px',
+        border: `1px solid ${tokens.gray300}`,
+        zIndex: 2,
+        padding: `${tokens.spacingL}`,
+      }}>
+      <Flex justifyContent="space-between">
+        <Flex flexDirection="column">
+          <Subheading marginBottom="none">{action.name}</Subheading>
+          <Text>{action.description}</Text>
+          <Text>{action.category} category</Text>
+        </Flex>
+        <Box>
+          <Button
+            isDisabled={isButtonDisabled()}
+            variant="primary"
+            onClick={() => callAction(action)}
+            isLoading={loadingAction === action.sys.id}>
+            Call Action
+          </Button>
+        </Box>
       </Flex>
-    </Card>
+      {(action as { parameters: any[] }).parameters.length ? (
+        <Box marginTop="spacingS">
+          <Paragraph style={{ fontWeight: tokens.fontWeightDemiBold }}>Parameters</Paragraph>
+          {(action as { parameters: any[] }).parameters.map((parameter) => (
+            <FormControl
+              isRequired={parameter.required}
+              style={{ marginBottom: '6px', marginTop: '4px' }}>
+              <FormControl.Label>{parameter.name || parameter.id}</FormControl.Label>
+              {renderParameterInput(parameter, action.sys.id)}
+            </FormControl>
+          ))}
+
+          {actionResults
+            .filter((result) => result.actionId === action.sys.id)
+            .map((result) => (
+              <ActionResult actionResult={result} />
+            ))}
+        </Box>
+      ) : null}
+    </Box>
   );
 };
 
