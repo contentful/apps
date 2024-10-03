@@ -1,5 +1,14 @@
-import { Box, Flex, Grid, IconButton, Subheading, Text } from '@contentful/f36-components';
-import { CycleIcon, PresentationIcon } from '@contentful/f36-icons';
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Paragraph,
+  Skeleton,
+  Subheading,
+  Text,
+} from '@contentful/f36-components';
+import { CycleIcon } from '@contentful/f36-icons';
 import {
   WebhookCallDetailsProps,
   WebhookCallRequest,
@@ -8,6 +17,7 @@ import { useEffect } from 'react';
 import AppActionCard from '../components/AppActionCard';
 import EmptyFishbowl from '../components/EmptyFishbowl';
 import useGetAppActions from '../hooks/useGetAppActions';
+import tokens from '@contentful/f36-tokens';
 
 export interface ActionResultData extends WebhookCallDetailsProps {
   request: WebhookCallRequest & { function?: string };
@@ -21,79 +31,101 @@ export interface ActionResultType {
 }
 
 const Page = () => {
-  const { getAllAppActions, appActions, loading } = useGetAppActions();
+  const { getAllAppActions, appActions, loading, error } = useGetAppActions();
 
   useEffect(() => {
     getAllAppActions();
   }, [getAllAppActions]);
 
-  return (
-    <Box
-      style={{
-        minHeight: '97vh',
-        padding: '20px',
-        margin: '20px',
-        marginTop: '0',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-        borderRadius: '8px',
-        backgroundColor: 'white',
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
-      <Box
-        style={{
-          marginBottom: '20px',
-          display: 'flex',
-          flexDirection: 'column',
-        }}>
-        <Flex>
-          <PresentationIcon style={{ marginRight: '8px' }} size="xlarge" />
-          <Text as="h1" fontSize="fontSizeXl">
-            <strong>App Actions</strong> <i>Demo Console</i>
-            <Subheading>
-              An example app for testing{' '}
-              <a href="https://www.contentful.com/developers/docs/extensibility/app-framework/app-actions/">
-                Contentful App Actions
-              </a>
-            </Subheading>
-          </Text>
-          <IconButton
-            style={{ marginLeft: 'auto' }}
-            variant="secondary"
-            aria-label="Reload App Actions"
-            icon={<CycleIcon />}
-            onClick={() => getAllAppActions()}
-          />
-        </Flex>
-      </Box>
-
-      {!loading && appActions?.items?.length ? (
-        <Box
-          style={{
-            margin: '0 auto',
-            flex: 1,
-            minWidth: '100%',
-          }}>
-          <Grid style={{ width: '100%' }} columns="1fr" rowGap="spacingM">
-            {appActions.items.map((action) => (
-              <AppActionCard action={action} />
-            ))}
-          </Grid>
-        </Box>
-      ) : (
+  const renderAppActionList = () => {
+    if (loading) {
+      return (
+        <Skeleton.Container>
+          <Skeleton.BodyText numberOfLines={4} />
+        </Skeleton.Container>
+      );
+    } else if (error) {
+      return (
         <Flex
           justifyContent="center"
           alignItems="center"
           flexDirection="column"
           style={{ flex: 1 }}>
-          <EmptyFishbowl />
-          <Text style={{ textAlign: 'center', marginTop: '20px' }}>
-            Uh oh, there's nothing here. It's time to create an App Action!
-            <br />
-            Navigate to your app's definition in the Contentful Web App and create a new App Action.
+          <Text style={{ textAlign: 'center' }}>
+            Uh oh, there was an error loading the app actions. Please try again.
           </Text>
         </Flex>
-      )}
+      );
+    } else if (appActions?.items?.length) {
+      return appActions.items.map((action) => (
+        <AppActionCard action={action} key={action.sys.id} />
+      ));
+    }
+
+    return (
+      <Flex justifyContent="center" alignItems="center" flexDirection="column" style={{ flex: 1 }}>
+        <EmptyFishbowl />
+        <Text style={{ textAlign: 'center', marginTop: '20px' }}>
+          Uh oh, there's nothing here. It's time to create an App Action!
+          <br />
+          Navigate to your app's definition in the Contentful Web App and create a new App Action.
+        </Text>
+      </Flex>
+    );
+  };
+
+  return (
+    <Box
+      style={{
+        height: 'auto',
+        margin: `${tokens.spacingXl} auto`,
+        padding: `${tokens.spacingXl} ${tokens.spacing2Xl}`,
+        maxWidth: '900px',
+        backgroundColor: tokens.colorWhite,
+        borderRadius: '6px',
+        border: `1px solid ${tokens.gray300}`,
+        zIndex: 2,
+      }}>
+      <Box>
+        <Heading>App Actions Demo Console</Heading>
+        <Paragraph>
+          An example app for testing{' '}
+          <a href="https://www.contentful.com/developers/docs/extensibility/app-framework/app-actions/">
+            {' '}
+            Contentful App Actions
+          </a>{' '}
+        </Paragraph>
+      </Box>
+
+      <Box
+        style={{
+          height: 'auto',
+          margin: `${tokens.spacingXl} auto`,
+          padding: `${tokens.spacingXl} ${tokens.spacing2Xl}`,
+          maxWidth: '900px',
+          backgroundColor: tokens.colorWhite,
+          borderRadius: '6px',
+          border: `1px solid ${tokens.gray300}`,
+          zIndex: 2,
+        }}>
+        <Box marginBottom="spacingL">
+          <Subheading>App Actions</Subheading>
+          <Paragraph>
+            All app actions associated with this app definition are listed below. Add values for
+            parameters and click Call Action to test the action. The request and response will then
+            appear for you to inspect. To view any changes made to the app actions, click Refresh
+            App Actions.
+          </Paragraph>
+          <Button
+            variant="secondary"
+            aria-label="Reload App Actions"
+            startIcon={<CycleIcon />}
+            onClick={() => getAllAppActions()}>
+            Refresh App Actions
+          </Button>
+        </Box>
+        {renderAppActionList()}
+      </Box>
     </Box>
   );
 };
