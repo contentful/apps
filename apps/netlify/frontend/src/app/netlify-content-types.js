@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { Note, Text, TextLink, Heading, Paragraph, Checkbox } from '@contentful/f36-components';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import tokens from '@contentful/f36-tokens';
 
 const styles = {
