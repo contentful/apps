@@ -27,7 +27,7 @@
     "@mux/mux-uploader-react": "1.0.1",
     "@vitejs/plugin-react": "^4.3.2",
     "crypto-browserify": "^3.12.0",
-    "happy-dom": "^15.7.4",
+    "jsdom": "^25.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-error-overlay": "6.0.11",
