@@ -14,13 +14,14 @@
     "@contentful/app-scripts": "1.2.0",
     "@contentful/app-sdk": "4.21.1",
     "@contentful/ecommerce-app-base": "3.1.67",
+    "isomorphic-fetch": "^3.0.0",
     "react": "17.0.1",
     "react-dom": "17.0.1",
-    "react-scripts": "5.0.1"
+    "vite": "^5.4.8"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts --openssl-legacy-provider build"
+    "start": "vite",
+    "build": "vite build"
   },
   "eslintConfig": {
     "extends": "react-app"
