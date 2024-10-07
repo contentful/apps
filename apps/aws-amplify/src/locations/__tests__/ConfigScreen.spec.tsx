@@ -89,7 +89,6 @@ describe('ConfigScreen', () => {
       ) as HTMLInputElement;
 
       expect(webhookUrlInput.value).toBe(testUrl);
-      console.log('screen', screen.debug());
 
       await userEvent.click(webhookUrlInput);
       fireEvent.change(
