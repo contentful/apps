@@ -261,7 +261,7 @@ describe('Mux frontend app', () => {
         ...SDK_MOCK.field,
         getValue: () => ({
           assetId: 'asset-test-123',
-          playbackId: 'playback-it-123',
+          playbackId: 'playback-test-123',
           ready: true,
           ratio: '16:9',
           max_stored_resolution: 'HD',
