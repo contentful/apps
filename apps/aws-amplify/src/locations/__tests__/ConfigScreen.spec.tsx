@@ -2,8 +2,9 @@ import { render, screen, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ConfigScreen from '../ConfigScreen';
 import { mockSdk } from '../../../test/mocks';
+import { vi } from 'vitest';
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
@@ -25,8 +26,8 @@ describe('ConfigScreen', () => {
       // simulate the user clicking the install button
       await mockSdk.app.onConfigure.mock.calls[0][0]();
 
-      expect(screen.getByText('Set Up AWS Amplify')).toBeInTheDocument();
-      expect(screen.getByText('AWS Amplify Webhook URL')).toBeInTheDocument();
+      expect(screen.getByText('Set Up AWS Amplify')).toBeDefined();
+      expect(screen.getByText('AWS Amplify Webhook URL')).toBeDefined();
     });
   });
 
@@ -71,25 +72,34 @@ describe('ConfigScreen', () => {
         amplifyWebhookUrl: testUrl,
       });
 
-      fireEvent.change(screen.getByTestId('webhookUrl'), {
-        target: {
-          value: testUrl,
-        },
-      });
+      fireEvent.change(
+        screen.getByPlaceholderText('ex. https://webhooks.amplify.us-east-1.amazonaws.com/...'),
+        {
+          target: {
+            value: testUrl,
+          },
+        }
+      );
     });
 
     it('overrides the previously saved parameters', async () => {
       const newUrl = 'https://www.newurl.com/';
-      const webhookUrlInput = screen.getByTestId('webhookUrl') as HTMLInputElement;
+      const webhookUrlInput = screen.getByPlaceholderText(
+        'ex. https://webhooks.amplify.us-east-1.amazonaws.com/...'
+      ) as HTMLInputElement;
 
       expect(webhookUrlInput.value).toBe(testUrl);
+      console.log('screen', screen.debug());
 
       await userEvent.click(webhookUrlInput);
-      fireEvent.change(screen.getByTestId('webhookUrl'), {
-        target: {
-          value: '',
-        },
-      });
+      fireEvent.change(
+        screen.getByPlaceholderText('ex. https://webhooks.amplify.us-east-1.amazonaws.com/...'),
+        {
+          target: {
+            value: '',
+          },
+        }
+      );
       await userEvent.type(webhookUrlInput, newUrl);
       await act(async () => {
         const res = await saveAppInstallation();
