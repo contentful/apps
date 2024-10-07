@@ -40,7 +40,7 @@
     "start": "cross-env BROWSER=none vite",
     "build": "GENERATE_SOURCEMAP=false vite build",
     "test": "vitest",
-    "test:ci": "CI=true vitest --runInBand",
+    "test:ci": "CI=true vitest",
     "eject": "vite eject",
     "lint": "eslint --max-warnings=0 .",
     "create-app-definition": "contentful-app-scripts create-app-definition"
