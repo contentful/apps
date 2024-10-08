@@ -44,7 +44,7 @@ async function fetchOpenAiResponse(
 async function getExistingTags(cma: PlainClientAPI): Promise<string[]> {
   try {
     const tags = await cma.tag.getMany({});
-    return tags.items.map((tag) => tag.name);
+    return tags.items.map((tag) => tag.sys.id);
   } catch (error) {
     console.error('Error fetching existing tags from Contentful:', error);
     throw error;
