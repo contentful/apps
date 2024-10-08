@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextInput, Card, Tooltip } from '@contentful/forma-36-react-components';
+import { TextInput, Card, Tooltip } from '@contentful/f36-components';
 import JiraClient from '../../jiraClient';
 import { ContentfulEntry, FormattedIssue } from '../../interfaces';
 
@@ -88,7 +88,7 @@ export default class Search extends React.Component<Props, State> {
               testId="search-result-issue"
               onClick={() => this.addLink(issue)}>
               <div>
-                <Tooltip place="bottom" content={`${issue.issuetype.name}: ${issue.key}`}>
+                <Tooltip placement="bottom" content={`${issue.issuetype.name}: ${issue.key}`}>
                   <img className="type" src={issue.issuetype.iconUrl} alt={issue.issuetype.name} />
                 </Tooltip>
               </div>
