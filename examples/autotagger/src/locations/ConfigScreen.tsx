@@ -35,10 +35,20 @@ const ConfigScreen: React.FC = () => {
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
-
+    const targetState = {
+      EditorInterface: {
+        ...currentState?.EditorInterface,
+      },
+    };
+    parameters.contentTypes?.split(',').forEach((id) => {
+      // assign the app to the sidebar on all selected content types
+      targetState.EditorInterface[id] = {
+        sidebar: { position: 0 },
+      };
+    });
     return {
       parameters: { ...parameters },
-      targetState: currentState,
+      targetState,
     };
   }, [parameters, sdk]);
 

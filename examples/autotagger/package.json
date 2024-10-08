@@ -38,8 +38,8 @@
     ]
   },
   "devDependencies": {
-    "@contentful/app-scripts": "1.25.0",
-    "@contentful/node-apps-toolkit": "^3.4.1",
+    "@contentful/app-scripts": "1.27.0",
+    "@contentful/node-apps-toolkit": "^3.9.0",
     "@testing-library/jest-dom": "^6.4.8",
     "@testing-library/react": "^16.0.0",
     "@tsconfig/recommended": "1.0.3",
@@ -53,5 +53,6 @@
     "vite": "^5.4.6",
     "vitest": "^2.0.5"
   },
-  "homepage": "."
+  "homepage": ".",
+  "type": "module"
 }
