@@ -4,7 +4,6 @@
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "^1.20.0",
-    "@originjs/vite-plugin-commonjs": "^1.0.3",
     "cross-env": "7.0.3",
     "happy-dom": "^15.7.4"
   },
@@ -16,7 +15,6 @@
     "@contentful/f36-tokens": "^4.0.5",
     "@emotion/css": "^11.13.0",
     "@rollup/plugin-commonjs": "^28.0.0",
-    "@sheerun/mutationobserver-shim": "^0.3.3",
     "@testing-library/react": "8.0.7",
     "@use-it/interval": "0.1.4",
     "@vitejs/plugin-react": "^4.3.1",
