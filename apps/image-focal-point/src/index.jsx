@@ -1,9 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
-import { Note } from '@contentful/forma-36-react-components';
+import { Note } from '@contentful/f36-components';
 import { init, locations } from '@contentful/app-sdk';
-import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
 
 import { AppView } from './components/AppView';
@@ -139,7 +138,7 @@ export class App extends React.Component {
     }
 
     return (
-      <Note noteType="negative">
+      <Note variant="negative">
         Could not find a field of type Asset with the ID &quot;{IMAGE_FIELD_ID}&quot;
       </Note>
     );

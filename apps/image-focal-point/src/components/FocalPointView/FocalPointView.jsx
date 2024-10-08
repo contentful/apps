@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, TextInput, TextLink } from '@contentful/forma-36-react-components';
+import { Button, TextInput, TextLink } from '@contentful/f36-components';
 
 import { styles } from './styles';
 
