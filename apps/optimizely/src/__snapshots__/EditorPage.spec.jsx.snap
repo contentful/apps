@@ -1,0 +1,19 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`EditorPage > should show the preemtive reconnect warning box 1`] = `
+<a
+  class="css-1lglquy"
+  data-test-id="preemptive-connect"
+>
+  connect with Optimizely.
+</a>
+`;
+
+exports[`EditorPage > should show the reauth modal when no client is available 1`] = `
+<p
+  class="css-acwcvw css-ki4iwd"
+  data-test-id="reconnect-optimizely"
+>
+  Your Optimizely session has expired. Reconnect to continue editing.
+</p>
+`;

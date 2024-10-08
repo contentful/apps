@@ -8,8 +8,6 @@ import Sidebar from './Sidebar';
 import { IncorrectContentType, isValidContentType, MissingProjectId } from './errors-messages';
 import OptimizelyClient from './optimizely-client';
 import AppPage from './AppPage';
-import '@contentful/forma-36-react-components/dist/styles.css';
-import '@contentful/forma-36-fcss/dist/styles.css';
 import 'whatwg-fetch';
 import { isCloseToExpiration } from './util';
 
@@ -38,10 +36,10 @@ if (window.location.hash) {
   window.close();
 }
 
-const OPTIMIZELY_CLIENT_APP_ID = process.env.REACT_APP_OPTIMIZELY_CLIENT_APP_ID;
+const OPTIMIZELY_CLIENT_APP_ID = import.meta.env.VITE_APP_OPTIMIZELY_CLIENT_APP_ID;
 const HOST = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
 
-const redirectUrl = process.env.REACT_APP_OPTIMIZELY_OAUTH_REDIRECT_URL || HOST;
+const redirectUrl = import.meta.env.VITE_APP_OPTIMIZELY_OAUTH_REDIRECT_URL || HOST;
 
 const url = `https://app.optimizely.com/oauth2/authorize
 ?client_id=${OPTIMIZELY_CLIENT_APP_ID}

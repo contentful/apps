@@ -5,6 +5,7 @@ import AppPage from '../src/AppPage';
 import mockProps from './mockProps';
 import projectData from './mockData/project.json';
 import contentTypesData from './mockData/contentTypes.json';
+import { vi } from 'vitest';
 
 const basicProps = {
   openAuth: () => {},
@@ -28,13 +29,13 @@ describe('AppPage', () => {
     const sdk = {
       ...basicProps.sdk,
       space: {
-        getContentTypes: jest.fn(() => Promise.resolve(contentTypesData)),
+        getContentTypes: vi.fn(() => Promise.resolve(contentTypesData)),
         updateContentType: () => {},
       },
       app: {
-        setReady: jest.fn(),
-        getParameters: jest.fn(() => Promise.resolve({ optimizelyProjectId: '123' })),
-        onConfigure: jest.fn((fn) => {
+        setReady: vi.fn(),
+        getParameters: vi.fn(() => Promise.resolve({ optimizelyProjectId: '123' })),
+        onConfigure: vi.fn((fn) => {
           configFunc = fn;
         }),
         onConfigurationCompleted: () => {},
@@ -70,12 +71,12 @@ describe('AppPage', () => {
     const sdk = {
       ...basicProps.sdk,
       space: {
-        getContentTypes: jest.fn(() => Promise.resolve(contentTypesData)),
+        getContentTypes: vi.fn(() => Promise.resolve(contentTypesData)),
       },
       app: {
-        setReady: jest.fn(),
-        getParameters: jest.fn(() => Promise.resolve({ optimizelyProjectId: '123' })),
-        onConfigure: jest.fn((fn) => {}),
+        setReady: vi.fn(),
+        getParameters: vi.fn(() => Promise.resolve({ optimizelyProjectId: '123' })),
+        onConfigure: vi.fn((fn) => {}),
         onConfigurationCompleted: () => {},
       },
     };
@@ -89,12 +90,12 @@ describe('AppPage', () => {
     const sdk = {
       ...basicProps.sdk,
       space: {
-        getContentTypes: jest.fn(() => Promise.resolve(contentTypesData)),
+        getContentTypes: vi.fn(() => Promise.resolve(contentTypesData)),
       },
       app: {
-        setReady: jest.fn(),
-        getParameters: jest.fn(() => Promise.resolve({ optimizelyProjectId: '123' })),
-        onConfigure: jest.fn((fn) => {}),
+        setReady: vi.fn(),
+        getParameters: vi.fn(() => Promise.resolve({ optimizelyProjectId: '123' })),
+        onConfigure: vi.fn((fn) => {}),
         onConfigurationCompleted: () => {},
       },
     };

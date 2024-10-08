@@ -5,6 +5,7 @@ import mockProps from './mockProps';
 import mockVariantData from './mockData/mockVariantData';
 
 import EditorPage from '../src/EditorPage';
+import { vi } from 'vitest';
 
 configure({ testIdAttribute: 'data-test-id' });
 
@@ -14,8 +15,8 @@ describe('EditorPage', () => {
     sdk = mockProps.sdk;
     sdk.entry.fields.experimentId.onValueChanged = (fn) => () => {};
 
-    Date.now = jest.fn(() => 100);
-    Math.random = jest.fn(() => 0.5);
+    Date.now = vi.fn(() => 100);
+    Math.random = vi.fn(() => 0.5);
   });
 
   it('should show the reauth modal when no client is available', () => {
@@ -41,7 +42,7 @@ describe('EditorPage', () => {
 
     sdk = { ...sdk, space };
 
-    sdk.entry.fields.experimentTitle.setValue = jest.fn();
+    sdk.entry.fields.experimentTitle.setValue = vi.fn();
     sdk.entry.fields.experimentKey.onValueChanged = (fn) => {
       valueChange = fn;
       return () => {};

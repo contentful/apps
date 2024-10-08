@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import {
   Heading,
   TextLink,
@@ -8,8 +8,8 @@ import {
   SkeletonContainer,
   SkeletonBodyText,
   Paragraph,
-} from '@contentful/forma-36-react-components';
-import tokens from '@contentful/forma-36-tokens';
+} from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 
 const styles = {
   heading: css({
