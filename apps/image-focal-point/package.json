@@ -38,5 +38,8 @@
     "> 1%",
     "not ie <= 11"
   ],
-  "homepage": "."
+  "homepage": ".",
+  "resolutions": {
+    "rollup": "npm:@rollup/wasm-node"
+  }
 }
