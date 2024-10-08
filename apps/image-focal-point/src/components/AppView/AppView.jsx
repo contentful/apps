@@ -143,7 +143,7 @@ export class AppView extends Component {
       <>
         <div className={styles.background} />
         <div className={styles.body}>
-          <React.Fragment>
+          <>
             <Heading className={styles.heading}>About Image Focal Point</Heading>
             <Paragraph>
               The Image Focal Point app allows you to associate focal point data with uploaded image
@@ -160,7 +160,7 @@ export class AppView extends Component {
                 onContentTypeIdChange={this.onContentTypeIdChange}
               />
             )}
-          </React.Fragment>
+          </>
         </div>
         <div className={styles.logo}>
           <img src={appLogo} alt="logo" />

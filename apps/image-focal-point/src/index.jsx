@@ -138,7 +138,7 @@ export class App extends React.Component {
     }
 
     return (
-      <Note noteType="negative">
+      <Note variant="negative">
         Could not find a field of type Asset with the ID &quot;{IMAGE_FIELD_ID}&quot;
       </Note>
     );
