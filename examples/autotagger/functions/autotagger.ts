@@ -56,9 +56,9 @@ async function createNewTags(cma: PlainClientAPI, newTags: string[]): Promise<vo
     await Promise.all(
       newTags.map((tag) =>
         cma.tag.createWithId(
-          { tagId: tag },
+          { tagId: tag.trim() },
           {
-            name: tag,
+            name: tag.trim(),
             sys: {
               visibility: 'private',
             },
