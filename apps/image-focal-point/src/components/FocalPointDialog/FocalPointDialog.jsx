@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Subheading, Modal } from '@contentful/forma-36-react-components';
+import { Button, Subheading, Modal } from '@contentful/f36-components';
 
 import { FocalPoint } from '../FocalPoint';
 import { ImagePreviewWithFocalPoint } from '../ImagePreviewWithFocalPoint';

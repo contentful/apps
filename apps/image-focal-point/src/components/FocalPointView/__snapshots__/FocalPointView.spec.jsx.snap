@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`App #render should render the extension field view 1`] = `
+exports[`FocalPointView > should render the focal point field view 1`] = `
 <div>
   <div
     class="css-70qvj9"
@@ -14,7 +14,7 @@ exports[`App #render should render the extension field view 1`] = `
         disabled=""
         id="focal-point"
         type="text"
-        value="Focal point not set"
+        value="x: 10px / y: 30px"
       />
     </div>
     <button
