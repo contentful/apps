@@ -20,7 +20,7 @@ interface State {
 }
 /** The Jira sidebar component */
 export default class Jira extends React.Component<Props, State> {
-  private issueInterval: NodeJS.Timeout | undefined;
+  private issueInterval: NodeJS.Timer | undefined;
 
   constructor(props: Props) {
     super(props);
