@@ -5,7 +5,6 @@ import standalone from './standalone';
 import App from './components/App';
 import Jira from './components/Jira';
 import Auth from './components/Auth';
-import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.scss';
 import JiraClient from './jiraClient';
 import { InstallationParameters } from './interfaces';
