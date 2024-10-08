@@ -5,7 +5,7 @@ import tokens from '@contentful/f36-tokens';
 import { css } from '@emotion/css';
 import { checkAndGetField } from '../util';
 import { ProjectType, fieldNames } from '../constants';
-import { wait } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 const getRuleEditUrl = (projectId, flagKey, ruleKey, environment) => {
   return `https://app.optimizely.com/v2/projects/${projectId}/flags/manage/${flagKey}/rules/${environment}/edit/${ruleKey}`;
@@ -56,7 +56,7 @@ export default function Sidebar(props) {
           setProjectType(type);
           return;
         } catch (err) {
-          await wait(1000);
+          await waitFor(1000);
         }
       }
     };

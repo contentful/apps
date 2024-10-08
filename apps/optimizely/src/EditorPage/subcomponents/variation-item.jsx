@@ -1,13 +1,13 @@
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { css } from '@emotion/css';
-import useInterval from '@use-it/interval';
 import { Paragraph, Subheading, EntryCard, Note, TextLink, Menu } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { SDKContext, GlobalStateContext } from './all-context';
 import VariationSelect from './variation-select';
 import VariationStats from './variations-stats';
 import { getAdditionalEntryInformation } from './utils';
+import useInterval from '../../hooks/useInterval';
 
 const styles = {
   variationContainer: css({

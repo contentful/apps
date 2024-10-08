@@ -12,7 +12,6 @@ import VariationsSection from './subcomponents/variations-section';
 import SectionSplitter from './subcomponents/section-splitter';
 import { SDKContext, GlobalStateContext } from './subcomponents/all-context';
 import prepareReferenceInfo, { COMBINED_LINK_VALIDATION_CONFLICT } from './reference-info';
-import useInterval from '@use-it/interval';
 import ConnectButton from '../ConnectButton';
 import { ProjectType, fieldNames } from '../constants';
 import { VARIATION_CONTAINER_ID } from '../AppPage/constants';
@@ -25,6 +24,7 @@ import {
   entryHasFxFields,
 } from '../util';
 import { getResultsUrl } from '../optimizely-client';
+import useInterval from '../hooks/useInterval';
 
 const styles = {
   root: css({
