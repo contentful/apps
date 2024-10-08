@@ -13,28 +13,28 @@ export const useAppSdkRouter = () => {
       return;
     }
 
-    const LocationRoutes = {
-      [AppSDK.locations.LOCATION_APP_CONFIG]: 'app-config',
-      [AppSDK.locations.LOCATION_ENTRY_FIELD]: 'field',
-      [AppSDK.locations.LOCATION_ENTRY_EDITOR]: 'entry-editor',
-      [AppSDK.locations.LOCATION_DIALOG]: 'dialog',
-      [AppSDK.locations.LOCATION_ENTRY_SIDEBAR]: 'sidebar',
-      [AppSDK.locations.LOCATION_PAGE]: 'page',
-      [AppSDK.locations.LOCATION_HOME]: 'home',
-    };
+    const Locations = [
+      AppSDK.locations.LOCATION_APP_CONFIG,
+      AppSDK.locations.LOCATION_ENTRY_FIELD,
+      AppSDK.locations.LOCATION_ENTRY_EDITOR,
+      AppSDK.locations.LOCATION_DIALOG,
+      AppSDK.locations.LOCATION_ENTRY_SIDEBAR,
+      AppSDK.locations.LOCATION_PAGE,
+      AppSDK.locations.LOCATION_HOME,
+    ] as const;
 
-    const path = Object.keys(LocationRoutes).find((key) => sdk?.location.is(key));
+    const requestedLocation = Locations.find((key) => sdk?.location.is(key));
 
-    if (!path) {
-      console.error('Unknown app location');
+    if (!requestedLocation) {
+      console.error(`Unknown app location`);
       return;
     }
 
-    if (location.pathname === `/${path}`) {
+    if (location.pathname === `/${requestedLocation}`) {
       return;
     }
 
     const params = new URLSearchParams(sdk?.ids);
-    return navigate(`/${path}?${params.toString()}`);
+    return navigate(`/${requestedLocation}?${params.toString()}`);
   }, [sdk]);
 };
