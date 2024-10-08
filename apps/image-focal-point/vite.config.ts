@@ -10,10 +10,6 @@ export default defineConfig({
   optimizeDeps: {
     include: ['reactjsx-runtime', 'react-dom'],
   },
-  esbuild: {
-    target: 'esnext',
-    platform: 'node',
-  },
   build: {
     outDir: 'build',
   },
