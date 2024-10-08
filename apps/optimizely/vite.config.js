@@ -1,7 +1,4 @@
 import react from '@vitejs/plugin-react';
-// import commonjs from 'vite-plugin-commonjs';
-import { esbuildCommonjs } from '@originjs/vite-plugin-commonjs';
-import commonjs from '@rollup/plugin-commonjs';
 
 import { defineConfig } from 'vite';
 
@@ -27,7 +24,7 @@ export default defineConfig(() => ({
       // include: ['node_modules/**', '**/index.js', '**/warning.js', '**/truncate.js', '**/dayjs.min.js', '**/utc.js', '**/relativeTime.js', '**/calendar.js', '**/react/jsx-runtime.js', '**/react-modal/lib/index.js', '**/lodash.get/index.js', '**/lodash.intersection/index.js', '**/use-methods/dist/index.js', '**/@testing-library/dom/dist/@testing-library/dom.esm.js', '**/pretty-format/build-es5/index.js'],
     },
     rollupOptions: {
-      treeshake: false,
+      // treeshake: true,
     },
   },
   optimizeDeps: {
