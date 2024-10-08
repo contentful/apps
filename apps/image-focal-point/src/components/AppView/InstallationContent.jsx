@@ -25,11 +25,12 @@ export function InstallationContent({
         To help you get started, we are going to create a content type for you with a title field,
         an image field and a focal point field.
       </Paragraph>
-      <FormControl id="content-type-name">
+      <FormControl id="content-type-name" testId="content-type-name">
         <FormControl.Label>Content type name</FormControl.Label>
         <TextInput
           placeholder="e.g. Image with Focal Point"
           name="contentTypeName"
+          testId="content-type-name-input"
           value={contentTypeName}
           onChange={onContentTypeNameChange}
           className={styles.input}
@@ -43,10 +44,11 @@ export function InstallationContent({
         </Flex>
         <FormControl.ValidationMessage>{validationMessageName}</FormControl.ValidationMessage>
       </FormControl>
-      <FormControl id="content-type-id">
+      <FormControl id="content-type-id" testId="content-type-id">
         <FormControl.Label>Content type ID</FormControl.Label>
         <TextInput
           name="contentTypeId"
+          testId="content-type-id-input"
           value={contentTypeId}
           onChange={onContentTypeIdChange}
           className={styles.input}

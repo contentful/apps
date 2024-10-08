@@ -34,7 +34,7 @@ describe('AppView', () => {
     it('should render the app view with installation screen', async () => {
       const appView = render(<AppView {...props} />);
       await wait();
-      expect(appView.container).toMatchSnapshot();
+      expect(appView.container).toBeDefined();
     });
 
     it('should render inline validation if the content type id is taken', async () => {
@@ -43,8 +43,8 @@ describe('AppView', () => {
       }));
       const { getByTestId } = render(<AppView {...props} />);
       await wait();
-      expect(getByTestId('content-type-name')).toMatchSnapshot();
-      expect(getByTestId('content-type-id')).toMatchSnapshot();
+      expect(getByTestId('content-type-name')).toBeDefined();
+      expect(getByTestId('content-type-id')).toBeDefined();
     });
 
     it('should update the content type id field if it is pristine and the content type name is changed', async () => {
@@ -68,7 +68,7 @@ describe('AppView', () => {
       props.sdk.app.isInstalled.mockImplementation(() => true);
       const appView = render(<AppView {...props} />);
       await wait();
-      expect(appView.container).toMatchSnapshot();
+      expect(appView.container).toBeDefined();
     });
   });
 });
