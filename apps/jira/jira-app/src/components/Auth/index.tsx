@@ -2,7 +2,7 @@
 import React from 'react';
 import OAuth from './OAuth';
 import JiraClient from '../../jiraClient';
-import { Typography, Heading, Paragraph } from '@contentful/forma-36-react-components';
+import { Heading, Paragraph } from '@contentful/f36-components';
 import { InstallationParameters } from '../../interfaces';
 
 /** Gets the expireTime from local storage to determine if the token is expired */
@@ -41,7 +41,7 @@ interface State {
 
 /** A wrapper for running the OAuth flow and passing a Jira client to the children */
 export default class AuthWrapper extends React.Component<Props, State> {
-  private expirationWatchInterval: NodeJS.Timeout | undefined;
+  private expirationWatchInterval: NodeJS.Timer | undefined;
 
   static defaultProps = {
     mode: 'full',
@@ -130,13 +130,13 @@ export default class AuthWrapper extends React.Component<Props, State> {
 
       if (isConfigMode) {
         return (
-          <Typography>
+          <>
             <Heading>Connect Jira</Heading>
             <Paragraph>
               Connect your Jira instance to Contentful to link Contentful entries to Jira issues.
             </Paragraph>
             <OAuth setToken={this.initialize} notifyError={this.props.notifyError} />
-          </Typography>
+          </>
         );
       }
 

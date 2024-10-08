@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  Typography,
-  Heading,
-  Paragraph,
-  Select,
-  Option,
-  TextInput,
-  Card,
-} from '@contentful/forma-36-react-components';
+import { Heading, Paragraph, Select, Option, TextInput, Card } from '@contentful/f36-components';
 import { JiraCloudResource, CloudProject } from '../../../interfaces';
 
 // using lodash.debouce basically breaks test with infinite timers
@@ -65,17 +57,16 @@ export default class InstanceStep extends React.Component<Props, State> {
     const { resources, pickResource, selectedResource, projects, selectedProject } = this.props;
 
     return (
-      <Typography>
+      <>
         <Heading>Configure</Heading>
         <Paragraph>Select the Jira site and project you want to connect</Paragraph>
         <div className="jira-config" data-test-id="instance-step">
           <Select
-            data-test-id="instance-selector"
+            testId="instance-selector"
             className="selector"
             // @ts-ignore: 2339
             onChange={(e) => pickResource(e.target.value)}
             isDisabled={resources.length === 1}
-            width="full"
             value={selectedResource || ''}>
             <Option value="">Select a site</Option>
             {resources.map((r) => (
@@ -102,20 +93,22 @@ export default class InstanceStep extends React.Component<Props, State> {
               }}
             />
             <div className="search-projects-results">
-              {projects.map((project) => (
-                <Card
-                  key={project.id}
-                  testId="search-result-project"
-                  onClick={() => {
-                    this.selectProject(project);
-                  }}>
-                  {project.name}
-                </Card>
-              ))}
+              {projects.map((project) => {
+                return (
+                  <Card
+                    key={project.id}
+                    testId="search-result-project"
+                    onClick={() => {
+                      this.selectProject(project);
+                    }}>
+                    {project.name}
+                  </Card>
+                );
+              })}
             </div>
           </div>
         </div>
-      </Typography>
+      </>
     );
   }
 }
