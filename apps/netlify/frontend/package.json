@@ -13,27 +13,29 @@
     "@contentful/f36-components": "^4.59.0",
     "@contentful/f36-icons": "^4.1.1",
     "@contentful/f36-tokens": "^4.0.0",
-    "@contentful/forma-36-fcss": "0.3.5",
+    "@emotion/css": "^11.13.4",
+    "@vitejs/plugin-react": "^4.3.2",
     "date-fns": "2.30.0",
-    "emotion": "10.0.27",
+    "happy-dom": "^15.7.4",
     "lodash.get": "4.4.2",
     "lodash.uniqby": "4.7.0",
     "prop-types": "15.8.1",
     "pubnub": "7.6.3",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "react-scripts": "5.0.1",
     "setimmediate": "^1.0.5",
     "uuid": "8.3.2",
+    "vite": "^5.4.8",
+    "vitest": "^2.1.1",
     "whatwg-fetch": "3.6.20"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts --openssl-legacy-provider build",
+    "start": "vite",
+    "build": "vite build",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 1VchawWvbIClHuMIyxwR5m --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 537Gb0QlvPjLKQYgLEY2jr --token ${TEST_CMA_TOKEN}",
-    "test": "TZ=UTC react-scripts test",
-    "test:ci": "TZ=UTC CI=true react-scripts test"
+    "test": "TZ=UTC vitest",
+    "test:ci": "TZ=UTC CI=true vitest"
   },
   "eslintConfig": {
     "extends": "react-app"

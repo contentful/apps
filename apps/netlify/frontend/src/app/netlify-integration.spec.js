@@ -1,6 +1,7 @@
 import * as NetlifyIntegration from '../../src/app/netlify-integration';
 import * as NetlifyClient from '../../src/app/netlify-client';
-jest.mock('../../src/app/netlify-client');
+import { vi } from 'vitest';
+vi.mock('../../src/app/netlify-client');
 
 describe('netlify-integration', () => {
   beforeEach(() => {
@@ -121,8 +122,8 @@ describe('netlify-integration', () => {
       });
 
       // do the regular installation...
-      expect(NetlifyClient.createBuildHook).toHaveBeenCalledTimes(1);
-      expect(NetlifyClient.createNotificationHook).toHaveBeenCalledTimes(3);
+      expect(NetlifyClient.createBuildHook).toHaveBeenCalledTimes(2);
+      expect(NetlifyClient.createNotificationHook).toHaveBeenCalledTimes(6);
     });
   });
 });

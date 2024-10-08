@@ -1,5 +1,5 @@
 import React from 'react';
-import { Paragraph, Button, Note } from '@contentful/forma-36-react-components';
+import { Paragraph, Button, Note } from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 
 interface SidebarProps {
@@ -10,8 +10,6 @@ const Sidebar = (props: SidebarProps) => {
   const { sdk } = props;
   // @ts-ignore
   const cpaToken = sdk?.parameters?.installation?.cpaToken;
-
-  console.log(cpaToken);
 
   sdk.window.startAutoResizer();
   const openGQLPlayground = () => {
@@ -35,7 +33,7 @@ const Sidebar = (props: SidebarProps) => {
       </Button>
     </Paragraph>
   ) : (
-    <Note noteType="warning">
+    <Note variant="warning">
       To use GraphQL playground. Please define the CPA installation parameter in your app
       configuration.
     </Note>

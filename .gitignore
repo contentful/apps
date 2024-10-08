@@ -10,3 +10,6 @@ tags
 lerna-debug.log
 .eslintcache
 .tool-versions
+.nx
+examples/**/package-lock.json
+examples/**/.npmrc
