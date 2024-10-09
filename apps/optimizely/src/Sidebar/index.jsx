@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { Button, ButtonGroup, Stack } from '@contentful/f36-components';
-import tokens from '@contentful/f36-tokens';
-import { css } from '@emotion/css';
+import { Button, Stack } from '@contentful/f36-components';
 import { checkAndGetField } from '../util';
 import { ProjectType, fieldNames } from '../constants';
 import { waitFor } from '@testing-library/react';
@@ -104,13 +102,15 @@ export default function Sidebar(props) {
   const isFx = projectType === ProjectType.FeatureExperimentation;
   console.log(
     { optimizelyProjectId, environment, flagKey, experimentKey },
-    getRuleEditUrl(optimizelyProjectId, flagKey, experimentKey, environment)
+    getRuleEditUrl(optimizelyProjectId, flagKey, experimentKey, environment),
+    getExperimentUrl(optimizelyProjectId, experimentId)
   );
 
   return (
     <div data-test-id="sidebar">
       <Stack variant="spaced" flexDirection="column">
         <Button
+          as="a"
           variant="primary"
           isFullWidth
           isDisabled={disableViewButton}
@@ -124,6 +124,7 @@ export default function Sidebar(props) {
           View in Optimizely
         </Button>
         <Button
+          as="a"
           variant="secondary"
           isFullWidth
           isDisabled={disableListButton}
