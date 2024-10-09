@@ -14,8 +14,6 @@ export default defineConfig(() => ({
       {
         find: /node_modules/,
         replacement: path.resolve(__dirname, 'node_modules'),
-        // find: /@use-it\/interval/,
-        // replacement: path.resolve(__dirname, 'node_modules', '@use-it', 'interval', 'dist', 'index.js'),
       },
     ],
   },
@@ -39,16 +37,6 @@ export default defineConfig(() => ({
       // },
     },
   },
-  // build: {
-  //   commonjsOptions: {
-  //     exclude: [],
-  //   },
-  // },
-  // esbuild: {
-  //   loader: 'jsx',
-  //   include: /.*\.jsx?$/,
-  //   exclude: [],
-  // },
   plugins: [react()],
   test: {
     environment: 'happy-dom',
