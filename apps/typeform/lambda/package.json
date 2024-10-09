@@ -10,7 +10,7 @@
     "test:ci": "jest",
     "serve:local": "DEPLOY_TIME_UNIX=$(date \"+%s\") LOCAL_DEV=true nodemon serve.js",
     "deploy": "DEPLOY_TIME_UNIX=$(date \"+%s\") sls deploy --stage $STAGE",
-    "deploy:test": "DEPLOY_TIME_UNIX=$(date \"+%s\") sls deploy --stage test"
+    "deploy:test": "DEPLOY_TIME_UNIX=$(date \"+%s\") sls create_domain && sls deploy --stage test"
   },
   "devDependencies": {
     "eslint": "6.8.0",
