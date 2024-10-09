@@ -57,7 +57,7 @@
     "@grpc/grpc-js": "^1.10.9",
     "@sentry/node": "^7.38.0",
     "cors": "^2.8.5",
-    "express": "^4.20.0",
+    "express": "^4.21.1",
     "google-auth-library": "^8.7.0",
     "google-gax": "^3.5.2",
     "googleapis": "^110.0.0",
