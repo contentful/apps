@@ -46,7 +46,7 @@ function getPercentOfTraffic(isFxProject, variation) {
 
 function useEntryCard(id) {
   const sdk = useContext(SDKContext);
-  const [state, actions] = useContext(GlobalStateContext);
+  const [state, methods] = useContext(GlobalStateContext);
   const allContentTypes = state.contentTypes;
 
   const entry = state.entries[id];
@@ -61,13 +61,13 @@ function useEntryCard(id) {
           ...entry,
           meta: getAdditionalEntryInformation(entry, allContentTypes, sdk.locales.default),
         };
-        actions.setEntry(id, data);
+        methods.setEntry(id, data);
         return entry;
       })
       .catch(() => {
         setError(true);
       });
-  }, [actions, allContentTypes, id, sdk.locales.default, sdk.space]);
+  }, [methods, allContentTypes, id, sdk.locales.default, sdk.space]);
 
   useEffect(() => {
     fetchEntry();
@@ -114,7 +114,7 @@ export function SelectedReference(props) {
       description={entry.meta.description}
       status={entry.meta.status}
       contentType={entry.meta.contentType}
-      actions={
+      methods={
         <Menu>
           <Menu.Item isDisabled={props.disableEdit} onClick={props.onEditClick}>
             Edit
