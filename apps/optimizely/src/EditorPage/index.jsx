@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { css } from '@emotion/css';
-import useMethods from 'use-methods';
+import { useMethods } from 'react-use';
 import tokens from '@contentful/f36-tokens';
 import { Note, Paragraph, Modal } from '@contentful/f36-components';
 import StatusBar from './subcomponents/status-bar';
@@ -12,6 +12,7 @@ import VariationsSection from './subcomponents/variations-section';
 import SectionSplitter from './subcomponents/section-splitter';
 import { SDKContext, GlobalStateContext } from './subcomponents/all-context';
 import prepareReferenceInfo, { COMBINED_LINK_VALIDATION_CONFLICT } from './reference-info';
+import useInterval from '../hooks/useInterval';
 import ConnectButton from '../ConnectButton';
 import { ProjectType, fieldNames } from '../constants';
 import { VARIATION_CONTAINER_ID } from '../AppPage/constants';
@@ -24,7 +25,6 @@ import {
   entryHasFxFields,
 } from '../util';
 import { getResultsUrl } from '../optimizely-client';
-import useInterval from '../hooks/useInterval';
 
 const styles = {
   root: css({
@@ -49,7 +49,7 @@ const updatetFxRuleFields = (fxRule) => {
   fxRule.status = status;
 };
 
-const methods = (state) => {
+function createMethods(state) {
   return {
     setInitialData({
       isFx,
@@ -59,54 +59,93 @@ const methods = (state) => {
       contentTypes,
       referenceInfo,
     }) {
-      state.isFx = isFx;
-      state.reloadNeeded = reloadNeeded;
-      state.primaryEnvironment = primaryEnvironment;
-      state.experiments = experiments;
-      state.contentTypes = contentTypes;
-      state.referenceInfo = referenceInfo;
-      state.loaded = true;
+      return {
+        ...state,
+        isFx,
+        reloadNeeded,
+        primaryEnvironment,
+        experiments,
+        contentTypes,
+        referenceInfo,
+        loaded: true,
+      };
     },
     setError(message) {
-      state.error = message;
+      return {
+        ...state,
+        error: message,
+      };
     },
     setExperiment(experimentKey, environment) {
-      state.experimentKey = experimentKey;
-      state.environment = environment;
-      state.meta = {};
+      return {
+        ...state,
+        experimentKey,
+        environment,
+        meta: {},
+      };
     },
     setVariations(variations) {
-      state.variations = variations;
+      return {
+        ...state,
+        variations,
+      };
     },
     setEntry(id, entry) {
-      state.entries[id] = entry;
+      return {
+        ...state,
+        entries: {
+          ...state.entries,
+          [id]: entry,
+        },
+      };
     },
     setMeta(meta) {
-      state.meta = meta;
+      return {
+        ...state,
+        meta,
+      };
     },
     setExperimentResults(id, results) {
-      state.experimentsResults[id] = results;
+      return {
+        ...state,
+        experimentsResults: {
+          ...state.experimentsResults,
+          [id]: results,
+        },
+      };
     },
     updateFxExperimentRule(key, environment, fxRule) {
       const index = state.experiments.findIndex(
         (experiment) => experiment.key === key && experiment.environment_key === environment
       );
       if (index !== -1) {
-        const expriment = { ...state.experiments[index], ...fxRule };
-        updatetFxRuleFields(expriment);
-        state.experiments[index] = expriment;
+        const experiment = { ...state.experiments[index], ...fxRule };
+        updatetFxRuleFields(experiment);
+        const updatedExperiments = [...state.experiments];
+        updatedExperiments[index] = experiment;
+        return {
+          ...state,
+          experiments: updatedExperiments,
+        };
       }
+      return state;
     },
     updateExperiment(id, experiment) {
       const index = state.experiments.findIndex(
         (experiment) => experiment.id.toString() === id.toString()
       );
       if (index !== -1) {
-        state.experiments[index] = experiment;
+        const updatedExperiments = [...state.experiments];
+        updatedExperiments[index] = experiment;
+        return {
+          ...state,
+          experiments: updatedExperiments,
+        };
       }
+      return state;
     },
   };
-};
+}
 
 const getInitialValue = (sdk) => ({
   loaded: false,
@@ -320,8 +359,9 @@ const fetchInitialData = async (sdk, client, slideInLevelPromise) => {
 };
 
 export default function EditorPage(props) {
-  const globalState = useMethods(methods, getInitialValue(props.sdk));
+  const globalState = useMethods(createMethods, getInitialValue(props.sdk));
   const [state, actions] = globalState;
+  console.log({ globalState });
   const [showAuth, setShowAuth] = useState(isCloseToExpiration(props.expires));
 
   const { sdk, client } = props;
@@ -359,6 +399,8 @@ export default function EditorPage(props) {
    * Fetch rule variations and experiment id for FX projects
    */
   useEffect(() => {
+    console.log('hook 2');
+
     let isActive = true;
 
     if (hasExperiment && isFx && !hasVariations && client) {
@@ -401,13 +443,14 @@ export default function EditorPage(props) {
     hasVariations,
     client,
     sdk,
-    actions,
   ]);
 
   /**
    * Fetch initial portion of data required to render initial state
    */
   useEffect(() => {
+    console.log('hook 3');
+
     let isActive = true;
 
     if (!state.loaded && client) {
@@ -432,12 +475,14 @@ export default function EditorPage(props) {
     return () => {
       isActive = false;
     };
-  }, [actions, state.loaded, client, sdk, slideInLevelRef]);
+  }, [state.loaded, client, sdk, slideInLevelRef]);
 
   /**
    * Pulling current experiment every 5s to get new status and variations
    */
   useEffect(() => {
+    console.log('hook 4');
+
     let isActive = true;
     let interval;
 
@@ -469,16 +514,7 @@ export default function EditorPage(props) {
       clearInterval(interval);
       isActive = false;
     };
-  }, [
-    hasExperiment,
-    isFx,
-    experimentKey,
-    experimentEnvironment,
-    experimentId,
-    flagKey,
-    client,
-    actions,
-  ]);
+  }, [hasExperiment, isFx, experimentKey, experimentEnvironment, experimentId, flagKey, client]);
 
   /*
    * Poll to see if we need to show the reauth flow preemptively
@@ -491,6 +527,8 @@ export default function EditorPage(props) {
    * Subscribe for changes in entry
    */
   useEffect(() => {
+    console.log('hook 5');
+
     const unsubsribeExperimentChange = props.sdk.entry.fields.experimentKey.onValueChanged(
       (data) => {
         const environment = checkAndGetField(props.sdk.entry, fieldNames.environment);
@@ -508,13 +546,15 @@ export default function EditorPage(props) {
       unsubscribeVariationsChange();
       unsubscribeMetaChange();
     };
-  }, [actions, props.sdk.entry]);
+  }, [props.sdk.entry]);
 
   const experimentName = experiment && experiment.name;
   /**
    * Update title every time experiment is changed
    */
   useEffect(() => {
+    console.log('hook 6');
+
     if (state.loaded) {
       const title = hasExperiment ? `[Optimizely] ${experimentName}` : '';
       props.sdk.entry.fields.experimentTitle.setValue(title);
@@ -525,6 +565,8 @@ export default function EditorPage(props) {
    * Fetch experiment results every time experiment is changed
    */
   useEffect(() => {
+    console.log('hook 7');
+
     if (state.loaded && hasExperiment && experimentId && client) {
       client
         .getExperimentResults(experimentId)
@@ -534,7 +576,7 @@ export default function EditorPage(props) {
         })
         .catch(() => {});
     }
-  }, [actions, hasExperiment, experimentId, client, state.loaded]);
+  }, [hasExperiment, experimentId, client, state.loaded]);
 
   const getExperimentResults = (experiment) => {
     if (!experiment) {

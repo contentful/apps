@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { init, locations } from '@contentful/app-sdk';
 import './index.css';
 import EditorPage from './EditorPage';
@@ -182,7 +182,9 @@ export default class App extends React.Component {
     }
   }
 }
+const container = document.getElementById('root');
+const root = createRoot(container);
 
 init((sdk) => {
-  render(<App sdk={sdk} />, document.getElementById('root'));
+  root.render(<App sdk={sdk} />);
 });
