@@ -1,3 +1,3 @@
 domainName: typeform-test.ctfapps.net
-CLIENT_ID: 2vyzzT2AjqrtfWKmaigvZjF8oYwUXrJABmcS5WK4MPJg
-CLIENT_SECRET: 8GmDhTmmk6pp8Yrhs5kMUcJK93xhpsMvTrMDQ4Hre515
+CLIENT_ID: ${ssm:/aws/reference/secretsmanager/ci/apps/typeform/test/client-id}
+CLIENT_SECRET: ${ssm:/aws/reference/secretsmanager/ci/apps/typeform/test/client-secret}
