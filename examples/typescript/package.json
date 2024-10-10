@@ -4,8 +4,8 @@
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "^4.29.1",
-    "@contentful/f36-components": "4.70.0",
-    "@contentful/f36-tokens": "4.0.5",
+    "@contentful/f36-components": "4.73.0",
+    "@contentful/f36-tokens": "4.1.0",
     "@contentful/react-apps-toolkit": "1.2.16",
     "contentful-management": "10.46.4",
     "emotion": "10.0.27",
