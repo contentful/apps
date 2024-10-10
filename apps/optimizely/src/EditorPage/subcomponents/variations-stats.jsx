@@ -82,7 +82,7 @@ export default function VariationStats(props) {
             label="visitors"
           />
         </div>
-        <Button variant="secondary" href={url} target="_blank">
+        <Button as="a" variant="secondary" href={url} target="_blank">
           See all results
         </Button>
       </div>

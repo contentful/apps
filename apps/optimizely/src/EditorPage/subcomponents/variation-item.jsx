@@ -71,7 +71,7 @@ function useEntryCard(id) {
 
   useEffect(() => {
     fetchEntry();
-  }, [fetchEntry]);
+  }, []);
 
   useInterval(() => {
     fetchEntry();
