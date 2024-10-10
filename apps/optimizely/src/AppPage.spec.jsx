@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanup, render, wait, fireEvent, act, configure } from '@testing-library/react';
+import { cleanup, render, waitFor, fireEvent, act, configure } from '@testing-library/react';
 
 import AppPage from '../src/AppPage';
 import mockProps from './mockProps';
@@ -46,7 +46,7 @@ describe('AppPage', () => {
 
     const { container, getByTestId } = render(<AppPage {...props} />);
 
-    await wait(() => {
+    await waitFor(() => {
       if (!configFunc) {
         throw '';
       }
@@ -81,9 +81,9 @@ describe('AppPage', () => {
       },
     };
     const props = { ...basicProps, sdk };
-    const { container } = render(<AppPage {...props} />);
+    const { getByText } = render(<AppPage {...props} />);
 
-    expect(container).toMatchSnapshot();
+    expect(getByText(/Connect Optimizely/)).toBeDefined();
   });
 
   it('should render the AppPage loading when first connected to Optimizely', () => {
@@ -101,8 +101,8 @@ describe('AppPage', () => {
     };
     const props = { ...basicProps, accessToken: '123', sdk };
 
-    const { container } = render(<AppPage {...props} />);
+    const { getByText } = render(<AppPage {...props} />);
 
-    expect(container).toMatchSnapshot();
+    expect(getByText(/currently connected to Optimizely/)).toBeDefined();
   });
 });

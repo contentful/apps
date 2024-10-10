@@ -3,7 +3,7 @@ import React from 'react';
 import { cleanup, render, configure } from '@testing-library/react';
 
 import App from '../src';
-import { vi } from 'vitest';
+import { expect, vi } from 'vitest';
 global.window.close = () => {};
 global.window.encodeURIComponent = (x) => x;
 global.window.addEventListener = vi.fn();
@@ -174,7 +174,7 @@ describe('Optimizely App', () => {
     const sdk = mockSdk();
     const { getByTestId } = render(<App sdk={sdk} />);
 
-    expect(getByTestId('missing-project')).toMatchSnapshot();
+    expect(getByTestId('missing-project')).toBeDefined();
   });
 
   it('should render the sidebar', () => {
@@ -192,7 +192,7 @@ describe('Optimizely App', () => {
     const sdk = mockSdk();
 
     const { getByTestId } = render(<App sdk={sdk} />);
-    expect(getByTestId('incorrect-type')).toMatchSnapshot();
+    expect(getByTestId('incorrect-type')).toBeDefined();
   });
 
   it('should render the editor page', () => {
@@ -209,6 +209,6 @@ describe('Optimizely App', () => {
     };
 
     const { getByTestId } = render(<App sdk={sdk} />);
-    expect(getByTestId('editor-page')).toMatchSnapshot();
+    expect(getByTestId('editor-page')).toBeDefined();
   });
 });

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, wait, configure } from '@testing-library/react';
+import { render, waitFor, configure } from '@testing-library/react';
 
 import mockProps from './mockProps';
 import mockVariantData from './mockData/mockVariantData';
@@ -63,11 +63,7 @@ describe('EditorPage', () => {
       <EditorPage sdk={sdk} expires={expires} client={client} openAuth={() => {}} />
     );
 
-    await wait();
-    valueChange('landing-page-hero');
-
-    await wait();
-
-    expect(container);
+    await waitFor(() => valueChange('landing-page-hero'));
+    await waitFor(() => expect(container));
   });
 });

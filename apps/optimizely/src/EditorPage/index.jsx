@@ -399,8 +399,6 @@ export default function EditorPage(props) {
    * Fetch rule variations and experiment id for FX projects
    */
   useEffect(() => {
-    console.log('hook 2');
-
     let isActive = true;
 
     if (hasExperiment && isFx && !hasVariations && client) {
@@ -449,8 +447,6 @@ export default function EditorPage(props) {
    * Fetch initial portion of data required to render initial state
    */
   useEffect(() => {
-    console.log('hook 3');
-
     let isActive = true;
 
     if (!state.loaded && client) {
@@ -481,8 +477,6 @@ export default function EditorPage(props) {
    * Pulling current experiment every 5s to get new status and variations
    */
   useEffect(() => {
-    console.log('hook 4');
-
     let isActive = true;
     let interval;
 
@@ -527,8 +521,6 @@ export default function EditorPage(props) {
    * Subscribe for changes in entry
    */
   useEffect(() => {
-    console.log('hook 5');
-
     const unsubsribeExperimentChange = props.sdk.entry.fields.experimentKey.onValueChanged(
       (data) => {
         const environment = checkAndGetField(props.sdk.entry, fieldNames.environment);
@@ -553,8 +545,6 @@ export default function EditorPage(props) {
    * Update title every time experiment is changed
    */
   useEffect(() => {
-    console.log('hook 6');
-
     if (state.loaded) {
       const title = hasExperiment ? `[Optimizely] ${experimentName}` : '';
       props.sdk.entry.fields.experimentTitle.setValue(title);
@@ -565,8 +555,6 @@ export default function EditorPage(props) {
    * Fetch experiment results every time experiment is changed
    */
   useEffect(() => {
-    console.log('hook 7');
-
     if (state.loaded && hasExperiment && experimentId && client) {
       client
         .getExperimentResults(experimentId)
