@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { AppExtensionSDK } from '@contentful/app-sdk';
-import { Button } from '@contentful/forma-36-react-components';
+import { Button } from '@contentful/f36-components';
 import { BASE_URL, CLIENT_ID } from '../constants';
 
 interface Props {
   sdk?: AppExtensionSDK;
   expireSoon?: boolean;
   isFullWidth: boolean;
-  buttonType?: 'primary' | 'positive' | 'negative' | 'muted' | 'naked' | undefined;
+  buttonType?: 'primary' | 'positive' | 'negative' | 'secondary' | 'transparent' | undefined;
   setToken: (token: string) => void;
 }
 
@@ -65,7 +65,7 @@ export function TypeformOAuth({
   };
 
   return (
-    <Button onClick={executeOauth} isFullWidth={isFullWidth} buttonType={buttonType} {...rest}>
+    <Button onClick={executeOauth} isFullWidth={isFullWidth} variant={buttonType} {...rest}>
       {expireSoon ? 'Reauthenticate with Typeform' : 'Sign in to Typeform'}
     </Button>
   );
