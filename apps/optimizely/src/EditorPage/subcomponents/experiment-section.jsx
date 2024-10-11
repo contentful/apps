@@ -24,21 +24,30 @@ const styles = {
 
 const NOT_SELECTED = '-1';
 
-export default function ExperimentSection(props) {
+export default function ExperimentSection({
+  loaded,
+  reloadNeeded,
+  hasVariations,
+  isFx,
+  experiment,
+  experiments = [],
+  onChangeExperiment,
+  onClearVariations,
+}) {
   const displayNames = new Map();
-  if (props.experiments) {
-    props.experiments.forEach((experiment) => {
-      if (props.isFx) {
-        const flagName = experiment.flag_name;
-        const ruleKey = experiment.name || experiment.key;
-        const environment = experiment.environment_key;
-        const onOff = experiment.enabled ? 'on' : 'off';
+  if (experiments) {
+    experiments.forEach((exp) => {
+      if (isFx) {
+        const flagName = exp.flag_name;
+        const ruleKey = exp.name || exp.key;
+        const environment = exp.environment_key;
+        const onOff = exp.enabled ? 'on' : 'off';
         const displayName = `${ruleKey} (flag: ${flagName}, environment: ${environment}, ${onOff})`;
 
-        displayNames.set(experiment.id.toString(), displayName);
+        displayNames.set(exp.id.toString(), displayName);
       } else {
-        const displayName = `${experiment.name || experiment.key} (${experiment.status})`;
-        displayNames.set(experiment.id.toString(), displayName);
+        const displayName = `${exp.name || exp.key} (${exp.status})`;
+        displayNames.set(exp.id.toString(), displayName);
       }
     });
   }
@@ -51,42 +60,34 @@ export default function ExperimentSection(props) {
         <FormControl.Label>Optimizely experiment</FormControl.Label>
         <Select
           isRequired
-          value={props.experiment ? props.experiment.id.toString() : ''}
+          value={experiment ? experiment.id.toString() : ''}
           onChange={(e) => {
             const value = e.target.value;
             if (value === NOT_SELECTED) {
-              props.onChangeExperiment({
+              onChangeExperiment({
                 experimentId: '',
                 experimentKey: '',
               });
             } else {
-              const experiment = props.experiments.find(
-                (experiment) => experiment.id.toString() === value
-              );
-              if (experiment) {
-                // props.onChangeExperiment({
-                //   experimentId: experiment.id.toString(),
-                //   experimentKey: experiment.key.toString(),
-                // });
-                props.onChangeExperiment(experiment);
+              const selectedExperiment = experiments.find((exp) => exp.id.toString() === value);
+              if (selectedExperiment) {
+                onChangeExperiment(selectedExperiment);
               }
             }
           }}
           width="large"
-          isDisabled={
-            props.hasVariations === true || props.loaded === false || props.reloadNeeded === true
-          }
+          isDisabled={hasVariations === true || loaded === false || reloadNeeded === true}
           id="experiment"
           name="experiment">
-          {props.loaded === false && (
+          {loaded === false && (
             <Select.Option value={NOT_SELECTED}>Fetching experiments...</Select.Option>
           )}
-          {props.loaded && (
+          {loaded && (
             <React.Fragment>
               <Select.Option value={NOT_SELECTED}>Select Optimizely experiment</Select.Option>
-              {props.experiments.map((experiment) => (
-                <Select.Option key={experiment.id.toString()} value={experiment.id.toString()}>
-                  {displayNames.get(experiment.id.toString())}
+              {experiments.map((exp) => (
+                <Select.Option key={exp.id.toString()} value={exp.id.toString()}>
+                  {displayNames.get(exp.id.toString())}
                 </Select.Option>
               ))}
             </React.Fragment>
@@ -94,16 +95,14 @@ export default function ExperimentSection(props) {
         </Select>
       </FormControl>
 
-      {props.hasVariations === true && !props.reloadNeeded && (
+      {hasVariations === true && !reloadNeeded && (
         <Paragraph className={styles.clearDescription}>
           To change experiment, first{' '}
-          <TextLink onClick={props.onClearVariations}>clear the content assigned</TextLink>.
+          <TextLink onClick={onClearVariations}>clear the content assigned</TextLink>.
         </Paragraph>
       )}
-      {props.experiment && props.experiment.description && (
-        <Paragraph className={styles.description}>
-          Description: {props.experiment.description}
-        </Paragraph>
+      {experiment && experiment.description && (
+        <Paragraph className={styles.description}>Description: {experiment.description}</Paragraph>
       )}
     </React.Fragment>
   );
@@ -119,8 +118,4 @@ ExperimentSection.propTypes = {
   experiments: PropTypes.arrayOf(ExperimentType.isRequired),
   onChangeExperiment: PropTypes.func.isRequired,
   onClearVariations: PropTypes.func.isRequired,
-};
-
-ExperimentSection.defaultProps = {
-  experiments: [],
 };

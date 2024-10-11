@@ -88,13 +88,13 @@ export function SelectedReference(props) {
   const { entry, loading, error } = useEntryCard(props.sys.id);
 
   if (loading) {
-    return <EntryCard loading className={styles.entryCard} />;
+    return <EntryCard isLoading={loading} className={styles.entryCard} />;
   }
 
   if (error) {
     return (
-      <Note variant="warning" title="Entry is missing" className={styles.missingNote}>
-        <TextLink linkType="secondary" onClick={props.onRemoveClick}>
+      <Note variant="secondary" title="Entry is missing" className={styles.missingNote}>
+        <TextLink variant="secondary" onClick={props.onRemoveClick}>
           Remove missing entry
         </TextLink>
       </Note>

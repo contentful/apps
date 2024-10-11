@@ -30,8 +30,8 @@ export default function VariationSelect(props) {
               Create entry and link
             </TextLink>
           </Menu.Trigger>
-          <Menu.List maxHeight={300}>
-            <Menu.SectionTitle isTitle>Select content type</Menu.SectionTitle>
+          <Menu.List style={{ maxHeight: '200px' }}>
+            <Menu.SectionTitle>Select content type</Menu.SectionTitle>
             {linkContentTypes.map((value, index) => (
               <Menu.Item
                 key={value}
@@ -46,7 +46,7 @@ export default function VariationSelect(props) {
       </div>
       <div className={styles.item}>
         <TextLink
-          disabled={props.disableEdit}
+          isDisabled={props.disableEdit}
           icon={<LinkIcon />}
           onClick={props.onLinkExistingClick}>
           Link an existing entry

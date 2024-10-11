@@ -100,11 +100,6 @@ export default function Sidebar(props) {
     !projectType || (projectType === ProjectType.FeatureExperimentation && !environment);
 
   const isFx = projectType === ProjectType.FeatureExperimentation;
-  console.log(
-    { optimizelyProjectId, environment, flagKey, experimentKey },
-    getRuleEditUrl(optimizelyProjectId, flagKey, experimentKey, environment),
-    getExperimentUrl(optimizelyProjectId, experimentId)
-  );
 
   return (
     <div data-test-id="sidebar">

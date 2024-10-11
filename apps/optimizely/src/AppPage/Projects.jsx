@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { css } from '@emotion/css';
 
 import tokens from '@contentful/f36-tokens';
-import { Heading, Select, Option, FormControl } from '@contentful/f36-components';
+import { Heading, Select, FormControl } from '@contentful/f36-components';
 
 const styles = {
   section: css({
@@ -11,7 +11,7 @@ const styles = {
   }),
 };
 
-export default function Projects({ allProjects, selectedProject, onProjectChange }) {
+export default function Projects({ allProjects = [], selectedProject, onProjectChange }) {
   return (
     <>
       <Heading>Optimizely Project</Heading>
@@ -26,22 +26,18 @@ export default function Projects({ allProjects, selectedProject, onProjectChange
           onChange={onProjectChange}
           isDisabled={!allProjects}
           width="large">
-          <Option value="">Select Optimizely Project</Option>
+          <Select.Option value="">Select Optimizely Project</Select.Option>
           {!!allProjects.length &&
             allProjects.map((p) => (
-              <Option key={p.id} value={p.id.toString()}>
+              <Select.Option key={p.id} value={p.id.toString()}>
                 {p.name}
-              </Option>
+              </Select.Option>
             ))}
         </Select>
       </FormControl>
     </>
   );
 }
-
-Projects.defaultProps = {
-  allProjects: [],
-};
 
 Projects.propTypes = {
   allProjects: PropTypes.array,

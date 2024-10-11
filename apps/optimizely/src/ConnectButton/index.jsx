@@ -3,9 +3,6 @@ import PropTypes from 'prop-types';
 import { css } from '@emotion/css';
 import { Button } from '@contentful/f36-components';
 
-// import OptimizelyLogo from './OptimizelyLogo';
-
-// import OptimizelyLogo from '../optimizely-logo';
 import AuthButton from './AuthButton';
 
 const styles = {
@@ -26,7 +23,7 @@ export default function ConnectButton({ openAuth }) {
       onClick={openAuth}
       testId="connect-button"
       isFullWidth
-      variant="naked">
+      variant="transparent">
       <AuthButton />
     </Button>
   );

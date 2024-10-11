@@ -361,7 +361,6 @@ const fetchInitialData = async (sdk, client, slideInLevelPromise) => {
 export default function EditorPage(props) {
   const globalState = useMethods(createMethods, getInitialValue(props.sdk));
   const [state, actions] = globalState;
-  // console.log({ globalState });
   const [showAuth, setShowAuth] = useState(isCloseToExpiration(props.expires));
 
   const { sdk, client } = props;
@@ -704,7 +703,7 @@ export default function EditorPage(props) {
           />
           <SectionSplitter />
           {showAuth && (
-            <Note variant="warning" className={styles.paragraph}>
+            <Note variant="secondary" className={styles.paragraph}>
               Your Optimizely session will expire soon. Click here to{' '}
               <a onClick={props.openAuth} className={styles.link} data-test-id="preemptive-connect">
                 connect with Optimizely.

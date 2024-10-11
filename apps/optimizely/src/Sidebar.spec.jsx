@@ -161,7 +161,6 @@ describe('Sidebar', () => {
 
   it('should run all lifecycle methods', () => {
     const sdk = mockSdk();
-    console.log({ sdk }, sdk.contentType.fields);
     const { unmount } = render(<Sidebar sdk={sdk} />);
 
     expect(sdk.window.startAutoResizer).toHaveBeenCalledTimes(1);
@@ -178,10 +177,6 @@ describe('Sidebar', () => {
 
   it('should use the project ID to create urls', () => {
     const sdk = mockSdk();
-    // console.log({sdk}, sdk.contentType.fields.experimentKey.getValue())
-    const { optimizelyProjectId, optimizelyProjectType } = sdk.parameters.installation;
-    console.log({ optimizelyProjectType });
-
     const { getByTestId } = render(<Sidebar sdk={sdk} />);
 
     expect(getByTestId('view-experiment').href).toBe(

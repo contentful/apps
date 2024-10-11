@@ -28,11 +28,11 @@ const styles = {
   }),
 };
 
-function ReferenceItem(props) {
+function ReferenceItem({ entry, onClick, separator }) {
   return (
     <div className={styles.item}>
-      <Tooltip content={`${props.entry.contentTypeName}`} place="bottom">
-        <TextLink onClick={props.onClick}>{props.entry.title + props.separator}</TextLink>
+      <Tooltip content={`${entry.contentTypeName}`} place="bottom">
+        <TextLink onClick={onClick}>{entry.title + separator}</TextLink>
       </Tooltip>
     </div>
   );
@@ -57,14 +57,14 @@ Container.propTypes = {
   children: PropTypes.any,
 };
 
-export default function ReferencesSection(props) {
+export default function ReferencesSection({ loaded, references = [], sdk }) {
   const onItemClick = (id) => () => {
-    props.sdk.navigator.openEntry(id, {
+    sdk.navigator.openEntry(id, {
       slideIn: true,
     });
   };
 
-  if (!props.loaded) {
+  if (!loaded) {
     return (
       <Container>
         <SkeletonContainer svgHeight="30px" clipId="references-section">
@@ -76,17 +76,17 @@ export default function ReferencesSection(props) {
 
   return (
     <Container>
-      {props.references.length > 0 &&
-        props.references.map((entry, index) => (
+      {references.length > 0 &&
+        references.map((entry, index) => (
           <React.Fragment key={entry.id}>
             <ReferenceItem
               entry={entry}
               onClick={onItemClick(entry.id)}
-              separator={index !== props.references.length - 1 ? ', ' : ''}
+              separator={index !== references.length - 1 ? ', ' : ''}
             />
           </React.Fragment>
         ))}
-      {props.references.length === 0 && (
+      {references.length === 0 && (
         <Paragraph className={styles.emptyParagraph}>
           No other entries link to this entry.
         </Paragraph>
@@ -99,8 +99,4 @@ ReferencesSection.propTypes = {
   loaded: PropTypes.bool.isRequired,
   references: PropTypes.array,
   sdk: PropTypes.object.isRequired,
-};
-
-ReferencesSection.defaultProps = {
-  references: [],
 };

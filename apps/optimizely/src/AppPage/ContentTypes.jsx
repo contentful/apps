@@ -179,7 +179,6 @@ export default function ContentTypes({
                   <Select
                     id="content-types"
                     name="content-types"
-                    labelText="Content Type"
                     isDisabled={isEditMode}
                     width="medium"
                     onChange={(e) => onSelectContentType(e.target.value)}
