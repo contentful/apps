@@ -3,9 +3,10 @@ import {
   Box,
   Button,
   Checkbox,
+  CopyButton,
   Flex,
   FormControl,
-  Paragraph,
+  Stack,
   Subheading,
   Text,
   TextInput,
@@ -15,7 +16,7 @@ import { AppActionProps } from 'contentful-management';
 import { useState } from 'react';
 import { ActionResultType } from '../locations/Page';
 import ActionResult from './ActionResult';
-import tokens from '@contentful/f36-tokens';
+import { styles } from './AppActionCard.styles';
 
 interface Props {
   action: AppActionProps;
@@ -39,21 +40,22 @@ const AppActionCard = (props: Props) => {
           appActionId: action.sys.id,
         },
         {
-          parameters: actionParameters[action.sys.id],
+          parameters: actionParameters[action.sys.id] || {},
         }
       );
 
       const timestamp = new Date().toLocaleString();
 
-      setActionResults((prevResults) => [
-        ...prevResults,
+      setActionResults(() => [
         { success: true, data: result, timestamp, actionId: action.sys.id },
+        ...actionResults,
       ]);
     } catch (error) {
       const timestamp = new Date().toLocaleString();
-      setActionResults((prevResults) => [
-        ...prevResults,
+      console.log(error);
+      setActionResults(() => [
         { success: false, error, timestamp, actionId: action.sys.id },
+        ...actionResults,
       ]);
     } finally {
       setLoadingAction(null);
@@ -135,23 +137,23 @@ const AppActionCard = (props: Props) => {
   };
 
   return (
-    <Box
-      style={{
-        height: 'auto',
-        margin: `${tokens.spacingL} auto`,
-        maxWidth: '900px',
-        backgroundColor: tokens.colorWhite,
-        borderRadius: '6px',
-        border: `1px solid ${tokens.gray300}`,
-        zIndex: 2,
-        padding: `${tokens.spacingL}`,
-      }}>
-      <Flex justifyContent="space-between">
-        <Flex flexDirection="column">
+    <Box className={styles.card}>
+      <Flex justifyContent="space-between" alignItems="center">
+        <Stack spacing="spacing2Xs" flexDirection="column" alignItems="flex-start">
           <Subheading marginBottom="none">{action.name}</Subheading>
-          <Text>{action.description}</Text>
-          <Text>{action.category} category</Text>
-        </Flex>
+          <div className={styles.sysId}>
+            <Text fontColor="gray600" marginRight="spacing2Xs">
+              {props.action.category} ·
+            </Text>
+            <Text fontColor="gray600" fontWeight="fontWeightMedium" marginRight="spacing2Xs">
+              ID
+            </Text>
+            <Text fontColor="gray600" className={styles.id}>
+              {props.action.sys.id}{' '}
+            </Text>
+            <CopyButton className={styles.copyButton} value={props.action.sys.id} />
+          </div>
+        </Stack>
         <Box>
           <Button
             isDisabled={isButtonDisabled()}
@@ -164,21 +166,23 @@ const AppActionCard = (props: Props) => {
       </Flex>
       {(action as { parameters: any[] }).parameters.length ? (
         <Box marginTop="spacingS">
-          <Paragraph style={{ fontWeight: tokens.fontWeightDemiBold }}>Parameters</Paragraph>
+          <Box marginBottom="spacingM">
+            <Subheading as="h4">Parameters</Subheading>
+          </Box>
           {(action as { parameters: any[] }).parameters.map((parameter) => (
             <FormControl isRequired={parameter.required} key={`${action.sys.id}-${parameter.id}`}>
               <FormControl.Label>{parameter.name || parameter.id}</FormControl.Label>
               {renderParameterInput(parameter, action.sys.id)}
             </FormControl>
           ))}
-
-          {actionResults
-            .filter((result) => result.actionId === action.sys.id)
-            .map((result) => (
-              <ActionResult actionResult={result} key={`${result.timestamp}`} />
-            ))}
         </Box>
       ) : null}
+
+      {actionResults
+        .filter((result) => result.actionId === action.sys.id)
+        .map((result) => (
+          <ActionResult actionResult={result} key={`${result.timestamp}`} />
+        ))}
     </Box>
   );
 };
