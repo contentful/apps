@@ -127,7 +127,7 @@ const Page = () => {
           zIndex: 2,
         }}>
         <Box marginBottom="spacingL">
-          <Subheading>App Actions</Subheading>
+          <Subheading as="h2">App Actions</Subheading>
           <Paragraph>
             All app actions associated with this app definition are listed below. Add values for
             parameters and click Call Action to test the action. The request and response will then
