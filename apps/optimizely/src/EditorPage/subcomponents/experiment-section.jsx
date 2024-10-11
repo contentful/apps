@@ -52,7 +52,7 @@ export default function ExperimentSection({
     });
   }
   return (
-    <React.Fragment>
+    <>
       <Heading element="h2" className={styles.heading}>
         Experiment:
       </Heading>
@@ -83,14 +83,14 @@ export default function ExperimentSection({
             <Select.Option value={NOT_SELECTED}>Fetching experiments...</Select.Option>
           )}
           {loaded && (
-            <React.Fragment>
+            <>
               <Select.Option value={NOT_SELECTED}>Select Optimizely experiment</Select.Option>
               {experiments.map((exp) => (
                 <Select.Option key={exp.id.toString()} value={exp.id.toString()}>
                   {displayNames.get(exp.id.toString())}
                 </Select.Option>
               ))}
-            </React.Fragment>
+            </>
           )}
         </Select>
       </FormControl>
@@ -104,7 +104,7 @@ export default function ExperimentSection({
       {experiment && experiment.description && (
         <Paragraph className={styles.description}>Description: {experiment.description}</Paragraph>
       )}
-    </React.Fragment>
+    </>
   );
 }
 
