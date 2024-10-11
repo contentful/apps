@@ -183,18 +183,8 @@ export default class App extends React.Component {
   }
 }
 
-// init((sdk) => {
-//   const container = document.getElementById('root');
-//   const root = createRoot(container);
-//   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-//     root.render(<Config sdk={sdk} />);
-//   } else {
-//     throw new Error('rendered outside of config location');
-//   }
-// });
-const container = document.getElementById('root');
-const root = createRoot(container);
-
 init((sdk) => {
+  const container = document.getElementById('root');
+  const root = createRoot(container);
   root.render(<App sdk={sdk} />);
 });

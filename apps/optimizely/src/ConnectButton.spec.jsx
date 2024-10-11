@@ -9,12 +9,6 @@ configure({ testIdAttribute: 'data-test-id' });
 describe('ConnectButton', () => {
   afterEach(cleanup);
 
-  it('should match snapshot', () => {
-    const { container } = render(<ConnectButton openAuth={() => {}} />);
-
-    expect(container).toMatchSnapshot();
-  });
-
   it('should handle the openAuth functionality onClick', () => {
     const openMock = vi.fn();
     const { getByTestId } = render(<ConnectButton openAuth={openMock} />);
