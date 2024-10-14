@@ -1,8 +1,8 @@
 import { Row, RunReportResponse } from 'types';
-import Note from 'components/common/Note/Note';
-import LineChart from 'components/main-app/LineChart/LineChart';
-import { parseDayAndMonth } from 'helpers/DateHelpers/DateHelpers';
-import ErrorDisplay from 'components/main-app/ErrorDisplay/ErrorDisplay';
+import Note from '../../common/Note/Note';
+import LineChart from '../LineChart/LineChart';
+import { parseDayAndMonth } from '../../../helpers/DateHelpers/DateHelpers';
+import ErrorDisplay from '../ErrorDisplay/ErrorDisplay';
 import { EMPTY_DATA_MSG } from '../constants/noteMessages';
 import { styles } from './ChartContent.styles';
 

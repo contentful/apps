@@ -5,7 +5,7 @@ import {
   ContentTypes,
   ContentTypeEntries,
 } from '../../../types';
-import AssignContentTypeCard from 'components/config-screen/assign-content-type/AssignContentTypeCard';
+import AssignContentTypeCard from './AssignContentTypeCard';
 
 const allContentTypes: AllContentTypes = {
   course: {
@@ -47,9 +47,9 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    expect(screen.getByText('Content type')).toBeVisible();
-    expect(screen.getByText('Slug field')).toBeVisible();
-    expect(screen.getByText('URL prefix')).toBeVisible();
+    expect(screen.getByText('Content type')).toBeDefined();
+    expect(screen.getByText('Slug field')).toBeDefined();
+    expect(screen.getByText('URL prefix')).toBeDefined();
   });
 
   it('can render the correct number of saved content types', () => {

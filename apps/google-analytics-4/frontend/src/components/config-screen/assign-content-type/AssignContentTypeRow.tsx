@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Box, Select, Stack, TextInput, TextLink } from '@contentful/f36-components';
-import { styles } from 'components/config-screen/assign-content-type/AssignContentType.styles';
+import { styles } from './AssignContentType.styles';
 import { EditorInterface } from '@contentful/app-sdk';
 import { AllContentTypes, AllContentTypeEntries, ContentTypes, ContentTypeValue } from 'types';
-import ContentTypeWarning from 'components/config-screen/assign-content-type/ContentTypeWarning';
+import ContentTypeWarning from './ContentTypeWarning';
 
 interface Props {
   contentTypeEntry: [string, ContentTypeValue];

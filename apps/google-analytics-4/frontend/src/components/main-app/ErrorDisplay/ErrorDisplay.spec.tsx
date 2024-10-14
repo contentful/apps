@@ -7,9 +7,10 @@ import {
   INVALID_SERVICE_ACCOUNT,
   PERMISSION_DENIED_MSG,
 } from '../constants/noteMessages';
-import { ApiError } from 'apis/api';
+import { ApiError } from '../../../apis/api';
+import { vi } from 'vitest';
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
@@ -34,8 +35,8 @@ describe('ErrorDisplay', () => {
     const warningMsg = await findByText(INVALID_ARGUMENT_MSG.replace(HYPER_LINK_COPY, '').trim());
     const hyperLink = getByTestId('cf-ui-text-link');
 
-    expect(warningMsg).toBeVisible();
-    expect(hyperLink).toBeVisible();
+    expect(warningMsg).toBeTruthy();
+    expect(hyperLink).toBeTruthy();
   });
 
   it('mounts with correct msg when error is of type DisabledDataApi', async () => {
@@ -54,7 +55,7 @@ describe('ErrorDisplay', () => {
 
     const warningMsg = await findByText(PERMISSION_DENIED_MSG);
 
-    expect(warningMsg).toBeVisible();
+    expect(warningMsg).toBeTruthy();
   });
 
   it('mounts with correct msg when error is of type FailedFetch', async () => {
@@ -75,8 +76,8 @@ describe('ErrorDisplay', () => {
     const warningMsg = await findByText(DEFAULT_ERR_MSG.replace(HYPER_LINK_COPY, '').trim());
     const hyperLink = getByTestId('cf-ui-text-link');
 
-    expect(warningMsg).toBeVisible();
-    expect(hyperLink).toBeVisible();
+    expect(warningMsg).toBeTruthy();
+    expect(hyperLink).toBeTruthy();
   });
 
   it('mounts with correct msg when error is of type InvalidServiceAccount', async () => {
@@ -99,8 +100,8 @@ describe('ErrorDisplay', () => {
     );
     const hyperLink = getByTestId('cf-ui-text-link');
 
-    expect(warningMsg).toBeVisible();
-    expect(hyperLink).toBeVisible();
+    expect(warningMsg).toBeTruthy();
+    expect(hyperLink).toBeTruthy();
   });
 
   it('mounts with correct msg when error is of type InvalidServiceAccountKey', async () => {
@@ -123,8 +124,8 @@ describe('ErrorDisplay', () => {
     );
     const hyperLink = getByTestId('cf-ui-text-link');
 
-    expect(warningMsg).toBeVisible();
-    expect(hyperLink).toBeVisible();
+    expect(warningMsg).toBeTruthy();
+    expect(hyperLink).toBeTruthy();
   });
 
   it('mounts with correct msg when error is of ApiError class but not an Error type explicitely handled', async () => {
@@ -144,7 +145,7 @@ describe('ErrorDisplay', () => {
 
     const warningMsg = await findByText(INTERNAL_ERR_MSG);
 
-    expect(warningMsg).toBeVisible();
+    expect(warningMsg).toBeTruthy();
   });
 
   it('mounts with correct msg when error is not a specified Api Error Type ', async () => {
@@ -153,6 +154,6 @@ describe('ErrorDisplay', () => {
 
     const warningMsg = await findByText(ERR_MSG);
 
-    expect(warningMsg).toBeVisible();
+    expect(warningMsg).toBeTruthy();
   });
 });

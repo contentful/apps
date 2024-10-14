@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import WarningDisplay from 'components/config-screen/WarningDisplay/WarningDisplay';
+import WarningDisplay from '../WarningDisplay/WarningDisplay';
 
 describe('WarningDisplay component', () => {
   it('renders an error icon and correct tooltip content', async () => {

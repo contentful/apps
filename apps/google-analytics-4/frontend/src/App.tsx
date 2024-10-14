@@ -11,7 +11,7 @@ import Home from './locations/Home';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { contentfulContext } from './helpers/contentfulContext';
 import { upperFirst } from 'lodash';
-import SegmentClient from 'clients/segmentClient';
+import SegmentClient from './clients/segmentClient';
 
 const ComponentLocationSettings = {
   [locations.LOCATION_APP_CONFIG]: ConfigScreen,

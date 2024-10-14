@@ -1,7 +1,7 @@
 import { Box, Tooltip } from '@contentful/f36-components';
 import { WarningIcon, ErrorCircleIcon } from '@contentful/f36-icons';
 import { ConfigurationWarningTypes } from 'types';
-import { WarningTypes } from 'components/config-screen/WarningDisplay/constants/warningMessages';
+import { WarningTypes } from './constants/warningMessages';
 
 interface Props {
   warningType: ConfigurationWarningTypes;

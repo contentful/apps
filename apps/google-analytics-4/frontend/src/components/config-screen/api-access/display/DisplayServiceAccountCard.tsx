@@ -15,19 +15,19 @@ import {
   CopyButton,
 } from '@contentful/f36-components';
 import { CycleIcon, ExternalLinkIcon } from '@contentful/f36-icons';
-import { useApi } from 'hooks/useApi';
+import { useApi } from '../../../../hooks/useApi';
 import { ServiceAccountKeyId } from 'types';
-import { ApiErrorType, ERROR_TYPE_MAP, isApiErrorType } from 'apis/apiTypes';
+import { ApiErrorType, ERROR_TYPE_MAP, isApiErrorType } from '../../../../apis/apiTypes';
 import { KeyValueMap } from 'contentful-management';
 import {
   getAdminApiErrorChecklistStatus,
   getDataApiErrorChecklistStatus,
   getGa4PropertyErrorChecklistStatus,
   getServiceKeyChecklistStatus,
-} from 'components/config-screen/api-access/display/ChecklistUtils';
-import ServiceAccountChecklist from 'components/config-screen/api-access/display/ServiceAccountChecklist';
+} from './ChecklistUtils';
+import ServiceAccountChecklist from './ServiceAccountChecklist';
 import { styles } from './DisplayServiceAccountCard.styles';
-import HyperLink from 'components/common/HyperLink/HyperLink';
+import HyperLink from '../../../common/HyperLink/HyperLink';
 
 interface Props {
   serviceAccountKeyId: ServiceAccountKeyId;

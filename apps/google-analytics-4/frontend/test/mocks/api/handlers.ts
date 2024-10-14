@@ -1,5 +1,5 @@
 import { rest } from 'msw';
-import { config } from 'config';
+import { config } from '../../../src/config';
 import { mockAccountSummary } from './mockData';
 import { runReportData } from '../../../../lambda/public/sampleData/MockData';
 const apiRoot = config.backendApiUrl;

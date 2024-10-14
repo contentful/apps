@@ -7,7 +7,7 @@ import { SDKProvider } from '@contentful/react-apps-toolkit';
 import LocalhostWarning from './components/LocalhostWarning';
 import App from './App';
 import { config } from './config';
-import { SegmentAnalyticsProvider } from 'providers/SegmentAnalyticsProvider';
+import { SegmentAnalyticsProvider } from './providers/SegmentAnalyticsProvider';
 
 Sentry.init({
   dsn: config.sentryDSN,

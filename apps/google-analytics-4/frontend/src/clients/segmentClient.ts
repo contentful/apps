@@ -1,7 +1,7 @@
-import { config } from 'config';
+import { config } from '../config';
 import { AnalyticsBrowser } from '@segment/analytics-next';
 import { KnownSDK } from '@contentful/app-sdk';
-import { getUserCookieConsent } from 'utils/cookieConsent';
+import { getUserCookieConsent } from '../utils/cookieConsent';
 
 let clientInstance: SegmentClient;
 

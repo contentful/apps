@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import { Stack, Select, TextLink, Paragraph } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { AccountSummariesType, ConfigurationWarningTypes } from 'types';
-import { styles } from 'components/config-screen/map-account-property/MapAccountPropertyDropdown.styles';
+import { styles } from './MapAccountPropertyDropdown.styles';
 import {
   NO_PROPERTIES,
   getPropertyDeletedMsg,
   WarningTypes,
-} from 'components/config-screen/WarningDisplay/constants/warningMessages';
-import WarningDisplay from 'components/config-screen/WarningDisplay/WarningDisplay';
-import Note from 'components/common/Note/Note';
+} from '../WarningDisplay/constants/warningMessages';
+import WarningDisplay from '../WarningDisplay/WarningDisplay';
+import Note from '../../common/Note/Note';
 
 interface Props {
   onSelectionChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;

@@ -11,7 +11,7 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import tokens from '@contentful/f36-tokens';
-import { parseRemToPxInt } from 'helpers/parse-styling-token/parse-styling-token';
+import { parseRemToPxInt } from '../../../helpers/parse-styling-token/parse-styling-token';
 import { styles } from './LineChart.styles';
 
 const ACCESSIBILITY_LABEL = 'Analytics line chart';

@@ -6,7 +6,7 @@ import {
   ContentfulContextHeaders,
   RunReportParamsType,
 } from '../types';
-import { fetchFromApi } from 'apis/fetchApi';
+import { fetchFromApi } from './fetchApi';
 import {
   Headers,
   ApiErrorType,
@@ -16,7 +16,7 @@ import {
   AccountSummaries,
   ZAccountSummaries,
   RunReportData,
-} from 'apis/apiTypes';
+} from './apiTypes';
 import { upperFirst } from 'lodash';
 import { CMAClient } from '@contentful/app-sdk';
 

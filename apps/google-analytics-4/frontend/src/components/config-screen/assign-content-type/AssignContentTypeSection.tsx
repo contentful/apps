@@ -22,8 +22,8 @@ import {
   ContentTypes,
   ContentTypeValue,
 } from 'types';
-import AssignContentTypeCard from 'components/config-screen/assign-content-type/AssignContentTypeCard';
-import { sortAndFormatAllContentTypes } from 'helpers/contentTypeHelpers/contentTypeHelpers';
+import AssignContentTypeCard from './AssignContentTypeCard';
+import { sortAndFormatAllContentTypes } from '../../../helpers/contentTypeHelpers/contentTypeHelpers';
 interface Props {
   mergeSdkParameters: Function;
   onIsValidContentTypeAssignment: Function;
