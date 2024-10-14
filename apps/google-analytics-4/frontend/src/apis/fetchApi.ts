@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import fetchWithSignedRequest from '../helpers/signed-requests';
-import { ApiError } from 'apis/api';
-import { Headers, ApiErrorType, ERROR_TYPE_MAP, ZApiErrorResponse } from 'apis/apiTypes';
+import { ApiError } from './api';
+import { Headers, ApiErrorType, ERROR_TYPE_MAP, ZApiErrorResponse } from './apiTypes';
 import { CMAClient } from '@contentful/app-sdk';
 
 export async function fetchFromApi<T>(

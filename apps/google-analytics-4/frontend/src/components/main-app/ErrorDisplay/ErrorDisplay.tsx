@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import Note from 'components/common/Note/Note';
-import { ApiErrorType, ERROR_TYPE_MAP, isApiErrorType } from 'apis/apiTypes';
+import Note from '../../common/Note/Note';
+import { ApiErrorType, ERROR_TYPE_MAP, isApiErrorType } from '../../../apis/apiTypes';
 import {
   INVALID_ARGUMENT_MSG,
   PERMISSION_DENIED_MSG,
   INVALID_SERVICE_ACCOUNT,
-} from 'components/main-app/constants/noteMessages';
+} from '../constants/noteMessages';
 import { AppConfigPageHyperLink, SupportHyperLink } from './CommonErrorDisplays';
 
 interface Props {

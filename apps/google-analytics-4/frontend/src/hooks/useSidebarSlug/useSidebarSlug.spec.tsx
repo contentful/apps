@@ -5,10 +5,11 @@ import * as useSDK from '@contentful/react-apps-toolkit';
 import { ContentTypeValue } from 'types';
 import * as getFieldValue from '../useGetFieldValue';
 import { EntrySys } from '@contentful/app-sdk';
+import { vi } from 'vitest';
 
-jest.mock('@contentful/react-apps-toolkit', () => ({ useSDK: jest.fn() }));
+vi.mock('@contentful/react-apps-toolkit', () => ({ useSDK: vi.fn() }));
 
-jest.mock('../useGetFieldValue', () => jest.fn());
+vi.mock('../useGetFieldValue', () => ({ default: vi.fn() }));
 
 interface Props {
   slugFieldInfo: ContentTypeValue;
@@ -48,148 +49,147 @@ const mockInstallationParams = {
 
 describe('useSidebarSlug hook', () => {
   it('returns slug info and status when content types are configured correctly', () => {
-    jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+    vi.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
       ...mockInstallationParams,
-      ...jest.requireActual('@contentful/react-apps-toolkit'),
+      ...(vi.importActual('@contentful/react-apps-toolkit') as any as any),
       entry: {
-        ...jest.requireActual('@contentful/react-apps-toolkit').entry,
+        ...(vi.importActual('@contentful/react-apps-toolkit') as any as any).entry,
         fields: { slugField: {} },
-        onSysChanged: jest.fn((cb) =>
+        onSysChanged: vi.fn((cb) =>
           cb({
             publishedAt: '2020202',
           } as unknown as EntrySys)
         ),
       },
     }));
-    jest.spyOn(getFieldValue, 'default').mockImplementation(() => '/fieldValue');
+    vi.spyOn(getFieldValue, 'default').mockImplementation(() => '/fieldValue');
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '/en-US' };
 
     render(<TestComponent slugFieldInfo={slugFieldInfo} />);
 
-    expect(getByText('slugFieldIsConfigured: true')).toBeVisible();
-    expect(getByText('contentTypeHasSlugField: true')).toBeVisible();
-    expect(getByText('isPublished: true')).toBeVisible();
-    expect(getByText('reportSlug: /en-US/fieldValue')).toBeVisible();
-    expect(getByText('slugFieldValue: /fieldValue')).toBeVisible();
-    expect(getByText('isContentTypeWarning: false')).toBeVisible();
+    expect(getByText('slugFieldIsConfigured: true')).toBeDefined();
+    expect(getByText('contentTypeHasSlugField: true')).toBeDefined();
+    expect(getByText('isPublished: true')).toBeDefined();
+    expect(getByText('reportSlug: /en-US/fieldValue')).toBeDefined();
+    expect(getByText('slugFieldValue: /fieldValue')).toBeDefined();
+    expect(getByText('isContentTypeWarning: false')).toBeDefined();
   });
 
   it('returns slug info and status when content types not configured correctly', () => {
-    jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+    vi.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
       ...mockInstallationParams,
-      ...jest.requireActual('@contentful/react-apps-toolkit'),
+      ...(vi.importActual('@contentful/react-apps-toolkit') as any as any),
       entry: {
-        ...jest.requireActual('@contentful/react-apps-toolkit').entry,
+        ...(vi.importActual('@contentful/react-apps-toolkit') as any as any).entry,
         fields: {},
-        onSysChanged: jest.fn((cb) =>
+        onSysChanged: vi.fn((cb) =>
           cb({
             publishedAt: '',
           } as unknown as EntrySys)
         ),
       },
     }));
-    jest.spyOn(getFieldValue, 'default').mockImplementation(() => '');
+    vi.spyOn(getFieldValue, 'default').mockImplementation(() => '');
 
     const slugFieldInfo = { slugField: '', urlPrefix: '/en-US' };
 
     render(<TestComponent slugFieldInfo={slugFieldInfo} />);
 
-    expect(getByText('slugFieldIsConfigured: false')).toBeVisible();
-    expect(getByText('contentTypeHasSlugField: false')).toBeVisible();
-    expect(getByText('isPublished: false')).toBeVisible();
-    expect(getByText('reportSlug: /en-US')).toBeVisible();
-    expect(getByText('slugFieldValue:')).toBeVisible();
-    expect(getByText('isContentTypeWarning: true')).toBeVisible();
+    expect(getByText('slugFieldIsConfigured: false')).toBeDefined();
+    expect(getByText('contentTypeHasSlugField: false')).toBeDefined();
+    expect(getByText('isPublished: false')).toBeDefined();
+    expect(getByText('reportSlug: /en-US')).toBeDefined();
+    expect(getByText('slugFieldValue:')).toBeDefined();
+    expect(getByText('isContentTypeWarning: true')).toBeDefined();
   });
 
   it('returns slug info and status when field value is updated', async () => {
-    jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+    vi.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
       ...mockInstallationParams,
-      ...jest.requireActual('@contentful/react-apps-toolkit'),
+      ...(vi.importActual('@contentful/react-apps-toolkit') as any),
       entry: {
-        ...jest.requireActual('@contentful/react-apps-toolkit').entry,
+        ...(vi.importActual('@contentful/react-apps-toolkit') as any).entry,
         fields: { slugField: {} },
-        onSysChanged: jest.fn((cb) =>
+        onSysChanged: vi.fn((cb) =>
           cb({
             publishedAt: '2020202',
           } as unknown as EntrySys)
         ),
       },
     }));
-    jest
-      .spyOn(getFieldValue, 'default')
+    vi.spyOn(getFieldValue, 'default')
       .mockImplementationOnce(() => '/fieldValue')
       .mockImplementationOnce(() => '/differentFieldValue');
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '/en-US' };
 
     render(<TestComponent slugFieldInfo={slugFieldInfo} />);
 
-    expect(getByText('slugFieldIsConfigured: true')).toBeVisible();
-    expect(getByText('contentTypeHasSlugField: true')).toBeVisible();
-    expect(getByText('isPublished: true')).toBeVisible();
-    expect(getByText('reportSlug: /en-US/fieldValue')).toBeVisible();
-    expect(getByText('slugFieldValue: /fieldValue')).toBeVisible();
-    expect(getByText('isContentTypeWarning: false')).toBeVisible();
+    expect(getByText('slugFieldIsConfigured: true')).toBeDefined();
+    expect(getByText('contentTypeHasSlugField: true')).toBeDefined();
+    expect(getByText('isPublished: true')).toBeDefined();
+    expect(getByText('reportSlug: /en-US/fieldValue')).toBeDefined();
+    expect(getByText('slugFieldValue: /fieldValue')).toBeDefined();
+    expect(getByText('isContentTypeWarning: false')).toBeDefined();
 
     const newSlugFieldValue = await findByText('slugFieldValue: /differentFieldValue');
 
-    expect(newSlugFieldValue).toBeVisible();
-    expect(getByText('reportSlug: /en-US/differentFieldValue')).toBeVisible();
+    expect(newSlugFieldValue).toBeDefined();
+    expect(getByText('reportSlug: /en-US/differentFieldValue')).toBeDefined();
   });
 
   it('returns slug info and status when a short text list field is selected and no URL prefix', async () => {
-    jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+    vi.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
       ...mockInstallationParams,
-      ...jest.requireActual('@contentful/react-apps-toolkit'),
+      ...(vi.importActual('@contentful/react-apps-toolkit') as any),
       entry: {
-        ...jest.requireActual('@contentful/react-apps-toolkit').entry,
+        ...(vi.importActual('@contentful/react-apps-toolkit') as any).entry,
         fields: { slugField: {} },
-        onSysChanged: jest.fn((cb) =>
+        onSysChanged: vi.fn((cb) =>
           cb({
             publishedAt: '2020202',
           } as unknown as EntrySys)
         ),
       },
     }));
-    jest.spyOn(getFieldValue, 'default').mockImplementation(() => ['category', 'pants', 'jeans']);
+    vi.spyOn(getFieldValue, 'default').mockImplementation(() => ['category', 'pants', 'jeans']);
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '' };
 
     render(<TestComponent slugFieldInfo={slugFieldInfo} />);
 
-    expect(getByText('slugFieldIsConfigured: true')).toBeVisible();
-    expect(getByText('contentTypeHasSlugField: true')).toBeVisible();
-    expect(getByText('isPublished: true')).toBeVisible();
-    expect(getByText('reportSlug: /category/pants/jeans')).toBeVisible();
-    expect(getByText('slugFieldValue: category,pants,jeans')).toBeVisible();
-    expect(getByText('isContentTypeWarning: false')).toBeVisible();
+    expect(getByText('slugFieldIsConfigured: true')).toBeDefined();
+    expect(getByText('contentTypeHasSlugField: true')).toBeDefined();
+    expect(getByText('isPublished: true')).toBeDefined();
+    expect(getByText('reportSlug: /category/pants/jeans')).toBeDefined();
+    expect(getByText('slugFieldValue: category,pants,jeans')).toBeDefined();
+    expect(getByText('isContentTypeWarning: false')).toBeDefined();
   });
 
   it('returns slug info and status with trailing slash', async () => {
     mockInstallationParams.parameters.installation.forceTrailingSlash = true;
 
-    jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+    vi.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
       ...mockInstallationParams,
-      ...jest.requireActual('@contentful/react-apps-toolkit'),
+      ...(vi.importActual('@contentful/react-apps-toolkit') as any),
       entry: {
-        ...jest.requireActual('@contentful/react-apps-toolkit').entry,
+        ...(vi.importActual('@contentful/react-apps-toolkit') as any).entry,
         fields: { slugField: {} },
-        onSysChanged: jest.fn((cb) =>
+        onSysChanged: vi.fn((cb) =>
           cb({
             publishedAt: '2020202',
           } as unknown as EntrySys)
         ),
       },
     }));
-    jest.spyOn(getFieldValue, 'default').mockImplementation(() => '/fieldValue');
+    vi.spyOn(getFieldValue, 'default').mockImplementation(() => '/fieldValue');
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '/en-US' };
 
     render(<TestComponent slugFieldInfo={slugFieldInfo} />);
 
-    expect(getByText('slugFieldIsConfigured: true')).toBeVisible();
-    expect(getByText('contentTypeHasSlugField: true')).toBeVisible();
-    expect(getByText('isPublished: true')).toBeVisible();
-    expect(getByText('reportSlug: /en-US/fieldValue/')).toBeVisible();
-    expect(getByText('slugFieldValue: /fieldValue')).toBeVisible();
-    expect(getByText('isContentTypeWarning: false')).toBeVisible();
+    expect(getByText('slugFieldIsConfigured: true')).toBeDefined();
+    expect(getByText('contentTypeHasSlugField: true')).toBeDefined();
+    expect(getByText('isPublished: true')).toBeDefined();
+    expect(getByText('reportSlug: /en-US/fieldValue/')).toBeDefined();
+    expect(getByText('slugFieldValue: /fieldValue')).toBeDefined();
+    expect(getByText('isContentTypeWarning: false')).toBeDefined();
   });
 });

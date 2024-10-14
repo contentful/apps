@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
-import ServiceAccountChecklist from 'components/config-screen/api-access/display/ServiceAccountChecklist';
-import { ApiErrorType, ERROR_TYPE_MAP } from 'apis/apiTypes';
+import ServiceAccountChecklist from './ServiceAccountChecklist';
+import { ApiErrorType, ERROR_TYPE_MAP } from '../../../../apis/apiTypes';
 import {
   getServiceKeyChecklistStatus,
   getAdminApiErrorChecklistStatus,
   getDataApiErrorChecklistStatus,
   getGa4PropertyErrorChecklistStatus,
-} from 'components/config-screen/api-access/display/ChecklistUtils';
+} from './ChecklistUtils';
 
 const invalidServiceAccountError = {
   errorType: ERROR_TYPE_MAP.invalidServiceAccount,

@@ -1,8 +1,9 @@
 import { act, render, screen } from '@testing-library/react';
 import ApiAccessSection from './ApiAccessSection';
 import { mockSdk, mockCma } from '../../../../test/mocks';
+import { vi } from 'vitest';
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ContentTypeValue } from 'types';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentEntitySys, SidebarExtensionSDK } from '@contentful/app-sdk';
-import { pathJoin } from 'utils/pathJoin';
+import { pathJoin } from '../../utils/pathJoin';
 import useGetFieldValue from '../useGetFieldValue';
 import { AppInstallationParameters } from 'types';
 

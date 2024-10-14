@@ -17,7 +17,7 @@ import {
   AssertionError,
   convertKeyFileToServiceAccountKey,
   convertServiceAccountKeyToServiceAccountKeyId,
-} from 'utils/serviceAccountKey';
+} from '../../../../utils/serviceAccountKey';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
 
 interface Props {
