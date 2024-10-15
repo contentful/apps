@@ -1,0 +1,4 @@
+frontendUrl: https://app.jira.ctfapps.net
+oauthRedirectUri: https://api.jira.ctfapps.net/auth
+baseUrl: https://api.jira.ctfapps.net
+domainName: api.jira.ctfapps.net
