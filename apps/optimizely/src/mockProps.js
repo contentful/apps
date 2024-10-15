@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+
 export default {
   sdk: {
     location: {},
@@ -35,7 +37,7 @@ export default {
     space: {},
     dialogs: {},
     navigator: {
-      onSlideInNavigation: jest.fn(),
+      onSlideInNavigation: vi.fn(),
     },
     notifier: {},
     ids: {
@@ -190,8 +192,8 @@ export default {
           },
         },
         experimentId: {
-          getValue: jest.fn(),
-          onValueChanged: jest.fn(() => () => {}),
+          getValue: vi.fn(),
+          onValueChanged: vi.fn(() => () => {}),
           id: 'experimentId',
           locales: ['en-US'],
           type: 'Symbol',
@@ -251,8 +253,8 @@ export default {
           },
         },
         meta: {
-          getValue: jest.fn(),
-          onValueChanged: jest.fn(() => () => {}),
+          getValue: vi.fn(),
+          onValueChanged: vi.fn(() => () => {}),
           id: 'meta',
           locales: ['en-US'],
           type: 'Object',
@@ -312,8 +314,8 @@ export default {
           },
         },
         variations: {
-          getValue: jest.fn(),
-          onValueChanged: jest.fn(() => () => {}),
+          getValue: vi.fn(),
+          onValueChanged: vi.fn(() => () => {}),
           id: 'variations',
           locales: ['en-US'],
           type: 'Array',
@@ -380,8 +382,8 @@ export default {
           id: 'experimentKey',
           locales: ['en-US'],
           type: 'Symbol',
-          getValue: jest.fn(),
-          onValueChanged: jest.fn(() => () => {}),
+          getValue: vi.fn(),
+          onValueChanged: vi.fn(() => () => {}),
           required: false,
           validations: [],
           _defaultLocale: 'en-US',
@@ -823,7 +825,7 @@ export default {
             type: 'Object',
             required: false,
             validations: [],
-            getValue: jest.fn(),
+            getValue: vi.fn(),
             _defaultLocale: 'en-US',
             _fieldLocales: {
               'en-US': {
