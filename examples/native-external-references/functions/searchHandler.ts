@@ -1,7 +1,7 @@
-import {
+import type {
   FunctionEventContext,
-  FunctionEventHandler
-} from '@contentful/node-apps-toolkit';
+  ResourcesSearchRequest
+} from '@contentful/functions-types';
 import { fetchApi, getUrls, transformResult } from './helpers';
 import { AppInstallationParameters } from './types/common';
 import { TmdbSearchResponse } from './types/tmdb';
@@ -28,10 +28,10 @@ const fetchSearch = async (
   };
 };
 
-export const searchHandler: FunctionEventHandler<
-  'resources.search',
-  AppInstallationParameters
-> = async (event, context) => {
+export const searchHandler = async (
+  event: ResourcesSearchRequest,
+  context: FunctionEventContext<AppInstallationParameters>
+) => {
   const { prefixUrl, searchUrl, trendingUrl } = getUrls(event.resourceType, {
     query: event.query,
     page: event.pages?.nextCursor ?? '1'

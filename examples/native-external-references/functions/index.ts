@@ -1,19 +1,13 @@
-import {
+import type {
   FunctionEvent,
   FunctionEventContext
-} from '@contentful/node-apps-toolkit';
+} from '@contentful/functions-types';
 import { searchHandler } from './searchHandler';
 import { lookupHandler } from './lookupHandler';
 import { AppInstallationParameters } from './types/common';
-import {
-  ResourcesLookupRequest,
-  ResourcesSearchRequest
-} from './types/handler';
-
-type Event = FunctionEvent | ResourcesSearchRequest | ResourcesLookupRequest;
 
 export const handler = (
-  event: Event,
+  event: FunctionEvent,
   context: FunctionEventContext<AppInstallationParameters>
 ) => {
   if (!context.appInstallationParameters.tmdbAccessToken) {

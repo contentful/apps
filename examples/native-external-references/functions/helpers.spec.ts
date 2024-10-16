@@ -51,7 +51,9 @@ describe('Getting the URLs', () => {
       lookupUrls: [
         'https://api.themoviedb.org/3/movie/urn:123?language=en-US',
         'https://api.themoviedb.org/3/movie/urn:456?language=en-US'
-      ]
+      ],
+      trendingUrl:
+        'https://api.themoviedb.org/3/trending/movie/day?language=en-US'
     });
   });
 
@@ -68,7 +70,9 @@ describe('Getting the URLs', () => {
       lookupUrls: [
         'https://api.themoviedb.org/3/person/urn:123?language=en-US',
         'https://api.themoviedb.org/3/person/urn:456?language=en-US'
-      ]
+      ],
+      trendingUrl:
+        'https://api.themoviedb.org/3/trending/person/day?language=en-US'
     });
   });
 });

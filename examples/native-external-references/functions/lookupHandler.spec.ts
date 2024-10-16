@@ -32,15 +32,15 @@ describe('Lookup handler', () => {
   });
 
   it('returns a response with populated items', async () => {
+    const urns = Array.isArray(testLookupEvent.lookupBy.urns)
+      ? testLookupEvent.lookupBy.urns
+      : [testLookupEvent.lookupBy.urns];
+
     mockApi.mockImplementationOnce(() =>
-      Promise.resolve(
-        createTmdbLookupResponse(Number(testLookupEvent.lookupBy.urns[0]))
-      )
+      Promise.resolve(createTmdbLookupResponse(Number(urns[0])))
     );
     mockApi.mockImplementationOnce(() =>
-      Promise.resolve(
-        createTmdbLookupResponse(Number(testLookupEvent.lookupBy.urns[1]))
-      )
+      Promise.resolve(createTmdbLookupResponse(Number(urns[1])))
     );
 
     const response = await lookupHandler(testLookupEvent, context);

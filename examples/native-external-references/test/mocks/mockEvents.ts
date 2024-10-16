@@ -1,5 +1,7 @@
-import { FunctionEventHandler } from '@contentful/node-apps-toolkit';
-import { AppInstallationParameters } from '../../functions/types/common';
+import type {
+  ResourcesSearchRequest,
+  ResourcesLookupRequest
+} from '@contentful/functions-types';
 import {
   TmdbItem,
   TmdbLookupResponse,
@@ -7,25 +9,18 @@ import {
 } from '../../functions/types/tmdb';
 
 export const context = {} as any;
-
-type SearchEvent = Parameters<
-  FunctionEventHandler<'resources.search', AppInstallationParameters>
->[0];
-
-type LookupEvent = Parameters<
-  FunctionEventHandler<'resources.lookup', AppInstallationParameters>
->[0];
-
-export const testSearchEvent: SearchEvent = {
+export const testSearchEvent: ResourcesSearchRequest = {
   type: 'resources.search',
   resourceType: 'TMDB:Person',
-  query: 'test query'
+  query: 'test query',
+  limit: 10
 };
 
-export const testLookupEvent: LookupEvent = {
+export const testLookupEvent: ResourcesLookupRequest = {
   type: 'resources.lookup',
   resourceType: 'TMDB:Person',
-  lookupBy: { urns: ['15', '22'] }
+  lookupBy: { urns: ['15', '22'] },
+  limit: 10
 };
 
 const createSingleTmdbResponse = (id: number): TmdbItem => ({
