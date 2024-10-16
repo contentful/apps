@@ -2,10 +2,11 @@ import * as React from 'react';
 import { render, cleanup } from '@testing-library/react';
 import { Props, ProductList } from './ProductList';
 import { productsList } from '../../__mocks__';
+import { vi } from 'vitest';
 
 const defaultProps: Props = {
   products: productsList,
-  selectProduct: jest.fn(),
+  selectProduct: vi.fn(),
   selectedSKUs: [],
 };
 

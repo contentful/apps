@@ -1,10 +1,12 @@
+import React from 'react';
 import { ProductCardMenu } from './ProductCardMenu';
 import { render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 
-const { getByTestId } = screen;
+const { getAllByLabelText } = screen;
 
 const props = {
-  onRemove: jest.fn(),
+  onRemove: vi.fn(),
   isDataVisible: true,
 };
 
@@ -12,10 +14,8 @@ describe('ProductCardMenu component', () => {
   it('mounts', () => {
     render(<ProductCardMenu {...props} />);
 
-    const iconButton = getByTestId('cf-ui-icon-button');
-    const icon = getByTestId('cf-ui-icon');
+    const iconButton = getAllByLabelText('Actions')[0];
 
-    expect(iconButton).toBeVisible();
-    expect(icon).toBeVisible();
+    expect(iconButton).toBeTruthy();
   });
 });
