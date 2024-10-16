@@ -5,7 +5,7 @@ import { ProductCardHeader } from '../ProductCardHeader/ProductCardHeader';
 import { ProductCardBody } from '../ProductCardBody/ProductCardBody';
 import { useIntegration } from '../../Editor';
 
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import tokens from '@contentful/f36-tokens';
 
 export const styles = {

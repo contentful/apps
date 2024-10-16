@@ -2,6 +2,7 @@ import * as React from 'react';
 import { fireEvent, configure, render, cleanup } from '@testing-library/react';
 import { Props, ProductListItem } from './ProductListItem';
 import { productsList } from '../../__mocks__';
+import { vi } from 'vitest';
 
 configure({
   testIdAttribute: 'data-test-id',
@@ -9,7 +10,7 @@ configure({
 
 const defaultProps: Props = {
   product: productsList[0],
-  selectProduct: jest.fn(),
+  selectProduct: vi.fn(),
   isSelected: false,
 };
 

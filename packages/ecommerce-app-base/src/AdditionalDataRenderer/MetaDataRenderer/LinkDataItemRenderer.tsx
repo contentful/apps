@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import { Caption, TextLink } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 
 const styles = {
   textLink: css({ fontSize: tokens.fontSizeS }),
