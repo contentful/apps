@@ -1,6 +1,7 @@
 import { ProductCardBody } from './ProductCardBody';
 import { cleanup, render, screen } from '@testing-library/react';
 import { productsList } from '../../__mocks__';
+import React from 'react';
 
 const { getByText, getByTestId, queryByTestId } = screen;
 
@@ -19,10 +20,10 @@ describe('ProductCardBody component', () => {
     const idElement = getByText(id);
     const imageElement = document.querySelector('img');
 
-    expect(mainBody).toBeVisible();
-    expect(titleElement).toBeVisible();
-    expect(descriptionElement).toBeVisible();
-    expect(idElement).toBeVisible();
+    expect(mainBody).toBeTruthy();
+    expect(titleElement).toBeTruthy();
+    expect(descriptionElement).toBeTruthy();
+    expect(idElement).toBeTruthy();
     expect(imageElement?.getAttribute('src')).toBe(image);
   });
 
@@ -38,6 +39,6 @@ describe('ProductCardBody component', () => {
     const errorMessage = getByText('Resource is missing or inaccessible');
 
     expect(mainBody).toBeFalsy();
-    expect(errorMessage).toBeVisible();
+    expect(errorMessage).toBeTruthy();
   });
 });

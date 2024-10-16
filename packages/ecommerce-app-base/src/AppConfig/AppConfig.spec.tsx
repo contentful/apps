@@ -145,7 +145,7 @@ describe('AppConfig', () => {
       screen.getByText(/The Some app app supports External references/)
     );
 
-    expect(result).toHaveTextContent('The Some app app supports External references');
+    expect(result.innerHTML).toBe('The Some app app supports External references');
   });
 
   it('hides the EAP orchestration note on click', async () => {
@@ -158,7 +158,7 @@ describe('AppConfig', () => {
 
     await waitFor(() => {
       const hiddenNote = screen.queryByText(/The Some app app supports External references/);
-      expect(hiddenNote).not.toBeInTheDocument();
+      expect(hiddenNote).not.toBeTruthy();
     });
   });
 

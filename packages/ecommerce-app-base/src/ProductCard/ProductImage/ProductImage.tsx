@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import React from 'react';
 import { useState } from 'react';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import tokens from '@contentful/f36-tokens';
 import { SkeletonContainer, SkeletonImage } from '@contentful/f36-components';
 import { AssetIcon } from '@contentful/f36-icons';
