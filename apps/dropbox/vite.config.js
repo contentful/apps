@@ -4,6 +4,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@contentful/dam-app-base': './node_modules/@contentful/dam-app-base/lib/index.js',
+      '@contentful/app-sdk': './node_modules/@contentful/app-sdk/dist/index.es.js',
     },
   },
   base: './',
