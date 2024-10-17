@@ -14,7 +14,7 @@ import {
 import { OrchestrationEapNote } from './OrchestrationEapNote';
 
 import tokens from '@contentful/f36-tokens';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 
 import FieldSelector from './FieldSelector';
 

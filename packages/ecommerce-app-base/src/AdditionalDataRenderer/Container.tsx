@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { FC, PropsWithChildren } from 'react';
 import { Box } from '@contentful/f36-components';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import tokens from '@contentful/f36-tokens';
 
 const styles = {

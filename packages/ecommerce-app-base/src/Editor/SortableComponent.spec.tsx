@@ -4,6 +4,7 @@ import { SortableComponent } from './SortableComponent';
 import { makeSdkMock, productsList } from '../__mocks__';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { ProductPreviewsFn } from '../types';
+import { vi } from 'vitest';
 
 const mockSdk = makeSdkMock();
 const skus = ['M0E20130820E90Z', 'A0E2300FX102203', 'M0E21300900DZN7'];
@@ -15,15 +16,15 @@ describe('SortableComponent', () => {
 
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore - typescript is upset because jest.fn() returns a type different than ProductPreviewsFn
-    mockFetchProductPreviews = jest.fn().mockImplementation(() => {
+    // @ts-ignore - typescript is upset because vi.fn() returns a type different than ProductPreviewsFn
+    mockFetchProductPreviews = vi.fn().mockImplementation(() => {
       return Promise.resolve(productsList);
     });
   });
 
   afterEach(() => {
     cleanup();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('calls `fetchProductPreviews()` to retrieve list of products for associated skus', async () => {
@@ -34,7 +35,7 @@ describe('SortableComponent', () => {
           disabled={false}
           config={mockConfig}
           skus={skus}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           fetchProductPreviews={mockFetchProductPreviews}
           skuType={mockSkuType}
         />
@@ -56,7 +57,7 @@ describe('SortableComponent', () => {
           disabled={false}
           config={mockConfig}
           skus={skus}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           fetchProductPreviews={mockFetchProductPreviews}
           skuType={mockSkuType}
         />
@@ -69,7 +70,7 @@ describe('SortableComponent', () => {
           sdk={mockSdk as unknown as FieldAppSDK}
           disabled={false}
           config={mockConfig}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           fetchProductPreviews={mockFetchProductPreviews}
           skuType={mockSkuType}
         />
@@ -91,7 +92,7 @@ describe('SortableComponent', () => {
           disabled={false}
           config={mockConfig}
           skus={skus}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           fetchProductPreviews={mockFetchProductPreviews}
           skuType={mockSkuType}
         />
@@ -104,7 +105,7 @@ describe('SortableComponent', () => {
           sdk={mockSdk as unknown as FieldAppSDK}
           disabled={false}
           config={mockConfig}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           fetchProductPreviews={mockFetchProductPreviews}
           skuType={mockSkuType}
         />
