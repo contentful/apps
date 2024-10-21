@@ -9,7 +9,7 @@
     "@contentful/react-apps-toolkit": "1.2.16",
     "@emotion/css": "^11.13.0",
     "@vitejs/plugin-react": "^4.3.2",
-    "contentful-management": "10.46.4",
+    "contentful-management": "^11.35.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "vite": "^5.4.9",
@@ -22,7 +22,8 @@
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
-    "build:functions": "node build-functions.js"
+    "build:functions": "node build-functions.js",
+    "create-app-action": "node create-app-action.js"
   },
   "eslintConfig": {
     "extends": "react-app"
