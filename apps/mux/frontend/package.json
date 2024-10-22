@@ -3,7 +3,6 @@
   "version": "1.10.14",
   "private": true,
   "devDependencies": {
-    "@contentful/app-scripts": "^1.2.0",
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "12.1.5",
     "@testing-library/user-event": "14.4.3",
@@ -19,6 +18,7 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
+    "@contentful/app-scripts": "^1.29.0",
     "@contentful/app-sdk": "4.12.0",
     "@contentful/dam-app-base": "2.0.46",
     "@contentful/f36-components": "4.67.0",
@@ -26,7 +26,6 @@
     "@mux/mux-player-react": "2.9.1",
     "@mux/mux-uploader-react": "1.0.1",
     "@vitejs/plugin-react": "^4.3.2",
-    "crypto-browserify": "^3.12.0",
     "jsdom": "^25.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
