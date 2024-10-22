@@ -3,6 +3,7 @@ import { render, waitFor, configure, fireEvent } from '@testing-library/react';
 
 import mockProps from '../../test/mockProps';
 import { AppView } from './AppView';
+import { vi } from 'vitest';
 
 configure({ testIdAttribute: 'data-test-id' });
 
@@ -13,13 +14,13 @@ describe('AppView', () => {
       sdk: {
         ...mockProps.sdk,
         space: {
-          getContentTypes: jest.fn(() => Promise.resolve({ items: [] })),
+          getContentTypes: vi.fn(() => Promise.resolve({ items: [] })),
         },
         app: {
-          setReady: jest.fn(),
-          isInstalled: jest.fn(),
-          onConfigure: jest.fn(),
-          onConfigurationCompleted: jest.fn(),
+          setReady: vi.fn(),
+          isInstalled: vi.fn(),
+          onConfigure: vi.fn(),
+          onConfigurationCompleted: vi.fn(),
         },
       },
     };
