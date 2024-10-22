@@ -23,7 +23,8 @@
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "build:functions": "node build-functions.js",
-    "create-app-action": "node create-app-action.js"
+    "create-app-action": "node create-app-action.js",
+    "install-app": "contentful-app-scripts install"
   },
   "eslintConfig": {
     "extends": "react-app"
