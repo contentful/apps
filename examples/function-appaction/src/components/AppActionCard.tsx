@@ -52,7 +52,6 @@ const AppActionCard = (props: Props) => {
       ]);
     } catch (error) {
       const timestamp = new Date().toLocaleString();
-      console.log(error);
       setActionResults(() => [
         { success: false, error, timestamp, actionId: action.sys.id },
         ...actionResults,
