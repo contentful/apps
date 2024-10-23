@@ -2,14 +2,14 @@ import React, { Component, ChangeEvent } from 'react';
 import { ConfigAppSDK, OnConfigureHandlerReturn } from '@contentful/app-sdk';
 import {
   Card,
-  TextField,
   Form,
+  FormControl,
   TextLink,
   Paragraph,
   Note,
   Tabs,
-  Tab,
-} from '@contentful/forma-36-react-components';
+  TextInput,
+} from '@contentful/f36-components';
 import logoUrl from '../assets/logo.png';
 import sidebarScreenshotUrl from '../assets/sidebar.png';
 
@@ -56,14 +56,16 @@ const TABS = [
             </TextLink>{' '}
             and save the Content Preview API token below:
           </Paragraph>
-          <TextField
-            name="cpaToken"
-            id="cpaToken"
-            labelText="CPA token"
-            required
-            value={state.parameters.cpaToken}
-            onChange={onInputChange}
-          />
+          <FormControl id="cpaToken">
+            <FormControl.Label>CPA token</FormControl.Label>
+            <TextInput
+              name="cpaToken"
+              id="cpaToken"
+              isRequired
+              value={state.parameters.cpaToken}
+              onChange={onInputChange}
+            />
+          </FormControl>
           <Note>
             The CPA (Content Preview API) token allows you to also access preview data when using
             GraphQL playground.
@@ -178,10 +180,6 @@ export default class Config extends Component<ConfigProps, ConfigState> {
     });
   };
 
-  selectTab = (tabId: string): void => {
-    this.setState({ currentTab: tabId });
-  };
-
   render() {
     const { currentTab } = this.state;
 
@@ -192,16 +190,14 @@ export default class Config extends Component<ConfigProps, ConfigState> {
           alt="GraphlQL Playground Logo"
           style={{ height: '5em', display: 'block' }}
         />
-        <Tabs role="navigation" withDivider>
-          {TABS.map(({ id, label }) => (
-            <Tab
-              id={id}
-              key={id}
-              selected={id === this.state.currentTab}
-              onSelect={() => this.selectTab(id)}>
-              {label}
-            </Tab>
-          ))}
+        <Tabs defaultTab="configuration">
+          <Tabs.List>
+            {TABS.map(({ id, label }) => (
+              <Tabs.Tab panelId={id} key={id}>
+                {label}
+              </Tabs.Tab>
+            ))}
+          </Tabs.List>
         </Tabs>
 
         {TABS.map(({ id, render }) => (

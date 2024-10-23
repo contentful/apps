@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { css } from 'emotion';
 
 import tokens from '@contentful/f36-tokens';
+import { css } from '@emotion/css';
+
 import {
   Heading,
   Paragraph,
@@ -43,9 +44,6 @@ const styles = {
     marginRight: tokens.spacingM,
     alignItems: 'center',
     color: tokens.gray600,
-  }),
-  editBtn: css({
-    margin: `0 ${tokens.spacingM}`,
   }),
 };
 
@@ -122,7 +120,7 @@ const NetlifyConfigEditor = ({
                 </div>
               )}
               <TextLink
-                className={styles.editBtn}
+                style={{ marginRight: tokens.spacingM }}
                 variant="primary"
                 isDisabled={disabled}
                 onClick={() => onEdit(configIndex)}>

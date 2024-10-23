@@ -3,13 +3,13 @@ import { AppExtensionSDK } from '@contentful/app-sdk';
 import {
   Heading,
   Paragraph,
-  Typography,
-  FieldGroup,
-  CheckboxField,
-  TextField,
   TextLink,
   Note,
-} from '@contentful/forma-36-react-components';
+  Flex,
+  FormControl,
+  TextInput,
+  Checkbox,
+} from '@contentful/f36-components';
 import get from 'lodash.get';
 // @ts-ignore 2307
 import logo from './logo.svg';
@@ -117,7 +117,7 @@ export default class AppConfig extends React.Component<Props, State> {
         <div className="body">
           <div className="config">
             <div className="section">
-              <Typography>
+              <>
                 <Heading>About Smartling</Heading>
                 <Paragraph className="about-p">
                   The{' '}
@@ -129,34 +129,37 @@ export default class AppConfig extends React.Component<Props, State> {
                   </TextLink>{' '}
                   app allows you to view the status of your translation without leaving Contentful.
                 </Paragraph>
-              </Typography>
+              </>
               <hr />
             </div>
             <div className="section">
-              <Typography>
+              <>
                 <Heading>Configuration</Heading>
-              </Typography>
-              <TextField
-                required
-                testId="projectId"
-                name="projectId"
-                id="projectId"
-                className="project-id"
-                labelText="Smartling project ID"
-                value={this.state.projectId}
-                // @ts-ignore 2339
-                onChange={(e) => this.setProjectId(e.target.value)}
-                helpText="To get the project ID, see the 'Project Settings > API' of your Smartling project."
-              />
-              <Typography>
+              </>
+              <FormControl>
+                <FormControl.Label>Smartling project ID</FormControl.Label>
+                <TextInput
+                  isRequired
+                  testId="projectId"
+                  name="projectId"
+                  id="projectId"
+                  className="project-id"
+                  value={this.state.projectId}
+                  onChange={(e) => this.setProjectId(e.target.value)}
+                />
+                <FormControl.HelpText>
+                  To get the project ID, see the 'Project Settings API' of your Smartling project.
+                </FormControl.HelpText>
+              </FormControl>
+              <>
                 <Heading>Assign to content types</Heading>
                 <Paragraph>Select which content types to use with Smartling.</Paragraph>
-              </Typography>
+              </>
               {this.state.contentTypes.length === 0 ? (
-                <Note noteType="warning">
+                <Note variant="warning">
                   There are <strong>no content types</strong> in this environment. You can add one{' '}
                   <TextLink
-                    linkType="primary"
+                    variant="primary"
                     target="_blank"
                     rel="noopener noreferrer"
                     href={
@@ -169,20 +172,21 @@ export default class AppConfig extends React.Component<Props, State> {
                   and assign it to the app from this screen.
                 </Note>
               ) : (
-                <FieldGroup>
+                <Flex>
                   {this.state.contentTypes.map((ct) => (
-                    <CheckboxField
-                      onChange={() => this.toggleCt(ct.id)}
-                      labelText={ct.name}
-                      name={ct.name}
-                      checked={this.state.selectedContentTypes.includes(ct.id)}
-                      value={ct.id}
-                      id={ct.name}
-                      key={ct.id}
-                      data-test-id={`ct-item-${ct.id}`}
-                    />
+                    <FormControl key={ct.id}>
+                      <FormControl.Label>{ct.name}</FormControl.Label>
+                      <Checkbox
+                        onChange={() => this.toggleCt(ct.id)}
+                        name={ct.name}
+                        isChecked={this.state.selectedContentTypes.includes(ct.id)}
+                        value={ct.id}
+                        id={ct.name}
+                        data-test-id={`ct-item-${ct.id}`}
+                      />
+                    </FormControl>
                   ))}
-                </FieldGroup>
+                </Flex>
               )}
             </div>
           </div>

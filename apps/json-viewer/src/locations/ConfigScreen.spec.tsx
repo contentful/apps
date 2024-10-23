@@ -2,8 +2,9 @@ import React from 'react';
 import ConfigScreen from './ConfigScreen';
 import { render } from '@testing-library/react';
 import { mockCma, mockSdk } from '../../test/mocks';
+import { vi } from 'vitest';
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));
@@ -14,9 +15,7 @@ describe('Config Screen component', () => {
 
     // simulate the user clicking the install button
     await mockSdk.app.onConfigure.mock.calls[0][0]();
-
-    expect(
-      getByText('When set to true, all nodes will be collapsed by default')
-    ).toBeInTheDocument();
+    const element = getByText('When set to true, all nodes will be collapsed by default');
+    expect(element.hasAttribute('class')).toBe(true);
   });
 });

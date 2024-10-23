@@ -5,8 +5,6 @@ import ReactDOM from 'react-dom';
 
 import { init, locations } from '@contentful/app-sdk';
 
-import '@contentful/forma-36-fcss/dist/styles.css';
-
 import NeflifySidebar from './sidebar';
 import NetlifyAppConfig from './app';
 
