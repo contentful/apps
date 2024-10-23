@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, ListItem, Heading, Paragraph } from '@contentful/forma-36-react-components';
+import { List, ListItem, Heading, Paragraph } from '@contentful/f36-components';
 import { Divider } from '../Divider';
 import { styles } from './styles';
 
