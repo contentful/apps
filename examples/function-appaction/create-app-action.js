@@ -17,11 +17,12 @@ const main = async () => {
       },
     },
   });
-  const accessToken = process.env['ACCESS_TOKEN'] || args.accessToken;
-  const { appDefinitionId, organizationId } = args;
+  const accessToken = process.env['CONTENTFUL_ACCESS_TOKEN'] || args.accessToken;
+  const organizationId = process.env['CONTENTFUL_ORG_ID'] || args.organizationId;
+  const appDefinitionId = process.env['CONTENTFUL_APP_DEF_ID'] || args.accessToken;
 
   if (!accessToken) {
-    console.error('No access token found in env!');
+    console.error('No accessToken provided');
     process.exit(1);
   }
 
