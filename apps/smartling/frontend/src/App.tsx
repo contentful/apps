@@ -1,10 +1,10 @@
 import React from 'react';
-import { locations, AppExtensionSDK, SidebarExtensionSDK } from '@contentful/app-sdk';
+import { locations, SidebarAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
 import AppConfig from './AppConfig';
 import Sidebar from './Sidebar';
 
 interface Props {
-  sdk: AppExtensionSDK | SidebarExtensionSDK;
+  sdk: ConfigAppSDK | SidebarAppSDK;
 }
 
 export default class App extends React.Component<Props> {
@@ -12,11 +12,11 @@ export default class App extends React.Component<Props> {
     const { sdk } = this.props;
 
     if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-      return <AppConfig sdk={sdk as AppExtensionSDK} />;
+      return <AppConfig sdk={sdk as ConfigAppSDK} />;
     } else if (sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)) {
       return (
         <Sidebar
-          sdk={sdk as SidebarExtensionSDK}
+          sdk={sdk as SidebarAppSDK}
           projectId={(sdk.parameters.installation as SmartlingParameters).projectId}
         />
       );

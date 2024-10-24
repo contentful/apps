@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { render } from 'react-dom';
-import { init, locations, AppExtensionSDK, SidebarExtensionSDK } from '@contentful/app-sdk';
+import { init, locations, ConfigAppSDK, SidebarAppSDK } from '@contentful/app-sdk';
 import './index.scss';
 import App from './App';
 
@@ -21,10 +21,7 @@ if (
       sdk.location.is(locations.LOCATION_APP_CONFIG) ||
       sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)
     ) {
-      render(
-        <App sdk={sdk as AppExtensionSDK | SidebarExtensionSDK} />,
-        document.getElementById('root')
-      );
+      render(<App sdk={sdk as ConfigAppSDK | SidebarAppSDK} />, document.getElementById('root'));
     }
   });
 }
