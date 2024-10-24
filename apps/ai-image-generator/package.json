@@ -21,8 +21,5 @@
     "esbuild": "^0.23.0",
     "node-addon-api": "^7.0.0",
     "sharp": "^0.33.0"
-  },
-  "devDependencies": {
-    "lru-cache": "^10.4.3"
   }
 }
