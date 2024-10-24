@@ -1,5 +1,5 @@
 import React from 'react';
-import { SidebarAppSDK } from '@contentful/app-sdk';
+import { SidebarExtensionSDK } from '@contentful/app-sdk';
 import {
   Icon,
   Button,
@@ -18,7 +18,7 @@ import smartlingClient from './smartlingClient';
 import { ExternalLinkIcon, InfoCircleIcon } from '@contentful/f36-icons';
 
 interface Props {
-  sdk: SidebarAppSDK;
+  sdk: SidebarExtensionSDK;
   projectId: string;
 }
 

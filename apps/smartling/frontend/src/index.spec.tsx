@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { render, fireEvent, cleanup, configure, wait } from '@testing-library/react';
-import { locations, ConfigAppSDK } from '@contentful/app-sdk';
+import { locations, AppExtensionSDK } from '@contentful/app-sdk';
 import 'whatwg-fetch';
 import fetchMock from 'fetch-mock';
 import App from './App';
@@ -113,7 +113,7 @@ describe('App', () => {
     mockSdk.location.is = (location: string) => location === locations.LOCATION_ENTRY_SIDEBAR;
     fetchMock.get('/entry?spaceId=space-123&projectId=project-id-123&entryId=entry-123', {});
     fetchMock.get('/refresh?refresh_token=', 401);
-    const wrapper = render(<App sdk={mockSdk as ConfigAppSDK} />);
+    const wrapper = render(<App sdk={mockSdk as AppExtensionSDK} />);
     await wait();
     expect(wrapper).toMatchSnapshot();
   });
@@ -125,7 +125,7 @@ describe('App', () => {
     fetchMock.get('/entry?spaceId=space-123&projectId=project-id-123&entryId=entry-123', {});
     fetchMock.get('/refresh?refresh_token=', 401);
 
-    const wrapper = render(<App sdk={mockSdk as ConfigAppSDK} />);
+    const wrapper = render(<App sdk={mockSdk as AppExtensionSDK} />);
     const oauthButton = await wrapper.findByTestId('open-dialog');
 
     oauthButton.click();
@@ -171,7 +171,7 @@ describe('App', () => {
       { overwriteRoutes: true }
     );
 
-    const { findByText } = render(<App sdk={mockSdk as ConfigAppSDK} />);
+    const { findByText } = render(<App sdk={mockSdk as AppExtensionSDK} />);
     await wait();
 
     expect(findByText('refresh-123')).toBeDefined();
@@ -205,7 +205,7 @@ describe('App', () => {
       { overwriteRoutes: true }
     );
 
-    const wrapper = render(<App sdk={mockSdk as ConfigAppSDK} />);
+    const wrapper = render(<App sdk={mockSdk as AppExtensionSDK} />);
     await wait();
 
     expect(wrapper).toMatchSnapshot();
