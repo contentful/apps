@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppExtensionSDK } from '@contentful/app-sdk';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Heading,
   Paragraph,
@@ -15,7 +15,7 @@ import get from 'lodash.get';
 import logo from './logo.svg';
 
 interface Props {
-  sdk: AppExtensionSDK;
+  sdk: ConfigAppSDK;
 }
 interface ContentType {
   name: string;
