@@ -6,8 +6,8 @@
       "description": "Automatically tag your entries using AI.",
       "path": "functions/autotagger.js",
       "entryFile": "functions/autotagger.ts",
-      "allowNetworks": ["api.flinkly.com", "api.openai.com"],
-      "accepts": ["appevent.handler"]
+      "allowNetworks": ["api.contentful.com", "api.openai.com"],
+      "accepts": ["appevent.handler", "appaction.call"]
     },
     {
       "id": "filter",
