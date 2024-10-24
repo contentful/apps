@@ -40,9 +40,6 @@ const copySharp = async () => {
   await fs.cp('./node_modules/simple-swizzle', './build/node_modules/simple-swizzle', {
     recursive: true,
   });
-  await fs.cp('./node_modules/yallist', './build/node_modules/yallist', {
-    recursive: true,
-  });
 };
 
 copySharp();
