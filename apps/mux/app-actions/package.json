@@ -12,7 +12,7 @@
     "test:watch": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha --watch --watch-files src --watch-files test -r dotenv/config"
   },
   "dependencies": {
-    "@contentful/node-apps-toolkit": "^3.9.0",
+    "@contentful/node-apps-toolkit": "^2.6.0",
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
@@ -21,9 +21,11 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/mocha": "^10.0.1",
     "@types/sinon": "^10.0.16",
+    "@types/sinon-chai": "^3.2.9",
     "chai": "^4.3.7",
     "mocha": "^10.2.0",
     "sinon": "^17.0.0",
+    "sinon-chai": "^3.7.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6"
   }
