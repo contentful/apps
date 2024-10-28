@@ -1,5 +1,5 @@
 import { ProfileFields, ProfileType } from '@components/config/appInstallationParameters';
-import { ChatCompletionRequestMessage } from 'openai';
+import { OpenAI } from 'openai';
 
 const generateBrandProfile = (profile: ProfileType) => {
   const { PROFILE, ADDITIONAL, VALUES, TONE, AUDIENCE, EXCLUDE, INCLUDE } = ProfileFields;
@@ -48,7 +48,10 @@ const generateBrandProfile = (profile: ProfileType) => {
   return profilePrompt;
 };
 
-const baseSystemPrompt = (profile: ProfileType, locale: string): ChatCompletionRequestMessage[] => [
+const baseSystemPrompt = (
+  profile: ProfileType,
+  locale: string
+): OpenAI.ChatCompletionMessageParam[] => [
   {
     role: 'system',
     content: `Forget everything from the previous conversation. `,
