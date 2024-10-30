@@ -57,6 +57,7 @@ export function TypeformOAuth({
   }, [oauthWindow, setToken]);
 
   const executeOauth = () => {
+    console.log('process:', process);
     const url = `${BASE_URL}/oauth/authorize?&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(
       `${window.location.origin}/callback`
     )}&scope=forms:read+workspaces:read`;
