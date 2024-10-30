@@ -34,7 +34,7 @@
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "chai": "^4.5.0",
     "eslint": "^7.12.1",
-    "mocha": "^10.6.0",
+    "mocha": "^10.8.1",
     "ngrok": "4.3.3",
     "nodemon": "^2.0.22",
     "prettier": "^2.8.7",

@@ -1,8 +1,7 @@
-import { ChatCompletionRequestMessage } from 'openai';
 import { streamToParsedText } from './aiHelpers';
 import { validateResponseStatus } from './handleAiApiErrors';
 import { defaultModelId } from '@configs/ai/gptModels';
-import { Model } from 'openai';
+import { OpenAI } from 'openai';
 
 /**
  * This class is used to interact with OpenAI's API.
@@ -26,10 +25,10 @@ class AI {
 
   /**
    * This function creates and returns a stream to OpenAI's API.
-   * @param payload ChatCompletionRequestMessage[]
+   * @param payload ChatCompletionMessageParam[]
    * @returns ReadableStreamDefaultReader<Uint8Array>
    */
-  streamChatCompletion = async (payload: ChatCompletionRequestMessage[]) => {
+  streamChatCompletion = async (payload: OpenAI.ChatCompletionMessageParam[]) => {
     const headers = {
       Authorization: `Bearer ${this.apiKey}`,
       'Content-Type': 'application/json',
@@ -70,7 +69,7 @@ class AI {
       return false;
     }
 
-    const dataList = this.decoder.decode(value as Buffer);
+    const dataList = this.decoder.decode(value as unknown as Buffer);
     const lines = dataList.split(/\n{2}/);
 
     const textData = lines.reduce(streamToParsedText, '');
@@ -97,7 +96,7 @@ class AI {
    * This function calls OpenAI's models endpoint in order to test whether the API Key is valid.
    * @returns Promise<Response>
    */
-  getModels = async (): Promise<{ object: 'list'; data: Model[] }> => {
+  getModels = async (): Promise<{ object: 'list'; data: OpenAI.Model[] }> => {
     const headers = {
       Authorization: `Bearer ${this.apiKey}`,
       'Content-Type': 'application/json',
