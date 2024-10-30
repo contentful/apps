@@ -30,18 +30,15 @@ npm i
 
 ### Create an App Definition
 
-You can create an app definition by [visiting the apps section](https://app.contentful.com/deeplink?link=app-definition-list) under your organization settings in the Contentful web app and clicking on the "Create App" button on the top right.
+You can create an app definition by [visiting the apps section](https://app.contentful.com/deeplink?link=app-definition-list) under your organization settings in the Contentful web app and clicking on the "Create App" button on the top right. Be sure to select **Page Location** and select the toggle for `Show app in main navigation` under the `Page` location.
 
 Alternatively, you can create an app using the the command `npm run create-app-definition`. You will need to answer the following questions on the terminal. Feel free to proceed with the default options provided.
 
 1. **Name of your application**. This is how your app will be named and it will be displayed in a few places throughout the UI. The default is the name of the folder you created.
-2. **Select where your app can be rendered**. This shows potential [app locations](https://www.contentful.com/developers/docs/extensibility/app-framework/locations/) where an app can be rendered within the Contentful Web app. Select **Page Location**, as this is where you will be able to test your app actions.
+2. **Select where your app can be rendered**. This shows potential [app locations](https://www.contentful.com/developers/docs/extensibility/app-framework/locations/) where an app can be rendered within the Contentful Web app. Select **Page Location**, as this is where you will be able to test your app actions. Select `y` for showing your app in the main navigation, and then provide a name for the link (e.g. `App Action Demo Console`) and a path (you can leave it as the default `/`).
 3. **Contentful CMA endpoint URL**. This refers to the URL used to interact with Contentful's Management APIs.
 4. **App Parameters**. These are configurable values that can be used to set default values or define custom validation rules; we do not need this to run the app so you can select `No`.
 5. The next steps will lead you through the process of providing a Contentful access token to the application and specifying the organization to which the application should be assigned.
-
-> **NOTE:**
-> In order to navigate to the page location for this app via the main navigation, you will need to go to the app definition in the Contentful web app and select `Show app in main navigation` under the `Page` location.
 
 ### Build and Upload your Function
 
