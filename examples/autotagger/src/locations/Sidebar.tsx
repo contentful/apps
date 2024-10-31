@@ -1,17 +1,39 @@
 import React from 'react';
-import { Paragraph } from '@contentful/f36-components';
+import { TagsIcon } from '@contentful/f36-icons';
+import { Button } from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
+
+const appActionId = 'YtIfXugb4P1w6Dqf4E8oq';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
 
-  return <Paragraph>Hello Sidebar Component (AppId: {sdk.ids.app})</Paragraph>;
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  useAutoResizer();
+
+  async function callAppAction() {
+    setIsLoading(true);
+    await sdk.cma.appActionCall.createWithResponse(
+      {
+        appDefinitionId: sdk.ids.app,
+        appActionId,
+      },
+      {
+        parameters: {
+          entryId: sdk.ids.entry,
+        },
+      }
+    );
+    setIsLoading(false);
+  }
+
+  return (
+    <Button isLoading={isLoading} startIcon={<TagsIcon />} isFullWidth onClick={callAppAction}>
+      Autotag
+    </Button>
+  );
 };
 
 export default Sidebar;
