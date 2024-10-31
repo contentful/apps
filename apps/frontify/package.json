@@ -4,17 +4,17 @@
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "1.2.0",
-    "cross-env": "7.0.3",
-    "react-scripts": "5.0.1"
+    "cross-env": "7.0.3"
   },
   "dependencies": {
     "@contentful/dam-app-base": "2.0.38",
     "react": "16.12.0",
-    "react-dom": "16.12.0"
+    "react-dom": "16.12.0",
+    "vite": "5.4.8"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts --openssl-legacy-provider build",
+    "start": "vite",
+    "build": "vite build",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5wHGALSJtz7y2EQOLfGhKH --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 2jRtAexmQcEdzaQkNQKdH6 --token ${TEST_CMA_TOKEN}"
   },
@@ -26,5 +26,8 @@
     "> 1%",
     "not ie <= 11"
   ],
-  "homepage": "."
+  "homepage": ".",
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.9.5"
+  }
 }
