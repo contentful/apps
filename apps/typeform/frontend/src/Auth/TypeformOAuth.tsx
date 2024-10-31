@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AppExtensionSDK } from '@contentful/app-sdk';
 import { Button } from '@contentful/f36-components';
-import { BASE_URL, CLIENT_ID } from '../constants';
+import { BASE_URL, getClientId } from '../constants';
 
 interface Props {
   sdk?: AppExtensionSDK;
@@ -57,7 +57,8 @@ export function TypeformOAuth({
   }, [oauthWindow, setToken]);
 
   const executeOauth = () => {
-    const url = `${BASE_URL}/oauth/authorize?&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(
+    const client_id = getClientId();
+    const url = `${BASE_URL}/oauth/authorize?&client_id=${client_id}&redirect_uri=${encodeURIComponent(
       `${window.location.origin}/callback`
     )}&scope=forms:read+workspaces:read`;
 
