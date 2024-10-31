@@ -3,7 +3,7 @@ import { chatCompletionsBaseUrl } from '@configs/ai/baseUrl';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import AI from '@utils/aiApi';
-import { ChatCompletionRequestMessage } from 'openai';
+import { OpenAI } from 'openai';
 import { useEffect, useMemo, useState } from 'react';
 import { defaultModelId } from '@configs/ai/gptModels';
 import AppInstallationParameters, {
@@ -42,8 +42,8 @@ const useAI = () => {
     content: string,
     profile: ProfileType,
     targetLocale: string
-  ): ChatCompletionRequestMessage[] => {
-    const userPrompt: ChatCompletionRequestMessage = {
+  ): OpenAI.ChatCompletionMessageParam[] => {
+    const userPrompt: OpenAI.ChatCompletionMessageParam = {
       role: 'user',
       content,
     };

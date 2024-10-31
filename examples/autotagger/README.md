@@ -1,17 +1,18 @@
 ## AI Autotagger Example Function
 
-This project includes an example of using the Contentful Management API (CMA) within an App Event Handler Function to automatically tag entries based on their content using OpenAI's GPT-4 model.
+This project includes an example of using the Contentful Management API (CMA) within an App Event Handler/App Action Call Function to automatically tag entries based on their content using OpenAI's GPT-4 model.
 
 ### Files Associated with the Example
 
-- **autotagger.ts**: Defines the event handler that automatically tags entries.
-- **selected-content-types-filter.ts**: Ensures only entries of selected content types are autotagged.
+- **autotagger.ts**: Defines the event handlers that automatically tag entries.
+- **selected-content-types-filter.ts**: Ensures only entries of selected content types are autotagged when using app events.
 - **ConfigScreen.tsx**: Provides the configuration screen for setting up the app.
+- **Sidebar.tsx**: Provides a button that will call an app action to perform on demand autotagging.
 - **contentful-app-manifest.json**: Defines the functions and their configurations.
 
 ### autotagger.ts
 
-Handles the `appevent.handler` event to automatically tag entries using OpenAI's GPT-4.
+Handles the `appevent.handler` and `appaction.call` events to automatically tag entries using OpenAI's GPT-4.
 
 ### selected-content-types-filter.ts
 
@@ -28,9 +29,13 @@ Defines the functions, their paths, and configurations used in the app:
 - **autotagger**: Automatically tags entries using AI.
 - **filter**: Ensures only selected content types are autotagged.
 
+## Utilizing App Action call Functions
+
+This app can utilize [app actions](https://www.contentful.com/developers/docs/extensibility/app-framework/app-actions/) to autotag events on demand. Once you have built and uploaded your app to Contentful, create an app action and link it to the autotagger function using the [CMA](https://www.contentful.com/developers/docs/references/content-management-api/#/reference/app-actions/app-actions-collection/create-an-action/console/js-plain) or the [Actions](https://app.contentful.com/deeplink?link=app-definition&tab=actions) tab on the App details page. Once you have created your action, place its id in the `appActionId` variable at the top of the [Sidebar.tsx](./src/locations/Sidebar.tsx) file, and reupload your app. 
+
 ## Utilizing App Event handler Functions
 
-This app utilizes [app events](https://www.contentful.com/developers/docs/extensibility/app-framework/app-events/) to subscribe to the `Entry.auto_save` event. Once you have built and uploaded your app to Contentful, link the autotagger and filter functions to your app event subscription and subscribe to the `Entry.auto_save` event using the [CMA](https://www.contentful.com/developers/docs/references/content-management-api/#/reference/app-event-subscriptions/app-event-subscription/update-or-subscribe-to-events/console/js-plain) or the [Events](https://app.contentful.com/deeplink?link=app-definition&tab=events) tab on the App details page.
+This app can utilize [app events](https://www.contentful.com/developers/docs/extensibility/app-framework/app-events/) to subscribe to the `Entry.auto_save` event. Once you have built and uploaded your app to Contentful, you can link the autotagger and filter functions to your app event subscription and subscribe to the `Entry.auto_save` event using the [CMA](https://www.contentful.com/developers/docs/references/content-management-api/#/reference/app-event-subscriptions/app-event-subscription/update-or-subscribe-to-events/console/js-plain) or the [Events](https://app.contentful.com/deeplink?link=app-definition&tab=events) tab on the App details page.
 
 ## Libraries to use
 

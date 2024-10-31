@@ -7,15 +7,15 @@
     "@contentful/f36-components": "^4.54.0",
     "@contentful/f36-tokens": "^4.0.2",
     "@contentful/f36-workbench": "^4.21.0",
-    "@contentful/forma-36-react-components": "^3.100.7",
     "@contentful/react-apps-toolkit": "^1.2.16",
+    "@emotion/css": "^11.13.4",
     "@graphiql/toolkit": "^0.10.0",
     "@originjs/vite-plugin-commonjs": "^1.0.3",
     "@tanstack/react-query": "^4.36.1",
-    "emotion": "10.0.27",
     "graphiql": "^3.0.9",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "vite": "^5.4.10",
     "vite-plugin-eslint": "^1.8.1"
   },
   "scripts": {
@@ -26,7 +26,7 @@
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEV_TESTING_ORG_ID} --definition-id A8dr1iHtz78TyWqrUFb72 --token ${TEST_CMA_TOKEN}"
   },
   "devDependencies": {
-    "@contentful/app-scripts": "^1.13.0",
+    "@contentful/app-scripts": "^1.29.0",
     "@testing-library/jest-dom": "^5.11.5",
     "@testing-library/react": "^11.1.2",
     "@types/jest": "^26.0.15",
@@ -35,7 +35,6 @@
     "@vitejs/plugin-react": "^4.1.1",
     "happy-dom": "9.20.3",
     "typescript": "^5.2.2",
-    "vite": "^4.5.0",
     "vitest": "^0.34.6"
   }
 }
