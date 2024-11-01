@@ -9,7 +9,7 @@ const getClientId = () => {
   // if prod return prod client id
   if (process.env.NODE_ENV === 'production') {
     return PROD_CLIENT_ID;
-  } else if (process.env.NODE_ENV === 'test') {
+  } else if (process.env.NODE_ENV === 'staging') {
     return TEST_CLIENT_ID;
   } else {
     console.error('Unknown environment: ', process.env.NODE_ENV);
