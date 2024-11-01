@@ -11,10 +11,17 @@ export default defineConfig({
   resolve: {
     alias: {
       'node-fetch': 'isomorphic-fetch',
+      '@contentful/ecommerce-app-base':
+        './node_modules/@contentful/ecommerce-app-base/lib/index.js',
     },
   },
   build: {
     outDir: 'build',
+    rollupOptions: {
+      commonjsOptions: {
+        transformMixedEsModules: true,
+      },
+    },
     commonjsOptions: { transformMixedEsModules: true },
   },
 });
