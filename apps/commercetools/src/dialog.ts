@@ -1,6 +1,5 @@
 import { DialogAppSDK } from '@contentful/app-sdk';
-import type { ProductPreviewsFn } from '@contentful/ecommerce-app-base';
-import { renderSkuPicker } from '@contentful/ecommerce-app-base';
+import { ProductPreviewsFn, renderSkuPicker } from '@contentful/ecommerce-app-base';
 import { createResolver, fetchPreviews } from './api';
 import { SkuType } from './types';
 
