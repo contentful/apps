@@ -40,8 +40,7 @@
     "start": "vite",
     "build": "rm -rf build && vite build",
     "test": "vitest --logHeapUsage --coverage",
-    "test:ci": "vitest",
-    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 2tw238ToHOjGSey4adTVy6 --token ${TEST_CMA_TOKEN}"
+    "test:ci": "vitest"
   },
   "eslintConfig": {
     "extends": "react-app"
