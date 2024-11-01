@@ -1,9 +1,9 @@
-const esbuild = require('esbuild');
-const { join, parse, resolve } = require('path');
-const yargs = require('yargs/yargs');
-const { hideBin } = require('yargs/helpers');
+import { context as _context, build } from 'esbuild';
+import { join, parse, resolve } from 'path';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
 
-const manifest = require('./contentful-app-manifest.json');
+import contentfulAppManifestJson from './contentful-app-manifest.json' assert { type: 'json' };
 
 const argv = yargs(hideBin(process.argv)).argv;
 
@@ -11,7 +11,7 @@ const validateFunctions = () => {
   const requiredProperties = ['id', 'path', 'entryFile', 'accepts'];
   const uniqueValues = new Set();
 
-  manifest.functions.forEach((contentfulFunction) => {
+  contentfulAppManifestJson.functions.forEach((contentfulFunction) => {
     requiredProperties.forEach((property) => {
       if (!contentfulFunction.hasOwnProperty(property)) {
         throw new Error(
@@ -43,11 +43,11 @@ const validateFunctions = () => {
 };
 
 const getEntryPoints = () => {
-  return manifest.functions.reduce((result, contentfulFunction) => {
+  return contentfulAppManifestJson.functions.reduce((result, contentfulFunction) => {
     const fileProperties = parse(contentfulFunction.path);
     const fileName = join(fileProperties.dir, fileProperties.name);
 
-    result[fileName] = resolve(__dirname, contentfulFunction.entryFile);
+    result[fileName] = resolve(process.cwd(), contentfulFunction.entryFile);
 
     return result;
   }, {});
@@ -71,10 +71,10 @@ const main = async (watch = false) => {
     };
 
     if (watch) {
-      const context = await esbuild.context(config);
+      const context = await _context(config);
       await context.watch();
     } else {
-      await esbuild.build(config);
+      await build(config);
     }
   } catch (e) {
     console.error('Error building functions');

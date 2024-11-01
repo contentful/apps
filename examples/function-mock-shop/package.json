@@ -41,7 +41,7 @@
     ]
   },
   "devDependencies": {
-    "@contentful/app-scripts": "1.29.0",
+    "@contentful/app-scripts": "1.30.0",
     "@contentful/node-apps-toolkit": "^3.9.0",
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
@@ -49,7 +49,7 @@
     "@testing-library/react": "14.3.1",
     "@tsconfig/create-react-app": "2.0.5",
     "@tsconfig/recommended": "1.0.8",
-    "@types/node": "16.18.116",
+    "@types/node": "16.18.118",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
     "cross-env": "7.0.3",
