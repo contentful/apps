@@ -38,6 +38,7 @@
     "test:ci": "TZ=UTC CI=true vitest"
   },
   "eslintConfig": {
+    "extends": "react-app"
   },
   "browserslist": [
     "last 5 Chrome version",
