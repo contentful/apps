@@ -1,4 +1,4 @@
-import tokens from '@contentful/forma-36-tokens';
+import tokens from '@contentful/f36-tokens';
 
 export function makeEyeIcon(color: 'primary' | 'dark'): string {
   const svgEncodedBase64 =

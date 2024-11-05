@@ -1,0 +1,3 @@
+domainName: typeform-test.ctfapps.net
+CLIENT_ID: ${ssm:/aws/reference/secretsmanager/ci/apps/typeform/test/client-id}
+CLIENT_SECRET: ${ssm:/aws/reference/secretsmanager/ci/apps/typeform/test/client-secret}
