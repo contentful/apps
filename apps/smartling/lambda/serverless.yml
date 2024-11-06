@@ -10,7 +10,7 @@ plugins:
 custom:
   myStage: ${opt:stage, self:provider.stage}
   customDomain:
-    domainName: smartling.ctfapps.net
+    domainName: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):domainName}
     stage: ${opt:stage, 'dev'}
     createRoute53Record: true
     endpointType: 'edge'
