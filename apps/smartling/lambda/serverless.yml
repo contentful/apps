@@ -17,7 +17,7 @@ custom:
     securityPolicy: tls_1_2
   prune:
     automatic: true
-    number: 2
+    number: 3
 
 provider:
   name: aws
