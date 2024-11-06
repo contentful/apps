@@ -10,7 +10,7 @@
     "test:ci": "npm run test:ci:build-frontend && jest",
     "test:ci:build-frontend": "cd ../frontend && npm run build && cd ../lambda",
     "deploy": "sls deploy --stage $STAGE",
-    "deploy:test": "DEPLOY_TIME_UNIX=$(date \"+%s\") sls create_domain --stage test && sls deploy --stage test"  
+    "deploy:test": "DEPLOY_TIME_UNIX=$(date \"+%s\") sls deploy --stage test"  
   },
   "dependencies": {
     "@contentful/smartling-frontend": "^1.7.71",

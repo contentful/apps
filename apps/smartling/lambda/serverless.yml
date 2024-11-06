@@ -10,14 +10,14 @@ plugins:
 custom:
   myStage: ${opt:stage, self:provider.stage}
   customDomain:
-    domainName: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):domainName}
+    domainName: smartling.ctfapps.net
     stage: ${opt:stage, 'dev'}
     createRoute53Record: true
     endpointType: 'edge'
     securityPolicy: tls_1_2
   prune:
     automatic: true
-    number: 4
+    number: 3
 
 provider:
   name: aws
