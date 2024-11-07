@@ -7,8 +7,4 @@ export default defineConfig({
   },
   base: '', // relative paths
   plugins: [react()],
-  test: {
-    environment: 'happy-dom',
-    globals: true,
-  },
 });
