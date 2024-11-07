@@ -32,7 +32,7 @@
     "@contentful/f36-tokens": "^4.0.5",
     "@vitejs/plugin-react": "^4.3.1",
     "@vitest/coverage-v8": "^2.1.1",
-    "contentful-management": "^11.36.2",
+    "contentful-management": "10.31.4",
     "happy-dom": "^15.11.0",
     "lodash.get": "^4.4.2",
     "react": "^17.0.2",
