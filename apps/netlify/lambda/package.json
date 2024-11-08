@@ -14,7 +14,7 @@
     "deploy:test": "SLS_DEBUG=* STAGE=test npm run deploy"
   },
   "devDependencies": {
-    "@contentful/node-apps-toolkit": "^3.9.1",
+    "@contentful/node-apps-toolkit": "^3.9.2",
     "eslint": "6.8.0",
     "jest": "^29.7.0",
     "serverless": "^3.39.0",
