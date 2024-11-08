@@ -51,8 +51,8 @@ const exampleAnalyticsHandler = async (event) => {
   }
 };
 
-// Since our function only accepts filter events,
-// we can safely assume the event is of type appevent.filter
+// Since our function only accepts handler events,
+// we can safely assume the event is of type appevent.handler
 export const handler = async (event, context) => {
   // This function will check to see if the event is an Entry and then send it to multiple external services to be handled
   if (event.headers['X-Contentful-Topic'].includes('Entry')) {

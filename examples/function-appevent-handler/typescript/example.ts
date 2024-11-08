@@ -58,8 +58,8 @@ const exampleAnalyticsHandler = async (event: AppEventEntry) => {
   }
 };
 
-// Since our function only accepts filter events,
-// we can safely assume the event is of type appevent.filter
+// Since our function only accepts handler events,
+// we can safely assume the event is of type appevent.handler
 export const handler: EventHandler<'appevent.handler'> = async (
   event: AppEventRequest,
   context: FunctionEventContext
