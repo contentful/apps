@@ -7,7 +7,7 @@
     "build": "rimraf built && tsc",
     "lint": "tslint --project ./tsconfig.json",
     "test": "DEPLOY_TIME_UNIX=$(date \"+%s\") jest --watch",
-    "test:ci": "DEPLOY_TIME_UNIX=$(date \"+%s\")npm run test:ci:build-frontend && jest",
+    "test:ci": "DEPLOY_TIME_UNIX=$(date \"+%s\") npm run test:ci:build-frontend && jest",
     "test:ci:build-frontend": "cd ../frontend && npm run build && cd ../lambda",
     "deploy": "DEPLOY_TIME_UNIX=$(date \"+%s\") sls deploy --stage $STAGE",
     "deploy:test": "DEPLOY_TIME_UNIX=$(date \"+%s\") sls deploy --stage test"  
