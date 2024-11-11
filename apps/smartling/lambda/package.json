@@ -3,14 +3,14 @@
   "version": "1.4.71",
   "private": true,
   "scripts": {
-    "start": "LOCAL_DEV=true FRONTEND_URL=http://localhost:3000 ts-node src/index.ts",
+    "start": "DEPLOY_TIME_UNIX=$(date \"+%s\") LOCAL_DEV=true FRONTEND_URL=http://localhost:3000 ts-node src/index.ts",
     "build": "rimraf built && tsc",
     "lint": "tslint --project ./tsconfig.json",
     "test": "jest --watch",
     "test:ci": "npm run test:ci:build-frontend && jest",
     "test:ci:build-frontend": "cd ../frontend && npm run build && cd ../lambda",
-    "deploy": "sls deploy --stage $STAGE",
-    "deploy:test": "sls deploy --stage test"  
+    "deploy": "DEPLOY_TIME_UNIX=$(date \"+%s\") sls deploy --stage $STAGE",
+    "deploy:test": "DEPLOY_TIME_UNIX=$(date \"+%s\") sls deploy --stage test"  
   },
   "dependencies": {
     "@contentful/smartling-frontend": "^1.7.71",

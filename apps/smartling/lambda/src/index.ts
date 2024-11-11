@@ -121,6 +121,18 @@ export function makeApp(fetchFn: any, issuer: any) {
     );
   });
 
+  const computeLastModifiedTime = () => {
+    const deployTime = process.env.DEPLOY_TIME_UNIX;
+    if (typeof deployTime === 'undefined') {
+      throw new Error('Missing DEPLOY_TIME_UNIX env var');
+    }
+
+    // JS uses number of _milliseconds_ since epoch, whereas unix generates number in
+    // _seconds_ since epoch. So we have to convert
+    const epochTime = Number(deployTime) * 1000;
+    return new Date(epochTime).toUTCString();
+  };
+
   if (process.env.LOCAL_DEV === 'true' && process.env.FRONTEND_URL) {
     // in development mode, proxy requests to the frontend development server running at FRONTEND_URL
     app.use('/frontend', requestProxier(process.env.FRONTEND_URL));
@@ -130,9 +142,13 @@ export function makeApp(fetchFn: any, issuer: any) {
     app.use('/static', requestProxier(process.env.FRONTEND_URL, 'static'));
   } else {
     // in production mode, frontend requests are served from the static smartling-frontend build folder
+    const lastModified = computeLastModifiedTime();
+
     app.use(
       '/frontend',
-      express.static(path.dirname(require.resolve('@contentful/smartling-frontend')))
+      express.static(path.dirname(require.resolve('@contentful/smartling-frontend')), {
+        lastModified,
+      })
     );
   }
 
