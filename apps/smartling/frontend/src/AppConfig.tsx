@@ -118,7 +118,7 @@ export default class AppConfig extends React.Component<Props, State> {
           <div className="config">
             <div className="section">
               <>
-                <Heading>About Smartling</Heading>
+                <Heading>About SMartling</Heading>
                 <Paragraph className="about-p">
                   The{' '}
                   <TextLink
