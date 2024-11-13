@@ -15,6 +15,11 @@ export default defineConfig({
   },
   build: {
     outDir: 'build',
+    rollupOptions: {
+      commonjsOptions: {
+        transformMixedEsModules: true,
+      },
+    },
     commonjsOptions: { transformMixedEsModules: true },
   },
 });
