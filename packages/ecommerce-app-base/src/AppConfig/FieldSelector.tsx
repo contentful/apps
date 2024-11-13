@@ -1,6 +1,6 @@
 import { Checkbox, Flex, Form, Paragraph, Radio, Subheading } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import * as React from 'react';
 import { Integration } from '../types';
 import { CompatibleFields, ContentType, FieldsSkuTypes, SelectedFields } from './fields';

@@ -5,6 +5,7 @@ import { Props, SkuPicker } from './SkuPicker';
 import { productsList } from '../__mocks__';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { Integration, ProductsFn } from '../types';
+import { vi } from 'vitest';
 
 configure({
   testIdAttribute: 'data-test-id',
@@ -30,16 +31,16 @@ describe('SkuPicker', () => {
             fieldValue: [],
           },
         },
-        close: jest.fn(),
+        close: vi.fn(),
         notifier: {
-          success: jest.fn(),
-          error: jest.fn(),
+          success: vi.fn(),
+          error: vi.fn(),
         },
       } as unknown as DialogAppSDK,
-      fetchProductPreviews: jest.fn((skus) =>
+      fetchProductPreviews: vi.fn((skus) =>
         productsList.filter((preview) => skus.includes(preview.sku))
       ) as unknown as Integration['fetchProductPreviews'],
-      fetchProducts: jest.fn(() => ({
+      fetchProducts: vi.fn(() => ({
         pagination: {
           count: 3,
           limit: 20,
@@ -54,44 +55,44 @@ describe('SkuPicker', () => {
 
   it('should render basic search successfully with no products selected', async () => {
     const { getByTestId, queryByTestId } = await renderComponent(defaultProps);
-    expect(getByTestId('sku-search')).toBeInTheDocument();
-    expect(queryByTestId('search-by-sku')).not.toBeInTheDocument();
+    expect(getByTestId('sku-search')).toBeTruthy();
+    expect(queryByTestId('search-by-sku')).not.toBeTruthy();
   });
 
   it('should not render search when hideSearch is true', async () => {
     const { queryByTestId } = await renderComponent({ ...defaultProps, hideSearch: true });
-    expect(queryByTestId('sku-search')).not.toBeInTheDocument();
-    expect(queryByTestId('search-by-sku')).not.toBeInTheDocument();
+    expect(queryByTestId('sku-search')).not.toBeTruthy();
+    expect(queryByTestId('search-by-sku')).not.toBeTruthy();
   });
 
   it('should render search by sku option if showSearchBySkuOption is true', async () => {
     const { getByTestId } = await renderComponent({ ...defaultProps, showSearchBySkuOption: true });
-    expect(getByTestId('search-by-sku')).toBeInTheDocument();
+    expect(getByTestId('search-by-sku')).toBeTruthy();
   });
 
   it('should render custom placeholder text in search box when makeSearchPlaceholderText exists', async () => {
-    const makeSearchPlaceholderText = jest.fn(() => 'My custom placeholder text');
+    const makeSearchPlaceholderText = vi.fn(() => 'My custom placeholder text');
     const { getByPlaceholderText } = await renderComponent({
       ...defaultProps,
       makeSearchPlaceholderText,
     });
-    expect(getByPlaceholderText('My custom placeholder text')).toBeInTheDocument();
+    expect(getByPlaceholderText('My custom placeholder text')).toBeTruthy();
   });
 
   it('should render custom help text under search box when makeSearchHelpText exists', async () => {
-    const makeSearchHelpText = jest.fn(() => 'My custom help text');
+    const makeSearchHelpText = vi.fn(() => 'My custom help text');
     const { getByText } = await renderComponent({
       ...defaultProps,
       makeSearchHelpText,
     });
-    expect(getByText('My custom help text')).toBeInTheDocument();
+    expect(getByText('My custom help text')).toBeTruthy();
   });
 
   describe('when it has infinite scrolling mode pagination', () => {
     it('should render the "Load more" text link if there is a next page', async () => {
       const { findByTestId } = await renderComponent({
         ...defaultProps,
-        fetchProducts: jest.fn(() => ({
+        fetchProducts: vi.fn(() => ({
           pagination: {
             hasNextPage: true,
           },
@@ -104,7 +105,7 @@ describe('SkuPicker', () => {
     it('should not render the "Load more" text link if there is no next page', async () => {
       const { queryByTestId } = await renderComponent({
         ...defaultProps,
-        fetchProducts: jest.fn(() => ({
+        fetchProducts: vi.fn(() => ({
           pagination: {
             hasNextPage: false,
           },
