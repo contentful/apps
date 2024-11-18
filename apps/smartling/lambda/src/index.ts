@@ -153,6 +153,7 @@ export function makeApp(fetchFn: any, issuer: any) {
     );
   }
 
+  // @ts-ignore
   app.use((_req, res) => res.status(404).send('Not found'));
 
   return app;
