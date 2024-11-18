@@ -1,6 +1,8 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
+const hash = Math.floor(Math.random() * 90000) + 10000;
+
 export default defineConfig(() => ({
   base: '', // relative paths
   server: {
@@ -10,6 +12,13 @@ export default defineConfig(() => ({
     // the parent project that combines both the frontend and the hosted app action backend needs to be able to override
     // the default location to its own build path
     outDir: process.env.BUILD_PATH || './build',
+    rollupOptions: {
+      output: {
+        entryFileNames: `[name]` + hash + `.js`,
+        chunkFileNames: `[name]` + hash + `.js`,
+        assetFileNames: `[name]` + hash + `.[ext]`,
+      },
+    },
   },
   plugins: [react()],
   test: {
