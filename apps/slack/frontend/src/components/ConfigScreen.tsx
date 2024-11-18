@@ -157,7 +157,7 @@ const Config = () => {
         {(Object.values(connectedWorkspaces).length > 0 ||
           workspaceState === WorkspaceState.LOADING ||
           workspaceState === WorkspaceState.ERROR) && (
-          <Subheading marginBottom="spacingS">Slack workspace</Subheading>
+          <Subheading marginBottom="spacingS">Slack Workspace</Subheading>
         )}
         {workspaceState === WorkspaceState.LOADING ? (
           <LoadingPanel />
