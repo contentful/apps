@@ -1,4 +1,5 @@
 import { Express } from 'express';
+// @ts-ignore 7016
 import * as express from 'serverless-express/express';
 import * as path from 'path';
 import fetch from 'node-fetch';
