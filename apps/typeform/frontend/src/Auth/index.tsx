@@ -53,7 +53,7 @@ export default function AuthWrapper({ sdk }: Props) {
             <div className={styles.body}>
               <div className={styles.authConfig}>
                 <>
-                  <Heading>Connect to TYPEFORM</Heading>
+                  <Heading>Connect to Typeform</Heading>
                   <Paragraph className={styles.aboutP}>
                     The{' '}
                     <TextLink
