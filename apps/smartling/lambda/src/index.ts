@@ -122,7 +122,6 @@ export function makeApp(fetchFn: any, issuer: any) {
   });
 
   const computeLastModifiedTime = () => {
-    console.log('DEPLOY_TIME_UNIX', process.env.DEPLOY_TIME_UNIX);
     const deployTime = process.env.DEPLOY_TIME_UNIX;
     if (typeof deployTime === 'undefined') {
       throw new Error('Missing DEPLOY_TIME_UNIX env var');
