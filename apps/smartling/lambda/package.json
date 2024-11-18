@@ -10,17 +10,17 @@
     "test:ci": "npm run test:ci:build-frontend && DEPLOY_TIME_UNIX=$(date \"+%s\") jest",
     "test:ci:build-frontend": "cd ../frontend && npm run build && cd ../lambda",
     "deploy": "DEPLOY_TIME_UNIX=$(date \"+%s\") sls deploy --stage $STAGE",
-    "deploy:test": "DEPLOY_TIME_UNIX=$(date \"+%s\") sls deploy --stage test"  
+    "deploy:test": "DEPLOY_TIME_UNIX=$(date \"+%s\") sls deploy --stage test"
   },
   "dependencies": {
     "@contentful/smartling-frontend": "^1.7.71",
-    "@types/express": "^4.17.2",
+    "@types/express": "^5.0.0",
     "@types/jest": "^27.5.2",
     "node-fetch": "^2.6.1",
     "openid-client": "^4.7.4",
     "rimraf": "^3.0.1",
     "serverless": "^3.31.0",
-    "serverless-express": "^2.0.11",
+    "serverless-express": "^2.0.12",
     "typescript": "^4.9.3"
   },
   "devDependencies": {
