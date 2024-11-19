@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@contentful/app-scripts": "^1.30.1",
     "@contentful/app-sdk": "4.13.0",
     "@contentful/f36-components": "4.67.0",
     "@contentful/f36-tokens": "4.0.5",
     "@contentful/react-apps-toolkit": "1.2.16",
-    "contentful-management": "10.18.2",
+    "contentful-management": "^11.38.0",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-json-view": "^1.21.3",
@@ -39,7 +40,6 @@
     ]
   },
   "devDependencies": {
-    "@contentful/app-scripts": "1.1.33",
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "12.1.5",
     "@tsconfig/create-react-app": "1.0.3",
@@ -47,7 +47,6 @@
     "@types/node": "18.11.5",
     "@types/react": "18.0.9",
     "@types/react-dom": "18.0.3",
-    "cross-env": "7.0.3",
     "jsdom": "^25.0.1",
     "typescript": "4.8.4"
   },
