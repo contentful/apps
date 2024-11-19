@@ -1,4 +1,0 @@
-domainName: jira-test.ctfapps.net
-FRONTEND_URL: 'https://jira-test.ctfapps.net'
-OAUTH_REDIRECT_URI: 'https://api.jira-test.ctfapps.net/auth'
-BASE_URL: 'https://api.jira-test.ctfapps.net'

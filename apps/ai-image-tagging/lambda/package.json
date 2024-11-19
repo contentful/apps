@@ -9,7 +9,7 @@
     "test": "jest",
     "serve": "node serve.js",
     "deploy": "sls deploy --stage $STAGE",
-    "deploy:test": "sls create_domain --verbose --stage test && sls deploy --stage test"
+    "deploy:test": "sls deploy --stage test"
   },
   "devDependencies": {
     "eslint": "6.8.0",
