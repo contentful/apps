@@ -18,8 +18,8 @@ custom:
       prd: 'https://api.jira.ctfapps.net'
       test: '${env:NGROK_URL}/dev'
   customDomain:
-    domainName: api.jira.ctfapps.net
-    stage: prd
+    domainName: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):domainName}
+    stage: ${opt:stage, 'dev'}
     createRoute53Record: true
     endpointType: 'edge'
     securityPolicy: tls_1_2
@@ -47,8 +47,8 @@ functions:
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/atlassian_oauth_lambda
     environment:
       OAUTH_CREDENTIALS_SECRET_ID: apps/jira/${opt:stage, 'test'}/oauth-credentials
-      OAUTH_REDIRECT_URI: ${self:custom.myEnvironment.OAUTH_REDIRECT_URI.${self:custom.myStage}}
-      FRONTEND_URL: ${self:custom.myEnvironment.FRONTEND_URL.${self:custom.myStage}}
+      OAUTH_REDIRECT_URI: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):OAUTH_REDIRECT_URI}
+      FRONTEND_URL: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):FRONTEND_URL}
       OAUTH_TOKEN_EXCHANGE_ENDPOINT: https://auth.atlassian.com/oauth/token
     events:
       - http:
@@ -61,7 +61,7 @@ functions:
     description: connect.json for JIRA
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/jira_connect_lambda
     environment:
-      BASE_URL: ${self:custom.myEnvironment.BASE_URL.${self:custom.myStage}}
+      BASE_URL: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):BASE_URL}
     events:
       - http:
           path: connect.json

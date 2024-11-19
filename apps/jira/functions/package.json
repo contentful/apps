@@ -10,7 +10,7 @@
     "test": "ts-mocha '**/*.spec.ts'",
     "test:ci": "npm run test",
     "deploy": "sls deploy --stage $STAGE",
-    "deploy:test": "npm run deploy",
+    "deploy:test": "sls create_domain --stage test && sls deploy --stage test",
     "start": "npm run build && serverless offline --httpPort 3000"
   },
   "dependencies": {

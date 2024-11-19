@@ -1,0 +1,4 @@
+domainName: app.jira.ctfapps.net
+FRONTEND_URL: 'https://app.jira.ctfapps.net'
+OAUTH_REDIRECT_URI: 'https://api.jira.ctfapps.net/auth'
+BASE_URL: 'https://api.jira.ctfapps.net'
