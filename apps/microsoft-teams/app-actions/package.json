@@ -13,7 +13,9 @@
   },
   "dependencies": {
     "@contentful/node-apps-toolkit": "^2.6.0",
-    "contentful-management": "^11.3.0"
+    "contentful-management": "^11.38.0",
+    "mocha": "^10.8.2",
+    "sinon": "^19.0.2"
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.0",
@@ -21,10 +23,8 @@
     "@types/mocha": "^10.0.1",
     "@types/sinon": "^10.0.16",
     "@types/sinon-chai": "^3.2.9",
-    "botbuilder": "^4.22.1",
+    "botbuilder": "^4.23.1",
     "chai": "^4.3.7",
-    "mocha": "^10.2.0",
-    "sinon": "^17.0.0",
     "sinon-chai": "^3.7.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6"
