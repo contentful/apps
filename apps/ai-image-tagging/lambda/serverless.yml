@@ -8,8 +8,8 @@ plugins:
 custom:
   tableName: sls-${opt:stage, self:provider.stage}-AiImageTaggingUsage
   customDomain:
-    domainName: ai-image-tagging.ctfapps.net
-    stage: prd
+    domainName: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):domainName}
+    stage: ${opt:stage, 'dev'}
     createRoute53Record: true
     endpointType: 'edge'
     securityPolicy: tls_1_2
