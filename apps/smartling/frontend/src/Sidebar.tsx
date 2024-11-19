@@ -254,7 +254,7 @@ export default class Sidebar extends React.Component<Props, State> {
         isFullWidth
         className="request-translation"
         onClick={() => window.open(smartlingLink)}>
-        <ExternalLinkIcon variant="secondary" /> Request Translation
+        <ExternalLinkIcon variant="secondary" /> Request translation
       </Button>
     );
 
