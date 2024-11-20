@@ -143,7 +143,7 @@ export function makeApp(fetchFn: any, issuer: any) {
   } else {
     // in production mode, frontend requests are served from the static smartling-frontend build folder
     const lastModified = computeLastModifiedTime();
-
+    app.set('cacheControl', 'no-cache');
     app.use(
       '/frontend',
       express.static(path.dirname(require.resolve('@contentful/smartling-frontend')), {
