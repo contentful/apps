@@ -21,12 +21,12 @@
     "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
-    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
+    "upload-ci": "contentful-app-scripts upload --ci --host api.contentful.com --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "prettier": "prettier --write functions",
     "open-settings": "contentful-app-scripts open-settings",
     "install-app": "contentful-app-scripts install",
-    "create-resource-entities": "ts-node -T -r dotenv/config ./src/tools/create-resource-entities.ts",
-    "show-resource-entities": "ts-node -T -r dotenv/config ./src/tools/show-resource-entities.ts"
+    "create-resource-entities": "HOST=api.contentful.com ts-node -T -r dotenv/config ./src/tools/create-resource-entities.ts",
+    "show-resource-entities": "HOST=api.contentful.com ts-node -T -r dotenv/config ./src/tools/show-resource-entities.ts"
   },
   "eslintConfig": {
     "extends": "react-app"
