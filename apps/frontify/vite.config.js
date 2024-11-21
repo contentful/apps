@@ -8,6 +8,7 @@ export default defineConfig({
   base: '', // relative paths
   plugins: [react()],
   build: {
+    outDir: 'build',
     rollupOptions: {
       external: ['react/jsx-runtime'],
     },
