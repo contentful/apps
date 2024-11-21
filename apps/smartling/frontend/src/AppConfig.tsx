@@ -137,7 +137,7 @@ export default class AppConfig extends React.Component<Props, State> {
                 <Heading>Configuration</Heading>
               </>
               <FormControl>
-                <FormControl.Label>SMartling project ID</FormControl.Label>
+                <FormControl.Label>Smartling project ID</FormControl.Label>
                 <TextInput
                   isRequired
                   testId="projectId"

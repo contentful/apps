@@ -166,9 +166,7 @@ export function makeApp(fetchFn: any, issuer: any) {
       '/frontend',
       express.static(path.dirname(require.resolve('@contentful/smartling-frontend')), {
         lastModified,
-        cacheControl: true,
         setHeaders: (res: any) => {
-          res.set('Cache-Control', 'no-store');
           res.set('Last-Modified', lastModified);
         },
       })
