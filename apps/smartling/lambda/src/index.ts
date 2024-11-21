@@ -152,7 +152,7 @@ export function makeApp(fetchFn: any, issuer: any) {
     // );
     app.use('/frontend', (_req, res) => {
       res.set('Cache-Control', 'no-store');
-      express.static(path.dirname(require.resolve('@contentful/smartling-frontend')), {
+      return express.static(path.dirname(require.resolve('@contentful/smartling-frontend')), {
         lastModified,
       });
     });
