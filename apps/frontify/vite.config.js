@@ -13,4 +13,7 @@ export default defineConfig({
       external: ['react/jsx-runtime'],
     },
   },
+  optimizeDeps: {
+    include: ['react/jsx-runtime'],
+  },
 });

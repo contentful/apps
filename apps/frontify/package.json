@@ -9,8 +9,8 @@
     "@contentful/app-scripts": "^1.30.1",
     "@contentful/dam-app-base": "^2.0.55",
     "@vitejs/plugin-react": "^4.3.3",
-    "react": "16.12.0",
-    "react-dom": "16.12.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "vite": "^5.4.10"
   },
   "scripts": {
@@ -28,5 +28,4 @@
     "not ie <= 11"
   ],
   "homepage": "."
-
 }
