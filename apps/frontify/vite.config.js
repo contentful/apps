@@ -9,9 +9,6 @@ export default defineConfig({
   plugins: [react()],
   build: {
     outDir: 'build',
-    rollupOptions: {
-      external: ['react/jsx-runtime'],
-    },
   },
   optimizeDeps: {
     include: ['react/jsx-runtime'],
