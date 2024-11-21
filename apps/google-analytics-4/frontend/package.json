@@ -59,7 +59,7 @@
     "@types/react": "18.0.9",
     "@types/react-dom": "18.0.3",
     "cross-env": "7.0.3",
-    "msw": "0.49.3",
+    "msw": "2.6.5",
     "typescript": "4.9.3"
   },
   "homepage": "."
