@@ -168,7 +168,8 @@ export function makeApp(fetchFn: any, issuer: any) {
         lastModified,
         cacheControl: true,
         setHeaders: (res: any) => {
-          res.set('Cache-Control', 'max-age=0, must-revalidate');
+          res.set('Cache-Control', 'no-store');
+          res.set('Last-Modified', lastModified);
         },
       })
     );
