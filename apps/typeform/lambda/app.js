@@ -24,7 +24,7 @@ const computeLastModifiedTime = () => {
   // JS uses number of _milliseconds_ since epoch, whereas unix generates number in
   // _seconds_ since epoch. So we have to convert
   const epochTime = Number(deployTime) * 1000;
-  return new Date(epochTime).toGMTString();
+  return new Date(epochTime).toUTCString();
 };
 
 app.use('/forms', async (req, res) => {
