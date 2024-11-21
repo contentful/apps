@@ -144,18 +144,18 @@ export function makeApp(fetchFn: any, issuer: any) {
     // in production mode, frontend requests are served from the static smartling-frontend build folder
     const lastModified = computeLastModifiedTime();
     // app.set('Cache-Control', 'no-store');
-    // app.use(
-    //   '/frontend',
-    //   express.static(path.dirname(require.resolve('@contentful/smartling-frontend')), {
-    //     lastModified,
-    //   })
-    // );
-    app.use('/frontend', (_req, res) => {
-      res.set('Cache-Control', 'no-store');
-      return express.static(path.dirname(require.resolve('@contentful/smartling-frontend')), {
+
+    const location = path.dirname(require.resolve('@contentful/smartling-frontend'));
+    app.use(
+      '/frontend',
+      express.static(location, {
         lastModified,
-      });
-    });
+        cacheControl: true,
+        setHeaders: function (res: any) {
+          res.set('Cache-Control', 'max-age=0, must-revalidate');
+        },
+      })
+    );
   }
 
   // @ts-ignore
