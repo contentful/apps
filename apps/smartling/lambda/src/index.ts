@@ -148,6 +148,9 @@ export function makeApp(fetchFn: any, issuer: any) {
       '/frontend',
       express.static(path.dirname(require.resolve('@contentful/smartling-frontend')), {
         lastModified,
+        setHeaders: (res: any) => {
+          res.set('Last-Modified', lastModified);
+        },
       })
     );
   }
