@@ -64,7 +64,15 @@ app.use('/callback', async (req, res) => {
 });
 
 const lastModified = computeLastModifiedTime();
-app.use('/frontend', express.static(FRONTEND, { lastModified }));
+app.use(
+  '/frontend',
+  express.static(FRONTEND, {
+    lastModified,
+    setHeaders: (res) => {
+      res.setHeader('Last-Modified', lastModified);
+    },
+  })
+);
 
 app.use((_req, res) => res.status(404).send('Not found'));
 
