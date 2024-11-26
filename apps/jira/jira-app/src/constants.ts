@@ -6,6 +6,11 @@ if (process.env.NODE_ENV === 'development') {
   CLIENT_ID = process.env.REACT_APP_ATLASSIAN_APP_CLIENT_ID || '';
 }
 
+if (process.env.STAGE === 'test') {
+  LAMBDA_URI = 'https://jira.ctfapps.net';
+  CLIENT_ID = process.env.REACT_APP_ATLASSIAN_APP_CLIENT_ID || '';
+}
+
 const constants = {
   OAUTH_REDIRECT_URI: `${LAMBDA_URI}/auth`,
   CONNECT_URL: `${LAMBDA_URI}/connect.json`,
