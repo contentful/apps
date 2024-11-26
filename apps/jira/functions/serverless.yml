@@ -10,13 +10,16 @@ custom:
   myEnvironment:
     FRONTEND_URL:
       prd: 'https://app.jira.ctfapps.net'
-      test: 'http://localhost:1234'
+      dev: 'http://localhost:1234'
+      test: 'https://app.jira-test.ctfapps.net'
     OAUTH_REDIRECT_URI:
       prd: 'https://api.jira.ctfapps.net/auth'
-      test: '${env:NGROK_URL}/dev/auth'
+      dev: '${env:NGROK_URL}/dev/auth'
+      test: 'https://app.jira-test.ctfapps.net/auth'
     BASE_URL:
       prd: 'https://api.jira.ctfapps.net'
-      test: '${env:NGROK_URL}/dev'
+      dev: '${env:NGROK_URL}/dev'
+      test: 'https://app.jira-test.ctfapps.net'
   customDomain:
     domainName: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):domainName}
     stage: ${opt:stage, 'dev'}
@@ -27,7 +30,7 @@ custom:
 provider:
   name: aws
   runtime: nodejs16.x
-  stage: ${opt:stage, 'test'}
+  stage: ${opt:stage, 'dev'}
   region: 'us-east-1'
   deploymentBucket:
     name: cf-apps-serverless-deployment
@@ -46,9 +49,9 @@ functions:
     description: OAuth backend for Atlassian
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/atlassian_oauth_lambda
     environment:
-      OAUTH_CREDENTIALS_SECRET_ID: apps/jira/${opt:stage, 'test'}/oauth-credentials
-      OAUTH_REDIRECT_URI: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):OAUTH_REDIRECT_URI}
-      FRONTEND_URL: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):FRONTEND_URL}
+       OAUTH_CREDENTIALS_SECRET_ID: apps/jira/${opt:stage, 'dev'}/oauth-credentials
+       OAUTH_REDIRECT_URI: ${self:custom.myEnvironment.OAUTH_REDIRECT_URI.${self:custom.myStage}}
+       FRONTEND_URL: ${self:custom.myEnvironment.FRONTEND_URL.${self:custom.myStage}}
       OAUTH_TOKEN_EXCHANGE_ENDPOINT: https://auth.atlassian.com/oauth/token
     events:
       - http:
