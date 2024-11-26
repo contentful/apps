@@ -11,7 +11,7 @@ custom:
     FRONTEND_URL:
       prd: 'https://app.jira.ctfapps.net'
       dev: 'http://localhost:1234'
-      test: 'https://app.jira-test.ctfapps.net'
+      test: 'https://app.jira-test.ctfapps.net/frontend'
     OAUTH_REDIRECT_URI:
       prd: 'https://api.jira.ctfapps.net/auth'
       dev: '${env:NGROK_URL}/dev/auth'
