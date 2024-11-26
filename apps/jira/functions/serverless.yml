@@ -64,7 +64,7 @@ functions:
     description: connect.json for JIRA
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/jira_connect_lambda
     environment:
-      BASE_URL: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):BASE_URL}
+      BASE_URL: ${self:custom.myEnvironment.BASE_URL.${self:custom.myStage}}
     events:
       - http:
           path: connect.json
