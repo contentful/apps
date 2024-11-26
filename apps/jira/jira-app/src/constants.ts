@@ -7,7 +7,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 if (process.env.STAGE === 'test') {
-  LAMBDA_URI = 'https://jira.ctfapps.net';
+  LAMBDA_URI = 'https://jira-test.ctfapps.net';
   CLIENT_ID = process.env.REACT_APP_ATLASSIAN_APP_CLIENT_ID || '';
 }
 
