@@ -49,9 +49,9 @@ functions:
     description: OAuth backend for Atlassian
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/atlassian_oauth_lambda
     environment:
-       OAUTH_CREDENTIALS_SECRET_ID: apps/jira/${opt:stage, 'dev'}/oauth-credentials
-       OAUTH_REDIRECT_URI: ${self:custom.myEnvironment.OAUTH_REDIRECT_URI.${self:custom.myStage}}
-       FRONTEND_URL: ${self:custom.myEnvironment.FRONTEND_URL.${self:custom.myStage}}
+      OAUTH_CREDENTIALS_SECRET_ID: apps/jira/${opt:stage, 'dev'}/oauth-credentials
+      OAUTH_REDIRECT_URI: ${self:custom.myEnvironment.OAUTH_REDIRECT_URI.${self:custom.myStage}}
+      FRONTEND_URL: ${self:custom.myEnvironment.FRONTEND_URL.${self:custom.myStage}}
       OAUTH_TOKEN_EXCHANGE_ENDPOINT: https://auth.atlassian.com/oauth/token
     events:
       - http:
