@@ -6,7 +6,7 @@ export default function AboutSection() {
     <Box>
       <Heading>About Google Analytics 4 for Contentful</Heading>
       <Paragraph>
-        The Gooogle Analytics 4 app displays real-time page-based analytics data from your
+        The Google Analytics 4 app displays real-time page-based analytics data from your
         organization’s Google Analytics 4 properties alongside relevant content entries.
       </Paragraph>
     </Box>
