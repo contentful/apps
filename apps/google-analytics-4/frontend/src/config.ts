@@ -14,9 +14,10 @@ function getEnvironmentVariable(
   return environmentVariableValue;
 }
 
-const backendApiUrl = lambdaConfig.stage
-  ? getEnvironmentVariable('REACT_APP_BACKEND_API_URL_TEST')
-  : getEnvironmentVariable('REACT_APP_BACKEND_API_URL');
+const backendApiUrl =
+  lambdaConfig.stage === 'test'
+    ? getEnvironmentVariable('REACT_APP_BACKEND_API_URL_TEST')
+    : getEnvironmentVariable('REACT_APP_BACKEND_API_URL');
 
 export const config = {
   backendApiUrl,
