@@ -13,14 +13,14 @@ function getEnvironmentVariable(
 }
 
 const backendApiUrl =
-  getEnvironmentVariable('REACT_APP_ENV', '') === 'test'
+  getEnvironmentVariable('REACT_APP_ENV', 'prod') === 'test'
     ? getEnvironmentVariable('REACT_APP_BACKEND_API_URL_TEST')
     : getEnvironmentVariable('REACT_APP_BACKEND_API_URL');
 
 console.log(
   { backendApiUrl },
-  getEnvironmentVariable('NODE_ENV', ''),
-  getEnvironmentVariable('REACT_APP_ENV', '')
+  getEnvironmentVariable('NODE_ENV', 'prod'),
+  getEnvironmentVariable('REACT_APP_ENV', 'prod')
 );
 
 export const config = {
