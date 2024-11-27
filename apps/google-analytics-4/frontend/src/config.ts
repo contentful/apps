@@ -1,5 +1,3 @@
-import { config as lambdaConfig } from '../../lambda/src/config';
-
 type EnvironmentVariable = string | null | number | undefined;
 
 function getEnvironmentVariable(
@@ -15,7 +13,7 @@ function getEnvironmentVariable(
 }
 
 const backendApiUrl =
-  lambdaConfig.stage === 'test'
+  getEnvironmentVariable('NODE_ENV') === 'test'
     ? getEnvironmentVariable('REACT_APP_BACKEND_API_URL_TEST')
     : getEnvironmentVariable('REACT_APP_BACKEND_API_URL');
 
