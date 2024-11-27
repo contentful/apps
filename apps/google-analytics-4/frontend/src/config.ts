@@ -17,7 +17,11 @@ const backendApiUrl =
     ? getEnvironmentVariable('REACT_APP_BACKEND_API_URL_TEST')
     : getEnvironmentVariable('REACT_APP_BACKEND_API_URL');
 
-console.log({ backendApiUrl }, getEnvironmentVariable('REACT_APP_ENV'));
+console.log(
+  { backendApiUrl },
+  getEnvironmentVariable('REACT_APP_ENV'),
+  getEnvironmentVariable('NODE_ENV')
+);
 
 export const config = {
   backendApiUrl,

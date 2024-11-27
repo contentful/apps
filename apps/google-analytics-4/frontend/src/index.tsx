@@ -22,7 +22,6 @@ Sentry.init({
 });
 
 const root = document.getElementById('root');
-console.log('config.env', config.environment);
 
 if (config.environment === 'development' && window.self === window.top) {
   // You can remove this if block before deploying your app
