@@ -107,7 +107,6 @@ jobs:
           command: |
             REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
-            REACT_APP_ENV='test' \
             NODE_ENV='staging' \
             npm run build
       - run:
@@ -117,6 +116,7 @@ jobs:
                 STATIC_JIRA_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1/jira" \
                 REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
                 REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
+                REACT_APP_ENV='test' \
                 STAGE='test' npm run deploy:test
       - run:
           name: Invalidate Slack staging cloudfront distribution
