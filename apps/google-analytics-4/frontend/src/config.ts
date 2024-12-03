@@ -12,6 +12,8 @@ function getEnvironmentVariable(
   return environmentVariableValue;
 }
 
+console.log(window.location);
+
 const backendApiUrl =
   getEnvironmentVariable('NODE_ENV') === 'test'
     ? getEnvironmentVariable('REACT_APP_BACKEND_API_URL_TEST')
@@ -24,7 +26,7 @@ console.log(
 );
 
 export const config = {
-  backendApiUrl,
+  backendApiUrl: window.location,
   version: getEnvironmentVariable('REACT_APP_VERSION', 'no-version-set'),
   release: getEnvironmentVariable('REACT_APP_RELEASE', 'no-release-hash-set'),
   sentryDSN: getEnvironmentVariable('REACT_APP_SENTRY_DSN'),
