@@ -109,8 +109,6 @@ jobs:
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
             NODE_ENV='staging' \
             npm run build
-          environment: |
-            REACT_APP_ENV='test'
       - run:
           name: Deploy apps to staging
           command: |
