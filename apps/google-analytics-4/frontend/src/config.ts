@@ -12,7 +12,7 @@ function getEnvironmentVariable(
   return environmentVariableValue;
 }
 
-console.log(window.location.href);
+console.log(process.env.REACT_APP_ENV);
 
 const backendApiUrl =
   getEnvironmentVariable('REACT_APP_ENV', 'prod') === 'test'
