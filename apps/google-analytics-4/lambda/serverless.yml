@@ -62,7 +62,6 @@ functions:
       DYNAMODB_ENDPOINT: ${self:custom.dynamoDbEndpoint}
       DYNAMODB_TABLE_NAME: ${self:custom.dynamoDbTableName}
       SERVICE_ACCOUNT_KEY_ENCRYPTION_SECRET: ${self:custom.serviceAccountKeyEncryptionSecret}
-      REACT_APP_GA4_ENV: ${opt:stage, 'dev'}
     handler: build/src/index.handler
     events:
       - http:

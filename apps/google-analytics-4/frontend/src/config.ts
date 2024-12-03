@@ -12,19 +12,10 @@ function getEnvironmentVariable(
   return environmentVariableValue;
 }
 
-console.log(process.env.REACT_APP_ENV);
-
 const backendApiUrl =
   getEnvironmentVariable('REACT_APP_ENV', 'prod') === 'test'
     ? getEnvironmentVariable('REACT_APP_BACKEND_API_URL_TEST')
     : getEnvironmentVariable('REACT_APP_BACKEND_API_URL');
-
-console.log(
-  { backendApiUrl },
-  getEnvironmentVariable('NODE_ENV', 'prod'),
-  getEnvironmentVariable('REACT_APP_ENV', 'prod'),
-  getEnvironmentVariable('REACT_APP_GA4_ENV', 'sdfsffd')
-);
 
 export const config = {
   backendApiUrl,
