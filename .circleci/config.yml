@@ -108,6 +108,7 @@ jobs:
             REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
             NODE_ENV='staging' \
+            REACT_APP_ENV='test' \
             npm run build
       - run:
           name: Deploy apps to staging
