@@ -25,8 +25,7 @@
   },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
-    "build": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) react-scripts build",
-    "build:test": "REACT_APP_ENV=test build",
+    "build": "REACT_APP_ENV=${STAGE} REACT_APP_RELEASE=$(git rev-parse --short HEAD) react-scripts build",
     "test": "react-scripts test",
     "test:ci": "CI=true react-scripts test --runInBand",
     "lint": "eslint --max-warnings=0 .",
