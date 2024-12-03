@@ -25,14 +25,14 @@
   },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
-    "build": "REACT_APP_ENV=${STAGE} REACT_APP_RELEASE=$(git rev-parse --short HEAD) react-scripts build",
+    "build": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) react-scripts build",
     "test": "react-scripts test",
     "test:ci": "CI=true react-scripts test --runInBand",
     "lint": "eslint --max-warnings=0 .",
     "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5DlxOS0KvGS1Wk362xgvbN --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:test": "REACT_APP_ENV=test NODE_ENV=test contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 42yub8HtSmIclUlVBHpHHP --token ${TEST_CMA_TOKEN}"
+    "deploy:test": "NODE_ENV=test contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 42yub8HtSmIclUlVBHpHHP --token ${TEST_CMA_TOKEN}"
   },
   "eslintConfig": {
     "extends": "react-app"
