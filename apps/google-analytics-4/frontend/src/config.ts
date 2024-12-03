@@ -22,7 +22,8 @@ const backendApiUrl =
 console.log(
   { backendApiUrl },
   getEnvironmentVariable('NODE_ENV', 'prod'),
-  getEnvironmentVariable('REACT_APP_ENV', 'prod')
+  getEnvironmentVariable('REACT_APP_ENV', 'prod'),
+  getEnvironmentVariable('REACT_APP_GA4_ENV', 'sdfsffd')
 );
 
 export const config = {
