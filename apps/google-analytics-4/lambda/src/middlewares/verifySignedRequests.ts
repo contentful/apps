@@ -37,8 +37,7 @@ const makeCanonicalReq = (req: Request) => {
     headers[key] = headers[key]?.toString();
   });
 
-  // TODO: make this stage prefixing logic better? (yuck)
-  const pathPrefix = config.stage !== 'prd' && config.stage !== 'test' ? `/${config.stage}` : '';
+  const pathPrefix = ['prd', 'test'].includes(config.stage) ? '' : `/${config.stage}`;
   const fullPath = req.originalUrl.split('?')[0];
   const signedPath = `${pathPrefix}${fullPath}`; // note: req.originalUrl starts with a `/` and includes the full path & query string
 
