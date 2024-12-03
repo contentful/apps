@@ -15,7 +15,7 @@ function getEnvironmentVariable(
 console.log(window.location.href);
 
 const backendApiUrl =
-  getEnvironmentVariable('NODE_ENV') === 'test'
+  getEnvironmentVariable('REACT_APP_ENV', 'prod') === 'test'
     ? getEnvironmentVariable('REACT_APP_BACKEND_API_URL_TEST')
     : getEnvironmentVariable('REACT_APP_BACKEND_API_URL');
 
