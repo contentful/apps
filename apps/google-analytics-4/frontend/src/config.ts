@@ -12,21 +12,19 @@ function getEnvironmentVariable(
   return environmentVariableValue;
 }
 
-console.log(window.location);
+// const backendApiUrl =
+//   getEnvironmentVariable('NODE_ENV') === 'test'
+//     ? getEnvironmentVariable('REACT_APP_BACKEND_API_URL_TEST')
+//     : getEnvironmentVariable('REACT_APP_BACKEND_API_URL');
 
-const backendApiUrl =
-  getEnvironmentVariable('NODE_ENV') === 'test'
-    ? getEnvironmentVariable('REACT_APP_BACKEND_API_URL_TEST')
-    : getEnvironmentVariable('REACT_APP_BACKEND_API_URL');
-
-console.log(
-  { backendApiUrl },
-  getEnvironmentVariable('NODE_ENV', 'prod'),
-  getEnvironmentVariable('REACT_APP_ENV', 'prod')
-);
+// console.log(
+//   { backendApiUrl },
+//   getEnvironmentVariable('NODE_ENV', 'prod'),
+//   getEnvironmentVariable('REACT_APP_ENV', 'prod')
+// );
 
 export const config = {
-  backendApiUrl: window.location,
+  backendApiUrl: window.location.href,
   version: getEnvironmentVariable('REACT_APP_VERSION', 'no-version-set'),
   release: getEnvironmentVariable('REACT_APP_RELEASE', 'no-release-hash-set'),
   sentryDSN: getEnvironmentVariable('REACT_APP_SENTRY_DSN'),
