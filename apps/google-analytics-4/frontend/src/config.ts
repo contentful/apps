@@ -1,16 +1,10 @@
 type EnvironmentVariable = string | null | number | undefined;
-interface ImportMetaEnv {
-  [key: string]: string;
-}
-interface ImportMetaData extends ImportMeta {
-  env: ImportMetaEnv;
-}
 
 function getEnvironmentVariable(
   environmentVariableName: string,
   fallback?: EnvironmentVariable
 ): string {
-  const environmentVariableValue = (import.meta as ImportMetaData).env[environmentVariableName];
+  const environmentVariableValue = import.meta.env[environmentVariableName];
   if (!environmentVariableValue) {
     if (fallback) return fallback.toString();
     throw new Error(`Missing environment variable: '${environmentVariableName}'`);
@@ -29,5 +23,5 @@ export const config = {
   release: getEnvironmentVariable('VITE_RELEASE', 'no-release-hash-set'),
   sentryDSN: getEnvironmentVariable('VITE_SENTRY_DSN'),
   segmentWriteKey: getEnvironmentVariable('VITE_SEGMENT_WRITE_KEY'),
-  environment: getEnvironmentVariable('NODE_ENV'),
+  environment: process.env.NODE_ENV,
 };

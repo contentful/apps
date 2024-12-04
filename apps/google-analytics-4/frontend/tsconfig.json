@@ -1,5 +1,5 @@
 {
-  "extends": "@tsconfig/create-react-app/tsconfig.json",
+  "extends": "@tsconfig/vite-react/tsconfig.json",
   "compilerOptions": {
     "baseUrl": "src",
     "sourceMap": true,

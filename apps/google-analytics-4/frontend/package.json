@@ -54,7 +54,7 @@
     "@contentful/app-scripts": "1.7.13",
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "12.1.5",
-    "@tsconfig/create-react-app": "1.0.3",
+    "@tsconfig/vite-react": "^3.4.0",
     "@types/jest": "29.4.0",
     "@types/node": "18.11.11",
     "@types/react": "18.0.9",
@@ -62,7 +62,8 @@
     "cross-env": "7.0.3",
     "jsdom": "^25.0.1",
     "msw": "0.49.3",
-    "typescript": "4.9.3"
+    "typescript": "4.9.3",
+    "vite-plugin-eslint": "^1.8.1"
   },
   "homepage": "."
 }
