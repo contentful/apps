@@ -41,7 +41,7 @@
     ]
   },
   "devDependencies": {
-    "@contentful/app-scripts": "1.31.0",
+    "@contentful/app-scripts": "1.31.1",
     "@contentful/node-apps-toolkit": "^3.9.0",
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
