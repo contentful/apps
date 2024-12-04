@@ -4,7 +4,8 @@
     "baseUrl": "src",
     "sourceMap": true,
     "inlineSources": true,
-    "sourceRoot": "/src"
+    "sourceRoot": "/src",
+    "types": ["vitest/globals"]
   },
   "include": ["src", "test"],
   "exclude": ["node_modules"]
