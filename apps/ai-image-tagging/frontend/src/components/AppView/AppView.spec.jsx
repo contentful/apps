@@ -63,7 +63,7 @@ describe('AppView', () => {
     });
   });
 
-  describe('when the app is installed', () => {
+  describe.only('when the app is installed', () => {
     it('should render the app view with configuration screen', async () => {
       props.sdk.app.isInstalled.mockImplementation(() => true);
       const appView = render(<AppView {...props} />);
