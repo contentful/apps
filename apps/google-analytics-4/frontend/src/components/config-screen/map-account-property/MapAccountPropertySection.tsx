@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Stack, Box, Subheading, Paragraph, Skeleton, Flex } from '@contentful/f36-components';
 import { AccountSummariesType } from 'types';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
-import MapAccountPropertyDropdown from 'components/config-screen/map-account-property/MapAccountPropertyDropdown';
+import MapAccountPropertyDropdown from './MapAccountPropertyDropdown';
 
 interface Props {
   accountsSummaries: AccountSummariesType[];

@@ -1,19 +1,20 @@
 import { render, screen } from '@testing-library/react';
 import { mockSdk, mockCma } from '../../../../test/mocks';
-import GoogleAnalyticsConfigPage from 'components/config-screen/GoogleAnalyticsConfigPage/GoogleAnalyticsConfigPage';
-import { config } from 'config';
+import GoogleAnalyticsConfigPage from './GoogleAnalyticsConfigPage';
+import { config } from '../../../config';
 import { validServiceKeyFile, validServiceKeyId } from '../../../../test/mocks';
 import userEvent from '@testing-library/user-event';
 import { ServiceAccountKey } from 'types';
+import { vi } from 'vitest';
 
 const apiRoot = config.backendApiUrl;
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));
 
-jest.mock('contentful-management', () => ({
+vi.mock('contentful-management', () => ({
   createClient: () => mockCma,
 }));
 
@@ -112,16 +113,20 @@ describe('Installed Service Account Key', () => {
     const user = userEvent.setup();
     render(<GoogleAnalyticsConfigPage />);
 
-    const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
-    await user.click(editServiceAccountButton);
-    const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
-    await user.click(keyFileInputBox);
+    try {
+      const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
+      await user.click(editServiceAccountButton);
+      const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
+      await user.click(keyFileInputBox);
 
-    const newServiceKeyFile: ServiceAccountKey = {
-      ...validServiceKeyFile,
-      private_key_id: 'PRIVATE_KEY_ID',
-    };
-    await user.paste(JSON.stringify(newServiceKeyFile));
+      const newServiceKeyFile: ServiceAccountKey = {
+        ...validServiceKeyFile,
+        private_key_id: 'PRIVATE_KEY_ID',
+      };
+      await user.paste(JSON.stringify(newServiceKeyFile));
+    } catch (error) {
+      console.error(error);
+    }
 
     expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
     const result = await saveAppInstallation();

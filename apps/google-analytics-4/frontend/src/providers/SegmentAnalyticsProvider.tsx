@@ -1,5 +1,5 @@
 import { AnalyticsBrowser } from '@segment/analytics-next';
-import { config } from 'config';
+import { config } from '../config';
 import { createContext, ReactNode } from 'react';
 
 export const SegmentAnalyticsContext = createContext<{ segmentAnalytics: AnalyticsBrowser | null }>(

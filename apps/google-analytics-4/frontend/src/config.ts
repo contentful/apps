@@ -1,10 +1,16 @@
 type EnvironmentVariable = string | null | number | undefined;
+interface ImportMetaEnv {
+  [key: string]: string;
+}
+interface ImportMetaData extends ImportMeta {
+  env: ImportMetaEnv;
+}
 
 function getEnvironmentVariable(
   environmentVariableName: string,
   fallback?: EnvironmentVariable
 ): string {
-  const environmentVariableValue = process.env[environmentVariableName];
+  const environmentVariableValue = (import.meta as ImportMetaData).env[environmentVariableName];
   if (!environmentVariableValue) {
     if (fallback) return fallback.toString();
     throw new Error(`Missing environment variable: '${environmentVariableName}'`);
@@ -13,15 +19,15 @@ function getEnvironmentVariable(
 }
 
 const backendApiUrl =
-  getEnvironmentVariable('REACT_APP_ENV', 'prod') === 'test'
-    ? getEnvironmentVariable('REACT_APP_BACKEND_API_URL_TEST')
-    : getEnvironmentVariable('REACT_APP_BACKEND_API_URL');
+  getEnvironmentVariable('VITE_ENV', 'prod') === 'test'
+    ? getEnvironmentVariable('VITE_BACKEND_API_URL_TEST')
+    : getEnvironmentVariable('VITE_BACKEND_API_URL');
 
 export const config = {
   backendApiUrl,
-  version: getEnvironmentVariable('REACT_APP_VERSION', 'no-version-set'),
-  release: getEnvironmentVariable('REACT_APP_RELEASE', 'no-release-hash-set'),
-  sentryDSN: getEnvironmentVariable('REACT_APP_SENTRY_DSN'),
-  segmentWriteKey: getEnvironmentVariable('REACT_APP_SEGMENT_WRITE_KEY'),
+  version: getEnvironmentVariable('VITE_VERSION', 'no-version-set'),
+  release: getEnvironmentVariable('VITE_RELEASE', 'no-release-hash-set'),
+  sentryDSN: getEnvironmentVariable('VITE_SENTRY_DSN'),
+  segmentWriteKey: getEnvironmentVariable('VITE_SEGMENT_WRITE_KEY'),
   environment: getEnvironmentVariable('NODE_ENV'),
 };

@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { styles } from 'components/config-screen/assign-content-type/AssignContentType.styles';
+import { styles } from './AssignContentType.styles';
 import {
   NO_SLUG_WARNING_MSG,
   REMOVED_FROM_SIDEBAR_WARNING_MSG,
   getContentTypeDeletedMsg,
   getSlugFieldDeletedMsg,
   WarningTypes,
-} from 'components/config-screen/WarningDisplay/constants/warningMessages';
+} from '../WarningDisplay/constants/warningMessages';
 import { ConfigurationWarningTypes } from 'types';
-import WarningDisplay from 'components/config-screen/WarningDisplay/WarningDisplay';
+import WarningDisplay from '../WarningDisplay/WarningDisplay';
 
 interface Props {
   contentTypeId: string;

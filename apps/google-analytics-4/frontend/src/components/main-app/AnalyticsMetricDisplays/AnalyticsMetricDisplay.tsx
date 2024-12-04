@@ -1,8 +1,8 @@
-import ChartFooter from 'components/main-app/ChartFooter/ChartFooter';
-import ChartHeader from 'components/main-app/ChartHeader/ChartHeader';
+import ChartFooter from '../ChartFooter/ChartFooter';
+import ChartHeader from '../ChartHeader/ChartHeader';
 import ChartContent from '../ChartContent/ChartContent';
 import { RunReportResponse, StartEndDates, DateRangeType } from 'types';
-import { getExternalUrl } from 'helpers/externalUrlHelpers/externalUrlHelpers';
+import { getExternalUrl } from '../../../helpers/externalUrlHelpers/externalUrlHelpers';
 
 interface Props {
   handleDateRangeChange: Function;

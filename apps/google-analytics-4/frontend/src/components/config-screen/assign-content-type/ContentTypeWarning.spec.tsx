@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ContentTypeWarning from 'components/config-screen/assign-content-type/ContentTypeWarning';
+import ContentTypeWarning from './ContentTypeWarning';
 import {
   NO_SLUG_WARNING_MSG,
   REMOVED_FROM_SIDEBAR_WARNING_MSG,
   getContentTypeDeletedMsg,
   getSlugFieldDeletedMsg,
-} from 'components/config-screen/WarningDisplay/constants/warningMessages';
+} from '../WarningDisplay/constants/warningMessages';
 
 describe('Content Type Warning for Config Screen', () => {
   it('renders an empty div if there are no warnings or errors', () => {

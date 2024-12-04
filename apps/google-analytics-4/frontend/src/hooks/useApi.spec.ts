@@ -3,13 +3,14 @@ import React, { FunctionComponent } from 'react';
 import { mockCma, mockSdk, validServiceKeyId } from '../../test/mocks';
 import { Api } from '../apis/api';
 import { useApi } from './useApi';
+import { vi } from 'vitest';
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));
 
-const testFn = jest.fn((val) => val);
+const testFn = vi.fn((val) => val);
 const renderTestComponent = (componentFn: FunctionComponent) => {
   const TestComponent = componentFn;
 

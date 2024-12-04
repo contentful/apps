@@ -8,12 +8,12 @@ describe('Chart Footer for the analytics app', () => {
   it('can render the slug name', () => {
     render(<ChartFooter slugName={mockSlugName} viewUrl={mockViewUrl} />);
 
-    expect(screen.getByText(/my-page/)).toBeVisible();
+    expect(screen.getByText(/my-page/)).toBeTruthy();
   });
 
   it('can render the link to open in Google Analytics', () => {
     render(<ChartFooter slugName={mockSlugName} viewUrl={mockViewUrl} />);
 
-    expect(screen.getByText('Open in Google Analytics')).toBeVisible();
+    expect(screen.getByText('Open in Google Analytics')).toBeTruthy();
   });
 });

@@ -1,5 +1,5 @@
-import GenericChecklistRow from 'components/config-screen/api-access/display/GenericCheckRow';
-import { ChecklistRow } from 'components/config-screen/api-access/display/ChecklistUtils';
+import GenericChecklistRow from './GenericCheckRow';
+import { ChecklistRow } from './ChecklistUtils';
 import tokens from '@contentful/f36-tokens';
 import { Box } from '@contentful/f36-components';
 

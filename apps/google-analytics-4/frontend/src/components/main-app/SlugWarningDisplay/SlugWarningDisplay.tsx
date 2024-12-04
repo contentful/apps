@@ -1,14 +1,11 @@
 import React from 'react';
-import { useSidebarSlug } from 'hooks/useSidebarSlug/useSidebarSlug';
-import Note from 'components/common/Note/Note';
+import { useSidebarSlug } from '../../../hooks/useSidebarSlug/useSidebarSlug';
+import Note from '../../common/Note/Note';
 import { ContentTypeValue } from 'types';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { SidebarExtensionSDK } from '@contentful/app-sdk';
-import { getContentTypeSpecificMsg } from 'components/main-app/constants/noteMessages';
-import {
-  SupportHyperLink,
-  AppConfigPageHyperLink,
-} from 'components/main-app/ErrorDisplay/CommonErrorDisplays';
+import { getContentTypeSpecificMsg } from '../constants/noteMessages';
+import { SupportHyperLink, AppConfigPageHyperLink } from '../ErrorDisplay/CommonErrorDisplays';
 
 interface Props {
   slugFieldInfo: ContentTypeValue;

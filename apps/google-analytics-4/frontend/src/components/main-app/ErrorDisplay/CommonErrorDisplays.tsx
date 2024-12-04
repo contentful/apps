@@ -1,8 +1,8 @@
 import React from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { SidebarExtensionSDK } from '@contentful/app-sdk';
-import { DEFAULT_ERR_MSG } from 'components/main-app/constants/noteMessages';
-import HyperLink from 'components/common/HyperLink/HyperLink';
+import { DEFAULT_ERR_MSG } from '../constants/noteMessages';
+import HyperLink from '../../common/HyperLink/HyperLink';
 
 interface AppConfigPageHyperLinkProps {
   bodyMsg: string;

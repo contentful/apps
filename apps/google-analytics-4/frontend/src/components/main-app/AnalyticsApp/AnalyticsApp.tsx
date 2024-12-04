@@ -1,14 +1,14 @@
 import { useAutoResizer } from '@contentful/react-apps-toolkit';
 import { useEffect, useState, useMemo } from 'react';
-import { Api } from 'apis/api';
-import getRangeDates from 'helpers/DateRangeHelpers/DateRangeHelpers';
+import { Api } from '../../../apis/api';
+import getRangeDates from '../../../helpers/DateRangeHelpers/DateRangeHelpers';
 import { DateRangeType, StartEndDates, ContentTypeValue } from 'types';
 import { Skeleton } from '@contentful/f36-components';
 import { isEmpty } from 'lodash';
-import { RunReportData } from 'apis/apiTypes';
-import { useSidebarSlug } from 'hooks/useSidebarSlug/useSidebarSlug';
-import SlugWarningDisplay from 'components/main-app/SlugWarningDisplay/SlugWarningDisplay';
-import AnalyticsMetricDisplay from 'components/main-app/AnalyticsMetricDisplays/AnalyticsMetricDisplay';
+import { RunReportData } from '../../../apis/apiTypes';
+import { useSidebarSlug } from '../../../hooks/useSidebarSlug/useSidebarSlug';
+import SlugWarningDisplay from '../SlugWarningDisplay/SlugWarningDisplay';
+import AnalyticsMetricDisplay from '../AnalyticsMetricDisplays/AnalyticsMetricDisplay';
 
 interface Props {
   api: Api;
