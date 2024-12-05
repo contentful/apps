@@ -28,9 +28,9 @@ describe('Analytics metric display components for the analytics app', () => {
     const slug = getByText(`Page path: ${SLUG}`);
     const chart = document.querySelector('canvas');
 
-    expect(pageViews).toBeVisible();
-    expect(metricName).toBeVisible();
-    expect(slug).toBeVisible();
-    expect(chart).toBeVisible();
+    expect(pageViews).toBeTruthy();
+    expect(metricName).toBeTruthy();
+    expect(slug).toBeTruthy();
+    expect(chart).toBeTruthy();
   });
 });

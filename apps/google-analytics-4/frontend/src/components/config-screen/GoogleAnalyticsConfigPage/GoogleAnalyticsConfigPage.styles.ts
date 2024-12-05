@@ -1,6 +1,6 @@
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
-import { googleAnalyticsBrand } from 'components/common/GoogleAnalyticsIcon';
+import { googleAnalyticsBrand } from '../../common/GoogleAnalyticsIcon';
 
 export const styles = {
   body: css({

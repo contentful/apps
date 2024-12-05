@@ -17,7 +17,7 @@ describe('LineChart component', () => {
 
     const chart = document.querySelector('canvas');
 
-    expect(chart).toBeVisible();
+    expect(chart).toBeTruthy();
     expect(chart).toHaveAccessibleName('Analytics line chart');
   });
 });

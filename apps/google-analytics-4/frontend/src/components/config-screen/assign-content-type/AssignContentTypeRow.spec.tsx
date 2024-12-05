@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AllContentTypes, AllContentTypeEntries, ContentTypes } from 'types';
-import AssignContentTypeRow from 'components/config-screen/assign-content-type/AssignContentTypeRow';
+import AssignContentTypeRow from './AssignContentTypeRow';
+import { vi } from 'vitest';
 
 const allContentTypes: AllContentTypes = {
   course: {
@@ -39,9 +40,9 @@ const contentTypes: ContentTypes = {
   },
 };
 
-const onRemoveContentType = jest.fn();
-const onContentTypeChange = jest.fn();
-const onContentTypeFieldChange = jest.fn();
+const onRemoveContentType = vi.fn();
+const onContentTypeChange = vi.fn();
+const onContentTypeFieldChange = vi.fn();
 
 const props = {
   index: 0,

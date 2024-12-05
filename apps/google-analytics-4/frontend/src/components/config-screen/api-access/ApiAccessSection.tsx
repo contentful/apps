@@ -1,5 +1,5 @@
-import DisplayServiceAccountCard from 'components/config-screen/api-access/display/DisplayServiceAccountCard';
-import SetupServiceAccountCard from 'components/config-screen/api-access/setup/SetupServiceAccountCard';
+import DisplayServiceAccountCard from './display/DisplayServiceAccountCard';
+import SetupServiceAccountCard from './setup/SetupServiceAccountCard';
 import { Subheading, Paragraph, Stack } from '@contentful/f36-components';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
 

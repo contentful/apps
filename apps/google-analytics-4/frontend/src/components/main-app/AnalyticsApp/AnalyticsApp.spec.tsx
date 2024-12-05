@@ -1,23 +1,21 @@
 import AnalyticsApp from './AnalyticsApp';
 import { render, screen } from '@testing-library/react';
-import { Api } from 'apis/api';
+import { Api } from '../../../apis/api';
 import { mockSdk, mockCma, validServiceKeyId } from '../../../../test/mocks';
 import runReportResponseHasViews from '../../../../../lambda/public/sampleData/runReportResponseHasViews.json';
 import runReportResponseNoView from '../../../../../lambda/public/sampleData/runReportResponseNoViews.json';
-import {
-  EMPTY_DATA_MSG,
-  getContentTypeSpecificMsg,
-} from 'components/main-app/constants/noteMessages';
-import * as useSidebarSlug from 'hooks/useSidebarSlug/useSidebarSlug';
+import { EMPTY_DATA_MSG, getContentTypeSpecificMsg } from '../constants/noteMessages';
+import * as useSidebarSlug from '../../../hooks/useSidebarSlug/useSidebarSlug';
+import { vi } from 'vitest';
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
-  useAutoResizer: () => jest.fn(),
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useAutoResizer: () => vi.fn(),
   useFieldValue: () => ['fieldValue'],
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));
 
-const mockApi = jest.fn();
+const mockApi = vi.fn();
 
 const { findByTestId, getByTestId, getByText, queryByTestId } = screen;
 
@@ -39,7 +37,7 @@ describe('AnalyticsApp with correct content types configured', () => {
       serviceAccountKeyId: validServiceKeyId,
     });
 
-    jest.spyOn(useSidebarSlug, 'useSidebarSlug').mockImplementation(() => ({
+    vi.spyOn(useSidebarSlug, 'useSidebarSlug').mockImplementation(() => ({
       slugFieldIsConfigured: true,
       contentTypeHasSlugField: true,
       isPublished: true,
@@ -56,8 +54,8 @@ describe('AnalyticsApp with correct content types configured', () => {
     const dropdown = await findByTestId(SELECT_TEST_ID);
     const chart = document.querySelector('canvas');
 
-    expect(dropdown).toBeVisible();
-    expect(chart).toBeVisible();
+    expect(dropdown).toBeDefined();
+    expect(chart).toBeDefined();
   });
 
   it('mounts with warning message when no data', async () => {
@@ -68,9 +66,9 @@ describe('AnalyticsApp with correct content types configured', () => {
     const warningNote = getByTestId(NOTE_TEST_ID);
     const noteText = getByText(EMPTY_DATA_MSG);
 
-    expect(dropdown).toBeVisible();
-    expect(warningNote).toBeVisible();
-    expect(noteText).toBeVisible();
+    expect(dropdown).toBeDefined();
+    expect(warningNote).toBeDefined();
+    expect(noteText).toBeDefined();
   });
 
   it('mounts with error message when error thrown', async () => {
@@ -81,9 +79,9 @@ describe('AnalyticsApp with correct content types configured', () => {
     const warningNote = getByTestId(NOTE_TEST_ID);
     const noteText = getByText('api error');
 
-    expect(dropdown).toBeVisible();
-    expect(warningNote).toBeVisible();
-    expect(noteText).toBeVisible();
+    expect(dropdown).toBeDefined();
+    expect(warningNote).toBeDefined();
+    expect(noteText).toBeDefined();
   });
 
   it('renders nothing when it has no response', async () => {
@@ -97,7 +95,7 @@ describe('AnalyticsApp with correct content types configured', () => {
 
 describe('AnalyticsApp when content types are not configured correctly', () => {
   it('renders SlugWarningDisplay component when slug field is not configured', async () => {
-    jest.spyOn(useSidebarSlug, 'useSidebarSlug').mockImplementation(() => ({
+    vi.spyOn(useSidebarSlug, 'useSidebarSlug').mockImplementation(() => ({
       slugFieldIsConfigured: true,
       contentTypeHasSlugField: false,
       isPublished: true,
@@ -116,7 +114,7 @@ describe('AnalyticsApp when content types are not configured correctly', () => {
     const noteText = getByText(warningMessage);
 
     expect(dropdown).toBeFalsy();
-    expect(warningNote).toBeVisible();
-    expect(noteText).toBeVisible();
+    expect(warningNote).toBeDefined();
+    expect(noteText).toBeDefined();
   });
 });

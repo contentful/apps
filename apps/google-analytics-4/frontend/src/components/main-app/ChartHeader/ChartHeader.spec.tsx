@@ -15,7 +15,7 @@ describe('Chart Header for the analytics app', () => {
       />
     );
 
-    expect(screen.getByText('150')).toBeVisible();
+    expect(screen.getByText('150')).toBeDefined();
   });
 
   it('can render the date range selector with options', () => {

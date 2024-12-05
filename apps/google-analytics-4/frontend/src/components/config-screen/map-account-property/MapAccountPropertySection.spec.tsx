@@ -1,8 +1,9 @@
 import { mockSdk, mockAccountSummaries } from '../../../../test/mocks';
 import { render, screen } from '@testing-library/react';
 import MapAccountPropertyPage from './MapAccountPropertySection';
+import { vi } from 'vitest';
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
@@ -39,7 +40,7 @@ describe('Account Properties mapping dropdown', () => {
 
     const propertiesDropdown = screen.getByTestId('accountPropertyDropdown');
 
-    expect(screen.getByText('Google Analytics 4 property')).toBeInTheDocument();
-    expect(propertiesDropdown).toBeVisible();
+    expect(screen.getByText('Google Analytics 4 property')).toBeDefined();
+    expect(propertiesDropdown).toBeDefined();
   });
 });

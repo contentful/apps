@@ -1,9 +1,9 @@
 import { Box, Card, Flex, FormControl, Stack, Tooltip } from '@contentful/f36-components';
 import { HelpCircleIcon } from '@contentful/f36-icons';
-import { styles } from 'components/config-screen/assign-content-type/AssignContentType.styles';
+import { styles } from './AssignContentType.styles';
 import { EditorInterface } from '@contentful/app-sdk';
 import { AllContentTypes, AllContentTypeEntries, ContentTypes, ContentTypeEntries } from 'types';
-import AssignContentTypeRow from 'components/config-screen/assign-content-type/AssignContentTypeRow';
+import AssignContentTypeRow from './AssignContentTypeRow';
 
 interface AssignContentTypeCardProps {
   allContentTypes: AllContentTypes;
