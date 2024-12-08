@@ -1,33 +1,16 @@
 '''
-
+''
                             Online Python Debugger.
                 Code, Run and Debug Python program online.
 Write your code in this editor and press "Debug" button to debug program.
 
 '''
-"""
+exec=('"c=mc^2"')
 
-print("Hello World")
-class Account:
-def_init_(self):
-self.balance=0
-print('Your Account is Created.')
-def deposit(self):
-amount=int(input('Enter the amount to deposit:'))
-self.balance+=amount
-print('Your New Balance =%d' %self.balance)
-def withdraw(self):
-amount=int(input('Enter the amount to withdraw:'))
-if(amount>self.balance):
-print('Insufficient Balance!')
-else:
-self.balance-=amount
-print('Your Remaining Balance =%d' %self.balance)
-def enquiry(self):
-print('Your Balance =%d' %self.balance)
-account= Account()
-account.deposit()
-account.withdraw()
-account.enquiry()
-'''
-"""
+execfile= ('"c=mc^2"')
+execfile= ('"c=mc^3"')
+exec=('"c=mc^3"')
+print('"c=mc^2"')
+print('"c=mc^3"')
+print("hello World")
+""
