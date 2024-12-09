@@ -5,10 +5,11 @@ import * as useSDK from '@contentful/react-apps-toolkit';
 import { ContentTypeValue } from 'types';
 import * as getFieldValue from '../useGetFieldValue';
 import { EntrySys } from '@contentful/app-sdk';
+import { vi } from 'vitest';
 
-jest.mock('@contentful/react-apps-toolkit', () => ({ useSDK: jest.fn() }));
+vi.mock('@contentful/react-apps-toolkit', () => ({ useSDK: vi.fn() }));
 
-jest.mock('../useGetFieldValue', () => jest.fn());
+vi.mock('../useGetFieldValue', () => vi.fn());
 
 interface Props {
   slugFieldInfo: ContentTypeValue;
@@ -48,20 +49,20 @@ const mockInstallationParams = {
 
 describe('useSidebarSlug hook', () => {
   it('returns slug info and status when content types are configured correctly', () => {
-    jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+    vi.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
       ...mockInstallationParams,
-      ...jest.requireActual('@contentful/react-apps-toolkit'),
+      ...vi.requireActual('@contentful/react-apps-toolkit'),
       entry: {
-        ...jest.requireActual('@contentful/react-apps-toolkit').entry,
+        ...vi.requireActual('@contentful/react-apps-toolkit').entry,
         fields: { slugField: {} },
-        onSysChanged: jest.fn((cb) =>
+        onSysChanged: vi.fn((cb) =>
           cb({
             publishedAt: '2020202',
           } as unknown as EntrySys)
         ),
       },
     }));
-    jest.spyOn(getFieldValue, 'default').mockImplementation(() => '/fieldValue');
+    vi.spyOn(getFieldValue, 'default').mockImplementation(() => '/fieldValue');
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '/en-US' };
 
     render(<TestComponent slugFieldInfo={slugFieldInfo} />);
@@ -75,20 +76,20 @@ describe('useSidebarSlug hook', () => {
   });
 
   it('returns slug info and status when content types not configured correctly', () => {
-    jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+    vi.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
       ...mockInstallationParams,
-      ...jest.requireActual('@contentful/react-apps-toolkit'),
+      ...vi.requireActual('@contentful/react-apps-toolkit'),
       entry: {
-        ...jest.requireActual('@contentful/react-apps-toolkit').entry,
+        ...vi.requireActual('@contentful/react-apps-toolkit').entry,
         fields: {},
-        onSysChanged: jest.fn((cb) =>
+        onSysChanged: vi.fn((cb) =>
           cb({
             publishedAt: '',
           } as unknown as EntrySys)
         ),
       },
     }));
-    jest.spyOn(getFieldValue, 'default').mockImplementation(() => '');
+    vi.spyOn(getFieldValue, 'default').mockImplementation(() => '');
 
     const slugFieldInfo = { slugField: '', urlPrefix: '/en-US' };
 
@@ -103,21 +104,20 @@ describe('useSidebarSlug hook', () => {
   });
 
   it('returns slug info and status when field value is updated', async () => {
-    jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+    vi.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
       ...mockInstallationParams,
-      ...jest.requireActual('@contentful/react-apps-toolkit'),
+      ...vi.requireActual('@contentful/react-apps-toolkit'),
       entry: {
-        ...jest.requireActual('@contentful/react-apps-toolkit').entry,
+        ...vi.requireActual('@contentful/react-apps-toolkit').entry,
         fields: { slugField: {} },
-        onSysChanged: jest.fn((cb) =>
+        onSysChanged: vi.fn((cb) =>
           cb({
             publishedAt: '2020202',
           } as unknown as EntrySys)
         ),
       },
     }));
-    jest
-      .spyOn(getFieldValue, 'default')
+    vi.spyOn(getFieldValue, 'default')
       .mockImplementationOnce(() => '/fieldValue')
       .mockImplementationOnce(() => '/differentFieldValue');
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '/en-US' };
@@ -138,20 +138,20 @@ describe('useSidebarSlug hook', () => {
   });
 
   it('returns slug info and status when a short text list field is selected and no URL prefix', async () => {
-    jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+    vi.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
       ...mockInstallationParams,
-      ...jest.requireActual('@contentful/react-apps-toolkit'),
+      ...vi.requireActual('@contentful/react-apps-toolkit'),
       entry: {
-        ...jest.requireActual('@contentful/react-apps-toolkit').entry,
+        ...vi.requireActual('@contentful/react-apps-toolkit').entry,
         fields: { slugField: {} },
-        onSysChanged: jest.fn((cb) =>
+        onSysChanged: vi.fn((cb) =>
           cb({
             publishedAt: '2020202',
           } as unknown as EntrySys)
         ),
       },
     }));
-    jest.spyOn(getFieldValue, 'default').mockImplementation(() => ['category', 'pants', 'jeans']);
+    vi.spyOn(getFieldValue, 'default').mockImplementation(() => ['category', 'pants', 'jeans']);
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '' };
 
     render(<TestComponent slugFieldInfo={slugFieldInfo} />);
@@ -167,20 +167,20 @@ describe('useSidebarSlug hook', () => {
   it('returns slug info and status with trailing slash', async () => {
     mockInstallationParams.parameters.installation.forceTrailingSlash = true;
 
-    jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+    vi.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
       ...mockInstallationParams,
-      ...jest.requireActual('@contentful/react-apps-toolkit'),
+      ...vi.requireActual('@contentful/react-apps-toolkit'),
       entry: {
-        ...jest.requireActual('@contentful/react-apps-toolkit').entry,
+        ...vi.requireActual('@contentful/react-apps-toolkit').entry,
         fields: { slugField: {} },
-        onSysChanged: jest.fn((cb) =>
+        onSysChanged: vi.fn((cb) =>
           cb({
             publishedAt: '2020202',
           } as unknown as EntrySys)
         ),
       },
     }));
-    jest.spyOn(getFieldValue, 'default').mockImplementation(() => '/fieldValue');
+    vi.spyOn(getFieldValue, 'default').mockImplementation(() => '/fieldValue');
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '/en-US' };
 
     render(<TestComponent slugFieldInfo={slugFieldInfo} />);

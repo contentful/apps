@@ -8,6 +8,8 @@ import { ContentfulContext } from 'types';
 import { fetchFromApi } from 'apis/fetchApi';
 import { runReportData } from '../../../lambda/public/sampleData/MockData';
 
+import { vi } from 'vitest';
+
 describe('fetchFromApi()', () => {
   const ZSomeSchema = z.object({ foo: z.string() });
   type SomeSchema = z.infer<typeof ZSomeSchema>;
@@ -40,10 +42,10 @@ describe('fetchFromApi()', () => {
   // See https://developer.mozilla.org/en-US/docs/Web/API/fetch#exceptions
   describe('when fetch throws a TypeError', () => {
     beforeEach(() => {
-      jest.spyOn(global, 'fetch').mockRejectedValue(new TypeError('boom!'));
+      vi.spyOn(global, 'fetch').mockRejectedValue(new TypeError('boom!'));
     });
     afterEach(() => {
-      jest.spyOn(global, 'fetch').mockRestore();
+      vi.spyOn(global, 'fetch').mockRestore();
     });
 
     it('throws an ApiServerError', async () => {

@@ -5,15 +5,16 @@ import { config } from 'config';
 import { validServiceKeyFile, validServiceKeyId } from '../../../../test/mocks';
 import userEvent from '@testing-library/user-event';
 import { ServiceAccountKey } from 'types';
+import { vi } from 'vitest';
 
 const apiRoot = config.backendApiUrl;
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));
 
-jest.mock('contentful-management', () => ({
+vi.mock('contentful-management', () => ({
   createClient: () => mockCma,
 }));
 
