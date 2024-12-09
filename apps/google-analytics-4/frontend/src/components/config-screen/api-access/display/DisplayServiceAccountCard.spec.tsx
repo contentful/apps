@@ -2,10 +2,11 @@ import { render, screen } from '@testing-library/react';
 import { mockSdk, mockCma, validServiceKeyId } from '../../../../../test/mocks';
 import DisplayServiceAccountCard from 'components/config-screen/api-access/display/DisplayServiceAccountCard';
 import { config } from '../../../../../src/config';
+import { vi } from 'vitest';
 
 const apiRoot = config.backendApiUrl;
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));

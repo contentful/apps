@@ -3,8 +3,9 @@ import userEvent from '@testing-library/user-event';
 import { mockAccountSummaries } from '../../../../test/mocks';
 import MapAccountPropertyDropdown from 'components/config-screen/map-account-property/MapAccountPropertyDropdown';
 import { NO_PROPERTIES } from 'components/config-screen/WarningDisplay/constants/warningMessages';
+import { vi } from 'vitest';
 
-const onSelectionChange = jest.fn();
+const onSelectionChange = vi.fn();
 
 describe('Property selection dropdown', () => {
   it('renders a dropdown with options if there are account summaries', () => {

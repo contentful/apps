@@ -4,12 +4,13 @@ import { useContext } from 'react';
 import { mockSdk } from '../../test/mocks';
 import { mockSegmentAnalytics } from '../../test/mocks/mockSegmentAnalytics';
 import { SegmentAnalyticsContext, SegmentAnalyticsProvider } from './SegmentAnalyticsProvider';
+import { vi } from 'vitest';
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
-jest.mock('@segment/analytics-next', () => ({ AnalyticsBrowser: mockSegmentAnalytics }));
+vi.mock('@segment/analytics-next', () => ({ AnalyticsBrowser: mockSegmentAnalytics }));
 
 describe('SegmentAnalyticsProvider', () => {
   const TestComponent = () => {
@@ -20,7 +21,7 @@ describe('SegmentAnalyticsProvider', () => {
   };
 
   it('provides a segmentAnalytics browser to its children', () => {
-    jest.spyOn(mockSegmentAnalytics, 'load');
+    vi.spyOn(mockSegmentAnalytics, 'load');
 
     render(
       <SegmentAnalyticsProvider>

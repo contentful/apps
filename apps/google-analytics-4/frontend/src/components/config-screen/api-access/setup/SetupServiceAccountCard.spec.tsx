@@ -2,8 +2,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SetupServiceAccountCard from 'components/config-screen/api-access/setup/SetupServiceAccountCard';
 import { mockSdk, mockCma, validServiceKeyFile } from '../../../../../test/mocks';
+import { vi } from 'vitest';
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));

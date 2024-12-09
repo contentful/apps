@@ -1,12 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import { mockSdk, mockCma } from '../../../../test/mocks';
 import AssignContentTypeSection from 'components/config-screen/assign-content-type/AssignContentTypeSection';
+import { vi } from 'vitest';
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
-jest.mock('contentful-management', () => ({
+vi.mock('contentful-management', () => ({
   createClient: () => mockCma,
 }));
 
