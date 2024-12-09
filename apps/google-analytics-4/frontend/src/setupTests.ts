@@ -5,6 +5,7 @@
 import '@testing-library/jest-dom';
 import { configure } from '@testing-library/react';
 import { server } from '../test/mocks/api/server';
+import { vi } from 'vitest';
 
 beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
@@ -12,11 +13,11 @@ afterAll(() => server.close());
 
 // suppress annoying jest error output by stubbing console.error during tests
 beforeEach(() => {
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 afterEach(() => {
-  jest.spyOn(console, 'error').mockRestore();
+  vi.spyOn(console, 'error').mockRestore();
 });
 
 configure({
