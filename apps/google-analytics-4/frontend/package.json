@@ -20,15 +20,16 @@
     "react": "17.0.2",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "17.0.2",
+    "react-scripts": "5.0.1",
     "zod": "3.23.8"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none vite",
-    "build": "VITE_RELEASE=$(git rev-parse --short HEAD) vite build",
-    "test": "vitest --watch",
-    "test:ci": "vitest",
+    "start": "cross-env BROWSER=none react-scripts start",
+    "build": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) react-scripts build",
+    "test": "react-scripts test",
+    "test:ci": "CI=true react-scripts test --runInBand",
     "lint": "eslint --max-warnings=0 .",
-    "eject": "vite eject",
+    "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5DlxOS0KvGS1Wk362xgvbN --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 42yub8HtSmIclUlVBHpHHP --token ${TEST_CMA_TOKEN}"
@@ -57,12 +58,9 @@
     "@types/node": "18.11.11",
     "@types/react": "18.0.9",
     "@types/react-dom": "18.0.3",
-    "@vitejs/plugin-react": "^4.3.4",
     "cross-env": "7.0.3",
     "msw": "0.49.3",
-    "typescript": "4.9.3",
-    "vite": "^6.0.3",
-    "vitest": "^2.1.8"
+    "typescript": "4.9.3"
   },
   "homepage": "."
 }
