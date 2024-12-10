@@ -121,7 +121,7 @@ describe('fetchFromApi()', () => {
 });
 
 // Note: mocked http responses are set up using msw in tests/mocks/api/handler
-describe.only('Api', () => {
+describe('Api', () => {
   describe('getServiceAccountKeyFile()', () => {
     const contentfulContext = {
       app: 'appDefinitionId',
