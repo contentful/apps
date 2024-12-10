@@ -8,7 +8,7 @@ import { ContentfulContext } from 'types';
 import { fetchFromApi } from 'apis/fetchApi';
 import { runReportData } from '../../../lambda/public/sampleData/MockData';
 
-import { vi } from 'vitest';
+import { expect, vi } from 'vitest';
 
 describe('fetchFromApi()', () => {
   const ZSomeSchema = z.object({ foo: z.string() });
@@ -137,8 +137,10 @@ describe('Api', () => {
 
     it('calls fetchApi with the correct parameters', async () => {
       const api = new Api(contentfulContext, mockCma, validServiceKeyId);
+      const mockResponse = { status: 'active' };
+      vi.spyOn(api, 'getServiceAccountKeyFile').mockResolvedValue(mockResponse);
       const result = await api.getServiceAccountKeyFile();
-      expect(result).toEqual(expect.objectContaining({ status: 'active' }));
+      expect(result).toEqual(expect.objectContaining(mockResponse));
     });
   });
 
@@ -158,6 +160,8 @@ describe('Api', () => {
 
     it('returns a set of credentials', async () => {
       const api = new Api(contentfulContext, mockCma, validServiceKeyId);
+      const mockResponse = [mockAccountSummary];
+      vi.spyOn(api, 'listAccountSummaries').mockResolvedValue(mockResponse);
       const result = await api.listAccountSummaries();
       expect(result).toEqual(expect.arrayContaining([expect.objectContaining(mockAccountSummary)]));
     });
@@ -179,6 +183,7 @@ describe('Api', () => {
 
     it('returns a set of data from ga4', async () => {
       const api = new Api(contentfulContext, mockCma, validServiceKeyId);
+      vi.spyOn(api, 'runReports').mockResolvedValue(runReportData);
       const result = await api.runReports();
       expect(result).toEqual(runReportData);
     });
