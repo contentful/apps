@@ -35,8 +35,14 @@ describe('fetchFromApi()', () => {
   });
 
   it('returns the correctly typed data', async () => {
+    const mockResponse = { foo: 'bar' };
+    vi.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => mockResponse,
+    } as Response);
+
     const result = await fetchFromApi<SomeSchema>(url, ZSomeSchema, contentfulContext.app, mockCma);
-    expect(result).toEqual(expect.objectContaining({ foo: 'bar' }));
+    expect(result).toEqual(expect.objectContaining(mockResponse));
   });
 
   // See https://developer.mozilla.org/en-US/docs/Web/API/fetch#exceptions
