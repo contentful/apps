@@ -1,6 +1,6 @@
 const mockCma: any = {
   appSignedRequest: {
-    create: () => ({}),
+    create: () => Promise.resolve({ additionalHeaders: 'lol' }),
   },
   getSpace: () => ({
     getEnvironment: () => ({
