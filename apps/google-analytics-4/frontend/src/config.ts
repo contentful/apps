@@ -4,7 +4,8 @@ function getEnvironmentVariable(
   environmentVariableName: string,
   fallback?: EnvironmentVariable
 ): string {
-  const environmentVariableValue = process.env[environmentVariableName];
+  // @ts-ignore
+  const environmentVariableValue = import.meta.env[environmentVariableName];
   if (!environmentVariableValue) {
     if (fallback) return fallback.toString();
     throw new Error(`Missing environment variable: '${environmentVariableName}'`);
