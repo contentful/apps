@@ -119,14 +119,17 @@ describe('Installed Service Account Key', () => {
 
     const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
     await user.click(editServiceAccountButton);
+    console.log('clicked editServiceAccountButton');
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
     await user.click(keyFileInputBox);
+    console.log('clicked keyFileInputBox');
 
     const newServiceKeyFile: ServiceAccountKey = {
       ...validServiceKeyFile,
       private_key_id: 'PRIVATE_KEY_ID',
     };
     await user.paste(JSON.stringify(newServiceKeyFile));
+    console.log({ newServiceKeyFile });
 
     expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
 
@@ -159,6 +162,8 @@ describe('Installed Service Account Key', () => {
     mockSdk.app.onConfigure.mockImplementation(() => mockSaveAppInstallation);
 
     const result = await mockSaveAppInstallation();
+
+    console.log({ result });
 
     expect(result).toEqual({
       parameters: {
