@@ -18,6 +18,10 @@ vi.mock('contentful-management', () => ({
   createClient: () => mockCma,
 }));
 
+vi.mock('@contentful/node-apps-toolkit', () => ({
+  verifyRequest: vi.fn(),
+}));
+
 // Helper to mock users clicking "save" -- return result of the callback passed to onConfigure()
 const saveAppInstallation = () => {
   // We manually call the LAST onConfigure() callback (this is important, as earlier calls have stale data)
