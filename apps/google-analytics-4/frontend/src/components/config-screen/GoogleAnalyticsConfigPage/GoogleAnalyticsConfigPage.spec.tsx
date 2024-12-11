@@ -125,7 +125,7 @@ describe('Installed Service Account Key', () => {
 
     expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
     const result = await saveAppInstallation();
-
+    console.log({ result });
     expect(result).toEqual({
       parameters: {
         serviceAccountKeyId: {
