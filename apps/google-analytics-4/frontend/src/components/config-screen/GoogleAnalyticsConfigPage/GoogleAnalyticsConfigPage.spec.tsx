@@ -19,7 +19,7 @@ vi.mock('contentful-management', () => ({
 }));
 
 vi.mock('@contentful/node-apps-toolkit', () => ({
-  verifyRequest: vi.fn(),
+  verifyRequest: () => true,
 }));
 
 // Helper to mock users clicking "save" -- return result of the callback passed to onConfigure()
