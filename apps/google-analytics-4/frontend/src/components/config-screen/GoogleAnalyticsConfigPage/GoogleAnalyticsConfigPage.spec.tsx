@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { mockSdk, mockCma } from '../../../../test/mocks';
 import GoogleAnalyticsConfigPage from 'components/config-screen/GoogleAnalyticsConfigPage/GoogleAnalyticsConfigPage';
 import { config } from 'config';
@@ -119,19 +119,19 @@ describe('Installed Service Account Key', () => {
 
     const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
     await user.click(editServiceAccountButton);
-    console.log('clicked editServiceAccountButton');
+
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
     await user.click(keyFileInputBox);
-    console.log('clicked keyFileInputBox');
 
     const newServiceKeyFile: ServiceAccountKey = {
       ...validServiceKeyFile,
       private_key_id: 'PRIVATE_KEY_ID',
     };
     await user.paste(JSON.stringify(newServiceKeyFile));
-    console.log({ newServiceKeyFile });
 
-    expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
+    });
 
     // const result = await saveAppInstallation();
 
