@@ -24,5 +24,5 @@ export const config = {
   release: getEnvironmentVariable('VITE_RELEASE', 'no-release-hash-set'),
   sentryDSN: getEnvironmentVariable('VITE_SENTRY_DSN'),
   segmentWriteKey: getEnvironmentVariable('VITE_SEGMENT_WRITE_KEY'),
-  environment: getEnvironmentVariable('NODE_ENV'),
+  environment: process.env.NODE_ENV,
 };
