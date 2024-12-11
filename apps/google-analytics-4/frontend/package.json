@@ -24,7 +24,7 @@
   },
   "scripts": {
     "start": "cross-env BROWSER=none vite",
-    "build": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) vite build",
+    "build": "VITE_RELEASE=$(git rev-parse --short HEAD) vite build",
     "test": "vitest --watch",
     "test:ci": "CI=true vitest",
     "lint": "eslint --max-warnings=0 .",
