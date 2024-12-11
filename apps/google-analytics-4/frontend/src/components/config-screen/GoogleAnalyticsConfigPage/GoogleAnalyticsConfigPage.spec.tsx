@@ -109,7 +109,7 @@ describe('Installed Service Account Key', () => {
     mockSdk.app.isInstalled.mockReturnValue(true);
   });
 
-  it.skip('overrides the saved values if a new key file is provided', async () => {
+  it('overrides the saved values if a new key file is provided', async () => {
     const user = userEvent.setup();
     render(<GoogleAnalyticsConfigPage />);
 
