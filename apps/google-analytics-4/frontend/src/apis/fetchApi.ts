@@ -63,6 +63,7 @@ function validateResponseStatus(response: Response, responseJson: any): void {
   if (response.status >= 400) {
     try {
       const apiErrorResponse = ZApiErrorResponse.parse(responseJson);
+      console.log({ apiErrorResponse });
       throw new ApiError(apiErrorResponse.errors);
     } catch (e: any) {
       if (e instanceof z.ZodError) {

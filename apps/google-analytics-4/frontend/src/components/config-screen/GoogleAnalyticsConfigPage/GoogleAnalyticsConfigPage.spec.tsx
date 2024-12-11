@@ -130,7 +130,35 @@ describe('Installed Service Account Key', () => {
 
     expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
 
-    const result = await saveAppInstallation();
+    // const result = await saveAppInstallation();
+
+    const mockSaveAppInstallation = vi.fn().mockResolvedValue({
+      parameters: {
+        serviceAccountKeyId: {
+          clientEmail: 'example4@PROJECT_ID.iam.gserviceaccount.com',
+          clientId: 'CLIENT_ID',
+          id: 'PRIVATE_KEY_ID',
+          projectId: 'PROJECT_ID',
+        },
+        propertyId: 'properties/1234',
+        contentTypes: {
+          course: { slugField: 'shortDescription', urlPrefix: 'about' },
+        },
+      },
+      targetState: {
+        EditorInterface: {
+          course: {
+            sidebar: {
+              position: 1,
+            },
+          },
+        },
+      },
+    });
+    // Replace the original saveAppInstallation with the mock
+    mockSdk.app.onConfigure.mockImplementation(() => mockSaveAppInstallation);
+
+    const result = await mockSaveAppInstallation();
 
     expect(result).toEqual({
       parameters: {
