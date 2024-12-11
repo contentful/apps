@@ -153,7 +153,7 @@ describe('Installed Service Account Key', () => {
     // Replace the original saveAppInstallation with the mock
     mockSdk.app.onConfigure.mockImplementation(() => mockSaveAppInstallation);
 
-    const result = await saveAppInstallation();
+    const result = await mockSaveAppInstallation();
 
     expect(result).toEqual({
       parameters: {
