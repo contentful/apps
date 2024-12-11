@@ -23,7 +23,7 @@ export default defineConfig(() => ({
       config: '/src/config',
     },
   },
-
+  envPrefix: 'REACT_APP',
   test: {
     globals: true,
     environment: 'jsdom',
