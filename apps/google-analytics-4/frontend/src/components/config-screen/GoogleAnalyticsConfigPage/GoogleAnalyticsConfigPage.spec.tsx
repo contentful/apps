@@ -6,6 +6,7 @@ import { validServiceKeyFile, validServiceKeyId } from '../../../../test/mocks';
 import userEvent from '@testing-library/user-event';
 import { ServiceAccountKey } from 'types';
 import { vi } from 'vitest';
+import { validateResponseStatus } from 'apis/fetchApi';
 
 const apiRoot = config.backendApiUrl;
 
@@ -21,6 +22,14 @@ vi.mock('contentful-management', () => ({
 vi.mock('@contentful/node-apps-toolkit', () => ({
   verifyRequest: () => true,
 }));
+
+vi.mock(import('apis/fetchApi'), async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    validateResponseStatus: () => Promise.resolve({}),
+  };
+});
 
 // Helper to mock users clicking "save" -- return result of the callback passed to onConfigure()
 const saveAppInstallation = () => {
@@ -111,6 +120,7 @@ describe('Installed Service Account Key', () => {
       },
     });
     mockSdk.app.isInstalled.mockReturnValue(true);
+    vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
   it('overrides the saved values if a new key file is provided', async () => {
@@ -133,7 +143,6 @@ describe('Installed Service Account Key', () => {
     //   expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
     // });
     // vi.useFakeTimers({ shouldAdvanceTime: true });
-    vi.useFakeTimers({ shouldAdvanceTime: true });
     render(<GoogleAnalyticsConfigPage />);
     const user = userEvent.setup();
 
@@ -186,8 +195,6 @@ describe('Installed Service Account Key', () => {
     mockSdk.app.onConfigure.mockImplementation(() => mockSaveAppInstallation);
 
     const result = await mockSaveAppInstallation();
-
-    console.log({ result });
 
     expect(result).toEqual({
       parameters: {
