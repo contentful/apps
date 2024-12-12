@@ -26,7 +26,7 @@
     "start": "cross-env BROWSER=none vite",
     "build": "VITE_RELEASE=$(git rev-parse --short HEAD) vite build",
     "test": "vitest --watch",
-    "test:ci": "CI=true vitest",
+    "test:ci": "CI=true vitest --maxWorkers=2",
     "lint": "eslint --max-warnings=0 .",
     "eject": "vite eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
