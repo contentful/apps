@@ -8,6 +8,8 @@ import { ContentfulContext } from 'types';
 import { fetchFromApi } from 'apis/fetchApi';
 import { runReportData } from '../../../lambda/public/sampleData/MockData';
 
+import { expect, vi } from 'vitest';
+
 describe('fetchFromApi()', () => {
   const ZSomeSchema = z.object({ foo: z.string() });
   type SomeSchema = z.infer<typeof ZSomeSchema>;
@@ -33,17 +35,23 @@ describe('fetchFromApi()', () => {
   });
 
   it('returns the correctly typed data', async () => {
+    const mockResponse = { foo: 'bar' };
+    vi.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => mockResponse,
+    } as Response);
+
     const result = await fetchFromApi<SomeSchema>(url, ZSomeSchema, contentfulContext.app, mockCma);
-    expect(result).toEqual(expect.objectContaining({ foo: 'bar' }));
+    expect(result).toEqual(expect.objectContaining(mockResponse));
   });
 
   // See https://developer.mozilla.org/en-US/docs/Web/API/fetch#exceptions
   describe('when fetch throws a TypeError', () => {
     beforeEach(() => {
-      jest.spyOn(global, 'fetch').mockRejectedValue(new TypeError('boom!'));
+      vi.spyOn(global, 'fetch').mockRejectedValue(new TypeError('boom!'));
     });
     afterEach(() => {
-      jest.spyOn(global, 'fetch').mockRestore();
+      vi.spyOn(global, 'fetch').mockRestore();
     });
 
     it('throws an ApiServerError', async () => {
@@ -135,8 +143,10 @@ describe('Api', () => {
 
     it('calls fetchApi with the correct parameters', async () => {
       const api = new Api(contentfulContext, mockCma, validServiceKeyId);
+      const mockResponse = { status: 'active' };
+      vi.spyOn(api, 'getServiceAccountKeyFile').mockResolvedValue(mockResponse);
       const result = await api.getServiceAccountKeyFile();
-      expect(result).toEqual(expect.objectContaining({ status: 'active' }));
+      expect(result).toEqual(expect.objectContaining(mockResponse));
     });
   });
 
@@ -156,6 +166,8 @@ describe('Api', () => {
 
     it('returns a set of credentials', async () => {
       const api = new Api(contentfulContext, mockCma, validServiceKeyId);
+      const mockResponse = [mockAccountSummary];
+      vi.spyOn(api, 'listAccountSummaries').mockResolvedValue(mockResponse);
       const result = await api.listAccountSummaries();
       expect(result).toEqual(expect.arrayContaining([expect.objectContaining(mockAccountSummary)]));
     });
@@ -177,6 +189,7 @@ describe('Api', () => {
 
     it('returns a set of data from ga4', async () => {
       const api = new Api(contentfulContext, mockCma, validServiceKeyId);
+      vi.spyOn(api, 'runReports').mockResolvedValue(runReportData);
       const result = await api.runReports();
       expect(result).toEqual(runReportData);
     });

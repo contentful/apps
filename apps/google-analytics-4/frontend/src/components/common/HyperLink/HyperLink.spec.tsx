@@ -1,5 +1,6 @@
 import HyperLink from './HyperLink';
 import { render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 
 const BODY = 'Have a great day!';
 const SUBSTRING = 'great';
@@ -17,7 +18,7 @@ describe('HyperLink component', () => {
   });
 
   it('can handle onClick of link', () => {
-    const mockOnClick = jest.fn();
+    const mockOnClick = vi.fn();
     render(<HyperLink body={BODY} substring={SUBSTRING} onClick={mockOnClick} />);
 
     const textLink = getByTestId('cf-ui-text-link');

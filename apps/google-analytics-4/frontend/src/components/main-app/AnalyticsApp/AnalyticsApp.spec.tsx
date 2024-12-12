@@ -9,15 +9,16 @@ import {
   getContentTypeSpecificMsg,
 } from 'components/main-app/constants/noteMessages';
 import * as useSidebarSlug from 'hooks/useSidebarSlug/useSidebarSlug';
+import { vi } from 'vitest';
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
-  useAutoResizer: () => jest.fn(),
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useAutoResizer: () => vi.fn(),
   useFieldValue: () => ['fieldValue'],
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));
 
-const mockApi = jest.fn();
+const mockApi = vi.fn();
 
 const { findByTestId, getByTestId, getByText, queryByTestId } = screen;
 
@@ -39,7 +40,7 @@ describe('AnalyticsApp with correct content types configured', () => {
       serviceAccountKeyId: validServiceKeyId,
     });
 
-    jest.spyOn(useSidebarSlug, 'useSidebarSlug').mockImplementation(() => ({
+    vi.spyOn(useSidebarSlug, 'useSidebarSlug').mockImplementation(() => ({
       slugFieldIsConfigured: true,
       contentTypeHasSlugField: true,
       isPublished: true,
@@ -97,7 +98,7 @@ describe('AnalyticsApp with correct content types configured', () => {
 
 describe('AnalyticsApp when content types are not configured correctly', () => {
   it('renders SlugWarningDisplay component when slug field is not configured', async () => {
-    jest.spyOn(useSidebarSlug, 'useSidebarSlug').mockImplementation(() => ({
+    vi.spyOn(useSidebarSlug, 'useSidebarSlug').mockImplementation(() => ({
       slugFieldIsConfigured: true,
       contentTypeHasSlugField: false,
       isPublished: true,

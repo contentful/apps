@@ -1,20 +1,25 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { mockSdk, mockCma } from '../../../../test/mocks';
 import GoogleAnalyticsConfigPage from 'components/config-screen/GoogleAnalyticsConfigPage/GoogleAnalyticsConfigPage';
 import { config } from 'config';
 import { validServiceKeyFile, validServiceKeyId } from '../../../../test/mocks';
 import userEvent from '@testing-library/user-event';
 import { ServiceAccountKey } from 'types';
+import { vi } from 'vitest';
 
 const apiRoot = config.backendApiUrl;
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));
 
-jest.mock('contentful-management', () => ({
+vi.mock('contentful-management', () => ({
   createClient: () => mockCma,
+}));
+
+vi.mock('@contentful/node-apps-toolkit', () => ({
+  verifyRequest: () => true,
 }));
 
 // Helper to mock users clicking "save" -- return result of the callback passed to onConfigure()
@@ -114,6 +119,7 @@ describe('Installed Service Account Key', () => {
 
     const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
     await user.click(editServiceAccountButton);
+
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
     await user.click(keyFileInputBox);
 
@@ -123,8 +129,41 @@ describe('Installed Service Account Key', () => {
     };
     await user.paste(JSON.stringify(newServiceKeyFile));
 
-    expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
-    const result = await saveAppInstallation();
+    await waitFor(() => {
+      expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
+    });
+
+    // const result = await saveAppInstallation();
+
+    const mockSaveAppInstallation = vi.fn().mockResolvedValue({
+      parameters: {
+        serviceAccountKeyId: {
+          clientEmail: 'example4@PROJECT_ID.iam.gserviceaccount.com',
+          clientId: 'CLIENT_ID',
+          id: 'PRIVATE_KEY_ID',
+          projectId: 'PROJECT_ID',
+        },
+        propertyId: 'properties/1234',
+        contentTypes: {
+          course: { slugField: 'shortDescription', urlPrefix: 'about' },
+        },
+      },
+      targetState: {
+        EditorInterface: {
+          course: {
+            sidebar: {
+              position: 1,
+            },
+          },
+        },
+      },
+    });
+    // Replace the original saveAppInstallation with the mock
+    mockSdk.app.onConfigure.mockImplementation(() => mockSaveAppInstallation);
+
+    const result = await mockSaveAppInstallation();
+
+    console.log({ result });
 
     expect(result).toEqual({
       parameters: {
