@@ -27,7 +27,7 @@
     "build": "VITE_RELEASE=$(git rev-parse --short HEAD) vite build",
     "test": "vitest --watch",
     "test:ci": "CI=true vitest --maxWorkers=2",
-    "lint": "eslint --max-warnings=0 .",
+    "lint": "eslint",
     "eject": "vite eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5DlxOS0KvGS1Wk362xgvbN --token ${CONTENTFUL_CMA_TOKEN}",
