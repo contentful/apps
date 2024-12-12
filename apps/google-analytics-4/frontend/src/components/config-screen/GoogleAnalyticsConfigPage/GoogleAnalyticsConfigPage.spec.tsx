@@ -133,6 +133,7 @@ describe('Installed Service Account Key', () => {
     //   expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
     // });
     // vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     render(<GoogleAnalyticsConfigPage />);
     const user = userEvent.setup();
 
