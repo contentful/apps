@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { mockSdk, mockCma } from '../../../../test/mocks';
 import GoogleAnalyticsConfigPage from 'components/config-screen/GoogleAnalyticsConfigPage/GoogleAnalyticsConfigPage';
 import { config } from 'config';
@@ -114,13 +114,36 @@ describe('Installed Service Account Key', () => {
   });
 
   it('overrides the saved values if a new key file is provided', async () => {
-    const user = userEvent.setup();
-    render(<GoogleAnalyticsConfigPage />);
+    // const user = userEvent.setup();
+    // render(<GoogleAnalyticsConfigPage />);
 
-    const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
+    // const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
+    // await user.click(editServiceAccountButton);
+
+    // const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
+    // await user.click(keyFileInputBox);
+
+    // const newServiceKeyFile: ServiceAccountKey = {
+    //   ...validServiceKeyFile,
+    //   private_key_id: 'PRIVATE_KEY_ID',
+    // };
+    // await user.paste(JSON.stringify(newServiceKeyFile));
+
+    // await waitFor(() => {
+    //   expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
+    // });
+    // vi.useFakeTimers({ shouldAdvanceTime: true });
+    render(<GoogleAnalyticsConfigPage />);
+    const user = userEvent.setup();
+
+    const editServiceAccountButton = await waitFor(() =>
+      screen.findByTestId('editServiceAccountButton')
+    );
+    expect(editServiceAccountButton).toBeInTheDocument();
     await user.click(editServiceAccountButton);
 
-    const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
+    const keyFileInputBox = await waitFor(() => screen.getByLabelText(/Service Account Key/i));
+    expect(keyFileInputBox).toBeInTheDocument();
     await user.click(keyFileInputBox);
 
     const newServiceKeyFile: ServiceAccountKey = {
@@ -129,9 +152,9 @@ describe('Installed Service Account Key', () => {
     };
     await user.paste(JSON.stringify(newServiceKeyFile));
 
-    await waitFor(() => {
-      expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
-    });
+    await act(async () =>
+      expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument()
+    );
 
     // const result = await saveAppInstallation();
 
