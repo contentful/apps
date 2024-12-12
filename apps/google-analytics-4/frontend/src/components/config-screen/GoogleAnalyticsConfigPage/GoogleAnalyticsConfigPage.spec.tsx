@@ -7,6 +7,7 @@ import userEvent from '@testing-library/user-event';
 import { ServiceAccountKey } from 'types';
 import { vi } from 'vitest';
 import { validateResponseStatus } from 'apis/fetchApi';
+import { SDKProvider } from '@contentful/react-apps-toolkit';
 
 const apiRoot = config.backendApiUrl;
 
@@ -27,7 +28,9 @@ vi.mock(import('apis/fetchApi'), async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
-    validateResponseStatus: () => Promise.resolve({}),
+    validateResponseStatus: () => {
+      return true;
+    },
   };
 });
 
@@ -143,6 +146,10 @@ describe('Installed Service Account Key', () => {
     //   expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
     // });
     // vi.useFakeTimers({ shouldAdvanceTime: true });
+
+    const consoleSpy = vi.spyOn(console, 'error');
+    expect(consoleSpy).toHaveBeenCalledTimes(0);
+
     render(<GoogleAnalyticsConfigPage />);
     const user = userEvent.setup();
 
