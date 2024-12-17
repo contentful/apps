@@ -25,8 +25,8 @@
     "prettier": "prettier --write functions",
     "open-settings": "contentful-app-scripts open-settings",
     "install-app": "contentful-app-scripts install",
-    "create-resource-entities": "CONTENTFUL_HOST=api.contentful.com ts-node -T -r dotenv/config ./src/tools/create-resource-entities.ts",
-    "show-resource-entities": "CONTENTFUL_HOST=api.contentful.com ts-node -T -r dotenv/config ./src/tools/show-resource-entities.ts"
+    "create-resource-entities": "ts-node -T -r dotenv/config ./src/tools/create-resource-entities.ts",
+    "show-resource-entities": "ts-node -T -r dotenv/config ./src/tools/show-resource-entities.ts"
   },
   "eslintConfig": {
     "extends": "react-app"

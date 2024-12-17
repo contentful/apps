@@ -19,8 +19,6 @@ import {
 type ResourceProviderResult = APIError | APIResourceProvider;
 type ResourceTypeResult = APIError | APIResourceType;
 
-const host = process.env.CONTENTFUL_HOST ?? 'api.contentful.com';
-
 const client = createClient({ accessToken }, { type: 'plain' });
 
 const put = async <T>({ resource, url }: { resource: string; url: string }) => {
