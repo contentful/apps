@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { useSidebarSlug } from './useSidebarSlug';
 import { render, screen } from '@testing-library/react';
@@ -48,21 +47,26 @@ const mockInstallationParams = {
   },
 };
 
+// importActual method in vitest returns a promise, which is not compatible with the SDK mock typing, so these tests are typed as any type
+
 describe('useSidebarSlug hook', () => {
   it('returns slug info and status when content types are configured correctly', () => {
-    vi.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
-      ...mockInstallationParams,
-      ...vi.importActual('@contentful/react-apps-toolkit'),
-      entry: {
-        ...vi.importActual('@contentful/react-apps-toolkit').entry,
-        fields: { slugField: {} },
-        onSysChanged: vi.fn((cb) =>
-          cb({
-            publishedAt: '2020202',
-          } as unknown as EntrySys)
-        ),
-      },
-    }));
+    vi.spyOn(useSDK, 'useSDK').mockImplementation(
+      () =>
+        ({
+          ...mockInstallationParams,
+          ...vi.importActual('@contentful/react-apps-toolkit'),
+          entry: {
+            ...vi.importActual('@contentful/react-apps-toolkit'),
+            fields: { slugField: {} },
+            onSysChanged: vi.fn((cb) =>
+              cb({
+                publishedAt: '2020202',
+              } as unknown as EntrySys)
+            ),
+          },
+        } as any)
+    );
     vi.spyOn(getFieldValue, 'default').mockImplementation(() => '/fieldValue');
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '/en-US' };
 
@@ -77,19 +81,22 @@ describe('useSidebarSlug hook', () => {
   });
 
   it('returns slug info and status when content types not configured correctly', () => {
-    vi.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
-      ...mockInstallationParams,
-      ...vi.importActual('@contentful/react-apps-toolkit'),
-      entry: {
-        ...vi.importActual('@contentful/react-apps-toolkit').entry,
-        fields: {},
-        onSysChanged: vi.fn((cb) =>
-          cb({
-            publishedAt: '',
-          } as unknown as EntrySys)
-        ),
-      },
-    }));
+    vi.spyOn(useSDK, 'useSDK').mockImplementation(
+      () =>
+        ({
+          ...mockInstallationParams,
+          ...vi.importActual('@contentful/react-apps-toolkit'),
+          entry: {
+            ...vi.importActual('@contentful/react-apps-toolkit'),
+            fields: {},
+            onSysChanged: vi.fn((cb) =>
+              cb({
+                publishedAt: '',
+              } as unknown as EntrySys)
+            ),
+          },
+        } as any)
+    );
     vi.spyOn(getFieldValue, 'default').mockImplementation(() => '');
 
     const slugFieldInfo = { slugField: '', urlPrefix: '/en-US' };
@@ -105,19 +112,22 @@ describe('useSidebarSlug hook', () => {
   });
 
   it('returns slug info and status when field value is updated', async () => {
-    vi.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
-      ...mockInstallationParams,
-      ...vi.importActual('@contentful/react-apps-toolkit'),
-      entry: {
-        ...vi.importActual('@contentful/react-apps-toolkit').entry,
-        fields: { slugField: {} },
-        onSysChanged: vi.fn((cb) =>
-          cb({
-            publishedAt: '2020202',
-          } as unknown as EntrySys)
-        ),
-      },
-    }));
+    vi.spyOn(useSDK, 'useSDK').mockImplementation(
+      () =>
+        ({
+          ...mockInstallationParams,
+          ...vi.importActual('@contentful/react-apps-toolkit'),
+          entry: {
+            ...vi.importActual('@contentful/react-apps-toolkit'),
+            fields: { slugField: {} },
+            onSysChanged: vi.fn((cb) =>
+              cb({
+                publishedAt: '2020202',
+              } as unknown as EntrySys)
+            ),
+          },
+        } as any)
+    );
     vi.spyOn(getFieldValue, 'default')
       .mockImplementationOnce(() => '/fieldValue')
       .mockImplementationOnce(() => '/differentFieldValue');
@@ -139,19 +149,22 @@ describe('useSidebarSlug hook', () => {
   });
 
   it('returns slug info and status when a short text list field is selected and no URL prefix', async () => {
-    vi.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
-      ...mockInstallationParams,
-      ...vi.importActual('@contentful/react-apps-toolkit'),
-      entry: {
-        ...vi.importActual('@contentful/react-apps-toolkit').entry,
-        fields: { slugField: {} },
-        onSysChanged: vi.fn((cb) =>
-          cb({
-            publishedAt: '2020202',
-          } as unknown as EntrySys)
-        ),
-      },
-    }));
+    vi.spyOn(useSDK, 'useSDK').mockImplementation(
+      () =>
+        ({
+          ...mockInstallationParams,
+          ...vi.importActual('@contentful/react-apps-toolkit'),
+          entry: {
+            ...vi.importActual('@contentful/react-apps-toolkit'),
+            fields: { slugField: {} },
+            onSysChanged: vi.fn((cb) =>
+              cb({
+                publishedAt: '2020202',
+              } as unknown as EntrySys)
+            ),
+          },
+        } as any)
+    );
     vi.spyOn(getFieldValue, 'default').mockImplementation(() => ['category', 'pants', 'jeans']);
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '' };
 
@@ -168,19 +181,22 @@ describe('useSidebarSlug hook', () => {
   it('returns slug info and status with trailing slash', async () => {
     mockInstallationParams.parameters.installation.forceTrailingSlash = true;
 
-    vi.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
-      ...mockInstallationParams,
-      ...vi.importActual('@contentful/react-apps-toolkit'),
-      entry: {
-        ...vi.importActual('@contentful/react-apps-toolkit').entry,
-        fields: { slugField: {} },
-        onSysChanged: vi.fn((cb) =>
-          cb({
-            publishedAt: '2020202',
-          } as unknown as EntrySys)
-        ),
-      },
-    }));
+    vi.spyOn(useSDK, 'useSDK').mockImplementation(
+      () =>
+        ({
+          ...mockInstallationParams,
+          ...vi.importActual('@contentful/react-apps-toolkit'),
+          entry: {
+            ...vi.importActual('@contentful/react-apps-toolkit'),
+            fields: { slugField: {} },
+            onSysChanged: vi.fn((cb) =>
+              cb({
+                publishedAt: '2020202',
+              } as unknown as EntrySys)
+            ),
+          },
+        } as any)
+    );
     vi.spyOn(getFieldValue, 'default').mockImplementation(() => '/fieldValue');
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '/en-US' };
 
