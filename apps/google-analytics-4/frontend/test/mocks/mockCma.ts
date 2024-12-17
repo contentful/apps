@@ -1,11 +1,6 @@
 const mockCma: any = {
   appSignedRequest: {
-    create: () =>
-      Promise.resolve({
-        additionalHeaders: 'lol',
-        'X-Contentful-ServiceAccountKeyId':
-          'eyJpZCI6IlBSSVZBVEVfS0VZX0lEIiwiY2xpZW50SWQiOiJDTElFTlRfSUQiLCJjbGllbnRFbWFpbCI6IkNMSUVOVF9JRCIsInByb2plY3RJZCI6IlBST0pFQ1RfSUQifQ==',
-      }),
+    create: () => ({}),
   },
   getSpace: () => ({
     getEnvironment: () => ({
