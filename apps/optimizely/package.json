@@ -4,6 +4,7 @@
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "^1.20.0",
+    "@testing-library/react": "^16.1.0",
     "cross-env": "7.0.3",
     "happy-dom": "^15.7.4"
   },
@@ -13,7 +14,6 @@
     "@contentful/f36-icons": "^4.29.0",
     "@contentful/f36-tokens": "^4.0.5",
     "@emotion/css": "^11.13.0",
-    "@testing-library/react": "^16.0.1",
     "@vitejs/plugin-react": "^4.3.1",
     "@vitest/coverage-v8": "^2.1.1",
     "lodash.get": "4.4.2",
