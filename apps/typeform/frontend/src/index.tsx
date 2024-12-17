@@ -7,8 +7,6 @@ import {
   FieldExtensionSDK,
   DialogExtensionSDK,
 } from '@contentful/app-sdk';
-import '@contentful/forma-36-react-components/dist/styles.css';
-import '@contentful/forma-36-fcss/dist/styles.css';
 import Authentication from './Auth';
 import { TypeFormField } from './Field/TypeFormField';
 import { TypeformPreviewWidget } from './TypeFormWidget';

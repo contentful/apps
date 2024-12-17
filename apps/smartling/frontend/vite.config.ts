@@ -1,6 +1,8 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
+const hash = Math.floor(Math.random() * 90000) + 10000;
+
 export default defineConfig(() => ({
   base: '', // relative paths
   server: {

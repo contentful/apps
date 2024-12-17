@@ -24,7 +24,7 @@ const computeLastModifiedTime = () => {
   // JS uses number of _milliseconds_ since epoch, whereas unix generates number in
   // _seconds_ since epoch. So we have to convert
   const epochTime = Number(deployTime) * 1000;
-  return new Date(epochTime).toGMTString();
+  return new Date(epochTime).toUTCString();
 };
 
 app.use('/forms', async (req, res) => {
@@ -64,7 +64,15 @@ app.use('/callback', async (req, res) => {
 });
 
 const lastModified = computeLastModifiedTime();
-app.use('/frontend', express.static(FRONTEND, { lastModified }));
+app.use(
+  '/frontend',
+  express.static(FRONTEND, {
+    lastModified,
+    setHeaders: (res) => {
+      res.setHeader('Last-Modified', lastModified);
+    },
+  })
+);
 
 app.use((_req, res) => res.status(404).send('Not found'));
 

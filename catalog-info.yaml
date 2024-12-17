@@ -5,7 +5,7 @@ metadata:
   annotations:
     circleci.com/project-slug: github/contentful/apps
     github.com/project-slug: contentful/apps
-    contentful.com/ci-alert-slack: prd-extensibility-bots
+    contentful.com/ci-alert-slack: prd-marketplace-bots
 
 spec:
   type: library

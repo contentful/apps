@@ -64,12 +64,12 @@ const ConfigScreen = () => {
             onChange={updateParameters('tmdbAccessToken')}
           />
           <FormControl.HelpText>
-            Provide the access token for TMDB
+            Provide the API Read Access Token for TMDB
           </FormControl.HelpText>
           {!parameters.tmdbAccessToken && (
             <FormControl.ValidationMessage>
-              Please, provide a valid API token. You can get one by signing up
-              at{' '}
+              Please, provide a valid API Read Access Token. You can get one by
+              signing up at{' '}
               <TextLink
                 href="https://www.themoviedb.org/"
                 target="_blank"

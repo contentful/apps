@@ -4,7 +4,7 @@ import { getGptModels, defaultModelId } from '@configs/ai/gptModels';
 import { ModelText } from '../configText';
 import { ParameterAction, ParameterReducer } from '../parameterReducer';
 import { ConfigErrors } from '../configText';
-import { Model as OpenAiModel } from 'openai';
+import * as OpenAi from 'openai';
 
 interface Props {
   apiKey: string;
@@ -14,7 +14,7 @@ interface Props {
 
 const Model = (props: Props) => {
   const { apiKey, model, dispatch } = props;
-  const [gptModels, setGptModels] = useState<OpenAiModel[]>([]);
+  const [gptModels, setGptModels] = useState<OpenAi.OpenAI.Model[]>([]);
 
   useEffect(() => {
     async function fetchGptModels() {

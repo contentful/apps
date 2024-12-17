@@ -1,6 +1,6 @@
 import React from 'react';
 import { ContentTypesSelection } from './ContentTypesPanel';
-import { cleanup, render } from '@testing-library/react';
+import { act, cleanup, render, waitFor } from '@testing-library/react';
 
 describe('ContentTypesList', function () {
   let contentTypeId = 1;
@@ -59,7 +59,7 @@ describe('ContentTypesList', function () {
     const authors = contentType('authors');
     const contentTypes = [posts, authors];
     const enabledTypes = [posts.sys.id];
-    const { queryByRole, queryAllByRole } = render(
+    const { getByRole, queryByRole, queryAllByRole } = render(
       <ContentTypesSelection
         contentTypes={contentTypes}
         enabledContentTypes={enabledTypes}
@@ -69,7 +69,7 @@ describe('ContentTypesList', function () {
       />
     );
 
-    const select = queryByRole('listbox');
+    const select = queryByRole('combobox');
     const options = queryAllByRole('option');
     const postsOption = options.find((option) => option.label === 'posts');
     const authorsOption = options.find((option) => option.label === 'authors');

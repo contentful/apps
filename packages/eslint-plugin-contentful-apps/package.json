@@ -1,6 +1,6 @@
 {
   "name": "@contentful/eslint-plugin-contentful-apps",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "main": "./dist/index.mjs",
   "typings": "./dist/index.d.ts",
   "module": "./dist/index.mjs",

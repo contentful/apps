@@ -7,21 +7,25 @@
     "@contentful/f36-components": "4.69.0",
     "@contentful/f36-tokens": "4.0.5",
     "@contentful/react-apps-toolkit": "1.2.16",
-    "contentful-management": "10.46.4",
-    "emotion": "10.0.27",
+    "@emotion/css": "^11.13.0",
+    "@vitejs/plugin-react": "^4.3.2",
+    "contentful-management": "^11.35.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-scripts": "5.0.1"
+    "vite": "^5.4.9",
+    "vitest": "^2.1.3"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build && npm run build:functions",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "start": "vite",
+    "build": "vite build && npm run build:functions",
+    "test": "vitest",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
-    "build:functions": "node build-functions.js"
+    "build:functions": "node build-functions.js",
+    "create-app-action": "node -r dotenv/config create-app-action.js",
+    "install-app": "contentful-app-scripts install",
+    "open-settings": "contentful-app-scripts open-settings"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -39,20 +43,22 @@
     ]
   },
   "devDependencies": {
-    "@contentful/app-scripts": "1.27.0",
-    "@contentful/node-apps-toolkit": "^3.9.0",
+    "@contentful/app-scripts": "1.30.0",
+    "@contentful/node-apps-toolkit": "^3.9.1",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "14.3.1",
     "@tsconfig/create-react-app": "2.0.5",
     "@tsconfig/recommended": "1.0.3",
-    "@types/node": "16.18.106",
+    "@types/node": "^22.7.5",
     "@types/react": "18.3.5",
     "@types/react-dom": "18.3.0",
     "cross-env": "7.0.3",
     "esbuild": "0.19.2",
-    "typescript": "4.9.5"
+    "happy-dom": "^15.7.4",
+    "typescript": "4.9.5",
+    "yargs": "^17.7.2"
   },
   "homepage": "."
 }

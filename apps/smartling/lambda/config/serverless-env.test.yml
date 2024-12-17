@@ -1,0 +1,3 @@
+domainName: smartling-test.ctfapps.net
+CLIENT_ID: ${ssm:/aws/reference/secretsmanager/ci/apps/smartling/test/client-id}
+CLIENT_SECRET: ${ssm:/aws/reference/secretsmanager/ci/apps/smartling/test/client-secret}

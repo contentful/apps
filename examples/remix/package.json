@@ -13,30 +13,34 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@contentful/app-scripts": "^1.30.1",
     "@contentful/app-sdk": "^4.29.1",
     "@contentful/f36-components": "^4.68.1",
     "@contentful/f36-tokens": "^4.0.5",
-    "@remix-run/node": "^2.11.2",
-    "@remix-run/react": "^2.11.2",
-    "@remix-run/serve": "^2.11.2",
+    "@remix-run/dev": "^2.14.0",
+    "@remix-run/node": "^2.14.0",
+    "@remix-run/react": "^2.14.0",
+    "@remix-run/serve": "^2.14.0",
     "@tanstack/react-query": "^5.52.2",
     "@tanstack/react-table": "^8.20.5",
-    "contentful-management": "^11.31.8",
+    "@vitejs/plugin-react": "^4.3.3",
+    "@vitest/coverage-v8": "^2.1.5",
+    "contentful-management": "^11.38.0",
     "dotenv": "^16.4.5",
     "isbot": "^4.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "remix-utils": "^7.6.0"
+    "remix-utils": "^7.6.0",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.5"
   },
   "devDependencies": {
-    "@remix-run/dev": "^2.11.2",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^6.7.4",
-    "@vitest/coverage-v8": "^2.0.5",
     "autoprefixer": "^10.4.19",
     "eslint": "^8.38.0",
     "eslint-import-resolver-typescript": "^3.6.1",
@@ -46,9 +50,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "remix-development-tools": "^4.4.1",
     "typescript": "^5.1.6",
-    "vite": "^5.1.0",
-    "vite-tsconfig-paths": "^4.2.1",
-    "vitest": "^2.0.5"
+    "vite-tsconfig-paths": "^4.2.1"
   },
   "engines": {
     "node": ">=20.0.0"

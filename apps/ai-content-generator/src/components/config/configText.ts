@@ -2,10 +2,7 @@ import { ProfileFields } from './appInstallationParameters';
 
 const ModelText = {
   title: 'Machine Learning Model',
-  helpText:
-    'According to the provider, for many basic tasks, the difference between GPT-4 and GPT-3.5 ' +
-    'models is not significant. However, in more complex reasoning situations, GPT-4 is much more ' +
-    'capable than any previous models.',
+  helpText: 'Select one of the available models based on your OpenAI API Key.',
 };
 
 export enum FieldTypes {
@@ -84,9 +81,9 @@ const Sections = {
   addToSidebarDescription: 'Assign AI Content Generator to content types.',
   costHeading: 'Cost',
   costSubheading: 'Generating content uses your Open AI tokens.',
-  costDescription: 'View the current pricing model at openai.com/pricing',
-  costLinkSubstring: 'openai.com/pricing',
-  costLink: 'https://openai.com/pricing',
+  costDescription: 'View the current pricing model at openai.com/api/pricing',
+  costLinkSubstring: 'openai.com/api/pricing',
+  costLink: 'https://openai.com/api/pricing/',
   rateLimitDescription: "Chat GPT enforces usage quotas. Learn about Chat GPT's rate limits",
   rateLimitLinkSubstring: "Chat GPT's rate limits",
   rateLimitLink: 'https://platform.openai.com/docs/guides/rate-limits/overview',

@@ -10,8 +10,8 @@ plugins:
 custom:
   myStage: ${opt:stage, self:provider.stage}
   customDomain:
-    domainName: smartling.ctfapps.net
-    stage: prd
+    domainName: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):domainName}
+    stage: ${opt:stage, 'dev'}
     createRoute53Record: true
     endpointType: 'edge'
     securityPolicy: tls_1_2
@@ -38,8 +38,9 @@ package:
 functions:
   app:
     environment:
-      CLIENT_ID: ${env:SMARTLING_CLIENT_ID}
-      CLIENT_SECRET: ${env:SMARTLING_CLIENT_SECRET}
+      CLIENT_ID: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):CLIENT_ID}
+      CLIENT_SECRET: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):CLIENT_SECRET}
+      DEPLOY_TIME_UNIX: ${env:DEPLOY_TIME_UNIX}
     handler: built/index.api
     events:
       - http:

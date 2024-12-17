@@ -3,4 +3,5 @@ import { defineConfig } from 'vite';
 
 export default defineConfig((env) => ({
   plugins: [react()],
+  base: '', // relative paths
 }));
