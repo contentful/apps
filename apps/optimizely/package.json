@@ -4,35 +4,39 @@
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "^1.20.0",
-    "cross-env": "7.0.3"
+    "@testing-library/react": "^16.1.0",
+    "cross-env": "7.0.3",
+    "happy-dom": "^15.7.4"
   },
   "dependencies": {
     "@contentful/app-sdk": "4.9.0",
-    "@contentful/forma-36-fcss": "0.3.5",
-    "@contentful/forma-36-react-components": "3.100.7",
-    "@contentful/forma-36-tokens": "0.11.2",
-    "@testing-library/react": "8.0.7",
-    "@use-it/interval": "0.1.4",
-    "emotion": "10.0.27",
+    "@contentful/f36-components": "^4.70.0",
+    "@contentful/f36-icons": "^4.29.0",
+    "@contentful/f36-tokens": "^4.0.5",
+    "@emotion/css": "^11.13.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "@vitest/coverage-v8": "^2.1.1",
     "lodash.get": "4.4.2",
     "lodash.intersection": "4.4.0",
     "prop-types": "15.8.1",
-    "react": "16.8.6",
-    "react-dom": "16.8.6",
-    "react-scripts": "^5.0.1",
-    "use-methods": "0.5.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-use": "^17.5.1",
+    "redux-dynamic-modules-core": "^5.2.3",
+    "vite": "^5.4.8",
+    "vite-plugin-commonjs": "^0.10.3",
+    "vitest": "^2.1.1",
     "whatwg-fetch": "3.6.20"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build",
+    "start": "vite",
+    "build": "rm -rf build && vite build",
     "build:local": "npm run env:local && npm run build",
     "env:local": "echo REACT_APP_OPTIMIZELY_CLIENT_APP_ID=${REACT_APP_OPTIMIZELY_CLIENT_APP_ID} > .env.local",
     "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/optimizely --acl public-read",
     "create-app-definition": "contentful-app-scripts create-app-definition",
-    "deploy:test": "npm run deploy",
-    "test": "TZ=UTC react-scripts test",
-    "test:ci": "TZ=UTC react-scripts test"
+    "test": "vitest",
+    "test:ci": "vitest"
   },
   "eslintConfig": {
     "extends": "react-app"

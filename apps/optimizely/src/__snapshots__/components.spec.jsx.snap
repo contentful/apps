@@ -1,0 +1,102 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`error message components > IncorrectContentType > should match snapshot 1`] = `
+<div>
+  <div
+    class="css-hvj582"
+    data-test-id="incorrect-type"
+  >
+    <article
+      class="css-ep96ao"
+      data-test-id="cf-ui-note"
+    >
+      <svg
+        aria-hidden="true"
+        class="css-77587x"
+        data-test-id="cf-ui-icon"
+        role="img"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M0 0h24v24H0z"
+          fill="none"
+        />
+        <path
+          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+        />
+      </svg>
+      <div
+        class="css-j7qwjs"
+      >
+        <h2
+          class="css-1fgrah0"
+          data-test-id="cf-ui-heading"
+        >
+          Extension "test-extension" cannot be assigned to this content type
+        </h2>
+        <div
+          class="css-n69953"
+        >
+          <div>
+            <strong>
+              Required:
+            </strong>
+             
+            experimentTitle (Symbol), experimentId (Symbol), experimentKey (Symbol), meta (Object), variations (Array)
+          </div>
+          <div>
+            <strong>
+              Missing:
+            </strong>
+             
+            key (symbol)
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+</div>
+`;
+
+exports[`error message components > MissingProjectId > should match snapshot 1`] = `
+<div>
+  <div
+    class="css-hvj582"
+    data-test-id="missing-project"
+  >
+    <article
+      class="css-ep96ao"
+      data-test-id="cf-ui-note"
+    >
+      <svg
+        aria-hidden="true"
+        class="css-t1jt9x"
+        data-test-id="cf-ui-icon"
+        role="img"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M0 0h24v24H0z"
+          fill="none"
+        />
+        <path
+          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+        />
+      </svg>
+      <div
+        class="css-j7qwjs"
+      >
+        <div
+          class="css-n69953"
+        >
+          Please, set 
+          <strong>
+            Optimizely Project ID
+          </strong>
+           in Extension settings.
+        </div>
+      </div>
+    </article>
+  </div>
+</div>
+`;
