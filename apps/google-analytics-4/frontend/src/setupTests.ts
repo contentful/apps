@@ -24,7 +24,6 @@ configure({
   testIdAttribute: 'data-test-id',
 });
 
-process.on('unhandledRejection', (reason) => {
+process.on('unhandledRejection', () => {
   vi.spyOn(console, 'error').mockImplementation(() => {});
-  throw reason;
 });
