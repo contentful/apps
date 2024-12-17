@@ -1,5 +1,6 @@
 import SegmentClient from './segmentClient';
 import { AnalyticsBrowser } from '@segment/analytics-next';
+import { vi } from 'vitest';
 
 describe('SegmentClient', () => {
   let segmentAnalytics: any;
@@ -36,13 +37,13 @@ describe('SegmentClient', () => {
       load: function () {
         return this as AnalyticsBrowser;
       },
-      identify: jest.fn(),
+      identify: vi.fn(),
     };
-    jest.spyOn(AnalyticsBrowser, 'load').mockReturnValue(mockAnalyticsBrowser as AnalyticsBrowser);
+    vi.spyOn(AnalyticsBrowser, 'load').mockReturnValue(mockAnalyticsBrowser as AnalyticsBrowser);
 
     segmentAnalytics = {
-      identify: jest.fn(),
-      page: jest.fn(),
+      identify: vi.fn(),
+      page: vi.fn(),
     };
     SegmentClient.segmentAnalytics = segmentAnalytics;
   });

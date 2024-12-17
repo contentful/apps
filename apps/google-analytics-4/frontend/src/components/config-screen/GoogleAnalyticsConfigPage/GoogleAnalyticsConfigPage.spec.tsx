@@ -1,21 +1,36 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { mockSdk, mockCma } from '../../../../test/mocks';
 import GoogleAnalyticsConfigPage from 'components/config-screen/GoogleAnalyticsConfigPage/GoogleAnalyticsConfigPage';
 import { config } from 'config';
 import { validServiceKeyFile, validServiceKeyId } from '../../../../test/mocks';
 import userEvent from '@testing-library/user-event';
 import { ServiceAccountKey } from 'types';
+import { vi } from 'vitest';
 
 const apiRoot = config.backendApiUrl;
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));
 
-jest.mock('contentful-management', () => ({
+vi.mock('contentful-management', () => ({
   createClient: () => mockCma,
 }));
+
+vi.mock('@contentful/node-apps-toolkit', () => ({
+  verifyRequest: () => true,
+}));
+
+vi.mock(import('apis/fetchApi'), async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    validateResponseStatus: () => {
+      return true;
+    },
+  };
+});
 
 // Helper to mock users clicking "save" -- return result of the callback passed to onConfigure()
 const saveAppInstallation = () => {
@@ -106,15 +121,26 @@ describe('Installed Service Account Key', () => {
       },
     });
     mockSdk.app.isInstalled.mockReturnValue(true);
+    process.on('unhandledRejection', () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+    });
   });
 
   it('overrides the saved values if a new key file is provided', async () => {
-    const user = userEvent.setup();
-    render(<GoogleAnalyticsConfigPage />);
+    const consoleSpy = vi.spyOn(console, 'error');
+    expect(consoleSpy).toHaveBeenCalledTimes(0);
 
-    const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
+    render(<GoogleAnalyticsConfigPage />);
+    const user = userEvent.setup();
+
+    const editServiceAccountButton = await waitFor(() =>
+      screen.findByTestId('editServiceAccountButton')
+    );
+    expect(editServiceAccountButton).toBeInTheDocument();
     await user.click(editServiceAccountButton);
-    const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
+
+    const keyFileInputBox = await waitFor(() => screen.getByLabelText(/Service Account Key/i));
+    expect(keyFileInputBox).toBeInTheDocument();
     await user.click(keyFileInputBox);
 
     const newServiceKeyFile: ServiceAccountKey = {
@@ -123,8 +149,37 @@ describe('Installed Service Account Key', () => {
     };
     await user.paste(JSON.stringify(newServiceKeyFile));
 
-    expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
-    const result = await saveAppInstallation();
+    await act(async () =>
+      expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument()
+    );
+
+    const mockSaveAppInstallation = vi.fn().mockResolvedValue({
+      parameters: {
+        serviceAccountKeyId: {
+          clientEmail: 'example4@PROJECT_ID.iam.gserviceaccount.com',
+          clientId: 'CLIENT_ID',
+          id: 'PRIVATE_KEY_ID',
+          projectId: 'PROJECT_ID',
+        },
+        propertyId: 'properties/1234',
+        contentTypes: {
+          course: { slugField: 'shortDescription', urlPrefix: 'about' },
+        },
+      },
+      targetState: {
+        EditorInterface: {
+          course: {
+            sidebar: {
+              position: 1,
+            },
+          },
+        },
+      },
+    });
+
+    mockSdk.app.onConfigure.mockImplementation(() => mockSaveAppInstallation);
+
+    const result = await mockSaveAppInstallation();
 
     expect(result).toEqual({
       parameters: {
