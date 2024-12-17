@@ -23,7 +23,3 @@ afterEach(() => {
 configure({
   testIdAttribute: 'data-test-id',
 });
-
-process.on('unhandledRejection', () => {
-  vi.spyOn(console, 'error').mockImplementation(() => {});
-});

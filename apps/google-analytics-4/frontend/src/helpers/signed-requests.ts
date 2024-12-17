@@ -36,8 +36,6 @@ async function fetchWithSignedRequest(
 
   Object.assign(req.headers, unsignedHeaders, signedHeaders);
 
-  console.log('req.url', req.url, 'headers', req.headers, 'signedHeaders', signedHeaders);
-
   return fetch(req.url, req);
 }
 

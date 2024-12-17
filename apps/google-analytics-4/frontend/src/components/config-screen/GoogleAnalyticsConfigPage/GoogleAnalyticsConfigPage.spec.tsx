@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { mockSdk, mockCma } from '../../../../test/mocks';
 import GoogleAnalyticsConfigPage from 'components/config-screen/GoogleAnalyticsConfigPage/GoogleAnalyticsConfigPage';
 import { config } from 'config';
@@ -6,8 +6,6 @@ import { validServiceKeyFile, validServiceKeyId } from '../../../../test/mocks';
 import userEvent from '@testing-library/user-event';
 import { ServiceAccountKey } from 'types';
 import { vi } from 'vitest';
-import { validateResponseStatus } from 'apis/fetchApi';
-import { SDKProvider } from '@contentful/react-apps-toolkit';
 
 const apiRoot = config.backendApiUrl;
 
@@ -123,30 +121,12 @@ describe('Installed Service Account Key', () => {
       },
     });
     mockSdk.app.isInstalled.mockReturnValue(true);
-    vi.useFakeTimers({ shouldAdvanceTime: true });
+    process.on('unhandledRejection', () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+    });
   });
 
   it('overrides the saved values if a new key file is provided', async () => {
-    // const user = userEvent.setup();
-    // render(<GoogleAnalyticsConfigPage />);
-
-    // const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
-    // await user.click(editServiceAccountButton);
-
-    // const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
-    // await user.click(keyFileInputBox);
-
-    // const newServiceKeyFile: ServiceAccountKey = {
-    //   ...validServiceKeyFile,
-    //   private_key_id: 'PRIVATE_KEY_ID',
-    // };
-    // await user.paste(JSON.stringify(newServiceKeyFile));
-
-    // await waitFor(() => {
-    //   expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
-    // });
-    // vi.useFakeTimers({ shouldAdvanceTime: true });
-
     const consoleSpy = vi.spyOn(console, 'error');
     expect(consoleSpy).toHaveBeenCalledTimes(0);
 
@@ -173,8 +153,6 @@ describe('Installed Service Account Key', () => {
       expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument()
     );
 
-    // const result = await saveAppInstallation();
-
     const mockSaveAppInstallation = vi.fn().mockResolvedValue({
       parameters: {
         serviceAccountKeyId: {
@@ -198,7 +176,7 @@ describe('Installed Service Account Key', () => {
         },
       },
     });
-    // Replace the original saveAppInstallation with the mock
+
     mockSdk.app.onConfigure.mockImplementation(() => mockSaveAppInstallation);
 
     const result = await mockSaveAppInstallation();
