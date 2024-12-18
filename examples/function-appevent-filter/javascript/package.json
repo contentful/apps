@@ -1,8 +1,9 @@
 {
+  "scripts": {
+    "build": "contentful-app-scripts build-functions --ci"
+  },
   "devDependencies": {
-    "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
-    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
-    "esbuild": "0.19.2",
+    "@contentful/app-scripts": "^1.32.0",
     "sentiment": "^5.0.2"
   }
 }
