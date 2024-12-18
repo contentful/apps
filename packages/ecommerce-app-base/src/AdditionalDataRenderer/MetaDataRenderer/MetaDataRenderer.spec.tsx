@@ -8,8 +8,8 @@ describe('A MetaDataRenderer', () => {
       <MetaDataRenderer columns={[{ title: 'hello world', items: [] }]} />
     );
     const title = getByRole('heading');
-    expect(title).toBeInTheDocument();
-    expect(title).toHaveTextContent('hello world');
+    expect(title).toBeTruthy();
+    expect(title.innerHTML).toBe('hello world');
   });
 
   it('can render columns content', () => {

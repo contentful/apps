@@ -1,7 +1,7 @@
 import { Box, Flex, Text } from '@contentful/f36-components';
 import { ProductCardMenu } from '../ProductCardMenu/ProductCardMenu';
 import { ExternalResource } from '../types';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import tokens from '@contentful/f36-tokens';
 
 export const styles = {

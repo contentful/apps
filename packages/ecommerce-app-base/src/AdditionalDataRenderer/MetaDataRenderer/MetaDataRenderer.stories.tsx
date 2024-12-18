@@ -3,7 +3,7 @@ import { columns } from '../../__mocks__/products';
 import { MetaDataRenderer } from './MetaDataRenderer';
 import { Box, Caption, TextLink } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 
 const meta: Meta<typeof MetaDataRenderer> = {
   title: 'AdditionalData/MetaDataRenderer',

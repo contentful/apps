@@ -1,11 +1,13 @@
+import { vi } from 'vitest';
+
 const mockSdk: any = {
   app: {
-    onConfigure: jest.fn(),
-    getParameters: jest.fn().mockReturnValueOnce({}),
-    setReady: jest.fn(),
-    getCurrentState: jest.fn(),
-    isInstalled: jest.fn(),
-    onConfigurationCompleted: jest.fn(),
+    onConfigure: vi.fn(),
+    getParameters: vi.fn().mockReturnValueOnce({}),
+    setReady: vi.fn(),
+    getCurrentState: vi.fn(),
+    isInstalled: vi.fn(),
+    onConfigurationCompleted: vi.fn(),
   },
   cma: {
     appSignedRequest: {
@@ -40,14 +42,14 @@ const mockSdk: any = {
     user: 'user-id',
   },
   notifier: {
-    error: jest.fn(),
+    error: vi.fn(),
   },
   parameters: {
     installation: {},
     instance: {},
   },
   location: {
-    is: jest.fn().mockReturnValue(true),
+    is: vi.fn().mockReturnValue(true),
   },
   contentType: {
     name: 'Category',

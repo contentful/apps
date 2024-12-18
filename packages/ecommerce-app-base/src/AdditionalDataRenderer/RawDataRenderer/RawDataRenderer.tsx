@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import * as React from 'react';
 import { CopyButton, Flex } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 
 const styles = {
   box: css({

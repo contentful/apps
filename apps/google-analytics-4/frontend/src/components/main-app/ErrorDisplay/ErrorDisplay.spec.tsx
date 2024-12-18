@@ -9,7 +9,7 @@ import {
 } from '../constants/noteMessages';
 import { ApiError } from 'apis/api';
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
