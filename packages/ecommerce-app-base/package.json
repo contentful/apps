@@ -70,7 +70,7 @@
   "scripts": {
     "build": "rimraf lib && tsc",
     "build:docs": "rimraf docs && typedoc",
-    "prepublishOnly": "npm run build && npm run build:docs",
+    "prepublishOnly": "npm run build",
     "test": "vitest",
     "test:ci": "CI=true vitest",
     "storybook": "storybook dev -p 6006",
