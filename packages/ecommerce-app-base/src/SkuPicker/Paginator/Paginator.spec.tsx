@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { configure, render, cleanup } from '@testing-library/react';
 import { getPagesRange, Props, Paginator } from './Paginator';
+import { vi } from 'vitest';
 
 configure({
   testIdAttribute: 'data-test-id',
@@ -9,7 +10,7 @@ configure({
 const defaultProps: Props = {
   activePage: 3,
   pageCount: 12,
-  setActivePage: jest.fn(),
+  setActivePage: vi.fn(),
 };
 
 const renderComponent = (props: Props) => {

@@ -1,7 +1,7 @@
 import { Note, TextLink } from '@contentful/f36-components';
 
 import tokens from '@contentful/f36-tokens';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 const styles = {

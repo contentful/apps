@@ -6,7 +6,7 @@ import { Button } from '@contentful/f36-components';
 
 import { ChevronLeftIcon, ChevronRightIcon } from '@contentful/f36-icons';
 
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 
 const styles = {
   button: css({

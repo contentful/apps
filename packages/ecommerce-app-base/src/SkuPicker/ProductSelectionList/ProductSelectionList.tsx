@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import { ProductSelectionListItem } from './ProductSelectionListItem';
 import { OtherProductsCounter } from './OtherProductsCounter';
 import { Product } from '../../types';

@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { Badge, Card, Heading, IconButton, Subheading } from '@contentful/f36-components';
 import { CloseIcon, ExternalLinkIcon } from '@contentful/f36-icons';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import tokens from '@contentful/f36-tokens';
 import type { Product } from '../../types';
 import { ProductImage } from '../ProductImage';

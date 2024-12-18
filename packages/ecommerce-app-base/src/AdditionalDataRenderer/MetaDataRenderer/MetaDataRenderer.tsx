@@ -4,7 +4,7 @@ import { Box, Caption } from '@contentful/f36-components';
 import { Row } from './Row';
 import { Column } from './Column';
 import { Container } from '../Container';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import tokens from '@contentful/f36-tokens';
 
 type ItemData = {
