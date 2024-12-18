@@ -16,7 +16,7 @@
     "start": "vite",
     "build": "npm run build:frontend && npm run build:functions",
     "build:frontend": "rm -rf build && tsc && vite build",
-    "build:functions": "node build-functions.js",
+    "build:functions": "contentful-app-scripts build-functions --ci",
     "test": "vitest run --passWithNoTests",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
@@ -38,7 +38,7 @@
     ]
   },
   "devDependencies": {
-    "@contentful/app-scripts": "1.27.0",
+    "@contentful/app-scripts": "1.32.0",
     "@contentful/node-apps-toolkit": "^3.9.0",
     "@testing-library/jest-dom": "^6.4.8",
     "@testing-library/react": "^16.0.0",
