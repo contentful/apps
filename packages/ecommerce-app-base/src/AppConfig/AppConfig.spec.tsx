@@ -85,7 +85,7 @@ describe('AppConfig', () => {
       [/Commercetools data locale/, 'en'],
     ].forEach(([labelRe, expected]) => {
       const configInput = screen.getByLabelText(labelRe as RegExp) as HTMLInputElement;
-      expect(configInput.value).toEqual(expected);
+      expect(configInput.value).toBe(expected);
     });
     [
       [/Product X$/, false],
