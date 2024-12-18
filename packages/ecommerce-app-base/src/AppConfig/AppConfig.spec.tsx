@@ -76,16 +76,18 @@ describe('AppConfig', () => {
 
     renderComponent(sdk);
     await waitFor(() => screen.getByLabelText(/Commercetools Project Key/));
-    [
-      [/Commercetools Project Key/, 'some-key'],
-      [/Client ID/, '12345'],
-      [/Client Secret/, 'some-secret'],
-      [/^API Endpoint/, 'some-endpoint'],
-      [/Auth API Endpoint/, 'some-auth-endpoint'],
-      [/Commercetools data locale/, 'en'],
-    ].forEach(([labelRe, expected]) => {
-      const configInput = screen.getByLabelText(labelRe as RegExp) as HTMLInputElement;
-      expect(configInput.value).toBe(expected);
+    await waitFor(() => {
+      [
+        [/Commercetools Project Key/, 'some-key'],
+        [/Client ID/, '12345'],
+        [/Client Secret/, 'some-secret'],
+        [/^API Endpoint/, 'some-endpoint'],
+        [/Auth API Endpoint/, 'some-auth-endpoint'],
+        [/Commercetools data locale/, 'en'],
+      ].forEach(([labelRe, expected]) => {
+        const configInput = screen.getByLabelText(labelRe as RegExp) as HTMLInputElement;
+        expect(configInput.value).toEqual(expected);
+      });
     });
     [
       [/Product X$/, false],
