@@ -5,6 +5,7 @@ export default defineConfig({
     port: 1234,
   },
   base: './',
+  envPrefix: 'REACT_APP',
   build: {
     outDir: 'build',
   },
