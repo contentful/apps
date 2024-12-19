@@ -21,9 +21,8 @@ header img {
   font-size: var(--font-size-m);
 }
 
-.jira-ticket {
+#jira-ticket {
     display: flex;
-    align-items: center;
     flex-direction: column;
     justify-content: space-between;
     margin-bottom: var(--spacing-xs);
