@@ -1,9 +1,9 @@
 import React from 'react';
-import { Typography, Heading, Paragraph, Button } from '@contentful/forma-36-react-components';
+import { Heading, Paragraph, Button } from '@contentful/f36-components';
 
 const JiraStep = () => (
   <div className="section">
-    <Typography>
+    <>
       <Heading>Get Jira companion app</Heading>
       <Paragraph>
         The companion app must be installed in your Jira instance in order for Contentful to link to
@@ -16,7 +16,7 @@ const JiraStep = () => (
         </Button>
         <br />
       </Paragraph>
-    </Typography>
+    </>
   </div>
 );
 

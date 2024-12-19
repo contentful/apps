@@ -1,4 +1,4 @@
-@import '@contentful/forma-36-tokens/dist/css/index.css';
+@import '@contentful/f36-tokens/dist/css/index.css';
 
 body {
   margin: 0;
@@ -21,14 +21,14 @@ header img {
   font-size: var(--font-size-m);
 }
 
-.jira-ticket {
+#jira-ticket {
     display: flex;
-    align-items: center;
     flex-direction: column;
     justify-content: space-between;
     margin-bottom: var(--spacing-xs);
     padding: var(--spacing-xs) var(--spacing-s);
     cursor: default;
+    max-width: fit-content;
 
     .primary {
       width: 100%;

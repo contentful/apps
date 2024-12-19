@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Paragraph } from '@contentful/forma-36-react-components';
+import { Button, Paragraph } from '@contentful/f36-components';
 import constants from '../../constants';
 
 interface Props {
@@ -58,7 +58,7 @@ export default class OAuth extends React.Component<Props> {
             <br />
           </Paragraph>
         )}
-        <Button onClick={this.executeOauth} buttonType="primary" isFullWidth testId="oauth-button">
+        <Button onClick={this.executeOauth} variant="primary" isFullWidth testId="oauth-button">
           {this.props.proactiveWarning ? 'Reauthenticate' : 'Connect to Jira'}
         </Button>
       </div>
