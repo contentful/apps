@@ -5,12 +5,13 @@
   "devDependencies": {
     "@contentful/app-scripts": "1.2.1",
     "cross-env": "7.0.3",
-    "react-scripts": "5.0.1"
+    "vite": "^6.0.3"
   },
   "dependencies": {
     "@contentful/app-sdk": "4.13.0",
     "@contentful/ecommerce-app-base": "3.1.48",
     "@types/lodash": "4.17.7",
+   "@vitejs/plugin-react": "^4.3.4",
     "core-js": "3.38.1",
     "graphql": "15.9.0",
     "graphql-tag": "2.12.6",
@@ -20,8 +21,8 @@
     "typescript": "4.2.4"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts --openssl-legacy-provider build",
+    "start": "cross-env BROWSER=none vite",
+    "build": "vite build",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 6sLWDUsuXcyIfkPeokdRxJ --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id oYicHM0ShmFwqrbFmVFtw --token ${TEST_CMA_TOKEN}",
     "typecheck": "tsc"
