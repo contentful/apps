@@ -1,7 +1,8 @@
 import React from 'react';
 import { FormattedIssue } from '../../interfaces';
 
-import { Card, Tooltip, Badge, Menu, TextLink } from '@contentful/f36-components';
+import { Card, Tooltip, Badge, Menu, TextLink, IconButton } from '@contentful/f36-components';
+import { MoreHorizontalIcon } from '@contentful/f36-icons';
 
 type TagType = 'primary' | 'positive' | 'warning' | 'secondary' | 'negative';
 
@@ -22,18 +23,26 @@ const IssueCard = ({ issue, onRemoveClick }: Props) => {
   const openInJira = () => window.open(issue.link, undefined, 'noopener,noreferrer');
 
   return (
-    <Card className="jira-ticket">
+    <Card id="jira-ticket">
       <div className="primary">
         <div className="top">
           <Badge variant={statusColors[issue.status.statusCategory.colorName]} className="tag">
             {issue.status.name}
           </Badge>
-          <Card>
-            <Menu>
+          <Menu>
+            <Menu.Trigger>
+              <IconButton
+                testId="menu-button"
+                variant="transparent"
+                icon={<MoreHorizontalIcon />}
+                aria-label="toggle menu"
+              />
+            </Menu.Trigger>
+            <Menu.List>
               <Menu.Item onClick={openInJira}>Open in Jira</Menu.Item>
               <Menu.Item onClick={onRemoveClick}>Unlink</Menu.Item>
-            </Menu>
-          </Card>
+            </Menu.List>
+          </Menu>
         </div>
         <div data-test-id="issue-summary">
           <TextLink onClick={openInJira} className="summary">
