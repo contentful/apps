@@ -63,7 +63,7 @@ const ContentTypeStep = ({
     contentToRender = (
       <Flex>
         {sortedContentTypes.map((ct) => (
-          <FormControl id={ct.name}>
+          <FormControl id={ct.name} key={ct.id}>
             <Checkbox
               testId={`ct-item-${ct.id}`}
               name={ct.name}
