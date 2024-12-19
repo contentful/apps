@@ -31,7 +31,7 @@
     "vitest": "^2.1.2"
   },
   "scripts": {
-    "start": "REACT_APP_NGROK_URL=${NGROK_URL} REACT_APP_ATLASSIAN_APP_CLIENT_ID=${ATLASSIAN_APP_CLIENT_ID} vite",
+    "start": "VITE_NGROK_URL=${NGROK_URL} VITE_ATLASSIAN_APP_CLIENT_ID=${ATLASSIAN_APP_CLIENT_ID} vite",
     "build": "vite build",
     "deploy": "aws s3 sync ./build ${STATIC_JIRA_S3_BASE} --acl public-read",
     "deploy:test": "npm run deploy",
