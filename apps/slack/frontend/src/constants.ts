@@ -1,5 +1,5 @@
-export const CLIENT_ID = process.env.REACT_APP_SLACK_CLIENT_ID;
-export const BACKEND_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+export const CLIENT_ID = import.meta.env.REACT_APP_SLACK_CLIENT_ID;
+export const BACKEND_BASE_URL = import.meta.env.REACT_APP_BACKEND_BASE_URL;
 
 export const makeOAuthURL = (spaceId: string, environmentId: string) => {
   const redirectUri = encodeURIComponent(
