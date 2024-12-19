@@ -16,7 +16,7 @@
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
     "build": "react-scripts build && npm run build:functions",
-    "build:functions": "node build-functions.js",
+    "build:functions": "contentful-app-scripts build-functions --ci",
     "test": "jest --watch",
     "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
@@ -44,7 +44,7 @@
     ]
   },
   "devDependencies": {
-    "@contentful/app-scripts": "1.27.0",
+    "@contentful/app-scripts": "1.32.0",
     "@contentful/node-apps-toolkit": "3.6.0",
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "14.2.2",
