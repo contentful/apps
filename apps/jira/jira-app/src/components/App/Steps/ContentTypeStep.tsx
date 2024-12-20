@@ -1,13 +1,13 @@
 import React from 'react';
 import {
-  Typography,
   Heading,
-  FieldGroup,
-  CheckboxField,
+  Flex,
   Paragraph,
   Note,
   TextLink,
-} from '@contentful/forma-36-react-components';
+  Checkbox,
+  FormControl,
+} from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
 interface Props {
@@ -43,10 +43,10 @@ const ContentTypeStep = ({
   let contentToRender;
   if (sortedContentTypes.length === 0) {
     contentToRender = (
-      <Note noteType="warning">
+      <Note variant="warning">
         There are <strong>no content types</strong> in this environment. You can add a{' '}
         <TextLink
-          linkType="primary"
+          variant="primary"
           target="_blank"
           rel="noopener noreferrer"
           href={
@@ -61,30 +61,29 @@ const ContentTypeStep = ({
     );
   } else {
     contentToRender = (
-      <FieldGroup>
+      <Flex>
         {sortedContentTypes.map((ct) => (
-          <CheckboxField
-            onChange={() => selectCt(ct.id)}
-            labelText={ct.name}
-            name={ct.name}
-            checked={selectedContentTypes.includes(ct.id)}
-            value={ct.id}
-            id={ct.name}
-            key={ct.id}
-            data-test-id={`ct-item-${ct.id}`}
-          />
+          <FormControl id={ct.name} key={ct.id}>
+            <Checkbox
+              testId={`ct-item-${ct.id}`}
+              name={ct.name}
+              isChecked={selectedContentTypes.includes(ct.id)}
+              onChange={() => selectCt(ct.id)}>
+              {ct.name}
+            </Checkbox>
+          </FormControl>
         ))}
-      </FieldGroup>
+      </Flex>
     );
   }
   return (
-    <Typography>
+    <>
       <Heading>Assign to content types</Heading>
       <Paragraph>Pick the content types where Jira will install to the sidebar.</Paragraph>
       <div className="content-types-config" data-test-id="content-types">
         {contentToRender}
       </div>
-    </Typography>
+    </>
   );
 };
 

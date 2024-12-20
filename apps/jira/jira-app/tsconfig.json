@@ -14,7 +14,8 @@
     "resolveJsonModule": true,
     "types": [
       "@types/jest",
-      "@types/node"
+      "@types/node",
+      "vite/client"
     ],
     "allowJs": true,
     "skipLibCheck": true,
