@@ -43,7 +43,7 @@ const TABS = [
     }) => (
       <>
         <Paragraph>
-          The GraphQL Playground app enabled developers and content creators to write GraphQL
+          The GraphiQL Playground app enabled developers and content creators to write GraphiQL
           queries right next to their content.
         </Paragraph>
         <Form>
@@ -68,7 +68,7 @@ const TABS = [
           </FormControl>
           <Note>
             The CPA (Content Preview API) token allows you to also access preview data when using
-            GraphQL playground.
+            GraphiQL playground.
           </Note>
         </Form>
       </>
@@ -80,8 +80,8 @@ const TABS = [
     render: () => (
       <>
         <Paragraph>
-          To enable GraphQL playground in the content entry sidebar head over to the content model
-          section and select the GraphQL Playground widget. It will be available only if you
+          To enable GraphiQL playground in the content entry sidebar head over to the content model
+          section and select the GraphiQL Playground widget. It will be available only if you
           configure and install the application correctly.
         </Paragraph>
         <img
