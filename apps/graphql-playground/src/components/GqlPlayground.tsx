@@ -115,6 +115,16 @@ function GqlPlayground(props: GqlPlaygroundProps) {
         </Note>
       )}
       <Provider store={store}>
+        <Note noteType="warning">
+          The GraphQL Playground App is sunsetting on 2-31-2025. Please begin using the new{' '}
+          <a
+            target="_blank"
+            rel="noreferrer"
+            href="https://app.contentful.com/deeplink?link=apps&id=6o8NJOeW54fY2UYY8zQUZY">
+            GraphiQL
+          </a>{' '}
+          Playground app which has full parity with this app.
+        </Note>
         <Playground tabs={tabs} settings={settings} fixedEndpoint={true} {...tabConfig} />
       </Provider>
     </>
