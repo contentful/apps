@@ -1,17 +1,11 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  base: './',
   server: {
     port: 3000,
   },
   build: {
     outDir: 'build',
-    lib: {
-      entry: 'src/index.tsx',
-      name: 'graphql-playground',
-    },
-  },
-  define: {
-    global: {},
   },
 });
