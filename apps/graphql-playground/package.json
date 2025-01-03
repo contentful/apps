@@ -34,7 +34,7 @@
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "vite",
     "build": "vite build",
-    "deploy": "echo 'pinned bundle, skip deploy'",
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 66frtrAqmWSowDJzQNDiD --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 3pH3a4bjlsvhdepgoqgWNK --token ${TEST_CMA_TOKEN}",
     "test": "vitest",
     "eject": "vite eject"
