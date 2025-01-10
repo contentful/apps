@@ -29,7 +29,10 @@ export class App extends React.Component {
   componentDidMount() {
     const { sdk } = this.props;
     sdk.window.startAutoResizer();
-
+    const focalPointValue = sdk.field.getValue();
+    if (focalPointValue?.focalPoint === null) {
+      sdk.field.removeValue();
+    }
     // Handler for external field value changes (e.g. when multiple authors are working on the same entry).
     this.detachExternalChangeHandler = sdk.field.onValueChanged(this.onExternalChange);
   }
