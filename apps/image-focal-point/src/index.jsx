@@ -28,6 +28,7 @@ export class App extends React.Component {
 
   componentDidMount() {
     const { sdk } = this.props;
+    console.log('mount', this.props.sdk.field);
 
     sdk.window.startAutoResizer();
 
@@ -66,7 +67,9 @@ export class App extends React.Component {
   }
 
   resetFocalPoint = () => {
-    this.setFocalPoint(null);
+    this.setState({ value: { focalPoint: null } });
+    this.props.sdk.field.removeValue();
+    console.log(this.props.sdk.field);
   };
 
   setFocalPoint = (focalPoint) => {
