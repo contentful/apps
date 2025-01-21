@@ -8,7 +8,8 @@
     "@contentful/f36-tokens": "4.0.2",
     "@contentful/react-apps-toolkit": "1.2.16",
     "@emotion/react": "^11.14.0",
-    "contentful-management": "10.46.4",
+    "contentful-management": "^11.42.0",
+    "dotenv": "^16.4.7",
     "emotion": "10.0.27",
     "happy-dom": "^15.11.6",
     "react": "18.3.1",
@@ -20,15 +21,17 @@
     "test": "vitest",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "upload": "contentful-app-scripts upload --bundle-dir ./dist",
-    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
+    "setup": "ts-node scripts/setup.ts"
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.19.1",
     "@testing-library/react": "14.0.0",
-    "@types/node": "16.18.38",
+    "@types/node": "^16.18.124",
     "@types/react": "18.3.1",
     "@types/react-dom": "18.3.0",
     "@vitejs/plugin-react": "4.2.1",
+    "ts-node": "^10.9.2",
     "typescript": "5.1.6",
     "vite": "4.5.5",
     "vitest": "0.32.4"

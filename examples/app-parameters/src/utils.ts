@@ -1,5 +1,5 @@
 import { ContentFields, Control } from 'contentful-management';
-import { FIELD_TYPES, FIELD_WIDGETS } from './constants';
+import { FIELD_TYPES } from './constants';
 import { FieldDetails, getFieldStatusParams } from './locations/Dialog';
 import { SelectedContentTypes, SidebarEditorInterface } from './components/AddToSidebarSection';
 
@@ -9,7 +9,6 @@ interface EditorInterfaceAssignment {
 
 export const getFieldStatus = ({ deleted, disabled, omitted, isTitle }: getFieldStatusParams) => {
   if (isTitle) return 'Entry title';
-  if (deleted) return 'Deleted';
   if (disabled) {
     if (!omitted) {
       return 'Hidden when editing';
@@ -56,21 +55,6 @@ export function generateInvocationParameters(
   });
 
   return JSON.stringify(fieldDetails);
-}
-
-export function getFieldAppearance(field: FieldDetails) {
-  const { widgetNamespace, widgetId } = field;
-  let appearance = '';
-  if (widgetNamespace === 'builtin') {
-    appearance = widgetId
-      ? FIELD_WIDGETS.find((widget) => widget.name === widgetId)?.label ?? ''
-      : '';
-  }
-  if (widgetNamespace === 'app') {
-    appearance = 'App';
-  }
-
-  return appearance;
 }
 
 export const generateEditorInterfaceAssignments = (
