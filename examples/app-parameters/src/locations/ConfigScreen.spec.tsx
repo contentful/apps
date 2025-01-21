@@ -1,12 +1,25 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { mockCma, mockSdk } from '../../test/mocks';
+import { mockSdk } from '../../test/mocks';
 import ConfigScreen from './ConfigScreen';
+import useGetAllContentTypes from '../hooks/useGetAllContentTypes';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
-  useCMA: () => mockCma,
 }));
+
+vi.mock('../hooks/useGetAllContentTypes', async () => {
+  const actual = await vi.importActual('../hooks/useGetAllContentTypes');
+  return {
+    ...(actual as typeof useGetAllContentTypes),
+    useGetAllContentTypes: {
+      allContentTypes: [],
+      selectedContentTypes: [],
+      setSelectedContentTypes: vi.fn(),
+      isLoading: false,
+    },
+  };
+});
 
 describe('Config Screen component', () => {
   it('Component text exists', async () => {
@@ -15,6 +28,6 @@ describe('Config Screen component', () => {
     // simulate the user clicking the install button
     await mockSdk.app.onConfigure.mock.calls[0][0]();
 
-    expect(getByText('Welcome to your contentful app. This is your config page.')).toBeTruthy();
+    expect(getByText('Content Type Summary App')).toBeTruthy();
   });
 });

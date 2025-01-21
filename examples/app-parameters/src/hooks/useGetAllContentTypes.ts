@@ -28,7 +28,7 @@ const useGetAllContentTypes = () => {
       );
       setAllContentTypes(sortedContentTypes || []);
       const currentState: AppState | null = await sdk.app.getCurrentState();
-      if (currentState !== null) {
+      if (currentState) {
         const { EditorInterface } = currentState;
         const selectedContentTypes = Object.keys(EditorInterface);
         const editorInterfaceCopy = {} as unknown as SelectedContentTypes;
