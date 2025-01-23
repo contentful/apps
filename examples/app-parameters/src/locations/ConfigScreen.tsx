@@ -42,8 +42,10 @@ const ConfigScreen = () => {
     })();
   }, [sdk]);
 
+  // This hook gets the content types and the selected content types for the app configuration screen
   const { allContentTypes, selectedContentTypes, setSelectedContentTypes, isLoading } =
     useGetAllContentTypes();
+  // This hook is where the save configuration logic is implemented
   useSaveConfigHandler(parameters, selectedContentTypes);
 
   const handleCheckboxChange = (contentType: ContentTypeProps, isChecked: boolean) => {

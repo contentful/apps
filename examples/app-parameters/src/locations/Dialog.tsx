@@ -21,6 +21,7 @@ export type getFieldStatusParams = {
 
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
+  // Access the invocation parameter value
   const parameters = sdk.parameters.invocation as unknown as DialogInvocationParameters;
   const fieldDetails = JSON.parse(parameters.fieldDetails) as FieldDetails[];
 

@@ -7,12 +7,10 @@ import { styles } from './Sidebar.styles';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
+  // Access the instance parameter value to get the content type color
   const { instance: instanceParams } = sdk.parameters;
 
   useAutoResizer();
-
-  // const access = await sdk.access.can('read', 'ContentType');
-  // console.log('access', access);
 
   return (
     <Box className={styles.box(instanceParams.contentTypeColor)}>

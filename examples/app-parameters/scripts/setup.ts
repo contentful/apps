@@ -1,11 +1,11 @@
 /*
  * This file is a setup script that uses your Content Management API (CMA) token
  * and the variables you specify in the ".env" file to:
- * + Create a new App
- * + Install the app to your Space
- * + Create an example Content Type
- * + Update the Editor Interface to include the app in the sidebar and update instance parameters
- * + Create an example entry
+ * + Create a new app definition
+ * + Install the app to your space and set values for installation parameters
+ * + Create an example content type
+ * + Update the editor interface to include the app in the sidebar and update instance parameters
+ * + Create an example entry where the app can be viewed in the sidebar and dialog locations
  */
 
 import * as contentful from 'contentful-management';
@@ -69,12 +69,15 @@ async function createAppDefinition() {
       },
       {
         name: 'Content type summary example app',
+        // This app will be hosted locally
         src: `http://localhost:3000`,
+        // This app uses these 3 locations
         locations: [
           { location: 'app-config' },
           { location: 'entry-sidebar' },
           { location: 'dialog' },
         ],
+        // Here is were we are defining the instance and invocation parameters that the app will use
         parameters: {
           instance: [
             {
@@ -135,6 +138,7 @@ async function createContentType() {
     name: 'Example content type with sidebar app',
     displayField: 'title',
     description: 'This is an example content type with a sidebar app assigned',
+    // Adding a variety of fields types to demonstrate the app's functionality
     fields: [
       {
         id: 'title',
@@ -195,6 +199,7 @@ async function createContentType() {
 }
 
 async function updateEditorInterface(contentTypeId: string, appId: string) {
+  // This is the configuration for the app in the sidebar, as well as the instance parameter value
   const updatedAppAssignment = {
     widgetNamespace: 'app',
     widgetId: appId,
@@ -203,6 +208,9 @@ async function updateEditorInterface(contentTypeId: string, appId: string) {
 
   try {
     const editorInterface = await client.editorInterface.get({ contentTypeId: contentTypeId });
+    // Add the app to the sidebar in the second position
+    // Add the default sidebar widgets if none are present
+    // see more details here: https://www.contentful.com/developers/docs/extensibility/app-framework/editor-interfaces/
     const updatedSidebar = [
       ...(editorInterface.sidebar?.length
         ? editorInterface.sidebar.splice(1, 0, updatedAppAssignment)

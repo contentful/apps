@@ -7,11 +7,9 @@ import {
 } from '../components/AddToSidebarSection';
 
 /**
- * This hook is used to save the parameters of the app.
+ * This hook is used to get all the content types and the selected content types for the app configuration screen.
  *
- * @param parameters the parameters to be saved
- * @param contentTypes the content types to be saved
- * @returns void
+ * @returns { allContentTypes, selectedContentTypes, setSelectedContentTypes, isLoading }
  */
 const useGetAllContentTypes = () => {
   const [allContentTypes, setAllContentTypes] = useState<ContentTypesWithEditorInterface[]>([]);
@@ -22,17 +20,21 @@ const useGetAllContentTypes = () => {
   const getAllContentTypes = useCallback(async () => {
     try {
       setIsLoading(true);
+
       const contentTypesResponse = await sdk.cma.contentType.getMany({});
       const sortedContentTypes = contentTypesResponse.items?.sort((a, b) =>
         a.name.localeCompare(b.name)
       );
       setAllContentTypes(sortedContentTypes || []);
+
+      // Accessing the current state of the app to get the content types where the app is assigned
       const currentState: AppState | null = await sdk.app.getCurrentState();
       if (currentState) {
         const { EditorInterface } = currentState;
         const selectedContentTypes = Object.keys(EditorInterface);
         const editorInterfaceCopy = {} as unknown as SelectedContentTypes;
         selectedContentTypes.forEach((contentType) => {
+          // Accessing the instance parameter value if it exists
           editorInterfaceCopy[contentType] =
             EditorInterface[contentType].sidebar?.settings?.contentTypeColor;
         });

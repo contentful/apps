@@ -21,12 +21,10 @@ const useSaveConfigHandler = (
   /*
     This method will be called when a user clicks on "Install"
     or "Save" in the configuration screen.
-    for more details see https://www.contentful.com/developers/docs/extensibility/ui-extensions/sdk-reference/#register-an-app-configuration-hook
+    for more details see https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/#register-an-app-configuration-hook
   */
   const getCurrentState = useCallback(async () => {
-    // TODO validate hex codes
     const currentState = await sdk.app.getCurrentState();
-
     const currentEditorInterface = currentState?.EditorInterface || {};
 
     // Assign the app to the sidebar for saved content types
@@ -40,7 +38,9 @@ const useSaveConfigHandler = (
     };
 
     return {
+      // Installation parameter values are saved here
       parameters,
+      // The new state of the app (e.g. the content types where the app is assigned and instance parameter values) is saved here
       targetState: newAppState,
     };
   }, [contentTypes, parameters, sdk.app]);

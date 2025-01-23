@@ -1,4 +1,4 @@
-import { ContentFields, Control } from 'contentful-management';
+import { ContentFields } from 'contentful-management';
 import { FIELD_TYPES } from './constants';
 import { FieldDetails, getFieldStatusParams } from './locations/Dialog';
 import { SelectedContentTypes, SidebarEditorInterface } from './components/AddToSidebarSection';
@@ -7,7 +7,7 @@ interface EditorInterfaceAssignment {
   [key: string]: { [key: string]: { position: number; settings: { contentTypeColor: string } } };
 }
 
-export const getFieldStatus = ({ deleted, disabled, omitted, isTitle }: getFieldStatusParams) => {
+export const getFieldStatus = ({ disabled, omitted, isTitle }: getFieldStatusParams) => {
   if (isTitle) return 'Entry title';
   if (disabled) {
     if (!omitted) {
@@ -38,18 +38,10 @@ export function getFieldType(field: FieldDetails) {
   return type;
 }
 
-export function generateInvocationParameters(
-  fields: ContentFields[],
-  controls: Control[],
-  displayField: string
-) {
+export function generateInvocationParameters(fields: ContentFields[], displayField: string) {
   const fieldDetails = fields.map((field) => {
-    console.log(field.id);
-    const fieldControl = controls.find((control) => control.fieldId === field.id);
-    console.log('CONTROL!', controls);
     return {
       ...field,
-      ...fieldControl,
       isTitle: field.id === displayField,
     };
   });

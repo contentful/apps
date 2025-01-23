@@ -2,12 +2,10 @@ import { SidebarAppSDK } from '@contentful/app-sdk';
 import { Button, Stack, TextLink } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { Control } from 'contentful-management';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { generateInvocationParameters } from '../utils';
 
 const ContentTypeActions = () => {
-  const [editorInterfaceControls, setEditorInterfaceControls] = useState<Control[]>([]);
   const sdk = useSDK<SidebarAppSDK>();
   const {
     ids: { space, environment },
@@ -18,21 +16,9 @@ const ContentTypeActions = () => {
       fields,
       displayField,
     },
+    // This is where the installation parameters are accessed
     parameters: { installation: installationParams },
   } = sdk;
-  const cma = sdk.cma;
-
-  useEffect(() => {
-    const getEditorInterface = async () => {
-      const editorInterface = await cma.editorInterface.get({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
-        contentTypeId: sdk.contentType.sys.id,
-      });
-      if (editorInterface.controls) setEditorInterfaceControls(editorInterface.controls);
-    };
-    getEditorInterface();
-  }, [sdk]);
 
   const handleFieldDetailsClick = useCallback(async () => {
     sdk.dialogs.openCurrentApp({
@@ -40,11 +26,12 @@ const ContentTypeActions = () => {
       width: 'large',
       allowHeightOverflow: true,
       title: `${name} Field Details`,
+      // This is where invocation parameters are passed to the dialog
       parameters: {
-        fieldDetails: generateInvocationParameters(fields, editorInterfaceControls, displayField),
+        fieldDetails: generateInvocationParameters(fields, displayField),
       },
     });
-  }, [sdk, editorInterfaceControls]);
+  }, [sdk]);
 
   const useGetContentTypeConfigLink = useCallback(() => {
     const link =
@@ -56,11 +43,13 @@ const ContentTypeActions = () => {
 
   return (
     <Stack flexDirection="column" spacing="spacingS">
+      {/* Display the Field Details button if the installation parameter is enabled */}
       {installationParams.displayFieldDetails && (
         <Button variant="secondary" onClick={handleFieldDetailsClick} isFullWidth>
           View Field Details
         </Button>
       )}
+      {/* Display the Edit Link if the installation parameter is enabled */}
       {installationParams.displayEditLink && (
         <TextLink
           href={useGetContentTypeConfigLink()}
