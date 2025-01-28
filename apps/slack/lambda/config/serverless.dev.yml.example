@@ -13,6 +13,7 @@ variables:
   dynamoEndpoint: http://dynamodb:8000
   frontendUrl: 'http://localhost:1234'
   workflowsUrl: 'workflows-url-for-cors'
+  webAppUrl: 'https://app.contentful.com'
   serverless:
     pathPrefix: '/dev'
   customDomain:

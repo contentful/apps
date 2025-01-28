@@ -1,7 +1,12 @@
 import { config } from '../config';
 
 const frontendUrl = new URL(config.frontendUrl);
-const allowedUrls = [config.workflowsUrl, frontendUrl.origin, /(http:\/\/localhost):(\d{1,4})/];
+const allowedUrls = [
+  config.workflowsUrl,
+  config.webappUrl,
+  frontendUrl.origin,
+  /(http:\/\/localhost):(\d{1,4})/,
+];
 
 export const corsConfig = {
   origin: allowedUrls,

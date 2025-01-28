@@ -14,6 +14,7 @@ export const config = {
   appId: envOr('APP_ID', 'unknown'),
   frontendUrl: envOr('FRONTEND_URL', 'https://localhost:3001'),
   workflowsUrl: envOr('WORKFLOWS_URL', 'https://localhost:3001'),
+  webappUrl: envOr('WEBAPP_YRL', 'https://localhost:3001'),
   backendUrl: envOr('BACKEND_URL', 'https://localhost:3000/dev/api'),
   signingSecret: envOr('SIGNING_SECRET', 'shhhh'),
   serverless: {
