@@ -3,7 +3,7 @@ import { config } from '../config';
 const frontendUrl = new URL(config.frontendUrl);
 const allowedUrls = [
   config.workflowsUrl,
-  config.webappUrl,
+  config.webAppUrl,
   frontendUrl.origin,
   /(http:\/\/localhost):(\d{1,4})/,
 ];
