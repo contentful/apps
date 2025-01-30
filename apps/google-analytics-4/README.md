@@ -2,6 +2,7 @@
 
 Contentful Marketplace App that displays real-time page-based analytics data from your organization’s Google Analytics 4 properties alongside relevant content entries.
 
+
 ## Requirements
 
 - [Google Analytics 4](https://developers.google.com/analytics/devguides/collection/ga4) (Note: Google's deprecated Universal Analytics is not supported in the Google Analytics 4 app)
