@@ -1,12 +1,9 @@
 import { config } from '../config';
 
 const frontendUrl = new URL(config.frontendUrl);
-const allowedUrls = [
-  config.workflowsUrl,
-  config.webAppUrl,
-  frontendUrl.origin,
-  /(http:\/\/localhost):(\d{1,4})/,
-];
+// Config value is a string with comma separated URLs
+const corsOrigins = config.corsOrigins.split(',');
+const allowedUrls = [...corsOrigins, frontendUrl.origin, /(http:\/\/localhost):(\d{1,4})/];
 
 export const corsConfig = {
   origin: allowedUrls,

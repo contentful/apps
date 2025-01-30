@@ -12,8 +12,7 @@ variables:
   tableName: sls-apps-slack-backend-dev-TokenTable
   dynamoEndpoint: http://dynamodb:8000
   frontendUrl: 'http://localhost:1234'
-  workflowsUrl: 'workflows-url-for-cors'
-  webAppUrl: 'https://app.contentful.com'
+  workflowsUrl: 'workflows-url-for-cors,https://app.contentful.com'
   serverless:
     pathPrefix: '/dev'
   customDomain:
