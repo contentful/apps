@@ -68,9 +68,9 @@ export const generateEditorInterfaceAssignments = (
     (acc: EditorInterfaceAssignment, contentTypeId) => {
       const isNewAssignment = !savedContentTypeAssignments.includes(contentTypeId);
       const isEditedAssignment =
-        currentEditorInterface[contentTypeId].sidebar?.settings?.contentTypeColor !==
+        currentEditorInterface[contentTypeId]?.sidebar?.settings?.contentTypeColor !==
         contentTypes[contentTypeId];
-      const position = currentEditorInterface[contentTypeId].sidebar?.position ?? 1;
+      const position = currentEditorInterface[contentTypeId]?.sidebar?.position ?? 1;
 
       const sidebarSettings = {
         sidebar: {

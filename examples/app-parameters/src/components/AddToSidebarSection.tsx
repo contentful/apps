@@ -53,11 +53,13 @@ const AddToSidebarSection = (props: Props) => {
 
   return (
     <Flex flexDirection="column" alignItems="flex-start" fullWidth={true}>
-      <Subheading>{'Add to sidebar views'}</Subheading>
+      <Subheading>Add to sidebar views</Subheading>
       <Paragraph>
-        {
-          'Assign the app to content types and optionally add a hex code to assign a color to that content type.'
-        }
+        Assign the app to content types and optionally add a hex code to assign a color to that
+        content type. This will assign the app to a content type's sidebar location via the
+        EditorInterface. This will also set the instance parameters for those content types. The
+        sidebar app reads the values of the instance parameters and displays the content type color
+        in the sidebar.
       </Paragraph>
       <Box className={styles.wrapper}>
         {allContentTypes.length ? (

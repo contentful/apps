@@ -50,7 +50,7 @@ async function main() {
   // Create an example entry
   await createEntry(contentTypeId);
 
-  console.log(`Setup complete!`);
+  console.log(`Setup complete`);
 }
 
 main().catch((e) => {
@@ -110,7 +110,7 @@ async function createAppDefinition() {
         },
       }
     );
-    console.log(`Created app definition! APP_ID is ${appDefinitionProps.sys.id}`);
+    console.log(`Created app definition: App id is ${appDefinitionProps.sys.id}`);
     return appDefinitionProps.sys.id;
   } catch (err) {
     throw new Error(`App definition creation failed: ${err instanceof Error ? err.message : err}`);
@@ -127,7 +127,7 @@ async function installApp(appId: string, parameters: contentful.FreeFormParamete
         parameters,
       }
     );
-    console.log(`Installed app!`);
+    console.log(`Installed app`);
   } catch (err) {
     throw new Error(`App installation failed: ${err instanceof Error ? err.message : err}`);
   }
@@ -181,7 +181,7 @@ async function createContentType() {
 
   try {
     const contentTypeProps = await client.contentType.create({}, body);
-    console.log('Set up example content type!');
+    console.log('Set up example content type');
     try {
       await client.contentType.publish(
         {
@@ -246,7 +246,7 @@ async function updateEditorInterface(contentTypeId: string, appId: string) {
         sidebar: updatedSidebar,
       }
     );
-    console.log(`App added to sidebar for content type!`);
+    console.log(`App added to sidebar for content type`);
   } catch (err) {
     throw new Error(`Editor Interface update failed: ${err instanceof Error ? err.message : err}`);
   }
@@ -272,7 +272,7 @@ async function createEntry(contentTypeId: string) {
 
   try {
     const entryResult = await client.entry.create({ contentTypeId: contentTypeId }, body);
-    console.log(`Created example entry! Entry id is ${entryResult.sys.id}`);
+    console.log(`Created example entry: Entry id is ${entryResult.sys.id}`);
   } catch (err) {
     throw new Error(`Entry creation failed: ${err instanceof Error ? err.message : err}`);
   }

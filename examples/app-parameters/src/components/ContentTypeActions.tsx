@@ -25,7 +25,7 @@ const ContentTypeActions = () => {
       position: 'center',
       width: 'large',
       allowHeightOverflow: true,
-      title: `${name} Field Details`,
+      title: `${name} Field Details (Using Invocation Parameters)`,
       // This is where invocation parameters are passed to the dialog
       parameters: {
         fieldDetails: generateInvocationParameters(fields, displayField),

@@ -78,6 +78,10 @@ const ConfigScreen = () => {
       </Paragraph>
       <hr className={styles.splitter} />
       <Heading>Configuration</Heading>
+      <Paragraph>
+        Toggling the values below will set the values for the app's two installation parameters.
+        These parameters are read in the app's sidebar and enable or disable the actions.
+      </Paragraph>
       <FormControl testId="display-field-details" isRequired>
         <FormControl.Label>Display Field Details</FormControl.Label>
         <Radio.Group
