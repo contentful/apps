@@ -5,7 +5,7 @@ variables:
   tableName: sls-apps-slack-backend-test-TokenTable
   dynamoEndpoint: dynamodb.${aws:region}.amazonaws.com
   frontendUrl: 'https://slack-test.ctfapps.net/index.html'
-  corsOrigins: '${env:STAGING_WORKFLOWS_URL},https://app.contentful.com'
+  workflowsUrl: ${env:STAGING_WORKFLOWS_URL}
   baseUrl: ${env:STAGING_CMA_HOST}
   app:
     privateKey: ${ssm:/aws/reference/secretsmanager/ci/apps/slack/test/private-key}

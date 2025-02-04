@@ -47,7 +47,7 @@ functions:
       SLACK_CLIENT_SECRET: ${self:custom.oauthCredentials.client_secret}
       SLACK_SIGNING_SECRET: ${self:custom.slackSigningSecret.signing_secret}
       FRONTEND_URL: ${self:custom.frontendUrl}
-      CORS_ORIGINS: '${self:custom.workflowsUrl},https://app.contentful.com'
+      WORKFLOWS_URL: ${self:custom.workflowsUrl}
       BACKEND_URL: https://${self:custom.customDomain.domainName}/api
       SIGNING_SECRET: ${self:custom.signingSecret.signing_secret}
       PRIVATE_APP_KEY: ${self:custom.app.privateKey}

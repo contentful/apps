@@ -5,7 +5,7 @@ variables:
   tableName: sls-apps-slack-backend-prd-TokenTable
   dynamoEndpoint: dynamodb.${aws:region}.amazonaws.com
   frontendUrl: 'https://slack.ctfapps.net/index.html'
-  corsOrigins: 'https://17a00aa2-860a-4c54-849b-d831f0198a13.ctfcloud.net,https://app.contentful.com'
+  workflowsUrl: 'https://17a00aa2-860a-4c54-849b-d831f0198a13.ctfcloud.net'
   baseUrl: 'https://api.contentful.com'
   app:
     privateKey: ${ssm:/aws/reference/secretsmanager/ci/apps/slack/prd/private-key}
