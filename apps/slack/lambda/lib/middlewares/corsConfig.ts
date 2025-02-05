@@ -3,8 +3,9 @@ import { config } from '../config';
 const frontendUrl = new URL(config.frontendUrl);
 const allowedUrls = [
   config.workflowsUrl,
-  config.webAppUrl,
   frontendUrl.origin,
+  'https://app.contentful.com',
+  'https://app.eu.contentful.com',
   /(http:\/\/localhost):(\d{1,4})/,
 ];
 
