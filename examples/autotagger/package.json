@@ -47,7 +47,7 @@
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
-    "esbuild": "0.19.2",
+    "esbuild": "0.25.0",
     "happy-dom": "^14.12.3",
     "typescript": "4.9.5",
     "vite": "^5.4.6",
