@@ -3,11 +3,12 @@
 exports[`App > #render > should render the extension field view 1`] = `
 <div>
   <div
-    class="css-70qvj9"
+    class="css-rvp98e"
   >
     <input
-      aria-describedby="focal-point-helptext"
-      class="css-82ji86 css-93644d"
+      aria-describedby="focal-point-validation"
+      aria-invalid="true"
+      class="css-x6c9ie css-93644d"
       data-test-id="focal-point"
       id="focal-point"
       type="text"

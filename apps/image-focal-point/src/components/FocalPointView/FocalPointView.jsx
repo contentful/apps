@@ -6,7 +6,6 @@ import { styles } from './styles';
 
 const FocalPointView = ({ focalPoint, showFocalPointDialog, resetFocalPoint }) => {
   const value = focalPoint ? `x: ${focalPoint.x}px / y: ${focalPoint.y}px` : 'Focal point not set';
-
   return (
     <div className={styles.container}>
       <TextInput
@@ -16,6 +15,7 @@ const FocalPointView = ({ focalPoint, showFocalPointDialog, resetFocalPoint }) =
         id="focal-point"
         testId="focal-point"
         value={value}
+        isInvalid={!focalPoint}
         disabled
       />
       <Button className={styles.button} buttonType="muted" onClick={showFocalPointDialog}>

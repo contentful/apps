@@ -28,7 +28,6 @@ export class App extends React.Component {
 
   componentDidMount() {
     const { sdk } = this.props;
-
     sdk.window.startAutoResizer();
 
     // Handler for external field value changes (e.g. when multiple authors are working on the same entry).
@@ -66,7 +65,8 @@ export class App extends React.Component {
   }
 
   resetFocalPoint = () => {
-    this.setFocalPoint(null);
+    this.setState({ value: { focalPoint: null } });
+    this.props.sdk.field.removeValue();
   };
 
   setFocalPoint = (focalPoint) => {
