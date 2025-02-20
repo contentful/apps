@@ -2,17 +2,12 @@
   "functions": [
     {
       "id": "example",
-      "name": "Example app",
-      "description": "This is an example app",
+      "name": "Example Function",
+      "description": "This is an example to help you learn how functions work.",
       "path": "functions/example.js",
       "entryFile": "functions/example.js",
-      "allowNetworks": [
-        "FakeAuditLogServer.com",
-        "FakeAnalyticsServer.com"
-      ],
-      "accepts": [
-        "appevent.handler"
-      ]
+      "allowNetworks": [],
+      "accepts": ["graphql.field.mapping", "graphql.query"]
     }
   ]
 }

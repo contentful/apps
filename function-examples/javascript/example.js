@@ -1,6 +1,9 @@
-import { FunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit';
+const EventType = {
+  GRAPHQL_FIELD_MAPPING: 'graphql.field.mapping',
+  GRAPHQL_QUERY: 'graphql.query',
+};
 
-const fieldMappingHandler: EventHandler<'graphql.field.mapping'> = (event, context) => {
+const fieldMappingHandler = (event, context) => {
   const fields = event.fields.map(({ contentTypeId, field }) => {
     return {
       contentTypeId,
@@ -17,18 +20,18 @@ const fieldMappingHandler: EventHandler<'graphql.field.mapping'> = (event, conte
   };
 };
 
-const queryHandler: EventHandler<'graphql.query'> = (event, context) => {
+const queryHandler = (event, context) => {
   return {
     data: {},
     errors: [],
   };
 };
 
-export const handler: EventHandler = (event, context) => {
-  if (event.type === 'graphql.field.mapping') {
+export const handler = (event, context) => {
+  if (event.type === EventType.GRAPHQL_FIELD_MAPPING) {
     return fieldMappingHandler(event, context);
   }
-  if (event.type === 'graphql.query') {
+  if (event.type === EventType.GRAPHQL_QUERY) {
     return queryHandler(event, context);
   }
   throw new Error('Unknown Event');
