@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "build": "contentful-app-scripts build-functions --ci"
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "^1.32.0",
+    "@contentful/node-apps-toolkit": "^3.9.0",
+    "@tsconfig/recommended": "1.0.8"
+  }
+}
