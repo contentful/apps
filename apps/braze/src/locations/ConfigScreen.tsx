@@ -1,14 +1,18 @@
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Flex, Form, Heading, Paragraph } from '@contentful/f36-components';
+import { Box, Flex, Form, FormControl, Heading, Paragraph, Subheading, TextInput, TextLink } from '@contentful/f36-components';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-import { css } from 'emotion';
 import { useCallback, useEffect, useState } from 'react';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { styles } from './ConfigScreen.styles';
+
 
 export interface AppInstallationParameters {}
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
+  const [value, setValue] = useState('');
   const sdk = useSDK<ConfigAppSDK>();
+  const spaceId = sdk.ids.space
 
   /*
      To use the cma, inject it as follows.
@@ -58,11 +62,45 @@ const ConfigScreen = () => {
   }, [sdk]);
 
   return (
-    <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
+    <Flex justifyContent='center' alignContent='center' >
+    <Box className={styles.body} marginTop="spacingL" padding ="spacingL" >     
+        <Heading marginBottom='spacingS'>Set up Braze</Heading>
+        <Paragraph marginBottom='spacing2Xs'>The Braze app allows editors to connect content stored in Contentful to Braze campaigns through </Paragraph>
+        <TextLink
+        icon={<ExternalLinkIcon />}
+        alignIcon="end"
+        href="https://braze.com/docs/user_guide/personalization_and_dynamic_content/connected_content"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Braze's Connected Content feature
+      </TextLink>
+      <hr className={styles.splitter}/>
+      <Subheading className={styles.subheading}>Connected Content configuration</Subheading>
+      <Paragraph marginBottom='spacing2Xs'> Select the Contentful API key that Braze will use to request your content via API at send time.
+      </Paragraph>
+      <TextLink
+        icon={<ExternalLinkIcon />}
+        alignIcon="end"
+        href={`https://app.contentful.com/spaces/${spaceId}/api/keys`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Manage API
+      </TextLink>
+      <Box marginTop='spacingM'>
       <Form>
-        <Heading>App Config</Heading>
-        <Paragraph>Welcome to your contentful app. This is your config page.</Paragraph>
+      <FormControl.Label>Select Contentful API key</FormControl.Label>
+      <TextInput
+        value={value}
+        type="apiKey"
+        name="apiKey"
+        placeholder="Content Delivery API - access token"
+        onChange={(e) => setValue(e.target.value)}
+      />
       </Form>
+      </Box>
+      </Box>
     </Flex>
   );
 };
