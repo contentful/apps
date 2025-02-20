@@ -1,0 +1,18 @@
+{
+  "functions": [
+    {
+      "id": "example",
+      "name": "Example app",
+      "description": "This is an example app",
+      "path": "functions/example.js",
+      "entryFile": "functions/example.js",
+      "allowNetworks": [
+        "FakeAuditLogServer.com",
+        "FakeAnalyticsServer.com"
+      ],
+      "accepts": [
+        "appevent.handler"
+      ]
+    }
+  ]
+}
