@@ -5,6 +5,8 @@ export const errorMiddleware: ErrorRequestHandler = (error, request, response, n
   if (error) {
     // Very dumb logging
     console.log(JSON.stringify(error));
+    console.log('error middleware:');
+    console.log(error);
 
     if (isException(error)) {
       response.status(error.status).send(error.toJSON());

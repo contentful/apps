@@ -5,6 +5,7 @@ export const styles = {
   container: css({
     display: 'flex',
     alignItems: 'center',
+    gap: '1rem',
   }),
   input: css({
     maxWidth: '280px',

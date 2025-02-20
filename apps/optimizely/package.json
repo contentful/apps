@@ -15,7 +15,7 @@
     "@contentful/f36-tokens": "^4.0.5",
     "@emotion/css": "^11.13.0",
     "@vitejs/plugin-react": "^4.3.1",
-    "@vitest/coverage-v8": "^2.1.1",
+    "@vitest/coverage-v8": "^2.1.9",
     "lodash.get": "4.4.2",
     "lodash.intersection": "4.4.0",
     "prop-types": "15.8.1",
@@ -23,9 +23,9 @@
     "react-dom": "^18.3.1",
     "react-use": "^17.5.1",
     "redux-dynamic-modules-core": "^5.2.3",
-    "vite": "^5.4.8",
+    "vite": "^5.4.14",
     "vite-plugin-commonjs": "^0.10.3",
-    "vitest": "^2.1.1",
+    "vitest": "^2.1.9",
     "whatwg-fetch": "3.6.20"
   },
   "scripts": {
