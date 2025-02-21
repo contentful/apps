@@ -12,6 +12,6 @@ export const styles = {
         borderRadius: tokens.borderRadiusMedium,
     }),
     subheading: css({
-        marging: 0
+        margin: 0
     }),
 }

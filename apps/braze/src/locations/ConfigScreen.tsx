@@ -91,12 +91,11 @@ const ConfigScreen = () => {
       </TextLink>
       <Box marginTop='spacingM'>
       <Form>
-      <FormControl.Label>Select Contentful API key</FormControl.Label>
+      <FormControl.Label>Contentful API key</FormControl.Label>
       <TextInput
         value={value}
         type="apiKey"
         name="apiKey"
-        placeholder="Content Delivery API - access token"
         onChange={(e) => setValue(e.target.value)}
       />
       </Form>
