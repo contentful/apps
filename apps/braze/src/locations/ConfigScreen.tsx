@@ -4,6 +4,7 @@ import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { styles } from './ConfigScreen.styles';
+import Splitter from '../components/Splitter';
 
 
 export interface AppInstallationParameters {}
@@ -75,7 +76,7 @@ const ConfigScreen = () => {
       >
         Braze's Connected Content feature
       </TextLink>
-      <hr className={styles.splitter}/>
+      <Splitter marginTop='spacingL' marginBottom='spacingL'/>
       <Subheading className={styles.subheading}>Connected Content configuration</Subheading>
       <Paragraph marginBottom='spacing2Xs'> Select the Contentful API key that Braze will use to request your content via API at send time.
       </Paragraph>

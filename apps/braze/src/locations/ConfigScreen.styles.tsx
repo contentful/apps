@@ -11,13 +11,6 @@ export const styles = {
         border: `1px solid ${tokens.gray300}`,
         borderRadius: tokens.borderRadiusMedium,
     }),
-    splitter: css({
-        marginTop: tokens.spacingL,
-        marginBottom: tokens.spacingL,
-        border: 0,
-        height: '1px',
-        backgroundColor: tokens.gray300,
-    }),
     subheading: css({
         marging: 0
     }),
