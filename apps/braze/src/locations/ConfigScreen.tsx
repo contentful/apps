@@ -21,6 +21,8 @@ export interface AppInstallationParameters {
     apiKey: string;
 }
 
+export const BRAZE_DOCUMENTATION = "https://braze.com/docs/user_guide/personalization_and_dynamic_content/connected_content";
+
 const ConfigScreen = () => {
     const [parameters, setParameters] = useState<AppInstallationParameters>({
         apiKey: '',
@@ -78,7 +80,7 @@ const ConfigScreen = () => {
                 <TextLink
                     icon={<ExternalLinkIcon/>}
                     alignIcon="end"
-                    href="https://braze.com/docs/user_guide/personalization_and_dynamic_content/connected_content"
+                    href={BRAZE_DOCUMENTATION}
                     target="_blank"
                     rel="noopener noreferrer"
                 >
@@ -104,7 +106,9 @@ const ConfigScreen = () => {
                         <TextInput
                             value={parameters.apiKey}
                             type="password"
-                            name="apiKey" onChange={(e) => setParameters({ ...parameters, apiKey: e.target.value })}
+                            name="apiKey"
+                            data-testid="apiKey"
+                            onChange={(e) => setParameters({ ...parameters, apiKey: e.target.value })}
                         />
                     </Form>
                 </Box>
