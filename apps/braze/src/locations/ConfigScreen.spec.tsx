@@ -1,5 +1,5 @@
 import {fireEvent, screen, render} from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi} from 'vitest';
 import { mockCma, mockSdk } from '../../test/mocks';
 import ConfigScreen, {BRAZE_DOCUMENTATION} from './ConfigScreen';
 
@@ -15,14 +15,19 @@ describe('Config Screen component', () => {
     expect(getByText('Set up Braze')).toBeTruthy();
   });
 
-  it('renders the external links correctly', () => {
+  it('renders the braze link correctly', () => {
     const brazeLink = getByText("Braze's Connected Content feature");
 
     expect(brazeLink).toBeTruthy();
     expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_DOCUMENTATION);
   });
 
-  // TODO : Hacer test de la url con space id
+  it('renders the link to manage api keys', () => {
+    const brazeLink = getByText("Manage API");
+
+    expect(brazeLink).toBeTruthy();
+    expect(brazeLink.closest('a')?.getAttribute('href')).toBe(`https://app.contentful.com/spaces/${mockSdk.spaceId}/api/keys`);
+  });
 
   it('has an input that sets api key correctly', () => {
     const input = screen.getAllByTestId('apiKey')[0];
