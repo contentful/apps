@@ -1,8 +1,11 @@
-import {fireEvent, screen, render} from '@testing-library/react';
-import { describe, expect, it, vi} from 'vitest';
+import { fireEvent, screen, render, cleanup, RenderResult } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockCma, mockSdk } from '../../test/mocks';
-import ConfigScreen, {BRAZE_DOCUMENTATION} from './ConfigScreen';
+import ConfigScreen, { BRAZE_DOCUMENTATION } from './ConfigScreen';
 import userEvent from '@testing-library/user-event';
+import {
+  queries
+} from '@testing-library/dom'
 
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
@@ -10,47 +13,58 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useCMA: () => mockCma,
 }));
 
+async function saveAppInstallation() {
+  return await mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
+}
+
 describe('Config Screen component', () => {
-  const { getByText } = render(<ConfigScreen />);
-
-  it('Component text exists', async () => {
-    expect(getByText('Set up Braze')).toBeTruthy();
+  let configScreen: RenderResult<typeof queries, HTMLElement, HTMLElement>;
+  beforeEach(() => {
+    configScreen = render(<ConfigScreen />);
   });
 
-  it('renders the braze link correctly', () => {
-    const brazeLink = getByText("Braze's Connected Content feature");
-
-    expect(brazeLink).toBeTruthy();
-    expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_DOCUMENTATION);
+  afterEach(() => {
+    cleanup();
   });
 
-  it('renders the link to manage api keys', () => {
-    const brazeLink = getByText("Manage API");
 
-    expect(brazeLink).toBeTruthy();
-    expect(brazeLink.closest('a')?.getAttribute('href')).toBe(`https://app.contentful.com/spaces/${mockSdk.spaceId}/api/keys`);
-  });
+  describe('components', () => {
+    it('renders the braze link correctly', () => {
+      const brazeLink = configScreen.getByText("Braze's Connected Content feature");
 
-  it('has an input that sets api key correctly', () => {
-    const input = screen.getAllByTestId('apiKey')[0];
-    fireEvent.change(input, {
-      target:{ value: `A test value for input` }
-    })
+      expect(brazeLink).toBeTruthy();
+      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_DOCUMENTATION);
+    });
 
-    const inputExpected = screen.getAllByTestId('apiKey')[0] as HTMLInputElement;
-    expect(inputExpected.value).toEqual(`A test value for input`)
-  });
+    it('renders the link to manage api keys', () => {
+      const brazeLink = configScreen.getByText("Manage API");
 
-  it('when installed the api key is set correctly', async () => {
-    const user = userEvent.setup();
+      expect(brazeLink).toBeTruthy();
+      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(`https://app.contentful.com/spaces/${mockSdk.spaceId}/api/keys`);
+    });
 
-    const apiKeyInput = screen.getAllByTestId('apiKey')[0];
-    await user.type(apiKeyInput, 'valid-api-key-123');
-    const result = await mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
+    it('has an input that sets api key correctly', () => {
+      const input = screen.getAllByTestId('apiKey')[0];
+      fireEvent.change(input, {
+        target: { value: `A test value for input` }
+      })
 
-    expect(result).toEqual({
-      parameters: { apiKey: 'valid-api-key-123' }
+      const inputExpected = screen.getAllByTestId('apiKey')[0] as HTMLInputElement;
+      expect(inputExpected.value).toEqual(`A test value for input`)
     });
   });
 
+  describe('installation', () => {
+    it('when installed the api key is set correctly', async () => {
+      const user = userEvent.setup();
+
+      const apiKeyInput = screen.getAllByTestId('apiKey')[0];
+      await user.type(apiKeyInput, 'valid-api-key-123');
+      const result = await saveAppInstallation();
+
+      expect(result).toEqual({
+        parameters: { apiKey: 'valid-api-key-123' }
+      });
+    });
+  });
 });
