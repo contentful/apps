@@ -94,6 +94,7 @@ const ConfigScreen = () => {
               type="password"
               name="apiKey"
               data-testid="apiKey"
+              placeholder="ex. 0ab1c234DE56f..."
               onChange={(e) => setParameters({ ...parameters, apiKey: e.target.value })}
             />
           </Form>
