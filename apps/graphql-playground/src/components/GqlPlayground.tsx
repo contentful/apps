@@ -116,7 +116,7 @@ function GqlPlayground(props: GqlPlaygroundProps) {
       )}
       <Provider store={store}>
         <Note noteType="warning">
-          The GraphQL Playground App is sunsetting on 2-31-2025. Please begin using the new{' '}
+          The GraphQL Playground App is sunsetting on 3-31-2025. Please begin using the new{' '}
           <a
             target="_blank"
             rel="noreferrer"
