@@ -3,10 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockCma, mockSdk } from '../../test/mocks';
 import ConfigScreen, { BRAZE_DOCUMENTATION } from './ConfigScreen';
 import userEvent from '@testing-library/user-event';
-import {
-  queries
-} from '@testing-library/dom'
-
+import { queries } from '@testing-library/dom';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -27,7 +24,6 @@ describe('Config Screen component', () => {
     cleanup();
   });
 
-
   describe('components', () => {
     it('renders the braze link correctly', () => {
       const brazeLink = configScreen.getByText("Braze's Connected Content feature");
@@ -37,20 +33,22 @@ describe('Config Screen component', () => {
     });
 
     it('renders the link to manage api keys', () => {
-      const brazeLink = configScreen.getByText("Manage API");
+      const brazeLink = configScreen.getByText('Manage API');
 
       expect(brazeLink).toBeTruthy();
-      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(`https://app.contentful.com/spaces/${mockSdk.spaceId}/api/keys`);
+      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(
+        `https://app.contentful.com/spaces/${mockSdk.spaceId}/api/keys`
+      );
     });
 
     it('has an input that sets api key correctly', () => {
       const input = screen.getAllByTestId('apiKey')[0];
       fireEvent.change(input, {
-        target: { value: `A test value for input` }
-      })
+        target: { value: `A test value for input` },
+      });
 
       const inputExpected = screen.getAllByTestId('apiKey')[0] as HTMLInputElement;
-      expect(inputExpected.value).toEqual(`A test value for input`)
+      expect(inputExpected.value).toEqual(`A test value for input`);
     });
   });
 
@@ -63,7 +61,7 @@ describe('Config Screen component', () => {
       const result = await saveAppInstallation();
 
       expect(result).toEqual({
-        parameters: { apiKey: 'valid-api-key-123' }
+        parameters: { apiKey: 'valid-api-key-123' },
       });
     });
   });
