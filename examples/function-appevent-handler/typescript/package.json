@@ -3,8 +3,8 @@
     "build": "contentful-app-scripts build-functions --ci"
   },
   "devDependencies": {
-    "@contentful/app-scripts": "^1.32.0",
-    "@contentful/node-apps-toolkit": "^3.4.1",
-    "@tsconfig/recommended": "1.0.3"
+    "@contentful/app-scripts": "^1.32.3",
+    "@contentful/node-apps-toolkit": "^3.10.2",
+    "@tsconfig/recommended": "1.0.8"
   }
 }
