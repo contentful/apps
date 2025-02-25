@@ -1,16 +1,23 @@
 import { SidebarAppSDK } from '@contentful/app-sdk';
-import { Paragraph } from '@contentful/f36-components';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { Button } from '@contentful/f36-components';
+import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
+  useAutoResizer();
 
-  return <Paragraph>Hello Sidebar Component (AppId: {sdk.ids.app})</Paragraph>;
+  return (
+    <Button
+      variant="primary"
+      isFullWidth={true}
+      onClick={async () => {
+        sdk.dialogs.openCurrentApp({
+          title: 'Generate Braze Connected Content Call',
+        });
+      }}>
+      Generate Braze Connected Content
+    </Button>
+  );
 };
 
 export default Sidebar;
