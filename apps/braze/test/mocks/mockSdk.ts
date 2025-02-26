@@ -9,6 +9,7 @@ const mockSdk: any = {
   },
   ids: {
     app: 'test-app',
+    spaceId: 'test-spaceId',
   },
   dialogs: {
     openCurrentApp: vi.fn(),
