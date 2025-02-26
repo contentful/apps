@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.1692.0",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^2.7.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.143",
@@ -23,7 +23,7 @@
     "@types/lodash": "^4.17.5",
     "@types/mocha": "^10.0.7",
     "@types/node": "^22.13.5",
-    "@types/node-fetch": "^2.6.12",
+    "@types/node-fetch": "^2.6.4",
     "@types/request": "^2.48.12",
     "@types/sinon-chai": "^3.2.12",
     "mocha": "^10.7.3",
