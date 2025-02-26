@@ -51,7 +51,7 @@ async function requestOauth(
     throw new Error('Atlassian token exchange failed');
   }
 
-  return response.json();
+  return response.json() as unknown as JiraResponse;
 }
 
 const makeFailureResponse = (frontendUrl: string, errorMesage: string) => ({
