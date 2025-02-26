@@ -19,10 +19,10 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.143",
-    "@types/lodash": "^4.17.5",
     "@types/chai": "^4.3.17",
+    "@types/lodash": "^4.17.5",
     "@types/mocha": "^10.0.7",
-    "@types/node": "^12.12.14",
+    "@types/node": "^22.13.5",
     "@types/node-fetch": "^2.6.4",
     "@types/request": "^2.48.12",
     "@types/sinon-chai": "^3.2.12",
