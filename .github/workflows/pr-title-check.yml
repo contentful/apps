@@ -1,0 +1,17 @@
+name: PR Title Check
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  check-title:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: deepakputhraya/action-pr-title@master
+        with:
+          # Regex to match jira ticket, examples: "[JIRA-123] My PR title" or "chore: no ticket []"
+          regex: '.*\[([A-Z]+-\d+|)\].*'
+          allowed_prefixes: ''
+          prefix_case_sensitive: false
+          min_length: 5
+          max_length: 150
