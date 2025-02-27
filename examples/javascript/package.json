@@ -4,23 +4,22 @@
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "^4.29.1",
-    "@contentful/f36-components": "4.78.0",
+    "@contentful/f36-components": "^4.78.0",
     "@contentful/f36-tokens": "4.2.0",
     "@contentful/react-apps-toolkit": "1.2.16",
     "contentful-management": "10.46.4",
     "emotion": "10.0.27",
     "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "react-scripts": "5.0.1"
+    "react-dom": "18.3.1"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
     "create-app-definition": "contentful-app-scripts create-app-definition",
-    "upload": "contentful-app-scripts upload --bundle-dir ./build",
-    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
+    "upload": "contentful-app-scripts upload --bundle-dir ./dist",
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -41,7 +40,10 @@
     "@contentful/app-scripts": "1.33.0",
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "14.3.1",
-    "cross-env": "7.0.3"
+    "@vitejs/plugin-react": "^4.0.3",
+    "cross-env": "7.0.3",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
   },
   "homepage": "."
 }
