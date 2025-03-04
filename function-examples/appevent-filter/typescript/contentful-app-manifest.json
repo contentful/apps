@@ -1,0 +1,13 @@
+{
+  "functions": [
+    {
+      "id": "appevent-filter",
+      "name": "App Event Filter Function Template",
+      "description": "Template for creating custom app event filters. Add your own code to filter events based on content types, field values, or other criteria.",
+      "path": "functions/appevent-filter-template.js",
+      "entryFile": "functions/appevent-filter-template.ts",
+      "allowNetworks": [],
+      "accepts": ["appevent.filter"]
+    }
+  ]
+}

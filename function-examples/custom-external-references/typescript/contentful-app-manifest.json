@@ -5,7 +5,7 @@
       "name": "Example Function",
       "description": "This is an example to help you learn how functions work.",
       "path": "functions/example.js",
-      "entryFile": "functions/example.js",
+      "entryFile": "functions/example.ts",
       "allowNetworks": [],
       "accepts": ["graphql.field.mapping", "graphql.query"]
     }

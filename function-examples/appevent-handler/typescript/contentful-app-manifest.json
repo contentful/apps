@@ -1,0 +1,13 @@
+{
+  "functions": [
+    {
+      "id": "appevent-handler",
+      "name": "Example App Event Handler Function",
+      "description": "Template for creating custom app event handlers. Add your own code to respond to Contentful events by sending data to external systems or performing other actions.",
+      "path": "functions/appevent-handler-template.js",
+      "entryFile": "functions/appevent-handler-template.ts",
+      "allowNetworks": [],
+      "accepts": ["appevent.handler"]
+    }
+  ]
+}

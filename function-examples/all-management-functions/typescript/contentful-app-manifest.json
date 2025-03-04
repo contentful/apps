@@ -1,0 +1,28 @@
+{
+  "functions": [
+    {
+      "id": "all-managment-functions",
+      "name": "All Management Functions Template",
+      "description": "Template supporting multiple function types: app actions, event handlers, filters, and transformations. Customize by keeping only what you need.",
+      "path": "functions/all-management-functions-template.js",
+      "entryFile": "functions/all-management-functions-template.ts",
+      "allowNetworks": [],
+      "accepts": [
+        "appaction.call", 
+        "appevent.handler", 
+        "appevent.filter", 
+        "appevent.transformation"
+      ],
+      "actions": [
+        {
+          "id": "example-action",
+          "name": "Example Action",
+          "type": "function",
+          "function": {
+            "sys": { "id": "all-managment-functions", "type": "Link", "linkType": "Function" }
+          }
+        }
+      ]
+    }
+  ]
+}
