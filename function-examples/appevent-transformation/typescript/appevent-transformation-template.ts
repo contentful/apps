@@ -1,9 +1,5 @@
-import { FunctionEventHandler } from '@contentful/node-apps-toolkit';
-import {
-  AppEventEntry,
-  AppEventRequest,
-  FunctionEventContext,
-} from '@contentful/node-apps-toolkit/lib/requests/typings';
+import { FunctionEventContext, FunctionEventHandler } from '@contentful/node-apps-toolkit';
+import { AppEventEntry, AppEventRequest } from '@contentful/node-apps-toolkit/lib/requests/typings';
 
 /**
  * App Event Transformation Function Template

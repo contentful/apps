@@ -1,8 +1,9 @@
-import { FunctionEventHandler } from '@contentful/node-apps-toolkit';
 import {
-  AppActionRequest,
   FunctionEventContext,
-} from '@contentful/node-apps-toolkit/lib/requests/typings';
+  FunctionEventHandler,
+  FunctionTypeEnum,
+} from '@contentful/node-apps-toolkit';
+import { AppActionRequest } from '@contentful/node-apps-toolkit/lib/requests/typings';
 
 /**
  * App Action Function Template
@@ -26,7 +27,7 @@ type AppActionParameters = {
  * @param event - Contains the parameters passed to your App Action
  * @param context - Provides access to the CMA client and other context information
  */
-export const handler: FunctionEventHandler<'appaction.call'> = async (
+export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
   event: AppActionRequest<'Custom', AppActionParameters>,
   context: FunctionEventContext
 ) => {
