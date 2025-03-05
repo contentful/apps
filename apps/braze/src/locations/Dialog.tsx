@@ -1,16 +1,25 @@
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { Paragraph } from '@contentful/f36-components';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { assembleQuery, Field } from '../dialogaux';
+
+export type InvocationParams = {
+  entryId: string;
+  entryFields: Field[];
+  contentTypeId: string;
+};
 
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
 
-  return <Paragraph>Hello Dialog Component (AppId: {sdk.ids.app})</Paragraph>;
+  const spaceId = sdk.ids.space;
+  const token = sdk.parameters.installation.apiKey;
+  const invocationParams = sdk.parameters.invocation as InvocationParams;
+  const contentTypeId = invocationParams.contentTypeId;
+  const entryId = invocationParams.entryId;
+
+  const query = assembleQuery(contentTypeId, entryId, invocationParams.entryFields, spaceId, token);
+
+  return <code>{query}</code>;
 };
 
 export default Dialog;
