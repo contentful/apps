@@ -138,7 +138,7 @@ Open `functions/appaction-call-template.ts` and add your custom logic based on y
 Here's an example that creates a new entry of a specific content type:
 
 ```ts
-import { AppActionRequest, FunctionEventContext, FunctionEventHandler } from '@contentful/node-apps-toolkit';
+import { AppActionRequest, FunctionEventContext, FunctionEventHandler, FunctionTypeEnum } from '@contentful/node-apps-toolkit';
 
 // Define your App Action parameters
 type CreateEntryParams = {
