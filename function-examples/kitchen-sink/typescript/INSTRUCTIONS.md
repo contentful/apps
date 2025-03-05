@@ -1,8 +1,8 @@
-# All Management Functions Template
+# Kitchen Sink Function Template
 
-This unified template provides a single function that can handle all Contentful function types: App Action, App Event Handler, App Event Filter, and App Event Transformation. This approach allows you to manage multiple function types in a single codebase with shared logic.
+This unified template provides a single function that can handle all Contentful Management function types: App Action, App Event Handler, App Event Filter, and App Event Transformation. This approach allows you to manage multiple function types in a single codebase with shared logic.
 
-## What is the All Management Functions Template?
+## What is the Kitchen Sink Function Template?
 
 This template helps you create a unified Contentful function that can respond to different event types based on the incoming request. The main handler routes the request to specific sub-handlers depending on the event type:
 
@@ -25,7 +25,7 @@ Use this template when you want to:
 To create a new app that includes this unified function template, run:
 
 ```bash
-npx create-contentful-app@latest --function all-management-functions
+npx create-contentful-app@latest --function kitchen-sink
 ```
 
 This command will generate a basic app template that includes:
@@ -49,12 +49,12 @@ The interactive process will guide you through selecting options for your functi
 **Non-interactive Mode**
 
 ```bash
-npx --no-install @contentful/app-scripts generate-function --ci --name <name> --example all-management-functions --language javascript
+npx --no-install @contentful/app-scripts generate-function --ci --name <name> --example kitchen-sink --language typescript
 ```
 
 **Available Parameters:**
 - `--name <name>`: Your function name (any value except 'example')
-- `--example <example>`: Use 'all-management-functions' for this template
+- `--example <example>`: Use 'kitchen-sink' for this template
 - `--language <language>`: 'javascript' or 'typescript'
 - `--ci`: Enables non-interactive mode
 
@@ -85,41 +85,41 @@ CONTENTFUL_ACCESS_TOKEN=your-access-token
 
 ### 4. Customize the Function
 
-Open `functions/all-management-functions-template.js` and customize each handler based on your requirements. The file includes separate handlers for each function type:
+Open `functions/kitchen-sink-template.ts` and customize each handler based on your requirements. The file includes separate handlers for each function type:
 
-```js
+```ts
 // App Action handler
-const appActionHandler = async (event, context) => {
+const appActionHandler = async (event: AppActionRequest, context: FunctionEventContext) => {
   // Your App Action logic here
 };
 
 // App Event handler
-const appEventHandler = async (event, context) => {
+const appEventHandler = async (event: AppEventRequest, context: FunctionEventContext) => {
   // Your App Event Handler logic here
 };
 
 // App Event Filter
-const appEventFilter = (event, context) => {
+const appEventFilter = (event: AppEventRequest, context: FunctionEventContext) => {
   // Your App Event Filter logic here
 };
 
 // App Event Transformation
-const appEventTransformation = async (event, context) => {
+const appEventTransformation = async (event: AppEventRequest, context: FunctionEventContext) => {
   // Your App Event Transformation logic here
 };
 
 // Main handler that routes to the appropriate function
-export const handler = async (event, context) => {
+export const handler: FunctionEventHandler = async (event, context) => {
   // Routes events to the correct handler based on event type
   switch (event.type) {
     case 'appaction.call':
-      return appActionHandler(event, context);
+      return appActionHandler(event as AppActionRequest, context);
     case 'appevent.handler':
-      return appEventHandler(event, context);
+      return appEventHandler(event as AppEventRequest, context);
     case 'appevent.filter':
-      return appEventFilter(event, context);
+      return appEventFilter(event as AppEventRequest, context);
     case 'appevent.transformation':
-      return appEventTransformation(event, context);
+      return appEventTransformation(event as AppEventRequest, context);
     default:
       throw new Error(`Unsupported event type: ${event.type}`);
   }
@@ -149,13 +149,28 @@ After uploading the function, you need to connect it to App Actions and/or Event
 Create an App Action via the Web UI or using the command line:
 
 ```bash
-npm run upsert-action
+npm run upsert-action:functions
 ```
 
 For this command to work, set the environment variables described in section 3 or pass them as arguments:
 
 ```bash
-npm run upsert-action -- --organizationId=<your_org_id> --definitionId=<your_app_id> --token=<your_token>
+npm run upsert-action:functions -- --organizationId=<your_org_id> --definitionId=<your_app_id> --token=<your_token>
+```
+
+If you're adding actions programmatically, you must update the `actions` array in your `contentful-app-manifest.json` file:
+
+```json
+"actions": [
+  {
+    "id": "yourCustomActionId",           // Unique identifier for your action, No Hyphens Allowed
+    "name": "Your Custom Action Name",    // Display name shown in the UI
+    "type": "function-invocation",        // Keep this as is for function-based actions
+    "functionId": "kitchenSink",          // Must match the function ID in the functions array
+    "category": "Custom",                 // Action category 
+    "parameters": []                      // Parameters needed by the action                      
+  }
+]
 ```
 
 #### For App Event Handlers, Filters, and Transformations

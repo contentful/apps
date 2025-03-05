@@ -31,17 +31,19 @@ This command will generate a basic app template that includes:
 - A `functions` folder that contains the template, instructions, and relevant config files.
 - All necessary scripts for building and deploying your function
 - App manifest file
-  - This file ensures that Contentful can properly identify, configure, and run your function.
+- This file ensures that Contentful can properly identify, configure, and run your function.
   - For more information see: [Creating and Uploading a Function - Tutorial](https://www.contentful.com/developers/docs/extensibility/app-framework/function-tutorial/)
 
 #### Adding the Function to an Existing App
 
-If you prefer to add the function to an existing app, you can run the following CLI commands from inside your app directory:
+If you prefer to add the function to an existing app, you can run the following CLI commands from inside your app directory: from inside your app directory
 
 **Interactive Mode**
 
 Run the CLI in interactive mode, which will prompt you for the necessary options:
 
+
+Run the CLI in interactive mode, which will prompt you for the necessary options:
 ```bash
 npx --no-install @contentful/app-scripts generate-function
 ```
@@ -55,13 +57,16 @@ The interactive process will guide you through:
 
 For automated workflows or CI/CD pipelines, use the `--ci` flag with required parameters:
 
+
+For automated workflows or CI/CD pipelines, use the `--ci` flag with required parameters:
 ```bash
 npx --no-install @contentful/app-scripts generate-function --ci --name <name> --example appaction --language javascript
 ```
 
 **Available Parameters:**
 
-- `--name <name>`: Your function name (any value except 'example')
+-
+ `--name <name>`: Your function name (any value except 'example')
 - `--example <example>`: Template to use (e.g., 'appaction', 'external-references')
 - `--language <language>`: 'javascript' or 'typescript' (defaults to typescript if invalid)
 - `--ci`: Enables non-interactive mode
@@ -236,6 +241,21 @@ npm run upsert-action -- --organizationId=<your_org_id> --definitionId=<your_app
 ```
 
 The `upsert-action` command will create the App Action if it doesn't exist, or update it if it does, linking it to your function.
+
+If you're adding actions programmatically, you must update the `actions` array in your `contentful-app-manifest.json` file:
+
+```json
+"actions": [
+  {
+    "id": "yourCustomActionId",           // Unique identifier for your action, No Hyphens Allowed
+    "name": "Your Custom Action Name",    // Display name shown in the UI
+    "type": "function-invocation",        // Keep this as is for function-based actions
+    "functionId": "appaction",            // Must match the function ID in the functions array
+    "category": "Custom",                 // Action category 
+    "parameters": []                      // Parameters needed by the action
+  }
+]
+```
 
 ## Additional Resources
 

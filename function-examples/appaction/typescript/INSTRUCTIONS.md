@@ -249,6 +249,21 @@ npm run upsert-action -- --organizationId=<your_org_id> --definitionId=<your_app
 
 The `upsert-action` command will create the App Action if it doesn't exist, or update it if it does, linking it to your function.
 
+If you're adding actions programmatically, you must update the `actions` array in your `contentful-app-manifest.json` file:
+
+```json
+"actions": [
+  {
+    "id": "yourCustomActionId",           // Unique identifier for your action, No Hyphens Allowed
+    "name": "Your Custom Action Name",    // Display name shown in the UI
+    "type": "function-invocation",        // Keep this as is for function-based actions
+    "functionId": "appaction",            // Must match the function ID in the functions array
+    "category": "Custom",                 // Action category 
+    "parameters": []                      // Parameters needed by the action
+  }
+]
+```
+
 ## Additional Resources
 
 - [Contentful App Functions Documentation](https://www.contentful.com/developers/docs/extensibility/app-framework/functions/)
