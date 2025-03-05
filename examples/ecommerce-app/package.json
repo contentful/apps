@@ -3,21 +3,24 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@contentful/app-scripts": "1.15.0",
     "@contentful/app-sdk": "^4.17.1",
     "@contentful/ecommerce-app-base": "3.0.0",
     "@contentful/f36-components": "4.4.1",
-    "cross-env": "7.0.3",
     "react": "17.0.2",
-    "react-dom": "17.0.2",
-    "react-scripts": "5.0.0"
+    "react-dom": "17.0.2"
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "1.15.0",
+    "cross-env": "7.0.3",
+    "vite": "^5.0.0",
+    "@vitejs/plugin-react": "^4.0.3"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build",
-    "eject": "react-scripts eject",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "upload": "contentful-app-scripts upload --bundle-dir ./dist",
-    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
   },
   "browserslist": {
     "production": [
