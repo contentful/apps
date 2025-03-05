@@ -132,7 +132,7 @@ Open `functions/appevent-filter-template.ts` and add your custom filtering logic
 To process only events for entries of the "blogPost" content type:
 
 ```ts
-export const handler: FunctionEventHandler<'appevent.filter'> = (event, context) => {
+export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventFilter> = (event, context) => {
   const { body } = event as AppEventEntry;
 
   // Process events only for the 'blogPost' content type

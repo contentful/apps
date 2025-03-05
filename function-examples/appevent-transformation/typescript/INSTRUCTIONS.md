@@ -135,7 +135,7 @@ Open `functions/appevent-transformation-template.ts` and add your custom transfo
 To enhance entry events with geocoding data:
 
 ```ts
-export const handler: FunctionEventHandler<'appevent.transformation'> = async (
+export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventTransformation> = async (
   event: AppEventRequest,
   context: FunctionEventContext
 ) => {

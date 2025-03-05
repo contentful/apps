@@ -133,7 +133,7 @@ Open `functions/appevent-handler-template.ts` and add your custom handling logic
 To handle entry publish events and send them to an external API:
 
 ```ts
-export const handler: EventHandler<'appevent.handler'> = async (
+export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = async (
   event: AppEventRequest,
   context: FunctionEventContext
 ) => {

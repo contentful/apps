@@ -1,4 +1,8 @@
-import { FunctionEventContext, FunctionEventHandler } from '@contentful/node-apps-toolkit';
+import {
+  FunctionEventContext,
+  FunctionEventHandler,
+  FunctionTypeEnum,
+} from '@contentful/node-apps-toolkit';
 import { AppEventEntry, AppEventRequest } from '@contentful/node-apps-toolkit/lib/requests/typings';
 
 /**
@@ -14,7 +18,7 @@ import { AppEventEntry, AppEventRequest } from '@contentful/node-apps-toolkit/li
  * @param context - The execution context with app installation parameters
  * @returns An object with the transformed body and headers
  */
-export const handler: FunctionEventHandler<'appevent.transformation'> = async (
+export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventTransformation> = async (
   event: AppEventRequest,
   context: FunctionEventContext
 ) => {

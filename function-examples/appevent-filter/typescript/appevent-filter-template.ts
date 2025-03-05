@@ -1,4 +1,4 @@
-import { FunctionEventHandler } from '@contentful/node-apps-toolkit';
+import { FunctionEventHandler, FunctionTypeEnum } from '@contentful/node-apps-toolkit';
 import { AppEventEntry } from '@contentful/node-apps-toolkit/lib/requests/typings';
 
 /**
@@ -14,7 +14,7 @@ import { AppEventEntry } from '@contentful/node-apps-toolkit/lib/requests/typing
  * @param context - The execution context
  * @returns An object with a result property (true to allow the event, false to filter it out)
  */
-export const handler: FunctionEventHandler<'appevent.filter'> = (event, context) => {
+export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventFilter> = (event, context) => {
   // Since our app event subscription only reacts to Entry events,
   // we can safely assume that the event is an AppEventEntry
   const { body } = event as AppEventEntry;

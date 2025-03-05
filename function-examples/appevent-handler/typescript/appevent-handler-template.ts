@@ -1,4 +1,4 @@
-import { FunctionEventHandler } from '@contentful/node-apps-toolkit';
+import { FunctionEventHandler, FunctionTypeEnum } from '@contentful/node-apps-toolkit';
 import {
   AppEventEntry,
   AppEventRequest,
@@ -18,7 +18,7 @@ import {
  * @param context - The execution context
  * @returns None - App event handlers don't return a response
  */
-export const handler: FunctionEventHandler<'appevent.handler'> = async (
+export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = async (
   event: AppEventRequest,
   context: FunctionEventContext
 ) => {
