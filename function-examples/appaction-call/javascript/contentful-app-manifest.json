@@ -1,11 +1,11 @@
 {
   "functions": [
     {
-      "id": "appaction",
+      "id": "appactionCall",
       "name": "App Action Function Template",
       "description": "Template for creating custom app actions. Add your own code to define how your app should respond when an action is triggered.",
-      "path": "functions/appaction-template.js",
-      "entryFile": "functions/appaction-template.ts",
+      "path": "functions/appaction-call-template.js",
+      "entryFile": "functions/appaction-call-template.js",
       "allowNetworks": [],
       "accepts": ["appaction.call"]
     }
@@ -15,7 +15,7 @@
       "id": "exampleAction",
       "name": "Example Action",
       "type": "function-invocation",
-      "functionId": "appaction",
+      "functionId": "appactionCall",
       "category": "Custom",
       "parameters": []
     }

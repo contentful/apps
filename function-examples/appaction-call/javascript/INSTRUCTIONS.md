@@ -23,7 +23,7 @@ Common use cases for App Action functions include:
 If you want to create a new app that includes the function template, run:
 
 ```bash
-npx create-contentful-app@latest --function appaction
+npx create-contentful-app@latest --function appaction-call
 ```
 
 This command will generate a basic app template that includes: 
@@ -60,21 +60,21 @@ For automated workflows or CI/CD pipelines, use the `--ci` flag with required pa
 
 For automated workflows or CI/CD pipelines, use the `--ci` flag with required parameters:
 ```bash
-npx --no-install @contentful/app-scripts generate-function --ci --name <name> --example appaction --language javascript
+npx --no-install @contentful/app-scripts generate-function --ci --name <name> --example appaction-call --language javascript
 ```
 
 **Available Parameters:**
 
 -
  `--name <name>`: Your function name (any value except 'example')
-- `--example <example>`: Template to use (e.g., 'appaction', 'external-references')
+- `--example <example>`: Template to use (e.g., 'appaction-call', 'external-references')
 - `--language <language>`: 'javascript' or 'typescript' (defaults to typescript if invalid)
 - `--ci`: Enables non-interactive mode
 
 **Example:**
 
 ```bash
-npx --no-install @contentful/app-scripts generate-function --ci --name content-processor --example appaction --language javascript
+npx --no-install @contentful/app-scripts generate-function --ci --name content-processor --example appaction-call --language javascript
 ```
 
 When executed, this command:
@@ -136,7 +136,7 @@ These variables authenticate your function with Contentful and link it to your a
 
 ### 4. Customize the App Action Function
 
-Open `functions/appaction-template.js` and add your custom logic based on your specific requirements.
+Open `functions/appaction-call-template.js` and add your custom logic based on your specific requirements.
 
 #### App Action Function Example
 
@@ -250,7 +250,7 @@ If you're adding actions programmatically, you must update the `actions` array i
     "id": "yourCustomActionId",           // Unique identifier for your action, No Hyphens Allowed
     "name": "Your Custom Action Name",    // Display name shown in the UI
     "type": "function-invocation",        // Keep this as is for function-based actions
-    "functionId": "appaction",            // Must match the function ID in the functions array
+    "functionId": "appactionCall",            // Must match the function ID in the functions array
     "category": "Custom",                 // Action category 
     "parameters": []                      // Parameters needed by the action
   }
