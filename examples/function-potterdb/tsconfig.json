@@ -1,5 +1,4 @@
 {
-  "extends": "@tsconfig/create-react-app/tsconfig.json",
   "compilerOptions": {
     "target": "es5",
     "moduleResolution": "node",
