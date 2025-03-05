@@ -5,7 +5,8 @@
   "devDependencies": {
     "@contentful/app-scripts": "1.15.0",
     "cross-env": "7.0.3",
-    "react-scripts": "5.0.1"
+    "vite": "^5.0.0",
+    "@vitejs/plugin-react": "^4.0.3"
   },
   "dependencies": {
     "@commercelayer/js-auth": "2.0.1",
@@ -16,13 +17,11 @@
     "react-dom": "17.0.1"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "upload": "contentful-app-scripts upload --bundle-dir ./dist",
-    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
   },
   "browserslist": [
     "last 5 Chrome version",
