@@ -1,81 +1,243 @@
-# App Action Function Example
+# App Action Function Template
 
-## Introduction
+App Action functions enable communication between apps by providing serverless endpoints that can be invoked through app actions. This template provides a starting point with skeleton code—you must add your custom action logic to meet your specific use case.
 
-App Action is an entity that allows communication between apps. Functions are serverless workloads that run on Contentful’s infrastructure to provide enhanced flexibility and customization. Functions can be linked to and then invoked via an App Action, which provides apps an easy way to expose generic capabilities to their own frontend as well as to other apps.
+## What is an App Action Function?
 
-## About this Example
+App Action functions are serverless workloads that run on Contentful's infrastructure to provide enhanced flexibility and customization. Unlike event-based functions that respond to system events, App Actions are explicitly invoked by an app or external system with specific parameters to perform an operation.
 
-This example app demonstrates how to set up an app to trigger an app action function. It also provides a frontend app page to test App Actions that trigger a function invocation in your app.
+Common use cases for App Action functions include:
 
-### Install the Example and Create an App Definition
+- Bulk content operations
+- Data synchronization between environments or spaces
+- Integration with external services and APIs
+- Content transformation and migration
+- Custom content validation or enrichment
 
-Use this command below to install the example app.
+## Getting Started
 
-```
-npx create-contentful-app@latest --example function-appaction
-```
+### 1. Adding the Function to a Contentful App
 
-Once the process finishes, navigate to the directory that was created by running this command:
+#### Creating a New App with the Function
 
-```
-cd <name-of-your-app>
-```
+If you want to create a new app that includes the function template, run:
 
-To complete the process, it is necessary to install all dependencies of the project by executing the following command:
-
-```
-npm i
+```bash
+npx create-contentful-app@latest --function appaction
 ```
 
-### Create an App Definition
+This command will generate a basic app template that includes: 
 
-You can create an app definition by [visiting the apps section](https://app.contentful.com/deeplink?link=app-definition-list) under your organization settings in the Contentful web app and clicking on the "Create App" button on the top right. Be sure to select **Page Location** and select the toggle for `Show app in main navigation` under the `Page` location.
+- A `functions` folder that contains the template, instructions, and relevant config files.
+- All necessary scripts for building and deploying your function
+- App manifest file
+  - This file ensures that Contentful can properly identify, configure, and run your function.
+  - For more information see: [Creating and Uploading a Function - Tutorial](https://www.contentful.com/developers/docs/extensibility/app-framework/function-tutorial/)
 
-Alternatively, you can create an app using the the command `npm run create-app-definition`. You will need to answer the following questions on the terminal. Feel free to proceed with the default options provided.
+#### Adding the Function to an Existing App
 
-1. **Name of your application**. This is how your app will be named and it will be displayed in a few places throughout the UI. The default is the name of the folder you created.
-2. **Select where your app can be rendered**. This shows potential [app locations](https://www.contentful.com/developers/docs/extensibility/app-framework/locations/) where an app can be rendered within the Contentful Web app. Select **Page Location**, as this is where you will be able to test your app actions. Select `y` for showing your app in the main navigation, and then provide a name for the link (e.g. `App Action Demo Console`) and a path (you can leave it as the default `/`).
-3. **Contentful CMA endpoint URL**. This refers to the URL used to interact with Contentful's Management APIs.
-4. **App Parameters**. These are configurable values that can be used to set default values or define custom validation rules; we do not need this to run the app so you can select `No`.
-5. The next steps will lead you through the process of providing a Contentful access token to the application and specifying the organization to which the application should be assigned.
+If you prefer to add the function to an existing app, you can run the following CLI commands from inside your app directory:
 
-### Build and Upload your Function
+**Interactive Mode**
 
-After you have created the app definition, you can then build and upload your app bundle containing your Contentful Function.
+Run the CLI in interactive mode, which will prompt you for the necessary options:
 
+```bash
+npx --no-install @contentful/app-scripts generate-function
 ```
+
+The interactive process will guide you through:
+1. Selecting a function name
+2. Choosing from available function examples
+3. Selecting your preferred language (JavaScript or TypeScript)
+
+**Non-interactive Mode**
+
+For automated workflows or CI/CD pipelines, use the `--ci` flag with required parameters:
+
+```bash
+npx --no-install @contentful/app-scripts generate-function --ci --name <name> --example appaction --language javascript
+```
+
+**Available Parameters:**
+
+- `--name <name>`: Your function name (any value except 'example')
+- `--example <example>`: Template to use (e.g., 'appaction', 'external-references')
+- `--language <language>`: 'javascript' or 'typescript' (defaults to typescript if invalid)
+- `--ci`: Enables non-interactive mode
+
+**Example:**
+
+```bash
+npx --no-install @contentful/app-scripts generate-function --ci --name content-processor --example appaction --language javascript
+```
+
+When executed, this command:
+
+- Creates a `functions` directory if one doesn't exist
+- Adds the selected function template with your specified name
+- Creates or updates the `contentful-app-manifest.json` file
+- Updates your `package.json` to include function build commands
+
+> **Note**: All function examples are sourced from the `contentful/apps/function-examples` repository.
+
+### 2. Connect to an App Definition
+
+If you haven't already created an app definition in Contentful, choose one of the options below.
+
+#### Manually via the Web UI
+
+- Navigate to the Apps section in your organization: (https://app.contentful.com/deeplink?link=app-definition-list)
+
+- Click the "Create App" button
+
+- Fill in the required fields. If you want to test your App Action function using a UI, be sure to select **Page Location** and check the toggle for `Show app in main navigation`.
+
+- Proceed to the [Set Up Your Environment](#3-set-up-your-environment) step.
+
+> **Note**: If you are unfamiliar with how to create a custom app definition in Contentful, please review the documentation here: [Create a Custom App - Tutorial](https://www.contentful.com/developers/docs/extensibility/app-framework/tutorial/?utm_source=webapp&utm_medium=app-listing&utm_campaign=in-app-help)
+
+#### Via CLI
+
+- Run: `npm run create-app-definition`
+- Answer the prompted questions. Feel free to proceed with the default options provided.
+
+  1. **Name of your application**.
+     - This is how your app will be named and it will be displayed in a few places throughout the UI. The default is the name of the folder you created.
+  2. **Select where your app can be rendered**.
+     - For testing App Actions, select **Page Location**, as this is where you will be able to test your app actions. Select `y` for showing your app in the main navigation, and then provide a name for the link.
+     - If your app is **frontendless** you can skip selecting a location.
+  3. **Contentful CMA endpoint URL**.
+     - This refers to the URL used to interact with Contentful's Management APIs.
+  4. **App Parameters**.
+     - These are configurable values that can be used to set default values or define custom validation rules.
+  5. The next steps will lead you through the process of providing a Contentful access token to the application and specifying the organization to which the application should be assigned.
+     - This will automatically create a `.env` file with these fields for you
+  6. Proceed to [Customize the App Action Function](#4-customize-the-app-action-function)
+
+### 3. Set Up Your Environment
+
+If you created your app definition manually through the web UI, or the CLI did not create one for you, create a `.env` file in the root of your application with your Contentful credentials:
+
+```env
+CONTENTFUL_ORG_ID=your-organization-id
+CONTENTFUL_APP_DEF_ID=your-app-definition-id
+CONTENTFUL_ACCESS_TOKEN=your-access-token
+```
+
+These variables authenticate your function with Contentful and link it to your app definition.
+
+> **Note**: You can generate an access token from your Space Settings menu. For the other values, you can find them in your Contentful organization and app settings.
+
+### 4. Customize the App Action Function
+
+Open `functions/appaction-template.js` and add your custom logic based on your specific requirements.
+
+#### App Action Function Example
+
+Here's an example that creates a new entry of a specific content type:
+
+```js
+/**
+ * App Action function that creates a new entry of a specified content type
+ */
+export const handler = async (event, context) => {
+  // Access the CMA client
+  const cma = context.cma;
+
+try {
+  // Extract parameters from the request
+const { contentTypeId, fields } = event.body;
+
+  // Get the space and environment from the context
+    const spaceId = context.spaceId;
+    const environmentId = context.environmentId;
+  
+  if (!contentTypeId || !fields) {
+  return {
+    error: 'Missing required parameters: contentTypeId and fields are required'
+      };
+    }
+    
+    // Create an entry using the CMA client
+    const entry = await cma.entry.create({
+      spaceId,
+      environmentId,
+      contentTypeId,
+      fields: Object.entries(fields).reduce((acc, [key, value]) => {
+        acc[key] = { 'en-US': value };
+        return acc;
+      }, {})
+    });
+    
+    return {
+      success: true,
+      entry: {
+        id: entry.sys.id,
+        contentType: entry.sys.contentType.sys.id,
+        createdAt: entry.sys.createdAt
+      }
+    };
+  } catch (error) {
+    console.error('Error executing App Action:', error);
+    return {
+      success: false,
+      error: error.message || 'An error occurred while processing your request'
+    };
+  }
+};
+```
+
+### 5. Build and Upload Your Function
+
+Currently, the only way to deploy a function is through the CLI. To do so, run the following commands:
+
+```bash
+# Build your function
 npm run build
+
+# Upload your function to Contentful
 npm run upload
 ```
 
-The interactive CLI will prompt you to provide additional details, such as a CMA endpoint URL. Select **Yes** when prompted if you’d like to activate the bundle after upload.
+The build step is essential since the upload process relies on the compiled code. The CLI may prompt for additional details (e.g., the CMA endpoint URL) and offer to activate the bundle post-upload.
 
-### Create an App Action
+> **Note**: For more information on the differences between `upload` and `upload-ci`, see the [Create Contentful App Documentation](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/)
 
-You can create an app action by navigating to the app definition in the Contentful web UI and following [these instructions](https://www.contentful.com/developers/docs/extensibility/app-framework/app-actions/#create-an-app-action), ensuring that you select `function-invocation` for the type and choosing your uploaded function.
+### 6. Create an App Action
 
-Otherwise, you can use the command provided in the example `package.json` to create an app action that will invoke your function: `npm run create-app-action`. For this command to work, the following environment variables must be set:
+To make your function accessible, you need to create an App Action that links to it. There are two ways to do this:
 
-- `CONTENTFUL_ORG_ID` - The ID of your organization
-- `CONTENTFUL_APP_DEF_ID` - The ID of the app to which to add the bundle
-- `CONTENTFUL_ACCESS_TOKEN` - A personal [access token](https://www.contentful.com/developers/docs/references/content-management-api/#/reference/personal-access-tokens)
+#### Via the Contentful Web App
 
-Alternatively, you can set these while running the command: `npm run create-app-action -- --appDefinitionId=<your_app_id> --accessToken=<your_token> --organizationId=<your_org_id>`
+1. Open your app definition in the Contentful web app
+2. Navigate to the "App Actions" tab
+3. Click "Create App Action" and fill in the required information:
+   - Name: A descriptive name for your action
+   - App Action ID: A unique identifier for this action
+   - Type: Select "Function Invocation"
+   - Function: Select your uploaded function
+4. Click "Create"
 
-### Install the app
+#### Via the Command Line
 
-Install the app to a space by navigating to the [Contentful web app](https://www.contentful.com/developers/docs/extensibility/app-framework/tutorial/#install-your-app-to-a-space) or by running the command: `npm run install-app`. Select the space and environment in which you would prefer to install the example app from the dialog that appears. You will have to grant access to the space the app will be installed in.
+You can programmatically create an App Action using the following command:
 
-Your example app is now configured and installed! You can navigate to the app page location to test your app action functions.
+```bash
+npm run upsert-action
+```
 
-### Running the app locally
+You will need to have set the environment variables described in the [Set Up Your Environment](#3-set-up-your-environment) step.
 
-The steps above will upload the app to Contentful's infrastructure. However, you can also run the app locally to be able to easier debug the code. To do this:
+Alternatively, you can pass them as arguments:
 
-- Run `npm run open-settings`, which will open the web page with the App details.
-- Deselect the **Hosted by Contentful** option and fill the text field below with `http://localhost:3000`.
-- Save the changes.
-- Run `npm start` in your app and navigate to the page location in the Contentful web app.
+```bash
+npm run upsert-action -- --organizationId=<your_org_id> --definitionId=<your_app_id> --token=<your_token>
+```
 
-This process is reversible and at any point you can go back to the setup that uses the bundle uploaded to Contentful's infrastructure.
+The `upsert-action` command will create the App Action if it doesn't exist, or update it if it does, linking it to your function.
+
+## Additional Resources
+
+- [Contentful App Functions Documentation](https://www.contentful.com/developers/docs/extensibility/app-framework/functions/)
+- [App Actions Overview](https://www.contentful.com/developers/docs/extensibility/app-framework/app-actions/)
