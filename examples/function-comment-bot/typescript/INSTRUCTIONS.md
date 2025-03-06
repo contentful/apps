@@ -21,7 +21,7 @@ This project is an example of a Contentful App Event Function that reacts to com
 
 Use the command below to install this template:
 ```shell
-npx create-contentful-app@latest -–function comment-bot
+npx create-contentful-app@latest --example function-comment-bot
 ```
 
 ### Creating an App

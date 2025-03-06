@@ -1,9 +1,9 @@
-import { FunctionEventHandler, FunctionTypeEnum } from '@contentful/node-apps-toolkit';
 import {
-  AppEventEntry,
-  AppEventRequest,
+  FunctionEventHandler,
+  FunctionTypeEnum,
   FunctionEventContext,
-} from '@contentful/node-apps-toolkit/lib/requests/typings';
+  AppEventRequest,
+} from '@contentful/node-apps-toolkit';
 
 /**
  * App Event Handler Function Template
@@ -25,7 +25,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = a
   // Check if the event is an Entry event
   // You can also handle other event types like Asset or ContentType
   if (event.headers['X-Contentful-Topic'].includes('Entry')) {
-    const entryEvent = event as AppEventEntry;
+    const entryEvent = event.body;
 
     // TODO: Implement your custom handling logic here
     // Examples: Extract data from the entry, Send data to external services, etc.

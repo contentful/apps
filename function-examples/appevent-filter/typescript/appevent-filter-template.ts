@@ -1,5 +1,4 @@
 import { FunctionEventHandler, FunctionTypeEnum } from '@contentful/node-apps-toolkit';
-import { AppEventEntry } from '@contentful/node-apps-toolkit/lib/requests/typings';
 
 /**
  * App Event Filter Function Template
@@ -17,7 +16,7 @@ import { AppEventEntry } from '@contentful/node-apps-toolkit/lib/requests/typing
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventFilter> = (event, context) => {
   // Since our app event subscription only reacts to Entry events,
   // we can safely assume that the event is an AppEventEntry
-  const { body } = event as AppEventEntry;
+  const { body } = event;
 
   // TODO: Implement your custom filtering logic here
   // Extract relevant fields from the entry

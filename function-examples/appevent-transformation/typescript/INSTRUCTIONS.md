@@ -84,7 +84,7 @@ If you haven't already created an app definition in Contentful, choose one of th
 
 #### Manually via the Web UI
 
-- Navigate to the Apps section in your organization: (https://app.contentful.com/deeplink?link=app-definition-list)
+- [Navigate to the Apps section in your organization](https://app.contentful.com/deeplink?link=app-definition-list)
 
 - Click the "Create App" button
 
@@ -141,7 +141,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventTransformati
 ) => {
   // Check if this is an Entry event with location data
   if (event.headers['X-Contentful-Topic'].includes('Entry')) {
-    const entryEvent = event as AppEventEntry;
+    const entryEvent = event.body;
     
     // Check if entry has location coordinates
     const latitude = entryEvent.body.fields?.latitude?.['en-US'];

@@ -2,8 +2,8 @@ import {
   FunctionEventContext,
   FunctionEventHandler,
   FunctionTypeEnum,
+  AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { AppActionRequest } from '@contentful/node-apps-toolkit/lib/requests/typings';
 
 /**
  * App Action Function Template

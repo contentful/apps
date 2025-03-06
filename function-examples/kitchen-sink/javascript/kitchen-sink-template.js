@@ -1,7 +1,7 @@
 /**
  * Unified Contentful Function Template
  *
- * This template includes handlers for all Contentful function types:
+ * This template includes handlers for all Contentful management function types:
  * - App Action
  * - App Event Handler
  * - App Event Filter

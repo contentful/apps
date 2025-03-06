@@ -92,7 +92,7 @@ If you haven't already created an app definition in Contentful, choose one of th
 
 #### Manually via the Web UI
 
-- Navigate to the Apps section in your organization: (https://app.contentful.com/deeplink?link=app-definition-list)
+- [Navigate to the Apps section in your organization](https://app.contentful.com/deeplink?link=app-definition-list)
 
 - Click the "Create App" button
 
@@ -229,7 +229,7 @@ To make your function accessible, you need to create an App Action that links to
 You can programmatically create an App Action using the following command:
 
 ```bash
-npm run upsert-action
+npm run upsert-actions
 ```
 
 You will need to have set the environment variables described in the [Set Up Your Environment](#3-set-up-your-environment) step.
@@ -237,10 +237,10 @@ You will need to have set the environment variables described in the [Set Up You
 Alternatively, you can pass them as arguments:
 
 ```bash
-npm run upsert-action -- --organizationId=<your_org_id> --definitionId=<your_app_id> --token=<your_token>
+npm run upsert-actions -- --organizationId=<your_org_id> --definitionId=<your_app_id> --token=<your_token>
 ```
 
-The `upsert-action` command will create the App Action if it doesn't exist, or update it if it does, linking it to your function.
+The `upsert-actions` command will create the App Action if it doesn't exist, or update it if it does, linking it to your function.
 
 If you're adding actions programmatically, you must update the `actions` array in your `contentful-app-manifest.json` file:
 

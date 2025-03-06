@@ -81,7 +81,7 @@ If you haven't already created an app definition in Contentful, choose one of th
 
 #### Manually via the Web UI
 
-- Navigate to the Apps section in your organization: (https://app.contentful.com/deeplink?link=app-definition-list)
+- [Navigate to the Apps section in your organization](https://app.contentful.com/deeplink?link=app-definition-list)
 
 - Click the "Create App" button
 
@@ -133,7 +133,7 @@ To process only events for entries of the "blogPost" content type:
 
 ```ts
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventFilter> = (event, context) => {
-  const { body } = event as AppEventEntry;
+  const { body } = event;
 
   // Process events only for the 'blogPost' content type
   if (body.sys?.contentType?.sys?.id === 'blogPost') { 

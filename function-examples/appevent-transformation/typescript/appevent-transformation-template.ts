@@ -2,8 +2,8 @@ import {
   FunctionEventContext,
   FunctionEventHandler,
   FunctionTypeEnum,
+  AppEventRequest,
 } from '@contentful/node-apps-toolkit';
-import { AppEventEntry, AppEventRequest } from '@contentful/node-apps-toolkit/lib/requests/typings';
 
 /**
  * App Event Transformation Function Template
@@ -26,7 +26,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventTransformati
 
   // Check the event type
   if (event.headers['X-Contentful-Topic'].includes('Entry')) {
-    const entryEvent = event as AppEventEntry;
+    const entryEvent = event.body;
 
     // TODO: Process or transform specific fields
     // Example: Transform specific fields based on your requirements

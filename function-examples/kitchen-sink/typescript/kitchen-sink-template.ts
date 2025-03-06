@@ -1,14 +1,14 @@
-import { FunctionEventHandler, FunctionEventContext } from '@contentful/node-apps-toolkit';
 import {
-  AppActionRequest,
-  AppEventEntry,
+  FunctionEventHandler,
+  FunctionEventContext,
   AppEventRequest,
-} from '@contentful/node-apps-toolkit/lib/requests/typings';
+  AppActionRequest,
+} from '@contentful/node-apps-toolkit';
 
 /**
  * Unified Contentful Function Template
  *
- * This template includes handlers for all Contentful function types:
+ * This template includes handlers for all Contentful management function types:
  * - App Action
  * - App Event Handler
  * - App Event Filter
@@ -64,7 +64,7 @@ const appActionHandler = async (
 const appEventHandler = async (event: AppEventRequest, context: FunctionEventContext) => {
   // Check if the event is an Entry event
   if (event.headers['X-Contentful-Topic'].includes('Entry')) {
-    const entryEvent = event as AppEventEntry;
+    const entryEvent = event.body;
 
     // TODO: Implement your event handling logic here
     // Example: Send data to external services, log events, etc.
@@ -84,7 +84,7 @@ const appEventHandler = async (event: AppEventRequest, context: FunctionEventCon
  */
 const appEventFilter = (event: AppEventRequest, context: FunctionEventContext) => {
   if (event.headers['X-Contentful-Topic'].includes('Entry')) {
-    const { body } = event as AppEventEntry;
+    const entryEvent = event.body;
 
     // TODO: Implement your filtering logic here
     // Example: Only allow events for specific content types
@@ -108,7 +108,7 @@ const appEventFilter = (event: AppEventRequest, context: FunctionEventContext) =
  */
 const appEventTransformation = async (event: AppEventRequest, context: FunctionEventContext) => {
   if (event.headers['X-Contentful-Topic'].includes('Entry')) {
-    const entryEvent = event as AppEventEntry;
+    const entryEvent = event.body;
 
     // TODO: Implement your transformation logic here
     // Example: Add computed fields or external data

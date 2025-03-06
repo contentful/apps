@@ -82,7 +82,7 @@ If you haven't already created an app definition in Contentful, choose one of th
 
 #### Manually via the Web UI
 
-- Navigate to the Apps section in your organization: (https://app.contentful.com/deeplink?link=app-definition-list)
+- [Navigate to the Apps section in your organization](https://app.contentful.com/deeplink?link=app-definition-list)
 
 - Click the "Create App" button
 
@@ -136,8 +136,8 @@ To handle entry publish events and send them to an external API:
 exports.handler = async (event, context) => {
   // Check if this is a publish event
   if (event.headers['X-Contentful-Topic'].includes('Entry.publish')) {
-    const entryEvent = event;
-    const entryId = entryEvent.body.sys.id;
+    const entryEvent = event.body;
+    const entryId = entryEvent.sys.id;
     
     try {
       // Example: Send the entry data to an external API

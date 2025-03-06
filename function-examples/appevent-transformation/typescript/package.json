@@ -4,7 +4,7 @@
   },
   "devDependencies": {
     "@contentful/app-scripts": "^2.1.2",
-    "@contentful/node-apps-toolkit": "^3.11.0",
+    "@contentful/node-apps-toolkit": "^3.11.1",
     "@tsconfig/recommended": "1.0.8"
   }
 }

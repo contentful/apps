@@ -149,13 +149,13 @@ After uploading the function, you need to connect it to App Actions and/or Event
 Create an App Action via the Web UI or using the command line:
 
 ```bash
-npm run upsert-action:functions
+npm run upsert-actions
 ```
 
 For this command to work, set the environment variables described in section 3 or pass them as arguments:
 
 ```bash
-npm run upsert-action:functions -- --organizationId=<your_org_id> --definitionId=<your_app_id> --token=<your_token>
+npm run upsert-actions -- --organizationId=<your_org_id> --definitionId=<your_app_id> --token=<your_token>
 ```
 
 If you're adding actions programmatically, you must update the `actions` array in your `contentful-app-manifest.json` file:

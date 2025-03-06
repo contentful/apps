@@ -15,7 +15,7 @@ export const handler = async (event, context) => {
   // Check if the event is an Entry event
   // You can also handle other event types like Asset or ContentType
   if (event.headers['X-Contentful-Topic'].includes('Entry')) {
-    const entryEvent = event;
+    const entryEvent = event.body;
 
     // TODO: Implement your custom handling logic here
     // Examples: Extract data from the entry, Send data to external services, etc.
