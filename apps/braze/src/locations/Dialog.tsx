@@ -1,6 +1,7 @@
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { assembleQuery, Field } from '../dialogaux';
+import generateLiquidTags from '../helpers/generateLiquidTags';
 
 export type InvocationParams = {
   entryId: string;
@@ -18,8 +19,14 @@ const Dialog = () => {
   const entryId = invocationParams.entryId;
 
   const query = assembleQuery(contentTypeId, entryId, invocationParams.entryFields, spaceId, token);
+  const liquidTag = generateLiquidTags(contentTypeId, invocationParams.entryFields[0]);
 
-  return <code>{query}</code>;
+  return (
+    <>
+      <code>{query}</code>
+      <code>{liquidTag}</code>
+    </>
+  );
 };
 
 export default Dialog;

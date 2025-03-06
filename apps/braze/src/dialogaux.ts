@@ -77,7 +77,7 @@ export function assembleQuery(
     :headers {"Authorization": "Bearer ${token}"}
     :body {{body}}
     :content_type application/json
-    :save response
+    :save ${SAVE_RESPONSE}
   %}`;
 }
 
