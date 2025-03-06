@@ -5,12 +5,13 @@ import {
   createTmdbLookupResponse,
   testLookupEvent
 } from '../test/mocks';
+import { vi, SpyInstance } from 'vitest';
 
 describe('Lookup handler', () => {
-  let mockApi: jest.SpyInstance;
+  let mockApi: SpyInstance;
 
   beforeEach(() => {
-    mockApi = jest.spyOn(helpers, 'fetchApi');
+    mockApi = vi.spyOn(helpers, 'fetchApi');
   });
 
   it('returns an empty response if TMDB does not return any results', async () => {

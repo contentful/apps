@@ -7,36 +7,14 @@
     "@contentful/f36-components": "4.45.0",
     "@contentful/f36-tokens": "4.0.2",
     "@contentful/react-apps-toolkit": "1.2.16",
+    "@types/node": "^22.13.5",
     "contentful-management": "10.38.3",
     "emotion": "10.0.27",
     "lodash.merge": "4.6.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-scripts": "5.0.1"
-  },
-  "scripts": {
-    "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "create-app-definition": "contentful-app-scripts create-app-definition",
-    "upload": "contentful-app-scripts upload --bundle-dir ./build",
-    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "vite-plugin-commonjs": "^0.10.4",
+    "vitest": "^3.0.7"
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.10.2",
@@ -45,11 +23,22 @@
     "@tsconfig/create-react-app": "2.0.0",
     "@types/jest": "29.5.2",
     "@types/lodash.merge": "4.6.7",
-    "@types/node": "16.18.38",
     "@types/react": "18.2.14",
     "@types/react-dom": "18.2.6",
+    "@vitejs/plugin-react": "^4.0.3",
     "cross-env": "7.0.3",
-    "typescript": "4.9.5"
+    "jsdom": "^26.0.0",
+    "typescript": "4.9.5",
+    "vite": "^5.0.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest",
+    "preview": "vite preview",
+    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "upload": "contentful-app-scripts upload --bundle-dir ./dist",
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
   },
   "homepage": "."
 }
