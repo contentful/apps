@@ -1,4 +1,5 @@
 import { FieldType } from '@contentful/app-sdk';
+import { SAVED_RESPONSE } from './helpers/utils';
 
 const IMAGE_FIELDS = 'title description url';
 
@@ -77,7 +78,7 @@ export function assembleQuery(
     :headers {"Authorization": "Bearer ${token}"}
     :body {{body}}
     :content_type application/json
-    :save ${SAVE_RESPONSE}
+    :save ${SAVED_RESPONSE}
   %}`;
 }
 

@@ -1,1 +1,1 @@
-const SAVE_RESPONSE = 'response';
+export const SAVED_RESPONSE = 'response';
