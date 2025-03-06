@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { FieldsResponse, resolveResponse } from './contentful-resolve-response';
 import { Field } from './dialogaux';
 import { createClient } from 'contentful-management';
 import { SidebarAppSDK } from '@contentful/app-sdk';
+import { FieldsResponse } from 'contentful-resolve-response';
+import resolveResponse from 'contentful-resolve-response';
 
 export function useFields(sdk: SidebarAppSDK): Field[] {
   const [entry, setEntry] = useState<Field[]>();
@@ -33,23 +34,44 @@ function transformFields(fields: FieldsResponse): Field[] {
     const field = Object.values(fieldsValues)[0]; // TODO: what if no locales?
 
     if (field instanceof Object && !(field instanceof Array) && field.fields !== undefined) {
-      return {
-        id: name,
-        type: 'Link',
-        linkType: field.sys.type,
-        fields: Object.keys(field.fields),
-      };
-    } else if (field instanceof Array) {
-      if (field[0] instanceof Object) {
+      if (field.sys.type === 'Asset') {
         return {
           id: name,
-          type: 'Array',
-          items: {
-            type: 'Link',
-            linkType: field[0].sys.type,
-            fields: Object.keys(field[0].fields),
-          },
+          type: 'Link',
+          linkType: 'Asset',
         };
+      } else {
+        return {
+          id: name,
+          type: 'Link',
+          linkType: field.sys.type,
+          entryType: field.sys.contentType.sys.id,
+          fields: Object.keys(field.fields),
+        };
+      }
+    } else if (field instanceof Array) {
+      if (field[0] instanceof Object) {
+        if (field[0].sys.type === 'Asset') {
+          return {
+            id: name,
+            type: 'Array',
+            items: {
+              type: 'Link',
+              linkType: 'Asset',
+            },
+          };
+        } else {
+          return {
+            id: name,
+            type: 'Array',
+            items: {
+              type: 'Link',
+              linkType: field[0].sys.type,
+              fields: Object.keys(field[0].fields),
+              entryType: field[0].sys.contentType.sys.id,
+            },
+          };
+        }
       } else {
         return {
           id: name,

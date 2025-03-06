@@ -2,7 +2,7 @@ import { locations } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useMemo } from 'react';
 import ConfigScreen from './locations/ConfigScreen';
-import Dialog from './dialogaux';
+import Dialog from './locations/Dialog';
 import Sidebar from './locations/Sidebar';
 
 const ComponentLocationSettings = {
