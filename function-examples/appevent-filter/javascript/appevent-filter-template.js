@@ -1,7 +1,3 @@
-// Import and instantiate a sentiment analysis library
-import Sentiment from 'sentiment';
-const sentiment = new Sentiment();
-
 /**
  * App Event Filter Function Template
  *
