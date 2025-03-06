@@ -1,0 +1,13 @@
+{
+  "functions": [
+    {
+      "id": "appeventTransformation",
+      "name": "App Event Transformation Function Template",
+      "description": "Template for creating custom app event transformations. Add your own code to modify event payloads before they're delivered to subscribers.",
+      "path": "functions/appevent-transformation-template.js",
+      "entryFile": "functions/appevent-transformation-template.ts",
+      "allowNetworks": [],
+      "accepts": ["appevent.transformation"]
+    }
+  ]
+}

@@ -3,7 +3,7 @@
 Use this command below to install the template.
 
 ```
-npx create-contentful-app@latest --function appevent-filter --javascript
+npx create-contentful-app@latest --example function-appevent-filter --javascript
 ```
 
 ### Creating an app

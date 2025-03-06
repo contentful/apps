@@ -3,7 +3,7 @@
 Use this command below to install the template.
 
 ```
-npx create-contentful-app@latest --function appevent-transformation --javascript
+npx create-contentful-app@latest --example function-appevent-transformation --javascript
 ```
 
 ### Creating an app

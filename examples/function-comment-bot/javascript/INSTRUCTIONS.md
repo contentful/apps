@@ -4,14 +4,16 @@ This project is an example of a Contentful App Event Function that reacts to com
 
 ## Table of Contents
 
-- [Getting Started](#getting-started)
-  - [Building your Function](#building-your-function)
-  - [Creating an App](#creating-an-app)
-  - [Using Environment Variables](#using-environment-variables)
-  - [Uploading the Code to Contentful](#uploading-the-code-to-contentful)
-- [Utilizing App Event Handler Functions](#utilizing-app-event-handler-functions)
-- [Usage of this App](#usage-of-this-app)
-  - [Adding New Bot Actions](#adding-new-bot-actions)
+- [App Event Function Example: Comment Bot](#app-event-function-example-comment-bot)
+  - [Table of Contents](#table-of-contents)
+  - [Getting Started](#getting-started)
+    - [Building your Function](#building-your-function)
+    - [Creating an App](#creating-an-app)
+    - [Using Environment Variables](#using-environment-variables)
+    - [Uploading the Code to Contentful](#uploading-the-code-to-contentful)
+  - [Utilizing app event handler functions](#utilizing-app-event-handler-functions)
+  - [Usage of this App](#usage-of-this-app)
+    - [Adding New Bot Actions](#adding-new-bot-actions)
 
 ## Getting Started
 
@@ -19,7 +21,7 @@ This project is an example of a Contentful App Event Function that reacts to com
 
 Use the command below to install this template:
 ```shell
-npx create-contentful-app@latest –function comment-bot
+npx create-contentful-app@latest -–example function-comment-bot --javascript
 ```
 
 ### Creating an App
