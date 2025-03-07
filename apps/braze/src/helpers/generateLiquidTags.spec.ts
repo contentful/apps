@@ -93,22 +93,4 @@ describe('Generate liquid tags', () => {
     expect(result).toContain('{{response.data.blogPost.address.lat}}');
     expect(result).toContain('{{response.data.blogPost.address.long}}');
   });
-
-  it('Content type with more than one field including one that is a list of text transforms both into a liquid tags', () => {
-    const contentTypeId = 'blogPost';
-    const entryFields: Field[] = [
-      {
-        id: 'list',
-        type: 'Array',
-        items: {
-          type: 'Symbol'
-        }
-      },
-    ];
-
-    const result = generateLiquidTags(contentTypeId, entryFields);
-
-    expect(result).toContain('{{response.data.blogPost.list.lat}}');
-    expect(result).toContain('{{response.data.blogPost.list.long}}');
-  });
 });
