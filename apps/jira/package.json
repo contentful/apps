@@ -15,6 +15,6 @@
     "dev": "node ./scripts/dev.js"
   },
   "dependencies": {
-    "contentful-management": "7.42.1"
+    "contentful-management": "11.48.0"
   }
 }
