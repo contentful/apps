@@ -1,8 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Field } from './dialogaux';
-import { createClient } from 'contentful-management';
+import {
+  AssetArrayField,
+  AssetField,
+  BasicArrayField,
+  BasicField,
+  EntryArrayField,
+  EntryField,
+  Field,
+} from './dialogaux';
+import { ContentFields, createClient, KeyValueMap, PlainClientAPI } from 'contentful-management';
 import { SidebarAppSDK } from '@contentful/app-sdk';
-import { FieldsResponse } from 'contentful-resolve-response';
 import resolveResponse from 'contentful-resolve-response';
 
 export function useFields(sdk: SidebarAppSDK): Field[] {
@@ -21,7 +28,7 @@ export function useFields(sdk: SidebarAppSDK): Field[] {
     const fetchEntry = async () => {
       const response = await cma.entry.references({ entryId: sdk.ids.entry, include: 10 });
       const items = resolveResponse(response);
-      const fields = transformFields(items[0]);
+      const fields = await transformFields(items[0], cma);
       setEntry(fields);
     };
     fetchEntry();
@@ -29,63 +36,104 @@ export function useFields(sdk: SidebarAppSDK): Field[] {
   return entry ?? [];
 }
 
-function transformFields(fields: FieldsResponse): Field[] {
-  return Object.entries(fields.fields).map(([name, fieldsValues]) => {
-    const field = Object.values(fieldsValues)[0]; // TODO: what if no locales?
-
-    if (field instanceof Object && !(field instanceof Array) && field.fields !== undefined) {
-      if (field.sys.type === 'Asset') {
-        return {
-          id: name,
-          type: 'Link',
-          linkType: 'Asset',
-        };
-      } else {
-        return {
-          id: name,
-          type: 'Link',
-          linkType: field.sys.type,
-          entryType: field.sys.contentType.sys.id,
-          fields: Object.keys(field.fields),
-        };
+async function transformFields(fields: any, cma: PlainClientAPI): Promise<Field[]> {
+  const contentType = await cma.contentType.get({ contentTypeId: fields.sys.contentType.sys.id });
+  const transformedFields = await Promise.all(
+    Object.entries(fields.fields).map(async ([name, fieldsValues]) => {
+      const field = Object.values(fieldsValues as { [key: string]: any })[0];
+      const fieldInfo = contentType.fields.find((f) => f.id === name);
+      if (!fieldInfo) {
+        throw new Error('Field not found');
       }
-    } else if (field instanceof Array) {
-      if (field[0] instanceof Object) {
-        if (field[0].sys.type === 'Asset') {
-          return {
-            id: name,
-            type: 'Array',
-            items: {
-              type: 'Link',
-              linkType: 'Asset',
-            },
-          };
+
+      if (fieldInfo.type === 'Link') {
+        if (fieldInfo.linkType === 'Asset') {
+          return assembleAssetField(name);
         } else {
-          return {
-            id: name,
-            type: 'Array',
-            items: {
-              type: 'Link',
-              linkType: field[0].sys.type,
-              fields: Object.keys(field[0].fields),
-              entryType: field[0].sys.contentType.sys.id,
-            },
-          };
+          return await assembleEntryField(name, field, cma);
+        }
+      } else if (fieldInfo.type === 'Array') {
+        if (fieldInfo.items && fieldInfo.items.type === 'Symbol') {
+          return assembleBasicArrayField(name);
+        } else if (fieldInfo.items && fieldInfo.items.linkType === 'Asset') {
+          return assembleAssetArrayField(name);
+        } else {
+          return await assembleEntryArrayField(name, field, cma);
         }
       } else {
-        return {
-          id: name,
-          type: 'Array',
-          items: {
-            type: 'Symbol',
-          },
-        };
+        return assembleBasicField(name, fieldInfo);
       }
-    } else {
-      return {
-        id: name,
-        type: 'Symbol',
-      };
-    }
-  });
+    })
+  );
+
+  return transformedFields;
+}
+
+function assembleBasicField(name: string, fieldInfo: ContentFields<KeyValueMap>): BasicField {
+  return {
+    id: name,
+    type: fieldInfo.type,
+  } as BasicField; // TODO: try to avoid this cast
+}
+
+function assembleAssetField(name: string): AssetField {
+  return {
+    id: name,
+    type: 'Link',
+    linkType: 'Asset',
+  };
+}
+
+async function assembleEntryField(
+  name: string,
+  field: any,
+  cma: PlainClientAPI
+): Promise<EntryField> {
+  return {
+    id: name,
+    type: 'Link',
+    linkType: 'Entry',
+    entryContentType: field.sys.contentType.sys.id,
+    fields: await transformFields(field, cma),
+  };
+}
+
+function assembleBasicArrayField(name: string): BasicArrayField {
+  return {
+    id: name,
+    type: 'Array',
+    items: {
+      type: 'Symbol',
+    },
+  };
+}
+
+function assembleAssetArrayField(name: string): AssetArrayField {
+  return {
+    id: name,
+    type: 'Array',
+    items: {
+      type: 'Link',
+      linkType: 'Asset',
+    },
+  };
+}
+
+async function assembleEntryArrayField(
+  name: string,
+  field: any,
+  cma: PlainClientAPI
+): Promise<EntryArrayField> {
+  return {
+    id: name,
+    type: 'Array',
+    items: await Promise.all(
+      field.map(async (f: any) => ({
+        type: 'Link',
+        linkType: 'Entry',
+        entryContentType: f.sys.contentType.sys.id,
+        fields: await transformFields(f, cma),
+      }))
+    ),
+  };
 }

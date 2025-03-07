@@ -1,79 +1,34 @@
-import { FieldType, FieldLinkType } from '@contentful/app-sdk';
-
-function fieldQuery(field: Field) {
-  if (field.type === 'Link') {
-    if (field.linkType === 'Entry') {
-      return entryQuery(field);
-    } else if (field.linkType === 'Asset') {
-      return assetQuery(field);
-    }
-  } else if (field.type === 'Array') {
-    if (field.items.type === 'Symbol') {
-      return basicQuery(field as BasicArrayField);
-    } else if (field.items.type === 'Link') {
-      if (field.items.linkType === 'Asset') {
-        if (field.items.type === 'Link' && field.items.linkType === 'Asset') {
-          return assetArrayQuery(field as AssetArrayField);
-        }
-      } else if (field.items.linkType === 'Entry') {
-        // TODO: what if multiple different content types were selected?
-        if (
-          field.items.type === 'Link' &&
-          field.items.linkType === 'Entry' &&
-          'entryType' in field.items &&
-          'fields' in field.items
-        ) {
-          return entryArrayQuery(field as EntryArrayField);
-        }
-      }
-    }
-  } else {
-    return basicQuery(field as BasicField);
-  }
-}
-function basicQuery(field: BasicField | BasicArrayField): string {
-  return field.id;
-}
-function assetQuery(field: AssetField): string {
-  return `${field.id} {${IMAGE_FIELDS}}`;
-}
-function entryQuery(field: EntryField): string {
-  const entryFields = field.fields?.join(' ');
-  const entryType = field.entryType.charAt(0).toUpperCase() + field.entryType.slice(1);
-  return `${field.id} {... on ${entryType} {${entryFields}}}`;
-}
-function assetArrayQuery(field: AssetArrayField): string {
-  return `${field.id}Collection {items {${IMAGE_FIELDS}}}`;
-}
-function entryArrayQuery(field: EntryArrayField): string {
-  // TODO: generalize entry fields, they could also be references or arrays
-  const entryFields = field.items.fields?.join(' ');
-  const entryType = field.items.entryType.charAt(0).toUpperCase() + field.items.entryType.slice(1);
-  return `${field.id}Collection {items {... on ${entryType} {${entryFields}}}}`;
-}
+import { FieldType } from '@contentful/app-sdk';
 
 const IMAGE_FIELDS = 'title description url';
 
-type BasicField = {
+export type BasicField = {
   id: string;
   type: Exclude<FieldType, 'Array' | 'Link'>;
 };
 
-type AssetField = {
+export type AssetField = {
   id: string;
   type: 'Link';
   linkType: 'Asset';
 };
 
-type EntryField = {
+export type EntryField = {
   id: string;
   type: 'Link';
   linkType: 'Entry';
-  entryType: string;
-  fields: string[];
+  entryContentType: string;
+  fields: Field[];
 };
 
-type BasicArrayField = {
+type EntryItem = {
+  type: 'Link';
+  linkType: 'Entry';
+  entryContentType: string;
+  fields: Field[];
+};
+
+export type BasicArrayField = {
   id: string;
   type: 'Array';
   items: {
@@ -81,7 +36,7 @@ type BasicArrayField = {
   };
 };
 
-type AssetArrayField = {
+export type AssetArrayField = {
   id: string;
   type: 'Array';
   items: {
@@ -90,15 +45,10 @@ type AssetArrayField = {
   };
 };
 
-type EntryArrayField = {
+export type EntryArrayField = {
   id: string;
   type: 'Array';
-  items: {
-    type: 'Link';
-    linkType: 'Entry';
-    entryType: string;
-    fields: string[];
-  };
+  items: EntryItem[];
 };
 
 export type Field =
@@ -108,10 +58,6 @@ export type Field =
   | BasicArrayField
   | AssetArrayField
   | EntryArrayField;
-
-function assembleFieldsQuery(entryFields: Field[]): string {
-  return entryFields.map((field) => fieldQuery(field)).join(' ');
-}
 
 export function assembleQuery(
   contentTypeId: string,
@@ -133,4 +79,72 @@ export function assembleQuery(
     :content_type application/json
     :save response
   %}`;
+}
+
+function assembleFieldsQuery(entryFields: Field[]): string {
+  return entryFields.map((field) => fieldQuery(field)).join(' ');
+}
+
+function fieldQuery(field: Field) {
+  if (field.type === 'Link') {
+    if (field.linkType === 'Entry') {
+      return entryQuery(field);
+    } else if (field.linkType === 'Asset') {
+      return assetQuery(field);
+    }
+  } else if (field.type === 'Array') {
+    if (Array.isArray(field.items)) {
+      return entryArrayQuery(field as EntryArrayField);
+    } else if (field.items.type === 'Symbol') {
+      return basicQuery(field as BasicArrayField);
+    } else if (field.items.type === 'Link' && field.items.linkType === 'Asset') {
+      return assetArrayQuery(field as AssetArrayField);
+    }
+  } else {
+    return basicQuery(field as BasicField);
+  }
+}
+
+function basicQuery(field: BasicField | BasicArrayField): string {
+  switch (field.type) {
+    case 'RichText':
+      return `${field.id} {json}`;
+    case 'Location':
+      return `${field.id} {lat lon}`;
+    default:
+      return field.id;
+  }
+}
+
+function assetQuery(field: AssetField): string {
+  return `${field.id} {${IMAGE_FIELDS}}`;
+}
+
+function entryQuery(field: EntryField): string {
+  const entryFields = fragmentQuery(field);
+  const entryType = capitalize(field.entryContentType);
+  return `${field.id} {... on ${entryType} {${entryFields}}}`;
+}
+
+function assetArrayQuery(field: AssetArrayField): string {
+  return `${field.id}Collection {items {${IMAGE_FIELDS}}}`;
+}
+
+function entryArrayQuery(field: EntryArrayField): string {
+  const fragments = field.items.map((item) => ({
+    fragment: fragmentQuery(item),
+    contentType: capitalize(item.entryContentType),
+  }));
+  const queries = fragments.map(
+    ({ fragment, contentType }) => `... on ${contentType} {${fragment}}`
+  );
+  return `${field.id}Collection {items {${queries.join(' ')}}}`;
+}
+
+function fragmentQuery(field: EntryItem): string {
+  return field.fields.map((field) => fieldQuery(field)).join(' ');
+}
+
+function capitalize(s: string) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }

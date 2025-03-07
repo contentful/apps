@@ -17,7 +17,7 @@ const Sidebar = () => {
 
   return (
     <Button
-      isLoading={!entryFields}
+      isDisabled={entryFields.length === 0} // TODO: isLoading doesn't seem to disable the button
       variant="primary"
       isFullWidth={true}
       onClick={async () => {
