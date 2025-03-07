@@ -1,5 +1,5 @@
 import { Field } from '../dialogaux';
-import {ASSET_FIELDS, SAVED_RESPONSE} from './utils';
+import {ASSET_FIELDS, LOCATION_LAT, LOCATION_LONG, SAVED_RESPONSE} from './utils';
 
 export default function generateLiquidTags(contentTypeId: string, fields: Field[]): string[] {
   const liquidTags: string[] = [];
@@ -16,8 +16,8 @@ export default function generateLiquidTags(contentTypeId: string, fields: Field[
         })
       }
     } else if (field.type === 'Location') {
-      liquidTags.push(`{{${content}.lat}}`);
-      liquidTags.push(`{{${content}.long}}`);
+      liquidTags.push(`{{${content}.${LOCATION_LAT}}}`);
+      liquidTags.push(`{{${content}.${LOCATION_LONG}}}`);
     } else {
       liquidTags.push(`{{${content}}}`);
     }
