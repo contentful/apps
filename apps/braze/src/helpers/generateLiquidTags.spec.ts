@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import generateLiquidTags from './generateLiquidTags';
+import generateLiquidTags, { generateLiquidTags2 } from './generateLiquidTags';
 import { Field } from './assembleQuery';
+import { BaseField, BasicField } from './field/baseField';
 
 describe('Generate liquid tags', () => {
   it('Content type with text field transforms it into a liquid tag', () => {
@@ -17,7 +18,7 @@ describe('Generate liquid tags', () => {
     expect(result).toContain('{{response.data.blogPost.title}}');
   });
 
-  it('Content type with more than one basic field transforms both into a liquid tags', () => {
+  it('Content type with more than one basic field transforms each into liquid tags', () => {
     const contentTypeId = 'blogPost';
     const entryFields: Field[] = [
       {
@@ -57,7 +58,7 @@ describe('Generate liquid tags', () => {
     expect(result).toContain('{{response.data.blogPost.decimal}}');
   });
 
-  it('Content type with more than one field including one that is an asset transforms both into a liquid tags', () => {
+  it('Content type with one field one that is an asset transforms into a liquid tags', () => {
     const contentTypeId = 'blogPost';
     const entryFields: Field[] = [
       {
@@ -79,7 +80,7 @@ describe('Generate liquid tags', () => {
     expect(result).toContain('{{response.data.blogPost.asset.height}}');
   });
 
-  it('Content type with more than one field including one that is a location transforms both into a liquid tags', () => {
+  it('Content type with one field that is a location transforms into a liquid tags', () => {
     const contentTypeId = 'blogPost';
     const entryFields: Field[] = [
       {
@@ -92,5 +93,42 @@ describe('Generate liquid tags', () => {
 
     expect(result).toContain('{{response.data.blogPost.address.lat}}');
     expect(result).toContain('{{response.data.blogPost.address.long}}');
+  });
+
+  it('Content type with one field that is a reference to an basic entry transforms into a liquid tags', () => {
+    const contentTypeId = 'blogPost';
+    const entryFields: Field[] = [
+      {
+        id: 'reference',
+        type: 'Link',
+        linkType: 'Entry',
+        entryContentType: 'reference',
+        fields: [
+          {
+            id: 'name',
+            type: 'Symbol',
+          },
+          {
+            id: 'phone',
+            type: 'Integer',
+          },
+        ],
+      },
+    ];
+
+    const result = generateLiquidTags(contentTypeId, entryFields);
+
+    expect(result).toContain('{{response.data.blogPost.reference.name}}');
+    expect(result).toContain('{{response.data.blogPost.reference.phone}}');
+  });
+
+  // -------------
+  it('Content type with more than one basic field transforms each into liquid tags 2', () => {
+    const contentTypeId = 'blogPost';
+    const entryFields: BaseField[] = [new BasicField('title', 'Symbol')];
+
+    const result = generateLiquidTags2(contentTypeId, entryFields);
+
+    expect(result).toContain('{{response.data.blogPost.title}}');
   });
 });
