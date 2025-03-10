@@ -194,7 +194,7 @@ describe('Generate liquid tags', () => {
     const contentTypeId = 'blogPost';
     const entryFields: Field[] = [
       {
-        id: '"listOfReferences"',
+        id: 'listOfReferences',
         type: 'Array',
         items: [
           {
