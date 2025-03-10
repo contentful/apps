@@ -14,6 +14,16 @@ const mockSdk: any = {
   dialogs: {
     openCurrentApp: vi.fn(),
   },
+  parameters: {
+    installation: {
+      apiKey: 'test-apiKey',
+    },
+    invocation: {
+      entryId: 'test-entryId',
+      entryFields: [], // TODO: add fields?
+      contentTypeId: 'test-contentTypeId',
+    },
+  },
 };
 
 export { mockSdk };

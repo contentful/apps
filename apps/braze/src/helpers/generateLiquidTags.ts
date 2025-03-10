@@ -1,4 +1,4 @@
-import { AssetArrayField, EntryArrayField, Field } from '../dialogaux';
+import { AssetArrayField, Field } from './assembleQuery';
 import { ASSET_FIELDS, LOCATION_LAT, LOCATION_LONG, SAVED_RESPONSE } from './utils';
 
 export default function generateLiquidTags(contentTypeId: string, fields: Field[]): string[] {

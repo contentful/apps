@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import {
   AssetArrayField,
   AssetField,
@@ -7,36 +6,10 @@ import {
   EntryArrayField,
   EntryField,
   Field,
-} from './dialogaux';
-import { ContentFields, createClient, KeyValueMap, PlainClientAPI } from 'contentful-management';
-import { SidebarAppSDK } from '@contentful/app-sdk';
-import resolveResponse from 'contentful-resolve-response';
+} from './assembleQuery';
+import { ContentFields, KeyValueMap, PlainClientAPI } from 'contentful-management';
 
-export function useFields(sdk: SidebarAppSDK): Field[] {
-  const [entry, setEntry] = useState<Field[]>();
-  const cma = createClient(
-    { apiAdapter: sdk.cmaAdapter },
-    {
-      type: 'plain',
-      defaults: {
-        environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      },
-    }
-  );
-  useEffect(() => {
-    const fetchEntry = async () => {
-      const response = await cma.entry.references({ entryId: sdk.ids.entry, include: 10 });
-      const items = resolveResponse(response);
-      const fields = await transformFields(items[0], cma);
-      setEntry(fields);
-    };
-    fetchEntry();
-  }, []);
-  return entry ?? [];
-}
-
-async function transformFields(fields: any, cma: PlainClientAPI): Promise<Field[]> {
+export async function transformEntryFields(fields: any, cma: PlainClientAPI): Promise<Field[]> {
   const contentType = await cma.contentType.get({ contentTypeId: fields.sys.contentType.sys.id });
   const transformedFields = await Promise.all(
     Object.entries(fields.fields).map(async ([name, fieldsValues]) => {
@@ -94,7 +67,7 @@ async function assembleEntryField(
     type: 'Link',
     linkType: 'Entry',
     entryContentType: field.sys.contentType.sys.id,
-    fields: await transformFields(field, cma),
+    fields: await transformEntryFields(field, cma),
   };
 }
 
@@ -132,7 +105,7 @@ async function assembleEntryArrayField(
         type: 'Link',
         linkType: 'Entry',
         entryContentType: f.sys.contentType.sys.id,
-        fields: await transformFields(f, cma),
+        fields: await transformEntryFields(f, cma),
       }))
     ),
   };
