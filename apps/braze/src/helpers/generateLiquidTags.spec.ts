@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import generateLiquidTags, { generateLiquidTags2 } from './generateLiquidTags';
+import generateLiquidTags from './generateLiquidTags';
 import { Field } from './assembleQuery';
 import { BaseField, BasicField } from './field/baseField';
 
@@ -40,6 +40,10 @@ describe('Generate liquid tags', () => {
       {
         id: 'longText',
         type: 'Text',
+      },
+      {
+        id: 'decimal',
+        type: 'Number',
       },
       {
         id: 'decimal',
@@ -122,13 +126,94 @@ describe('Generate liquid tags', () => {
     expect(result).toContain('{{response.data.blogPost.reference.phone}}');
   });
 
-  // -------------
-  it('Content type with more than one basic field transforms each into liquid tags 2', () => {
+  it('Content type with one field that is a reference to an asset transforms into a liquid tags', () => {
     const contentTypeId = 'blogPost';
-    const entryFields: BaseField[] = [new BasicField('title', 'Symbol')];
+    const entryFields: Field[] = [
+      {
+        id: 'reference',
+        type: 'Link',
+        linkType: 'Entry',
+        entryContentType: 'reference',
+        fields: [
+          {
+            id: 'asset',
+            type: 'Link',
+            linkType: 'Asset',
+          },
+        ],
+      },
+    ];
 
-    const result = generateLiquidTags2(contentTypeId, entryFields);
+    const result = generateLiquidTags(contentTypeId, entryFields);
 
-    expect(result).toContain('{{response.data.blogPost.title}}');
+    expect(result).toContain('{{response.data.blogPost.reference.asset.title}}');
+    expect(result).toContain('{{response.data.blogPost.reference.asset.description}}');
+    expect(result).toContain('{{response.data.blogPost.reference.asset.url}}');
+    expect(result).toContain('{{response.data.blogPost.reference.asset.contentType}}');
+    expect(result).toContain('{{response.data.blogPost.reference.asset.fileName}}');
+    expect(result).toContain('{{response.data.blogPost.reference.asset.size}}');
+    expect(result).toContain('{{response.data.blogPost.reference.asset.width}}');
+    expect(result).toContain('{{response.data.blogPost.reference.asset.height}}');
+  });
+
+  it('Content type with one field that contains a reference within a reference transforms into a liquid tags', () => {
+    const contentTypeId = 'blogPost';
+    const entryFields: Field[] = [
+      {
+        id: 'reference',
+        type: 'Link',
+        linkType: 'Entry',
+        entryContentType: 'reference',
+        fields: [
+          {
+            id: 'referenceWithinAReference',
+            type: 'Link',
+            linkType: 'Entry',
+            entryContentType: 'reference',
+            fields: [
+              {
+                id: 'name',
+                type: 'Symbol',
+              },
+              {
+                id: 'phone',
+                type: 'Integer',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    const result = generateLiquidTags(contentTypeId, entryFields);
+
+    expect(result).toContain('{{response.data.blogPost.reference.referenceWithinAReference.name}}');
+  });
+
+  it('Content type with one field that contains a list of references transforms into a liquid tags', () => {
+    const contentTypeId = 'blogPost';
+    const entryFields: Field[] = [
+      {
+        id: '"listOfReferences"',
+        type: 'Array',
+        items: [
+          {
+            type: 'Link',
+            linkType: 'Entry',
+            entryContentType: 'tag',
+            fields: [
+              {
+                id: 'name',
+                type: 'Symbol',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    const result = generateLiquidTags(contentTypeId, entryFields);
+
+    expect(result).toContain('{{response.data.blogPost.listOfReferencesCollection.items[0].name}}');
   });
 });
