@@ -1,5 +1,5 @@
 import { FieldType } from '@contentful/app-sdk';
-import { SAVED_RESPONSE } from './helpers/utils';
+import { SAVED_RESPONSE } from './utils';
 
 const IMAGE_FIELDS = 'title description url';
 
@@ -60,16 +60,10 @@ export type Field =
   | AssetArrayField
   | EntryArrayField;
 
-export function assembleQuery(
-  contentTypeId: string,
-  entryId: string,
-  entryFields: Field[],
-  spaceId: string,
-  token: string
-) {
+export function generateConnectedContentCall(query: string, spaceId: string, token: string) {
   return `
   {% capture body %}
-  {"query":"{${contentTypeId}(id:\\"${entryId}\\"){${assembleFieldsQuery(entryFields)}}}"}
+  ${query}
   {% endcapture %}
 
   {% connected_content
@@ -80,6 +74,25 @@ export function assembleQuery(
     :content_type application/json
     :save ${SAVED_RESPONSE}
   %}`;
+}
+
+export async function getGraphQLResponse(spaceId: string, token: string, query: string) {
+  const response = await fetch(`https://graphql.contentful.com/content/v1/spaces/${spaceId}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: query,
+  });
+  if (!response.ok) {
+    return null;
+  }
+  return response.json();
+}
+
+export function assembleQuery(contentTypeId: string, entryId: string, entryFields: Field[]) {
+  return `{"query":"{${contentTypeId}(id:\\"${entryId}\\"){${assembleFieldsQuery(entryFields)}}}"}`;
 }
 
 function assembleFieldsQuery(entryFields: Field[]): string {
