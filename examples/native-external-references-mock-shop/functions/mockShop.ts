@@ -1,3 +1,4 @@
+import { FunctionEventContext } from '@contentful/functions-types';
 import {
   EventHandler,
   MappingHandler,
@@ -7,6 +8,16 @@ import {
   ResourcesSearchHandler,
   SearchResultData,
 } from './types';
+
+const getMockShopUrl = (context: FunctionEventContext<Record<string, any>>) => {
+  const { apiEndpoint } = context.appInstallationParameters;
+  let mockShopUrl = apiEndpoint;
+  if (!mockShopUrl) {
+    mockShopUrl = 'https://mock.shop/api';
+    console.warn(`No API url configured, falling back to '${mockShopUrl}'`);
+  }
+  return mockShopUrl;
+};
 
 const resourceTypeMappingHandler: MappingHandler = (event) => {
   const mappings = event.resourceTypes.map(({ resourceTypeId }) => ({
@@ -24,13 +35,8 @@ const resourceTypeMappingHandler: MappingHandler = (event) => {
 const queryHandler: QueryHandler = async (event, context) => {
   // Installation parameters are defined in the app definition
   // and set per installation.
-  const { apiEndpoint } = context.appInstallationParameters;
 
-  let mockShopUrl = apiEndpoint;
-  if (!mockShopUrl) {
-    mockShopUrl = 'https://mock.shop/api';
-    console.warn(`No API url configured, falling back to '${mockShopUrl}'`);
-  }
+  const mockShopUrl = getMockShopUrl(context);
 
   // Make a request to the third party API.
   // The expected return type aligns with the
@@ -51,14 +57,7 @@ const queryHandler: QueryHandler = async (event, context) => {
 
 const searchHandler: ResourcesSearchHandler = async (event, context) => {
   const { query, resourceType } = event;
-
-  const { apiEndpoint } = context.appInstallationParameters;
-
-  let mockShopUrl = apiEndpoint;
-  if (!mockShopUrl) {
-    mockShopUrl = 'https://mock.shop/api';
-    console.warn(`No API url configured, falling back to '${mockShopUrl}'`);
-  }
+  const mockShopUrl = getMockShopUrl(context);
 
   if (resourceType !== 'MockShop:Product') {
     throw new Error(`Resource type ${resourceType} not supported`);
@@ -103,10 +102,12 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
   };
 };
 
-const loookupHandler: ResourcesLookupHandler = async (event, _context) => {
+const loookupHandler: ResourcesLookupHandler = async (event, context) => {
   const { urns } = event.lookupBy;
 
-  const response = await fetch('https://mock.shop/api', {
+  const mockShopUrl = getMockShopUrl(context);
+
+  const response = await fetch(mockShopUrl, {
     body: JSON.stringify({
       query: /* GraphQL */ `
         query searchProducts($ids: [ID!]!) {
@@ -142,6 +143,11 @@ const loookupHandler: ResourcesLookupHandler = async (event, _context) => {
   };
 };
 
+/*
+ * The handler function is the entry point for the function which calls
+ * the appropriate handler based on the event type
+ */
+
 export const handler: EventHandler = (event, context) => {
   if (event.type === 'resources.search') {
     return searchHandler(event, context);
@@ -159,5 +165,5 @@ export const handler: EventHandler = (event, context) => {
     return queryHandler(event, context);
   }
 
-  throw new Error('Unknown Event');
+  throw new Error('Bad Request: Unknown Event');
 };
