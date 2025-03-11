@@ -1,30 +1,25 @@
-import { FunctionEventKey, FunctionEventMap, FunctionEventContext } from '@contentful/functions-types'
-
-export type FunctionEventHandler<K extends FunctionEventKey = FunctionEventKey, P extends Record<string, any> = Record<string, any>> = (event: FunctionEventMap[K]['request'], context: FunctionEventContext<P>) => Promise<FunctionEventMap[K]['response']> | FunctionEventMap[K]['response'];
-
-type InstallationParameters = {
-  apiEndpoint: string;
-  url: string;
-};
-
-type EventHandler = FunctionEventHandler<FunctionEventKey, InstallationParameters>;
-type QueryHandler = FunctionEventHandler<'graphql.query', InstallationParameters>;
-type MappingHandler = FunctionEventHandler<'graphql.resourcetype.mapping', InstallationParameters>;
-type ResourcesSearchHandler = FunctionEventHandler<'resources.search'>;
-type ResourcesLookupHandler = FunctionEventHandler<'resources.lookup'>;
+import {
+  EventHandler,
+  MappingHandler,
+  ProductLookupData,
+  QueryHandler,
+  ResourcesLookupHandler,
+  ResourcesSearchHandler,
+  SearchResultData,
+} from './types';
 
 const resourceTypeMappingHandler: MappingHandler = (event) => {
   const mappings = event.resourceTypes.map(({ resourceTypeId }) => ({
     resourceTypeId,
     graphQLOutputType: 'Product',
     graphQLQueryField: 'product',
-    graphQLQueryArguments: { id: '' },
-  }))
+    graphQLQueryArguments: { id: '/urn' },
+  }));
 
   return {
-    resourceTypes: mappings
-  }
-}
+    resourceTypes: mappings,
+  };
+};
 
 const queryHandler: QueryHandler = async (event, context) => {
   // Installation parameters are defined in the app definition
@@ -55,14 +50,23 @@ const queryHandler: QueryHandler = async (event, context) => {
 };
 
 const searchHandler: ResourcesSearchHandler = async (event, context) => {
-  const { query, resourceType } = event
+  const { query, resourceType } = event;
+
+  const { apiEndpoint } = context.appInstallationParameters;
+
+  let mockShopUrl = apiEndpoint;
+  if (!mockShopUrl) {
+    mockShopUrl = 'https://mock.shop/api';
+    console.warn(`No API url configured, falling back to '${mockShopUrl}'`);
+  }
+
   if (resourceType !== 'MockShop:Product') {
     throw new Error(`Resource type ${resourceType} not supported`);
   }
 
-  const response = await fetch('https://mock.shop/api', {
+  const response = await fetch(mockShopUrl, {
     body: JSON.stringify({
-      query: /* GraphQL */`
+      query: /* GraphQL */ `
         query searchProducts($query: String!) {
           search(query: $query, first: 3, types: PRODUCT) {
             edges {
@@ -85,8 +89,8 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
     method: 'POST',
     headers: { Accept: 'application/json', 'content-type': 'application/json' },
   });
-  const result = await response.json()
-  // @ts-ignore
+  const result = (await response.json()) as SearchResultData;
+
   const items = result.data.search.edges.map(({ node }) => ({
     ...node,
     urn: node.id,
@@ -96,15 +100,15 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
   return {
     items,
     pages: {},
-  }
-}
+  };
+};
 
-const loookupHandler: ResourcesLookupHandler = async (event, context) => {
-  const { urns } = event.lookupBy
+const loookupHandler: ResourcesLookupHandler = async (event, _context) => {
+  const { urns } = event.lookupBy;
 
   const response = await fetch('https://mock.shop/api', {
     body: JSON.stringify({
-      query: /* GraphQL */`
+      query: /* GraphQL */ `
         query searchProducts($ids: [ID!]!) {
           nodes(ids: $ids) {
             ... on Product {
@@ -124,8 +128,8 @@ const loookupHandler: ResourcesLookupHandler = async (event, context) => {
     headers: { Accept: 'application/json', 'content-type': 'application/json' },
   });
 
-  const result = await response.json()
- 
+  const result = (await response.json()) as ProductLookupData;
+
   const items = result.data.nodes.map((node) => ({
     ...node,
     urn: node.id,
@@ -135,8 +139,8 @@ const loookupHandler: ResourcesLookupHandler = async (event, context) => {
   return {
     items,
     pages: {},
-  }
-}
+  };
+};
 
 export const handler: EventHandler = (event, context) => {
   if (event.type === 'resources.search') {

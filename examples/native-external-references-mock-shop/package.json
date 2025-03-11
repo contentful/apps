@@ -24,7 +24,7 @@
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
-    "build:functions": "node build-functions.js",
+    "build:functions": "contentful-app-scripts build-functions --ci",
     "create-resource-entities": "tsx -r dotenv/config ./src/tools/create-resource-entities.ts",
     "show-resource-entities": "ts-node -T -r dotenv/config ./src/tools/show-resource-entities.ts"
   },
