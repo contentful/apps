@@ -29,26 +29,33 @@ type EntryItem = {
   fields: Field[];
 };
 
+type AssetItem = {
+  type: 'Link';
+  linkType: 'Asset';
+};
+
+type SymbolItem = {
+  type: 'Symbol';
+};
+
 export type BasicArrayField = {
   id: string;
   type: 'Array';
-  items: {
-    type: 'Symbol';
-  };
+  arrayType: 'Symbol';
+  items: SymbolItem[];
 };
 
 export type AssetArrayField = {
   id: string;
   type: 'Array';
-  items: {
-    type: 'Link';
-    linkType: 'Asset';
-  };
+  arrayType: 'Asset';
+  items: AssetItem[];
 };
 
 export type EntryArrayField = {
   id: string;
   type: 'Array';
+  arrayType: 'Entry';
   items: EntryItem[];
 };
 
@@ -107,11 +114,11 @@ function fieldQuery(field: Field) {
       return assetQuery(field);
     }
   } else if (field.type === 'Array') {
-    if (Array.isArray(field.items)) {
+    if (field.arrayType === 'Entry') {
       return entryArrayQuery(field as EntryArrayField);
-    } else if (field.items.type === 'Symbol') {
+    } else if (field.arrayType === 'Symbol') {
       return basicQuery(field as BasicArrayField);
-    } else if (field.items.type === 'Link' && field.items.linkType === 'Asset') {
+    } else if (field.arrayType === 'Asset') {
       return assetArrayQuery(field as AssetArrayField);
     }
   } else {

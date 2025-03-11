@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import generateLiquidTags from './generateLiquidTags';
 import { Field } from './assembleQuery';
-import { BaseField, BasicField } from './field/baseField';
 
 describe('Generate liquid tags', () => {
   it('Content type with text field transforms it into a liquid tag', () => {
@@ -196,6 +195,7 @@ describe('Generate liquid tags', () => {
       {
         id: 'listOfReferences',
         type: 'Array',
+        arrayType: 'Entry',
         items: [
           {
             type: 'Link',
@@ -215,5 +215,33 @@ describe('Generate liquid tags', () => {
     const result = generateLiquidTags(contentTypeId, entryFields);
 
     expect(result).toContain('{{response.data.blogPost.listOfReferencesCollection.items[0].name}}');
+  });
+
+  it('Content type with one field that contains a list of assets transforms into a liquid tags', () => {
+    const contentTypeId = 'blogPost';
+    const entryFields: Field[] = [
+      {
+        id: 'listOfAsset',
+        type: 'Array',
+        arrayType: 'Asset',
+        items: [
+          {
+            type: 'Link',
+            linkType: 'Asset',
+          },
+        ]
+      },
+    ];
+
+    const result = generateLiquidTags(contentTypeId, entryFields);
+
+    expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].title}}');
+    expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].description}}');
+    expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].url}}');
+    expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].contentType}}');
+    expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].fileName}}');
+    expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].size}}');
+    expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].width}}');
+    expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].height}}');
   });
 });
