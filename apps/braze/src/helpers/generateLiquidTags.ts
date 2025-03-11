@@ -1,5 +1,5 @@
-import { Field } from './assembleQuery';
-import { ASSET_FIELDS, LOCATION_LAT, LOCATION_LONG, SAVED_RESPONSE } from './utils';
+import {EntryArrayField, Field} from './assembleQuery';
+import {ASSET_FIELDS, LOCATION_LAT, LOCATION_LONG, SAVED_RESPONSE} from './utils';
 
 export default function generateLiquidTags(prefix: string, fields: Field[]): string[] {
   const liquidTags: string[] = [];
@@ -18,18 +18,12 @@ export default function generateLiquidTags(prefix: string, fields: Field[]): str
     } else if (field.type === 'Location') {
       liquidTags.push(...generateLiquidLocationFields(content));
     } else if (field.type === 'Array') {
-      //TODO: refactor extract methods
       if (field.arrayType === 'Entry') {
-        field.items.map(({ fields }, index) => {
-          const entryArrayPrefix = `${prefix}.${field.id}Collection.items[${index}]`;
-          liquidTags.push(...generateLiquidTags(entryArrayPrefix, fields));
-        });
+        pushEntryArrayLiquidTag(field, prefix, liquidTags);
       } else if (field.arrayType === 'Asset') {
-        const entryArrayPrefix = `${content}Collection.items[${index}]`;
-        liquidTags.push(...generateLiquidAssetFields(entryArrayPrefix));
+        liquidTags.push(...generateAssetArrayLiquidTag(content, index));
       } else if (field.arrayType === 'Symbol') {
-        const entryArrayPrefix = `${content}Collection`;
-        liquidTags.push(`{{${entryArrayPrefix}}}`);
+        liquidTags.push(generateTextArrayLiquidTag(content));
       }
     } else {
       liquidTags.push(`{{${content}}}`);
@@ -44,4 +38,19 @@ function generateLiquidAssetFields(content: string): string[] {
 
 function generateLiquidLocationFields(content: string): string[] {
   return [`{{${content}.${LOCATION_LAT}}}`, `{{${content}.${LOCATION_LONG}}}`];
+}
+
+function pushEntryArrayLiquidTag(field: EntryArrayField, prefix: string, liquidTags: string[]) {
+  field.items.map(({fields}, index) => {
+    const entryArrayPrefix = `${prefix}.${field.id}Collection.items[${index}]`;
+    liquidTags.push(...generateLiquidTags(entryArrayPrefix, fields));
+  });
+}
+
+function generateAssetArrayLiquidTag(content: string, index: number) {
+  return generateLiquidAssetFields(`${content}Collection.items[${index}]`);
+}
+
+function generateTextArrayLiquidTag(content: string) {
+  return `{{${content}Collection}}`;
 }
