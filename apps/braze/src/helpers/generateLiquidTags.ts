@@ -25,9 +25,11 @@ export default function generateLiquidTags(prefix: string, fields: Field[]): str
           liquidTags.push(...generateLiquidTags(entryArrayPrefix, fields));
         });
       } else if (field.arrayType === 'Asset') {
-        // TODO: do something similar to entryArrays for assets and test it
         const entryArrayPrefix = `${content}Collection.items[${index}]`;
         liquidTags.push(...generateLiquidAssetFields(entryArrayPrefix));
+      } else if (field.arrayType === 'Symbol') {
+        const entryArrayPrefix = `${content}Collection`;
+        liquidTags.push(`{{${entryArrayPrefix}}}`);
       }
     } else {
       liquidTags.push(`{{${content}}}`);

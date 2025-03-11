@@ -189,6 +189,26 @@ describe('Generate liquid tags', () => {
     expect(result).toContain('{{response.data.blogPost.reference.referenceWithinAReference.name}}');
   });
 
+  it('Content type with one field that contains a list of text transforms into a liquid tags', () => {
+    const contentTypeId = 'blogPost';
+    const entryFields: Field[] = [
+      {
+        id: 'listOfText',
+        type: 'Array',
+        arrayType: 'Symbol',
+        items: [
+          {
+            type: 'Symbol',
+          },
+        ]
+      },
+    ];
+
+    const result = generateLiquidTags(contentTypeId, entryFields);
+
+    expect(result).toContain('{{response.data.blogPost.listOfTextCollection}}');
+  });
+
   it('Content type with one field that contains a list of references transforms into a liquid tags', () => {
     const contentTypeId = 'blogPost';
     const entryFields: Field[] = [
