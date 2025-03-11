@@ -6,6 +6,7 @@ import Dialog from './Dialog';
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
+  useAutoResizer: () => {},
 }));
 
 // TODO: add more
@@ -13,6 +14,8 @@ describe('Dialog component', () => {
   it('Component text exists', () => {
     const { getByText } = render(<Dialog />);
 
-    expect(getByText('Braze Connected Content Call')).toBeTruthy();
+    expect(
+      getByText('Select which fields you would like to include', { exact: false })
+    ).toBeTruthy();
   });
 });
