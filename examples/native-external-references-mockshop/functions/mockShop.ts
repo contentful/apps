@@ -2,6 +2,7 @@ import { FunctionEventContext } from '@contentful/functions-types';
 import {
   EventHandler,
   MappingHandler,
+  ProductEdge,
   ProductLookupData,
   QueryHandler,
   ResourcesLookupHandler,
@@ -18,6 +19,20 @@ const getMockShopUrl = (context: FunctionEventContext<Record<string, any>>) => {
   }
   return mockShopUrl;
 };
+
+function withUrn(node: ProductEdge['node']) {
+  return {
+    ...node,
+    urn: node.id,
+  };
+}
+
+function withBadge(node: ProductEdge['node']) {
+  return {
+    ...node,
+    badge: { variant: 'primary', label: 'it works' },
+  };
+}
 
 const resourceTypeMappingHandler: MappingHandler = (event) => {
   const mappings = event.resourceTypes.map(({ resourceTypeId }) => ({
@@ -90,12 +105,10 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
   });
   const result = (await response.json()) as SearchResultData;
 
-  const items = result.data.search.edges.map(({ node }) => ({
-    ...node,
-    urn: node.id,
-    badge: { variant: 'primary', label: 'it works' },
+  const items = result.data.search.edges.map((node) => ({
+    ...withBadge(node),
+    ...withUrn(node),
   }));
-
   return {
     items,
     pages: {},
@@ -132,9 +145,8 @@ const loookupHandler: ResourcesLookupHandler = async (event, context) => {
   const result = (await response.json()) as ProductLookupData;
 
   const items = result.data.nodes.map((node) => ({
-    ...node,
-    urn: node.id,
-    badge: { variant: 'primary', label: 'it works' },
+    ...withBadge(node),
+    ...withUrn(node),
   }));
 
   return {

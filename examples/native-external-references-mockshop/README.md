@@ -10,6 +10,7 @@ This project was bootstrapped with [Create Contentful App](https://github.com/co
     - [Creating a custom app definition](#creating-a-custom-app-definition)
     - [Creating resource entities](#creating-resource-entities)
     - [Installing the app](#installing-the-app)
+    - [Build and upload the app](#upload-the-app)
 4. [Entities overview](#entities-overview)
 5. [Code structure](#code-structure)
     - [Functions](#functions)
@@ -35,6 +36,7 @@ Contentful supports external content integration through the [App Framework](htt
 To overcome these challenges, we offer a more streamlined and cohesive approach to linking third-party systems through existing content model Reference Fields. This upgraded version of fields is referred to as **Native external references** .
 
 Native external references streamline how third-party systems link to existing Reference Fields.
+
 For the purpose of this example, we will be connecting to the [MockShop](https://mock.shop/) external system and query the data using Contentful Graph API
 
 With Native external references we introduce the following new entity types that allow us to model the data from third-party systems in Contentful:
@@ -123,6 +125,11 @@ This will tell Contentful that we want to connect to `MockShop` via the function
 Your example app is now configured and installed.
 
 The form that will save the MockShop API URL when we install the app has been defined in `src/locations/ConfigScreen.tsx` . More information how configuration screens are set up can be found in [this App Configuration tutorial](https://www.contentful.com/developers/docs/extensibility/app-framework/app-configuration/).
+
+## Build functions and upload the app
+
+* After installing the app, build the functions and upload the app by running the command: ` npm run build && npx contentful-app-scripts upload --ci --bundle-dir ./build --organization-id <organisation-id> --definition-id <app-definition-id> --token <cma-token>`
+For more information on environment variables, see [npm run upload-ci](#npm-run-upload-ci)
 
 # Entities overview
 
@@ -242,7 +249,7 @@ The function properties are as follows:
 * `path`: This is the path to the transpiled source file of the Function in your bundle. Exposing a `handler` function.
 * `entryFile`: Path pointing to the source file of the Function. Exposing a `handler` function.
 * `allowedNetworks`: A list of endpoints the Function should be allowed to connect to. This is a security feature to prevent unauthorized access to your network.
-* `accepts`: An array of event types the Function can handle. In this case we have two event types: `resources.search`,  `resources.lookup` `graphql.resourcetype.mapping`,   `graphql.query`.
+* `accepts`: An array of event types the Function can handle. In this case we have two event types: `resources.search`,  `resources.lookup` `graphql.resourcetype.mapping`,  `graphql.query`.
 # Available Scripts
 
 In the project directory, you can run:

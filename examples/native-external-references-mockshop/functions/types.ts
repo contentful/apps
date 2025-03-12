@@ -28,7 +28,7 @@ export type MappingHandler = FunctionEventHandler<
 export type ResourcesSearchHandler = FunctionEventHandler<'resources.search'>;
 export type ResourcesLookupHandler = FunctionEventHandler<'resources.lookup'>;
 
-type ProductEdge = {
+export type ProductEdge = {
   node: {
     id: string;
     title: string;
@@ -42,7 +42,7 @@ type ProductEdge = {
 export type SearchResultData = {
   data: {
     search: {
-      edges: ProductEdge[];
+      edges: ProductEdge['node'][];
     };
   };
 };
