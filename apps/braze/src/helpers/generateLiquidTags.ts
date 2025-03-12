@@ -43,10 +43,13 @@ function generateEntryArrayLiquidTag(field: EntryArrayField, prefix: string) {
 }
 
 function generateAssetArrayLiquidTag(field: AssetArrayField, content: string) {
-  return ASSET_FIELDS.flatMap((_, index) => {
-    const entryArrayPrefix = `${content}Collection.items[${index}]`;
-    return generateLiquidAssetFields(entryArrayPrefix);
-  });
+    return [
+      `{% for ${field.id}CollectionItem in ${content}Collection.items %}
+    {{ ${field.id}CollectionItem.title }}
+    {{ ${field.id}CollectionItem.description }}
+    {{ ${field.id}CollectionItem.url }}
+      {% endfor %}`,
+    ];
 }
 
 function generateTextArrayLiquidTag(content: string, field: BasicArrayField) {

@@ -253,18 +253,9 @@ describe('Generate liquid tags', () => {
 
     const result = generateLiquidTags(contentTypeId, entryFields);
 
-    expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].title}}');
     expect(result).toContain(
-      '{{response.data.blogPost.listOfAssetCollection.items[0].description}}'
+        `{% for listOfAssetCollectionItem in response.data.blogPost.listOfAssetCollection.items %}\n    {{ listOfAssetCollectionItem.title }}\n{{ listOfAssetCollectionItem.description }}\n{{ listOfAssetCollectionItem.url }}\n      {% endfor %}`
     );
-    expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].url}}');
-    expect(result).toContain(
-      '{{response.data.blogPost.listOfAssetCollection.items[0].contentType}}'
-    );
-    expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].fileName}}');
-    expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].size}}');
-    expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].width}}');
-    expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].height}}');
   });
 
   it('Content type with one field that contains a reference within a reference whitin another reference transforms into a liquid tags', () => {
