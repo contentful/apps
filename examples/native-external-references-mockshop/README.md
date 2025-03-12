@@ -1,4 +1,4 @@
-This app demonstrates external resource links using the [TMDB API](https://developer.themoviedb.org/docs/getting-started).
+This app showcases how to integrate external resource links through the Contentful Graph API, powered by the [MockShop API](https://mock.shop/).
 
 This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
 
@@ -8,18 +8,11 @@ This project was bootstrapped with [Create Contentful App](https://github.com/co
 3. [Instructions to create and run the app](#instructions-to-create-and-run-the-app)
     - [Copying the example](#copying-the-example)
     - [Creating a custom app definition](#creating-a-custom-app-definition)
-    - [Building and uploading the app](#building-and-uploading-the-app)
-      - [Running the app locally](#running-the-app-locally)
     - [Creating resource entities](#creating-resource-entities)
     - [Installing the app](#installing-the-app)
 4. [Entities overview](#entities-overview)
 5. [Code structure](#code-structure)
     - [Functions](#functions)
-      - [Search request](#search-request)
-      - [Lookup request](#lookup-request)
-      - [Response](#response)
-      - [Example](#example)
-    - [Property mapping for rendering in the Web app](#property-mapping-for-rendering-in-the-web-app)
     - [App manifest](#app-manifest)
 6. [Available Scripts](#available-scripts)
 # Prerequisites
@@ -86,6 +79,7 @@ You will need to answer the following questions on the terminal. Feel free to pr
 
 1. **Name of your application** . This is how your app will be named and it will be displayed in a few places throughout the UI. The default is the name of the folder you created.
 2. **Select where your app can be rendered**. This shows potential [app locations](https://www.contentful.com/developers/docs/extensibility/app-framework/locations/) where an app can be rendered within the Contentful Web app. Select **App configuration screen** , as we will utilize the configuration screen to provide the External API URL for the app.
+3. **Contentful CMA endpoint URL** . This refers to the URL used to interact with Contentful's Management APIs.
 4. **App Parameters** . These are configurable values that can be used to set default values or define custom validation rules. As we need to define these for the API URL in this case:
 
 * Opt for **Y** to advance with the process of defining the parameters.
@@ -98,28 +92,9 @@ You will need to answer the following questions on the terminal. Feel free to pr
 > **NOTE:** 
 > Make sure the organization ID you select here is the Organization that has access to the Native external references feature.
 
+> Please configure the .env variables properly before running these scripts
+
 You now have a basic application that can be enriched with additional information that will enable the example project you downloaded to function properly.
-
-## Building and uploading the app
-
-After creating the app definition, we can take care of uploading the code by running these commands:
-
-```bash
-npm run build
-npm run upload
-```
-
-The interactive CLI will prompt you to provide additional details, such as a CMA endpoint URL. Select **Yes** when prompted if you’d like to activate the bundle after upload.
-
-### Running the app locally
-
-The steps above will upload the app to Contentful's infrastructure. However, you can also run the app locally to be able to easier debug the code. To do this:
-
-* Run `npm run open-settings`, which will open the web page with the App details.
-* Deselect the **Hosted by Contentful** option and fill the text field below with `http://localhost:3000`.
-* Save the changes.
-
-This process is reversible and at any point you can go back to the setup that uses the bundle uploaded to Contentful's infrastructure.
 
 ## Creating resource entities
 
@@ -142,11 +117,11 @@ This will tell Contentful that we want to connect to `MockShop` via the function
 
 * After you successfully upload your app, install it to an existing space by running the command: `npm run install-app`
 * Select the space and environment in which you would prefer to install the example app from the dialog that appears. You will have to grant access to the space the app will be installed in.
-* After granting access, the configuration screen, which is rendered by the <ConfigScreen /> component, will be displayed. Input your TMDB API token into the form and proceed to save the changes.
+* After granting access, the configuration screen, which is rendered by the <ConfigScreen /> component, will be displayed. Input your MockShop API URL into the form and proceed to save the changes.
 
 Your example app is now configured and installed.
 
-The form that will save the token when we install the app has been defined in `src/locations/ConfigScreen.tsx` . More information how configuration screens are set up can be found in [this App Configuration tutorial](https://www.contentful.com/developers/docs/extensibility/app-framework/app-configuration/).
+The form that will save the MockShop API URL when we install the app has been defined in `src/locations/ConfigScreen.tsx` . More information how configuration screens are set up can be found in [this App Configuration tutorial](https://www.contentful.com/developers/docs/extensibility/app-framework/app-configuration/).
 
 # Entities overview
 
@@ -157,22 +132,6 @@ Below is a representation of how a _Resource Provider_ is structured, using the 
    "sys":{
       "id":"MockShop",
       "type":"ResourceProvider",
-      "createdAt":"2025-02-25T14:11:06.803Z",
-      "updatedAt":"2025-03-11T15:55:41.077Z",
-      "createdBy":{
-         "sys":{
-            "type":"Link",
-            "linkType":"User",
-            "id":"3yXwx2EpevblFaVIVWaZ8H"
-         }
-      },
-      "updatedBy":{
-         "sys":{
-            "type":"Link",
-            "linkType":"User",
-            "id":"1UsrZROaHXHXrnEyptuEjz"
-         }
-      },
       "organization":{
          "sys":{
             "type":"Link",
@@ -210,22 +169,6 @@ We are representing _Resource Types_ in a similar structure:
       {
          "sys":{
             "id":"MockShop:Product",
-            "createdAt":"2025-02-25T14:11:07.233Z",
-            "updatedAt":"2025-03-11T15:55:41.323Z",
-            "createdBy":{
-               "sys":{
-                  "type":"Link",
-                  "linkType":"User",
-                  "id":"3yXwx2EpevblFaVIVWaZ8H"
-               }
-            },
-            "updatedBy":{
-               "sys":{
-                  "type":"Link",
-                  "linkType":"User",
-                  "id":"1UsrZROaHXHXrnEyptuEjz"
-               }
-            },
             "resourceProvider":{
                "sys":{
                   "type":"Link",
@@ -237,14 +180,14 @@ We are representing _Resource Types_ in a similar structure:
                "sys":{
                   "type":"Link",
                   "linkType":"AppDefinition",
-                  "id":"1ZIsjoQpZIjZ9GvQmrXMwK"
+                  "id":""
                }
             },
             "organization":{
                "sys":{
                   "type":"Link",
                   "linkType":"Organization",
-                  "id":"00y2g65dGhRIi6Xu9X3UGy"
+                  "id":""
                }
             },
             "type":"ResourceType"
@@ -260,9 +203,7 @@ We are representing _Resource Types_ in a similar structure:
          }
       }
    ],
-   "pages":{
-      
-   }
+   "pages":{}
 }
 ```
 
@@ -274,176 +215,19 @@ The example app is using [Functions](https://www.contentful.com/developers/docs/
 
 * `resources.search` - retrieval of specific content based on search queries
 * `resources.lookup` - retrieval of specific content based on URNs (IDs)
-* `resourcetype.mapping` - retrieval of specific resource type mappings 
-* `graphql.query` - event to handle graphql query of external third party API
+* `resourcetype.mapping` - retrieval of specific resource type mappings(used in knowing what fields are mapped to external type)
+* `graphql.query` -  handle graphql query of external third party API
 
-### Search request
+## Property mapping 
 
-Search handler expects the following shape for outgoing requests:
-
-```typescript
-type ResourcesSearchRequest = {
-  type: 'resources.search';
-  resourceType: string;
-  query: string;
-  limit?: number;
-  pages?: {
-    nextCursor: string;
-  };
-};
-```
-
-| property         | type                          | description                                                                                                                        |
-| ---------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| limit            | number (required)             | Number defining the maximum items that should be returned                                                                       |
-| pages            | object (optional)             |
-| pages.nextCursor | string (required)             | Cursor string pointing to the specific page of results to be used as a starting point for the request                              |
-| resourceType     | string (required)             | String consisting of the name of the provider and the resource within the provider, in a format `{Provider}:{Type}, eg. TMDB: Movie |
-| type             | `resources.search` (required) | Identifier for the type of the event                                                                                               |
-| query            | string (optional)             | Search query to be passed to Contentful Function, which in turn passes it down to the 3rd party system's search API                |
-
-### Lookup request
-
-Lookup handler expects the following shape for outgoing requests:
-
-```typescript
-type Scalar = string | number | boolean;
-
-type ResourcesLookupRequest<
-  L extends Record<string, Scalar[]> = Record<string, Scalar[]>
-> = {
-  type: 'resources.lookup';
-  lookupBy: L;
-  resourceType: string;
-  limit?: number;
-  pages?: {
-    nextCursor: string;
-  };
-};
-```
-
-| property         | type                          | description                                                                                                                        |
-| ---------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| limit            | number (required)             | Number defining the maximum items that should be returned                                                                       |
-| pages            | object (optional)             |
-| pages.nextCursor | string (required)             | Cursor string pointing to the specific page of results to be used as a starting point for the request                              |
-| resourceType     | string (required)             | String consisting of the name of the provider and the resource within the provider, in a format `{Provider}:{Type}, eg. TMDB: Movie |
-| type             | `resources.lookup` (required) | Identifier for the type of the event                                                                                               |
-| lookupBy         | object (required)             |
-| lookupBy.urns    | string[]                      | List of IDs of entities to be fetched                                                                                              |
-
-### Response
-
-Both events return the same shape of the response:
-
-```typescript
-type ResourcesSearchResponse = {
-  items: Resource[];
-  pages: {
-    nextCursor?: string;
-  };
-};
-
-type ResourcesLookupResponse = {
-  items: Resource[];
-  pages: {
-    nextCursor?: string;
-  };
-};
-```
-
-| property         | type                  | description                                              |
-| ---------------- | --------------------- | -------------------------------------------------------- |
-| items            | Resource[] (required) | List of returned resources                               |
-| pages            | object (required)     |                                                          |
-| pages.nextCursor | string (optional)     | Cursor string to be used to request next page of results |
-
-Functions are designed without prior knowledge of the response data structure from third-party systems. Therefore, an additional transformation is required to ensure that all Function events return responses with a consistent shape of `Resource` s. This transformation is carried out by the `transformResult` function located in the `function/helpers.ts` file. In our example, we are expecting `Resource` to conform to a particular shape:
-
-```typescript
-type Resource = {
-  urn: string;
-  name: string;
-  image?: {
-    url: string;
-  };
-  externalUrl: string;
-};
-```
-
-### Example
-
-Assuming that TMDB API exposes `Person` entities with the following (simplified) shape:
-
-```json
-{
-  "results": [
-    {
-      "id": 1245,
-      "name": "Scarlett Johansson",
-      "profile_path": "/6NsMbJXRlDZuDzatN2akFdGuTvx.jpg"
-    }
-    {
-      "id": 488,
-      "name": "Steven Spielberg",
-      "profile_path": "/tZxcg19YQ3e8fJ0pOs7hjlnmmr6.jpg"
-    },
-    {
-      "id": 31,
-      "name": "Tom Hanks",
-      "profile_path": "/mKr8PN8sn80LzVaZMg8L52kmakm.jpg"
-    }
-  ]
-}
-```
-
-An example search event request could look like this:
-
-```typescript
-const searchRequest: ResourcesSearchRequest = {
-  type: 'resources.search',
-  resourceType: 'TMDB:Person',
-  query: 'Tom'
-};
-```
-
-And an example lookup event request could look like this:
-
-```typescript
-const lookupRequest: ResourcesLookupRequest = {
-  type: 'resources.lookup',
-  resourceType: 'TMDB:Person',
-  lookupBy: {
-    urn: ['31', '1245']
-  }
-};
-```
-
-In the examples above, we would expect:
-
-* the search event to return the resource with the URN `31` (Tom Hanks), 
-* the lookup event to return the resources with the URNs `31` (Tom Hanks) and `1245` (Scarlett Johansson).
-
-## Property mapping for rendering in the Web app
+Contentful uses resourcetype.mapping to determine which field in an entry is mapped to an external type and to specify any arguments required for External GraphQL queries defined in `queryHandler` 
 
 Contentful web app displays entries using components that require specific data structures to fill their UI elements.
+The mapping between these components and external system data is established using [JSON pointers](https://datatracker.ietf.org/doc/html/rfc6901).
 
-The mapping between these components and external system data is established using [JSON pointers](https://datatracker.ietf.org/doc/html/rfc6901). This mapping is defined in the `defaultFieldMapping` property of each `Resource Type` and must adhere to the structure used for mapping the values shown in the entry component:
+This mapping is defined in the `defaultFieldMapping` property of each `Resource Type` and must adhere to the structure used for mapping the values shown in the entry component:
 
-| property      | type              |
-| ------------- | ----------------- |
-| title         | string (required) |
-| subtitle      | string (optional) |
-| description   | string (optional) |
-| externalUrl   | string (optional) |
-| image         | object (optional) |
-| image.url     | string (required) |
-| image.altText | string (optional) |
-| badge         | object (optional) |
-| badge.label   | string (required) |
-| badge.variant | string (required) |
-
-The definitions of `Movie` and `Person` **Resource Type** representations can be found in the `src/tools/entities/movie.json` and `src/tools/entities/person.json` files, respectively.
+The definitions of `Product` **Resource Type** representations can be found in the ` src/tools/entities/product.json ` .
 
 ## App manifest
 
