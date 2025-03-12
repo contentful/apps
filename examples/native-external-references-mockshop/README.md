@@ -13,6 +13,7 @@ This project was bootstrapped with [Create Contentful App](https://github.com/co
 4. [Entities overview](#entities-overview)
 5. [Code structure](#code-structure)
     - [Functions](#functions)
+    - [Property mapping](#property-mapping)
     - [App manifest](#app-manifest)
 6. [Available Scripts](#available-scripts)
 # Prerequisites
@@ -29,12 +30,12 @@ This project was bootstrapped with [Create Contentful App](https://github.com/co
 
 # Description
 
-Contentful provides a method for integrating content from external sources using the [App Framework](https://www.contentful.com/developers/docs/extensibility/app-framework/). The [App Marketplace](https://www.contentful.com/marketplace/) currently offers complete solutions tailored for specific systems such as [Shopify](https://www.contentful.com/help/external-references-with-shopify/) or [commercetools](https://www.contentful.com/help/external-references-with-commercetools/). However, connecting to other systems requires developing custom frontend apps with bespoke implementation.
+Contentful supports external content integration through the [App Framework](https://www.contentful.com/developers/docs/extensibility/app-framework/). The [App Marketplace](https://www.contentful.com/marketplace/) currently offers offers ready-made solutions for systems like [Shopify](https://www.contentful.com/help/external-references-with-shopify/) or [commercetools](https://www.contentful.com/help/external-references-with-commercetools/). However, connecting to other systems requires developing custom frontend apps with bespoke implementation.
 
 To overcome these challenges, we offer a more streamlined and cohesive approach to linking third-party systems through existing content model Reference Fields. This upgraded version of fields is referred to as **Native external references** .
 
-Currently, the application setup primarily revolves around command-line operations. However, you can also view the connected content displayed in the user interface. 
-For the purpose of this example, we will be connecting to the [MockShop](https://mock.shop/) external system.
+Native external references streamline how third-party systems link to existing Reference Fields.
+For the purpose of this example, we will be connecting to the [MockShop](https://mock.shop/) external system and query the data using Contentful Graph API
 
 With Native external references we introduce the following new entity types that allow us to model the data from third-party systems in Contentful:
 
@@ -215,12 +216,12 @@ The example app is using [Functions](https://www.contentful.com/developers/docs/
 
 * `resources.search` - retrieval of specific content based on search queries
 * `resources.lookup` - retrieval of specific content based on URNs (IDs)
-* `resourcetype.mapping` - retrieval of specific resource type mappings(used in knowing what fields are mapped to external type)
-* `graphql.query` -  handle graphql query of external third party API
+* `graphql.resourcetype.mapping` - retrieves resource type mappings that determine which fields map to an external type
+* `graphql.query` -  handles GraphQL queries for the external third-party API.
 
-## Property mapping 
+## Property mapping
 
-Contentful uses resourcetype.mapping to determine which field in an entry is mapped to an external type and to specify any arguments required for External GraphQL queries defined in `queryHandler` 
+Contentful uses `resource type mappings` to determine which field in an entry is mapped to an external type and to specify any arguments required for External GraphQL queries defined in `queryHandler` 
 
 Contentful web app displays entries using components that require specific data structures to fill their UI elements.
 The mapping between these components and external system data is established using [JSON pointers](https://datatracker.ietf.org/doc/html/rfc6901).
@@ -241,7 +242,7 @@ The function properties are as follows:
 * `path`: This is the path to the transpiled source file of the Function in your bundle. Exposing a `handler` function.
 * `entryFile`: Path pointing to the source file of the Function. Exposing a `handler` function.
 * `allowedNetworks`: A list of endpoints the Function should be allowed to connect to. This is a security feature to prevent unauthorized access to your network.
-* `accepts`: An array of event types the Function can handle. In this case we have two event types: `resources.search` and `resources.lookup`.
+* `accepts`: An array of event types the Function can handle. In this case we have two event types: `resources.search`,  `resources.lookup` `graphql.resourcetype.mapping`,   `graphql.query`.
 # Available Scripts
 
 In the project directory, you can run:
