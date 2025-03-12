@@ -9,6 +9,7 @@
     "@contentful/react-apps-toolkit": "1.2.16",
     "@testing-library/user-event": "^14.6.1",
     "contentful-management": "10.46.4",
+    "contentful-resolve-response": "^1.9.2",
     "emotion": "10.0.27",
     "happy-dom": "^15.11.6",
     "react": "18.3.1",
@@ -25,6 +26,7 @@
   "devDependencies": {
     "@contentful/app-scripts": "1.19.1",
     "@testing-library/react": "14.0.0",
+    "@types/contentful-resolve-response": "^0.1.33",
     "@types/node": "16.18.38",
     "@types/react": "18.3.1",
     "@types/react-dom": "18.3.0",

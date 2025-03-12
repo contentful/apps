@@ -8,10 +8,11 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useCMA: () => mockCma,
 }));
 
+// TODO: add more
 describe('Dialog component', () => {
   it('Component text exists', () => {
     const { getByText } = render(<Dialog />);
 
-    expect(getByText('Hello Dialog Component (AppId: test-app)')).toBeTruthy();
+    expect(getByText('Braze Connected Content Call')).toBeTruthy();
   });
 });
