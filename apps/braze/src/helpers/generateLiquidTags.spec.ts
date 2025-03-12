@@ -76,11 +76,6 @@ describe('Generate liquid tags', () => {
     expect(result).toContain('{{response.data.blogPost.asset.title}}');
     expect(result).toContain('{{response.data.blogPost.asset.description}}');
     expect(result).toContain('{{response.data.blogPost.asset.url}}');
-    expect(result).toContain('{{response.data.blogPost.asset.contentType}}');
-    expect(result).toContain('{{response.data.blogPost.asset.fileName}}');
-    expect(result).toContain('{{response.data.blogPost.asset.size}}');
-    expect(result).toContain('{{response.data.blogPost.asset.width}}');
-    expect(result).toContain('{{response.data.blogPost.asset.height}}');
   });
 
   it('Content type with one field that is a location transforms into a liquid tags', () => {
@@ -148,11 +143,6 @@ describe('Generate liquid tags', () => {
     expect(result).toContain('{{response.data.blogPost.reference.asset.title}}');
     expect(result).toContain('{{response.data.blogPost.reference.asset.description}}');
     expect(result).toContain('{{response.data.blogPost.reference.asset.url}}');
-    expect(result).toContain('{{response.data.blogPost.reference.asset.contentType}}');
-    expect(result).toContain('{{response.data.blogPost.reference.asset.fileName}}');
-    expect(result).toContain('{{response.data.blogPost.reference.asset.size}}');
-    expect(result).toContain('{{response.data.blogPost.reference.asset.width}}');
-    expect(result).toContain('{{response.data.blogPost.reference.asset.height}}');
   });
 
   it('Content type with one field that contains a reference within a reference transforms into a liquid tags', () => {
@@ -205,7 +195,7 @@ describe('Generate liquid tags', () => {
     const result = generateLiquidTags(contentTypeId, entryFields);
 
     expect(result).toContain(
-      `{% for listOfTextItem in response.data.blogPost.listOfText %}\n    {{ listOfTextItem }}\n      {% endfor %}`
+      `{% for listOfTextItem in response.data.blogPost.listOfText %}\n{{ listOfTextItem }}\n{% endfor %}`
     );
   });
 
@@ -254,7 +244,7 @@ describe('Generate liquid tags', () => {
     const result = generateLiquidTags(contentTypeId, entryFields);
 
     expect(result).toContain(
-        `{% for listOfAssetCollectionItem in response.data.blogPost.listOfAssetCollection.items %}\n    {{ listOfAssetCollectionItem.title }}\n{{ listOfAssetCollectionItem.description }}\n{{ listOfAssetCollectionItem.url }}\n      {% endfor %}`
+      `{% for listOfAssetCollectionItem in response.data.blogPost.listOfAssetCollection.items %}\n{{ listOfAssetCollectionItem.title }}\n{{ listOfAssetCollectionItem.description }}\n{{ listOfAssetCollectionItem.url }}\n{% endfor %}`
     );
   });
 

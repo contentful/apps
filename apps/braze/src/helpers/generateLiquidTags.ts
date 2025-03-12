@@ -43,20 +43,20 @@ function generateEntryArrayLiquidTag(field: EntryArrayField, prefix: string) {
 }
 
 function generateAssetArrayLiquidTag(field: AssetArrayField, content: string) {
-    return [
-      `{% for ${field.id}CollectionItem in ${content}Collection.items %}
-    {{ ${field.id}CollectionItem.title }}
-    {{ ${field.id}CollectionItem.description }}
-    {{ ${field.id}CollectionItem.url }}
-      {% endfor %}`,
-    ];
+  return [
+    `{% for ${field.id}CollectionItem in ${content}Collection.items %}
+{{ ${field.id}CollectionItem.title }}
+{{ ${field.id}CollectionItem.description }}
+{{ ${field.id}CollectionItem.url }}
+{% endfor %}`,
+  ];
 }
 
 function generateTextArrayLiquidTag(content: string, field: BasicArrayField) {
   return [
     `{% for ${field.id}Item in ${content} %}
-    {{ ${field.id}Item }}
-      {% endfor %}`,
+{{ ${field.id}Item }}
+{% endfor %}`,
   ];
 }
 
