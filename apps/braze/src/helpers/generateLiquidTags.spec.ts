@@ -259,4 +259,46 @@ describe('Generate liquid tags', () => {
     expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].width}}');
     expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].height}}');
   });
+
+  it('Content type with one field that contains a reference within a reference whitin another reference transforms into a liquid tags', () => {
+    const contentTypeId = 'blogPost';
+    const entryFields: Field[] = [
+      {
+        id: 'reference',
+        type: 'Link',
+        linkType: 'Entry',
+        entryContentType: 'reference',
+        fields: [
+          {
+            id: 'referenceWithinAReference',
+            type: 'Link',
+            linkType: 'Entry',
+            entryContentType: 'reference',
+            fields: [
+              {
+                id: 'referenceWithAnotherAReference',
+                type: 'Link',
+                linkType: 'Entry',
+                entryContentType: 'reference',
+                fields: [
+                  {
+                    id: 'name',
+                    type: 'Symbol',
+                  },
+                  {
+                    id: 'phone',
+                    type: 'Integer',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    const result = generateLiquidTags(contentTypeId, entryFields);
+
+    expect(result).toContain('{{response.data.blogPost.reference.referenceWithinAReference.referenceWithAnotherAReference.name}}');
+  });
 });
