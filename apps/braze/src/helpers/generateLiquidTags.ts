@@ -1,4 +1,4 @@
-import {AssetArrayField, BasicArrayField, EntryArrayField, Field} from './assembleQuery';
+import { AssetArrayField, BasicArrayField, EntryArrayField, Field } from './assembleQuery';
 import { ASSET_FIELDS, LOCATION_LAT, LOCATION_LONG, SAVED_RESPONSE } from './utils';
 
 export default function generateLiquidTags(prefix: string, fields: Field[]): string[] {
@@ -43,22 +43,29 @@ function generateEntryArrayLiquidTag(field: EntryArrayField, prefix: string) {
 }
 
 function generateAssetArrayLiquidTag(field: AssetArrayField, content: string) {
-  return field.items.flatMap((_, index) => {
+  return ASSET_FIELDS.flatMap((_, index) => {
     const entryArrayPrefix = `${content}Collection.items[${index}]`;
     return generateLiquidAssetFields(entryArrayPrefix);
   });
 }
 
-function generateTextArrayLiquidTag(content: string) {
-  return [`{{${content}}}`];
+function generateTextArrayLiquidTag(content: string, field: BasicArrayField) {
+  return [
+    `{% for ${field.id}Item in ${content} %}
+    {{ ${field.id}Item }}
+      {% endfor %}`,
+  ];
 }
 
-function generateArraysLiquidTags(field: BasicArrayField | AssetArrayField | EntryArrayField, prefix: string, content: string
+function generateArraysLiquidTags(
+  field: BasicArrayField | AssetArrayField | EntryArrayField,
+  prefix: string,
+  content: string
 ): string[] {
   if (field.arrayType === 'Entry') {
     return generateEntryArrayLiquidTag(field, prefix);
   } else if (field.arrayType === 'Asset') {
     return generateAssetArrayLiquidTag(field, content);
   }
-  return generateTextArrayLiquidTag(content);
+  return generateTextArrayLiquidTag(content, field);
 }

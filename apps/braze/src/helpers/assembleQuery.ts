@@ -42,14 +42,14 @@ export type BasicArrayField = {
   id: string;
   type: 'Array';
   arrayType: 'Symbol';
-  items: SymbolItem[];
+  items: SymbolItem;
 };
 
 export type AssetArrayField = {
   id: string;
   type: 'Array';
   arrayType: 'Asset';
-  items: AssetItem[];
+  items: AssetItem;
 };
 
 export type EntryArrayField = {

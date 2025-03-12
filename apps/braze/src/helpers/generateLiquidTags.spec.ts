@@ -191,41 +191,45 @@ describe('Generate liquid tags', () => {
 
   it('Content type with one field that contains a list of text transforms into a liquid tags', () => {
     const contentTypeId = 'blogPost';
-    const entryFields: Field[] = [{
-      id: 'listOfText',
-      type: 'Array',
-      arrayType: 'Symbol',
-      items: [{
-        type: 'Symbol',
+    const entryFields: Field[] = [
+      {
+        id: 'listOfText',
+        type: 'Array',
+        arrayType: 'Symbol',
+        items: {
+          type: 'Symbol',
+        },
       },
-      ]
-    },
     ];
 
     const result = generateLiquidTags(contentTypeId, entryFields);
 
-    expect(result).toContain('{{response.data.blogPost.listOfText}}');
+    expect(result).toContain(
+      `{% for listOfTextItem in response.data.blogPost.listOfText %}\n    {{ listOfTextItem }}\n      {% endfor %}`
+    );
   });
 
   it('Content type with one field that contains a list of references transforms into a liquid tags', () => {
     const contentTypeId = 'blogPost';
-    const entryFields: Field[] = [{
-      id: 'listOfReferences',
-      type: 'Array',
-      arrayType: 'Entry',
-      items: [
+    const entryFields: Field[] = [
+      {
+        id: 'listOfReferences',
+        type: 'Array',
+        arrayType: 'Entry',
+        items: [
           {
             type: 'Link',
             linkType: 'Entry',
             entryContentType: 'tag',
-            fields: [{
-              id: 'name',
-              type: 'Symbol',
-            },
+            fields: [
+              {
+                id: 'name',
+                type: 'Symbol',
+              },
             ],
           },
-      ],
-    },
+        ],
+      },
     ];
 
     const result = generateLiquidTags(contentTypeId, entryFields);
@@ -235,25 +239,28 @@ describe('Generate liquid tags', () => {
 
   it('Content type with one field that contains a list of assets transforms into a liquid tags', () => {
     const contentTypeId = 'blogPost';
-    const entryFields: Field[] = [{
-      id: 'listOfAsset',
-      type: 'Array',
-      arrayType: 'Asset',
-      items: [
-          {
-            type: 'Link',
-            linkType: 'Asset',
-          },
-      ]
-    },
+    const entryFields: Field[] = [
+      {
+        id: 'listOfAsset',
+        type: 'Array',
+        arrayType: 'Asset',
+        items: {
+          type: 'Link',
+          linkType: 'Asset',
+        },
+      },
     ];
 
     const result = generateLiquidTags(contentTypeId, entryFields);
 
     expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].title}}');
-    expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].description}}');
+    expect(result).toContain(
+      '{{response.data.blogPost.listOfAssetCollection.items[0].description}}'
+    );
     expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].url}}');
-    expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].contentType}}');
+    expect(result).toContain(
+      '{{response.data.blogPost.listOfAssetCollection.items[0].contentType}}'
+    );
     expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].fileName}}');
     expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].size}}');
     expect(result).toContain('{{response.data.blogPost.listOfAssetCollection.items[0].width}}');
@@ -299,6 +306,8 @@ describe('Generate liquid tags', () => {
 
     const result = generateLiquidTags(contentTypeId, entryFields);
 
-    expect(result).toContain('{{response.data.blogPost.reference.referenceWithinAReference.referenceWithAnotherAReference.name}}');
+    expect(result).toContain(
+      '{{response.data.blogPost.reference.referenceWithinAReference.referenceWithAnotherAReference.name}}'
+    );
   });
 });
