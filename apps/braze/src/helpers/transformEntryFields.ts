@@ -11,7 +11,7 @@ import { ContentFields, KeyValueMap, PlainClientAPI } from 'contentful-managemen
 
 export async function transformEntryFields(fields: any, cma: PlainClientAPI): Promise<Field[]> {
   const contentType = await cma.contentType.get({ contentTypeId: fields.sys.contentType.sys.id });
-  const transformedFields = await Promise.all(
+  return await Promise.all(
     Object.entries(fields.fields).map(async ([name, fieldsValues]) => {
       const field = Object.values(fieldsValues as { [key: string]: any })[0];
       const fieldInfo = contentType.fields.find((f) => f.id === name);
@@ -38,8 +38,6 @@ export async function transformEntryFields(fields: any, cma: PlainClientAPI): Pr
       }
     })
   );
-
-  return transformedFields;
 }
 
 function assembleBasicField(name: string, fieldInfo: ContentFields<KeyValueMap>): BasicField {
@@ -75,6 +73,7 @@ function assembleBasicArrayField(name: string): BasicArrayField {
   return {
     id: name,
     type: 'Array',
+    arrayType: 'Symbol',
     items: {
       type: 'Symbol',
     },
@@ -85,6 +84,7 @@ function assembleAssetArrayField(name: string): AssetArrayField {
   return {
     id: name,
     type: 'Array',
+    arrayType: 'Asset',
     items: {
       type: 'Link',
       linkType: 'Asset',
@@ -100,6 +100,7 @@ async function assembleEntryArrayField(
   return {
     id: name,
     type: 'Array',
+    arrayType: 'Entry',
     items: await Promise.all(
       field.map(async (f: any) => ({
         type: 'Link',

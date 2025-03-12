@@ -29,27 +29,32 @@ type EntryItem = {
   fields: Field[];
 };
 
-type AssetItem = {
-  type: 'Link';
-  linkType: 'Asset';
-};
-
-type SymbolItem = {
-  type: 'Symbol';
-};
+// type AssetItem = {
+//   type: 'Link';
+//   linkType: 'Asset';
+// };
+//
+// type SymbolItem = {
+//   type: 'Symbol';
+// };
 
 export type BasicArrayField = {
   id: string;
   type: 'Array';
   arrayType: 'Symbol';
-  items: SymbolItem[];
+  items: {
+    type: 'Symbol';
+  };
 };
 
 export type AssetArrayField = {
   id: string;
   type: 'Array';
   arrayType: 'Asset';
-  items: AssetItem[];
+  items: {
+    type: 'Link';
+    linkType: 'Asset';
+  };
 };
 
 export type EntryArrayField = {
