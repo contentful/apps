@@ -1,20 +1,12 @@
-import {
-  createClient,
-  CursorPaginatedCollectionProp
-} from 'contentful-management';
+import { createClient, CursorPaginatedCollectionProp } from 'contentful-management';
 import type {
   APIError,
   APIResourceProvider,
   APIResourceType,
   ResourceProvider,
-  ResourceType
+  ResourceType,
 } from './types';
-import {
-  accessToken,
-  appDefinitionId,
-  manifest,
-  organizationId
-} from './imports';
+import { accessToken, appDefinitionId, manifest, organizationId } from './imports';
 
 type ResourceProviderResult = APIError | APIResourceProvider;
 type ResourceTypeResult = APIError | APIResourceType;
@@ -41,9 +33,7 @@ export const getResourceProvider = async () => {
   return get<ResourceProviderResult>({ url });
 };
 
-export const createResourceProvider = async (
-  resourceProvider: ResourceProvider
-) => {
+export const createResourceProvider = async (resourceProvider: ResourceProvider) => {
   const url = `https://api.contentful.com/organizations/${organizationId}/app_definitions/${appDefinitionId}/resource_provider`;
 
   const resourceProviderWithFunctionId: ResourceProvider = {
@@ -52,16 +42,16 @@ export const createResourceProvider = async (
       ...resourceProvider.function,
       sys: {
         ...resourceProvider.function.sys,
-        id: manifest.functions[0].id
-      }
-    }
+        id: manifest.functions[0].id,
+      },
+    },
   };
 
   const body = JSON.stringify(resourceProviderWithFunctionId);
 
   return put<ResourceProviderResult>({
     resource: body,
-    url
+    url,
   });
 };
 
@@ -78,6 +68,6 @@ export const createResourceType = async (resourceType: ResourceType) => {
 
   return put<ResourceTypeResult>({
     resource: body,
-    url
+    url,
   });
 };

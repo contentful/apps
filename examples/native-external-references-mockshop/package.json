@@ -28,7 +28,8 @@
     "build:functions": "contentful-app-scripts build-functions --ci",
     "create-resource-entities": "tsx -r dotenv/config ./src/tools/create-resource-entities.ts",
     "show-resource-entities": "tsx -r dotenv/config ./src/tools/show-resource-entities.ts",
-    "install-app": "contentful-app-scripts install"
+    "install-app": "contentful-app-scripts install",
+    "prettier": "prettier --write functions, src"
   },
   "eslintConfig": {
     "extends": "react-app"
