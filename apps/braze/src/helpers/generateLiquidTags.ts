@@ -1,4 +1,4 @@
-import { Field } from './assembleQuery';
+import {AssetArrayField, BasicArrayField, EntryArrayField, Field} from './assembleQuery';
 import { ASSET_FIELDS, LOCATION_LAT, LOCATION_LONG, SAVED_RESPONSE } from './utils';
 
 export default function generateLiquidTags(prefix: string, fields: Field[]): string[] {
@@ -13,14 +13,12 @@ export default function generateLiquidTags(prefix: string, fields: Field[]): str
           liquidTags.push(...generateLiquidAssetFields(content));
         }
         if (field.linkType === 'Entry') {
-          // TODO : check if this works for entry within entry within entry
           liquidTags.push(...generateLiquidTags(`${prefix}.${field.id}`, field.fields));
         }
       } else if (field.type === 'Location') {
         liquidTags.push(...generateLiquidLocationFields(content));
       } else if (field.type === 'Array') {
-        // TODO : do arrays
-        // generateArraysLiquidTags(field, prefix, liquidTags, content, index);
+        liquidTags.push(...generateArraysLiquidTags(field, prefix, content));
       } else {
         liquidTags.push(`{{${content}}}`);
       }
@@ -37,33 +35,30 @@ function generateLiquidLocationFields(content: string): string[] {
   return [`{{${content}.${LOCATION_LAT}}}`, `{{${content}.${LOCATION_LONG}}}`];
 }
 
-// function pushEntryArrayLiquidTag(field: EntryArrayField, prefix: string, liquidTags: string[]) {
-//   field.items.map(({ fields }, index) => {
-//     const entryArrayPrefix = `${prefix}.${field.id}Collection.items[${index}]`;
-//     liquidTags.push(...generateLiquidTags(entryArrayPrefix, fields));
-//   });
-// }
-//
-// function generateAssetArrayLiquidTag(content: string, index: number) {
-//   return generateLiquidAssetFields(`${content}Collection.items[${index}]`);
-// }
-//
-// function generateTextArrayLiquidTag(content: string) {
-//   return [`{{${content}Collection}}`];
-// }
-//
-// function generateArraysLiquidTags(
-//   field: BasicArrayField | AssetArrayField | EntryArrayField,
-//   prefix: string,
-//   liquidTags: string[],
-//   content: string,
-//   index: number
-// ): string[] {
-//   if (field.arrayType === 'Entry') {
-//     pushEntryArrayLiquidTag(field, prefix, liquidTags);
-//   } else if (field.arrayType === 'Asset') {
-//     return generateAssetArrayLiquidTag(content, index);
-//   }
-//
-//   return generateTextArrayLiquidTag(content);
-// }
+function generateEntryArrayLiquidTag(field: EntryArrayField, prefix: string) {
+  return field.items.flatMap(({ fields }, index) => {
+    const entryArrayPrefix = `${prefix}.${field.id}Collection.items[${index}]`;
+    return generateLiquidTags(entryArrayPrefix, fields);
+  });
+}
+
+function generateAssetArrayLiquidTag(field: AssetArrayField, content: string) {
+  return field.items.flatMap((_, index) => {
+    const entryArrayPrefix = `${content}Collection.items[${index}]`;
+    return generateLiquidAssetFields(entryArrayPrefix);
+  });
+}
+
+function generateTextArrayLiquidTag(content: string) {
+  return [`{{${content}}}`];
+}
+
+function generateArraysLiquidTags(field: BasicArrayField | AssetArrayField | EntryArrayField, prefix: string, content: string
+): string[] {
+  if (field.arrayType === 'Entry') {
+    return generateEntryArrayLiquidTag(field, prefix);
+  } else if (field.arrayType === 'Asset') {
+    return generateAssetArrayLiquidTag(field, content);
+  }
+  return generateTextArrayLiquidTag(content);
+}
