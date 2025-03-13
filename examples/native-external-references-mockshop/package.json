@@ -1,5 +1,5 @@
 {
-  "name": "mockshop-function",
+  "name": "native-external-references-mockshop",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -19,13 +19,13 @@
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
     "build": "react-scripts build && npm run build:functions",
+    "build:functions": "contentful-app-scripts build-functions --ci",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "open-settings": "contentful-app-scripts open-settings",
-    "build:functions": "contentful-app-scripts build-functions --ci",
     "create-resource-entities": "tsx -r dotenv/config ./src/tools/create-resource-entities.ts",
     "show-resource-entities": "tsx -r dotenv/config ./src/tools/show-resource-entities.ts",
     "install-app": "contentful-app-scripts install",
@@ -47,7 +47,7 @@
     ]
   },
   "devDependencies": {
-    "@contentful/app-scripts": "^1.31.0",
+    "@contentful/app-scripts": "^1.32.0",
     "@contentful/node-apps-toolkit": "^3.6.1",
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "14.3.1",
