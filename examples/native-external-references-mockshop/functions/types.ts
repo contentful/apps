@@ -4,7 +4,6 @@ import {
   FunctionEventContext,
 } from '@contentful/functions-types';
 
-
 type InstallationParameters = {
   apiEndpoint: string;
   url: string;
@@ -50,6 +49,6 @@ export type SearchResultData = {
 
 export type ProductLookupData = {
   data: {
-    nodes: Product[];
+    nodes: (Product | null)[];
   };
 };

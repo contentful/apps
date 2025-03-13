@@ -116,10 +116,18 @@ const loookupHandler: ResourcesLookupHandler = async (event, context) => {
 
   const result = (await response.json()) as ProductLookupData;
 
-  const items = result.data.nodes.map((node) => ({
-    ...withBadge(node),
-    ...withUrn(node),
-  }));
+  const items = result.data.nodes
+    .map((node) => {
+      if (node === null) {
+        console.error('Null node encountered');
+        return null;
+      }
+      return {
+        ...withBadge(node),
+        ...withUrn(node),
+      };
+    })
+    .filter((item) => item !== null);
 
   return {
     items,

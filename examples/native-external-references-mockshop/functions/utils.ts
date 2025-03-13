@@ -1,5 +1,5 @@
-import { FunctionEventContext } from "@contentful/functions-types";
-import { Product } from "./types";
+import { FunctionEventContext } from '@contentful/functions-types';
+import { Product } from './types';
 
 export const getMockShopUrl = (context: FunctionEventContext<Record<string, any>>) => {
   const { apiEndpoint } = context.appInstallationParameters;
