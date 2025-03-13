@@ -1,5 +1,5 @@
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import {
   generateConnectedContentCall,
   Field,
@@ -8,8 +8,11 @@ import {
 } from '../helpers/assembleQuery';
 import generateLiquidTags from '../helpers/generateLiquidTags';
 
-import { Heading, List, ListItem } from '@contentful/f36-components';
+import { Box, Button, Flex } from '@contentful/f36-components';
 import { useEffect, useState } from 'react';
+import FieldsSelectionStep from '../components/FieldsSelectionStep';
+import CodeBlocksStep from '../components/CodeBlocksStep';
+import LocalesSelectionStep from '../components/LocalesSelectionStep';
 
 export type InvocationParams = {
   entryId: string;
@@ -17,9 +20,26 @@ export type InvocationParams = {
   contentTypeId: string;
 };
 
+const STEPS = ['fields', 'locales', 'codeBlocks'];
+
+function nextStep(step: string): string {
+  const currentStepIndex = STEPS.findIndex((s) => s === step);
+  const nextStepIndex =
+    currentStepIndex < STEPS.length - 1 ? currentStepIndex + 1 : currentStepIndex;
+  return STEPS[nextStepIndex];
+}
+
+function previousStep(step: string): string {
+  const currentStepIndex = STEPS.findIndex((s) => s === step);
+  const nextStepIndex = currentStepIndex > 0 ? currentStepIndex - 1 : currentStepIndex;
+  return STEPS[nextStepIndex];
+}
+
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
-  const [graphqlResponse, setGraphqlResponse] = useState<string>();
+  useAutoResizer();
+  const [graphqlResponse, setGraphqlResponse] = useState<string>('');
+  const [step, setStep] = useState('fields');
 
   const spaceId = sdk.ids.space;
   const token = sdk.parameters.installation.apiKey;
@@ -38,24 +58,52 @@ const Dialog = () => {
   }, []);
 
   return (
-    <>
-      <Heading marginBottom="spacingS">Braze Connected Content Call</Heading>
-      <code>{connectedContentCall}</code>
-      <Heading marginBottom="spacingS">
-        Liquid tag to reference selected Contentful fields, within Braze message body
-      </Heading>
-      <List>
-        {liquidTags.map((liquidTag) => (
-          <ListItem key={liquidTag}>
-            <code>{liquidTag}</code>
-          </ListItem>
-        ))}
-      </List>
-      <Heading marginBottom="spacingS">
-        JSON data available in Braze via Connected Content call
-      </Heading>
-      <code>{graphqlResponse}</code>
-    </>
+    <Box
+      paddingBottom="spacingM"
+      paddingTop="spacingM"
+      paddingLeft="spacingL"
+      paddingRight="spacingL">
+      {step === 'fields' && <FieldsSelectionStep></FieldsSelectionStep>}
+      {step === 'locales' && <LocalesSelectionStep></LocalesSelectionStep>}
+      {step === 'codeBlocks' && (
+        <CodeBlocksStep
+          connectedContentCall={connectedContentCall}
+          liquidTags={liquidTags}
+          graphqlResponse={graphqlResponse}></CodeBlocksStep>
+      )}
+
+      <Flex
+        padding="spacingM"
+        gap="spacingM"
+        justifyContent="end"
+        style={{
+          position: 'sticky',
+          bottom: 0,
+          background: 'white',
+        }}>
+        {step !== 'fields' && (
+          <Button
+            variant="secondary"
+            size="small"
+            onClick={() => setStep((currentStep) => previousStep(currentStep))}>
+            Back
+          </Button>
+        )}
+        {step !== 'codeBlocks' && (
+          <Button
+            variant="primary"
+            size="small"
+            onClick={() => setStep((currentStep) => nextStep(currentStep))}>
+            Next
+          </Button>
+        )}
+        {step === 'codeBlocks' && (
+          <Button variant="primary" size="small" onClick={() => sdk.close()}>
+            Close
+          </Button>
+        )}
+      </Flex>
+    </Box>
   );
 };
 
