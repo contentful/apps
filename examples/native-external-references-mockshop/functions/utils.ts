@@ -2,11 +2,10 @@ import { FunctionEventContext } from '@contentful/functions-types';
 import { Product } from './types';
 
 export const getMockShopUrl = (context: FunctionEventContext<Record<string, any>>) => {
-  const { apiEndpoint } = context.appInstallationParameters;
-  let mockShopUrl = apiEndpoint;
+  const { apiEndpoint: mockShopUrl } = context.appInstallationParameters;
   if (!mockShopUrl) {
-    mockShopUrl = 'https://mock.shop/api';
     console.warn(`No API url configured, falling back to '${mockShopUrl}'`);
+    return 'https://mock.shop/api';
   }
   return mockShopUrl;
 };
