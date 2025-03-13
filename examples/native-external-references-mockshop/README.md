@@ -8,15 +8,15 @@ This project was bootstrapped with [Create Contentful App](https://github.com/co
 3. [Instructions to create and run the app](#instructions-to-create-and-run-the-app)
     - [Copying the example](#copying-the-example)
     - [Creating a custom app definition](#creating-a-custom-app-definition)
+    - [Building and uploading the app](#building-and-uploading-the-app)
     - [Creating resource entities](#creating-resource-entities)
     - [Installing the app](#installing-the-app)
-    - [Build and upload the app](#upload-the-app)
-4. [Entities overview](#entities-overview)
-5. [Code structure](#code-structure)
+4. [Code structure](#code-structure)
     - [Functions](#functions)
+    - [Entities overview](#entities-overview)
     - [Property mapping](#property-mapping)
     - [App manifest](#app-manifest)
-6. [Available Scripts](#available-scripts)
+5. [Available Scripts](#available-scripts)
 # Prerequisites
 * We're assuming you are familiar with the following concepts:
   + [App Framework](https://www.contentful.com/developers/docs/extensibility/app-framework/), including [App Definition](https://www.contentful.com/developers/docs/extensibility/app-framework/app-definition/) and [App Installation](https://www.contentful.com/developers/docs/extensibility/app-framework/app-installation/)
@@ -68,6 +68,18 @@ To complete the process, it is necessary to install all dependencies of the proj
 npm i
 ```
 
+## Building and uploading the app
+
+After creating the app definition, we can take care of uploading the code by running these commands:
+
+```bash
+npm run build && npx contentful-app-scripts upload --ci --bundle-dir ./build --organization-id <organisation-id> --definition-id <app-definition-id> --token <cma-token>`
+```
+
+For more information on environment variables, see [npm run upload-ci](#npm-run-upload-ci)
+
+The interactive CLI will prompt you to provide additional details, such as a CMA endpoint URL. Select **Yes** when prompted if you’d like to activate the bundle after upload.
+
 ## Creating a custom app definition
 
 To see your app within Contentful, you must first set it up. To do that, we will create an app definition, which is an entity that represents an app in Contentful and stores general information about it.
@@ -94,8 +106,8 @@ You will need to answer the following questions on the terminal. Feel free to pr
 
 > **NOTE:** 
 > Make sure the organization ID you select here is the Organization that has access to the Native external references feature.
-
-> Please configure the .env variables properly before running these scripts
+>  
+> This command creates the app definition in your first space within the master environment.
 
 You now have a basic application that can be enriched with additional information that will enable the example project you downloaded to function properly.
 
@@ -126,12 +138,18 @@ Your example app is now configured and installed.
 
 The form that will save the MockShop API URL when we install the app has been defined in `src/locations/ConfigScreen.tsx` . More information how configuration screens are set up can be found in [this App Configuration tutorial](https://www.contentful.com/developers/docs/extensibility/app-framework/app-configuration/).
 
-## Build functions and upload the app
+# Code structure
 
-* After installing the app, build the functions and upload the app by running the command: ` npm run build && npx contentful-app-scripts upload --ci --bundle-dir ./build --organization-id <organisation-id> --definition-id <app-definition-id> --token <cma-token>`
-For more information on environment variables, see [npm run upload-ci](#npm-run-upload-ci)
+## Functions
 
-# Entities overview
+The example app is using [Functions](https://www.contentful.com/developers/docs/extensibility/app-framework/functions/) to provide a connection between Contentful and the Mock.shop API. In the `functions/mockShop.ts` file we are defining two events that are necessary for Native external references to function properly:
+
+* `resources.search` - retrieval of specific content based on search queries
+* `resources.lookup` - retrieval of specific content based on URNs (IDs)
+* `graphql.resourcetype.mapping` - retrieves resource type mappings that determine which fields map to an external type
+* `graphql.query` -  handles GraphQL queries for the external third-party API.
+
+## Entities overview
 
 Below is a representation of how a _Resource Provider_ is structured, using the MockShop app as an illustrative example.
 
@@ -144,14 +162,14 @@ Below is a representation of how a _Resource Provider_ is structured, using the 
          "sys":{
             "type":"Link",
             "linkType":"Organization",
-            "id":"00y2g65dGhRIi6Xu9X3UGy"
+            "id":"<organisation-id>"
          }
       },
       "appDefinition":{
          "sys":{
             "type":"Link",
             "linkType":"AppDefinition",
-            "id":"1ZIsjoQpZIjZ9GvQmrXMwK"
+            "id":"<app-definitin-id>"
          }
       }
    },
@@ -188,14 +206,14 @@ We are representing _Resource Types_ in a similar structure:
                "sys":{
                   "type":"Link",
                   "linkType":"AppDefinition",
-                  "id":""
+                  "id":"<app-definitin-id>"
                }
             },
             "organization":{
                "sys":{
                   "type":"Link",
                   "linkType":"Organization",
-                  "id":""
+                  "id":"<organisation-id>"
                }
             },
             "type":"ResourceType"
@@ -214,17 +232,6 @@ We are representing _Resource Types_ in a similar structure:
    "pages":{}
 }
 ```
-
-# Code structure
-
-## Functions
-
-The example app is using [Functions](https://www.contentful.com/developers/docs/extensibility/app-framework/functions/) to provide a connection between Contentful and the Mock.shop API. In the `functions/mockShop.ts` file we are defining two events that are necessary for Native external references to function properly:
-
-* `resources.search` - retrieval of specific content based on search queries
-* `resources.lookup` - retrieval of specific content based on URNs (IDs)
-* `graphql.resourcetype.mapping` - retrieves resource type mappings that determine which fields map to an external type
-* `graphql.query` -  handles GraphQL queries for the external third-party API.
 
 ## Property mapping
 
@@ -249,7 +256,7 @@ The function properties are as follows:
 * `path`: This is the path to the transpiled source file of the Function in your bundle. Exposing a `handler` function.
 * `entryFile`: Path pointing to the source file of the Function. Exposing a `handler` function.
 * `allowedNetworks`: A list of endpoints the Function should be allowed to connect to. This is a security feature to prevent unauthorized access to your network.
-* `accepts`: An array of event types the Function can handle. In this case we have two event types: `resources.search`,  `resources.lookup` `graphql.resourcetype.mapping`,  `graphql.query`.
+* `accepts`: An array of event types the Function can handle. In this case we have two event types: `resources.search`,  `resources.lookup` `graphql.resourcetype.mapping`,                         `graphql.query`.
 # Available Scripts
 
 In the project directory, you can run:
