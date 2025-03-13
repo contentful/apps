@@ -95,7 +95,7 @@ You will need to answer the following questions in the terminal when prompted. F
 > **NOTE:** 
 > Make sure the organization ID you select here is of the organization that has access to the Native external references feature.
 >  
-> This command creates the app definition in your first space within the master environment.
+> This command creates the app definition in your first space within the master environment in your organisation.
 
 You now have a basic application that can be enriched with additional information that will enable the example project you downloaded to function properly.
 
@@ -235,7 +235,7 @@ We are representing _Resource Types_ in a similar structure:
 
 ## Property mapping
 
-Contentful uses `Resource Type Mappings` to determine which field in an entry is mapped to an external type and to specify any arguments required for external GraphQL queries defined in `queryHandler`. 
+Contentful uses `Resource Type Mappings` to determine which field in an entry is mapped to an external type and to specify any arguments required for external GraphQL queries defined in the `queryHandler`. 
 
 Contentful web application displays entries using components that require specific data structures to fill their UI elements.
 The mapping between these components and external system data is established using [JSON pointers](https://datatracker.ietf.org/doc/html/rfc6901).

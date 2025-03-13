@@ -1,38 +1,15 @@
-import { FunctionEventContext } from '@contentful/functions-types';
+
 import {
   EventHandler,
   MappingHandler,
-  Product,
   ProductLookupData,
   QueryHandler,
   ResourcesLookupHandler,
   ResourcesSearchHandler,
   SearchResultData,
 } from './types';
+import { getMockShopUrl, withBadge, withUrn } from './utils';
 
-const getMockShopUrl = (context: FunctionEventContext<Record<string, any>>) => {
-  const { apiEndpoint } = context.appInstallationParameters;
-  let mockShopUrl = apiEndpoint;
-  if (!mockShopUrl) {
-    mockShopUrl = 'https://mock.shop/api';
-    console.warn(`No API url configured, falling back to '${mockShopUrl}'`);
-  }
-  return mockShopUrl;
-};
-
-function withUrn(node: Product) {
-  return {
-    ...node,
-    urn: node.id,
-  };
-}
-
-function withBadge(node: Product) {
-  return {
-    ...node,
-    badge: { variant: 'primary', label: 'it works' },
-  };
-}
 
 const resourceTypeMappingHandler: MappingHandler = (event) => {
   const mappings = event.resourceTypes.map(({ resourceTypeId }) => ({
@@ -71,12 +48,9 @@ const queryHandler: QueryHandler = async (event, context) => {
 };
 
 const searchHandler: ResourcesSearchHandler = async (event, context) => {
-  const { query, resourceType } = event;
+  const { query } = event;
   const mockShopUrl = getMockShopUrl(context);
 
-  if (resourceType !== 'MockShop:Product') {
-    throw new Error(`Resource type ${resourceType} not supported`);
-  }
 
   const response = await fetch(mockShopUrl, {
     body: JSON.stringify({
