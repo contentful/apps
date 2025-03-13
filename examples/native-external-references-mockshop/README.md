@@ -68,18 +68,6 @@ To complete the process, it is necessary to install all dependencies of the proj
 npm i
 ```
 
-## Building and uploading the app
-
-After creating the app definition, we can take care of uploading the code by running these commands:
-
-```bash
-npm run build && npx contentful-app-scripts upload --ci --bundle-dir ./build --organization-id <organisation-id> --definition-id <app-definition-id> --token <cma-token>`
-```
-
-For more information on environment variables, see [npm run upload-ci](#npm-run-upload-ci)
-
-The interactive CLI will prompt you to provide additional details, such as a CMA endpoint URL. Select **Yes** when prompted if you’d like to activate the bundle after upload.
-
 ## Creating a custom app definition
 
 To see your app within Contentful, you must first set it up. To do that, we will create an app definition, which is an entity that represents an app in Contentful and stores general information about it.
@@ -110,6 +98,18 @@ You will need to answer the following questions on the terminal. Feel free to pr
 > This command creates the app definition in your first space within the master environment.
 
 You now have a basic application that can be enriched with additional information that will enable the example project you downloaded to function properly.
+
+## Building and uploading the app
+
+After creating the app definition, we can take care of uploading the code by running these commands:
+
+```bash
+npm run build && npx contentful-app-scripts upload --ci --bundle-dir ./build --organization-id <organisation-id> --definition-id <app-definition-id> --token <cma-token>`
+```
+
+For more information on environment variables, see [npm run upload-ci](#npm-run-upload-ci)
+
+The interactive CLI will prompt you to provide additional details, such as a CMA endpoint URL. Select **Yes** when prompted if you’d like to activate the bundle after upload.
 
 ## Creating resource entities
 
@@ -256,7 +256,7 @@ The function properties are as follows:
 * `path`: This is the path to the transpiled source file of the Function in your bundle. Exposing a `handler` function.
 * `entryFile`: Path pointing to the source file of the Function. Exposing a `handler` function.
 * `allowedNetworks`: A list of endpoints the Function should be allowed to connect to. This is a security feature to prevent unauthorized access to your network.
-* `accepts`: An array of event types the Function can handle. In this case we have two event types: `resources.search`,  `resources.lookup` `graphql.resourcetype.mapping`,                         `graphql.query`.
+* `accepts`: An array of event types the Function can handle. In this case we have two event types: `resources.search`,  `resources.lookup` `graphql.resourcetype.mapping`,                             `graphql.query`.
 # Available Scripts
 
 In the project directory, you can run:
