@@ -1,7 +1,5 @@
 import { FieldType } from '@contentful/app-sdk';
-import { SAVED_RESPONSE } from './utils';
-
-const IMAGE_FIELDS = 'title description url';
+import { ASSET_FIELDS_QUERY, SAVED_RESPONSE } from './utils';
 
 export type BasicField = {
   id: string;
@@ -138,7 +136,7 @@ function basicQuery(field: BasicField | BasicArrayField): string {
 }
 
 function assetQuery(field: AssetField): string {
-  return `${field.id} {${IMAGE_FIELDS}}`;
+  return `${field.id} {${ASSET_FIELDS_QUERY}}`;
 }
 
 function entryQuery(field: EntryField): string {
@@ -148,7 +146,7 @@ function entryQuery(field: EntryField): string {
 }
 
 function assetArrayQuery(field: AssetArrayField): string {
-  return `${field.id}Collection {items {${IMAGE_FIELDS}}}`;
+  return `${field.id}Collection {items {${ASSET_FIELDS_QUERY}}}`;
 }
 
 function entryArrayQuery(field: EntryArrayField): string {

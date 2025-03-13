@@ -177,6 +177,9 @@ describe('Generate liquid tags', () => {
     const result = generateLiquidTags(contentTypeId, entryFields);
 
     expect(result).toContain('{{response.data.blogPost.reference.referenceWithinAReference.name}}');
+    expect(result).toContain(
+      '{{response.data.blogPost.reference.referenceWithinAReference.phone}}'
+    );
   });
 
   it('Content type with one field that contains a list of text transforms into a liquid tags', () => {

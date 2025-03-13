@@ -43,11 +43,11 @@ function generateEntryArrayLiquidTag(field: EntryArrayField, prefix: string) {
 }
 
 function generateAssetArrayLiquidTag(field: AssetArrayField, content: string) {
+  const items = ASSET_FIELDS.map((assetField) => `{{ ${field.id}CollectionItem.${assetField} }}`);
+
   return [
     `{% for ${field.id}CollectionItem in ${content}Collection.items %}
-{{ ${field.id}CollectionItem.title }}
-{{ ${field.id}CollectionItem.description }}
-{{ ${field.id}CollectionItem.url }}
+${items.join('\n')}
 {% endfor %}`,
   ];
 }
