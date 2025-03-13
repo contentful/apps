@@ -66,7 +66,7 @@ To get started with your application, you need to make a local copy of the examp
 > Make sure you replace `<name-of-your-app>` with the name of your choice.
 
 ```bash
-npx create-contentful-app@latest <name-of-your-app> --example native-external-references
+npx create-contentful-app@latest <name-of-your-app> --example native-external-references-tmdb
 ```
 
 Once the process finishes, navigate to the directory that was created by running this command:
