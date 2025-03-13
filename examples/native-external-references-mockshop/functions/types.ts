@@ -4,6 +4,12 @@ import {
   FunctionEventContext,
 } from '@contentful/functions-types';
 
+
+type InstallationParameters = {
+  apiEndpoint: string;
+  url: string;
+};
+
 export type FunctionEventHandler<
   FunctionEvent extends FunctionEventKey = FunctionEventKey,
   ContextParameters extends Record<string, any> = Record<string, any>
@@ -13,11 +19,6 @@ export type FunctionEventHandler<
 ) =>
   | Promise<FunctionEventMap[FunctionEvent]['response']>
   | FunctionEventMap[FunctionEvent]['response'];
-
-type InstallationParameters = {
-  apiEndpoint: string;
-  url: string;
-};
 
 export type EventHandler = FunctionEventHandler<FunctionEventKey, InstallationParameters>;
 export type QueryHandler = FunctionEventHandler<'graphql.query', InstallationParameters>;

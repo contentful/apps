@@ -1,4 +1,3 @@
-
 import {
   EventHandler,
   MappingHandler,
@@ -9,7 +8,6 @@ import {
   SearchResultData,
 } from './types';
 import { getMockShopUrl, withBadge, withUrn } from './utils';
-
 
 const resourceTypeMappingHandler: MappingHandler = (event) => {
   const mappings = event.resourceTypes.map(({ resourceTypeId }) => ({
@@ -25,15 +23,16 @@ const resourceTypeMappingHandler: MappingHandler = (event) => {
 };
 
 const queryHandler: QueryHandler = async (event, context) => {
-  // Installation parameters are defined in the app definition
-  // and set per installation.
+  /* Installation parameters are defined in the app definition
+   * and set per installation */
 
   const mockShopUrl = getMockShopUrl(context);
 
-  // Make a request to the third party API.
-  // The expected return type aligns with the
-  // one outlined in the GraphQL specs:
-  // https://spec.graphql.org/October2021/#sec-Response
+  /* Make a request to the third party API.
+   * The expected return type aligns with the
+   * one outlined in the GraphQL specs:
+   * https://spec.graphql.org/October2021/#sec-Response
+   */
   const response = await fetch(mockShopUrl, {
     body: JSON.stringify({
       query: event.query,
@@ -50,7 +49,6 @@ const queryHandler: QueryHandler = async (event, context) => {
 const searchHandler: ResourcesSearchHandler = async (event, context) => {
   const { query } = event;
   const mockShopUrl = getMockShopUrl(context);
-
 
   const response = await fetch(mockShopUrl, {
     body: JSON.stringify({
