@@ -1,7 +1,15 @@
-import { Box, List, ListItem, Paragraph, Subheading } from '@contentful/f36-components';
+import {
+  Box,
+  CopyButton,
+  Flex,
+  List,
+  ListItem,
+  Paragraph,
+  Subheading,
+} from '@contentful/f36-components';
 import Splitter from './Splitter';
 import tokens from '@contentful/f36-tokens';
-import {Prism as SyntaxHighlighter} from "react-syntax-highlighter";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 
 interface CodeBlocksStepProps {
   connectedContentCall: string;
@@ -25,20 +33,34 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           Braze Connected Content Call
         </Subheading>
-        <SyntaxHighlighter language="liquid"
-                           customStyle={{
-                             backgroundColor: tokens.gray100,
-                             border: `1px solid ${tokens.gray300}`
-                           }}
-                           lineNumberStyle={{
-                             paddingLeft: tokens.spacingS,
-                             paddingRight: tokens.spacingS,
-                             backgroundColor: "white",
-                             borderRight: `1px solid ${tokens.gray300}`,
-                             width: '7%',
-                             flex: ''
-                           }}
-                           showLineNumbers={true}>
+        <Flex
+          style={{
+            backgroundColor: tokens.gray400,
+            height: tokens.spacing2Xl,
+            borderTopLeftRadius: tokens.borderRadiusMedium,
+            borderTopRightRadius: tokens.borderRadiusMedium,
+          }}
+          justifyContent="end">
+          <CopyButton value="x" size="small" />
+        </Flex>
+        <SyntaxHighlighter
+          language="liquid"
+          customStyle={{
+            padding: '0px',
+            margin: '0px',
+            backgroundColor: tokens.gray100,
+            border: `1px solid ${tokens.gray300}`,
+            borderBottomLeftRadius: tokens.borderRadiusMedium,
+            borderBottomRightRadius: tokens.borderRadiusMedium,
+          }}
+          lineNumberStyle={{
+            paddingLeft: tokens.spacingS,
+            paddingRight: tokens.spacingS,
+            backgroundColor: 'white',
+            borderRight: `1px solid ${tokens.gray300}`,
+            width: '7%',
+          }}
+          showLineNumbers={true}>
           {connectedContentCall}
         </SyntaxHighlighter>
 

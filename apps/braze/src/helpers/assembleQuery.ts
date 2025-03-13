@@ -66,19 +66,18 @@ export type Field =
   | EntryArrayField;
 
 export function generateConnectedContentCall(query: string, spaceId: string, token: string) {
-  return `
-  {% capture body %}
-  ${query}
-  {% endcapture %}
+  return `{% capture body %}
+${query}
+{% endcapture %}
 
-  {% connected_content
+{% connected_content
     https://graphql.contentful.com/content/v1/spaces/${spaceId}
     :method post
     :headers {"Authorization": "Bearer ${token}"}
     :body {{body}}
     :content_type application/json
     :save ${SAVED_RESPONSE}
-  %}`;
+%}`;
 }
 
 export async function getGraphQLResponse(spaceId: string, token: string, query: string) {
