@@ -28,27 +28,27 @@ export type MappingHandler = FunctionEventHandler<
 export type ResourcesSearchHandler = FunctionEventHandler<'resources.search'>;
 export type ResourcesLookupHandler = FunctionEventHandler<'resources.lookup'>;
 
-export type ProductEdge = {
-  node: {
-    id: string;
-    title: string;
-    featuredImage?: {
-      url: string;
-      altText?: string;
-    };
+export type Product = {
+  id: string;
+  title: string;
+  featuredImage?: {
+    url: string;
+    altText?: string;
   };
 };
 
 export type SearchResultData = {
   data: {
     search: {
-      edges: ProductEdge['node'][];
+      edges: {
+        node: Product;
+      }[];
     };
   };
 };
 
 export type ProductLookupData = {
   data: {
-    nodes: ProductEdge['node'][];
+    nodes: Product[];
   };
 };

@@ -2,7 +2,7 @@ import { FunctionEventContext } from '@contentful/functions-types';
 import {
   EventHandler,
   MappingHandler,
-  ProductEdge,
+  Product,
   ProductLookupData,
   QueryHandler,
   ResourcesLookupHandler,
@@ -20,14 +20,14 @@ const getMockShopUrl = (context: FunctionEventContext<Record<string, any>>) => {
   return mockShopUrl;
 };
 
-function withUrn(node: ProductEdge['node']) {
+function withUrn(node: Product) {
   return {
     ...node,
     urn: node.id,
   };
 }
 
-function withBadge(node: ProductEdge['node']) {
+function withBadge(node: Product) {
   return {
     ...node,
     badge: { variant: 'primary', label: 'it works' },
@@ -105,9 +105,9 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
   });
   const result = (await response.json()) as SearchResultData;
 
-  const items = result.data.search.edges.map((node) => ({
-    ...withBadge(node),
-    ...withUrn(node),
+  const items = result.data.search.edges.map((edge) => ({
+    ...withBadge(edge.node),
+    ...withUrn(edge.node),
   }));
   return {
     items,
