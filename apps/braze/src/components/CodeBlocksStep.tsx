@@ -1,6 +1,7 @@
 import { Box, List, ListItem, Paragraph, Subheading } from '@contentful/f36-components';
 import Splitter from './Splitter';
 import tokens from '@contentful/f36-tokens';
+import {Prism as SyntaxHighlighter} from "react-syntax-highlighter";
 
 interface CodeBlocksStepProps {
   connectedContentCall: string;
@@ -24,7 +25,22 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           Braze Connected Content Call
         </Subheading>
-        <code>{connectedContentCall}</code>
+        <SyntaxHighlighter language="liquid"
+                           customStyle={{
+                             backgroundColor: tokens.gray100,
+                             border: `1px solid ${tokens.gray300}`
+                           }}
+                           lineNumberStyle={{
+                             paddingLeft: tokens.spacingS,
+                             paddingRight: tokens.spacingS,
+                             backgroundColor: "white",
+                             borderRight: `1px solid ${tokens.gray300}`,
+                             width: '7%',
+                             flex: ''
+                           }}
+                           showLineNumbers={true}>
+          {connectedContentCall}
+        </SyntaxHighlighter>
 
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
 
