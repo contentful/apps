@@ -17,6 +17,7 @@ const {
   CONTENTFUL_ORG_ID: organizationId = '',
   CONTENTFUL_APP_DEF_ID: appDefinitionId = '',
   CONTENTFUL_ACCESS_TOKEN: accessToken = '',
+  CONTENTFUL_HOST: contentfulHost = '',
 } = process.env;
 
 assert.ok(organizationId !== '', `CONTENTFUL_ORG_ID environment variable must be defined`);
@@ -28,4 +29,12 @@ assert.ok(accessToken !== '', `CONTENTFUL_ACCESS_TOKEN environment variable must
 const mockshop = mockshopJson as ResourceProvider;
 const product = productJson as ResourceType;
 
-export { organizationId, appDefinitionId, accessToken, manifest, mockshop, product };
+export {
+  organizationId,
+  appDefinitionId,
+  accessToken,
+  contentfulHost,
+  manifest,
+  mockshop,
+  product,
+};

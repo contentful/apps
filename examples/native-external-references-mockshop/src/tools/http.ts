@@ -6,12 +6,13 @@ import type {
   ResourceProvider,
   ResourceType,
 } from './types';
-import { accessToken, appDefinitionId, manifest, organizationId } from './imports';
+import { accessToken, appDefinitionId, manifest, organizationId, contentfulHost } from './imports';
 
 type ResourceProviderResult = APIError | APIResourceProvider;
 type ResourceTypeResult = APIError | APIResourceType;
 
 const client = createClient({ accessToken }, { type: 'plain' });
+const host = contentfulHost || 'api.contentful.com';
 
 const put = async <T>({ resource, url }: { resource: string; url: string }) => {
   return client.raw.put<T>(url, resource).catch((err: Error) => {
@@ -28,13 +29,13 @@ const get = async <T>({ url }: { url: string }) => {
 };
 
 export const getResourceProvider = async () => {
-  const url = `https://api.contentful.com/organizations/${organizationId}/app_definitions/${appDefinitionId}/resource_provider`;
+  const url = `https://${host}/organizations/${organizationId}/app_definitions/${appDefinitionId}/resource_provider`;
 
   return get<ResourceProviderResult>({ url });
 };
 
 export const createResourceProvider = async (resourceProvider: ResourceProvider) => {
-  const url = `https://api.contentful.com/organizations/${organizationId}/app_definitions/${appDefinitionId}/resource_provider`;
+  const url = `https://${host}/organizations/${organizationId}/app_definitions/${appDefinitionId}/resource_provider`;
 
   const resourceProviderWithFunctionId: ResourceProvider = {
     ...resourceProvider,
@@ -56,13 +57,13 @@ export const createResourceProvider = async (resourceProvider: ResourceProvider)
 };
 
 export const listResourceTypes = async () => {
-  const url = `https://api.contentful.com/organizations/${organizationId}/app_definitions/${appDefinitionId}/resource_provider/resource_types`;
+  const url = `https://${host}/organizations/${organizationId}/app_definitions/${appDefinitionId}/resource_provider/resource_types`;
 
   return get<CursorPaginatedCollectionProp<ResourceTypeResult>>({ url });
 };
 
 export const createResourceType = async (resourceType: ResourceType) => {
-  const url = `https://api.contentful.com/organizations/${organizationId}/app_definitions/${appDefinitionId}/resource_provider/resource_types/${resourceType.sys.id}`;
+  const url = `https://${host}/organizations/${organizationId}/app_definitions/${appDefinitionId}/resource_provider/resource_types/${resourceType.sys.id}`;
 
   const body = JSON.stringify({ ...resourceType, sys: undefined });
 
