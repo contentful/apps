@@ -21,7 +21,7 @@ This project was bootstrapped with [Create Contentful App](https://github.com/co
 * We're assuming you are familiar with the following concepts:
   + [App Framework](https://www.contentful.com/developers/docs/extensibility/app-framework/), including [App Definition](https://www.contentful.com/developers/docs/extensibility/app-framework/app-definition/) and [App Installation](https://www.contentful.com/developers/docs/extensibility/app-framework/app-installation/)
   + [Functions](https://www.contentful.com/developers/docs/extensibility/app-framework/functions/)
-* The space where you will install the application has the [Orchestration](https://www.contentful.com/help/orchestration/) feature enabled.
+* The space where you will install the application has the [Orchestration](https://www.contentful.com/help/orchestration/) feature set enabled.
 
 * Your system has installed:
   + The latest LTS version of [Node.js](https://nodejs.org/en/)
@@ -31,13 +31,13 @@ This project was bootstrapped with [Create Contentful App](https://github.com/co
 
 # Description
 
-Contentful supports external content integration through the [App Framework](https://www.contentful.com/developers/docs/extensibility/app-framework/). The [App Marketplace](https://www.contentful.com/marketplace/) currently offers offers ready-made solutions for systems like [Shopify](https://www.contentful.com/help/external-references-with-shopify/) or [commercetools](https://www.contentful.com/help/external-references-with-commercetools/). However, connecting to other systems requires developing custom frontend apps with bespoke implementation.
+Contentful supports external content integration through the [App Framework](https://www.contentful.com/developers/docs/extensibility/app-framework/). The [App Marketplace](https://www.contentful.com/marketplace/) currently offers ready-made solutions for systems like [Shopify](https://www.contentful.com/help/external-references-with-shopify/) or [commercetools](https://www.contentful.com/help/external-references-with-commercetools/). However, connecting to other systems requires developing custom frontend apps with bespoke implementation.
 
 To overcome these challenges, we offer a more streamlined and cohesive approach to linking third-party systems through existing content model Reference Fields. This upgraded version of fields is referred to as **Native external references** .
 
-Native external references streamline how third-party systems link to existing Reference Fields.
+Native external references make it possible to connect any how third-party systems link to existing reference fields.
 
-For the purpose of this example, we will be connecting to the [MockShop](https://mock.shop/) external system and query the data using Contentful Graph API
+For the purpose of this example, we will be connecting to the [MockShop](https://mock.shop/) external system and resolving its data through Contentful GraphQL API.
 
 With Native external references we introduce the following new entity types that allow us to model the data from third-party systems in Contentful:
 
@@ -78,22 +78,22 @@ To create the app definition, run this command:
 npm run create-app-definition
 ```
 
-You will need to answer the following questions on the terminal. Feel free to proceed with the default options provided.
+You will need to answer the following questions in the terminal when prompted. Feel free to proceed with the default options provided.
 
-1. **Name of your application** . This is how your app will be named and it will be displayed in a few places throughout the UI. The default is the name of the folder you created.
-2. **Select where your app can be rendered**. This shows potential [app locations](https://www.contentful.com/developers/docs/extensibility/app-framework/locations/) where an app can be rendered within the Contentful Web app. Select **App configuration screen** , as we will utilize the configuration screen to provide the External API URL for the app.
-3. **Contentful CMA endpoint URL** . This refers to the URL used to interact with Contentful's Management APIs.
-4. **App Parameters** . These are configurable values that can be used to set default values or define custom validation rules. As we need to define these for the API URL in this case:
+1. **Name of your application**. This is how your app will be named and it will be displayed in a few places throughout the UI. The default is the name of the folder you created.
+2. **Select where your app can be rendered**. This shows potential [app locations](https://www.contentful.com/developers/docs/extensibility/app-framework/locations/) where an app can be rendered within the Contentful Web app. Select **App configuration screen** , as we will utilize the configuration screen to provide the external API URL for the app.
+3. **Contentful CMA endpoint URL**. This refers to the URL used to interact with Contentful's Management APIs.
+4. **App Parameters**. These are configurable values that can be used to set default values or define custom validation rules. We need to define these for the API URL in this case:
 
-* Opt for **Y** to advance with the process of defining the parameters.
-* Choose **Installation** .
-* Input `MockShop API Endpoint` as **Parameter name** and `apiEndpoint` as **ID** .
-* Select **Symbol** as type and mark the parameter as required.
+* Opt for **Y** to advance with the process of defining the parameters
+* Choose **Installation**
+* Input `MockShop API Endpoint` as **Parameter name** and `apiEndpoint` as **ID**
+* Select **Symbol** as type and mark the parameter as required
 
 5. The next steps will lead you through the process of providing a Contentful access token to the application and specifying the organization to which the application should be assigned.
 
 > **NOTE:** 
-> Make sure the organization ID you select here is the Organization that has access to the Native external references feature.
+> Make sure the organization ID you select here is of the organization that has access to the Native external references feature.
 >  
 > This command creates the app definition in your first space within the master environment.
 
@@ -136,22 +136,22 @@ This will tell Contentful that we want to connect to `MockShop` via the function
 
 Your example app is now configured and installed.
 
-The form that will save the MockShop API URL when we install the app has been defined in `src/locations/ConfigScreen.tsx` . More information how configuration screens are set up can be found in [this App Configuration tutorial](https://www.contentful.com/developers/docs/extensibility/app-framework/app-configuration/).
+The form that will save the MockShop API URL when we install the app has been defined in `src/locations/ConfigScreen.tsx`. More information on how configuration screens are set up can be found in [this App Configuration tutorial](https://www.contentful.com/developers/docs/extensibility/app-framework/app-configuration/).
 
 # Code structure
 
 ## Functions
 
-The example app is using [Functions](https://www.contentful.com/developers/docs/extensibility/app-framework/functions/) to provide a connection between Contentful and the Mock.shop API. In the `functions/mockShop.ts` file we are defining two events that are necessary for Native external references to function properly:
+The example app is using [Functions](https://www.contentful.com/developers/docs/extensibility/app-framework/functions/) to provide a connection between Contentful and the MockShop API. In the `functions/mockShop.ts` file, we are defining two events that are necessary for Native external references to function properly:
 
 * `resources.search` - retrieval of specific content based on search queries
 * `resources.lookup` - retrieval of specific content based on URNs (IDs)
-* `graphql.resourcetype.mapping` - retrieves resource type mappings that determine which fields map to an external type
-* `graphql.query` -  handles GraphQL queries for the external third-party API.
+* `graphql.resourcetype.mapping` - retrieval of resource type mappings, which determines what fields map to an external type
+* `graphql.query` -  handles GraphQL queries for the external third-party API
 
 ## Entities overview
 
-Below is a representation of how a _Resource Provider_ is structured, using the MockShop app as an illustrative example.
+Below is a representation of how a _Resource Provider_ is structured, using the MockShop app as an illustrative example:
 
 ```json
 {
@@ -235,35 +235,35 @@ We are representing _Resource Types_ in a similar structure:
 
 ## Property mapping
 
-Contentful uses `resource type mappings` to determine which field in an entry is mapped to an external type and to specify any arguments required for External GraphQL queries defined in `queryHandler` 
+Contentful uses `Resource Type Mappings` to determine which field in an entry is mapped to an external type and to specify any arguments required for external GraphQL queries defined in `queryHandler`. 
 
-Contentful web app displays entries using components that require specific data structures to fill their UI elements.
+Contentful web application displays entries using components that require specific data structures to fill their UI elements.
 The mapping between these components and external system data is established using [JSON pointers](https://datatracker.ietf.org/doc/html/rfc6901).
 
 This mapping is defined in the `defaultFieldMapping` property of each `Resource Type` and must adhere to the structure used for mapping the values shown in the entry component:
 
-The definitions of `Product` **Resource Type** representations can be found in the ` src/tools/entities/product.json ` .
+The definitions of `Product` **Resource Type** representations can be found in the ` src/tools/entities/product.json `.
 
 ## App manifest
 
-The app manifest is a JSON file that describes the app and its capabilities. It contains a `functions` property which is an array of functions the app can run. Currently, Contentful Apps can only be associated with one function, therefore you can only have one function in the array.
+The app manifest is a JSON file that describes the app and its capabilities. It contains a `functions` property, which is an array of functions the app can run. Currently, Contentful Apps can only be associated with one function, therefore you can only have one function in the array.
 
 The function properties are as follows:
 
 * `id`: The _id_ of the Function.
 * `name`: A readable name for the Function.
 * `description`: A brief description of the Function.
-* `path`: This is the path to the transpiled source file of the Function in your bundle. Exposing a `handler` function.
+* `path`: This is the path to the transpiled source file of the Function in your bundle, exposing a `handler` function
 * `entryFile`: Path pointing to the source file of the Function. Exposing a `handler` function.
-* `allowedNetworks`: A list of endpoints the Function should be allowed to connect to. This is a security feature to prevent unauthorized access to your network.
-* `accepts`: An array of event types the Function can handle. In this case we have two event types: `resources.search`,  `resources.lookup` `graphql.resourcetype.mapping`,                             `graphql.query`.
+* `allowedNetworks`: A list of endpoints the Function should be allowed to connect to, this is a security feature to prevent unauthorized access to your network.
+* `accepts`: An array of event types the Function can handle, in this case we have two event types: [`resources.search`, `resources.lookup` `graphql.resourcetype.mapping`,`graphql.query`].
 # Available Scripts
 
 In the project directory, you can run:
 
 #### `npm start` 
 
-Creates or updates your app definition in Contentful, and runs the app in development mode.
+Creates or updates your app definition in Contentful and runs the app in development mode.
 Open your app to view it in the browser.
 
 The page will reload if you make edits.
@@ -279,15 +279,13 @@ Your app is ready to be deployed!
 
 #### `npm run upload` 
 
-Uploads the build folder to contentful and creates a bundle that is automatically activated.
+Uploads the build folder to Contentful and creates a bundle that is automatically activated.
 The command guides you through the deployment process and asks for all required arguments.
 Read [here](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/#deploy-with-contentful) for more information about the deployment process.
 
 #### `npm run upload-ci` 
 
-Similar to `npm run upload` it will upload your app to contentful and activate it. The only difference is  
-that with this command all required arguments are read from the environment variables, for example when you add
-the upload command to your CI pipeline.
+Similar to `npm run upload`, this command will upload your app to Contentful and activate it. The only difference is that with this command, all required arguments are read from the environment variables (e.g., when you add the upload command to your CI pipeline).
 
 For this command to work, the following environment variables must be set:
 
