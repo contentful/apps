@@ -127,7 +127,7 @@ const loookupHandler: ResourcesLookupHandler = async (event, context) => {
         ...withUrn(node),
       };
     })
-    .filter((item) => item !== null);
+    .filter((item) => !!item);
 
   return {
     items,
