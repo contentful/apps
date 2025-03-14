@@ -15,6 +15,7 @@
     "react-dom": "18.3.1"
   },
   "scripts": {
+    "build": "npm run build:functions",
     "build:functions": "contentful-app-scripts build-functions --ci",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
