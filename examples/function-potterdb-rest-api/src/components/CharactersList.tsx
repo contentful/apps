@@ -1,4 +1,3 @@
-import React from 'react';
 import type { ReactElement } from 'react';
 import { List } from '@contentful/f36-components';
 import { css } from 'emotion';

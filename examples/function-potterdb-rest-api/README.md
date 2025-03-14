@@ -163,7 +163,7 @@ const schema = createSchema({
 In the `queryHandler` function we grab the request event, we take the arguments needed to execute our query, in our example this will be the `slug` of the PotterDB character, which value is stored in the entry field, and then we prepare the request and execute it with Yoga.
 
 ```js
-const queryHandler: EventHandler<'graphql.query'> = async (event, context) => {
+const queryHandler: EventHandler<FunctionTypeEnum.GraphqlQuery> = async (event, context) => {
   const { query, operationName, variables } = event;
   const body = JSON.stringify({
     query,
