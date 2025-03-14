@@ -13,7 +13,7 @@ type HookResult = {
 
 export function useProduct(productId: string = ''): HookResult {
   const sdk = useSDK<ConfigAppSDK>();
-  const { apiEndpoint } = sdk.parameters.installation || 'https://mock.shop/api';
+  const apiEndpoint = sdk.parameters.installation?.apiEndpoint || 'https://mock.shop/api';
   const { isLoading, data: product } = useQuery<Product>({
     queryKey: ['product', productId],
     queryFn: () =>
