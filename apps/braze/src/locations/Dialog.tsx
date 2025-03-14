@@ -34,6 +34,11 @@ function previousStep(step: string): string {
     return STEPS[nextStepIndex];
 }
 
+function formatGraphqlResponse(response: JSON) {
+    const jsonString = JSON.stringify(response, null, 2);
+    return jsonString.replace(/\n/g, "\n");
+}
+
 const Dialog = () => {
     const sdk = useSDK<DialogAppSDK>();
     useAutoResizer();
@@ -51,7 +56,9 @@ const Dialog = () => {
     useEffect(() => {
         const fetchEntry = async () => {
             const response = await getGraphQLResponse(spaceId, token, query);
-            setGraphqlResponse(JSON.stringify(response));
+            const graphqlResponseWithNewlines = formatGraphqlResponse(response);
+
+            setGraphqlResponse(graphqlResponseWithNewlines);
         };
         fetchEntry();
     }, []);

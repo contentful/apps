@@ -5,8 +5,9 @@ import { codeBlockStyles, lineNumberStyle } from './codeblock.style';
 
 type Props = {
   code: string;
+  language?: string;
 };
-const CodeBlock = ({ code }: Props) => {
+const CodeBlock = ({ code, language }: Props) => {
   return (
     <>
       <Flex
@@ -29,7 +30,7 @@ const CodeBlock = ({ code }: Props) => {
         />
       </Flex>
       <SyntaxHighlighter
-        language="liquid"
+        language={language}
         style={codeBlockStyles}
         lineNumberStyle={lineNumberStyle}
         showLineNumbers={true}>

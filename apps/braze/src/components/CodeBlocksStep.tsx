@@ -25,20 +25,20 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           Braze Connected Content Call
         </Subheading>
-        <CodeBlock code={connectedContentCall} />
+        <CodeBlock language={'liquid'} code={connectedContentCall} />
 
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
 
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           Liquid tag to reference selected Contentful fields, within Braze message body
         </Subheading>
-        <CodeBlock code={liquidTags.join('\n')} />
+        <CodeBlock language={'liquid'} code={liquidTags.join('\n')} />
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
 
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           JSON data available in Braze via Connected Content call
         </Subheading>
-        <CodeBlock code={graphqlResponse} />
+        <CodeBlock language={'json'} code={graphqlResponse} />
       </Box>
     </>
   );
