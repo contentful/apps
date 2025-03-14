@@ -8,6 +8,7 @@ describe('Generate liquid tags', () => {
     const entryField: Field[] = [
       {
         id: 'title',
+        localized: false,
         type: 'Symbol',
       },
     ];
@@ -22,30 +23,37 @@ describe('Generate liquid tags', () => {
     const entryFields: Field[] = [
       {
         id: 'title',
+        localized: false,
         type: 'Symbol',
       },
       {
         id: 'number',
+        localized: false,
         type: 'Integer',
       },
       {
         id: 'date',
+        localized: false,
         type: 'Date',
       },
       {
         id: 'bool',
+        localized: false,
         type: 'Boolean',
       },
       {
         id: 'longText',
+        localized: false,
         type: 'Text',
       },
       {
         id: 'decimal',
+        localized: false,
         type: 'Number',
       },
       {
         id: 'decimal',
+        localized: false,
         type: 'Number',
       },
     ];
@@ -66,6 +74,7 @@ describe('Generate liquid tags', () => {
     const entryFields: Field[] = [
       {
         id: 'asset',
+        localized: false,
         type: 'Link',
         linkType: 'Asset',
       },
@@ -83,6 +92,7 @@ describe('Generate liquid tags', () => {
     const entryFields: Field[] = [
       {
         id: 'address',
+        localized: false,
         type: 'Location',
       },
     ];
@@ -98,16 +108,19 @@ describe('Generate liquid tags', () => {
     const entryFields: Field[] = [
       {
         id: 'reference',
+        localized: false,
         type: 'Link',
         linkType: 'Entry',
         entryContentType: 'reference',
         fields: [
           {
             id: 'name',
+            localized: false,
             type: 'Symbol',
           },
           {
             id: 'phone',
+            localized: false,
             type: 'Integer',
           },
         ],
@@ -125,12 +138,14 @@ describe('Generate liquid tags', () => {
     const entryFields: Field[] = [
       {
         id: 'reference',
+        localized: false,
         type: 'Link',
         linkType: 'Entry',
         entryContentType: 'reference',
         fields: [
           {
             id: 'asset',
+            localized: false,
             type: 'Link',
             linkType: 'Asset',
           },
@@ -150,22 +165,26 @@ describe('Generate liquid tags', () => {
     const entryFields: Field[] = [
       {
         id: 'reference',
+        localized: false,
         type: 'Link',
         linkType: 'Entry',
         entryContentType: 'reference',
         fields: [
           {
             id: 'referenceWithinAReference',
+            localized: false,
             type: 'Link',
             linkType: 'Entry',
             entryContentType: 'reference',
             fields: [
               {
                 id: 'name',
+                localized: false,
                 type: 'Symbol',
               },
               {
                 id: 'phone',
+                localized: false,
                 type: 'Integer',
               },
             ],
@@ -187,6 +206,7 @@ describe('Generate liquid tags', () => {
     const entryFields: Field[] = [
       {
         id: 'listOfText',
+        localized: false,
         type: 'Array',
         arrayType: 'Symbol',
         items: {
@@ -207,6 +227,7 @@ describe('Generate liquid tags', () => {
     const entryFields: Field[] = [
       {
         id: 'listOfReferences',
+        localized: false,
         type: 'Array',
         arrayType: 'Entry',
         items: [
@@ -217,6 +238,7 @@ describe('Generate liquid tags', () => {
             fields: [
               {
                 id: 'name',
+                localized: false,
                 type: 'Symbol',
               },
             ],
@@ -235,6 +257,7 @@ describe('Generate liquid tags', () => {
     const entryFields: Field[] = [
       {
         id: 'listOfAsset',
+        localized: false,
         type: 'Array',
         arrayType: 'Asset',
         items: {
@@ -256,28 +279,33 @@ describe('Generate liquid tags', () => {
     const entryFields: Field[] = [
       {
         id: 'reference',
+        localized: false,
         type: 'Link',
         linkType: 'Entry',
         entryContentType: 'reference',
         fields: [
           {
             id: 'referenceWithinAReference',
+            localized: false,
             type: 'Link',
             linkType: 'Entry',
             entryContentType: 'reference',
             fields: [
               {
                 id: 'referenceWithAnotherAReference',
+                localized: false,
                 type: 'Link',
                 linkType: 'Entry',
                 entryContentType: 'reference',
                 fields: [
                   {
                     id: 'name',
+                    localized: false,
                     type: 'Symbol',
                   },
                   {
                     id: 'phone',
+                    localized: false,
                     type: 'Integer',
                   },
                 ],
