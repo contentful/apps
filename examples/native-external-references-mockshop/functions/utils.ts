@@ -1,4 +1,4 @@
-import { FunctionEventContext } from '@contentful/functions-types';
+import { FunctionEventContext } from '@contentful/node-apps-toolkit';
 import { Product } from './types';
 
 export const getMockShopUrl = (context: FunctionEventContext<Record<string, any>>) => {
