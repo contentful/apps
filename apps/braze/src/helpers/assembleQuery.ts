@@ -67,7 +67,7 @@ export type Field =
 
 export function generateConnectedContentCall(query: string, spaceId: string, token: string) {
   return `{% capture body %}
-${query}
+  ${query}
 {% endcapture %}
 
 {% connected_content
