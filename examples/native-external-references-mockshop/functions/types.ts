@@ -1,32 +1,21 @@
-import {
-  FunctionEventKey,
-  FunctionEventMap,
-  FunctionEventContext,
-} from '@contentful/functions-types';
+import { FunctionEventHandler, FunctionTypeEnum } from '@contentful/node-apps-toolkit';
 
-type InstallationParameters = {
+export type InstallationParameters = {
   apiEndpoint: string;
   url: string;
 };
 
-export type FunctionEventHandler<
-  FunctionEvent extends FunctionEventKey = FunctionEventKey,
-  ContextParameters extends Record<string, any> = Record<string, any>
-> = (
-  event: FunctionEventMap[FunctionEvent]['request'],
-  context: FunctionEventContext<ContextParameters>
-) =>
-  | Promise<FunctionEventMap[FunctionEvent]['response']>
-  | FunctionEventMap[FunctionEvent]['response'];
-
-export type EventHandler = FunctionEventHandler<FunctionEventKey, InstallationParameters>;
-export type QueryHandler = FunctionEventHandler<'graphql.query', InstallationParameters>;
-export type MappingHandler = FunctionEventHandler<
-  'graphql.resourcetype.mapping',
+export type EventHandler = FunctionEventHandler<FunctionTypeEnum, InstallationParameters>;
+export type QueryHandler = FunctionEventHandler<
+  FunctionTypeEnum.GraphqlQuery,
   InstallationParameters
 >;
-export type ResourcesSearchHandler = FunctionEventHandler<'resources.search'>;
-export type ResourcesLookupHandler = FunctionEventHandler<'resources.lookup'>;
+export type MappingHandler = FunctionEventHandler<
+  FunctionTypeEnum.GraphqlResourceTypeMapping,
+  InstallationParameters
+>;
+export type ResourcesSearchHandler = FunctionEventHandler<FunctionTypeEnum.ResourcesSearch>;
+export type ResourcesLookupHandler = FunctionEventHandler<FunctionTypeEnum.ResourcesLookup>;
 
 export type Product = {
   id: string;
