@@ -1,16 +1,7 @@
-import {
-  Box,
-  CopyButton,
-  Flex,
-  List,
-  ListItem,
-  Paragraph,
-  Subheading,
-} from '@contentful/f36-components';
+import { Box, Paragraph, Subheading } from '@contentful/f36-components';
 import Splitter from './Splitter';
 import tokens from '@contentful/f36-tokens';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import {codeBlockStyles, lineNumberStyle} from './codeblock.style';
+import CodeBlock from './codeblock';
 
 interface CodeBlocksStepProps {
   connectedContentCall: string;
@@ -34,51 +25,20 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           Braze Connected Content Call
         </Subheading>
-        <Flex
-          style={{
-            backgroundColor: tokens.gray400,
-            height: tokens.spacing2Xl,
-            borderTopLeftRadius: tokens.borderRadiusSmall,
-            borderTopRightRadius: tokens.borderRadiusSmall,
-          }}
-          justifyContent="end">
-          <CopyButton value={connectedContentCall} size="small" />
-        </Flex>
-        <SyntaxHighlighter
-          language="liquid"
-          style={codeBlockStyles}
-          customStyle={{
-            padding: '0px',
-            margin: '0px',
-            backgroundColor: tokens.gray100,
-            border: `1px solid ${tokens.gray300}`,
-            borderBottomLeftRadius: tokens.borderRadiusSmall,
-            borderBottomRightRadius: tokens.borderRadiusSmall,
-          }}
-          lineNumberStyle={lineNumberStyle}
-          showLineNumbers={true}>
-          {connectedContentCall}
-        </SyntaxHighlighter>
+        <CodeBlock code={connectedContentCall} />
 
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
 
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           Liquid tag to reference selected Contentful fields, within Braze message body
         </Subheading>
-        <List>
-          {liquidTags.map((liquidTag) => (
-            <ListItem key={liquidTag}>
-              <code>{liquidTag}</code>
-            </ListItem>
-          ))}
-        </List>
-
+        <CodeBlock code={liquidTags.join('\n')} />
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
 
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           JSON data available in Braze via Connected Content call
         </Subheading>
-        <code>{graphqlResponse}</code>
+        <CodeBlock code={graphqlResponse} />
       </Box>
     </>
   );

@@ -1,27 +1,28 @@
 import { CSSProperties } from 'react';
-import tokens from "@contentful/f36-tokens";
+import tokens from '@contentful/f36-tokens';
 
 export const lineNumberStyle: CSSProperties = {
-    paddingRight: tokens.spacingM,
-    paddingLeft: tokens.spacingS,
-    backgroundColor: tokens.colorWhite,
-    borderRight: `1px solid ${tokens.gray300}`,
-    width: tokens.spacing2Xl,
+  paddingRight: tokens.spacingM,
+  paddingLeft: tokens.spacingS,
+  marginRight: tokens.spacingM,
+  backgroundColor: tokens.colorWhite,
+  borderRight: `1px solid ${tokens.gray300}`,
+  width: tokens.spacing2Xl,
 };
 
 export const codeBlockStyles: Record<string, CSSProperties> = {
   'code[class*="language-"]': {
-    color: 'black',
+    color: tokens.colorBlack,
     background: 'none',
     textShadow: '0 1px white',
     fontFamily: "'Geist Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
-    fontSize: '1em',
+    fontSize: tokens.spacingS,
     textAlign: 'left',
     whiteSpace: 'pre',
     wordSpacing: 'normal',
     wordBreak: 'normal',
     wordWrap: 'normal',
-    lineHeight: '1.5',
+    lineHeight: '2',
     MozTabSize: '4',
     OTabSize: '4',
     tabSize: '4',
@@ -32,16 +33,19 @@ export const codeBlockStyles: Record<string, CSSProperties> = {
   },
   'pre[class*="language-"]': {
     color: 'black',
-    background: '#f5f2f0',
+    background: tokens.gray100,
+    border: `1px solid ${tokens.gray300}`,
+    borderBottomLeftRadius: tokens.borderRadiusSmall,
+    borderBottomRightRadius: tokens.borderRadiusSmall,
     textShadow: '0 1px white',
-    fontFamily: "Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
+    fontFamily: "'Geist Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
     fontSize: '1em',
     textAlign: 'left',
     whiteSpace: 'pre',
     wordSpacing: 'normal',
     wordBreak: 'normal',
     wordWrap: 'normal',
-    lineHeight: '1.5',
+    lineHeight: '1',
     MozTabSize: '4',
     OTabSize: '4',
     tabSize: '4',
@@ -49,8 +53,8 @@ export const codeBlockStyles: Record<string, CSSProperties> = {
     MozHyphens: 'none',
     msHyphens: 'none',
     hyphens: 'none',
-    padding: '1em',
-    margin: '.5em 0',
+    padding: '0em',
+    margin: '0em',
     overflow: 'auto',
   },
   'pre[class*="language-"]::-moz-selection': {
