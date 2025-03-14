@@ -5,10 +5,10 @@ import {
   createTmdbLookupResponse,
   testLookupEvent
 } from '../test/mocks';
-import { vi, SpyInstance } from 'vitest';
+import { vi, MockInstance, describe, beforeEach, it, expect } from 'vitest';
 
 describe('Lookup handler', () => {
-  let mockApi: SpyInstance;
+  let mockApi: MockInstance;
 
   beforeEach(() => {
     mockApi = vi.spyOn(helpers, 'fetchApi');

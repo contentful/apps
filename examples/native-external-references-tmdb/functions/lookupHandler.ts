@@ -1,6 +1,7 @@
 import {
   FunctionEventContext,
-  FunctionEventHandler
+  FunctionEventHandler,
+  FunctionTypeEnum
 } from '@contentful/node-apps-toolkit';
 import { fetchApi, getUrls, transformResult } from './helpers';
 import { AppInstallationParameters } from './types/common';
@@ -30,7 +31,7 @@ const fetchLookup = async (
 };
 
 export const lookupHandler: FunctionEventHandler<
-  'resources.lookup',
+  FunctionTypeEnum.ResourcesLookup,
   AppInstallationParameters
 > = async (event, context) => {
   const { lookupUrls, prefixUrl } = getUrls(event.resourceType, {

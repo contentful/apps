@@ -1,5 +1,6 @@
 import { getUrls, transformResult } from './helpers';
 import { TmdbItem } from './types/tmdb';
+import { describe, it, expect } from 'vitest';
 
 describe('Transforming the result', () => {
   it('transforms a movie result', () => {
