@@ -1,6 +1,7 @@
 import {
   FunctionEventContext,
-  FunctionEventHandler
+  FunctionEventHandler,
+  FunctionTypeEnum
 } from '@contentful/node-apps-toolkit';
 import { fetchApi, getUrls, transformResult } from './helpers';
 import { AppInstallationParameters } from './types/common';
@@ -29,7 +30,7 @@ const fetchSearch = async (
 };
 
 export const searchHandler: FunctionEventHandler<
-  'resources.search',
+  FunctionTypeEnum.ResourcesSearch,
   AppInstallationParameters
 > = async (event, context) => {
   const { prefixUrl, searchUrl, trendingUrl } = getUrls(event.resourceType, {
