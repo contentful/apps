@@ -1,4 +1,13 @@
 import { CSSProperties } from 'react';
+import tokens from "@contentful/f36-tokens";
+
+export const lineNumberStyle: CSSProperties = {
+    paddingRight: tokens.spacingM,
+    paddingLeft: tokens.spacingS,
+    backgroundColor: tokens.colorWhite,
+    borderRight: `1px solid ${tokens.gray300}`,
+    width: tokens.spacing2Xl,
+};
 
 export const codeBlockStyles: Record<string, CSSProperties> = {
   'code[class*="language-"]': {

@@ -10,7 +10,7 @@ import {
 import Splitter from './Splitter';
 import tokens from '@contentful/f36-tokens';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { codeBlockStyles } from './codeblock.style';
+import {codeBlockStyles, lineNumberStyle} from './codeblock.style';
 
 interface CodeBlocksStepProps {
   connectedContentCall: string;
@@ -55,14 +55,7 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
             borderBottomLeftRadius: tokens.borderRadiusSmall,
             borderBottomRightRadius: tokens.borderRadiusSmall,
           }}
-          lineNumberStyle={{
-            paddingLeft: tokens.spacingS,
-            fontFamily: 'Geist Mono',
-            paddingRight: tokens.spacingS,
-            backgroundColor: 'white',
-            borderRight: `1px solid ${tokens.gray300}`,
-            width: '7%',
-          }}
+          lineNumberStyle={lineNumberStyle}
           showLineNumbers={true}>
           {connectedContentCall}
         </SyntaxHighlighter>
