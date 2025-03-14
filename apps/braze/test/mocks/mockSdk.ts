@@ -19,10 +19,14 @@ const mockSdk: any = {
       apiKey: 'test-apiKey',
     },
     invocation: {
-      entryId: 'test-entryId',
-      entryFields: [], // TODO: add fields?
+      id: 'test-entryId',
+      fields: [], // TODO: add fields?
       contentTypeId: 'test-contentTypeId',
     },
+  },
+  locales: {
+    default: 'en-US',
+    available: ['en-US', 'es-AR'],
   },
 };
 

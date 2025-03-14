@@ -2,7 +2,7 @@ import { SidebarAppSDK } from '@contentful/app-sdk';
 import { Button } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { transformEntryFields } from '../helpers/transformEntryFields';
-import { InvocationParams } from './Dialog';
+import { EntryInfo } from './Dialog';
 import { useEffect, useState } from 'react';
 import { createClient } from 'contentful-management';
 import { Field } from '../helpers/assembleQuery';
@@ -33,9 +33,9 @@ const Sidebar = () => {
     fetchEntry();
   }, []);
 
-  const invocationParams: InvocationParams = {
-    entryId: sdk.ids.entry,
-    entryFields: entryFields,
+  const invocationParams: EntryInfo = {
+    id: sdk.ids.entry,
+    fields: entryFields,
     contentTypeId: sdk.ids.contentType,
   };
 
@@ -49,6 +49,7 @@ const Sidebar = () => {
         sdk.dialogs.openCurrentApp({
           title: 'Generate Braze Connected Content Call',
           parameters: invocationParams,
+          width: 'fullWidth',
         });
       }}>
       Generate Braze Connected Content

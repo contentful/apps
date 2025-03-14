@@ -1,14 +1,46 @@
-import { Box, List, ListItem, Paragraph, Subheading } from '@contentful/f36-components';
+import {
+  Box,
+  Button,
+  Flex,
+  List,
+  ListItem,
+  Paragraph,
+  Subheading,
+} from '@contentful/f36-components';
 import Splitter from './Splitter';
 import tokens from '@contentful/f36-tokens';
+import { useState, useEffect } from 'react';
+import {
+  assembleQuery,
+  generateConnectedContentCall,
+  getGraphQLResponse,
+} from '../helpers/assembleQuery';
+import generateLiquidTags from '../helpers/generateLiquidTags';
+import { EntryInfo } from '../locations/Dialog';
 
-interface CodeBlocksStepProps {
-  connectedContentCall: string;
-  liquidTags: string[];
-  graphqlResponse: string;
-}
+type CodeBlocksStepProps = {
+  spaceId: string;
+  contentfulToken: string;
+  entryInfo: EntryInfo;
+  selectedLocales: string[];
+  handlePreviousStep: () => void;
+  handleClose: () => void;
+};
 const CodeBlocksStep = (props: CodeBlocksStepProps) => {
-  const { connectedContentCall, liquidTags, graphqlResponse } = props;
+  const { spaceId, contentfulToken, entryInfo, handlePreviousStep, handleClose } = props;
+  const [graphqlResponse, setGraphqlResponse] = useState<string>('');
+
+  const query = assembleQuery(entryInfo.contentTypeId, entryInfo.id, entryInfo.fields);
+  const connectedContentCall = generateConnectedContentCall(query, spaceId, contentfulToken);
+  const liquidTags = generateLiquidTags(entryInfo.contentTypeId, entryInfo.fields);
+  useEffect(() => {
+    const fetchEntry = async () => {
+      const response = await getGraphQLResponse(spaceId, contentfulToken, query);
+      setGraphqlResponse(JSON.stringify(response));
+    };
+    fetchEntry();
+  }, []);
+
   return (
     <>
       <Paragraph fontColor="gray700" lineHeight="lineHeightCondensed">
@@ -46,6 +78,23 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
         </Subheading>
         <code>{graphqlResponse}</code>
       </Box>
+
+      <Flex
+        padding="spacingM"
+        gap="spacingM"
+        justifyContent="end"
+        style={{
+          position: 'sticky',
+          bottom: 0,
+          background: 'white',
+        }}>
+        <Button variant="secondary" size="small" onClick={handlePreviousStep}>
+          Back
+        </Button>
+        <Button variant="primary" size="small" onClick={handleClose}>
+          Close
+        </Button>
+      </Flex>
     </>
   );
 };

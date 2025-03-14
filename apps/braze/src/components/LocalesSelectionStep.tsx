@@ -1,10 +1,74 @@
-import { Paragraph } from '@contentful/f36-components';
+import { Button, Flex, FormControl, Paragraph } from '@contentful/f36-components';
+import { Multiselect } from '@contentful/f36-multiselect';
+import { Dispatch, SetStateAction, useState } from 'react';
 
-const LocalesSelectionStep = () => {
+type LocalesSelectionStepProps = {
+  locales: string[];
+  selectedLocales: string[];
+  setSelectedLocales: Dispatch<SetStateAction<string[]>>;
+  handlePreviousStep: () => void;
+  handleNextStep: () => void;
+};
+const LocalesSelectionStep = (props: LocalesSelectionStepProps) => {
+  const { locales, selectedLocales, setSelectedLocales, handlePreviousStep, handleNextStep } =
+    props;
+
+  const handleSelectItem = (event: { target: { checked: boolean; value: string } }): void => {
+    const { checked, value } = event.target;
+    if (checked) {
+      setSelectedLocales((prevState: string[]) => [...prevState, value]);
+    } else {
+      const newSelectedSpaces = selectedLocales.filter((space: string) => space !== value);
+      setSelectedLocales(newSelectedSpaces);
+    }
+  };
+
   return (
-    <Paragraph fontColor="gray700" lineHeight="lineHeightCondensed">
-      Select the locales you want to reference in Braze messages.
-    </Paragraph>
+    <>
+      <Paragraph fontColor="gray700" lineHeight="lineHeightCondensed">
+        Select the locales you want to reference in Braze messages.
+      </Paragraph>
+
+      <FormControl isRequired isInvalid={selectedLocales.length === 0}>
+        <FormControl.Label>Locales</FormControl.Label>
+
+        <Multiselect
+          currentSelection={selectedLocales}
+          popoverProps={{ isFullWidth: true }}
+          placeholder="Select one or more">
+          {locales.map((local) => {
+            const val = local.toLowerCase().replace(/\s/g, '-');
+            return (
+              <Multiselect.Option
+                key={`key-${val}}`}
+                itemId={`space-${val}}`}
+                value={local}
+                label={local}
+                onSelectItem={handleSelectItem}
+                isChecked={selectedLocales.includes(local)}
+              />
+            );
+          })}
+        </Multiselect>
+      </FormControl>
+
+      <Flex
+        padding="spacingM"
+        gap="spacingM"
+        justifyContent="end"
+        style={{
+          position: 'sticky',
+          bottom: 0,
+          background: 'white',
+        }}>
+        <Button variant="secondary" size="small" onClick={handlePreviousStep}>
+          Back
+        </Button>
+        <Button variant="primary" size="small" onClick={handleNextStep}>
+          Next
+        </Button>
+      </Flex>
+    </>
   );
 };
 export default LocalesSelectionStep;

@@ -3,17 +3,20 @@ import { ASSET_FIELDS_QUERY, SAVED_RESPONSE } from './utils';
 
 export type BasicField = {
   id: string;
+  localized: boolean;
   type: Exclude<FieldType, 'Array' | 'Link'>;
 };
 
 export type AssetField = {
   id: string;
+  localized: boolean;
   type: 'Link';
   linkType: 'Asset';
 };
 
 export type EntryField = {
   id: string;
+  localized: boolean;
   type: 'Link';
   linkType: 'Entry';
   entryContentType: string;
@@ -38,6 +41,7 @@ type SymbolItem = {
 
 export type BasicArrayField = {
   id: string;
+  localized: boolean;
   type: 'Array';
   arrayType: 'Symbol';
   items: SymbolItem;
@@ -45,6 +49,7 @@ export type BasicArrayField = {
 
 export type AssetArrayField = {
   id: string;
+  localized: boolean;
   type: 'Array';
   arrayType: 'Asset';
   items: AssetItem;
@@ -52,6 +57,7 @@ export type AssetArrayField = {
 
 export type EntryArrayField = {
   id: string;
+  localized: boolean;
   type: 'Array';
   arrayType: 'Entry';
   items: EntryItem[];
