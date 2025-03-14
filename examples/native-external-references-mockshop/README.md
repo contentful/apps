@@ -96,7 +96,8 @@ You now have a basic application that can be enriched with additional informatio
 After creating the app definition, we can take care of uploading the code by running these commands:
 
 ```bash
-npm run build && npx contentful-app-scripts upload --ci --bundle-dir ./build --organization-id <organisation-id> --definition-id <app-definition-id> --token <cma-token>`
+npm run build:functions 
+npm run upload
 ```
 
 For more information on environment variables, see [npm run upload-ci](#npm-run-upload-ci)
