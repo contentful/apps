@@ -1,6 +1,12 @@
-import { FunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit';
+import {
+  FunctionEventHandler as EventHandler,
+  FunctionTypeEnum,
+} from '@contentful/node-apps-toolkit';
 
-const fieldMappingHandler: EventHandler<'graphql.field.mapping'> = (event, context) => {
+const fieldMappingHandler: EventHandler<FunctionTypeEnum.GraphqlFieldMapping> = (
+  event,
+  context
+) => {
   const fields = event.fields.map(({ contentTypeId, field }) => {
     return {
       contentTypeId,
@@ -17,7 +23,7 @@ const fieldMappingHandler: EventHandler<'graphql.field.mapping'> = (event, conte
   };
 };
 
-const queryHandler: EventHandler<'graphql.query'> = async (event, context) => {
+const queryHandler: EventHandler<FunctionTypeEnum.GraphqlQuery> = async (event, context) => {
   /*
    * Forwards the GraphQL query to the PotterDB GraphQL API as is.
    * The `event` contains a boolean `isIntrospectionQuery` that can be used to
