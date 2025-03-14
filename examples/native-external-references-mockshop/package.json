@@ -14,6 +14,7 @@
     "open-settings": "contentful-app-scripts open-settings",
     "create-resource-entities": "tsx -r dotenv/config ./src/tools/create-resource-entities.ts",
     "show-resource-entities": "tsx -r dotenv/config ./src/tools/show-resource-entities.ts",
+    "delete-resource-entities": "tsx -r dotenv/config ./src/tools/delete-resource-entities.ts",
     "install-app": "contentful-app-scripts install",
     "prettier": "prettier --write functions, src"
   },

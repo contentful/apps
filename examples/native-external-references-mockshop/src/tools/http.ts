@@ -28,6 +28,13 @@ const get = async <T>({ url }: { url: string }) => {
   });
 };
 
+const del = async <T>({ url }: { url: string }) => {
+  return client.raw.delete<T>(url).catch((err: Error) => {
+    console.error('error:' + err);
+    throw err;
+  });
+};
+
 export const getResourceProvider = async () => {
   const url = `https://${host}/organizations/${organizationId}/app_definitions/${appDefinitionId}/resource_provider`;
 
@@ -69,6 +76,22 @@ export const createResourceType = async (resourceType: ResourceType) => {
 
   return put<ResourceTypeResult>({
     resource: body,
+    url,
+  });
+};
+
+export const deleteResourceProvider = async () => {
+  const url = `https://${host}/organizations/${organizationId}/app_definitions/${appDefinitionId}/resource_provider`;
+
+  return del<ResourceProviderResult>({
+    url,
+  });
+};
+
+export const deleteResourceType = async (resourceType: ResourceType) => {
+  const url = `https://${host}/organizations/${organizationId}/app_definitions/${appDefinitionId}/resource_provider/resource_types/${resourceType.sys.id}`;
+
+  return del<ResourceTypeResult>({
     url,
   });
 };
