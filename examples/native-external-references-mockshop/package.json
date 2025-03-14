@@ -12,15 +12,10 @@
     "emotion": "10.0.27",
     "graphql-request": "^6.1.0",
     "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "react-scripts": "5.0.1"
+    "react-dom": "18.3.1"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build && npm run build:functions",
     "build:functions": "contentful-app-scripts build-functions --ci",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
@@ -32,18 +27,6 @@
   },
   "eslintConfig": {
     "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   },
   "devDependencies": {
     "@contentful/app-scripts": "^1.33.2",
