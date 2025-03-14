@@ -1,4 +1,3 @@
-import React from 'react';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useFieldValue, useSDK } from '@contentful/react-apps-toolkit';
 import { Button } from '@contentful/f36-components';

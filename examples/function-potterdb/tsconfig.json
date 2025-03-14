@@ -3,7 +3,7 @@
     "target": "es5",
     "moduleResolution": "node",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "jsx": "react"
+    "jsx": "react-jsx"
   },
   "include": ["src"],
   "exclude": ["actions", "functions"]

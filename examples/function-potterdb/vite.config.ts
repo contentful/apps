@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: './dist',
+    outDir: './build',
   },
   test: {
     setupFiles: './src/setupTests.ts', // Equivalent to Jest's setup file
@@ -14,4 +14,5 @@ export default defineConfig({
   server: {
     port: 3000,
   },
+  base: '', // relative paths
 });
