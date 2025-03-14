@@ -9,7 +9,7 @@ import { Product } from '../components/Product';
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
-  const [productId, setProductId] = useFieldValue<String>(sdk.field.id, sdk.field.locale);
+  const [productId, setProductId] = useFieldValue<string>(sdk.field.id, sdk.field.locale);
   const { isLoading, product } = useProduct(productId);
 
   useEffect(() => {
