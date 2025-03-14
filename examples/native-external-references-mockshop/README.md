@@ -62,12 +62,6 @@ Once the process finishes, navigate to the directory that was created by running
 cd <name-of-your-app>
 ```
 
-To complete the process, it is necessary to install all dependencies of the project by executing the following command:
-
-```bash
-npm i
-```
-
 ## Creating a custom app definition
 
 To see your app within Contentful, you must first set it up. To do that, we will create an app definition, which is an entity that represents an app in Contentful and stores general information about it.
