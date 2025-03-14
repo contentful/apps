@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { List } from '@contentful/f36-components';
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';

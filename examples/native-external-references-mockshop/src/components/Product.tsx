@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { Flex, Button, Subheading, SkeletonImage, Skeleton, Box } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
