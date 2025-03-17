@@ -1,14 +1,3 @@
-import {
-  Box,
-  Button,
-  Flex,
-  List,
-  ListItem,
-  Paragraph,
-  Subheading,
-} from '@contentful/f36-components';
-import Splitter from './Splitter';
-import tokens from '@contentful/f36-tokens';
 import { useState, useEffect } from 'react';
 import {
   assembleQuery,
@@ -17,6 +6,11 @@ import {
 } from '../helpers/assembleQuery';
 import { EntryInfo } from '../locations/Dialog';
 import { Field } from '../fields/Field';
+import WizardFooter from './WizardFooter';
+import { Box, Button, Paragraph, Subheading } from '@contentful/f36-components';
+import Splitter from './Splitter';
+import tokens from '@contentful/f36-tokens';
+import CodeBlock from './CodeBlock';
 
 type CodeBlocksStepProps = {
   spaceId: string;
@@ -27,6 +21,12 @@ type CodeBlocksStepProps = {
   handlePreviousStep: () => void;
   handleClose: () => void;
 };
+
+function formatGraphqlResponse(response: JSON) {
+  const jsonString = JSON.stringify(response, null, 2);
+  return jsonString.replace(/\n/g, '\n');
+}
+
 const CodeBlocksStep = (props: CodeBlocksStepProps) => {
   const { spaceId, contentfulToken, entryInfo, fields, handlePreviousStep, handleClose } = props;
   const [graphqlResponse, setGraphqlResponse] = useState<string>('');
@@ -37,7 +37,9 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
   useEffect(() => {
     const fetchEntry = async () => {
       const response = await getGraphQLResponse(spaceId, contentfulToken, query);
-      setGraphqlResponse(JSON.stringify(response));
+      const graphqlResponseWithNewlines = formatGraphqlResponse(response);
+
+      setGraphqlResponse(graphqlResponseWithNewlines);
     };
     fetchEntry();
   }, [spaceId, contentfulToken, query]);
@@ -57,45 +59,30 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           Braze Connected Content Call
         </Subheading>
-        <code>{connectedContentCall}</code>
+        <CodeBlock language={'liquid'} code={connectedContentCall} />
 
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
 
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           Liquid tag to reference selected Contentful fields, within Braze message body
         </Subheading>
-        <List>
-          {liquidTags.map((liquidTag) => (
-            <ListItem key={liquidTag}>
-              <code>{liquidTag}</code>
-            </ListItem>
-          ))}
-        </List>
-
+        <CodeBlock language={'liquid'} code={liquidTags.join('\n')} />
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
 
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           JSON data available in Braze via Connected Content call
         </Subheading>
-        <code>{graphqlResponse}</code>
+        <CodeBlock language={'json'} code={graphqlResponse} />
       </Box>
 
-      <Flex
-        padding="spacingM"
-        gap="spacingM"
-        justifyContent="end"
-        style={{
-          position: 'sticky',
-          bottom: 0,
-          background: 'white',
-        }}>
+      <WizardFooter>
         <Button variant="secondary" size="small" onClick={handlePreviousStep}>
           Back
         </Button>
         <Button variant="primary" size="small" onClick={handleClose}>
           Close
         </Button>
-      </Flex>
+      </WizardFooter>
     </>
   );
 };

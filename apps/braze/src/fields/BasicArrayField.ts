@@ -11,10 +11,9 @@ export class BasicArrayField extends Field {
 
   generateLiquidTagForType(template: string): string[] {
     return [
-      `
-      {% for ${this.id}Item in ${template}.${this.id} %}
-        {{ ${this.id}Item }}
-      {% endfor %}`,
+      `{% for ${this.id}Item in ${template}.${this.id} %}
+  {{ ${this.id}Item }}
+{% endfor %}`,
     ];
   }
 }

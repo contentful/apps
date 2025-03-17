@@ -12,10 +12,9 @@ describe('BasicArrayField', () => {
     const field = new BasicArrayField('words', 'blogPost', false);
     const result = field.generateLiquidTag();
     expect(result).toEqual([
-      `
-      {% for wordsItem in response.data.blogPost.words %}
-        {{ wordsItem }}
-      {% endfor %}`,
+      '{% for wordsItem in response.data.blogPost.words %}\n' +
+        '  {{ wordsItem }}\n' +
+        '{% endfor %}',
     ]);
   });
 });

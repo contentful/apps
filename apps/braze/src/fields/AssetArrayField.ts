@@ -13,13 +13,14 @@ export class AssetArrayField extends Field {
   }
 
   generateLiquidTagForType(template: string): string[] {
-    const items = ASSET_FIELDS.map((assetField) => `{{ ${this.id}CollectionItem.${assetField} }}`);
+    const items = ASSET_FIELDS.map(
+      (assetField) => `  {{ ${this.id}CollectionItem.${assetField} }}`
+    );
 
     return [
-      `
-      {% for ${this.id}CollectionItem in ${template}.${this.id}Collection.items %}
-        ${items.join('\n')}
-      {% endfor %}`,
+      `{% for ${this.id}CollectionItem in ${template}.${this.id}Collection.items %}
+${items.join('\n')}
+{% endfor %}`,
     ];
   }
 }
