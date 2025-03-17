@@ -105,18 +105,18 @@ describe('transformEntryFields', () => {
 
     mockCma.contentType.get.mockImplementation(({ contentTypeId }) => {
       if (contentTypeId === 'article') {
-        return Promise.resolve({
+        return {
           name: 'Article',
           fields: [{ id: 'author', type: 'Link', linkType: 'Entry', localized: false }],
-        });
+        };
       } else if (contentTypeId === 'author') {
-        return Promise.resolve({
+        return {
           name: 'Author',
           fields: [
             { id: 'name', type: 'Symbol', localized: true },
             { id: 'bio', type: 'Text', localized: true },
           ],
-        });
+        };
       }
     });
 
@@ -239,7 +239,7 @@ describe('transformEntryFields', () => {
 
     mockCma.contentType.get.mockImplementation(({ contentTypeId }) => {
       if (contentTypeId === 'article') {
-        return Promise.resolve({
+        return {
           name: 'Article',
           fields: [
             {
@@ -249,12 +249,12 @@ describe('transformEntryFields', () => {
               localized: false,
             },
           ],
-        });
+        };
       } else if (contentTypeId === 'category') {
-        return Promise.resolve({
+        return {
           name: 'Category',
           fields: [{ id: 'name', type: 'Symbol', localized: true }],
-        });
+        };
       }
     });
 
@@ -299,5 +299,73 @@ describe('transformEntryFields', () => {
     await expect(transformEntryFields(mockEntry, mockCma as any)).rejects.toThrow(
       'Field not found'
     );
+  });
+
+  it('should limit the recursion depth for nested references based on NESTED_DEPTH constant', async () => {
+    const max_depth = 5;
+
+    // Create mock entries with deep nesting structure
+    const createNestedEntry = (maxDepth: number, depth: number = 1): any => {
+      const contentTypeId = `level${depth}`;
+
+      return {
+        sys: {
+          contentType: {
+            sys: { id: contentTypeId },
+          },
+        },
+        fields: {
+          name: { 'en-US': `Level ${depth} Name` },
+          ...(depth < maxDepth
+            ? { nestedRef: { 'en-US': createNestedEntry(maxDepth, depth + 1) } }
+            : {}),
+        },
+      };
+    };
+
+    const mockEntry = createNestedEntry(7);
+
+    mockCma.contentType.get.mockImplementation(({ contentTypeId }) => {
+      const level = parseInt(contentTypeId.replace('level', ''));
+      const fields = [
+        { id: 'name', type: 'Symbol', localized: false },
+        {
+          id: 'nestedRef',
+          type: 'Link',
+          localized: false,
+        },
+      ];
+
+      return {
+        name: `level${level}`,
+        fields,
+      };
+    });
+
+    const result = await transformEntryFields(mockEntry, mockCma as any);
+
+    expect(result).toHaveLength(2); // name and nestedRef
+    expect(result[0].id).toEqual('name');
+    expect(result[1]).toBeInstanceOf(ReferenceField);
+
+    // Verify that we have references up to level 5 but not beyond
+    let currentField: ReferenceField | null = result[1] as ReferenceField;
+    let level = 2;
+
+    while (currentField && level <= max_depth) {
+      if (level < max_depth) {
+        expect(currentField.fields.length).toBe(2);
+        const nestedRefField = currentField.fields[1] as ReferenceField;
+        expect(nestedRefField.entryContentTypeId).toBe(`level${level}`);
+        expect(nestedRefField.referenceContentType).toBe(`level${level + 1}`);
+        currentField = nestedRefField || null;
+      } else {
+        // At level 5, we should have the name field but no further references
+        expect(currentField.fields.length).toBe(1);
+        expect(currentField.fields[0].id).toBe('name');
+      }
+
+      level++;
+    }
   });
 });
