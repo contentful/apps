@@ -4,9 +4,9 @@
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "^2.3.0",
+    "@vitejs/plugin-react": "^4.0.3",
     "cross-env": "7.0.3",
-    "vite": "^5.0.0",
-    "@vitejs/plugin-react": "^4.0.3"
+    "vite": "^5.0.0"
   },
   "dependencies": {
     "@commercelayer/js-auth": "2.0.1",
