@@ -30,6 +30,7 @@ const CodeBlock = ({ code, language }: Props) => {
         />
       </Flex>
       <SyntaxHighlighter
+        data-testid="code-component"
         language={language}
         style={codeBlockStyles}
         lineNumberStyle={lineNumberStyle}
