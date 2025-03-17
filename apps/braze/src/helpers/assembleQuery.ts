@@ -104,22 +104,24 @@ function assembleFieldsQuery(entryFields: Field[]): string {
 }
 
 function fieldQuery(field: Field) {
-  if (field.type === 'Link') {
-    if (field.linkType === 'Entry') {
-      return entryQuery(field);
-    } else if (field.linkType === 'Asset') {
-      return assetQuery(field);
+  if (field.type !== 'RichText') {
+    if (field.type === 'Link') {
+      if (field.linkType === 'Entry') {
+        return entryQuery(field);
+      } else if (field.linkType === 'Asset') {
+        return assetQuery(field);
+      }
+    } else if (field.type === 'Array') {
+      if (field.arrayType === 'Entry') {
+        return entryArrayQuery(field as EntryArrayField);
+      } else if (field.arrayType === 'Symbol') {
+        return basicQuery(field as BasicArrayField);
+      } else if (field.arrayType === 'Asset') {
+        return assetArrayQuery(field as AssetArrayField);
+      }
+    } else {
+      return basicQuery(field as BasicField);
     }
-  } else if (field.type === 'Array') {
-    if (field.arrayType === 'Entry') {
-      return entryArrayQuery(field as EntryArrayField);
-    } else if (field.arrayType === 'Symbol') {
-      return basicQuery(field as BasicArrayField);
-    } else if (field.arrayType === 'Asset') {
-      return assetArrayQuery(field as AssetArrayField);
-    }
-  } else {
-    return basicQuery(field as BasicField);
   }
 }
 

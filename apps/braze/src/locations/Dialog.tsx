@@ -44,7 +44,6 @@ const Dialog = () => {
   useAutoResizer();
   const [graphqlResponse, setGraphqlResponse] = useState<string>('');
   const [step, setStep] = useState('fields');
-
   const spaceId = sdk.ids.space;
   const token = sdk.parameters.installation.apiKey;
   const invocationParams = sdk.parameters.invocation as InvocationParams;
@@ -53,6 +52,7 @@ const Dialog = () => {
   const query = assembleQuery(contentTypeId, entryId, invocationParams.entryFields);
   const connectedContentCall = generateConnectedContentCall(query, spaceId, token);
   const liquidTags = generateLiquidTags(contentTypeId, invocationParams.entryFields);
+
   useEffect(() => {
     const fetchEntry = async () => {
       const response = await getGraphQLResponse(spaceId, token, query);
