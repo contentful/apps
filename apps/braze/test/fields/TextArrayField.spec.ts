@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { BasicArrayField } from '../../src/fields/BasicArrayField';
+import { TextArrayField } from '../../src/fields/TextArrayField';
 
-describe('BasicArrayField', () => {
+describe('TextArrayField', () => {
   it('Generates query', () => {
-    const field = new BasicArrayField('words', 'blogPost', false);
+    const field = new TextArrayField('words', 'blogPost', false);
     const result = field.generateQuery();
     expect(result).toEqual('words');
   });
 
   it('Generates liquid tag', () => {
-    const field = new BasicArrayField('words', 'blogPost', false);
+    const field = new TextArrayField('words', 'blogPost', false);
     const result = field.generateLiquidTag();
     expect(result).toEqual([
       '{% for wordsItem in response.data.blogPost.words %}\n' +

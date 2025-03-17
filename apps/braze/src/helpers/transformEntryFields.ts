@@ -1,13 +1,14 @@
-import { FieldType } from '@contentful/app-sdk';
 import { BasicField } from '../fields/BasicField';
 import { PlainClientAPI } from 'contentful-management';
 import { Field } from '../fields/Field';
 import { AssetField } from '../fields/AssetField';
 import { ReferenceField } from '../fields/ReferenceField';
-import { BasicArrayField } from '../fields/BasicArrayField';
+import { TextArrayField } from '../fields/TextArrayField';
 import { AssetArrayField } from '../fields/AssetArrayField';
 import { ReferenceArrayField } from '../fields/ReferenceArrayField';
 import { ReferenceItem } from '../fields/ReferenceItem';
+import { RichTextField } from '../fields/RichTextField';
+import { LocationField } from '../fields/LocationField';
 
 const NESTED_DEPTH = 5;
 
@@ -44,7 +45,7 @@ export async function transformEntryFields(
       }
     } else if (fieldInfo.type === 'Array') {
       if (fieldInfo.items && fieldInfo.items.type === 'Symbol') {
-        const newField = new BasicArrayField(name, contentType.name, fieldInfo.localized);
+        const newField = new TextArrayField(name, contentType.name, fieldInfo.localized);
         fields.push(newField);
       } else if (fieldInfo.items && fieldInfo.items.linkType === 'Asset') {
         const newField = new AssetArrayField(name, contentType.name, fieldInfo.localized);
@@ -70,13 +71,16 @@ export async function transformEntryFields(
         fields.push(newField);
       }
     } else {
-      const newField = new BasicField(
-        name,
-        contentType.name,
-        fieldInfo.localized,
-        fieldInfo.type as Exclude<FieldType, 'Array' | 'Link'>
-      );
-      fields.push(newField);
+      if (fieldInfo.type === 'RichText') {
+        const newField = new RichTextField(name, contentType.name, fieldInfo.localized);
+        fields.push(newField);
+      } else if (fieldInfo.type === 'Location') {
+        const newField = new LocationField(name, contentType.name, fieldInfo.localized);
+        fields.push(newField);
+      } else {
+        const newField = new BasicField(name, contentType.name, fieldInfo.localized);
+        fields.push(newField);
+      }
     }
   }
   return fields;

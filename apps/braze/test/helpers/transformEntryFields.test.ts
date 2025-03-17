@@ -3,7 +3,7 @@ import { transformEntryFields } from '../../src/helpers/transformEntryFields';
 import { BasicField } from '../../src/fields/BasicField';
 import { AssetField } from '../../src/fields/AssetField';
 import { ReferenceField } from '../../src/fields/ReferenceField';
-import { BasicArrayField } from '../../src/fields/BasicArrayField';
+import { TextArrayField } from '../../src/fields/TextArrayField';
 import { AssetArrayField } from '../../src/fields/AssetArrayField';
 import { ReferenceArrayField } from '../../src/fields/ReferenceArrayField';
 import { ReferenceItem } from '../../src/fields/ReferenceItem';
@@ -44,7 +44,6 @@ describe('transformEntryFields', () => {
     expect(fieldInstance.id).toBe('title');
     expect(fieldInstance.entryContentTypeId).toBe('Article');
     expect(fieldInstance.localized).toBe(true);
-    expect(fieldInstance.type).toBe('Symbol');
   });
 
   it('should create an AssetField instance with correct properties', async () => {
@@ -156,8 +155,8 @@ describe('transformEntryFields', () => {
     const result = await transformEntryFields(mockEntry, mockCma as any);
 
     expect(result).toHaveLength(1);
-    expect(result[0]).toBeInstanceOf(BasicArrayField);
-    const fieldInstance = result[0] as BasicArrayField;
+    expect(result[0]).toBeInstanceOf(TextArrayField);
+    const fieldInstance = result[0] as TextArrayField;
     expect(fieldInstance.id).toBe('tags');
     expect(fieldInstance.entryContentTypeId).toBe('Article');
     expect(fieldInstance.localized).toBe(true);

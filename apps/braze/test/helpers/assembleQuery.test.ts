@@ -4,7 +4,7 @@ import { BasicField } from '../../src/fields/BasicField';
 
 describe('assembleQuery', () => {
   it('should create a valid GraphQL query with one basic field', () => {
-    const field = new BasicField('title', 'Article', false, 'Symbol');
+    const field = new BasicField('title', 'Article', false);
 
     const contentTypeId = 'article';
     const entryId = 'abc123';

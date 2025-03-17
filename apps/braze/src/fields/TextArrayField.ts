@@ -1,6 +1,6 @@
 import { Field } from './Field';
 
-export class BasicField extends Field {
+export class TextArrayField extends Field {
   constructor(id: string, entryContentTypeId: string, localized: boolean) {
     super(id, entryContentTypeId, localized);
   }
@@ -10,6 +10,10 @@ export class BasicField extends Field {
   }
 
   generateLiquidTagForType(template: string): string[] {
-    return [`{{${template}.${this.id}}}`];
+    return [
+      `{% for ${this.id}Item in ${template}.${this.id} %}
+  {{ ${this.id}Item }}
+{% endfor %}`,
+    ];
   }
 }

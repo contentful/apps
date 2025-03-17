@@ -5,8 +5,8 @@ import { BasicField } from '../../src/fields/BasicField';
 
 describe('ReferenceArrayField', () => {
   it('Generates query', () => {
-    const name = new BasicField('name', 'author', false, 'Symbol');
-    const phone = new BasicField('phone', 'author', false, 'Number');
+    const name = new BasicField('name', 'author', false);
+    const phone = new BasicField('phone', 'author', false);
     const item = new ReferenceItem('author', [name, phone]);
     const field = new ReferenceArrayField('authors', 'blogPost', false, [item]);
     const result = field.generateQuery();
@@ -14,8 +14,8 @@ describe('ReferenceArrayField', () => {
   });
 
   it('Generates liquid tags', () => {
-    const name = new BasicField('name', 'author', false, 'Symbol');
-    const phone = new BasicField('phone', 'author', false, 'Number');
+    const name = new BasicField('name', 'author', false);
+    const phone = new BasicField('phone', 'author', false);
     const item = new ReferenceItem('author', [name, phone]);
     const field = new ReferenceArrayField('authors', 'blogPost', false, [item]);
     const result = field.generateLiquidTag();

@@ -6,8 +6,8 @@ import { ASSET_FIELDS_QUERY } from '../../src/helpers/utils';
 
 describe('ReferenceField', () => {
   it('Generates query for reference with baic fields', () => {
-    const name = new BasicField('name', 'author', false, 'Symbol');
-    const phone = new BasicField('phone', 'author', false, 'Number');
+    const name = new BasicField('name', 'author', false);
+    const phone = new BasicField('phone', 'author', false);
     const field = new ReferenceField('author', 'blogPost', false, 'author', [name, phone]);
     const result = field.generateQuery();
     expect(result).toEqual('author {... on Author {name phone}}');
@@ -21,7 +21,7 @@ describe('ReferenceField', () => {
   });
 
   it('Generates query for reference within a reference', () => {
-    const book = new BasicField('name', 'book', false, 'Symbol');
+    const book = new BasicField('name', 'book', false);
     const nestedReference = new ReferenceField('book', 'author', false, 'book', [book]);
     const field = new ReferenceField('author', 'blogPost', false, 'author', [nestedReference]);
     const result = field.generateQuery();
@@ -29,8 +29,8 @@ describe('ReferenceField', () => {
   });
 
   it('Generates liquid tag for reference with basic fields', () => {
-    const name = new BasicField('name', 'author', false, 'Symbol');
-    const phone = new BasicField('phone', 'author', false, 'Number');
+    const name = new BasicField('name', 'author', false);
+    const phone = new BasicField('phone', 'author', false);
     const field = new ReferenceField('author', 'blogPost', false, 'author', [name, phone]);
     const result = field.generateLiquidTag();
     expect(result).toContain('{{response.data.blogPost.author.name}}');
@@ -47,7 +47,7 @@ describe('ReferenceField', () => {
   });
 
   it('Generates liquid tag for reference within a reference', () => {
-    const book = new BasicField('name', 'book', false, 'Symbol');
+    const book = new BasicField('name', 'book', false);
     const nestedReference = new ReferenceField('book', 'author', false, 'author', [book]);
     const field = new ReferenceField('author', 'blogPost', false, 'author', [nestedReference]);
     const result = field.generateLiquidTag();
