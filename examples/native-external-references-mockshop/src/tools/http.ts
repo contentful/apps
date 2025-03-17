@@ -1,15 +1,16 @@
-import { createClient, CursorPaginatedCollectionProp } from 'contentful-management';
-import type {
-  APIError,
-  APIResourceProvider,
-  APIResourceType,
-  ResourceProvider,
-  ResourceType,
-} from './types';
+import { createClient, CursorPaginatedCollectionProp, ResourceProviderProps, ResourceTypeProps } from 'contentful-management';
 import { accessToken, appDefinitionId, manifest, organizationId, contentfulHost } from './imports';
 
-type ResourceProviderResult = APIError | APIResourceProvider;
-type ResourceTypeResult = APIError | APIResourceType;
+type APIError = {
+  sys: { type: 'Error'; id: string };
+  message: string;
+  details: {
+    errors: { name: string; reason: string }[];
+  };
+};
+
+type ResourceProviderResult = APIError | ResourceProviderProps;
+type ResourceTypeResult = APIError | ResourceTypeProps;
 
 const client = createClient({ accessToken }, { type: 'plain' });
 const host = contentfulHost || 'api.contentful.com';
@@ -41,10 +42,10 @@ export const getResourceProvider = async () => {
   return get<ResourceProviderResult>({ url });
 };
 
-export const createResourceProvider = async (resourceProvider: ResourceProvider) => {
+export const createResourceProvider = async (resourceProvider: ResourceProviderProps) => {
   const url = `https://${host}/organizations/${organizationId}/app_definitions/${appDefinitionId}/resource_provider`;
 
-  const resourceProviderWithFunctionId: ResourceProvider = {
+  const resourceProviderWithFunctionId: ResourceProviderProps = {
     ...resourceProvider,
     function: {
       ...resourceProvider.function,
@@ -69,7 +70,7 @@ export const listResourceTypes = async () => {
   return get<CursorPaginatedCollectionProp<ResourceTypeResult>>({ url });
 };
 
-export const createResourceType = async (resourceType: ResourceType) => {
+export const createResourceType = async (resourceType: ResourceTypeProps) => {
   const url = `https://${host}/organizations/${organizationId}/app_definitions/${appDefinitionId}/resource_provider/resource_types/${resourceType.sys.id}`;
 
   const body = JSON.stringify({ ...resourceType, sys: undefined });
@@ -88,7 +89,7 @@ export const deleteResourceProvider = async () => {
   });
 };
 
-export const deleteResourceType = async (resourceType: ResourceType) => {
+export const deleteResourceType = async (resourceType: ResourceTypeProps) => {
   const url = `https://${host}/organizations/${organizationId}/app_definitions/${appDefinitionId}/resource_provider/resource_types/${resourceType.sys.id}`;
 
   return del<ResourceTypeResult>({
