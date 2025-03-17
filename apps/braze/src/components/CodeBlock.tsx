@@ -1,7 +1,7 @@
 import { Flex, CopyButton } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { codeBlockStyles, lineNumberStyle } from './codeblock.style';
+import SyntaxHighlighter from "react-syntax-highlighter/dist/cjs/light";
 
 type Props = {
   code: string;
