@@ -7,6 +7,5 @@
     "resolveJsonModule": true,
     "jsx": "react"
   },
-  "include": ["./src/tools/*", "./functions/*"],
-  "exclude": ["./src/typings.ts"]
+  "include": ["./src/", "./functions/"]
 }
