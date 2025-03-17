@@ -43,7 +43,7 @@ function generateEntryArrayLiquidTag(field: EntryArrayField, prefix: string) {
 }
 
 function generateAssetArrayLiquidTag(field: AssetArrayField, content: string) {
-  const items = ASSET_FIELDS.map((assetField) => `{{ ${field.id}CollectionItem.${assetField} }}`);
+  const items = ASSET_FIELDS.map((assetField) => `  {{ ${field.id}CollectionItem.${assetField} }}`);
 
   return [
     `{% for ${field.id}CollectionItem in ${content}Collection.items %}
@@ -55,7 +55,7 @@ ${items.join('\n')}
 function generateTextArrayLiquidTag(content: string, field: BasicArrayField) {
   return [
     `{% for ${field.id}Item in ${content} %}
-{{ ${field.id}Item }}
+  {{ ${field.id}Item }}
 {% endfor %}`,
   ];
 }

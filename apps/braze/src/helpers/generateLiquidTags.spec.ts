@@ -198,7 +198,9 @@ describe('Generate liquid tags', () => {
     const result = generateLiquidTags(contentTypeId, entryFields);
 
     expect(result).toContain(
-      `{% for listOfTextItem in response.data.blogPost.listOfText %}\n{{ listOfTextItem }}\n{% endfor %}`
+      '{% for listOfTextItem in response.data.blogPost.listOfText %}\n' +
+        '  {{ listOfTextItem }}\n' +
+        '{% endfor %}'
     );
   });
 
@@ -247,7 +249,11 @@ describe('Generate liquid tags', () => {
     const result = generateLiquidTags(contentTypeId, entryFields);
 
     expect(result).toContain(
-      `{% for listOfAssetCollectionItem in response.data.blogPost.listOfAssetCollection.items %}\n{{ listOfAssetCollectionItem.title }}\n{{ listOfAssetCollectionItem.description }}\n{{ listOfAssetCollectionItem.url }}\n{% endfor %}`
+      '{% for listOfAssetCollectionItem in response.data.blogPost.listOfAssetCollection.items %}\n' +
+        '  {{ listOfAssetCollectionItem.title }}\n' +
+        '  {{ listOfAssetCollectionItem.description }}\n' +
+        '  {{ listOfAssetCollectionItem.url }}\n' +
+        '{% endfor %}'
     );
   });
 

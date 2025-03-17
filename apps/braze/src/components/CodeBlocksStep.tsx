@@ -1,6 +1,7 @@
-import { Box, List, ListItem, Paragraph, Subheading } from '@contentful/f36-components';
+import { Box, Paragraph, Subheading } from '@contentful/f36-components';
 import Splitter from './Splitter';
 import tokens from '@contentful/f36-tokens';
+import CodeBlock from './CodeBlock';
 
 interface CodeBlocksStepProps {
   connectedContentCall: string;
@@ -24,27 +25,20 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           Braze Connected Content Call
         </Subheading>
-        <code>{connectedContentCall}</code>
+        <CodeBlock language={'liquid'} code={connectedContentCall} />
 
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
 
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           Liquid tag to reference selected Contentful fields, within Braze message body
         </Subheading>
-        <List>
-          {liquidTags.map((liquidTag) => (
-            <ListItem key={liquidTag}>
-              <code>{liquidTag}</code>
-            </ListItem>
-          ))}
-        </List>
-
+        <CodeBlock language={'liquid'} code={liquidTags.join('\n')} />
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
 
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           JSON data available in Braze via Connected Content call
         </Subheading>
-        <code>{graphqlResponse}</code>
+        <CodeBlock language={'json'} code={graphqlResponse} />
       </Box>
     </>
   );

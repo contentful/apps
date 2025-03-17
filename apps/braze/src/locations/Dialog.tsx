@@ -7,7 +7,6 @@ import {
   getGraphQLResponse,
 } from '../helpers/assembleQuery';
 import generateLiquidTags from '../helpers/generateLiquidTags';
-
 import { Box, Button, Flex } from '@contentful/f36-components';
 import { useEffect, useState } from 'react';
 import FieldsSelectionStep from '../components/FieldsSelectionStep';
@@ -35,12 +34,16 @@ function previousStep(step: string): string {
   return STEPS[nextStepIndex];
 }
 
+function formatGraphqlResponse(response: JSON) {
+  const jsonString = JSON.stringify(response, null, 2);
+  return jsonString.replace(/\n/g, '\n');
+}
+
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
   useAutoResizer();
   const [graphqlResponse, setGraphqlResponse] = useState<string>('');
   const [step, setStep] = useState('fields');
-
   const spaceId = sdk.ids.space;
   const token = sdk.parameters.installation.apiKey;
   const invocationParams = sdk.parameters.invocation as InvocationParams;
@@ -49,10 +52,13 @@ const Dialog = () => {
   const query = assembleQuery(contentTypeId, entryId, invocationParams.entryFields);
   const connectedContentCall = generateConnectedContentCall(query, spaceId, token);
   const liquidTags = generateLiquidTags(contentTypeId, invocationParams.entryFields);
+
   useEffect(() => {
     const fetchEntry = async () => {
       const response = await getGraphQLResponse(spaceId, token, query);
-      setGraphqlResponse(JSON.stringify(response));
+      const graphqlResponseWithNewlines = formatGraphqlResponse(response);
+
+      setGraphqlResponse(graphqlResponseWithNewlines);
     };
     fetchEntry();
   }, []);

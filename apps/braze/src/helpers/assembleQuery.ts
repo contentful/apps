@@ -66,19 +66,18 @@ export type Field =
   | EntryArrayField;
 
 export function generateConnectedContentCall(query: string, spaceId: string, token: string) {
-  return `
-  {% capture body %}
+  return `{% capture body %}
   ${query}
-  {% endcapture %}
+{% endcapture %}
 
-  {% connected_content
+{% connected_content
     https://graphql.contentful.com/content/v1/spaces/${spaceId}
     :method post
     :headers {"Authorization": "Bearer ${token}"}
     :body {{body}}
     :content_type application/json
     :save ${SAVED_RESPONSE}
-  %}`;
+%}`;
 }
 
 export async function getGraphQLResponse(spaceId: string, token: string, query: string) {
@@ -105,22 +104,24 @@ function assembleFieldsQuery(entryFields: Field[]): string {
 }
 
 function fieldQuery(field: Field) {
-  if (field.type === 'Link') {
-    if (field.linkType === 'Entry') {
-      return entryQuery(field);
-    } else if (field.linkType === 'Asset') {
-      return assetQuery(field);
+  if (field.type !== 'RichText') {
+    if (field.type === 'Link') {
+      if (field.linkType === 'Entry') {
+        return entryQuery(field);
+      } else if (field.linkType === 'Asset') {
+        return assetQuery(field);
+      }
+    } else if (field.type === 'Array') {
+      if (field.arrayType === 'Entry') {
+        return entryArrayQuery(field as EntryArrayField);
+      } else if (field.arrayType === 'Symbol') {
+        return basicQuery(field as BasicArrayField);
+      } else if (field.arrayType === 'Asset') {
+        return assetArrayQuery(field as AssetArrayField);
+      }
+    } else {
+      return basicQuery(field as BasicField);
     }
-  } else if (field.type === 'Array') {
-    if (field.arrayType === 'Entry') {
-      return entryArrayQuery(field as EntryArrayField);
-    } else if (field.arrayType === 'Symbol') {
-      return basicQuery(field as BasicArrayField);
-    } else if (field.arrayType === 'Asset') {
-      return assetArrayQuery(field as AssetArrayField);
-    }
-  } else {
-    return basicQuery(field as BasicField);
   }
 }
 
