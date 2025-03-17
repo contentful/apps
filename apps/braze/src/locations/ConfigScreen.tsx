@@ -33,6 +33,11 @@ const ConfigScreen = () => {
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
+    if (!parameters.apiKey) {
+      sdk.notifier.error('A valid Contentful API key is required');
+      return false;
+    }
+
     return {
       parameters,
       targetState: currentState,
