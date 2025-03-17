@@ -1,7 +1,7 @@
 import { Box, Paragraph, Subheading } from '@contentful/f36-components';
 import Splitter from './Splitter';
 import tokens from '@contentful/f36-tokens';
-import CodeBlock from './codeblock';
+import CodeBlock from './CodeBlock';
 
 interface CodeBlocksStepProps {
   connectedContentCall: string;
