@@ -1,9 +1,10 @@
 import { fireEvent, screen, render, cleanup, RenderResult } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockCma, mockSdk } from '../../test/mocks';
-import ConfigScreen, { BRAZE_DOCUMENTATION } from './ConfigScreen';
+import { mockCma, mockSdk } from '../mocks';
+import ConfigScreen, { BRAZE_DOCUMENTATION } from '../../src/locations/ConfigScreen';
 import userEvent from '@testing-library/user-event';
 import { queries } from '@testing-library/dom';
+import React from 'react';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
