@@ -1,8 +1,9 @@
+import assert from 'node:assert';
+import { ResourceProviderProps, ResourceTypeProps } from 'contentful-management';
+
 import mockshopJson from './entities/mockshop.json';
 import productJson from './entities/product.json';
 import manifest from '../../contentful-app-manifest.json';
-import assert from 'assert';
-import type { ResourceProvider, ResourceType } from './types';
 
 assert.equal(
   typeof manifest,
@@ -26,8 +27,8 @@ assert.ok(appDefinitionId !== '', `CONTENTFUL_APP_DEF_ID environment variable mu
 
 assert.ok(accessToken !== '', `CONTENTFUL_ACCESS_TOKEN environment variable must be defined`);
 
-const mockshop = mockshopJson as ResourceProvider;
-const product = productJson as ResourceType;
+const mockshop = mockshopJson as ResourceProviderProps;
+const product = productJson as ResourceTypeProps;
 
 export {
   organizationId,
