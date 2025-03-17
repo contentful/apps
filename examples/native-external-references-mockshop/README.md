@@ -13,6 +13,7 @@ This project was bootstrapped with [Create Contentful App](https://github.com/co
     - [Installing the app](#installing-the-app)
 4. [Code structure](#code-structure)
     - [Functions](#functions)
+    - [Setting Up Resource Provider and ResourceEntities](#setting-up-resourceentities)
     - [Property mapping](#property-mapping)
     - [App manifest](#app-manifest)
 5. [Available Scripts](#available-scripts)
@@ -136,12 +137,23 @@ The example app is using [Functions](https://www.contentful.com/developers/docs/
 * `graphql.resourcetype.mapping` - retrieval of resource type mappings, which determines what fields map to an external type
 * `graphql.query` -  handles GraphQL queries for the external third-party API
 
+## Setting Up ResourceEntities
+
+All ResourceEntities(such as the Resource Provider and various Resource Entities) are created and managed via the utility code in `src/tools`. These helper methods allow you to:
+
+* `create-resource-entities.ts` - Create new ResourceEntities
+* `delete-resource-entities.ts` - Delete ResourceEntities
+* `show-resource-entities.ts` - Show available ResourceEntities
+
+Customize the ResourceEntities according to your specific requirements using these helper methods.
+
+
 ## Property mapping
 
 Contentful uses `Resource Type Mappings` to determine which field in an entry is mapped to an external type and to specify any arguments required for external GraphQL queries defined in the `queryHandler`. 
 
 The mapping between these components and external system data is established using [JSON pointers](https://datatracker.ietf.org/doc/html/rfc6901).
-The definitions of `Product` **Resource Type** representations can be found in the ` src/tools/entities/product.json `.
+The definitions of `Product` **Resource Type** representations can be found in the `src/tools/entities/product.json `.
 This mapping is defined in the `defaultFieldMapping` property of each `Resource Type` and must adhere to the structure used for mapping the values shown in the entry component.
 
 ## App manifest
