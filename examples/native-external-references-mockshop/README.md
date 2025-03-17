@@ -13,7 +13,6 @@ This project was bootstrapped with [Create Contentful App](https://github.com/co
     - [Installing the app](#installing-the-app)
 4. [Code structure](#code-structure)
     - [Functions](#functions)
-    - [Entities overview](#entities-overview)
     - [Property mapping](#property-mapping)
     - [App manifest](#app-manifest)
 5. [Available Scripts](#available-scripts)
@@ -75,14 +74,11 @@ npm run create-app-definition
 You will need to answer the following questions in the terminal when prompted. Feel free to proceed with the default options provided.
 
 1. **Name of your application**. This is how your app will be named and it will be displayed in a few places throughout the UI. The default is the name of the folder you created.
-2. **Select where your app can be rendered**. This shows potential [app locations](https://www.contentful.com/developers/docs/extensibility/app-framework/locations/) where an app can be rendered within the Contentful Web app. Select **App configuration screen** , as we will utilize the configuration screen to provide the external API URL for the app.
+2. **Select where your app can be rendered**. This shows potential [app locations](https://www.contentful.com/developers/docs/extensibility/app-framework/locations/) where an app can be rendered within the Contentful Web app. We don’t need to configure any app locations in this example. Simply press **Enter** to skip setting them.
 3. **Contentful CMA endpoint URL**. This refers to the URL used to interact with Contentful's Management APIs.
-4. **App Parameters**. These are configurable values that can be used to set default values or define custom validation rules. We need to define these for the API URL in this case:
+4. **App Parameters**. These configurable values set defaults or define custom validation rules. We won’t define any in this example since the API URL remains the same.
 
-* Opt for **Y** to advance with the process of defining the parameters
-* Choose **Installation**
-* Input `MockShop API Endpoint` as **Parameter name** and `apiEndpoint` as **ID**
-* Select **Symbol** as type and mark the parameter as required
+* Opt for **N** to advance with the process of defining the parameters
 
 5. The next steps will lead you through the process of providing a Contentful access token to the application and specifying the organization to which the application should be assigned.
 
@@ -125,11 +121,9 @@ This will tell Contentful that we want to connect to `MockShop` via the function
 
 * After you successfully upload your app, install it to an existing space by running the command: `npm run install-app`
 * Select the space and environment in which you would prefer to install the example app from the dialog that appears. You will have to grant access to the space the app will be installed in.
-* After granting access, the configuration screen, which is rendered by the <ConfigScreen /> component, will be displayed. Input your MockShop API URL into the form and proceed to save the changes.
 
 Your example app is now configured and installed.
 
-The form that will save the MockShop API URL when we install the app has been defined in `src/locations/ConfigScreen.tsx`. More information on how configuration screens are set up can be found in [this App Configuration tutorial](https://www.contentful.com/developers/docs/extensibility/app-framework/app-configuration/).
 
 # Code structure
 
@@ -141,90 +135,6 @@ The example app is using [Functions](https://www.contentful.com/developers/docs/
 * `resources.lookup` - retrieval of specific content based on URNs (IDs)
 * `graphql.resourcetype.mapping` - retrieval of resource type mappings, which determines what fields map to an external type
 * `graphql.query` -  handles GraphQL queries for the external third-party API
-
-## Entities overview
-
-Below is a representation of how a _Resource Provider_ is structured, using the MockShop app as an illustrative example:
-
-```json
-{
-   "sys":{
-      "id":"MockShop",
-      "type":"ResourceProvider",
-      "organization":{
-         "sys":{
-            "type":"Link",
-            "linkType":"Organization",
-            "id":"<organisation-id>"
-         }
-      },
-      "appDefinition":{
-         "sys":{
-            "type":"Link",
-            "linkType":"AppDefinition",
-            "id":"<app-definitin-id>"
-         }
-      }
-   },
-   "type":"function",
-   "function":{
-      "sys":{
-         "type":"Link",
-         "linkType":"Function",
-         "id":"MockShopTutorial"
-      }
-   }
-}
-```
-
-We are representing _Resource Types_ in a similar structure:
-
-```json
-{
-   "sys":{
-      "type":"Array"
-   },
-   "items":[
-      {
-         "sys":{
-            "id":"MockShop:Product",
-            "resourceProvider":{
-               "sys":{
-                  "type":"Link",
-                  "linkType":"ResourceProvider",
-                  "id":"MockShop"
-               }
-            },
-            "appDefinition":{
-               "sys":{
-                  "type":"Link",
-                  "linkType":"AppDefinition",
-                  "id":"<app-definitin-id>"
-               }
-            },
-            "organization":{
-               "sys":{
-                  "type":"Link",
-                  "linkType":"Organization",
-                  "id":"<organisation-id>"
-               }
-            },
-            "type":"ResourceType"
-         },
-         "name":"Product",
-         "defaultFieldMapping":{
-            "title":"{ /title }",
-            "image":{
-               "altText":"{ /featuredImage/altText }",
-               "url":"{ /featuredImage/url }"
-            },
-            "subtitle":"Product ID: { /id }"
-         }
-      }
-   ],
-   "pages":{}
-}
-```
 
 ## Property mapping
 
