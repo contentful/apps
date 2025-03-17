@@ -1,30 +1,8 @@
-type Link<T> = {
-  sys: {
-    type: string;
-    linkType: T;
-    id: string;
-  };
-};
+import { ResourceProviderProps, ResourceTypeProps, Link } from 'contentful-management';
 
-export type ResourceProvider = {
-  sys: { id: string };
-  type: string;
-  function: Link<'Function'>;
-};
+export type ResourceProvider = ResourceProviderProps;
 
-export type ResourceType = {
-  sys: { id: string };
-  name: string;
-  defaultFieldMapping: {
-    title: string;
-    subtitle: string;
-    externalUrl: string;
-    image: {
-      url: string;
-      altText: string;
-    };
-  };
-};
+export type ResourceType = ResourceTypeProps;
 
 export type APIResourceProvider = {
   sys: {
