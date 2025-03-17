@@ -1,12 +1,4 @@
-import {
-  Box,
-  Button,
-  Flex,
-  List,
-  ListItem,
-  Paragraph,
-  Subheading,
-} from '@contentful/f36-components';
+import { Box, Button, List, ListItem, Paragraph, Subheading } from '@contentful/f36-components';
 import Splitter from './Splitter';
 import tokens from '@contentful/f36-tokens';
 import { useState, useEffect } from 'react';
@@ -17,6 +9,7 @@ import {
 } from '../helpers/assembleQuery';
 import generateLiquidTags from '../helpers/generateLiquidTags';
 import { EntryInfo } from '../locations/Dialog';
+import WizardFooter from './WizardFooter';
 
 type CodeBlocksStepProps = {
   spaceId: string;
@@ -79,22 +72,14 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
         <code>{graphqlResponse}</code>
       </Box>
 
-      <Flex
-        padding="spacingM"
-        gap="spacingM"
-        justifyContent="end"
-        style={{
-          position: 'sticky',
-          bottom: 0,
-          background: 'white',
-        }}>
+      <WizardFooter>
         <Button variant="secondary" size="small" onClick={handlePreviousStep}>
           Back
         </Button>
         <Button variant="primary" size="small" onClick={handleClose}>
           Close
         </Button>
-      </Flex>
+      </WizardFooter>
     </>
   );
 };

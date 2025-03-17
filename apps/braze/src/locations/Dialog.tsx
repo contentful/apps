@@ -37,9 +37,8 @@ const Dialog = () => {
       paddingRight="spacingL">
       {step === FIELDS_STEP && (
         <FieldsSelectionStep
-          handleNextStep={() =>
-            setStep(shouldChooseLocales ? LOCALES_STEP : CODE_BLOCKS_STEP)
-          }></FieldsSelectionStep>
+          handleNextStep={() => setStep(shouldChooseLocales ? LOCALES_STEP : CODE_BLOCKS_STEP)}
+        />
       )}
       {step === LOCALES_STEP && (
         <LocalesSelectionStep
@@ -47,7 +46,8 @@ const Dialog = () => {
           selectedLocales={selectedLocales}
           setSelectedLocales={setSelectedLocales}
           handlePreviousStep={() => setStep(FIELDS_STEP)}
-          handleNextStep={() => setStep(CODE_BLOCKS_STEP)}></LocalesSelectionStep>
+          handleNextStep={() => setStep(CODE_BLOCKS_STEP)}
+        />
       )}
       {step === CODE_BLOCKS_STEP && (
         <CodeBlocksStep
@@ -56,7 +56,8 @@ const Dialog = () => {
           entryInfo={entryInfo}
           selectedLocales={selectedLocales}
           handlePreviousStep={() => setStep(shouldChooseLocales ? LOCALES_STEP : FIELDS_STEP)}
-          handleClose={() => sdk.close()}></CodeBlocksStep>
+          handleClose={() => sdk.close()}
+        />
       )}
     </Box>
   );

@@ -1,6 +1,7 @@
-import { Button, Flex, FormControl, Paragraph } from '@contentful/f36-components';
+import { Button, FormControl, Paragraph } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction } from 'react';
+import WizardFooter from './WizardFooter';
 
 type LocalesSelectionStepProps = {
   locales: string[];
@@ -52,22 +53,14 @@ const LocalesSelectionStep = (props: LocalesSelectionStepProps) => {
         </Multiselect>
       </FormControl>
 
-      <Flex
-        padding="spacingM"
-        gap="spacingM"
-        justifyContent="end"
-        style={{
-          position: 'sticky',
-          bottom: 0,
-          background: 'white',
-        }}>
+      <WizardFooter>
         <Button variant="secondary" size="small" onClick={handlePreviousStep}>
           Back
         </Button>
         <Button variant="primary" size="small" onClick={handleNextStep}>
           Next
         </Button>
-      </Flex>
+      </WizardFooter>
     </>
   );
 };

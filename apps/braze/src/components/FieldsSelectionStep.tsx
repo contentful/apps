@@ -1,5 +1,6 @@
-import { Button, Flex, Paragraph, TextLink } from '@contentful/f36-components';
+import { Button, Paragraph, TextLink } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
+import WizardFooter from './WizardFooter';
 
 type FieldsSelectionStepProps = {
   handleNextStep: () => void;
@@ -21,20 +22,11 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
           view documentation here
         </TextLink>
       </Paragraph>
-
-      <Flex
-        padding="spacingM"
-        gap="spacingM"
-        justifyContent="end"
-        style={{
-          position: 'sticky',
-          bottom: 0,
-          background: 'white',
-        }}>
+      <WizardFooter>
         <Button variant="primary" size="small" onClick={handleNextStep}>
           Next
         </Button>
-      </Flex>
+      </WizardFooter>
     </>
   );
 };
