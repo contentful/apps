@@ -1,8 +1,8 @@
 import { createClient, ResourceProviderProps, ResourceTypeProps } from 'contentful-management';
 import { accessToken, appDefinitionId, manifest, organizationId, contentfulHost } from './imports';
 
-const client = createClient({ accessToken }, { type: 'plain' });
 const host = contentfulHost || 'api.contentful.com';
+const client = createClient({ accessToken, host }, { type: 'plain' });
 
 export const getResourceProvider = async () => {
   return client.resourceProvider.get({ organizationId, appDefinitionId });
