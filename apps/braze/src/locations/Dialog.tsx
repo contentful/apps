@@ -5,14 +5,14 @@ import { useEffect, useState } from 'react';
 import FieldsSelectionStep from '../components/FieldsSelectionStep';
 import CodeBlocksStep from '../components/CodeBlocksStep';
 import LocalesSelectionStep from '../components/LocalesSelectionStep';
-import { Field } from '../fields/Field';
 import { createClient } from 'contentful-management';
 import resolveResponse from 'contentful-resolve-response';
-import { transformEntryFields } from '../helpers/transformEntryFields';
+import { FieldsFactory } from '../fields/FieldsFactory';
+import { Entry } from '../fields/Entry';
 
 export type EntryInfo = {
   id: string;
-  contentTypeId: string;
+  contentType: string;
 };
 
 const FIELDS_STEP = 'fields';
@@ -26,7 +26,7 @@ const Dialog = () => {
   const entryInfo = sdk.parameters.invocation as EntryInfo;
   const [step, setStep] = useState('fields');
   const [selectedLocales, setSelectedLocales] = useState<string[]>([sdk.locales.default]);
-  const [entryFields, setEntryFields] = useState<Field[]>([]);
+  const [entry, setEntry] = useState<Entry>();
 
   const cma = createClient(
     { apiAdapter: sdk.cmaAdapter },
@@ -42,13 +42,20 @@ const Dialog = () => {
     const fetchEntry = async () => {
       const response = await cma.entry.references({ entryId: entryInfo.id, include: 5 });
       const items = resolveResponse(response);
-      const fields = await transformEntryFields(items[0], cma);
-      setEntryFields(fields);
+      const fields = await FieldsFactory.createFields(items[0], cma);
+      const entry = new Entry(
+        entryInfo.id,
+        entryInfo.contentType,
+        fields,
+        sdk.ids.space,
+        sdk.parameters.installation.apiKey
+      );
+      setEntry(entry);
     };
     fetchEntry();
   }, [entryInfo]);
 
-  if (entryFields.length === 0) {
+  if (!entry) {
     return (
       <Stack flexDirection="column">
         <Spinner size="large" variant="primary" />
@@ -56,8 +63,7 @@ const Dialog = () => {
     );
   }
 
-  const anyFieldIsLocalized = entryFields.some((field) => field.localized);
-  const shouldChooseLocales = locales.length > 1 && anyFieldIsLocalized;
+  const shouldChooseLocales = locales.length > 1 && entry.anyFieldIsLocalized();
 
   return (
     <Box
@@ -81,10 +87,7 @@ const Dialog = () => {
       )}
       {step === CODE_BLOCKS_STEP && (
         <CodeBlocksStep
-          spaceId={sdk.ids.space}
-          contentfulToken={sdk.parameters.installation.apiKey}
-          entryInfo={entryInfo}
-          fields={entryFields}
+          entry={entry}
           selectedLocales={selectedLocales}
           handlePreviousStep={() => setStep(shouldChooseLocales ? LOCALES_STEP : FIELDS_STEP)}
           handleClose={() => sdk.close()}

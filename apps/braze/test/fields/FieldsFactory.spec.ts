@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { transformEntryFields } from '../../src/helpers/transformEntryFields';
+import { FieldsFactory } from '../../src/fields/FieldsFactory';
 import { BasicField } from '../../src/fields/BasicField';
 import { AssetField } from '../../src/fields/AssetField';
 import { ReferenceField } from '../../src/fields/ReferenceField';
@@ -8,7 +8,7 @@ import { AssetArrayField } from '../../src/fields/AssetArrayField';
 import { ReferenceArrayField } from '../../src/fields/ReferenceArrayField';
 import { ReferenceItem } from '../../src/fields/ReferenceItem';
 
-describe('transformEntryFields', () => {
+describe('FieldsFactory', () => {
   const mockCma = {
     contentType: {
       get: vi.fn(),
@@ -36,7 +36,7 @@ describe('transformEntryFields', () => {
       fields: [{ id: 'title', type: 'Symbol', localized: true }],
     });
 
-    const result = await transformEntryFields(mockEntry, mockCma as any);
+    const result = await FieldsFactory.createFields(mockEntry, mockCma as any);
 
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(BasicField);
@@ -67,7 +67,7 @@ describe('transformEntryFields', () => {
       fields: [{ id: 'featuredImage', type: 'Link', linkType: 'Asset', localized: true }],
     });
 
-    const result = await transformEntryFields(mockEntry, mockCma as any);
+    const result = await FieldsFactory.createFields(mockEntry, mockCma as any);
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(AssetField);
     const fieldInstance = result[0] as AssetField;
@@ -119,7 +119,7 @@ describe('transformEntryFields', () => {
       }
     });
 
-    const result = await transformEntryFields(mockEntry, mockCma as any);
+    const result = await FieldsFactory.createFields(mockEntry, mockCma as any);
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(ReferenceField);
     const fieldInstance = result[0] as ReferenceField;
@@ -152,7 +152,7 @@ describe('transformEntryFields', () => {
       fields: [{ id: 'tags', type: 'Array', items: { type: 'Symbol' }, localized: true }],
     });
 
-    const result = await transformEntryFields(mockEntry, mockCma as any);
+    const result = await FieldsFactory.createFields(mockEntry, mockCma as any);
 
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(TextArrayField);
@@ -191,7 +191,7 @@ describe('transformEntryFields', () => {
       ],
     });
 
-    const result = await transformEntryFields(mockEntry, mockCma as any);
+    const result = await FieldsFactory.createFields(mockEntry, mockCma as any);
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(AssetArrayField);
     const fieldInstance = result[0] as AssetArrayField;
@@ -257,7 +257,7 @@ describe('transformEntryFields', () => {
       }
     });
 
-    const result = await transformEntryFields(mockEntry, mockCma as any);
+    const result = await FieldsFactory.createFields(mockEntry, mockCma as any);
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(ReferenceArrayField);
     const fieldInstance = result[0] as ReferenceArrayField;
@@ -295,7 +295,7 @@ describe('transformEntryFields', () => {
       fields: [{ id: 'title', type: 'Symbol', localized: true }],
     });
 
-    await expect(transformEntryFields(mockEntry, mockCma as any)).rejects.toThrow(
+    await expect(FieldsFactory.createFields(mockEntry, mockCma as any)).rejects.toThrow(
       'Field not found'
     );
   });
@@ -341,7 +341,7 @@ describe('transformEntryFields', () => {
       };
     });
 
-    const result = await transformEntryFields(mockEntry, mockCma as any);
+    const result = await FieldsFactory.createFields(mockEntry, mockCma as any);
 
     expect(result).toHaveLength(2); // name and nestedRef
     expect(result[0].id).toEqual('name');

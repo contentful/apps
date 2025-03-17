@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { SIDEBAR_BUTTON_TEXT, DIALOG_TITLE } from '../../src/helpers/utils';
+import { SIDEBAR_BUTTON_TEXT, DIALOG_TITLE } from '../../src/utils';
 import { mockSdk, mockCma } from '../mocks';
 import Sidebar from '../../src/locations/Sidebar';
 

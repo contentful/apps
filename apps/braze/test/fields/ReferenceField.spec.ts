@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ReferenceField } from '../../src/fields/ReferenceField';
 import { BasicField } from '../../src/fields/BasicField';
 import { AssetField } from '../../src/fields/AssetField';
-import { ASSET_FIELDS_QUERY } from '../../src/helpers/utils';
+import { ASSET_FIELDS_QUERY } from '../../src/utils';
 
 describe('ReferenceField', () => {
   it('Generates query for reference with baic fields', () => {

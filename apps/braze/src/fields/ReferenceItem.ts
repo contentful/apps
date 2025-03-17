@@ -1,4 +1,4 @@
-import { capitalize } from '../helpers/utils';
+import { capitalize } from '../utils';
 import { Field } from './Field';
 
 export class ReferenceItem {

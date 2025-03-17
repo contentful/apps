@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { AssetArrayField } from '../../src/fields/AssetArrayField';
-import { ASSET_FIELDS_QUERY } from '../../src/helpers/utils';
+import { ASSET_FIELDS_QUERY } from '../../src/utils';
 
 describe('AssetArrayField', () => {
   it('Generates query', () => {

@@ -2,7 +2,7 @@ import { SidebarAppSDK } from '@contentful/app-sdk';
 import { Button } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { EntryInfo } from './Dialog';
-import { DIALOG_TITLE, SIDEBAR_BUTTON_TEXT } from '../helpers/utils';
+import { DIALOG_TITLE, SIDEBAR_BUTTON_TEXT } from '../utils';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
@@ -10,7 +10,7 @@ const Sidebar = () => {
 
   const invocationParams: EntryInfo = {
     id: sdk.ids.entry,
-    contentTypeId: sdk.ids.contentType,
+    contentType: sdk.ids.contentType,
   };
 
   return (

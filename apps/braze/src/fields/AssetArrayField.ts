@@ -1,4 +1,4 @@
-import { ASSET_FIELDS, ASSET_FIELDS_QUERY } from '../helpers/utils';
+import { ASSET_FIELDS, ASSET_FIELDS_QUERY } from '../utils';
 import { Field } from './Field';
 
 export class AssetArrayField extends Field {

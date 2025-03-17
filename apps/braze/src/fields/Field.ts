@@ -1,4 +1,4 @@
-import { SAVED_RESPONSE } from '../helpers/utils';
+import { SAVED_RESPONSE } from '../utils';
 
 export abstract class Field {
   public id: string;

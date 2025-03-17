@@ -1,4 +1,4 @@
-import { capitalize, SAVED_RESPONSE } from '../helpers/utils';
+import { capitalize, SAVED_RESPONSE } from '../utils';
 import { Field } from './Field';
 
 export class ReferenceField extends Field {
