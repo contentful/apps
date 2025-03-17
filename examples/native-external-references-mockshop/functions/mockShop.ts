@@ -87,7 +87,7 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
   };
 };
 
-const loookupHandler: ResourcesLookupHandler = async (event, context) => {
+const lookupHandler: ResourcesLookupHandler = async (event, context) => {
   const { urns } = event.lookupBy;
 
   const mockShopUrl = getMockShopUrl(context);
@@ -146,7 +146,7 @@ export const handler: EventHandler = (event, context) => {
   }
 
   if (event.type === 'resources.lookup') {
-    return loookupHandler(event, context);
+    return lookupHandler(event, context);
   }
 
   if (event.type === 'graphql.resourcetype.mapping') {

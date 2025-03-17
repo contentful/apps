@@ -7,7 +7,12 @@
       "path": "functions/mockShop.js",
       "entryFile": "functions/mockShop.ts",
       "allowNetworks": ["https://mock.shop/api"],
-      "accepts": ["graphql.resourcetype.mapping", "graphql.query", "resources.lookup", "resources.search"]
+      "accepts": [
+        "graphql.resourcetype.mapping",
+        "graphql.query",
+        "resources.lookup",
+        "resources.search"
+      ]
     }
   ]
 }

@@ -100,6 +100,8 @@ npm run upload
 For more information on environment variables, see [npm run upload-ci](#npm-run-upload-ci)
 
 The interactive CLI will prompt you to provide additional details, such as a CMA endpoint URL. Select **Yes** when prompted if you’d like to activate the bundle after upload.
+> **NOTE:**
+> EU data residency users should use https://api.eu.contentful.com instead of the default.
 
 ## Creating resource entities
 
@@ -167,7 +169,7 @@ The function properties are as follows:
 * `description`: A brief description of the Function.
 * `path`: This is the path to the transpiled source file of the Function in your bundle, exposing a `handler` function
 * `entryFile`: Path pointing to the source file of the Function. Exposing a `handler` function.
-* `allowedNetworks`: A list of endpoints the Function should be allowed to connect to, this is a security feature to prevent unauthorized access to your network.
+* `allowNetworks`: A list of endpoints the Function should be allowed to connect to, this is a security feature to prevent unauthorized access to your network.
 * `accepts`: An array of event types the Function can handle, in this case we have two event types: [`resources.search`, `resources.lookup` `graphql.resourcetype.mapping`,`graphql.query`].
 # Available Scripts
 
