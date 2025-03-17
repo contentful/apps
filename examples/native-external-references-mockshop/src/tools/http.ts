@@ -20,7 +20,10 @@ export const createResourceProvider = async (resourceProvider: ResourceProviderP
     },
   };
 
-  return client.resourceProvider.upsert({ organizationId, appDefinitionId }, resourceProviderWithFunctionId);
+  return client.resourceProvider.upsert(
+    { organizationId, appDefinitionId },
+    resourceProviderWithFunctionId
+  );
 };
 
 export const deleteResourceProvider = async () => {
@@ -30,7 +33,10 @@ export const deleteResourceProvider = async () => {
 export const createResourceType = async (resourceType: ResourceTypeProps) => {
   const { sys, ...data } = resourceType;
 
-  return client.resourceType.upsert({ organizationId, appDefinitionId, resourceTypeId: resourceType.sys.id }, data);
+  return client.resourceType.upsert(
+    { organizationId, appDefinitionId, resourceTypeId: resourceType.sys.id },
+    data
+  );
 };
 
 export const listResourceTypes = async () => {
@@ -38,5 +44,9 @@ export const listResourceTypes = async () => {
 };
 
 export const deleteResourceType = async (resourceType: ResourceTypeProps) => {
-  return client.resourceType.delete({ organizationId, appDefinitionId, resourceTypeId: resourceType.sys.id });
+  return client.resourceType.delete({
+    organizationId,
+    appDefinitionId,
+    resourceTypeId: resourceType.sys.id,
+  });
 };
