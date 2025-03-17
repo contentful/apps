@@ -1,13 +1,13 @@
-import {
-  AssetArrayField,
-  AssetField,
-  BasicArrayField,
-  BasicField,
-  EntryArrayField,
-  EntryField,
-  Field,
-} from './assembleQuery';
-import { ContentFields, KeyValueMap, PlainClientAPI } from 'contentful-management';
+import { FieldType } from '@contentful/app-sdk';
+import { BasicField } from '../fields/BasicField';
+import { PlainClientAPI } from 'contentful-management';
+import { Field } from '../fields/Field';
+import { AssetField } from '../fields/AssetField';
+import { ReferenceField } from '../fields/ReferenceField';
+import { BasicArrayField } from '../fields/BasicArrayField';
+import { AssetArrayField } from '../fields/AssetArrayField';
+import { ReferenceArrayField } from '../fields/ReferenceArrayField';
+import { ReferenceItem } from '../fields/ReferenceItem';
 
 export async function transformEntryFields(entry: any, cma: PlainClientAPI): Promise<Field[]> {
   const contentType = await cma.contentType.get({ contentTypeId: entry.sys.contentType.sys.id });
@@ -18,109 +18,43 @@ export async function transformEntryFields(entry: any, cma: PlainClientAPI): Pro
       if (!fieldInfo) {
         throw new Error('Field not found');
       }
-      const localized = fieldInfo.localized;
 
       if (fieldInfo.type === 'Link') {
         if (fieldInfo.linkType === 'Asset') {
-          return assembleAssetField(name, localized);
+          return new AssetField(name, contentType.name, fieldInfo.localized);
         } else {
-          return await assembleEntryField(name, field, cma, localized);
+          return new ReferenceField(
+            name,
+            contentType.name,
+            fieldInfo.localized,
+            field.sys.contentType.sys.id,
+            await transformEntryFields(field, cma)
+          );
         }
       } else if (fieldInfo.type === 'Array') {
         if (fieldInfo.items && fieldInfo.items.type === 'Symbol') {
-          return assembleBasicArrayField(name, localized);
+          return new BasicArrayField(name, contentType.name, fieldInfo.localized);
         } else if (fieldInfo.items && fieldInfo.items.linkType === 'Asset') {
-          return assembleAssetArrayField(name, localized);
+          return new AssetArrayField(name, contentType.name, fieldInfo.localized);
         } else {
-          return await assembleEntryArrayField(name, field, cma, localized);
+          const items = await Promise.all(
+            field.map(async (f: any) => {
+              return new ReferenceItem(
+                f.sys.contentType.sys.id,
+                await transformEntryFields(f, cma)
+              );
+            })
+          );
+          return new ReferenceArrayField(name, contentType.name, fieldInfo.localized, items);
         }
       } else {
-        return assembleBasicField(name, fieldInfo, localized);
+        return new BasicField(
+          name,
+          contentType.name,
+          fieldInfo.localized,
+          fieldInfo.type as Exclude<FieldType, 'Array' | 'Link'>
+        );
       }
     })
   );
-}
-
-function assembleBasicField(
-  name: string,
-  fieldInfo: ContentFields<KeyValueMap>,
-  localized: boolean
-): BasicField {
-  return {
-    id: name,
-    localized: localized,
-    type: fieldInfo.type,
-  } as BasicField; // TODO: try to avoid this cast
-}
-
-function assembleAssetField(name: string, localized: boolean): AssetField {
-  return {
-    id: name,
-    localized: localized,
-    type: 'Link',
-    linkType: 'Asset',
-  };
-}
-
-async function assembleEntryField(
-  name: string,
-  field: any,
-  cma: PlainClientAPI,
-  localized: boolean
-): Promise<EntryField> {
-  return {
-    id: name,
-    localized: localized,
-    type: 'Link',
-    linkType: 'Entry',
-    entryContentType: field.sys.contentType.sys.id,
-    fields: await transformEntryFields(field, cma),
-  };
-}
-
-function assembleBasicArrayField(name: string, localized: boolean): BasicArrayField {
-  return {
-    id: name,
-    localized: localized,
-    type: 'Array',
-    arrayType: 'Symbol',
-    items: {
-      type: 'Symbol',
-    },
-  };
-}
-
-function assembleAssetArrayField(name: string, localized: boolean): AssetArrayField {
-  return {
-    id: name,
-    localized: localized,
-    type: 'Array',
-    arrayType: 'Asset',
-    items: {
-      type: 'Link',
-      linkType: 'Asset',
-    },
-  };
-}
-
-async function assembleEntryArrayField(
-  name: string,
-  field: any,
-  cma: PlainClientAPI,
-  localized: boolean
-): Promise<EntryArrayField> {
-  return {
-    id: name,
-    localized: localized,
-    type: 'Array',
-    arrayType: 'Entry',
-    items: await Promise.all(
-      field.map(async (f: any) => ({
-        type: 'Link',
-        linkType: 'Entry',
-        entryContentType: f.sys.contentType.sys.id,
-        fields: await transformEntryFields(f, cma),
-      }))
-    ),
-  };
 }

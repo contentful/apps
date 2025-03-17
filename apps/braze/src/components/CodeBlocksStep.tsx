@@ -15,31 +15,32 @@ import {
   generateConnectedContentCall,
   getGraphQLResponse,
 } from '../helpers/assembleQuery';
-import generateLiquidTags from '../helpers/generateLiquidTags';
 import { EntryInfo } from '../locations/Dialog';
+import { Field } from '../fields/Field';
 
 type CodeBlocksStepProps = {
   spaceId: string;
   contentfulToken: string;
   entryInfo: EntryInfo;
+  fields: Field[];
   selectedLocales: string[];
   handlePreviousStep: () => void;
   handleClose: () => void;
 };
 const CodeBlocksStep = (props: CodeBlocksStepProps) => {
-  const { spaceId, contentfulToken, entryInfo, handlePreviousStep, handleClose } = props;
+  const { spaceId, contentfulToken, entryInfo, fields, handlePreviousStep, handleClose } = props;
   const [graphqlResponse, setGraphqlResponse] = useState<string>('');
 
-  const query = assembleQuery(entryInfo.contentTypeId, entryInfo.id, entryInfo.fields);
+  const query = assembleQuery(entryInfo.contentTypeId, entryInfo.id, fields);
   const connectedContentCall = generateConnectedContentCall(query, spaceId, contentfulToken);
-  const liquidTags = generateLiquidTags(entryInfo.contentTypeId, entryInfo.fields);
+  const liquidTags = fields.flatMap((field) => field.generateLiquidTag());
   useEffect(() => {
     const fetchEntry = async () => {
       const response = await getGraphQLResponse(spaceId, contentfulToken, query);
       setGraphqlResponse(JSON.stringify(response));
     };
     fetchEntry();
-  }, []);
+  }, [spaceId, contentfulToken, query]);
 
   return (
     <>
