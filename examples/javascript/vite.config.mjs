@@ -9,4 +9,11 @@ export default defineConfig({
     setupFiles: './src/setupTests.js', // Equivalent to Jest's setup file
   },
   base: '',
+  build: {
+    outDir: 'build',
+  },
+  server: {
+    host: 'localhost',
+    port: 3000,
+  },
 });
