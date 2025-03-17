@@ -140,12 +140,9 @@ The example app is using [Functions](https://www.contentful.com/developers/docs/
 
 Contentful uses `Resource Type Mappings` to determine which field in an entry is mapped to an external type and to specify any arguments required for external GraphQL queries defined in the `queryHandler`. 
 
-Contentful web application displays entries using components that require specific data structures to fill their UI elements.
 The mapping between these components and external system data is established using [JSON pointers](https://datatracker.ietf.org/doc/html/rfc6901).
-
-This mapping is defined in the `defaultFieldMapping` property of each `Resource Type` and must adhere to the structure used for mapping the values shown in the entry component:
-
 The definitions of `Product` **Resource Type** representations can be found in the ` src/tools/entities/product.json `.
+This mapping is defined in the `defaultFieldMapping` property of each `Resource Type` and must adhere to the structure used for mapping the values shown in the entry component.
 
 ## App manifest
 
