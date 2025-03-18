@@ -62,8 +62,8 @@ describe('Config Screen component', () => {
     });
   });
 
-  describe('installation', () => {
-    it('when installed the api key is set correctly', async () => {
+  describe('when installed ', () => {
+    it('a valid api key, the api key is set correctly', async () => {
       const user = userEvent.setup();
       const apiKeyInput = screen.getAllByTestId('apiKey')[0];
       await user.type(apiKeyInput, 'valid-api-key-123');
@@ -76,6 +76,21 @@ describe('Config Screen component', () => {
       expect(result).toEqual({
         parameters: { apiKey: 'valid-api-key-123' },
       });
+    });
+
+    it('an invalid api key, the api key is not set', async () => {
+      const user = userEvent.setup();
+      const apiKeyInput = screen.getAllByTestId('apiKey')[0];
+      await user.type(apiKeyInput, 'invalid-api-key-123');
+
+      vi.spyOn(window, 'fetch').mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: false,
+          json: () => Promise.resolve({ error: 'Invalid API key' }),
+        } as Response)
+      );
+
+      await expect(saveAppInstallation()).rejects.toThrow();
     });
   });
 });
