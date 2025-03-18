@@ -139,6 +139,9 @@ const ConfigScreen = () => {
               placeholder="ex. 0ab1c234DE56f..."
               onChange={(e) => setParameters({ ...parameters, apiKey: e.target.value })}
             />
+            {!apiKeyValid && (
+              <FormControl.ValidationMessage>Invalid API key</FormControl.ValidationMessage>
+            )}
           </Form>
         </Box>
       </Box>
