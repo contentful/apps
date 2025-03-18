@@ -16,3 +16,7 @@ export const SIDEBAR_BUTTON_TEXT = 'Generate Braze Connected Content';
 export function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
+
+export function removeIndentation(str: string) {
+  return ('' + str).replace(/(\n)\s+/g, '$1');
+}

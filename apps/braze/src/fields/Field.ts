@@ -14,8 +14,13 @@ export abstract class Field {
   abstract generateQuery(): string;
   public abstract generateLiquidTagForType(template: string): string[];
 
-  generateLiquidTag(): string[] {
-    const template = `${SAVED_RESPONSE}.data.${this.entryContentTypeId}`;
+  generateLiquidTag(locale?: string): string[] {
+    let template = `${SAVED_RESPONSE}.data.${this.entryContentTypeId}`;
+
+    if (locale) {
+      const localWithoutHypens = locale?.replace('-', '') ?? '';
+      template = `${SAVED_RESPONSE}.data.${localWithoutHypens}`;
+    }
     return this.generateLiquidTagForType(template);
   }
 }
