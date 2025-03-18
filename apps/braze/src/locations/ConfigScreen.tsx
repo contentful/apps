@@ -24,31 +24,35 @@ export const BRAZE_DOCUMENTATION =
   'https://braze.com/docs/user_guide/personalization_and_dynamic_content/connected_content';
 export const BRAZE_BASE_URL = 'https://cdn.contentful.com/spaces/';
 
+export async function callToContentful(url: string, newApiKey: string) {
+  return await fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${newApiKey}`,
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
 const ConfigScreen = () => {
-  const [apiKeyValid, setApiKeyValid] = useState(false);
+  const [apiKeyIsValid, setApiKeyIsValid] = useState(false);
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     apiKey: '',
   });
   const sdk = useSDK<ConfigAppSDK>();
   const spaceId = sdk.ids.space;
 
-  async function checkToken(newApiKey: string, displayNotification: boolean) {
+  async function apiKeyCheck(newApiKey: string, displayNotification: boolean) {
     if (!newApiKey) {
-      setApiKeyValid(false);
+      setApiKeyIsValid(false);
       return false;
     }
 
     const url = `${BRAZE_BASE_URL}${sdk.ids.space}`;
-    const response: Response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${newApiKey}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    const response: Response = await callToContentful(url, newApiKey);
 
     const isValid = response.ok;
-    setApiKeyValid(isValid);
+    setApiKeyIsValid(isValid);
 
     if (displayNotification) {
       isValid
@@ -62,7 +66,7 @@ const ConfigScreen = () => {
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
-    const isValid = await checkToken(parameters.apiKey, false);
+    const isValid = await apiKeyCheck(parameters.apiKey, false);
 
     if (!parameters.apiKey || !isValid) {
       sdk.notifier.error('A valid Contentful API key is required');
@@ -92,7 +96,7 @@ const ConfigScreen = () => {
   }, [sdk]);
 
   useEffect(() => {
-    const getData = setTimeout(() => checkToken(parameters.apiKey, true), 800);
+    const getData = setTimeout(() => apiKeyCheck(parameters.apiKey, true), 800);
 
     return () => clearTimeout(getData);
   }, [parameters.apiKey]);
@@ -135,11 +139,11 @@ const ConfigScreen = () => {
               value={parameters.apiKey}
               name="apiKey"
               data-testid="apiKey"
-              isInvalid={!apiKeyValid}
+              isInvalid={!apiKeyIsValid}
               placeholder="ex. 0ab1c234DE56f..."
               onChange={(e) => setParameters({ ...parameters, apiKey: e.target.value })}
             />
-            {!apiKeyValid && (
+            {!apiKeyIsValid && (
               <FormControl.ValidationMessage>Invalid API key</FormControl.ValidationMessage>
             )}
           </Form>
