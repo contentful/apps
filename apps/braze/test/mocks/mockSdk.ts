@@ -27,6 +27,9 @@ const mockSdk: any = {
     default: 'en-US',
     available: ['en-US', 'es-AR'],
   },
+  notifier: {
+    error: vi.fn(),
+  },
 };
 
 export { mockSdk };

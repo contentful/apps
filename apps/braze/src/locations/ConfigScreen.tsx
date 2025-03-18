@@ -22,7 +22,7 @@ export interface AppInstallationParameters {
 
 export const BRAZE_DOCUMENTATION =
   'https://braze.com/docs/user_guide/personalization_and_dynamic_content/connected_content';
-export const BRAZE_BASE_URL = 'https://cdn.contentful.com/spaces/';
+export const CONTENTFUL_BASE_URL = 'https://cdn.contentful.com/spaces/';
 
 export async function callToContentful(url: string, newApiKey: string) {
   return await fetch(url, {
@@ -35,30 +35,24 @@ export async function callToContentful(url: string, newApiKey: string) {
 }
 
 const ConfigScreen = () => {
-  const [apiKeyIsValid, setApiKeyIsValid] = useState(false);
+  const [apiKeyIsValid, setApiKeyIsValid] = useState(true);
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     apiKey: '',
   });
   const sdk = useSDK<ConfigAppSDK>();
   const spaceId = sdk.ids.space;
 
-  async function apiKeyCheck(newApiKey: string, displayNotification: boolean) {
+  async function apiKeyCheck(newApiKey: string) {
     if (!newApiKey) {
       setApiKeyIsValid(false);
       return false;
     }
 
-    const url = `${BRAZE_BASE_URL}${sdk.ids.space}`;
+    const url = `${CONTENTFUL_BASE_URL}${sdk.ids.space}`;
     const response: Response = await callToContentful(url, newApiKey);
 
     const isValid = response.ok;
     setApiKeyIsValid(isValid);
-
-    if (displayNotification) {
-      isValid
-        ? sdk.notifier.success(`Contentful API key was validated successfully`)
-        : sdk.notifier.warning(`API key doesn't connect to Contentful`);
-    }
 
     return isValid;
   }
@@ -66,7 +60,7 @@ const ConfigScreen = () => {
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
-    const isValid = await apiKeyCheck(parameters.apiKey, false);
+    const isValid = await apiKeyCheck(parameters.apiKey);
 
     if (!parameters.apiKey || !isValid) {
       sdk.notifier.error('A valid Contentful API key is required');
@@ -94,12 +88,6 @@ const ConfigScreen = () => {
       sdk.app.setReady();
     })();
   }, [sdk]);
-
-  useEffect(() => {
-    const getData = setTimeout(() => apiKeyCheck(parameters.apiKey, true), 800);
-
-    return () => clearTimeout(getData);
-  }, [parameters.apiKey]);
 
   return (
     <Flex justifyContent="center" alignContent="center">
