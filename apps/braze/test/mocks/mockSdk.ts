@@ -20,7 +20,6 @@ const mockSdk: any = {
     },
     invocation: {
       id: 'test-entryId',
-      fields: [], // TODO: add fields?
       contentTypeId: 'test-contentTypeId',
     },
   },

@@ -1,21 +1,13 @@
 import { useState, useEffect } from 'react';
-import {
-  assembleQuery,
-  generateConnectedContentCall,
-  getGraphQLResponse,
-} from '../helpers/assembleQuery';
-import generateLiquidTags from '../helpers/generateLiquidTags';
-import { EntryInfo } from '../locations/Dialog';
 import WizardFooter from './WizardFooter';
 import { Box, Button, Paragraph, Subheading } from '@contentful/f36-components';
 import Splitter from './Splitter';
 import tokens from '@contentful/f36-tokens';
 import CodeBlock from './CodeBlock';
+import { Entry } from '../fields/Entry';
 
 type CodeBlocksStepProps = {
-  spaceId: string;
-  contentfulToken: string;
-  entryInfo: EntryInfo;
+  entry: Entry;
   selectedLocales: string[];
   handlePreviousStep: () => void;
   handleClose: () => void;
@@ -27,21 +19,19 @@ function formatGraphqlResponse(response: JSON) {
 }
 
 const CodeBlocksStep = (props: CodeBlocksStepProps) => {
-  const { spaceId, contentfulToken, entryInfo, handlePreviousStep, handleClose } = props;
+  const { entry, handlePreviousStep, handleClose } = props;
+
   const [graphqlResponse, setGraphqlResponse] = useState<string>('');
 
-  const query = assembleQuery(entryInfo.contentTypeId, entryInfo.id, entryInfo.fields);
-  const connectedContentCall = generateConnectedContentCall(query, spaceId, contentfulToken);
-  const liquidTags = generateLiquidTags(entryInfo.contentTypeId, entryInfo.fields);
   useEffect(() => {
     const fetchEntry = async () => {
-      const response = await getGraphQLResponse(spaceId, contentfulToken, query);
+      const response = await entry.getGraphQLResponse();
       const graphqlResponseWithNewlines = formatGraphqlResponse(response);
 
       setGraphqlResponse(graphqlResponseWithNewlines);
     };
     fetchEntry();
-  }, []);
+  }, [entry]);
 
   return (
     <>
@@ -58,14 +48,14 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           Braze Connected Content Call
         </Subheading>
-        <CodeBlock language={'liquid'} code={connectedContentCall} />
+        <CodeBlock language={'liquid'} code={entry.generateConnectedContentCall()} />
 
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
 
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           Liquid tag to reference selected Contentful fields, within Braze message body
         </Subheading>
-        <CodeBlock language={'liquid'} code={liquidTags.join('\n')} />
+        <CodeBlock language={'liquid'} code={entry.generateLiquidTags().join('\n')} />
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
 
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
