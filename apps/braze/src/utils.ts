@@ -18,5 +18,5 @@ export function capitalize(s: string): string {
 }
 
 export function firstLetterToLowercase(s: string): string {
-  return s.charAt(0).toLocaleLowerCase() + s.slice(1);
+  return s.charAt(0).toLowerCase() + s.slice(1);
 }
