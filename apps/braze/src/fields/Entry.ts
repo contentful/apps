@@ -23,9 +23,9 @@ export class Entry {
     this.query = this.assembleQuery();
   }
 
-  generateConnectedContentCall() {
+  generateConnectedContentCall(locales: string[]) {
     return `{% capture body %}
-    ${this.query}
+    ${locales.length > 0 ? this.localizeQuery(locales) : this.query}
   {% endcapture %}
   
   {% connected_content
@@ -38,11 +38,16 @@ export class Entry {
   %}`;
   }
 
-  generateLiquidTags() {
+  generateLiquidTags(locales: string[]) {
+    if (locales.length > 0) {
+      return locales.flatMap((locales) =>
+        this.fields.flatMap((field) => field.generateLiquidTag(locales))
+      );
+    }
     return this.fields.flatMap((field) => field.generateLiquidTag());
   }
 
-  async getGraphQLResponse() {
+  async getGraphQLResponse(locales: string[]) {
     const response = await fetch(
       `https://graphql.contentful.com/content/v1/spaces/${this.spaceId}`,
       {
@@ -51,7 +56,7 @@ export class Entry {
           Authorization: `Bearer ${this.contentfulToken}`,
           'Content-Type': 'application/json',
         },
-        body: this.query,
+        body: locales?.length > 0 ? this.localizeQuery(locales) : this.query,
       }
     );
     return response.json();
@@ -63,6 +68,17 @@ export class Entry {
 
   private assembleQuery() {
     return `{"query":"{${this.contentType}(id:\\"${this.id}\\"){${this.assembleFieldsQuery()}}}"}`;
+  }
+
+  private localizeQuery(locales: string[]) {
+    const body = locales.map((locale) => {
+      const localWithoutHypens = locale.replace('-', '');
+      return `${localWithoutHypens}: ${this.contentType}(id:\\"${
+        this.id
+      }\\", locale:\\"${locale}\\"){${this.assembleFieldsQuery()}}`;
+    });
+
+    return `{"query":"{${body}}"}`;
   }
 
   private assembleFieldsQuery(): string {
