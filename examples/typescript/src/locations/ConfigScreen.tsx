@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Heading, Form, Paragraph, Flex } from '@contentful/f36-components';
 import { css } from 'emotion';
