@@ -184,5 +184,6 @@ Create Event Subscriptions via the Web UI or using the Content Management API. W
 ## Additional Resources
 
 - [Contentful App Functions Documentation](https://www.contentful.com/developers/docs/extensibility/app-framework/functions/)
+- [Working with Functions](https://www.contentful.com/developers/docs/extensibility/app-framework/working-with-functions/)
 - [App Actions Overview](https://www.contentful.com/developers/docs/extensibility/app-framework/app-actions/)
 - [App Events Overview](https://www.contentful.com/developers/docs/extensibility/app-framework/app-events/)

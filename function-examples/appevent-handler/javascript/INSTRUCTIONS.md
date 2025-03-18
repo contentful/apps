@@ -30,7 +30,7 @@ This command will generate a basic app template that includes:
 - All necessary scripts for building and deploying your function
 - App manifest file
   - This file ensures that Contentful can properly identify, configure, and run your function.
-  - For more information see: [Creating and Uploading a Function - Tutorial](https://www.contentful.com/developers/docs/extensibility/app-framework/function-tutorial/)
+  - For more information see: [Working with Functions](https://www.contentful.com/developers/docs/extensibility/app-framework/working-with-functions/)
 
 #### Adding the Function to an Existing App
 
@@ -244,5 +244,6 @@ Use the CMA to programmatically subscribe your function to events. This approach
 ## Additional Resources
 
 - [Contentful App Functions Documentation](https://www.contentful.com/developers/docs/extensibility/app-framework/functions/)
+- [Working with Functions](https://www.contentful.com/developers/docs/extensibility/app-framework/working-with-functions/)
 - [App Event Subscriptions API Reference](https://www.contentful.com/developers/docs/references/content-management-api/#/reference/app-event-subscriptions)
 - [App Events Overview](https://www.contentful.com/developers/docs/extensibility/app-framework/app-events/)
