@@ -42,7 +42,7 @@ describe('FieldsFactory', () => {
     expect(result[0]).toBeInstanceOf(BasicField);
     const fieldInstance = result[0] as BasicField;
     expect(fieldInstance.id).toBe('title');
-    expect(fieldInstance.entryContentTypeId).toBe('Article');
+    expect(fieldInstance.entryContentTypeId).toBe('article');
     expect(fieldInstance.localized).toBe(true);
   });
 
@@ -72,7 +72,7 @@ describe('FieldsFactory', () => {
     expect(result[0]).toBeInstanceOf(AssetField);
     const fieldInstance = result[0] as AssetField;
     expect(fieldInstance.id).toBe('featuredImage');
-    expect(fieldInstance.entryContentTypeId).toBe('Article');
+    expect(fieldInstance.entryContentTypeId).toBe('article');
     expect(fieldInstance.localized).toBe(true);
   });
 
@@ -124,7 +124,7 @@ describe('FieldsFactory', () => {
     expect(result[0]).toBeInstanceOf(ReferenceField);
     const fieldInstance = result[0] as ReferenceField;
     expect(fieldInstance.id).toBe('author');
-    expect(fieldInstance.entryContentTypeId).toBe('Article');
+    expect(fieldInstance.entryContentTypeId).toBe('article');
     expect(fieldInstance.localized).toBe(false);
     expect(fieldInstance.referenceContentType).toBe('author');
 
@@ -158,7 +158,7 @@ describe('FieldsFactory', () => {
     expect(result[0]).toBeInstanceOf(TextArrayField);
     const fieldInstance = result[0] as TextArrayField;
     expect(fieldInstance.id).toBe('tags');
-    expect(fieldInstance.entryContentTypeId).toBe('Article');
+    expect(fieldInstance.entryContentTypeId).toBe('article');
     expect(fieldInstance.localized).toBe(true);
   });
 
@@ -196,7 +196,7 @@ describe('FieldsFactory', () => {
     expect(result[0]).toBeInstanceOf(AssetArrayField);
     const fieldInstance = result[0] as AssetArrayField;
     expect(fieldInstance.id).toBe('images');
-    expect(fieldInstance.entryContentTypeId).toBe('Gallery');
+    expect(fieldInstance.entryContentTypeId).toBe('gallery');
     expect(fieldInstance.localized).toBe(true);
   });
 
@@ -263,7 +263,7 @@ describe('FieldsFactory', () => {
     const fieldInstance = result[0] as ReferenceArrayField;
 
     expect(fieldInstance.id).toBe('categories');
-    expect(fieldInstance.entryContentTypeId).toBe('Article');
+    expect(fieldInstance.entryContentTypeId).toBe('article');
     expect(fieldInstance.localized).toBe(false);
 
     expect(fieldInstance.items).toHaveLength(2);
