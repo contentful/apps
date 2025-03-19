@@ -41,14 +41,14 @@ const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
   const spaceId = sdk.ids.space;
 
-  async function apiKeyCheck(newApiKey: string) {
-    if (!newApiKey) {
+  async function checkApiKey(apiKey: string) {
+    if (!apiKey) {
       setApiKeyIsValid(false);
       return false;
     }
 
     const url = `https://${sdk.hostnames.delivery}/spaces/${sdk.ids.space}`;
-    const response: Response = await callToContentful(url, newApiKey);
+    const response: Response = await callToContentful(url, apiKey);
 
     const isValid = response.ok;
     setApiKeyIsValid(isValid);
@@ -59,7 +59,7 @@ const ConfigScreen = () => {
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
-    const isValid = await apiKeyCheck(parameters.apiKey);
+    const isValid = await checkApiKey(parameters.apiKey);
 
     if (!parameters.apiKey || !isValid) {
       sdk.notifier.error('A valid Contentful API key is required');
