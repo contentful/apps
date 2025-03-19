@@ -22,7 +22,6 @@ export interface AppInstallationParameters {
 
 export const BRAZE_DOCUMENTATION =
   'https://braze.com/docs/user_guide/personalization_and_dynamic_content/connected_content';
-export const CONTENTFUL_BASE_URL = 'https://cdn.contentful.com/spaces/';
 
 export async function callToContentful(url: string, newApiKey: string) {
   return await fetch(url, {
@@ -48,7 +47,7 @@ const ConfigScreen = () => {
       return false;
     }
 
-    const url = `${CONTENTFUL_BASE_URL}${sdk.ids.space}`;
+    const url = `https://${sdk.hostnames.delivery}/spaces/${sdk.ids.space}`;
     const response: Response = await callToContentful(url, newApiKey);
 
     const isValid = response.ok;
