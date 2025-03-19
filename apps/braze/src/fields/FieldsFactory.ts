@@ -61,7 +61,7 @@ export class FieldsFactory {
           const items = await Promise.all(
             field.map(async (f: any, index: number) => {
               return new ReferenceItem(
-                `[${index}]`,
+                crypto.randomUUID(),
                 contentTypeId,
                 fieldInfo.localized,
                 f.sys.contentType.sys.id,

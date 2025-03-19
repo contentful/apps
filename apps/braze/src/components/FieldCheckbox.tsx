@@ -8,10 +8,11 @@ import { ReferenceItem } from '../fields/ReferenceItem';
 import { useState } from 'react';
 import { ChevronDownIcon, ChevronUpIcon } from '@contentful/f36-icons';
 
-type FieldCheckboxProps = {
-  field: Field;
-  handleToggle: (event: React.ChangeEvent<HTMLInputElement>) => void;
-};
+type FieldCheckboxProps =
+  | BasicFieldCheckboxProps
+  | ReferenceCheckboxProps
+  | ReferenceArrayCheckboxProps
+  | ReferenceItemCheckboxProps;
 const FieldCheckbox = (props: FieldCheckboxProps) => {
   const { field, handleToggle } = props;
   if (field instanceof ReferenceField) {
@@ -21,7 +22,6 @@ const FieldCheckbox = (props: FieldCheckboxProps) => {
   }
   return <BasicFieldCheckbox key={field.id} field={field} handleToggle={handleToggle} />;
 };
-export default FieldCheckbox;
 
 type BasicFieldCheckboxProps = {
   field: Field;
@@ -87,7 +87,7 @@ const ReferenceArrayCheckbox = (props: ReferenceArrayCheckboxProps) => {
             return (
               <ReferenceItemCheckbox
                 key={item.uniqueId()}
-                item={item}
+                field={item}
                 handleToggle={handleToggle}
               />
             );
@@ -99,18 +99,18 @@ const ReferenceArrayCheckbox = (props: ReferenceArrayCheckboxProps) => {
 };
 
 type ReferenceItemCheckboxProps = {
-  item: ReferenceItem;
+  field: ReferenceItem;
   handleToggle: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 const ReferenceItemCheckbox = (props: ReferenceItemCheckboxProps) => {
-  const { item, handleToggle } = props;
+  const { field, handleToggle } = props;
   const [show, setShow] = useState(false);
   return (
     <>
-      <CheckboxContainer field={item} handleToggle={handleToggle} show={show} setShow={setShow} />
+      <CheckboxContainer field={field} handleToggle={handleToggle} show={show} setShow={setShow} />
       {show && (
         <Box paddingLeft="spacingL">
-          {item.fields.map((field) => {
+          {field.fields.map((field) => {
             return (
               <FieldCheckbox key={field.uniqueId()} field={field} handleToggle={handleToggle} />
             );
@@ -150,3 +150,5 @@ const CheckboxContainer = (props: {
     </Flex>
   );
 };
+
+export default FieldCheckbox;
