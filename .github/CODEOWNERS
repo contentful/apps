@@ -1,6 +1,6 @@
 # team tundra owns all code in this repository by default
 
-- @contentful/team-marketplace
+* @contentful/team-marketplace
 
 examples/function-mock-shop @contentful/team-monet
 examples/function-potterdb @contentful/team-monet
