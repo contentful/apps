@@ -1,4 +1,4 @@
-import { SAVED_RESPONSE } from '../utils';
+import { firstLetterToLowercase, SAVED_RESPONSE } from '../utils';
 import { Field } from './Field';
 
 export class Entry {
@@ -16,7 +16,7 @@ export class Entry {
     contentfulToken: string
   ) {
     this.id = id;
-    this.contentType = contentType;
+    this.contentType = firstLetterToLowercase(contentType);
     this.fields = fields;
     this.spaceId = spaceId;
     this.contentfulToken = contentfulToken;

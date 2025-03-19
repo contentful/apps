@@ -20,6 +20,7 @@ export class FieldsFactory {
     depth: number = 1
   ): Promise<Field[]> {
     const contentType = await cma.contentType.get({ contentTypeId: entry.sys.contentType.sys.id });
+    const contentTypeId = entry.sys.contentType.sys.id;
     const fields = [];
     for (const [name, fieldsValues] of Object.entries(entry.fields)) {
       const field = Object.values(fieldsValues as { [key: string]: any })[0];
@@ -27,10 +28,11 @@ export class FieldsFactory {
       if (!fieldInfo) {
         throw new Error('Field not found');
       }
+      const localized = fieldInfo.localized;
 
       if (fieldInfo.type === 'Link') {
         if (fieldInfo.linkType === 'Asset') {
-          const newField = new AssetField(name, contentType.name, fieldInfo.localized);
+          const newField = new AssetField(name, contentTypeId, localized);
           fields.push(newField);
         } else {
           if (depth >= this.NESTED_DEPTH) {
@@ -38,8 +40,8 @@ export class FieldsFactory {
           }
           const newField = new ReferenceField(
             name,
-            contentType.name,
-            fieldInfo.localized,
+            contentTypeId,
+            localized,
             field.sys.contentType.sys.id,
             await this.createFields(field, cma, depth + 1)
           );
@@ -47,10 +49,10 @@ export class FieldsFactory {
         }
       } else if (fieldInfo.type === 'Array') {
         if (fieldInfo.items && fieldInfo.items.type === 'Symbol') {
-          const newField = new TextArrayField(name, contentType.name, fieldInfo.localized);
+          const newField = new TextArrayField(name, contentTypeId, localized);
           fields.push(newField);
         } else if (fieldInfo.items && fieldInfo.items.linkType === 'Asset') {
-          const newField = new AssetArrayField(name, contentType.name, fieldInfo.localized);
+          const newField = new AssetArrayField(name, contentTypeId, localized);
           fields.push(newField);
         } else {
           if (depth >= this.NESTED_DEPTH) {
@@ -64,23 +66,18 @@ export class FieldsFactory {
               );
             })
           );
-          const newField = new ReferenceArrayField(
-            name,
-            contentType.name,
-            fieldInfo.localized,
-            items
-          );
+          const newField = new ReferenceArrayField(name, contentTypeId, localized, items);
           fields.push(newField);
         }
       } else {
         if (fieldInfo.type === 'RichText') {
-          const newField = new RichTextField(name, contentType.name, fieldInfo.localized);
+          const newField = new RichTextField(name, contentTypeId, localized);
           fields.push(newField);
         } else if (fieldInfo.type === 'Location') {
-          const newField = new LocationField(name, contentType.name, fieldInfo.localized);
+          const newField = new LocationField(name, contentTypeId, localized);
           fields.push(newField);
         } else {
-          const newField = new BasicField(name, contentType.name, fieldInfo.localized);
+          const newField = new BasicField(name, contentTypeId, localized);
           fields.push(newField);
         }
       }

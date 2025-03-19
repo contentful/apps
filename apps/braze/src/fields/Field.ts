@@ -1,4 +1,4 @@
-import { SAVED_RESPONSE } from '../utils';
+import { firstLetterToLowercase, SAVED_RESPONSE } from '../utils';
 
 export abstract class Field {
   public id: string;
@@ -6,8 +6,8 @@ export abstract class Field {
   public entryContentTypeId: string;
 
   constructor(id: string, entryContentTypeId: string, localized: boolean) {
-    this.id = id;
-    this.entryContentTypeId = entryContentTypeId;
+    this.id = firstLetterToLowercase(id);
+    this.entryContentTypeId = firstLetterToLowercase(entryContentTypeId);
     this.localized = localized;
   }
 
