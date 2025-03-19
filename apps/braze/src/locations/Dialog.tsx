@@ -1,6 +1,6 @@
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { Box, Spinner, Stack } from '@contentful/f36-components';
+import { Box, Skeleton } from '@contentful/f36-components';
 import { useEffect, useRef, useState } from 'react';
 import FieldsSelectionStep from '../components/FieldsSelectionStep';
 import CodeBlocksStep from '../components/CodeBlocksStep';
@@ -60,9 +60,9 @@ const Dialog = () => {
 
   if (!entry) {
     return (
-      <Stack flexDirection="column">
-        <Spinner size="large" variant="primary" />
-      </Stack>
+      <Skeleton.Container width="97%">
+        <Skeleton.BodyText offsetLeft="50" offsetTop="20" numberOfLines={4} />
+      </Skeleton.Container>
     );
   }
 

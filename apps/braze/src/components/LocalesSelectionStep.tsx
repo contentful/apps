@@ -14,7 +14,7 @@ const LocalesSelectionStep = (props: LocalesSelectionStepProps) => {
   const { locales, selectedLocales, setSelectedLocales, handlePreviousStep, handleNextStep } =
     props;
 
-  const handleSelectLocale = (event: { target: { checked: boolean; value: string } }): void => {
+  const handleSelectLocale = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const { checked, value } = event.target;
     if (checked) {
       setSelectedLocales((prevState: string[]) => [...prevState, value]);

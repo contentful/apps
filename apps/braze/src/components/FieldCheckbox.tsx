@@ -1,14 +1,16 @@
-import { Box, Checkbox, Text } from '@contentful/f36-components';
+import { Box, Checkbox, Flex, IconButton, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 import { Field } from '../fields/Field';
 import { ReferenceArrayField } from '../fields/ReferenceArrayField';
 import { ReferenceField } from '../fields/ReferenceField';
 import { ReferenceItem } from '../fields/ReferenceItem';
+import { useState } from 'react';
+import { ChevronDownIcon, ChevronUpIcon } from '@contentful/f36-icons';
 
 type FieldCheckboxProps = {
   field: Field;
-  handleToggle: (event: { target: { checked: boolean; id: string } }) => void;
+  handleToggle: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 const FieldCheckbox = (props: FieldCheckboxProps) => {
   const { field, handleToggle } = props;
@@ -23,13 +25,16 @@ export default FieldCheckbox;
 
 type BasicFieldCheckboxProps = {
   field: Field;
-  handleToggle: (event: { target: { checked: boolean; id: string } }) => void;
+  handleToggle: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 const BasicFieldCheckbox = (props: BasicFieldCheckboxProps) => {
   const { field, handleToggle } = props;
   return (
     <Box
-      className={css({ border: `1px solid ${tokens.gray200}` })}
+      className={css({
+        border: `1px solid ${tokens.gray200}`,
+        borderRadius: tokens.borderRadiusSmall,
+      })}
       margin="spacingXs"
       padding="spacingXs">
       <Checkbox id={field.uniqueId()} isChecked={field.selected} onChange={handleToggle}>
@@ -41,77 +46,107 @@ const BasicFieldCheckbox = (props: BasicFieldCheckboxProps) => {
 
 type ReferenceCheckboxProps = {
   field: ReferenceField;
-  handleToggle: (event: { target: { checked: boolean; id: string } }) => void;
+  handleToggle: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 const ReferenceCheckbox = (props: ReferenceCheckboxProps) => {
   const { field, handleToggle } = props;
+  const [show, setShow] = useState(false);
   return (
     <>
-      <Box
-        className={css({ border: `1px solid ${tokens.gray200}` })}
-        margin="spacingXs"
-        padding="spacingXs">
-        <Checkbox id={field.uniqueId()} isChecked={field.selected} onChange={handleToggle}>
-          <Text fontWeight="fontWeightNormal">Reference: {field.uniqueId()}</Text>
-        </Checkbox>
-      </Box>
-      {field.fields.map((nestedField) => {
-        return (
-          <FieldCheckbox
-            key={nestedField.uniqueId()}
-            field={nestedField}
-            handleToggle={handleToggle}
-          />
-        );
-      })}
+      <CheckboxContainer field={field} handleToggle={handleToggle} show={show} setShow={setShow} />
+      {show && (
+        <Box paddingLeft="spacingL">
+          {field.fields.map((nestedField) => {
+            return (
+              <FieldCheckbox
+                key={nestedField.uniqueId()}
+                field={nestedField}
+                handleToggle={handleToggle}
+              />
+            );
+          })}
+        </Box>
+      )}
     </>
   );
 };
 
 type ReferenceArrayCheckboxProps = {
   field: ReferenceArrayField;
-  handleToggle: (event: { target: { checked: boolean; id: string } }) => void;
+  handleToggle: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 const ReferenceArrayCheckbox = (props: ReferenceArrayCheckboxProps) => {
   const { field, handleToggle } = props;
+  const [show, setShow] = useState(false);
   return (
     <>
-      <Box
-        className={css({ border: `1px solid ${tokens.gray200}` })}
-        margin="spacingXs"
-        padding="spacingXs">
-        <Checkbox id={field.uniqueId()} isChecked={field.selected} onChange={handleToggle}>
-          <Text fontWeight="fontWeightNormal">Array of references: {field.uniqueId()}</Text>
-        </Checkbox>
-      </Box>
-      {field.items.map((item) => {
-        return (
-          <ReferenceItemCheckbox key={item.uniqueId()} item={item} handleToggle={handleToggle} />
-        );
-      })}
+      <CheckboxContainer field={field} handleToggle={handleToggle} show={show} setShow={setShow} />
+      {show && (
+        <Box paddingLeft="spacingL">
+          {field.items.map((item) => {
+            return (
+              <ReferenceItemCheckbox
+                key={item.uniqueId()}
+                item={item}
+                handleToggle={handleToggle}
+              />
+            );
+          })}
+        </Box>
+      )}
     </>
   );
 };
 
 type ReferenceItemCheckboxProps = {
   item: ReferenceItem;
-  handleToggle: (event: { target: { checked: boolean; id: string } }) => void;
+  handleToggle: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 const ReferenceItemCheckbox = (props: ReferenceItemCheckboxProps) => {
   const { item, handleToggle } = props;
+  const [show, setShow] = useState(false);
   return (
     <>
-      <Box
-        className={css({ border: `1px solid ${tokens.gray200}` })}
-        margin="spacingXs"
-        padding="spacingXs">
-        <Checkbox id={item.uniqueId()} isChecked={item.selected} onChange={handleToggle}>
-          <Text fontWeight="fontWeightNormal">Reference item: {item.uniqueId()} </Text>
-        </Checkbox>
-      </Box>
-      {item.fields.map((field) => {
-        return <FieldCheckbox key={field.uniqueId()} field={field} handleToggle={handleToggle} />;
-      })}
+      <CheckboxContainer field={item} handleToggle={handleToggle} show={show} setShow={setShow} />
+      {show && (
+        <Box paddingLeft="spacingL">
+          {item.fields.map((field) => {
+            return (
+              <FieldCheckbox key={field.uniqueId()} field={field} handleToggle={handleToggle} />
+            );
+          })}
+        </Box>
+      )}
     </>
+  );
+};
+
+const CheckboxContainer = (props: {
+  field: Field;
+  handleToggle: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  show: boolean;
+  setShow: (show: boolean) => void;
+}) => {
+  const { field, handleToggle, show, setShow } = props;
+  return (
+    <Flex
+      className={css({
+        border: `1px solid ${tokens.gray200}`,
+        borderRadius: tokens.borderRadiusSmall,
+      })}
+      justifyContent="space-between"
+      margin="spacingXs"
+      padding="spacingXs">
+      <Checkbox id={field.uniqueId()} isChecked={field.selected} onChange={handleToggle}>
+        <Text fontWeight="fontWeightDemiBold">Basic: {field.uniqueId()}</Text>
+      </Checkbox>
+      <IconButton
+        icon={show ? <ChevronUpIcon /> : <ChevronDownIcon />}
+        aria-label="Down arrow"
+        variant="transparent"
+        size="small"
+        onClick={() => setShow(!show)}
+      />
+    </Flex>
   );
 };
