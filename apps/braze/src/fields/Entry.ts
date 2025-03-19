@@ -24,7 +24,7 @@ export class Entry {
   generateConnectedContentCall(locales: string[]) {
     return `{% capture body %}
     ${this.assembleQuery(locales)}
-  {% endcapture %}
+{% endcapture %}
   
   {% connected_content
       https://graphql.contentful.com/content/v1/spaces/${this.spaceId}
