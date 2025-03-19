@@ -7,7 +7,6 @@ export class Entry {
   public fields: Field[];
   private spaceId: string;
   private contentfulToken: string;
-  private query: string;
   constructor(
     id: string,
     contentType: string,
@@ -20,12 +19,11 @@ export class Entry {
     this.fields = fields;
     this.spaceId = spaceId;
     this.contentfulToken = contentfulToken;
-    this.query = this.assembleQuery();
   }
 
   generateConnectedContentCall(locales: string[]) {
     return `{% capture body %}
-    ${locales.length > 0 ? this.localizeQuery(locales) : this.query}
+    ${this.assembleQuery(locales)}
   {% endcapture %}
   
   {% connected_content
@@ -56,7 +54,7 @@ export class Entry {
           Authorization: `Bearer ${this.contentfulToken}`,
           'Content-Type': 'application/json',
         },
-        body: locales?.length > 0 ? this.localizeQuery(locales) : this.query,
+        body: this.assembleQuery(locales),
       }
     );
     return response.json();
@@ -66,19 +64,23 @@ export class Entry {
     return this.fields.some((field) => field.localized);
   }
 
-  private assembleQuery() {
-    return `{"query":"{${this.contentType}(id:\\"${this.id}\\"){${this.assembleFieldsQuery()}}}"}`;
+  private assembleQuery(locales: string[]) {
+    const body = locales.length > 0 ? this.localizedQueryBody(locales) : this.queryBody();
+
+    return `{"query":"{${body}}"}`;
   }
 
-  private localizeQuery(locales: string[]) {
-    const body = locales.map((locale) => {
+  private queryBody() {
+    return `${this.contentType}(id:\\"${this.id}\\"){${this.assembleFieldsQuery()}}`;
+  }
+
+  private localizedQueryBody(locales: string[]) {
+    return locales.map((locale) => {
       const localWithoutHypens = locale.replace('-', '');
       return `${localWithoutHypens}: ${this.contentType}(id:\\"${
         this.id
       }\\", locale:\\"${locale}\\"){${this.assembleFieldsQuery()}}`;
     });
-
-    return `{"query":"{${body}}"}`;
   }
 
   private assembleFieldsQuery(): string {

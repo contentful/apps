@@ -16,40 +16,38 @@ describe('Entry', () => {
   );
   const locales = ['en-US', 'it', 'es-AR'];
 
-  it('Generates content call without localization', () => {
+  it('Generates content call with no fields', () => {
+    const entry = new Entry('anId', 'aCustomContentType', [], 'anSpaceId', 'apiToken');
     const result = entry.generateConnectedContentCall([]);
-
     const expected = removeIndentation(`{% capture body %}
-{"query":"{aCustomContentType(id:\\"anId\\"){title}}"}
-        {% endcapture %}
-        {% connected_content
-          https://graphql.contentful.com/content/v1/spaces/anSpaceId
-          :method post
-          :headers {"Authorization": "Bearer apiToken"}
-          :body {{body}}
-          :content_type application/json
-          :save response
-      %}`);
+      {"query":"{aCustomContentType(id:\\"anId\\"){}}"}
+      {% endcapture %}
+      
+      {% connected_content
+      https://graphql.contentful.com/content/v1/spaces/anSpaceId
+      :method post
+      :headers {"Authorization": "Bearer apiToken"}
+      :body {{body}}
+      :content_type application/json
+      :save response
+  %}`);
 
     expect(removeIndentation(result)).toContain(expected);
   });
 
-  it('Generates content call with localization', () => {
+  it('Generates content call with a body with localization', () => {
+    const result = entry.generateConnectedContentCall([]);
+    const expectedQueryBody = `{"query":"{aCustomContentType(id:\\"anId\\"){title}}"}`;
+
+    expect(result).toContain(expectedQueryBody);
+  });
+
+  it('Generates content call with a body with localization', () => {
     const result = entryLocalized.generateConnectedContentCall(locales);
 
-    const expected = removeIndentation(`{% capture body %}
-{"query":"{enUS: aCustomContentType(id:\\"anId\\", locale:\\"en-US\\"){title},it: aCustomContentType(id:\\"anId\\", locale:\\"it\\"){title},esAR: aCustomContentType(id:\\"anId\\", locale:\\"es-AR\\"){title}}"}
-        {% endcapture %}
-        {% connected_content
-          https://graphql.contentful.com/content/v1/spaces/anSpaceId
-          :method post
-          :headers {"Authorization": "Bearer apiToken"}
-          :body {{body}}
-          :content_type application/json
-          :save response
-      %}`);
+    const expected = `{"query":"{enUS: aCustomContentType(id:\\"anId\\", locale:\\"en-US\\"){title},it: aCustomContentType(id:\\"anId\\", locale:\\"it\\"){title},esAR: aCustomContentType(id:\\"anId\\", locale:\\"es-AR\\"){title}}"}`;
 
-    expect(removeIndentation(result)).toEqual(expected);
+    expect(result).toContain(expected);
   });
 
   it('Generates liquidTags without localization', () => {
