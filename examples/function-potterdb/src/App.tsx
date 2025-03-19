@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { locations } from '@contentful/app-sdk';
 import Field from './locations/Field';
 import { useSDK } from '@contentful/react-apps-toolkit';

@@ -1,3 +1,4 @@
+import React from 'react';
 import { Paragraph, TextLink, Note, Flex } from '@contentful/f36-components';
 
 const LocalhostWarning = () => {

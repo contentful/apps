@@ -1,3 +1,4 @@
+import React from 'react';
 import { GlobalStyles } from '@contentful/f36-components';
 import { SDKProvider } from '@contentful/react-apps-toolkit';
 
