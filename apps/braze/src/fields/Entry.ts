@@ -1,4 +1,4 @@
-import { firstLetterToLowercase, SAVED_RESPONSE } from '../utils';
+import { removeHypens, firstLetterToLowercase, SAVED_RESPONSE } from '../utils';
 import { Field } from './Field';
 
 export class Entry {
@@ -38,8 +38,8 @@ export class Entry {
 
   generateLiquidTags(locales: string[]) {
     if (locales.length > 0) {
-      return locales.flatMap((locales) =>
-        this.fields.flatMap((field) => field.generateLiquidTag(locales))
+      return locales.flatMap((locale) =>
+        this.fields.flatMap((field) => field.generateLiquidTag(locale))
       );
     }
     return this.fields.flatMap((field) => field.generateLiquidTag());
@@ -75,12 +75,12 @@ export class Entry {
   }
 
   private localizedQueryBody(locales: string[]) {
-    return locales.map((locale) => {
-      const localWithoutHypens = locale.replace('-', '');
-      return `${localWithoutHypens}: ${this.contentType}(id:\\"${
-        this.id
-      }\\", locale:\\"${locale}\\"){${this.assembleFieldsQuery()}}`;
-    });
+    return locales.map(
+      (locale) =>
+        `${removeHypens(locale)}: ${this.contentType}(id:\\"${
+          this.id
+        }\\", locale:\\"${locale}\\"){${this.assembleFieldsQuery()}}`
+    );
   }
 
   private assembleFieldsQuery(): string {

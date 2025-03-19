@@ -1,4 +1,4 @@
-import { firstLetterToLowercase, SAVED_RESPONSE } from '../utils';
+import { removeHypens, firstLetterToLowercase, SAVED_RESPONSE } from '../utils';
 
 export abstract class Field {
   public id: string;
@@ -18,8 +18,7 @@ export abstract class Field {
     let template = `${SAVED_RESPONSE}.data.${this.entryContentTypeId}`;
 
     if (locale) {
-      const localWithoutHypens = locale?.replace('-', '') ?? '';
-      template = `${SAVED_RESPONSE}.data.${localWithoutHypens}`;
+      template = `${SAVED_RESPONSE}.data.${removeHypens(locale)}`;
     }
     return this.generateLiquidTagForType(template);
   }

@@ -24,3 +24,7 @@ export function firstLetterToLowercase(s: string): string {
 export function removeIndentation(str: string) {
   return ('' + str).replace(/(\n)\s+/g, '$1');
 }
+
+export function removeHypens(str: string) {
+  return str.replace('-', '');
+}
