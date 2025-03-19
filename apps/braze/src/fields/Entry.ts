@@ -64,7 +64,7 @@ export class Entry {
     return this.fields.some((field) => field.localized);
   }
 
-  private assembleQuery(locales: string[]) {
+  assembleQuery(locales: string[]) {
     const body = locales.length > 0 ? this.localizedQueryBody(locales) : this.queryBody();
 
     return `{"query":"{${body}}"}`;

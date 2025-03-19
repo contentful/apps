@@ -32,26 +32,24 @@ describe('Entry', () => {
       :save response
   %}`);
 
-    expect(removeIndentation(result)).toContain(expected);
+    expect(removeIndentation(result)).toEqual(expected);
   });
 
-  it('Generates content call with a body with localization', () => {
-    const result = entry.generateConnectedContentCall([]);
+  it('Asembles query for body with a localized entry', () => {
+    const result = entry.assembleQuery([]);
     const expectedQueryBody = `{"query":"{aCustomContentType(id:\\"anId\\"){title}}"}`;
 
-    expect(result).toContain(expectedQueryBody);
+    expect(result).toEqual(expectedQueryBody);
   });
 
-  it('Generates content call with a body with localization', () => {
-    const result = entryLocalized.generateConnectedContentCall(locales);
-
+  it('Asembles query for body with a localized entry', () => {
+    const result = entryLocalized.assembleQuery(locales);
     const expected = `{"query":"{enUS: aCustomContentType(id:\\"anId\\", locale:\\"en-US\\"){title},it: aCustomContentType(id:\\"anId\\", locale:\\"it\\"){title},esAR: aCustomContentType(id:\\"anId\\", locale:\\"es-AR\\"){title}}"}`;
 
-    expect(result).toContain(expected);
+    expect(result).toEqual(expected);
   });
 
   it('Generates liquidTags without localization', () => {
-    const entry = new Entry('anId', 'aCustomContentType', [field], 'anSpaceId', 'apiToken');
     const result = entry.generateLiquidTags([]);
 
     expect(result).toEqual(['{{response.data.blogPost.title}}']);
