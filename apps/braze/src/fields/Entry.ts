@@ -7,7 +7,6 @@ export class Entry {
   public fields: Field[];
   private spaceId: string;
   private contentfulToken: string;
-  private query: string;
   constructor(
     id: string,
     contentType: string,
@@ -20,12 +19,11 @@ export class Entry {
     this.fields = fields;
     this.spaceId = spaceId;
     this.contentfulToken = contentfulToken;
-    this.query = this.assembleQuery();
   }
 
   generateConnectedContentCall() {
     return `{% capture body %}
-    ${this.query}
+    ${this.assembleQuery()}
   {% endcapture %}
   
   {% connected_content
@@ -51,7 +49,7 @@ export class Entry {
           Authorization: `Bearer ${this.contentfulToken}`,
           'Content-Type': 'application/json',
         },
-        body: this.query,
+        body: this.assembleQuery(),
       }
     );
     return response.json();
@@ -61,11 +59,20 @@ export class Entry {
     return this.fields.some((field) => field.localized);
   }
 
+  getAllFields(): Field[] {
+    return this.fields.flatMap((field) => {
+      return field.getAllFields();
+    });
+  }
+
   private assembleQuery() {
     return `{"query":"{${this.contentType}(id:\\"${this.id}\\"){${this.assembleFieldsQuery()}}}"}`;
   }
 
   private assembleFieldsQuery(): string {
-    return this.fields.map((field) => field.generateQuery()).join(' ');
+    return this.fields
+      .filter((field) => field.selected)
+      .map((field) => field.generateQuery())
+      .join(' ');
   }
 }

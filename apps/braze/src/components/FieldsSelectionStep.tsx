@@ -1,12 +1,32 @@
 import { Button, Paragraph, TextLink } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import WizardFooter from './WizardFooter';
+import FieldCheckbox from './FieldCheckbox';
+import { Entry } from '../fields/Entry';
+import { useState } from 'react';
 
 type FieldsSelectionStepProps = {
+  entry: Entry;
   handleNextStep: () => void;
 };
 const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
-  const { handleNextStep } = props;
+  const { entry, handleNextStep } = props;
+  const [selectedFields, setSelectedFields] = useState<string[]>([]);
+
+  const fields = entry.fields;
+  const allFields = entry.getAllFields();
+
+  const handleToggle = (event: { target: { checked: boolean; id: string } }): void => {
+    const { checked, id } = event.target;
+    if (checked) {
+      allFields.find((field) => field.uniqueId() === id)?.select();
+      setSelectedFields([...selectedFields, id]);
+    } else {
+      allFields.find((field) => field.uniqueId() === id)?.deselect();
+      setSelectedFields(selectedFields.filter((field) => field !== id));
+    }
+  };
+
   return (
     <>
       <Paragraph fontColor="gray700" lineHeight="lineHeightCondensed">
@@ -22,6 +42,11 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
           view documentation here
         </TextLink>
       </Paragraph>
+
+      {fields.map((field) => {
+        return <FieldCheckbox key={field.uniqueId()} field={field} handleToggle={handleToggle} />;
+      })}
+
       <WizardFooter>
         <Button variant="primary" size="small" onClick={handleNextStep}>
           Next

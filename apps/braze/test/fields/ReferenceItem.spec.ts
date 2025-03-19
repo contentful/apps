@@ -5,16 +5,20 @@ import { BasicField } from '../../src/fields/BasicField';
 describe('ReferenceItem', () => {
   it('Generates fragment query for item', () => {
     const name = new BasicField('name', 'author', false);
+    name.selected = true;
     const phone = new BasicField('phone', 'author', false);
-    const item = new ReferenceItem('author', [name, phone]);
+    phone.selected = true;
+    const item = new ReferenceItem('[0]', 'blog', false, 'author', [name, phone]);
     const result = item.generateQuery();
     expect(result).toEqual('... on Author {name phone}');
   });
 
   it('Generates liquid tags for item', () => {
     const name = new BasicField('name', 'author', false);
+    name.selected = true;
     const phone = new BasicField('phone', 'author', false);
-    const item = new ReferenceItem('author', [name, phone]);
+    phone.selected = true;
+    const item = new ReferenceItem('[0]', 'blog', false, 'author', [name, phone]);
     const result = item.generateLiquidTagForType(
       'response.data.blogPost.authorsCollection.items[0]'
     );

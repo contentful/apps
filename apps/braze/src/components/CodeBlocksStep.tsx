@@ -31,7 +31,7 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
       setGraphqlResponse(graphqlResponseWithNewlines);
     };
     fetchEntry();
-  }, [entry]);
+  }, []);
 
   return (
     <>

@@ -59,8 +59,11 @@ export class FieldsFactory {
             continue;
           }
           const items = await Promise.all(
-            field.map(async (f: any) => {
+            field.map(async (f: any, index: number) => {
               return new ReferenceItem(
+                `[${index}]`,
+                contentTypeId,
+                fieldInfo.localized,
                 f.sys.contentType.sys.id,
                 await this.createFields(f, cma, depth + 1)
               );

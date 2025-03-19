@@ -7,7 +7,9 @@ import { ASSET_FIELDS_QUERY } from '../../src/utils';
 describe('ReferenceField', () => {
   it('Generates query for reference with baic fields', () => {
     const name = new BasicField('name', 'author', false);
+    name.selected = true;
     const phone = new BasicField('phone', 'author', false);
+    phone.selected = true;
     const field = new ReferenceField('author', 'blogPost', false, 'author', [name, phone]);
     const result = field.generateQuery();
     expect(result).toEqual('author {... on Author {name phone}}');
@@ -15,6 +17,7 @@ describe('ReferenceField', () => {
 
   it('Generates query for reference with asset', () => {
     const image = new AssetField('image', 'author', false);
+    image.selected = true;
     const field = new ReferenceField('author', 'blogPost', false, 'author', [image]);
     const result = field.generateQuery();
     expect(result).toEqual(`author {... on Author {image {${ASSET_FIELDS_QUERY.join(' ')}}}}`);
@@ -22,7 +25,9 @@ describe('ReferenceField', () => {
 
   it('Generates query for reference within a reference', () => {
     const book = new BasicField('name', 'book', false);
+    book.selected = true;
     const nestedReference = new ReferenceField('book', 'author', false, 'book', [book]);
+    nestedReference.selected = true;
     const field = new ReferenceField('author', 'blogPost', false, 'author', [nestedReference]);
     const result = field.generateQuery();
     expect(result).toEqual('author {... on Author {book {... on Book {name}}}}');
@@ -30,7 +35,9 @@ describe('ReferenceField', () => {
 
   it('Generates liquid tag for reference with basic fields', () => {
     const name = new BasicField('name', 'author', false);
+    name.selected = true;
     const phone = new BasicField('phone', 'author', false);
+    phone.selected = true;
     const field = new ReferenceField('author', 'blogPost', false, 'author', [name, phone]);
     const result = field.generateLiquidTag();
     expect(result).toContain('{{response.data.blogPost.author.name}}');
@@ -39,7 +46,9 @@ describe('ReferenceField', () => {
 
   it('Generates liquid tag for reference with asset', () => {
     const image = new AssetField('image', 'author', false);
+    image.selected = true;
     const field = new ReferenceField('author', 'blogPost', false, 'author', [image]);
+    field.selected = true;
     const result = field.generateLiquidTag();
     expect(result).toContain('{{response.data.blogPost.author.image.title}}');
     expect(result).toContain('{{response.data.blogPost.author.image.description}}');
@@ -48,7 +57,9 @@ describe('ReferenceField', () => {
 
   it('Generates liquid tag for reference within a reference', () => {
     const book = new BasicField('name', 'book', false);
+    book.selected = true;
     const nestedReference = new ReferenceField('book', 'author', false, 'author', [book]);
+    nestedReference.selected = true;
     const field = new ReferenceField('author', 'blogPost', false, 'author', [nestedReference]);
     const result = field.generateLiquidTag();
     expect(result).toContain('{{response.data.blogPost.author.book.name}}');

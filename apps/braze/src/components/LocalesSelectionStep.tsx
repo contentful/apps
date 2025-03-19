@@ -14,7 +14,7 @@ const LocalesSelectionStep = (props: LocalesSelectionStepProps) => {
   const { locales, selectedLocales, setSelectedLocales, handlePreviousStep, handleNextStep } =
     props;
 
-  const handleSelectItem = (event: { target: { checked: boolean; value: string } }): void => {
+  const handleSelectLocale = (event: { target: { checked: boolean; value: string } }): void => {
     const { checked, value } = event.target;
     if (checked) {
       setSelectedLocales((prevState: string[]) => [...prevState, value]);
@@ -45,7 +45,7 @@ const LocalesSelectionStep = (props: LocalesSelectionStepProps) => {
                 itemId={`space-${val}}`}
                 value={local}
                 label={local}
-                onSelectItem={handleSelectItem}
+                onSelectItem={handleSelectLocale}
                 isChecked={selectedLocales.includes(local)}
               />
             );
