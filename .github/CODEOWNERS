@@ -2,13 +2,10 @@
 
 - @contentful/team-marketplace
 
-examples/function-mock-shop @contentful/team-fusion
-examples/function-potterdb @contentful/team-fusion
-examples/function-potterdb-rest-api @contentful/team-fusion
-examples/native-external-references-mockshop @contentful/team-fusion
-examples/native-external-references-tmdb @contentful/team-fusion
-examples/function-templates @contentful/team-fusion
-function-examples/external-references @contentful/team-fusion
+examples/function-mock-shop @contentful/team-monet
+examples/function-potterdb @contentful/team-monet
+examples/function-potterdb-rest-api @contentful/team-monet
+examples/function-templates @contentful/team-monet
 
 # package.json and package-lock.json should be unowned so that dependabot can automatically update dependencies
 
