@@ -4,18 +4,21 @@ import { Field } from './Field';
 export class Entry {
   public id: string;
   public contentType: string;
+  public title: string;
   public fields: Field[];
   private spaceId: string;
   private contentfulToken: string;
   constructor(
     id: string,
     contentType: string,
+    title: string,
     fields: Field[],
     spaceId: string,
     contentfulToken: string
   ) {
     this.id = id;
     this.contentType = firstLetterToLowercase(contentType);
+    this.title = title;
     this.fields = fields;
     this.spaceId = spaceId;
     this.contentfulToken = contentfulToken;

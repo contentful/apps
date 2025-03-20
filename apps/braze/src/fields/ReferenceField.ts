@@ -1,19 +1,26 @@
-import { capitalize, SAVED_RESPONSE } from '../utils';
+import { capitalize } from '../utils';
 import { Field } from './Field';
 
 export class ReferenceField extends Field {
-  public referenceContentType: string;
+  public referenceContentTypeId: string;
+  public referenceContentTypeName: string;
+  public title: string;
   public fields: Field[];
 
   constructor(
     id: string,
+    name: string,
     entryContentTypeId: string,
+    title: string,
     localized: boolean,
-    referenceContentType: string,
+    referenceContentTypeId: string,
+    referenceContentTypeName: string,
     fields: Field[]
   ) {
-    super(id, entryContentTypeId, localized);
-    this.referenceContentType = referenceContentType;
+    super(id, name, entryContentTypeId, localized);
+    this.referenceContentTypeId = referenceContentTypeId;
+    this.referenceContentTypeName = referenceContentTypeName;
+    this.title = title;
     fields.forEach((field) => (field.parent = this));
     this.fields = fields;
   }
@@ -22,7 +29,7 @@ export class ReferenceField extends Field {
     const referenceFields = this.selectedFields()
       .map((field) => field.generateQuery())
       .join(' ');
-    const referenceType = capitalize(this.referenceContentType);
+    const referenceType = capitalize(this.referenceContentTypeId);
     return `${this.id} {... on ${referenceType} {${referenceFields}}}`;
   }
 
@@ -30,6 +37,10 @@ export class ReferenceField extends Field {
     return this.selectedFields().flatMap((field) =>
       field.generateLiquidTagForType(`${template}.${this.id}`)
     );
+  }
+
+  displayName(): string {
+    return `${this.name} > ${this.title} (${this.referenceContentTypeName})`;
   }
 
   select(): void {

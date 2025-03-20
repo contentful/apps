@@ -1,8 +1,8 @@
 import { Field } from './Field';
 
 export class TextArrayField extends Field {
-  constructor(id: string, entryContentTypeId: string, localized: boolean) {
-    super(id, entryContentTypeId, localized);
+  constructor(id: string, name: string, entryContentTypeId: string, localized: boolean) {
+    super(id, name, entryContentTypeId, localized);
   }
 
   generateQuery(): string {

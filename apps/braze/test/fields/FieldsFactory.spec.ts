@@ -36,7 +36,7 @@ describe('FieldsFactory', () => {
       fields: [{ id: 'title', type: 'Symbol', localized: true }],
     });
 
-    const result = await FieldsFactory.createFields(mockEntry, mockCma as any);
+    const result = await new FieldsFactory(mockCma as any).createFields(mockEntry);
 
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(BasicField);
@@ -67,7 +67,7 @@ describe('FieldsFactory', () => {
       fields: [{ id: 'featuredImage', type: 'Link', linkType: 'Asset', localized: true }],
     });
 
-    const result = await FieldsFactory.createFields(mockEntry, mockCma as any);
+    const result = await new FieldsFactory(mockCma as any).createFields(mockEntry);
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(AssetField);
     const fieldInstance = result[0] as AssetField;
@@ -107,6 +107,10 @@ describe('FieldsFactory', () => {
         return {
           name: 'Article',
           fields: [{ id: 'author', type: 'Link', linkType: 'Entry', localized: false }],
+          displayField: '',
+          sys: {
+            id: 'article',
+          },
         };
       } else if (contentTypeId === 'author') {
         return {
@@ -115,18 +119,22 @@ describe('FieldsFactory', () => {
             { id: 'name', type: 'Symbol', localized: true },
             { id: 'bio', type: 'Text', localized: true },
           ],
+          displayField: 'name',
+          sys: {
+            id: 'author',
+          },
         };
       }
     });
 
-    const result = await FieldsFactory.createFields(mockEntry, mockCma as any);
+    const result = await new FieldsFactory(mockCma as any).createFields(mockEntry);
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(ReferenceField);
     const fieldInstance = result[0] as ReferenceField;
     expect(fieldInstance.id).toBe('author');
     expect(fieldInstance.entryContentTypeId).toBe('article');
     expect(fieldInstance.localized).toBe(false);
-    expect(fieldInstance.referenceContentType).toBe('author');
+    expect(fieldInstance.referenceContentTypeId).toBe('author');
 
     expect(fieldInstance.fields).toHaveLength(2);
     expect(fieldInstance.fields[0]).toBeInstanceOf(BasicField);
@@ -152,7 +160,7 @@ describe('FieldsFactory', () => {
       fields: [{ id: 'tags', type: 'Array', items: { type: 'Symbol' }, localized: true }],
     });
 
-    const result = await FieldsFactory.createFields(mockEntry, mockCma as any);
+    const result = await new FieldsFactory(mockCma as any).createFields(mockEntry);
 
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(TextArrayField);
@@ -191,7 +199,7 @@ describe('FieldsFactory', () => {
       ],
     });
 
-    const result = await FieldsFactory.createFields(mockEntry, mockCma as any);
+    const result = await new FieldsFactory(mockCma as any).createFields(mockEntry);
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(AssetArrayField);
     const fieldInstance = result[0] as AssetArrayField;
@@ -248,16 +256,24 @@ describe('FieldsFactory', () => {
               localized: false,
             },
           ],
+          displayField: null,
+          sys: {
+            id: contentTypeId,
+          },
         };
       } else if (contentTypeId === 'category') {
         return {
           name: 'Category',
           fields: [{ id: 'name', type: 'Symbol', localized: true }],
+          displayField: 'name',
+          sys: {
+            id: contentTypeId,
+          },
         };
       }
     });
 
-    const result = await FieldsFactory.createFields(mockEntry, mockCma as any);
+    const result = await new FieldsFactory(mockCma as any).createFields(mockEntry);
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(ReferenceArrayField);
     const fieldInstance = result[0] as ReferenceArrayField;
@@ -268,12 +284,12 @@ describe('FieldsFactory', () => {
 
     expect(fieldInstance.items).toHaveLength(2);
     expect(fieldInstance.items[0]).toBeInstanceOf(ReferenceItem);
-    expect(fieldInstance.items[0].referenceContentType).toBe('category');
+    expect(fieldInstance.items[0].referenceContentTypeId).toBe('category');
     expect(fieldInstance.items[0].fields).toHaveLength(1);
     expect(fieldInstance.items[0].fields[0].id).toBe('name');
 
     expect(fieldInstance.items[1]).toBeInstanceOf(ReferenceItem);
-    expect(fieldInstance.items[1].referenceContentType).toBe('category');
+    expect(fieldInstance.items[1].referenceContentTypeId).toBe('category');
     expect(fieldInstance.items[1].fields).toHaveLength(1);
     expect(fieldInstance.items[1].fields[0].id).toBe('name');
   });
@@ -294,8 +310,7 @@ describe('FieldsFactory', () => {
       name: 'Article',
       fields: [{ id: 'title', type: 'Symbol', localized: true }],
     });
-
-    await expect(FieldsFactory.createFields(mockEntry, mockCma as any)).rejects.toThrow(
+    await expect(new FieldsFactory(mockCma as any).createFields(mockEntry)).rejects.toThrow(
       'Field not found'
     );
   });
@@ -338,10 +353,14 @@ describe('FieldsFactory', () => {
       return {
         name: `level${level}`,
         fields,
+        displayField: 'name',
+        sys: {
+          id: contentTypeId,
+        },
       };
     });
 
-    const result = await FieldsFactory.createFields(mockEntry, mockCma as any);
+    const result = await new FieldsFactory(mockCma as any).createFields(mockEntry);
 
     expect(result).toHaveLength(2); // name and nestedRef
     expect(result[0].id).toEqual('name');
@@ -356,7 +375,7 @@ describe('FieldsFactory', () => {
         expect(currentField.fields.length).toBe(2);
         const nestedRefField = currentField.fields[1] as ReferenceField;
         expect(nestedRefField.entryContentTypeId).toBe(`level${level}`);
-        expect(nestedRefField.referenceContentType).toBe(`level${level + 1}`);
+        expect(nestedRefField.referenceContentTypeId).toBe(`level${level + 1}`);
         currentField = nestedRefField || null;
       } else {
         // At level 5, we should have the name field but no further references

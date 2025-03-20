@@ -73,7 +73,7 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
         marginBottom="spacingS"
         padding="spacingXs">
         <Checkbox id={entry.id} isChecked={entrySelected} onChange={toggleEntry}>
-          <Text fontWeight="fontWeightDemiBold">The Entry</Text>
+          <Text fontWeight="fontWeightDemiBold">{entry.title}</Text>
         </Checkbox>
       </Box>
 

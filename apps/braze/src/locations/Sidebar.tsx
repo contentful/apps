@@ -10,7 +10,8 @@ const Sidebar = () => {
 
   const invocationParams: EntryInfo = {
     id: sdk.ids.entry,
-    contentType: sdk.ids.contentType,
+    contentTypeId: sdk.ids.contentType,
+    title: sdk.entry.fields[sdk.contentType.displayField].getValue(),
   };
 
   return (

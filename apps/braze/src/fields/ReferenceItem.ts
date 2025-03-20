@@ -5,12 +5,26 @@ import { ReferenceField } from './ReferenceField';
 export class ReferenceItem extends ReferenceField {
   constructor(
     id: string,
+    name: string,
     entryContentTypeId: string,
+    title: string,
     localized: boolean,
-    referenceContentType: string,
+    referenceContentTypeId: string,
+    referenceContentTypeName: string,
     fields: Field[]
   ) {
-    super(id, entryContentTypeId, localized, referenceContentType, fields);
+    super(
+      id,
+      name,
+      entryContentTypeId,
+      title,
+      localized,
+      referenceContentTypeId,
+      referenceContentTypeName,
+      fields
+    );
+    this.referenceContentTypeName = referenceContentTypeName;
+    this.title = title;
     fields.forEach((field) => (field.parent = this));
   }
 
@@ -18,7 +32,7 @@ export class ReferenceItem extends ReferenceField {
     const itemFields = this.selectedFields()
       .map((field) => field.generateQuery())
       .join(' ');
-    const itemContentType = capitalize(this.referenceContentType);
+    const itemContentType = capitalize(this.referenceContentTypeId);
     return `... on ${itemContentType} {${itemFields}}`;
   }
 

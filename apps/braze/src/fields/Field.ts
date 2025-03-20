@@ -5,13 +5,15 @@ import { ReferenceItem } from './ReferenceItem';
 
 export abstract class Field {
   public id: string;
+  public name: string;
   public localized: boolean;
   public entryContentTypeId: string;
   public selected: boolean = false;
   public parent: ReferenceField | ReferenceArrayField | ReferenceItem | null = null;
 
-  constructor(id: string, entryContentTypeId: string, localized: boolean) {
+  constructor(id: string, name: string, entryContentTypeId: string, localized: boolean) {
     this.id = firstLetterToLowercase(id);
+    this.name = name;
     this.entryContentTypeId = firstLetterToLowercase(entryContentTypeId);
     this.localized = localized;
   }
@@ -22,6 +24,10 @@ export abstract class Field {
   generateLiquidTag(): string[] {
     const template = `${SAVED_RESPONSE}.data.${this.entryContentTypeId}`;
     return this.generateLiquidTagForType(template);
+  }
+
+  displayName(): string {
+    return this.name;
   }
 
   select(): void {

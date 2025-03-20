@@ -4,13 +4,13 @@ import { ASSET_FIELDS_QUERY } from '../../src/utils';
 
 describe('AssetArrayField', () => {
   it('Generates query', () => {
-    const field = new AssetArrayField('headers', 'blogPost', false);
+    const field = new AssetArrayField('headers', 'Headers', 'blogPost', false);
     const result = field.generateQuery();
     expect(result).toEqual(`headersCollection {items {${ASSET_FIELDS_QUERY}}}`);
   });
 
   it('Generates liquid tag for symbol', () => {
-    const field = new AssetArrayField('headers', 'blogPost', false);
+    const field = new AssetArrayField('headers', 'Headers', 'blogPost', false);
     const result = field.generateLiquidTag();
     expect(result).toEqual([
       '{% for headersCollectionItem in response.data.blogPost.headersCollection.items %}\n' +

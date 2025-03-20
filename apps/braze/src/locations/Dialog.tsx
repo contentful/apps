@@ -13,7 +13,8 @@ import { Field } from '../fields/Field';
 
 export type EntryInfo = {
   id: string;
-  contentType: string;
+  contentTypeId: string;
+  title: string;
 };
 
 const FIELDS_STEP = 'fields';
@@ -44,11 +45,12 @@ const Dialog = () => {
     const fetchEntry = async () => {
       const response = await cma.entry.references({ entryId: entryInfo.id, include: 5 });
       const items = resolveResponse(response);
-      const fields = await FieldsFactory.createFields(items[0], cma);
+      const fields = await new FieldsFactory(cma).createFields(items[0]);
       fieldsRef.current = fields;
       const entry = new Entry(
         entryInfo.id,
-        entryInfo.contentType,
+        entryInfo.contentTypeId,
+        entryInfo.title,
         fieldsRef.current,
         sdk.ids.space,
         sdk.parameters.installation.apiKey

@@ -4,8 +4,8 @@ export class LocationField extends Field {
   LOCATION_LAT = 'lat';
   LOCATION_LON = 'lon';
 
-  constructor(id: string, entryContentTypeId: string, localized: boolean) {
-    super(id, entryContentTypeId, localized);
+  constructor(id: string, name: string, entryContentTypeId: string, localized: boolean) {
+    super(id, name, entryContentTypeId, localized);
   }
 
   generateQuery(): string {

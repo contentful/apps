@@ -27,6 +27,16 @@ const mockSdk: any = {
     default: 'en-US',
     available: ['en-US', 'es-AR'],
   },
+  entry: {
+    fields: {
+      name: {
+        getValue: vi.fn().mockReturnValue('Title'),
+      },
+    },
+  },
+  contentType: {
+    displayField: 'name',
+  },
 };
 
 export { mockSdk };

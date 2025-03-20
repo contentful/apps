@@ -38,7 +38,7 @@ const BasicFieldCheckbox = (props: BasicFieldCheckboxProps) => {
       margin="spacingXs"
       padding="spacingXs">
       <Checkbox id={field.uniqueId()} isChecked={field.selected} onChange={handleToggle}>
-        <Text fontWeight="fontWeightNormal">Basic: {field.uniqueId()}</Text>
+        <Text fontWeight="fontWeightNormal">{field.displayName()}</Text>
       </Checkbox>
     </Box>
   );
@@ -138,7 +138,7 @@ const CheckboxContainer = (props: {
       margin="spacingXs"
       padding="spacingXs">
       <Checkbox id={field.uniqueId()} isChecked={field.selected} onChange={handleToggle}>
-        <Text fontWeight="fontWeightDemiBold">Basic: {field.uniqueId()}</Text>
+        <Text fontWeight="fontWeightDemiBold">{field.displayName()}</Text>
       </Checkbox>
       <IconButton
         icon={show ? <ChevronUpIcon /> : <ChevronDownIcon />}

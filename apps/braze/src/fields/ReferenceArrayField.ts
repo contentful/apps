@@ -4,8 +4,14 @@ import { ReferenceItem } from './ReferenceItem';
 export class ReferenceArrayField extends Field {
   public items: ReferenceItem[];
 
-  constructor(id: string, entryContentTypeId: string, localized: boolean, items: ReferenceItem[]) {
-    super(id, entryContentTypeId, localized);
+  constructor(
+    id: string,
+    name: string,
+    entryContentTypeId: string,
+    localized: boolean,
+    items: ReferenceItem[]
+  ) {
+    super(id, name, entryContentTypeId, localized);
     items.forEach((item) => (item.parent = this));
     this.items = items;
   }
