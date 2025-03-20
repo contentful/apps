@@ -1,10 +1,13 @@
-import type { FunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit';
+import type {
+  FunctionEventHandler as EventHandler,
+  FunctionTypeEnum,
+} from '@contentful/node-apps-toolkit';
 import { createSchema, createYoga } from 'graphql-yoga';
 import { GraphQLError } from 'graphql';
 
 /*
  * We re-create a basic subset of the actual payloads in order to showcase how to wrap a REST API.
- * this schema will be use to handle upcomming graphql queries
+ * this schema will be use to handle upcoming graphql queries
  */
 const typeDefs = `
 type Character {
@@ -72,7 +75,10 @@ const schema = createSchema({
 });
 const yoga = createYoga({ schema, graphiql: false });
 
-const fieldMappingHandler: EventHandler<'graphql.field.mapping'> = (event, context) => {
+const fieldMappingHandler: EventHandler<FunctionTypeEnum.GraphqlFieldMapping> = (
+  event,
+  context
+) => {
   const fields = event.fields.map(({ contentTypeId, field }) => {
     return {
       contentTypeId,
@@ -89,7 +95,7 @@ const fieldMappingHandler: EventHandler<'graphql.field.mapping'> = (event, conte
   };
 };
 
-const queryHandler: EventHandler<'graphql.query'> = async (event, context) => {
+const queryHandler: EventHandler<FunctionTypeEnum.GraphqlQuery> = async (event, context) => {
   const { query, operationName, variables } = event;
   const body = JSON.stringify({
     query,

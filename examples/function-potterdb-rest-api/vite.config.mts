@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -11,4 +12,8 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
   },
+  build: {
+    outDir: './build',
+  },
+  base: '', // relative paths
 });
