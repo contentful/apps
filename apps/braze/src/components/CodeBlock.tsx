@@ -1,7 +1,7 @@
 import { Flex, CopyButton } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import SyntaxHighlighter from 'react-syntax-highlighter/dist/cjs/light';
-import { codeBlockStyles, lineNumberStyle } from './codeblock.styles';
+import { codeBlockStyles, lineNumberStyle } from './CodeBlock.styles';
 
 type Props = {
   code: string;

@@ -53,7 +53,7 @@ describe('Config Screen component', () => {
     });
   });
 
-  describe('installation ', () => {
+  describe('installation', () => {
     it('when installed the api key is set correctly', async () => {
       const user = userEvent.setup();
 
