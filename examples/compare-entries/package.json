@@ -17,7 +17,7 @@
     "react-dom": "^16.14.0"
   },
   "devDependencies": {
-    "@contentful/app-scripts": "1.10.2",
+    "@contentful/app-scripts": "^2.3.0",
     "@tsconfig/create-react-app": "2.0.0",
     "@vitejs/plugin-react": "^4.0.3",
     "cross-env": "7.0.3",
@@ -29,6 +29,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "create-app-definition": "contentful-app-scripts create-app-definition",
+    "add-locations": "contentful-app-scripts add-locations",
     "upload": "contentful-app-scripts upload --bundle-dir ./dist",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
   },

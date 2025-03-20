@@ -7,23 +7,22 @@ This project was bootstrapped with [Create Contentful App](https://github.com/co
 1. [Prerequisites](#prerequisites)
 2. [Description](#description)
 3. [Instructions to create and run the app](#instructions-to-create-and-run-the-app)
-    - [Copying the example](#copying-the-example)
-    - [Creating a custom app definition](#creating-a-custom-app-definition)
-    - [Building and uploading the app](#building-and-uploading-the-app)
-      - [Running the app locally](#running-the-app-locally)
-    - [Creating resource entities](#creating-resource-entities)
-    - [Installing the app](#installing-the-app)
+   - [Copying the example](#copying-the-example)
+   - [Creating a custom app definition](#creating-a-custom-app-definition)
+   - [Building and uploading the app](#building-and-uploading-the-app)
+     - [Running the app locally](#running-the-app-locally)
+   - [Creating resource entities](#creating-resource-entities)
+   - [Installing the app](#installing-the-app)
 4. [Entities overview](#entities-overview)
 5. [Code structure](#code-structure)
-    - [Functions](#functions)
-      - [Search request](#search-request)
-      - [Lookup request](#lookup-request)
-      - [Response](#response)
-      - [Example](#example)
-    - [Property mapping for rendering in the Web app](#property-mapping-for-rendering-in-the-web-app)
-    - [App manifest](#app-manifest)
+   - [Functions](#functions)
+     - [Search request](#search-request)
+     - [Lookup request](#lookup-request)
+     - [Response](#response)
+     - [Example](#example)
+   - [Property mapping for rendering in the Web app](#property-mapping-for-rendering-in-the-web-app)
+   - [App manifest](#app-manifest)
 6. [Available Scripts](#available-scripts)
-
 
 # Prerequisites
 
@@ -32,8 +31,8 @@ This project was bootstrapped with [Create Contentful App](https://github.com/co
   - [Functions](https://www.contentful.com/developers/docs/extensibility/app-framework/functions/)
 - The space where you will install the application has the [Orchestration](https://www.contentful.com/help/orchestration/) feature enabled.
 - A valid API token for the TMDB API is required to run this app. You can get one by signing up at [TMDB](https://www.themoviedb.org/signup).
-> **NOTE:**
-> TMDB does not generate the API token instantly. Make sure you initiate the signup process in advance to prevent any hindrance to your progress.
+  > **NOTE:**
+  > TMDB does not generate the API token instantly. Make sure you initiate the signup process in advance to prevent any hindrance to your progress.
 - Your system has installed:
   - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
   - The latest LTS version of [Node.js](https://nodejs.org/en/)
@@ -47,7 +46,7 @@ Contentful provides a method for integrating content from external sources using
 
 To overcome these challenges, we offer a more streamlined and cohesive approach to linking third-party systems through existing content model Reference Fields. This upgraded version of fields is referred to as **Native external references**.
 
-This example is designed to walk you through the beta version of the extended linking feature. Currently, the application setup primarily revolves around command-line operations. However, you can also view the connected content displayed in the user interface. 
+This example is designed to walk you through the beta version of the extended linking feature. Currently, the application setup primarily revolves around command-line operations. However, you can also view the connected content displayed in the user interface.
 For the purpose of this example, we will be connecting to the [Movie Database](https://www.themoviedb.org/) external system.
 
 With Native external references we introduce the following new entity types that allow us to model the data from third-party systems in Contentful:
@@ -60,7 +59,7 @@ With Native external references we introduce the following new entity types that
 
 ## Copying the example
 
-To get started with your application, you need to make a local copy of the example code by running the following command in your terminal. 
+To get started with your application, you need to make a local copy of the example code by running the following command in your terminal.
 
 > **NOTE:**
 > Make sure you replace `<name-of-your-app>` with the name of your choice.
@@ -104,8 +103,8 @@ You will need to answer the following questions on the terminal. Feel free to pr
 - Select **Symbol** as type and mark the parameter as required.
 
 5. The next steps will lead you through the process of providing a Contentful access token to the application and specifying the organization to which the application should be assigned.
-> **NOTE:**
-> Make sure the organization ID you select here is the Organization that has access to the Native external references feature.
+   > **NOTE:**
+   > Make sure the organization ID you select here is the Organization that has access to the Native external references feature.
 
 You now have a basic application that can be enriched with additional information that will enable the example project you downloaded to function properly.
 
@@ -119,6 +118,11 @@ npm run upload
 ```
 
 The interactive CLI will prompt you to provide additional details, such as a CMA endpoint URL. Select **Yes** when prompted if you’d like to activate the bundle after upload.
+
+## Adding locations to an app
+
+You can add locations to an existing app using the CLI command `npm run add-locations`. This will launch an interactive prompt, allowing you to select locations to add to your app.
+You can also add locations to an app definition by [visiting the apps section](https://app.contentful.com/deeplink?link=app-definition-list) under your organization settings in the Contentful web UI and clicking on the **"Edit"** flyout button for your app and selecting locations on the **"General"** tab.
 
 ### Running the app locally
 
@@ -140,9 +144,8 @@ npm run create-resource-entities
 
 This will tell Contentful that we want to connect to `TMDB` via the function we uploaded in [Building and uploading the app](#building-and-uploading-the-app) step and that the same function can provide `TMDB:Movie` and `TMDB:Person` _Resource Types_.
 
-> **NOTE:**
-> `create-resource-entities` script generates new entities within the system, and prints out a minimal log when the operation has succeeded.
-> 
+> **NOTE:** > `create-resource-entities` script generates new entities within the system, and prints out a minimal log when the operation has succeeded.
+>
 > If you would like to list all the previously created entities, you can utilize a similar script that prints out more verbose details: `npm run show-resource-entities`.
 
 ## Installing the app
@@ -236,7 +239,7 @@ type ResourcesSearchRequest = {
 
 | property         | type                          | description                                                                                                                        |
 | ---------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| limit            | number (required)             | Number defining the maximum items that should be returned                                                                       |
+| limit            | number (required)             | Number defining the maximum items that should be returned                                                                          |
 | pages            | object (optional)             |
 | pages.nextCursor | string (required)             | Cursor string pointing to the specific page of results to be used as a starting point for the request                              |
 | resourceType     | string (required)             | String consisting of the name of the provider and the resource within the provider, in a format `{Provider}:{Type}, eg. TMDB:Movie |
@@ -265,7 +268,7 @@ type ResourcesLookupRequest<
 
 | property         | type                          | description                                                                                                                        |
 | ---------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| limit            | number (required)             | Number defining the maximum items that should be returned                                                                       |
+| limit            | number (required)             | Number defining the maximum items that should be returned                                                                          |
 | pages            | object (optional)             |
 | pages.nextCursor | string (required)             | Cursor string pointing to the specific page of results to be used as a starting point for the request                              |
 | resourceType     | string (required)             | String consisting of the name of the provider and the resource within the provider, in a format `{Provider}:{Type}, eg. TMDB:Movie |
