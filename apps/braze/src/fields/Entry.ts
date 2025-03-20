@@ -1,4 +1,4 @@
-import { firstLetterToLowercase, SAVED_RESPONSE } from '../utils';
+import { removeHypens, firstLetterToLowercase, SAVED_RESPONSE } from '../utils';
 import { Field } from './Field';
 
 export class Entry {
@@ -24,10 +24,10 @@ export class Entry {
     this.contentfulToken = contentfulToken;
   }
 
-  generateConnectedContentCall() {
+  generateConnectedContentCall(locales: string[]) {
     return `{% capture body %}
-    ${this.assembleQuery()}
-  {% endcapture %}
+    ${this.assembleQuery(locales)}
+{% endcapture %}
   
   {% connected_content
       https://graphql.contentful.com/content/v1/spaces/${this.spaceId}
@@ -39,11 +39,11 @@ export class Entry {
   %}`;
   }
 
-  generateLiquidTags() {
-    return this.fields.flatMap((field) => field.generateLiquidTag());
+  generateLiquidTags(locales: string[]) {
+    return locales.length > 0 ? this.localizedLiquidTags(locales) : this.liquidTags();
   }
 
-  async getGraphQLResponse() {
+  async getGraphQLResponse(locales: string[]) {
     const response = await fetch(
       `https://graphql.contentful.com/content/v1/spaces/${this.spaceId}`,
       {
@@ -52,7 +52,7 @@ export class Entry {
           Authorization: `Bearer ${this.contentfulToken}`,
           'Content-Type': 'application/json',
         },
-        body: this.assembleQuery(),
+        body: this.assembleQuery(locales),
       }
     );
     return response.json();
@@ -68,8 +68,23 @@ export class Entry {
     });
   }
 
-  private assembleQuery() {
-    return `{"query":"{${this.contentType}(id:\\"${this.id}\\"){${this.assembleFieldsQuery()}}}"}`;
+  assembleQuery(locales: string[]) {
+    const body = locales.length > 0 ? this.localizedQueryBody(locales) : this.queryBody();
+
+    return `{"query":"{${body}}"}`;
+  }
+
+  private queryBody() {
+    return `${this.contentType}(id:\\"${this.id}\\"){${this.assembleFieldsQuery()}}`;
+  }
+
+  private localizedQueryBody(locales: string[]) {
+    return locales.map(
+      (locale) =>
+        `${removeHypens(locale)}: ${this.contentType}(id:\\"${
+          this.id
+        }\\", locale:\\"${locale}\\"){${this.assembleFieldsQuery()}}`
+    );
   }
 
   private assembleFieldsQuery(): string {
@@ -77,5 +92,19 @@ export class Entry {
       .filter((field) => field.selected)
       .map((field) => field.generateQuery())
       .join(' ');
+  }
+
+  private liquidTags() {
+    return this.fields
+      .filter((field) => field.selected)
+      .flatMap((field) => field.generateLiquidTag());
+  }
+
+  private localizedLiquidTags(locales: string[]) {
+    return locales.flatMap((locale) =>
+      this.fields
+        .filter((field) => field.selected)
+        .flatMap((field) => field.generateLiquidTag(locale))
+    );
   }
 }

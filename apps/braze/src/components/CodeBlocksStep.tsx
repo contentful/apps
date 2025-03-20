@@ -19,13 +19,13 @@ function formatGraphqlResponse(response: JSON) {
 }
 
 const CodeBlocksStep = (props: CodeBlocksStepProps) => {
-  const { entry, handlePreviousStep, handleClose } = props;
+  const { entry, handlePreviousStep, handleClose, selectedLocales } = props;
 
   const [graphqlResponse, setGraphqlResponse] = useState<string>('');
 
   useEffect(() => {
     const fetchEntry = async () => {
-      const response = await entry.getGraphQLResponse();
+      const response = await entry.getGraphQLResponse(selectedLocales);
       const graphqlResponseWithNewlines = formatGraphqlResponse(response);
 
       setGraphqlResponse(graphqlResponseWithNewlines);
@@ -48,14 +48,17 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           Braze Connected Content Call
         </Subheading>
-        <CodeBlock language={'liquid'} code={entry.generateConnectedContentCall()} />
+        <CodeBlock language={'liquid'} code={entry.generateConnectedContentCall(selectedLocales)} />
 
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
 
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           Liquid tag to reference selected Contentful fields, within Braze message body
         </Subheading>
-        <CodeBlock language={'liquid'} code={entry.generateLiquidTags().join('\n')} />
+        <CodeBlock
+          language={'liquid'}
+          code={entry.generateLiquidTags(selectedLocales).join('\n')}
+        />
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
 
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">

@@ -57,7 +57,11 @@ const LocalesSelectionStep = (props: LocalesSelectionStepProps) => {
         <Button variant="secondary" size="small" onClick={handlePreviousStep}>
           Back
         </Button>
-        <Button variant="primary" size="small" onClick={handleNextStep}>
+        <Button
+          variant="primary"
+          size="small"
+          onClick={handleNextStep}
+          isDisabled={selectedLocales.length === 0}>
           Next
         </Button>
       </WizardFooter>

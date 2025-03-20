@@ -23,15 +23,48 @@ export interface AppInstallationParameters {
 export const BRAZE_DOCUMENTATION =
   'https://braze.com/docs/user_guide/personalization_and_dynamic_content/connected_content';
 
+export async function callToContentful(url: string, newApiKey: string) {
+  return await fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${newApiKey}`,
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
 const ConfigScreen = () => {
+  const [apiKeyIsValid, setApiKeyIsValid] = useState(true);
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     apiKey: '',
   });
   const sdk = useSDK<ConfigAppSDK>();
   const spaceId = sdk.ids.space;
 
+  async function checkApiKey(apiKey: string) {
+    if (!apiKey) {
+      setApiKeyIsValid(false);
+      return false;
+    }
+
+    const url = `https://${sdk.hostnames.delivery}/spaces/${sdk.ids.space}`;
+    const response: Response = await callToContentful(url, apiKey);
+
+    const isValid = response.ok;
+    setApiKeyIsValid(isValid);
+
+    return isValid;
+  }
+
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
+
+    const isValid = await checkApiKey(parameters.apiKey);
+
+    if (!parameters.apiKey || !isValid) {
+      sdk.notifier.error('A valid Contentful API key is required');
+      return false;
+    }
 
     return {
       parameters,
@@ -91,12 +124,16 @@ const ConfigScreen = () => {
             <FormControl.Label>Contentful API key</FormControl.Label>
             <TextInput
               value={parameters.apiKey}
-              type="password"
               name="apiKey"
               data-testid="apiKey"
+              isInvalid={!apiKeyIsValid}
               placeholder="ex. 0ab1c234DE56f..."
+              type="password"
               onChange={(e) => setParameters({ ...parameters, apiKey: e.target.value })}
             />
+            {!apiKeyIsValid && (
+              <FormControl.ValidationMessage>Invalid API key</FormControl.ValidationMessage>
+            )}
           </Form>
         </Box>
       </Box>

@@ -37,6 +37,12 @@ const mockSdk: any = {
   contentType: {
     displayField: 'name',
   },
+  notifier: {
+    error: vi.fn(),
+  },
+  hostnames: {
+    delivery: 'cdn.contentful.com',
+  },
 };
 
 export { mockSdk };
