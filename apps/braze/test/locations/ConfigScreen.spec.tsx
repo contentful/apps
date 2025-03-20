@@ -11,6 +11,15 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useCMA: () => mockCma,
 }));
 
+vi.mock('./ConfigScreen', async () => {
+  const actual: any = await vi.importActual('./ConfigScreen');
+
+  return {
+    ...actual,
+    callContentful: vi.fn().mockResolvedValue({ ok: true, error: null }),
+  };
+});
+
 async function saveAppInstallation() {
   return await mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
 }
@@ -53,17 +62,33 @@ describe('Config Screen component', () => {
     });
   });
 
-  describe('installation', () => {
-    it('when installed the api key is set correctly', async () => {
+  describe('installation ', () => {
+    it('sets the parameters correctly if the api key is valid', async () => {
       const user = userEvent.setup();
-
       const apiKeyInput = screen.getAllByTestId('apiKey')[0];
       await user.type(apiKeyInput, 'valid-api-key-123');
+      vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
+        return { ok: true, status: 200 };
+      });
+
       const result = await saveAppInstallation();
 
       expect(result).toEqual({
         parameters: { apiKey: 'valid-api-key-123' },
       });
+    });
+
+    it('shows a toast error if the api key is invalid', async () => {
+      const user = userEvent.setup();
+      const apiKeyInput = screen.getAllByTestId('apiKey')[0];
+      await user.type(apiKeyInput, 'invalid-api-key-123');
+      vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
+        return { ok: false, status: 401 };
+      });
+
+      await saveAppInstallation();
+
+      expect(mockSdk.notifier.error).toHaveBeenCalledWith('A valid Contentful API key is required');
     });
   });
 });
