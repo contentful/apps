@@ -128,7 +128,7 @@ const ConfigScreen = () => {
               data-testid="apiKey"
               isInvalid={!apiKeyIsValid}
               placeholder="ex. 0ab1c234DE56f..."
-              type={'password'}
+              type="password"
               onChange={(e) => setParameters({ ...parameters, apiKey: e.target.value })}
             />
             {!apiKeyIsValid && (
