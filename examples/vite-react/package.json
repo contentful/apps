@@ -18,11 +18,12 @@
     "build": "tsc && vite build",
     "test": "vitest",
     "create-app-definition": "contentful-app-scripts create-app-definition",
+    "add-locations": "contentful-app-scripts add-locations",
     "upload": "contentful-app-scripts upload --bundle-dir ./dist",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
   },
   "devDependencies": {
-    "@contentful/app-scripts": "1.19.1",
+    "@contentful/app-scripts": "^2.3.0",
     "@testing-library/react": "14.0.0",
     "@types/node": "16.18.38",
     "@types/react": "18.3.1",

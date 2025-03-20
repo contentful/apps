@@ -9,7 +9,8 @@
     "lint": "next lint",
     "test": "jest --watch",
     "test:ci": "jest --ci",
-    "create-app-definition": "contentful-app-scripts create-app-definition"
+    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "add-locations": "contentful-app-scripts add-locations"
   },
   "dependencies": {
     "@contentful/app-sdk": "4.22.0",
@@ -21,7 +22,7 @@
     "react-dom": "18.2.0"
   },
   "devDependencies": {
-    "@contentful/app-scripts": "1.15.0",
+    "@contentful/app-scripts": "^2.3.0",
     "@testing-library/jest-dom": "5.16.5",
     "@testing-library/react": "14.0.0",
     "@types/node": "16.18.38",
