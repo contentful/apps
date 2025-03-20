@@ -20,3 +20,11 @@ export function capitalize(s: string): string {
 export function firstLetterToLowercase(s: string): string {
   return s.charAt(0).toLowerCase() + s.slice(1);
 }
+
+export function removeIndentation(str: string) {
+  return ('' + str).replace(/(\n)\s+/g, '$1');
+}
+
+export function removeHypens(str: string) {
+  return str.replace('-', '');
+}

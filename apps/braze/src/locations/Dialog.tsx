@@ -25,8 +25,8 @@ const Dialog = () => {
   const locales = sdk.locales.available;
   const entryInfo = sdk.parameters.invocation as EntryInfo;
   const [step, setStep] = useState('fields');
-  const [selectedLocales, setSelectedLocales] = useState<string[]>([sdk.locales.default]);
-  const [entry, setEntry] = useState<Entry>();
+  const [selectedLocales, setSelectedLocales] = useState<string[]>([]);
+  const [entry, setEntry] = useState<Entry | undefined>(undefined);
 
   const cma = createClient(
     { apiAdapter: sdk.cmaAdapter },
