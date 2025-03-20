@@ -4,12 +4,15 @@ import { Entry } from '../../src/fields/Entry';
 import { removeIndentation } from '../../src/utils';
 
 describe('Entry', () => {
-  const field = new BasicField('title', 'blogPost', false);
-  const localizedField = new BasicField('title', 'blogPost', true);
-  const entry = new Entry('anId', 'aCustomContentType', [field], 'anSpaceId', 'apiToken');
+  const field = new BasicField('title', 'Title', 'blogPost', false);
+  field.selected = true;
+  const localizedField = new BasicField('title', 'Title', 'blogPost', true);
+  localizedField.selected = true;
+  const entry = new Entry('anId', 'aCustomContentType', 'aTitle', [field], 'anSpaceId', 'apiToken');
   const entryLocalized = new Entry(
     'anId',
     'aCustomContentType',
+    'aTitle',
     [localizedField],
     'anSpaceId',
     'apiToken'
@@ -17,7 +20,7 @@ describe('Entry', () => {
   const locales = ['en-US', 'it', 'es-AR'];
 
   it('Generates content call with no fields', () => {
-    const entry = new Entry('anId', 'aCustomContentType', [], 'anSpaceId', 'apiToken');
+    const entry = new Entry('anId', 'aCustomContentType', 'aTitle', [], 'anSpaceId', 'apiToken');
     const result = entry.generateConnectedContentCall([]);
     const expected = removeIndentation(`{% capture body %}
       {"query":"{aCustomContentType(id:\\"anId\\"){}}"}

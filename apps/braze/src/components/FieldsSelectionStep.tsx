@@ -1,12 +1,51 @@
-import { Button, Paragraph, TextLink } from '@contentful/f36-components';
+import { Box, Button, Checkbox, Paragraph, TextLink, Text } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import WizardFooter from './WizardFooter';
+import FieldCheckbox from './FieldCheckbox';
+import { Entry } from '../fields/Entry';
+import { useState } from 'react';
+import { css } from 'emotion';
+import tokens from '@contentful/f36-tokens';
 
 type FieldsSelectionStepProps = {
+  entry: Entry;
   handleNextStep: () => void;
 };
 const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
-  const { handleNextStep } = props;
+  const { entry, handleNextStep } = props;
+  const [selectedFields, setSelectedFields] = useState<string[]>([]);
+  const [entrySelected, setEntrySelected] = useState(entry.fields.some((field) => field.selected));
+
+  const fields = entry.fields;
+  const allFields = entry.getAllFields();
+
+  const handleToggle = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const { checked, id } = event.target;
+    allFields.find((field) => field.uniqueId() === id)?.toggle(checked);
+    const newSelectedFields = allFields
+      .filter((field) => field.selected)
+      .map((field) => field.uniqueId());
+    setSelectedFields(newSelectedFields);
+    if (newSelectedFields.length === 0) {
+      setEntrySelected(false);
+    } else {
+      setEntrySelected(true);
+    }
+  };
+
+  const toggleEntry = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const { checked } = event.target;
+    if (checked) {
+      allFields.forEach((field) => (field.selected = true));
+      setEntrySelected(true);
+      setSelectedFields(allFields.map((field) => field.uniqueId()));
+    } else {
+      allFields.forEach((field) => (field.selected = false));
+      setEntrySelected(false);
+      setSelectedFields([]);
+    }
+  };
+
   return (
     <>
       <Paragraph fontColor="gray700" lineHeight="lineHeightCondensed">
@@ -22,8 +61,28 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
           view documentation here
         </TextLink>
       </Paragraph>
+
+      <Box
+        className={css({
+          border: `1px solid ${tokens.gray200}`,
+          borderRadius: tokens.borderRadiusSmall,
+        })}
+        margin="spacingXs"
+        marginBottom="spacingS"
+        padding="spacingXs">
+        <Checkbox id={entry.id} isChecked={entrySelected} onChange={toggleEntry}>
+          <Text fontWeight="fontWeightDemiBold">{entry.title}</Text>
+        </Checkbox>
+      </Box>
+
+      <Box paddingLeft="spacingL">
+        {fields.map((field) => {
+          return <FieldCheckbox key={field.uniqueId()} field={field} handleToggle={handleToggle} />;
+        })}
+      </Box>
+
       <WizardFooter>
-        <Button variant="primary" size="small" onClick={handleNextStep}>
+        <Button variant="primary" size="small" onClick={handleNextStep} isDisabled={!entrySelected}>
           Next
         </Button>
       </WizardFooter>

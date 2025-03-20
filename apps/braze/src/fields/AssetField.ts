@@ -2,8 +2,8 @@ import { ASSET_FIELDS, ASSET_FIELDS_QUERY } from '../utils';
 import { Field } from './Field';
 
 export class AssetField extends Field {
-  constructor(id: string, entryContentTypeId: string, localized: boolean) {
-    super(id, entryContentTypeId, localized);
+  constructor(id: string, name: string, entryContentTypeId: string, localized: boolean) {
+    super(id, name, entryContentTypeId, localized);
   }
 
   generateQuery(): string {

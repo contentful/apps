@@ -27,8 +27,21 @@ const mockSdk: any = {
     default: 'en-US',
     available: ['en-US', 'es-AR'],
   },
+  entry: {
+    fields: {
+      name: {
+        getValue: vi.fn().mockReturnValue('Title'),
+      },
+    },
+  },
+  contentType: {
+    displayField: 'name',
+  },
   notifier: {
     error: vi.fn(),
+  },
+  hostnames: {
+    delivery: 'cdn.contentful.com',
   },
 };
 

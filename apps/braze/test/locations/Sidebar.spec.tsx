@@ -28,6 +28,7 @@ describe('Sidebar component', () => {
       parameters: {
         id: mockSdk.ids.entry,
         contentTypeId: mockSdk.ids.contentType,
+        title: 'Title',
       },
       width: 'fullWidth',
     });
