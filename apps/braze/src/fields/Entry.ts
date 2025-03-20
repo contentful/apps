@@ -88,23 +88,22 @@ export class Entry {
   }
 
   private assembleFieldsQuery(): string {
-    return this.fields
-      .filter((field) => field.selected)
+    return this.selectedFields()
       .map((field) => field.generateQuery())
       .join(' ');
   }
 
   private liquidTags() {
-    return this.fields
-      .filter((field) => field.selected)
-      .flatMap((field) => field.generateLiquidTag());
+    return this.selectedFields().flatMap((field) => field.generateLiquidTag());
   }
 
   private localizedLiquidTags(locales: string[]) {
     return locales.flatMap((locale) =>
-      this.fields
-        .filter((field) => field.selected)
-        .flatMap((field) => field.generateLiquidTag(locale))
+      this.selectedFields().flatMap((field) => field.generateLiquidTag(locale))
     );
+  }
+
+  private selectedFields() {
+    return this.fields.filter((field) => field.selected);
   }
 }

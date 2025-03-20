@@ -21,17 +21,15 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
 
   const handleToggle = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const { checked, id } = event.target;
-    if (checked) {
-      allFields.find((field) => field.uniqueId() === id)?.select();
-      setEntrySelected(true);
-      setSelectedFields([...selectedFields, id]);
+    allFields.find((field) => field.uniqueId() === id)?.toggle(checked);
+    const newSelectedFields = allFields
+      .filter((field) => field.selected)
+      .map((field) => field.uniqueId());
+    setSelectedFields(newSelectedFields);
+    if (newSelectedFields.length === 0) {
+      setEntrySelected(false);
     } else {
-      allFields.find((field) => field.uniqueId() === id)?.deselect();
-      const newSelectedFields = selectedFields.filter((field) => field !== id);
-      setSelectedFields(newSelectedFields);
-      if (newSelectedFields.length === 0) {
-        setEntrySelected(false);
-      }
+      setEntrySelected(true);
     }
   };
 

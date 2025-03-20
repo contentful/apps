@@ -9,7 +9,7 @@ describe('ReferenceItem', () => {
     const phone = new BasicField('phone', 'Phone', 'author', false);
     phone.selected = true;
     const item = new ReferenceItem(
-      '[0]',
+      'idReferenceItem',
       'Blog item #1',
       'blog',
       'Title',
@@ -28,7 +28,7 @@ describe('ReferenceItem', () => {
     const phone = new BasicField('phone', 'Phone', 'author', false);
     phone.selected = true;
     const item = new ReferenceItem(
-      '[0]',
+      'idReferenceItem',
       'Blog item #1',
       'blog',
       'Title',

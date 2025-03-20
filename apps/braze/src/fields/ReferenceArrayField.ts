@@ -28,37 +28,22 @@ export class ReferenceArrayField extends Field {
     });
   }
 
-  select(): void {
-    this.selected = true;
-    this.items.forEach((item) => item.select());
+  toggle(selected: boolean) {
+    this.selected = selected;
+    this.items.forEach((item) => item.toggle(selected));
     if (this.parent) {
-      this.parent.childSelected();
+      this.parent.childToggled(selected);
     }
   }
 
-  deselect(): void {
-    this.selected = false;
-    this.items.forEach((item) => item.deselect());
-    if (this.parent) {
-      this.parent.childDeselected();
-    }
-  }
-
-  childSelected(): void {
-    if (this.items.every((item) => item.selected)) {
+  childToggled(selected: boolean) {
+    if (this.items.some((item) => item.selected)) {
       this.selected = true;
-    }
-    if (this.parent) {
-      this.parent.childSelected();
-    }
-  }
-
-  childDeselected(): void {
-    if (this.items.every((item) => !item.selected)) {
+    } else {
       this.selected = false;
     }
     if (this.parent) {
-      this.parent.childDeselected();
+      this.parent.childToggled(selected);
     }
   }
 

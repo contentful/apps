@@ -43,37 +43,22 @@ export class ReferenceField extends Field {
     return `${this.name} > ${this.title} (${this.referenceContentTypeName})`;
   }
 
-  select(): void {
-    this.selected = true;
-    this.fields.forEach((field) => field.select());
+  toggle(selected: boolean) {
+    this.selected = selected;
+    this.fields.forEach((field) => field.toggle(selected));
     if (this.parent) {
-      this.parent.childSelected();
+      this.parent.childToggled(selected);
     }
   }
 
-  deselect(): void {
-    this.selected = false;
-    this.fields.forEach((field) => field.deselect());
-    if (this.parent) {
-      this.parent.childDeselected();
-    }
-  }
-
-  childSelected(): void {
-    if (this.fields.every((field) => field.selected)) {
+  childToggled(selected: boolean) {
+    if (this.fields.some((field) => field.selected)) {
       this.selected = true;
-    }
-    if (this.parent) {
-      this.parent.childSelected();
-    }
-  }
-
-  childDeselected(): void {
-    if (this.fields.every((field) => !field.selected)) {
+    } else {
       this.selected = false;
     }
     if (this.parent) {
-      this.parent.childDeselected();
+      this.parent.childToggled(selected);
     }
   }
 

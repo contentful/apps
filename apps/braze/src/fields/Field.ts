@@ -34,17 +34,10 @@ export abstract class Field {
     return this.name;
   }
 
-  select(): void {
-    this.selected = true;
+  toggle(selected: boolean) {
+    this.selected = selected;
     if (this.parent) {
-      this.parent.childSelected();
-    }
-  }
-
-  deselect(): void {
-    this.selected = false;
-    if (this.parent) {
-      this.parent.childDeselected();
+      this.parent.childToggled(selected);
     }
   }
 
