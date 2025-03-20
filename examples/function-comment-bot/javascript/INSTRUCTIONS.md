@@ -20,6 +20,7 @@ This project is an example of a Contentful App Event Function that reacts to com
 ### Building your Function
 
 Use the command below to install this template:
+
 ```shell
 npx create-contentful-app@latest -–example function-comment-bot --javascript
 ```
@@ -42,7 +43,8 @@ When using functions, you don't need to worry about hosting your own code. Conte
 
 ### Adding locations to an app
 
-You can add locations to an existing app using CLI using `npm run add-locations`. This will launch an interactive prompt to allow you to select locations to add to your app. You can also add locations to an app definition by [visiting the apps section](https://app.contentful.com/deeplink?link=app-definition-list) under your organization settings in the Contentful web UI and clicking on the "Edit" flyout button for your app and selecting locations on the "General" tab.
+You can add locations to an existing app using CLI using `npm run add-locations`. This will launch an interactive prompt, allowing you to select locations to add to your app.
+You can also add locations to an app definition by [visiting the apps section](https://app.contentful.com/deeplink?link=app-definition-list) under your organization settings in the Contentful web UI and clicking on the **"Edit"** flyout button for your app and selecting locations on the **"General"** tab.
 
 ## Utilizing app event handler functions
 
@@ -59,7 +61,7 @@ This app contains a comment bot, a Contentful Function that is triggered by comm
 Supported commands out of the box:
 
 - `/show-publish`: Adds the publication widget to the entry’s sidebar.
--	`/hide-publish`: Removes the publication widget from the entry’s sidebar.
+- `/hide-publish`: Removes the publication widget from the entry’s sidebar.
 
 More commands can be added by introducing new actions to the project.
 
@@ -68,9 +70,10 @@ More commands can be added by introducing new actions to the project.
 To add a new action:
 
 1. Create a New Bot Action File: In the [bot-actions](./bot-actions/) directory, create a new file (e.g., yourAction.js).
-2. Implement the Bot Action. If you'd like you can also extend the `BotActionBase` class to gain access to common shared functionality. 
+2. Implement the Bot Action. If you'd like you can also extend the `BotActionBase` class to gain access to common shared functionality.
+
 ```typescript
-import { BotActionBase } from "./bot-action-base";
+import { BotActionBase } from './bot-action-base';
 
 export class YourAction extends BotActionBase {
   async execute(params): Promise<void> {
@@ -80,12 +83,14 @@ export class YourAction extends BotActionBase {
 ```
 
 3. Register the Action: Add the new action to the [bot-action-registry.js] file.
+
 ```typescript
-import { YourAction } from "./yourAction";
+import { YourAction } from './yourAction';
 
 const actionRegistry = {
-  "/your-command": new YourAction(),
+  '/your-command': new YourAction(),
   // Other actions...
 };
 ```
+
 4. Test Your Action: Make a comment on a Contentful entry with your new command, and observe the bot in action.
