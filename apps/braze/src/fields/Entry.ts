@@ -37,12 +37,7 @@ export class Entry {
   }
 
   generateLiquidTags(locales: string[]) {
-    if (locales.length > 0) {
-      return locales.flatMap((locale) =>
-        this.fields.flatMap((field) => field.generateLiquidTag(locale))
-      );
-    }
-    return this.fields.flatMap((field) => field.generateLiquidTag());
+    return locales.length > 0 ? this.localizedLiquidTags(locales) : this.liquidTags();
   }
 
   async getGraphQLResponse(locales: string[]) {
@@ -85,5 +80,15 @@ export class Entry {
 
   private assembleFieldsQuery(): string {
     return this.fields.map((field) => field.generateQuery()).join(' ');
+  }
+
+  private liquidTags() {
+    return this.fields.flatMap((field) => field.generateLiquidTag());
+  }
+
+  private localizedLiquidTags(locales: string[]) {
+    return locales.flatMap((locale) =>
+      this.fields.flatMap((field) => field.generateLiquidTag(locale))
+    );
   }
 }
