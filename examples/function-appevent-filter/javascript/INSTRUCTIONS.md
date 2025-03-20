@@ -22,6 +22,10 @@ You will need to set the following environment variables as listed below:
 
 It as simple using the CLI command `npm run upload-ci`. This will perform two actions: upload the code, linking it to the app, and then finally activating the code ready for usage in both
 
+### Adding locations to an app
+
+You can add locations to an existing app using CLI using `npm run add-locations`. This will launch an interactive prompt to allow you to select locations to add to your app. You can also add locations to an app definition by [visiting the apps section](https://app.contentful.com/deeplink?link=app-definition-list) under your organization settings in the Contentful web UI and clicking on the "Edit" flyout button for your app and selecting locations on the "General" tab.
+
 ## Utilizing app event filter functions
 
 When you create an app that utilizes [app events](https://www.contentful.com/developers/docs/extensibility/app-framework/app-events/), you can define the entities and topics for these events. However, you may also want to do some additional filtering for these app events. For example, you might want to filter Entry events so that they are only sent for certain content types. App event filter functions are a flexible way of making app events even more powerful for your apps.
