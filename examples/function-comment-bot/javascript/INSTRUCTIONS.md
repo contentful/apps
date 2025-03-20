@@ -27,7 +27,7 @@ npx create-contentful-app@latest -–example function-comment-bot --javascript
 
 ### Creating an App
 
-You can create an app using CLI with `npm run create-app-definition`. This will prompt you to enter details for your new app and organization details. You can also create an app definition by [visiting the apps section](https://app.contentful.com/deeplink?link=app-definition-list) under your organization settings in the Contentful web UI and clicking on the "Create App" button on the top right.
+You can create an app using the CLI command `npm run create-app-definition`. This will prompt you to enter details for your new app and organization details. You can also create an app definition by [visiting the apps section](https://app.contentful.com/deeplink?link=app-definition-list) under your organization settings in the Contentful web UI and clicking on the "Create App" button on the top right.
 
 ### Using Environment Variables
 
@@ -43,7 +43,7 @@ When using functions, you don't need to worry about hosting your own code. Conte
 
 ### Adding locations to an app
 
-You can add locations to an existing app using CLI using `npm run add-locations`. This will launch an interactive prompt, allowing you to select locations to add to your app.
+You can add locations to an existing app using the CLI command `npm run add-locations`. This will launch an interactive prompt, allowing you to select locations to add to your app.
 You can also add locations to an app definition by [visiting the apps section](https://app.contentful.com/deeplink?link=app-definition-list) under your organization settings in the Contentful web UI and clicking on the **"Edit"** flyout button for your app and selecting locations on the **"General"** tab.
 
 ## Utilizing app event handler functions

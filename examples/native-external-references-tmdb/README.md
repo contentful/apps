@@ -121,7 +121,7 @@ The interactive CLI will prompt you to provide additional details, such as a CMA
 
 ## Adding locations to an app
 
-You can add locations to an existing app using CLI using `npm run add-locations`. This will launch an interactive prompt, allowing you to select locations to add to your app.
+You can add locations to an existing app using the CLI command `npm run add-locations`. This will launch an interactive prompt, allowing you to select locations to add to your app.
 You can also add locations to an app definition by [visiting the apps section](https://app.contentful.com/deeplink?link=app-definition-list) under your organization settings in the Contentful web UI and clicking on the **"Edit"** flyout button for your app and selecting locations on the **"General"** tab.
 
 ### Running the app locally
