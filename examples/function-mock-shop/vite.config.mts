@@ -6,9 +6,8 @@ export default defineConfig({
   server: {
     port: 3000,
   },
-  test: {
-    setupFiles: './src/setupTests.ts', // Equivalent to Jest's setup file
-    globals: true,
-    environment: 'jsdom',
+  build: {
+    outDir: './build',
   },
+  base: '', // relative paths
 });
