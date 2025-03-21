@@ -46,7 +46,7 @@ function DialogLocation({ sdk }) {
   useEffect(() => {
     const fetchAssets = async () => {
       const response = await fetch(
-        `/dam_api_response.json?api_key=${apiKey}&project_id=${projectId}`
+        `./dam_api_response.json?api_key=${apiKey}&project_id=${projectId}`
       );
       return response.json();
     };
