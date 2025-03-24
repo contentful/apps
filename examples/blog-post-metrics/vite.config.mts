@@ -15,6 +15,9 @@ export default defineConfig({
     port: 3000,
     strictPort: true,
   },
+  build: {
+    outDir: 'build',
+  },
   test: {
     globals: true, // Enables Jest-like global test functions (test, expect)
     environment: 'jsdom', // Simulates a browser for component tests
