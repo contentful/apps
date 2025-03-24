@@ -42,7 +42,7 @@ function DialogLocation({ sdk }) {
   useEffect(async () => {
     const fetchProducts = async () => {
       const response = await fetch(
-        `/ecommerce_api_response.json?api_key=${apiKey}&project_id=${projectId}`
+        `./ecommerce_api_response.json?api_key=${apiKey}&project_id=${projectId}`
       );
       return response.json();
     };
@@ -74,7 +74,7 @@ async function fetchProductPreviews(skus, parameters) {
   const projectId = parameters.projectId;
 
   const response = await fetch(
-    `/ecommerce_api_response.json?api_key=${apiKey}&project_id=${projectId}`
+    `./ecommerce_api_response.json?api_key=${apiKey}&project_id=${projectId}`
   );
   const products = await response.json();
   return products.filter((product) => skus.includes(product.sku));

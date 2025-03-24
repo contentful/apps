@@ -4,9 +4,10 @@ This app demonstrates how to share a state between two locations, in this case t
 
 The state contains just a timestamp. Both Sidebar and Dialog contain a button "SET TIME" that updates the timestamp.
 
-### Cannot truly whare state between Contentful App locations
+### Cannot truly share state between Contentful App locations
 
 The first important thing to note is that it is NOT really possible to truly share a React state between two app locations. In a standard React application, this could be achieved by:
+
 - wrapping both components with a Provider that creates a state + a dispatcher by invoking the useReducer hook
 - retrieving the state and the dispatcher inside both components by invoking the hook created by the Provider
 
@@ -16,7 +17,7 @@ However, Contentful Apps run inside distinct iframes; this means that, in the se
 
 Since [sdk.dialogs.openCurrentApp](https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/#open-the-current-app-in-a-dialog) allows only to pass string parameters (this is actually a limitation due to the underlying [postMessage API](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage)), the Sidebar state must be serialized with JSON.stringify().
 
-The Dialog receives the serialized Sidebar state, istantiates its own state with a useReducer hook and fills it immediately by deserializing the Sidebar state with JSON.parse() inside a useEffect.
+The Dialog receives the serialized Sidebar state, instantiates its own state with a useReducer hook and fills it immediately by deserializing the Sidebar state with JSON.parse() inside a useEffect.
 
 The Dialog operates then as desired, modifying its state normally through its React dispatcher.
 
