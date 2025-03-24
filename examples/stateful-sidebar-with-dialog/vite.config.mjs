@@ -15,4 +15,5 @@ export default defineConfig({
     environment: 'happy-dom',
     setupFiles: './test/vite.setup.ts',
   },
+  base: '', // relative paths
 });
