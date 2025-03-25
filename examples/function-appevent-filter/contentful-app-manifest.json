@@ -1,0 +1,13 @@
+{
+  "functions": [
+    {
+      "id": "appeventFilterExample",
+      "name": "Example App Event Filter Function",
+      "description": "This is an example to help you learn how App Event filter functions work; this function filters entry publish events based on the sentiment of the entry's description field.",
+      "path": "functions/appevent-filter-example.js",
+      "entryFile": "functions/appevent-filter-example.ts",
+      "allowNetworks": [],
+      "accepts": ["appevent.filter"]
+    }
+  ]
+}
