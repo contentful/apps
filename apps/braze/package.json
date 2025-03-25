@@ -21,7 +21,7 @@
     "start": "vite",
     "build": "tsc && vite build",
     "test": "vitest",
-    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "create-app-definition": "contentful-app-scripts create-app-definition"
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.19.1",
