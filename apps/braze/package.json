@@ -34,7 +34,7 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "@vitejs/plugin-react": "4.2.1",
     "typescript": "5.1.6",
-    "vite": "4.5.5",
+    "vite": "4.5.10",
     "vitest": "0.32.4"
   }
 }
