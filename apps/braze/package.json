@@ -21,7 +21,8 @@
     "start": "vite",
     "build": "tsc && vite build",
     "test": "vitest",
-    "create-app-definition": "contentful-app-scripts create-app-definition"
+    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id gWLhC7MnK2rgcvifgE4do --token ${CONTENTFUL_CMA_TOKEN}"
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.19.1",
