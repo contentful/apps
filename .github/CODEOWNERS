@@ -2,6 +2,13 @@
 
 * @contentful/team-marketplace
 
+# team tundra co-owns examples and function examples
+
+examples @contentful/team-tundra
+function-examples @contentful/team-tundra
+
+# team fusion co-owns delivery function examples
+
 examples/function-mock-shop @contentful/team-fusion
 examples/function-potterdb @contentful/team-fusion
 examples/function-potterdb-rest-api @contentful/team-fusion

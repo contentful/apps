@@ -1,27 +1,28 @@
-# App Event Filter Function Example
+# App Event Handler Function Example
 
-App event filter functions enable you to decide which events your app should process by inspecting event payloads before they reach your main logic. This example demonstrates how you can use a function to filter entry publish events based on the sentiment of the entry's description field.
+App event handler functions enable you to react to events in your Contentful space by executing custom code when specific events occur. This template provides a starting point with skeleton code—you must add your custom handling logic to meet your specific use case.
 
-## What is an App Event Filter Function?
+## What is an App Event Handler Function?
 
-App event filter functions give you fine-grained control over event processing by letting you analyze the event content before deciding whether to process it.
+Unlike filter functions that determine whether to process events, handlers actually perform actions in response to events.
 
-Common use cases for filtering events include:
+Common use cases for handling events include:
 
-- Only processing events from specific content types
-- Filtering based on field values or metadata
-- Reducing event processing load by filtering out unnecessary events
+- Sending notifications to external systems
+- Synchronizing content with third-party services
+- Creating audit logs or analytics
+- Triggering external workflows
 
 ## Getting Started
 
-This example app demonstrates how to use a filter function to filter entry publish events based on the sentiment of a description field on the entry. If an entry has positive content in the description field, the function will evaluate to `true` and the event will be sent through. If an entry has negative content in the description field, the function will evaluate to `false` and the event will not be sent through.
+This example app demonstrates a scenario where a developer wants to subscribe to all events on entry entities and send those events to both an external audit log service and an external analytics service. Previously, a developer would have needed to create, build, and maintain their own backend service to do this logic. App functions now allow developers to upload serverless functions that run on Contentful's infrastructure to respond to events. The logic in the function accepts incoming entry events, creates a payload for the audit log and analytics services, and sends these events to those external services.
 
 ### 1. Install the Example App
 
 Use this command below to install the example:
 
 ```bash
-npx create-contentful-app@latest --example function-appevent-filter
+npx create-contentful-app@latest --example function-appevent-handler
 ```
 
 ### 2. Connect to an App Definition
@@ -53,7 +54,7 @@ If you haven't already created an app definition in Contentful, choose one of th
   4. No **app parameters** are needed for this app.
   5. The next steps will lead you through the process of providing a Contentful access token to the application and specifying the organization to which the application should be assigned.
      - This will automatically create a `.env` file with these fields for you
-  6. Proceed to [Examine the Filter Function Code](#4-examine-the-filter-function-code)
+  6. Proceed to [Examine the Handler Function Code](#4-examine-the-handler-function-code)
 
 ### 3. Set Up Your Environment
 
@@ -69,11 +70,11 @@ These variables authenticate your function with Contentful and link it to your a
 
 > **Note**: You can generate an access token from your Space Settings menu. For the other values, you can find them in your Contentful organization and app settings.
 
-### 4. Examine the Filter Function Code
+### 4. Examine the Handler Function Code
 
-Open `functions/appevent-filter-example.ts` to see how this function will filter events.
+Open `functions/appevent-handler-example.ts` to see how this function will handle events. The function accepts incoming entry events, creates a payload for the audit log and analytics services, and sends these events to those external services.
 
-The function uses a package called `sentiment` to analyze the content of a description field on an entry. If the sentiment score is zero or above, then the function will return true and the event will continue. If it is below zero, then the function will return false and the event will be discarded.
+**NOTE:** At the top of the function, you will see two variables `auditLogUrl` and `analyticsUrl` that will need to be updated with actual URLs in order for this example to work. We recommend to use [webhook.site](https://webhook.site/) to create these URLs and then be able to inspect the sent events. Update the file with your URLs and save the file before continuing.
 
 ### 5. Build and Upload Your Function
 
@@ -93,9 +94,7 @@ The build step is essential since the upload process relies on the compiled code
 
 ### 6. Link Your Function to an Event Subscription
 
-To activate your function, you need to subscribe it to specific events. Before setting up your app event subscription, you will need a URL endpoint for the event target. For local testing, we recommend to use [webhook.site](https://webhook.site/) to inspect the sent events.
-
-There are a few ways to do this:
+To activate your function, you need to subscribe it to specific events. There are a few ways to do this:
 
 #### Run the Provided Script
 
@@ -105,7 +104,7 @@ This example app comes with a script that creates an app event subscription usin
 npm run create-app-event
 ```
 
-This will create an app event subscription with the target URL you specified, the filter function you uploaded to your app, and a subscription to the entry publish event.
+This will create an app event subscription with your handler function as the target and a subscription to all entry topics.
 
 #### Via the Contentful Web App
 
@@ -114,9 +113,8 @@ This will create an app event subscription with the target URL you specified, th
 3. Select the option to "Enable events"
 4. Create an event subscription
 
-- For the "Target", select "Target a URL" and paste the generated URL from `webhook.site` into the "Target a URL" input field.
-- In the "Filter Function" section, this is where you select your uploaded filter function. When this is selected, all events will be processed by this filter function. Any events that return false will be discarded and will not continue to the target. Only events returning true will continue to the target.
-- For the "Topics", select the Entry Publish event
+- For the "Target", select "Target a function" and select your uploaded function.
+- For the "Topics", select all Entry topics.
 
 ### 7. Install the App
 
@@ -124,7 +122,7 @@ Next, you will need to install the app into a space. Run this script `npm run in
 
 ### 8. Create a Content Type and Publish an Entry
 
-The final step is to create a content type that has a description field for the filter function to run a sentiment analysis on, and to create and publish entries. The easiest way to do this is to use the provided script. Before using the script, ensure that you have created a `.env` file with all of the environment variables listed in the `.env.example` file. Ensure that the space and environment you add to your environment variables match where you have installed the app.
+The final step is to trigger entry events that will be sent to the app event handler function. This example app includes a script to do this. Before using the script, ensure that you have created a `.env` file with all of the environment variables listed in the `.env.example` file. Ensure that the space and environment you add to your environment variables match where you have installed the app. The script will use a content type from your `.env` if provided, or will create a new one. Then it will create an entry for that content type and will publish this entry.
 
 Then run:
 
@@ -132,11 +130,13 @@ Then run:
 npm run create-content-type-publish-entries
 ```
 
-This script uses the CMA JavaScript SDK to create a content type, publish the content type, create two entries (one positive and one negative), and publish those two entries.
+This script uses the CMA JavaScript SDK to create a content type (if no content type id is provided) and create an entry. This will trigger two events that your app is subscribed to: `Entry.create` and `Entry.publish`. After running the script, you should see that two events were sent to both your audit log URL and your analytics URL, each with their appropriate payload.
+
+You can also trigger entry events from the Contentful web app.
 
 ### 9. Inspect the sent events and function logs
 
-After running the script, you can inspect the sent events and function logs to see that the filter function worked correctly. You should have only received one event to your URL endpoint for when the positive entry published. Navigate to your app definition (run `npm run open-settings`), click on the "Functions" tab, then the menu next to your function, and click "View Logs". Select your space and environment to see the logs for your function. You should see two logs, one for each published entry. Clicking on each log will show the sentiment score for each entry; the positive one will have a positive score and the negative one will have a negative score (which is why that event was filtered and not sent).
+After running the script, you can inspect the sent events and function logs to see that the handler function worked correctly. If you ran the script, you should see two events were sent to both your audit log URL and your analytics URL. Navigate to your app definition (run `npm run open-settings`), click on the "Functions" tab, then the menu next to your function, and click "View Logs". Select your space and environment to see the logs for your function. You should see two logs, one for `Entry.create` and one for `Entry.publish`. Clicking on each log will show the the logs from the function.
 
 ## Additional Resources
 
