@@ -1,12 +1,12 @@
 {
   "functions": [
     {
-      "id": "example",
+      "id": "appeventHandlerExample",
       "name": "Example App Event Handler Function",
       "description": "This is an example to help you learn how App Event handler functions work.",
-      "path": "functions/example.js",
-      "entryFile": "functions/example.js",
-      "allowNetworks": ["FakeAuditLogServer.com", "FakeAnalyticsServer.com"],
+      "path": "functions/appevent-handler-example.js",
+      "entryFile": "functions/appevent-handler-example.ts",
+      "allowNetworks": ["webhook.site"],
       "accepts": ["appevent.handler"]
     }
   ]
