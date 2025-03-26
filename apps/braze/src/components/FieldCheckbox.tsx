@@ -135,12 +135,19 @@ const CheckboxContainer = (props: {
         borderRadius: tokens.borderRadiusSmall,
       })}
       justifyContent="space-between"
+      alignItems="center"
       margin="spacingXs"
-      padding="spacingXs">
+      paddingLeft="spacingXs"
+      paddingRight="spacingXs"
+      paddingTop="spacing2Xs"
+      paddingBottom="spacing2Xs">
       <Checkbox id={field.uniqueId()} isChecked={field.selected} onChange={handleToggle}>
         <Text fontWeight="fontWeightDemiBold">{field.displayName()}</Text>
       </Checkbox>
       <IconButton
+        className={css({
+          minHeight: '0',
+        })}
         icon={show ? <ChevronUpIcon /> : <ChevronDownIcon />}
         aria-label="Down arrow"
         variant="transparent"
