@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@contentful/app-scripts": "2.3.1",
-    "@testing-library/react": "14.0.0",
+    "@testing-library/react": "16.2.0",
     "@types/contentful-resolve-response": "^0.1.33",
     "@types/node": "16.18.38",
     "@types/react": "18.3.1",
