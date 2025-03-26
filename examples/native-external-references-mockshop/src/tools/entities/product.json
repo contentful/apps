@@ -1,0 +1,12 @@
+{
+  "sys": { "id": "MockShop:Product" },
+  "name": "Product",
+  "defaultFieldMapping": {
+    "title": "{ /title }",
+    "subtitle": "Product ID: { /id }",
+    "image": {
+      "url": "{ /featuredImage/url }",
+      "altText": "{ /featuredImage/altText }"
+    }
+  }
+}

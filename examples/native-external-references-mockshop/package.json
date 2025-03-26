@@ -1,0 +1,31 @@
+{
+  "name": "native-external-references-mockshop",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "npm run build:functions",
+    "build:functions": "contentful-app-scripts build-functions --ci",
+    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "add-locations": "contentful-app-scripts add-locations",
+    "upload": "contentful-app-scripts upload --bundle-dir ./build",
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
+    "open-settings": "contentful-app-scripts open-settings",
+    "create-resource-entities": "tsx -r dotenv/config ./src/tools/create-resource-entities.ts",
+    "show-resource-entities": "tsx -r dotenv/config ./src/tools/show-resource-entities.ts",
+    "delete-resource-entities": "tsx -r dotenv/config ./src/tools/delete-resource-entities.ts",
+    "install-app": "contentful-app-scripts install",
+    "prettier": "prettier --write functions, src"
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "^2.3.0",
+    "@tsconfig/recommended": "^1.0.8",
+    "@types/node": "^16.18.126",
+    "contentful-management": "^11.48.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "homepage": ".",
+  "dependencies": {
+    "@contentful/node-apps-toolkit": "^3.12.0"
+  }
+}

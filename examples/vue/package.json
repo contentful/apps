@@ -9,6 +9,7 @@
     "typecheck": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "create-app-definition": "contentful-app-scripts create-app-definition",
+    "add-locations": "contentful-app-scripts add-locations",
     "upload": "contentful-app-scripts upload --bundle-dir ./dist",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
   },
@@ -18,7 +19,7 @@
   },
   "devDependencies": {
     "@babel/types": "7.22.5",
-    "@contentful/app-scripts": "1.15.0",
+    "@contentful/app-scripts": "^2.3.0",
     "@rushstack/eslint-patch": "1.3.2",
     "@types/jsdom": "21.1.1",
     "@types/node": "16.18.38",

@@ -1,0 +1,28 @@
+{
+  "functions": [
+    {
+      "id": "kitchenSink",
+      "name": "Kitchen Sink Function Template",
+      "description": "Template supporting multiple function types: app actions, event handlers, filters, and transformations. Customize by keeping only what you need.",
+      "path": "functions/kitchen-sink-template.js",
+      "entryFile": "functions/kitchen-sink-template.ts",
+      "allowNetworks": [],
+      "accepts": [
+        "appaction.call",
+        "appevent.handler",
+        "appevent.filter",
+        "appevent.transformation"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "exampleAction",
+      "name": "Example Action",
+      "type": "function-invocation",
+      "functionId": "kitchenSink",
+      "category": "Custom",
+      "parameters": []
+    }
+  ]
+}

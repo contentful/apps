@@ -82,11 +82,9 @@ This template contains a workflow you can use to automatically deploy your app t
 - `app-definition-id` (_required_): The id of the app definition.
 - `access-token` (_required_): A personal access token for the Content Management API. Should be stored as a secret in your GitHub repository (`Settings` -> `Secrets` -> `Actions`).
 
-You can set these parameters in your repository's settings under `Settings` -> `Secrets` -> `Actions` (use the `Repository ecrets` section).
+You can set these parameters in your repository's settings under `Settings` -> `Secrets` -> `Actions` (use the `Repository secrets` section).
 For more information about the Github Actions workflow, check out the [Github Actions documentation](https://docs.github.com/en/actions) or the [Github Actions for Contentful Apps documentation](https://github.com/contentful/actions-app-deploy).
 
 ## Learn More
 
 [Read more](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/) and check out the video on how to use the CLI.
-
-Create Contentful App uses [Create React App](https://create-react-app.dev/). You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started) and how to further customize your app.

@@ -1,3 +1,4 @@
+import React from 'react';
 import { init, KnownAppSDK } from '@contentful/app-sdk';
 import { GlobalStyles } from '@contentful/f36-components';
 import { createRoot } from 'react-dom/client';

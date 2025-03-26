@@ -1,0 +1,65 @@
+import { lookupHandler } from './lookupHandler';
+import * as helpers from './helpers';
+import {
+  context,
+  createTmdbLookupResponse,
+  testLookupEvent
+} from '../test/mocks';
+import { vi, MockInstance, describe, beforeEach, it, expect } from 'vitest';
+
+describe('Lookup handler', () => {
+  let mockApi: MockInstance;
+
+  beforeEach(() => {
+    mockApi = vi.spyOn(helpers, 'fetchApi');
+  });
+
+  it('returns an empty response if TMDB does not return any results', async () => {
+    mockApi.mockImplementation(() => Promise.resolve(undefined));
+
+    const response = await lookupHandler(testLookupEvent, context);
+    expect(response).toEqual({ items: [], pages: {} });
+  });
+
+  it('returns an empty response if one of TMDB requests fails', async () => {
+    mockApi.mockImplementation(() =>
+      Promise.resolve(createTmdbLookupResponse())
+    );
+    mockApi.mockImplementationOnce(() => Promise.resolve(undefined));
+
+    const response = await lookupHandler(testLookupEvent, context);
+
+    expect(response).toEqual({ items: [], pages: {} });
+  });
+
+  it('returns a response with populated items', async () => {
+    mockApi.mockImplementationOnce(() =>
+      Promise.resolve(
+        createTmdbLookupResponse(Number(testLookupEvent.lookupBy.urns[0]))
+      )
+    );
+    mockApi.mockImplementationOnce(() =>
+      Promise.resolve(
+        createTmdbLookupResponse(Number(testLookupEvent.lookupBy.urns[1]))
+      )
+    );
+
+    const response = await lookupHandler(testLookupEvent, context);
+
+    expect(response).toHaveProperty('items');
+    expect(response.items).toEqual([
+      {
+        urn: '15',
+        name: 'John Doe',
+        externalUrl: 'https://www.themoviedb.org/person/15',
+        image: { url: 'https://image.tmdb.org/t/p/w200/profile15.jpg' }
+      },
+      {
+        urn: '22',
+        name: 'John Doe',
+        externalUrl: 'https://www.themoviedb.org/person/22',
+        image: { url: 'https://image.tmdb.org/t/p/w200/profile22.jpg' }
+      }
+    ]);
+  });
+});

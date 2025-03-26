@@ -1,0 +1,18 @@
+{
+  "functions": [
+    {
+      "id": "MockShopTutorial",
+      "name": "MockShopTutorial",
+      "description": "In this tutorial, you will learn how to create a function that fetches data from a mock shop API.",
+      "path": "functions/mockShop.js",
+      "entryFile": "functions/mockShop.ts",
+      "allowNetworks": ["https://mock.shop/api"],
+      "accepts": [
+        "graphql.resourcetype.mapping",
+        "graphql.query",
+        "resources.lookup",
+        "resources.search"
+      ]
+    }
+  ]
+}

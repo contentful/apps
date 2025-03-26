@@ -1,9 +1,9 @@
 {
-  "extends": "@tsconfig/create-react-app/tsconfig.json",
   "compilerOptions": {
     "target": "es5",
     "moduleResolution": "node",
     "lib": ["dom", "dom.iterable", "esnext"],
+    "esModuleInterop": true,
     "jsx": "react"
   },
   "include": ["src"],

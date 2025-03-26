@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client';
 
 import { GlobalStyles } from '@contentful/f36-components';
 import { SDKProvider } from '@contentful/react-apps-toolkit';
-import StateAndDispatchProvider from './model/reducerAndInitialSidebarState';
 
 import LocalhostWarning from './components/LocalhostWarning';
 import App from './App';

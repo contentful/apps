@@ -3,6 +3,6 @@
     "build": "contentful-app-scripts build-functions --ci"
   },
   "devDependencies": {
-    "@contentful/app-scripts": "^1.32.0"
+    "@contentful/app-scripts": "^2.3.0"
   }
 }

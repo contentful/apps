@@ -1,11 +1,21 @@
-# team tundra owns all code in this repository by default
+# team marketplace owns all code in this repository by default
 
-* @contentful/team-tundra
+* @contentful/team-marketplace
 
-examples/function-mock-shop @contentful/team-monet
-examples/function-potterdb @contentful/team-monet
-examples/function-potterdb-rest-api @contentful/team-monet
-examples/function-templates @contentful/team-monet
+# team tundra co-owns examples and function examples
+
+examples @contentful/team-tundra
+function-examples @contentful/team-tundra
+
+# team fusion co-owns delivery function examples
+
+examples/function-mock-shop @contentful/team-fusion
+examples/function-potterdb @contentful/team-fusion
+examples/function-potterdb-rest-api @contentful/team-fusion
+examples/function-templates @contentful/team-fusion
+examples/native-external-references-mockshop @contentful/team-fusion
+examples/native-external-references-tmdb @contentful/team-fusion
+function-examples/external-references @contentful/team-fusion
 
 # package.json and package-lock.json should be unowned so that dependabot can automatically update dependencies
 

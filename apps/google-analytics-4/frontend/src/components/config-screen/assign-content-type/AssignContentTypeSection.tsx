@@ -12,7 +12,7 @@ import {
 } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { ContentTypeProps, createClient } from 'contentful-management';
-import { AppExtensionSDK, EditorInterface } from '@contentful/app-sdk';
+import { KnownAppSDK, EditorInterface } from '@contentful/app-sdk';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import {
@@ -59,7 +59,7 @@ const AssignContentTypeSection = (props: Props) => {
   );
   const [loadingAllContentTypes, setLoadingAllContentTypes] = useState<boolean>(true);
 
-  const sdk = useSDK<AppExtensionSDK>();
+  const sdk = useSDK<KnownAppSDK>();
 
   useEffect(() => {
     setLoadingContentTypes(true);
@@ -76,16 +76,34 @@ const AssignContentTypeSection = (props: Props) => {
     );
   }, [contentTypes]);
 
+  const fetchAllContentTypes = async (sdk: KnownAppSDK): Promise<ContentTypeProps[]> => {
+    const cma = createClient({ apiAdapter: sdk.cmaAdapter });
+    const space = await cma.getSpace(sdk.ids.space);
+    const environment = await space.getEnvironment(sdk.ids.environment);
+
+    let allContentTypes: ContentTypeProps[] = [];
+    let skip = 0;
+    const limit = 100;
+    let areMoreContentTypes = true;
+
+    while (areMoreContentTypes) {
+      const response = await environment.getContentTypes({ skip, limit });
+      if (response.items) {
+        allContentTypes = allContentTypes.concat(response.items as ContentTypeProps[]);
+        areMoreContentTypes = response.items.length === limit;
+      } else {
+        areMoreContentTypes = false;
+      }
+      skip += limit;
+    }
+
+    return allContentTypes;
+  };
+
   useEffect(() => {
     const getAllContentTypes = async () => {
-      const cma = createClient({ apiAdapter: sdk.cmaAdapter });
-      const space = await cma.getSpace(sdk.ids.space);
-      const environment = await space.getEnvironment(sdk.ids.environment);
-      const contentTypes = await environment.getContentTypes();
-
-      const formattedContentTypes = sortAndFormatAllContentTypes(
-        contentTypes.items as ContentTypeProps[]
-      );
+      const allContentTypes = await fetchAllContentTypes(sdk);
+      const formattedContentTypes = sortAndFormatAllContentTypes(allContentTypes);
 
       setAllContentTypes(formattedContentTypes);
       setAllContentTypeEntries(Object.entries(formattedContentTypes));

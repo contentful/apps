@@ -51,6 +51,11 @@ npm run upload
 
 The interactive CLI will prompt you to provide additional details, such as a CMA endpoint URL. Select **Yes** when prompted if you’d like to activate the bundle after upload.
 
+### Adding locations to an app
+
+You can add locations to an existing app using the CLI command `npm run add-locations`. This will launch an interactive prompt, allowing you to select locations to add to your app.
+You can also add locations to an app definition by [visiting the apps section](https://app.contentful.com/deeplink?link=app-definition-list) under your organization settings in the Contentful web UI and clicking on the **"Edit"** flyout button for your app and selecting locations on the **"General"** tab.
+
 ### Create an App Action
 
 You can create an app action by navigating to the app definition in the Contentful web UI and following [these instructions](https://www.contentful.com/developers/docs/extensibility/app-framework/app-actions/#create-an-app-action), ensuring that you select `function-invocation` for the type and choosing your uploaded function.

@@ -4,27 +4,30 @@ This project is an example of a Contentful App Event Function that reacts to com
 
 ## Table of Contents
 
-- [Getting Started](#getting-started)
-  - [Building your Function](#building-your-function)
-  - [Creating an App](#creating-an-app)
-  - [Using Environment Variables](#using-environment-variables)
-  - [Uploading the Code to Contentful](#uploading-the-code-to-contentful)
-- [Utilizing App Event Handler Functions](#utilizing-app-event-handler-functions)
-- [Usage of this App](#usage-of-this-app)
-  - [Adding New Bot Actions](#adding-new-bot-actions)
+- [App Event Function Example: Comment Bot](#app-event-function-example-comment-bot)
+  - [Table of Contents](#table-of-contents)
+  - [Getting Started](#getting-started)
+    - [Building your Function](#building-your-function)
+    - [Creating an App](#creating-an-app)
+    - [Using Environment Variables](#using-environment-variables)
+    - [Uploading the Code to Contentful](#uploading-the-code-to-contentful)
+  - [Utilizing app event handler functions](#utilizing-app-event-handler-functions)
+  - [Usage of this App](#usage-of-this-app)
+    - [Adding New Bot Actions](#adding-new-bot-actions)
 
 ## Getting Started
 
 ### Building your Function
 
 Use the command below to install this template:
+
 ```shell
-npx create-contentful-app@latest –function comment-bot
+npx create-contentful-app@latest --example function-comment-bot
 ```
 
 ### Creating an App
 
-You can create an app using CLI with `npm run create-app-definition`. This will prompt you to enter details for your new app and organization details. You can also create an app definition by [visiting the apps section](https://app.contentful.com/deeplink?link=app-definition-list) under your organization settings in the Contentful web UI and clicking on the "Create App" button on the top right.
+You can create an app using the CLI command `npm run create-app-definition`. This will prompt you to enter details for your new app and organization details. You can also create an app definition by [visiting the apps section](https://app.contentful.com/deeplink?link=app-definition-list) under your organization settings in the Contentful web UI and clicking on the "Create App" button on the top right.
 
 ### Using Environment Variables
 
@@ -37,6 +40,11 @@ You will need to set the following environment variables as listed below:
 ### Uploading the Code to Contentful
 
 When using functions, you don't need to worry about hosting your own code. Contentful handles everything, and you just need to use the CLI command `npm run upload`, or, if you have configured the [environment variables](#using-environment-variables) for your project, `npm run upload-ci`. This will perform several actions: uploading the code, linking it to the app, and finally activating the code, making it ready for usage.
+
+### Adding locations to an app
+
+You can add locations to an existing app using the CLI command `npm run add-locations`. This will launch an interactive prompt, allowing you to select locations to add to your app.
+You can also add locations to an app definition by [visiting the apps section](https://app.contentful.com/deeplink?link=app-definition-list) under your organization settings in the Contentful web UI and clicking on the **"Edit"** flyout button for your app and selecting locations on the **"General"** tab.
 
 ## Utilizing app event handler functions
 
@@ -53,7 +61,7 @@ This app contains a comment bot, a Contentful Function that is triggered by comm
 Supported commands out of the box:
 
 - `/show-publish`: Adds the publication widget to the entry’s sidebar.
--	`/hide-publish`: Removes the publication widget from the entry’s sidebar.
+- `/hide-publish`: Removes the publication widget from the entry’s sidebar.
 
 More commands can be added by introducing new actions to the project.
 
@@ -62,10 +70,11 @@ More commands can be added by introducing new actions to the project.
 To add a new action:
 
 1. Create a New Bot Action File: In the [bot-actions](./bot-actions/) directory, create a new file (e.g., yourAction.ts).
-2. Implement the `BotAction` Interface: Ensure the new bot action implements the `BotAction` interface defined in the [types](types.ts). If you'd like you can also extend the `BotActionBase` class to gain access to common shared functionality. 
+2. Implement the `BotAction` Interface: Ensure the new bot action implements the `BotAction` interface defined in the [types](types.ts). If you'd like you can also extend the `BotActionBase` class to gain access to common shared functionality.
+
 ```typescript
-import { BotActionBase } from "./bot-action-base";
-import type { BotAction, BotActionParams } from "../types";
+import { BotActionBase } from './bot-action-base';
+import type { BotAction, BotActionParams } from '../types';
 
 export class YourAction extends BotActionBase implements BotAction {
   async execute(params: BotActionParams): Promise<void> {
@@ -75,12 +84,14 @@ export class YourAction extends BotActionBase implements BotAction {
 ```
 
 3. Register the Action: Add the new action to the [bot-action-registry.ts](./bot-actions/bot-action-registry.ts) file.
+
 ```typescript
-import { YourAction } from "./yourAction";
+import { YourAction } from './yourAction';
 
 const actionRegistry: { [key: string]: BotAction } = {
-  "/your-command": new YourAction(),
+  '/your-command': new YourAction(),
   // Other actions...
 };
 ```
+
 4. Test Your Action: Make a comment on a Contentful entry with your new command, and observe the bot in action.

@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "build": "contentful-app-scripts build-functions --ci",
+    "upsert-actions": "contentful-app-scripts upsert-actions --ci --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "^2.3.0",
+    "@contentful/node-apps-toolkit": "^3.11.1",
+    "@tsconfig/recommended": "1.0.8"
+  }
+}
