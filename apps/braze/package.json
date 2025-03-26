@@ -9,7 +9,7 @@
     "@contentful/f36-tokens": "4.0.2",
     "@contentful/react-apps-toolkit": "1.2.16",
     "@testing-library/user-event": "^14.6.1",
-    "contentful-management": "10.46.4",
+    "contentful-management": "11.48.3",
     "contentful-resolve-response": "^1.9.2",
     "emotion": "10.0.27",
     "happy-dom": "^17.4.4",
