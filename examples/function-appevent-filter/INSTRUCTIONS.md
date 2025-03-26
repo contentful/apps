@@ -53,7 +53,7 @@ If you haven't already created an app definition in Contentful, choose one of th
   4. No **app parameters** are needed for this app.
   5. The next steps will lead you through the process of providing a Contentful access token to the application and specifying the organization to which the application should be assigned.
      - This will automatically create a `.env` file with these fields for you
-  6. Proceed to [Customize the Filter Function](#4-examine-the-filter-function-code)
+  6. Proceed to [Examine the Filter Function Code](#4-examine-the-filter-function-code)
 
 ### 3. Set Up Your Environment
 

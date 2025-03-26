@@ -1,7 +1,7 @@
 import { FunctionEventHandler } from '@contentful/node-apps-toolkit';
 import {
   FunctionTypeEnum,
-  EntryCreateEventPayload,
+  EntryPublishEventPayload,
 } from '@contentful/node-apps-toolkit/lib/requests/typings';
 
 // Import and instantiate a sentiment analysis library
@@ -13,7 +13,7 @@ const sentiment = new Sentiment();
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventFilter> = (event, context) => {
   // Since our app event subscription only reacts to Entry publish events,
   // we can safely assume that the event body is EntryCreateEventPayload
-  const { body } = event as { body: EntryCreateEventPayload };
+  const { body } = event as { body: EntryPublishEventPayload };
 
   // Extract the 'description' field from the body and analyze its sentiment
   const description = body.fields.description['en-US'];
