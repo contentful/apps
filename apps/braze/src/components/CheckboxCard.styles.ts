@@ -6,7 +6,3 @@ export const checkboxCard: CSSProperties = {
   borderRadius: tokens.borderRadiusSmall,
   height: tokens.spacingXl,
 };
-
-export const iconButton: CSSProperties = {
-  minHeight: '0',
-};

@@ -12,20 +12,20 @@ interface CheckboxCardProps extends MarginProps {
   children?: React.ReactNode;
 }
 function CheckboxCard(props: CheckboxCardProps) {
-  const { id, isSelected, title, onChange, fontWeight, children, ...otherProps } = props;
+  const { id, isSelected, title, onChange, fontWeight, children, margin, ...otherProps } = props;
 
   return (
     <Flex
       style={checkboxCard}
       justifyContent="space-between"
       alignItems="center"
-      margin="spacingXs"
+      margin={margin || 'spacingXs'}
       padding="spacingXs"
       {...otherProps}>
-      <Checkbox id={props.id} isChecked={props.isSelected} onChange={props.onChange}>
-        <Text fontWeight={props.fontWeight}>{props.title}</Text>
+      <Checkbox id={id} isChecked={isSelected} onChange={onChange}>
+        <Text fontWeight={fontWeight}>{title}</Text>
       </Checkbox>
-      {props.children}
+      {children}
     </Flex>
   );
 }
