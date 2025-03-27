@@ -1,6 +1,6 @@
 # App Event Transformation Function Example
 
-App event transformation functions enable you to modify event payloads before they reach their destination by adding, removing, or changing data in the event. This template provides a starting point with skeleton code—you must add your custom transformation logic to meet your specific use case.
+App event transformation functions enable you to modify event payloads before they reach their destination by adding, removing, or changing data in the event.
 
 ## What is an App Event Transformation Function?
 
