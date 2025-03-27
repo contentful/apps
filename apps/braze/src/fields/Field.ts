@@ -48,4 +48,8 @@ export abstract class Field {
   getAllFields(): Field[] {
     return [this];
   }
+
+  isEnabled(): boolean {
+    return true;
+  }
 }
