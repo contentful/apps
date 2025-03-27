@@ -132,7 +132,7 @@ const CheckboxContainer = (props: {
       onChange={handleToggle}
       fontWeight="fontWeightDemiBold">
       <IconButton
-        style={{minHeight: '0'}}
+        style={{ minHeight: '0' }}
         icon={show ? <ChevronUpIcon /> : <ChevronDownIcon />}
         aria-label="Down arrow"
         variant="transparent"
