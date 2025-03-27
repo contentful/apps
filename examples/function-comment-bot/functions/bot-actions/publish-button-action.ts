@@ -1,4 +1,6 @@
-import { BotActionBase } from './bot-action-base';
+import { isManagementContextInvocation, BotAction, BotActionParams } from '../types';
+import type { EditorInterfaceProps } from 'contentful-management';
+import { BotActionBase, defaultEditorInterfaceSidebar } from './bot-action-base';
 
 const publicationWidget = {
   settings: {},
@@ -6,9 +8,12 @@ const publicationWidget = {
   widgetNamespace: 'sidebar-builtin',
 };
 
-export class PublishButtonAction extends BotActionBase {
-  async execute(params) {
+export class PublishButtonAction extends BotActionBase implements BotAction {
+  async execute(params: BotActionParams): Promise<void> {
     const { commentBody, context, parentEntityId } = params;
+    if (!isManagementContextInvocation(context)) {
+      throw new Error('This action requires the Contentful Management API client to be available');
+    }
     const { cma } = context;
 
     const contentType = await this.loadContentType(cma, parentEntityId);
@@ -28,16 +33,19 @@ export class PublishButtonAction extends BotActionBase {
     );
   }
 
-  showPublish(editorInterface) {
+  private showPublish(editorInterface: EditorInterfaceProps) {
     if (!editorInterface.sidebar) {
-      editorInterface.sidebar = [];
+      editorInterface.sidebar = defaultEditorInterfaceSidebar;
     }
     if (!editorInterface.sidebar.find(({ widgetId }) => widgetId === publicationWidget.widgetId)) {
       editorInterface.sidebar.unshift(publicationWidget);
     }
   }
 
-  hidePublish(editorInterface) {
+  private hidePublish(editorInterface: EditorInterfaceProps) {
+    if (!editorInterface.sidebar) {
+      editorInterface.sidebar = defaultEditorInterfaceSidebar;
+    }
     if (editorInterface.sidebar) {
       editorInterface.sidebar = editorInterface.sidebar.filter(
         ({ widgetId }) => widgetId !== publicationWidget.widgetId
