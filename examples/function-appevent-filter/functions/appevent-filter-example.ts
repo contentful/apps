@@ -12,7 +12,7 @@ const sentiment = new Sentiment();
 // we can safely assume the event is of type appevent.filter
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventFilter> = (event, context) => {
   // Since our app event subscription only reacts to Entry publish events,
-  // we can safely assume that the event body is EntryCreateEventPayload
+  // we can safely assume that the event body is EntryPublishEventPayload
   const { body } = event as { body: EntryPublishEventPayload };
 
   // Extract the 'description' field from the body and analyze its sentiment

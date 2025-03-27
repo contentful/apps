@@ -1,21 +1,22 @@
-# App Event Handler Function Example
+# App Event Transformation Function Example
 
-App event handler functions enable you to react to events in your Contentful space by executing custom code when specific events occur.
+App event transformation functions enable you to modify event payloads before they reach their destination by adding, removing, or changing data in the event.
 
-## What is an App Event Handler Function?
+## What is an App Event Transformation Function?
 
-Unlike filter functions that determine whether to process events, handlers actually perform actions in response to events.
+Unlike filter functions that determine whether to process events or handler functions that react to events, transformation functions alter the event payload itself.
 
-Common use cases for handling events include:
+Common use cases for transforming events include:
 
-- Sending notifications to external systems
-- Synchronizing content with third-party services
-- Creating audit logs or analytics
-- Triggering external workflows
+- Adding computed fields or metadata to events
+- Resolving references to include related content
+- Converting data formats
+- Enriching content with data from external services (e.g., geocoding)
+- Normalizing or standardizing field values
 
 ## Getting Started
 
-This example app demonstrates a scenario where a developer wants to subscribe to all events on entry entities and send those events to both an external audit log service and an external analytics service. Previously, a developer would have needed to create, build, and maintain their own backend service to do this logic. App functions now allow developers to upload serverless functions that run on Contentful's infrastructure to respond to events. The logic in the function accepts incoming entry events, creates a payload for the audit log and analytics services, and sends these events to those external services.
+An app event transformation function allows you to transform the payload of events before they are sent off. This example demonstrates how to use the app event transformation function to transform the payload of the `entry.publish` event, by geocoding a latitude and longitude field to a human-readable address.
 
 ### 1. Install the Example App
 
@@ -54,7 +55,7 @@ If you haven't already created an app definition in Contentful, choose one of th
   4. No **app parameters** are needed for this app.
   5. The next steps will lead you through the process of providing a Contentful access token to the application and specifying the organization to which the application should be assigned.
      - This will automatically create a `.env` file with these fields for you
-  6. Proceed to [Examine the Handler Function Code](#4-examine-the-handler-function-code)
+  6. Proceed to [Examine the Transformation Function Code](#4-examine-the-transformation-function-code)
 
 ### 3. Set Up Your Environment
 
@@ -70,11 +71,11 @@ These variables authenticate your function with Contentful and link it to your a
 
 > **Note**: You can generate an access token from your Space Settings menu. For the other values, you can find them in your Contentful organization and app settings.
 
-### 4. Examine the Handler Function Code
+### 4. Examine the Transformation Function Code
 
-Open `functions/appevent-handler-example.ts` to see how this function will handle events. The function accepts incoming entry events, creates a payload for the audit log and analytics services, and sends these events to those external services.
+Open `functions/appevent-transformation-example.ts` to see how this function will transform events.
 
-**NOTE:** At the top of the function, you will see two variables `auditLogUrl` and `analyticsUrl` that will need to be updated with actual URLs in order for this example to work. We recommend to use [webhook.site](https://webhook.site/) to create these URLs and then be able to inspect the sent events. Update the file with your URLs and save the file before continuing.
+The function accepts incoming entry publish events with a location field that has latitude and longitude coordinates as its field value. The function calls an external API ([Nominatim](https://nominatim.org/)) to get a human-readable address using those coordinates, and then adjusts the payload to include this information before sending it on to the target.
 
 ### 5. Build and Upload Your Function
 
@@ -94,7 +95,7 @@ The build step is essential since the upload process relies on the compiled code
 
 ### 6. Link Your Function to an Event Subscription
 
-To activate your function, you need to subscribe it to specific events. There are a few ways to do this:
+To activate your function, you need to subscribe it to specific events. Before setting up your app event subscription, you will need a URL endpoint for the event target. For local testing, we recommend to use [webhook.site](https://webhook.site/) to inspect the sent events.
 
 #### Run the Provided Script
 
@@ -104,7 +105,7 @@ This example app comes with a script that creates an app event subscription usin
 npm run create-app-event
 ```
 
-This will create an app event subscription with your handler function as the target and a subscription to all entry topics.
+This will create an app event subscription with the target URL you specified, the transformation function you uploaded to your app, and a subscription to the entry publish event.
 
 #### Via the Contentful Web App
 
@@ -113,8 +114,9 @@ This will create an app event subscription with your handler function as the tar
 3. Select the option to "Enable events"
 4. Create an event subscription
 
-- For the "Target", select "Target a function" and select your uploaded function.
-- For the "Topics", select all Entry topics.
+- For the "Target", select "Target a URL" and paste the generated URL from `webhook.site` into the "Target a URL" input field.
+- In the "Transformation Function" section, this is where you select your uploaded transformation function. When this is selected, all events will be processed by this transformation function.
+- For the "Topics", select the Entry Publish event
 
 ### 7. Install the App
 
@@ -122,7 +124,7 @@ Next, you will need to install the app into a space. Run this script `npm run in
 
 ### 8. Create a Content Type and Publish an Entry
 
-The final step is to trigger entry events that will be sent to the app event handler function. This example app includes a script to do this. Before using the script, ensure that you have created a `.env` file with all of the environment variables listed in the `.env.example` file. Ensure that the space and environment you add to your environment variables match where you have installed the app. The script will use a content type from your `.env` if provided, or will create a new one. Then it will create an entry for that content type and will publish this entry.
+The final step is to create a content type that has a location field for the transformation function to run the geocoding on, and to create and publish entries. The easiest way to do this is to use the provided script. Before using the script, ensure that you have created a `.env` file with all of the environment variables listed in the `.env.example` file. Ensure that the space and environment you add to your environment variables match where you have installed the app.
 
 Then run:
 
@@ -130,13 +132,11 @@ Then run:
 npm run create-content-type-publish-entries
 ```
 
-This script uses the CMA JavaScript SDK to create a content type (if no content type id is provided) and create an entry. This will trigger two events that your app is subscribed to: `Entry.create` and `Entry.publish`. After running the script, you should see that two events were sent to both your audit log URL and your analytics URL, each with their appropriate payload.
-
-You can also trigger entry events from the Contentful web app.
+This script uses the CMA JavaScript SDK to create a content type, publish the content type, create an entry, and publish the entry.
 
 ### 9. Inspect the sent events and function logs
 
-After running the script, you can inspect the sent events and function logs to see that the handler function worked correctly. If you ran the script, you should see two events were sent to both your audit log URL and your analytics URL. Navigate to your app definition (run `npm run open-settings`), click on the "Functions" tab, then the menu next to your function, and click "View Logs". Select your space and environment to see the logs for your function. You should see two logs, one for `Entry.create` and one for `Entry.publish`. Clicking on each log will show the the logs from the function.
+After running the script, you can inspect the sent events and function logs to see that the transformation function worked correctly. You should have only received one event to your URL endpoint for when the entry was published. In the event payload, you should see the added address information and `X-Is-Geocoded` header. Navigate to your app definition (run `npm run open-settings`), click on the "Functions" tab, then the menu next to your function, and click "View Logs". Select your space and environment to see the logs for your function. You should see one log, processing the event and transforming the event payload.
 
 ## Additional Resources
 

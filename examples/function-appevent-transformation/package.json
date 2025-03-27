@@ -1,0 +1,27 @@
+{
+  "name": "function-appevent-transformation",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "npm run build:functions",
+    "build:functions": "contentful-app-scripts build-functions --ci",
+    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "add-locations": "contentful-app-scripts add-locations",
+    "upload": "contentful-app-scripts upload --bundle-dir ./build",
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
+    "open-settings": "contentful-app-scripts open-settings",
+    "install-app": "contentful-app-scripts install",
+    "create-app-event": "tsx -r dotenv/config ./src/tools/create-app-event.ts",
+    "create-content-type-publish-entries": "tsx -r dotenv/config ./src/tools/create-content-type-publish-entries.ts"
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "^2.3.0",
+    "@contentful/node-apps-toolkit": "^3.12.0",
+    "@tsconfig/recommended": "1.0.8",
+    "@types/node": "^16.18.126",
+    "@types/sentiment": "^5.0.4",
+    "contentful-management": "^11.48.3",
+    "sentiment": "^5.0.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}
