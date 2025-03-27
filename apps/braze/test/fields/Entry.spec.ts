@@ -33,7 +33,12 @@ describe('Entry', () => {
       :body {{body}}
       :content_type application/json
       :save response
-  %}`);
+      :retry
+%}
+
+{% if response.__http_status_code__ != 200 %}
+  {% abort_message('Could not connect to Contentful') %}
+{% endif %}`);
 
     expect(removeIndentation(result)).toEqual(expected);
   });
