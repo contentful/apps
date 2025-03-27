@@ -7,10 +7,18 @@ export class RichTextField extends Field {
   }
 
   generateQuery(): string {
-    return '';
+    throw new Error('Rich text not supported');
   }
 
   generateLiquidTagForType(template: string): string[] {
-    return [];
+    throw new Error('Rich text not supported');
+  }
+
+  isEnabled(): boolean {
+    return false;
+  }
+
+  displayName(): string {
+    return `${this.name} (Support for rich text fields coming soon)`;
   }
 }

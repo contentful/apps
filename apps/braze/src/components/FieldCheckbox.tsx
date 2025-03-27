@@ -37,7 +37,11 @@ const BasicFieldCheckbox = (props: BasicFieldCheckboxProps) => {
       })}
       margin="spacingXs"
       padding="spacingXs">
-      <Checkbox id={field.uniqueId()} isChecked={field.selected} onChange={handleToggle}>
+      <Checkbox
+        id={field.uniqueId()}
+        isChecked={field.selected}
+        onChange={handleToggle}
+        isDisabled={!field.isEnabled()}>
         <Text fontWeight="fontWeightNormal">{field.displayName()}</Text>
       </Checkbox>
     </Box>
