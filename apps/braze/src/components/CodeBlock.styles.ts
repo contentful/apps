@@ -10,9 +10,22 @@ export const lineNumberStyle: CSSProperties = {
   width: tokens.spacing2Xl,
 };
 
-export const codeBlockStyles: Record<string, CSSProperties> = {
+export const copyButtonBar: CSSProperties = {
+  backgroundColor: tokens.gray400,
+  height: tokens.spacing2Xl,
+  borderTopLeftRadius: tokens.borderRadiusSmall,
+  borderTopRightRadius: tokens.borderRadiusSmall,
+};
+
+export const copyButtonStyles: CSSProperties = {
+  height: tokens.spacingXl,
+  width: tokens.spacingXl,
+  minHeight: tokens.spacingXl,
+  marginRight: tokens.spacingXs,
+};
+
+export const baseCodeBlockStyles: Record<string, CSSProperties> = {
   'code[class*="language-"]': {
-    color: tokens.colorBlack,
     background: 'none',
     textShadow: '0 1px white',
     fontFamily: "'Geist Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
@@ -34,9 +47,6 @@ export const codeBlockStyles: Record<string, CSSProperties> = {
   'pre[class*="language-"]': {
     color: 'black',
     background: tokens.gray100,
-    border: `1px solid ${tokens.gray300}`,
-    borderBottomLeftRadius: tokens.borderRadiusSmall,
-    borderBottomRightRadius: tokens.borderRadiusSmall,
     textShadow: '0 1px white',
     fontFamily: "'Geist Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
     fontSize: '1em',
@@ -203,5 +213,63 @@ export const codeBlockStyles: Record<string, CSSProperties> = {
   },
   italic: {
     fontStyle: 'italic',
+  },
+};
+
+export const codeBlockErrorStyles: Record<string, CSSProperties> = {
+  ...baseCodeBlockStyles,
+  'pre[class*="language-"]': {
+    ...baseCodeBlockStyles['pre[class*="language-"]'],
+    border: `1px solid ${tokens.red600}`,
+  },
+  'code[class*="language-"]': {
+    ...baseCodeBlockStyles['code[class*="language-"]'],
+    color: tokens.red600,
+  },
+};
+
+export const codeBlockStyles: Record<string, CSSProperties> = {
+  ...baseCodeBlockStyles,
+  'pre[class*="language-"]': {
+    ...baseCodeBlockStyles['pre[class*="language-"]'],
+    border: `1px solid ${tokens.gray300}`,
+  },
+  'code[class*="language-"]': {
+    ...baseCodeBlockStyles['code[class*="language-"]'],
+    color: tokens.colorBlack,
+  },
+};
+
+export const codeBlockErrorWithCopyButtonBorder: Record<string, CSSProperties> = {
+  ...codeBlockErrorStyles,
+  'pre[class*="language-"]': {
+    ...codeBlockErrorStyles['pre[class*="language-"]'],
+    borderBottomLeftRadius: tokens.borderRadiusSmall,
+    borderBottomRightRadius: tokens.borderRadiusSmall,
+  },
+};
+
+export const codeBlockErrorWithoutCopyButtonBorder: Record<string, CSSProperties> = {
+  ...codeBlockErrorStyles,
+  'pre[class*="language-"]': {
+    ...codeBlockErrorStyles['pre[class*="language-"]'],
+    borderRadius: tokens.borderRadiusSmall,
+  },
+};
+
+export const codeBlockWithCopyButtonBorder: Record<string, CSSProperties> = {
+  ...codeBlockStyles,
+  'pre[class*="language-"]': {
+    ...codeBlockStyles['pre[class*="language-"]'],
+    borderBottomLeftRadius: tokens.borderRadiusSmall,
+    borderBottomRightRadius: tokens.borderRadiusSmall,
+  },
+};
+
+export const codeBlockWithoutCopyButtonBorder: Record<string, CSSProperties> = {
+  ...codeBlockStyles,
+  'pre[class*="language-"]': {
+    ...codeBlockStyles['pre[class*="language-"]'],
+    borderRadius: tokens.borderRadiusSmall,
   },
 };

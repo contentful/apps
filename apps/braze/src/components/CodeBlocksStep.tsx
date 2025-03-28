@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import WizardFooter from './WizardFooter';
-import { Box, Button, Paragraph, Subheading } from '@contentful/f36-components';
+import { Box, Button, Paragraph, Subheading, ValidationMessage } from '@contentful/f36-components';
 import Splitter from './Splitter';
 import tokens from '@contentful/f36-tokens';
 import CodeBlock from './CodeBlock';
@@ -20,12 +20,19 @@ function formatGraphqlResponse(response: JSON) {
 
 const CodeBlocksStep = (props: CodeBlocksStepProps) => {
   const { entry, handlePreviousStep, handleClose, selectedLocales } = props;
-
+  const [graphqlCallError, setGraphqlCallError] = useState<boolean>(false);
   const [graphqlResponse, setGraphqlResponse] = useState<string>('');
+  const liquidTagsCode = entry.generateLiquidTags(selectedLocales).join('\n');
+  const contentCallCode = entry.generateConnectedContentCall(selectedLocales);
 
   useEffect(() => {
     const fetchEntry = async () => {
       const response = await entry.getGraphQLResponse(selectedLocales);
+
+      if (!response.ok) {
+        setGraphqlCallError(!graphqlCallError);
+      }
+
       const graphqlResponseWithNewlines = formatGraphqlResponse(response);
 
       setGraphqlResponse(graphqlResponseWithNewlines);
@@ -48,23 +55,23 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           Braze Connected Content Call
         </Subheading>
-        <CodeBlock language={'liquid'} code={entry.generateConnectedContentCall(selectedLocales)} />
+        <CodeBlock language={'liquid'} code={contentCallCode} showCopyButton />
 
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
 
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           Liquid tag to reference selected Contentful fields, within Braze message body
         </Subheading>
-        <CodeBlock
-          language={'liquid'}
-          code={entry.generateLiquidTags(selectedLocales).join('\n')}
-        />
+        <CodeBlock language={'liquid'} code={liquidTagsCode} showCopyButton />
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
 
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           JSON data available in Braze via Connected Content call
         </Subheading>
-        <CodeBlock language={'json'} code={graphqlResponse} />
+        {graphqlCallError && (
+          <ValidationMessage>Connected Content call unsuccessful</ValidationMessage>
+        )}
+        <CodeBlock language={'json'} code={graphqlResponse} hasError={graphqlCallError} />
       </Box>
 
       <WizardFooter>
