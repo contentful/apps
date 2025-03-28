@@ -1,40 +1,46 @@
-import { Flex, CopyButton } from '@contentful/f36-components';
-import tokens from '@contentful/f36-tokens';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { codeBlockStyles, lineNumberStyle } from './CodeBlock.styles';
+import {
+  lineNumberStyle,
+  copyButtonBar,
+  copyButtonStyles,
+  codeBlockErrorWithCopyButtonBorder,
+  codeBlockErrorWithoutCopyButtonBorder,
+  codeBlockWithCopyButtonBorder,
+  codeBlockWithoutCopyButtonBorder,
+} from './CodeBlock.styles';
+import { BorderRadiusTokens } from '@contentful/f36-tokens';
+import { CopyButton, Flex } from '@contentful/f36-components';
 
 type Props = {
   code: string;
   language?: string;
+  hasError?: boolean;
+  border?: BorderRadiusTokens;
+  showCopyButton?: boolean;
 };
-const CodeBlock = ({ code, language }: Props) => {
+const CodeBlock = ({ code, language, hasError, showCopyButton }: Props) => {
+  const languageWithoutColor = 'pureBasic';
+  let styles = hasError
+    ? showCopyButton
+      ? codeBlockErrorWithCopyButtonBorder
+      : codeBlockErrorWithoutCopyButtonBorder
+    : showCopyButton
+      ? codeBlockWithCopyButtonBorder
+      : codeBlockWithoutCopyButtonBorder;
+
   return (
     <>
-      <Flex
-        style={{
-          backgroundColor: tokens.gray400,
-          height: tokens.spacing2Xl,
-          borderTopLeftRadius: tokens.borderRadiusSmall,
-          borderTopRightRadius: tokens.borderRadiusSmall,
-        }}
-        alignItems="center"
-        justifyContent="end">
-        <CopyButton
-          value={code}
-          style={{
-            height: tokens.spacingXl,
-            width: tokens.spacingXl,
-            minHeight: tokens.spacingXl,
-            marginRight: tokens.spacingXs,
-          }}
-        />
-      </Flex>
+      {showCopyButton && (
+        <Flex style={copyButtonBar} alignItems="center" justifyContent="end">
+          <CopyButton value={code} style={copyButtonStyles} />
+        </Flex>
+      )}
       <SyntaxHighlighter
         data-testid="code-component"
-        language={language}
-        style={codeBlockStyles}
+        language={!hasError ? language : languageWithoutColor}
+        style={styles}
         lineNumberStyle={lineNumberStyle}
-        showLineNumbers={true}>
+        showLineNumbers>
         {code}
       </SyntaxHighlighter>
     </>
