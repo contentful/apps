@@ -140,7 +140,7 @@ npm run hide-publish
 npm run show-publish
 ```
 
-Since the publish button by default is added to the sidebar, run `npm run hide-publish` first. Then check the Contentful web app to see that the publish button is no longer visible in the web app. The run `npm run show-publish` to make it visible again.
+Since the publish button by default is added to the sidebar, run `npm run hide-publish` first. Then check the Contentful web app to see that the publish button is no longer visible in the web app. Then run `npm run show-publish` to make it visible again. You may have to refresh the Contentful web app to see the changes.
 
 You can also trigger events from the Contentful web app by adding comments to an entry.
 
