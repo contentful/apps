@@ -1,6 +1,8 @@
 {
   "scripts": {
-    "build": "contentful-app-scripts build-functions --ci"
+    "build": "contentful-app-scripts build-functions --ci",
+    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "upload": "contentful-app-scripts upload --bundle-dir ./build"
   },
   "devDependencies": {
     "@contentful/app-scripts": "^2.3.0",
