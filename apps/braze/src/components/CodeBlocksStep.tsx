@@ -1,10 +1,16 @@
 import { useState, useEffect } from 'react';
 import WizardFooter from './WizardFooter';
-import { Box, Button, Paragraph, Subheading, ValidationMessage } from '@contentful/f36-components';
+import {
+  Box,
+  Button,
+  Paragraph,
+  Subheading,
+} from '@contentful/f36-components';
 import Splitter from './Splitter';
 import tokens from '@contentful/f36-tokens';
 import CodeBlock from './CodeBlock';
 import { Entry } from '../fields/Entry';
+import OctagonValidationMessage from './OctagonValidationMessage';
 
 type CodeBlocksStepProps = {
   entry: Entry;
@@ -68,7 +74,7 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
         </Subheading>
         <CodeBlock language={'json'} code={graphqlResponse} hasError={graphqlCallError} />
         {graphqlCallError && (
-          <ValidationMessage>Connected Content call unsuccessful</ValidationMessage>
+          <OctagonValidationMessage>Connected Content call unsuccessful</OctagonValidationMessage>
         )}
       </Box>
 
