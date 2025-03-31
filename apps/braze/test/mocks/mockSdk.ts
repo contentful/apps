@@ -27,6 +27,9 @@ const mockSdk: any = {
     default: 'en-US',
     available: ['en-US', 'es-AR'],
   },
+  hostnames: {
+    delivery: 'app.contentful.com',
+  },
   notifier: {
     error: vi.fn(),
   },

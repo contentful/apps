@@ -14,9 +14,9 @@ describe('AssetArrayField', () => {
     const result = field.generateLiquidTag();
     expect(result).toEqual([
       '{% for headersCollectionItem in response.data.blogPost.headersCollection.items %}\n' +
-        '  {{ headersCollectionItem.title }}\n' +
-        '  {{ headersCollectionItem.description }}\n' +
-        '  {{ headersCollectionItem.url }}\n' +
+        '  {{headersCollectionItem.title}}\n' +
+        '  {{headersCollectionItem.description}}\n' +
+        '  {{headersCollectionItem.url}}\n' +
         '{% endfor %}',
     ]);
   });

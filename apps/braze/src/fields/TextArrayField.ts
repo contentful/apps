@@ -12,7 +12,7 @@ export class TextArrayField extends Field {
   generateLiquidTagForType(template: string): string[] {
     return [
       `{% for ${this.id}Item in ${template}.${this.id} %}
-  {{ ${this.id}Item }}
+  {{${this.id}Item}}
 {% endfor %}`,
     ];
   }

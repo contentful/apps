@@ -13,7 +13,7 @@ describe('TextArrayField', () => {
     const result = field.generateLiquidTag();
     expect(result).toEqual([
       '{% for wordsItem in response.data.blogPost.words %}\n' +
-        '  {{ wordsItem }}\n' +
+        '  {{wordsItem}}\n' +
         '{% endfor %}',
     ]);
   });
