@@ -1,35 +1,73 @@
-import { Box, Button, Paragraph, TextLink } from '@contentful/f36-components';
+import { Box, Button, Checkbox, Paragraph, TextLink, Text } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import WizardFooter from './WizardFooter';
 import FieldCheckbox from './FieldCheckbox';
 import { Entry } from '../fields/Entry';
 import { useState } from 'react';
-import CheckboxCard from './CheckboxCard';
+import { Field } from '../fields/Field';
+import { css } from 'emotion';
+import tokens from '@contentful/f36-tokens';
 
 type FieldsSelectionStepProps = {
   entry: Entry;
   handleNextStep: () => void;
 };
+
 const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
   const { entry, handleNextStep } = props;
-  const [selectedFields, setSelectedFields] = useState<string[]>([]);
-  const [entrySelected, setEntrySelected] = useState(entry.fields.some((field) => field.selected));
+  const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set());
+  const [entrySelected, setEntrySelected] = useState(false);
 
   const fields = entry.fields;
   const allFields = entry.getAllFields();
 
   const handleToggle = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const { checked, id } = event.target;
-    allFields.find((field) => field.uniqueId() === id)?.toggle(checked);
-    const newSelectedFields = allFields
-      .filter((field) => field.selected)
-      .map((field) => field.uniqueId());
-    setSelectedFields(newSelectedFields);
-    if (newSelectedFields.length === 0) {
-      setEntrySelected(false);
-    } else {
-      setEntrySelected(true);
+    const field = allFields.find((field) => field.uniqueId() === id);
+    if (!field) {
+      return;
     }
+
+    field.toggle(checked);
+    const newSelectedFields = new Set(selectedFields);
+
+    if (checked) {
+      newSelectedFields.add(field.uniqueId());
+    } else {
+      newSelectedFields.delete(field.uniqueId());
+    }
+
+    toggleNestedFields(field, checked, newSelectedFields);
+    toggleParentField(field, newSelectedFields, allFields);
+
+    setSelectedFields(newSelectedFields);
+    setEntrySelected(newSelectedFields.size === allFields.length);
+  };
+
+  const toggleNestedFields = (field: any, checked: boolean, selectedFields: Set<string>): void => {
+    for (const child of field.getChildren()) {
+      if (checked) {
+        selectedFields.add(child.uniqueId());
+      } else {
+        selectedFields.delete(child.uniqueId());
+      }
+
+      if (child.getChildren().length > 0) {
+        toggleNestedFields(child, checked, selectedFields);
+      }
+    }
+  };
+
+  const toggleParentField = (field: Field, selectedSet: Set<string>, allFields: any[]): void => {
+    if (!field.parent) return;
+
+    if (field.parent.getChildren().every((child) => selectedSet.has(child.uniqueId()))) {
+      selectedSet.add(field.parent.uniqueId());
+    } else if (field.parent.getChildren().some((child) => !selectedSet.has(child.uniqueId()))) {
+      selectedSet.delete(field.parent.uniqueId());
+    }
+
+    toggleParentField(field.parent, selectedSet, allFields);
   };
 
   const toggleEntry = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -37,11 +75,11 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
     if (checked) {
       allFields.forEach((field) => (field.selected = true));
       setEntrySelected(true);
-      setSelectedFields(allFields.map((field) => field.uniqueId()));
+      setSelectedFields(new Set(allFields.map((field) => field.uniqueId())));
     } else {
       allFields.forEach((field) => (field.selected = false));
       setEntrySelected(false);
-      setSelectedFields([]);
+      setSelectedFields(new Set());
     }
   };
 
@@ -61,17 +99,29 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
         </TextLink>
       </Paragraph>
 
-      <CheckboxCard
-        id={entry.id}
-        isSelected={entrySelected}
-        title={entry.title}
-        onChange={toggleEntry}
+      <Box
+        className={css({
+          border: `1px solid ${tokens.gray200}`,
+          borderRadius: tokens.borderRadiusSmall,
+        })}
+        margin="spacingXs"
         marginBottom="spacingS"
-      />
+        padding="spacingXs">
+        <Checkbox id={entry.id} isChecked={entrySelected} onChange={toggleEntry}>
+          <Text fontWeight="fontWeightDemiBold">{entry.title}</Text>
+        </Checkbox>
+      </Box>
 
       <Box paddingLeft="spacingL">
         {fields.map((field) => {
-          return <FieldCheckbox key={field.uniqueId()} field={field} handleToggle={handleToggle} />;
+          return (
+            <FieldCheckbox
+              key={field.uniqueId()}
+              field={field}
+              handleToggle={handleToggle}
+              selectedFields={selectedFields}
+            />
+          );
         })}
       </Box>
 

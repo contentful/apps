@@ -45,7 +45,7 @@ export abstract class Field {
     return !!this.parent ? `${this.parent.uniqueId()}.${this.id}` : this.id;
   }
 
-  getAllFields(): Field[] {
-    return [this];
+  getChildren(): Field[] {
+    return [];
   }
 }

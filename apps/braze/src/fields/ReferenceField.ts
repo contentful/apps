@@ -62,10 +62,10 @@ export class ReferenceField extends Field {
     }
   }
 
-  getAllFields(): Field[] {
-    const fields: Field[] = [this];
+  getChildren(): Field[] {
+    const fields: Field[] = [];
     this.fields.forEach((field) => {
-      fields.push(...field.getAllFields());
+      fields.push(...[field, ...field.getChildren()]);
     });
     return fields;
   }
