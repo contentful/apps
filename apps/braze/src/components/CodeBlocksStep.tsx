@@ -29,9 +29,7 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
     const fetchEntry = async () => {
       const response = await entry.getGraphQLResponse(selectedLocales);
 
-      if (!response.ok) {
-        setGraphqlCallError(!graphqlCallError);
-      }
+      setGraphqlCallError(!!response.errors?.length);
 
       const graphqlResponseWithNewlines = formatGraphqlResponse(response);
 
