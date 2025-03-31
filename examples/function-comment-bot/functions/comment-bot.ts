@@ -1,13 +1,14 @@
-import type { FunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit';
 import type {
   AppEventComment,
   AppEventRequest,
   FunctionEventContext,
-} from '@contentful/node-apps-toolkit/lib/requests/typings';
+  FunctionEventHandler as EventHandler,
+  FunctionTypeEnum,
+} from '@contentful/node-apps-toolkit';
 import type { CreateCommentBody } from './types';
 import { getAction } from './bot-actions/bot-action-registry';
 
-export const handler: EventHandler<'appevent.handler'> = async (
+export const handler: EventHandler<FunctionTypeEnum.AppEventHandler> = async (
   event: AppEventRequest,
   context: FunctionEventContext
 ) => {
@@ -15,6 +16,8 @@ export const handler: EventHandler<'appevent.handler'> = async (
   const createCommentBody = body as unknown as CreateCommentBody;
   const { parentEntity } = createCommentBody.sys.newComment.sys;
   const commentBody = createCommentBody.sys.newComment.body;
+
+  console.log(`Received comment: ${commentBody}`);
 
   const action = getAction(commentBody);
   if (action) {
