@@ -26,17 +26,22 @@ export class Entry {
 
   generateConnectedContentCall(locales: string[]) {
     return `{% capture body %}
-    ${this.assembleQuery(locales)}
+  ${this.assembleQuery(locales)}
 {% endcapture %}
   
-  {% connected_content
-      https://graphql.contentful.com/content/v1/spaces/${this.spaceId}
-      :method post
-      :headers {"Authorization": "Bearer ${this.contentfulToken}"}
-      :body {{body}}
-      :content_type application/json
-      :save ${SAVED_RESPONSE}
-  %}`;
+{% connected_content
+  https://graphql.contentful.com/content/v1/spaces/${this.spaceId}
+  :method post
+  :headers {"Authorization": "Bearer ${this.contentfulToken}"}
+  :body {{body}}
+  :content_type application/json
+  :save ${SAVED_RESPONSE}
+  :retry
+%}
+
+{% if response.__http_status_code__ != 200 %}
+  {% abort_message('Could not connect to Contentful') %}
+{% endif %}`;
   }
 
   generateLiquidTags(locales: string[]) {
