@@ -32,7 +32,7 @@ const CodeBlock = ({ code, language, hasError, showCopyButton }: Props) => {
     <>
       {showCopyButton && (
         <Flex style={copyButtonBar} alignItems="center" justifyContent="end">
-          <CopyButton value={code} style={copyButtonStyles} />
+          <CopyButton data-testid="copy-button" value={code} style={copyButtonStyles} />
         </Flex>
       )}
       <SyntaxHighlighter
