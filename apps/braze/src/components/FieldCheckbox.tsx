@@ -47,16 +47,10 @@ const BasicFieldCheckbox = (props: BasicFieldCheckboxProps) => {
   return (
     <CheckboxCard
       id={field.uniqueId()}
-<<<<<<< HEAD
       title={field.displayName()}
       selectedFields={selectedFields}
       onChange={handleToggle}
       isDisabled={!field.isEnabled()}
-=======
-      isSelected={field.selected}
-      title={field.displayName()}
-      onChange={handleToggle}
->>>>>>> a376b5af5 (Extract a component to eliminate duplicated logic)
     />
   );
 };
