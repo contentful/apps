@@ -66,10 +66,10 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           JSON data available in Braze via Connected Content call
         </Subheading>
+        <CodeBlock language={'json'} code={graphqlResponse} hasError={graphqlCallError} />
         {graphqlCallError && (
           <ValidationMessage>Connected Content call unsuccessful</ValidationMessage>
         )}
-        <CodeBlock language={'json'} code={graphqlResponse} hasError={graphqlCallError} />
       </Box>
 
       <WizardFooter>
