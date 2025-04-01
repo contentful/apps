@@ -25,8 +25,8 @@ const CodeBlock = ({ code, language, hasError, showCopyButton }: Props) => {
       ? codeBlockErrorWithCopyButtonBorder
       : codeBlockErrorWithoutCopyButtonBorder
     : showCopyButton
-      ? codeBlockWithCopyButtonBorder
-      : codeBlockWithoutCopyButtonBorder;
+    ? codeBlockWithCopyButtonBorder
+    : codeBlockWithoutCopyButtonBorder;
 
   return (
     <>
