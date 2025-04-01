@@ -2,7 +2,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import {
   lineNumberStyle,
   copyButtonBar,
-  copyButtonStyles,
+  copyButton,
   codeBlockWithErrorAndWithoutCopyButtonBorder,
   codeBlockWithoutErrorAndWithoutCopyButtonBorder,
   codeBlockWithoutErrorAndWithCopyButton,
@@ -32,7 +32,7 @@ const CodeBlock = ({ code, language, hasError, showCopyButton }: Props) => {
     <>
       {showCopyButton && (
         <Flex style={copyButtonBar} alignItems="center" justifyContent="end">
-          <CopyButton data-testid="copy-button" value={code} style={copyButtonStyles} />
+          <CopyButton data-testid="copy-button" value={code} style={copyButton} />
         </Flex>
       )}
       <SyntaxHighlighter

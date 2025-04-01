@@ -17,7 +17,7 @@ export const copyButtonBar: CSSProperties = {
   borderTopRightRadius: tokens.borderRadiusSmall,
 };
 
-export const copyButtonStyles: CSSProperties = {
+export const copyButton: CSSProperties = {
   height: tokens.spacingXl,
   width: tokens.spacingXl,
   minHeight: tokens.spacingXl,
