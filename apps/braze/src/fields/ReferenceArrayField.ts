@@ -47,10 +47,10 @@ export class ReferenceArrayField extends Field {
     }
   }
 
-  getAllFields(): Field[] {
-    const fields: Field[] = [this];
+  getChildren(): Field[] {
+    const fields: Field[] = [];
     this.items.forEach((item) => {
-      fields.push(...item.getAllFields());
+      fields.push(...[item, ...item.getChildren()]);
     });
     return fields;
   }
