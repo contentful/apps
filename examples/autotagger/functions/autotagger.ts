@@ -3,16 +3,38 @@ import {
   AppActionRequest,
   AppEventEntry,
   AppEventRequest,
+  EntryAutosaveEventPayload,
   FunctionEventContext,
+  FunctionTypeEnum,
 } from '@contentful/node-apps-toolkit/lib/requests/typings';
-import type { EntryProps, PlainClientAPI, Link } from 'contentful-management';
+import {
+  type EntryProps,
+  type PlainClientAPI,
+  type Link,
+  createClient,
+} from 'contentful-management';
 import { buildAutotagPrompts } from './prompts';
 
 const DEFAULT_API_URL = 'https://api.openai.com/v1/chat/completions';
 const DEFAULT_MODEL = 'gpt-4o';
 
+function initContentfulManagementClient(context: FunctionEventContext): PlainClientAPI {
+  if (!context.cmaClientOptions) {
+    throw new Error(
+      'Contentful Management API client options are only provided for certain function types. To learn more about using the CMA within functions, see https://www.contentful.com/developers/docs/extensibility/app-framework/functions/#using-the-cma.'
+    );
+  }
+  return createClient(context.cmaClientOptions, {
+    type: 'plain',
+    defaults: {
+      spaceId: context.spaceId,
+      environmentId: context.environmentId,
+    },
+  });
+}
+
 async function fetchOpenAiResponse(
-  entry: EntryProps,
+  entry: EntryAutosaveEventPayload | EntryProps,
   apiKey: string,
   apiUrl: string,
   model: string
@@ -74,12 +96,12 @@ async function createNewTags(cma: PlainClientAPI, newTags: string[]): Promise<vo
 
 async function updateEntryTags(
   cma: PlainClientAPI,
-  entry: EntryProps,
+  entry: EntryAutosaveEventPayload | EntryProps,
   tags: Link<'Tag'>[]
 ): Promise<void> {
   try {
     await cma.entry.patch(
-      { entryId: entry.sys.id },
+      { entryId: entry.sys.id, version: entry.sys.version },
       [
         {
           op: 'replace',
@@ -98,7 +120,7 @@ async function updateEntryTags(
 }
 
 async function autotag(
-  entry: EntryProps,
+  entry: EntryAutosaveEventPayload | EntryProps,
   cma: PlainClientAPI,
   appInstallationParameters: Record<string, any>
 ) {
@@ -123,19 +145,17 @@ async function autotag(
   }
 }
 
-const appActionHandler: EventHandler<'appaction.call'> = async (
-  event: AppActionRequest<'Custom' | 'Entries.v1.0' | 'Notification.v1.0'>,
+const appActionHandler: EventHandler<FunctionTypeEnum.AppActionCall> = async (
+  event: AppActionRequest<'Custom', { entryId: string }>,
   context: FunctionEventContext
 ) => {
   const {
     body: { entryId },
-  } = event as AppActionRequest<'Custom', { entryId: string }>;
-  const { cma, appInstallationParameters } = context as FunctionEventContext & {
-    cma: PlainClientAPI;
-  };
+  } = event;
   try {
+    const cma = initContentfulManagementClient(context);
     const entry = await cma.entry.get({ entryId });
-    await autotag(entry, cma, appInstallationParameters);
+    await autotag(entry, cma, context.appInstallationParameters);
     return { success: true };
   } catch (error) {
     console.error('Error handling action:', error);
@@ -143,25 +163,22 @@ const appActionHandler: EventHandler<'appaction.call'> = async (
   }
 };
 
-const appEventHandler: EventHandler<'appevent.handler'> = async (
+const appEventHandler: EventHandler<FunctionTypeEnum.AppEventHandler> = async (
   event: AppEventRequest,
   context: FunctionEventContext
 ) => {
-  const { cma, appInstallationParameters } = context as FunctionEventContext & {
-    cma: PlainClientAPI;
-  };
   try {
+    const cma = initContentfulManagementClient(context);
     const { body: entry } = event as AppEventEntry;
-    await autotag(entry, cma, appInstallationParameters);
+    await autotag(entry as EntryAutosaveEventPayload, cma, context.appInstallationParameters);
   } catch (error) {
     console.error('Error handling event:', error);
   }
 };
 
-export const handler: EventHandler<'appaction.call' | 'appevent.handler'> = async (
-  event: AppActionRequest | AppEventRequest,
-  context: FunctionEventContext
-) => {
+export const handler: EventHandler<
+  FunctionTypeEnum.AppActionCall | FunctionTypeEnum.AppEventHandler
+> = async (event, context) => {
   if (event.type === 'appaction.call') {
     return appActionHandler(event, context);
   } else if (event.type === 'appevent.handler') {
