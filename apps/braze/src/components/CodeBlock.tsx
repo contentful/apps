@@ -3,10 +3,10 @@ import {
   lineNumberStyle,
   copyButtonBar,
   copyButtonStyles,
-  codeBlockErrorWithCopyButtonBorder,
-  codeBlockErrorWithoutCopyButtonBorder,
-  codeBlockWithCopyButtonBorder,
-  codeBlockWithoutCopyButtonBorder,
+  codeBlockWithErrorAndWithoutCopyButtonBorder,
+  codeBlockWithoutErrorAndWithoutCopyButtonBorder,
+  codeBlockWithoutErrorAndWithCopyButton,
+  codeBlockWithErrorAndWithCopyButton,
 } from './CodeBlock.styles';
 import { BorderRadiusTokens } from '@contentful/f36-tokens';
 import { CopyButton, Flex } from '@contentful/f36-components';
@@ -20,13 +20,13 @@ type Props = {
 };
 const CodeBlock = ({ code, language, hasError, showCopyButton }: Props) => {
   const languageWithoutColor = 'pureBasic';
-  let styles = hasError
+  let styles = !hasError
     ? showCopyButton
-      ? codeBlockErrorWithCopyButtonBorder
-      : codeBlockErrorWithoutCopyButtonBorder
+      ? codeBlockWithoutErrorAndWithCopyButton
+      : codeBlockWithoutErrorAndWithoutCopyButtonBorder
     : showCopyButton
-    ? codeBlockWithCopyButtonBorder
-    : codeBlockWithoutCopyButtonBorder;
+    ? codeBlockWithErrorAndWithCopyButton
+    : codeBlockWithErrorAndWithoutCopyButtonBorder;
 
   return (
     <>

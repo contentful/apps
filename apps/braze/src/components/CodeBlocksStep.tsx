@@ -80,7 +80,9 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
           hasError={hasError(graphqlResponse)}
         />
         {hasError(graphqlResponse) && (
-          <OctagonValidationMessage>Connected Content call unsuccessful</OctagonValidationMessage>
+          <OctagonValidationMessage>
+            The Connected Content request failed. Please review the error details above.
+          </OctagonValidationMessage>
         )}
       </Box>
 
