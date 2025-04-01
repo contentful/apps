@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import WizardFooter from './WizardFooter';
-import { Box, Button, Paragraph, Subheading } from '@contentful/f36-components';
+import { Box, Button, Paragraph, Skeleton, Subheading } from '@contentful/f36-components';
 import Splitter from './Splitter';
 import tokens from '@contentful/f36-tokens';
 import CodeBlock from './CodeBlock';
@@ -14,15 +14,17 @@ type CodeBlocksStepProps = {
   handleClose: () => void;
 };
 
-function formatGraphqlResponse(response: JSON) {
-  const jsonString = JSON.stringify(response, null, 2);
-  return jsonString.replace(/\n/g, '\n');
+function formatGraphqlResponse(response: string) {
+  return response.replace(/\n/g, '\n');
+}
+
+function hasError(response: string) {
+  return !!JSON.parse(response).errors?.length;
 }
 
 const CodeBlocksStep = (props: CodeBlocksStepProps) => {
   const { entry, handlePreviousStep, handleClose, selectedLocales } = props;
-  const [graphqlCallError, setGraphqlCallError] = useState<boolean>(false);
-  const [graphqlResponse, setGraphqlResponse] = useState<string>('');
+  const [graphqlResponse, setgraphqlResponse] = useState<string | undefined>(undefined);
   const liquidTagsCode = entry.generateLiquidTags(selectedLocales).join('\n');
   const contentCallCode = entry.generateConnectedContentCall(selectedLocales);
 
@@ -30,14 +32,19 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
     const fetchEntry = async () => {
       const response = await entry.getGraphQLResponse(selectedLocales);
 
-      setGraphqlCallError(!!response.errors?.length);
-
-      const graphqlResponseWithNewlines = formatGraphqlResponse(response);
-
-      setGraphqlResponse(graphqlResponseWithNewlines);
+      const jsonString = JSON.stringify(response, null, 2);
+      setgraphqlResponse(jsonString);
     };
     fetchEntry();
   }, []);
+
+  if (!graphqlResponse) {
+    return (
+      <Skeleton.Container width="97%">
+        <Skeleton.BodyText offsetLeft="50" offsetTop="20" numberOfLines={4} />
+      </Skeleton.Container>
+    );
+  }
 
   return (
     <>
@@ -67,8 +74,12 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
         <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeL" lineHeight="lineHeightL">
           JSON data available in Braze via Connected Content call
         </Subheading>
-        <CodeBlock language={'json'} code={graphqlResponse} hasError={graphqlCallError} />
-        {graphqlCallError && (
+        <CodeBlock
+          language={'json'}
+          code={formatGraphqlResponse(graphqlResponse)}
+          hasError={hasError(graphqlResponse)}
+        />
+        {hasError(graphqlResponse) && (
           <OctagonValidationMessage>Connected Content call unsuccessful</OctagonValidationMessage>
         )}
       </Box>
