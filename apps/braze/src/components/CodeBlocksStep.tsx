@@ -1,11 +1,6 @@
 import { useState, useEffect } from 'react';
 import WizardFooter from './WizardFooter';
-import {
-  Box,
-  Button,
-  Paragraph,
-  Subheading,
-} from '@contentful/f36-components';
+import { Box, Button, Paragraph, Subheading } from '@contentful/f36-components';
 import Splitter from './Splitter';
 import tokens from '@contentful/f36-tokens';
 import CodeBlock from './CodeBlock';
