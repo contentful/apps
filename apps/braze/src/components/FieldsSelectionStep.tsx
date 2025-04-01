@@ -31,12 +31,7 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
     field.toggle(checked);
     const newSelectedFields = new Set(selectedFields);
 
-    if (checked) {
-      newSelectedFields.add(field.uniqueId());
-    } else {
-      newSelectedFields.delete(field.uniqueId());
-    }
-
+    updateSelectedFields(checked, newSelectedFields, field.uniqueId());
     toggleNestedFields(field, checked, newSelectedFields);
     toggleParentField(field, newSelectedFields, allFields);
 
@@ -44,13 +39,17 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
     setEntrySelected(newSelectedFields.size === allFields.length);
   };
 
+  const updateSelectedFields = (
+    checked: boolean,
+    selectedFields: Set<string>,
+    id: string
+  ): void => {
+    checked ? selectedFields.add(id) : selectedFields.delete(id);
+  };
+
   const toggleNestedFields = (field: any, checked: boolean, selectedFields: Set<string>): void => {
     for (const child of field.getChildren()) {
-      if (checked) {
-        selectedFields.add(child.uniqueId());
-      } else {
-        selectedFields.delete(child.uniqueId());
-      }
+      updateSelectedFields(checked, selectedFields, child.uniqueId());
 
       if (child.getChildren().length > 0) {
         toggleNestedFields(child, checked, selectedFields);
@@ -60,10 +59,13 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
 
   const toggleParentField = (field: Field, selectedSet: Set<string>, allFields: any[]): void => {
     if (!field.parent) return;
+    const children = field.parent.getChildren();
 
-    if (field.parent.getChildren().every((child) => selectedSet.has(child.uniqueId()))) {
+    const allChildrenSelected = children.every((child) => selectedSet.has(child.uniqueId()));
+    const anyChildrenSelected = children.some((child) => selectedSet.has(child.uniqueId()));
+    if (allChildrenSelected) {
       selectedSet.add(field.parent.uniqueId());
-    } else if (field.parent.getChildren().some((child) => !selectedSet.has(child.uniqueId()))) {
+    } else if (!anyChildrenSelected) {
       selectedSet.delete(field.parent.uniqueId());
     }
 
