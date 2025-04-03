@@ -34,7 +34,8 @@ function CheckboxCard(props: CheckboxCardProps) {
       className={checkboxCard}
       justifyContent="space-between"
       alignItems="center"
-      margin="spacingXs"
+      marginTop="spacingXs"
+      marginRight="spacingXs"
       padding="spacingXs">
       <Checkbox
         id={id}

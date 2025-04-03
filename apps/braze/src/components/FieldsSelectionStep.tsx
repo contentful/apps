@@ -105,8 +105,9 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
           border: `1px solid ${tokens.gray200}`,
           borderRadius: tokens.borderRadiusSmall,
         })}
-        margin="spacingXs"
-        marginBottom="spacingS"
+        marginTop="spacingXs"
+        marginRight="spacingXs"
+        marginLeft="spacingXs"
         padding="spacingXs">
         <Checkbox id={entry.id} isChecked={entrySelected} onChange={toggleEntry}>
           <Text fontWeight="fontWeightDemiBold">{entry.title}</Text>
@@ -114,13 +115,14 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
       </Box>
 
       <Box paddingLeft="spacingL">
-        {fields.map((field) => {
+        {fields.map((field, index) => {
           return (
             <FieldCheckbox
               key={field.uniqueId()}
               field={field}
               handleToggle={handleToggle}
               selectedFields={selectedFields}
+              isLast={fields.length - 1 === index}
             />
           );
         })}
