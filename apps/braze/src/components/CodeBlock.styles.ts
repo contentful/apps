@@ -49,7 +49,7 @@ export const codeBlockWithoutErrorAndWithCopyButton: Record<string, CSSPropertie
     border: `1px solid ${tokens.gray300}`,
     borderBottomLeftRadius: tokens.borderRadiusSmall,
     borderBottomRightRadius: tokens.borderRadiusSmall,
-    color: 'black',
+    color: tokens.colorBlack,
     background: tokens.gray100,
     textShadow: '0 1px white',
     fontFamily: "'Geist Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
