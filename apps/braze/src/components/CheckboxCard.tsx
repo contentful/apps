@@ -16,7 +16,7 @@ function CheckboxCard(props: CheckboxCardProps) {
 
   return (
     <Flex
-      style={checkboxCard}
+      className={checkboxCard}
       justifyContent="space-between"
       alignItems="center"
       margin={margin || 'spacingXs'}
