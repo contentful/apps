@@ -20,13 +20,21 @@ type Props = {
 };
 const CodeBlock = ({ code, language, hasError, showCopyButton }: Props) => {
   const languageWithoutColor = 'pureBasic';
-  let styles = !hasError
-    ? showCopyButton
-      ? codeBlockWithoutErrorAndWithCopyButton
-      : codeBlockWithoutErrorAndWithoutCopyButtonBorder
-    : showCopyButton
-    ? codeBlockWithErrorAndWithCopyButton
-    : codeBlockWithErrorAndWithoutCopyButtonBorder;
+  let styles;
+
+  if (hasError) {
+    if (showCopyButton) {
+      styles = codeBlockWithErrorAndWithCopyButton;
+    } else {
+      styles = codeBlockWithErrorAndWithoutCopyButtonBorder;
+    }
+  } else {
+    if (showCopyButton) {
+      styles = codeBlockWithoutErrorAndWithCopyButton;
+    } else {
+      styles = codeBlockWithoutErrorAndWithoutCopyButtonBorder;
+    }
+  }
 
   return (
     <>
