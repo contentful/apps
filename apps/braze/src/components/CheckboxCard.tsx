@@ -29,7 +29,8 @@ function CheckboxCard(props: CheckboxCardProps) {
       style={checkboxCard}
       justifyContent="space-between"
       alignItems="center"
-      margin="spacingXs"
+      marginTop="spacingXs"
+      marginRight="spacingXs"
       padding="spacingXs">
       <Checkbox id={id} isChecked={selected} onChange={handleChange}>
         <Text fontWeight={fontWeight}>{title}</Text>
