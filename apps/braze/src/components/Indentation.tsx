@@ -1,5 +1,5 @@
-import { Box, Flex } from '@contentful/f36-components';
-import { lStyle, tBottomStyle, tTopStyle } from './Indentation.syles';
+import { Box, Flex, Spacing } from '@contentful/f36-components';
+import { styles } from './Indentation.styles';
 
 type Props = {
   isLast?: boolean;
@@ -7,14 +7,14 @@ type Props = {
 function TComponent() {
   return (
     <Flex flexDirection="column">
-      <Box style={tTopStyle}></Box>
-      <Box style={tBottomStyle}></Box>
+      <Box className={styles.tTopStyle}></Box>
+      <Box className={styles.tBottomStyle}></Box>
     </Flex>
   );
 }
 
 function LComponent() {
-  return <Box style={lStyle}></Box>;
+  return <Box className={styles.lStyle}></Box>;
 }
 
 export const Indentation = ({ isLast }: Props) => {
