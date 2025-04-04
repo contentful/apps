@@ -52,10 +52,10 @@ type BasicFieldCheckboxProps = {
 };
 
 const BasicFieldCheckbox = (props: BasicFieldCheckboxProps) => {
-  const { field, selectedFields, handleToggle } = props;
+  const { field, selectedFields, handleToggle, isLast } = props;
   return (
     <Flex alignItems="center">
-      <Indentation isLast={props.isLast} />
+      <Indentation isLast={isLast} />
       <CheckboxCard
         id={field.uniqueId()}
         title={field.displayName()}
@@ -78,28 +78,30 @@ const ReferenceCheckbox = (props: ReferenceCheckboxProps) => {
   return (
     <Flex>
       <Indentation isLast={isLast} />
-      <CheckboxContainer
-        field={field}
-        selectedFields={selectedFields}
-        handleToggle={handleToggle}
-        show={show}
-        setShow={setShow}
-      />
-      {show && (
-        <Box paddingLeft="spacingL">
-          {field.fields.map((nestedField, index) => {
-            return (
-              <FieldCheckbox
-                key={nestedField.uniqueId()}
-                selectedFields={selectedFields}
-                field={nestedField}
-                handleToggle={handleToggle}
-                isLast={field.fields.length - 1 === index}
-              />
-            );
-          })}
-        </Box>
-      )}
+      <Flex flexDirection="column" style={{ width: '100%' }}>
+        <CheckboxContainer
+          field={field}
+          selectedFields={selectedFields}
+          handleToggle={handleToggle}
+          show={show}
+          setShow={setShow}
+        />
+        {show && (
+          <Box paddingLeft="spacingL">
+            {field.fields.map((nestedField, index) => {
+              return (
+                <FieldCheckbox
+                  key={nestedField.uniqueId()}
+                  selectedFields={selectedFields}
+                  field={nestedField}
+                  handleToggle={handleToggle}
+                  isLast={field.fields.length - 1 === index}
+                />
+              );
+            })}
+          </Box>
+        )}
+      </Flex>
     </Flex>
   );
 };
@@ -111,32 +113,38 @@ type ReferenceArrayCheckboxProps = {
   isLast?: boolean;
 };
 const ReferenceArrayCheckbox = (props: ReferenceArrayCheckboxProps) => {
-  const { field, selectedFields, handleToggle } = props;
+  const { field, selectedFields, handleToggle, isLast } = props;
   const [show, setShow] = useState(false);
   return (
-    <>
-      <CheckboxContainer
-        field={field}
-        selectedFields={selectedFields}
-        handleToggle={handleToggle}
-        show={show}
-        setShow={setShow}
-      />
+    <Flex flexDirection="column">
+      <Flex alignItems="center">
+        <Indentation isLast={isLast} />
+        <CheckboxContainer
+          field={field}
+          selectedFields={selectedFields}
+          handleToggle={handleToggle}
+          show={show}
+          setShow={setShow}
+        />
+      </Flex>
       {show && (
-        <Box paddingLeft="spacingL">
-          {field.items.map((item) => {
+        <Box style={{ paddingLeft: '48px' }}>
+          {field.items.map((item, index) => {
             return (
-              <ReferenceItemCheckbox
-                key={item.uniqueId()}
-                field={item}
-                selectedFields={selectedFields}
-                handleToggle={handleToggle}
-              />
+              <Flex>
+                <Indentation isLast={field.items.length - 1 === index} />
+                <ReferenceItemCheckbox
+                  key={item.uniqueId()}
+                  field={item}
+                  selectedFields={selectedFields}
+                  handleToggle={handleToggle}
+                />
+              </Flex>
             );
           })}
         </Box>
       )}
-    </>
+    </Flex>
   );
 };
 
@@ -150,7 +158,7 @@ const ReferenceItemCheckbox = (props: ReferenceItemCheckboxProps) => {
   const { field, selectedFields, handleToggle } = props;
   const [show, setShow] = useState(false);
   return (
-    <>
+    <Flex flexDirection="column" style={{ width: '100%' }}>
       <CheckboxContainer
         field={field}
         selectedFields={selectedFields}
@@ -173,7 +181,7 @@ const ReferenceItemCheckbox = (props: ReferenceItemCheckboxProps) => {
           })}
         </Box>
       )}
-    </>
+    </Flex>
   );
 };
 
@@ -194,7 +202,7 @@ const CheckboxContainer = (props: {
       onChange={handleToggle}
       fontWeight="fontWeightDemiBold">
       <IconButton
-        style={{ minHeight: '0' }}
+        style={{ minHeight: 0 }}
         icon={show ? <ChevronUpIcon /> : <ChevronDownIcon />}
         aria-label="Down arrow"
         variant="transparent"
