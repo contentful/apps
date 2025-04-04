@@ -1,11 +1,10 @@
-import { Box, Button, Checkbox, Paragraph, TextLink, Text } from '@contentful/f36-components';
+import { Box, Button, Paragraph, TextLink } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import WizardFooter from './WizardFooter';
 import FieldCheckbox from './FieldCheckbox';
 import { Entry } from '../fields/Entry';
 import { useState } from 'react';
-import { css } from 'emotion';
-import tokens from '@contentful/f36-tokens';
+import CheckboxCard from './CheckboxCard';
 
 type FieldsSelectionStepProps = {
   entry: Entry;
@@ -62,18 +61,13 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
         </TextLink>
       </Paragraph>
 
-      <Box
-        className={css({
-          border: `1px solid ${tokens.gray200}`,
-          borderRadius: tokens.borderRadiusSmall,
-        })}
-        margin="spacingXs"
+      <CheckboxCard
+        id={entry.id}
+        isSelected={entrySelected}
+        title={entry.title}
+        onChange={toggleEntry}
         marginBottom="spacingS"
-        padding="spacingXs">
-        <Checkbox id={entry.id} isChecked={entrySelected} onChange={toggleEntry}>
-          <Text fontWeight="fontWeightDemiBold">{entry.title}</Text>
-        </Checkbox>
-      </Box>
+      />
 
       <Box paddingLeft="spacingL">
         {fields.map((field) => {
