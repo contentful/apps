@@ -30,12 +30,12 @@ const LocalesSelectionStep = (props: LocalesSelectionStepProps) => {
         Select the locales you want to reference in Braze messages.
       </Paragraph>
 
-      <FormControl isRequired isInvalid={selectedLocales.length === 0}>
+      <FormControl isRequired isInvalid={selectedLocales.length === 0} marginBottom="spacing4Xl">
         <FormControl.Label>Locales</FormControl.Label>
 
         <Multiselect
           currentSelection={selectedLocales}
-          popoverProps={{ isFullWidth: true }}
+          popoverProps={{ isFullWidth: true, listMaxHeight: 108 }}
           placeholder="Select one or more">
           {locales.map((local) => {
             const val = local.toLowerCase().replace(/\s/g, '-');
