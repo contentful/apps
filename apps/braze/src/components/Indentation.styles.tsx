@@ -13,11 +13,11 @@ export const styles = {
     borderBottom: `1px solid ${tokens.gray300}`,
     borderLeft: `1px solid ${tokens.gray300}`,
     width: tokens.spacingL,
-    height: '28px',
+    height: '25px',
   }),
   tBottomStyle: css({
     borderLeft: `1px solid ${tokens.gray300}`,
     width: tokens.spacingL,
-    height: '20px',
+    height: '12px',
   }),
 };
