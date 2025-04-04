@@ -18,6 +18,6 @@ export const styles = {
   tBottomStyle: css({
     borderLeft: `1px solid ${tokens.gray300}`,
     width: tokens.spacingL,
-    height: '20px',
+    height: '12px',
   }),
 };
