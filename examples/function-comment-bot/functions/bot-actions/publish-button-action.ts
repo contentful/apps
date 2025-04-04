@@ -11,10 +11,8 @@ const publicationWidget = {
 export class PublishButtonAction extends BotActionBase implements BotAction {
   async execute(params: BotActionParams): Promise<void> {
     const { commentBody, context, parentEntityId } = params;
-    if (!isManagementContextInvocation(context)) {
-      throw new Error('This action requires the Contentful Management API client to be available');
-    }
-    const { cma } = context;
+
+    const cma = this.initContentfulManagementClient(context);
 
     const contentType = await this.loadContentType(cma, parentEntityId);
     const contentTypeId = contentType.sys.contentType.sys.id;

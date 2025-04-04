@@ -1,6 +1,7 @@
+import { EntryAutosaveEventPayload } from '@contentful/node-apps-toolkit';
 import type { EntryProps } from 'contentful-management';
 
-export function buildAutotagPrompts(entry: EntryProps) {
+export function buildAutotagPrompts(entry: EntryAutosaveEventPayload | EntryProps) {
   return [
     {
       role: 'system',
