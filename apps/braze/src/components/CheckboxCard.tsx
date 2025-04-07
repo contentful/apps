@@ -11,6 +11,7 @@ interface CheckboxCardProps extends MarginProps {
   isDisabled?: boolean;
   fontWeight?: FontWeightTokens;
   children?: React.ReactNode;
+  width?: string;
 }
 function CheckboxCard(props: CheckboxCardProps) {
 <<<<<<< HEAD
@@ -32,6 +33,7 @@ function CheckboxCard(props: CheckboxCardProps) {
   return (
     <Flex
       className={checkboxCard}
+      fullWidth
       justifyContent="space-between"
       alignItems="center"
       marginTop="spacingXs"

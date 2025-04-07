@@ -6,7 +6,7 @@ export const styles = {
     borderBottom: `1px solid ${tokens.gray300}`,
     borderLeft: `1px solid ${tokens.gray300}`,
     width: tokens.spacingL,
-    height: '25px',
+    height: '24px',
     marginBottom: '16px',
   }),
   tTopStyle: css({
