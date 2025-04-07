@@ -7,6 +7,8 @@ import { useState } from 'react';
 import { ChevronDownIcon, ChevronUpIcon } from '@contentful/f36-icons';
 import CheckboxCard from './CheckboxCard';
 import { Indentation } from './Indentation';
+import { css } from 'emotion';
+import tokens from '@contentful/f36-tokens';
 
 type FieldCheckboxProps =
   | BasicFieldCheckboxProps
@@ -54,7 +56,7 @@ type BasicFieldCheckboxProps = {
 const BasicFieldCheckbox = (props: BasicFieldCheckboxProps) => {
   const { field, selectedFields, handleToggle, isLast } = props;
   return (
-    <Flex alignItems="center">
+    <Flex alignItems="center" fullWidth>
       <Indentation isLast={isLast} />
       <CheckboxCard
         id={field.uniqueId()}
@@ -78,7 +80,7 @@ const ReferenceCheckbox = (props: ReferenceCheckboxProps) => {
   return (
     <Flex>
       <Indentation isLast={isLast} />
-      <Flex flexDirection="column" style={{ width: '100%' }}>
+      <Flex flexDirection="column" fullWidth>
         <CheckboxContainer
           field={field}
           selectedFields={selectedFields}
@@ -87,17 +89,44 @@ const ReferenceCheckbox = (props: ReferenceCheckboxProps) => {
           setShow={setShow}
         />
         {show && (
-          <Box paddingLeft="spacingL">
+          <Box paddingLeft={isLast ? 'spacingL' : undefined}>
             {field.fields.map((nestedField, index) => {
-              return (
-                <FieldCheckbox
-                  key={nestedField.uniqueId()}
-                  selectedFields={selectedFields}
-                  field={nestedField}
-                  handleToggle={handleToggle}
-                  isLast={field.fields.length - 1 === index}
-                />
-              );
+              let widget;
+              {
+                if (!isLast) {
+                  widget = (
+                    <Flex>
+                      <Box
+                        className={css({
+                          borderLeft: `1px solid ${tokens.gray300}`,
+                          width: tokens.spacingL,
+                          height: '40px',
+                          position: 'relative',
+                          right: '24px',
+                        })}></Box>
+                      <FieldCheckbox
+                        key={nestedField.uniqueId()}
+                        selectedFields={selectedFields}
+                        field={nestedField}
+                        handleToggle={handleToggle}
+                        isLast={field.fields.length - 1 === index}
+                      />
+                    </Flex>
+                  );
+                } else {
+                  widget = (
+                    <FieldCheckbox
+                      key={nestedField.uniqueId()}
+                      selectedFields={selectedFields}
+                      field={nestedField}
+                      handleToggle={handleToggle}
+                      isLast={field.fields.length - 1 === index}
+                    />
+                  );
+                }
+              }
+
+              return widget;
             })}
           </Box>
         )}
@@ -128,16 +157,27 @@ const ReferenceArrayCheckbox = (props: ReferenceArrayCheckboxProps) => {
         />
       </Flex>
       {show && (
-        <Box style={{ paddingLeft: '48px' }}>
+        <Box style={{ paddingLeft: '24px' }}>
           {field.items.map((item, index) => {
+            const last = field.items.length - 1 === index;
+
             return (
               <Flex>
-                <Indentation isLast={field.items.length - 1 === index} />
+                <Box
+                  className={css({
+                    borderLeft: `1px solid ${tokens.gray300}`,
+                    width: tokens.spacingL,
+                    height: '40px',
+                    position: 'relative',
+                    right: '24px',
+                  })}></Box>
+                <Indentation isLast={last} />
                 <ReferenceItemCheckbox
                   key={item.uniqueId()}
                   field={item}
                   selectedFields={selectedFields}
                   handleToggle={handleToggle}
+                  isLast={last}
                 />
               </Flex>
             );
@@ -155,10 +195,10 @@ type ReferenceItemCheckboxProps = {
   isLast?: boolean;
 };
 const ReferenceItemCheckbox = (props: ReferenceItemCheckboxProps) => {
-  const { field, selectedFields, handleToggle } = props;
+  const { field, selectedFields, handleToggle, isLast } = props;
   const [show, setShow] = useState(false);
   return (
-    <Flex flexDirection="column" style={{ width: '100%' }}>
+    <Flex flexDirection="column" fullWidth>
       <CheckboxContainer
         field={field}
         selectedFields={selectedFields}
@@ -167,19 +207,55 @@ const ReferenceItemCheckbox = (props: ReferenceItemCheckboxProps) => {
         setShow={setShow}
       />
       {show && (
-        <Box paddingLeft="spacingL">
-          {field.fields.map((f, index) => {
-            return (
-              <FieldCheckbox
-                key={f.uniqueId()}
-                field={f}
-                selectedFields={selectedFields}
-                handleToggle={handleToggle}
-                isLast={field.fields.length - 1 === index}
-              />
-            );
-          })}
-        </Box>
+        <Flex>
+          <Box
+            className={css({
+              borderLeft: `1px solid ${tokens.gray300}`,
+              width: tokens.spacingL,
+              height: `${field.fields.length * 40}px`,
+              position: 'relative',
+              right: '72px',
+            })}></Box>
+          <Box style={{ width: '100%' }}>
+            {field.fields.map((f, index) => {
+              let component;
+              {
+                if (!isLast) {
+                  component = (
+                    <Flex>
+                      <Box
+                        className={css({
+                          borderLeft: `1px solid ${tokens.gray300}`,
+                          height: '40px',
+                          position: 'relative',
+                          right: '48px',
+                        })}></Box>
+                      <FieldCheckbox
+                        key={f.uniqueId()}
+                        field={f}
+                        selectedFields={selectedFields}
+                        handleToggle={handleToggle}
+                        isLast={field.fields.length - 1 === index}
+                      />
+                    </Flex>
+                  );
+                } else {
+                  component = (
+                    <FieldCheckbox
+                      key={f.uniqueId()}
+                      field={f}
+                      selectedFields={selectedFields}
+                      handleToggle={handleToggle}
+                      isLast={field.fields.length - 1 === index}
+                    />
+                  );
+                }
+              }
+
+              return component;
+            })}
+          </Box>
+        </Flex>
       )}
     </Flex>
   );
