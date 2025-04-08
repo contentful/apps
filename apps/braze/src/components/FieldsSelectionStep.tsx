@@ -107,7 +107,6 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
           borderRadius: tokens.borderRadiusSmall,
         })}
         marginTop="spacingXs"
-        marginRight="spacingXs"
         marginLeft="spacingXs"
         padding="spacingXs">
         <Checkbox id={entry.id} isChecked={entrySelected} onChange={toggleEntry}>
