@@ -35,6 +35,7 @@ const BasicFieldCheckbox = (props: BasicFieldCheckboxProps) => {
       isSelected={field.selected}
       title={field.displayName()}
       onChange={handleToggle}
+      isDisabled={!field.isEnabled()}
     />
   );
 };
