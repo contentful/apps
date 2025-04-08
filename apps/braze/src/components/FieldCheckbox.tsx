@@ -215,7 +215,7 @@ const ReferenceItemCheckbox = (props: ReferenceItemCheckboxProps) => {
               width: tokens.spacingL,
               height: `${field.fields.length * 40}px`,
               position: 'relative',
-              right: '72px',
+              right: isLast ? '70.5px' : '71px',
             })}></Box>
           <Box style={{ width: '100%' }}>
             {field.fields.map((f, index) => {
@@ -229,7 +229,7 @@ const ReferenceItemCheckbox = (props: ReferenceItemCheckboxProps) => {
                           borderLeft: `1px solid ${tokens.gray300}`,
                           height: '40px',
                           position: 'relative',
-                          right: '48px',
+                          right: '47.5px',
                         })}></Box>
                       <FieldCheckbox
                         key={f.uniqueId()}
