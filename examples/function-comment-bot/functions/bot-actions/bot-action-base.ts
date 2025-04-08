@@ -1,6 +1,22 @@
-import { PlainClientAPI } from 'contentful-management';
+import { type FunctionEventContext } from '@contentful/node-apps-toolkit';
+import { type PlainClientAPI, createClient } from 'contentful-management';
 
 export class BotActionBase {
+  initContentfulManagementClient(context: FunctionEventContext): PlainClientAPI {
+    if (!context.cmaClientOptions) {
+      throw new Error(
+        'Contentful Management API client options are only provided for certain function types. To learn more about using the CMA within functions, see https://www.contentful.com/developers/docs/extensibility/app-framework/functions/#using-the-cma.'
+      );
+    }
+    return createClient(context.cmaClientOptions, {
+      type: 'plain',
+      defaults: {
+        spaceId: context.spaceId,
+        environmentId: context.environmentId,
+      },
+    });
+  }
+
   async loadContentType(cma: PlainClientAPI, entryId: string) {
     return cma.entry.get({ entryId });
   }

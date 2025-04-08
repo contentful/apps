@@ -1,40 +1,54 @@
-import { Flex, CopyButton } from '@contentful/f36-components';
-import tokens from '@contentful/f36-tokens';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { codeBlockStyles, lineNumberStyle } from './CodeBlock.styles';
+import {
+  lineNumberStyle,
+  copyButtonBar,
+  copyButton,
+  codeBlockWithErrorAndWithoutCopyButtonBorder,
+  codeBlockWithoutErrorAndWithoutCopyButtonBorder,
+  codeBlockWithoutErrorAndWithCopyButton,
+  codeBlockWithErrorAndWithCopyButton,
+} from './CodeBlock.styles';
+import { BorderRadiusTokens } from '@contentful/f36-tokens';
+import { CopyButton, Flex } from '@contentful/f36-components';
 
 type Props = {
   code: string;
   language?: string;
+  hasError?: boolean;
+  border?: BorderRadiusTokens;
+  showCopyButton?: boolean;
 };
-const CodeBlock = ({ code, language }: Props) => {
+const CodeBlock = ({ code, language, hasError, showCopyButton }: Props) => {
+  const languageWithoutColor = 'pureBasic';
+  let styles;
+
+  if (hasError) {
+    if (showCopyButton) {
+      styles = codeBlockWithErrorAndWithCopyButton;
+    } else {
+      styles = codeBlockWithErrorAndWithoutCopyButtonBorder;
+    }
+  } else {
+    if (showCopyButton) {
+      styles = codeBlockWithoutErrorAndWithCopyButton;
+    } else {
+      styles = codeBlockWithoutErrorAndWithoutCopyButtonBorder;
+    }
+  }
+
   return (
     <>
-      <Flex
-        style={{
-          backgroundColor: tokens.gray400,
-          height: tokens.spacing2Xl,
-          borderTopLeftRadius: tokens.borderRadiusSmall,
-          borderTopRightRadius: tokens.borderRadiusSmall,
-        }}
-        alignItems="center"
-        justifyContent="end">
-        <CopyButton
-          value={code}
-          style={{
-            height: tokens.spacingXl,
-            width: tokens.spacingXl,
-            minHeight: tokens.spacingXl,
-            marginRight: tokens.spacingXs,
-          }}
-        />
-      </Flex>
+      {showCopyButton && (
+        <Flex style={copyButtonBar} alignItems="center" justifyContent="end">
+          <CopyButton data-testid="copy-button" value={code} style={copyButton} />
+        </Flex>
+      )}
       <SyntaxHighlighter
         data-testid="code-component"
-        language={language}
-        style={codeBlockStyles}
+        language={!hasError ? language : languageWithoutColor}
+        style={styles}
         lineNumberStyle={lineNumberStyle}
-        showLineNumbers={true}>
+        showLineNumbers>
         {code}
       </SyntaxHighlighter>
     </>
