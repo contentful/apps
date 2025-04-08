@@ -8,11 +8,22 @@ interface CheckboxCardProps extends MarginProps {
   isSelected: boolean;
   title: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  isDisabled?: boolean;
   fontWeight?: FontWeightTokens;
   children?: React.ReactNode;
 }
 function CheckboxCard(props: CheckboxCardProps) {
-  const { id, isSelected, title, onChange, fontWeight, children, margin, ...otherProps } = props;
+  const {
+    id,
+    isSelected,
+    title,
+    onChange,
+    isDisabled = false,
+    fontWeight,
+    children,
+    margin,
+    ...otherProps
+  } = props;
 
   return (
     <Flex
@@ -22,7 +33,7 @@ function CheckboxCard(props: CheckboxCardProps) {
       margin={margin || 'spacingXs'}
       padding="spacingXs"
       {...otherProps}>
-      <Checkbox id={id} isChecked={isSelected} onChange={onChange}>
+      <Checkbox id={id} isChecked={isSelected} onChange={onChange} isDisabled={isDisabled}>
         <Text fontWeight={fontWeight}>{title}</Text>
       </Checkbox>
       {children}
