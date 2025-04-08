@@ -32,7 +32,11 @@ function CheckboxCard(props: CheckboxCardProps) {
       alignItems="center"
       margin="spacingXs"
       padding="spacingXs">
-      <Checkbox id={id} isChecked={selected} onChange={handleChange} isDisabled={isDisabled}>
+      <Checkbox
+        id={id}
+        isChecked={!isDisabled && selected}
+        onChange={handleChange}
+        isDisabled={isDisabled}>
         <Text fontWeight={fontWeight}>{title}</Text>
       </Checkbox>
       {children}
