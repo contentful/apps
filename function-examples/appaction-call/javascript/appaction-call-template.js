@@ -3,7 +3,26 @@
  *
  * This template provides a starting point for creating an App Action function.
  * You'll need to implement your custom logic in the handler function below.
- *
+ */
+
+import { createClient } from 'contentful-management';
+
+function initContentfulManagementClient(context) {
+  if (!context.cmaClientOptions) {
+    throw new Error(
+      'Contentful Management API client options are only provided for certain function types. To learn more about using the CMA within functions, see https://www.contentful.com/developers/docs/extensibility/app-framework/functions/#using-the-cma.'
+    );
+  }
+  return createClient(context.cmaClientOptions, {
+    type: 'plain',
+    defaults: {
+      spaceId: context.spaceId,
+      environmentId: context.environmentId,
+    },
+  });
+}
+
+/**
  * This handler is invoked when your App Action is called
  *
  * @param {Object} event - Contains the parameters passed to your App Action
@@ -11,8 +30,8 @@
  * @returns {Object} The response from your App Action
  */
 export const handler = async (event, context) => {
-  // Access the authenticated CMA client to interact with Contentful
-  const cma = context.cma;
+  // Instantiate an authenticated CMA client to interact with Contentful
+  const cma = initContentfulManagementClient(context);
 
   // Extract parameters from the event body
   // const { paramName } = event.body;

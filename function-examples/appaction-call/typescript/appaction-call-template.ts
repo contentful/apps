@@ -1,9 +1,10 @@
-import {
+import type {
   FunctionEventContext,
   FunctionEventHandler,
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
+import { type PlainClientAPI, createClient } from 'contentful-management';
 
 /**
  * App Action Function Template
@@ -21,6 +22,21 @@ type AppActionParameters = {
   // booleanParam: boolean;
 };
 
+function initContentfulManagementClient(context: FunctionEventContext): PlainClientAPI {
+  if (!context.cmaClientOptions) {
+    throw new Error(
+      'Contentful Management API client options are only provided for certain function types. To learn more about using the CMA within functions, see https://www.contentful.com/developers/docs/extensibility/app-framework/functions/#using-the-cma.'
+    );
+  }
+  return createClient(context.cmaClientOptions, {
+    type: 'plain',
+    defaults: {
+      spaceId: context.spaceId,
+      environmentId: context.environmentId,
+    },
+  });
+}
+
 /**
  * This handler is invoked when your App Action is called
  *
@@ -31,8 +47,8 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   event: AppActionRequest<'Custom', AppActionParameters>,
   context: FunctionEventContext
 ) => {
-  // Access the authenticated CMA client to interact with Contentful
-  const cma = context.cma!;
+  // Instantiate an authenticated CMA client to interact with Contentful
+  const cma = initContentfulManagementClient(context);
 
   // Extract parameters from the event body
   // const { paramName } = event.body;

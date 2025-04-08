@@ -1,0 +1,13 @@
+{
+  "functions": [
+    {
+      "id": "appeventTransformationExample",
+      "name": "Example App Event Transformation Function",
+      "description": "This is an example to help you learn how App Event transformation functions work; this function transforms the event payload by geocoding a latitude and longitude field to a human-readable address.",
+      "path": "functions/appevent-transformation-example.js",
+      "entryFile": "functions/appevent-transformation-example.ts",
+      "allowNetworks": ["openstreetmap.org", "nominatim.openstreetmap.org"],
+      "accepts": ["appevent.transformation"]
+    }
+  ]
+}

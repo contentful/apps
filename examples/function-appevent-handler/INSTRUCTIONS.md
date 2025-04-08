@@ -1,6 +1,6 @@
 # App Event Handler Function Example
 
-App event handler functions enable you to react to events in your Contentful space by executing custom code when specific events occur. This template provides a starting point with skeleton code—you must add your custom handling logic to meet your specific use case.
+App event handler functions enable you to react to events in your Contentful space by executing custom code when specific events occur.
 
 ## What is an App Event Handler Function?
 

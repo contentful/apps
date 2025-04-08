@@ -1,12 +1,11 @@
-import { Box, Checkbox, Flex, IconButton, Text } from '@contentful/f36-components';
-import tokens from '@contentful/f36-tokens';
-import { css } from 'emotion';
+import { Box, IconButton } from '@contentful/f36-components';
 import { Field } from '../fields/Field';
 import { ReferenceArrayField } from '../fields/ReferenceArrayField';
 import { ReferenceField } from '../fields/ReferenceField';
 import { ReferenceItem } from '../fields/ReferenceItem';
 import { useState } from 'react';
 import { ChevronDownIcon, ChevronUpIcon } from '@contentful/f36-icons';
+import CheckboxCard from './CheckboxCard';
 
 type FieldCheckboxProps =
   | BasicFieldCheckboxProps
@@ -27,24 +26,17 @@ type BasicFieldCheckboxProps = {
   field: Field;
   handleToggle: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
+
 const BasicFieldCheckbox = (props: BasicFieldCheckboxProps) => {
   const { field, handleToggle } = props;
   return (
-    <Box
-      className={css({
-        border: `1px solid ${tokens.gray200}`,
-        borderRadius: tokens.borderRadiusSmall,
-      })}
-      margin="spacingXs"
-      padding="spacingXs">
-      <Checkbox
-        id={field.uniqueId()}
-        isChecked={field.selected}
-        onChange={handleToggle}
-        isDisabled={!field.isEnabled()}>
-        <Text fontWeight="fontWeightNormal">{field.displayName()}</Text>
-      </Checkbox>
-    </Box>
+    <CheckboxCard
+      id={field.uniqueId()}
+      isSelected={field.selected}
+      title={field.displayName()}
+      onChange={handleToggle}
+      isDisabled={!field.isEnabled()}
+    />
   );
 };
 
@@ -132,26 +124,23 @@ const CheckboxContainer = (props: {
   setShow: (show: boolean) => void;
 }) => {
   const { field, handleToggle, show, setShow } = props;
+
   return (
-    <Flex
-      className={css({
-        border: `1px solid ${tokens.gray200}`,
-        borderRadius: tokens.borderRadiusSmall,
-      })}
-      justifyContent="space-between"
-      margin="spacingXs"
-      padding="spacingXs">
-      <Checkbox id={field.uniqueId()} isChecked={field.selected} onChange={handleToggle}>
-        <Text fontWeight="fontWeightDemiBold">{field.displayName()}</Text>
-      </Checkbox>
+    <CheckboxCard
+      id={field.uniqueId()}
+      isSelected={field.selected}
+      title={field.displayName()}
+      onChange={handleToggle}
+      fontWeight="fontWeightDemiBold">
       <IconButton
+        style={{ minHeight: '0' }}
         icon={show ? <ChevronUpIcon /> : <ChevronDownIcon />}
         aria-label="Down arrow"
         variant="transparent"
         size="small"
         onClick={() => setShow(!show)}
       />
-    </Flex>
+    </CheckboxCard>
   );
 };
 

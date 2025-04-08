@@ -10,7 +10,21 @@ export const lineNumberStyle: CSSProperties = {
   width: tokens.spacing2Xl,
 };
 
-export const codeBlockStyles: Record<string, CSSProperties> = {
+export const copyButtonBar: CSSProperties = {
+  backgroundColor: tokens.gray400,
+  height: tokens.spacing2Xl,
+  borderTopLeftRadius: tokens.borderRadiusSmall,
+  borderTopRightRadius: tokens.borderRadiusSmall,
+};
+
+export const copyButton: CSSProperties = {
+  height: tokens.spacingXl,
+  width: tokens.spacingXl,
+  minHeight: tokens.spacingXl,
+  marginRight: tokens.spacingXs,
+};
+
+export const codeBlockWithoutErrorAndWithCopyButton: Record<string, CSSProperties> = {
   'code[class*="language-"]': {
     color: tokens.colorBlack,
     background: 'none',
@@ -32,11 +46,11 @@ export const codeBlockStyles: Record<string, CSSProperties> = {
     hyphens: 'none',
   },
   'pre[class*="language-"]': {
-    color: 'black',
-    background: tokens.gray100,
     border: `1px solid ${tokens.gray300}`,
     borderBottomLeftRadius: tokens.borderRadiusSmall,
     borderBottomRightRadius: tokens.borderRadiusSmall,
+    color: tokens.colorBlack,
+    background: tokens.gray100,
     textShadow: '0 1px white',
     fontFamily: "'Geist Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
     fontSize: '1em',
@@ -203,5 +217,35 @@ export const codeBlockStyles: Record<string, CSSProperties> = {
   },
   italic: {
     fontStyle: 'italic',
+  },
+};
+
+export const codeBlockWithErrorAndWithCopyButton: Record<string, CSSProperties> = {
+  ...codeBlockWithoutErrorAndWithCopyButton,
+  'pre[class*="language-"]': {
+    ...codeBlockWithoutErrorAndWithCopyButton['pre[class*="language-"]'],
+    border: `1px solid ${tokens.red600}`,
+    borderBottomLeftRadius: tokens.borderRadiusSmall,
+    borderBottomRightRadius: tokens.borderRadiusSmall,
+  },
+  'code[class*="language-"]': {
+    ...codeBlockWithoutErrorAndWithCopyButton['code[class*="language-"]'],
+    color: tokens.red600,
+  },
+};
+
+export const codeBlockWithErrorAndWithoutCopyButtonBorder: Record<string, CSSProperties> = {
+  ...codeBlockWithErrorAndWithCopyButton,
+  'pre[class*="language-"]': {
+    ...codeBlockWithErrorAndWithCopyButton['pre[class*="language-"]'],
+    borderRadius: tokens.borderRadiusSmall,
+  },
+};
+
+export const codeBlockWithoutErrorAndWithoutCopyButtonBorder: Record<string, CSSProperties> = {
+  ...codeBlockWithoutErrorAndWithCopyButton,
+  'pre[class*="language-"]': {
+    ...codeBlockWithoutErrorAndWithCopyButton['pre[class*="language-"]'],
+    borderRadius: tokens.borderRadiusSmall,
   },
 };

@@ -1,0 +1,13 @@
+{
+  "functions": [
+    {
+      "id": "commentBotExample",
+      "name": "Comment Bot 🤖",
+      "description": "This is an example to help you learn how App Event handler functions work.",
+      "path": "functions/comment-bot.js",
+      "entryFile": "functions/comment-bot.ts",
+      "allowNetworks": [],
+      "accepts": ["appevent.handler"]
+    }
+  ]
+}
