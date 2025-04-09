@@ -19,7 +19,8 @@ import { styles } from './ConfigScreen.styles';
 import Splitter from '../components/Splitter';
 
 export interface AppInstallationParameters {
-  apiKey: string;
+  contentfulApiKey: string;
+  brazeApiKey: string;
 }
 
 export const BRAZE_CONNECTED_CONTENT_DOCUMENTATION =
@@ -27,8 +28,9 @@ export const BRAZE_CONNECTED_CONTENT_DOCUMENTATION =
 export const BRAZE_APP_DOCUMENTATION = 'https://www.contentful.com/help/apps/braze-app/';
 export const CONTENT_TYPE_DOCUMENTATION =
   'https://www.contentful.com/help/content-types/configure-content-type/';
+const BRAZE_API_KEY_DOCUMENTATION = `https://dashboard.braze.com/app_settings/developer_console/apisettings#apikeys`;
 
-export async function callToContentful(url: string, newApiKey: string) {
+export async function callTo(url: string, newApiKey: string) {
   return await fetch(url, {
     method: 'GET',
     headers: {
@@ -39,35 +41,47 @@ export async function callToContentful(url: string, newApiKey: string) {
 }
 
 const ConfigScreen = () => {
-  const [apiKeyIsValid, setApiKeyIsValid] = useState(true);
+  const [contentfulApiKeyIsValid, contentfulSetApiKeyIsValid] = useState(true);
+  const [brazeApiKeyIsValid, brazeSetApiKeyIsValid] = useState(true);
   const [parameters, setParameters] = useState<AppInstallationParameters>({
-    apiKey: '',
+    contentfulApiKey: '',
+    brazeApiKey: '',
   });
   const sdk = useSDK<ConfigAppSDK>();
   const spaceId = sdk.ids.space;
 
-  async function checkApiKey(apiKey: string) {
+  async function checkContentfulApiKey(apiKey: string) {
     if (!apiKey) {
-      setApiKeyIsValid(false);
+      contentfulSetApiKeyIsValid(false);
       return false;
     }
 
     const url = `https://${sdk.hostnames.delivery}/spaces/${sdk.ids.space}`;
-    const response: Response = await callToContentful(url, apiKey);
+    const response: Response = await callTo(url, apiKey);
 
     const isValid = response.ok;
-    setApiKeyIsValid(isValid);
+    contentfulSetApiKeyIsValid(isValid);
 
     return isValid;
+  }
+
+  async function checkBrazeApiKey(apiKey: string) {
+    const hasAValue = !!apiKey?.trim();
+    brazeSetApiKeyIsValid(hasAValue);
+
+    // TODO : See how to check if the api key is valid, we cannot add a fetch here because the api key is for reading and also writing
+
+    return hasAValue;
   }
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
-    const isValid = await checkApiKey(parameters.apiKey);
+    const isContentfulKeyValid = await checkContentfulApiKey(parameters.contentfulApiKey);
+    const isBrazeKeyValid = await checkBrazeApiKey(parameters.brazeApiKey);
 
-    if (!parameters.apiKey || !isValid) {
-      sdk.notifier.error('A valid Contentful API key is required');
+    if (!isContentfulKeyValid || !isBrazeKeyValid) {
+      sdk.notifier.error('A valid API key is required');
       return false;
     }
 
@@ -119,15 +133,48 @@ const ConfigScreen = () => {
           <Form>
             <FormControl.Label>Contentful Delivery API - access token</FormControl.Label>
             <TextInput
-              value={parameters.apiKey}
-              name="apiKey"
-              data-testid="apiKey"
-              isInvalid={!apiKeyIsValid}
+              value={parameters.contentfulApiKey}
+              name="contentfulApiKey"
+              data-testid="contentfulApiKey"
+              isInvalid={!contentfulApiKeyIsValid}
               placeholder="ex. 0ab1c234DE56f..."
               type="password"
-              onChange={(e) => setParameters({ ...parameters, apiKey: e.target.value })}
+              onChange={(e) => setParameters({ ...parameters, contentfulApiKey: e.target.value })}
             />
-            {!apiKeyIsValid && (
+            {!contentfulApiKeyIsValid && (
+              <FormControl.ValidationMessage>Invalid API key</FormControl.ValidationMessage>
+            )}
+          </Form>
+        </Box>
+        <Splitter marginTop="spacingL" marginBottom="spacingL" />
+        <Subheading className={styles.subheading}>Content Blocks configuration</Subheading>
+        <Paragraph marginBottom="spacing2Xs">
+          {' '}
+          Connect specific entry fields stored in Contentful to create Content Blocks in Braze
+          through
+        </Paragraph>
+        <TextLink
+          icon={<ExternalLinkIcon />}
+          alignIcon="end"
+          href={BRAZE_API_KEY_DOCUMENTATION}
+          target="_blank"
+          rel="noopener noreferrer">
+          Braze's Content Block feature
+        </TextLink>
+        <span>.</span>
+        <Box marginTop="spacingM">
+          <Form>
+            <FormControl.Label>Braze REST API key</FormControl.Label>
+            <TextInput
+              value={parameters.brazeApiKey}
+              name="brazeApiKey"
+              data-testid="brazeApiKey"
+              isInvalid={!brazeApiKeyIsValid}
+              placeholder="ex. 0ab1c234DE56f..."
+              type="password"
+              onChange={(e) => setParameters({ ...parameters, brazeApiKey: e.target.value })}
+            />
+            {!brazeApiKeyIsValid && (
               <FormControl.ValidationMessage>Invalid API key</FormControl.ValidationMessage>
             )}
           </Form>
