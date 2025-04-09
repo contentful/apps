@@ -6,7 +6,7 @@ import { ReferenceItem } from '../fields/ReferenceItem';
 import { useState } from 'react';
 import { ChevronDownIcon, ChevronUpIcon } from '@contentful/f36-icons';
 import CheckboxCard from './CheckboxCard';
-import { Indentation } from './Indentation';
+import { Indentation, VerticalComponent } from './Indentation';
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
 
@@ -97,14 +97,7 @@ const ReferenceCheckbox = (props: ReferenceCheckboxProps) => {
                 if (!isLast) {
                   widget = (
                     <Flex>
-                      <Box
-                        className={css({
-                          borderLeft: `1px solid ${tokens.gray300}`,
-                          width: tokens.spacingL,
-                          height: '40px',
-                          position: 'relative',
-                          right: '24px',
-                        })}></Box>
+                      <VerticalComponent />
                       <FieldCheckbox
                         key={nestedField.uniqueId()}
                         selectedFields={selectedFields}
@@ -164,14 +157,7 @@ const ReferenceArrayCheckbox = (props: ReferenceArrayCheckboxProps) => {
 
             return (
               <Flex>
-                <Box
-                  className={css({
-                    borderLeft: `1px solid ${tokens.gray300}`,
-                    width: tokens.spacingL,
-                    height: '40px',
-                    position: 'relative',
-                    right: '24px',
-                  })}></Box>
+                <VerticalComponent />
                 <Indentation isLast={last} />
                 <ReferenceItemCheckbox
                   key={item.uniqueId()}

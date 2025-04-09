@@ -17,6 +17,10 @@ function LComponent() {
   return <Box className={styles.lStyle}></Box>;
 }
 
+export const VerticalComponent = () => {
+  return <Box className={styles.verticalStyle} />;
+};
+
 export const Indentation = ({ isLast }: Props) => {
   if (isLast) {
     return <LComponent />;
