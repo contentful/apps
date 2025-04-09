@@ -45,8 +45,7 @@ const Dialog = () => {
     const fetchEntry = async () => {
       const response = await cma.entry.references({ entryId: entryInfo.id, include: 5 });
       const items = resolveResponse(response);
-      const fields = await new FieldsFactory(cma).createFields(items[0]);
-      fieldsRef.current = fields;
+      fieldsRef.current = await new FieldsFactory(cma).createFields(items[0]);
       const entry = new Entry(
         entryInfo.id,
         entryInfo.contentTypeId,

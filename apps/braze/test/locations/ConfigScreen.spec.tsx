@@ -2,9 +2,11 @@ import { cleanup, fireEvent, render, RenderResult, screen } from '@testing-libra
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
 import ConfigScreen, {
-  BRAZE_APP_DOCUMENTATION,
+  BRAZE_API_KEY_DOCUMENTATION,
   BRAZE_CONNECTED_CONTENT_DOCUMENTATION,
-  CONTENT_TYPE_DOCUMENTATION,
+    BRAZE_APP_DOCUMENTATION,
+    BRAZE_CONNECTED_CONTENT_DOCUMENTATION,
+    CONTENT_TYPE_DOCUMENTATION
 } from '../../src/locations/ConfigScreen';
 import userEvent from '@testing-library/user-event';
 import { queries } from '@testing-library/dom';
@@ -39,16 +41,21 @@ describe('Config Screen component', () => {
   });
 
   describe('components', () => {
-    it('renders the braze link correctly', () => {
+    it('renders the braze connected content link correctly', () => {
       const brazeLink = configScreen.getByText("Braze's Connected Content feature");
 
       expect(brazeLink).toBeTruthy();
-      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(
-        BRAZE_CONNECTED_CONTENT_DOCUMENTATION
-      );
+      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_CONNECTED_CONTENT_DOCUMENTATION);
     });
 
-    it('renders the link to manage api keys', () => {
+      it('renders the braze api key link correctly', () => {
+          const brazeLink = configScreen.getByText("Braze's Content Block feature");
+
+          expect(brazeLink).toBeTruthy();
+          expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_API_KEY_DOCUMENTATION);
+      });
+
+    it('renders the link to contentful manage api keys', () => {
       const brazeLink = configScreen.getByText('Manage API Keys');
 
       expect(brazeLink).toBeTruthy();
@@ -71,13 +78,23 @@ describe('Config Screen component', () => {
       expect(brazeLink.closest('a')?.getAttribute('href')).toBe(CONTENT_TYPE_DOCUMENTATION);
     });
 
-    it('has an input that sets api key correctly', () => {
+    it('has an input that sets contentful api key correctly', () => {
       const input = screen.getAllByTestId('contentfulApiKey')[0];
       fireEvent.change(input, {
         target: { value: `A test value for input` },
       });
 
       const inputExpected = screen.getAllByTestId('contentfulApiKey')[0] as HTMLInputElement;
+      expect(inputExpected.value).toEqual(`A test value for input`);
+    });
+
+    it('has an input that sets braze api key correctly', () => {
+      const input = screen.getAllByTestId('brazeApiKey')[0];
+      fireEvent.change(input, {
+        target: { value: `A test value for input` },
+      });
+
+      const inputExpected = screen.getAllByTestId('brazeApiKey')[0] as HTMLInputElement;
       expect(inputExpected.value).toEqual(`A test value for input`);
     });
   });
