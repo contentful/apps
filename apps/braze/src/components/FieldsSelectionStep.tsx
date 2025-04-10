@@ -128,7 +128,11 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
       </Box>
 
       <WizardFooter>
-        <Button variant="primary" size="small" onClick={handleNextStep} isDisabled={!entrySelected}>
+        <Button
+          variant="primary"
+          size="small"
+          onClick={handleNextStep}
+          isDisabled={selectedFields.size === 0}>
           Next
         </Button>
       </WizardFooter>
