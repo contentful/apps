@@ -7,6 +7,7 @@ export class Entry {
   public title: string;
   public fields: Field[];
   private spaceId: string;
+  private environment: string;
   private contentfulToken: string;
   constructor(
     id: string,
@@ -14,6 +15,7 @@ export class Entry {
     title: string,
     fields: Field[],
     spaceId: string,
+    environment: string,
     contentfulToken: string
   ) {
     this.id = id;
@@ -21,6 +23,7 @@ export class Entry {
     this.title = title;
     this.fields = fields;
     this.spaceId = spaceId;
+    this.environment = environment;
     this.contentfulToken = contentfulToken;
   }
 
@@ -30,7 +33,7 @@ export class Entry {
 {% endcapture %}
   
 {% connected_content
-  https://graphql.contentful.com/content/v1/spaces/${this.spaceId}
+  https://graphql.contentful.com/content/v1/spaces/${this.spaceId}/environments/${this.environment}
   :method post
   :headers {"Authorization": "Bearer ${this.contentfulToken}"}
   :body {{body}}
@@ -50,7 +53,7 @@ export class Entry {
 
   async getGraphQLResponse(locales: string[]) {
     const response = await fetch(
-      `https://graphql.contentful.com/content/v1/spaces/${this.spaceId}`,
+      `https://graphql.contentful.com/content/v1/spaces/${this.spaceId}/environments/${this.environment}`,
       {
         method: 'POST',
         headers: {

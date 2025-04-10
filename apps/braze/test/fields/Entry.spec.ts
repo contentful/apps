@@ -8,26 +8,43 @@ describe('Entry', () => {
   field.selected = true;
   const localizedField = new BasicField('title', 'Title', 'blogPost', true);
   localizedField.selected = true;
-  const entry = new Entry('anId', 'aCustomContentType', 'aTitle', [field], 'anSpaceId', 'apiToken');
+  const entry = new Entry(
+    'anId',
+    'aCustomContentType',
+    'aTitle',
+    [field],
+    'anSpaceId',
+    'anEnvironemnt',
+    'apiToken'
+  );
   const entryLocalized = new Entry(
     'anId',
     'aCustomContentType',
     'aTitle',
     [localizedField],
     'anSpaceId',
+    'anEnvironemnt',
     'apiToken'
   );
   const locales = ['en-US', 'it', 'es-AR'];
 
   it('Generates content call with no fields', () => {
-    const entry = new Entry('anId', 'aCustomContentType', 'aTitle', [], 'anSpaceId', 'apiToken');
+    const entry = new Entry(
+      'anId',
+      'aCustomContentType',
+      'aTitle',
+      [],
+      'anSpaceId',
+      'anEnvironemnt',
+      'apiToken'
+    );
     const result = entry.generateConnectedContentCall([]);
     const expected = removeIndentation(`{% capture body %}
       {"query":"{aCustomContentType(id:\\"anId\\"){}}"}
       {% endcapture %}
       
       {% connected_content
-      https://graphql.contentful.com/content/v1/spaces/anSpaceId
+      https://graphql.contentful.com/content/v1/spaces/anSpaceId/environments/anEnvironemnt
       :method post
       :headers {"Authorization": "Bearer apiToken"}
       :body {{body}}
