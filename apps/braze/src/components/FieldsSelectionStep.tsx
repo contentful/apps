@@ -62,10 +62,9 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
     const children = field.parent.getChildren();
 
     const allChildrenSelected = children.every((child) => selectedSet.has(child.uniqueId()));
-    const anyChildrenSelected = children.some((child) => selectedSet.has(child.uniqueId()));
     if (allChildrenSelected) {
       selectedSet.add(field.parent.uniqueId());
-    } else if (!anyChildrenSelected) {
+    } else {
       selectedSet.delete(field.parent.uniqueId());
     }
 
