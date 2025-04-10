@@ -72,7 +72,7 @@ export class Entry {
 
   getAllFields(): Field[] {
     return this.fields.flatMap((field) => {
-      return field.getAllFields();
+      return [field, ...field.getChildren()];
     });
   }
 

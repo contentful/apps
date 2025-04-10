@@ -13,27 +13,42 @@ type FieldCheckboxProps =
   | ReferenceArrayCheckboxProps
   | ReferenceItemCheckboxProps;
 const FieldCheckbox = (props: FieldCheckboxProps) => {
-  const { field, handleToggle } = props;
+  const { field, selectedFields, handleToggle } = props;
   if (field instanceof ReferenceField) {
-    return <ReferenceCheckbox key={field.id} field={field} handleToggle={handleToggle} />;
+    return (
+      <ReferenceCheckbox
+        field={field}
+        selectedFields={selectedFields}
+        handleToggle={handleToggle}
+      />
+    );
   } else if (field instanceof ReferenceArrayField) {
-    return <ReferenceArrayCheckbox key={field.id} field={field} handleToggle={handleToggle} />;
+    return (
+      <ReferenceArrayCheckbox
+        field={field}
+        selectedFields={selectedFields}
+        handleToggle={handleToggle}
+      />
+    );
   }
-  return <BasicFieldCheckbox key={field.id} field={field} handleToggle={handleToggle} />;
+  return (
+    <BasicFieldCheckbox field={field} selectedFields={selectedFields} handleToggle={handleToggle} />
+  );
 };
 
 type BasicFieldCheckboxProps = {
   field: Field;
+  selectedFields: Set<string>;
   handleToggle: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
 const BasicFieldCheckbox = (props: BasicFieldCheckboxProps) => {
-  const { field, handleToggle } = props;
+  const { field, selectedFields, handleToggle } = props;
   return (
     <CheckboxCard
       id={field.uniqueId()}
-      isSelected={field.selected}
       title={field.displayName()}
+      selectedFields={selectedFields}
       onChange={handleToggle}
       isDisabled={!field.isEnabled()}
     />
@@ -42,20 +57,28 @@ const BasicFieldCheckbox = (props: BasicFieldCheckboxProps) => {
 
 type ReferenceCheckboxProps = {
   field: ReferenceField;
+  selectedFields: Set<string>;
   handleToggle: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 const ReferenceCheckbox = (props: ReferenceCheckboxProps) => {
-  const { field, handleToggle } = props;
+  const { field, selectedFields, handleToggle } = props;
   const [show, setShow] = useState(false);
   return (
     <>
-      <CheckboxContainer field={field} handleToggle={handleToggle} show={show} setShow={setShow} />
+      <CheckboxContainer
+        field={field}
+        selectedFields={selectedFields}
+        handleToggle={handleToggle}
+        show={show}
+        setShow={setShow}
+      />
       {show && (
         <Box paddingLeft="spacingL">
           {field.fields.map((nestedField) => {
             return (
               <FieldCheckbox
                 key={nestedField.uniqueId()}
+                selectedFields={selectedFields}
                 field={nestedField}
                 handleToggle={handleToggle}
               />
@@ -69,14 +92,21 @@ const ReferenceCheckbox = (props: ReferenceCheckboxProps) => {
 
 type ReferenceArrayCheckboxProps = {
   field: ReferenceArrayField;
+  selectedFields: Set<string>;
   handleToggle: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 const ReferenceArrayCheckbox = (props: ReferenceArrayCheckboxProps) => {
-  const { field, handleToggle } = props;
+  const { field, selectedFields, handleToggle } = props;
   const [show, setShow] = useState(false);
   return (
     <>
-      <CheckboxContainer field={field} handleToggle={handleToggle} show={show} setShow={setShow} />
+      <CheckboxContainer
+        field={field}
+        selectedFields={selectedFields}
+        handleToggle={handleToggle}
+        show={show}
+        setShow={setShow}
+      />
       {show && (
         <Box paddingLeft="spacingL">
           {field.items.map((item) => {
@@ -84,6 +114,7 @@ const ReferenceArrayCheckbox = (props: ReferenceArrayCheckboxProps) => {
               <ReferenceItemCheckbox
                 key={item.uniqueId()}
                 field={item}
+                selectedFields={selectedFields}
                 handleToggle={handleToggle}
               />
             );
@@ -96,19 +127,31 @@ const ReferenceArrayCheckbox = (props: ReferenceArrayCheckboxProps) => {
 
 type ReferenceItemCheckboxProps = {
   field: ReferenceItem;
+  selectedFields: Set<string>;
   handleToggle: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 const ReferenceItemCheckbox = (props: ReferenceItemCheckboxProps) => {
-  const { field, handleToggle } = props;
+  const { field, selectedFields, handleToggle } = props;
   const [show, setShow] = useState(false);
   return (
     <>
-      <CheckboxContainer field={field} handleToggle={handleToggle} show={show} setShow={setShow} />
+      <CheckboxContainer
+        field={field}
+        selectedFields={selectedFields}
+        handleToggle={handleToggle}
+        show={show}
+        setShow={setShow}
+      />
       {show && (
         <Box paddingLeft="spacingL">
           {field.fields.map((field) => {
             return (
-              <FieldCheckbox key={field.uniqueId()} field={field} handleToggle={handleToggle} />
+              <FieldCheckbox
+                key={field.uniqueId()}
+                field={field}
+                selectedFields={selectedFields}
+                handleToggle={handleToggle}
+              />
             );
           })}
         </Box>
@@ -119,17 +162,18 @@ const ReferenceItemCheckbox = (props: ReferenceItemCheckboxProps) => {
 
 const CheckboxContainer = (props: {
   field: Field;
+  selectedFields: Set<string>;
   handleToggle: (event: React.ChangeEvent<HTMLInputElement>) => void;
   show: boolean;
   setShow: (show: boolean) => void;
 }) => {
-  const { field, handleToggle, show, setShow } = props;
+  const { field, selectedFields, handleToggle, show, setShow } = props;
 
   return (
     <CheckboxCard
       id={field.uniqueId()}
-      isSelected={field.selected}
       title={field.displayName()}
+      selectedFields={selectedFields}
       onChange={handleToggle}
       fontWeight="fontWeightDemiBold">
       <IconButton

@@ -39,8 +39,4 @@ export class ReferenceItem extends ReferenceField {
   generateLiquidTagForType(template: string): string[] {
     return this.selectedFields().flatMap((field) => field.generateLiquidTagForType(`${template}`));
   }
-
-  uniqueId(): string {
-    return !!this.parent ? `${this.parent.uniqueId()}${this.id}` : this.id;
-  }
 }

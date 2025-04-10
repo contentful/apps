@@ -8,7 +8,7 @@ describe('FieldCheckbox component', () => {
   it('Rich text field shows as disabled', () => {
     const richTextField = new RichTextField('id', 'name', 'contentType', false);
     const { getByText, container } = render(
-      <FieldCheckbox field={richTextField} handleToggle={() => {}} />
+      <FieldCheckbox field={richTextField} handleToggle={() => {}} selectedFields={new Set()} />
     );
     expect(getByText(richTextField.displayName())).toBeTruthy();
     const checkbox = container.querySelector('input[type="checkbox"]') as HTMLInputElement;
