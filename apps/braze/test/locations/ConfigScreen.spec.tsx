@@ -6,7 +6,7 @@ import ConfigScreen, {
   BRAZE_APP_DOCUMENTATION,
   BRAZE_CONNECTED_CONTENT_DOCUMENTATION,
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
-    CONTENT_TYPE_DOCUMENTATION
+  CONTENT_TYPE_DOCUMENTATION,
 } from '../../src/locations/ConfigScreen';
 import userEvent from '@testing-library/user-event';
 import { queries } from '@testing-library/dom';
@@ -42,24 +42,19 @@ describe('Config Screen component', () => {
 
   describe('components', () => {
     it('renders the braze app link correctly', () => {
-      const brazeLink = configScreen.getByText('here');
+      const brazeLink = configScreen.getByTestId(BRAZE_APP_DOCUMENTATION);
 
       expect(brazeLink).toBeTruthy();
       expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_APP_DOCUMENTATION);
     });
 
-    it('renders the braze connected content link correctly', () => {
-      const brazeLink = configScreen.getByText("Braze's Connected Content feature");
+    it('renders the link to contentful manage api keys', () => {
+      const brazeLink = configScreen.getByText('Manage API Keys');
 
       expect(brazeLink).toBeTruthy();
-      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_CONNECTED_CONTENT_DOCUMENTATION);
-    });
-
-      it('renders the braze content block link correctly', () => {
-          const brazeLink = configScreen.getByText("Braze's Content Block feature");
-
-          expect(brazeLink).toBeTruthy();
-      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_CONTENT_BLOCK_DOCUMENTATION);
+      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(
+        `https://app.contentful.com/spaces/${mockSdk.spaceId}/api/keys`
+      );
     });
 
     it('renders the braze api key link correctly', () => {
@@ -69,23 +64,23 @@ describe('Config Screen component', () => {
       expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_API_KEY_DOCUMENTATION);
     });
 
-    it('renders the link to contentful manage api keys', () => {
-      const brazeLink = configScreen.getByText('Manage API keys');
+    it('renders the braze connected content link correctly', () => {
+      const brazeLink = configScreen.getByText("Braze's Connected Content feature");
 
       expect(brazeLink).toBeTruthy();
       expect(brazeLink.closest('a')?.getAttribute('href')).toBe(
-        `https://app.contentful.com/spaces/${mockSdk.spaceId}/api/keys`
+        BRAZE_CONNECTED_CONTENT_DOCUMENTATION
       );
     });
 
-    it('renders the braze app link correctly', () => {
-      const brazeLink = configScreen.getByTestId(BRAZE_APP_DOCUMENTATION);
+    it('renders the braze content block link correctly', () => {
+      const brazeLink = configScreen.getByText("Braze's Content Block feature");
 
       expect(brazeLink).toBeTruthy();
-      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_APP_DOCUMENTATION);
+      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_CONTENT_BLOCK_DOCUMENTATION);
     });
 
-    it('renders the braze app link correctly', () => {
+    it('renders the content type link correctly', () => {
       const brazeLink = configScreen.getByTestId(CONTENT_TYPE_DOCUMENTATION);
 
       expect(brazeLink).toBeTruthy();
