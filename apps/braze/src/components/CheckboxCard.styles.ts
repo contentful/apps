@@ -5,5 +5,4 @@ export const checkboxCard = css({
   border: `1px solid ${tokens.gray200}`,
   borderRadius: tokens.borderRadiusSmall,
   height: tokens.spacingXl,
-  width: '100%',
 });

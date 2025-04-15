@@ -14,11 +14,7 @@ interface CheckboxCardProps extends MarginProps {
   width?: string;
 }
 function CheckboxCard(props: CheckboxCardProps) {
-<<<<<<< HEAD
   const { id, title, selectedFields, onChange, isDisabled = false, fontWeight, children } = props;
-=======
-  const { id, title, selectedFields, onChange, fontWeight, children } = props;
->>>>>>> fb0733f3a (Braze app: Adjust checkbox 'select all' behaviour)
   const [selected, setSelected] = useState(() => selectedFields.has(id));
 
   useEffect(() => {
