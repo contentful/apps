@@ -1,7 +1,11 @@
 import { fireEvent, screen, render, cleanup, RenderResult } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
-import ConfigScreen, { BRAZE_DOCUMENTATION } from '../../src/locations/ConfigScreen';
+import ConfigScreen, {
+  BRAZE_APP_DOCUMENTATION,
+  BRAZE_CONNECTED_CONTENT_DOCUMENTATION,
+  CONTENT_TYPE_DOCUMENTATION,
+} from '../../src/locations/ConfigScreen';
 import userEvent from '@testing-library/user-event';
 import { queries } from '@testing-library/dom';
 import React from 'react';
@@ -39,16 +43,32 @@ describe('Config Screen component', () => {
       const brazeLink = configScreen.getByText("Braze's Connected Content feature");
 
       expect(brazeLink).toBeTruthy();
-      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_DOCUMENTATION);
+      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(
+        BRAZE_CONNECTED_CONTENT_DOCUMENTATION
+      );
     });
 
     it('renders the link to manage api keys', () => {
-      const brazeLink = configScreen.getByText('Manage API');
+      const brazeLink = configScreen.getByText('Manage API Keys');
 
       expect(brazeLink).toBeTruthy();
       expect(brazeLink.closest('a')?.getAttribute('href')).toBe(
         `https://app.contentful.com/spaces/${mockSdk.spaceId}/api/keys`
       );
+    });
+
+    it('renders the braze app link correctly', () => {
+      const brazeLink = configScreen.getByTestId('braze-app-docs-here-link');
+
+      expect(brazeLink).toBeTruthy();
+      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_APP_DOCUMENTATION);
+    });
+
+    it('renders the braze app link correctly', () => {
+      const brazeLink = configScreen.getByTestId('content-type-docs-here-link');
+
+      expect(brazeLink).toBeTruthy();
+      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(CONTENT_TYPE_DOCUMENTATION);
     });
 
     it('has an input that sets api key correctly', () => {

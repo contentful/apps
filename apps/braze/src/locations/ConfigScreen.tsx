@@ -9,6 +9,8 @@ import {
   Subheading,
   TextInput,
   TextLink,
+  Text,
+  Spacing,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
@@ -20,8 +22,11 @@ export interface AppInstallationParameters {
   apiKey: string;
 }
 
-export const BRAZE_DOCUMENTATION =
+export const BRAZE_CONNECTED_CONTENT_DOCUMENTATION =
   'https://braze.com/docs/user_guide/personalization_and_dynamic_content/connected_content';
+export const BRAZE_APP_DOCUMENTATION = 'https://www.contentful.com/help/apps/braze-app/';
+export const CONTENT_TYPE_DOCUMENTATION =
+  'https://www.contentful.com/help/content-types/configure-content-type/';
 
 export async function callToContentful(url: string, newApiKey: string) {
   return await fetch(url, {
@@ -92,36 +97,31 @@ const ConfigScreen = () => {
     <Flex justifyContent="center" alignContent="center">
       <Box className={styles.body} marginTop="spacingL" padding="spacingL">
         <Heading marginBottom="spacingS">Set up Braze</Heading>
-        <Paragraph marginBottom="spacing2Xs">
+        <InformationSection
+          url={BRAZE_CONNECTED_CONTENT_DOCUMENTATION}
+          linkText="Braze's Connected Content feature">
           The Braze app allows editors to connect content stored in Contentful to Braze campaigns
-          through{' '}
-        </Paragraph>
-        <TextLink
-          icon={<ExternalLinkIcon />}
-          alignIcon="end"
-          href={BRAZE_DOCUMENTATION}
-          target="_blank"
-          rel="noopener noreferrer">
-          Braze's Connected Content feature
-        </TextLink>
+          through
+        </InformationSection>
+        <InformationSection
+          url={BRAZE_APP_DOCUMENTATION}
+          linkText="here"
+          marginTop="spacingL"
+          dataTestId="braze-app-docs-here-link">
+          Learn more about how to connect Contentful with Braze and configure the Braze app
+        </InformationSection>
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
-        <Subheading className={styles.subheading}>Connected Content configuration</Subheading>
-        <Paragraph marginBottom="spacing2Xs">
-          {' '}
-          Select the Contentful API key that Braze will use to request your content via API at send
+        <Heading marginBottom="spacingL">Connected Content configuration</Heading>
+        <Subheading className={styles.subheading}>Input the Contentful Delivery API</Subheading>
+        <InformationSection
+          url={`https://app.contentful.com/spaces/${spaceId}/api/keys`}
+          linkText="Manage API Keys">
+          Input the Contentful API key that Braze will use to request your content via API at send
           time.
-        </Paragraph>
-        <TextLink
-          icon={<ExternalLinkIcon />}
-          alignIcon="end"
-          href={`https://app.contentful.com/spaces/${spaceId}/api/keys`}
-          target="_blank"
-          rel="noopener noreferrer">
-          Manage API
-        </TextLink>
-        <Box marginTop="spacingM">
+        </InformationSection>
+        <Box marginTop="spacingM" marginBottom="spacingM">
           <Form>
-            <FormControl.Label>Contentful API key</FormControl.Label>
+            <FormControl.Label>Contentful Delivery API - access token</FormControl.Label>
             <TextInput
               value={parameters.apiKey}
               name="apiKey"
@@ -136,9 +136,47 @@ const ConfigScreen = () => {
             )}
           </Form>
         </Box>
+        <Subheading className={styles.subheading}>Add Braze to your content types</Subheading>
+        <InformationSection
+          url={CONTENT_TYPE_DOCUMENTATION}
+          linkText="here"
+          marginTop="spacing2Xs"
+          dataTestId="content-type-docs-here-link">
+          Navigate to the content type you would like to use under the Content model tab in the main
+          navigation. Select the content type and adjust the sidebar settings on the Sidebar tab.
+          Learn more about configuring your content type
+        </InformationSection>
       </Box>
     </Flex>
   );
 };
+
+type InformationSectionProps = {
+  url: string;
+  children: string;
+  linkText: string;
+  marginTop?: Spacing;
+  marginBottom?: Spacing;
+  dataTestId?: string;
+};
+function InformationSection(props: InformationSectionProps) {
+  return (
+    <Paragraph
+      marginBottom={props.marginBottom ? props.marginBottom : 'spacing2Xs'}
+      marginTop={props.marginTop ? props.marginTop : 'spacingXs'}>
+      {props.children}
+      <TextLink
+        icon={<ExternalLinkIcon />}
+        alignIcon="end"
+        href={props.url}
+        target="_blank"
+        data-testid={props.dataTestId}
+        rel="noopener noreferrer">
+        {props.linkText}
+      </TextLink>
+      <Text> .</Text>
+    </Paragraph>
+  );
+}
 
 export default ConfigScreen;
