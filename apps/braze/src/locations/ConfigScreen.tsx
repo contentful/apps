@@ -103,7 +103,11 @@ const ConfigScreen = () => {
           The Braze app allows editors to connect content stored in Contentful to Braze campaigns
           through
         </InformationSection>
-        <InformationSection url={BRAZE_APP_DOCUMENTATION} linkText="here" marginTop="spacingL">
+        <InformationSection
+          url={BRAZE_APP_DOCUMENTATION}
+          linkText="here"
+          marginTop="spacingL"
+          dataTestId="braze-app-docs-here-link">
           Learn more about how to connect Contentful with Braze and configure the Braze app
         </InformationSection>
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
@@ -133,7 +137,11 @@ const ConfigScreen = () => {
           </Form>
         </Box>
         <Subheading className={styles.subheading}>Add Braze to your content types</Subheading>
-        <InformationSection url={CONTENT_TYPE_DOCUMENTATION} linkText="here" marginTop="spacing2Xs">
+        <InformationSection
+          url={CONTENT_TYPE_DOCUMENTATION}
+          linkText="here"
+          marginTop="spacing2Xs"
+          dataTestId="content-type-docs-here-link">
           Navigate to the content type you would like to use under the Content model tab in the main
           navigation. Select the content type and adjust the sidebar settings on the Sidebar tab.
           Learn more about configuring your content type
@@ -149,6 +157,7 @@ type InformationSectionProps = {
   linkText: string;
   marginTop?: Spacing;
   marginBottom?: Spacing;
+  dataTestId?: string;
 };
 function InformationSection(props: InformationSectionProps) {
   return (
@@ -161,7 +170,7 @@ function InformationSection(props: InformationSectionProps) {
         alignIcon="end"
         href={props.url}
         target="_blank"
-        data-testid={props.url}
+        data-testid={props.dataTestId}
         rel="noopener noreferrer">
         {props.linkText}
       </TextLink>
