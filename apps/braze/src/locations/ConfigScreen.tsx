@@ -6,7 +6,6 @@ import {
   FormControl,
   Heading,
   Paragraph,
-  Subheading,
   TextInput,
   TextLink,
   Text,
@@ -111,7 +110,13 @@ const ConfigScreen = () => {
   return (
     <Flex justifyContent="center" alignContent="center">
       <Box className={styles.body} marginTop="spacingS" marginBottom="spacingS" padding="spacingL">
-        <TitleSection />
+        <Heading marginBottom="spacingXs">Set up Braze</Heading>
+        <InformationSection
+          url={BRAZE_APP_DOCUMENTATION}
+          linkText="here"
+          dataTestId="braze-app-docs-here-link">
+          Learn more about how to connect Contentful with Braze and configure the Braze app
+        </InformationSection>
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
         <ContentTypeSection />
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
@@ -131,20 +136,6 @@ const ConfigScreen = () => {
     </Flex>
   );
 };
-
-function TitleSection() {
-  return (
-    <>
-      <Heading marginBottom="spacingXs">Set up Braze</Heading>
-      <InformationSection
-        url={BRAZE_APP_DOCUMENTATION}
-        linkText="here"
-        dataTestId="braze-app-docs-here-link">
-        Learn more about how to connect Contentful with Braze and configure the Braze app
-      </InformationSection>
-    </>
-  );
-}
 
 function ConnectedContentSection(props: {
   spaceId: string;
@@ -192,17 +183,10 @@ function ContentTypeSection() {
         linkText="here"
         marginTop="spacing2Xs"
         dataTestId="content-type-docs-here-link">
-        Select the content type(s) you would like to use with Braze. You can update this by
-        adjusting the settings in the content type menu under the Sidebar tab. Learn more about
-        configuring your content type
+        Navigate to the content type you would like to use under the Content model tab in the main
+        navigation. Select the content type and adjust the sidebar settings on the Sidebar tab.
+        Learn more about configuring your content type
       </InformationSection>
-      <Box marginTop="spacingM">
-        <Form>
-          <FormControl.Label>Select content type(s)</FormControl.Label>
-          {/* TODO : Implement autocomplete */}
-          <TextInput name="content-type" data-testid="content-type-input" placeholder="Search" />
-        </Form>
-      </Box>
     </>
   );
 }
