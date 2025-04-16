@@ -255,7 +255,7 @@ function InformationSection(props: InformationSectionProps) {
       fontColor={props.fontColor}
       marginBottom={props.marginBottom ? props.marginBottom : 'spacing2Xs'}
       marginTop={props.marginTop ? props.marginTop : 'spacingXs'}>
-      {`${props.children} `}
+      {props.children}
       <TextLink
         icon={<ExternalLinkIcon />}
         alignIcon="end"
