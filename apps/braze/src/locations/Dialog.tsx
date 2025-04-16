@@ -73,7 +73,7 @@ const Dialog = () => {
         fieldsRef.current,
         sdk.ids.space,
         sdk.ids.environment,
-        sdk.parameters.installation.apiKey
+        sdk.parameters.installation.contentfulApiKey
       );
       setEntry(entry);
     };
