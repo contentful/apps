@@ -113,14 +113,16 @@ const ConfigScreen = () => {
       <Box className={styles.body} marginTop="spacingS" marginBottom="spacingS" padding="spacingL">
         <TitleSection />
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
-        <ContentfulSection
+        <ContentTypeSection />
+        <Splitter marginTop="spacingL" marginBottom="spacingL" />
+        <ConnectedContentSection
           spaceId={spaceId}
           parameters={parameters}
           contentfulApiKeyIsValid={contentfulApiKeyIsValid}
           onChange={(e) => setParameters({ ...parameters, contentfulApiKey: e.target.value })}
         />
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
-        <BrazeSection
+        <ContentBlockSection
           parameters={parameters}
           brazeApiKeyIsValid={brazeApiKeyIsValid}
           onChange={(e) => setParameters({ ...parameters, brazeApiKey: e.target.value })}
@@ -133,17 +135,10 @@ const ConfigScreen = () => {
 function TitleSection() {
   return (
     <>
-      <Heading marginBottom="spacingS">Set up Braze</Heading>
-      <InformationSection
-        url={BRAZE_CONNECTED_CONTENT_DOCUMENTATION}
-        linkText="Braze's Connected Content feature">
-        The Braze app allows editors to connect content stored in Contentful to Braze campaigns
-        through
-      </InformationSection>
+      <Heading marginBottom="spacingXs">Set up Braze</Heading>
       <InformationSection
         url={BRAZE_APP_DOCUMENTATION}
         linkText="here"
-        marginTop="spacingL"
         dataTestId="braze-app-docs-here-link">
         Learn more about how to connect Contentful with Braze and configure the Braze app
       </InformationSection>
@@ -151,7 +146,7 @@ function TitleSection() {
   );
 }
 
-function ContentfulSection(props: {
+function ConnectedContentSection(props: {
   spaceId: string;
   parameters: AppInstallationParameters;
   contentfulApiKeyIsValid: boolean;
@@ -159,15 +154,14 @@ function ContentfulSection(props: {
 }) {
   return (
     <>
-      <Heading marginBottom="spacingL">Connected Content configuration</Heading>
-      <Subheading className={styles.subheading}>Input the Contentful Delivery API</Subheading>
+      <Heading marginBottom="spacing2Xs">Connected Content configuration</Heading>
       <InformationSection
         url={`https://app.contentful.com/spaces/${props.spaceId}/api/keys`}
         linkText="Manage API Keys">
         Input the Contentful API key that Braze will use to request your content via API at send
         time.
       </InformationSection>
-      <Box marginTop="spacingM" marginBottom="spacingM">
+      <Box marginTop="spacingM">
         <Form>
           <FormControl.Label>Contentful Delivery API - access token</FormControl.Label>
           <Text fontColor="gray500"> (required)</Text>
@@ -185,28 +179,42 @@ function ContentfulSection(props: {
           )}
         </Form>
       </Box>
-      <Subheading className={styles.subheading}>Add Braze to your content types</Subheading>
+    </>
+  );
+}
+
+function ContentTypeSection() {
+  return (
+    <>
+      <Heading marginBottom="spacing2Xs">Add Braze to your content types</Heading>
       <InformationSection
         url={CONTENT_TYPE_DOCUMENTATION}
         linkText="here"
         marginTop="spacing2Xs"
         dataTestId="content-type-docs-here-link">
-        Navigate to the content type you would like to use under the Content model tab in the main
-        navigation. Select the content type and adjust the sidebar settings on the Sidebar tab.
-        Learn more about configuring your content type
+        Select the content type(s) you would like to use with Braze. You can update this by
+        adjusting the settings in the content type menu under the Sidebar tab. Learn more about
+        configuring your content type
       </InformationSection>
+      <Box marginTop="spacingM">
+        <Form>
+          <FormControl.Label>Select content type(s)</FormControl.Label>
+          {/* TODO : Implement autocomplete */}
+          <TextInput name="content-type" data-testid="content-type-input" placeholder="Search" />
+        </Form>
+      </Box>
     </>
   );
 }
 
-function BrazeSection(props: {
+function ContentBlockSection(props: {
   parameters: AppInstallationParameters;
   brazeApiKeyIsValid: boolean;
   onChange: (e: any) => void;
 }) {
   return (
     <>
-      <Subheading className={styles.subheading}>Content Blocks configuration</Subheading>
+      <Heading marginBottom="spacing2Xs">Content Blocks configuration</Heading>
       <InformationSection
         url={BRAZE_CONTENT_BLOCK_DOCUMENTATION}
         linkText="Braze's Content Block feature">
@@ -255,7 +263,7 @@ function InformationSection(props: InformationSectionProps) {
       fontColor={props.fontColor}
       marginBottom={props.marginBottom ? props.marginBottom : 'spacing2Xs'}
       marginTop={props.marginTop ? props.marginTop : 'spacingXs'}>
-      {props.children}
+      {props.children}{' '}
       <TextLink
         icon={<ExternalLinkIcon />}
         alignIcon="end"
