@@ -6,7 +6,6 @@ import FieldsSelectionStep from '../components/FieldsSelectionStep';
 import CodeBlocksStep from '../components/CodeBlocksStep';
 import LocalesSelectionStep from '../components/LocalesSelectionStep';
 import { createClient } from 'contentful-management';
-import resolveResponse from 'contentful-resolve-response';
 import { FieldsFactory } from '../fields/FieldsFactory';
 import { Entry } from '../fields/Entry';
 import { Field } from '../fields/Field';
@@ -43,9 +42,7 @@ const Dialog = () => {
   );
   useEffect(() => {
     const fetchEntry = async () => {
-      const response = await cma.entry.references({ entryId: entryInfo.id, include: 5 });
-      const items = resolveResponse(response);
-      const fields = await new FieldsFactory(cma).createFields(items[0]);
+      const fields = await new FieldsFactory(entryInfo, cma).createFields();
       fieldsRef.current = fields;
       const entry = new Entry(
         entryInfo.id,

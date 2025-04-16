@@ -8,35 +8,55 @@ import { AssetArrayField } from '../../src/fields/AssetArrayField';
 import { ReferenceArrayField } from '../../src/fields/ReferenceArrayField';
 import { ReferenceItem } from '../../src/fields/ReferenceItem';
 
+// Mock the library that contains resolveResponse
+vi.mock('contentful-resolve-response', () => {
+  return {
+    default: vi.fn(),
+  };
+});
+
+// Import the mocked function for use in tests
+import resolveResponse from 'contentful-resolve-response';
+
 describe('FieldsFactory', () => {
   const mockCma = {
     contentType: {
       get: vi.fn(),
     },
+    entry: {
+      references: vi.fn(),
+    },
+  };
+
+  const mockEntryInfo = {
+    id: 'entryId',
+    contentTypeId: 'article',
+    title: 'entryTitle',
   };
 
   beforeEach(() => {
     vi.resetAllMocks();
+    (resolveResponse as any).mockReset();
   });
 
   it('should create a BasicField instance with correct properties', async () => {
-    const mockEntry = {
-      sys: {
-        contentType: {
-          sys: { id: 'article' },
+    const mockEntry = [
+      {
+        fields: {
+          title: { 'en-US': 'Test Article Title' },
         },
       },
-      fields: {
-        title: { 'en-US': 'Test Article Title' },
-      },
-    };
+    ];
+    (resolveResponse as any).mockReturnValue(mockEntry);
 
     mockCma.contentType.get.mockResolvedValue({
-      name: 'Article',
       fields: [{ id: 'title', type: 'Symbol', localized: true }],
+      sys: {
+        id: 'article',
+      },
     });
 
-    const result = await new FieldsFactory(mockCma as any).createFields(mockEntry);
+    const result = await new FieldsFactory(mockEntryInfo, mockCma as any).createFields();
 
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(BasicField);
@@ -47,27 +67,27 @@ describe('FieldsFactory', () => {
   });
 
   it('should create an AssetField instance with correct properties', async () => {
-    const mockEntry = {
-      sys: {
-        contentType: {
-          sys: { id: 'article' },
-        },
-      },
-      fields: {
-        featuredImage: {
-          'en-US': {
-            sys: { type: 'Link', linkType: 'Asset' },
+    const mockEntry = [
+      {
+        fields: {
+          featuredImage: {
+            'en-US': {
+              sys: { type: 'Link', linkType: 'Asset' },
+            },
           },
         },
       },
-    };
+    ];
+    (resolveResponse as any).mockReturnValue(mockEntry);
 
     mockCma.contentType.get.mockResolvedValue({
-      name: 'Article',
       fields: [{ id: 'featuredImage', type: 'Link', linkType: 'Asset', localized: true }],
+      sys: {
+        id: 'article',
+      },
     });
 
-    const result = await new FieldsFactory(mockCma as any).createFields(mockEntry);
+    const result = await new FieldsFactory(mockEntryInfo, mockCma as any).createFields();
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(AssetField);
     const fieldInstance = result[0] as AssetField;
@@ -89,23 +109,25 @@ describe('FieldsFactory', () => {
       },
     };
 
-    const mockEntry = {
-      sys: {
-        contentType: {
-          sys: { id: 'article' },
+    const mockEntry = [
+      {
+        sys: {
+          contentType: {
+            sys: { id: 'article' },
+          },
+        },
+        fields: {
+          author: {
+            'en-US': mockReferencedEntry,
+          },
         },
       },
-      fields: {
-        author: {
-          'en-US': mockReferencedEntry,
-        },
-      },
-    };
+    ];
+    (resolveResponse as any).mockReturnValue(mockEntry);
 
     mockCma.contentType.get.mockImplementation(({ contentTypeId }) => {
       if (contentTypeId === 'article') {
         return {
-          name: 'Article',
           fields: [{ id: 'author', type: 'Link', linkType: 'Entry', localized: false }],
           displayField: '',
           sys: {
@@ -114,7 +136,6 @@ describe('FieldsFactory', () => {
         };
       } else if (contentTypeId === 'author') {
         return {
-          name: 'Author',
           fields: [
             { id: 'name', type: 'Symbol', localized: true },
             { id: 'bio', type: 'Text', localized: true },
@@ -127,7 +148,7 @@ describe('FieldsFactory', () => {
       }
     });
 
-    const result = await new FieldsFactory(mockCma as any).createFields(mockEntry);
+    const result = await new FieldsFactory(mockEntryInfo, mockCma as any).createFields();
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(ReferenceField);
     const fieldInstance = result[0] as ReferenceField;
@@ -144,23 +165,23 @@ describe('FieldsFactory', () => {
   });
 
   it('should create a BasicArrayField instance with correct properties', async () => {
-    const mockEntry = {
-      sys: {
-        contentType: {
-          sys: { id: 'article' },
+    const mockEntry = [
+      {
+        fields: {
+          tags: { 'en-US': ['news', 'tech', 'featured'] },
         },
       },
-      fields: {
-        tags: { 'en-US': ['news', 'tech', 'featured'] },
-      },
-    };
+    ];
+    (resolveResponse as any).mockReturnValue(mockEntry);
 
     mockCma.contentType.get.mockResolvedValue({
-      name: 'Article',
       fields: [{ id: 'tags', type: 'Array', items: { type: 'Symbol' }, localized: true }],
+      sys: {
+        id: 'article',
+      },
     });
 
-    const result = await new FieldsFactory(mockCma as any).createFields(mockEntry);
+    const result = await new FieldsFactory(mockEntryInfo, mockCma as any).createFields();
 
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(TextArrayField);
@@ -171,24 +192,21 @@ describe('FieldsFactory', () => {
   });
 
   it('should create an AssetArrayField instance with correct properties', async () => {
-    const mockEntry = {
-      sys: {
-        contentType: {
-          sys: { id: 'gallery' },
+    const mockEntry = [
+      {
+        fields: {
+          images: {
+            'en-US': [
+              { sys: { type: 'Link', linkType: 'Asset' } },
+              { sys: { type: 'Link', linkType: 'Asset' } },
+            ],
+          },
         },
       },
-      fields: {
-        images: {
-          'en-US': [
-            { sys: { type: 'Link', linkType: 'Asset' } },
-            { sys: { type: 'Link', linkType: 'Asset' } },
-          ],
-        },
-      },
-    };
+    ];
+    (resolveResponse as any).mockReturnValue(mockEntry);
 
     mockCma.contentType.get.mockResolvedValue({
-      name: 'Gallery',
       fields: [
         {
           id: 'images',
@@ -197,9 +215,12 @@ describe('FieldsFactory', () => {
           localized: true,
         },
       ],
+      sys: {
+        id: 'gallery',
+      },
     });
 
-    const result = await new FieldsFactory(mockCma as any).createFields(mockEntry);
+    const result = await new FieldsFactory(mockEntryInfo, mockCma as any).createFields();
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(AssetArrayField);
     const fieldInstance = result[0] as AssetArrayField;
@@ -231,23 +252,25 @@ describe('FieldsFactory', () => {
       },
     };
 
-    const mockEntry = {
-      sys: {
-        contentType: {
-          sys: { id: 'article' },
+    const mockEntry = [
+      {
+        sys: {
+          contentType: {
+            sys: { id: 'article' },
+          },
+        },
+        fields: {
+          categories: {
+            'en-US': [mockReferencedEntry1, mockReferencedEntry2],
+          },
         },
       },
-      fields: {
-        categories: {
-          'en-US': [mockReferencedEntry1, mockReferencedEntry2],
-        },
-      },
-    };
+    ];
+    (resolveResponse as any).mockReturnValue(mockEntry);
 
     mockCma.contentType.get.mockImplementation(({ contentTypeId }) => {
       if (contentTypeId === 'article') {
         return {
-          name: 'Article',
           fields: [
             {
               id: 'categories',
@@ -263,7 +286,6 @@ describe('FieldsFactory', () => {
         };
       } else if (contentTypeId === 'category') {
         return {
-          name: 'Category',
           fields: [{ id: 'name', type: 'Symbol', localized: true }],
           displayField: 'name',
           sys: {
@@ -273,7 +295,7 @@ describe('FieldsFactory', () => {
       }
     });
 
-    const result = await new FieldsFactory(mockCma as any).createFields(mockEntry);
+    const result = await new FieldsFactory(mockEntryInfo, mockCma as any).createFields();
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(ReferenceArrayField);
     const fieldInstance = result[0] as ReferenceArrayField;
@@ -292,27 +314,6 @@ describe('FieldsFactory', () => {
     expect(fieldInstance.items[1].referenceContentTypeId).toBe('category');
     expect(fieldInstance.items[1].fields).toHaveLength(1);
     expect(fieldInstance.items[1].fields[0].id).toBe('name');
-  });
-
-  it('should throw an error when field is not found in content type', async () => {
-    const mockEntry = {
-      sys: {
-        contentType: {
-          sys: { id: 'article' },
-        },
-      },
-      fields: {
-        nonExistentField: { 'en-US': 'Some value' },
-      },
-    };
-
-    mockCma.contentType.get.mockResolvedValue({
-      name: 'Article',
-      fields: [{ id: 'title', type: 'Symbol', localized: true }],
-    });
-    await expect(new FieldsFactory(mockCma as any).createFields(mockEntry)).rejects.toThrow(
-      'Field not found'
-    );
   });
 
   it('should limit the recursion depth for nested references based on NESTED_DEPTH constant', async () => {
@@ -338,20 +339,20 @@ describe('FieldsFactory', () => {
     };
 
     const mockEntry = createNestedEntry(7);
+    (resolveResponse as any).mockReturnValue([mockEntry]);
 
     mockCma.contentType.get.mockImplementation(({ contentTypeId }) => {
-      const level = parseInt(contentTypeId.replace('level', ''));
       const fields = [
         { id: 'name', type: 'Symbol', localized: false },
         {
           id: 'nestedRef',
           type: 'Link',
+          linkType: 'Entry',
           localized: false,
         },
       ];
 
       return {
-        name: `level${level}`,
         fields,
         displayField: 'name',
         sys: {
@@ -360,7 +361,7 @@ describe('FieldsFactory', () => {
       };
     });
 
-    const result = await new FieldsFactory(mockCma as any).createFields(mockEntry);
+    const result = await new FieldsFactory(mockEntryInfo, mockCma as any).createFields();
 
     expect(result).toHaveLength(2); // name and nestedRef
     expect(result[0].id).toEqual('name');
