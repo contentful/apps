@@ -42,7 +42,7 @@ describe('Config Screen component', () => {
 
   describe('components', () => {
     it('renders the braze app link correctly', () => {
-      const brazeLink = configScreen.getByTestId(BRAZE_APP_DOCUMENTATION);
+      const brazeLink = configScreen.getByTestId('braze-app-docs-here-link');
 
       expect(brazeLink).toBeTruthy();
       expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_APP_DOCUMENTATION);
@@ -81,7 +81,7 @@ describe('Config Screen component', () => {
     });
 
     it('renders the content type link correctly', () => {
-      const brazeLink = configScreen.getByTestId(CONTENT_TYPE_DOCUMENTATION);
+      const brazeLink = configScreen.getByTestId('content-type-docs-here-link');
 
       expect(brazeLink).toBeTruthy();
       expect(brazeLink.closest('a')?.getAttribute('href')).toBe(CONTENT_TYPE_DOCUMENTATION);
