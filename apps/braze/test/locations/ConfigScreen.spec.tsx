@@ -4,7 +4,6 @@ import { mockCma, mockSdk } from '../mocks';
 import ConfigScreen, {
   BRAZE_API_KEY_DOCUMENTATION,
   BRAZE_APP_DOCUMENTATION,
-  BRAZE_CONNECTED_CONTENT_DOCUMENTATION,
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
   CONTENT_TYPE_DOCUMENTATION,
 } from '../../src/locations/ConfigScreen';
@@ -62,15 +61,6 @@ describe('Config Screen component', () => {
 
       expect(brazeLink).toBeTruthy();
       expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_API_KEY_DOCUMENTATION);
-    });
-
-    it('renders the braze connected content link correctly', () => {
-      const brazeLink = configScreen.getByText("Braze's Connected Content feature");
-
-      expect(brazeLink).toBeTruthy();
-      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(
-        BRAZE_CONNECTED_CONTENT_DOCUMENTATION
-      );
     });
 
     it('renders the braze content block link correctly', () => {

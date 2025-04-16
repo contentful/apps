@@ -25,8 +25,6 @@ export interface AppInstallationParameters {
 
 export const BRAZE_APP_DOCUMENTATION = 'https://www.contentful.com/help/apps/braze-app/';
 export const BRAZE_API_KEY_DOCUMENTATION = `https://dashboard.braze.com/app_settings/developer_console/apisettings#apikeys`;
-export const BRAZE_CONNECTED_CONTENT_DOCUMENTATION =
-  'https://braze.com/docs/user_guide/personalization_and_dynamic_content/connected_content';
 export const CONTENT_TYPE_DOCUMENTATION =
   'https://www.contentful.com/help/content-types/configure-content-type/';
 export const BRAZE_CONTENT_BLOCK_DOCUMENTATION =
