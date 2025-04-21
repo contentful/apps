@@ -1,15 +1,16 @@
 import { cleanup, fireEvent, render, RenderResult, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
-import ConfigScreen, {
+import ConfigScreen from '../../src/locations/ConfigScreen';
+import userEvent from '@testing-library/user-event';
+import { queries } from '@testing-library/dom';
+import React from 'react';
+import {
   BRAZE_API_KEY_DOCUMENTATION,
   BRAZE_APP_DOCUMENTATION,
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
   CONTENT_TYPE_DOCUMENTATION,
-} from '../../src/locations/ConfigScreen';
-import userEvent from '@testing-library/user-event';
-import { queries } from '@testing-library/dom';
-import React from 'react';
+} from '../../src/utils';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,

@@ -1,34 +1,21 @@
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import {
-  Box,
-  Flex,
-  Form,
-  FormControl,
-  Heading,
-  Paragraph,
-  TextInput,
-  TextLink,
-  Text,
-  Spacing,
-} from '@contentful/f36-components';
+import { Box, Flex, Form, FormControl, Heading, TextInput, Text } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { styles } from './ConfigScreen.styles';
 import Splitter from '../components/Splitter';
-import { ColorTokens } from '@contentful/f36-tokens';
+import {
+  BRAZE_API_KEY_DOCUMENTATION,
+  BRAZE_APP_DOCUMENTATION,
+  BRAZE_CONTENT_BLOCK_DOCUMENTATION,
+  CONTENT_TYPE_DOCUMENTATION,
+} from '../utils';
+import InformationLinkComponent from '../components/InformationLinkComponent';
 
 export interface AppInstallationParameters {
   contentfulApiKey: string;
   brazeApiKey: string;
 }
-
-export const BRAZE_APP_DOCUMENTATION = 'https://www.contentful.com/help/apps/braze-app/';
-export const BRAZE_API_KEY_DOCUMENTATION = `https://dashboard.braze.com/app_settings/developer_console/apisettings#apikeys`;
-export const CONTENT_TYPE_DOCUMENTATION =
-  'https://www.contentful.com/help/content-types/configure-content-type/';
-export const BRAZE_CONTENT_BLOCK_DOCUMENTATION =
-  'https://www.braze.com/docs/api/endpoints/templates/content_blocks_templates/post_create_email_content_block';
 
 export async function callTo(url: string, newApiKey: string) {
   return await fetch(url, {
@@ -109,12 +96,12 @@ const ConfigScreen = () => {
     <Flex justifyContent="center" alignContent="center">
       <Box className={styles.body} marginTop="spacingS" marginBottom="spacingS" padding="spacingL">
         <Heading marginBottom="spacingXs">Set up Braze</Heading>
-        <InformationSection
+        <InformationLinkComponent
           url={BRAZE_APP_DOCUMENTATION}
           linkText="here"
           dataTestId="braze-app-docs-here-link">
           Learn more about how to connect Contentful with Braze and configure the Braze app
-        </InformationSection>
+        </InformationLinkComponent>
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
         <ContentTypeSection />
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
@@ -144,12 +131,12 @@ function ConnectedContentSection(props: {
   return (
     <>
       <Heading marginBottom="spacing2Xs">Connected Content configuration</Heading>
-      <InformationSection
+      <InformationLinkComponent
         url={`https://app.contentful.com/spaces/${props.spaceId}/api/keys`}
         linkText="Manage API Keys">
         Input the Contentful API key that Braze will use to request your content via API at send
         time.
-      </InformationSection>
+      </InformationLinkComponent>
       <Box marginTop="spacingM">
         <Form>
           <FormControl.Label>Contentful Delivery API - access token</FormControl.Label>
@@ -176,7 +163,7 @@ function ContentTypeSection() {
   return (
     <>
       <Heading marginBottom="spacing2Xs">Add Braze to your content types</Heading>
-      <InformationSection
+      <InformationLinkComponent
         url={CONTENT_TYPE_DOCUMENTATION}
         linkText="here"
         marginTop="spacing2Xs"
@@ -184,7 +171,7 @@ function ContentTypeSection() {
         Navigate to the content type you would like to use under the Content model tab in the main
         navigation. Select the content type and adjust the sidebar settings on the Sidebar tab.
         Learn more about configuring your content type
-      </InformationSection>
+      </InformationLinkComponent>
     </>
   );
 }
@@ -197,11 +184,11 @@ function ContentBlockSection(props: {
   return (
     <>
       <Heading marginBottom="spacing2Xs">Content Blocks configuration</Heading>
-      <InformationSection
+      <InformationLinkComponent
         url={BRAZE_CONTENT_BLOCK_DOCUMENTATION}
         linkText="Braze's Content Block feature">
         Connect specific entry fields stored in Contentful to create Content Blocks in Braze through
-      </InformationSection>
+      </InformationLinkComponent>
       <Box marginTop="spacingM">
         <Form>
           <FormControl.Label>Braze REST API key</FormControl.Label>
@@ -220,43 +207,13 @@ function ContentBlockSection(props: {
           )}
         </Form>
       </Box>
-      <InformationSection
+      <InformationLinkComponent
         fontColor="gray500"
         linkText="Braze REST API Keys page"
         url={BRAZE_API_KEY_DOCUMENTATION}>
         Enter your Braze REST API key. If you need to generate a key, visit your
-      </InformationSection>
+      </InformationLinkComponent>
     </>
-  );
-}
-
-type InformationSectionProps = {
-  url: string;
-  children: string;
-  linkText: string;
-  marginTop?: Spacing;
-  marginBottom?: Spacing;
-  fontColor?: ColorTokens | undefined;
-  dataTestId?: string;
-};
-function InformationSection(props: InformationSectionProps) {
-  return (
-    <Paragraph
-      fontColor={props.fontColor}
-      marginBottom={props.marginBottom ? props.marginBottom : 'spacing2Xs'}
-      marginTop={props.marginTop ? props.marginTop : 'spacingXs'}>
-      {props.children}{' '}
-      <TextLink
-        icon={<ExternalLinkIcon />}
-        alignIcon="end"
-        href={props.url}
-        target="_blank"
-        data-testid={props.dataTestId}
-        rel="noopener noreferrer">
-        {props.linkText}
-      </TextLink>
-      <Text> .</Text>
-    </Paragraph>
   );
 }
 
