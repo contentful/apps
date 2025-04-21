@@ -27,6 +27,10 @@ export class Entry {
     this.contentfulToken = contentfulToken;
   }
 
+  serialize() {
+    return {};
+  }
+
   generateConnectedContentCall(locales: string[]) {
     return `{% capture body %}
   ${this.assembleQuery(locales)}
