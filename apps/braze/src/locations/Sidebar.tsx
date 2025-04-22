@@ -12,7 +12,7 @@ import {
 import tokens from '@contentful/f36-tokens';
 import { styles } from './Sidebar.styles';
 import { KeyValueMap } from 'contentful-management';
-import InformationLinkComponent from '../components/InformationLinkComponent';
+import InformationWithLink from '../components/InformationWithLink';
 
 function openDialog(
   sdk: Omit<BaseAppSDK<KeyValueMap, KeyValueMap, never>, 'ids'> &
@@ -43,14 +43,14 @@ const Sidebar = () => {
     <>
       <Box>
         <Subheading className={styles.subheading}>Connected Content</Subheading>
-        <InformationLinkComponent
+        <InformationWithLink
           url={CONNECTED_CONTENT_DOCUMENTATION}
           linkText={'Learn more'}
           fontColor="gray500"
           marginTop="spacing2Xs"
           marginBottom="spacingS">
           Generate a Connected Content call to copy and paste into Braze.
-        </InformationLinkComponent>
+        </InformationWithLink>
         <Button
           color={tokens.gray500}
           isFullWidth={true}
@@ -62,14 +62,14 @@ const Sidebar = () => {
       </Box>
       <Box marginTop="spacingS">
         <Subheading className={styles.subheading}>Content Blocks</Subheading>
-        <InformationLinkComponent
+        <InformationWithLink
           url={BRAZE_CONTENT_BLOCK_DOCUMENTATION}
           linkText={'Learn more'}
           fontColor="gray500"
           marginTop="spacing2Xs"
           marginBottom="spacingS">
           Send individual entry fields to Braze to create Content Blocks.
-        </InformationLinkComponent>
+        </InformationWithLink>
         <Button
           color={tokens.gray500}
           isFullWidth={true}

@@ -12,19 +12,20 @@ type InformationSectionProps = {
   fontColor?: ColorTokens | undefined;
   dataTestId?: string;
 };
-function InformationLinkComponent(props: InformationSectionProps) {
+function InformationWithLink(props: InformationSectionProps) {
   return (
     <Paragraph
       fontColor={props.fontColor}
       marginBottom={props.marginBottom ? props.marginBottom : 'spacing2Xs'}
-      marginTop={props.marginTop ? props.marginTop : 'spacingXs'}>
+      marginTop={props.marginTop ? props.marginTop : 'spacingXs'}
+      data-testid={props.dataTestId}>
       {props.children}{' '}
       <TextLink
         icon={<ExternalLinkIcon />}
         alignIcon="end"
         href={props.url}
         target="_blank"
-        data-testid={props.dataTestId}
+        data-testid={`link-${props.dataTestId}`}
         rel="noopener noreferrer">
         {props.linkText}
       </TextLink>
@@ -33,4 +34,4 @@ function InformationLinkComponent(props: InformationSectionProps) {
   );
 }
 
-export default InformationLinkComponent;
+export default InformationWithLink;
