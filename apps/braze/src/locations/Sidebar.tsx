@@ -9,7 +9,6 @@ const Sidebar = () => {
   useAutoResizer();
 
   const initialInvocationParams: InvocationParams = {
-    step: 'fields',
     entryId: sdk.ids.entry,
     contentTypeId: sdk.ids.contentType,
     title: sdk.entry.fields[sdk.contentType.displayField].getValue(),

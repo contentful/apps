@@ -10,12 +10,13 @@ import tokens from '@contentful/f36-tokens';
 
 type FieldsSelectionStepProps = {
   entry: Entry;
+  selectedFields: Set<string>;
+  setSelectedFields: React.Dispatch<React.SetStateAction<Set<string>>>;
   handleNextStep: () => void;
 };
 
 const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
-  const { entry, handleNextStep } = props;
-  const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set());
+  const { entry, selectedFields, setSelectedFields, handleNextStep } = props;
   const [entrySelected, setEntrySelected] = useState(false);
 
   const fields = entry.fields;

@@ -11,10 +11,11 @@ import { Entry } from '../fields/Entry';
 import { Field } from '../fields/Field';
 
 export type InvocationParams = {
-  step: string;
+  step?: string;
   entryId?: string;
   contentTypeId?: string;
   title?: string;
+  selectedFields?: string[];
   selectedLocales?: string[];
   serializedEntry?: {};
 };
@@ -28,7 +29,8 @@ const Dialog = () => {
   useAutoResizer();
 
   const invocationParams = sdk.parameters.invocation as InvocationParams;
-  const currentStep = invocationParams.step;
+  const currentStep = invocationParams.step || FIELDS_STEP;
+  const currentSelectedFields = invocationParams.selectedFields || [];
   const currentSelectedLocales = invocationParams.selectedLocales || [];
   const currentEntry = invocationParams.serializedEntry
     ? Entry.fromSerialized(invocationParams.serializedEntry)
@@ -37,6 +39,7 @@ const Dialog = () => {
   const locales = sdk.locales.available;
 
   const [step, setStep] = useState(currentStep);
+  const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set(currentSelectedFields));
   const [selectedLocales, setSelectedLocales] = useState<string[]>(currentSelectedLocales);
   const [entry, setEntry] = useState<Entry | undefined>(currentEntry);
   const fieldsRef = useRef<Field[]>(currentEntry ? currentEntry.fields : []);
@@ -96,6 +99,8 @@ const Dialog = () => {
       {step === FIELDS_STEP && (
         <FieldsSelectionStep
           entry={entry}
+          selectedFields={selectedFields}
+          setSelectedFields={setSelectedFields}
           handleNextStep={() =>
             shouldChooseLocales
               ? setStep(LOCALES_STEP)
@@ -116,6 +121,7 @@ const Dialog = () => {
             sdk.close({
               step: CODE_BLOCKS_STEP,
               serializedEntry: entry.serialize(),
+              selectedFields: selectedFields,
               selectedLocales: selectedLocales,
             })
           }
@@ -128,6 +134,7 @@ const Dialog = () => {
           handlePreviousStep={() =>
             sdk.close({
               step: shouldChooseLocales ? LOCALES_STEP : FIELDS_STEP,
+              selectedFields: selectedFields,
               selectedLocales: selectedLocales,
               serializedEntry: entry.serialize(),
             })
