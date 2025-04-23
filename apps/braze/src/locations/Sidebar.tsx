@@ -9,7 +9,6 @@ import {
   SIDEBAR_CREATE_BUTTON_TEXT,
   SIDEBAR_GENERATE_BUTTON_TEXT,
 } from '../utils';
-import tokens from '@contentful/f36-tokens';
 import { styles } from './Sidebar.styles';
 import { KeyValueMap } from 'contentful-management';
 import InformationWithLink from '../components/InformationWithLink';
@@ -52,7 +51,7 @@ const Sidebar = () => {
           Generate a Connected Content call to copy and paste into Braze.
         </InformationWithLink>
         <Button
-          color={tokens.gray500}
+          variant="secondary"
           isFullWidth={true}
           onClick={() => {
             openDialog(sdk, invocationParams);
@@ -71,7 +70,7 @@ const Sidebar = () => {
           Send individual entry fields to Braze to create Content Blocks.
         </InformationWithLink>
         <Button
-          color={tokens.gray500}
+          variant="secondary"
           isFullWidth={true}
           onClick={() => {
             openDialog(sdk, invocationParams);
