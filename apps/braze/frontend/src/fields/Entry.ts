@@ -12,7 +12,7 @@ export class Entry {
   constructor(
     id: string,
     contentType: string,
-    title: string,
+    title: string = 'Untitled',
     fields: Field[],
     spaceId: string,
     environment: string,

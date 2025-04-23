@@ -1,0 +1,38 @@
+{
+  "name": "@contentful/ai-image-generator-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "NODE_ENV=production tsc",
+    "test": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha --exit",
+    "test:ci": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 CI=true mocha --exit",
+    "test:debug": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha -- --inspect --inspect-brk",
+    "test:watch": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha --watch --watch-files src --watch-files test",
+    "call-hosted-app-action": "npx ts-node test/scripts/call-hosted-app-action.ts"
+  },
+  "devDependencies": {
+    "@tsconfig/node18": "^18.2.0",
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.1",
+    "@types/sinon": "^10.0.16",
+    "@types/sinon-chai": "^3.2.9",
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "node-addon-api": "^7.0.0",
+    "node-gyp": "^10.0.1",
+    "sinon": "^15.2.0",
+    "sinon-chai": "^3.7.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.2",
+    "@contentful/node-apps-toolkit": "^3.12.0",
+    "contentful-management": "^11.6.1",
+    "@contentful/app-scripts": "^2.3.0",
+    "@tsconfig/recommended": "1.0.8",
+    "@types/node": "^16.18.126",
+    "@types/sentiment": "^5.0.4",
+    "sentiment": "^5.0.2",
+    "tsx": "^4.19.3"
+  }
+}

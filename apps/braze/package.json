@@ -1,40 +1,17 @@
 {
-  "name": "braze",
+  "name": "@contentful/braze",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "@contentful/app-sdk": "4.25.0",
-    "@contentful/f36-components": "4.65.4",
-    "@contentful/f36-multiselect": "^4.26.0",
-    "@contentful/f36-tokens": "4.0.2",
-    "@contentful/react-apps-toolkit": "1.2.16",
-    "@testing-library/user-event": "^14.6.1",
-    "contentful-management": "11.48.3",
-    "contentful-resolve-response": "^1.9.2",
-    "emotion": "10.0.27",
-    "happy-dom": "^17.4.4",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "react-syntax-highlighter": "^15.6.1"
-  },
   "scripts": {
-    "start": "vite",
-    "build": "tsc && vite build",
-    "test": "vitest",
     "create-app-definition": "contentful-app-scripts create-app-definition",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id gWLhC7MnK2rgcvifgE4do --token ${CONTENTFUL_CMA_TOKEN}"
+    "start": "cd frontend && npm run start",
+    "build": "rimraf ./build && npm run build-frontend && npm run build-backend",
+    "build-backend": "cd backend && npm ci && cd .. && node build-actions.js",
+    "build-frontend": "cd frontend && npm ci --include=dev && BUILD_PATH=../build npm run build",
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id gWLhC7MnK2rgcvifgE4do --token ${CONTENTFUL_CMA_TOKEN}"
   },
-  "devDependencies": {
-    "@contentful/app-scripts": "2.3.1",
-    "@testing-library/react": "16.2.0",
-    "@types/contentful-resolve-response": "^0.1.33",
-    "@types/node": "22.13.13",
-    "@types/react": "18.3.1",
-    "@types/react-dom": "18.3.0",
-    "@types/react-syntax-highlighter": "^15.5.13",
-    "@vitejs/plugin-react": "4.3.4",
-    "typescript": "5.1.6",
-    "vite": "6.2.6",
-    "vitest": "3.0.9"
+  "dependencies": {
+    "@contentful/app-scripts": "^1.29.0",
+    "esbuild": "^0.23.0"
   }
 }

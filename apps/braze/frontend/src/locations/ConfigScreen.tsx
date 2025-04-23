@@ -123,7 +123,7 @@ const ConfigScreen = () => {
           <Form>
             <FormControl.Label>Contentful Delivery API - access token</FormControl.Label>
             <TextInput
-              value={parameters.apiKey}
+              value={parameters.apiKey || ''}
               name="apiKey"
               data-testid="apiKey"
               isInvalid={!apiKeyIsValid}
