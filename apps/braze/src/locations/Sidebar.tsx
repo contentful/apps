@@ -1,8 +1,17 @@
-import { SidebarAppSDK } from '@contentful/app-sdk';
-import { Button } from '@contentful/f36-components';
+import { BaseAppSDK, IdsAPI, SharedEditorSDK, SidebarAppSDK, WindowAPI } from '@contentful/app-sdk';
+import { Box, Button, Subheading } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { DIALOG_TITLE, SIDEBAR_BUTTON_TEXT } from '../utils';
+import {
+    BRAZE_CONTENT_BLOCK_DOCUMENTATION,
+    CONNECTED_CONTENT_DOCUMENTATION,
+    DIALOG_TITLE,
+    SIDEBAR_CREATE_BUTTON_TEXT,
+    SIDEBAR_GENERATE_BUTTON_TEXT,
+} from '../utils';
 import { InvocationParams } from './Dialog';
+import { styles } from './Sidebar.styles';
+import { KeyValueMap } from 'contentful-management';
+import InformationWithLink from '../components/InformationWithLink';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
@@ -14,30 +23,63 @@ const Sidebar = () => {
     title: sdk.entry.fields[sdk.contentType.displayField].getValue(),
   };
 
-  const openDialogLogic = async (
-    step: string,
-    parameters: InvocationParams = initialInvocationParams
-  ) => {
-    const width = step === 'codeBlocks' ? 'fullWidth' : 'large';
-    const result = await openDialog(parameters, width);
-    if (!result || result['step'] === 'close') {
-      return;
-    }
-    await openDialogLogic(result['step'], result);
-  };
+    const openDialogLogic = async (
+        step: string,
+        parameters: InvocationParams = initialInvocationParams
+    ) => {
+        const width = step === 'codeBlocks' ? 'fullWidth' : 'large';
+        const result = await openDialog(parameters, width);
+        if (!result || result['step'] === 'close') {
+            return;
+        }
+        await openDialogLogic(result['step'], result);
+    };
 
-  const openDialog = async (parameters: InvocationParams, width: 'fullWidth' | 'large') => {
-    return sdk.dialogs.openCurrentApp({
-      title: DIALOG_TITLE,
-      parameters: parameters,
-      width: width,
-    });
-  };
+    const openDialog = async (parameters: InvocationParams, width: 'fullWidth' | 'large') => {
+        return sdk.dialogs.openCurrentApp({
+            title: DIALOG_TITLE,
+            parameters: parameters,
+            width: width,
+        });
+    };
 
   return (
-    <Button variant="primary" isFullWidth={true} onClick={() => openDialogLogic('fields')}>
-      {SIDEBAR_BUTTON_TEXT}
-    </Button>
+    <>
+      <Box>
+        <Subheading className={styles.subheading}>Connected Content</Subheading>
+        <InformationWithLink
+          url={CONNECTED_CONTENT_DOCUMENTATION}
+          linkText={'Learn more'}
+          fontColor="gray500"
+          marginTop="spacing2Xs"
+          marginBottom="spacingS">
+          Generate a Connected Content call to copy and paste into Braze.
+        </InformationWithLink>
+        <Button
+          variant="secondary"
+          isFullWidth={true}
+          onClick={() => openDialogLogic('fields')}>
+          {SIDEBAR_GENERATE_BUTTON_TEXT}
+        </Button>
+      </Box>
+      <Box marginTop="spacingS">
+        <Subheading className={styles.subheading}>Content Blocks</Subheading>
+        <InformationWithLink
+          url={BRAZE_CONTENT_BLOCK_DOCUMENTATION}
+          linkText={'Learn more'}
+          fontColor="gray500"
+          marginTop="spacing2Xs"
+          marginBottom="spacingS">
+          Send individual entry fields to Braze to create Content Blocks.
+        </InformationWithLink>
+        <Button
+          variant="secondary"
+          isFullWidth={true}
+          onClick={() => openDialogLogic('fields')}>
+          {SIDEBAR_CREATE_BUTTON_TEXT}
+        </Button>
+      </Box>
+    </>
   );
 };
 
