@@ -65,26 +65,18 @@ const ConfigScreen = () => {
     return isValid;
   }
 
-  async function checkBrazeApiKey(apiKey: string) {
-    const hasAValue = !!apiKey?.trim();
-    setBrazeApiKeyIsValid(hasAValue);
-
-    return hasAValue;
-  }
-
-  async function checkBrazeEndpoint(endpoint: string) {
-    const hasAValue = !!endpoint?.trim();
-    setBrazeEndpointIsValid(hasAValue);
-
-    return hasAValue;
+  function checkIfHasValue(value: string, setIsValid: (valid: boolean) => void) {
+    const hasValue = !!value?.trim();
+    setIsValid(hasValue);
+    return hasValue;
   }
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
     const isContentfulKeyValid = await checkContentfulApiKey(parameters.contentfulApiKey);
-    const isBrazeKeyValid = await checkBrazeApiKey(parameters.brazeApiKey);
-    const isBrazeEndpointValid = await checkBrazeEndpoint(parameters.brazeEndpoint);
+    const isBrazeKeyValid = checkIfHasValue(parameters.brazeApiKey, setBrazeApiKeyIsValid);
+    const isBrazeEndpointValid = checkIfHasValue(parameters.brazeEndpoint, setBrazeEndpointIsValid);
 
     if (!isContentfulKeyValid || !isBrazeKeyValid || !isBrazeEndpointValid) {
       sdk.notifier.error('Some fields are missing or invalid');
