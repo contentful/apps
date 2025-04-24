@@ -102,13 +102,10 @@ export const handler: EventHandler<FunctionTypeEnum.AppEventHandler> = async (
   return;
 };
 
-const brazeExample = async (event: AppEventEntry) => { 
-
+const brazeExample = async (event: AppEventEntry) => {
   try {
-    const url =
-    'https://rest.iad-03.braze.com/content_blocks/list';
-    
-    
+    const url = 'https://rest.iad-03.braze.com/content_blocks/list';
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -120,35 +117,31 @@ const brazeExample = async (event: AppEventEntry) => {
   } catch (error) {
     console.error('Failed to send sys and metadata to audit log server', error);
   }
-  
-  };
-  
-  const brazeUpdateExample = async (event: AppEventEntry) => { 
-    const body = JSON.stringify({
-      content_block_id: "123",
-    name: "Entry-field-A",
-    description: "Contrary to popular belief, Lorem Ipsum is not simply random",
-    content: "<h1>Hola use una app function para actualizar este contenido</h1>",
-    state: "active",
-    tags: []
-  })
-  
-    try {
-      const url =
-      'https://rest.iad-03.braze.com/content_blocks/update';
-      
-      
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          Authorization: `1234`,
-          'Content-Type': 'application/json',
-        },
-        body
-      });
-      console.log(response);
-    } catch (error) {
-      console.error('Failed to send sys and metadata to audit log server', error);
-    }
-    
-    };
+};
+
+const brazeUpdateExample = async (event: AppEventEntry) => {
+  const body = JSON.stringify({
+    content_block_id: '123',
+    name: 'Entry-field-A',
+    description: 'Contrary to popular belief, Lorem Ipsum is not simply random',
+    content: '<h1>Hola use una app function para actualizar este contenido</h1>',
+    state: 'active',
+    tags: [],
+  });
+
+  try {
+    const url = 'https://rest.iad-03.braze.com/content_blocks/update';
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `1234`,
+        'Content-Type': 'application/json',
+      },
+      body,
+    });
+    console.log(response);
+  } catch (error) {
+    console.error('Failed to send sys and metadata to audit log server', error);
+  }
+};

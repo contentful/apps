@@ -1,7 +1,7 @@
 import { AppActionProps, PlainClientAPI, createClient } from 'contentful-management';
 import { WebhookCallDetailsProps } from 'contentful-management/dist/typings/entities/webhook';
 import { parseArgs } from 'node:util';
-import * as util from "node:util";
+import * as util from 'node:util';
 
 class AppActionRunner {
   private readonly client: PlainClientAPI;

@@ -8,10 +8,13 @@
     "build": "rimraf ./build && npm run build-frontend && npm run build-backend",
     "build-backend": "cd backend && npm ci && cd .. && node build-actions.js",
     "build-frontend": "cd frontend && npm ci --include=dev && BUILD_PATH=../build npm run build",
+    "upload-backend": "node upload-actions.js",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id gWLhC7MnK2rgcvifgE4do --token ${CONTENTFUL_CMA_TOKEN}"
   },
   "dependencies": {
     "@contentful/app-scripts": "^1.29.0",
+    "archiver": "^7.0.1",
+    "dotenv": "^16.5.0",
     "esbuild": "^0.23.0"
   }
 }

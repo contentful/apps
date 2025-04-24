@@ -1,16 +1,14 @@
 {
   "actions": [
     {
-      "id": "brazeAppeventHandlerExample",
-      "name": "Example App Event Handler Function",
+      "id": "brazeHandler",
+      "name": "Braze Event Handler",
       "category": "Custom",
-      "description": "This is an example to help you learn how App Event handler functions work; this function handles entry events and sends customized payloads to two external services.",
+      "description": "Handles entry events and sends payloads to Braze and a webhook.",
       "type": "function",
-      "path": "actions/appevent-handler-example.js",
-      "entryFile": "./backend/src/actions/appevent-handler-example.ts",
-      "allowNetworks": ["webhook.site","https://rest.iad-03.braze.com"],
-      "parameters": [],
-      "accepts": ["appevent.handler"]
+      "path": "actions/braze-handler.js",
+      "allowNetworks": ["webhook.site", "rest.iad-03.braze.com"],
+      "parameters": []
     }
   ]
 }
