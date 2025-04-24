@@ -1,4 +1,5 @@
 import { capitalize } from '../utils';
+import { Entry } from './Entry';
 import { Field } from './Field';
 import { ReferenceField } from './ReferenceField';
 
@@ -26,6 +27,28 @@ export class ReferenceItem extends ReferenceField {
     this.referenceContentTypeName = referenceContentTypeName;
     this.title = title;
     fields.forEach((field) => (field.parent = this));
+  }
+
+  get type(): string {
+    return 'ReferenceItem';
+  }
+
+  static fromSerialized(serializedField: any): ReferenceItem {
+    const deserializedFields = serializedField.fields.map((f: any) => Entry.deserializeField(f));
+
+    const item = new ReferenceItem(
+      serializedField.id,
+      serializedField.name,
+      serializedField.entryContentTypeId,
+      serializedField.title,
+      serializedField.localized,
+      serializedField.referenceContentTypeId,
+      serializedField.referenceContentTypeName,
+      deserializedFields
+    );
+    item.selected = serializedField.selected;
+    deserializedFields.forEach((f: Field) => (f.parent = item));
+    return item;
   }
 
   generateQuery(): string {

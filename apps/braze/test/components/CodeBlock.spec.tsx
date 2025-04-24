@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { mockCma, mockSdk } from '../../test/mocks';
-import CodeBlock from './CodeBlock';
+import { mockCma, mockSdk } from '../mocks';
+import CodeBlock from '../../src/components/CodeBlock';
 import { screen, render, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 

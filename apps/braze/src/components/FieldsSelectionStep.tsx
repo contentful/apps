@@ -17,10 +17,10 @@ type FieldsSelectionStepProps = {
 
 const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
   const { entry, selectedFields, setSelectedFields, handleNextStep } = props;
-  const [entrySelected, setEntrySelected] = useState(false);
 
   const fields = entry.fields;
   const allFields = entry.getAllFields();
+  const [entrySelected, setEntrySelected] = useState(selectedFields.size === allFields.length);
 
   const handleToggle = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const { checked, id } = event.target;
@@ -34,7 +34,7 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
 
     updateSelectedFields(checked, newSelectedFields, field.uniqueId());
     toggleNestedFields(field, checked, newSelectedFields);
-    toggleParentField(field, newSelectedFields, allFields);
+    toggleParentField(field, newSelectedFields);
 
     setSelectedFields(newSelectedFields);
     setEntrySelected(newSelectedFields.size === allFields.length);
@@ -58,7 +58,7 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
     }
   };
 
-  const toggleParentField = (field: Field, selectedSet: Set<string>, allFields: any[]): void => {
+  const toggleParentField = (field: Field, selectedSet: Set<string>): void => {
     if (!field.parent) return;
     const children = field.parent.getChildren();
 
@@ -69,7 +69,7 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
       selectedSet.delete(field.parent.uniqueId());
     }
 
-    toggleParentField(field.parent, selectedSet, allFields);
+    toggleParentField(field.parent, selectedSet);
   };
 
   const toggleEntry = (event: React.ChangeEvent<HTMLInputElement>): void => {

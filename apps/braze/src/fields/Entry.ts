@@ -1,5 +1,14 @@
 import { removeHypens, firstLetterToLowercase, SAVED_RESPONSE } from '../utils';
+import { AssetArrayField } from './AssetArrayField';
+import { AssetField } from './AssetField';
+import { BasicField } from './BasicField';
 import { Field } from './Field';
+import { LocationField } from './LocationField';
+import { ReferenceArrayField } from './ReferenceArrayField';
+import { ReferenceField } from './ReferenceField';
+import { ReferenceItem } from './ReferenceItem';
+import { RichTextField } from './RichTextField';
+import { TextArrayField } from './TextArrayField';
 
 export class Entry {
   public id: string;
@@ -27,8 +36,53 @@ export class Entry {
     this.contentfulToken = contentfulToken;
   }
 
+  static fromSerialized(serializedEntry: any): Entry {
+    return new Entry(
+      serializedEntry['id'],
+      serializedEntry['contentType'],
+      serializedEntry['title'],
+      serializedEntry['fields'].map((field: any) => this.deserializeField(field)),
+      serializedEntry['spaceId'],
+      serializedEntry['environment'],
+      serializedEntry['contentfulToken']
+    );
+  }
+
+  static deserializeField(serializedField: any): Field {
+    switch (serializedField.type) {
+      case 'BasicField':
+        return BasicField.fromSerialized(serializedField);
+      case 'AssetField':
+        return AssetField.fromSerialized(serializedField);
+      case 'AssetArrayField':
+        return AssetArrayField.fromSerialized(serializedField);
+      case 'LocationField':
+        return LocationField.fromSerialized(serializedField);
+      case 'ReferenceField':
+        return ReferenceField.fromSerialized(serializedField);
+      case 'ReferenceArrayField':
+        return ReferenceArrayField.fromSerialized(serializedField);
+      case 'ReferenceItem':
+        return ReferenceItem.fromSerialized(serializedField);
+      case 'RichTextField':
+        return RichTextField.fromSerialized(serializedField);
+      case 'TextArrayField':
+        return TextArrayField.fromSerialized(serializedField);
+      default:
+        throw new Error(`Unknown field type: ${serializedField.type}`);
+    }
+  }
+
   serialize() {
-    return {};
+    return {
+      id: this.id,
+      contentType: this.contentType,
+      title: this.title,
+      fields: this.fields.map((field) => field.serialize()),
+      spaceId: this.spaceId,
+      environment: this.environment,
+      contentfulToken: this.contentfulToken,
+    };
   }
 
   generateConnectedContentCall(locales: string[]) {

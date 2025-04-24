@@ -6,6 +6,21 @@ export class BasicField extends Field {
     super(id, name, entryContentTypeId, localized);
   }
 
+  get type(): string {
+    return 'BasicField';
+  }
+
+  static fromSerialized(serializedField: any): BasicField {
+    const field = new BasicField(
+      serializedField.id,
+      serializedField.name,
+      serializedField.entryContentTypeId,
+      serializedField.localized
+    );
+    field.selected = serializedField.selected;
+    return field;
+  }
+
   generateQuery(): string {
     return this.id;
   }

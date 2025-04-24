@@ -6,6 +6,25 @@ export class RichTextField extends Field {
     super(id, name, entryContentTypeId, localized);
   }
 
+  get type(): string {
+    return 'RichTextField';
+  }
+
+  public override set selected(value: boolean) {
+    return;
+  }
+
+  static fromSerialized(serializedField: any): RichTextField {
+    const field = new RichTextField(
+      serializedField.id,
+      serializedField.name,
+      serializedField.entryContentTypeId,
+      serializedField.localized
+    );
+    field.selected = serializedField.selected;
+    return field;
+  }
+
   generateQuery(): string {
     throw new Error('Rich text not supported');
   }

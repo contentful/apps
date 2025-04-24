@@ -20,10 +20,10 @@ const Sidebar = () => {
   ) => {
     const width = step === 'codeBlocks' ? 'fullWidth' : 'large';
     const result = await openDialog(parameters, width);
-    const nextStep = result['step'];
-    if (nextStep !== 'close') {
-      await openDialogLogic(nextStep, result);
+    if (!result || result['step'] === 'close') {
+      return;
     }
+    await openDialogLogic(result['step'], result);
   };
 
   const openDialog = async (parameters: InvocationParams, width: 'fullWidth' | 'large') => {

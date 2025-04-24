@@ -8,6 +8,21 @@ export class LocationField extends Field {
     super(id, name, entryContentTypeId, localized);
   }
 
+  get type(): string {
+    return 'LocationField';
+  }
+
+  static fromSerialized(serializedField: any): LocationField {
+    const field = new LocationField(
+      serializedField.id,
+      serializedField.name,
+      serializedField.entryContentTypeId,
+      serializedField.localized
+    );
+    field.selected = serializedField.selected;
+    return field;
+  }
+
   generateQuery(): string {
     return `${this.id} {lat lon}`;
   }

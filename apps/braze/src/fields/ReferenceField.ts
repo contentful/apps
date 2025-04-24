@@ -1,4 +1,5 @@
 import { capitalize } from '../utils';
+import { Entry } from './Entry';
 import { Field } from './Field';
 
 export class ReferenceField extends Field {
@@ -23,6 +24,39 @@ export class ReferenceField extends Field {
     this.title = title;
     fields.forEach((field) => (field.parent = this));
     this.fields = fields;
+  }
+
+  get type(): string {
+    return 'ReferenceField';
+  }
+
+  serialize(): any {
+    const base = super.serialize();
+    return {
+      ...base,
+      referenceContentTypeId: this.referenceContentTypeId,
+      referenceContentTypeName: this.referenceContentTypeName,
+      title: this.title,
+      fields: this.fields.map((f) => f.serialize()),
+    };
+  }
+
+  static fromSerialized(serializedField: any): ReferenceField {
+    const deserializedFields = serializedField.fields.map((f: any) => Entry.deserializeField(f));
+
+    const field = new ReferenceField(
+      serializedField.id,
+      serializedField.name,
+      serializedField.entryContentTypeId,
+      serializedField.title,
+      serializedField.localized,
+      serializedField.referenceContentTypeId,
+      serializedField.referenceContentTypeName,
+      deserializedFields
+    );
+    field.selected = serializedField.selected;
+    deserializedFields.forEach((f: Field) => (f.parent = field));
+    return field;
   }
 
   generateQuery(): string {
@@ -70,7 +104,7 @@ export class ReferenceField extends Field {
     return fields;
   }
 
-  protected selectedFields(): Field[] {
+  selectedFields(): Field[] {
     return this.fields.filter((field) => field.selected);
   }
 }

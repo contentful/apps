@@ -1,6 +1,3 @@
-import { ReferenceArrayField } from './ReferenceArrayField';
-import { ReferenceField } from './ReferenceField';
-import { ReferenceItem } from './ReferenceItem';
 import { removeHypens, firstLetterToLowercase, SAVED_RESPONSE } from '../utils';
 
 export abstract class Field {
@@ -8,8 +5,8 @@ export abstract class Field {
   public name: string;
   public localized: boolean;
   public entryContentTypeId: string;
-  public selected: boolean = false;
-  public parent: ReferenceField | ReferenceArrayField | ReferenceItem | null = null;
+  private _selected: boolean = false;
+  public parent: Field | null = null;
 
   constructor(id: string, name: string, entryContentTypeId: string, localized: boolean) {
     this.id = firstLetterToLowercase(id);
@@ -18,8 +15,28 @@ export abstract class Field {
     this.localized = localized;
   }
 
+  public get selected(): boolean {
+    return this._selected;
+  }
+
+  public set selected(value: boolean) {
+    this._selected = value;
+  }
+
   abstract generateQuery(): string;
   public abstract generateLiquidTagForType(template: string): string[];
+  abstract get type(): string;
+
+  serialize(): any {
+    return {
+      id: this.id,
+      name: this.name,
+      entryContentTypeId: this.entryContentTypeId,
+      localized: this.localized,
+      selected: this.selected,
+      type: this.type,
+    };
+  }
 
   generateLiquidTag(locale?: string): string[] {
     let template = `${SAVED_RESPONSE}.data.${this.entryContentTypeId}`;
@@ -48,6 +65,8 @@ export abstract class Field {
   getChildren(): Field[] {
     return [];
   }
+
+  childToggled(selected: boolean) {}
 
   isEnabled(): boolean {
     return true;
