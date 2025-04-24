@@ -22,14 +22,6 @@ const validateActions = () => {
   });
 };
 
-const getEntryPoints = () => {
-  return manifest.actions.reduce((acc, action) => {
-    const fileName = action.path.replace(/^actions\//, '').replace(/\.js$/, '');
-    acc[fileName] = resolve(__dirname, action.entryFile);
-    return acc;
-  }, {});
-};
-
 const main = async () => {
   try {
     console.log('🔧 Building app actions...');

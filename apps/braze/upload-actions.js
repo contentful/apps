@@ -46,15 +46,9 @@ async function uploadActions() {
   const appDefinition = await org.getAppDefinition(DEFINITION_ID);
 
   await appDefinition.createAppBundle({
-    upload: {
-      sys: {
-        type: 'Link',
-        linkType: 'AppUpload',
-        id: upload.sys.id,
-      },
-    },
-    actions: require('./contentful-app-manifest.json').actions,
+    appUploadId: upload.sys.id,
     comment: 'Subida solo de backend (acciones)',
+    actions: require('./contentful-app-manifest.json').actions,
   });
 
   console.log('✅ Bundle subido con éxito!');
