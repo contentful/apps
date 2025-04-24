@@ -1,5 +1,14 @@
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Box, Flex, Form, FormControl, Heading, TextInput, Text } from '@contentful/f36-components';
+import {
+  Box,
+  Flex,
+  Form,
+  FormControl,
+  Heading,
+  TextInput,
+  Text,
+  Subheading,
+} from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
 import { styles } from './ConfigScreen.styles';
@@ -8,6 +17,7 @@ import {
   BRAZE_API_KEY_DOCUMENTATION,
   BRAZE_APP_DOCUMENTATION,
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
+  BRAZE_ENDPOINTS_LIST,
   CONTENT_TYPE_DOCUMENTATION,
 } from '../utils';
 import InformationWithLink from '../components/InformationWithLink';
@@ -15,6 +25,7 @@ import InformationWithLink from '../components/InformationWithLink';
 export interface AppInstallationParameters {
   contentfulApiKey: string;
   brazeApiKey: string;
+  brazeEndpoint: string;
 }
 
 export async function callTo(url: string, newApiKey: string) {
@@ -29,10 +40,12 @@ export async function callTo(url: string, newApiKey: string) {
 
 const ConfigScreen = () => {
   const [contentfulApiKeyIsValid, contentfulSetApiKeyIsValid] = useState(true);
-  const [brazeApiKeyIsValid, brazeSetApiKeyIsValid] = useState(true);
+  const [brazeApiKeyIsValid, setBrazeApiKeyIsValid] = useState(true);
+  const [brazeEndpointIsValid, setBrazeEndpointIsValid] = useState(true);
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     contentfulApiKey: '',
     brazeApiKey: '',
+    brazeEndpoint: '',
   });
   const sdk = useSDK<ConfigAppSDK>();
   const spaceId = sdk.ids.space;
@@ -54,7 +67,14 @@ const ConfigScreen = () => {
 
   async function checkBrazeApiKey(apiKey: string) {
     const hasAValue = !!apiKey?.trim();
-    brazeSetApiKeyIsValid(hasAValue);
+    setBrazeApiKeyIsValid(hasAValue);
+
+    return hasAValue;
+  }
+
+  async function checkBrazeEndpoint(endpoint: string) {
+    const hasAValue = !!endpoint?.trim();
+    setBrazeEndpointIsValid(hasAValue);
 
     return hasAValue;
   }
@@ -64,9 +84,10 @@ const ConfigScreen = () => {
 
     const isContentfulKeyValid = await checkContentfulApiKey(parameters.contentfulApiKey);
     const isBrazeKeyValid = await checkBrazeApiKey(parameters.brazeApiKey);
+    const isBrazeEndpointValid = await checkBrazeEndpoint(parameters.brazeEndpoint);
 
-    if (!isContentfulKeyValid || !isBrazeKeyValid) {
-      sdk.notifier.error('A valid API key is required');
+    if (!isContentfulKeyValid || !isBrazeKeyValid || !isBrazeEndpointValid) {
+      sdk.notifier.error('Some fields are missing or invalid');
       return false;
     }
 
@@ -115,7 +136,8 @@ const ConfigScreen = () => {
         <ContentBlockSection
           parameters={parameters}
           brazeApiKeyIsValid={brazeApiKeyIsValid}
-          onChange={(e) => setParameters({ ...parameters, brazeApiKey: e.target.value })}
+          brazeEndpointIsValid={brazeEndpointIsValid}
+          setParameters={setParameters}
         />
       </Box>
     </Flex>
@@ -179,7 +201,8 @@ function ContentTypeSection() {
 function ContentBlockSection(props: {
   parameters: AppInstallationParameters;
   brazeApiKeyIsValid: boolean;
-  onChange: (e: any) => void;
+  brazeEndpointIsValid: boolean;
+  setParameters: (e: any) => void;
 }) {
   return (
     <>
@@ -200,7 +223,9 @@ function ContentBlockSection(props: {
             isInvalid={!props.brazeApiKeyIsValid}
             placeholder="ex. 0ab1c234DE56f..."
             type="password"
-            onChange={props.onChange}
+            onChange={(e) =>
+              props.setParameters({ ...props.parameters, brazeApiKey: e.target.value })
+            }
           />
           {!props.brazeApiKeyIsValid && (
             <FormControl.ValidationMessage>Invalid API key</FormControl.ValidationMessage>
@@ -208,11 +233,39 @@ function ContentBlockSection(props: {
         </Form>
       </Box>
       <InformationWithLink
+        marginBottom="spacingL"
         fontColor="gray500"
         linkText="Braze REST API Keys page"
         url={BRAZE_API_KEY_DOCUMENTATION}>
         Enter your Braze REST API key. If you need to generate a key, visit your
       </InformationWithLink>
+      <Subheading className={styles.subheading}>Input your Braze REST endpoint</Subheading>
+      <InformationWithLink
+        linkText="here"
+        dataTestId="rest-endpoints-here"
+        url={BRAZE_ENDPOINTS_LIST}>
+        View the URL of your Braze dashboard. Then, use it to determine the correct Braze REST
+        endpoint. You can find a list of REST endpoint URLs
+      </InformationWithLink>
+      <Box marginTop="spacingM">
+        <Form>
+          <FormControl.Label>Braze REST endpoint</FormControl.Label>
+          <Text fontColor="gray500"> (required)</Text>
+          <TextInput
+            value={props.parameters.brazeEndpoint}
+            name="brazeEndpoint"
+            data-testid="brazeEndpoint"
+            isInvalid={!props.brazeEndpointIsValid}
+            placeholder="ex. https://rest.iad-01.braze.com"
+            onChange={(e) =>
+              props.setParameters({ ...props.parameters, brazeEndpoint: e.target.value })
+            }
+          />
+          {!props.brazeEndpointIsValid && (
+            <FormControl.ValidationMessage>Invalid REST Endpoint</FormControl.ValidationMessage>
+          )}
+        </Form>
+      </Box>
     </>
   );
 }
