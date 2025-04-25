@@ -1,5 +1,6 @@
 import { capitalize } from '../utils';
 import { Field } from './Field';
+import { FieldRegistry } from './fieldRegistry';
 
 export class ReferenceField extends Field {
   public referenceContentTypeId: string;
@@ -21,8 +22,43 @@ export class ReferenceField extends Field {
     this.referenceContentTypeId = referenceContentTypeId;
     this.referenceContentTypeName = referenceContentTypeName;
     this.title = title;
-    fields.forEach((field) => (field.parent = this));
     this.fields = fields;
+    this.fields.forEach((field) => (field.parent = this));
+  }
+
+  get type(): string {
+    return 'ReferenceField';
+  }
+
+  serialize(): any {
+    const base = super.serialize();
+    return {
+      ...base,
+      referenceContentTypeId: this.referenceContentTypeId,
+      referenceContentTypeName: this.referenceContentTypeName,
+      title: this.title,
+      fields: this.fields.map((f) => f.serialize()),
+    };
+  }
+
+  static fromSerialized(serializedField: any): ReferenceField {
+    const deserializedFields = serializedField.fields.map((f: any) =>
+      FieldRegistry.deserializeField(f)
+    );
+
+    const field = new ReferenceField(
+      serializedField.id,
+      serializedField.name,
+      serializedField.entryContentTypeId,
+      serializedField.title,
+      serializedField.localized,
+      serializedField.referenceContentTypeId,
+      serializedField.referenceContentTypeName,
+      deserializedFields
+    );
+    field.selected = serializedField.selected;
+    deserializedFields.forEach((f: Field) => (f.parent = field));
+    return field;
   }
 
   generateQuery(): string {
@@ -70,7 +106,9 @@ export class ReferenceField extends Field {
     return fields;
   }
 
-  protected selectedFields(): Field[] {
+  selectedFields(): Field[] {
     return this.fields.filter((field) => field.selected);
   }
 }
+
+FieldRegistry.registerFieldType('ReferenceField', ReferenceField.fromSerialized);

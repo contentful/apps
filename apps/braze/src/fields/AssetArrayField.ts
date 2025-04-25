@@ -1,11 +1,25 @@
 import { ASSET_FIELDS, ASSET_FIELDS_QUERY } from '../utils';
 import { Field } from './Field';
+import { FieldRegistry } from './fieldRegistry';
 
 export class AssetArrayField extends Field {
   constructor(id: string, name: string, entryContentTypeId: string, localized: boolean) {
     super(id, name, entryContentTypeId, localized);
-    this.id = id;
-    this.localized = localized;
+  }
+
+  get type(): string {
+    return 'AssetArrayField';
+  }
+
+  static fromSerialized(serializedField: any): AssetArrayField {
+    const field = new AssetArrayField(
+      serializedField.id,
+      serializedField.name,
+      serializedField.entryContentTypeId,
+      serializedField.localized
+    );
+    field.selected = serializedField.selected;
+    return field;
   }
 
   generateQuery(): string {
@@ -22,3 +36,5 @@ ${items.join('\n')}
     ];
   }
 }
+
+FieldRegistry.registerFieldType('AssetArrayField', AssetArrayField.fromSerialized);

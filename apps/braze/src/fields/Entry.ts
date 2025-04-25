@@ -1,5 +1,6 @@
 import { removeHypens, firstLetterToLowercase, SAVED_RESPONSE } from '../utils';
 import { Field } from './Field';
+import { FieldRegistry } from './fieldRegistry';
 
 export class Entry {
   public id: string;
@@ -25,6 +26,30 @@ export class Entry {
     this.spaceId = spaceId;
     this.environment = environment;
     this.contentfulToken = contentfulToken;
+  }
+
+  static fromSerialized(serializedEntry: any): Entry {
+    return new Entry(
+      serializedEntry['id'],
+      serializedEntry['contentType'],
+      serializedEntry['title'],
+      serializedEntry['fields'].map((field: any) => FieldRegistry.deserializeField(field)),
+      serializedEntry['spaceId'],
+      serializedEntry['environment'],
+      serializedEntry['contentfulToken']
+    );
+  }
+
+  serialize() {
+    return {
+      id: this.id,
+      contentType: this.contentType,
+      title: this.title,
+      fields: this.fields.map((field) => field.serialize()),
+      spaceId: this.spaceId,
+      environment: this.environment,
+      contentfulToken: this.contentfulToken,
+    };
   }
 
   generateConnectedContentCall(locales: string[]) {

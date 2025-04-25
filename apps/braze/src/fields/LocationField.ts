@@ -1,4 +1,5 @@
 import { Field } from './Field';
+import { FieldRegistry } from './fieldRegistry';
 
 export class LocationField extends Field {
   LOCATION_LAT = 'lat';
@@ -6,6 +7,21 @@ export class LocationField extends Field {
 
   constructor(id: string, name: string, entryContentTypeId: string, localized: boolean) {
     super(id, name, entryContentTypeId, localized);
+  }
+
+  get type(): string {
+    return 'LocationField';
+  }
+
+  static fromSerialized(serializedField: any): LocationField {
+    const field = new LocationField(
+      serializedField.id,
+      serializedField.name,
+      serializedField.entryContentTypeId,
+      serializedField.localized
+    );
+    field.selected = serializedField.selected;
+    return field;
   }
 
   generateQuery(): string {
@@ -19,3 +35,5 @@ export class LocationField extends Field {
     ];
   }
 }
+
+FieldRegistry.registerFieldType('LocationField', LocationField.fromSerialized);

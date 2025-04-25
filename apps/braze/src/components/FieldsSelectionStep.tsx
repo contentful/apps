@@ -10,16 +10,17 @@ import tokens from '@contentful/f36-tokens';
 
 type FieldsSelectionStepProps = {
   entry: Entry;
+  selectedFields: Set<string>;
+  setSelectedFields: React.Dispatch<React.SetStateAction<Set<string>>>;
   handleNextStep: () => void;
 };
 
 const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
-  const { entry, handleNextStep } = props;
-  const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set());
-  const [entrySelected, setEntrySelected] = useState(false);
+  const { entry, selectedFields, setSelectedFields, handleNextStep } = props;
 
   const fields = entry.fields;
   const allFields = entry.getAllFields();
+  const [entrySelected, setEntrySelected] = useState(selectedFields.size === allFields.length);
 
   const handleToggle = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const { checked, id } = event.target;
@@ -33,7 +34,7 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
 
     updateSelectedFields(checked, newSelectedFields, field.uniqueId());
     toggleNestedFields(field, checked, newSelectedFields);
-    toggleParentField(field, newSelectedFields, allFields);
+    toggleParentField(field, newSelectedFields);
 
     setSelectedFields(newSelectedFields);
     setEntrySelected(newSelectedFields.size === allFields.length);
@@ -57,7 +58,7 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
     }
   };
 
-  const toggleParentField = (field: Field, selectedSet: Set<string>, allFields: any[]): void => {
+  const toggleParentField = (field: Field, selectedSet: Set<string>): void => {
     if (!field.parent) return;
     const children = field.parent.getChildren();
 
@@ -68,7 +69,7 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
       selectedSet.delete(field.parent.uniqueId());
     }
 
-    toggleParentField(field.parent, selectedSet, allFields);
+    toggleParentField(field.parent, selectedSet);
   };
 
   const toggleEntry = (event: React.ChangeEvent<HTMLInputElement>): void => {

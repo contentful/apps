@@ -14,25 +14,26 @@ import { ReferenceField } from './ReferenceField';
 import { ReferenceItem } from './ReferenceItem';
 import { RichTextField } from './RichTextField';
 import { TextArrayField } from './TextArrayField';
-import { EntryInfo } from '../locations/Dialog';
 import resolveResponse from 'contentful-resolve-response';
 
 export class FieldsFactory {
   private contentTypes: { [key: string]: ContentTypeProps };
-  private entryInfo: EntryInfo;
+  private entryId: string;
+  private entryContentTypeId: string;
   private cma: PlainClientAPI;
   NESTED_DEPTH = 5;
 
-  public constructor(entryInfo: EntryInfo, cma: PlainClientAPI) {
-    this.entryInfo = entryInfo;
+  public constructor(entryId: string, entryContentTypeId: string, cma: PlainClientAPI) {
+    this.entryId = entryId;
+    this.entryContentTypeId = entryContentTypeId;
     this.cma = cma;
     this.contentTypes = {};
   }
 
   public async createFields() {
-    const response = await this.cma.entry.references({ entryId: this.entryInfo.id, include: 5 });
+    const response = await this.cma.entry.references({ entryId: this.entryId, include: 5 });
     const items = resolveResponse(response);
-    const contentType = await this.getContentType(this.entryInfo.contentTypeId);
+    const contentType = await this.getContentType(this.entryContentTypeId);
     return this.createFieldsForEntry(items[0].fields, contentType);
   }
 

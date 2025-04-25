@@ -28,11 +28,8 @@ describe('FieldsFactory', () => {
     },
   };
 
-  const mockEntryInfo = {
-    id: 'entryId',
-    contentTypeId: 'article',
-    title: 'entryTitle',
-  };
+  const entryId = 'entryId';
+  const entryContentTypeId = 'article';
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -56,7 +53,11 @@ describe('FieldsFactory', () => {
       },
     });
 
-    const result = await new FieldsFactory(mockEntryInfo, mockCma as any).createFields();
+    const result = await new FieldsFactory(
+      entryId,
+      entryContentTypeId,
+      mockCma as any
+    ).createFields();
 
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(BasicField);
@@ -87,7 +88,11 @@ describe('FieldsFactory', () => {
       },
     });
 
-    const result = await new FieldsFactory(mockEntryInfo, mockCma as any).createFields();
+    const result = await new FieldsFactory(
+      entryId,
+      entryContentTypeId,
+      mockCma as any
+    ).createFields();
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(AssetField);
     const fieldInstance = result[0] as AssetField;
@@ -148,7 +153,11 @@ describe('FieldsFactory', () => {
       }
     });
 
-    const result = await new FieldsFactory(mockEntryInfo, mockCma as any).createFields();
+    const result = await new FieldsFactory(
+      entryId,
+      entryContentTypeId,
+      mockCma as any
+    ).createFields();
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(ReferenceField);
     const fieldInstance = result[0] as ReferenceField;
@@ -181,7 +190,11 @@ describe('FieldsFactory', () => {
       },
     });
 
-    const result = await new FieldsFactory(mockEntryInfo, mockCma as any).createFields();
+    const result = await new FieldsFactory(
+      entryId,
+      entryContentTypeId,
+      mockCma as any
+    ).createFields();
 
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(TextArrayField);
@@ -220,7 +233,11 @@ describe('FieldsFactory', () => {
       },
     });
 
-    const result = await new FieldsFactory(mockEntryInfo, mockCma as any).createFields();
+    const result = await new FieldsFactory(
+      entryId,
+      entryContentTypeId,
+      mockCma as any
+    ).createFields();
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(AssetArrayField);
     const fieldInstance = result[0] as AssetArrayField;
@@ -295,7 +312,11 @@ describe('FieldsFactory', () => {
       }
     });
 
-    const result = await new FieldsFactory(mockEntryInfo, mockCma as any).createFields();
+    const result = await new FieldsFactory(
+      entryId,
+      entryContentTypeId,
+      mockCma as any
+    ).createFields();
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(ReferenceArrayField);
     const fieldInstance = result[0] as ReferenceArrayField;
@@ -361,7 +382,11 @@ describe('FieldsFactory', () => {
       };
     });
 
-    const result = await new FieldsFactory(mockEntryInfo, mockCma as any).createFields();
+    const result = await new FieldsFactory(
+      entryId,
+      entryContentTypeId,
+      mockCma as any
+    ).createFields();
 
     expect(result).toHaveLength(2); // name and nestedRef
     expect(result[0].id).toEqual('name');

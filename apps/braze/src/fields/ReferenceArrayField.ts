@@ -1,4 +1,5 @@
 import { Field } from './Field';
+import { FieldRegistry } from './fieldRegistry';
 import { ReferenceItem } from './ReferenceItem';
 
 export class ReferenceArrayField extends Field {
@@ -14,6 +15,35 @@ export class ReferenceArrayField extends Field {
     super(id, name, entryContentTypeId, localized);
     items.forEach((item) => (item.parent = this));
     this.items = items;
+  }
+
+  get type(): string {
+    return 'ReferenceArrayField';
+  }
+
+  serialize(): any {
+    const base = super.serialize();
+    return {
+      ...base,
+      items: this.items.map((item) => item.serialize()),
+    };
+  }
+
+  static fromSerialized(serializedField: any): ReferenceArrayField {
+    const deserializedItems = serializedField.items.map((item: any) =>
+      ReferenceItem.fromSerialized(item)
+    );
+
+    const field = new ReferenceArrayField(
+      serializedField.id,
+      serializedField.name,
+      serializedField.entryContentTypeId,
+      serializedField.localized,
+      deserializedItems
+    );
+    field.selected = serializedField.selected;
+    deserializedItems.forEach((item: ReferenceItem) => (item.parent = field));
+    return field;
   }
 
   generateQuery(): string {
@@ -59,3 +89,5 @@ export class ReferenceArrayField extends Field {
     return this.items.filter((item) => item.selected);
   }
 }
+
+FieldRegistry.registerFieldType('ReferenceArrayField', ReferenceArrayField.fromSerialized);
