@@ -5,11 +5,12 @@
   "scripts": {
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "start": "cd frontend && npm run start",
-    "build": "rimraf ./build && npm run build-frontend && npm run build-backend",
+    "build": "rimraf ./build && rimraf ./build-backend && npm run build-frontend && npm run build-backend",
     "build-backend": "cd backend && npm ci && cd .. && node build-actions.js",
     "build-frontend": "cd frontend && npm ci --include=dev && BUILD_PATH=../build npm run build",
     "upload-backend": "node upload-actions.js",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id gWLhC7MnK2rgcvifgE4do --token ${CONTENTFUL_CMA_TOKEN}"
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id gWLhC7MnK2rgcvifgE4do --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy-backend": "contentful-app-scripts upload --ci --bundle-dir ./build-backend --organization-id ${DEFINITIONS_ORG_ID} --definition-id gWLhC7MnK2rgcvifgE4do --token ${CONTENTFUL_CMA_TOKEN}"
   },
   "dependencies": {
     "@contentful/app-scripts": "^1.29.0",

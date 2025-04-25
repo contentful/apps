@@ -1,6 +1,7 @@
 const esbuild = require('esbuild');
 const { resolve } = require('path');
 const manifest = require('./contentful-app-manifest.json');
+const fs = require('fs');
 
 const entryFile = 'backend/src/actions/braze-handler.ts';
 
@@ -27,18 +28,27 @@ const main = async () => {
     console.log('🔧 Building app actions...');
     validateActions();
 
+    // Ensure build-backend directory exists
+    if (!fs.existsSync('build-backend')) {
+      fs.mkdirSync('build-backend', { recursive: true });
+    }
+
+    // Build the action file
     await esbuild.build({
       entryPoints: [entryFile],
       minify: false,
       bundle: true,
       platform: 'node',
-      outdir: 'build/actions',
+      outdir: 'build-backend/actions',
       format: 'cjs',
       target: 'es2022',
       logLevel: 'info',
       external: ['node:*', 'sharp'],
       loader: { '.ts': 'ts' },
     });
+
+    // Copy the manifest file to build-backend
+    fs.copyFileSync('contentful-app-manifest.json', 'build-backend/contentful-app-manifest.json');
 
     console.log('✅ Actions built successfully!');
   } catch (error) {

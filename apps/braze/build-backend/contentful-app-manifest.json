@@ -1,0 +1,14 @@
+{
+  "actions": [
+    {
+      "id": "brazeHandler",
+      "name": "Braze Event Handler",
+      "category": "Custom",
+      "description": "Handles entry events and sends payloads to Braze and a webhook.",
+      "type": "function",
+      "path": "actions/braze-handler.js",
+      "allowNetworks": ["webhook.site", "rest.iad-03.braze.com"],
+      "parameters": []
+    }
+  ]
+}
