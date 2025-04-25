@@ -22,6 +22,8 @@ export const BRAZE_APP_DOCUMENTATION = 'https://www.contentful.com/help/apps/bra
 export const BRAZE_API_KEY_DOCUMENTATION = `https://dashboard.braze.com/app_settings/developer_console/apisettings#apikeys`;
 export const BRAZE_CONTENT_BLOCK_DOCUMENTATION =
   'https://www.braze.com/docs/api/endpoints/templates/content_blocks_templates/post_create_email_content_block';
+export const BRAZE_ENDPOINTS_LIST =
+  'https://www.braze.com/docs/api/basics#braze-rest-api-collection';
 
 export function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
