@@ -1,4 +1,5 @@
 import { Field } from './Field';
+import { FieldRegistry } from './fieldRegistry';
 
 // Used for all types (see FieldType from contentful-management) except for arrays, links, rich text and location
 export class BasicField extends Field {
@@ -29,3 +30,5 @@ export class BasicField extends Field {
     return [`{{${template}.${this.id}}}`];
   }
 }
+
+FieldRegistry.registerFieldType('BasicField', BasicField.fromSerialized);

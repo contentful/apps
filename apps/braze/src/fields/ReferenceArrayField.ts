@@ -1,4 +1,5 @@
 import { Field } from './Field';
+import { FieldRegistry } from './fieldRegistry';
 import { ReferenceItem } from './ReferenceItem';
 
 export class ReferenceArrayField extends Field {
@@ -88,3 +89,5 @@ export class ReferenceArrayField extends Field {
     return this.items.filter((item) => item.selected);
   }
 }
+
+FieldRegistry.registerFieldType('ReferenceArrayField', ReferenceArrayField.fromSerialized);

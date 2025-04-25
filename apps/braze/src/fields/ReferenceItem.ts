@@ -1,7 +1,7 @@
 import { capitalize } from '../utils';
-import { Entry } from './Entry';
 import { Field } from './Field';
 import { ReferenceField } from './ReferenceField';
+import { FieldRegistry } from './fieldRegistry';
 
 export class ReferenceItem extends ReferenceField {
   constructor(
@@ -24,9 +24,6 @@ export class ReferenceItem extends ReferenceField {
       referenceContentTypeName,
       fields
     );
-    this.referenceContentTypeName = referenceContentTypeName;
-    this.title = title;
-    fields.forEach((field) => (field.parent = this));
   }
 
   get type(): string {
@@ -34,7 +31,9 @@ export class ReferenceItem extends ReferenceField {
   }
 
   static fromSerialized(serializedField: any): ReferenceItem {
-    const deserializedFields = serializedField.fields.map((f: any) => Entry.deserializeField(f));
+    const deserializedFields = serializedField.fields.map((f: any) =>
+      FieldRegistry.deserializeField(f)
+    );
 
     const item = new ReferenceItem(
       serializedField.id,
@@ -63,3 +62,5 @@ export class ReferenceItem extends ReferenceField {
     return this.selectedFields().flatMap((field) => field.generateLiquidTagForType(`${template}`));
   }
 }
+
+FieldRegistry.registerFieldType('ReferenceItem', ReferenceItem.fromSerialized);

@@ -1,4 +1,5 @@
 import { Field } from './Field';
+import { FieldRegistry } from './fieldRegistry';
 
 export class LocationField extends Field {
   LOCATION_LAT = 'lat';
@@ -34,3 +35,5 @@ export class LocationField extends Field {
     ];
   }
 }
+
+FieldRegistry.registerFieldType('LocationField', LocationField.fromSerialized);

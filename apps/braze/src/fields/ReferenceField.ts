@@ -1,6 +1,6 @@
 import { capitalize } from '../utils';
-import { Entry } from './Entry';
 import { Field } from './Field';
+import { FieldRegistry } from './fieldRegistry';
 
 export class ReferenceField extends Field {
   public referenceContentTypeId: string;
@@ -22,8 +22,8 @@ export class ReferenceField extends Field {
     this.referenceContentTypeId = referenceContentTypeId;
     this.referenceContentTypeName = referenceContentTypeName;
     this.title = title;
-    fields.forEach((field) => (field.parent = this));
     this.fields = fields;
+    this.fields.forEach((field) => (field.parent = this));
   }
 
   get type(): string {
@@ -42,7 +42,9 @@ export class ReferenceField extends Field {
   }
 
   static fromSerialized(serializedField: any): ReferenceField {
-    const deserializedFields = serializedField.fields.map((f: any) => Entry.deserializeField(f));
+    const deserializedFields = serializedField.fields.map((f: any) =>
+      FieldRegistry.deserializeField(f)
+    );
 
     const field = new ReferenceField(
       serializedField.id,
@@ -108,3 +110,5 @@ export class ReferenceField extends Field {
     return this.fields.filter((field) => field.selected);
   }
 }
+
+FieldRegistry.registerFieldType('ReferenceField', ReferenceField.fromSerialized);

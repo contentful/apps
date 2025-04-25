@@ -1,4 +1,5 @@
 import { Field } from './Field';
+import { FieldRegistry } from './fieldRegistry';
 
 // We are not supporting rich text fields for now
 export class RichTextField extends Field {
@@ -41,3 +42,5 @@ export class RichTextField extends Field {
     return `${this.name} (Support for rich text fields coming soon)`;
   }
 }
+
+FieldRegistry.registerFieldType('RichTextField', RichTextField.fromSerialized);

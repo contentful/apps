@@ -1,4 +1,5 @@
 import { Field } from './Field';
+import { FieldRegistry } from './fieldRegistry';
 
 export class TextArrayField extends Field {
   constructor(id: string, name: string, entryContentTypeId: string, localized: boolean) {
@@ -32,3 +33,5 @@ export class TextArrayField extends Field {
     ];
   }
 }
+
+FieldRegistry.registerFieldType('TextArrayField', TextArrayField.fromSerialized);

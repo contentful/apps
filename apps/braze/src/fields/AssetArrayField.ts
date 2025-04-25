@@ -1,5 +1,6 @@
 import { ASSET_FIELDS, ASSET_FIELDS_QUERY } from '../utils';
 import { Field } from './Field';
+import { FieldRegistry } from './fieldRegistry';
 
 export class AssetArrayField extends Field {
   constructor(id: string, name: string, entryContentTypeId: string, localized: boolean) {
@@ -35,3 +36,5 @@ ${items.join('\n')}
     ];
   }
 }
+
+FieldRegistry.registerFieldType('AssetArrayField', AssetArrayField.fromSerialized);
