@@ -1,5 +1,4 @@
-import { render, fireEvent, cleanup, waitFor } from '@testing-library/react'; // Import waitFor
-import React from 'react';
+import { render, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import {
   DIALOG_TITLE,
@@ -20,7 +19,7 @@ vi.mock('contentful-management', () => ({
 
 describe('Sidebar component', () => {
   beforeEach(() => {
-    vi.clearAllMocks(); // Clear mocks before each test
+    vi.clearAllMocks();
   });
 
   afterEach(cleanup);
@@ -41,7 +40,7 @@ describe('Sidebar component', () => {
     expect(button.innerText).toBe(SIDEBAR_CREATE_BUTTON_TEXT);
   });
 
-  it('Button opens a dialog initially', async () => {
+  it('Generate button opens a dialog initially', async () => {
     const { getByText } = render(<Sidebar />);
     const button = getByText(SIDEBAR_GENERATE_BUTTON_TEXT);
     await fireEvent.click(button);
@@ -58,7 +57,7 @@ describe('Sidebar component', () => {
     });
   });
 
-  it('Button opens dialog again if parameters are returned', async () => {
+  it('Generate button opens dialog again if parameters are returned', async () => {
     const result = { step: 'codeBlocks', otherParam: 'value' };
     vi.mocked(mockSdk.dialogs.openCurrentApp).mockResolvedValueOnce(result);
 
@@ -88,7 +87,7 @@ describe('Sidebar component', () => {
     });
   });
 
-  it('Button does not open dialog again if step is close', async () => {
+  it('Generate button does not open dialog again if step is close', async () => {
     const result = { step: 'close' };
     vi.mocked(mockSdk.dialogs.openCurrentApp).mockResolvedValueOnce(result);
 
