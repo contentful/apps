@@ -12,9 +12,9 @@ import { Field } from '../fields/Field';
 
 export type InvocationParams = {
   step?: string;
-  entryId?: string;
-  contentTypeId?: string;
-  title?: string;
+  entryId: string;
+  contentTypeId: string;
+  title: string;
   selectedFields?: string[];
   selectedLocales?: string[];
   serializedEntry?: {};
@@ -66,10 +66,10 @@ const Dialog = () => {
         cma
       ).createFields();
       fieldsRef.current = fields;
-      const entry = new Entry( // TODO: check if we can remove the !
-        invocationParams.entryId!,
-        invocationParams.contentTypeId!,
-        invocationParams.title!,
+      const entry = new Entry(
+        invocationParams.entryId,
+        invocationParams.contentTypeId,
+        invocationParams.title,
         fieldsRef.current,
         sdk.ids.space,
         sdk.ids.environment,
@@ -106,6 +106,9 @@ const Dialog = () => {
               ? setStep(LOCALES_STEP)
               : sdk.close({
                   step: CODE_BLOCKS_STEP,
+                  entryId: invocationParams.entryId,
+                  contentTypeId: invocationParams.contentTypeId,
+                  title: invocationParams.title,
                   serializedEntry: entry.serialize(),
                 })
           }
@@ -120,6 +123,9 @@ const Dialog = () => {
           handleNextStep={() =>
             sdk.close({
               step: CODE_BLOCKS_STEP,
+              entryId: invocationParams.entryId,
+              contentTypeId: invocationParams.contentTypeId,
+              title: invocationParams.title,
               serializedEntry: entry.serialize(),
               selectedFields: selectedFields,
               selectedLocales: selectedLocales,
@@ -134,6 +140,9 @@ const Dialog = () => {
           handlePreviousStep={() =>
             sdk.close({
               step: shouldChooseLocales ? LOCALES_STEP : FIELDS_STEP,
+              entryId: invocationParams.entryId,
+              contentTypeId: invocationParams.contentTypeId,
+              title: invocationParams.title,
               selectedFields: selectedFields,
               selectedLocales: selectedLocales,
               serializedEntry: entry.serialize(),

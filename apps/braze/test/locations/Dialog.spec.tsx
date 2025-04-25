@@ -68,6 +68,9 @@ describe('Dialog component', () => {
 
     expect(mockSdk.close).toHaveBeenCalledWith({
       step: 'codeBlocks',
+      entryId: 'entryId',
+      contentTypeId: 'contentTypeId',
+      title: 'title',
       serializedEntry: mockEntry.serialize(),
     });
   });
