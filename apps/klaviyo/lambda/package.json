@@ -1,0 +1,18 @@
+{
+  "name": "klaviyo-lambda",
+  "version": "1.0.0",
+  "description": "Serverless function for Klaviyo integration",
+  "main": "src/index.js",
+  "scripts": {
+    "test": ""
+  },
+  "dependencies": {
+    "axios": "^1.4.0",
+    "aws-lambda": "^1.0.7"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.1400.0"
+  },
+  "author": "",
+  "license": "ISC"
+} 

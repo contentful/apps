@@ -1,0 +1,50 @@
+{
+  "name": "Klaviyo",
+  "description": "Sync your Contentful content with Klaviyo",
+  "id": "klaviyo",
+  "category": "Marketing",
+  "version": "0.1.0",
+  "locations": [
+    {
+      "location": "app-config",
+      "component": "ConfigScreen"
+    },
+    {
+      "location": "entry-sidebar",
+      "component": "Sidebar"
+    },
+    {
+      "location": "entry-field",
+      "component": "Field"
+    },
+    {
+      "location": "dialog",
+      "component": "FieldSelectDialog"
+    }
+  ],
+  "parameters": {
+    "installation": [
+      {
+        "id": "klaviyoClientId",
+        "name": "Klaviyo OAuth Client ID",
+        "description": "Your Klaviyo OAuth app client ID",
+        "type": "Symbol",
+        "required": true
+      },
+      {
+        "id": "klaviyoClientSecret",
+        "name": "Klaviyo OAuth Client Secret",
+        "description": "Your Klaviyo OAuth app client secret",
+        "type": "Symbol",
+        "required": true
+      },
+      {
+        "id": "klaviyoRedirectUri",
+        "name": "Klaviyo OAuth Redirect URI",
+        "description": "The redirect URI registered with your Klaviyo OAuth app",
+        "type": "Symbol",
+        "required": true
+      }
+    ]
+  }
+} 
