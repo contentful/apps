@@ -54,6 +54,7 @@ describe('Dialog component', () => {
       entryId: 'entryId',
       contentTypeId: 'contentTypeId',
       title: 'title',
+      mode: 'generate',
     };
     render(<Dialog />);
 
@@ -72,6 +73,7 @@ describe('Dialog component', () => {
       contentTypeId: 'contentTypeId',
       title: 'title',
       serializedEntry: mockEntry.serialize(),
+      mode: 'generate',
     });
   });
 
@@ -80,6 +82,7 @@ describe('Dialog component', () => {
       step: 'codeBlocks',
       selectedFields: new Set([mockField.uniqueId()]),
       serializedEntry: mockEntry.serialize(),
+      mode: 'generate',
     };
     render(<Dialog />);
 
@@ -93,6 +96,7 @@ describe('Dialog component', () => {
       step: 'fields',
       selectedFields: new Set([mockField.uniqueId()]),
       serializedEntry: mockEntry.serialize(),
+      mode: 'generate',
     };
     render(<Dialog />);
 

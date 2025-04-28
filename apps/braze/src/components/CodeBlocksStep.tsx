@@ -86,7 +86,7 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
         )}
       </Box>
 
-      <WizardFooter>
+      <WizardFooter paddingRight="0">
         <Button variant="secondary" size="small" onClick={handlePreviousStep}>
           Back
         </Button>

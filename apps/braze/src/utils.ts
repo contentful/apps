@@ -10,7 +10,8 @@ export const ASSET_FIELDS_QUERY = [
   'height',
 ];
 export const ASSET_FIELDS = ['title', 'description', 'url'];
-export const DIALOG_TITLE = 'Generate Braze Connected Content Call';
+export const GENERATE_DIALOG_TITLE = 'Generate Braze Connected Content Call';
+export const CREATE_DIALOG_TITLE = 'Generate Braze Content Blocks';
 export const SIDEBAR_GENERATE_BUTTON_TEXT = 'Generate';
 export const SIDEBAR_CREATE_BUTTON_TEXT = 'Create';
 

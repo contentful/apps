@@ -127,7 +127,7 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
         })}
       </Box>
 
-      <WizardFooter>
+      <WizardFooter paddingRight="0">
         <Button
           variant="primary"
           size="small"

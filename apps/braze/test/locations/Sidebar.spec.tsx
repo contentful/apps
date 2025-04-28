@@ -1,7 +1,8 @@
 import { render, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import {
-  DIALOG_TITLE,
+  GENERATE_DIALOG_TITLE,
+  CREATE_DIALOG_TITLE,
   SIDEBAR_GENERATE_BUTTON_TEXT,
   SIDEBAR_CREATE_BUTTON_TEXT,
 } from '../../src/utils';
@@ -47,10 +48,11 @@ describe('Sidebar component', () => {
 
     expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledTimes(1);
     expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledWith({
-      title: DIALOG_TITLE,
+      title: GENERATE_DIALOG_TITLE,
       parameters: {
         entryId: mockSdk.ids.entry,
         contentTypeId: mockSdk.ids.contentType,
+        mode: 'generate',
         title: 'Title',
       },
       width: 'large',
@@ -67,9 +69,10 @@ describe('Sidebar component', () => {
 
     expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledTimes(1);
     expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledWith({
-      title: DIALOG_TITLE,
+      title: GENERATE_DIALOG_TITLE,
       parameters: {
         entryId: mockSdk.ids.entry,
+        mode: "generate",
         contentTypeId: mockSdk.ids.contentType,
         title: 'Title',
       },
@@ -81,8 +84,8 @@ describe('Sidebar component', () => {
     });
 
     expect(mockSdk.dialogs.openCurrentApp).toHaveBeenNthCalledWith(2, {
-      title: DIALOG_TITLE,
-      parameters: result,
+      title: GENERATE_DIALOG_TITLE,
+      parameters: { ...result, mode: 'generate' },
       width: 'fullWidth',
     });
   });
@@ -97,10 +100,11 @@ describe('Sidebar component', () => {
 
     expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledTimes(1);
     expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledWith({
-      title: DIALOG_TITLE,
+      title: GENERATE_DIALOG_TITLE,
       parameters: {
         entryId: mockSdk.ids.entry,
         contentTypeId: mockSdk.ids.contentType,
+        mode: 'generate',
         title: 'Title',
       },
       width: 'large',
@@ -116,10 +120,11 @@ describe('Sidebar component', () => {
     getByText(SIDEBAR_CREATE_BUTTON_TEXT).click();
 
     expect(mockSdk.dialogs.openCurrentApp).toBeCalledWith({
-      title: DIALOG_TITLE,
+      title: CREATE_DIALOG_TITLE,
       parameters: {
         entryId: mockSdk.ids.entry,
         contentTypeId: mockSdk.ids.contentType,
+        mode: 'create',
         title: 'Title',
       },
       width: 'large',

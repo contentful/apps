@@ -1,7 +1,17 @@
 import { Flex } from '@contentful/f36-components';
 
-const FieldsSelectionStep = (props: { children: React.ReactNode }) => {
-  const { children } = props;
+type WizardFooterProps = {
+  children: React.ReactNode;
+  marginTop?: string;
+  marginBottom?: string;
+  paddingTop?: string;
+  paddingBottom?: string;
+  paddingLeft?: string;
+  paddingRight?: string;
+};
+
+const WizardFooter = (props: WizardFooterProps) => {
+  const { children, marginTop, marginBottom, paddingTop, paddingBottom, paddingLeft, paddingRight } = props;
   return (
     <Flex
       padding="spacingM"
@@ -11,9 +21,16 @@ const FieldsSelectionStep = (props: { children: React.ReactNode }) => {
         position: 'sticky',
         bottom: 0,
         background: 'white',
+        marginTop: marginTop || 'spacingXs',
+        marginBottom: marginBottom || 'spacingXs',
+        paddingTop: paddingTop || 'spacingM',
+        paddingBottom: paddingBottom || 'spacingM',
+        paddingLeft: paddingLeft || 'spacingM',
+        paddingRight: paddingRight || 'spacingM',
       }}>
       {children}
     </Flex>
   );
 };
-export default FieldsSelectionStep;
+
+export default WizardFooter;
