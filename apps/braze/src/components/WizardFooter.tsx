@@ -11,7 +11,15 @@ type WizardFooterProps = {
 };
 
 const WizardFooter = (props: WizardFooterProps) => {
-  const { children, marginTop, marginBottom, paddingTop, paddingBottom, paddingLeft, paddingRight } = props;
+  const {
+    children,
+    marginTop,
+    marginBottom,
+    paddingTop,
+    paddingBottom,
+    paddingLeft,
+    paddingRight,
+  } = props;
   return (
     <Flex
       padding="spacingM"

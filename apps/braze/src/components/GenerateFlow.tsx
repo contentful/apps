@@ -22,7 +22,15 @@ type GenerateFlowProps = {
 };
 
 const GenerateFlow = (props: GenerateFlowProps) => {
-  const { sdk, entry, invocationParams, locales, initialStep = FIELDS_STEP, initialSelectedFields = [], initialSelectedLocales = [] } = props;
+  const {
+    sdk,
+    entry,
+    invocationParams,
+    locales,
+    initialStep = FIELDS_STEP,
+    initialSelectedFields = [],
+    initialSelectedLocales = [],
+  } = props;
 
   const [step, setStep] = useState(initialStep);
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set(initialSelectedFields));
@@ -49,7 +57,7 @@ const GenerateFlow = (props: GenerateFlowProps) => {
                   entryId: invocationParams.entryId,
                   contentTypeId: invocationParams.contentTypeId,
                   title: invocationParams.title,
-                  serializedEntry: entry.serialize()
+                  serializedEntry: entry.serialize(),
                 })
           }
         />
@@ -95,4 +103,4 @@ const GenerateFlow = (props: GenerateFlowProps) => {
   );
 };
 
-export default GenerateFlow; 
+export default GenerateFlow;

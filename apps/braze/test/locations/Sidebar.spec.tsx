@@ -72,7 +72,7 @@ describe('Sidebar component', () => {
       title: GENERATE_DIALOG_TITLE,
       parameters: {
         entryId: mockSdk.ids.entry,
-        mode: "generate",
+        mode: 'generate',
         contentTypeId: mockSdk.ids.contentType,
         title: 'Title',
       },

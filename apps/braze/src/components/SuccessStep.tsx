@@ -11,17 +11,20 @@ type SuccessStepProps = {
 const SuccessStep = ({ onClose }: SuccessStepProps) => {
   return (
     <>
-      <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeXl" lineHeight="lineHeightL">Success!</Subheading>
+      <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeXl" lineHeight="lineHeightL">
+        Success!
+      </Subheading>
       <Paragraph>
-        Seven fields were successfully sent to Braze. You can view them from your Braze dashboard by navigating to Templates {'>'} Content Blocks.
+        Seven fields were successfully sent to Braze. You can view them from your Braze dashboard by
+        navigating to Templates {'>'} Content Blocks.
       </Paragraph>
       <WizardFooter paddingTop="0" paddingBottom="0" paddingRight="0">
-          <Button variant="primary" size="small" onClick={onClose}>
-            Done
-          </Button>
+        <Button variant="primary" size="small" onClick={onClose}>
+          Done
+        </Button>
       </WizardFooter>
     </>
   );
 };
 
-export default SuccessStep; 
+export default SuccessStep;

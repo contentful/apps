@@ -22,7 +22,10 @@ const FieldsStep = ({ entry, selectedFields, setSelectedFields, onNext }: Fields
 
   return (
     <>
-      <Paragraph>Select the fields you would like to generate into Content Blocks. Referenced fields are not available in this list, but can be linked directly through the entry.</Paragraph>
+      <Paragraph>
+        Select the fields you would like to generate into Content Blocks. Referenced fields are not
+        available in this list, but can be linked directly through the entry.
+      </Paragraph>
       <FormControl marginBottom="spacingXs">
         <FormControl.Label>Select Fields</FormControl.Label>
         <Select
@@ -49,4 +52,4 @@ const FieldsStep = ({ entry, selectedFields, setSelectedFields, onNext }: Fields
   );
 };
 
-export default FieldsStep; 
+export default FieldsStep;

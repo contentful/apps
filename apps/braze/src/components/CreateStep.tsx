@@ -12,31 +12,25 @@ type CreateStepProps = {
   onCreate: () => void;
 };
 
-const CreateStep = ({
-  isSubmitting,
-  onBack,
-  onCreate,
-}: CreateStepProps) => {
+const CreateStep = ({ isSubmitting, onBack, onCreate }: CreateStepProps) => {
   return (
     <>
       <Box>
         <Paragraph>
-          Edit each field to change the name or add an optional description. When complete, send directly to Braze. Content Block names should be unique.
+          Edit each field to change the name or add an optional description. When complete, send
+          directly to Braze. Content Block names should be unique.
         </Paragraph>
       </Box>
       <WizardFooter paddingTop="spacing2Xs" paddingBottom="0" paddingRight="0">
         <Button variant="secondary" size="small" onClick={onBack}>
           Back
         </Button>
-        <Button
-          variant="primary"
-          size="small"
-          onClick={onCreate}>
-            {isSubmitting ? 'Creating...' : 'Send to Braze'}
+        <Button variant="primary" size="small" onClick={onCreate}>
+          {isSubmitting ? 'Creating...' : 'Send to Braze'}
         </Button>
       </WizardFooter>
     </>
   );
 };
 
-export default CreateStep; 
+export default CreateStep;
