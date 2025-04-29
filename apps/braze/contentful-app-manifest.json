@@ -1,0 +1,36 @@
+{
+  "functions": [
+    {
+      "id": "createContentBlocksFunction",
+      "name": "Create content blocks function",
+      "description": "Function to create content blocks from App Action.",
+      "path": "functions/createContentBlocks.js",
+      "entryFile": "functions/createContentBlocks.ts",
+      "allowNetworks": [],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "updateContentBlocksFunction",
+      "name": "Update content blocks function",
+      "description": "Function to update content blocks from App Events.",
+      "path": "functions/updateContentBlocks.js",
+      "entryFile": "functions/updateContentBlocks.ts",
+      "allowNetworks": [],
+      "accepts": [
+        "appevent.handler"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "createContentBlocksAction",
+      "name": "Create content blocks action",
+      "type": "function-invocation",
+      "functionId": "createContentBlocksFunction",
+      "category": "Custom",
+      "parameters": []
+    }
+  ]
+}
