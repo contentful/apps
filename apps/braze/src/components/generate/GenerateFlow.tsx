@@ -3,9 +3,9 @@ import { useState } from 'react';
 import FieldsSelectionStep from './FieldsSelectionStep';
 import CodeBlocksStep from './CodeBlocksStep';
 import LocalesSelectionStep from './LocalesSelectionStep';
-import { Entry } from '../fields/Entry';
+import { Entry } from '../../fields/Entry';
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { InvocationParams } from '../locations/Dialog';
+import { InvocationParams } from '../../locations/Dialog';
 
 const FIELDS_STEP = 'fields';
 const LOCALES_STEP = 'locales';

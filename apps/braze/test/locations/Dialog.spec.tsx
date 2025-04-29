@@ -54,7 +54,6 @@ describe('Dialog component', () => {
       entryId: 'entryId',
       contentTypeId: 'contentTypeId',
       title: 'title',
-      mode: 'generate',
     };
     render(<Dialog />);
 
@@ -68,12 +67,11 @@ describe('Dialog component', () => {
     fireEvent.click(screen.getByRole('button', { name: /next/i }));
 
     expect(mockSdk.close).toHaveBeenCalledWith({
-      step: 'codeBlocks',
-      entryId: 'entryId',
       contentTypeId: 'contentTypeId',
-      title: 'title',
+      entryId: 'entryId',
       serializedEntry: mockEntry.serialize(),
-      mode: 'generate',
+      step: 'codeBlocks',
+      title: 'title',
     });
   });
 
@@ -82,7 +80,6 @@ describe('Dialog component', () => {
       step: 'codeBlocks',
       selectedFields: new Set([mockField.uniqueId()]),
       serializedEntry: mockEntry.serialize(),
-      mode: 'generate',
     };
     render(<Dialog />);
 
@@ -96,7 +93,6 @@ describe('Dialog component', () => {
       step: 'fields',
       selectedFields: new Set([mockField.uniqueId()]),
       serializedEntry: mockEntry.serialize(),
-      mode: 'generate',
     };
     render(<Dialog />);
 

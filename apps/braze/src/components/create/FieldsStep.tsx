@@ -1,6 +1,6 @@
 import { Button, FormControl, Select, Option, Paragraph } from '@contentful/f36-components';
-import { Entry } from '../fields/Entry';
-import WizardFooter from './WizardFooter';
+import { Entry } from '../../fields/Entry';
+import WizardFooter from '../WizardFooter';
 
 type FieldsStepProps = {
   entry: Entry;

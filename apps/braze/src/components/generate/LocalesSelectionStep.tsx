@@ -1,7 +1,7 @@
 import { Button, FormControl, Paragraph } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { Dispatch, SetStateAction } from 'react';
-import WizardFooter from './WizardFooter';
+import WizardFooter from '../WizardFooter';
 
 type LocalesSelectionStepProps = {
   locales: string[];

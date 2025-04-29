@@ -1,8 +1,8 @@
 import { Box } from '@contentful/f36-components';
 import { useState } from 'react';
-import { Entry } from '../fields/Entry';
+import { Entry } from '../../fields/Entry';
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { InvocationParams } from '../locations/Dialog';
+import { InvocationParams } from '../../locations/Dialog';
 import FieldsStep from './FieldsStep';
 import CreateStep from './CreateStep';
 import SuccessStep from './SuccessStep';

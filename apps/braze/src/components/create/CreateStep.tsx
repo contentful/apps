@@ -1,6 +1,6 @@
 import { Box, Paragraph, Button } from '@contentful/f36-components';
-import { Entry } from '../fields/Entry';
-import WizardFooter from './WizardFooter';
+import { Entry } from '../../fields/Entry';
+import WizardFooter from '../WizardFooter';
 
 type CreateStepProps = {
   entry: Entry;

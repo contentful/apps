@@ -6,8 +6,8 @@ import { createClient } from 'contentful-management';
 import { FieldsFactory } from '../fields/FieldsFactory';
 import { Entry } from '../fields/Entry';
 import { Field } from '../fields/Field';
-import GenerateFlow from '../components/GenerateFlow';
-import CreateFlow from '../components/CreateFlow';
+import GenerateFlow from '../components/generate/GenerateFlow';
+import CreateFlow from '../components/create/CreateFlow';
 
 export type InvocationParams = {
   step?: string;

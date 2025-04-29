@@ -1,6 +1,6 @@
 import { Paragraph, Button, Subheading } from '@contentful/f36-components';
-import { Entry } from '../fields/Entry';
-import WizardFooter from './WizardFooter';
+import { Entry } from '../../fields/Entry';
+import WizardFooter from '../WizardFooter';
 
 type SuccessStepProps = {
   entry: Entry;
