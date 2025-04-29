@@ -2,17 +2,16 @@ import React from 'react';
 import { render } from 'react-dom';
 import { GlobalStyles } from '@contentful/f36-components';
 import { init, locations } from '@contentful/app-sdk';
-import { AppExtensionSDK, DialogExtensionSDK } from '@contentful/app-sdk';
 
 // Import your components
 import ConfigScreen from './locations/ConfigScreen';
 import FieldMappingScreen from './locations/FieldMappingScreen';
-import FieldMapper from './components/FieldMapper';
 import { KlaviyoAppProvider } from './context/KlaviyoAppContext';
 import { Sidebar } from './locations/Sidebar';
 import FieldSelectDialog from './locations/FieldSelectDialog';
 // Create a simple context for SDK
 import { createContext } from 'react';
+import logger from './utils/logger';
 
 // Create your own SDK context
 export const SDKContext = createContext<any>(null);
@@ -27,12 +26,12 @@ const root = document.getElementById('root');
 // Update the message event listener in index.tsx
 window.addEventListener('message', async (event) => {
   if (event.data && event.data.type === 'updateFieldMappings') {
-    console.log('Received field mapping update:', event.data.fieldMappings);
+    logger.log('Received field mapping update:', event.data.fieldMappings);
 
     // If we're in development mode, save to localStorage for testing
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.MODE !== 'production') {
       localStorage.setItem('dev_field_mappings', JSON.stringify(event.data.fieldMappings));
-      console.log('Saved field mappings to localStorage for dev mode');
+      logger.log('Saved field mappings to localStorage for dev mode');
     }
 
     // If we have access to the global SDK object, try to save using it
@@ -48,15 +47,15 @@ window.addEventListener('message', async (event) => {
           },
         });
 
-        console.log('Updated field mappings in installation parameters');
+        logger.log('Updated field mappings in installation parameters');
       }
     } catch (error) {
-      console.error('Failed to update field mappings in installation parameters:', error);
+      logger.error('Failed to update field mappings in installation parameters:', error);
     }
   }
 });
 
-if (process.env.NODE_ENV === 'development' && window.self === window.top) {
+if (import.meta.env.MODE !== 'production' && window.self === window.top) {
   // Try to get any saved field mappings from localStorage
   const savedMappings = localStorage.getItem('dev_field_mappings');
   const fieldMappings = savedMappings ? JSON.parse(savedMappings) : [];
@@ -69,7 +68,7 @@ if (process.env.NODE_ENV === 'development' && window.self === window.top) {
         fieldMappings,
       }),
       setParameters: (params: any) => {
-        console.log('Setting parameters in dev mode:', params);
+        logger.log('Setting parameters in dev mode:', params);
         if (params.installation && params.installation.fieldMappings) {
           localStorage.setItem(
             'dev_field_mappings',
@@ -95,8 +94,8 @@ if (process.env.NODE_ENV === 'development' && window.self === window.top) {
       },
     },
     notifier: {
-      success: (message: string) => console.log(`Success: ${message}`),
-      error: (message: string) => console.error(`Error: ${message}`),
+      success: (message: string) => logger.log(`Success: ${message}`),
+      error: (message: string) => logger.error(`Error: ${message}`),
     },
     window: {
       startAutoResizer: () => {},
@@ -130,9 +129,9 @@ if (process.env.NODE_ENV === 'development' && window.self === window.top) {
 } else {
   // Production init
   init((sdk) => {
-    console.log('SDK Location:', sdk.location);
-    console.log('Is config?', sdk.location.is(locations.LOCATION_APP_CONFIG));
-    console.log('Is sidebar?', sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR));
+    logger.log('SDK Location:', sdk.location);
+    logger.log('Is config?', sdk.location.is(locations.LOCATION_APP_CONFIG));
+    logger.log('Is sidebar?', sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR));
 
     const ComponentLocation = sdk.location.is(locations.LOCATION_DIALOG)
       ? FieldSelectDialog

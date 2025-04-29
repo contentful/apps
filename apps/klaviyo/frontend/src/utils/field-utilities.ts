@@ -1,5 +1,6 @@
 import { SidebarExtensionSDK } from '@contentful/app-sdk';
 import { FieldData } from './klaviyo-api-service';
+import logger from './logger';
 
 /**
  * Retrieves detailed information about a field
@@ -68,13 +69,13 @@ export const getFieldDetails = async (
           ];
         }
       } catch (assetError) {
-        console.error('Error getting asset details:', assetError);
+        logger.error('Error getting asset details:', assetError);
       }
     }
 
     return fieldData;
   } catch (error) {
-    console.error(`Error getting field details for ${fieldId}:`, error);
+    logger.error(`Error getting field details for ${fieldId}:`, error);
     // Return minimal field data on error
     return {
       id: fieldId,

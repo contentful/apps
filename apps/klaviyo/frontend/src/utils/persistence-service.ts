@@ -1,5 +1,6 @@
 import { BaseExtensionSDK } from '@contentful/app-sdk';
 import { FieldData } from './klaviyo-api-service';
+import logger from './logger';
 
 // Use a consistent storage key across all components
 export const STORAGE_KEY = 'klaviyo_field_mappings';
@@ -14,19 +15,19 @@ export const getSyncData = async (sdk: BaseExtensionSDK): Promise<FieldData[]> =
     if (localData) {
       try {
         const parsedData = JSON.parse(localData);
-        console.log('[persistence] Retrieved mappings from localStorage:', parsedData);
+        logger.log('[persistence] Retrieved mappings from localStorage:', parsedData);
         return parsedData;
       } catch (parseError) {
-        console.error('[persistence] Error parsing localStorage data:', parseError);
+        logger.error('[persistence] Error parsing localStorage data:', parseError);
         return [];
       }
     }
 
     // If localStorage is empty, return empty array
-    console.log('[persistence] No mappings found in localStorage');
+    logger.log('[persistence] No mappings found in localStorage');
     return [];
   } catch (error) {
-    console.error('[persistence] Error retrieving sync data:', error);
+    logger.error('[persistence] Error retrieving sync data:', error);
     return [];
   }
 };
@@ -34,12 +35,9 @@ export const getSyncData = async (sdk: BaseExtensionSDK): Promise<FieldData[]> =
 /**
  * Update sync data in localStorage and broadcast changes
  */
-export const updateSyncData = async (
-  sdk: BaseExtensionSDK,
-  data: FieldData[]
-): Promise<boolean> => {
+export const updateSyncData = async (data: FieldData[]): Promise<boolean> => {
   try {
-    console.log('[persistence] Updating field mappings:', data);
+    logger.log('[persistence] Updating field mappings:', data);
 
     // Store in localStorage for immediate access across components
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -53,9 +51,9 @@ export const updateSyncData = async (
         },
         '*'
       );
-      console.log('[persistence] Broadcast updateFieldMappings event');
+      logger.log('[persistence] Broadcast updateFieldMappings event');
     } catch (broadcastError) {
-      console.warn('[persistence] Error broadcasting field mapping update:', broadcastError);
+      logger.warn('[persistence] Error broadcasting field mapping update:', broadcastError);
     }
 
     // Also dispatch a storage event for cross-tab updates
@@ -67,14 +65,14 @@ export const updateSyncData = async (
         storageArea: localStorage,
       });
       window.dispatchEvent(storageEvent);
-      console.log('[persistence] Dispatched storage event');
+      logger.log('[persistence] Dispatched storage event');
     } catch (storageError) {
-      console.warn('[persistence] Error dispatching storage event:', storageError);
+      logger.warn('[persistence] Error dispatching storage event:', storageError);
     }
 
     return true;
   } catch (error) {
-    console.error('[persistence] Error updating sync data:', error);
+    logger.error('[persistence] Error updating sync data:', error);
     return false;
   }
 };
@@ -89,7 +87,7 @@ export const getLocalMappings = (): FieldData[] => {
       return JSON.parse(data);
     }
   } catch (e) {
-    console.error('[persistence] Error getting local mappings:', e);
+    logger.error('[persistence] Error getting local mappings:', e);
   }
   return [];
 };

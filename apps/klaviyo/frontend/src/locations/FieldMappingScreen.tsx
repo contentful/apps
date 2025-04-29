@@ -26,6 +26,7 @@ import {
 import { getSyncData, updateSyncData } from '../utils/persistence-service';
 import { FieldData, SyncContent } from '../utils/klaviyo-api-service';
 import { SyncStatusTable } from '../components/SyncStatusTable';
+import logger from '../utils/logger';
 
 // Extend the FieldData type to include contentTypeId
 interface ExtendedFieldData extends FieldData {
@@ -44,7 +45,6 @@ export const FieldMappingScreen: React.FC = () => {
   const [mappings, setMappings] = useState<ExtendedFieldData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [contentTypes, setContentTypes] = useState<Record<string, string>>({});
-  const [activeTab, setActiveTab] = useState<'mappings' | 'syncStatus'>('mappings');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [availableContentTypes, setAvailableContentTypes] = useState<
     Array<{ id: string; name: string }>
@@ -72,7 +72,7 @@ export const FieldMappingScreen: React.FC = () => {
         if (localStorageData) {
           try {
             mappingsFromStorage = JSON.parse(localStorageData);
-            console.log(
+            logger.log(
               '[FieldMappingScreen] Loaded mappings directly from localStorage:',
               mappingsFromStorage
             );
@@ -81,14 +81,14 @@ export const FieldMappingScreen: React.FC = () => {
               setMappings(mappingsFromStorage);
             }
           } catch (parseError) {
-            console.error('[FieldMappingScreen] Error parsing localStorage data:', parseError);
+            logger.error('[FieldMappingScreen] Error parsing localStorage data:', parseError);
           }
         }
 
         // As a backup, also try the persistence service
         if (!mappingsFromStorage.length) {
           const savedMappings = await getSyncData(sdk);
-          console.log(
+          logger.log(
             '[FieldMappingScreen] Loaded mappings from persistence service:',
             savedMappings
           );
@@ -96,7 +96,7 @@ export const FieldMappingScreen: React.FC = () => {
           if (savedMappings && Array.isArray(savedMappings) && savedMappings.length > 0) {
             setMappings(savedMappings);
           } else {
-            console.log('[FieldMappingScreen] No mappings found');
+            logger.log('[FieldMappingScreen] No mappings found');
           }
         }
 
@@ -124,13 +124,13 @@ export const FieldMappingScreen: React.FC = () => {
             });
           });
         } catch (ctError) {
-          console.warn('[FieldMappingScreen] Failed to load content type names:', ctError);
+          logger.warn('[FieldMappingScreen] Failed to load content type names:', ctError);
         }
 
         setContentTypes(ctNames);
         setAvailableContentTypes(contentTypesList);
       } catch (error) {
-        console.error('[FieldMappingScreen] Error loading mappings:', error);
+        logger.error('[FieldMappingScreen] Error loading mappings:', error);
       } finally {
         setIsLoading(false);
       }
@@ -142,7 +142,7 @@ export const FieldMappingScreen: React.FC = () => {
     // Function to handle message events
     const handleFieldMappingUpdate = (event: MessageEvent) => {
       if (event.data && event.data.type === 'updateFieldMappings') {
-        console.log(
+        logger.log(
           '[FieldMappingScreen] Received field mapping update via message:',
           event.data.fieldMappings
         );
@@ -155,7 +155,7 @@ export const FieldMappingScreen: React.FC = () => {
     // Function to handle storage events
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'klaviyo_field_mappings') {
-        console.log('[FieldMappingScreen] Storage changed in another tab/window');
+        logger.log('[FieldMappingScreen] Storage changed in another tab/window');
         loadData(); // Reload completely to ensure fresh data
       }
     };
@@ -196,7 +196,7 @@ export const FieldMappingScreen: React.FC = () => {
         const existingMappings = mappings.filter((m) => m.contentTypeId === selectedContentType);
         setSelectedFields(existingMappings.map((m) => m.id));
       } catch (error) {
-        console.error('Error loading fields:', error);
+        logger.error('Error loading fields:', error);
         setAvailableFields([]);
       }
     };
@@ -208,7 +208,7 @@ export const FieldMappingScreen: React.FC = () => {
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'klaviyo_field_mappings') {
-        console.log('Storage changed, reloading mappings');
+        logger.log('Storage changed, reloading mappings');
         const loadMappings = async () => {
           const savedMappings = await getSyncData(sdk);
           setMappings(savedMappings || []);
@@ -317,7 +317,7 @@ export const FieldMappingScreen: React.FC = () => {
 
       // Combine and save
       const updatedMappings = [...existingMappings, ...newMappings];
-      await updateSyncData(sdk, updatedMappings);
+      await updateSyncData(updatedMappings);
 
       // Update local state
       setMappings(updatedMappings);
@@ -333,7 +333,7 @@ export const FieldMappingScreen: React.FC = () => {
 
       setSyncMessage('Mappings saved successfully');
     } catch (error) {
-      console.error('Error saving mappings:', error);
+      logger.error('Error saving mappings:', error);
       setSyncMessage('Error saving mappings');
     }
   };
@@ -381,7 +381,7 @@ export const FieldMappingScreen: React.FC = () => {
       );
       setSyncMessage('Content successfully synced to Klaviyo!');
     } catch (error: any) {
-      console.error('Error syncing:', error);
+      logger.error('Error syncing:', error);
       setSyncMessage(`Error syncing: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsSyncing(false);
@@ -392,53 +392,6 @@ export const FieldMappingScreen: React.FC = () => {
     setSelectedFields((prev) =>
       prev.includes(fieldId) ? prev.filter((id) => id !== fieldId) : [...prev, fieldId]
     );
-  };
-
-  // Update the forceRefresh function
-  const forceRefresh = () => {
-    console.log('[FieldMappingScreen] Force refreshing mappings...');
-    setIsLoading(true);
-
-    try {
-      // Always check localStorage first
-      const localStorageData = localStorage.getItem('klaviyo_field_mappings');
-      if (localStorageData) {
-        try {
-          const mappingsFromStorage = JSON.parse(localStorageData);
-          console.log('[FieldMappingScreen] Found mappings in localStorage:', mappingsFromStorage);
-
-          if (Array.isArray(mappingsFromStorage)) {
-            setMappings(mappingsFromStorage);
-            setIsLoading(false);
-            return; // Exit early if we found mappings
-          }
-        } catch (error) {
-          console.error('[FieldMappingScreen] Error parsing localStorage:', error);
-        }
-      } else {
-        console.log('[FieldMappingScreen] No mappings found in localStorage');
-      }
-
-      // Fallback to persistence service if localStorage doesn't have mappings
-      getSyncData(sdk)
-        .then((savedMappings) => {
-          console.log(
-            '[FieldMappingScreen] Loaded mappings from persistence service:',
-            savedMappings
-          );
-          setMappings(savedMappings || []);
-        })
-        .catch((error) => {
-          console.error('[FieldMappingScreen] Error loading mappings:', error);
-          setMappings([]);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    } catch (error) {
-      console.error('[FieldMappingScreen] Error refreshing mappings:', error);
-      setIsLoading(false);
-    }
   };
 
   return (
@@ -454,16 +407,13 @@ export const FieldMappingScreen: React.FC = () => {
               <Tabs.Tab panelId="mappingsPanel">Field Mappings</Tabs.Tab>
               <Tabs.Tab panelId="syncStatusPanel">Sync Status</Tabs.Tab>
             </Tabs.List>
-            <Tabs.Panel id="mappingsPanel">
-              <Flex justifyContent="flex-end" marginBottom="spacingM">
+            <Tabs.Panel id="mappingsPanel" style={{ paddingTop: '20px' }}>
+              <Flex justifyContent="flex-start" marginBottom="spacingM">
                 <Button
                   variant="positive"
                   onClick={openConfigModal}
                   style={{ marginRight: '10px' }}>
                   Configure Field Mappings
-                </Button>
-                <Button variant="secondary" onClick={forceRefresh} isLoading={isLoading}>
-                  Refresh Mappings
                 </Button>
               </Flex>
 

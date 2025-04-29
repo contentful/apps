@@ -1,5 +1,5 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { sendToKlaviyo, SyncContent, FieldData, KlaviyoConfig } from './klaviyo-api-service';
+import { sendToKlaviyo, SyncContent, KlaviyoConfig } from './klaviyo-api-service';
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -139,7 +139,7 @@ describe('klaviyo-api-service', () => {
   describe('SyncContent', () => {
     it('should throw error if API key is missing', async () => {
       // Arrange
-      const syncContent = new SyncContent();
+      const syncContent = new SyncContent({});
       const mockSdk = {
         parameters: {
           installation: {},
@@ -161,7 +161,7 @@ describe('klaviyo-api-service', () => {
 
     it('should process fields and call API', async () => {
       // Arrange
-      const syncContent = new SyncContent();
+      const syncContent = new SyncContent({});
       const mockSdk = {
         parameters: {
           installation: {
@@ -247,7 +247,7 @@ describe('klaviyo-api-service', () => {
 
     it('should handle errors during sync', async () => {
       // Arrange
-      const syncContent = new SyncContent();
+      const syncContent = new SyncContent({});
       const mockSdk = {
         parameters: {
           installation: {

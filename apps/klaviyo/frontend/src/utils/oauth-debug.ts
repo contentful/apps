@@ -4,6 +4,7 @@
 
 import axios from 'axios';
 import { API_PROXY_URL } from '../config/klaviyo';
+import logger from './logger';
 
 /**
  * Checks if OAuth tokens are available and valid
@@ -53,7 +54,7 @@ export const checkOAuthTokens = async (): Promise<{
         data: response.data,
       };
     } catch (error) {
-      console.error('OAuth token validation error:', error);
+      logger.error('OAuth token validation error:', error);
       validationResult = {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -85,5 +86,5 @@ export const clearOAuthTokens = (): void => {
     .filter((key) => key.startsWith('klaviyo_pkce_data'))
     .forEach((key) => localStorage.removeItem(key));
 
-  console.log('All Klaviyo OAuth tokens cleared from localStorage');
+  logger.log('All Klaviyo OAuth tokens cleared from localStorage');
 };

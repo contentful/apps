@@ -1,6 +1,5 @@
-import React from 'react';
 import FieldSelectDialog from './FieldSelectDialog';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import '@testing-library/jest-dom';
 
@@ -39,7 +38,7 @@ describe('FieldSelectDialog component', () => {
   });
 
   it('renders the field selection dialog', async () => {
-    render(<FieldSelectDialog />);
+    render(<FieldSelectDialog entry={{}} mappings={[]} />);
 
     // Check that the component renders with expected title
     expect(screen.getByText('Select Fields to Map to Klaviyo')).toBeInTheDocument();
@@ -50,14 +49,14 @@ describe('FieldSelectDialog component', () => {
   });
 
   it('filters out unsupported field types', async () => {
-    render(<FieldSelectDialog />);
+    render(<FieldSelectDialog entry={{}} mappings={[]} />);
 
     // Boolean fields should not be included in select options
     expect(screen.queryByText('Published')).not.toBeInTheDocument();
   });
 
   it('selects fields and submits', async () => {
-    render(<FieldSelectDialog />);
+    render(<FieldSelectDialog entry={{}} mappings={[]} />);
 
     // Select the title field
     const titleCheckbox = screen.getByText('Title');
@@ -72,7 +71,7 @@ describe('FieldSelectDialog component', () => {
   });
 
   it('selects an image field and submits', async () => {
-    render(<FieldSelectDialog />);
+    render(<FieldSelectDialog entry={{}} mappings={[]} />);
 
     // Select the image field
     const imageCheckbox = screen.getByText('Featured Image');
@@ -87,7 +86,7 @@ describe('FieldSelectDialog component', () => {
   });
 
   it('allows canceling the dialog', async () => {
-    render(<FieldSelectDialog />);
+    render(<FieldSelectDialog entry={{}} mappings={[]} />);
 
     // Click the cancel button
     const cancelButton = screen.getByRole('button', { name: /cancel/i });

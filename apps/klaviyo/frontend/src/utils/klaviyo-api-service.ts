@@ -102,15 +102,15 @@ export const sendToKlaviyo = async (
 
     return await response.json();
   } catch (error) {
-    console.error('Error sending data to Klaviyo:', error);
+    logger.error('Error sending data to Klaviyo:', error);
     throw error;
   }
 };
 
 // Import the KlaviyoService and OAuth configuration
 import { KlaviyoService } from '../services/klaviyo';
-import { KlaviyoOAuthConfig } from '../config/klaviyo';
 import { OAuthService } from '../services/oauth';
+import logger from './logger';
 
 // Define the FieldMapping interface to match the service's requirements
 interface FieldMapping {
@@ -131,7 +131,7 @@ interface FieldMapping {
 export class SyncContent {
   entry: any;
   constructor(entry: any) {
-    console.log('SyncContent constructor:', entry);
+    logger.log('SyncContent constructor:', entry);
     this.entry = entry;
   }
   /**
@@ -145,7 +145,7 @@ export class SyncContent {
     mappings: Array<{ contentfulFieldId: string; klaviyoBlockName: string; fieldType: string }>
   ) {
     try {
-      console.log('Starting content sync with mappings:', mappings);
+      logger.log('Starting content sync with mappings:', mappings);
 
       const clientId = sdk.parameters.installation.installation.clientId;
       const clientSecret = sdk.parameters.installation.installation.clientSecret;
@@ -153,10 +153,10 @@ export class SyncContent {
         sdk.parameters.installation.klaviyoRedirectUri ||
         `${window.location.origin}:3001/auth/callback`;
 
-      console.log('Client ID:', clientId, sdk.parameters.installation);
-      console.log('Client Secret:', clientSecret);
-      console.log('Redirect URI:', redirectUri);
-      console.log('Entry:', this.entry, sdk.entry);
+      logger.log('Client ID:', clientId, sdk.parameters.installation);
+      logger.log('Client Secret:', clientSecret);
+      logger.log('Redirect URI:', redirectUri);
+      logger.log('Entry:', this.entry, sdk.entry);
       // Check if we have a valid OAuth token
       const oauthService = new OAuthService({
         clientId,
@@ -190,7 +190,7 @@ export class SyncContent {
       });
 
       // Get entry data and content type ID safely
-      console.log('Entry:', this.entry, sdk);
+      logger.log('Entry:', this.entry, sdk);
       // Get content type ID safely - use multiple approaches to ensure we get a value
       let contentTypeId;
 
@@ -209,11 +209,11 @@ export class SyncContent {
       }
       // Log a warning but continue with the content type ID
       else {
-        console.warn('Could not determine content type ID from entry or SDK, using "unknown"');
+        logger.warn('Could not determine content type ID from entry or SDK, using "unknown"');
         contentTypeId = 'unknown';
       }
 
-      console.log('Using content type ID:', contentTypeId, this.entry);
+      logger.log('Using content type ID:', contentTypeId, this.entry);
 
       // Convert to FieldMapping array for the KlaviyoService
       const fieldMappings: FieldMapping[] = mappings.map((mapping) => ({
@@ -231,7 +231,7 @@ export class SyncContent {
       // Call the KlaviyoService to sync content
       const result = await klaviyoService.syncContent(fieldMappings, this.entry);
 
-      console.log('Sync completed successfully:', result);
+      logger.log('Sync completed successfully:', result);
 
       // Notify the user
       sdk.notifier.success('Content successfully synced to Klaviyo');
@@ -247,7 +247,7 @@ export class SyncContent {
           const fieldSys = await field?.getSys();
           fieldUpdates[mapping.contentfulFieldId] = fieldSys?.updatedAt || Date.now();
         } catch (fieldError) {
-          console.warn(
+          logger.warn(
             `Couldn't get update time for field ${mapping.contentfulFieldId}:`,
             fieldError
           );
@@ -260,7 +260,7 @@ export class SyncContent {
 
       return result;
     } catch (error: any) {
-      console.error('Error syncing content to Klaviyo:', error);
+      logger.error('Error syncing content to Klaviyo:', error);
 
       // Special handling for OAuth errors
       if (
@@ -278,7 +278,7 @@ export class SyncContent {
       // Notify the user of the error
       if (sdk.notifier) {
         sdk.notifier.error(
-          `Failed to sync content to Klaviyo. ${error.message || 'See console for details.'}`
+          `Failed to sync content to Klaviyo. ${error.message || 'See logger for details.'}`
         );
       }
 
@@ -332,7 +332,7 @@ export class SyncContent {
         })
       );
     } catch (error) {
-      console.error('Error updating sync status:', error);
+      logger.error('Error updating sync status:', error);
     }
   }
 }
@@ -383,7 +383,7 @@ export const updateSyncStatus = (
       })
     );
   } catch (error) {
-    console.error('Error updating sync status:', error);
+    logger.error('Error updating sync status:', error);
   }
 };
 
@@ -437,7 +437,7 @@ export const checkNeedsSync = (
 
     return needsSync;
   } catch (error) {
-    console.error('Error checking sync status:', error);
+    logger.error('Error checking sync status:', error);
     return true; // Default to needs sync if there's an error
   }
 };
@@ -456,7 +456,7 @@ export const getAllSyncStatuses = (forceRefresh: boolean = false): SyncStatus[] 
     if (!statusesStr) return [];
     return JSON.parse(statusesStr);
   } catch (error) {
-    console.error('Error getting sync statuses:', error);
+    logger.error('Error getting sync statuses:', error);
     return [];
   }
 };
@@ -501,6 +501,6 @@ export const markEntryForSync = (
     // Save back to localStorage
     localStorage.setItem(storageKey, JSON.stringify(existingStatuses));
   } catch (error) {
-    console.error('Error marking entry for sync:', error);
+    logger.error('Error marking entry for sync:', error);
   }
 };

@@ -14,6 +14,7 @@ import {
   Stack,
 } from '@contentful/f36-components';
 import { FieldMapping, MappedField } from '../config/klaviyo';
+import logger from '../utils/logger';
 
 const FieldMapper: React.FC = () => {
   const sdk = useSDK<FieldExtensionSDK>();
@@ -71,7 +72,7 @@ const FieldMapper: React.FC = () => {
         // Set available properties based on mapping type
         updateAvailableProperties(mappingType);
       } catch (error) {
-        console.error('Error checking existing mapping:', error);
+        logger.error('Error checking existing mapping:', error);
       } finally {
         setIsLoading(false);
       }
@@ -140,6 +141,13 @@ const FieldMapper: React.FC = () => {
         fieldMappings.push({
           contentTypeId,
           fields: [newMapping],
+          fieldType: 'text',
+          contentfulFieldId: fieldId,
+          klaviyoBlockName: 'Text',
+          name: 'Text',
+          type: 'text',
+          severity: 'info',
+          value: 'Text',
         });
       }
 
@@ -156,7 +164,7 @@ const FieldMapper: React.FC = () => {
       setIsMapped(true);
       sdk.notifier.success('Field mapping saved successfully');
     } catch (error) {
-      console.error('Error saving field mapping:', error);
+      logger.error('Error saving field mapping:', error);
       sdk.notifier.error(
         `Failed to save mapping: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -206,7 +214,7 @@ const FieldMapper: React.FC = () => {
         sdk.notifier.success('Field mapping removed');
       }
     } catch (error) {
-      console.error('Error removing field mapping:', error);
+      logger.error('Error removing field mapping:', error);
       sdk.notifier.error(
         `Failed to remove mapping: ${error instanceof Error ? error.message : 'Unknown error'}`
       );

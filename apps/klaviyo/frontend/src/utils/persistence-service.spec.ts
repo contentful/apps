@@ -163,7 +163,7 @@ describe('persistence-service', () => {
       };
 
       // Act
-      await updateSyncData(mockSdk as any, mockMappings);
+      await updateSyncData(mockMappings as any);
 
       // Assert
       expect(mockSessionStorage.setItem).toHaveBeenCalledWith(
@@ -184,7 +184,7 @@ describe('persistence-service', () => {
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
       // Act
-      await updateSyncData(mockSdk as any, mockMappings);
+      await updateSyncData(mockMappings as any);
 
       // Assert
       expect(consoleSpy).toHaveBeenCalled();
@@ -218,7 +218,7 @@ describe('persistence-service', () => {
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       // Act
-      await updateSyncData(mockSdk as any, mockMappings);
+      await updateSyncData(mockMappings as any);
 
       // Assert
       expect(warnSpy).toHaveBeenCalled();

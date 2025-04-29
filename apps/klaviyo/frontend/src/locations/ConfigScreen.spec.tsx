@@ -1,6 +1,6 @@
 import React from 'react';
-import { ConfigScreen } from './ConfigScreen';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import ConfigScreen from './ConfigScreen';
+import { render, screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import '@testing-library/jest-dom';
 import { locations } from '@contentful/app-sdk';

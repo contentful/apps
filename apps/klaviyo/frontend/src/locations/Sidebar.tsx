@@ -5,6 +5,7 @@ import { Button, Flex, Text, Note } from '@contentful/f36-components';
 import { FieldData, markEntryForSync } from '../utils/klaviyo-api-service';
 import { getSyncData, updateSyncData } from '../utils/persistence-service';
 import { getFieldDetails } from '../utils/field-utilities';
+import { logger } from '../utils/logger';
 
 // Types
 type SDKType = SidebarExtensionSDK | ConfigAppSDK;
@@ -48,16 +49,16 @@ export const Sidebar = () => {
   useEffect(() => {
     const loadMappings = async () => {
       try {
-        console.log('[Sidebar] Loading field mappings...');
+        logger.log('[Sidebar] Loading field mappings...');
         const savedMappings = await getSyncData(sdk);
         if (savedMappings && Array.isArray(savedMappings) && savedMappings.length > 0) {
-          console.log('[Sidebar] Loaded mappings:', savedMappings);
+          logger.log('[Sidebar] Loaded mappings:', savedMappings);
           setMappings(savedMappings);
         } else {
-          console.log('[Sidebar] No existing mappings found');
+          logger.log('[Sidebar] No existing mappings found');
         }
       } catch (error) {
-        console.error('[Sidebar] Error loading mappings:', error);
+        logger.error('[Sidebar] Error loading mappings:', error);
       } finally {
         setLoading(false);
       }
@@ -68,7 +69,7 @@ export const Sidebar = () => {
     // Also listen for storage events to update in real-time across tabs
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'klaviyo_field_mappings') {
-        console.log('[Sidebar] Storage changed, reloading mappings');
+        logger.log('[Sidebar] Storage changed, reloading mappings');
         loadMappings();
       }
     };
@@ -86,26 +87,12 @@ export const Sidebar = () => {
 // Configuration component
 const ConfigComponent = ({
   sdk,
-  setMappings,
-  loading,
-  setLoading,
 }: {
   sdk: ConfigAppSDK;
   setMappings: React.Dispatch<React.SetStateAction<FieldData[]>>;
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const handleSave = useCallback(
-    async (values: FieldData[]) => {
-      setLoading(true);
-      setMappings(values);
-      await updateSyncData(sdk, values);
-      setLoading(false);
-      return true;
-    },
-    [sdk, setMappings, setLoading]
-  );
-
   useEffect(() => {
     sdk.app.onConfigure(() => ({
       parameters: {},
@@ -148,7 +135,7 @@ const SidebarComponent = ({
     if (!sdk.dialogs) return;
 
     try {
-      console.log('[Sidebar] Opening field select dialog...');
+      logger.log('[Sidebar] Opening field select dialog...');
 
       // Get all fields from the content type
       const contentType = await sdk.space.getContentType(sdk.ids.contentType);
@@ -189,15 +176,15 @@ const SidebarComponent = ({
       const result = await sdk.dialogs.openCurrentApp(dialogOptions);
 
       if (!result) {
-        console.log('[Sidebar] Dialog closed without result');
+        logger.log('[Sidebar] Dialog closed without result');
         return; // User cancelled
       }
 
-      console.log('[Sidebar] Dialog result:', result);
+      logger.log('[Sidebar] Dialog result:', result);
 
       // Check if the dialog was closed with mappings
       if (result.mappings && Array.isArray(result.mappings)) {
-        console.log('[Sidebar] Using mappings from dialog result');
+        logger.log('[Sidebar] Using mappings from dialog result');
 
         // Update our state with the mappings from the dialog
         setMappings(result.mappings);
@@ -238,7 +225,7 @@ const SidebarComponent = ({
         localStorage.setItem('klaviyo_field_mappings', JSON.stringify(newMappings));
 
         // Also update via the persistence service
-        await updateSyncData(sdk, newMappings);
+        await updateSyncData(newMappings);
 
         // Notify other components about the update
         window.postMessage(
@@ -250,7 +237,7 @@ const SidebarComponent = ({
         );
       }
     } catch (error) {
-      console.error('[Sidebar] Error in configure dialog:', error);
+      logger.error('[Sidebar] Error in configure dialog:', error);
     }
   }, [sdk, mappings, setMappings, setShowSuccess]);
 
@@ -265,7 +252,7 @@ const SidebarComponent = ({
         if (field) {
           // Use onValueChanged to detect when the field value changes
           const removeHandler = field.onValueChanged(() => {
-            console.log(`Field ${mapping.name} value changed, marking for sync`);
+            logger.log(`Field ${mapping.name} value changed, marking for sync`);
 
             const entryId = sdk.entry.getSys().id;
             const contentTypeId = sdk.ids.contentType;
@@ -278,7 +265,7 @@ const SidebarComponent = ({
           fieldChangeHandlers.push(removeHandler);
         }
       } catch (error) {
-        console.error(`Error setting up change listener for field ${mapping.id}:`, error);
+        logger.error(`Error setting up change listener for field ${mapping.id}:`, error);
       }
     }
 

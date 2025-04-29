@@ -10,6 +10,7 @@ import ConfigScreen from './locations/ConfigScreen';
 import FieldSelectDialog from './locations/FieldSelectDialog';
 import { useEffect, useState } from 'react';
 import { FieldMapping } from './config/klaviyo';
+import logger from './utils/logger';
 
 // Map of components by location
 const ComponentLocationSettings = {
@@ -34,7 +35,7 @@ const App = () => {
         setMappings(existingMappings);
       }
     } catch (error) {
-      console.error('Error loading mappings:', error);
+      logger.error('Error loading mappings:', error);
     }
   }, [sdk.parameters.installation]);
 

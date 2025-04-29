@@ -6,7 +6,6 @@ import {
   TableCell,
   TableBody,
   Button,
-  Badge,
   Box,
   Stack,
   Text,
@@ -19,6 +18,7 @@ import {
   markEntryForSync,
   SyncContent,
 } from '../utils/klaviyo-api-service';
+import logger from '../utils/logger';
 
 interface SyncStatusTableProps {
   onRefresh?: () => void;
@@ -32,7 +32,7 @@ export const SyncStatusTable: React.FC<SyncStatusTableProps> = ({ onRefresh, sdk
   const loadSyncStatuses = () => {
     // Force a fresh load of sync statuses
     const statuses = getAllSyncStatuses(true); // Add a force refresh parameter
-    console.log('Loaded sync statuses:', statuses);
+    logger.log('Loaded sync statuses:', statuses);
     setSyncStatuses(statuses);
 
     // Call the parent onRefresh if provided
@@ -57,7 +57,7 @@ export const SyncStatusTable: React.FC<SyncStatusTableProps> = ({ onRefresh, sdk
 
     // Add event listener for sync completion
     const handleSyncCompletion = (event: CustomEvent) => {
-      console.log('Sync status changed, refreshing table');
+      logger.log('Sync status changed, refreshing table');
       loadSyncStatuses();
     };
 
@@ -114,24 +114,7 @@ export const SyncStatusTable: React.FC<SyncStatusTableProps> = ({ onRefresh, sdk
       const entryUrl = `https://app.contentful.com/spaces/${spaceId}/environments/${environmentId}/entries/${entryId}`;
       window.open(entryUrl, '_blank');
     } catch (error) {
-      console.error('Error opening entry:', error);
-    }
-  };
-
-  // Add a helper function to clear sync status for testing
-  const clearSyncStatus = (entryId: string) => {
-    try {
-      const storageKey = 'klaviyo_sync_status';
-      const existingStatusesStr = localStorage.getItem(storageKey);
-      if (!existingStatusesStr) return;
-
-      const existingStatuses = JSON.parse(existingStatusesStr);
-      const updatedStatuses = existingStatuses.filter((status: any) => status.entryId !== entryId);
-
-      localStorage.setItem(storageKey, JSON.stringify(updatedStatuses));
-      loadSyncStatuses(); // Now this will work since loadSyncStatuses is accessible here
-    } catch (error) {
-      console.error('Error clearing sync status:', error);
+      logger.error('Error opening entry:', error);
     }
   };
 
@@ -160,7 +143,7 @@ export const SyncStatusTable: React.FC<SyncStatusTableProps> = ({ onRefresh, sdk
         loadSyncStatuses();
       }
     } catch (error: any) {
-      console.error('Error syncing content:', error);
+      logger.error('Error syncing content:', error);
       sdk.notifier.error(`Failed to sync content: ${error.message}`);
     }
   };

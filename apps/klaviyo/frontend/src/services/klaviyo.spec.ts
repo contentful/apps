@@ -57,7 +57,7 @@ describe('KlaviyoService', () => {
       (service as any).proxyApi = mockProxyApi;
 
       // Act
-      const result = await service.createUniversalContentBlock(name, content);
+      const result = await service.createUniversalContentBlock(name, content, []);
 
       // Assert
       expect(mockProxyApi.post).toHaveBeenCalledWith('', {
@@ -94,7 +94,7 @@ describe('KlaviyoService', () => {
       (service as any).proxyApi = mockProxyApi;
 
       // Act
-      const result = await service.createUniversalContentBlock(name, JSON.stringify(content));
+      const result = await service.createUniversalContentBlock(name, JSON.stringify(content), []);
 
       // Assert
       expect(mockProxyApi.post).toHaveBeenCalledWith(
@@ -129,7 +129,7 @@ describe('KlaviyoService', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       // Act & Assert
-      await expect(service.createUniversalContentBlock(name, content)).rejects.toThrow();
+      await expect(service.createUniversalContentBlock(name, content, [])).rejects.toThrow();
       expect(consoleSpy).toHaveBeenCalledWith('Error creating universal content block:', mockError);
 
       // Restore console
@@ -156,7 +156,7 @@ describe('KlaviyoService', () => {
       (service as any).proxyApi = mockProxyApi;
 
       // Act
-      const result = await service.uploadImage(imageUrl, name);
+      const result = await service.uploadImage(imageUrl);
 
       // Assert
       expect(mockProxyApi.post).toHaveBeenCalledWith('', {
@@ -196,7 +196,7 @@ describe('KlaviyoService', () => {
       (service as any).proxyApi = mockProxyApi;
 
       // Act
-      const result = await service.uploadImage(imageUrl, name);
+      const result = await service.uploadImage(imageUrl);
 
       // Assert
       expect(mockProxyApi.post).toHaveBeenCalledWith('', {
@@ -228,7 +228,7 @@ describe('KlaviyoService', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       // Act & Assert
-      await expect(service.uploadImage(imageUrl, name)).rejects.toThrow();
+      await expect(service.uploadImage(imageUrl)).rejects.toThrow();
       expect(consoleSpy).toHaveBeenCalled();
 
       // Restore console
@@ -258,7 +258,7 @@ describe('KlaviyoService', () => {
       service.createUniversalContentBlock = vi.fn().mockResolvedValue({ id: 'block123' });
 
       // Act
-      const result = await service.syncContent(mappings, entry);
+      const result = await service.syncContent(mappings as any, entry);
 
       // Assert
       expect(service.createUniversalContentBlock).toHaveBeenCalledWith('Title', 'Test Title');
@@ -298,7 +298,7 @@ describe('KlaviyoService', () => {
         .mockResolvedValue({ id: 'image123', imageUrl: 'https://klaviyo.com/image123.jpg' });
 
       // Act
-      const result = await service.syncContent(mappings, entry);
+      const result = await service.syncContent(mappings as any, entry);
 
       // Assert
       expect((service as any).getAssetUrl).toHaveBeenCalledWith(entry, 'image');
@@ -334,7 +334,7 @@ describe('KlaviyoService', () => {
       service.createUniversalContentBlock = vi.fn().mockResolvedValue({ id: 'block123' });
 
       // Act
-      const result = await service.syncContent(mappings, entry);
+      const result = await service.syncContent(mappings as any, entry);
 
       // Assert
       expect((service as any).formatJsonObject).toHaveBeenCalled();
@@ -374,7 +374,7 @@ describe('KlaviyoService', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       // Act
-      const result = await service.syncContent(mappings, entry);
+      const result = await service.syncContent(mappings as any, entry);
 
       // Assert
       expect(service.createUniversalContentBlock).toHaveBeenCalledTimes(1); // Only for the title

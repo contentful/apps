@@ -1,236 +1,12 @@
 import type { SidebarExtensionSDK } from '@contentful/app-sdk';
 import { KlaviyoService } from '../services/klaviyo';
 import { FieldMapping } from '../config/klaviyo';
-import { createClient } from 'contentful-management';
+import { logger } from '../utils/logger';
 
 interface EntryEventData {
   entry: any;
   sdk: SidebarExtensionSDK;
   mappings: FieldMapping[];
-}
-
-// Helper function to check if a value is a JSON string asset reference
-function isAssetLinkString(value: any): boolean {
-  if (typeof value !== 'string') return false;
-
-  try {
-    const parsed = JSON.parse(value);
-    return (
-      parsed &&
-      parsed.sys &&
-      parsed.sys.type === 'Link' &&
-      parsed.sys.linkType === 'Asset' &&
-      parsed.sys.id
-    );
-  } catch (e) {
-    return false;
-  }
-}
-
-// Helper function to check if a value is a JSON string entry reference
-function isEntryLinkString(value: any): boolean {
-  if (typeof value !== 'string') return false;
-
-  try {
-    const parsed = JSON.parse(value);
-    return (
-      parsed &&
-      parsed.sys &&
-      parsed.sys.type === 'Link' &&
-      parsed.sys.linkType === 'Entry' &&
-      parsed.sys.id
-    );
-  } catch (e) {
-    return false;
-  }
-}
-
-// Helper function to extract id from a string reference
-function getIdFromString(value: string): string | null {
-  try {
-    const parsed = JSON.parse(value);
-    return parsed?.sys?.id || null;
-  } catch (e) {
-    return null;
-  }
-}
-
-// Helper function to get linkType from a string reference
-function getLinkTypeFromString(value: string): string | null {
-  try {
-    const parsed = JSON.parse(value);
-    return parsed?.sys?.linkType || null;
-  } catch (e) {
-    return null;
-  }
-}
-
-// Helper function to resolve asset references
-async function resolveAssetReferences(
-  sdk: SidebarExtensionSDK,
-  entry: any,
-  mappings: FieldMapping[]
-) {
-  try {
-    // Only continue if we have image field mappings
-    const imageFields = mappings.filter((mapping) => mapping.fieldType === 'image');
-    if (imageFields.length === 0) {
-      return entry;
-    }
-
-    console.log('Entry fields before resolution:', JSON.stringify(entry.fields, null, 2));
-
-    const entryId = entry.sys.id;
-
-    // Get access token from the SDK
-    // The SDK gives us direct access to a CMA client
-    const cma = sdk.cma;
-    if (!cma) {
-      console.error('CMA client not available');
-      return entry;
-    }
-
-    // Create a copy of the entry to modify
-    const resolvedEntry = JSON.parse(JSON.stringify(entry));
-
-    // Process each image field mapping
-    for (const mapping of imageFields) {
-      const fieldId = mapping.contentfulFieldId;
-      console.log(`Processing field ${fieldId}`);
-
-      try {
-        // Check for different field formats
-        if (entry.fields[fieldId]?._fieldLocales?.['en-US']?._value) {
-          // New SDK format with _fieldLocales
-          const fieldValue = entry.fields[fieldId]._fieldLocales['en-US']._value;
-          console.log(`Field value for ${fieldId}:`, fieldValue);
-
-          // If it's a string reference to an asset
-          if (isAssetLinkString(fieldValue)) {
-            const assetId = getIdFromString(fieldValue);
-            console.log(`Found asset ID in string: ${assetId}`);
-
-            if (assetId) {
-              try {
-                // Fetch the asset
-                const asset = await cma.asset.get({ assetId });
-                console.log(`Found asset:`, asset);
-
-                // Replace the string reference with the asset object
-                // Create the structure that getAssetUrl expects
-                resolvedEntry.fields[fieldId] = {
-                  'en-US': asset,
-                };
-              } catch (assetError) {
-                console.error(`Error fetching asset ${assetId}:`, assetError);
-              }
-            }
-          }
-          // If it's a string reference to an entry
-          else if (isEntryLinkString(fieldValue)) {
-            const linkedEntryId = getIdFromString(fieldValue);
-            console.log(`Found entry ID in string: ${linkedEntryId}`);
-
-            if (linkedEntryId) {
-              try {
-                // Fetch the linked entry
-                const linkedEntry = await cma.entry.get({ entryId: linkedEntryId });
-                console.log(`Found linked entry:`, linkedEntry);
-
-                // Replace the string reference with the entry object
-                resolvedEntry.fields[fieldId] = {
-                  'en-US': linkedEntry,
-                };
-              } catch (entryError) {
-                console.error(`Error fetching linked entry ${linkedEntryId}:`, entryError);
-              }
-            }
-          }
-        } else if (entry.fields[fieldId]?.['en-US']) {
-          // Standard field format
-          const fieldValue = entry.fields[fieldId]['en-US'];
-          console.log(`Standard field value for ${fieldId}:`, fieldValue);
-
-          // If it's a direct asset link
-          if (fieldValue?.sys?.type === 'Link' && fieldValue?.sys?.linkType === 'Asset') {
-            const assetId = fieldValue.sys.id;
-            console.log(`Found asset ID in direct link: ${assetId}`);
-
-            try {
-              // Fetch the asset
-              const asset = await cma.asset.get({ assetId });
-              console.log(`Found asset:`, asset);
-
-              // Replace the link with the asset object
-              resolvedEntry.fields[fieldId]['en-US'] = asset;
-            } catch (assetError) {
-              console.error(`Error fetching asset ${assetId}:`, assetError);
-            }
-          }
-          // If it's a direct entry link
-          else if (fieldValue?.sys?.type === 'Link' && fieldValue?.sys?.linkType === 'Entry') {
-            const linkedEntryId = fieldValue.sys.id;
-            console.log(`Found entry ID in direct link: ${linkedEntryId}`);
-
-            try {
-              // Fetch the linked entry
-              const linkedEntry = await cma.entry.get({ entryId: linkedEntryId });
-              console.log(`Found linked entry:`, linkedEntry);
-
-              // Replace the link with the entry object
-              resolvedEntry.fields[fieldId]['en-US'] = linkedEntry;
-            } catch (entryError) {
-              console.error(`Error fetching linked entry ${linkedEntryId}:`, entryError);
-            }
-          }
-          // If it's a string reference to an asset
-          else if (typeof fieldValue === 'string' && isAssetLinkString(fieldValue)) {
-            const assetId = getIdFromString(fieldValue);
-            console.log(`Found asset ID in string: ${assetId}`);
-
-            if (assetId) {
-              try {
-                // Fetch the asset
-                const asset = await cma.asset.get({ assetId });
-                console.log(`Found asset:`, asset);
-
-                // Replace the string reference with the asset object
-                resolvedEntry.fields[fieldId]['en-US'] = asset;
-              } catch (assetError) {
-                console.error(`Error fetching asset ${assetId}:`, assetError);
-              }
-            }
-          }
-          // If it's a string reference to an entry
-          else if (typeof fieldValue === 'string' && isEntryLinkString(fieldValue)) {
-            const linkedEntryId = getIdFromString(fieldValue);
-            console.log(`Found entry ID in string: ${linkedEntryId}`);
-
-            if (linkedEntryId) {
-              try {
-                // Fetch the linked entry
-                const linkedEntry = await cma.entry.get({ entryId: linkedEntryId });
-                console.log(`Found linked entry:`, linkedEntry);
-
-                // Replace the string reference with the entry object
-                resolvedEntry.fields[fieldId]['en-US'] = linkedEntry;
-              } catch (entryError) {
-                console.error(`Error fetching linked entry ${linkedEntryId}:`, entryError);
-              }
-            }
-          }
-        }
-      } catch (fieldError) {
-        console.error(`Error processing field ${fieldId}:`, fieldError);
-      }
-    }
-
-    console.log('Entry fields after resolution:', JSON.stringify(resolvedEntry.fields, null, 2));
-    return resolvedEntry;
-  } catch (error) {
-    console.error('Error resolving asset references:', error);
-    return entry; // Return original entry if we can't resolve assets
-  }
 }
 
 // Helper function to extract data from a resolved entry
@@ -279,7 +55,7 @@ function extractContentFromEntry(entry: any, targetFieldId?: string): string {
     // As a last resort, return a generic message
     return 'Referenced content';
   } catch (error) {
-    console.error('Error extracting content from entry:', error);
+    logger.error('Error extracting content from entry:', error);
     return 'Error extracting content';
   }
 }
@@ -359,7 +135,7 @@ async function resolveEntryReferenceArray(
       }
     }
 
-    console.log(`Resolving array of ${entryIds.length} entry references`);
+    logger.log(`Resolving array of ${entryIds.length} entry references`);
 
     const resolvedEntries = [];
     for (const entryId of entryIds) {
@@ -371,14 +147,14 @@ async function resolveEntryReferenceArray(
         const entryContent = extractContentFromEntry(linkedEntry);
         resolvedEntries.push(entryContent);
       } catch (error) {
-        console.error(`Error resolving entry reference ${entryId}:`, error);
+        logger.error(`Error resolving entry reference ${entryId}:`, error);
         resolvedEntries.push(`[Unresolved reference: ${entryId}]`);
       }
     }
 
     return resolvedEntries.join(', ');
   } catch (error) {
-    console.error('Error resolving entry reference array:', error);
+    logger.error('Error resolving entry reference array:', error);
     if (typeof value === 'string') {
       return value;
     } else {
@@ -410,9 +186,9 @@ function processFieldValue(field: any): any {
 
 // Helper function to check if a value is a Contentful rich text document
 function isRichTextDocument(value: any): boolean {
-  console.log('Checking rich text document type:', typeof value);
+  logger.log('Checking rich text document type:', typeof value);
   if (typeof value === 'string') {
-    console.log('String value:', value.substring(0, 100));
+    logger.log('String value:', value.substring(0, 100));
     return value.includes('"nodeType":"document"');
   }
 
@@ -430,15 +206,15 @@ function richTextToHtml(richTextNode: any): string {
   if (!richTextNode) return '';
 
   try {
-    console.log('Rich text node type before processing:', typeof richTextNode);
+    logger.log('Rich text node type before processing:', typeof richTextNode);
 
     // Handle string JSON case - parse it to an object
     if (typeof richTextNode === 'string') {
       try {
         richTextNode = JSON.parse(richTextNode);
-        console.log('Parsed JSON string to object');
+        logger.log('Parsed JSON string to object');
       } catch (e) {
-        console.error('Error parsing rich text JSON string:', e);
+        logger.error('Error parsing rich text JSON string:', e);
         return richTextNode;
       }
     }
@@ -452,9 +228,9 @@ function richTextToHtml(richTextNode: any): string {
       try {
         // Try to parse it as JSON
         richTextNode = JSON.parse(richTextNode.content);
-        console.log('Parsed content string to object');
+        logger.log('Parsed content string to object');
       } catch (e) {
-        console.error('Error parsing rich text string:', e);
+        logger.error('Error parsing rich text string:', e);
         return richTextNode.content;
       }
     }
@@ -467,7 +243,7 @@ function richTextToHtml(richTextNode: any): string {
       richTextNode.content &&
       Array.isArray(richTextNode.content)
     ) {
-      console.log('Converting direct rich text object to HTML');
+      logger.log('Converting direct rich text object to HTML');
       // Create a document node containing the content array
       return richTextToHtml({
         nodeType: 'document',
@@ -561,7 +337,7 @@ function richTextToHtml(richTextNode: any): string {
           } else if (mark.type === 'strike') {
             content = `<strike>${content}</strike>`;
           } else {
-            console.log(`Unhandled text mark type: ${mark.type}`);
+            logger.log(`Unhandled text mark type: ${mark.type}`);
           }
         }
       }
@@ -591,10 +367,10 @@ function richTextToHtml(richTextNode: any): string {
     }
 
     // Fallback for unhandled node types
-    console.warn(`Unhandled rich text node type: ${richTextNode.nodeType}`);
+    logger.warn(`Unhandled rich text node type: ${richTextNode.nodeType}`);
     return '';
   } catch (error) {
-    console.error('Error converting rich text to HTML:', error, richTextNode);
+    logger.error('Error converting rich text to HTML:', error, richTextNode);
     // If we got a JSON string but couldn't properly process it,
     // return it directly to Klaviyo to handle
     if (
@@ -611,7 +387,7 @@ export async function onEntryUpdate(event: EntryEventData) {
   const { entry, sdk, mappings } = event;
 
   // Log mappings to verify field types
-  console.log(
+  logger.log(
     'Processing mappings:',
     mappings.map((m) => ({
       field: m.contentfulFieldId,
@@ -630,19 +406,19 @@ export async function onEntryUpdate(event: EntryEventData) {
 
   // Check for required parameters
   if (!oauthConfig.clientId) {
-    console.error('Klaviyo Client ID is missing from installation parameters');
+    logger.error('Klaviyo Client ID is missing from installation parameters');
     sdk.notifier.error('Klaviyo Client ID is missing from installation parameters');
     return;
   }
 
   if (!oauthConfig.clientSecret) {
-    console.error('Klaviyo Client Secret is missing from installation parameters');
+    logger.error('Klaviyo Client Secret is missing from installation parameters');
     sdk.notifier.error('Klaviyo Client Secret is missing from installation parameters');
     return;
   }
 
   if (!oauthConfig.redirectUri) {
-    console.error('Klaviyo Redirect URI is missing from installation parameters');
+    logger.error('Klaviyo Redirect URI is missing from installation parameters');
     sdk.notifier.error('Klaviyo Redirect URI is missing from installation parameters');
     return;
   }
@@ -650,7 +426,7 @@ export async function onEntryUpdate(event: EntryEventData) {
   // Check if we have an access token
   const accessToken = localStorage.getItem('klaviyo_access_token');
   if (!accessToken) {
-    console.error('No access token available - OAuth authentication required');
+    logger.error('No access token available - OAuth authentication required');
     sdk.notifier.error(
       'Authentication required: No access token available. Please use the Klaviyo app configuration to connect to Klaviyo.'
     );
@@ -658,13 +434,13 @@ export async function onEntryUpdate(event: EntryEventData) {
   }
 
   if (!mappings || mappings.length === 0) {
-    console.log('No field mappings found for entry:', entry.sys.id);
+    logger.log('No field mappings found for entry:', entry.sys.id);
     return;
   }
 
   // Check if we have any image fields to process
   const hasImageFields = mappings.some((mapping) => mapping.fieldType === 'image');
-  console.log(`Has image fields to process: ${hasImageFields}`);
+  logger.log(`Has image fields to process: ${hasImageFields}`);
 
   try {
     // Create a modified entry with properly resolved assets
@@ -678,16 +454,16 @@ export async function onEntryUpdate(event: EntryEventData) {
       const fieldId = mapping.contentfulFieldId;
       const field = entry.fields[fieldId];
 
-      console.log(`Processing field ${fieldId} with type ${mapping.fieldType}`);
+      logger.log(`Processing field ${fieldId} with type ${mapping.fieldType}`);
 
       // For image fields, get the actual asset URL using the SDK
       if (mapping.fieldType === 'image') {
-        console.log(`Processing image field ${fieldId}`);
+        logger.log(`Processing image field ${fieldId}`);
 
         try {
           // Get the asset reference using the SDK
           const assetValue = field.getValue();
-          console.log(`Asset value for ${fieldId}:`, assetValue);
+          logger.log(`Asset value for ${fieldId}:`, assetValue);
 
           // Case 1: Direct asset reference with sys.id
           if (assetValue && assetValue.sys) {
@@ -700,15 +476,15 @@ export async function onEntryUpdate(event: EntryEventData) {
               if (assetValue.sys.linkType === 'Asset') {
                 assetId = assetValue.sys.id;
                 isAssetLink = true;
-                console.log(`Found Asset link with ID: ${assetId}`);
+                logger.log(`Found Asset link with ID: ${assetId}`);
               } else if (assetValue.sys.linkType === 'Entry') {
                 assetId = assetValue.sys.id;
                 isEntryLink = true;
-                console.log(`Found Entry link with ID: ${assetId}`);
+                logger.log(`Found Entry link with ID: ${assetId}`);
               }
             } else if (assetValue.sys.type === 'Asset') {
               assetId = assetValue.sys.id;
-              console.log(`Found direct Asset with ID: ${assetId}`);
+              logger.log(`Found direct Asset with ID: ${assetId}`);
             }
 
             if (assetId) {
@@ -721,11 +497,11 @@ export async function onEntryUpdate(event: EntryEventData) {
                 } else if (isEntryLink) {
                   // For entry links, fetch the linked entry
                   const linkedEntry = await sdk.cma.entry.get({ entryId: assetId });
-                  console.log(`Linked entry retrieved:`, linkedEntry);
+                  logger.log(`Linked entry retrieved:`, linkedEntry);
 
                   // Extract content from the linked entry
                   const entryContent = extractContentFromEntry(linkedEntry);
-                  console.log(`Extracted content from linked entry: ${entryContent}`);
+                  logger.log(`Extracted content from linked entry: ${entryContent}`);
 
                   // Store the extracted content
                   processedEntry.fields[fieldId] = {
@@ -738,7 +514,7 @@ export async function onEntryUpdate(event: EntryEventData) {
                 }
 
                 if (asset) {
-                  console.log(`Asset retrieved:`, asset);
+                  logger.log(`Asset retrieved:`, asset);
 
                   // Create a structure that will work with our existing code
                   processedEntry.fields[fieldId] = {
@@ -746,7 +522,7 @@ export async function onEntryUpdate(event: EntryEventData) {
                   };
                 }
               } catch (assetError) {
-                console.error(`Error fetching asset/entry ${assetId}:`, assetError);
+                logger.error(`Error fetching asset/entry ${assetId}:`, assetError);
 
                 // Fallback: If we can't get the asset, try to get the URL directly from the UI extension
                 try {
@@ -754,7 +530,7 @@ export async function onEntryUpdate(event: EntryEventData) {
                   if (field.getValue() && field.getValue().fields && field.getValue().fields.file) {
                     const fileUrl = field.getValue().fields.file.url;
                     if (fileUrl) {
-                      console.log(`Found file URL directly: ${fileUrl}`);
+                      logger.log(`Found file URL directly: ${fileUrl}`);
                       // Create a structure with just the URL for our service to use
                       processedEntry.fields[fieldId] = {
                         'en-US': {
@@ -768,7 +544,7 @@ export async function onEntryUpdate(event: EntryEventData) {
                     }
                   }
                 } catch (urlError) {
-                  console.error(`Error getting asset URL:`, urlError);
+                  logger.error(`Error getting asset URL:`, urlError);
                   // Just pass through the original value as a last resort
                   processedEntry.fields[fieldId] = {
                     'en-US': assetValue,
@@ -779,7 +555,7 @@ export async function onEntryUpdate(event: EntryEventData) {
           }
           // Case 2: JSON string reference to an asset or entry
           else if (typeof assetValue === 'string' && assetValue.includes('"sys"')) {
-            console.log(`Found JSON string reference: ${assetValue}`);
+            logger.log(`Found JSON string reference: ${assetValue}`);
 
             try {
               const parsed = JSON.parse(assetValue);
@@ -793,14 +569,14 @@ export async function onEntryUpdate(event: EntryEventData) {
                   id = parsed.sys.id;
                   if (parsed.sys.linkType === 'Asset') {
                     isAssetLink = true;
-                    console.log(`Found Asset link in JSON with ID: ${id}`);
+                    logger.log(`Found Asset link in JSON with ID: ${id}`);
                   } else if (parsed.sys.linkType === 'Entry') {
                     isEntryLink = true;
-                    console.log(`Found Entry link in JSON with ID: ${id}`);
+                    logger.log(`Found Entry link in JSON with ID: ${id}`);
                   }
                 } else if (parsed.sys.type === 'Asset') {
                   id = parsed.sys.id;
-                  console.log(`Found direct Asset in JSON with ID: ${id}`);
+                  logger.log(`Found direct Asset in JSON with ID: ${id}`);
                 }
 
                 if (id) {
@@ -808,7 +584,7 @@ export async function onEntryUpdate(event: EntryEventData) {
                     if (isAssetLink) {
                       // Try to get the asset through the CMA
                       const asset = await sdk.cma.asset.get({ assetId: id });
-                      console.log(`Asset retrieved from string reference:`, asset);
+                      logger.log(`Asset retrieved from string reference:`, asset);
 
                       // Store the asset in our processed entry
                       processedEntry.fields[fieldId] = {
@@ -817,11 +593,11 @@ export async function onEntryUpdate(event: EntryEventData) {
                     } else if (isEntryLink) {
                       // Try to get the linked entry through the CMA
                       const linkedEntry = await sdk.cma.entry.get({ entryId: id });
-                      console.log(`Entry retrieved from string reference:`, linkedEntry);
+                      logger.log(`Entry retrieved from string reference:`, linkedEntry);
 
                       // Extract content from the linked entry
                       const entryContent = extractContentFromEntry(linkedEntry);
-                      console.log(`Extracted content from linked entry: ${entryContent}`);
+                      logger.log(`Extracted content from linked entry: ${entryContent}`);
 
                       // Store the extracted content
                       processedEntry.fields[fieldId] = {
@@ -829,7 +605,7 @@ export async function onEntryUpdate(event: EntryEventData) {
                       };
                     }
                   } catch (fetchError) {
-                    console.error(`Error fetching reference ${id}:`, fetchError);
+                    logger.error(`Error fetching reference ${id}:`, fetchError);
                     // Pass through the original
                     processedEntry.fields[fieldId] = {
                       'en-US': assetValue,
@@ -838,7 +614,7 @@ export async function onEntryUpdate(event: EntryEventData) {
                 }
               }
             } catch (parseError) {
-              console.error(`Error parsing reference:`, parseError);
+              logger.error(`Error parsing reference:`, parseError);
               // Pass through the original
               processedEntry.fields[fieldId] = {
                 'en-US': assetValue,
@@ -846,13 +622,13 @@ export async function onEntryUpdate(event: EntryEventData) {
             }
           } else {
             // Unsupported format, just pass it through
-            console.log(`Unsupported asset format:`, assetValue);
+            logger.log(`Unsupported asset format:`, assetValue);
             processedEntry.fields[fieldId] = {
               'en-US': assetValue,
             };
           }
         } catch (fieldError) {
-          console.error(`Error processing field ${fieldId}:`, fieldError);
+          logger.error(`Error processing field ${fieldId}:`, fieldError);
           // Pass through the original field if we encounter an error
           if (entry.fields[fieldId]) {
             processedEntry.fields[fieldId] = entry.fields[fieldId];
@@ -861,18 +637,18 @@ export async function onEntryUpdate(event: EntryEventData) {
       }
       // For entry field type, which is specifically for entry references
       else if (mapping.fieldType === 'entry') {
-        console.log(`Processing entry reference field ${fieldId}`);
+        logger.log(`Processing entry reference field ${fieldId}`);
 
         try {
           // Get the field value, handling different formats
           const value = processFieldValue(field);
-          console.log(`Entry reference value for ${fieldId}:`, value);
+          logger.log(`Entry reference value for ${fieldId}:`, value);
 
           // Handle different types of entry references
 
           // 1. Direct Entry object
           if (value && value.sys && value.sys.type === 'Entry') {
-            console.log(`Direct Entry object found`);
+            logger.log(`Direct Entry object found`);
             // Extract content from this entry
             const entryContent = extractContentFromEntry(value);
             processedEntry.fields[fieldId] = {
@@ -887,7 +663,7 @@ export async function onEntryUpdate(event: EntryEventData) {
             value.sys.linkType === 'Entry'
           ) {
             const entryId = value.sys.id;
-            console.log(`Entry link found with ID: ${entryId}`);
+            logger.log(`Entry link found with ID: ${entryId}`);
 
             try {
               // Fetch the linked entry
@@ -895,13 +671,13 @@ export async function onEntryUpdate(event: EntryEventData) {
 
               // Extract content from the linked entry
               const entryContent = extractContentFromEntry(linkedEntry);
-              console.log(`Content extracted from linked entry: ${entryContent}`);
+              logger.log(`Content extracted from linked entry: ${entryContent}`);
 
               processedEntry.fields[fieldId] = {
                 'en-US': entryContent,
               };
             } catch (error) {
-              console.error(`Error resolving entry link: ${error}`);
+              logger.error(`Error resolving entry link: ${error}`);
               processedEntry.fields[fieldId] = {
                 'en-US': `[Unresolved entry: ${entryId}]`,
               };
@@ -909,7 +685,7 @@ export async function onEntryUpdate(event: EntryEventData) {
           }
           // 3. Array of Entry Links (direct array format)
           else if (isDirectEntryReferenceArray(value)) {
-            console.log(`Direct array of entry references detected`);
+            logger.log(`Direct array of entry references detected`);
             const resolvedContent = await resolveEntryReferenceArray(sdk, value);
             processedEntry.fields[fieldId] = {
               'en-US': resolvedContent,
@@ -917,11 +693,11 @@ export async function onEntryUpdate(event: EntryEventData) {
           }
           // 4. String with JSON entry reference
           else if (typeof value === 'string' && value.includes('"sys"')) {
-            console.log(`JSON string reference found: ${value}`);
+            logger.log(`JSON string reference found: ${value}`);
 
             // Check if it's an array of references
             if (isEntryReferenceArray(value)) {
-              console.log(`Array of entry references detected`);
+              logger.log(`Array of entry references detected`);
               const resolvedContent = await resolveEntryReferenceArray(sdk, value);
               processedEntry.fields[fieldId] = {
                 'en-US': resolvedContent,
@@ -940,25 +716,25 @@ export async function onEntryUpdate(event: EntryEventData) {
 
                     // Extract content from the linked entry
                     const entryContent = extractContentFromEntry(linkedEntry);
-                    console.log(`Content extracted from entry reference: ${entryContent}`);
+                    logger.log(`Content extracted from entry reference: ${entryContent}`);
 
                     processedEntry.fields[fieldId] = {
                       'en-US': entryContent,
                     };
                   } catch (error) {
-                    console.error(`Error resolving entry reference: ${error}`);
+                    logger.error(`Error resolving entry reference: ${error}`);
                     processedEntry.fields[fieldId] = {
                       'en-US': `[Unresolved entry: ${entryId}]`,
                     };
                   }
                 } else {
-                  console.warn(`Unrecognized JSON structure:`, parsed);
+                  logger.warn(`Unrecognized JSON structure:`, parsed);
                   processedEntry.fields[fieldId] = {
                     'en-US': value,
                   };
                 }
               } catch (error) {
-                console.error(`Error parsing JSON string: ${error}`);
+                logger.error(`Error parsing JSON string: ${error}`);
                 processedEntry.fields[fieldId] = {
                   'en-US': value,
                 };
@@ -967,28 +743,28 @@ export async function onEntryUpdate(event: EntryEventData) {
           }
           // 5. Other types of values
           else {
-            console.log(`Unknown entry reference format:`, value);
+            logger.log(`Unknown entry reference format:`, value);
             processedEntry.fields[fieldId] = {
               'en-US': value,
             };
           }
         } catch (error) {
-          console.error(`Error processing entry reference field ${fieldId}:`, error);
+          logger.error(`Error processing entry reference field ${fieldId}:`, error);
           processedEntry.fields[fieldId] = entry.fields[fieldId];
         }
       }
       // For reference-array field type, which is specifically for arrays of entry references
       else if (mapping.fieldType === 'reference-array') {
-        console.log(`Processing reference array field ${fieldId}`);
+        logger.log(`Processing reference array field ${fieldId}`);
 
         try {
           // Get the field value, handling different formats
           const value = processFieldValue(field);
-          console.log(`Reference array value for ${fieldId}:`, value);
+          logger.log(`Reference array value for ${fieldId}:`, value);
 
           // Direct array of Entry Links
           if (isDirectEntryReferenceArray(value)) {
-            console.log(`Direct array of entry references detected`);
+            logger.log(`Direct array of entry references detected`);
             const resolvedContent = await resolveEntryReferenceArray(sdk, value);
             processedEntry.fields[fieldId] = {
               'en-US': resolvedContent,
@@ -996,7 +772,7 @@ export async function onEntryUpdate(event: EntryEventData) {
           }
           // JSON string array of Entry Links
           else if (typeof value === 'string' && isEntryReferenceArray(value)) {
-            console.log(`JSON string array of entry references detected`);
+            logger.log(`JSON string array of entry references detected`);
             const resolvedContent = await resolveEntryReferenceArray(sdk, value);
             processedEntry.fields[fieldId] = {
               'en-US': resolvedContent,
@@ -1004,17 +780,17 @@ export async function onEntryUpdate(event: EntryEventData) {
           }
           // _fieldLocales format that needs special handling
           else if (field?._fieldLocales?.['en-US']?._value) {
-            console.log(`Field with _fieldLocales detected`);
+            logger.log(`Field with _fieldLocales detected`);
             const fieldValue = field._fieldLocales['en-US']._value;
 
             if (isDirectEntryReferenceArray(fieldValue)) {
-              console.log(`_fieldLocales contains array of entry references`);
+              logger.log(`_fieldLocales contains array of entry references`);
               const resolvedContent = await resolveEntryReferenceArray(sdk, fieldValue);
               processedEntry.fields[fieldId] = {
                 'en-US': resolvedContent,
               };
             } else {
-              console.warn(`Unrecognized _fieldLocales value:`, fieldValue);
+              logger.warn(`Unrecognized _fieldLocales value:`, fieldValue);
               processedEntry.fields[fieldId] = {
                 'en-US': JSON.stringify(fieldValue),
               };
@@ -1022,7 +798,7 @@ export async function onEntryUpdate(event: EntryEventData) {
           }
           // Unknown format, just pass through as JSON
           else {
-            console.log(`Unknown reference array format:`, value);
+            logger.log(`Unknown reference array format:`, value);
             if (typeof value === 'object') {
               processedEntry.fields[fieldId] = {
                 'en-US': JSON.stringify(value),
@@ -1034,7 +810,7 @@ export async function onEntryUpdate(event: EntryEventData) {
             }
           }
         } catch (error) {
-          console.error(`Error processing reference array field ${fieldId}:`, error);
+          logger.error(`Error processing reference array field ${fieldId}:`, error);
           processedEntry.fields[fieldId] = entry.fields[fieldId];
         }
       }
@@ -1044,18 +820,18 @@ export async function onEntryUpdate(event: EntryEventData) {
         try {
           // Get the field value, handling different formats
           const textValue = processFieldValue(field);
-          console.log(
+          logger.log(
             `Text field ${fieldId} value:`,
             typeof textValue === 'object' ? 'Complex object' : textValue
           );
 
           // First, check if this is a rich text document
           if (isRichTextDocument(textValue)) {
-            console.log(`Rich text document detected in text field ${fieldId}`);
+            logger.log(`Rich text document detected in text field ${fieldId}`);
 
             // Convert rich text to HTML
             const htmlContent = richTextToHtml(textValue);
-            console.log(
+            logger.log(
               `Converted rich text to HTML: ${htmlContent.substring(0, 100)}${
                 htmlContent.length > 100 ? '...' : ''
               }`
@@ -1076,11 +852,11 @@ export async function onEntryUpdate(event: EntryEventData) {
             Array.isArray(textValue.content) &&
             textValue.nodeType === 'document'
           ) {
-            console.log(`Rich text document with standard structure detected`);
+            logger.log(`Rich text document with standard structure detected`);
 
             // Convert to HTML
             const htmlContent = richTextToHtml(textValue);
-            console.log(
+            logger.log(
               `Converted rich text to HTML: ${htmlContent.substring(0, 100)}${
                 htmlContent.length > 100 ? '...' : ''
               }`
@@ -1096,7 +872,7 @@ export async function onEntryUpdate(event: EntryEventData) {
           // Handle the structure from the example
           // {data: {}, content: [...]} without explicit nodeType
           if (typeof textValue === 'object' && textValue.data && Array.isArray(textValue.content)) {
-            console.log(`Rich text content array detected without explicit nodeType`);
+            logger.log(`Rich text content array detected without explicit nodeType`);
 
             // Convert to HTML by creating a document node with the content
             const htmlContent = richTextToHtml({
@@ -1104,7 +880,7 @@ export async function onEntryUpdate(event: EntryEventData) {
               data: textValue.data,
               content: textValue.content,
             });
-            console.log(
+            logger.log(
               `Converted rich text to HTML: ${htmlContent.substring(0, 100)}${
                 htmlContent.length > 100 ? '...' : ''
               }`
@@ -1119,13 +895,13 @@ export async function onEntryUpdate(event: EntryEventData) {
 
           // For Rich Text fields that come as JSON string instead of parsed object
           if (typeof textValue === 'string' && textValue.includes('"nodeType":"document"')) {
-            console.log(`Rich text found as JSON string`);
+            logger.log(`Rich text found as JSON string`);
 
             try {
               // Parse the JSON string and convert to HTML
               const richTextObj = JSON.parse(textValue);
               const htmlContent = richTextToHtml(richTextObj);
-              console.log(
+              logger.log(
                 `Converted JSON string rich text to HTML: ${htmlContent.substring(0, 100)}${
                   htmlContent.length > 100 ? '...' : ''
                 }`
@@ -1136,7 +912,7 @@ export async function onEntryUpdate(event: EntryEventData) {
                 'en-US': htmlContent,
               };
             } catch (parseError) {
-              console.error(`Error parsing rich text JSON string:`, parseError);
+              logger.error(`Error parsing rich text JSON string:`, parseError);
               // If we can't parse it, just pass it through
               processedEntry.fields[fieldId] = {
                 'en-US': textValue,
@@ -1150,12 +926,12 @@ export async function onEntryUpdate(event: EntryEventData) {
             field?._fieldLocales?.['en-US']?._value &&
             isRichTextDocument(field._fieldLocales['en-US']._value)
           ) {
-            console.log(`Rich text document found in _fieldLocales._value`);
+            logger.log(`Rich text document found in _fieldLocales._value`);
             const richTextValue = field._fieldLocales['en-US']._value;
 
             // Convert rich text to HTML
             const htmlContent = richTextToHtml(richTextValue);
-            console.log(
+            logger.log(
               `Converted rich text to HTML: ${htmlContent.substring(0, 100)}${
                 htmlContent.length > 100 ? '...' : ''
               }`
@@ -1174,7 +950,7 @@ export async function onEntryUpdate(event: EntryEventData) {
             Array.isArray(field._fieldLocales['en-US']._value) &&
             isDirectEntryReferenceArray(field._fieldLocales['en-US']._value)
           ) {
-            console.log(`Array of references found in _fieldLocales._value`);
+            logger.log(`Array of references found in _fieldLocales._value`);
             const fieldValue = field._fieldLocales['en-US']._value;
             const resolvedContent = await resolveEntryReferenceArray(sdk, fieldValue);
             processedEntry.fields[fieldId] = {
@@ -1185,7 +961,7 @@ export async function onEntryUpdate(event: EntryEventData) {
 
           // Check if this is a direct array of entry references
           if (isDirectEntryReferenceArray(textValue)) {
-            console.log(`Direct array of entry references detected in text field`);
+            logger.log(`Direct array of entry references detected in text field`);
             const resolvedContent = await resolveEntryReferenceArray(sdk, textValue);
             processedEntry.fields[fieldId] = {
               'en-US': resolvedContent,
@@ -1201,7 +977,7 @@ export async function onEntryUpdate(event: EntryEventData) {
           ) {
             // Check if it's an array of references
             if (isEntryReferenceArray(textValue)) {
-              console.log(`Array of entry references detected in text field`);
+              logger.log(`Array of entry references detected in text field`);
               const resolvedContent = await resolveEntryReferenceArray(sdk, textValue);
               processedEntry.fields[fieldId] = {
                 'en-US': resolvedContent,
@@ -1210,7 +986,7 @@ export async function onEntryUpdate(event: EntryEventData) {
             }
 
             // Single entry reference
-            console.log(`Found potential Entry reference in text field: ${textValue}`);
+            logger.log(`Found potential Entry reference in text field: ${textValue}`);
 
             try {
               const parsed = JSON.parse(textValue);
@@ -1221,16 +997,16 @@ export async function onEntryUpdate(event: EntryEventData) {
                 parsed.sys.id
               ) {
                 const linkedEntryId = parsed.sys.id;
-                console.log(`Found Entry link ID: ${linkedEntryId}`);
+                logger.log(`Found Entry link ID: ${linkedEntryId}`);
 
                 try {
                   // Fetch the linked entry
                   const linkedEntry = await sdk.cma.entry.get({ entryId: linkedEntryId });
-                  console.log(`Linked entry retrieved:`, linkedEntry);
+                  logger.log(`Linked entry retrieved:`, linkedEntry);
 
                   // Extract content from the linked entry
                   const entryContent = extractContentFromEntry(linkedEntry);
-                  console.log(`Extracted content from linked entry: ${entryContent}`);
+                  logger.log(`Extracted content from linked entry: ${entryContent}`);
 
                   // Store the extracted content
                   processedEntry.fields[fieldId] = {
@@ -1238,38 +1014,38 @@ export async function onEntryUpdate(event: EntryEventData) {
                   };
                   continue; // Skip the rest of this iteration
                 } catch (entryError) {
-                  console.error(`Error fetching linked entry ${linkedEntryId}:`, entryError);
+                  logger.error(`Error fetching linked entry ${linkedEntryId}:`, entryError);
                   // Fall back to original value
                 }
               }
             } catch (parseError) {
-              console.error(`Error parsing entry reference:`, parseError);
+              logger.error(`Error parsing entry reference:`, parseError);
             }
           }
 
           // If we didn't handle it as a special case, just copy the original value
           processedEntry.fields[fieldId] = entry.fields[fieldId];
         } catch (fieldError) {
-          console.error(`Error processing text field ${fieldId}:`, fieldError);
+          logger.error(`Error processing text field ${fieldId}:`, fieldError);
           // Pass through the original field
           processedEntry.fields[fieldId] = entry.fields[fieldId];
         }
       }
     }
 
-    console.log('Processed entry:', processedEntry);
+    logger.log('Processed entry:', processedEntry);
 
     // Initialize Klaviyo service with OAuth config
     const klaviyoService = new KlaviyoService(oauthConfig);
 
     // Sync content to Klaviyo
     const results = await klaviyoService.syncContent(mappings, processedEntry);
-    console.log('Successfully synced content to Klaviyo:', results);
+    logger.log('Successfully synced content to Klaviyo:', results);
 
     // Show success notification
     sdk.notifier.success('Content successfully synced to Klaviyo');
   } catch (error) {
-    console.error('Error syncing content to Klaviyo:', error);
+    logger.error('Error syncing content to Klaviyo:', error);
 
     // Special handling for OAuth errors
     if (
@@ -1286,7 +1062,7 @@ export async function onEntryUpdate(event: EntryEventData) {
         'Authentication failed: Your session has expired. Please reconnect to Klaviyo in the app configuration.'
       );
     } else {
-      sdk.notifier.error('Failed to sync content to Klaviyo. See console for details.');
+      sdk.notifier.error('Failed to sync content to Klaviyo. See logger for details.');
     }
   }
 }

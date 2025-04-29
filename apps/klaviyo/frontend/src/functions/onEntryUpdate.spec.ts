@@ -17,6 +17,7 @@ vi.mock('../services/klaviyo', () => {
 
 // Import KlaviyoService after mocking
 import { KlaviyoService } from '../services/klaviyo';
+import logger from '../utils/logger';
 
 describe('onEntryUpdate', () => {
   // Setup mock SDK and console spies
@@ -124,8 +125,28 @@ describe('onEntryUpdate', () => {
 
     // Create properly typed mappings
     const mappings: FieldMapping[] = [
-      { contentfulFieldId: 'title', klaviyoBlockName: 'Title', fieldType: 'text' },
-      { contentfulFieldId: 'description', klaviyoBlockName: 'Description', fieldType: 'text' },
+      {
+        contentfulFieldId: 'title',
+        klaviyoBlockName: 'Title',
+        fieldType: 'text',
+        contentTypeId: 'test-type',
+        fields: [],
+        name: 'Title',
+        type: 'text',
+        value: 'Test Title',
+        severity: 'info',
+      },
+      {
+        contentfulFieldId: 'description',
+        klaviyoBlockName: 'Description',
+        fieldType: 'text',
+        contentTypeId: 'test-type',
+        fields: [],
+        name: 'Description',
+        type: 'text',
+        value: 'Test Description',
+        severity: 'info',
+      },
     ];
 
     // Call the function
@@ -176,7 +197,17 @@ describe('onEntryUpdate', () => {
     };
 
     const mappings: FieldMapping[] = [
-      { contentfulFieldId: 'title', klaviyoBlockName: 'Title', fieldType: 'text' },
+      {
+        contentfulFieldId: 'title',
+        klaviyoBlockName: 'Title',
+        fieldType: 'text',
+        contentTypeId: 'test-type',
+        fields: [],
+        name: 'Title',
+        type: 'text',
+        value: 'Test Title',
+        severity: 'info',
+      },
     ];
 
     // Call the function
@@ -186,6 +217,6 @@ describe('onEntryUpdate', () => {
     expect(mockNotifier.error).toHaveBeenCalledWith(
       'Failed to sync content to Klaviyo. See console for details.'
     );
-    expect(console.error).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalled();
   });
 });

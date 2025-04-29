@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
-import { KLAVIYO_API_BASE_URL, API_PROXY_URL, KlaviyoOAuthConfig } from '../config/klaviyo';
+import { API_PROXY_URL, KlaviyoOAuthConfig } from '../config/klaviyo';
 import { OAuthService } from './oauth';
+import { logger } from '../utils/logger';
 
 // Define the Tokens interface
 interface Tokens {
@@ -20,32 +21,6 @@ interface FieldMapping {
   klaviyoBlockName: string;
   value: any;
 }
-
-// Define the Klaviyo API response types
-interface KlaviyoApiResponse<T> {
-  data: T;
-}
-
-interface KlaviyoContentBlock {
-  id: string;
-  type: string;
-  attributes: {
-    name: string;
-    text?: string;
-    html?: string;
-    url?: string;
-  };
-}
-
-interface KlaviyoImage {
-  id: string;
-  type: string;
-  attributes: {
-    name: string;
-    url: string;
-  };
-}
-
 export class KlaviyoService {
   private config: KlaviyoOAuthConfig;
   private oauthService: OAuthService;
@@ -63,12 +38,14 @@ export class KlaviyoService {
       : window.location.origin + API_PROXY_URL;
 
     const accessToken = config.accessToken || this.oauthService.getAccessToken();
-    console.log('Initialized KlaviyoService with proxy URL:', this.proxyUrl);
-    console.log('Initialized KlaviyoService with tokens:', this.tokens);
+    logger.log('Initialized KlaviyoService with proxy URL:', this.proxyUrl);
+    logger.log('Initialized KlaviyoService with tokens:', this.tokens);
 
     // Initialize proxy API client
     this.proxyApi = axios.create({
-      baseURL: 'http://localhost:3001',
+      baseURL: API_PROXY_URL.startsWith('http')
+        ? API_PROXY_URL
+        : window.location.origin + API_PROXY_URL,
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
@@ -85,7 +62,7 @@ export class KlaviyoService {
   }
 
   private async callApi<T>(endpoint: string, method: string, data?: any): Promise<T> {
-    console.log('Calling API:', {
+    logger.log('Calling API:', {
       endpoint,
       method,
       data,
@@ -97,8 +74,14 @@ export class KlaviyoService {
     }
 
     let attributes = {};
-    console.log('Data:', data, data.content_type === 'text');
+    logger.log('Data:', data, data.contentType === 'text');
     if (data.contentType === 'text') {
+      // Ensure content is always a string to avoid 400 errors with numbers
+      const contentValue =
+        typeof data.fields[0].value !== 'string'
+          ? String(data.fields[0].value)
+          : data.fields[0].value;
+
       attributes = {
         type: 'template-universal-content',
         attributes: {
@@ -107,7 +90,7 @@ export class KlaviyoService {
             content_type: 'block',
             type: 'text',
             data: {
-              content: data.fields[0].value,
+              content: contentValue,
               display_options: {},
               styles: {},
             },
@@ -123,6 +106,12 @@ export class KlaviyoService {
         },
       };
     } else if (data.contentType === 'html') {
+      // Also ensure HTML content is always a string
+      const htmlContent =
+        typeof data.fields[0].value !== 'string'
+          ? String(data.fields[0].value)
+          : data.fields[0].value;
+
       attributes = {
         type: 'template-universal-content',
         attributes: {
@@ -131,7 +120,7 @@ export class KlaviyoService {
             content_type: 'block',
             type: 'html',
             data: {
-              content: data.fields[0].value,
+              content: htmlContent,
               display_options: {},
               styles: {},
             },
@@ -149,7 +138,7 @@ export class KlaviyoService {
           : { data: { data: attributes, authorization: `Bearer ${this.tokens.access_token}` } }),
       };
 
-      console.log('Making API request:', {
+      logger.log('Making API request:', {
         method: config.method,
         url: config.url,
         config: config,
@@ -159,7 +148,7 @@ export class KlaviyoService {
       const response = await this.proxyApi.request<{ data: T }>(config);
       return response.data.data;
     } catch (error: any) {
-      console.error('API call failed:', {
+      logger.error('API call failed:', {
         endpoint,
         method,
         error: error.response?.data || error.message,
@@ -177,35 +166,21 @@ export class KlaviyoService {
     }
   }
 
-  private mapFieldsToKlaviyo(fields: FieldMapping[]): Record<string, any> {
-    const mappedFields: Record<string, any> = {};
-
-    fields.forEach((field) => {
-      mappedFields[field.klaviyoBlockName] = {
-        name: field.name,
-        type: field.type,
-        value: field.value,
-        fieldType: field.fieldType,
-        contentfulFieldId: field.contentfulFieldId,
-      };
-    });
-
-    return mappedFields;
-  }
-
   private mapContentfulFieldToKlaviyo(
     contentfulFieldId: string,
     klaviyoBlockName: string,
-    value: string
+    value: any
   ): FieldMapping {
-    return this.createFieldMapping(contentfulFieldId, klaviyoBlockName, value);
-  }
-
-  private mapContentfulEntryToKlaviyo(entry: any, fieldMappings: FieldMapping[]): FieldMapping[] {
-    return fieldMappings.map((mapping) => {
-      const value = entry.fields[mapping.contentfulFieldId];
-      return this.createFieldMapping(mapping.contentfulFieldId, mapping.klaviyoBlockName, value);
-    });
+    // Ensure value is always a string to avoid issues with numbers/integers
+    return {
+      contentfulFieldId,
+      klaviyoBlockName,
+      name: klaviyoBlockName,
+      type: 'text',
+      severity: 'info',
+      fieldType: 'text',
+      value: value != null ? String(value) : '',
+    };
   }
 
   async createUniversalContentBlock(
@@ -222,14 +197,14 @@ export class KlaviyoService {
         )
       );
 
-      const response = await this.callApi('/api/klaviyo/proxy/template-universal-content', 'POST', {
+      const response = await this.callApi('template-universal-content', 'POST', {
         name,
         contentType,
         fields: mappedFields,
       });
       return response;
     } catch (error) {
-      console.error('Error creating universal content block:', error);
+      logger.error('Error creating universal content block:', error);
       throw error;
     }
   }
@@ -243,74 +218,70 @@ export class KlaviyoService {
           field.value
         )
       );
-      const response = await this.callApi(
-        `/api/klaviyo/proxy/template-universal-content/${blockId}`,
-        'PUT',
-        {
-          fields: mappedFields,
-        }
-      );
+      const response = await this.callApi(`template-universal-content/${blockId}`, 'PUT', {
+        fields: mappedFields,
+      });
       return response;
     } catch (error) {
-      console.error('Error updating universal content block:', error);
+      logger.error('Error updating universal content block:', error);
       throw error;
     }
   }
 
   async uploadImage(imageUrl: string): Promise<any> {
-    console.log('Uploading image:', imageUrl);
+    logger.log('Uploading image:', imageUrl);
 
     try {
-      const uploadedImage = await this.callApi('/images', 'POST', {
+      const uploadedImage = await this.callApi('images', 'POST', {
         url: imageUrl,
       });
-      console.log('Uploaded image:', uploadedImage);
+      logger.log('Uploaded image:', uploadedImage);
       return uploadedImage;
     } catch (error: any) {
-      console.error('Failed to upload image:', error);
+      logger.error('Failed to upload image:', error);
       throw new Error(`Failed to upload image: ${error.message}`);
     }
   }
 
   // Helper method to extract asset URL from Contentful asset reference
   private getAssetUrl(entry: any, fieldId: string): string | null {
-    console.log(`Extracting asset URL for field ${fieldId}`);
+    logger.log(`Extracting asset URL for field ${fieldId}`);
 
     try {
       // First, check if we're dealing with the new SDK format
       if (entry.fields[fieldId]?._fieldLocales) {
-        console.log(`Field ${fieldId} has _fieldLocales format`);
+        logger.log(`Field ${fieldId} has _fieldLocales format`);
         const assetData = entry.fields[fieldId]._fieldLocales['en-US']._value;
-        console.log(`Asset data from _fieldLocales:`, assetData);
+        logger.log(`Asset data from _fieldLocales:`, assetData);
 
         // If it's a string, it might be a JSON string that needs parsing
         if (typeof assetData === 'string' && assetData.includes('"sys"')) {
           try {
-            console.log(`Asset data is a JSON string:`, assetData);
+            logger.log(`Asset data is a JSON string:`, assetData);
             const parsed = JSON.parse(assetData);
 
             // Check for Link type references to assets
             if (parsed.sys?.type === 'Link' && parsed.sys?.linkType === 'Asset') {
               // This is a link to an asset, but we need to resolve it
-              console.log('Asset link found but needs to be resolved:', assetData);
+              logger.log('Asset link found but needs to be resolved:', assetData);
               return null;
             }
           } catch (e) {
             // Not a valid JSON string, continue with other checks
-            console.log(`Error parsing asset data:`, e);
+            logger.log(`Error parsing asset data:`, e);
           }
         }
 
         // If it's an object with fields property, it might be a resolved asset
         if (assetData?.fields?.file?.['en-US']?.url) {
-          console.log(`Found file URL in _fieldLocales:`, assetData.fields.file['en-US'].url);
+          logger.log(`Found file URL in _fieldLocales:`, assetData.fields.file['en-US'].url);
           return `https:${assetData.fields.file['en-US'].url}`;
         }
       }
 
       // Check for CMA-resolved asset
       if (entry.fields[fieldId]?.['en-US']?.fields?.file?.url) {
-        console.log(
+        logger.log(
           `Found CMA-resolved asset with direct URL:`,
           entry.fields[fieldId]['en-US'].fields.file.url
         );
@@ -319,7 +290,7 @@ export class KlaviyoService {
 
       // Check for old SDK format (direct access to fields)
       if (entry.fields[fieldId]?.['en-US']?.fields?.file?.['en-US']?.url) {
-        console.log(
+        logger.log(
           `Found asset URL in old SDK format:`,
           entry.fields[fieldId]['en-US'].fields.file['en-US'].url
         );
@@ -328,7 +299,7 @@ export class KlaviyoService {
 
       // For assets that have already been published, check for the standard format
       if (entry.fields[fieldId]?.['en-US']?.url) {
-        console.log(`Found direct asset URL:`, entry.fields[fieldId]['en-US'].url);
+        logger.log(`Found direct asset URL:`, entry.fields[fieldId]['en-US'].url);
         return entry.fields[fieldId]['en-US'].url.startsWith('//')
           ? `https:${entry.fields[fieldId]['en-US'].url}`
           : entry.fields[fieldId]['en-US'].url;
@@ -342,21 +313,21 @@ export class KlaviyoService {
         fieldValue.sys.type === 'Link' &&
         fieldValue.sys.linkType === 'Asset'
       ) {
-        console.log(`Found Link reference to Asset but URL not available`);
+        logger.log(`Found Link reference to Asset but URL not available`);
         // We can't extract the URL directly, but we can log the asset ID for debugging
         if (fieldValue.sys.id) {
-          console.log(`Asset ID from Link: ${fieldValue.sys.id}`);
+          logger.log(`Asset ID from Link: ${fieldValue.sys.id}`);
         }
         return null;
       }
 
-      console.log(
+      logger.log(
         'Could not extract asset URL from',
         JSON.stringify(entry.fields[fieldId], null, 2)
       );
       return null;
     } catch (error) {
-      console.error('Error extracting asset URL:', error);
+      logger.error('Error extracting asset URL:', error);
       return null;
     }
   }
@@ -594,20 +565,20 @@ export class KlaviyoService {
       }
 
       // If we don't recognize the node type, return empty string
-      console.warn(`Unhandled rich text node type: ${richTextNode.nodeType}`);
+      logger.warn(`Unhandled rich text node type: ${richTextNode.nodeType}`);
       return '';
     } catch (error) {
-      console.error('Error converting rich text to HTML:', error);
+      logger.error('Error converting rich text to HTML:', error);
       return '[Rich text conversion error]';
     }
   }
 
   async syncContent(mappings: FieldMapping[], entry: any) {
-    console.log(`Starting content sync with ${mappings.length} mappings`);
+    logger.log(`Starting content sync with ${mappings.length} mappings`);
 
     // First, log all the mappings we received
     for (const mapping of mappings) {
-      console.log(
+      logger.log(
         `Mapping: field=${mapping.contentfulFieldId}, type=${mapping.fieldType}, block=${mapping.klaviyoBlockName}`
       );
     }
@@ -615,7 +586,7 @@ export class KlaviyoService {
     const promises = [];
     for (const mapping of mappings) {
       try {
-        console.log(`Processing mapping: ${JSON.stringify(mapping)}`);
+        logger.log(`Processing mapping: ${JSON.stringify(mapping)}`);
 
         if (
           mapping.fieldType === 'text' ||
@@ -633,7 +604,7 @@ export class KlaviyoService {
             content = entry.fields[mapping.contentfulFieldId]?.['en-US'] || '';
           }
 
-          console.log(`Content type: ${typeof content}`, content);
+          logger.log(`Content type: ${typeof content}`, content);
 
           // Check if this is a rich text object with content array and nodeType document
           if (
@@ -643,7 +614,7 @@ export class KlaviyoService {
                 Array.isArray(content.content) &&
                 (content.nodeType === 'document' || !content.nodeType)))
           ) {
-            console.log(`Found rich text object: ${JSON.stringify(content).substring(0, 100)}...`);
+            logger.log(`Found rich text object: ${JSON.stringify(content).substring(0, 100)}...`);
 
             // Convert rich text object to HTML using helper function
             let html = '';
@@ -661,7 +632,7 @@ export class KlaviyoService {
                 });
               }
 
-              console.log(`Converted rich text to HTML: ${html.substring(0, 100)}...`);
+              logger.log(`Converted rich text to HTML: ${html.substring(0, 100)}...`);
 
               promises.push(
                 this.createUniversalContentBlock(mapping.klaviyoBlockName, 'text', [
@@ -674,7 +645,7 @@ export class KlaviyoService {
               );
               continue;
             } catch (error) {
-              console.error(`Error converting rich text to HTML:`, error);
+              logger.error(`Error converting rich text to HTML:`, error);
               // If HTML conversion fails, fall back to JSON stringify
               content = JSON.stringify(content);
             }
@@ -703,7 +674,7 @@ export class KlaviyoService {
           // Special handling for location data
           const formattedLocation = this.formatLocationData(content);
           if (formattedLocation !== null) {
-            console.log(`Found and formatted location data: ${formattedLocation}`);
+            logger.log(`Found and formatted location data: ${formattedLocation}`);
 
             // Use the formatted location string
             promises.push(
@@ -721,7 +692,7 @@ export class KlaviyoService {
           // Special handling for JSON objects
           const formattedJson = this.formatJsonObject(content);
           if (formattedJson !== null) {
-            console.log(
+            logger.log(
               `Found and formatted JSON object: ${formattedJson.substring(0, 100)}${
                 formattedJson.length > 100 ? '...' : ''
               }`
@@ -748,7 +719,7 @@ export class KlaviyoService {
               content.includes('[Unresolved reference:') ||
               content.includes(', '))
           ) {
-            console.log(`Found processed reference array content: ${content.substring(0, 100)}...`);
+            logger.log(`Found processed reference array content: ${content.substring(0, 100)}...`);
             // This is already processed by onEntryUpdate, so we can use it directly
           }
           // Check for JSON strings of entry references in case they weren't fully processed
@@ -757,8 +728,8 @@ export class KlaviyoService {
             content.includes('"sys"') &&
             content.includes('"linkType":"Entry"')
           ) {
-            console.log(`Found Entry references in content: ${content.substring(0, 100)}...`);
-            console.log(`This content was expected to be resolved by onEntryUpdate`);
+            logger.log(`Found Entry references in content: ${content.substring(0, 100)}...`);
+            logger.log(`This content was expected to be resolved by onEntryUpdate`);
             // We use the content as is, since resolving references should have happened in onEntryUpdate
           } else if (Array.isArray(content)) {
             // If it's an array, check if it's an array of references (which should have been processed)
@@ -766,7 +737,7 @@ export class KlaviyoService {
               content.length > 0 &&
               content.some((item) => item?.sys?.type === 'Link' && item?.sys?.linkType === 'Entry')
             ) {
-              console.log(`Found unprocessed array of references:`, content);
+              logger.log(`Found unprocessed array of references:`, content);
               // Since this should have been processed in onEntryUpdate, we'll just join the sys.id values
               const refIds = content
                 .filter((item) => item?.sys?.id)
@@ -775,16 +746,16 @@ export class KlaviyoService {
               content = refIds || JSON.stringify(content);
             } else {
               // For other arrays, stringify normally
-              console.log(`Regular array content detected, stringifying:`, content);
+              logger.log(`Regular array content detected, stringifying:`, content);
               content = JSON.stringify(content);
             }
           } else if (typeof content === 'object' && content !== null) {
             // If it's any other object, stringify it
-            console.log(`Object content detected, stringifying:`, content);
+            logger.log(`Object content detected, stringifying:`, content);
             content = JSON.stringify(content);
           }
 
-          console.log(
+          logger.log(
             `Syncing ${mapping.fieldType} field:`,
             mapping.klaviyoBlockName,
             typeof content === 'string' && content.length > 100
@@ -798,8 +769,8 @@ export class KlaviyoService {
             ])
           );
         } else if (mapping.fieldType === 'image') {
-          console.log('Processing image field:', mapping.contentfulFieldId);
-          console.log(
+          logger.log('Processing image field:', mapping.contentfulFieldId);
+          logger.log(
             'Field data:',
             JSON.stringify(entry.fields[mapping.contentfulFieldId], null, 2)
           );
@@ -808,10 +779,10 @@ export class KlaviyoService {
           const imageUrl = this.getAssetUrl(entry, mapping.contentfulFieldId);
 
           if (imageUrl) {
-            console.log('Uploading image URL to Klaviyo:', mapping.klaviyoBlockName, imageUrl);
+            logger.log('Uploading image URL to Klaviyo:', mapping.klaviyoBlockName, imageUrl);
             promises.push(this.uploadImage(imageUrl));
           } else {
-            console.warn(`Could not extract image URL for field ${mapping.contentfulFieldId}`);
+            logger.warn(`Could not extract image URL for field ${mapping.contentfulFieldId}`);
 
             // If we have a JSON string containing a sys.id reference, parse it and log
             try {
@@ -834,13 +805,13 @@ export class KlaviyoService {
                     assetData.sys?.linkType === 'Asset' &&
                     assetData.sys?.id
                   ) {
-                    console.error(
+                    logger.error(
                       `Asset reference found but couldn't be resolved: ${assetData.sys.id}`
                     );
-                    console.error(
+                    logger.error(
                       'This indicates that the asset resolution in onEntryUpdate failed.'
                     );
-                    console.error(
+                    logger.error(
                       'The asset needs to be resolved before reaching the KlaviyoService.'
                     );
                   }
@@ -850,32 +821,30 @@ export class KlaviyoService {
                     assetData.sys?.linkType === 'Entry' &&
                     assetData.sys?.id
                   ) {
-                    console.error(`Entry reference found in image field: ${assetData.sys.id}`);
-                    console.error(
+                    logger.error(`Entry reference found in image field: ${assetData.sys.id}`);
+                    logger.error(
                       'Entry references should be resolved to text content before reaching this point.'
                     );
-                    console.error(
-                      'Consider changing the field type to "entry" instead of "image".'
-                    );
+                    logger.error('Consider changing the field type to "entry" instead of "image".');
                   }
                 } catch (e) {
                   // Not a valid JSON or not an asset reference
-                  console.error('Error parsing potential asset/entry reference:', e);
+                  logger.error('Error parsing potential asset/entry reference:', e);
                 }
               } else {
-                console.error('Unrecognized asset format:', assetReference);
+                logger.error('Unrecognized asset format:', assetReference);
               }
             } catch (e) {
-              console.error('Error analyzing field data:', e);
+              logger.error('Error analyzing field data:', e);
             }
           }
         } else {
-          console.warn(
+          logger.warn(
             `Unknown field type "${mapping.fieldType}" for field ${mapping.contentfulFieldId}`
           );
         }
       } catch (error) {
-        console.error(`Error syncing field ${mapping.contentfulFieldId}:`, error);
+        logger.error(`Error syncing field ${mapping.contentfulFieldId}:`, error);
         // Continue with next mapping instead of stopping the entire process
       }
     }
@@ -889,33 +858,17 @@ export class KlaviyoService {
   private createFieldMapping(
     contentfulFieldId: string,
     klaviyoBlockName: string,
-    value: string
-  ): FieldMapping {
-    return {
-      name: klaviyoBlockName,
-      type: 'text',
-      severity: 'info',
-      contentfulFieldId,
-      fieldType: 'text',
-      klaviyoBlockName,
-      value: Boolean(value) ? String(value) : '',
-    };
-  }
-
-  // Update the createImageFieldMapping function
-  private createImageFieldMapping(
-    contentfulFieldId: string,
-    klaviyoBlockName: string,
     value: any
   ): FieldMapping {
     return {
-      name: klaviyoBlockName,
-      type: 'image',
-      severity: 'info',
       contentfulFieldId,
-      fieldType: 'image',
       klaviyoBlockName,
-      value,
+      name: klaviyoBlockName,
+      type: 'text',
+      severity: 'info',
+      fieldType: 'text',
+      // Ensure value is always a string to avoid 400 errors
+      value: value != null ? String(value) : '',
     };
   }
 
@@ -926,13 +879,14 @@ export class KlaviyoService {
     value: any
   ): FieldMapping {
     return {
-      name: klaviyoBlockName,
-      type: 'richText',
-      severity: 'info',
       contentfulFieldId,
-      fieldType: 'richText',
       klaviyoBlockName,
-      value,
+      name: klaviyoBlockName,
+      type: 'html',
+      severity: 'info',
+      fieldType: 'text',
+      // Ensure value is always a string to avoid 400 errors
+      value: value != null ? String(value) : '',
     };
   }
 }

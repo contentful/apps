@@ -1,14 +1,13 @@
 import axios from 'axios';
 import {
   KLAVIYO_AUTH_URL,
-  KLAVIYO_TOKEN_URL,
-  KLAVIYO_REVOKE_URL,
   KlaviyoOAuthConfig,
   API_PROXY_URL,
   OAuthTokenResponse,
   PKCEData,
   DEFAULT_SCOPES,
 } from '../config/klaviyo';
+import { logger } from '../utils/logger';
 
 export class OAuthService {
   private config: KlaviyoOAuthConfig;
@@ -76,7 +75,6 @@ export class OAuthService {
   /**
    * Exchange authorization code for access and refresh tokens
    * @param code Authorization code from redirect
-   * @param state State parameter from redirect
    * @param codeVerifier The code verifier used in the PKCE exchange
    * @returns Token response with access_token, refresh_token, etc.
    */
@@ -108,7 +106,7 @@ export class OAuthService {
 
       const tokenData = await response.json();
 
-      // Store token data in localStorage
+      // Store token data in localStorage (securely without logging)
       localStorage.setItem('klaviyo_access_token', tokenData.access_token);
       localStorage.setItem('klaviyo_refresh_token', tokenData.refresh_token);
 
@@ -118,7 +116,7 @@ export class OAuthService {
 
       return tokenData;
     } catch (error) {
-      console.error('Error exchanging code for token:', error);
+      logger.error('Error exchanging code for token:', error);
       throw error;
     }
   }
@@ -140,19 +138,29 @@ export class OAuthService {
     if (this.config.clientSecret === undefined) {
       throw new Error('No client secret available');
     }
-    // Request new tokens via proxy
-    const response = await axios.post(`${API_PROXY_URL}/oauth/token`, {
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken,
-      client_id: this.config.clientId,
-      client_secret: this.config.clientSecret,
-    });
 
-    // Store new tokens
-    const tokenData: OAuthTokenResponse = response.data;
-    this.storeTokens(tokenData);
+    try {
+      // Request new tokens via proxy
+      const response = await axios.post(`${API_PROXY_URL}/oauth/token`, {
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+        client_id: this.config.clientId,
+        client_secret: this.config.clientSecret,
+      });
 
-    return tokenData;
+      // Store new tokens
+      const tokenData: OAuthTokenResponse = response.data;
+      this.storeTokens(tokenData);
+
+      return tokenData;
+    } catch (error) {
+      // Log error without exposing sensitive data
+      logger.error(
+        'Error refreshing token:',
+        error instanceof Error ? error.message : 'Unknown error'
+      );
+      throw error;
+    }
   }
 
   /**
@@ -189,24 +197,37 @@ export class OAuthService {
         );
       }
 
+      // Clear tokens from localStorage
+      localStorage.removeItem('klaviyo_access_token');
+      localStorage.removeItem('klaviyo_refresh_token');
+      localStorage.removeItem('klaviyo_token_expires_at');
+
       return;
     } catch (error) {
-      console.error('Error revoking token:', error);
+      logger.error('Error revoking token:', error);
       throw error;
     }
   }
 
   /**
    * Get valid access token, refreshing if necessary
-   * @returns Valid access token string
+   * @returns Promise with access token string
    */
-  async getAccessToken(): Promise<string> {
-    const tokenExpiresAt = parseInt(localStorage.getItem('klaviyo_token_expires_at') || '0', 10);
+  async getValidToken(): Promise<string> {
     const accessToken = localStorage.getItem('klaviyo_access_token');
+    const expiresAtStr = localStorage.getItem('klaviyo_token_expires_at');
 
-    // Check if token is expired or about to expire (60 seconds buffer)
-    if (!accessToken || Date.now() + 60000 >= tokenExpiresAt) {
-      // Token is expired or about to expire, refresh it
+    if (!accessToken) {
+      throw new Error('No access token available');
+    }
+
+    // Check if token is expired or will expire in the next 5 minutes
+    const now = Date.now();
+    const expiresAt = expiresAtStr ? parseInt(expiresAtStr, 10) : 0;
+    const isExpired = now >= expiresAt - 5 * 60 * 1000; // 5 min buffer
+
+    if (isExpired) {
+      logger.log('Token expired or expiring soon, refreshing...');
       const newTokens = await this.refreshToken();
       return newTokens.access_token;
     }
@@ -215,17 +236,33 @@ export class OAuthService {
   }
 
   /**
-   * Store token data in storage
+   * Get access token from localStorage
+   * @returns Access token or null
+   */
+  getAccessToken(): string | null {
+    return localStorage.getItem('klaviyo_access_token');
+  }
+
+  /**
+   * Store tokens in localStorage and update expiration
+   * @param tokenData Token response data
    */
   private storeTokens(tokenData: OAuthTokenResponse): void {
-    const expiresAt = Date.now() + tokenData.expires_in * 1000;
+    if (!tokenData.access_token) return;
+
     localStorage.setItem('klaviyo_access_token', tokenData.access_token);
-    localStorage.setItem('klaviyo_refresh_token', tokenData.refresh_token);
+
+    if (tokenData.refresh_token) {
+      localStorage.setItem('klaviyo_refresh_token', tokenData.refresh_token);
+    }
+
+    const expiresAt = Date.now() + (tokenData.expires_in || 3600) * 1000;
     localStorage.setItem('klaviyo_token_expires_at', expiresAt.toString());
   }
 
   /**
-   * Get refresh token from storage
+   * Get refresh token from localStorage
+   * @returns Refresh token or null
    */
   private getRefreshToken(): string | null {
     return localStorage.getItem('klaviyo_refresh_token');

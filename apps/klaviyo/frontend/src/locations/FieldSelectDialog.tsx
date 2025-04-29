@@ -6,20 +6,16 @@ import {
   Button,
   Flex,
   Form,
-  FormControl,
   Heading,
   Note,
   Stack,
   Text,
-  Autocomplete,
   Subheading,
-  IconButton,
   Pill,
-  Select,
 } from '@contentful/f36-components';
-import { DeleteIcon } from '@contentful/f36-icons';
 import { SyncContent } from '../utils/klaviyo-api-service';
 import { FieldMapping } from '../config/klaviyo';
+import logger from '../utils/logger';
 
 interface Field {
   id: string;
@@ -101,7 +97,7 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
 
   const handleSaveClick = () => {
     try {
-      console.log('[FieldSelectDialog] Saving mappings...');
+      logger.log('[FieldSelectDialog] Saving mappings...');
 
       // First, get current mappings directly from localStorage for consistency
       const existingMappingsStr = localStorage.getItem('klaviyo_field_mappings');
@@ -109,10 +105,10 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
       try {
         if (existingMappingsStr) {
           existingMappings = JSON.parse(existingMappingsStr);
-          console.log('[FieldSelectDialog] Found existing mappings:', existingMappings);
+          logger.log('[FieldSelectDialog] Found existing mappings:', existingMappings);
         }
       } catch (parseError) {
-        console.error('[FieldSelectDialog] Error parsing existing mappings:', parseError);
+        logger.error('[FieldSelectDialog] Error parsing existing mappings:', parseError);
       }
 
       // Create new mapping objects
@@ -128,7 +124,7 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
         };
       });
 
-      console.log('[FieldSelectDialog] New mappings:', newMappings);
+      logger.log('[FieldSelectDialog] New mappings:', newMappings);
 
       // Merge with existing mappings (filtering out any for the same content type)
       let updatedMappings = [...existingMappings];
@@ -142,7 +138,7 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
       // Add the new mappings
       updatedMappings = [...updatedMappings, ...newMappings];
 
-      console.log('[FieldSelectDialog] Final merged mappings to save:', updatedMappings);
+      logger.log('[FieldSelectDialog] Final merged mappings to save:', updatedMappings);
 
       // Save directly to localStorage first for immediate sharing
       localStorage.setItem('klaviyo_field_mappings', JSON.stringify(updatedMappings));
@@ -164,7 +160,7 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
         success: true,
       });
     } catch (error) {
-      console.error('[FieldSelectDialog] Error saving mappings:', error);
+      logger.error('[FieldSelectDialog] Error saving mappings:', error);
       sdk.close({
         error: 'Failed to save mappings',
         success: false,
@@ -206,15 +202,12 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
         });
       }, 1500);
     } catch (error) {
-      console.error('Error in sync:', error);
+      logger.error('Error in sync:', error);
       setSyncMessage(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsSyncing(false);
     }
   };
-
-  // Format field name with type
-  const formatFieldOption = (field: Field) => `${field.name} (${field.type})`;
 
   // Get field by ID
   const getFieldById = (fieldId: string) => fields.find((f) => f.id === fieldId);
@@ -248,7 +241,7 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
 
             <Box
               style={{
-                maxHeight: '200px',
+                maxHeight: '90px',
                 overflow: 'auto',
                 border: '1px solid #EEEEEE',
                 borderRadius: '4px',

@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSDK } from '../hooks/useSDK';
 import {
   Form,
@@ -16,12 +16,9 @@ import {
   Pill,
 } from '@contentful/f36-components';
 import { ExternalLinkIcon, CopyIcon, CheckCircleIcon } from '@contentful/f36-icons';
-import { FieldMapping } from '../config/klaviyo';
-import { ConfigAppSDK, ContentType, AppExtensionSDK } from '@contentful/app-sdk';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 import { OAuthService } from '../services/oauth';
-import { KlaviyoOAuthConfig, PKCEData } from '../config/klaviyo';
-import { checkOAuthTokens, clearOAuthTokens } from '../utils/oauth-debug';
-import console from 'console';
+import { logger } from '../utils/logger';
 
 interface AppLocation {
   id: string;
@@ -34,11 +31,6 @@ interface ContentTypeWithEditorInterfaces {
     id: string;
   };
   name: string;
-}
-
-interface KlaviyoTokens {
-  access_token: string;
-  refresh_token: string;
 }
 
 interface KlaviyoAuthMessage {
@@ -69,39 +61,11 @@ const AVAILABLE_LOCATIONS: AppLocation[] = [
   },
 ];
 
-// Styles for the step indicator
-const stepIndicatorStyle = {
-  width: '28px',
-  height: '28px',
-  borderRadius: '50%',
-  backgroundColor: '#e5ebed',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginRight: '16px',
-  fontWeight: 600,
-  color: '#536471',
-};
-
 // Styles for the container
 const containerStyle = {
   padding: '24px',
   border: '1px solid #e5ebed',
   borderRadius: '6px',
-  width: '100%',
-};
-
-// Styles for the section
-const sectionStyle = {
-  marginBottom: '16px',
-  width: '100%',
-};
-
-// Style for divider line
-const dividerStyle = {
-  height: '1px',
-  backgroundColor: '#e5ebed',
-  margin: '12px 0',
   width: '100%',
 };
 
@@ -115,8 +79,23 @@ const getProxyRedirectUri = () => {
       ? `${urlParts[0]}:${urlParts[1]}` // For URLs like http://localhost
       : origin; // For production URLs
 
-  // Ensure we're using port 3001 for the proxy
-  return `${hostnameWithProtocol}:3001/auth/callback`;
+  // Ensure we're using port 3001 for the proxy in development or production URL path
+  if (import.meta.env.MODE !== 'production') {
+    return `${hostnameWithProtocol}:3001/auth/callback`;
+  } else {
+    return `${hostnameWithProtocol}/api/klaviyo/auth/callback`;
+  }
+};
+
+// Check if an access token exists and is valid
+const hasValidAccessToken = () => {
+  const accessToken = localStorage.getItem('klaviyo_access_token');
+  const expiresAtStr = localStorage.getItem('klaviyo_token_expires_at');
+
+  if (!accessToken) return false;
+
+  const expiresAt = expiresAtStr ? parseInt(expiresAtStr, 10) : 0;
+  return Date.now() < expiresAt;
 };
 
 const ConfigScreen = () => {
@@ -148,7 +127,10 @@ const ConfigScreen = () => {
       if (currentParameters?.installation) {
         setClientId(currentParameters.installation.clientId || '');
         setClientSecret(currentParameters.installation.clientSecret || '');
-        setIsConnected(!!currentParameters.installation.accessToken);
+
+        // Set connected status based on valid tokens in localStorage
+        setIsConnected(hasValidAccessToken());
+
         setSelectedContentTypes(currentParameters.installation.contentTypes || []);
       }
 
@@ -193,21 +175,23 @@ const ConfigScreen = () => {
         },
       };
 
-      // Merge tokens if they exist
-      const tokens = await checkOAuthTokens();
-      if (tokens?.accessToken && tokens?.refreshToken) {
-        parameters.installation.accessToken = tokens.accessToken;
-        parameters.installation.refreshToken = tokens.refreshToken;
+      // Get current tokens from localStorage
+      const accessToken = localStorage.getItem('klaviyo_access_token');
+      const refreshToken = localStorage.getItem('klaviyo_refresh_token');
+
+      if (accessToken && refreshToken) {
+        parameters.installation.accessToken = accessToken;
+        parameters.installation.refreshToken = refreshToken;
       }
 
       return {
-        parameters: { installation: parameters.installation },
+        parameters,
         targetState,
       };
     };
 
     sdk.app.onConfigure(() => onConfigure());
-  }, [sdk, clientId, clientSecret, selectedContentTypes]);
+  }, [clientId, clientSecret, selectedContentTypes, sdk]);
 
   useEffect(() => {
     if (!searchQuery) {
@@ -223,240 +207,218 @@ const ConfigScreen = () => {
   }, [searchQuery, contentTypes]);
 
   const handleConnect = async () => {
+    // Validate inputs
+    if (!clientId || !clientSecret) {
+      sdk.notifier.error('Please provide both Client ID and Client Secret');
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
-      const config: KlaviyoOAuthConfig = {
+      // Create OAuth service
+      const oauthService = new OAuthService({
         clientId,
         clientSecret,
         redirectUri,
-      };
-
-      const oauthService = new OAuthService(config);
+      });
 
       // Generate PKCE data
       const pkceData = await oauthService.generatePKCE();
 
-      // Store PKCE data in localStorage with a unique key based on state
-      localStorage.setItem(`klaviyo_pkce_data`, JSON.stringify(pkceData));
+      // Store pkceData in localStorage for retrieval after redirect
+      localStorage.setItem('klaviyo_pkce_data', JSON.stringify(pkceData));
 
-      // Get authorization URL
+      // Build authorization URL
       const authUrl = oauthService.getAuthorizationUrl(pkceData);
 
-      // Open OAuth window
-      const oauthWindow = window.open(authUrl, 'Klaviyo Auth', 'width=800,height=900');
+      // Open a popup window for OAuth flow
+      const width = 800;
+      const height = 700;
+      const left = window.screen.width / 2 - width / 2;
+      const top = window.screen.height / 2 - height / 2;
 
-      // Check if popup was blocked
-      if (!oauthWindow) {
-        throw new Error(
-          'Popup window was blocked. Please allow popups for this site and try again.'
-        );
+      const authWindow = window.open(
+        authUrl,
+        'KlaviyoAuth',
+        `width=${width},height=${height},top=${top},left=${left},menubar=no,toolbar=no,location=no,status=no`
+      );
+
+      if (!authWindow) {
+        throw new Error('Popup was blocked by your browser. Please allow popups for this site.');
       }
 
-      // Try to focus the window
-      oauthWindow.focus();
-
-      let cleanup: (() => void) | undefined;
-
-      // Create a promise that resolves when auth is complete
-      const authPromise = new Promise<KlaviyoTokens>((resolve, reject) => {
-        let isProcessing = false;
-        let isResolved = false;
-        let tokenExchangePromise: Promise<void> | null = null;
-
-        const messageHandler = async (e: MessageEvent<KlaviyoAuthMessage>) => {
-          // Log all received messages for debugging
-          console.log('Received message event:', {
-            origin: e.origin,
-            source: e.source === oauthWindow ? 'oauth window' : 'other',
-            data: e.data,
-          });
-
-          // Accept messages from any origin since we're validating the source window
-          if (e.source !== oauthWindow) {
-            console.log('Message from unexpected source, ignoring');
-            return;
-          }
-
-          const { type, code, error, error_description } = e.data;
-
-          if (type !== 'KLAVIYO_AUTH_CALLBACK') {
-            console.log('Unexpected message type:', type);
-            return;
-          }
-
-          if (error) {
-            reject(new Error(`Authentication failed: ${error_description || error}`));
-            return;
-          }
-
-          if (!code) {
-            reject(new Error('No authorization code received'));
-            return;
-          }
-
-          if (isProcessing) {
-            console.log('Already processing auth code, ignoring duplicate message');
-            return;
-          }
-
-          console.log('Processing authentication code');
-          isProcessing = true;
-
-          // Create a promise for the token exchange
-          tokenExchangePromise = (async () => {
-            try {
-              // Retrieve the stored PKCE data
-              const storedPkceData = localStorage.getItem(`klaviyo_pkce_data`);
-              if (!storedPkceData) {
-                throw new Error('PKCE data not found');
-              }
-
-              const pkceData = JSON.parse(storedPkceData);
-
-              // Exchange code for tokens
-              console.log('Exchanging code for tokens');
-              const tokens = await oauthService.exchangeCodeForToken(code, pkceData.codeVerifier);
-              console.log('Received tokens successfully');
-
-              // Clean up stored PKCE data
-              localStorage.removeItem(`klaviyo_pkce_data`);
-
-              isResolved = true;
-              resolve(tokens);
-            } catch (error) {
-              console.error('Error during token exchange:', error);
-              isProcessing = false;
-              reject(error);
-            }
-          })();
-        };
-
-        // Add message listener
-        console.log('Adding message listener');
-        window.addEventListener('message', messageHandler);
-
-        // Set timeout for auth flow
-        const timeoutId = setTimeout(() => {
-          console.log('Authentication timed out');
-          if (cleanup) cleanup();
-          reject(new Error('Authentication timed out'));
-        }, 300000); // 5 minute timeout
-
-        // Cleanup on window close
-        const checkWindow = setInterval(async () => {
-          if (oauthWindow?.closed) {
-            console.log('OAuth window was closed, waiting for token exchange to complete...');
-
-            // If we're in the middle of a token exchange, wait for it
-            if (tokenExchangePromise) {
-              try {
-                await tokenExchangePromise;
-                // If we get here, the token exchange completed successfully
-                console.log('Token exchange completed after window close');
-                return;
-              } catch (error) {
-                // Token exchange failed
-                console.error('Token exchange failed after window close:', error);
-              }
-            }
-
-            // If we get here, either there was no token exchange in progress
-            // or it failed after the window was closed
-            if (!isResolved) {
-              console.log('Window closed before successful token exchange');
-              clearInterval(checkWindow);
-              clearTimeout(timeoutId);
-              if (cleanup) cleanup();
-              reject(
-                new Error(
-                  'Authentication window was closed. Please keep the window open until authentication completes.'
-                )
-              );
-            }
-          }
-        }, 1000);
-
-        // Define cleanup function
-        cleanup = () => {
-          console.log('Running cleanup');
+      // Set up message listener for OAuth callback
+      const messageHandler = async (e: MessageEvent<KlaviyoAuthMessage>) => {
+        if (e.data.type === 'KLAVIYO_AUTH_CALLBACK') {
+          // Remove message event listener
           window.removeEventListener('message', messageHandler);
-          clearInterval(checkWindow);
-          clearTimeout(timeoutId);
-        };
-      });
+          setIsLoading(false);
 
-      try {
-        // Wait for auth to complete
-        const tokens = await authPromise;
-        console.log('tokens', tokens);
+          try {
+            // Close the auth window
+            authWindow?.close();
 
-        // Save credentials and tokens
-        try {
-          // Configure the app with the new parameters
-          sdk.app.onConfigure(() => {
-            console.log('Saving configuration...');
+            // Handle authentication error
+            if (e.data.error) {
+              throw new Error(`Authentication error: ${e.data.error}`);
+            }
+
+            if (!e.data.code) {
+              throw new Error('No authorization code received');
+            }
+
+            // Get stored PKCE data
+            const storedPkceDataStr = localStorage.getItem('klaviyo_pkce_data');
+            if (!storedPkceDataStr) {
+              throw new Error('PKCE data not found');
+            }
+            const storedPkceData = JSON.parse(storedPkceDataStr);
+
+            // Exchange code for token
+            const tokens = await oauthService.exchangeCodeForToken(
+              e.data.code,
+              storedPkceData.codeVerifier
+            );
+
+            // Store tokens directly in localStorage (we don't need to call setTokens)
+            // The exchangeCodeForToken method already stores them
+
+            // Clear PKCE data from localStorage
+            localStorage.removeItem('klaviyo_pkce_data');
+
+            // Update connection state
             setIsConnected(true);
-            return {
+            sdk.notifier.success('Successfully connected to Klaviyo');
+
+            // Update installation parameters for persistence
+            const parameters = await sdk.app.getParameters<AppInstallationParameters>();
+
+            // Call onConfigure to save the parameters
+            sdk.app.onConfigure(() => ({
               parameters: {
                 installation: {
+                  ...parameters?.installation,
                   clientId,
                   clientSecret,
                   accessToken: tokens.access_token,
                   refreshToken: tokens.refresh_token,
                 },
               },
-            };
-          });
-
-          // If we get here, configuration was successful
-          console.log('Configuration saved successfully');
-
-          // Notify the OAuth window that we're done
-          if (oauthWindow && !oauthWindow.closed) {
-            try {
-              oauthWindow.postMessage({ type: 'KLAVIYO_AUTH_COMPLETE' }, '*');
-            } catch (error) {
-              console.error('Error notifying OAuth window:', error);
-            }
+              targetState: {
+                EditorInterface: selectedContentTypes.reduce((acc, contentTypeId) => {
+                  acc[contentTypeId] = {
+                    sidebar: {
+                      position: 0,
+                      settings: { helpText: 'Klaviyo integration' },
+                    },
+                  };
+                  return acc;
+                }, {} as Record<string, any>),
+              },
+            }));
+          } catch (error) {
+            logger.error('Error during token exchange:', error);
+            sdk.notifier.error(error instanceof Error ? error.message : 'Authentication failed');
           }
-
-          setIsConnected(true);
-          sdk.notifier.success('Successfully connected to Klaviyo');
-        } catch (configError) {
-          console.error('Failed to save configuration:', configError);
-          setIsConnected(false);
-          throw new Error('Failed to save app configuration');
         }
+      };
+
+      // Add message event listener
+      window.addEventListener('message', messageHandler);
+
+      // Create an interval to check if the window is closed
+      const checkWindowInterval = setInterval(() => {
+        if (authWindow?.closed) {
+          clearInterval(checkWindowInterval);
+          window.removeEventListener('message', messageHandler);
+
+          try {
+            // The window was closed without a successful OAuth flow
+            // Need to notify the user
+            // We'll only do this if we haven't received the callback message
+            if (!isConnected) {
+              setIsLoading(false);
+              sdk.notifier.warning('Authentication window was closed before completing');
+            }
+          } catch (error) {
+            logger.error('Token exchange failed after window close:', error);
+            setIsLoading(false);
+          }
+        }
+      }, 500);
+
+      // Send a ping to the popup window
+      try {
+        setTimeout(() => {
+          if (authWindow && !authWindow.closed) {
+            authWindow.postMessage({ type: 'PING_FROM_PARENT' }, '*');
+          }
+        }, 1000);
       } catch (error) {
-        console.error('Connection failed:', error);
-        setIsConnected(false); // Ensure connected state is false on error
-        sdk.notifier.error(error instanceof Error ? error.message : 'Failed to connect to Klaviyo');
-      } finally {
-        if (cleanup) cleanup();
-        setIsLoading(false);
+        logger.error('Error notifying OAuth window:', error);
       }
-    } catch (error) {
-      console.error('Connection failed:', error);
-      sdk.notifier.error(error instanceof Error ? error.message : 'Failed to connect to Klaviyo');
+    } catch (configError) {
+      logger.error('Failed to save configuration:', configError);
+      sdk.notifier.error('Failed to save configuration');
+      setIsLoading(false);
     }
   };
 
   const handleDisconnect = async () => {
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
+      // Create OAuth service
+      const oauthService = new OAuthService({
+        clientId,
+        clientSecret,
+        redirectUri,
+      });
+
+      // Revoke token
+      await oauthService.revokeToken();
+
+      // Clear tokens from localStorage
+      localStorage.removeItem('klaviyo_access_token');
+      localStorage.removeItem('klaviyo_refresh_token');
+      localStorage.removeItem('klaviyo_token_expires_at');
+
+      // Update connection state
+      setIsConnected(false);
+      sdk.notifier.success('Successfully disconnected from Klaviyo');
+
+      // Update installation parameters
+      const parameters = await sdk.app.getParameters<AppInstallationParameters>();
+
+      // Call onConfigure to save the parameters
       sdk.app.onConfigure(() => ({
         parameters: {
           installation: {
-            clientId: '',
-            clientSecret: '',
-            accessToken: '',
+            ...parameters?.installation,
+            clientId,
+            clientSecret,
+            accessToken: undefined,
+            refreshToken: undefined,
           },
         },
+        targetState: {
+          EditorInterface: selectedContentTypes.reduce((acc, contentTypeId) => {
+            acc[contentTypeId] = {
+              sidebar: {
+                position: 0,
+                settings: { helpText: 'Klaviyo integration' },
+              },
+            };
+            return acc;
+          }, {} as Record<string, any>),
+        },
       }));
-      setIsConnected(false);
     } catch (error) {
-      console.error('Disconnection failed:', error);
-      sdk.notifier.error('Failed to disconnect from Klaviyo');
+      logger.error('Disconnection failed:', error);
+      sdk.notifier.error(
+        error instanceof Error ? error.message : 'Failed to disconnect from Klaviyo'
+      );
     } finally {
       setIsLoading(false);
     }
