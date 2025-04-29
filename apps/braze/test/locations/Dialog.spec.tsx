@@ -32,7 +32,7 @@ const mockEntry = new Entry(
   [mockField],
   mockSdk.ids.space,
   mockSdk.ids.environemnt,
-  mockSdk.parameters.installation.apiKey
+  mockSdk.parameters.installation.contentfulApiKey
 );
 
 const FIELDS_STEP_TEXT = 'Select which fields';

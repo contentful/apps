@@ -16,8 +16,7 @@ const mockSdk: any = {
   },
   parameters: {
     installation: {
-      apiKey: 'test-apiKey',
-      contentfulApiKey: 'test-apiKey',
+      contentfulApiKey: 'test-contentful-apiKey',
       brazeApiKey: 'test-braze-apiKey',
     },
     invocation: {
