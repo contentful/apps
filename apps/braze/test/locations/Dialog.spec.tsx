@@ -1,6 +1,6 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import Dialog from '../../src/locations/Dialog';
 import React from 'react';
 import { Entry } from '../../src/fields/Entry';
@@ -35,8 +35,9 @@ const mockEntry = new Entry(
   mockSdk.parameters.installation.contentfulApiKey
 );
 
-const FIELDS_STEP_TEXT = 'Select which fields';
+const GENERATE_FIELDS_STEP_TEXT = 'Select which fields';
 const CODE_BLOCKS_STEP_TEXT = 'Braze Connected Content Call';
+const CREATE_FIELDS_STEP_TEXT = 'generate into Content Blocks';
 
 describe('Dialog component', () => {
   beforeEach(() => {
@@ -49,7 +50,7 @@ describe('Dialog component', () => {
   });
   afterEach(cleanup);
 
-  it('navigates through steps and closes', async () => {
+  it('Generate wizard navigates through steps and closes', async () => {
     mockSdk.parameters.invocation = {
       mode: 'generate',
       entryId: 'entryId',
@@ -58,7 +59,7 @@ describe('Dialog component', () => {
     };
     render(<Dialog />);
 
-    await screen.findByText(FIELDS_STEP_TEXT, { exact: false });
+    await screen.findByText(GENERATE_FIELDS_STEP_TEXT, { exact: false });
 
     expect(screen.getByLabelText<HTMLInputElement>(mockField.name).checked).toBe(false);
 
@@ -76,7 +77,7 @@ describe('Dialog component', () => {
     });
   });
 
-  it('opens directly to Code Blocks step when specified in parameters', async () => {
+  it('Generate wizard opens directly to Code Blocks step when specified in parameters', async () => {
     mockSdk.parameters.invocation = {
       mode: 'generate',
       step: 'codeBlocks',
@@ -87,10 +88,10 @@ describe('Dialog component', () => {
 
     await screen.findByText(CODE_BLOCKS_STEP_TEXT);
     expect(screen.getByText(mockField.uniqueId())).toBeTruthy();
-    expect(screen.queryByText(FIELDS_STEP_TEXT)).toBeFalsy();
+    expect(screen.queryByText(GENERATE_FIELDS_STEP_TEXT)).toBeFalsy();
   });
 
-  it('opens with pre-selected fields when specified in parameters', async () => {
+  it('Generate wizard opens with pre-selected fields when specified in parameters', async () => {
     mockSdk.parameters.invocation = {
       mode: 'generate',
       step: 'fields',
@@ -99,9 +100,40 @@ describe('Dialog component', () => {
     };
     render(<Dialog />);
 
-    await screen.findByText(FIELDS_STEP_TEXT, { exact: false });
+    await screen.findByText(GENERATE_FIELDS_STEP_TEXT, { exact: false });
     expect(screen.getByText(mockField.name)).toBeTruthy();
 
     expect(screen.getByLabelText<HTMLInputElement>(mockField.name).checked).toBe(true);
+  });
+
+  it('Create wizard navigates through steps and closes', async () => {
+    mockSdk.parameters.invocation = {
+      mode: 'create',
+      entryId: 'entryId',
+      contentTypeId: 'contentTypeId',
+      title: 'title',
+    };
+
+    render(<Dialog />);
+
+    await screen.findByText(CREATE_FIELDS_STEP_TEXT, { exact: false });
+
+    const select = screen.getByTestId(`select-${mockEntry.id}`) as HTMLSelectElement;
+    expect(select).toBeTruthy();
+
+    fireEvent.change(select, { target: { value: mockField.name } });
+
+    const nextButton = screen.getByRole('button', { name: /next/i });
+    fireEvent.click(nextButton);
+
+    await waitFor(() => {
+      expect(mockSdk.close).toHaveBeenCalledWith({
+        contentTypeId: 'contentTypeId',
+        entryId: 'entryId',
+        serializedEntry: mockEntry.serialize(),
+        step: 'create',
+        title: 'title',
+      });
+    });
   });
 });

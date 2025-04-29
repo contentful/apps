@@ -35,7 +35,8 @@ const FieldsStep = ({
         <FormControl.Label>Select Fields</FormControl.Label>
         <Select
           value={Array.from(selectedFields)[selectedFields.size - 1] || ''}
-          onChange={(e) => handleFieldChange(e.target.value)}>
+          onChange={(e) => handleFieldChange(e.target.value)}
+          data-testid={`select-${entry.id}`}>
           <Option value="">Select a field</Option>
           {entry.fields.map((field) => (
             <Option key={field.uniqueId()} value={field.uniqueId()}>

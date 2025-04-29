@@ -19,7 +19,7 @@ type CreateFlowProps = {
 };
 
 const CreateFlow = (props: CreateFlowProps) => {
-  const { sdk, entry, initialSelectedFields = [] } = props;
+  const { sdk, entry, invocationParams, initialSelectedFields = [] } = props;
 
   const [step, setStep] = useState(FIELDS_STEP);
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set(initialSelectedFields));
@@ -50,7 +50,15 @@ const CreateFlow = (props: CreateFlowProps) => {
           entry={entry}
           selectedFields={selectedFields}
           setSelectedFields={setSelectedFields}
-          handleNextStep={() => setStep(CREATE_STEP)}
+          handleNextStep={() =>
+            sdk.close({
+              step: CREATE_STEP,
+              entryId: invocationParams.entryId,
+              contentTypeId: invocationParams.contentTypeId,
+              title: invocationParams.title,
+              serializedEntry: entry.serialize(),
+            })
+          }
         />
       )}
       {step === CREATE_STEP && (
