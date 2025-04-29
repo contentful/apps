@@ -8,11 +8,11 @@ type CreateStepProps = {
   contentBlockName: string;
   setContentBlockName: (name: string) => void;
   isSubmitting: boolean;
-  onBack: () => void;
-  onCreate: () => void;
+  handlePreviousStep: () => void;
+  handleNextStep: () => void;
 };
 
-const CreateStep = ({ isSubmitting, onBack, onCreate }: CreateStepProps) => {
+const CreateStep = ({ isSubmitting, handlePreviousStep, handleNextStep }: CreateStepProps) => {
   return (
     <>
       <Box>
@@ -22,10 +22,10 @@ const CreateStep = ({ isSubmitting, onBack, onCreate }: CreateStepProps) => {
         </Paragraph>
       </Box>
       <WizardFooter paddingTop="spacing2Xs" paddingBottom="0" paddingRight="0">
-        <Button variant="secondary" size="small" onClick={onBack}>
+        <Button variant="secondary" size="small" onClick={handlePreviousStep}>
           Back
         </Button>
-        <Button variant="primary" size="small" onClick={onCreate}>
+        <Button variant="primary" size="small" onClick={handleNextStep}>
           {isSubmitting ? 'Creating...' : 'Send to Braze'}
         </Button>
       </WizardFooter>

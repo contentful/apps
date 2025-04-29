@@ -5,10 +5,10 @@ import WizardFooter from '../WizardFooter';
 type SuccessStepProps = {
   entry: Entry;
   selectedFields: Set<string>;
-  onClose: () => void;
+  handleClose: () => void;
 };
 
-const SuccessStep = ({ onClose }: SuccessStepProps) => {
+const SuccessStep = ({ handleClose }: SuccessStepProps) => {
   return (
     <>
       <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeXl" lineHeight="lineHeightL">
@@ -19,7 +19,7 @@ const SuccessStep = ({ onClose }: SuccessStepProps) => {
         navigating to Templates {'>'} Content Blocks.
       </Paragraph>
       <WizardFooter paddingTop="0" paddingBottom="0" paddingRight="0">
-        <Button variant="primary" size="small" onClick={onClose}>
+        <Button variant="primary" size="small" onClick={handleClose}>
           Done
         </Button>
       </WizardFooter>

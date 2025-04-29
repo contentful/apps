@@ -8,6 +8,7 @@ import { Entry } from '../fields/Entry';
 import { Field } from '../fields/Field';
 import GenerateFlow from '../components/generate/GenerateFlow';
 import CreateFlow from '../components/create/CreateFlow';
+import { FIELDS_STEP } from '../utils';
 
 export type InvocationParams = {
   step?: string;
@@ -17,7 +18,7 @@ export type InvocationParams = {
   selectedFields?: string[];
   selectedLocales?: string[];
   serializedEntry?: {};
-  mode?: string;
+  mode: string;
 };
 
 const Dialog = () => {
@@ -25,13 +26,13 @@ const Dialog = () => {
   useAutoResizer();
 
   const invocationParams = sdk.parameters.invocation as InvocationParams;
-  const currentStep = invocationParams.step || 'fields';
+  const currentStep = invocationParams.step || FIELDS_STEP;
   const currentSelectedFields = invocationParams.selectedFields || [];
   const currentSelectedLocales = invocationParams.selectedLocales || [];
   const currentEntry = invocationParams.serializedEntry
     ? Entry.fromSerialized(invocationParams.serializedEntry)
     : undefined;
-  const mode = invocationParams.mode || 'generate';
+  const mode = invocationParams.mode;
 
   const [entry, setEntry] = useState<Entry | undefined>(currentEntry);
   const fieldsRef = useRef<Field[]>(currentEntry ? currentEntry.fields : []);
@@ -95,10 +96,7 @@ const Dialog = () => {
       sdk={sdk}
       entry={entry}
       invocationParams={invocationParams}
-      locales={sdk.locales.available}
-      initialStep={currentStep}
       initialSelectedFields={currentSelectedFields}
-      initialSelectedLocales={currentSelectedLocales}
     />
   );
 };

@@ -6,8 +6,8 @@ import LocalesSelectionStep from './LocalesSelectionStep';
 import { Entry } from '../../fields/Entry';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { InvocationParams } from '../../locations/Dialog';
+import { FIELDS_STEP } from '../../utils';
 
-const FIELDS_STEP = 'fields';
 const LOCALES_STEP = 'locales';
 const CODE_BLOCKS_STEP = 'codeBlocks';
 

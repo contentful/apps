@@ -6,6 +6,7 @@ import {
   CONNECTED_CONTENT_DOCUMENTATION,
   CREATE_DIALOG_MODE,
   CREATE_DIALOG_TITLE,
+  FIELDS_STEP,
   GENERATE_DIALOG_MODE,
   GENERATE_DIALOG_TITLE,
   SIDEBAR_CREATE_BUTTON_TEXT,
@@ -20,6 +21,7 @@ const Sidebar = () => {
   useAutoResizer();
 
   const initialInvocationParams: InvocationParams = {
+    mode: GENERATE_DIALOG_MODE,
     entryId: sdk.ids.entry,
     contentTypeId: sdk.ids.contentType,
     title: sdk.entry.fields[sdk.contentType.displayField].getValue(),
@@ -61,7 +63,7 @@ const Sidebar = () => {
         <Button
           variant="secondary"
           isFullWidth={true}
-          onClick={() => openDialogLogic('fields', undefined, GENERATE_DIALOG_MODE)}>
+          onClick={() => openDialogLogic(FIELDS_STEP, undefined, GENERATE_DIALOG_MODE)}>
           {SIDEBAR_GENERATE_BUTTON_TEXT}
         </Button>
       </Box>
@@ -78,7 +80,7 @@ const Sidebar = () => {
         <Button
           variant="secondary"
           isFullWidth={true}
-          onClick={() => openDialogLogic('fields', undefined, CREATE_DIALOG_MODE)}>
+          onClick={() => openDialogLogic(FIELDS_STEP, undefined, CREATE_DIALOG_MODE)}>
           {SIDEBAR_CREATE_BUTTON_TEXT}
         </Button>
       </Box>

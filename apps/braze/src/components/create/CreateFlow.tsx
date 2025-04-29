@@ -6,8 +6,8 @@ import { InvocationParams } from '../../locations/Dialog';
 import FieldsStep from './FieldsStep';
 import CreateStep from './CreateStep';
 import SuccessStep from './SuccessStep';
+import { FIELDS_STEP } from '../../utils';
 
-const FIELDS_STEP = 'fields';
 const CREATE_STEP = 'create';
 const SUCCESS_STEP = 'success';
 
@@ -15,16 +15,13 @@ type CreateFlowProps = {
   sdk: DialogAppSDK;
   entry: Entry;
   invocationParams: InvocationParams;
-  locales: string[];
-  initialStep?: string;
   initialSelectedFields?: string[];
-  initialSelectedLocales?: string[];
 };
 
 const CreateFlow = (props: CreateFlowProps) => {
-  const { sdk, entry, initialStep = FIELDS_STEP, initialSelectedFields = [] } = props;
+  const { sdk, entry, initialSelectedFields = [] } = props;
 
-  const [step, setStep] = useState(initialStep);
+  const [step, setStep] = useState(FIELDS_STEP);
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set(initialSelectedFields));
   const [contentBlockName, setContentBlockName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,7 +50,7 @@ const CreateFlow = (props: CreateFlowProps) => {
           entry={entry}
           selectedFields={selectedFields}
           setSelectedFields={setSelectedFields}
-          onNext={() => setStep(CREATE_STEP)}
+          handleNextStep={() => setStep(CREATE_STEP)}
         />
       )}
       {step === CREATE_STEP && (
@@ -63,15 +60,15 @@ const CreateFlow = (props: CreateFlowProps) => {
           contentBlockName={contentBlockName}
           setContentBlockName={setContentBlockName}
           isSubmitting={isSubmitting}
-          onBack={() => setStep(FIELDS_STEP)}
-          onCreate={handleCreate}
+          handlePreviousStep={() => setStep(FIELDS_STEP)}
+          handleNextStep={handleCreate}
         />
       )}
       {step === SUCCESS_STEP && (
         <SuccessStep
           entry={entry}
           selectedFields={selectedFields}
-          onClose={() => sdk.close({ step: 'close' })}
+          handleClose={() => sdk.close({ step: 'close' })}
         />
       )}
     </Box>

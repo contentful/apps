@@ -16,6 +16,7 @@ export const SIDEBAR_GENERATE_BUTTON_TEXT = 'Generate';
 export const SIDEBAR_CREATE_BUTTON_TEXT = 'Create';
 export const CREATE_DIALOG_MODE = 'create';
 export const GENERATE_DIALOG_MODE = 'generate';
+export const FIELDS_STEP = 'fields';
 
 export const CONNECTED_CONTENT_DOCUMENTATION =
   'https://www.braze.com/docs/user_guide/personalization_and_dynamic_content/connected_content';

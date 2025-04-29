@@ -6,10 +6,15 @@ type FieldsStepProps = {
   entry: Entry;
   selectedFields: Set<string>;
   setSelectedFields: (fields: Set<string>) => void;
-  onNext: () => void;
+  handleNextStep: () => void;
 };
 
-const FieldsStep = ({ entry, selectedFields, setSelectedFields, onNext }: FieldsStepProps) => {
+const FieldsStep = ({
+  entry,
+  selectedFields,
+  setSelectedFields,
+  handleNextStep,
+}: FieldsStepProps) => {
   const handleFieldChange = (fieldId: string) => {
     const newSelectedFields = new Set(selectedFields);
     if (newSelectedFields.has(fieldId)) {
@@ -43,7 +48,7 @@ const FieldsStep = ({ entry, selectedFields, setSelectedFields, onNext }: Fields
         <Button
           variant="primary"
           size="small"
-          onClick={onNext}
+          onClick={handleNextStep}
           isDisabled={selectedFields.size === 0}>
           Next
         </Button>
