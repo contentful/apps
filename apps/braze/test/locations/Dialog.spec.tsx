@@ -51,6 +51,7 @@ describe('Dialog component', () => {
 
   it('navigates through steps and closes', async () => {
     mockSdk.parameters.invocation = {
+      mode: 'generate',
       entryId: 'entryId',
       contentTypeId: 'contentTypeId',
       title: 'title',
@@ -77,6 +78,7 @@ describe('Dialog component', () => {
 
   it('opens directly to Code Blocks step when specified in parameters', async () => {
     mockSdk.parameters.invocation = {
+      mode: 'generate',
       step: 'codeBlocks',
       selectedFields: new Set([mockField.uniqueId()]),
       serializedEntry: mockEntry.serialize(),
@@ -90,6 +92,7 @@ describe('Dialog component', () => {
 
   it('opens with pre-selected fields when specified in parameters', async () => {
     mockSdk.parameters.invocation = {
+      mode: 'generate',
       step: 'fields',
       selectedFields: new Set([mockField.uniqueId()]),
       serializedEntry: mockEntry.serialize(),
