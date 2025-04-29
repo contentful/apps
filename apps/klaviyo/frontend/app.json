@@ -20,6 +20,10 @@
     {
       "location": "dialog",
       "component": "FieldSelectDialog"
+    },
+    {
+      "location": "page",
+      "component": "FieldMappingScreen"
     }
   ],
   "parameters": {

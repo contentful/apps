@@ -195,8 +195,12 @@ const parseQueryString = (url) => {
 
 // Main Lambda handler
 exports.handler = async (event) => {
-  console.log('Received event:', JSON.stringify(event, null, 2));
-
+  console.log('--- Incoming Request ---');
+  console.log('Method:', event.httpMethod);
+  console.log('Path:', event.path);
+  console.log('Headers:', event.headers);
+  console.log('Body:', event.body);
+  console.log('------------------------');
   // Handle preflight OPTIONS request for CORS
   if (event.httpMethod === 'OPTIONS') {
     console.log('Handling OPTIONS preflight request');
@@ -363,6 +367,54 @@ exports.handler = async (event) => {
       }
     }
 
+    if (event.path === '/api/klaviyo/proxy/oauth/token') {
+      console.log('Processing OAuth token refresh request');
+      const body = JSON.parse(event.body || '{}');
+      const {
+        grant_type: grantType,
+        refresh_token: refreshToken,
+        client_id: clientId,
+        client_secret: clientSecret,
+      } = body;
+
+      if (!grantType || !refreshToken || !clientId || !clientSecret) {
+        return formatResponse(400, {
+          error: 'Missing required fields for token refresh',
+          details: {
+            grantType,
+            hasRefreshToken: !!refreshToken,
+            hasClientId: !!clientId,
+            hasClientSecret: !!clientSecret,
+          },
+        });
+      }
+
+      try {
+        // OAuth requires form-encoded data
+        const params = new URLSearchParams();
+        params.append('grant_type', grantType);
+        params.append('refresh_token', refreshToken);
+
+        // Basic auth requires Base64 encoding of client_id:client_secret
+        const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+
+        const response = await axios.post(KLAVIYO_AUTH_URL, params, {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Authorization: `Basic ${auth}`,
+          },
+        });
+
+        return formatResponse(200, response.data);
+      } catch (error) {
+        console.error('Error refreshing token:', error.response?.data || error.message);
+        return formatResponse(error.response?.status || 500, {
+          error: 'Failed to refresh token',
+          details: error.response?.data || error.message,
+        });
+      }
+    }
+
     // Handle token revocation endpoint
     if (event.path === '/api/klaviyo/proxy/oauth/revoke') {
       console.log('Processing OAuth revoke request');
@@ -416,6 +468,7 @@ exports.handler = async (event) => {
         if (event.path === '/api/klaviyo/proxy') {
           // Route to appropriate handler
           let result;
+          console.log('The action is', action);
           switch (action) {
             case 'track':
               result = await trackEvent(data, accessToken);
@@ -438,12 +491,21 @@ exports.handler = async (event) => {
 
           // Proxy the request to the Klaviyo API
           const method = event.httpMethod.toLowerCase() || 'get';
+          console.log(
+            'sending request to',
+            `https://a.klaviyo.com/api/${endpoint}`,
+            'with data',
+            data,
+            'and accessToken',
+            accessToken
+          );
           const response = await axios({
             method,
             url: `https://a.klaviyo.com/api/${endpoint}`,
-            data: data || {},
+            data: { data } || {},
             headers: {
               'Content-Type': 'application/json',
+              revision: '2025-04-15',
               Authorization: `Bearer ${accessToken}`,
             },
           });

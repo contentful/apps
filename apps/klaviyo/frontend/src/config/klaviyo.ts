@@ -14,16 +14,34 @@ export interface KlaviyoConfig {
 export interface KlaviyoOAuthConfig {
   clientId: string;
   clientSecret: string;
-  redirectUri: string;
+  redirectUri?: string;
   accessToken?: string;
   refreshToken?: string;
   tokenExpiresAt?: number;
 }
 
+export interface KlaviyoAppConfig extends KlaviyoOAuthConfig {
+  selectedLocations?: Record<string, boolean>;
+  selectedContentTypes?: Record<string, boolean>;
+}
+
+export interface MappedField {
+  fieldId: string;
+  klaviyoProperty: string;
+  mappingType: 'profile' | 'event' | 'custom';
+  lastMappedAt?: number; // timestamp
+}
+
 export interface FieldMapping {
+  contentTypeId: string;
+  fields: MappedField[];
+  fieldType: 'text' | 'image' | 'entry' | 'reference-array';
   contentfulFieldId: string;
   klaviyoBlockName: string;
-  fieldType: 'text' | 'image' | 'entry' | 'reference-array';
+  name: string;
+  type: string;
+  severity: string;
+  value: any;
 }
 
 export interface EntryConfig {

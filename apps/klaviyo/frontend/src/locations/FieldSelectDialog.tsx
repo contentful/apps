@@ -1,157 +1,339 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DialogExtensionSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '../hooks/useSDK';
 import {
   Box,
-  Checkbox,
   Button,
-  Stack,
-  Heading,
-  Text,
+  Flex,
+  Form,
   FormControl,
+  Heading,
+  Note,
+  Stack,
+  Text,
+  Autocomplete,
+  Subheading,
+  IconButton,
+  Pill,
+  Select,
 } from '@contentful/f36-components';
+import { DeleteIcon } from '@contentful/f36-icons';
+import { SyncContent } from '../utils/klaviyo-api-service';
+import { FieldMapping } from '../config/klaviyo';
 
-// Field option structure passed from dialog parameters
-interface FieldOption {
+interface Field {
   id: string;
   name: string;
-  type?: string;
+  type: string;
 }
 
-// Dialog invocation parameters
-interface InvocationParameters {
-  fields: FieldOption[];
-}
-
-// Type guard to check if an object has fields property
-const hasFieldsArray = (obj: any): obj is { fields: FieldOption[] } => {
-  return obj && Array.isArray(obj.fields);
-};
-
-// Helper to filter unsupported field types
-const filterUnsupportedFields = (fields: FieldOption[]): FieldOption[] => {
-  return fields.filter((field) => {
-    // Skip Boolean fields
-    if (field.type && field.type === 'Boolean') {
-      console.log(`Skipping Boolean field: ${field.name}`);
-      return false;
-    }
-
-    // Skip Reference fields
-    if (
-      (field.type && field.type === 'Array' && field.name.toLowerCase().includes('reference')) ||
-      (field.name.toLowerCase().includes('reference') && field.type && field.type.includes('Link'))
-    ) {
-      console.log(`Skipping Reference field: ${field.name}`);
-      return false;
-    }
-
-    return true;
-  });
-};
-
-const FieldSelectDialog = () => {
+const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
+  entry,
+  mappings,
+}) => {
   const sdk = useSDK<DialogExtensionSDK>();
+  const [fields, setFields] = useState<Field[]>([]);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
-  const [fields, setFields] = useState<FieldOption[]>([]);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredOptions, setFilteredOptions] = useState<Field[]>([]);
+  const [hoveredField, setHoveredField] = useState<string | null>(null);
 
-  // Initialize dialog with field options
+  // Get the parameters passed to this dialog
+  const {
+    fields: availableFields = [],
+    preSelectedFields = [],
+    showSyncButton = false,
+    contentTypeId = '',
+    currentEntry = '',
+  } = (sdk.parameters.invocation as {
+    fields?: Field[];
+    preSelectedFields?: string[];
+    showSyncButton?: boolean;
+    contentTypeId?: string;
+    currentEntry?: string;
+  }) || {};
+
   useEffect(() => {
-    const loadFields = () => {
-      try {
-        const params = sdk.parameters.invocation;
+    // Initialize fields and preselections
+    if (availableFields && Array.isArray(availableFields)) {
+      setFields(availableFields);
+      setFilteredOptions(availableFields);
+    }
 
-        if (params && typeof params === 'object' && hasFieldsArray(params)) {
-          // Apply safety filter to exclude unsupported fields
-          const filteredFields = filterUnsupportedFields(params.fields);
-          setFields(filteredFields);
-        } else {
-          console.error('Invalid parameters format. Expected fields array.');
-        }
-      } catch (error) {
-        console.error('Error loading field parameters:', error);
-      }
-    };
+    if (preSelectedFields && Array.isArray(preSelectedFields)) {
+      setSelectedFields(preSelectedFields);
+    }
 
-    loadFields();
-    sdk.window.startAutoResizer();
+    // Set dialog size
+    sdk.window.updateHeight(500);
+  }, [availableFields, preSelectedFields]);
 
-    return () => sdk.window.stopAutoResizer();
-  }, [sdk]);
+  useEffect(() => {
+    // Filter options based on search query
+    if (!searchQuery) {
+      // Show only unselected fields when no search query
+      setFilteredOptions(fields.filter((field) => !selectedFields.includes(field.id)));
+      return;
+    }
 
-  // Toggle field selection
-  const handleFieldToggle = (fieldId: string) => {
-    setSelectedFields((prevSelected) =>
-      prevSelected.includes(fieldId)
-        ? prevSelected.filter((id) => id !== fieldId)
-        : [...prevSelected, fieldId]
+    const query = searchQuery.toLowerCase();
+    const filtered = fields.filter(
+      (field) =>
+        !selectedFields.includes(field.id) &&
+        (field.name.toLowerCase().includes(query) || field.id.toLowerCase().includes(query))
     );
+    setFilteredOptions(filtered);
+  }, [searchQuery, fields, selectedFields]);
+
+  const handleFieldSelect = (fieldId: string) => {
+    // Add the field to selected fields
+    setSelectedFields((prev) => [...prev, fieldId]);
+    // Clear the search
+    setSearchQuery('');
   };
 
-  // Submit selected fields
-  const handleSubmit = () => {
-    const fieldInfo = selectedFields.map((fieldId) => {
-      const field = fields.find((f) => f.id === fieldId);
-
-      // Check if it's an image field
-      const isAsset =
-        field?.type === 'Asset' ||
-        field?.type === 'Link' ||
-        field?.name?.includes('(Asset)') ||
-        field?.name?.includes('(Link)');
-
-      return { id: fieldId, isAsset };
-    });
-
-    sdk.close(fieldInfo);
+  const handleFieldRemove = (fieldId: string) => {
+    // Remove the field from selected fields
+    setSelectedFields((prev) => prev.filter((id) => id !== fieldId));
   };
 
-  // Cancel dialog
-  const handleCancel = () => sdk.close([]);
+  const handleSaveClick = () => {
+    try {
+      console.log('[FieldSelectDialog] Saving mappings...');
+
+      // First, get current mappings directly from localStorage for consistency
+      const existingMappingsStr = localStorage.getItem('klaviyo_field_mappings');
+      let existingMappings = [];
+      try {
+        if (existingMappingsStr) {
+          existingMappings = JSON.parse(existingMappingsStr);
+          console.log('[FieldSelectDialog] Found existing mappings:', existingMappings);
+        }
+      } catch (parseError) {
+        console.error('[FieldSelectDialog] Error parsing existing mappings:', parseError);
+      }
+
+      // Create new mapping objects
+      const newMappings = selectedFields.map((fieldId) => {
+        const field = fields.find((f) => f.id === fieldId);
+        return {
+          id: fieldId,
+          name: field?.name || fieldId,
+          type: field?.type || 'Text',
+          value: '',
+          contentTypeId: contentTypeId || '',
+          isAsset: field?.type === 'Asset' || field?.type === 'AssetLink' || false,
+        };
+      });
+
+      console.log('[FieldSelectDialog] New mappings:', newMappings);
+
+      // Merge with existing mappings (filtering out any for the same content type)
+      let updatedMappings = [...existingMappings];
+      if (contentTypeId) {
+        // Remove any mappings for this content type
+        updatedMappings = updatedMappings.filter(
+          (mapping: any) => mapping.contentTypeId !== contentTypeId
+        );
+      }
+
+      // Add the new mappings
+      updatedMappings = [...updatedMappings, ...newMappings];
+
+      console.log('[FieldSelectDialog] Final merged mappings to save:', updatedMappings);
+
+      // Save directly to localStorage first for immediate sharing
+      localStorage.setItem('klaviyo_field_mappings', JSON.stringify(updatedMappings));
+
+      // Broadcast the update via a postMessage
+      window.postMessage(
+        {
+          type: 'updateFieldMappings',
+          fieldMappings: updatedMappings,
+        },
+        '*'
+      );
+
+      // Return the selected fields and mappings to the calling component
+      // This is critical for the Sidebar to properly receive the mappings
+      sdk.close({
+        selectedFields,
+        mappings: updatedMappings,
+        success: true,
+      });
+    } catch (error) {
+      console.error('[FieldSelectDialog] Error saving mappings:', error);
+      sdk.close({
+        error: 'Failed to save mappings',
+        success: false,
+      });
+    }
+  };
+
+  const handleSyncClick = async () => {
+    if (selectedFields.length === 0) {
+      setSyncMessage('Please select at least one field');
+      return;
+    }
+
+    setIsSyncing(true);
+    setSyncMessage('Syncing to Klaviyo...');
+
+    try {
+      // Convert to the format expected by syncContent
+      const formattedMappings = selectedFields.map((fieldId) => {
+        const field = fields.find((f) => f.id === fieldId);
+        return {
+          contentfulFieldId: fieldId,
+          klaviyoBlockName: field?.name || fieldId,
+          fieldType: 'text', // Default to text for simplicity
+        };
+      });
+
+      // Sync using the parent context SDK (e.g. sidebar)
+      const syncContentService = new SyncContent(JSON.parse(currentEntry));
+      await syncContentService.syncContent(sdk, formattedMappings);
+
+      setSyncMessage('Fields synced to Klaviyo. Closing dialog...');
+
+      // Return both selected fields and a sync action
+      setTimeout(() => {
+        sdk.close({
+          action: 'sync',
+          selectedFields,
+        });
+      }, 1500);
+    } catch (error) {
+      console.error('Error in sync:', error);
+      setSyncMessage(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Format field name with type
+  const formatFieldOption = (field: Field) => `${field.name} (${field.type})`;
+
+  // Get field by ID
+  const getFieldById = (fieldId: string) => fields.find((f) => f.id === fieldId);
 
   return (
-    <Box padding="spacingM">
-      <Stack spacing="spacingS" flexDirection="column" alignItems="flex-start">
-        <Heading>Select Fields to Map to Klaviyo</Heading>
-        <Text marginBottom="spacingXs">Select the fields you want to map to Klaviyo blocks:</Text>
+    <Box padding="spacingL">
+      <Form>
+        <Stack spacing="spacingL" flexDirection="column">
+          <Heading>Select Fields to Map to Klaviyo</Heading>
 
-        {fields.length > 0 ? (
-          <Box width="100%">
-            <Stack flexDirection="column" spacing="spacingXs">
-              {fields.map((field) => (
-                <FormControl
-                  key={field.id}
-                  marginBottom="none"
-                  style={{ textAlign: 'left', width: '100%' }}>
-                  <Checkbox
-                    id={field.id}
-                    name={field.id}
-                    isChecked={selectedFields.includes(field.id)}
-                    onChange={() => handleFieldToggle(field.id)}
-                    style={{ justifyContent: 'flex-start', width: '100%', textAlign: 'left' }}>
-                    {field.name}
-                  </Checkbox>
-                </FormControl>
-              ))}
-            </Stack>
+          <Text>Select the fields you want to include in the Klaviyo sync:</Text>
+
+          <Box>
+            <Text fontWeight="fontWeightMedium" marginBottom="spacingS">
+              Available Fields
+            </Text>
+
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Type to filter fields..."
+              style={{
+                width: '100%',
+                padding: '8px',
+                borderRadius: '4px',
+                border: '1px solid #DADADA',
+                marginBottom: '16px',
+              }}
+            />
+
+            <Box
+              style={{
+                maxHeight: '200px',
+                overflow: 'auto',
+                border: '1px solid #EEEEEE',
+                borderRadius: '4px',
+                padding: '8px',
+              }}>
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((field) => (
+                  <Box
+                    key={field.id}
+                    padding="spacingXs"
+                    onClick={() => handleFieldSelect(field.id)}
+                    onMouseEnter={() => setHoveredField(field.id)}
+                    onMouseLeave={() => setHoveredField(null)}
+                    style={{
+                      cursor: 'pointer',
+                      borderBottom: '1px solid #EEEEEE',
+                      backgroundColor: hoveredField === field.id ? '#F7F9FA' : 'transparent',
+                    }}>
+                    <Text>{field.name}</Text>
+                    <Text fontColor="gray500" fontSize="fontSizeS">
+                      ({field.type})
+                    </Text>
+                  </Box>
+                ))
+              ) : (
+                <Text fontColor="gray500" style={{ textAlign: 'center', padding: 'spacingM' }}>
+                  No matching fields found
+                </Text>
+              )}
+            </Box>
           </Box>
-        ) : (
-          <Text marginBottom="spacingS">No fields available to map</Text>
-        )}
 
-        <Stack
-          spacing="spacingS"
-          justifyContent="flex-start"
-          flexDirection="row"
-          marginTop="spacingM">
-          <Button variant="primary" onClick={handleSubmit} isDisabled={selectedFields.length === 0}>
-            Generate Mappings
-          </Button>
-          <Button variant="secondary" onClick={handleCancel}>
-            Cancel
-          </Button>
+          {selectedFields.length > 0 && (
+            <Box>
+              <Subheading marginBottom="spacingS">Selected Fields</Subheading>
+              <Flex flexWrap="wrap" gap="spacingXs">
+                {selectedFields.map((fieldId) => {
+                  const field = getFieldById(fieldId);
+                  if (!field) return null;
+
+                  return (
+                    <Pill
+                      key={field.id}
+                      label={`${field.name} (${field.type})`}
+                      onClose={() => handleFieldRemove(field.id)}
+                      style={{ marginBottom: '8px' }}
+                    />
+                  );
+                })}
+              </Flex>
+            </Box>
+          )}
+
+          {syncMessage && (
+            <Note variant={syncMessage.includes('Error') ? 'negative' : 'positive'}>
+              {syncMessage}
+            </Note>
+          )}
+
+          <Flex justifyContent="space-between">
+            <Button variant="secondary" onClick={() => sdk.close()}>
+              Cancel
+            </Button>
+
+            <Flex gap="spacingS">
+              <Button
+                variant="positive"
+                onClick={handleSaveClick}
+                isDisabled={selectedFields.length === 0}>
+                Save Selections
+              </Button>
+
+              {showSyncButton && (
+                <Button
+                  variant="primary"
+                  onClick={handleSyncClick}
+                  isDisabled={selectedFields.length === 0}
+                  isLoading={isSyncing}>
+                  Save & Sync to Klaviyo
+                </Button>
+              )}
+            </Flex>
+          </Flex>
         </Stack>
-      </Stack>
+      </Form>
     </Box>
   );
 };

@@ -82,7 +82,7 @@ export const clearOAuthTokens = (): void => {
 
   // Also clear any client-specific PKCE data
   Object.keys(localStorage)
-    .filter((key) => key.startsWith('klaviyo_pkce_data_'))
+    .filter((key) => key.startsWith('klaviyo_pkce_data'))
     .forEach((key) => localStorage.removeItem(key));
 
   console.log('All Klaviyo OAuth tokens cleared from localStorage');

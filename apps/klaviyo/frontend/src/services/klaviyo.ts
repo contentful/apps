@@ -1,17 +1,57 @@
-import axios from 'axios';
-import {
-  KLAVIYO_API_BASE_URL,
-  API_PROXY_URL,
-  KlaviyoOAuthConfig,
-  FieldMapping,
-} from '../config/klaviyo';
+import axios, { AxiosInstance } from 'axios';
+import { KLAVIYO_API_BASE_URL, API_PROXY_URL, KlaviyoOAuthConfig } from '../config/klaviyo';
 import { OAuthService } from './oauth';
+
+// Define the Tokens interface
+interface Tokens {
+  access_token: string;
+  refresh_token?: string;
+  token_type?: string;
+  expires_in?: number;
+}
+
+// Define the FieldMapping interface
+interface FieldMapping {
+  name: string;
+  type: string;
+  severity: string;
+  contentfulFieldId: string;
+  fieldType: string;
+  klaviyoBlockName: string;
+  value: any;
+}
+
+// Define the Klaviyo API response types
+interface KlaviyoApiResponse<T> {
+  data: T;
+}
+
+interface KlaviyoContentBlock {
+  id: string;
+  type: string;
+  attributes: {
+    name: string;
+    text?: string;
+    html?: string;
+    url?: string;
+  };
+}
+
+interface KlaviyoImage {
+  id: string;
+  type: string;
+  attributes: {
+    name: string;
+    url: string;
+  };
+}
 
 export class KlaviyoService {
   private config: KlaviyoOAuthConfig;
   private oauthService: OAuthService;
-  private proxyApi;
+  private proxyApi: AxiosInstance;
   private proxyUrl: string;
+  private tokens: Tokens | null = null;
 
   constructor(config: KlaviyoOAuthConfig) {
     this.config = config;
@@ -22,161 +62,213 @@ export class KlaviyoService {
       ? API_PROXY_URL
       : window.location.origin + API_PROXY_URL;
 
+    const accessToken = config.accessToken || this.oauthService.getAccessToken();
     console.log('Initialized KlaviyoService with proxy URL:', this.proxyUrl);
+    console.log('Initialized KlaviyoService with tokens:', this.tokens);
 
-    // Proxy API client for browser usage
+    // Initialize proxy API client
     this.proxyApi = axios.create({
-      baseURL: this.proxyUrl,
+      baseURL: 'http://localhost:3001',
       headers: {
         'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${accessToken || this.tokens?.access_token}`,
       },
     });
   }
 
-  // Helper method to make API calls via proxy using OAuth
-  private async callApi(endpoint: string, method: string, data?: any) {
-    try {
-      console.log(`Making API call via proxy: ${method} ${endpoint}`);
-      console.log(`Proxy URL: ${this.proxyUrl}`);
-
-      // Get a valid access token - use existing if provided, otherwise get from OAuth service
-      let accessToken;
-      if (this.config.accessToken) {
-        accessToken = this.config.accessToken;
-        console.log('Using provided access token');
-      } else {
-        console.log('Getting fresh access token from OAuth service');
-        accessToken = await this.oauthService.getAccessToken();
-      }
-
-      if (!accessToken) {
-        throw new Error('No access token available for API call');
-      }
-
-      // Make the API call with Bearer token for OAuth
-      const response = await this.proxyApi.post(this.proxyUrl, {
-        endpoint,
-        method,
-        data,
-        authorization: `Bearer ${accessToken}`, // Send OAuth token instead of API key
-      });
-
-      console.log(`API call to ${endpoint} completed successfully`);
-      return response.data;
-    } catch (error) {
-      console.error(`Error calling Klaviyo API via proxy (${method} ${endpoint}):`, error);
-
-      if (axios.isAxiosError(error)) {
-        console.error('Response status:', error.response?.status);
-        console.error('Response data:', error.response?.data);
-        console.error('Request config:', error.config);
-
-        // If 401 Unauthorized, token might be expired, clear it
-        if (error.response?.status === 401) {
-          localStorage.removeItem('klaviyo_access_token');
-          throw new Error(
-            'Authentication failed: Your session has expired. Please reconnect to Klaviyo.'
-          );
-        }
-      }
-
-      throw error;
+  setTokens(tokens: Tokens) {
+    this.tokens = tokens;
+    if (tokens?.access_token) {
+      this.proxyApi.defaults.headers.common['Authorization'] = `Bearer ${tokens.access_token}`;
     }
   }
 
-  async createUniversalContentBlock(name: string, content: string | object) {
-    console.log('Creating universal content block:', name, content);
-    try {
-      // Check if content is HTML from rich text conversion
-      const isHtml =
-        typeof content === 'string' &&
-        (content.startsWith('<p>') ||
-          content.startsWith('<h') ||
-          content.includes('</p>') ||
-          content.includes('</h'));
+  private async callApi<T>(endpoint: string, method: string, data?: any): Promise<T> {
+    console.log('Calling API:', {
+      endpoint,
+      method,
+      data,
+      tokens: this.tokens,
+    });
 
-      // Check if content is already a string
-      const contentToSend = typeof content === 'string' ? content : JSON.stringify(content);
+    if (!this.tokens?.access_token) {
+      throw new Error('No access token available');
+    }
 
-      // Set the appropriate content type based on whether it's HTML
-      const contentType = isHtml ? 'html' : 'text';
-
-      console.log(`Sending content of type: ${contentType}`);
-
-      return await this.callApi('/template-universal-content', 'POST', {
-        data: {
-          type: 'template-universal-content',
-          attributes: {
-            name,
-            definition: {
-              content_type: 'block',
-              type: contentType,
-              data: {
-                content: contentToSend,
-                display_options: {},
-              },
+    let attributes = {};
+    console.log('Data:', data, data.content_type === 'text');
+    if (data.contentType === 'text') {
+      attributes = {
+        type: 'template-universal-content',
+        attributes: {
+          name: data.name,
+          definition: {
+            content_type: 'block',
+            type: 'text',
+            data: {
+              content: data.fields[0].value,
+              display_options: {},
+              styles: {},
             },
           },
         },
+      };
+    } else if (data.contentType === 'image') {
+      attributes = {
+        type: 'image',
+        attributes: {
+          name: data.name,
+          import_from_url: data.url,
+        },
+      };
+    } else if (data.contentType === 'html') {
+      attributes = {
+        type: 'template-universal-content',
+        attributes: {
+          name: data.name,
+          definition: {
+            content_type: 'block',
+            type: 'html',
+            data: {
+              content: data.fields[0].value,
+              display_options: {},
+              styles: {},
+            },
+          },
+        },
+      };
+    }
+
+    try {
+      const config = {
+        method,
+        url: endpoint.startsWith('/') ? endpoint : `/${endpoint}`,
+        ...(method === 'GET'
+          ? { params: data }
+          : { data: { data: attributes, authorization: `Bearer ${this.tokens.access_token}` } }),
+      };
+
+      console.log('Making API request:', {
+        method: config.method,
+        url: config.url,
+        config: config,
+        dataType: method === 'GET' ? 'params' : 'body',
       });
+
+      const response = await this.proxyApi.request<{ data: T }>(config);
+      return response.data.data;
+    } catch (error: any) {
+      console.error('API call failed:', {
+        endpoint,
+        method,
+        error: error.response?.data || error.message,
+      });
+
+      // Enhance error with more details
+      const enhancedError = new Error(error.response?.data?.error || error.message);
+      Object.assign(enhancedError, {
+        status: error.response?.status,
+        details: error.response?.data?.details,
+        headers: error.response?.headers,
+      });
+
+      throw enhancedError;
+    }
+  }
+
+  private mapFieldsToKlaviyo(fields: FieldMapping[]): Record<string, any> {
+    const mappedFields: Record<string, any> = {};
+
+    fields.forEach((field) => {
+      mappedFields[field.klaviyoBlockName] = {
+        name: field.name,
+        type: field.type,
+        value: field.value,
+        fieldType: field.fieldType,
+        contentfulFieldId: field.contentfulFieldId,
+      };
+    });
+
+    return mappedFields;
+  }
+
+  private mapContentfulFieldToKlaviyo(
+    contentfulFieldId: string,
+    klaviyoBlockName: string,
+    value: string
+  ): FieldMapping {
+    return this.createFieldMapping(contentfulFieldId, klaviyoBlockName, value);
+  }
+
+  private mapContentfulEntryToKlaviyo(entry: any, fieldMappings: FieldMapping[]): FieldMapping[] {
+    return fieldMappings.map((mapping) => {
+      const value = entry.fields[mapping.contentfulFieldId];
+      return this.createFieldMapping(mapping.contentfulFieldId, mapping.klaviyoBlockName, value);
+    });
+  }
+
+  async createUniversalContentBlock(
+    name: string,
+    contentType: string,
+    fields: FieldMapping[]
+  ): Promise<any> {
+    try {
+      const mappedFields = fields.map((field) =>
+        this.mapContentfulFieldToKlaviyo(
+          field.contentfulFieldId,
+          field.klaviyoBlockName,
+          field.value
+        )
+      );
+
+      const response = await this.callApi('/api/klaviyo/proxy/template-universal-content', 'POST', {
+        name,
+        contentType,
+        fields: mappedFields,
+      });
+      return response;
     } catch (error) {
       console.error('Error creating universal content block:', error);
       throw error;
     }
   }
 
-  async updateUniversalContentBlock(blockId: string, content: string) {
+  async updateUniversalContentBlock(blockId: string, fields: FieldMapping[]): Promise<any> {
     try {
-      return await this.callApi(`/template-universal-content/${blockId}`, 'PATCH', {
-        data: {
-          type: 'universal-content-block',
-          attributes: {
-            definition: {
-              data: content,
-            },
-          },
-        },
-      });
+      const mappedFields = fields.map((field) =>
+        this.mapContentfulFieldToKlaviyo(
+          field.contentfulFieldId,
+          field.klaviyoBlockName,
+          field.value
+        )
+      );
+      const response = await this.callApi(
+        `/api/klaviyo/proxy/template-universal-content/${blockId}`,
+        'PUT',
+        {
+          fields: mappedFields,
+        }
+      );
+      return response;
     } catch (error) {
       console.error('Error updating universal content block:', error);
       throw error;
     }
   }
 
-  public async uploadImage(
-    imageUrl: string,
-    name: string
-  ): Promise<{ id: string; imageUrl: string }> {
-    console.log(`Uploading image from ${imageUrl}`);
-
-    let url = imageUrl;
-    // If url doesn't start with http, assume it's a contentful asset and construct the full url
-    if (!url.startsWith('http')) {
-      url = `https:${url}`;
-    }
+  async uploadImage(imageUrl: string): Promise<any> {
+    console.log('Uploading image:', imageUrl);
 
     try {
-      // Update to use the correct Klaviyo images API endpoint with the current revision
-      const response = await this.callApi('/images/', 'POST', {
-        data: {
-          type: 'image',
-          attributes: {
-            import_from_url: url,
-            name: name,
-          },
-        },
+      const uploadedImage = await this.callApi('/images', 'POST', {
+        url: imageUrl,
       });
-
-      console.log(`Image upload successful: ${JSON.stringify(response)}`);
-
-      // Extract the image ID and URL from the response
-      const imageId = response.data.id;
-      const uploadedImageUrl = response.data.attributes.url;
-
-      return { id: imageId, imageUrl: uploadedImageUrl };
-    } catch (error) {
-      console.error(`Error uploading image: ${error}`);
-      throw error;
+      console.log('Uploaded image:', uploadedImage);
+      return uploadedImage;
+    } catch (error: any) {
+      console.error('Failed to upload image:', error);
+      throw new Error(`Failed to upload image: ${error.message}`);
     }
   }
 
@@ -511,8 +603,6 @@ export class KlaviyoService {
   }
 
   async syncContent(mappings: FieldMapping[], entry: any) {
-    const results = [];
-
     console.log(`Starting content sync with ${mappings.length} mappings`);
 
     // First, log all the mappings we received
@@ -522,6 +612,7 @@ export class KlaviyoService {
       );
     }
 
+    const promises = [];
     for (const mapping of mappings) {
       try {
         console.log(`Processing mapping: ${JSON.stringify(mapping)}`);
@@ -572,9 +663,15 @@ export class KlaviyoService {
 
               console.log(`Converted rich text to HTML: ${html.substring(0, 100)}...`);
 
-              // Send as HTML to Klaviyo
-              const result = await this.createUniversalContentBlock(mapping.klaviyoBlockName, html);
-              results.push(result);
+              promises.push(
+                this.createUniversalContentBlock(mapping.klaviyoBlockName, 'text', [
+                  this.createRichTextFieldMapping(
+                    mapping.contentfulFieldId,
+                    mapping.klaviyoBlockName,
+                    html
+                  ),
+                ])
+              );
               continue;
             } catch (error) {
               console.error(`Error converting rich text to HTML:`, error);
@@ -591,13 +688,15 @@ export class KlaviyoService {
               content.includes('</p>') ||
               content.includes('</h'))
           ) {
-            console.log(`Found HTML content from rich text: ${content.substring(0, 100)}...`);
-            // We'll create a content block in Klaviyo with the HTML
-            const result = await this.createUniversalContentBlock(
-              mapping.klaviyoBlockName,
-              content
+            promises.push(
+              this.createUniversalContentBlock(mapping.klaviyoBlockName, 'html', [
+                this.createFieldMapping(
+                  mapping.contentfulFieldId,
+                  mapping.klaviyoBlockName,
+                  content
+                ),
+              ])
             );
-            results.push(result);
             continue;
           }
 
@@ -607,11 +706,15 @@ export class KlaviyoService {
             console.log(`Found and formatted location data: ${formattedLocation}`);
 
             // Use the formatted location string
-            const result = await this.createUniversalContentBlock(
-              mapping.klaviyoBlockName,
-              formattedLocation
+            promises.push(
+              this.createUniversalContentBlock(mapping.klaviyoBlockName, 'text', [
+                this.createFieldMapping(
+                  mapping.contentfulFieldId,
+                  mapping.klaviyoBlockName,
+                  formattedLocation
+                ),
+              ])
             );
-            results.push(result);
             continue;
           }
 
@@ -625,11 +728,15 @@ export class KlaviyoService {
             );
 
             // Use the formatted JSON string
-            const result = await this.createUniversalContentBlock(
-              mapping.klaviyoBlockName,
-              formattedJson
+            promises.push(
+              this.createUniversalContentBlock(mapping.klaviyoBlockName, 'text', [
+                this.createFieldMapping(
+                  mapping.contentfulFieldId,
+                  mapping.klaviyoBlockName,
+                  formattedJson
+                ),
+              ])
             );
-            results.push(result);
             continue;
           }
 
@@ -685,8 +792,11 @@ export class KlaviyoService {
               : content
           );
 
-          const result = await this.createUniversalContentBlock(mapping.klaviyoBlockName, content);
-          results.push(result);
+          promises.push(
+            this.createUniversalContentBlock(mapping.klaviyoBlockName, 'text', [
+              this.createFieldMapping(mapping.contentfulFieldId, mapping.klaviyoBlockName, content),
+            ])
+          );
         } else if (mapping.fieldType === 'image') {
           console.log('Processing image field:', mapping.contentfulFieldId);
           console.log(
@@ -699,9 +809,7 @@ export class KlaviyoService {
 
           if (imageUrl) {
             console.log('Uploading image URL to Klaviyo:', mapping.klaviyoBlockName, imageUrl);
-            const result = await this.uploadImage(imageUrl, mapping.klaviyoBlockName);
-            console.log('Image upload result:', result);
-            results.push(result);
+            promises.push(this.uploadImage(imageUrl));
           } else {
             console.warn(`Could not extract image URL for field ${mapping.contentfulFieldId}`);
 
@@ -772,6 +880,59 @@ export class KlaviyoService {
       }
     }
 
+    const results = await Promise.all(promises);
+
     return results;
+  }
+
+  // Update the createFieldMapping function
+  private createFieldMapping(
+    contentfulFieldId: string,
+    klaviyoBlockName: string,
+    value: string
+  ): FieldMapping {
+    return {
+      name: klaviyoBlockName,
+      type: 'text',
+      severity: 'info',
+      contentfulFieldId,
+      fieldType: 'text',
+      klaviyoBlockName,
+      value: Boolean(value) ? String(value) : '',
+    };
+  }
+
+  // Update the createImageFieldMapping function
+  private createImageFieldMapping(
+    contentfulFieldId: string,
+    klaviyoBlockName: string,
+    value: any
+  ): FieldMapping {
+    return {
+      name: klaviyoBlockName,
+      type: 'image',
+      severity: 'info',
+      contentfulFieldId,
+      fieldType: 'image',
+      klaviyoBlockName,
+      value,
+    };
+  }
+
+  // Update the createRichTextFieldMapping function
+  private createRichTextFieldMapping(
+    contentfulFieldId: string,
+    klaviyoBlockName: string,
+    value: any
+  ): FieldMapping {
+    return {
+      name: klaviyoBlockName,
+      type: 'richText',
+      severity: 'info',
+      contentfulFieldId,
+      fieldType: 'richText',
+      klaviyoBlockName,
+      value,
+    };
   }
 }

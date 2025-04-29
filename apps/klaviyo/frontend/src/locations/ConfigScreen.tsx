@@ -1,5 +1,5 @@
-import React, { useEffect, useCallback, useState } from 'react';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import React, { useCallback, useState, useEffect } from 'react';
+import { useSDK } from '../hooks/useSDK';
 import {
   Form,
   FormControl,
@@ -12,16 +12,62 @@ import {
   Flex,
   TextLink,
   Paragraph,
+  Autocomplete,
+  Pill,
 } from '@contentful/f36-components';
+import { ExternalLinkIcon, CopyIcon, CheckCircleIcon } from '@contentful/f36-icons';
 import { FieldMapping } from '../config/klaviyo';
-import { ConfigAppSDK } from '@contentful/app-sdk';
+import { ConfigAppSDK, ContentType, AppExtensionSDK } from '@contentful/app-sdk';
 import { OAuthService } from '../services/oauth';
 import { KlaviyoOAuthConfig, PKCEData } from '../config/klaviyo';
 import { checkOAuthTokens, clearOAuthTokens } from '../utils/oauth-debug';
+import console from 'console';
 
-interface ConfigScreenProps {
-  mappings?: FieldMapping[];
+interface AppLocation {
+  id: string;
+  name: string;
+  description: string;
 }
+
+interface ContentTypeWithEditorInterfaces {
+  sys: {
+    id: string;
+  };
+  name: string;
+}
+
+interface KlaviyoTokens {
+  access_token: string;
+  refresh_token: string;
+}
+
+interface KlaviyoAuthMessage {
+  type: 'KLAVIYO_AUTH_CALLBACK';
+  code?: string;
+  error?: string;
+  error_description?: string;
+}
+
+interface Installation {
+  clientId: string;
+  clientSecret: string;
+  accessToken?: string;
+  refreshToken?: string;
+  locations?: AppLocation[];
+  contentTypes?: string[];
+}
+
+interface AppInstallationParameters {
+  installation: Installation;
+}
+
+const AVAILABLE_LOCATIONS: AppLocation[] = [
+  {
+    id: 'entry-sidebar',
+    name: 'Entry Sidebar',
+    description: 'Add Klaviyo integration to the entry sidebar',
+  },
+];
 
 // Styles for the step indicator
 const stepIndicatorStyle = {
@@ -73,755 +119,512 @@ const getProxyRedirectUri = () => {
   return `${hostnameWithProtocol}:3001/auth/callback`;
 };
 
-export const ConfigScreen: React.FC<ConfigScreenProps> = ({ mappings = [] }) => {
+const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [connecting, setConnecting] = useState(false);
-  const [pkceData, setPkceData] = useState<PKCEData | null>(null);
-  const [config, setConfig] = useState<KlaviyoOAuthConfig | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [authUrl, setAuthUrl] = useState<string | null>(null);
+  const [clientId, setClientId] = useState('');
+  const [clientSecret, setClientSecret] = useState('');
+  const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredContentTypes, setFilteredContentTypes] = useState<
+    ContentTypeWithEditorInterfaces[]
+  >([]);
+  const [contentTypes, setContentTypes] = useState<ContentTypeWithEditorInterfaces[]>([]);
+  const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>([]);
+  const redirectUri = getProxyRedirectUri();
 
-  // Add message listener for OAuth callback
   useEffect(() => {
-    const handleMessage = async (event: MessageEvent) => {
-      // Check if the message is from our OAuth callback
-      if (event.data && event.data.type === 'KLAVIYO_AUTH_CALLBACK') {
-        console.log('Received OAuth callback message:', event.data);
+    // Initialize the app
+    async function initializeApp() {
+      // Get current parameters
+      const currentParameters = await sdk.app.getParameters<AppInstallationParameters>();
 
-        const { code, state, error, error_description } = event.data;
+      // Get available content types
+      const availableContentTypes = await sdk.space.getContentTypes();
+      setContentTypes(availableContentTypes.items);
 
-        if (error || error_description) {
-          setErrorMessage(`Authorization failed: ${error || ''} ${error_description || ''}`);
-          setConnecting(false);
-          return;
-        }
-
-        if (code && state && config) {
-          try {
-            console.log('Calling exchangeCodeForToken with code and state from callback message');
-            console.log('Auth data:', {
-              code_length: code.length,
-              state_length: state.length,
-              config_available: !!config,
-              client_id_available: !!config?.clientId,
-              client_secret_available: !!config?.clientSecret,
-              redirect_uri: config?.redirectUri,
-            });
-
-            await exchangeCodeForToken(code, state);
-            console.log('Authorization completed successfully via postMessage');
-            setAuthUrl(null); // Clear the auth URL once authorized
-            setConnecting(false);
-          } catch (err) {
-            console.error('Error processing OAuth callback:', err);
-            setErrorMessage(
-              `Failed to complete authorization: ${
-                err instanceof Error ? err.message : 'Unknown error'
-              }`
-            );
-            setConnecting(false);
-          }
-        } else {
-          console.error('Missing required OAuth callback parameters:', {
-            code_available: !!code,
-            state_available: !!state,
-            config_available: !!config,
-          });
-          setErrorMessage('Authorization failed: Missing required parameters');
-          setConnecting(false);
-        }
+      // Set initial state from parameters if they exist
+      if (currentParameters?.installation) {
+        setClientId(currentParameters.installation.clientId || '');
+        setClientSecret(currentParameters.installation.clientSecret || '');
+        setIsConnected(!!currentParameters.installation.accessToken);
+        setSelectedContentTypes(currentParameters.installation.contentTypes || []);
       }
-    };
 
-    // Add message event listener
-    window.addEventListener('message', handleMessage);
-    console.log('Added postMessage event listener for OAuth callback');
+      // Mark app as ready
+      sdk.app.setReady();
+    }
 
-    // Cleanup
-    return () => {
-      window.removeEventListener('message', handleMessage);
-      console.log('Removed postMessage event listener');
-    };
-  }, [config]);
+    initializeApp();
+  }, [sdk]);
 
-  // Check for authorization code in the URL when redirected back from Klaviyo
+  // Add onConfigure callback
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const state = urlParams.get('state');
-    const error = urlParams.get('error');
-    const errorDescription = urlParams.get('error_description');
+    // Handler called when app configuration is saved
+    const onConfigure = async () => {
+      if (!clientId || !clientSecret) {
+        sdk.notifier.error('Please provide both Client ID and Client Secret');
+        return false;
+      }
 
-    if (error || errorDescription) {
-      // Handle auth errors
-      setErrorMessage(`Authorization failed: ${error || ''} ${errorDescription || ''}`);
+      // Prepare editor interfaces
+      const editorInterface = {
+        sidebar: {
+          position: 0,
+          settings: { helpText: 'Klaviyo integration' },
+        },
+      };
+
+      // Set up editor interfaces for each selected content type
+      const targetState = {
+        EditorInterface: selectedContentTypes.reduce((acc, contentTypeId) => {
+          acc[contentTypeId] = editorInterface;
+          return acc;
+        }, {} as Record<string, any>),
+      };
+
+      const parameters: AppInstallationParameters = {
+        installation: {
+          clientId,
+          clientSecret,
+          locations: AVAILABLE_LOCATIONS, // Always include entry-sidebar
+          contentTypes: selectedContentTypes,
+        },
+      };
+
+      // Merge tokens if they exist
+      const tokens = await checkOAuthTokens();
+      if (tokens?.accessToken && tokens?.refreshToken) {
+        parameters.installation.accessToken = tokens.accessToken;
+        parameters.installation.refreshToken = tokens.refreshToken;
+      }
+
+      return {
+        parameters: { installation: parameters.installation },
+        targetState,
+      };
+    };
+
+    sdk.app.onConfigure(() => onConfigure());
+  }, [sdk, clientId, clientSecret, selectedContentTypes]);
+
+  useEffect(() => {
+    if (!searchQuery) {
+      setFilteredContentTypes(contentTypes);
       return;
     }
 
-    if (code && state && config) {
-      // Exchange code for tokens
-      exchangeCodeForToken(code, state);
-    }
-  }, [config]);
+    const query = searchQuery.toLowerCase();
+    const filtered = contentTypes.filter(
+      (ct) => ct.name.toLowerCase().includes(query) || ct.sys.id.toLowerCase().includes(query)
+    );
+    setFilteredContentTypes(filtered);
+  }, [searchQuery, contentTypes]);
 
-  // Initialize configuration and check if already authorized
-  useEffect(() => {
-    async function initConfig() {
-      // Get installation parameters
-      const parameters = sdk.parameters.installation;
-
-      console.log('Installation parameters:', parameters);
-
-      // Get or provide default values for OAuth config
-      const clientId = (parameters?.klaviyoClientId as string) || '';
-      const clientSecret = (parameters?.klaviyoClientSecret as string) || '';
-
-      // Calculate a default redirect URI based on current location if not provided
-      let redirectUri = parameters?.klaviyoRedirectUri as string;
-      if (!redirectUri) {
-        // Use proxy server redirect URI
-        redirectUri = getProxyRedirectUri();
-        console.log('Using proxy redirect URI:', redirectUri);
-      }
-
-      // Create temporary config even if not all parameters are provided
-      // This allows the user to see form inputs and be able to save values
+  const handleConnect = async () => {
+    try {
+      setIsLoading(true);
       const config: KlaviyoOAuthConfig = {
         clientId,
         clientSecret,
         redirectUri,
       };
 
-      console.log('Created OAuth config:', {
-        clientId: clientId ? `${clientId.substring(0, 5)}...` : 'Missing',
-        clientSecret: clientSecret ? 'Present (hidden)' : 'Missing',
-        redirectUri,
-      });
-
-      setConfig(config);
-
-      // Only set error message if we're missing all parameters
-      if (!clientId && !clientSecret && !redirectUri) {
-        setErrorMessage(
-          'Please provide OAuth credentials in the installation parameters and save the app configuration.'
-        );
-      } else if (!clientId) {
-        setErrorMessage(
-          'Klaviyo Client ID is required. Please add it to the installation parameters.'
-        );
-      } else if (!clientSecret) {
-        setErrorMessage(
-          'Klaviyo Client Secret is required. Please add it to the installation parameters.'
-        );
-      } else {
-        setErrorMessage(null);
-      }
-
-      // Check if we already have tokens
-      const accessToken = localStorage.getItem('klaviyo_access_token');
-      const refreshToken = localStorage.getItem('klaviyo_refresh_token');
-      const tokenExpiresAt = localStorage.getItem('klaviyo_token_expires_at');
-
-      console.log('OAuth token status:', {
-        accessToken: accessToken ? 'Present' : 'Missing',
-        refreshToken: refreshToken ? 'Present' : 'Missing',
-        tokenExpiresAt: tokenExpiresAt || 'Missing',
-      });
-
-      if (accessToken && refreshToken && tokenExpiresAt) {
-        setIsAuthorized(true);
-      }
-    }
-
-    initConfig();
-  }, [sdk.parameters.installation]); // Only depend on sdk.parameters.installation, not the entire sdk
-
-  // Exchange authorization code for token
-  const exchangeCodeForToken = async (code: string, state: string) => {
-    if (!config) return;
-
-    try {
-      setConnecting(true);
-      setErrorMessage(null);
-
       const oauthService = new OAuthService(config);
-      await oauthService.exchangeCodeForToken(code, state);
 
-      // Update state
-      setIsAuthorized(true);
-
-      // Remove code and state from URL to prevent reuse
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } catch (error) {
-      console.error('Error exchanging code for token:', error);
-      setErrorMessage(
-        `Failed to connect to Klaviyo: ${error instanceof Error ? error.message : 'Unknown error'}`
-      );
-    } finally {
-      setConnecting(false);
-    }
-  };
-
-  // Start authorization flow
-  const handleConnect = useCallback(async () => {
-    if (!config) return;
-
-    try {
-      setConnecting(true);
-      setErrorMessage(null);
-
-      // Save credentials for future use (especially for disconnecting)
-      if (config.clientId && config.clientSecret && config.redirectUri) {
-        localStorage.setItem('klaviyo_client_id', config.clientId);
-        localStorage.setItem('klaviyo_client_secret', config.clientSecret);
-        localStorage.setItem('klaviyo_redirect_uri', config.redirectUri);
-
-        console.log('Saved credentials to localStorage:', {
-          clientId_first_chars: config.clientId.substring(0, 5) + '...',
-          clientSecret_length: config.clientSecret.length,
-          redirectUri: config.redirectUri,
-        });
-      }
-
-      const oauthService = new OAuthService(config);
+      // Generate PKCE data
       const pkceData = await oauthService.generatePKCE();
-      setPkceData(pkceData);
 
-      // Generate the authorization URL
+      // Store PKCE data in localStorage with a unique key based on state
+      localStorage.setItem(`klaviyo_pkce_data`, JSON.stringify(pkceData));
+
+      // Get authorization URL
       const authUrl = oauthService.getAuthorizationUrl(pkceData);
-      console.log('Opening authorization URL in a new window:', authUrl);
-      setAuthUrl(authUrl);
 
-      // Open a popup window for the OAuth flow instead of redirecting
-      // This avoids the Content Security Policy (CSP) frame-ancestors restriction
-      const popupWidth = 800;
-      const popupHeight = 700;
-      const left = window.screenX + (window.outerWidth - popupWidth) / 2;
-      const top = window.screenY + (window.outerHeight - popupHeight) / 2;
+      // Open OAuth window
+      const oauthWindow = window.open(authUrl, 'Klaviyo Auth', 'width=800,height=900');
 
-      // Open the popup
-      const authWindow = window.open(
-        authUrl,
-        'KlaviyoAuth',
-        `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes`
-      );
-
-      if (!authWindow) {
-        // Popup was blocked
-        setErrorMessage(
-          'Popup window was blocked. Please allow popups for this site or click the authorization link below.'
+      // Check if popup was blocked
+      if (!oauthWindow) {
+        throw new Error(
+          'Popup window was blocked. Please allow popups for this site and try again.'
         );
-        setConnecting(false);
-        return;
       }
 
-      // Event listener was added in useEffect, so we don't need to do anything else here
-      console.log('Popup window opened, waiting for postMessage from callback');
-    } catch (error) {
-      console.error('Error starting authorization flow:', error);
-      setErrorMessage(
-        `Failed to start authorization flow: ${
-          error instanceof Error ? error.message : 'Unknown error'
-        }`
-      );
-      setConnecting(false);
-    }
-  }, [config]);
+      // Try to focus the window
+      oauthWindow.focus();
 
-  // Handle oauth callback when redirected back with code parameter
-  useEffect(() => {
-    const handleAuthCallback = async () => {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get('code');
-      const state = params.get('state');
-      const error = params.get('error');
+      let cleanup: (() => void) | undefined;
 
-      // If this is a popup window with the auth callback
-      if (code && state) {
-        try {
-          if (!config) {
-            console.error('No config available for token exchange');
+      // Create a promise that resolves when auth is complete
+      const authPromise = new Promise<KlaviyoTokens>((resolve, reject) => {
+        let isProcessing = false;
+        let isResolved = false;
+        let tokenExchangePromise: Promise<void> | null = null;
+
+        const messageHandler = async (e: MessageEvent<KlaviyoAuthMessage>) => {
+          // Log all received messages for debugging
+          console.log('Received message event:', {
+            origin: e.origin,
+            source: e.source === oauthWindow ? 'oauth window' : 'other',
+            data: e.data,
+          });
+
+          // Accept messages from any origin since we're validating the source window
+          if (e.source !== oauthWindow) {
+            console.log('Message from unexpected source, ignoring');
             return;
           }
 
-          const oauthService = new OAuthService(config);
-          await oauthService.exchangeCodeForToken(code, state);
+          const { type, code, error, error_description } = e.data;
 
-          // Clean up the URL
-          window.history.replaceState({}, document.title, window.location.pathname);
-
-          // Close the popup if this is the popup window
-          if (window.opener && window.opener !== window) {
-            window.close();
+          if (type !== 'KLAVIYO_AUTH_CALLBACK') {
+            console.log('Unexpected message type:', type);
+            return;
           }
-        } catch (err) {
-          console.error('Error exchanging code for token:', err);
-          setErrorMessage(
-            `Authorization failed: ${err instanceof Error ? err.message : 'Unknown error'}`
-          );
+
+          if (error) {
+            reject(new Error(`Authentication failed: ${error_description || error}`));
+            return;
+          }
+
+          if (!code) {
+            reject(new Error('No authorization code received'));
+            return;
+          }
+
+          if (isProcessing) {
+            console.log('Already processing auth code, ignoring duplicate message');
+            return;
+          }
+
+          console.log('Processing authentication code');
+          isProcessing = true;
+
+          // Create a promise for the token exchange
+          tokenExchangePromise = (async () => {
+            try {
+              // Retrieve the stored PKCE data
+              const storedPkceData = localStorage.getItem(`klaviyo_pkce_data`);
+              if (!storedPkceData) {
+                throw new Error('PKCE data not found');
+              }
+
+              const pkceData = JSON.parse(storedPkceData);
+
+              // Exchange code for tokens
+              console.log('Exchanging code for tokens');
+              const tokens = await oauthService.exchangeCodeForToken(code, pkceData.codeVerifier);
+              console.log('Received tokens successfully');
+
+              // Clean up stored PKCE data
+              localStorage.removeItem(`klaviyo_pkce_data`);
+
+              isResolved = true;
+              resolve(tokens);
+            } catch (error) {
+              console.error('Error during token exchange:', error);
+              isProcessing = false;
+              reject(error);
+            }
+          })();
+        };
+
+        // Add message listener
+        console.log('Adding message listener');
+        window.addEventListener('message', messageHandler);
+
+        // Set timeout for auth flow
+        const timeoutId = setTimeout(() => {
+          console.log('Authentication timed out');
+          if (cleanup) cleanup();
+          reject(new Error('Authentication timed out'));
+        }, 300000); // 5 minute timeout
+
+        // Cleanup on window close
+        const checkWindow = setInterval(async () => {
+          if (oauthWindow?.closed) {
+            console.log('OAuth window was closed, waiting for token exchange to complete...');
+
+            // If we're in the middle of a token exchange, wait for it
+            if (tokenExchangePromise) {
+              try {
+                await tokenExchangePromise;
+                // If we get here, the token exchange completed successfully
+                console.log('Token exchange completed after window close');
+                return;
+              } catch (error) {
+                // Token exchange failed
+                console.error('Token exchange failed after window close:', error);
+              }
+            }
+
+            // If we get here, either there was no token exchange in progress
+            // or it failed after the window was closed
+            if (!isResolved) {
+              console.log('Window closed before successful token exchange');
+              clearInterval(checkWindow);
+              clearTimeout(timeoutId);
+              if (cleanup) cleanup();
+              reject(
+                new Error(
+                  'Authentication window was closed. Please keep the window open until authentication completes.'
+                )
+              );
+            }
+          }
+        }, 1000);
+
+        // Define cleanup function
+        cleanup = () => {
+          console.log('Running cleanup');
+          window.removeEventListener('message', messageHandler);
+          clearInterval(checkWindow);
+          clearTimeout(timeoutId);
+        };
+      });
+
+      try {
+        // Wait for auth to complete
+        const tokens = await authPromise;
+        console.log('tokens', tokens);
+
+        // Save credentials and tokens
+        try {
+          // Configure the app with the new parameters
+          sdk.app.onConfigure(() => {
+            console.log('Saving configuration...');
+            setIsConnected(true);
+            return {
+              parameters: {
+                installation: {
+                  clientId,
+                  clientSecret,
+                  accessToken: tokens.access_token,
+                  refreshToken: tokens.refresh_token,
+                },
+              },
+            };
+          });
+
+          // If we get here, configuration was successful
+          console.log('Configuration saved successfully');
+
+          // Notify the OAuth window that we're done
+          if (oauthWindow && !oauthWindow.closed) {
+            try {
+              oauthWindow.postMessage({ type: 'KLAVIYO_AUTH_COMPLETE' }, '*');
+            } catch (error) {
+              console.error('Error notifying OAuth window:', error);
+            }
+          }
+
+          setIsConnected(true);
+          sdk.notifier.success('Successfully connected to Klaviyo');
+        } catch (configError) {
+          console.error('Failed to save configuration:', configError);
+          setIsConnected(false);
+          throw new Error('Failed to save app configuration');
         }
-      } else if (error) {
-        setErrorMessage(`Authorization failed: ${error} ${params.get('error_description') || ''}`);
+      } catch (error) {
+        console.error('Connection failed:', error);
+        setIsConnected(false); // Ensure connected state is false on error
+        sdk.notifier.error(error instanceof Error ? error.message : 'Failed to connect to Klaviyo');
+      } finally {
+        if (cleanup) cleanup();
+        setIsLoading(false);
       }
-    };
-
-    handleAuthCallback();
-  }, [config]);
-
-  // Disconnect from Klaviyo
-  const handleDisconnect = useCallback(async () => {
-    try {
-      setConnecting(true);
-      setErrorMessage(null);
-
-      // Get saved credentials from configuration or localStorage
-      let clientId = config?.clientId;
-      let clientSecret = config?.clientSecret;
-
-      // If credentials are missing from config, try to get them from localStorage
-      if (!clientId || !clientSecret) {
-        clientId = localStorage.getItem('klaviyo_client_id') || '';
-        clientSecret = localStorage.getItem('klaviyo_client_secret') || '';
-
-        console.log('Using credentials from localStorage for revocation:', {
-          clientId_available: !!clientId,
-          clientSecret_available: !!clientSecret,
-        });
-      } else {
-        // Save credentials for future use
-        localStorage.setItem('klaviyo_client_id', clientId);
-        localStorage.setItem('klaviyo_client_secret', clientSecret);
-      }
-
-      if (!clientId || !clientSecret) {
-        setErrorMessage(
-          'Client ID or Secret not found. Please enter them in the form before disconnecting.'
-        );
-        sdk.notifier.error('Client credentials required for disconnecting.');
-        return;
-      }
-
-      // Create a complete config with the stored credentials
-      const oauthConfig: KlaviyoOAuthConfig = {
-        clientId,
-        clientSecret,
-        redirectUri: config?.redirectUri || getProxyRedirectUri(),
-      };
-
-      console.log('Revoking tokens with config:', {
-        clientId_first_chars: clientId.substring(0, 5) + '...',
-        clientSecret_length: clientSecret.length,
-        redirectUri: oauthConfig.redirectUri,
-      });
-
-      // Revoke token
-      const oauthService = new OAuthService(oauthConfig);
-      await oauthService.revokeToken();
-
-      // Clear tokens
-      localStorage.removeItem('klaviyo_access_token');
-      localStorage.removeItem('klaviyo_refresh_token');
-      localStorage.removeItem('klaviyo_token_expires_at');
-
-      // Don't remove stored client credentials for future connect/disconnect operations
-      // localStorage.removeItem('klaviyo_client_id');
-      // localStorage.removeItem('klaviyo_client_secret');
-
-      setIsAuthorized(false);
-      sdk.notifier.success('Successfully disconnected from Klaviyo');
     } catch (error) {
-      console.error('Error disconnecting from Klaviyo:', error);
-      setErrorMessage(
-        `Failed to disconnect from Klaviyo: ${
-          error instanceof Error ? error.message : 'Unknown error'
-        }`
-      );
-    } finally {
-      setConnecting(false);
+      console.error('Connection failed:', error);
+      sdk.notifier.error(error instanceof Error ? error.message : 'Failed to connect to Klaviyo');
     }
-  }, [config, sdk]);
+  };
 
-  // Configure app in Contentful
-  useEffect(() => {
-    const appSdk = sdk;
-    appSdk.app.onConfigure(() => {
-      console.log('onConfigure called, saving parameters:', {
-        clientId: config?.clientId ? `${config.clientId.substring(0, 5)}...` : 'Missing',
-        clientSecret: config?.clientSecret ? 'Present (hidden)' : 'Missing',
-        redirectUri: config?.redirectUri,
-      });
-
-      // Validate required parameters
-      if (!config?.clientId) {
-        appSdk.notifier.error('Klaviyo Client ID is required');
-        return false;
-      }
-
-      if (!config.clientSecret) {
-        appSdk.notifier.error('Klaviyo Client Secret is required');
-        return false;
-      }
-
-      if (!config.redirectUri) {
-        appSdk.notifier.error('Klaviyo Redirect URI is required');
-        return false;
-      }
-
-      return {
+  const handleDisconnect = async () => {
+    try {
+      setIsLoading(true);
+      sdk.app.onConfigure(() => ({
         parameters: {
           installation: {
-            klaviyoClientId: config.clientId,
-            klaviyoClientSecret: config.clientSecret,
-            klaviyoRedirectUri: config.redirectUri,
+            clientId: '',
+            clientSecret: '',
+            accessToken: '',
           },
         },
-        targetState: {
-          EditorInterface: {},
-        },
-      };
-    });
+      }));
+      setIsConnected(false);
+    } catch (error) {
+      console.error('Disconnection failed:', error);
+      sdk.notifier.error('Failed to disconnect from Klaviyo');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    appSdk.app.setReady();
-  }, [config]);
-
-  // Add message listener for OAuth callback completion
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      // Check if the message is from our OAuth callback
-      if (event.data && event.data.type === 'KLAVIYO_AUTH_COMPLETE') {
-        console.log('Received OAuth completion message:', event.data);
-
-        if (event.data.success) {
-          setIsAuthorized(true);
-          setConnecting(false);
-          setErrorMessage(null);
-          sdk.notifier.success('Successfully connected to Klaviyo!');
-        } else {
-          setConnecting(false);
-          setErrorMessage(`Authentication failed: ${event.data.error || 'Unknown error'}`);
-        }
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-
-    return () => {
-      window.removeEventListener('message', handleMessage);
-    };
-  }, [sdk]);
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    sdk.notifier.success('Copied to clipboard');
+  };
 
   return (
-    <Box maxWidth="768px" style={{ margin: '0 auto' }} padding="spacingL">
-      <Stack
-        flexDirection="column"
-        spacing="spacingS"
-        style={{
-          maxWidth: '768px',
-          margin: '0 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}>
-        <Box style={containerStyle}>
-          <Box style={sectionStyle}>
-            <Flex alignItems="flex-start" marginBottom="spacingS">
-              <Box style={stepIndicatorStyle}>1</Box>
-              <Heading>Create Klaviyo OAuth App</Heading>
-            </Flex>
-            <Paragraph>Before connecting, you need to create an OAuth app in Klaviyo:</Paragraph>
-            <ol style={{ marginLeft: '20px' }}>
-              <li>
-                Go to{' '}
+    <Box style={{ maxWidth: '800px', margin: '64px auto' }}>
+      <Box padding="spacingXl" style={{ border: '1px solid #E5EBED', borderRadius: '4px' }}>
+        <Stack spacing="spacingXl" flexDirection="column" alignItems="flex-start">
+          <Stack spacing="spacingM" flexDirection="column" alignItems="flex-start">
+            <Heading>Configure access</Heading>
+            <Text>Input your client ID and secret to connect your Klaviyo account.</Text>
+          </Stack>
+
+          <Form style={{ width: '100%' }}>
+            <Stack spacing="spacingXl" flexDirection="column" alignItems="flex-start">
+              <FormControl isRequired style={{ width: '100%', margin: '0' }}>
+                <FormControl.Label>Client ID</FormControl.Label>
+                <TextInput
+                  value={clientId}
+                  onChange={(e) => setClientId(e.target.value)}
+                  placeholder="Enter your client ID"
+                  style={{ width: '100%' }}
+                />
                 <TextLink
-                  href="https://www.klaviyo.com/manage-apps"
+                  style={{ marginTop: '8px' }}
+                  href="https://developers.klaviyo.com/en/docs/create_oauth_app"
                   target="_blank"
-                  rel="noopener noreferrer">
-                  Klaviyo Manage Apps
+                  rel="noopener noreferrer"
+                  icon={<ExternalLinkIcon />}>
+                  Learn how to create a public OAuth app in Klaviyo
                 </TextLink>
-              </li>
-              <li>Click "Create a Custom API OAuth App"</li>
-              <li>
-                Add the following Redirect URI:
-                <Box
-                  marginY="spacingXs"
-                  padding="spacingXs"
-                  style={{
-                    backgroundColor: '#f7f9fa',
-                    fontFamily: 'monospace',
-                    wordBreak: 'break-all',
-                    borderRadius: '4px',
-                  }}>
-                  {getProxyRedirectUri()}
-                </Box>
-              </li>
-              <li>
-                Select the following scopes:
-                <Box
-                  marginY="spacingXs"
-                  padding="spacingXs"
-                  style={{
-                    backgroundColor: '#f7f9fa',
-                    fontFamily: 'monospace',
-                    wordBreak: 'break-all',
-                    borderRadius: '4px',
-                  }}>
-                  accounts:read, metrics:read, profiles:read, profiles:write, lists:read,
-                  lists:write, templates:read, templates:write
-                </Box>
-              </li>
-              <li>Copy your Client ID and Client Secret to the fields below</li>
-            </ol>
-            <Box style={dividerStyle} />
-          </Box>
-
-          <Box style={sectionStyle}>
-            <Flex alignItems="flex-start" marginBottom="spacingS">
-              <Box style={stepIndicatorStyle}>2</Box>
-              <Heading>Configure access</Heading>
-            </Flex>
-            <Paragraph marginBottom="spacingS">
-              Enter your Klaviyo OAuth credentials to authenticate the connection between Contentful
-              and Klaviyo.
-            </Paragraph>
-
-            <Form style={{ marginTop: '1rem' }}>
-              <FormControl>
-                <FormControl.Label>Klaviyo OAuth Configuration</FormControl.Label>
-                <Flex flexDirection="column" gap="spacingM" style={{ marginTop: '0.5rem' }}>
-                  <FormControl>
-                    <FormControl.Label>Client ID</FormControl.Label>
-                    <TextInput
-                      value={config?.clientId || ''}
-                      onChange={(e) => {
-                        setConfig((prev) => (prev ? { ...prev, clientId: e.target.value } : null));
-                      }}
-                      placeholder="Enter your Klaviyo OAuth Client ID"
-                      width="full"
-                    />
-                  </FormControl>
-
-                  <FormControl>
-                    <FormControl.Label>Client Secret</FormControl.Label>
-                    <TextInput
-                      value={config?.clientSecret || ''}
-                      onChange={(e) => {
-                        setConfig((prev) =>
-                          prev ? { ...prev, clientSecret: e.target.value } : null
-                        );
-                      }}
-                      placeholder="Enter your Klaviyo OAuth Client Secret"
-                      type="password"
-                      width="full"
-                    />
-                  </FormControl>
-
-                  <FormControl>
-                    <FormControl.Label>Redirect URI</FormControl.Label>
-                    <TextInput
-                      value={config?.redirectUri || ''}
-                      onChange={(e) => {
-                        setConfig((prev) =>
-                          prev ? { ...prev, redirectUri: e.target.value } : null
-                        );
-                      }}
-                      placeholder="Enter the OAuth Redirect URI"
-                      width="full"
-                    />
-                    <FormControl.HelpText>
-                      This should match a redirect URI registered in your Klaviyo OAuth app
-                    </FormControl.HelpText>
-                  </FormControl>
-                </Flex>
               </FormControl>
 
-              <Box marginTop="spacingM">
-                <FormControl>
-                  <FormControl.Label>Connection Status</FormControl.Label>
-                  <Flex flexDirection="column" gap="spacingS" style={{ marginTop: '0.5rem' }}>
-                    {isAuthorized ? (
-                      <>
-                        <Paragraph>✅ Connected to Klaviyo</Paragraph>
-                        <Button
-                          variant="negative"
-                          onClick={handleDisconnect}
-                          isLoading={connecting}
-                          isDisabled={connecting}>
-                          Disconnect from Klaviyo
-                        </Button>
-                      </>
+              <FormControl isRequired style={{ width: '100%', margin: '0' }}>
+                <FormControl.Label>Client secret</FormControl.Label>
+                <TextInput
+                  type="password"
+                  value={clientSecret}
+                  onChange={(e) => setClientSecret(e.target.value)}
+                  placeholder="Enter your client secret"
+                  style={{ width: '100%' }}
+                />
+              </FormControl>
+
+              <Stack
+                spacing="spacingM"
+                flexDirection="column"
+                alignItems="flex-start"
+                style={{ width: '100%' }}>
+                <Text fontWeight="fontWeightMedium">Connection status</Text>
+                <Flex alignItems="center" gap="spacingM">
+                  <Button
+                    variant={isConnected ? (isHovered ? 'negative' : 'secondary') : 'secondary'}
+                    isLoading={isLoading}
+                    onClick={isConnected ? handleDisconnect : handleConnect}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}>
+                    {isConnected ? (
+                      isHovered ? (
+                        'Disconnect'
+                      ) : (
+                        <Flex alignItems="center" gap="spacingXs">
+                          Connected
+                          <CheckCircleIcon variant="positive" />
+                        </Flex>
+                      )
                     ) : (
-                      <>
-                        <Paragraph>❌ Not connected to Klaviyo</Paragraph>
-                        <Button
-                          variant="primary"
-                          onClick={handleConnect}
-                          isLoading={connecting}
-                          isDisabled={
-                            connecting ||
-                            !config ||
-                            !config.clientId ||
-                            !config.clientSecret ||
-                            !config.redirectUri
-                          }>
-                          Connect to Klaviyo
-                        </Button>
-                        {(!config ||
-                          !config.clientId ||
-                          !config.clientSecret ||
-                          !config.redirectUri) && (
-                          <FormControl.HelpText>
-                            Please fill in all OAuth credentials above and save the configuration
-                            before connecting.
-                          </FormControl.HelpText>
-                        )}
-                        {authUrl && (
-                          <Box marginTop="spacingS">
-                            <Paragraph fontColor="gray700" fontSize="fontSizeS">
-                              If the popup was blocked, you can manually authorize by clicking this
-                              link:
-                            </Paragraph>
-                            <TextLink href={authUrl} target="_blank" rel="noopener noreferrer">
-                              Authorize in Klaviyo
-                            </TextLink>
-                            <Paragraph
-                              fontColor="gray700"
-                              fontSize="fontSizeS"
-                              marginTop="spacingXs">
-                              After authorization, return to this window and refresh the page to
-                              check connection status.
-                            </Paragraph>
-                          </Box>
-                        )}
-                      </>
+                      'Connect to Klaviyo'
                     )}
-                  </Flex>
-                </FormControl>
-              </Box>
-            </Form>
-            <Box style={dividerStyle} />
-          </Box>
+                  </Button>
+                  <Text>Status: {isConnected ? 'connected' : 'disconnected'}</Text>
+                </Flex>
+              </Stack>
 
-          <Box style={sectionStyle}>
-            <Flex alignItems="flex-start" marginBottom="spacingS">
-              <Box style={stepIndicatorStyle}>3</Box>
-              <Heading>Set up rules</Heading>
-            </Flex>
-            <Paragraph>
-              Configure how content should be synced from Contentful to Klaviyo. Define field
-              mappings and content transformation rules.
-            </Paragraph>
-            {mappings.length > 0 ? (
-              <Box marginTop="spacingS">
-                <Text fontWeight="fontWeightMedium">Current mappings: {mappings.length}</Text>
-                <Text>Your content mappings are configured and ready to use.</Text>
-              </Box>
-            ) : (
-              <Box marginTop="spacingS">
-                <Text>
-                  No content mappings configured yet. Add mappings from the content entry sidebar.
+              <Stack
+                spacing="spacingM"
+                flexDirection="column"
+                alignItems="flex-start"
+                style={{ width: '100%' }}>
+                <Text fontWeight="fontWeightMedium">Redirect URI</Text>
+                <Flex gap="spacingS" style={{ width: '100%' }}>
+                  <TextInput value={redirectUri} isReadOnly isDisabled style={{ width: '100%' }} />
+                  <Button
+                    variant="secondary"
+                    onClick={() => copyToClipboard(redirectUri)}
+                    startIcon={<CopyIcon />}
+                  />
+                </Flex>
+                <Text fontColor="gray500">
+                  Enter this in your Klaviyo OAuth app settings. It cannot be changed.
                 </Text>
+              </Stack>
+
+              {/* Content Types Section */}
+              <Box style={containerStyle}>
+                <Stack spacing="spacingM" flexDirection="column" alignItems="flex-start">
+                  <Heading>Content Types</Heading>
+                  <Paragraph>
+                    Select which content types should have the Klaviyo sidebar integration
+                  </Paragraph>
+
+                  <Stack spacing="spacingS" flexDirection="column" alignItems="flex-start">
+                    <FormControl style={{ width: '100%' }}>
+                      <FormControl.Label>Search and select content types</FormControl.Label>
+                      <Autocomplete
+                        items={filteredContentTypes.map((ct) => ({
+                          label: ct.name,
+                          description: ct.sys.id,
+                          value: ct.sys.id,
+                        }))}
+                        onInputValueChange={setSearchQuery}
+                        onSelectItem={(item) => {
+                          if (item && !selectedContentTypes.includes(item.value)) {
+                            setSelectedContentTypes([...selectedContentTypes, item.value]);
+                          }
+                          setSearchQuery('');
+                        }}
+                        listWidth="full"
+                        placeholder="Search for content types..."
+                        isDisabled={false}
+                        renderItem={(item) => (
+                          <Flex flexDirection="column">
+                            <Text>{item.label}</Text>
+                            <Text fontColor="gray500" fontSize="fontSizeS">
+                              {item.description}
+                            </Text>
+                          </Flex>
+                        )}
+                        itemToString={(item) => item?.label || ''}
+                      />
+                    </FormControl>
+
+                    {selectedContentTypes.length > 0 && (
+                      <Box marginTop="spacingM">
+                        <Text fontWeight="fontWeightMedium" marginBottom="spacingS">
+                          Selected Content Types
+                        </Text>
+                        <Flex flexWrap="wrap" gap="spacingXs">
+                          {selectedContentTypes.map((typeId) => {
+                            const contentType = contentTypes.find((ct) => ct.sys.id === typeId);
+                            return (
+                              <Pill
+                                key={typeId}
+                                label={contentType?.name || typeId}
+                                onClose={() => {
+                                  setSelectedContentTypes(
+                                    selectedContentTypes.filter((id) => id !== typeId)
+                                  );
+                                }}
+                              />
+                            );
+                          })}
+                        </Flex>
+                      </Box>
+                    )}
+                  </Stack>
+                </Stack>
               </Box>
-            )}
-            <Box style={dividerStyle} />
-          </Box>
-
-          <Box style={sectionStyle}>
-            <Flex alignItems="flex-start" marginBottom="spacingS">
-              <Heading>Disclaimer</Heading>
-            </Flex>
-            <Paragraph>
-              This app syncs content from Contentful to Klaviyo through secure API connections. Make
-              sure you have the necessary permissions in both Contentful and Klaviyo before using
-              this integration.
-            </Paragraph>
-            <Box style={dividerStyle} />
-          </Box>
-
-          <Box style={sectionStyle}>
-            <Flex alignItems="flex-start" marginBottom="spacingS">
-              <Heading>Additional section</Heading>
-            </Flex>
-            <Paragraph>
-              Need more help? Check out our documentation or contact support for assistance with
-              setting up and using the Klaviyo integration.
-            </Paragraph>
-          </Box>
-        </Box>
-
-        <Box style={sectionStyle}>
-          <Flex alignItems="flex-start" marginBottom="spacingS">
-            <Box style={stepIndicatorStyle}>4</Box>
-            <Heading>Connection Status & Debugging</Heading>
-          </Flex>
-          <Paragraph>Use these options to check or troubleshoot your Klaviyo connection.</Paragraph>
-
-          <Flex marginTop="spacingM" gap="spacingM">
-            <Button
-              variant="secondary"
-              onClick={async () => {
-                try {
-                  setConnecting(true);
-                  setErrorMessage(null);
-                  const result = await checkOAuthTokens();
-
-                  if (result.hasTokens && !result.isExpired && result.validationResult.success) {
-                    sdk.notifier.success('Connection to Klaviyo is active and working correctly');
-                    setIsAuthorized(true);
-                  } else if (result.hasTokens && result.isExpired) {
-                    sdk.notifier.error(`Connection expired. Please reconnect to Klaviyo.`);
-                    setIsAuthorized(false);
-                  } else if (!result.hasTokens) {
-                    sdk.notifier.error('Not connected to Klaviyo. Please connect first.');
-                    setIsAuthorized(false);
-                  } else {
-                    sdk.notifier.error(
-                      `Connection test failed: ${result.validationResult.error || 'Unknown error'}`
-                    );
-                    setIsAuthorized(false);
-                  }
-                } catch (error) {
-                  console.error('Error testing connection:', error);
-                  setErrorMessage(
-                    `Connection test failed: ${
-                      error instanceof Error ? error.message : 'Unknown error'
-                    }`
-                  );
-                } finally {
-                  setConnecting(false);
-                }
-              }}
-              isDisabled={connecting}>
-              Test Connection
-            </Button>
-
-            <Button
-              variant="negative"
-              onClick={() => {
-                clearOAuthTokens();
-                setIsAuthorized(false);
-                sdk.notifier.success(
-                  'OAuth tokens cleared. You will need to reconnect to Klaviyo.'
-                );
-              }}
-              isDisabled={connecting || !isAuthorized}>
-              Reset Connection
-            </Button>
-          </Flex>
-
-          <Box style={dividerStyle} />
-        </Box>
-
-        <Box marginTop="spacingM">
-          <Text
-            marginTop="spacingS"
-            fontColor="gray600"
-            fontSize="fontSizeS"
-            style={{ textAlign: 'center' }}>
-            {errorMessage}
-          </Text>
-        </Box>
-      </Stack>
+            </Stack>
+          </Form>
+        </Stack>
+      </Box>
     </Box>
   );
 };

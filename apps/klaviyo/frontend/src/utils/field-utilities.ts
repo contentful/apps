@@ -32,6 +32,7 @@ export const getFieldDetails = async (
       type: fieldDef.type,
       value: fieldValue,
       isAsset: isAsset,
+      contentTypeId: sdk.ids.contentType,
     };
 
     // Handle asset fields differently
@@ -81,6 +82,7 @@ export const getFieldDetails = async (
       type: 'Unknown',
       value: null,
       isAsset: isAsset,
+      contentTypeId: sdk.ids.contentType,
     };
   }
 };

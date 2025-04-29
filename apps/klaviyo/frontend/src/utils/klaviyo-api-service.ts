@@ -15,6 +15,7 @@ export interface FieldData {
     fileName: string;
     contentType: string;
   }>;
+  contentTypeId?: string;
 }
 
 /**
@@ -25,6 +26,19 @@ export interface KlaviyoConfig {
   privateKey?: string;
   listId?: string;
   endpoint?: string;
+}
+
+/**
+ * Interface for tracking sync status of entries
+ */
+export interface SyncStatus {
+  entryId: string;
+  contentTypeId: string;
+  contentTypeName?: string;
+  lastSynced: number; // timestamp
+  fieldsUpdatedAt?: Record<string, number>; // fieldId -> last update timestamp
+  needsSync: boolean;
+  syncCompleted: boolean;
 }
 
 /**
@@ -95,12 +109,31 @@ export const sendToKlaviyo = async (
 
 // Import the KlaviyoService and OAuth configuration
 import { KlaviyoService } from '../services/klaviyo';
-import { FieldMapping, KlaviyoOAuthConfig } from '../config/klaviyo';
+import { KlaviyoOAuthConfig } from '../config/klaviyo';
+import { OAuthService } from '../services/oauth';
+
+// Define the FieldMapping interface to match the service's requirements
+interface FieldMapping {
+  contentfulFieldId: string;
+  fieldType: 'text' | 'image' | 'entry' | 'reference-array';
+  klaviyoBlockName: string;
+  contentTypeId?: string;
+  fields?: any;
+  name: string;
+  type: string;
+  severity: string;
+  value: any;
+}
 
 /**
  * Class for syncing Contentful content to Klaviyo
  */
 export class SyncContent {
+  entry: any;
+  constructor(entry: any) {
+    console.log('SyncContent constructor:', entry);
+    this.entry = entry;
+  }
   /**
    * Syncs content from Contentful to Klaviyo
    * @param sdk The Contentful SDK
@@ -114,62 +147,116 @@ export class SyncContent {
     try {
       console.log('Starting content sync with mappings:', mappings);
 
-      // Check if we have a valid OAuth token
-      const accessToken = localStorage.getItem('klaviyo_access_token');
-      const refreshToken = localStorage.getItem('klaviyo_refresh_token');
-      const tokenExpiresAt = localStorage.getItem('klaviyo_token_expires_at');
+      const clientId = sdk.parameters.installation.installation.clientId;
+      const clientSecret = sdk.parameters.installation.installation.clientSecret;
+      const redirectUri =
+        sdk.parameters.installation.klaviyoRedirectUri ||
+        `${window.location.origin}:3001/auth/callback`;
 
-      if (!accessToken || !refreshToken) {
-        // If we need to authenticate first, show a message to the user
-        sdk.notifier.error(
-          'Please connect to Klaviyo first. Go to the app configuration and click "Connect to Klaviyo".'
-        );
+      console.log('Client ID:', clientId, sdk.parameters.installation);
+      console.log('Client Secret:', clientSecret);
+      console.log('Redirect URI:', redirectUri);
+      console.log('Entry:', this.entry, sdk.entry);
+      // Check if we have a valid OAuth token
+      const oauthService = new OAuthService({
+        clientId,
+        clientSecret,
+        redirectUri,
+      });
+      const accessToken = await oauthService.getAccessToken();
+      if (!accessToken) {
+        sdk.notifier.error('Please connect to Klaviyo first...');
         throw new Error('Authentication required: No access token available');
       }
-
-      // Check if token is expired
-      if (tokenExpiresAt && parseInt(tokenExpiresAt, 10) < Date.now()) {
-        sdk.notifier.error(
-          'Your Klaviyo authentication has expired. Please reconnect in the app configuration.'
-        );
-        throw new Error('Authentication expired: Token has expired');
-      }
-
-      console.log('Using OAuth token for authentication');
-
-      // Get installation parameters just for the redirect URI (needed by the service)
-      const params = sdk.parameters?.installation || {};
-      const redirectUri =
-        params.klaviyoRedirectUri || `${window.location.origin}:3001/auth/callback`;
 
       // Initialize the KlaviyoService with OAuth configuration
       // We don't need actual client ID and secret for API calls once we have a token
       const klaviyoService = new KlaviyoService({
-        clientId: 'using-existing-token', // Not used for API calls
-        clientSecret: 'using-existing-token', // Not used for API calls
-        redirectUri: redirectUri,
+        clientId,
+        clientSecret,
+        redirectUri,
         accessToken: accessToken,
-        refreshToken: refreshToken,
-        tokenExpiresAt: parseInt(tokenExpiresAt || '0', 10),
+        refreshToken: localStorage.getItem('klaviyo_refresh_token') || undefined,
+        tokenExpiresAt: parseInt(localStorage.getItem('klaviyo_token_expires_at') || '0', 10),
       });
 
-      // Get entry data
-      const entry = sdk.entry;
+      // Set the tokens in the service
+      klaviyoService.setTokens({
+        access_token: accessToken,
+        refresh_token: localStorage.getItem('klaviyo_refresh_token') || '',
+        token_type: 'Bearer',
+        expires_in:
+          parseInt(localStorage.getItem('klaviyo_token_expires_at') || '0', 10) - Date.now(),
+      });
+
+      // Get entry data and content type ID safely
+      console.log('Entry:', this.entry, sdk);
+      // Get content type ID safely - use multiple approaches to ensure we get a value
+      let contentTypeId;
+
+      // Try to get it from entry.sys.contentType (if it exists)
+      if (
+        this.entry &&
+        this.entry.sys &&
+        this.entry.sys.contentType &&
+        this.entry.sys.contentType.sys
+      ) {
+        contentTypeId = this.entry.sys.contentType.sys.id;
+      }
+      // Try to get it from sdk.ids
+      else if (sdk.ids && sdk.ids.contentType) {
+        contentTypeId = sdk.ids.contentType;
+      }
+      // Log a warning but continue with the content type ID
+      else {
+        console.warn('Could not determine content type ID from entry or SDK, using "unknown"');
+        contentTypeId = 'unknown';
+      }
+
+      console.log('Using content type ID:', contentTypeId, this.entry);
 
       // Convert to FieldMapping array for the KlaviyoService
       const fieldMappings: FieldMapping[] = mappings.map((mapping) => ({
         contentfulFieldId: mapping.contentfulFieldId,
         klaviyoBlockName: mapping.klaviyoBlockName,
-        fieldType: mapping.fieldType as any,
+        fieldType: mapping.fieldType as 'text' | 'image' | 'entry' | 'reference-array',
+        contentTypeId,
+        fields: this.entry.fields,
+        name: this.entry.fields[mapping.contentfulFieldId].name || '',
+        type: this.entry.fields[mapping.contentfulFieldId].type || '',
+        severity: this.entry.fields[mapping.contentfulFieldId].severity || '',
+        value: this.entry.fields[mapping.contentfulFieldId].value || '',
       }));
 
       // Call the KlaviyoService to sync content
-      const result = await klaviyoService.syncContent(fieldMappings, entry);
+      const result = await klaviyoService.syncContent(fieldMappings, this.entry);
 
       console.log('Sync completed successfully:', result);
 
       // Notify the user
       sdk.notifier.success('Content successfully synced to Klaviyo');
+
+      // Create a field update timestamp map
+      const fieldUpdates: Record<string, number> = {};
+
+      // For each mapped field, get its last update time
+      for (const mapping of mappings) {
+        // Get field last update time, defaulting to current time if not available
+        try {
+          const field = this.entry.fields[mapping.contentfulFieldId];
+          const fieldSys = await field?.getSys();
+          fieldUpdates[mapping.contentfulFieldId] = fieldSys?.updatedAt || Date.now();
+        } catch (fieldError) {
+          console.warn(
+            `Couldn't get update time for field ${mapping.contentfulFieldId}:`,
+            fieldError
+          );
+          fieldUpdates[mapping.contentfulFieldId] = Date.now();
+        }
+      }
+
+      // Update sync status after successful sync
+      this.updateSyncStatus(contentTypeId, sdk.contentType?.name || '', true);
 
       return result;
     } catch (error: any) {
@@ -198,4 +285,222 @@ export class SyncContent {
       throw error;
     }
   }
+
+  // Add a new method to update sync status
+  private updateSyncStatus(contentTypeId: string, contentTypeName: string, synced: boolean = true) {
+    try {
+      // Get current sync statuses
+      const storageKey = 'klaviyo_sync_status';
+      const existingStatusesStr = localStorage.getItem(storageKey);
+      const existingStatuses = existingStatusesStr ? JSON.parse(existingStatusesStr) : [];
+
+      // Find if we have a status for this entry
+      const entryIndex = existingStatuses.findIndex(
+        (status: any) => status.entryId === `${contentTypeId}-${contentTypeName}`
+      );
+
+      // Current timestamp
+      const now = new Date().toISOString();
+
+      if (entryIndex >= 0) {
+        // Update existing status
+        existingStatuses[entryIndex] = {
+          ...existingStatuses[entryIndex],
+          lastSynced: now,
+          needsSync: !synced,
+          syncCompleted: !synced,
+        };
+      } else {
+        // Add new status
+        existingStatuses.push({
+          entryId: `${contentTypeId}-${contentTypeName}`,
+          contentTypeId,
+          contentTypeName,
+          lastSynced: now,
+          needsSync: !synced,
+          syncCompleted: !synced,
+        });
+      }
+
+      // Save updated statuses
+      localStorage.setItem(storageKey, JSON.stringify(existingStatuses));
+
+      // Dispatch event to notify other components
+      window.dispatchEvent(
+        new CustomEvent('klaviyo-sync-completed', {
+          detail: { entryId: `${contentTypeId}-${contentTypeName}`, contentTypeId },
+        })
+      );
+    } catch (error) {
+      console.error('Error updating sync status:', error);
+    }
+  }
 }
+
+// Add this function to manage sync status
+export const updateSyncStatus = (
+  entryId: string,
+  contentTypeId: string,
+  fields: Record<string, number> = {}
+): void => {
+  try {
+    const storageKey = 'klaviyo_sync_status';
+    const existingStatusesStr = localStorage.getItem(storageKey);
+    const existingStatuses = existingStatusesStr ? JSON.parse(existingStatusesStr) : [];
+
+    const now = Date.now();
+    const statusIndex = existingStatuses.findIndex(
+      (status: SyncStatus) => status.entryId === entryId && status.contentTypeId === contentTypeId
+    );
+
+    if (statusIndex >= 0) {
+      // Update existing status
+      existingStatuses[statusIndex] = {
+        ...existingStatuses[statusIndex],
+        lastSynced: now,
+        fieldsUpdatedAt: { ...existingStatuses[statusIndex].fieldsUpdatedAt, ...fields },
+        needsSync: false,
+        syncCompleted: true,
+      };
+    } else {
+      // Add new status
+      existingStatuses.push({
+        entryId,
+        contentTypeId,
+        lastSynced: now,
+        fieldsUpdatedAt: fields,
+        needsSync: false,
+        syncCompleted: true,
+      });
+    }
+
+    localStorage.setItem(storageKey, JSON.stringify(existingStatuses));
+
+    // Dispatch an event to notify components of the sync completion
+    window.dispatchEvent(
+      new CustomEvent('klaviyo-sync-completed', {
+        detail: { entryId, contentTypeId },
+      })
+    );
+  } catch (error) {
+    console.error('Error updating sync status:', error);
+  }
+};
+
+// Add this function to check if an entry needs syncing
+export const checkNeedsSync = (
+  entryId: string,
+  contentTypeId: string,
+  fieldsUpdatedAt: Record<string, number>
+): boolean => {
+  try {
+    // Get existing sync statuses
+    const storageKey = 'klaviyo_sync_status';
+    const existingStatusesJson = localStorage.getItem(storageKey);
+    const existingStatuses: SyncStatus[] = existingStatusesJson
+      ? JSON.parse(existingStatusesJson)
+      : [];
+
+    // Find this entry's status
+    const existingStatus = existingStatuses.find(
+      (status) => status.entryId === entryId && status.contentTypeId === contentTypeId
+    );
+
+    if (!existingStatus) {
+      // Never synced before, so it needs sync
+      return true;
+    }
+
+    // Check if any fields have been updated since last sync
+    let needsSync = false;
+
+    for (const [fieldId, updatedAt] of Object.entries(fieldsUpdatedAt)) {
+      // If this field has been updated since last sync
+      if (updatedAt > existingStatus.lastSynced) {
+        needsSync = true;
+        break;
+      }
+    }
+
+    // Update the status if needed
+    if (needsSync) {
+      const statuses = [...existingStatuses];
+      const statusIndex = statuses.findIndex(
+        (s) => s.entryId === entryId && s.contentTypeId === contentTypeId
+      );
+
+      if (statusIndex >= 0) {
+        statuses[statusIndex].needsSync = true;
+        localStorage.setItem(storageKey, JSON.stringify(statuses));
+      }
+    }
+
+    return needsSync;
+  } catch (error) {
+    console.error('Error checking sync status:', error);
+    return true; // Default to needs sync if there's an error
+  }
+};
+
+// Add this function to get all sync statuses
+export const getAllSyncStatuses = (forceRefresh: boolean = false): SyncStatus[] => {
+  try {
+    const storageKey = 'klaviyo_sync_status';
+    const statusesStr = localStorage.getItem(storageKey);
+
+    // Clear cache if force refresh is requested
+    if (forceRefresh) {
+      localStorage.removeItem(`${storageKey}_cache`);
+    }
+
+    if (!statusesStr) return [];
+    return JSON.parse(statusesStr);
+  } catch (error) {
+    console.error('Error getting sync statuses:', error);
+    return [];
+  }
+};
+
+// Add this function to mark an entry as needing sync
+export const markEntryForSync = (
+  entryId: string,
+  contentTypeId: string,
+  contentTypeName?: string
+): void => {
+  try {
+    // Get existing sync statuses
+    const storageKey = 'klaviyo_sync_status';
+    const existingStatusesJson = localStorage.getItem(storageKey);
+    const existingStatuses: SyncStatus[] = existingStatusesJson
+      ? JSON.parse(existingStatusesJson)
+      : [];
+
+    // Find this entry's status
+    const existingIndex = existingStatuses.findIndex(
+      (status) => status.entryId === entryId && status.contentTypeId === contentTypeId
+    );
+
+    if (existingIndex >= 0) {
+      // Update existing status
+      existingStatuses[existingIndex].needsSync = true;
+      if (contentTypeName) {
+        existingStatuses[existingIndex].contentTypeName = contentTypeName;
+      }
+    } else {
+      // Add new status
+      existingStatuses.push({
+        entryId,
+        contentTypeId,
+        contentTypeName,
+        lastSynced: 0, // Never synced
+        needsSync: true,
+        syncCompleted: false,
+      });
+    }
+
+    // Save back to localStorage
+    localStorage.setItem(storageKey, JSON.stringify(existingStatuses));
+  } catch (error) {
+    console.error('Error marking entry for sync:', error);
+  }
+};

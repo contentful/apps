@@ -1,74 +1,95 @@
-import { SidebarExtensionSDK, ConfigAppSDK, locations } from '@contentful/app-sdk';
+import { BaseExtensionSDK } from '@contentful/app-sdk';
+import { FieldData } from './klaviyo-api-service';
 
-// Type for SDK used in persistence functions
-type SDKType = SidebarExtensionSDK | ConfigAppSDK;
+// Use a consistent storage key across all components
+export const STORAGE_KEY = 'klaviyo_field_mappings';
 
 /**
- * Get sync data from app state
- * @param sdk The Contentful SDK instance
- * @returns The saved field mappings or null if not found
+ * Get sync data from localStorage
  */
-export const getSyncData = async (sdk: SDKType): Promise<any> => {
+export const getSyncData = async (sdk: BaseExtensionSDK): Promise<FieldData[]> => {
   try {
-    // Handle different SDK types
-    if (sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)) {
-      // For sidebar, we use the entry field metadata
-      const sidebarSdk = sdk as SidebarExtensionSDK;
-
-      // Check if we can access the entry metadata
+    // Always use localStorage for sharing between components
+    const localData = localStorage.getItem(STORAGE_KEY);
+    if (localData) {
       try {
-        // Get app state from session storage as a workaround
-        const storageKey = `klaviyo-mappings-${sidebarSdk.ids.entry}`;
-        const storageData = sessionStorage.getItem(storageKey);
-        if (storageData) {
-          return JSON.parse(storageData);
-        }
-      } catch (storageError) {
-        console.warn('Failed to access session storage:', storageError);
+        const parsedData = JSON.parse(localData);
+        console.log('[persistence] Retrieved mappings from localStorage:', parsedData);
+        return parsedData;
+      } catch (parseError) {
+        console.error('[persistence] Error parsing localStorage data:', parseError);
+        return [];
       }
-
-      // Fallback to global state if available
-      return [];
-    } else if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-      // For config screen, get installation parameters
-      const configSdk = sdk as ConfigAppSDK;
-      const params = configSdk.parameters.installation;
-      return params?.mappings || [];
     }
+
+    // If localStorage is empty, return empty array
+    console.log('[persistence] No mappings found in localStorage');
     return [];
   } catch (error) {
-    console.error('Error getting sync data:', error);
+    console.error('[persistence] Error retrieving sync data:', error);
     return [];
   }
 };
 
 /**
- * Update sync data in app state
- * @param sdk The Contentful SDK instance
- * @param data The data to save
- * @returns Promise resolving when data is saved
+ * Update sync data in localStorage and broadcast changes
  */
-export const updateSyncData = async (sdk: SDKType, data: any): Promise<void> => {
+export const updateSyncData = async (
+  sdk: BaseExtensionSDK,
+  data: FieldData[]
+): Promise<boolean> => {
   try {
-    // Handle different SDK types
-    if (sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)) {
-      // For sidebar, store the data in session storage
-      const sidebarSdk = sdk as SidebarExtensionSDK;
+    console.log('[persistence] Updating field mappings:', data);
 
-      // Use session storage as a workaround
-      try {
-        const storageKey = `klaviyo-mappings-${sidebarSdk.ids.entry}`;
-        sessionStorage.setItem(storageKey, JSON.stringify(data));
-      } catch (storageError) {
-        console.warn('Failed to save to session storage:', storageError);
-      }
-    } else if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-      // For config screen, we don't immediately update installation parameters
-      // They will be saved when the user clicks Save in the config screen
-      console.log('Config data will be saved on app configuration save', data);
+    // Store in localStorage for immediate access across components
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+    // Broadcast a message event for other components to listen for
+    try {
+      window.postMessage(
+        {
+          type: 'updateFieldMappings',
+          fieldMappings: data,
+        },
+        '*'
+      );
+      console.log('[persistence] Broadcast updateFieldMappings event');
+    } catch (broadcastError) {
+      console.warn('[persistence] Error broadcasting field mapping update:', broadcastError);
     }
+
+    // Also dispatch a storage event for cross-tab updates
+    try {
+      // Create and dispatch a storage event for other tabs
+      const storageEvent = new StorageEvent('storage', {
+        key: STORAGE_KEY,
+        newValue: JSON.stringify(data),
+        storageArea: localStorage,
+      });
+      window.dispatchEvent(storageEvent);
+      console.log('[persistence] Dispatched storage event');
+    } catch (storageError) {
+      console.warn('[persistence] Error dispatching storage event:', storageError);
+    }
+
+    return true;
   } catch (error) {
-    console.error('Error updating sync data:', error);
-    throw error;
+    console.error('[persistence] Error updating sync data:', error);
+    return false;
   }
+};
+
+/**
+ * Manual function to directly check localStorage
+ */
+export const getLocalMappings = (): FieldData[] => {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (data) {
+      return JSON.parse(data);
+    }
+  } catch (e) {
+    console.error('[persistence] Error getting local mappings:', e);
+  }
+  return [];
 };

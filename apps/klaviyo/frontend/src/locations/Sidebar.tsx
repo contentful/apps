@@ -1,15 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ConfigAppSDK, locations, SidebarExtensionSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import { Button, Flex, Text } from '@contentful/f36-components';
-import { CloseIcon } from '@contentful/f36-icons';
-import { FieldData, SyncContent } from '../utils/klaviyo-api-service';
+import { useSDK } from '../hooks/useSDK';
+import { Button, Flex, Text, Note } from '@contentful/f36-components';
+import { FieldData, markEntryForSync } from '../utils/klaviyo-api-service';
 import { getSyncData, updateSyncData } from '../utils/persistence-service';
 import { getFieldDetails } from '../utils/field-utilities';
 
 // Types
 type SDKType = SidebarExtensionSDK | ConfigAppSDK;
-type SelectedField = { id: string; isAsset: boolean; source?: string };
 
 // Component to determine if we're in configuration or sidebar mode
 export const Sidebar = () => {
@@ -18,6 +16,7 @@ export const Sidebar = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
   // Determine current component context (sidebar or config)
   const getCurrentComponent = () => {
@@ -32,6 +31,8 @@ export const Sidebar = () => {
         setShowSuccess={setShowSuccess}
         buttonDisabled={buttonDisabled}
         setButtonDisabled={setButtonDisabled}
+        syncMessage={syncMessage}
+        setSyncMessage={setSyncMessage}
       />
     ) : (
       <ConfigComponent
@@ -47,18 +48,36 @@ export const Sidebar = () => {
   useEffect(() => {
     const loadMappings = async () => {
       try {
+        console.log('[Sidebar] Loading field mappings...');
         const savedMappings = await getSyncData(sdk);
-        if (savedMappings && Array.isArray(savedMappings)) {
+        if (savedMappings && Array.isArray(savedMappings) && savedMappings.length > 0) {
+          console.log('[Sidebar] Loaded mappings:', savedMappings);
           setMappings(savedMappings);
+        } else {
+          console.log('[Sidebar] No existing mappings found');
         }
       } catch (error) {
-        console.error('Error loading mappings:', error);
+        console.error('[Sidebar] Error loading mappings:', error);
       } finally {
         setLoading(false);
       }
     };
 
     loadMappings();
+
+    // Also listen for storage events to update in real-time across tabs
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'klaviyo_field_mappings') {
+        console.log('[Sidebar] Storage changed, reloading mappings');
+        loadMappings();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [sdk]);
 
   return getCurrentComponent();
@@ -112,8 +131,7 @@ const SidebarComponent = ({
   setMappings,
   showSuccess,
   setShowSuccess,
-  buttonDisabled,
-  setButtonDisabled,
+  syncMessage,
 }: {
   sdk: SidebarExtensionSDK;
   mappings: FieldData[];
@@ -122,12 +140,16 @@ const SidebarComponent = ({
   setShowSuccess: React.Dispatch<React.SetStateAction<boolean>>;
   buttonDisabled: boolean;
   setButtonDisabled: React.Dispatch<React.SetStateAction<boolean>>;
+  syncMessage: string | null;
+  setSyncMessage: React.Dispatch<React.SetStateAction<string | null>>;
 }) => {
-  // Handle field selection and mapping generation
-  const handleGenerateClick = useCallback(async () => {
+  // Handle field selection using Contentful's dialog
+  const handleConfigureClick = useCallback(async () => {
     if (!sdk.dialogs) return;
 
     try {
+      console.log('[Sidebar] Opening field select dialog...');
+
       // Get all fields from the content type
       const contentType = await sdk.space.getContentType(sdk.ids.contentType);
 
@@ -145,64 +167,126 @@ const SidebarComponent = ({
           type: field.type,
         }));
 
-      // Open dialog to select fields
-      const selectedFields = (await sdk.dialogs.openCurrentApp({
-        title: 'Select fields',
-        width: 'medium',
-        parameters: { fields: validFields },
-        minHeight: 300,
-      })) as SelectedField[];
+      // Pre-select already mapped fields
+      const preSelectedFields = mappings.map((mapping) => mapping.id);
 
-      if (!selectedFields || !Array.isArray(selectedFields) || selectedFields.length === 0) {
-        return;
+      // Prepare field selection data
+      const dialogOptions = {
+        title: 'Configure & Sync to Klaviyo',
+        width: 'medium' as 'medium',
+        minHeight: 400,
+        parameters: {
+          currentEntry: JSON.stringify(sdk.entry),
+          fields: validFields,
+          preSelectedFields,
+          contentTypeId: sdk.ids.contentType,
+          contentTypeName: sdk.contentType.name,
+          showSyncButton: true,
+        },
+      };
+
+      // Open dialog to select fields
+      const result = await sdk.dialogs.openCurrentApp(dialogOptions);
+
+      if (!result) {
+        console.log('[Sidebar] Dialog closed without result');
+        return; // User cancelled
       }
 
-      // Transform selected fields into FieldData format
-      const newMappings = await Promise.all(
-        selectedFields.map(async (field) => {
-          const details = await getFieldDetails(field.id, field.isAsset, sdk);
-          return details;
-        })
-      );
+      console.log('[Sidebar] Dialog result:', result);
 
-      // Update state and persistence
-      setMappings(newMappings);
-      await updateSyncData(sdk, newMappings);
+      // Check if the dialog was closed with mappings
+      if (result.mappings && Array.isArray(result.mappings)) {
+        console.log('[Sidebar] Using mappings from dialog result');
+
+        // Update our state with the mappings from the dialog
+        setMappings(result.mappings);
+
+        // Also update the mappings in localStorage directly
+        localStorage.setItem('klaviyo_field_mappings', JSON.stringify(result.mappings));
+
+        // And notify any other components
+        window.postMessage(
+          {
+            type: 'updateFieldMappings',
+            fieldMappings: result.mappings,
+          },
+          '*'
+        );
+      }
+      // Check if we got field selections or sync result
+      else if (result.action === 'sync') {
+        // The dialog performed the sync directly
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
+      } else if (result.selectedFields && Array.isArray(result.selectedFields)) {
+        // Transform selected fields into FieldData format
+        const newMappings = await Promise.all(
+          result.selectedFields.map(async (fieldId: string) => {
+            const details = await getFieldDetails(fieldId, false, sdk);
+            return {
+              ...details,
+              contentTypeId: sdk.ids.contentType,
+            };
+          })
+        );
+
+        // Update state and persistence
+        setMappings(newMappings);
+
+        // Save to localStorage directly for immediate sharing
+        localStorage.setItem('klaviyo_field_mappings', JSON.stringify(newMappings));
+
+        // Also update via the persistence service
+        await updateSyncData(sdk, newMappings);
+
+        // Notify other components about the update
+        window.postMessage(
+          {
+            type: 'updateFieldMappings',
+            fieldMappings: newMappings,
+          },
+          '*'
+        );
+      }
     } catch (error) {
-      console.error('Error generating mappings:', error);
+      console.error('[Sidebar] Error in configure dialog:', error);
     }
-  }, [sdk, setMappings]);
+  }, [sdk, mappings, setMappings, setShowSuccess]);
 
-  // Handle removing a field mapping
-  const handleRemoveMapping = useCallback(
-    async (indexToRemove: number) => {
-      const updatedMappings = mappings.filter((_, index) => index !== indexToRemove);
-      setMappings(updatedMappings);
-      await updateSyncData(sdk, updatedMappings);
-    },
-    [sdk, mappings, setMappings]
-  );
+  // Field change listeners - keep this code
+  useEffect(() => {
+    const fieldChangeHandlers: (() => void)[] = [];
 
-  // Handle content synchronization
-  const handleSyncClick = useCallback(async () => {
-    setButtonDisabled(true);
-    try {
-      const syncContent = new SyncContent();
-      // Convert FieldData[] to the expected mapping format
-      const formattedMappings = mappings.map((mapping) => ({
-        contentfulFieldId: mapping.id,
-        klaviyoBlockName: mapping.name,
-        fieldType: mapping.isAsset ? 'image' : 'text',
-      }));
-      await syncContent.syncContent(sdk, formattedMappings);
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
-    } catch (error) {
-      console.error('Error syncing content:', error);
-    } finally {
-      setButtonDisabled(false);
+    // For each mapped field, add a change listener
+    for (const mapping of mappings) {
+      try {
+        const field = sdk.entry.fields[mapping.id];
+        if (field) {
+          // Use onValueChanged to detect when the field value changes
+          const removeHandler = field.onValueChanged(() => {
+            console.log(`Field ${mapping.name} value changed, marking for sync`);
+
+            const entryId = sdk.entry.getSys().id;
+            const contentTypeId = sdk.ids.contentType;
+            const contentTypeName = sdk.contentType.name;
+
+            // Mark this entry as needing sync
+            markEntryForSync(entryId, contentTypeId, contentTypeName);
+          });
+
+          fieldChangeHandlers.push(removeHandler);
+        }
+      } catch (error) {
+        console.error(`Error setting up change listener for field ${mapping.id}:`, error);
+      }
     }
-  }, [sdk, mappings, setButtonDisabled, setShowSuccess]);
+
+    // Clean up handlers on unmount
+    return () => {
+      fieldChangeHandlers.forEach((handler) => handler());
+    };
+  }, [mappings, sdk]);
 
   useEffect(() => {
     const handleChanged = () => {
@@ -218,65 +302,20 @@ const SidebarComponent = ({
   }, [sdk]);
 
   return (
-    <Flex flexDirection="column" gap="spacingM" style={{ maxWidth: '300px' }}>
-      <Button
-        variant="primary"
-        isFullWidth
-        onClick={handleGenerateClick}
-        isDisabled={buttonDisabled}>
-        Configure Field Mappings
-      </Button>
-
-      {mappings.length > 0 ? (
-        <Flex
-          flexDirection="column"
-          gap="spacingXs"
-          padding="spacingS"
-          style={{ background: '#F7F9FA', borderRadius: '4px' }}>
-          <Text fontWeight="fontWeightMedium">
-            {mappings.length} Field{mappings.length > 1 ? 's' : ''} Ready to Sync:
-          </Text>
-          {mappings.map((mapping, index) => (
-            <Flex
-              key={`${mapping.id}-${index}`}
-              justifyContent="space-between"
-              alignItems="center"
-              padding="spacingXs"
-              marginBottom="spacingXs"
-              style={{ borderBottom: '1px solid #EEEEEE' }}>
-              <Text fontSize="fontSizeS">{mapping.name}</Text>
-              <Flex alignItems="center" gap="spacingXs">
-                <Text fontSize="fontSizeS" fontColor="gray600">
-                  {mapping.isAsset ? 'Image' : 'Text'}
-                </Text>
-                <Button
-                  size="small"
-                  variant="transparent"
-                  onClick={() => handleRemoveMapping(index)}
-                  aria-label={`Remove ${mapping.name}`}>
-                  <CloseIcon />
-                </Button>
-              </Flex>
-            </Flex>
-          ))}
-        </Flex>
-      ) : (
-        <Flex justifyContent="center" padding="spacingS">
-          <Text fontColor="gray600" fontSize="fontSizeS">
-            No fields configured yet. Click "Configure Field Mappings" to get started.
-          </Text>
-        </Flex>
-      )}
-
-      <Button
-        variant="positive"
-        isFullWidth
-        onClick={handleSyncClick}
-        isDisabled={buttonDisabled || mappings.length === 0}>
-        Sync to Klaviyo
+    <Flex flexDirection="column" gap="spacingM" style={{ maxWidth: '300px', height: '100%' }}>
+      <Button variant="positive" onClick={handleConfigureClick} isFullWidth>
+        Configure & Sync to Klaviyo
       </Button>
 
       {showSuccess && <Text fontColor="colorPositive">Successfully synced to Klaviyo!</Text>}
+
+      {syncMessage && (
+        <Note
+          style={{ marginTop: '10px', padding: '10px', borderRadius: '4px' }}
+          variant={syncMessage.includes('Error') ? 'negative' : 'positive'}>
+          {syncMessage}
+        </Note>
+      )}
     </Flex>
   );
 };

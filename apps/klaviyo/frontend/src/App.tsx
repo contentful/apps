@@ -6,7 +6,7 @@ import {
 } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { Sidebar } from './locations/Sidebar';
-import { ConfigScreen } from './locations/ConfigScreen';
+import ConfigScreen from './locations/ConfigScreen';
 import FieldSelectDialog from './locations/FieldSelectDialog';
 import { useEffect, useState } from 'react';
 import { FieldMapping } from './config/klaviyo';
@@ -57,12 +57,9 @@ const App = () => {
     // Find which location we're in and get the corresponding component
     for (const [location, Component] of Object.entries(ComponentLocationSettings)) {
       if (sdk.location.is(location)) {
-        // Only pass mappings to components that need them
-        const needsMappings =
-          location === locations.LOCATION_ENTRY_SIDEBAR ||
-          location === locations.LOCATION_APP_CONFIG;
+        const entry = (sdk as any).entry || {};
 
-        return needsMappings ? <Component mappings={mappings} /> : <Component />;
+        return <Component mappings={mappings} entry={entry} />;
       }
     }
     return null;
