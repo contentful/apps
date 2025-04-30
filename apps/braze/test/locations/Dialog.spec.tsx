@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import Dialog from '../../src/locations/Dialog';
 import React from 'react';
 import { Entry } from '../../src/fields/Entry';
@@ -126,14 +126,9 @@ describe('Dialog component', () => {
     const nextButton = screen.getByRole('button', { name: /next/i });
     fireEvent.click(nextButton);
 
-    await waitFor(() => {
-      expect(mockSdk.close).toHaveBeenCalledWith({
-        contentTypeId: 'contentTypeId',
-        entryId: 'entryId',
-        serializedEntry: mockEntry.serialize(),
-        step: 'create',
-        title: 'title',
-      });
+    const createStepParagraph = await screen.findByText('Edit each field to change', {
+      exact: false,
     });
+    expect(createStepParagraph).toBeTruthy();
   });
 });
