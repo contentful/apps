@@ -35,6 +35,10 @@ ${items.join('\n')}
 {% endfor %}`,
     ];
   }
+
+  isEnabledForCreate(): boolean {
+    return false;
+  }
 }
 
 FieldRegistry.registerFieldType('AssetArrayField', AssetArrayField.fromSerialized);

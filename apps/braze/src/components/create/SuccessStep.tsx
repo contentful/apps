@@ -18,7 +18,7 @@ const SuccessStep = ({ handleClose }: SuccessStepProps) => {
         Seven fields were successfully sent to Braze. You can view them from your Braze dashboard by
         navigating to Templates {'>'} Content Blocks.
       </Paragraph>
-      <WizardFooter paddingTop="0" paddingBottom="0" paddingRight="0">
+      <WizardFooter>
         <Button variant="primary" size="small" onClick={handleClose}>
           Done
         </Button>

@@ -47,10 +47,10 @@ const BasicFieldCheckbox = (props: BasicFieldCheckboxProps) => {
   return (
     <CheckboxCard
       id={field.uniqueId()}
-      title={field.displayName()}
+      title={field.displayNameForGenerate()}
       selectedFields={selectedFields}
       onChange={handleToggle}
-      isDisabled={!field.isEnabled()}
+      isDisabled={!field.isEnabledForGenerate()}
     />
   );
 };
@@ -172,7 +172,7 @@ const CheckboxContainer = (props: {
   return (
     <CheckboxCard
       id={field.uniqueId()}
-      title={field.displayName()}
+      title={field.displayNameForGenerate()}
       selectedFields={selectedFields}
       onChange={handleToggle}
       fontWeight="fontWeightDemiBold">
