@@ -4,7 +4,11 @@ import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import {
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
   CONNECTED_CONTENT_DOCUMENTATION,
-  DIALOG_TITLE,
+  CREATE_DIALOG_MODE,
+  CREATE_DIALOG_TITLE,
+  FIELDS_STEP,
+  GENERATE_DIALOG_MODE,
+  GENERATE_DIALOG_TITLE,
   SIDEBAR_CREATE_BUTTON_TEXT,
   SIDEBAR_GENERATE_BUTTON_TEXT,
 } from '../utils';
@@ -17,6 +21,7 @@ const Sidebar = () => {
   useAutoResizer();
 
   const initialInvocationParams: InvocationParams = {
+    mode: GENERATE_DIALOG_MODE,
     entryId: sdk.ids.entry,
     contentTypeId: sdk.ids.contentType,
     title: sdk.entry.fields[sdk.contentType.displayField].getValue(),
@@ -24,19 +29,20 @@ const Sidebar = () => {
 
   const openDialogLogic = async (
     step: string,
-    parameters: InvocationParams = initialInvocationParams
+    parameters: InvocationParams = initialInvocationParams,
+    mode: string
   ) => {
     const width = step === 'codeBlocks' ? 'fullWidth' : 'large';
-    const result = await openDialog(parameters, width);
+    const result = await openDialog({ ...parameters, mode }, width);
     if (!result || result['step'] === 'close') {
       return;
     }
-    await openDialogLogic(result['step'], result);
+    await openDialogLogic(result['step'], result, mode);
   };
 
   const openDialog = async (parameters: InvocationParams, width: 'fullWidth' | 'large') => {
     return sdk.dialogs.openCurrentApp({
-      title: DIALOG_TITLE,
+      title: parameters.mode === CREATE_DIALOG_MODE ? CREATE_DIALOG_TITLE : GENERATE_DIALOG_TITLE,
       parameters: parameters,
       width: width,
     });
@@ -54,7 +60,10 @@ const Sidebar = () => {
           marginBottom="spacingS">
           Generate a Connected Content call to copy and paste into Braze.
         </InformationWithLink>
-        <Button variant="secondary" isFullWidth={true} onClick={() => openDialogLogic('fields')}>
+        <Button
+          variant="secondary"
+          isFullWidth={true}
+          onClick={() => openDialogLogic(FIELDS_STEP, undefined, GENERATE_DIALOG_MODE)}>
           {SIDEBAR_GENERATE_BUTTON_TEXT}
         </Button>
       </Box>
@@ -68,7 +77,10 @@ const Sidebar = () => {
           marginBottom="spacingS">
           Send individual entry fields to Braze to create Content Blocks.
         </InformationWithLink>
-        <Button variant="secondary" isFullWidth={true} onClick={() => openDialogLogic('fields')}>
+        <Button
+          variant="secondary"
+          isFullWidth={true}
+          onClick={() => openDialogLogic(FIELDS_STEP, undefined, CREATE_DIALOG_MODE)}>
           {SIDEBAR_CREATE_BUTTON_TEXT}
         </Button>
       </Box>
