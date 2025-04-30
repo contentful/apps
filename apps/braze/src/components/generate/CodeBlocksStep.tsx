@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import WizardFooter from './WizardFooter';
+import WizardFooter from '../WizardFooter';
 import { Box, Button, Paragraph, Skeleton, Subheading } from '@contentful/f36-components';
-import Splitter from './Splitter';
+import Splitter from '../Splitter';
 import tokens from '@contentful/f36-tokens';
-import CodeBlock from './CodeBlock';
-import { Entry } from '../fields/Entry';
-import OctagonValidationMessage from './OctagonValidationMessage';
+import CodeBlock from '../CodeBlock';
+import { Entry } from '../../fields/Entry';
+import OctagonValidationMessage from '../OctagonValidationMessage';
 
 type CodeBlocksStepProps = {
   entry: Entry;
@@ -86,7 +86,7 @@ const CodeBlocksStep = (props: CodeBlocksStepProps) => {
         )}
       </Box>
 
-      <WizardFooter>
+      <WizardFooter paddingRight="0">
         <Button variant="secondary" size="small" onClick={handlePreviousStep}>
           Back
         </Button>
