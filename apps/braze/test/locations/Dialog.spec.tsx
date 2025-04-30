@@ -124,11 +124,23 @@ describe('Dialog component', () => {
     fireEvent.change(select, { target: { value: mockField.name } });
 
     const nextButton = screen.getByRole('button', { name: /next/i });
+    expect(nextButton).toBeTruthy();
+
     fireEvent.click(nextButton);
 
     const createStepParagraph = await screen.findByText('Edit each field to change', {
       exact: false,
     });
     expect(createStepParagraph).toBeTruthy();
+
+    const sendToBrazeButton = screen.getByRole('button', { name: /Send to Braze/i });
+    expect(sendToBrazeButton).toBeTruthy();
+
+    fireEvent.click(sendToBrazeButton);
+
+    const successStepParagraph = await screen.findByText('Seven fields were successfully', {
+      exact: false,
+    });
+    expect(successStepParagraph).toBeTruthy();
   });
 });
