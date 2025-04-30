@@ -2,10 +2,20 @@ import { useCallback, useEffect, useState } from 'react';
 import { ConfigAppSDK, locations, SidebarExtensionSDK } from '@contentful/app-sdk';
 import { useSDK } from '../hooks/useSDK';
 import { Button, Flex, Text, Note } from '@contentful/f36-components';
-import { FieldData, markEntryForSync } from '../utils/klaviyo-api-service';
+import {
+  FieldData,
+  markEntryForSync,
+  setupEntryChangeListener,
+  SyncContent,
+} from '../utils/klaviyo-api-service';
 import { getSyncData, updateSyncData } from '../utils/persistence-service';
 import { getFieldDetails } from '../utils/field-utilities';
 import { logger } from '../utils/logger';
+import {
+  initializeEntryChangeMonitoring,
+  registerPublishListener,
+} from '../utils/entry-change-listener';
+import { getFieldMappings } from '../utils/field-mappings';
 
 // Types
 type SDKType = SidebarExtensionSDK | ConfigAppSDK;
@@ -18,6 +28,9 @@ export const Sidebar = () => {
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [syncSuccessful, setSyncSuccessful] = useState(false);
 
   // Determine current component context (sidebar or config)
   const getCurrentComponent = () => {
@@ -34,6 +47,12 @@ export const Sidebar = () => {
         setButtonDisabled={setButtonDisabled}
         syncMessage={syncMessage}
         setSyncMessage={setSyncMessage}
+        isSyncing={isSyncing}
+        setIsSyncing={setIsSyncing}
+        error={error}
+        setError={setError}
+        syncSuccessful={syncSuccessful}
+        setSyncSuccessful={setSyncSuccessful}
       />
     ) : (
       <ConfigComponent
@@ -118,7 +137,15 @@ const SidebarComponent = ({
   setMappings,
   showSuccess,
   setShowSuccess,
+  buttonDisabled,
+  setButtonDisabled,
   syncMessage,
+  isSyncing,
+  setIsSyncing,
+  error,
+  setError,
+  syncSuccessful,
+  setSyncSuccessful,
 }: {
   sdk: SidebarExtensionSDK;
   mappings: FieldData[];
@@ -129,6 +156,12 @@ const SidebarComponent = ({
   setButtonDisabled: React.Dispatch<React.SetStateAction<boolean>>;
   syncMessage: string | null;
   setSyncMessage: React.Dispatch<React.SetStateAction<string | null>>;
+  isSyncing: boolean;
+  setIsSyncing: React.Dispatch<React.SetStateAction<boolean>>;
+  error: string | null;
+  setError: React.Dispatch<React.SetStateAction<string | null>>;
+  syncSuccessful: boolean;
+  setSyncSuccessful: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   // Handle field selection using Contentful's dialog
   const handleConfigureClick = useCallback(async () => {
@@ -241,40 +274,22 @@ const SidebarComponent = ({
     }
   }, [sdk, mappings, setMappings, setShowSuccess]);
 
-  // Field change listeners - keep this code
+  // Set up automatic change detection and sync status updates
   useEffect(() => {
-    const fieldChangeHandlers: (() => void)[] = [];
+    // Use our new utility function to set up entry monitoring
+    const removeFieldChangeListeners = initializeEntryChangeMonitoring(sdk, mappings);
 
-    // For each mapped field, add a change listener
-    for (const mapping of mappings) {
-      try {
-        const field = sdk.entry.fields[mapping.id];
-        if (field) {
-          // Use onValueChanged to detect when the field value changes
-          const removeHandler = field.onValueChanged(() => {
-            logger.log(`Field ${mapping.name} value changed, marking for sync`);
+    // Set up publish event listener
+    const removePublishListener = registerPublishListener(sdk);
 
-            const entryId = sdk.entry.getSys().id;
-            const contentTypeId = sdk.ids.contentType;
-            const contentTypeName = sdk.contentType.name;
-
-            // Mark this entry as needing sync
-            markEntryForSync(entryId, contentTypeId, contentTypeName);
-          });
-
-          fieldChangeHandlers.push(removeHandler);
-        }
-      } catch (error) {
-        logger.error(`Error setting up change listener for field ${mapping.id}:`, error);
-      }
-    }
-
-    // Clean up handlers on unmount
+    // Return combined cleanup function
     return () => {
-      fieldChangeHandlers.forEach((handler) => handler());
+      removeFieldChangeListeners();
+      removePublishListener();
     };
-  }, [mappings, sdk]);
+  }, [sdk, mappings]);
 
+  // Listen for sys changes (like publish/unpublish)
   useEffect(() => {
     const handleChanged = () => {
       setShowSuccess(false);
@@ -286,7 +301,133 @@ const SidebarComponent = ({
     return () => {
       removeHandler();
     };
-  }, [sdk]);
+  }, [sdk, setShowSuccess]);
+
+  // Function to handle the sync button click
+  const handleSync = async () => {
+    setIsSyncing(true);
+    setError(null);
+
+    try {
+      // Get field mappings for this content type
+      const contentTypeId = sdk.ids.contentType;
+      const contentTypeName = sdk.contentType?.name || '';
+      const fieldMappings = await getFieldMappings(sdk);
+
+      if (!fieldMappings || fieldMappings.length === 0) {
+        throw new Error('No field mappings configured for this content type');
+      }
+
+      // Get entry
+      const entryId = sdk.entry.getSys().id;
+
+      logger.log(`Syncing entry ${entryId} (${contentTypeId}: ${contentTypeName})...`);
+
+      // Ensure we have the full entry with all fields
+      const entry = entryId ? await sdk.space.getEntry(entryId) : sdk.entry;
+
+      // Create sync content instance with SDK reference
+      const syncContent = new SyncContent(entry, sdk);
+
+      // Pass SDK and useSdk option
+      const result = await syncContent.syncContent(sdk, fieldMappings, { useSdk: true });
+
+      // Explicitly update the localStorage status to ensure it's updated
+      const now = Date.now();
+      const storageKey = 'klaviyo_sync_status';
+      const existingStatusesStr = localStorage.getItem(storageKey);
+      const existingStatuses = existingStatusesStr ? JSON.parse(existingStatusesStr) : [];
+
+      // Find or create status entry
+      const statusIndex = existingStatuses.findIndex(
+        (status: any) => status.entryId === entryId && status.contentTypeId === contentTypeId
+      );
+
+      if (statusIndex >= 0) {
+        // Update existing
+        existingStatuses[statusIndex] = {
+          ...existingStatuses[statusIndex],
+          lastSynced: now,
+          needsSync: false,
+          syncCompleted: true,
+          contentTypeName: contentTypeName,
+        };
+      } else {
+        // Create new
+        existingStatuses.push({
+          entryId,
+          contentTypeId,
+          contentTypeName,
+          lastSynced: now,
+          needsSync: false,
+          syncCompleted: true,
+        });
+      }
+
+      // Save back to localStorage
+      localStorage.setItem(storageKey, JSON.stringify(existingStatuses));
+
+      // Dispatch event
+      window.dispatchEvent(
+        new CustomEvent('klaviyo-sync-completed', {
+          detail: { entryId, contentTypeId, contentTypeName, lastSynced: now },
+        })
+      );
+
+      logger.log(`Sync completed for entry ${entryId} at ${new Date(now).toISOString()}`);
+
+      // Show success message
+      setSyncSuccessful(true);
+
+      // Reset after a delay
+      setTimeout(() => {
+        setSyncSuccessful(false);
+      }, 3000);
+
+      return result;
+    } catch (err: any) {
+      logger.error('Sync error:', err);
+      setError(err.message || 'Unknown error');
+      return null;
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Function to set up change listeners for tracked fields
+  const setupChangeListeners = async () => {
+    try {
+      if (!sdk || !sdk.entry) return;
+
+      // Get field mappings for this content type
+      const fieldMappings = await getFieldMappings(sdk);
+
+      if (!fieldMappings || fieldMappings.length === 0) {
+        console.warn('No field mappings to track');
+        return;
+      }
+
+      // Get list of tracked fields
+      const fieldIds = fieldMappings
+        .map((mapping) => mapping.contentfulFieldId || mapping.fieldId)
+        .filter(Boolean) as string[];
+
+      if (fieldIds.length === 0) {
+        console.warn('No field IDs found in mappings');
+        return;
+      }
+
+      logger.log(`Setting up change listeners for fields: ${fieldIds.join(', ')}`);
+
+      // Set up entry change listener with SDK option
+      const cleanupFunction = setupEntryChangeListener(sdk, fieldIds, { useSdk: true });
+
+      // Clean up on unmount
+      return cleanupFunction;
+    } catch (error) {
+      logger.error('Error setting up change listeners:', error);
+    }
+  };
 
   return (
     <Flex flexDirection="column" gap="spacingM" style={{ maxWidth: '300px', height: '100%' }}>

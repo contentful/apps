@@ -383,8 +383,32 @@ function richTextToHtml(richTextNode: any): string {
   }
 }
 
+// Helper function to get space ID from SDK or entry
+function getSpaceId(sdk: any, entry: any): string | null {
+  // Try to get from SDK first
+  if (sdk?.ids?.space) {
+    return sdk.ids.space;
+  }
+
+  // Then try from entry
+  if (entry?.sys?.space?.sys?.id) {
+    return entry.sys.space.sys.id;
+  }
+
+  return null;
+}
+
+// Helper function to construct an asset URL from space ID and asset ID
+function constructAssetUrl(spaceId: string, assetId: string): string {
+  return `https://images.ctfassets.net/${spaceId}/${assetId}/asset.jpg`;
+}
+
 export async function onEntryUpdate(event: EntryEventData) {
   const { entry, sdk, mappings } = event;
+
+  // Extract space ID early for asset resolution
+  const spaceId = getSpaceId(sdk, entry);
+  logger.log(`Space ID for asset resolution: ${spaceId || 'Not available'}`);
 
   // Log mappings to verify field types
   logger.log(
@@ -493,7 +517,17 @@ export async function onEntryUpdate(event: EntryEventData) {
                 let asset;
                 if (isAssetLink) {
                   // For asset links, we need to resolve to get the actual asset
+                  logger.log(`Resolving asset link with ID: ${assetId}`);
                   asset = await sdk.cma.asset.get({ assetId });
+
+                  // Log the resolved asset to help with debugging
+                  if (asset) {
+                    logger.log(`Successfully resolved asset:`, {
+                      id: asset.sys.id,
+                      title: asset.fields?.title?.['en-US'],
+                      url: asset.fields?.file?.['en-US']?.url,
+                    });
+                  }
                 } else if (isEntryLink) {
                   // For entry links, fetch the linked entry
                   const linkedEntry = await sdk.cma.entry.get({ entryId: assetId });
@@ -516,13 +550,50 @@ export async function onEntryUpdate(event: EntryEventData) {
                 if (asset) {
                   logger.log(`Asset retrieved:`, asset);
 
-                  // Create a structure that will work with our existing code
-                  processedEntry.fields[fieldId] = {
-                    'en-US': asset,
-                  };
+                  // Ensure the asset has a proper file URL
+                  if (asset.fields?.file?.['en-US']?.url) {
+                    logger.log(`Asset has URL: ${asset.fields.file['en-US'].url}`);
+
+                    // Ensure the URL has proper protocol
+                    const assetUrl = asset.fields.file['en-US'].url;
+                    const fullUrl = assetUrl.startsWith('//') ? `https:${assetUrl}` : assetUrl;
+
+                    logger.log(`Full asset URL: ${fullUrl}`);
+
+                    // Create a structure with both the asset and explicit URL for easier processing
+                    processedEntry.fields[fieldId] = {
+                      'en-US': {
+                        ...asset,
+                        _resolvedUrl: fullUrl, // Add explicit URL field for easier extraction
+                      },
+                    };
+                  } else {
+                    logger.error(`Asset does not have a file URL. Asset ID: ${assetId}`);
+
+                    // If we have a space ID, construct a fallback URL
+                    if (spaceId) {
+                      const fallbackUrl = constructAssetUrl(spaceId, assetId);
+                      logger.log(`Constructed fallback URL: ${fallbackUrl}`);
+
+                      processedEntry.fields[fieldId] = {
+                        'en-US': {
+                          ...asset,
+                          _resolvedUrl: fallbackUrl,
+                        },
+                      };
+                    } else {
+                      // Create a structure that will work with our existing code
+                      processedEntry.fields[fieldId] = {
+                        'en-US': asset,
+                      };
+                    }
+                  }
                 }
               } catch (assetError) {
                 logger.error(`Error fetching asset/entry ${assetId}:`, assetError);
+
+                // Attempt to handle the error gracefully
+                logger.warn(`Attempting fallback methods for asset ${assetId}`);
 
                 // Fallback: If we can't get the asset, try to get the URL directly from the UI extension
                 try {
@@ -539,8 +610,53 @@ export async function onEntryUpdate(event: EntryEventData) {
                               url: fileUrl,
                             },
                           },
+                          _resolvedUrl: fileUrl.startsWith('//') ? `https:${fileUrl}` : fileUrl,
                         },
                       };
+                    }
+                  } else if (spaceId) {
+                    // Use the spaceId to construct a fallback URL
+                    const fallbackUrl = constructAssetUrl(spaceId, assetId);
+                    logger.log(`Constructed fallback URL: ${fallbackUrl}`);
+
+                    processedEntry.fields[fieldId] = {
+                      'en-US': {
+                        sys: { id: assetId, type: 'Asset' },
+                        _resolvedUrl: fallbackUrl,
+                      },
+                    };
+                  } else {
+                    // Final attempt: try constructing a URL from the space ID and asset ID if available
+                    try {
+                      // Extract space ID from SDK if available
+                      const spaceIdFromSdk = sdk.ids?.space;
+                      if (spaceIdFromSdk && assetId) {
+                        logger.log(
+                          `Attempting to construct URL from space ID and asset ID: ${spaceIdFromSdk}/${assetId}`
+                        );
+
+                        const assetUrl = constructAssetUrl(spaceIdFromSdk, assetId);
+
+                        processedEntry.fields[fieldId] = {
+                          'en-US': {
+                            sys: {
+                              id: assetId,
+                              type: 'Asset',
+                              space: { sys: { id: spaceIdFromSdk } },
+                            },
+                            fields: {
+                              file: {
+                                url: `//images.ctfassets.net/${spaceIdFromSdk}/${assetId}/asset.jpg`,
+                              },
+                            },
+                            _resolvedUrl: assetUrl,
+                          },
+                        };
+
+                        logger.warn(`Created fallback asset URL - this may not work correctly`);
+                      }
+                    } catch (constructError) {
+                      logger.error(`Error constructing fallback URL:`, constructError);
                     }
                   }
                 } catch (urlError) {
@@ -586,10 +702,40 @@ export async function onEntryUpdate(event: EntryEventData) {
                       const asset = await sdk.cma.asset.get({ assetId: id });
                       logger.log(`Asset retrieved from string reference:`, asset);
 
-                      // Store the asset in our processed entry
-                      processedEntry.fields[fieldId] = {
-                        'en-US': asset,
-                      };
+                      // Ensure the asset has a proper file URL
+                      if (asset.fields?.file?.['en-US']?.url) {
+                        const assetUrl = asset.fields.file['en-US'].url;
+                        const fullUrl = assetUrl.startsWith('//') ? `https:${assetUrl}` : assetUrl;
+
+                        logger.log(`Full asset URL from string reference: ${fullUrl}`);
+
+                        // Store the asset in our processed entry with explicit URL field
+                        processedEntry.fields[fieldId] = {
+                          'en-US': {
+                            ...asset,
+                            _resolvedUrl: fullUrl,
+                          },
+                        };
+                      } else {
+                        // If asset doesn't have URL but we have a space ID, construct one
+                        if (spaceId) {
+                          const fallbackUrl = constructAssetUrl(spaceId, id);
+                          logger.log(`Constructed fallback URL for JSON asset: ${fallbackUrl}`);
+
+                          // Store the asset with constructed URL
+                          processedEntry.fields[fieldId] = {
+                            'en-US': {
+                              ...asset,
+                              _resolvedUrl: fallbackUrl,
+                            },
+                          };
+                        } else {
+                          // Store the asset even without URL
+                          processedEntry.fields[fieldId] = {
+                            'en-US': asset,
+                          };
+                        }
+                      }
                     } else if (isEntryLink) {
                       // Try to get the linked entry through the CMA
                       const linkedEntry = await sdk.cma.entry.get({ entryId: id });
@@ -606,10 +752,24 @@ export async function onEntryUpdate(event: EntryEventData) {
                     }
                   } catch (fetchError) {
                     logger.error(`Error fetching reference ${id}:`, fetchError);
-                    // Pass through the original
-                    processedEntry.fields[fieldId] = {
-                      'en-US': assetValue,
-                    };
+
+                    // Try to construct a fallback URL if we have space information
+                    if (spaceId && id && isAssetLink) {
+                      const fallbackUrl = constructAssetUrl(spaceId, id);
+                      logger.log(`Constructed fallback URL after fetch error: ${fallbackUrl}`);
+
+                      processedEntry.fields[fieldId] = {
+                        'en-US': {
+                          sys: { id, type: 'Asset' },
+                          _resolvedUrl: fallbackUrl,
+                        },
+                      };
+                    } else {
+                      // Pass through the original as last resort
+                      processedEntry.fields[fieldId] = {
+                        'en-US': assetValue,
+                      };
+                    }
                   }
                 }
               }

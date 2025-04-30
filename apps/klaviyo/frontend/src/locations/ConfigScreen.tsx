@@ -51,6 +51,10 @@ interface Installation {
 
 interface AppInstallationParameters {
   installation: Installation;
+  syncData?: {
+    syncStatuses: string[];
+    lastUpdated: number;
+  };
 }
 
 const AVAILABLE_LOCATIONS: AppLocation[] = [
@@ -132,6 +136,83 @@ const ConfigScreen = () => {
         setIsConnected(hasValidAccessToken());
 
         setSelectedContentTypes(currentParameters.installation.contentTypes || []);
+
+        // Initialize sync data structure if not present
+        if (!currentParameters.syncData) {
+          // Migrate existing data from localStorage if available
+          const localStorageKey = 'klaviyo_sync_status';
+          const existingStatusesStr = localStorage.getItem(localStorageKey);
+
+          if (existingStatusesStr) {
+            try {
+              const existingStatuses = JSON.parse(existingStatusesStr);
+
+              // Create new sync data structure with existing statuses
+              const updatedParameters = {
+                ...currentParameters,
+                syncData: {
+                  syncStatuses: existingStatuses,
+                  lastUpdated: Date.now(),
+                },
+              };
+
+              // Use onConfigure to save the parameters
+              sdk.app.onConfigure(() => ({
+                parameters: updatedParameters,
+                targetState: {
+                  EditorInterface: selectedContentTypes.reduce((acc, id) => {
+                    acc[id] = { sidebar: { position: 0 } };
+                    return acc;
+                  }, {} as any),
+                },
+              }));
+
+              logger.log('Migrated sync statuses from localStorage to Contentful parameters');
+            } catch (error) {
+              logger.error('Error migrating sync statuses from localStorage:', error);
+
+              // Create empty sync data structure with empty statuses
+              const updatedParameters = {
+                ...currentParameters,
+                syncData: {
+                  syncStatuses: [],
+                  lastUpdated: Date.now(),
+                },
+              };
+
+              // Use onConfigure to save the parameters
+              sdk.app.onConfigure(() => ({
+                parameters: updatedParameters,
+                targetState: {
+                  EditorInterface: selectedContentTypes.reduce((acc, id) => {
+                    acc[id] = { sidebar: { position: 0 } };
+                    return acc;
+                  }, {} as any),
+                },
+              }));
+            }
+          } else {
+            // Create empty sync data structure
+            const updatedParameters = {
+              ...currentParameters,
+              syncData: {
+                syncStatuses: [],
+                lastUpdated: Date.now(),
+              },
+            };
+
+            // Use onConfigure to save the parameters
+            sdk.app.onConfigure(() => ({
+              parameters: updatedParameters,
+              targetState: {
+                EditorInterface: selectedContentTypes.reduce((acc, id) => {
+                  acc[id] = { sidebar: { position: 0 } };
+                  return acc;
+                }, {} as any),
+              },
+            }));
+          }
+        }
       }
 
       // Mark app as ready
@@ -143,55 +224,36 @@ const ConfigScreen = () => {
 
   // Add onConfigure callback
   useEffect(() => {
-    // Handler called when app configuration is saved
-    const onConfigure = async () => {
-      if (!clientId || !clientSecret) {
-        sdk.notifier.error('Please provide both Client ID and Client Secret');
-        return false;
-      }
+    sdk.app.onConfigure(() => {
+      // Get existing sync data to preserve it
+      return sdk.app.getParameters().then((parameters) => {
+        const { syncData } = parameters || {};
 
-      // Prepare editor interfaces
-      const editorInterface = {
-        sidebar: {
-          position: 0,
-          settings: { helpText: 'Klaviyo integration' },
-        },
-      };
-
-      // Set up editor interfaces for each selected content type
-      const targetState = {
-        EditorInterface: selectedContentTypes.reduce((acc, contentTypeId) => {
-          acc[contentTypeId] = editorInterface;
-          return acc;
-        }, {} as Record<string, any>),
-      };
-
-      const parameters: AppInstallationParameters = {
-        installation: {
-          clientId,
-          clientSecret,
-          locations: AVAILABLE_LOCATIONS, // Always include entry-sidebar
-          contentTypes: selectedContentTypes,
-        },
-      };
-
-      // Get current tokens from localStorage
-      const accessToken = localStorage.getItem('klaviyo_access_token');
-      const refreshToken = localStorage.getItem('klaviyo_refresh_token');
-
-      if (accessToken && refreshToken) {
-        parameters.installation.accessToken = accessToken;
-        parameters.installation.refreshToken = refreshToken;
-      }
-
-      return {
-        parameters,
-        targetState,
-      };
-    };
-
-    sdk.app.onConfigure(() => onConfigure());
-  }, [clientId, clientSecret, selectedContentTypes, sdk]);
+        // Return parameters for the app
+        return {
+          parameters: {
+            installation: {
+              clientId,
+              clientSecret,
+              redirectUri,
+              contentTypes: selectedContentTypes,
+            },
+            // Preserve existing sync data
+            syncData: syncData || {
+              syncStatuses: [],
+              lastUpdated: Date.now(),
+            },
+          },
+          targetState: {
+            EditorInterface: selectedContentTypes.reduce((acc, id) => {
+              acc[id] = { sidebar: { position: 0 } };
+              return acc;
+            }, {} as any),
+          },
+        };
+      });
+    });
+  }, [sdk, clientId, clientSecret, selectedContentTypes, redirectUri]);
 
   useEffect(() => {
     if (!searchQuery) {
@@ -347,17 +409,6 @@ const ConfigScreen = () => {
           }
         }
       }, 500);
-
-      // Send a ping to the popup window
-      try {
-        setTimeout(() => {
-          if (authWindow && !authWindow.closed) {
-            authWindow.postMessage({ type: 'PING_FROM_PARENT' }, '*');
-          }
-        }, 1000);
-      } catch (error) {
-        logger.error('Error notifying OAuth window:', error);
-      }
     } catch (configError) {
       logger.error('Failed to save configuration:', configError);
       sdk.notifier.error('Failed to save configuration');

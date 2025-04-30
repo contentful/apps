@@ -204,26 +204,6 @@ export const FieldMappingScreen: React.FC = () => {
     loadFields();
   }, [selectedContentType, mappings]);
 
-  // Try to reload data if localStorage might have changed
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'klaviyo_field_mappings') {
-        logger.log('Storage changed, reloading mappings');
-        const loadMappings = async () => {
-          const savedMappings = await getSyncData(sdk);
-          setMappings(savedMappings || []);
-        };
-        loadMappings();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
-
   // Fetch entries when content type is selected
   useEffect(() => {
     const fetchEntries = async () => {
@@ -401,18 +381,18 @@ export const FieldMappingScreen: React.FC = () => {
 
         <Paragraph>Manage field mappings and sync status for Klaviyo integration.</Paragraph>
 
-        <Box marginBottom="spacingM">
+        <Box>
           <Tabs defaultTab="mappingsPanel">
             <Tabs.List>
               <Tabs.Tab panelId="mappingsPanel">Field Mappings</Tabs.Tab>
               <Tabs.Tab panelId="syncStatusPanel">Sync Status</Tabs.Tab>
             </Tabs.List>
             <Tabs.Panel id="mappingsPanel" style={{ paddingTop: '20px' }}>
-              <Flex justifyContent="flex-start" marginBottom="spacingM">
+              <Flex justifyContent="flex-start">
                 <Button
                   variant="positive"
                   onClick={openConfigModal}
-                  style={{ marginRight: '10px' }}>
+                  style={{ marginBottom: '16px' }}>
                   Configure Field Mappings
                 </Button>
               </Flex>
@@ -472,10 +452,15 @@ export const FieldMappingScreen: React.FC = () => {
           <>
             <Modal.Header title="Configure Field Mappings" onClose={closeConfigModal} />
             <Modal.Content>
-              <Stack spacing="spacingM" flexDirection="column">
-                <FormControl>
+              <Stack
+                spacing="spacingM"
+                alignItems="flex-start"
+                flexDirection="column"
+                style={{ width: '100%' }}>
+                <FormControl style={{ width: '100%' }}>
                   <FormControl.Label>Select Content Type</FormControl.Label>
                   <Select
+                    style={{ width: '100%' }}
                     onChange={(e) => setSelectedContentType(e.target.value)}
                     value={selectedContentType}>
                     <Select.Option value="">-- Select a content type --</Select.Option>
@@ -487,12 +472,13 @@ export const FieldMappingScreen: React.FC = () => {
                   </Select>
                 </FormControl>
                 {selectedContentType && (
-                  <FormControl>
+                  <FormControl style={{ width: '100%' }}>
                     <FormControl.Label>Select Entry</FormControl.Label>
                     {isEntriesLoading ? (
                       <Spinner size="small" />
                     ) : entries.length > 0 ? (
                       <Select
+                        style={{ width: '100%' }}
                         onChange={(e) => setSelectedEntryId(e.target.value)}
                         value={selectedEntryId}>
                         <Select.Option value="">-- Select an entry --</Select.Option>
@@ -508,8 +494,8 @@ export const FieldMappingScreen: React.FC = () => {
                   </FormControl>
                 )}
 
-                <Box>
-                  <Text fontWeight="fontWeightMedium" marginBottom="spacingS">
+                <Box style={{ width: '100%' }}>
+                  <Text fontWeight="fontWeightMedium" style={{ width: '100%' }}>
                     Available Fields
                   </Text>
 
@@ -523,7 +509,6 @@ export const FieldMappingScreen: React.FC = () => {
                       padding: '8px',
                       borderRadius: '4px',
                       border: '1px solid #DADADA',
-                      marginBottom: '16px',
                     }}
                   />
 
@@ -600,7 +585,13 @@ export const FieldMappingScreen: React.FC = () => {
                 )}
               </Stack>
             </Modal.Content>
-            <Modal.Controls>
+            <Modal.Controls
+              style={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'flex-start',
+              }}>
               <Button variant="secondary" onClick={closeConfigModal}>
                 Cancel
               </Button>

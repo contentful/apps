@@ -181,10 +181,110 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
       // Convert to the format expected by syncContent
       const formattedMappings = selectedFields.map((fieldId) => {
         const field = fields.find((f) => f.id === fieldId);
+
+        // Determine field type based on field information
+        let fieldType = 'text'; // Default to text
+        let isAssetField = false;
+
+        // Check if this is an image/asset field
+        if (field) {
+          // Common asset field types in Contentful
+          const assetTypes = ['Asset', 'Link', 'Media', 'Image', 'File'];
+          const imageNamePatterns = [
+            'image',
+            'picture',
+            'photo',
+            'avatar',
+            'logo',
+            'banner',
+            'icon',
+            'thumbnail',
+            'cover',
+            'media',
+          ];
+
+          // Check field type for asset indicators
+          isAssetField = assetTypes.some((type) =>
+            field.type?.toLowerCase().includes(type.toLowerCase())
+          );
+
+          // If not detected by type, check field name for common image patterns
+          if (!isAssetField) {
+            isAssetField = imageNamePatterns.some(
+              (pattern) =>
+                field.id?.toLowerCase().includes(pattern.toLowerCase()) ||
+                field.name?.toLowerCase().includes(pattern.toLowerCase())
+            );
+          }
+
+          // Also try to check the actual content of the field from entry if available
+          if (!isAssetField && currentEntry) {
+            try {
+              const parsedEntry = JSON.parse(currentEntry);
+              const fieldContent = parsedEntry?.fields?.[fieldId];
+
+              // Check if field contains asset reference structure
+              if (fieldContent) {
+                // Check _fieldLocales format
+                if (fieldContent._fieldLocales && fieldContent._fieldLocales['en-US']?._value) {
+                  const value = fieldContent._fieldLocales['en-US']._value;
+
+                  // Check for direct asset references
+                  if (
+                    value?.sys?.type === 'Asset' ||
+                    (value?.sys?.type === 'Link' && value?.sys?.linkType === 'Asset')
+                  ) {
+                    isAssetField = true;
+                  }
+
+                  // Check for stringified asset references
+                  if (
+                    typeof value === 'string' &&
+                    value.includes('"sys"') &&
+                    value.includes('"linkType":"Asset"')
+                  ) {
+                    isAssetField = true;
+                  }
+                }
+
+                // Check traditional field format
+                if (fieldContent['en-US']) {
+                  const value = fieldContent['en-US'];
+
+                  // Check for direct asset references
+                  if (
+                    value?.sys?.type === 'Asset' ||
+                    (value?.sys?.type === 'Link' && value?.sys?.linkType === 'Asset')
+                  ) {
+                    isAssetField = true;
+                  }
+
+                  // Check for stringified asset references
+                  if (
+                    typeof value === 'string' &&
+                    value.includes('"sys"') &&
+                    value.includes('"linkType":"Asset"')
+                  ) {
+                    isAssetField = true;
+                  }
+                }
+              }
+            } catch (e) {
+              // Silently ignore parsing errors
+            }
+          }
+
+          if (isAssetField) {
+            fieldType = 'image';
+            logger.log(`Detected image field: ${field.name} (${field.id})`);
+          }
+        }
+
         return {
           contentfulFieldId: fieldId,
           klaviyoBlockName: field?.name || fieldId,
-          fieldType: 'text', // Default to text for simplicity
+          fieldType: fieldType,
+          isAssetField: isAssetField,
         };
       });
 
@@ -215,12 +315,12 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
   return (
     <Box padding="spacingL">
       <Form>
-        <Stack spacing="spacingL" flexDirection="column">
-          <Heading>Select Fields to Map to Klaviyo</Heading>
+        <Stack spacing="spacingL" flexDirection="column" alignItems="flex-start">
+          <Heading marginBottom="none">Select Fields to Map to Klaviyo</Heading>
 
           <Text>Select the fields you want to include in the Klaviyo sync:</Text>
 
-          <Box>
+          <Box style={{ width: '100%' }}>
             <Text fontWeight="fontWeightMedium" marginBottom="spacingS">
               Available Fields
             </Text>
@@ -235,13 +335,13 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
                 padding: '8px',
                 borderRadius: '4px',
                 border: '1px solid #DADADA',
-                marginBottom: '16px',
               }}
             />
 
             <Box
               style={{
                 maxHeight: '90px',
+                minWidth: '100%',
                 overflow: 'auto',
                 border: '1px solid #EEEEEE',
                 borderRadius: '4px',
@@ -301,7 +401,7 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
             </Note>
           )}
 
-          <Flex justifyContent="space-between">
+          <Flex justifyContent="space-between" style={{ width: '100%' }}>
             <Button variant="secondary" onClick={() => sdk.close()}>
               Cancel
             </Button>

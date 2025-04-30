@@ -193,6 +193,11 @@ const parseQueryString = (url) => {
   return params;
 };
 
+const updateSyncStatus = async (entryId, contentTypeId, contentTypeName) => {
+  console.log('Updating sync status for entry', entryId, contentTypeId, contentTypeName);
+  // TODO: update the sync status for the entry
+};
+
 // Main Lambda handler
 exports.handler = async (event) => {
   console.log('--- Incoming Request ---');
@@ -201,6 +206,7 @@ exports.handler = async (event) => {
   console.log('Headers:', event.headers);
   console.log('Body:', event.body);
   console.log('------------------------');
+
   // Handle preflight OPTIONS request for CORS
   if (event.httpMethod === 'OPTIONS') {
     console.log('Handling OPTIONS preflight request');
@@ -212,6 +218,17 @@ exports.handler = async (event) => {
   }
 
   try {
+    // Handle app events for entry changes
+    if (event.path === '/api/klaviyo/entry-changes' && event.httpMethod === 'POST') {
+      console.log('Processing entry change event', event.body);
+      // update the sync status for the entry
+      const body = JSON.parse(event.body || '{}');
+      const entryId = body.sys.entryId;
+      const contentTypeId = body.sys.contentType.sys.id;
+      const contentTypeName = body.sys.contentType.sys.id;
+      await updateSyncStatus(entryId, contentTypeId, contentTypeName);
+    }
+
     // Handle OAuth callback endpoint
     if (event.path === '/auth/callback' && event.httpMethod === 'GET') {
       console.log('Processing OAuth callback');

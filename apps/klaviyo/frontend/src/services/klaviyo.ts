@@ -228,13 +228,22 @@ export class KlaviyoService {
     }
   }
 
-  async uploadImage(imageUrl: string): Promise<any> {
-    logger.log('Uploading image:', imageUrl);
+  async uploadImage(imageUrl: string, name?: string): Promise<any> {
+    logger.log('Uploading image:', imageUrl, name ? `with name: ${name}` : '');
+
+    // Default name if not provided
+    const imageName = name || 'Contentful Image';
 
     try {
+      // Ensure Contentful URLs have https: prefix
+      const fullImageUrl = imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl;
+
       const uploadedImage = await this.callApi('images', 'POST', {
-        url: imageUrl,
+        contentType: 'image',
+        url: fullImageUrl,
+        name: imageName,
       });
+
       logger.log('Uploaded image:', uploadedImage);
       return uploadedImage;
     } catch (error: any) {
@@ -251,20 +260,92 @@ export class KlaviyoService {
       // First, check if we're dealing with the new SDK format
       if (entry.fields[fieldId]?._fieldLocales) {
         logger.log(`Field ${fieldId} has _fieldLocales format`);
-        const assetData = entry.fields[fieldId]._fieldLocales['en-US']._value;
+
+        // Get the locale value - prefer 'en-US' or use the first available locale
+        const localeKeys = Object.keys(entry.fields[fieldId]._fieldLocales);
+        const locale = localeKeys.includes('en-US') ? 'en-US' : localeKeys[0];
+
+        if (!locale) {
+          logger.error(`No locales found for field ${fieldId}`);
+          return null;
+        }
+
+        const fieldLocale = entry.fields[fieldId]._fieldLocales[locale];
+        const assetData = fieldLocale?._value;
+
         logger.log(`Asset data from _fieldLocales:`, assetData);
 
-        // If it's a string, it might be a JSON string that needs parsing
-        if (typeof assetData === 'string' && assetData.includes('"sys"')) {
-          try {
-            logger.log(`Asset data is a JSON string:`, assetData);
-            const parsed = JSON.parse(assetData);
+        // If the field has _value that contains a sys property (direct reference)
+        if (assetData?.sys) {
+          if (
+            assetData.sys.type === 'Link' &&
+            assetData.sys.linkType === 'Asset' &&
+            assetData.sys.id
+          ) {
+            const assetId = assetData.sys.id;
+            logger.log(`Found direct asset reference with ID: ${assetId}`);
 
-            // Check for Link type references to assets
-            if (parsed.sys?.type === 'Link' && parsed.sys?.linkType === 'Asset') {
-              // This is a link to an asset, but we need to resolve it
-              logger.log('Asset link found but needs to be resolved:', assetData);
-              return null;
+            // Try to use the spaceId from entry.sys.space.sys.id if available
+            const spaceId = entry.sys?.space?.sys?.id;
+            if (spaceId) {
+              const assetUrl = `https://images.ctfassets.net/${spaceId}/${assetId}/asset.jpg`;
+              logger.log(`Constructed asset URL: ${assetUrl}`);
+              return assetUrl;
+            }
+
+            // If we can't get the space ID from the entry, try to extract it from localStorage
+            // This is a fallback mechanism
+            const envSpaceId = localStorage.getItem('contentful_space_id');
+            if (envSpaceId) {
+              const assetUrl = `https://images.ctfassets.net/${envSpaceId}/${assetId}/asset.jpg`;
+              logger.log(`Constructed asset URL with stored space ID: ${assetUrl}`);
+              return assetUrl;
+            }
+
+            // Store the asset ID for use elsewhere even if we can't construct the URL now
+            logger.log(`Could not construct URL, but asset ID is: ${assetId}`);
+            return `asset:${assetId}`;
+          }
+        }
+
+        // If it's a string, it might be a JSON string that needs parsing
+        if (typeof assetData === 'string') {
+          try {
+            // Check for stringified JSON containing a Link reference
+            if (
+              assetData.includes('"sys"') &&
+              assetData.includes('"type":"Link"') &&
+              assetData.includes('"linkType":"Asset"')
+            ) {
+              logger.log(`Found stringified asset reference: ${assetData}`);
+              const parsed = JSON.parse(assetData);
+
+              // Check for Link type references to assets
+              if (parsed.sys?.type === 'Link' && parsed.sys?.linkType === 'Asset') {
+                // Unresolved asset reference
+                const assetId = parsed.sys.id;
+                logger.log(`Unresolved Asset link reference with ID: ${assetId}`);
+
+                // Try to use the spaceId from entry.sys.space.sys.id if available
+                const spaceId = entry.sys?.space?.sys?.id;
+                if (spaceId && assetId) {
+                  const assetUrl = `https://images.ctfassets.net/${spaceId}/${assetId}/asset.jpg`;
+                  logger.log(`Constructed asset URL: ${assetUrl}`);
+                  return assetUrl;
+                }
+
+                // Fallback to using localStorage
+                const envSpaceId = localStorage.getItem('contentful_space_id');
+                if (envSpaceId && assetId) {
+                  const assetUrl = `https://images.ctfassets.net/${envSpaceId}/${assetId}/asset.jpg`;
+                  logger.log(`Constructed asset URL with stored space ID: ${assetUrl}`);
+                  return assetUrl;
+                }
+
+                // Store the asset ID for use elsewhere even if we can't construct the URL now
+                logger.log(`Could not construct URL, but asset ID is: ${assetId}`);
+                return `asset:${assetId}`;
+              }
             }
           } catch (e) {
             // Not a valid JSON string, continue with other checks
@@ -272,10 +353,107 @@ export class KlaviyoService {
           }
         }
 
+        // Handle complex nested structure in _fieldLocales
+        // This is a special case for the structure observed in the logs
+        if (fieldLocale && typeof fieldLocale === 'object') {
+          // Try to extract the asset ID from various possible paths in the structure
+          let assetId = null;
+
+          // Search for asset ID in _value.sys path
+          if (
+            fieldLocale._value?.sys?.id &&
+            (fieldLocale._value.sys.linkType === 'Asset' || fieldLocale._value.sys.type === 'Asset')
+          ) {
+            assetId = fieldLocale._value.sys.id;
+            logger.log(`Found asset ID in _value.sys: ${assetId}`);
+          }
+
+          // Check for nested sys objects that might contain the asset ID
+          if (!assetId && typeof fieldLocale === 'object') {
+            // Try to find any sys object with linkType=Asset recursively
+            const findAssetId = (obj: any, depth = 0): string | null => {
+              if (!obj || typeof obj !== 'object' || depth > 5) return null;
+
+              if (
+                obj.sys &&
+                obj.sys.id &&
+                (obj.sys.linkType === 'Asset' || obj.sys.type === 'Asset')
+              ) {
+                return obj.sys.id;
+              }
+
+              for (const key in obj) {
+                if (typeof obj[key] === 'object') {
+                  const foundId = findAssetId(obj[key], depth + 1);
+                  if (foundId) return foundId;
+                }
+              }
+
+              return null;
+            };
+
+            assetId = findAssetId(fieldLocale);
+            if (assetId) {
+              logger.log(`Found asset ID through recursive search: ${assetId}`);
+            }
+          }
+
+          if (assetId) {
+            // Try to get space ID from different sources
+            const spaceId =
+              entry.sys?.space?.sys?.id || localStorage.getItem('contentful_space_id');
+
+            if (spaceId) {
+              const assetUrl = `https://images.ctfassets.net/${spaceId}/${assetId}/asset.jpg`;
+              logger.log(`Constructed asset URL for complex structure: ${assetUrl}`);
+              return assetUrl;
+            }
+
+            // Store the asset ID for use elsewhere even if we can't construct the URL now
+            logger.log(`Could not construct URL, but asset ID is: ${assetId}`);
+            return `asset:${assetId}`;
+          }
+        }
+
         // If it's an object with fields property, it might be a resolved asset
         if (assetData?.fields?.file?.['en-US']?.url) {
           logger.log(`Found file URL in _fieldLocales:`, assetData.fields.file['en-US'].url);
           return `https:${assetData.fields.file['en-US'].url}`;
+        }
+      }
+
+      // Check for direct stringified JSON in the field value
+      const directFieldValue = entry.fields[fieldId]?.['en-US'];
+      if (typeof directFieldValue === 'string' && directFieldValue.includes('"sys"')) {
+        try {
+          logger.log(`Found potential stringified asset JSON: ${directFieldValue}`);
+          const parsed = JSON.parse(directFieldValue);
+
+          if (parsed.sys?.type === 'Link' && parsed.sys?.linkType === 'Asset' && parsed.sys?.id) {
+            const assetId = parsed.sys.id;
+            logger.log(`Parsed stringified asset reference with ID: ${assetId}`);
+
+            // Try to use the spaceId from entry.sys.space.sys.id if available
+            const spaceId = entry.sys?.space?.sys?.id;
+            if (spaceId) {
+              const assetUrl = `https://images.ctfassets.net/${spaceId}/${assetId}/asset.jpg`;
+              logger.log(`Constructed asset URL: ${assetUrl}`);
+              return assetUrl;
+            }
+
+            // Fallback to localStorage
+            const envSpaceId = localStorage.getItem('contentful_space_id');
+            if (envSpaceId) {
+              const assetUrl = `https://images.ctfassets.net/${envSpaceId}/${assetId}/asset.jpg`;
+              logger.log(`Constructed asset URL with stored space ID: ${assetUrl}`);
+              return assetUrl;
+            }
+
+            // Store the asset ID for use elsewhere
+            return `asset:${assetId}`;
+          }
+        } catch (e) {
+          logger.log(`Error parsing potential asset JSON: ${e}`);
         }
       }
 
@@ -305,20 +483,112 @@ export class KlaviyoService {
           : entry.fields[fieldId]['en-US'].url;
       }
 
-      // Check for Link references to assets that have been resolved
+      // Direct sys structure check - for unresolved asset references
       const fieldValue = entry.fields[fieldId]?.['en-US'];
-      if (
-        fieldValue &&
-        fieldValue.sys &&
-        fieldValue.sys.type === 'Link' &&
-        fieldValue.sys.linkType === 'Asset'
-      ) {
-        logger.log(`Found Link reference to Asset but URL not available`);
-        // We can't extract the URL directly, but we can log the asset ID for debugging
-        if (fieldValue.sys.id) {
-          logger.log(`Asset ID from Link: ${fieldValue.sys.id}`);
+      if (fieldValue && typeof fieldValue === 'object') {
+        // Check specifically for direct Link references in sys
+        if (
+          fieldValue.sys?.type === 'Link' &&
+          fieldValue.sys?.linkType === 'Asset' &&
+          fieldValue.sys?.id
+        ) {
+          const assetId = fieldValue.sys.id;
+          logger.log(`Found unresolved Link reference to Asset with ID: ${assetId}`);
+
+          // Try to use the spaceId from entry.sys.space.sys.id if available
+          const spaceId = entry.sys?.space?.sys?.id;
+          if (spaceId) {
+            const assetUrl = `https://images.ctfassets.net/${spaceId}/${assetId}/asset.jpg`;
+            logger.log(`Constructed asset URL: ${assetUrl}`);
+            return assetUrl;
+          }
+
+          // Fallback to localStorage
+          const envSpaceId = localStorage.getItem('contentful_space_id');
+          if (envSpaceId) {
+            const assetUrl = `https://images.ctfassets.net/${envSpaceId}/${assetId}/asset.jpg`;
+            logger.log(`Constructed asset URL with stored space ID: ${assetUrl}`);
+            return assetUrl;
+          }
+
+          // Store the asset ID for use elsewhere
+          return `asset:${assetId}`;
         }
+
+        // Check for direct asset with sys but no Link type
+        if (fieldValue.sys?.type === 'Asset' && fieldValue.sys?.id) {
+          const assetId = fieldValue.sys.id;
+          logger.log(`Found direct Asset reference with ID: ${assetId}`);
+
+          // If it's a direct Asset (not a Link) and has file.url, we can extract the URL
+          if (fieldValue.fields?.file?.url) {
+            logger.log(`Found URL in direct Asset reference: ${fieldValue.fields.file.url}`);
+            const url = fieldValue.fields.file.url;
+            return url.startsWith('//') ? `https:${url}` : url;
+          }
+
+          // We found an Asset reference but couldn't get the URL
+          logger.log(`Asset reference found but couldn't extract URL. Asset ID: ${assetId}`);
+
+          // Try to use the spaceId from entry.sys.space.sys.id if available
+          const spaceId = entry.sys?.space?.sys?.id;
+          if (spaceId) {
+            const assetUrl = `https://images.ctfassets.net/${spaceId}/${assetId}/asset.jpg`;
+            logger.log(`Constructed asset URL: ${assetUrl}`);
+            return assetUrl;
+          }
+
+          // Fallback to localStorage
+          const envSpaceId = localStorage.getItem('contentful_space_id');
+          if (envSpaceId) {
+            const assetUrl = `https://images.ctfassets.net/${envSpaceId}/${assetId}/asset.jpg`;
+            logger.log(`Constructed asset URL with stored space ID: ${assetUrl}`);
+            return assetUrl;
+          }
+
+          // Store the asset ID for use elsewhere
+          return `asset:${assetId}`;
+        }
+      }
+
+      // Last resort: try to extract asset ID from any structure
+      const extractAssetIdFromObject = (obj: any): string | null => {
+        if (!obj || typeof obj !== 'object') return null;
+
+        // Check if this object is an asset reference
+        if (obj.sys?.type === 'Link' && obj.sys?.linkType === 'Asset' && obj.sys?.id) {
+          return obj.sys.id;
+        }
+
+        if (obj.sys?.type === 'Asset' && obj.sys?.id) {
+          return obj.sys.id;
+        }
+
+        // Recursively check all object properties
+        for (const key in obj) {
+          if (typeof obj[key] === 'object') {
+            const result = extractAssetIdFromObject(obj[key]);
+            if (result) return result;
+          }
+        }
+
         return null;
+      };
+
+      const assetId = extractAssetIdFromObject(entry.fields[fieldId]);
+      if (assetId) {
+        logger.log(`Extracted asset ID through deep search: ${assetId}`);
+
+        const spaceId = entry.sys?.space?.sys?.id || localStorage.getItem('contentful_space_id');
+
+        if (spaceId) {
+          const assetUrl = `https://images.ctfassets.net/${spaceId}/${assetId}/asset.jpg`;
+          logger.log(`Constructed asset URL from extracted ID: ${assetUrl}`);
+          return assetUrl;
+        }
+
+        // Store the asset ID for use elsewhere
+        return `asset:${assetId}`;
       }
 
       logger.log(
@@ -576,276 +846,365 @@ export class KlaviyoService {
   async syncContent(mappings: FieldMapping[], entry: any) {
     logger.log(`Starting content sync with ${mappings.length} mappings`);
 
-    // First, log all the mappings we received
-    for (const mapping of mappings) {
-      logger.log(
-        `Mapping: field=${mapping.contentfulFieldId}, type=${mapping.fieldType}, block=${mapping.klaviyoBlockName}`
-      );
-    }
+    const promises: Promise<any>[] = [];
 
-    const promises = [];
     for (const mapping of mappings) {
-      try {
-        logger.log(`Processing mapping: ${JSON.stringify(mapping)}`);
+      let content: any = mapping.value;
 
+      logger.log(`Processing field ${mapping.contentfulFieldId} with type ${mapping.fieldType}`);
+
+      if (
+        mapping.fieldType === 'text' ||
+        mapping.fieldType === 'entry' ||
+        mapping.fieldType === 'reference-array'
+      ) {
+        // Check if content is null or undefined
+        if (content === null || content === undefined) {
+          logger.log(`Content is null or undefined for ${mapping.contentfulFieldId}, skipping`);
+          continue;
+        }
+
+        // Check if content is a boolean or number, convert to string for handling
+        if (typeof content === 'boolean' || typeof content === 'number') {
+          content = String(content);
+        }
+
+        // Check if content is an array, convert to comma-separated string for better display
+        if (Array.isArray(content)) {
+          logger.log(`Converting array to string for ${mapping.contentfulFieldId}`);
+          content = content.join(', ');
+        }
+
+        // Check if this is a rich text object with content array and nodeType document
         if (
-          mapping.fieldType === 'text' ||
-          mapping.fieldType === 'entry' ||
-          mapping.fieldType === 'reference-array'
+          typeof content === 'object' &&
+          (content.nodeType === 'document' ||
+            (content.content &&
+              Array.isArray(content.content) &&
+              (content.nodeType === 'document' || !content.nodeType)))
         ) {
-          let content;
+          logger.log(`Found rich text object: ${JSON.stringify(content).substring(0, 100)}...`);
 
-          // Handle different SDK versions for getting field values
-          if (entry.fields[mapping.contentfulFieldId]?._fieldLocales) {
-            // New SDK
-            content = entry.fields[mapping.contentfulFieldId]._fieldLocales['en-US']._value || '';
-          } else {
-            // Old SDK
-            content = entry.fields[mapping.contentfulFieldId]?.['en-US'] || '';
-          }
-
-          logger.log(`Content type: ${typeof content}`, content);
-
-          // Check if this is a rich text object with content array and nodeType document
-          if (
-            typeof content === 'object' &&
-            (content.nodeType === 'document' ||
-              (content.content &&
-                Array.isArray(content.content) &&
-                (content.nodeType === 'document' || !content.nodeType)))
-          ) {
-            logger.log(`Found rich text object: ${JSON.stringify(content).substring(0, 100)}...`);
-
-            // Convert rich text object to HTML using helper function
-            let html = '';
-            try {
-              // If the object has a direct nodeType of document, use it directly
-              if (content.nodeType === 'document') {
-                html = this.richTextToHtml(content);
-              }
-              // If it's the structure with content array but missing nodeType, add it
-              else {
-                html = this.richTextToHtml({
-                  nodeType: 'document',
-                  data: content.data || {},
-                  content: content.content,
-                });
-              }
-
-              logger.log(`Converted rich text to HTML: ${html.substring(0, 100)}...`);
-
-              promises.push(
-                this.createUniversalContentBlock(mapping.klaviyoBlockName, 'text', [
-                  this.createRichTextFieldMapping(
-                    mapping.contentfulFieldId,
-                    mapping.klaviyoBlockName,
-                    html
-                  ),
-                ])
-              );
-              continue;
-            } catch (error) {
-              logger.error(`Error converting rich text to HTML:`, error);
-              // If HTML conversion fails, fall back to JSON stringify
-              content = JSON.stringify(content);
+          // Convert rich text object to HTML using helper function
+          let html = '';
+          try {
+            // If the object has a direct nodeType of document, use it directly
+            if (content.nodeType === 'document') {
+              html = this.richTextToHtml(content);
             }
-          }
+            // If it's the structure with content array but missing nodeType, add it
+            else {
+              html = this.richTextToHtml({
+                nodeType: 'document',
+                data: content.data || {},
+                content: content.content,
+              });
+            }
 
-          // Special handling for HTML content (converted from rich text)
-          if (
-            typeof content === 'string' &&
-            (content.startsWith('<p>') ||
-              content.startsWith('<h') ||
-              content.includes('</p>') ||
-              content.includes('</h'))
-          ) {
-            promises.push(
-              this.createUniversalContentBlock(mapping.klaviyoBlockName, 'html', [
-                this.createFieldMapping(
-                  mapping.contentfulFieldId,
-                  mapping.klaviyoBlockName,
-                  content
-                ),
-              ])
-            );
-            continue;
-          }
+            logger.log(`Converted rich text to HTML: ${html.substring(0, 100)}...`);
 
-          // Special handling for location data
-          const formattedLocation = this.formatLocationData(content);
-          if (formattedLocation !== null) {
-            logger.log(`Found and formatted location data: ${formattedLocation}`);
-
-            // Use the formatted location string
             promises.push(
               this.createUniversalContentBlock(mapping.klaviyoBlockName, 'text', [
-                this.createFieldMapping(
+                this.createRichTextFieldMapping(
                   mapping.contentfulFieldId,
                   mapping.klaviyoBlockName,
-                  formattedLocation
+                  html
                 ),
               ])
             );
             continue;
-          }
-
-          // Special handling for JSON objects
-          const formattedJson = this.formatJsonObject(content);
-          if (formattedJson !== null) {
-            logger.log(
-              `Found and formatted JSON object: ${formattedJson.substring(0, 100)}${
-                formattedJson.length > 100 ? '...' : ''
-              }`
-            );
-
-            // Use the formatted JSON string
-            promises.push(
-              this.createUniversalContentBlock(mapping.klaviyoBlockName, 'text', [
-                this.createFieldMapping(
-                  mapping.contentfulFieldId,
-                  mapping.klaviyoBlockName,
-                  formattedJson
-                ),
-              ])
-            );
-            continue;
-          }
-
-          // Special handling for reference arrays
-          // Check if this is a processed reference array (already converted to string by onEntryUpdate)
-          if (
-            typeof content === 'string' &&
-            (content.includes('Referenced entry:') ||
-              content.includes('[Unresolved reference:') ||
-              content.includes(', '))
-          ) {
-            logger.log(`Found processed reference array content: ${content.substring(0, 100)}...`);
-            // This is already processed by onEntryUpdate, so we can use it directly
-          }
-          // Check for JSON strings of entry references in case they weren't fully processed
-          else if (
-            typeof content === 'string' &&
-            content.includes('"sys"') &&
-            content.includes('"linkType":"Entry"')
-          ) {
-            logger.log(`Found Entry references in content: ${content.substring(0, 100)}...`);
-            logger.log(`This content was expected to be resolved by onEntryUpdate`);
-            // We use the content as is, since resolving references should have happened in onEntryUpdate
-          } else if (Array.isArray(content)) {
-            // If it's an array, check if it's an array of references (which should have been processed)
-            if (
-              content.length > 0 &&
-              content.some((item) => item?.sys?.type === 'Link' && item?.sys?.linkType === 'Entry')
-            ) {
-              logger.log(`Found unprocessed array of references:`, content);
-              // Since this should have been processed in onEntryUpdate, we'll just join the sys.id values
-              const refIds = content
-                .filter((item) => item?.sys?.id)
-                .map((item) => `Reference ID: ${item.sys.id}`)
-                .join(', ');
-              content = refIds || JSON.stringify(content);
-            } else {
-              // For other arrays, stringify normally
-              logger.log(`Regular array content detected, stringifying:`, content);
-              content = JSON.stringify(content);
-            }
-          } else if (typeof content === 'object' && content !== null) {
-            // If it's any other object, stringify it
-            logger.log(`Object content detected, stringifying:`, content);
+          } catch (error) {
+            logger.error(`Error converting rich text to HTML:`, error);
+            // If HTML conversion fails, fall back to JSON stringify
             content = JSON.stringify(content);
           }
+        }
 
+        // Handle explicitly formatted JSON object (helps with debugging/formatting)
+        // If it's an object/array, try to stringify it for better display
+        let formattedJson = null;
+        if (typeof content === 'object') {
+          try {
+            formattedJson = JSON.stringify(content, null, 2);
+          } catch (error) {
+            logger.error(`Error stringifying object:`, error);
+          }
+        }
+
+        if (formattedJson !== null) {
           logger.log(
-            `Syncing ${mapping.fieldType} field:`,
-            mapping.klaviyoBlockName,
-            typeof content === 'string' && content.length > 100
-              ? content.substring(0, 100) + '...'
-              : content
+            `Found and formatted JSON object: ${formattedJson.substring(0, 100)}${
+              formattedJson.length > 100 ? '...' : ''
+            }`
           );
 
+          // Use the formatted JSON string
           promises.push(
             this.createUniversalContentBlock(mapping.klaviyoBlockName, 'text', [
-              this.createFieldMapping(mapping.contentfulFieldId, mapping.klaviyoBlockName, content),
+              this.createFieldMapping(
+                mapping.contentfulFieldId,
+                mapping.klaviyoBlockName,
+                formattedJson
+              ),
             ])
           );
-        } else if (mapping.fieldType === 'image') {
-          logger.log('Processing image field:', mapping.contentfulFieldId);
+          continue;
+        }
+
+        // Special handling for reference arrays
+        // Check if this is a processed reference array (already converted to string by onEntryUpdate)
+        if (
+          typeof content === 'string' &&
+          (content.includes('Referenced entry:') ||
+            content.includes('[Unresolved reference:') ||
+            content.includes(', '))
+        ) {
+          logger.log(`Found processed reference array content: ${content.substring(0, 100)}...`);
+          // This is already processed by onEntryUpdate, so we can use it directly
+        }
+
+        // Handle JSON strings that might need formatting (for better display)
+        // If it's a JSON string that wasn't parsed earlier, try to parse and reformat it
+        if (typeof content === 'string' && content.startsWith('{') && content.endsWith('}')) {
+          try {
+            const parsed = JSON.parse(content);
+
+            // Check if this is an unresolved asset reference
+            if (parsed.sys?.type === 'Link' && parsed.sys?.linkType === 'Asset' && parsed.sys?.id) {
+              logger.log(`Found unresolved asset reference in text field: ${parsed.sys.id}`);
+              content = `[Image reference: ${parsed.sys.id}]`;
+            } else {
+              // Regular JSON formatting
+              const formatted = JSON.stringify(parsed, null, 2);
+              logger.log(`Reformatted JSON string: ${formatted.substring(0, 100)}...`);
+              content = formatted;
+            }
+          } catch (error) {
+            // Not valid JSON, continue with original content
+            logger.log(`String looks like JSON but couldn't be parsed, using as-is`);
+          }
+        }
+
+        logger.log(
+          `Syncing ${mapping.fieldType} field:`,
+          mapping.klaviyoBlockName,
+          typeof content === 'string' && content.length > 100
+            ? content.substring(0, 100) + '...'
+            : content
+        );
+
+        promises.push(
+          this.createUniversalContentBlock(mapping.klaviyoBlockName, 'text', [
+            this.createFieldMapping(mapping.contentfulFieldId, mapping.klaviyoBlockName, content),
+          ])
+        );
+      } else if (mapping.fieldType === 'image') {
+        logger.log('Processing image field:', mapping.contentfulFieldId);
+
+        // IMPORTANT: Always use the image API endpoint for image fields
+        let imageUrl = null;
+        let assetId = null;
+
+        // Get the entry's space ID
+        const spaceId = entry.sys?.space?.sys?.id || localStorage.getItem('contentful_space_id');
+
+        if (typeof content === 'string') {
           logger.log(
-            'Field data:',
-            JSON.stringify(entry.fields[mapping.contentfulFieldId], null, 2)
+            `Image field has string value: ${
+              content.length > 100 ? content.substring(0, 100) + '...' : content
+            }`
           );
 
-          // Try to extract image URL
-          const imageUrl = this.getAssetUrl(entry, mapping.contentfulFieldId);
+          // Case 1: Check for asset: prefix which contains the asset ID
+          if (content.startsWith('asset:')) {
+            assetId = content.substring(6); // Remove the 'asset:' prefix
+            logger.log(`Extracted asset ID from asset: prefix: ${assetId}`);
 
-          if (imageUrl) {
-            logger.log('Uploading image URL to Klaviyo:', mapping.klaviyoBlockName, imageUrl);
-            promises.push(this.uploadImage(imageUrl));
-          } else {
-            logger.warn(`Could not extract image URL for field ${mapping.contentfulFieldId}`);
-
-            // If we have a JSON string containing a sys.id reference, parse it and log
-            try {
-              const fieldData = entry.fields[mapping.contentfulFieldId];
-              let assetReference;
-
-              // Try to get the asset reference based on field structure
-              if (fieldData?._fieldLocales?.['en-US']?._value) {
-                assetReference = fieldData._fieldLocales['en-US']._value;
-              } else if (fieldData?.['en-US']) {
-                assetReference = fieldData['en-US'];
-              }
-
-              // If we have a string that looks like a JSON asset reference
-              if (typeof assetReference === 'string' && assetReference.includes('"sys"')) {
-                try {
-                  const assetData = JSON.parse(assetReference);
-                  if (
-                    assetData.sys?.type === 'Link' &&
-                    assetData.sys?.linkType === 'Asset' &&
-                    assetData.sys?.id
-                  ) {
-                    logger.error(
-                      `Asset reference found but couldn't be resolved: ${assetData.sys.id}`
-                    );
-                    logger.error(
-                      'This indicates that the asset resolution in onEntryUpdate failed.'
-                    );
-                    logger.error(
-                      'The asset needs to be resolved before reaching the KlaviyoService.'
-                    );
-                  }
-                  // Check for entry references as well
-                  else if (
-                    assetData.sys?.type === 'Link' &&
-                    assetData.sys?.linkType === 'Entry' &&
-                    assetData.sys?.id
-                  ) {
-                    logger.error(`Entry reference found in image field: ${assetData.sys.id}`);
-                    logger.error(
-                      'Entry references should be resolved to text content before reaching this point.'
-                    );
-                    logger.error('Consider changing the field type to "entry" instead of "image".');
-                  }
-                } catch (e) {
-                  // Not a valid JSON or not an asset reference
-                  logger.error('Error parsing potential asset/entry reference:', e);
-                }
-              } else {
-                logger.error('Unrecognized asset format:', assetReference);
-              }
-            } catch (e) {
-              logger.error('Error analyzing field data:', e);
+            if (spaceId) {
+              imageUrl = `https://images.ctfassets.net/${spaceId}/${assetId}/asset.jpg`;
+              logger.log(`Constructed asset URL from asset: prefix: ${imageUrl}`);
             }
           }
+          // Case 2: It's already a URL
+          else if (content.startsWith('http') || content.startsWith('//')) {
+            imageUrl = content.startsWith('//') ? `https:${content}` : content;
+            logger.log(`Using direct URL: ${imageUrl}`);
+          }
+          // Case 3: It's a stringified JSON with sys.id
+          else if (
+            content.includes('"sys"') &&
+            (content.includes('"type":"Link"') || content.includes('"type":"Asset"')) &&
+            content.includes('"linkType":"Asset"')
+          ) {
+            try {
+              const parsed = JSON.parse(content);
+              if (
+                (parsed.sys?.type === 'Link' &&
+                  parsed.sys?.linkType === 'Asset' &&
+                  parsed.sys?.id) ||
+                (parsed.sys?.type === 'Asset' && parsed.sys?.id)
+              ) {
+                assetId = parsed.sys.id;
+                logger.log(`Extracted asset ID from JSON string: ${assetId}`);
+
+                if (spaceId) {
+                  imageUrl = `https://images.ctfassets.net/${spaceId}/${assetId}/asset.jpg`;
+                  logger.log(`Constructed asset URL from stringified JSON: ${imageUrl}`);
+                }
+              }
+            } catch (e) {
+              logger.error(`Error parsing potential asset JSON string:`, e);
+            }
+          }
+        }
+        // Case 4: Direct object with sys property
+        else if (typeof content === 'object' && content?.sys) {
+          if (
+            (content.sys.type === 'Link' && content.sys.linkType === 'Asset' && content.sys.id) ||
+            (content.sys.type === 'Asset' && content.sys.id)
+          ) {
+            assetId = content.sys.id;
+            logger.log(`Found direct asset reference with ID: ${assetId}`);
+
+            if (spaceId) {
+              imageUrl = `https://images.ctfassets.net/${spaceId}/${assetId}/asset.jpg`;
+              logger.log(`Constructed asset URL from direct reference: ${imageUrl}`);
+            }
+          } else if (content.sys.type === 'Asset' && content.fields?.file?.url) {
+            const fileUrl = content.fields.file.url;
+            imageUrl = fileUrl.startsWith('//') ? `https:${fileUrl}` : fileUrl;
+            logger.log(`Found URL in direct asset: ${imageUrl}`);
+          }
+        }
+
+        // If we still don't have an image URL, try to extract from field data
+        if (!imageUrl) {
+          // Check field data in the entry
+          const fieldData = entry.fields[mapping.contentfulFieldId];
+
+          // Look for _resolvedUrl first (added by our asset resolution code)
+          if (fieldData?.['en-US']?._resolvedUrl) {
+            imageUrl = fieldData['en-US']._resolvedUrl;
+            logger.log(`Found _resolvedUrl in field data: ${imageUrl}`);
+          } else if (fieldData?._fieldLocales?.['en-US']?._value?._resolvedUrl) {
+            imageUrl = fieldData._fieldLocales['en-US']._value._resolvedUrl;
+            logger.log(`Found _resolvedUrl in _fieldLocales: ${imageUrl}`);
+          }
+          // Try to parse the field value if it's a string
+          else if (
+            typeof fieldData?.['en-US'] === 'string' &&
+            fieldData['en-US'].includes('"sys"')
+          ) {
+            try {
+              const parsed = JSON.parse(fieldData['en-US']);
+              if (
+                (parsed.sys?.type === 'Link' &&
+                  parsed.sys?.linkType === 'Asset' &&
+                  parsed.sys?.id) ||
+                (parsed.sys?.type === 'Asset' && parsed.sys?.id)
+              ) {
+                assetId = parsed.sys.id;
+                logger.log(`Extracted asset ID from field data JSON: ${assetId}`);
+
+                if (spaceId) {
+                  imageUrl = `https://images.ctfassets.net/${spaceId}/${assetId}/asset.jpg`;
+                  logger.log(`Constructed asset URL from field data: ${imageUrl}`);
+                }
+              }
+            } catch (e) {
+              logger.error(`Error parsing field data JSON:`, e);
+            }
+          }
+          // Last resort: try getAssetUrl helper
+          else {
+            let assetUrlResult = this.getAssetUrl(entry, mapping.contentfulFieldId);
+            logger.log(`Used getAssetUrl helper, result: ${assetUrlResult || 'null'}`);
+
+            // Check if the result is an asset ID marker
+            if (assetUrlResult && assetUrlResult.startsWith('asset:')) {
+              assetId = assetUrlResult.substring(6); // Remove the 'asset:' prefix
+              logger.log(`Extracted asset ID from getAssetUrl result: ${assetId}`);
+
+              if (spaceId) {
+                imageUrl = `https://images.ctfassets.net/${spaceId}/${assetId}/asset.jpg`;
+                logger.log(`Constructed asset URL from asset ID: ${imageUrl}`);
+              }
+            } else if (assetUrlResult) {
+              imageUrl = assetUrlResult;
+            }
+          }
+        }
+
+        // If we have a URL, upload it using the image API
+        if (imageUrl) {
+          logger.log(`Uploading image to Klaviyo using image API: ${imageUrl}`);
+          promises.push(this.uploadImage(imageUrl, mapping.klaviyoBlockName));
+        }
+        // If we only have an asset ID, try to construct a URL
+        else if (assetId && spaceId) {
+          const constructedUrl = `https://images.ctfassets.net/${spaceId}/${assetId}/asset.jpg`;
+          logger.log(`Uploading constructed URL to Klaviyo: ${constructedUrl}`);
+          promises.push(this.uploadImage(constructedUrl, mapping.klaviyoBlockName));
         } else {
-          logger.warn(
-            `Unknown field type "${mapping.fieldType}" for field ${mapping.contentfulFieldId}`
+          logger.error(`Could not determine image URL for field ${mapping.contentfulFieldId}`);
+
+          // Extract any available asset ID from the error context
+          let referenceId = assetId;
+
+          // If we don't have an asset ID yet, try to extract it from content
+          if (!referenceId && typeof content === 'object' && content?.sys?.id) {
+            referenceId = content.sys.id;
+          }
+
+          // If we still don't have an ID, check for a deep asset reference
+          if (!referenceId) {
+            const extractAssetId = (obj: any): string | null => {
+              if (!obj || typeof obj !== 'object') return null;
+
+              if (
+                obj.sys?.id &&
+                (obj.sys?.type === 'Asset' ||
+                  (obj.sys?.type === 'Link' && obj.sys?.linkType === 'Asset'))
+              ) {
+                return obj.sys.id;
+              }
+
+              for (const key in obj) {
+                if (typeof obj[key] === 'object') {
+                  const result = extractAssetId(obj[key]);
+                  if (result) return result;
+                }
+              }
+
+              return null;
+            };
+
+            referenceId =
+              extractAssetId(content) ||
+              extractAssetId(entry.fields[mapping.contentfulFieldId]) ||
+              'unknown';
+          }
+
+          // Instead of skipping, create a text message explaining the issue
+          const errorMessage = `[Image could not be resolved. Asset Reference: ${
+            referenceId || 'unknown'
+          }]`;
+
+          logger.log(`Creating text placeholder for unresolved image: ${errorMessage}`);
+          promises.push(
+            this.createUniversalContentBlock(mapping.klaviyoBlockName, 'text', [
+              this.createFieldMapping(
+                mapping.contentfulFieldId,
+                mapping.klaviyoBlockName,
+                errorMessage
+              ),
+            ])
           );
         }
-      } catch (error) {
-        logger.error(`Error syncing field ${mapping.contentfulFieldId}:`, error);
-        // Continue with next mapping instead of stopping the entire process
+      } else {
+        logger.warn(
+          `Unknown field type "${mapping.fieldType}" for field ${mapping.contentfulFieldId}`
+        );
       }
     }
 

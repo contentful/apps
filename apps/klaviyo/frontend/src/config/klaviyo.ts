@@ -55,6 +55,7 @@ export interface FieldMapping {
   type: string;
   severity: string;
   value: any;
+  isAssetField?: boolean;
 }
 
 export interface EntryConfig {
