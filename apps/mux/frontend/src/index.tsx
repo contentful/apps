@@ -1,6 +1,6 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
 
-import React from 'react';
+import React, { ChangeEvent, createRef } from 'react';
 import { render } from 'react-dom';
 
 import { init, locations, AppExtensionSDK, FieldExtensionSDK } from '@contentful/app-sdk';
@@ -29,6 +29,7 @@ import Menu from './components/menu';
 import PlayerCode from './components/playercode';
 import CountryDatalist from './components/countryDatalist';
 import CaptionsList from './components/captionsList';
+import ModalUploadAsset, { ModalData } from './components/modalUploadAsset';
 
 import {
   type InstallationParams,
@@ -51,6 +52,8 @@ interface SignedTokens {
 export class App extends React.Component<AppProps, AppState> {
   apiClient: ApiClient;
   cmaClient: PlainClientAPI;
+  resolveRef = createRef<(value: string|null) => void>();
+  muxUploaderRef = createRef<any>();
 
   constructor(props: AppProps) {
     super(props);
@@ -85,6 +88,9 @@ export class App extends React.Component<AppProps, AppState> {
         field && ('playbackId' in field || 'signedPlaybackId' in field)
           ? field.playbackId || field.signedPlaybackId
           : undefined,
+      modalUploadAssetVisible: false,
+      file: null,
+      showMuxUploaderUI: false,
     };
   }
 
@@ -319,7 +325,46 @@ export class App extends React.Component<AppProps, AppState> {
     await this.pollForAssetDetails();
   };
 
-  getUploadUrl = async () => {
+  handleFile = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      this.setState({ file: e.target.files[0] }); 
+      this.setState({ modalUploadAssetVisible: true }); 
+    }
+  };
+
+  handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (e.dataTransfer.files?.[0]) {
+      this.setState({ file: e.dataTransfer.files[0] }); 
+      this.setState({ modalUploadAssetVisible: true }); 
+    }
+  };
+
+
+  onConfirmModal = async (options: ModalData) => {
+    const muxUploadUrl = await this.getUploadUrl(options)
+    const uploader = this.muxUploaderRef.current!;
+    uploader.endpoint = muxUploadUrl;
+
+    uploader.dispatchEvent(
+      new CustomEvent('file-ready', {
+        bubbles: true,
+        composed: true,
+        detail: this.state.file,
+      })
+    );
+
+    this.setState({ showMuxUploaderUI: true });
+    this.setState({ modalUploadAssetVisible: false }); 
+  }
+
+  onCloseModal = async () => {
+    this.resolveRef.current?.(null)
+    this.setState({ file: null }); 
+    this.setState({ modalUploadAssetVisible: false }); 
+  }
+
+  getUploadUrl = async (options: ModalData) => {
     const passthroughId = (this.props.sdk.entry.getSys() as { id: string }).id;
 
     const { muxEnableAudioNormalize } = this.props.sdk.parameters
@@ -336,6 +381,7 @@ export class App extends React.Component<AppProps, AppState> {
             .muxEnableSignedUrls
             ? 'signed'
             : 'public',
+          video_quality: options.videoQuality,
         },
       })
     );
@@ -351,7 +397,14 @@ export class App extends React.Component<AppProps, AppState> {
     });
 
     return muxUpload.url;
-  };
+  }
+
+  // openModal = async () => {
+  //   return new Promise<string>((resolve, reject) => {
+  //     (this.resolveRef.current as unknown as (value: string) => void) = resolve;
+  //     this.setState({ modalUploadAssetVisible: true });
+  //   });
+  // };
 
   onUploadError = (progress: CustomEvent) => {
     this.setState({ error: progress.detail });
@@ -1102,37 +1155,47 @@ export class App extends React.Component<AppProps, AppState> {
 
     return (
       <section>
+        <ModalUploadAsset isShown={this.state.modalUploadAssetVisible} onClose={this.onCloseModal} onConfirm={this.onConfirmModal}/>
         <Box marginBottom="spacingM">
           <div className="uploader_area">
-            <MuxUploaderDrop
-              mux-uploader="muxuploader"
-              overlay
-              overlayText="Drop Video"
-              style={{
-                '--overlay-background-color': 'rgb(231, 235, 238)',
-              }}>
-              <MuxUploader
-                id="muxuploader"
-                type="bar"
-                onSuccess={this.onUploadSuccess}
-                endpoint={this.getUploadUrl}
-                noDrop
-                //onError={this.onUploadError}
-                style={
-                  {
-                    '--uploader-background-color': 'rgb(247, 249, 250)',
-                    '--button-border-radius': '4px',
-                    '--button-border': '1px solid rgb(207, 217, 224)',
-                    '--button-padding': '0.5rem 1rem',
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: '1em',
-                    minHeight: '250px',
-                  } as React.CSSProperties
-                }></MuxUploader>
-            </MuxUploaderDrop>
+            <div
+              style={
+                {
+                  width: '100%',
+                  display: this.state.showMuxUploaderUI ? 'none' : 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  padding: '1em',
+                  minHeight: '250px',
+                } as React.CSSProperties
+              }
+              onDrop={this.handleDrop}
+              onDragOver={(e) => e.preventDefault()}
+            >
+              <input type="file" onChange={this.handleFile} />
+              <p>Drop a video file or select one here</p>
+            </div>
+            <MuxUploader
+              id="muxuploader"
+              ref={this.muxUploaderRef}
+              type="bar"
+              onSuccess={this.onUploadSuccess}
+              noDrop
+
+              style={
+                {
+                  '--uploader-background-color': 'rgb(247, 249, 250)',
+                  '--button-border-radius': '4px',
+                  '--button-border': '1px solid rgb(207, 217, 224)',
+                  '--button-padding': '0.5rem 1rem',
+                  width: '100%',
+                  display: this.state.showMuxUploaderUI ? 'flex' : 'none',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  padding: '1em',
+                  minHeight: '250px',
+                } as React.CSSProperties
+              }></MuxUploader>
           </div>
         </Box>
 
