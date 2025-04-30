@@ -198,6 +198,17 @@ const updateSyncStatus = async (entryId, contentTypeId, contentTypeName) => {
   // TODO: update the sync status for the entry
 };
 
+// Define allowlist of permitted endpoints
+const ALLOWED_ENDPOINTS = [
+  'template-universal-content',
+  'images',
+  'profiles',
+  'metrics',
+  'lists',
+  'campaigns',
+  // Add other valid endpoints your app needs
+];
+
 // Main Lambda handler
 exports.handler = async (event) => {
   console.log('--- Incoming Request ---');
@@ -506,16 +517,17 @@ exports.handler = async (event) => {
         else {
           const endpoint = event.path.replace('/api/klaviyo/proxy/', '');
 
-          // Proxy the request to the Klaviyo API
+          // Validate endpoint against allowlist
+          const baseEndpoint = endpoint.split('/')[0]; // Get the first part of the path
+          if (!ALLOWED_ENDPOINTS.includes(baseEndpoint)) {
+            return formatResponse(403, {
+              error: 'Forbidden',
+              message: 'The requested endpoint is not allowed',
+            });
+          }
+
+          // Proceed with validated endpoint
           const method = event.httpMethod.toLowerCase() || 'get';
-          console.log(
-            'sending request to',
-            `https://a.klaviyo.com/api/${endpoint}`,
-            'with data',
-            data,
-            'and accessToken',
-            accessToken
-          );
           const response = await axios({
             method,
             url: `https://a.klaviyo.com/api/${endpoint}`,
