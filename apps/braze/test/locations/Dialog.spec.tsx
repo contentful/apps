@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockCma, mockSdk } from '../mocks';
+import { mockSdk } from '../mocks';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import Dialog from '../../src/locations/Dialog';
 import React from 'react';
@@ -10,6 +10,12 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useAutoResizer: () => {},
 }));
+
+const mockCma = {
+  appActionCall: {
+    createWithResponse: vi.fn(),
+  },
+};
 
 vi.mock('contentful-management', () => ({
   createClient: () => mockCma,
@@ -113,6 +119,13 @@ describe('Dialog component', () => {
       contentTypeId: 'contentTypeId',
       title: 'title',
     };
+    mockCma.appActionCall.createWithResponse.mockResolvedValue({
+      response: {
+        body: JSON.stringify({
+          results: [['fieldId', 'contentBlockId']],
+        }),
+      },
+    });
 
     render(<Dialog />);
 

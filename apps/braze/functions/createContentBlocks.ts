@@ -5,21 +5,16 @@ import type {
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
 import { type PlainClientAPI, createClient } from 'contentful-management';
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 
-/**
- * App Action Function Template
- *
- * This template provides a starting point for creating an App Action function.
- * You'll need to implement your custom logic in the handler function below.
- */
+type AppInstallationParameters = {
+  brazeApiKey: string;
+  brazeEndpoint: string;
+};
 
-// TODO: Define your App Action parameters here
-// These parameters should match what you configured in your App Action definition
-type AppActionParameters = {
-  // Example:
-  // paramName: string;
-  // numberParam: number;
-  // booleanParam: boolean;
+export type AppActionParameters = {
+  entryId: string;
+  fieldIds: string;
 };
 
 function initContentfulManagementClient(context: FunctionEventContext): PlainClientAPI {
@@ -37,38 +32,92 @@ function initContentfulManagementClient(context: FunctionEventContext): PlainCli
   });
 }
 
-/**
- * This handler is invoked when your App Action is called
- *
- * @param event - Contains the parameters passed to your App Action
- * @param context - Provides access to the CMA client and other context information
- */
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
-  event: AppActionRequest<'Custom', AppActionParameters>,
+  event: AppActionRequest<'Custom', { entryId: string; fieldIds: string }>,
   context: FunctionEventContext
 ) => {
-  // Instantiate an authenticated CMA client to interact with Contentful
-  // const cma = initContentfulManagementClient(context);
+  const cma = initContentfulManagementClient(context);
 
-  // Extract parameters from the event body
-  // const { paramName } = event.body;
+  const { entryId, fieldIds } = event.body;
+  const entry = await cma.entry.get({ entryId });
+  const contentType = await cma.contentType.get({
+    contentTypeId: entry.sys.contentType.sys.id,
+  });
+  const locale = entry.sys.locale || 'en-US'; // TODO: define what to do here
+  const entryTitle = !!contentType.displayField
+    ? entry.fields[contentType.displayField]?.[locale] || 'Untitled'
+    : 'Untitled';
 
-  // TODO: Implement your custom logic here
+  const fieldIdArray = fieldIds.split(',').map((id) => id.trim());
 
-  // Examples of what you could do:
-  // 1. Fetch or modify content with the CMA client
-  // 2. Call external APIs
-  // 3. Transform data
-  // 4. Create or update entries
+  const { brazeApiKey, brazeEndpoint } =
+    context.appInstallationParameters as AppInstallationParameters;
 
-  // Return your response data
-  // This will be available in the App Action response
+  if (!brazeApiKey || !brazeEndpoint) {
+    throw new Error('Braze API key or endpoint not configured');
+  }
+
+  const results = [];
+
+  for (const fieldId of fieldIdArray) {
+    const fieldValue = entry.fields[fieldId]?.[locale];
+
+    if (!fieldValue) {
+      results.push({
+        fieldId,
+        success: false,
+        message: `Field ${fieldId} not found or has no value`,
+      });
+      continue;
+    }
+
+    try {
+      const field = contentType.fields.find((f) => f.id === fieldId);
+      let content = fieldValue;
+
+      if (field?.type === 'RichText') {
+        content = documentToHtmlString(fieldValue);
+      }
+
+      const response = await fetch(`${brazeEndpoint}/content_blocks/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${brazeApiKey}`,
+        },
+        body: JSON.stringify({
+          name: `${entryTitle}-${fieldId}`,
+          content: content,
+          state: 'draft',
+        }),
+      });
+
+      if (!response.ok) {
+        results.push({
+          fieldId,
+          success: false,
+          message: `Error creating content block: ${response.statusText}`,
+        });
+        continue;
+      }
+
+      const data = await response.json();
+
+      results.push({
+        fieldId,
+        success: true,
+        contentBlockId: data.content_block_id,
+      });
+    } catch (error) {
+      results.push({
+        fieldId,
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+
   return {
-    // Add your response data here
-    message: 'TODO: Replace this with your implementation',
-    timestamp: new Date().toISOString(),
-
-    // Uncomment to see the event data during development
-    // event: event,
+    results,
   };
 };
