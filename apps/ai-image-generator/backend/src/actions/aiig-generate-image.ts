@@ -39,9 +39,10 @@ export const handler = async (
       .filter((image): image is Image => !!image.url);
   } catch (e) {
     if (e instanceof APIError) {
-      const message = e.type === 'invalid_request_error'
-        ? `Image generation failed: Please verify that your OpenAI account has DALL-E credits available.`
-        : e.message;
+      const message =
+        e.type === 'invalid_request_error'
+          ? `Image generation failed: Please verify that your OpenAI account has DALL-E credits available.`
+          : e.message;
       return {
         ok: false,
         errors: [
