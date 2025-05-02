@@ -55,120 +55,193 @@ export class KlaviyoService {
       // Transform Contentful fields to Klaviyo content data
       const contentData: Record<string, any> = {};
 
-      // Process each field mapping to extract data
-      for (const mapping of fieldMappings) {
-        try {
-          // Properly get the fields from the mapping
-          const contentfulFieldId = mapping.contentfulFieldId;
-          const klaviyoBlockName = mapping.klaviyoBlockName || contentfulFieldId;
+      console.log(`Processing entry with ${fieldMappings.length} field mappings`);
 
-          // Extract field value from entry
-          let value;
+      // If no field mappings provided, extract all available fields from the entry
+      if (fieldMappings.length === 0) {
+        console.log('No field mappings provided, extracting all available fields from entry');
 
-          // First check if the entry has direct fields
-          if (entry.fields && entry.fields[contentfulFieldId]) {
-            // Entry in CMA format with locales
-            const field = entry.fields[contentfulFieldId];
-            // Try to get from first locale if it's a localized field
-            if (typeof field === 'object' && !Array.isArray(field)) {
-              const firstLocale = Object.keys(field)[0];
-              if (firstLocale) {
-                value = field[firstLocale];
-              }
-            } else {
-              value = field;
-            }
-          } else if (entry[contentfulFieldId] !== undefined) {
-            // Direct field access format
-            value = entry[contentfulFieldId];
-          }
+        // Extract fields from the entry fields object
+        if (entry.fields) {
+          console.log(`Entry has ${Object.keys(entry.fields).length} fields in the fields object`);
 
-          console.log(
-            `Processing field ${contentfulFieldId} -> ${klaviyoBlockName}, value type: ${typeof value}`
-          );
+          for (const fieldId in entry.fields) {
+            try {
+              const field = entry.fields[fieldId];
 
-          // Skip empty values
-          if (value === undefined || value === null || value === '') {
-            console.log(`Skipping empty value for field ${contentfulFieldId}`);
-            continue;
-          }
+              // Handle localized fields
+              if (typeof field === 'object' && !Array.isArray(field)) {
+                const firstLocale = Object.keys(field)[0] || 'en-US';
+                const value = field[firstLocale];
 
-          // Add to content data - handle different field types appropriately
-          if (mapping.fieldType === 'image' || mapping.isAssetField) {
-            // For image fields, resolve the asset URL
-            if (typeof value === 'object' && value.sys) {
-              // Try to extract the image URL from the asset value
-              let imageUrl = '';
-
-              // First check if the _resolvedUrl field is present (set by our entry-sync-function)
-              if (value._resolvedUrl) {
-                imageUrl = value._resolvedUrl;
-              }
-              // Check if we have a normal Contentful asset structure
-              else if (value.fields?.file?.['en-US']?.url || value.fields?.file?.url) {
-                const fileUrl = value.fields.file['en-US']?.url || value.fields.file.url;
-                // Make sure the URL starts with https:
-                imageUrl = fileUrl.startsWith('//') ? `https:${fileUrl}` : fileUrl;
-              }
-
-              // Fallback: Construct URL from asset ID if no direct URL found
-              if (!imageUrl && value.sys.id) {
-                const assetId = value.sys.id;
-                const spaceId = value.sys.space?.sys?.id || entry.sys.space?.sys?.id || '';
-
-                if (spaceId) {
-                  imageUrl = `https://images.ctfassets.net/${spaceId}/${assetId}/asset.jpg`;
+                // Add the field to content data
+                if (value !== undefined && value !== null) {
+                  console.log(`Adding field ${fieldId} from fields object (type: ${typeof value})`);
+                  contentData[fieldId] =
+                    typeof value === 'object' ? JSON.stringify(value) : String(value);
+                }
+              } else {
+                // Non-localized field
+                if (field !== undefined && field !== null) {
+                  console.log(`Adding non-localized field ${fieldId} (type: ${typeof field})`);
+                  contentData[fieldId] =
+                    typeof field === 'object' ? JSON.stringify(field) : String(field);
                 }
               }
-
-              // Use the resolved URL or the placeholder if we couldn't extract anything
-              contentData[klaviyoBlockName] = imageUrl || 'https://example.com/asset-placeholder';
-
-              console.log(
-                `Resolved image URL for ${klaviyoBlockName}: ${contentData[klaviyoBlockName]}`
-              );
+            } catch (error) {
+              console.error(`Error extracting field ${fieldId}:`, error);
             }
           }
-          // Handle different field types
-          else if (mapping.fieldType === 'richText') {
-            // Process rich text (converts to HTML)
-            if (value && value.nodeType === 'document') {
-              try {
-                const richTextHtml = this.processRichText(value);
-                contentData[klaviyoBlockName] = richTextHtml;
-                console.log(`Processed rich text for ${klaviyoBlockName}`);
-              } catch (e) {
-                console.error('Error processing rich text:', e);
-                contentData[klaviyoBlockName] = '';
+        }
+
+        // Also extract direct fields at the top level if they exist
+        for (const key in entry) {
+          // Skip system fields and objects
+          if (
+            key !== 'sys' &&
+            key !== 'fields' &&
+            key !== 'metadata' &&
+            typeof entry[key] !== 'function'
+          ) {
+            try {
+              const value = entry[key];
+
+              if (value !== undefined && value !== null) {
+                console.log(`Adding direct field ${key} (type: ${typeof value})`);
+                contentData[key] =
+                  typeof value === 'object' ? JSON.stringify(value) : String(value);
               }
-            } else {
-              // If not a proper rich text object, store as is or empty string
-              contentData[klaviyoBlockName] = value || '';
+            } catch (error) {
+              console.error(`Error extracting direct field ${key}:`, error);
             }
-          } else if (mapping.fieldType === 'json') {
-            // JSON fields: stringify to preserve structure
-            contentData[klaviyoBlockName] = JSON.stringify(value);
-          } else {
-            // Simple fields (text, number, etc.) - convert to string for consistency
-            contentData[klaviyoBlockName] = String(value || '');
           }
+        }
 
-          console.log(
-            `Successfully mapped ${contentfulFieldId} -> ${klaviyoBlockName} with value type: ${typeof contentData[
-              klaviyoBlockName
-            ]}`
-          );
-        } catch (error) {
-          console.error(
-            `Error processing field mapping ${mapping.contentfulFieldId} -> ${mapping.klaviyoBlockName}:`,
-            error
-          );
+        console.log(
+          `Extracted ${Object.keys(contentData).length} fields from entry without mappings`
+        );
+      }
+      // Process each field mapping to extract data
+      else {
+        for (const mapping of fieldMappings) {
+          try {
+            // Properly get the fields from the mapping
+            const contentfulFieldId = mapping.contentfulFieldId;
+            const klaviyoBlockName = mapping.klaviyoBlockName || contentfulFieldId;
+
+            // Extract field value from entry
+            let value;
+
+            // First check if the entry has direct fields
+            if (entry.fields && entry.fields[contentfulFieldId]) {
+              // Entry in CMA format with locales
+              const field = entry.fields[contentfulFieldId];
+              // Try to get from first locale if it's a localized field
+              if (typeof field === 'object' && !Array.isArray(field)) {
+                const firstLocale = Object.keys(field)[0];
+                if (firstLocale) {
+                  value = field[firstLocale];
+                }
+              } else {
+                value = field;
+              }
+            } else if (entry[contentfulFieldId] !== undefined) {
+              // Direct field access format
+              value = entry[contentfulFieldId];
+            }
+
+            console.log(
+              `Processing field ${contentfulFieldId} -> ${klaviyoBlockName}, value type: ${typeof value}`
+            );
+
+            // Skip empty values
+            if (value === undefined || value === null || value === '') {
+              console.log(`Skipping empty value for field ${contentfulFieldId}`);
+              continue;
+            }
+
+            // Add to content data - handle different field types appropriately
+            if (mapping.fieldType === 'image' || mapping.isAssetField) {
+              // For image fields, resolve the asset URL
+              if (typeof value === 'object' && value.sys) {
+                // Try to extract the image URL from the asset value
+                let imageUrl = '';
+
+                // First check if the _resolvedUrl field is present (set by our entry-sync-function)
+                if (value._resolvedUrl) {
+                  imageUrl = value._resolvedUrl;
+                }
+                // Check if we have a normal Contentful asset structure
+                else if (value.fields?.file?.['en-US']?.url || value.fields?.file?.url) {
+                  const fileUrl = value.fields.file['en-US']?.url || value.fields.file.url;
+                  // Make sure the URL starts with https:
+                  imageUrl = fileUrl.startsWith('//') ? `https:${fileUrl}` : fileUrl;
+                }
+
+                // Fallback: Construct URL from asset ID if no direct URL found
+                if (!imageUrl && value.sys.id) {
+                  const assetId = value.sys.id;
+                  const spaceId = value.sys.space?.sys?.id || entry.sys.space?.sys?.id || '';
+
+                  if (spaceId) {
+                    imageUrl = `https://images.ctfassets.net/${spaceId}/${assetId}/asset.jpg`;
+                  }
+                }
+
+                // Use the resolved URL or the placeholder if we couldn't extract anything
+                contentData[klaviyoBlockName] = imageUrl || 'https://example.com/asset-placeholder';
+
+                console.log(
+                  `Resolved image URL for ${klaviyoBlockName}: ${contentData[klaviyoBlockName]}`
+                );
+              }
+            }
+            // Handle different field types
+            else if (mapping.fieldType === 'richText') {
+              // Process rich text (converts to HTML)
+              if (value && value.nodeType === 'document') {
+                try {
+                  const richTextHtml = this.processRichText(value);
+                  contentData[klaviyoBlockName] = richTextHtml;
+                  console.log(`Processed rich text for ${klaviyoBlockName}`);
+                } catch (e) {
+                  console.error('Error processing rich text:', e);
+                  contentData[klaviyoBlockName] = '';
+                }
+              } else {
+                // If not a proper rich text object, store as is or empty string
+                contentData[klaviyoBlockName] = value || '';
+              }
+            } else if (mapping.fieldType === 'json') {
+              // JSON fields: stringify to preserve structure
+              contentData[klaviyoBlockName] = JSON.stringify(value);
+            } else {
+              // Simple fields (text, number, etc.) - convert to string for consistency
+              contentData[klaviyoBlockName] = String(value || '');
+            }
+
+            console.log(
+              `Successfully mapped ${contentfulFieldId} -> ${klaviyoBlockName} with value type: ${typeof contentData[
+                klaviyoBlockName
+              ]}`
+            );
+          } catch (error) {
+            console.error(
+              `Error processing field mapping ${mapping.contentfulFieldId} -> ${mapping.klaviyoBlockName}:`,
+              error
+            );
+          }
         }
       }
 
       // Add additional metadata useful for tracking
       contentData.external_id = entryId;
       contentData.updated_at = new Date().toISOString();
+
+      // Add content type ID if available
+      if (entry.sys?.contentType?.sys?.id) {
+        contentData.content_type = entry.sys.contentType.sys.id;
+      }
 
       // Prepare content name based on entry title or ID
       let contentName = '';
@@ -189,6 +262,13 @@ export class KlaviyoService {
           contentTypeName.charAt(0).toUpperCase() + contentTypeName.slice(1)
         } ${entryId}`;
       }
+
+      // Log summary of what we're about to send
+      console.log(
+        `Prepared content data with ${
+          Object.keys(contentData).length
+        } fields for content "${contentName}"`
+      );
 
       // Look for existing content by entry ID to determine if this is an update
       const existingContent = await this.findContentByExternalId(entryId);
@@ -233,45 +313,65 @@ export class KlaviyoService {
       // Use the ID pattern we're adding to the name field: [ID:externalId]
       const idPattern = `[ID:${externalId}]`;
 
-      // Use contains operator to find entries with this ID pattern in the name
-      const response = await this.makeRequest('GET', 'template-universal-content', {
-        filter: `contains(name,"${idPattern}")`,
-        'page[size]': 20, // Increased page size to find more potential matches
-      });
+      // First try: Get a list of templates and filter client-side since contains is not supported
+      try {
+        console.log('Getting list of templates to find matches for ID pattern');
+        const response = await this.makeRequest('GET', 'template-universal-content', {
+          'page[size]': 100, // Get a larger set to search through
+        });
 
-      // Check for valid response data
-      if (!response || !response.data) {
-        console.log('Invalid or empty response from Klaviyo API when searching for content');
-        return null;
-      }
-
-      // Log the number of items found
-      if (Array.isArray(response.data)) {
-        console.log(
-          `Found ${response.data.length} potential matches for content with ID pattern: ${idPattern}`
-        );
-
-        // If we found matches, look for the exact ID pattern
-        if (response.data.length > 0) {
-          // Look for an exact match first (exact name with the ID pattern)
-          const exactMatch = response.data.find(
-            (item: any) =>
-              item.attributes && item.attributes.name && item.attributes.name.includes(idPattern)
+        // Check for valid response data
+        if (response?.data && Array.isArray(response.data)) {
+          console.log(
+            `Retrieved ${response.data.length} templates from Klaviyo to search for ID pattern: ${idPattern}`
           );
 
-          if (exactMatch) {
+          // Find templates with our ID pattern in the name
+          const matches = response.data.filter(
+            (item: any) => item.attributes?.name && item.attributes.name.includes(idPattern)
+          );
+
+          if (matches.length > 0) {
+            console.log(`Found ${matches.length} templates with ID pattern: ${idPattern}`);
             console.log(
-              `Found exact match for content with ID: ${exactMatch.id}, name: "${exactMatch.attributes?.name}"`
+              `Using first match with ID: ${matches[0].id}, name: "${matches[0].attributes?.name}"`
             );
-            return exactMatch;
+            return matches[0];
           }
 
-          // If no exact match, return the first result
-          console.log(`No exact match found, using first result with ID: ${response.data[0].id}`);
-          return response.data[0];
+          console.log(
+            `No templates found containing ID pattern: ${idPattern} among ${response.data.length} templates`
+          );
         }
-      } else {
-        console.error('Unexpected response format from Klaviyo API:', response);
+      } catch (listError) {
+        console.error('Error retrieving template list:', listError);
+      }
+
+      // Second try: Use the exact name with the ID pattern
+      // Try with a few potential name formats
+      const potentialNames = [
+        `My Blog 2 ${idPattern}`,
+        `Blog ${idPattern}`,
+        `blog ${idPattern}`,
+        `Content ${idPattern}`,
+      ];
+
+      for (const name of potentialNames) {
+        try {
+          console.log(`Trying to find template with exact name: "${name}"`);
+          const response = await this.makeRequest('GET', 'template-universal-content', {
+            filter: `equals(name,"${name}")`,
+            'page[size]': 10,
+          });
+
+          if (response?.data && Array.isArray(response.data) && response.data.length > 0) {
+            console.log(`Found template with name "${name}", ID: ${response.data[0].id}`);
+            return response.data[0];
+          }
+        } catch (nameError) {
+          console.error(`Error finding template with name "${name}":`, nameError);
+          // Continue to the next name
+        }
       }
 
       console.log(`No existing content found for ID pattern: ${idPattern}`);
