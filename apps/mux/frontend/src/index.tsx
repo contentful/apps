@@ -18,8 +18,6 @@ import {
 import { Form, FormControl, Checkbox, TextInput } from '@contentful/f36-forms';
 
 import MuxPlayer from '@mux/mux-player-react';
-import MuxUploader from '@mux/mux-uploader-react';
-import { MuxUploaderDrop } from '@mux/mux-uploader-react';
 
 import Config from './locations/config';
 import ApiClient from './util/apiClient';
@@ -30,6 +28,7 @@ import PlayerCode from './components/playercode';
 import CountryDatalist from './components/countryDatalist';
 import CaptionsList from './components/captionsList';
 import ModalUploadAsset, { ModalData } from './components/modalUploadAsset';
+import UploadArea from './components/UploadArea/UploadArea';
 
 import {
   type InstallationParams,
@@ -54,6 +53,7 @@ export class App extends React.Component<AppProps, AppState> {
   cmaClient: PlainClientAPI;
   resolveRef = createRef<(value: string|null) => void>();
   muxUploaderRef = createRef<any>();
+  fileInputRef = React.createRef<HTMLInputElement>();
 
   constructor(props: AppProps) {
     super(props);
@@ -362,6 +362,9 @@ export class App extends React.Component<AppProps, AppState> {
     this.resolveRef.current?.(null)
     this.setState({ file: null }); 
     this.setState({ modalUploadAssetVisible: false }); 
+    if (this.fileInputRef.current) {
+      this.fileInputRef.current.value = '';
+    }
   }
 
   getUploadUrl = async (options: ModalData) => {
@@ -398,13 +401,6 @@ export class App extends React.Component<AppProps, AppState> {
 
     return muxUpload.url;
   }
-
-  // openModal = async () => {
-  //   return new Promise<string>((resolve, reject) => {
-  //     (this.resolveRef.current as unknown as (value: string) => void) = resolve;
-  //     this.setState({ modalUploadAssetVisible: true });
-  //   });
-  // };
 
   onUploadError = (progress: CustomEvent) => {
     this.setState({ error: progress.detail });
@@ -1156,48 +1152,14 @@ export class App extends React.Component<AppProps, AppState> {
     return (
       <section>
         <ModalUploadAsset isShown={this.state.modalUploadAssetVisible} onClose={this.onCloseModal} onConfirm={this.onConfirmModal}/>
-        <Box marginBottom="spacingM">
-          <div className="uploader_area">
-            <div
-              style={
-                {
-                  width: '100%',
-                  display: this.state.showMuxUploaderUI ? 'none' : 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  padding: '1em',
-                  minHeight: '250px',
-                } as React.CSSProperties
-              }
-              onDrop={this.handleDrop}
-              onDragOver={(e) => e.preventDefault()}
-            >
-              <input type="file" onChange={this.handleFile} />
-              <p>Drop a video file or select one here</p>
-            </div>
-            <MuxUploader
-              id="muxuploader"
-              ref={this.muxUploaderRef}
-              type="bar"
-              onSuccess={this.onUploadSuccess}
-              noDrop
-
-              style={
-                {
-                  '--uploader-background-color': 'rgb(247, 249, 250)',
-                  '--button-border-radius': '4px',
-                  '--button-border': '1px solid rgb(207, 217, 224)',
-                  '--button-padding': '0.5rem 1rem',
-                  width: '100%',
-                  display: this.state.showMuxUploaderUI ? 'flex' : 'none',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  padding: '1em',
-                  minHeight: '250px',
-                } as React.CSSProperties
-              }></MuxUploader>
-          </div>
-        </Box>
+        <UploadArea
+          showMuxUploaderUI={this.state.showMuxUploaderUI}
+          muxUploaderRef={this.muxUploaderRef}
+          onSuccess={this.onUploadSuccess}
+          onDrop={this.handleDrop}
+          onFileChange={this.handleFile}
+          fileInputRef={this.fileInputRef}
+        />
 
         <Form onSubmit={this.addVideoByInput}>
           <FormControl>
