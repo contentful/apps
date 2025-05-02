@@ -1,5 +1,6 @@
 import { FC, useState } from 'react';
-import { Modal, Button, Radio, Stack, FormControl } from '@contentful/f36-components';
+import { Modal, Button, Radio, Stack, FormControl, TextLink } from '@contentful/f36-components';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 export interface ModalData {
   videoQuality: string;
@@ -56,6 +57,18 @@ const ModalUploadAsset: FC<ModalProps> = ({isShown = false, onClose, onConfirm})
                 Premium
               </Radio>
             </Stack>
+            <FormControl.HelpText>
+              The video quality level informs the quality, cost, and available platform features for the asset.
+              <TextLink
+                icon={<ExternalLinkIcon />}
+                alignIcon="end"
+                href="https://www.mux.com/docs/guides/use-video-quality-levels#introducing-video-quality-levels"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Learn more
+              </TextLink>
+            </FormControl.HelpText>
           </FormControl>
         </Modal.Content>
 

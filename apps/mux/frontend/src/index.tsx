@@ -27,7 +27,7 @@ import Menu from './components/menu';
 import PlayerCode from './components/playercode';
 import CountryDatalist from './components/countryDatalist';
 import CaptionsList from './components/captionsList';
-import ModalUploadAsset, { ModalData } from './components/modalUploadAsset';
+import ModalUploadAsset, { ModalData } from './components/ModalUploadAsset';
 import UploadArea from './components/UploadArea/UploadArea';
 
 import {
