@@ -12,8 +12,14 @@ type ModalProps = {
   onConfirm: (options: ModalData) => void;
 };
 
+const options: Record<string,string> = {
+  basic: 'Lower video quality with no encoding cost. Ideal for simple video needs. ',
+  plus: 'High-quality video with smart encoding that adapts to content complexity. ',
+  premium: 'Top-tier quality for high-end content like live sports or movies. ',
+};
+
 const ModalUploadAsset: FC<ModalProps> = ({isShown = false, onClose, onConfirm}) => {
-  const [videoQuality, setVideoQuality] = useState('basic');
+  const [videoQuality, setVideoQuality] = useState('plus');
 
   return (
     <>
@@ -29,36 +35,21 @@ const ModalUploadAsset: FC<ModalProps> = ({isShown = false, onClose, onConfirm})
           <FormControl>
             <FormControl.Label>Video Quality</FormControl.Label>
             <Stack flexDirection="row">
-              <Radio
-                id="radioBasic"
-                name="radio-controlled"
-                value="basic"
-                isChecked={videoQuality === 'basic'}
-                onChange={() => setVideoQuality('basic')}
-              >
-                Basic
-              </Radio>
-              <Radio
-                id="radioPlus"
-                name="radio-controlled"
-                value="plus"
-                isChecked={videoQuality === 'plus'}
-                onChange={() => setVideoQuality('plus')}
-              >
-                Plus
-              </Radio>
-              <Radio
-                id="radioPremium"
-                name="radio-controlled"
-                value="basic"
-                isChecked={videoQuality === 'premium'}
-                onChange={() => setVideoQuality('premium')}
-              >
-                Premium
-              </Radio>
+              {Object.entries(options).map(([id]) => (
+                <Radio
+                  key={id}
+                  id={`radio${id}`}
+                  name="radio-controlled"
+                  value={id}
+                  isChecked={videoQuality === id}
+                  onChange={() => setVideoQuality(id)}
+                >
+                  {String(id[0]).toUpperCase() + String(id).slice(1)}
+                </Radio>
+              ))}
             </Stack>
             <FormControl.HelpText>
-              The video quality level informs the quality, cost, and available platform features for the asset.
+              {options[videoQuality]}
               <TextLink
                 icon={<ExternalLinkIcon />}
                 alignIcon="end"
