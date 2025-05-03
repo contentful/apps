@@ -1,5 +1,5 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { sendToKlaviyo, SyncContent, KlaviyoConfig } from './klaviyo-api-service';
+import { sendToKlaviyo, SyncContent, KlaviyoConfig } from './klaviyo-sync-service';
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -17,7 +17,7 @@ describe('klaviyo-api-service', () => {
     it('should throw error if API key is missing', async () => {
       // Arrange
       const config: KlaviyoConfig = {
-        apiKey: '',
+        publicKey: '',
         endpoint: 'profiles',
       };
       const mappings = { email: 'email' };
@@ -40,7 +40,7 @@ describe('klaviyo-api-service', () => {
     it('should throw error if email or phone number is missing', async () => {
       // Arrange
       const config: KlaviyoConfig = {
-        apiKey: 'test-api-key',
+        publicKey: 'test-api-key',
         endpoint: 'profiles',
       };
       const mappings = { name: 'full_name' };
@@ -57,7 +57,7 @@ describe('klaviyo-api-service', () => {
     it('should send data to Klaviyo API successfully', async () => {
       // Arrange
       const config: KlaviyoConfig = {
-        apiKey: 'test-api-key',
+        publicKey: 'test-api-key',
         endpoint: 'profiles',
       };
       const mappings = {
@@ -110,7 +110,7 @@ describe('klaviyo-api-service', () => {
     it('should throw error if API request fails', async () => {
       // Arrange
       const config: KlaviyoConfig = {
-        apiKey: 'test-api-key',
+        publicKey: 'test-api-key',
         endpoint: 'profiles',
       };
       const mappings = { email: 'email' };
@@ -165,7 +165,8 @@ describe('klaviyo-api-service', () => {
       const mockSdk = {
         parameters: {
           installation: {
-            klaviyoApiKey: 'test-api-key',
+            publicKey: 'test-api-key',
+            privateKey: 'test-private-key',
           },
         },
         entry: {
@@ -233,7 +234,7 @@ describe('klaviyo-api-service', () => {
       );
 
       const requestBody = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
-      expect(requestBody).toHaveProperty('apiKey', 'test-api-key');
+      expect(requestBody).toHaveProperty('publicKey', 'test-api-key');
       expect(requestBody).toHaveProperty('mappings', mappings);
       expect(requestBody).toHaveProperty('entryId', 'entry123');
       expect(requestBody.fields).toHaveProperty('title');
@@ -251,7 +252,7 @@ describe('klaviyo-api-service', () => {
       const mockSdk = {
         parameters: {
           installation: {
-            klaviyoApiKey: 'test-api-key',
+            publicKey: 'test-api-key',
           },
         },
         entry: {

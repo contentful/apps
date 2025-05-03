@@ -13,8 +13,18 @@ import {
   Paragraph,
   Stack,
 } from '@contentful/f36-components';
-import { FieldMapping, MappedField } from '../config/klaviyo';
 import logger from '../utils/logger';
+import { getSyncData, updateSyncData } from '../services/persistence-service';
+
+// Define field mapping interface that aligns with the rest of the app
+interface FieldData {
+  id: string;
+  name: string;
+  type: string;
+  value: any;
+  isAsset: boolean;
+  contentTypeId?: string;
+}
 
 const FieldMapper: React.FC = () => {
   const sdk = useSDK<FieldExtensionSDK>();
@@ -23,6 +33,7 @@ const FieldMapper: React.FC = () => {
   const [isMapped, setIsMapped] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [availableProperties, setAvailableProperties] = useState<string[]>([]);
+  const [existingMappings, setExistingMappings] = useState<FieldData[]>([]);
 
   // Profile properties (you can expand this list)
   const PROFILE_PROPERTIES = [
@@ -44,42 +55,53 @@ const FieldMapper: React.FC = () => {
   const EVENT_PROPERTIES = ['event_name', 'value', 'items', 'custom_property'];
 
   useEffect(() => {
-    async function checkExistingMapping() {
+    async function loadMappings() {
       try {
         setIsLoading(true);
 
-        // Get app installation parameters
-        const parameters = sdk.parameters.installation;
-        const fieldMappings = (parameters?.fieldMappings as FieldMapping[]) || [];
+        // Load mappings from persistence service (localStorage)
+        const mappings = await getSyncData(sdk);
+        setExistingMappings(mappings || []);
 
         // Get current content type and field
         const contentTypeId = sdk.contentType.sys.id;
         const fieldId = sdk.field.id;
 
         // Check if this field is already mapped
-        const contentTypeMapping = fieldMappings.find((m) => m.contentTypeId === contentTypeId);
+        const fieldMapping = mappings?.find(
+          (m) => m.contentTypeId === contentTypeId && m.id === fieldId
+        );
 
-        if (contentTypeMapping) {
-          const fieldMapping = contentTypeMapping.fields.find((f) => f.fieldId === fieldId);
+        if (fieldMapping) {
+          // Try to determine the mapping type based on the klaviyo property name
+          const property = fieldMapping.name;
+          let detectedType: 'profile' | 'event' | 'custom' = 'custom';
 
-          if (fieldMapping) {
-            setMappingType(fieldMapping.mappingType);
-            setKlaviyoProperty(fieldMapping.klaviyoProperty);
-            setIsMapped(true);
+          if (PROFILE_PROPERTIES.includes(property)) {
+            detectedType = 'profile';
+          } else if (EVENT_PROPERTIES.includes(property)) {
+            detectedType = 'event';
           }
-        }
 
-        // Set available properties based on mapping type
-        updateAvailableProperties(mappingType);
+          setMappingType(detectedType);
+          setKlaviyoProperty(property);
+          setIsMapped(true);
+
+          // Set available properties based on detected type
+          updateAvailableProperties(detectedType);
+        } else {
+          // Set default available properties
+          updateAvailableProperties('profile');
+        }
       } catch (error) {
-        logger.error('Error checking existing mapping:', error);
+        logger.error('Error loading field mappings:', error);
       } finally {
         setIsLoading(false);
       }
     }
 
-    checkExistingMapping();
-  }, [sdk.contentType.sys.id, sdk.field.id, sdk.parameters.installation]);
+    loadMappings();
+  }, [sdk]);
 
   const updateAvailableProperties = (type: 'profile' | 'event' | 'custom') => {
     if (type === 'profile') {
@@ -104,65 +126,47 @@ const FieldMapper: React.FC = () => {
     try {
       setIsLoading(true);
 
-      // Get app installation parameters
-      const parameters = sdk.parameters.installation;
-      const fieldMappings = [...((parameters?.fieldMappings as FieldMapping[]) || [])];
-
       // Get current content type and field
       const contentTypeId = sdk.contentType.sys.id;
       const fieldId = sdk.field.id;
+      const fieldName = sdk.contentType.fields.find((f) => f.id === fieldId)?.name || fieldId;
+
+      // Filter out any existing mapping for this field
+      const filteredMappings = existingMappings.filter(
+        (m) => !(m.contentTypeId === contentTypeId && m.id === fieldId)
+      );
 
       // Create new field mapping
-      const newMapping: MappedField = {
-        fieldId,
-        klaviyoProperty,
-        mappingType,
-        lastMappedAt: Date.now(),
+      const newMapping: FieldData = {
+        id: fieldId,
+        name: klaviyoProperty, // Use the klaviyo property as the name
+        type: 'Text',
+        value: '',
+        isAsset: false,
+        contentTypeId: contentTypeId,
       };
 
-      // Check if this content type is already in mappings
-      const contentTypeIndex = fieldMappings.findIndex((m) => m.contentTypeId === contentTypeId);
+      // Add the new mapping
+      const updatedMappings = [...filteredMappings, newMapping];
 
-      if (contentTypeIndex >= 0) {
-        // Content type exists, check if field is already mapped
-        const fieldIndex = fieldMappings[contentTypeIndex].fields.findIndex(
-          (f) => f.fieldId === fieldId
-        );
+      // Save to persistence service
+      await updateSyncData(updatedMappings);
 
-        if (fieldIndex >= 0) {
-          // Update existing field mapping
-          fieldMappings[contentTypeIndex].fields[fieldIndex] = newMapping;
-        } else {
-          // Add new field mapping
-          fieldMappings[contentTypeIndex].fields.push(newMapping);
-        }
-      } else {
-        // Add new content type mapping
-        fieldMappings.push({
-          contentTypeId,
-          fields: [newMapping],
-          fieldType: 'text',
-          contentfulFieldId: fieldId,
-          klaviyoBlockName: 'Text',
-          name: 'Text',
-          type: 'text',
-          severity: 'info',
-          value: 'Text',
-        });
-      }
+      // Update local state
+      setExistingMappings(updatedMappings);
+      setIsMapped(true);
 
-      // Save updated mappings to installation parameters via the parent window
-      // This is a workaround since FieldExtensionSDK doesn't have app.setParameters
-      window.parent.postMessage(
+      // Notify success
+      sdk.notifier.success('Field mapping saved successfully');
+
+      // Broadcast change to other components
+      window.postMessage(
         {
           type: 'updateFieldMappings',
-          fieldMappings,
+          fieldMappings: updatedMappings,
         },
         '*'
       );
-
-      setIsMapped(true);
-      sdk.notifier.success('Field mapping saved successfully');
     } catch (error) {
       logger.error('Error saving field mapping:', error);
       sdk.notifier.error(
@@ -177,42 +181,35 @@ const FieldMapper: React.FC = () => {
     try {
       setIsLoading(true);
 
-      // Get app installation parameters
-      const parameters = sdk.parameters.installation;
-      const fieldMappings = [...((parameters?.fieldMappings as FieldMapping[]) || [])];
-
       // Get current content type and field
       const contentTypeId = sdk.contentType.sys.id;
       const fieldId = sdk.field.id;
 
-      // Find content type in mappings
-      const contentTypeIndex = fieldMappings.findIndex((m) => m.contentTypeId === contentTypeId);
+      // Filter out this field mapping
+      const updatedMappings = existingMappings.filter(
+        (m) => !(m.contentTypeId === contentTypeId && m.id === fieldId)
+      );
 
-      if (contentTypeIndex >= 0) {
-        // Filter out this field
-        fieldMappings[contentTypeIndex].fields = fieldMappings[contentTypeIndex].fields.filter(
-          (f) => f.fieldId !== fieldId
-        );
+      // Save to persistence service
+      await updateSyncData(updatedMappings);
 
-        // If no fields left, remove the content type mapping
-        if (fieldMappings[contentTypeIndex].fields.length === 0) {
-          fieldMappings.splice(contentTypeIndex, 1);
-        }
+      // Update local state
+      setExistingMappings(updatedMappings);
+      setIsMapped(false);
+      setKlaviyoProperty('');
+      setMappingType('profile');
 
-        // Save updated mappings to installation parameters via the parent window
-        window.parent.postMessage(
-          {
-            type: 'updateFieldMappings',
-            fieldMappings,
-          },
-          '*'
-        );
+      // Notify success
+      sdk.notifier.success('Field mapping removed');
 
-        setIsMapped(false);
-        setKlaviyoProperty('');
-        setMappingType('profile');
-        sdk.notifier.success('Field mapping removed');
-      }
+      // Broadcast change to other components
+      window.postMessage(
+        {
+          type: 'updateFieldMappings',
+          fieldMappings: updatedMappings,
+        },
+        '*'
+      );
     } catch (error) {
       logger.error('Error removing field mapping:', error);
       sdk.notifier.error(
@@ -256,10 +253,10 @@ const FieldMapper: React.FC = () => {
                   value={klaviyoProperty}
                   onChange={(e) => setKlaviyoProperty(e.target.value)}
                   isDisabled={isLoading}>
-                  <Select.Option value="">Select a property</Select.Option>
+                  <Select.Option value="">-- Select a property --</Select.Option>
                   {availableProperties.map((prop) => (
                     <Select.Option key={prop} value={prop}>
-                      {prop.replace(/_/g, ' ')}
+                      {prop.replace('_', ' ')}
                     </Select.Option>
                   ))}
                 </Select>
@@ -278,23 +275,22 @@ const FieldMapper: React.FC = () => {
               </FormControl>
             )}
 
-            <Flex justifyContent="space-between">
+            <Flex justifyContent="flex-start" gap="spacingS">
               {isMapped ? (
                 <>
-                  <Button
-                    variant="negative"
-                    onClick={removeMapping}
-                    isDisabled={isLoading}
-                    isLoading={isLoading}>
-                    Remove Mapping
-                  </Button>
-
                   <Button
                     variant="primary"
                     onClick={saveMapping}
                     isDisabled={isLoading || !klaviyoProperty}
                     isLoading={isLoading}>
                     Update Mapping
+                  </Button>
+                  <Button
+                    variant="negative"
+                    onClick={removeMapping}
+                    isDisabled={isLoading}
+                    isLoading={isLoading}>
+                    Remove Mapping
                   </Button>
                 </>
               ) : (
@@ -311,20 +307,9 @@ const FieldMapper: React.FC = () => {
         </Form>
 
         {isMapped && (
-          <Box
-            padding="spacingM"
-            backgroundColor="colorWhite"
-            border="1px solid #E5EBED"
-            borderRadius="4px">
-            <Text fontWeight="fontWeightMedium">Current Mapping:</Text>
-            <Flex marginTop="spacingXs">
-              <Text>This field</Text>
-              <Text margin="spacingXs">→</Text>
-              <Text fontWeight="fontWeightMedium">
-                {mappingType} property: {klaviyoProperty}
-              </Text>
-            </Flex>
-          </Box>
+          <Text fontColor="gray600">
+            This field is mapped to the Klaviyo property: <strong>{klaviyoProperty}</strong>
+          </Text>
         )}
       </Stack>
     </Box>

@@ -50,5 +50,24 @@
         "required": true
       }
     ]
-  }
+  },
+  "functions": [
+    {
+      "id": "klaviyoEntrySync",
+      "name": "Klaviyo Entry Sync",
+      "description": "Automatically syncs Contentful entries to Klaviyo on publish/update",
+      "path": "functions/entry-sync-function.js",
+      "entryFile": "functions/entry-sync-function.ts",
+      "allowNetworks": ["a.klaviyo.com"],
+      "accepts": ["appevent.handler"]
+    }
+  ],
+  "appEventHandlers": [
+    {
+      "functionId": "klaviyoEntrySync",
+      "name": "Auto-sync to Klaviyo",
+      "description": "Automatically syncs content to Klaviyo when entries are published or updated",
+      "topics": ["ContentManagement.Entry.publish", "ContentManagement.Entry.auto_save", "ContentManagement.Entry.save"]
+    }
+  ]
 } 

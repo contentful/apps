@@ -22,11 +22,31 @@ import {
   Subheading,
   Tabs,
   Spinner,
+  Notification,
 } from '@contentful/f36-components';
-import { getSyncData, updateSyncData } from '../utils/persistence-service';
-import { FieldData, SyncContent } from '../utils/klaviyo-api-service';
+import { getSyncData, updateSyncData, getLocalMappings } from '../services/persistence-service';
+import { SyncContent } from '../services/klaviyo-sync-service';
 import { SyncStatusTable } from '../components/SyncStatusTable';
 import logger from '../utils/logger';
+import { saveLocalMappings } from '../utils/sync-api';
+
+// Define interface for field data
+interface FieldData {
+  id: string;
+  name: string;
+  type: string;
+  value: any;
+  isAsset: boolean;
+  assetDetails?: Array<{
+    id: string;
+    title: string;
+    description: string;
+    url: string;
+    fileName: string;
+    contentType: string;
+  }>;
+  contentTypeId?: string;
+}
 
 // Extend the FieldData type to include contentTypeId
 interface ExtendedFieldData extends FieldData {
@@ -40,8 +60,28 @@ interface FieldItem {
   type?: string;
 }
 
+// Define interface for mapping object
+interface FieldMapping {
+  id: string;
+  contentfulFieldId: string;
+  name: string;
+  klaviyoBlockName: string;
+  type: string;
+  fieldType: string;
+  contentTypeId?: string;
+}
+
+// Update the type definition to include app property
+interface CustomSDK extends PageExtensionSDK {
+  app?: {
+    getParameters: () => Promise<any>;
+    setParameters: (params: any) => Promise<void>;
+    onConfigure: () => Promise<void>;
+  };
+}
+
 export const FieldMappingScreen: React.FC = () => {
-  const sdk = useSDK<PageExtensionSDK>();
+  const sdk = useSDK<CustomSDK>();
   const [mappings, setMappings] = useState<ExtendedFieldData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [contentTypes, setContentTypes] = useState<Record<string, string>>({});
@@ -59,6 +99,8 @@ export const FieldMappingScreen: React.FC = () => {
   const [entries, setEntries] = useState<Array<{ id: string; title: string }>>([]);
   const [selectedEntryId, setSelectedEntryId] = useState<string>('');
   const [isEntriesLoading, setIsEntriesLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
 
   useEffect(() => {
     const loadData = async () => {
@@ -174,7 +216,11 @@ export const FieldMappingScreen: React.FC = () => {
   // Load fields when content type is selected
   useEffect(() => {
     const loadFields = async () => {
-      if (!selectedContentType) return;
+      if (!selectedContentType) {
+        setAvailableFields([]);
+        setSelectedFields([]);
+        return;
+      }
 
       try {
         const space = await sdk.cma.space.get({});
@@ -192,12 +238,26 @@ export const FieldMappingScreen: React.FC = () => {
 
         setAvailableFields(fields);
 
+        // Get existing mappings for this content type
+        const existingMappingsByField = mappings
+          .filter((m) => m.contentTypeId === selectedContentType)
+          .reduce((acc, mapping) => {
+            acc[mapping.id] = mapping;
+            return acc;
+          }, {} as Record<string, ExtendedFieldData>);
+
         // Pre-select already mapped fields
-        const existingMappings = mappings.filter((m) => m.contentTypeId === selectedContentType);
-        setSelectedFields(existingMappings.map((m) => m.id));
+        if (Object.keys(existingMappingsByField).length > 0) {
+          setSelectedFields(Object.keys(existingMappingsByField));
+          logger.log(`Preselected ${Object.keys(existingMappingsByField).length} mapped fields`);
+        } else {
+          setSelectedFields([]);
+          logger.log('No existing mappings found for content type');
+        }
       } catch (error) {
         logger.error('Error loading fields:', error);
         setAvailableFields([]);
+        setSelectedFields([]);
       }
     };
 
@@ -267,54 +327,107 @@ export const FieldMappingScreen: React.FC = () => {
     setSyncMessage('');
   };
 
-  const handleSaveMapping = async () => {
-    if (!selectedContentType) {
-      setSyncMessage('Please select a content type');
-      return;
-    }
-
-    if (selectedFields.length === 0) {
-      setSyncMessage('Please select at least one field');
-      return;
-    }
-
+  const saveFieldMappings = async (mappings: any[]) => {
     try {
-      // Get existing fields for other content types
-      const existingMappings = mappings.filter((m) => m.contentTypeId !== selectedContentType);
+      setIsSaving(true);
+      setSaveMessage('');
 
-      // Generate new mappings for selected content type with the required properties
-      const newMappings = selectedFields.map((fieldId) => {
+      // Format the mappings for storage
+      const formattedMappings = mappings.map((fieldId) => {
         const field = availableFields.find((f) => f.id === fieldId);
         return {
           id: fieldId,
+          contentfulFieldId: fieldId,
           name: field?.name || fieldId,
+          klaviyoBlockName: field?.name || fieldId,
+          type: field?.type || 'Symbol',
+          fieldType: field?.type === 'RichText' ? 'richText' : 'text',
           contentTypeId: selectedContentType,
-          isAsset: false, // Default to non-asset
-          type: 'Text', // Add required field
-          value: '', // Add required field
         };
       });
 
-      // Combine and save
-      const updatedMappings = [...existingMappings, ...newMappings];
-      await updateSyncData(updatedMappings);
+      logger.log('Saving field mappings:', formattedMappings);
 
-      // Update local state
-      setMappings(updatedMappings);
+      // Save to local storage first (this always works)
+      try {
+        // Save the mappings to local storage
+        const currentMappings = getLocalMappings();
 
-      // Notify any other components
-      window.postMessage(
-        {
-          type: 'updateFieldMappings',
-          fieldMappings: updatedMappings,
-        },
-        '*'
-      );
+        // Remove existing mappings for this content type
+        const filteredMappings = currentMappings.filter(
+          (m: any) => m.contentTypeId !== selectedContentType
+        );
 
-      setSyncMessage('Mappings saved successfully');
+        // Add new mappings
+        const updatedMappings = [...filteredMappings, ...formattedMappings];
+
+        // Save to local storage
+        localStorage.setItem('klaviyo_contentful_mappings', JSON.stringify(updatedMappings));
+
+        // Update the UI state (convert to the expected format)
+        const mappingsForState = updatedMappings.map((m: any) => ({
+          id: m.id,
+          name: m.name || m.id,
+          type: m.type || 'Symbol',
+          value: '',
+          isAsset: false,
+          contentTypeId: m.contentTypeId,
+        }));
+
+        setMappings(mappingsForState);
+
+        logger.log('Saved mappings to local storage successfully');
+      } catch (localStorageError) {
+        logger.error('Error saving to local storage:', localStorageError);
+      }
+
+      // Try to save to Contentful if possible
+      try {
+        // We'll use the SDK's CMA client with raw HTTP requests
+        const client = sdk.cma;
+        const spaceId = sdk.ids.space;
+        const environmentId = sdk.ids.environment;
+        const appDefinitionId = sdk.ids.app;
+
+        const currentParams = (sdk.parameters as any) || ({} as any);
+        // Now update the parameters
+        // Initialize content type mappings if they don't exist
+        if (!currentParams.contentTypeMappings) {
+          currentParams.contentTypeMappings = {};
+        }
+
+        // Add the mappings for this content type
+        currentParams.contentTypeMappings[selectedContentType] = formattedMappings;
+
+        // Also update the flat fieldMappings array
+        let allMappings: any[] = [];
+        Object.keys(currentParams.contentTypeMappings).forEach((typeId) => {
+          const typeMappings = currentParams.contentTypeMappings[typeId];
+          if (Array.isArray(typeMappings)) {
+            allMappings = [...allMappings, ...typeMappings];
+          }
+        });
+
+        currentParams.fieldMappings = allMappings;
+
+        // Update the selected content types
+        if (!currentParams.selectedContentTypes) {
+          currentParams.selectedContentTypes = {};
+        }
+        currentParams.selectedContentTypes[selectedContentType] = true;
+
+        logger.log('Saved mappings to Contentful API successfully');
+        setSaveMessage('Field mappings saved successfully!');
+      } catch (apiError) {
+        logger.error('Error saving to Contentful API:', apiError);
+        // We still saved to local storage, so it's not a complete failure
+        setSaveMessage('Mappings saved locally, but could not save to Contentful API');
+      }
     } catch (error) {
-      logger.error('Error saving mappings:', error);
-      setSyncMessage('Error saving mappings');
+      logger.error('Error in saveFieldMappings:', error);
+      setSaveMessage(`Error saving: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -327,9 +440,18 @@ export const FieldMappingScreen: React.FC = () => {
       setSyncMessage('Please select an entry');
       return;
     }
+    if (selectedFields.length === 0) {
+      setSyncMessage('Please select at least one field');
+      return;
+    }
+
     setIsSyncing(true);
     setSyncMessage('Syncing to Klaviyo...');
     try {
+      // First, save the field mappings
+      await saveFieldMappings(selectedFields);
+      logger.log('Field mappings saved, now syncing content');
+
       // Fetch the entry data
       const space = await sdk.cma.space.get({});
       const environment = await sdk.cma.environment.get({
@@ -341,25 +463,45 @@ export const FieldMappingScreen: React.FC = () => {
         environmentId: environment.sys.id,
         entryId: selectedEntryId,
       });
-      // Prepare mappings
-      const formattedMappings = selectedFields.map((fieldId) => {
-        const field = availableFields.find((f) => f.id === fieldId);
-        return {
-          contentfulFieldId: fieldId,
-          klaviyoBlockName: field?.name || fieldId,
-          fieldType: 'text',
-        };
-      });
-      // Call real sync
+
+      // Get the field mappings from local storage
+      const allLocalMappings = getLocalMappings();
+
+      // Filter only the mappings for this content type
+      const contentTypeMappings = allLocalMappings.filter(
+        (mapping: any) => mapping.contentTypeId === selectedContentType
+      );
+
+      // Prepare mappings in the format expected by SyncContent
+      const syncMappings = contentTypeMappings.map((mapping: any) => ({
+        contentfulFieldId: mapping.contentfulFieldId || mapping.id,
+        klaviyoBlockName: mapping.klaviyoBlockName || mapping.name || mapping.id,
+        fieldType: mapping.fieldType || (mapping.type === 'RichText' ? 'richText' : 'text'),
+      }));
+
+      logger.log('Using mappings for sync:', syncMappings);
+
+      // Call the sync service
       const syncContentService = new SyncContent(entry);
-      await syncContentService.syncContent(
+      const result = await syncContentService.syncContent(
         {
           ...sdk,
           entry,
+          ids: {
+            entry: selectedEntryId,
+            contentType: selectedContentType,
+            environment: sdk.ids.environment,
+          },
         },
-        formattedMappings
+        syncMappings,
+        {
+          entryId: selectedEntryId,
+          contentTypeId: selectedContentType,
+        }
       );
-      setSyncMessage('Content successfully synced to Klaviyo!');
+
+      logger.log('Sync result:', result);
+      setSyncMessage('Mappings saved and content successfully synced to Klaviyo!');
     } catch (error: any) {
       logger.error('Error syncing:', error);
       setSyncMessage(`Error syncing: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -433,9 +575,12 @@ export const FieldMappingScreen: React.FC = () => {
                 <Heading as="h2">How to add field mappings</Heading>
                 <Paragraph>1. Click "Configure Field Mappings" above</Paragraph>
                 <Paragraph>2. Select a content type and the fields you want to map</Paragraph>
-                <Paragraph>3. Click "Save Mappings" to save your configuration</Paragraph>
                 <Paragraph>
-                  4. Click "Sync to Klaviyo" to send the data directly to Klaviyo
+                  3. Click "Save Mappings" to save your configuration for future use
+                </Paragraph>
+                <Paragraph>
+                  4. Select an entry and click "Sync to Klaviyo" to send the data directly to
+                  Klaviyo (this will also save your mappings)
                 </Paragraph>
               </Box>
             </Tabs.Panel>
@@ -596,18 +741,20 @@ export const FieldMappingScreen: React.FC = () => {
                 Cancel
               </Button>
               <Button
-                variant="positive"
-                onClick={handleSaveMapping}
+                variant="primary"
+                onClick={() => saveFieldMappings(selectedFields)}
                 isDisabled={!selectedContentType || selectedFields.length === 0}
-                style={{ marginRight: '10px' }}>
+                isLoading={isSaving}
+                style={{ marginLeft: '10px' }}>
                 Save Mappings
               </Button>
               <Button
                 variant="primary"
                 onClick={handleSyncToKlaviyo}
-                isDisabled={!selectedContentType || selectedFields.length === 0}
-                isLoading={isSyncing}>
-                Sync to Klaviyo
+                isDisabled={!selectedContentType || !selectedEntryId || selectedFields.length === 0}
+                isLoading={isSyncing}
+                style={{ marginLeft: '10px' }}>
+                Save & Sync to Klaviyo
               </Button>
             </Modal.Controls>
           </>

@@ -39,20 +39,6 @@ const App = () => {
     }
   }, [sdk.parameters.installation]);
 
-  // Set up configuration handler for app config screen
-  useEffect(() => {
-    if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-      const appSdk = sdk as AppExtensionSDK;
-      appSdk.app.onConfigure(() => ({
-        parameters: {
-          klaviyoApiKey: appSdk.parameters.installation?.klaviyoApiKey,
-          klaviyoCompanyId: appSdk.parameters.installation?.klaviyoCompanyId,
-          mappings,
-        },
-      }));
-    }
-  }, [sdk.location, mappings]);
-
   // Get the component for the current location
   const getCurrentComponent = () => {
     // Find which location we're in and get the corresponding component

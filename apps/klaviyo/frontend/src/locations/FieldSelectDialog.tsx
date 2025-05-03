@@ -13,9 +13,22 @@ import {
   Subheading,
   Pill,
 } from '@contentful/f36-components';
-import { SyncContent } from '../utils/klaviyo-api-service';
+import { SyncContent } from '../services/klaviyo-sync-service';
 import { FieldMapping } from '../config/klaviyo';
 import logger from '../utils/logger';
+
+// Extend Window interface to allow our custom property
+declare global {
+  interface Window {
+    _klaviyoDialogResult?: {
+      selectedFields?: string[];
+      mappings?: any[];
+      success?: boolean;
+      action?: string;
+      error?: string;
+    };
+  }
+}
 
 interface Field {
   id: string;
@@ -152,19 +165,22 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
         '*'
       );
 
-      // Return the selected fields and mappings to the calling component
-      // This is critical for the Sidebar to properly receive the mappings
-      sdk.close({
+      // Show success message instead of closing the dialog
+      setSyncMessage(
+        'Field selections saved successfully. You can continue editing or close the dialog.'
+      );
+
+      // Store the mappings in state so they're available when the user closes manually
+      window._klaviyoDialogResult = {
         selectedFields,
         mappings: updatedMappings,
         success: true,
-      });
+      };
     } catch (error) {
       logger.error('[FieldSelectDialog] Error saving mappings:', error);
-      sdk.close({
-        error: 'Failed to save mappings',
-        success: false,
-      });
+      setSyncMessage(
+        `Error saving mappings: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   };
 
@@ -288,19 +304,54 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
         };
       });
 
+      // Try to safely extract entry and content type IDs
+      let entryId: string | undefined;
+      let contentTypeId: string | undefined;
+
+      // From invocation parameters (most reliable)
+      if (sdk.parameters.invocation && typeof sdk.parameters.invocation === 'object') {
+        const invocation = sdk.parameters.invocation as Record<string, any>;
+        if (invocation.entryId && typeof invocation.entryId === 'string') {
+          entryId = invocation.entryId;
+        }
+        if (invocation.contentTypeId && typeof invocation.contentTypeId === 'string') {
+          contentTypeId = invocation.contentTypeId;
+        }
+      }
+
+      // Fall back to SDK IDs if available
+      if (!entryId && sdk.ids) {
+        const ids = sdk.ids as Record<string, any>;
+        if (ids.entry && typeof ids.entry === 'string') {
+          entryId = ids.entry;
+        }
+      }
+
+      if (!contentTypeId && sdk.ids) {
+        const ids = sdk.ids as Record<string, any>;
+        if (ids.contentType && typeof ids.contentType === 'string') {
+          contentTypeId = ids.contentType;
+        }
+      }
+
+      logger.log('Starting sync with IDs:', { entryId, contentTypeId });
+
       // Sync using the parent context SDK (e.g. sidebar)
-      const syncContentService = new SyncContent(JSON.parse(currentEntry));
-      await syncContentService.syncContent(sdk, formattedMappings);
+      const syncContentService = new SyncContent(currentEntry);
+      await syncContentService.syncContent(sdk, formattedMappings, {
+        entryId,
+        contentTypeId,
+      });
 
-      setSyncMessage('Fields synced to Klaviyo. Closing dialog...');
+      setSyncMessage(
+        'Fields successfully synced to Klaviyo! You can continue editing or close the dialog.'
+      );
 
-      // Return both selected fields and a sync action
-      setTimeout(() => {
-        sdk.close({
-          action: 'sync',
-          selectedFields,
-        });
-      }, 1500);
+      // Store the result in a global variable so it's available when the dialog is closed manually
+      window._klaviyoDialogResult = {
+        action: 'sync',
+        selectedFields,
+      };
     } catch (error) {
       logger.error('Error in sync:', error);
       setSyncMessage(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -311,6 +362,47 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
 
   // Get field by ID
   const getFieldById = (fieldId: string) => fields.find((f) => f.id === fieldId);
+
+  // Add an effect to set the sdk.close handler
+  useEffect(() => {
+    // When the component mounts, set up a custom onClose handler
+    const handleClose = () => {
+      // Return the stored result when dialog is closed manually
+      return (
+        window._klaviyoDialogResult || {
+          selectedFields,
+          success: true,
+        }
+      );
+    };
+
+    // Store the original close method
+    const originalClose = sdk.close;
+
+    // Create a global variable to store the dialog result
+    window._klaviyoDialogResult = undefined;
+
+    // Override the close method to use our custom handler
+    sdk.close = function () {
+      return originalClose.call(this, handleClose());
+    };
+
+    // Restore original close method on unmount
+    return () => {
+      sdk.close = originalClose;
+    };
+  }, [sdk, selectedFields]);
+
+  const handleCancel = () => {
+    // Set result before closing
+    window._klaviyoDialogResult = {
+      selectedFields,
+      success: true,
+    };
+
+    // Call the close method which will use our custom handler
+    sdk.close();
+  };
 
   return (
     <Box padding="spacingL">
@@ -402,8 +494,8 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
           )}
 
           <Flex justifyContent="space-between" style={{ width: '100%' }}>
-            <Button variant="secondary" onClick={() => sdk.close()}>
-              Cancel
+            <Button variant="secondary" onClick={handleCancel}>
+              Close
             </Button>
 
             <Flex gap="spacingS">

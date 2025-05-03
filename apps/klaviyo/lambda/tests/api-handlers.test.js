@@ -31,8 +31,8 @@ mockTrackEvent.mockImplementation(() => {
 mockUploadEvent.mockImplementation(() => {
   return {
     data: {
-      id: 'template-123',
-      type: 'template',
+      id: 'content-123',
+      type: 'universal-content',
     },
   };
 });
@@ -113,24 +113,32 @@ describe('API Handlers', () => {
   });
 
   // Test uploadEvent
-  test('uploadEvent sends template content to Klaviyo', async () => {
-    const templateData = {
-      type: 'template',
+  test('uploadEvent sends content to Klaviyo', async () => {
+    const contentData = {
+      type: 'universal-content',
       attributes: {
-        name: 'Test Template',
-        html: '<p>Hello world</p>',
+        name: 'Test Content',
+        definition: {
+          content_type: 'block',
+          type: 'html',
+          data: {
+            content: '<p>Hello world</p>',
+            styles: {},
+            display_options: {},
+          },
+        },
       },
     };
 
-    const result = await mockUploadEvent(templateData, 'test_token');
+    const result = await mockUploadEvent(contentData, 'test_token');
 
     expect(result).toEqual({
       data: {
-        id: 'template-123',
-        type: 'template',
+        id: 'content-123',
+        type: 'universal-content',
       },
     });
-    expect(mockUploadEvent).toHaveBeenCalledWith(templateData, 'test_token');
+    expect(mockUploadEvent).toHaveBeenCalledWith(contentData, 'test_token');
   });
 
   // Test identifyProfile

@@ -12,6 +12,8 @@ import FieldSelectDialog from './locations/FieldSelectDialog';
 // Create a simple context for SDK
 import { createContext } from 'react';
 import logger from './utils/logger';
+import { storeAppDefinitionId, getAppDefinitionId } from './services/persistence-service';
+import { getGlobalSDK, ensureAppParameters } from './utils/sdk-helpers';
 
 // Create your own SDK context
 export const SDKContext = createContext<any>(null);
@@ -26,135 +28,163 @@ const root = document.getElementById('root');
 // Update the message event listener in index.tsx
 window.addEventListener('message', async (event) => {
   if (event.data && event.data.type === 'updateFieldMappings') {
-    logger.log('Received field mapping update:', event.data.fieldMappings);
-
-    // If we're in development mode, save to localStorage for testing
-    if (import.meta.env.MODE !== 'production') {
-      localStorage.setItem('dev_field_mappings', JSON.stringify(event.data.fieldMappings));
-      logger.log('Saved field mappings to localStorage for dev mode');
-    }
-
-    // If we have access to the global SDK object, try to save using it
     try {
-      const globalSdk = (window as any).sdk;
-      if (globalSdk && globalSdk.app && typeof globalSdk.app.setParameters === 'function') {
-        const currentParams = globalSdk.parameters?.installation || {};
+      console.log('Received field mapping update event:', event.data);
 
-        await globalSdk.app.setParameters({
-          installation: {
-            ...currentParams,
-            fieldMappings: event.data.fieldMappings,
-          },
+      // Use our new helper with retry logic
+      const globalSdk = await getGlobalSDK();
+
+      // Check if SDK is fully available
+      if (!globalSdk) {
+        console.warn(
+          'Global SDK not available after retries, storing mappings in localStorage only'
+        );
+        // Save to localStorage as a fallback
+        localStorage.setItem('klaviyo_field_mappings', JSON.stringify(event.data.fieldMappings));
+
+        // Store app definition ID if available
+        if (event.data.appDefinitionId) {
+          storeAppDefinitionId(event.data.appDefinitionId);
+        }
+        return;
+      }
+
+      // Get necessary IDs
+      const spaceId = globalSdk.ids.space;
+      const environmentId = globalSdk.ids.environment;
+      // Use appDefinitionId from event if available, otherwise from SDK or localStorage
+      const appDefinitionId =
+        event.data.appDefinitionId || globalSdk.ids.app || getAppDefinitionId();
+
+      if (!spaceId || !environmentId || !appDefinitionId) {
+        console.error('Missing required IDs for updating app parameters', {
+          spaceId,
+          environmentId,
+          appDefinitionId,
         });
 
-        logger.log('Updated field mappings in installation parameters');
+        // Still save to localStorage as fallback
+        localStorage.setItem('klaviyo_field_mappings', JSON.stringify(event.data.fieldMappings));
+        return;
+      }
+
+      try {
+        // Get current parameters
+        const appInstallation = await globalSdk.cma.appInstallation.get({
+          appDefinitionId,
+          spaceId,
+          environmentId,
+        });
+
+        const currentParams = appInstallation.parameters || {};
+
+        // Format the mappings if needed
+        const fieldMappings = event.data.fieldMappings.map((item: any) => ({
+          contentfulFieldId: item.id || item.contentfulFieldId,
+          klaviyoBlockName: item.name || item.klaviyoBlockName || item.id || item.contentfulFieldId,
+          fieldType:
+            item.type === 'RichText' || item.fieldType === 'richText' ? 'richText' : 'text',
+          contentTypeId: item.contentTypeId,
+        }));
+
+        // Organize mappings by content type
+        const contentTypeMappings: Record<string, any[]> = {};
+        fieldMappings.forEach((mapping: any) => {
+          if (mapping.contentTypeId) {
+            if (!contentTypeMappings[mapping.contentTypeId]) {
+              contentTypeMappings[mapping.contentTypeId] = [];
+            }
+            contentTypeMappings[mapping.contentTypeId].push(mapping);
+          }
+        });
+
+        console.log('Saving field mappings to app parameters:', {
+          fieldMappings,
+          contentTypeMappings,
+          mappingCount: fieldMappings.length,
+          contentTypeCount: Object.keys(contentTypeMappings).length,
+        });
+
+        // Prepare updated parameters
+        const updatedParameters = {
+          ...currentParams,
+          fieldMappings,
+          contentTypeMappings,
+          appDefinitionId, // Include appDefinitionId at the top level
+          installation: {
+            ...(currentParams.installation || {}),
+            fieldMappings,
+            contentTypeMappings,
+            appDefinitionId, // Include appDefinitionId in installation
+            mappings: event.data.fieldMappings, // Store original format too
+          },
+        };
+
+        // Save the parameters to the app using the correct method
+        console.log('onConfigure', updatedParameters, globalSdk.app);
+        await globalSdk.app.onConfigure();
+
+        // Also save to localStorage for components that might not have SDK access
+        localStorage.setItem('klaviyo_field_mappings', JSON.stringify(event.data.fieldMappings));
+
+        console.log('Saved field mappings to app parameters');
+      } catch (sdkError) {
+        console.error('Error saving field mappings via SDK:', sdkError);
+        // Fall back to localStorage if SDK fails
+        localStorage.setItem('klaviyo_field_mappings', JSON.stringify(event.data.fieldMappings));
       }
     } catch (error) {
-      logger.error('Failed to update field mappings in installation parameters:', error);
+      console.error('Error saving field mappings to app parameters:', error);
+      // Last resort fallback to localStorage
+      if (event.data.fieldMappings) {
+        localStorage.setItem('klaviyo_field_mappings', JSON.stringify(event.data.fieldMappings));
+      }
     }
   }
 });
 
-if (import.meta.env.MODE !== 'production' && window.self === window.top) {
-  // Try to get any saved field mappings from localStorage
-  const savedMappings = localStorage.getItem('dev_field_mappings');
-  const fieldMappings = savedMappings ? JSON.parse(savedMappings) : [];
+init((sdk) => {
+  logger.log('SDK Location:', sdk.location);
+  logger.log('Is config?', sdk.location.is(locations.LOCATION_APP_CONFIG));
+  logger.log('Is sidebar?', sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR));
 
-  // Create a mock SDK for development
-  const mockSdk: any = {
-    app: {
-      onConfigure: () => Promise.resolve({}),
-      getParameters: () => ({
-        fieldMappings,
-      }),
-      setParameters: (params: any) => {
-        logger.log('Setting parameters in dev mode:', params);
-        if (params.installation && params.installation.fieldMappings) {
-          localStorage.setItem(
-            'dev_field_mappings',
-            JSON.stringify(params.installation.fieldMappings)
-          );
-        }
-        return Promise.resolve();
-      },
-      setReady: () => {},
-    },
-    ids: {
-      app: 'klaviyo-app',
-      space: 'space-id',
-      environment: 'environment-id',
-      user: 'user-id',
-    },
-    location: {
-      is: () => true,
-    },
-    parameters: {
-      installation: {
-        fieldMappings,
-      },
-    },
-    notifier: {
-      success: (message: string) => logger.log(`Success: ${message}`),
-      error: (message: string) => logger.error(`Error: ${message}`),
-    },
-    window: {
-      startAutoResizer: () => {},
-    },
-    // Add CMA for ContentTypes
-    cma: {
-      space: {
-        get: () => Promise.resolve({ sys: { id: 'space-id' } }),
-      },
-      environment: {
-        get: () => Promise.resolve({ sys: { id: 'environment-id' } }),
-      },
-      contentType: {
-        getMany: () => Promise.resolve({ items: [] }),
-      },
-    },
-  };
+  // Set SDK globally for cross-component access
+  (window as any).sdk = sdk;
 
-  // Make the SDK available globally for development
-  (window as any).sdk = mockSdk;
+  // Store app definition ID for later use
+  if (sdk.ids && sdk.ids.app) {
+    storeAppDefinitionId(sdk.ids.app);
+    logger.log('Stored app definition ID:', sdk.ids.app);
+  } else {
+    logger.warn('App definition ID not available in SDK');
+  }
 
+  // Ensure app parameters are properly initialized
+  ensureAppParameters(sdk).catch((error) => {
+    logger.error('Error ensuring app parameters:', error);
+  });
+
+  const ComponentLocation = sdk.location.is(locations.LOCATION_DIALOG)
+    ? FieldSelectDialog
+    : sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)
+    ? Sidebar
+    : sdk.location.is(locations.LOCATION_APP_CONFIG)
+    ? ConfigScreen
+    : sdk.location.is(locations.LOCATION_PAGE)
+    ? FieldMappingScreen
+    : null;
+
+  if (!ComponentLocation) {
+    return;
+  }
+
+  const entry = (sdk as any).entry || {};
+  const mappings = (sdk as any).parameters?.installation?.fieldMappings || [];
   render(
-    <SDKContextProvider sdk={mockSdk}>
+    <SDKContextProvider sdk={sdk}>
       <GlobalStyles />
-      <KlaviyoAppProvider>
-        <ConfigScreen />
-      </KlaviyoAppProvider>
+      <ComponentLocation entry={entry} mappings={mappings} />
     </SDKContextProvider>,
     root
   );
-} else {
-  // Production init
-  init((sdk) => {
-    logger.log('SDK Location:', sdk.location);
-    logger.log('Is config?', sdk.location.is(locations.LOCATION_APP_CONFIG));
-    logger.log('Is sidebar?', sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR));
-
-    const ComponentLocation = sdk.location.is(locations.LOCATION_DIALOG)
-      ? FieldSelectDialog
-      : sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)
-      ? Sidebar
-      : sdk.location.is(locations.LOCATION_APP_CONFIG)
-      ? ConfigScreen
-      : sdk.location.is(locations.LOCATION_PAGE)
-      ? FieldMappingScreen
-      : null;
-
-    if (!ComponentLocation) {
-      return;
-    }
-
-    const entry = (sdk as any).entry || {};
-    const mappings = (sdk as any).parameters?.installation?.fieldMappings || [];
-    render(
-      <SDKContextProvider sdk={sdk}>
-        <GlobalStyles />
-        <ComponentLocation entry={entry} mappings={mappings} />
-      </SDKContextProvider>,
-      root
-    );
-  });
-}
+});

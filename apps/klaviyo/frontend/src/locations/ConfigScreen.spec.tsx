@@ -10,8 +10,8 @@ const mockSdk = {
   app: {
     onConfigure: vi.fn().mockReturnValue(true),
     getParameters: vi.fn().mockResolvedValue({
-      klaviyoApiKey: 'old-api-key',
-      klaviyoCompanyId: 'old-company-id',
+      publicKey: 'old-api-key',
+      privateKey: 'old-private-key',
     }),
     setReady: vi.fn(),
     getCurrentState: vi.fn().mockReturnValue({
@@ -27,8 +27,8 @@ const mockSdk = {
   },
   parameters: {
     installation: {
-      klaviyoApiKey: 'existing-api-key',
-      klaviyoCompanyId: 'existing-company-id',
+      publicKey: 'existing-api-key',
+      privateKey: 'existing-private-key',
     },
   },
   ids: {
@@ -55,7 +55,7 @@ const mockCma = {
       },
       parameters: {
         instanceParameters: {
-          klaviyoApiKey: 'api-key-from-cma',
+          publicKey: 'api-key-from-cma',
         },
       },
     }),
@@ -72,8 +72,8 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 vi.mock('formik', () => ({
   useFormik: vi.fn(() => ({
     values: {
-      klaviyoApiKey: 'existing-api-key',
-      klaviyoCompanyId: 'existing-company-id',
+      publicKey: 'existing-api-key',
+      privateKey: 'existing-private-key',
     },
     errors: {},
     touched: {},

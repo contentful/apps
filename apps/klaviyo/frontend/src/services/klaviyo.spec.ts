@@ -22,6 +22,7 @@ describe('KlaviyoService', () => {
     clientId: 'test-client-id',
     clientSecret: 'test-client-secret',
     redirectUri: 'test-redirect-uri',
+    publicKey: 'test-public-key',
   };
 
   let service: KlaviyoService;

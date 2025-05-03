@@ -7,8 +7,8 @@ import {
   markEntryForSync,
   setupEntryChangeListener,
   SyncContent,
-} from '../utils/klaviyo-api-service';
-import { getSyncData, updateSyncData } from '../utils/persistence-service';
+} from '../services/klaviyo-sync-service';
+import { getSyncData, updateSyncData } from '../services/persistence-service';
 import { getFieldDetails } from '../utils/field-utilities';
 import { logger } from '../utils/logger';
 import {
@@ -112,15 +112,6 @@ const ConfigComponent = ({
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  useEffect(() => {
-    sdk.app.onConfigure(() => ({
-      parameters: {},
-      targetState: {
-        EditorInterface: {},
-      },
-    }));
-  }, [sdk]);
-
   return (
     <Flex flexDirection="column" margin="spacingM">
       <Text>
@@ -140,6 +131,7 @@ const SidebarComponent = ({
   buttonDisabled,
   setButtonDisabled,
   syncMessage,
+  setSyncMessage,
   isSyncing,
   setIsSyncing,
   error,
@@ -165,41 +157,39 @@ const SidebarComponent = ({
 }) => {
   // Handle field selection using Contentful's dialog
   const handleConfigureClick = useCallback(async () => {
-    if (!sdk.dialogs) return;
-
     try {
-      logger.log('[Sidebar] Opening field select dialog...');
+      // Ensure we have entry and content type IDs
+      const entryId = sdk.ids.entry;
+      const contentTypeId = sdk.ids.contentType;
 
-      // Get all fields from the content type
-      const contentType = await sdk.space.getContentType(sdk.ids.contentType);
+      if (!entryId || !contentTypeId) {
+        logger.error('[Sidebar] Missing required IDs:', { entryId, contentTypeId });
+        setError('Missing entry or content type ID. Please refresh the page and try again.');
+        return;
+      }
 
-      // Filter valid fields (non-boolean, non-reference)
-      const validFields = contentType.fields
-        .filter(
-          (field) =>
-            field.type !== 'Boolean' &&
-            !(field.type === 'Array' && field.name.toLowerCase().includes('reference')) &&
-            !field.name.toLowerCase().includes('reference')
-        )
-        .map((field) => ({
-          id: field.id,
-          name: field.name,
-          type: field.type,
-        }));
+      logger.log('[Sidebar] Opening configure dialog with IDs:', { entryId, contentTypeId });
 
-      // Pre-select already mapped fields
-      const preSelectedFields = mappings.map((mapping) => mapping.id);
+      // Get all valid fields for this content type
+      const validFields = await getContentTypeFields(sdk, contentTypeId);
+      const preSelectedFields = mappings
+        .filter((m) => m.contentTypeId === sdk.ids.contentType)
+        .map((m) => m.id);
 
-      // Prepare field selection data
+      // Set up dialog options
       const dialogOptions = {
-        title: 'Configure & Sync to Klaviyo',
-        width: 'medium' as 'medium',
-        minHeight: 400,
+        width: 800,
+        minHeight: 600,
+        position: 'center' as 'center',
+        title: 'Configure Klaviyo Field Mappings',
+        shouldCloseOnEscapePress: true,
+        shouldCloseOnOverlayClick: true,
         parameters: {
+          entryId, // Explicitly include entry ID
+          contentTypeId, // Explicitly include content type ID
           currentEntry: JSON.stringify(sdk.entry),
           fields: validFields,
           preSelectedFields,
-          contentTypeId: sdk.ids.contentType,
           contentTypeName: sdk.contentType.name,
           showSyncButton: true,
         },
@@ -225,14 +215,8 @@ const SidebarComponent = ({
         // Also update the mappings in localStorage directly
         localStorage.setItem('klaviyo_field_mappings', JSON.stringify(result.mappings));
 
-        // And notify any other components
-        window.postMessage(
-          {
-            type: 'updateFieldMappings',
-            fieldMappings: result.mappings,
-          },
-          '*'
-        );
+        // Update via our improved persistence service
+        await updateSyncData(result.mappings);
       }
       // Check if we got field selections or sync result
       else if (result.action === 'sync') {
@@ -257,17 +241,8 @@ const SidebarComponent = ({
         // Save to localStorage directly for immediate sharing
         localStorage.setItem('klaviyo_field_mappings', JSON.stringify(newMappings));
 
-        // Also update via the persistence service
+        // Update via our improved persistence service
         await updateSyncData(newMappings);
-
-        // Notify other components about the update
-        window.postMessage(
-          {
-            type: 'updateFieldMappings',
-            fieldMappings: newMappings,
-          },
-          '*'
-        );
       }
     } catch (error) {
       logger.error('[Sidebar] Error in configure dialog:', error);
@@ -305,92 +280,185 @@ const SidebarComponent = ({
 
   // Function to handle the sync button click
   const handleSync = async () => {
-    setIsSyncing(true);
-    setError(null);
-
     try {
-      // Get field mappings for this content type
-      const contentTypeId = sdk.ids.contentType;
-      const contentTypeName = sdk.contentType?.name || '';
-      const fieldMappings = await getFieldMappings(sdk);
+      setError(null);
+      setButtonDisabled(true);
+      setIsSyncing(true);
+      setSyncMessage('Syncing content to Klaviyo...');
+
+      // Get current field mappings
+      const fieldMappings = await getSyncData(sdk);
 
       if (!fieldMappings || fieldMappings.length === 0) {
-        throw new Error('No field mappings configured for this content type');
+        setError('No field mappings found. Please configure field mappings first.');
+        setSyncMessage(null);
+        setIsSyncing(false);
+        setButtonDisabled(false);
+        return;
       }
 
-      // Get entry
-      const entryId = sdk.entry.getSys().id;
+      logger.log('[Sidebar] Starting sync with field mappings:', fieldMappings);
 
-      logger.log(`Syncing entry ${entryId} (${contentTypeId}: ${contentTypeName})...`);
+      // Comprehensive SDK inspection to debug ID issues
+      logger.log('[Sidebar] Detailed SDK inspection:', {
+        sdkType: typeof sdk,
+        hasIds: !!sdk.ids,
+        idsType: sdk.ids ? typeof sdk.ids : 'undefined',
+        idsProperties: sdk.ids ? Object.keys(sdk.ids) : [],
+        idsEntry: sdk.ids?.entry,
+        idsContentType: sdk.ids?.contentType,
+        hasEntry: !!sdk.entry,
+        entryType: sdk.entry ? typeof sdk.entry : 'undefined',
+        hasGetSys: sdk.entry?.getSys ? typeof sdk.entry.getSys : 'undefined',
+        location: sdk.location ? Object.keys(sdk.location) : [],
+        locationIsSidebar: sdk.location?.is(locations.LOCATION_ENTRY_SIDEBAR),
+      });
 
-      // Ensure we have the full entry with all fields
-      const entry = entryId ? await sdk.space.getEntry(entryId) : sdk.entry;
+      // We need to ensure we have the entry ID and content type ID
+      // Try multiple sources to ensure we get valid IDs
+      let entryId = undefined;
+      let contentTypeId = undefined;
 
-      // Create sync content instance with SDK reference
-      const syncContent = new SyncContent(entry, sdk);
+      // 1. Try to get from sdk.ids - this is usually the most reliable for sidebar extensions
+      if (sdk.ids) {
+        entryId = sdk.ids.entry;
+        contentTypeId = sdk.ids.contentType;
+        logger.log('[Sidebar] IDs from sdk.ids:', { entryId, contentTypeId });
+      }
 
-      // Pass SDK and useSdk option
-      const result = await syncContent.syncContent(sdk, fieldMappings, { useSdk: true });
+      // 2. If still missing, try to get from entry sys object
+      if (!entryId || !contentTypeId) {
+        let entrySys: any = null;
 
-      // Explicitly update the localStorage status to ensure it's updated
-      const now = Date.now();
-      const storageKey = 'klaviyo_sync_status';
-      const existingStatusesStr = localStorage.getItem(storageKey);
-      const existingStatuses = existingStatusesStr ? JSON.parse(existingStatusesStr) : [];
+        try {
+          // First try with getSys method
+          if (typeof sdk.entry.getSys === 'function') {
+            entrySys = sdk.entry.getSys();
+            logger.log('[Sidebar] Entry sys from getSys():', entrySys);
+          }
+          // Alternative approach with direct sys property access
+          else if (sdk.entry && 'sys' in sdk.entry) {
+            entrySys = (sdk.entry as any).sys;
+            logger.log('[Sidebar] Entry sys from direct access:', entrySys);
+          }
 
-      // Find or create status entry
-      const statusIndex = existingStatuses.findIndex(
-        (status: any) => status.entryId === entryId && status.contentTypeId === contentTypeId
-      );
+          // Process the sys data if we got it from either method
+          if (entrySys) {
+            if (!entryId && entrySys.id) {
+              entryId = entrySys.id;
+              logger.log('[Sidebar] Got entryId from entry sys:', entryId);
+            }
 
-      if (statusIndex >= 0) {
-        // Update existing
-        existingStatuses[statusIndex] = {
-          ...existingStatuses[statusIndex],
-          lastSynced: now,
-          needsSync: false,
-          syncCompleted: true,
-          contentTypeName: contentTypeName,
-        };
-      } else {
-        // Create new
-        existingStatuses.push({
+            if (!contentTypeId && entrySys?.contentType?.sys?.id) {
+              contentTypeId = entrySys.contentType.sys.id;
+              logger.log('[Sidebar] Got contentTypeId from entry sys:', contentTypeId);
+            }
+          }
+        } catch (e) {
+          logger.error('[Sidebar] Error getting IDs from entry sys:', e);
+        }
+      }
+
+      // 3. Last try: check if we can get it from content type
+      if (!contentTypeId && sdk.contentType?.sys?.id) {
+        contentTypeId = sdk.contentType.sys.id;
+        logger.log('[Sidebar] Got contentTypeId from sdk.contentType:', contentTypeId);
+      }
+
+      // Final confirmation of IDs before proceeding
+      logger.log('[Sidebar] Final IDs for sync:', {
+        entryId,
+        contentTypeId,
+        idsAvailable: !!sdk.ids,
+        entryIdFromIds: sdk.ids?.entry,
+        contentTypeIdFromIds: sdk.ids?.contentType,
+      });
+
+      // Verify that we have the required IDs before proceeding
+      if (!entryId || !contentTypeId) {
+        setError('Missing entry ID or content type ID. Please try again.');
+        logger.error('[Sidebar] Missing IDs:', {
           entryId,
           contentTypeId,
-          contentTypeName,
-          lastSynced: now,
-          needsSync: false,
-          syncCompleted: true,
+          sdkIds: sdk.ids,
         });
+        setSyncMessage(null);
+        setIsSyncing(false);
+        setButtonDisabled(false);
+        return;
       }
 
-      // Save back to localStorage
-      localStorage.setItem(storageKey, JSON.stringify(existingStatuses));
+      // Convert field mappings to the format expected by syncContent
+      const formattedMappings = fieldMappings.map((mapping) => ({
+        contentfulFieldId: mapping.id,
+        klaviyoBlockName: mapping.name,
+        fieldType: mapping.type,
+      }));
 
-      // Dispatch event
-      window.dispatchEvent(
-        new CustomEvent('klaviyo-sync-completed', {
-          detail: { entryId, contentTypeId, contentTypeName, lastSynced: now },
-        })
-      );
+      // Initialize sync service with the SDK
+      const syncService = new SyncContent(null, sdk);
 
-      logger.log(`Sync completed for entry ${entryId} at ${new Date(now).toISOString()}`);
+      try {
+        // Explicitly create options object with the IDs
+        const syncOptions = {
+          useSdk: true,
+          forceUpdate: true,
+          entryId, // Explicitly include entry ID
+          contentTypeId, // Explicitly include content type ID
+        };
 
-      // Show success message
-      setSyncSuccessful(true);
+        logger.log('[Sidebar] Calling syncContent with options:', syncOptions);
 
-      // Reset after a delay
-      setTimeout(() => {
+        // Perform sync with explicit options
+        const result = await syncService.syncContent(sdk, formattedMappings, syncOptions);
+
+        if (result && result.success === false) {
+          setError(`Sync failed: ${result.error || 'Unknown error'}`);
+          setSyncSuccessful(false);
+        } else {
+          // Mark sync as successful
+          setShowSuccess(true);
+          setSyncSuccessful(true);
+          setSyncMessage('Content synced successfully!');
+
+          setTimeout(() => {
+            setShowSuccess(false);
+            setSyncMessage(null);
+          }, 3000);
+        }
+      } catch (syncError) {
+        logger.error('[Sidebar] Error during content sync:', syncError);
+
+        // Show better error messages based on the error type
+        let errorMessage = 'Error syncing content to Klaviyo.';
+
+        if (typeof syncError === 'string') {
+          errorMessage = syncError;
+        } else if (syncError instanceof Error) {
+          if (syncError.message.includes('Forbidden')) {
+            errorMessage = 'Authentication failed. Check your API keys and permissions.';
+          } else {
+            errorMessage = syncError.message;
+          }
+        }
+
+        setError(errorMessage);
         setSyncSuccessful(false);
-      }, 3000);
+      }
+    } catch (error) {
+      // This catches any other errors (like network issues)
+      logger.error('[Sidebar] Unexpected error during sync:', error);
 
-      return result;
-    } catch (err: any) {
-      logger.error('Sync error:', err);
-      setError(err.message || 'Unknown error');
-      return null;
+      let errorMessage = 'Unexpected error during sync.';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      setError(errorMessage);
+      setSyncSuccessful(false);
     } finally {
       setIsSyncing(false);
+      setButtonDisabled(false);
     }
   };
 
@@ -446,4 +514,24 @@ const SidebarComponent = ({
       )}
     </Flex>
   );
+};
+
+// Get all fields from a content type
+const getContentTypeFields = async (sdk: any, contentTypeId: string) => {
+  // Get the content type definition
+  const contentType = await sdk.space.getContentType(contentTypeId);
+
+  // Filter valid fields (exclude certain types that wouldn't make sense to sync)
+  return contentType.fields
+    .filter(
+      (field: any) =>
+        field.type !== 'Boolean' &&
+        !(field.type === 'Array' && field.name.toLowerCase().includes('reference')) &&
+        !field.name.toLowerCase().includes('reference')
+    )
+    .map((field: any) => ({
+      id: field.id,
+      name: field.name,
+      type: field.type,
+    }));
 };

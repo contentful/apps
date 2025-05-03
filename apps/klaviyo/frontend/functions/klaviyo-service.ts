@@ -56,10 +56,28 @@ export class KlaviyoService {
       const contentData: Record<string, any> = {};
 
       console.log(`Processing entry with ${fieldMappings.length} field mappings`);
+      console.log(
+        'Field mappings detail:',
+        JSON.stringify(
+          fieldMappings.map((m) => ({
+            contentfulFieldId: m.contentfulFieldId,
+            klaviyoBlockName: m.klaviyoBlockName,
+            fieldType: m.fieldType,
+          }))
+        )
+      );
 
       // If no field mappings provided, extract all available fields from the entry
-      if (fieldMappings.length === 0) {
+      if (!fieldMappings || !Array.isArray(fieldMappings) || fieldMappings.length === 0) {
         console.log('No field mappings provided, extracting all available fields from entry');
+
+        // Check if we have the entry's content type ID to log more info
+        const contentTypeId = entry.sys?.contentType?.sys?.id;
+        if (contentTypeId) {
+          console.log(
+            `Entry's content type is ${contentTypeId}, but no mappings were found for it`
+          );
+        }
 
         // Extract fields from the entry fields object
         if (entry.fields) {
@@ -94,35 +112,13 @@ export class KlaviyoService {
           }
         }
 
-        // Also extract direct fields at the top level if they exist
-        for (const key in entry) {
-          // Skip system fields and objects
-          if (
-            key !== 'sys' &&
-            key !== 'fields' &&
-            key !== 'metadata' &&
-            typeof entry[key] !== 'function'
-          ) {
-            try {
-              const value = entry[key];
-
-              if (value !== undefined && value !== null) {
-                console.log(`Adding direct field ${key} (type: ${typeof value})`);
-                contentData[key] =
-                  typeof value === 'object' ? JSON.stringify(value) : String(value);
-              }
-            } catch (error) {
-              console.error(`Error extracting direct field ${key}:`, error);
-            }
-          }
-        }
-
         console.log(
           `Extracted ${Object.keys(contentData).length} fields from entry without mappings`
         );
       }
       // Process each field mapping to extract data
       else {
+        console.log(`Processing ${fieldMappings.length} field mappings with defined mappings`);
         for (const mapping of fieldMappings) {
           try {
             // Properly get the fields from the mapping

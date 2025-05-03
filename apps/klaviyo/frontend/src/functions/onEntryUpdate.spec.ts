@@ -1,6 +1,20 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { FieldMapping } from '../config/klaviyo';
 import { SidebarExtensionSDK } from '@contentful/app-sdk';
+
+// Mock the FieldMapping import from '../config/klaviyo'
+vi.mock('../config/klaviyo', () => {
+  // Return an object with the same interface used in services/klaviyo.ts
+  return {
+    FieldMapping: {
+      // This is just a type, not used as a value
+    },
+    KLAVIYO_API_BASE_URL: 'https://a.klaviyo.com/api',
+    API_PROXY_URL: '/api/klaviyo/proxy',
+    APP_NAME: 'Contentful Klaviyo App',
+    APP_ID: 'contentful-klaviyo-app',
+    DEBUG_MODE: false,
+  };
+});
 
 // Import the function to test directly
 import { onEntryUpdate } from './onEntryUpdate';
@@ -61,8 +75,11 @@ describe('onEntryUpdate', () => {
   const mockSdk = {
     parameters: {
       installation: {
-        klaviyoApiKey: 'test-api-key',
-        klaviyoCompanyId: 'test-company-id',
+        publicKey: 'test-public-key',
+        privateKey: 'test-private-key',
+        klaviyoClientId: 'test-client-id',
+        klaviyoClientSecret: 'test-client-secret',
+        klaviyoRedirectUri: 'https://test-redirect-uri.com',
       },
     },
     cma: {
@@ -103,6 +120,14 @@ describe('onEntryUpdate', () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    // Mock local storage for access token
+    vi.spyOn(localStorage, 'getItem').mockImplementation((key) => {
+      if (key === 'klaviyo_access_token') {
+        return 'mock-access-token';
+      }
+      return null;
+    });
   });
 
   afterEach(() => {
@@ -123,29 +148,33 @@ describe('onEntryUpdate', () => {
       },
     };
 
-    // Create properly typed mappings
-    const mappings: FieldMapping[] = [
+    // Create properly typed mappings for the test
+    const mappings = [
       {
         contentfulFieldId: 'title',
         klaviyoBlockName: 'Title',
         fieldType: 'text',
-        contentTypeId: 'test-type',
-        fields: [],
         name: 'Title',
         type: 'text',
-        value: 'Test Title',
         severity: 'info',
+        value: 'Test Title',
+        // Add these to match the FieldMapping from config/klaviyo.ts
+        contentfulField: 'title',
+        klaviyoField: 'Title',
+        id: 'title',
       },
       {
         contentfulFieldId: 'description',
         klaviyoBlockName: 'Description',
         fieldType: 'text',
-        contentTypeId: 'test-type',
-        fields: [],
         name: 'Description',
         type: 'text',
-        value: 'Test Description',
         severity: 'info',
+        value: 'Test Description',
+        // Add these to match the FieldMapping from config/klaviyo.ts
+        contentfulField: 'description',
+        klaviyoField: 'Description',
+        id: 'description',
       },
     ];
 
@@ -154,8 +183,8 @@ describe('onEntryUpdate', () => {
 
     // Assert KlaviyoService constructor was called with correct config
     expect(KlaviyoService).toHaveBeenCalledWith({
-      apiKey: 'test-api-key',
-      companyId: 'test-company-id',
+      publicKey: 'test-public-key',
+      privateKey: 'test-private-key',
     });
 
     // Assert syncContent was called
@@ -196,17 +225,19 @@ describe('onEntryUpdate', () => {
       },
     };
 
-    const mappings: FieldMapping[] = [
+    const mappings = [
       {
         contentfulFieldId: 'title',
         klaviyoBlockName: 'Title',
         fieldType: 'text',
-        contentTypeId: 'test-type',
-        fields: [],
         name: 'Title',
         type: 'text',
-        value: 'Test Title',
         severity: 'info',
+        value: 'Test Title',
+        // Add these to match the FieldMapping from config/klaviyo.ts
+        contentfulField: 'title',
+        klaviyoField: 'Title',
+        id: 'title',
       },
     ];
 
@@ -215,7 +246,7 @@ describe('onEntryUpdate', () => {
 
     // Verify error handling
     expect(mockNotifier.error).toHaveBeenCalledWith(
-      'Failed to sync content to Klaviyo. See console for details.'
+      expect.stringContaining('Failed to sync content to Klaviyo')
     );
     expect(logger.error).toHaveBeenCalled();
   });

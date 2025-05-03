@@ -1,7 +1,18 @@
 import type { SidebarExtensionSDK } from '@contentful/app-sdk';
 import { KlaviyoService } from '../services/klaviyo';
-import { FieldMapping } from '../config/klaviyo';
+import type { KlaviyoAppConfig } from '../config/klaviyo';
 import { logger } from '../utils/logger';
+
+// Define the FieldMapping interface to match the one in klaviyo.ts service
+interface FieldMapping {
+  name: string;
+  type: string;
+  severity: string;
+  contentfulFieldId: string;
+  fieldType: string;
+  klaviyoBlockName: string;
+  value: any;
+}
 
 interface EntryEventData {
   entry: any;
@@ -185,7 +196,7 @@ function processFieldValue(field: any): any {
 }
 
 // Helper function to check if a value is a Contentful rich text document
-function isRichTextDocument(value: any): boolean {
+export function isRichTextDocument(value: any): boolean {
   logger.log('Checking rich text document type:', typeof value);
   if (typeof value === 'string') {
     logger.log('String value:', value.substring(0, 100));
@@ -202,7 +213,7 @@ function isRichTextDocument(value: any): boolean {
 }
 
 // Helper function to convert Contentful rich text to HTML
-function richTextToHtml(richTextNode: any): string {
+export function richTextToHtml(richTextNode: any): string {
   if (!richTextNode) return '';
 
   try {
@@ -420,40 +431,19 @@ export async function onEntryUpdate(event: EntryEventData) {
     }))
   );
 
-  // Get the app installation parameters for OAuth credentials
+  // Get the app installation parameters
   const parameters = sdk.parameters.installation;
-  const oauthConfig = {
-    clientId: parameters?.klaviyoClientId as string,
-    clientSecret: parameters?.klaviyoClientSecret as string,
-    redirectUri: parameters?.klaviyoRedirectUri as string,
-  };
 
-  // Check for required parameters
-  if (!oauthConfig.clientId) {
-    logger.error('Klaviyo Client ID is missing from installation parameters');
-    sdk.notifier.error('Klaviyo Client ID is missing from installation parameters');
+  // Check for required API keys
+  if (!parameters?.publicKey) {
+    logger.error('Klaviyo Public Key is missing from installation parameters');
+    sdk.notifier.error('Klaviyo Public Key is missing from installation parameters');
     return;
   }
 
-  if (!oauthConfig.clientSecret) {
-    logger.error('Klaviyo Client Secret is missing from installation parameters');
-    sdk.notifier.error('Klaviyo Client Secret is missing from installation parameters');
-    return;
-  }
-
-  if (!oauthConfig.redirectUri) {
-    logger.error('Klaviyo Redirect URI is missing from installation parameters');
-    sdk.notifier.error('Klaviyo Redirect URI is missing from installation parameters');
-    return;
-  }
-
-  // Check if we have an access token
-  const accessToken = localStorage.getItem('klaviyo_access_token');
-  if (!accessToken) {
-    logger.error('No access token available - OAuth authentication required');
-    sdk.notifier.error(
-      'Authentication required: No access token available. Please use the Klaviyo app configuration to connect to Klaviyo.'
-    );
+  if (!parameters?.privateKey) {
+    logger.error('Klaviyo Private Key is missing from installation parameters');
+    sdk.notifier.error('Klaviyo Private Key is missing from installation parameters');
     return;
   }
 
@@ -1195,34 +1185,26 @@ export async function onEntryUpdate(event: EntryEventData) {
 
     logger.log('Processed entry:', processedEntry);
 
-    // Initialize Klaviyo service with OAuth config
-    const klaviyoService = new KlaviyoService(oauthConfig);
+    // Create a Klaviyo service with API key and company ID from installation parameters
+    logger.log('Creating KlaviyoService with config:', {
+      publicKey: parameters.publicKey,
+      privateKey: parameters.privateKey,
+    });
 
-    // Sync content to Klaviyo
-    const results = await klaviyoService.syncContent(mappings, processedEntry);
-    logger.log('Successfully synced content to Klaviyo:', results);
+    const klaviyoService = new KlaviyoService({
+      publicKey: parameters.publicKey,
+      privateKey: parameters.privateKey,
+    });
 
-    // Show success notification
+    // Process the entry fields based on mappings
+    const result = await klaviyoService.syncContent(mappings, processedEntry);
+    logger.log('Sync result:', result);
+
     sdk.notifier.success('Content successfully synced to Klaviyo');
-  } catch (error) {
-    logger.error('Error syncing content to Klaviyo:', error);
-
-    // Special handling for OAuth errors
-    if (
-      error instanceof Error &&
-      (error.message.includes('Authentication required') ||
-        error.message.includes('Authentication failed') ||
-        error.message.includes('Your session has expired'))
-    ) {
-      // Clear token to force re-authentication
-      localStorage.removeItem('klaviyo_access_token');
-      localStorage.removeItem('klaviyo_refresh_token');
-      localStorage.removeItem('klaviyo_token_expires_at');
-      sdk.notifier.error(
-        'Authentication failed: Your session has expired. Please reconnect to Klaviyo in the app configuration.'
-      );
-    } else {
-      sdk.notifier.error('Failed to sync content to Klaviyo. See logger for details.');
-    }
+    return result;
+  } catch (error: any) {
+    logger.error('Error syncing to Klaviyo:', error);
+    sdk.notifier.error(`Failed to sync content to Klaviyo: ${error.message || 'Unknown error'}`);
+    throw error;
   }
 }

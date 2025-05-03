@@ -1,5 +1,5 @@
 import { SidebarExtensionSDK } from '@contentful/app-sdk';
-import { FieldData } from './klaviyo-api-service';
+import { FieldData } from '../services/klaviyo-sync-service';
 import logger from './logger';
 
 /**

@@ -98,7 +98,8 @@ const mockSdk = {
   },
   parameters: {
     installation: {
-      klaviyoApiKey: 'test-api-key',
+      publicKey: 'test-api-key',
+      privateKey: 'test-private-key',
     },
   },
   dialogs: {
@@ -138,7 +139,7 @@ describe('Sidebar component', () => {
   });
 
   it('allows adding a new field mapping', async () => {
-    const { updateSyncData } = await import('../utils/persistence-service');
+    const { updateSyncData } = await import('../services/persistence-service');
 
     render(<Sidebar />);
 

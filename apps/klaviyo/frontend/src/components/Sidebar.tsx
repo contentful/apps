@@ -93,20 +93,167 @@ const Sidebar = () => {
     };
   }, [sdk, checkSyncStatus]);
 
+  // Get full entry data including deep fields
+  const getFullEntryData = async (): Promise<Record<string, any>> => {
+    try {
+      // Check that SDK and entry are available
+      if (!sdk || !sdk.entry || !sdk.entry.fields) {
+        logger.error('SDK or entry not fully available for data collection');
+        throw new Error('SDK or entry not fully available');
+      }
+
+      // Wait a moment to ensure entry is fully loaded
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const entryFields = sdk.entry.fields;
+      const processedFields: Record<string, any> = {};
+
+      logger.log(`Found ${Object.keys(entryFields).length} fields in entry`);
+
+      // First pass to collect field IDs for logging
+      const fieldIds = Object.keys(entryFields);
+      logger.log('Available fields:', fieldIds);
+
+      // Process fields to get current values
+      fieldIds.forEach((fieldId) => {
+        try {
+          const field = entryFields[fieldId];
+
+          if (!field) {
+            logger.warn(`Field ${fieldId} exists in keys but is undefined`);
+            return;
+          }
+
+          // Check if field has getValue method
+          if (typeof field.getValue !== 'function') {
+            logger.warn(`Field ${fieldId} has no getValue method`, field);
+            return;
+          }
+
+          // For localized content, take the current locale value
+          const rawValue = field.getValue();
+
+          logger.log(`Processing field "${fieldId}":`, {
+            type: typeof rawValue,
+            isNull: rawValue === null,
+            isUndefined: rawValue === undefined,
+            isObject: typeof rawValue === 'object',
+            isArray: Array.isArray(rawValue),
+            hasNodeType: rawValue && typeof rawValue === 'object' && 'nodeType' in rawValue,
+          });
+
+          if (rawValue !== undefined && rawValue !== null) {
+            // For rich text, include the entire document
+            if (rawValue && typeof rawValue === 'object' && rawValue.nodeType === 'document') {
+              processedFields[fieldId] = rawValue;
+            }
+            // For arrays (like references)
+            else if (Array.isArray(rawValue)) {
+              processedFields[fieldId] = rawValue.map((item) => {
+                if (item && item.sys && item.sys.id) {
+                  return {
+                    id: item.sys.id,
+                    linkType: item.sys.linkType || 'Entry',
+                  };
+                }
+                return item;
+              });
+            }
+            // For simple values
+            else {
+              processedFields[fieldId] = rawValue;
+            }
+          }
+        } catch (error) {
+          logger.warn(`Error processing field ${fieldId}:`, error);
+        }
+      });
+
+      // Add the entry title as a special field if not already present
+      if (!processedFields.title && sdk.entry.getSys) {
+        try {
+          const entrySys = sdk.entry.getSys();
+          processedFields.title = entrySys.id ? `Entry ${entrySys.id}` : null;
+
+          // Also try to get the content type name
+          if (sdk.contentType && sdk.contentType.name) {
+            processedFields.contentTypeName = sdk.contentType.name;
+          }
+        } catch (error) {
+          logger.warn('Error getting entry title:', error);
+        }
+      }
+
+      // Add some default content if we have no fields
+      if (Object.keys(processedFields).length === 0) {
+        logger.warn('No field data found, adding default entry data');
+        processedFields.title = `Entry ${sdk.ids.entry}`;
+        processedFields.defaultContent =
+          'This entry has no content fields or they could not be accessed';
+      }
+
+      logger.log('Final processed fields:', processedFields);
+      logger.log('Field count:', Object.keys(processedFields).length);
+
+      return processedFields;
+    } catch (error) {
+      logger.error('Error collecting complete entry data:', error);
+      throw error;
+    }
+  };
+
   // Handle sync button click
   const handleSync = async () => {
     try {
       setSyncing(true);
       setErrors([]);
 
+      console.log('handleSync called', sdk);
+      // Check that SDK and essential components are available
+      if (!sdk || !sdk.ids || !sdk.ids.entry || !sdk.ids.contentType) {
+        throw new Error('SDK or entry information not available');
+      }
+
       // Get content type information
       const contentTypeId = sdk.ids.contentType;
-      const entryId = sdk.entry.getSys().id;
+      const entryId = sdk.ids.entry;
 
-      logger.log(`Syncing entry ${entryId} to Klaviyo...`);
+      // Verify we have an entry ID
+      if (!entryId) {
+        const entrySys = sdk.entry?.getSys ? sdk.entry.getSys() : null;
+        throw new Error(
+          `Entry ID not available. SDK entry state: ${entrySys ? 'has sys' : 'no sys'}`
+        );
+      }
 
-      // Call the API to sync the entry
-      const result = await syncEntryToKlaviyo(entryId, contentTypeId);
+      logger.log(`Syncing entry ${entryId} of type ${contentTypeId} to Klaviyo...`);
+
+      // Get complete entry data
+      let processedFields: Record<string, any>;
+      try {
+        processedFields = await getFullEntryData();
+      } catch (fieldError) {
+        logger.error('Failed to get entry data:', fieldError);
+        setErrors(['Failed to retrieve entry data. Please reload the entry and try again.']);
+        sdk.notifier.error('Failed to retrieve entry data');
+        setSyncing(false);
+        return;
+      }
+
+      // Check if we have any fields
+      if (!processedFields || Object.keys(processedFields).length === 0) {
+        logger.error('No fields found in entry data');
+        setErrors(['No content fields found in this entry. Please add content before syncing.']);
+        sdk.notifier.error('No content to sync to Klaviyo');
+        setSyncing(false);
+        return;
+      }
+
+      logger.log('Prepared entry fields:', processedFields);
+      logger.log('Entry fields count:', Object.keys(processedFields).length);
+
+      // Call the API to sync the entry with field data
+      const result = await syncEntryToKlaviyo(entryId, contentTypeId, processedFields);
 
       if (result.success) {
         // Show success message

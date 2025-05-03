@@ -1,7 +1,6 @@
 import { SidebarExtensionSDK } from '@contentful/app-sdk';
-import { fetchEntrySyncStatus, markEntryForSyncViaApi } from './sync-api';
+import { fetchEntrySyncStatus, markEntryForSyncViaApi, SyncStatus } from './sync-api';
 import logger from './logger';
-import { SyncStatus } from './klaviyo-api-service';
 
 /**
  * Initialize minimal change listeners for a Contentful entry in the sidebar

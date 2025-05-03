@@ -1,3 +1,8 @@
+import React from 'react';
+import logger from '../utils/logger';
+import { v4 as uuidv4 } from 'uuid';
+import { locations } from '@contentful/app-sdk';
+
 /**
  * Interface representing field data structure
  */
@@ -30,7 +35,7 @@ export interface FieldChangeTracker {
  * Interface representing Klaviyo API configuration
  */
 export interface KlaviyoConfig {
-  apiKey: string;
+  publicKey: string;
   privateKey?: string;
   listId?: string;
   endpoint?: string;
@@ -47,6 +52,7 @@ export interface SyncStatus {
   fieldsUpdatedAt?: Record<string, number>; // fieldId -> last update timestamp
   needsSync: boolean;
   syncCompleted: boolean;
+  lastSyncedVersion?: number; // Add this new field to track the entry version
 }
 
 /**
@@ -63,6 +69,8 @@ export interface SyncParameters {
 export interface SyncOptions {
   useSdk?: boolean; // Whether to use SDK for storing sync status vs localStorage
   forceUpdate?: boolean; // Whether to force an update regardless of sync status
+  entryId?: string; // Optional entry ID to use if not available in sdk.ids
+  contentTypeId?: string; // Optional content type ID to use if not available in sdk.ids
 }
 
 /**
@@ -78,7 +86,7 @@ export const sendToKlaviyo = async (
   entryData: Record<string, FieldData>
 ): Promise<any> => {
   try {
-    if (!config.apiKey) {
+    if (!config.publicKey) {
       throw new Error('Klaviyo API key is required');
     }
 
@@ -108,7 +116,7 @@ export const sendToKlaviyo = async (
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        Authorization: `Klaviyo-API-Key ${config.apiKey}`,
+        Authorization: `Klaviyo-API-Key ${config.publicKey}`,
       },
       body: JSON.stringify({
         data: transformedData,
@@ -132,9 +140,188 @@ export const sendToKlaviyo = async (
 };
 
 // Import the KlaviyoService and OAuth configuration
-import { KlaviyoService } from '../services/klaviyo';
-import { OAuthService } from '../services/oauth';
-import logger from './logger';
+import { KlaviyoService } from './klaviyo';
+import { error } from 'console';
+
+// Helper function to check if a value is a Contentful rich text document
+function isRichTextDocument(value: any): boolean {
+  if (typeof value === 'string') {
+    return value.includes('"nodeType":"document"');
+  }
+
+  return (
+    value &&
+    typeof value === 'object' &&
+    (value.nodeType === 'document' ||
+      (typeof value.content === 'string' && value.content.includes('"nodeType":"document"')) ||
+      (Array.isArray(value.content) && value.content.length > 0))
+  );
+}
+
+// Helper function to convert Contentful rich text to HTML
+function richTextToHtml(richTextNode: any): string {
+  if (!richTextNode) return '';
+
+  try {
+    // Handle string JSON case - parse it to an object
+    if (typeof richTextNode === 'string') {
+      try {
+        richTextNode = JSON.parse(richTextNode);
+      } catch (e) {
+        return richTextNode;
+      }
+    }
+
+    // If content is a string that contains a serialized rich text document
+    if (
+      typeof richTextNode === 'object' &&
+      typeof richTextNode.content === 'string' &&
+      richTextNode.content.includes('"nodeType":"document"')
+    ) {
+      try {
+        // Try to parse it as JSON
+        richTextNode = JSON.parse(richTextNode.content);
+      } catch (e) {
+        return richTextNode.content;
+      }
+    }
+
+    // If the content is already in the format shown in the example
+    if (
+      typeof richTextNode === 'object' &&
+      !richTextNode.nodeType &&
+      richTextNode.content &&
+      Array.isArray(richTextNode.content)
+    ) {
+      // Create a document node containing the content array
+      return richTextToHtml({
+        nodeType: 'document',
+        data: richTextNode.data || {},
+        content: richTextNode.content,
+      });
+    }
+
+    // Handle document node
+    if (richTextNode.nodeType === 'document') {
+      return richTextNode.content?.map((node: any) => richTextToHtml(node)).join('') || '';
+    }
+
+    // Handle paragraph node
+    if (richTextNode.nodeType === 'paragraph') {
+      const content = richTextNode.content?.map((node: any) => richTextToHtml(node)).join('') || '';
+      return `<p>${content}</p>`;
+    }
+
+    // Handle heading nodes
+    if (richTextNode.nodeType === 'heading-1') {
+      const content = richTextNode.content?.map((node: any) => richTextToHtml(node)).join('') || '';
+      return `<h1>${content}</h1>`;
+    }
+    if (richTextNode.nodeType === 'heading-2') {
+      const content = richTextNode.content?.map((node: any) => richTextToHtml(node)).join('') || '';
+      return `<h2>${content}</h2>`;
+    }
+    if (richTextNode.nodeType === 'heading-3') {
+      const content = richTextNode.content?.map((node: any) => richTextToHtml(node)).join('') || '';
+      return `<h3>${content}</h3>`;
+    }
+    if (richTextNode.nodeType === 'heading-4') {
+      const content = richTextNode.content?.map((node: any) => richTextToHtml(node)).join('') || '';
+      return `<h4>${content}</h4>`;
+    }
+    if (richTextNode.nodeType === 'heading-5') {
+      const content = richTextNode.content?.map((node: any) => richTextToHtml(node)).join('') || '';
+      return `<h5>${content}</h5>`;
+    }
+    if (richTextNode.nodeType === 'heading-6') {
+      const content = richTextNode.content?.map((node: any) => richTextToHtml(node)).join('') || '';
+      return `<h6>${content}</h6>`;
+    }
+
+    // Handle list nodes
+    if (richTextNode.nodeType === 'unordered-list') {
+      const content = richTextNode.content?.map((node: any) => richTextToHtml(node)).join('') || '';
+      return `<ul>${content}</ul>`;
+    }
+    if (richTextNode.nodeType === 'ordered-list') {
+      const content = richTextNode.content?.map((node: any) => richTextToHtml(node)).join('') || '';
+      return `<ol>${content}</ol>`;
+    }
+    if (richTextNode.nodeType === 'list-item') {
+      const content = richTextNode.content?.map((node: any) => richTextToHtml(node)).join('') || '';
+      return `<li>${content}</li>`;
+    }
+
+    // Handle hyperlink
+    if (richTextNode.nodeType === 'hyperlink') {
+      const content = richTextNode.content?.map((node: any) => richTextToHtml(node)).join('') || '';
+      return `<a href="${richTextNode.data?.uri || '#'}" ${
+        richTextNode.data?.title ? `title="${richTextNode.data.title}"` : ''
+      }>${content}</a>`;
+    }
+
+    // Handle text node
+    if (richTextNode.nodeType === 'text') {
+      let content = richTextNode.value || '';
+
+      // Apply marks (bold, italic, etc.)
+      if (richTextNode.marks && richTextNode.marks.length > 0) {
+        for (const mark of richTextNode.marks) {
+          if (mark.type === 'bold') {
+            content = `<strong>${content}</strong>`;
+          } else if (mark.type === 'italic') {
+            content = `<em>${content}</em>`;
+          } else if (mark.type === 'underline') {
+            content = `<u>${content}</u>`;
+          } else if (mark.type === 'code') {
+            content = `<code>${content}</code>`;
+          } else if (mark.type === 'superscript') {
+            content = `<sup>${content}</sup>`;
+          } else if (mark.type === 'subscript') {
+            content = `<sub>${content}</sub>`;
+          } else if (
+            mark.type === 'strikethrough' ||
+            mark.type === 'strike-through' ||
+            mark.type === 'strike'
+          ) {
+            content = `<strike>${content}</strike>`;
+          }
+        }
+      }
+
+      return content;
+    }
+
+    // Handle hr/divider
+    if (richTextNode.nodeType === 'hr') {
+      return '<hr>';
+    }
+
+    // Handle blockquote
+    if (richTextNode.nodeType === 'blockquote') {
+      const content = richTextNode.content?.map((node: any) => richTextToHtml(node)).join('') || '';
+      return `<blockquote>${content}</blockquote>`;
+    }
+
+    // Handle embedded entry or asset (skip or replace with placeholder)
+    if (
+      richTextNode.nodeType === 'embedded-entry-block' ||
+      richTextNode.nodeType === 'embedded-asset-block' ||
+      richTextNode.nodeType === 'embedded-entry-inline' ||
+      richTextNode.nodeType === 'embedded-asset-inline'
+    ) {
+      return '[Embedded content]';
+    }
+
+    // Log unhandled node types
+    logger.warn(`Unhandled rich text node type: ${richTextNode.nodeType}`);
+    return typeof richTextNode === 'string' ? richTextNode : JSON.stringify(richTextNode);
+  } catch (error) {
+    // Return the original value if conversion fails
+    logger.error('Error converting rich text to HTML:', error);
+    return typeof richTextNode === 'string' ? richTextNode : JSON.stringify(richTextNode);
+  }
+}
 
 // Define the FieldMapping interface to match the service's requirements
 interface FieldMapping {
@@ -154,13 +341,12 @@ interface FieldMapping {
  * Class for syncing Contentful content to Klaviyo
  */
 export class SyncContent {
-  entry: any;
   sdk: any;
 
   constructor(entry: any, sdk?: any) {
-    logger.log('SyncContent constructor:', entry);
-    this.entry = entry;
-    this.sdk = sdk;
+    logger.log('SyncContent constructor initialized');
+    // Store the SDK rather than the entry
+    this.sdk = sdk || entry; // Support both new and old ways of calling
   }
   /**
    * Syncs content from Contentful to Klaviyo
@@ -175,594 +361,541 @@ export class SyncContent {
     options: SyncOptions = {}
   ) {
     try {
-      logger.log('Starting content sync with mappings:', mappings);
+      // Debugging - log what was passed in
+      logger.log('SyncContent.syncContent called with:', {
+        hasSdk: !!sdk,
+        sdkType: sdk ? typeof sdk : 'undefined',
+        mappingsCount: mappings ? mappings.length : 0,
+        options: JSON.stringify(options),
+        hasIds: !!sdk?.ids,
+        idsObject: sdk?.ids ? JSON.stringify(sdk.ids) : 'none',
+        entryId:
+          options.entryId || sdk?.ids?.entry || (sdk?.entry?.getSys ? 'has getSys' : 'no getSys'),
+      });
 
-      // Store SDK reference if not already set
-      if (!this.sdk && sdk) {
-        this.sdk = sdk;
-      }
+      // Get entry information from multiple possible sources
+      let entryId = options.entryId;
+      let contentTypeId = options.contentTypeId;
 
-      // Get installation parameters more robustly
-      let params;
-      try {
-        // Try to get params from sdk.parameters.installation
-        params = sdk.parameters?.installation;
-        logger.log('Got parameters from sdk.parameters.installation:', params);
-      } catch (e) {
-        logger.error('Error getting parameters from sdk.parameters.installation:', e);
-      }
-
-      // If that failed or didn't have the right structure, try app.getParameters()
-      if (!params?.clientId && !params?.installation?.clientId) {
-        try {
-          const appParams = await sdk.app.getParameters();
-          params = appParams?.installation || {};
-          logger.log('Got parameters from sdk.app.getParameters():', params);
-        } catch (e) {
-          logger.error('Error getting parameters from sdk.app.getParameters():', e);
+      // Try to get from sdk.ids first (common for sidebar extensions)
+      if (sdk?.ids) {
+        if (!entryId && sdk.ids.entry) {
+          entryId = sdk.ids.entry;
+          logger.log('Got entryId from sdk.ids:', entryId);
+        }
+        if (!contentTypeId && sdk.ids.contentType) {
+          contentTypeId = sdk.ids.contentType;
+          logger.log('Got contentTypeId from sdk.ids:', contentTypeId);
         }
       }
 
-      // Log all available parameters to help debug
-      logger.log('SDK parameters:', sdk.parameters);
-      logger.log('Final params:', params);
-
-      // Extract clientId, clientSecret, and redirectUri, handling both structures
-      const clientId = params?.clientId || params?.installation?.clientId;
-      const clientSecret = params?.clientSecret || params?.installation?.clientSecret;
-      const redirectUri =
-        params?.redirectUri ||
-        params?.installation?.redirectUri ||
-        params?.klaviyoRedirectUri ||
-        `${window.location.origin}:3001/auth/callback`;
-
-      if (!clientId || !clientSecret) {
-        throw new Error('OAuth credentials not found in installation parameters');
-      }
-
-      logger.log('Client ID:', clientId);
-      logger.log('Client Secret:', clientSecret);
-      logger.log('Redirect URI:', redirectUri);
-      logger.log('Entry:', this.entry);
-
-      // Check if we have a valid OAuth token
-      const oauthService = new OAuthService({
-        clientId,
-        clientSecret,
-        redirectUri,
-      });
-      const accessToken = await oauthService.getAccessToken();
-      if (!accessToken) {
-        sdk.notifier.error('Please connect to Klaviyo first...');
-        throw new Error('Authentication required: No access token available');
-      }
-
-      // Initialize the KlaviyoService with OAuth configuration
-      // We don't need actual client ID and secret for API calls once we have a token
-      const klaviyoService = new KlaviyoService({
-        clientId,
-        clientSecret,
-        redirectUri,
-        accessToken: accessToken,
-        refreshToken: localStorage.getItem('klaviyo_refresh_token') || undefined,
-        tokenExpiresAt: parseInt(localStorage.getItem('klaviyo_token_expires_at') || '0', 10),
-      });
-
-      // Set the tokens in the service
-      klaviyoService.setTokens({
-        access_token: accessToken,
-        refresh_token: localStorage.getItem('klaviyo_refresh_token') || '',
-        token_type: 'Bearer',
-        expires_in:
-          parseInt(localStorage.getItem('klaviyo_token_expires_at') || '0', 10) - Date.now(),
-      });
-
-      // Get entry data and content type ID safely
-      logger.log('Entry:', this.entry, sdk);
-      // Get content type ID safely - use multiple approaches to ensure we get a value
-      let contentTypeId;
-
-      // Try to get it from entry.sys.contentType (if it exists)
-      if (
-        this.entry &&
-        this.entry.sys &&
-        this.entry.sys.contentType &&
-        this.entry.sys.contentType.sys
-      ) {
-        contentTypeId = this.entry.sys.contentType.sys.id;
-      }
-      // Try to get it from sdk.ids
-      else if (sdk.ids && sdk.ids.contentType) {
-        contentTypeId = sdk.ids.contentType;
-      }
-      // Log a warning but continue with the content type ID
-      else {
-        logger.warn('Could not determine content type ID from entry or SDK, using "unknown"');
-        contentTypeId = 'unknown';
-      }
-
-      logger.log('Using content type ID:', contentTypeId, this.entry);
-
-      // Ensure mappings has the expected format
-      let processedMappings = mappings;
-
-      // Check if mappings is an array of objects with the required properties
-      if (
-        !Array.isArray(mappings) ||
-        (mappings.length > 0 && (!mappings[0].contentfulFieldId || !mappings[0].klaviyoBlockName))
-      ) {
-        logger.log('Received mappings in non-standard format:', mappings);
-
-        // Try to convert to the expected format
+      // If still missing, try to get from sdk.entry (for dialog extensions)
+      if ((!entryId || !contentTypeId) && sdk?.entry) {
         try {
-          if (typeof mappings === 'object' && !Array.isArray(mappings)) {
-            // Handle object mappings where the key is the field ID and the value is the klaviyo property
-            processedMappings = Object.entries(mappings).map(([fieldId, klaviyoProperty]) => ({
-              contentfulFieldId: fieldId,
-              klaviyoBlockName: String(klaviyoProperty),
-              fieldType: 'text',
-            }));
-          } else if (Array.isArray(mappings)) {
-            // Handle array of simpler objects
-            processedMappings = mappings
-              .map((mapping) => {
-                // Try to extract mapping data from different potential formats
-                const contentfulFieldId =
-                  (mapping as any).contentfulFieldId ||
-                  (mapping as any).fieldId ||
-                  (mapping as any).id ||
-                  (mapping as any).field;
-
-                const klaviyoBlockName =
-                  (mapping as any).klaviyoBlockName ||
-                  (mapping as any).klaviyoProperty ||
-                  (mapping as any).blockName ||
-                  (mapping as any).property ||
-                  contentfulFieldId; // Default to field ID if no mapping found
-
-                const fieldType = (mapping as any).fieldType || (mapping as any).type || 'text'; // Default to text
-
-                return {
-                  contentfulFieldId,
-                  klaviyoBlockName,
-                  fieldType,
-                };
-              })
-              .filter((m) => m.contentfulFieldId); // Only keep mappings with a valid field ID
-          }
-        } catch (error) {
-          logger.error('Error processing non-standard mapping format:', error);
-        }
-
-        logger.log('Processed mappings:', processedMappings);
-      }
-
-      // Convert to FieldMapping array for the KlaviyoService
-      const fieldMappings: FieldMapping[] = processedMappings
-        .map((mapping: any) => {
-          // Validate required mapping properties
-          if (!mapping.contentfulFieldId || !mapping.klaviyoBlockName) {
-            logger.error('Invalid mapping format:', mapping);
-            return null;
-          }
-
-          // Get field value safely with fallbacks for different SDK structures
-          let fieldValue = '';
-          let fieldName = mapping.contentfulFieldId;
-          let fieldType = mapping.fieldType || 'text';
-          let isAssetField = mapping.isAssetField || false;
-
-          try {
-            // Try to safely get the field value and metadata
-            if (this.entry.fields && this.entry.fields[mapping.contentfulFieldId]) {
-              const field = this.entry.fields[mapping.contentfulFieldId];
-
-              // Check if field has direct value property
-              if (field && typeof field.value !== 'undefined') {
-                fieldValue = field.value;
-                fieldName = field.name || mapping.contentfulFieldId;
-                fieldType = field.type || mapping.fieldType || 'text';
-              }
-              // Check if field has getValue method (CMA SDK pattern)
-              else if (field && typeof field.getValue === 'function') {
-                fieldValue = field.getValue() || '';
-                fieldName = mapping.contentfulFieldId;
-                fieldType = mapping.fieldType || 'text';
-
-                // Check if this is an asset value
-                if (fieldValue && typeof fieldValue === 'object' && (fieldValue as any).sys) {
-                  if (
-                    ((fieldValue as any).sys.type === 'Link' &&
-                      (fieldValue as any).sys.linkType === 'Asset') ||
-                    (fieldValue as any).sys.type === 'Asset'
-                  ) {
-                    isAssetField = true;
-                    logger.log(`Detected Asset reference field: ${mapping.contentfulFieldId}`);
-                  }
-                }
-              }
-              // Check for localized format (_fieldLocales structure)
-              else if (field && field._fieldLocales) {
-                // Get the locale value - prefer 'en-US' or use the first available locale
-                const localeKeys = Object.keys(field._fieldLocales);
-                const locale = localeKeys.includes('en-US') ? 'en-US' : localeKeys[0];
-
-                if (locale && field._fieldLocales[locale]) {
-                  fieldValue = field._fieldLocales[locale]._value;
-                  fieldName = mapping.contentfulFieldId;
-                  fieldType = mapping.fieldType || 'text';
-
-                  // Check if this is a stringified asset reference
-                  if (
-                    typeof fieldValue === 'string' &&
-                    fieldValue.includes('"sys"') &&
-                    fieldValue.includes('"linkType":"Asset"')
-                  ) {
-                    isAssetField = true;
-                    logger.log(
-                      `Detected stringified Asset reference: ${mapping.contentfulFieldId}`
-                    );
-                  }
-
-                  // Check if this is a direct asset reference
-                  if (
-                    fieldValue &&
-                    typeof fieldValue === 'object' &&
-                    (fieldValue as any).sys &&
-                    ((fieldValue as any).sys.type === 'Asset' ||
-                      ((fieldValue as any).sys.type === 'Link' &&
-                        (fieldValue as any).sys.linkType === 'Asset'))
-                  ) {
-                    isAssetField = true;
-                    logger.log(
-                      `Detected direct Asset reference in _fieldLocales: ${mapping.contentfulFieldId}`
-                    );
-                  }
-                }
-              }
-              // Check localized old format
-              else if (field && field['en-US']) {
-                fieldValue = field['en-US'];
-                fieldName = mapping.contentfulFieldId;
-                fieldType = mapping.fieldType || 'text';
-
-                // Check if this is a direct or stringified asset reference
-                if (
-                  (typeof fieldValue === 'object' &&
-                    (fieldValue as any).sys &&
-                    (((fieldValue as any).sys.type === 'Link' &&
-                      (fieldValue as any).sys.linkType === 'Asset') ||
-                      (fieldValue as any).sys.type === 'Asset')) ||
-                  (typeof fieldValue === 'string' &&
-                    fieldValue.includes('"sys"') &&
-                    fieldValue.includes('"linkType":"Asset"'))
-                ) {
-                  isAssetField = true;
-                  logger.log(`Detected Asset reference in en-US: ${mapping.contentfulFieldId}`);
-                }
-              }
-              // Check if the field is a direct object
-              else if (field && typeof field === 'object') {
-                fieldValue = field;
-                fieldName = mapping.contentfulFieldId;
-                fieldType = mapping.fieldType || 'text';
-
-                // Check for asset reference in direct object
-                if (
-                  typeof field === 'object' &&
-                  (field as any).sys &&
-                  ((field as any).sys.type === 'Asset' ||
-                    ((field as any).sys.type === 'Link' && (field as any).sys.linkType === 'Asset'))
-                ) {
-                  isAssetField = true;
-                  logger.log(
-                    `Detected Asset reference in field object: ${mapping.contentfulFieldId}`
-                  );
-                }
-              }
-              // Fallback to the mapping
-              else {
-                fieldValue = '';
-                fieldName = mapping.contentfulFieldId;
-                fieldType = mapping.fieldType || 'text';
-              }
-
-              // Additional detection by field name if not already detected as asset
-              if (!isAssetField && fieldType === 'text') {
-                // Check field name for common image field patterns
-                const imageNamePatterns = [
-                  'image',
-                  'picture',
-                  'photo',
-                  'avatar',
-                  'logo',
-                  'banner',
-                  'icon',
-                  'thumbnail',
-                  'cover',
-                ];
-                if (
-                  imageNamePatterns.some(
-                    (pattern) =>
-                      mapping.contentfulFieldId.toLowerCase().includes(pattern) ||
-                      fieldName.toLowerCase().includes(pattern)
-                  )
-                ) {
-                  isAssetField = true;
-                  logger.log(`Detected probable image field by name: ${mapping.contentfulFieldId}`);
-                }
-              }
-
-              // Override fieldType to 'image' if it's an asset field and not explicitly set otherwise
-              if (isAssetField && (fieldType === 'text' || !mapping.fieldType)) {
-                fieldType = 'image';
-                logger.log(`Setting field type to 'image' for: ${mapping.contentfulFieldId}`);
-              }
-            } else {
-              logger.warn(
-                `Field ${mapping.contentfulFieldId} not found in entry fields:`,
-                this.entry.fields
-              );
+          // First try getSys method
+          if (typeof sdk.entry.getSys === 'function') {
+            const entrySys = sdk.entry.getSys();
+            if (!entryId && entrySys?.id) {
+              entryId = entrySys.id;
+              logger.log('Got entryId from sdk.entry.getSys():', entryId);
             }
-          } catch (error) {
-            logger.error(`Error accessing field ${mapping.contentfulFieldId}:`, error);
-            // Continue with empty value rather than failing
+            if (!contentTypeId && entrySys?.contentType?.sys?.id) {
+              contentTypeId = entrySys.contentType.sys.id;
+              logger.log('Got contentTypeId from sdk.entry.getSys():', contentTypeId);
+            }
           }
+          // Alternative approach to get sys data if getSys is not a function
+          else if (sdk.entry.sys) {
+            const entrySys = sdk.entry.sys;
+            if (!entryId && entrySys?.id) {
+              entryId = entrySys.id;
+              logger.log('Got entryId from sdk.entry.sys:', entryId);
+            }
+            if (!contentTypeId && entrySys?.contentType?.sys?.id) {
+              contentTypeId = entrySys.contentType.sys.id;
+              logger.log('Got contentTypeId from sdk.entry.sys:', contentTypeId);
+            }
+          }
+        } catch (e) {
+          logger.error('Error getting entry sys data:', e);
+        }
+      }
 
-          logger.log(`Mapped field ${mapping.contentfulFieldId} -> ${mapping.klaviyoBlockName}:`, {
-            fieldValue,
-            fieldType,
-            isAssetField,
+      // Attempt to get from sys if passed entry has sys property directly
+      if ((!entryId || !contentTypeId) && sdk?.sys) {
+        if (!entryId && sdk.sys.id) {
+          entryId = sdk.sys.id;
+          logger.log('Got entryId from sdk.sys:', entryId);
+        }
+        if (!contentTypeId && sdk.sys.contentType?.sys?.id) {
+          contentTypeId = sdk.sys.contentType.sys.id;
+          logger.log('Got contentTypeId from sdk.sys:', contentTypeId);
+        }
+      }
+
+      // Last attempt - try to get from the entry parameter directly
+      if ((!entryId || !contentTypeId) && sdk?.entry?.sys) {
+        const entrySys = sdk.entry.sys;
+        if (!entryId && entrySys.id) {
+          entryId = entrySys.id;
+          logger.log('Got entryId from entry.sys:', entryId);
+        }
+        if (!contentTypeId && entrySys.contentType?.sys?.id) {
+          contentTypeId = entrySys.contentType.sys.id;
+          logger.log('Got contentTypeId from entry.sys:', contentTypeId);
+        }
+      }
+
+      // One more try with this.sdk if different from passed sdk
+      if ((!entryId || !contentTypeId) && this.sdk && this.sdk !== sdk) {
+        if (!entryId && this.sdk.ids?.entry) {
+          entryId = this.sdk.ids.entry;
+        }
+        if (!contentTypeId && this.sdk.ids?.contentType) {
+          contentTypeId = this.sdk.ids.contentType;
+        }
+
+        // Try entry.sys as well
+        if ((!entryId || !contentTypeId) && this.sdk.entry) {
+          try {
+            // Try getSys method first
+            if (typeof this.sdk.entry.getSys === 'function') {
+              const entrySys = this.sdk.entry.getSys();
+              if (!entryId && entrySys?.id) {
+                entryId = entrySys.id;
+              }
+              if (!contentTypeId && entrySys?.contentType?.sys?.id) {
+                contentTypeId = entrySys.contentType.sys.id;
+              }
+            }
+            // Alternative approach to get sys data if getSys is not a function
+            else if (this.sdk.entry.sys) {
+              const entrySys = this.sdk.entry.sys;
+              if (!entryId && entrySys?.id) {
+                entryId = entrySys.id;
+              }
+              if (!contentTypeId && entrySys?.contentType?.sys?.id) {
+                contentTypeId = entrySys.contentType.sys.id;
+              }
+            }
+          } catch (e) {
+            logger.error('Error getting entry sys data from this.sdk:', e);
+          }
+        }
+      }
+
+      // Log all the places we've tried to get the IDs from
+      logger.log('Entry and content type ID resolution:', {
+        finalEntryId: entryId,
+        finalContentTypeId: contentTypeId,
+        fromOptions: {
+          entryId: options.entryId,
+          contentTypeId: options.contentTypeId,
+        },
+        fromSdkIds: {
+          entryId: sdk?.ids?.entry,
+          contentTypeId: sdk?.ids?.contentType,
+        },
+        fromThisSdkIds: {
+          entryId: this.sdk?.ids?.entry,
+          contentTypeId: this.sdk?.ids?.contentType,
+        },
+        entryApiMethods: sdk?.entry
+          ? Object.keys(sdk.entry).filter((k) => typeof sdk.entry[k] === 'function')
+          : [],
+        hasEntryGetSys: typeof sdk?.entry?.getSys === 'function',
+        hasEntrySys: sdk?.entry && 'sys' in sdk.entry,
+        hasSdkEntry: !!sdk?.entry,
+      });
+
+      if (!entryId || !contentTypeId) {
+        logger.error('syncContent missing entryId or contentTypeId:', {
+          entryId,
+          contentTypeId,
+          options,
+        });
+        return { success: false, error: 'Missing entry ID or content type ID' };
+      }
+
+      logger.log(`Syncing entry ${entryId} of content type ${contentTypeId}`);
+
+      // Get entry fields data if we have SDK access
+      let entryFields: Record<string, any> = {};
+      const spaceId = sdk.ids.space || sdk.entry.sys.space.sys.id;
+      console.log('sdk', sdk);
+      console.log('entryId', entryId);
+      console.log('spaceId', spaceId);
+      console.log('environmentId', sdk.ids.environment);
+      const entry = await sdk.cma.entry.get({
+        entryId,
+        spaceId,
+        environmentId: sdk.ids.environment,
+      });
+      console.log('entry', entry);
+
+      // Process entry data from CMA response
+      if (entry?.fields) {
+        try {
+          // For CMA entry responses, fields are localized with locale keys (e.g., 'en-US')
+          const fields = entry.fields;
+
+          // Process localized fields
+          Object.keys(fields).forEach((fieldId) => {
+            try {
+              // Get the field value, typically stored under a locale key like 'en-US'
+              const fieldData = fields[fieldId];
+
+              // Find the first available locale (usually 'en-US')
+              const localeKeys = Object.keys(fieldData);
+              if (localeKeys.length > 0) {
+                const firstLocale = localeKeys[0];
+                const rawValue = fieldData[firstLocale];
+
+                if (rawValue !== undefined && rawValue !== null) {
+                  // For rich text, include the entire document
+                  if (
+                    rawValue &&
+                    typeof rawValue === 'object' &&
+                    (rawValue.nodeType === 'document' || (rawValue.data && rawValue.content))
+                  ) {
+                    entryFields[fieldId] = rawValue;
+                  }
+                  // For asset references
+                  else if (
+                    rawValue &&
+                    typeof rawValue === 'object' &&
+                    rawValue.sys &&
+                    (rawValue.sys.linkType === 'Asset' || rawValue.sys.type === 'Asset')
+                  ) {
+                    entryFields[fieldId] = rawValue;
+                  }
+                  // For arrays (like references)
+                  else if (Array.isArray(rawValue)) {
+                    entryFields[fieldId] = rawValue;
+                  }
+                  // For simple values
+                  else {
+                    entryFields[fieldId] = rawValue;
+                  }
+                }
+              }
+            } catch (fieldError) {
+              logger.warn(`Error processing field ${fieldId}:`, fieldError);
+            }
           });
 
-          return {
-            contentfulFieldId: mapping.contentfulFieldId,
-            klaviyoBlockName: mapping.klaviyoBlockName,
-            fieldType: fieldType as 'text' | 'image' | 'entry' | 'reference-array',
-            contentTypeId,
-            name: fieldName,
-            type: fieldType,
-            severity: 'info',
-            value: fieldValue,
-            isAssetField,
-          };
-        })
-        .filter((mapping) => mapping !== null);
-
-      // Ensure we have at least one valid mapping
-      if (fieldMappings.length === 0) {
-        throw new Error(
-          `No valid field mappings could be processed for content type: ${contentTypeId}`
-        );
+          // Log the processed entry fields for debugging
+          logger.log('Successfully processed entry fields from CMA:', {
+            fieldCount: Object.keys(entryFields).length,
+            fieldIds: Object.keys(entryFields),
+          });
+        } catch (error) {
+          logger.error('Error processing entry fields from CMA:', error);
+        }
       }
-
-      // Call the KlaviyoService to sync content
-      const result = await klaviyoService.syncContent(fieldMappings, this.entry);
-
-      logger.log('Sync completed successfully:', result);
-
-      // Notify the user
-      sdk.notifier.success('Content successfully synced to Klaviyo');
-
-      // Create a field update timestamp map
-      const fieldUpdates: Record<string, number> = {};
-
-      // For each mapped field, get its last update time
-      for (const mapping of mappings) {
-        // Get field last update time, defaulting to current time if not available
+      // Fallback to SDK field methods if CMA method failed
+      else if (sdk?.entry?.fields) {
         try {
-          const field = this.entry.fields[mapping.contentfulFieldId];
-          const fieldSys = await field?.getSys();
-          fieldUpdates[mapping.contentfulFieldId] = fieldSys?.updatedAt || Date.now();
-        } catch (fieldError) {
-          logger.warn(
-            `Couldn't get update time for field ${mapping.contentfulFieldId}:`,
-            fieldError
-          );
-          fieldUpdates[mapping.contentfulFieldId] = Date.now();
+          const fields = sdk.entry.fields;
+
+          // Process fields to get current values
+          Object.keys(fields).forEach((fieldId) => {
+            try {
+              const field = fields[fieldId];
+              // For localized content, take the current locale value
+              if (typeof field.getValue === 'function') {
+                const rawValue = field.getValue();
+
+                if (rawValue !== undefined && rawValue !== null) {
+                  // For rich text, include the entire document
+                  if (
+                    rawValue &&
+                    typeof rawValue === 'object' &&
+                    rawValue.nodeType === 'document'
+                  ) {
+                    entryFields[fieldId] = rawValue;
+                  }
+                  // For arrays (like references)
+                  else if (Array.isArray(rawValue)) {
+                    entryFields[fieldId] = rawValue;
+                  }
+                  // For simple values
+                  else {
+                    entryFields[fieldId] = rawValue;
+                  }
+                }
+              }
+            } catch (fieldError) {
+              logger.warn(`Error processing field ${fieldId}:`, fieldError);
+            }
+          });
+
+          logger.log('Successfully processed entry fields from SDK:', {
+            fieldCount: Object.keys(entryFields).length,
+            fieldIds: Object.keys(entryFields),
+          });
+        } catch (error) {
+          logger.error('Error processing entry fields from SDK:', error);
         }
       }
 
-      // Update sync status after successful sync
-      await this.updateSyncStatus(contentTypeId, sdk.contentType?.name || '', true);
-
-      return result;
-    } catch (error: any) {
-      logger.error('Error syncing content to Klaviyo:', error);
-
-      // Special handling for OAuth errors
-      if (
-        error.message &&
-        (error.message.includes('Authentication required') ||
-          error.message.includes('Authentication failed') ||
-          error.message.includes('Your session has expired'))
-      ) {
-        // Clear token to force re-authentication
-        localStorage.removeItem('klaviyo_access_token');
-        localStorage.removeItem('klaviyo_refresh_token');
-        localStorage.removeItem('klaviyo_token_expires_at');
+      // Add the entry title as a special field if not already present
+      if (!entryFields.title && entry?.sys?.id) {
+        entryFields.title = `Entry ${entry.sys.id}`;
+      } else if (!entryFields.title && sdk?.entry?.getSys) {
+        try {
+          const entrySys = sdk.entry.getSys();
+          entryFields.title = entrySys.id
+            ? `Entry ${entrySys.id}`
+            : entryId
+            ? `Entry ${entryId}`
+            : 'Untitled Entry';
+        } catch (error) {
+          logger.warn('Error getting entry title:', error);
+          entryFields.title = entryId ? `Entry ${entryId}` : 'Untitled Entry';
+        }
+      } else if (!entryFields.title) {
+        entryFields.title = entryId ? `Entry ${entryId}` : 'Untitled Entry';
       }
 
-      // Notify the user of the error
-      if (sdk.notifier) {
-        sdk.notifier.error(
-          `Failed to sync content to Klaviyo. ${error.message || 'See logger for details.'}`
-        );
+      // Process rich text fields to convert them to HTML if needed
+      for (const fieldId of Object.keys(entryFields)) {
+        const value = entryFields[fieldId];
+        if (value && typeof value === 'object' && value.nodeType === 'document') {
+          try {
+            // Convert rich text to HTML
+            entryFields[fieldId] = richTextToHtml(value);
+            logger.log(`Converted rich text field ${fieldId} to HTML`);
+          } catch (error) {
+            logger.error(`Error converting rich text field ${fieldId}:`, error);
+          }
+        }
       }
 
-      throw error;
+      // Log the final prepared entry fields
+      logger.log('Prepared entry fields for sync:', {
+        fieldCount: Object.keys(entryFields).length,
+        fieldIds: Object.keys(entryFields).join(', '),
+        titleField: entryFields.title,
+      });
+
+      // Import the syncEntryToKlaviyo function dynamically to avoid circular dependencies
+      const { syncEntryToKlaviyo } = await import('../utils/sync-api');
+
+      // Call the API to sync data to Klaviyo, passing entry data
+      const syncResult = await syncEntryToKlaviyo(entryId, contentTypeId, entryFields);
+
+      // Log the result
+      if (syncResult.success) {
+        logger.log('Successfully synced content to Klaviyo:', syncResult);
+
+        // Update sync status
+        const contentTypeName = sdk.contentType?.name || '';
+
+        if (sdk.contentType) {
+          await this.updateSyncStatusSimple(contentTypeId, contentTypeName, true);
+        }
+
+        // Show success notification if SDK is available
+        if (sdk.notifier) {
+          sdk.notifier.success('Content synced to Klaviyo successfully');
+        }
+
+        return { success: true };
+      } else {
+        const errorMessage = syncResult.errors?.join(', ') || 'Unknown error occurred during sync';
+        logger.error('Error syncing content to Klaviyo:', errorMessage);
+
+        // Show error notification if SDK is available
+        if (sdk.notifier) {
+          sdk.notifier.error(`Error syncing to Klaviyo: ${errorMessage}`);
+        }
+
+        return {
+          success: false,
+          error: errorMessage,
+        };
+      }
+    } catch (error) {
+      logger.error('Error in syncContent:', error);
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
     }
   }
 
-  // Add a new method to update sync status
-  private async updateSyncStatus(
+  // Simplified method that doesn't require entry.sys
+  private async updateSyncStatusSimple(
     contentTypeId: string,
     contentTypeName: string,
     synced: boolean = true
   ) {
     try {
-      // Check if SDK is accessible
+      if (!this.sdk) {
+        logger.error('Cannot update sync status: No SDK available');
+        return;
+      }
+
+      const entryId = this.sdk.ids?.entry;
+
+      if (!entryId) {
+        logger.error('Cannot update sync status: No entry ID available from SDK');
+        return;
+      }
+
+      // Use SDK if available to update status
       if (this.sdk && this.sdk.app) {
-        // Use SDK to update sync status in Contentful's instance parameters
-        await this.updateSyncStatusWithSdk(contentTypeId, contentTypeName, synced);
+        await this.updateSyncStatusWithSdkSimple(contentTypeId, contentTypeName, synced);
       } else {
-        // Fallback to localStorage
-        this.updateSyncStatusWithLocalStorage(contentTypeId, contentTypeName, synced);
+        // Fall back to localStorage
+        this.updateSyncStatusWithLocalStorageSimple(
+          entryId,
+          contentTypeId,
+          contentTypeName,
+          synced
+        );
       }
     } catch (error) {
       logger.error('Error updating sync status:', error);
     }
   }
 
-  // Update sync status using Contentful's instance parameters
-  private async updateSyncStatusWithSdk(
+  // Updated version that doesn't require entry.sys
+  private async updateSyncStatusWithSdkSimple(
     contentTypeId: string,
     contentTypeName: string,
     synced: boolean = true
   ) {
     try {
-      if (!this.sdk || !this.sdk.app) {
-        throw new Error('SDK not available');
-      }
-
-      // Get the entry ID
-      const entryId = this.entry?.sys?.id || '';
-      if (!entryId) {
-        logger.warn('No entry ID found for sync status update');
+      if (!this.sdk || !this.sdk.app || !this.sdk.ids?.entry) {
+        logger.error('Cannot update sync status with SDK: Missing SDK or entry ID');
         return;
       }
 
-      // Use localStorage as storage for sync data in sidebar context
-      // This is necessary because sidebar extensions can't modify app parameters directly
-      const storageKey = 'klaviyo_sync_status';
-      const existingStatusesStr = localStorage.getItem(storageKey);
-      const existingStatuses = existingStatusesStr ? JSON.parse(existingStatusesStr) : [];
+      const entryId = this.sdk.ids.entry;
 
-      // Current timestamp
-      const now = Date.now();
+      // Get parameters from SDK
+      const parameters = await this.sdk.app.getParameters();
 
-      // Generate a more consistent entry ID - we might be in different contexts with different formats
-      const normalizedEntryId = entryId.includes(`${contentTypeId}-`) ? entryId : entryId;
+      // Initialize sync data structure if not present
+      const syncData: SyncParameters = parameters?.syncData || {
+        syncStatuses: [],
+        lastUpdated: Date.now(),
+      };
 
-      // Find if we have a status for this entry
-      const entryIndex = existingStatuses.findIndex(
-        (status: any) =>
-          (status.entryId === normalizedEntryId || status.entryId === entryId) &&
-          status.contentTypeId === contentTypeId
+      // Check if entry already has a status
+      const statusIndex = syncData.syncStatuses.findIndex(
+        (status) => status.entryId === entryId && status.contentTypeId === contentTypeId
       );
 
-      if (entryIndex >= 0) {
+      if (statusIndex >= 0) {
         // Update existing status
-        existingStatuses[entryIndex] = {
-          ...existingStatuses[entryIndex],
-          entryId: normalizedEntryId,
-          lastSynced: now,
-          needsSync: !synced,
-          syncCompleted: synced,
-        };
+        if (synced) {
+          syncData.syncStatuses[statusIndex].lastSynced = Date.now();
+          syncData.syncStatuses[statusIndex].syncCompleted = true;
+          syncData.syncStatuses[statusIndex].needsSync = false;
+        } else {
+          // Mark as needing sync
+          syncData.syncStatuses[statusIndex].needsSync = true;
+        }
       } else {
         // Add new status
-        existingStatuses.push({
-          entryId: normalizedEntryId,
+        syncData.syncStatuses.push({
+          entryId,
           contentTypeId,
           contentTypeName,
-          lastSynced: now,
+          lastSynced: synced ? Date.now() : 0,
           needsSync: !synced,
           syncCompleted: synced,
         });
       }
 
-      // Save updated statuses to localStorage
-      localStorage.setItem(storageKey, JSON.stringify(existingStatuses));
+      // Update timestamp
+      syncData.lastUpdated = Date.now();
 
-      // Also try to update via postMessage to parent window
-      try {
-        window.parent.postMessage(
-          {
-            type: 'klaviyo-sync-status-update',
-            data: {
-              entryId: normalizedEntryId,
-              contentTypeId,
-              contentTypeName,
-              lastSynced: now,
-              needsSync: !synced,
-              syncCompleted: synced,
-            },
-          },
-          '*'
+      // Save back to instance parameters
+      await this.sdk.app.setParameters({
+        ...parameters,
+        syncData,
+      });
+
+      // If sync was successful, trigger a sync event
+      if (synced) {
+        window.dispatchEvent(
+          new CustomEvent('klaviyo-sync-completed', {
+            detail: { entryId, contentTypeId },
+          })
         );
-      } catch (postMsgError) {
-        logger.warn('Failed to send sync status update via postMessage:', postMsgError);
       }
-
-      // Dispatch event to notify other components
-      window.dispatchEvent(
-        new CustomEvent('klaviyo-sync-completed', {
-          detail: {
-            entryId: normalizedEntryId,
-            contentTypeId,
-            contentTypeName,
-            lastSynced: now,
-          },
-        })
-      );
-
-      logger.log(`Sync status updated for ${normalizedEntryId} (${contentTypeId})`);
     } catch (error) {
       logger.error('Error updating sync status with SDK:', error);
-      // Fall back to localStorage
-      this.updateSyncStatusWithLocalStorage(contentTypeId, contentTypeName, synced);
+
+      // Fall back to localStorage if SDK fails
+      if (this.sdk?.ids?.entry) {
+        this.updateSyncStatusWithLocalStorageSimple(
+          this.sdk.ids.entry,
+          contentTypeId,
+          contentTypeName,
+          synced
+        );
+      }
     }
   }
 
-  // Update sync status using localStorage as fallback
-  private updateSyncStatusWithLocalStorage(
+  // Updated version that takes entryId as a parameter
+  private updateSyncStatusWithLocalStorageSimple(
+    entryId: string,
     contentTypeId: string,
     contentTypeName: string,
     synced: boolean = true
   ) {
     try {
-      // Get current sync statuses
       const storageKey = 'klaviyo_sync_status';
-      const existingStatusesStr = localStorage.getItem(storageKey);
-      const existingStatuses = existingStatusesStr ? JSON.parse(existingStatusesStr) : [];
 
-      // Find if we have a status for this entry
-      const entryId = `${contentTypeId}-${contentTypeName}`;
-      const entryIndex = existingStatuses.findIndex((status: any) => status.entryId === entryId);
+      // Get existing statuses
+      const statusesStr = localStorage.getItem(storageKey);
+      let statuses: SyncStatus[] = [];
 
-      // Current timestamp
-      const now = Date.now();
+      if (statusesStr) {
+        statuses = JSON.parse(statusesStr);
+      }
 
-      if (entryIndex >= 0) {
+      // Check if entry already has a status
+      const statusIndex = statuses.findIndex(
+        (status) => status.entryId === entryId && status.contentTypeId === contentTypeId
+      );
+
+      if (statusIndex >= 0) {
         // Update existing status
-        existingStatuses[entryIndex] = {
-          ...existingStatuses[entryIndex],
-          lastSynced: now,
-          needsSync: !synced,
-          syncCompleted: synced,
-        };
+        if (synced) {
+          statuses[statusIndex].lastSynced = Date.now();
+          statuses[statusIndex].syncCompleted = true;
+          statuses[statusIndex].needsSync = false;
+        } else {
+          // Mark as needing sync
+          statuses[statusIndex].needsSync = true;
+        }
       } else {
         // Add new status
-        existingStatuses.push({
+        statuses.push({
           entryId,
           contentTypeId,
           contentTypeName,
-          lastSynced: now,
+          lastSynced: synced ? Date.now() : 0,
           needsSync: !synced,
           syncCompleted: synced,
         });
       }
 
-      // Save updated statuses
-      localStorage.setItem(storageKey, JSON.stringify(existingStatuses));
+      // Save back to localStorage
+      localStorage.setItem(storageKey, JSON.stringify(statuses));
 
-      // Dispatch event to notify other components
-      window.dispatchEvent(
-        new CustomEvent('klaviyo-sync-completed', {
-          detail: { entryId, contentTypeId },
-        })
-      );
+      // If sync was successful, trigger a sync event
+      if (synced) {
+        window.dispatchEvent(
+          new CustomEvent('klaviyo-sync-completed', {
+            detail: { entryId, contentTypeId },
+          })
+        );
+      }
     } catch (error) {
       logger.error('Error updating sync status with localStorage:', error);
     }
@@ -800,57 +933,69 @@ export const updateSyncStatusWithSdk = async (
   fields: Record<string, number> = {}
 ): Promise<void> => {
   try {
-    // Get current parameters
+    // Get parameters from SDK
     const parameters = await sdk.app.getParameters();
-    const syncData: SyncParameters = parameters?.syncData || {
-      syncStatuses: [],
-      lastUpdated: Date.now(),
-    };
+    const syncData: SyncParameters = parameters?.syncData || { syncStatuses: [], lastUpdated: 0 };
 
-    const now = Date.now();
-    const statusIndex = syncData.syncStatuses.findIndex(
-      (status: SyncStatus) => status.entryId === entryId && status.contentTypeId === contentTypeId
+    // Get the entry to store its version
+    let entryVersion: number | undefined;
+    try {
+      const entry = await sdk.space.getEntry(entryId);
+      if (entry && entry.sys) {
+        entryVersion = entry.sys.version;
+      }
+    } catch (err) {
+      logger.error('Failed to get entry version:', err);
+      // Continue anyway without version info
+    }
+
+    // Find this entry's status
+    const existingIndex = syncData.syncStatuses.findIndex(
+      (status) => status.entryId === entryId && status.contentTypeId === contentTypeId
     );
 
-    if (statusIndex >= 0) {
+    if (existingIndex >= 0) {
       // Update existing status
-      syncData.syncStatuses[statusIndex] = {
-        ...syncData.syncStatuses[statusIndex],
-        lastSynced: now,
-        fieldsUpdatedAt: { ...syncData.syncStatuses[statusIndex].fieldsUpdatedAt, ...fields },
-        needsSync: false,
-        syncCompleted: true,
-      };
+      syncData.syncStatuses[existingIndex].lastSynced = Date.now();
+      syncData.syncStatuses[existingIndex].syncCompleted = true;
+      syncData.syncStatuses[existingIndex].needsSync = false;
+
+      // Add version info if available
+      if (entryVersion !== undefined) {
+        syncData.syncStatuses[existingIndex].lastSyncedVersion = entryVersion;
+      }
+
+      // Update field timestamps if provided
+      if (Object.keys(fields).length > 0) {
+        syncData.syncStatuses[existingIndex].fieldsUpdatedAt = {
+          ...(syncData.syncStatuses[existingIndex].fieldsUpdatedAt || {}),
+          ...fields,
+        };
+      }
     } else {
-      // Add new status
+      // Create new status
       syncData.syncStatuses.push({
         entryId,
         contentTypeId,
-        lastSynced: now,
+        lastSynced: Date.now(),
         fieldsUpdatedAt: fields,
         needsSync: false,
         syncCompleted: true,
+        lastSyncedVersion: entryVersion,
       });
     }
 
-    // Update timestamp
-    syncData.lastUpdated = now;
-
-    // Save back to instance parameters
+    // Update timestamp and save back to instance parameters
+    syncData.lastUpdated = Date.now();
     await sdk.app.setParameters({
       ...parameters,
       syncData,
     });
 
-    // Dispatch an event to notify components of the sync completion
-    window.dispatchEvent(
-      new CustomEvent('klaviyo-sync-completed', {
-        detail: { entryId, contentTypeId },
-      })
-    );
+    logger.log('Updated sync status with SDK for entry', entryId);
   } catch (error) {
     logger.error('Error updating sync status with SDK:', error);
-    // Fall back to localStorage if SDK update fails
+    // Fall back to localStorage for robustness
     updateSyncStatusWithLocalStorage(entryId, contentTypeId, fields);
   }
 };
@@ -861,47 +1006,60 @@ export const updateSyncStatusWithSdk = async (
 export const updateSyncStatusWithLocalStorage = (
   entryId: string,
   contentTypeId: string,
-  fields: Record<string, number> = {}
+  fields: Record<string, number> = {},
+  entryVersion?: number
 ): void => {
   try {
     const storageKey = 'klaviyo_sync_status';
-    const existingStatusesStr = localStorage.getItem(storageKey);
-    const existingStatuses = existingStatusesStr ? JSON.parse(existingStatusesStr) : [];
+    const statusesStr = localStorage.getItem(storageKey);
+    let statuses: SyncStatus[] = [];
 
-    const now = Date.now();
-    const statusIndex = existingStatuses.findIndex(
-      (status: SyncStatus) => status.entryId === entryId && status.contentTypeId === contentTypeId
+    if (statusesStr) {
+      statuses = JSON.parse(statusesStr);
+    }
+
+    // Find existing status for this entry
+    const existingIndex = statuses.findIndex(
+      (status) => status.entryId === entryId && status.contentTypeId === contentTypeId
     );
 
-    if (statusIndex >= 0) {
+    if (existingIndex >= 0) {
       // Update existing status
-      existingStatuses[statusIndex] = {
-        ...existingStatuses[statusIndex],
-        lastSynced: now,
-        fieldsUpdatedAt: { ...existingStatuses[statusIndex].fieldsUpdatedAt, ...fields },
-        needsSync: false,
-        syncCompleted: true,
-      };
+      statuses[existingIndex].lastSynced = Date.now();
+      statuses[existingIndex].syncCompleted = true;
+      statuses[existingIndex].needsSync = false;
+
+      // Add version info if available
+      if (entryVersion !== undefined) {
+        statuses[existingIndex].lastSyncedVersion = entryVersion;
+      }
+
+      // Update field timestamps if provided
+      if (Object.keys(fields).length > 0) {
+        statuses[existingIndex].fieldsUpdatedAt = {
+          ...(statuses[existingIndex].fieldsUpdatedAt || {}),
+          ...fields,
+        };
+      }
     } else {
-      // Add new status
-      existingStatuses.push({
+      // Create new status
+      statuses.push({
         entryId,
         contentTypeId,
-        lastSynced: now,
+        lastSynced: Date.now(),
         fieldsUpdatedAt: fields,
         needsSync: false,
         syncCompleted: true,
+        lastSyncedVersion: entryVersion,
       });
     }
 
-    localStorage.setItem(storageKey, JSON.stringify(existingStatuses));
+    // Save back to localStorage
+    localStorage.setItem(storageKey, JSON.stringify(statuses));
+    logger.log('Updated sync status with localStorage for entry', entryId);
 
-    // Dispatch an event to notify components of the sync completion
-    window.dispatchEvent(
-      new CustomEvent('klaviyo-sync-completed', {
-        detail: { entryId, contentTypeId },
-      })
-    );
+    // Clear the cache
+    localStorage.removeItem(`${storageKey}_cache`);
   } catch (error) {
     logger.error('Error updating sync status with localStorage:', error);
   }
@@ -1312,9 +1470,33 @@ export const setupEntryChangeListener = (
   logger.log(`Setting up change listeners for ${syncedFields.length} fields`);
 
   // Get entry ID and content type info
-  const entryId = sdk.entry.getSys().id;
-  const contentTypeId = sdk.ids.contentType;
-  const contentTypeName = sdk.contentType?.name || '';
+  let entryId: string;
+  let contentTypeId: string;
+  let contentTypeName = '';
+
+  try {
+    // Try to get IDs from different sources
+    if (sdk.ids) {
+      entryId = sdk.ids.entry;
+      contentTypeId = sdk.ids.contentType;
+    } else if (typeof sdk.entry.getSys === 'function') {
+      const entrySys = sdk.entry.getSys();
+      entryId = entrySys.id;
+      contentTypeId = entrySys.contentType?.sys?.id;
+    } else if (sdk.entry && 'sys' in sdk.entry) {
+      const entrySys = (sdk.entry as any).sys;
+      entryId = entrySys.id;
+      contentTypeId = entrySys.contentType?.sys?.id;
+    } else {
+      logger.error('Unable to determine entry ID or content type ID');
+      return () => {}; // Exit early if we can't get necessary IDs
+    }
+
+    contentTypeName = sdk.contentType?.name || '';
+  } catch (error) {
+    logger.error('Error getting entry IDs:', error);
+    return () => {}; // Exit if we can't get IDs
+  }
 
   // Initialize field trackers
   const fieldTrackers: Record<string, FieldChangeTracker> = {};
