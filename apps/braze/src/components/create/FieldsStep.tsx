@@ -19,13 +19,8 @@ const FieldsStep = ({
 }: FieldsStepProps) => {
   const allFields = entry.fields;
   const allFieldIds = allFields.map((field) => field.uniqueId());
-  const allSelected = selectedFields.size === allFieldIds.length;
-
   const idToLabel = Object.fromEntries(
     allFields.map((f) => [f.uniqueId(), f.displayNameForCreate()])
-  );
-  const labelToId = Object.fromEntries(
-    allFields.map((f) => [f.displayNameForCreate(), f.uniqueId()])
   );
 
   const currentSelection = Array.from(selectedFields)
@@ -33,8 +28,7 @@ const FieldsStep = ({
     .filter(Boolean);
 
   const handleSelectField = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { checked, value } = event.target;
-    const id = labelToId[value];
+    const { checked, id } = event.target;
     const newSelectedFields = new Set(selectedFields);
     if (checked) {
       newSelectedFields.add(id);
@@ -64,12 +58,15 @@ const FieldsStep = ({
           currentSelection={currentSelection}
           popoverProps={{ isFullWidth: true, listMaxHeight: 108 }}
           placeholder="Select one or more">
-          <Multiselect.SelectAll onSelectItem={handleSelectAll} isChecked={allSelected} />
+          <Multiselect.SelectAll
+            onSelectItem={handleSelectAll}
+            isChecked={selectedFields.size === allFieldIds.length}
+          />
           {allFields.map((field) => (
             <Multiselect.Option
               key={field.uniqueId()}
               itemId={field.displayNameForCreate()}
-              value={field.displayNameForCreate()}
+              value={field.uniqueId()}
               label={field.displayNameForCreate()}
               onSelectItem={handleSelectField}
               isChecked={selectedFields.has(field.uniqueId())}

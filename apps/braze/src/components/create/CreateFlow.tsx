@@ -25,17 +25,7 @@ const CreateFlow = (props: CreateFlowProps) => {
   const [contentBlockName, setContentBlockName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const allowedFields = entry.fields.filter((field) => field.isEnabledForCreate());
-
-  const filteredEntry = new Entry(
-    entry.id,
-    entry.contentType,
-    entry.title,
-    allowedFields,
-    entry['spaceId'],
-    entry['environment'],
-    entry['contentfulToken']
-  );
+  entry.fields = entry.fields.filter((field) => field.isEnabledForCreate());
 
   const handleCreate = async () => {
     setIsSubmitting(true);
@@ -58,7 +48,7 @@ const CreateFlow = (props: CreateFlowProps) => {
       paddingRight="spacingL">
       {step === FIELDS_STEP && (
         <FieldsStep
-          entry={filteredEntry}
+          entry={entry}
           selectedFields={selectedFields}
           setSelectedFields={setSelectedFields}
           handleNextStep={() => setStep(CREATE_STEP)}
