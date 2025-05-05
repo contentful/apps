@@ -25,7 +25,7 @@ const CreateFlow = (props: CreateFlowProps) => {
   const [contentBlockName, setContentBlockName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  entry.fields = entry.fields.filter((field) => field.isEnabledForCreate());
+  // entry.fields = entry.fields.filter((field) => field.isEnabledForCreate());
 
   const handleCreate = async () => {
     setIsSubmitting(true);

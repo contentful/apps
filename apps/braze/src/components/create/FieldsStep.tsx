@@ -3,6 +3,7 @@ import { Multiselect } from '@contentful/f36-multiselect';
 import { Entry } from '../../fields/Entry';
 import WizardFooter from '../WizardFooter';
 import React from 'react';
+import { Field } from '../../fields/Field';
 
 type FieldsStepProps = {
   entry: Entry;
@@ -18,10 +19,14 @@ const FieldsStep = ({
   handleNextStep,
 }: FieldsStepProps) => {
   const allFields = entry.fields;
-  const allFieldIds = allFields.map((field) => field.uniqueId());
+  const filteredFields = allFields.filter((field) => field.isEnabledForCreate());
   const idToLabel = Object.fromEntries(
     allFields.map((f) => [f.uniqueId(), f.displayNameForCreate()])
   );
+
+  const allFieldIds = (fields: Field[]) => {
+    return fields.map((field) => field.uniqueId());
+  };
 
   const currentSelection = Array.from(selectedFields)
     .map((id) => idToLabel[id])
@@ -40,7 +45,7 @@ const FieldsStep = ({
 
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      setSelectedFields(new Set(allFieldIds));
+      setSelectedFields(new Set(allFieldIds(filteredFields)));
     } else {
       setSelectedFields(new Set());
     }
@@ -60,7 +65,7 @@ const FieldsStep = ({
           placeholder="Select one or more">
           <Multiselect.SelectAll
             onSelectItem={handleSelectAll}
-            isChecked={selectedFields.size === allFieldIds.length}
+            isChecked={selectedFields.size === allFieldIds(filteredFields).length}
           />
           {allFields.map((field) => (
             <Multiselect.Option
@@ -71,6 +76,7 @@ const FieldsStep = ({
               onSelectItem={handleSelectField}
               isChecked={selectedFields.has(field.uniqueId())}
               data-testid={`select-${entry.id}`}
+              isDisabled={!field.isEnabledForCreate()}
             />
           ))}
         </Multiselect>
