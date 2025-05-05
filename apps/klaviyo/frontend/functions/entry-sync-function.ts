@@ -507,6 +507,24 @@ export const handler = async (
 
     console.log('Prepared field mappings for Klaviyo:', klaviyoFieldMappings);
 
+    // Add space ID to entry if it's not already there
+    if (effectiveSpaceId) {
+      if (!entry.sys) {
+        entry.sys = {} as any;
+      }
+      if (!entry.sys.space) {
+        entry.sys.space = {
+          sys: {
+            type: 'Link',
+            linkType: 'Space',
+            id: effectiveSpaceId,
+          },
+        } as any;
+      }
+      // Also add as a direct property for easier access
+      (entry as any).spaceId = effectiveSpaceId;
+    }
+
     // Actually sync the content to Klaviyo
     const syncResult = await klaviyoService.syncContent(klaviyoFieldMappings, entry);
     console.log('Sync result:', syncResult);

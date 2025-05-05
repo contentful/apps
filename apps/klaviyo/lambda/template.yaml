@@ -4,6 +4,7 @@ Resources:
     Properties:
       Handler: app.handler
       Runtime: nodejs18.x
+      Timeout: 30
       Environment:
         Variables:
           SYNC_STATUS_TABLE: !Ref KlaviyoSyncStatusTable

@@ -337,7 +337,8 @@ export const updateSyncStatusViaApi = async (
 export async function syncEntryToKlaviyo(
   entryId: string,
   contentTypeId: string,
-  entryData: any
+  entryData: Record<string, any>,
+  spaceId?: string
 ): Promise<SyncResult> {
   try {
     const baseUrl = getBaseUrl();
@@ -489,23 +490,21 @@ export async function syncEntryToKlaviyo(
 
     // Send the request with improved error handling
     try {
+      const payload: any = {
+        entryId,
+        contentTypeId,
+        entryData: cleanedEntry,
+        fieldMappings: mappings,
+      };
+      if (spaceId) {
+        payload.spaceId = spaceId;
+      }
       const response = await fetch(`${baseUrl}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          action: 'syncEntry',
-          data: {
-            entryId,
-            contentTypeId,
-            entryData: cleanedEntry, // Send the cleaned entry data
-            fieldMappings: mappings, // Include the field mappings
-          },
-          // Use retrieved API keys
-          privateKey,
-          publicKey,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -622,28 +621,26 @@ export const getSavedFieldMappings = async (contentTypeId: string): Promise<any[
 };
 
 /**
- * Save mappings to local storage for a specific content type
+ * Safely saves field mappings to localStorage
+ * @param mappings Field mappings to save
+ * @returns True if successful, false otherwise
  */
-export const saveLocalMappings = async (mappings: any[], contentTypeId: string): Promise<void> => {
+export const saveLocalMappings = (mappings: any[]): boolean => {
   try {
-    // Get all current mappings
-    const allMappings = getLocalMappings();
+    if (!Array.isArray(mappings)) {
+      logger.warn('[saveLocalMappings] Attempted to save non-array mappings:', mappings);
+      return false;
+    }
 
-    // Filter out any existing mappings for this content type
-    const filteredMappings = allMappings.filter(
-      (mapping) => mapping.contentTypeId !== contentTypeId
-    );
-
-    // Add the new mappings
-    const updatedMappings = [...filteredMappings, ...mappings];
-
-    // Save to local storage
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedMappings));
-
+    localStorage.setItem('klaviyo_field_mappings', JSON.stringify(mappings));
     logger.log(
-      `Saved ${mappings.length} mappings for content type ${contentTypeId} to local storage`
+      '[saveLocalMappings] Successfully saved',
+      mappings.length,
+      'mappings to localStorage'
     );
+    return true;
   } catch (error) {
-    logger.error('Error saving mappings to local storage:', error);
+    logger.error('[saveLocalMappings] Error saving mappings to localStorage:', error);
+    return false;
   }
 };

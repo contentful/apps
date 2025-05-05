@@ -38,6 +38,7 @@ const validateCredentials = async (privateKey) => {
         revision: KLAVIYO_API_REVISION,
         Authorization: `Klaviyo-API-Key ${privateKey}`,
       },
+      timeout: 25000, // 25 seconds timeout for API requests
     });
 
     console.log('Successfully validated Klaviyo credentials');
@@ -98,6 +99,7 @@ const trackEvent = async (data, privateKey) => {
           revision: KLAVIYO_API_REVISION,
           Authorization: `Klaviyo-API-Key ${privateKey}`,
         },
+        timeout: 25000, // 25 seconds timeout for API requests
       }
     );
     return response.data;
@@ -184,6 +186,7 @@ const findContentByExternalId = async (externalId, privateKey) => {
         revision: KLAVIYO_API_REVISION,
         Authorization: `Klaviyo-API-Key ${privateKey}`,
       },
+      timeout: 25000, // 25 seconds timeout for API requests
     });
 
     // Check if we got any content blocks
@@ -244,6 +247,25 @@ const uploadContent = async (data, privateKey) => {
       apiUrl: `${KLAVIYO_API_URL}/${endpoint}`,
     });
 
+    // Process any fields to extract localized content
+    if (data.fields && Array.isArray(data.fields)) {
+      data.fields = data.fields.map((field) => {
+        if (field.value && typeof field.value === 'object' && !Array.isArray(field.value)) {
+          // Check if this is a localized text field object
+          if (field.value['en-US'] !== undefined || Object.keys(field.value).length === 1) {
+            console.log(`Processing localized field value in uploadContent: ${field.fieldId}`);
+            const extractedValue = extractTextFromLocalizedField(field.value);
+            console.log(`Extracted value: "${extractedValue}"`);
+            return {
+              ...field,
+              value: extractedValue,
+            };
+          }
+        }
+        return field;
+      });
+    }
+
     // Format the request body according to Klaviyo's JSON:API requirements
     let requestBody;
 
@@ -259,6 +281,27 @@ const uploadContent = async (data, privateKey) => {
       if (data.data.type === 'universal-content') {
         requestBody.data.type = 'template-universal-content';
       }
+
+      // Process content if it's a localized object or any JSON object
+      if (
+        requestBody.data.attributes?.definition?.data?.content &&
+        typeof requestBody.data.attributes.definition.data.content === 'object'
+      ) {
+        const content = requestBody.data.attributes.definition.data.content;
+        console.log('Processing content object in definition data');
+        // First try to extract text from localized field
+        const extractedContent = extractTextFromLocalizedField(content);
+
+        // If we got something other than [object Object], use it
+        if (extractedContent !== '[object Object]') {
+          requestBody.data.attributes.definition.data.content = extractedContent;
+          console.log(`Extracted content text: "${extractedContent}"`);
+        } else {
+          // Otherwise format it as JSON
+          requestBody.data.attributes.definition.data.content = formatJsonForDisplay(content);
+          console.log('Formatted content as JSON');
+        }
+      }
     } else {
       // Otherwise, wrap the data in a proper JSON:API format
       const contentType =
@@ -266,6 +309,33 @@ const uploadContent = async (data, privateKey) => {
         (data.fields && data.fields.some((f) => f.type === 'html' || f.fieldType === 'richText'))
           ? 'html'
           : 'text';
+
+      // Extract field content, handling localized objects if needed
+      let fieldContent = '';
+      if (data.fields && data.fields.length > 0) {
+        fieldContent = formatFieldsToHtml(data.fields);
+      } else if (data.content) {
+        // If content is an object (localized or JSON), format it appropriately
+        if (typeof data.content === 'object' && !Array.isArray(data.content)) {
+          console.log('Processing direct content object');
+
+          // First try to extract text from localized field
+          const extractedContent = extractTextFromLocalizedField(data.content);
+
+          // If we got something other than [object Object], use it
+          if (extractedContent !== '[object Object]') {
+            fieldContent = extractedContent;
+            console.log(`Extracted content text: "${extractedContent}"`);
+          } else {
+            // Otherwise format it as JSON with proper HTML formatting for display
+            const formattedJson = formatJsonForDisplay(data.content);
+            fieldContent = `<pre class="json-object">${escapeHtml(formattedJson)}</pre>`;
+            console.log('Formatted content as JSON');
+          }
+        } else {
+          fieldContent = data.content;
+        }
+      }
 
       // Create the base request body structure
       requestBody = {
@@ -277,10 +347,7 @@ const uploadContent = async (data, privateKey) => {
               content_type: 'block',
               type: contentType,
               data: {
-                content:
-                  data.fields && data.fields.length > 0
-                    ? formatFieldsToHtml(data.fields)
-                    : data.content || '',
+                content: fieldContent,
                 // Only include display_options, never styles for creation
                 display_options: {},
               },
@@ -364,6 +431,7 @@ const uploadContent = async (data, privateKey) => {
         revision: KLAVIYO_API_REVISION,
         Authorization: `Klaviyo-API-Key ${privateKey}`,
       },
+      timeout: 25000, // 25 seconds timeout for API requests
     });
 
     console.log(`Klaviyo API response status: ${response.status}`);
@@ -405,6 +473,7 @@ const identifyProfile = async (data, privateKey) => {
           revision: KLAVIYO_API_REVISION,
           Authorization: `Klaviyo-API-Key ${privateKey}`,
         },
+        timeout: 25000, // 25 seconds timeout for API requests
       }
     );
     return response.data;
@@ -420,17 +489,7 @@ const identifyProfile = async (data, privateKey) => {
 };
 
 // Define allowlist of permitted endpoints
-const ALLOWED_ENDPOINTS = [
-  'template-universal-content',
-  'universal-content', // Keep for backward compatibility
-  'images',
-  'profiles',
-  'metrics',
-  'lists',
-  'campaigns',
-  'accounts',
-  // Add other valid endpoints your app needs
-];
+const ALLOWED_ENDPOINTS = ['template-universal-content', 'images'];
 
 // Main Lambda handler
 exports.handler = async (event) => {
@@ -570,6 +629,7 @@ exports.handler = async (event) => {
               revision: KLAVIYO_API_REVISION,
               Authorization: `Klaviyo-API-Key ${privateKey}`,
             },
+            timeout: 25000, // 25 seconds timeout for API requests
           });
 
           console.log(`Klaviyo API response status: ${response.status}`);
@@ -639,24 +699,37 @@ exports.handler = async (event) => {
             // Simple success response for now
             result = { success: true, message: 'Sync status updated' };
           } else if (action === 'syncEntry') {
-            console.log(`Processing sync entry action for entry ${data.entryId}`);
+            console.log('Processing sync entry action for entry', data.entryId);
+
             try {
-              // Log the entire data object to see what we're receiving
               console.log('Received syncEntry data:', JSON.stringify(data, null, 2));
 
-              // Instead of fetching from Contentful, use the entry data passed from the frontend
-              if (!data.entryData || Object.keys(data.entryData).length === 0) {
-                console.error('Missing or empty entry data in request');
-                return formatResponse(400, {
-                  success: false,
-                  message:
-                    'Missing or empty entry data in request. Please check that your entry has content and the frontend is properly collecting the data.',
-                  data: null,
-                });
+              // Extract space ID if provided
+              let spaceId = data.spaceId;
+
+              // If no space ID provided, try to extract from entry data
+              if (!spaceId) {
+                console.log(
+                  'No space ID provided in request data. Will attempt to extract from entry data.'
+                );
+
+                // Attempt to detect it in the entry references
+                if (
+                  data.entryData &&
+                  data.entryData.reference &&
+                  Array.isArray(data.entryData.reference)
+                ) {
+                  for (const ref of data.entryData.reference) {
+                    if (ref.sys && ref.sys.space && ref.sys.space.sys && ref.sys.space.sys.id) {
+                      spaceId = ref.sys.space.sys.id;
+                      console.log(`Extracted space ID from reference: ${spaceId}`);
+                      break;
+                    }
+                  }
+                }
               }
 
-              const entry = data.entryData;
-              console.log(`Using provided entry data:`, JSON.stringify(entry, null, 2));
+              console.log(`Using provided entry data:`, JSON.stringify(data.entryData, null, 2));
 
               // Check if field mappings were provided
               const fieldMappings = data.fieldMappings || [];
@@ -701,7 +774,7 @@ exports.handler = async (event) => {
               }
 
               // Get base title for entries
-              const baseTitle = extractTitleFromEntry(entry, contentType);
+              const baseTitle = extractTitleFromEntry(data.entryData, contentType);
 
               // Array to store all upload results
               const uploadResults = [];
@@ -710,15 +783,7 @@ exports.handler = async (event) => {
               if (!fieldMappings || fieldMappings.length === 0) {
                 console.warn('No field mappings provided, creating a placeholder entry');
 
-                // Create a generic payload with placeholder content
-                const fallbackContent =
-                  entry._note || entry._error || 'No content available for this entry';
                 const externalId = `${data.entryId}-default`;
-
-                // Check if this content already exists
-                console.log(
-                  `Checking if fallback content already exists with external ID ${externalId}`
-                );
                 const existingContent = await findContentByExternalId(externalId, privateKey);
 
                 let klaviyoPayload;
@@ -770,136 +835,258 @@ exports.handler = async (event) => {
                 for (const mapping of fieldMappings) {
                   const { contentfulFieldId, klaviyoBlockName, fieldType } = mapping;
                   console.log(
-                    `Processing field mapping as separate entry: ${contentfulFieldId} -> ${klaviyoBlockName} (${fieldType})`
+                    `Processing field mapping: ${contentfulFieldId} -> ${klaviyoBlockName} (${fieldType})`
                   );
 
+                  // Look for space ID in data if available, will be useful for asset URLs
+                  let spaceId = '';
+                  if (data.spaceId) {
+                    spaceId = data.spaceId;
+                    console.log(`Found space ID in request data: ${spaceId}`);
+                  } else if (
+                    data.entryData &&
+                    data.entryData.sys &&
+                    data.entryData.sys.space &&
+                    data.entryData.sys.space.sys
+                  ) {
+                    spaceId = data.entryData.sys.space.sys.id;
+                    console.log(`Found space ID in entry data: ${spaceId}`);
+                  }
+
                   // Skip if field doesn't exist in entry
-                  if (!entry[contentfulFieldId]) {
+                  if (!data.entryData[contentfulFieldId]) {
                     console.log(`Field ${contentfulFieldId} not found in entry, skipping`);
                     continue;
                   }
 
-                  const value = entry[contentfulFieldId];
+                  const value = data.entryData[contentfulFieldId];
                   let processedValue = value;
-                  let processedFieldType = fieldType;
+                  let processedFieldType = fieldType || 'text';
 
-                  // Process value based on field type
-                  if (value !== null && value !== undefined) {
-                    // Determine field type if not specified
-                    if (!processedFieldType) {
-                      if (value && typeof value === 'object' && value.nodeType === 'document') {
-                        processedFieldType = 'richText';
-                      } else if (
-                        value &&
-                        typeof value === 'object' &&
-                        value.sys &&
-                        value.sys.type === 'Link' &&
-                        value.sys.linkType === 'Asset'
-                      ) {
-                        processedFieldType = 'image';
+                  // Early detection of image fields to ensure proper processing
+                  // This helps prevent the field from being treated as regular text
+                  if (
+                    processedFieldType === 'image' ||
+                    contentfulFieldId === 'titleImage' ||
+                    (typeof value === 'object' && value?.sys?.linkType === 'Asset') ||
+                    (typeof value === 'string' &&
+                      (value.includes('"linkType":"Asset"') ||
+                        value.includes('linkType\\":\\"Asset')))
+                  ) {
+                    console.log(`Confirmed image field type for ${contentfulFieldId}`);
+                    processedFieldType = 'image';
+
+                    // Skip the localized content check for image fields
+                    // Continue to image processing...
+                  }
+                  // Handle localized content first (common case)
+                  else if (
+                    value &&
+                    typeof value === 'object' &&
+                    !Array.isArray(value) &&
+                    (value['en-US'] !== undefined || Object.keys(value).length === 1)
+                  ) {
+                    console.log(`Detected localized content in field ${contentfulFieldId}`);
+
+                    // Extract the text value from the localized object
+                    const extractedText = extractTextFromLocalizedField(value);
+                    console.log(
+                      `Extracted text from localized field ${contentfulFieldId}: "${extractedText}"`
+                    );
+
+                    // Use extracted text as the processed value
+                    processedValue = extractedText;
+                  }
+                  // Handle rich text content
+                  else if (
+                    processedFieldType === 'richText' ||
+                    (value &&
+                      typeof value === 'object' &&
+                      (value.nodeType === 'document' ||
+                        (value.content && Array.isArray(value.content))))
+                  ) {
+                    console.log(`Detected rich text content in field ${contentfulFieldId}`);
+                    processedFieldType = 'richText';
+
+                    // If value is already a string (pre-formatted HTML), use it directly
+                    if (
+                      typeof value === 'string' &&
+                      (value.startsWith('<') || value.includes('</'))
+                    ) {
+                      processedValue = value;
+                    }
+                    // Otherwise, convert object to JSON string for storage
+                    else if (typeof value === 'object') {
+                      processedValue = JSON.stringify(value);
+                    }
+                  }
+                  // Handle entry references
+                  else if (
+                    processedFieldType === 'entry' ||
+                    processedFieldType === 'reference-array'
+                  ) {
+                    console.log(`Detected reference content in field ${contentfulFieldId}`);
+
+                    // For references, store as JSON
+                    if (typeof value !== 'string') {
+                      processedValue = JSON.stringify(value);
+                    }
+                  }
+                  // Handle regular text or other content
+                  else if (typeof value === 'object') {
+                    console.log(`Converting object to JSON string for field ${contentfulFieldId}`);
+                    processedValue = JSON.stringify(value);
+                  }
+
+                  // Skip creating template-universal-content for images that were already uploaded to images API
+                  if (processedFieldType === 'image') {
+                    console.log(`Processing image field ${contentfulFieldId} for Klaviyo...`);
+                    try {
+                      console.log(`Attempting to upload image for field: ${contentfulFieldId}`);
+                      const imageResult = await processImageField(
+                        value,
+                        klaviyoBlockName,
+                        spaceId,
+                        privateKey
+                      );
+                      if (imageResult.success && imageResult.url) {
+                        // Successfully uploaded to Images API
+                        console.log(
+                          `Successfully uploaded image to Klaviyo Images API: ${imageResult.url}`
+                        );
+                        uploadResults.push({
+                          data: {
+                            id: imageResult.id || `image-${Date.now()}`,
+                            type: 'image',
+                            attributes: {
+                              name: klaviyoBlockName,
+                              url: imageResult.url,
+                            },
+                          },
+                          meta: {
+                            message: 'Image uploaded directly to images API',
+                          },
+                        });
                       } else {
-                        processedFieldType = 'text';
+                        // Image upload failed - log and skip
+                        console.error(
+                          `Image upload failed for field ${contentfulFieldId}: ${imageResult.error}`
+                        );
+                      }
+                      // Always skip to the next field for images
+                      continue;
+                    } catch (imageError) {
+                      console.error(
+                        `Error processing image field ${contentfulFieldId}:`,
+                        imageError
+                      );
+                      // Always skip to the next field for images
+                      continue;
+                    }
+                  }
+
+                  // Check if content already exists in Klaviyo
+                  const externalId = `${data.entryId}-${contentfulFieldId}`;
+                  console.log(`Checking for existing content with external ID ${externalId}`);
+                  const existingContent = await findContentByExternalId(externalId, privateKey);
+
+                  let fieldPayload;
+
+                  if (existingContent) {
+                    console.log(
+                      `Found existing content for field ${contentfulFieldId}, id: ${existingContent.id}, name: "${existingContent.attributes?.name}"`
+                    );
+
+                    // For image fields, check if the value is already a URL (indicating successful upload to images API)
+                    let fieldValue = processedValue;
+                    let finalFieldType = processedFieldType;
+
+                    // If this is an image and the value is a URL, change the field type to 'text' to properly display the image
+                    if (processedFieldType === 'image') {
+                      console.log(`Processing image field for ${klaviyoBlockName}`);
+
+                      if (typeof processedValue === 'string' && processedValue.startsWith('http')) {
+                        console.log(
+                          `Converting image field to HTML with image tag for ${klaviyoBlockName}`
+                        );
+                        finalFieldType = 'text';
+                        // Add HTML img tag for better display in Klaviyo
+                        fieldValue = `<img src="${processedValue}" alt="${klaviyoBlockName}" style="max-width:100%;" />`;
+                      } else if (
+                        typeof processedValue === 'string' &&
+                        processedValue.includes('"sys"')
+                      ) {
+                        // This is a stringified JSON reference that couldn't be uploaded
+                        console.log(
+                          `Image reference couldn't be uploaded, creating a note in the content`
+                        );
+                        finalFieldType = 'text';
+                        fieldValue = `<p>Image reference (please make sure spaceId is provided): ${processedValue}</p>`;
                       }
                     }
 
-                    // Format object values
-                    if (
-                      typeof value === 'object' &&
-                      processedFieldType !== 'richText' &&
-                      processedFieldType !== 'image'
-                    ) {
-                      processedValue = JSON.stringify(value);
+                    // Create an update payload with the existing ID
+                    fieldPayload = {
+                      id: existingContent.id,
+                      name: klaviyoBlockName,
+                      contentType: 'html',
+                      objectType: 'template-universal-content',
+                      external_id: externalId,
+                      fields: [
+                        {
+                          fieldId: klaviyoBlockName || contentfulFieldId,
+                          fieldType: finalFieldType,
+                          value: fieldValue,
+                        },
+                      ],
+                    };
+                  } else {
+                    // For image fields, check if the value is already a URL (indicating successful upload to images API)
+                    let fieldValue = processedValue;
+                    let finalFieldType = processedFieldType;
+
+                    // If this is an image and the value is a URL, change the field type to 'text' to properly display the image
+                    if (processedFieldType === 'image') {
+                      console.log(`Processing new image field for ${klaviyoBlockName}`);
+
+                      if (typeof processedValue === 'string' && processedValue.startsWith('http')) {
+                        console.log(
+                          `Converting image field to HTML with image tag for ${klaviyoBlockName}`
+                        );
+                        finalFieldType = 'text';
+                        // Add HTML img tag for better display in Klaviyo
+                        fieldValue = `<img src="${processedValue}" alt="${klaviyoBlockName}" style="max-width:100%;" />`;
+                      } else if (
+                        typeof processedValue === 'string' &&
+                        processedValue.includes('"sys"')
+                      ) {
+                        // This is a stringified JSON reference that couldn't be uploaded
+                        console.log(
+                          `Image reference couldn't be uploaded, creating a note in the content`
+                        );
+                        finalFieldType = 'text';
+                        fieldValue = `<p>Image reference (please make sure spaceId is provided): ${processedValue}</p>`;
+                      }
                     }
 
-                    // Create a separate klaviyoPayload for this field
-                    const fieldTitle = `${baseTitle} - ${klaviyoBlockName}`;
-                    const externalId = `${data.entryId}-${contentfulFieldId}`; // Unique external_id for each field
-
-                    // First check if this content already exists in Klaviyo
-                    console.log(
-                      `Checking if content already exists for field ${contentfulFieldId} with external ID ${externalId}`
-                    );
-                    const existingContent = await findContentByExternalId(externalId, privateKey);
-
-                    let fieldPayload;
-
-                    if (existingContent) {
-                      console.log(
-                        `Found existing content for field ${contentfulFieldId}, id: ${existingContent.id}, name: "${existingContent.attributes?.name}"`
-                      );
-
-                      // Create an update payload with the existing ID
-                      fieldPayload = {
-                        id: existingContent.id,
-                        name: fieldTitle,
-                        contentType: 'html',
-                        objectType: 'template-universal-content',
-                        external_id: externalId,
-                        fields: [
-                          {
-                            fieldId: klaviyoBlockName,
-                            fieldType: processedFieldType,
-                            value: processedValue,
-                          },
-                        ],
-                      };
-                      console.log(
-                        `Created update payload with ID: ${fieldPayload.id} for field ${contentfulFieldId}`
-                      );
-
-                      // Add note that this is an update operation for this field
-                      console.log(
-                        `Will update existing Klaviyo content for field ${contentfulFieldId} instead of creating new content`
-                      );
-                    } else {
-                      // Create a new content payload
-                      fieldPayload = {
-                        name: fieldTitle,
-                        contentType: 'html',
-                        objectType: 'template-universal-content',
-                        external_id: externalId,
-                        fields: [
-                          {
-                            fieldId: klaviyoBlockName,
-                            fieldType: processedFieldType,
-                            value: processedValue,
-                          },
-                        ],
-                      };
-                    }
-
-                    console.log(
-                      `Prepared Klaviyo payload for field ${contentfulFieldId}:`,
-                      JSON.stringify(fieldPayload, null, 2)
-                    );
-
-                    try {
-                      // Upload this field to Klaviyo
-                      const fieldUploadResult = await uploadContent(fieldPayload, privateKey);
-                      console.log(
-                        `Field ${contentfulFieldId} uploaded to Klaviyo:`,
-                        JSON.stringify(fieldUploadResult, null, 2)
-                      );
-                      uploadResults.push({
-                        field: contentfulFieldId,
-                        klaviyoField: klaviyoBlockName,
-                        result: fieldUploadResult,
-                      });
-                    } catch (fieldError) {
-                      console.error(
-                        `Error uploading field ${contentfulFieldId} to Klaviyo:`,
-                        fieldError.response?.status,
-                        fieldError.response?.statusText,
-                        fieldError.response?.data || fieldError.message
-                      );
-
-                      uploadResults.push({
-                        field: contentfulFieldId,
-                        klaviyoField: klaviyoBlockName,
-                        error: fieldError.response?.data || fieldError.message,
-                      });
-                    }
+                    // Create a new content payload
+                    fieldPayload = {
+                      name: klaviyoBlockName,
+                      contentType: 'html',
+                      objectType: 'template-universal-content',
+                      external_id: externalId,
+                      fields: [
+                        {
+                          fieldId: klaviyoBlockName || contentfulFieldId,
+                          fieldType: finalFieldType,
+                          value: fieldValue,
+                        },
+                      ],
+                    };
                   }
+
+                  const uploadResult = await uploadContent(fieldPayload, privateKey);
+                  uploadResults.push(uploadResult);
                 }
               }
 
@@ -1033,6 +1220,15 @@ function formatFieldsToHtml(fields) {
       .klaviyo-field-html .field-content {
         /* Allow rich text to use its own formatting */
       }
+      .json-object {
+        background-color: #f5f5f5;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 8px;
+        font-family: monospace;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+      }
     </style>
   `;
 
@@ -1047,25 +1243,55 @@ function formatFieldsToHtml(fields) {
       const fieldId = field.fieldId || 'Field';
       const fieldType = (field.fieldType || 'text').toLowerCase();
 
+      // Process the field value based on type
+      let processedValue = field.value;
+
+      // Check if we have a localized object
+      if (typeof processedValue === 'object' && !Array.isArray(processedValue)) {
+        // Check for localized field value structure
+        if (processedValue['en-US'] !== undefined || Object.keys(processedValue).length === 1) {
+          console.log(`[formatFieldsToHtml] Processing localized field: ${fieldId}`);
+          processedValue = extractTextFromLocalizedField(processedValue);
+          console.log(`[formatFieldsToHtml] Extracted: "${processedValue}"`);
+        }
+      }
+
       let formattedValue;
 
       // Handle different field types
       if (fieldType === 'richtext' || fieldType === 'html') {
         // For rich text, use value as-is since it should already be HTML
         formattedValue =
-          typeof field.value === 'string'
-            ? field.value
-            : typeof field.value === 'object'
-            ? JSON.stringify(field.value)
-            : String(field.value);
+          typeof processedValue === 'string'
+            ? processedValue
+            : typeof processedValue === 'object'
+            ? JSON.stringify(processedValue)
+            : String(processedValue);
+      } else if (
+        fieldType === 'json' ||
+        (typeof processedValue === 'object' && processedValue !== null)
+      ) {
+        // Format JSON objects nicely with syntax highlighting
+        try {
+          const jsonString = formatJsonForDisplay(processedValue);
+          formattedValue = `<pre class="json-object">${escapeHtml(jsonString)}</pre>`;
+        } catch (e) {
+          formattedValue = String(processedValue);
+        }
+      } else if (
+        fieldType === 'location' ||
+        (typeof processedValue === 'string' && isLocationField(processedValue))
+      ) {
+        // Format location fields
+        formattedValue = formatLocationField(processedValue);
       } else {
         // For regular text, escape HTML characters
         const rawValue =
-          typeof field.value === 'string'
-            ? field.value
-            : typeof field.value === 'object'
-            ? JSON.stringify(field.value)
-            : String(field.value);
+          typeof processedValue === 'string'
+            ? processedValue
+            : typeof processedValue === 'object'
+            ? JSON.stringify(processedValue)
+            : String(processedValue);
 
         formattedValue = escapeHtml(rawValue);
       }
@@ -1095,4 +1321,352 @@ function escapeHtml(text) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+/**
+ * Helper function to extract text from localized field values
+ * @param {any} value The field value that might be in locale format like {"en-US": "value"}
+ * @returns {string} The extracted string value
+ */
+function extractTextFromLocalizedField(value) {
+  // If it's null or undefined, return empty string
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  // If it's already a string, return it
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  // If it's an object that might have locale keys like {"en-US": "Text Value"}
+  if (typeof value === 'object' && !Array.isArray(value)) {
+    // Check if it has locale keys
+    if ('en-US' in value) {
+      return typeof value['en-US'] === 'string' ? value['en-US'] : String(value['en-US'] || '');
+    }
+
+    // Try the first key if it exists
+    const keys = Object.keys(value);
+    if (keys.length > 0) {
+      const firstLocale = keys[0];
+      return typeof value[firstLocale] === 'string'
+        ? value[firstLocale]
+        : String(value[firstLocale] || '');
+    }
+  }
+
+  // Fallback: convert to string
+  try {
+    return String(value);
+  } catch (e) {
+    console.error('Error converting value to string:', e);
+    return '';
+  }
+}
+
+/**
+ * Helper function to format JSON objects for display
+ * @param {any} value The JSON object to format
+ * @returns {string} A formatted string representation of the JSON
+ */
+function formatJsonForDisplay(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  try {
+    if (typeof value === 'object') {
+      // First check if it's a localized field and extract the text if so
+      const localizedText = extractTextFromLocalizedField(value);
+      if (localizedText && localizedText !== '[object Object]') {
+        return localizedText;
+      }
+
+      // Otherwise format it as pretty JSON
+      return JSON.stringify(value, null, 2);
+    }
+
+    // Return non-objects as strings
+    return String(value);
+  } catch (error) {
+    console.error('Error formatting JSON for display:', error);
+    return String(value || '');
+  }
+}
+
+/**
+ * Helper function to check if a string value is a Contentful location field format
+ * @param {string} value String to check
+ * @returns {boolean} true if it's a location field
+ */
+function isLocationField(value) {
+  if (!value || typeof value !== 'string') return false;
+
+  // Check if it's just a latitude coordinate
+  if (/^-?\d+\.\d+$/.test(value)) {
+    return true;
+  }
+
+  // Check for "lat,lng" format (comma-separated coordinates)
+  if (/^-?\d+\.\d+,-?\d+\.\d+$/.test(value)) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Format a location field for display
+ * @param {string} value Location field value
+ * @returns {string} Formatted location field
+ */
+function formatLocationField(value) {
+  if (!value) return '';
+
+  // First check if the string already contains a comma (lat,lng format)
+  if (value.includes(',')) {
+    const [lat, lng] = value.split(',');
+    return `Latitude: ${lat}, Longitude: ${lng}`;
+  }
+
+  // If it's just a number (likely just the latitude), try to warn about incomplete coordinates
+  if (/^-?\d+\.\d+$/.test(value)) {
+    console.log(`Warning: Incomplete location field value. Only has one coordinate: ${value}`);
+    return `Coordinates: ${value} (incomplete location data)`;
+  }
+
+  // Return the original value if we can't parse it
+  return value;
+}
+
+/**
+ * Process an image field and upload it to Klaviyo's Images API
+ * @param {any} value The image field value
+ * @param {string} imageTitle The title for the image
+ * @param {string} spaceId The Contentful space ID
+ * @param {string} privateKey The Klaviyo API key
+ * @returns {Promise<{success: boolean, url?: string, id?: string, error?: string}>}
+ */
+async function processImageField(value, imageTitle, spaceId, privateKey) {
+  console.log('Processing image field for upload to Klaviyo Images API');
+
+  // Extract image URL from asset reference
+  let imageUrl = '';
+  let assetId = '';
+  let processedValue = value; // Make a copy that we can modify
+
+  try {
+    console.log(`Raw image value type: ${typeof value}`);
+    console.log(`Raw image value: ${JSON.stringify(value)}`);
+
+    // Check if it's a stringified JSON object
+    if (typeof value === 'string' && (value.includes('"sys"') || value.includes('\\"sys\\"'))) {
+      try {
+        // Handle escaped JSON strings
+        const cleanValue = value.replace(/\\"/g, '"').replace(/^"/, '').replace(/"$/, '');
+        console.log('Cleaning stringified asset reference:', cleanValue);
+
+        // Parse the string into an object
+        const parsedValue = JSON.parse(cleanValue);
+        console.log('Successfully parsed asset reference:', JSON.stringify(parsedValue));
+
+        // Extract asset ID
+        if (parsedValue.sys && parsedValue.sys.id) {
+          assetId = parsedValue.sys.id;
+          console.log(`Extracted asset ID from parsed string: ${assetId}`);
+
+          // Create a cloned value to avoid modifying the constant
+          processedValue = { ...parsedValue };
+        }
+      } catch (e) {
+        console.error('Failed to parse stringified asset reference:', e);
+
+        // Try alternative parsing for deeply nested JSON strings
+        try {
+          const doubleStringified = JSON.parse(value);
+          if (typeof doubleStringified === 'string' && doubleStringified.includes('"sys"')) {
+            const parsedInner = JSON.parse(doubleStringified);
+            console.log('Parsed double-stringified asset reference:', JSON.stringify(parsedInner));
+
+            if (parsedInner.sys && parsedInner.sys.id) {
+              assetId = parsedInner.sys.id;
+              console.log(`Extracted asset ID from double-parsed string: ${assetId}`);
+              processedValue = { ...parsedInner };
+            }
+          }
+        } catch (innerError) {
+          console.error('Failed alternative parsing:', innerError);
+        }
+      }
+    } else if (typeof value === 'object' && value?.sys?.id) {
+      // Direct object reference
+      assetId = value.sys.id;
+      console.log(`Using direct asset ID from object: ${assetId}`);
+    }
+
+    // First check if the _resolvedUrl field is present (set by entry-sync-function)
+    if (processedValue && processedValue._resolvedUrl) {
+      imageUrl = processedValue._resolvedUrl;
+      console.log(`Using _resolvedUrl: ${imageUrl}`);
+    }
+    // Check if we have a normal Contentful asset structure
+    else if (
+      (processedValue && processedValue.fields?.file?.['en-US']?.url) ||
+      (processedValue && processedValue.fields?.file?.url)
+    ) {
+      const fileUrl = processedValue.fields.file['en-US']?.url || processedValue.fields.file.url;
+      // Make sure the URL starts with https:
+      imageUrl = fileUrl.startsWith('//') ? `https:${fileUrl}` : fileUrl;
+      console.log(`Using URL from fields.file: ${imageUrl}`);
+    }
+
+    // Fallback: Construct URL from asset ID if no direct URL found
+    if (!imageUrl && assetId) {
+      console.log(`Using asset ID for URL construction: ${assetId}`);
+
+      if (!spaceId) {
+        console.error('No spaceId available for asset URL construction. Skipping image upload.');
+        return { success: false, error: 'No spaceId available for asset URL construction.' };
+      }
+      // Use Contentful Images API with proper parameters
+      const params = [
+        'fm=jpg', // Format as JPEG
+        'fit=fill', // Resize to fit dimensions
+        'w=1200', // Max width 1200px
+        'q=80', // 80% quality
+      ].join('&');
+      imageUrl = `https://images.ctfassets.net/${spaceId}/${assetId}?${params}`;
+    }
+
+    console.log(`Final image URL for upload: ${imageUrl}`);
+
+    if (!imageUrl) {
+      return { success: false, error: 'Could not extract image URL from asset reference' };
+    }
+
+    // Try to upload the image to Klaviyo
+    try {
+      // Format data for Klaviyo images API
+      const imageRequestBody = {
+        data: {
+          type: 'image',
+          attributes: {
+            name: imageTitle || 'Contentful Image',
+            import_from_url: imageUrl,
+          },
+        },
+      };
+
+      console.log(`Image upload request body:`, JSON.stringify(imageRequestBody));
+
+      const imageResponse = await axios({
+        method: 'post',
+        url: `${KLAVIYO_API_URL}/images/`,
+        data: imageRequestBody,
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          revision: KLAVIYO_API_REVISION,
+          Authorization: `Klaviyo-API-Key ${privateKey}`,
+        },
+        timeout: 25000, // 25 seconds timeout
+      });
+
+      // Log detailed success information for debugging
+      console.log(`Image upload successful - Status: ${imageResponse.status}`);
+      console.log(`Response headers: ${JSON.stringify(imageResponse.headers)}`);
+      console.log(`Response data: ${JSON.stringify(imageResponse.data)}`);
+
+      if (imageResponse.data && imageResponse.data.data) {
+        const imageId = imageResponse.data.data.id;
+        const imageKlaviyoUrl = imageResponse.data.data.attributes.url;
+
+        console.log(`Image uploaded successfully. ID: ${imageId}, URL: ${imageKlaviyoUrl}`);
+        return {
+          success: true,
+          url: imageKlaviyoUrl,
+          id: imageId,
+        };
+      }
+
+      return { success: false, error: 'Unexpected image upload response format' };
+    } catch (uploadError) {
+      console.error(
+        'Error uploading image to Klaviyo:',
+        uploadError.response?.status,
+        uploadError.response?.data || uploadError.message
+      );
+
+      // If the first upload attempt failed, try with alternative formats
+      if (uploadError.response && uploadError.response.status === 400 && assetId) {
+        if (!spaceId) {
+          console.error(
+            'No spaceId available for asset URL construction (alternative formats). Skipping image upload.'
+          );
+          return { success: false, error: 'No spaceId available for asset URL construction.' };
+        }
+        console.log('First upload attempt failed. Trying with alternative image formats...');
+        // Try with different formats that Contentful supports
+        const alternativeFormats = [
+          `https://images.ctfassets.net/${spaceId}/${assetId}?w=1000&h=1000&fit=fill`, // Square image
+          `https://images.ctfassets.net/${spaceId}/${assetId}?w=1920&h=1080&fit=fill`, // 16:9 image
+          `https://images.ctfassets.net/${spaceId}/${assetId}?fm=jpg&w=1200&q=80`, // JPG format with settings
+          `https://images.ctfassets.net/${spaceId}/${assetId}?fm=png&w=1200`, // PNG format
+          `https://downloads.ctfassets.net/${spaceId}/${assetId}`, // Download URL (last resort)
+        ];
+        // Try each alternative format
+        for (const alternativeUrl of alternativeFormats) {
+          try {
+            console.log(`Trying alternative image URL: ${alternativeUrl}`);
+            const altImageRequestBody = {
+              data: {
+                type: 'image',
+                attributes: {
+                  name: imageTitle || 'Contentful Image',
+                  import_from_url: alternativeUrl,
+                },
+              },
+            };
+            const altImageResponse = await axios({
+              method: 'post',
+              url: `${KLAVIYO_API_URL}/images/`,
+              data: altImageRequestBody,
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                revision: KLAVIYO_API_REVISION,
+                Authorization: `Klaviyo-API-Key ${privateKey}`,
+              },
+              timeout: 25000, // 25 seconds timeout
+            });
+            if (altImageResponse.data && altImageResponse.data.data) {
+              const altImageId = altImageResponse.data.data.id;
+              const altImageKlaviyoUrl = altImageResponse.data.data.attributes.url;
+              console.log(
+                `Alternative image uploaded successfully. ID: ${altImageId}, URL: ${altImageKlaviyoUrl}`
+              );
+              return {
+                success: true,
+                url: altImageKlaviyoUrl,
+                id: altImageId,
+              };
+            }
+          } catch (altUploadError) {
+            console.log(
+              `Alternative upload with ${alternativeUrl} failed:`,
+              altUploadError.response?.status || altUploadError.message
+            );
+            // Continue to next format
+          }
+        }
+      }
+
+      // If we get here, all attempts failed
+      return { success: false, error: uploadError.message || 'Image upload failed' };
+    }
+  } catch (e) {
+    console.error('Error processing image field:', e);
+    return { success: false, error: e.message };
+  }
 }

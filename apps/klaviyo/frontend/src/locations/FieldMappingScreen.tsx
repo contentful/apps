@@ -22,9 +22,8 @@ import {
   Subheading,
   Tabs,
   Spinner,
-  Notification,
 } from '@contentful/f36-components';
-import { getSyncData, updateSyncData, getLocalMappings } from '../services/persistence-service';
+import { getSyncData, getLocalMappings } from '../services/persistence-service';
 import { SyncContent } from '../services/klaviyo-sync-service';
 import { SyncStatusTable } from '../components/SyncStatusTable';
 import logger from '../utils/logger';
@@ -60,17 +59,6 @@ interface FieldItem {
   type?: string;
 }
 
-// Define interface for mapping object
-interface FieldMapping {
-  id: string;
-  contentfulFieldId: string;
-  name: string;
-  klaviyoBlockName: string;
-  type: string;
-  fieldType: string;
-  contentTypeId?: string;
-}
-
 // Update the type definition to include app property
 interface CustomSDK extends PageExtensionSDK {
   app?: {
@@ -101,6 +89,7 @@ export const FieldMappingScreen: React.FC = () => {
   const [isEntriesLoading, setIsEntriesLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
+  const [isSyncSuccess, setIsSyncSuccess] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
@@ -237,6 +226,7 @@ export const FieldMappingScreen: React.FC = () => {
         }));
 
         setAvailableFields(fields);
+        logger.log(`Loaded fields for content type ${selectedContentType}:`, fields);
 
         // Get existing mappings for this content type
         const existingMappingsByField = mappings
@@ -335,14 +325,31 @@ export const FieldMappingScreen: React.FC = () => {
       // Format the mappings for storage
       const formattedMappings = mappings.map((fieldId) => {
         const field = availableFields.find((f) => f.id === fieldId);
+        const fieldType = field?.type || 'Symbol';
+
+        // Properly identify field types
+        let mappingFieldType = 'text';
+        if (fieldType === 'RichText') {
+          mappingFieldType = 'richText';
+        } else if (fieldType === 'Asset' || fieldType === 'Link') {
+          mappingFieldType = 'image';
+        } else if (fieldType === 'Array') {
+          mappingFieldType = 'reference-array';
+        } else if (fieldType === 'Object' || fieldType === 'ObjectMap') {
+          mappingFieldType = 'json';
+        } else if (fieldType === 'Location') {
+          mappingFieldType = 'location';
+        }
+
         return {
           id: fieldId,
           contentfulFieldId: fieldId,
           name: field?.name || fieldId,
           klaviyoBlockName: field?.name || fieldId,
-          type: field?.type || 'Symbol',
-          fieldType: field?.type === 'RichText' ? 'richText' : 'text',
+          type: fieldType,
+          fieldType: mappingFieldType,
           contentTypeId: selectedContentType,
+          isAsset: fieldType === 'Asset' || fieldType === 'Link',
         };
       });
 
@@ -362,9 +369,9 @@ export const FieldMappingScreen: React.FC = () => {
         const updatedMappings = [...filteredMappings, ...formattedMappings];
 
         // Save to local storage
-        localStorage.setItem('klaviyo_contentful_mappings', JSON.stringify(updatedMappings));
+        saveLocalMappings(updatedMappings);
 
-        // Update the UI state (convert to the expected format)
+        // Update the UI state (convert to the expected format for state)
         const mappingsForState = updatedMappings.map((m: any) => ({
           id: m.id,
           name: m.name || m.id,
@@ -374,7 +381,8 @@ export const FieldMappingScreen: React.FC = () => {
           contentTypeId: m.contentTypeId,
         }));
 
-        setMappings(mappingsForState);
+        // Make sure we're setting a proper array of objects for React rendering
+        setMappings(Array.isArray(mappingsForState) ? mappingsForState : []);
 
         logger.log('Saved mappings to local storage successfully');
       } catch (localStorageError) {
@@ -431,6 +439,70 @@ export const FieldMappingScreen: React.FC = () => {
     }
   };
 
+  // Add this helper function for processing localized fields
+  const processLocalizedFields = (entryData: any): any => {
+    if (!entryData) return {};
+
+    const processedData: any = {};
+
+    // Process each field to handle localized content
+    for (const fieldId in entryData) {
+      if (!entryData.hasOwnProperty(fieldId)) continue;
+
+      const fieldValue = entryData[fieldId];
+      const field = availableFields.find((f) => f.id === fieldId);
+      const fieldType = field?.type || 'Symbol';
+
+      // Handle location fields specially to ensure both coordinates are preserved
+      if (
+        fieldType === 'Location' &&
+        fieldValue &&
+        typeof fieldValue === 'object' &&
+        !Array.isArray(fieldValue)
+      ) {
+        // Format location as a comma-separated string of coordinates
+        if (fieldValue.lat !== undefined && fieldValue.lon !== undefined) {
+          processedData[fieldId] = `${fieldValue.lat},${fieldValue.lon}`;
+          logger.log(
+            `Formatted location field ${fieldId} as coordinate string: ${processedData[fieldId]}`
+          );
+          continue;
+        }
+      }
+
+      // Process localized fields with format {\"en-US\": \"value\"}
+      if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) {
+        // Check if it's a localized field with standard structure
+        if (fieldValue['en-US'] !== undefined) {
+          // Extract the value from the en-US locale
+          processedData[fieldId] = fieldValue['en-US'];
+          logger.log(`Extracted text from localized field ${fieldId}:`, processedData[fieldId]);
+          continue;
+        }
+
+        // If it's an object with a single locale key
+        const keys = Object.keys(fieldValue);
+        if (keys.length === 1 && typeof fieldValue[keys[0]] !== 'object') {
+          processedData[fieldId] = fieldValue[keys[0]];
+          logger.log(`Extracted text from single-locale field ${fieldId}:`, processedData[fieldId]);
+          continue;
+        }
+
+        // For complex objects, preserve them properly using JSON.stringify
+        // This prevents [object Object] when sending to the backend
+        processedData[fieldId] = JSON.stringify(fieldValue);
+        logger.log(`Preserved JSON object for field ${fieldId}`);
+        continue;
+      }
+
+      // Keep other values as-is
+      processedData[fieldId] = fieldValue;
+    }
+
+    return processedData;
+  };
+
+  // Update the handleSyncToKlaviyo function to use the new processing function
   const handleSyncToKlaviyo = async () => {
     if (!selectedContentType) {
       setSyncMessage('Please select a content type');
@@ -455,58 +527,145 @@ export const FieldMappingScreen: React.FC = () => {
       // Fetch the entry data
       const space = await sdk.cma.space.get({});
       const environment = await sdk.cma.environment.get({
-        environmentId: sdk.ids.environment,
         spaceId: space.sys.id,
+        environmentId: sdk.ids.environment,
       });
       const entry = await sdk.cma.entry.get({
         spaceId: space.sys.id,
-        environmentId: environment.sys.id,
-        entryId: selectedEntryId,
+        environmentId: sdk.ids.environment,
+        entryId: selectedEntryId as string,
       });
 
-      // Get the field mappings from local storage
-      const allLocalMappings = getLocalMappings();
+      // Extract field values
+      const entryData: Record<string, any> = {};
 
-      // Filter only the mappings for this content type
-      const contentTypeMappings = allLocalMappings.filter(
-        (mapping: any) => mapping.contentTypeId === selectedContentType
+      // Process each field in the entry
+      if (entry && entry.fields) {
+        for (const fieldId in entry.fields) {
+          if (selectedFields.includes(fieldId)) {
+            // Get the raw value from entry fields
+            const rawValue = entry.fields[fieldId];
+            const field = availableFields.find((f) => f.id === fieldId);
+            const fieldType = field?.type || 'Symbol';
+
+            // Handle location fields specially
+            if (fieldType === 'Location' && typeof rawValue === 'object' && rawValue !== null) {
+              if (rawValue['en-US'] && typeof rawValue['en-US'] === 'object') {
+                const locationObj = rawValue['en-US'];
+                if (locationObj.lat !== undefined && locationObj.lon !== undefined) {
+                  entryData[fieldId] = `${locationObj.lat},${locationObj.lon}`;
+                  logger.log(
+                    `Formatted location field ${fieldId} as coordinate string: ${entryData[fieldId]}`
+                  );
+                  continue;
+                }
+              }
+            }
+
+            // For complex objects, stringify them to preserve all data
+            if (typeof rawValue === 'object' && rawValue !== null) {
+              // For complex objects, JSON stringify them to preserve the data
+              logger.log(`Processing complex object field ${fieldId}`);
+              entryData[fieldId] = rawValue;
+            } else {
+              entryData[fieldId] = rawValue;
+            }
+          }
+        }
+      }
+
+      // Process any localized fields to extract their values
+      const processedEntryData = processLocalizedFields(entryData);
+
+      logger.log('Processed entry data for sync:', processedEntryData);
+
+      // Get all local mappings that match our content type
+      const allLocalMappings = getLocalMappings();
+      logger.log(
+        'All local mappings:',
+        allLocalMappings,
+        'Selected content type:',
+        selectedContentType
       );
+
+      const contentTypeMappings = allLocalMappings.filter(
+        (mapping) => mapping.contentTypeId === selectedContentType
+      );
+      logger.log('Mappings after contentTypeId filter:', contentTypeMappings);
+
+      if (contentTypeMappings.length === 0) {
+        logger.log('No existing mappings found for content type', selectedContentType);
+
+        // Preselect the fields based on the current selection
+        logger.log('Preselected', selectedFields.length, 'mapped fields');
+
+        // Create new mappings from selected fields
+        const newMappings = selectedFields.map((fieldId) => {
+          const field = availableFields.find((f) => f.id === fieldId);
+          const fieldType = field?.type || 'Symbol';
+
+          // Determine proper field type based on Contentful field type
+          let mappingFieldType = 'text';
+          if (fieldType === 'RichText') {
+            mappingFieldType = 'richText';
+          } else if (fieldType === 'Asset' || fieldType === 'Link') {
+            mappingFieldType = 'image';
+          } else if (fieldType === 'Object' || fieldType === 'Array') {
+            mappingFieldType = 'json';
+          } else if (fieldType === 'Location') {
+            mappingFieldType = 'location';
+          }
+
+          return {
+            id: fieldId,
+            contentfulFieldId: fieldId,
+            name: field?.name || fieldId,
+            klaviyoBlockName: field?.name || fieldId,
+            type: fieldType,
+            fieldType: mappingFieldType,
+            contentTypeId: selectedContentType,
+            isAsset: false,
+            value: processedEntryData[fieldId],
+          };
+        });
+        logger.log('Created new mappings from selected fields:', newMappings);
+        contentTypeMappings.push(...newMappings);
+      }
 
       // Prepare mappings in the format expected by SyncContent
       const syncMappings = contentTypeMappings.map((mapping: any) => ({
         contentfulFieldId: mapping.contentfulFieldId || mapping.id,
         klaviyoBlockName: mapping.klaviyoBlockName || mapping.name || mapping.id,
-        fieldType: mapping.fieldType || (mapping.type === 'RichText' ? 'richText' : 'text'),
+        fieldType:
+          mapping.fieldType ||
+          (mapping.type === 'RichText' ? 'richText' : mapping.type === 'Object' ? 'json' : 'text'),
       }));
 
-      logger.log('Using mappings for sync:', syncMappings);
+      // Initialize SyncContent with the current entry
+      const syncContent = new SyncContent(processedEntryData, sdk);
 
-      // Call the sync service
-      const syncContentService = new SyncContent(entry);
-      const result = await syncContentService.syncContent(
-        {
-          ...sdk,
-          entry,
-          ids: {
-            entry: selectedEntryId,
-            contentType: selectedContentType,
-            environment: sdk.ids.environment,
-          },
-        },
-        syncMappings,
-        {
-          entryId: selectedEntryId,
-          contentTypeId: selectedContentType,
-        }
-      );
+      // Attempt to sync content
+      const result = await syncContent.syncContent(sdk, syncMappings, {
+        entryId: selectedEntryId,
+        contentTypeId: selectedContentType,
+      });
 
-      logger.log('Sync result:', result);
-      setSyncMessage('Mappings saved and content successfully synced to Klaviyo!');
-    } catch (error: any) {
-      logger.error('Error syncing:', error);
-      setSyncMessage(`Error syncing: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
       setIsSyncing(false);
+
+      if (result && result.success) {
+        setIsSyncSuccess(true);
+        setSyncMessage('Content synced successfully to Klaviyo!');
+      } else {
+        setIsSyncSuccess(false);
+        setSyncMessage(`Error syncing content: ${result?.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      setIsSyncing(false);
+      setIsSyncSuccess(false);
+      setSyncMessage(
+        `Error syncing content: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+      console.error('Error syncing content:', error);
     }
   };
 
@@ -553,11 +712,11 @@ export const FieldMappingScreen: React.FC = () => {
                   <TableBody>
                     {mappings.map((mapping, index) => (
                       <TableRow key={`${mapping.id}-${index}`}>
-                        <TableCell>{mapping.name}</TableCell>
+                        <TableCell>{String(mapping.name || mapping.id || '')}</TableCell>
                         <TableCell>{mapping.isAsset ? 'Image' : 'Text'}</TableCell>
                         <TableCell>
                           {mapping.contentTypeId
-                            ? contentTypes[mapping.contentTypeId] || mapping.contentTypeId
+                            ? contentTypes[mapping.contentTypeId] || String(mapping.contentTypeId)
                             : 'Unknown'}
                         </TableCell>
                       </TableRow>

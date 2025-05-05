@@ -168,8 +168,13 @@ function richTextToHtml(richTextNode: any): string {
       try {
         richTextNode = JSON.parse(richTextNode);
       } catch (e) {
-        return richTextNode;
+        return richTextNode; // Return original if not valid JSON
       }
+    }
+
+    // Special case for Contentful's locale-wrapped format like {"en-US": {...}}
+    if (richTextNode && typeof richTextNode === 'object' && richTextNode['en-US']) {
+      return richTextToHtml(richTextNode['en-US']);
     }
 
     // If content is a string that contains a serialized rich text document
@@ -313,13 +318,30 @@ function richTextToHtml(richTextNode: any): string {
       return '[Embedded content]';
     }
 
-    // Log unhandled node types
+    // Fallback for unhandled node types
     logger.warn(`Unhandled rich text node type: ${richTextNode.nodeType}`);
-    return typeof richTextNode === 'string' ? richTextNode : JSON.stringify(richTextNode);
+
+    // Last resort - if we can't convert it properly, return the stringified object
+    if (typeof richTextNode === 'object') {
+      return JSON.stringify(richTextNode);
+    }
+
+    return typeof richTextNode === 'string' ? richTextNode : '';
   } catch (error) {
     // Return the original value if conversion fails
     logger.error('Error converting rich text to HTML:', error);
-    return typeof richTextNode === 'string' ? richTextNode : JSON.stringify(richTextNode);
+
+    // If it's already a string, return it directly
+    if (typeof richTextNode === 'string') {
+      return richTextNode;
+    }
+
+    // Otherwise try to stringify the object
+    try {
+      return JSON.stringify(richTextNode);
+    } catch (e) {
+      return '';
+    }
   }
 }
 
@@ -345,9 +367,551 @@ export class SyncContent {
 
   constructor(entry: any, sdk?: any) {
     logger.log('SyncContent constructor initialized');
-    // Store the SDK rather than the entry
-    this.sdk = sdk || entry; // Support both new and old ways of calling
+
+    // Handle different initialization scenarios
+    if (sdk) {
+      // Case 1: Both entry and sdk are provided (new way)
+      this.sdk = sdk;
+
+      // If entry is a string, try to parse it
+      if (typeof entry === 'string') {
+        try {
+          this.sdk.currentEntry = entry;
+        } catch (e) {
+          logger.error('[SyncContent] Error parsing entry string', e);
+        }
+      } else if (typeof entry === 'object') {
+        // Store the entry object for later use
+        this.sdk.currentEntry = JSON.stringify(entry);
+      }
+    } else if (entry) {
+      if (entry.location && typeof entry.location.is === 'function') {
+        // Case 2: Only sdk is provided in the entry parameter (old way)
+        this.sdk = entry;
+
+        // Try to get current entry from invocation parameters
+        if (
+          entry.parameters &&
+          entry.parameters.invocation &&
+          entry.parameters.invocation.currentEntry
+        ) {
+          this.sdk.currentEntry = entry.parameters.invocation.currentEntry;
+        }
+      } else {
+        // Case 3: Direct entry data in entry parameter
+        this.sdk = entry;
+      }
+    } else {
+      // Case 4: Nothing provided
+      this.sdk = {};
+      logger.error('[SyncContent] No SDK or entry data provided');
+    }
   }
+
+  /**
+   * Get entry data from the SDK
+   * @param sdk The Contentful SDK
+   * @returns The processed entry data
+   */
+  private async getEntryData(sdk: any): Promise<any> {
+    try {
+      if (!sdk) {
+        throw new Error('SDK not available');
+      }
+
+      const entryData: Record<string, any> = {};
+
+      // Check if we have a direct entry object (dialog context)
+      if (this.sdk && typeof this.sdk !== 'function' && typeof this.sdk !== 'object') {
+        logger.log('[SyncContent] Using direct entry data');
+        // Direct entry data provided to constructor
+        const directEntry = this.sdk;
+
+        // Process fields in the direct entry data
+        if (directEntry && directEntry.fields) {
+          for (const fieldId in directEntry.fields) {
+            try {
+              const value = directEntry.fields[fieldId];
+              entryData[fieldId] = {
+                id: fieldId,
+                name: fieldId,
+                type: typeof value === 'object' ? 'Object' : typeof value,
+                value: value,
+                isAsset: value && value.sys && value.sys.linkType === 'Asset',
+              };
+            } catch (fieldError) {
+              logger.error(`Error processing direct entry field ${fieldId}:`, fieldError);
+            }
+          }
+          return entryData;
+        }
+      }
+
+      // Try to get data from SDK entry (sidebar context)
+      if (sdk.entry && sdk.entry.fields) {
+        const entry = sdk.entry;
+
+        // Process all fields in the entry
+        for (const fieldId in entry.fields) {
+          try {
+            const field = entry.fields[fieldId];
+            if (field) {
+              let value;
+              let fieldType;
+
+              // Try to use getValue() but fall back to direct value if not available
+              if (typeof field.getValue === 'function') {
+                value = field.getValue();
+                fieldType = field.type;
+              } else if (field.type || field.id) {
+                // Field object with properties but no getValue
+                value = field.value || field;
+                fieldType = field.type || 'Unknown';
+              } else {
+                // Raw value
+                value = field;
+                fieldType = typeof field === 'object' ? 'Object' : typeof field;
+              }
+
+              entryData[fieldId] = {
+                id: fieldId,
+                name: fieldId,
+                type: fieldType || 'Unknown',
+                value: value,
+                isAsset: fieldType === 'Asset' || fieldType === 'Link',
+              };
+
+              // Process rich text if needed
+              if (isRichTextDocument(value)) {
+                entryData[fieldId].htmlValue = richTextToHtml(value);
+              }
+
+              // Process asset fields
+              if (entryData[fieldId].isAsset && value && value.sys) {
+                entryData[fieldId].assetDetails = await this.resolveAsset(sdk, value);
+              }
+            }
+          } catch (fieldError) {
+            logger.error(`Error processing field ${fieldId}:`, fieldError);
+          }
+        }
+
+        return entryData;
+      }
+
+      // If we have entry data already available in the constructor or parameters
+      if (sdk.currentEntry && typeof sdk.currentEntry === 'string') {
+        try {
+          const parsedEntry = JSON.parse(sdk.currentEntry);
+          if (parsedEntry && parsedEntry.fields) {
+            return this.processEntryFromCma(parsedEntry);
+          }
+        } catch (parseError) {
+          logger.error('[SyncContent] Error parsing currentEntry:', parseError);
+        }
+      }
+
+      // If we have direct fields in parameters invocation
+      if (sdk.parameters && sdk.parameters.invocation && sdk.parameters.invocation.entryData) {
+        const entryData = sdk.parameters.invocation.entryData;
+        for (const fieldId in entryData) {
+          try {
+            const value = entryData[fieldId];
+            entryData[fieldId] = {
+              id: fieldId,
+              name: fieldId,
+              type: typeof value === 'object' ? 'Object' : typeof value,
+              value: value,
+              isAsset: value && value.sys && value.sys.linkType === 'Asset',
+            };
+          } catch (fieldError) {
+            logger.error(`Error processing invocation field ${fieldId}:`, fieldError);
+          }
+        }
+        return entryData;
+      }
+
+      logger.error('[SyncContent] Could not get entry data from any source');
+      return {};
+    } catch (error) {
+      logger.error('[SyncContent] Error getting entry data from SDK:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Process an entry from the Content Management API
+   * @param entry The entry from the CMA
+   * @returns The processed entry data
+   */
+  private processEntryFromCma(entry: any): any {
+    try {
+      if (!entry || !entry.fields) {
+        throw new Error('Invalid entry data');
+      }
+
+      const entryData: Record<string, any> = {};
+
+      // Process all fields in the entry
+      for (const fieldId in entry.fields) {
+        try {
+          const fieldValue = entry.fields[fieldId];
+          const localeValue = fieldValue['en-US'] || Object.values(fieldValue)[0]; // Default to first locale
+
+          // Try to determine field type
+          let fieldType = 'Text';
+          let isAsset = false;
+
+          if (localeValue && typeof localeValue === 'object') {
+            if (localeValue.sys && localeValue.sys.type === 'Link') {
+              fieldType = localeValue.sys.linkType || 'Link';
+              isAsset = localeValue.sys.linkType === 'Asset';
+            } else if (localeValue.nodeType === 'document') {
+              fieldType = 'RichText';
+            } else if (Array.isArray(localeValue)) {
+              fieldType = 'Array';
+            } else {
+              fieldType = 'Object';
+            }
+          } else if (typeof localeValue === 'number') {
+            fieldType = 'Number';
+          } else if (typeof localeValue === 'boolean') {
+            fieldType = 'Boolean';
+          }
+
+          entryData[fieldId] = {
+            id: fieldId,
+            name: fieldId, // Default name is the field ID
+            type: fieldType,
+            value: localeValue,
+            isAsset: isAsset,
+          };
+
+          // Process rich text if needed
+          if (isRichTextDocument(localeValue)) {
+            entryData[fieldId].htmlValue = richTextToHtml(localeValue);
+          }
+        } catch (fieldError) {
+          logger.error(`Error processing CMA field ${fieldId}:`, fieldError);
+        }
+      }
+
+      return entryData;
+    } catch (error) {
+      logger.error('Error processing entry from CMA:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Resolve asset details
+   * @param sdk The Contentful SDK
+   * @param assetLink The asset link object
+   * @returns The resolved asset details
+   */
+  private async resolveAsset(sdk: any, assetLink: any): Promise<any[]> {
+    try {
+      if (
+        !assetLink ||
+        !assetLink.sys ||
+        assetLink.sys.type !== 'Link' ||
+        assetLink.sys.linkType !== 'Asset'
+      ) {
+        return [];
+      }
+
+      const assetId = assetLink.sys.id;
+
+      // Try to get the asset using the SDK
+      if (sdk.space && typeof sdk.space.getAsset === 'function') {
+        const asset = await sdk.space.getAsset(assetId);
+
+        if (asset && asset.fields) {
+          const title = asset.fields.title?.['en-US'] || '';
+          const description = asset.fields.description?.['en-US'] || '';
+          const file = asset.fields.file?.['en-US'];
+
+          if (file) {
+            return [
+              {
+                id: assetId,
+                title,
+                description,
+                url: file.url,
+                fileName: file.fileName,
+                contentType: file.contentType,
+              },
+            ];
+          }
+        }
+      }
+
+      return [];
+    } catch (error) {
+      logger.error('Error resolving asset:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get the Klaviyo API key from the SDK or environment
+   * @param sdk The Contentful SDK
+   * @returns The Klaviyo API key
+   */
+  private async getKlaviyoApiKey(sdk: any): Promise<string | undefined> {
+    try {
+      logger.log('[SyncContent] Attempting to get Klaviyo API key');
+
+      // Check app installation parameters first
+      if (sdk && sdk.parameters && sdk.parameters.installation) {
+        const { klaviyoApiKey } = sdk.parameters.installation;
+        if (klaviyoApiKey) {
+          logger.log('[SyncContent] Found API key in SDK parameters');
+          return klaviyoApiKey;
+        }
+      }
+
+      // Check local storage under multiple possible keys
+      const storageKeys = [
+        'klaviyo_api_key',
+        'klaviyoApiKey',
+        'KLAVIYO_API_KEY',
+        'klaviyo_private_key',
+        'klaviyoPrivateKey',
+      ];
+
+      for (const key of storageKeys) {
+        const storedKey = localStorage.getItem(key);
+        if (storedKey) {
+          logger.log(`[SyncContent] Found API key in localStorage with key: ${key}`);
+          return storedKey;
+        }
+      }
+
+      // Check if the SDK has direct invocation parameters (dialog context)
+      if (sdk && sdk.parameters && sdk.parameters.invocation) {
+        const invocation = sdk.parameters.invocation;
+
+        // Check various potential parameter names
+        const possibleKeyParams = ['privateKey', 'klaviyoApiKey', 'apiKey', 'klaviyo_api_key'];
+
+        for (const param of possibleKeyParams) {
+          if (invocation[param]) {
+            logger.log(`[SyncContent] Found API key in invocation parameters: ${param}`);
+            return invocation[param];
+          }
+        }
+      }
+
+      // If we have an app instance, try to get from secure app storage
+      if (sdk && sdk.app && typeof sdk.app.getParameters === 'function') {
+        try {
+          const params = await sdk.app.getParameters();
+          if (params && params.klaviyoApiKey) {
+            logger.log('[SyncContent] Found API key in app parameters');
+            return params.klaviyoApiKey;
+          }
+        } catch (e) {
+          logger.error('[SyncContent] Error getting app parameters:', e);
+        }
+      }
+
+      // Try to get from the configuration in localStorage
+      try {
+        const configStr = localStorage.getItem('klaviyo_config');
+        if (configStr) {
+          const config = JSON.parse(configStr);
+          if (config && config.privateKey) {
+            logger.log('[SyncContent] Found API key in klaviyo_config');
+            return config.privateKey;
+          }
+        }
+      } catch (e) {
+        logger.error('[SyncContent] Error parsing config from localStorage:', e);
+      }
+
+      logger.error('[SyncContent] No Klaviyo API key found in any location');
+      return undefined;
+    } catch (error) {
+      logger.error('[SyncContent] Error getting Klaviyo API key:', error);
+      return undefined;
+    }
+  }
+
+  /**
+   * Helper function to extract text from localized field values
+   * @param value The field value that might be in locale format like {"en-US": "value"}
+   * @returns The extracted string value
+   */
+  private extractTextFromLocalizedField(value: any): string {
+    // If it's null or undefined, return empty string
+    if (value === null || value === undefined) {
+      return '';
+    }
+
+    // If it's already a string, return it
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    // If it's an object that might have locale keys like {"en-US": "Text Value"}
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      // Check if it has locale keys
+      if ('en-US' in value) {
+        return typeof value['en-US'] === 'string' ? value['en-US'] : String(value['en-US'] || '');
+      }
+
+      // Try the first key if it exists
+      const keys = Object.keys(value);
+      if (keys.length > 0) {
+        const firstLocale = keys[0];
+        return typeof value[firstLocale] === 'string'
+          ? value[firstLocale]
+          : String(value[firstLocale] || '');
+      }
+    }
+
+    // Fallback: convert to string
+    try {
+      return String(value);
+    } catch (e) {
+      logger.error('Error converting value to string:', e);
+      return '';
+    }
+  }
+
+  /**
+   * Format a location field value into a string with both coordinates
+   * @param location Location field object or value
+   * @returns Formatted string with lat/lon coordinates
+   */
+  private formatLocationField(location: any): string {
+    if (!location) return '';
+
+    // If it's already a string, return it
+    if (typeof location === 'string') {
+      return location;
+    }
+
+    // Check if it's a location object with lat/lon
+    if (typeof location === 'object' && !Array.isArray(location)) {
+      // Contentful location format has lat and lon properties
+      if (location.lat !== undefined && location.lon !== undefined) {
+        return `${location.lat},${location.lon}`;
+      }
+
+      // Alternative format might have latitude/longitude properties
+      if (location.latitude !== undefined && location.longitude !== undefined) {
+        return `${location.latitude},${location.longitude}`;
+      }
+    }
+
+    // Return JSON string as fallback
+    return JSON.stringify(location);
+  }
+
+  /**
+   * Process entry data to ensure all field values are properly formatted
+   * Handles localized fields, rich text, etc.
+   * @param entryData The raw entry data
+   * @param mappings Field mappings with type information
+   * @returns Processed entry data with simplified values
+   */
+  private processEntryData(
+    entryData: Record<string, any>,
+    mappings: Array<{ contentfulFieldId: string; klaviyoBlockName: string; fieldType: string }>
+  ): Record<string, any> {
+    if (!entryData) {
+      return {};
+    }
+
+    const processedData: Record<string, any> = {};
+
+    // Process each field in the entry data
+    for (const fieldId in entryData) {
+      if (!entryData.hasOwnProperty(fieldId)) continue;
+
+      let value = entryData[fieldId];
+
+      // Handle wrapped field value objects (with value property)
+      if (value && typeof value === 'object' && value.hasOwnProperty('value')) {
+        value = value.value;
+      }
+
+      // Find the field mapping to determine type
+      const mapping = mappings.find((m) => m.contentfulFieldId === fieldId);
+      const fieldType = mapping?.fieldType || 'text';
+
+      // Process based on field type
+      if (fieldType === 'richText' && isRichTextDocument(value)) {
+        // Convert rich text to HTML
+        logger.log(`[processEntryData] Converting rich text field ${fieldId} to HTML`);
+        processedData[fieldId] = richTextToHtml(value);
+      } else if (fieldType === 'location') {
+        // Handle location field specially to ensure both coordinates are included
+        logger.log(`[processEntryData] Formatting location field ${fieldId}`);
+        processedData[fieldId] = this.formatLocationField(value);
+      } else if (typeof value === 'string' && this.isLocationField(value)) {
+        // Handle location fields (format: "lat,lng")
+        logger.log(`[processEntryData] Formatting location field ${fieldId}`);
+        processedData[fieldId] = this.formatLocationField(value);
+      } else if (fieldType === 'json' || (typeof value === 'object' && !Array.isArray(value))) {
+        // First try to extract text for localized objects
+        const extractedText = this.extractTextFromLocalizedField(value);
+
+        // If the extracted text is just [object Object], we need to stringify the object properly
+        if (
+          extractedText === '[object Object]' ||
+          extractedText === '' ||
+          extractedText === 'undefined'
+        ) {
+          logger.log(`[processEntryData] Stringifying JSON object for field ${fieldId}`);
+
+          // Try to parse JSON if the value is a string that looks like a stringified object
+          if (typeof value === 'string' && value.startsWith('{') && value.endsWith('}')) {
+            try {
+              const parsedObj = JSON.parse(value);
+              processedData[fieldId] = JSON.stringify(parsedObj, null, 2);
+            } catch (e) {
+              // If it's not valid JSON, just use the string as-is
+              processedData[fieldId] = value;
+            }
+          } else {
+            // For objects, stringify with formatting
+            processedData[fieldId] = JSON.stringify(value, null, 2);
+          }
+        } else {
+          // Use the extracted text
+          processedData[fieldId] = extractedText;
+        }
+      } else {
+        // Keep other values as-is
+        processedData[fieldId] = value;
+      }
+    }
+
+    return processedData;
+  }
+
+  /**
+   * Check if a string value is a Contentful location field format
+   * @param value String to check
+   * @returns true if it's a location field
+   */
+  private isLocationField(value: string): boolean {
+    // First try to check if it's just a latitude coordinate
+    if (/^-?\d+\.\d+$/.test(value)) {
+      return true;
+    }
+
+    // Check for "lat,lng" format (comma-separated coordinates)
+    if (/^-?\d+\.\d+,-?\d+\.\d+$/.test(value)) {
+      return true;
+    }
+
+    return false;
+  }
+
   /**
    * Syncs content from Contentful to Klaviyo
    * @param sdk The Contentful SDK
@@ -360,365 +924,202 @@ export class SyncContent {
     mappings: Array<{ contentfulFieldId: string; klaviyoBlockName: string; fieldType: string }>,
     options: SyncOptions = {}
   ) {
+    if (!mappings || mappings.length === 0) {
+      logger.error('[SyncContent] No field mappings provided');
+      return {
+        success: false,
+        error: 'No field mappings provided',
+      };
+    }
+
+    // Add additional validation to make sure mappings are properly structured
+    const invalidMappings = mappings.filter(
+      (mapping) => !mapping.contentfulFieldId || !mapping.klaviyoBlockName
+    );
+
+    if (invalidMappings.length > 0) {
+      logger.error('[SyncContent] Invalid mappings found:', invalidMappings);
+      return {
+        success: false,
+        error: 'Some field mappings are invalid (missing required properties)',
+      };
+    }
+
+    logger.log('[SyncContent] Starting content sync with mappings:', mappings);
+
     try {
-      // Debugging - log what was passed in
-      logger.log('SyncContent.syncContent called with:', {
-        hasSdk: !!sdk,
-        sdkType: sdk ? typeof sdk : 'undefined',
-        mappingsCount: mappings ? mappings.length : 0,
-        options: JSON.stringify(options),
-        hasIds: !!sdk?.ids,
-        idsObject: sdk?.ids ? JSON.stringify(sdk.ids) : 'none',
-        entryId:
-          options.entryId || sdk?.ids?.entry || (sdk?.entry?.getSys ? 'has getSys' : 'no getSys'),
-      });
-
-      // Get entry information from multiple possible sources
-      let entryId = options.entryId;
-      let contentTypeId = options.contentTypeId;
-
-      // Try to get from sdk.ids first (common for sidebar extensions)
-      if (sdk?.ids) {
-        if (!entryId && sdk.ids.entry) {
-          entryId = sdk.ids.entry;
-          logger.log('Got entryId from sdk.ids:', entryId);
-        }
-        if (!contentTypeId && sdk.ids.contentType) {
-          contentTypeId = sdk.ids.contentType;
-          logger.log('Got contentTypeId from sdk.ids:', contentTypeId);
-        }
-      }
-
-      // If still missing, try to get from sdk.entry (for dialog extensions)
-      if ((!entryId || !contentTypeId) && sdk?.entry) {
-        try {
-          // First try getSys method
-          if (typeof sdk.entry.getSys === 'function') {
-            const entrySys = sdk.entry.getSys();
-            if (!entryId && entrySys?.id) {
-              entryId = entrySys.id;
-              logger.log('Got entryId from sdk.entry.getSys():', entryId);
-            }
-            if (!contentTypeId && entrySys?.contentType?.sys?.id) {
-              contentTypeId = entrySys.contentType.sys.id;
-              logger.log('Got contentTypeId from sdk.entry.getSys():', contentTypeId);
-            }
-          }
-          // Alternative approach to get sys data if getSys is not a function
-          else if (sdk.entry.sys) {
-            const entrySys = sdk.entry.sys;
-            if (!entryId && entrySys?.id) {
-              entryId = entrySys.id;
-              logger.log('Got entryId from sdk.entry.sys:', entryId);
-            }
-            if (!contentTypeId && entrySys?.contentType?.sys?.id) {
-              contentTypeId = entrySys.contentType.sys.id;
-              logger.log('Got contentTypeId from sdk.entry.sys:', contentTypeId);
-            }
-          }
-        } catch (e) {
-          logger.error('Error getting entry sys data:', e);
-        }
-      }
-
-      // Attempt to get from sys if passed entry has sys property directly
-      if ((!entryId || !contentTypeId) && sdk?.sys) {
-        if (!entryId && sdk.sys.id) {
-          entryId = sdk.sys.id;
-          logger.log('Got entryId from sdk.sys:', entryId);
-        }
-        if (!contentTypeId && sdk.sys.contentType?.sys?.id) {
-          contentTypeId = sdk.sys.contentType.sys.id;
-          logger.log('Got contentTypeId from sdk.sys:', contentTypeId);
-        }
-      }
-
-      // Last attempt - try to get from the entry parameter directly
-      if ((!entryId || !contentTypeId) && sdk?.entry?.sys) {
-        const entrySys = sdk.entry.sys;
-        if (!entryId && entrySys.id) {
-          entryId = entrySys.id;
-          logger.log('Got entryId from entry.sys:', entryId);
-        }
-        if (!contentTypeId && entrySys.contentType?.sys?.id) {
-          contentTypeId = entrySys.contentType.sys.id;
-          logger.log('Got contentTypeId from entry.sys:', contentTypeId);
-        }
-      }
-
-      // One more try with this.sdk if different from passed sdk
-      if ((!entryId || !contentTypeId) && this.sdk && this.sdk !== sdk) {
-        if (!entryId && this.sdk.ids?.entry) {
-          entryId = this.sdk.ids.entry;
-        }
-        if (!contentTypeId && this.sdk.ids?.contentType) {
-          contentTypeId = this.sdk.ids.contentType;
-        }
-
-        // Try entry.sys as well
-        if ((!entryId || !contentTypeId) && this.sdk.entry) {
-          try {
-            // Try getSys method first
-            if (typeof this.sdk.entry.getSys === 'function') {
-              const entrySys = this.sdk.entry.getSys();
-              if (!entryId && entrySys?.id) {
-                entryId = entrySys.id;
-              }
-              if (!contentTypeId && entrySys?.contentType?.sys?.id) {
-                contentTypeId = entrySys.contentType.sys.id;
-              }
-            }
-            // Alternative approach to get sys data if getSys is not a function
-            else if (this.sdk.entry.sys) {
-              const entrySys = this.sdk.entry.sys;
-              if (!entryId && entrySys?.id) {
-                entryId = entrySys.id;
-              }
-              if (!contentTypeId && entrySys?.contentType?.sys?.id) {
-                contentTypeId = entrySys.contentType.sys.id;
-              }
-            }
-          } catch (e) {
-            logger.error('Error getting entry sys data from this.sdk:', e);
-          }
-        }
-      }
-
-      // Log all the places we've tried to get the IDs from
-      logger.log('Entry and content type ID resolution:', {
-        finalEntryId: entryId,
-        finalContentTypeId: contentTypeId,
-        fromOptions: {
-          entryId: options.entryId,
-          contentTypeId: options.contentTypeId,
-        },
-        fromSdkIds: {
-          entryId: sdk?.ids?.entry,
-          contentTypeId: sdk?.ids?.contentType,
-        },
-        fromThisSdkIds: {
-          entryId: this.sdk?.ids?.entry,
-          contentTypeId: this.sdk?.ids?.contentType,
-        },
-        entryApiMethods: sdk?.entry
-          ? Object.keys(sdk.entry).filter((k) => typeof sdk.entry[k] === 'function')
-          : [],
-        hasEntryGetSys: typeof sdk?.entry?.getSys === 'function',
-        hasEntrySys: sdk?.entry && 'sys' in sdk.entry,
-        hasSdkEntry: !!sdk?.entry,
-      });
+      // Extract entry ID and content type ID from params or SDK
+      const entryId = options.entryId || (sdk.ids && sdk.ids.entry);
+      const contentTypeId = options.contentTypeId || (sdk.ids && sdk.ids.contentType);
 
       if (!entryId || !contentTypeId) {
-        logger.error('syncContent missing entryId or contentTypeId:', {
-          entryId,
-          contentTypeId,
-          options,
-        });
-        return { success: false, error: 'Missing entry ID or content type ID' };
-      }
-
-      logger.log(`Syncing entry ${entryId} of content type ${contentTypeId}`);
-
-      // Get entry fields data if we have SDK access
-      let entryFields: Record<string, any> = {};
-      const spaceId = sdk.ids.space || sdk.entry.sys.space.sys.id;
-      console.log('sdk', sdk);
-      console.log('entryId', entryId);
-      console.log('spaceId', spaceId);
-      console.log('environmentId', sdk.ids.environment);
-      const entry = await sdk.cma.entry.get({
-        entryId,
-        spaceId,
-        environmentId: sdk.ids.environment,
-      });
-      console.log('entry', entry);
-
-      // Process entry data from CMA response
-      if (entry?.fields) {
-        try {
-          // For CMA entry responses, fields are localized with locale keys (e.g., 'en-US')
-          const fields = entry.fields;
-
-          // Process localized fields
-          Object.keys(fields).forEach((fieldId) => {
-            try {
-              // Get the field value, typically stored under a locale key like 'en-US'
-              const fieldData = fields[fieldId];
-
-              // Find the first available locale (usually 'en-US')
-              const localeKeys = Object.keys(fieldData);
-              if (localeKeys.length > 0) {
-                const firstLocale = localeKeys[0];
-                const rawValue = fieldData[firstLocale];
-
-                if (rawValue !== undefined && rawValue !== null) {
-                  // For rich text, include the entire document
-                  if (
-                    rawValue &&
-                    typeof rawValue === 'object' &&
-                    (rawValue.nodeType === 'document' || (rawValue.data && rawValue.content))
-                  ) {
-                    entryFields[fieldId] = rawValue;
-                  }
-                  // For asset references
-                  else if (
-                    rawValue &&
-                    typeof rawValue === 'object' &&
-                    rawValue.sys &&
-                    (rawValue.sys.linkType === 'Asset' || rawValue.sys.type === 'Asset')
-                  ) {
-                    entryFields[fieldId] = rawValue;
-                  }
-                  // For arrays (like references)
-                  else if (Array.isArray(rawValue)) {
-                    entryFields[fieldId] = rawValue;
-                  }
-                  // For simple values
-                  else {
-                    entryFields[fieldId] = rawValue;
-                  }
-                }
-              }
-            } catch (fieldError) {
-              logger.warn(`Error processing field ${fieldId}:`, fieldError);
-            }
-          });
-
-          // Log the processed entry fields for debugging
-          logger.log('Successfully processed entry fields from CMA:', {
-            fieldCount: Object.keys(entryFields).length,
-            fieldIds: Object.keys(entryFields),
-          });
-        } catch (error) {
-          logger.error('Error processing entry fields from CMA:', error);
-        }
-      }
-      // Fallback to SDK field methods if CMA method failed
-      else if (sdk?.entry?.fields) {
-        try {
-          const fields = sdk.entry.fields;
-
-          // Process fields to get current values
-          Object.keys(fields).forEach((fieldId) => {
-            try {
-              const field = fields[fieldId];
-              // For localized content, take the current locale value
-              if (typeof field.getValue === 'function') {
-                const rawValue = field.getValue();
-
-                if (rawValue !== undefined && rawValue !== null) {
-                  // For rich text, include the entire document
-                  if (
-                    rawValue &&
-                    typeof rawValue === 'object' &&
-                    rawValue.nodeType === 'document'
-                  ) {
-                    entryFields[fieldId] = rawValue;
-                  }
-                  // For arrays (like references)
-                  else if (Array.isArray(rawValue)) {
-                    entryFields[fieldId] = rawValue;
-                  }
-                  // For simple values
-                  else {
-                    entryFields[fieldId] = rawValue;
-                  }
-                }
-              }
-            } catch (fieldError) {
-              logger.warn(`Error processing field ${fieldId}:`, fieldError);
-            }
-          });
-
-          logger.log('Successfully processed entry fields from SDK:', {
-            fieldCount: Object.keys(entryFields).length,
-            fieldIds: Object.keys(entryFields),
-          });
-        } catch (error) {
-          logger.error('Error processing entry fields from SDK:', error);
-        }
-      }
-
-      // Add the entry title as a special field if not already present
-      if (!entryFields.title && entry?.sys?.id) {
-        entryFields.title = `Entry ${entry.sys.id}`;
-      } else if (!entryFields.title && sdk?.entry?.getSys) {
-        try {
-          const entrySys = sdk.entry.getSys();
-          entryFields.title = entrySys.id
-            ? `Entry ${entrySys.id}`
-            : entryId
-            ? `Entry ${entryId}`
-            : 'Untitled Entry';
-        } catch (error) {
-          logger.warn('Error getting entry title:', error);
-          entryFields.title = entryId ? `Entry ${entryId}` : 'Untitled Entry';
-        }
-      } else if (!entryFields.title) {
-        entryFields.title = entryId ? `Entry ${entryId}` : 'Untitled Entry';
-      }
-
-      // Process rich text fields to convert them to HTML if needed
-      for (const fieldId of Object.keys(entryFields)) {
-        const value = entryFields[fieldId];
-        if (value && typeof value === 'object' && value.nodeType === 'document') {
-          try {
-            // Convert rich text to HTML
-            entryFields[fieldId] = richTextToHtml(value);
-            logger.log(`Converted rich text field ${fieldId} to HTML`);
-          } catch (error) {
-            logger.error(`Error converting rich text field ${fieldId}:`, error);
-          }
-        }
-      }
-
-      // Log the final prepared entry fields
-      logger.log('Prepared entry fields for sync:', {
-        fieldCount: Object.keys(entryFields).length,
-        fieldIds: Object.keys(entryFields).join(', '),
-        titleField: entryFields.title,
-      });
-
-      // Import the syncEntryToKlaviyo function dynamically to avoid circular dependencies
-      const { syncEntryToKlaviyo } = await import('../utils/sync-api');
-
-      // Call the API to sync data to Klaviyo, passing entry data
-      const syncResult = await syncEntryToKlaviyo(entryId, contentTypeId, entryFields);
-
-      // Log the result
-      if (syncResult.success) {
-        logger.log('Successfully synced content to Klaviyo:', syncResult);
-
-        // Update sync status
-        const contentTypeName = sdk.contentType?.name || '';
-
-        if (sdk.contentType) {
-          await this.updateSyncStatusSimple(contentTypeId, contentTypeName, true);
-        }
-
-        // Show success notification if SDK is available
-        if (sdk.notifier) {
-          sdk.notifier.success('Content synced to Klaviyo successfully');
-        }
-
-        return { success: true };
-      } else {
-        const errorMessage = syncResult.errors?.join(', ') || 'Unknown error occurred during sync';
-        logger.error('Error syncing content to Klaviyo:', errorMessage);
-
-        // Show error notification if SDK is available
-        if (sdk.notifier) {
-          sdk.notifier.error(`Error syncing to Klaviyo: ${errorMessage}`);
-        }
-
+        logger.error('[SyncContent] Missing entry ID or content type ID');
         return {
           success: false,
-          error: errorMessage,
+          error: 'Missing entry ID or content type ID',
+        };
+      }
+
+      // Get configuration settings
+      const appConfig = (sdk.parameters && sdk.parameters.installation) || {};
+      const { klaviyoApiKey, klaviyoCompanyId } = appConfig;
+
+      // Fall back to secure storage if we don't have API key from app config
+      if (!klaviyoApiKey) {
+        logger.warn('[SyncContent] No API key in app config, checking secure storage');
+      }
+
+      // Get a populated entry object with all required fields
+      let entryData: any = null;
+
+      if (sdk.entry) {
+        // First, try to read directly from the entry object provided by SDK
+        try {
+          entryData = await this.getEntryData(sdk);
+          logger.log('[SyncContent] Got entry data from SDK:', Object.keys(entryData));
+        } catch (error) {
+          logger.error('[SyncContent] Error getting entry data from SDK:', error);
+          entryData = null;
+        }
+      }
+
+      if (!entryData || Object.keys(entryData).length === 0) {
+        // If that fails, use the content management API to fetch the entry
+        try {
+          if (sdk.cma) {
+            logger.log(`[SyncContent] Fetching entry ${entryId} from CMA`);
+            const entry = await sdk.cma.entry.get({ entryId });
+            entryData = this.processEntryFromCma(entry);
+            logger.log('[SyncContent] Got entry data from CMA:', Object.keys(entryData));
+          } else {
+            // Try to use direct entry if provided in constructor
+            entryData = await this.getEntryData(this.sdk);
+            if (entryData && Object.keys(entryData).length > 0) {
+              logger.log('[SyncContent] Got entry data from constructor:', Object.keys(entryData));
+            } else {
+              logger.error('[SyncContent] CMA not available and no entry data found');
+              return {
+                success: false,
+                error: 'No entry data available from any source',
+              };
+            }
+          }
+        } catch (fetchError) {
+          logger.error('[SyncContent] Error fetching entry from CMA:', fetchError);
+          return {
+            success: false,
+            error: `Error fetching entry: ${
+              fetchError instanceof Error ? fetchError.message : 'Unknown error'
+            }`,
+          };
+        }
+      }
+
+      // Final check for entry data
+      if (!entryData || Object.keys(entryData).length === 0) {
+        logger.error('[SyncContent] No entry data available after all attempts');
+        return {
+          success: false,
+          error: 'No entry data available',
+        };
+      }
+
+      try {
+        // Prepare parameters for the legacy proxy
+        const klaviyoApiKey = await this.getKlaviyoApiKey(sdk);
+
+        if (!klaviyoApiKey) {
+          logger.error('[SyncContent] No Klaviyo API key available');
+          return {
+            success: false,
+            error: 'Klaviyo API key is required',
+          };
+        }
+
+        // Prepare payload for the proxy
+        const payload = {
+          action: 'syncEntry',
+          data: {
+            entryId,
+            contentTypeId,
+            entryData: {},
+            fieldMappings: mappings,
+          },
+          privateKey: klaviyoApiKey,
+          publicKey: klaviyoCompanyId,
+        };
+
+        // Process the entry data to ensure all fields are properly formatted
+        if (entryData) {
+          payload.data.entryData = this.processEntryData(entryData, mappings);
+          logger.log(
+            '[SyncContent] Processed entry data for payload:',
+            Object.keys(payload.data.entryData).length,
+            'fields:',
+            Object.keys(payload.data.entryData).join(', ')
+          );
+        }
+        // If we still don't have entry data and this.sdk has entryData, use that
+        else if (this.sdk && this.sdk.entryData) {
+          payload.data.entryData = this.processEntryData(this.sdk.entryData, mappings);
+          logger.log(
+            '[SyncContent] Using processed SDK entry data:',
+            Object.keys(payload.data.entryData).length,
+            'fields'
+          );
+        }
+
+        logger.log('[SyncContent] Prepared sync payload:', {
+          action: payload.action,
+          entryId: payload.data.entryId,
+          contentTypeId: payload.data.contentTypeId,
+          fieldMappingsCount: payload.data.fieldMappings.length,
+          entryDataFields: Object.keys(payload.data.entryData),
+        });
+
+        // Use our Klaviyo service to send the request
+        const klaviyoService = new KlaviyoService({
+          publicKey: klaviyoCompanyId || '',
+          privateKey: klaviyoApiKey || '',
+        });
+        const result = await klaviyoService.proxy(payload);
+
+        if (result && result.success) {
+          logger.log('[SyncContent] Sync successful');
+
+          // Update sync status
+          if (options.useSdk) {
+            await this.updateSyncStatusWithSdkSimple(contentTypeId, '', true);
+          } else {
+            this.updateSyncStatusSimple(contentTypeId, '', true);
+          }
+
+          return {
+            success: true,
+            message: 'Content synced successfully',
+            data: result.data,
+          };
+        } else {
+          // Success was false or result was invalid
+          logger.error('[SyncContent] Sync failed with result:', result);
+          return {
+            success: false,
+            error: result?.error || 'Unknown error during sync',
+          };
+        }
+      } catch (syncError) {
+        logger.error('[SyncContent] Error during sync:', syncError);
+        return {
+          success: false,
+          error: syncError instanceof Error ? syncError.message : 'Unknown error during sync',
         };
       }
     } catch (error) {
-      logger.error('Error in syncContent:', error);
-      return { success: false, error: error instanceof Error ? error.message : String(error) };
+      logger.error('[SyncContent] Unexpected error in syncContent:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unexpected error during sync',
+      };
     }
   }
 

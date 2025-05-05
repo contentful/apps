@@ -58,78 +58,78 @@ export const getSyncData = async (sdk: BaseExtensionSDK): Promise<FieldData[]> =
 /**
  * Update sync data in both localStorage and app parameters
  */
-export const updateSyncData = async (data: FieldData[]): Promise<void> => {
+export const updateSyncData = async (
+  sdk: any,
+  fieldMappings: any[] = [],
+  contentTypeMappings: Record<string, any> = {}
+): Promise<boolean> => {
   try {
-    // Always update localStorage for immediate sharing
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    logger.log('[persistence] Saved mappings to localStorage');
+    // Log the input parameters for debugging
+    logger.log('onConfigure persistence', sdk, {
+      ...sdk.parameters?.installation,
+      fieldMappings,
+      contentTypeMappings,
+    });
 
-    // Attempt to update via SDK if available
+    // Make sure we always have arrays for both
+    const mappings = Array.isArray(fieldMappings) ? fieldMappings : [];
+    const contentTypes = contentTypeMappings || {};
+
+    // First save to localStorage for immediate local effect and backup
     try {
-      const globalSdk = await getGlobalSDK();
-
-      if (!globalSdk || !globalSdk.app) {
-        logger.warn('[persistence] SDK not available for persisting mappings to app parameters');
-        return;
-      }
-
-      // Get space and environment IDs
-      const spaceId = globalSdk.ids.space;
-      const environmentId = globalSdk.ids.environment;
-      // Get app definition ID from event, SDK, or localStorage
-      const appDefinitionId = globalSdk.ids.app || getAppDefinitionId();
-
-      if (!spaceId || !environmentId || !appDefinitionId) {
-        logger.error('[persistence] Missing required IDs for updating app parameters', {
-          spaceId,
-          environmentId,
-          appDefinitionId,
-        });
-        return;
-      }
-
-      // Get current parameters
-      const parameters = await globalSdk.app.getParameters();
-
-      // Update field mappings in parameters
-      const updatedParameters = {
-        ...parameters,
-        installation: {
-          ...(parameters?.installation || {}),
-          fieldMappings: data,
-        },
-      };
-
-      // Store in app parameters
-      if (globalSdk.app && globalSdk.app.onConfigure) {
-        console.log('onConfigure persistence', globalSdk.app, updatedParameters);
-        await globalSdk.app.onConfigure();
-
-        logger.log('[persistence] Updated mappings in app parameters via CMA');
-      } else if (globalSdk.app.setParameters) {
-        // Fallback to app.setParameters if CMA is not available
-        await globalSdk.app.setParameters(updatedParameters);
-        logger.log('[persistence] Updated mappings in app parameters');
-      }
-    } catch (sdkError) {
-      logger.error('[persistence] Error updating mappings via SDK:', sdkError);
+      localStorage.setItem('klaviyo_field_mappings', JSON.stringify(mappings));
+      localStorage.setItem('klaviyo_content_types', JSON.stringify(contentTypes));
+      logger.log('[persistence] Saved mappings to localStorage');
+    } catch (localStorageError) {
+      logger.error('[persistence] Error saving to localStorage:', localStorageError);
     }
+
+    // Only try to use SDK if we're in the right context where it's expected to be available
+    if (sdk && sdk.app && typeof sdk.app.onConfigure === 'function') {
+      try {
+        // Get the current parameters from app installation
+        const currentParameters = sdk.parameters?.installation || {};
+
+        // Prepare new parameters object with updated values
+        const updatedParameters = {
+          ...currentParameters,
+          fieldMappings: mappings,
+          contentTypeMappings: contentTypes,
+        };
+
+        // Update app parameters via SDK
+        await sdk.app.onConfigure(() => ({
+          parameters: updatedParameters,
+        }));
+
+        logger.log('[persistence] Updated mappings via SDK');
+        return true;
+      } catch (sdkError) {
+        logger.error('[persistence] Error updating mappings via SDK:', sdkError);
+        // Continue - we've already saved to localStorage as backup
+      }
+    } else {
+      logger.log('[persistence] SDK app.onConfigure not available, using localStorage only');
+    }
+
+    return true;
   } catch (error) {
-    logger.error('[persistence] Error updating sync data:', error);
+    logger.error('Error updating sync status with localStorage:', error);
+    return false;
   }
 };
 
 /**
  * Manual function to directly check localStorage
  */
-export const getLocalMappings = (): FieldData[] => {
+export const getLocalMappings = (): any[] => {
   try {
-    const data = localStorage.getItem(STORAGE_KEY);
+    const data = localStorage.getItem('klaviyo_field_mappings');
     if (data) {
       return JSON.parse(data);
     }
-  } catch (e) {
-    logger.error('[persistence] Error getting local mappings:', e);
+  } catch (error) {
+    logger.error('[persistence] Error retrieving mappings from localStorage:', error);
   }
   return [];
 };

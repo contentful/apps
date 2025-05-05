@@ -30,12 +30,13 @@
     "build:frontend": "rm -rf build && tsc && vite build",
     "build:functions": "contentful-app-scripts build-functions --ci",
     "preview": "vite preview",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "add-locations": "contentful-app-scripts add-locations",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
-    "proxy": "node server.js",
+    "proxy": "cd ../lambda && npm run dev",
     "dev-with-proxy": "concurrently \"npm run dev\" \"npm run proxy\""
   },
   "eslintConfig": {

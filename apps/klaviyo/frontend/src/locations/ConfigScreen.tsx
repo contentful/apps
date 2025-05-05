@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -7,7 +7,6 @@ import {
   Form,
   FormControl,
   Heading,
-  Paragraph,
   Stack,
   Text,
   TextInput,
@@ -18,17 +17,10 @@ import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '../hooks/useSDK';
 
 import { ContentTypesList } from '../components/ContentTypesList';
-import { KlaviyoService } from '../services/klaviyo';
 import { KlaviyoAppConfig } from '../config/klaviyo';
 import { getContentTypes } from '../utils/contentful-helper';
 import { API_PROXY_URL } from '../config/klaviyo';
-import { type } from 'os';
-import {
-  getSyncData,
-  updateSyncData,
-  getLocalMappings,
-  STORAGE_KEY,
-} from '../services/persistence-service';
+import { updateSyncData, getLocalMappings } from '../services/persistence-service';
 
 // Styles for the container
 const containerStyle = {
@@ -98,6 +90,7 @@ const logParameters = (params: any, source: string) => {
 
 const storeApiKeysInLocalStorage = (publicKey: string, privateKey: string) => {
   try {
+    // Store main record with both keys
     localStorage.setItem(
       'klaviyo_api_keys',
       JSON.stringify({
@@ -105,7 +98,28 @@ const storeApiKeysInLocalStorage = (publicKey: string, privateKey: string) => {
         privateKey: privateKey,
       })
     );
-    console.log('Stored API keys in localStorage for backup access');
+
+    // Store individual keys under multiple names for better compatibility
+    // Private key (API key)
+    localStorage.setItem('klaviyo_api_key', privateKey);
+    localStorage.setItem('klaviyoApiKey', privateKey);
+    localStorage.setItem('privateKey', privateKey);
+
+    // Public key (Company ID)
+    localStorage.setItem('klaviyo_company_id', publicKey);
+    localStorage.setItem('klaviyoCompanyId', publicKey);
+    localStorage.setItem('publicKey', publicKey);
+
+    // Also store as a config object
+    localStorage.setItem(
+      'klaviyo_config',
+      JSON.stringify({
+        publicKey: publicKey,
+        privateKey: privateKey,
+      })
+    );
+
+    console.log('Stored API keys in localStorage under multiple keys for better compatibility');
   } catch (e) {
     console.error('Failed to store API keys in localStorage:', e);
   }

@@ -252,6 +252,12 @@ const Sidebar = () => {
       logger.log('Prepared entry fields:', processedFields);
       logger.log('Entry fields count:', Object.keys(processedFields).length);
 
+      // Add spaceId to the entry data
+      const spaceId = sdk.ids?.space;
+      if (spaceId) {
+        processedFields.spaceId = spaceId;
+      }
+
       // Call the API to sync the entry with field data
       const result = await syncEntryToKlaviyo(entryId, contentTypeId, processedFields);
 

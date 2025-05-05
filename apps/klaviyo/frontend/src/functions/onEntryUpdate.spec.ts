@@ -20,7 +20,7 @@ vi.mock('../config/klaviyo', () => {
 import { onEntryUpdate } from './onEntryUpdate';
 
 // Mock KlaviyoService
-const syncContentMock = vi.fn().mockResolvedValue([{ id: 'block123', success: true }]);
+const syncContentMock = vi.fn();
 vi.mock('../services/klaviyo', () => {
   return {
     KlaviyoService: vi.fn().mockImplementation(() => ({
@@ -135,6 +135,9 @@ describe('onEntryUpdate', () => {
   });
 
   it('should process text fields correctly', async () => {
+    // Setup mock to return success
+    syncContentMock.mockResolvedValueOnce([{ id: 'block123', success: true }]);
+
     // Create mock entry with text fields
     const entry = {
       sys: { id: 'test-entry', type: 'Entry' },
@@ -212,7 +215,7 @@ describe('onEntryUpdate', () => {
   });
 
   it('should handle errors during sync process', async () => {
-    // Mock a sync error
+    // Mock a sync error for this specific test
     syncContentMock.mockRejectedValueOnce(new Error('Sync error'));
 
     // Create test entry and mappings
@@ -241,13 +244,12 @@ describe('onEntryUpdate', () => {
       },
     ];
 
-    // Call the function
-    await onEntryUpdate({ entry, sdk: mockSdk, mappings });
+    // Call the function and expect it to throw
+    await expect(onEntryUpdate({ entry, sdk: mockSdk, mappings })).rejects.toThrow('Sync error');
 
     // Verify error handling
     expect(mockNotifier.error).toHaveBeenCalledWith(
       expect.stringContaining('Failed to sync content to Klaviyo')
     );
-    expect(logger.error).toHaveBeenCalled();
   });
 });

@@ -43,11 +43,62 @@ export class KlaviyoService {
     });
   }
 
+  /**
+   * Helper function to extract text from localized field values
+   * @param value The field value that might be in locale format like {"en-US": "value"}
+   * @returns The extracted string value
+   */
+  private extractTextFromLocalizedField(value: any): string {
+    // If it's null or undefined, return empty string
+    if (value === null || value === undefined) {
+      return '';
+    }
+
+    // If it's already a string, return it
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    // If it's an object that might have locale keys like {"en-US": "Text Value"}
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      // Check if it has locale keys
+      if ('en-US' in value) {
+        return typeof value['en-US'] === 'string' ? value['en-US'] : String(value['en-US'] || '');
+      }
+
+      // Try the first key if it exists
+      const keys = Object.keys(value);
+      if (keys.length > 0) {
+        const firstLocale = keys[0];
+        return typeof value[firstLocale] === 'string'
+          ? value[firstLocale]
+          : String(value[firstLocale] || '');
+      }
+    }
+
+    // Fallback: convert to string
+    try {
+      return String(value);
+    } catch (e) {
+      logger.error('Error converting value to string:', e);
+      return '';
+    }
+  }
+
   private mapContentfulFieldToKlaviyo(
     contentfulFieldId: string,
     klaviyoBlockName: string,
     value: any
   ): FieldMapping {
+    // Extract value from localized field if needed
+    let processedValue = value;
+
+    // Check if value is a localized object
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      processedValue = this.extractTextFromLocalizedField(value);
+      logger.log(`Extracted text from localized field ${contentfulFieldId}: "${processedValue}"`);
+    }
+
     // Ensure value is always a string to avoid issues with numbers/integers
     return {
       contentfulFieldId,
@@ -56,7 +107,7 @@ export class KlaviyoService {
       type: 'text',
       severity: 'info',
       fieldType: 'text',
-      value: value != null ? String(value) : '',
+      value: processedValue != null ? String(processedValue) : '',
     };
   }
 
@@ -65,6 +116,15 @@ export class KlaviyoService {
     klaviyoBlockName: string,
     value: any
   ): FieldMapping {
+    // Extract value from localized field if needed
+    let processedValue = value;
+
+    // Check if value is a localized object
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      processedValue = this.extractTextFromLocalizedField(value);
+      logger.log(`Extracted text from localized field ${contentfulFieldId}: "${processedValue}"`);
+    }
+
     return {
       contentfulFieldId,
       klaviyoBlockName,
@@ -72,7 +132,7 @@ export class KlaviyoService {
       type: 'text',
       severity: 'info',
       fieldType: 'text',
-      value: value,
+      value: processedValue,
     };
   }
 
@@ -81,6 +141,15 @@ export class KlaviyoService {
     klaviyoBlockName: string,
     value: any
   ): FieldMapping {
+    // For rich text, we might need to extract the document from a locale wrapper
+    let processedValue = value;
+
+    // Check if value is a localized object
+    if (value && typeof value === 'object' && !Array.isArray(value) && 'en-US' in value) {
+      processedValue = value['en-US'];
+      logger.log(`Extracted rich text from localized field ${contentfulFieldId}`);
+    }
+
     return {
       contentfulFieldId,
       klaviyoBlockName,
@@ -88,7 +157,7 @@ export class KlaviyoService {
       type: 'html',
       severity: 'info',
       fieldType: 'richText',
-      value: value,
+      value: processedValue,
     };
   }
 
@@ -459,6 +528,57 @@ export class KlaviyoService {
       } else {
         throw new Error(`Unknown error in API call to ${endpoint}`);
       }
+    }
+  }
+
+  // Add proxy method for direct API calls
+  async proxy(payload: any): Promise<any> {
+    try {
+      logger.log('Proxying request:', {
+        action: payload.action,
+        entryId: payload.data?.entryId,
+        contentTypeId: payload.data?.contentTypeId,
+        fieldMappingsCount: payload.data?.fieldMappings?.length || 0,
+      });
+
+      // Make the API request through our proxy
+      const response = await fetch(this.proxyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      // Check if the response is ok
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        logger.error('Proxy API call failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData,
+        });
+
+        // Handle different HTTP errors
+        if (response.status === 403) {
+          throw new Error('Forbidden - check your API key and permissions');
+        } else if (response.status === 401) {
+          throw new Error('Unauthorized - authentication failed');
+        } else if (response.status === 429) {
+          throw new Error('Rate limit exceeded - please try again later');
+        } else {
+          throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+        }
+      }
+
+      // Parse and return the response data
+      const responseData = await response.json();
+      logger.log('Proxy API call succeeded with result:', responseData);
+      return responseData;
+    } catch (error) {
+      logger.error('Error in proxy API call:', error);
+      throw error;
     }
   }
 }

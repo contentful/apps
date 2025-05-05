@@ -1,6 +1,23 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { getSyncData, updateSyncData } from './persistence-service';
+import { getSyncData, updateSyncData, STORAGE_KEY } from './persistence-service';
 import { locations } from '@contentful/app-sdk';
+import logger from '../utils/logger';
+import * as sdkHelpers from '../utils/sdk-helpers';
+
+// Mock the SDK helpers
+vi.mock('../utils/sdk-helpers', () => ({
+  getGlobalSDK: vi.fn(),
+  getAppDefinitionId: vi.fn().mockReturnValue('app123'),
+}));
+
+// Mock the logger
+vi.mock('../utils/logger', () => ({
+  default: {
+    log: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}));
 
 describe('persistence-service', () => {
   const mockEntryLocation = locations.LOCATION_ENTRY_SIDEBAR;
@@ -9,8 +26,8 @@ describe('persistence-service', () => {
     { contentfulFieldId: 'title', klaviyoBlockName: 'Title', fieldType: 'text' },
   ];
 
-  // Mock sessionStorage
-  const mockSessionStorage = {
+  // Mock localStorage
+  const mockLocalStorage = {
     getItem: vi.fn(),
     setItem: vi.fn(),
     removeItem: vi.fn(),
@@ -19,98 +36,108 @@ describe('persistence-service', () => {
     length: 0,
   };
 
-  // Setup global sessionStorage mock
+  // Mock global SDK
+  const mockGlobalSDK = {
+    location: {
+      is: vi.fn(),
+    },
+    ids: {
+      entry: 'entry123',
+      space: 'space123',
+      environment: 'env123',
+      app: 'app123',
+      contentType: 'contentType123',
+    },
+    app: {
+      getParameters: vi.fn().mockResolvedValue({
+        installation: {
+          fieldMappings: mockMappings,
+        },
+      }),
+      setParameters: vi.fn().mockResolvedValue({}),
+      onConfigure: vi.fn().mockResolvedValue({}),
+    },
+  };
+
+  // Setup global localStorage mock
   beforeEach(() => {
     vi.resetAllMocks();
 
-    // Mock global sessionStorage
-    global.sessionStorage = mockSessionStorage as any;
+    // Mock global localStorage
+    global.localStorage = mockLocalStorage as any;
 
     // Reset mock counters
-    mockSessionStorage.getItem.mockClear();
-    mockSessionStorage.setItem.mockClear();
+    mockLocalStorage.getItem.mockClear();
+    mockLocalStorage.setItem.mockClear();
+
+    // Setup SDK helper mock
+    (sdkHelpers.getGlobalSDK as jest.Mock).mockResolvedValue(mockGlobalSDK);
+
+    // Reset logger mocks
+    (logger.log as jest.Mock).mockClear();
+    (logger.warn as jest.Mock).mockClear();
+    (logger.error as jest.Mock).mockClear();
   });
 
   describe('getSyncData', () => {
-    it('should get data from session storage in sidebar location', async () => {
+    it('should get data from localStorage first', async () => {
       // Arrange
-      const mockEntryId = 'entry123';
-      const storageKey = `klaviyo-mappings-${mockEntryId}`;
-      const mockSdk = {
-        location: {
-          is: vi.fn((loc) => loc === mockEntryLocation),
-        },
-        ids: {
-          entry: mockEntryId,
-        },
-      };
-
-      mockSessionStorage.getItem.mockReturnValue(JSON.stringify(mockMappings));
+      mockLocalStorage.getItem.mockReturnValue(JSON.stringify(mockMappings));
 
       // Act
-      const result = await getSyncData(mockSdk as any);
+      const result = await getSyncData({} as any);
 
       // Assert
-      expect(mockSdk.location.is).toHaveBeenCalledWith(mockEntryLocation);
-      expect(mockSessionStorage.getItem).toHaveBeenCalledWith(storageKey);
+      expect(mockLocalStorage.getItem).toHaveBeenCalledWith(STORAGE_KEY);
+      expect(result).toEqual(mockMappings);
+      expect(logger.log).toHaveBeenCalledWith(
+        '[persistence] Retrieved mappings from localStorage:',
+        mockMappings
+      );
+    });
+
+    it('should get data from installation parameters if localStorage is empty', async () => {
+      // Arrange
+      mockLocalStorage.getItem.mockReturnValue(null);
+      mockGlobalSDK.app.getParameters.mockResolvedValue({
+        installation: {
+          fieldMappings: mockMappings,
+        },
+      });
+
+      // Act
+      const result = await getSyncData({} as any);
+
+      // Assert
+      expect(sdkHelpers.getGlobalSDK).toHaveBeenCalled();
+      expect(mockGlobalSDK.app.getParameters).toHaveBeenCalled();
       expect(result).toEqual(mockMappings);
     });
 
-    it('should get data from installation parameters in config location', async () => {
+    it('should return empty array if no mappings found in localStorage', async () => {
       // Arrange
-      const mockSdk = {
-        location: {
-          is: vi.fn((loc) => loc === mockConfigLocation),
-        },
-        parameters: {
-          installation: {
-            mappings: mockMappings,
-          },
-        },
-      };
+      mockLocalStorage.getItem.mockReturnValue(null);
+      (sdkHelpers.getGlobalSDK as jest.Mock).mockResolvedValue(null);
 
       // Act
-      const result = await getSyncData(mockSdk as any);
-
-      // Assert
-      expect(mockSdk.location.is).toHaveBeenCalledWith(mockConfigLocation);
-      expect(result).toEqual(mockMappings);
-    });
-
-    it('should return empty array if no mappings found in session storage', async () => {
-      // Arrange
-      const mockEntryId = 'entry123';
-      const mockSdk = {
-        location: {
-          is: vi.fn((loc) => loc === mockEntryLocation),
-        },
-        ids: {
-          entry: mockEntryId,
-        },
-      };
-
-      mockSessionStorage.getItem.mockReturnValue(null);
-
-      // Act
-      const result = await getSyncData(mockSdk as any);
+      const result = await getSyncData({} as any);
 
       // Assert
       expect(result).toEqual([]);
+      expect(logger.log).toHaveBeenCalledWith(
+        '[persistence] No mappings found in localStorage or SDK'
+      );
     });
 
-    it('should return empty array if no mappings found in config', async () => {
+    it('should return empty array if no mappings found in SDK parameters', async () => {
       // Arrange
-      const mockSdk = {
-        location: {
-          is: vi.fn((loc) => loc === mockConfigLocation),
-        },
-        parameters: {
-          installation: {},
-        },
-      };
+      mockLocalStorage.getItem.mockReturnValue(null);
+      mockGlobalSDK.app.getParameters.mockResolvedValue({
+        installation: {},
+      });
 
       // Act
-      const result = await getSyncData(mockSdk as any);
+      const result = await getSyncData({} as any);
 
       // Assert
       expect(result).toEqual([]);
@@ -118,113 +145,62 @@ describe('persistence-service', () => {
 
     it('should handle errors and return empty array', async () => {
       // Arrange
-      const mockSdk = {
-        location: {
-          is: vi.fn((loc) => loc === mockEntryLocation),
-        },
-        ids: {
-          entry: 'entry123',
-        },
-      };
-
-      // Mock sessionStorage.getItem to throw an error
-      const mockError = new Error('Test error');
-      mockSessionStorage.getItem.mockImplementation(() => {
-        throw mockError;
+      mockLocalStorage.getItem.mockImplementation(() => {
+        throw new Error('Test error');
       });
 
-      // Console error spy
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
       // Act
-      const result = await getSyncData(mockSdk as any);
+      const result = await getSyncData({} as any);
 
       // Assert
       expect(result).toEqual([]);
-      expect(consoleSpy).toHaveBeenCalled();
-
-      // Restore console
-      consoleSpy.mockRestore();
+      expect(logger.error).toHaveBeenCalledWith(
+        '[persistence] Error retrieving sync data:',
+        expect.any(Error)
+      );
     });
   });
 
   describe('updateSyncData', () => {
-    it('should update session storage in sidebar location', async () => {
-      // Arrange
-      const mockEntryId = 'entry123';
-      const storageKey = `klaviyo-mappings-${mockEntryId}`;
-      const mockSdk = {
-        location: {
-          is: vi.fn((loc) => loc === mockEntryLocation),
-        },
-        ids: {
-          entry: mockEntryId,
-        },
-      };
-
+    it('should update localStorage', async () => {
       // Act
       await updateSyncData(mockMappings as any);
 
       // Assert
-      expect(mockSessionStorage.setItem).toHaveBeenCalledWith(
-        storageKey,
+      expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
+        STORAGE_KEY,
         JSON.stringify(mockMappings)
       );
+      expect(logger.log).toHaveBeenCalledWith('[persistence] Saved mappings to localStorage');
     });
 
-    it('should log message in config location', async () => {
-      // Arrange
-      const mockSdk = {
-        location: {
-          is: vi.fn((loc) => loc === mockConfigLocation),
-        },
-      };
-
-      // Console log spy
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-
+    it('should attempt to update SDK parameters', async () => {
       // Act
       await updateSyncData(mockMappings as any);
 
       // Assert
-      expect(consoleSpy).toHaveBeenCalled();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Config data will be saved'),
-        expect.anything()
+      expect(sdkHelpers.getGlobalSDK).toHaveBeenCalled();
+      expect(mockGlobalSDK.app.getParameters).toHaveBeenCalled();
+      expect(mockGlobalSDK.app.onConfigure).toHaveBeenCalled();
+      expect(logger.log).toHaveBeenCalledWith(
+        '[persistence] Updated mappings in app parameters via CMA'
       );
-
-      // Restore console
-      consoleSpy.mockRestore();
     });
 
     it('should handle errors during storage update', async () => {
       // Arrange
-      const mockSdk = {
-        location: {
-          is: vi.fn((loc) => loc === mockEntryLocation),
-        },
-        ids: {
-          entry: 'entry123',
-        },
-      };
-
-      // Mock sessionStorage.setItem to throw an error
-      const mockError = new Error('Test error');
-      mockSessionStorage.setItem.mockImplementation(() => {
-        throw mockError;
+      mockLocalStorage.setItem.mockImplementation(() => {
+        throw new Error('Test error');
       });
-
-      // Console spy
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       // Act
       await updateSyncData(mockMappings as any);
 
       // Assert
-      expect(warnSpy).toHaveBeenCalled();
-
-      // Restore console
-      warnSpy.mockRestore();
+      expect(logger.error).toHaveBeenCalledWith(
+        '[persistence] Error updating sync data:',
+        expect.any(Error)
+      );
     });
   });
 });

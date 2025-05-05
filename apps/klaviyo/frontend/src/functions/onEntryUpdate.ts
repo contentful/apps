@@ -1,6 +1,5 @@
 import type { SidebarExtensionSDK } from '@contentful/app-sdk';
 import { KlaviyoService } from '../services/klaviyo';
-import type { KlaviyoAppConfig } from '../config/klaviyo';
 import { logger } from '../utils/logger';
 
 // Define the FieldMapping interface to match the one in klaviyo.ts service
@@ -1195,6 +1194,23 @@ export async function onEntryUpdate(event: EntryEventData) {
       publicKey: parameters.publicKey,
       privateKey: parameters.privateKey,
     });
+
+    // Make sure we have spaceId for asset resolution
+    const entrySpaceId = getSpaceId(sdk, entry);
+    logger.log(`Using space ID for asset resolution: ${entrySpaceId || 'Not available'}`);
+
+    // Add space ID to processed entry if available
+    if (entrySpaceId) {
+      if (!processedEntry.sys) {
+        processedEntry.sys = {};
+      }
+      if (!processedEntry.sys.space) {
+        processedEntry.sys.space = { sys: { id: entrySpaceId } };
+      }
+
+      // Also add as a direct property for easier access
+      (processedEntry as any).spaceId = entrySpaceId;
+    }
 
     // Process the entry fields based on mappings
     const result = await klaviyoService.syncContent(mappings, processedEntry);

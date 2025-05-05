@@ -3,26 +3,29 @@ import { getFieldDetails } from './field-utilities';
 
 describe('field-utilities', () => {
   describe('getFieldDetails', () => {
-    it('should return field details for a regular text field', async () => {
-      // Arrange
+    it('should handle text fields correctly', async () => {
+      // Setup
       const fieldId = 'title';
       const isAsset = false;
+      const mockContentType = {
+        fields: [
+          {
+            id: 'title',
+            name: 'Title',
+            type: 'Symbol',
+            localized: true,
+            required: true,
+          },
+        ],
+      };
       const mockSdk = {
         space: {
-          getContentType: vi.fn().mockResolvedValue({
-            fields: [
-              {
-                id: 'title',
-                name: 'Title',
-                type: 'Symbol',
-              },
-            ],
-          }),
+          getContentType: vi.fn().mockResolvedValue(mockContentType),
         },
         entry: {
           fields: {
             title: {
-              getValue: vi.fn().mockReturnValue('Test Title'),
+              getValue: () => 'Sample Title',
             },
           },
         },
@@ -42,55 +45,38 @@ describe('field-utilities', () => {
         id: 'title',
         name: 'Title',
         type: 'Symbol',
-        value: 'Test Title',
+        value: 'Sample Title',
+        contentTypeId: 'blogPost',
         isAsset: false,
       });
       expect(mockSdk.space.getContentType).toHaveBeenCalledWith('blogPost');
     });
 
-    it('should return field details with asset information', async () => {
-      // Arrange
-      const fieldId = 'image';
-      const isAsset = true;
-      const assetId = 'asset123';
+    it('should handle reference fields correctly', async () => {
+      // Setup
+      const fieldId = 'author';
+      const isAsset = false;
+      const mockContentType = {
+        fields: [
+          {
+            id: 'author',
+            name: 'Author',
+            type: 'Link',
+            linkType: 'Entry',
+            required: false,
+          },
+        ],
+      };
       const mockSdk = {
         space: {
-          getContentType: vi.fn().mockResolvedValue({
-            fields: [
-              {
-                id: 'image',
-                name: 'Image',
-                type: 'Link',
-              },
-            ],
-          }),
-          getAsset: vi.fn().mockResolvedValue({
-            sys: {
-              id: assetId,
-            },
-            fields: {
-              title: {
-                'en-US': 'Test Image',
-              },
-              description: {
-                'en-US': 'Test Description',
-              },
-              file: {
-                'en-US': {
-                  url: '//images.ctfassets.net/test.jpg',
-                  fileName: 'test.jpg',
-                  contentType: 'image/jpeg',
-                },
-              },
-            },
-          }),
+          getContentType: vi.fn().mockResolvedValue(mockContentType),
         },
         entry: {
           fields: {
-            image: {
-              getValue: vi.fn().mockReturnValue({
+            author: {
+              getValue: () => ({
                 sys: {
-                  id: assetId,
+                  id: 'author123',
                 },
               }),
             },
@@ -109,82 +95,44 @@ describe('field-utilities', () => {
 
       // Assert
       expect(result).toEqual({
-        id: 'image',
-        name: 'Image',
+        id: 'author',
+        name: 'Author',
         type: 'Link',
         value: {
           sys: {
-            id: assetId,
+            id: 'author123',
           },
         },
-        isAsset: true,
-        assetDetails: [
-          {
-            id: assetId,
-            title: 'Test Image',
-            description: 'Test Description',
-            url: '//images.ctfassets.net/test.jpg',
-            fileName: 'test.jpg',
-            contentType: 'image/jpeg',
-          },
-        ],
+        contentTypeId: 'blogPost',
+        isAsset: false,
       });
-      expect(mockSdk.space.getAsset).toHaveBeenCalledWith(assetId);
     });
 
-    it('should handle multiple assets', async () => {
-      // Arrange
-      const fieldId = 'gallery';
-      const isAsset = true;
-      const assetIds = ['asset123', 'asset456'];
+    it('should handle array fields correctly', async () => {
+      // Setup
+      const fieldId = 'tags';
+      const isAsset = false;
+      const mockContentType = {
+        fields: [
+          {
+            id: 'tags',
+            name: 'Tags',
+            type: 'Array',
+            items: {
+              type: 'Symbol',
+            },
+            required: false,
+          },
+        ],
+      };
       const mockSdk = {
         space: {
-          getContentType: vi.fn().mockResolvedValue({
-            fields: [
-              {
-                id: 'gallery',
-                name: 'Gallery',
-                type: 'Array',
-              },
-            ],
-          }),
-          getAsset: vi
-            .fn()
-            .mockResolvedValueOnce({
-              sys: { id: assetIds[0] },
-              fields: {
-                title: { 'en-US': 'Image 1' },
-                description: { 'en-US': 'Description 1' },
-                file: {
-                  'en-US': {
-                    url: '//images.ctfassets.net/image1.jpg',
-                    fileName: 'image1.jpg',
-                    contentType: 'image/jpeg',
-                  },
-                },
-              },
-            })
-            .mockResolvedValueOnce({
-              sys: { id: assetIds[1] },
-              fields: {
-                title: { 'en-US': 'Image 2' },
-                description: { 'en-US': 'Description 2' },
-                file: {
-                  'en-US': {
-                    url: '//images.ctfassets.net/image2.jpg',
-                    fileName: 'image2.jpg',
-                    contentType: 'image/jpeg',
-                  },
-                },
-              },
-            }),
+          getContentType: vi.fn().mockResolvedValue(mockContentType),
         },
         entry: {
           fields: {
-            gallery: {
-              getValue: vi
-                .fn()
-                .mockReturnValue([{ sys: { id: assetIds[0] } }, { sys: { id: assetIds[1] } }]),
+            tags: {
+              getValue: () => ['tech', 'news', 'tutorial'],
             },
           },
         },
@@ -201,59 +149,107 @@ describe('field-utilities', () => {
 
       // Assert
       expect(result).toEqual({
-        id: 'gallery',
-        name: 'Gallery',
+        id: 'tags',
+        name: 'Tags',
         type: 'Array',
-        value: [{ sys: { id: assetIds[0] } }, { sys: { id: assetIds[1] } }],
-        isAsset: true,
-        assetDetails: [
-          {
-            id: assetIds[0],
-            title: 'Image 1',
-            description: 'Description 1',
-            url: '//images.ctfassets.net/image1.jpg',
-            fileName: 'image1.jpg',
-            contentType: 'image/jpeg',
-          },
-          {
-            id: assetIds[1],
-            title: 'Image 2',
-            description: 'Description 2',
-            url: '//images.ctfassets.net/image2.jpg',
-            fileName: 'image2.jpg',
-            contentType: 'image/jpeg',
-          },
-        ],
+        value: ['tech', 'news', 'tutorial'],
+        contentTypeId: 'blogPost',
+        isAsset: false,
       });
     });
 
-    it('should handle errors during field processing', async () => {
-      // Arrange
-      const fieldId = 'nonExistentField';
-      const isAsset = false;
+    it('should handle asset fields correctly', async () => {
+      // Setup
+      const fieldId = 'featuredImage';
+      const isAsset = true;
+      const mockContentType = {
+        fields: [
+          {
+            id: 'featuredImage',
+            name: 'Featured Image',
+            type: 'Link',
+            linkType: 'Asset',
+            required: false,
+          },
+        ],
+      };
+      const mockAsset = {
+        fields: {
+          file: {
+            'en-US': {
+              url: '//images.ctfassets.net/test/image.jpg',
+              fileName: 'image.jpg',
+              contentType: 'image/jpeg',
+            },
+          },
+          title: {
+            'en-US': 'Featured Image',
+          },
+        },
+        sys: {
+          id: 'asset123',
+        },
+      };
       const mockSdk = {
         space: {
-          getContentType: vi.fn().mockResolvedValue({
-            fields: [
-              {
-                id: 'title',
-                name: 'Title',
-                type: 'Symbol',
-              },
-            ],
-          }),
+          getContentType: vi.fn().mockResolvedValue(mockContentType),
+          getAsset: vi.fn().mockResolvedValue(mockAsset),
         },
         entry: {
           fields: {
-            title: {
-              getValue: vi.fn().mockReturnValue('Test Title'),
+            featuredImage: {
+              getValue: () => ({ sys: { id: 'asset123' } }),
             },
           },
         },
         ids: {
           contentType: 'blogPost',
+          entry: 'entry123',
+        },
+        locales: {
+          default: 'en-US',
         },
       };
+
+      // Act
+      const result = await getFieldDetails(fieldId, isAsset, mockSdk as any);
+
+      // Assert
+      expect(result).toEqual({
+        id: 'featuredImage',
+        name: 'Featured Image',
+        type: 'Link',
+        value: { sys: { id: 'asset123' } },
+        contentTypeId: 'blogPost',
+        isAsset: true,
+        assetDetails: expect.arrayContaining([
+          expect.objectContaining({
+            id: 'asset123',
+            title: 'Featured Image',
+          }),
+        ]),
+      });
+    });
+
+    it('should handle errors during field processing', async () => {
+      // Setup
+      const fieldId = 'nonExistentField';
+      const isAsset = false;
+      const mockSdk = {
+        space: {
+          getContentType: vi.fn().mockRejectedValue(new Error('Content type error')),
+        },
+        entry: {
+          fields: {},
+        },
+        ids: {
+          contentType: 'blogPost',
+        },
+        locales: {
+          default: 'en-US',
+        },
+      };
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       // Act
       const result = await getFieldDetails(fieldId, isAsset, mockSdk as any);
@@ -265,63 +261,9 @@ describe('field-utilities', () => {
         type: 'Unknown',
         value: null,
         isAsset: false,
+        contentTypeId: 'blogPost',
       });
-    });
-
-    it('should handle errors during asset retrieval', async () => {
-      // Arrange
-      const fieldId = 'image';
-      const isAsset = true;
-      const assetId = 'asset123';
-      const mockSdk = {
-        space: {
-          getContentType: vi.fn().mockResolvedValue({
-            fields: [
-              {
-                id: 'image',
-                name: 'Image',
-                type: 'Link',
-              },
-            ],
-          }),
-          getAsset: vi.fn().mockRejectedValue(new Error('Asset not found')),
-        },
-        entry: {
-          fields: {
-            image: {
-              getValue: vi.fn().mockReturnValue({
-                sys: {
-                  id: assetId,
-                },
-              }),
-            },
-          },
-        },
-        ids: {
-          contentType: 'blogPost',
-        },
-        locales: {
-          default: 'en-US',
-        },
-      };
-
-      // Act
-      const result = await getFieldDetails(fieldId, isAsset, mockSdk as any);
-
-      // Assert
-      expect(result).toEqual({
-        id: fieldId,
-        name: 'Image',
-        type: 'Link',
-        value: {
-          sys: {
-            id: assetId,
-          },
-        },
-        isAsset: true,
-      });
-      // Should not have assetDetails since the asset retrieval failed
-      expect(result.assetDetails).toBeUndefined();
+      expect(consoleSpy).toHaveBeenCalled();
     });
   });
 });

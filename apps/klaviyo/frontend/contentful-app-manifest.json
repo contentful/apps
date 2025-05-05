@@ -29,23 +29,16 @@
   "parameters": {
     "installation": [
       {
-        "id": "klaviyoClientId",
-        "name": "Klaviyo OAuth Client ID",
-        "description": "Your Klaviyo OAuth app client ID",
+        "id": "klaviyoPublicKey",
+        "name": "Klaviyo Public API Key",
+        "description": "Your Klaviyo public API key (starts with pk_)",
         "type": "Symbol",
         "required": true
       },
       {
-        "id": "klaviyoClientSecret",
-        "name": "Klaviyo OAuth Client Secret",
-        "description": "Your Klaviyo OAuth app client secret",
-        "type": "Symbol",
-        "required": true
-      },
-      {
-        "id": "klaviyoRedirectUri",
-        "name": "Klaviyo OAuth Redirect URI",
-        "description": "The redirect URI registered with your Klaviyo OAuth app",
+        "id": "klaviyoPrivateKey",
+        "name": "Klaviyo Private API Key",
+        "description": "Your Klaviyo private API key (starts with pk_)",
         "type": "Symbol",
         "required": true
       }

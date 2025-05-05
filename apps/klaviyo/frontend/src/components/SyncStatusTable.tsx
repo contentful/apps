@@ -12,8 +12,6 @@ import {
   Heading,
   Flex,
   Badge,
-  Accordion,
-  AccordionItem,
   Tooltip,
   ModalConfirm,
   Spinner,
@@ -24,9 +22,8 @@ import {
   getAllSyncStatuses,
   markEntryForSync,
 } from '../services/klaviyo-sync-service';
-import { formatDistanceToNow } from 'date-fns';
 import logger from '../utils/logger';
-import { getSyncData, getLocalMappings } from '../services/persistence-service';
+import { getSyncData } from '../services/persistence-service';
 
 // Define a new interface for ContentfulEntry with version info
 interface ContentfulEntry {
@@ -553,14 +550,6 @@ export const SyncStatusTable: React.FC<SyncStatusTableProps> = ({ onRefresh, sdk
       logger.error('Error deduplicating sync statuses:', err);
       sdk.notifier.error('Failed to deduplicate sync statuses');
     }
-  };
-
-  // Helper to format date
-  const formatDate = (timestamp: number) => {
-    if (!timestamp) return 'Never';
-
-    const date = new Date(timestamp);
-    return date.toLocaleString();
   };
 
   // Helper to calculate how long since last sync

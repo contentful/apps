@@ -36,10 +36,7 @@ interface Field {
   type: string;
 }
 
-const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
-  entry,
-  mappings,
-}) => {
+const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = () => {
   const sdk = useSDK<DialogExtensionSDK>();
   const [fields, setFields] = useState<Field[]>([]);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
@@ -112,6 +109,11 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
     try {
       logger.log('[FieldSelectDialog] Saving mappings...');
 
+      if (selectedFields.length === 0) {
+        setSyncMessage('Please select at least one field');
+        return;
+      }
+
       // First, get current mappings directly from localStorage for consistency
       const existingMappingsStr = localStorage.getItem('klaviyo_field_mappings');
       let existingMappings = [];
@@ -127,24 +129,47 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
       // Create new mapping objects
       const newMappings = selectedFields.map((fieldId) => {
         const field = fields.find((f) => f.id === fieldId);
+
+        // Ensure contentTypeId is always included and valid
+        const mappingContentTypeId = contentTypeId || '';
+
+        logger.log(
+          `Creating mapping for field ${fieldId} with contentTypeId ${mappingContentTypeId}`
+        );
+
         return {
           id: fieldId,
           name: field?.name || fieldId,
           type: field?.type || 'Text',
           value: '',
-          contentTypeId: contentTypeId || '',
+          contentTypeId: mappingContentTypeId,
           isAsset: field?.type === 'Asset' || field?.type === 'AssetLink' || false,
         };
       });
 
-      logger.log('[FieldSelectDialog] New mappings:', newMappings);
+      logger.log('[FieldSelectDialog] New mappings with explicit contentTypeId:', newMappings);
 
       // Merge with existing mappings (filtering out any for the same content type)
       let updatedMappings = [...existingMappings];
       if (contentTypeId) {
+        // First, log the existing mappings with their content types
+        logger.log(
+          '[FieldSelectDialog] Existing mappings by contentTypeId:',
+          existingMappings.reduce((acc: Record<string, number>, mapping: any) => {
+            const ctId = mapping.contentTypeId || 'no-content-type';
+            acc[ctId] = (acc[ctId] || 0) + 1;
+            return acc;
+          }, {})
+        );
+
         // Remove any mappings for this content type
         updatedMappings = updatedMappings.filter(
           (mapping: any) => mapping.contentTypeId !== contentTypeId
+        );
+
+        logger.log(
+          '[FieldSelectDialog] Removed existing mappings for contentTypeId:',
+          contentTypeId
         );
       }
 
@@ -165,17 +190,32 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
         '*'
       );
 
-      // Show success message instead of closing the dialog
+      // Show success message
       setSyncMessage(
         'Field selections saved successfully. You can continue editing or close the dialog.'
       );
 
-      // Store the mappings in state so they're available when the user closes manually
+      // Store the mappings in window._klaviyoDialogResult so they're available when the dialog is closed
       window._klaviyoDialogResult = {
         selectedFields,
         mappings: updatedMappings,
         success: true,
       };
+
+      // If SDK is available, try to close with the result
+      if (sdk && typeof sdk.close === 'function') {
+        setTimeout(() => {
+          try {
+            sdk.close({
+              selectedFields,
+              mappings: updatedMappings,
+              success: true,
+            });
+          } catch (error) {
+            logger.error('[FieldSelectDialog] Error closing dialog with result:', error);
+          }
+        }, 1500);
+      }
     } catch (error) {
       logger.error('[FieldSelectDialog] Error saving mappings:', error);
       setSyncMessage(
@@ -194,6 +234,41 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
     setSyncMessage('Syncing to Klaviyo...');
 
     try {
+      // Try to get API key and store it in localStorage for the sync process
+      let apiKey = '';
+
+      // 1. Try to get from invocation parameters
+      if (sdk.parameters.invocation) {
+        const inv = sdk.parameters.invocation as Record<string, any>;
+        if (inv.privateKey) {
+          apiKey = inv.privateKey;
+          logger.log('Using privateKey from invocation parameters');
+        } else if (inv.klaviyoApiKey) {
+          apiKey = inv.klaviyoApiKey;
+          logger.log('Using klaviyoApiKey from invocation parameters');
+        }
+      }
+
+      // 2. If still not found, try to get from installation parameters
+      if (!apiKey && sdk.parameters.installation) {
+        const inst = sdk.parameters.installation as Record<string, any>;
+        if (inst.privateKey) {
+          apiKey = inst.privateKey;
+          logger.log('Using privateKey from installation parameters');
+        } else if (inst.klaviyoApiKey) {
+          apiKey = inst.klaviyoApiKey;
+          logger.log('Using klaviyoApiKey from installation parameters');
+        }
+      }
+
+      // 3. Store API key for sync process
+      if (apiKey) {
+        // Store under multiple keys to ensure we can find it
+        localStorage.setItem('klaviyo_api_key', apiKey);
+        localStorage.setItem('klaviyoApiKey', apiKey);
+        logger.log('Stored API key in localStorage for synchronization');
+      }
+
       // Convert to the format expected by syncContent
       const formattedMappings = selectedFields.map((fieldId) => {
         const field = fields.find((f) => f.id === fieldId);
