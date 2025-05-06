@@ -44,9 +44,11 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     contentTypeId: entry.sys.contentType.sys.id,
   });
   const locale = entry.sys.locale || 'en-US'; // TODO: define what to do here
+
   const entryTitle = !!contentType.displayField
     ? entry.fields[contentType.displayField]?.[locale] || 'Untitled'
     : 'Untitled';
+  const entryTitleWithoutSpaces = entryTitle.replace(/\s+/g, '-');
 
   const fieldIdArray = fieldIds.split(',').map((id) => id.trim());
 
@@ -86,7 +88,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
           Authorization: `Bearer ${brazeApiKey}`,
         },
         body: JSON.stringify({
-          name: `${entryTitle}-${fieldId}`,
+          name: `${entryTitleWithoutSpaces}-${fieldId}`,
           content: content,
           state: 'draft',
         }),

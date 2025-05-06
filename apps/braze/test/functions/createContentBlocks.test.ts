@@ -90,7 +90,7 @@ describe('createContentBlocks', () => {
           Authorization: 'Bearer test-api-key',
         },
         body: JSON.stringify({
-          name: 'Test Title-title',
+          name: 'Test-Title-title',
           content: 'Test Title',
           state: 'draft',
         }),
