@@ -1,5 +1,5 @@
 import { SidebarAppSDK } from '@contentful/app-sdk';
-import { Box, Button, Subheading } from '@contentful/f36-components';
+import { Box, Button, Subheading, Card, Text, Stack } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import {
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
@@ -9,15 +9,21 @@ import {
   FIELDS_STEP,
   GENERATE_DIALOG_MODE,
   GENERATE_DIALOG_TITLE,
+  SIDEBAR_CONNECTED_ENTRIES_BUTTON_TEXT,
   SIDEBAR_CREATE_BUTTON_TEXT,
   SIDEBAR_GENERATE_BUTTON_TEXT,
 } from '../utils';
 import { InvocationParams } from './Dialog';
 import { styles } from './Sidebar.styles';
 import InformationWithLink from '../components/InformationWithLink';
+import Splitter from '../components/Splitter';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
+  const connectedFields = JSON.parse(sdk.parameters.installation.brazeConnectedFields || '{}');
+  const currentEntryId = sdk.ids.entry;
+  const connectedFieldsForCurrentEntry: [string, string][] = connectedFields[currentEntryId] || [];
+
   useAutoResizer();
 
   const initialInvocationParams: InvocationParams = {
@@ -84,6 +90,31 @@ const Sidebar = () => {
           {SIDEBAR_CREATE_BUTTON_TEXT}
         </Button>
       </Box>
+      {Object.keys(connectedFieldsForCurrentEntry).length > 0 && (
+        <>
+          <Box marginTop="spacingM">
+            <Card className={styles.card}>
+              <Subheading className={styles.subheadingCard}>
+                Connected Content Block entries
+              </Subheading>
+              <Splitter />
+              <Stack flexDirection="column" spacing="spacingXs" alignItems="initial">
+                {connectedFieldsForCurrentEntry.map(([contentfulFieldId], index) => (
+                  <Text key={`${currentEntryId}-${index}`} className={styles.listItem}>
+                    {contentfulFieldId}
+                  </Text>
+                ))}
+              </Stack>
+            </Card>
+            <Button
+              variant="secondary"
+              isFullWidth={true}
+              onClick={() => sdk.navigator.openCurrentAppPage()}>
+              {SIDEBAR_CONNECTED_ENTRIES_BUTTON_TEXT}
+            </Button>
+          </Box>
+        </>
+      )}
     </>
   );
 };
