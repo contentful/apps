@@ -1,12 +1,14 @@
 {
   "functions": [
     {
-      "id": "MockShopTutorial",
-      "name": "MockShopTutorial",
-      "description": "In this tutorial, you will learn how to create a function that fetches data from a mock shop API.",
-      "path": "functions/mockShop.js",
-      "entryFile": "functions/mockShop.ts",
-      "allowNetworks": ["https://mock.shop/api"],
+      "id": "GoogleDriveTutorial",
+      "name": "GoogleDriveTutorial",
+      "description": "Google Drive API example",
+      "path": "functions/googleDrive.js",
+      "entryFile": "functions/googleDrive.ts",
+      "allowNetworks": [
+        "https://www.googleapis.com"
+      ],
       "accepts": [
         "graphql.resourcetype.mapping",
         "graphql.query",

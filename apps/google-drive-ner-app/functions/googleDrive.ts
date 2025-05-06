@@ -22,7 +22,7 @@ const typeDefs = `
 type File {
   id: String!
   name: String!
-  iconLink: String!
+  thumbnailLink: String!
 }
 
 type Query {
@@ -39,7 +39,7 @@ const schema = createSchema({
         }
 
         const url = search
-          ? `https://www.googleapis.com/drive/v3/files?q=${search}`
+          ? `https://www.googleapis.com/drive/v3/files?q=name%20contains%20'${search}'&fields=files(id,name,thumbnailLink)`
           : `https://www.googleapis.com/drive/v3/files/${ids}`;
 
         const response = await fetch(url);
@@ -50,20 +50,18 @@ const schema = createSchema({
           );
         }
 
-        const file = await response.json();
-
-        console.log('GOOGLE DRIVE SEARCHFILES:', file);
-        const { files } = file.data;
+        const json = await response.json();
+        console.log('Google Drive API Response:', json);
 
         /**
          * The PotterDB API returns all the character information, so we grab the subset of it
          * that matches with the defined graphql schema.
          *
          */
-        return files.map((file) => ({
+        return json.data.files.map((file: any) => ({
           id: file.id,
           title: file.name,
-          iconLink: file.iconLink,
+          image: file.thumbnailLink,
         }));
       },
     },
@@ -123,7 +121,7 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
           file(search: $query) {
             id
             name
-            iconLink
+            thumbnailLink
           }
         }
       `,
@@ -132,9 +130,10 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
     method: 'POST',
     headers: { Accept: 'application/json', 'content-type': 'application/json' },
   });
-  const result = (await response.json()) as any;
+  const json = await response.json();
+  console.log('Google Drive API Response:', json);
 
-  const items = result.files.map((file) => ({
+  const items = json.data.files.map((file: any) => ({
     ...withBadge(file),
     ...withUrn(file),
   }));
@@ -156,7 +155,7 @@ const lookupHandler: ResourcesLookupHandler = async (event, context) => {
           file(ids: $ids) {
             id
             name
-            iconLink
+            thumbnailLink
           }
         }
       `,
@@ -166,20 +165,21 @@ const lookupHandler: ResourcesLookupHandler = async (event, context) => {
     headers: { Accept: 'application/json', 'content-type': 'application/json' },
   });
 
-  const result = (await response.json()) as any;
+  const json = await response.json();
+  console.log('Google Drive API Response:', json);
 
-  const items = result.data.files
-    .map((node) => {
-      if (node === null) {
-        console.error('Null node encountered');
+  const items = json.data.files
+    .map((file: any) => {
+      if (file === null) {
+        console.error('Null file encountered');
         return null;
       }
       return {
-        ...withBadge(node),
-        ...withUrn(node),
+        ...withBadge(file),
+        ...withUrn(file),
       };
     })
-    .filter((item) => !!item);
+    .filter((file: any) => !!file);
 
   return {
     items,
