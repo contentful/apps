@@ -26,7 +26,7 @@ type File {
 }
 
 type Query {
-  file(search: String, ids: [ID!]): [File!]!
+  file(search: String, ids: [ID!], id: ID!): [File!]!
 }`;
 
 const schema = createSchema({
@@ -77,7 +77,7 @@ const resourceTypeMappingHandler: MappingHandler = (event) => {
     graphQLQueryField: 'file',
     graphQLQueryArguments: { id: '/urn' },
   }));
-
+  console.log('resourceTypeMappingHandler', { mappings });
   return {
     resourceTypes: mappings,
   };
@@ -106,7 +106,7 @@ const queryHandler: QueryHandler = async (event, context) => {
     },
     context
   );
-  console.log({ event, context }, response.json());
+  console.log({ event, context, response });
   return response.json();
 };
 
