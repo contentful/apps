@@ -34,23 +34,20 @@ const UploadArea: React.FC<UploadAreaProps> = ({
         className={styles.dropzone}
         style={{ display: showMuxUploaderUI ? 'none' : 'flex' }}
         onDrop={onDrop}
-        onDragOver={(e) => e.preventDefault()}
-      >
-        <h2 className={styles.title}>
-          Drop a video file here to upload
-        </h2>
+        onDragOver={(e) => e.preventDefault()}>
+        <h2 className={styles.title}>Drop a video file here to upload</h2>
         <span className={styles.or}>or</span>
         <Button
           variant="secondary"
           size="large"
           className={styles.uploadButton}
-          onClick={handleButtonClick}
-        >
+          onClick={handleButtonClick}>
           Upload a video
         </Button>
         <input
           ref={inputRef}
           type="file"
+          accept="video/*,audio/*"
           style={{ display: 'none' }}
           onChange={onFileChange}
         />
@@ -62,16 +59,18 @@ const UploadArea: React.FC<UploadAreaProps> = ({
         onSuccess={onSuccess}
         noDrop
         className={styles.muxUploaderContainer}
-        style={{
-          '--uploader-background-color': 'rgb(247, 249, 250)',
-          '--button-border-radius': '4px',
-          '--button-border': '1px solid rgb(207, 217, 224)',
-          '--button-padding': '0.5rem 1rem',
-          display: showMuxUploaderUI ? 'flex' : 'none',
-        } as React.CSSProperties}
+        style={
+          {
+            '--uploader-background-color': 'rgb(247, 249, 250)',
+            '--button-border-radius': '4px',
+            '--button-border': '1px solid rgb(207, 217, 224)',
+            '--button-padding': '0.5rem 1rem',
+            display: showMuxUploaderUI ? 'flex' : 'none',
+          } as React.CSSProperties
+        }
       />
     </Box>
   );
 };
 
-export default UploadArea; 
+export default UploadArea;
