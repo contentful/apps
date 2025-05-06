@@ -7,7 +7,7 @@ import {
   ResourcesSearchHandler,
   SearchResultData,
 } from './types';
-import { getMockShopUrl, withBadge, withUrn } from './utils';
+import { withBadge, withUrn } from './utils';
 
 import { createSchema, createYoga } from 'graphql-yoga';
 import { GraphQLError } from 'graphql';
@@ -87,15 +87,14 @@ const queryHandler: QueryHandler = async (event, context) => {
   /* Installation parameters are defined in the app definition
    * and set per installation */
 
-  const mockShopUrl = getMockShopUrl(context);
-
   /* Make a request to the third party API.
    * The expected return type aligns with the
    * one outlined in the GraphQL specs:
    * https://spec.graphql.org/October2021/#sec-Response
    */
+  console.log('query handler ran');
   const response = await yoga.fetch(
-    mockShopUrl,
+    'http://this-does-not-matter.com/graphql',
     {
       body: JSON.stringify({
         query: event.query,
@@ -103,18 +102,17 @@ const queryHandler: QueryHandler = async (event, context) => {
         variables: event.variables,
       }),
       method: 'POST',
-      headers: { Accept: 'application/json', 'content-type': 'application/json' },
+      headers: { accept: 'application/graphql-response+json', 'content-type': 'application/json' },
     },
     context
   );
-
+  console.log({ event, context }, response.json());
   return response.json();
 };
 
 const searchHandler: ResourcesSearchHandler = async (event, context) => {
   const { query } = event;
-  const mockShopUrl = getMockShopUrl(context);
-  const response = await fetch(mockShopUrl, {
+  const response = await fetch('http://this-does-not-matter.com/graphql', {
     body: JSON.stringify({
       query: /* GraphQL */ `
         query searchFiles($query: String!) {
@@ -146,9 +144,7 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
 const lookupHandler: ResourcesLookupHandler = async (event, context) => {
   const { urns } = event.lookupBy;
 
-  const mockShopUrl = getMockShopUrl(context);
-
-  const response = await fetch(mockShopUrl, {
+  const response = await fetch('http://this-does-not-matter.com/graphql', {
     body: JSON.stringify({
       query: /* GraphQL */ `
         query lookupFiles($ids: [ID!]!) {

@@ -1,16 +1,6 @@
 import { FunctionEventContext } from '@contentful/node-apps-toolkit';
 import { Product } from './types';
 
-export const getMockShopUrl = (context: FunctionEventContext<Record<string, any>>) => {
-  const mockShopUrl = context.appInstallationParameters?.apiEndpoint;
-
-  if (!mockShopUrl) {
-    console.warn(`No API url configured, using default: https://mock.shop/api`);
-    return 'https://mock.shop/api';
-  }
-  return mockShopUrl;
-};
-
 export function withUrn(file: any) {
   return {
     ...file,

@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 import { ResourceProviderProps, ResourceTypeProps } from 'contentful-management';
 
-import mockshopJson from './entities/mockshop.json';
-import productJson from './entities/product.json';
+import googleDriveJson from './entities/google-drive.json';
+import fileJson from './entities/file.json';
 import manifest from '../../contentful-app-manifest.json';
 
 assert.equal(
@@ -27,8 +27,8 @@ assert.ok(appDefinitionId !== '', `CONTENTFUL_APP_DEF_ID environment variable mu
 
 assert.ok(accessToken !== '', `CONTENTFUL_ACCESS_TOKEN environment variable must be defined`);
 
-const mockshop = mockshopJson as ResourceProviderProps;
-const product = productJson as ResourceTypeProps;
+const googleDrive = googleDriveJson as ResourceProviderProps;
+const file = fileJson as ResourceTypeProps;
 
 export {
   organizationId,
@@ -36,6 +36,6 @@ export {
   accessToken,
   contentfulHost,
   manifest,
-  mockshop,
-  product,
+  googleDrive,
+  file,
 };

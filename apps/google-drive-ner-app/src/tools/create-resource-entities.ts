@@ -1,12 +1,12 @@
 import { createResourceProvider, createResourceType } from './http';
-import { mockshop, product } from './imports';
+import { file, googleDrive } from './imports';
 
 const main = async () => {
-  const mockshopResult = await createResourceProvider(mockshop);
-  const [productResult] = await Promise.all([createResourceType(product)]);
+  const mockshopResult = await createResourceProvider(googleDrive);
+  const [fileResult] = await Promise.all([createResourceType(file)]);
 
   console.dir(mockshopResult, { depth: 5 });
-  console.dir(productResult, { depth: 5 });
+  console.dir(fileResult, { depth: 5 });
 };
 
 main();
