@@ -5,8 +5,10 @@ import {
   FunctionEventContext,
   FunctionTypeEnum,
 } from '@contentful/node-apps-toolkit';
+
 import type { PlainClientAPI, EntryProps, ContentTypeProps } from 'contentful-management';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
+import { createContentType, createEntry, mockFetchSuccess } from '../mocks/mocksForFunctions';
 
 const mockCma = {
   entry: {
@@ -47,59 +49,8 @@ describe('createContentBlocks', () => {
 
   it('should create content blocks for text fields', async () => {
     // Mock entry data
-    const mockEntry = {
-      sys: {
-        id: 'entry-id',
-        type: 'Entry',
-        space: { sys: { type: 'Link', linkType: 'Space', id: 'space-id' } },
-        environment: { sys: { type: 'Link', linkType: 'Environment', id: 'environment-id' } },
-        contentType: {
-          sys: {
-            type: 'Link',
-            linkType: 'ContentType',
-            id: 'content-type-id',
-          },
-        },
-        locale: 'en-US',
-        version: 1,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
-        automationTags: [],
-      },
-      fields: {
-        title: {
-          'en-US': 'Test Title',
-        },
-      },
-    } as unknown as EntryProps;
-
-    // Mock contentType data
-    const mockContentType = {
-      sys: {
-        type: 'ContentType',
-        id: 'content-type-id',
-        version: 1,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
-        space: { sys: { type: 'Link', linkType: 'Space', id: 'space-id' } },
-        environment: { sys: { type: 'Link', linkType: 'Environment', id: 'environment-id' } },
-      },
-      name: 'Test Content Type',
-      description: 'Test Description',
-      displayField: 'title',
-      fields: [
-        {
-          id: 'title',
-          name: 'Title',
-          type: 'Text',
-          localized: true,
-          required: true,
-          validations: [],
-          disabled: false,
-          omitted: false,
-        },
-      ],
-    } as ContentTypeProps;
+    const mockEntry = createEntry({ title: 'Test Title' });
+    const mockContentType = createContentType(['title']);
 
     // Mock API responses
     vi.mocked(mockCma.entry.get).mockResolvedValue(mockEntry);
@@ -148,79 +99,19 @@ describe('createContentBlocks', () => {
   });
 
   it('should convert rich text fields to HTML', async () => {
-    // Mock entry data
-    const mockEntry = {
-      sys: {
-        id: 'entry-id',
-        type: 'Entry',
-        space: { sys: { type: 'Link', linkType: 'Space', id: 'space-id' } },
-        environment: { sys: { type: 'Link', linkType: 'Environment', id: 'environment-id' } },
-        contentType: {
-          sys: {
-            type: 'Link',
-            linkType: 'ContentType',
-            id: 'content-type-id',
-          },
-        },
-        locale: 'en-US',
-        version: 1,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
-        automationTags: [],
-      },
-      fields: {
-        content: {
-          'en-US': {
-            nodeType: 'document',
-            content: [],
-          },
-        },
-      },
-    } as unknown as EntryProps;
-
-    // Mock contentType data
-    const mockContentType = {
-      sys: {
-        type: 'ContentType',
-        id: 'content-type-id',
-        version: 1,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
-        space: { sys: { type: 'Link', linkType: 'Space', id: 'space-id' } },
-        environment: { sys: { type: 'Link', linkType: 'Environment', id: 'environment-id' } },
-      },
-      name: 'Test Content Type',
-      description: 'Test Description',
-      displayField: 'title',
-      fields: [
-        {
-          id: 'content',
-          name: 'Content',
-          type: 'RichText',
-          localized: true,
-          required: true,
-          validations: [],
-          disabled: false,
-          omitted: false,
-        },
-      ],
-    } as ContentTypeProps;
+    // Mock Entry data
+    const entry = createEntry({ content: { nodeType: 'document', content: [] } });
+    const contentType = createContentType(['content'], 'RichText');
 
     // Mock API responses
-    vi.mocked(mockCma.entry.get).mockResolvedValue(mockEntry);
-    vi.mocked(mockCma.contentType.get).mockResolvedValue(mockContentType);
+    vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+    vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
     vi.mocked(documentToHtmlString).mockReturnValue('<p>Test HTML</p>');
-    vi.mocked(global.fetch).mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ content_block_id: 'block-id' }),
-    } as Response);
+    mockFetchSuccess({ content_block_id: 'block-id' });
 
     const event: AppActionRequest<'Custom', { entryId: string; fieldIds: string }> = {
       type: FunctionTypeEnum.AppActionCall,
-      body: {
-        entryId: 'entry-id',
-        fieldIds: 'content',
-      },
+      body: { entryId: 'entry-id', fieldIds: 'content' },
       headers: {},
     };
 
@@ -236,7 +127,7 @@ describe('createContentBlocks', () => {
       ],
     });
 
-    expect(documentToHtmlString).toHaveBeenCalledWith(mockEntry.fields.content['en-US']);
+    expect(documentToHtmlString).toHaveBeenCalledWith(entry.fields.content['en-US']);
     expect(global.fetch).toHaveBeenCalledWith(
       'https://test.braze.com/content_blocks/create',
       expect.objectContaining({
@@ -250,67 +141,17 @@ describe('createContentBlocks', () => {
   });
 
   it('should handle missing fields', async () => {
-    // Mock entry data
-    const mockEntry = {
-      sys: {
-        id: 'entry-id',
-        type: 'Entry',
-        space: { sys: { type: 'Link', linkType: 'Space', id: 'space-id' } },
-        environment: { sys: { type: 'Link', linkType: 'Environment', id: 'environment-id' } },
-        contentType: {
-          sys: {
-            type: 'Link',
-            linkType: 'ContentType',
-            id: 'content-type-id',
-          },
-        },
-        locale: 'en-US',
-        version: 1,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
-        automationTags: [],
-      },
-      fields: {},
-    } as unknown as EntryProps;
-
-    // Mock contentType data
-    const mockContentType = {
-      sys: {
-        type: 'ContentType',
-        id: 'content-type-id',
-        version: 1,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
-        space: { sys: { type: 'Link', linkType: 'Space', id: 'space-id' } },
-        environment: { sys: { type: 'Link', linkType: 'Environment', id: 'environment-id' } },
-      },
-      name: 'Test Content Type',
-      description: 'Test Description',
-      displayField: 'title',
-      fields: [
-        {
-          id: 'title',
-          name: 'Title',
-          type: 'Text',
-          localized: true,
-          required: true,
-          validations: [],
-          disabled: false,
-          omitted: false,
-        },
-      ],
-    } as ContentTypeProps;
+    // Mock Entry data
+    const entry = createEntry({});
+    const contentType = createContentType(['title']);
 
     // Mock API responses
-    vi.mocked(mockCma.entry.get).mockResolvedValue(mockEntry);
-    vi.mocked(mockCma.contentType.get).mockResolvedValue(mockContentType);
+    vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+    vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
 
     const event: AppActionRequest<'Custom', { entryId: string; fieldIds: string }> = {
       type: FunctionTypeEnum.AppActionCall,
-      body: {
-        entryId: 'entry-id',
-        fieldIds: 'title',
-      },
+      body: { entryId: 'entry-id', fieldIds: 'title' },
       headers: {},
     };
 
@@ -330,64 +171,13 @@ describe('createContentBlocks', () => {
   });
 
   it('should handle API errors', async () => {
-    // Mock entry data
-    const mockEntry = {
-      sys: {
-        id: 'entry-id',
-        type: 'Entry',
-        space: { sys: { type: 'Link', linkType: 'Space', id: 'space-id' } },
-        environment: { sys: { type: 'Link', linkType: 'Environment', id: 'environment-id' } },
-        contentType: {
-          sys: {
-            type: 'Link',
-            linkType: 'ContentType',
-            id: 'content-type-id',
-          },
-        },
-        locale: 'en-US',
-        version: 1,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
-        automationTags: [],
-      },
-      fields: {
-        title: {
-          'en-US': 'Test Title',
-        },
-      },
-    } as unknown as EntryProps;
-
-    // Mock contentType data
-    const mockContentType = {
-      sys: {
-        type: 'ContentType',
-        id: 'content-type-id',
-        version: 1,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
-        space: { sys: { type: 'Link', linkType: 'Space', id: 'space-id' } },
-        environment: { sys: { type: 'Link', linkType: 'Environment', id: 'environment-id' } },
-      },
-      name: 'Test Content Type',
-      description: 'Test Description',
-      displayField: 'title',
-      fields: [
-        {
-          id: 'title',
-          name: 'Title',
-          type: 'Text',
-          localized: true,
-          required: true,
-          validations: [],
-          disabled: false,
-          omitted: false,
-        },
-      ],
-    } as ContentTypeProps;
+    // Mock Entry data
+    const entry = createEntry({ title: 'Test Title' });
+    const contentType = createContentType(['title']);
 
     // Mock API responses
-    vi.mocked(mockCma.entry.get).mockResolvedValue(mockEntry);
-    vi.mocked(mockCma.contentType.get).mockResolvedValue(mockContentType);
+    vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+    vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
     vi.mocked(global.fetch).mockResolvedValue({
       ok: false,
       statusText: 'Unauthorized',
@@ -395,10 +185,7 @@ describe('createContentBlocks', () => {
 
     const event: AppActionRequest<'Custom', { entryId: string; fieldIds: string }> = {
       type: FunctionTypeEnum.AppActionCall,
-      body: {
-        entryId: 'entry-id',
-        fieldIds: 'title',
-      },
+      body: { entryId: 'entry-id', fieldIds: 'title' },
       headers: {},
     };
 
