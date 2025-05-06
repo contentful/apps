@@ -47,7 +47,11 @@ export abstract class Field {
     return this.generateLiquidTagForType(template);
   }
 
-  displayName(): string {
+  displayNameForGenerate(): string {
+    return this.name;
+  }
+
+  displayNameForCreate(): string {
     return this.name;
   }
 
@@ -68,7 +72,11 @@ export abstract class Field {
 
   childToggled(selected: boolean) {}
 
-  isEnabled(): boolean {
+  isEnabledForGenerate(): boolean {
+    return true;
+  }
+
+  isEnabledForCreate(): boolean {
     return true;
   }
 }

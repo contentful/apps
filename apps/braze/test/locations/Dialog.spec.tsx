@@ -118,17 +118,24 @@ describe('Dialog component', () => {
 
     await screen.findByText(CREATE_FIELDS_STEP_TEXT, { exact: false });
 
-    const select = screen.getByTestId(`select-${mockEntry.id}`) as HTMLSelectElement;
-    expect(select).toBeTruthy();
+    const multiSelect = screen.getByText('Select one or more');
+    expect(multiSelect).toBeTruthy();
 
-    fireEvent.change(select, { target: { value: mockField.name } });
+    fireEvent.click(multiSelect);
+
+    const checkbox = screen.getByRole('checkbox', {
+      name: mockField.displayNameForGenerate(),
+    });
+    expect(checkbox).toBeTruthy();
+
+    fireEvent.click(checkbox);
 
     const nextButton = screen.getByRole('button', { name: /next/i });
     expect(nextButton).toBeTruthy();
 
     fireEvent.click(nextButton);
 
-    const createStepParagraph = await screen.findByText('Edit each field to change', {
+    const createStepParagraph = screen.getByText('Edit each field to change', {
       exact: false,
     });
     expect(createStepParagraph).toBeTruthy();
@@ -138,7 +145,7 @@ describe('Dialog component', () => {
 
     fireEvent.click(sendToBrazeButton);
 
-    const successStepParagraph = await screen.findByText('Seven fields were successfully', {
+    const successStepParagraph = screen.getByText('Seven fields were successfully', {
       exact: false,
     });
     expect(successStepParagraph).toBeTruthy();

@@ -20,7 +20,6 @@ type CreateFlowProps = {
 
 const CreateFlow = (props: CreateFlowProps) => {
   const { sdk, entry, initialSelectedFields = [] } = props;
-
   const [step, setStep] = useState(FIELDS_STEP);
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set(initialSelectedFields));
   const [contentBlockName, setContentBlockName] = useState('');

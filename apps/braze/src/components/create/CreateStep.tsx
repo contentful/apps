@@ -21,7 +21,7 @@ const CreateStep = ({ isSubmitting, handlePreviousStep, handleNextStep }: Create
           directly to Braze. Content Block names should be unique.
         </Paragraph>
       </Box>
-      <WizardFooter paddingTop="spacing2Xs" paddingBottom="0" paddingRight="0">
+      <WizardFooter>
         <Button variant="secondary" size="small" onClick={handlePreviousStep}>
           Back
         </Button>

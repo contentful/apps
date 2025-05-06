@@ -53,7 +53,7 @@ const LocalesSelectionStep = (props: LocalesSelectionStepProps) => {
         </Multiselect>
       </FormControl>
 
-      <WizardFooter paddingRight="0">
+      <WizardFooter>
         <Button variant="secondary" size="small" onClick={handlePreviousStep}>
           Back
         </Button>
