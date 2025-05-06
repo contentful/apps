@@ -31,6 +31,7 @@ export interface AppState {
   modalUploadAssetVisible: boolean;
   file: File | null;
   showMuxUploaderUI: boolean;
+  pendingUploadURL: string | null;
 }
 
 export interface MuxContentfulObject {
