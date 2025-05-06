@@ -7,6 +7,7 @@ import FieldsStep from './FieldsStep';
 import CreateStep from './CreateStep';
 import SuccessStep from './SuccessStep';
 import { FIELDS_STEP } from '../../utils';
+import { createClient } from 'contentful-management';
 
 const CREATE_STEP = 'create';
 const SUCCESS_STEP = 'success';
@@ -25,17 +26,49 @@ const CreateFlow = (props: CreateFlowProps) => {
   const [contentBlockName, setContentBlockName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const cma = createClient(
+    { apiAdapter: sdk.cmaAdapter },
+    {
+      type: 'plain',
+      defaults: {
+        environmentId: sdk.ids.environment,
+        spaceId: sdk.ids.space,
+      },
+    }
+  );
+
   const handleCreate = async () => {
     setIsSubmitting(true);
-    try {
-      // TODO: Implement the actual creation of content blocks in Braze
-      // This would involve making an API call to Braze with the selected fields
-      setStep(SUCCESS_STEP);
-    } catch (error) {
-      console.error('Failed to create content block:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
+
+    const connectedFields = JSON.parse(sdk.parameters.installation.brazeConnectedFields || '{}');
+    const entryConnectedFields = connectedFields[entry.id] || [];
+
+    const response = await cma.appActionCall.createWithResponse(
+      {
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
+        appDefinitionId: '3xrrkR4QQr5YqMvOOoIt4y', //sdk.ids.app!,
+        appActionId: 'createContentBlocksAction',
+      },
+      {
+        parameters: {
+          entryId: entry.id,
+          fieldIds: Array.from(selectedFields).join(','),
+        },
+      }
+    );
+    const data = JSON.parse(response.response.body);
+    // TODO: define type returned by the action
+    const newFields = data.results
+      .filter((result: any) => result.success)
+      .map((result: any) => [result.fieldId, result.contentBlockId]);
+
+    connectedFields[entry.id] = [...entryConnectedFields, ...newFields];
+    sdk.parameters.installation.brazeConnectedFields = JSON.stringify(connectedFields);
+
+    // TODO: handle errors
+    setIsSubmitting(false);
+    setStep(SUCCESS_STEP);
   };
 
   return (
