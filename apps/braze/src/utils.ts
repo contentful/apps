@@ -14,6 +14,7 @@ export const GENERATE_DIALOG_TITLE = 'Generate Braze Connected Content Call';
 export const CREATE_DIALOG_TITLE = 'Generate Braze Content Blocks';
 export const SIDEBAR_GENERATE_BUTTON_TEXT = 'Generate';
 export const SIDEBAR_CREATE_BUTTON_TEXT = 'Create';
+export const SIDEBAR_CONNECTED_ENTRIES_BUTTON_TEXT = 'View all connected entries';
 export const CREATE_DIALOG_MODE = 'create';
 export const GENERATE_DIALOG_MODE = 'generate';
 export const FIELDS_STEP = 'fields';

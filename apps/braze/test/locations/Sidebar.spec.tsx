@@ -5,6 +5,7 @@ import {
   CREATE_DIALOG_TITLE,
   SIDEBAR_GENERATE_BUTTON_TEXT,
   SIDEBAR_CREATE_BUTTON_TEXT,
+  SIDEBAR_CONNECTED_ENTRIES_BUTTON_TEXT,
 } from '../../src/utils';
 import { mockSdk, mockCma } from '../mocks';
 import Sidebar from '../../src/locations/Sidebar';
@@ -129,5 +130,25 @@ describe('Sidebar component', () => {
       },
       width: 'large',
     });
+  });
+
+  it('renders the "Connected Content Block entries" section when connectedFields are present', () => {
+    const { getByText, queryByText } = render(<Sidebar />);
+
+    expect(getByText('Connected Content Block entries')).toBeTruthy();
+    expect(getByText('fieldA')).toBeTruthy();
+    expect(getByText('fieldB')).toBeTruthy();
+    expect(queryByText('fieldC')).toBeNull();
+  });
+
+  it('renders the Connected Entries button and triggers navigation when clicked', async () => {
+    const { getByText } = render(<Sidebar />);
+    const button = getByText(SIDEBAR_CONNECTED_ENTRIES_BUTTON_TEXT);
+
+    expect(button).toBeTruthy();
+
+    fireEvent.click(button);
+
+    expect(mockSdk.navigator.openCurrentAppPage).toHaveBeenCalledTimes(1);
   });
 });
