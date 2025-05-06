@@ -270,10 +270,10 @@ export class KlaviyoService {
   /**
    * Upload an image to Klaviyo
    */
-  async uploadImage(imageUrl: string, name?: string): Promise<any> {
+  async uploadImage(imageUrl: string, name?: string, spaceId?: string): Promise<any> {
     try {
       const imageName = name || `Image-${new Date().getTime()}`;
-      return await this.apiService.uploadImage(imageName, imageUrl);
+      return await this.apiService.uploadImage(imageName, imageUrl, spaceId);
     } catch (error) {
       logger.error('Error uploading image:', error);
       throw error;

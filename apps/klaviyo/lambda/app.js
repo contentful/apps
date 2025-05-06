@@ -1441,6 +1441,61 @@ function formatLocationField(value) {
 }
 
 /**
+ * Helper function to find an existing image in Klaviyo by URL
+ * @param {string} imageUrl The image URL to search for
+ * @param {string} privateKey The Klaviyo API key
+ * @returns {Promise<{id: string, url: string, name: string} | null>}
+ */
+async function findKlaviyoImageByUrl(imageUrl, privateKey) {
+  let cursor = undefined;
+  const pageSize = 100;
+  let foundImage = null;
+  let hasMore = true;
+
+  while (hasMore && !foundImage) {
+    try {
+      const params = { 'page[size]': pageSize };
+      if (cursor) params['page[cursor]'] = cursor;
+      const response = await axios({
+        method: 'get',
+        url: `${KLAVIYO_API_URL}/images/`,
+        params,
+        headers: {
+          Accept: 'application/vnd.api+json',
+          revision: KLAVIYO_API_REVISION,
+          Authorization: `Klaviyo-API-Key ${privateKey}`,
+        },
+        timeout: 25000,
+      });
+      const images = response.data?.data || [];
+      foundImage = images.find((img) => img?.attributes?.image_url === imageUrl);
+      // Cursor-based pagination: check for next link
+      const nextLink = response.data?.links?.next;
+      hasMore = !!nextLink && !foundImage;
+      if (hasMore) {
+        // Extract cursor from next link (Klaviyo returns full URL)
+        const urlObj = new URL(nextLink);
+        cursor = urlObj.searchParams.get('page[cursor]');
+      }
+    } catch (error) {
+      console.error(
+        'Error searching for existing Klaviyo images:',
+        error.response?.data || error.message
+      );
+      break;
+    }
+  }
+  if (foundImage) {
+    return {
+      id: foundImage.id,
+      url: foundImage.attributes.image_url,
+      name: foundImage.attributes.name,
+    };
+  }
+  return null;
+}
+
+/**
  * Process an image field and upload it to Klaviyo's Images API
  * @param {any} value The image field value
  * @param {string} imageTitle The title for the image
@@ -1453,96 +1508,59 @@ async function processImageField(value, imageTitle, spaceId, privateKey) {
 
   // Extract image URL from asset reference
   let imageUrl = '';
-  let assetId = '';
   let processedValue = value; // Make a copy that we can modify
 
   try {
     console.log(`Raw image value type: ${typeof value}`);
     console.log(`Raw image value: ${JSON.stringify(value)}`);
 
-    // Check if it's a stringified JSON object
-    if (typeof value === 'string' && (value.includes('"sys"') || value.includes('\\"sys\\"'))) {
-      try {
-        // Handle escaped JSON strings
-        const cleanValue = value.replace(/\\"/g, '"').replace(/^"/, '').replace(/"$/, '');
-        console.log('Cleaning stringified asset reference:', cleanValue);
-
-        // Parse the string into an object
-        const parsedValue = JSON.parse(cleanValue);
-        console.log('Successfully parsed asset reference:', JSON.stringify(parsedValue));
-
-        // Extract asset ID
-        if (parsedValue.sys && parsedValue.sys.id) {
-          assetId = parsedValue.sys.id;
-          console.log(`Extracted asset ID from parsed string: ${assetId}`);
-
-          // Create a cloned value to avoid modifying the constant
-          processedValue = { ...parsedValue };
-        }
-      } catch (e) {
-        console.error('Failed to parse stringified asset reference:', e);
-
-        // Try alternative parsing for deeply nested JSON strings
+    // If value is a string and looks like a URL, use it directly
+    if (typeof value === 'string') {
+      // Try to parse as JSON if it looks like an object
+      if (value.trim().startsWith('{')) {
         try {
-          const doubleStringified = JSON.parse(value);
-          if (typeof doubleStringified === 'string' && doubleStringified.includes('"sys"')) {
-            const parsedInner = JSON.parse(doubleStringified);
-            console.log('Parsed double-stringified asset reference:', JSON.stringify(parsedInner));
-
-            if (parsedInner.sys && parsedInner.sys.id) {
-              assetId = parsedInner.sys.id;
-              console.log(`Extracted asset ID from double-parsed string: ${assetId}`);
-              processedValue = { ...parsedInner };
-            }
-          }
-        } catch (innerError) {
-          console.error('Failed alternative parsing:', innerError);
+          processedValue = JSON.parse(value);
+        } catch (e) {
+          // Not JSON, treat as string
+          processedValue = value;
         }
+      } else if (value.startsWith('http') || value.startsWith('//')) {
+        imageUrl = value.startsWith('//') ? `https:${value}` : value;
       }
-    } else if (typeof value === 'object' && value?.sys?.id) {
-      // Direct object reference
-      assetId = value.sys.id;
-      console.log(`Using direct asset ID from object: ${assetId}`);
     }
 
-    // First check if the _resolvedUrl field is present (set by entry-sync-function)
-    if (processedValue && processedValue._resolvedUrl) {
-      imageUrl = processedValue._resolvedUrl;
-      console.log(`Using _resolvedUrl: ${imageUrl}`);
-    }
-    // Check if we have a normal Contentful asset structure
-    else if (
-      (processedValue && processedValue.fields?.file?.['en-US']?.url) ||
-      (processedValue && processedValue.fields?.file?.url)
-    ) {
-      const fileUrl = processedValue.fields.file['en-US']?.url || processedValue.fields.file.url;
-      // Make sure the URL starts with https:
-      imageUrl = fileUrl.startsWith('//') ? `https:${fileUrl}` : fileUrl;
-      console.log(`Using URL from fields.file: ${imageUrl}`);
-    }
-
-    // Fallback: Construct URL from asset ID if no direct URL found
-    if (!imageUrl && assetId) {
-      console.log(`Using asset ID for URL construction: ${assetId}`);
-
-      if (!spaceId) {
-        console.error('No spaceId available for asset URL construction. Skipping image upload.');
-        return { success: false, error: 'No spaceId available for asset URL construction.' };
+    // If value is an object, check for _resolvedUrl or fields.file.url
+    if (!imageUrl && typeof processedValue === 'object' && processedValue !== null) {
+      if (processedValue._resolvedUrl) {
+        imageUrl = processedValue._resolvedUrl;
+        console.log(`Using _resolvedUrl: ${imageUrl}`);
+      } else if (processedValue.fields?.file?.['en-US']?.url || processedValue.fields?.file?.url) {
+        const fileUrl = processedValue.fields.file['en-US']?.url || processedValue.fields.file.url;
+        imageUrl = fileUrl.startsWith('//') ? `https:${fileUrl}` : fileUrl;
+        console.log(`Using URL from fields.file: ${imageUrl}`);
       }
-      // Use Contentful Images API with proper parameters
-      const params = [
-        'fm=jpg', // Format as JPEG
-        'fit=fill', // Resize to fit dimensions
-        'w=1200', // Max width 1200px
-        'q=80', // 80% quality
-      ].join('&');
-      imageUrl = `https://images.ctfassets.net/${spaceId}/${assetId}?${params}`;
+    }
+
+    // If we still don't have a valid URL, error out
+    if (!imageUrl) {
+      console.error('No valid image URL found in asset value. Skipping image upload.');
+      return { success: false, error: 'No valid image URL found in asset value.' };
     }
 
     console.log(`Final image URL for upload: ${imageUrl}`);
 
-    if (!imageUrl) {
-      return { success: false, error: 'Could not extract image URL from asset reference' };
+    // Check for existing image in Klaviyo before uploading
+    const existingImage = await findKlaviyoImageByUrl(imageUrl, privateKey);
+    if (existingImage) {
+      console.log(
+        `Found existing image in Klaviyo. ID: ${existingImage.id}, URL: ${existingImage.url}`
+      );
+      return {
+        success: true,
+        url: existingImage.url,
+        id: existingImage.id,
+        reused: true,
+      };
     }
 
     // Try to upload the image to Klaviyo
@@ -1580,7 +1598,7 @@ async function processImageField(value, imageTitle, spaceId, privateKey) {
 
       if (imageResponse.data && imageResponse.data.data) {
         const imageId = imageResponse.data.data.id;
-        const imageKlaviyoUrl = imageResponse.data.data.attributes.url;
+        const imageKlaviyoUrl = imageResponse.data.data.attributes.image_url;
 
         console.log(`Image uploaded successfully. ID: ${imageId}, URL: ${imageKlaviyoUrl}`);
         return {
@@ -1597,76 +1615,10 @@ async function processImageField(value, imageTitle, spaceId, privateKey) {
         uploadError.response?.status,
         uploadError.response?.data || uploadError.message
       );
-
-      // If the first upload attempt failed, try with alternative formats
-      if (uploadError.response && uploadError.response.status === 400 && assetId) {
-        if (!spaceId) {
-          console.error(
-            'No spaceId available for asset URL construction (alternative formats). Skipping image upload.'
-          );
-          return { success: false, error: 'No spaceId available for asset URL construction.' };
-        }
-        console.log('First upload attempt failed. Trying with alternative image formats...');
-        // Try with different formats that Contentful supports
-        const alternativeFormats = [
-          `https://images.ctfassets.net/${spaceId}/${assetId}?w=1000&h=1000&fit=fill`, // Square image
-          `https://images.ctfassets.net/${spaceId}/${assetId}?w=1920&h=1080&fit=fill`, // 16:9 image
-          `https://images.ctfassets.net/${spaceId}/${assetId}?fm=jpg&w=1200&q=80`, // JPG format with settings
-          `https://images.ctfassets.net/${spaceId}/${assetId}?fm=png&w=1200`, // PNG format
-          `https://downloads.ctfassets.net/${spaceId}/${assetId}`, // Download URL (last resort)
-        ];
-        // Try each alternative format
-        for (const alternativeUrl of alternativeFormats) {
-          try {
-            console.log(`Trying alternative image URL: ${alternativeUrl}`);
-            const altImageRequestBody = {
-              data: {
-                type: 'image',
-                attributes: {
-                  name: imageTitle || 'Contentful Image',
-                  import_from_url: alternativeUrl,
-                },
-              },
-            };
-            const altImageResponse = await axios({
-              method: 'post',
-              url: `${KLAVIYO_API_URL}/images/`,
-              data: altImageRequestBody,
-              headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-                revision: KLAVIYO_API_REVISION,
-                Authorization: `Klaviyo-API-Key ${privateKey}`,
-              },
-              timeout: 25000, // 25 seconds timeout
-            });
-            if (altImageResponse.data && altImageResponse.data.data) {
-              const altImageId = altImageResponse.data.data.id;
-              const altImageKlaviyoUrl = altImageResponse.data.data.attributes.url;
-              console.log(
-                `Alternative image uploaded successfully. ID: ${altImageId}, URL: ${altImageKlaviyoUrl}`
-              );
-              return {
-                success: true,
-                url: altImageKlaviyoUrl,
-                id: altImageId,
-              };
-            }
-          } catch (altUploadError) {
-            console.log(
-              `Alternative upload with ${alternativeUrl} failed:`,
-              altUploadError.response?.status || altUploadError.message
-            );
-            // Continue to next format
-          }
-        }
-      }
-
-      // If we get here, all attempts failed
-      return { success: false, error: uploadError.message || 'Image upload failed' };
+      return { success: false, error: uploadError.message };
     }
-  } catch (e) {
-    console.error('Error processing image field:', e);
-    return { success: false, error: e.message };
+  } catch (error) {
+    console.error('Error processing image field:', error);
+    return { success: false, error: error.message };
   }
 }

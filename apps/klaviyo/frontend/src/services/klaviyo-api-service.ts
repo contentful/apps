@@ -264,12 +264,13 @@ export class KlaviyoApiService {
   /**
    * Upload an image to Klaviyo
    */
-  async uploadImage(name: string, url: string): Promise<any> {
+  async uploadImage(name: string, url: string, spaceId?: string): Promise<any> {
     try {
       return await this.callApi('images', 'POST', {
         name,
         url,
         contentType: 'image',
+        ...(spaceId ? { spaceId } : {}),
       });
     } catch (error) {
       logger.error('Error uploading image:', error);

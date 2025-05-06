@@ -1,7 +1,5 @@
 import React from 'react';
-import logger from '../utils/logger';
-import { v4 as uuidv4 } from 'uuid';
-import { locations } from '@contentful/app-sdk';
+import { logger } from '../utils/logger';
 
 /**
  * Interface representing field data structure
@@ -82,7 +80,7 @@ export interface SyncOptions {
  */
 export const sendToKlaviyo = async (
   config: KlaviyoConfig,
-  fieldMappings: Record<string, string>,
+  fieldMapping: Record<string, string>,
   entryData: Record<string, FieldData>
 ): Promise<any> => {
   try {
@@ -91,7 +89,7 @@ export const sendToKlaviyo = async (
     }
 
     // Transform field data according to mappings
-    const transformedData = Object.entries(fieldMappings).reduce(
+    const transformedData = Object.entries(fieldMapping).reduce(
       (acc, [contentfulField, klaviyoField]) => {
         if (entryData[contentfulField]) {
           acc[klaviyoField] = entryData[contentfulField].value;
@@ -101,14 +99,9 @@ export const sendToKlaviyo = async (
       {} as Record<string, any>
     );
 
-    // Basic validation
-    if (!transformedData.email && !transformedData.phone_number) {
-      throw new Error('Either email or phone number is required for Klaviyo profiles');
-    }
-
-    // Endpoint defaults to profiles if not specified
-    const endpoint = config.endpoint || 'profiles';
-    const baseUrl = 'https://a.klaviyo.com/api/v2';
+    // Endpoint defaults to template-universal-content if not specified
+    const endpoint = config.endpoint || 'template-universal-content';
+    const baseUrl = 'https://a.klaviyo.com/api';
 
     // Build request options
     const options = {
@@ -141,7 +134,6 @@ export const sendToKlaviyo = async (
 
 // Import the KlaviyoService and OAuth configuration
 import { KlaviyoService } from './klaviyo';
-import { error } from 'console';
 
 // Helper function to check if a value is a Contentful rich text document
 function isRichTextDocument(value: any): boolean {
@@ -345,27 +337,14 @@ function richTextToHtml(richTextNode: any): string {
   }
 }
 
-// Define the FieldMapping interface to match the service's requirements
-interface FieldMapping {
-  contentfulFieldId: string;
-  fieldType: 'text' | 'image' | 'entry' | 'reference-array';
-  klaviyoBlockName: string;
-  contentTypeId?: string;
-  fields?: any;
-  name: string;
-  type: string;
-  severity: string;
-  value: any;
-  isAssetField?: boolean;
-}
-
 /**
  * Class for syncing Contentful content to Klaviyo
  */
 export class SyncContent {
   sdk: any;
 
-  constructor(entry: any, sdk?: any) {
+  constructor(entry: any, sdk: any) {
+    console.log('SyncContent constructor initialized', sdk, entry);
     logger.log('SyncContent constructor initialized');
 
     // Handle different initialization scenarios
@@ -622,22 +601,23 @@ export class SyncContent {
 
       const assetId = assetLink.sys.id;
 
-      // Try to get the asset using the SDK
+      // Always fetch the asset from the CMA
       if (sdk.space && typeof sdk.space.getAsset === 'function') {
         const asset = await sdk.space.getAsset(assetId);
-
         if (asset && asset.fields) {
           const title = asset.fields.title?.['en-US'] || '';
           const description = asset.fields.description?.['en-US'] || '';
           const file = asset.fields.file?.['en-US'];
 
-          if (file) {
+          if (file && file.url) {
+            // Ensure the URL is fully qualified
+            const url = file.url.startsWith('//') ? `https:${file.url}` : file.url;
             return [
               {
                 id: assetId,
                 title,
                 description,
-                url: file.url,
+                url,
                 fileName: file.fileName,
                 contentType: file.contentType,
               },
@@ -817,10 +797,10 @@ export class SyncContent {
    * @param mappings Field mappings with type information
    * @returns Processed entry data with simplified values
    */
-  private processEntryData(
+  private async processEntryData(
     entryData: Record<string, any>,
     mappings: Array<{ contentfulFieldId: string; klaviyoBlockName: string; fieldType: string }>
-  ): Record<string, any> {
+  ): Promise<Record<string, any>> {
     if (!entryData) {
       return {};
     }
@@ -841,12 +821,86 @@ export class SyncContent {
       // Find the field mapping to determine type
       const mapping = mappings.find((m) => m.contentfulFieldId === fieldId);
       const fieldType = mapping?.fieldType || 'text';
+      console.log(`[processEntryData] Field ${fieldId} type:`, fieldType);
 
       // Process based on field type
       if (fieldType === 'richText' && isRichTextDocument(value)) {
         // Convert rich text to HTML
         logger.log(`[processEntryData] Converting rich text field ${fieldId} to HTML`);
         processedData[fieldId] = richTextToHtml(value);
+      } else if (fieldType === 'image') {
+        let assetRef = value;
+        console.log(
+          `[processEntryData] Image field ${fieldId} value:`,
+          value,
+          this.sdk.space,
+          this.sdk.cma
+        );
+        // If value is a string, try to parse as JSON asset reference
+        if (typeof value === 'string') {
+          try {
+            logger.log(`[processEntryData] Attempting to parse image field ${fieldId} as JSON`);
+            const parsed = JSON.parse(value);
+            if (
+              parsed &&
+              parsed.sys &&
+              parsed.sys.type === 'Link' &&
+              parsed.sys.linkType === 'Asset'
+            ) {
+              assetRef = parsed;
+              logger.log(`[processEntryData] Parsed asset reference for ${fieldId}:`, assetRef);
+            }
+          } catch (e) {
+            logger.log(`[processEntryData] Could not parse image field ${fieldId} as JSON:`, e);
+            // Not a JSON string, leave as is
+          }
+        }
+        // If we have an asset reference, resolve it
+        if (
+          assetRef &&
+          assetRef.sys &&
+          assetRef.sys.type === 'Link' &&
+          assetRef.sys.linkType === 'Asset'
+        ) {
+          try {
+            logger.log(
+              `[processEntryData] Resolving asset for field ${fieldId} with id ${assetRef.sys.id}`
+            );
+            const asset = await this.sdk.space.getAsset(assetRef.sys.id);
+            const file = asset.fields.file?.['en-US'];
+            if (file && file.url) {
+              processedData[fieldId] = file.url.startsWith('//') ? `https:${file.url}` : file.url;
+              logger.log(
+                `[processEntryData] Resolved asset URL for ${fieldId}:`,
+                processedData[fieldId]
+              );
+            } else {
+              logger.error(
+                `[processEntryData] Could not resolve file.url for asset ${assetRef.sys.id}`
+              );
+              processedData[fieldId] = '';
+            }
+          } catch (err) {
+            logger.error(`[processEntryData] Error resolving asset for field ${fieldId}:`, err);
+            processedData[fieldId] = '';
+          }
+        } else if (
+          typeof assetRef === 'string' &&
+          (assetRef.startsWith('http') || assetRef.startsWith('//'))
+        ) {
+          // Already a URL
+          processedData[fieldId] = assetRef.startsWith('//') ? `https:${assetRef}` : assetRef;
+          logger.log(
+            `[processEntryData] Image field ${fieldId} is already a URL:`,
+            processedData[fieldId]
+          );
+        } else {
+          // Fallback: send empty string (lambda will skip)
+          logger.error(
+            `[processEntryData] Image field ${fieldId} is not a valid asset reference or URL. Sending empty string.`
+          );
+          processedData[fieldId] = '';
+        }
       } else if (fieldType === 'location') {
         // Handle location field specially to ensure both coordinates are included
         logger.log(`[processEntryData] Formatting location field ${fieldId}`);
@@ -885,6 +939,7 @@ export class SyncContent {
           processedData[fieldId] = extractedText;
         }
       } else {
+        console.log(`[processEntryData] FieldType not found. Field ${fieldId} value:`, value);
         // Keep other values as-is
         processedData[fieldId] = value;
       }
@@ -1037,6 +1092,8 @@ export class SyncContent {
         }
 
         // Prepare payload for the proxy
+        const spaceId = getEffectiveSpaceId(sdk); // Use your helper
+
         const payload = {
           action: 'syncEntry',
           data: {
@@ -1044,6 +1101,7 @@ export class SyncContent {
             contentTypeId,
             entryData: {},
             fieldMappings: mappings,
+            spaceId, // <-- ADD THIS LINE
           },
           privateKey: klaviyoApiKey,
           publicKey: klaviyoCompanyId,
@@ -1051,7 +1109,7 @@ export class SyncContent {
 
         // Process the entry data to ensure all fields are properly formatted
         if (entryData) {
-          payload.data.entryData = this.processEntryData(entryData, mappings);
+          payload.data.entryData = await this.processEntryData(entryData, mappings);
           logger.log(
             '[SyncContent] Processed entry data for payload:',
             Object.keys(payload.data.entryData).length,
@@ -1061,7 +1119,7 @@ export class SyncContent {
         }
         // If we still don't have entry data and this.sdk has entryData, use that
         else if (this.sdk && this.sdk.entryData) {
-          payload.data.entryData = this.processEntryData(this.sdk.entryData, mappings);
+          payload.data.entryData = await this.processEntryData(this.sdk.entryData, mappings);
           logger.log(
             '[SyncContent] Using processed SDK entry data:',
             Object.keys(payload.data.entryData).length,
@@ -2279,4 +2337,9 @@ const updateFieldTimestampsWithLocalStorage = (
   } catch (error) {
     logger.error('Error updating field timestamps with localStorage:', error);
   }
+};
+
+// Add a helper to get the effective spaceId from sdk
+const getEffectiveSpaceId = (sdk: any): string | undefined => {
+  return sdk?.parameters?.installation?.spaceId || sdk?.ids?.space;
 };

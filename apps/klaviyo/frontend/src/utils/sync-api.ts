@@ -338,7 +338,8 @@ export async function syncEntryToKlaviyo(
   entryId: string,
   contentTypeId: string,
   entryData: Record<string, any>,
-  spaceId?: string
+  spaceId?: string,
+  fieldMappings?: any[]
 ): Promise<SyncResult> {
   try {
     const baseUrl = getBaseUrl();
@@ -353,6 +354,8 @@ export async function syncEntryToKlaviyo(
       entryDataType: entryData ? typeof entryData : 'undefined',
       entryDataEmpty: entryData ? Object.keys(entryData).length === 0 : true,
       entryDataFields: entryData ? Object.keys(entryData) : [],
+      fieldMappingsProvided: !!fieldMappings,
+      fieldMappingsCount: fieldMappings ? fieldMappings.length : 0,
     });
 
     // If entry data wasn't provided or is empty, try to get it from the SDK
@@ -466,7 +469,7 @@ export async function syncEntryToKlaviyo(
     });
 
     // Fetch the current field mappings from the API to ensure they're included
-    const mappings = await getSavedFieldMappings(contentTypeId);
+    const mappings = fieldMappings ?? (await getSavedFieldMappings(contentTypeId));
     console.log('Retrieved mappings for content type:', contentTypeId, mappings);
 
     // Prepare the cleaned entry data to send
@@ -491,14 +494,17 @@ export async function syncEntryToKlaviyo(
     // Send the request with improved error handling
     try {
       const payload: any = {
-        entryId,
-        contentTypeId,
-        entryData: cleanedEntry,
-        fieldMappings: mappings,
+        action: 'syncEntry',
+        data: {
+          entryId,
+          contentTypeId,
+          entryData: cleanedEntry,
+          fieldMappings: mappings,
+          ...(spaceId ? { spaceId } : {}),
+        },
+        privateKey,
+        publicKey,
       };
-      if (spaceId) {
-        payload.spaceId = spaceId;
-      }
       const response = await fetch(`${baseUrl}`, {
         method: 'POST',
         headers: {
@@ -628,10 +634,12 @@ export const getSavedFieldMappings = async (contentTypeId: string): Promise<any[
 export const saveLocalMappings = (mappings: any[]): boolean => {
   try {
     if (!Array.isArray(mappings)) {
+      console.log('saving mappings error', mappings);
       logger.warn('[saveLocalMappings] Attempted to save non-array mappings:', mappings);
       return false;
     }
 
+    console.log('saving mappings', mappings);
     localStorage.setItem('klaviyo_field_mappings', JSON.stringify(mappings));
     logger.log(
       '[saveLocalMappings] Successfully saved',

@@ -2,6 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { GlobalStyles } from '@contentful/f36-components';
 import { init, locations } from '@contentful/app-sdk';
+import { SDKProvider } from '@contentful/react-apps-toolkit';
 
 // Import your components
 import ConfigScreen from './locations/ConfigScreen';
@@ -9,19 +10,9 @@ import FieldMappingScreen from './locations/FieldMappingScreen';
 import { KlaviyoAppProvider } from './context/KlaviyoAppContext';
 import { Sidebar } from './locations/Sidebar';
 import FieldSelectDialog from './locations/FieldSelectDialog';
-// Create a simple context for SDK
-import { createContext } from 'react';
 import logger from './utils/logger';
 import { storeAppDefinitionId, getAppDefinitionId } from './services/persistence-service';
 import { getGlobalSDK, ensureAppParameters } from './utils/sdk-helpers';
-
-// Create your own SDK context
-export const SDKContext = createContext<any>(null);
-
-// Create a provider component
-const SDKContextProvider = ({ children, sdk }: { children: React.ReactNode; sdk: any }) => (
-  <SDKContext.Provider value={sdk}>{children}</SDKContext.Provider>
-);
 
 const root = document.getElementById('root');
 
@@ -143,6 +134,13 @@ window.addEventListener('message', async (event) => {
   }
 });
 
+window.addEventListener('storage', (e) => {
+  if (e.key === 'klaviyo_field_mappings') {
+    console.log('klaviyo_field_mappings changed:', e.newValue);
+    localStorage.setItem('klaviyo_field_mappings', e.newValue || '');
+  }
+});
+
 init((sdk) => {
   logger.log('SDK Location:', sdk.location);
   logger.log('Is config?', sdk.location.is(locations.LOCATION_APP_CONFIG));
@@ -181,10 +179,10 @@ init((sdk) => {
   const entry = (sdk as any).entry || {};
   const mappings = (sdk as any).parameters?.installation?.fieldMappings || [];
   render(
-    <SDKContextProvider sdk={sdk}>
+    <SDKProvider>
       <GlobalStyles />
       <ComponentLocation entry={entry} mappings={mappings} />
-    </SDKContextProvider>,
+    </SDKProvider>,
     root
   );
 });

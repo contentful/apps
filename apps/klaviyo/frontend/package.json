@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "^4.29.1",
-    "@contentful/f36-components": "^4.0.0",
+    "@contentful/f36-components": "^4.79.1",
     "@contentful/f36-forms": "^4.0.0",
     "@contentful/f36-icons": "^4.0.0",
     "@contentful/f36-tokens": "^4.0.0",

@@ -139,7 +139,7 @@ describe('klaviyo-api-service', () => {
   describe('SyncContent', () => {
     it('should throw error if API key is missing', async () => {
       // Arrange
-      const syncContent = new SyncContent({});
+      const syncContent = new SyncContent({}, {});
       const mockSdk = {
         parameters: {
           installation: {},
@@ -161,7 +161,7 @@ describe('klaviyo-api-service', () => {
 
     it('should process fields and call API', async () => {
       // Arrange
-      const syncContent = new SyncContent({});
+      const syncContent = new SyncContent({}, {});
       const mockSdk = {
         parameters: {
           installation: {
@@ -248,7 +248,7 @@ describe('klaviyo-api-service', () => {
 
     it('should handle errors during sync', async () => {
       // Arrange
-      const syncContent = new SyncContent({});
+      const syncContent = new SyncContent({}, {});
       const mockSdk = {
         parameters: {
           installation: {

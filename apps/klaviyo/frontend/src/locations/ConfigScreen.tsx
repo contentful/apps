@@ -14,7 +14,7 @@ import {
 } from '@contentful/f36-components';
 import { CheckCircleIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { useSDK } from '../hooks/useSDK';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 import { ContentTypesList } from '../components/ContentTypesList';
 import { KlaviyoAppConfig } from '../config/klaviyo';
@@ -210,11 +210,13 @@ const ConfigScreen = () => {
       console.log(`Combined ${allMappings.length} total field mappings from all content types`);
 
       // Create the final parameters object
+      const spaceId = sdk.ids.space;
       const parameters = {
         publicKey,
         privateKey,
         selectedLocations,
         selectedContentTypes,
+        spaceId,
         // Use our combined mappings
         fieldMappings: allMappings,
         // Use our updated content type mappings

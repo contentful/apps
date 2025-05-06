@@ -1,21 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { DialogExtensionSDK } from '@contentful/app-sdk';
-import { useSDK } from '../hooks/useSDK';
+import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import {
   Box,
   Button,
   Flex,
-  Form,
-  Heading,
+  Checkbox,
   Note,
-  Stack,
   Text,
-  Subheading,
-  Pill,
+  Stack,
+  IconButton,
 } from '@contentful/f36-components';
+import { CloseIcon } from '@contentful/f36-icons';
 import { SyncContent } from '../services/klaviyo-sync-service';
 import { FieldMapping } from '../config/klaviyo';
 import logger from '../utils/logger';
+import { saveLocalMappings } from '../utils/sync-api';
+import { getLocalMappings } from '../services/persistence-service';
+import ReactDOM from 'react-dom';
 
 // Extend Window interface to allow our custom property
 declare global {
@@ -36,15 +38,24 @@ interface Field {
   type: string;
 }
 
-const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = () => {
+// Helper to get spaceId from installation parameters or fallback to sdk.ids.space
+const getEffectiveSpaceId = (sdk: DialogExtensionSDK): string | undefined => {
+  return sdk.parameters?.installation?.spaceId || sdk.ids?.space;
+};
+
+export const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ({
+  entry,
+  mappings,
+}) => {
+  useAutoResizer();
   const sdk = useSDK<DialogExtensionSDK>();
   const [fields, setFields] = useState<Field[]>([]);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredOptions, setFilteredOptions] = useState<Field[]>([]);
-  const [hoveredField, setHoveredField] = useState<string | null>(null);
+  const [step, setStep] = useState<1 | 2>(1);
+  const [blockNames, setBlockNames] = useState<Record<string, string>>({});
+  const [editingBlock, setEditingBlock] = useState<string | null>(null);
 
   // Get the parameters passed to this dialog
   const {
@@ -65,78 +76,44 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ()
     // Initialize fields and preselections
     if (availableFields && Array.isArray(availableFields)) {
       setFields(availableFields);
-      setFilteredOptions(availableFields);
     }
 
-    if (preSelectedFields && Array.isArray(preSelectedFields)) {
+    // Try to load mappings from localStorage for this contentTypeId
+    let localMappings: any[] = [];
+    try {
+      localMappings = getLocalMappings();
+      console.log('Dialog: loaded localMappings from localStorage:', localMappings);
+    } catch (e) {
+      console.log('error getting local mappings', e);
+      localMappings = [];
+    }
+    const currentTypeMappings = contentTypeId
+      ? localMappings.filter((m) => m.contentTypeId === contentTypeId)
+      : [];
+    if (currentTypeMappings.length > 0) {
+      // Preselect fields and block names from local mappings
+      setSelectedFields(currentTypeMappings.map((m) => m.contentfulFieldId || m.id));
+      const blockNamesObj: Record<string, string> = {};
+      currentTypeMappings.forEach((m) => {
+        blockNamesObj[m.contentfulFieldId || m.id] =
+          m.klaviyoBlockName || m.name || m.contentfulFieldId || m.id;
+      });
+      setBlockNames(blockNamesObj);
+    } else if (preSelectedFields && Array.isArray(preSelectedFields)) {
       setSelectedFields(preSelectedFields);
     }
 
     // Set dialog size
     sdk.window.updateHeight(500);
-  }, [availableFields, preSelectedFields]);
+  }, [sdk.parameters.invocation]);
 
+  // Ensure the dialog always returns the latest mappings on close
   useEffect(() => {
-    // Filter options based on search query
-    if (!searchQuery) {
-      // Show only unselected fields when no search query
-      setFilteredOptions(fields.filter((field) => !selectedFields.includes(field.id)));
-      return;
-    }
-
-    const query = searchQuery.toLowerCase();
-    const filtered = fields.filter(
-      (field) =>
-        !selectedFields.includes(field.id) &&
-        (field.name.toLowerCase().includes(query) || field.id.toLowerCase().includes(query))
-    );
-    setFilteredOptions(filtered);
-  }, [searchQuery, fields, selectedFields]);
-
-  const handleFieldSelect = (fieldId: string) => {
-    // Add the field to selected fields
-    setSelectedFields((prev) => [...prev, fieldId]);
-    // Clear the search
-    setSearchQuery('');
-  };
-
-  const handleFieldRemove = (fieldId: string) => {
-    // Remove the field from selected fields
-    setSelectedFields((prev) => prev.filter((id) => id !== fieldId));
-  };
-
-  const handleSaveClick = () => {
-    try {
-      logger.log('[FieldSelectDialog] Saving mappings...');
-
-      if (selectedFields.length === 0) {
-        setSyncMessage('Please select at least one field');
-        return;
-      }
-
-      // First, get current mappings directly from localStorage for consistency
-      const existingMappingsStr = localStorage.getItem('klaviyo_field_mappings');
-      let existingMappings = [];
-      try {
-        if (existingMappingsStr) {
-          existingMappings = JSON.parse(existingMappingsStr);
-          logger.log('[FieldSelectDialog] Found existing mappings:', existingMappings);
-        }
-      } catch (parseError) {
-        logger.error('[FieldSelectDialog] Error parsing existing mappings:', parseError);
-      }
-
-      // Create new mapping objects
+    const originalClose = sdk.close;
+    const handleClose = () => {
       const newMappings = selectedFields.map((fieldId) => {
         const field = fields.find((f) => f.id === fieldId);
-
-        // Ensure contentTypeId is always included and valid
         const mappingContentTypeId = contentTypeId || '';
-
-        logger.log(
-          `Creating mapping for field ${fieldId} with contentTypeId ${mappingContentTypeId}`
-        );
-
         return {
           id: fieldId,
           name: field?.name || fieldId,
@@ -146,456 +123,329 @@ const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] }> = ()
           isAsset: field?.type === 'Asset' || field?.type === 'AssetLink' || false,
         };
       });
-
-      logger.log('[FieldSelectDialog] New mappings with explicit contentTypeId:', newMappings);
-
-      // Merge with existing mappings (filtering out any for the same content type)
-      let updatedMappings = [...existingMappings];
-      if (contentTypeId) {
-        // First, log the existing mappings with their content types
-        logger.log(
-          '[FieldSelectDialog] Existing mappings by contentTypeId:',
-          existingMappings.reduce((acc: Record<string, number>, mapping: any) => {
-            const ctId = mapping.contentTypeId || 'no-content-type';
-            acc[ctId] = (acc[ctId] || 0) + 1;
-            return acc;
-          }, {})
-        );
-
-        // Remove any mappings for this content type
-        updatedMappings = updatedMappings.filter(
-          (mapping: any) => mapping.contentTypeId !== contentTypeId
-        );
-
-        logger.log(
-          '[FieldSelectDialog] Removed existing mappings for contentTypeId:',
-          contentTypeId
-        );
-      }
-
-      // Add the new mappings
-      updatedMappings = [...updatedMappings, ...newMappings];
-
-      logger.log('[FieldSelectDialog] Final merged mappings to save:', updatedMappings);
-
-      // Save directly to localStorage first for immediate sharing
-      localStorage.setItem('klaviyo_field_mappings', JSON.stringify(updatedMappings));
-
-      // Broadcast the update via a postMessage
-      window.postMessage(
-        {
-          type: 'updateFieldMappings',
-          fieldMappings: updatedMappings,
-        },
-        '*'
-      );
-
-      // Show success message
-      setSyncMessage(
-        'Field selections saved successfully. You can continue editing or close the dialog.'
-      );
-
-      // Store the mappings in window._klaviyoDialogResult so they're available when the dialog is closed
-      window._klaviyoDialogResult = {
+      return {
         selectedFields,
-        mappings: updatedMappings,
+        mappings: newMappings,
         success: true,
       };
-
-      // If SDK is available, try to close with the result
-      if (sdk && typeof sdk.close === 'function') {
-        setTimeout(() => {
-          try {
-            sdk.close({
-              selectedFields,
-              mappings: updatedMappings,
-              success: true,
-            });
-          } catch (error) {
-            logger.error('[FieldSelectDialog] Error closing dialog with result:', error);
-          }
-        }, 1500);
-      }
-    } catch (error) {
-      logger.error('[FieldSelectDialog] Error saving mappings:', error);
-      setSyncMessage(
-        `Error saving mappings: ${error instanceof Error ? error.message : 'Unknown error'}`
-      );
-    }
-  };
-
-  const handleSyncClick = async () => {
-    if (selectedFields.length === 0) {
-      setSyncMessage('Please select at least one field');
-      return;
-    }
-
-    setIsSyncing(true);
-    setSyncMessage('Syncing to Klaviyo...');
-
-    try {
-      // Try to get API key and store it in localStorage for the sync process
-      let apiKey = '';
-
-      // 1. Try to get from invocation parameters
-      if (sdk.parameters.invocation) {
-        const inv = sdk.parameters.invocation as Record<string, any>;
-        if (inv.privateKey) {
-          apiKey = inv.privateKey;
-          logger.log('Using privateKey from invocation parameters');
-        } else if (inv.klaviyoApiKey) {
-          apiKey = inv.klaviyoApiKey;
-          logger.log('Using klaviyoApiKey from invocation parameters');
-        }
-      }
-
-      // 2. If still not found, try to get from installation parameters
-      if (!apiKey && sdk.parameters.installation) {
-        const inst = sdk.parameters.installation as Record<string, any>;
-        if (inst.privateKey) {
-          apiKey = inst.privateKey;
-          logger.log('Using privateKey from installation parameters');
-        } else if (inst.klaviyoApiKey) {
-          apiKey = inst.klaviyoApiKey;
-          logger.log('Using klaviyoApiKey from installation parameters');
-        }
-      }
-
-      // 3. Store API key for sync process
-      if (apiKey) {
-        // Store under multiple keys to ensure we can find it
-        localStorage.setItem('klaviyo_api_key', apiKey);
-        localStorage.setItem('klaviyoApiKey', apiKey);
-        logger.log('Stored API key in localStorage for synchronization');
-      }
-
-      // Convert to the format expected by syncContent
-      const formattedMappings = selectedFields.map((fieldId) => {
-        const field = fields.find((f) => f.id === fieldId);
-
-        // Determine field type based on field information
-        let fieldType = 'text'; // Default to text
-        let isAssetField = false;
-
-        // Check if this is an image/asset field
-        if (field) {
-          // Common asset field types in Contentful
-          const assetTypes = ['Asset', 'Link', 'Media', 'Image', 'File'];
-          const imageNamePatterns = [
-            'image',
-            'picture',
-            'photo',
-            'avatar',
-            'logo',
-            'banner',
-            'icon',
-            'thumbnail',
-            'cover',
-            'media',
-          ];
-
-          // Check field type for asset indicators
-          isAssetField = assetTypes.some((type) =>
-            field.type?.toLowerCase().includes(type.toLowerCase())
-          );
-
-          // If not detected by type, check field name for common image patterns
-          if (!isAssetField) {
-            isAssetField = imageNamePatterns.some(
-              (pattern) =>
-                field.id?.toLowerCase().includes(pattern.toLowerCase()) ||
-                field.name?.toLowerCase().includes(pattern.toLowerCase())
-            );
-          }
-
-          // Also try to check the actual content of the field from entry if available
-          if (!isAssetField && currentEntry) {
-            try {
-              const parsedEntry = JSON.parse(currentEntry);
-              const fieldContent = parsedEntry?.fields?.[fieldId];
-
-              // Check if field contains asset reference structure
-              if (fieldContent) {
-                // Check _fieldLocales format
-                if (fieldContent._fieldLocales && fieldContent._fieldLocales['en-US']?._value) {
-                  const value = fieldContent._fieldLocales['en-US']._value;
-
-                  // Check for direct asset references
-                  if (
-                    value?.sys?.type === 'Asset' ||
-                    (value?.sys?.type === 'Link' && value?.sys?.linkType === 'Asset')
-                  ) {
-                    isAssetField = true;
-                  }
-
-                  // Check for stringified asset references
-                  if (
-                    typeof value === 'string' &&
-                    value.includes('"sys"') &&
-                    value.includes('"linkType":"Asset"')
-                  ) {
-                    isAssetField = true;
-                  }
-                }
-
-                // Check traditional field format
-                if (fieldContent['en-US']) {
-                  const value = fieldContent['en-US'];
-
-                  // Check for direct asset references
-                  if (
-                    value?.sys?.type === 'Asset' ||
-                    (value?.sys?.type === 'Link' && value?.sys?.linkType === 'Asset')
-                  ) {
-                    isAssetField = true;
-                  }
-
-                  // Check for stringified asset references
-                  if (
-                    typeof value === 'string' &&
-                    value.includes('"sys"') &&
-                    value.includes('"linkType":"Asset"')
-                  ) {
-                    isAssetField = true;
-                  }
-                }
-              }
-            } catch (e) {
-              // Silently ignore parsing errors
-            }
-          }
-
-          if (isAssetField) {
-            fieldType = 'image';
-            logger.log(`Detected image field: ${field.name} (${field.id})`);
-          }
-        }
-
-        return {
-          contentfulFieldId: fieldId,
-          klaviyoBlockName: field?.name || fieldId,
-          fieldType: fieldType,
-          isAssetField: isAssetField,
-        };
-      });
-
-      // Try to safely extract entry and content type IDs
-      let entryId: string | undefined;
-      let contentTypeId: string | undefined;
-
-      // From invocation parameters (most reliable)
-      if (sdk.parameters.invocation && typeof sdk.parameters.invocation === 'object') {
-        const invocation = sdk.parameters.invocation as Record<string, any>;
-        if (invocation.entryId && typeof invocation.entryId === 'string') {
-          entryId = invocation.entryId;
-        }
-        if (invocation.contentTypeId && typeof invocation.contentTypeId === 'string') {
-          contentTypeId = invocation.contentTypeId;
-        }
-      }
-
-      // Fall back to SDK IDs if available
-      if (!entryId && sdk.ids) {
-        const ids = sdk.ids as Record<string, any>;
-        if (ids.entry && typeof ids.entry === 'string') {
-          entryId = ids.entry;
-        }
-      }
-
-      if (!contentTypeId && sdk.ids) {
-        const ids = sdk.ids as Record<string, any>;
-        if (ids.contentType && typeof ids.contentType === 'string') {
-          contentTypeId = ids.contentType;
-        }
-      }
-
-      logger.log('Starting sync with IDs:', { entryId, contentTypeId });
-
-      // Sync using the parent context SDK (e.g. sidebar)
-      const syncContentService = new SyncContent(currentEntry);
-      await syncContentService.syncContent(sdk, formattedMappings, {
-        entryId,
-        contentTypeId,
-      });
-
-      setSyncMessage(
-        'Fields successfully synced to Klaviyo! You can continue editing or close the dialog.'
-      );
-
-      // Store the result in a global variable so it's available when the dialog is closed manually
-      window._klaviyoDialogResult = {
-        action: 'sync',
-        selectedFields,
-      };
-    } catch (error) {
-      logger.error('Error in sync:', error);
-      setSyncMessage(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
-  // Get field by ID
-  const getFieldById = (fieldId: string) => fields.find((f) => f.id === fieldId);
-
-  // Add an effect to set the sdk.close handler
-  useEffect(() => {
-    // When the component mounts, set up a custom onClose handler
-    const handleClose = () => {
-      // Return the stored result when dialog is closed manually
-      return (
-        window._klaviyoDialogResult || {
-          selectedFields,
-          success: true,
-        }
-      );
     };
-
-    // Store the original close method
-    const originalClose = sdk.close;
-
-    // Create a global variable to store the dialog result
-    window._klaviyoDialogResult = undefined;
-
-    // Override the close method to use our custom handler
     sdk.close = function () {
+      console.log('closing dialog', handleClose());
       return originalClose.call(this, handleClose());
     };
-
-    // Restore original close method on unmount
     return () => {
       sdk.close = originalClose;
     };
-  }, [sdk, selectedFields]);
-
-  const handleCancel = () => {
-    // Set result before closing
-    window._klaviyoDialogResult = {
-      selectedFields,
-      success: true,
-    };
-
-    // Call the close method which will use our custom handler
-    sdk.close();
-  };
+  }, [sdk, selectedFields, fields, contentTypeId]);
 
   return (
-    <Box padding="spacingL">
-      <Form>
-        <Stack spacing="spacingL" flexDirection="column" alignItems="flex-start">
-          <Heading marginBottom="none">Select Fields to Map to Klaviyo</Heading>
-
-          <Text>Select the fields you want to include in the Klaviyo sync:</Text>
-
-          <Box style={{ width: '100%' }}>
-            <Text fontWeight="fontWeightMedium" marginBottom="spacingS">
-              Available Fields
+    <Box padding="spacingL" style={{ minWidth: 480, maxWidth: 600 }}>
+      {/* Description */}
+      <Text style={{ marginBottom: 20 }}>
+        Select the fields you would like to generate into Universal Content. Referenced fields are
+        not available in this list.
+      </Text>
+      {/* Step 1: Field selection */}
+      {step === 1 && (
+        <>
+          <Box style={{ width: '100%', marginBottom: 20, position: 'relative' }}>
+            <Text fontWeight="fontWeightMedium" style={{ marginBottom: 4 }}>
+              Select fields
             </Text>
-
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Type to filter fields..."
-              style={{
-                width: '100%',
-                padding: '8px',
-                borderRadius: '4px',
-                border: '1px solid #DADADA',
-              }}
+            <CustomFieldDropdown
+              fields={fields}
+              selectedFields={selectedFields}
+              setSelectedFields={setSelectedFields}
             />
-
-            <Box
-              style={{
-                maxHeight: '90px',
-                minWidth: '100%',
-                overflow: 'auto',
-                border: '1px solid #EEEEEE',
-                borderRadius: '4px',
-                padding: '8px',
-              }}>
-              {filteredOptions.length > 0 ? (
-                filteredOptions.map((field) => (
-                  <Box
-                    key={field.id}
-                    padding="spacingXs"
-                    onClick={() => handleFieldSelect(field.id)}
-                    onMouseEnter={() => setHoveredField(field.id)}
-                    onMouseLeave={() => setHoveredField(null)}
-                    style={{
-                      cursor: 'pointer',
-                      borderBottom: '1px solid #EEEEEE',
-                      backgroundColor: hoveredField === field.id ? '#F7F9FA' : 'transparent',
-                    }}>
-                    <Text>{field.name}</Text>
-                    <Text fontColor="gray500" fontSize="fontSizeS">
-                      ({field.type})
-                    </Text>
-                  </Box>
-                ))
-              ) : (
-                <Text fontColor="gray500" style={{ textAlign: 'center', padding: 'spacingM' }}>
-                  No matching fields found
-                </Text>
-              )}
-            </Box>
           </Box>
-
-          {selectedFields.length > 0 && (
-            <Box>
-              <Subheading marginBottom="spacingS">Selected Fields</Subheading>
-              <Flex flexWrap="wrap" gap="spacingXs">
-                {selectedFields.map((fieldId) => {
-                  const field = getFieldById(fieldId);
-                  if (!field) return null;
-
-                  return (
-                    <Pill
-                      key={field.id}
-                      label={`${field.name} (${field.type})`}
-                      onClose={() => handleFieldRemove(field.id)}
-                      style={{ marginBottom: '8px' }}
-                    />
-                  );
-                })}
+          <Flex style={{ width: '100%', justifyContent: 'flex-end', gap: 8 }}>
+            <Button
+              variant="primary"
+              onClick={() => {
+                // Initialize block names for selected fields
+                const newBlockNames: Record<string, string> = {};
+                selectedFields.forEach((fieldId) => {
+                  const field = fields.find((f) => f.id === fieldId);
+                  newBlockNames[fieldId] = field
+                    ? `${contentTypeId}.${field.name.replace(/\s+/g, '')}`
+                    : fieldId;
+                });
+                setBlockNames(newBlockNames);
+                setStep(2);
+              }}
+              isDisabled={selectedFields.length === 0}>
+              Next
+            </Button>
+          </Flex>
+        </>
+      )}
+      {/* Step 2: Content Block name editing */}
+      {step === 2 && (
+        <>
+          {/* Content Block name editing */}
+          {selectedFields.map((fieldId) => (
+            <Box key={fieldId} style={{ marginBottom: 20 }}>
+              <Text fontWeight="fontWeightMedium" style={{ marginBottom: 4, display: 'block' }}>
+                Content Block name
+              </Text>
+              <Flex
+                alignItems="center"
+                style={{
+                  background: '#fff',
+                  border: '1px solid #E5E7EB',
+                  borderRadius: 8,
+                  padding: '12px 16px',
+                }}>
+                {editingBlock === fieldId ? (
+                  <input
+                    type="text"
+                    value={blockNames[fieldId]}
+                    onChange={(e) => setBlockNames({ ...blockNames, [fieldId]: e.target.value })}
+                    onBlur={() => setEditingBlock(null)}
+                    autoFocus
+                    style={{
+                      flex: 1,
+                      fontSize: 16,
+                      border: 'none',
+                      outline: 'none',
+                      background: 'transparent',
+                    }}
+                  />
+                ) : (
+                  <Text style={{ flex: 1, fontSize: 16 }}>{blockNames[fieldId]}</Text>
+                )}
+                <IconButton
+                  aria-label="Edit block name"
+                  icon={
+                    <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M13.5 2.75a1.768 1.768 0 0 1 2.5 2.5l-8.25 8.25-3 0.5 0.5-3 8.25-8.25Z"
+                        stroke="#888"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  }
+                  variant="transparent"
+                  onClick={() => setEditingBlock(fieldId)}
+                  style={{ marginLeft: 8 }}
+                />
               </Flex>
             </Box>
-          )}
-
-          {syncMessage && (
-            <Note variant={syncMessage.includes('Error') ? 'negative' : 'positive'}>
-              {syncMessage}
-            </Note>
-          )}
-
-          <Flex justifyContent="space-between" style={{ width: '100%' }}>
-            <Button variant="secondary" onClick={handleCancel}>
-              Close
+          ))}
+          <Flex style={{ width: '100%', justifyContent: 'space-between', gap: 8 }}>
+            <Button variant="secondary" onClick={() => setStep(1)}>
+              Back
             </Button>
-
-            <Flex gap="spacingS">
-              <Button
-                variant="positive"
-                onClick={handleSaveClick}
-                isDisabled={selectedFields.length === 0}>
-                Save Selections
-              </Button>
-
-              {showSyncButton && (
-                <Button
-                  variant="primary"
-                  onClick={handleSyncClick}
-                  isDisabled={selectedFields.length === 0}
-                  isLoading={isSyncing}>
-                  Save & Sync to Klaviyo
-                </Button>
-              )}
-            </Flex>
+            <Button
+              variant="primary"
+              onClick={() => {
+                // Build new mappings for this content type
+                const newMappings = selectedFields.map((fieldId) => {
+                  const field = fields.find((f) => f.id === fieldId);
+                  return {
+                    id: fieldId,
+                    name: field?.name || fieldId,
+                    contentfulFieldId: fieldId,
+                    klaviyoBlockName: blockNames[fieldId],
+                    fieldType: field?.type || 'Text',
+                    contentTypeId: contentTypeId || '',
+                  };
+                });
+                // Merge with existing mappings for other content types
+                let allMappings = getLocalMappings();
+                // Remove old mappings for this content type
+                allMappings = allMappings.filter((m) => m.contentTypeId !== (contentTypeId || ''));
+                // Add new mappings for this content type
+                const updatedMappings = [...allMappings, ...newMappings];
+                console.log('Dialog: saving updatedMappings to localStorage:', updatedMappings);
+                saveLocalMappings(updatedMappings);
+                // Broadcast update to parent window so Sidebar/Page can update their state
+                window.parent.postMessage(
+                  {
+                    type: 'updateFieldMappings',
+                    fieldMappings: updatedMappings,
+                  },
+                  '*'
+                );
+                sdk.close({
+                  mappings: newMappings,
+                  success: true,
+                });
+              }}>
+              Send to Klaviyo
+            </Button>
           </Flex>
-        </Stack>
-      </Form>
+        </>
+      )}
+      {/* Sync message */}
+      {syncMessage && (
+        <Note
+          variant={syncMessage.includes('Error') ? 'negative' : 'positive'}
+          style={{ marginBottom: 16 }}>
+          {syncMessage}
+        </Note>
+      )}
     </Box>
   );
 };
+
+// Custom dropdown component for field selection
+function CustomFieldDropdown({
+  fields,
+  selectedFields,
+  setSelectedFields,
+}: {
+  fields: { id: string; name: string; type: string }[];
+  selectedFields: string[];
+  setSelectedFields: (fields: string[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 300 });
+
+  // Recalculate position
+  const updatePosition = () => {
+    if (dropdownRef.current) {
+      const rect = dropdownRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (open) {
+      updatePosition();
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
+    }
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [open]);
+
+  const filteredFields = fields.filter(
+    (f) =>
+      f.name.toLowerCase().includes(search.toLowerCase()) ||
+      f.id.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const allSelected = selectedFields.length === fields.length && fields.length > 0;
+  const someSelected = selectedFields.length > 0 && selectedFields.length < fields.length;
+
+  const dropdownMenu = (
+    <Box
+      style={{
+        position: 'absolute',
+        zIndex: 99999,
+        top: dropdownPos.top,
+        left: dropdownPos.left,
+        width: dropdownPos.width,
+        background: '#fff',
+        border: '1px solid #DADADA',
+        borderRadius: 8,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+        padding: 0,
+        marginTop: 4,
+      }}>
+      <Box style={{ padding: 8, borderBottom: '1px solid #eee' }}>
+        <input
+          type="text"
+          placeholder="Search fields..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{
+            width: '100%',
+            padding: 6,
+            borderRadius: 4,
+            border: '1px solid #eee',
+            fontSize: 14,
+          }}
+        />
+      </Box>
+      <Box style={{ maxHeight: 220, overflowY: 'auto', padding: 8 }}>
+        <label style={{ display: 'flex', alignItems: 'center', marginBottom: 8, fontWeight: 500 }}>
+          <input
+            type="checkbox"
+            checked={allSelected}
+            ref={(el) => {
+              if (el) el.indeterminate = someSelected;
+            }}
+            onChange={() => {
+              if (allSelected) setSelectedFields([]);
+              else setSelectedFields(fields.map((f) => f.id));
+            }}
+            style={{ marginRight: 8 }}
+          />
+          Select all
+        </label>
+        {filteredFields.map((field) => (
+          <label
+            key={field.id}
+            style={{ display: 'flex', alignItems: 'center', marginBottom: 6, fontWeight: 400 }}>
+            <input
+              type="checkbox"
+              checked={selectedFields.includes(field.id)}
+              onChange={() => {
+                if (selectedFields.includes(field.id)) {
+                  setSelectedFields(selectedFields.filter((id) => id !== field.id));
+                } else {
+                  setSelectedFields([...selectedFields, field.id]);
+                }
+              }}
+              style={{ marginRight: 8 }}
+            />
+            {field.name.replace(/\b\w/g, (c) => c.toUpperCase())}
+          </label>
+        ))}
+        {filteredFields.length === 0 && (
+          <Text fontColor="gray500" style={{ padding: 8 }}>
+            No fields found
+          </Text>
+        )}
+      </Box>
+    </Box>
+  );
+
+  return (
+    <Box style={{ position: 'relative' }} ref={dropdownRef}>
+      <Button
+        variant="secondary"
+        style={{
+          width: '100%',
+          justifyContent: 'space-between',
+          textAlign: 'left',
+          background: '#FAFAFA',
+          border: '1px solid #DADADA',
+          color: '#888',
+          fontSize: '15px',
+          borderRadius: 6,
+        }}
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="listbox"
+        aria-expanded={open}>
+        {selectedFields.length === 0 ? 'Select one or more' : `${selectedFields.length} selected`}
+        <span style={{ float: 'right', marginLeft: 8 }}>
+          <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M4 6l4 4 4-4"
+              stroke="#888"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+      </Button>
+      {open && ReactDOM.createPortal(dropdownMenu, document.body)}
+    </Box>
+  );
+}
 
 export default FieldSelectDialog;
