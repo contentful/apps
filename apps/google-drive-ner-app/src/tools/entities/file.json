@@ -1,0 +1,12 @@
+{
+  "sys": { "id": "GoogleDrive:File" },
+  "name": "File",
+  "defaultFieldMapping": {
+    "title": "{ /title }",
+    "subtitle": "File ID: { /id }",
+    "image": {
+      "url": "{ /iconLink }",
+      "altText": "{ /featuredImage/altText }"
+    }
+  }
+}

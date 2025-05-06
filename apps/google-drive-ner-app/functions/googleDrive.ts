@@ -49,24 +49,14 @@ const queryHandler: QueryHandler = async (event, context) => {
 const searchHandler: ResourcesSearchHandler = async (event, context) => {
   const { query } = event;
   const mockShopUrl = getMockShopUrl(context);
-
   const response = await fetch(mockShopUrl, {
     body: JSON.stringify({
       query: /* GraphQL */ `
-        query searchProducts($query: String!) {
-          search(query: $query, first: 3, types: PRODUCT) {
-            edges {
-              node {
-                ... on Product {
-                  id
-                  title
-                  featuredImage {
-                    url
-                    altText
-                  }
-                }
-              }
-            }
+        query searchFiles($query: String!) {
+          file(query: $query, first: 3) {
+            id
+            name
+            iconLink
           }
         }
       `,

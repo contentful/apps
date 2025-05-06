@@ -26,7 +26,7 @@ const schema = createSchema({
         /**
          * We grab the query argument `slug` and use it to fetch the character from the PotterDB API.
          */
-        const response = await fetch(`https://api.potterdb.com/v1/characters/${slug}`);
+        const response = await fetch(`https://api.potterdb.com/v1/characters/${search}`);
 
         if (!response.ok) {
           throw new GraphQLError(`PotterDB returned a non-200 status code: ${response.status}`);
