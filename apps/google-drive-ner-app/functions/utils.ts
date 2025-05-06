@@ -11,10 +11,10 @@ export const getMockShopUrl = (context: FunctionEventContext<Record<string, any>
   return mockShopUrl;
 };
 
-export function withUrn(node: Product) {
+export function withUrn(file: any) {
   return {
-    ...node,
-    urn: node.id,
+    ...file,
+    urn: file.id,
   };
 }
 

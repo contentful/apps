@@ -9,11 +9,74 @@ import {
 } from './types';
 import { getMockShopUrl, withBadge, withUrn } from './utils';
 
+import { createSchema, createYoga } from 'graphql-yoga';
+import { GraphQLError } from 'graphql';
+
+/*
+ * We re-create a basic subset of the actual payloads in order to showcase how to wrap a REST API.
+ * this schema will be use to handle upcoming graphql queries
+ *
+ * Source: https://developers.google.com/workspace/drive/api/reference/rest/v3/files
+ */
+const typeDefs = `
+type File {
+  id: String!
+  name: String!
+  iconLink: String!
+}
+
+type Query {
+  file(search: String, ids: [ID!]): [File!]!
+}`;
+
+const schema = createSchema({
+  typeDefs,
+  resolvers: {
+    Query: {
+      file: async (_parent, { search, ids }, _context) => {
+        if (!search && !ids) {
+          throw new GraphQLError('Either search or ids must be provided');
+        }
+
+        const url = search
+          ? `https://www.googleapis.com/drive/v3/files?q=${search}`
+          : `https://www.googleapis.com/drive/v3/files/${ids}`;
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new GraphQLError(
+            `Google Drive API returned a non-200 status code: ${response.status}`
+          );
+        }
+
+        const file = await response.json();
+
+        console.log('GOOGLE DRIVE SEARCHFILES:', file);
+        const { files } = file.data;
+
+        /**
+         * The PotterDB API returns all the character information, so we grab the subset of it
+         * that matches with the defined graphql schema.
+         *
+         */
+        return files.map((file) => ({
+          id: file.id,
+          title: file.name,
+          iconLink: file.iconLink,
+        }));
+      },
+    },
+  },
+});
+
+const yoga = createYoga({ schema, graphiql: false });
+
 const resourceTypeMappingHandler: MappingHandler = (event) => {
   const mappings = event.resourceTypes.map(({ resourceTypeId }) => ({
     resourceTypeId,
-    graphQLOutputType: 'Product',
-    graphQLQueryField: 'product',
+    graphQLOutputType: 'File',
+    graphQLQueryField: 'file',
     graphQLQueryArguments: { id: '/urn' },
   }));
 
@@ -33,15 +96,19 @@ const queryHandler: QueryHandler = async (event, context) => {
    * one outlined in the GraphQL specs:
    * https://spec.graphql.org/October2021/#sec-Response
    */
-  const response = await fetch(mockShopUrl, {
-    body: JSON.stringify({
-      query: event.query,
-      operationName: event.operationName,
-      variables: event.variables,
-    }),
-    method: 'POST',
-    headers: { Accept: 'application/json', 'content-type': 'application/json' },
-  });
+  const response = await yoga.fetch(
+    mockShopUrl,
+    {
+      body: JSON.stringify({
+        query: event.query,
+        operationName: event.operationName,
+        variables: event.variables,
+      }),
+      method: 'POST',
+      headers: { Accept: 'application/json', 'content-type': 'application/json' },
+    },
+    context
+  );
 
   return response.json();
 };
@@ -53,7 +120,7 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
     body: JSON.stringify({
       query: /* GraphQL */ `
         query searchFiles($query: String!) {
-          file(query: $query, first: 3) {
+          file(search: $query) {
             id
             name
             iconLink
@@ -65,11 +132,11 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
     method: 'POST',
     headers: { Accept: 'application/json', 'content-type': 'application/json' },
   });
-  const result = (await response.json()) as SearchResultData;
+  const result = (await response.json()) as any;
 
-  const items = result.data.search.edges.map((edge) => ({
-    ...withBadge(edge.node),
-    ...withUrn(edge.node),
+  const items = result.files.map((file) => ({
+    ...withBadge(file),
+    ...withUrn(file),
   }));
   return {
     items,
@@ -85,16 +152,11 @@ const lookupHandler: ResourcesLookupHandler = async (event, context) => {
   const response = await fetch(mockShopUrl, {
     body: JSON.stringify({
       query: /* GraphQL */ `
-        query searchProducts($ids: [ID!]!) {
-          nodes(ids: $ids) {
-            ... on Product {
-              id
-              title
-              featuredImage {
-                url
-                altText
-              }
-            }
+        query lookupFiles($ids: [ID!]!) {
+          file(ids: $ids) {
+            id
+            name
+            iconLink
           }
         }
       `,
@@ -104,9 +166,9 @@ const lookupHandler: ResourcesLookupHandler = async (event, context) => {
     headers: { Accept: 'application/json', 'content-type': 'application/json' },
   });
 
-  const result = (await response.json()) as ProductLookupData;
+  const result = (await response.json()) as any;
 
-  const items = result.data.nodes
+  const items = result.data.files
     .map((node) => {
       if (node === null) {
         console.error('Null node encountered');

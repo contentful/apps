@@ -6,7 +6,7 @@
     "subtitle": "File ID: { /id }",
     "image": {
       "url": "{ /iconLink }",
-      "altText": "{ /featuredImage/altText }"
+      "altText": "{ /title }"
     }
   }
 }
