@@ -15,25 +15,32 @@ type File {
 }
 
 type Query {
-  file(search: String!): File
+  searchFiles(search: String!): [File!]!
+  lookupFiles(ids: [ID!]!): [File!]!
 }`;
 
 const schema = createSchema({
   typeDefs,
   resolvers: {
     Query: {
-      file: async (_parent, { search }, _context) => {
+      searchFiles: async (_parent, { search }, _context) => {
         /**
          * We grab the query argument `slug` and use it to fetch the character from the PotterDB API.
          */
-        const response = await fetch(`https://api.potterdb.com/v1/characters/${slug}`);
+        const response = await fetch(
+          `https://www.googleapis.com/discovery/v1/apis/drive/v3/files?q=${search}`
+        );
 
         if (!response.ok) {
-          throw new GraphQLError(`PotterDB returned a non-200 status code: ${response.status}`);
+          throw new GraphQLError(
+            `Google Drive API returned a non-200 status code: ${response.status}`
+          );
         }
 
         const file = await response.json();
-        const { name, id, iconLink } = file.data.attributes;
+
+        console.log('GOOGLE DRIVE SEARCHFILES:', file);
+        const { files } = file.data;
 
         /**
          * The PotterDB API returns all the character information, so we grab the subset of it
@@ -41,11 +48,23 @@ const schema = createSchema({
          *
          */
 
-        return {
-          name,
-          id,
-          iconLink,
-        };
+        return files;
+      },
+      lookupFiles: async (_parent, { ids }, _context) => {
+        const response = await fetch(`https://www.googleapis.com/drive/v3/files/${ids}`);
+
+        if (!response.ok) {
+          throw new GraphQLError(
+            `Google Drive API returned a non-200 status code: ${response.status}`
+          );
+        }
+
+        const file = await response.json();
+
+        console.log('GOOGLE DRIVE LOOKUP FILES:', file);
+        const { files } = file.data;
+
+        return files;
       },
     },
   },
