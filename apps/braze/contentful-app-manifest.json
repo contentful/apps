@@ -7,9 +7,7 @@
       "path": "functions/createContentBlocks.js",
       "entryFile": "functions/createContentBlocks.ts",
       "allowNetworks": [],
-      "accepts": [
-        "appaction.call"
-      ]
+      "accepts": ["appaction.call"]
     },
     {
       "id": "updateContentBlocksFunction",
@@ -18,9 +16,7 @@
       "path": "functions/updateContentBlocks.js",
       "entryFile": "functions/updateContentBlocks.ts",
       "allowNetworks": [],
-      "accepts": [
-        "appevent.handler"
-      ]
+      "accepts": ["appevent.handler"]
     }
   ],
   "actions": [
