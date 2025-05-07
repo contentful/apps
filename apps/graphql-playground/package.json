@@ -3,7 +3,7 @@
   "version": "0.2.11",
   "private": true,
   "devDependencies": {
-    "@contentful/app-scripts": "1.2.0",
+    "@contentful/app-scripts": "1.33.2",
     "@testing-library/jest-dom": "^5.11.5",
     "@testing-library/react": "^11.1.2",
     "@testing-library/user-event": "^12.2.2",
