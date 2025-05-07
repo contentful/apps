@@ -1,4 +1,4 @@
-import { removeHypens, firstLetterToLowercase, SAVED_RESPONSE } from '../utils';
+import { removeHypens, firstLetterToLowercase, SAVED_RESPONSE, EntryStatus } from '../utils';
 import { Field } from './Field';
 import { FieldRegistry } from './fieldRegistry';
 
@@ -152,13 +152,13 @@ export class Entry {
 
   public getEntryState = () => {
     if (!this.publishedAt) {
-      return 'draft';
+      return EntryStatus.Draft;
     }
 
     if (this.publishedAt !== this.updatedAt) {
-      return 'changed';
+      return EntryStatus.Changed;
     }
 
-    return 'published';
+    return EntryStatus.Published;
   };
 }

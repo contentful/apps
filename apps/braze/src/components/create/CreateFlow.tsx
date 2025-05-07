@@ -6,7 +6,7 @@ import { InvocationParams } from '../../locations/Dialog';
 import FieldsStep from './FieldsStep';
 import CreateStep from './CreateStep';
 import SuccessStep from './SuccessStep';
-import { FIELDS_STEP } from '../../utils';
+import { EntryStatus, FIELDS_STEP } from '../../utils';
 import { createClient } from 'contentful-management';
 import DraftStep from './DraftStep';
 
@@ -40,7 +40,7 @@ const CreateFlow = (props: CreateFlowProps) => {
   );
 
   const handleCreate = async () => {
-    if (entry.getEntryState() !== 'published' && step === CREATE_STEP) {
+    if (entry.getEntryState() !== EntryStatus.Published && step === CREATE_STEP) {
       setStep(DRAFT_STEP);
       return;
     }
