@@ -4,7 +4,7 @@ import { Heading, Form, Flex, TextInput, FormControl } from '@contentful/f36-com
 import { useSDK } from '@contentful/react-apps-toolkit';
 
 interface AppInstallationParameters {
-  apiEndpoint?: string;
+  token?: string;
 }
 
 const ConfigScreen = () => {
@@ -19,9 +19,9 @@ const ConfigScreen = () => {
     };
   }, [parameters, sdk]);
 
-  function updateApiEndpoint(e: React.ChangeEvent<HTMLInputElement>) {
+  function updateToken(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
-    setParameters({ apiEndpoint: value });
+    setParameters({ token: value });
   }
 
   useEffect(() => {
@@ -44,20 +44,15 @@ const ConfigScreen = () => {
     <Flex flexDirection="column" margin="spacingL">
       <Heading>App Config</Heading>
       <Form>
-        <FormControl isRequired isInvalid={!parameters.apiEndpoint}>
+        <FormControl isRequired isInvalid={!parameters.token}>
           <FormControl.Label>API token</FormControl.Label>
-          <TextInput
-            value={parameters.apiEndpoint}
-            type="url"
-            name="apiEndpoint"
-            onChange={updateApiEndpoint}
-          />
+          <TextInput value={parameters.token} type="text" name="token" onChange={updateToken} />
           <FormControl.HelpText>
-            Provide the url to the API endpoint of the shop
+            Provide an API token to access the Google Drive API.
           </FormControl.HelpText>
-          {!parameters.apiEndpoint && (
+          {!parameters.token && (
             <FormControl.ValidationMessage>
-              Please, provide the API endpoint: "https://mock.shop/api"
+              Please enter a valid API token
             </FormControl.ValidationMessage>
           )}
         </FormControl>
