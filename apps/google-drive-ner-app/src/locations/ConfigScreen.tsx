@@ -45,7 +45,7 @@ const ConfigScreen = () => {
       <Heading>App Config</Heading>
       <Form>
         <FormControl isRequired isInvalid={!parameters.apiEndpoint}>
-          <FormControl.Label>API endpoint</FormControl.Label>
+          <FormControl.Label>API token</FormControl.Label>
           <TextInput
             value={parameters.apiEndpoint}
             type="url"

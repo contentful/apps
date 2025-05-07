@@ -5,7 +5,7 @@
   "scripts": {
     "start": "vite",
     "test": "vitest",
-    "build": "npm run build:functions",
+    "build": "vite build && npm run build:functions",
     "build:functions": "contentful-app-scripts build-functions --ci",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "add-locations": "contentful-app-scripts add-locations",
