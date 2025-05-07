@@ -1,72 +1,14 @@
+import { schema } from './googleDriveGraphqlSchema';
 import {
   EventHandler,
   MappingHandler,
-  ProductLookupData,
   QueryHandler,
   ResourcesLookupHandler,
   ResourcesSearchHandler,
-  SearchResultData,
 } from './types';
 import { withBadge, withUrn } from './utils';
 
-import { createSchema, createYoga } from 'graphql-yoga';
-import { GraphQLError } from 'graphql';
-
-/*
- * We re-create a basic subset of the actual payloads in order to showcase how to wrap a REST API.
- * this schema will be use to handle upcoming graphql queries
- *
- * Source: https://developers.google.com/workspace/drive/api/reference/rest/v3/files
- */
-const typeDefs = `
-type File {
-  id: String!
-  name: String!
-  thumbnailLink: String!
-}
-
-type Query {
-  file(search: String, ids: [ID!]): [File!]!
-}`;
-
-const schema = createSchema({
-  typeDefs,
-  resolvers: {
-    Query: {
-      file: async (_parent, { search, ids }, _context) => {
-        if (!search && !ids) {
-          throw new GraphQLError('Either search or ids must be provided');
-        }
-
-        const url = search
-          ? `https://www.googleapis.com/drive/v3/files?q=name%20contains%20'${search}'&fields=files(id,name,thumbnailLink)`
-          : `https://www.googleapis.com/drive/v3/files/${ids}`;
-
-        const response = await fetch(url);
-
-        if (!response.ok) {
-          throw new GraphQLError(
-            `Google Drive API returned a non-200 status code: ${response.status}`
-          );
-        }
-
-        const json = await response.json();
-        console.log('Google Drive API Response:', json);
-
-        /**
-         * The PotterDB API returns all the character information, so we grab the subset of it
-         * that matches with the defined graphql schema.
-         *
-         */
-        return json.data.files.map((file: any) => ({
-          id: file.id,
-          title: file.name,
-          image: file.thumbnailLink,
-        }));
-      },
-    },
-  },
-});
+import { createYoga } from 'graphql-yoga';
 
 const yoga = createYoga({ schema, graphiql: false });
 
@@ -92,6 +34,7 @@ const queryHandler: QueryHandler = async (event, context) => {
    * one outlined in the GraphQL specs:
    * https://spec.graphql.org/October2021/#sec-Response
    */
+
   console.log('query handler ran');
   const response = await yoga.fetch(
     'http://this-does-not-matter.com/graphql',
@@ -106,8 +49,10 @@ const queryHandler: QueryHandler = async (event, context) => {
     },
     context
   );
-  console.log({ event, context }, response.json());
-  return response.json();
+  const result = await response.json();
+  console.log('Instrospection Response:', JSON.stringify(result, null, 2));
+
+  return result;
 };
 
 const searchHandler: ResourcesSearchHandler = async (event, context) => {
@@ -131,7 +76,7 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
   const json = await response.json();
   console.log('Google Drive API Response:', json);
 
-  const items = json.data.files.map((file: any) => ({
+  const items = json.files.map((file: any) => ({
     ...withBadge(file),
     ...withUrn(file),
   }));
@@ -144,7 +89,7 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
 const lookupHandler: ResourcesLookupHandler = async (event, context) => {
   const { urns } = event.lookupBy;
 
-  const response = await fetch('http://this-does-not-matter.com/graphql', {
+  const response = await yoga.fetch('http://this-does-not-matter.com/graphql', {
     body: JSON.stringify({
       query: /* GraphQL */ `
         query lookupFiles($ids: [ID!]!) {
@@ -164,7 +109,7 @@ const lookupHandler: ResourcesLookupHandler = async (event, context) => {
   const json = await response.json();
   console.log('Google Drive API Response:', json);
 
-  const items = json.data.files
+  const items = json.files
     .map((file: any) => {
       if (file === null) {
         console.error('Null file encountered');
