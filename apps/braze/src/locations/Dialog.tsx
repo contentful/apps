@@ -54,9 +54,9 @@ const Dialog = () => {
 
     const fetchEntry = async () => {
       const fieldsFactory = new FieldsFactory(
-          invocationParams.entryId!,
-          invocationParams.contentTypeId!,
-          cma
+        invocationParams.entryId!,
+        invocationParams.contentTypeId!,
+        cma
       );
       const [cmaEntry, cmaContentType] = await fieldsFactory.getEntryAndContentType();
       fieldsRef.current = await fieldsFactory.createFieldsForEntry(cmaEntry.fields, cmaContentType);

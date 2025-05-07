@@ -34,23 +34,23 @@ const mockCMAEntryItemResponse = {
   sys: {
     id: 'entryId',
     contentType: {
-      sys: {id: 'contentTypeId'}
+      sys: { id: 'contentTypeId' },
     },
     type: 'Entry',
   },
   fields: {
-    title: {'en-US': 'Some Title'},
+    title: { 'en-US': 'Some Title' },
     fieldId: {
       'en-US': {
         sys: {
           id: 'referencedEntryId',
           linkType: 'Entry',
           type: 'Link',
-        }
-      }
-    }
-  }
-}
+        },
+      },
+    },
+  },
+};
 
 const mockCMAContentTypeResponse = {
   sys: {
@@ -64,8 +64,8 @@ const mockCMAContentTypeResponse = {
       name: 'Field Name',
       type: 'Link',
       linkType: 'Entry',
-    }
-  ]
+    },
+  ],
 };
 
 const mockField = new BasicField('fieldId', 'fieldName', 'contentTypeId', false);
@@ -88,7 +88,10 @@ const CREATE_FIELDS_STEP_TEXT = 'generate into Content Blocks';
 describe('Dialog component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetEntryAndContentType.mockResolvedValue([mockCMAEntryItemResponse, mockCMAContentTypeResponse]);
+    mockGetEntryAndContentType.mockResolvedValue([
+      mockCMAEntryItemResponse,
+      mockCMAContentTypeResponse,
+    ]);
     mockCreateFieldsForEntry.mockResolvedValue([mockField]);
     vi.spyOn(mockEntry, 'getGraphQLResponse').mockImplementation(async () => 'graphql response');
     vi.spyOn(Entry, 'fromSerialized').mockImplementation(() => mockEntry);
@@ -194,10 +197,20 @@ describe('Dialog component', () => {
     });
     expect(createStepParagraph).toBeTruthy();
 
-    const sendToBrazeButton = screen.getByRole('button', { name: /Send to Braze/i });
-    expect(sendToBrazeButton).toBeTruthy();
+    const sendToBrazeButtonCreateStep = screen.getByRole('button', { name: /Send to Braze/i });
+    expect(sendToBrazeButtonCreateStep).toBeTruthy();
 
-    fireEvent.click(sendToBrazeButton);
+    fireEvent.click(sendToBrazeButtonCreateStep);
+
+    const draftStepParagraph = screen.getByText('This entry has not yet been published', {
+      exact: false,
+    });
+    expect(draftStepParagraph).toBeTruthy();
+
+    const sendToBrazeButtonDraftStep = screen.getByRole('button', { name: /Send to Braze/i });
+    expect(sendToBrazeButtonDraftStep).toBeTruthy();
+
+    fireEvent.click(sendToBrazeButtonDraftStep);
 
     const successStepParagraph = await screen.findByText('Seven fields were successfully', {
       exact: false,

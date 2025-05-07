@@ -1,5 +1,4 @@
-import { Box, Paragraph, Button } from '@contentful/f36-components';
-import { Entry } from '../../fields/Entry';
+import { Paragraph, Button, Subheading } from '@contentful/f36-components';
 import WizardFooter from '../WizardFooter';
 
 type CreateStepProps = {
@@ -11,12 +10,13 @@ type CreateStepProps = {
 const DraftStep = ({ isSubmitting, handlePreviousStep, handleNextStep }: CreateStepProps) => {
   return (
     <>
-      <Box>
-        <Paragraph>
-          Edit each field to change the name or add an optional description. When complete, send
-          directly to Braze. Content Block names should be unique.
-        </Paragraph>
-      </Box>
+      <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeXl" lineHeight="lineHeightL">
+        This entry is in a “Draft” state.
+      </Subheading>
+      <Paragraph marginBottom="spacing2Xs">
+        This entry has not yet been published, and it's content may not have passed your
+        organizations review standards yet. Are you sure you want to send to Braze?
+      </Paragraph>
       <WizardFooter>
         <Button variant="secondary" size="small" onClick={handlePreviousStep}>
           Back

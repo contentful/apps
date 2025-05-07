@@ -8,7 +8,7 @@ import CreateStep from './CreateStep';
 import SuccessStep from './SuccessStep';
 import { FIELDS_STEP } from '../../utils';
 import { createClient } from 'contentful-management';
-import DraftStep from "./DraftStep";
+import DraftStep from './DraftStep';
 
 const CREATE_STEP = 'create';
 const DRAFT_STEP = 'draft';
@@ -40,6 +40,11 @@ const CreateFlow = (props: CreateFlowProps) => {
   );
 
   const handleCreate = async () => {
+    if (entry.getEntryState() !== 'published' && step === CREATE_STEP) {
+      setStep(DRAFT_STEP);
+      return;
+    }
+
     setIsSubmitting(true);
 
     const connectedFields = JSON.parse(sdk.parameters.installation.brazeConnectedFields || '{}');
@@ -99,11 +104,11 @@ const CreateFlow = (props: CreateFlowProps) => {
         />
       )}
       {step === DRAFT_STEP && (
-          <DraftStep
-              isSubmitting={isSubmitting}
-              handlePreviousStep={() => setStep(FIELDS_STEP)}
-              handleNextStep={handleCreate}
-          />
+        <DraftStep
+          isSubmitting={isSubmitting}
+          handlePreviousStep={() => setStep(CREATE_STEP)}
+          handleNextStep={handleCreate}
+        />
       )}
       {step === SUCCESS_STEP && (
         <SuccessStep

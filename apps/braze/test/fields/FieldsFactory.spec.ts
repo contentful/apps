@@ -1,4 +1,4 @@
-import {describe, it, expect, vi, beforeEach, Mock} from 'vitest';
+import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { FieldsFactory } from '../../src/fields/FieldsFactory';
 import { BasicField } from '../../src/fields/BasicField';
 import { AssetField } from '../../src/fields/AssetField';
@@ -383,15 +383,15 @@ describe('FieldsFactory', () => {
   });
 });
 
-async function createFields(entryId: string, entryContentTypeId: string, mockCma: {
-  contentType: { get: Mock };
-  entry: { references: Mock }
-}) {
-  const fieldsFactory = new FieldsFactory(
-      entryId,
-      entryContentTypeId,
-      mockCma as any
-  );
+async function createFields(
+  entryId: string,
+  entryContentTypeId: string,
+  mockCma: {
+    contentType: { get: Mock };
+    entry: { references: Mock };
+  }
+) {
+  const fieldsFactory = new FieldsFactory(entryId, entryContentTypeId, mockCma as any);
   const [cmaEntry, cmaContentType] = await fieldsFactory.getEntryAndContentType();
   return await fieldsFactory.createFieldsForEntry(cmaEntry.fields, cmaContentType);
 }
