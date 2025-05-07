@@ -62,7 +62,7 @@ const schema = makeExecutableSchema({
         } else if (ids && ids.length > 0) {
           // Make individual requests for each ID
           const filePromises = ids.map(async (fileId) => {
-            const url = `https://www.googleapis.com/drive/v3/files/${fileId}&fields=id,name,thumbnailLink`;
+            const url = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,thumbnailLink`;
             const response = await fetch(url, {
               method: 'GET',
               headers: {
@@ -71,11 +71,6 @@ const schema = makeExecutableSchema({
                 Authorization: `Bearer ${token}`,
               },
             });
-
-            if (!response.ok) {
-              console.error(`Failed to fetch file ${fileId}: ${response.status}`);
-              return null;
-            }
 
             return response.json();
           });
