@@ -60,11 +60,15 @@ describe('createContentBlocks', () => {
       json: () => Promise.resolve({ content_block_id: 'block-id' }),
     } as Response);
 
-    const event: AppActionRequest<'Custom', { entryId: string; fieldIds: string }> = {
+    const event: AppActionRequest<
+      'Custom',
+      { entryId: string; fieldIds: string; contentBlockNames: string }
+    > = {
       type: FunctionTypeEnum.AppActionCall,
       body: {
         entryId: 'entry-id',
         fieldIds: 'title',
+        contentBlockNames: JSON.stringify({ title: 'custom-title-name' }),
       },
       headers: {},
     };
@@ -90,7 +94,7 @@ describe('createContentBlocks', () => {
           Authorization: 'Bearer test-api-key',
         },
         body: JSON.stringify({
-          name: 'Test-Title-title',
+          name: 'custom-title-name',
           content: 'Test Title',
           state: 'draft',
         }),
@@ -109,9 +113,16 @@ describe('createContentBlocks', () => {
     vi.mocked(documentToHtmlString).mockReturnValue('<p>Test HTML</p>');
     mockFetchSuccess({ content_block_id: 'block-id' });
 
-    const event: AppActionRequest<'Custom', { entryId: string; fieldIds: string }> = {
+    const event: AppActionRequest<
+      'Custom',
+      { entryId: string; fieldIds: string; contentBlockNames: string }
+    > = {
       type: FunctionTypeEnum.AppActionCall,
-      body: { entryId: 'entry-id', fieldIds: 'content' },
+      body: {
+        entryId: 'entry-id',
+        fieldIds: 'content',
+        contentBlockNames: JSON.stringify({ content: 'custom-content-name' }),
+      },
       headers: {},
     };
 
@@ -132,7 +143,7 @@ describe('createContentBlocks', () => {
       'https://test.braze.com/content_blocks/create',
       expect.objectContaining({
         body: JSON.stringify({
-          name: 'Untitled-content',
+          name: 'custom-content-name',
           content: '<p>Test HTML</p>',
           state: 'draft',
         }),
@@ -149,9 +160,16 @@ describe('createContentBlocks', () => {
     vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
     vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
 
-    const event: AppActionRequest<'Custom', { entryId: string; fieldIds: string }> = {
+    const event: AppActionRequest<
+      'Custom',
+      { entryId: string; fieldIds: string; contentBlockNames: string }
+    > = {
       type: FunctionTypeEnum.AppActionCall,
-      body: { entryId: 'entry-id', fieldIds: 'title' },
+      body: {
+        entryId: 'entry-id',
+        fieldIds: 'title',
+        contentBlockNames: JSON.stringify({ title: 'custom-title-name' }),
+      },
       headers: {},
     };
 
@@ -183,9 +201,16 @@ describe('createContentBlocks', () => {
       statusText: 'Unauthorized',
     } as Response);
 
-    const event: AppActionRequest<'Custom', { entryId: string; fieldIds: string }> = {
+    const event: AppActionRequest<
+      'Custom',
+      { entryId: string; fieldIds: string; contentBlockNames: string }
+    > = {
       type: FunctionTypeEnum.AppActionCall,
-      body: { entryId: 'entry-id', fieldIds: 'title' },
+      body: {
+        entryId: 'entry-id',
+        fieldIds: 'title',
+        contentBlockNames: JSON.stringify({ title: 'custom-title-name' }),
+      },
       headers: {},
     };
 
