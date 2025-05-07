@@ -6,7 +6,7 @@ import { InvocationParams } from '../../locations/Dialog';
 import FieldsStep from './FieldsStep';
 import CreateStep from './CreateStep';
 import SuccessStep from './SuccessStep';
-import { EntryStatus, FIELDS_STEP} from '../../utils';
+import { EntryStatus, FIELDS_STEP } from '../../utils';
 import { createClient } from 'contentful-management';
 import DraftStep from './DraftStep';
 
