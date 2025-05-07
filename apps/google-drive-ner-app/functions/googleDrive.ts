@@ -15,7 +15,7 @@ const yoga = createYoga({ schema, graphiql: false });
 const resourceTypeMappingHandler: MappingHandler = (event) => {
   const mappings = event.resourceTypes.map(({ resourceTypeId }) => ({
     resourceTypeId,
-    graphQLOutputType: 'File',
+    graphQLOutputType: 'FileResult',
     graphQLQueryField: 'file',
     graphQLQueryArguments: { id: '/urn' },
   }));

@@ -8,8 +8,12 @@ type File {
   image: String
 }
 
+type FileResult {
+  items: [File!]!
+}
+
 type Query {
-  file(id: String, search: String): File
+  file(id: String, search: String): FileResult
 }
 `;
 
@@ -66,9 +70,13 @@ const schema = makeExecutableSchema({
 
         // console.log('Google Drive API Response:', files);
         return {
-          id: '1234',
-          title: 'Sample File',
-          image: 'https://example.com/image.png',
+          items: [
+            {
+              id: '1234',
+              title: 'Sample File',
+              image: 'https://example.com/image.png',
+            },
+          ],
         };
       },
     },
