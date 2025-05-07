@@ -76,3 +76,58 @@ export const getFieldMappings = async (sdk: SidebarExtensionSDK): Promise<any[]>
     return [];
   }
 };
+
+/**
+ * Get klaviyo field mappings from a Contentful entry (JSON-stringified array of objects)
+ * @param sdk The Contentful SDK instance
+ * @param entryId The ID of the entry
+ * @returns Array of field mappings or empty array if none found
+ */
+export const getEntryKlaviyoFieldMappings = async (sdk: any, entryId: string): Promise<any[]> => {
+  try {
+    const entry = await sdk.cma.entry.get({
+      entryId,
+      spaceId: sdk.ids.space,
+      environmentId: sdk.ids.environment,
+    });
+    const raw = entry.fields?.klaviyoFieldMappings?.['en-US'];
+    if (!raw) return [];
+    try {
+      return JSON.parse(raw);
+    } catch (e) {
+      logger.error('Failed to parse klaviyoFieldMappings JSON:', e);
+      return [];
+    }
+  } catch (error) {
+    logger.error('Error fetching entry for klaviyoFieldMappings:', error);
+    return [];
+  }
+};
+
+/**
+ * Set klaviyo field mappings on a Contentful entry (as JSON-stringified array of objects)
+ * @param sdk The Contentful SDK instance
+ * @param entryId The ID of the entry
+ * @param mappings Array of field mapping objects
+ */
+export const setEntryKlaviyoFieldMappings = async (
+  sdk: any,
+  entryId: string,
+  mappings: any[]
+): Promise<void> => {
+  try {
+    const entry = await sdk.cma.entry.get({
+      entryId,
+      spaceId: sdk.ids.space,
+      environmentId: sdk.ids.environment,
+    });
+    entry.fields = entry.fields || {};
+    entry.fields.klaviyoFieldMappings = { 'en-US': JSON.stringify(mappings) };
+    await sdk.cma.entry.update(
+      { entryId, spaceId: sdk.ids.space, environmentId: sdk.ids.environment },
+      entry
+    );
+  } catch (error) {
+    logger.error('Error setting klaviyoFieldMappings on entry:', error);
+  }
+};

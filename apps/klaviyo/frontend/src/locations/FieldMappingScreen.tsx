@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { PageExtensionSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import {
@@ -30,6 +30,10 @@ import { SyncContent } from '../services/klaviyo-sync-service';
 import { SyncStatusTable } from '../components/SyncStatusTable';
 import logger from '../utils/logger';
 import { saveLocalMappings } from '../utils/sync-api';
+import {
+  getEntryKlaviyoFieldMappings,
+  setEntryKlaviyoFieldMappings,
+} from '../utils/field-mappings';
 
 // Define interface for field data
 interface FieldData {
@@ -90,7 +94,9 @@ export const FieldMappingScreen: React.FC = () => {
   const [syncMessage, setSyncMessage] = useState('');
   const [hoveredField, setHoveredField] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [entries, setEntries] = useState<Array<{ id: string; title: string }>>([]);
+  const [entries, setEntries] = useState<
+    Array<{ id: string; title: string; contentTypeId: string }>
+  >([]);
   const [selectedEntryId, setSelectedEntryId] = useState<string>('');
   const [isEntriesLoading, setIsEntriesLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -101,6 +107,14 @@ export const FieldMappingScreen: React.FC = () => {
   const [checkedFields, setCheckedFields] = useState<string[]>([]);
   const [selectedEntryGroup, setSelectedEntryGroup] = useState<ExtendedFieldData[] | null>(null);
   const [modalAvailableFields, setModalAvailableFields] = useState<FieldItem[]>([]);
+  const [allEntryMappings, setAllEntryMappings] = useState<
+    { entryId: string; title: string; contentTypeId: string; mappings: any[] }[]
+  >([]);
+  const [modalEntryId, setModalEntryId] = useState<string | null>(null);
+  const [modalContentTypeId, setModalContentTypeId] = useState<string | null>(null);
+  const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Group mappings by contentTypeId (or another unique entry identifier)
   const groupedMappings: Record<string, ExtendedFieldData[]> = React.useMemo(() => {
@@ -172,39 +186,13 @@ export const FieldMappingScreen: React.FC = () => {
       try {
         setIsLoading(true);
 
-        // First check localStorage directly to ensure we have the most current data
-        const localStorageData = localStorage.getItem('klaviyo_field_mappings');
-        let mappingsFromStorage = [];
-
-        if (localStorageData) {
-          try {
-            mappingsFromStorage = JSON.parse(localStorageData);
-            logger.log(
-              '[FieldMappingScreen] Loaded mappings directly from localStorage:',
-              mappingsFromStorage
-            );
-
-            if (Array.isArray(mappingsFromStorage) && mappingsFromStorage.length > 0) {
-              setMappings(mappingsFromStorage);
-            }
-          } catch (parseError) {
-            logger.error('[FieldMappingScreen] Error parsing localStorage data:', parseError);
-          }
-        }
-
-        // As a backup, also try the persistence service
-        if (!mappingsFromStorage.length) {
-          const savedMappings = await getSyncData(sdk);
-          logger.log(
-            '[FieldMappingScreen] Loaded mappings from persistence service:',
-            savedMappings
-          );
-
-          if (savedMappings && Array.isArray(savedMappings) && savedMappings.length > 0) {
-            setMappings(savedMappings);
-          } else {
-            logger.log('[FieldMappingScreen] No mappings found');
-          }
+        // Only load mappings if an entry is selected
+        if (selectedEntryId) {
+          const entryMappings = await getEntryKlaviyoFieldMappings(sdk, selectedEntryId);
+          logger.log('[FieldMappingScreen] Loaded mappings from entry:', entryMappings);
+          setMappings(entryMappings);
+        } else {
+          setMappings([]);
         }
 
         // Get content type names for display
@@ -243,40 +231,11 @@ export const FieldMappingScreen: React.FC = () => {
       }
     };
 
-    // Initial load
     loadData();
 
-    // Function to handle message events
-    const handleFieldMappingUpdate = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'updateFieldMappings') {
-        logger.log(
-          '[FieldMappingScreen] Received field mapping update via message:',
-          event.data.fieldMappings
-        );
-        if (Array.isArray(event.data.fieldMappings)) {
-          setMappings(event.data.fieldMappings);
-        }
-      }
-    };
-
-    // Function to handle storage events
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'klaviyo_field_mappings') {
-        logger.log('[FieldMappingScreen] Storage changed in another tab/window');
-        loadData(); // Reload completely to ensure fresh data
-      }
-    };
-
-    // Add all event listeners
-    window.addEventListener('message', handleFieldMappingUpdate);
-    window.addEventListener('storage', handleStorageChange);
-
-    // Clean up on unmount
-    return () => {
-      window.removeEventListener('message', handleFieldMappingUpdate);
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
+    // No localStorage or message event listeners needed
+    // Clean up on unmount: nothing to clean
+  }, [selectedEntryId, sdk]);
 
   // Load fields when content type is selected
   useEffect(() => {
@@ -332,10 +291,9 @@ export const FieldMappingScreen: React.FC = () => {
 
   // Fetch entries when content type is selected
   useEffect(() => {
-    const fetchEntries = async () => {
+    const fetchAllEntries = async () => {
       setEntries([]);
       setSelectedEntryId('');
-      if (!selectedContentType) return;
       setIsEntriesLoading(true);
       try {
         const space = await sdk.cma.space.get({});
@@ -343,14 +301,16 @@ export const FieldMappingScreen: React.FC = () => {
           environmentId: sdk.ids.environment,
           spaceId: space.sys.id,
         });
+        logger.log('Fetching ALL entries in env:', environment.sys.id);
+        // Fetch all entries (up to 1000 for now)
         const entriesResponse = await sdk.cma.entry.getMany({
           spaceId: space.sys.id,
           environmentId: environment.sys.id,
           query: {
-            content_type: selectedContentType,
-            limit: 100,
+            limit: 1000,
           },
         });
+        logger.log('All entries response:', entriesResponse.items);
         setEntries(
           entriesResponse.items.map((entry: any) => ({
             id: entry.sys.id,
@@ -359,19 +319,57 @@ export const FieldMappingScreen: React.FC = () => {
               entry.fields?.name?.['en-US'] ||
               entry.fields?.heading?.['en-US'] ||
               entry.sys.id,
+            contentTypeId: entry.sys.contentType?.sys?.id || 'unknown',
           }))
         );
       } catch (error) {
+        logger.error('Error loading all entries:', error);
         setEntries([]);
-        setSyncMessage('Error loading entries for this content type');
+        setSyncMessage('Error loading entries');
       } finally {
         setIsEntriesLoading(false);
       }
     };
-    fetchEntries();
-  }, [selectedContentType, sdk]);
+    fetchAllEntries();
+  }, [sdk]);
 
-  const saveFieldMappings = async (mappings: any[], fieldsSource?: FieldItem[]) => {
+  // Fetch all entries for the selected content type and load their mappings
+  useEffect(() => {
+    const loadAllEntryMappings = async () => {
+      setIsLoading(true);
+      try {
+        if (entries.length > 0) {
+          const allMappings: {
+            entryId: string;
+            title: string;
+            contentTypeId: string;
+            mappings: any[];
+          }[] = [];
+          for (const entry of entries) {
+            const entryMappings = await getEntryKlaviyoFieldMappings(sdk, entry.id);
+            allMappings.push({
+              entryId: entry.id,
+              title: entry.title,
+              contentTypeId: entry.contentTypeId || 'unknown',
+              mappings: entryMappings || [],
+            });
+          }
+          setAllEntryMappings(allMappings);
+        } else {
+          setAllEntryMappings([]);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadAllEntryMappings();
+  }, [entries, sdk]);
+
+  const saveFieldMappings = async (
+    mappings: any[],
+    fieldsSource?: FieldItem[],
+    entryIdOverride?: string
+  ) => {
     try {
       setIsSaving(true);
       setSaveMessage('');
@@ -403,102 +401,20 @@ export const FieldMappingScreen: React.FC = () => {
           klaviyoBlockName: field?.name || fieldId,
           type: fieldType,
           fieldType: mappingFieldType,
-          contentTypeId: selectedContentType,
+          contentTypeId: undefined, // Not used in this context
           isAsset: fieldType === 'Asset' || fieldType === 'Link',
+          value: '',
         };
       });
 
-      logger.log('Saving field mappings:', formattedMappings);
-
-      // Save to local storage first (this always works)
-      try {
-        // Save the mappings to local storage
-        const currentMappings = getLocalMappings();
-
-        // Remove existing mappings for this content type
-        const filteredMappings = currentMappings.filter(
-          (m: any) => m.contentTypeId !== selectedContentType
-        );
-
-        // Add new mappings and deduplicate by contentTypeId and id
-        const combinedMappings = [...filteredMappings, ...formattedMappings];
-        const uniqueMap = new Map();
-        combinedMappings.forEach((m) => {
-          // Use both contentTypeId and id as the unique key
-          const key = `${m.contentTypeId || ''}:${m.id}`;
-          uniqueMap.set(key, m);
-        });
-        const updatedMappings = Array.from(uniqueMap.values());
-        console.log(
-          'updatedMappings',
-          updatedMappings,
-          filteredMappings,
-          formattedMappings,
-          selectedContentType
-        );
-
-        // Save to local storage
-        saveLocalMappings(updatedMappings);
-
-        // Update the UI state (convert to the expected format for state)
-        const mappingsForState = updatedMappings.map((m: any) => ({
-          id: m.id,
-          name: m.name || m.id,
-          type: m.type || 'Symbol',
-          value: '',
-          isAsset: false,
-          contentTypeId: m.contentTypeId,
-        }));
-
-        // Make sure we're setting a proper array of objects for React rendering
-        setMappings(Array.isArray(mappingsForState) ? mappingsForState : []);
-
-        logger.log('Saved mappings to local storage successfully');
-      } catch (localStorageError) {
-        logger.error('Error saving to local storage:', localStorageError);
-      }
-
-      // Try to save to Contentful if possible
-      try {
-        // We'll use the SDK's CMA client with raw HTTP requests
-        const client = sdk.cma;
-        const spaceId = sdk.ids.space;
-        const environmentId = sdk.ids.environment;
-        const appDefinitionId = sdk.ids.app;
-
-        const currentParams = (sdk.parameters as any) || ({} as any);
-        // Now update the parameters
-        // Initialize content type mappings if they don't exist
-        if (!currentParams.contentTypeMappings) {
-          currentParams.contentTypeMappings = {};
-        }
-
-        // Add the mappings for this content type
-        currentParams.contentTypeMappings[selectedContentType] = formattedMappings;
-
-        // Also update the flat fieldMappings array
-        let allMappings: any[] = [];
-        Object.keys(currentParams.contentTypeMappings).forEach((typeId) => {
-          const typeMappings = currentParams.contentTypeMappings[typeId];
-          if (Array.isArray(typeMappings)) {
-            allMappings = [...allMappings, ...typeMappings];
-          }
-        });
-
-        currentParams.fieldMappings = allMappings;
-
-        // Update the selected content types
-        if (!currentParams.selectedContentTypes) {
-          currentParams.selectedContentTypes = {};
-        }
-        currentParams.selectedContentTypes[selectedContentType] = true;
-
-        logger.log('Saved mappings to Contentful API successfully');
-        setSaveMessage('Field mappings saved successfully!');
-      } catch (apiError) {
-        logger.error('Error saving to Contentful API:', apiError);
-        // We still saved to local storage, so it's not a complete failure
-        setSaveMessage('Mappings saved locally, but could not save to Contentful API');
+      const entryIdToSave = entryIdOverride || selectedEntryId;
+      console.log('[saveFieldMappings] entryIdToSave:', entryIdToSave);
+      if (entryIdToSave) {
+        await setEntryKlaviyoFieldMappings(sdk, entryIdToSave, formattedMappings);
+        setMappings(formattedMappings);
+        setSaveMessage('Field mappings saved to entry successfully!');
+      } else {
+        setSaveMessage('No entry selected.');
       }
     } catch (error) {
       logger.error('Error in saveFieldMappings:', error);
@@ -517,14 +433,19 @@ export const FieldMappingScreen: React.FC = () => {
   };
 
   // When opening the modal, set checkedFields to mapped field IDs
-  const openFieldsModal = async (fields: ExtendedFieldData[]) => {
+  const openFieldsModal = async (
+    fields: ExtendedFieldData[],
+    entryId: string,
+    contentTypeId: string
+  ) => {
     setSelectedEntryGroup(fields);
+    setModalEntryId(entryId);
+    setModalContentTypeId(contentTypeId);
     // Set selectedContentType to the contentTypeId of the entry group
     if (fields[0]?.contentTypeId) {
       setSelectedContentType(fields[0].contentTypeId);
     }
     setIsFieldsModalOpen(true);
-    const contentTypeId = fields[0]?.contentTypeId;
     let allFields: FieldItem[] = [];
     if (contentTypeId) {
       // Fetch fields for this contentTypeId using the SDK
@@ -547,12 +468,72 @@ export const FieldMappingScreen: React.FC = () => {
   };
 
   const handleFieldsModalClose = async () => {
-    // Save the checked fields as the new mappings for this entry group/content type
     if (selectedEntryGroup && checkedFields) {
-      // Save only for the current entry group/content type
-      await saveFieldMappings(checkedFields, modalAvailableFields);
+      const entryId = modalEntryId;
+      const contentTypeId = modalContentTypeId;
+      console.log('[handleFieldsModalClose] entryId:', entryId, 'contentTypeId:', contentTypeId);
+      if (entryId && contentTypeId) {
+        await saveFieldMappings(checkedFields, modalAvailableFields, entryId);
+        // Fetch mappings again to verify
+        const entryMappings = await getEntryKlaviyoFieldMappings(sdk, entryId);
+        console.log('[handleFieldsModalClose] Fetched mappings after save:', entryMappings);
+        if (!entryMappings || entryMappings.length === 0) {
+          logger.error('[SyncContent] No field mappings provided for entryId:', entryId);
+          setSyncMessage('No field mappings found after save. Please try again.');
+        } else {
+          try {
+            const syncInstance = new SyncContent({ entryId, contentTypeId }, sdk);
+            await syncInstance.syncContent(syncInstance.sdk, entryMappings);
+            setSyncMessage('Synced with Klaviyo!');
+          } catch (syncError) {
+            logger.error('Error syncing with Klaviyo:', syncError);
+            setSyncMessage('Error syncing with Klaviyo');
+          }
+        }
+      } else {
+        logger.error(
+          '[handleFieldsModalClose] No entryId or contentTypeId found for modal:',
+          selectedEntryGroup
+        );
+        setSyncMessage('No entryId or contentTypeId found for this entry.');
+      }
     }
+    setModalEntryId(null);
+    setModalContentTypeId(null);
     setIsFieldsModalOpen(false);
+  };
+
+  // Dropdown close on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    if (dropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownOpen]);
+
+  // Select all logic
+  const allSelected =
+    selectedContentTypes.length === availableContentTypes.length &&
+    availableContentTypes.length > 0;
+  const someSelected =
+    selectedContentTypes.length > 0 && selectedContentTypes.length < availableContentTypes.length;
+  const handleSelectAll = () => {
+    if (allSelected) setSelectedContentTypes([]);
+    else setSelectedContentTypes(availableContentTypes.map((ct) => ct.id));
+  };
+  const handleToggleContentType = (id: string) => {
+    setSelectedContentTypes((prev) =>
+      prev.includes(id) ? prev.filter((ct) => ct !== id) : [...prev, id]
+    );
   };
 
   return (
@@ -567,124 +548,160 @@ export const FieldMappingScreen: React.FC = () => {
           </Text>
         </Box>
         <Text fontColor="gray700" fontSize="fontSizeL">
-          Connected entries: {connectedCount}/{maxCount}
+          Connected entries: {allEntryMappings.length}/{maxCount}
         </Text>
       </Flex>
-      <Box>
-        {groupedEntries.length > 0 ? (
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Entry name</TableCell>
-                <TableCell>Content type</TableCell>
-                <TableCell>Connected fields</TableCell>
-                <TableCell>Updated</TableCell>
-                <TableCell>Status</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {groupedEntries.map((fields, idx) => (
-                <TableRow
-                  key={fields[0]?.id || idx}
-                  style={{ cursor: 'pointer' }}
-                  onClick={async () => await openFieldsModal(fields)}>
-                  <TableCell>{getEntryName(fields)}</TableCell>
-                  <TableCell>{getContentType(fields)}</TableCell>
-                  <TableCell>{fields.length}</TableCell>
-                  <TableCell>{getUpdatedTimeGroup(fields)}</TableCell>
-                  <TableCell>{getStatusPill(getStatusGroup(fields))}</TableCell>
-                </TableRow>
+      {/* Content type multi-select dropdown */}
+      <Box
+        style={{
+          maxWidth: 480,
+          margin: '0 auto',
+          marginBottom: 40,
+          background: '#fff',
+          borderRadius: 12,
+          boxShadow: '0 2px 16px rgba(0,0,0,0.08)',
+          padding: 32,
+        }}>
+        <Text
+          as="h2"
+          fontWeight="fontWeightDemiBold"
+          fontSize="fontSizeL"
+          style={{ marginBottom: 8 }}>
+          Assign content types
+        </Text>
+        <Text fontColor="gray700" style={{ marginBottom: 18 }}>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.
+        </Text>
+        <Text fontWeight="fontWeightMedium" style={{ marginBottom: 8, display: 'block' }}>
+          Content types
+        </Text>
+        <Box style={{ position: 'relative', width: '100%' }} ref={dropdownRef}>
+          <Button
+            variant="secondary"
+            style={{
+              width: '100%',
+              justifyContent: 'space-between',
+              textAlign: 'left',
+              background: '#FAFAFA',
+              border: '1px solid #DADADA',
+              color: '#888',
+              fontSize: '15px',
+              borderRadius: 6,
+            }}
+            onClick={() => setDropdownOpen((open) => !open)}
+            aria-haspopup="listbox"
+            aria-expanded={dropdownOpen}>
+            {selectedContentTypes.length === 0
+              ? 'Select content types'
+              : selectedContentTypes.length === 1
+              ? availableContentTypes.find((ct) => ct.id === selectedContentTypes[0])?.name
+              : `${selectedContentTypes.length} selected`}
+            <span style={{ float: 'right', marginLeft: 8 }}>
+              <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M4 6l4 4 4-4"
+                  stroke="#888"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+          </Button>
+          {dropdownOpen && (
+            <Box
+              style={{
+                position: 'absolute',
+                zIndex: 99999,
+                top: '100%',
+                left: 0,
+                width: '100%',
+                background: '#fff',
+                border: '1px solid #DADADA',
+                borderRadius: 8,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                padding: 0,
+                marginTop: 4,
+                maxHeight: 320,
+                overflowY: 'auto',
+              }}>
+              <Box style={{ padding: 12, borderBottom: '1px solid #eee' }}>
+                <Checkbox
+                  isChecked={allSelected}
+                  isIndeterminate={someSelected}
+                  onChange={handleSelectAll}
+                  style={{ fontWeight: 500 }}>
+                  Select all
+                </Checkbox>
+              </Box>
+              {availableContentTypes.map((ct) => (
+                <Box
+                  key={ct.id}
+                  style={{
+                    padding: '10px 18px',
+                    borderBottom: '1px solid #F0F0F0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                  }}>
+                  <Checkbox
+                    isChecked={selectedContentTypes.includes(ct.id)}
+                    onChange={() => handleToggleContentType(ct.id)}
+                    style={{ marginRight: 8 }}>
+                    {ct.name}
+                  </Checkbox>
+                </Box>
               ))}
-            </TableBody>
-          </Table>
-        ) : (
-          <Note variant="warning">No entries with field mappings found.</Note>
-        )}
-      </Box>
-
-      {/* Connected Fields Modal */}
-      <Modal isShown={isFieldsModalOpen} onClose={handleFieldsModalClose} size="medium">
-        {() => (
+            </Box>
+          )}
+        </Box>
+        {/* Selected count and pills */}
+        {selectedContentTypes.length > 0 && (
           <>
-            <Modal.Header title="Connected fields" onClose={handleFieldsModalClose} />
-            <Modal.Content>
-              {selectedEntryGroup && (
-                <Box padding="spacingL">
-                  <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingL">
-                    <Flex alignItems="center" gap="spacingM">
-                      <Box>
-                        <Stack flexDirection="column" alignItems="flex-start">
-                          <Text>Entry name</Text>
-                          <Text as="span" fontWeight="fontWeightMedium">
-                            {getEntryName(selectedEntryGroup)}
-                          </Text>
-                        </Stack>
-                      </Box>
-                      <Box>
-                        <Stack flexDirection="column" alignItems="flex-start">
-                          <Text>Connected fields</Text>
-                          <Text as="span" fontWeight="fontWeightMedium">
-                            {selectedEntryGroup.length}
-                          </Text>
-                        </Stack>
-                      </Box>
-                    </Flex>
-                    <Button variant="secondary" size="small" style={{ height: 32 }}>
-                      View entry
+            <Text fontColor="gray500" style={{ marginTop: 12, marginBottom: 10, fontSize: 15 }}>
+              {selectedContentTypes.length} selected
+            </Text>
+            <Flex flexWrap="wrap" gap="spacingS" style={{ marginBottom: 0 }}>
+              {selectedContentTypes.map((id) => {
+                const ct = availableContentTypes.find((c) => c.id === id);
+                if (!ct) return null;
+                return (
+                  <Flex
+                    key={id}
+                    alignItems="center"
+                    style={{
+                      background: '#e5e8eb',
+                      borderRadius: 20,
+                      padding: '6px 16px 6px 14px',
+                      marginRight: 8,
+                      marginBottom: 8,
+                      fontSize: 15,
+                      fontWeight: 500,
+                    }}>
+                    <Text style={{ marginRight: 8 }}>{ct.name}</Text>
+                    <Button
+                      variant="transparent"
+                      size="small"
+                      aria-label={`Remove ${ct.name}`}
+                      onClick={() =>
+                        setSelectedContentTypes((prev) => prev.filter((x) => x !== id))
+                      }
+                      style={{
+                        padding: 0,
+                        minWidth: 22,
+                        fontSize: 18,
+                        color: '#888',
+                        marginLeft: 2,
+                      }}>
+                      ×
                     </Button>
                   </Flex>
-                  <Box
-                    style={{
-                      background: '#fff',
-                      borderRadius: 8,
-                      border: '1px solid #E5E5E5',
-                      padding: 0,
-                      marginTop: 16,
-                    }}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell style={{ width: 40, fontWeight: 700 }}>
-                            <Checkbox
-                              isChecked={
-                                modalAvailableFields.length > 0 &&
-                                checkedFields.length === modalAvailableFields.length
-                              }
-                              onChange={handleHeaderCheckbox}>
-                              Field name
-                            </Checkbox>
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {modalAvailableFields.map((field, idx) => (
-                          <TableRow key={field.id + idx}>
-                            <TableCell>
-                              <Checkbox
-                                isChecked={checkedFields.includes(field.id)}
-                                onChange={() => handleFieldCheckbox(field.id)}>
-                                {field.name || field.id}
-                              </Checkbox>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </Box>
-                </Box>
-              )}
-            </Modal.Content>
-            <Modal.Controls>
-              <Button
-                variant="secondary"
-                style={{ minWidth: 100 }}
-                onClick={handleFieldsModalClose}>
-                Close
-              </Button>
-            </Modal.Controls>
+                );
+              })}
+            </Flex>
           </>
         )}
-      </Modal>
+      </Box>
     </Box>
   );
 };

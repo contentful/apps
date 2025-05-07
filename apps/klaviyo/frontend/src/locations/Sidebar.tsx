@@ -3,7 +3,10 @@ import { ConfigAppSDK, locations, SidebarExtensionSDK } from '@contentful/app-sd
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { Button, Flex, Text, Note } from '@contentful/f36-components';
 import { FieldData } from '../services/klaviyo-sync-service';
-import { getSyncData, updateSyncData } from '../services/persistence-service';
+import {
+  getEntryKlaviyoFieldMappings,
+  setEntryKlaviyoFieldMappings,
+} from '../utils/field-mappings';
 import { getFieldDetails } from '../utils/field-utilities';
 import { logger } from '../utils/logger';
 import {
@@ -56,10 +59,11 @@ export const Sidebar = () => {
     const loadMappings = async () => {
       try {
         logger.log('[Sidebar] Loading field mappings...');
-        const savedMappings = await getSyncData(sdk);
+        console.log('loading mappings', sdk);
+        const entryId = (sdk.ids as any).entry;
+        const savedMappings = await getEntryKlaviyoFieldMappings(sdk, entryId);
         if (savedMappings && Array.isArray(savedMappings) && savedMappings.length > 0) {
-          logger.log('[Sidebar] Loaded mappings:', savedMappings);
-          console.log('Sidebar: loaded mappings from localStorage:', savedMappings);
+          logger.log('[Sidebar] Loaded mappings from entry:', savedMappings);
           setMappings(savedMappings);
         } else {
           logger.log('[Sidebar] No existing mappings found');
@@ -73,19 +77,8 @@ export const Sidebar = () => {
 
     loadMappings();
 
-    // Also listen for storage events to update in real-time across tabs
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'klaviyo_field_mappings') {
-        logger.log('[Sidebar] Storage changed, reloading mappings');
-        loadMappings();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
+    // No localStorage event listeners needed
+    return () => {};
   }, [sdk]);
 
   return getCurrentComponent();
@@ -207,9 +200,8 @@ const SidebarComponent = ({
         shouldCloseOnEscapePress: true,
         shouldCloseOnOverlayClick: true,
         parameters: {
-          entryId, // Explicitly include entry ID
+          entryId, // Explicitly include entry ID (string)
           contentTypeId, // Explicitly include content type ID
-          currentEntry: JSON.stringify({ ...sdk.entry, sys: sdk.entry.getSys() }),
           fields: validFields,
           preSelectedFields,
           contentTypeName: sdk.contentType.name,
@@ -231,20 +223,11 @@ const SidebarComponent = ({
         const dialogResult = (window as any)._klaviyoDialogResult;
         if (dialogResult && dialogResult.mappings && Array.isArray(dialogResult.mappings)) {
           setMappings(dialogResult.mappings);
-          localStorage.setItem('klaviyo_field_mappings', JSON.stringify(dialogResult.mappings));
-          await updateSyncData(dialogResult.mappings);
+          const entryId = sdk.ids.entry;
+          await setEntryKlaviyoFieldMappings(sdk, entryId, dialogResult.mappings);
           setShowSuccess(true);
           setTimeout(() => setShowSuccess(false), 3000);
           return;
-        }
-        // Fallback: reload from localStorage
-        const localMappings = localStorage.getItem('klaviyo_field_mappings');
-        if (localMappings) {
-          const parsed = JSON.parse(localMappings);
-          setMappings(parsed);
-          await updateSyncData(parsed);
-          setShowSuccess(true);
-          setTimeout(() => setShowSuccess(false), 3000);
         }
         return;
       }
@@ -256,45 +239,22 @@ const SidebarComponent = ({
         logger.log('[Sidebar] Using mappings from dialog result');
 
         // Merge new mappings for this content type with existing mappings for other content types
-        let allMappings = [];
-        try {
-          const localMappings = localStorage.getItem('klaviyo_field_mappings');
-          allMappings = localMappings ? JSON.parse(localMappings) : [];
-          console.log('localMappings', localMappings, allMappings);
-        } catch (e) {
-          allMappings = [];
-        }
+        const entryId = sdk.ids.entry;
+        let allMappings = await getEntryKlaviyoFieldMappings(sdk, entryId);
         const contentTypeId = sdk.ids.contentType;
         allMappings = allMappings.filter((m: any) => m.contentTypeId !== contentTypeId);
         const updatedMappings = [...allMappings, ...result.mappings];
         console.log('Sidebar: merged updatedMappings before save:', updatedMappings);
         setMappings(updatedMappings);
-        localStorage.setItem('klaviyo_field_mappings', JSON.stringify(updatedMappings));
-        await updateSyncData(updatedMappings);
+        await setEntryKlaviyoFieldMappings(sdk, entryId, updatedMappings);
 
         // --- NEW: Immediately trigger sync to Klaviyo ---
         try {
-          const entryId = sdk.ids.entry;
-          const contentTypeId = sdk.ids.contentType;
-          const spaceId = getEffectiveSpaceId(sdk);
-          // Build syncFieldMappings first
-          const syncFieldMappings = updatedMappings.map((mapping: any) => ({
-            contentfulFieldId: mapping.id,
-            klaviyoBlockName: mapping.name,
-            fieldType:
-              mapping.type === 'Asset'
-                ? 'image'
-                : mapping.type === 'RichText'
-                ? 'richText'
-                : 'text',
-          }));
-
-          // Use syncFieldMappings to build entryData
           const entryData: Record<string, any> = {};
-          for (const field of syncFieldMappings) {
-            const fieldId = field.contentfulFieldId;
+          for (const field of updatedMappings) {
+            const fieldId = field.id;
             if (sdk.entry.fields[fieldId]) {
-              if (field.fieldType === 'image') {
+              if (field.type === 'Asset') {
                 const assetRef = sdk.entry.fields[fieldId].getValue();
                 if (assetRef && assetRef.sys && assetRef.sys.id) {
                   try {
@@ -323,7 +283,16 @@ const SidebarComponent = ({
             contentTypeId,
             entryData,
             spaceId,
-            syncFieldMappings
+            updatedMappings.map((mapping: any) => ({
+              contentfulFieldId: mapping.id,
+              klaviyoBlockName: mapping.name,
+              fieldType:
+                mapping.type === 'Asset'
+                  ? 'image'
+                  : mapping.type === 'RichText'
+                  ? 'richText'
+                  : 'text',
+            }))
           );
           if (syncResult.success) {
             setShowSuccess(true);
@@ -365,11 +334,9 @@ const SidebarComponent = ({
           // Update state and persistence
           setMappings(newMappings);
 
-          // Save to localStorage directly for immediate sharing
-          localStorage.setItem('klaviyo_field_mappings', JSON.stringify(newMappings));
-
-          // Update via our improved persistence service
-          await updateSyncData(newMappings);
+          // Save to Contentful entry field
+          const entryId = sdk.ids.entry;
+          await setEntryKlaviyoFieldMappings(sdk, entryId, newMappings);
 
           // Show success message
           setShowSuccess(true);
@@ -421,7 +388,7 @@ const SidebarComponent = ({
 
   return (
     <Flex flexDirection="column" gap="spacingM" style={{ maxWidth: '300px', height: '100%' }}>
-      <Button variant="positive" onClick={handleConfigureClick} isFullWidth>
+      <Button variant="primary" onClick={handleConfigureClick} isFullWidth>
         Configure & Sync to Klaviyo
       </Button>
 

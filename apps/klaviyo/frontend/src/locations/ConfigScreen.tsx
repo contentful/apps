@@ -20,7 +20,10 @@ import { ContentTypesList } from '../components/ContentTypesList';
 import { KlaviyoAppConfig } from '../config/klaviyo';
 import { getContentTypes } from '../utils/contentful-helper';
 import { API_PROXY_URL } from '../config/klaviyo';
-import { updateSyncData, getLocalMappings } from '../services/persistence-service';
+import {
+  getEntryKlaviyoFieldMappings,
+  setEntryKlaviyoFieldMappings,
+} from '../utils/field-mappings';
 
 // Styles for the container
 const containerStyle = {
@@ -162,7 +165,7 @@ const ConfigScreen = () => {
       // Get field mappings from both localStorage and current parameters
       let localMappings: any[] = [];
       try {
-        localMappings = getLocalMappings();
+        localMappings = await getEntryKlaviyoFieldMappings(sdk, '');
         if (localMappings.length > 0) {
           console.log('Found local mappings:', localMappings.length);
         }
@@ -258,7 +261,7 @@ const ConfigScreen = () => {
           try {
             if (parameters.fieldMappings && Array.isArray(parameters.fieldMappings)) {
               // Use persistence service to ensure consistency
-              updateSyncData(parameters.fieldMappings);
+              setEntryKlaviyoFieldMappings(sdk, '', parameters.fieldMappings);
               console.log('Saved field mappings to persistence service from parameters');
             }
           } catch (e) {

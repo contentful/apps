@@ -1552,14 +1552,35 @@ async function processImageField(value, imageTitle, spaceId, privateKey) {
     // Check for existing image in Klaviyo before uploading
     const existingImage = await findKlaviyoImageByUrl(imageUrl, privateKey);
     if (existingImage) {
-      console.log(
-        `Found existing image in Klaviyo. ID: ${existingImage.id}, URL: ${existingImage.url}`
-      );
+      // PATCH the image to update/touch it
+      try {
+        await axios({
+          method: 'patch',
+          url: `${KLAVIYO_API_URL}/images/${existingImage.id}`,
+          data: {
+            data: { type: 'image' },
+          },
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            revision: KLAVIYO_API_REVISION,
+            Authorization: `Klaviyo-API-Key ${privateKey}`,
+          },
+          timeout: 25000,
+        });
+        console.log(`Patched existing image in Klaviyo. ID: ${existingImage.id}`);
+      } catch (patchError) {
+        console.error(
+          'Error patching existing image in Klaviyo:',
+          patchError.response?.data || patchError.message
+        );
+      }
       return {
         success: true,
         url: existingImage.url,
         id: existingImage.id,
         reused: true,
+        patched: true,
       };
     }
 

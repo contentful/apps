@@ -14,7 +14,10 @@ import {
   Stack,
 } from '@contentful/f36-components';
 import logger from '../utils/logger';
-import { getSyncData, updateSyncData } from '../services/persistence-service';
+import {
+  getEntryKlaviyoFieldMappings,
+  setEntryKlaviyoFieldMappings,
+} from '../utils/field-mappings';
 
 // Define field mapping interface that aligns with the rest of the app
 interface FieldData {
@@ -59,8 +62,9 @@ const FieldMapper: React.FC = () => {
       try {
         setIsLoading(true);
 
-        // Load mappings from persistence service (localStorage)
-        const mappings = await getSyncData(sdk);
+        // Load mappings from Contentful entry field
+        const entryId = sdk.ids.entry;
+        const mappings = await getEntryKlaviyoFieldMappings(sdk, entryId);
         setExistingMappings(mappings || []);
 
         // Get current content type and field
@@ -130,6 +134,7 @@ const FieldMapper: React.FC = () => {
       const contentTypeId = sdk.contentType.sys.id;
       const fieldId = sdk.field.id;
       const fieldName = sdk.contentType.fields.find((f) => f.id === fieldId)?.name || fieldId;
+      const entryId = sdk.ids.entry;
 
       // Filter out any existing mapping for this field
       const filteredMappings = existingMappings.filter(
@@ -149,8 +154,8 @@ const FieldMapper: React.FC = () => {
       // Add the new mapping
       const updatedMappings = [...filteredMappings, newMapping];
 
-      // Save to persistence service
-      await updateSyncData(updatedMappings);
+      // Save to Contentful entry field
+      await setEntryKlaviyoFieldMappings(sdk, entryId, updatedMappings);
 
       // Update local state
       setExistingMappings(updatedMappings);
@@ -159,14 +164,14 @@ const FieldMapper: React.FC = () => {
       // Notify success
       sdk.notifier.success('Field mapping saved successfully');
 
-      // Broadcast change to other components
-      window.postMessage(
-        {
-          type: 'updateFieldMappings',
-          fieldMappings: updatedMappings,
-        },
-        '*'
-      );
+      // Broadcast change to other components (optional, can be removed if not needed)
+      // window.postMessage(
+      //   {
+      //     type: 'updateFieldMappings',
+      //     fieldMappings: updatedMappings,
+      //   },
+      //   '*'
+      // );
     } catch (error) {
       logger.error('Error saving field mapping:', error);
       sdk.notifier.error(
@@ -184,32 +189,21 @@ const FieldMapper: React.FC = () => {
       // Get current content type and field
       const contentTypeId = sdk.contentType.sys.id;
       const fieldId = sdk.field.id;
+      const entryId = sdk.ids.entry;
 
       // Filter out this field mapping
       const updatedMappings = existingMappings.filter(
         (m) => !(m.contentTypeId === contentTypeId && m.id === fieldId)
       );
 
-      // Save to persistence service
-      await updateSyncData(updatedMappings);
+      // Save to Contentful entry field
+      await setEntryKlaviyoFieldMappings(sdk, entryId, updatedMappings);
 
       // Update local state
       setExistingMappings(updatedMappings);
       setIsMapped(false);
       setKlaviyoProperty('');
       setMappingType('profile');
-
-      // Notify success
-      sdk.notifier.success('Field mapping removed');
-
-      // Broadcast change to other components
-      window.postMessage(
-        {
-          type: 'updateFieldMappings',
-          fieldMappings: updatedMappings,
-        },
-        '*'
-      );
     } catch (error) {
       logger.error('Error removing field mapping:', error);
       sdk.notifier.error(

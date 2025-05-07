@@ -345,53 +345,81 @@ export const handler = async (
     // Initialize field mappings array and locations to check
     let fieldMappings: AppFieldMapping[] = [];
 
-    // First check if we have content type specific mappings
-    if (parameters.contentTypeMappings && typeof parameters.contentTypeMappings === 'object') {
-      const contentTypeSpecificMappings = parameters.contentTypeMappings[contentTypeId];
-      if (Array.isArray(contentTypeSpecificMappings) && contentTypeSpecificMappings.length > 0) {
+    // 1. Try to get mappings from the entry itself (now using 'klaviyoFieldMappings' field)
+    if (
+      entryData.fields &&
+      entryData.fields.klaviyoFieldMappings &&
+      entryData.fields.klaviyoFieldMappings['en-US']
+    ) {
+      let rawMappings = entryData.fields.klaviyoFieldMappings['en-US'];
+      if (typeof rawMappings === 'string') {
+        try {
+          fieldMappings = JSON.parse(rawMappings);
+          console.log(
+            `Parsed ${fieldMappings.length} field mappings from JSON string in 'klaviyoFieldMappings'`
+          );
+        } catch (e) {
+          console.error('Failed to parse klaviyoFieldMappings as JSON:', e, rawMappings);
+          fieldMappings = [];
+        }
+      } else if (Array.isArray(rawMappings)) {
+        fieldMappings = rawMappings;
         console.log(
-          `Found ${contentTypeSpecificMappings.length} field mappings specific to content type ${contentTypeId}`
+          `Retrieved ${fieldMappings.length} field mappings from entry field 'klaviyoFieldMappings'`
         );
-        fieldMappings = contentTypeSpecificMappings;
       }
     }
 
-    // If no content type specific mappings were found, check the general fieldMappings
-    if (fieldMappings.length === 0 && Array.isArray(parameters.fieldMappings)) {
-      const filteredMappings = parameters.fieldMappings.filter(
-        (mapping: any) => !mapping.contentTypeId || mapping.contentTypeId === contentTypeId
-      );
-
-      if (filteredMappings.length > 0) {
-        console.log(
-          `Using ${filteredMappings.length} field mappings from general fieldMappings array`
-        );
-        fieldMappings = filteredMappings;
+    // 2. Fallback to parameters if not found on entry
+    if (fieldMappings.length === 0) {
+      // First check if we have content type specific mappings
+      if (parameters.contentTypeMappings && typeof parameters.contentTypeMappings === 'object') {
+        const contentTypeSpecificMappings = parameters.contentTypeMappings[contentTypeId];
+        if (Array.isArray(contentTypeSpecificMappings) && contentTypeSpecificMappings.length > 0) {
+          console.log(
+            `Found ${contentTypeSpecificMappings.length} field mappings specific to content type ${contentTypeId}`
+          );
+          fieldMappings = contentTypeSpecificMappings;
+        }
       }
-    }
 
-    // If still no mappings, check inside installation object as fallback
-    if (fieldMappings.length === 0 && parameters.installation) {
-      // Check installation.contentTypeMappings
-      if (
-        parameters.installation.contentTypeMappings &&
-        parameters.installation.contentTypeMappings[contentTypeId] &&
-        Array.isArray(parameters.installation.contentTypeMappings[contentTypeId])
-      ) {
-        fieldMappings = parameters.installation.contentTypeMappings[contentTypeId];
-        console.log(
-          `Found ${fieldMappings.length} mappings in installation.contentTypeMappings[${contentTypeId}]`
-        );
-      }
-      // Check installation.fieldMappings
-      else if (Array.isArray(parameters.installation.fieldMappings)) {
-        const filteredMappings = parameters.installation.fieldMappings.filter(
+      // If no content type specific mappings were found, check the general fieldMappings
+      if (fieldMappings.length === 0 && Array.isArray(parameters.fieldMappings)) {
+        const filteredMappings = parameters.fieldMappings.filter(
           (mapping: any) => !mapping.contentTypeId || mapping.contentTypeId === contentTypeId
         );
 
         if (filteredMappings.length > 0) {
-          console.log(`Found ${filteredMappings.length} mappings in installation.fieldMappings`);
+          console.log(
+            `Using ${filteredMappings.length} field mappings from general fieldMappings array`
+          );
           fieldMappings = filteredMappings;
+        }
+      }
+
+      // If still no mappings, check inside installation object as fallback
+      if (fieldMappings.length === 0 && parameters.installation) {
+        // Check installation.contentTypeMappings
+        if (
+          parameters.installation.contentTypeMappings &&
+          parameters.installation.contentTypeMappings[contentTypeId] &&
+          Array.isArray(parameters.installation.contentTypeMappings[contentTypeId])
+        ) {
+          fieldMappings = parameters.installation.contentTypeMappings[contentTypeId];
+          console.log(
+            `Found ${fieldMappings.length} mappings in installation.contentTypeMappings[${contentTypeId}]`
+          );
+        }
+        // Check installation.fieldMappings
+        else if (Array.isArray(parameters.installation.fieldMappings)) {
+          const filteredMappings = parameters.installation.fieldMappings.filter(
+            (mapping: any) => !mapping.contentTypeId || mapping.contentTypeId === contentTypeId
+          );
+
+          if (filteredMappings.length > 0) {
+            console.log(`Found ${filteredMappings.length} mappings in installation.fieldMappings`);
+            fieldMappings = filteredMappings;
+          }
         }
       }
     }
@@ -399,11 +427,17 @@ export const handler = async (
     console.log(`Retrieved ${fieldMappings.length} field mappings from parameters`);
 
     // Process the field mappings
-    const processedMappings = fieldMappings.map((mapping: AppFieldMapping) => {
+    const processedMappings = fieldMappings.map((mapping: any) => {
+      // Support both legacy and new mapping keys
+      const contentfulFieldId = mapping.contentfulFieldId || mapping.id;
+      const klaviyoBlockName = mapping.klaviyoBlockName || mapping.name || contentfulFieldId;
+      const fieldType = mapping.fieldType || mapping.type || 'text';
       return {
-        contentfulFieldId: mapping.contentfulFieldId,
-        klaviyoBlockName: mapping.klaviyoBlockName || mapping.contentfulFieldId,
-        fieldType: mapping.fieldType || 'text',
+        contentfulFieldId,
+        klaviyoBlockName,
+        fieldType,
+        contentTypeId: mapping.contentTypeId,
+        // add any other fields you need
       };
     });
 
@@ -526,7 +560,7 @@ export const handler = async (
     }
 
     // Actually sync the content to Klaviyo
-    const syncResult = await klaviyoService.syncContent(klaviyoFieldMappings, entry);
+    const syncResult = await klaviyoService.syncContent(klaviyoFieldMappings, entry, cma);
     console.log('Sync result:', syncResult);
 
     // Update sync status in app parameters
@@ -658,29 +692,8 @@ async function updateSyncStatus(
         }
       }
 
-      if (!appDefinitionId) {
-        console.error('Missing app definition ID in parameters and context');
-        // Even without appDefinitionId, we successfully synced the content
-        console.log(
-          `Successfully synced entry ${entryId} to Klaviyo but could not update sync status`
-        );
-        return;
-      }
-
       // Add the app definition ID to the parameters to ensure it's saved for future use
       updatedParameters.appDefinitionId = appDefinitionId;
-
-      // Use the correct method to update app installation parameters
-      await cma.appInstallation.upsert(
-        {
-          appDefinitionId,
-          spaceId,
-          environmentId,
-        },
-        {
-          parameters: updatedParameters,
-        }
-      );
 
       console.log(`Updated sync status for entry ${entryId}`);
     } catch (e) {

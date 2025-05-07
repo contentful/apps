@@ -19,6 +19,7 @@ export interface FieldData {
     contentType: string;
   }>;
   contentTypeId?: string;
+  htmlValue?: string; // <-- Add this for rich text HTML
 }
 
 // Track field changes with timestamps
@@ -92,7 +93,15 @@ export const sendToKlaviyo = async (
     const transformedData = Object.entries(fieldMapping).reduce(
       (acc, [contentfulField, klaviyoField]) => {
         if (entryData[contentfulField]) {
-          acc[klaviyoField] = entryData[contentfulField].value;
+          // If this is a rich text field, use htmlValue if available
+          if (
+            isRichTextDocument(entryData[contentfulField].value) &&
+            entryData[contentfulField].htmlValue
+          ) {
+            acc[klaviyoField] = entryData[contentfulField].htmlValue;
+          } else {
+            acc[klaviyoField] = entryData[contentfulField].value;
+          }
         }
         return acc;
       },
@@ -463,6 +472,8 @@ export class SyncContent {
               // Process rich text if needed
               if (isRichTextDocument(value)) {
                 entryData[fieldId].htmlValue = richTextToHtml(value);
+                // Always set value to HTML string for rich text fields
+                entryData[fieldId].value = entryData[fieldId].htmlValue;
               }
 
               // Process asset fields
@@ -569,6 +580,8 @@ export class SyncContent {
           // Process rich text if needed
           if (isRichTextDocument(localeValue)) {
             entryData[fieldId].htmlValue = richTextToHtml(localeValue);
+            // Always set value to HTML string for rich text fields
+            entryData[fieldId].value = entryData[fieldId].htmlValue;
           }
         } catch (fieldError) {
           logger.error(`Error processing CMA field ${fieldId}:`, fieldError);
@@ -825,8 +838,14 @@ export class SyncContent {
 
       // Process based on field type
       if (fieldType === 'richText' && isRichTextDocument(value)) {
-        // Convert rich text to HTML
+        // Always convert rich text to HTML for outgoing data
         logger.log(`[processEntryData] Converting rich text field ${fieldId} to HTML`);
+        processedData[fieldId] = richTextToHtml(value);
+      } else if (isRichTextDocument(value)) {
+        // If fieldType is not set but value is rich text, also convert
+        logger.log(
+          `[processEntryData] Detected rich text in field ${fieldId} (no explicit type), converting to HTML`
+        );
         processedData[fieldId] = richTextToHtml(value);
       } else if (fieldType === 'image') {
         let assetRef = value;
