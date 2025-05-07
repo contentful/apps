@@ -98,7 +98,11 @@ const Sidebar = () => {
                 Connected Content Block entries
               </Subheading>
               <Splitter />
-              <Stack flexDirection="column" spacing="spacingXs" alignItems="initial">
+              <Stack
+                flexDirection="column"
+                spacing="spacingXs"
+                alignItems="initial"
+                className={connectedFieldsForCurrentEntry.length > 5 ? styles.stack : undefined}>
                 {connectedFieldsForCurrentEntry.map(([contentfulFieldId], index) => (
                   <Text key={`${currentEntryId}-${index}`} className={styles.listItem}>
                     {contentfulFieldId}

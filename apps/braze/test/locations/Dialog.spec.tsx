@@ -158,7 +158,7 @@ describe('Dialog component', () => {
 
     fireEvent.click(sendToBrazeButton);
 
-    const successStepParagraph = screen.getByText('Seven fields were successfully', {
+    const successStepParagraph = await screen.findByText('Seven fields were successfully', {
       exact: false,
     });
     expect(successStepParagraph).toBeTruthy();

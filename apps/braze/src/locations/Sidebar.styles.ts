@@ -19,6 +19,10 @@ export const styles = {
     padding: tokens.spacingXs,
     marginBottom: tokens.spacingS,
   }),
+  stack: css({
+    maxHeight: '126px',
+    overflowY: 'auto',
+  }),
   listItem: css({
     color: tokens.gray500,
   }),
