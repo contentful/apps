@@ -79,7 +79,7 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
     context
   );
   const json = await response.json();
-  console.log('Google Drive API Response:', json);
+  console.log('Google Drive API Response [searchHandler]:', json);
 
   const items = json.files.map((file: any) => ({
     ...withBadge(file),
@@ -112,7 +112,7 @@ const lookupHandler: ResourcesLookupHandler = async (event, context) => {
   });
 
   const json = await response.json();
-  console.log('Google Drive API Response:', json);
+  console.log('Google Drive API Response [lookupHandler]:', json);
 
   const items = json.files
     .map((file: any) => {

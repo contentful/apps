@@ -27,6 +27,8 @@ const schema = makeExecutableSchema({
           throw new GraphQLError('Either "search" or "id" must be provided');
         }
 
+        const { token } = context.appInstallationParameters;
+
         let files = [];
 
         if (search) {
@@ -37,8 +39,10 @@ const schema = makeExecutableSchema({
             headers: {
               Accept: 'application/json',
               'content-type': 'application/json',
+              Authorization: `Bearer ${token}`,
             },
           });
+          console.log('SEARCH RESPONSE', { response });
 
           if (!response.ok) {
             throw new GraphQLError(
@@ -49,15 +53,17 @@ const schema = makeExecutableSchema({
           const json = await response.json();
           files = json.files ?? [];
         } else if (id) {
-          const url = `https://www.googleapis.com/drive/v3/files/${id}?fields=id,name,thumbnailLink`;
+          const url = `https://www.googleapis.com/drive/v3/files/${id}`; // ?fields=id,name,thumbnailLink
 
           const response = await fetch(url, {
             method: 'GET',
             headers: {
               Accept: 'application/json',
               'content-type': 'application/json',
+              Authorization: `Bearer ${token}`,
             },
           });
+          console.log('LOOKUP RESPONSE', { response });
 
           if (!response.ok) {
             throw new GraphQLError(
@@ -69,7 +75,7 @@ const schema = makeExecutableSchema({
           files = [json];
         }
 
-        // console.log('Google Drive API Response:', files);
+        console.log('Google Drive API Response [schema]:', files);
         return {
           items: files.map((file: any) => ({
             id: file.id,
