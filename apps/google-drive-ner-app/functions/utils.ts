@@ -8,9 +8,9 @@ export function withUrn(file: any) {
   };
 }
 
-export function withBadge(node: Product) {
+export function withBadge(file: any) {
   return {
-    ...node,
+    ...file,
     badge: { variant: 'primary', label: 'it works' },
   };
 }

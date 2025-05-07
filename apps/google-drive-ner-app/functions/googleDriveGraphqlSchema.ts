@@ -30,6 +30,8 @@ const schema = makeExecutableSchema({
 
         const { token } = context.appInstallationParameters;
 
+        console.log('Google Drive API Token:', token);
+
         let files = [];
 
         if (search) {

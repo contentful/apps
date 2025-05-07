@@ -82,12 +82,19 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
     },
     context
   );
-  const json = await response.json();
-  console.log('Google Drive API Response [searchHandler]:', json);
+  const result = await response.json();
+  console.log('Google Drive API Response [searchHandler]:', result);
 
-  const items = json.files.map((file: any) => ({
-    ...withBadge(file),
-    ...withUrn(file),
+  if (result.errors && result.errors.length > 0) {
+    return {
+      items: [],
+      pages: {},
+    };
+  }
+
+  const items = result.data.items.map((item: any) => ({
+    ...withBadge(item),
+    ...withUrn(item),
   }));
   return {
     items,
@@ -119,6 +126,13 @@ const lookupHandler: ResourcesLookupHandler = async (event, context) => {
 
   const json = await response.json();
   console.log('Google Drive API Response [lookupHandler]:', json);
+
+  if (!json.files) {
+    return {
+      items: [],
+      pages: {},
+    };
+  }
 
   const items = json.files
     .map((file: any) => {
