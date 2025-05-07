@@ -3,6 +3,7 @@ import { FunctionEventHandler, FunctionTypeEnum } from '@contentful/node-apps-to
 export type InstallationParameters = {
   apiEndpoint: string;
   url: string;
+  token: string;
 };
 
 export type EventHandler = FunctionEventHandler<FunctionTypeEnum, InstallationParameters>;

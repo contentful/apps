@@ -57,22 +57,27 @@ const queryHandler: QueryHandler = async (event, context) => {
 
 const searchHandler: ResourcesSearchHandler = async (event, context) => {
   const { query } = event;
-  const response = await fetch('http://this-does-not-matter.com/graphql', {
-    body: JSON.stringify({
-      query: /* GraphQL */ `
-        query searchFiles($query: String!) {
-          file(search: $query) {
-            id
-            name
-            thumbnailLink
+
+  const response = await yoga.fetch(
+    'http://this-does-not-matter.com/graphql',
+    {
+      body: JSON.stringify({
+        query: /* GraphQL */ `
+          query searchFiles($query: String!) {
+            file(search: $query) {
+              id
+              name
+              thumbnailLink
+            }
           }
-        }
-      `,
-      variables: { query },
-    }),
-    method: 'POST',
-    headers: { Accept: 'application/json', 'content-type': 'application/json' },
-  });
+        `,
+        variables: { query },
+      }),
+      method: 'POST',
+      headers: { Accept: 'application/json', 'content-type': 'application/json' },
+    },
+    context
+  );
   const json = await response.json();
   console.log('Google Drive API Response:', json);
 

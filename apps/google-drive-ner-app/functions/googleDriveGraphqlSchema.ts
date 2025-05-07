@@ -1,5 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { makeExecutableSchema } from '@graphql-tools/schema';
+import { FunctionEventContext } from '@contentful/node-apps-toolkit';
 
 const typeDefs = `
 type File {
@@ -21,7 +22,7 @@ const schema = makeExecutableSchema({
   typeDefs,
   resolvers: {
     Query: {
-      file: async (_parent, { id, search }, _context) => {
+      file: async (_parent, { id, search }, context: FunctionEventContext<Record<string, any>>) => {
         if (!search && !id) {
           throw new GraphQLError('Either "search" or "id" must be provided');
         }
