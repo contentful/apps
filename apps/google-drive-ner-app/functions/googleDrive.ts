@@ -105,36 +105,40 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
 const lookupHandler: ResourcesLookupHandler = async (event, context) => {
   const { urns } = event.lookupBy;
 
-  const response = await yoga.fetch('http://this-does-not-matter.com/graphql', {
-    body: JSON.stringify({
-      query: /* GraphQL */ `
-        query lookupFiles($ids: [ID!]!) {
-          file(ids: $ids) {
-            items {
-              id
-              title
-              image
+  const response = await yoga.fetch(
+    'http://this-does-not-matter.com/graphql',
+    {
+      body: JSON.stringify({
+        query: /* GraphQL */ `
+          query lookupFiles($ids: [ID!]!) {
+            file(ids: $ids) {
+              items {
+                id
+                title
+                image
+              }
             }
           }
-        }
-      `,
-      variables: { ids: urns },
-    }),
-    method: 'POST',
-    headers: { Accept: 'application/json', 'content-type': 'application/json' },
-  });
+        `,
+        variables: { ids: urns },
+      }),
+      method: 'POST',
+      headers: { Accept: 'application/json', 'content-type': 'application/json' },
+    },
+    context
+  );
 
-  const json = await response.json();
-  console.log('Google Drive API Response [lookupHandler]:', json);
+  const result = await response.json();
+  console.log('Google Drive API Response [lookupHandler]:', result);
 
-  if (!json.files) {
+  if (result.errors && result.errors.length > 0) {
     return {
       items: [],
       pages: {},
     };
   }
 
-  const items = json.files
+  const items = result.data.file.items
     .map((file: any) => {
       if (file === null) {
         console.error('Null file encountered');

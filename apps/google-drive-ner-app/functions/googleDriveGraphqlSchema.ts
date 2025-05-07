@@ -14,7 +14,7 @@ type FileResult {
 }
 
 type Query {
-  file(id: String, search: String): FileResult
+  file(id: ID, ids: [ID!], search: String): FileResult
 }
 `;
 
@@ -22,10 +22,14 @@ const schema = makeExecutableSchema({
   typeDefs,
   resolvers: {
     Query: {
-      file: async (_parent, { id, search }, context: FunctionEventContext<Record<string, any>>) => {
-        console.log('Google Drive API Request:', { id, search });
-        if (!search && !id) {
-          throw new GraphQLError('Either "search" or "id" must be provided');
+      file: async (
+        _parent,
+        { id, ids, search },
+        context: FunctionEventContext<Record<string, any>>
+      ) => {
+        console.log('Google Drive API Request:', { ids, search });
+        if (!search && !ids) {
+          throw new GraphQLError('Either "search" or "ids" must be provided');
         }
 
         const { token } = context.appInstallationParameters;
@@ -55,27 +59,29 @@ const schema = makeExecutableSchema({
 
           const json = await response.json();
           files = json.files ?? [];
-        } else if (id) {
-          const url = `https://www.googleapis.com/drive/v3/files/${id}`; // ?fields=id,name,thumbnailLink
+        } else if (ids && ids.length > 0) {
+          // Make individual requests for each ID
+          const filePromises = ids.map(async (fileId) => {
+            const url = `https://www.googleapis.com/drive/v3/files/${fileId}&fields=id,name,thumbnailLink`;
+            const response = await fetch(url, {
+              method: 'GET',
+              headers: {
+                Accept: 'application/json',
+                'content-type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+            });
 
-          const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-              Accept: 'application/json',
-              'content-type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
+            if (!response.ok) {
+              console.error(`Failed to fetch file ${fileId}: ${response.status}`);
+              return null;
+            }
+
+            return response.json();
           });
-          console.log('LOOKUP RESPONSE', { response });
 
-          if (!response.ok) {
-            throw new GraphQLError(
-              `Google Drive API returned a non-200 status code: ${response.status}`
-            );
-          }
-
-          const json = await response.json();
-          files = [json];
+          const results = await Promise.all(filePromises);
+          files = results.filter((file): file is any => file !== null);
         }
 
         console.log('Google Drive API Response [schema]:', files);
