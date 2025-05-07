@@ -92,7 +92,7 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
     };
   }
 
-  const items = result.data.items.map((item: any) => ({
+  const items = result.data.file.items.map((item: any) => ({
     ...withBadge(item),
     ...withUrn(item),
   }));
