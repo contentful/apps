@@ -29,6 +29,12 @@ export const BRAZE_CONTENT_BLOCK_DOCUMENTATION =
 export const BRAZE_ENDPOINTS_LIST =
   'https://www.braze.com/docs/api/basics#braze-rest-api-collection';
 
+export enum EntryStatus {
+  Draft = 'DRAFT',
+  Changed = 'CHANGED',
+  Published = 'PUBLISHED',
+}
+
 export function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
