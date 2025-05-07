@@ -58,6 +58,8 @@ const queryHandler: QueryHandler = async (event, context) => {
 const searchHandler: ResourcesSearchHandler = async (event, context) => {
   const { query } = event;
 
+  console.log('searchHandler', { query });
+
   const response = await yoga.fetch(
     'http://this-does-not-matter.com/graphql',
     {
@@ -65,9 +67,11 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
         query: /* GraphQL */ `
           query searchFiles($query: String!) {
             file(search: $query) {
-              id
-              name
-              thumbnailLink
+              items {
+                id
+                title
+                image
+              }
             }
           }
         `,
@@ -99,9 +103,11 @@ const lookupHandler: ResourcesLookupHandler = async (event, context) => {
       query: /* GraphQL */ `
         query lookupFiles($ids: [ID!]!) {
           file(ids: $ids) {
-            id
-            name
-            thumbnailLink
+            items {
+              id
+              title
+              image
+            }
           }
         }
       `,

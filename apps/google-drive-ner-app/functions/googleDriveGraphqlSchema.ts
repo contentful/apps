@@ -23,6 +23,7 @@ const schema = makeExecutableSchema({
   resolvers: {
     Query: {
       file: async (_parent, { id, search }, context: FunctionEventContext<Record<string, any>>) => {
+        console.log('Google Drive API Request:', { id, search });
         if (!search && !id) {
           throw new GraphQLError('Either "search" or "id" must be provided');
         }
