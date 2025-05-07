@@ -21,12 +21,52 @@ vi.mock('contentful-management', () => ({
   createClient: () => mockCma,
 }));
 
-const mockCreateFields = vi.fn();
+const mockGetEntryAndContentType = vi.fn();
+const mockCreateFieldsForEntry = vi.fn();
 vi.mock('../../src/fields/FieldsFactory', () => ({
   FieldsFactory: vi.fn().mockImplementation(() => ({
-    createFields: mockCreateFields,
+    getEntryAndContentType: mockGetEntryAndContentType,
+    createFieldsForEntry: mockCreateFieldsForEntry,
   })),
 }));
+
+const mockCMAEntryItemResponse = {
+  sys: {
+    id: 'entryId',
+    contentType: {
+      sys: {id: 'contentTypeId'}
+    },
+    type: 'Entry',
+  },
+  fields: {
+    title: {'en-US': 'Some Title'},
+    fieldId: {
+      'en-US': {
+        sys: {
+          id: 'referencedEntryId',
+          linkType: 'Entry',
+          type: 'Link',
+        }
+      }
+    }
+  }
+}
+
+const mockCMAContentTypeResponse = {
+  sys: {
+    id: 'contentTypeId',
+    type: 'ContentType',
+  },
+  name: 'Example Content Type',
+  fields: [
+    {
+      id: 'fieldId',
+      name: 'Field Name',
+      type: 'Link',
+      linkType: 'Entry',
+    }
+  ]
+};
 
 const mockField = new BasicField('fieldId', 'fieldName', 'contentTypeId', false);
 mockField.selected = true;
@@ -48,7 +88,8 @@ const CREATE_FIELDS_STEP_TEXT = 'generate into Content Blocks';
 describe('Dialog component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCreateFields.mockResolvedValue([mockField]);
+    mockGetEntryAndContentType.mockResolvedValue([mockCMAEntryItemResponse, mockCMAContentTypeResponse]);
+    mockCreateFieldsForEntry.mockResolvedValue([mockField]);
     vi.spyOn(mockEntry, 'getGraphQLResponse').mockImplementation(async () => 'graphql response');
     vi.spyOn(Entry, 'fromSerialized').mockImplementation(() => mockEntry);
     mockSdk.parameters.invocation = undefined;
@@ -158,7 +199,7 @@ describe('Dialog component', () => {
 
     fireEvent.click(sendToBrazeButton);
 
-    const successStepParagraph = screen.getByText('Seven fields were successfully', {
+    const successStepParagraph = await screen.findByText('Seven fields were successfully', {
       exact: false,
     });
     expect(successStepParagraph).toBeTruthy();

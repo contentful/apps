@@ -10,6 +10,8 @@ export class Entry {
   private spaceId: string;
   private environment: string;
   private contentfulToken: string;
+  private publishedAt: string | undefined;
+  private updatedAt: string | undefined;
   constructor(
     id: string,
     contentType: string,
@@ -17,7 +19,9 @@ export class Entry {
     fields: Field[],
     spaceId: string,
     environment: string,
-    contentfulToken: string
+    contentfulToken: string,
+    publishedAt?: string,
+    updatedAt?: string
   ) {
     this.id = id;
     this.contentType = firstLetterToLowercase(contentType);
@@ -26,6 +30,8 @@ export class Entry {
     this.spaceId = spaceId;
     this.environment = environment;
     this.contentfulToken = contentfulToken;
+    this.publishedAt = publishedAt;
+    this.updatedAt = updatedAt;
   }
 
   static fromSerialized(serializedEntry: any): Entry {
@@ -36,7 +42,9 @@ export class Entry {
       serializedEntry['fields'].map((field: any) => FieldRegistry.deserializeField(field)),
       serializedEntry['spaceId'],
       serializedEntry['environment'],
-      serializedEntry['contentfulToken']
+      serializedEntry['contentfulToken'],
+      serializedEntry['publishedAt'],
+      serializedEntry['updatedAt']
     );
   }
 
@@ -49,6 +57,8 @@ export class Entry {
       spaceId: this.spaceId,
       environment: this.environment,
       contentfulToken: this.contentfulToken,
+      publishedAt: this.publishedAt,
+      updatedAt: this.updatedAt,
     };
   }
 
@@ -139,4 +149,16 @@ export class Entry {
   private selectedFields() {
     return this.fields.filter((field) => field.selected);
   }
+
+  public getEntryState = () => {
+    if (!this.publishedAt) {
+      return 'draft';
+    }
+
+    if (this.publishedAt !== this.updatedAt) {
+      return 'changed';
+    }
+
+    return 'published';
+  };
 }

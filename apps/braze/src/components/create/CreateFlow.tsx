@@ -8,8 +8,10 @@ import CreateStep from './CreateStep';
 import SuccessStep from './SuccessStep';
 import { FIELDS_STEP } from '../../utils';
 import { createClient } from 'contentful-management';
+import DraftStep from "./DraftStep";
 
 const CREATE_STEP = 'create';
+const DRAFT_STEP = 'draft';
 const SUCCESS_STEP = 'success';
 
 type CreateFlowProps = {
@@ -95,6 +97,13 @@ const CreateFlow = (props: CreateFlowProps) => {
           handlePreviousStep={() => setStep(FIELDS_STEP)}
           handleNextStep={handleCreate}
         />
+      )}
+      {step === DRAFT_STEP && (
+          <DraftStep
+              isSubmitting={isSubmitting}
+              handlePreviousStep={() => setStep(FIELDS_STEP)}
+              handleNextStep={handleCreate}
+          />
       )}
       {step === SUCCESS_STEP && (
         <SuccessStep

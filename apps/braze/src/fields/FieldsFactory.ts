@@ -30,14 +30,14 @@ export class FieldsFactory {
     this.contentTypes = {};
   }
 
-  public async createFields() {
+  public async getEntryAndContentType() {
     const response = await this.cma.entry.references({ entryId: this.entryId, include: 5 });
     const items = resolveResponse(response);
     const contentType = await this.getContentType(this.entryContentTypeId);
-    return this.createFieldsForEntry(items[0].fields, contentType);
+    return [items[0], contentType];
   }
 
-  private async createFieldsForEntry(
+  public async createFieldsForEntry(
     entryFields: any,
     contentType: ContentTypeProps,
     currentDepth: number = 1
