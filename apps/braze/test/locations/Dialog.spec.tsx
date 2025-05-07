@@ -158,9 +158,10 @@ describe('Dialog component', () => {
 
     fireEvent.click(sendToBrazeButton);
 
-    const successStepParagraph = screen.getByText('Seven fields were successfully', {
+    const successStepParagraph = screen.getByText('successfully sent to Braze', {
       exact: false,
     });
+
     expect(successStepParagraph).toBeTruthy();
   });
 });
