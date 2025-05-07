@@ -19,7 +19,7 @@ const resourceTypeMappingHandler: MappingHandler = (event) => {
     graphQLQueryField: 'file',
     graphQLQueryArguments: { id: '/urn' },
   }));
-
+  console.log('resourceTypeMappingHandler', { mappings });
   return {
     resourceTypes: mappings,
   };
