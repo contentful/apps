@@ -10,8 +10,7 @@ export class Entry {
   private spaceId: string;
   private environment: string;
   private contentfulToken: string;
-  private publishedAt: string | undefined;
-  private updatedAt: string | undefined;
+  public state: EntryStatus;
   constructor(
     id: string,
     contentType: string,
@@ -30,8 +29,7 @@ export class Entry {
     this.spaceId = spaceId;
     this.environment = environment;
     this.contentfulToken = contentfulToken;
-    this.publishedAt = publishedAt;
-    this.updatedAt = updatedAt;
+    this.state = this.getEntryState(publishedAt, updatedAt);
   }
 
   static fromSerialized(serializedEntry: any): Entry {
@@ -43,8 +41,7 @@ export class Entry {
       serializedEntry['spaceId'],
       serializedEntry['environment'],
       serializedEntry['contentfulToken'],
-      serializedEntry['publishedAt'],
-      serializedEntry['updatedAt']
+      serializedEntry['state']
     );
   }
 
@@ -57,8 +54,7 @@ export class Entry {
       spaceId: this.spaceId,
       environment: this.environment,
       contentfulToken: this.contentfulToken,
-      publishedAt: this.publishedAt,
-      updatedAt: this.updatedAt,
+      state: this.state,
     };
   }
 
@@ -150,12 +146,12 @@ export class Entry {
     return this.fields.filter((field) => field.selected);
   }
 
-  public getEntryState = () => {
-    if (!this.publishedAt) {
+  public getEntryState = (publishedAt: string | undefined, updatedAt: string | undefined) => {
+    if (!publishedAt) {
       return EntryStatus.Draft;
     }
 
-    if (this.publishedAt !== this.updatedAt) {
+    if (publishedAt !== updatedAt) {
       return EntryStatus.Changed;
     }
 

@@ -40,7 +40,7 @@ const CreateFlow = (props: CreateFlowProps) => {
   );
 
   const handleCreate = async () => {
-    if (entry.getEntryState() !== EntryStatus.Published && step === CREATE_STEP) {
+    if (entry.state !== EntryStatus.Published && step === CREATE_STEP) {
       setStep(DRAFT_STEP);
       return;
     }
