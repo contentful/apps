@@ -102,7 +102,7 @@ const Sidebar = () => {
                 flexDirection="column"
                 spacing="spacingXs"
                 alignItems="initial"
-                className={connectedFieldsForCurrentEntry.length > 5 ? styles.stack : undefined}>
+                className={styles.stack}>
                 {connectedFieldsForCurrentEntry.map(([contentfulFieldId], index) => (
                   <Text key={`${currentEntryId}-${index}`} className={styles.listItem}>
                     {contentfulFieldId}
