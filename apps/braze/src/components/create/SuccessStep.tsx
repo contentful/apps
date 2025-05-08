@@ -8,6 +8,7 @@ type SuccessStepProps = {
   handleClose: () => void;
 };
 
+
 const SuccessStep = ({ selectedFields, handleClose }: SuccessStepProps) => {
   return (
     <>
