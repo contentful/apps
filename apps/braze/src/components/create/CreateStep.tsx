@@ -13,6 +13,7 @@ import { EditIcon } from '@contentful/f36-icons';
 import { Entry } from '../../fields/Entry';
 import WizardFooter from '../WizardFooter';
 import { useState, useEffect } from 'react';
+import { editButton } from './CreateStep.styles';
 
 type CreateStepProps = {
   entry: Entry;
@@ -59,10 +60,6 @@ const CreateStep = ({
     }));
   };
 
-  const handleSave = (fieldId: string) => {
-    setEditingField(null);
-  };
-
   return (
     <>
       <Box>
@@ -80,7 +77,6 @@ const CreateStep = ({
                     <TextInput
                       value={contentBlockNames[fieldId] || ''}
                       onChange={(e) => handleNameChange(fieldId, e.target.value)}
-                      onBlur={() => handleSave(fieldId)}
                       autoFocus
                     />
                   ) : (
@@ -93,6 +89,7 @@ const CreateStep = ({
                   icon={<EditIcon />}
                   aria-label="Edit content block"
                   onClick={() => handleEdit(fieldId)}
+                  className={editButton}
                 />
               </Flex>
             </Card>

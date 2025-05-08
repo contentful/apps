@@ -6,6 +6,7 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import { type PlainClientAPI, createClient } from 'contentful-management';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
+import { STATUS_CODES } from 'http';
 
 type AppInstallationParameters = {
   brazeApiKey: string;
@@ -33,11 +34,11 @@ function initContentfulManagementClient(context: FunctionEventContext): PlainCli
   });
 }
 
-export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
-  event: AppActionRequest<
-    'Custom',
-    { entryId: string; fieldIds: string; contentBlockNames: string }
-  >,
+export const handler: FunctionEventHandler<
+  FunctionTypeEnum.AppActionCall,
+  AppActionParameters
+> = async (
+  event: AppActionRequest<'Custom', AppActionParameters>,
   context: FunctionEventContext
 ) => {
   const cma = initContentfulManagementClient(context);
@@ -69,6 +70,15 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
         fieldId,
         success: false,
         message: `Field ${fieldId} not found or has no value`,
+      });
+      continue;
+    }
+
+    if (!parsedContentBlockNames[fieldId]) {
+      results.push({
+        fieldId,
+        success: false,
+        message: `Content block name not found or has no value for field ${fieldId}`,
       });
       continue;
     }
