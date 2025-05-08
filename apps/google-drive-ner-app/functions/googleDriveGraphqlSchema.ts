@@ -28,8 +28,8 @@ const schema = makeExecutableSchema({
         context: FunctionEventContext<Record<string, any>>
       ) => {
         console.log('Google Drive API Request:', { ids, search });
-        if (!search && !ids) {
-          throw new GraphQLError('Either "search" or "ids" must be provided');
+        if (!search && !id && (!ids || ids.length === 0)) {
+          throw new GraphQLError('Either "search" or "ids" or id  must be provided');
         }
 
         const { token } = context.appInstallationParameters;
@@ -38,7 +38,28 @@ const schema = makeExecutableSchema({
 
         let files = [];
 
-        if (search) {
+        if (id) {
+          const url = `https://www.googleapis.com/drive/v3/files/${id}?fields=id,name,thumbnailLink`;
+
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+              'content-type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          console.log('Graph QL Event handler Response from Google Drive API', { response });
+
+          if (!response.ok) {
+            throw new GraphQLError(
+              `Google Drive API returned a non-200 status code: ${response.status}`
+            );
+          }
+
+          const result = await response.json();
+          files = [result];
+        } else if (search) {
           const url = `https://www.googleapis.com/drive/v3/files?q=name contains '${search}'&fields=files(id,name,thumbnailLink)`;
 
           const response = await fetch(url, {
@@ -61,8 +82,9 @@ const schema = makeExecutableSchema({
           files = json.files ?? [];
         } else if (ids && ids.length > 0) {
           // Make individual requests for each ID
-          const filePromises = ids.map(async (fileId) => {
-            const url = `https://www.googleapis.com/drive/v3/files/${fileId}&fields=id,name,thumbnailLink`;
+          // todo : fix any type
+          const filePromises = ids.map(async (fileId: any) => {
+            const url = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,thumbnailLink`;
             const response = await fetch(url, {
               method: 'GET',
               headers: {
