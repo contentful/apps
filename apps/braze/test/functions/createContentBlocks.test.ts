@@ -349,7 +349,7 @@ describe('createContentBlocks', () => {
         {
           fieldId: 'description',
           success: false,
-          message: 'Content block name not provided for field description',
+          message: 'Content block name not found or has no value for field description',
         },
       ],
     });
