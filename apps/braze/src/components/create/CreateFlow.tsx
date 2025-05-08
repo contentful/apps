@@ -50,32 +50,36 @@ const CreateFlow = (props: CreateFlowProps) => {
     const connectedFields = JSON.parse(sdk.parameters.installation.brazeConnectedFields || '{}');
     const entryConnectedFields = connectedFields[entry.id] || [];
 
-    const response = await cma.appActionCall.createWithResponse(
-      {
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
-        appDefinitionId: '3xrrkR4QQr5YqMvOOoIt4y', //sdk.ids.app!,
-        appActionId: 'createContentBlocksAction',
-      },
-      {
-        parameters: {
-          entryId: entry.id,
-          fieldIds: Array.from(selectedFields).join(','),
+    try {
+      const response = await cma.appActionCall.createWithResponse(
+        {
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
+          appDefinitionId: sdk.ids.app!,
+          appActionId: 'createContentBlocksAction',
         },
-      }
-    );
-    const data = JSON.parse(response.response.body);
-    // TODO: define type returned by the action
-    const newFields = data.results
-      .filter((result: any) => result.success)
-      .map((result: any) => [result.fieldId, result.contentBlockId]);
+        {
+          parameters: {
+            entryId: entry.id,
+            fieldIds: Array.from(selectedFields).join(','),
+          },
+        }
+      );
+      const data = JSON.parse(response.response.body);
+      // TODO: define type returned by the action
+      const newFields = data.results
+        .filter((result: any) => result.success)
+        .map((result: any) => [result.fieldId, result.contentBlockId]);
 
-    connectedFields[entry.id] = [...entryConnectedFields, ...newFields];
-    sdk.parameters.installation.brazeConnectedFields = JSON.stringify(connectedFields);
+      connectedFields[entry.id] = [...entryConnectedFields, ...newFields];
+      sdk.parameters.installation.brazeConnectedFields = JSON.stringify(connectedFields);
 
-    // TODO: handle errors
-    setIsSubmitting(false);
-    setStep(SUCCESS_STEP);
+      setIsSubmitting(false);
+      setStep(SUCCESS_STEP);
+    } catch (error) {
+      // TODO: handle errors
+      console.error(error);
+    }
   };
 
   return (

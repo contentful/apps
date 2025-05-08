@@ -96,7 +96,7 @@ const Field = () => {
 
       case 'undefined':
         if (sdk.field.required) {
-          return 'Invalid';
+          return 'No color selected';
         } else {
           return 'Select a color…';
         }
