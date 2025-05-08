@@ -6,9 +6,6 @@ import {
   Button,
   Flex,
   Heading,
-  Note,
-  Paragraph,
-  Stack,
   Text,
   Table,
   TableBody,
@@ -16,20 +13,10 @@ import {
   TableHead,
   TableRow,
   Modal,
-  Select,
-  FormControl,
-  Pill,
-  Subheading,
-  Tabs,
-  Spinner,
   Badge,
   Checkbox,
 } from '@contentful/f36-components';
-import { getSyncData, getLocalMappings } from '../services/persistence-service';
-import { SyncContent } from '../services/klaviyo-sync-service';
-import { SyncStatusTable } from '../components/SyncStatusTable';
 import logger from '../utils/logger';
-import { saveLocalMappings } from '../utils/sync-api';
 import {
   getEntryKlaviyoFieldMappings,
   setEntryKlaviyoFieldMappings,
@@ -83,26 +70,18 @@ export const FieldMappingScreen: React.FC = () => {
   const [mappings, setMappings] = useState<ExtendedFieldData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [contentTypes, setContentTypes] = useState<Record<string, string>>({});
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [availableContentTypes, setAvailableContentTypes] = useState<
     Array<{ id: string; name: string }>
   >([]);
   const [selectedContentType, setSelectedContentType] = useState<string>('');
   const [availableFields, setAvailableFields] = useState<FieldItem[]>([]);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
-  const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
-  const [hoveredField, setHoveredField] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
   const [entries, setEntries] = useState<
     Array<{ id: string; title: string; contentTypeId: string }>
   >([]);
   const [selectedEntryId, setSelectedEntryId] = useState<string>('');
   const [isEntriesLoading, setIsEntriesLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState('');
-  const [isSyncSuccess, setIsSyncSuccess] = useState(true);
-  const [selectedEntry, setSelectedEntry] = useState<ExtendedFieldData | null>(null);
   const [isFieldsModalOpen, setIsFieldsModalOpen] = useState(false);
   const [checkedFields, setCheckedFields] = useState<string[]>([]);
   const [selectedEntryGroup, setSelectedEntryGroup] = useState<ExtendedFieldData[] | null>(null);
@@ -112,7 +91,6 @@ export const FieldMappingScreen: React.FC = () => {
   >([]);
   const [modalEntryId, setModalEntryId] = useState<string | null>(null);
   const [modalContentTypeId, setModalContentTypeId] = useState<string | null>(null);
-  const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -125,56 +103,6 @@ export const FieldMappingScreen: React.FC = () => {
       return acc;
     }, {} as Record<string, ExtendedFieldData[]>);
   }, [mappings]);
-
-  // Helper to get entry name for a group
-  const getEntryName = (fields: ExtendedFieldData[]) => {
-    // Use the first mapping's name as the entry name
-    return fields[0]?.name || fields[0]?.klaviyoBlockName || fields[0]?.id || 'Unknown';
-  };
-
-  // Helper to get content type for a group
-  const getContentType = (fields: ExtendedFieldData[]) => {
-    return fields[0]?.contentTypeId
-      ? contentTypes[fields[0].contentTypeId] || fields[0].contentTypeId
-      : 'Unknown';
-  };
-
-  // Helper to get updated time for a group (stubbed)
-  const getUpdatedTimeGroup = (fields: ExtendedFieldData[]) => {
-    return fields[0]?.updated || 'Just now';
-  };
-
-  // Helper to get status for a group (stubbed)
-  const getStatusGroup = (fields: ExtendedFieldData[]) => {
-    return fields[0]?.status;
-  };
-
-  // Helper to get connected fields list for modal
-  const getConnectedFieldsList = (fields: ExtendedFieldData[]) => {
-    return fields.map((f) => f.name || f.klaviyoBlockName || f.id);
-  };
-
-  // Handle checkbox logic
-  const handleFieldCheckbox = (field: string) => {
-    setCheckedFields((prev) =>
-      prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field]
-    );
-  };
-  const allFields = selectedEntryGroup ? getConnectedFieldsList(selectedEntryGroup) : [];
-  const allChecked = allFields.length > 0 && checkedFields.length === allFields.length;
-  const handleHeaderCheckbox = () => {
-    const allIds = modalAvailableFields.map((f) => f.id);
-    if (allIds.length > 0 && checkedFields.length === allIds.length) {
-      setCheckedFields([]);
-    } else {
-      setCheckedFields(allIds);
-    }
-  };
-
-  // Reset checked fields when modal opens/closes or entry changes
-  React.useEffect(() => {
-    setCheckedFields([]);
-  }, [isFieldsModalOpen, selectedEntryGroup]);
 
   // Count of grouped entries
   const groupedEntries = Object.values(groupedMappings);
@@ -365,144 +293,6 @@ export const FieldMappingScreen: React.FC = () => {
     loadAllEntryMappings();
   }, [entries, sdk]);
 
-  const saveFieldMappings = async (
-    mappings: any[],
-    fieldsSource?: FieldItem[],
-    entryIdOverride?: string
-  ) => {
-    try {
-      setIsSaving(true);
-      setSaveMessage('');
-
-      // Format the mappings for storage
-      const fieldsArr = fieldsSource || availableFields;
-      const formattedMappings = mappings.map((fieldId) => {
-        const field = fieldsArr.find((f) => f.id === fieldId);
-        const fieldType = field?.type || 'Symbol';
-
-        // Properly identify field types
-        let mappingFieldType = 'text';
-        if (fieldType === 'RichText') {
-          mappingFieldType = 'richText';
-        } else if (fieldType === 'Asset' || fieldType === 'Link') {
-          mappingFieldType = 'image';
-        } else if (fieldType === 'Array') {
-          mappingFieldType = 'reference-array';
-        } else if (fieldType === 'Object' || fieldType === 'ObjectMap') {
-          mappingFieldType = 'json';
-        } else if (fieldType === 'Location') {
-          mappingFieldType = 'location';
-        }
-
-        return {
-          id: fieldId,
-          contentfulFieldId: fieldId,
-          name: field?.name || fieldId,
-          klaviyoBlockName: field?.name || fieldId,
-          type: fieldType,
-          fieldType: mappingFieldType,
-          contentTypeId: undefined, // Not used in this context
-          isAsset: fieldType === 'Asset' || fieldType === 'Link',
-          value: '',
-        };
-      });
-
-      const entryIdToSave = entryIdOverride || selectedEntryId;
-      console.log('[saveFieldMappings] entryIdToSave:', entryIdToSave);
-      if (entryIdToSave) {
-        await setEntryKlaviyoFieldMappings(sdk, entryIdToSave, formattedMappings);
-        setMappings(formattedMappings);
-        setSaveMessage('Field mappings saved to entry successfully!');
-      } else {
-        setSaveMessage('No entry selected.');
-      }
-    } catch (error) {
-      logger.error('Error in saveFieldMappings:', error);
-      setSaveMessage(`Error saving: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // Helper to get status pill
-  const getStatusPill = (status?: string) => {
-    if (status === 'Published') {
-      return <Badge variant="positive">Published</Badge>;
-    }
-    return <Badge variant="warning">Draft</Badge>;
-  };
-
-  // When opening the modal, set checkedFields to mapped field IDs
-  const openFieldsModal = async (
-    fields: ExtendedFieldData[],
-    entryId: string,
-    contentTypeId: string
-  ) => {
-    setSelectedEntryGroup(fields);
-    setModalEntryId(entryId);
-    setModalContentTypeId(contentTypeId);
-    // Set selectedContentType to the contentTypeId of the entry group
-    if (fields[0]?.contentTypeId) {
-      setSelectedContentType(fields[0].contentTypeId);
-    }
-    setIsFieldsModalOpen(true);
-    let allFields: FieldItem[] = [];
-    if (contentTypeId) {
-      // Fetch fields for this contentTypeId using the SDK
-      const space = await sdk.cma.space.get({});
-      const contentType = await sdk.cma.contentType.get({
-        spaceId: space.sys.id,
-        environmentId: sdk.ids.environment,
-        contentTypeId,
-      });
-      allFields = contentType.fields.map((field: any) => ({
-        id: field.id,
-        name: field.name,
-        type: field.type,
-      }));
-    }
-    setModalAvailableFields(allFields);
-    // Set checkedFields to mapped field IDs
-    const mappedFieldIds = fields.map((f) => f.id);
-    setCheckedFields(mappedFieldIds);
-  };
-
-  const handleFieldsModalClose = async () => {
-    if (selectedEntryGroup && checkedFields) {
-      const entryId = modalEntryId;
-      const contentTypeId = modalContentTypeId;
-      console.log('[handleFieldsModalClose] entryId:', entryId, 'contentTypeId:', contentTypeId);
-      if (entryId && contentTypeId) {
-        await saveFieldMappings(checkedFields, modalAvailableFields, entryId);
-        // Fetch mappings again to verify
-        const entryMappings = await getEntryKlaviyoFieldMappings(sdk, entryId);
-        console.log('[handleFieldsModalClose] Fetched mappings after save:', entryMappings);
-        if (!entryMappings || entryMappings.length === 0) {
-          logger.error('[SyncContent] No field mappings provided for entryId:', entryId);
-          setSyncMessage('No field mappings found after save. Please try again.');
-        } else {
-          try {
-            const syncInstance = new SyncContent({ entryId, contentTypeId }, sdk);
-            await syncInstance.syncContent(syncInstance.sdk, entryMappings);
-            setSyncMessage('Synced with Klaviyo!');
-          } catch (syncError) {
-            logger.error('Error syncing with Klaviyo:', syncError);
-            setSyncMessage('Error syncing with Klaviyo');
-          }
-        }
-      } else {
-        logger.error(
-          '[handleFieldsModalClose] No entryId or contentTypeId found for modal:',
-          selectedEntryGroup
-        );
-        setSyncMessage('No entryId or contentTypeId found for this entry.');
-      }
-    }
-    setModalEntryId(null);
-    setModalContentTypeId(null);
-    setIsFieldsModalOpen(false);
-  };
-
   // Dropdown close on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -520,188 +310,210 @@ export const FieldMappingScreen: React.FC = () => {
     };
   }, [dropdownOpen]);
 
-  // Select all logic
-  const allSelected =
-    selectedContentTypes.length === availableContentTypes.length &&
-    availableContentTypes.length > 0;
-  const someSelected =
-    selectedContentTypes.length > 0 && selectedContentTypes.length < availableContentTypes.length;
-  const handleSelectAll = () => {
-    if (allSelected) setSelectedContentTypes([]);
-    else setSelectedContentTypes(availableContentTypes.map((ct) => ct.id));
-  };
-  const handleToggleContentType = (id: string) => {
-    setSelectedContentTypes((prev) =>
-      prev.includes(id) ? prev.filter((ct) => ct !== id) : [...prev, id]
-    );
-  };
-
   return (
-    <Box padding="spacingL" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-      <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingL">
+    <Box style={{ maxWidth: '1000px', margin: '40px auto' }}>
+      <Flex justifyContent="space-between" alignItems="center" style={{ marginBottom: 24 }}>
         <Box>
-          <Heading as="h1" marginBottom="spacingXs">
+          <Heading as="h2" marginBottom="none">
             Klaviyo Universal Content
           </Heading>
-          <Text fontColor="gray700" fontSize="fontSizeL">
-            Content connected to Klaviyo through Universal Content
-          </Text>
         </Box>
-        <Text fontColor="gray700" fontSize="fontSizeL">
-          Connected entries: {allEntryMappings.length}/{maxCount}
+        <Text fontWeight="fontWeightMedium" fontColor="gray600">
+          Connected entries: {connectedCount}/{maxCount}
         </Text>
       </Flex>
-      {/* Content type multi-select dropdown */}
       <Box
-        style={{
-          maxWidth: 480,
-          margin: '0 auto',
-          marginBottom: 40,
-          background: '#fff',
-          borderRadius: 12,
-          boxShadow: '0 2px 16px rgba(0,0,0,0.08)',
-          padding: 32,
-        }}>
-        <Text
-          as="h2"
-          fontWeight="fontWeightDemiBold"
-          fontSize="fontSizeL"
-          style={{ marginBottom: 8 }}>
-          Assign content types
-        </Text>
-        <Text fontColor="gray700" style={{ marginBottom: 18 }}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.
-        </Text>
-        <Text fontWeight="fontWeightMedium" style={{ marginBottom: 8, display: 'block' }}>
-          Content types
-        </Text>
-        <Box style={{ position: 'relative', width: '100%' }} ref={dropdownRef}>
-          <Button
-            variant="secondary"
-            style={{
-              width: '100%',
-              justifyContent: 'space-between',
-              textAlign: 'left',
-              background: '#FAFAFA',
-              border: '1px solid #DADADA',
-              color: '#888',
-              fontSize: '15px',
-              borderRadius: 6,
-            }}
-            onClick={() => setDropdownOpen((open) => !open)}
-            aria-haspopup="listbox"
-            aria-expanded={dropdownOpen}>
-            {selectedContentTypes.length === 0
-              ? 'Select content types'
-              : selectedContentTypes.length === 1
-              ? availableContentTypes.find((ct) => ct.id === selectedContentTypes[0])?.name
-              : `${selectedContentTypes.length} selected`}
-            <span style={{ float: 'right', marginLeft: 8 }}>
-              <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M4 6l4 4 4-4"
-                  stroke="#888"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
-          </Button>
-          {dropdownOpen && (
-            <Box
-              style={{
-                position: 'absolute',
-                zIndex: 99999,
-                top: '100%',
-                left: 0,
-                width: '100%',
-                background: '#fff',
-                border: '1px solid #DADADA',
-                borderRadius: 8,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                padding: 0,
-                marginTop: 4,
-                maxHeight: 320,
-                overflowY: 'auto',
-              }}>
-              <Box style={{ padding: 12, borderBottom: '1px solid #eee' }}>
-                <Checkbox
-                  isChecked={allSelected}
-                  isIndeterminate={someSelected}
-                  onChange={handleSelectAll}
-                  style={{ fontWeight: 500 }}>
-                  Select all
-                </Checkbox>
-              </Box>
-              {availableContentTypes.map((ct) => (
-                <Box
-                  key={ct.id}
-                  style={{
-                    padding: '10px 18px',
-                    borderBottom: '1px solid #F0F0F0',
-                    display: 'flex',
-                    alignItems: 'center',
-                    cursor: 'pointer',
+        style={{ background: '#fff', borderRadius: 8, boxShadow: '0 1px 4px #e5ebed', padding: 0 }}>
+        <Table style={{ minWidth: 800 }}>
+          <TableHead>
+            <TableRow>
+              <TableCell>Entry name</TableCell>
+              <TableCell>Content type</TableCell>
+              <TableCell>Connected fields</TableCell>
+              <TableCell>Updated</TableCell>
+              <TableCell>Status</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {entries.map((entry, idx) => {
+              const entryMappings =
+                allEntryMappings.find((e) => e.entryId === entry.id)?.mappings || [];
+              return (
+                <TableRow
+                  key={entry.id}
+                  style={{ cursor: 'pointer' }}
+                  onClick={async () => {
+                    // Fetch all fields for this entry's content type
+                    const space = await sdk.cma.space.get({});
+                    const contentType = await sdk.cma.contentType.get({
+                      spaceId: space.sys.id,
+                      environmentId: sdk.ids.environment,
+                      contentTypeId: entry.contentTypeId,
+                    });
+                    const allFields = contentType.fields.map((field: any) => ({
+                      id: field.id,
+                      name: field.name,
+                      type: field.type,
+                    }));
+                    setModalAvailableFields(allFields);
+                    // Get mapped field IDs for this entry
+                    const mappedFieldIds = entryMappings.map((f) => f.id);
+                    // Debug logging
+                    console.log(
+                      'Available field IDs:',
+                      allFields.map((f) => f.id)
+                    );
+                    console.log('Mapped field IDs:', mappedFieldIds);
+                    // Normalize IDs for comparison
+                    const normalize = (id: string) => id.trim().toLowerCase();
+                    const checked = allFields
+                      .map((f) => f.id)
+                      .filter((id) => mappedFieldIds.map(normalize).includes(normalize(id)));
+                    setCheckedFields(checked);
+                    setSelectedEntryGroup(entryMappings);
+                    setModalEntryId(entry.id);
+                    // Delay opening modal to ensure state is set
+                    setTimeout(() => setIsFieldsModalOpen(true), 0);
                   }}>
-                  <Checkbox
-                    isChecked={selectedContentTypes.includes(ct.id)}
-                    onChange={() => handleToggleContentType(ct.id)}
-                    style={{ marginRight: 8 }}>
-                    {ct.name}
-                  </Checkbox>
-                </Box>
-              ))}
-            </Box>
-          )}
-        </Box>
-        {/* Selected count and pills */}
-        {selectedContentTypes.length > 0 && (
-          <>
-            <Text fontColor="gray500" style={{ marginTop: 12, marginBottom: 10, fontSize: 15 }}>
-              {selectedContentTypes.length} selected
-            </Text>
-            <Flex flexWrap="wrap" gap="spacingS" style={{ marginBottom: 0 }}>
-              {selectedContentTypes.map((id) => {
-                const ct = availableContentTypes.find((c) => c.id === id);
-                if (!ct) return null;
-                return (
+                  <TableCell>{entry.title}</TableCell>
+                  <TableCell>{contentTypes[entry.contentTypeId] || entry.contentTypeId}</TableCell>
+                  <TableCell>{entryMappings.length}</TableCell>
+                  <TableCell>Just now</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={idx % 2 === 0 ? 'positive' : 'warning'}
+                      style={{ textTransform: 'capitalize' }}>
+                      {idx % 2 === 0 ? 'Published' : 'Draft'}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </Box>
+      {/* Modal for connected fields */}
+      <Modal
+        isShown={isFieldsModalOpen}
+        onClose={() => setIsFieldsModalOpen(false)}
+        size="medium"
+        aria-label="Connected fields">
+        <Modal.Header title="Connected fields" />
+        <Modal.Content>
+          {(() => {
+            if (modalAvailableFields.length > 0) {
+              // Debug log for checkedFields in modal render
+              console.log('Rendering modal, checkedFields:', checkedFields);
+              return (
+                <Box>
                   <Flex
-                    key={id}
+                    justifyContent="space-between"
                     alignItems="center"
-                    style={{
-                      background: '#e5e8eb',
-                      borderRadius: 20,
-                      padding: '6px 16px 6px 14px',
-                      marginRight: 8,
-                      marginBottom: 8,
-                      fontSize: 15,
-                      fontWeight: 500,
-                    }}>
-                    <Text style={{ marginRight: 8 }}>{ct.name}</Text>
-                    <Button
-                      variant="transparent"
-                      size="small"
-                      aria-label={`Remove ${ct.name}`}
-                      onClick={() =>
-                        setSelectedContentTypes((prev) => prev.filter((x) => x !== id))
-                      }
-                      style={{
-                        padding: 0,
-                        minWidth: 22,
-                        fontSize: 18,
-                        color: '#888',
-                        marginLeft: 2,
-                      }}>
-                      ×
+                    style={{ marginBottom: 16 }}>
+                    <Flex gap="spacingL" alignItems="center">
+                      <Box>
+                        <Text fontWeight="fontWeightMedium">Entry name: </Text>
+                        <Text>{entries.find((e) => e.id === modalEntryId)?.title || ''}</Text>
+                      </Box>
+                      <Box>
+                        <Text fontWeight="fontWeightMedium">Connected fields: </Text>
+                        <Text>{checkedFields.length}</Text>
+                      </Box>
+                    </Flex>
+                    <Button variant="secondary" size="small" style={{ alignSelf: 'flex-end' }}>
+                      View entry
                     </Button>
                   </Flex>
-                );
-              })}
-            </Flex>
-          </>
-        )}
-      </Box>
+                  <Box style={{ border: '1px solid #e5ebed', borderRadius: 6, marginTop: 16 }}>
+                    <Table style={{ minWidth: 400, margin: 0 }}>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell style={{ width: 48 }}>
+                            <Checkbox
+                              isChecked={
+                                modalAvailableFields.length > 0 &&
+                                checkedFields.length === modalAvailableFields.length
+                              }
+                              isIndeterminate={
+                                checkedFields.length > 0 &&
+                                checkedFields.length < modalAvailableFields.length
+                              }
+                              onChange={() => {
+                                if (checkedFields.length === modalAvailableFields.length) {
+                                  setCheckedFields([]);
+                                } else {
+                                  setCheckedFields(modalAvailableFields.map((f) => f.id));
+                                }
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell>Field name</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {modalAvailableFields.map((field, idx) => (
+                          <TableRow key={field.id || idx}>
+                            <TableCell>
+                              <Checkbox
+                                isChecked={checkedFields.includes(field.id)}
+                                onChange={() => {
+                                  setCheckedFields((prev) =>
+                                    prev.includes(field.id)
+                                      ? prev.filter((f) => f !== field.id)
+                                      : [...prev, field.id]
+                                  );
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell>{field.name}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </Box>
+                </Box>
+              );
+            }
+            return null;
+          })()}
+        </Modal.Content>
+        <Modal.Controls>
+          <Button
+            variant="secondary"
+            onClick={async () => {
+              if (modalEntryId && modalAvailableFields.length > 0) {
+                try {
+                  // Build new mappings for checked fields
+                  const newMappings = modalAvailableFields
+                    .filter((f) => checkedFields.includes(f.id))
+                    .map((f) => ({
+                      id: f.id,
+                      name: f.name,
+                      type: f.type,
+                      value: '',
+                      contentTypeId: modalContentTypeId,
+                      isAsset: f.type === 'Asset' || f.type === 'AssetLink' || false,
+                    }));
+                  await setEntryKlaviyoFieldMappings(sdk, modalEntryId, newMappings);
+                  // Update allEntryMappings for immediate UI feedback
+                  setAllEntryMappings((prev) =>
+                    prev.map((e) =>
+                      e.entryId === modalEntryId ? { ...e, mappings: newMappings } : e
+                    )
+                  );
+                  setIsFieldsModalOpen(false);
+                } catch (err) {
+                  logger.error('Failed to save field mappings:', err);
+                  setIsFieldsModalOpen(false);
+                }
+              } else {
+                setIsFieldsModalOpen(false);
+              }
+            }}>
+            Close
+          </Button>
+        </Modal.Controls>
+      </Modal>
     </Box>
   );
 };

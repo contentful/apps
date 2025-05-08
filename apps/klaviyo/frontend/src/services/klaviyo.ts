@@ -462,120 +462,61 @@ export class KlaviyoService {
     }
   }
 
-  // Modified callApi method to better handle auth errors
-  async callApi(endpoint: string, method: string, data?: any): Promise<any> {
+  // Modified callApi method to use App Action
+  async callApi(endpoint: string, method: string, data: any, sdk: any): Promise<any> {
     try {
       const baseUrl = 'https://a.klaviyo.com/api/v1';
       const url = `${baseUrl}/${endpoint}`;
-
-      const options = {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          Authorization: `Klaviyo-API-Key ${this.config.publicKey}`,
+      const client = sdk.cma;
+      // Use App Action for proxy
+      const result = await client.appActionCall.create(
+        {
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environment,
+          appDefinitionId: sdk.ids.app,
+          appActionId: '5SUT62FpO3cuWVr9A7BrpK',
         },
-        body: data ? JSON.stringify(data) : undefined,
-      };
-
-      logger.log(`Making ${method} API call to ${endpoint}`);
-
-      // Make the API request through our proxy
-      const response = await fetch(`${API_PROXY_URL}/proxy/request`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          url,
-          method,
-          headers: options.headers,
-          data: data || null,
-          publicKey: this.config.publicKey,
-          privateKey: this.config.privateKey,
-        }),
-      });
-
-      // Check if the response is ok
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        logger.error('API call failed:', {
-          endpoint,
-          method,
-          error: errorData,
-        });
-
-        // Handle different HTTP errors
-        if (response.status === 403) {
-          throw new Error('Forbidden - check your API key and permissions');
-        } else if (response.status === 401) {
-          throw new Error('Unauthorized - authentication failed');
-        } else if (response.status === 429) {
-          throw new Error('Rate limit exceeded - please try again later');
-        } else {
-          throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+        {
+          parameters: {
+            url,
+            method,
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+            },
+            data: data || null,
+          },
         }
+      );
+      if (result.status && result.status >= 400) {
+        throw new Error(result.message || `Error ${result.status}`);
       }
-
-      // Parse and return the response data
-      return await response.json();
+      return result;
     } catch (error) {
       logger.error(`Error in API call to ${endpoint}:`, error);
-
-      // Rethrow the error with a clear message
-      if (error instanceof Error) {
-        throw error;
-      } else {
-        throw new Error(`Unknown error in API call to ${endpoint}`);
-      }
+      throw error;
     }
   }
 
-  // Add proxy method for direct API calls
-  async proxy(payload: any): Promise<any> {
+  // Add proxy method for direct API calls using App Action
+  async proxy(payload: any, sdk: any): Promise<any> {
     try {
-      logger.log('Proxying request:', {
-        action: payload.action,
-        entryId: payload.data?.entryId,
-        contentTypeId: payload.data?.contentTypeId,
-        fieldMappingsCount: payload.data?.fieldMappings?.length || 0,
-      });
-
-      // Make the API request through our proxy
-      const response = await fetch(this.proxyUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
+      const client = sdk.cma;
+      const result = await client.appActionCall.create(
+        {
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environment,
+          appDefinitionId: sdk.ids.app,
+          appActionId: '5SUT62FpO3cuWVr9A7BrpK',
         },
-        body: JSON.stringify(payload),
-      });
-
-      // Check if the response is ok
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        logger.error('Proxy API call failed:', {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData,
-        });
-
-        // Handle different HTTP errors
-        if (response.status === 403) {
-          throw new Error('Forbidden - check your API key and permissions');
-        } else if (response.status === 401) {
-          throw new Error('Unauthorized - authentication failed');
-        } else if (response.status === 429) {
-          throw new Error('Rate limit exceeded - please try again later');
-        } else {
-          throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+        {
+          parameters: payload,
         }
+      );
+      if (result.status && result.status >= 400) {
+        throw new Error(result.message || `Error ${result.status}`);
       }
-
-      // Parse and return the response data
-      const responseData = await response.json();
-      logger.log('Proxy API call succeeded with result:', responseData);
-      return responseData;
+      return result;
     } catch (error) {
       logger.error('Error in proxy API call:', error);
       throw error;

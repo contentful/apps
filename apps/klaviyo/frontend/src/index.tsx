@@ -134,13 +134,6 @@ window.addEventListener('message', async (event) => {
   }
 });
 
-window.addEventListener('storage', (e) => {
-  if (e.key === 'klaviyo_field_mappings') {
-    console.log('klaviyo_field_mappings changed:', e.newValue);
-    localStorage.setItem('klaviyo_field_mappings', e.newValue || '');
-  }
-});
-
 init((sdk) => {
   logger.log('SDK Location:', sdk.location);
   logger.log('Is config?', sdk.location.is(locations.LOCATION_APP_CONFIG));

@@ -32,7 +32,7 @@ describe('klaviyo-api-service', () => {
       };
 
       // Act & Assert
-      await expect(sendToKlaviyo(config, mappings, entryData)).rejects.toThrow(
+      await expect(sendToKlaviyo(config, mappings, entryData, {})).rejects.toThrow(
         'Klaviyo API key is required'
       );
     });
@@ -49,7 +49,7 @@ describe('klaviyo-api-service', () => {
       };
 
       // Act & Assert
-      await expect(sendToKlaviyo(config, mappings, entryData)).rejects.toThrow(
+      await expect(sendToKlaviyo(config, mappings, entryData, {})).rejects.toThrow(
         'Either email or phone number is required for Klaviyo profiles'
       );
     });
@@ -83,7 +83,7 @@ describe('klaviyo-api-service', () => {
       (global.fetch as jest.Mock).mockResolvedValue(mockResponse);
 
       // Act
-      const result = await sendToKlaviyo(config, mappings, entryData);
+      const result = await sendToKlaviyo(config, mappings, entryData, {});
 
       // Assert
       expect(global.fetch).toHaveBeenCalledWith(
@@ -132,7 +132,9 @@ describe('klaviyo-api-service', () => {
       (global.fetch as jest.Mock).mockResolvedValue(mockResponse);
 
       // Act & Assert
-      await expect(sendToKlaviyo(config, mappings, entryData)).rejects.toThrow(/Klaviyo API error/);
+      await expect(sendToKlaviyo(config, mappings, entryData, {})).rejects.toThrow(
+        /Klaviyo API error/
+      );
     });
   });
 

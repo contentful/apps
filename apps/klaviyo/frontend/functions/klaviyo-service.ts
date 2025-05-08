@@ -1,6 +1,4 @@
 import console from 'console';
-import { PlainClientAPI } from 'contentful-management';
-
 // Define interfaces
 interface FieldMapping {
   contentfulFieldId: string;
@@ -176,7 +174,6 @@ export class KlaviyoService {
               continue;
             }
             const contentData: Record<string, any> = {};
-            let blockType: 'text' | 'image' = 'text';
             let imageUrl: string = '';
             let altText = klaviyoBlockName;
             let htmlContent = '';
@@ -305,9 +302,8 @@ export class KlaviyoService {
                     uploadedUrl = imageUrl;
                   }
                 }
-                blockType = 'image';
-                contentData[klaviyoBlockName] = uploadedUrl;
-                htmlContent = '';
+                // No Universal Content image block creation here
+                continue; // Skip to next mapping
               }
             } else if (
               (mapping.fieldType && mapping.fieldType.toLowerCase() === 'richtext') ||
@@ -321,15 +317,12 @@ export class KlaviyoService {
                 console.error('Error processing rich text:', e);
                 contentData[klaviyoBlockName] = '';
               }
-              blockType = 'text';
               htmlContent = this.convertDataToHTML(contentData);
             } else if (mapping.fieldType === 'json') {
               contentData[klaviyoBlockName] = JSON.stringify(value);
-              blockType = 'text';
               htmlContent = this.convertDataToHTML(contentData);
             } else {
               contentData[klaviyoBlockName] = String(value || '');
-              blockType = 'text';
               htmlContent = this.convertDataToHTML(contentData);
             }
             contentData.external_id = `${entryId}-${klaviyoBlockName}`;
@@ -340,29 +333,7 @@ export class KlaviyoService {
               klaviyoBlockName
             );
             let response;
-            if (blockType === 'image' && imageUrl) {
-              // For image blocks, use the image block type
-              if (existingContent) {
-                response = await this.updateContent(
-                  existingContent.id,
-                  klaviyoBlockName,
-                  '', // no HTML content
-                  contentData.external_id,
-                  'image',
-                  imageUrl,
-                  altText
-                );
-              } else {
-                response = await this.createContent(
-                  klaviyoBlockName,
-                  '', // no HTML content
-                  contentData.external_id,
-                  'image',
-                  imageUrl,
-                  altText
-                );
-              }
-            } else {
+            if (htmlContent) {
               // For text blocks, use the current logic
               if (existingContent) {
                 response = await this.updateContent(
@@ -493,7 +464,7 @@ export class KlaviyoService {
           content_type: 'block',
           type: 'image',
           data: {
-            src: imageUrl,
+            url: imageUrl,
             properties: {
               alt_text: altText || name,
               dynamic: false,
@@ -561,7 +532,7 @@ export class KlaviyoService {
           content_type: 'block',
           type: 'image',
           data: {
-            src: imageUrl,
+            url: imageUrl,
             properties: {
               alt_text: altText || name,
               dynamic: false,

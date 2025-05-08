@@ -73,6 +73,9 @@ export const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] 
   }) || {};
 
   useEffect(() => {
+    // Debug: Log availableFields and preSelectedFields on dialog open
+    logger.log('[FieldSelectDialog] availableFields:', availableFields);
+    logger.log('[FieldSelectDialog] preSelectedFields:', preSelectedFields);
     if (availableFields && Array.isArray(availableFields)) {
       setFields(availableFields);
     }
@@ -103,7 +106,7 @@ export const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] 
         name: field.name,
         type: field.type,
         value: '',
-        contentTypeId,
+        contentTypeId: contentTypeId,
         isAsset: field.type === 'Asset' || field.type === 'AssetLink' || false,
       }));
       await setEntryKlaviyoFieldMappings(sdk, entryId, newMappings);
@@ -120,7 +123,7 @@ export const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] 
           name: field.name,
           type: field.type,
           value: '',
-          contentTypeId,
+          contentTypeId: contentTypeId,
           isAsset: field.type === 'Asset' || field.type === 'AssetLink' || false,
         }));
         await setEntryKlaviyoFieldMappings(sdk, entryId, newMappings);

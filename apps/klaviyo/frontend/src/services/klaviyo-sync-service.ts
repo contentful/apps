@@ -82,59 +82,31 @@ export interface SyncOptions {
 export const sendToKlaviyo = async (
   config: KlaviyoConfig,
   fieldMapping: Record<string, string>,
-  entryData: Record<string, FieldData>
+  entryData: Record<string, FieldData>,
+  sdk: any
 ): Promise<any> => {
   try {
-    if (!config.publicKey) {
-      throw new Error('Klaviyo API key is required');
-    }
-
-    // Transform field data according to mappings
-    const transformedData = Object.entries(fieldMapping).reduce(
-      (acc, [contentfulField, klaviyoField]) => {
-        if (entryData[contentfulField]) {
-          // If this is a rich text field, use htmlValue if available
-          if (
-            isRichTextDocument(entryData[contentfulField].value) &&
-            entryData[contentfulField].htmlValue
-          ) {
-            acc[klaviyoField] = entryData[contentfulField].htmlValue;
-          } else {
-            acc[klaviyoField] = entryData[contentfulField].value;
-          }
-        }
-        return acc;
-      },
-      {} as Record<string, any>
-    );
-
-    // Endpoint defaults to template-universal-content if not specified
-    const endpoint = config.endpoint || 'template-universal-content';
-    const baseUrl = 'https://a.klaviyo.com/api';
-
-    // Build request options
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Authorization: `Klaviyo-API-Key ${config.publicKey}`,
-      },
-      body: JSON.stringify({
-        data: transformedData,
-        ...(config.listId && { list_id: config.listId }),
-      }),
+    const client = sdk.cma;
+    const payload = {
+      config,
+      fieldMapping,
+      entryData,
     };
-
-    // Make the API request
-    const response = await fetch(`${baseUrl}/${endpoint}`, options);
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Klaviyo API error: ${response.status} - ${JSON.stringify(errorData)}`);
+    const result = await client.appActionCall.create(
+      {
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
+        appDefinitionId: sdk.ids.app,
+        appActionId: '5SUT62FpO3cuWVr9A7BrpK',
+      },
+      {
+        parameters: payload,
+      }
+    );
+    if (result.status && result.status >= 400) {
+      throw new Error(result.message || `Error ${result.status}`);
     }
-
-    return await response.json();
+    return result;
   } catch (error) {
     logger.error('Error sending data to Klaviyo:', error);
     throw error;
@@ -1159,7 +1131,7 @@ export class SyncContent {
           publicKey: klaviyoCompanyId || '',
           privateKey: klaviyoApiKey || '',
         });
-        const result = await klaviyoService.proxy(payload);
+        const result = await klaviyoService.proxy(payload, this.sdk);
 
         if (result && result.success) {
           logger.log('[SyncContent] Sync successful');

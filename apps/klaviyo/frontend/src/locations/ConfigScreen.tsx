@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   Box,
   Button,
@@ -11,8 +11,10 @@ import {
   Text,
   TextInput,
   TextLink,
+  Popover,
+  Pill,
 } from '@contentful/f36-components';
-import { CheckCircleIcon, ExternalLinkIcon } from '@contentful/f36-icons';
+import { CheckCircleIcon, ExternalLinkIcon, ChevronDownIcon } from '@contentful/f36-icons';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
@@ -135,34 +137,63 @@ const ConfigScreen = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [selectedLocations, setSelectedLocations] = useState<Record<string, boolean>>({});
   const [selectedContentTypes, setSelectedContentTypes] = useState<Record<string, boolean>>({});
   const [contentTypes, setContentTypes] = useState<any[]>([]);
   const [isReadOnly, setIsReadOnly] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Initialize the app
+  // Effect 1: Only run initializeApp on mount
   useEffect(() => {
-    // Start the app in loading state
+    const initializeApp = async () => {
+      const parameters = await sdk.app.getParameters<KlaviyoAppConfig>();
+      logParameters(parameters, 'initializeApp');
+      if (parameters) {
+        setPublicKey(parameters.publicKey || '');
+        setPrivateKey(parameters.privateKey || '');
+        setSelectedContentTypes(parameters.selectedContentTypes || {});
+        if (parameters.publicKey && parameters.privateKey) {
+          validateCredentials(parameters.publicKey, parameters.privateKey);
+        }
+        if (parameters.fieldMappings || parameters.contentTypeMappings) {
+          try {
+            if (parameters.fieldMappings && Array.isArray(parameters.fieldMappings)) {
+              setEntryKlaviyoFieldMappings(sdk, '', parameters.fieldMappings);
+              console.log('Saved field mappings to persistence service from parameters');
+            }
+          } catch (e) {
+            console.error('Error saving mappings to persistence service:', e);
+          }
+        }
+      }
+      const isInstalled = await sdk.app.isInstalled();
+      setIsReadOnly(isInstalled);
+      loadContentTypes();
+      sdk.app.setReady();
+    };
+    initializeApp();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sdk]);
+
+  // Effect 2: Register onConfigure with latest state
+  useEffect(() => {
     sdk.app.onConfigure(async () => {
-      // Get the current parameters first for logging
       const currentParameters = await sdk.app.getParameters();
       logParameters(currentParameters, 'onConfigure-start');
-
       console.log('onConfigure', publicKey, privateKey);
       if (!publicKey || !privateKey) {
         sdk.notifier.error('Please provide both Public Key and Private Key');
         return false;
       }
-
-      if (!isConnected) {
-        sdk.notifier.error('Please connect to Klaviyo before installing the app');
-        return false;
+      const isInstalled = await sdk.app.isInstalled();
+      if (isInstalled) {
+        const valid = await validateCredentials(publicKey, privateKey);
+        if (!valid) {
+          sdk.notifier.error('Could not validate Klaviyo credentials. Please check your API keys.');
+          return false;
+        }
       }
-
-      // Store API keys in localStorage for backup access
       storeApiKeysInLocalStorage(publicKey, privateKey);
-
-      // Get field mappings from both localStorage and current parameters
       let localMappings: any[] = [];
       try {
         localMappings = await getEntryKlaviyoFieldMappings(sdk, '');
@@ -172,15 +203,9 @@ const ConfigScreen = () => {
       } catch (e) {
         console.error('Error getting local mappings:', e);
       }
-
-      // Prepare the content type mappings structure
       const contentTypeMappings = { ...(currentParameters?.contentTypeMappings || {}) };
-
-      // If we have local mappings, prioritize those and organize them by content type
       if (localMappings.length > 0) {
-        // Group mappings by content type
         const mappingsByContentType: Record<string, any[]> = {};
-
         localMappings.forEach((mapping) => {
           if (mapping.contentTypeId) {
             if (!mappingsByContentType[mapping.contentTypeId]) {
@@ -189,19 +214,14 @@ const ConfigScreen = () => {
             mappingsByContentType[mapping.contentTypeId].push(mapping);
           }
         });
-
-        // Update contentTypeMappings with local mappings
         Object.keys(mappingsByContentType).forEach((contentTypeId) => {
           contentTypeMappings[contentTypeId] = mappingsByContentType[contentTypeId];
         });
-
         console.log(
           'Updated contentTypeMappings from localStorage:',
           Object.keys(contentTypeMappings)
         );
       }
-
-      // Flatten all content type mappings into a single fieldMappings array
       let allMappings: any[] = [];
       Object.keys(contentTypeMappings).forEach((typeId) => {
         const typeMappings = contentTypeMappings[typeId];
@@ -209,80 +229,37 @@ const ConfigScreen = () => {
           allMappings = [...allMappings, ...typeMappings];
         }
       });
-
       console.log(`Combined ${allMappings.length} total field mappings from all content types`);
-
-      // Create the final parameters object
       const spaceId = sdk.ids.space;
+      const selectedLocations = { 'entry-sidebar': true };
       const parameters = {
         publicKey,
         privateKey,
         selectedLocations,
         selectedContentTypes,
         spaceId,
-        // Use our combined mappings
         fieldMappings: allMappings,
-        // Use our updated content type mappings
         contentTypeMappings,
       };
-
-      // Log the final parameters
       logParameters(parameters, 'onConfigure-final');
-
-      // Return the configuration
+      const filteredSelectedContentTypes = Object.keys(selectedContentTypes)
+        .filter((id) => selectedContentTypes[id])
+        .reduce((acc, id) => {
+          acc[id] = true;
+          return acc;
+        }, {} as Record<string, boolean>);
+      const editorInterface = buildEditorInterfaceConfig(filteredSelectedContentTypes);
+      console.log('selectedContentTypes at save:', selectedContentTypes);
+      console.log('filteredSelectedContentTypes at save:', filteredSelectedContentTypes);
+      console.log('targetState.EditorInterface at save:', editorInterface);
       return {
         parameters,
         targetState: {
-          EditorInterface: buildEditorInterfaceConfig(),
+          EditorInterface: editorInterface,
         },
       };
     });
-
-    // Load the current app installation parameters
-    const initializeApp = async () => {
-      const parameters = await sdk.app.getParameters<KlaviyoAppConfig>();
-
-      // Log the loaded parameters
-      logParameters(parameters, 'initializeApp');
-
-      if (parameters) {
-        setPublicKey(parameters.publicKey || '');
-        setPrivateKey(parameters.privateKey || '');
-        setSelectedLocations(parameters.selectedLocations || {});
-        setSelectedContentTypes(parameters.selectedContentTypes || {});
-
-        // If we have parameters, check if we're connected
-        if (parameters.publicKey && parameters.privateKey) {
-          validateCredentials(parameters.publicKey, parameters.privateKey);
-        }
-
-        // Store mappings in localStorage for backup
-        if (parameters.fieldMappings || parameters.contentTypeMappings) {
-          try {
-            if (parameters.fieldMappings && Array.isArray(parameters.fieldMappings)) {
-              // Use persistence service to ensure consistency
-              setEntryKlaviyoFieldMappings(sdk, '', parameters.fieldMappings);
-              console.log('Saved field mappings to persistence service from parameters');
-            }
-          } catch (e) {
-            console.error('Error saving mappings to persistence service:', e);
-          }
-        }
-      }
-
-      // Check if app is installed and in read-only mode
-      const isInstalled = await sdk.app.isInstalled();
-      setIsReadOnly(isInstalled);
-
-      // Get available content types
-      loadContentTypes();
-
-      // App is ready
-      sdk.app.setReady();
-    };
-
-    initializeApp();
-  }, [sdk, publicKey, privateKey, isConnected]);
+  }, [sdk, publicKey, privateKey, selectedContentTypes]);
 
   // Load content types
   const loadContentTypes = async () => {
@@ -296,7 +273,7 @@ const ConfigScreen = () => {
   };
 
   // Build editor interface config based on selected locations and content types
-  const buildEditorInterfaceConfig = () => {
+  const buildEditorInterfaceConfig = (selectedContentTypes: Record<string, boolean>) => {
     const targetContentTypes = Object.keys(selectedContentTypes).filter(
       (contentTypeId) => selectedContentTypes[contentTypeId]
     );
@@ -304,101 +281,89 @@ const ConfigScreen = () => {
     // Build target state for editor interface
     const editorInterface: Record<string, any> = {};
 
-    if (selectedLocations['entry-sidebar']) {
-      targetContentTypes.forEach((contentTypeId) => {
-        editorInterface[contentTypeId] = {
-          sidebar: {
-            position: 0,
-          },
-        };
-      });
-    }
+    // Always enable entry-sidebar
+    targetContentTypes.forEach((contentTypeId) => {
+      editorInterface[contentTypeId] = {
+        sidebar: {
+          position: 0,
+        },
+      };
+    });
 
+    console.log('buildEditorInterfaceConfig', editorInterface);
     return editorInterface;
   };
 
-  // Handle location selection
-  const handleLocationToggle = (locationId: string) => {
-    setSelectedLocations((prev) => ({
-      ...prev,
-      [locationId]: !prev[locationId],
-    }));
+  // Helper to get content type name by ID
+  const getContentTypeName = (id: string) => {
+    const ct = contentTypes.find((ct) => ct.sys.id === id);
+    return ct ? ct.name : id;
   };
 
-  // Handle content type selection
-  const handleContentTypeToggle = (contentTypeId: string) => {
-    setSelectedContentTypes((prev) => ({
-      ...prev,
-      [contentTypeId]: !prev[contentTypeId],
-    }));
+  // Handle select all
+  const allSelected =
+    contentTypes.length > 0 &&
+    Object.keys(selectedContentTypes).filter((id) => selectedContentTypes[id]).length ===
+      contentTypes.length;
+  const handleSelectAll = () => {
+    if (allSelected) {
+      const cleared: Record<string, boolean> = {};
+      contentTypes.forEach((ct) => {
+        cleared[ct.sys.id] = false;
+      });
+      setSelectedContentTypes(cleared);
+    } else {
+      const all: Record<string, boolean> = {};
+      contentTypes.forEach((ct) => {
+        all[ct.sys.id] = true;
+      });
+      setSelectedContentTypes(all);
+    }
   };
 
-  // Validate Klaviyo API credentials
-  const validateCredentials = async (pubKey: string, privKey: string) => {
+  // Handle pill remove
+  const handleRemoveContentType = (id: string) => {
+    setSelectedContentTypes((prev) => ({ ...prev, [id]: false }));
+  };
+
+  // Validate Klaviyo API credentials using App Action
+  const validateCredentials = async (pubKey: string, privKey: string): Promise<boolean> => {
     setIsValidating(true);
     setErrorMessage('');
-
     try {
-      // Use the base URL from config to make the request
-      const baseUrl = API_PROXY_URL.startsWith('http')
-        ? API_PROXY_URL
-        : window.location.origin + API_PROXY_URL;
-
-      const response = await fetch(`${baseUrl}/validate-credentials`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const client = sdk.cma;
+      const result = await client.appActionCall.create(
+        {
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environment,
+          appDefinitionId: sdk.ids.app,
+          appActionId: '4QzhEVBw043erLfXQ2V0IL',
         },
-        body: JSON.stringify({
-          publicKey: pubKey,
-          privateKey: privKey,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage = 'Invalid credentials';
-
-        try {
-          const errorData = JSON.parse(errorText);
-          errorMessage = errorData.message || errorMessage;
-        } catch (e) {
-          console.error('Error parsing error response:', e, errorText);
+        {
+          parameters: {
+            publicKey: pubKey,
+            privateKey: privKey,
+          },
         }
-
-        setErrorMessage(errorMessage);
+      );
+      console.log('validateCredentials', result);
+      if (!result) {
+        setErrorMessage('Error validating credentials. Please check your API keys');
         setIsConnected(false);
+        return false;
       } else {
         setIsConnected(true);
-
-        // Store API keys in localStorage for backup access when credentials are validated
         storeApiKeysInLocalStorage(pubKey, privKey);
+        return true;
       }
     } catch (error) {
       console.error('Error validating credentials:', error);
       setErrorMessage('Network error. Please try again.');
       setIsConnected(false);
+      return false;
     } finally {
       setIsValidating(false);
     }
-  };
-
-  // Handle connect button click
-  const handleConnect = async () => {
-    // Validate inputs
-    console.log('handleConnect', publicKey, privateKey);
-    if (!publicKey || !privateKey) {
-      sdk.notifier.error('Please provide both Public Key and Private Key');
-      return;
-    }
-
-    validateCredentials(publicKey, privateKey);
-  };
-
-  // Handle disconnect button click
-  const handleDisconnect = () => {
-    setIsConnected(false);
-    sdk.notifier.success('Disconnected from Klaviyo');
   };
 
   return (
@@ -443,66 +408,7 @@ const ConfigScreen = () => {
                 </TextLink>
               </FormControl>
 
-              {errorMessage && <Text fontColor="red600">{errorMessage}</Text>}
-
-              <Stack
-                spacing="spacingM"
-                flexDirection="column"
-                alignItems="flex-start"
-                style={{ width: '100%' }}>
-                <Text fontWeight="fontWeightMedium">Connection status</Text>
-                <Flex alignItems="center" gap="spacingM">
-                  <Button
-                    variant={isConnected ? 'secondary' : 'primary'}
-                    isLoading={isValidating}
-                    onClick={isConnected ? handleDisconnect : handleConnect}
-                    isDisabled={isReadOnly}>
-                    {isConnected ? (
-                      <Flex alignItems="center" gap="spacingXs">
-                        Disconnect
-                      </Flex>
-                    ) : (
-                      'Connect to Klaviyo'
-                    )}
-                  </Button>
-                  <Flex alignItems="center" gap="spacingXs">
-                    <Text>Status:</Text>
-                    {isConnected ? (
-                      <Flex alignItems="center" gap="spacingXs">
-                        <Text fontColor="green600">connected</Text>
-                        <CheckCircleIcon variant="positive" />
-                      </Flex>
-                    ) : (
-                      <Text fontColor="gray500">disconnected</Text>
-                    )}
-                  </Flex>
-                </Flex>
-              </Stack>
-
-              <Stack
-                spacing="spacingM"
-                flexDirection="column"
-                alignItems="flex-start"
-                style={{ width: '100%' }}>
-                <Text fontWeight="fontWeightMedium">App Locations</Text>
-                <Text fontColor="gray500">Select where to display the Klaviyo integration</Text>
-                <div style={{ width: '100%' }}>
-                  {AVAILABLE_LOCATIONS.map((location) => (
-                    <Checkbox
-                      key={location.id}
-                      id={`location-${location.id}`}
-                      isChecked={selectedLocations[location.id] || false}
-                      onChange={() => handleLocationToggle(location.id)}
-                      isDisabled={isReadOnly}>
-                      <div>
-                        <Text fontWeight="fontWeightMedium">{location.name}</Text>
-                        <Text fontColor="gray500">{location.description}</Text>
-                      </div>
-                    </Checkbox>
-                  ))}
-                </div>
-              </Stack>
-
+              {/* Content Types Dropdown Section */}
               <Stack
                 spacing="spacingM"
                 flexDirection="column"
@@ -512,14 +418,70 @@ const ConfigScreen = () => {
                 <Text fontColor="gray500">
                   Select which content types to enable with the Klaviyo integration
                 </Text>
-                <div style={containerStyle}>
-                  <ContentTypesList
-                    contentTypes={contentTypes}
-                    selectedContentTypes={selectedContentTypes}
-                    onContentTypeToggle={handleContentTypeToggle}
-                    isDisabled={isReadOnly}
-                  />
-                </div>
+                <Box style={{ width: '100%', position: 'relative' }}>
+                  <Popover
+                    isOpen={isDropdownOpen}
+                    onClose={() => setIsDropdownOpen(false)}
+                    placement="bottom-start">
+                    <Popover.Trigger>
+                      <Button
+                        variant="secondary"
+                        endIcon={<ChevronDownIcon />}
+                        style={{ width: '100%', justifyContent: 'space-between' }}
+                        onClick={() => setIsDropdownOpen((open) => !open)}
+                        aria-haspopup="listbox"
+                        aria-expanded={isDropdownOpen}>
+                        {Object.keys(selectedContentTypes).filter((id) => selectedContentTypes[id])
+                          .length > 0
+                          ? `${
+                              Object.keys(selectedContentTypes).filter(
+                                (id) => selectedContentTypes[id]
+                              ).length
+                            } selected`
+                          : 'Select content types'}
+                      </Button>
+                    </Popover.Trigger>
+                    <Popover.Content>
+                      <Box style={{ minWidth: 280, maxHeight: 320, overflowY: 'auto', padding: 8 }}>
+                        <Checkbox
+                          isChecked={allSelected}
+                          onChange={handleSelectAll}
+                          style={{ marginBottom: 8 }}>
+                          Select all
+                        </Checkbox>
+                        <Stack flexDirection="column" alignItems="flex-start" spacing="none">
+                          {contentTypes.map((ct) => (
+                            <Checkbox
+                              key={ct.sys.id}
+                              isChecked={!!selectedContentTypes[ct.sys.id]}
+                              onChange={() =>
+                                setSelectedContentTypes((prev) => ({
+                                  ...prev,
+                                  [ct.sys.id]: !prev[ct.sys.id],
+                                }))
+                              }
+                              style={{ marginBottom: 4 }}>
+                              {ct.name}
+                            </Checkbox>
+                          ))}
+                        </Stack>
+                      </Box>
+                    </Popover.Content>
+                  </Popover>
+                </Box>
+                {/* Pills for selected content types */}
+                <Flex flexWrap="wrap" gap="spacingXs" style={{ marginTop: 12 }}>
+                  {Object.keys(selectedContentTypes)
+                    .filter((id) => selectedContentTypes[id])
+                    .map((id) => (
+                      <Pill
+                        key={id}
+                        label={getContentTypeName(id)}
+                        onClose={() => handleRemoveContentType(id)}
+                        style={{ marginBottom: 6 }}
+                      />
+                    ))}
+                </Flex>
               </Stack>
             </Stack>
           </Form>

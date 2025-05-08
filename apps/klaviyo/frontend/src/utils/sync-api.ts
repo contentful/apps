@@ -41,88 +41,44 @@ interface SyncResult {
  */
 export const fetchEntrySyncStatus = async (
   entryId: string,
-  contentTypeId?: string
+  contentTypeId: string | undefined,
+  sdk: any
 ): Promise<SyncStatus | null | boolean> => {
   try {
-    // Get API keys from localStorage
-    const { privateKey, publicKey } = getApiKeys();
-
-    // Using v2 API endpoint if no contentTypeId is provided
-    if (!contentTypeId) {
-      logger.log(`Fetching sync status for entry ${entryId} (v2 API)`);
-      const baseUrl = getBaseUrl();
-      const response = await fetch(`${baseUrl}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'syncFetchStatus',
-          data: {
-            entryId,
-          },
-          // Use retrieved API keys
-          privateKey,
-          publicKey,
-        }),
-      });
-
-      if (!response.ok) {
-        // If the backend is not available, assume sync is needed
-        if (response.status >= 500) {
-          logger.warn(`Backend service unavailable when checking sync status: ${response.status}`);
-          return true;
+    const client = sdk.cma;
+    const parameters = contentTypeId
+      ? {
+          action: 'syncFetchDetailedStatus',
+          data: { entryId, contentTypeId },
         }
-
-        const errorData = await response.json();
-        logger.error('Error fetching sync status:', errorData);
-        return true; // If we can't determine status, assume sync is needed
-      }
-
-      const data = await response.json();
-      return data.data?.needsSync === true;
+      : {
+          action: 'syncFetchStatus',
+          data: { entryId },
+        };
+    // Validate parameters before making the call
+    if (!parameters || typeof parameters !== 'object' || !parameters.action) {
+      logger.error('App Action call missing required parameters:', parameters);
+      throw new Error('App Action call missing required parameters');
     }
-
-    // Original v1 API endpoint - also update this to use the common base URL
-    logger.log(`Fetching sync status for entry ${entryId} of type ${contentTypeId}`);
-    const baseUrl = getBaseUrl();
-    const response = await fetch(`${baseUrl}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    logger.log('App Action call parameters:', parameters);
+    try {
+      console.log('Sending App Action parameters:', JSON.stringify(parameters, null, 2));
+    } catch (e) {
+      console.log('Sending App Action parameters (raw):', parameters);
+    }
+    const result = await client.appActionCall.create(
+      {
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
+        appDefinitionId: sdk.ids.app,
+        appActionId: '5SUT62FpO3cuWVr9A7BrpK',
       },
-      body: JSON.stringify({
-        action: 'syncFetchDetailedStatus',
-        data: {
-          entryId,
-          contentTypeId,
-        },
-        // Use retrieved API keys
-        privateKey,
-        publicKey,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${response.statusText}`);
+      { parameters }
+    );
+    if (result.status && result.status >= 400) {
+      throw new Error(result.message || `Error ${result.status}`);
     }
-
-    const data = await response.json();
-
-    if (!data || !data.data) {
-      return null;
-    }
-
-    // Transform to match SyncStatus interface
-    return {
-      entryId: data.data.entryId,
-      contentTypeId: data.data.contentTypeId,
-      contentTypeName: data.data.contentTypeName,
-      lastSynced: data.data.lastSynced || 0,
-      fieldsUpdatedAt: data.data.fieldsUpdatedAt || {},
-      needsSync: data.data.needsSync || false,
-      syncCompleted: data.data.syncCompleted || false,
-    };
+    return result.data || result;
   } catch (error) {
     logger.error('Error fetching sync status:', error);
     return null;
@@ -132,37 +88,29 @@ export const fetchEntrySyncStatus = async (
 /**
  * Get all sync statuses from the backend
  */
-export const fetchAllSyncStatuses = async (token: string): Promise<SyncStatus[]> => {
+export const fetchAllSyncStatuses = async (token: string, sdk: any): Promise<SyncStatus[]> => {
   try {
-    // Get API keys from localStorage
-    const { privateKey, publicKey } = getApiKeys();
-
-    const baseUrl = getBaseUrl();
-    const response = await fetch(`${baseUrl}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const client = sdk.cma;
+    const result = await client.appActionCall.create(
+      {
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
+        appDefinitionId: sdk.ids.app,
+        appActionId: '5SUT62FpO3cuWVr9A7BrpK',
       },
-      body: JSON.stringify({
-        action: 'syncFetchAllStatuses',
-        // Use retrieved API keys
-        privateKey,
-        publicKey,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${response.statusText}`);
+      {
+        parameters: {
+          action: 'syncFetchAllStatuses',
+        },
+      }
+    );
+    if (result.status && result.status >= 400) {
+      throw new Error(result.message || `Error ${result.status}`);
     }
-
-    const data = await response.json();
-
-    if (!Array.isArray(data.data)) {
+    if (!Array.isArray(result.data)) {
       return [];
     }
-
-    // Transform data to match SyncStatus interface
-    return data.data.map((item: any) => ({
+    return result.data.map((item: any) => ({
       entryId: item.entryId,
       contentTypeId: item.contentTypeId,
       contentTypeName: item.contentTypeName || '',
@@ -219,69 +167,53 @@ const getApiKeys = (): { privateKey: string; publicKey: string } => {
 export const markEntryForSyncViaApi = async (
   entryId: string,
   contentTypeIdOrFieldIds?: string | string[],
-  contentTypeName?: string
+  contentTypeName?: string,
+  sdk?: any
 ): Promise<boolean> => {
   try {
-    // Get the base URL (which should be '/api/klaviyo/proxy')
-    const baseUrl = getBaseUrl();
-    // Get API keys from localStorage
-    const { privateKey, publicKey } = getApiKeys();
-
-    // Using v2 API endpoint if contentTypeIdOrFieldIds is an array (fieldIds)
+    const client = sdk.cma;
+    let parameters;
     if (Array.isArray(contentTypeIdOrFieldIds)) {
-      const fieldIds = contentTypeIdOrFieldIds;
-      // Instead of using /request, use the legacy proxy approach since the sync endpoints aren't in the allowed list
-      const response = await fetch(`${baseUrl}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'syncMark',
-          data: {
-            entryId,
-            fieldIds,
-          },
-          // Use retrieved API keys
-          privateKey,
-          publicKey,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        logger.error('Error marking entry for sync:', errorData);
-        return false;
-      }
-
-      return true;
-    }
-
-    // Original v1 API endpoint
-    const contentTypeId = contentTypeIdOrFieldIds as string;
-    // Use the legacy proxy endpoint
-    const response = await fetch(`${baseUrl}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        action: 'syncMarkForSync',
+      parameters = {
+        action: 'syncMark',
         data: {
           entryId,
-          contentTypeId,
-          contentTypeName: contentTypeName || '',
+          fieldIds: contentTypeIdOrFieldIds,
         },
-        // Use retrieved API keys
-        privateKey,
-        publicKey,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${response.statusText}`);
+      };
+    } else {
+      parameters = {
+        action: 'syncMark',
+        data: {
+          entryId,
+          contentTypeId: contentTypeIdOrFieldIds,
+          contentTypeName,
+        },
+      };
     }
-
+    // Validate parameters before making the call
+    if (!parameters || typeof parameters !== 'object' || !parameters.action) {
+      logger.error('App Action call missing required parameters:', parameters);
+      throw new Error('App Action call missing required parameters');
+    }
+    logger.log('App Action call parameters:', parameters);
+    try {
+      console.log('Sending App Action parameters:', JSON.stringify(parameters, null, 2));
+    } catch (e) {
+      console.log('Sending App Action parameters (raw):', parameters);
+    }
+    const result = await client.appActionCall.create(
+      {
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
+        appDefinitionId: sdk.ids.app,
+        appActionId: '5SUT62FpO3cuWVr9A7BrpK',
+      },
+      { parameters }
+    );
+    if (result.status && result.status >= 400) {
+      throw new Error(result.message || `Error ${result.status}`);
+    }
     return true;
   } catch (error) {
     logger.error('Error marking entry for sync:', error);

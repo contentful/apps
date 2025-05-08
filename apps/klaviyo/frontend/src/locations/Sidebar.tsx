@@ -142,12 +142,15 @@ const SidebarComponent = ({
       }
 
       logger.log('[Sidebar] Opening configure dialog with IDs:', { entryId, contentTypeId });
-
       // Get all valid fields for this content type
       const validFields = await getContentTypeFields(sdk, contentTypeId);
       const preSelectedFields = mappings
         .filter((m) => m.contentTypeId === sdk.ids.contentType)
         .map((m) => m.id);
+      // Debug: Log mappings, preSelectedFields, and validFields
+      logger.log('[Sidebar] Current mappings:', mappings);
+      logger.log('[Sidebar] preSelectedFields:', preSelectedFields);
+      logger.log('[Sidebar] validFields:', validFields);
 
       // Try to get API keys to pass to the dialog
       let privateKey = '';

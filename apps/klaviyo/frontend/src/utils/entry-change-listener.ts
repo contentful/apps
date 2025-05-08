@@ -58,7 +58,7 @@ export const initializeEntryChangeMonitoring = (
             logger.log(`Field ${fieldId} changed, notifying backend`);
 
             // Send notification to backend
-            markEntryForSyncViaApi(entryId, contentTypeId, contentTypeName)
+            markEntryForSyncViaApi(entryId, contentTypeId, contentTypeName, sdk)
               .then(() => {
                 logger.log(`Successfully notified backend of changes to entry ${entryId}`);
               })
@@ -104,7 +104,7 @@ export const checkIfEntryNeedsSync = async (
     const ctId = contentTypeId || sdk.ids.contentType;
 
     // Check with backend API
-    const syncStatus = await fetchEntrySyncStatus(entryId, ctId);
+    const syncStatus = await fetchEntrySyncStatus(entryId, ctId, sdk);
 
     // If no status exists, or needsSync is true
     return syncStatus === null || (syncStatus as SyncStatus).needsSync;
@@ -133,7 +133,7 @@ export const registerPublishListener = (sdk: SidebarExtensionSDK): (() => void) 
           const contentTypeName = sdk.contentType?.name || '';
 
           // Mark for sync in backend
-          markEntryForSyncViaApi(entryId, contentTypeId, contentTypeName)
+          markEntryForSyncViaApi(entryId, contentTypeId, contentTypeName, sdk)
             .then(() => {
               // Notify the user that the entry needs to be synced
               sdk.notifier.success(

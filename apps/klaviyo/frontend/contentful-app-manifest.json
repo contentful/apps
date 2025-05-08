@@ -53,6 +53,33 @@
       "entryFile": "functions/entry-sync-function.ts",
       "allowNetworks": ["a.klaviyo.com"],
       "accepts": ["appevent.handler"]
+    },
+    {
+      "id": "validateCredentialsAppAction",
+      "name": "Validate Credentials",
+      "description": "Validates Klaviyo API credentials",
+      "path": "functions/validateCredentialsAppAction.js",
+      "entryFile": "functions/validateCredentialsAppAction.ts",
+      "allowNetworks": ["a.klaviyo.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "uploadContentAppAction",
+      "name": "Upload Content",
+      "description": "Uploads or updates content blocks in Klaviyo",
+      "path": "functions/uploadContentAppAction.js",
+      "entryFile": "functions/uploadContentAppAction.ts",
+      "allowNetworks": ["a.klaviyo.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "proxyRequestAppAction",
+      "name": "Proxy Request",
+      "description": "Proxies requests to allowed Klaviyo endpoints",
+      "path": "functions/proxyRequestAppAction.js",
+      "entryFile": "functions/proxyRequestAppAction.ts",
+      "allowNetworks": ["a.klaviyo.com"],
+      "accepts": ["appaction.call"]
     }
   ],
   "appEventHandlers": [
@@ -60,7 +87,11 @@
       "functionId": "klaviyoEntrySync",
       "name": "Auto-sync to Klaviyo",
       "description": "Automatically syncs content to Klaviyo when entries are published or updated",
-      "topics": ["ContentManagement.Entry.publish", "ContentManagement.Entry.auto_save", "ContentManagement.Entry.save"]
+      "topics": [
+        "ContentManagement.Entry.publish",
+        "ContentManagement.Entry.auto_save",
+        "ContentManagement.Entry.save"
+      ]
     }
   ]
 } 

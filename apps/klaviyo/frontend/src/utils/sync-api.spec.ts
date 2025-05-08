@@ -70,7 +70,7 @@ describe('sync-api', () => {
 
   describe('fetchEntrySyncStatus', () => {
     it('should return expected format for entry with content type ID', async () => {
-      const result = await fetchEntrySyncStatus('entry123', 'contentType123');
+      const result = await fetchEntrySyncStatus('entry123', 'contentType123', {});
 
       expect(result).toEqual({
         synced: true,
@@ -79,7 +79,7 @@ describe('sync-api', () => {
     });
 
     it('should return expected format for entry without content type ID (v2 API)', async () => {
-      const result = await fetchEntrySyncStatus('entry123');
+      const result = await fetchEntrySyncStatus('entry123', '', {});
 
       expect(result).toEqual({
         synced: true,
@@ -105,7 +105,7 @@ describe('sync-api', () => {
 
   describe('fetchAllSyncStatuses', () => {
     it('should return expected entry statuses', async () => {
-      const result = await fetchAllSyncStatuses('contentType123');
+      const result = await fetchAllSyncStatuses('contentType123', {});
 
       // Check array structure and properties
       expect(Array.isArray(result)).toBe(true);
