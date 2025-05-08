@@ -8,6 +8,7 @@ import {
   IconButton,
   Flex,
   TextInput,
+  FormControl,
 } from '@contentful/f36-components';
 import { EditIcon } from '@contentful/f36-icons';
 import { Entry } from '../../fields/Entry';
@@ -72,15 +73,21 @@ const CreateStep = ({
             <Card key={fieldId} margin="none" style={{ padding: 'spacingXs' }}>
               <Flex justifyContent="space-between">
                 <Stack spacing="spacing2Xs" flexDirection="column" alignItems="flex-start">
-                  <Text>Name</Text>
                   {editingField === fieldId ? (
-                    <TextInput
-                      value={contentBlockNames[fieldId] || ''}
-                      onChange={(e) => handleNameChange(fieldId, e.target.value)}
-                      autoFocus
-                    />
+                    <FormControl isRequired>
+                      <FormControl.Label>Name</FormControl.Label>
+                      <TextInput
+                        value={contentBlockNames[fieldId] || ''}
+                        onChange={(e) => handleNameChange(fieldId, e.target.value)}
+                        autoFocus
+                      />
+                      <FormControl.HelpText>Name should be unique.</FormControl.HelpText>
+                    </FormControl>
                   ) : (
-                    <Text fontWeight="fontWeightDemiBold">{contentBlockNames[fieldId]}</Text>
+                    <>
+                      <Text>Name</Text>
+                      <Text fontWeight="fontWeightDemiBold">{contentBlockNames[fieldId]}</Text>
+                    </>
                   )}
                 </Stack>
                 <IconButton

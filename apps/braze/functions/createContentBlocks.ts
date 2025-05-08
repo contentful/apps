@@ -6,7 +6,6 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import { type PlainClientAPI, createClient } from 'contentful-management';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
-import { STATUS_CODES } from 'http';
 
 type AppInstallationParameters = {
   brazeApiKey: string;
