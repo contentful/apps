@@ -60,7 +60,9 @@ const schema = makeExecutableSchema({
           const result = await response.json();
           files = [result];
         } else if (search) {
-          const url = `https://www.googleapis.com/drive/v3/files?q=name contains '${search}'&fields=files(id,name,thumbnailLink)`;
+          // API Reference: https://developers.google.com/workspace/drive/api/reference/rest/v3/files/list
+          const query = `name contains '${search}' and mimeType != 'application/vnd.google-apps.folder'`;
+          const url = `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,thumbnailLink)`;
 
           const response = await fetch(url, {
             method: 'GET',
@@ -82,8 +84,8 @@ const schema = makeExecutableSchema({
           files = json.files ?? [];
         } else if (ids && ids.length > 0) {
           // Make individual requests for each ID
-          // todo : fix any type
-          const filePromises = ids.map(async (fileId: any) => {
+          // API Reference: https://developers.google.com/workspace/drive/api/reference/rest/v3/files/get
+          const filePromises = ids.map(async (fileId: string) => {
             const url = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,thumbnailLink`;
             const response = await fetch(url, {
               method: 'GET',
@@ -93,11 +95,6 @@ const schema = makeExecutableSchema({
                 Authorization: `Bearer ${token}`,
               },
             });
-
-            if (!response.ok) {
-              console.error(`Failed to fetch file ${fileId}: ${response.status}`);
-              return null;
-            }
 
             return response.json();
           });
