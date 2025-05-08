@@ -391,8 +391,8 @@ const SidebarComponent = ({
 
   return (
     <Flex flexDirection="column" gap="spacingM" style={{ maxWidth: '300px', height: '100%' }}>
-      <Button variant="primary" onClick={handleConfigureClick} isFullWidth>
-        Configure & Sync to Klaviyo
+      <Button variant="secondary" onClick={handleConfigureClick} isFullWidth>
+        Sync fields to Klaviyo
       </Button>
 
       {showSuccess && <Text fontColor="colorPositive">Successfully synced to Klaviyo!</Text>}

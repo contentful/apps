@@ -275,9 +275,6 @@ export const FieldSelectDialog: React.FC<{ entry: any; mappings: FieldMapping[] 
           Close
         </Button>
         <Flex justifyContent="flex-end" alignItems="center" gap="spacingM">
-          <Button variant="positive" onClick={handleSaveSelections}>
-            Save Selections
-          </Button>
           <Button variant="primary" onClick={handleSaveAndSync} isLoading={isSyncing}>
             Save & Sync to Klaviyo
           </Button>
