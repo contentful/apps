@@ -8,15 +8,16 @@ type SuccessStepProps = {
   handleClose: () => void;
 };
 
-const SuccessStep = ({ handleClose }: SuccessStepProps) => {
+const SuccessStep = ({ selectedFields, handleClose }: SuccessStepProps) => {
   return (
     <>
       <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeXl" lineHeight="lineHeightL">
         Success!
       </Subheading>
       <Paragraph>
-        Seven fields were successfully sent to Braze. You can view them from your Braze dashboard by
-        navigating to Templates {'>'} Content Blocks.
+        {selectedFields.size || 0} {selectedFields.size === 1 ? 'field was' : 'fields were'}{' '}
+        successfully sent to Braze. You can view them from your Braze dashboard by navigating to
+        Templates {'>'} Content Blocks.
       </Paragraph>
       <WizardFooter>
         <Button variant="primary" size="small" onClick={handleClose}>

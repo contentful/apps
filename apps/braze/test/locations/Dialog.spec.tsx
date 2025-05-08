@@ -158,9 +158,13 @@ describe('Dialog component', () => {
 
     fireEvent.click(sendToBrazeButton);
 
-    const successStepParagraph = screen.getByText('Seven fields were successfully', {
-      exact: false,
-    });
+    const successStepParagraph = await screen.findByText(
+      'You can view them from your Braze dashboard by navigating to',
+      {
+        exact: false,
+      }
+    );
+
     expect(successStepParagraph).toBeTruthy();
   });
 });
