@@ -56,7 +56,7 @@ const CreateFlow = (props: CreateFlowProps) => {
             entryId: entry.id,
             fieldIds: Array.from(selectedFields).join(','),
             contentBlockNames: JSON.stringify(contentBlockNames),
-        },
+          },
         }
       );
       const data = JSON.parse(response.response.body);
