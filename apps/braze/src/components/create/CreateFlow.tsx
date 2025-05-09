@@ -39,7 +39,7 @@ const CreateFlow = (props: CreateFlowProps) => {
     }
   );
 
-  const handleCreate = async () => {
+  const handleCreate = async (contentBlockNames: Record<string, string>) => {
     if (entry.state !== EntryStatus.Published && step === CREATE_STEP) {
       setStep(DRAFT_STEP);
       return;
@@ -62,6 +62,7 @@ const CreateFlow = (props: CreateFlowProps) => {
           parameters: {
             entryId: entry.id,
             fieldIds: Array.from(selectedFields).join(','),
+            contentBlockNames: JSON.stringify(contentBlockNames),
           },
         }
       );
