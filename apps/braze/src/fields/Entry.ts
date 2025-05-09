@@ -1,4 +1,4 @@
-import { removeHypens, firstLetterToLowercase, SAVED_RESPONSE } from '../utils';
+import { removeHypens, firstLetterToLowercase, SAVED_RESPONSE, EntryStatus } from '../utils';
 import { Field } from './Field';
 import { FieldRegistry } from './fieldRegistry';
 
@@ -10,6 +10,7 @@ export class Entry {
   private spaceId: string;
   private environment: string;
   private contentfulToken: string;
+  public state: EntryStatus;
   constructor(
     id: string,
     contentType: string,
@@ -17,7 +18,9 @@ export class Entry {
     fields: Field[],
     spaceId: string,
     environment: string,
-    contentfulToken: string
+    contentfulToken: string,
+    publishedAt?: string,
+    updatedAt?: string
   ) {
     this.id = id;
     this.contentType = firstLetterToLowercase(contentType);
@@ -26,6 +29,7 @@ export class Entry {
     this.spaceId = spaceId;
     this.environment = environment;
     this.contentfulToken = contentfulToken;
+    this.state = this.getEntryState(publishedAt, updatedAt);
   }
 
   static fromSerialized(serializedEntry: any): Entry {
@@ -36,7 +40,8 @@ export class Entry {
       serializedEntry['fields'].map((field: any) => FieldRegistry.deserializeField(field)),
       serializedEntry['spaceId'],
       serializedEntry['environment'],
-      serializedEntry['contentfulToken']
+      serializedEntry['contentfulToken'],
+      serializedEntry['state']
     );
   }
 
@@ -49,6 +54,7 @@ export class Entry {
       spaceId: this.spaceId,
       environment: this.environment,
       contentfulToken: this.contentfulToken,
+      state: this.state,
     };
   }
 
@@ -139,4 +145,16 @@ export class Entry {
   private selectedFields() {
     return this.fields.filter((field) => field.selected);
   }
+
+  private getEntryState = (publishedAt: string | undefined, updatedAt: string | undefined) => {
+    if (!publishedAt) {
+      return EntryStatus.Draft;
+    }
+
+    if (publishedAt !== updatedAt) {
+      return EntryStatus.Changed;
+    }
+
+    return EntryStatus.Published;
+  };
 }
