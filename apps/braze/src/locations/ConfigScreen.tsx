@@ -52,7 +52,7 @@ const ConfigScreen = () => {
       return false;
     }
 
-    const url = `https://${sdk.hostnames.delivery}/spaces/${sdk.ids.space}/environments/${sdk.ids.environment}/entries?limit=1`;
+    const url = `https://${sdk.hostnames.delivery}/spaces/${sdk.ids.space}/environments/${sdk.ids.environment}`;
     const response: Response = await callToContentful(url, apiKey);
 
     const isValid = response.ok;
