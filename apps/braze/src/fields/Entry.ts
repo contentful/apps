@@ -146,7 +146,7 @@ export class Entry {
     return this.fields.filter((field) => field.selected);
   }
 
-  public getEntryState = (publishedAt: string | undefined, updatedAt: string | undefined) => {
+  private getEntryState = (publishedAt: string | undefined, updatedAt: string | undefined) => {
     if (!publishedAt) {
       return EntryStatus.Draft;
     }

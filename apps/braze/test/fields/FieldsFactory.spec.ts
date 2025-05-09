@@ -392,6 +392,6 @@ async function createFields(
   }
 ) {
   const fieldsFactory = new FieldsFactory(entryId, entryContentTypeId, mockCma as any);
-  const [cmaEntry, cmaContentType] = await fieldsFactory.getEntryAndContentType();
-  return await fieldsFactory.createFieldsForEntry(cmaEntry.fields, cmaContentType);
+  const cmaEntry = await fieldsFactory.getEntry();
+  return await fieldsFactory.createFieldsForEntry(cmaEntry.fields);
 }

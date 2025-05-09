@@ -58,8 +58,8 @@ const Dialog = () => {
         invocationParams.contentTypeId!,
         cma
       );
-      const [cmaEntry, cmaContentType] = await fieldsFactory.getEntryAndContentType();
-      fieldsRef.current = await fieldsFactory.createFieldsForEntry(cmaEntry.fields, cmaContentType);
+      const cmaEntry = await fieldsFactory.getEntry();
+      fieldsRef.current = await fieldsFactory.createFieldsForEntry(cmaEntry.fields);
       const entry = new Entry(
         invocationParams.entryId,
         invocationParams.contentTypeId,

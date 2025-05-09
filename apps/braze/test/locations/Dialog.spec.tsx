@@ -5,6 +5,7 @@ import Dialog from '../../src/locations/Dialog';
 import React from 'react';
 import { Entry } from '../../src/fields/Entry';
 import { BasicField } from '../../src/fields/BasicField';
+import { createEntry } from '../mocks/mocksForFunctions';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -21,52 +22,25 @@ vi.mock('contentful-management', () => ({
   createClient: () => mockCma,
 }));
 
-const mockGetEntryAndContentType = vi.fn();
+const mockGetEntry = vi.fn();
 const mockCreateFieldsForEntry = vi.fn();
 vi.mock('../../src/fields/FieldsFactory', () => ({
   FieldsFactory: vi.fn().mockImplementation(() => ({
-    getEntryAndContentType: mockGetEntryAndContentType,
+    getEntry: mockGetEntry,
     createFieldsForEntry: mockCreateFieldsForEntry,
   })),
 }));
 
-const mockCMAEntryItemResponse = {
-  sys: {
-    id: 'entryId',
-    contentType: {
-      sys: { id: 'contentTypeId' },
-    },
-    type: 'Entry',
-  },
-  fields: {
-    title: { 'en-US': 'Some Title' },
-    fieldId: {
-      'en-US': {
-        sys: {
-          id: 'referencedEntryId',
-          linkType: 'Entry',
-          type: 'Link',
-        },
-      },
-    },
-  },
-};
-
-const mockCMAContentTypeResponse = {
-  sys: {
-    id: 'contentTypeId',
-    type: 'ContentType',
-  },
-  name: 'Example Content Type',
-  fields: [
-    {
-      id: 'fieldId',
-      name: 'Field Name',
-      type: 'Link',
+const mockCMAEntryItemResponse = createEntry({
+  title: 'Some Title',
+  fieldId: {
+    sys: {
+      id: 'referencedEntryId',
       linkType: 'Entry',
+      type: 'Link',
     },
-  ],
-};
+  },
+});
 
 const mockField = new BasicField('fieldId', 'fieldName', 'contentTypeId', false);
 mockField.selected = true;
@@ -88,10 +62,7 @@ const CREATE_FIELDS_STEP_TEXT = 'generate into Content Blocks';
 describe('Dialog component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetEntryAndContentType.mockResolvedValue([
-      mockCMAEntryItemResponse,
-      mockCMAContentTypeResponse,
-    ]);
+    mockGetEntry.mockResolvedValue(mockCMAEntryItemResponse);
     mockCreateFieldsForEntry.mockResolvedValue([mockField]);
     vi.spyOn(mockEntry, 'getGraphQLResponse').mockImplementation(async () => 'graphql response');
     vi.spyOn(Entry, 'fromSerialized').mockImplementation(() => mockEntry);
@@ -212,9 +183,12 @@ describe('Dialog component', () => {
 
     fireEvent.click(sendToBrazeButtonDraftStep);
 
-    const successStepParagraph = await screen.findByText('Seven fields were successfully', {
-      exact: false,
-    });
+    const successStepParagraph = await screen.findByText(
+      'You can view them from your Braze dashboard by navigating to',
+      {
+        exact: false,
+      }
+    );
     expect(successStepParagraph).toBeTruthy();
   });
 });
