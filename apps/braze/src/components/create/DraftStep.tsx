@@ -3,11 +3,17 @@ import WizardFooter from '../WizardFooter';
 
 type CreateStepProps = {
   isSubmitting: boolean;
+  contentBlockNames: Record<string, string>;
   handlePreviousStep: () => void;
-  handleNextStep: () => void;
+  handleNextStep: (contentBlockNames: Record<string, string>) => void;
 };
 
-const DraftStep = ({ isSubmitting, handlePreviousStep, handleNextStep }: CreateStepProps) => {
+const DraftStep = ({
+  isSubmitting,
+  contentBlockNames,
+  handlePreviousStep,
+  handleNextStep,
+}: CreateStepProps) => {
   return (
     <>
       <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeXl" lineHeight="lineHeightL">
@@ -21,7 +27,7 @@ const DraftStep = ({ isSubmitting, handlePreviousStep, handleNextStep }: CreateS
         <Button variant="secondary" size="small" onClick={handlePreviousStep}>
           Back
         </Button>
-        <Button variant="primary" size="small" onClick={handleNextStep}>
+        <Button variant="primary" size="small" onClick={() => handleNextStep(contentBlockNames)}>
           {isSubmitting ? 'Creating...' : 'Send to Braze'}
         </Button>
       </WizardFooter>

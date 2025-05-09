@@ -25,7 +25,7 @@ const CreateFlow = (props: CreateFlowProps) => {
   const { sdk, entry, initialSelectedFields = [] } = props;
   const [step, setStep] = useState(FIELDS_STEP);
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set(initialSelectedFields));
-  const [contentBlockName, setContentBlockName] = useState('');
+  const [contentBlockNames, setContentBlockNames] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const cma = createClient(
@@ -101,10 +101,10 @@ const CreateFlow = (props: CreateFlowProps) => {
         <CreateStep
           entry={entry}
           selectedFields={selectedFields}
-          contentBlockName={contentBlockName}
-          setContentBlockName={setContentBlockName}
           isSubmitting={isSubmitting}
           handlePreviousStep={() => setStep(FIELDS_STEP)}
+          contentBlockNames={contentBlockNames}
+          setContentBlockNames={setContentBlockNames}
           handleNextStep={handleCreate}
         />
       )}
@@ -112,6 +112,7 @@ const CreateFlow = (props: CreateFlowProps) => {
         <DraftStep
           isSubmitting={isSubmitting}
           handlePreviousStep={() => setStep(CREATE_STEP)}
+          contentBlockNames={contentBlockNames}
           handleNextStep={handleCreate}
         />
       )}

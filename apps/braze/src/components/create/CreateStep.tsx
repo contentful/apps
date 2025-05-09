@@ -19,8 +19,8 @@ import { editButton } from './CreateStep.styles';
 type CreateStepProps = {
   entry: Entry;
   selectedFields: Set<string>;
-  contentBlockName: string;
-  setContentBlockName: (name: string) => void;
+  contentBlockNames: Record<string, string>;
+  setContentBlockNames: any;
   isSubmitting: boolean;
   handlePreviousStep: () => void;
   handleNextStep: (contentBlockNames: Record<string, string>) => void;
@@ -35,10 +35,11 @@ const CreateStep = ({
   entry,
   selectedFields,
   isSubmitting,
+  contentBlockNames,
+  setContentBlockNames,
   handlePreviousStep,
   handleNextStep,
 }: CreateStepProps) => {
-  const [contentBlockNames, setContentBlockNames] = useState<Record<string, string>>({});
   const [editingField, setEditingField] = useState<string | null>(null);
 
   useEffect(() => {
@@ -55,7 +56,7 @@ const CreateStep = ({
   };
 
   const handleNameChange = (fieldId: string, value: string) => {
-    setContentBlockNames((prev) => ({
+    setContentBlockNames((prev: any) => ({
       ...prev,
       [fieldId]: value,
     }));
