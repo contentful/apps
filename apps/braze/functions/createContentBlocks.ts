@@ -15,6 +15,7 @@ type AppInstallationParameters = {
 export type AppActionParameters = {
   entryId: string;
   fieldIds: string;
+  contentBlockNames: string;
 };
 
 function initContentfulManagementClient(context: FunctionEventContext): PlainClientAPI {
@@ -32,23 +33,22 @@ function initContentfulManagementClient(context: FunctionEventContext): PlainCli
   });
 }
 
-export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
-  event: AppActionRequest<'Custom', { entryId: string; fieldIds: string }>,
+export const handler: FunctionEventHandler<
+  FunctionTypeEnum.AppActionCall,
+  AppActionParameters
+> = async (
+  event: AppActionRequest<'Custom', AppActionParameters>,
   context: FunctionEventContext
 ) => {
   const cma = initContentfulManagementClient(context);
 
-  const { entryId, fieldIds } = event.body;
+  const { entryId, fieldIds, contentBlockNames } = event.body;
+  const parsedContentBlockNames = JSON.parse(contentBlockNames) as Record<string, string>;
   const entry = await cma.entry.get({ entryId });
   const contentType = await cma.contentType.get({
     contentTypeId: entry.sys.contentType.sys.id,
   });
   const locale = entry.sys.locale || 'en-US'; // TODO: define what to do here
-
-  const entryTitle = !!contentType.displayField
-    ? entry.fields[contentType.displayField]?.[locale] || 'Untitled'
-    : 'Untitled';
-  const entryTitleWithoutSpaces = entryTitle.replace(/\s+/g, '-');
 
   const fieldIdArray = fieldIds.split(',').map((id) => id.trim());
 
@@ -73,6 +73,15 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
       continue;
     }
 
+    if (!parsedContentBlockNames[fieldId]) {
+      results.push({
+        fieldId,
+        success: false,
+        message: `Content block name not found or has no value for field ${fieldId}`,
+      });
+      continue;
+    }
+
     try {
       const field = contentType.fields.find((f) => f.id === fieldId);
       let content = fieldValue;
@@ -88,7 +97,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
           Authorization: `Bearer ${brazeApiKey}`,
         },
         body: JSON.stringify({
-          name: `${entryTitleWithoutSpaces}-${fieldId}`,
+          name: parsedContentBlockNames[fieldId],
           content: content,
           state: 'draft',
         }),

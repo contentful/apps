@@ -38,6 +38,12 @@
           "name": "Field IDs",
           "type": "Symbol",
           "required": true
+        },
+        {
+          "id": "contentBlockNames",
+          "name": "Content Block Names",
+          "type": "Symbol",
+          "required": true
         }
       ]
     }

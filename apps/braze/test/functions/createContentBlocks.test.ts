@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { handler } from '../../functions/createContentBlocks';
+import { AppActionParameters, handler } from '../../functions/createContentBlocks';
 import {
   AppActionRequest,
   FunctionEventContext,
@@ -60,11 +60,12 @@ describe('createContentBlocks', () => {
       json: () => Promise.resolve({ content_block_id: 'block-id' }),
     } as Response);
 
-    const event: AppActionRequest<'Custom', { entryId: string; fieldIds: string }> = {
+    const event: AppActionRequest<'Custom', AppActionParameters> = {
       type: FunctionTypeEnum.AppActionCall,
       body: {
         entryId: 'entry-id',
         fieldIds: 'title',
+        contentBlockNames: JSON.stringify({ title: 'custom-title-name' }),
       },
       headers: {},
     };
@@ -90,7 +91,7 @@ describe('createContentBlocks', () => {
           Authorization: 'Bearer test-api-key',
         },
         body: JSON.stringify({
-          name: 'Test-Title-title',
+          name: 'custom-title-name',
           content: 'Test Title',
           state: 'draft',
         }),
@@ -109,9 +110,13 @@ describe('createContentBlocks', () => {
     vi.mocked(documentToHtmlString).mockReturnValue('<p>Test HTML</p>');
     mockFetchSuccess({ content_block_id: 'block-id' });
 
-    const event: AppActionRequest<'Custom', { entryId: string; fieldIds: string }> = {
+    const event: AppActionRequest<'Custom', AppActionParameters> = {
       type: FunctionTypeEnum.AppActionCall,
-      body: { entryId: 'entry-id', fieldIds: 'content' },
+      body: {
+        entryId: 'entry-id',
+        fieldIds: 'content',
+        contentBlockNames: JSON.stringify({ content: 'custom-content-name' }),
+      },
       headers: {},
     };
 
@@ -132,7 +137,7 @@ describe('createContentBlocks', () => {
       'https://test.braze.com/content_blocks/create',
       expect.objectContaining({
         body: JSON.stringify({
-          name: 'Untitled-content',
+          name: 'custom-content-name',
           content: '<p>Test HTML</p>',
           state: 'draft',
         }),
@@ -149,9 +154,13 @@ describe('createContentBlocks', () => {
     vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
     vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
 
-    const event: AppActionRequest<'Custom', { entryId: string; fieldIds: string }> = {
+    const event: AppActionRequest<'Custom', AppActionParameters> = {
       type: FunctionTypeEnum.AppActionCall,
-      body: { entryId: 'entry-id', fieldIds: 'title' },
+      body: {
+        entryId: 'entry-id',
+        fieldIds: 'title',
+        contentBlockNames: JSON.stringify({ title: 'custom-title-name' }),
+      },
       headers: {},
     };
 
@@ -183,9 +192,13 @@ describe('createContentBlocks', () => {
       statusText: 'Unauthorized',
     } as Response);
 
-    const event: AppActionRequest<'Custom', { entryId: string; fieldIds: string }> = {
+    const event: AppActionRequest<'Custom', AppActionParameters> = {
       type: FunctionTypeEnum.AppActionCall,
-      body: { entryId: 'entry-id', fieldIds: 'title' },
+      body: {
+        entryId: 'entry-id',
+        fieldIds: 'title',
+        contentBlockNames: JSON.stringify({ title: 'custom-title-name' }),
+      },
       headers: {},
     };
 
@@ -200,5 +213,147 @@ describe('createContentBlocks', () => {
         },
       ],
     });
+  });
+
+  it('should handle multiple fields with custom names', async () => {
+    // Mock Entry data
+    const entry = createEntry({ title: 'Test Title', description: 'Test Description' });
+    const contentType = createContentType(['title', 'description']);
+
+    // Mock API responses
+    vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+    vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
+    vi.mocked(global.fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ content_block_id: 'block-id-1' }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ content_block_id: 'block-id-2' }),
+      } as Response);
+
+    const event: AppActionRequest<'Custom', AppActionParameters> = {
+      type: FunctionTypeEnum.AppActionCall,
+      body: {
+        entryId: 'entry-id',
+        fieldIds: 'title,description',
+        contentBlockNames: JSON.stringify({
+          title: 'custom-title-name',
+          description: 'custom-description-name',
+        }),
+      },
+      headers: {},
+    };
+
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      results: [
+        {
+          fieldId: 'title',
+          success: true,
+          contentBlockId: 'block-id-1',
+        },
+        {
+          fieldId: 'description',
+          success: true,
+          contentBlockId: 'block-id-2',
+        },
+      ],
+    });
+
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      1,
+      'https://test.braze.com/content_blocks/create',
+      expect.objectContaining({
+        body: JSON.stringify({
+          name: 'custom-title-name',
+          content: 'Test Title',
+          state: 'draft',
+        }),
+      })
+    );
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      2,
+      'https://test.braze.com/content_blocks/create',
+      expect.objectContaining({
+        body: JSON.stringify({
+          name: 'custom-description-name',
+          content: 'Test Description',
+          state: 'draft',
+        }),
+      })
+    );
+  });
+
+  it('should handle invalid contentBlockNames JSON', async () => {
+    // Mock Entry data
+    const entry = createEntry({ title: 'Test Title' });
+    const contentType = createContentType(['title']);
+
+    // Mock API responses
+    vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+    vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
+
+    const event: AppActionRequest<'Custom', AppActionParameters> = {
+      type: FunctionTypeEnum.AppActionCall,
+      body: {
+        entryId: 'entry-id',
+        fieldIds: 'title',
+        contentBlockNames: 'invalid-json',
+      },
+      headers: {},
+    };
+
+    await expect(handler(event, mockContext)).rejects.toThrow();
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('should handle missing contentBlockNames for a field', async () => {
+    // Mock Entry data
+    const entry = createEntry({ title: 'Test Title', description: 'Test Description' });
+    const contentType = createContentType(['title', 'description']);
+
+    // Mock API responses
+    vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+    vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ content_block_id: 'block-id' }),
+    } as Response);
+
+    const event: AppActionRequest<'Custom', AppActionParameters> = {
+      type: FunctionTypeEnum.AppActionCall,
+      body: {
+        entryId: 'entry-id',
+        fieldIds: 'title,description',
+        contentBlockNames: JSON.stringify({
+          title: 'custom-title-name',
+          // description name is missing
+        }),
+      },
+      headers: {},
+    };
+
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      results: [
+        {
+          fieldId: 'title',
+          success: true,
+          contentBlockId: 'block-id',
+        },
+        {
+          fieldId: 'description',
+          success: false,
+          message: 'Content block name not found or has no value for field description',
+        },
+      ],
+    });
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 });

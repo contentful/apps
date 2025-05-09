@@ -37,7 +37,7 @@ const CreateFlow = (props: CreateFlowProps) => {
     }
   );
 
-  const handleCreate = async () => {
+  const handleCreate = async (contentBlockNames: Record<string, string>) => {
     setIsSubmitting(true);
 
     const connectedFields = JSON.parse(sdk.parameters.installation.brazeConnectedFields || '{}');
@@ -55,6 +55,7 @@ const CreateFlow = (props: CreateFlowProps) => {
           parameters: {
             entryId: entry.id,
             fieldIds: Array.from(selectedFields).join(','),
+            contentBlockNames: JSON.stringify(contentBlockNames),
           },
         }
       );
