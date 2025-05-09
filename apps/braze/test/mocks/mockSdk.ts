@@ -8,6 +8,7 @@ const mockSdk: any = {
     getCurrentState: vi.fn(),
   },
   ids: {
+    entry: 'testEntryId',
     app: 'test-app',
     spaceId: 'test-spaceId',
   },
@@ -18,6 +19,13 @@ const mockSdk: any = {
     installation: {
       contentfulApiKey: 'test-contentful-apiKey',
       brazeApiKey: 'test-braze-apiKey',
+      brazeConnectedFields: JSON.stringify({
+        testEntryId: [
+          ['fieldA', 'brazeIdA'],
+          ['fieldB', 'brazeIdB'],
+        ],
+        testEntryId2: [['fieldC', 'brazeIdC']],
+      }),
     },
     invocation: {
       id: 'test-entryId',
@@ -43,6 +51,9 @@ const mockSdk: any = {
   },
   hostnames: {
     delivery: 'cdn.contentful.com',
+  },
+  navigator: {
+    openCurrentAppPage: vi.fn(),
   },
 };
 
