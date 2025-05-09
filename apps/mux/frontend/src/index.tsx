@@ -27,7 +27,7 @@ import Menu from './components/menu';
 import PlayerCode from './components/playercode';
 import CountryDatalist from './components/countryDatalist';
 import CaptionsList from './components/captionsList';
-import ModalUploadAsset, { ModalData } from './components/ModalUploadAsset';
+import ModalUploadAsset, { ModalData } from './components/UploadConfiguration/ModalUploadAsset';
 import UploadArea from './components/UploadArea/UploadArea';
 
 import {
@@ -289,18 +289,37 @@ export class App extends React.Component<AppProps, AppState> {
     const passthroughId = (this.props.sdk.entry.getSys() as { id: string }).id;
 
     const requestBody: any = {
-      input: [
+      inputs: [
         {
           url: remoteURL,
         },
       ],
       passthrough: passthroughId,
-      playback_policy: (this.props.sdk.parameters.installation as InstallationParams)
-        .muxEnableSignedUrls
-        ? 'signed'
-        : 'public',
+      playback_policies: options.playbackPolicies,
       video_quality: options.videoQuality,
     };
+
+    // Captions case
+    console.log('Captions options!', options.captionsConfig);
+    if (options.captionsConfig.captionsType !== 'off') {
+      if (options.captionsConfig.captionsType === 'auto') {
+        requestBody.inputs[0].generated_subtitles = [
+          {
+            language_code: options.captionsConfig.languageCode,
+            name: options.captionsConfig.languageName,
+          },
+        ];
+      } else {
+        requestBody.inputs.push({
+          url: options.captionsConfig.url,
+          type: 'text',
+          text_type: 'subtitles',
+          closed_captions: options.captionsConfig.closedCaptions,
+          language_code: options.captionsConfig.languageCode,
+          name: options.captionsConfig.languageName,
+        });
+      }
+    }
 
     const result = await this.apiClient.post('/video/v1/assets', JSON.stringify(requestBody));
 
@@ -387,21 +406,60 @@ export class App extends React.Component<AppProps, AppState> {
     const { muxEnableAudioNormalize } = this.props.sdk.parameters
       .installation as InstallationParams;
 
-    const res = await this.apiClient.post(
-      '/video/v1/uploads',
-      JSON.stringify({
-        cors_origin: window.location.origin,
-        new_asset_settings: {
-          passthrough: passthroughId,
-          normalize_audio: muxEnableAudioNormalize || false,
-          playback_policy: (this.props.sdk.parameters.installation as InstallationParams)
-            .muxEnableSignedUrls
-            ? 'signed'
-            : 'public',
-          video_quality: options.videoQuality,
-        },
-      })
-    );
+    const data: {
+      cors_origin: string;
+      new_asset_settings: {
+        passthrough: string;
+        normalize_audio: boolean;
+        playback_policies: string[];
+        video_quality: string;
+        inputs: Array<{
+          generated_subtitles?: Array<{
+            language_code: string;
+            name: string;
+          }>;
+          url?: string;
+          type?: string;
+          text_type?: string;
+          closed_captions?: boolean;
+          language_code?: string;
+          name?: string;
+        }>;
+      };
+    } = {
+      cors_origin: window.location.origin,
+      new_asset_settings: {
+        passthrough: passthroughId,
+        normalize_audio: muxEnableAudioNormalize || false,
+        playback_policies: options.playbackPolicies,
+        video_quality: options.videoQuality,
+        inputs: [],
+      },
+    };
+
+    // Captions case
+    if (options.captionsConfig.captionsType !== 'off') {
+      if (options.captionsConfig.captionsType === 'auto') {
+        data.new_asset_settings.inputs.push({
+          generated_subtitles: [
+            {
+              language_code: options.captionsConfig.languageCode,
+              name: options.captionsConfig.languageName,
+            },
+          ],
+        });
+      } else {
+        data.new_asset_settings.inputs.push({
+          url: options.captionsConfig.url,
+          type: 'text',
+          text_type: 'subtitles',
+          closed_captions: options.captionsConfig.closedCaptions,
+          language_code: options.captionsConfig.languageCode,
+          name: options.captionsConfig.languageName,
+        });
+      }
+    }
+    const res = await this.apiClient.post('/video/v1/uploads', JSON.stringify(data));
 
     if (!this.responseCheck(res)) {
       return;
@@ -1169,6 +1227,7 @@ export class App extends React.Component<AppProps, AppState> {
           isShown={this.state.modalUploadAssetVisible}
           onClose={this.onCloseModal}
           onConfirm={this.onConfirmModal}
+          installationParams={this.props.sdk.parameters.installation as InstallationParams}
         />
         <UploadArea
           showMuxUploaderUI={this.state.showMuxUploaderUI}
