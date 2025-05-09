@@ -44,7 +44,7 @@ const CreateStep = ({
   useEffect(() => {
     // Initialize content block names with defaults
     const initialNames: Record<string, string> = {};
-    Array.from(selectedFields).forEach((fieldId) => {
+    selectedFields.forEach((fieldId) => {
       initialNames[fieldId] = getDefaultContentBlockName(entry, fieldId);
     });
     setContentBlockNames(initialNames);
