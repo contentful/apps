@@ -28,16 +28,6 @@ export const BRAZE_APP_DOCUMENTATION = 'https://www.contentful.com/help/apps/bra
 export const CONTENT_TYPE_DOCUMENTATION =
   'https://www.contentful.com/help/content-types/configure-content-type/';
 
-export async function callToContentful(url: string, newApiKey: string) {
-  return await fetch(url, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${newApiKey}`,
-      'Content-Type': 'application/json',
-    },
-  });
-}
-
 const ConfigScreen = () => {
   const [apiKeyIsValid, setApiKeyIsValid] = useState(true);
   const [parameters, setParameters] = useState<AppInstallationParameters>({
@@ -46,14 +36,25 @@ const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
   const spaceId = sdk.ids.space;
 
-  async function checkApiKey(apiKey: string) {
+  async function checkContentfulApiKey(apiKey: string) {
     if (!apiKey) {
       setApiKeyIsValid(false);
       return false;
     }
 
-    const url = `https://${sdk.hostnames.delivery}/spaces/${sdk.ids.space}/environments/${sdk.ids.environment}`;
-    const response: Response = await callToContentful(url, apiKey);
+    // Use GraphQL endpoint for validation
+    const url = `https://graphql.contentful.com/content/v1/spaces/${sdk.ids.space}/environments/${sdk.ids.environment}`;
+    const query = {
+      query: `query { entryCollection { total } }`,
+    };
+    const response: Response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(query),
+    });
 
     const isValid = response.ok;
     setApiKeyIsValid(isValid);
@@ -64,7 +65,7 @@ const ConfigScreen = () => {
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
-    const isValid = await checkApiKey(parameters.apiKey);
+    const isValid = await checkContentfulApiKey(parameters.apiKey);
 
     if (!parameters.apiKey || !isValid) {
       sdk.notifier.error('A valid Contentful API key is required');
