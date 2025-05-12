@@ -105,17 +105,17 @@ export const handler: FunctionEventHandler<
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
         results.push({
           fieldId,
           success: false,
           statusCode: response.status,
-          message: `Error creating content block for field ${fieldId}: ${response.statusText}`,
+          message: `Error creating content block for field ${fieldId}: ${data.message}`,
         });
         continue;
       }
-
-      const data = await response.json();
 
       results.push({
         fieldId,
