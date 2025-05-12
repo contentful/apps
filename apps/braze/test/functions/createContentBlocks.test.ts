@@ -6,7 +6,7 @@ import {
   FunctionTypeEnum,
 } from '@contentful/node-apps-toolkit';
 
-import type { PlainClientAPI, EntryProps, ContentTypeProps } from 'contentful-management';
+import type { PlainClientAPI } from 'contentful-management';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { createContentType, createEntry, mockFetchSuccess } from '../mocks/mocksForFunctions';
 
@@ -77,6 +77,7 @@ describe('createContentBlocks', () => {
         {
           fieldId: 'title',
           success: true,
+          statusCode: 201,
           contentBlockId: 'block-id',
         },
       ],
@@ -127,6 +128,7 @@ describe('createContentBlocks', () => {
         {
           fieldId: 'content',
           success: true,
+          statusCode: 201,
           contentBlockId: 'block-id',
         },
       ],
@@ -171,6 +173,7 @@ describe('createContentBlocks', () => {
         {
           fieldId: 'title',
           success: false,
+          statusCode: 404,
           message: 'Field title not found or has no value',
         },
       ],
@@ -189,8 +192,9 @@ describe('createContentBlocks', () => {
     vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
     vi.mocked(global.fetch).mockResolvedValue({
       ok: false,
+      status: 400,
       statusText: 'Unauthorized',
-    } as Response);
+    } as Partial<Response> as Response);
 
     const event: AppActionRequest<'Custom', AppActionParameters> = {
       type: FunctionTypeEnum.AppActionCall,
@@ -209,7 +213,8 @@ describe('createContentBlocks', () => {
         {
           fieldId: 'title',
           success: false,
-          message: 'Error creating content block: Unauthorized',
+          statusCode: 400,
+          message: 'Error creating content block for field title: Unauthorized',
         },
       ],
     });
@@ -253,11 +258,13 @@ describe('createContentBlocks', () => {
         {
           fieldId: 'title',
           success: true,
+          statusCode: 201,
           contentBlockId: 'block-id-1',
         },
         {
           fieldId: 'description',
           success: true,
+          statusCode: 201,
           contentBlockId: 'block-id-2',
         },
       ],
@@ -344,11 +351,13 @@ describe('createContentBlocks', () => {
         {
           fieldId: 'title',
           success: true,
+          statusCode: 201,
           contentBlockId: 'block-id',
         },
         {
           fieldId: 'description',
           success: false,
+          statusCode: 404,
           message: 'Content block name not found or has no value for field description',
         },
       ],

@@ -127,7 +127,7 @@ describe('Dialog component', () => {
     expect(screen.getByLabelText<HTMLInputElement>(mockField.name).checked).toBe(true);
   });
 
-  it('Create wizard navigates through steps and closes', async () => {
+  it('Create wizard navigates through steps, show succes step and closes', async () => {
     mockSdk.parameters.invocation = {
       mode: 'create',
       entryId: 'entryId',
@@ -137,51 +137,16 @@ describe('Dialog component', () => {
     mockCma.appActionCall.createWithResponse.mockResolvedValue({
       response: {
         body: JSON.stringify({
-          results: [['fieldId', 'contentBlockId']],
+          results: [
+            { fieldId: 'fieldId', success: true, status: 201, contentBlockId: 'contentBlockId' },
+          ],
         }),
       },
     });
 
     render(<Dialog />);
 
-    await screen.findByText(CREATE_FIELDS_STEP_TEXT, { exact: false });
-
-    const multiSelect = screen.getByText('Select one or more');
-    expect(multiSelect).toBeTruthy();
-
-    fireEvent.click(multiSelect);
-
-    const checkbox = screen.getByRole('checkbox', {
-      name: mockField.displayNameForGenerate(),
-    });
-    expect(checkbox).toBeTruthy();
-
-    fireEvent.click(checkbox);
-
-    const nextButton = screen.getByRole('button', { name: /next/i });
-    expect(nextButton).toBeTruthy();
-
-    fireEvent.click(nextButton);
-
-    const createStepParagraph = screen.getByText('Edit each field to change', {
-      exact: false,
-    });
-    expect(createStepParagraph).toBeTruthy();
-
-    const sendToBrazeButtonCreateStep = screen.getByRole('button', { name: /Send to Braze/i });
-    expect(sendToBrazeButtonCreateStep).toBeTruthy();
-
-    fireEvent.click(sendToBrazeButtonCreateStep);
-
-    const draftStepParagraph = screen.getByText('This entry has not yet been published', {
-      exact: false,
-    });
-    expect(draftStepParagraph).toBeTruthy();
-
-    const sendToBrazeButtonDraftStep = screen.getByRole('button', { name: /Send to Braze/i });
-    expect(sendToBrazeButtonDraftStep).toBeTruthy();
-
-    fireEvent.click(sendToBrazeButtonDraftStep);
+    await navigateToFinalStep();
 
     const successStepParagraph = await screen.findByText(
       'You can view them from your Braze dashboard by navigating to',
@@ -191,4 +156,92 @@ describe('Dialog component', () => {
     );
     expect(successStepParagraph).toBeTruthy();
   });
+
+  it('Shows ClientErrorStep when there are client errors', async () => {
+    mockSdk.parameters.invocation = {
+      mode: 'create',
+      entryId: 'entryId',
+      contentTypeId: 'contentTypeId',
+      title: 'title',
+    };
+
+    mockCma.appActionCall.createWithResponse.mockResolvedValue({
+      response: {
+        body: JSON.stringify({
+          results: [
+            {
+              fieldId: 'name',
+              success: false,
+              statusCode: 404,
+              message: 'Content block name not found or has no value for field name',
+            },
+            {
+              fieldId: 'lastname',
+              success: false,
+              statusCode: 404,
+              message: 'Content block name not found or has no value for field lastname',
+            },
+          ],
+        }),
+      },
+    });
+
+    render(<Dialog />);
+
+    await navigateToFinalStep();
+
+    await screen.findByText('There was an issue');
+
+    expect(
+      screen.getByText(
+        'Error code [404] - [Content block name not found or has no value for field name]'
+      )
+    ).toBeTruthy();
+    expect(
+      screen.getByText(
+        'Error code [404] - [Content block name not found or has no value for field lastname]'
+      )
+    ).toBeTruthy();
+  });
 });
+
+async function navigateToFinalStep() {
+  await screen.findByText(CREATE_FIELDS_STEP_TEXT, { exact: false });
+
+  const multiSelect = screen.getByText('Select one or more');
+  expect(multiSelect).toBeTruthy();
+
+  fireEvent.click(multiSelect);
+
+  const checkbox = screen.getByRole('checkbox', {
+    name: mockField.displayNameForGenerate(),
+  });
+  expect(checkbox).toBeTruthy();
+
+  fireEvent.click(checkbox);
+
+  const nextButton = screen.getByRole('button', { name: /next/i });
+  expect(nextButton).toBeTruthy();
+
+  fireEvent.click(nextButton);
+
+  const createStepParagraph = screen.getByText('Edit each field to change', {
+    exact: false,
+  });
+  expect(createStepParagraph).toBeTruthy();
+
+  const sendToBrazeButtonCreateStep = screen.getByRole('button', { name: /Send to Braze/i });
+  expect(sendToBrazeButtonCreateStep).toBeTruthy();
+
+  fireEvent.click(sendToBrazeButtonCreateStep);
+
+  const draftStepParagraph = screen.getByText('This entry has not yet been published', {
+    exact: false,
+  });
+  expect(draftStepParagraph).toBeTruthy();
+
+  const sendToBrazeButtonDraftStep = screen.getByRole('button', { name: /Send to Braze/i });
+  expect(sendToBrazeButtonDraftStep).toBeTruthy();
+
+  fireEvent.click(sendToBrazeButtonDraftStep);
+}
