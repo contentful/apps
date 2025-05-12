@@ -24,7 +24,7 @@ const ClientErrorStep = ({ fieldsWithErrors, handleClose }: ClientErrorStepProps
         {fieldsWithErrors
           .filter((field) => field.statusCode !== 500)
           .map((field) => (
-            <Text key={`${field.id}-index`}>
+            <Text key={`${field.fieldId}-index`}>
               Error code [{field.statusCode}] - [{field.message}]
             </Text>
           ))}
