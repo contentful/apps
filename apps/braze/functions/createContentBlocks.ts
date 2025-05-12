@@ -78,6 +78,7 @@ export const handler: FunctionEventHandler<
       results.push({
         fieldId,
         success: false,
+        statusCode: 404,
         message: `Content block name not found or has no value for field ${fieldId}`,
       });
       continue;
