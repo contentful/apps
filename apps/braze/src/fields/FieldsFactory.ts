@@ -30,18 +30,20 @@ export class FieldsFactory {
     this.contentTypes = {};
   }
 
-  public async createFields() {
+  public async getEntry() {
     const response = await this.cma.entry.references({ entryId: this.entryId, include: 5 });
-    const items = resolveResponse(response);
-    const contentType = await this.getContentType(this.entryContentTypeId);
-    return this.createFieldsForEntry(items[0].fields, contentType);
+    return resolveResponse(response)[0];
   }
 
-  private async createFieldsForEntry(
+  public async createFieldsForEntry(
     entryFields: any,
-    contentType: ContentTypeProps,
+    contentType?: ContentTypeProps,
     currentDepth: number = 1
   ): Promise<Field[]> {
+    if (!contentType) {
+      contentType = await this.getContentType(this.entryContentTypeId);
+    }
+
     const fields = [];
     for (const fieldInfo of contentType.fields) {
       if (!this.isReferenceField(fieldInfo) && !this.isReferenceArrayField(fieldInfo)) {

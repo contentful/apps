@@ -53,12 +53,13 @@ const Dialog = () => {
     );
 
     const fetchEntry = async () => {
-      const fields = await new FieldsFactory(
+      const fieldsFactory = new FieldsFactory(
         invocationParams.entryId!,
         invocationParams.contentTypeId!,
         cma
-      ).createFields();
-      fieldsRef.current = fields;
+      );
+      const cmaEntry = await fieldsFactory.getEntry();
+      fieldsRef.current = await fieldsFactory.createFieldsForEntry(cmaEntry.fields);
       const entry = new Entry(
         invocationParams.entryId,
         invocationParams.contentTypeId,
@@ -66,7 +67,9 @@ const Dialog = () => {
         fieldsRef.current,
         sdk.ids.space,
         sdk.ids.environment,
-        sdk.parameters.installation.contentfulApiKey
+        sdk.parameters.installation.contentfulApiKey,
+        cmaEntry.sys.publishedAt,
+        cmaEntry.sys.updatedAt
       );
       setEntry(entry);
     };

@@ -6,10 +6,12 @@ import { InvocationParams } from '../../locations/Dialog';
 import FieldsStep from './FieldsStep';
 import CreateStep from './CreateStep';
 import SuccessStep from './SuccessStep';
-import { FIELDS_STEP } from '../../utils';
+import { EntryStatus, FIELDS_STEP } from '../../utils';
 import { createClient } from 'contentful-management';
+import DraftStep from './DraftStep';
 
 const CREATE_STEP = 'create';
+const DRAFT_STEP = 'draft';
 const SUCCESS_STEP = 'success';
 
 type CreateFlowProps = {
@@ -23,7 +25,7 @@ const CreateFlow = (props: CreateFlowProps) => {
   const { sdk, entry, initialSelectedFields = [] } = props;
   const [step, setStep] = useState(FIELDS_STEP);
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set(initialSelectedFields));
-  const [contentBlockName, setContentBlockName] = useState('');
+  const [contentBlockNames, setContentBlockNames] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const cma = createClient(
@@ -38,6 +40,11 @@ const CreateFlow = (props: CreateFlowProps) => {
   );
 
   const handleCreate = async (contentBlockNames: Record<string, string>) => {
+    if (entry.state !== EntryStatus.Published && step === CREATE_STEP) {
+      setStep(DRAFT_STEP);
+      return;
+    }
+
     setIsSubmitting(true);
 
     const connectedFields = JSON.parse(sdk.parameters.installation.brazeConnectedFields || '{}');
@@ -94,10 +101,18 @@ const CreateFlow = (props: CreateFlowProps) => {
         <CreateStep
           entry={entry}
           selectedFields={selectedFields}
-          contentBlockName={contentBlockName}
-          setContentBlockName={setContentBlockName}
           isSubmitting={isSubmitting}
           handlePreviousStep={() => setStep(FIELDS_STEP)}
+          contentBlockNames={contentBlockNames}
+          setContentBlockNames={setContentBlockNames}
+          handleNextStep={handleCreate}
+        />
+      )}
+      {step === DRAFT_STEP && (
+        <DraftStep
+          isSubmitting={isSubmitting}
+          handlePreviousStep={() => setStep(CREATE_STEP)}
+          contentBlockNames={contentBlockNames}
           handleNextStep={handleCreate}
         />
       )}
