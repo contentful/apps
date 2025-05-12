@@ -311,7 +311,7 @@ describe('FieldsFactory', () => {
     expect(fieldInstance.items[1].fields[0].id).toBe('name');
   });
 
-  it('should limit the recursion depth for nested references based on NESTED_DEPTH constant', async () => {
+  it('qences based on NESTED_DEPTH constant', async () => {
     const max_depth = 5;
 
     // Create mock entries with deep nesting structure
