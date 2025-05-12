@@ -1,4 +1,3 @@
-import console from 'console';
 // Define interfaces
 interface FieldMapping {
   contentfulFieldId: string;
@@ -11,6 +10,7 @@ interface FieldMapping {
   severity: string;
   value: any;
   isAssetField?: boolean;
+  klaviyoImageId?: string;
 }
 
 interface KlaviyoCredentials {
@@ -86,20 +86,7 @@ export class KlaviyoService {
       if (!entryId) {
         throw new Error('Entry ID is missing');
       }
-      // Load klaviyoFieldMappings from entry (JSON string)
-      let klaviyoFieldMappings: any[] = [];
-      if (
-        entry.fields &&
-        entry.fields.klaviyoFieldMappings &&
-        entry.fields.klaviyoFieldMappings['en-US']
-      ) {
-        try {
-          klaviyoFieldMappings = JSON.parse(entry.fields.klaviyoFieldMappings['en-US']);
-        } catch (e) {
-          console.error('Failed to parse klaviyoFieldMappings:', e);
-        }
-      }
-      // If no field mappings provided, fallback to old logic
+      // Only use the fieldMappings argument passed in
       if (!fieldMappings || !Array.isArray(fieldMappings) || fieldMappings.length === 0) {
         const contentData: Record<string, any> = {};
         console.log('No field mappings provided, extracting all available fields from entry');
@@ -155,19 +142,22 @@ export class KlaviyoService {
           try {
             const contentfulFieldId = mapping.contentfulFieldId;
             const klaviyoBlockName = mapping.klaviyoBlockName || contentfulFieldId;
-            let value;
-            if (entry.fields && entry.fields[contentfulFieldId]) {
-              const field = entry.fields[contentfulFieldId];
-              if (typeof field === 'object' && !Array.isArray(field)) {
-                const firstLocale = Object.keys(field)[0];
-                if (firstLocale) {
-                  value = field[firstLocale];
+            // Use mapping.value if present, otherwise fallback to old extraction logic
+            let value = mapping.value;
+            if (value === undefined) {
+              if (entry.fields && entry.fields[contentfulFieldId]) {
+                const field = entry.fields[contentfulFieldId];
+                if (typeof field === 'object' && !Array.isArray(field)) {
+                  const firstLocale = Object.keys(field)[0];
+                  if (firstLocale) {
+                    value = field[firstLocale];
+                  }
+                } else {
+                  value = field;
                 }
-              } else {
-                value = field;
+              } else if (entry[contentfulFieldId] !== undefined) {
+                value = entry[contentfulFieldId];
               }
-            } else if (entry[contentfulFieldId] !== undefined) {
-              value = entry[contentfulFieldId];
             }
             if (value === undefined || value === null || value === '') {
               console.log(`Skipping empty value for field ${contentfulFieldId}`);
@@ -202,7 +192,7 @@ export class KlaviyoService {
                   continue; // Skip this image block if we can't get a valid URL
                 }
                 // Find mapping for this field
-                let mappingObj = klaviyoFieldMappings.find(
+                let mappingObj = fieldMappings.find(
                   (m: any) =>
                     m.contentfulFieldId === contentfulFieldId || m.id === contentfulFieldId
                 );
@@ -253,7 +243,7 @@ export class KlaviyoService {
                     if (mappingObj) {
                       mappingObj.klaviyoImageId = klaviyoImageId;
                     } else {
-                      klaviyoFieldMappings.push({ ...mapping, klaviyoImageId });
+                      fieldMappings.push({ ...mapping, klaviyoImageId });
                     }
                     // Save updated mappings to Contentful
                     if (cma && entryId) {
@@ -266,7 +256,7 @@ export class KlaviyoService {
                         });
                         // 2. Update the field
                         entryToUpdate.fields.klaviyoFieldMappings = {
-                          'en-US': JSON.stringify(klaviyoFieldMappings),
+                          'en-US': JSON.stringify(fieldMappings),
                         };
                         entryToUpdate = await cma.entry.update(
                           {
@@ -475,8 +465,8 @@ export class KlaviyoService {
               block_padding_right: 0,
               block_padding_left: 0,
             },
-            display_options: {},
           },
+          display_options: {},
         };
       } else {
         definition = {
@@ -490,10 +480,11 @@ export class KlaviyoService {
               block_padding_right: 0,
               block_padding_left: 0,
             },
-            display_options: {},
           },
+          display_options: {},
         };
       }
+      // Universal content block data model
       const data = {
         data: {
           type: 'template-universal-content',

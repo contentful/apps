@@ -46,14 +46,19 @@ export const fetchEntrySyncStatus = async (
 ): Promise<SyncStatus | null | boolean> => {
   try {
     const client = sdk.cma;
+    const { privateKey, publicKey } = getApiKeys();
     const parameters = contentTypeId
       ? {
           action: 'syncFetchDetailedStatus',
           data: { entryId, contentTypeId },
+          privateKey,
+          publicKey,
         }
       : {
           action: 'syncFetchStatus',
           data: { entryId },
+          privateKey,
+          publicKey,
         };
     // Validate parameters before making the call
     if (!parameters || typeof parameters !== 'object' || !parameters.action) {
@@ -168,31 +173,25 @@ export const markEntryForSyncViaApi = async (
   entryId: string,
   contentTypeIdOrFieldIds?: string | string[],
   contentTypeName?: string,
-  sdk?: any
+  sdk?: any,
+  extraParams?: Record<string, any>
 ): Promise<boolean> => {
   try {
     const client = sdk.cma;
-    let parameters;
+    const { privateKey, publicKey } = getApiKeys();
+    let parameters: any = {
+      ...(extraParams || {}),
+      entryId,
+      privateKey,
+      publicKey,
+    };
     if (Array.isArray(contentTypeIdOrFieldIds)) {
-      parameters = {
-        action: 'syncMark',
-        data: {
-          entryId,
-          fieldIds: contentTypeIdOrFieldIds,
-        },
-      };
+      parameters.fieldIds = contentTypeIdOrFieldIds;
     } else {
-      parameters = {
-        action: 'syncMark',
-        data: {
-          entryId,
-          contentTypeId: contentTypeIdOrFieldIds,
-          contentTypeName,
-        },
-      };
+      parameters.contentTypeId = contentTypeIdOrFieldIds;
     }
     // Validate parameters before making the call
-    if (!parameters || typeof parameters !== 'object' || !parameters.action) {
+    if (!parameters || typeof parameters !== 'object') {
       logger.error('App Action call missing required parameters:', parameters);
       throw new Error('App Action call missing required parameters');
     }
@@ -202,7 +201,7 @@ export const markEntryForSyncViaApi = async (
     } catch (e) {
       console.log('Sending App Action parameters (raw):', parameters);
     }
-    const result = await client.appActionCall.create(
+    const result = await client.appActionCall.createWithResponse(
       {
         spaceId: sdk.ids.space,
         environmentId: sdk.ids.environment,
@@ -211,10 +210,21 @@ export const markEntryForSyncViaApi = async (
       },
       { parameters }
     );
+    console.log('App Action result:', result);
     if (result.status && result.status >= 400) {
       throw new Error(result.message || `Error ${result.status}`);
     }
-    return true;
+    // Parse the response body if it exists
+    if (result.response && result.response.body) {
+      try {
+        const parsed = JSON.parse(result.response.body);
+        return parsed;
+      } catch (e) {
+        logger.error('Failed to parse app action response body as JSON:', result.response.body, e);
+        return result.response.body;
+      }
+    }
+    return result;
   } catch (error) {
     logger.error('Error marking entry for sync:', error);
     return false;

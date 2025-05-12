@@ -194,44 +194,30 @@ const SidebarComponent = ({
 
       console.log('mappings and sdk', mappings, sdk, sdk.entry.getSys());
 
-      // Set up dialog options
-      const dialogOptions = {
-        width: 800,
-        minHeight: 200,
-        position: 'center' as 'center',
-        title: 'Configure Klaviyo Field Mappings',
-        shouldCloseOnEscapePress: true,
-        shouldCloseOnOverlayClick: true,
+      // Fetch the entry with all locales
+      const localizedEntry = await sdk.cma.entry.get({
+        entryId: sdk.ids.entry,
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
+      });
+
+      // Now open the dialog, passing the fully-localized entry
+      const result = await sdk.dialogs.openCurrentApp({
         parameters: {
-          entryId, // Explicitly include entry ID (string)
-          contentTypeId, // Explicitly include content type ID
+          entry: JSON.parse(JSON.stringify(localizedEntry)),
           fields: validFields,
           preSelectedFields,
-          contentTypeName: sdk.contentType.name,
           showSyncButton: true,
-          privateKey, // Pass the API key to the dialog
-          publicKey, // Pass the company ID to the dialog
-          klaviyoApiKey: privateKey, // Alternative name
-          klaviyoCompanyId: publicKey, // Alternative name
-          spaceId: spaceId || '',
+          contentTypeId,
+          entryId,
+          privateKey,
+          publicKey,
         },
-      };
-
-      // Open dialog to select fields
-      const result = await sdk.dialogs.openCurrentApp(dialogOptions);
+        width: 800,
+      });
 
       if (!result) {
-        logger.log('[Sidebar] Dialog closed without result, attempting to recover last selections');
-        // Try to get the last selections from window._klaviyoDialogResult
-        const dialogResult = (window as any)._klaviyoDialogResult;
-        if (dialogResult && dialogResult.mappings && Array.isArray(dialogResult.mappings)) {
-          setMappings(dialogResult.mappings);
-          const entryId = sdk.ids.entry;
-          await setEntryKlaviyoFieldMappings(sdk, entryId, dialogResult.mappings);
-          setShowSuccess(true);
-          setTimeout(() => setShowSuccess(false), 3000);
-          return;
-        }
+        logger.log('[Sidebar] Dialog closed without result');
         return;
       }
 
@@ -299,7 +285,6 @@ const SidebarComponent = ({
           );
           if (syncResult.success) {
             setShowSuccess(true);
-            setSyncMessage('Successfully synced to Klaviyo!');
             setTimeout(() => setShowSuccess(false), 3000);
           } else {
             setSyncMessage(
@@ -425,5 +410,6 @@ const getContentTypeFields = async (sdk: any, contentTypeId: string) => {
       id: field.id,
       name: field.name,
       type: field.type,
+      localized: field.localized,
     }));
 };

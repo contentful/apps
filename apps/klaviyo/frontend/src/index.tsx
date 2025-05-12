@@ -3,6 +3,7 @@ import { render } from 'react-dom';
 import { GlobalStyles } from '@contentful/f36-components';
 import { init, locations } from '@contentful/app-sdk';
 import { SDKProvider } from '@contentful/react-apps-toolkit';
+import './global.css';
 
 // Import your components
 import ConfigScreen from './locations/ConfigScreen';
@@ -169,12 +170,11 @@ init((sdk) => {
     return;
   }
 
-  const entry = (sdk as any).entry || {};
   const mappings = (sdk as any).parameters?.installation?.fieldMappings || [];
   render(
     <SDKProvider>
       <GlobalStyles />
-      <ComponentLocation entry={entry} mappings={mappings} />
+      <ComponentLocation mappings={mappings} />
     </SDKProvider>,
     root
   );

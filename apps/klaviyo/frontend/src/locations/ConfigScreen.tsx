@@ -130,6 +130,38 @@ const storeApiKeysInLocalStorage = (publicKey: string, privateKey: string) => {
   }
 };
 
+// Helper to ensure klaviyoFieldMappings entry exists
+const ensureKlaviyoFieldMappingsEntry = async (sdk: ConfigAppSDK) => {
+  const cma = sdk.cma;
+  const spaceId = sdk.ids.space;
+  const environmentId = sdk.ids.environment;
+  // Try to find the entry by content type
+  const entries = await cma.entry.getMany({
+    spaceId,
+    environmentId,
+    content_type: 'klaviyoFieldMappings',
+    limit: 1,
+  } as any);
+  if (entries.items && entries.items.length > 0) {
+    return entries.items[0];
+  }
+  // If not found, create it
+  const defaultLocale = sdk.locales?.default || 'en-US';
+  const entry = await cma.entry.create(
+    { spaceId, environmentId, contentTypeId: 'klaviyoFieldMappings' } as any,
+    {
+      fields: {
+        mappings: {
+          [defaultLocale]: JSON.stringify([]),
+        },
+      },
+    }
+  );
+  // Optionally publish the entry
+  await cma.entry.publish({ entryId: entry.sys.id, spaceId, environmentId }, entry);
+  return entry;
+};
+
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
   const [publicKey, setPublicKey] = useState('');
@@ -252,6 +284,9 @@ const ConfigScreen = () => {
       console.log('selectedContentTypes at save:', selectedContentTypes);
       console.log('filteredSelectedContentTypes at save:', filteredSelectedContentTypes);
       console.log('targetState.EditorInterface at save:', editorInterface);
+      // Ensure klaviyoFieldMappings entry exists before saving config
+      await ensureKlaviyoFieldMappingsEntry(sdk);
+      console.log('klaviyoFieldMappings entry ensured');
       return {
         parameters,
         targetState: {

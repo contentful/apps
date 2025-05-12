@@ -297,7 +297,7 @@ export class KlaviyoService {
    */
   async listUniversalContentBlocks(params?: any): Promise<any[]> {
     try {
-      logger.log('Listing universal content blocks with params:', params);
+      logger.log('Listing universal content with params:', params);
 
       // Format query params according to Klaviyo API requirements
       const queryParams: Record<string, any> = {};

@@ -29,10 +29,30 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   context: FunctionEventContext
 ) => {
   try {
-    console.log('proxyRequest App Action called', event);
-    const { endpoint, method, data, params, privateKey, publicKey } = event.body;
+    console.log('proxyRequest App Action called', event.body);
+    let { endpoint, method, data, params, privateKey, publicKey } = event.body;
+    // Parse data and params if they are strings
+    try {
+      console.log('data', data);
+      if (typeof data === 'string') {
+        data = JSON.parse(data);
+        console.log('Parsed data:', data);
+      }
+    } catch (e) {
+      console.error('Failed to parse data:', e);
+    }
+    try {
+      if (typeof params === 'string') {
+        params = JSON.parse(params);
+        console.log('Parsed params:', params);
+      }
+    } catch (e) {
+      console.error('Failed to parse params:', e);
+    }
+    console.log('privateKey', privateKey, 'endpoint', endpoint);
     if (!privateKey || !endpoint) return { response: { error: 'Missing required parameters' } };
     const baseEndpoint = endpoint.split('/')[0];
+    console.log('baseEndpoint', baseEndpoint, !ALLOWED_ENDPOINTS.includes(baseEndpoint));
     if (!ALLOWED_ENDPOINTS.includes(baseEndpoint))
       return { response: { error: 'Endpoint not allowed' } };
     const formattedEndpoint = endpoint.endsWith('/') ? endpoint : `${endpoint}/`;
@@ -43,7 +63,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
         'Content-Type': 'application/json',
         Accept: 'application/json',
         revision: KLAVIYO_API_REVISION,
-        Authorization: `${publicKey}:${privateKey}`,
+        Authorization: `Klaviyo-API-Key ${privateKey}`,
       },
     };
     if (fetchOptions.method === 'GET' && params) {
@@ -51,13 +71,18 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     } else if (fetchOptions.method !== 'GET') {
       fetchOptions.body = JSON.stringify(data);
     }
+    console.log('fetching', url, fetchOptions);
     const response = await fetch(url, fetchOptions);
     if (!response.ok) {
-      throw new Error(`Klaviyo API error: ${response.status}`);
+      throw new Error(
+        `Klaviyo API error: ${response.status}. ${response.statusText} ${JSON.stringify(
+          response.body
+        )} ${JSON.stringify(response)}`
+      );
     }
-    return {
-      response: response.json(),
-    };
+    const responseData = await response.json();
+    console.log('Returning from proxy with:', responseData);
+    return responseData;
   } catch (error) {
     console.error('proxyRequest App Action error:', error);
     return {

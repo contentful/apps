@@ -78,37 +78,96 @@ export const getFieldMappings = async (sdk: SidebarExtensionSDK): Promise<any[]>
 };
 
 /**
- * Get klaviyo field mappings from a Contentful entry (JSON-stringified array of objects)
+ * Get klaviyo field mappings for a specific entry from the central klaviyoFieldMappings entry.
  * @param sdk The Contentful SDK instance
- * @param entryId The ID of the entry
- * @returns Array of field mappings or empty array if none found
+ * @param entryId The ID of the entry whose mappings you want
+ * @returns Array of field mappings for the entryId, or empty array if none found
  */
-export const getEntryKlaviyoFieldMappings = async (sdk: any, entryId: string): Promise<any[]> => {
+export const getEntryKlaviyoFieldMappings = async (
+  sdkOrCma: any,
+  entryId: string,
+  spaceId?: string,
+  environmentId?: string
+): Promise<any[]> => {
+  console.log('getEntryKlaviyoFieldMappings called with:', { spaceId, environmentId });
   try {
-    const entry = await sdk.cma.entry.get({
-      entryId,
-      spaceId: sdk.ids.space,
-      environmentId: sdk.ids.environment,
-    });
-    const raw = entry.fields?.klaviyoFieldMappings?.['en-US'];
-    if (!raw) return [];
-    try {
-      return JSON.parse(raw);
-    } catch (e) {
-      logger.error('Failed to parse klaviyoFieldMappings JSON:', e);
+    let cma: any;
+    let defaultLocale: string | undefined;
+    // Detect if this is the App SDK or plain CMA client
+    if (sdkOrCma.cma && sdkOrCma.ids) {
+      // App SDK
+      spaceId = sdkOrCma.ids.space;
+      environmentId = sdkOrCma.ids.environment;
+      cma = sdkOrCma.cma;
+      defaultLocale = sdkOrCma.locales?.default || 'en-US';
+    } else {
+      // Plain CMA client (lambda/app action)
+      cma = sdkOrCma;
+      // Use passed-in values if available
+      spaceId = spaceId || process.env.CONTENTFUL_SPACE_ID;
+      environmentId = environmentId || process.env.CONTENTFUL_ENVIRONMENT_ID || 'master';
+      defaultLocale = 'en-US'; // fallback
+    }
+    if (!spaceId || !environmentId) {
+      console.error('Missing spaceId or environmentId in getEntryKlaviyoFieldMappings');
       return [];
     }
+    // Find the klaviyoFieldMappings entries
+    const entries = await cma.entry.getMany({
+      spaceId,
+      environmentId,
+      content_type: 'klaviyoFieldMappings',
+      limit: 100,
+    } as any);
+    console.log('entries from getEntryKlaviyoFieldMappings', entries);
+    // Find the first entry with a valid stringified mappings field
+    const localeKey = defaultLocale || 'en-US';
+    const mappingEntry = entries.items.find(
+      (item: any) =>
+        item.fields &&
+        item.fields.mappings &&
+        typeof (item.fields.mappings[localeKey] || Object.values(item.fields.mappings)[0]) ===
+          'string'
+    );
+    if (!mappingEntry) {
+      console.warn('No valid klaviyoFieldMappings entry found');
+      return [];
+    }
+    const raw = mappingEntry.fields?.mappings;
+    if (!raw) return [];
+    let allMappings: any[] = [];
+    try {
+      let mappingsValue = raw[localeKey] || Object.values(raw)[0];
+      if (typeof mappingsValue === 'string') {
+        allMappings = JSON.parse(mappingsValue);
+      } else if (Array.isArray(mappingsValue)) {
+        allMappings = mappingsValue;
+      } else if (typeof mappingsValue === 'object' && mappingsValue !== null) {
+        allMappings = [mappingsValue];
+      } else {
+        allMappings = [];
+      }
+      if (!Array.isArray(allMappings)) {
+        console.error('klaviyoFieldMappings.mappings is not an array:', allMappings);
+        allMappings = [];
+      }
+    } catch (e) {
+      console.error('Failed to parse klaviyoFieldMappings.mappings JSON:', e);
+      allMappings = [];
+    }
+    // Filter for the requested entryId
+    return allMappings.filter((m) => m.entryId === entryId);
   } catch (error) {
-    logger.error('Error fetching entry for klaviyoFieldMappings:', error);
+    console.error('Error fetching klaviyoFieldMappings entry:', error);
     return [];
   }
 };
 
 /**
- * Set klaviyo field mappings on a Contentful entry (as JSON-stringified array of objects)
+ * Set klaviyo field mappings for a specific entry in the central klaviyoFieldMappings entry.
  * @param sdk The Contentful SDK instance
  * @param entryId The ID of the entry
- * @param mappings Array of field mapping objects
+ * @param mappings Array of field mapping objects for this entry
  */
 export const setEntryKlaviyoFieldMappings = async (
   sdk: any,
@@ -116,18 +175,110 @@ export const setEntryKlaviyoFieldMappings = async (
   mappings: any[]
 ): Promise<void> => {
   try {
-    const entry = await sdk.cma.entry.get({
-      entryId,
+    // Fetch all klaviyoFieldMappings entries
+    const entries = await sdk.cma.entry.getMany({
       spaceId: sdk.ids.space,
       environmentId: sdk.ids.environment,
-    });
-    entry.fields = entry.fields || {};
-    entry.fields.klaviyoFieldMappings = { 'en-US': JSON.stringify(mappings) };
+      content_type: 'klaviyoFieldMappings',
+      limit: 100,
+    } as any);
+    // Use the first valid entry
+    let mappingEntry = entries.items.find(
+      (entry: any) =>
+        entry.sys.contentType &&
+        entry.sys.contentType.sys.id === 'klaviyoFieldMappings' &&
+        entry.fields &&
+        entry.fields.mappings
+    );
+    // If not found, create it
+    if (!mappingEntry) {
+      const defaultLocale = sdk.locales?.default || 'en-US';
+      mappingEntry = await sdk.cma.entry.create(
+        {
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environment,
+          contentTypeId: 'klaviyoFieldMappings',
+        } as any,
+        {
+          fields: {
+            mappings: {
+              [defaultLocale]: JSON.stringify([]),
+            },
+          },
+        }
+      );
+      // Optionally publish the entry
+      await sdk.cma.entry.publish(
+        {
+          entryId: mappingEntry.sys.id,
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environment,
+        },
+        mappingEntry
+      );
+      // Re-fetch the entry to get the latest sys.version
+      mappingEntry = await sdk.cma.entry.get({
+        entryId: mappingEntry.sys.id,
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
+      });
+    }
+    // Defensive: ensure we have the correct entry type
+    if (
+      !mappingEntry.sys.contentType ||
+      mappingEntry.sys.contentType.sys.id !== 'klaviyoFieldMappings'
+    ) {
+      throw new Error('Could not find or create a klaviyoFieldMappings entry.');
+    }
+    // Parse existing mappings
+    let allMappings: any[] = [];
+    if (mappingEntry.fields && mappingEntry.fields.mappings) {
+      try {
+        const mappingsField = mappingEntry.fields.mappings;
+        let mappingsValue =
+          typeof mappingsField === 'string'
+            ? mappingsField
+            : mappingsField[sdk.locales?.default || 'en-US'] || Object.values(mappingsField)[0];
+        if (typeof mappingsValue === 'string') {
+          allMappings = JSON.parse(mappingsValue);
+        } else if (Array.isArray(mappingsValue)) {
+          allMappings = mappingsValue;
+        } else if (typeof mappingsValue === 'object' && mappingsValue !== null) {
+          allMappings = [mappingsValue];
+        } else {
+          allMappings = [];
+        }
+        if (!Array.isArray(allMappings)) {
+          logger.error('klaviyoFieldMappings.mappings is not an array:', allMappings);
+          allMappings = [];
+        }
+      } catch (e) {
+        logger.error('Failed to parse klaviyoFieldMappings.mappings JSON:', e);
+        allMappings = [];
+      }
+    }
+    // Remove old mappings for this entryId
+    const filtered = allMappings.filter((m) => m.entryId !== entryId);
+    // Add new mappings (ensure each has entryId)
+    const newMappings = mappings.map((m) => ({ ...m, entryId }));
+    const updated = [...filtered, ...newMappings];
+    // Update the entry (localized field, pass full sys object)
     await sdk.cma.entry.update(
-      { entryId, spaceId: sdk.ids.space, environmentId: sdk.ids.environment },
-      entry
+      {
+        entryId: mappingEntry.sys.id,
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
+      },
+      {
+        sys: mappingEntry.sys,
+        fields: {
+          mappings: {
+            [sdk.locales?.default || 'en-US']: JSON.stringify(updated),
+          },
+        },
+      }
     );
   } catch (error) {
-    logger.error('Error setting klaviyoFieldMappings on entry:', error);
+    logger.error('Error setting klaviyoFieldMappings in central entry:', error);
   }
 };

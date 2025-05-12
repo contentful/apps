@@ -38,6 +38,28 @@ const FieldMapper: React.FC = () => {
   const [availableProperties, setAvailableProperties] = useState<string[]>([]);
   const [existingMappings, setExistingMappings] = useState<FieldData[]>([]);
 
+  // Utility to check if the field is boolean or reference
+  const fieldId = sdk.field.id;
+  const fieldDef = sdk.contentType.fields.find((f: any) => f.id === fieldId);
+  console.log('Field definition for', fieldId, fieldDef);
+
+  const isBooleanOrReferenceField = (() => {
+    if (!fieldDef) return false;
+    // Boolean
+    if (fieldDef.type === 'Boolean') return true;
+    // Entry reference (single)
+    if (fieldDef.type === 'Link' && fieldDef.linkType === 'Entry') return true;
+    // Array of entry references
+    if (
+      fieldDef.type === 'Array' &&
+      fieldDef.items &&
+      fieldDef.items.type === 'Link' &&
+      fieldDef.items.linkType === 'Entry'
+    )
+      return true;
+    return false;
+  })();
+
   // Profile properties (you can expand this list)
   const PROFILE_PROPERTIES = [
     'email',
@@ -231,7 +253,7 @@ const FieldMapper: React.FC = () => {
                 name="mapping-type"
                 value={mappingType}
                 onChange={handleTypeChange}
-                isDisabled={isLoading}>
+                isDisabled={isLoading || isBooleanOrReferenceField}>
                 <Select.Option value="profile">Profile Property</Select.Option>
                 <Select.Option value="event">Event Property</Select.Option>
                 <Select.Option value="custom">Custom Property</Select.Option>
@@ -246,7 +268,7 @@ const FieldMapper: React.FC = () => {
                   name="klaviyo-property"
                   value={klaviyoProperty}
                   onChange={(e) => setKlaviyoProperty(e.target.value)}
-                  isDisabled={isLoading}>
+                  isDisabled={isLoading || isBooleanOrReferenceField}>
                   <Select.Option value="">-- Select a property --</Select.Option>
                   {availableProperties.map((prop) => (
                     <Select.Option key={prop} value={prop}>
@@ -264,7 +286,7 @@ const FieldMapper: React.FC = () => {
                   value={klaviyoProperty}
                   onChange={(e) => setKlaviyoProperty(e.target.value)}
                   placeholder="Enter custom property name"
-                  isDisabled={isLoading}
+                  isDisabled={isLoading || isBooleanOrReferenceField}
                 />
               </FormControl>
             )}
@@ -275,14 +297,14 @@ const FieldMapper: React.FC = () => {
                   <Button
                     variant="primary"
                     onClick={saveMapping}
-                    isDisabled={isLoading || !klaviyoProperty}
+                    isDisabled={isLoading || !klaviyoProperty || isBooleanOrReferenceField}
                     isLoading={isLoading}>
                     Update Mapping
                   </Button>
                   <Button
                     variant="negative"
                     onClick={removeMapping}
-                    isDisabled={isLoading}
+                    isDisabled={isLoading || isBooleanOrReferenceField}
                     isLoading={isLoading}>
                     Remove Mapping
                   </Button>
@@ -291,7 +313,7 @@ const FieldMapper: React.FC = () => {
                 <Button
                   variant="primary"
                   onClick={saveMapping}
-                  isDisabled={isLoading || !klaviyoProperty}
+                  isDisabled={isLoading || !klaviyoProperty || isBooleanOrReferenceField}
                   isLoading={isLoading}>
                   Save Mapping
                 </Button>

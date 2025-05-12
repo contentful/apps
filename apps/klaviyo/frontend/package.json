@@ -10,6 +10,7 @@
     "@contentful/f36-tokens": "^4.0.0",
     "@contentful/node-apps-toolkit": "^3.13.0",
     "@contentful/react-apps-toolkit": "1.2.16",
+    "@contentful/rich-text-html-renderer": "^17.0.0",
     "contentful-management": "10.46.4",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

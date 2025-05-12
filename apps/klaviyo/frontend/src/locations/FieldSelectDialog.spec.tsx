@@ -51,13 +51,11 @@ vi.mock('@testing-library/react', async () => {
     queryByText: vi
       .fn()
       .mockImplementation((text) => (text === 'Published' ? null : { textContent: text })),
-    getByRole: vi
-      .fn()
-      .mockImplementation((role, options) => ({
-        role,
-        name: options?.name,
-        toBeInTheDocument: () => true,
-      })),
+    getByRole: vi.fn().mockImplementation((role, options) => ({
+      role,
+      name: options?.name,
+      toBeInTheDocument: () => true,
+    })),
     findByText: vi.fn().mockImplementation((text) => Promise.resolve({ textContent: text })),
   };
 
@@ -90,7 +88,7 @@ describe('Field Select Dialog component', () => {
   });
 
   it.skip('renders the field selection dialog', async () => {
-    render(<FieldSelectDialog entry={{}} mappings={[]} />);
+    render(<FieldSelectDialog mappings={[]} />);
 
     // Check that the component renders with expected title
     expect(screen.getByText('Select Fields to Map to Klaviyo')).toBeInTheDocument();
@@ -101,14 +99,14 @@ describe('Field Select Dialog component', () => {
   });
 
   it.skip('filters out unsupported field types', async () => {
-    render(<FieldSelectDialog entry={{}} mappings={[]} />);
+    render(<FieldSelectDialog mappings={[]} />);
 
     // Boolean fields should not be included in select options
     expect(screen.queryByText('Published')).not.toBeInTheDocument();
   });
 
   it.skip('selects fields and submits', async () => {
-    render(<FieldSelectDialog entry={{}} mappings={[]} />);
+    render(<FieldSelectDialog mappings={[]} />);
 
     // Select the title field
     const titleCheckbox = screen.getByText('Title');
@@ -123,7 +121,7 @@ describe('Field Select Dialog component', () => {
   });
 
   it.skip('selects an image field and submits', async () => {
-    render(<FieldSelectDialog entry={{}} mappings={[]} />);
+    render(<FieldSelectDialog mappings={[]} />);
 
     // Select the image field
     const imageCheckbox = screen.getByText('Featured Image');
@@ -138,7 +136,7 @@ describe('Field Select Dialog component', () => {
   });
 
   it.skip('allows canceling the dialog', async () => {
-    render(<FieldSelectDialog entry={{}} mappings={[]} />);
+    render(<FieldSelectDialog mappings={[]} />);
 
     // Click the cancel button
     const cancelButton = screen.getByRole('button', { name: /cancel/i });

@@ -46,7 +46,7 @@ const App = () => {
       if (sdk.location.is(location)) {
         const entry = (sdk as any).entry || {};
 
-        return <Component mappings={mappings} entry={entry} />;
+        return <Component mappings={mappings} />;
       }
     }
     return null;

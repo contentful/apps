@@ -16,7 +16,6 @@ import {
   Badge,
   Checkbox,
 } from '@contentful/f36-components';
-import logger from '../utils/logger';
 import {
   getEntryKlaviyoFieldMappings,
   setEntryKlaviyoFieldMappings,
@@ -47,6 +46,7 @@ interface ExtendedFieldData extends FieldData {
   fields?: Array<{ id: string; name: string }>;
   klaviyoBlockName?: string;
   updated?: string;
+  locale?: string;
 }
 
 // Define interface for field items
@@ -93,6 +93,10 @@ export const FieldMappingScreen: React.FC = () => {
   const [modalContentTypeId, setModalContentTypeId] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [availableLocales, setAvailableLocales] = useState<string[]>([]);
+  const [selectedLocales, setSelectedLocales] = useState<string[]>([]);
+  // Add step state for modal navigation
+  const [modalStep, setModalStep] = useState<number>(1);
 
   // Group mappings by contentTypeId (or another unique entry identifier)
   const groupedMappings: Record<string, ExtendedFieldData[]> = React.useMemo(() => {
@@ -106,8 +110,28 @@ export const FieldMappingScreen: React.FC = () => {
 
   // Count of grouped entries
   const groupedEntries = Object.values(groupedMappings);
-  const connectedCount = groupedEntries.length;
+  // Calculate the number of unique entries with at least one mapping
+  const connectedEntryIds = React.useMemo(() => {
+    return Array.from(
+      new Set(
+        allEntryMappings.filter((e) => e.mappings && e.mappings.length > 0).map((e) => e.entryId)
+      )
+    );
+  }, [allEntryMappings]);
+  const connectedCount = connectedEntryIds.length;
   const maxCount = 25;
+
+  // Build a map from field ID to array of mapped locales for the current entry
+  const fieldLocaleMap: Record<string, string[]> = React.useMemo(() => {
+    const map: Record<string, string[]> = {};
+    (selectedEntryGroup || []).forEach((m) => {
+      if (!map[m.id]) map[m.id] = [];
+      if (m.locale && !map[m.id].includes(m.locale)) {
+        map[m.id].push(m.locale);
+      }
+    });
+    return map;
+  }, [selectedEntryGroup]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -117,7 +141,6 @@ export const FieldMappingScreen: React.FC = () => {
         // Only load mappings if an entry is selected
         if (selectedEntryId) {
           const entryMappings = await getEntryKlaviyoFieldMappings(sdk, selectedEntryId);
-          logger.log('[FieldMappingScreen] Loaded mappings from entry:', entryMappings);
           setMappings(entryMappings);
         } else {
           setMappings([]);
@@ -147,13 +170,13 @@ export const FieldMappingScreen: React.FC = () => {
             });
           });
         } catch (ctError) {
-          logger.warn('[FieldMappingScreen] Failed to load content type names:', ctError);
+          console.warn('[FieldMappingScreen] Failed to load content type names:', ctError);
         }
 
         setContentTypes(ctNames);
         setAvailableContentTypes(contentTypesList);
       } catch (error) {
-        logger.error('[FieldMappingScreen] Error loading mappings:', error);
+        console.error('[FieldMappingScreen] Error loading mappings:', error);
       } finally {
         setIsLoading(false);
       }
@@ -185,11 +208,12 @@ export const FieldMappingScreen: React.FC = () => {
         const fields = contentType.fields.map((field) => ({
           id: field.id,
           name: field.name,
-          type: field.type, // Include the field type
+          type: field.type,
+          localized: field.localized,
         }));
 
         setAvailableFields(fields);
-        logger.log(`Loaded fields for content type ${selectedContentType}:`, fields);
+        console.log(`Loaded fields for content type ${selectedContentType}:`, fields);
 
         // Get existing mappings for this content type
         const existingMappingsByField = mappings
@@ -202,13 +226,13 @@ export const FieldMappingScreen: React.FC = () => {
         // Pre-select already mapped fields
         if (Object.keys(existingMappingsByField).length > 0) {
           setSelectedFields(Object.keys(existingMappingsByField));
-          logger.log(`Preselected ${Object.keys(existingMappingsByField).length} mapped fields`);
+          console.log(`Preselected ${Object.keys(existingMappingsByField).length} mapped fields`);
         } else {
           setSelectedFields([]);
-          logger.log('No existing mappings found for content type');
+          console.log('No existing mappings found for content type');
         }
       } catch (error) {
-        logger.error('Error loading fields:', error);
+        console.error('Error loading fields:', error);
         setAvailableFields([]);
         setSelectedFields([]);
       }
@@ -229,7 +253,7 @@ export const FieldMappingScreen: React.FC = () => {
           environmentId: sdk.ids.environment,
           spaceId: space.sys.id,
         });
-        logger.log('Fetching ALL entries in env:', environment.sys.id);
+        console.log('Fetching ALL entries in env:', environment.sys.id);
         // Fetch all entries (up to 1000 for now)
         const entriesResponse = await sdk.cma.entry.getMany({
           spaceId: space.sys.id,
@@ -238,7 +262,7 @@ export const FieldMappingScreen: React.FC = () => {
             limit: 1000,
           },
         });
-        logger.log('All entries response:', entriesResponse.items);
+        console.log('All entries response:', entriesResponse.items);
         setEntries(
           entriesResponse.items.map((entry: any) => ({
             id: entry.sys.id,
@@ -251,7 +275,7 @@ export const FieldMappingScreen: React.FC = () => {
           }))
         );
       } catch (error) {
-        logger.error('Error loading all entries:', error);
+        console.error('Error loading all entries:', error);
         setEntries([]);
         setSyncMessage('Error loading entries');
       } finally {
@@ -310,8 +334,16 @@ export const FieldMappingScreen: React.FC = () => {
     };
   }, [dropdownOpen]);
 
+  // Helper to determine if any selected field is localized
+  const anySelectedFieldLocalized = React.useMemo(() => {
+    return checkedFields.some((fieldId) => {
+      const field = modalAvailableFields.find((f) => f.id === fieldId);
+      return field && (field as any).localized;
+    });
+  }, [checkedFields, modalAvailableFields]);
+
   return (
-    <Box style={{ maxWidth: '1000px', margin: '40px auto' }}>
+    <Box style={{ maxWidth: '1000px', margin: '40px auto', padding: 0 }}>
       <Flex justifyContent="space-between" alignItems="center" style={{ marginBottom: 24 }}>
         <Box>
           <Heading as="h2" marginBottom="none">
@@ -329,55 +361,66 @@ export const FieldMappingScreen: React.FC = () => {
             <TableRow>
               <TableCell>Entry name</TableCell>
               <TableCell>Content type</TableCell>
-              <TableCell>Connected fields</TableCell>
               <TableCell>Updated</TableCell>
               <TableCell>Status</TableCell>
+              <TableCell>Connected fields</TableCell>
+              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>
             {entries.map((entry, idx) => {
               const entryMappings =
                 allEntryMappings.find((e) => e.entryId === entry.id)?.mappings || [];
+              const openModalForEntry = async () => {
+                // Fetch all fields for this entry's content type
+                const space = await sdk.cma.space.get({});
+                const contentType = await sdk.cma.contentType.get({
+                  spaceId: space.sys.id,
+                  environmentId: sdk.ids.environment,
+                  contentTypeId: entry.contentTypeId,
+                });
+                const allFields = contentType.fields.map((field: any) => ({
+                  id: field.id,
+                  name: field.name,
+                  type: field.type,
+                  localized: field.localized,
+                }));
+                setModalAvailableFields(allFields);
+                // Fetch locales
+                const environment = await sdk.cma.environment.get({
+                  environmentId: sdk.ids.environment,
+                  spaceId: space.sys.id,
+                });
+                const localesResponse = await sdk.cma.locale.getMany({
+                  spaceId: space.sys.id,
+                  environmentId: environment.sys.id,
+                });
+                const locales = localesResponse.items.map((locale: any) => locale.code);
+                // Determine all mapped locales for this entry
+                const mappedLocales = Array.from(
+                  new Set(entryMappings.map((f) => f.locale).filter(Boolean))
+                );
+                setAvailableLocales(locales);
+                setSelectedLocales(
+                  mappedLocales.length > 0 ? mappedLocales : locales.length > 0 ? [locales[0]] : []
+                );
+                // Get mapped field IDs for this entry
+                const mappedFieldIds = entryMappings.map((f) => f.id);
+                // Normalize IDs for comparison
+                const normalize = (id: string) => id.trim().toLowerCase();
+                const checked = allFields
+                  .map((f) => f.id)
+                  .filter((id) => mappedFieldIds.map(normalize).includes(normalize(id)));
+                setCheckedFields(checked);
+                setSelectedEntryGroup(entryMappings);
+                setModalEntryId(entry.id);
+                // Delay opening modal to ensure state is set
+                setTimeout(() => setIsFieldsModalOpen(true), 0);
+              };
               return (
-                <TableRow
-                  key={entry.id}
-                  style={{ cursor: 'pointer' }}
-                  onClick={async () => {
-                    // Fetch all fields for this entry's content type
-                    const space = await sdk.cma.space.get({});
-                    const contentType = await sdk.cma.contentType.get({
-                      spaceId: space.sys.id,
-                      environmentId: sdk.ids.environment,
-                      contentTypeId: entry.contentTypeId,
-                    });
-                    const allFields = contentType.fields.map((field: any) => ({
-                      id: field.id,
-                      name: field.name,
-                      type: field.type,
-                    }));
-                    setModalAvailableFields(allFields);
-                    // Get mapped field IDs for this entry
-                    const mappedFieldIds = entryMappings.map((f) => f.id);
-                    // Debug logging
-                    console.log(
-                      'Available field IDs:',
-                      allFields.map((f) => f.id)
-                    );
-                    console.log('Mapped field IDs:', mappedFieldIds);
-                    // Normalize IDs for comparison
-                    const normalize = (id: string) => id.trim().toLowerCase();
-                    const checked = allFields
-                      .map((f) => f.id)
-                      .filter((id) => mappedFieldIds.map(normalize).includes(normalize(id)));
-                    setCheckedFields(checked);
-                    setSelectedEntryGroup(entryMappings);
-                    setModalEntryId(entry.id);
-                    // Delay opening modal to ensure state is set
-                    setTimeout(() => setIsFieldsModalOpen(true), 0);
-                  }}>
+                <TableRow key={entry.id} style={{ cursor: 'pointer' }} onClick={openModalForEntry}>
                   <TableCell>{entry.title}</TableCell>
                   <TableCell>{contentTypes[entry.contentTypeId] || entry.contentTypeId}</TableCell>
-                  <TableCell>{entryMappings.length}</TableCell>
                   <TableCell>Just now</TableCell>
                   <TableCell>
                     <Badge
@@ -385,6 +428,18 @@ export const FieldMappingScreen: React.FC = () => {
                       style={{ textTransform: 'capitalize' }}>
                       {idx % 2 === 0 ? 'Published' : 'Draft'}
                     </Badge>
+                  </TableCell>
+                  <TableCell>{entryMappings.length}</TableCell>
+                  <TableCell>
+                    <Button
+                      size="small"
+                      variant="secondary"
+                      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                        e.stopPropagation();
+                        openModalForEntry();
+                      }}>
+                      View fields
+                    </Button>
                   </TableCell>
                 </TableRow>
               );
@@ -394,6 +449,7 @@ export const FieldMappingScreen: React.FC = () => {
       </Box>
       {/* Modal for connected fields */}
       <Modal
+        style={{ padding: 0 }}
         isShown={isFieldsModalOpen}
         onClose={() => setIsFieldsModalOpen(false)}
         size="medium"
@@ -405,113 +461,272 @@ export const FieldMappingScreen: React.FC = () => {
               // Debug log for checkedFields in modal render
               console.log('Rendering modal, checkedFields:', checkedFields);
               return (
-                <Box>
-                  <Flex
-                    justifyContent="space-between"
-                    alignItems="center"
-                    style={{ marginBottom: 16 }}>
-                    <Flex gap="spacingL" alignItems="center">
-                      <Box>
-                        <Text fontWeight="fontWeightMedium">Entry name: </Text>
-                        <Text>{entries.find((e) => e.id === modalEntryId)?.title || ''}</Text>
-                      </Box>
-                      <Box>
-                        <Text fontWeight="fontWeightMedium">Connected fields: </Text>
-                        <Text>{checkedFields.length}</Text>
-                      </Box>
-                    </Flex>
-                    <Button variant="secondary" size="small" style={{ alignSelf: 'flex-end' }}>
-                      View entry
-                    </Button>
-                  </Flex>
-                  <Box style={{ border: '1px solid #e5ebed', borderRadius: 6, marginTop: 16 }}>
-                    <Table style={{ minWidth: 400, margin: 0 }}>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell style={{ width: 48 }}>
-                            <Checkbox
-                              isChecked={
-                                modalAvailableFields.length > 0 &&
-                                checkedFields.length === modalAvailableFields.length
-                              }
-                              isIndeterminate={
-                                checkedFields.length > 0 &&
-                                checkedFields.length < modalAvailableFields.length
-                              }
-                              onChange={() => {
-                                if (checkedFields.length === modalAvailableFields.length) {
-                                  setCheckedFields([]);
-                                } else {
-                                  setCheckedFields(modalAvailableFields.map((f) => f.id));
+                <div style={{ maxHeight: 400, overflowY: 'auto', padding: 0 }}>
+                  <Box style={{ padding: 16 }}>
+                    {/* Step 1: Field selection UI */}
+                    {modalStep === 1 && (
+                      <>
+                        <Box
+                          style={{
+                            border: '1px solid #e5ebed',
+                            borderRadius: 8,
+                            padding: 16,
+                            marginBottom: 16,
+                          }}>
+                          <Flex justifyContent="space-between" alignItems="center">
+                            <Flex gap="spacingL" alignItems="center">
+                              <Box>
+                                <Text fontWeight="fontWeightMedium">Entry name: </Text>
+                                <Text>
+                                  {entries.find((e) => e.id === modalEntryId)?.title || ''}
+                                </Text>
+                              </Box>
+                              <Box>
+                                <Text fontWeight="fontWeightMedium">Connected fields: </Text>
+                                <Text>{checkedFields.length}</Text>
+                              </Box>
+                            </Flex>
+                            <Button
+                              variant="secondary"
+                              size="small"
+                              style={{ alignSelf: 'flex-end' }}
+                              onClick={() => {
+                                if (modalEntryId) {
+                                  const spaceId = sdk.ids.space;
+                                  const environmentId = sdk.ids.environment;
+                                  const entryUrl = `https://app.contentful.com/spaces/${spaceId}/environments/${environmentId}/entries/${modalEntryId}`;
+                                  window.open(entryUrl, '_blank', 'noopener');
                                 }
-                              }}
-                            />
-                          </TableCell>
-                          <TableCell>Field name</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {modalAvailableFields.map((field, idx) => (
-                          <TableRow key={field.id || idx}>
-                            <TableCell>
+                              }}>
+                              View entry
+                            </Button>
+                          </Flex>
+                        </Box>
+                        <Box
+                          style={{ border: '1px solid #e5ebed', borderRadius: 6, marginTop: 16 }}>
+                          <Table style={{ minWidth: 400, margin: 0 }}>
+                            <TableHead>
+                              <TableRow>
+                                <TableCell style={{ width: 48 }}>
+                                  <Checkbox
+                                    isChecked={
+                                      modalAvailableFields.length > 0 &&
+                                      checkedFields.length === modalAvailableFields.length
+                                    }
+                                    isIndeterminate={
+                                      checkedFields.length > 0 &&
+                                      checkedFields.length < modalAvailableFields.length
+                                    }
+                                    onChange={() => {
+                                      if (checkedFields.length === modalAvailableFields.length) {
+                                        setCheckedFields([]);
+                                      } else {
+                                        setCheckedFields(modalAvailableFields.map((f) => f.id));
+                                      }
+                                    }}
+                                  />
+                                </TableCell>
+                                <TableCell>Field name</TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {modalAvailableFields.map((field, idx) => (
+                                <TableRow key={field.id || idx}>
+                                  <TableCell>
+                                    <Checkbox
+                                      isChecked={checkedFields.includes(field.id)}
+                                      onChange={() => {
+                                        setCheckedFields((prev) =>
+                                          prev.includes(field.id)
+                                            ? prev.filter((f) => f !== field.id)
+                                            : [...prev, field.id]
+                                        );
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell style={{ paddingLeft: 0 }}>
+                                    <div style={{ fontWeight: 600 }}>{field.name}</div>
+                                    {fieldLocaleMap[field.id] &&
+                                      fieldLocaleMap[field.id].length > 0 && (
+                                        <div
+                                          style={{
+                                            color: '#67728A',
+                                            fontSize: 13,
+                                            marginTop: 2,
+                                            paddingLeft: 0,
+                                          }}>
+                                          {fieldLocaleMap[field.id].length === 1
+                                            ? fieldLocaleMap[field.id][0]
+                                            : fieldLocaleMap[field.id].length <= 3
+                                            ? `${fieldLocaleMap[field.id].length} locales`
+                                            : `${fieldLocaleMap[field.id][0]} and ${
+                                                fieldLocaleMap[field.id].length - 1
+                                              } more locales`}
+                                        </div>
+                                      )}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </Box>
+                      </>
+                    )}
+                    {/* Step 2: Locale selection UI (only if any selected field is localized) */}
+                    {modalStep === 2 && anySelectedFieldLocalized && (
+                      <>
+                        <Box style={{ marginBottom: 16 }}>
+                          <Text fontWeight="fontWeightMedium">Select locales:</Text>
+                          <Flex gap="spacingS" style={{ marginTop: 8 }}>
+                            {availableLocales.map((locale) => (
                               <Checkbox
-                                isChecked={checkedFields.includes(field.id)}
+                                key={locale}
+                                isChecked={selectedLocales.includes(locale)}
                                 onChange={() => {
-                                  setCheckedFields((prev) =>
-                                    prev.includes(field.id)
-                                      ? prev.filter((f) => f !== field.id)
-                                      : [...prev, field.id]
+                                  setSelectedLocales((prev) =>
+                                    prev.includes(locale)
+                                      ? prev.filter((l) => l !== locale)
+                                      : [...prev, locale]
                                   );
-                                }}
-                              />
-                            </TableCell>
-                            <TableCell>{field.name}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                                }}>
+                                {locale}
+                              </Checkbox>
+                            ))}
+                          </Flex>
+                        </Box>
+                      </>
+                    )}
                   </Box>
-                </Box>
+                </div>
               );
             }
             return null;
           })()}
         </Modal.Content>
         <Modal.Controls>
-          <Button
-            variant="secondary"
-            onClick={async () => {
-              if (modalEntryId && modalAvailableFields.length > 0) {
-                try {
-                  // Build new mappings for checked fields
-                  const newMappings = modalAvailableFields
-                    .filter((f) => checkedFields.includes(f.id))
-                    .map((f) => ({
-                      id: f.id,
-                      name: f.name,
-                      type: f.type,
-                      value: '',
-                      contentTypeId: modalContentTypeId,
-                      isAsset: f.type === 'Asset' || f.type === 'AssetLink' || false,
-                    }));
-                  await setEntryKlaviyoFieldMappings(sdk, modalEntryId, newMappings);
-                  // Update allEntryMappings for immediate UI feedback
-                  setAllEntryMappings((prev) =>
-                    prev.map((e) =>
-                      e.entryId === modalEntryId ? { ...e, mappings: newMappings } : e
-                    )
-                  );
-                  setIsFieldsModalOpen(false);
-                } catch (err) {
-                  logger.error('Failed to save field mappings:', err);
-                  setIsFieldsModalOpen(false);
-                }
-              } else {
+          <div
+            style={{ position: 'sticky', bottom: 0, background: '#fff', zIndex: 2, padding: 16 }}>
+            {/* If any selected field is localized, use two-step process */}
+            {anySelectedFieldLocalized ? (
+              <>
+                {modalStep === 1 && (
+                  <Button
+                    variant="primary"
+                    onClick={() => setModalStep(2)}
+                    isDisabled={checkedFields.length === 0}
+                    style={{ marginRight: 16 }}>
+                    Next
+                  </Button>
+                )}
+                {modalStep === 2 && (
+                  <>
+                    <Button variant="secondary" onClick={() => setModalStep(1)}>
+                      Back
+                    </Button>
+                    <Button
+                      style={{ marginRight: 8, marginLeft: 8 }}
+                      variant="primary"
+                      onClick={async () => {
+                        if (modalEntryId && modalAvailableFields.length > 0) {
+                          try {
+                            // Build new mappings for checked fields and selected locales
+                            const newMappings: any[] = [];
+                            for (const field of modalAvailableFields.filter((f) =>
+                              checkedFields.includes(f.id)
+                            )) {
+                              for (const locale of selectedLocales) {
+                                newMappings.push({
+                                  id: field.id,
+                                  name: field.name,
+                                  type: field.type,
+                                  value: '',
+                                  contentTypeId: modalContentTypeId,
+                                  isAsset:
+                                    field.type === 'Asset' || field.type === 'AssetLink' || false,
+                                  locale,
+                                });
+                              }
+                            }
+                            await setEntryKlaviyoFieldMappings(sdk, modalEntryId, newMappings);
+                            // Update allEntryMappings for immediate UI feedback
+                            setAllEntryMappings((prev) =>
+                              prev.map((e) =>
+                                e.entryId === modalEntryId ? { ...e, mappings: newMappings } : e
+                              )
+                            );
+                            setIsFieldsModalOpen(false);
+                            setModalStep(1); // Reset step for next open
+                          } catch (err) {
+                            console.error('Failed to save field mappings:', err);
+                            setIsFieldsModalOpen(false);
+                            setModalStep(1);
+                          }
+                        } else {
+                          setIsFieldsModalOpen(false);
+                          setModalStep(1);
+                        }
+                      }}
+                      isDisabled={selectedLocales.length === 0}>
+                      Save
+                    </Button>
+                  </>
+                )}
+              </>
+            ) : (
+              // If all selected fields are non-localized, show Save button on step 1
+              modalStep === 1 && (
+                <Button
+                  style={{ marginRight: 8 }}
+                  variant="primary"
+                  onClick={async () => {
+                    if (modalEntryId && modalAvailableFields.length > 0) {
+                      try {
+                        // Build new mappings for checked fields (no locale)
+                        const newMappings: any[] = [];
+                        for (const field of modalAvailableFields.filter((f) =>
+                          checkedFields.includes(f.id)
+                        )) {
+                          newMappings.push({
+                            id: field.id,
+                            name: field.name,
+                            type: field.type,
+                            value: '',
+                            contentTypeId: modalContentTypeId,
+                            isAsset: field.type === 'Asset' || field.type === 'AssetLink' || false,
+                          });
+                        }
+                        await setEntryKlaviyoFieldMappings(sdk, modalEntryId, newMappings);
+                        setAllEntryMappings((prev) =>
+                          prev.map((e) =>
+                            e.entryId === modalEntryId ? { ...e, mappings: newMappings } : e
+                          )
+                        );
+                        setIsFieldsModalOpen(false);
+                        setModalStep(1);
+                      } catch (err) {
+                        console.error('Failed to save field mappings:', err);
+                        setIsFieldsModalOpen(false);
+                        setModalStep(1);
+                      }
+                    } else {
+                      setIsFieldsModalOpen(false);
+                      setModalStep(1);
+                    }
+                  }}
+                  isDisabled={checkedFields.length === 0}>
+                  Save
+                </Button>
+              )
+            )}
+            <Button
+              variant="secondary"
+              onClick={() => {
                 setIsFieldsModalOpen(false);
-              }
-            }}>
-            Close
-          </Button>
+                setModalStep(1);
+              }}>
+              Cancel
+            </Button>
+          </div>
         </Modal.Controls>
       </Modal>
     </Box>

@@ -1,6 +1,7 @@
 import * as contentful from 'contentful-management';
 import { KlaviyoService } from './klaviyo-service';
 import console from 'console';
+import { getEntryKlaviyoFieldMappings } from '../src/utils/field-mappings';
 
 // Define Event types similar to Contentful's App SDK
 interface AppEventHandlerRequest {
@@ -42,6 +43,7 @@ interface FieldMapping {
   severity: string;
   value: any;
   isAssetField?: boolean;
+  locale?: string;
 }
 
 interface SyncOptions {
@@ -71,6 +73,12 @@ interface AppFieldMapping {
   klaviyoBlockName: string;
   fieldType?: string;
   contentTypeId?: string;
+  name?: string;
+  type?: string;
+  severity?: string;
+  value?: any;
+  isAssetField?: boolean;
+  locale?: string;
 }
 
 // Interface for app installation parameters
@@ -84,6 +92,7 @@ interface AppInstallationParameters {
   selectedContentTypes?: Record<string, boolean>;
   contentTypeMappings?: Record<string, AppFieldMapping[]>;
   installation?: any;
+  selectedLocales?: string[];
   [key: string]: any;
 }
 
@@ -342,89 +351,21 @@ export const handler = async (
       );
     }
 
-    // Initialize field mappings array and locations to check
-    let fieldMappings: AppFieldMapping[] = [];
-
-    // 1. Try to get mappings from the entry itself (now using 'klaviyoFieldMappings' field)
-    if (
-      entryData.fields &&
-      entryData.fields.klaviyoFieldMappings &&
-      entryData.fields.klaviyoFieldMappings['en-US']
-    ) {
-      let rawMappings = entryData.fields.klaviyoFieldMappings['en-US'];
-      if (typeof rawMappings === 'string') {
-        try {
-          fieldMappings = JSON.parse(rawMappings);
-          console.log(
-            `Parsed ${fieldMappings.length} field mappings from JSON string in 'klaviyoFieldMappings'`
-          );
-        } catch (e) {
-          console.error('Failed to parse klaviyoFieldMappings as JSON:', e, rawMappings);
-          fieldMappings = [];
-        }
-      } else if (Array.isArray(rawMappings)) {
-        fieldMappings = rawMappings;
-        console.log(
-          `Retrieved ${fieldMappings.length} field mappings from entry field 'klaviyoFieldMappings'`
-        );
-      }
+    // Log the values before calling the function
+    console.log('Calling getEntryKlaviyoFieldMappings with:', {
+      effectiveSpaceId,
+      effectiveEnvironmentId,
+    });
+    if (!effectiveSpaceId || !effectiveEnvironmentId) {
+      throw new Error('effectiveSpaceId or effectiveEnvironmentId is missing');
     }
-
-    // 2. Fallback to parameters if not found on entry
-    if (fieldMappings.length === 0) {
-      // First check if we have content type specific mappings
-      if (parameters.contentTypeMappings && typeof parameters.contentTypeMappings === 'object') {
-        const contentTypeSpecificMappings = parameters.contentTypeMappings[contentTypeId];
-        if (Array.isArray(contentTypeSpecificMappings) && contentTypeSpecificMappings.length > 0) {
-          console.log(
-            `Found ${contentTypeSpecificMappings.length} field mappings specific to content type ${contentTypeId}`
-          );
-          fieldMappings = contentTypeSpecificMappings;
-        }
-      }
-
-      // If no content type specific mappings were found, check the general fieldMappings
-      if (fieldMappings.length === 0 && Array.isArray(parameters.fieldMappings)) {
-        const filteredMappings = parameters.fieldMappings.filter(
-          (mapping: any) => !mapping.contentTypeId || mapping.contentTypeId === contentTypeId
-        );
-
-        if (filteredMappings.length > 0) {
-          console.log(
-            `Using ${filteredMappings.length} field mappings from general fieldMappings array`
-          );
-          fieldMappings = filteredMappings;
-        }
-      }
-
-      // If still no mappings, check inside installation object as fallback
-      if (fieldMappings.length === 0 && parameters.installation) {
-        // Check installation.contentTypeMappings
-        if (
-          parameters.installation.contentTypeMappings &&
-          parameters.installation.contentTypeMappings[contentTypeId] &&
-          Array.isArray(parameters.installation.contentTypeMappings[contentTypeId])
-        ) {
-          fieldMappings = parameters.installation.contentTypeMappings[contentTypeId];
-          console.log(
-            `Found ${fieldMappings.length} mappings in installation.contentTypeMappings[${contentTypeId}]`
-          );
-        }
-        // Check installation.fieldMappings
-        else if (Array.isArray(parameters.installation.fieldMappings)) {
-          const filteredMappings = parameters.installation.fieldMappings.filter(
-            (mapping: any) => !mapping.contentTypeId || mapping.contentTypeId === contentTypeId
-          );
-
-          if (filteredMappings.length > 0) {
-            console.log(`Found ${filteredMappings.length} mappings in installation.fieldMappings`);
-            fieldMappings = filteredMappings;
-          }
-        }
-      }
-    }
-
-    console.log(`Retrieved ${fieldMappings.length} field mappings from parameters`);
+    // Fetch mappings from the centralized klaviyoFieldMappings entry
+    const fieldMappings = await getEntryKlaviyoFieldMappings(
+      cma,
+      entryId,
+      effectiveSpaceId,
+      effectiveEnvironmentId
+    );
 
     // Process the field mappings
     const processedMappings = fieldMappings.map((mapping: any) => {
@@ -437,7 +378,12 @@ export const handler = async (
         klaviyoBlockName,
         fieldType,
         contentTypeId: mapping.contentTypeId,
-        // add any other fields you need
+        name: mapping.name || contentfulFieldId,
+        type: mapping.type || fieldType,
+        severity: 'info',
+        value: mapping.value,
+        isAssetField: mapping.isAssetField,
+        locale: mapping.locale,
       };
     });
 
@@ -486,24 +432,55 @@ export const handler = async (
       return {};
     }
 
+    // Determine selected locales
+    let selectedLocales: string[] = [];
+    if (Array.isArray(parameters.selectedLocales) && parameters.selectedLocales.length > 0) {
+      selectedLocales = parameters.selectedLocales;
+    } else {
+      // Fallback: try to get all locales from the entry fields
+      const allLocalesSet = new Set<string>();
+      if (entryData.fields) {
+        Object.values(entryData.fields).forEach((field: any) => {
+          if (field && typeof field === 'object' && !Array.isArray(field)) {
+            Object.keys(field).forEach((locale) => allLocalesSet.add(locale));
+          }
+        });
+      }
+      selectedLocales = Array.from(allLocalesSet);
+      if (selectedLocales.length === 0) {
+        selectedLocales = ['en-US']; // fallback default
+      }
+    }
+    console.log('Locales to sync:', selectedLocales);
+
+    // Determine if multiple locales are selected
+    const appendLocaleSuffix = selectedLocales.length > 1;
     // Create field mappings in the expected format for Klaviyo service
-    const klaviyoFieldMappings: FieldMapping[] = processedMappings.map((mapping: any) => {
-      // Try to get field value
-      let fieldValue: any = '';
-      let fieldName = mapping.contentfulFieldId;
-      let fieldType = mapping.fieldType || 'text';
-      let isAssetField = false;
-
-      try {
-        if (entry.fields && entry.fields[mapping.contentfulFieldId]) {
-          const field = entry.fields[mapping.contentfulFieldId];
-
-          // Get appropriate locale version
-          const locales = Object.keys(field);
-          const locale = locales.includes('en-US') ? 'en-US' : locales[0];
-
-          fieldValue = field[locale];
-
+    const klaviyoFieldMappings: FieldMapping[] = [];
+    for (const mapping of processedMappings) {
+      // Determine which locales this field actually has values for
+      let fieldLocales: string[] = [];
+      if (
+        entry.fields &&
+        entry.fields[mapping.contentfulFieldId] &&
+        typeof entry.fields[mapping.contentfulFieldId] === 'object'
+      ) {
+        fieldLocales = Object.keys(entry.fields[mapping.contentfulFieldId]).filter(
+          (locale) => entry.fields[mapping.contentfulFieldId][locale] !== undefined
+        );
+      }
+      const fieldIsLocalized = fieldLocales.length > 1;
+      for (const locale of selectedLocales) {
+        let fieldType = mapping.fieldType || 'text';
+        let isAssetField = false;
+        // Only create a mapping if the field has a value for this locale
+        if (
+          entry.fields &&
+          entry.fields[mapping.contentfulFieldId] &&
+          typeof entry.fields[mapping.contentfulFieldId] === 'object' &&
+          entry.fields[mapping.contentfulFieldId][locale] !== undefined
+        ) {
+          let fieldValue = entry.fields[mapping.contentfulFieldId][locale];
           // Check if this is an asset field
           if (
             fieldValue &&
@@ -514,30 +491,33 @@ export const handler = async (
             isAssetField = true;
             fieldType = 'image';
           }
+          // Append locale to block name, name, and external_id only if the field is localized
+          const localeSuffix = fieldIsLocalized ? `-${locale}` : '';
+          // Debug log for value being mapped
+          console.log(`Mapping for ${mapping.contentfulFieldId} [${locale}]:`, fieldValue);
+          klaviyoFieldMappings.push({
+            contentfulFieldId: mapping.contentfulFieldId,
+            klaviyoBlockName:
+              (mapping.klaviyoBlockName || mapping.contentfulFieldId) + localeSuffix,
+            fieldType: fieldType as
+              | 'text'
+              | 'image'
+              | 'entry'
+              | 'reference-array'
+              | 'richText'
+              | 'json',
+            contentTypeId,
+            name: (mapping.name || mapping.contentfulFieldId) + localeSuffix,
+            type: mapping.type || fieldType,
+            severity: 'info',
+            value: fieldValue,
+            isAssetField,
+            locale,
+            // external_id will be constructed in KlaviyoService using klaviyoBlockName (which now includes the locale if needed)
+          });
         }
-      } catch (error) {
-        console.error(`Error accessing field ${mapping.contentfulFieldId}:`, error);
       }
-
-      // Create the mapping with appropriate type and metadata
-      return {
-        contentfulFieldId: mapping.contentfulFieldId,
-        klaviyoBlockName: mapping.klaviyoBlockName || mapping.contentfulFieldId,
-        fieldType: fieldType as
-          | 'text'
-          | 'image'
-          | 'entry'
-          | 'reference-array'
-          | 'richText'
-          | 'json',
-        contentTypeId,
-        name: mapping.name || fieldName,
-        type: mapping.type || fieldType,
-        severity: 'info',
-        value: fieldValue,
-        isAssetField,
-      };
-    });
+    }
 
     console.log('Prepared field mappings for Klaviyo:', klaviyoFieldMappings);
 

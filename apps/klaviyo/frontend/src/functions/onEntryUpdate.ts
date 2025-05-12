@@ -1,6 +1,7 @@
 import type { SidebarExtensionSDK } from '@contentful/app-sdk';
 import { KlaviyoService } from '../services/klaviyo';
 import { logger } from '../utils/logger';
+import { getEntryKlaviyoFieldMappings } from '../utils/field-mappings';
 
 // Define the FieldMapping interface to match the one in klaviyo.ts service
 interface FieldMapping {
@@ -414,7 +415,10 @@ function constructAssetUrl(spaceId: string, assetId: string): string {
 }
 
 export async function onEntryUpdate(event: EntryEventData) {
-  const { entry, sdk, mappings } = event;
+  const { entry, sdk } = event;
+
+  // Fetch mappings from the centralized klaviyoFieldMappings entry
+  const mappings = await getEntryKlaviyoFieldMappings(sdk, entry.sys.id);
 
   // Extract space ID early for asset resolution
   const spaceId = getSpaceId(sdk, entry);
