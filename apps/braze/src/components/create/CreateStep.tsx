@@ -16,15 +16,15 @@ import WizardFooter from '../WizardFooter';
 import { useState, useEffect } from 'react';
 import { editButton } from './CreateStep.styles';
 
-type CreateStepProps = {
+interface CreateStepProps {
   entry: Entry;
   selectedFields: Set<string>;
   contentBlockNames: Record<string, string>;
-  setContentBlockNames: any;
+  setContentBlockNames: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   isSubmitting: boolean;
   handlePreviousStep: () => void;
   handleNextStep: (contentBlockNames: Record<string, string>) => void;
-};
+}
 
 const getDefaultContentBlockName = (entry: Entry, fieldId: string) => {
   const entryTitle = entry.title || 'Untitled';
@@ -56,10 +56,12 @@ const CreateStep = ({
   };
 
   const handleNameChange = (fieldId: string, value: string) => {
-    setContentBlockNames((prev: any) => ({
-      ...prev,
-      [fieldId]: value,
-    }));
+    setContentBlockNames((prev) => {
+      return {
+        ...prev,
+        [fieldId]: value,
+      };
+    });
   };
 
   return (
