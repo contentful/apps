@@ -1,0 +1,88 @@
+{
+  "name": "Klaviyo",
+  "description": "Sync your Contentful content with Klaviyo",
+  "id": "klaviyo",
+  "category": "Marketing",
+  "version": "0.1.0",
+  "locations": [
+    {
+      "location": "app-config",
+      "component": "ConfigScreen"
+    },
+    {
+      "location": "entry-sidebar",
+      "component": "Sidebar"
+    },
+    {
+      "location": "entry-field",
+      "component": "Field"
+    },
+    {
+      "location": "dialog",
+      "component": "FieldSelectDialog"
+    },
+    {
+      "location": "page",
+      "component": "FieldMappingScreen"
+    }
+  ],
+  "parameters": {
+    "installation": [
+      {
+        "id": "klaviyoPublicKey",
+        "name": "Klaviyo Public API Key",
+        "description": "Your Klaviyo public API key (starts with pk_)",
+        "type": "Symbol",
+        "required": true
+      },
+      {
+        "id": "klaviyoPrivateKey",
+        "name": "Klaviyo Private API Key",
+        "description": "Your Klaviyo private API key (starts with pk_)",
+        "type": "Symbol",
+        "required": true
+      }
+    ]
+  },
+  "functions": [
+    {
+      "id": "klaviyoEntrySync",
+      "name": "Klaviyo Entry Sync",
+      "description": "Automatically syncs Contentful entries to Klaviyo on publish/update",
+      "path": "functions/entry-sync-function.js",
+      "entryFile": "functions/entry-sync-function.ts",
+      "allowNetworks": ["a.klaviyo.com"],
+      "accepts": ["appevent.handler"]
+    },
+    {
+      "id": "validateCredentialsAppAction",
+      "name": "Validate Credentials",
+      "description": "Validates Klaviyo API credentials",
+      "path": "functions/validateCredentialsAppAction.js",
+      "entryFile": "functions/validateCredentialsAppAction.ts",
+      "allowNetworks": ["a.klaviyo.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "proxyRequestAppAction",
+      "name": "Proxy Request",
+      "description": "Proxies requests to allowed Klaviyo endpoints",
+      "path": "functions/proxyRequestAppAction.js",
+      "entryFile": "functions/proxyRequestAppAction.ts",
+      "allowNetworks": ["a.klaviyo.com"],
+      "accepts": ["appaction.call"]
+    }
+  ],
+  "appEventHandlers": [
+    {
+      "functionId": "klaviyoEntrySync",
+      "name": "Auto-sync to Klaviyo",
+      "description": "Automatically syncs content to Klaviyo when entries are published or updated",
+      "topics": [
+        "ContentManagement.Entry.publish",
+        "ContentManagement.Entry.auto_save",
+        "ContentManagement.Entry.save"
+      ]
+    }
+  ]
+} 
