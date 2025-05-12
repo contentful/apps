@@ -110,7 +110,7 @@ export const handler: FunctionEventHandler<
           fieldId,
           success: false,
           statusCode: response.status,
-          message: `Error creating content block: ${response.statusText}`,
+          message: `Error creating content block for field ${fieldId}: ${response.statusText}`,
         });
         continue;
       }
