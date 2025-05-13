@@ -49,8 +49,8 @@ describe('createContentBlocks', () => {
 
   it('should create content blocks for text fields', async () => {
     // Mock entry data
-    const mockEntry = createEntry({ title: 'Test Title' });
-    const mockContentType = createContentType(['title']);
+    const mockEntry = createEntry({ title: 'Test Title', author: 'Test Author' });
+    const mockContentType = createContentType(['title', 'author']);
 
     // Mock API responses
     vi.mocked(mockCma.entry.get).mockResolvedValue(mockEntry);
@@ -64,8 +64,15 @@ describe('createContentBlocks', () => {
       type: FunctionTypeEnum.AppActionCall,
       body: {
         entryId: 'entry-id',
-        fieldIds: 'title',
-        contentBlockNames: JSON.stringify({ title: 'custom-title-name' }),
+        fieldIds: 'title,author',
+        contentBlockNames: JSON.stringify({
+          title: 'custom-title-name',
+          author: 'custom-author-name',
+        }),
+        contentBlockDescriptions: JSON.stringify({
+          title: 'custom-title-description',
+          author: 'custom-author-description',
+        }),
       },
       headers: {},
     };
@@ -80,10 +87,23 @@ describe('createContentBlocks', () => {
           statusCode: 201,
           contentBlockId: 'block-id',
         },
+        {
+          fieldId: 'author',
+          success: true,
+          statusCode: 201,
+          contentBlockId: 'block-id',
+        },
+        {
+          fieldId: 'author',
+          success: true,
+          contentBlockId: 'block-id',
+        },
       ],
     });
 
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      1,
       'https://test.braze.com/content_blocks/create',
       expect.objectContaining({
         method: 'POST',
@@ -95,6 +115,19 @@ describe('createContentBlocks', () => {
           name: 'custom-title-name',
           content: 'Test Title',
           state: 'draft',
+          description: 'custom-title-description',
+        }),
+      })
+    );
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      2,
+      'https://test.braze.com/content_blocks/create',
+      expect.objectContaining({
+        body: JSON.stringify({
+          name: 'custom-author-name',
+          content: 'Test Author',
+          state: 'draft',
+          description: 'custom-author-description',
         }),
       })
     );
@@ -117,6 +150,7 @@ describe('createContentBlocks', () => {
         entryId: 'entry-id',
         fieldIds: 'content',
         contentBlockNames: JSON.stringify({ content: 'custom-content-name' }),
+        contentBlockDescriptions: JSON.stringify({ content: 'custom-content-description' }),
       },
       headers: {},
     };
@@ -142,6 +176,7 @@ describe('createContentBlocks', () => {
           name: 'custom-content-name',
           content: '<p>Test HTML</p>',
           state: 'draft',
+          description: 'custom-content-description',
         }),
       })
     );
@@ -150,7 +185,7 @@ describe('createContentBlocks', () => {
   it('should handle missing fields', async () => {
     // Mock Entry data
     const entry = createEntry({});
-    const contentType = createContentType(['title']);
+    const contentType = createContentType(['title', 'author']);
 
     // Mock API responses
     vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
@@ -160,8 +195,15 @@ describe('createContentBlocks', () => {
       type: FunctionTypeEnum.AppActionCall,
       body: {
         entryId: 'entry-id',
-        fieldIds: 'title',
-        contentBlockNames: JSON.stringify({ title: 'custom-title-name' }),
+        fieldIds: 'title,author',
+        contentBlockNames: JSON.stringify({
+          title: 'custom-title-name',
+          author: 'custom-author-name',
+        }),
+        contentBlockDescriptions: JSON.stringify({
+          title: 'custom-title-description',
+          author: 'custom-author-description',
+        }),
       },
       headers: {},
     };
@@ -176,6 +218,11 @@ describe('createContentBlocks', () => {
           statusCode: 404,
           message: 'Field title not found or has no value',
         },
+        {
+          fieldId: 'author',
+          success: false,
+          message: 'Field author not found or has no value',
+        },
       ],
     });
 
@@ -184,8 +231,8 @@ describe('createContentBlocks', () => {
 
   it('should handle API errors', async () => {
     // Mock Entry data
-    const entry = createEntry({ title: 'Test Title' });
-    const contentType = createContentType(['title']);
+    const entry = createEntry({ title: 'Test Title', author: 'Test Author' });
+    const contentType = createContentType(['title', 'author']);
 
     // Mock API responses
     vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
@@ -203,8 +250,15 @@ describe('createContentBlocks', () => {
       type: FunctionTypeEnum.AppActionCall,
       body: {
         entryId: 'entry-id',
-        fieldIds: 'title',
-        contentBlockNames: JSON.stringify({ title: 'custom-title-name' }),
+        fieldIds: 'title,author',
+        contentBlockNames: JSON.stringify({
+          title: 'custom-title-name',
+          author: 'custom-author-name',
+        }),
+        contentBlockDescriptions: JSON.stringify({
+          title: 'custom-title-description',
+          author: 'custom-author-description',
+        }),
       },
       headers: {},
     };
@@ -219,14 +273,25 @@ describe('createContentBlocks', () => {
           statusCode: 401,
           message: 'Error creating content block for field title: Unauthorized',
         },
+        {
+          fieldId: 'author',
+          success: false,
+          statusCode: 401,
+          message: 'Error creating content block for field title: Unauthorized',
+        },
+        {
+          fieldId: 'author',
+          success: false,
+          message: 'Error creating content block: Unauthorized',
+        },
       ],
     });
   });
 
   it('should handle multiple fields with custom names', async () => {
     // Mock Entry data
-    const entry = createEntry({ title: 'Test Title', description: 'Test Description' });
-    const contentType = createContentType(['title', 'description']);
+    const entry = createEntry({ title: 'Test Title', author: 'Test Author' });
+    const contentType = createContentType(['title', 'author']);
 
     // Mock API responses
     vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
@@ -245,10 +310,14 @@ describe('createContentBlocks', () => {
       type: FunctionTypeEnum.AppActionCall,
       body: {
         entryId: 'entry-id',
-        fieldIds: 'title,description',
+        fieldIds: 'title,author',
         contentBlockNames: JSON.stringify({
           title: 'custom-title-name',
-          description: 'custom-description-name',
+          author: 'custom-author-name',
+        }),
+        contentBlockDescriptions: JSON.stringify({
+          title: 'custom-title-description',
+          author: 'custom-author-description',
         }),
       },
       headers: {},
@@ -265,7 +334,7 @@ describe('createContentBlocks', () => {
           contentBlockId: 'block-id-1',
         },
         {
-          fieldId: 'description',
+          fieldId: 'author',
           success: true,
           statusCode: 201,
           contentBlockId: 'block-id-2',
@@ -282,6 +351,7 @@ describe('createContentBlocks', () => {
           name: 'custom-title-name',
           content: 'Test Title',
           state: 'draft',
+          description: 'custom-title-description',
         }),
       })
     );
@@ -290,9 +360,10 @@ describe('createContentBlocks', () => {
       'https://test.braze.com/content_blocks/create',
       expect.objectContaining({
         body: JSON.stringify({
-          name: 'custom-description-name',
-          content: 'Test Description',
+          name: 'custom-author-name',
+          content: 'Test Author',
           state: 'draft',
+          description: 'custom-author-description',
         }),
       })
     );
@@ -300,8 +371,8 @@ describe('createContentBlocks', () => {
 
   it('should handle invalid contentBlockNames JSON', async () => {
     // Mock Entry data
-    const entry = createEntry({ title: 'Test Title' });
-    const contentType = createContentType(['title']);
+    const entry = createEntry({ title: 'Test Title', author: 'Test Author' });
+    const contentType = createContentType(['title', 'author']);
 
     // Mock API responses
     vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
@@ -311,8 +382,12 @@ describe('createContentBlocks', () => {
       type: FunctionTypeEnum.AppActionCall,
       body: {
         entryId: 'entry-id',
-        fieldIds: 'title',
+        fieldIds: 'title,author',
         contentBlockNames: 'invalid-json',
+        contentBlockDescriptions: JSON.stringify({
+          title: 'custom-title-description',
+          author: 'custom-author-description',
+        }),
       },
       headers: {},
     };
@@ -323,8 +398,8 @@ describe('createContentBlocks', () => {
 
   it('should handle missing contentBlockNames for a field', async () => {
     // Mock Entry data
-    const entry = createEntry({ title: 'Test Title', description: 'Test Description' });
-    const contentType = createContentType(['title', 'description']);
+    const entry = createEntry({ title: 'Test Title', author: 'Test Author' });
+    const contentType = createContentType(['title', 'author']);
 
     // Mock API responses
     vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
@@ -338,10 +413,14 @@ describe('createContentBlocks', () => {
       type: FunctionTypeEnum.AppActionCall,
       body: {
         entryId: 'entry-id',
-        fieldIds: 'title,description',
+        fieldIds: 'title,author',
         contentBlockNames: JSON.stringify({
           title: 'custom-title-name',
-          // description name is missing
+          // author name is missing
+        }),
+        contentBlockDescriptions: JSON.stringify({
+          title: 'custom-title-description',
+          author: 'custom-author-description',
         }),
       },
       headers: {},
@@ -358,10 +437,10 @@ describe('createContentBlocks', () => {
           contentBlockId: 'block-id',
         },
         {
-          fieldId: 'description',
+          fieldId: 'author',
           success: false,
           statusCode: 404,
-          message: 'Content block name not found or has no value for field description',
+          message: 'Content block name not found or has no value for field author',
         },
       ],
     });
