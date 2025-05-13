@@ -102,10 +102,12 @@ const ContentBlockForm = ({
           autoFocus
         />
         <FormControl.HelpText>Name should be unique</FormControl.HelpText>
-        <FormControl.ValidationMessage>
-          Content Block name can only contain alphanumeric characters (A-Z, a-z, 0-9), dashes (-),
-          and underscores (_).
-        </FormControl.ValidationMessage>
+        {!isNameValid && (
+          <FormControl.ValidationMessage>
+            Content Block name can only contain alphanumeric characters (A-Z, a-z, 0-9), dashes (-),
+            and underscores (_).
+          </FormControl.ValidationMessage>
+        )}
       </FormControl>
       <FormControl style={{ width: '100%' }}>
         <FormControl.Label>Description</FormControl.Label>
