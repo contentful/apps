@@ -67,6 +67,15 @@ const CreateFlow = (props: CreateFlowProps) => {
     const connectedFields = JSON.parse(sdk.parameters.installation.brazeConnectedFields || '{}');
     const entryConnectedFields = connectedFields[entry.id] || [];
 
+    // Create a map of field IDs to their respective names and descriptions
+    const names: Record<string, string> = {};
+    const descriptions: Record<string, string> = {};
+
+    Object.entries(data).forEach(([fieldId, state]) => {
+      names[fieldId] = state.name;
+      descriptions[fieldId] = state.description;
+    });
+
     try {
       const response = await cma.appActionCall.createWithResponse(
         {
@@ -79,8 +88,8 @@ const CreateFlow = (props: CreateFlowProps) => {
           parameters: {
             entryId: entry.id,
             fieldIds: Array.from(selectedFields).join(','),
-            contentBlockNames: JSON.stringify(data.names),
-            contentBlockDescriptions: JSON.stringify(data.descriptions),
+            contentBlockNames: JSON.stringify(names),
+            contentBlockDescriptions: JSON.stringify(descriptions),
           },
         }
       );
