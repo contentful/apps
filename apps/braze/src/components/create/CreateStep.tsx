@@ -35,10 +35,12 @@ type ContentBlockFormProps = {
   onDescriptionChange: (value: string) => void;
   onCancel: () => void;
   onSave: (fieldId: string) => void;
+  isNameValid: boolean;
 };
 
 type ContentBlockViewProps = {
   name: string;
+  description: string;
   onEdit: () => void;
 };
 
@@ -53,6 +55,7 @@ type ContentBlockCardProps = {
   onDescriptionChange: (value: string) => void;
   onCancel: () => void;
   onSave: (fieldId: string) => void;
+  isNameValid: boolean;
 };
 
 type CreateStepProps = {
@@ -71,6 +74,10 @@ export const getDefaultContentBlockName = (entry: Entry, fieldId: string) => {
   return `${entryTitle.replace(/\s+/g, '-')}-${fieldId}`;
 };
 
+const isValidContentBlockName = (name: string): boolean => {
+  return /^[A-Za-z0-9_-]+$/.test(name);
+};
+
 // Components
 const ContentBlockForm = ({
   fieldId,
@@ -79,11 +86,12 @@ const ContentBlockForm = ({
   onNameChange,
   onDescriptionChange,
   onCancel,
+  isNameValid,
   onSave,
 }: ContentBlockFormProps) => {
   return (
     <Stack flexDirection="column" style={{ width: '100%' }}>
-      <FormControl isRequired style={{ width: '100%' }}>
+      <FormControl isRequired isInvalid={!isNameValid} style={{ width: '100%' }}>
         <FormControl.Label>Content Block name</FormControl.Label>
         <TextInput
           value={editDraft.name}
@@ -93,7 +101,11 @@ const ContentBlockForm = ({
           style={{ marginBottom: tokens.spacingS }}
           autoFocus
         />
-        <FormControl.HelpText>Name should be unique.</FormControl.HelpText>
+        <FormControl.HelpText>Name should be unique</FormControl.HelpText>
+        <FormControl.ValidationMessage>
+          Content Block name can only contain alphanumeric characters (A-Z, a-z, 0-9), dashes (-),
+          and underscores (_).
+        </FormControl.ValidationMessage>
       </FormControl>
       <FormControl style={{ width: '100%' }}>
         <FormControl.Label>Description</FormControl.Label>
@@ -127,24 +139,34 @@ const ContentBlockForm = ({
   );
 };
 
-const ContentBlockView = ({ name, onEdit }: ContentBlockViewProps) => {
+const ContentBlockView = ({ name, description, onEdit }: ContentBlockViewProps) => {
   return (
     <Flex justifyContent="space-between">
       <Stack
-        spacing="spacing2Xs"
+        spacing="spacingS"
         flexDirection="column"
         alignItems="flex-start"
         style={{ width: '100%' }}>
-        <Text>Content Block name</Text>
-        <Text fontWeight="fontWeightDemiBold">{name}</Text>
+        <Stack spacing="spacingXs" flexDirection="column" alignItems="flex-start">
+          <Text>Content Block name</Text>
+          <Text fontWeight="fontWeightDemiBold">{name}</Text>
+        </Stack>
+        {description !== '' && (
+          <Stack spacing="spacingXs" flexDirection="column" alignItems="flex-start">
+            <Text>Description</Text>
+            <Text fontWeight="fontWeightDemiBold">{description}</Text>
+          </Stack>
+        )}
       </Stack>
       <IconButton
         size="small"
         variant="secondary"
-        icon={<PencilSimple />}
+        icon={<PencilSimple size={16} />}
         aria-label="Edit content block"
         onClick={onEdit}
         className={editButton}
+        withTooltip
+        tooltipProps={{ content: 'Edit name or add a description' }}
       />
     </Flex>
   );
@@ -161,9 +183,17 @@ const ContentBlockCard = ({
   onDescriptionChange,
   onCancel,
   onSave,
+  isNameValid,
 }: ContentBlockCardProps) => {
   return (
-    <Card margin="none" style={{ padding: tokens.spacingXs }}>
+    <Card
+      margin="none"
+      style={{
+        paddingTop: tokens.spacingXs,
+        paddingBottom: tokens.spacingS,
+        paddingLeft: tokens.spacingXs,
+        paddingRight: tokens.spacingXs,
+      }}>
       {isEditing ? (
         <ContentBlockForm
           fieldId={fieldId}
@@ -173,10 +203,12 @@ const ContentBlockCard = ({
           onDescriptionChange={onDescriptionChange}
           onCancel={onCancel}
           onSave={onSave}
+          isNameValid={isNameValid}
         />
       ) : (
         <ContentBlockView
           name={contentBlockState.names[fieldId] || ''}
+          description={contentBlockState.descriptions[fieldId] || ''}
           onEdit={() => onEdit(fieldId)}
         />
       )}
@@ -200,6 +232,7 @@ const CreateStep = ({
     name: '',
     description: '',
   });
+  const [isNameValid, setIsNameValid] = useState(true);
 
   // Effects
   useEffect(() => {
@@ -257,6 +290,10 @@ const CreateStep = ({
   };
 
   const handleSave = (fieldId: string) => {
+    if (!isValidContentBlockName(editDraft.name)) {
+      setIsNameValid(false);
+      return;
+    }
     setContentBlockStates((prev) => ({
       names: { ...prev.names, [fieldId]: editDraft.name },
       descriptions: { ...prev.descriptions, [fieldId]: editDraft.description },
@@ -272,7 +309,7 @@ const CreateStep = ({
           Edit each field to change the name or add an optional description. When complete, send
           directly to Braze. Content Block names should be unique.
         </Paragraph>
-        <Stack spacing="spacingS" flexDirection="column">
+        <Stack spacing="spacingM" flexDirection="column">
           {Array.from(selectedFields).map((fieldId: string) => (
             <ContentBlockCard
               key={fieldId}
@@ -286,6 +323,7 @@ const CreateStep = ({
               onDescriptionChange={handleDescriptionChange}
               onCancel={handleCancel}
               onSave={handleSave}
+              isNameValid={isNameValid}
             />
           ))}
         </Stack>
@@ -298,7 +336,10 @@ const CreateStep = ({
           data-testid="back-button">
           Back
         </Button>
-        <Button variant="primary" onClick={() => handleNextStep(contentBlockStates)}>
+        <Button
+          variant="primary"
+          onClick={() => handleNextStep(contentBlockStates)}
+          isDisabled={editingField !== null}>
           {isSubmitting ? 'Creating...' : 'Send to Braze'}
         </Button>
       </WizardFooter>
