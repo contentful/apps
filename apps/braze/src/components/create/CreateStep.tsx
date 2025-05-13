@@ -66,7 +66,7 @@ type CreateStepProps = {
 };
 
 // Utils
-const getDefaultContentBlockName = (entry: Entry, fieldId: string) => {
+export const getDefaultContentBlockName = (entry: Entry, fieldId: string) => {
   const entryTitle = entry.title || 'Untitled';
   return `${entryTitle.replace(/\s+/g, '-')}-${fieldId}`;
 };

@@ -1,13 +1,6 @@
-import React from 'react';
-import {
-  render,
-  screen,
-  fireEvent,
-  cleanup,
-  waitForElementToBeRemoved,
-} from '@testing-library/react';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import CreateStep from '../../../src/components/create/CreateStep';
+import CreateStep, { getDefaultContentBlockName } from '../../../src/components/create/CreateStep';
 import { Entry } from '../../../src/fields/Entry';
 import { BasicField } from '../../../src/fields/BasicField';
 
@@ -121,5 +114,12 @@ describe('CreateStep', () => {
     fireEvent.click(backButton);
 
     expect(mockHandlePreviousStep).toHaveBeenCalled();
+  });
+
+  describe('when trying to get the default name', () => {
+    it('returns the correct default name', () => {
+      const defaultName = getDefaultContentBlockName(mockEntry, 'field1');
+      expect(defaultName).toBe('Test-Entry-field1');
+    });
   });
 });
