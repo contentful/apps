@@ -45,7 +45,22 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     } catch (e) {
       console.error('Failed to parse params:', e);
     }
-    if (!privateKey || !endpoint) return { response: { error: 'Missing required parameters' } };
+    if (!privateKey) {
+      console.error('Missing private key');
+      return { response: { error: 'Missing required private key' } };
+    }
+    if (!endpoint) {
+      console.error('Missing endpoint');
+      return { response: { error: 'Missing required endpoint' } };
+    }
+    if (!data) {
+      console.error('Missing data');
+      return { response: { error: 'Missing required data' } };
+    }
+    if (!params) {
+      console.error('Missing params');
+      return { response: { error: 'Missing required params' } };
+    }
     const baseEndpoint = endpoint.split('/')[0];
     if (!ALLOWED_ENDPOINTS.includes(baseEndpoint))
       return { response: { error: 'Endpoint not allowed' } };

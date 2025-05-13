@@ -10,6 +10,7 @@ import {
 } from '../utils/field-mappings';
 import { markEntryForSyncViaApi } from '../utils/sync-api';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
+import { KlaviyoService } from '../utils/klaviyo-service';
 
 // Extend Window interface to allow our custom property
 declare global {
@@ -90,6 +91,14 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
     }
     fetchMappings();
   }, [sdk, entryId]);
+
+  useEffect(() => {
+    if (fields.length && currentMappings.length) {
+      // Find fields that are mapped
+      const mappedFieldIds = currentMappings.map((m) => m.contentfulFieldId);
+      setSelectedFields(fields.filter((f) => mappedFieldIds.includes(f.id)));
+    }
+  }, [fields, currentMappings]);
 
   // Build a map from field ID to array of mapped locales
   const fieldLocaleMap: Record<string, string[]> = React.useMemo(() => {
@@ -198,178 +207,76 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
     try {
       if (contentTypeId && entryId) {
         let newMappings: any[] = [];
-        selectedLocales.forEach((locale) => {
-          selectedFields.forEach((field) => {
+        selectedFields.forEach((field) => {
+          // Get the field value from the entry
+          let fieldValue = '';
+          if (entry.fields && entry.fields[field.id]) {
+            const fieldData = entry.fields[field.id];
+            if (typeof fieldData === 'object' && !Array.isArray(fieldData)) {
+              // Handle localized fields
+              const firstLocale = Object.keys(fieldData)[0] || 'en-US';
+              fieldValue = fieldData[firstLocale];
+            } else {
+              // Handle non-localized fields
+              fieldValue = fieldData;
+            }
+          }
+
+          if (field.localized) {
+            // For localized fields, create a mapping for each selected locale
+            selectedLocales.forEach((locale) => {
+              const localizedValue = entry.fields?.[field.id]?.[locale] || fieldValue;
+              newMappings.push({
+                contentfulFieldId: field.id,
+                klaviyoBlockName: `${field.name}-${locale}`,
+                fieldType: field.type.toLowerCase(),
+                value: localizedValue,
+                contentTypeId: contentTypeId,
+                isAsset: field.type === 'Asset' || field.type === 'AssetLink' || false,
+                locale,
+              });
+            });
+          } else {
+            // For non-localized fields, create a single mapping without locale
             newMappings.push({
-              id: field.id,
-              name: `${field.name}-${locale}`,
-              type: field.type,
-              value: '',
+              contentfulFieldId: field.id,
+              klaviyoBlockName: field.name,
+              fieldType: field.type.toLowerCase(),
+              value: fieldValue,
               contentTypeId: contentTypeId,
               isAsset: field.type === 'Asset' || field.type === 'AssetLink' || false,
-              locale,
             });
-          });
+          }
         });
+
+        // Log the mappings and entry for debugging
+        console.error('Field mappings:', JSON.stringify(newMappings, null, 2));
+        console.error('Entry data:', JSON.stringify(entry, null, 2));
+
         await setEntryKlaviyoFieldMappings(sdk, entryId, newMappings);
-        // Prepare Klaviyo API keys from installation parameters
-        const { klaviyoApiKey, klaviyoCompanyId } = sdk.parameters.installation || {};
-        const privateKey = klaviyoApiKey;
-        const publicKey = klaviyoCompanyId;
-        // Send a proxy request for each mapping
-        for (const mapping of newMappings) {
-          // Get the content from the entry field, using locale if available
-          let content = '';
-          if (entry && entry.fields && entry.fields[mapping.id]) {
-            const fieldValue = entry.fields[mapping.id];
-            if (typeof fieldValue === 'object' && fieldValue !== null) {
-              // Strict: only use the selected locale, do not fall back
-              if (
-                mapping.locale &&
-                fieldValue[mapping.locale] !== undefined &&
-                fieldValue[mapping.locale] !== null &&
-                fieldValue[mapping.locale] !== ''
-              ) {
-                const localeValue = fieldValue[mapping.locale];
-                // If it's a Contentful rich text document, convert to HTML
-                if (
-                  localeValue &&
-                  typeof localeValue === 'object' &&
-                  localeValue.nodeType === 'document'
-                ) {
-                  content = documentToHtmlString(localeValue);
-                } else {
-                  content = localeValue;
-                }
-              } else {
-                content = '';
-              }
-            } else if (typeof fieldValue === 'string') {
-              content = fieldValue;
-            }
-          }
-          // Block name includes locale
-          const blockName = `${mapping.name} [ID:${entryId}-${mapping.name}]`;
-          // 1. Fetch all universal content blocks (no filter, page[size]=100)
-          const idPattern = `[ID:${entryId}]`;
-          let existingId: string | undefined = undefined;
-          try {
-            const allBlocksResult = await markEntryForSyncViaApi(
-              entryId,
-              contentTypeId,
-              undefined,
-              sdk,
-              {
-                endpoint: 'template-universal-content',
-                method: 'GET',
-                params: JSON.stringify({ 'page[size]': 100 }),
-                privateKey,
-                publicKey,
-              }
-            );
-            // Use allBlocksResult.data directly as an array of blocks
-            let blocks: any[] = [];
-            if (
-              allBlocksResult &&
-              typeof allBlocksResult === 'object' &&
-              'data' in allBlocksResult &&
-              Array.isArray((allBlocksResult as any).data)
-            ) {
-              blocks = (allBlocksResult as any).data;
-            }
-            if (blocks.length > 0) {
-              const matches = blocks.filter(
-                (block: any) => block.attributes && block.attributes.name === blockName
-              );
-              if (matches.length > 0) {
-                existingId = matches[0].id;
-              }
-            }
-          } catch (err) {
-            console.error('Error fetching all Klaviyo content:', err);
-          }
-          // Build the Klaviyo payload after existingId is determined
-          let klaviyoPayload;
-          if (existingId) {
-            // PATCH: include id
-            klaviyoPayload = {
-              data: {
-                type: 'template-universal-content',
-                id: existingId,
-                attributes: {
-                  name: blockName,
-                  definition: {
-                    content_type: 'block',
-                    type: 'text', // or 'html' if needed
-                    data: {
-                      content: content || '',
-                      styles: {
-                        block_padding_bottom: 0,
-                        block_padding_top: 0,
-                        block_padding_right: 0,
-                        block_padding_left: 0,
-                      },
-                      display_options: {},
-                    },
-                  },
-                },
-              },
-            };
-          } else {
-            // POST: do not include id
-            klaviyoPayload = {
-              data: {
-                type: 'template-universal-content',
-                attributes: {
-                  name: blockName,
-                  definition: {
-                    content_type: 'block',
-                    type: 'text', // or 'html' if needed
-                    data: {
-                      content: content || '',
-                      styles: {
-                        block_padding_bottom: 0,
-                        block_padding_top: 0,
-                        block_padding_right: 0,
-                        block_padding_left: 0,
-                      },
-                      display_options: {},
-                    },
-                  },
-                },
-              },
-            };
-          }
-          if (existingId) {
-            // 2. Exists: PATCH
-            await markEntryForSyncViaApi(entryId, contentTypeId, undefined, sdk, {
-              endpoint: `template-universal-content/${existingId}`,
-              method: 'PATCH',
-              data: JSON.stringify(klaviyoPayload), // Send as string for App Action
-              params: JSON.stringify({}),
-              privateKey,
-              publicKey,
-            });
-          } else {
-            // 3. Not found: POST
-            await markEntryForSyncViaApi(entryId, contentTypeId, undefined, sdk, {
-              endpoint: 'template-universal-content',
-              method: 'POST',
-              data: JSON.stringify(klaviyoPayload), // Send as string for App Action
-              params: JSON.stringify({}),
-              privateKey,
-              publicKey,
-            });
-          }
-        }
+
+        // Initialize KlaviyoService with API keys
+        const { privateKey, publicKey } = sdk.parameters.installation || {};
+        const klaviyoService = new KlaviyoService(
+          {
+            privateKey,
+            publicKey,
+          },
+          sdk.cma
+        );
+
+        // Use syncContent to sync the entry
+        const response = await klaviyoService.syncContent(newMappings, entry, sdk.cma);
+        console.error('Sync response:', JSON.stringify(response, null, 2));
       }
       sdk.notifier.success('Fields successfully synced to Klaviyo!');
-      sdk.close({
-        selectedFields: selectedFields.map((f) => f.id),
-        selectedLocales,
-        success: true,
-      });
+      // sdk.close({
+      //   selectedFields: selectedFields.map((f) => f.id),
+      //   selectedLocales,
+      //   success: true,
+      // });
     } catch (e) {
+      console.error('Error syncing to Klaviyo:', e);
       sdk.notifier.error('Error syncing to Klaviyo');
     } finally {
       setIsSyncing(false);

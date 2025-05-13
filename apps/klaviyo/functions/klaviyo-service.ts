@@ -1,3 +1,5 @@
+import { error } from 'console';
+
 // Define interfaces
 interface FieldMapping {
   contentfulFieldId: string;
@@ -78,36 +80,50 @@ export class KlaviyoService {
    * @returns Promise with the results of the sync operation
    */
   async syncContent(fieldMappings: FieldMapping[], entry: any, cma?: any): Promise<any> {
+    console.error('=== SYNC CONTENT START ===');
+    console.error('Field Mappings:', JSON.stringify(fieldMappings, null, 2));
+    console.error('Entry:', JSON.stringify(entry, null, 2));
+
     try {
       const entryId = entry.sys?.id;
       if (!entryId) {
+        console.error('Entry ID is missing');
         throw new Error('Entry ID is missing');
       }
+      console.error('Processing entry ID:', entryId);
+
       // Only use the fieldMappings argument passed in
       if (!fieldMappings || !Array.isArray(fieldMappings) || fieldMappings.length === 0) {
+        console.error('No field mappings provided, extracting all fields');
         const contentData: Record<string, any> = {};
 
         // Extract fields from the entry fields object
         if (entry.fields) {
+          console.error('Entry fields:', JSON.stringify(entry.fields, null, 2));
           for (const fieldId in entry.fields) {
             try {
               const field = entry.fields[fieldId];
+              console.error(`Processing field ${fieldId}:`, JSON.stringify(field, null, 2));
 
               // Handle localized fields
               if (typeof field === 'object' && !Array.isArray(field)) {
                 const firstLocale = Object.keys(field)[0] || 'en-US';
                 const value = field[firstLocale];
+                console.error(`Localized field ${fieldId} value:`, JSON.stringify(value, null, 2));
 
                 // Add the field to content data
                 if (value !== undefined && value !== null) {
-                  contentData[fieldId] =
-                    typeof value === 'object' ? JSON.stringify(value) : String(value);
+                  contentData[fieldId] = this.safeFieldValue(fieldId, value);
+                  console.error(`Added to contentData: ${fieldId} =`, contentData[fieldId]);
                 }
               } else {
                 // Non-localized field
                 if (field !== undefined && field !== null) {
-                  contentData[fieldId] =
-                    typeof field === 'object' ? JSON.stringify(field) : String(field);
+                  contentData[fieldId] = this.safeFieldValue(fieldId, field);
+                  console.error(
+                    `Added to contentData (non-localized): ${fieldId} =`,
+                    contentData[fieldId]
+                  );
                 }
               }
             } catch (error) {
@@ -120,213 +136,216 @@ export class KlaviyoService {
         const responses = [];
         for (const mapping of fieldMappings) {
           try {
+            console.error('Processing mapping:', JSON.stringify(mapping, null, 2));
             const contentfulFieldId = mapping.contentfulFieldId;
             const klaviyoBlockName = mapping.klaviyoBlockName || contentfulFieldId;
+
             // Use mapping.value if present, otherwise fallback to old extraction logic
             let value = mapping.value;
+            console.error(
+              `Initial value for ${contentfulFieldId}:`,
+              JSON.stringify(value, null, 2)
+            );
+
             if (value === undefined) {
               if (entry.fields && entry.fields[contentfulFieldId]) {
                 const field = entry.fields[contentfulFieldId];
+                console.error(`Field from entry.fields:`, JSON.stringify(field, null, 2));
+
                 if (typeof field === 'object' && !Array.isArray(field)) {
                   const firstLocale = Object.keys(field)[0];
                   if (firstLocale) {
                     value = field[firstLocale];
+                    console.error(
+                      `Localized value for ${contentfulFieldId}:`,
+                      JSON.stringify(value, null, 2)
+                    );
                   }
                 } else {
                   value = field;
+                  console.error(
+                    `Non-localized value for ${contentfulFieldId}:`,
+                    JSON.stringify(value, null, 2)
+                  );
                 }
               } else if (entry[contentfulFieldId] !== undefined) {
                 value = entry[contentfulFieldId];
+                console.error(
+                  `Value from entry root for ${contentfulFieldId}:`,
+                  JSON.stringify(value, null, 2)
+                );
               }
             }
+
             if (value === undefined || value === null || value === '') {
+              console.error(`Skipping empty value for ${contentfulFieldId}`);
               continue;
             }
+
             const contentData: Record<string, any> = {};
             let imageUrl: string = '';
             let altText = klaviyoBlockName;
             let htmlContent = '';
-            if (mapping.fieldType === 'image' || mapping.isAssetField) {
-              if (typeof value === 'object' && value.sys) {
-                let assetId = value.sys.id;
-                // Fetch the correct asset URL from CMA
-                let cmaUrl = '';
-                if (assetId && cma) {
-                  cmaUrl = (await this.fetchAssetUrlFromCMA(assetId, entry, cma)) || '';
-                }
-                if (!cmaUrl) {
-                  console.error(
-                    'Could not resolve a valid Contentful asset URL for image field:',
-                    klaviyoBlockName
-                  );
-                  continue; // Skip this image block if we can't get a valid URL
-                }
-                imageUrl = typeof cmaUrl === 'string' ? cmaUrl : '';
-                if (!imageUrl) {
-                  console.error(
-                    'Could not resolve a valid Contentful asset URL for image field:',
-                    klaviyoBlockName
-                  );
-                  continue; // Skip this image block if we can't get a valid URL
-                }
-                // Find mapping for this field
-                let mappingObj = fieldMappings.find(
-                  (m: any) =>
-                    m.contentfulFieldId === contentfulFieldId || m.id === contentfulFieldId
-                );
-                let klaviyoImageId = mappingObj && mappingObj.klaviyoImageId;
-                // Try to upload or patch to Klaviyo Images API
-                let imageName = klaviyoBlockName;
-                if (value.fields && value.fields.title) {
-                  imageName = value.fields.title['en-US'] || value.fields.title || klaviyoBlockName;
-                }
-                let uploadedUrl = '';
-                if (klaviyoImageId) {
-                  // PATCH the image in Klaviyo
-                  try {
-                    await this.makeRequest('PATCH', `images/${klaviyoImageId}`, {
-                      data: {
-                        type: 'image',
-                        id: klaviyoImageId,
-                        attributes: {
-                          name: imageName,
-                        },
-                      },
-                    });
-                    // Try to get the image URL from Klaviyo
-                    const imgResp = await this.makeRequest('GET', `images/${klaviyoImageId}`);
-                    uploadedUrl = imgResp?.data?.attributes?.image_url || imageUrl;
-                  } catch (patchError) {
-                    console.error('Error patching existing image in Klaviyo:', patchError);
-                    uploadedUrl = imageUrl;
+
+            // Handle different field types
+            console.error(`Field type for ${contentfulFieldId}:`, mapping.fieldType);
+            switch (mapping.fieldType?.toLowerCase()) {
+              case 'image':
+              case 'asset':
+                console.error(`Processing image/asset field: ${contentfulFieldId}`);
+                if (typeof value === 'object' && value.sys) {
+                  let assetId = value.sys.id;
+                  console.error(`Asset ID: ${assetId}`);
+
+                  // Fetch the correct asset URL from CMA
+                  let cmaUrl = '';
+                  if (assetId && cma) {
+                    cmaUrl = (await this.fetchAssetUrlFromCMA(assetId, entry, cma)) || '';
+                    console.error(`CMA URL: ${cmaUrl}`);
                   }
-                } else {
-                  // POST new image
-                  const data = {
-                    data: {
-                      type: 'image',
-                      attributes: {
-                        import_from_url: imageUrl,
-                        name: imageName,
-                        hidden: false,
-                      },
-                    },
-                  };
-                  const response = await this.makeRequest('POST', 'images', data);
-                  if (response && response.data && response.data.id) {
-                    klaviyoImageId = response.data.id;
-                    uploadedUrl = response.data.attributes?.image_url || imageUrl;
-                    // Update mapping and save back to Contentful
-                    if (mappingObj) {
-                      mappingObj.klaviyoImageId = klaviyoImageId;
-                    } else {
-                      fieldMappings.push({ ...mapping, klaviyoImageId });
-                    }
-                    // Save updated mappings to Contentful
-                    if (cma && entryId) {
-                      try {
-                        // 1. Get the latest entry
-                        let entryToUpdate = await cma.entry.get({
-                          entryId,
-                          spaceId: entry.sys.space.sys.id,
-                          environmentId: entry.sys.environment.sys.id,
-                        });
-                        // 2. Update the field
-                        entryToUpdate.fields.klaviyoFieldMappings = {
-                          'en-US': JSON.stringify(fieldMappings),
-                        };
-                        entryToUpdate = await cma.entry.update(
-                          {
-                            entryId,
-                            spaceId: entry.sys.space.sys.id,
-                            environmentId: entry.sys.environment.sys.id,
-                          },
-                          entryToUpdate
-                        );
-                        // 3. Re-fetch the entry to get the new version
-                        entryToUpdate = await cma.entry.get({
-                          entryId,
-                          spaceId: entry.sys.space.sys.id,
-                          environmentId: entry.sys.environment.sys.id,
-                        });
-                        // 4. Now publish with the latest version
-                        await cma.entry.publish(
-                          {
-                            entryId,
-                            spaceId: entry.sys.space.sys.id,
-                            environmentId: entry.sys.environment.sys.id,
-                          },
-                          entryToUpdate
-                        );
-                      } catch (err) {
-                        console.error('Failed to update klaviyoFieldMappings on entry:', err);
-                      }
-                    }
-                  } else {
-                    uploadedUrl = imageUrl;
+
+                  if (!cmaUrl) {
+                    console.error(
+                      'Could not resolve a valid Contentful asset URL for image field:',
+                      klaviyoBlockName
+                    );
+                    continue;
                   }
+
+                  imageUrl = typeof cmaUrl === 'string' ? cmaUrl : '';
+                  if (!imageUrl) {
+                    console.error(
+                      'Could not resolve a valid Contentful asset URL for image field:',
+                      klaviyoBlockName
+                    );
+                    continue;
+                  }
+
+                  // Handle image upload to Klaviyo
+                  let mappingObj = fieldMappings.find(
+                    (m: any) =>
+                      m.contentfulFieldId === contentfulFieldId || m.id === contentfulFieldId
+                  );
+                  let klaviyoImageId = mappingObj && mappingObj.klaviyoImageId;
+                  let imageName = klaviyoBlockName;
+
+                  if (value.fields && value.fields.title) {
+                    imageName =
+                      value.fields.title['en-US'] || value.fields.title || klaviyoBlockName;
+                  }
+
+                  console.error(`Creating/updating image content: ${imageName}`);
+                  const response = await this.createOrUpdateContent(
+                    imageName,
+                    '', // No HTML content for images
+                    `${entryId}-${klaviyoBlockName}`,
+                    'image',
+                    imageUrl,
+                    altText
+                  );
+                  console.error('Image content response:', JSON.stringify(response, null, 2));
+                  responses.push(response);
                 }
-                // No Universal Content image block creation here
-                continue; // Skip to next mapping
-              }
-            } else if (
-              (mapping.fieldType && mapping.fieldType.toLowerCase() === 'richtext') ||
-              (value && value.nodeType === 'document')
-            ) {
-              // Always convert to HTML
-              try {
-                const richTextHtml = this.processRichText(value);
-                contentData[klaviyoBlockName] = richTextHtml;
-              } catch (e) {
-                console.error('Error processing rich text:', e);
-                contentData[klaviyoBlockName] = '';
-              }
-              htmlContent = this.convertDataToHTML(contentData);
-            } else if (mapping.fieldType === 'json') {
-              contentData[klaviyoBlockName] = JSON.stringify(value);
-              htmlContent = this.convertDataToHTML(contentData);
-            } else {
-              contentData[klaviyoBlockName] = String(value || '');
-              htmlContent = this.convertDataToHTML(contentData);
+                break;
+
+              case 'richtext':
+                console.error(`Processing rich text field: ${contentfulFieldId}`);
+                try {
+                  const richTextHtml = this.processRichText(value);
+                  console.error(`Rich text HTML: ${richTextHtml}`);
+                  contentData[klaviyoBlockName] = richTextHtml;
+                  htmlContent = this.convertDataToHTML(contentData);
+                  console.error(`Creating/updating rich text content: ${klaviyoBlockName}`);
+                  const response = await this.createOrUpdateContent(
+                    klaviyoBlockName,
+                    htmlContent,
+                    `${entryId}-${klaviyoBlockName}`,
+                    'text'
+                  );
+                  console.error('Rich text content response:', JSON.stringify(response, null, 2));
+                  responses.push(response);
+                } catch (error) {
+                  console.error(`Error processing rich text field ${klaviyoBlockName}:`, error);
+                }
+                break;
+
+              case 'json':
+                console.error(`Processing JSON field: ${contentfulFieldId}`);
+                try {
+                  const jsonValue = typeof value === 'string' ? JSON.parse(value) : value;
+                  contentData[klaviyoBlockName] = JSON.stringify(jsonValue, null, 2);
+                  htmlContent = this.convertDataToHTML(contentData);
+                  console.error(`Creating/updating JSON content: ${klaviyoBlockName}`);
+                  const response = await this.createOrUpdateContent(
+                    klaviyoBlockName,
+                    htmlContent,
+                    `${entryId}-${klaviyoBlockName}`,
+                    'text'
+                  );
+                  console.error('JSON content response:', JSON.stringify(response, null, 2));
+                  responses.push(response);
+                } catch (error) {
+                  console.error(`Error processing JSON field ${klaviyoBlockName}:`, error);
+                }
+                break;
+
+              case 'entry':
+              case 'reference-array':
+                console.error(`Processing reference field: ${contentfulFieldId}`);
+                try {
+                  const processedValue = this.safeFieldValue(klaviyoBlockName, value);
+                  console.error(`Processed reference value: ${processedValue}`);
+                  if (processedValue) {
+                    contentData[klaviyoBlockName] = processedValue;
+                    htmlContent = this.convertDataToHTML(contentData);
+                    console.error(`Creating/updating reference content: ${klaviyoBlockName}`);
+                    const response = await this.createOrUpdateContent(
+                      klaviyoBlockName,
+                      htmlContent,
+                      `${entryId}-${klaviyoBlockName}`,
+                      'text'
+                    );
+                    console.error('Reference content response:', JSON.stringify(response, null, 2));
+                    responses.push(response);
+                  }
+                } catch (error) {
+                  console.error(`Error processing reference field ${klaviyoBlockName}:`, error);
+                }
+                break;
+
+              default:
+                // Handle text and other field types
+                console.error(`Processing default field type: ${contentfulFieldId}`);
+                try {
+                  const processedValue = this.safeFieldValue(klaviyoBlockName, value);
+                  console.error(`Processed value: ${processedValue}`);
+                  if (processedValue) {
+                    contentData[klaviyoBlockName] = processedValue;
+                    htmlContent = this.convertDataToHTML(contentData);
+                    console.error(`Creating/updating content: ${klaviyoBlockName}`);
+                    const response = await this.createOrUpdateContent(
+                      klaviyoBlockName,
+                      htmlContent,
+                      `${entryId}-${klaviyoBlockName}`,
+                      'text'
+                    );
+                    console.error('Content response:', JSON.stringify(response, null, 2));
+                    responses.push(response);
+                  }
+                } catch (error) {
+                  console.error(`Error processing field ${klaviyoBlockName}:`, error);
+                }
+                break;
             }
-            contentData.external_id = `${entryId}-${klaviyoBlockName}`;
-            // Pass nameWithId to findContentByExternalId
-            const existingContent = await this.findContentByExternalId(
-              contentData.external_id,
-              klaviyoBlockName
-            );
-            let response;
-            if (htmlContent) {
-              // For text blocks, use the current logic
-              if (existingContent) {
-                response = await this.updateContent(
-                  existingContent.id,
-                  klaviyoBlockName,
-                  htmlContent,
-                  contentData.external_id,
-                  'text'
-                );
-              } else {
-                response = await this.createContent(
-                  klaviyoBlockName,
-                  htmlContent,
-                  contentData.external_id,
-                  'text'
-                );
-              }
-            }
-            responses.push(response);
           } catch (error) {
-            console.error(
-              `Error processing mapping for field ${mapping.contentfulFieldId}:`,
-              error
-            );
+            console.error(`Error processing mapping for ${mapping.klaviyoBlockName}:`, error);
           }
         }
+        console.error('=== SYNC CONTENT COMPLETE ===');
         return responses;
       }
     } catch (error) {
-      console.error('Error in KlaviyoService.syncContent:', error);
+      console.error('Error in syncContent:', error);
       throw error;
     }
   }
@@ -420,8 +439,8 @@ export class KlaviyoService {
               block_padding_right: 0,
               block_padding_left: 0,
             },
+            display_options: {},
           },
-          display_options: {},
         };
       } else {
         definition = {
@@ -429,14 +448,9 @@ export class KlaviyoService {
           type: 'text',
           data: {
             content: htmlContent,
-            styles: {
-              block_padding_bottom: 0,
-              block_padding_top: 0,
-              block_padding_right: 0,
-              block_padding_left: 0,
-            },
+            styles: {},
+            display_options: {},
           },
-          display_options: {},
         };
       }
       // Universal content block data model
@@ -449,6 +463,7 @@ export class KlaviyoService {
           },
         },
       };
+      console.log('Creating content:', data);
       return await this.makeRequest('POST', 'template-universal-content', data);
     } catch (error) {
       console.error('Error creating content:', error);
@@ -487,8 +502,8 @@ export class KlaviyoService {
               block_padding_right: 0,
               block_padding_left: 0,
             },
-            display_options: {},
           },
+          display_options: {},
         };
       } else {
         definition = {
@@ -502,8 +517,8 @@ export class KlaviyoService {
               block_padding_right: 0,
               block_padding_left: 0,
             },
-            display_options: {},
           },
+          display_options: {},
         };
       }
       const data = {
@@ -513,6 +528,7 @@ export class KlaviyoService {
           attributes: {
             name: nameWithId,
             definition,
+            external_id: externalId,
           },
         },
       };
@@ -536,20 +552,81 @@ export class KlaviyoService {
    * Safely format a field value for HTML output, converting rich text objects to HTML.
    */
   private safeFieldValue(key: string, value: any): string {
-    if (value === null || value === undefined) return '';
-    if (typeof value === 'string') return value;
-    // If value is a rich text document, convert to HTML
-    if (value && typeof value === 'object' && value.nodeType === 'document') {
-      return this.processRichText(value);
+    console.log(`Processing field ${key} with value:`, value);
+
+    if (value === null || value === undefined) {
+      console.log(`Field ${key} is null or undefined`);
+      return '';
     }
-    // If key suggests rich text but value is object, try to convert
-    if (key.toLowerCase().includes('richtext') && value && typeof value === 'object') {
-      return this.processRichText(value);
+
+    if (typeof value === 'string') {
+      console.log(`Field ${key} is a string:`, value);
+      return value;
     }
+
+    // Handle rich text
+    if (value && typeof value === 'object') {
+      if (value.nodeType === 'document') {
+        console.log(`Field ${key} is a rich text document`);
+        return this.processRichText(value);
+      }
+
+      // Handle rich text in other formats
+      if (
+        key.toLowerCase().includes('richtext') ||
+        (value.content && Array.isArray(value.content))
+      ) {
+        console.log(`Field ${key} appears to be rich text`);
+        return this.processRichText(value);
+      }
+
+      // Handle arrays
+      if (Array.isArray(value)) {
+        console.log(`Field ${key} is an array`);
+        return value.map((item) => this.safeFieldValue(key, item)).join(', ');
+      }
+
+      // Handle objects with sys property (references)
+      if (value.sys) {
+        console.log(`Field ${key} is a reference`);
+        if (value.sys.type === 'Link') {
+          return value.sys.id;
+        }
+        return JSON.stringify(value);
+      }
+
+      // Handle objects with fields property (entries)
+      if (value.fields) {
+        console.log(`Field ${key} has fields property`);
+        const firstLocale = Object.keys(value.fields)[0] || 'en-US';
+        const fieldValue = value.fields[firstLocale];
+        if (fieldValue !== undefined) {
+          return this.safeFieldValue(key, fieldValue);
+        }
+      }
+
+      // Try to extract a display value
+      if (value.title) {
+        console.log(`Field ${key} has title property`);
+        return value.title;
+      }
+      if (value.name) {
+        console.log(`Field ${key} has name property`);
+        return value.name;
+      }
+      if (value.value) {
+        console.log(`Field ${key} has value property`);
+        return value.value;
+      }
+    }
+
     // Fallback: stringify
     try {
-      return JSON.stringify(value);
+      console.log(`Field ${key} using fallback stringify`);
+      const stringified = JSON.stringify(value);
+      return stringified === '{}' ? '' : stringified;
     } catch {
+      console.log(`Field ${key} using String() fallback`);
       return String(value);
     }
   }
@@ -558,6 +635,7 @@ export class KlaviyoService {
    * Convert structured data to HTML for Klaviyo
    */
   private convertDataToHTML(data: Record<string, any>): string {
+    console.log('Converting data to HTML:', data);
     const fieldKeys = Object.keys(data).filter((key) => key !== 'title' && key !== 'external_id');
     const heading = fieldKeys.length > 0 ? fieldKeys[0] : '';
     let html = `<!DOCTYPE html>
@@ -586,7 +664,9 @@ export class KlaviyoService {
       // Only one mapped field: just show the value, no label
       const key = fieldKeys[0];
       const value = data[key];
+      console.log(`Processing single field ${key} with value:`, value);
       const safeValue = this.safeFieldValue(key, value);
+      console.log(`Safe value for ${key}:`, safeValue);
       if (safeValue !== '') {
         if (
           key.includes('richText') ||
@@ -617,7 +697,9 @@ export class KlaviyoService {
           continue;
         }
         const value = data[key];
+        console.log(`Processing field ${key} with value:`, value);
         const safeValue = this.safeFieldValue(key, value);
+        console.log(`Safe value for ${key}:`, safeValue);
         if (safeValue === '') {
           continue;
         }
@@ -655,6 +737,7 @@ export class KlaviyoService {
       }
     }
     html += `\n </div>\n</body>\n</html>`;
+    console.log('Generated HTML:', html);
     return html;
   }
 
@@ -831,6 +914,36 @@ export class KlaviyoService {
     } catch (error) {
       console.error('Error making Klaviyo API request:', error);
       throw error;
+    }
+  }
+
+  private async createOrUpdateContent(
+    name: string,
+    htmlContent: string,
+    externalId: string,
+    blockType: 'text' | 'image' = 'text',
+    imageUrl?: string,
+    altText?: string
+  ): Promise<any> {
+    const contentData = {
+      external_id: externalId,
+    };
+
+    // Find existing content by external ID
+    const existingContent = await this.findContentByExternalId(externalId, name);
+
+    if (existingContent) {
+      return this.updateContent(
+        existingContent.id,
+        name,
+        htmlContent,
+        externalId,
+        blockType,
+        imageUrl,
+        altText
+      );
+    } else {
+      return this.createContent(name, htmlContent, externalId, blockType, imageUrl, altText);
     }
   }
 }
