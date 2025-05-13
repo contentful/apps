@@ -24,8 +24,8 @@ type CreateFlowProps = {
 };
 
 export type ContentBlockState = {
-  name: string;
-  description: string;
+  names: Record<string, string>;
+  descriptions: Record<string, string>;
 };
 
 type FieldError = {
@@ -40,9 +40,10 @@ const CreateFlow = (props: CreateFlowProps) => {
   const [step, setStep] = useState(FIELDS_STEP);
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set(initialSelectedFields));
   const [fieldsWithErrors, setFieldsWithErrors] = useState<FieldError[]>([]);
-  const [contentBlockStates, setContentBlockStates] = useState<Record<string, ContentBlockState>>(
-    {}
-  );
+  const [contentBlockStates, setContentBlockStates] = useState<ContentBlockState>({
+    names: {},
+    descriptions: {},
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const cma = createClient(
@@ -56,7 +57,7 @@ const CreateFlow = (props: CreateFlowProps) => {
     }
   );
 
-  const handleCreate = async (data: Record<string, ContentBlockState>) => {
+  const handleCreate = async (data: ContentBlockState) => {
     if (entry.state !== EntryStatus.Published && step === CREATE_STEP) {
       setStep(DRAFT_STEP);
       return;
@@ -66,15 +67,6 @@ const CreateFlow = (props: CreateFlowProps) => {
 
     const connectedFields = JSON.parse(sdk.parameters.installation.brazeConnectedFields || '{}');
     const entryConnectedFields = connectedFields[entry.id] || [];
-
-    // Create a map of field IDs to their respective names and descriptions
-    const names: Record<string, string> = {};
-    const descriptions: Record<string, string> = {};
-
-    Object.entries(data).forEach(([fieldId, state]) => {
-      names[fieldId] = state.name;
-      descriptions[fieldId] = state.description;
-    });
 
     try {
       const response = await cma.appActionCall.createWithResponse(
@@ -88,8 +80,8 @@ const CreateFlow = (props: CreateFlowProps) => {
           parameters: {
             entryId: entry.id,
             fieldIds: Array.from(selectedFields).join(','),
-            contentBlockNames: JSON.stringify(names),
-            contentBlockDescriptions: JSON.stringify(descriptions),
+            contentBlockNames: JSON.stringify(data.names),
+            contentBlockDescriptions: JSON.stringify(data.descriptions),
           },
         }
       );

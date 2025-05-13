@@ -4,9 +4,9 @@ import { ContentBlockState } from './CreateFlow';
 
 type DraftStepProps = {
   isSubmitting: boolean;
-  contentBlockStates: Record<string, ContentBlockState>;
+  contentBlockStates: ContentBlockState;
   handlePreviousStep: () => void;
-  handleNextStep: (data: Record<string, ContentBlockState>) => void;
+  handleNextStep: (data: ContentBlockState) => void;
 };
 
 const DraftStep = ({

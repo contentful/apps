@@ -23,14 +23,14 @@ const MAX_DESCRIPTION_LENGTH = 250;
 
 // Types
 type ContentBlockState = {
-  name: string;
-  description: string;
+  names: Record<string, string>;
+  descriptions: Record<string, string>;
 };
 
 type ContentBlockFormProps = {
   fieldId: string;
   entry: Entry;
-  editDraft: ContentBlockState;
+  editDraft: { name: string; description: string };
   onNameChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   onCancel: () => void;
@@ -47,7 +47,7 @@ type ContentBlockCardProps = {
   entry: Entry;
   contentBlockState: ContentBlockState;
   isEditing: boolean;
-  editDraft: ContentBlockState;
+  editDraft: { name: string; description: string };
   onEdit: (fieldId: string) => void;
   onNameChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
@@ -58,11 +58,11 @@ type ContentBlockCardProps = {
 type CreateStepProps = {
   entry: Entry;
   selectedFields: Set<string>;
-  contentBlockStates: Record<string, ContentBlockState>;
-  setContentBlockStates: Dispatch<SetStateAction<Record<string, ContentBlockState>>>;
+  contentBlockStates: ContentBlockState;
+  setContentBlockStates: Dispatch<SetStateAction<ContentBlockState>>;
   isSubmitting: boolean;
   handlePreviousStep: () => void;
-  handleNextStep: (contentBlockStates: Record<string, ContentBlockState>) => void;
+  handleNextStep: (contentBlockStates: ContentBlockState) => void;
 };
 
 // Utils
@@ -173,7 +173,10 @@ const ContentBlockCard = ({
           onSave={onSave}
         />
       ) : (
-        <ContentBlockView name={contentBlockState.name} onEdit={() => onEdit(fieldId)} />
+        <ContentBlockView
+          name={contentBlockState.names[fieldId] || ''}
+          onEdit={() => onEdit(fieldId)}
+        />
       )}
     </Card>
   );
@@ -191,22 +194,26 @@ const CreateStep = ({
 }: CreateStepProps) => {
   // State
   const [editingField, setEditingField] = useState<string | null>(null);
-  const [editDraft, setEditDraft] = useState<ContentBlockState>({ name: '', description: '' });
+  const [editDraft, setEditDraft] = useState<{ name: string; description: string }>({
+    name: '',
+    description: '',
+  });
 
   // Effects
   useEffect(() => {
-    const initialStates: Record<string, ContentBlockState> = {};
+    const initialStates: ContentBlockState = {
+      names: {},
+      descriptions: {},
+    };
     selectedFields.forEach((fieldId) => {
-      initialStates[fieldId] = {
-        name: getDefaultContentBlockName(entry, fieldId),
-        description: '',
-      };
+      initialStates.names[fieldId] = getDefaultContentBlockName(entry, fieldId);
+      initialStates.descriptions[fieldId] = '';
     });
     setContentBlockStates(initialStates);
   }, [entry, selectedFields]);
 
   // Early return: show skeleton if any field state is missing
-  if (Array.from(selectedFields).some((fieldId) => !contentBlockStates[fieldId])) {
+  if (Array.from(selectedFields).some((fieldId) => !contentBlockStates.names[fieldId])) {
     return (
       <Box padding="spacingM">
         <Skeleton.Container>
@@ -221,7 +228,10 @@ const CreateStep = ({
   // Event Handlers
   const handleEdit = (fieldId: string) => {
     setEditingField(fieldId);
-    setEditDraft(contentBlockStates[fieldId] || { name: '', description: '' });
+    setEditDraft({
+      name: contentBlockStates.names[fieldId] || '',
+      description: contentBlockStates.descriptions[fieldId] || '',
+    });
   };
 
   const handleNameChange = (value: string) => {
@@ -237,26 +247,20 @@ const CreateStep = ({
   const handleCancel = () => {
     setEditingField(null);
     if (editingField) {
-      setEditDraft(contentBlockStates[editingField] || { name: '', description: '' });
+      setEditDraft({
+        name: contentBlockStates.names[editingField] || '',
+        description: contentBlockStates.descriptions[editingField] || '',
+      });
     }
   };
+
   const handleSave = (fieldId: string) => {
-    setContentBlockStates((prev: Record<string, ContentBlockState>) => ({
-      ...prev,
-      [fieldId]: { ...editDraft },
+    setContentBlockStates((prev) => ({
+      names: { ...prev.names, [fieldId]: editDraft.name },
+      descriptions: { ...prev.descriptions, [fieldId]: editDraft.description },
     }));
     setEditingField(null);
     setEditDraft({ name: '', description: '' });
-  };
-
-  const getContentBlockData = () => {
-    const names: Record<string, string> = {};
-    const descriptions: Record<string, string> = {};
-    Object.entries(contentBlockStates).forEach(([fieldId, state]) => {
-      names[fieldId] = state.name;
-      descriptions[fieldId] = state.description;
-    });
-    return { names, descriptions };
   };
 
   return (
@@ -272,7 +276,7 @@ const CreateStep = ({
               key={fieldId}
               fieldId={fieldId}
               entry={entry}
-              contentBlockState={contentBlockStates[fieldId]}
+              contentBlockState={contentBlockStates}
               isEditing={editingField === fieldId}
               editDraft={editDraft}
               onEdit={handleEdit}
