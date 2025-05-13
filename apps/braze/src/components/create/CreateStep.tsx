@@ -9,59 +9,254 @@ import {
   Flex,
   TextInput,
   FormControl,
+  Textarea,
+  Skeleton,
 } from '@contentful/f36-components';
-import { EditIcon } from '@contentful/f36-icons';
 import { Entry } from '../../fields/Entry';
 import WizardFooter from '../WizardFooter';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { editButton } from './CreateStep.styles';
+import { PencilSimple } from '@phosphor-icons/react';
+import tokens from '@contentful/f36-tokens';
 
-interface CreateStepProps {
+const MAX_DESCRIPTION_LENGTH = 250;
+
+// Types
+type ContentBlockState = {
+  name: string;
+  description: string;
+};
+
+type ContentBlockFormProps = {
+  fieldId: string;
+  entry: Entry;
+  editDraft: ContentBlockState;
+  onNameChange: (value: string) => void;
+  onDescriptionChange: (value: string) => void;
+  onCancel: () => void;
+  onSave: (fieldId: string) => void;
+};
+
+type ContentBlockViewProps = {
+  name: string;
+  onEdit: () => void;
+};
+
+type ContentBlockCardProps = {
+  fieldId: string;
+  entry: Entry;
+  contentBlockState: ContentBlockState;
+  isEditing: boolean;
+  editDraft: ContentBlockState;
+  onEdit: (fieldId: string) => void;
+  onNameChange: (value: string) => void;
+  onDescriptionChange: (value: string) => void;
+  onCancel: () => void;
+  onSave: (fieldId: string) => void;
+};
+
+type CreateStepProps = {
   entry: Entry;
   selectedFields: Set<string>;
-  contentBlockNames: Record<string, string>;
-  setContentBlockNames: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  contentBlockStates: Record<string, ContentBlockState>;
+  setContentBlockStates: Dispatch<SetStateAction<Record<string, ContentBlockState>>>;
   isSubmitting: boolean;
   handlePreviousStep: () => void;
-  handleNextStep: (contentBlockNames: Record<string, string>) => void;
-}
+  handleNextStep: (contentBlockStates: Record<string, ContentBlockState>) => void;
+};
 
+// Utils
 const getDefaultContentBlockName = (entry: Entry, fieldId: string) => {
   const entryTitle = entry.title || 'Untitled';
   return `${entryTitle.replace(/\s+/g, '-')}-${fieldId}`;
 };
 
+// Components
+const ContentBlockForm = ({
+  fieldId,
+  entry,
+  editDraft,
+  onNameChange,
+  onDescriptionChange,
+  onCancel,
+  onSave,
+}: ContentBlockFormProps) => {
+  return (
+    <Stack flexDirection="column" style={{ width: '100%' }}>
+      <FormControl isRequired style={{ width: '100%' }}>
+        <FormControl.Label>Content Block name</FormControl.Label>
+        <TextInput
+          value={editDraft.name}
+          onChange={(e) => onNameChange(e.target.value)}
+          placeholder={getDefaultContentBlockName(entry, fieldId)}
+          style={{ marginBottom: tokens.spacingS }}
+          autoFocus
+        />
+        <FormControl.HelpText>Name should be unique.</FormControl.HelpText>
+      </FormControl>
+      <FormControl style={{ width: '100%' }}>
+        <FormControl.Label>Description</FormControl.Label>
+        <Textarea
+          value={editDraft.description}
+          onChange={(e) => onDescriptionChange(e.target.value)}
+          maxLength={MAX_DESCRIPTION_LENGTH}
+          rows={3}
+          style={{ marginBottom: tokens.spacing2Xs }}
+        />
+        <Text fontColor="gray500" fontSize="fontSizeS">
+          {editDraft.description.length} / {MAX_DESCRIPTION_LENGTH}
+        </Text>
+      </FormControl>
+      <Flex
+        justifyContent="flex-end"
+        style={{ gap: tokens.spacingS, marginTop: tokens.spacingS, width: '100%' }}>
+        <Button
+          variant="secondary"
+          size="small"
+          onClick={onCancel}
+          style={{ marginRight: tokens.spacingS }}>
+          Cancel
+        </Button>
+        <Button variant="secondary" size="small" onClick={() => onSave(fieldId)}>
+          Save
+        </Button>
+      </Flex>
+    </Stack>
+  );
+};
+
+const ContentBlockView = ({ name, onEdit }: ContentBlockViewProps) => {
+  return (
+    <Flex justifyContent="space-between">
+      <Stack
+        spacing="spacing2Xs"
+        flexDirection="column"
+        alignItems="flex-start"
+        style={{ width: '100%' }}>
+        <Text>Content Block name</Text>
+        <Text fontWeight="fontWeightDemiBold">{name}</Text>
+      </Stack>
+      <IconButton
+        size="small"
+        variant="secondary"
+        icon={<PencilSimple />}
+        aria-label="Edit content block"
+        onClick={onEdit}
+        className={editButton}
+      />
+    </Flex>
+  );
+};
+
+const ContentBlockCard = ({
+  fieldId,
+  entry,
+  contentBlockState,
+  isEditing,
+  editDraft,
+  onEdit,
+  onNameChange,
+  onDescriptionChange,
+  onCancel,
+  onSave,
+}: ContentBlockCardProps) => {
+  return (
+    <Card margin="none" style={{ padding: tokens.spacingXs }}>
+      {isEditing ? (
+        <ContentBlockForm
+          fieldId={fieldId}
+          entry={entry}
+          editDraft={editDraft}
+          onNameChange={onNameChange}
+          onDescriptionChange={onDescriptionChange}
+          onCancel={onCancel}
+          onSave={onSave}
+        />
+      ) : (
+        <ContentBlockView name={contentBlockState.name} onEdit={() => onEdit(fieldId)} />
+      )}
+    </Card>
+  );
+};
+
+// Main Component
 const CreateStep = ({
   entry,
   selectedFields,
   isSubmitting,
-  contentBlockNames,
-  setContentBlockNames,
+  contentBlockStates,
+  setContentBlockStates,
   handlePreviousStep,
   handleNextStep,
 }: CreateStepProps) => {
+  // State
   const [editingField, setEditingField] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState<ContentBlockState>({ name: '', description: '' });
 
+  // Effects
   useEffect(() => {
-    // Initialize content block names with defaults
-    const initialNames: Record<string, string> = {};
+    const initialStates: Record<string, ContentBlockState> = {};
     selectedFields.forEach((fieldId) => {
-      initialNames[fieldId] = getDefaultContentBlockName(entry, fieldId);
-    });
-    setContentBlockNames(initialNames);
-  }, [entry, selectedFields]);
-
-  const handleEdit = (fieldId: string) => {
-    setEditingField(fieldId);
-  };
-
-  const handleNameChange = (fieldId: string, value: string) => {
-    setContentBlockNames((prev) => {
-      return {
-        ...prev,
-        [fieldId]: value,
+      initialStates[fieldId] = {
+        name: getDefaultContentBlockName(entry, fieldId),
+        description: '',
       };
     });
+    setContentBlockStates(initialStates);
+  }, [entry, selectedFields]);
+
+  // Early return: show skeleton if any field state is missing
+  if (Array.from(selectedFields).some((fieldId) => !contentBlockStates[fieldId])) {
+    return (
+      <Box padding="spacingM">
+        <Skeleton.Container>
+          <Skeleton.BodyText numberOfLines={2} />
+          <Skeleton.Image width={200} height={32} />
+          <Skeleton.BodyText numberOfLines={1} />
+        </Skeleton.Container>
+      </Box>
+    );
+  }
+
+  // Event Handlers
+  const handleEdit = (fieldId: string) => {
+    setEditingField(fieldId);
+    setEditDraft(contentBlockStates[fieldId] || { name: '', description: '' });
+  };
+
+  const handleNameChange = (value: string) => {
+    setEditDraft((prev) => ({ ...prev, name: value }));
+  };
+
+  const handleDescriptionChange = (value: string) => {
+    if (value.length <= MAX_DESCRIPTION_LENGTH) {
+      setEditDraft((prev) => ({ ...prev, description: value }));
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingField(null);
+    if (editingField) {
+      setEditDraft(contentBlockStates[editingField] || { name: '', description: '' });
+    }
+  };
+  const handleSave = (fieldId: string) => {
+    setContentBlockStates((prev: Record<string, ContentBlockState>) => ({
+      ...prev,
+      [fieldId]: { ...editDraft },
+    }));
+    setEditingField(null);
+    setEditDraft({ name: '', description: '' });
+  };
+
+  const getContentBlockData = () => {
+    const names: Record<string, string> = {};
+    const descriptions: Record<string, string> = {};
+    Object.entries(contentBlockStates).forEach(([fieldId, state]) => {
+      names[fieldId] = state.name;
+      descriptions[fieldId] = state.description;
+    });
+    return { names, descriptions };
   };
 
   return (
@@ -73,44 +268,31 @@ const CreateStep = ({
         </Paragraph>
         <Stack spacing="spacingS" flexDirection="column">
           {Array.from(selectedFields).map((fieldId: string) => (
-            <Card key={fieldId} margin="none" style={{ padding: 'spacingXs' }}>
-              <Flex justifyContent="space-between">
-                <Stack spacing="spacing2Xs" flexDirection="column" alignItems="flex-start">
-                  {editingField === fieldId ? (
-                    <FormControl isRequired>
-                      <FormControl.Label>Name</FormControl.Label>
-                      <TextInput
-                        value={contentBlockNames[fieldId] || ''}
-                        onChange={(e) => handleNameChange(fieldId, e.target.value)}
-                        autoFocus
-                      />
-                      <FormControl.HelpText>Name should be unique.</FormControl.HelpText>
-                    </FormControl>
-                  ) : (
-                    <>
-                      <Text>Name</Text>
-                      <Text fontWeight="fontWeightDemiBold">{contentBlockNames[fieldId]}</Text>
-                    </>
-                  )}
-                </Stack>
-                <IconButton
-                  size="small"
-                  variant="secondary"
-                  icon={<EditIcon />}
-                  aria-label="Edit content block"
-                  onClick={() => handleEdit(fieldId)}
-                  className={editButton}
-                />
-              </Flex>
-            </Card>
+            <ContentBlockCard
+              key={fieldId}
+              fieldId={fieldId}
+              entry={entry}
+              contentBlockState={contentBlockStates[fieldId]}
+              isEditing={editingField === fieldId}
+              editDraft={editDraft}
+              onEdit={handleEdit}
+              onNameChange={handleNameChange}
+              onDescriptionChange={handleDescriptionChange}
+              onCancel={handleCancel}
+              onSave={handleSave}
+            />
           ))}
         </Stack>
       </Box>
       <WizardFooter>
-        <Button variant="secondary" size="small" onClick={handlePreviousStep}>
+        <Button
+          variant="secondary"
+          size="small"
+          onClick={handlePreviousStep}
+          data-testid="back-button">
           Back
         </Button>
-        <Button variant="primary" onClick={() => handleNextStep(contentBlockNames)}>
+        <Button variant="primary" onClick={() => handleNextStep(contentBlockStates)}>
           {isSubmitting ? 'Creating...' : 'Send to Braze'}
         </Button>
       </WizardFooter>
