@@ -1,4 +1,11 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import React from 'react';
+import {
+  render,
+  screen,
+  fireEvent,
+  cleanup,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import CreateStep from '../../../src/components/create/CreateStep';
 import { Entry } from '../../../src/fields/Entry';
@@ -26,7 +33,10 @@ describe('CreateStep', () => {
       <CreateStep
         entry={mockEntry}
         selectedFields={mockSelectedFields}
-        contentBlockStates={{}}
+        contentBlockStates={{
+          names: { field1: 'Field-1', field2: 'Field-2' },
+          descriptions: { field1: 'Field 1 description', field2: 'Field 2 description' },
+        }}
         setContentBlockStates={() => {}}
         isSubmitting={false}
         handlePreviousStep={mockHandlePreviousStep}
@@ -44,24 +54,15 @@ describe('CreateStep', () => {
     cleanup();
   });
 
-  it('renders the component with initial state', () => {
+  it('renders the component with initial state', async () => {
     renderComponent();
 
     // Check if main elements are rendered
     expect(screen.getByText(/Edit each field/i)).toBeTruthy();
-    expect(screen.getAllByText('Name')).toHaveLength(mockSelectedFields.size);
+    expect(screen.getAllByText('Content Block name')).toHaveLength(mockSelectedFields.size);
     expect(screen.getAllByRole('button', { name: /Edit content block/i })).toHaveLength(
       mockSelectedFields.size
     );
-  });
-
-  it('shows default content block names', () => {
-    renderComponent();
-
-    mockSelectedFields.forEach((fieldId) => {
-      const expectedName = `Test-Entry-${fieldId}`;
-      expect(screen.getByText(expectedName)).toBeTruthy();
-    });
   });
 
   it('enters edit mode when edit button is clicked', () => {
@@ -72,10 +73,10 @@ describe('CreateStep', () => {
 
     // Check if form control elements appear
     expect(screen.getByText('Name should be unique.')).toBeTruthy();
-    expect(screen.getByRole('textbox')).toBeTruthy();
+    expect(screen.getByText('Field 1 description')).toBeTruthy();
   });
 
-  it('updates content block name when edited', () => {
+  it('updates content block when edited', () => {
     renderComponent();
 
     // Click edit button for first field
@@ -83,14 +84,21 @@ describe('CreateStep', () => {
     fireEvent.click(editButtons[0]);
 
     // Type new name
-    const input = screen.getByRole('textbox') as HTMLInputElement;
-    fireEvent.change(input, { target: { value: 'New Name' } });
+    const inputName = screen.getByTestId('content-block-name-input') as HTMLInputElement;
+    fireEvent.change(inputName, { target: { value: 'New Name' } });
+
+    // Type new description
+    const inputDescription = screen.getByTestId(
+      'content-block-description-input'
+    ) as HTMLInputElement;
+    fireEvent.change(inputDescription, { target: { value: 'New Description' } });
 
     // Check if the new name is in the input
-    expect(input.value).toBe('New Name');
+    expect(inputName.value).toBe('New Name');
+    expect(inputDescription.value).toBe('New Description');
   });
 
-  it('handles form submission', () => {
+  it('handles form submission', async () => {
     renderComponent();
 
     // Click the submit button
@@ -106,7 +114,7 @@ describe('CreateStep', () => {
     expect(screen.getByText('Creating...')).toBeTruthy();
   });
 
-  it('navigates back when back button is clicked', () => {
+  it('navigates back when back button is clicked', async () => {
     renderComponent();
 
     const backButton = screen.getByRole('button', { name: 'Back' });

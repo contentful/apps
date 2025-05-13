@@ -87,6 +87,7 @@ const ContentBlockForm = ({
         <FormControl.Label>Content Block name</FormControl.Label>
         <TextInput
           value={editDraft.name}
+          data-testid="content-block-name-input"
           onChange={(e) => onNameChange(e.target.value)}
           placeholder={getDefaultContentBlockName(entry, fieldId)}
           style={{ marginBottom: tokens.spacingS }}
@@ -102,6 +103,7 @@ const ContentBlockForm = ({
           maxLength={MAX_DESCRIPTION_LENGTH}
           rows={3}
           style={{ marginBottom: tokens.spacing2Xs }}
+          data-testid="content-block-description-input"
         />
         <Text fontColor="gray500" fontSize="fontSizeS">
           {editDraft.description.length} / {MAX_DESCRIPTION_LENGTH}
@@ -216,7 +218,7 @@ const CreateStep = ({
   if (Array.from(selectedFields).some((fieldId) => !contentBlockStates.names[fieldId])) {
     return (
       <Box padding="spacingM">
-        <Skeleton.Container>
+        <Skeleton.Container data-testid="cf-ui-skeleton-form">
           <Skeleton.BodyText numberOfLines={2} />
           <Skeleton.Image width={200} height={32} />
           <Skeleton.BodyText numberOfLines={1} />
