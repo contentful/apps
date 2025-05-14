@@ -44,6 +44,12 @@
           "name": "Content Block Names",
           "type": "Symbol",
           "required": true
+        },
+        {
+          "id": "contentBlockDescriptions",
+          "name": "Content Block Descriptions",
+          "type": "Symbol",
+          "required": true
         }
       ]
     }

@@ -9,6 +9,7 @@
     "@contentful/f36-tokens": "4.0.2",
     "@contentful/react-apps-toolkit": "1.2.16",
     "@contentful/rich-text-html-renderer": "^17.0.0",
+    "@phosphor-icons/react": "^2.1.7",
     "@testing-library/user-event": "^14.6.1",
     "contentful-management": "11.48.3",
     "contentful-resolve-response": "^1.9.2",
@@ -27,7 +28,10 @@
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "upsert-actions": "contentful-app-scripts upsert-actions --ci --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
-    "build:functions": "contentful-app-scripts build-functions --ci"
+    "build:functions": "contentful-app-scripts build-functions --ci",
+    "deploy:dev": "source .env && contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id \"$DEFINITIONS_ORG_ID\" --definition-id gWLhC7MnK2rgcvifgE4do --token \"$CONTENTFUL_CMA_TOKEN\"",
+    "upload-ci:dev": "source .env && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\"",
+    "upsert-actions:dev": "source .env && contentful-app-scripts upsert-actions --ci --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\""
   },
   "devDependencies": {
     "@contentful/app-scripts": "^2.3.0",

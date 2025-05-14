@@ -12,10 +12,16 @@ type AppInstallationParameters = {
   brazeEndpoint: string;
 };
 
+type ContentBlockData = {
+  name: string;
+  description: string;
+};
+
 export type AppActionParameters = {
   entryId: string;
   fieldIds: string;
   contentBlockNames: string;
+  contentBlockDescriptions: string;
 };
 
 function initContentfulManagementClient(context: FunctionEventContext): PlainClientAPI {
@@ -42,8 +48,12 @@ export const handler: FunctionEventHandler<
 ) => {
   const cma = initContentfulManagementClient(context);
 
-  const { entryId, fieldIds, contentBlockNames } = event.body;
+  const { entryId, fieldIds, contentBlockNames, contentBlockDescriptions } = event.body;
   const parsedContentBlockNames = JSON.parse(contentBlockNames) as Record<string, string>;
+  const parsedContentBlockDescriptions = JSON.parse(contentBlockDescriptions) as Record<
+    string,
+    string
+  >;
   const entry = await cma.entry.get({ entryId });
   const contentType = await cma.contentType.get({
     contentTypeId: entry.sys.contentType.sys.id,
@@ -102,6 +112,7 @@ export const handler: FunctionEventHandler<
           name: parsedContentBlockNames[fieldId],
           content: content,
           state: 'draft',
+          description: parsedContentBlockDescriptions[fieldId] || '',
         }),
       });
 

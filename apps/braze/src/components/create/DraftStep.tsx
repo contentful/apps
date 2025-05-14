@@ -1,23 +1,24 @@
 import { Paragraph, Button, Subheading } from '@contentful/f36-components';
 import WizardFooter from '../WizardFooter';
+import { ContentBlockData } from './CreateFlow';
 
 type DraftStepProps = {
   isSubmitting: boolean;
-  contentBlockNames: Record<string, string>;
+  contentBlocksData: ContentBlockData;
   handlePreviousStep: () => void;
-  handleNextStep: (contentBlockNames: Record<string, string>) => void;
+  handleNextStep: (data: ContentBlockData) => void;
 };
 
 const DraftStep = ({
   isSubmitting,
-  contentBlockNames,
+  contentBlocksData,
   handlePreviousStep,
   handleNextStep,
 }: DraftStepProps) => {
   return (
     <>
       <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeXl" lineHeight="lineHeightL">
-        This entry is in a “Draft” state.
+        This entry is in a "Draft" state.
       </Subheading>
       <Paragraph marginBottom="spacing2Xs">
         This entry has not yet been published, and it's content may not have passed your
@@ -27,7 +28,7 @@ const DraftStep = ({
         <Button variant="secondary" size="small" onClick={handlePreviousStep}>
           Back
         </Button>
-        <Button variant="primary" size="small" onClick={() => handleNextStep(contentBlockNames)}>
+        <Button variant="primary" size="small" onClick={() => handleNextStep(contentBlocksData)}>
           {isSubmitting ? 'Creating...' : 'Send to Braze'}
         </Button>
       </WizardFooter>

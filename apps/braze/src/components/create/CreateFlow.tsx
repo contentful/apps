@@ -23,6 +23,11 @@ type CreateFlowProps = {
   initialSelectedFields?: string[];
 };
 
+export type ContentBlockData = {
+  names: Record<string, string>;
+  descriptions: Record<string, string>;
+};
+
 type FieldError = {
   fieldId: string;
   success: boolean;
@@ -35,7 +40,10 @@ const CreateFlow = (props: CreateFlowProps) => {
   const [step, setStep] = useState(FIELDS_STEP);
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set(initialSelectedFields));
   const [fieldsWithErrors, setFieldsWithErrors] = useState<FieldError[]>([]);
-  const [contentBlockNames, setContentBlockNames] = useState<Record<string, string>>({});
+  const [contentBlocksData, setContentBlocksData] = useState<ContentBlockData>({
+    names: {},
+    descriptions: {},
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const cma = createClient(
@@ -49,7 +57,7 @@ const CreateFlow = (props: CreateFlowProps) => {
     }
   );
 
-  const handleCreate = async (contentBlockNames: Record<string, string>) => {
+  const handleCreate = async (data: ContentBlockData) => {
     if (entry.state !== EntryStatus.Published && step === CREATE_STEP) {
       setStep(DRAFT_STEP);
       return;
@@ -72,21 +80,21 @@ const CreateFlow = (props: CreateFlowProps) => {
           parameters: {
             entryId: entry.id,
             fieldIds: Array.from(selectedFields).join(','),
-            contentBlockNames: JSON.stringify(contentBlockNames),
+            contentBlockNames: JSON.stringify(data.names),
+            contentBlockDescriptions: JSON.stringify(data.descriptions),
           },
         }
       );
-      const data = JSON.parse(response.response.body);
+      const responseData = JSON.parse(response.response.body);
 
-      // TODO: define type returned by the action
-      const newFields = data.results
+      const newFields = responseData.results
         .filter((result: any) => result.success)
         .map((result: any) => [result.fieldId, result.contentBlockId]);
 
       connectedFields[entry.id] = [...entryConnectedFields, ...newFields];
       sdk.parameters.installation.brazeConnectedFields = JSON.stringify(connectedFields);
 
-      const errors = data.results.filter((result: any) => !result.success);
+      const errors = responseData.results.filter((result: any) => !result.success);
       const clientErrors = errors.filter((result: any) => result.statusCode !== 500);
       if (errors.length > 0 && clientErrors.length > 0) {
         setFieldsWithErrors(errors);
@@ -122,8 +130,8 @@ const CreateFlow = (props: CreateFlowProps) => {
           selectedFields={selectedFields}
           isSubmitting={isSubmitting}
           handlePreviousStep={() => setStep(FIELDS_STEP)}
-          contentBlockNames={contentBlockNames}
-          setContentBlockNames={setContentBlockNames}
+          contentBlocksData={contentBlocksData}
+          setContentBlocksData={setContentBlocksData}
           handleNextStep={handleCreate}
         />
       )}
@@ -131,7 +139,7 @@ const CreateFlow = (props: CreateFlowProps) => {
         <DraftStep
           isSubmitting={isSubmitting}
           handlePreviousStep={() => setStep(CREATE_STEP)}
-          contentBlockNames={contentBlockNames}
+          contentBlocksData={contentBlocksData}
           handleNextStep={handleCreate}
         />
       )}
