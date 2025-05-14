@@ -1,7 +1,7 @@
 import { Paragraph, Button, Subheading } from '@contentful/f36-components';
 import WizardFooter from '../WizardFooter';
 
-type CreateStepProps = {
+type DraftStepProps = {
   isSubmitting: boolean;
   contentBlockNames: Record<string, string>;
   handlePreviousStep: () => void;
@@ -13,7 +13,7 @@ const DraftStep = ({
   contentBlockNames,
   handlePreviousStep,
   handleNextStep,
-}: CreateStepProps) => {
+}: DraftStepProps) => {
   return (
     <>
       <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeXl" lineHeight="lineHeightL">

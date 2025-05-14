@@ -68,6 +68,7 @@ export const handler: FunctionEventHandler<
       results.push({
         fieldId,
         success: false,
+        statusCode: 404,
         message: `Field ${fieldId} not found or has no value`,
       });
       continue;
@@ -77,6 +78,7 @@ export const handler: FunctionEventHandler<
       results.push({
         fieldId,
         success: false,
+        statusCode: 404,
         message: `Content block name not found or has no value for field ${fieldId}`,
       });
       continue;
@@ -103,26 +105,29 @@ export const handler: FunctionEventHandler<
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
         results.push({
           fieldId,
           success: false,
-          message: `Error creating content block: ${response.statusText}`,
+          statusCode: response.status,
+          message: `Error creating content block for field ${fieldId}: ${data.message}`,
         });
         continue;
       }
 
-      const data = await response.json();
-
       results.push({
         fieldId,
         success: true,
+        statusCode: 201,
         contentBlockId: data.content_block_id,
       });
     } catch (error) {
       results.push({
         fieldId,
         success: false,
+        statusCode: 500,
         message: error instanceof Error ? error.message : 'Unknown error',
       });
     }

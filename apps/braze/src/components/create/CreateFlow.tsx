@@ -9,9 +9,11 @@ import SuccessStep from './SuccessStep';
 import { EntryStatus, FIELDS_STEP } from '../../utils';
 import { createClient } from 'contentful-management';
 import DraftStep from './DraftStep';
+import ClientErrorStep from './ClientErrorStep';
 
 const CREATE_STEP = 'create';
 const DRAFT_STEP = 'draft';
+const CLIENT_ERROR_STEP = 'client-error';
 const SUCCESS_STEP = 'success';
 
 type CreateFlowProps = {
@@ -21,10 +23,18 @@ type CreateFlowProps = {
   initialSelectedFields?: string[];
 };
 
+type FieldError = {
+  fieldId: string;
+  success: boolean;
+  statusCode: number;
+  message: string;
+};
+
 const CreateFlow = (props: CreateFlowProps) => {
   const { sdk, entry, initialSelectedFields = [] } = props;
   const [step, setStep] = useState(FIELDS_STEP);
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set(initialSelectedFields));
+  const [fieldsWithErrors, setFieldsWithErrors] = useState<FieldError[]>([]);
   const [contentBlockNames, setContentBlockNames] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -67,6 +77,7 @@ const CreateFlow = (props: CreateFlowProps) => {
         }
       );
       const data = JSON.parse(response.response.body);
+
       // TODO: define type returned by the action
       const newFields = data.results
         .filter((result: any) => result.success)
@@ -74,6 +85,14 @@ const CreateFlow = (props: CreateFlowProps) => {
 
       connectedFields[entry.id] = [...entryConnectedFields, ...newFields];
       sdk.parameters.installation.brazeConnectedFields = JSON.stringify(connectedFields);
+
+      const errors = data.results.filter((result: any) => !result.success);
+      const clientErrors = errors.filter((result: any) => result.statusCode !== 500);
+      if (errors.length > 0 && clientErrors.length > 0) {
+        setFieldsWithErrors(errors);
+        setStep(CLIENT_ERROR_STEP);
+        return;
+      }
 
       setIsSubmitting(false);
       setStep(SUCCESS_STEP);
@@ -114,6 +133,12 @@ const CreateFlow = (props: CreateFlowProps) => {
           handlePreviousStep={() => setStep(CREATE_STEP)}
           contentBlockNames={contentBlockNames}
           handleNextStep={handleCreate}
+        />
+      )}
+      {step === CLIENT_ERROR_STEP && (
+        <ClientErrorStep
+          fieldsWithErrors={fieldsWithErrors}
+          handleClose={() => sdk.close({ step: 'close' })}
         />
       )}
       {step === SUCCESS_STEP && (
