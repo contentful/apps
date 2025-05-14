@@ -10,6 +10,15 @@
       "accepts": ["appaction.call"]
     },
     {
+      "id": "listContentBlocksFunction",
+      "name": "List content blocks function",
+      "description": "Function to get the list of content blocks from App Action.",
+      "path": "functions/listContentBlocks.js",
+      "entryFile": "functions/listContentBlocks.ts",
+      "allowNetworks": ["https://*.braze.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
       "id": "updateContentBlocksFunction",
       "name": "Update content blocks function",
       "description": "Function to update content blocks from App Events.",
@@ -46,6 +55,14 @@
           "required": true
         }
       ]
+    },
+    {
+      "id": "listContentBlocksAction",
+      "name": "List content blocks action",
+      "type": "function-invocation",
+      "functionId": "listContentBlocksFunction",
+      "category": "Custom",
+      "parameters": []
     }
   ]
 }

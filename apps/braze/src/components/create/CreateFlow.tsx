@@ -100,6 +100,8 @@ const CreateFlow = (props: CreateFlowProps) => {
       {step === CREATE_STEP && (
         <CreateStep
           entry={entry}
+          sdk={sdk}
+          cma={cma}
           selectedFields={selectedFields}
           isSubmitting={isSubmitting}
           handlePreviousStep={() => setStep(FIELDS_STEP)}

@@ -9,15 +9,20 @@ import {
   Flex,
   TextInput,
   FormControl,
+  Note,
 } from '@contentful/f36-components';
 import { EditIcon } from '@contentful/f36-icons';
 import { Entry } from '../../fields/Entry';
 import WizardFooter from '../WizardFooter';
 import { useState, useEffect } from 'react';
 import { editButton } from './CreateStep.styles';
+import { DialogAppSDK } from '@contentful/app-sdk';
+import { PlainClientAPI } from 'contentful-management';
 
 interface CreateStepProps {
   entry: Entry;
+  sdk: DialogAppSDK;
+  cma: PlainClientAPI;
   selectedFields: Set<string>;
   contentBlockNames: Record<string, string>;
   setContentBlockNames: React.Dispatch<React.SetStateAction<Record<string, string>>>;
@@ -33,6 +38,8 @@ const getDefaultContentBlockName = (entry: Entry, fieldId: string) => {
 
 const CreateStep = ({
   entry,
+  sdk,
+  cma,
   selectedFields,
   isSubmitting,
   contentBlockNames,
@@ -41,6 +48,8 @@ const CreateStep = ({
   handleNextStep,
 }: CreateStepProps) => {
   const [editingField, setEditingField] = useState<string | null>(null);
+  const [existingFields, setExistingFields] = useState<string[]>([]);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     // Initialize content block names with defaults
@@ -64,16 +73,62 @@ const CreateStep = ({
     });
   };
 
+  const handleSendToBraze = async () => {
+    try {
+      console.log('Executing get list of content blocks');
+      const listResponse = await cma.appActionCall.createWithResponse(
+        {
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
+          appDefinitionId: sdk.ids.app!,
+          appActionId: 'listContentBlocksAction',
+        },
+        {
+          parameters: {},
+        }
+      );
+      const listResults = JSON.parse(listResponse.response.body);
+
+      const existingCodeBlockNames = Object.keys(contentBlockNames).filter((name) =>
+        listResults.contentBlocks.some((block: any) => block.id === name)
+      );
+
+      if (existingCodeBlockNames.length > 0) {
+        setExistingFields(existingCodeBlockNames);
+        setHasError(true);
+      } else {
+        setHasError(false);
+        handleNextStep(contentBlockNames);
+      }
+
+      console.log('Finished executing get list of content blocks', listResults);
+      console.log('Existing content blocks', existingCodeBlockNames);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <>
       <Box>
+        {hasError && (
+          <Note variant="negative" title="There was an issue">
+            Some content block names already exist. Please change them to be unique.
+          </Note>
+        )}
         <Paragraph>
           Edit each field to change the name or add an optional description. When complete, send
           directly to Braze. Content Block names should be unique.
         </Paragraph>
         <Stack spacing="spacingS" flexDirection="column">
           {Array.from(selectedFields).map((fieldId: string) => (
-            <Card key={fieldId} margin="none" style={{ padding: 'spacingXs' }}>
+            <Card
+              key={fieldId}
+              margin="none"
+              style={{
+                padding: 'spacingXs',
+                borderColor: hasError && existingFields.includes(fieldId) ? 'red' : undefined,
+              }}>
               <Flex justifyContent="space-between">
                 <Stack spacing="spacing2Xs" flexDirection="column" alignItems="flex-start">
                   {editingField === fieldId ? (
@@ -110,7 +165,7 @@ const CreateStep = ({
         <Button variant="secondary" size="small" onClick={handlePreviousStep}>
           Back
         </Button>
-        <Button variant="primary" onClick={() => handleNextStep(contentBlockNames)}>
+        <Button variant="primary" onClick={handleSendToBraze}>
           {isSubmitting ? 'Creating...' : 'Send to Braze'}
         </Button>
       </WizardFooter>
