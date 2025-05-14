@@ -192,7 +192,7 @@ describe('createContentBlocks', () => {
     vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
     vi.mocked(global.fetch).mockResolvedValue({
       ok: false,
-      status: 500,
+      status: 401,
       json: () =>
         Promise.resolve({
           message: 'Unauthorized',
@@ -216,7 +216,7 @@ describe('createContentBlocks', () => {
         {
           fieldId: 'title',
           success: false,
-          statusCode: 500,
+          statusCode: 401,
           message: 'Error creating content block for field title: Unauthorized',
         },
       ],
