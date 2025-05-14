@@ -93,11 +93,6 @@ describe('createContentBlocks', () => {
           statusCode: 201,
           contentBlockId: 'block-id',
         },
-        {
-          fieldId: 'author',
-          success: true,
-          contentBlockId: 'block-id',
-        },
       ],
     });
 
@@ -221,6 +216,7 @@ describe('createContentBlocks', () => {
         {
           fieldId: 'author',
           success: false,
+          statusCode: 404,
           message: 'Field author not found or has no value',
         },
       ],
@@ -277,12 +273,7 @@ describe('createContentBlocks', () => {
           fieldId: 'author',
           success: false,
           statusCode: 401,
-          message: 'Error creating content block for field title: Unauthorized',
-        },
-        {
-          fieldId: 'author',
-          success: false,
-          message: 'Error creating content block: Unauthorized',
+          message: 'Error creating content block for field author: Unauthorized',
         },
       ],
     });

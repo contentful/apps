@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockSdk } from '../mocks';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import Dialog from '../../src/locations/Dialog';
-import React from 'react';
 import { Entry } from '../../src/fields/Entry';
 import { BasicField } from '../../src/fields/BasicField';
 import { createEntry } from '../mocks/mocksForFunctions';
@@ -154,6 +153,7 @@ describe('Dialog component', () => {
         exact: false,
       }
     );
+
     expect(successStepParagraph).toBeTruthy();
   });
 

@@ -65,7 +65,7 @@ describe('CreateStep', () => {
     fireEvent.click(editButtons[0]);
 
     // Check if form control elements appear
-    expect(screen.getByText('Name should be unique.')).toBeTruthy();
+    expect(screen.getByTestId('content-block-description-input')).toBeTruthy();
     expect(screen.getByText('Field 1 description')).toBeTruthy();
   });
 

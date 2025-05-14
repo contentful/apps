@@ -94,7 +94,7 @@ const CreateFlow = (props: CreateFlowProps) => {
       connectedFields[entry.id] = [...entryConnectedFields, ...newFields];
       sdk.parameters.installation.brazeConnectedFields = JSON.stringify(connectedFields);
 
-      const errors = data.results.filter((result: any) => !result.success);
+      const errors = responseData.results.filter((result: any) => !result.success);
       const clientErrors = errors.filter((result: any) => result.statusCode !== 500);
       if (errors.length > 0 && clientErrors.length > 0) {
         setFieldsWithErrors(errors);
