@@ -296,6 +296,7 @@ const CreateStep = ({
       setIsNameValid(false);
       return;
     }
+    setIsNameValid(true);
     setContentBlockStates((prev) => ({
       names: { ...prev.names, [fieldId]: editDraft.name },
       descriptions: { ...prev.descriptions, [fieldId]: editDraft.description },
