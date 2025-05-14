@@ -23,7 +23,7 @@ type CreateFlowProps = {
   initialSelectedFields?: string[];
 };
 
-export type ContentBlockState = {
+export type ContentBlockData = {
   names: Record<string, string>;
   descriptions: Record<string, string>;
 };
@@ -40,7 +40,7 @@ const CreateFlow = (props: CreateFlowProps) => {
   const [step, setStep] = useState(FIELDS_STEP);
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set(initialSelectedFields));
   const [fieldsWithErrors, setFieldsWithErrors] = useState<FieldError[]>([]);
-  const [contentBlockStates, setContentBlockStates] = useState<ContentBlockState>({
+  const [contentBlocksData, setContentBlocksData] = useState<ContentBlockData>({
     names: {},
     descriptions: {},
   });
@@ -57,7 +57,7 @@ const CreateFlow = (props: CreateFlowProps) => {
     }
   );
 
-  const handleCreate = async (data: ContentBlockState) => {
+  const handleCreate = async (data: ContentBlockData) => {
     if (entry.state !== EntryStatus.Published && step === CREATE_STEP) {
       setStep(DRAFT_STEP);
       return;
@@ -130,8 +130,8 @@ const CreateFlow = (props: CreateFlowProps) => {
           selectedFields={selectedFields}
           isSubmitting={isSubmitting}
           handlePreviousStep={() => setStep(FIELDS_STEP)}
-          contentBlockStates={contentBlockStates}
-          setContentBlockStates={setContentBlockStates}
+          contentBlocksData={contentBlocksData}
+          setContentBlocksData={setContentBlocksData}
           handleNextStep={handleCreate}
         />
       )}
@@ -139,7 +139,7 @@ const CreateFlow = (props: CreateFlowProps) => {
         <DraftStep
           isSubmitting={isSubmitting}
           handlePreviousStep={() => setStep(CREATE_STEP)}
-          contentBlockStates={contentBlockStates}
+          contentBlocksData={contentBlocksData}
           handleNextStep={handleCreate}
         />
       )}

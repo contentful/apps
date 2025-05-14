@@ -26,11 +26,11 @@ describe('CreateStep', () => {
       <CreateStep
         entry={mockEntry}
         selectedFields={mockSelectedFields}
-        contentBlockStates={{
+        contentBlocksData={{
           names: { field1: 'Field-1', field2: 'Field-2' },
           descriptions: { field1: 'Field 1 description', field2: 'Field 2 description' },
         }}
-        setContentBlockStates={() => {}}
+        setContentBlocksData={() => {}}
         isSubmitting={false}
         handlePreviousStep={mockHandlePreviousStep}
         handleNextStep={mockHandleNextStep}

@@ -22,7 +22,7 @@ import tokens from '@contentful/f36-tokens';
 const MAX_DESCRIPTION_LENGTH = 250;
 
 // Types
-type ContentBlockState = {
+type ContentBlockData = {
   names: Record<string, string>;
   descriptions: Record<string, string>;
 };
@@ -47,7 +47,7 @@ type ContentBlockViewProps = {
 type ContentBlockCardProps = {
   fieldId: string;
   entry: Entry;
-  contentBlockState: ContentBlockState;
+  contentBlocksData: ContentBlockData;
   isEditing: boolean;
   editDraft: { name: string; description: string };
   onEdit: (fieldId: string) => void;
@@ -61,11 +61,11 @@ type ContentBlockCardProps = {
 type CreateStepProps = {
   entry: Entry;
   selectedFields: Set<string>;
-  contentBlockStates: ContentBlockState;
-  setContentBlockStates: Dispatch<SetStateAction<ContentBlockState>>;
+  contentBlocksData: ContentBlockData;
+  setContentBlocksData: Dispatch<SetStateAction<ContentBlockData>>;
   isSubmitting: boolean;
   handlePreviousStep: () => void;
-  handleNextStep: (contentBlockStates: ContentBlockState) => void;
+  handleNextStep: (contentBlocksData: ContentBlockData) => void;
 };
 
 // Utils
@@ -177,7 +177,7 @@ const ContentBlockView = ({ name, description, onEdit }: ContentBlockViewProps) 
 const ContentBlockCard = ({
   fieldId,
   entry,
-  contentBlockState,
+  contentBlocksData,
   isEditing,
   editDraft,
   onEdit,
@@ -209,8 +209,8 @@ const ContentBlockCard = ({
         />
       ) : (
         <ContentBlockView
-          name={contentBlockState.names[fieldId] || ''}
-          description={contentBlockState.descriptions[fieldId] || ''}
+          name={contentBlocksData.names[fieldId] || ''}
+          description={contentBlocksData.descriptions[fieldId] || ''}
           onEdit={() => onEdit(fieldId)}
         />
       )}
@@ -223,8 +223,8 @@ const CreateStep = ({
   entry,
   selectedFields,
   isSubmitting,
-  contentBlockStates,
-  setContentBlockStates,
+  contentBlocksData,
+  setContentBlocksData,
   handlePreviousStep,
   handleNextStep,
 }: CreateStepProps) => {
@@ -238,7 +238,7 @@ const CreateStep = ({
 
   // Effects
   useEffect(() => {
-    const initialStates: ContentBlockState = {
+    const initialStates: ContentBlockData = {
       names: {},
       descriptions: {},
     };
@@ -246,11 +246,11 @@ const CreateStep = ({
       initialStates.names[fieldId] = getDefaultContentBlockName(entry, fieldId);
       initialStates.descriptions[fieldId] = '';
     });
-    setContentBlockStates(initialStates);
+    setContentBlocksData(initialStates);
   }, [entry, selectedFields]);
 
   // Early return: show skeleton if any field state is missing
-  if (Array.from(selectedFields).some((fieldId) => !contentBlockStates.names[fieldId])) {
+  if (Array.from(selectedFields).some((fieldId) => !contentBlocksData.names[fieldId])) {
     return (
       <Box padding="spacingM">
         <Skeleton.Container data-testid="cf-ui-skeleton-form">
@@ -266,8 +266,8 @@ const CreateStep = ({
   const handleEdit = (fieldId: string) => {
     setEditingField(fieldId);
     setEditDraft({
-      name: contentBlockStates.names[fieldId] || '',
-      description: contentBlockStates.descriptions[fieldId] || '',
+      name: contentBlocksData.names[fieldId] || '',
+      description: contentBlocksData.descriptions[fieldId] || '',
     });
   };
 
@@ -285,8 +285,8 @@ const CreateStep = ({
     setEditingField(null);
     if (editingField) {
       setEditDraft({
-        name: contentBlockStates.names[editingField] || '',
-        description: contentBlockStates.descriptions[editingField] || '',
+        name: contentBlocksData.names[editingField] || '',
+        description: contentBlocksData.descriptions[editingField] || '',
       });
     }
   };
@@ -297,7 +297,7 @@ const CreateStep = ({
       return;
     }
     setIsNameValid(true);
-    setContentBlockStates((prev) => ({
+    setContentBlocksData((prev) => ({
       names: { ...prev.names, [fieldId]: editDraft.name },
       descriptions: { ...prev.descriptions, [fieldId]: editDraft.description },
     }));
@@ -318,7 +318,7 @@ const CreateStep = ({
               key={fieldId}
               fieldId={fieldId}
               entry={entry}
-              contentBlockState={contentBlockStates}
+              contentBlocksData={contentBlocksData}
               isEditing={editingField === fieldId}
               editDraft={editDraft}
               onEdit={handleEdit}
@@ -341,7 +341,7 @@ const CreateStep = ({
         </Button>
         <Button
           variant="primary"
-          onClick={() => handleNextStep(contentBlockStates)}
+          onClick={() => handleNextStep(contentBlocksData)}
           isDisabled={editingField !== null}>
           {isSubmitting ? 'Creating...' : 'Send to Braze'}
         </Button>

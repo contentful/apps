@@ -1,17 +1,17 @@
 import { Paragraph, Button, Subheading } from '@contentful/f36-components';
 import WizardFooter from '../WizardFooter';
-import { ContentBlockState } from './CreateFlow';
+import { ContentBlockData } from './CreateFlow';
 
 type DraftStepProps = {
   isSubmitting: boolean;
-  contentBlockStates: ContentBlockState;
+  contentBlocksData: ContentBlockData;
   handlePreviousStep: () => void;
-  handleNextStep: (data: ContentBlockState) => void;
+  handleNextStep: (data: ContentBlockData) => void;
 };
 
 const DraftStep = ({
   isSubmitting,
-  contentBlockStates,
+  contentBlocksData,
   handlePreviousStep,
   handleNextStep,
 }: DraftStepProps) => {
@@ -28,7 +28,7 @@ const DraftStep = ({
         <Button variant="secondary" size="small" onClick={handlePreviousStep}>
           Back
         </Button>
-        <Button variant="primary" size="small" onClick={() => handleNextStep(contentBlockStates)}>
+        <Button variant="primary" size="small" onClick={() => handleNextStep(contentBlocksData)}>
           {isSubmitting ? 'Creating...' : 'Send to Braze'}
         </Button>
       </WizardFooter>
