@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DialogExtensionSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { Box, Button, Flex, Checkbox, Text, Stack } from '@contentful/f36-components';
@@ -8,8 +8,6 @@ import {
   getEntryKlaviyoFieldMappings,
   setEntryKlaviyoFieldMappings,
 } from '../utils/field-mappings';
-import { markEntryForSyncViaApi } from '../utils/sync-api';
-import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { KlaviyoService } from '../utils/klaviyo-service';
 
 // Extend Window interface to allow our custom property
@@ -104,9 +102,10 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
   const fieldLocaleMap: Record<string, string[]> = React.useMemo(() => {
     const map: Record<string, string[]> = {};
     (currentMappings || []).forEach((m) => {
-      if (!map[m.id]) map[m.id] = [];
-      if (m.locale && !map[m.id].includes(m.locale)) {
-        map[m.id].push(m.locale);
+      const fieldId = m.contentfulFieldId;
+      if (!map[fieldId]) map[fieldId] = [];
+      if (m.locale && !map[fieldId].includes(m.locale)) {
+        map[fieldId].push(m.locale);
       }
     });
     return map;
@@ -114,7 +113,7 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
 
   // Total connected fields = number of unique field IDs in mappings
   const connectedFieldsCount = React.useMemo(() => {
-    const uniqueFieldIds = new Set((currentMappings || []).map((m) => m.id));
+    const uniqueFieldIds = new Set((currentMappings || []).map((m) => m.contentfulFieldId));
     return uniqueFieldIds.size;
   }, [currentMappings]);
 
@@ -150,7 +149,7 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
         }
       }
       setFields(updatedFields);
-      const mappedFieldIds = (currentMappings || []).map((m) => m.id);
+      const mappedFieldIds = (currentMappings || []).map((m) => m.contentfulFieldId);
       setSelectedFields(
         updatedFields.filter(
           (f) =>
@@ -229,7 +228,8 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
               newMappings.push({
                 contentfulFieldId: field.id,
                 klaviyoBlockName: `${field.name}-${locale}`,
-                fieldType: field.type.toLowerCase(),
+                fieldType:
+                  field.type.toLowerCase() === 'richtext' ? 'richtext' : field.type.toLowerCase(),
                 value: localizedValue,
                 contentTypeId: contentTypeId,
                 isAsset: field.type === 'Asset' || field.type === 'AssetLink' || false,
@@ -241,17 +241,14 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
             newMappings.push({
               contentfulFieldId: field.id,
               klaviyoBlockName: field.name,
-              fieldType: field.type.toLowerCase(),
+              fieldType:
+                field.type.toLowerCase() === 'richtext' ? 'richtext' : field.type.toLowerCase(),
               value: fieldValue,
               contentTypeId: contentTypeId,
               isAsset: field.type === 'Asset' || field.type === 'AssetLink' || false,
             });
           }
         });
-
-        // Log the mappings and entry for debugging
-        console.error('Field mappings:', JSON.stringify(newMappings, null, 2));
-        console.error('Entry data:', JSON.stringify(entry, null, 2));
 
         await setEntryKlaviyoFieldMappings(sdk, entryId, newMappings);
 
@@ -267,9 +264,14 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
 
         // Use syncContent to sync the entry
         const response = await klaviyoService.syncContent(newMappings, entry, sdk.cma);
-        console.error('Sync response:', JSON.stringify(response, null, 2));
+        const hasErrors = response.some((r: any) => r.errors.length > 0);
+        if (response && !hasErrors) {
+          sdk.notifier.success('Fields successfully synced to Klaviyo!');
+        } else {
+          console.error('Error syncing to Klaviyo:', response);
+          sdk.notifier.error('Error syncing to Klaviyo');
+        }
       }
-      sdk.notifier.success('Fields successfully synced to Klaviyo!');
       // sdk.close({
       //   selectedFields: selectedFields.map((f) => f.id),
       //   selectedLocales,

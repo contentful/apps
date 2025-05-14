@@ -80,50 +80,36 @@ export class KlaviyoService {
    * @returns Promise with the results of the sync operation
    */
   async syncContent(fieldMappings: FieldMapping[], entry: any, cma?: any): Promise<any> {
-    console.error('=== SYNC CONTENT START ===');
-    console.error('Field Mappings:', JSON.stringify(fieldMappings, null, 2));
-    console.error('Entry:', JSON.stringify(entry, null, 2));
-
     try {
       const entryId = entry.sys?.id;
       if (!entryId) {
         console.error('Entry ID is missing');
         throw new Error('Entry ID is missing');
       }
-      console.error('Processing entry ID:', entryId);
 
       // Only use the fieldMappings argument passed in
       if (!fieldMappings || !Array.isArray(fieldMappings) || fieldMappings.length === 0) {
-        console.error('No field mappings provided, extracting all fields');
         const contentData: Record<string, any> = {};
 
         // Extract fields from the entry fields object
         if (entry.fields) {
-          console.error('Entry fields:', JSON.stringify(entry.fields, null, 2));
           for (const fieldId in entry.fields) {
             try {
               const field = entry.fields[fieldId];
-              console.error(`Processing field ${fieldId}:`, JSON.stringify(field, null, 2));
 
               // Handle localized fields
               if (typeof field === 'object' && !Array.isArray(field)) {
                 const firstLocale = Object.keys(field)[0] || 'en-US';
                 const value = field[firstLocale];
-                console.error(`Localized field ${fieldId} value:`, JSON.stringify(value, null, 2));
 
                 // Add the field to content data
                 if (value !== undefined && value !== null) {
                   contentData[fieldId] = this.safeFieldValue(fieldId, value);
-                  console.error(`Added to contentData: ${fieldId} =`, contentData[fieldId]);
                 }
               } else {
                 // Non-localized field
                 if (field !== undefined && field !== null) {
                   contentData[fieldId] = this.safeFieldValue(fieldId, field);
-                  console.error(
-                    `Added to contentData (non-localized): ${fieldId} =`,
-                    contentData[fieldId]
-                  );
                 }
               }
             } catch (error) {
@@ -134,80 +120,96 @@ export class KlaviyoService {
       } else {
         // Send a separate content block for each mapping
         const responses = [];
+        const processedFields = new Map<string, Set<string>>(); // Map of base field name to set of locales
+
         for (const mapping of fieldMappings) {
           try {
-            console.error('Processing mapping:', JSON.stringify(mapping, null, 2));
             const contentfulFieldId = mapping.contentfulFieldId;
-            const klaviyoBlockName = mapping.klaviyoBlockName || contentfulFieldId;
+            let klaviyoBlockName = mapping.klaviyoBlockName || contentfulFieldId;
+
+            // Extract the last locale from the field name
+            const lastLocaleMatch = klaviyoBlockName.match(/-([a-z]{2}(?:-[A-Z]{2})?)$/);
+            if (!lastLocaleMatch) {
+              console.log(`Skipping field ${klaviyoBlockName} - no valid locale found`);
+              continue;
+            }
+            const locale = lastLocaleMatch[1];
+
+            // Get the base name by removing all locale suffixes
+            const baseName = klaviyoBlockName.replace(
+              /-[a-z]{2}(?:-[A-Z]{2})?(-[a-z]{2}(?:-[A-Z]{2})?)?$/,
+              ''
+            );
+
+            // Skip if we've already processed this base field for this locale
+            if (!processedFields.has(baseName)) {
+              processedFields.set(baseName, new Set());
+            }
+            const locales = processedFields.get(baseName)!;
+            if (locales.has(locale)) {
+              console.log(`Skipping duplicate field mapping for ${baseName} in locale ${locale}`);
+              continue;
+            }
+            locales.add(locale);
 
             // Use mapping.value if present, otherwise fallback to old extraction logic
             let value = mapping.value;
-            console.error(
-              `Initial value for ${contentfulFieldId}:`,
-              JSON.stringify(value, null, 2)
-            );
 
             if (value === undefined) {
               if (entry.fields && entry.fields[contentfulFieldId]) {
                 const field = entry.fields[contentfulFieldId];
-                console.error(`Field from entry.fields:`, JSON.stringify(field, null, 2));
 
                 if (typeof field === 'object' && !Array.isArray(field)) {
-                  const firstLocale = Object.keys(field)[0];
-                  if (firstLocale) {
-                    value = field[firstLocale];
-                    console.error(
-                      `Localized value for ${contentfulFieldId}:`,
-                      JSON.stringify(value, null, 2)
-                    );
+                  // Get the field value for the specific locale
+                  value = field[locale];
+
+                  if (value === undefined) {
+                    console.log(`No value found for field ${baseName} in locale ${locale}`);
+                    continue;
                   }
                 } else {
                   value = field;
-                  console.error(
-                    `Non-localized value for ${contentfulFieldId}:`,
-                    JSON.stringify(value, null, 2)
-                  );
                 }
               } else if (entry[contentfulFieldId] !== undefined) {
                 value = entry[contentfulFieldId];
-                console.error(
-                  `Value from entry root for ${contentfulFieldId}:`,
-                  JSON.stringify(value, null, 2)
-                );
               }
             }
 
             if (value === undefined || value === null || value === '') {
-              console.error(`Skipping empty value for ${contentfulFieldId}`);
+              console.error(`Skipping empty value for ${baseName} in locale ${locale}`);
               continue;
             }
 
             const contentData: Record<string, any> = {};
             let imageUrl: string = '';
-            let altText = klaviyoBlockName;
+            let altText = `${baseName} (${locale})`;
             let htmlContent = '';
 
+            // Construct the block name and external ID with a single locale
+            const blockName = `${baseName}-${locale}`;
+            const externalId = `${entryId}-${baseName}-${locale}`;
+
+            console.log(
+              `Processing field ${baseName} with locale ${locale} - Block name: ${blockName}, External ID: ${externalId}`
+            );
+
             // Handle different field types
-            console.error(`Field type for ${contentfulFieldId}:`, mapping.fieldType);
             switch (mapping.fieldType?.toLowerCase()) {
               case 'image':
               case 'asset':
-                console.error(`Processing image/asset field: ${contentfulFieldId}`);
                 if (typeof value === 'object' && value.sys) {
                   let assetId = value.sys.id;
-                  console.error(`Asset ID: ${assetId}`);
 
                   // Fetch the correct asset URL from CMA
                   let cmaUrl = '';
                   if (assetId && cma) {
                     cmaUrl = (await this.fetchAssetUrlFromCMA(assetId, entry, cma)) || '';
-                    console.error(`CMA URL: ${cmaUrl}`);
                   }
 
                   if (!cmaUrl) {
                     console.error(
                       'Could not resolve a valid Contentful asset URL for image field:',
-                      klaviyoBlockName
+                      blockName
                     );
                     continue;
                   }
@@ -216,7 +218,7 @@ export class KlaviyoService {
                   if (!imageUrl) {
                     console.error(
                       'Could not resolve a valid Contentful asset URL for image field:',
-                      klaviyoBlockName
+                      blockName
                     );
                     continue;
                   }
@@ -227,113 +229,95 @@ export class KlaviyoService {
                       m.contentfulFieldId === contentfulFieldId || m.id === contentfulFieldId
                   );
                   let klaviyoImageId = mappingObj && mappingObj.klaviyoImageId;
-                  let imageName = klaviyoBlockName;
+                  let imageName = blockName;
 
                   if (value.fields && value.fields.title) {
-                    imageName =
-                      value.fields.title['en-US'] || value.fields.title || klaviyoBlockName;
+                    imageName = value.fields.title[locale] || value.fields.title || blockName;
                   }
 
-                  console.error(`Creating/updating image content: ${imageName}`);
                   const response = await this.createOrUpdateContent(
                     imageName,
                     '', // No HTML content for images
-                    `${entryId}-${klaviyoBlockName}`,
+                    externalId,
                     'image',
                     imageUrl,
                     altText
                   );
-                  console.error('Image content response:', JSON.stringify(response, null, 2));
                   responses.push(response);
                 }
                 break;
 
               case 'richtext':
-                console.error(`Processing rich text field: ${contentfulFieldId}`);
                 try {
                   const richTextHtml = this.processRichText(value);
-                  console.error(`Rich text HTML: ${richTextHtml}`);
-                  contentData[klaviyoBlockName] = richTextHtml;
+                  contentData[baseName] = richTextHtml;
                   htmlContent = this.convertDataToHTML(contentData);
-                  console.error(`Creating/updating rich text content: ${klaviyoBlockName}`);
                   const response = await this.createOrUpdateContent(
-                    klaviyoBlockName,
+                    blockName,
                     htmlContent,
-                    `${entryId}-${klaviyoBlockName}`,
+                    externalId,
                     'text'
                   );
-                  console.error('Rich text content response:', JSON.stringify(response, null, 2));
                   responses.push(response);
                 } catch (error) {
-                  console.error(`Error processing rich text field ${klaviyoBlockName}:`, error);
+                  console.error(`Error processing rich text field ${blockName}:`, error);
                 }
                 break;
 
               case 'json':
-                console.error(`Processing JSON field: ${contentfulFieldId}`);
                 try {
                   const jsonValue = typeof value === 'string' ? JSON.parse(value) : value;
-                  contentData[klaviyoBlockName] = JSON.stringify(jsonValue, null, 2);
+                  contentData[baseName] = JSON.stringify(jsonValue, null, 2);
                   htmlContent = this.convertDataToHTML(contentData);
-                  console.error(`Creating/updating JSON content: ${klaviyoBlockName}`);
                   const response = await this.createOrUpdateContent(
-                    klaviyoBlockName,
+                    blockName,
                     htmlContent,
-                    `${entryId}-${klaviyoBlockName}`,
+                    externalId,
                     'text'
                   );
-                  console.error('JSON content response:', JSON.stringify(response, null, 2));
                   responses.push(response);
                 } catch (error) {
-                  console.error(`Error processing JSON field ${klaviyoBlockName}:`, error);
+                  console.error(`Error processing JSON field ${blockName}:`, error);
                 }
                 break;
 
               case 'entry':
               case 'reference-array':
-                console.error(`Processing reference field: ${contentfulFieldId}`);
                 try {
-                  const processedValue = this.safeFieldValue(klaviyoBlockName, value);
-                  console.error(`Processed reference value: ${processedValue}`);
+                  const processedValue = this.safeFieldValue(baseName, value);
                   if (processedValue) {
-                    contentData[klaviyoBlockName] = processedValue;
+                    contentData[baseName] = processedValue;
                     htmlContent = this.convertDataToHTML(contentData);
-                    console.error(`Creating/updating reference content: ${klaviyoBlockName}`);
                     const response = await this.createOrUpdateContent(
-                      klaviyoBlockName,
+                      blockName,
                       htmlContent,
-                      `${entryId}-${klaviyoBlockName}`,
+                      externalId,
                       'text'
                     );
-                    console.error('Reference content response:', JSON.stringify(response, null, 2));
                     responses.push(response);
                   }
                 } catch (error) {
-                  console.error(`Error processing reference field ${klaviyoBlockName}:`, error);
+                  console.error(`Error processing reference field ${blockName}:`, error);
                 }
                 break;
 
               default:
                 // Handle text and other field types
-                console.error(`Processing default field type: ${contentfulFieldId}`);
                 try {
-                  const processedValue = this.safeFieldValue(klaviyoBlockName, value);
-                  console.error(`Processed value: ${processedValue}`);
+                  const processedValue = this.safeFieldValue(baseName, value);
                   if (processedValue) {
-                    contentData[klaviyoBlockName] = processedValue;
+                    contentData[baseName] = processedValue;
                     htmlContent = this.convertDataToHTML(contentData);
-                    console.error(`Creating/updating content: ${klaviyoBlockName}`);
                     const response = await this.createOrUpdateContent(
-                      klaviyoBlockName,
+                      blockName,
                       htmlContent,
-                      `${entryId}-${klaviyoBlockName}`,
+                      externalId,
                       'text'
                     );
-                    console.error('Content response:', JSON.stringify(response, null, 2));
                     responses.push(response);
                   }
                 } catch (error) {
-                  console.error(`Error processing field ${klaviyoBlockName}:`, error);
+                  console.error(`Error processing field ${blockName}:`, error);
                 }
                 break;
             }
@@ -341,7 +325,6 @@ export class KlaviyoService {
             console.error(`Error processing mapping for ${mapping.klaviyoBlockName}:`, error);
           }
         }
-        console.error('=== SYNC CONTENT COMPLETE ===');
         return responses;
       }
     } catch (error) {
@@ -433,12 +416,7 @@ export class KlaviyoService {
               alt_text: altText || name,
               dynamic: false,
             },
-            styles: {
-              block_padding_bottom: 0,
-              block_padding_top: 0,
-              block_padding_right: 0,
-              block_padding_left: 0,
-            },
+            styles: {},
             display_options: {},
           },
         };
@@ -496,14 +474,9 @@ export class KlaviyoService {
               alt_text: altText || name,
               dynamic: false,
             },
-            styles: {
-              block_padding_bottom: 0,
-              block_padding_top: 0,
-              block_padding_right: 0,
-              block_padding_left: 0,
-            },
+            styles: {},
+            display_options: {},
           },
-          display_options: {},
         };
       } else {
         definition = {
@@ -511,14 +484,9 @@ export class KlaviyoService {
           type: 'text',
           data: {
             content: htmlContent,
-            styles: {
-              block_padding_bottom: 0,
-              block_padding_top: 0,
-              block_padding_right: 0,
-              block_padding_left: 0,
-            },
+            styles: {},
+            display_options: {},
           },
-          display_options: {},
         };
       }
       const data = {
@@ -528,7 +496,6 @@ export class KlaviyoService {
           attributes: {
             name: nameWithId,
             definition,
-            external_id: externalId,
           },
         },
       };

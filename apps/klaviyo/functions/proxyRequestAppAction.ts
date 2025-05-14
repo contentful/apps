@@ -31,6 +31,12 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   try {
     let { endpoint, method, data, params, privateKey, publicKey } = event.body;
     // Parse data and params if they are strings
+    console.log('data', data);
+    console.log('params', params);
+    console.log('privateKey', privateKey);
+    console.log('endpoint', endpoint);
+    console.log('method', method);
+
     try {
       if (typeof data === 'string') {
         data = JSON.parse(data);
