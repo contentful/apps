@@ -18,9 +18,13 @@ import {
   BRAZE_APP_DOCUMENTATION,
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
   BRAZE_ENDPOINTS_LIST,
+  CONFIG_CONTENT_TYPE_ID,
+  CONFIG_ENTRY_ID,
+  CONFIG_FIELD_ID,
   CONTENT_TYPE_DOCUMENTATION,
 } from '../utils';
 import InformationWithLink from '../components/InformationWithLink';
+import { createClient, PlainClientAPI } from 'contentful-management';
 
 export interface AppInstallationParameters {
   contentfulApiKey: string;
@@ -49,6 +53,17 @@ const ConfigScreen = () => {
   });
   const sdk = useSDK<ConfigAppSDK>();
   const spaceId = sdk.ids.space;
+
+  const cma = createClient(
+    { apiAdapter: sdk.cmaAdapter },
+    {
+      type: 'plain',
+      defaults: {
+        environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
+        spaceId: sdk.ids.space,
+      },
+    }
+  );
 
   async function checkContentfulApiKey(apiKey: string) {
     if (!apiKey) {
@@ -80,6 +95,14 @@ const ConfigScreen = () => {
 
     if (!isContentfulKeyValid || !isBrazeKeyValid || !isBrazeEndpointValid) {
       sdk.notifier.error('Some fields are missing or invalid');
+      return false;
+    }
+
+    try {
+      await createContentType(cma);
+    } catch (e) {
+      console.error(e);
+      sdk.notifier.error('Error creating content type for configuration');
       return false;
     }
 
@@ -135,6 +158,38 @@ const ConfigScreen = () => {
     </Flex>
   );
 };
+
+async function createContentType(cma: PlainClientAPI) {
+  try {
+    await cma.contentType.get({
+      contentTypeId: CONFIG_CONTENT_TYPE_ID,
+    });
+    return;
+  } catch (e) {}
+
+  const contentTypeBody = {
+    name: CONFIG_CONTENT_TYPE_ID,
+    description: 'Content Type used by the Braze app. Do not delete or modify manually.',
+    fields: [
+      {
+        id: CONFIG_FIELD_ID,
+        name: CONFIG_FIELD_ID,
+        required: false,
+        localized: false,
+        type: 'Object',
+      },
+    ],
+  };
+  const contentTypeProps = await cma.contentType.createWithId(
+    { contentTypeId: CONFIG_CONTENT_TYPE_ID },
+    contentTypeBody
+  );
+  await cma.contentType.publish({ contentTypeId: CONFIG_CONTENT_TYPE_ID }, contentTypeProps);
+  await cma.entry.createWithId(
+    { contentTypeId: CONFIG_CONTENT_TYPE_ID, entryId: CONFIG_ENTRY_ID },
+    { fields: {} }
+  );
+}
 
 function ConnectedContentSection(props: {
   spaceId: string;

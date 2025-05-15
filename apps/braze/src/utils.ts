@@ -1,3 +1,6 @@
+import { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
+import { EntryConnectedFields } from './components/create/CreateFlow';
+
 export const SAVED_RESPONSE = 'response';
 export const ASSET_FIELDS_QUERY = [
   'title',
@@ -30,6 +33,10 @@ export const BRAZE_CONTENT_BLOCK_DOCUMENTATION =
 export const BRAZE_ENDPOINTS_LIST =
   'https://www.braze.com/docs/api/basics#braze-rest-api-collection';
 
+export const CONFIG_CONTENT_TYPE_ID = 'brazeConfig';
+export const CONFIG_FIELD_ID = 'connectedFields';
+export const CONFIG_ENTRY_ID = 'brazeConfig';
+
 export enum EntryStatus {
   Draft = 'DRAFT',
   Changed = 'CHANGED',
@@ -50,4 +57,21 @@ export function removeIndentation(str: string) {
 
 export function removeHypens(str: string) {
   return str.replace('-', '');
+}
+
+export async function updateConfig(
+  configEntry: EntryProps<KeyValueMap>,
+  locale: string,
+  connectedFields: EntryConnectedFields,
+  cma: PlainClientAPI
+) {
+  if (!configEntry.fields[CONFIG_FIELD_ID]) {
+    configEntry.fields[CONFIG_FIELD_ID] = {};
+  }
+  configEntry.fields[CONFIG_FIELD_ID][locale] = connectedFields;
+  await cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
+}
+
+export async function getConfigEntry(cma: PlainClientAPI): Promise<EntryProps<KeyValueMap>> {
+  return await cma.entry.get({ entryId: CONFIG_ENTRY_ID });
 }

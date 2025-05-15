@@ -1,4 +1,4 @@
-import { render, fireEvent, cleanup, waitFor, getByRole } from '@testing-library/react';
+import { render, fireEvent, cleanup, waitFor, screen } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import {
   GENERATE_DIALOG_TITLE,
@@ -7,7 +7,7 @@ import {
   SIDEBAR_CREATE_BUTTON_TEXT,
   SIDEBAR_CONNECTED_ENTRIES_BUTTON_TEXT,
 } from '../../src/utils';
-import { mockSdk, mockCma } from '../mocks';
+import { mockSdk } from '../mocks';
 import Sidebar from '../../src/locations/Sidebar';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import React from 'react';
@@ -17,6 +17,12 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useAutoResizer: () => {},
 }));
 
+const mockCma = {
+  entry: {
+    get: vi.fn(),
+  },
+};
+
 vi.mock('contentful-management', () => ({
   createClient: () => mockCma,
 }));
@@ -24,6 +30,20 @@ vi.mock('contentful-management', () => ({
 describe('Sidebar component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockCma.entry.get.mockResolvedValue({
+      fields: {
+        connectedFields: {
+          'en-US': {
+            [mockSdk.ids.entry]: [
+              {
+                fieldId: 'fieldA',
+                contentBlockId: 'contentBlockA',
+              },
+            ],
+          },
+        },
+      },
+    });
     (useSDK as any).mockReturnValue(mockSdk);
   });
 
@@ -137,17 +157,15 @@ describe('Sidebar component', () => {
     });
   });
 
-  it('renders the "Connected Content Block entries" section when connectedFields are present', () => {
-    const { getByText, queryByText } = render(<Sidebar />);
-
-    expect(getByText('Connected Content Block entries')).toBeTruthy();
+  it('renders the "Connected Content Block entries" section when connectedFields are present', async () => {
+    const { getByText } = render(<Sidebar />);
+    await screen.findByText('Connected Content Block entries', { exact: false });
     expect(getByText('fieldA')).toBeTruthy();
-    expect(getByText('fieldB')).toBeTruthy();
-    expect(queryByText('fieldC')).toBeNull();
   });
 
   it('renders the Connected Entries button and triggers navigation when clicked', async () => {
     const { getByText } = render(<Sidebar />);
+    await screen.findByText(SIDEBAR_CONNECTED_ENTRIES_BUTTON_TEXT, { exact: false });
     const button = getByText(SIDEBAR_CONNECTED_ENTRIES_BUTTON_TEXT);
 
     expect(button).toBeTruthy();

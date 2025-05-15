@@ -12,12 +12,14 @@ import {
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import {
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
+  CONFIG_FIELD_ID,
   CONNECTED_CONTENT_DOCUMENTATION,
   CREATE_DIALOG_MODE,
   CREATE_DIALOG_TITLE,
   FIELDS_STEP,
   GENERATE_DIALOG_MODE,
   GENERATE_DIALOG_TITLE,
+  getConfigEntry,
   SIDEBAR_CONNECTED_ENTRIES_BUTTON_TEXT,
   SIDEBAR_CREATE_BUTTON_TEXT,
   SIDEBAR_GENERATE_BUTTON_TEXT,
@@ -26,14 +28,38 @@ import { InvocationParams } from './Dialog';
 import { styles } from './Sidebar.styles';
 import InformationWithLink from '../components/InformationWithLink';
 import Splitter from '../components/Splitter';
+import { createClient, QueryParams } from 'contentful-management';
+import { useEffect, useState } from 'react';
+import { EntryConnectedFields } from '../components/create/CreateFlow';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
-  const connectedFields = JSON.parse(sdk.parameters.installation.brazeConnectedFields || '{}');
-  const currentEntryId = sdk.ids.entry;
-  const connectedFieldsForCurrentEntry: [string, string][] = connectedFields[currentEntryId] || [];
-
   useAutoResizer();
+  const [entryConnectedFields, setEntryConnectedFields] = useState<
+    EntryConnectedFields | undefined
+  >(undefined);
+  const currentEntryId = sdk.ids.entry;
+
+  const cma = createClient(
+    { apiAdapter: sdk.cmaAdapter },
+    {
+      type: 'plain',
+      defaults: {
+        environmentId: sdk.ids.environment,
+        spaceId: sdk.ids.space,
+      },
+    }
+  );
+
+  useEffect(() => {
+    const getConfig = async () => {
+      const configEntry = await getConfigEntry(cma);
+      const connectedFields = configEntry.fields[CONFIG_FIELD_ID]?.[sdk.locales.default] || {};
+      const entryConnectedFields: EntryConnectedFields = connectedFields[sdk.ids.entry] || [];
+      setEntryConnectedFields(entryConnectedFields);
+    };
+    getConfig();
+  }, []);
 
   const initialInvocationParams: InvocationParams = {
     mode: GENERATE_DIALOG_MODE,
@@ -124,7 +150,7 @@ const Sidebar = () => {
           {SIDEBAR_CREATE_BUTTON_TEXT}
         </Button>
       </Box>
-      {Object.keys(connectedFieldsForCurrentEntry).length > 0 && (
+      {entryConnectedFields !== undefined && entryConnectedFields.length > 0 && (
         <>
           <Box marginTop="spacingM">
             <Card className={styles.card}>
@@ -137,9 +163,9 @@ const Sidebar = () => {
                 spacing="spacingXs"
                 alignItems="initial"
                 className={styles.stack}>
-                {connectedFieldsForCurrentEntry.map(([contentfulFieldId], index) => (
+                {entryConnectedFields.map((fieldMapping, index) => (
                   <Text key={`${currentEntryId}-${index}`} className={styles.listItem}>
-                    {contentfulFieldId}
+                    {fieldMapping.fieldId}
                   </Text>
                 ))}
               </Stack>
