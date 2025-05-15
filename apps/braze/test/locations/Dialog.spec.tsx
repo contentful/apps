@@ -15,6 +15,10 @@ const mockCma = {
   appActionCall: {
     createWithResponse: vi.fn(),
   },
+  entry: {
+    get: vi.fn(),
+    update: vi.fn(),
+  },
 };
 
 vi.mock('contentful-management', () => ({
@@ -65,6 +69,20 @@ describe('Dialog component', () => {
     mockCreateFieldsForEntry.mockResolvedValue([mockField]);
     vi.spyOn(mockEntry, 'getGraphQLResponse').mockImplementation(async () => 'graphql response');
     vi.spyOn(Entry, 'fromSerialized').mockImplementation(() => mockEntry);
+    mockCma.entry.get.mockResolvedValue({
+      fields: {
+        connectedFields: {
+          'en-US': {
+            [mockSdk.ids.entry]: [
+              {
+                fieldId: 'fieldA',
+                contentBlockId: 'contentBlockA',
+              },
+            ],
+          },
+        },
+      },
+    });
     mockSdk.parameters.invocation = undefined;
     mockSdk.close = vi.fn();
   });

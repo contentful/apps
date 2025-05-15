@@ -1,10 +1,9 @@
 import { cleanup, fireEvent, render, RenderResult, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockCma, mockSdk } from '../mocks';
+import { mockSdk } from '../mocks';
 import ConfigScreen from '../../src/locations/ConfigScreen';
 import userEvent from '@testing-library/user-event';
 import { queries } from '@testing-library/dom';
-import React from 'react';
 import {
   BRAZE_API_KEY_DOCUMENTATION,
   BRAZE_APP_DOCUMENTATION,
@@ -13,9 +12,23 @@ import {
   CONTENT_TYPE_DOCUMENTATION,
 } from '../../src/utils';
 
+const mockCma = {
+  contentType: {
+    get: vi.fn(),
+    createWithId: vi.fn(),
+    publish: vi.fn(),
+  },
+  entry: {
+    createWithId: vi.fn(),
+  },
+};
+
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
-  useCMA: () => mockCma,
+}));
+
+vi.mock('contentful-management', () => ({
+  createClient: () => mockCma,
 }));
 
 vi.mock('./ConfigScreen', async () => {
@@ -34,6 +47,7 @@ async function saveAppInstallation() {
 describe('Config Screen component', () => {
   let configScreen: RenderResult<typeof queries, HTMLElement, HTMLElement>;
   beforeEach(() => {
+    vi.clearAllMocks();
     configScreen = render(<ConfigScreen />);
   });
 
@@ -186,6 +200,48 @@ describe('Config Screen component', () => {
       await saveAppInstallation();
 
       expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
+    });
+  });
+
+  describe('createContentType', () => {
+    it('creates content type and entry if they do not exist', async () => {
+      const user = userEvent.setup();
+      const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
+      const brazeApiKeyInput = screen.getAllByTestId('brazeApiKey')[0];
+      const brazeEndpointInput = screen.getAllByTestId('brazeEndpoint')[0];
+      await user.type(contentfulApiKeyInput, 'valid-api-key-123');
+      await user.type(brazeApiKeyInput, 'valid-api-key-321');
+      await user.type(brazeEndpointInput, 'valid-rest-endpoint-132');
+      vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
+        return { ok: true, status: 200 };
+      });
+      mockCma.contentType.get.mockRejectedValueOnce(new Error('Content type not found'));
+
+      await saveAppInstallation();
+
+      expect(mockCma.contentType.createWithId).toHaveBeenCalled();
+      expect(mockCma.contentType.publish).toHaveBeenCalled();
+      expect(mockCma.entry.createWithId).toHaveBeenCalled();
+    });
+
+    it('does not create content type if it already exists', async () => {
+      const user = userEvent.setup();
+      const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
+      const brazeApiKeyInput = screen.getAllByTestId('brazeApiKey')[0];
+      const brazeEndpointInput = screen.getAllByTestId('brazeEndpoint')[0];
+      await user.type(contentfulApiKeyInput, 'valid-api-key-123');
+      await user.type(brazeApiKeyInput, 'valid-api-key-321');
+      await user.type(brazeEndpointInput, 'valid-rest-endpoint-132');
+      vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
+        return { ok: true, status: 200 };
+      });
+      mockCma.contentType.get.mockResolvedValueOnce({}); // Simulate content type already exists
+
+      await saveAppInstallation();
+
+      expect(mockCma.contentType.createWithId).not.toHaveBeenCalled();
+      expect(mockCma.contentType.publish).not.toHaveBeenCalled();
+      expect(mockCma.entry.createWithId).not.toHaveBeenCalled();
     });
   });
 });

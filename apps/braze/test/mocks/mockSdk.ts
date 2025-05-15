@@ -19,13 +19,6 @@ const mockSdk: any = {
     installation: {
       contentfulApiKey: 'test-contentful-apiKey',
       brazeApiKey: 'test-braze-apiKey',
-      brazeConnectedFields: JSON.stringify({
-        testEntryId: [
-          ['fieldA', 'brazeIdA'],
-          ['fieldB', 'brazeIdB'],
-        ],
-        testEntryId2: [['fieldC', 'brazeIdC']],
-      }),
     },
     invocation: {
       id: 'test-entryId',
