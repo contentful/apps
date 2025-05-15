@@ -1,5 +1,14 @@
 import { SidebarAppSDK } from '@contentful/app-sdk';
-import { Box, Button, Subheading, Card, Text, Stack } from '@contentful/f36-components';
+import {
+  Box,
+  Button,
+  Subheading,
+  Card,
+  Text,
+  Stack,
+  Note,
+  TextLink,
+} from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import {
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
@@ -80,9 +89,32 @@ const Sidebar = () => {
     });
   };
 
+  const handleOpenAppConfig = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    await sdk.navigator.openAppConfig();
+  };
+
+  const hasUpdatedConfig =
+    sdk.parameters.installation.contentfulApiKey &&
+    sdk.parameters.installation.brazeApiKey &&
+    sdk.parameters.installation.brazeEndpoint;
+
   return (
     <>
       <Box>
+        {!hasUpdatedConfig && (
+          <Note variant="warning">
+            <Text>Update your app configuration </Text>
+            <TextLink
+              alignIcon="end"
+              href="#"
+              onClick={handleOpenAppConfig}
+              target="_blank"
+              rel="noopener noreferrer">
+              here
+            </TextLink>
+          </Note>
+        )}
         <Subheading className={styles.subheading}>Connected Content</Subheading>
         <InformationWithLink
           url={CONNECTED_CONTENT_DOCUMENTATION}
@@ -95,7 +127,8 @@ const Sidebar = () => {
         <Button
           variant="secondary"
           isFullWidth={true}
-          onClick={() => openDialogLogic(FIELDS_STEP, undefined, GENERATE_DIALOG_MODE)}>
+          onClick={() => openDialogLogic(FIELDS_STEP, undefined, GENERATE_DIALOG_MODE)}
+          isDisabled={!hasUpdatedConfig}>
           {SIDEBAR_GENERATE_BUTTON_TEXT}
         </Button>
       </Box>
@@ -112,7 +145,8 @@ const Sidebar = () => {
         <Button
           variant="secondary"
           isFullWidth={true}
-          onClick={() => openDialogLogic(FIELDS_STEP, undefined, CREATE_DIALOG_MODE)}>
+          onClick={() => openDialogLogic(FIELDS_STEP, undefined, CREATE_DIALOG_MODE)}
+          isDisabled={!hasUpdatedConfig}>
           {SIDEBAR_CREATE_BUTTON_TEXT}
         </Button>
       </Box>

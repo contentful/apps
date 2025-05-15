@@ -5,6 +5,7 @@ import Dialog from '../../src/locations/Dialog';
 import { Entry } from '../../src/fields/Entry';
 import { BasicField } from '../../src/fields/BasicField';
 import { createEntry } from '../mocks/mocksForFunctions';
+import React from 'react';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,

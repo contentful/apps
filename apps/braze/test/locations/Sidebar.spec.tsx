@@ -9,9 +9,11 @@ import {
 } from '../../src/utils';
 import { mockSdk } from '../mocks';
 import Sidebar from '../../src/locations/Sidebar';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import React from 'react';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
-  useSDK: () => mockSdk,
+  useSDK: vi.fn(() => mockSdk),
   useAutoResizer: () => {},
 }));
 
@@ -42,6 +44,7 @@ describe('Sidebar component', () => {
         },
       },
     });
+    (useSDK as any).mockReturnValue(mockSdk);
   });
 
   afterEach(cleanup);
@@ -136,11 +139,13 @@ describe('Sidebar component', () => {
     });
   });
 
-  it('Create button opens a dialog', () => {
+  it('Create button opens a dialog', async () => {
+    vi.mocked(mockSdk.dialogs.openCurrentApp).mockResolvedValueOnce({ step: 'close' });
     const { getByText } = render(<Sidebar />);
-    getByText(SIDEBAR_CREATE_BUTTON_TEXT).click();
+    const button = getByText(SIDEBAR_CREATE_BUTTON_TEXT);
+    await fireEvent.click(button);
 
-    expect(mockSdk.dialogs.openCurrentApp).toBeCalledWith({
+    expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledWith({
       title: CREATE_DIALOG_TITLE,
       parameters: {
         entryId: mockSdk.ids.entry,
@@ -168,5 +173,104 @@ describe('Sidebar component', () => {
     fireEvent.click(button);
 
     expect(mockSdk.navigator.openCurrentAppPage).toHaveBeenCalledTimes(1);
+  });
+
+  describe('Configuration validation', () => {
+    it('shows warning when all config values are empty', () => {
+      const sdkWithEmptyConfig = {
+        ...mockSdk,
+        parameters: {
+          ...mockSdk.parameters,
+          installation: {
+            contentfulApiKey: '',
+            brazeApiKey: '',
+            brazeEndpoint: '',
+            brazeConnectedFields: '{}',
+          },
+        },
+      };
+      (useSDK as any).mockReturnValue(sdkWithEmptyConfig);
+
+      const { getByText } = render(<Sidebar />);
+      expect(getByText('Update your app configuration')).toBeTruthy();
+    });
+
+    it('shows warning when contentfulApiKey is missing', () => {
+      const sdkWithMissingContentfulKey = {
+        ...mockSdk,
+        parameters: {
+          ...mockSdk.parameters,
+          installation: {
+            ...mockSdk.parameters.installation,
+            contentfulApiKey: '',
+          },
+        },
+      };
+      (useSDK as any).mockReturnValue(sdkWithMissingContentfulKey);
+
+      const { getByText } = render(<Sidebar />);
+      expect(getByText('Update your app configuration')).toBeTruthy();
+    });
+
+    it('shows warning when brazeApiKey is missing', () => {
+      const sdkWithMissingBrazeKey = {
+        ...mockSdk,
+        parameters: {
+          ...mockSdk.parameters,
+          installation: {
+            ...mockSdk.parameters.installation,
+            brazeApiKey: '',
+          },
+        },
+      };
+      (useSDK as any).mockReturnValue(sdkWithMissingBrazeKey);
+
+      const { getByText } = render(<Sidebar />);
+      expect(getByText('Update your app configuration')).toBeTruthy();
+    });
+
+    it('shows warning when brazeEndpoint is missing', () => {
+      const sdkWithMissingEndpoint = {
+        ...mockSdk,
+        parameters: {
+          ...mockSdk.parameters,
+          installation: {
+            ...mockSdk.parameters.installation,
+            brazeEndpoint: '',
+          },
+        },
+      };
+      (useSDK as any).mockReturnValue(sdkWithMissingEndpoint);
+
+      const { getByText } = render(<Sidebar />);
+      expect(getByText('Update your app configuration')).toBeTruthy();
+    });
+
+    it('disables buttons when config is incomplete', () => {
+      const sdkWithIncompleteConfig = {
+        ...mockSdk,
+        parameters: {
+          ...mockSdk.parameters,
+          installation: {
+            contentfulApiKey: '',
+            brazeApiKey: 'test-braze-key',
+            brazeEndpoint: 'test-endpoint',
+            brazeConnectedFields: '{}',
+          },
+        },
+      };
+      (useSDK as any).mockReturnValue(sdkWithIncompleteConfig);
+
+      const { getByText, getByRole } = render(<Sidebar />);
+      const generateButton = getByRole('button', {
+        name: SIDEBAR_GENERATE_BUTTON_TEXT,
+      }) as HTMLButtonElement;
+      const createButton = getByRole('button', {
+        name: SIDEBAR_CREATE_BUTTON_TEXT,
+      }) as HTMLButtonElement;
+
+      expect(generateButton?.disabled).toBe(true);
+      expect(createButton?.disabled).toBe(true);
+    });
   });
 });

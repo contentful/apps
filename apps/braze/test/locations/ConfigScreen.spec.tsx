@@ -11,6 +11,7 @@ import {
   BRAZE_ENDPOINTS_LIST,
   CONTENT_TYPE_DOCUMENTATION,
 } from '../../src/utils';
+import React from 'react';
 
 const mockCma = {
   contentType: {
