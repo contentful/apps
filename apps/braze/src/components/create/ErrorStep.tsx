@@ -33,7 +33,7 @@ const ErrorStep = ({
     (field) => !field.success && field.statusCode === 500
   );
   const correctlyCreatedFields = creationResultFields.filter((field) => field.success);
-  const isServerError = serverErrors.length > 0;
+  const containsServerError = serverErrors.length > 0;
 
   function handleRetry() {
     const filteredContentBlocksData = {
@@ -57,7 +57,7 @@ const ErrorStep = ({
         There was an issue
       </Subheading>
       <Stack flexDirection="column" alignItems="flex-start" className={styles.stack}>
-        {isServerError && serverErrors[0] && (
+        {containsServerError && serverErrors[0] && (
           <Text>
             Error code [{serverErrors[0].statusCode}] - [{serverErrors[0].message}] . Please retry
             sending to Braze.
@@ -70,7 +70,7 @@ const ErrorStep = ({
         ))}
       </Stack>
       <WizardFooter>
-        {isServerError ? (
+        {containsServerError ? (
           <Button variant="primary" size="small" onClick={handleRetry}>
             {isSubmitting ? 'Retrying...' : 'Retry'}
           </Button>
