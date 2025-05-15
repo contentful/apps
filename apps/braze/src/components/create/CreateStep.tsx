@@ -344,7 +344,6 @@ const CreateStep = ({
           isLoading={isSubmitting}
           onClick={() => handleNextStep(contentBlocksData)}
           isDisabled={editingField !== null}
-          dataTestId="send-to-braze-button"
         />
       </WizardFooter>
     </>

@@ -5,7 +5,6 @@ type CreateButtonProps = {
   onClick: () => void;
   isDisabled?: boolean;
   size?: 'small' | 'medium' | 'large';
-  dataTestId?: string;
 };
 
 const CreateButton = ({
@@ -21,8 +20,7 @@ const CreateButton = ({
       size={size}
       onClick={onClick}
       isDisabled={isDisabled || isLoading}
-      isLoading={isLoading}
-      data-testid={dataTestId}>
+      isLoading={isLoading}>
       {isLoading ? 'Creating' : 'Send to Braze'}
     </Button>
   );
