@@ -239,11 +239,14 @@ describe('Dialog component', () => {
 
     await screen.findByText('There was an issue');
 
-    expect(
-      screen.getByText(
-        'Error code [500] - [Internal server error] . Please retry sending to Braze.'
-      )
-    ).toBeTruthy();
+    // Check for each error message
+    const errorMessages = screen.getAllByText(
+      'Error code [500] - [Internal server error] . Please retry sending to Braze.'
+    );
+    expect(errorMessages.length).toBeGreaterThan(0);
+    errorMessages.forEach((message) => {
+      expect(message).toBeTruthy();
+    });
 
     expect(screen.getByRole('button', { name: /retry/i })).toBeTruthy();
   });
@@ -256,7 +259,6 @@ describe('Dialog component', () => {
       title: 'title',
     };
 
-    // First call returns server error
     mockCma.appActionCall.createWithResponse
       .mockResolvedValueOnce({
         response: {
@@ -272,7 +274,6 @@ describe('Dialog component', () => {
           }),
         },
       })
-      // Second call (after retry) returns success
       .mockResolvedValueOnce({
         response: {
           body: JSON.stringify({
@@ -290,23 +291,22 @@ describe('Dialog component', () => {
 
     render(<Dialog />);
 
-    // Navigate to create step and trigger error
     await navigateToFinalStep();
 
-    // Verify error state
     await screen.findByText('There was an issue');
-    expect(
-      screen.getByText(
-        'Error code [500] - [Internal server error] . Please retry sending to Braze.'
-      )
-    ).toBeTruthy();
 
-    // Click retry button
+    const errorMessages = screen.getAllByText(
+      'Error code [500] - [Internal server error] . Please retry sending to Braze.'
+    );
+    expect(errorMessages.length).toBeGreaterThan(0);
+    errorMessages.forEach((message) => {
+      expect(message).toBeTruthy();
+    });
+
     const retryButton = screen.getByRole('button', { name: /retry/i });
     expect(retryButton).toBeTruthy();
     fireEvent.click(retryButton);
 
-    // Verify success state after retry
     const successMessage = await screen.findByText(
       'You can view them from your Braze dashboard by navigating to',
       { exact: false }

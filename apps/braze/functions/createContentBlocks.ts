@@ -12,11 +12,6 @@ type AppInstallationParameters = {
   brazeEndpoint: string;
 };
 
-type ContentBlockData = {
-  name: string;
-  description: string;
-};
-
 export type AppActionParameters = {
   entryId: string;
   fieldIds: string;
@@ -78,7 +73,7 @@ export const handler: FunctionEventHandler<
       results.push({
         fieldId,
         success: false,
-        statusCode: 404,
+        statusCode: 400,
         message: `Field ${fieldId} not found or has no value`,
       });
       continue;
@@ -88,7 +83,7 @@ export const handler: FunctionEventHandler<
       results.push({
         fieldId,
         success: false,
-        statusCode: 404,
+        statusCode: 400,
         message: `Content block name not found or has no value for field ${fieldId}`,
       });
       continue;

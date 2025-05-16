@@ -57,12 +57,11 @@ const ErrorStep = ({
         There was an issue
       </Subheading>
       <Stack flexDirection="column" alignItems="flex-start" className={styles.stack}>
-        {containsServerError && serverErrors[0] && (
-          <Text>
-            Error code [{serverErrors[0].statusCode}] - [{serverErrors[0].message}] . Please retry
-            sending to Braze.
+        {serverErrors.map((field, index) => (
+          <Text key={`${field.fieldId}-${index}`}>
+            Error code [{field.statusCode}] - [{field.message}] . Please retry sending to Braze.
           </Text>
-        )}
+        ))}
         {clientErrors.map((field, index) => (
           <Text key={`${field.fieldId}-${index}`}>
             Error code [{field.statusCode}] - [{field.message}]
@@ -71,8 +70,8 @@ const ErrorStep = ({
       </Stack>
       <WizardFooter>
         {containsServerError ? (
-          <Button variant="primary" size="small" onClick={handleRetry}>
-            {isSubmitting ? 'Retrying...' : 'Retry'}
+          <Button isLoading={isSubmitting} variant="primary" size="small" onClick={handleRetry}>
+            Retry
           </Button>
         ) : (
           <Button variant="primary" size="small" onClick={handleClose}>
