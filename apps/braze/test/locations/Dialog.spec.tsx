@@ -5,6 +5,7 @@ import Dialog from '../../src/locations/Dialog';
 import { Entry } from '../../src/fields/Entry';
 import { BasicField } from '../../src/fields/BasicField';
 import { createEntry } from '../mocks/mocksForFunctions';
+import React from 'react';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -14,6 +15,10 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 const mockCma = {
   appActionCall: {
     createWithResponse: vi.fn(),
+  },
+  entry: {
+    get: vi.fn(),
+    update: vi.fn(),
   },
 };
 
@@ -65,6 +70,20 @@ describe('Dialog component', () => {
     mockCreateFieldsForEntry.mockResolvedValue([mockField]);
     vi.spyOn(mockEntry, 'getGraphQLResponse').mockImplementation(async () => 'graphql response');
     vi.spyOn(Entry, 'fromSerialized').mockImplementation(() => mockEntry);
+    mockCma.entry.get.mockResolvedValue({
+      fields: {
+        connectedFields: {
+          'en-US': {
+            [mockSdk.ids.entry]: [
+              {
+                fieldId: 'fieldA',
+                contentBlockId: 'contentBlockA',
+              },
+            ],
+          },
+        },
+      },
+    });
     mockSdk.parameters.invocation = undefined;
     mockSdk.close = vi.fn();
   });

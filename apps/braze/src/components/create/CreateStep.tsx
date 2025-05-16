@@ -18,6 +18,7 @@ import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { editButton } from './CreateStep.styles';
 import { PencilSimple } from '@phosphor-icons/react';
 import tokens from '@contentful/f36-tokens';
+import CreateButton from './CreateButton';
 
 const MAX_DESCRIPTION_LENGTH = 250;
 
@@ -339,12 +340,11 @@ const CreateStep = ({
           data-testid="back-button">
           Back
         </Button>
-        <Button
-          variant="primary"
+        <CreateButton
+          isLoading={isSubmitting}
           onClick={() => handleNextStep(contentBlocksData)}
-          isDisabled={editingField !== null}>
-          {isSubmitting ? 'Creating...' : 'Send to Braze'}
-        </Button>
+          isDisabled={editingField !== null}
+        />
       </WizardFooter>
     </>
   );

@@ -104,7 +104,7 @@ describe('CreateStep', () => {
   it('shows loading state when submitting', () => {
     renderComponent({ isSubmitting: true });
 
-    expect(screen.getByText('Creating...')).toBeTruthy();
+    expect(screen.getByText('Creating')).toBeTruthy();
   });
 
   it('navigates back when back button is clicked', async () => {

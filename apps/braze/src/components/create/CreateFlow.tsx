@@ -6,7 +6,13 @@ import { InvocationParams } from '../../locations/Dialog';
 import FieldsStep from './FieldsStep';
 import CreateStep from './CreateStep';
 import SuccessStep from './SuccessStep';
-import { EntryStatus, FIELDS_STEP } from '../../utils';
+import {
+  CONFIG_FIELD_ID,
+  EntryStatus,
+  FIELDS_STEP,
+  getConfigEntry,
+  updateConfig,
+} from '../../utils';
 import { createClient } from 'contentful-management';
 import DraftStep from './DraftStep';
 import ErrorStep from './ErrorStep';
@@ -33,6 +39,15 @@ export type CreationResultField = {
   success: boolean;
   statusCode: number;
   message: string;
+};
+
+export type EntryConnectedFields = {
+  fieldId: string;
+  contentBlockId: string;
+}[];
+
+export type ConnectedFields = {
+  [entryId: string]: EntryConnectedFields;
 };
 
 const CreateFlow = (props: CreateFlowProps) => {
@@ -65,10 +80,11 @@ const CreateFlow = (props: CreateFlowProps) => {
 
     setIsSubmitting(true);
 
-    const connectedFields = JSON.parse(sdk.parameters.installation.brazeConnectedFields || '{}');
-    const entryConnectedFields = connectedFields[entry.id] || [];
-
     try {
+      const configEntry = await getConfigEntry(cma);
+      const connectedFields = configEntry.fields[CONFIG_FIELD_ID]?.[sdk.locales.default] || {};
+      const entryConnectedFields: EntryConnectedFields = connectedFields[entry.id] || [];
+
       const response = await cma.appActionCall.createWithResponse(
         {
           spaceId: sdk.ids.space,
@@ -89,10 +105,16 @@ const CreateFlow = (props: CreateFlowProps) => {
 
       const newFields = responseData.results
         .filter((result: any) => result.success)
-        .map((result: any) => [result.fieldId, result.contentBlockId]);
+        .map((result: any) => {
+          return {
+            fieldId: result.fieldId,
+            contentBlockId: result.contentBlockId,
+          };
+        });
 
       connectedFields[entry.id] = [...entryConnectedFields, ...newFields];
-      sdk.parameters.installation.brazeConnectedFields = JSON.stringify(connectedFields);
+
+      await updateConfig(configEntry, sdk.locales.default, connectedFields, cma);
 
       setCreationResultFields(responseData.results);
 
@@ -108,6 +130,7 @@ const CreateFlow = (props: CreateFlowProps) => {
     } catch (error) {
       // TODO: handle errors
       console.error(error);
+      setIsSubmitting(false);
     }
   };
 
