@@ -28,7 +28,7 @@ export type ContentBlockData = {
   descriptions: Record<string, string>;
 };
 
-type CreationResultField = {
+export type CreationResultField = {
   fieldId: string;
   success: boolean;
   statusCode: number;
@@ -97,7 +97,7 @@ const CreateFlow = (props: CreateFlowProps) => {
       setCreationResultFields(responseData.results);
 
       const errors = responseData.results.filter((result: any) => !result.success);
-      if (errors.length > 0 && errors.length > 0) {
+      if (errors.length > 0) {
         setStep(ERROR_STEP);
         setIsSubmitting(false);
         return;
