@@ -15,11 +15,11 @@ import {
 } from '../../utils';
 import { createClient } from 'contentful-management';
 import DraftStep from './DraftStep';
-import ClientErrorStep from './ClientErrorStep';
+import ErrorStep from './ErrorStep';
 
 const CREATE_STEP = 'create';
 const DRAFT_STEP = 'draft';
-const CLIENT_ERROR_STEP = 'client-error';
+const ERROR_STEP = 'error';
 const SUCCESS_STEP = 'success';
 
 type CreateFlowProps = {
@@ -34,7 +34,7 @@ export type ContentBlockData = {
   descriptions: Record<string, string>;
 };
 
-type FieldError = {
+export type CreationResultField = {
   fieldId: string;
   success: boolean;
   statusCode: number;
@@ -54,7 +54,7 @@ const CreateFlow = (props: CreateFlowProps) => {
   const { sdk, entry, initialSelectedFields = [] } = props;
   const [step, setStep] = useState(FIELDS_STEP);
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set(initialSelectedFields));
-  const [fieldsWithErrors, setFieldsWithErrors] = useState<FieldError[]>([]);
+  const [creationResultFields, setCreationResultFields] = useState<CreationResultField[]>([]);
   const [contentBlocksData, setContentBlocksData] = useState<ContentBlockData>({
     names: {},
     descriptions: {},
@@ -116,11 +116,12 @@ const CreateFlow = (props: CreateFlowProps) => {
 
       await updateConfig(configEntry, sdk.locales.default, connectedFields, cma);
 
+      setCreationResultFields(responseData.results);
+
       const errors = responseData.results.filter((result: any) => !result.success);
-      const clientErrors = errors.filter((result: any) => result.statusCode !== 500);
-      if (errors.length > 0 && clientErrors.length > 0) {
-        setFieldsWithErrors(errors);
-        setStep(CLIENT_ERROR_STEP);
+      if (errors.length > 0) {
+        setStep(ERROR_STEP);
+        setIsSubmitting(false);
         return;
       }
 
@@ -166,9 +167,12 @@ const CreateFlow = (props: CreateFlowProps) => {
           handleNextStep={handleCreate}
         />
       )}
-      {step === CLIENT_ERROR_STEP && (
-        <ClientErrorStep
-          fieldsWithErrors={fieldsWithErrors}
+      {step === ERROR_STEP && (
+        <ErrorStep
+          isSubmitting={isSubmitting}
+          creationResultFields={creationResultFields}
+          contentBlocksData={contentBlocksData}
+          handleCreate={handleCreate}
           handleClose={() => sdk.close({ step: 'close' })}
         />
       )}

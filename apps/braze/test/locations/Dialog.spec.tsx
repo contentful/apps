@@ -176,7 +176,7 @@ describe('Dialog component', () => {
     expect(successStepParagraph).toBeTruthy();
   });
 
-  it('Shows ClientErrorStep when there are client errors', async () => {
+  it('Display client errors message correctly', async () => {
     mockSdk.parameters.invocation = {
       mode: 'create',
       entryId: 'entryId',
@@ -191,13 +191,13 @@ describe('Dialog component', () => {
             {
               fieldId: 'name',
               success: false,
-              statusCode: 404,
+              statusCode: 400,
               message: 'Content block name not found or has no value for field name',
             },
             {
               fieldId: 'lastname',
               success: false,
-              statusCode: 404,
+              statusCode: 400,
               message: 'Content block name not found or has no value for field lastname',
             },
           ],
@@ -213,14 +213,115 @@ describe('Dialog component', () => {
 
     expect(
       screen.getByText(
-        'Error code [404] - [Content block name not found or has no value for field name]'
+        'Error code [400] - [Content block name not found or has no value for field name]'
       )
     ).toBeTruthy();
     expect(
       screen.getByText(
-        'Error code [404] - [Content block name not found or has no value for field lastname]'
+        'Error code [400] - [Content block name not found or has no value for field lastname]'
       )
     ).toBeTruthy();
+  });
+
+  it('Display server error message correctly', async () => {
+    mockSdk.parameters.invocation = {
+      mode: 'create',
+      entryId: 'entryId',
+      contentTypeId: 'contentTypeId',
+      title: 'title',
+    };
+
+    mockCma.appActionCall.createWithResponse.mockResolvedValue({
+      response: {
+        body: JSON.stringify({
+          results: [
+            {
+              fieldId: 'name',
+              success: false,
+              statusCode: 500,
+              message: 'Internal server error',
+            },
+            {
+              fieldId: 'lastname',
+              success: false,
+              statusCode: 500,
+              message: 'Internal server error',
+            },
+          ],
+        }),
+      },
+    });
+
+    render(<Dialog />);
+
+    await navigateToFinalStep();
+
+    await screen.findByText('There was an issue');
+
+    const errorMessages = screen.getAllByText(
+      'Error code [500] - [Internal server error] . Please retry sending to Braze.'
+    );
+    expect(errorMessages.length).toBeGreaterThan(0);
+    errorMessages.forEach((message) => {
+      expect(message).toBeTruthy();
+    });
+
+    expect(screen.getByRole('button', { name: /retry/i })).toBeTruthy();
+  });
+
+  it('Retry button works correctly after server error', async () => {
+    mockSdk.parameters.invocation = {
+      mode: 'create',
+      entryId: 'entryId',
+      contentTypeId: 'contentTypeId',
+      title: 'title',
+    };
+
+    mockCma.appActionCall.createWithResponse
+      .mockResolvedValueOnce({
+        response: {
+          body: JSON.stringify({
+            results: [
+              {
+                fieldId: 'name',
+                success: false,
+                statusCode: 500,
+                message: 'Internal server error',
+              },
+            ],
+          }),
+        },
+      })
+      .mockResolvedValueOnce({
+        response: {
+          body: JSON.stringify({
+            results: [
+              {
+                fieldId: 'name',
+                success: true,
+                statusCode: 201,
+                contentBlockId: 'contentBlockId',
+              },
+            ],
+          }),
+        },
+      });
+
+    render(<Dialog />);
+
+    await navigateToFinalStep();
+
+    await screen.findByText('There was an issue');
+
+    const retryButton = screen.getByRole('button', { name: /retry/i });
+    expect(retryButton).toBeTruthy();
+    fireEvent.click(retryButton);
+
+    const successMessage = await screen.findByText(
+      'You can view them from your Braze dashboard by navigating to',
+      { exact: false }
+    );
+    expect(successMessage).toBeTruthy();
   });
 });
 
