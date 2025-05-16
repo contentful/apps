@@ -1,7 +1,7 @@
 import { Stack, Button, Subheading, Text } from '@contentful/f36-components';
 import WizardFooter from '../WizardFooter';
 import { styles } from './ErrorStep.styles';
-import {ContentBlockData, CreationResultField} from './CreateFlow';
+import { ContentBlockData, CreationResultField } from './CreateFlow';
 import React from 'react';
 
 type ClientErrorStepProps = {
