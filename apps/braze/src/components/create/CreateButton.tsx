@@ -12,7 +12,6 @@ const CreateButton = ({
   onClick,
   isDisabled = false,
   size = 'small',
-  dataTestId,
 }: CreateButtonProps) => {
   return (
     <Button
