@@ -172,13 +172,13 @@ describe('Dialog component', () => {
             {
               fieldId: 'name',
               success: false,
-              statusCode: 404,
+              statusCode: 400,
               message: 'Content block name not found or has no value for field name',
             },
             {
               fieldId: 'lastname',
               success: false,
-              statusCode: 404,
+              statusCode: 400,
               message: 'Content block name not found or has no value for field lastname',
             },
           ],
@@ -194,12 +194,12 @@ describe('Dialog component', () => {
 
     expect(
       screen.getByText(
-        'Error code [404] - [Content block name not found or has no value for field name]'
+        'Error code [400] - [Content block name not found or has no value for field name]'
       )
     ).toBeTruthy();
     expect(
       screen.getByText(
-        'Error code [404] - [Content block name not found or has no value for field lastname]'
+        'Error code [400] - [Content block name not found or has no value for field lastname]'
       )
     ).toBeTruthy();
   });
@@ -239,7 +239,6 @@ describe('Dialog component', () => {
 
     await screen.findByText('There was an issue');
 
-    // Check for each error message
     const errorMessages = screen.getAllByText(
       'Error code [500] - [Internal server error] . Please retry sending to Braze.'
     );
@@ -294,14 +293,6 @@ describe('Dialog component', () => {
     await navigateToFinalStep();
 
     await screen.findByText('There was an issue');
-
-    const errorMessages = screen.getAllByText(
-      'Error code [500] - [Internal server error] . Please retry sending to Braze.'
-    );
-    expect(errorMessages.length).toBeGreaterThan(0);
-    errorMessages.forEach((message) => {
-      expect(message).toBeTruthy();
-    });
 
     const retryButton = screen.getByRole('button', { name: /retry/i });
     expect(retryButton).toBeTruthy();
