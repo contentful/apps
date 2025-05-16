@@ -15,7 +15,7 @@ const yoga = createYoga({ schema, graphiql: false });
 const resourceTypeMappingHandler: MappingHandler = (event) => {
   const mappings = event.resourceTypes.map(({ resourceTypeId }) => ({
     resourceTypeId,
-    graphQLOutputType: 'FileResult',
+    graphQLOutputType: 'FileUnion',
     graphQLQueryField: 'file',
     graphQLQueryArguments: { id: '/urn' },
   }));
@@ -112,10 +112,12 @@ const lookupHandler: ResourcesLookupHandler = async (event, context) => {
         query: /* GraphQL */ `
           query lookupFiles($ids: [ID!]!) {
             file(ids: $ids) {
-              items {
-                id
-                title
-                image
+              ... on FileResult {
+                items {
+                  id
+                  title
+                  image
+                }
               }
             }
           }

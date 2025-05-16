@@ -13,8 +13,10 @@ type FileResult {
   items: [File!]!
 }
 
+union FileUnion = File | FileResult
+
 type Query {
-  file(id: ID, ids: [ID!], search: String): FileResult
+  file(id: ID, ids: [ID!], search: String): FileUnion
 }
 `;
 
@@ -29,7 +31,7 @@ const schema = makeExecutableSchema({
       ) => {
         console.log('Google Drive API Request:', { ids, search });
         if (!search && !id && (!ids || ids.length === 0)) {
-          throw new GraphQLError('Either "search" or "ids" or id  must be provided');
+          throw new GraphQLError('Either "search" or "ids" or "id" must be provided');
         }
 
         const { token } = context.appInstallationParameters;
