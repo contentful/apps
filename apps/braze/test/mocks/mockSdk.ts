@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import { BRAZE_ENDPOINTS_LIST } from '../../src/utils';
+import { BRAZE_ENDPOINTS } from '../../src/utils';
 
 const mockSdk: any = {
   app: {
@@ -20,7 +20,7 @@ const mockSdk: any = {
     installation: {
       contentfulApiKey: 'test-contentful-apiKey',
       brazeApiKey: 'test-braze-apiKey',
-      brazeEndpoint: BRAZE_ENDPOINTS_LIST[0],
+      brazeEndpoint: BRAZE_ENDPOINTS[0].url,
     },
     invocation: {
       id: 'test-entryId',
