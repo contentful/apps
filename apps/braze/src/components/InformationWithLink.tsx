@@ -5,7 +5,7 @@ import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 type InformationSectionProps = {
   url: string;
-  children: string;
+  children?: string;
   linkText: string;
   marginTop?: Spacing;
   marginBottom?: Spacing;
