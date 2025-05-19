@@ -1,6 +1,7 @@
 export interface KlaviyoAppConfig {
-  publicKey: string;
-  privateKey: string;
+  clientId: string;
+  clientSecret: string;
+  accessToken?: string;
   selectedLocations?: Record<string, boolean>;
   selectedContentTypes?: Record<string, boolean>;
   fieldMappings?: any[];

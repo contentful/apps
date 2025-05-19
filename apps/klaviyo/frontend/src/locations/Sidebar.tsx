@@ -100,27 +100,18 @@ const SidebarComponent = ({
       logger.log('[Sidebar] preSelectedFields:', preSelectedFields);
       logger.log('[Sidebar] validFields:', validFields);
 
-      // Try to get API keys to pass to the dialog
-      let privateKey = '';
-      let publicKey = '';
+      // Try to get accessToken to pass to the dialog
+      let accessToken = '';
 
       // From app installation parameters
       if (sdk.parameters && sdk.parameters.installation) {
-        const {
-          klaviyoApiKey,
-          klaviyoCompanyId,
-          privateKey: pk,
-          publicKey: pubk,
-        } = sdk.parameters.installation;
-        if (klaviyoApiKey) privateKey = klaviyoApiKey;
-        if (klaviyoCompanyId) publicKey = klaviyoCompanyId;
-        if (pk) privateKey = pk;
-        if (pubk) publicKey = pubk;
+        const { klaviyoApiKey, klaviyoCompanyId } = sdk.parameters.installation;
+        if (klaviyoApiKey) accessToken = klaviyoApiKey;
+        if (klaviyoCompanyId) accessToken = klaviyoCompanyId;
       }
 
-      logger.log('[Sidebar] Private/Public keys available for dialog:', {
-        privateKeyAvailable: !!privateKey,
-        publicKeyAvailable: !!publicKey,
+      logger.log('[Sidebar] AccessToken available for dialog:', {
+        accessTokenAvailable: !!accessToken,
       });
 
       // Fetch the entry with all locales
@@ -139,8 +130,7 @@ const SidebarComponent = ({
           showSyncButton: true,
           contentTypeId,
           entryId,
-          privateKey,
-          publicKey,
+          accessToken,
         },
         width: 800,
       });

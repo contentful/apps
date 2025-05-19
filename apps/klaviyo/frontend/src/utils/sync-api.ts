@@ -19,39 +19,23 @@ export interface SyncStatus {
 }
 
 /**
- * Get API keys from localStorage
+ * Get access token from localStorage
  */
-const getApiKeys = (): { privateKey: string; publicKey: string } => {
+const getAccessToken = (): { accessToken: string } => {
   try {
-    // Try the new keys format first
     const keysString = localStorage.getItem('klaviyo_api_keys');
     if (keysString) {
       const keys = JSON.parse(keysString);
-      // Check for correct key names (publicKey/privateKey)
-      if (keys.publicKey && keys.privateKey) {
-        logger.log('Found API keys in localStorage with new naming');
-        return {
-          privateKey: keys.privateKey,
-          publicKey: keys.publicKey,
-        };
-      }
-
-      // Check for old key names (apiKey/privateKey)
-      if (keys.apiKey && keys.privateKey) {
-        logger.log('Found API keys in localStorage with old naming');
-        return {
-          privateKey: keys.privateKey,
-          publicKey: keys.apiKey,
-        };
+      if (keys.accessToken) {
+        logger.log('Found access token in localStorage');
+        return { accessToken: keys.accessToken };
       }
     }
-
-    // If not found or invalid, log a warning
-    logger.warn('API keys not found in localStorage or have invalid format');
+    logger.warn('Access token not found in localStorage or has invalid format');
   } catch (error) {
-    logger.error('Error retrieving API keys from localStorage:', error);
+    logger.error('Error retrieving access token from localStorage:', error);
   }
-  return { privateKey: '', publicKey: '' };
+  return { accessToken: '' };
 };
 
 /**
@@ -66,19 +50,17 @@ export const markEntryForSyncViaApi = async (
 ): Promise<boolean> => {
   try {
     const client = sdk.cma;
-    const { privateKey, publicKey } = getApiKeys();
+    const { accessToken } = getAccessToken();
     let parameters: any = {
       ...(extraParams || {}),
       entryId,
-      privateKey,
-      publicKey,
+      accessToken,
     };
     if (Array.isArray(contentTypeIdOrFieldIds)) {
       parameters.fieldIds = contentTypeIdOrFieldIds;
     } else {
       parameters.contentTypeId = contentTypeIdOrFieldIds;
     }
-    // Validate parameters before making the call
     if (!parameters || typeof parameters !== 'object') {
       logger.error('App Action call missing required parameters:', parameters);
       throw new Error('App Action call missing required parameters');
@@ -100,7 +82,6 @@ export const markEntryForSyncViaApi = async (
     if (result.status && result.status >= 400) {
       throw new Error(result.message || `Error ${result.status}`);
     }
-    // Parse the response body if it exists
     if (result.response && result.response.body) {
       try {
         const parsed = JSON.parse(result.response.body);

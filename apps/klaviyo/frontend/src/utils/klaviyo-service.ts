@@ -3,8 +3,7 @@ import { FieldMapping } from '../config/klaviyo';
 import { KnownSDK, CMAClient } from '@contentful/app-sdk';
 
 interface KlaviyoCredentials {
-  privateKey: string;
-  publicKey: string;
+  accessToken: string;
 }
 
 interface KlaviyoImage {
@@ -146,8 +145,7 @@ export class KlaviyoService {
             method: 'GET',
             data: '{}',
             params: '{}',
-            privateKey: this.credentials.privateKey,
-            publicKey: this.credentials.publicKey,
+            accessToken: this.credentials.accessToken,
           },
         }
       );
@@ -263,8 +261,7 @@ export class KlaviyoService {
             method: existingImage ? 'PATCH' : 'POST',
             params: '{}',
             data: JSON.stringify(payload),
-            privateKey: this.credentials.privateKey,
-            publicKey: this.credentials.publicKey,
+            accessToken: this.credentials.accessToken,
           },
         }
       );
@@ -559,8 +556,7 @@ export class KlaviyoService {
             data: '{}',
             method: 'GET',
             params: JSON.stringify({ filter: `equals(name,\"${nameWithId}\")`, 'page[size]': 1 }),
-            privateKey: this.credentials.privateKey,
-            publicKey: this.credentials.publicKey,
+            accessToken: this.credentials.accessToken,
           },
         }
       );
@@ -670,8 +666,7 @@ export class KlaviyoService {
               method: 'PATCH',
               params: '{}',
               data: JSON.stringify(updatePayload),
-              privateKey: this.credentials.privateKey,
-              publicKey: this.credentials.publicKey,
+              accessToken: this.credentials.accessToken,
             },
           }
         );
@@ -721,8 +716,7 @@ export class KlaviyoService {
               method: 'POST',
               params: '{}',
               data: JSON.stringify(payload),
-              privateKey: this.credentials.privateKey,
-              publicKey: this.credentials.publicKey,
+              accessToken: this.credentials.accessToken,
             },
           }
         );

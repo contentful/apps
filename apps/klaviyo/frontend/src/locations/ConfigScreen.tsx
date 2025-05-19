@@ -24,6 +24,8 @@ import {
   getEntryKlaviyoFieldMappings,
   setEntryKlaviyoFieldMappings,
 } from '../utils/field-mappings';
+import ConnectionComponent from '../components/ConnectionComponent';
+import { useParams } from 'react-router-dom';
 
 // Helper to ensure klaviyoFieldMappings entry exists
 const ensureKlaviyoFieldMappingsEntry = async (sdk: ConfigAppSDK) => {
@@ -58,25 +60,32 @@ const ensureKlaviyoFieldMappingsEntry = async (sdk: ConfigAppSDK) => {
 };
 
 const ConfigScreen = () => {
+  const params = useParams();
+  console.log('Params:', params);
   const sdk = useSDK<ConfigAppSDK>();
-  const [publicKey, setPublicKey] = useState('');
-  const [privateKey, setPrivateKey] = useState('');
+  const [clientId, setClientId] = useState('');
+  const [clientSecret, setClientSecret] = useState('');
+  const [accessToken, setAccessToken] = useState('');
   const [selectedContentTypes, setSelectedContentTypes] = useState<Record<string, boolean>>({});
   const [contentTypes, setContentTypes] = useState<any[]>([]);
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Effect 1: Only run initializeApp on mount
+  useEffect(() => {
+    // Log the current URL of the hosted Contentful app
+    console.log('Contentful App URL:', window.location);
+    console.log('LocalStorage:', window.localStorage.getItem('Test'));
+  }, []);
+
   useEffect(() => {
     const initializeApp = async () => {
       const parameters = await sdk.app.getParameters<KlaviyoAppConfig>();
+      console.log('Parameters:', parameters);
       if (parameters) {
-        setPublicKey(parameters.publicKey || '');
-        setPrivateKey(parameters.privateKey || '');
+        setClientId(parameters.clientId || '');
+        setClientSecret(parameters.clientSecret || '');
+        setAccessToken(parameters.accessToken || '');
         setSelectedContentTypes(parameters.selectedContentTypes || {});
-        if (parameters.publicKey && parameters.privateKey) {
-          validateCredentials(parameters.publicKey, parameters.privateKey);
-        }
         if (parameters.fieldMappings || parameters.contentTypeMappings) {
           try {
             if (parameters.fieldMappings && Array.isArray(parameters.fieldMappings)) {
@@ -93,24 +102,14 @@ const ConfigScreen = () => {
       sdk.app.setReady();
     };
     initializeApp();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sdk]);
 
-  // Effect 2: Register onConfigure with latest state
   useEffect(() => {
     sdk.app.onConfigure(async () => {
       const currentParameters = await sdk.app.getParameters();
-      if (!publicKey || !privateKey) {
-        sdk.notifier.error('Please provide both Public Key and Private Key');
+      if (!clientId || !clientSecret) {
+        sdk.notifier.error('Please provide both Client ID and Client Secret');
         return false;
-      }
-      const isInstalled = await sdk.app.isInstalled();
-      if (isInstalled) {
-        const valid = await validateCredentials(publicKey, privateKey);
-        if (!valid) {
-          sdk.notifier.error('Could not validate Klaviyo credentials. Please check your API keys.');
-          return false;
-        }
       }
       let localMappings: any[] = [];
       try {
@@ -143,8 +142,9 @@ const ConfigScreen = () => {
       const spaceId = sdk.ids.space;
       const selectedLocations = { 'entry-sidebar': true };
       const parameters = {
-        publicKey,
-        privateKey,
+        clientId,
+        clientSecret,
+        accessToken,
         selectedLocations,
         selectedContentTypes,
         spaceId,
@@ -158,7 +158,6 @@ const ConfigScreen = () => {
           return acc;
         }, {} as Record<string, boolean>);
       const editorInterface = buildEditorInterfaceConfig(filteredSelectedContentTypes);
-      // Ensure klaviyoFieldMappings entry exists before saving config
       await ensureKlaviyoFieldMappingsEntry(sdk);
       return {
         parameters,
@@ -167,7 +166,7 @@ const ConfigScreen = () => {
         },
       };
     });
-  }, [sdk, publicKey, privateKey, selectedContentTypes]);
+  }, [sdk, clientId, clientSecret, accessToken, selectedContentTypes]);
 
   // Load content types
   const loadContentTypes = async () => {
@@ -233,77 +232,57 @@ const ConfigScreen = () => {
     setSelectedContentTypes((prev) => ({ ...prev, [id]: false }));
   };
 
-  // Validate Klaviyo API credentials using App Action
-  const validateCredentials = async (pubKey: string, privKey: string): Promise<boolean> => {
-    try {
-      const client = sdk.cma;
-      const result = await client.appActionCall.create(
-        {
-          spaceId: sdk.ids.space,
-          environmentId: sdk.ids.environment,
-          appDefinitionId: sdk.ids.app,
-          appActionId: '4QzhEVBw043erLfXQ2V0IL',
-        },
-        {
-          parameters: {
-            publicKey: pubKey,
-            privateKey: privKey,
-          },
-        }
-      );
-      if (!result) {
-        return false;
-      } else {
-        return true;
-      }
-    } catch (error) {
-      console.error('Error validating credentials:', error);
-      return false;
-    }
-  };
-
   return (
     <Box style={{ maxWidth: '800px', margin: '64px auto' }}>
       <Box padding="spacingXl" style={{ border: '1px solid #E5EBED', borderRadius: '4px' }}>
+        {/* OAuth Connection Component Placeholder */}
+        <Box style={{ marginBottom: '32px', width: '100%' }}>
+          <ConnectionComponent
+            clientId={clientId}
+            clientSecret={clientSecret}
+            redirectUri="https://app.contentful.com/spaces/u0ge3owcpcam/apps/35ZeiuUc1uciWR2AXbozas"
+            accessToken={accessToken}
+            onTokenChange={setAccessToken}
+          />
+        </Box>
+        {/* End OAuth Connection Component Placeholder */}
         <Stack spacing="spacingXl" flexDirection="column" alignItems="flex-start">
           <Stack spacing="spacingM" flexDirection="column" alignItems="flex-start">
             <Heading>Configure access</Heading>
-            <Text>Input your Klaviyo API keys to connect your account.</Text>
+            <Text>Input your Klaviyo OAuth credentials to connect your account.</Text>
           </Stack>
 
           <Form style={{ width: '100%' }}>
             <Stack spacing="spacingXl" flexDirection="column" alignItems="flex-start">
               <FormControl isRequired style={{ width: '100%', margin: '0' }}>
-                <FormControl.Label>Public Key</FormControl.Label>
+                <FormControl.Label>Client ID</FormControl.Label>
                 <TextInput
-                  value={publicKey}
-                  onChange={(e) => setPublicKey(e.target.value)}
-                  placeholder="Enter your public key"
+                  value={clientId}
+                  onChange={(e) => setClientId(e.target.value)}
+                  placeholder="Enter your OAuth client ID"
                   style={{ width: '100%' }}
                   isDisabled={isReadOnly}
                 />
               </FormControl>
 
               <FormControl isRequired style={{ width: '100%', margin: '0' }}>
-                <FormControl.Label>Private Key</FormControl.Label>
+                <FormControl.Label>Client Secret</FormControl.Label>
                 <TextInput
                   type="password"
-                  value={privateKey}
-                  onChange={(e) => setPrivateKey(e.target.value)}
-                  placeholder="Enter your private key"
+                  value={clientSecret}
+                  onChange={(e) => setClientSecret(e.target.value)}
+                  placeholder="Enter your OAuth client secret"
                   style={{ width: '100%' }}
                   isDisabled={isReadOnly}
                 />
-                <TextLink
-                  style={{ marginTop: '8px' }}
-                  href="https://developers.klaviyo.com/en/docs/api-keys-authentication"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  icon={<ExternalLinkIcon />}>
-                  Learn how to create API keys in Klaviyo
-                </TextLink>
               </FormControl>
-
+              {/* Optionally show access token if available */}
+              {accessToken && (
+                <FormControl style={{ width: '100%', margin: '0' }}>
+                  <FormControl.Label>Access Token</FormControl.Label>
+                  <TextInput value={accessToken} isReadOnly style={{ width: '100%' }} />
+                </FormControl>
+              )}
               {/* Content Types Dropdown Section */}
               <Stack
                 spacing="spacingM"

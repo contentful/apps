@@ -252,12 +252,9 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
 
         await setEntryKlaviyoFieldMappings(sdk, entryId, newMappings);
 
-        // Initialize KlaviyoService with API keys
-        const { privateKey, publicKey } = sdk.parameters.installation || {};
         const klaviyoService = new KlaviyoService(
           {
-            privateKey,
-            publicKey,
+            accessToken: sdk.parameters.installation?.accessToken,
           },
           sdk.cma
         );

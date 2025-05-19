@@ -1,9 +1,12 @@
 import React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { GlobalStyles } from '@contentful/f36-components';
 import { init, locations } from '@contentful/app-sdk';
 import { SDKProvider } from '@contentful/react-apps-toolkit';
 import './global.css';
+import Callback from './pages/auth/callback';
+import App from './App';
 
 // Import your components
 import ConfigScreen from './locations/ConfigScreen';
@@ -136,11 +139,20 @@ init((sdk) => {
   }
 
   const mappings = (sdk as any).parameters?.installation?.fieldMappings || [];
-  render(
-    <SDKProvider>
+  createRoot(root!).render(
+    <BrowserRouter>
       <GlobalStyles />
-      <ComponentLocation mappings={mappings} />
-    </SDKProvider>,
-    root
+      <Routes>
+        <Route path="/auth/callback" element={<Callback />} />
+        <Route
+          path="*"
+          element={
+            <SDKProvider>
+              <ComponentLocation mappings={mappings} />
+            </SDKProvider>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
   );
 });
