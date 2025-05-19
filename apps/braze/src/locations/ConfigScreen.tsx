@@ -94,7 +94,7 @@ const ConfigScreen = () => {
 
     const isContentfulKeyValid = await checkContentfulApiKey(parameters.contentfulApiKey);
     const isBrazeKeyValid = checkIfHasValue(parameters.brazeApiKey, setBrazeApiKeyIsValid);
-    console.log('parameters.brazeEndpoint', parameters.brazeEndpoint);
+
     const isBrazeEndpointValid = checkIfHasValue(parameters.brazeEndpoint, setBrazeEndpointIsValid);
 
     if (!isContentfulKeyValid || !isBrazeKeyValid || !isBrazeEndpointValid) {
@@ -123,7 +123,6 @@ const ConfigScreen = () => {
   useEffect(() => {
     (async () => {
       const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
-      console.log('currentParameters', currentParameters);
 
       if (currentParameters) {
         setParameters(currentParameters);

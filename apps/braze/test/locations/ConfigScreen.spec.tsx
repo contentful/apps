@@ -1,3 +1,4 @@
+import React from 'react';
 import { cleanup, fireEvent, render, RenderResult, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockSdk } from '../mocks';
@@ -12,7 +13,6 @@ import {
   BRAZE_ENDPOINTS,
   CONTENT_TYPE_DOCUMENTATION,
 } from '../../src/utils';
-import React from 'react';
 
 const mockCma = {
   contentType: {
@@ -132,15 +132,20 @@ describe('Config Screen component', () => {
       const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
       const brazeApiKeyInput = screen.getAllByTestId('brazeApiKey')[0];
       const brazeEndpointInput = screen.getByPlaceholderText('ex. rest.iad-01.braze.com');
+
       await user.type(contentfulApiKeyInput, 'valid-api-key-123');
       await user.type(brazeApiKeyInput, 'valid-api-key-321');
-      await user.type(brazeEndpointInput, BRAZE_ENDPOINTS[0].url);
+
+      // Simulate selecting an item from the Autocomplete
+      fireEvent.change(brazeEndpointInput, { target: { value: BRAZE_ENDPOINTS[0].name } });
+      const menuItem = screen.getByText(BRAZE_ENDPOINTS[0].name);
+      fireEvent.click(menuItem);
+
       vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
         return { ok: true, status: 200 };
       });
 
       const result = await saveAppInstallation();
-      console.log('result', result);
 
       expect(result).toEqual({
         parameters: {
@@ -205,12 +210,20 @@ describe('Config Screen component', () => {
       const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
       const brazeApiKeyInput = screen.getAllByTestId('brazeApiKey')[0];
       const brazeEndpointInput = screen.getByPlaceholderText('ex. rest.iad-01.braze.com');
+
       await user.type(contentfulApiKeyInput, 'valid-api-key-123');
       await user.type(brazeApiKeyInput, 'valid-api-key-321');
-      await user.type(brazeEndpointInput, BRAZE_ENDPOINTS[0].url);
+
+      // Simulate selecting an item from the Autocomplete
+      fireEvent.change(brazeEndpointInput, { target: { value: BRAZE_ENDPOINTS[0].name } });
+      const menuItem = screen.getByText(BRAZE_ENDPOINTS[0].name);
+      fireEvent.click(menuItem);
+
       vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
         return { ok: true, status: 200 };
       });
+
+      // Mock contentType.get to throw an error to trigger content type creation
       mockCma.contentType.get.mockRejectedValueOnce(new Error('Content type not found'));
 
       await saveAppInstallation();
