@@ -17,7 +17,7 @@ import { Entry } from '../../fields/Entry';
 import WizardFooter from '../WizardFooter';
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { editButton } from './CreateStep.styles';
-import { PencilSimple, CheckCircle, Warning } from '@phosphor-icons/react';
+import { PencilSimple, CheckCircle, WarningOctagon } from '@phosphor-icons/react';
 import tokens from '@contentful/f36-tokens';
 import CreateButton from './CreateButton';
 import { CreationResultField } from './CreateFlow';
@@ -172,11 +172,11 @@ const ContentBlockView = ({
           <Text>Content Block name</Text>
           <Flex alignItems="center" style={{ gap: tokens.spacing2Xs }}>
             {isCreated && <Icon as={CheckCircle} variant="positive" size="tiny" />}
-            {error && <Icon as={Warning} variant="negative" size="tiny" />}
-            <Text fontWeight="fontWeightDemiBold">{name}</Text>
+            {error && <Icon as={WarningOctagon} variant="negative" size="tiny" />}
+            <Text fontWeight="fontWeightMedium">{name}</Text>
           </Flex>
           {error && (
-            <Text as="span" fontColor="gray700" fontSize="fontSizeS">
+            <Text fontColor="red600" fontSize="fontSizeS">
               {error}
             </Text>
           )}
@@ -227,6 +227,7 @@ const ContentBlockCard = ({
         paddingBottom: tokens.spacingS,
         paddingLeft: tokens.spacingXs,
         paddingRight: tokens.spacingXs,
+        borderColor: error ? tokens.red600 : undefined,
       }}>
       {isEditing ? (
         <ContentBlockForm
