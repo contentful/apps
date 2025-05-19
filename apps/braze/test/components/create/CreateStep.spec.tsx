@@ -34,6 +34,7 @@ describe('CreateStep', () => {
         isSubmitting={false}
         handlePreviousStep={mockHandlePreviousStep}
         handleNextStep={mockHandleNextStep}
+        creationResultFields={[]}
         {...props}
       />
     );
@@ -120,6 +121,38 @@ describe('CreateStep', () => {
     it('returns the correct default name', () => {
       const defaultName = getDefaultContentBlockName(mockEntry, 'field1');
       expect(defaultName).toBe('Test-Entry-field1');
+    });
+  });
+
+  describe('when handling creation results', () => {
+    it('shows success state for successful fields and error message for failed fields', () => {
+      const creationResultFields = [
+        {
+          fieldId: 'field1',
+          success: true,
+          statusCode: 200,
+          message: '',
+        },
+        {
+          fieldId: 'field2',
+          success: false,
+          statusCode: 400,
+          message: 'Content Block name already exists',
+        },
+      ];
+
+      renderComponent({ creationResultFields });
+
+      const successIcon = screen.getAllByRole('button', {
+        name: 'Content block created successfully',
+      });
+      expect(successIcon).toHaveLength(1);
+
+      const errorMessage = screen.getByText('Content Block name already exists');
+      expect(errorMessage).toBeTruthy();
+
+      const editButtons = screen.getAllByRole('button', { name: /Edit content block/i });
+      expect(editButtons).toHaveLength(1);
     });
   });
 });

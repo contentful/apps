@@ -74,7 +74,7 @@ export const handler: FunctionEventHandler<
         fieldId,
         success: false,
         statusCode: 400,
-        message: `Field ${fieldId} not found or has no value`,
+        message: `Field ${fieldId} does not exist or is empty`,
       });
       continue;
     }
@@ -84,7 +84,7 @@ export const handler: FunctionEventHandler<
         fieldId,
         success: false,
         statusCode: 400,
-        message: `Content block name not found or has no value for field ${fieldId}`,
+        message: `Unexpected error: Content block name not found for field ${fieldId}`,
       });
       continue;
     }
