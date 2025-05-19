@@ -11,12 +11,13 @@ import {
   FormControl,
   Textarea,
   Skeleton,
+  Icon,
 } from '@contentful/f36-components';
 import { Entry } from '../../fields/Entry';
 import WizardFooter from '../WizardFooter';
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { editButton } from './CreateStep.styles';
-import { PencilSimple, Check } from '@phosphor-icons/react';
+import { PencilSimple, CheckCircle, Warning } from '@phosphor-icons/react';
 import tokens from '@contentful/f36-tokens';
 import CreateButton from './CreateButton';
 import { CreationResultField } from './CreateFlow';
@@ -45,7 +46,7 @@ type ContentBlockViewProps = {
   name: string;
   description: string;
   onEdit: () => void;
-  isDisabled?: boolean;
+  isCreated?: boolean;
   error?: string;
 };
 
@@ -61,7 +62,7 @@ type ContentBlockCardProps = {
   onCancel: () => void;
   onSave: (fieldId: string) => void;
   isNameValid: boolean;
-  isDisabled?: boolean;
+  isCreated?: boolean;
   error?: string;
 };
 
@@ -157,7 +158,7 @@ const ContentBlockView = ({
   name,
   description,
   onEdit,
-  isDisabled,
+  isCreated,
   error,
 }: ContentBlockViewProps) => {
   return (
@@ -169,9 +170,13 @@ const ContentBlockView = ({
         style={{ width: '100%' }}>
         <Stack spacing="spacingXs" flexDirection="column" alignItems="flex-start">
           <Text>Content Block name</Text>
-          <Text fontWeight="fontWeightDemiBold">{name}</Text>
+          <Flex alignItems="center" style={{ gap: tokens.spacing2Xs }}>
+            {isCreated && <Icon as={CheckCircle} variant="positive" size="tiny" />}
+            {error && <Icon as={Warning} variant="negative" size="tiny" />}
+            <Text fontWeight="fontWeightDemiBold">{name}</Text>
+          </Flex>
           {error && (
-            <Text fontColor="red600" fontSize="fontSizeS">
+            <Text as="span" fontColor="gray700" fontSize="fontSizeS">
               {error}
             </Text>
           )}
@@ -183,17 +188,7 @@ const ContentBlockView = ({
           </Stack>
         )}
       </Stack>
-      {isDisabled ? (
-        <IconButton
-          size="small"
-          variant="positive"
-          icon={<Check size={16} />}
-          aria-label="Content block created successfully"
-          className={editButton}
-          withTooltip
-          tooltipProps={{ content: 'Content block created successfully' }}
-        />
-      ) : (
+      {!isCreated && (
         <IconButton
           size="small"
           variant="secondary"
@@ -221,9 +216,9 @@ const ContentBlockCard = ({
   onCancel,
   onSave,
   isNameValid,
-  isDisabled,
+  isCreated,
   error,
-}: ContentBlockCardProps & { isDisabled?: boolean; error?: string }) => {
+}: ContentBlockCardProps & { isCreated?: boolean; error?: string }) => {
   return (
     <Card
       margin="none"
@@ -249,7 +244,7 @@ const ContentBlockCard = ({
           name={contentBlocksData.names[fieldId] || ''}
           description={contentBlocksData.descriptions[fieldId] || ''}
           onEdit={() => onEdit(fieldId)}
-          isDisabled={isDisabled}
+          isCreated={isCreated}
           error={error}
         />
       )}
@@ -367,7 +362,7 @@ const CreateStep = ({
               onCancel={handleCancel}
               onSave={handleSave}
               isNameValid={isNameValid}
-              isDisabled={creationResultFields.some(
+              isCreated={creationResultFields.some(
                 (result) => result.fieldId === fieldId && result.success
               )}
               error={creationResultFields.find((result) => result.fieldId === fieldId)?.message}

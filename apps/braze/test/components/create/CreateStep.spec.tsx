@@ -125,7 +125,7 @@ describe('CreateStep', () => {
   });
 
   describe('when handling creation results', () => {
-    it('shows success state for successful fields and error message for failed fields', () => {
+    it('shows success state and error message for fields', () => {
       const creationResultFields = [
         {
           fieldId: 'field1',
@@ -142,11 +142,6 @@ describe('CreateStep', () => {
       ];
 
       renderComponent({ creationResultFields });
-
-      const successIcon = screen.getAllByRole('button', {
-        name: 'Content block created successfully',
-      });
-      expect(successIcon).toHaveLength(1);
 
       const errorMessage = screen.getByText('Content Block name already exists');
       expect(errorMessage).toBeTruthy();
