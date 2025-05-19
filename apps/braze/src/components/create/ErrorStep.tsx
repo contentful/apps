@@ -54,7 +54,7 @@ const ErrorStep = ({
         {serverErrors.map((field, index) => (
           <List.Item key={`${field.fieldId}-${index}`}>
             <Text fontWeight="fontWeightDemiBold">{field.fieldId}</Text> - error code{' '}
-            {field.statusCode} - {field.message} . Please retry sending to Braze.
+            {field.statusCode} - {field.message}. Please retry sending to Braze.
           </List.Item>
         ))}
         {clientErrors.map((field, index) => (
