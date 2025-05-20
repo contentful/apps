@@ -18,7 +18,7 @@ type ModalProps = {
   installationParams: InstallationParams;
 };
 
-const ModalUploadAsset: FC<ModalProps> = ({
+const ModalContent: FC<ModalProps> = ({
   isShown = false,
   onClose,
   onConfirm,
@@ -95,6 +95,11 @@ const ModalUploadAsset: FC<ModalProps> = ({
       </Modal.Controls>
     </Modal>
   );
+};
+
+const ModalUploadAsset: FC<ModalProps> = (props) => {
+  if (!props.isShown) return null;
+  return <ModalContent {...props} />;
 };
 
 export default ModalUploadAsset;
