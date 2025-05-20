@@ -2,6 +2,7 @@ import { PlainClientAPI } from 'contentful-management';
 import { getConfigEntry } from '../utils';
 import { Entry } from '../fields/Entry';
 import { FieldsFactory } from '../fields/FieldsFactory';
+import { EntryConnectedField } from '../components/create/CreateFlow';
 
 /**
  * Fetches entries from Contentful that have connectedFields (with at least one field).
@@ -38,27 +39,34 @@ export async function fetchBrazeConnectedEntries(
   if (!entriesResponse?.items) return [];
 
   return await Promise.all(
-    entriesResponse.items.map(async (item: any) => {
+    entriesResponse.items.map(async (rawEntry: any) => {
       const fieldsFactory = new FieldsFactory(
-        item.sys.id,
-        item.sys.contentType?.sys?.id || '',
+        rawEntry.sys.id,
+        rawEntry.sys.contentType?.sys?.id || '',
         cma
       );
-      const cmaEntry = await fieldsFactory.getEntry();
-      console.log('CMA ENTRY: ', cmaEntry);
-      console.log('CMA PUB: ', cmaEntry.sys.publishedAt);
-      console.log('CMA UPD: ', cmaEntry.sys.updatedAt);
-      const fields = await fieldsFactory.createFieldsForEntry(cmaEntry.fields);
+      const rawEntryId = rawEntry.sys.id;
+      const entryConnectedFields = entrys[rawEntryId];
+
+      console.log('ENTRY CONNECTED FIELDS: ', entryConnectedFields);
+
+      const rawFields = entryConnectedFields.map(
+        (contentBlockData: EntryConnectedField) => rawEntry.fields[contentBlockData.fieldId]
+      );
+
+      console.log('RAW FIELDS: ', rawFields);
+
+      const fields = await fieldsFactory.createFieldsForEntryLALALA(rawFields);
       return new Entry(
-        item.sys.id,
-        item.sys.contentType?.sys?.id || '',
-        item.fields?.name?.['en-US'] || 'Untitled',
+        rawEntry.sys.id,
+        rawEntry.sys.contentType?.sys?.id || '',
+        rawEntry.fields?.name?.['en-US'] || 'Untitled', // Todo : get entry name
         fields,
-        item.sys.space?.sys?.id || spaceId,
-        item.sys.environment?.sys?.id || environmentId,
+        rawEntry.sys.space?.sys?.id || spaceId,
+        rawEntry.sys.environment?.sys?.id || environmentId,
         '',
-        cmaEntry.sys.publishedAt,
-        cmaEntry.sys.updatedAt
+        rawEntry.sys.publishedAt,
+        rawEntry.sys.updatedAt
       );
     })
   );
