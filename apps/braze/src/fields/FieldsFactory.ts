@@ -35,6 +35,23 @@ export class FieldsFactory {
     return resolveResponse(response)[0];
   }
 
+  public async createFieldsForEntryLALALA(
+    entryFields: any,
+    contentType?: ContentTypeProps,
+    currentDepth: number = 1
+  ): Promise<Field[]> {
+    if (!contentType) {
+      contentType = await this.getContentType(this.entryContentTypeId);
+    }
+
+    const fields = [];
+    // const newContentType = entryFields.map((field) => {})
+    for (const fieldInfo of contentType.fields) {
+      fields.push(this.createSimpleField(fieldInfo, contentType));
+    }
+    return fields;
+  }
+
   public async createFieldsForEntry(
     entryFields: any,
     contentType?: ContentTypeProps,

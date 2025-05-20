@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Paragraph,
   Box,
   Table,
   Text,
@@ -19,6 +18,7 @@ import InformationWithLink from '../components/InformationWithLink';
 import { styles } from './Page.styles';
 import Splitter from '../components/Splitter';
 import { createClient } from 'contentful-management';
+import { Entry } from '../fields/Entry';
 
 const HELP_URL =
   'https://www.braze.com/docs/api/endpoints/templates/content_blocks_templates/post_create_email_content_block';
@@ -51,7 +51,7 @@ const getConnectedFieldsCount = (connectedFields: any) => {
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
-  const [entries, setEntries] = useState<any[]>([]);
+  const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -141,10 +141,10 @@ const Page = () => {
                       const name = entry.title;
                       const contentType = entry.contentType;
                       const updated = getUpdatedLabel(entry.updatedAt);
-                      const status = entry.getStatus();
+                      const status = entry.state;
                       const connectedCount = getConnectedFieldsCount(entry.fields); // Todo : this are not the real connected fields
                       return (
-                        <Table.Row key={entry.sys.id}>
+                        <Table.Row key={entry.id}>
                           <Table.Cell>{name}</Table.Cell>
                           <Table.Cell>{contentType}</Table.Cell>
                           <Table.Cell>{updated}</Table.Cell>
@@ -154,7 +154,9 @@ const Page = () => {
                             <Button
                               variant="secondary"
                               size="small"
-                              onClick={() => sdk.navigator.openEntry(entry.sys.id)}>
+                              onClick={() => {
+                                // Todo : implement
+                              }}>
                               View fields
                             </Button>
                           </Table.Cell>
