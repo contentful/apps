@@ -128,7 +128,6 @@ const useAI = () => {
     sendStopSignal,
     error,
     hasError,
-    model: sdk.parameters.installation.model ?? defaultModelId,
   };
 };
 
