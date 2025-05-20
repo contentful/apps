@@ -26,15 +26,15 @@ const ModalUploadAsset: FC<ModalProps> = ({
 }) => {
   const [videoQuality, setVideoQuality] = useState('plus');
   const [playbackPolicies, setPlaybackPolicies] = useState<string[]>(['public']);
+  const [captionsConfig, setCaptionsConfig] = useState<CaptionsConfig>({
+    captionsType: 'off',
+  });
   const { muxEnableSignedUrls } = installationParams;
   const [videoQualityExpanded, setVideoQualityExpanded] = useState<boolean>(true);
 
   const [validationState, setValidationState] = useState<Record<string, boolean>>({
     playbackPolicies: true,
-  });
-
-  const [captionsConfig, setCaptionsConfig] = useState<CaptionsConfig>({
-    captionsType: 'off',
+    captions: true,
   });
 
   const handleValidationChange = (componentId: string, isValid: boolean) => {
@@ -72,7 +72,11 @@ const ModalUploadAsset: FC<ModalProps> = ({
           </Accordion.Item>
 
           <Accordion.Item title="Captions">
-            <CaptionsConfiguration value={captionsConfig} onChange={setCaptionsConfig} />
+            <CaptionsConfiguration
+              captionsConfig={captionsConfig}
+              onCaptionsChange={setCaptionsConfig}
+              onValidationChange={(isValid) => handleValidationChange('captions', isValid)}
+            />
           </Accordion.Item>
         </Accordion>
       </Modal.Content>
