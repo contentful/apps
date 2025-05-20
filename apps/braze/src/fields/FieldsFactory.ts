@@ -112,6 +112,7 @@ export class FieldsFactory {
     contentType: ContentTypeProps,
     currentDepth: number
   ): Promise<ReferenceField> {
+    console.log('FIELD VALUE: ', fieldValue);
     const fieldContentType = await this.getContentType(fieldValue.sys.contentType.sys.id);
     const title = !!fieldContentType.displayField
       ? Object.values(fieldValue.fields[fieldContentType.displayField] as { [key: string]: any })[0]
