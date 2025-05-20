@@ -11,15 +11,18 @@ import {
   FormControl,
   Textarea,
   Skeleton,
+  Icon,
 } from '@contentful/f36-components';
 import { Entry } from '../../fields/Entry';
 import WizardFooter from '../WizardFooter';
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { editButton } from './CreateStep.styles';
-import { PencilSimple } from '@phosphor-icons/react';
+import { PencilSimple, CheckCircle, WarningOctagon } from '@phosphor-icons/react';
 import tokens from '@contentful/f36-tokens';
 import CreateButton from './CreateButton';
+import { CreationResultField } from './CreateFlow';
 
+const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 250;
 
 // Types
@@ -43,6 +46,8 @@ type ContentBlockViewProps = {
   name: string;
   description: string;
   onEdit: () => void;
+  isCreated?: boolean;
+  error?: string;
 };
 
 type ContentBlockCardProps = {
@@ -57,6 +62,8 @@ type ContentBlockCardProps = {
   onCancel: () => void;
   onSave: (fieldId: string) => void;
   isNameValid: boolean;
+  isCreated?: boolean;
+  error?: string;
 };
 
 type CreateStepProps = {
@@ -67,6 +74,7 @@ type CreateStepProps = {
   isSubmitting: boolean;
   handlePreviousStep: () => void;
   handleNextStep: (contentBlocksData: ContentBlockData) => void;
+  creationResultFields: CreationResultField[];
 };
 
 // Utils
@@ -98,10 +106,14 @@ const ContentBlockForm = ({
           value={editDraft.name}
           data-testid="content-block-name-input"
           onChange={(e) => onNameChange(e.target.value)}
+          maxLength={MAX_NAME_LENGTH}
           placeholder={getDefaultContentBlockName(entry, fieldId)}
           style={{ marginBottom: tokens.spacingS }}
           autoFocus
         />
+        <Text fontColor="gray500" fontSize="fontSizeS">
+          {editDraft.name.length} / {MAX_NAME_LENGTH}
+        </Text>
         <FormControl.HelpText>Name should be unique</FormControl.HelpText>
         {!isNameValid && (
           <FormControl.ValidationMessage>
@@ -142,7 +154,13 @@ const ContentBlockForm = ({
   );
 };
 
-const ContentBlockView = ({ name, description, onEdit }: ContentBlockViewProps) => {
+const ContentBlockView = ({
+  name,
+  description,
+  onEdit,
+  isCreated,
+  error,
+}: ContentBlockViewProps) => {
   return (
     <Flex justifyContent="space-between">
       <Stack
@@ -152,7 +170,16 @@ const ContentBlockView = ({ name, description, onEdit }: ContentBlockViewProps) 
         style={{ width: '100%' }}>
         <Stack spacing="spacingXs" flexDirection="column" alignItems="flex-start">
           <Text>Content Block name</Text>
-          <Text fontWeight="fontWeightDemiBold">{name}</Text>
+          <Flex alignItems="center" style={{ gap: tokens.spacing2Xs }}>
+            {isCreated && <Icon as={CheckCircle} variant="positive" size="tiny" />}
+            {error && <Icon as={WarningOctagon} variant="negative" size="tiny" />}
+            <Text fontWeight="fontWeightMedium">{name}</Text>
+          </Flex>
+          {error && (
+            <Text fontColor="red600" fontSize="fontSizeS">
+              {error}
+            </Text>
+          )}
         </Stack>
         {description !== '' && (
           <Stack spacing="spacingXs" flexDirection="column" alignItems="flex-start">
@@ -161,16 +188,18 @@ const ContentBlockView = ({ name, description, onEdit }: ContentBlockViewProps) 
           </Stack>
         )}
       </Stack>
-      <IconButton
-        size="small"
-        variant="secondary"
-        icon={<PencilSimple size={16} />}
-        aria-label="Edit content block"
-        onClick={onEdit}
-        className={editButton}
-        withTooltip
-        tooltipProps={{ content: 'Edit name or add a description' }}
-      />
+      {!isCreated && (
+        <IconButton
+          size="small"
+          variant="secondary"
+          icon={<PencilSimple size={16} />}
+          aria-label="Edit content block"
+          onClick={onEdit}
+          className={editButton}
+          withTooltip
+          tooltipProps={{ content: 'Edit name or add a description' }}
+        />
+      )}
     </Flex>
   );
 };
@@ -187,7 +216,9 @@ const ContentBlockCard = ({
   onCancel,
   onSave,
   isNameValid,
-}: ContentBlockCardProps) => {
+  isCreated,
+  error,
+}: ContentBlockCardProps & { isCreated?: boolean; error?: string }) => {
   return (
     <Card
       margin="none"
@@ -196,6 +227,7 @@ const ContentBlockCard = ({
         paddingBottom: tokens.spacingS,
         paddingLeft: tokens.spacingXs,
         paddingRight: tokens.spacingXs,
+        borderColor: error ? tokens.red600 : undefined,
       }}>
       {isEditing ? (
         <ContentBlockForm
@@ -213,6 +245,8 @@ const ContentBlockCard = ({
           name={contentBlocksData.names[fieldId] || ''}
           description={contentBlocksData.descriptions[fieldId] || ''}
           onEdit={() => onEdit(fieldId)}
+          isCreated={isCreated}
+          error={error}
         />
       )}
     </Card>
@@ -228,6 +262,7 @@ const CreateStep = ({
   setContentBlocksData,
   handlePreviousStep,
   handleNextStep,
+  creationResultFields,
 }: CreateStepProps) => {
   // State
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -328,6 +363,10 @@ const CreateStep = ({
               onCancel={handleCancel}
               onSave={handleSave}
               isNameValid={isNameValid}
+              isCreated={creationResultFields.some(
+                (result) => result.fieldId === fieldId && result.success
+              )}
+              error={creationResultFields.find((result) => result.fieldId === fieldId)?.message}
             />
           ))}
         </Stack>

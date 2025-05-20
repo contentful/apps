@@ -21,6 +21,7 @@ const CREATE_STEP = 'create';
 const DRAFT_STEP = 'draft';
 const ERROR_STEP = 'error';
 const SUCCESS_STEP = 'success';
+const BRAZE_NAME_EXISTS_ERROR = 'name already exists';
 
 type CreateFlowProps = {
   sdk: DialogAppSDK;
@@ -80,6 +81,27 @@ const CreateFlow = (props: CreateFlowProps) => {
 
     setIsSubmitting(true);
 
+    const names: Record<string, string> = {};
+    const descriptions: Record<string, string> = {};
+    Object.entries(data.names)
+      .filter(
+        ([fieldId, fieldName]) =>
+          !creationResultFields.some((result) => result.fieldId === fieldId && result.success)
+      )
+      .forEach(([fieldId, fieldName]) => (names[fieldId] = fieldName));
+    Object.entries(data.descriptions)
+      .filter(
+        ([fieldId, fieldDescription]) =>
+          !creationResultFields.some((result) => result.fieldId === fieldId && result.success)
+      )
+      .forEach(([fieldId, fieldDescription]) => (descriptions[fieldId] = fieldDescription));
+    const fieldsIds = Array.from(selectedFields)
+      .filter(
+        (fieldId) =>
+          !creationResultFields.some((result) => result.fieldId === fieldId && result.success)
+      )
+      .join(',');
+
     try {
       const configEntry = await getConfigEntry(cma);
       const connectedFields = configEntry.fields[CONFIG_FIELD_ID]?.[sdk.locales.default] || {};
@@ -95,13 +117,13 @@ const CreateFlow = (props: CreateFlowProps) => {
         {
           parameters: {
             entryId: entry.id,
-            fieldIds: Array.from(selectedFields).join(','),
-            contentBlockNames: JSON.stringify(data.names),
-            contentBlockDescriptions: JSON.stringify(data.descriptions),
+            fieldIds: fieldsIds,
+            contentBlockNames: JSON.stringify(names),
+            contentBlockDescriptions: JSON.stringify(descriptions),
           },
         }
       );
-      const responseData = JSON.parse(response.response.body);
+      const responseData: { results: CreationResultField[] } = JSON.parse(response.response.body);
 
       const newFields = responseData.results
         .filter((result: any) => result.success)
@@ -116,20 +138,28 @@ const CreateFlow = (props: CreateFlowProps) => {
 
       await updateConfig(configEntry, sdk.locales.default, connectedFields, cma);
 
-      setCreationResultFields(responseData.results);
+      const newCreationResultFields: CreationResultField[] = [
+        ...creationResultFields.filter(
+          (newResult: CreationResultField) =>
+            !responseData.results.some((oldResult) => oldResult.fieldId === newResult.fieldId)
+        ),
+        ...responseData.results,
+      ];
+      setCreationResultFields(newCreationResultFields);
 
       const errors = responseData.results.filter((result: any) => !result.success);
-      if (errors.length > 0) {
+      if (
+        errors.length > 0 &&
+        !errors.some((error: any) => error.message?.includes(BRAZE_NAME_EXISTS_ERROR))
+      ) {
         setStep(ERROR_STEP);
-        setIsSubmitting(false);
         return;
       }
 
-      setIsSubmitting(false);
       setStep(SUCCESS_STEP);
     } catch (error) {
-      // TODO: handle errors
-      console.error(error);
+      console.error('Error creating content blocks: ', error);
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -157,6 +187,7 @@ const CreateFlow = (props: CreateFlowProps) => {
           contentBlocksData={contentBlocksData}
           setContentBlocksData={setContentBlocksData}
           handleNextStep={handleCreate}
+          creationResultFields={creationResultFields}
         />
       )}
       {step === DRAFT_STEP && (

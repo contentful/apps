@@ -1,8 +1,7 @@
-import { Stack, Button, Subheading, Text } from '@contentful/f36-components';
+import { Button, Subheading, Text, List } from '@contentful/f36-components';
 import WizardFooter from '../WizardFooter';
-import { styles } from './ErrorStep.styles';
 import { ContentBlockData, CreationResultField } from './CreateFlow';
-import React from 'react';
+import InformationWithLink from '../InformationWithLink';
 
 type ClientErrorStepProps = {
   isSubmitting: boolean;
@@ -19,6 +18,7 @@ const ErrorStep = ({
   handleClose,
   handleCreate,
 }: ClientErrorStepProps) => {
+  const createdFields = creationResultFields.filter((field) => field.success);
   const clientErrors = creationResultFields.filter(
     (field) => !field.success && field.statusCode !== 500
   );
@@ -47,20 +47,41 @@ const ErrorStep = ({
   return (
     <>
       <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeXl" lineHeight="lineHeightL">
-        There was an issue
+        There was an issue with some Content Blocks
       </Subheading>
-      <Stack flexDirection="column" alignItems="flex-start" className={styles.stack}>
+      <Text>The following errors occurred:</Text>
+      <List>
         {serverErrors.map((field, index) => (
-          <Text key={`${field.fieldId}-${index}`}>
-            Error code [{field.statusCode}] - [{field.message}] . Please retry sending to Braze.
-          </Text>
+          <List.Item key={`${field.fieldId}-${index}`}>
+            <Text fontWeight="fontWeightDemiBold">{field.fieldId}</Text> - error code{' '}
+            {field.statusCode} - {field.message}. Please retry sending to Braze.
+          </List.Item>
         ))}
         {clientErrors.map((field, index) => (
-          <Text key={`${field.fieldId}-${index}`}>
-            Error code [{field.statusCode}] - [{field.message}]
-          </Text>
+          <List.Item key={`${field.fieldId}-${index}`}>
+            <Text fontWeight="fontWeightDemiBold">{field.fieldId}</Text> - error code{' '}
+            {field.statusCode} - {field.message}
+          </List.Item>
         ))}
-      </Stack>
+        {clientErrors.length > 0 && (
+          <List.Item>
+            <InformationWithLink
+              url={'https://support.contentful.com/hc/en-us'}
+              linkText="Get support here"
+              marginTop="spacing2Xs"
+              marginBottom="spacingL"
+            />
+          </List.Item>
+        )}
+      </List>
+      <Text>The following Content Blocks were created successfully:</Text>
+      <List>
+        {createdFields.map((field, index) => (
+          <List.Item key={`${field.fieldId}-${index}`}>
+            <Text fontWeight="fontWeightDemiBold">{field.fieldId}</Text>
+          </List.Item>
+        ))}
+      </List>
       <WizardFooter>
         {containsServerError ? (
           <Button isLoading={isSubmitting} variant="primary" size="small" onClick={handleRetry}>

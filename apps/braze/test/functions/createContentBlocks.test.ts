@@ -211,13 +211,13 @@ describe('createContentBlocks', () => {
           fieldId: 'title',
           success: false,
           statusCode: 400,
-          message: 'Field title not found or has no value',
+          message: 'Field title does not exist or is empty',
         },
         {
           fieldId: 'author',
           success: false,
           statusCode: 400,
-          message: 'Field author not found or has no value',
+          message: 'Field author does not exist or is empty',
         },
       ],
     });
@@ -431,7 +431,7 @@ describe('createContentBlocks', () => {
           fieldId: 'author',
           success: false,
           statusCode: 400,
-          message: 'Content block name not found or has no value for field author',
+          message: 'Unexpected error: Content block name not found for field author',
         },
       ],
     });
