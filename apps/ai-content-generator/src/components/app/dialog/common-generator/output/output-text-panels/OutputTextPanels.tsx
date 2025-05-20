@@ -47,6 +47,9 @@ const OutputTextPanels = (props: Props) => {
   };
 
   const generate = () => {
+    // Log the model being used for generation
+    // eslint-disable-next-line no-console
+    console.log('AI Content Generator: Using model', ai.model);
     onGenerate(ai.generateMessage);
   };
 
