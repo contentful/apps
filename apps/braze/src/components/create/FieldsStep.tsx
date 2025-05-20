@@ -4,6 +4,7 @@ import { Entry } from '../../fields/Entry';
 import WizardFooter from '../WizardFooter';
 import React from 'react';
 import { Field } from '../../fields/Field';
+import { MULTISELECT_DIALOG_HEIGHT } from '../../utils';
 
 type FieldsStepProps = {
   entry: Entry;
@@ -57,11 +58,14 @@ const FieldsStep = ({
         Select the fields you would like to generate into Content Blocks. Referenced fields are not
         available in this list, but can be linked directly through the entry.
       </Paragraph>
-      <FormControl isRequired isInvalid={setSelectedFields.length === 0} marginBottom="spacing4Xl">
+      <FormControl
+        isRequired
+        isInvalid={setSelectedFields.length === 0}
+        style={{ marginBottom: '7rem' }}>
         <FormControl.Label>Select Fields</FormControl.Label>
         <Multiselect
           currentSelection={currentSelection}
-          popoverProps={{ isFullWidth: true, listMaxHeight: 108 }}
+          popoverProps={{ isFullWidth: true, listMaxHeight: MULTISELECT_DIALOG_HEIGHT }}
           placeholder="Select one or more">
           <Multiselect.SelectAll
             onSelectItem={handleSelectAll}
