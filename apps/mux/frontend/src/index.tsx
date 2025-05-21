@@ -300,7 +300,6 @@ export class App extends React.Component<AppProps, AppState> {
     };
 
     // Captions case
-    console.log('Captions options!', options.captionsConfig);
     if (options.captionsConfig.captionsType !== 'off') {
       if (options.captionsConfig.captionsType === 'auto') {
         requestBody.inputs[0].generated_subtitles = [
@@ -317,6 +316,20 @@ export class App extends React.Component<AppProps, AppState> {
           closed_captions: options.captionsConfig.closedCaptions,
           language_code: options.captionsConfig.languageCode,
           name: options.captionsConfig.languageName,
+        });
+      }
+    }
+
+    if (options.mp4Config.enabled) {
+      requestBody.static_renditions = [];
+      if (options.mp4Config.audioOnly) {
+        requestBody.static_renditions.push({
+          resolution: 'audio-only',
+        });
+      }
+      if (options.mp4Config.highestResolution) {
+        requestBody.static_renditions.push({
+          resolution: 'highest',
         });
       }
     }
@@ -412,6 +425,7 @@ export class App extends React.Component<AppProps, AppState> {
         passthrough: string;
         normalize_audio: boolean;
         playback_policies: string[];
+        static_renditions?: object[];
         video_quality: string;
         inputs: Array<{
           generated_subtitles?: Array<{
@@ -456,6 +470,20 @@ export class App extends React.Component<AppProps, AppState> {
           closed_captions: options.captionsConfig.closedCaptions,
           language_code: options.captionsConfig.languageCode,
           name: options.captionsConfig.languageName,
+        });
+      }
+    }
+
+    if (options.mp4Config.enabled) {
+      data.new_asset_settings.static_renditions = [];
+      if (options.mp4Config.audioOnly) {
+        data.new_asset_settings.static_renditions.push({
+          resolution: 'audio-only',
+        });
+      }
+      if (options.mp4Config.highestResolution) {
+        data.new_asset_settings.static_renditions.push({
+          resolution: 'highest',
         });
       }
     }
