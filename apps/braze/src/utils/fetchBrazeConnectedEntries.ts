@@ -7,19 +7,21 @@ import { EntryConnectedField } from '../components/create/CreateFlow';
 /**
  * Fetches entries from Contentful that have connectedFields (with at least one field).
  * @param cma Contentful Management API client
+ * @param contentfulApiKey
  * @param spaceId The space ID
  * @param environmentId The environment ID
  * @returns Array of entries with connectedFields
  */
 export async function fetchBrazeConnectedEntries(
   cma: PlainClientAPI,
+  contentfulApiKey: string,
   spaceId: string,
   environmentId: string
 ): Promise<Entry[]> {
   const configEntry = await getConfigEntry(cma);
   console.log('GET CONGIG ENRTRY: ', configEntry);
 
-  const entrys = configEntry?.fields?.connectedFields?.['en-US'];
+  const entrys = configEntry?.fields?.connectedFields?.['en-US'] || [];
   const entrysIds: string[] = [];
   Object.entries(entrys).forEach(([key]) => {
     entrysIds.push(key);
@@ -40,6 +42,7 @@ export async function fetchBrazeConnectedEntries(
 
   return await Promise.all(
     entriesResponse.items.map(async (rawEntry: any) => {
+      console.log('RAW ENTRY: ', rawEntry);
       const fieldsFactory = new FieldsFactory(
         rawEntry.sys.id,
         rawEntry.sys.contentType?.sys?.id || '',
@@ -58,16 +61,16 @@ export async function fetchBrazeConnectedEntries(
       });
 
       console.log('RAW FIELDS: ', rawFields);
-
-      const fields = await fieldsFactory.createFieldsForEntryLALALA(rawFields);
+      const fieldsAndTitle = await fieldsFactory.createFieldsForEntryLALALA(rawFields);
+      const entryTitle = rawEntry.fields[fieldsAndTitle.title]?.['en-US'] || 'Untitled';
       return new Entry(
         rawEntry.sys.id,
         rawEntry.sys.contentType?.sys?.id || '',
-        rawEntry.fields?.name?.['en-US'] || 'Untitled', // Todo : get entry name
-        fields,
+        entryTitle,
+        fieldsAndTitle.fields,
         rawEntry.sys.space?.sys?.id || spaceId,
         rawEntry.sys.environment?.sys?.id || environmentId,
-        '',
+        contentfulApiKey,
         rawEntry.sys.publishedAt,
         rawEntry.sys.updatedAt
       );

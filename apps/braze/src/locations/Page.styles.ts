@@ -3,6 +3,7 @@ import { css } from 'emotion';
 
 export const styles = {
   container: css({
+    background: tokens.colorWhite,
     height: 'auto',
     boxShadow: tokens.boxShadowDefault,
     minHeight: '40vh',

@@ -30,7 +30,10 @@ const getStatusBadge = (status: string) => {
   return <Badge variant="warning">Draft</Badge>;
 };
 
-const getUpdatedLabel = (dateString: string) => {
+const getUpdatedLabel = (dateString: string | undefined) => {
+  if (!dateString) {
+    return '-';
+  }
   const date = new Date(dateString);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
@@ -69,7 +72,12 @@ const Page = () => {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetchBrazeConnectedEntries(cma, sdk.ids.space, sdk.ids.environment || 'master')
+    fetchBrazeConnectedEntries(
+      cma,
+      sdk.parameters?.installation?.contentfulApiKey,
+      sdk.ids.space,
+      sdk.ids.environment || 'master'
+    )
       .then((entries) => {
         setEntries(entries);
         setLoading(false);
@@ -107,13 +115,13 @@ const Page = () => {
                 <Text marginLeft="spacingM">Loading...</Text>
               </Flex>
             ) : error ? (
-              <Box marginBottom="spacingL">
+              <Box marginTop="spacingL">
                 <Note variant="negative" title="Error">
                   {error}
                 </Note>
               </Box>
             ) : entries.length === 0 ? (
-              <Box marginBottom="spacingL">
+              <Box marginTop="spacingL">
                 <Note variant="warning" title="No connected entries">
                   There are no entries connected to Braze Content Blocks.
                 </Note>
@@ -142,7 +150,7 @@ const Page = () => {
                       const contentType = entry.contentType;
                       const updated = getUpdatedLabel(entry.updatedAt);
                       const status = entry.state;
-                      const connectedCount = getConnectedFieldsCount(entry.fields); // Todo : this are not the real connected fields
+                      const connectedCount = getConnectedFieldsCount(entry.fields);
                       return (
                         <Table.Row key={entry.id}>
                           <Table.Cell>{name}</Table.Cell>

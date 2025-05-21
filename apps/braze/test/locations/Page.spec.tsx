@@ -140,6 +140,7 @@ describe('Page component', () => {
 
     const result = await fetchBrazeConnectedEntries(
       mockCma as unknown as any,
+      'valid-contentful-api-key',
       'space-id',
       'environment-id'
     );
@@ -148,11 +149,11 @@ describe('Page component', () => {
     const entry = new Entry(
       'entry-id',
       'content-type-id',
-      'Untitled',
+      'Test Title',
       [title, author],
       'space-id',
       'environment-id',
-      '',
+      'valid-contentful-api-key',
       '2025-05-15T16:49:16.367Z',
       '2025-05-15T16:49:16.367Z'
     );
@@ -275,6 +276,7 @@ describe('Page component', () => {
 
     const result = await fetchBrazeConnectedEntries(
       mockCma as unknown as any,
+      'valid-contentful-api-key',
       'space-id',
       'environment-id'
     );
@@ -282,11 +284,11 @@ describe('Page component', () => {
     const entry = new Entry(
       'entry-id',
       'content-type-id',
-      'Untitled',
+      'Test Title',
       [title],
       'space-id',
       'environment-id',
-      '',
+      'valid-contentful-api-key',
       '2025-05-15T16:49:16.367Z',
       '2025-05-15T16:49:16.367Z'
     );
