@@ -4,8 +4,8 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import Dialog from '../../src/locations/Dialog';
 import { Entry } from '../../src/fields/Entry';
 import { BasicField } from '../../src/fields/BasicField';
-import { createEntry } from '../mocks/mocksForFunctions';
 import React from 'react';
+import { createGetEntryResponse } from '../mocks/entryResponse';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -35,7 +35,7 @@ vi.mock('../../src/fields/FieldsFactory', () => ({
   })),
 }));
 
-const mockCMAEntryItemResponse = createEntry({
+const mockCMAEntryItemResponse = createGetEntryResponse({
   title: 'Some Title',
   fieldId: {
     sys: {
