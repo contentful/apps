@@ -234,3 +234,20 @@ header img {
 
   }
  }
+
+.project-autocomplete {
+  width: 100%;
+  min-width: 320px;
+  max-width: 400px;
+}
+.project-autocomplete input {
+  width: 100% !important;
+  min-width: 320px !important;
+  max-width: 400px !important;
+}
+.project-autocomplete [role='listbox'] {
+  width: 100% !important;
+  min-width: 320px !important;
+  max-width: 400px !important;
+  max-height: 600px !important;
+}
