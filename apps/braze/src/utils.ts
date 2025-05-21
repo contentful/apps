@@ -37,7 +37,7 @@ export const CONFIG_CONTENT_TYPE_ID = 'brazeConfig';
 export const CONFIG_FIELD_ID = 'connectedFields';
 export const CONFIG_ENTRY_ID = 'brazeConfig';
 
-export const MULTISELECT_DIALOG_HEIGHT = 144;
+export const MULTISELECT_DIALOG_HEIGHT = 36 * 4; // Shows 4 items
 
 export enum EntryStatus {
   Draft = 'DRAFT',
