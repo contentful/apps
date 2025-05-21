@@ -34,8 +34,8 @@ export const BRAZE_ENDPOINTS_LIST =
   'https://www.braze.com/docs/api/basics#braze-rest-api-collection';
 
 export const CONFIG_CONTENT_TYPE_ID = 'brazeConfig';
-export const CONFIG_FIELD_ID = 'connectedFields';
 export const CONFIG_ENTRY_ID = 'brazeConfig';
+export const CONFIG_FIELD_ID = 'connectedFields';
 
 export enum EntryStatus {
   Draft = 'DRAFT',
@@ -61,15 +61,15 @@ export function removeHypens(str: string) {
 
 export async function updateConfig(
   configEntry: EntryProps<KeyValueMap>,
-  locale: string,
   connectedFields: EntryConnectedFields,
   cma: PlainClientAPI
 ) {
   if (!configEntry.fields[CONFIG_FIELD_ID]) {
     configEntry.fields[CONFIG_FIELD_ID] = {};
   }
+  const locale = 'en-US'; // TODO: get default locale
   configEntry.fields[CONFIG_FIELD_ID][locale] = connectedFields;
-  await cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
+  return await cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
 }
 
 export async function getConfigEntry(cma: PlainClientAPI): Promise<EntryProps<KeyValueMap>> {

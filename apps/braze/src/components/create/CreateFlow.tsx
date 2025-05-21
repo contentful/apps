@@ -136,7 +136,7 @@ const CreateFlow = (props: CreateFlowProps) => {
 
       connectedFields[entry.id] = [...entryConnectedFields, ...newFields];
 
-      await updateConfig(configEntry, sdk.locales.default, connectedFields, cma);
+      await updateConfig(configEntry, connectedFields, cma);
 
       const newCreationResultFields: CreationResultField[] = [
         ...creationResultFields.filter(
