@@ -38,11 +38,10 @@ export default class InstanceStep extends React.Component<Props> {
         <Heading>Configure</Heading>
         <Paragraph>Select the Jira site and project you want to connect</Paragraph>
         <div className="jira-config" data-test-id="instance-step">
-          <div style={{ display: 'flex', gap: 16, alignItems: 'center', width: '100%' }}>
+          <div className="jira-config-row">
             <Select
               testId="instance-selector"
               className="selector"
-              style={{ minWidth: 320, maxWidth: 400, flex: 1 }}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => pickResource(e.target.value)}
               isDisabled={resources.length === 1}
               value={selectedResource || ''}>
@@ -58,7 +57,6 @@ export default class InstanceStep extends React.Component<Props> {
               items={projects}
               itemToString={(item) => (item ? item.name : '')}
               testId="project-autocomplete"
-              style={{ minWidth: 320, maxWidth: 400, flex: 1 }}
               noMatchesMessage="No projects found"
               onSelectItem={(item) => {
                 if (item) this.props.pickProject(item);
@@ -72,12 +70,7 @@ export default class InstanceStep extends React.Component<Props> {
                 return (
                   <div
                     data-test-id="search-result-project"
-                    style={{
-                      background: isSelected ? '#f3f4f6' : 'white',
-                      padding: '10px 16px',
-                      cursor: 'pointer',
-                      fontWeight: isSelected ? 'bold' : 'normal',
-                    }}>
+                    className={`autocomplete-item${isSelected ? ' selected' : ''}`}>
                     {item.name}
                   </div>
                 );
