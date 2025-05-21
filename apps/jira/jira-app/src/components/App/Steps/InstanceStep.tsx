@@ -2,10 +2,6 @@ import React from 'react';
 import { Heading, Paragraph, Select, Option, Autocomplete } from '@contentful/f36-components';
 import { JiraCloudResource, CloudProject } from '../../../interfaces';
 
-interface State {
-  inputValue: string;
-}
-
 interface Props {
   resources: JiraCloudResource[];
   selectedResource: string;
@@ -17,6 +13,23 @@ interface Props {
 }
 
 export default class InstanceStep extends React.Component<Props> {
+  componentDidMount() {
+    this.setInputTestId();
+  }
+
+  componentDidUpdate() {
+    this.setInputTestId();
+  }
+
+  setInputTestId() {
+    // Forma 36 Autocomplete renders an input inside the component
+    // We find it and set the data-test-id for the test
+    const el = document.querySelector('.project-autocomplete input');
+    if (el) {
+      el.setAttribute('data-test-id', 'cf-ui-text-input');
+    }
+  }
+
   render() {
     const { resources, pickResource, selectedResource, projects, selectedProject } = this.props;
 
@@ -30,8 +43,7 @@ export default class InstanceStep extends React.Component<Props> {
               testId="instance-selector"
               className="selector"
               style={{ minWidth: 320, maxWidth: 400, flex: 1 }}
-              // @ts-ignore: 2339
-              onChange={(e) => pickResource(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => pickResource(e.target.value)}
               isDisabled={resources.length === 1}
               value={selectedResource || ''}>
               <Option value="">Select a site</Option>
@@ -59,6 +71,7 @@ export default class InstanceStep extends React.Component<Props> {
                 const isSelected = selectedProject && selectedProject.id === item.id;
                 return (
                   <div
+                    data-test-id="search-result-project"
                     style={{
                       background: isSelected ? '#f3f4f6' : 'white',
                       padding: '10px 16px',
@@ -77,11 +90,3 @@ export default class InstanceStep extends React.Component<Props> {
     );
   }
 }
-
-/* Add this CSS to your main stylesheet or in a <style> tag:
-.project-autocomplete [role='listbox'] {
-  min-width: 320px !important;
-  max-width: 400px !important;
-  width: 100% !important;
-}
-*/
