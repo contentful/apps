@@ -56,7 +56,9 @@ const mockEntry = new Entry(
   [mockField],
   mockSdk.ids.space,
   mockSdk.ids.environemnt,
-  mockSdk.parameters.installation.contentfulApiKey
+  mockSdk.parameters.installation.contentfulApiKey,
+  undefined,
+  '2024-01-01T00:00:00Z'
 );
 
 const GENERATE_FIELDS_STEP_TEXT = 'Select which fields';
