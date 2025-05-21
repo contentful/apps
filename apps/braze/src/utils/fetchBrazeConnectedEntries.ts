@@ -19,7 +19,6 @@ export async function fetchBrazeConnectedEntries(
   environmentId: string
 ): Promise<Entry[]> {
   const configEntry = await getConfigEntry(cma);
-  console.log('GET CONGIG ENRTRY: ', configEntry);
 
   const entrys = configEntry?.fields?.connectedFields?.['en-US'] || [];
   const entrysIds: string[] = [];
@@ -36,13 +35,10 @@ export async function fetchBrazeConnectedEntries(
     },
   });
 
-  console.log('ENTRIES RESPONSE: ', entriesResponse);
-
   if (!entriesResponse?.items) return [];
 
   return await Promise.all(
     entriesResponse.items.map(async (rawEntry: any) => {
-      console.log('RAW ENTRY: ', rawEntry);
       const fieldsFactory = new FieldsFactory(
         rawEntry.sys.id,
         rawEntry.sys.contentType?.sys?.id || '',
@@ -51,8 +47,6 @@ export async function fetchBrazeConnectedEntries(
       const rawEntryId = rawEntry.sys.id;
       const entryConnectedFields = entrys[rawEntryId];
 
-      console.log('ENTRY CONNECTED FIELDS: ', entryConnectedFields);
-
       const rawFields = entryConnectedFields.map((contentBlockData: EntryConnectedField) => {
         return {
           fieldId: contentBlockData.fieldId,
@@ -60,7 +54,6 @@ export async function fetchBrazeConnectedEntries(
         };
       });
 
-      console.log('RAW FIELDS: ', rawFields);
       const fieldsAndTitle = await fieldsFactory.createFieldsForEntryLALALA(rawFields);
       const entryTitle = rawEntry.fields[fieldsAndTitle.title]?.['en-US'] || 'Untitled';
       return new Entry(
