@@ -50,9 +50,12 @@ export async function fetchBrazeConnectedEntries(
 
       console.log('ENTRY CONNECTED FIELDS: ', entryConnectedFields);
 
-      const rawFields = entryConnectedFields.map(
-        (contentBlockData: EntryConnectedField) => rawEntry.fields[contentBlockData.fieldId]
-      );
+      const rawFields = entryConnectedFields.map((contentBlockData: EntryConnectedField) => {
+        return {
+          fieldId: contentBlockData.fieldId,
+          ...rawEntry.fields[contentBlockData.fieldId],
+        };
+      });
 
       console.log('RAW FIELDS: ', rawFields);
 

@@ -45,8 +45,12 @@ export class FieldsFactory {
     }
 
     const fields = [];
-    // const newContentType = entryFields.map((field) => {})
-    for (const fieldInfo of contentType.fields) {
+    const entryFieldIds = entryFields.map((field: any) => field.fieldId);
+    const newContentTypeFields = contentType.fields.filter((field) =>
+      entryFieldIds.includes(field.id)
+    );
+    console.log('NEW CONTENT TYPE: ', newContentTypeFields);
+    for (const fieldInfo of newContentTypeFields) {
       fields.push(this.createSimpleField(fieldInfo, contentType));
     }
     return fields;
