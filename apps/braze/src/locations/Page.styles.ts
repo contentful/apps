@@ -5,7 +5,6 @@ export const styles = {
   container: css({
     background: tokens.colorWhite,
     minHeight: '100vh',
-    height: '100vh',
     width: '100%',
     border: `1px solid ${tokens.gray300}`,
     borderRadius: tokens.borderRadiusMedium,
@@ -17,5 +16,8 @@ export const styles = {
   emptyComponentContainer: css({ minHeight: '80vh' }),
   buttonCell: css({
     width: '6rem',
+  }),
+  loading: css({
+    height: '80vh',
   }),
 };

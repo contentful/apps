@@ -6,11 +6,9 @@ import {
   Badge,
   Spinner,
   Button,
-  Note,
   Flex,
   Heading,
   Subheading,
-  Paragraph,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { PageAppSDK } from '@contentful/app-sdk';
@@ -20,9 +18,7 @@ import { styles } from './Page.styles';
 import Splitter from '../components/Splitter';
 import { createClient } from 'contentful-management';
 import { Entry } from '../fields/Entry';
-
-const HELP_URL =
-  'https://www.braze.com/docs/api/endpoints/templates/content_blocks_templates/post_create_email_content_block';
+import { BRAZE_CONTENT_BLOCK_DOCUMENTATION } from '../utils';
 
 const getStatusBadge = (status: string) => {
   if (status.toLowerCase() === 'published') {
@@ -53,29 +49,20 @@ const getConnectedFieldsCount = (connectedFields: any) => {
   return connectedFields.length;
 };
 
-// Loading state component
 function LoadingState() {
   return (
-    <Flex alignItems="center" justifyContent="center" padding="spacingL">
+    <Flex alignItems="center" justifyContent="center" className={styles.loading}>
       <Spinner size="large" />
       <Text marginLeft="spacingM">Loading...</Text>
     </Flex>
   );
 }
 
-// Error state component
-function ErrorState({ error }: { error: string }) {
-  return (
-    <Box marginTop="spacingL">
-      <Note variant="negative" title="Error">
-        {error}
-      </Note>
-    </Box>
-  );
-}
-
-// Empty state component
-function EmptyState() {
+type MessageProps = {
+  title: string;
+  message: string;
+};
+function DisplayMessage({ title, message }: MessageProps) {
   return (
     <Flex
       flexDirection="column"
@@ -83,14 +70,13 @@ function EmptyState() {
       justifyContent="center"
       className={styles.emptyComponentContainer}>
       <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold" marginBottom="spacingXs">
-        No active Braze Content Blocks
+        {title}
       </Text>
-      <Text fontColor="gray600">Once you have created Content Blocks, they will display here.</Text>
+      <Text fontColor="gray600">{message}</Text>
     </Flex>
   );
 }
 
-// Table component
 function ConnectedEntriesTable({ entries }: { entries: Entry[] }) {
   return (
     <Box marginTop="spacingXl">
@@ -203,7 +189,10 @@ const Page = () => {
               <Subheading className={styles.subheading}>
                 Content connected to Braze through Content Blocks
               </Subheading>
-              <InformationWithLink url={HELP_URL} linkText="here" dataTestId="help-here">
+              <InformationWithLink
+                url={BRAZE_CONTENT_BLOCK_DOCUMENTATION}
+                linkText="here"
+                dataTestId="help-here">
                 Learn more about Braze Content Blocks
               </InformationWithLink>
             </>
@@ -212,9 +201,12 @@ const Page = () => {
             {loading ? (
               <LoadingState />
             ) : error ? (
-              <ErrorState error={error} />
-            ) : entries.length === 0 ? (
-              <EmptyState />
+              <DisplayMessage title="There was an error" message="Please contact support" />
+            ) : !hasConnectedEntries() ? (
+              <DisplayMessage
+                title="No active Braze Content Blocks"
+                message="Once you have created Content Blocks, they will display here."
+              />
             ) : (
               <ConnectedEntriesTable entries={entries} />
             )}
