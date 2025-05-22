@@ -8,6 +8,8 @@ import {
   TextInput,
   Text,
   Subheading,
+  Select,
+  Note,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
@@ -17,7 +19,9 @@ import {
   BRAZE_API_KEY_DOCUMENTATION,
   BRAZE_APP_DOCUMENTATION,
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
-  BRAZE_ENDPOINTS_LIST,
+  BRAZE_ENDPOINTS,
+  BRAZE_ENDPOINTS_DOCUMENTATION,
+  BrazeEndpoint,
   CONFIG_CONTENT_TYPE_ID,
   CONFIG_ENTRY_ID,
   CONFIG_FIELD_ID,
@@ -91,6 +95,7 @@ const ConfigScreen = () => {
 
     const isContentfulKeyValid = await checkContentfulApiKey(parameters.contentfulApiKey);
     const isBrazeKeyValid = checkIfHasValue(parameters.brazeApiKey, setBrazeApiKeyIsValid);
+
     const isBrazeEndpointValid = checkIfHasValue(parameters.brazeEndpoint, setBrazeEndpointIsValid);
 
     if (!isContentfulKeyValid || !isBrazeKeyValid || !isBrazeEndpointValid) {
@@ -138,6 +143,12 @@ const ConfigScreen = () => {
           dataTestId="braze-app-docs-here">
           Learn more about how to connect Contentful with Braze and configure the Braze app
         </InformationWithLink>
+        <Box marginTop="spacingL" marginBottom="spacingL">
+          <Note variant="neutral">
+            The Braze app will create a content type labeled "brazeConfig". Do not delete or modify
+            manually.
+          </Note>
+        </Box>
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
         <ContentTypeSection />
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
@@ -245,12 +256,23 @@ function ContentTypeSection() {
   );
 }
 
-function ContentBlockSection(props: {
+type ContentBlockSectionProps = {
   parameters: AppInstallationParameters;
   brazeApiKeyIsValid: boolean;
   brazeEndpointIsValid: boolean;
   setParameters: (e: any) => void;
-}) {
+};
+
+function ContentBlockSection({
+  parameters,
+  brazeApiKeyIsValid,
+  brazeEndpointIsValid,
+  setParameters,
+}: ContentBlockSectionProps) {
+  const handleSelectItem = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setParameters({ ...parameters, brazeEndpoint: e.target.value });
+  };
+
   return (
     <>
       <Heading marginBottom="spacing2Xs">Content Blocks configuration</Heading>
@@ -264,17 +286,15 @@ function ContentBlockSection(props: {
           <FormControl.Label>Braze REST API key</FormControl.Label>
           <Text fontColor="gray500"> (required)</Text>
           <TextInput
-            value={props.parameters.brazeApiKey}
+            value={parameters.brazeApiKey}
             name="brazeApiKey"
             data-testid="brazeApiKey"
-            isInvalid={!props.brazeApiKeyIsValid}
+            isInvalid={!brazeApiKeyIsValid}
             placeholder="ex. 0ab1c234DE56f..."
             type="password"
-            onChange={(e) =>
-              props.setParameters({ ...props.parameters, brazeApiKey: e.target.value })
-            }
+            onChange={(e) => setParameters({ ...parameters, brazeApiKey: e.target.value })}
           />
-          {!props.brazeApiKeyIsValid && (
+          {!brazeApiKeyIsValid && (
             <FormControl.ValidationMessage>Invalid API key</FormControl.ValidationMessage>
           )}
         </Form>
@@ -286,32 +306,33 @@ function ContentBlockSection(props: {
         url={BRAZE_API_KEY_DOCUMENTATION}>
         Enter your Braze REST API key. If you need to generate a key, visit your
       </InformationWithLink>
-      <Subheading className={styles.subheading}>Input your Braze REST endpoint</Subheading>
+      <Subheading className={styles.subheading}>Select your Braze REST endpoint</Subheading>
       <InformationWithLink
         linkText="here"
         dataTestId="rest-endpoints-here"
-        url={BRAZE_ENDPOINTS_LIST}>
+        url={BRAZE_ENDPOINTS_DOCUMENTATION}>
         View the URL of your Braze dashboard. Then, use it to determine the correct Braze REST
         endpoint. You can find a list of REST endpoint URLs
       </InformationWithLink>
       <Box marginTop="spacingM">
-        <Form>
+        <FormControl isRequired>
           <FormControl.Label>Braze REST endpoint</FormControl.Label>
-          <Text fontColor="gray500"> (required)</Text>
-          <TextInput
-            value={props.parameters.brazeEndpoint}
-            name="brazeEndpoint"
-            data-testid="brazeEndpoint"
-            isInvalid={!props.brazeEndpointIsValid}
-            placeholder="ex. https://rest.iad-01.braze.com"
-            onChange={(e) =>
-              props.setParameters({ ...props.parameters, brazeEndpoint: e.target.value })
-            }
-          />
-          {!props.brazeEndpointIsValid && (
+          <Select
+            value={parameters.brazeEndpoint}
+            onChange={handleSelectItem}
+            isInvalid={!brazeEndpointIsValid}
+            data-testid="brazeEndpoint">
+            <Select.Option value="">Select one</Select.Option>
+            {BRAZE_ENDPOINTS.map((endpoint) => (
+              <Select.Option key={endpoint.url} value={endpoint.url}>
+                {endpoint.name}
+              </Select.Option>
+            ))}
+          </Select>
+          {!brazeEndpointIsValid && (
             <FormControl.ValidationMessage>Invalid REST Endpoint</FormControl.ValidationMessage>
           )}
-        </Form>
+        </FormControl>
       </Box>
     </>
   );

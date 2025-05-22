@@ -30,8 +30,68 @@ export const BRAZE_APP_DOCUMENTATION = 'https://www.contentful.com/help/apps/bra
 export const BRAZE_API_KEY_DOCUMENTATION = `https://dashboard.braze.com/app_settings/developer_console/apisettings#apikeys`;
 export const BRAZE_CONTENT_BLOCK_DOCUMENTATION =
   'https://www.braze.com/docs/api/endpoints/templates/content_blocks_templates/post_create_email_content_block';
-export const BRAZE_ENDPOINTS_LIST =
+export const BRAZE_ENDPOINTS_DOCUMENTATION =
   'https://www.braze.com/docs/api/basics#braze-rest-api-collection';
+
+export type BrazeEndpoint = {
+  name: string;
+  url: string;
+};
+
+export const BRAZE_ENDPOINTS: BrazeEndpoint[] = [
+  {
+    name: 'rest.iad-01.braze.com',
+    url: 'https://rest.iad-01.braze.com',
+  },
+  {
+    name: 'rest.iad-02.braze.com',
+    url: 'https://rest.iad-02.braze.com',
+  },
+  {
+    name: 'rest.iad-03.braze.com',
+    url: 'https://rest.iad-03.braze.com',
+  },
+  {
+    name: 'rest.iad-04.braze.com',
+    url: 'https://rest.iad-04.braze.com',
+  },
+  {
+    name: 'rest.iad-05.braze.com',
+    url: 'https://rest.iad-05.braze.com',
+  },
+  {
+    name: 'rest.iad-06.braze.com',
+    url: 'https://rest.iad-06.braze.com',
+  },
+  {
+    name: 'rest.iad-07.braze.com',
+    url: 'https://rest.iad-07.braze.com',
+  },
+  {
+    name: 'rest.iad-08.braze.com',
+    url: 'https://rest.iad-08.braze.com',
+  },
+  {
+    name: 'rest.us-10.braze.com',
+    url: 'https://rest.us-10.braze.com',
+  },
+  {
+    name: 'rest.fra-01.braze.eu',
+    url: 'https://rest.fra-01.braze.eu',
+  },
+  {
+    name: 'rest.fra-02.braze.eu',
+    url: 'https://rest.fra-02.braze.eu',
+  },
+  {
+    name: 'rest.au-01.braze.com',
+    url: 'https://rest.au-01.braze.com',
+  },
+  {
+    name: 'rest.id-01.braze.com',
+    url: 'https://rest.id-01.braze.com',
+  },
+];
 
 export const CONFIG_CONTENT_TYPE_ID = 'brazeConfig';
 export const CONFIG_FIELD_ID = 'connectedFields';

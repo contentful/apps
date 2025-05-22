@@ -1,3 +1,4 @@
+import React from 'react';
 import { cleanup, fireEvent, render, RenderResult, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockSdk } from '../mocks';
@@ -8,10 +9,10 @@ import {
   BRAZE_API_KEY_DOCUMENTATION,
   BRAZE_APP_DOCUMENTATION,
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
-  BRAZE_ENDPOINTS_LIST,
+  BRAZE_ENDPOINTS_DOCUMENTATION,
+  BRAZE_ENDPOINTS,
   CONTENT_TYPE_DOCUMENTATION,
 } from '../../src/utils';
-import React from 'react';
 
 const mockCma = {
   contentType: {
@@ -98,7 +99,7 @@ describe('Config Screen component', () => {
       const brazeLink = configScreen.getByTestId('link-rest-endpoints-here');
 
       expect(brazeLink).toBeTruthy();
-      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_ENDPOINTS_LIST);
+      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_ENDPOINTS_DOCUMENTATION);
     });
 
     it('has an input that sets contentful api key correctly', () => {
@@ -111,24 +112,14 @@ describe('Config Screen component', () => {
       expect(inputExpected.value).toEqual(`A test value for input`);
     });
 
-    it('has an input that sets braze api key correctly', () => {
-      const input = screen.getAllByTestId('brazeApiKey')[0];
-      fireEvent.change(input, {
-        target: { value: `A test value for input` },
+    it('has an input that sets braze rest endpoint key correctly', async () => {
+      const select = screen.getByTestId('brazeEndpoint');
+      fireEvent.change(select, {
+        target: { value: BRAZE_ENDPOINTS[0].url },
       });
 
-      const inputExpected = screen.getAllByTestId('brazeApiKey')[0] as HTMLInputElement;
-      expect(inputExpected.value).toEqual(`A test value for input`);
-    });
-
-    it('has an input that sets braze rest endpoint key correctly', () => {
-      const input = screen.getAllByTestId('brazeEndpoint')[0];
-      fireEvent.change(input, {
-        target: { value: `A test value for input` },
-      });
-
-      const inputExpected = screen.getAllByTestId('brazeEndpoint')[0] as HTMLInputElement;
-      expect(inputExpected.value).toEqual(`A test value for input`);
+      const selectExpected = screen.getByTestId('brazeEndpoint') as HTMLSelectElement;
+      expect(selectExpected.value).toEqual(BRAZE_ENDPOINTS[0].url);
     });
   });
 
@@ -137,10 +128,14 @@ describe('Config Screen component', () => {
       const user = userEvent.setup();
       const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
       const brazeApiKeyInput = screen.getAllByTestId('brazeApiKey')[0];
-      const brazeEndpointInput = screen.getAllByTestId('brazeEndpoint')[0];
+      const brazeEndpointSelect = screen.getByTestId('brazeEndpoint');
+
       await user.type(contentfulApiKeyInput, 'valid-api-key-123');
       await user.type(brazeApiKeyInput, 'valid-api-key-321');
-      await user.type(brazeEndpointInput, 'valid-rest-endpoint-132');
+
+      // Simulate selecting an endpoint from the Select
+      fireEvent.change(brazeEndpointSelect, { target: { value: BRAZE_ENDPOINTS[0].url } });
+
       vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
         return { ok: true, status: 200 };
       });
@@ -151,7 +146,7 @@ describe('Config Screen component', () => {
         parameters: {
           contentfulApiKey: 'valid-api-key-123',
           brazeApiKey: 'valid-api-key-321',
-          brazeEndpoint: 'valid-rest-endpoint-132',
+          brazeEndpoint: BRAZE_ENDPOINTS[0].url,
         },
       });
     });
@@ -159,11 +154,13 @@ describe('Config Screen component', () => {
     it('shows a toast error if the contentful api key is not set or invalid', async () => {
       const user = userEvent.setup();
       const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
-      const brazeEndpointInput = screen.getAllByTestId('brazeEndpoint')[0];
+      const brazeEndpointSelect = screen.getByTestId('brazeEndpoint');
       const brazeApiKeyInput = screen.getAllByTestId('brazeApiKey')[0];
-      await user.type(brazeEndpointInput, 'valid-rest-endpoint-123');
+
       await user.type(brazeApiKeyInput, 'valid-api-key-123');
+      fireEvent.change(brazeEndpointSelect, { target: { value: BRAZE_ENDPOINTS[0].url } });
       await user.type(contentfulApiKeyInput, 'invalid-api-key-123');
+
       vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
         return { ok: false, status: 401 };
       });
@@ -176,9 +173,11 @@ describe('Config Screen component', () => {
     it('shows a toast error if the braze api key is not set', async () => {
       const user = userEvent.setup();
       const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
-      const brazeEndpointInput = screen.getAllByTestId('brazeEndpoint')[0];
+      const brazeEndpointSelect = screen.getByTestId('brazeEndpoint');
+
       await user.type(contentfulApiKeyInput, 'valid-api-key-123');
-      await user.type(brazeEndpointInput, 'valid-rest-endpoint-123');
+      fireEvent.change(brazeEndpointSelect, { target: { value: BRAZE_ENDPOINTS[0].url } });
+
       vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
         return { ok: true, status: 200 };
       });
@@ -192,8 +191,10 @@ describe('Config Screen component', () => {
       const user = userEvent.setup();
       const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
       const brazeApiKeyInput = screen.getAllByTestId('brazeApiKey')[0];
+
       await user.type(contentfulApiKeyInput, 'valid-api-key-123');
       await user.type(brazeApiKeyInput, 'valid-api-key-123');
+
       vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
         return { ok: true, status: 200 };
       });
@@ -209,13 +210,19 @@ describe('Config Screen component', () => {
       const user = userEvent.setup();
       const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
       const brazeApiKeyInput = screen.getAllByTestId('brazeApiKey')[0];
-      const brazeEndpointInput = screen.getAllByTestId('brazeEndpoint')[0];
+      const brazeEndpointSelect = screen.getByTestId('brazeEndpoint');
+
       await user.type(contentfulApiKeyInput, 'valid-api-key-123');
       await user.type(brazeApiKeyInput, 'valid-api-key-321');
-      await user.type(brazeEndpointInput, 'valid-rest-endpoint-132');
+
+      // Simulate selecting an endpoint from the Select
+      fireEvent.change(brazeEndpointSelect, { target: { value: BRAZE_ENDPOINTS[0].url } });
+
       vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
         return { ok: true, status: 200 };
       });
+
+      // Mock contentType.get to throw an error to trigger content type creation
       mockCma.contentType.get.mockRejectedValueOnce(new Error('Content type not found'));
 
       await saveAppInstallation();
@@ -229,10 +236,12 @@ describe('Config Screen component', () => {
       const user = userEvent.setup();
       const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
       const brazeApiKeyInput = screen.getAllByTestId('brazeApiKey')[0];
-      const brazeEndpointInput = screen.getAllByTestId('brazeEndpoint')[0];
+      const brazeEndpointSelect = screen.getByTestId('brazeEndpoint');
+
       await user.type(contentfulApiKeyInput, 'valid-api-key-123');
       await user.type(brazeApiKeyInput, 'valid-api-key-321');
-      await user.type(brazeEndpointInput, 'valid-rest-endpoint-132');
+      fireEvent.change(brazeEndpointSelect, { target: { value: BRAZE_ENDPOINTS[0].url } });
+
       vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
         return { ok: true, status: 200 };
       });
