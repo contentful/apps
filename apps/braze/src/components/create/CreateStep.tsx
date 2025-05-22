@@ -20,17 +20,12 @@ import { editButton } from './CreateStep.styles';
 import { PencilSimple, CheckCircle, WarningOctagon } from '@phosphor-icons/react';
 import tokens from '@contentful/f36-tokens';
 import CreateButton from './CreateButton';
-import { CreationResultField } from './CreateFlow';
+import { ContentBlockData, CreationResultField } from './CreateFlow';
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 250;
 
 // Types
-type ContentBlockData = {
-  names: Record<string, string>;
-  descriptions: Record<string, string>;
-};
-
 type ContentBlockFormProps = {
   fieldId: string;
   entry: Entry;

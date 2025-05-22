@@ -8,6 +8,7 @@ import CreateStep from './CreateStep';
 import SuccessStep from './SuccessStep';
 import {
   CONFIG_FIELD_ID,
+  EntryConnectedFields,
   EntryStatus,
   FIELDS_STEP,
   getConfigEntry,
@@ -40,15 +41,6 @@ export type CreationResultField = {
   success: boolean;
   statusCode: number;
   message: string;
-};
-
-export type EntryConnectedFields = {
-  fieldId: string;
-  contentBlockId: string;
-}[];
-
-export type ConnectedFields = {
-  [entryId: string]: EntryConnectedFields;
 };
 
 const CreateFlow = (props: CreateFlowProps) => {
@@ -136,7 +128,7 @@ const CreateFlow = (props: CreateFlowProps) => {
 
       connectedFields[entry.id] = [...entryConnectedFields, ...newFields];
 
-      await updateConfig(configEntry, sdk.locales.default, connectedFields, cma);
+      await updateConfig(configEntry, connectedFields, cma);
 
       const newCreationResultFields: CreationResultField[] = [
         ...creationResultFields.filter(

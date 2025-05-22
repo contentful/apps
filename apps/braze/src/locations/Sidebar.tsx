@@ -16,6 +16,7 @@ import {
   CONNECTED_CONTENT_DOCUMENTATION,
   CREATE_DIALOG_MODE,
   CREATE_DIALOG_TITLE,
+  EntryConnectedFields,
   FIELDS_STEP,
   GENERATE_DIALOG_MODE,
   GENERATE_DIALOG_TITLE,
@@ -28,9 +29,8 @@ import { InvocationParams } from './Dialog';
 import { styles } from './Sidebar.styles';
 import InformationWithLink from '../components/InformationWithLink';
 import Splitter from '../components/Splitter';
-import { createClient, QueryParams } from 'contentful-management';
+import { createClient } from 'contentful-management';
 import { useEffect, useState } from 'react';
-import { EntryConnectedFields } from '../components/create/CreateFlow';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
