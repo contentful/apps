@@ -10,21 +10,13 @@ import {
   CONFIG_ENTRY_ID,
   CONFIG_CONTENT_TYPE_ID,
   updateConfig,
+  ConnectedFields,
+  AppInstallationParameters,
 } from '../src/utils';
 import { createClient, EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 
 const WAIT_TIMES = [0, 5000, 10000];
-
-type EntryConnectedFields = {
-  fieldId: string;
-  contentBlockId: string;
-}[];
-
-type AppInstallationParameters = {
-  brazeApiKey: string;
-  brazeEndpoint: string;
-};
 
 function initContentfulManagementClient(context: FunctionEventContext): PlainClientAPI {
   if (!context.cmaClientOptions) {
@@ -62,9 +54,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = a
   if (!configField) {
     return;
   }
-  const connectedFields = Object.values(configField)[0] as {
-    [entryId: string]: EntryConnectedFields;
-  };
+  const connectedFields = Object.values(configField)[0] as ConnectedFields;
   const entryConnectedFields = connectedFields[entryId];
   if (!entryConnectedFields) {
     return;

@@ -1,5 +1,4 @@
 import { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
-import { EntryConnectedFields } from './components/create/CreateFlow';
 
 export const SAVED_RESPONSE = 'response';
 export const ASSET_FIELDS_QUERY = [
@@ -37,6 +36,21 @@ export const CONFIG_CONTENT_TYPE_ID = 'brazeConfig';
 export const CONFIG_ENTRY_ID = 'brazeConfig';
 export const CONFIG_FIELD_ID = 'connectedFields';
 
+export type AppInstallationParameters = {
+  contentfulApiKey: string;
+  brazeApiKey: string;
+  brazeEndpoint: string;
+};
+
+export type EntryConnectedFields = {
+  fieldId: string;
+  contentBlockId: string;
+}[];
+
+export type ConnectedFields = {
+  [entryId: string]: EntryConnectedFields;
+};
+
 export enum EntryStatus {
   Draft = 'DRAFT',
   Changed = 'CHANGED',
@@ -61,7 +75,7 @@ export function removeHypens(str: string) {
 
 export async function updateConfig(
   configEntry: EntryProps<KeyValueMap>,
-  connectedFields: EntryConnectedFields,
+  connectedFields: ConnectedFields,
   cma: PlainClientAPI
 ) {
   if (!configEntry.fields[CONFIG_FIELD_ID]) {

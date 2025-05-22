@@ -6,11 +6,7 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import { type PlainClientAPI, createClient } from 'contentful-management';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
-
-type AppInstallationParameters = {
-  brazeApiKey: string;
-  brazeEndpoint: string;
-};
+import { AppInstallationParameters } from '../src/utils';
 
 export type AppActionParameters = {
   entryId: string;
