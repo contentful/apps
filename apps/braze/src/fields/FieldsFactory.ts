@@ -35,21 +35,16 @@ export class FieldsFactory {
     return resolveResponse(response)[0];
   }
 
-  public async createFieldsForEntryLALALA(
-    entryFields: any,
-    contentType?: ContentTypeProps
-  ): Promise<any> {
-    if (!contentType) {
-      contentType = await this.getContentType(this.entryContentTypeId);
-    }
+  public async createFieldsForConnectedFields(connectedFieldsIds: string[]): Promise<any> {
+    // Connected entries do not have referece fields, so we can skip the nested depth check
+    const contentType = await this.getContentType(this.entryContentTypeId);
 
     const fields = [];
-    const entryFieldIds = entryFields.map((field: any) => field.fieldId);
-    const newContentTypeFields = contentType.fields.filter((field) =>
-      entryFieldIds.includes(field.id)
-    );
-    for (const fieldInfo of newContentTypeFields) {
-      fields.push(this.createSimpleField(fieldInfo, contentType));
+    for (const field of contentType.fields) {
+      // We also need to filter the fields that are connected to the entry
+      if (connectedFieldsIds.includes(field.id)) {
+        fields.push(this.createSimpleField(field, contentType));
+      }
     }
     return { title: contentType.displayField, fields };
   }
