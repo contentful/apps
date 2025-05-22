@@ -4,9 +4,9 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { type PlainClientAPI, createClient } from 'contentful-management';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { AppInstallationParameters } from '../src/utils';
+import { initContentfulManagementClient } from './common';
 
 export type AppActionParameters = {
   entryId: string;
@@ -14,21 +14,6 @@ export type AppActionParameters = {
   contentBlockNames: string;
   contentBlockDescriptions: string;
 };
-
-function initContentfulManagementClient(context: FunctionEventContext): PlainClientAPI {
-  if (!context.cmaClientOptions) {
-    throw new Error(
-      'Contentful Management API client options are only provided for certain function types. To learn more about using the CMA within functions, see https://www.contentful.com/developers/docs/extensibility/app-framework/functions/#using-the-cma.'
-    );
-  }
-  return createClient(context.cmaClientOptions, {
-    type: 'plain',
-    defaults: {
-      spaceId: context.spaceId,
-      environmentId: context.environmentId,
-    },
-  });
-}
 
 export const handler: FunctionEventHandler<
   FunctionTypeEnum.AppActionCall,
