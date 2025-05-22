@@ -148,11 +148,10 @@ const CreateFlow = (props: CreateFlowProps) => {
       setCreationResultFields(newCreationResultFields);
 
       const errors = responseData.results.filter((result: any) => !result.success);
-      if (
-        errors.length > 0 &&
-        !errors.some((error: any) => error.message?.includes(BRAZE_NAME_EXISTS_ERROR))
-      ) {
-        setStep(ERROR_STEP);
+      if (errors.length > 0) {
+        if (!errors.some((error: any) => error.message?.includes(BRAZE_NAME_EXISTS_ERROR))) {
+          setStep(ERROR_STEP);
+        }
         return;
       }
 

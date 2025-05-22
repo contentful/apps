@@ -73,7 +73,7 @@ export const handler: FunctionEventHandler<
       results.push({
         fieldId,
         success: false,
-        statusCode: 400,
+        statusCode: 600,
         message: `Field ${fieldId} does not exist or is empty`,
       });
       continue;

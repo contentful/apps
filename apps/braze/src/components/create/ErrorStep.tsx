@@ -19,11 +19,14 @@ const ErrorStep = ({
   handleCreate,
 }: ClientErrorStepProps) => {
   const createdFields = creationResultFields.filter((field) => field.success);
-  const clientErrors = creationResultFields.filter(
-    (field) => !field.success && field.statusCode !== 500
+  const customerErrors = creationResultFields.filter(
+    (field) => !field.success && field.statusCode === 600
   );
   const serverErrors = creationResultFields.filter(
     (field) => !field.success && field.statusCode === 500
+  );
+  const clientErrors = creationResultFields.filter(
+    (field) => !field.success && field.statusCode !== 500 && field.statusCode !== 600
   );
   const correctlyCreatedFields = creationResultFields.filter((field) => field.success);
   const containsServerError = serverErrors.length > 0;
@@ -51,6 +54,12 @@ const ErrorStep = ({
       </Subheading>
       <Text>The following errors occurred:</Text>
       <List>
+        {customerErrors.map((field, index) => (
+          <List.Item key={`${field.fieldId}-${index}`}>
+            <Text fontWeight="fontWeightDemiBold">{field.fieldId}</Text> - error code{' '}
+            {field.statusCode} - {field.message}. Please fix the errors and retry sending to Braze.
+          </List.Item>
+        ))}
         {serverErrors.map((field, index) => (
           <List.Item key={`${field.fieldId}-${index}`}>
             <Text fontWeight="fontWeightDemiBold">{field.fieldId}</Text> - error code{' '}
@@ -69,19 +78,25 @@ const ErrorStep = ({
               url={'https://support.contentful.com/hc/en-us'}
               linkText="Get support here"
               marginTop="spacing2Xs"
-              marginBottom="spacingL"
             />
           </List.Item>
         )}
       </List>
-      <Text>The following Content Blocks were created successfully:</Text>
-      <List>
-        {createdFields.map((field, index) => (
-          <List.Item key={`${field.fieldId}-${index}`}>
-            <Text fontWeight="fontWeightDemiBold">{field.fieldId}</Text>
-          </List.Item>
-        ))}
-      </List>
+      {createdFields.length > 0 && (
+        <>
+          <br />
+          <Text>The following Content Blocks were created successfully:</Text>
+          <List>
+            {createdFields.map((field, index) => (
+              <List.Item key={`${field.fieldId}-${index}`}>
+                <Text fontWeight="fontWeightDemiBold">
+                  {contentBlocksData.names[field.fieldId]}
+                </Text>
+              </List.Item>
+            ))}
+          </List>
+        </>
+      )}
       <WizardFooter>
         {containsServerError ? (
           <Button isLoading={isSubmitting} variant="primary" size="small" onClick={handleRetry}>
