@@ -38,6 +38,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = a
   const configEntry: EntryProps<KeyValueMap> = await getConfigEntry(cma);
   const configField = configEntry.fields[CONFIG_FIELD_ID];
   if (!configField) {
+    console.error(`Configuration field ${CONFIG_FIELD_ID} not found`);
     return;
   }
   const connectedFields = Object.values(configField)[0] as ConnectedFields;
