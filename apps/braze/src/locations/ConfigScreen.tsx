@@ -8,7 +8,7 @@ import {
   TextInput,
   Text,
   Subheading,
-  Autocomplete,
+  Select,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
@@ -267,8 +267,6 @@ function ContentBlockSection({
     url: '',
   });
 
-  const [filteredItems, setFilteredItems] = useState<BrazeEndpoint[]>(BRAZE_ENDPOINTS);
-
   // Initialize selectedBrazeEndpoint when parameters change
   useEffect(() => {
     if (parameters.brazeEndpoint) {
@@ -279,18 +277,12 @@ function ContentBlockSection({
     }
   }, [parameters.brazeEndpoint]);
 
-  // We filter the "spaces" array by the inputValue
-  // we use 'toLowerCase()' to make the search case insensitive
-  const handleInputValueChange = (nameValue: string) => {
-    const newFilteredItems = BRAZE_ENDPOINTS.filter(({ name }) =>
-      name.toLowerCase().includes(nameValue.toLowerCase())
-    );
-    setFilteredItems(newFilteredItems);
-  };
-
-  const handleSelectItem = (item: BrazeEndpoint) => {
-    setSelectedBrazeEndpoint(item);
-    setParameters({ ...parameters, brazeEndpoint: item.url });
+  const handleSelectItem = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedEndpoint = BRAZE_ENDPOINTS.find((end) => end.url === e.target.value);
+    if (selectedEndpoint) {
+      setSelectedBrazeEndpoint(selectedEndpoint);
+      setParameters({ ...parameters, brazeEndpoint: selectedEndpoint.url });
+    }
   };
 
   return (
@@ -337,17 +329,17 @@ function ContentBlockSection({
       <Box marginTop="spacingM">
         <FormControl isRequired>
           <FormControl.Label>Braze REST endpoint</FormControl.Label>
-          <Autocomplete
-            items={filteredItems}
-            onInputValueChange={handleInputValueChange}
-            onSelectItem={handleSelectItem}
-            selectedItem={selectedBrazeEndpoint}
-            itemToString={(item) => item.name}
-            renderItem={(item) => item.name}
-            placeholder="ex. rest.iad-01.braze.com"
-            data-testid="brazeEndpoint"
-            listWidth="full"
-          />
+          <Select
+            value={selectedBrazeEndpoint.url}
+            onChange={handleSelectItem}
+            data-testid="brazeEndpoint">
+            <Select.Option value="">Select an endpoint</Select.Option>
+            {BRAZE_ENDPOINTS.map((endpoint) => (
+              <Select.Option key={endpoint.url} value={endpoint.url}>
+                {endpoint.name}
+              </Select.Option>
+            ))}
+          </Select>
           {!brazeEndpointIsValid && (
             <FormControl.ValidationMessage>Invalid REST Endpoint</FormControl.ValidationMessage>
           )}
