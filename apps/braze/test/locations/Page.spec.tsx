@@ -1,79 +1,111 @@
-import { describe, vi, beforeEach, afterEach, it, expect } from 'vitest';
-import { cleanup } from '@testing-library/react';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { render, waitFor, screen } from '@testing-library/react';
+import { vi, describe, beforeEach, it, expect, Mock, afterEach } from 'vitest';
+import Page from '../../src/locations/Page';
 import { fetchBrazeConnectedEntries } from '../../src/utils/fetchBrazeConnectedEntries';
-import { Entry } from '../../src/fields/Entry';
 import { BasicField } from '../../src/fields/BasicField';
-import { mockConnectedFields, mockSingleConnectedField } from '../mocks/connectedFields';
-import { createContentTypeResponse } from '../mocks/contentTypeResponse';
-import { createGetManyEntryResponse } from '../mocks/entryResponse';
+import { Entry } from '../../src/fields/Entry';
 
-describe('Page component', () => {
-  const mockCma = {
-    contentType: {
-      get: vi.fn().mockResolvedValue(createContentTypeResponse(['title', 'author'])),
-    },
-    entry: {
-      getMany: vi.fn().mockResolvedValue({
-        sys: { type: 'Array' },
-        total: 1,
-        skip: 0,
-        limit: 1000,
-        items: [createGetManyEntryResponse({ title: 'Title', author: 'Author' })],
-      }),
-      get: vi.fn(),
-    },
-  };
+vi.mock('@contentful/react-apps-toolkit');
+vi.mock('../../src/utils/fetchBrazeConnectedEntries');
+vi.mock('contentful-management', () => ({
+  createClient: vi.fn(() => ({})),
+}));
 
+const mockSdk = {
+  cmaAdapter: {},
+  ids: {
+    environment: 'env-id',
+    space: 'space-id',
+  },
+  parameters: {
+    installation: {
+      contentfulApiKey: 'api-key',
+    },
+  },
+  locales: {
+    default: 'en-US',
+  },
+};
+
+describe('Page', () => {
   beforeEach(() => {
+    vi.clearAllMocks();
+    (useSDK as unknown as Mock).mockReturnValue(mockSdk);
+  });
+  afterEach(() => {
     vi.clearAllMocks();
   });
 
-  afterEach(cleanup);
+  it('renders loading state initially', () => {
+    (fetchBrazeConnectedEntries as Mock).mockReturnValue(new Promise(() => {}));
+    render(<Page />);
+    expect(screen.getByText(/Loading.../i)).toBeTruthy();
+  });
 
-  const createExpectedEntry = (fields: BasicField[]) => {
-    return new Entry(
+  it('renders error state if fetch fails', async () => {
+    (fetchBrazeConnectedEntries as Mock).mockRejectedValue(new Error('fail'));
+    render(<Page />);
+    await waitFor(() => {
+      expect(screen.getByText(/There was an error/i)).toBeTruthy();
+      expect(screen.getByText(/Please contact support/i)).toBeTruthy();
+    });
+  });
+
+  it('renders empty state if no entries', async () => {
+    (fetchBrazeConnectedEntries as Mock).mockResolvedValue([]);
+    render(<Page />);
+    await waitFor(() => {
+      expect(screen.getByText(/No active Braze Content Blocks/i)).toBeTruthy();
+      expect(
+        screen.getByText(/Once you have created Content Blocks, they will display here./i)
+      ).toBeTruthy();
+    });
+  });
+
+  it('renders connected entries table if entries exist', async () => {
+    const title = new BasicField('title', 'Title', 'content-type-id', true);
+    const author = new BasicField('author', 'Author', 'content-type-id', true);
+    const expectedEntry = new Entry(
       'entry-id',
       'content-type-id',
       'Title',
-      fields,
+      [title, author],
       'space-id',
       'environment-id',
       'valid-contentful-api-key',
       '2025-05-15T16:49:16.367Z',
       '2025-05-15T16:49:16.367Z'
     );
-  };
-
-  it('returns an entry when two fields are connected', async () => {
-    mockCma.entry.get.mockResolvedValue(mockConnectedFields);
-    const title = new BasicField('title', 'Title', 'content-type-id', true);
-    const author = new BasicField('author', 'Author', 'content-type-id', true);
-    const expectedEntry = createExpectedEntry([title, author]);
-
-    const result = await fetchBrazeConnectedEntries(
-      mockCma as unknown as any,
-      'valid-contentful-api-key',
-      'space-id',
-      'environment-id',
-      'en-US'
-    );
-
-    expect(result[0].serialize()).toEqual(expectedEntry.serialize());
+    (fetchBrazeConnectedEntries as Mock).mockResolvedValue([expectedEntry]);
+    render(<Page />);
+    await waitFor(() => {
+      expect(screen.getByText(/Content connected to Braze/i)).toBeTruthy();
+      expect(screen.getByText(/Title/i)).toBeTruthy();
+      expect(screen.getByText(/Published/i)).toBeTruthy();
+      expect(screen.getByRole('button', { name: /View fields/i })).toBeTruthy();
+    });
   });
 
-  it('returns an entry with only connected fields when one field is connected', async () => {
-    mockCma.entry.get.mockResolvedValue(mockSingleConnectedField);
+  it('shows correct badge for draft status', async () => {
     const title = new BasicField('title', 'Title', 'content-type-id', true);
-    const expectedEntry = createExpectedEntry([title]);
-
-    const result = await fetchBrazeConnectedEntries(
-      mockCma as unknown as any,
-      'valid-contentful-api-key',
+    const author = new BasicField('author', 'Author', 'content-type-id', true);
+    const expectedEntry = new Entry(
+      'entry-id',
+      'content-type-id',
+      'Title',
+      [title, author],
       'space-id',
       'environment-id',
-      'en-US'
+      'valid-contentful-api-key',
+      '',
+      '2025-05-15T16:49:16.367Z'
     );
+    (fetchBrazeConnectedEntries as Mock).mockResolvedValue([expectedEntry]);
 
-    expect(result[0].serialize()).toEqual(expectedEntry.serialize());
+    render(<Page />);
+    await waitFor(() => {
+      expect(screen.getByText(/Draft/i)).toBeTruthy();
+    });
   });
 });

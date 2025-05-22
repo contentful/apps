@@ -19,6 +19,7 @@ import Splitter from '../components/Splitter';
 import { createClient } from 'contentful-management';
 import { Entry } from '../fields/Entry';
 import { BRAZE_CONTENT_BLOCK_DOCUMENTATION } from '../utils';
+import { Field } from '../fields/Field';
 
 const getStatusBadge = (status: string) => {
   if (status.toLowerCase() === 'published') {
@@ -45,7 +46,7 @@ const getUpdatedLabel = (dateString: string | undefined) => {
   });
 };
 
-const getConnectedFieldsCount = (connectedFields: any) => {
+const getConnectedFieldsCount = (connectedFields: Field[]) => {
   return connectedFields.length;
 };
 
@@ -148,7 +149,6 @@ const Page = () => {
 
   useEffect(() => {
     setLoading(true);
-    setError(null);
     fetchBrazeConnectedEntries(
       cma,
       sdk.parameters?.installation?.contentfulApiKey,
@@ -161,7 +161,6 @@ const Page = () => {
         setLoading(false);
       })
       .catch((e) => {
-        console.log('Error: ', e);
         setError('Error loading connected entries');
         setLoading(false);
       });
