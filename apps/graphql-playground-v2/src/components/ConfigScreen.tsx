@@ -190,7 +190,7 @@ export default class Config extends Component<ConfigProps, ConfigState> {
           alt="GraphlQL Playground Logo"
           style={{ height: '5em', display: 'block' }}
         />
-        <Tabs defaultTab="configuration">
+        <Tabs currentTab={currentTab} onTabChange={(id) => this.setState({ currentTab: id })}>
           <Tabs.List>
             {TABS.map(({ id, label }) => (
               <Tabs.Tab panelId={id} key={id}>
