@@ -54,7 +54,8 @@ describe('Page component', () => {
       mockCma as unknown as any,
       'valid-contentful-api-key',
       'space-id',
-      'environment-id'
+      'environment-id',
+      'en-US'
     );
 
     expect(result[0].serialize()).toEqual(expectedEntry.serialize());
@@ -69,7 +70,8 @@ describe('Page component', () => {
       mockCma as unknown as any,
       'valid-contentful-api-key',
       'space-id',
-      'environment-id'
+      'environment-id',
+      'en-US'
     );
 
     expect(result[0].serialize()).toEqual(expectedEntry.serialize());

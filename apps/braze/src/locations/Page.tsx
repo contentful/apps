@@ -10,6 +10,7 @@ import {
   Flex,
   Heading,
   Subheading,
+  Paragraph,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { PageAppSDK } from '@contentful/app-sdk';
@@ -52,6 +53,96 @@ const getConnectedFieldsCount = (connectedFields: any) => {
   return connectedFields.length;
 };
 
+// Loading state component
+function LoadingState() {
+  return (
+    <Flex alignItems="center" justifyContent="center" padding="spacingL">
+      <Spinner size="large" />
+      <Text marginLeft="spacingM">Loading...</Text>
+    </Flex>
+  );
+}
+
+// Error state component
+function ErrorState({ error }: { error: string }) {
+  return (
+    <Box marginTop="spacingL">
+      <Note variant="negative" title="Error">
+        {error}
+      </Note>
+    </Box>
+  );
+}
+
+// Empty state component
+function EmptyState() {
+  return (
+    <Flex
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+      className={styles.emptyComponentContainer}>
+      <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold" marginBottom="spacingXs">
+        No active Braze Content Blocks
+      </Text>
+      <Text fontColor="gray600">Once you have created Content Blocks, they will display here.</Text>
+    </Flex>
+  );
+}
+
+// Table component
+function ConnectedEntriesTable({ entries }: { entries: Entry[] }) {
+  return (
+    <Box marginTop="spacingXl">
+      <Flex justifyContent="end" alignItems="center" marginBottom="spacingXs">
+        <Text fontColor="gray600" fontSize="fontSizeS">
+          Connected entries: {entries.length}/25
+        </Text>
+      </Flex>
+      <Table>
+        <Table.Head>
+          <Table.Row>
+            <Table.Cell>Entry name</Table.Cell>
+            <Table.Cell>Content type</Table.Cell>
+            <Table.Cell>Updated</Table.Cell>
+            <Table.Cell>Status</Table.Cell>
+            <Table.Cell>Connected fields</Table.Cell>
+            <Table.Cell align="center" className={styles.buttonCell} />
+          </Table.Row>
+        </Table.Head>
+        <Table.Body>
+          {entries.map((entry) => {
+            const name = entry.title;
+            const contentType = entry.contentType;
+            const updated = getUpdatedLabel(entry.updatedAt);
+            const status = entry.state;
+            const connectedCount = getConnectedFieldsCount(entry.fields);
+            return (
+              <Table.Row key={entry.id}>
+                <Table.Cell>{name}</Table.Cell>
+                <Table.Cell>{contentType}</Table.Cell>
+                <Table.Cell>{updated}</Table.Cell>
+                <Table.Cell>{getStatusBadge(status)}</Table.Cell>
+                <Table.Cell>{connectedCount}</Table.Cell>
+                <Table.Cell align="center" className={styles.buttonCell}>
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={() => {
+                      // Todo : implement
+                    }}>
+                    View fields
+                  </Button>
+                </Table.Cell>
+              </Table.Row>
+            );
+          })}
+        </Table.Body>
+      </Table>
+    </Box>
+  );
+}
+
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -90,8 +181,12 @@ const Page = () => {
       });
   }, []);
 
+  const hasConnectedEntries = () => {
+    return entries.length > 0;
+  };
+
   return (
-    <Flex justifyContent="center" padding="spacing2Xl">
+    <Flex justifyContent="center" paddingLeft="spacing2Xl" paddingRight="spacing2Xl">
       <Box className={styles.container}>
         <Heading
           as="h1"
@@ -103,78 +198,25 @@ const Page = () => {
         </Heading>
         <Splitter />
         <Box padding="spacingL">
-          <Subheading className={styles.subheading}>
-            Content connected to Braze through Content Blocks
-          </Subheading>
-          <InformationWithLink url={HELP_URL} linkText="here" dataTestId="help-here">
-            Learn more about Braze Content Blocks
-          </InformationWithLink>
+          {hasConnectedEntries() && (
+            <>
+              <Subheading className={styles.subheading}>
+                Content connected to Braze through Content Blocks
+              </Subheading>
+              <InformationWithLink url={HELP_URL} linkText="here" dataTestId="help-here">
+                Learn more about Braze Content Blocks
+              </InformationWithLink>
+            </>
+          )}
           <Box>
             {loading ? (
-              <Flex alignItems="center" justifyContent="center" padding="spacingL">
-                <Spinner size="large" />
-                <Text marginLeft="spacingM">Loading...</Text>
-              </Flex>
+              <LoadingState />
             ) : error ? (
-              <Box marginTop="spacingL">
-                <Note variant="negative" title="Error">
-                  {error}
-                </Note>
-              </Box>
+              <ErrorState error={error} />
             ) : entries.length === 0 ? (
-              <Box marginTop="spacingL">
-                <Note variant="warning" title="No connected entries">
-                  There are no entries connected to Braze Content Blocks.
-                </Note>
-              </Box>
+              <EmptyState />
             ) : (
-              <Box marginTop="spacingXl">
-                <Flex justifyContent="end" alignItems="center" marginBottom="spacingXs">
-                  <Text fontColor="gray600" fontSize="fontSizeS">
-                    Connected entries: {entries.length}/25
-                  </Text>
-                </Flex>
-                <Table>
-                  <Table.Head>
-                    <Table.Row>
-                      <Table.Cell as="th">Entry name</Table.Cell>
-                      <Table.Cell as="th">Content type</Table.Cell>
-                      <Table.Cell as="th">Updated</Table.Cell>
-                      <Table.Cell as="th">Status</Table.Cell>
-                      <Table.Cell as="th">Connected fields</Table.Cell>
-                      <Table.Cell as="th" />
-                    </Table.Row>
-                  </Table.Head>
-                  <Table.Body>
-                    {entries.map((entry) => {
-                      const name = entry.title;
-                      const contentType = entry.contentType;
-                      const updated = getUpdatedLabel(entry.updatedAt);
-                      const status = entry.state;
-                      const connectedCount = getConnectedFieldsCount(entry.fields);
-                      return (
-                        <Table.Row key={entry.id}>
-                          <Table.Cell>{name}</Table.Cell>
-                          <Table.Cell>{contentType}</Table.Cell>
-                          <Table.Cell>{updated}</Table.Cell>
-                          <Table.Cell>{getStatusBadge(status)}</Table.Cell>
-                          <Table.Cell>{connectedCount}</Table.Cell>
-                          <Table.Cell>
-                            <Button
-                              variant="secondary"
-                              size="small"
-                              onClick={() => {
-                                // Todo : implement
-                              }}>
-                              View fields
-                            </Button>
-                          </Table.Cell>
-                        </Table.Row>
-                      );
-                    })}
-                  </Table.Body>
-                </Table>
-              </Box>
+              <ConnectedEntriesTable entries={entries} />
             )}
           </Box>
         </Box>
