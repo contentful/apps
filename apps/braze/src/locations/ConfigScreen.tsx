@@ -9,6 +9,7 @@ import {
   Text,
   Subheading,
   Select,
+  Note,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
@@ -142,6 +143,12 @@ const ConfigScreen = () => {
           dataTestId="braze-app-docs-here">
           Learn more about how to connect Contentful with Braze and configure the Braze app
         </InformationWithLink>
+        <Box marginTop="spacingL" marginBottom="spacingL">
+          <Note variant="neutral">
+            The Braze app will create a content type labeled "brazeConfig". Do not delete or modify
+            manually.
+          </Note>
+        </Box>
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
         <ContentTypeSection />
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
@@ -262,27 +269,8 @@ function ContentBlockSection({
   brazeEndpointIsValid,
   setParameters,
 }: ContentBlockSectionProps) {
-  const [selectedBrazeEndpoint, setSelectedBrazeEndpoint] = useState<BrazeEndpoint>({
-    name: '',
-    url: '',
-  });
-
-  // Initialize selectedBrazeEndpoint when parameters change
-  useEffect(() => {
-    if (parameters.brazeEndpoint) {
-      const matchingEndpoint = BRAZE_ENDPOINTS.find((end) => end.url === parameters.brazeEndpoint);
-      if (matchingEndpoint) {
-        setSelectedBrazeEndpoint(matchingEndpoint);
-      }
-    }
-  }, [parameters.brazeEndpoint]);
-
   const handleSelectItem = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedEndpoint = BRAZE_ENDPOINTS.find((end) => end.url === e.target.value);
-    if (selectedEndpoint) {
-      setSelectedBrazeEndpoint(selectedEndpoint);
-      setParameters({ ...parameters, brazeEndpoint: selectedEndpoint.url });
-    }
+    setParameters({ ...parameters, brazeEndpoint: e.target.value });
   };
 
   return (
@@ -318,7 +306,7 @@ function ContentBlockSection({
         url={BRAZE_API_KEY_DOCUMENTATION}>
         Enter your Braze REST API key. If you need to generate a key, visit your
       </InformationWithLink>
-      <Subheading className={styles.subheading}>Input your Braze REST endpoint</Subheading>
+      <Subheading className={styles.subheading}>Select your Braze REST endpoint</Subheading>
       <InformationWithLink
         linkText="here"
         dataTestId="rest-endpoints-here"
@@ -330,10 +318,11 @@ function ContentBlockSection({
         <FormControl isRequired>
           <FormControl.Label>Braze REST endpoint</FormControl.Label>
           <Select
-            value={selectedBrazeEndpoint.url}
+            value={parameters.brazeEndpoint}
             onChange={handleSelectItem}
+            isInvalid={!brazeEndpointIsValid}
             data-testid="brazeEndpoint">
-            <Select.Option value="">Select an endpoint</Select.Option>
+            <Select.Option value="">Select one</Select.Option>
             {BRAZE_ENDPOINTS.map((endpoint) => (
               <Select.Option key={endpoint.url} value={endpoint.url}>
                 {endpoint.name}
