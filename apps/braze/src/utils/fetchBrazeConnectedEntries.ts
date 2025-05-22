@@ -11,10 +11,11 @@ export async function fetchBrazeConnectedEntries(
   cma: PlainClientAPI,
   contentfulApiKey: string,
   spaceId: string,
-  environmentId: string
+  environmentId: string,
+  defaultLocale: string
 ): Promise<Entry[]> {
   const configEntry = await getConfigEntry(cma);
-  const entries = configEntry?.fields?.connectedFields?.['en-US'] || {};
+  const entries = configEntry?.fields?.connectedFields?.[defaultLocale] || {};
   const entryIds = Object.keys(entries);
 
   if (!entryIds.length) return [];
@@ -39,7 +40,7 @@ export async function fetchBrazeConnectedEntries(
 
       const fieldsFactory = new FieldsFactory(entryId, entryContentTypeId, cma);
       const fieldsAndTitle = await fieldsFactory.createFieldsForConnectedFields(connectedFieldIds);
-      const entryTitle = rawEntry.fields[fieldsAndTitle.title]?.['en-US'] || 'Untitled';
+      const entryTitle = rawEntry.fields[fieldsAndTitle.title]?.[defaultLocale] || 'Untitled';
 
       return new Entry(
         entryId,
