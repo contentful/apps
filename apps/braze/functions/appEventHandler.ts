@@ -12,6 +12,7 @@ import {
   updateConfig,
   ConnectedFields,
   AppInstallationParameters,
+  EntryConnectedFields,
 } from '../src/utils';
 import { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
@@ -19,17 +20,61 @@ import { initContentfulManagementClient } from './common';
 
 const WAIT_TIMES = [0, 5000, 10000];
 
+const appUninstalledHandler = async (cma: PlainClientAPI) => {
+  await callAndRetry(() => deleteConfigEntry(cma));
+};
+
+const entryDeletedHandler = async (
+  cma: PlainClientAPI,
+  entryId: string,
+  configEntry: EntryProps<KeyValueMap>,
+  connectedFields: ConnectedFields
+) => {
+  delete connectedFields[entryId];
+  await callAndRetry(() => updateConfig(configEntry, connectedFields, cma));
+};
+
+const entrySavedHandler = async (
+  cma: PlainClientAPI,
+  context: FunctionEventContext,
+  body: any,
+  entryConnectedFields: EntryConnectedFields
+) => {
+  const { brazeApiKey, brazeEndpoint } =
+    context.appInstallationParameters as AppInstallationParameters;
+  const contentType = await cma.contentType.get({
+    contentTypeId: body.sys.contentType.sys.id,
+  });
+
+  for (const fieldId of Object.keys(body.fields)) {
+    const field = entryConnectedFields.find((connectedField) => connectedField.fieldId === fieldId);
+    if (!field) {
+      continue;
+    }
+    const contentBlockId = field.contentBlockId;
+    let newValue: any = Object.values(body.fields[fieldId])[0];
+
+    const fieldInfo = contentType.fields.find((f) => f.id === fieldId);
+
+    if (fieldInfo?.type === 'RichText') {
+      newValue = documentToHtmlString(newValue);
+    }
+
+    await callAndRetry(() =>
+      updateContentBlock(brazeEndpoint, brazeApiKey, contentBlockId, newValue)
+    );
+  }
+};
+
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = async (
   event: AppEventRequest,
   context: FunctionEventContext
 ) => {
-  const { brazeApiKey, brazeEndpoint } =
-    context.appInstallationParameters as AppInstallationParameters;
   const cma = initContentfulManagementClient(context);
 
-  if (event.headers['X-Contentful-Topic'].includes('AppInstallation.delete')) {
-    await callAndRetry(() => deleteConfigEntry(cma));
-    return;
+  const contentfulTopic = event.headers['X-Contentful-Topic'];
+  if (contentfulTopic.includes('AppInstallation.delete')) {
+    await appUninstalledHandler(cma);
   }
 
   const body = event.body as any;
@@ -47,40 +92,13 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = a
     return;
   }
 
-  if (event.headers['X-Contentful-Topic'].includes('Entry.delete')) {
-    delete connectedFields[entryId];
-    await callAndRetry(() => updateConfig(configEntry, connectedFields, cma));
-    return;
-  }
-
-  if (
-    event.headers['X-Contentful-Topic'].includes('Entry.save') ||
-    event.headers['X-Contentful-Topic'].includes('Entry.auto_save')
+  if (contentfulTopic.includes('Entry.delete')) {
+    await entryDeletedHandler(cma, entryId, configEntry, connectedFields);
+  } else if (
+    contentfulTopic.includes('Entry.save') ||
+    contentfulTopic.includes('Entry.auto_save')
   ) {
-    const contentType = await cma.contentType.get({
-      contentTypeId: body.sys.contentType.sys.id,
-    });
-
-    for (const fieldId of Object.keys(body.fields)) {
-      const field = entryConnectedFields.find(
-        (connectedField) => connectedField.fieldId === fieldId
-      );
-      if (!field) {
-        continue;
-      }
-      const contentBlockId = field.contentBlockId;
-      let newValue: any = Object.values(body.fields[fieldId])[0];
-
-      const fieldInfo = contentType.fields.find((f) => f.id === fieldId);
-
-      if (fieldInfo?.type === 'RichText') {
-        newValue = documentToHtmlString(newValue);
-      }
-
-      await callAndRetry(() =>
-        updateContentBlock(brazeEndpoint, brazeApiKey, contentBlockId, newValue)
-      );
-    }
+    await entrySavedHandler(cma, context, body, entryConnectedFields);
   }
 };
 

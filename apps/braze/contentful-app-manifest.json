@@ -10,11 +10,11 @@
       "accepts": ["appaction.call"]
     },
     {
-      "id": "updateContentBlocksFunction",
-      "name": "Update content blocks function",
-      "description": "Function to update content blocks from App Events.",
-      "path": "functions/updateContentBlocks.js",
-      "entryFile": "functions/updateContentBlocks.ts",
+      "id": "appEventHandler",
+      "name": "App event handler function",
+      "description": "Function to handle App Events.",
+      "path": "functions/appEventHandler.js",
+      "entryFile": "functions/appEventHandler.ts",
       "allowNetworks": ["https://*.braze.com"],
       "accepts": ["appevent.handler"]
     }

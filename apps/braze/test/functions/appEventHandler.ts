@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { handler } from '../../functions/updateContentBlocks';
+import { handler } from '../../functions/appEventHandler';
 import { createClient } from 'contentful-management';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { getConfigEntry, updateConfig } from '../../src/utils';
