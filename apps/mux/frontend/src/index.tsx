@@ -1,6 +1,6 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
 
-import React from 'react';
+import React, { ChangeEvent, createRef } from 'react';
 import { render } from 'react-dom';
 
 import { init, locations, AppExtensionSDK, FieldExtensionSDK } from '@contentful/app-sdk';
@@ -18,8 +18,6 @@ import {
 import { Form, FormControl, Checkbox, TextInput } from '@contentful/f36-forms';
 
 import MuxPlayer from '@mux/mux-player-react';
-import MuxUploader from '@mux/mux-uploader-react';
-import { MuxUploaderDrop } from '@mux/mux-uploader-react';
 
 import Config from './locations/config';
 import ApiClient from './util/apiClient';
@@ -29,6 +27,8 @@ import Menu from './components/menu';
 import PlayerCode from './components/playercode';
 import CountryDatalist from './components/countryDatalist';
 import CaptionsList from './components/captionsList';
+import ModalUploadAsset, { ModalData } from './components/ModalUploadAsset';
+import UploadArea from './components/UploadArea/UploadArea';
 
 import {
   type InstallationParams,
@@ -51,6 +51,9 @@ interface SignedTokens {
 export class App extends React.Component<AppProps, AppState> {
   apiClient: ApiClient;
   cmaClient: PlainClientAPI;
+  resolveRef = createRef<(value: string | null) => void>();
+  muxUploaderRef = createRef<any>();
+  fileInputRef = React.createRef<HTMLInputElement>();
 
   constructor(props: AppProps) {
     super(props);
@@ -85,6 +88,10 @@ export class App extends React.Component<AppProps, AppState> {
         field && ('playbackId' in field || 'signedPlaybackId' in field)
           ? field.playbackId || field.signedPlaybackId
           : undefined,
+      modalUploadAssetVisible: false,
+      file: null,
+      showMuxUploaderUI: false,
+      pendingUploadURL: null,
     };
   }
 
@@ -268,7 +275,7 @@ export class App extends React.Component<AppProps, AppState> {
     if (!input) return;
 
     if (this.isURL(input)) {
-      this.addByURL(input);
+      this.setState({ modalUploadAssetVisible: true, pendingUploadURL: input });
       return;
     }
 
@@ -278,24 +285,24 @@ export class App extends React.Component<AppProps, AppState> {
     this.pollForAssetDetails();
   };
 
-  addByURL = async (remoteURL: string): Promise<void> => {
+  addByURL = async (remoteURL: string, options: ModalData): Promise<void> => {
     const passthroughId = (this.props.sdk.entry.getSys() as { id: string }).id;
 
-    const result = await this.apiClient.post(
-      '/video/v1/assets',
-      JSON.stringify({
-        input: [
-          {
-            url: remoteURL,
-          },
-        ],
-        passthrough: passthroughId,
-        playback_policy: (this.props.sdk.parameters.installation as InstallationParams)
-          .muxEnableSignedUrls
-          ? 'signed'
-          : 'public',
-      })
-    );
+    const requestBody: any = {
+      input: [
+        {
+          url: remoteURL,
+        },
+      ],
+      passthrough: passthroughId,
+      playback_policy: (this.props.sdk.parameters.installation as InstallationParams)
+        .muxEnableSignedUrls
+        ? 'signed'
+        : 'public',
+      video_quality: options.videoQuality,
+    };
+
+    const result = await this.apiClient.post('/video/v1/assets', JSON.stringify(requestBody));
 
     if (!this.responseCheck(result)) {
       return;
@@ -319,7 +326,62 @@ export class App extends React.Component<AppProps, AppState> {
     await this.pollForAssetDetails();
   };
 
-  getUploadUrl = async () => {
+  handleFile = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      this.setState({ file: e.target.files[0] });
+      this.setState({ modalUploadAssetVisible: true });
+    }
+  };
+
+  handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (e.dataTransfer.files?.[0]) {
+      this.setState({ file: e.dataTransfer.files[0] });
+      this.setState({ modalUploadAssetVisible: true });
+    }
+  };
+
+  /**
+   * Configuration modal handles two distinct upload scenarios:
+   * 1. Direct URL submission: When a user provides a video URL to be processed by Mux
+   * 2. File upload: When a user selects a file through the UploadArea component
+   */
+  onConfirmModal = async (options: ModalData) => {
+    if (this.state.pendingUploadURL) {
+      await this.addByURL(this.state.pendingUploadURL, options);
+      this.setState({ pendingUploadURL: null });
+    } else {
+      const muxUploadUrl = await this.getUploadUrl(options);
+      const uploader = this.muxUploaderRef.current!;
+      uploader.endpoint = muxUploadUrl;
+
+      uploader.dispatchEvent(
+        new CustomEvent('file-ready', {
+          bubbles: true,
+          composed: true,
+          detail: this.state.file,
+        })
+      );
+
+      this.setState({ showMuxUploaderUI: true });
+    }
+    this.setState({ modalUploadAssetVisible: false });
+  };
+
+  onCloseModal = () => {
+    if (this.state.pendingUploadURL) {
+      this.setState({ pendingUploadURL: null });
+    } else {
+      this.resolveRef.current?.(null);
+      this.setState({ file: null });
+      if (this.fileInputRef.current) {
+        this.fileInputRef.current.value = '';
+      }
+    }
+    this.setState({ modalUploadAssetVisible: false });
+  };
+
+  getUploadUrl = async (options: ModalData) => {
     const passthroughId = (this.props.sdk.entry.getSys() as { id: string }).id;
 
     const { muxEnableAudioNormalize } = this.props.sdk.parameters
@@ -336,6 +398,7 @@ export class App extends React.Component<AppProps, AppState> {
             .muxEnableSignedUrls
             ? 'signed'
             : 'public',
+          video_quality: options.videoQuality,
         },
       })
     );
@@ -1102,39 +1165,19 @@ export class App extends React.Component<AppProps, AppState> {
 
     return (
       <section>
-        <Box marginBottom="spacingM">
-          <div className="uploader_area">
-            <MuxUploaderDrop
-              mux-uploader="muxuploader"
-              overlay
-              overlayText="Drop Video"
-              style={{
-                '--overlay-background-color': 'rgb(231, 235, 238)',
-              }}>
-              <MuxUploader
-                id="muxuploader"
-                type="bar"
-                onSuccess={this.onUploadSuccess}
-                endpoint={this.getUploadUrl}
-                noDrop
-                //onError={this.onUploadError}
-                style={
-                  {
-                    '--uploader-background-color': 'rgb(247, 249, 250)',
-                    '--button-border-radius': '4px',
-                    '--button-border': '1px solid rgb(207, 217, 224)',
-                    '--button-padding': '0.5rem 1rem',
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: '1em',
-                    minHeight: '250px',
-                  } as React.CSSProperties
-                }></MuxUploader>
-            </MuxUploaderDrop>
-          </div>
-        </Box>
+        <ModalUploadAsset
+          isShown={this.state.modalUploadAssetVisible}
+          onClose={this.onCloseModal}
+          onConfirm={this.onConfirmModal}
+        />
+        <UploadArea
+          showMuxUploaderUI={this.state.showMuxUploaderUI}
+          muxUploaderRef={this.muxUploaderRef}
+          onSuccess={this.onUploadSuccess}
+          onDrop={this.handleDrop}
+          onFileChange={this.handleFile}
+          fileInputRef={this.fileInputRef}
+        />
 
         <Form onSubmit={this.addVideoByInput}>
           <FormControl>
