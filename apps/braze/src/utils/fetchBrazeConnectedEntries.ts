@@ -5,12 +5,7 @@ import { FieldsFactory } from '../fields/FieldsFactory';
 import { EntryConnectedField } from '../components/create/CreateFlow';
 
 /**
- * Fetches entries from Contentful that have connectedFields (with at least one field).
- * @param cma Contentful Management API client
- * @param contentfulApiKey
- * @param spaceId The space ID
- * @param environmentId The environment ID
- * @returns Array of entries with connectedFields
+ * Fetches entries from Contentful that have connectedFields.
  */
 export async function fetchBrazeConnectedEntries(
   cma: PlainClientAPI,
@@ -19,50 +14,40 @@ export async function fetchBrazeConnectedEntries(
   environmentId: string
 ): Promise<Entry[]> {
   const configEntry = await getConfigEntry(cma);
+  const entries = configEntry?.fields?.connectedFields?.['en-US'] || {};
+  const entryIds = Object.keys(entries);
 
-  const entrys = configEntry?.fields?.connectedFields?.['en-US'] || [];
-  const entrysIds: string[] = [];
-  Object.entries(entrys).forEach(([key]) => {
-    entrysIds.push(key);
-  });
+  if (!entryIds.length) return [];
 
-  const entriesResponse = await cma.entry.getMany({
-    spaceId,
-    environmentId,
+  const response = await cma.entry.getMany({
+    spaceId: spaceId,
+    environmentId: environmentId,
     query: {
-      'sys.id[in]': entrysIds.join(','),
-      limit: 1000,
+      'sys.id[in]': entryIds.join(','),
+      limit: 25,
     },
   });
 
-  if (!entriesResponse?.items) return [];
+  const rawEntries = response && response.items ? response.items : [];
 
-  return await Promise.all(
-    entriesResponse.items.map(async (rawEntry: any) => {
-      const fieldsFactory = new FieldsFactory(
-        rawEntry.sys.id,
-        rawEntry.sys.contentType?.sys?.id || '',
-        cma
-      );
-      const rawEntryId = rawEntry.sys.id;
-      const entryConnectedFields = entrys[rawEntryId];
+  return Promise.all(
+    rawEntries.map(async (rawEntry: any) => {
+      const entryId = rawEntry.sys.id;
+      const entryContentTypeId = rawEntry.sys.contentType?.sys?.id || '';
+      const entryConnectedFields: EntryConnectedField[] = entries[entryId];
+      const connectedFieldIds = entryConnectedFields.map((f) => f.fieldId);
 
-      const rawFields = entryConnectedFields.map((contentBlockData: EntryConnectedField) => {
-        return {
-          fieldId: contentBlockData.fieldId,
-          ...rawEntry.fields[contentBlockData.fieldId],
-        };
-      });
-
-      const fieldsAndTitle = await fieldsFactory.createFieldsForEntryLALALA(rawFields);
+      const fieldsFactory = new FieldsFactory(entryId, entryContentTypeId, cma);
+      const fieldsAndTitle = await fieldsFactory.createFieldsForConnectedFields(connectedFieldIds);
       const entryTitle = rawEntry.fields[fieldsAndTitle.title]?.['en-US'] || 'Untitled';
+
       return new Entry(
-        rawEntry.sys.id,
-        rawEntry.sys.contentType?.sys?.id || '',
+        entryId,
+        entryContentTypeId,
         entryTitle,
         fieldsAndTitle.fields,
-        rawEntry.sys.space?.sys?.id || spaceId,
-        rawEntry.sys.environment?.sys?.id || environmentId,
+        spaceId,
+        environmentId,
         contentfulApiKey,
         rawEntry.sys.publishedAt,
         rawEntry.sys.updatedAt
