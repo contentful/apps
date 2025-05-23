@@ -5,7 +5,7 @@ import Dialog from '../../src/locations/Dialog';
 import { Entry } from '../../src/fields/Entry';
 import { BasicField } from '../../src/fields/BasicField';
 import React from 'react';
-import { createGetEntryResponse } from '../mocks/entryResponse';
+import { createEntryResponse } from '../mocks/entryResponse';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -35,7 +35,7 @@ vi.mock('../../src/fields/FieldsFactory', () => ({
   })),
 }));
 
-const mockCMAEntryItemResponse = createGetEntryResponse({
+const mockCMAEntryItemResponse = createEntryResponse({
   title: 'Some Title',
   fieldId: {
     sys: {

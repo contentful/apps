@@ -5,6 +5,7 @@ import Page from '../../src/locations/Page';
 import { fetchBrazeConnectedEntries } from '../../src/utils/fetchBrazeConnectedEntries';
 import { BasicField } from '../../src/fields/BasicField';
 import { Entry } from '../../src/fields/Entry';
+import { mockSdk } from '../mocks/mockSdk';
 
 vi.mock('@contentful/react-apps-toolkit');
 vi.mock('../../src/utils/fetchBrazeConnectedEntries');
@@ -12,23 +13,9 @@ vi.mock('contentful-management', () => ({
   createClient: vi.fn(() => ({})),
 }));
 
-const mockSdk = {
-  cmaAdapter: {},
-  ids: {
-    environment: 'env-id',
-    space: 'space-id',
-  },
-  parameters: {
-    installation: {
-      contentfulApiKey: 'api-key',
-    },
-  },
-  locales: {
-    default: 'en-US',
-  },
-};
-
 describe('Page', () => {
+  const title = new BasicField('title', 'Title', 'content-type-id', true);
+  const author = new BasicField('author', 'Author', 'content-type-id', true);
   beforeEach(() => {
     vi.clearAllMocks();
     (useSDK as unknown as Mock).mockReturnValue(mockSdk);
@@ -64,9 +51,7 @@ describe('Page', () => {
   });
 
   it('renders connected entries table if entries exist', async () => {
-    const title = new BasicField('title', 'Title', 'content-type-id', true);
-    const author = new BasicField('author', 'Author', 'content-type-id', true);
-    const expectedEntry = new Entry(
+    const publishEntry = new Entry(
       'entry-id',
       'content-type-id',
       'Title',
@@ -77,7 +62,7 @@ describe('Page', () => {
       '2025-05-15T16:49:16.367Z',
       '2025-05-15T16:49:16.367Z'
     );
-    (fetchBrazeConnectedEntries as Mock).mockResolvedValue([expectedEntry]);
+    (fetchBrazeConnectedEntries as Mock).mockResolvedValue([publishEntry]);
     render(<Page />);
     await waitFor(() => {
       expect(screen.getByText(/Content connected to Braze/i)).toBeTruthy();
@@ -88,9 +73,7 @@ describe('Page', () => {
   });
 
   it('shows correct badge for draft status', async () => {
-    const title = new BasicField('title', 'Title', 'content-type-id', true);
-    const author = new BasicField('author', 'Author', 'content-type-id', true);
-    const expectedEntry = new Entry(
+    const draftEntry = new Entry(
       'entry-id',
       'content-type-id',
       'Title',
@@ -101,7 +84,7 @@ describe('Page', () => {
       '',
       '2025-05-15T16:49:16.367Z'
     );
-    (fetchBrazeConnectedEntries as Mock).mockResolvedValue([expectedEntry]);
+    (fetchBrazeConnectedEntries as Mock).mockResolvedValue([draftEntry]);
 
     render(<Page />);
     await waitFor(() => {

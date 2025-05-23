@@ -5,7 +5,8 @@ import { Entry } from '../../src/fields/Entry';
 import { BasicField } from '../../src/fields/BasicField';
 import { mockConnectedFields, mockSingleConnectedField } from '../mocks/connectedFields';
 import { createContentTypeResponse } from '../mocks/contentTypeResponse';
-import { createGetManyEntryResponse } from '../mocks/entryResponse';
+import { createEntryResponse as createEntryResponse } from '../mocks/entryResponse';
+import { isPublished } from 'contentful-management';
 
 describe('fetchBrazeConnectedEntries', () => {
   const mockCma = {
@@ -18,7 +19,7 @@ describe('fetchBrazeConnectedEntries', () => {
         total: 1,
         skip: 0,
         limit: 1000,
-        items: [createGetManyEntryResponse({ title: 'Title', author: 'Author' })],
+        items: [createEntryResponse({ title: 'Title', author: 'Author' }, true, true)],
       }),
       get: vi.fn(),
     },
@@ -39,8 +40,8 @@ describe('fetchBrazeConnectedEntries', () => {
       'space-id',
       'environment-id',
       'valid-contentful-api-key',
-      '2025-05-15T16:49:16.367Z',
-      '2025-05-15T16:49:16.367Z'
+      '',
+      '2024-01-01T00:00:00Z'
     );
   };
 
