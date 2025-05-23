@@ -29,16 +29,24 @@ import CountryDatalist from './components/countryDatalist';
 import CaptionsList from './components/captionsList';
 import ModalUploadAsset, { ModalData } from './components/UploadConfiguration/ModalUploadAsset';
 import UploadArea from './components/UploadArea/UploadArea';
+import Mp4RenditionsPanel from './components/UploadConfiguration/Mp4RenditionsPanel';
 
 import {
   type InstallationParams,
   type MuxContentfulObject,
   type AppState,
   AppProps,
+  ResolutionType,
 } from './util/types';
 
 import './index.css';
 import { createClient, PlainClientAPI } from 'contentful-management';
+import {
+  addByURL,
+  getUploadUrl,
+  deleteStaticRendition,
+  createStaticRendition,
+} from './util/muxApi';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -285,79 +293,6 @@ export class App extends React.Component<AppProps, AppState> {
     this.pollForAssetDetails();
   };
 
-  addByURL = async (remoteURL: string, options: ModalData): Promise<void> => {
-    const passthroughId = (this.props.sdk.entry.getSys() as { id: string }).id;
-
-    const requestBody: any = {
-      inputs: [
-        {
-          url: remoteURL,
-        },
-      ],
-      passthrough: passthroughId,
-      playback_policies: options.playbackPolicies,
-      video_quality: options.videoQuality,
-    };
-
-    // Captions case
-    if (options.captionsConfig.captionsType !== 'off') {
-      if (options.captionsConfig.captionsType === 'auto') {
-        requestBody.inputs[0].generated_subtitles = [
-          {
-            language_code: options.captionsConfig.languageCode,
-            name: options.captionsConfig.languageName,
-          },
-        ];
-      } else {
-        requestBody.inputs.push({
-          url: options.captionsConfig.url,
-          type: 'text',
-          text_type: 'subtitles',
-          closed_captions: options.captionsConfig.closedCaptions,
-          language_code: options.captionsConfig.languageCode,
-          name: options.captionsConfig.languageName,
-        });
-      }
-    }
-
-    if (options.mp4Config.enabled) {
-      requestBody.static_renditions = [];
-      if (options.mp4Config.audioOnly) {
-        requestBody.static_renditions.push({
-          resolution: 'audio-only',
-        });
-      }
-      if (options.mp4Config.highestResolution) {
-        requestBody.static_renditions.push({
-          resolution: 'highest',
-        });
-      }
-    }
-
-    const result = await this.apiClient.post('/video/v1/assets', JSON.stringify(requestBody));
-
-    if (!this.responseCheck(result)) {
-      return;
-    }
-
-    const muxUpload = await result.json();
-
-    if ('error' in muxUpload) {
-      this.setAssetError(muxUpload.error.messages[0]);
-      return;
-    }
-
-    if (muxUpload.data.status === 'errored') {
-      this.setAssetError(muxUpload.data.errors.messages[0]);
-      return;
-    }
-
-    await this.props.sdk.field.setValue({
-      assetId: muxUpload.data.id,
-    });
-    await this.pollForAssetDetails();
-  };
-
   handleFile = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       this.setState({ file: e.target.files[0] });
@@ -380,10 +315,23 @@ export class App extends React.Component<AppProps, AppState> {
    */
   onConfirmModal = async (options: ModalData) => {
     if (this.state.pendingUploadURL) {
-      await this.addByURL(this.state.pendingUploadURL, options);
+      await addByURL(
+        this.apiClient,
+        this.props.sdk,
+        this.state.pendingUploadURL,
+        options,
+        async (res) => await this.responseCheck(res),
+        this.setAssetError,
+        this.pollForAssetDetails
+      );
       this.setState({ pendingUploadURL: null });
     } else {
-      const muxUploadUrl = await this.getUploadUrl(options);
+      const muxUploadUrl = await getUploadUrl(
+        this.apiClient,
+        this.props.sdk,
+        options,
+        async (res) => await this.responseCheck(res)
+      );
       const uploader = this.muxUploaderRef.current!;
       uploader.endpoint = muxUploadUrl;
 
@@ -411,95 +359,6 @@ export class App extends React.Component<AppProps, AppState> {
       }
     }
     this.setState({ modalUploadAssetVisible: false });
-  };
-
-  getUploadUrl = async (options: ModalData) => {
-    const passthroughId = (this.props.sdk.entry.getSys() as { id: string }).id;
-
-    const { muxEnableAudioNormalize } = this.props.sdk.parameters
-      .installation as InstallationParams;
-
-    const data: {
-      cors_origin: string;
-      new_asset_settings: {
-        passthrough: string;
-        normalize_audio: boolean;
-        playback_policies: string[];
-        static_renditions?: object[];
-        video_quality: string;
-        inputs: Array<{
-          generated_subtitles?: Array<{
-            language_code: string;
-            name: string;
-          }>;
-          url?: string;
-          type?: string;
-          text_type?: string;
-          closed_captions?: boolean;
-          language_code?: string;
-          name?: string;
-        }>;
-      };
-    } = {
-      cors_origin: window.location.origin,
-      new_asset_settings: {
-        passthrough: passthroughId,
-        normalize_audio: muxEnableAudioNormalize || false,
-        playback_policies: options.playbackPolicies,
-        video_quality: options.videoQuality,
-        inputs: [],
-      },
-    };
-
-    // Captions case
-    if (options.captionsConfig.captionsType !== 'off') {
-      if (options.captionsConfig.captionsType === 'auto') {
-        data.new_asset_settings.inputs.push({
-          generated_subtitles: [
-            {
-              language_code: options.captionsConfig.languageCode,
-              name: options.captionsConfig.languageName,
-            },
-          ],
-        });
-      } else {
-        data.new_asset_settings.inputs.push({
-          url: options.captionsConfig.url,
-          type: 'text',
-          text_type: 'subtitles',
-          closed_captions: options.captionsConfig.closedCaptions,
-          language_code: options.captionsConfig.languageCode,
-          name: options.captionsConfig.languageName,
-        });
-      }
-    }
-
-    if (options.mp4Config.enabled) {
-      data.new_asset_settings.static_renditions = [];
-      if (options.mp4Config.audioOnly) {
-        data.new_asset_settings.static_renditions.push({
-          resolution: 'audio-only',
-        });
-      }
-      if (options.mp4Config.highestResolution) {
-        data.new_asset_settings.static_renditions.push({
-          resolution: 'highest',
-        });
-      }
-    }
-    const res = await this.apiClient.post('/video/v1/uploads', JSON.stringify(data));
-
-    if (!this.responseCheck(res)) {
-      return;
-    }
-
-    const { data: muxUpload } = await res.json();
-
-    await this.props.sdk.field.setValue({
-      uploadId: muxUpload.id,
-    });
-
-    return muxUpload.url;
   };
 
   onUploadError = (progress: CustomEvent) => {
@@ -744,6 +603,7 @@ export class App extends React.Component<AppProps, AppState> {
       error: assetError || undefined,
       created_at: asset.created_at ? Number(asset.created_at) : undefined,
       captions: captions && captions.length > 0 ? captions : undefined,
+      static_renditions: asset.static_renditions?.files || undefined,
       is_live: asset.is_live || undefined,
       live_stream_id: asset.live_stream_id || undefined,
     });
@@ -762,10 +622,14 @@ export class App extends React.Component<AppProps, AppState> {
       ? captions.find((track) => track.status === 'preparing')
       : false;
 
+    const renditionPreparing = asset.static_renditions?.files
+      ? asset.static_renditions.files.find((rend) => rend.status === 'preparing')
+      : false;
+
     // Contentful is not able to listen for Mux webhooks, so we poll for status changes.
     // Users will need to leave their browser windows open until processses are complete.
     // Webhooks are the recommended way to listen for status changes over polling.
-    if (asset.status === 'preparing' || trackPreparing) {
+    if (asset.status === 'preparing' || trackPreparing || renditionPreparing) {
       await delay(350);
       await this.pollForAssetDetails();
     }
@@ -1016,6 +880,50 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
+  deleteStaticRenditionHandler = async (staticRenditionId: string) => {
+    if (!this.state.value || !this.state.value.assetId) return;
+    const assetId = this.state.value.assetId;
+
+    const res = await deleteStaticRendition(this.apiClient, assetId, staticRenditionId);
+
+    if (res.status === 204) {
+      await delay(500);
+      await this.resync();
+    } else {
+      try {
+        const errorRes = await res.json();
+        if (errorRes.error?.messages?.[0]) {
+          this.props.sdk.notifier.error(errorRes.error.messages[0]);
+        }
+      } catch (e) {
+        this.props.sdk.notifier.error('Error deleting static rendition');
+      }
+      this.resync({ silent: true });
+    }
+  };
+
+  createStaticRenditionHandler = async (type: ResolutionType) => {
+    if (!this.state.value || !this.state.value.assetId) return;
+    const assetId = this.state.value.assetId;
+
+    const res = await createStaticRendition(this.apiClient, assetId, type);
+
+    if (res.status === 201) {
+      await delay(500);
+      await this.resync();
+    } else {
+      try {
+        const errorRes = await res.json();
+        if (errorRes.error?.messages?.[0]) {
+          this.props.sdk.notifier.error(errorRes.error.messages[0]);
+        }
+      } catch (e) {
+        this.props.sdk.notifier.error('Error creating static rendition');
+      }
+      this.resync({ silent: true });
+    }
+  };
+
   render = () => {
     if (this.state.error) {
       return (
@@ -1146,6 +1054,7 @@ export class App extends React.Component<AppProps, AppState> {
                 <Tabs.Tab panelId="captions">Captions</Tabs.Tab>
                 <Tabs.Tab panelId="playercode">Player Code</Tabs.Tab>
                 <Tabs.Tab panelId="debug">Data</Tabs.Tab>
+                <Tabs.Tab panelId="mp4renditions">MP4 Renditions</Tabs.Tab>
               </Tabs.List>
 
               <Tabs.Panel id="playercode">
@@ -1242,6 +1151,14 @@ export class App extends React.Component<AppProps, AppState> {
                     {JSON.stringify(this.state.value, null, 2)}
                   </Box>
                 </pre>
+              </Tabs.Panel>
+
+              <Tabs.Panel id="mp4renditions">
+                <Mp4RenditionsPanel
+                  asset={this.state.value}
+                  onCreateRendition={this.createStaticRenditionHandler}
+                  onDeleteRendition={this.deleteStaticRenditionHandler}
+                />
               </Tabs.Panel>
             </Tabs>
           </div>
