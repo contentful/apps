@@ -42,10 +42,12 @@ export type CreationResultField = {
   message: string;
 };
 
-export type EntryConnectedFields = {
+export type EntryConnectedField = {
   fieldId: string;
   contentBlockId: string;
-}[];
+};
+
+export type EntryConnectedFields = EntryConnectedField[];
 
 export type ConnectedFields = {
   [entryId: string]: EntryConnectedFields;
