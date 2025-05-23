@@ -28,6 +28,10 @@ export interface AppState {
   playerPlaybackId?: string;
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   raw?: any;
+  modalUploadAssetVisible: boolean;
+  file: File | null;
+  showMuxUploaderUI: boolean;
+  pendingUploadURL: string | null;
 }
 
 export interface MuxContentfulObject {
