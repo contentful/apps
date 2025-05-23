@@ -4,11 +4,13 @@ import { InstallationParams } from '../../util/types';
 import { VideoQualitySelector } from './VideoQualitySelector';
 import { PlaybackPolicySelector } from './PlaybackPolicySelector';
 import CaptionsConfiguration, { CaptionsConfig } from './CaptionsConfiguration';
+import Mp4RenditionsConfiguration, { Mp4RenditionsConfig } from './Mp4RenditionsConfiguration';
 
 export interface ModalData {
   videoQuality: string;
   playbackPolicies: string[];
   captionsConfig: CaptionsConfig;
+  mp4Config: Mp4RenditionsConfig;
 }
 
 type ModalProps = {
@@ -29,12 +31,18 @@ const ModalContent: FC<ModalProps> = ({
   const [captionsConfig, setCaptionsConfig] = useState<CaptionsConfig>({
     captionsType: 'off',
   });
+  const [mp4Config, setMp4Config] = useState<Mp4RenditionsConfig>({
+    enabled: false,
+    highestResolution: true,
+    audioOnly: false,
+  });
   const { muxEnableSignedUrls } = installationParams;
   const [videoQualityExpanded, setVideoQualityExpanded] = useState<boolean>(true);
 
   const [validationState, setValidationState] = useState<Record<string, boolean>>({
     playbackPolicies: true,
     captions: true,
+    mp4: true,
   });
 
   const handleValidationChange = (componentId: string, isValid: boolean) => {
@@ -78,6 +86,14 @@ const ModalContent: FC<ModalProps> = ({
               onValidationChange={(isValid) => handleValidationChange('captions', isValid)}
             />
           </Accordion.Item>
+
+          <Accordion.Item title="MP4 Generation">
+            <Mp4RenditionsConfiguration
+              mp4Config={mp4Config}
+              onMp4ConfigChange={setMp4Config}
+              onValidationChange={(isValid) => handleValidationChange('mp4', isValid)}
+            />
+          </Accordion.Item>
         </Accordion>
       </Modal.Content>
 
@@ -88,7 +104,7 @@ const ModalContent: FC<ModalProps> = ({
         <Button
           size="small"
           variant="positive"
-          onClick={() => onConfirm({ videoQuality, playbackPolicies, captionsConfig })}
+          onClick={() => onConfirm({ videoQuality, playbackPolicies, captionsConfig, mp4Config })}
           isDisabled={!isFormValid}>
           Upload
         </Button>
