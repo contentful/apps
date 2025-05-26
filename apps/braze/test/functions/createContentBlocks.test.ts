@@ -64,15 +64,18 @@ describe('createContentBlocks', () => {
       type: FunctionTypeEnum.AppActionCall,
       body: {
         entryId: 'entry-id',
-        fieldIds: 'title,author',
-        contentBlockNames: JSON.stringify({
-          title: 'custom-title-name',
-          author: 'custom-author-name',
-        }),
-        contentBlockDescriptions: JSON.stringify({
-          title: 'custom-title-description',
-          author: 'custom-author-description',
-        }),
+        fieldsData: JSON.stringify([
+          {
+            fieldId: 'title',
+            contentBlockName: 'custom-title-name',
+            contentBlockDescription: 'custom-title-description',
+          },
+          {
+            fieldId: 'author',
+            contentBlockName: 'custom-author-name',
+            contentBlockDescription: 'custom-author-description',
+          },
+        ]),
       },
       headers: {},
     };
@@ -143,9 +146,13 @@ describe('createContentBlocks', () => {
       type: FunctionTypeEnum.AppActionCall,
       body: {
         entryId: 'entry-id',
-        fieldIds: 'content',
-        contentBlockNames: JSON.stringify({ content: 'custom-content-name' }),
-        contentBlockDescriptions: JSON.stringify({ content: 'custom-content-description' }),
+        fieldsData: JSON.stringify([
+          {
+            fieldId: 'content',
+            contentBlockName: 'custom-content-name',
+            contentBlockDescription: 'custom-content-description',
+          },
+        ]),
       },
       headers: {},
     };
@@ -190,15 +197,18 @@ describe('createContentBlocks', () => {
       type: FunctionTypeEnum.AppActionCall,
       body: {
         entryId: 'entry-id',
-        fieldIds: 'title,author',
-        contentBlockNames: JSON.stringify({
-          title: 'custom-title-name',
-          author: 'custom-author-name',
-        }),
-        contentBlockDescriptions: JSON.stringify({
-          title: 'custom-title-description',
-          author: 'custom-author-description',
-        }),
+        fieldsData: JSON.stringify([
+          {
+            fieldId: 'title',
+            contentBlockName: 'custom-title-name',
+            contentBlockDescription: 'custom-title-description',
+          },
+          {
+            fieldId: 'author',
+            contentBlockName: 'custom-author-name',
+            contentBlockDescription: 'custom-author-description',
+          },
+        ]),
       },
       headers: {},
     };
@@ -210,13 +220,13 @@ describe('createContentBlocks', () => {
         {
           fieldId: 'title',
           success: false,
-          statusCode: 400,
+          statusCode: 600,
           message: 'Field title does not exist or is empty',
         },
         {
           fieldId: 'author',
           success: false,
-          statusCode: 400,
+          statusCode: 600,
           message: 'Field author does not exist or is empty',
         },
       ],
@@ -246,15 +256,18 @@ describe('createContentBlocks', () => {
       type: FunctionTypeEnum.AppActionCall,
       body: {
         entryId: 'entry-id',
-        fieldIds: 'title,author',
-        contentBlockNames: JSON.stringify({
-          title: 'custom-title-name',
-          author: 'custom-author-name',
-        }),
-        contentBlockDescriptions: JSON.stringify({
-          title: 'custom-title-description',
-          author: 'custom-author-description',
-        }),
+        fieldsData: JSON.stringify([
+          {
+            fieldId: 'title',
+            contentBlockName: 'custom-title-name',
+            contentBlockDescription: 'custom-title-description',
+          },
+          {
+            fieldId: 'author',
+            contentBlockName: 'custom-author-name',
+            contentBlockDescription: 'custom-author-description',
+          },
+        ]),
       },
       headers: {},
     };
@@ -301,15 +314,18 @@ describe('createContentBlocks', () => {
       type: FunctionTypeEnum.AppActionCall,
       body: {
         entryId: 'entry-id',
-        fieldIds: 'title,author',
-        contentBlockNames: JSON.stringify({
-          title: 'custom-title-name',
-          author: 'custom-author-name',
-        }),
-        contentBlockDescriptions: JSON.stringify({
-          title: 'custom-title-description',
-          author: 'custom-author-description',
-        }),
+        fieldsData: JSON.stringify([
+          {
+            fieldId: 'title',
+            contentBlockName: 'custom-title-name',
+            contentBlockDescription: 'custom-title-description',
+          },
+          {
+            fieldId: 'author',
+            contentBlockName: 'custom-author-name',
+            contentBlockDescription: 'custom-author-description',
+          },
+        ]),
       },
       headers: {},
     };
@@ -360,7 +376,7 @@ describe('createContentBlocks', () => {
     );
   });
 
-  it('should handle invalid contentBlockNames JSON', async () => {
+  it('should handle invalid fieldsData JSON', async () => {
     // Mock Entry data
     const entry = createEntry({ title: 'Test Title', author: 'Test Author' });
     const contentType = createContentType(['title', 'author']);
@@ -373,12 +389,7 @@ describe('createContentBlocks', () => {
       type: FunctionTypeEnum.AppActionCall,
       body: {
         entryId: 'entry-id',
-        fieldIds: 'title,author',
-        contentBlockNames: 'invalid-json',
-        contentBlockDescriptions: JSON.stringify({
-          title: 'custom-title-description',
-          author: 'custom-author-description',
-        }),
+        fieldsData: 'invalid-json',
       },
       headers: {},
     };
@@ -404,15 +415,18 @@ describe('createContentBlocks', () => {
       type: FunctionTypeEnum.AppActionCall,
       body: {
         entryId: 'entry-id',
-        fieldIds: 'title,author',
-        contentBlockNames: JSON.stringify({
-          title: 'custom-title-name',
-          // author name is missing
-        }),
-        contentBlockDescriptions: JSON.stringify({
-          title: 'custom-title-description',
-          author: 'custom-author-description',
-        }),
+        fieldsData: JSON.stringify([
+          {
+            fieldId: 'title',
+            contentBlockName: 'custom-title-name',
+            contentBlockDescription: 'custom-title-description',
+          },
+          {
+            fieldId: 'author',
+            // author name is missing
+            contentBlockDescription: 'custom-author-description',
+          },
+        ]),
       },
       headers: {},
     };
@@ -430,8 +444,9 @@ describe('createContentBlocks', () => {
         {
           fieldId: 'author',
           success: false,
-          statusCode: 400,
-          message: 'Unexpected error: Content block name not found for field author',
+          statusCode: 601,
+          message:
+            'Unexpected error: Information missing. Field ID: author - Content block name: undefined',
         },
       ],
     });

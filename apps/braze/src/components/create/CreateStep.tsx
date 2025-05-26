@@ -21,6 +21,7 @@ import { PencilSimple, CheckCircle, WarningOctagon } from '@phosphor-icons/react
 import tokens from '@contentful/f36-tokens';
 import CreateButton from './CreateButton';
 import { ContentBlockData, CreationResultField } from './CreateFlow';
+import { localizeFieldId } from '../../utils';
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 250;
@@ -28,6 +29,7 @@ const MAX_DESCRIPTION_LENGTH = 250;
 // Types
 type ContentBlockFormProps = {
   fieldId: string;
+  locale?: string;
   entry: Entry;
   editDraft: { name: string; description: string };
   onNameChange: (value: string) => void;
@@ -47,6 +49,7 @@ type ContentBlockViewProps = {
 
 type ContentBlockCardProps = {
   fieldId: string;
+  locale?: string;
   entry: Entry;
   contentBlocksData: ContentBlockData;
   isEditing: boolean;
@@ -64,6 +67,7 @@ type ContentBlockCardProps = {
 type CreateStepProps = {
   entry: Entry;
   selectedFields: Set<string>;
+  selectedLocales?: string[];
   contentBlocksData: ContentBlockData;
   setContentBlocksData: Dispatch<SetStateAction<ContentBlockData>>;
   isSubmitting: boolean;
@@ -73,8 +77,10 @@ type CreateStepProps = {
 };
 
 // Utils
-export const getDefaultContentBlockName = (entry: Entry, fieldId: string) => {
+export const getDefaultContentBlockName = (entry: Entry, fieldId: string, locale?: string) => {
   const entryTitle = entry.title || 'Untitled';
+  fieldId = localizeFieldId(fieldId, locale);
+  // TODO: remove other special characters
   return `${entryTitle.replace(/\s+/g, '-')}-${fieldId}`;
 };
 
@@ -85,6 +91,7 @@ const isValidContentBlockName = (name: string): boolean => {
 // Components
 const ContentBlockForm = ({
   fieldId,
+  locale,
   entry,
   editDraft,
   onNameChange,
@@ -102,7 +109,7 @@ const ContentBlockForm = ({
           data-testid="content-block-name-input"
           onChange={(e) => onNameChange(e.target.value)}
           maxLength={MAX_NAME_LENGTH}
-          placeholder={getDefaultContentBlockName(entry, fieldId)}
+          placeholder={getDefaultContentBlockName(entry, fieldId, locale)}
           style={{ marginBottom: tokens.spacingS }}
           autoFocus
         />
@@ -141,7 +148,10 @@ const ContentBlockForm = ({
           style={{ marginRight: tokens.spacingS }}>
           Cancel
         </Button>
-        <Button variant="secondary" size="small" onClick={() => onSave(fieldId)}>
+        <Button
+          variant="secondary"
+          size="small"
+          onClick={() => onSave(localizeFieldId(fieldId, locale))}>
           Save
         </Button>
       </Flex>
@@ -201,6 +211,7 @@ const ContentBlockView = ({
 
 const ContentBlockCard = ({
   fieldId,
+  locale,
   entry,
   contentBlocksData,
   isEditing,
@@ -213,7 +224,8 @@ const ContentBlockCard = ({
   isNameValid,
   isCreated,
   error,
-}: ContentBlockCardProps & { isCreated?: boolean; error?: string }) => {
+}: ContentBlockCardProps) => {
+  const localizedFieldId = localizeFieldId(fieldId, locale);
   return (
     <Card
       margin="none"
@@ -227,6 +239,7 @@ const ContentBlockCard = ({
       {isEditing ? (
         <ContentBlockForm
           fieldId={fieldId}
+          locale={locale}
           entry={entry}
           editDraft={editDraft}
           onNameChange={onNameChange}
@@ -237,9 +250,9 @@ const ContentBlockCard = ({
         />
       ) : (
         <ContentBlockView
-          name={contentBlocksData.names[fieldId] || ''}
-          description={contentBlocksData.descriptions[fieldId] || ''}
-          onEdit={() => onEdit(fieldId)}
+          name={contentBlocksData.names[localizedFieldId] || ''}
+          description={contentBlocksData.descriptions[localizedFieldId] || ''}
+          onEdit={() => onEdit(localizedFieldId)}
           isCreated={isCreated}
           error={error}
         />
@@ -252,6 +265,7 @@ const ContentBlockCard = ({
 const CreateStep = ({
   entry,
   selectedFields,
+  selectedLocales,
   isSubmitting,
   contentBlocksData,
   setContentBlocksData,
@@ -267,6 +281,8 @@ const CreateStep = ({
   });
   const [isNameValid, setIsNameValid] = useState(true);
 
+  const localesList = selectedLocales ? selectedLocales : [undefined];
+
   // Effects
   useEffect(() => {
     const initialStates: ContentBlockData = {
@@ -274,14 +290,33 @@ const CreateStep = ({
       descriptions: {},
     };
     selectedFields.forEach((fieldId) => {
-      initialStates.names[fieldId] = getDefaultContentBlockName(entry, fieldId);
-      initialStates.descriptions[fieldId] = '';
+      const isLocalized = entry.fields.find((f) => f.id === fieldId)?.localized || false;
+      if (!isLocalized) {
+        initialStates.names[fieldId] = getDefaultContentBlockName(entry, fieldId, undefined);
+        initialStates.descriptions[fieldId] = '';
+      } else {
+        localesList.forEach((locale) => {
+          const localizedFieldId = localizeFieldId(fieldId, locale);
+          initialStates.names[localizedFieldId] = getDefaultContentBlockName(
+            entry,
+            fieldId,
+            locale
+          );
+          initialStates.descriptions[localizedFieldId] = '';
+        });
+      }
     });
     setContentBlocksData(initialStates);
   }, [entry, selectedFields]);
 
   // Early return: show skeleton if any field state is missing
-  if (Array.from(selectedFields).some((fieldId) => !contentBlocksData.names[fieldId])) {
+  // TODO
+  /*
+  if (
+    Array.from(selectedFields)
+      .flatMap((fieldId) => localesList.map((locale) => localizeFieldId(fieldId, locale)))
+      .some((fieldId) => !contentBlocksData.names[fieldId])
+  ) {
     return (
       <Box padding="spacingM">
         <Skeleton.Container data-testid="cf-ui-skeleton-form">
@@ -292,6 +327,7 @@ const CreateStep = ({
       </Box>
     );
   }
+    */
 
   // Event Handlers
   const handleEdit = (fieldId: string) => {
@@ -344,26 +380,42 @@ const CreateStep = ({
           directly to Braze. Content Block names should be unique.
         </Paragraph>
         <Stack spacing="spacingM" flexDirection="column">
-          {Array.from(selectedFields).map((fieldId: string) => (
-            <ContentBlockCard
-              key={fieldId}
-              fieldId={fieldId}
-              entry={entry}
-              contentBlocksData={contentBlocksData}
-              isEditing={editingField === fieldId}
-              editDraft={editDraft}
-              onEdit={handleEdit}
-              onNameChange={handleNameChange}
-              onDescriptionChange={handleDescriptionChange}
-              onCancel={handleCancel}
-              onSave={handleSave}
-              isNameValid={isNameValid}
-              isCreated={creationResultFields.some(
-                (result) => result.fieldId === fieldId && result.success
-              )}
-              error={creationResultFields.find((result) => result.fieldId === fieldId)?.message}
-            />
-          ))}
+          {Array.from(selectedFields).flatMap((fieldId) => {
+            const isLocalized = entry.fields.find((f) => f.id === fieldId)?.localized || false;
+            const fieldLocales = isLocalized ? localesList : [undefined];
+
+            return fieldLocales.map((locale) => {
+              const localizedFieldId = localizeFieldId(fieldId, locale);
+              return (
+                <ContentBlockCard
+                  key={fieldId}
+                  fieldId={fieldId}
+                  locale={locale}
+                  entry={entry}
+                  contentBlocksData={contentBlocksData}
+                  isEditing={editingField === localizedFieldId}
+                  editDraft={editDraft}
+                  onEdit={handleEdit}
+                  onNameChange={handleNameChange}
+                  onDescriptionChange={handleDescriptionChange}
+                  onCancel={handleCancel}
+                  onSave={handleSave}
+                  isNameValid={isNameValid}
+                  isCreated={creationResultFields.some(
+                    (result) =>
+                      result.success &&
+                      localizedFieldId === localizeFieldId(result.fieldId, result.locale)
+                  )}
+                  error={
+                    creationResultFields.find(
+                      (result) =>
+                        localizedFieldId === localizeFieldId(result.fieldId, result.locale)
+                    )?.message
+                  }
+                />
+              );
+            });
+          })}
         </Stack>
       </Box>
       <WizardFooter>
