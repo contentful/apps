@@ -36,7 +36,7 @@ vi.mock('../../src/fields/FieldsFactory', () => ({
 }));
 
 const mockCMAEntryItemResponse = createEntry({
-  title: 'Some Title',
+  title: { 'en-US': 'Some Title' },
   fieldId: {
     sys: {
       id: 'referencedEntryId',

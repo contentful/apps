@@ -49,7 +49,10 @@ describe('createContentBlocks', () => {
 
   it('should create content blocks for text fields', async () => {
     // Mock entry data
-    const mockEntry = createEntry({ title: 'Test Title', author: 'Test Author' });
+    const mockEntry = createEntry({
+      title: { 'en-US': 'Test Title' },
+      author: { 'en-US': 'Test Author' },
+    });
     const mockContentType = createContentType(['title', 'author']);
 
     // Mock API responses
@@ -133,7 +136,7 @@ describe('createContentBlocks', () => {
 
   it('should convert rich text fields to HTML', async () => {
     // Mock Entry data
-    const entry = createEntry({ content: { nodeType: 'document', content: [] } });
+    const entry = createEntry({ content: { 'en-US': { nodeType: 'document', content: [] } } });
     const contentType = createContentType(['content'], 'RichText');
 
     // Mock API responses
@@ -237,7 +240,10 @@ describe('createContentBlocks', () => {
 
   it('should handle API errors', async () => {
     // Mock Entry data
-    const entry = createEntry({ title: 'Test Title', author: 'Test Author' });
+    const entry = createEntry({
+      title: { 'en-US': 'Test Title' },
+      author: { 'en-US': 'Test Author' },
+    });
     const contentType = createContentType(['title', 'author']);
 
     // Mock API responses
@@ -250,7 +256,7 @@ describe('createContentBlocks', () => {
         Promise.resolve({
           message: 'Unauthorized',
         }),
-    } as Partial<Response> as Response);
+    } as Response);
 
     const event: AppActionRequest<'Custom', AppActionParameters> = {
       type: FunctionTypeEnum.AppActionCall,
@@ -294,7 +300,10 @@ describe('createContentBlocks', () => {
 
   it('should handle multiple fields with custom names', async () => {
     // Mock Entry data
-    const entry = createEntry({ title: 'Test Title', author: 'Test Author' });
+    const entry = createEntry({
+      title: { 'en-US': 'Test Title' },
+      author: { 'en-US': 'Test Author' },
+    });
     const contentType = createContentType(['title', 'author']);
 
     // Mock API responses
@@ -378,7 +387,10 @@ describe('createContentBlocks', () => {
 
   it('should handle invalid fieldsData JSON', async () => {
     // Mock Entry data
-    const entry = createEntry({ title: 'Test Title', author: 'Test Author' });
+    const entry = createEntry({
+      title: { 'en-US': 'Test Title' },
+      author: { 'en-US': 'Test Author' },
+    });
     const contentType = createContentType(['title', 'author']);
 
     // Mock API responses
@@ -400,7 +412,10 @@ describe('createContentBlocks', () => {
 
   it('should handle missing contentBlockNames for a field', async () => {
     // Mock Entry data
-    const entry = createEntry({ title: 'Test Title', author: 'Test Author' });
+    const entry = createEntry({
+      title: { 'en-US': 'Test Title' },
+      author: { 'en-US': 'Test Author' },
+    });
     const contentType = createContentType(['title', 'author']);
 
     // Mock API responses
@@ -452,5 +467,70 @@ describe('createContentBlocks', () => {
     });
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('should create content blocks for localized fields', async () => {
+    const mockEntry = createEntry({
+      title: {
+        'en-US': 'English Title',
+        'es-ES': 'Spanish Title',
+      },
+    });
+    const mockContentType = createContentType(['title']);
+
+    vi.mocked(mockCma.entry.get).mockResolvedValue(mockEntry);
+    vi.mocked(mockCma.contentType.get).mockResolvedValue(mockContentType);
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ content_block_id: 'block-id-localized' }),
+    } as Response);
+
+    const event: AppActionRequest<'Custom', AppActionParameters> = {
+      type: FunctionTypeEnum.AppActionCall,
+      body: {
+        entryId: 'entry-id',
+        fieldsData: JSON.stringify([
+          {
+            fieldId: 'title',
+            locale: 'es-ES',
+            contentBlockName: 'custom-title-name-es',
+            contentBlockDescription: 'custom-title-description-es',
+          },
+        ]),
+      },
+      headers: {},
+    };
+
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      results: [
+        {
+          fieldId: 'title',
+          locale: 'es-ES',
+          success: true,
+          statusCode: 201,
+          contentBlockId: 'block-id-localized',
+        },
+      ],
+    });
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://test.braze.com/content_blocks/create',
+      expect.objectContaining({
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer test-api-key',
+        },
+        body: JSON.stringify({
+          name: 'custom-title-name-es',
+          content: 'Spanish Title',
+          state: 'draft',
+          description: 'custom-title-description-es',
+        }),
+      })
+    );
   });
 });

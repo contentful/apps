@@ -35,9 +35,7 @@ export function createEntry(fields: Record<string, any>): EntryProps {
       updatedAt: '2024-01-01T00:00:00Z',
       automationTags: [],
     },
-    fields: Object.fromEntries(
-      Object.entries(fields).map(([key, value]) => [key, { 'en-US': value }])
-    ),
+    fields: Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, value])),
   } as EntryProps;
 }
 
