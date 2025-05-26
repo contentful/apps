@@ -16,6 +16,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { styles } from './ConfigScreen.styles';
 import Splitter from '../components/Splitter';
 import {
+  AppInstallationParameters,
   BRAZE_API_KEY_DOCUMENTATION,
   BRAZE_APP_DOCUMENTATION,
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
@@ -29,12 +30,6 @@ import {
 } from '../utils';
 import InformationWithLink from '../components/InformationWithLink';
 import { createClient, PlainClientAPI } from 'contentful-management';
-
-export interface AppInstallationParameters {
-  contentfulApiKey: string;
-  brazeApiKey: string;
-  brazeEndpoint: string;
-}
 
 export async function callTo(url: string, newApiKey: string) {
   return await fetch(url, {
