@@ -26,6 +26,7 @@ describe('CreateStep', () => {
       <CreateStep
         entry={mockEntry}
         selectedFields={mockSelectedFields}
+        selectedLocales={['en-US', 'ga']}
         contentBlocksData={{
           names: { field1: 'Field-1', 'field2-en-US': 'Field-2-en-US', 'field2-ga': 'Field-2-ga' },
           descriptions: {
@@ -57,14 +58,12 @@ describe('CreateStep', () => {
 
     // Check if main elements are rendered
     expect(screen.getByText(/Edit each field/i)).toBeTruthy();
-    expect(screen.getAllByText('Content Block name')).toHaveLength(mockSelectedFields.size);
-    expect(screen.getAllByRole('button', { name: /Edit content block/i })).toHaveLength(
-      mockSelectedFields.size
-    );
+    expect(screen.getAllByText('Content Block name')).toHaveLength(3);
+    expect(screen.getAllByRole('button', { name: /Edit content block/i })).toHaveLength(3);
   });
 
   it('renders the component with initial state with localized fields', async () => {
-    renderComponent({ selectedLocales: ['en-US', 'ga'] });
+    renderComponent();
 
     expect(screen.getByText(/Edit each field/i)).toBeTruthy();
     expect(screen.getByText(/Field-1/i)).toBeTruthy();
@@ -150,6 +149,14 @@ describe('CreateStep', () => {
         },
         {
           fieldId: 'field2',
+          locale: 'ga',
+          success: true,
+          statusCode: 200,
+          message: '',
+        },
+        {
+          fieldId: 'field2',
+          locale: 'en-US',
           success: false,
           statusCode: 400,
           message: 'Content Block name already exists',

@@ -282,6 +282,13 @@ const CreateStep = ({
   const [isNameValid, setIsNameValid] = useState(true);
 
   const localesList = selectedLocales ? selectedLocales : [undefined];
+  const localizedFieldsIds = Array.from(selectedFields).flatMap((fieldId) => {
+    const isLocalized = entry.fields.find((f) => f.id === fieldId)?.localized || false;
+    if (!isLocalized) {
+      return [localizeFieldId(fieldId, undefined)];
+    }
+    return localesList.map((locale) => localizeFieldId(fieldId, locale));
+  });
 
   // Effects
   useEffect(() => {
@@ -310,13 +317,7 @@ const CreateStep = ({
   }, [entry, selectedFields]);
 
   // Early return: show skeleton if any field state is missing
-  // TODO
-  /*
-  if (
-    Array.from(selectedFields)
-      .flatMap((fieldId) => localesList.map((locale) => localizeFieldId(fieldId, locale)))
-      .some((fieldId) => !contentBlocksData.names[fieldId])
-  ) {
+  if (localizedFieldsIds.some((fieldId) => !contentBlocksData.names[fieldId])) {
     return (
       <Box padding="spacingM">
         <Skeleton.Container data-testid="cf-ui-skeleton-form">
@@ -327,7 +328,6 @@ const CreateStep = ({
       </Box>
     );
   }
-    */
 
   // Event Handlers
   const handleEdit = (fieldId: string) => {
