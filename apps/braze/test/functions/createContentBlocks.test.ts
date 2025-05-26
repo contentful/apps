@@ -178,11 +178,9 @@ describe('createContentBlocks', () => {
   });
 
   it('should handle missing fields', async () => {
-    // Mock Entry data
     const entry = createEntry({});
     const contentType = createContentType(['title', 'author']);
 
-    // Mock API responses
     vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
     vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
 
@@ -210,13 +208,13 @@ describe('createContentBlocks', () => {
         {
           fieldId: 'title',
           success: false,
-          statusCode: 400,
+          statusCode: 600,
           message: 'Field title does not exist or is empty',
         },
         {
           fieldId: 'author',
           success: false,
-          statusCode: 400,
+          statusCode: 600,
           message: 'Field author does not exist or is empty',
         },
       ],

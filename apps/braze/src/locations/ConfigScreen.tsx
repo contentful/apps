@@ -21,7 +21,6 @@ import {
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
   BRAZE_ENDPOINTS,
   BRAZE_ENDPOINTS_DOCUMENTATION,
-  BrazeEndpoint,
   CONFIG_CONTENT_TYPE_ID,
   CONFIG_ENTRY_ID,
   CONFIG_FIELD_ID,
@@ -103,19 +102,34 @@ const ConfigScreen = () => {
       return false;
     }
 
+    const contentTypes = ['blogPost'];
+
     try {
-      await createContentType(cma);
+      await createContentType(sdk, cma);
     } catch (e) {
       console.error(e);
       sdk.notifier.error('Error creating content type for configuration');
       return false;
     }
+    await addAppToSidebar(sdk, cma, contentTypes);
+
+    const targetState = {
+      ...currentState,
+      EditorInterface: contentTypes.reduce((acc, contentTypeId) => {
+        return {
+          ...acc,
+          [contentTypeId]: {
+            sidebar: { position: 0 },
+          },
+        };
+      }, {}),
+    };
 
     return {
       parameters,
-      targetState: currentState,
+      targetState,
     };
-  }, [parameters, sdk]);
+  }, [parameters, sdk, cma]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -170,7 +184,7 @@ const ConfigScreen = () => {
   );
 };
 
-async function createContentType(cma: PlainClientAPI) {
+async function createContentType(sdk: ConfigAppSDK, cma: PlainClientAPI) {
   try {
     await cma.contentType.get({
       contentTypeId: CONFIG_CONTENT_TYPE_ID,
@@ -200,6 +214,33 @@ async function createContentType(cma: PlainClientAPI) {
     { contentTypeId: CONFIG_CONTENT_TYPE_ID, entryId: CONFIG_ENTRY_ID },
     { fields: {} }
   );
+}
+
+async function addAppToSidebar(sdk: ConfigAppSDK, cma: PlainClientAPI, contentTypesId: string[]) {
+  for (const contentTypeId of contentTypesId) {
+    try {
+      const editorInterface = await cma.editorInterface.get({ contentTypeId });
+      const updatedSidebar = [
+        ...(editorInterface.sidebar || []),
+        {
+          widgetId: sdk.ids.app,
+          widgetNamespace: 'app',
+          settings: { position: 0 },
+        },
+      ];
+
+      const response = await cma.editorInterface.update(
+        { contentTypeId },
+        {
+          ...editorInterface,
+          sidebar: updatedSidebar,
+        }
+      );
+    } catch (e) {
+      console.error(`Failed to add app to sidebar for content type ${contentTypeId}:`, e);
+      sdk.notifier.error(`Failed to add app to sidebar for content type ${contentTypeId}`);
+    }
+  }
 }
 
 function ConnectedContentSection(props: {

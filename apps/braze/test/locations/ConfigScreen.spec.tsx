@@ -23,6 +23,10 @@ const mockCma = {
   entry: {
     createWithId: vi.fn(),
   },
+  editorInterface: {
+    get: vi.fn(),
+    update: vi.fn(),
+  },
 };
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
@@ -45,6 +49,21 @@ vi.mock('./ConfigScreen', async () => {
 async function saveAppInstallation() {
   return await mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
 }
+
+const fillScreen = async () => {
+  const user = userEvent.setup();
+  const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
+  const brazeApiKeyInput = screen.getAllByTestId('brazeApiKey')[0];
+  const brazeEndpointSelect = screen.getByTestId('brazeEndpoint');
+
+  await user.type(contentfulApiKeyInput, 'valid-api-key-123');
+  await user.type(brazeApiKeyInput, 'valid-api-key-321');
+  fireEvent.change(brazeEndpointSelect, { target: { value: BRAZE_ENDPOINTS[0].url } });
+
+  vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
+    return { ok: true, status: 200 };
+  });
+};
 
 describe('Config Screen component', () => {
   let configScreen: RenderResult<typeof queries, HTMLElement, HTMLElement>;
@@ -125,20 +144,7 @@ describe('Config Screen component', () => {
 
   describe('installation ', () => {
     it('sets the parameters correctly if the three inputs are set correctly', async () => {
-      const user = userEvent.setup();
-      const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
-      const brazeApiKeyInput = screen.getAllByTestId('brazeApiKey')[0];
-      const brazeEndpointSelect = screen.getByTestId('brazeEndpoint');
-
-      await user.type(contentfulApiKeyInput, 'valid-api-key-123');
-      await user.type(brazeApiKeyInput, 'valid-api-key-321');
-
-      // Simulate selecting an endpoint from the Select
-      fireEvent.change(brazeEndpointSelect, { target: { value: BRAZE_ENDPOINTS[0].url } });
-
-      vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
-        return { ok: true, status: 200 };
-      });
+      await fillScreen();
 
       const result = await saveAppInstallation();
 
@@ -147,6 +153,15 @@ describe('Config Screen component', () => {
           contentfulApiKey: 'valid-api-key-123',
           brazeApiKey: 'valid-api-key-321',
           brazeEndpoint: BRAZE_ENDPOINTS[0].url,
+        },
+        targetState: {
+          EditorInterface: {
+            blogPost: {
+              sidebar: {
+                position: 0,
+              },
+            },
+          },
         },
       });
     });
@@ -207,22 +222,7 @@ describe('Config Screen component', () => {
 
   describe('createContentType', () => {
     it('creates content type and entry if they do not exist', async () => {
-      const user = userEvent.setup();
-      const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
-      const brazeApiKeyInput = screen.getAllByTestId('brazeApiKey')[0];
-      const brazeEndpointSelect = screen.getByTestId('brazeEndpoint');
-
-      await user.type(contentfulApiKeyInput, 'valid-api-key-123');
-      await user.type(brazeApiKeyInput, 'valid-api-key-321');
-
-      // Simulate selecting an endpoint from the Select
-      fireEvent.change(brazeEndpointSelect, { target: { value: BRAZE_ENDPOINTS[0].url } });
-
-      vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
-        return { ok: true, status: 200 };
-      });
-
-      // Mock contentType.get to throw an error to trigger content type creation
+      await fillScreen();
       mockCma.contentType.get.mockRejectedValueOnce(new Error('Content type not found'));
 
       await saveAppInstallation();
@@ -233,25 +233,61 @@ describe('Config Screen component', () => {
     });
 
     it('does not create content type if it already exists', async () => {
-      const user = userEvent.setup();
-      const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
-      const brazeApiKeyInput = screen.getAllByTestId('brazeApiKey')[0];
-      const brazeEndpointSelect = screen.getByTestId('brazeEndpoint');
-
-      await user.type(contentfulApiKeyInput, 'valid-api-key-123');
-      await user.type(brazeApiKeyInput, 'valid-api-key-321');
-      fireEvent.change(brazeEndpointSelect, { target: { value: BRAZE_ENDPOINTS[0].url } });
-
-      vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
-        return { ok: true, status: 200 };
-      });
-      mockCma.contentType.get.mockResolvedValueOnce({}); // Simulate content type already exists
+      await fillScreen();
+      mockCma.contentType.get.mockResolvedValueOnce({});
 
       await saveAppInstallation();
 
       expect(mockCma.contentType.createWithId).not.toHaveBeenCalled();
       expect(mockCma.contentType.publish).not.toHaveBeenCalled();
       expect(mockCma.entry.createWithId).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('addAppToSidebar', () => {
+    it('adds app to sidebar for each content type', async () => {
+      await fillScreen();
+      mockCma.editorInterface.get.mockResolvedValueOnce({
+        sidebar: [],
+        sys: { contentType: { sys: { id: 'blogPost' } } },
+      });
+      mockCma.editorInterface.update.mockResolvedValueOnce({});
+
+      const result = await saveAppInstallation();
+
+      expect(mockCma.editorInterface.get).toHaveBeenCalledWith({ contentTypeId: 'blogPost' });
+      expect(mockCma.editorInterface.update).toHaveBeenCalledWith(
+        { contentTypeId: 'blogPost' },
+        expect.objectContaining({
+          sidebar: expect.arrayContaining([
+            expect.objectContaining({
+              widgetId: mockSdk.ids.app,
+              widgetNamespace: 'app',
+              settings: { position: 0 },
+            }),
+          ]),
+        })
+      );
+
+      expect(result.targetState.EditorInterface).toEqual({
+        blogPost: {
+          sidebar: { position: 0 },
+        },
+      });
+    });
+
+    it('handles errors when adding app to sidebar', async () => {
+      await fillScreen();
+
+      mockCma.editorInterface.get.mockRejectedValueOnce(
+        new Error('Failed to get editor interface')
+      );
+
+      await saveAppInstallation();
+
+      expect(mockSdk.notifier.error).toHaveBeenCalledWith(
+        'Failed to add app to sidebar for content type blogPost'
+      );
     });
   });
 });
