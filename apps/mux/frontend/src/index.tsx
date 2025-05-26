@@ -730,11 +730,6 @@ export class App extends React.Component<AppProps, AppState> {
 
   reloadPlayer = async () => {
     if (!this.state || !this.state.value) return;
-    const currentPlaybackId = this.state.playerPlaybackId;
-    this.setState({ playerPlaybackId: undefined });
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    this.setState({ playerPlaybackId: currentPlaybackId });
-    await new Promise((resolve) => setTimeout(resolve, 100));
     this.muxPlayerRef.current?.load();
   };
 
