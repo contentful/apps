@@ -504,13 +504,16 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
-  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   resync = async (params?: any) => {
-    return await this.pollForAssetDetails().then(() => {
-      if (!params || !params.silent)
-        this.props.sdk.notifier.success('Updated: Data was synced with Mux.');
+    await this.pollForAssetDetails();
+
+    if (!params?.silent) {
+      this.props.sdk.notifier.success('Updated: Data was synced with Mux.');
+    }
+
+    if (!params?.skipPlayerResync) {
       this.reloadPlayer();
-    });
+    }
   };
 
   pollForAssetDetails = async (): Promise<void> => {
@@ -881,7 +884,7 @@ export class App extends React.Component<AppProps, AppState> {
 
     if (res.status === 204) {
       await delay(500);
-      await this.resync();
+      await this.resync({ skipPlayerResync: true });
     } else {
       try {
         const errorRes = await res.json();
@@ -891,7 +894,7 @@ export class App extends React.Component<AppProps, AppState> {
       } catch (e) {
         this.props.sdk.notifier.error('Error deleting static rendition');
       }
-      this.resync({ silent: true });
+      this.resync({ silent: true, skipPlayerResync: true });
     }
   };
 
@@ -903,7 +906,7 @@ export class App extends React.Component<AppProps, AppState> {
 
     if (res.status === 201) {
       await delay(500);
-      await this.resync();
+      await this.resync({ skipPlayerResync: true });
     } else {
       try {
         const errorRes = await res.json();
@@ -913,7 +916,7 @@ export class App extends React.Component<AppProps, AppState> {
       } catch (e) {
         this.props.sdk.notifier.error('Error creating static rendition');
       }
-      this.resync({ silent: true });
+      this.resync({ silent: true, skipPlayerResync: true });
     }
   };
 
