@@ -212,13 +212,13 @@ describe('createContentBlocks', () => {
         {
           fieldId: 'title',
           success: false,
-          statusCode: 400,
+          statusCode: 600,
           message: 'Field title does not exist or is empty',
         },
         {
           fieldId: 'author',
           success: false,
-          statusCode: 400,
+          statusCode: 600,
           message: 'Field author does not exist or is empty',
         },
       ],

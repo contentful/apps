@@ -1,8 +1,7 @@
 import { PlainClientAPI } from 'contentful-management';
-import { getConfigEntry } from '../utils';
+import { EntryConnectedFields, getConfigEntry } from '../utils';
 import { Entry } from '../fields/Entry';
 import { FieldsFactory } from '../fields/FieldsFactory';
-import { EntryConnectedField } from '../components/create/CreateFlow';
 
 /**
  * Fetches entries from Contentful that have connectedFields.
@@ -35,7 +34,7 @@ export async function fetchBrazeConnectedEntries(
     rawEntries.map(async (rawEntry: any) => {
       const entryId = rawEntry.sys.id;
       const entryContentTypeId = rawEntry.sys.contentType?.sys?.id || '';
-      const entryConnectedFields: EntryConnectedField[] = entries[entryId];
+      const entryConnectedFields: EntryConnectedFields = entries[entryId];
       const connectedFieldIds = entryConnectedFields.map((f) => f.fieldId);
 
       const fieldsFactory = new FieldsFactory(entryId, entryContentTypeId, cma);
