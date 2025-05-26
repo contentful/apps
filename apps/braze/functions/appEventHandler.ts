@@ -28,7 +28,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = a
 
   const contentfulTopic = event.headers['X-Contentful-Topic'];
   if (contentfulTopic.includes('AppInstallation.delete')) {
-    await appUninstalledHandler(cma);
+    return await appUninstalledHandler(cma);
   }
 
   const body = event.body as any;

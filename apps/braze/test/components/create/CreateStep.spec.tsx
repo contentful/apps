@@ -6,7 +6,7 @@ import { BasicField } from '../../../src/fields/BasicField';
 
 describe('CreateStep', () => {
   const field1 = new BasicField('field1', 'Field 1', 'test', false);
-  const field2 = new BasicField('field2', 'Field 2', 'test', false);
+  const field2 = new BasicField('field2', 'Field 2', 'test', true);
   const mockEntry = new Entry(
     'entry-id',
     'test',
@@ -27,8 +27,12 @@ describe('CreateStep', () => {
         entry={mockEntry}
         selectedFields={mockSelectedFields}
         contentBlocksData={{
-          names: { field1: 'Field-1', field2: 'Field-2' },
-          descriptions: { field1: 'Field 1 description', field2: 'Field 2 description' },
+          names: { field1: 'Field-1', 'field2-en-US': 'Field-2-en-US', 'field2-ga': 'Field-2-ga' },
+          descriptions: {
+            field1: 'Field 1 description',
+            'field2-en-US': 'Field 2 en-US',
+            'field2-ga': 'Field 2 ga',
+          },
         }}
         setContentBlocksData={() => {}}
         isSubmitting={false}
@@ -57,6 +61,17 @@ describe('CreateStep', () => {
     expect(screen.getAllByRole('button', { name: /Edit content block/i })).toHaveLength(
       mockSelectedFields.size
     );
+  });
+
+  it('renders the component with initial state with localized fields', async () => {
+    renderComponent({ selectedLocales: ['en-US', 'ga'] });
+
+    expect(screen.getByText(/Edit each field/i)).toBeTruthy();
+    expect(screen.getByText(/Field-1/i)).toBeTruthy();
+    expect(screen.getByText(/Field-2-en-US/i)).toBeTruthy();
+    expect(screen.getByText(/Field-2-ga/i)).toBeTruthy();
+    expect(screen.getAllByText('Content Block name')).toHaveLength(3);
+    expect(screen.getAllByRole('button', { name: /Edit content block/i })).toHaveLength(3);
   });
 
   it('enters edit mode when edit button is clicked', () => {

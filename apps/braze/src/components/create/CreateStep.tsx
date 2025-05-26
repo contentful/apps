@@ -388,7 +388,7 @@ const CreateStep = ({
               const localizedFieldId = localizeFieldId(fieldId, locale);
               return (
                 <ContentBlockCard
-                  key={fieldId}
+                  key={localizedFieldId}
                   fieldId={fieldId}
                   locale={locale}
                   entry={entry}
