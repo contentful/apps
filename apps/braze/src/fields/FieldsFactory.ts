@@ -35,7 +35,7 @@ export class FieldsFactory {
     return resolveResponse(response)[0];
   }
 
-  public async createFieldsForConnectedEntries(
+  public async createFieldsForConnectedEntry(
     connectedFieldsIds: string[]
   ): Promise<{ title: string; fields: Field[] }> {
     // Connected entries do not have referece fields, so we can skip the nested depth check
