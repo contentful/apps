@@ -51,6 +51,7 @@ interface SignedTokens {
 export class App extends React.Component<AppProps, AppState> {
   apiClient: ApiClient;
   cmaClient: PlainClientAPI;
+  muxPlayerRef = React.createRef<any>();
 
   constructor(props: AppProps) {
     super(props);
@@ -75,7 +76,6 @@ export class App extends React.Component<AppProps, AppState> {
     this.state = {
       value: field,
       isDeleting: false,
-      isReloading: false,
       isTokenLoading: false,
       error:
         (!muxAccessTokenId || !muxAccessTokenSecret) &&
@@ -684,7 +684,6 @@ export class App extends React.Component<AppProps, AppState> {
 
     this.clearCaptionForm(form);
     await this.resync();
-    await this.reloadPlayer();
   };
 
   clearCaptionForm = (form) => {
@@ -701,7 +700,6 @@ export class App extends React.Component<AppProps, AppState> {
     if (res.status === 204) {
       await delay(500); // Hack, no webhook to wait for update, so we guess.
       await this.resync();
-      await this.reloadPlayer();
     } else {
       const errorRes = await res.json();
       if (errorRes.error.messages[0]) {
@@ -732,12 +730,12 @@ export class App extends React.Component<AppProps, AppState> {
 
   reloadPlayer = async () => {
     if (!this.state || !this.state.value) return;
-    // Toggle for Player to reload manifest and see/remove captions.
-    this.setState({ isReloading: true });
-    // A slight delay was required for captions to show.
-    await delay(300).then(() => {
-      this.setState({ isReloading: false });
-    });
+    const currentPlaybackId = this.state.playerPlaybackId;
+    this.setState({ playerPlaybackId: undefined });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    this.setState({ playerPlaybackId: currentPlaybackId });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    this.muxPlayerRef.current?.load();
   };
 
   playerParams = () => {
@@ -947,10 +945,10 @@ export class App extends React.Component<AppProps, AppState> {
               )}
 
             <section className="player" style={this.getPlayerAspectRatio()}>
-              {!this.state.isReloading &&
-              this.state.playerPlaybackId !== 'playback-test-123' &&
+              {this.state.playerPlaybackId !== 'playback-test-123' &&
               (this.state.value.playbackId || this.state.playbackToken) ? (
                 <MuxPlayer
+                  ref={this.muxPlayerRef}
                   data-testid="muxplayer"
                   style={{ height: '100%', width: '100%' }}
                   playbackId={this.state.playerPlaybackId}
