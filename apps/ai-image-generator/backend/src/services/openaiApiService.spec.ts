@@ -31,7 +31,7 @@ describe('OpenAiApiService', () => {
 
     it('returns a promise with the image edit response', async () => {
       const result = await openAIApiService.createImage(validCreateImageParams());
-      expect(result).to.include(mockImagesResponse.data[0]);
+      expect(result).to.include(mockImagesResponse.data?.[0]);
     });
   });
 
@@ -43,7 +43,7 @@ describe('OpenAiApiService', () => {
 
     it('returns a promise with the image edit response', async () => {
       const result = await openAIApiService.editImage(validEditImageParms());
-      expect(result).to.include(mockImagesResponse.data[0]);
+      expect(result).to.include(mockImagesResponse.data?.[0]);
     });
   });
 });
