@@ -281,13 +281,12 @@ const CreateStep = ({
   });
   const [isNameValid, setIsNameValid] = useState(true);
 
-  const localesList = selectedLocales ? selectedLocales : [undefined];
   const localizedFieldsIds = Array.from(selectedFields).flatMap((fieldId) => {
     const isLocalized = entry.fields.find((f) => f.id === fieldId)?.localized || false;
-    if (!isLocalized) {
-      return [localizeFieldId(fieldId, undefined)];
+    if (!isLocalized || !selectedLocales) {
+      return [localizeFieldId(fieldId)];
     }
-    return localesList.map((locale) => localizeFieldId(fieldId, locale));
+    return selectedLocales.map((locale) => localizeFieldId(fieldId, locale));
   });
 
   // Effects
@@ -298,11 +297,11 @@ const CreateStep = ({
     };
     selectedFields.forEach((fieldId) => {
       const isLocalized = entry.fields.find((f) => f.id === fieldId)?.localized || false;
-      if (!isLocalized) {
+      if (!isLocalized || !selectedLocales) {
         initialStates.names[fieldId] = getDefaultContentBlockName(entry, fieldId);
         initialStates.descriptions[fieldId] = '';
       } else {
-        localesList.forEach((locale) => {
+        selectedFields.forEach((locale) => {
           const localizedFieldId = localizeFieldId(fieldId, locale);
           initialStates.names[localizedFieldId] = getDefaultContentBlockName(
             entry,
@@ -382,9 +381,30 @@ const CreateStep = ({
         <Stack spacing="spacingM" flexDirection="column">
           {Array.from(selectedFields).flatMap((fieldId) => {
             const isLocalized = entry.fields.find((f) => f.id === fieldId)?.localized || false;
-            const fieldLocales = isLocalized ? localesList : [undefined];
+            if (!isLocalized || !selectedLocales) {
+              return [
+                <ContentBlockCard
+                  key={fieldId}
+                  fieldId={fieldId}
+                  entry={entry}
+                  contentBlocksData={contentBlocksData}
+                  isEditing={editingField === fieldId}
+                  editDraft={editDraft}
+                  onEdit={handleEdit}
+                  onNameChange={handleNameChange}
+                  onDescriptionChange={handleDescriptionChange}
+                  onCancel={handleCancel}
+                  onSave={handleSave}
+                  isNameValid={isNameValid}
+                  isCreated={creationResultFields.some(
+                    (result) => result.success && fieldId === result.fieldId
+                  )}
+                  error={creationResultFields.find((result) => fieldId === result.fieldId)?.message}
+                />,
+              ];
+            }
 
-            return fieldLocales.map((locale) => {
+            return selectedLocales.map((locale) => {
               const localizedFieldId = localizeFieldId(fieldId, locale);
               return (
                 <ContentBlockCard
