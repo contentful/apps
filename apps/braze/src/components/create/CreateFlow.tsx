@@ -83,14 +83,18 @@ const CreateFlow = (props: CreateFlowProps) => {
 
   const getFieldsToCreate = (data: ContentBlockData) => {
     const fieldsToCreate = [];
+    const contentBlockAlreadyCreated = (fieldId: string, locale?: string) => {
+      return creationResultFields.some(
+        (result) =>
+          result.success && result.fieldId === fieldId && (locale ? result.locale === locale : true)
+      );
+    };
+
     for (const fieldId of Array.from(selectedFields)) {
       const fieldIsLocalized = entry.fields.find((f) => f.id === fieldId)?.localized;
       if (shouldChooseLocales(selectedFields) && fieldIsLocalized) {
         for (const locale of selectedLocales) {
-          const contentBlockAlreadyCreated = creationResultFields.some(
-            (result) => result.success && result.fieldId === fieldId && result.locale === locale
-          );
-          if (contentBlockAlreadyCreated) {
+          if (contentBlockAlreadyCreated(fieldId, locale)) {
             continue;
           }
 
@@ -103,10 +107,7 @@ const CreateFlow = (props: CreateFlowProps) => {
           });
         }
       } else {
-        const contentBlockAlreadyCreated = creationResultFields.some(
-          (result) => result.success && result.fieldId === fieldId
-        );
-        if (contentBlockAlreadyCreated) {
+        if (contentBlockAlreadyCreated(fieldId)) {
           continue;
         }
         fieldsToCreate.push({
