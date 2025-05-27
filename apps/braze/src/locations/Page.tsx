@@ -19,9 +19,15 @@ import { fetchBrazeConnectedEntries } from '../utils/fetchBrazeConnectedEntries'
 import InformationWithLink from '../components/InformationWithLink';
 import { styles } from './Page.styles';
 import Splitter from '../components/Splitter';
-import { createClient } from 'contentful-management';
+import { createClient, EntryProps, PlainClientAPI } from 'contentful-management';
 import { Entry } from '../fields/Entry';
-import { BRAZE_CONTENT_BLOCK_DOCUMENTATION } from '../utils';
+import {
+  BRAZE_CONTENT_BLOCK_DOCUMENTATION,
+  CONFIG_FIELD_ID,
+  ConnectedFields,
+  getConfigEntry,
+  updateConfig,
+} from '../utils';
 import { Field } from '../fields/Field';
 
 const getStatusBadge = (status: string) => {
@@ -87,12 +93,14 @@ function ConnectedFieldsModal({
   onClose,
   onViewEntry,
   onDisconnect,
+  cma,
 }: {
   entry: Entry;
   isShown: boolean;
   onClose: () => void;
   onViewEntry: () => void;
   onDisconnect: (selectedFieldIds: string[]) => void;
+  cma: PlainClientAPI;
 }) {
   const [selectedFields, setSelectedFields] = useState<Set<string>>(() => new Set());
   const allFieldIds = entry.fields.map((f) => f.uniqueId());
@@ -119,8 +127,26 @@ function ConnectedFieldsModal({
     });
   };
 
-  const handleDisconnect = () => {
+  const handleDisconnect = async () => {
+    const configEntry: EntryProps = await getConfigEntry(cma);
+
+    const configField = configEntry.fields[CONFIG_FIELD_ID];
+    const connectedFields = Object.values(configField)[0] as ConnectedFields;
+    const entryConnectedFields = connectedFields[entry.id];
+
+    const isNotField = (field: { fieldId: any; locale?: string; contentBlockId?: string }) =>
+      !selectedFields.has(field.fieldId);
+
+    if (entryConnectedFields.length === 1) {
+      // If this is the last connected field, we remove the entire entry from connectedFields
+      delete connectedFields[entry.id];
+    } else if (entryConnectedFields.length > 1) {
+      connectedFields[entry.id] = [...entryConnectedFields.filter((field) => isNotField(field))];
+    }
+
+    await updateConfig(configEntry, connectedFields, cma);
     onDisconnect(Array.from(selectedFields));
+    setSelectedFields(new Set());
   };
 
   return (
@@ -287,7 +313,7 @@ const Page = () => {
     }
   );
 
-  useEffect(() => {
+  const loadEntries = () => {
     setLoading(true);
     fetchBrazeConnectedEntries(
       cma,
@@ -305,6 +331,10 @@ const Page = () => {
       .finally(() => {
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    loadEntries();
   }, []);
 
   const hasConnectedEntries = () => {
@@ -331,6 +361,7 @@ const Page = () => {
     //TODO: Add logic to disconnect fields from Braze
     setModalOpen(false);
     setShowSuccess(true);
+    loadEntries();
   };
 
   const handleCloseSuccess = () => {
@@ -382,6 +413,7 @@ const Page = () => {
                 isShown={modalOpen}
                 onClose={handleCloseModal}
                 onViewEntry={handleViewEntry}
+                cma={cma}
                 onDisconnect={handleDisconnectFields}
               />
             )}
