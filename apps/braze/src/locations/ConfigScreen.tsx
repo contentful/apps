@@ -253,7 +253,6 @@ async function addAppToSidebar(sdk: ConfigAppSDK, cma: PlainClientAPI, contentTy
         }
       );
     } catch (e) {
-      console.error(`Failed to add app to sidebar for content type ${contentTypeId}:`, e);
       sdk.notifier.error(`Failed to add app to sidebar for content type ${contentTypeId}`);
     }
   }
