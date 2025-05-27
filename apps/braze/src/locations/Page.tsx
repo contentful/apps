@@ -28,7 +28,7 @@ const getStatusBadge = (status: string) => {
   return <Badge variant="warning">Draft</Badge>;
 };
 
-const getUpdatedLabel = (dateString: string | undefined) => {
+const getLastUpdatedTime = (dateString: string | undefined) => {
   if (!dateString) {
     return '-';
   }
@@ -101,7 +101,7 @@ function ConnectedEntriesTable({ entries }: { entries: Entry[] }) {
           {entries.map((entry) => {
             const name = entry.title;
             const contentType = entry.contentType;
-            const updated = getUpdatedLabel(entry.updatedAt);
+            const updated = getLastUpdatedTime(entry.updatedAt);
             const status = entry.state;
             const connectedCount = getConnectedFieldsCount(entry.fields);
             return (
