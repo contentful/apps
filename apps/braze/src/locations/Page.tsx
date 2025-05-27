@@ -153,8 +153,8 @@ const Page = () => {
       cma,
       sdk.parameters?.installation?.contentfulApiKey,
       sdk.ids.space,
-      sdk.ids.environment || 'master',
-      sdk.locales.default || 'en-US'
+      sdk.ids.environment,
+      sdk.locales.default
     )
       .then((entries) => {
         setEntries(entries);
