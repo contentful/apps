@@ -78,10 +78,10 @@ type CreateStepProps = {
 
 // Utils
 export const getDefaultContentBlockName = (entry: Entry, fieldId: string, locale?: string) => {
-  const entryTitle = entry.title || 'Untitled';
+  let entryTitle = entry.title || 'Untitled';
   fieldId = localizeFieldId(fieldId, locale);
-  // TODO: remove other special characters
-  return `${entryTitle.replace(/\s+/g, '-')}-${fieldId}`;
+  entryTitle = entryTitle.replace(/\s+/g, '-').replace(/[^A-Za-z0-9_-]/g, '');
+  return `${entryTitle}-${fieldId}`;
 };
 
 const isValidContentBlockName = (name: string): boolean => {
