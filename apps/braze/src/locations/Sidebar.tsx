@@ -21,6 +21,7 @@ import {
   GENERATE_DIALOG_MODE,
   GENERATE_DIALOG_TITLE,
   getConfigEntry,
+  localizeFieldId,
   SIDEBAR_CONNECTED_ENTRIES_BUTTON_TEXT,
   SIDEBAR_CREATE_BUTTON_TEXT,
   SIDEBAR_GENERATE_BUTTON_TEXT,
@@ -165,7 +166,7 @@ const Sidebar = () => {
                 className={styles.stack}>
                 {entryConnectedFields.map((fieldMapping, index) => (
                   <Text key={`${currentEntryId}-${index}`} className={styles.listItem}>
-                    {fieldMapping.fieldId}
+                    {localizeFieldId(fieldMapping.fieldId, fieldMapping.locale)}
                   </Text>
                 ))}
               </Stack>

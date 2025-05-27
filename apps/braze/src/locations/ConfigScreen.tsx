@@ -10,6 +10,10 @@ import {
   Subheading,
   Select,
   Note,
+  Stack,
+  Autocomplete,
+  Paragraph,
+  Pill,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
@@ -22,14 +26,13 @@ import {
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
   BRAZE_ENDPOINTS,
   BRAZE_ENDPOINTS_DOCUMENTATION,
-  BrazeEndpoint,
   CONFIG_CONTENT_TYPE_ID,
   CONFIG_ENTRY_ID,
   CONFIG_FIELD_ID,
   CONTENT_TYPE_DOCUMENTATION,
 } from '../utils';
 import InformationWithLink from '../components/InformationWithLink';
-import { createClient, PlainClientAPI } from 'contentful-management';
+import { ContentTypeProps, createClient, PlainClientAPI } from 'contentful-management';
 
 export async function callTo(url: string, newApiKey: string) {
   return await fetch(url, {
@@ -50,6 +53,9 @@ const ConfigScreen = () => {
     brazeApiKey: '',
     brazeEndpoint: '',
   });
+  const [selectedContentTypes, setSelectedContentTypes] = useState<{ id: string; name: string }[]>(
+    []
+  );
   const sdk = useSDK<ConfigAppSDK>();
   const spaceId = sdk.ids.space;
 
@@ -99,18 +105,37 @@ const ConfigScreen = () => {
     }
 
     try {
-      await createContentType(cma);
+      await createContentType(sdk, cma);
     } catch (e) {
       console.error(e);
       sdk.notifier.error('Error creating content type for configuration');
       return false;
     }
+    await addAppToSidebar(
+      sdk,
+      cma,
+      selectedContentTypes.map((contentType) => contentType.id)
+    );
 
-    return {
+    const response: { parameters: AppInstallationParameters; targetState?: any } = {
       parameters,
-      targetState: currentState,
     };
-  }, [parameters, sdk]);
+
+    const editorInterface = selectedContentTypes.reduce((acc, contentType) => {
+      return {
+        ...acc,
+        [contentType.id]: {
+          sidebar: { position: 0 },
+        },
+      };
+    }, {});
+
+    if (Object.keys(editorInterface).length !== 0) {
+      response.targetState = { ...currentState, EditorInterface: editorInterface };
+    }
+
+    return response;
+  }, [parameters, sdk, cma, selectedContentTypes]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -145,7 +170,12 @@ const ConfigScreen = () => {
           </Note>
         </Box>
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
-        <ContentTypeSection />
+        <ContentTypeSection
+          selectedContentTypes={selectedContentTypes}
+          setSelectedContentTypes={setSelectedContentTypes}
+          cma={cma}
+          sdk={sdk}
+        />
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
         <ConnectedContentSection
           spaceId={spaceId}
@@ -165,7 +195,7 @@ const ConfigScreen = () => {
   );
 };
 
-async function createContentType(cma: PlainClientAPI) {
+async function createContentType(sdk: ConfigAppSDK, cma: PlainClientAPI) {
   try {
     await cma.contentType.get({
       contentTypeId: CONFIG_CONTENT_TYPE_ID,
@@ -195,6 +225,32 @@ async function createContentType(cma: PlainClientAPI) {
     { contentTypeId: CONFIG_CONTENT_TYPE_ID, entryId: CONFIG_ENTRY_ID },
     { fields: {} }
   );
+}
+
+async function addAppToSidebar(sdk: ConfigAppSDK, cma: PlainClientAPI, contentTypesId: string[]) {
+  for (const contentTypeId of contentTypesId) {
+    try {
+      const editorInterface = await cma.editorInterface.get({ contentTypeId });
+      const updatedSidebar = [
+        ...(editorInterface.sidebar || []),
+        {
+          widgetId: sdk.ids.app,
+          widgetNamespace: 'app',
+          settings: { position: 0 },
+        },
+      ];
+
+      await cma.editorInterface.update(
+        { contentTypeId },
+        {
+          ...editorInterface,
+          sidebar: updatedSidebar,
+        }
+      );
+    } catch (e) {
+      sdk.notifier.error(`Failed to add app to sidebar for content type ${contentTypeId}`);
+    }
+  }
 }
 
 function ConnectedContentSection(props: {
@@ -234,7 +290,79 @@ function ConnectedContentSection(props: {
   );
 }
 
-function ContentTypeSection() {
+function ContentTypeSection(props: {
+  selectedContentTypes: { id: string; name: string }[];
+  setSelectedContentTypes: (contentTypes: { id: string; name: string }[]) => void;
+  cma: PlainClientAPI;
+  sdk: ConfigAppSDK;
+}) {
+  const [availableContentTypes, setAvailableContentTypes] = useState<
+    { id: string; name: string }[]
+  >([]);
+  const [filteredContentTypes, setFilteredContentTypes] = useState<{ id: string; name: string }[]>(
+    []
+  );
+
+  const fetchAllContentTypes = async (): Promise<ContentTypeProps[]> => {
+    let allContentTypes: ContentTypeProps[] = [];
+    let skip = 0;
+    const limit = 1000;
+    let areMoreContentTypes = true;
+
+    while (areMoreContentTypes) {
+      const response = await props.cma.contentType.getMany({
+        spaceId: props.sdk.ids.space,
+        environmentId: props.sdk.ids.environment,
+        query: { skip, limit },
+      });
+      if (response.items) {
+        allContentTypes = allContentTypes.concat(response.items as ContentTypeProps[]);
+        areMoreContentTypes = response.items.length === limit;
+      } else {
+        areMoreContentTypes = false;
+      }
+      skip += limit;
+    }
+
+    return allContentTypes;
+  };
+
+  useEffect(() => {
+    (async () => {
+      const contentTypes = await fetchAllContentTypes();
+      const newAvailableContentTypes = contentTypes.map((ct) => ({
+        id: ct.sys.id,
+        name: ct.name,
+      }));
+      setAvailableContentTypes(newAvailableContentTypes);
+      setFilteredContentTypes(
+        newAvailableContentTypes.sort((a, b) => a.name.localeCompare(b.name))
+      );
+    })();
+  }, []);
+
+  const handleInputValueChange = (value: string) => {
+    setFilteredContentTypes(
+      availableContentTypes.filter((contentType) =>
+        contentType.name.toLowerCase().includes(value.toLowerCase())
+      )
+    );
+  };
+
+  const handleSelectItem = (item: { id: string; name: string }) => {
+    props.setSelectedContentTypes([...props.selectedContentTypes, item]);
+    setFilteredContentTypes(filteredContentTypes.filter(({ id, name }) => id !== item.id));
+  };
+
+  const handleUnselectItem = (item: { id: string; name: string }) => {
+    props.setSelectedContentTypes(
+      props.selectedContentTypes.filter((contentType) => contentType.id !== item.id)
+    );
+    setFilteredContentTypes(
+      [...filteredContentTypes, item].sort((a, b) => a.name.localeCompare(b.name))
+    );
+  };
+
   return (
     <>
       <Heading marginBottom="spacing2Xs">Add Braze to your content types</Heading>
@@ -243,10 +371,39 @@ function ContentTypeSection() {
         linkText="here"
         marginTop="spacing2Xs"
         dataTestId="content-type-docs-here">
-        Navigate to the content type you would like to use under the Content model tab in the main
-        navigation. Select the content type and adjust the sidebar settings on the Sidebar tab.
-        Learn more about configuring your content type
+        Select the content type(s) you would like to use with Braze. You can update this by
+        adjusting the settings in the content type menu under the Sidebar tab. Learn more about
+        configuring your content type
       </InformationWithLink>
+      <Stack flexDirection="column" alignItems="start">
+        <Autocomplete<{ id: string; name: string }>
+          items={filteredContentTypes}
+          onInputValueChange={handleInputValueChange}
+          onSelectItem={handleSelectItem}
+          itemToString={(item) => item.name}
+          renderItem={(item) => <Text fontWeight="fontWeightDemiBold">{item.name}</Text>}
+          textOnAfterSelect="clear"
+          closeAfterSelect={false}
+          listWidth="full"
+        />
+
+        {props.selectedContentTypes.length > 0 && (
+          <>
+            <Paragraph>Selected content types:</Paragraph>
+            <Flex flexDirection="row" gap="spacing2Xs">
+              {props.selectedContentTypes.map((contentType, index) => (
+                <Pill
+                  key={index}
+                  label={contentType.name}
+                  isDraggable={false}
+                  onClose={() => handleUnselectItem(contentType)}
+                  data-testid={`pill-${contentType.id}`}
+                />
+              ))}
+            </Flex>
+          </>
+        )}
+      </Stack>
     </>
   );
 }

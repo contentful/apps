@@ -19,7 +19,13 @@ describe('fetchBrazeConnectedEntries', () => {
         total: 1,
         skip: 0,
         limit: 1000,
-        items: [createEntryResponse({ title: 'Title', author: 'Author' }, true, true)],
+        items: [
+          createEntryResponse(
+            { title: { 'en-US': 'Title' }, author: { 'en-US': 'Author' } },
+            true,
+            true
+          ),
+        ],
       }),
       get: vi.fn(),
     },

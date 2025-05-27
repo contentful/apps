@@ -213,7 +213,6 @@ describe('updateContentBlocks', () => {
       ],
     });
 
-    // Mock fetch to fail twice then succeed
     vi.mocked(global.fetch)
       .mockRejectedValueOnce(new Error('Network error'))
       .mockResolvedValueOnce(new Response(JSON.stringify({ success: true }), { status: 200 }));
@@ -221,5 +220,88 @@ describe('updateContentBlocks', () => {
     await handler(event as any, mockContext as any);
 
     expect(global.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('should update content block for each locale on entry save', async () => {
+    const event = {
+      headers: {
+        'X-Contentful-Topic': ['Entry.save'],
+      },
+      body: {
+        sys: {
+          id: 'test-entry-id',
+          contentType: {
+            sys: {
+              id: 'test-content-type',
+            },
+          },
+        },
+        fields: {
+          localizedField: {
+            'en-US': 'English value',
+            'es-ES': 'Spanish value',
+          },
+        },
+      },
+    };
+
+    const mockConfigEntry = {
+      fields: {
+        connectedFields: {
+          'en-US': {
+            'test-entry-id': [
+              {
+                fieldId: 'localizedField',
+                locale: 'en-US',
+                contentBlockId: 'block-id-en',
+              },
+              {
+                fieldId: 'localizedField',
+                locale: 'es-ES',
+                contentBlockId: 'block-id-es',
+              },
+            ],
+          },
+        },
+      },
+    };
+
+    vi.mocked(getConfigEntry).mockResolvedValue(mockConfigEntry as any);
+    mockCma.contentType.get.mockResolvedValue({
+      fields: [
+        {
+          id: 'localizedField',
+          type: 'Text',
+        },
+      ],
+    });
+
+    vi.mocked(global.fetch).mockResolvedValue(
+      new Response(JSON.stringify({ success: true }), { status: 200 })
+    );
+
+    await handler(event as any, mockContext as any);
+
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      1,
+      'https://test.braze.com/content_blocks/update',
+      expect.objectContaining({
+        body: JSON.stringify({
+          content_block_id: 'block-id-en',
+          content: 'English value',
+        }),
+      })
+    );
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      2,
+      'https://test.braze.com/content_blocks/update',
+      expect.objectContaining({
+        body: JSON.stringify({
+          content_block_id: 'block-id-es',
+          content: 'Spanish value',
+        }),
+      })
+    );
   });
 });

@@ -37,8 +37,6 @@ export function createEntryResponse(
         sys: { type: 'Link', linkType: 'ContentType', id: 'content-type-id' },
       },
     },
-    fields: Object.fromEntries(
-      Object.entries(fields).map(([key, value]) => [key, { 'en-US': value }])
-    ),
+    fields: Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, value])),
   };
 }
