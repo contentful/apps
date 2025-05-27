@@ -16,7 +16,7 @@ import {
 } from '../src/utils';
 import { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
-import { initContentfulManagementClient } from './common';
+import { getConfigAndConnectedFields, initContentfulManagementClient } from './common';
 
 const WAIT_TIMES = [0, 5000, 10000];
 
@@ -34,15 +34,15 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = a
   const body = event.body as any;
   const entryId = body.sys.id;
 
-  const configEntry: EntryProps<KeyValueMap> = await getConfigEntry(cma);
-  const configField = configEntry.fields[CONFIG_FIELD_ID];
-  if (!configField) {
-    console.error(`Configuration field ${CONFIG_FIELD_ID} not found`);
-    return;
-  }
-  const connectedFields = Object.values(configField)[0] as ConnectedFields;
-  const entryConnectedFields = connectedFields[entryId];
-  if (!entryConnectedFields) {
+  let configEntry: EntryProps<KeyValueMap>;
+  let connectedFields: ConnectedFields;
+  let entryConnectedFields: EntryConnectedFields;
+  try {
+    ({ configEntry, connectedFields, entryConnectedFields } = await getConfigAndConnectedFields(
+      cma,
+      entryId
+    ));
+  } catch (error) {
     return;
   }
 
