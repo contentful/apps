@@ -8,7 +8,9 @@ import {
 
 import type { PlainClientAPI } from 'contentful-management';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
-import { createContentType, createEntry, mockFetchSuccess } from '../mocks/mocksForFunctions';
+import { mockFetchSuccess } from '../mocks/mocksForFunctions';
+import { createEntryResponse } from '../mocks/entryResponse';
+import { createContentTypeResponse } from '../mocks/contentTypeResponse';
 
 const mockCma = {
   entry: {
@@ -49,11 +51,11 @@ describe('createContentBlocks', () => {
 
   it('should create content blocks for text fields', async () => {
     // Mock entry data
-    const mockEntry = createEntry({
+    const mockEntry = createEntryResponse({
       title: { 'en-US': 'Test Title' },
       author: { 'en-US': 'Test Author' },
     });
-    const mockContentType = createContentType(['title', 'author']);
+    const mockContentType = createContentTypeResponse(['title', 'author']);
 
     // Mock API responses
     vi.mocked(mockCma.entry.get).mockResolvedValue(mockEntry);
@@ -136,8 +138,10 @@ describe('createContentBlocks', () => {
 
   it('should convert rich text fields to HTML', async () => {
     // Mock Entry data
-    const entry = createEntry({ content: { 'en-US': { nodeType: 'document', content: [] } } });
-    const contentType = createContentType(['content'], 'RichText');
+    const entry = createEntryResponse({
+      content: { 'en-US': { nodeType: 'document', content: [] } },
+    });
+    const contentType = createContentTypeResponse(['content'], 'RichText');
 
     // Mock API responses
     vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
@@ -189,8 +193,8 @@ describe('createContentBlocks', () => {
 
   it('should handle missing fields', async () => {
     // Mock Entry data
-    const entry = createEntry({});
-    const contentType = createContentType(['title', 'author']);
+    const entry = createEntryResponse({});
+    const contentType = createContentTypeResponse(['title', 'author']);
 
     // Mock API responses
     vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
@@ -240,11 +244,11 @@ describe('createContentBlocks', () => {
 
   it('should handle API errors', async () => {
     // Mock Entry data
-    const entry = createEntry({
+    const entry = createEntryResponse({
       title: { 'en-US': 'Test Title' },
       author: { 'en-US': 'Test Author' },
     });
-    const contentType = createContentType(['title', 'author']);
+    const contentType = createContentTypeResponse(['title', 'author']);
 
     // Mock API responses
     vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
@@ -300,11 +304,11 @@ describe('createContentBlocks', () => {
 
   it('should handle multiple fields with custom names', async () => {
     // Mock Entry data
-    const entry = createEntry({
+    const entry = createEntryResponse({
       title: { 'en-US': 'Test Title' },
       author: { 'en-US': 'Test Author' },
     });
-    const contentType = createContentType(['title', 'author']);
+    const contentType = createContentTypeResponse(['title', 'author']);
 
     // Mock API responses
     vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
@@ -387,11 +391,11 @@ describe('createContentBlocks', () => {
 
   it('should handle invalid fieldsData JSON', async () => {
     // Mock Entry data
-    const entry = createEntry({
+    const entry = createEntryResponse({
       title: { 'en-US': 'Test Title' },
       author: { 'en-US': 'Test Author' },
     });
-    const contentType = createContentType(['title', 'author']);
+    const contentType = createContentTypeResponse(['title', 'author']);
 
     // Mock API responses
     vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
@@ -412,11 +416,11 @@ describe('createContentBlocks', () => {
 
   it('should handle missing contentBlockNames for a field', async () => {
     // Mock Entry data
-    const entry = createEntry({
+    const entry = createEntryResponse({
       title: { 'en-US': 'Test Title' },
       author: { 'en-US': 'Test Author' },
     });
-    const contentType = createContentType(['title', 'author']);
+    const contentType = createContentTypeResponse(['title', 'author']);
 
     // Mock API responses
     vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
@@ -470,13 +474,13 @@ describe('createContentBlocks', () => {
   });
 
   it('should create content blocks for localized fields', async () => {
-    const mockEntry = createEntry({
+    const mockEntry = createEntryResponse({
       title: {
         'en-US': 'English Title',
         'es-ES': 'Spanish Title',
       },
     });
-    const mockContentType = createContentType(['title']);
+    const mockContentType = createContentTypeResponse(['title']);
 
     vi.mocked(mockCma.entry.get).mockResolvedValue(mockEntry);
     vi.mocked(mockCma.contentType.get).mockResolvedValue(mockContentType);

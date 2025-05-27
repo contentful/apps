@@ -35,6 +35,22 @@ export class FieldsFactory {
     return resolveResponse(response)[0];
   }
 
+  public async createFieldsForConnectedEntry(
+    connectedFieldsIds: string[]
+  ): Promise<{ title: string; fields: Field[] }> {
+    // Connected entries do not have referece fields, so we can skip the nested depth check
+    const contentType = await this.getContentType(this.entryContentTypeId);
+
+    const fields = [];
+    for (const field of contentType.fields) {
+      // We also need to filter the fields that are connected to the entry
+      if (connectedFieldsIds.includes(field.id)) {
+        fields.push(this.createSimpleField(field, contentType));
+      }
+    }
+    return { title: contentType.displayField, fields };
+  }
+
   public async createFieldsForEntry(
     entryFields: any,
     contentType?: ContentTypeProps,

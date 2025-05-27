@@ -10,6 +10,7 @@ export class Entry {
   private spaceId: string;
   private environment: string;
   private contentfulToken: string;
+  public updatedAt: string | undefined;
   public state: EntryStatus;
   constructor(
     id: string,
@@ -29,6 +30,7 @@ export class Entry {
     this.spaceId = spaceId;
     this.environment = environment;
     this.contentfulToken = contentfulToken;
+    this.updatedAt = updatedAt;
     this.state = this.getEntryState(publishedAt, updatedAt);
   }
 
@@ -41,6 +43,7 @@ export class Entry {
       serializedEntry['spaceId'],
       serializedEntry['environment'],
       serializedEntry['contentfulToken'],
+      serializedEntry['updatedAt'],
       serializedEntry['state']
     );
   }
@@ -54,6 +57,7 @@ export class Entry {
       spaceId: this.spaceId,
       environment: this.environment,
       contentfulToken: this.contentfulToken,
+      updatedAt: this.updatedAt,
       state: this.state,
     };
   }
