@@ -158,10 +158,11 @@ const Page = () => {
     )
       .then((entries) => {
         setEntries(entries);
-        setLoading(false);
       })
       .catch((e) => {
         setError('Error loading connected entries');
+      })
+      .finally(() => {
         setLoading(false);
       });
   }, []);
