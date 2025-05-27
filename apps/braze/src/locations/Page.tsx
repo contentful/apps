@@ -9,6 +9,8 @@ import {
   Flex,
   Heading,
   Subheading,
+  Modal,
+  Checkbox,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { PageAppSDK } from '@contentful/app-sdk';
@@ -78,7 +80,128 @@ function DisplayMessage({ title, message }: MessageProps) {
   );
 }
 
-function ConnectedEntriesTable({ entries }: { entries: Entry[] }) {
+function ConnectedFieldsModal({
+  entry,
+  isShown,
+  onClose,
+  onViewEntry,
+}: {
+  entry: Entry;
+  isShown: boolean;
+  onClose: () => void;
+  onViewEntry: () => void;
+}) {
+  const [selectedFields, setSelectedFields] = useState<Set<string>>(() => new Set());
+  const allFieldIds = entry.fields.map((f) => f.uniqueId());
+  const allSelected = allFieldIds.every((id) => selectedFields.has(id));
+  const someSelected = allFieldIds.some((id) => selectedFields.has(id));
+
+  const handleSelectAll = () => {
+    if (allSelected) {
+      setSelectedFields(new Set());
+    } else {
+      setSelectedFields(new Set(allFieldIds));
+    }
+  };
+
+  const handleFieldToggle = (id: string) => {
+    setSelectedFields((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  return (
+    <Modal isShown={isShown} onClose={onClose} size="medium" testId="connected-fields-modal">
+      {() => (
+        <>
+          <Modal.Header title="Connected fields" onClose={onClose} />
+          <Modal.Content>
+            <Box className={styles.modalMainContainer}>
+              <Box className={styles.modalEntryContainer}>
+                <Flex flexDirection="column">
+                  <Text fontColor="gray600" marginBottom="spacing2Xs">
+                    Entry name
+                  </Text>
+                  <Text data-testid="modal-entry-title" fontWeight="fontWeightDemiBold">
+                    {entry.title}
+                  </Text>
+                </Flex>
+                <Flex flexDirection="column">
+                  <Text fontColor="gray600" marginBottom="spacing2Xs">
+                    Connected fields
+                  </Text>
+                  <Text data-testid="modal-fields-length" fontWeight="fontWeightDemiBold">
+                    {entry.fields.length}
+                  </Text>
+                </Flex>
+                <Button
+                  variant="secondary"
+                  size="small"
+                  onClick={onViewEntry}
+                  className={styles.viewEntryButton}>
+                  View entry
+                </Button>
+              </Box>
+              <Table className={styles.modalConnectedFieldsContainer}>
+                <Table.Head>
+                  <Table.Row>
+                    <Table.Cell className={styles.checkboxCell}>
+                      <Checkbox
+                        isChecked={allSelected}
+                        isIndeterminate={!allSelected && someSelected}
+                        onChange={handleSelectAll}
+                        data-testid="select-all-fields"
+                        aria-label="Select all fields"
+                      />
+                    </Table.Cell>
+                    <Table.Cell className={styles.baseCell}>
+                      <Text>Field name</Text>
+                    </Table.Cell>
+                  </Table.Row>
+                </Table.Head>
+                <Table.Body>
+                  {entry.fields.map((field) => (
+                    <Table.Row key={field.uniqueId()}>
+                      <Table.Cell className={styles.checkboxCell}>
+                        <Checkbox
+                          isChecked={selectedFields.has(field.uniqueId())}
+                          onChange={() => handleFieldToggle(field.uniqueId())}
+                          aria-label={field.displayNameForCreate()}
+                        />
+                      </Table.Cell>
+                      <Table.Cell className={styles.boldCell}>
+                        {field.id.charAt(0).toUpperCase() + field.id.slice(1)}
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table>
+            </Box>
+          </Modal.Content>
+          <Modal.Controls>
+            <Button variant="secondary" size="small" onClick={onClose}>
+              Close
+            </Button>
+          </Modal.Controls>
+        </>
+      )}
+    </Modal>
+  );
+}
+
+function ConnectedEntriesTable({
+  entries,
+  onViewFields,
+}: {
+  entries: Entry[];
+  onViewFields: (entry: Entry) => void;
+}) {
   return (
     <Box marginTop="spacingXl">
       <Flex justifyContent="end" alignItems="center" marginBottom="spacingXs">
@@ -112,12 +235,7 @@ function ConnectedEntriesTable({ entries }: { entries: Entry[] }) {
                 <Table.Cell>{getStatusBadge(status)}</Table.Cell>
                 <Table.Cell>{connectedCount}</Table.Cell>
                 <Table.Cell align="center" className={styles.buttonCell}>
-                  <Button
-                    variant="secondary"
-                    size="small"
-                    onClick={() => {
-                      // Todo : implement
-                    }}>
+                  <Button variant="secondary" size="small" onClick={() => onViewFields(entry)}>
                     View fields
                   </Button>
                 </Table.Cell>
@@ -135,6 +253,8 @@ const Page = () => {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [modalEntry, setModalEntry] = useState<Entry | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const cma = createClient(
     { apiAdapter: sdk.cmaAdapter },
@@ -159,7 +279,7 @@ const Page = () => {
       .then((entries) => {
         setEntries(entries);
       })
-      .catch((e) => {
+      .catch(() => {
         setError('Error loading connected entries');
       })
       .finally(() => {
@@ -169,6 +289,22 @@ const Page = () => {
 
   const hasConnectedEntries = () => {
     return entries.length > 0;
+  };
+
+  const handleViewFields = (entry: Entry) => {
+    setModalEntry(entry);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setModalEntry(null);
+  };
+
+  const handleViewEntry = () => {
+    if (modalEntry) {
+      sdk.navigator.openEntry(modalEntry.id);
+    }
   };
 
   return (
@@ -208,7 +344,15 @@ const Page = () => {
                 message="Once you have created Content Blocks, they will display here."
               />
             ) : (
-              <ConnectedEntriesTable entries={entries} />
+              <ConnectedEntriesTable entries={entries} onViewFields={handleViewFields} />
+            )}
+            {modalEntry && (
+              <ConnectedFieldsModal
+                entry={modalEntry}
+                isShown={modalOpen}
+                onClose={handleCloseModal}
+                onViewEntry={handleViewEntry}
+              />
             )}
           </Box>
         </Box>

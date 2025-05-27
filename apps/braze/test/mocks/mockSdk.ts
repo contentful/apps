@@ -48,6 +48,7 @@ const mockSdk: any = {
     delivery: 'cdn.contentful.com',
   },
   navigator: {
+    openEntry: vi.fn(),
     openCurrentAppPage: vi.fn(),
     openAppConfig: vi.fn(),
   },
