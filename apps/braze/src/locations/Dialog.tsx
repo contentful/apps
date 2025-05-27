@@ -89,7 +89,6 @@ const Dialog = () => {
       sdk={sdk}
       entry={entry}
       invocationParams={invocationParams}
-      locales={sdk.locales.available}
       initialStep={currentStep}
       initialSelectedFields={currentSelectedFields}
       initialSelectedLocales={currentSelectedLocales}

@@ -16,10 +16,12 @@ import {
   CONNECTED_CONTENT_DOCUMENTATION,
   CREATE_DIALOG_MODE,
   CREATE_DIALOG_TITLE,
+  EntryConnectedFields,
   FIELDS_STEP,
   GENERATE_DIALOG_MODE,
   GENERATE_DIALOG_TITLE,
   getConfigEntry,
+  localizeFieldId,
   SIDEBAR_CONNECTED_ENTRIES_BUTTON_TEXT,
   SIDEBAR_CREATE_BUTTON_TEXT,
   SIDEBAR_GENERATE_BUTTON_TEXT,
@@ -28,9 +30,8 @@ import { InvocationParams } from './Dialog';
 import { styles } from './Sidebar.styles';
 import InformationWithLink from '../components/InformationWithLink';
 import Splitter from '../components/Splitter';
-import { createClient, QueryParams } from 'contentful-management';
+import { createClient } from 'contentful-management';
 import { useEffect, useState } from 'react';
-import { EntryConnectedFields } from '../components/create/CreateFlow';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
@@ -165,7 +166,7 @@ const Sidebar = () => {
                 className={styles.stack}>
                 {entryConnectedFields.map((fieldMapping, index) => (
                   <Text key={`${currentEntryId}-${index}`} className={styles.listItem}>
-                    {fieldMapping.fieldId}
+                    {localizeFieldId(fieldMapping.fieldId, fieldMapping.locale)}
                   </Text>
                 ))}
               </Stack>
