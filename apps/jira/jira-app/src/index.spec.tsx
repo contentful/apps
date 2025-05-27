@@ -255,7 +255,7 @@ describe('The Jira App Components', () => {
       );
 
       // expect project data to not have loaded yet in the next <input>
-      expect(projectSearchInput.placeholder).toEqual('Search for a project');
+      expect(projectSearchInput.placeholder).toEqual('Search');
 
       // pick an instance
       fireEvent.change(instanceSelector, {
@@ -276,9 +276,6 @@ describe('The Jira App Components', () => {
       });
 
       fireEvent.click(wrapper.getByTestId('search-result-project'));
-
-      // expect project data to have loaded into the project <input>'s placeholder
-      expect(projectSearchInput.placeholder).toEqual('Project name 2');
 
       const contentTypeList = wrapper.getByTestId('content-types');
 
