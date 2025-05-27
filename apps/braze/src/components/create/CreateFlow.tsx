@@ -81,25 +81,16 @@ const CreateFlow = (props: CreateFlowProps) => {
     }
   );
 
-  const handleCreate = async (data: ContentBlockData) => {
-    if (entry.state !== EntryStatus.Published && step === CREATE_STEP) {
-      setStep(DRAFT_STEP);
-      return;
-    }
-
-    setIsSubmitting(true);
-
+  const getFieldsToCreate = (data: ContentBlockData) => {
     const fieldsToCreate = [];
-
     for (const fieldId of Array.from(selectedFields)) {
       const fieldIsLocalized = entry.fields.find((f) => f.id === fieldId)?.localized;
       if (shouldChooseLocales(selectedFields) && fieldIsLocalized) {
         for (const locale of selectedLocales) {
-          if (
-            creationResultFields.some(
-              (result) => result.success && result.fieldId === fieldId && result.locale === locale
-            )
-          ) {
+          const contentBlockAlreadyCreated = creationResultFields.some(
+            (result) => result.success && result.fieldId === fieldId && result.locale === locale
+          );
+          if (contentBlockAlreadyCreated) {
             continue;
           }
 
@@ -112,7 +103,10 @@ const CreateFlow = (props: CreateFlowProps) => {
           });
         }
       } else {
-        if (creationResultFields.some((result) => result.success && result.fieldId === fieldId)) {
+        const contentBlockAlreadyCreated = creationResultFields.some(
+          (result) => result.success && result.fieldId === fieldId
+        );
+        if (contentBlockAlreadyCreated) {
           continue;
         }
         fieldsToCreate.push({
@@ -122,12 +116,37 @@ const CreateFlow = (props: CreateFlowProps) => {
         });
       }
     }
+    return fieldsToCreate;
+  };
+
+  const updateConnectedFields = async (responseData: { results: CreationResultField[] }) => {
+    const newFields = responseData.results
+      .filter((result: any) => result.success)
+      .map((result: any) => {
+        return {
+          fieldId: result.fieldId,
+          locale: result.locale,
+          contentBlockId: result.contentBlockId,
+        };
+      });
+    const configEntry = await getConfigEntry(cma);
+    const connectedFields = configEntry.fields[CONFIG_FIELD_ID]?.[sdk.locales.default] || {};
+    const entryConnectedFields: EntryConnectedFields = connectedFields[entry.id] || [];
+    connectedFields[entry.id] = [...entryConnectedFields, ...newFields];
+    await updateConfig(configEntry, connectedFields, cma);
+  };
+
+  const handleCreate = async (data: ContentBlockData) => {
+    if (entry.state !== EntryStatus.Published && step === CREATE_STEP) {
+      setStep(DRAFT_STEP);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const fieldsToCreate = getFieldsToCreate(data);
 
     try {
-      const configEntry = await getConfigEntry(cma);
-      const connectedFields = configEntry.fields[CONFIG_FIELD_ID]?.[sdk.locales.default] || {};
-      const entryConnectedFields: EntryConnectedFields = connectedFields[entry.id] || [];
-
       const response = await cma.appActionCall.createWithResponse(
         {
           spaceId: sdk.ids.space,
@@ -144,19 +163,7 @@ const CreateFlow = (props: CreateFlowProps) => {
       );
       const responseData: { results: CreationResultField[] } = JSON.parse(response.response.body);
 
-      const newFields = responseData.results
-        .filter((result: any) => result.success)
-        .map((result: any) => {
-          return {
-            fieldId: result.fieldId,
-            locale: result.locale,
-            contentBlockId: result.contentBlockId,
-          };
-        });
-
-      connectedFields[entry.id] = [...entryConnectedFields, ...newFields];
-
-      await updateConfig(configEntry, connectedFields, cma);
+      await updateConnectedFields(responseData);
 
       const newCreationResultFields: CreationResultField[] = [
         ...creationResultFields.filter(

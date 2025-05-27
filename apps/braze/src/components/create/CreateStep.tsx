@@ -283,10 +283,10 @@ const CreateStep = ({
 
   const localizedFieldsIds = Array.from(selectedFields).flatMap((fieldId) => {
     const isLocalized = entry.fields.find((f) => f.id === fieldId)?.localized || false;
-    if (!isLocalized || !selectedLocales) {
-      return [localizeFieldId(fieldId)];
+    if (isLocalized && !!selectedLocales) {
+      return selectedLocales.map((locale) => localizeFieldId(fieldId, locale));
     }
-    return selectedLocales.map((locale) => localizeFieldId(fieldId, locale));
+    return [localizeFieldId(fieldId)];
   });
 
   // Effects
@@ -297,10 +297,7 @@ const CreateStep = ({
     };
     selectedFields.forEach((fieldId) => {
       const isLocalized = entry.fields.find((f) => f.id === fieldId)?.localized || false;
-      if (!isLocalized || !selectedLocales) {
-        initialStates.names[fieldId] = getDefaultContentBlockName(entry, fieldId);
-        initialStates.descriptions[fieldId] = '';
-      } else {
+      if (isLocalized && !!selectedLocales) {
         selectedFields.forEach((locale) => {
           const localizedFieldId = localizeFieldId(fieldId, locale);
           initialStates.names[localizedFieldId] = getDefaultContentBlockName(
@@ -310,6 +307,9 @@ const CreateStep = ({
           );
           initialStates.descriptions[localizedFieldId] = '';
         });
+      } else {
+        initialStates.names[fieldId] = getDefaultContentBlockName(entry, fieldId);
+        initialStates.descriptions[fieldId] = '';
       }
     });
     setContentBlocksData(initialStates);
@@ -381,60 +381,59 @@ const CreateStep = ({
         <Stack spacing="spacingM" flexDirection="column">
           {Array.from(selectedFields).flatMap((fieldId) => {
             const isLocalized = entry.fields.find((f) => f.id === fieldId)?.localized || false;
-            if (!isLocalized || !selectedLocales) {
-              return [
-                <ContentBlockCard
-                  key={fieldId}
-                  fieldId={fieldId}
-                  entry={entry}
-                  contentBlocksData={contentBlocksData}
-                  isEditing={editingField === fieldId}
-                  editDraft={editDraft}
-                  onEdit={handleEdit}
-                  onNameChange={handleNameChange}
-                  onDescriptionChange={handleDescriptionChange}
-                  onCancel={handleCancel}
-                  onSave={handleSave}
-                  isNameValid={isNameValid}
-                  isCreated={creationResultFields.some(
-                    (result) => result.success && fieldId === result.fieldId
-                  )}
-                  error={creationResultFields.find((result) => fieldId === result.fieldId)?.message}
-                />,
-              ];
-            }
-
-            return selectedLocales.map((locale) => {
-              const localizedFieldId = localizeFieldId(fieldId, locale);
-              return (
-                <ContentBlockCard
-                  key={localizedFieldId}
-                  fieldId={fieldId}
-                  locale={locale}
-                  entry={entry}
-                  contentBlocksData={contentBlocksData}
-                  isEditing={editingField === localizedFieldId}
-                  editDraft={editDraft}
-                  onEdit={handleEdit}
-                  onNameChange={handleNameChange}
-                  onDescriptionChange={handleDescriptionChange}
-                  onCancel={handleCancel}
-                  onSave={handleSave}
-                  isNameValid={isNameValid}
-                  isCreated={creationResultFields.some(
-                    (result) =>
-                      result.success &&
-                      localizedFieldId === localizeFieldId(result.fieldId, result.locale)
-                  )}
-                  error={
-                    creationResultFields.find(
+            if (isLocalized && !!selectedLocales) {
+              return selectedLocales.map((locale) => {
+                const localizedFieldId = localizeFieldId(fieldId, locale);
+                return (
+                  <ContentBlockCard
+                    key={localizedFieldId}
+                    fieldId={fieldId}
+                    locale={locale}
+                    entry={entry}
+                    contentBlocksData={contentBlocksData}
+                    isEditing={editingField === localizedFieldId}
+                    editDraft={editDraft}
+                    onEdit={handleEdit}
+                    onNameChange={handleNameChange}
+                    onDescriptionChange={handleDescriptionChange}
+                    onCancel={handleCancel}
+                    onSave={handleSave}
+                    isNameValid={isNameValid}
+                    isCreated={creationResultFields.some(
                       (result) =>
+                        result.success &&
                         localizedFieldId === localizeFieldId(result.fieldId, result.locale)
-                    )?.message
-                  }
-                />
-              );
-            });
+                    )}
+                    error={
+                      creationResultFields.find(
+                        (result) =>
+                          localizedFieldId === localizeFieldId(result.fieldId, result.locale)
+                      )?.message
+                    }
+                  />
+                );
+              });
+            }
+            return [
+              <ContentBlockCard
+                key={fieldId}
+                fieldId={fieldId}
+                entry={entry}
+                contentBlocksData={contentBlocksData}
+                isEditing={editingField === fieldId}
+                editDraft={editDraft}
+                onEdit={handleEdit}
+                onNameChange={handleNameChange}
+                onDescriptionChange={handleDescriptionChange}
+                onCancel={handleCancel}
+                onSave={handleSave}
+                isNameValid={isNameValid}
+                isCreated={creationResultFields.some(
+                  (result) => result.success && fieldId === result.fieldId
+                )}
+                error={creationResultFields.find((result) => fieldId === result.fieldId)?.message}
+              />,
+            ];
           })}
         </Stack>
       </Box>
