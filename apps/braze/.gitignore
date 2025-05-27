@@ -12,9 +12,6 @@
 .env.*
 !.env*.example
 
-# cursor rules
-/.cursor
-
 # misc
 .DS_Store
 
