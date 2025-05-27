@@ -75,7 +75,7 @@ export interface Captions {
 export interface StaticRendition {
   width?: number;
   type: string;
-  status: 'ready' | 'preparing' | 'error';
+  status: 'ready' | 'preparing' | 'error' | 'skipped';
   resolution_tier?: string;
   resolution: ResolutionType;
   name: string;

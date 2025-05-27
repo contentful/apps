@@ -1,8 +1,8 @@
 import { FC } from 'react';
-import { Box, Table, Button, TextLink, Note, Spinner } from '@contentful/f36-components';
+import { Box, Table, Button, TextLink, Note, Spinner, Tooltip } from '@contentful/f36-components';
 
 interface RenditionInfo {
-  status: 'ready' | 'in_progress' | 'none';
+  status: 'ready' | 'in_progress' | 'none' | 'skipped';
   url?: string;
   id?: string;
 }
@@ -18,6 +18,7 @@ const statusLabel = {
   ready: 'Ready',
   in_progress: 'In progress',
   none: 'Not created',
+  skipped: 'Not available',
 };
 
 const Mp4RenditionsList: FC<Mp4RenditionsListProps> = ({
@@ -66,6 +67,13 @@ const Mp4RenditionsList: FC<Mp4RenditionsListProps> = ({
                     onClick={() => onCreateRendition(rendition.key as 'highest' | 'audio-only')}>
                     Create
                   </Button>
+                )}
+                {rendition.data.status === 'skipped' && (
+                  <Tooltip content="This rendition cannot be created because it conflicts with the asset's content type (e.g., trying to create a video rendition for an audio-only asset)">
+                    <Button size="small" variant="secondary" isDisabled>
+                      Create
+                    </Button>
+                  </Tooltip>
                 )}
                 {rendition.data.status === 'ready' && rendition.data.id && (
                   <Button

@@ -4,7 +4,7 @@ import { Box } from '@contentful/f36-components';
 import { MuxContentfulObject, StaticRendition, ResolutionType } from '../../util/types';
 
 interface RenditionInfo {
-  status: 'ready' | 'in_progress' | 'none';
+  status: 'ready' | 'in_progress' | 'none' | 'skipped';
   url?: string;
   id?: string;
 }
@@ -27,6 +27,7 @@ const mapRendition = (
     if (file.status === 'ready')
       response = { status: 'ready', url: `${baseStaticRenditionURL}/${file.name}`, id: file.id };
     else if (file.status === 'preparing') response = { status: 'in_progress', id: file.id };
+    else if (file.status === 'skipped') response = { status: 'skipped', id: file.id };
     else response = { status: 'none', id: file.id };
   }
   return response;
