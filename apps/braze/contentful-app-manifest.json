@@ -6,8 +6,12 @@
       "description": "Function to create content blocks from App Action.",
       "path": "functions/createContentBlocks.js",
       "entryFile": "functions/createContentBlocks.ts",
-      "allowNetworks": ["https://*.braze.com"],
-      "accepts": ["appaction.call"]
+      "allowNetworks": [
+        "https://*.braze.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
     },
     {
       "id": "appEventHandler",
@@ -15,8 +19,12 @@
       "description": "Function to handle App Events.",
       "path": "functions/appEventHandler.js",
       "entryFile": "functions/appEventHandler.ts",
-      "allowNetworks": ["https://*.braze.com"],
-      "accepts": ["appevent.handler"]
+      "allowNetworks": [
+        "https://*.braze.com"
+      ],
+      "accepts": [
+        "appevent.handler"
+      ]
     }
   ],
   "actions": [
@@ -34,20 +42,8 @@
           "required": true
         },
         {
-          "id": "fieldIds",
-          "name": "Field IDs",
-          "type": "Symbol",
-          "required": true
-        },
-        {
-          "id": "contentBlockNames",
-          "name": "Content Block Names",
-          "type": "Symbol",
-          "required": true
-        },
-        {
-          "id": "contentBlockDescriptions",
-          "name": "Content Block Descriptions",
+          "id": "fieldsData",
+          "name": "Fields data",
           "type": "Symbol",
           "required": true
         }

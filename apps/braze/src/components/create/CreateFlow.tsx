@@ -13,13 +13,16 @@ import {
   FIELDS_STEP,
   getConfigEntry,
   updateConfig,
+  localizeFieldId,
 } from '../../utils';
 import { createClient } from 'contentful-management';
 import DraftStep from './DraftStep';
 import ErrorStep from './ErrorStep';
+import LocalesSelectionStep from '../generate/LocalesSelectionStep';
 
 const CREATE_STEP = 'create';
 const DRAFT_STEP = 'draft';
+const LOCALES_STEP = 'locales';
 const ERROR_STEP = 'error';
 const SUCCESS_STEP = 'success';
 const BRAZE_NAME_EXISTS_ERROR = 'name already exists';
@@ -29,6 +32,7 @@ type CreateFlowProps = {
   entry: Entry;
   invocationParams: InvocationParams;
   initialSelectedFields?: string[];
+  initialSelectedLocales?: string[];
 };
 
 export type ContentBlockData = {
@@ -38,21 +42,33 @@ export type ContentBlockData = {
 
 export type CreationResultField = {
   fieldId: string;
+  locale: string;
   success: boolean;
   statusCode: number;
   message: string;
 };
 
 const CreateFlow = (props: CreateFlowProps) => {
-  const { sdk, entry, initialSelectedFields = [] } = props;
+  const { sdk, entry, initialSelectedFields = [], initialSelectedLocales = [] } = props;
   const [step, setStep] = useState(FIELDS_STEP);
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set(initialSelectedFields));
+  const [selectedLocales, setSelectedLocales] = useState<string[]>(initialSelectedLocales);
   const [creationResultFields, setCreationResultFields] = useState<CreationResultField[]>([]);
   const [contentBlocksData, setContentBlocksData] = useState<ContentBlockData>({
     names: {},
     descriptions: {},
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const locales = sdk.locales.available;
+
+  const shouldChooseLocales = (selectedFields: Set<string>): boolean => {
+    return (
+      locales.length > 1 &&
+      Array.from(selectedFields).some(
+        (fieldId) => entry.fields.find((f) => f.id === fieldId)?.localized
+      )
+    );
+  };
 
   const cma = createClient(
     { apiAdapter: sdk.cmaAdapter },
@@ -65,6 +81,62 @@ const CreateFlow = (props: CreateFlowProps) => {
     }
   );
 
+  const getFieldsToCreate = (data: ContentBlockData) => {
+    const fieldsToCreate = [];
+    const contentBlockAlreadyCreated = (fieldId: string, locale?: string) => {
+      return creationResultFields.some(
+        (result) =>
+          result.success && result.fieldId === fieldId && (locale ? result.locale === locale : true)
+      );
+    };
+
+    for (const fieldId of Array.from(selectedFields)) {
+      const fieldIsLocalized = entry.fields.find((f) => f.id === fieldId)?.localized;
+      if (shouldChooseLocales(selectedFields) && fieldIsLocalized) {
+        for (const locale of selectedLocales) {
+          if (contentBlockAlreadyCreated(fieldId, locale)) {
+            continue;
+          }
+
+          const localizedFieldId = localizeFieldId(fieldId, locale);
+          fieldsToCreate.push({
+            fieldId,
+            locale,
+            contentBlockName: data.names[localizedFieldId],
+            contentBlockDescription: data.descriptions[localizedFieldId],
+          });
+        }
+      } else {
+        if (contentBlockAlreadyCreated(fieldId)) {
+          continue;
+        }
+        fieldsToCreate.push({
+          fieldId,
+          contentBlockName: data.names[fieldId],
+          contentBlockDescription: data.descriptions[fieldId],
+        });
+      }
+    }
+    return fieldsToCreate;
+  };
+
+  const updateConnectedFields = async (responseData: { results: CreationResultField[] }) => {
+    const newFields = responseData.results
+      .filter((result: any) => result.success)
+      .map((result: any) => {
+        return {
+          fieldId: result.fieldId,
+          locale: result.locale,
+          contentBlockId: result.contentBlockId,
+        };
+      });
+    const configEntry = await getConfigEntry(cma);
+    const connectedFields = configEntry.fields[CONFIG_FIELD_ID]?.[sdk.locales.default] || {};
+    const entryConnectedFields: EntryConnectedFields = connectedFields[entry.id] || [];
+    connectedFields[entry.id] = [...entryConnectedFields, ...newFields];
+    await updateConfig(configEntry, connectedFields, cma);
+  };
+
   const handleCreate = async (data: ContentBlockData) => {
     if (entry.state !== EntryStatus.Published && step === CREATE_STEP) {
       setStep(DRAFT_STEP);
@@ -73,32 +145,9 @@ const CreateFlow = (props: CreateFlowProps) => {
 
     setIsSubmitting(true);
 
-    const names: Record<string, string> = {};
-    const descriptions: Record<string, string> = {};
-    Object.entries(data.names)
-      .filter(
-        ([fieldId, fieldName]) =>
-          !creationResultFields.some((result) => result.fieldId === fieldId && result.success)
-      )
-      .forEach(([fieldId, fieldName]) => (names[fieldId] = fieldName));
-    Object.entries(data.descriptions)
-      .filter(
-        ([fieldId, fieldDescription]) =>
-          !creationResultFields.some((result) => result.fieldId === fieldId && result.success)
-      )
-      .forEach(([fieldId, fieldDescription]) => (descriptions[fieldId] = fieldDescription));
-    const fieldsIds = Array.from(selectedFields)
-      .filter(
-        (fieldId) =>
-          !creationResultFields.some((result) => result.fieldId === fieldId && result.success)
-      )
-      .join(',');
+    const fieldsToCreate = getFieldsToCreate(data);
 
     try {
-      const configEntry = await getConfigEntry(cma);
-      const connectedFields = configEntry.fields[CONFIG_FIELD_ID]?.[sdk.locales.default] || {};
-      const entryConnectedFields: EntryConnectedFields = connectedFields[entry.id] || [];
-
       const response = await cma.appActionCall.createWithResponse(
         {
           spaceId: sdk.ids.space,
@@ -109,26 +158,13 @@ const CreateFlow = (props: CreateFlowProps) => {
         {
           parameters: {
             entryId: entry.id,
-            fieldIds: fieldsIds,
-            contentBlockNames: JSON.stringify(names),
-            contentBlockDescriptions: JSON.stringify(descriptions),
+            fieldsData: JSON.stringify(fieldsToCreate),
           },
         }
       );
       const responseData: { results: CreationResultField[] } = JSON.parse(response.response.body);
 
-      const newFields = responseData.results
-        .filter((result: any) => result.success)
-        .map((result: any) => {
-          return {
-            fieldId: result.fieldId,
-            contentBlockId: result.contentBlockId,
-          };
-        });
-
-      connectedFields[entry.id] = [...entryConnectedFields, ...newFields];
-
-      await updateConfig(configEntry, connectedFields, cma);
+      await updateConnectedFields(responseData);
 
       const newCreationResultFields: CreationResultField[] = [
         ...creationResultFields.filter(
@@ -166,6 +202,17 @@ const CreateFlow = (props: CreateFlowProps) => {
           entry={entry}
           selectedFields={selectedFields}
           setSelectedFields={setSelectedFields}
+          handleNextStep={() =>
+            setStep(shouldChooseLocales(selectedFields) ? LOCALES_STEP : CREATE_STEP)
+          }
+        />
+      )}
+      {step === LOCALES_STEP && (
+        <LocalesSelectionStep
+          locales={locales}
+          selectedLocales={selectedLocales}
+          setSelectedLocales={setSelectedLocales}
+          handlePreviousStep={() => setStep(FIELDS_STEP)}
           handleNextStep={() => setStep(CREATE_STEP)}
         />
       )}
@@ -173,8 +220,11 @@ const CreateFlow = (props: CreateFlowProps) => {
         <CreateStep
           entry={entry}
           selectedFields={selectedFields}
+          selectedLocales={shouldChooseLocales(selectedFields) ? selectedLocales : undefined}
           isSubmitting={isSubmitting}
-          handlePreviousStep={() => setStep(FIELDS_STEP)}
+          handlePreviousStep={() =>
+            setStep(shouldChooseLocales(selectedFields) ? LOCALES_STEP : FIELDS_STEP)
+          }
           contentBlocksData={contentBlocksData}
           setContentBlocksData={setContentBlocksData}
           handleNextStep={handleCreate}
@@ -201,7 +251,7 @@ const CreateFlow = (props: CreateFlowProps) => {
       {step === SUCCESS_STEP && (
         <SuccessStep
           entry={entry}
-          selectedFields={selectedFields}
+          createdFields={creationResultFields.filter((result) => result.success).length}
           handleClose={() => sdk.close({ step: 'close' })}
         />
       )}

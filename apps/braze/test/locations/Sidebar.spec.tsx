@@ -37,6 +37,7 @@ describe('Sidebar component', () => {
             [mockSdk.ids.entry]: [
               {
                 fieldId: 'fieldA',
+                locale: 'en-US',
                 contentBlockId: 'contentBlockA',
               },
             ],
@@ -160,7 +161,7 @@ describe('Sidebar component', () => {
   it('renders the "Connected Content Block entries" section when connectedFields are present', async () => {
     const { getByText } = render(<Sidebar />);
     await screen.findByText('Connected Content Block entries', { exact: false });
-    expect(getByText('fieldA')).toBeTruthy();
+    expect(getByText('fieldA-en-US')).toBeTruthy();
   });
 
   it('renders the Connected Entries button and triggers navigation when clicked', async () => {

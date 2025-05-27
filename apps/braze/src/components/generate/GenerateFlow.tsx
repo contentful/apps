@@ -15,7 +15,6 @@ type GenerateFlowProps = {
   sdk: DialogAppSDK;
   entry: Entry;
   invocationParams: InvocationParams;
-  locales: string[];
   initialStep?: string;
   initialSelectedFields?: string[];
   initialSelectedLocales?: string[];
@@ -26,7 +25,6 @@ const GenerateFlow = (props: GenerateFlowProps) => {
     sdk,
     entry,
     invocationParams,
-    locales,
     initialStep = FIELDS_STEP,
     initialSelectedFields = [],
     initialSelectedLocales = [],
@@ -36,6 +34,7 @@ const GenerateFlow = (props: GenerateFlowProps) => {
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set(initialSelectedFields));
   const [selectedLocales, setSelectedLocales] = useState<string[]>(initialSelectedLocales);
 
+  const locales = sdk.locales.available;
   const shouldChooseLocales = locales.length > 1 && entry.anyFieldIsLocalized();
 
   return (

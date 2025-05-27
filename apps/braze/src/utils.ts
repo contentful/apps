@@ -104,6 +104,7 @@ export type AppInstallationParameters = {
 
 export type EntryConnectedFields = {
   fieldId: string;
+  locale: string;
   contentBlockId: string;
 }[];
 
@@ -151,3 +152,7 @@ export async function updateConfig(
 export async function getConfigEntry(cma: PlainClientAPI): Promise<EntryProps<KeyValueMap>> {
   return await cma.entry.get({ entryId: CONFIG_ENTRY_ID });
 }
+
+export const localizeFieldId = (fieldId: string, locale?: string) => {
+  return locale ? `${fieldId}-${locale}` : fieldId;
+};

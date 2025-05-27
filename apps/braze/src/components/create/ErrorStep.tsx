@@ -2,6 +2,7 @@ import { Button, Subheading, Text, List } from '@contentful/f36-components';
 import WizardFooter from '../WizardFooter';
 import { ContentBlockData, CreationResultField } from './CreateFlow';
 import InformationWithLink from '../InformationWithLink';
+import { localizeFieldId } from '../../utils';
 
 type ClientErrorStepProps = {
   isSubmitting: boolean;
@@ -28,19 +29,18 @@ const ErrorStep = ({
   const clientErrors = creationResultFields.filter(
     (field) => !field.success && field.statusCode !== 500 && field.statusCode !== 600
   );
-  const correctlyCreatedFields = creationResultFields.filter((field) => field.success);
   const containsServerError = serverErrors.length > 0;
 
   function handleRetry() {
     const filteredContentBlocksData = {
       names: Object.fromEntries(
         Object.entries(contentBlocksData.names).filter(
-          ([fieldId]) => !correctlyCreatedFields.some((field) => field.fieldId === fieldId)
+          ([fieldId]) => !createdFields.some((field) => field.fieldId === fieldId)
         )
       ),
       descriptions: Object.fromEntries(
         Object.entries(contentBlocksData.descriptions).filter(
-          ([fieldId]) => !correctlyCreatedFields.some((field) => field.fieldId === fieldId)
+          ([fieldId]) => !createdFields.some((field) => field.fieldId === fieldId)
         )
       ),
     };
@@ -90,7 +90,7 @@ const ErrorStep = ({
             {createdFields.map((field, index) => (
               <List.Item key={`${field.fieldId}-${index}`}>
                 <Text fontWeight="fontWeightDemiBold">
-                  {contentBlocksData.names[field.fieldId]}
+                  {contentBlocksData.names[localizeFieldId(field.fieldId, field.locale)]}
                 </Text>
               </List.Item>
             ))}
