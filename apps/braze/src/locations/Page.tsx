@@ -11,6 +11,7 @@ import {
   Subheading,
   Modal,
   Checkbox,
+  Stack,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { PageAppSDK } from '@contentful/app-sdk';
@@ -85,11 +86,13 @@ function ConnectedFieldsModal({
   isShown,
   onClose,
   onViewEntry,
+  onDisconnect,
 }: {
   entry: Entry;
   isShown: boolean;
   onClose: () => void;
   onViewEntry: () => void;
+  onDisconnect: (selectedFieldIds: string[]) => void;
 }) {
   const [selectedFields, setSelectedFields] = useState<Set<string>>(() => new Set());
   const allFieldIds = entry.fields.map((f) => f.uniqueId());
@@ -114,6 +117,10 @@ function ConnectedFieldsModal({
       }
       return next;
     });
+  };
+
+  const handleDisconnect = () => {
+    onDisconnect(Array.from(selectedFields));
   };
 
   return (
@@ -148,6 +155,18 @@ function ConnectedFieldsModal({
                   View entry
                 </Button>
               </Box>
+              {selectedFields.size > 0 && (
+                <Stack
+                  flexDirection="column"
+                  spacing="spacing2Xs"
+                  marginBottom="spacingM"
+                  alignItems="start">
+                  <Text fontColor="gray600">{selectedFields.size} selected</Text>
+                  <Button variant="negative" size="small" onClick={handleDisconnect}>
+                    Disconnect
+                  </Button>
+                </Stack>
+              )}
               <Table className={styles.modalConnectedFieldsContainer}>
                 <Table.Head>
                   <Table.Row>
@@ -255,6 +274,7 @@ const Page = () => {
   const [error, setError] = useState<string | null>(null);
   const [modalEntry, setModalEntry] = useState<Entry | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const cma = createClient(
     { apiAdapter: sdk.cmaAdapter },
@@ -307,6 +327,16 @@ const Page = () => {
     }
   };
 
+  const handleDisconnectFields = (selectedFieldIds: string[]) => {
+    //TODO: Add logic to disconnect fields from Braze
+    setModalOpen(false);
+    setShowSuccess(true);
+  };
+
+  const handleCloseSuccess = () => {
+    setShowSuccess(false);
+  };
+
   return (
     <Flex justifyContent="center" paddingLeft="spacing2Xl" paddingRight="spacing2Xl">
       <Box className={styles.container}>
@@ -352,7 +382,25 @@ const Page = () => {
                 isShown={modalOpen}
                 onClose={handleCloseModal}
                 onViewEntry={handleViewEntry}
+                onDisconnect={handleDisconnectFields}
               />
+            )}
+            {showSuccess && (
+              <Modal isShown={showSuccess} onClose={handleCloseSuccess} size="small">
+                {() => (
+                  <>
+                    <Modal.Header title="Disconnect from Braze" onClose={handleCloseSuccess} />
+                    <Modal.Content>
+                      <Text>Fields successfully disconnected from Braze.</Text>
+                    </Modal.Content>
+                    <Modal.Controls>
+                      <Button variant="secondary" size="small" onClick={handleCloseSuccess}>
+                        Close
+                      </Button>
+                    </Modal.Controls>
+                  </>
+                )}
+              </Modal>
             )}
           </Box>
         </Box>
