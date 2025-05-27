@@ -298,7 +298,7 @@ const CreateStep = ({
     selectedFields.forEach((fieldId) => {
       const isLocalized = entry.fields.find((f) => f.id === fieldId)?.localized || false;
       if (isLocalized && !!selectedLocales) {
-        selectedFields.forEach((locale) => {
+        selectedLocales.forEach((locale) => {
           const localizedFieldId = localizeFieldId(fieldId, locale);
           initialStates.names[localizedFieldId] = getDefaultContentBlockName(
             entry,
