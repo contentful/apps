@@ -192,11 +192,9 @@ describe('createContentBlocks', () => {
   });
 
   it('should handle missing fields', async () => {
-    // Mock Entry data
     const entry = createEntryResponse({});
     const contentType = createContentTypeResponse(['title', 'author']);
 
-    // Mock API responses
     vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
     vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
 
