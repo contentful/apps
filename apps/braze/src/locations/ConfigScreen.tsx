@@ -342,7 +342,7 @@ function ContentTypeSection(props: {
       }));
       setAvailableContentTypes(newAvailableContentTypes);
       setFilteredContentTypes(
-        newAvailableContentTypes.toSorted((a, b) => a.name.localeCompare(b.name))
+        newAvailableContentTypes.sort((a, b) => a.name.localeCompare(b.name))
       );
     })();
   }, []);
@@ -365,7 +365,7 @@ function ContentTypeSection(props: {
       props.selectedContentTypes.filter((contentType) => contentType.id !== item.id)
     );
     setFilteredContentTypes(
-      [...filteredContentTypes, item].toSorted((a, b) => a.name.localeCompare(b.name))
+      [...filteredContentTypes, item].sort((a, b) => a.name.localeCompare(b.name))
     );
   };
 
@@ -377,9 +377,9 @@ function ContentTypeSection(props: {
         linkText="here"
         marginTop="spacing2Xs"
         dataTestId="content-type-docs-here">
-        Navigate to the content type you would like to use under the Content model tab in the main
-        navigation. Select the content type and adjust the sidebar settings on the Sidebar tab.
-        Learn more about configuring your content type
+        Select the content type(s) you would like to use with Braze. You can update this by
+        adjusting the settings in the content type menu under the Sidebar tab. Learn more about
+        configuring your content type
       </InformationWithLink>
       <Stack flexDirection="column" alignItems="start">
         <Autocomplete<{ id: string; name: string }>
