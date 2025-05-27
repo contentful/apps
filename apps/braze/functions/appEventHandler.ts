@@ -83,28 +83,18 @@ const entrySavedHandler = async (
     contentTypeId: body.sys.contentType.sys.id,
   });
 
-  for (const fieldId of Object.keys(body.fields)) {
-    for (let [locale, newValue] of Object.entries(body.fields[fieldId])) {
-      const field = entryConnectedFields.find(
-        (connectedField) =>
-          connectedField.fieldId === fieldId &&
-          (connectedField.locale === locale || !connectedField.locale)
-      );
-      if (!field) {
-        continue;
-      }
-      const contentBlockId = field.contentBlockId;
-
-      const fieldInfo = contentType.fields.find((f) => f.id === fieldId);
-
-      if (fieldInfo?.type === 'RichText') {
-        newValue = documentToHtmlString(newValue as any);
-      }
-
-      await callAndRetry(() =>
-        updateContentBlock(brazeEndpoint, brazeApiKey, contentBlockId, newValue)
-      );
+  for (const connectedField of entryConnectedFields) {
+    const field = body.fields[connectedField.fieldId];
+    const locale = connectedField.locale || Object.keys(field)[0];
+    let fieldValue = field[locale];
+    const fieldInfo = contentType.fields.find((f) => f.id === connectedField.fieldId);
+    if (!fieldValue || !fieldInfo) {
+      continue;
     }
+    fieldValue = fieldInfo.type === 'RichText' ? documentToHtmlString(fieldValue) : fieldValue;
+    await callAndRetry(() =>
+      updateContentBlock(brazeEndpoint, brazeApiKey, connectedField.contentBlockId, fieldValue)
+    );
   }
 };
 

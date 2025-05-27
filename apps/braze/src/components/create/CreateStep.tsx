@@ -299,7 +299,7 @@ const CreateStep = ({
     selectedFields.forEach((fieldId) => {
       const isLocalized = entry.fields.find((f) => f.id === fieldId)?.localized || false;
       if (!isLocalized) {
-        initialStates.names[fieldId] = getDefaultContentBlockName(entry, fieldId, undefined);
+        initialStates.names[fieldId] = getDefaultContentBlockName(entry, fieldId);
         initialStates.descriptions[fieldId] = '';
       } else {
         localesList.forEach((locale) => {

@@ -76,9 +76,6 @@ const createContentBlock = async (
   }
 
   let fieldValue = entry.fields[fieldId] ? entry.fields[fieldId] : undefined;
-  if (fieldValue) {
-    fieldValue = locale ? fieldValue[locale] : Object.values(fieldValue)[0];
-  }
 
   if (!fieldValue) {
     return {
@@ -92,6 +89,8 @@ const createContentBlock = async (
         ' does not exist or is empty',
     };
   }
+
+  fieldValue = locale ? fieldValue[locale] : Object.values(fieldValue)[0];
 
   try {
     const field = contentType.fields.find((f) => f.id === fieldId);
