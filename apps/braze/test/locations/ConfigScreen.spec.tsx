@@ -3,8 +3,8 @@ import { cleanup, fireEvent, render, RenderResult, screen } from '@testing-libra
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockSdk } from '../mocks';
 import ConfigScreen from '../../src/locations/ConfigScreen';
-import userEvent from '@testing-library/user-event';
-import { queries } from '@testing-library/dom';
+import userEvent, { UserEvent } from '@testing-library/user-event';
+import { queries, waitFor } from '@testing-library/dom';
 import {
   BRAZE_API_KEY_DOCUMENTATION,
   BRAZE_APP_DOCUMENTATION,
@@ -19,6 +19,7 @@ const mockCma = {
     get: vi.fn(),
     createWithId: vi.fn(),
     publish: vi.fn(),
+    getMany: vi.fn(),
   },
   entry: {
     createWithId: vi.fn(),
@@ -50,8 +51,8 @@ async function saveAppInstallation() {
   return await mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
 }
 
-const fillScreen = async () => {
-  const user = userEvent.setup();
+const fillScreen = async (user?: UserEvent) => {
+  user = user || userEvent.setup();
   const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
   const brazeApiKeyInput = screen.getAllByTestId('brazeApiKey')[0];
   const brazeEndpointSelect = screen.getByTestId('brazeEndpoint');
@@ -69,6 +70,13 @@ describe('Config Screen component', () => {
   let configScreen: RenderResult<typeof queries, HTMLElement, HTMLElement>;
   beforeEach(() => {
     vi.clearAllMocks();
+    mockCma.contentType.getMany.mockResolvedValue({
+      items: [
+        { sys: { id: 'blogPost' }, name: 'Blog Post' },
+        { sys: { id: 'article' }, name: 'Article' },
+        { sys: { id: 'news' }, name: 'News' },
+      ],
+    });
     configScreen = render(<ConfigScreen />);
   });
 
@@ -154,15 +162,6 @@ describe('Config Screen component', () => {
           brazeApiKey: 'valid-api-key-321',
           brazeEndpoint: BRAZE_ENDPOINTS[0].url,
         },
-        targetState: {
-          EditorInterface: {
-            blogPost: {
-              sidebar: {
-                position: 0,
-              },
-            },
-          },
-        },
       });
     });
 
@@ -244,14 +243,42 @@ describe('Config Screen component', () => {
     });
   });
 
-  describe('addAppToSidebar', () => {
+  describe('Content type installation', () => {
+    const selectContentTypes = async (user: UserEvent) => {
+      const autocomplete = screen.getByPlaceholderText('Search');
+      await user.click(autocomplete);
+      await user.type(autocomplete, 'Blog');
+      const option = await screen.findByText('Blog Post');
+      await user.click(option);
+    };
+
+    it('loads and displays available content types', async () => {
+      const user = userEvent.setup();
+
+      const autocomplete = screen.getByPlaceholderText('Search');
+      await user.click(autocomplete);
+
+      const blogPost = await screen.findByText('Blog Post');
+      const article = await screen.findByText('Article');
+      const news = await screen.findByText('News');
+
+      expect(mockCma.contentType.getMany).toHaveBeenCalled();
+      expect(blogPost).toBeTruthy();
+      expect(article).toBeTruthy();
+      expect(news).toBeTruthy();
+    });
+
     it('adds app to sidebar for each content type', async () => {
-      await fillScreen();
       mockCma.editorInterface.get.mockResolvedValueOnce({
         sidebar: [],
         sys: { contentType: { sys: { id: 'blogPost' } } },
       });
       mockCma.editorInterface.update.mockResolvedValueOnce({});
+
+      const user = userEvent.setup();
+      await fillScreen(user);
+      await selectContentTypes(user);
+      await waitFor(() => expect(screen.getByTestId('pill-blogPost')).toBeTruthy());
 
       const result = await saveAppInstallation();
 
@@ -277,7 +304,10 @@ describe('Config Screen component', () => {
     });
 
     it('handles errors when adding app to sidebar', async () => {
-      await fillScreen();
+      const user = userEvent.setup();
+      await fillScreen(user);
+      await selectContentTypes(user);
+      await waitFor(() => expect(screen.getByTestId('pill-blogPost')).toBeTruthy());
 
       mockCma.editorInterface.get.mockRejectedValueOnce(
         new Error('Failed to get editor interface')
