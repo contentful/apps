@@ -4,8 +4,8 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import Dialog from '../../src/locations/Dialog';
 import { Entry } from '../../src/fields/Entry';
 import { BasicField } from '../../src/fields/BasicField';
-import { createEntry } from '../mocks/mocksForFunctions';
 import React from 'react';
+import { createEntryResponse } from '../mocks/entryResponse';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -35,7 +35,7 @@ vi.mock('../../src/fields/FieldsFactory', () => ({
   })),
 }));
 
-const mockCMAEntryItemResponse = createEntry({
+const mockCMAEntryItemResponse = createEntryResponse({
   title: 'Some Title',
   fieldId: {
     sys: {
@@ -56,7 +56,9 @@ const mockEntry = new Entry(
   [mockField],
   mockSdk.ids.space,
   mockSdk.ids.environemnt,
-  mockSdk.parameters.installation.contentfulApiKey
+  mockSdk.parameters.installation.contentfulApiKey,
+  undefined,
+  '2024-01-01T00:00:00Z'
 );
 
 const GENERATE_FIELDS_STEP_TEXT = 'Select which fields';
