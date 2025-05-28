@@ -184,7 +184,7 @@ function ConnectedFieldsModal({
                   </Button>
                 </Stack>
               )}
-              <Table className={styles.modalConnectedFieldsContainer}>
+              <Table>
                 <Table.Head>
                   <Table.Row>
                     <Table.Cell className={styles.checkboxCell}>
@@ -197,7 +197,7 @@ function ConnectedFieldsModal({
                       />
                     </Table.Cell>
                     <Table.Cell className={styles.baseCell}>
-                      <Text>Field name</Text>
+                      <Text>Select all fields</Text>
                     </Table.Cell>
                   </Table.Row>
                 </Table.Head>
@@ -213,8 +213,10 @@ function ConnectedFieldsModal({
                             aria-label={getFieldDisplayName(field.fieldId, field.locale)}
                           />
                         </Table.Cell>
-                        <Table.Cell className={styles.boldCell}>
-                          {getFieldDisplayName(field.fieldId, field.locale)}
+                        <Table.Cell className={styles.baseCell}>
+                          <Text fontWeight="fontWeightDemiBold">
+                            {getFieldDisplayName(field.fieldId, field.locale)}
+                          </Text>
                         </Table.Cell>
                       </Table.Row>
                     );
