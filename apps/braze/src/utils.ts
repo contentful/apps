@@ -136,6 +136,18 @@ export function removeHypens(str: string) {
   return str.replace('-', '');
 }
 
+async function getDefaultLocale(cma: PlainClientAPI): Promise<string> {
+  const fallbackLocale = 'en-US';
+  try {
+    const locales = await cma.locale.getMany({ query: { limit: 1000 } });
+    const defaultLocale = locales.items.find((locale) => locale.default);
+    return defaultLocale?.code || fallbackLocale;
+  } catch (error) {
+    console.error('Error fetching default locale:', error);
+    return fallbackLocale;
+  }
+}
+
 export async function updateConfig(
   configEntry: EntryProps<KeyValueMap>,
   connectedFields: ConnectedFields,
@@ -144,7 +156,7 @@ export async function updateConfig(
   if (!configEntry.fields[CONFIG_FIELD_ID]) {
     configEntry.fields[CONFIG_FIELD_ID] = {};
   }
-  const locale = 'en-US'; // TODO: get default locale
+  const locale = await getDefaultLocale(cma);
   configEntry.fields[CONFIG_FIELD_ID][locale] = connectedFields;
   return await cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
 }
