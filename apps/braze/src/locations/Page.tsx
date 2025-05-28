@@ -388,13 +388,13 @@ const Page = () => {
     }
 
     await updateConfig(configEntry, connectedFields, cma);
-    await loadEntries();
     setModalOpen(false);
     setShowSuccess(true);
   };
 
-  const handleCloseSuccess = () => {
+  const handleCloseSuccess = async () => {
     setShowSuccess(false);
+    await loadEntries();
   };
 
   return (
