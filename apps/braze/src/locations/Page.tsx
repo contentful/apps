@@ -88,13 +88,15 @@ function DisplayMessage({ title, message }: MessageProps) {
   );
 }
 
+const getFieldId = (field: { fieldId: string; locale?: string }) =>
+  `${field.fieldId}${field.locale ? `-${field.locale}` : ''}`;
+
 function ConnectedFieldsModal({
   entry,
   isShown,
   onClose,
   onViewEntry,
   onDisconnect,
-  cma,
   entryConnectedFields,
 }: {
   entry: Entry;
@@ -102,13 +104,9 @@ function ConnectedFieldsModal({
   onClose: () => void;
   onViewEntry: () => void;
   onDisconnect: (selectedFieldIds: string[], entry: Entry) => void;
-  cma: PlainClientAPI;
   entryConnectedFields: EntryConnectedFields;
 }) {
   const [selectedFields, setSelectedFields] = useState<Set<string>>(() => new Set());
-
-  const getFieldId = (field: { fieldId: string; locale?: string }) =>
-    `${field.fieldId}${field.locale ? `-${field.locale}` : ''}`;
 
   const allFieldIds = entryConnectedFields.map(getFieldId);
   const allSelected = allFieldIds.every((id) => selectedFields.has(id));
@@ -315,29 +313,29 @@ const Page = () => {
     }
   );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const config = await getConfigEntry(cma);
-        setConfigEntry(config);
-        const entries = await fetchBrazeConnectedEntries(
-          cma,
-          sdk.parameters?.installation?.contentfulApiKey,
-          sdk.ids.space,
-          sdk.ids.environment,
-          sdk.locales.default,
-          config
-        );
-        setEntries(entries);
-      } catch (error) {
-        setError('Error loading connected entries');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadEntries = async () => {
+    setLoading(true);
+    try {
+      const config = await getConfigEntry(cma);
+      setConfigEntry(config);
+      const entries = await fetchBrazeConnectedEntries(
+        cma,
+        sdk.parameters?.installation?.contentfulApiKey,
+        sdk.ids.space,
+        sdk.ids.environment,
+        sdk.locales.default,
+        config
+      );
+      setEntries(entries);
+    } catch (error) {
+      setError('Error loading connected entries');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchData();
+  useEffect(() => {
+    loadEntries();
   }, []);
 
   const hasConnectedEntries = () => {
@@ -373,9 +371,6 @@ const Page = () => {
     const connectedFields = Object.values(configField)[0] as ConnectedFields;
     const entryConnectedFields = connectedFields[entry.id];
 
-    const getFieldId = (field: { fieldId: string; locale?: string }) =>
-      `${field.fieldId}${field.locale ? `-${field.locale}` : ''}`;
-
     const isNotField = (field: { fieldId: string; locale?: string; contentBlockId?: string }) =>
       !selectedFieldIds.includes(getFieldId(field));
 
@@ -385,8 +380,8 @@ const Page = () => {
       connectedFields[entry.id] = entryConnectedFields.filter(isNotField);
     }
 
-    const newConfig = await updateConfig(configEntry, connectedFields, cma);
-    setConfigEntry(newConfig);
+    await updateConfig(configEntry, connectedFields, cma);
+    await loadEntries();
     setModalOpen(false);
     setShowSuccess(true);
   };
@@ -440,7 +435,6 @@ const Page = () => {
                 isShown={modalOpen}
                 onClose={handleCloseModal}
                 onViewEntry={handleViewEntry}
-                cma={cma}
                 onDisconnect={handleDisconnectFields}
                 entryConnectedFields={entryConnectedFields}
               />
