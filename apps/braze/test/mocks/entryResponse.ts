@@ -41,18 +41,20 @@ export function createEntryResponse(
   };
 }
 
+export const mockConfigEntrySys = {
+  type: 'Entry',
+  id: 'config-entry',
+  contentType: { sys: { type: 'Link', linkType: 'ContentType', id: 'config' } },
+  space: { sys: { type: 'Link', linkType: 'Space', id: 'space-id' } },
+  environment: { sys: { type: 'Link', linkType: 'Environment', id: 'environment-id' } },
+  version: 1,
+  createdAt: '2024-01-01T00:00:00Z',
+  updatedAt: '2024-01-01T00:00:00Z',
+  automationTags: [],
+};
+
 export const mockConfigEntry: EntryProps = {
-  sys: {
-    id: 'mockConfigEntryId',
-    type: 'Entry',
-    createdAt: '2023-01-01T00:00:00Z',
-    updatedAt: '2023-01-01T00:00:00Z',
-    environment: { sys: { id: 'env', type: 'Environment', linkType: 'Environment' } },
-    space: { sys: { id: 'space', type: 'Space', linkType: 'Space' } },
-    contentType: { sys: { id: 'config', type: 'Link', linkType: 'ContentType' } },
-    automationTags: [],
-    version: 0,
-  },
+  sys: mockConfigEntrySys,
   fields: {
     connectedFields: {
       'en-US': {

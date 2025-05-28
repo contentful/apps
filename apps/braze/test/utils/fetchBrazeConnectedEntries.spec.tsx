@@ -5,8 +5,10 @@ import { Entry } from '../../src/fields/Entry';
 import { BasicField } from '../../src/fields/BasicField';
 import { mockConnectedFields, mockSingleConnectedField } from '../mocks/connectedFields';
 import { createContentTypeResponse } from '../mocks/contentTypeResponse';
-import { createEntryResponse as createEntryResponse } from '../mocks/entryResponse';
-import { isPublished } from 'contentful-management';
+import {
+  createEntryResponse as createEntryResponse,
+  mockConfigEntrySys,
+} from '../mocks/entryResponse';
 
 describe('fetchBrazeConnectedEntries', () => {
   const mockCma = {
@@ -62,7 +64,8 @@ describe('fetchBrazeConnectedEntries', () => {
       'valid-contentful-api-key',
       'space-id',
       'environment-id',
-      'en-US'
+      'en-US',
+      { ...mockConnectedFields, sys: mockConfigEntrySys }
     );
 
     expect(result[0].serialize()).toEqual(expectedEntry.serialize());
@@ -78,7 +81,8 @@ describe('fetchBrazeConnectedEntries', () => {
       'valid-contentful-api-key',
       'space-id',
       'environment-id',
-      'en-US'
+      'en-US',
+      { ...mockSingleConnectedField, sys: mockConfigEntrySys }
     );
 
     expect(result[0].serialize()).toEqual(expectedEntry.serialize());
