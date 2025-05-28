@@ -15,6 +15,7 @@ import {
   SidebarContentBlockInfo,
 } from '../../src/utils';
 import { AppActionParameters } from '../../functions/createContentBlocks';
+import { mockContext } from '../mocks/mocksForFunctions';
 
 vi.mock('../../functions/common', () => ({
   initContentfulManagementClient: vi.fn(),
@@ -33,16 +34,6 @@ const handler: (
   event: AppActionRequest<'Custom', AppActionParameters>,
   context: FunctionEventContext
 ) => Promise<HandlerResponse> = originalHandler as any;
-
-const mockContext = {
-  appInstallationParameters: {
-    brazeApiKey: 'test-api-key',
-    brazeEndpoint: 'https://rest.iad-01.braze.com',
-  } as AppInstallationParameters,
-  spaceId: 'test-space-id',
-  environmentId: 'test-env-id',
-  cmaToken: 'test-cma-token',
-} as unknown as FunctionEventContext;
 
 const mockEvent = {
   type: FunctionTypeEnum.AppActionCall,
@@ -92,7 +83,7 @@ describe('getContentBlocks handler', () => {
     expect(getConfigAndConnectedFields).toHaveBeenCalledWith(mockCma, 'test-entry-id');
     expect(global.fetch).toHaveBeenCalledTimes(2);
     expect(global.fetch).toHaveBeenCalledWith(
-      'https://rest.iad-01.braze.com/content_blocks/info?content_block_id=cbId1',
+      'https://test.braze.com/content_blocks/info?content_block_id=cbId1',
       {
         method: 'GET',
         headers: {
@@ -102,7 +93,7 @@ describe('getContentBlocks handler', () => {
       }
     );
     expect(global.fetch).toHaveBeenCalledWith(
-      'https://rest.iad-01.braze.com/content_blocks/info?content_block_id=cbId2',
+      'https://test.braze.com/content_blocks/info?content_block_id=cbId2',
       {
         method: 'GET',
         headers: {
