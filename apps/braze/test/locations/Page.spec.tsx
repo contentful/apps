@@ -9,7 +9,8 @@ import { Entry } from '../../src/fields/Entry';
 import { mockSdk } from '../mocks';
 import { fireEvent } from '@testing-library/react';
 import { getConfigEntry, updateConfig } from '../../src/utils';
-import { mockConfigEntry } from '../mocks/entryResponse';
+import { createConfigEntry } from '../mocks/entryResponse';
+import { mockConfigEntryWithLocalizedFields } from '../mocks/connectedFields';
 
 describe('Page Location', () => {
   vi.mock('@contentful/react-apps-toolkit');
@@ -26,6 +27,8 @@ describe('Page Location', () => {
   vi.mock('contentful-management', () => ({
     createClient: vi.fn(() => ({})),
   }));
+
+  const mockConfigEntry = createConfigEntry(mockConfigEntryWithLocalizedFields);
 
   beforeEach(() => {
     vi.clearAllMocks();

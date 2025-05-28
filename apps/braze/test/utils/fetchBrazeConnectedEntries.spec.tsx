@@ -3,11 +3,15 @@ import { cleanup } from '@testing-library/react';
 import { fetchBrazeConnectedEntries } from '../../src/utils/fetchBrazeConnectedEntries';
 import { Entry } from '../../src/fields/Entry';
 import { BasicField } from '../../src/fields/BasicField';
-import { mockConnectedFields, mockSingleConnectedField } from '../mocks/connectedFields';
+import {
+  mockConfigEntryWithLocalizedFields,
+  mockConnectedFields,
+  mockSingleConnectedField,
+} from '../mocks/connectedFields';
 import { createContentTypeResponse } from '../mocks/contentTypeResponse';
 import {
+  createConfigEntry,
   createEntryResponse as createEntryResponse,
-  mockConfigEntrySys,
 } from '../mocks/entryResponse';
 
 describe('fetchBrazeConnectedEntries', () => {
@@ -54,7 +58,6 @@ describe('fetchBrazeConnectedEntries', () => {
   };
 
   it('returns an entry when two fields are connected', async () => {
-    mockCma.entry.get.mockResolvedValue(mockConnectedFields);
     const title = new BasicField('title', 'Title', 'content-type-id', true);
     const author = new BasicField('author', 'Author', 'content-type-id', true);
     const expectedEntry = createExpectedEntry([title, author]);
@@ -65,14 +68,13 @@ describe('fetchBrazeConnectedEntries', () => {
       'space-id',
       'environment-id',
       'en-US',
-      { ...mockConnectedFields, sys: mockConfigEntrySys }
+      createConfigEntry(mockConnectedFields)
     );
 
     expect(result[0].serialize()).toEqual(expectedEntry.serialize());
   });
 
   it('returns an entry with only connected fields when one field is connected', async () => {
-    mockCma.entry.get.mockResolvedValue(mockSingleConnectedField);
     const title = new BasicField('title', 'Title', 'content-type-id', true);
     const expectedEntry = createExpectedEntry([title]);
 
@@ -82,7 +84,7 @@ describe('fetchBrazeConnectedEntries', () => {
       'space-id',
       'environment-id',
       'en-US',
-      { ...mockSingleConnectedField, sys: mockConfigEntrySys }
+      createConfigEntry(mockSingleConnectedField)
     );
 
     expect(result[0].serialize()).toEqual(expectedEntry.serialize());

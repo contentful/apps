@@ -1,4 +1,4 @@
-import { EntryProps } from 'contentful-management';
+import { EntryProps, KeyValueMap } from 'contentful-management';
 
 export function createEntryResponse(
   fields: Record<string, any>,
@@ -53,17 +53,11 @@ export const mockConfigEntrySys = {
   automationTags: [],
 };
 
-export const mockConfigEntry: EntryProps = {
-  sys: mockConfigEntrySys,
-  fields: {
-    connectedFields: {
-      'en-US': {
-        'entry-id': [
-          { fieldId: 'name', locale: 'en-US', contentBlockId: 'block1' },
-          { fieldId: 'name', locale: 'en-AU', contentBlockId: 'block2' },
-          { fieldId: 'description', contentBlockId: 'block3' },
-        ],
-      },
+export const createConfigEntry = (connectedFields: KeyValueMap) => {
+  return {
+    sys: mockConfigEntrySys,
+    fields: {
+      connectedFields,
     },
-  },
+  };
 };
