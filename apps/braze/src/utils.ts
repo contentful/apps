@@ -151,13 +151,14 @@ async function getDefaultLocale(cma: PlainClientAPI): Promise<string> {
 export async function updateConfig(
   configEntry: EntryProps<KeyValueMap>,
   connectedFields: ConnectedFields,
-  cma: PlainClientAPI
+  cma: PlainClientAPI,
+  defaultLocale?: string
 ) {
   if (!configEntry.fields[CONFIG_FIELD_ID]) {
     configEntry.fields[CONFIG_FIELD_ID] = {};
   }
-  const locale = await getDefaultLocale(cma);
-  configEntry.fields[CONFIG_FIELD_ID][locale] = connectedFields;
+  defaultLocale ||= await getDefaultLocale(cma);
+  configEntry.fields[CONFIG_FIELD_ID][defaultLocale] = connectedFields;
   return await cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
 }
 

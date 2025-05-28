@@ -134,7 +134,7 @@ const CreateFlow = (props: CreateFlowProps) => {
     const connectedFields = configEntry.fields[CONFIG_FIELD_ID]?.[sdk.locales.default] || {};
     const entryConnectedFields: EntryConnectedFields = connectedFields[entry.id] || [];
     connectedFields[entry.id] = [...entryConnectedFields, ...newFields];
-    await updateConfig(configEntry, connectedFields, cma);
+    await updateConfig(configEntry, connectedFields, cma, sdk.locales.default);
   };
 
   const handleCreate = async (data: ContentBlockData) => {
