@@ -40,3 +40,28 @@ export function createEntryResponse(
     fields: Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, value])),
   };
 }
+
+export const mockConfigEntry: EntryProps = {
+  sys: {
+    id: 'mockConfigEntryId',
+    type: 'Entry',
+    createdAt: '2023-01-01T00:00:00Z',
+    updatedAt: '2023-01-01T00:00:00Z',
+    environment: { sys: { id: 'env', type: 'Environment', linkType: 'Environment' } },
+    space: { sys: { id: 'space', type: 'Space', linkType: 'Space' } },
+    contentType: { sys: { id: 'config', type: 'Link', linkType: 'ContentType' } },
+    automationTags: [],
+    version: 0,
+  },
+  fields: {
+    connectedFields: {
+      'en-US': {
+        'entry-id': [
+          { fieldId: 'name', locale: 'en-US', contentBlockId: 'block1' },
+          { fieldId: 'name', locale: 'en-AU', contentBlockId: 'block2' },
+          { fieldId: 'description', contentBlockId: 'block3' },
+        ],
+      },
+    },
+  },
+};

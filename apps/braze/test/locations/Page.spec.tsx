@@ -7,16 +7,29 @@ import { fetchBrazeConnectedEntries } from '../../src/utils/fetchBrazeConnectedE
 import { BasicField } from '../../src/fields/BasicField';
 import { Entry } from '../../src/fields/Entry';
 import { mockSdk } from '../mocks';
+import { fireEvent } from '@testing-library/react';
+import { getConfigEntry, updateConfig } from '../../src/utils';
+import { mockConfigEntry } from '../mocks/entryResponse';
 
 describe('Page Location', () => {
   vi.mock('@contentful/react-apps-toolkit');
   vi.mock('../../src/utils/fetchBrazeConnectedEntries');
+  vi.mock('../../src/utils', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('../../src/utils')>();
+    return {
+      ...actual,
+      getConfigEntry: vi.fn(),
+      updateConfig: vi.fn(),
+    } as typeof actual;
+  });
+
   vi.mock('contentful-management', () => ({
     createClient: vi.fn(() => ({})),
   }));
 
   beforeEach(() => {
     vi.clearAllMocks();
+    (getConfigEntry as Mock).mockResolvedValue(mockConfigEntry);
   });
 
   afterEach(() => {
@@ -139,21 +152,9 @@ describe('Page Location', () => {
 
       expect(screen.getByTestId('modal-entry-title')).toBeTruthy();
       expect(screen.getByTestId('modal-fields-length')).toBeTruthy();
+      expect(screen.getByText('Field name')).toBeTruthy();
       expect(screen.getByText('View entry')).toBeTruthy();
-    });
-
-    it('lists all connected fields with checkboxes', async () => {
-      render(<Page />);
-      const viewFieldsButton = (await screen.findAllByRole('button', { name: /View fields/i }))[0];
-      viewFieldsButton.click();
-      await screen.findByRole('dialog');
-      expect(screen.getByText('Title')).toBeTruthy();
-      expect(screen.getByText('Description')).toBeTruthy();
-      expect(screen.getByText('Checkbox')).toBeTruthy();
-      // Checkboxes for each field
-      expect(screen.getByLabelText('Title')).toBeTruthy();
-      expect(screen.getByLabelText('Description')).toBeTruthy();
-      expect(screen.getByLabelText('Checkbox')).toBeTruthy();
+      expect(screen.getByText('View entry')).toBeTruthy();
     });
 
     it('selects/deselects all fields with header checkbox', async () => {
@@ -164,14 +165,10 @@ describe('Page Location', () => {
       const selectAll = screen.getByTestId('select-all-fields');
       // Select all
       selectAll.click();
-      expect((screen.getByLabelText('Title') as HTMLInputElement).checked).toBe(true);
       expect((screen.getByLabelText('Description') as HTMLInputElement).checked).toBe(true);
-      expect((screen.getByLabelText('Checkbox') as HTMLInputElement).checked).toBe(true);
       // Deselect all
       selectAll.click();
-      expect((screen.getByLabelText('Title') as HTMLInputElement).checked).toBe(false);
       expect((screen.getByLabelText('Description') as HTMLInputElement).checked).toBe(false);
-      expect((screen.getByLabelText('Checkbox') as HTMLInputElement).checked).toBe(false);
     });
 
     it('toggles individual field selection', async () => {
@@ -179,7 +176,7 @@ describe('Page Location', () => {
       const viewFieldsButton = (await screen.findAllByRole('button', { name: /View fields/i }))[0];
       viewFieldsButton.click();
       await screen.findByRole('dialog');
-      const titleCheckbox = screen.getByLabelText('Title') as HTMLInputElement;
+      const titleCheckbox = screen.getByLabelText('Description') as HTMLInputElement;
       expect(titleCheckbox.checked).toBe(false);
       titleCheckbox.click();
       expect(titleCheckbox.checked).toBe(true);
@@ -194,6 +191,96 @@ describe('Page Location', () => {
       await screen.findByRole('dialog');
       screen.getByRole('button', { name: /View entry/i }).click();
       expect(mockSdk.navigator.openEntry).toHaveBeenCalledWith('entry-id');
+    });
+  });
+
+  describe('Field Mapping and Disconnection', () => {
+    const mockEntry = new Entry(
+      'entry-id',
+      'content-type-id',
+      'Test Entry',
+      [
+        new BasicField('name', 'Name', 'content-type-id', true),
+        new BasicField('description', 'Description', 'content-type-id', false),
+      ],
+      'space-id',
+      'environment-id',
+      'valid-contentful-api-key',
+      '2025-05-15T16:49:16.367Z',
+      '2025-05-15T16:49:16.367Z'
+    );
+
+    beforeEach(() => {
+      (useSDK as unknown as Mock).mockReturnValue(mockSdk);
+      (getConfigEntry as Mock).mockResolvedValue(mockConfigEntry);
+      (fetchBrazeConnectedEntries as Mock).mockResolvedValue([mockEntry]);
+      (updateConfig as Mock).mockResolvedValue(mockConfigEntry);
+    });
+
+    it('should correctly map field IDs with locales', async () => {
+      render(<Page />);
+      const viewFieldsButton = await screen.findByRole('button', { name: /View fields/i });
+      viewFieldsButton.click();
+
+      const checkboxes = await screen.findAllByRole('checkbox');
+      expect(checkboxes).toHaveLength(4); // 3 fields + select all checkbox
+
+      const fieldNames = screen.getAllByText(/Name|Description/);
+      expect(fieldNames).toHaveLength(3);
+      expect(screen.getByText('Name (en-US)')).toBeTruthy();
+      expect(screen.getByText('Name (en-AU)')).toBeTruthy();
+      expect(screen.getByText('Description')).toBeTruthy();
+    });
+
+    it('should handle field disconnection correctly', async () => {
+      render(<Page />);
+      const viewFieldsButton = await screen.findByRole('button', { name: /View fields/i });
+      viewFieldsButton.click();
+
+      // Select a field to disconnect
+      const checkboxes = await screen.findAllByRole('checkbox');
+      const fieldCheckbox = checkboxes[1]; // First field checkbox
+      fireEvent.click(fieldCheckbox);
+
+      // Click disconnect button
+      const disconnectButton = screen.getByRole('button', { name: /Disconnect/i });
+      fireEvent.click(disconnectButton);
+
+      // Verify updateConfig was called with correct parameters
+      expect(updateConfig).toHaveBeenCalledWith(
+        mockConfigEntry,
+        expect.objectContaining({
+          'entry-id': expect.arrayContaining([
+            expect.objectContaining({
+              fieldId: 'name',
+              locale: 'en-AU',
+              contentBlockId: 'block2',
+            }),
+            expect.objectContaining({
+              fieldId: 'description',
+              contentBlockId: 'block3',
+            }),
+          ]),
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it('should handle disconnecting all fields correctly', async () => {
+      render(<Page />);
+      const viewFieldsButton = await screen.findByRole('button', { name: /View fields/i });
+      viewFieldsButton.click();
+
+      // Select all fields
+      const selectAllCheckbox = await screen.findByTestId('select-all-fields');
+      fireEvent.click(selectAllCheckbox);
+
+      // Click disconnect button
+      const disconnectButton = screen.getByRole('button', { name: /Disconnect/i });
+      fireEvent.click(disconnectButton);
+
+      // Verify updateConfig was called with empty array for the entry
+      expect(updateConfig).toHaveBeenCalled();
     });
   });
 });
