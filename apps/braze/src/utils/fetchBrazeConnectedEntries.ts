@@ -1,4 +1,4 @@
-import { PlainClientAPI } from 'contentful-management';
+import { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
 import { EntryConnectedFields, getConfigEntry } from '../utils';
 import { Entry } from '../fields/Entry';
 import { FieldsFactory } from '../fields/FieldsFactory';
@@ -11,9 +11,9 @@ export async function fetchBrazeConnectedEntries(
   contentfulApiKey: string,
   spaceId: string,
   environmentId: string,
-  defaultLocale: string
+  defaultLocale: string,
+  configEntry: EntryProps<KeyValueMap>
 ): Promise<Entry[]> {
-  const configEntry = await getConfigEntry(cma);
   const entries = configEntry?.fields?.connectedFields?.[defaultLocale] || {};
   const entryIds = Object.keys(entries);
 

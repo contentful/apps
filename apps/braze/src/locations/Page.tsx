@@ -99,7 +99,7 @@ function ConnectedFieldsModal({
   isShown: boolean;
   onClose: () => void;
   onViewEntry: () => void;
-  onDisconnect: (selectedFieldIds: string[]) => void;
+  onDisconnect: (selectedFieldIds: string[], entry: Entry) => void;
   cma: PlainClientAPI;
 }) {
   const [selectedFields, setSelectedFields] = useState<Set<string>>(() => new Set());
@@ -128,24 +128,7 @@ function ConnectedFieldsModal({
   };
 
   const handleDisconnect = async () => {
-    const configEntry: EntryProps = await getConfigEntry(cma);
-
-    const configField = configEntry.fields[CONFIG_FIELD_ID];
-    const connectedFields = Object.values(configField)[0] as ConnectedFields;
-    const entryConnectedFields = connectedFields[entry.id];
-
-    const isNotField = (field: { fieldId: any; locale?: string; contentBlockId?: string }) =>
-      !selectedFields.has(field.fieldId);
-
-    if (entryConnectedFields.length === 1) {
-      // If this is the last connected field, we remove the entire entry from connectedFields
-      delete connectedFields[entry.id];
-    } else if (entryConnectedFields.length > 1) {
-      connectedFields[entry.id] = [...entryConnectedFields.filter((field) => isNotField(field))];
-    }
-
-    await updateConfig(configEntry, connectedFields, cma);
-    onDisconnect(Array.from(selectedFields));
+    onDisconnect(Array.from(selectedFields), entry);
     setSelectedFields(new Set());
   };
 
@@ -301,6 +284,7 @@ const Page = () => {
   const [modalEntry, setModalEntry] = useState<Entry | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [configEntry, setConfigEntry] = useState<EntryProps | null>(null);
 
   const cma = createClient(
     { apiAdapter: sdk.cmaAdapter },
@@ -313,28 +297,27 @@ const Page = () => {
     }
   );
 
-  const loadEntries = () => {
-    setLoading(true);
-    fetchBrazeConnectedEntries(
-      cma,
-      sdk.parameters?.installation?.contentfulApiKey,
-      sdk.ids.space,
-      sdk.ids.environment,
-      sdk.locales.default
-    )
-      .then((entries) => {
-        setEntries(entries);
-      })
-      .catch(() => {
-        setError('Error loading connected entries');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
   useEffect(() => {
-    loadEntries();
+    (async () => {
+      setLoading(true);
+      try {
+        const config = await getConfigEntry(cma);
+        setConfigEntry(config);
+        const entries = await fetchBrazeConnectedEntries(
+          cma,
+          sdk.parameters?.installation?.contentfulApiKey,
+          sdk.ids.space,
+          sdk.ids.environment,
+          sdk.locales.default,
+          config
+        );
+        setEntries(entries);
+      } catch (error) {
+        setError('Error loading connected entries');
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
   const hasConnectedEntries = () => {
@@ -357,11 +340,28 @@ const Page = () => {
     }
   };
 
-  const handleDisconnectFields = (selectedFieldIds: string[]) => {
-    //TODO: Add logic to disconnect fields from Braze
+  const handleDisconnectFields = async (selectedFieldIds: string[], entry: Entry) => {
+    if (!configEntry) return;
+
+    const configField = configEntry.fields[CONFIG_FIELD_ID];
+    const connectedFields = Object.values(configField)[0] as ConnectedFields;
+    const entryConnectedFields = connectedFields[entry.id];
+
+    const isNotField = (field: { fieldId: any; locale?: string; contentBlockId?: string }) =>
+      !selectedFieldIds.includes(field.fieldId);
+
+    if (entryConnectedFields.length === 1) {
+      // If this is the last connected field, we remove the entire entry from connectedFields
+      delete connectedFields[entry.id];
+    } else if (entryConnectedFields.length > 1) {
+      connectedFields[entry.id] = [...entryConnectedFields.filter((field) => isNotField(field))];
+    }
+
+    const updatedConfig = await updateConfig(configEntry, connectedFields, cma);
+
+    setConfigEntry(updatedConfig);
     setModalOpen(false);
     setShowSuccess(true);
-    loadEntries();
   };
 
   const handleCloseSuccess = () => {
