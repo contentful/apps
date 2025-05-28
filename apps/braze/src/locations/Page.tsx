@@ -25,6 +25,7 @@ import {
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
   CONFIG_FIELD_ID,
   ConnectedFields,
+  EntryConnectedFields,
   getConfigEntry,
   updateConfig,
 } from '../utils';
@@ -94,6 +95,7 @@ function ConnectedFieldsModal({
   onViewEntry,
   onDisconnect,
   cma,
+  entryConnectedFields,
 }: {
   entry: Entry;
   isShown: boolean;
@@ -101,9 +103,13 @@ function ConnectedFieldsModal({
   onViewEntry: () => void;
   onDisconnect: (selectedFieldIds: string[], entry: Entry) => void;
   cma: PlainClientAPI;
+  entryConnectedFields: EntryConnectedFields;
 }) {
   const [selectedFields, setSelectedFields] = useState<Set<string>>(() => new Set());
-  const allFieldIds = entry.fields.map((f) => f.uniqueId());
+
+  const allFieldIds = entryConnectedFields.map(
+    (f) => `${f.fieldId}${f.locale ? `-${f.locale}` : ''}`
+  );
   const allSelected = allFieldIds.every((id) => selectedFields.has(id));
   const someSelected = allFieldIds.some((id) => selectedFields.has(id));
 
@@ -132,6 +138,13 @@ function ConnectedFieldsModal({
     setSelectedFields(new Set());
   };
 
+  const getFieldDisplayName = (fieldId: string, locale?: string) => {
+    const field = entry.fields.find((f) => f.id === fieldId);
+    if (!field) return fieldId;
+    const displayName = field.displayNameForCreate();
+    return locale ? `${displayName} (${locale})` : displayName;
+  };
+
   return (
     <Modal isShown={isShown} onClose={onClose} size="medium" testId="connected-fields-modal">
       {() => (
@@ -153,7 +166,7 @@ function ConnectedFieldsModal({
                     Connected fields
                   </Text>
                   <Text data-testid="modal-fields-length" fontWeight="fontWeightDemiBold">
-                    {entry.fields.length}
+                    {entryConnectedFields.length}
                   </Text>
                 </Flex>
                 <Button
@@ -194,20 +207,23 @@ function ConnectedFieldsModal({
                   </Table.Row>
                 </Table.Head>
                 <Table.Body>
-                  {entry.fields.map((field) => (
-                    <Table.Row key={field.uniqueId()}>
-                      <Table.Cell className={styles.checkboxCell}>
-                        <Checkbox
-                          isChecked={selectedFields.has(field.uniqueId())}
-                          onChange={() => handleFieldToggle(field.uniqueId())}
-                          aria-label={field.displayNameForCreate()}
-                        />
-                      </Table.Cell>
-                      <Table.Cell className={styles.boldCell}>
-                        {field.id.charAt(0).toUpperCase() + field.id.slice(1)}
-                      </Table.Cell>
-                    </Table.Row>
-                  ))}
+                  {entryConnectedFields.map((field) => {
+                    const fieldId = `${field.fieldId}${field.locale ? `-${field.locale}` : ''}`;
+                    return (
+                      <Table.Row key={fieldId}>
+                        <Table.Cell className={styles.checkboxCell}>
+                          <Checkbox
+                            isChecked={selectedFields.has(fieldId)}
+                            onChange={() => handleFieldToggle(fieldId)}
+                            aria-label={getFieldDisplayName(field.fieldId, field.locale)}
+                          />
+                        </Table.Cell>
+                        <Table.Cell className={styles.boldCell}>
+                          {getFieldDisplayName(field.fieldId, field.locale)}
+                        </Table.Cell>
+                      </Table.Row>
+                    );
+                  })}
                 </Table.Body>
               </Table>
             </Box>
@@ -285,6 +301,7 @@ const Page = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [configEntry, setConfigEntry] = useState<EntryProps | null>(null);
+  const [entryConnectedFields, setEntryConnectedFields] = useState<EntryConnectedFields>([]);
 
   const cma = createClient(
     { apiAdapter: sdk.cmaAdapter },
@@ -298,7 +315,7 @@ const Page = () => {
   );
 
   useEffect(() => {
-    (async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
         const config = await getConfigEntry(cma);
@@ -317,7 +334,9 @@ const Page = () => {
       } finally {
         setLoading(false);
       }
-    })();
+    };
+
+    fetchData();
   }, []);
 
   const hasConnectedEntries = () => {
@@ -326,12 +345,18 @@ const Page = () => {
 
   const handleViewFields = (entry: Entry) => {
     setModalEntry(entry);
+    if (configEntry) {
+      const configField = configEntry.fields[CONFIG_FIELD_ID];
+      const connectedFields = Object.values(configField)[0] as ConnectedFields;
+      setEntryConnectedFields(connectedFields[entry.id] || []);
+    }
     setModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
     setModalEntry(null);
+    setEntryConnectedFields([]);
   };
 
   const handleViewEntry = () => {
@@ -347,19 +372,22 @@ const Page = () => {
     const connectedFields = Object.values(configField)[0] as ConnectedFields;
     const entryConnectedFields = connectedFields[entry.id];
 
-    const isNotField = (field: { fieldId: any; locale?: string; contentBlockId?: string }) =>
-      !selectedFieldIds.includes(field.fieldId);
+    const isNotField = (field: { fieldId: string; locale?: string; contentBlockId?: string }) => {
+      const fieldId = `${field.fieldId}${field.locale ? `-${field.locale}` : ''}`;
+      return !selectedFieldIds.includes(fieldId);
+    };
 
-    if (entryConnectedFields.length === 1) {
-      // If this is the last connected field, we remove the entire entry from connectedFields
+    if (entryConnectedFields.length === selectedFieldIds.length) {
+      // If all fields are being disconnected, remove the entire entry
       delete connectedFields[entry.id];
-    } else if (entryConnectedFields.length > 1) {
-      connectedFields[entry.id] = [...entryConnectedFields.filter((field) => isNotField(field))];
+    } else if (entryConnectedFields.length > selectedFieldIds.length) {
+      // Remove only the selected fields
+      connectedFields[entry.id] = entryConnectedFields.filter(isNotField);
     }
 
-    const updatedConfig = await updateConfig(configEntry, connectedFields, cma);
+    const newConfig = await updateConfig(configEntry, connectedFields, cma);
 
-    setConfigEntry(updatedConfig);
+    setConfigEntry(newConfig);
     setModalOpen(false);
     setShowSuccess(true);
   };
@@ -415,6 +443,7 @@ const Page = () => {
                 onViewEntry={handleViewEntry}
                 cma={cma}
                 onDisconnect={handleDisconnectFields}
+                entryConnectedFields={entryConnectedFields}
               />
             )}
             {showSuccess && (

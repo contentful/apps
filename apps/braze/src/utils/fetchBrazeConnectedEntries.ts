@@ -38,14 +38,14 @@ export async function fetchBrazeConnectedEntries(
       const connectedFieldIds = entryConnectedFields.map((f) => f.fieldId);
 
       const fieldsFactory = new FieldsFactory(entryId, entryContentTypeId, cma);
-      const fieldsAndTitle = await fieldsFactory.createFieldsForConnectedEntry(connectedFieldIds);
-      const entryTitle = rawEntry.fields[fieldsAndTitle.title]?.[defaultLocale] || 'Untitled';
+      const fields = await fieldsFactory.createFieldsForConnectedEntry(connectedFieldIds);
+      const entryTitle = rawEntry.fields[fields.title]?.[defaultLocale] || 'Untitled';
 
       return new Entry(
         entryId,
         entryContentTypeId,
         entryTitle,
-        fieldsAndTitle.fields,
+        fields.fields,
         spaceId,
         environmentId,
         contentfulApiKey,
