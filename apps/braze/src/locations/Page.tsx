@@ -107,9 +107,10 @@ function ConnectedFieldsModal({
 }) {
   const [selectedFields, setSelectedFields] = useState<Set<string>>(() => new Set());
 
-  const allFieldIds = entryConnectedFields.map(
-    (f) => `${f.fieldId}${f.locale ? `-${f.locale}` : ''}`
-  );
+  const getFieldId = (field: { fieldId: string; locale?: string }) =>
+    `${field.fieldId}${field.locale ? `-${field.locale}` : ''}`;
+
+  const allFieldIds = entryConnectedFields.map(getFieldId);
   const allSelected = allFieldIds.every((id) => selectedFields.has(id));
   const someSelected = allFieldIds.some((id) => selectedFields.has(id));
 
@@ -208,7 +209,7 @@ function ConnectedFieldsModal({
                 </Table.Head>
                 <Table.Body>
                   {entryConnectedFields.map((field) => {
-                    const fieldId = `${field.fieldId}${field.locale ? `-${field.locale}` : ''}`;
+                    const fieldId = getFieldId(field);
                     return (
                       <Table.Row key={fieldId}>
                         <Table.Cell className={styles.checkboxCell}>
@@ -372,21 +373,19 @@ const Page = () => {
     const connectedFields = Object.values(configField)[0] as ConnectedFields;
     const entryConnectedFields = connectedFields[entry.id];
 
-    const isNotField = (field: { fieldId: string; locale?: string; contentBlockId?: string }) => {
-      const fieldId = `${field.fieldId}${field.locale ? `-${field.locale}` : ''}`;
-      return !selectedFieldIds.includes(fieldId);
-    };
+    const getFieldId = (field: { fieldId: string; locale?: string }) =>
+      `${field.fieldId}${field.locale ? `-${field.locale}` : ''}`;
+
+    const isNotField = (field: { fieldId: string; locale?: string; contentBlockId?: string }) =>
+      !selectedFieldIds.includes(getFieldId(field));
 
     if (entryConnectedFields.length === selectedFieldIds.length) {
-      // If all fields are being disconnected, remove the entire entry
       delete connectedFields[entry.id];
     } else if (entryConnectedFields.length > selectedFieldIds.length) {
-      // Remove only the selected fields
       connectedFields[entry.id] = entryConnectedFields.filter(isNotField);
     }
 
     const newConfig = await updateConfig(configEntry, connectedFields, cma);
-
     setConfigEntry(newConfig);
     setModalOpen(false);
     setShowSuccess(true);
