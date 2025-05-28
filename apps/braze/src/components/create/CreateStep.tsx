@@ -78,10 +78,10 @@ type CreateStepProps = {
 
 // Utils
 export const getDefaultContentBlockName = (entry: Entry, fieldId: string, locale?: string) => {
-  const entryTitle = entry.title || 'Untitled';
+  let entryTitle = entry.title || 'Untitled';
   fieldId = localizeFieldId(fieldId, locale);
-  // TODO: remove other special characters
-  return `${entryTitle.replace(/\s+/g, '-')}-${fieldId}`;
+  entryTitle = entryTitle.replace(/\s+/g, '-').replace(/[^A-Za-z0-9_-]/g, '');
+  return `${entryTitle}-${fieldId}`;
 };
 
 const isValidContentBlockName = (name: string): boolean => {
@@ -298,7 +298,7 @@ const CreateStep = ({
     selectedFields.forEach((fieldId) => {
       const isLocalized = entry.fields.find((f) => f.id === fieldId)?.localized || false;
       if (isLocalized && !!selectedLocales) {
-        selectedFields.forEach((locale) => {
+        selectedLocales.forEach((locale) => {
           const localizedFieldId = localizeFieldId(fieldId, locale);
           initialStates.names[localizedFieldId] = getDefaultContentBlockName(
             entry,

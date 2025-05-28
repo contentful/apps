@@ -136,6 +136,12 @@ describe('CreateStep', () => {
       const defaultName = getDefaultContentBlockName(mockEntry, 'field1');
       expect(defaultName).toBe('Test-Entry-field1');
     });
+
+    it('removes any not permitted characters', () => {
+      mockEntry.title = 'Test Entry!!!';
+      const defaultName = getDefaultContentBlockName(mockEntry, 'field1');
+      expect(defaultName).toBe('Test-Entry-field1');
+    });
   });
 
   describe('when handling creation results', () => {
