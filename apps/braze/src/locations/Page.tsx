@@ -56,10 +56,6 @@ const getLastUpdatedTime = (dateString: string | undefined) => {
   });
 };
 
-const getConnectedFieldsCount = (connectedFields: Field[]) => {
-  return connectedFields.length;
-};
-
 function LoadingState() {
   return (
     <Flex alignItems="center" justifyContent="center" className={styles.loading}>
@@ -241,10 +237,19 @@ function ConnectedFieldsModal({
 function ConnectedEntriesTable({
   entries,
   onViewFields,
+  configEntry,
 }: {
   entries: Entry[];
   onViewFields: (entry: Entry) => void;
+  configEntry: EntryProps | null;
 }) {
+  const getConnectedFieldsCount = (entry: Entry) => {
+    if (!configEntry) return 0;
+    const configField = configEntry.fields[CONFIG_FIELD_ID];
+    const connectedFields = Object.values(configField)[0] as ConnectedFields;
+    return connectedFields[entry.id]?.length || 0;
+  };
+
   return (
     <Box marginTop="spacingXl">
       <Flex justifyContent="end" alignItems="center" marginBottom="spacingXs">
@@ -269,7 +274,7 @@ function ConnectedEntriesTable({
             const contentType = entry.contentType;
             const updated = getLastUpdatedTime(entry.updatedAt);
             const status = entry.state;
-            const connectedCount = getConnectedFieldsCount(entry.fields);
+            const connectedCount = getConnectedFieldsCount(entry);
             return (
               <Table.Row key={entry.id}>
                 <Table.Cell>{name}</Table.Cell>
@@ -427,7 +432,11 @@ const Page = () => {
                 message="Once you have created Content Blocks, they will display here."
               />
             ) : (
-              <ConnectedEntriesTable entries={entries} onViewFields={handleViewFields} />
+              <ConnectedEntriesTable
+                entries={entries}
+                onViewFields={handleViewFields}
+                configEntry={configEntry}
+              />
             )}
             {modalEntry && (
               <ConnectedFieldsModal
