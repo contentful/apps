@@ -117,10 +117,6 @@ const ConfigScreen = () => {
       selectedContentTypes.map((contentType) => contentType.id)
     );
 
-    const response: { parameters: AppInstallationParameters; targetState?: any } = {
-      parameters,
-    };
-
     const editorInterface = selectedContentTypes.reduce((acc, contentType) => {
       return {
         ...acc,
@@ -130,11 +126,10 @@ const ConfigScreen = () => {
       };
     }, {});
 
-    if (Object.keys(editorInterface).length !== 0) {
-      response.targetState = { ...currentState, EditorInterface: editorInterface };
-    }
-
-    return response;
+    return {
+      parameters,
+      targetState: { EditorInterface: { ...currentState?.EditorInterface, ...editorInterface } },
+    };
   }, [parameters, sdk, cma, selectedContentTypes]);
 
   useEffect(() => {
@@ -296,6 +291,7 @@ function ContentTypeSection(props: {
   cma: PlainClientAPI;
   sdk: ConfigAppSDK;
 }) {
+  const { selectedContentTypes, setSelectedContentTypes, cma, sdk } = props;
   const [availableContentTypes, setAvailableContentTypes] = useState<
     { id: string; name: string }[]
   >([]);
@@ -310,9 +306,9 @@ function ContentTypeSection(props: {
     let areMoreContentTypes = true;
 
     while (areMoreContentTypes) {
-      const response = await props.cma.contentType.getMany({
-        spaceId: props.sdk.ids.space,
-        environmentId: props.sdk.ids.environment,
+      const response = await cma.contentType.getMany({
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
         query: { skip, limit },
       });
       if (response.items) {
@@ -329,15 +325,28 @@ function ContentTypeSection(props: {
 
   useEffect(() => {
     (async () => {
-      const contentTypes = await fetchAllContentTypes();
-      const newAvailableContentTypes = contentTypes.map((ct) => ({
-        id: ct.sys.id,
-        name: ct.name,
-      }));
+      const currentState = await sdk.app.getCurrentState();
+      const currentContentTypesIds = Object.keys(currentState?.EditorInterface || {});
+      const excludedContentTypesIds = [CONFIG_CONTENT_TYPE_ID, ...currentContentTypesIds];
+
+      const allContentTypes = await fetchAllContentTypes();
+
+      const currentContentTypes = allContentTypes
+        .filter((ct) => currentContentTypesIds.includes(ct.sys.id))
+        .map((ct) => ({ id: ct.sys.id, name: ct.name }));
+
+      const newAvailableContentTypes = allContentTypes
+        .filter((ct) => !excludedContentTypesIds.includes(ct.sys.id))
+        .map((ct) => ({
+          id: ct.sys.id,
+          name: ct.name,
+        }));
+
       setAvailableContentTypes(newAvailableContentTypes);
       setFilteredContentTypes(
         newAvailableContentTypes.sort((a, b) => a.name.localeCompare(b.name))
       );
+      setSelectedContentTypes(currentContentTypes);
     })();
   }, []);
 
@@ -350,13 +359,13 @@ function ContentTypeSection(props: {
   };
 
   const handleSelectItem = (item: { id: string; name: string }) => {
-    props.setSelectedContentTypes([...props.selectedContentTypes, item]);
+    setSelectedContentTypes([...selectedContentTypes, item]);
     setFilteredContentTypes(filteredContentTypes.filter(({ id, name }) => id !== item.id));
   };
 
   const handleUnselectItem = (item: { id: string; name: string }) => {
-    props.setSelectedContentTypes(
-      props.selectedContentTypes.filter((contentType) => contentType.id !== item.id)
+    setSelectedContentTypes(
+      selectedContentTypes.filter((contentType) => contentType.id !== item.id)
     );
     setFilteredContentTypes(
       [...filteredContentTypes, item].sort((a, b) => a.name.localeCompare(b.name))
@@ -387,11 +396,11 @@ function ContentTypeSection(props: {
           listWidth="full"
         />
 
-        {props.selectedContentTypes.length > 0 && (
+        {selectedContentTypes.length > 0 && (
           <>
             <Paragraph>Selected content types:</Paragraph>
             <Flex flexDirection="row" gap="spacing2Xs">
-              {props.selectedContentTypes.map((contentType, index) => (
+              {selectedContentTypes.map((contentType, index) => (
                 <Pill
                   key={index}
                   label={contentType.name}
