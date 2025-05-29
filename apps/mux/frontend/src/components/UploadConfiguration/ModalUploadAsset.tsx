@@ -1,40 +1,58 @@
 import { FC, useState } from 'react';
 import { Modal, Button, Accordion } from '@contentful/f36-components';
-import { InstallationParams } from '../../util/types';
 import { VideoQualitySelector } from './VideoQualitySelector';
 import { PlaybackPolicySelector } from './PlaybackPolicySelector';
-import CaptionsConfiguration, { CaptionsConfig } from './CaptionsConfiguration';
+import { CaptionsConfiguration, CaptionsConfig } from './CaptionsConfiguration';
 import Mp4RenditionsConfiguration, { Mp4RenditionsConfig } from './Mp4RenditionsConfiguration';
+import MetadataConfiguration, { MetadataConfig } from './MetadataConfiguration';
 
 export interface ModalData {
   videoQuality: string;
   playbackPolicies: string[];
   captionsConfig: CaptionsConfig;
   mp4Config: Mp4RenditionsConfig;
+  metadataConfig: MetadataConfig;
 }
 
-type ModalProps = {
+interface ModalUploadAssetProps {
   isShown: boolean;
   onClose: () => void;
-  onConfirm: (options: ModalData) => void;
-  installationParams: InstallationParams;
-};
+  onConfirm: (data: ModalData) => void;
+  installationParams: {
+    muxEnableSignedUrls: boolean;
+  };
+}
 
-const ModalContent: FC<ModalProps> = ({
+const ModalContent: FC<ModalUploadAssetProps> = ({
   isShown = false,
   onClose,
   onConfirm,
   installationParams,
 }) => {
-  const [videoQuality, setVideoQuality] = useState('plus');
-  const [playbackPolicies, setPlaybackPolicies] = useState<string[]>(['public']);
-  const [captionsConfig, setCaptionsConfig] = useState<CaptionsConfig>({
-    captionsType: 'off',
-  });
-  const [mp4Config, setMp4Config] = useState<Mp4RenditionsConfig>({
-    enabled: false,
-    highestResolution: true,
-    audioOnly: false,
+  const [modalData, setModalData] = useState<ModalData>({
+    videoQuality: 'plus',
+    playbackPolicies: ['public'],
+    captionsConfig: {
+      captionsType: 'off',
+      languageCode: null,
+      languageName: null,
+      url: null,
+      closedCaptions: null,
+    },
+    mp4Config: {
+      enabled: false,
+      audioOnly: false,
+      highestResolution: false,
+    },
+    metadataConfig: {
+      enabled: false,
+      standardMetadata: {
+        title: undefined,
+        creatorId: undefined,
+        externalId: undefined,
+      },
+      customMetadata: undefined,
+    },
   });
   const { muxEnableSignedUrls } = installationParams;
   const [videoQualityExpanded, setVideoQualityExpanded] = useState<boolean>(true);
@@ -43,6 +61,7 @@ const ModalContent: FC<ModalProps> = ({
     playbackPolicies: true,
     captions: true,
     mp4: true,
+    metadata: true,
   });
 
   const handleValidationChange = (componentId: string, isValid: boolean) => {
@@ -65,32 +84,50 @@ const ModalContent: FC<ModalProps> = ({
             onExpand={() => setVideoQualityExpanded(true)}
             onCollapse={() => setVideoQualityExpanded(false)}>
             <VideoQualitySelector
-              selectedQuality={videoQuality}
-              onQualityChange={setVideoQuality}
+              selectedQuality={modalData.videoQuality}
+              onQualityChange={(quality) =>
+                setModalData((prev) => ({ ...prev, videoQuality: quality }))
+              }
             />
           </Accordion.Item>
 
           <Accordion.Item title="Privacy Settings">
             <PlaybackPolicySelector
-              selectedPolicies={playbackPolicies}
-              onPoliciesChange={setPlaybackPolicies}
+              selectedPolicies={modalData.playbackPolicies}
+              onPoliciesChange={(policies) =>
+                setModalData((prev) => ({ ...prev, playbackPolicies: policies }))
+              }
               enableSignedUrls={muxEnableSignedUrls}
               onValidationChange={(isValid) => handleValidationChange('playbackPolicies', isValid)}
             />
           </Accordion.Item>
 
+          <Accordion.Item title="Metadata">
+            <MetadataConfiguration
+              metadataConfig={modalData.metadataConfig}
+              onMetadataChange={(config) =>
+                setModalData((prev) => ({ ...prev, metadataConfig: config }))
+              }
+              onValidationChange={(isValid) => handleValidationChange('metadata', isValid)}
+            />
+          </Accordion.Item>
+
           <Accordion.Item title="Captions">
             <CaptionsConfiguration
-              captionsConfig={captionsConfig}
-              onCaptionsChange={setCaptionsConfig}
+              captionsConfig={modalData.captionsConfig}
+              onCaptionsChange={(config) =>
+                setModalData((prev) => ({ ...prev, captionsConfig: config }))
+              }
               onValidationChange={(isValid) => handleValidationChange('captions', isValid)}
             />
           </Accordion.Item>
 
           <Accordion.Item title="MP4 Generation">
             <Mp4RenditionsConfiguration
-              mp4Config={mp4Config}
-              onMp4ConfigChange={setMp4Config}
+              mp4Config={modalData.mp4Config}
+              onMp4ConfigChange={(config) =>
+                setModalData((prev) => ({ ...prev, mp4Config: config }))
+              }
               onValidationChange={(isValid) => handleValidationChange('mp4', isValid)}
             />
           </Accordion.Item>
@@ -104,7 +141,7 @@ const ModalContent: FC<ModalProps> = ({
         <Button
           size="small"
           variant="positive"
-          onClick={() => onConfirm({ videoQuality, playbackPolicies, captionsConfig, mp4Config })}
+          onClick={() => onConfirm(modalData)}
           isDisabled={!isFormValid}>
           Upload
         </Button>
@@ -113,7 +150,7 @@ const ModalContent: FC<ModalProps> = ({
   );
 };
 
-const ModalUploadAsset: FC<ModalProps> = (props) => {
+const ModalUploadAsset: FC<ModalUploadAssetProps> = (props) => {
   if (!props.isShown) return null;
   return <ModalContent {...props} />;
 };
