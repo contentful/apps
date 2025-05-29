@@ -27,6 +27,7 @@ export const styles = {
   }),
   modalMainContainer: css({
     minWidth: 400,
+    maxHeight: '50vh',
   }),
   modalEntryContainer: css({
     border: `1px solid ${tokens.gray300}`,

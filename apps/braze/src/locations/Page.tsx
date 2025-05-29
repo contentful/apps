@@ -140,7 +140,6 @@ function ConnectedFieldsModal({
   };
 
   const fieldsWithErrors = entryConnectedFields.filter((field) => field.error);
-
   return (
     <Modal isShown={isShown} onClose={onClose} size="medium" testId="connected-fields-modal">
       {() => (
@@ -230,15 +229,17 @@ function ConnectedFieldsModal({
                           />
                         </Table.Cell>
                         <Table.Cell className={styles.baseCell}>
-                          <Flex flexDirection="row">
+                          <Flex flexDirection="row" gap="spacingXs">
                             <Text fontWeight="fontWeightDemiBold">
                               {getFieldDisplayName(field.fieldId, field.locale)}
                             </Text>
-                            <Badge
-                              variant="negative"
-                              startIcon={
-                                <WarningOctagonIcon />
-                              }>{`Error code ${field.error?.status}`}</Badge>
+                            {field.error && (
+                              <Badge
+                                variant="negative"
+                                startIcon={
+                                  <WarningOctagonIcon />
+                                }>{`Error code ${field.error?.status}`}</Badge>
+                            )}
                           </Flex>
                         </Table.Cell>
                       </Table.Row>
