@@ -291,6 +291,9 @@ const CreateStep = ({
 
   // Effects
   useEffect(() => {
+    if (Object.keys(contentBlocksData.names).length > 0) {
+      return;
+    }
     const initialStates: ContentBlockData = {
       names: {},
       descriptions: {},
