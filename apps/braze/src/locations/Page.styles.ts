@@ -2,7 +2,7 @@ import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 
 const baseTableCell = {
-  paddingTop: tokens.spacingXs,
+  paddingTop: tokens.spacingS,
   paddingBottom: tokens.spacingXs,
 };
 
@@ -48,13 +48,16 @@ export const styles = {
   }),
   baseCell: css({
     ...baseTableCell,
+    paddingLeft: 0,
+    verticalAlign: 'middle',
   }),
   checkboxCell: css({
     ...baseTableCell,
     width: 40,
+    paddingRight: tokens.spacingXs,
+    verticalAlign: 'middle',
   }),
   boldCell: css({
-    ...baseTableCell,
     fontWeight: 'bold',
   }),
 };

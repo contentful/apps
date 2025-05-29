@@ -11,6 +11,7 @@ import {
   Subheading,
   Modal,
   Checkbox,
+  Stack,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { PageAppSDK } from '@contentful/app-sdk';
@@ -18,9 +19,17 @@ import { fetchBrazeConnectedEntries } from '../utils/fetchBrazeConnectedEntries'
 import InformationWithLink from '../components/InformationWithLink';
 import { styles } from './Page.styles';
 import Splitter from '../components/Splitter';
-import { createClient } from 'contentful-management';
+import { createClient, EntryProps, PlainClientAPI } from 'contentful-management';
 import { Entry } from '../fields/Entry';
-import { BRAZE_CONTENT_BLOCK_DOCUMENTATION } from '../utils';
+import {
+  BRAZE_CONTENT_BLOCK_DOCUMENTATION,
+  CONFIG_FIELD_ID,
+  ConnectedFields,
+  EntryConnectedFields,
+  getConfigEntry,
+  localizeFieldId,
+  updateConfig,
+} from '../utils';
 import { Field } from '../fields/Field';
 
 const getStatusBadge = (status: string) => {
@@ -46,10 +55,6 @@ const getLastUpdatedTime = (dateString: string | undefined) => {
     month: 'short',
     year: 'numeric',
   });
-};
-
-const getConnectedFieldsCount = (connectedFields: Field[]) => {
-  return connectedFields.length;
 };
 
 function LoadingState() {
@@ -85,14 +90,21 @@ function ConnectedFieldsModal({
   isShown,
   onClose,
   onViewEntry,
+  onDisconnect,
+  entryConnectedFields,
 }: {
   entry: Entry;
   isShown: boolean;
   onClose: () => void;
   onViewEntry: () => void;
+  onDisconnect: (selectedFieldIds: string[], entry: Entry) => void;
+  entryConnectedFields: EntryConnectedFields;
 }) {
   const [selectedFields, setSelectedFields] = useState<Set<string>>(() => new Set());
-  const allFieldIds = entry.fields.map((f) => f.uniqueId());
+
+  const allFieldIds = entryConnectedFields.map((field) =>
+    localizeFieldId(field.fieldId, field.locale)
+  );
   const allSelected = allFieldIds.every((id) => selectedFields.has(id));
   const someSelected = allFieldIds.some((id) => selectedFields.has(id));
 
@@ -116,6 +128,18 @@ function ConnectedFieldsModal({
     });
   };
 
+  const handleDisconnect = async () => {
+    onDisconnect(Array.from(selectedFields), entry);
+    setSelectedFields(new Set());
+  };
+
+  const getFieldDisplayName = (fieldId: string, locale?: string) => {
+    const field = entry.fields.find((f) => f.id === fieldId);
+    if (!field) return fieldId;
+    const displayName = field.displayNameForCreate();
+    return locale ? `${displayName} (${locale})` : displayName;
+  };
+
   return (
     <Modal isShown={isShown} onClose={onClose} size="medium" testId="connected-fields-modal">
       {() => (
@@ -137,7 +161,7 @@ function ConnectedFieldsModal({
                     Connected fields
                   </Text>
                   <Text data-testid="modal-fields-length" fontWeight="fontWeightDemiBold">
-                    {entry.fields.length}
+                    {entryConnectedFields.length}
                   </Text>
                 </Flex>
                 <Button
@@ -148,7 +172,19 @@ function ConnectedFieldsModal({
                   View entry
                 </Button>
               </Box>
-              <Table className={styles.modalConnectedFieldsContainer}>
+              {selectedFields.size > 0 && (
+                <Stack
+                  flexDirection="column"
+                  spacing="spacing2Xs"
+                  marginBottom="spacingM"
+                  alignItems="start">
+                  <Text fontColor="gray600">{selectedFields.size} selected</Text>
+                  <Button variant="negative" size="small" onClick={handleDisconnect}>
+                    Disconnect
+                  </Button>
+                </Stack>
+              )}
+              <Table>
                 <Table.Head>
                   <Table.Row>
                     <Table.Cell className={styles.checkboxCell}>
@@ -161,25 +197,30 @@ function ConnectedFieldsModal({
                       />
                     </Table.Cell>
                     <Table.Cell className={styles.baseCell}>
-                      <Text>Field name</Text>
+                      <Text>Select all fields</Text>
                     </Table.Cell>
                   </Table.Row>
                 </Table.Head>
                 <Table.Body>
-                  {entry.fields.map((field) => (
-                    <Table.Row key={field.uniqueId()}>
-                      <Table.Cell className={styles.checkboxCell}>
-                        <Checkbox
-                          isChecked={selectedFields.has(field.uniqueId())}
-                          onChange={() => handleFieldToggle(field.uniqueId())}
-                          aria-label={field.displayNameForCreate()}
-                        />
-                      </Table.Cell>
-                      <Table.Cell className={styles.boldCell}>
-                        {field.id.charAt(0).toUpperCase() + field.id.slice(1)}
-                      </Table.Cell>
-                    </Table.Row>
-                  ))}
+                  {entryConnectedFields.map((field) => {
+                    const fieldId = localizeFieldId(field.fieldId, field.locale);
+                    return (
+                      <Table.Row key={fieldId}>
+                        <Table.Cell className={styles.checkboxCell}>
+                          <Checkbox
+                            isChecked={selectedFields.has(fieldId)}
+                            onChange={() => handleFieldToggle(fieldId)}
+                            aria-label={getFieldDisplayName(field.fieldId, field.locale)}
+                          />
+                        </Table.Cell>
+                        <Table.Cell className={styles.baseCell}>
+                          <Text fontWeight="fontWeightDemiBold">
+                            {getFieldDisplayName(field.fieldId, field.locale)}
+                          </Text>
+                        </Table.Cell>
+                      </Table.Row>
+                    );
+                  })}
                 </Table.Body>
               </Table>
             </Box>
@@ -198,10 +239,19 @@ function ConnectedFieldsModal({
 function ConnectedEntriesTable({
   entries,
   onViewFields,
+  configEntry,
 }: {
   entries: Entry[];
   onViewFields: (entry: Entry) => void;
+  configEntry: EntryProps | null;
 }) {
+  const getConnectedFieldsCount = (entry: Entry) => {
+    if (!configEntry) return 0;
+    const configField = configEntry.fields[CONFIG_FIELD_ID];
+    const connectedFields = Object.values(configField)[0] as ConnectedFields;
+    return connectedFields[entry.id]?.length || 0;
+  };
+
   return (
     <Box marginTop="spacingXl">
       <Flex justifyContent="end" alignItems="center" marginBottom="spacingXs">
@@ -226,7 +276,7 @@ function ConnectedEntriesTable({
             const contentType = entry.contentType;
             const updated = getLastUpdatedTime(entry.updatedAt);
             const status = entry.state;
-            const connectedCount = getConnectedFieldsCount(entry.fields);
+            const connectedCount = getConnectedFieldsCount(entry);
             return (
               <Table.Row key={entry.id}>
                 <Table.Cell>{name}</Table.Cell>
@@ -255,6 +305,9 @@ const Page = () => {
   const [error, setError] = useState<string | null>(null);
   const [modalEntry, setModalEntry] = useState<Entry | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [configEntry, setConfigEntry] = useState<EntryProps | null>(null);
+  const [entryConnectedFields, setEntryConnectedFields] = useState<EntryConnectedFields>([]);
 
   const cma = createClient(
     { apiAdapter: sdk.cmaAdapter },
@@ -267,24 +320,29 @@ const Page = () => {
     }
   );
 
-  useEffect(() => {
+  const loadEntries = async () => {
     setLoading(true);
-    fetchBrazeConnectedEntries(
-      cma,
-      sdk.parameters?.installation?.contentfulApiKey,
-      sdk.ids.space,
-      sdk.ids.environment,
-      sdk.locales.default
-    )
-      .then((entries) => {
-        setEntries(entries);
-      })
-      .catch(() => {
-        setError('Error loading connected entries');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    try {
+      const config = await getConfigEntry(cma);
+      setConfigEntry(config);
+      const entries = await fetchBrazeConnectedEntries(
+        cma,
+        sdk.parameters?.installation?.contentfulApiKey,
+        sdk.ids.space,
+        sdk.ids.environment,
+        sdk.locales.default,
+        config
+      );
+      setEntries(entries);
+    } catch (error) {
+      setError('Error loading connected entries');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadEntries();
   }, []);
 
   const hasConnectedEntries = () => {
@@ -293,18 +351,53 @@ const Page = () => {
 
   const handleViewFields = (entry: Entry) => {
     setModalEntry(entry);
+    if (configEntry) {
+      const configField = configEntry.fields[CONFIG_FIELD_ID];
+      const connectedFields = Object.values(configField)[0] as ConnectedFields;
+      setEntryConnectedFields(connectedFields[entry.id] || []);
+    }
     setModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
     setModalEntry(null);
+    setEntryConnectedFields([]);
   };
 
   const handleViewEntry = () => {
     if (modalEntry) {
       sdk.navigator.openEntry(modalEntry.id);
     }
+  };
+
+  const handleDisconnectFields = async (selectedFieldIds: string[], entry: Entry) => {
+    if (!configEntry) return;
+
+    const configField = configEntry.fields[CONFIG_FIELD_ID];
+    const connectedFields = Object.values(configField)[0] as ConnectedFields;
+    const entryConnectedFields = connectedFields[entry.id];
+
+    const isNotSelectedField = (field: {
+      fieldId: string;
+      locale?: string;
+      contentBlockId?: string;
+    }) => !selectedFieldIds.includes(localizeFieldId(field.fieldId, field.locale));
+
+    if (entryConnectedFields.length === selectedFieldIds.length) {
+      delete connectedFields[entry.id];
+    } else if (entryConnectedFields.length > selectedFieldIds.length) {
+      connectedFields[entry.id] = entryConnectedFields.filter(isNotSelectedField);
+    }
+
+    await updateConfig(configEntry, connectedFields, cma);
+    setModalOpen(false);
+    setShowSuccess(true);
+  };
+
+  const handleCloseSuccess = async () => {
+    setShowSuccess(false);
+    await loadEntries();
   };
 
   return (
@@ -344,7 +437,11 @@ const Page = () => {
                 message="Once you have created Content Blocks, they will display here."
               />
             ) : (
-              <ConnectedEntriesTable entries={entries} onViewFields={handleViewFields} />
+              <ConnectedEntriesTable
+                entries={entries}
+                onViewFields={handleViewFields}
+                configEntry={configEntry}
+              />
             )}
             {modalEntry && (
               <ConnectedFieldsModal
@@ -352,7 +449,26 @@ const Page = () => {
                 isShown={modalOpen}
                 onClose={handleCloseModal}
                 onViewEntry={handleViewEntry}
+                onDisconnect={handleDisconnectFields}
+                entryConnectedFields={entryConnectedFields}
               />
+            )}
+            {showSuccess && (
+              <Modal isShown={showSuccess} onClose={handleCloseSuccess} size="small">
+                {() => (
+                  <>
+                    <Modal.Header title="Disconnect from Braze" onClose={handleCloseSuccess} />
+                    <Modal.Content>
+                      <Text>Fields successfully disconnected from Braze.</Text>
+                    </Modal.Content>
+                    <Modal.Controls>
+                      <Button variant="secondary" size="small" onClick={handleCloseSuccess}>
+                        Close
+                      </Button>
+                    </Modal.Controls>
+                  </>
+                )}
+              </Modal>
             )}
           </Box>
         </Box>

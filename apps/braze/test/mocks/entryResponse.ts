@@ -1,4 +1,4 @@
-import { EntryProps } from 'contentful-management';
+import { EntryProps, KeyValueMap } from 'contentful-management';
 
 export function createEntryResponse(
   fields: Record<string, any>,
@@ -40,3 +40,24 @@ export function createEntryResponse(
     fields: Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, value])),
   };
 }
+
+export const mockConfigEntrySys = {
+  type: 'Entry',
+  id: 'config-entry',
+  contentType: { sys: { type: 'Link', linkType: 'ContentType', id: 'config' } },
+  space: { sys: { type: 'Link', linkType: 'Space', id: 'space-id' } },
+  environment: { sys: { type: 'Link', linkType: 'Environment', id: 'environment-id' } },
+  version: 1,
+  createdAt: '2024-01-01T00:00:00Z',
+  updatedAt: '2024-01-01T00:00:00Z',
+  automationTags: [],
+};
+
+export const createConfigEntry = (connectedFields: KeyValueMap) => {
+  return {
+    sys: mockConfigEntrySys,
+    fields: {
+      connectedFields,
+    },
+  };
+};

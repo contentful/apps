@@ -3,10 +3,16 @@ import { cleanup } from '@testing-library/react';
 import { fetchBrazeConnectedEntries } from '../../src/utils/fetchBrazeConnectedEntries';
 import { Entry } from '../../src/fields/Entry';
 import { BasicField } from '../../src/fields/BasicField';
-import { mockConnectedFields, mockSingleConnectedField } from '../mocks/connectedFields';
+import {
+  mockConfigEntryWithLocalizedFields,
+  mockConnectedFields,
+  mockSingleConnectedField,
+} from '../mocks/connectedFields';
 import { createContentTypeResponse } from '../mocks/contentTypeResponse';
-import { createEntryResponse as createEntryResponse } from '../mocks/entryResponse';
-import { isPublished } from 'contentful-management';
+import {
+  createConfigEntry,
+  createEntryResponse as createEntryResponse,
+} from '../mocks/entryResponse';
 
 describe('fetchBrazeConnectedEntries', () => {
   const mockCma = {
@@ -52,7 +58,6 @@ describe('fetchBrazeConnectedEntries', () => {
   };
 
   it('returns an entry when two fields are connected', async () => {
-    mockCma.entry.get.mockResolvedValue(mockConnectedFields);
     const title = new BasicField('title', 'Title', 'content-type-id', true);
     const author = new BasicField('author', 'Author', 'content-type-id', true);
     const expectedEntry = createExpectedEntry([title, author]);
@@ -62,14 +67,14 @@ describe('fetchBrazeConnectedEntries', () => {
       'valid-contentful-api-key',
       'space-id',
       'environment-id',
-      'en-US'
+      'en-US',
+      createConfigEntry(mockConnectedFields)
     );
 
     expect(result[0].serialize()).toEqual(expectedEntry.serialize());
   });
 
   it('returns an entry with only connected fields when one field is connected', async () => {
-    mockCma.entry.get.mockResolvedValue(mockSingleConnectedField);
     const title = new BasicField('title', 'Title', 'content-type-id', true);
     const expectedEntry = createExpectedEntry([title]);
 
@@ -78,7 +83,8 @@ describe('fetchBrazeConnectedEntries', () => {
       'valid-contentful-api-key',
       'space-id',
       'environment-id',
-      'en-US'
+      'en-US',
+      createConfigEntry(mockSingleConnectedField)
     );
 
     expect(result[0].serialize()).toEqual(expectedEntry.serialize());
