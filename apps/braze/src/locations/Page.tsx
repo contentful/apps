@@ -106,6 +106,7 @@ function ConnectedFieldsModal({
   );
   const allSelected = allFieldIds.every((id) => selectedFields.has(id));
   const someSelected = allFieldIds.some((id) => selectedFields.has(id));
+  const fieldsWithErrors = entryConnectedFields.filter((field) => field.error);
 
   const handleSelectAll = () => {
     if (allSelected) {
@@ -139,7 +140,6 @@ function ConnectedFieldsModal({
     return locale ? `${displayName} (${locale})` : displayName;
   };
 
-  const fieldsWithErrors = entryConnectedFields.filter((field) => field.error);
   return (
     <Modal isShown={isShown} onClose={onClose} size="medium" testId="connected-fields-modal">
       {() => (
@@ -269,11 +269,15 @@ function ConnectedEntriesTable({
   onViewFields: (entry: Entry) => void;
   configEntry: EntryProps | null;
 }) {
-  const getConnectedFieldsCount = (entry: Entry) => {
-    if (!configEntry) return 0;
+  function getConnectedEntries(): ConnectedFields {
+    if (!configEntry) return {};
     const configField = configEntry.fields[CONFIG_FIELD_ID];
-    const connectedFields = Object.values(configField)[0] as ConnectedFields;
-    return connectedFields[entry.id]?.length || 0;
+    return Object.values(configField)[0] as ConnectedFields;
+  }
+
+  const getConnectedFieldsCount = (entry: Entry) => {
+    const connectedFields = getConnectedEntries()[entry.id];
+    return connectedFields?.length || 0;
   };
 
   return (
@@ -301,13 +305,25 @@ function ConnectedEntriesTable({
             const updated = getLastUpdatedTime(entry.updatedAt);
             const status = entry.state;
             const connectedCount = getConnectedFieldsCount(entry);
+            const connectedFields = getConnectedEntries()[entry.id];
+            const hasErrors = connectedFields.some((field) => field.error);
+
             return (
               <Table.Row key={entry.id}>
                 <Table.Cell>{name}</Table.Cell>
                 <Table.Cell>{contentType}</Table.Cell>
                 <Table.Cell>{updated}</Table.Cell>
                 <Table.Cell>{getStatusBadge(status)}</Table.Cell>
-                <Table.Cell>{connectedCount}</Table.Cell>
+                <Table.Cell>
+                  <Flex flexDirection="row" gap="spacingM">
+                    {connectedCount}
+                    {hasErrors && (
+                      <Badge variant="negative" startIcon={<WarningOctagonIcon />}>
+                        Connection error
+                      </Badge>
+                    )}
+                  </Flex>
+                </Table.Cell>
                 <Table.Cell align="center" className={styles.buttonCell}>
                   <Button variant="secondary" size="small" onClick={() => onViewFields(entry)}>
                     View fields
