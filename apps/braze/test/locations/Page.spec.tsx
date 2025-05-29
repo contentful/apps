@@ -286,4 +286,104 @@ describe('Page Location', () => {
       expect(updateConfig).toHaveBeenCalled();
     });
   });
+
+  describe('Connected Fields Modal - Error Handling', () => {
+    const makeFieldWithError = (
+      id: string,
+      name: string,
+      error: { code: string; description: string }
+    ) => {
+      const field = new BasicField(id, name, 'content-type-id', true);
+      (field as any).error = error;
+      return field;
+    };
+
+    const error1 = { code: '123', description: 'First error' };
+    const error2 = { code: '456', description: 'Second error' };
+
+    const entryWithOneError = new Entry(
+      'entry-id',
+      'content-type-id',
+      'Dogs',
+      [
+        makeFieldWithError('title', 'Title', error1),
+        new BasicField('description', 'Description', 'content-type-id', false),
+        new BasicField('checkbox', 'Checkbox', 'content-type-id', false),
+      ],
+      'space-id',
+      'environment-id',
+      'valid-contentful-api-key',
+      '2025-05-15T16:49:16.367Z',
+      '2025-05-15T16:49:16.367Z'
+    );
+
+    const entryWithMultipleErrors = new Entry(
+      'entry-id',
+      'content-type-id',
+      'Dogs',
+      [
+        makeFieldWithError('title', 'Title', error1),
+        makeFieldWithError('description', 'Description', error2),
+        new BasicField('checkbox', 'Checkbox', 'content-type-id', false),
+      ],
+      'space-id',
+      'environment-id',
+      'valid-contentful-api-key',
+      '2025-05-15T16:49:16.367Z',
+      '2025-05-15T16:49:16.367Z'
+    );
+
+    beforeEach(() => {
+      (useSDK as unknown as Mock).mockReturnValue(mockSdk);
+    });
+
+    it('shows a single error banner if one field has an error', async () => {
+      (fetchBrazeConnectedEntries as Mock).mockResolvedValue([entryWithOneError]);
+      render(<Page />);
+      const viewFieldsButton = (await screen.findAllByRole('button', { name: /View fields/i }))[0];
+      viewFieldsButton.click();
+      await screen.findByRole('dialog');
+      expect(screen.getByText('"Title" connection error')).toBeTruthy();
+      expect(screen.getByText('Error code [123] - First error')).toBeTruthy();
+      // Only one error banner
+      expect(screen.queryByText('"Description" connection error')).toBeNull();
+    });
+
+    it('shows multiple error banners if multiple fields have errors', async () => {
+      (fetchBrazeConnectedEntries as Mock).mockResolvedValue([entryWithMultipleErrors]);
+      render(<Page />);
+      const viewFieldsButton = (await screen.findAllByRole('button', { name: /View fields/i }))[0];
+      viewFieldsButton.click();
+      await screen.findByRole('dialog');
+      expect(screen.getByText('"Title" connection error')).toBeTruthy();
+      expect(screen.getByText('Error code [123] - First error')).toBeTruthy();
+      expect(screen.getByText('"Description" connection error')).toBeTruthy();
+      expect(screen.getByText('Error code [456] - Second error')).toBeTruthy();
+    });
+
+    it('does not show error banner if no field has an error', async () => {
+      const entryNoError = new Entry(
+        'entry-id',
+        'content-type-id',
+        'Dogs',
+        [
+          new BasicField('title', 'Title', 'content-type-id', true),
+          new BasicField('description', 'Description', 'content-type-id', false),
+          new BasicField('checkbox', 'Checkbox', 'content-type-id', false),
+        ],
+        'space-id',
+        'environment-id',
+        'valid-contentful-api-key',
+        '2025-05-15T16:49:16.367Z',
+        '2025-05-15T16:49:16.367Z'
+      );
+      (fetchBrazeConnectedEntries as Mock).mockResolvedValue([entryNoError]);
+      render(<Page />);
+      const viewFieldsButton = (await screen.findAllByRole('button', { name: /View fields/i }))[0];
+      viewFieldsButton.click();
+      await screen.findByRole('dialog');
+      expect(screen.queryByText(/connection error/)).toBeNull();
+      expect(screen.queryByText(/Error code/)).toBeNull();
+    });
+  });
 });

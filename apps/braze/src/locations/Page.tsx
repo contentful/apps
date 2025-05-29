@@ -19,7 +19,7 @@ import { fetchBrazeConnectedEntries } from '../utils/fetchBrazeConnectedEntries'
 import InformationWithLink from '../components/InformationWithLink';
 import { styles } from './Page.styles';
 import Splitter from '../components/Splitter';
-import { createClient, EntryProps, PlainClientAPI } from 'contentful-management';
+import { createClient, EntryProps } from 'contentful-management';
 import { Entry } from '../fields/Entry';
 import {
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
@@ -30,7 +30,7 @@ import {
   localizeFieldId,
   updateConfig,
 } from '../utils';
-import { Field } from '../fields/Field';
+import WarningOctagonIcon from '../components/WarningOctagonIcon';
 
 const getStatusBadge = (status: string) => {
   if (status.toLowerCase() === 'published') {
@@ -101,7 +101,6 @@ function ConnectedFieldsModal({
   entryConnectedFields: EntryConnectedFields;
 }) {
   const [selectedFields, setSelectedFields] = useState<Set<string>>(() => new Set());
-
   const allFieldIds = entryConnectedFields.map((field) =>
     localizeFieldId(field.fieldId, field.locale)
   );
@@ -140,6 +139,8 @@ function ConnectedFieldsModal({
     return locale ? `${displayName} (${locale})` : displayName;
   };
 
+  const fieldsWithErrors = entryConnectedFields.filter((field) => field.error);
+
   return (
     <Modal isShown={isShown} onClose={onClose} size="medium" testId="connected-fields-modal">
       {() => (
@@ -147,6 +148,21 @@ function ConnectedFieldsModal({
           <Modal.Header title="Connected fields" onClose={onClose} />
           <Modal.Content>
             <Box className={styles.modalMainContainer}>
+              {/* Error banners at the top, if any */}
+              {fieldsWithErrors.length > 0 && (
+                <Box>
+                  {fieldsWithErrors.map((field) => (
+                    <Box key={field.fieldId} className={styles.modalErrorBanner}>
+                      <span className={styles.modalErrorTitle}>
+                        {`"${getFieldDisplayName(field.fieldId, field.locale)}" connection error`}
+                      </span>
+                      <span className={styles.modalErrorMessage}>
+                        Error code [{field.error?.status}] - {field.error?.message}
+                      </span>
+                    </Box>
+                  ))}
+                </Box>
+              )}
               <Box className={styles.modalEntryContainer}>
                 <Flex flexDirection="column">
                   <Text fontColor="gray600" marginBottom="spacing2Xs">
@@ -214,9 +230,16 @@ function ConnectedFieldsModal({
                           />
                         </Table.Cell>
                         <Table.Cell className={styles.baseCell}>
-                          <Text fontWeight="fontWeightDemiBold">
-                            {getFieldDisplayName(field.fieldId, field.locale)}
-                          </Text>
+                          <Flex flexDirection="row">
+                            <Text fontWeight="fontWeightDemiBold">
+                              {getFieldDisplayName(field.fieldId, field.locale)}
+                            </Text>
+                            <Badge
+                              variant="negative"
+                              startIcon={
+                                <WarningOctagonIcon />
+                              }>{`Error code ${field.error?.status}`}</Badge>
+                          </Flex>
                         </Table.Cell>
                       </Table.Row>
                     );
