@@ -158,7 +158,7 @@ async function updateContentBlock(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer `,
+      Authorization: `Bearer ${brazeApiKey}`,
     },
     body: JSON.stringify({
       content_block_id: contentBlockId,
@@ -166,10 +166,12 @@ async function updateContentBlock(
     }),
   });
 
-  const data = await response.json();
-
   if (!response.ok) {
-    throw new CustomError(data?.message || 'Unknown error', response.status);
+    const body = await response.json();
+    throw new CustomError(
+      `Failed to update content block: ${body.message}` || 'Unknown error',
+      response.status
+    );
   }
 }
 

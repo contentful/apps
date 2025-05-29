@@ -305,7 +305,7 @@ function ConnectedEntriesTable({
             const status = entry.state;
             const connectedCount = getConnectedFieldsCount(entry);
             const connectedFields = getConnectedEntries()[entry.id];
-            const hasErrors = connectedFields.some((field) => field.error);
+            const hasErrors = connectedFields?.some((field) => field.error);
 
             return (
               <Table.Row key={entry.id}>
