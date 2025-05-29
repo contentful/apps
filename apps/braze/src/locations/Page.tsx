@@ -147,11 +147,10 @@ function ConnectedFieldsModal({
           <Modal.Header title="Connected fields" onClose={onClose} />
           <Modal.Content>
             <Box className={styles.modalMainContainer}>
-              {/* Error banners at the top, if any */}
               {fieldsWithErrors.length > 0 && (
                 <Box>
-                  {fieldsWithErrors.map((field) => (
-                    <Box key={field.fieldId} className={styles.modalErrorBanner}>
+                  {fieldsWithErrors.map((field, index) => (
+                    <Box key={`${field.fieldId}-${index}`} className={styles.modalErrorBanner}>
                       <span className={styles.modalErrorTitle}>
                         {`"${getFieldDisplayName(field.fieldId, field.locale)}" connection error`}
                       </span>
@@ -217,10 +216,10 @@ function ConnectedFieldsModal({
                   </Table.Row>
                 </Table.Head>
                 <Table.Body>
-                  {entryConnectedFields.map((field) => {
+                  {entryConnectedFields.map((field, index) => {
                     const fieldId = localizeFieldId(field.fieldId, field.locale);
                     return (
-                      <Table.Row key={fieldId}>
+                      <Table.Row key={`${fieldId}-${index}`}>
                         <Table.Cell className={styles.checkboxCell}>
                           <Checkbox
                             isChecked={selectedFields.has(fieldId)}
