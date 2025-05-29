@@ -386,7 +386,9 @@ function ContentTypeSection(props: {
       </InformationWithLink>
       <Stack flexDirection="column" alignItems="start">
         <Autocomplete<{ id: string; name: string }>
-          items={filteredContentTypes}
+          items={filteredContentTypes.filter(
+            (ct) => !selectedContentTypes.some((selected) => selected.id === ct.id)
+          )}
           onInputValueChange={handleInputValueChange}
           onSelectItem={handleSelectItem}
           itemToString={(item) => item.name}
@@ -397,7 +399,7 @@ function ContentTypeSection(props: {
         />
 
         {selectedContentTypes.length > 0 && (
-          <>
+          <Box width="full" overflow="auto">
             <Paragraph>Selected content types:</Paragraph>
             <Flex flexDirection="row" gap="spacing2Xs" flexWrap="wrap">
               {selectedContentTypes.map((contentType, index) => (
@@ -410,7 +412,7 @@ function ContentTypeSection(props: {
                 />
               ))}
             </Flex>
-          </>
+          </Box>
         )}
       </Stack>
     </>
