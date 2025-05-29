@@ -399,7 +399,7 @@ function ContentTypeSection(props: {
         {selectedContentTypes.length > 0 && (
           <>
             <Paragraph>Selected content types:</Paragraph>
-            <Flex flexDirection="row" gap="spacing2Xs">
+            <Flex flexDirection="row" gap="spacing2Xs" flexWrap="wrap">
               {selectedContentTypes.map((contentType, index) => (
                 <Pill
                   key={index}
