@@ -162,6 +162,9 @@ describe('Config Screen component', () => {
           brazeApiKey: 'valid-api-key-321',
           brazeEndpoint: BRAZE_ENDPOINTS[0].url,
         },
+        targetState: {
+          EditorInterface: {},
+        },
       });
     });
 
