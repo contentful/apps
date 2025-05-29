@@ -18,9 +18,13 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 const mockCma = {
-  entry: {
-    get: vi.fn(),
+  appActionCall: {
+    createWithResponse: vi.fn(),
   },
+};
+
+mockSdk.entry.fields['fieldA'] = {
+  name: 'Field A',
 };
 
 vi.mock('contentful-management', () => ({
@@ -30,19 +34,18 @@ vi.mock('contentful-management', () => ({
 describe('Sidebar component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCma.entry.get.mockResolvedValue({
-      fields: {
-        connectedFields: {
-          'en-US': {
-            [mockSdk.ids.entry]: [
-              {
-                fieldId: 'fieldA',
-                locale: 'en-US',
-                contentBlockId: 'contentBlockA',
-              },
-            ],
-          },
-        },
+    mockCma.appActionCall.createWithResponse.mockResolvedValue({
+      response: {
+        body: JSON.stringify({
+          contentBlocks: [
+            {
+              fieldId: 'fieldA',
+              locale: 'en-US',
+              contentBlockId: 'contentBlockA',
+              contentBlockName: 'Content Block A',
+            },
+          ],
+        }),
       },
     });
     (useSDK as any).mockReturnValue(mockSdk);
@@ -161,7 +164,8 @@ describe('Sidebar component', () => {
   it('renders the "Connected Content Block entries" section when connectedFields are present', async () => {
     const { getByText } = render(<Sidebar />);
     await screen.findByText('Connected Content Block entries', { exact: false });
-    expect(getByText('fieldA-en-US')).toBeTruthy();
+    expect(getByText('Field A (en-US)')).toBeTruthy();
+    expect(getByText('Content Block A')).toBeTruthy();
   });
 
   it('renders the Connected Entries button and triggers navigation when clicked', async () => {
