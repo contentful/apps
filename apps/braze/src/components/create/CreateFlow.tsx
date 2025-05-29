@@ -141,6 +141,8 @@ const CreateFlow = (props: CreateFlowProps) => {
     if (entry.state !== EntryStatus.Published && step === CREATE_STEP) {
       setStep(DRAFT_STEP);
       return;
+    } else if (step === DRAFT_STEP) {
+      setStep(CREATE_STEP);
     }
 
     setIsSubmitting(true);
@@ -185,6 +187,9 @@ const CreateFlow = (props: CreateFlowProps) => {
 
       setStep(SUCCESS_STEP);
     } catch (error) {
+      if (step === DRAFT_STEP) {
+        setStep(CREATE_STEP);
+      }
       console.error('Error creating content blocks: ', error);
     } finally {
       setIsSubmitting(false);
