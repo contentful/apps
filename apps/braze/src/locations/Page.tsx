@@ -27,6 +27,7 @@ import {
   ConnectedFields,
   EntryConnectedFields,
   getConfigEntry,
+  localizeFieldId,
   updateConfig,
 } from '../utils';
 import { Field } from '../fields/Field';
@@ -84,9 +85,6 @@ function DisplayMessage({ title, message }: MessageProps) {
   );
 }
 
-const getFieldId = (field: { fieldId: string; locale?: string }) =>
-  `${field.fieldId}${field.locale ? `-${field.locale}` : ''}`;
-
 function ConnectedFieldsModal({
   entry,
   isShown,
@@ -104,7 +102,9 @@ function ConnectedFieldsModal({
 }) {
   const [selectedFields, setSelectedFields] = useState<Set<string>>(() => new Set());
 
-  const allFieldIds = entryConnectedFields.map(getFieldId);
+  const allFieldIds = entryConnectedFields.map((field) =>
+    localizeFieldId(field.fieldId, field.locale)
+  );
   const allSelected = allFieldIds.every((id) => selectedFields.has(id));
   const someSelected = allFieldIds.some((id) => selectedFields.has(id));
 
@@ -203,7 +203,7 @@ function ConnectedFieldsModal({
                 </Table.Head>
                 <Table.Body>
                   {entryConnectedFields.map((field) => {
-                    const fieldId = getFieldId(field);
+                    const fieldId = localizeFieldId(field.fieldId, field.locale);
                     return (
                       <Table.Row key={fieldId}>
                         <Table.Cell className={styles.checkboxCell}>
@@ -378,13 +378,16 @@ const Page = () => {
     const connectedFields = Object.values(configField)[0] as ConnectedFields;
     const entryConnectedFields = connectedFields[entry.id];
 
-    const isNotField = (field: { fieldId: string; locale?: string; contentBlockId?: string }) =>
-      !selectedFieldIds.includes(getFieldId(field));
+    const isNotSelectedField = (field: {
+      fieldId: string;
+      locale?: string;
+      contentBlockId?: string;
+    }) => !selectedFieldIds.includes(localizeFieldId(field.fieldId, field.locale));
 
     if (entryConnectedFields.length === selectedFieldIds.length) {
       delete connectedFields[entry.id];
     } else if (entryConnectedFields.length > selectedFieldIds.length) {
-      connectedFields[entry.id] = entryConnectedFields.filter(isNotField);
+      connectedFields[entry.id] = entryConnectedFields.filter(isNotSelectedField);
     }
 
     await updateConfig(configEntry, connectedFields, cma);
