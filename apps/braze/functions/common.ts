@@ -1,5 +1,11 @@
 import { FunctionEventContext } from '@contentful/node-apps-toolkit';
-import { createClient, PlainClientAPI } from 'contentful-management';
+import { createClient, EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
+import {
+  ConnectedFields,
+  EntryConnectedFields,
+  getConfigEntry,
+  CONFIG_FIELD_ID,
+} from '../src/utils';
 
 export function initContentfulManagementClient(context: FunctionEventContext): PlainClientAPI {
   if (!context.cmaClientOptions) {
@@ -14,4 +20,26 @@ export function initContentfulManagementClient(context: FunctionEventContext): P
       environmentId: context.environmentId,
     },
   });
+}
+
+export async function getConfigAndConnectedFields(
+  cma: PlainClientAPI,
+  entryId: string
+): Promise<{
+  configEntry: EntryProps<KeyValueMap>;
+  connectedFields: ConnectedFields;
+  entryConnectedFields: EntryConnectedFields;
+}> {
+  const configEntry: EntryProps<KeyValueMap> = await getConfigEntry(cma);
+  const configField = configEntry.fields[CONFIG_FIELD_ID];
+  if (!configField) {
+    console.error(`Configuration field ${CONFIG_FIELD_ID} not found`);
+    throw new Error(`Configuration field ${CONFIG_FIELD_ID} not found`);
+  }
+  const connectedFields = Object.values(configField)[0] as ConnectedFields;
+  const entryConnectedFields = connectedFields[entryId];
+  if (!entryConnectedFields) {
+    throw new Error(`Configuration field ${CONFIG_FIELD_ID} not found`);
+  }
+  return { configEntry, connectedFields, entryConnectedFields };
 }

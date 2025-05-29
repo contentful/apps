@@ -14,6 +14,19 @@
       ]
     },
     {
+      "id": "getContentBlocksFunction",
+      "name": "Get content blocks function",
+      "description": "Function to get content blocks from App Action.",
+      "path": "functions/getContentBlocks.js",
+      "entryFile": "functions/getContentBlocks.ts",
+      "allowNetworks": [
+        "https://*.braze.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
       "id": "appEventHandler",
       "name": "App event handler function",
       "description": "Function to handle App Events.",
@@ -44,6 +57,21 @@
         {
           "id": "fieldsData",
           "name": "Fields data",
+          "type": "Symbol",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "getContentBlocksAction",
+      "name": "Get content blocks action",
+      "type": "function-invocation",
+      "functionId": "getContentBlocksFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "entryId",
+          "name": "Entry ID",
           "type": "Symbol",
           "required": true
         }

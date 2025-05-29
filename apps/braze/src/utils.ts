@@ -102,14 +102,23 @@ export type AppInstallationParameters = {
   brazeEndpoint: string;
 };
 
-export type EntryConnectedFields = {
+export type ConnectedField = {
   fieldId: string;
   locale: string;
   contentBlockId: string;
-}[];
+};
+
+export type EntryConnectedFields = ConnectedField[];
 
 export type ConnectedFields = {
   [entryId: string]: EntryConnectedFields;
+};
+
+export type SidebarContentBlockInfo = {
+  fieldId: string;
+  locale: string;
+  contentBlockId: string;
+  contentBlockName: string;
 };
 
 export const MULTISELECT_DIALOG_HEIGHT = 36 * 4; // Shows 4 items

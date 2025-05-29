@@ -20,7 +20,7 @@ export const styles = {
     marginBottom: tokens.spacingS,
   }),
   stack: css({
-    maxHeight: '126px',
+    maxHeight: '176px',
     overflowY: 'auto',
   }),
   listItem: css({

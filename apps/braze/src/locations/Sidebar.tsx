@@ -1,30 +1,18 @@
 import { SidebarAppSDK } from '@contentful/app-sdk';
-import {
-  Box,
-  Button,
-  Subheading,
-  Card,
-  Text,
-  Stack,
-  Note,
-  TextLink,
-} from '@contentful/f36-components';
+import { Box, Button, Subheading, Card, Text, Note, TextLink } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import {
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
-  CONFIG_FIELD_ID,
   CONNECTED_CONTENT_DOCUMENTATION,
   CREATE_DIALOG_MODE,
   CREATE_DIALOG_TITLE,
-  EntryConnectedFields,
   FIELDS_STEP,
   GENERATE_DIALOG_MODE,
   GENERATE_DIALOG_TITLE,
-  getConfigEntry,
-  localizeFieldId,
   SIDEBAR_CONNECTED_ENTRIES_BUTTON_TEXT,
   SIDEBAR_CREATE_BUTTON_TEXT,
   SIDEBAR_GENERATE_BUTTON_TEXT,
+  SidebarContentBlockInfo,
 } from '../utils';
 import { InvocationParams } from './Dialog';
 import { styles } from './Sidebar.styles';
@@ -36,9 +24,7 @@ import { useEffect, useState } from 'react';
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
   useAutoResizer();
-  const [entryConnectedFields, setEntryConnectedFields] = useState<
-    EntryConnectedFields | undefined
-  >(undefined);
+  const [entryConnectedFields, setEntryConnectedFields] = useState<SidebarContentBlockInfo[]>([]);
   const currentEntryId = sdk.ids.entry;
 
   const cma = createClient(
@@ -53,13 +39,27 @@ const Sidebar = () => {
   );
 
   useEffect(() => {
-    const getConfig = async () => {
-      const configEntry = await getConfigEntry(cma);
-      const connectedFields = configEntry.fields[CONFIG_FIELD_ID]?.[sdk.locales.default] || {};
-      const entryConnectedFields: EntryConnectedFields = connectedFields[sdk.ids.entry] || [];
-      setEntryConnectedFields(entryConnectedFields);
+    const getContentBlocksData = async () => {
+      const response = await cma.appActionCall.createWithResponse(
+        {
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
+          appDefinitionId: sdk.ids.app!,
+          appActionId: 'getContentBlocksAction',
+        },
+        {
+          parameters: {
+            entryId: sdk.ids.entry,
+          },
+        }
+      );
+      const responseData: { contentBlocks: SidebarContentBlockInfo[] } = JSON.parse(
+        response.response.body
+      );
+
+      setEntryConnectedFields(responseData.contentBlocks);
     };
-    getConfig();
+    getContentBlocksData();
   }, []);
 
   const initialInvocationParams: InvocationParams = {
@@ -151,7 +151,7 @@ const Sidebar = () => {
           {SIDEBAR_CREATE_BUTTON_TEXT}
         </Button>
       </Box>
-      {entryConnectedFields !== undefined && entryConnectedFields.length > 0 && (
+      {entryConnectedFields.length > 0 && (
         <>
           <Box marginTop="spacingM">
             <Card className={styles.card}>
@@ -159,17 +159,27 @@ const Sidebar = () => {
                 Connected Content Block entries
               </Subheading>
               <Splitter />
-              <Stack
-                flexDirection="column"
-                spacing="spacingXs"
-                alignItems="initial"
-                className={styles.stack}>
+              <div className={styles.stack}>
                 {entryConnectedFields.map((fieldMapping, index) => (
-                  <Text key={`${currentEntryId}-${index}`} className={styles.listItem}>
-                    {localizeFieldId(fieldMapping.fieldId, fieldMapping.locale)}
-                  </Text>
+                  <>
+                    <Text as="div" fontSize="fontSizeS" className={styles.listItem}>
+                      Field name
+                    </Text>
+                    <Text as="div" fontWeight="fontWeightMedium">
+                      {`${sdk.entry.fields[fieldMapping.fieldId].name}${
+                        fieldMapping.locale ? ` (${fieldMapping.locale})` : ''
+                      }`}
+                    </Text>
+                    <Text as="div" fontSize="fontSizeS" className={styles.listItem}>
+                      Content block name
+                    </Text>
+                    <Text as="div" fontWeight="fontWeightMedium">
+                      {fieldMapping.contentBlockName}
+                    </Text>
+                    <Splitter />
+                  </>
                 ))}
-              </Stack>
+              </div>
             </Card>
             <Button
               variant="secondary"
