@@ -64,7 +64,7 @@ type ContentBlockCardProps = {
   error?: string;
 };
 
-type CreateStepProps = {
+export type CreateStepProps = {
   entry: Entry;
   selectedFields: Set<string>;
   selectedLocales?: string[];

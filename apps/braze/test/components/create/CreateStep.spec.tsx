@@ -1,8 +1,13 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import CreateStep, { getDefaultContentBlockName } from '../../../src/components/create/CreateStep';
+import CreateStep, {
+  CreateStepProps,
+  getDefaultContentBlockName,
+} from '../../../src/components/create/CreateStep';
 import { Entry } from '../../../src/fields/Entry';
 import { BasicField } from '../../../src/fields/BasicField';
+import React, { useState } from 'react';
+import { ContentBlockData } from '../../../src/components/create/CreateFlow';
 
 describe('CreateStep', () => {
   const field1 = new BasicField('field1', 'Field 1', 'test', false);
@@ -21,30 +26,6 @@ describe('CreateStep', () => {
   const mockHandlePreviousStep = vi.fn();
   const mockHandleNextStep = vi.fn();
 
-  const renderComponent = (props = {}) => {
-    return render(
-      <CreateStep
-        entry={mockEntry}
-        selectedFields={mockSelectedFields}
-        selectedLocales={['en-US', 'ga']}
-        contentBlocksData={{
-          names: { field1: 'Field-1', 'field2-en-US': 'Field-2-en-US', 'field2-ga': 'Field-2-ga' },
-          descriptions: {
-            field1: 'Field 1 description',
-            'field2-en-US': 'Field 2 en-US',
-            'field2-ga': 'Field 2 ga',
-          },
-        }}
-        setContentBlocksData={() => {}}
-        isSubmitting={false}
-        handlePreviousStep={mockHandlePreviousStep}
-        handleNextStep={mockHandleNextStep}
-        creationResultFields={[]}
-        {...props}
-      />
-    );
-  };
-
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -53,39 +34,60 @@ describe('CreateStep', () => {
     cleanup();
   });
 
+  const TestCreateStepWrapper = (
+    props: Partial<CreateStepProps> & {
+      initialContentBlocksData?: ContentBlockData;
+    }
+  ) => {
+    const [contentBlocksData, setContentBlocksData] = useState<ContentBlockData>(
+      props.initialContentBlocksData || { names: {}, descriptions: {} }
+    );
+
+    return (
+      <CreateStep
+        entry={mockEntry}
+        selectedFields={mockSelectedFields}
+        selectedLocales={['en-US', 'ga']}
+        isSubmitting={false}
+        handlePreviousStep={mockHandlePreviousStep}
+        handleNextStep={mockHandleNextStep}
+        creationResultFields={[]}
+        {...props}
+        contentBlocksData={contentBlocksData}
+        setContentBlocksData={setContentBlocksData}
+      />
+    );
+  };
+
   it('renders the component with initial state', async () => {
-    renderComponent();
+    await act(async () => {
+      render(<TestCreateStepWrapper />);
+    });
 
-    // Check if main elements are rendered
     expect(screen.getByText(/Edit each field/i)).toBeTruthy();
+    expect(screen.getByText('Test-Entry-field1')).toBeTruthy();
+    expect(screen.getByText('Test-Entry-field2-en-US')).toBeTruthy();
+    expect(screen.getByText('Test-Entry-field2-ga')).toBeTruthy();
     expect(screen.getAllByText('Content Block name')).toHaveLength(3);
     expect(screen.getAllByRole('button', { name: /Edit content block/i })).toHaveLength(3);
   });
 
-  it('renders the component with initial state with localized fields', async () => {
-    renderComponent();
-
-    expect(screen.getByText(/Edit each field/i)).toBeTruthy();
-    expect(screen.getByText(/Field-1/i)).toBeTruthy();
-    expect(screen.getByText(/Field-2-en-US/i)).toBeTruthy();
-    expect(screen.getByText(/Field-2-ga/i)).toBeTruthy();
-    expect(screen.getAllByText('Content Block name')).toHaveLength(3);
-    expect(screen.getAllByRole('button', { name: /Edit content block/i })).toHaveLength(3);
-  });
-
-  it('enters edit mode when edit button is clicked', () => {
-    renderComponent();
+  it('enters edit mode when edit button is clicked', async () => {
+    await act(async () => {
+      render(<TestCreateStepWrapper />);
+    });
 
     const editButtons = screen.getAllByRole('button', { name: /Edit content block/i });
     fireEvent.click(editButtons[0]);
 
     // Check if form control elements appear
     expect(screen.getByTestId('content-block-description-input')).toBeTruthy();
-    expect(screen.getByText('Field 1 description')).toBeTruthy();
   });
 
-  it('updates content block when edited', () => {
-    renderComponent();
+  it('updates content block when edited', async () => {
+    await act(async () => {
+      render(<TestCreateStepWrapper />);
+    });
 
     // Click edit button for first field
     const editButtons = screen.getAllByRole('button', { name: /Edit content block/i });
@@ -107,7 +109,9 @@ describe('CreateStep', () => {
   });
 
   it('handles form submission', async () => {
-    renderComponent();
+    await act(async () => {
+      render(<TestCreateStepWrapper />);
+    });
 
     // Click the submit button
     const submitButton = screen.getByRole('button', { name: /Send to Braze/i });
@@ -116,14 +120,18 @@ describe('CreateStep', () => {
     expect(mockHandleNextStep).toHaveBeenCalled();
   });
 
-  it('shows loading state when submitting', () => {
-    renderComponent({ isSubmitting: true });
+  it('shows loading state when submitting', async () => {
+    await act(async () => {
+      render(<TestCreateStepWrapper isSubmitting={true} />);
+    });
 
     expect(screen.getByText('Creating')).toBeTruthy();
   });
 
   it('navigates back when back button is clicked', async () => {
-    renderComponent();
+    await act(async () => {
+      render(<TestCreateStepWrapper />);
+    });
 
     const backButton = screen.getByRole('button', { name: 'Back' });
     fireEvent.click(backButton);
@@ -145,7 +153,7 @@ describe('CreateStep', () => {
   });
 
   describe('when handling creation results', () => {
-    it('shows success state and error message for fields', () => {
+    it('shows success state and error message for fields', async () => {
       const creationResultFields = [
         {
           fieldId: 'field1',
@@ -169,7 +177,9 @@ describe('CreateStep', () => {
         },
       ];
 
-      renderComponent({ creationResultFields });
+      await act(async () => {
+        render(<TestCreateStepWrapper creationResultFields={creationResultFields} />);
+      });
 
       const errorMessage = screen.getByText('Content Block name already exists');
       expect(errorMessage).toBeTruthy();
