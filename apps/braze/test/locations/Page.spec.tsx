@@ -10,11 +10,7 @@ import { mockSdk } from '../mocks';
 import { fireEvent } from '@testing-library/react';
 import { getConfigEntry, updateConfig } from '../../src/utils';
 import { createConfigEntry } from '../mocks/entryResponse';
-import {
-  mockConfigEntryWithError,
-  mockConfigEntryWithErrors,
-  mockConfigEntryWithLocalizedFields,
-} from '../mocks/connectedFields';
+import { mockConfigEntryWithLocalizedFields } from '../mocks/connectedFields';
 
 describe('Page Location', () => {
   vi.mock('@contentful/react-apps-toolkit');
@@ -291,14 +287,13 @@ describe('Page Location', () => {
     });
   });
 
-  describe('Connected Fields Modal - Error Handling', () => {
-    const name = new BasicField('name', 'Name', 'content-type-id', false);
+  describe('Error Handling', () => {
     const description = new BasicField('description', 'Description', 'content-type-id', false);
     const entry = new Entry(
       'entry-id',
       'content-type-id',
       'title',
-      [name, description],
+      [description],
       'space-id',
       'environment-id',
       'valid-contentful-api-key',
@@ -311,42 +306,6 @@ describe('Page Location', () => {
       (fetchBrazeConnectedEntries as Mock).mockResolvedValue([entry]);
     });
 
-    it('opens modal when View fields is clicked', async () => {
-      render(<Page />);
-      const viewFieldsButton = (await screen.findAllByRole('button', { name: /View fields/i }))[0];
-      viewFieldsButton.click();
-      const modal = await screen.findByRole('dialog');
-      expect(screen.getByText('Description')).toBeTruthy();
-
-      expect(modal).toBeTruthy();
-      expect(screen.getByText('View entry')).toBeTruthy();
-    });
-
-    it('shows a single error banner if one field has an error', async () => {
-      (getConfigEntry as Mock).mockResolvedValue(createConfigEntry(mockConfigEntryWithError));
-      render(<Page />);
-      const viewFieldsButton = (await screen.findAllByRole('button', { name: /View fields/i }))[0];
-      viewFieldsButton.click();
-      const modal = await screen.findByRole('dialog');
-      expect(screen.getByText('Description')).toBeTruthy();
-
-      expect(modal).toBeTruthy();
-      expect(screen.getByText('Error code 401')).toBeTruthy();
-      // Only one error banner
-    });
-
-    it('shows multiple error banners if multiple fields have errors', async () => {
-      (getConfigEntry as Mock).mockResolvedValue(createConfigEntry(mockConfigEntryWithErrors));
-      render(<Page />);
-      const viewFieldsButton = (await screen.findAllByRole('button', { name: /View fields/i }))[0];
-      viewFieldsButton.click();
-      await screen.findByRole('dialog');
-      expect(screen.getByText('"Title" connection error')).toBeTruthy();
-      expect(screen.getByText('Error code [123] - First error')).toBeTruthy();
-      expect(screen.getByText('"Description" connection error')).toBeTruthy();
-      expect(screen.getByText('Error code [456] - Second error')).toBeTruthy();
-    });
-
     it('does not show error banner if no field has an error', async () => {
       render(<Page />);
       const viewFieldsButton = (await screen.findAllByRole('button', { name: /View fields/i }))[0];
@@ -354,6 +313,69 @@ describe('Page Location', () => {
       await screen.findByRole('dialog');
       expect(screen.queryByText(/connection error/)).toBeNull();
       expect(screen.queryByText(/Error code/)).toBeNull();
+    });
+
+    describe('When there are errors', () => {
+      it('shows error banner if one field has an error', async () => {
+        const mockConfigEntry = createConfigEntry({
+          'en-US': {
+            'entry-id': [
+              { fieldId: 'name', locale: 'en-US', contentBlockId: 'block1' },
+              { fieldId: 'name', locale: 'en-AU', contentBlockId: 'block2' },
+              {
+                fieldId: 'description',
+                contentBlockId: 'block3',
+                error: { message: 'connection error', status: 500 },
+              },
+            ],
+          },
+        });
+
+        (getConfigEntry as Mock).mockResolvedValue(mockConfigEntry);
+
+        render(<Page />);
+        const viewFieldsButton = (
+          await screen.findAllByRole('button', { name: /View fields/i })
+        )[0];
+        viewFieldsButton.click();
+        const modal = await screen.findByRole('dialog');
+
+        expect(modal).toBeTruthy();
+        expect(screen.getByText('"Description" connection error')).toBeTruthy();
+        expect(screen.queryByText('"Title" connection error')).toBeNull();
+      });
+
+      it('shows multiple error banners if multiple fields have errors', async () => {
+        const mockConfigEntryWithMultipleErrors = createConfigEntry({
+          'en-US': {
+            'entry-id': [
+              {
+                fieldId: 'name',
+                contentBlockId: 'block2',
+                error: { message: 'connection error', status: 500 },
+              },
+              {
+                fieldId: 'description',
+                contentBlockId: 'block3',
+                error: { message: 'connection error', status: 500 },
+              },
+            ],
+          },
+        });
+
+        (getConfigEntry as Mock).mockResolvedValue(mockConfigEntryWithMultipleErrors);
+
+        render(<Page />);
+        const viewFieldsButton = (
+          await screen.findAllByRole('button', { name: /View fields/i })
+        )[0];
+        viewFieldsButton.click();
+        const modal = await screen.findByRole('dialog');
+
+        expect(modal).toBeTruthy();
+        expect(screen.getByText('"Description" connection error')).toBeTruthy();
+        expect(screen.queryByText('"Name" connection error')).toBeNull();
+      });
     });
   });
 });

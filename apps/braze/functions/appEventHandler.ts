@@ -105,6 +105,7 @@ const entrySavedHandler = async (
     };
 
     try {
+      // TODO : add callAndRetry
       await updateContentBlock(
         brazeEndpoint,
         brazeApiKey,

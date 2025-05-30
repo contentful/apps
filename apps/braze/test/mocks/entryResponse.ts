@@ -53,7 +53,7 @@ export const mockConfigEntrySys = {
   automationTags: [],
 };
 
-export const createConfigEntry = (connectedFields: KeyValueMap) => {
+export const createConfigEntry = (connectedFields: KeyValueMap): EntryProps => {
   return {
     sys: mockConfigEntrySys,
     fields: {
