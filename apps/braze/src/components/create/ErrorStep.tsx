@@ -56,20 +56,27 @@ const ErrorStep = ({
       <List>
         {customerErrors.map((field, index) => (
           <List.Item key={`${field.fieldId}-${index}`}>
-            <Text fontWeight="fontWeightDemiBold">{field.fieldId}</Text> - error code{' '}
-            {field.statusCode} - {field.message}. Please fix the errors and retry sending to Braze.
+            <Text fontWeight="fontWeightDemiBold">
+              {localizeFieldId(field.fieldId, field.locale)}
+            </Text>{' '}
+            - error code {field.statusCode} - {field.message}. Please fix the errors and retry
+            sending to Braze.
           </List.Item>
         ))}
         {serverErrors.map((field, index) => (
           <List.Item key={`${field.fieldId}-${index}`}>
-            <Text fontWeight="fontWeightDemiBold">{field.fieldId}</Text> - error code{' '}
-            {field.statusCode} - {field.message}. Please retry sending to Braze.
+            <Text fontWeight="fontWeightDemiBold">
+              {localizeFieldId(field.fieldId, field.locale)}
+            </Text>{' '}
+            - error code {field.statusCode} - {field.message}. Please retry sending to Braze.
           </List.Item>
         ))}
         {clientErrors.map((field, index) => (
           <List.Item key={`${field.fieldId}-${index}`}>
-            <Text fontWeight="fontWeightDemiBold">{field.fieldId}</Text> - error code{' '}
-            {field.statusCode} - {field.message}
+            <Text fontWeight="fontWeightDemiBold">
+              {localizeFieldId(field.fieldId, field.locale)}
+            </Text>{' '}
+            - error code {field.statusCode} - {field.message}
           </List.Item>
         ))}
         {clientErrors.length > 0 && (
