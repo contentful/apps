@@ -1,6 +1,6 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
 
-import React from 'react';
+import React, { ChangeEvent, createRef } from 'react';
 import { render } from 'react-dom';
 
 import { init, locations, AppExtensionSDK, FieldExtensionSDK } from '@contentful/app-sdk';
@@ -18,8 +18,6 @@ import {
 import { Form, FormControl, Checkbox, TextInput } from '@contentful/f36-forms';
 
 import MuxPlayer from '@mux/mux-player-react';
-import MuxUploader from '@mux/mux-uploader-react';
-import { MuxUploaderDrop } from '@mux/mux-uploader-react';
 
 import Config from './locations/config';
 import ApiClient from './util/apiClient';
@@ -29,16 +27,26 @@ import Menu from './components/menu';
 import PlayerCode from './components/playercode';
 import CountryDatalist from './components/countryDatalist';
 import CaptionsList from './components/captionsList';
+import ModalUploadAsset, { ModalData } from './components/UploadConfiguration/ModalUploadAsset';
+import UploadArea from './components/UploadArea/UploadArea';
+import Mp4RenditionsPanel from './components/UploadConfiguration/Mp4RenditionsPanel';
 
 import {
   type InstallationParams,
   type MuxContentfulObject,
   type AppState,
   AppProps,
+  ResolutionType,
 } from './util/types';
 
 import './index.css';
 import { createClient, PlainClientAPI } from 'contentful-management';
+import {
+  addByURL,
+  getUploadUrl,
+  deleteStaticRendition,
+  createStaticRendition,
+} from './util/muxApi';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -51,6 +59,10 @@ interface SignedTokens {
 export class App extends React.Component<AppProps, AppState> {
   apiClient: ApiClient;
   cmaClient: PlainClientAPI;
+  resolveRef = createRef<(value: string | null) => void>();
+  muxUploaderRef = createRef<any>();
+  fileInputRef = React.createRef<HTMLInputElement>();
+  muxPlayerRef = React.createRef<any>();
 
   constructor(props: AppProps) {
     super(props);
@@ -75,7 +87,6 @@ export class App extends React.Component<AppProps, AppState> {
     this.state = {
       value: field,
       isDeleting: false,
-      isReloading: false,
       isTokenLoading: false,
       error:
         (!muxAccessTokenId || !muxAccessTokenSecret) &&
@@ -85,6 +96,10 @@ export class App extends React.Component<AppProps, AppState> {
         field && ('playbackId' in field || 'signedPlaybackId' in field)
           ? field.playbackId || field.signedPlaybackId
           : undefined,
+      modalUploadAssetVisible: false,
+      file: null,
+      showMuxUploaderUI: false,
+      pendingUploadURL: null,
     };
   }
 
@@ -268,7 +283,7 @@ export class App extends React.Component<AppProps, AppState> {
     if (!input) return;
 
     if (this.isURL(input)) {
-      this.addByURL(input);
+      this.setState({ modalUploadAssetVisible: true, pendingUploadURL: input });
       return;
     }
 
@@ -278,79 +293,72 @@ export class App extends React.Component<AppProps, AppState> {
     this.pollForAssetDetails();
   };
 
-  addByURL = async (remoteURL: string): Promise<void> => {
-    const passthroughId = (this.props.sdk.entry.getSys() as { id: string }).id;
-
-    const result = await this.apiClient.post(
-      '/video/v1/assets',
-      JSON.stringify({
-        input: [
-          {
-            url: remoteURL,
-          },
-        ],
-        passthrough: passthroughId,
-        playback_policy: (this.props.sdk.parameters.installation as InstallationParams)
-          .muxEnableSignedUrls
-          ? 'signed'
-          : 'public',
-      })
-    );
-
-    if (!this.responseCheck(result)) {
-      return;
+  handleFile = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      this.setState({ file: e.target.files[0] });
+      this.setState({ modalUploadAssetVisible: true });
     }
-
-    const muxUpload = await result.json();
-
-    if ('error' in muxUpload) {
-      this.setAssetError(muxUpload.error.messages[0]);
-      return;
-    }
-
-    if (muxUpload.data.status === 'errored') {
-      this.setAssetError(muxUpload.data.errors.messages[0]);
-      return;
-    }
-
-    await this.props.sdk.field.setValue({
-      assetId: muxUpload.data.id,
-    });
-    await this.pollForAssetDetails();
   };
 
-  getUploadUrl = async () => {
-    const passthroughId = (this.props.sdk.entry.getSys() as { id: string }).id;
-
-    const { muxEnableAudioNormalize } = this.props.sdk.parameters
-      .installation as InstallationParams;
-
-    const res = await this.apiClient.post(
-      '/video/v1/uploads',
-      JSON.stringify({
-        cors_origin: window.location.origin,
-        new_asset_settings: {
-          passthrough: passthroughId,
-          normalize_audio: muxEnableAudioNormalize || false,
-          playback_policy: (this.props.sdk.parameters.installation as InstallationParams)
-            .muxEnableSignedUrls
-            ? 'signed'
-            : 'public',
-        },
-      })
-    );
-
-    if (!this.responseCheck(res)) {
-      return;
+  handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (e.dataTransfer.files?.[0]) {
+      this.setState({ file: e.dataTransfer.files[0] });
+      this.setState({ modalUploadAssetVisible: true });
     }
+  };
 
-    const { data: muxUpload } = await res.json();
+  /**
+   * Configuration modal handles two distinct upload scenarios:
+   * 1. Direct URL submission: When a user provides a video URL to be processed by Mux
+   * 2. File upload: When a user selects a file through the UploadArea component
+   */
+  onConfirmModal = async (options: ModalData) => {
+    if (this.state.pendingUploadURL) {
+      await addByURL(
+        this.apiClient,
+        this.props.sdk,
+        this.state.pendingUploadURL,
+        options,
+        async (res) => await this.responseCheck(res),
+        this.setAssetError,
+        this.pollForAssetDetails
+      );
+      this.setState({ pendingUploadURL: null });
+    } else {
+      const muxUploadUrl = await getUploadUrl(
+        this.apiClient,
+        this.props.sdk,
+        options,
+        async (res) => await this.responseCheck(res)
+      );
+      const uploader = this.muxUploaderRef.current!;
+      uploader.endpoint = muxUploadUrl;
 
-    await this.props.sdk.field.setValue({
-      uploadId: muxUpload.id,
-    });
+      uploader.dispatchEvent(
+        new CustomEvent('file-ready', {
+          bubbles: true,
+          composed: true,
+          detail: this.state.file,
+        })
+      );
 
-    return muxUpload.url;
+      this.setState({ showMuxUploaderUI: true });
+    }
+    this.setState({ modalUploadAssetVisible: false });
+  };
+
+  onCloseModal = () => {
+    if (this.state.pendingUploadURL) {
+      this.setState({ pendingUploadURL: null });
+    } else {
+      this.resolveRef.current?.(null);
+      this.setState({ file: null });
+      if (this.fileInputRef.current) {
+        this.fileInputRef.current.value = '';
+      }
+    }
+    this.setState({ modalUploadAssetVisible: false });
   };
 
   onUploadError = (progress: CustomEvent) => {
@@ -496,13 +504,16 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
-  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   resync = async (params?: any) => {
-    return await this.pollForAssetDetails().then(() => {
-      if (!params || !params.silent)
-        this.props.sdk.notifier.success('Updated: Data was synced with Mux.');
+    await this.pollForAssetDetails();
+
+    if (!params?.silent) {
+      this.props.sdk.notifier.success('Updated: Data was synced with Mux.');
+    }
+
+    if (!params?.skipPlayerResync) {
       this.reloadPlayer();
-    });
+    }
   };
 
   pollForAssetDetails = async (): Promise<void> => {
@@ -595,6 +606,7 @@ export class App extends React.Component<AppProps, AppState> {
       error: assetError || undefined,
       created_at: asset.created_at ? Number(asset.created_at) : undefined,
       captions: captions && captions.length > 0 ? captions : undefined,
+      static_renditions: asset.static_renditions?.files || undefined,
       is_live: asset.is_live || undefined,
       live_stream_id: asset.live_stream_id || undefined,
     });
@@ -613,10 +625,14 @@ export class App extends React.Component<AppProps, AppState> {
       ? captions.find((track) => track.status === 'preparing')
       : false;
 
+    const renditionPreparing = asset.static_renditions?.files
+      ? asset.static_renditions.files.find((rend) => rend.status === 'preparing')
+      : false;
+
     // Contentful is not able to listen for Mux webhooks, so we poll for status changes.
     // Users will need to leave their browser windows open until processses are complete.
     // Webhooks are the recommended way to listen for status changes over polling.
-    if (asset.status === 'preparing' || trackPreparing) {
+    if (asset.status === 'preparing' || trackPreparing || renditionPreparing) {
       await delay(350);
       await this.pollForAssetDetails();
     }
@@ -684,7 +700,6 @@ export class App extends React.Component<AppProps, AppState> {
 
     this.clearCaptionForm(form);
     await this.resync();
-    await this.reloadPlayer();
   };
 
   clearCaptionForm = (form) => {
@@ -701,7 +716,6 @@ export class App extends React.Component<AppProps, AppState> {
     if (res.status === 204) {
       await delay(500); // Hack, no webhook to wait for update, so we guess.
       await this.resync();
-      await this.reloadPlayer();
     } else {
       const errorRes = await res.json();
       if (errorRes.error.messages[0]) {
@@ -732,12 +746,7 @@ export class App extends React.Component<AppProps, AppState> {
 
   reloadPlayer = async () => {
     if (!this.state || !this.state.value) return;
-    // Toggle for Player to reload manifest and see/remove captions.
-    this.setState({ isReloading: true });
-    // A slight delay was required for captions to show.
-    await delay(300).then(() => {
-      this.setState({ isReloading: false });
-    });
+    this.muxPlayerRef.current?.load();
   };
 
   playerParams = () => {
@@ -867,6 +876,50 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
+  deleteStaticRenditionHandler = async (staticRenditionId: string) => {
+    if (!this.state.value || !this.state.value.assetId) return;
+    const assetId = this.state.value.assetId;
+
+    const res = await deleteStaticRendition(this.apiClient, assetId, staticRenditionId);
+
+    if (res.status === 204) {
+      await delay(500);
+      await this.resync({ skipPlayerResync: true });
+    } else {
+      try {
+        const errorRes = await res.json();
+        if (errorRes.error?.messages?.[0]) {
+          this.props.sdk.notifier.error(errorRes.error.messages[0]);
+        }
+      } catch (e) {
+        this.props.sdk.notifier.error('Error deleting static rendition');
+      }
+      this.resync({ silent: true, skipPlayerResync: true });
+    }
+  };
+
+  createStaticRenditionHandler = async (type: ResolutionType) => {
+    if (!this.state.value || !this.state.value.assetId) return;
+    const assetId = this.state.value.assetId;
+
+    const res = await createStaticRendition(this.apiClient, assetId, type);
+
+    if (res.status === 201) {
+      await delay(500);
+      await this.resync({ skipPlayerResync: true });
+    } else {
+      try {
+        const errorRes = await res.json();
+        if (errorRes.error?.messages?.[0]) {
+          this.props.sdk.notifier.error(errorRes.error.messages[0]);
+        }
+      } catch (e) {
+        this.props.sdk.notifier.error('Error creating static rendition');
+      }
+      this.resync({ silent: true, skipPlayerResync: true });
+    }
+  };
+
   render = () => {
     if (this.state.error) {
       return (
@@ -947,10 +1000,10 @@ export class App extends React.Component<AppProps, AppState> {
               )}
 
             <section className="player" style={this.getPlayerAspectRatio()}>
-              {!this.state.isReloading &&
-              this.state.playerPlaybackId !== 'playback-test-123' &&
+              {this.state.playerPlaybackId !== 'playback-test-123' &&
               (this.state.value.playbackId || this.state.playbackToken) ? (
                 <MuxPlayer
+                  ref={this.muxPlayerRef}
                   data-testid="muxplayer"
                   style={{ height: '100%', width: '100%' }}
                   playbackId={this.state.playerPlaybackId}
@@ -997,6 +1050,7 @@ export class App extends React.Component<AppProps, AppState> {
                 <Tabs.Tab panelId="captions">Captions</Tabs.Tab>
                 <Tabs.Tab panelId="playercode">Player Code</Tabs.Tab>
                 <Tabs.Tab panelId="debug">Data</Tabs.Tab>
+                <Tabs.Tab panelId="mp4renditions">MP4 Renditions</Tabs.Tab>
               </Tabs.List>
 
               <Tabs.Panel id="playercode">
@@ -1094,6 +1148,14 @@ export class App extends React.Component<AppProps, AppState> {
                   </Box>
                 </pre>
               </Tabs.Panel>
+
+              <Tabs.Panel id="mp4renditions">
+                <Mp4RenditionsPanel
+                  asset={this.state.value}
+                  onCreateRendition={this.createStaticRenditionHandler}
+                  onDeleteRendition={this.deleteStaticRenditionHandler}
+                />
+              </Tabs.Panel>
             </Tabs>
           </div>
         );
@@ -1102,39 +1164,20 @@ export class App extends React.Component<AppProps, AppState> {
 
     return (
       <section>
-        <Box marginBottom="spacingM">
-          <div className="uploader_area">
-            <MuxUploaderDrop
-              mux-uploader="muxuploader"
-              overlay
-              overlayText="Drop Video"
-              style={{
-                '--overlay-background-color': 'rgb(231, 235, 238)',
-              }}>
-              <MuxUploader
-                id="muxuploader"
-                type="bar"
-                onSuccess={this.onUploadSuccess}
-                endpoint={this.getUploadUrl}
-                noDrop
-                //onError={this.onUploadError}
-                style={
-                  {
-                    '--uploader-background-color': 'rgb(247, 249, 250)',
-                    '--button-border-radius': '4px',
-                    '--button-border': '1px solid rgb(207, 217, 224)',
-                    '--button-padding': '0.5rem 1rem',
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: '1em',
-                    minHeight: '250px',
-                  } as React.CSSProperties
-                }></MuxUploader>
-            </MuxUploaderDrop>
-          </div>
-        </Box>
+        <ModalUploadAsset
+          isShown={this.state.modalUploadAssetVisible}
+          onClose={this.onCloseModal}
+          onConfirm={this.onConfirmModal}
+          installationParams={this.props.sdk.parameters.installation as InstallationParams}
+        />
+        <UploadArea
+          showMuxUploaderUI={this.state.showMuxUploaderUI}
+          muxUploaderRef={this.muxUploaderRef}
+          onSuccess={this.onUploadSuccess}
+          onDrop={this.handleDrop}
+          onFileChange={this.handleFile}
+          fileInputRef={this.fileInputRef}
+        />
 
         <Form onSubmit={this.addVideoByInput}>
           <FormControl>

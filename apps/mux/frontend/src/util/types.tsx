@@ -19,7 +19,6 @@ export interface AppState {
   error: string | false;
   errorShowResetAction: boolean | false;
   isDeleting: boolean | false;
-  isReloading: boolean | false;
   isTokenLoading: boolean | false;
   playbackToken?: string;
   posterToken?: string;
@@ -28,25 +27,32 @@ export interface AppState {
   playerPlaybackId?: string;
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   raw?: any;
+  modalUploadAssetVisible: boolean;
+  file: File | null;
+  showMuxUploaderUI: boolean;
+  pendingUploadURL: string | null;
 }
+
+export type ResolutionType = 'highest' | 'audio-only';
 
 export interface MuxContentfulObject {
   version: number;
-  uploadId: string;
+  uploadId?: string;
   assetId: string;
   playbackId?: string;
   signedPlaybackId?: string;
   ready: boolean;
-  ratio: string;
-  error: string;
-  max_stored_resolution: string;
-  max_stored_frame_rate: number;
-  audioOnly: boolean;
-  duration: number;
-  created_at: number;
+  ratio?: string;
+  error?: string;
+  max_stored_resolution?: string;
+  max_stored_frame_rate?: number;
+  audioOnly?: boolean;
+  duration?: number;
+  created_at?: number;
   captions?: Array<Captions>;
   is_live?: boolean;
   live_stream_id?: string;
+  static_renditions?: Array<StaticRendition>;
 }
 
 export interface Error {
@@ -55,16 +61,30 @@ export interface Error {
 }
 
 export interface Captions {
-  type?: string;
-  text_type?: string;
-  text_source?: string;
-  language_code?: string;
-  name?: string;
-  closed_captions?: boolean;
+  type: string;
+  'text_type ': string;
+  language_code: string;
+  name: string;
+  closed_captions: boolean;
   status?: string;
-  id?: string;
+  id: string;
   passthrough?: string;
   errored?: Error;
+}
+
+export interface StaticRendition {
+  width?: number;
+  type: string;
+  status: 'ready' | 'preparing' | 'error' | 'skipped';
+  resolution_tier?: string;
+  resolution: ResolutionType;
+  name: string;
+  id: string;
+  height?: number;
+  filesize?: string;
+  ext: string;
+  bitrate?: number;
+  url?: string;
 }
 
 export interface captionListProps {
