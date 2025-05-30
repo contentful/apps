@@ -59,7 +59,7 @@ describe('CreateStep', () => {
     );
   };
 
-  it('renders the component with initial state', async () => {
+  it('renders the component without', async () => {
     await act(async () => {
       render(<TestCreateStepWrapper />);
     });
@@ -68,6 +68,37 @@ describe('CreateStep', () => {
     expect(screen.getByText('Test-Entry-field1')).toBeTruthy();
     expect(screen.getByText('Test-Entry-field2-en-US')).toBeTruthy();
     expect(screen.getByText('Test-Entry-field2-ga')).toBeTruthy();
+    expect(screen.getAllByText('Content Block name')).toHaveLength(3);
+    expect(screen.getAllByRole('button', { name: /Edit content block/i })).toHaveLength(3);
+  });
+
+  it('renders the component with initial state', async () => {
+    await act(async () => {
+      render(
+        <TestCreateStepWrapper
+          initialContentBlocksData={{
+            names: {
+              field1: 'Field 1 custom',
+              'field2-en-US': 'Field 2 en-US custom',
+              'field2-ga': 'Field 2 ga custom',
+            },
+            descriptions: {
+              field1: 'Field 1 description custom',
+              'field2-en-US': 'Field 2 en-US description custom',
+              'field2-ga': 'Field 2 ga description custom',
+            },
+          }}
+        />
+      );
+    });
+
+    expect(screen.getByText(/Edit each field/i)).toBeTruthy();
+    expect(screen.getByText('Field 1 custom')).toBeTruthy();
+    expect(screen.getByText('Field 2 en-US custom')).toBeTruthy();
+    expect(screen.getByText('Field 2 ga custom')).toBeTruthy();
+    expect(screen.getByText('Field 1 description custom')).toBeTruthy();
+    expect(screen.getByText('Field 2 en-US description custom')).toBeTruthy();
+    expect(screen.getByText('Field 2 ga description custom')).toBeTruthy();
     expect(screen.getAllByText('Content Block name')).toHaveLength(3);
     expect(screen.getAllByRole('button', { name: /Edit content block/i })).toHaveLength(3);
   });
