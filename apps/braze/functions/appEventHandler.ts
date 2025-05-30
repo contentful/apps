@@ -111,10 +111,18 @@ async function callAndRetry(fn: () => Promise<any>, waitTimeIndex: number = 0): 
 }
 
 async function deleteConfigEntry(cma: PlainClientAPI) {
-  await cma.entry.unpublish({ entryId: CONFIG_ENTRY_ID });
-  await cma.entry.delete({ entryId: CONFIG_ENTRY_ID });
-  await cma.contentType.unpublish({ contentTypeId: CONFIG_CONTENT_TYPE_ID });
-  await cma.contentType.delete({ contentTypeId: CONFIG_CONTENT_TYPE_ID });
+  try {
+    await cma.entry.unpublish({ entryId: CONFIG_ENTRY_ID });
+  } catch (e) {}
+  try {
+    await cma.entry.delete({ entryId: CONFIG_ENTRY_ID });
+  } catch (e) {}
+  try {
+    await cma.contentType.unpublish({ contentTypeId: CONFIG_CONTENT_TYPE_ID });
+  } catch (e) {}
+  try {
+    await cma.contentType.delete({ contentTypeId: CONFIG_CONTENT_TYPE_ID });
+  } catch (e) {}
 }
 
 async function updateContentBlock(

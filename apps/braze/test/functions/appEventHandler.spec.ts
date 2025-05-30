@@ -62,6 +62,30 @@ describe('updateContentBlocks', () => {
     });
   });
 
+  it('should delete the custom entry and content type when they are not published', async () => {
+    const event = {
+      headers: {
+        'X-Contentful-Topic': ['AppInstallation.delete'],
+      },
+    };
+
+    mockCma.entry.unpublish.mockRejectedValue(new Error('Entry is already unpublished'));
+    mockCma.contentType.unpublish.mockRejectedValue(
+      new Error('Content type is already unpublished')
+    );
+
+    await handler(event as any, mockContext as any);
+
+    expect(mockCma.entry.unpublish).toHaveBeenCalledWith({ entryId: 'brazeConfig' });
+    expect(mockCma.entry.delete).toHaveBeenCalledWith({ entryId: 'brazeConfig' });
+    expect(mockCma.contentType.unpublish).toHaveBeenCalledWith({
+      contentTypeId: 'brazeConfig',
+    });
+    expect(mockCma.contentType.delete).toHaveBeenCalledWith({
+      contentTypeId: 'brazeConfig',
+    });
+  });
+
   it('should remove the entry id from the config on entry deletion', async () => {
     const event = {
       headers: {
