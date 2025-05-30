@@ -192,7 +192,9 @@ describe('createContentBlocks', () => {
   });
 
   it('should handle missing fields', async () => {
-    const entry = createEntryResponse({});
+    const entry = createEntryResponse({
+      title: { 'es-AR': 'Test Title' },
+    });
     const contentType = createContentTypeResponse(['title', 'author']);
 
     vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
@@ -205,6 +207,7 @@ describe('createContentBlocks', () => {
         fieldsData: JSON.stringify([
           {
             fieldId: 'title',
+            locale: 'en-US',
             contentBlockName: 'custom-title-name',
             contentBlockDescription: 'custom-title-description',
           },
@@ -224,9 +227,10 @@ describe('createContentBlocks', () => {
       results: [
         {
           fieldId: 'title',
+          locale: 'en-US',
           success: false,
           statusCode: 600,
-          message: 'Field title does not exist or is empty',
+          message: 'Field title with locale en-US does not exist or is empty',
         },
         {
           fieldId: 'author',
