@@ -295,9 +295,7 @@ function ContentTypeSection(props: {
   const [availableContentTypes, setAvailableContentTypes] = useState<
     { id: string; name: string }[]
   >([]);
-  const [filteredContentTypes, setFilteredContentTypes] = useState<{ id: string; name: string }[]>(
-    []
-  );
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     let allContentTypes: ContentTypeProps[] = [];
@@ -327,50 +325,47 @@ function ContentTypeSection(props: {
     (async () => {
       const currentState = await sdk.app.getCurrentState();
       const currentContentTypesIds = Object.keys(currentState?.EditorInterface || {});
-      const excludedContentTypesIds = [CONFIG_CONTENT_TYPE_ID, ...currentContentTypesIds];
+      const excludedContentTypesIds = [CONFIG_CONTENT_TYPE_ID];
 
       const allContentTypes = await fetchAllContentTypes();
-
-      const currentContentTypes = allContentTypes
-        .filter((ct) => currentContentTypesIds.includes(ct.sys.id))
-        .map((ct) => ({ id: ct.sys.id, name: ct.name }));
 
       const newAvailableContentTypes = allContentTypes
         .filter((ct) => !excludedContentTypesIds.includes(ct.sys.id))
         .map((ct) => ({
           id: ct.sys.id,
           name: ct.name,
-        }));
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
 
       setAvailableContentTypes(newAvailableContentTypes);
-      setFilteredContentTypes(
-        newAvailableContentTypes.sort((a, b) => a.name.localeCompare(b.name))
-      );
-      setSelectedContentTypes(currentContentTypes);
+
+      // If we have current content types, set them as selected
+      if (currentContentTypesIds.length > 0) {
+        const currentContentTypes = allContentTypes
+          .filter((ct) => currentContentTypesIds.includes(ct.sys.id))
+          .map((ct) => ({ id: ct.sys.id, name: ct.name }));
+        setSelectedContentTypes(currentContentTypes);
+      }
     })();
   }, []);
 
-  const handleInputValueChange = (value: string) => {
-    setFilteredContentTypes(
-      availableContentTypes.filter((contentType) =>
-        contentType.name.toLowerCase().includes(value.toLowerCase())
-      )
-    );
-  };
+  const filteredContentTypes = availableContentTypes.filter(
+    (contentType) =>
+      !selectedContentTypes.some((selected) => selected.id === contentType.id) &&
+      contentType.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleSelectItem = (item: { id: string; name: string }) => {
     setSelectedContentTypes([...selectedContentTypes, item]);
-    setFilteredContentTypes(filteredContentTypes.filter(({ id, name }) => id !== item.id));
   };
 
   const handleUnselectItem = (item: { id: string; name: string }) => {
     setSelectedContentTypes(
       selectedContentTypes.filter((contentType) => contentType.id !== item.id)
     );
-    setFilteredContentTypes(
-      [...filteredContentTypes, item].sort((a, b) => a.name.localeCompare(b.name))
-    );
   };
+
+  const isAllSelected = selectedContentTypes.length === availableContentTypes.length;
 
   return (
     <>
@@ -386,11 +381,11 @@ function ContentTypeSection(props: {
       </InformationWithLink>
       <Stack flexDirection="column" alignItems="start">
         <Autocomplete<{ id: string; name: string }>
-          items={filteredContentTypes.filter(
-            (ct) => !selectedContentTypes.some((selected) => selected.id === ct.id)
-          )}
-          onInputValueChange={handleInputValueChange}
+          items={filteredContentTypes}
+          onInputValueChange={setSearchQuery}
           onSelectItem={handleSelectItem}
+          placeholder={isAllSelected ? 'All content types have been selected' : 'Search'}
+          isDisabled={isAllSelected}
           itemToString={(item) => item.name}
           renderItem={(item) => <Text fontWeight="fontWeightDemiBold">{item.name}</Text>}
           textOnAfterSelect="clear"

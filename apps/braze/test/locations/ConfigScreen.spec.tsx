@@ -13,6 +13,7 @@ import {
   BRAZE_ENDPOINTS,
   CONTENT_TYPE_DOCUMENTATION,
 } from '../../src/utils';
+import { createContentTypeResponse } from '../mocks/contentTypeResponse';
 
 const mockCma = {
   contentType: {
@@ -256,6 +257,7 @@ describe('Config Screen component', () => {
     };
 
     it('loads and displays available content types', async () => {
+      await fillScreen();
       const user = userEvent.setup();
 
       const autocomplete = screen.getByPlaceholderText('Search');
@@ -278,6 +280,7 @@ describe('Config Screen component', () => {
       });
       mockCma.editorInterface.update.mockResolvedValueOnce({});
 
+      await fillScreen();
       const user = userEvent.setup();
       await fillScreen(user);
       await selectContentTypes(user);
