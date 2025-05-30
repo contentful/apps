@@ -155,7 +155,7 @@ function ConnectedFieldsModal({
                         {`"${getFieldDisplayName(field.fieldId, field.locale)}" connection error`}
                       </span>
                       <span className={styles.modalErrorMessage}>
-                        Error code [{field.error?.status}] - {field.error?.message}
+                        Error code {field.error?.status} - {field.error?.message}
                       </span>
                     </Box>
                   ))}
