@@ -35,3 +35,46 @@ export const mockConfigEntryWithLocalizedFields: KeyValueMap = {
     ],
   },
 };
+
+export const mockConfigEntryWithError: KeyValueMap = {
+  'en-US': {
+    'entry-id': [
+      {
+        fieldId: 'name',
+        locale: 'en-US',
+        contentBlockId: 'block1',
+        error: {
+          status: 401,
+          message: 'Invalid API key: ',
+        },
+      },
+      { fieldId: 'name', locale: 'en-AU', contentBlockId: 'block2' },
+      { fieldId: 'description', contentBlockId: 'block3' },
+    ],
+  },
+};
+
+export const mockConfigEntryWithErrors: KeyValueMap = {
+  'en-US': {
+    'entry-id': [
+      {
+        fieldId: 'name',
+        locale: 'en-US',
+        contentBlockId: 'block1',
+        error: {
+          status: 401,
+          message: 'Invalid API key: ',
+        },
+      },
+      { fieldId: 'name', locale: 'en-AU', contentBlockId: 'block2' },
+      {
+        fieldId: 'description',
+        contentBlockId: 'block3',
+        error: {
+          status: 401,
+          message: 'Invalid API key: ',
+        },
+      },
+    ],
+  },
+};

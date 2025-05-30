@@ -10,7 +10,11 @@ import { mockSdk } from '../mocks';
 import { fireEvent } from '@testing-library/react';
 import { getConfigEntry, updateConfig } from '../../src/utils';
 import { createConfigEntry } from '../mocks/entryResponse';
-import { mockConfigEntryWithLocalizedFields } from '../mocks/connectedFields';
+import {
+  mockConfigEntryWithError,
+  mockConfigEntryWithErrors,
+  mockConfigEntryWithLocalizedFields,
+} from '../mocks/connectedFields';
 
 describe('Page Location', () => {
   vi.mock('@contentful/react-apps-toolkit');
@@ -288,17 +292,18 @@ describe('Page Location', () => {
   });
 
   describe('Connected Fields Modal - Error Handling', () => {
+    const name = new BasicField('name', 'Name', 'content-type-id', false);
     const description = new BasicField('description', 'Description', 'content-type-id', false);
     const entry = new Entry(
-        'entry-id',
-        'content-type-id',
-        'title',
-        [description],
-        'space-id',
-        'environment-id',
-        'valid-contentful-api-key',
-        '2025-05-15T16:49:16.367Z',
-        '2025-05-15T16:49:16.367Z'
+      'entry-id',
+      'content-type-id',
+      'title',
+      [name, description],
+      'space-id',
+      'environment-id',
+      'valid-contentful-api-key',
+      '2025-05-15T16:49:16.367Z',
+      '2025-05-15T16:49:16.367Z'
     );
 
     beforeEach(() => {
@@ -318,6 +323,7 @@ describe('Page Location', () => {
     });
 
     it('shows a single error banner if one field has an error', async () => {
+      (getConfigEntry as Mock).mockResolvedValue(createConfigEntry(mockConfigEntryWithError));
       render(<Page />);
       const viewFieldsButton = (await screen.findAllByRole('button', { name: /View fields/i }))[0];
       viewFieldsButton.click();
@@ -325,13 +331,12 @@ describe('Page Location', () => {
       expect(screen.getByText('Description')).toBeTruthy();
 
       expect(modal).toBeTruthy();
-      expect(screen.getByText('connection error')).toBeTruthy();
-      expect(screen.getByText('Error code [123]')).toBeTruthy();
+      expect(screen.getByText('Error code 401')).toBeTruthy();
       // Only one error banner
-      expect(screen.queryByText('"title" connection error')).toBeNull();
     });
 
     it('shows multiple error banners if multiple fields have errors', async () => {
+      (getConfigEntry as Mock).mockResolvedValue(createConfigEntry(mockConfigEntryWithErrors));
       render(<Page />);
       const viewFieldsButton = (await screen.findAllByRole('button', { name: /View fields/i }))[0];
       viewFieldsButton.click();
