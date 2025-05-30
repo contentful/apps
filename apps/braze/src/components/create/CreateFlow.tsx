@@ -42,7 +42,7 @@ export type ContentBlockData = {
 
 export type CreationResultField = {
   fieldId: string;
-  locale: string;
+  locale?: string;
   success: boolean;
   statusCode: number;
   message: string;
