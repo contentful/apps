@@ -1,10 +1,108 @@
+import { ModalData } from '../components/UploadConfiguration/ModalUploadAsset';
 import { InstallationParams, ResolutionType } from './types';
 
-export interface ModalData {
-  videoQuality: string;
-  playbackPolicies: string[];
-  captionsConfig: any;
-  mp4Config: any;
+interface AssetSettings {
+  passthrough: string;
+  playback_policies: string[];
+  video_quality: string;
+  meta?: {
+    title?: string;
+    creator_id?: string;
+    external_id?: string;
+  };
+  static_renditions?: Array<{ resolution: string }>;
+  inputs: Array<{
+    url?: string;
+    generated_subtitles?: Array<{
+      language_code: string;
+      name: string;
+    }>;
+    type?: string;
+    text_type?: string;
+    closed_captions?: boolean;
+    language_code?: string;
+    name?: string;
+  }>;
+}
+
+interface AssetInput {
+  url: string;
+  generated_subtitles?: Array<{
+    language_code: string;
+    name: string;
+  }>;
+  type?: string;
+  text_type?: string;
+  closed_captions?: boolean;
+  language_code?: string;
+  name?: string;
+}
+
+function buildAssetSettings(options: ModalData, passthroughId: string): AssetSettings {
+  const settings: AssetSettings = {
+    passthrough: passthroughId,
+    playback_policies: options.playbackPolicies,
+    video_quality: options.videoQuality,
+    inputs: [],
+  };
+
+  // Metadata case
+  if (options.metadataConfig.enabled) {
+    // Standard metadata
+    if (options.metadataConfig.standardMetadata) {
+      const { title, creatorId, externalId } = options.metadataConfig.standardMetadata;
+      if (title || creatorId || externalId) {
+        settings.meta = {};
+        if (title) settings.meta.title = title;
+        if (creatorId) settings.meta.creator_id = creatorId;
+        if (externalId) settings.meta.external_id = externalId;
+      }
+    }
+    // Custom metadata
+    if (options.metadataConfig.customMetadata) {
+      settings.passthrough = options.metadataConfig.customMetadata;
+    }
+  }
+
+  // Captions case
+  if (options.captionsConfig.captionsType !== 'off') {
+    if (options.captionsConfig.captionsType === 'auto') {
+      settings.inputs.push({
+        generated_subtitles: [
+          {
+            language_code: options.captionsConfig.languageCode,
+            name: options.captionsConfig.languageName,
+          },
+        ],
+      });
+    } else {
+      settings.inputs.push({
+        url: options.captionsConfig.url,
+        type: 'text',
+        text_type: 'subtitles',
+        closed_captions: options.captionsConfig.closedCaptions,
+        language_code: options.captionsConfig.languageCode,
+        name: options.captionsConfig.languageName,
+      });
+    }
+  }
+
+  // MP4 renditions case
+  if (options.mp4Config.enabled) {
+    settings.static_renditions = [];
+    if (options.mp4Config.audioOnly) {
+      settings.static_renditions.push({
+        resolution: 'audio-only',
+      });
+    }
+    if (options.mp4Config.highestResolution) {
+      settings.static_renditions.push({
+        resolution: 'highest',
+      });
+    }
+  }
+
+  return settings;
 }
 
 export async function addByURL(
@@ -17,50 +115,28 @@ export async function addByURL(
   pollForAssetDetails: () => Promise<void>
 ) {
   const passthroughId = (sdk.entry.getSys() as { id: string }).id;
+  const settings = buildAssetSettings(options, passthroughId);
 
-  const requestBody: any = {
+  const requestBody = {
+    ...settings,
     inputs: [
       {
         url: remoteURL,
-      },
+      } as AssetInput,
     ],
-    passthrough: passthroughId,
-    playback_policies: options.playbackPolicies,
-    video_quality: options.videoQuality,
   };
 
-  // Captions case
-  if (options.captionsConfig.captionsType !== 'off') {
-    if (options.captionsConfig.captionsType === 'auto') {
-      requestBody.inputs[0].generated_subtitles = [
-        {
-          language_code: options.captionsConfig.languageCode,
-          name: options.captionsConfig.languageName,
-        },
-      ];
+  if (settings.inputs.length > 0) {
+    if (settings.inputs[0].generated_subtitles) {
+      requestBody.inputs[0] = {
+        ...requestBody.inputs[0],
+        ...settings.inputs[0],
+      };
     } else {
       requestBody.inputs.push({
-        url: options.captionsConfig.url,
-        type: 'text',
-        text_type: 'subtitles',
-        closed_captions: options.captionsConfig.closedCaptions,
-        language_code: options.captionsConfig.languageCode,
-        name: options.captionsConfig.languageName,
-      });
-    }
-  }
-
-  if (options.mp4Config.enabled) {
-    requestBody.static_renditions = [];
-    if (options.mp4Config.audioOnly) {
-      requestBody.static_renditions.push({
-        resolution: 'audio-only',
-      });
-    }
-    if (options.mp4Config.highestResolution) {
-      requestBody.static_renditions.push({
-        resolution: 'highest',
-      });
+        ...settings.inputs[0],
+        url: settings.inputs[0].url || '',
+      } as AssetInput);
     }
   }
 
@@ -95,78 +171,18 @@ export async function getUploadUrl(
   responseCheck: (res: any) => boolean | Promise<boolean>
 ) {
   const passthroughId = (sdk.entry.getSys() as { id: string }).id;
-
   const { muxEnableAudioNormalize } = sdk.parameters.installation as InstallationParams;
+  const settings = buildAssetSettings(options, passthroughId);
 
-  const data: {
-    cors_origin: string;
-    new_asset_settings: {
-      passthrough: string;
-      normalize_audio: boolean;
-      playback_policies: string[];
-      static_renditions?: object[];
-      video_quality: string;
-      inputs: Array<{
-        generated_subtitles?: Array<{
-          language_code: string;
-          name: string;
-        }>;
-        url?: string;
-        type?: string;
-        text_type?: string;
-        closed_captions?: boolean;
-        language_code?: string;
-        name?: string;
-      }>;
-    };
-  } = {
+  const requestBody = {
     cors_origin: window.location.origin,
     new_asset_settings: {
-      passthrough: passthroughId,
+      ...settings,
       normalize_audio: muxEnableAudioNormalize || false,
-      playback_policies: options.playbackPolicies,
-      video_quality: options.videoQuality,
-      inputs: [],
     },
   };
 
-  // Captions case
-  if (options.captionsConfig.captionsType !== 'off') {
-    if (options.captionsConfig.captionsType === 'auto') {
-      data.new_asset_settings.inputs.push({
-        generated_subtitles: [
-          {
-            language_code: options.captionsConfig.languageCode,
-            name: options.captionsConfig.languageName,
-          },
-        ],
-      });
-    } else {
-      data.new_asset_settings.inputs.push({
-        url: options.captionsConfig.url,
-        type: 'text',
-        text_type: 'subtitles',
-        closed_captions: options.captionsConfig.closedCaptions,
-        language_code: options.captionsConfig.languageCode,
-        name: options.captionsConfig.languageName,
-      });
-    }
-  }
-
-  if (options.mp4Config.enabled) {
-    data.new_asset_settings.static_renditions = [];
-    if (options.mp4Config.audioOnly) {
-      data.new_asset_settings.static_renditions.push({
-        resolution: 'audio-only',
-      });
-    }
-    if (options.mp4Config.highestResolution) {
-      data.new_asset_settings.static_renditions.push({
-        resolution: 'highest',
-      });
-    }
-  }
-  const res = await apiClient.post('/video/v1/uploads', JSON.stringify(data));
+  const res = await apiClient.post('/video/v1/uploads', JSON.stringify(requestBody));
 
   if (!(await responseCheck(res))) {
     return;
