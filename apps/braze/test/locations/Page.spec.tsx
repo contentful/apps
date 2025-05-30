@@ -316,25 +316,23 @@ describe('Page Location', () => {
     });
 
     describe('When there are errors', () => {
-      const mockConfigEntry = createConfigEntry({
-        'en-US': {
-          'entry-id': [
-            { fieldId: 'name', locale: 'en-US', contentBlockId: 'block1' },
-            { fieldId: 'name', locale: 'en-AU', contentBlockId: 'block2' },
-            {
-              fieldId: 'description',
-              contentBlockId: 'block3',
-              error: { message: 'connection error', status: 500 },
-            },
-          ],
-        },
-      });
+      it('shows error banner if one field has an error', async () => {
+        const mockConfigEntry = createConfigEntry({
+          'en-US': {
+            'entry-id': [
+              { fieldId: 'name', locale: 'en-US', contentBlockId: 'block1' },
+              { fieldId: 'name', locale: 'en-AU', contentBlockId: 'block2' },
+              {
+                fieldId: 'description',
+                contentBlockId: 'block3',
+                error: { message: 'connection error', status: 500 },
+              },
+            ],
+          },
+        });
 
-      beforeEach(() => {
         (getConfigEntry as Mock).mockResolvedValue(mockConfigEntry);
-      });
 
-      it('shows a single error banner if one field has an error', async () => {
         render(<Page />);
         const viewFieldsButton = (
           await screen.findAllByRole('button', { name: /View fields/i })
@@ -347,17 +345,36 @@ describe('Page Location', () => {
         expect(screen.queryByText('"Title" connection error')).toBeNull();
       });
 
-      it.skip('shows multiple error banners if multiple fields have errors', async () => {
+      it('shows multiple error banners if multiple fields have errors', async () => {
+        const mockConfigEntryWithMultipleErrors = createConfigEntry({
+          'en-US': {
+            'entry-id': [
+              {
+                fieldId: 'name',
+                contentBlockId: 'block2',
+                error: { message: 'connection error', status: 500 },
+              },
+              {
+                fieldId: 'description',
+                contentBlockId: 'block3',
+                error: { message: 'connection error', status: 500 },
+              },
+            ],
+          },
+        });
+
+        (getConfigEntry as Mock).mockResolvedValue(mockConfigEntryWithMultipleErrors);
+
         render(<Page />);
         const viewFieldsButton = (
           await screen.findAllByRole('button', { name: /View fields/i })
         )[0];
         viewFieldsButton.click();
-        await screen.findByRole('dialog');
-        expect(screen.getByText('"Title" connection error')).toBeTruthy();
-        expect(screen.getByText('Error code [123] - First error')).toBeTruthy();
+        const modal = await screen.findByRole('dialog');
+
+        expect(modal).toBeTruthy();
         expect(screen.getByText('"Description" connection error')).toBeTruthy();
-        expect(screen.getByText('Error code [456] - Second error')).toBeTruthy();
+        expect(screen.queryByText('"Name" connection error')).toBeNull();
       });
     });
   });

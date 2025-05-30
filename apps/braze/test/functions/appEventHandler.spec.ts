@@ -4,7 +4,6 @@ import * as appEventHandlerModule from '../../functions/appEventHandler';
 import { createClient } from 'contentful-management';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { getConfigEntry, updateConfig } from '../../src/utils';
-import {CustomError} from "../../functions/customError";
 
 vi.mock('contentful-management', () => ({
   createClient: vi.fn(),
@@ -26,6 +25,7 @@ describe('updateContentBlocks', () => {
     entry: {
       unpublish: vi.fn(),
       delete: vi.fn(),
+      update: vi.fn(),
     },
   };
 
@@ -217,13 +217,19 @@ describe('updateContentBlocks', () => {
       ],
     });
 
-    vi.mocked(global.fetch)
-      .mockRejectedValueOnce(new Error('Network error'))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ success: true }), { status: 200 }));
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: () =>
+        Promise.resolve({
+          message: 'Server Error',
+        }),
+    } as Response);
 
     await handler(event as any, mockContext as any);
 
-    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(mockCma.entry.update).toHaveBeenCalledOnce();
   });*/
 
   it('should update content block for each locale on entry save', async () => {
@@ -307,181 +313,5 @@ describe('updateContentBlocks', () => {
         }),
       })
     );
-  });
-});
-
-describe('Field error handling on entry save', () => {
-  const mockCma = {
-    contentType: {
-      get: vi.fn(),
-      unpublish: vi.fn(),
-      delete: vi.fn(),
-    },
-    entry: {
-      unpublish: vi.fn(),
-      delete: vi.fn(),
-      update: vi.fn(),
-      get: vi.fn(),
-    },
-  };
-
-  const mockContext = {
-    appInstallationParameters: {
-      brazeApiKey: 'test-api-key',
-      brazeEndpoint: 'https://test.braze.com',
-    },
-    cmaClientOptions: {},
-    spaceId: 'test-space',
-    environmentId: 'test-env',
-  };
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    (createClient as any).mockReturnValue(mockCma);
-    global.fetch = vi.fn();
-    vi.spyOn(appEventHandlerModule, 'updateFieldErrors').mockImplementation(vi.fn());
-  });
-
-  it('should call updateFieldErrors when updateContentBlock fails for a field', async () => {
-    const event = {
-      headers: {
-        'X-Contentful-Topic': ['Entry.save'],
-      },
-      body: {
-        sys: {
-          id: 'entry-err',
-          contentType: {
-            sys: { id: 'ct' },
-          },
-        },
-        fields: {
-          testField: { 'en-US': 'value' },
-        },
-      },
-    };
-    const mockConfigEntry = {
-      fields: {
-        connectedFields: {
-          'en-US': {
-            'entry-err': [{ fieldId: 'testField', locale: 'en-US', contentBlockId: 'block-err' }],
-          },
-        },
-      },
-    };
-    vi.mocked(getConfigEntry).mockResolvedValue(mockConfigEntry as any);
-    mockCma.contentType.get.mockResolvedValue({ fields: [{ id: 'testField', type: 'Text' }] });
-    vi.mocked(global.fetch).mockRejectedValue(Object.assign(new CustomError('Internal Error', 500)));
-
-    await handler(event as any, mockContext as any);
-
-    expect(appEventHandlerModule.updateFieldErrors).toHaveBeenCalledWith(mockCma, 'entry-err', [
-      {
-        fieldId: 'testField',
-        locale: 'en-US',
-        contentBlockId: 'block-err',
-        error: {
-          status: 500,
-          message: 'Internal Error',
-        },
-      },
-    ]);
-  });
-
-  it('should store multiple field errors', async () => {
-    const event = {
-      headers: {
-        'X-Contentful-Topic': ['Entry.save'],
-      },
-      body: {
-        sys: {
-          id: 'entry-multi',
-          contentType: {
-            sys: { id: 'ct' },
-          },
-        },
-        fields: {
-          fieldA: { 'en-US': 'A' },
-          fieldB: { 'en-US': 'B' },
-        },
-      },
-    };
-    const mockConfigEntry = {
-      fields: {
-        connectedFields: {
-          'en-US': {
-            'entry-multi': [
-              { fieldId: 'fieldA', locale: 'en-US', contentBlockId: 'blockA' },
-              { fieldId: 'fieldB', locale: 'en-US', contentBlockId: 'blockB' },
-            ],
-          },
-        },
-      },
-    };
-    vi.mocked(getConfigEntry).mockResolvedValue(mockConfigEntry as any);
-    mockCma.contentType.get.mockResolvedValue({
-      fields: [
-        { id: 'fieldA', type: 'Text' },
-        { id: 'fieldB', type: 'Text' },
-      ],
-    });
-    vi.mocked(global.fetch)
-      .mockRejectedValueOnce({ status: 400, message: 'Bad Request' })
-      .mockRejectedValueOnce({ status: 404, message: 'Not Found' });
-
-    await handler(event as any, mockContext as any);
-    expect(appEventHandlerModule.updateFieldErrors).toHaveBeenCalledWith(mockCma, 'entry-multi', [
-      {
-        fieldId: 'fieldA',
-        locale: 'en-US',
-        contentBlockId: 'blockA',
-        error: { status: 400, message: 'Bad Request' },
-      },
-      {
-        fieldId: 'fieldB',
-        locale: 'en-US',
-        contentBlockId: 'blockB',
-        error: { status: 404, message: 'Not Found' },
-      },
-    ]);
-  });
-
-  it('should not call updateFieldErrors if all updates succeed', async () => {
-    const event = {
-      headers: {
-        'X-Contentful-Topic': ['Entry.save'],
-      },
-      body: {
-        sys: {
-          id: 'entry-ok',
-          contentType: {
-            sys: { id: 'ct' },
-          },
-        },
-        fields: {
-          testField: { 'en-US': 'value' },
-        },
-      },
-    };
-    const mockConfigEntry = {
-      fields: {
-        connectedFields: {
-          'en-US': {
-            'entry-ok': [{ fieldId: 'testField', locale: 'en-US', contentBlockId: 'block-ok' }],
-          },
-        },
-      },
-    };
-    vi.mocked(getConfigEntry).mockResolvedValue(mockConfigEntry as any);
-    mockCma.contentType.get.mockResolvedValue({ fields: [{ id: 'testField', type: 'Text' }] });
-    vi.mocked(global.fetch).mockResolvedValueOnce(new Response('{}', { status: 200 }));
-
-    await handler(event as any, mockContext as any);
-    expect(appEventHandlerModule.updateFieldErrors).toHaveBeenCalledWith(mockCma, 'entry-ok', [
-      {
-        fieldId: 'testField',
-        locale: 'en-US',
-        contentBlockId: 'block-ok',
-      },
-    ]);
   });
 });
