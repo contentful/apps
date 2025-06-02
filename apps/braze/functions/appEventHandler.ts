@@ -182,8 +182,8 @@ export const updateFieldErrors = async (
   results: Array<ConnectedField>
 ) => {
   const configEntry = await getConfigEntry(cma);
-  const locale = 'en-US'; // TODO: get default locale
-  const connectedFields = configEntry.fields[CONFIG_FIELD_ID]?.[locale] || {};
+  const configField = configEntry.fields[CONFIG_FIELD_ID];
+  const connectedFields = (Object.values(configField)[0] || {}) as ConnectedFields;
 
   const newFields = results.map((result: any) => {
     return {
