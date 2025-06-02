@@ -100,6 +100,8 @@ export class App extends React.Component<AppProps, AppState> {
       file: null,
       showMuxUploaderUI: false,
       pendingUploadURL: null,
+      isPolling: false,
+      initialResyncDone: false,
     };
   }
 
@@ -193,6 +195,13 @@ export class App extends React.Component<AppProps, AppState> {
         await this.pollForAssetDetails();
         return;
       }
+    }
+  }
+
+  componentDidUpdate(prevProps: AppProps, prevState: AppState) {
+    if (this.state.value?.assetId && !this.state.initialResyncDone) {
+      this.resync({ silent: true });
+      this.setState({ initialResyncDone: true });
     }
   }
 
@@ -516,130 +525,147 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
-  pollForAssetDetails = async (): Promise<void> => {
+  pollForAssetDetails = async (isRecursiveCall: boolean = false): Promise<void> => {
+    if (!isRecursiveCall && this.state.isPolling) {
+      return;
+    }
+
     if (!this.state.value || !this.state.value.assetId) {
       throw Error('Something went wrong, because by this point we require an assetId.');
     }
 
-    const assetRes = await this.getAsset(this.state.value.assetId);
-
-    if (!assetRes) {
-      throw Error('Something went wrong, we were not able to get the asset.');
+    if (!isRecursiveCall) {
+      this.setState({ isPolling: true });
     }
 
-    this.setState({
-      raw: assetRes,
-    });
+    try {
+      const assetRes = await this.getAsset(this.state.value.assetId);
 
-    let assetError;
-    if ('error' in assetRes) {
-      assetError = assetRes.error.messages[0] || 'Unknown error';
-    }
-    if (assetRes.data?.status === 'errored') {
-      assetError = assetRes.data.errors.messages[0] || 'Unknown error';
-    }
+      if (!assetRes) {
+        throw Error('Something went wrong, we were not able to get the asset.');
+      }
 
-    if (assetError) {
-      this.setAssetError(assetError);
-      await this.props.sdk.field.setValue({
-        ...this.state.value,
-        error: assetError,
+      this.setState({
+        raw: assetRes,
       });
-      return;
-    }
 
-    const asset = assetRes.data;
+      let assetError;
+      if ('error' in assetRes) {
+        assetError = assetRes.error.messages[0] || 'Unknown error';
+      }
+      if (assetRes.data?.status === 'errored') {
+        assetError = assetRes.data.errors.messages[0] || 'Unknown error';
+      }
 
-    const publicPlayback = asset.playback_ids.find(
-      ({ policy }: { policy: string }) => policy === 'public'
-    );
-    const signedPlayback = asset.playback_ids.find(
-      ({ policy }: { policy: string }) => policy === 'signed'
-    );
+      if (assetError) {
+        this.setAssetError(assetError);
+        await this.props.sdk.field.setValue({
+          ...this.state.value,
+          error: assetError,
+        });
+        if (!isRecursiveCall) {
+          this.setState({ isPolling: false });
+        }
+        return;
+      }
 
-    const audioOnly =
-      'max_stored_resolution' in asset && asset.max_stored_resolution === 'Audio only'
-        ? true
-        : false;
+      const asset = assetRes.data;
 
-    const erroredTracks =
-      'tracks' in asset ? asset.tracks.filter((track) => track.status === 'errored') : undefined;
-
-    // Notifly of the error and delete any failed tracks (like captions) so the track can be re-uploaded.
-    if (erroredTracks && erroredTracks.length > 0) {
-      this.props.sdk.notifier.error(erroredTracks[0].error.messages[0]);
-      const res = await this.apiClient.del(
-        `/video/v1/assets/${this.state.value.assetId}/tracks/${erroredTracks[0].id}`
+      const publicPlayback = asset.playback_ids.find(
+        ({ policy }: { policy: string }) => policy === 'public'
       );
-      if (res.status !== 204) {
-        try {
-          const deleteError = await res.clone().json();
-          this.props.sdk.notifier.error('Error deleting caption: ' + deleteError.messages[0]);
-        } catch (error) {
-          const deleteError = await res.clone().text();
-          console.error(error, deleteError);
+      const signedPlayback = asset.playback_ids.find(
+        ({ policy }: { policy: string }) => policy === 'signed'
+      );
+
+      const audioOnly =
+        'max_stored_resolution' in asset && asset.max_stored_resolution === 'Audio only'
+          ? true
+          : false;
+
+      const erroredTracks =
+        'tracks' in asset ? asset.tracks.filter((track) => track.status === 'errored') : undefined;
+
+      // Notifly of the error and delete any failed tracks (like captions) so the track can be re-uploaded.
+      if (erroredTracks && erroredTracks.length > 0) {
+        this.props.sdk.notifier.error(erroredTracks[0].error.messages[0]);
+        const res = await this.apiClient.del(
+          `/video/v1/assets/${this.state.value.assetId}/tracks/${erroredTracks[0].id}`
+        );
+        if (res.status !== 204) {
+          try {
+            const deleteError = await res.clone().json();
+            this.props.sdk.notifier.error('Error deleting caption: ' + deleteError.messages[0]);
+          } catch (error) {
+            const deleteError = await res.clone().text();
+            console.error(error, deleteError);
+          }
         }
       }
-    }
 
-    const captions =
-      'tracks' in asset
-        ? asset.tracks.filter(
-            (track) =>
-              track.text_type === 'subtitles' &&
-              (track.status === 'ready' || track.status === 'preparing')
-          )
-        : undefined;
+      const captions =
+        'tracks' in asset
+          ? asset.tracks.filter(
+              (track) =>
+                track.text_type === 'subtitles' &&
+                (track.status === 'ready' || track.status === 'preparing')
+            )
+          : undefined;
 
-    await this.props.sdk.field.setValue({
-      version: 3,
-      uploadId: this.state.value.uploadId || undefined,
-      assetId: this.state.value.assetId,
-      playbackId: (publicPlayback && publicPlayback.id) || undefined,
-      signedPlaybackId: (signedPlayback && signedPlayback.id) || undefined,
-      ready: asset.status === 'ready',
-      ratio: asset.aspect_ratio || undefined,
-      max_stored_resolution: asset.max_stored_resolution || undefined,
-      max_stored_frame_rate: asset.max_stored_frame_rate || undefined,
-      duration: asset.duration || undefined,
-      audioOnly: audioOnly,
-      error: assetError || undefined,
-      created_at: asset.created_at ? Number(asset.created_at) : undefined,
-      captions: captions && captions.length > 0 ? captions : undefined,
-      static_renditions: asset.static_renditions?.files || undefined,
-      is_live: asset.is_live || undefined,
-      live_stream_id: asset.live_stream_id || undefined,
-    });
+      await this.props.sdk.field.setValue({
+        version: 3,
+        uploadId: this.state.value.uploadId || undefined,
+        assetId: this.state.value.assetId,
+        playbackId: (publicPlayback && publicPlayback.id) || undefined,
+        signedPlaybackId: (signedPlayback && signedPlayback.id) || undefined,
+        ready: asset.status === 'ready',
+        ratio: asset.aspect_ratio || undefined,
+        max_stored_resolution: asset.max_stored_resolution || undefined,
+        max_stored_frame_rate: asset.max_stored_frame_rate || undefined,
+        duration: asset.duration || undefined,
+        audioOnly: audioOnly,
+        error: assetError || undefined,
+        created_at: asset.created_at ? Number(asset.created_at) : undefined,
+        captions: captions && captions.length > 0 ? captions : undefined,
+        static_renditions: asset.static_renditions?.files || undefined,
+        is_live: asset.is_live || undefined,
+        live_stream_id: asset.live_stream_id || undefined,
+      });
 
-    if (publicPlayback && publicPlayback.id) {
-      this.setState({ playerPlaybackId: publicPlayback.id });
-    } else if (signedPlayback && signedPlayback.id) {
-      this.setState({ playerPlaybackId: signedPlayback.id });
-    }
+      if (publicPlayback && publicPlayback.id) {
+        this.setState({ playerPlaybackId: publicPlayback.id });
+      } else if (signedPlayback && signedPlayback.id) {
+        this.setState({ playerPlaybackId: signedPlayback.id });
+      }
 
-    if (signedPlayback) {
-      await this.setSignedPlayback(signedPlayback.id);
-    }
+      if (signedPlayback) {
+        await this.setSignedPlayback(signedPlayback.id);
+      }
 
-    const trackPreparing = captions
-      ? captions.find((track) => track.status === 'preparing')
-      : false;
+      const trackPreparing = captions
+        ? captions.find((track) => track.status === 'preparing')
+        : false;
 
-    const renditionPreparing = asset.static_renditions?.files
-      ? asset.static_renditions.files.find((rend) => rend.status === 'preparing')
-      : false;
+      const renditionPreparing = asset.static_renditions?.files
+        ? asset.static_renditions.files.find((rend) => rend.status === 'preparing')
+        : false;
 
-    // Contentful is not able to listen for Mux webhooks, so we poll for status changes.
-    // Users will need to leave their browser windows open until processses are complete.
-    // Webhooks are the recommended way to listen for status changes over polling.
-    if (asset.status === 'preparing' || trackPreparing || renditionPreparing) {
-      await delay(350);
-      await this.pollForAssetDetails();
-    }
+      // Contentful is not able to listen for Mux webhooks, so we poll for status changes.
+      // Users will need to leave their browser windows open until processses are complete.
+      // Webhooks are the recommended way to listen for status changes over polling.
+      if (asset.status === 'preparing' || trackPreparing || renditionPreparing) {
+        await delay(500);
+        await this.pollForAssetDetails(true);
+      }
 
-    if (asset.is_live === true) {
-      await delay(1000);
-      await this.pollForAssetDetails();
+      if (asset.is_live === true) {
+        await delay(1000);
+        await this.pollForAssetDetails(true);
+      }
+    } finally {
+      if (!isRecursiveCall) {
+        this.setState({ isPolling: false });
+      }
     }
   };
 

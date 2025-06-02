@@ -31,6 +31,8 @@ export interface AppState {
   file: File | null;
   showMuxUploaderUI: boolean;
   pendingUploadURL: string | null;
+  isPolling: boolean;
+  initialResyncDone: boolean;
 }
 
 export type ResolutionType = 'highest' | 'audio-only';
