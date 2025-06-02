@@ -91,11 +91,11 @@ export const CaptionsConfiguration: FC<CaptionsConfigurationProps> = ({
   };
 
   const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newType = e.target.value as 'off' | 'auto' | 'custom';
+    const newType = e.target.value;
     setLanguageInputValue('');
     if (newType === 'off') {
       onCaptionsChange({ captionsType: 'off' });
-    } else {
+    } else if (newType === 'auto' || newType === 'custom') {
       onCaptionsChange({
         captionsType: newType,
         languageCode: '',
@@ -103,6 +103,8 @@ export const CaptionsConfiguration: FC<CaptionsConfigurationProps> = ({
         closedCaptions: false,
         url: '',
       });
+    } else {
+      throw new Error('Unsupported type');
     }
   };
 
