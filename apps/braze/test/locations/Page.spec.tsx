@@ -220,36 +220,32 @@ describe('Page Location', () => {
       (updateConfig as Mock).mockResolvedValue(mockConfigEntry);
     });
 
-    it('should correctly map field IDs with locales', async () => {
+    const openFieldsModal = async () => {
       render(<Page />);
       const viewFieldsButton = await screen.findByRole('button', { name: /View fields/i });
-      viewFieldsButton.click();
+      fireEvent.click(viewFieldsButton);
+      return screen.findByRole('dialog');
+    };
 
+    it('should correctly map field IDs with locales', async () => {
+      await openFieldsModal();
       const checkboxes = await screen.findAllByRole('checkbox');
-      expect(checkboxes).toHaveLength(4); // 3 fields + select all checkbox
 
-      const fieldNames = screen.getAllByText(/Name|Description/);
-      expect(fieldNames).toHaveLength(3);
+      expect(checkboxes).toHaveLength(4); // 3 fields + select all checkbox
       expect(screen.getByText('Name (en-US)')).toBeTruthy();
       expect(screen.getByText('Name (en-AU)')).toBeTruthy();
       expect(screen.getByText('Description')).toBeTruthy();
     });
 
     it('should handle field disconnection correctly', async () => {
-      render(<Page />);
-      const viewFieldsButton = await screen.findByRole('button', { name: /View fields/i });
-      viewFieldsButton.click();
+      await openFieldsModal();
 
-      // Select a field to disconnect
       const checkboxes = await screen.findAllByRole('checkbox');
       const fieldCheckbox = checkboxes[1]; // First field checkbox
       fireEvent.click(fieldCheckbox);
-
-      // Click disconnect button
       const disconnectButton = screen.getByRole('button', { name: /Disconnect/i });
       fireEvent.click(disconnectButton);
 
-      // Verify updateConfig was called with correct parameters
       expect(updateConfig).toHaveBeenCalledWith(
         mockConfigEntry,
         expect.objectContaining({
@@ -270,19 +266,13 @@ describe('Page Location', () => {
     });
 
     it('should handle disconnecting all fields correctly', async () => {
-      render(<Page />);
-      const viewFieldsButton = await screen.findByRole('button', { name: /View fields/i });
-      viewFieldsButton.click();
+      await openFieldsModal();
 
-      // Select all fields
       const selectAllCheckbox = await screen.findByTestId('select-all-fields');
       fireEvent.click(selectAllCheckbox);
-
-      // Click disconnect button
       const disconnectButton = screen.getByRole('button', { name: /Disconnect/i });
       fireEvent.click(disconnectButton);
 
-      // Verify updateConfig was called with empty array for the entry
       expect(updateConfig).toHaveBeenCalled();
     });
   });

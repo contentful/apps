@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { handler } from '../../functions/appEventHandler';
-import * as appEventHandlerModule from '../../functions/appEventHandler';
 import { createClient } from 'contentful-management';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { getConfigEntry, updateConfig } from '../../src/utils';
@@ -43,7 +42,6 @@ describe('updateContentBlocks', () => {
     vi.clearAllMocks();
     (createClient as any).mockReturnValue(mockCma);
     global.fetch = vi.fn();
-    vi.spyOn(appEventHandlerModule, 'updateFieldErrors').mockImplementation(vi.fn());
   });
 
   it('should delete the custom entry and content type on app installation deletion', async () => {
@@ -169,8 +167,7 @@ describe('updateContentBlocks', () => {
     );
   });
 
-  /* TODO : fix implementation
-  it('should retry on failure', async () => {
+  it('should update the config on save failure', async () => {
     const event = {
       headers: {
         'X-Contentful-Topic': ['Entry.save'],
@@ -229,8 +226,8 @@ describe('updateContentBlocks', () => {
     await handler(event as any, mockContext as any);
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
-    expect(mockCma.entry.update).toHaveBeenCalledOnce();
-  });*/
+    expect(vi.mocked(updateConfig)).toHaveBeenCalledOnce();
+  });
 
   it('should update content block for each locale on entry save', async () => {
     const event = {
