@@ -31,6 +31,5 @@ export const styles = {
   whiteBox: {
     background: tokens.colorWhite,
     borderRadius: tokens.borderRadiusMedium,
-    boxShadow: tokens.boxShadowDefault,
   },
 } as const;

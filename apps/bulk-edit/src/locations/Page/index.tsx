@@ -127,6 +127,20 @@ const Page = () => {
     return value !== undefined && value !== null ? String(value) : '-';
   };
 
+  const getEntryTitle = (entry: Entry, fields: ContentTypeField[]): string => {
+    if (!fields.length) return 'Untitled';
+    const value = entry.fields[fields[0].id]?.[LOCALE];
+    if (
+      value === undefined ||
+      value === null ||
+      value === '' ||
+      (typeof value === 'object' && value !== null)
+    ) {
+      return 'Untitled';
+    }
+    return String(value);
+  };
+
   return (
     <Flex>
       <Box style={styles.mainContent} padding="spacingL">
@@ -165,7 +179,7 @@ const Page = () => {
                         <Table.Row>
                           {fields.length > 0 && (
                             <Table.Cell as="th" key="displayName" style={styles.stickyHeader}>
-                              {fields[0].name}
+                              Display Name
                             </Table.Cell>
                           )}
                           <Table.Cell as="th" key="status" style={styles.tableHeader}>
@@ -185,7 +199,7 @@ const Page = () => {
                             <Table.Row key={entry.sys.id}>
                               {fields.length > 0 && (
                                 <Table.Cell testId="display-name-cell" style={styles.stickyCell}>
-                                  {entry.fields[fields[0].id]?.[LOCALE] ?? ''}
+                                  {getEntryTitle(entry, fields)}
                                 </Table.Cell>
                               )}
                               <Table.Cell testId="status-cell">

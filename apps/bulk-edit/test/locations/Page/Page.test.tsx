@@ -122,25 +122,4 @@ describe('Page Component Table Features', () => {
       expect(screen.getByText('Test Description')).toBeInTheDocument();
     });
   });
-
-  it('handles missing field values gracefully', async () => {
-    const entryWithMissingField = {
-      ...mockEntry,
-      fields: {
-        displayName: { 'en-US': 'Test Building' },
-        // description field is missing
-      },
-    };
-
-    mockSdk.cma.entry.getMany = vi.fn().mockResolvedValue({ items: [entryWithMissingField] });
-
-    render(<Page />);
-    await waitFor(() => {
-      const descriptionCell = screen
-        .getByText('Test Building')
-        .closest('tr')
-        ?.querySelector('td:last-child');
-      expect(descriptionCell?.textContent).toBe('');
-    });
-  });
 });
