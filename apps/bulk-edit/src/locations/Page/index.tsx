@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from 'react';
 
-import { Box, Heading, Flex, Spinner, Badge, Table } from '@contentful/f36-components';
+import {
+  Box,
+  Heading,
+  Flex,
+  Spinner,
+  Badge,
+  Table,
+  Text,
+  Checkbox,
+  Stack,
+} from '@contentful/f36-components';
 import { NavList } from '@contentful/f36-navlist';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
@@ -89,75 +99,84 @@ const Page = () => {
 
   return (
     <Flex>
-      <Box style={styles.sidebar} padding="spacingL">
-        <NavList aria-label="Content types" testId="content-types-nav">
-          {contentTypes.map((ct) => (
-            <NavList.Item
-              as="button"
-              key={ct.sys.id}
-              isActive={ct.sys.id === selectedContentTypeId}
-              onClick={() => handleNavClick(ct.sys.id)}
-              testId="content-type-nav-item">
-              {ct.name}
-            </NavList.Item>
-          ))}
-        </NavList>
-      </Box>
       <Box style={styles.mainContent} padding="spacingL">
-        {loading ? (
-          <Spinner />
-        ) : (
-          <>
-            <Heading>
-              {selectedContentType ? `Bulk edit ${selectedContentType.name}` : 'Bulk Edit App'}
-            </Heading>
-            {entriesLoading ? (
-              <Spinner />
-            ) : (
-              <Table testId="bulk-edit-table" style={styles.table}>
-                <Table.Head>
-                  <Table.Row>
-                    {fields.length > 0 && (
-                      <Table.Cell as="th" key="displayName" style={styles.stickyHeader}>
-                        {fields[0].name}
-                      </Table.Cell>
-                    )}
-                    <Table.Cell as="th" key="status">
-                      Status
-                    </Table.Cell>
-                    {fields.slice(1).map((field) => (
-                      <Table.Cell as="th" key={field.id}>
-                        {field.name}
-                      </Table.Cell>
-                    ))}
-                  </Table.Row>
-                </Table.Head>
-                <Table.Body>
-                  {entries.map((entry) => {
-                    const status = getStatus(entry);
-                    return (
-                      <Table.Row key={entry.sys.id}>
-                        {fields.length > 0 && (
-                          <Table.Cell testId="display-name-cell" style={styles.stickyCell}>
-                            {entry.fields[fields[0].id]?.[LOCALE] ?? ''}
+        <Box style={styles.whiteBox} padding="spacingL">
+          <Flex>
+            <Flex style={styles.sidebar} padding="spacingL" flexDirection="column" gap="spacingXs">
+              <Text fontColor="gray600">Content types</Text>
+              <NavList aria-label="Content types" testId="content-types-nav">
+                {contentTypes.map((ct) => (
+                  <NavList.Item
+                    as="button"
+                    key={ct.sys.id}
+                    isActive={ct.sys.id === selectedContentTypeId}
+                    onClick={() => handleNavClick(ct.sys.id)}
+                    testId="content-type-nav-item">
+                    {ct.name}
+                  </NavList.Item>
+                ))}
+              </NavList>
+            </Flex>
+            <Box padding="spacingL">
+              {loading ? (
+                <Spinner />
+              ) : (
+                <>
+                  <Heading>
+                    {selectedContentType
+                      ? `Bulk edit ${selectedContentType.name}`
+                      : 'Bulk Edit App'}
+                  </Heading>
+                  {entriesLoading ? (
+                    <Spinner />
+                  ) : (
+                    <Table testId="bulk-edit-table" style={styles.table}>
+                      <Table.Head>
+                        <Table.Row>
+                          {fields.length > 0 && (
+                            <Table.Cell as="th" key="displayName" style={styles.stickyHeader}>
+                              {fields[0].name}
+                            </Table.Cell>
+                          )}
+                          <Table.Cell as="th" key="status" style={styles.tableHeader}>
+                            Status
                           </Table.Cell>
-                        )}
-                        <Table.Cell testId="status-cell">
-                          <Badge variant={status.color}>{status.label}</Badge>
-                        </Table.Cell>
-                        {fields.slice(1).map((field) => (
-                          <Table.Cell key={field.id}>
-                            {entry.fields[field.id]?.[LOCALE] ?? ''}
-                          </Table.Cell>
-                        ))}
-                      </Table.Row>
-                    );
-                  })}
-                </Table.Body>
-              </Table>
-            )}
-          </>
-        )}
+                          {fields.slice(1).map((field) => (
+                            <Table.Cell as="th" key={field.id} style={styles.tableHeader}>
+                              {field.name}
+                            </Table.Cell>
+                          ))}
+                        </Table.Row>
+                      </Table.Head>
+                      <Table.Body>
+                        {entries.map((entry) => {
+                          const status = getStatus(entry);
+                          return (
+                            <Table.Row key={entry.sys.id}>
+                              {fields.length > 0 && (
+                                <Table.Cell testId="display-name-cell" style={styles.stickyCell}>
+                                  {entry.fields[fields[0].id]?.[LOCALE] ?? ''}
+                                </Table.Cell>
+                              )}
+                              <Table.Cell testId="status-cell">
+                                <Badge variant={status.color}>{status.label}</Badge>
+                              </Table.Cell>
+                              {fields.slice(1).map((field) => (
+                                <Table.Cell key={field.id}>
+                                  {entry.fields[field.id]?.[LOCALE] ?? ''}
+                                </Table.Cell>
+                              ))}
+                            </Table.Row>
+                          );
+                        })}
+                      </Table.Body>
+                    </Table>
+                  )}
+                </>
+              )}
+            </Box>
+          </Flex>
+        </Box>
       </Box>
     </Flex>
   );
