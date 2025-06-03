@@ -37,9 +37,6 @@ export async function getConfigAndConnectedFields(
     throw new Error(`Configuration field ${CONFIG_FIELD_ID} not found`);
   }
   const connectedFields = Object.values(configField)[0] as ConnectedFields;
-  const entryConnectedFields = connectedFields[entryId];
-  if (!entryConnectedFields) {
-    throw new Error(`Configuration field ${CONFIG_FIELD_ID} not found`);
-  }
+  const entryConnectedFields = connectedFields[entryId] || [];
   return { configEntry, connectedFields, entryConnectedFields };
 }

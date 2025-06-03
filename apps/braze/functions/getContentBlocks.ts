@@ -22,6 +22,12 @@ export const handler: FunctionEventHandler<
 
   const { entryConnectedFields } = await getConfigAndConnectedFields(cma, entryId);
 
+  if (entryConnectedFields.length === 0) {
+    return {
+      contentBlocks: [],
+    };
+  }
+
   const contentBlocks = await Promise.all(
     entryConnectedFields.map((field) => getContentBlock(brazeEndpoint, brazeApiKey, field))
   );
