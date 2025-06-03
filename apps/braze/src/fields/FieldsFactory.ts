@@ -70,14 +70,25 @@ export class FieldsFactory {
           continue;
         }
         const fieldValue = Object.values(field as { [key: string]: any })[0];
-        if (this.isReferenceField(fieldInfo)) {
+        const hasReference = fieldValue?.sys?.contentType;
+        if (this.isReferenceField(fieldInfo) && hasReference) {
           fields.push(
             await this.createReferenceField(fieldInfo, fieldValue, contentType, currentDepth)
           );
-        } else if (this.isReferenceArrayField(fieldInfo)) {
-          fields.push(
-            await this.createReferenceArrayField(fieldInfo, fieldValue, contentType, currentDepth)
-          );
+        } else {
+          if (this.isReferenceArrayField(fieldInfo)) {
+            const hasReferences = fieldValue.every((f: any) => f?.sys?.contentType);
+            if (hasReferences) {
+              fields.push(
+                await this.createReferenceArrayField(
+                  fieldInfo,
+                  fieldValue,
+                  contentType,
+                  currentDepth
+                )
+              );
+            }
+          }
         }
       }
     }
