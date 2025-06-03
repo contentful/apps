@@ -185,9 +185,7 @@ describe('FieldsFactory', () => {
     (resolveResponse as any).mockReturnValue(mockEntry);
 
     mockCma.contentType.get.mockResolvedValue({
-      fields: [
-        { id: 'author', type: 'Link', linkType: 'Entry', localized: false },
-      ],
+      fields: [{ id: 'author', type: 'Link', linkType: 'Entry', localized: false }],
       displayField: '',
       sys: {
         id: 'article',
@@ -196,7 +194,7 @@ describe('FieldsFactory', () => {
 
     const result = await createFields(entryId, entryContentTypeId, mockCma);
     expect(result).toHaveLength(0);
-    expect(result.find(f => f instanceof ReferenceField)).toBeUndefined();
+    expect(result.find((f) => f instanceof ReferenceField)).toBeUndefined();
   });
 
   it('should create a BasicArrayField instance with correct properties', async () => {
