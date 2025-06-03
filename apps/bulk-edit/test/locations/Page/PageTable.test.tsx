@@ -86,4 +86,50 @@ describe('Page Table Features', () => {
 
     expect(screen.getByText('B2')).toBeInTheDocument();
   });
+
+  it('renders a Location field as Lat/Lon in the table', async () => {
+    mockSdk.cma = createMockCma();
+    render(<Page />);
+    await waitFor(() => {
+      expect(screen.getByText('Building With Location')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Building With Location'));
+    await waitFor(() => {
+      expect(screen.getByText('Lat: 39.73923, Lon: -104.99025')).toBeInTheDocument();
+    });
+  });
+
+  it('renders a Boolean field as true/false in the table', async () => {
+    mockSdk.cma = createMockCma();
+    render(<Page />);
+    await waitFor(() => {
+      expect(screen.getByText('Building With Boolean')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Building With Boolean'));
+    await waitFor(() => {
+      expect(screen.getByText('true')).toBeInTheDocument();
+    });
+  });
+
+  it('renders a JSON/Object field as truncated JSON string in the table', async () => {
+    mockSdk.cma = createMockCma();
+    render(<Page />);
+    await waitFor(() => {
+      expect(screen.getByText('Building With JSON')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Building With JSON'));
+    await waitFor(() => {
+      // The JSON string should be truncated to 100 chars
+      const cell = screen.getByText((content, node) => {
+        return (
+          typeof content === 'string' &&
+          content.startsWith(
+            '{"foo":"bar","long":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+          ) &&
+          content.length <= 100
+        );
+      });
+      expect(cell).toBeInTheDocument();
+    });
+  });
 });

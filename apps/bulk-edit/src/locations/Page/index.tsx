@@ -60,7 +60,7 @@ const Page = () => {
       setEntriesLoading(true);
       try {
         const ct = await sdk.cma.contentType.get({ contentTypeId: selectedContentTypeId });
-        setFields(ct.fields.map((f: ContentTypeField) => ({ id: f.id, name: f.name })));
+        setFields(ct.fields.map((f: any) => ({ id: f.id, name: f.name, type: f.type })));
         const res = await sdk.cma.entry.getMany({
           spaceId: sdk.ids.space,
           environmentId: sdk.ids.environment,
@@ -95,6 +95,36 @@ const Page = () => {
       return { label: 'Published', color: 'positive' };
     }
     return { label: 'Unknown', color: 'negative' };
+  };
+
+  const isLocationValue = (value: unknown): value is { lat: number; lon: number } => {
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      'lat' in value &&
+      'lon' in value &&
+      typeof (value as any).lat === 'number' &&
+      typeof (value as any).lon === 'number'
+    );
+  };
+
+  const truncate = (str: string, max: number = 100) =>
+    str.length > max ? str.slice(0, max) + ' ...' : str;
+
+  const renderFieldValue = (field: ContentTypeField, value: unknown): string => {
+    if (field.type === 'Location' && isLocationValue(value)) {
+      return truncate(`Lat: ${value.lat}, Lon: ${value.lon}`);
+    }
+    if (field.type === 'Boolean' && typeof value === 'boolean') {
+      return value ? 'true' : 'false';
+    }
+    if (field.type === 'Object' && typeof value === 'object' && value !== null) {
+      return truncate(JSON.stringify(value));
+    }
+    if (typeof value === 'object' && value !== null) {
+      return '';
+    }
+    return value !== undefined && value !== null ? String(value) : '-';
   };
 
   return (
@@ -163,7 +193,7 @@ const Page = () => {
                               </Table.Cell>
                               {fields.slice(1).map((field) => (
                                 <Table.Cell key={field.id}>
-                                  {entry.fields[field.id]?.[LOCALE] ?? ''}
+                                  {renderFieldValue(field, entry.fields[field.id]?.[LOCALE])}
                                 </Table.Cell>
                               ))}
                             </Table.Row>

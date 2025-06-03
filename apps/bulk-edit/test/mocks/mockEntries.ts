@@ -94,6 +94,69 @@ export const mockEntries: Record<string, EntryProps[]> = {
       fields: { displayName: { 'en-US': 'C2' } },
     },
   ],
+  buildingWithLocation: [
+    {
+      sys: {
+        id: '100',
+        type: 'Entry',
+        contentType: { sys: { type: 'Link', linkType: 'ContentType', id: 'buildingWithLocation' } },
+        version: 1,
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+        space: { sys: { type: 'Link', linkType: 'Space', id: 'space-id' } },
+        environment: { sys: { type: 'Link', linkType: 'Environment', id: 'master' } },
+        automationTags: [],
+      },
+      fields: {
+        displayName: { 'en-US': 'Building with Location' },
+        location: { 'en-US': { lat: 39.73923, lon: -104.99025 } },
+      },
+    },
+  ],
+  buildingWithBoolean: [
+    {
+      sys: {
+        id: '200',
+        type: 'Entry',
+        contentType: { sys: { type: 'Link', linkType: 'ContentType', id: 'buildingWithBoolean' } },
+        version: 1,
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+        space: { sys: { type: 'Link', linkType: 'Space', id: 'space-id' } },
+        environment: { sys: { type: 'Link', linkType: 'Environment', id: 'master' } },
+        automationTags: [],
+      },
+      fields: {
+        displayName: { 'en-US': 'Building with Boolean' },
+        isActive: { 'en-US': true },
+      },
+    },
+  ],
+  buildingWithJson: [
+    {
+      sys: {
+        id: '300',
+        type: 'Entry',
+        contentType: { sys: { type: 'Link', linkType: 'ContentType', id: 'buildingWithJson' } },
+        version: 1,
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+        space: { sys: { type: 'Link', linkType: 'Space', id: 'space-id' } },
+        environment: { sys: { type: 'Link', linkType: 'Environment', id: 'master' } },
+        automationTags: [],
+      },
+      fields: {
+        displayName: { 'en-US': 'Building with JSON' },
+        metadata: {
+          'en-US': {
+            foo: 'bar',
+            long: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+            nested: { a: 1, b: 2 },
+          },
+        },
+      },
+    },
+  ],
 };
 
 export const mockEntry = mockEntries.condoA[0];

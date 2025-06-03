@@ -77,6 +77,72 @@ export const mockContentTypes: ContentTypeProps[] = [
       },
     ],
   },
+  {
+    sys: createSysProps('buildingWithLocation'),
+    name: 'Building With Location',
+    description: 'Building with a location field',
+    displayField: 'displayName',
+    fields: [
+      {
+        id: 'displayName',
+        name: 'Display Name',
+        required: false,
+        localized: false,
+        type: 'Symbol',
+      },
+      {
+        id: 'location',
+        name: 'Location',
+        required: false,
+        localized: false,
+        type: 'Location',
+      },
+    ],
+  },
+  {
+    sys: createSysProps('buildingWithBoolean'),
+    name: 'Building With Boolean',
+    description: 'Building with a boolean field',
+    displayField: 'displayName',
+    fields: [
+      {
+        id: 'displayName',
+        name: 'Display Name',
+        required: false,
+        localized: false,
+        type: 'Symbol',
+      },
+      {
+        id: 'isActive',
+        name: 'Is Active',
+        required: false,
+        localized: false,
+        type: 'Boolean',
+      },
+    ],
+  },
+  {
+    sys: createSysProps('buildingWithJson'),
+    name: 'Building With JSON',
+    description: 'Building with a JSON field',
+    displayField: 'displayName',
+    fields: [
+      {
+        id: 'displayName',
+        name: 'Display Name',
+        required: false,
+        localized: false,
+        type: 'Symbol',
+      },
+      {
+        id: 'metadata',
+        name: 'Metadata',
+        required: false,
+        localized: false,
+        type: 'Object',
+      },
+    ],
+  },
 ];
 
 export const mockContentType = mockContentTypes[1]; // Condo A
