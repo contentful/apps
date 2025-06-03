@@ -20,12 +20,12 @@ import InformationWithLink from '../components/InformationWithLink';
 import Splitter from '../components/Splitter';
 import { createClient } from 'contentful-management';
 import { useEffect, useState } from 'react';
+import React from 'react';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
   useAutoResizer();
   const [entryConnectedFields, setEntryConnectedFields] = useState<SidebarContentBlockInfo[]>([]);
-  const currentEntryId = sdk.ids.entry;
 
   const cma = createClient(
     { apiAdapter: sdk.cmaAdapter },
@@ -161,7 +161,7 @@ const Sidebar = () => {
               <Splitter />
               <div className={styles.stack}>
                 {entryConnectedFields.map((fieldMapping, index) => (
-                  <>
+                  <React.Fragment key={`${fieldMapping.fieldId}-${index}`}>
                     <Text as="div" fontSize="fontSizeS" className={styles.listItem}>
                       Field name
                     </Text>
@@ -177,7 +177,7 @@ const Sidebar = () => {
                       {fieldMapping.contentBlockName}
                     </Text>
                     <Splitter />
-                  </>
+                  </React.Fragment>
                 ))}
               </div>
             </Card>
