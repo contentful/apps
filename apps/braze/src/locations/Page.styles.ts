@@ -27,6 +27,7 @@ export const styles = {
   }),
   modalMainContainer: css({
     minWidth: 400,
+    maxHeight: '50vh',
   }),
   modalEntryContainer: css({
     border: `1px solid ${tokens.gray300}`,
@@ -59,5 +60,26 @@ export const styles = {
   }),
   boldCell: css({
     fontWeight: 'bold',
+  }),
+  modalErrorBanner: css({
+    background: tokens.red100,
+    border: `1px solid ${tokens.red500}`,
+    borderRadius: tokens.borderRadiusMedium,
+    padding: tokens.spacingM,
+    marginBottom: tokens.spacingS,
+    color: tokens.red700,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: tokens.spacing2Xs,
+  }),
+  modalErrorTitle: css({
+    color: tokens.red700,
+    fontWeight: 'bold',
+    fontSize: tokens.fontSizeM,
+    marginBottom: tokens.spacing2Xs,
+  }),
+  modalErrorMessage: css({
+    color: tokens.red700,
+    fontSize: tokens.fontSizeS,
   }),
 };

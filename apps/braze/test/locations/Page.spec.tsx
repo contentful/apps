@@ -220,36 +220,32 @@ describe('Page Location', () => {
       (updateConfig as Mock).mockResolvedValue(mockConfigEntry);
     });
 
-    it('should correctly map field IDs with locales', async () => {
+    const openFieldsModal = async () => {
       render(<Page />);
       const viewFieldsButton = await screen.findByRole('button', { name: /View fields/i });
-      viewFieldsButton.click();
+      fireEvent.click(viewFieldsButton);
+      return screen.findByRole('dialog');
+    };
 
+    it('should correctly map field IDs with locales', async () => {
+      await openFieldsModal();
       const checkboxes = await screen.findAllByRole('checkbox');
-      expect(checkboxes).toHaveLength(4); // 3 fields + select all checkbox
 
-      const fieldNames = screen.getAllByText(/Name|Description/);
-      expect(fieldNames).toHaveLength(3);
+      expect(checkboxes).toHaveLength(4); // 3 fields + select all checkbox
       expect(screen.getByText('Name (en-US)')).toBeTruthy();
       expect(screen.getByText('Name (en-AU)')).toBeTruthy();
       expect(screen.getByText('Description')).toBeTruthy();
     });
 
     it('should handle field disconnection correctly', async () => {
-      render(<Page />);
-      const viewFieldsButton = await screen.findByRole('button', { name: /View fields/i });
-      viewFieldsButton.click();
+      await openFieldsModal();
 
-      // Select a field to disconnect
       const checkboxes = await screen.findAllByRole('checkbox');
       const fieldCheckbox = checkboxes[1]; // First field checkbox
       fireEvent.click(fieldCheckbox);
-
-      // Click disconnect button
       const disconnectButton = screen.getByRole('button', { name: /Disconnect/i });
       fireEvent.click(disconnectButton);
 
-      // Verify updateConfig was called with correct parameters
       expect(updateConfig).toHaveBeenCalledWith(
         mockConfigEntry,
         expect.objectContaining({
@@ -270,20 +266,106 @@ describe('Page Location', () => {
     });
 
     it('should handle disconnecting all fields correctly', async () => {
-      render(<Page />);
-      const viewFieldsButton = await screen.findByRole('button', { name: /View fields/i });
-      viewFieldsButton.click();
+      await openFieldsModal();
 
-      // Select all fields
       const selectAllCheckbox = await screen.findByTestId('select-all-fields');
       fireEvent.click(selectAllCheckbox);
-
-      // Click disconnect button
       const disconnectButton = screen.getByRole('button', { name: /Disconnect/i });
       fireEvent.click(disconnectButton);
 
-      // Verify updateConfig was called with empty array for the entry
       expect(updateConfig).toHaveBeenCalled();
+    });
+  });
+
+  describe('Error Handling', () => {
+    const description = new BasicField('description', 'Description', 'content-type-id', false);
+    const entry = new Entry(
+      'entry-id',
+      'content-type-id',
+      'title',
+      [description],
+      'space-id',
+      'environment-id',
+      'valid-contentful-api-key',
+      '2025-05-15T16:49:16.367Z',
+      '2025-05-15T16:49:16.367Z'
+    );
+
+    beforeEach(() => {
+      (useSDK as unknown as Mock).mockReturnValue(mockSdk);
+      (fetchBrazeConnectedEntries as Mock).mockResolvedValue([entry]);
+    });
+
+    it('does not show error banner if no field has an error', async () => {
+      render(<Page />);
+      const viewFieldsButton = (await screen.findAllByRole('button', { name: /View fields/i }))[0];
+      viewFieldsButton.click();
+      await screen.findByRole('dialog');
+      expect(screen.queryByText(/connection error/)).toBeNull();
+      expect(screen.queryByText(/Error code/)).toBeNull();
+    });
+
+    describe('When there are errors', () => {
+      it('shows error banner if one field has an error', async () => {
+        const mockConfigEntry = createConfigEntry({
+          'en-US': {
+            'entry-id': [
+              { fieldId: 'name', locale: 'en-US', contentBlockId: 'block1' },
+              { fieldId: 'name', locale: 'en-AU', contentBlockId: 'block2' },
+              {
+                fieldId: 'description',
+                contentBlockId: 'block3',
+                error: { message: 'connection error', status: 500 },
+              },
+            ],
+          },
+        });
+
+        (getConfigEntry as Mock).mockResolvedValue(mockConfigEntry);
+
+        render(<Page />);
+        const viewFieldsButton = (
+          await screen.findAllByRole('button', { name: /View fields/i })
+        )[0];
+        viewFieldsButton.click();
+        const modal = await screen.findByRole('dialog');
+
+        expect(modal).toBeTruthy();
+        expect(screen.getByText('"Description" connection error')).toBeTruthy();
+        expect(screen.queryByText('"Title" connection error')).toBeNull();
+      });
+
+      it('shows multiple error banners if multiple fields have errors', async () => {
+        const mockConfigEntryWithMultipleErrors = createConfigEntry({
+          'en-US': {
+            'entry-id': [
+              {
+                fieldId: 'name',
+                contentBlockId: 'block2',
+                error: { message: 'connection error', status: 500 },
+              },
+              {
+                fieldId: 'description',
+                contentBlockId: 'block3',
+                error: { message: 'connection error', status: 500 },
+              },
+            ],
+          },
+        });
+
+        (getConfigEntry as Mock).mockResolvedValue(mockConfigEntryWithMultipleErrors);
+
+        render(<Page />);
+        const viewFieldsButton = (
+          await screen.findAllByRole('button', { name: /View fields/i })
+        )[0];
+        viewFieldsButton.click();
+        const modal = await screen.findByRole('dialog');
+
+        expect(modal).toBeTruthy();
+        expect(screen.getByText('"Description" connection error')).toBeTruthy();
+        expect(screen.queryByText('"Name" connection error')).toBeNull();
+      });
     });
   });
 });

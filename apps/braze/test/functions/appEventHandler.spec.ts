@@ -24,6 +24,7 @@ describe('updateContentBlocks', () => {
     entry: {
       unpublish: vi.fn(),
       delete: vi.fn(),
+      update: vi.fn(),
     },
   };
 
@@ -190,7 +191,7 @@ describe('updateContentBlocks', () => {
     );
   });
 
-  it('should retry on failure', async () => {
+  it('should update the config on save failure', async () => {
     const event = {
       headers: {
         'X-Contentful-Topic': ['Entry.save'],
@@ -237,13 +238,19 @@ describe('updateContentBlocks', () => {
       ],
     });
 
-    vi.mocked(global.fetch)
-      .mockRejectedValueOnce(new Error('Network error'))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ success: true }), { status: 200 }));
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: () =>
+        Promise.resolve({
+          message: 'Server Error',
+        }),
+    } as Response);
 
     await handler(event as any, mockContext as any);
 
-    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(updateConfig)).toHaveBeenCalledOnce();
   });
 
   it('should update content block for each locale on entry save', async () => {

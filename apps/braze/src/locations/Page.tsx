@@ -19,7 +19,7 @@ import { fetchBrazeConnectedEntries } from '../utils/fetchBrazeConnectedEntries'
 import InformationWithLink from '../components/InformationWithLink';
 import { styles } from './Page.styles';
 import Splitter from '../components/Splitter';
-import { createClient, EntryProps, PlainClientAPI } from 'contentful-management';
+import { createClient, EntryProps } from 'contentful-management';
 import { Entry } from '../fields/Entry';
 import {
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
@@ -30,7 +30,7 @@ import {
   localizeFieldId,
   updateConfig,
 } from '../utils';
-import { Field } from '../fields/Field';
+import WarningOctagonIcon from '../components/WarningOctagonIcon';
 
 const getStatusBadge = (status: string) => {
   if (status.toLowerCase() === 'published') {
@@ -101,12 +101,12 @@ function ConnectedFieldsModal({
   entryConnectedFields: EntryConnectedFields;
 }) {
   const [selectedFields, setSelectedFields] = useState<Set<string>>(() => new Set());
-
   const allFieldIds = entryConnectedFields.map((field) =>
     localizeFieldId(field.fieldId, field.locale)
   );
   const allSelected = allFieldIds.every((id) => selectedFields.has(id));
   const someSelected = allFieldIds.some((id) => selectedFields.has(id));
+  const fieldsWithErrors = entryConnectedFields.filter((field) => field.error);
 
   const handleSelectAll = () => {
     if (allSelected) {
@@ -147,6 +147,20 @@ function ConnectedFieldsModal({
           <Modal.Header title="Connected fields" onClose={onClose} />
           <Modal.Content>
             <Box className={styles.modalMainContainer}>
+              {fieldsWithErrors.length > 0 && (
+                <Box>
+                  {fieldsWithErrors.map((field, index) => (
+                    <Box key={`${field.fieldId}-${index}`} className={styles.modalErrorBanner}>
+                      <span className={styles.modalErrorTitle}>
+                        {`"${getFieldDisplayName(field.fieldId, field.locale)}" connection error`}
+                      </span>
+                      <span className={styles.modalErrorMessage}>
+                        Error code {field.error?.status} - {field.error?.message}
+                      </span>
+                    </Box>
+                  ))}
+                </Box>
+              )}
               <Box className={styles.modalEntryContainer}>
                 <Flex flexDirection="column">
                   <Text fontColor="gray600" marginBottom="spacing2Xs">
@@ -202,10 +216,10 @@ function ConnectedFieldsModal({
                   </Table.Row>
                 </Table.Head>
                 <Table.Body>
-                  {entryConnectedFields.map((field) => {
+                  {entryConnectedFields.map((field, index) => {
                     const fieldId = localizeFieldId(field.fieldId, field.locale);
                     return (
-                      <Table.Row key={fieldId}>
+                      <Table.Row key={`${fieldId}-${index}`}>
                         <Table.Cell className={styles.checkboxCell}>
                           <Checkbox
                             isChecked={selectedFields.has(fieldId)}
@@ -214,9 +228,18 @@ function ConnectedFieldsModal({
                           />
                         </Table.Cell>
                         <Table.Cell className={styles.baseCell}>
-                          <Text fontWeight="fontWeightDemiBold">
-                            {getFieldDisplayName(field.fieldId, field.locale)}
-                          </Text>
+                          <Flex flexDirection="row" gap="spacingXs">
+                            <Text fontWeight="fontWeightDemiBold">
+                              {getFieldDisplayName(field.fieldId, field.locale)}
+                            </Text>
+                            {field.error && (
+                              <Badge
+                                variant="negative"
+                                startIcon={
+                                  <WarningOctagonIcon />
+                                }>{`Error code ${field.error?.status}`}</Badge>
+                            )}
+                          </Flex>
                         </Table.Cell>
                       </Table.Row>
                     );
@@ -245,11 +268,15 @@ function ConnectedEntriesTable({
   onViewFields: (entry: Entry) => void;
   configEntry: EntryProps | null;
 }) {
-  const getConnectedFieldsCount = (entry: Entry) => {
-    if (!configEntry) return 0;
+  function getConnectedEntries(): ConnectedFields {
+    if (!configEntry) return {};
     const configField = configEntry.fields[CONFIG_FIELD_ID];
-    const connectedFields = Object.values(configField)[0] as ConnectedFields;
-    return connectedFields[entry.id]?.length || 0;
+    return Object.values(configField)[0] as ConnectedFields;
+  }
+
+  const getConnectedFieldsCount = (entry: Entry) => {
+    const connectedFields = getConnectedEntries()[entry.id];
+    return connectedFields?.length || 0;
   };
 
   return (
@@ -277,13 +304,25 @@ function ConnectedEntriesTable({
             const updated = getLastUpdatedTime(entry.updatedAt);
             const status = entry.state;
             const connectedCount = getConnectedFieldsCount(entry);
+            const connectedFields = getConnectedEntries()[entry.id];
+            const hasErrors = connectedFields?.some((field) => field.error);
+
             return (
               <Table.Row key={entry.id}>
                 <Table.Cell>{name}</Table.Cell>
                 <Table.Cell>{contentType}</Table.Cell>
                 <Table.Cell>{updated}</Table.Cell>
                 <Table.Cell>{getStatusBadge(status)}</Table.Cell>
-                <Table.Cell>{connectedCount}</Table.Cell>
+                <Table.Cell>
+                  <Flex flexDirection="row" gap="spacingM">
+                    {connectedCount}
+                    {hasErrors && (
+                      <Badge variant="negative" startIcon={<WarningOctagonIcon />}>
+                        Connection error
+                      </Badge>
+                    )}
+                  </Flex>
+                </Table.Cell>
                 <Table.Cell align="center" className={styles.buttonCell}>
                   <Button variant="secondary" size="small" onClick={() => onViewFields(entry)}>
                     View fields

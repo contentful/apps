@@ -106,6 +106,7 @@ export type ConnectedField = {
   fieldId: string;
   locale: string;
   contentBlockId: string;
+  error?: { status: number; message: string };
 };
 
 export type EntryConnectedFields = ConnectedField[];

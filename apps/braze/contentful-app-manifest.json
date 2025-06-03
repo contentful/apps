@@ -6,12 +6,8 @@
       "description": "Function to create content blocks from App Action.",
       "path": "functions/createContentBlocks.js",
       "entryFile": "functions/createContentBlocks.ts",
-      "allowNetworks": [
-        "https://*.braze.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["https://*.braze.com"],
+      "accepts": ["appaction.call"]
     },
     {
       "id": "getContentBlocksFunction",
@@ -19,12 +15,8 @@
       "description": "Function to get content blocks from App Action.",
       "path": "functions/getContentBlocks.js",
       "entryFile": "functions/getContentBlocks.ts",
-      "allowNetworks": [
-        "https://*.braze.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["https://*.braze.com"],
+      "accepts": ["appaction.call"]
     },
     {
       "id": "appEventHandler",
@@ -32,12 +24,8 @@
       "description": "Function to handle App Events.",
       "path": "functions/appEventHandler.js",
       "entryFile": "functions/appEventHandler.ts",
-      "allowNetworks": [
-        "https://*.braze.com"
-      ],
-      "accepts": [
-        "appevent.handler"
-      ]
+      "allowNetworks": ["https://*.braze.com"],
+      "accepts": ["appevent.handler"]
     }
   ],
   "actions": [

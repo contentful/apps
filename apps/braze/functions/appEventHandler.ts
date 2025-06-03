@@ -13,10 +13,12 @@ import {
   ConnectedFields,
   AppInstallationParameters,
   EntryConnectedFields,
+  ConnectedField,
 } from '../src/utils';
 import { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { getConfigAndConnectedFields, initContentfulManagementClient } from './common';
+import { CustomError } from './customError';
 
 const WAIT_TIMES = [0, 5000, 10000];
 
@@ -83,18 +85,48 @@ const entrySavedHandler = async (
     contentTypeId: body.sys.contentType.sys.id,
   });
 
+  const results: Array<ConnectedField> = [];
   for (const connectedField of entryConnectedFields) {
     const field = body.fields[connectedField.fieldId];
     const locale = connectedField.locale || Object.keys(field)[0];
     let fieldValue = field[locale];
     const fieldInfo = contentType.fields.find((f) => f.id === connectedField.fieldId);
+
     if (!fieldValue || !fieldInfo) {
       continue;
     }
+
     fieldValue = fieldInfo.type === 'RichText' ? documentToHtmlString(fieldValue) : fieldValue;
-    await callAndRetry(() =>
-      updateContentBlock(brazeEndpoint, brazeApiKey, connectedField.contentBlockId, fieldValue)
-    );
+
+    let updateResult: ConnectedField = {
+      fieldId: connectedField.fieldId,
+      locale,
+      contentBlockId: connectedField.contentBlockId,
+    };
+
+    try {
+      // TODO : add callAndRetry
+      await updateContentBlock(
+        brazeEndpoint,
+        brazeApiKey,
+        connectedField.contentBlockId,
+        fieldValue
+      );
+    } catch (error: any) {
+      updateResult = {
+        ...updateResult,
+        error: {
+          status: error?.statusCode || 500,
+          message: error?.message || String(error),
+        },
+      };
+    }
+
+    results.push(updateResult);
+  }
+
+  if (results.length > 0) {
+    await updateFieldErrors(cma, body.sys.id, results);
   }
 };
 
@@ -131,7 +163,7 @@ async function updateContentBlock(
   contentBlockId: string,
   newValue: any
 ) {
-  await fetch(`${brazeEndpoint}/content_blocks/update`, {
+  const response = await fetch(`${brazeEndpoint}/content_blocks/update`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -142,4 +174,35 @@ async function updateContentBlock(
       content: newValue,
     }),
   });
+
+  if (!response.ok) {
+    const body = await response.json();
+    throw new CustomError(
+      `Failed to update content block: ${body.message}` || 'Unknown error',
+      response.status
+    );
+  }
 }
+
+export const updateFieldErrors = async (
+  cma: PlainClientAPI,
+  entryId: string,
+  results: Array<ConnectedField>
+) => {
+  const configEntry = await getConfigEntry(cma);
+  const configField = configEntry.fields[CONFIG_FIELD_ID];
+  const connectedFields = (Object.values(configField)[0] || {}) as ConnectedFields;
+
+  const newFields = results.map((result: any) => {
+    return {
+      fieldId: result.fieldId,
+      locale: result.locale,
+      contentBlockId: result.contentBlockId,
+      ...(result.error ? { error: result.error } : {}),
+    };
+  });
+
+  connectedFields[entryId] = [...newFields];
+
+  await updateConfig(configEntry, connectedFields, cma);
+};
