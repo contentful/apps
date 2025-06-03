@@ -27,9 +27,11 @@ import Menu from './components/menu';
 import PlayerCode from './components/playercode';
 import CountryDatalist from './components/countryDatalist';
 import CaptionsList from './components/captionsList';
-import ModalUploadAsset, { ModalData } from './components/UploadConfiguration/ModalUploadAsset';
+import MuxAssetConfigurationModal, {
+  ModalData,
+} from './components/AssetConfiguration/MuxAssetConfigurationModal';
 import UploadArea from './components/UploadArea/UploadArea';
-import Mp4RenditionsPanel from './components/UploadConfiguration/Mp4RenditionsPanel';
+import Mp4RenditionsPanel from './components/AssetConfiguration/Mp4RenditionsPanel';
 
 import {
   type InstallationParams,
@@ -97,7 +99,7 @@ export class App extends React.Component<AppProps, AppState> {
         field && ('playbackId' in field || 'signedPlaybackId' in field)
           ? field.playbackId || field.signedPlaybackId
           : undefined,
-      modalUploadAssetVisible: false,
+      modalAssetConfigurationVisible: false,
       file: null,
       showMuxUploaderUI: false,
       pendingUploadURL: null,
@@ -294,7 +296,7 @@ export class App extends React.Component<AppProps, AppState> {
     if (!input) return;
 
     if (this.isURL(input)) {
-      this.setState({ modalUploadAssetVisible: true, pendingUploadURL: input });
+      this.setState({ modalAssetConfigurationVisible: true, pendingUploadURL: input });
       return;
     }
 
@@ -307,7 +309,7 @@ export class App extends React.Component<AppProps, AppState> {
   handleFile = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       this.setState({ file: e.target.files[0] });
-      this.setState({ modalUploadAssetVisible: true });
+      this.setState({ modalAssetConfigurationVisible: true });
     }
   };
 
@@ -315,12 +317,12 @@ export class App extends React.Component<AppProps, AppState> {
     e.preventDefault();
     if (e.dataTransfer.files?.[0]) {
       this.setState({ file: e.dataTransfer.files[0] });
-      this.setState({ modalUploadAssetVisible: true });
+      this.setState({ modalAssetConfigurationVisible: true });
     }
   };
 
   handleEditAsset = () => {
-    this.setState({ modalUploadAssetVisible: true, isEditMode: true });
+    this.setState({ modalAssetConfigurationVisible: true, isEditMode: true });
   };
 
   handleUpdateAsset = async (options: ModalData) => {
@@ -333,7 +335,7 @@ export class App extends React.Component<AppProps, AppState> {
     }
 
     await this.resync();
-    this.setState({ modalUploadAssetVisible: false, isEditMode: false });
+    this.setState({ modalAssetConfigurationVisible: false, isEditMode: false });
   };
 
   onConfirmModal = async (options: ModalData) => {
@@ -373,7 +375,7 @@ export class App extends React.Component<AppProps, AppState> {
 
       this.setState({ showMuxUploaderUI: true });
     }
-    this.setState({ modalUploadAssetVisible: false });
+    this.setState({ modalAssetConfigurationVisible: false });
   };
 
   onCloseModal = () => {
@@ -386,7 +388,7 @@ export class App extends React.Component<AppProps, AppState> {
         this.fileInputRef.current.value = '';
       }
     }
-    this.setState({ modalUploadAssetVisible: false, isEditMode: false });
+    this.setState({ modalAssetConfigurationVisible: false, isEditMode: false });
   };
 
   onUploadError = (progress: CustomEvent) => {
@@ -969,8 +971,8 @@ export class App extends React.Component<AppProps, AppState> {
 
   render = () => {
     const modal = (
-      <ModalUploadAsset
-        isShown={this.state.modalUploadAssetVisible}
+      <MuxAssetConfigurationModal
+        isShown={this.state.modalAssetConfigurationVisible}
         onClose={this.onCloseModal}
         onConfirm={this.onConfirmModal}
         installationParams={this.props.sdk.parameters.installation as InstallationParams}

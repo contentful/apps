@@ -27,7 +27,7 @@ export interface AppState {
   playerPlaybackId?: string;
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   raw?: any;
-  modalUploadAssetVisible: boolean;
+  modalAssetConfigurationVisible: boolean;
   file: File | null;
   showMuxUploaderUI: boolean;
   pendingUploadURL: string | null;

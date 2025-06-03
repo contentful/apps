@@ -15,7 +15,7 @@ export interface ModalData {
   metadataConfig: MetadataConfig;
 }
 
-interface ModalUploadAssetProps {
+interface MuxAssetConfigurationModalProps {
   isShown: boolean;
   onClose: () => void;
   onConfirm: (data: ModalData) => void;
@@ -26,7 +26,7 @@ interface ModalUploadAssetProps {
   asset?: MuxContentfulObject;
 }
 
-const ModalContent: FC<ModalUploadAssetProps> = ({
+const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
   isShown = false,
   onClose,
   onConfirm,
@@ -213,9 +213,9 @@ const ModalContent: FC<ModalUploadAssetProps> = ({
   );
 };
 
-const ModalUploadAsset: FC<ModalUploadAssetProps> = (props) => {
+const MuxAssetConfigurationModal: FC<MuxAssetConfigurationModalProps> = (props) => {
   if (!props.isShown) return null;
   return <ModalContent {...props} />;
 };
 
-export default ModalUploadAsset;
+export default MuxAssetConfigurationModal;
