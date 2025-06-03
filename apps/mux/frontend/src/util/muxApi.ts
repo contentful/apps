@@ -211,3 +211,24 @@ export async function createStaticRendition(apiClient: any, assetId: string, typ
     JSON.stringify({ resolution: type })
   );
 }
+
+export async function updateAsset(apiClient: any, assetId: string, options: ModalData) {
+  const requestBody: any = {
+    meta: {
+      title: '',
+      creator_id: '',
+      external_id: '',
+    },
+    passthrough: '',
+  };
+
+  if (options.metadataConfig.enabled) {
+    const { title, creatorId, externalId } = options.metadataConfig.standardMetadata ?? {};
+    requestBody.meta.title = title ?? '';
+    requestBody.meta.creator_id = creatorId ?? '';
+    requestBody.meta.external_id = externalId ?? '';
+    requestBody.passthrough = options.metadataConfig.customMetadata ?? '';
+  }
+
+  return await apiClient.patch(`/video/v1/assets/${assetId}`, JSON.stringify(requestBody));
+}

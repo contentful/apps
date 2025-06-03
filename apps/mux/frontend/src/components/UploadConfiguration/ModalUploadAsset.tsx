@@ -1,10 +1,11 @@
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { Modal, Button, Accordion } from '@contentful/f36-components';
 import { VideoQualitySelector } from './VideoQualitySelector';
 import { PlaybackPolicySelector } from './PlaybackPolicySelector';
 import { CaptionsConfiguration, CaptionsConfig } from './CaptionsConfiguration';
 import Mp4RenditionsConfiguration, { Mp4RenditionsConfig } from './Mp4RenditionsConfiguration';
 import MetadataConfiguration, { MetadataConfig } from './MetadataConfiguration';
+import { MuxContentfulObject } from '../../util/types';
 
 export interface ModalData {
   videoQuality: string;
@@ -21,6 +22,8 @@ interface ModalUploadAssetProps {
   installationParams: {
     muxEnableSignedUrls: boolean;
   };
+  isEditMode?: boolean;
+  asset?: MuxContentfulObject;
 }
 
 const ModalContent: FC<ModalUploadAssetProps> = ({
@@ -28,6 +31,8 @@ const ModalContent: FC<ModalUploadAssetProps> = ({
   onClose,
   onConfirm,
   installationParams,
+  isEditMode = false,
+  asset,
 }) => {
   const [modalData, setModalData] = useState<ModalData>({
     videoQuality: 'plus',
@@ -54,8 +59,45 @@ const ModalContent: FC<ModalUploadAssetProps> = ({
       customMetadata: undefined,
     },
   });
+
+  useEffect(() => {
+    if (isEditMode && asset) {
+      const hasMetadata =
+        !!asset.meta?.title ||
+        !!asset.meta?.creator_id ||
+        !!asset.meta?.external_id ||
+        !!asset.passthrough;
+
+      setModalData({
+        videoQuality: 'plus',
+        playbackPolicies: asset.signedPlaybackId ? ['signed'] : ['public'],
+        captionsConfig: {
+          captionsType: 'off',
+          languageCode: null,
+          languageName: null,
+          url: null,
+          closedCaptions: null,
+        },
+        mp4Config: {
+          enabled: false,
+          audioOnly: false,
+          highestResolution: false,
+        },
+        metadataConfig: {
+          enabled: hasMetadata,
+          standardMetadata: {
+            title: asset.meta?.title,
+            creatorId: asset.meta?.creator_id,
+            externalId: asset.meta?.external_id,
+          },
+          customMetadata: asset.passthrough,
+        },
+      });
+    }
+  }, [isEditMode, asset]);
+
   const { muxEnableSignedUrls } = installationParams;
-  const [videoQualityExpanded, setVideoQualityExpanded] = useState<boolean>(true);
+  const [mainCategoryExpanded, setMainCategoryExpanded] = useState<boolean>(true);
 
   const [validationState, setValidationState] = useState<Record<string, boolean>>({
     playbackPolicies: true,
@@ -75,34 +117,51 @@ const ModalContent: FC<ModalUploadAssetProps> = ({
 
   return (
     <Modal isShown={isShown} onClose={onClose}>
-      <Modal.Header title="Configure Mux Upload" onClose={onClose} />
+      <Modal.Header
+        title={isEditMode ? 'Edit Mux Asset' : 'Configure Mux Upload'}
+        onClose={onClose}
+      />
       <Modal.Content>
         <Accordion>
+          {!isEditMode && (
+            <Accordion.Item
+              title="Video Quality Settings"
+              isExpanded={mainCategoryExpanded}
+              onExpand={() => setMainCategoryExpanded(true)}
+              onCollapse={() => setMainCategoryExpanded(false)}>
+              <VideoQualitySelector
+                selectedQuality={modalData.videoQuality}
+                onQualityChange={(quality) =>
+                  setModalData((prev) => ({ ...prev, videoQuality: quality }))
+                }
+              />
+            </Accordion.Item>
+          )}
+
+          {!isEditMode && (
+            <Accordion.Item title="Privacy Settings">
+              <PlaybackPolicySelector
+                selectedPolicies={modalData.playbackPolicies}
+                onPoliciesChange={(policies) =>
+                  setModalData((prev) => ({ ...prev, playbackPolicies: policies }))
+                }
+                enableSignedUrls={muxEnableSignedUrls}
+                onValidationChange={(isValid) =>
+                  handleValidationChange('playbackPolicies', isValid)
+                }
+              />
+            </Accordion.Item>
+          )}
+
           <Accordion.Item
-            title="Video Quality Settings"
-            isExpanded={videoQualityExpanded}
-            onExpand={() => setVideoQualityExpanded(true)}
-            onCollapse={() => setVideoQualityExpanded(false)}>
-            <VideoQualitySelector
-              selectedQuality={modalData.videoQuality}
-              onQualityChange={(quality) =>
-                setModalData((prev) => ({ ...prev, videoQuality: quality }))
-              }
-            />
-          </Accordion.Item>
-
-          <Accordion.Item title="Privacy Settings">
-            <PlaybackPolicySelector
-              selectedPolicies={modalData.playbackPolicies}
-              onPoliciesChange={(policies) =>
-                setModalData((prev) => ({ ...prev, playbackPolicies: policies }))
-              }
-              enableSignedUrls={muxEnableSignedUrls}
-              onValidationChange={(isValid) => handleValidationChange('playbackPolicies', isValid)}
-            />
-          </Accordion.Item>
-
-          <Accordion.Item title="Metadata">
+            title="Metadata"
+            {...(isEditMode
+              ? {
+                  isExpanded: mainCategoryExpanded,
+                  onExpand: () => setMainCategoryExpanded(true),
+                  onCollapse: () => setMainCategoryExpanded(false),
+                }
+              : {})}>
             <MetadataConfiguration
               metadataConfig={modalData.metadataConfig}
               onMetadataChange={(config) =>
@@ -112,25 +171,29 @@ const ModalContent: FC<ModalUploadAssetProps> = ({
             />
           </Accordion.Item>
 
-          <Accordion.Item title="Captions">
-            <CaptionsConfiguration
-              captionsConfig={modalData.captionsConfig}
-              onCaptionsChange={(config) =>
-                setModalData((prev) => ({ ...prev, captionsConfig: config }))
-              }
-              onValidationChange={(isValid) => handleValidationChange('captions', isValid)}
-            />
-          </Accordion.Item>
+          {!isEditMode && (
+            <>
+              <Accordion.Item title="Captions">
+                <CaptionsConfiguration
+                  captionsConfig={modalData.captionsConfig}
+                  onCaptionsChange={(config) =>
+                    setModalData((prev) => ({ ...prev, captionsConfig: config }))
+                  }
+                  onValidationChange={(isValid) => handleValidationChange('captions', isValid)}
+                />
+              </Accordion.Item>
 
-          <Accordion.Item title="MP4 Generation">
-            <Mp4RenditionsConfiguration
-              mp4Config={modalData.mp4Config}
-              onMp4ConfigChange={(config) =>
-                setModalData((prev) => ({ ...prev, mp4Config: config }))
-              }
-              onValidationChange={(isValid) => handleValidationChange('mp4', isValid)}
-            />
-          </Accordion.Item>
+              <Accordion.Item title="MP4 Generation">
+                <Mp4RenditionsConfiguration
+                  mp4Config={modalData.mp4Config}
+                  onMp4ConfigChange={(config) =>
+                    setModalData((prev) => ({ ...prev, mp4Config: config }))
+                  }
+                  onValidationChange={(isValid) => handleValidationChange('mp4', isValid)}
+                />
+              </Accordion.Item>
+            </>
+          )}
         </Accordion>
       </Modal.Content>
 
@@ -143,7 +206,7 @@ const ModalContent: FC<ModalUploadAssetProps> = ({
           variant="positive"
           onClick={() => onConfirm(modalData)}
           isDisabled={!isFormValid}>
-          Upload
+          {isEditMode ? 'Update' : 'Upload'}
         </Button>
       </Modal.Controls>
     </Modal>
