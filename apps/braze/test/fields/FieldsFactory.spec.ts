@@ -160,6 +160,43 @@ describe('FieldsFactory', () => {
     expect(fieldInstance.fields[1].id).toBe('bio');
   });
 
+  it('should skip reference fields with null content type', async () => {
+    const mockReferencedEntry = {
+      sys: {
+        contentType: null,
+      },
+      fields: {},
+    };
+
+    const mockEntry = [
+      {
+        sys: {
+          contentType: {
+            sys: { id: 'article' },
+          },
+        },
+        fields: {
+          author: {
+            'en-US': mockReferencedEntry,
+          },
+        },
+      },
+    ];
+    (resolveResponse as any).mockReturnValue(mockEntry);
+
+    mockCma.contentType.get.mockResolvedValue({
+      fields: [{ id: 'author', type: 'Link', linkType: 'Entry', localized: false }],
+      displayField: '',
+      sys: {
+        id: 'article',
+      },
+    });
+
+    const result = await createFields(entryId, entryContentTypeId, mockCma);
+    expect(result).toHaveLength(0);
+    expect(result.find((f) => f instanceof ReferenceField)).toBeUndefined();
+  });
+
   it('should create a BasicArrayField instance with correct properties', async () => {
     const mockEntry = [
       {
