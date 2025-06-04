@@ -210,11 +210,11 @@ const Page = () => {
                                   {getEntryTitle(entry, fields)}
                                 </Table.Cell>
                               )}
-                              <Table.Cell testId="status-cell">
+                              <Table.Cell testId="status-cell" style={styles.cell}>
                                 <Badge variant={status.color}>{status.label}</Badge>
                               </Table.Cell>
                               {fields.slice(1).map((field) => (
-                                <Table.Cell key={field.id}>
+                                <Table.Cell key={field.id} style={styles.cell}>
                                   {renderFieldValue(field, entry.fields[field.id]?.[LOCALE])}
                                 </Table.Cell>
                               ))}

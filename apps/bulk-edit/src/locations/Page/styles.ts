@@ -18,15 +18,21 @@ export const styles = {
     position: 'sticky',
     left: 0,
     zIndex: 1,
+    borderRight: `1px solid ${tokens.gray300}`,
   },
   tableHeader: {
-    background: tokens.gray300,
+    background: tokens.gray200,
+    borderRight: `1px solid ${tokens.gray300}`,
   },
   stickyHeader: {
-    background: tokens.gray300,
+    background: tokens.gray200,
     position: 'sticky',
     left: 0,
     zIndex: 2,
+    borderRight: `1px solid ${tokens.gray300}`,
+  },
+  cell: {
+    borderRight: `1px solid ${tokens.gray300}`,
   },
   whiteBox: {
     background: tokens.colorWhite,
