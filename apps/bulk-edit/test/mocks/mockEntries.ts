@@ -17,70 +17,78 @@ export const createMockEntry = (fields: Record<string, any>, sysOverrides: Parti
   fields,
 });
 
-export const mockEntries: Record<string, EntryProps[]> = {
-  condoA: [
-    createMockEntry(
-      { displayName: { 'en-US': 'Building one' } },
-      { id: '1', contentType: { sys: { id: 'condoA' } }, version: 1 }
-    ),
-    createMockEntry(
-      { displayName: { 'en-US': 'Building two' } },
-      { id: '2', contentType: { sys: { id: 'condoA' } }, version: 2, publishedVersion: 1 }
-    ),
-  ],
-  condoB: [
-    createMockEntry(
-      { displayName: { 'en-US': 'B1' } },
-      { id: '4', contentType: { sys: { id: 'condoB' } }, version: 1 }
-    ),
-    createMockEntry(
-      { displayName: { 'en-US': 'B2' } },
-      { id: '5', contentType: { sys: { id: 'condoB' } }, version: 2, publishedVersion: 1 }
-    ),
-  ],
-  condoC: [
-    createMockEntry(
-      { displayName: { 'en-US': 'C1' } },
-      { id: '7', contentType: { sys: { id: 'condoC' } }, version: 1 }
-    ),
-    createMockEntry(
-      { displayName: { 'en-US': 'C2' } },
-      { id: '8', contentType: { sys: { id: 'condoC' } }, version: 2, publishedVersion: 1 }
-    ),
-  ],
-  buildingWithLocation: [
-    createMockEntry(
-      {
-        displayName: { 'en-US': 'Building with Location' },
-        location: { 'en-US': { lat: 39.73923, lon: -104.99025 } },
-      },
-      { id: '100', contentType: { sys: { id: 'buildingWithLocation' } } }
-    ),
-  ],
-  buildingWithBoolean: [
-    createMockEntry(
-      {
-        displayName: { 'en-US': 'Building with Boolean' },
-        isActive: { 'en-US': true },
-      },
-      { id: '200', contentType: { sys: { id: 'buildingWithBoolean' } } }
-    ),
-  ],
-  buildingWithJson: [
-    createMockEntry(
-      {
-        displayName: { 'en-US': 'Building with JSON' },
-        json: {
-          'en-US': {
-            foo: 'bar',
-            long: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-            nested: { a: 1, b: 2 },
-          },
-        },
-      },
-      { id: '300', contentType: { sys: { id: 'buildingWithJson' } } }
-    ),
-  ],
-};
+// Condo A entries
+export const condoAEntry1: EntryProps = createMockEntry(
+  { displayName: { 'en-US': 'Building one' } },
+  { id: '1', contentType: { sys: { id: 'condoA' } }, version: 1 }
+);
 
-export const mockEntry = mockEntries.condoA[0];
+export const condoAEntry2: EntryProps = createMockEntry(
+  { displayName: { 'en-US': 'Building two' } },
+  { id: '2', contentType: { sys: { id: 'condoA' } }, version: 2, publishedVersion: 1 }
+);
+
+export const condoAEntries: EntryProps[] = [condoAEntry1, condoAEntry2];
+
+// Condo B entries
+export const condoBEntry1: EntryProps = createMockEntry(
+  { displayName: { 'en-US': 'B1' } },
+  { id: '4', contentType: { sys: { id: 'condoB' } }, version: 1 }
+);
+
+export const condoBEntry2: EntryProps = createMockEntry(
+  { displayName: { 'en-US': 'B2' } },
+  { id: '5', contentType: { sys: { id: 'condoB' } }, version: 2, publishedVersion: 1 }
+);
+
+export const condoBEntries: EntryProps[] = [condoBEntry1, condoBEntry2];
+
+// Condo C entries
+export const condoCEntry1: EntryProps = createMockEntry(
+  { displayName: { 'en-US': undefined } },
+  { id: '7', contentType: { sys: { id: 'condoC' } }, version: 1 }
+);
+
+export const condoCEntry2: EntryProps = createMockEntry(
+  { displayName: { 'en-US': 'C2' } },
+  { id: '8', contentType: { sys: { id: 'condoC' } }, version: 2, publishedVersion: 1 }
+);
+
+export const condoCEntries: EntryProps[] = [condoCEntry1, condoCEntry2];
+
+// Building with Location entry
+export const buildingWithLocationEntry: EntryProps = createMockEntry(
+  {
+    displayName: { 'en-US': 'Building with Location' },
+    location: { 'en-US': { lat: 39.73923, lon: -104.99025 } },
+  },
+  { id: '100', contentType: { sys: { id: 'buildingWithLocation' } } }
+);
+
+// Building with Boolean entry
+export const buildingWithBooleanEntry: EntryProps = createMockEntry(
+  {
+    displayName: { 'en-US': 'Building with Boolean' },
+    isActive: { 'en-US': true },
+  },
+  { id: '200', contentType: { sys: { id: 'buildingWithBoolean' } } }
+);
+
+export const buildingWithBooleanEntries: EntryProps[] = [buildingWithBooleanEntry];
+
+// Building with JSON entry
+export const buildingWithJsonEntry: EntryProps = createMockEntry(
+  {
+    displayName: { 'en-US': 'Building with JSON' },
+    json: {
+      'en-US': {
+        foo: 'bar',
+        long: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+        nested: { a: 1, b: 2 },
+      },
+    },
+  },
+  { id: '300', contentType: { sys: { id: 'buildingWithJson' } } }
+);
+
+export const buildingWithJsonEntries: EntryProps[] = [buildingWithJsonEntry];

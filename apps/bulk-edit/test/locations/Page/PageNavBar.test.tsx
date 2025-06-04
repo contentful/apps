@@ -3,8 +3,12 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, beforeEach, vi, expect, afterEach } from 'vitest';
 import Page from '../../../src/locations/Page';
 import { mockSdk } from '../../mocks/mockSdk';
-import { createMockCma } from '../../mocks/mockCma';
-import { mockEntries } from '../../mocks/mockEntries';
+import { createMockCma, getManyContentTypes } from '../../mocks/mockCma';
+import {
+  condoAContentType,
+  condoBContentType,
+  condoCContentType,
+} from '../../mocks/mockContentTypes';
 
 // Correctly mock Forma 36 NavList component
 // Mock useSDK to return mockSdk
@@ -15,12 +19,11 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 describe('Page Navigation', () => {
   beforeEach(() => {
     mockSdk.cma = createMockCma();
-    const minimalContentTypes = [
-      { sys: { id: 'condoA' }, name: 'Condo A', fields: [] },
-      { sys: { id: 'condoB' }, name: 'Condo B', fields: [] },
-      { sys: { id: 'condoC' }, name: 'Condo C', fields: [] },
-    ];
-    mockSdk.cma.contentType.getMany = vi.fn().mockResolvedValue({ items: minimalContentTypes });
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(
+        getManyContentTypes([condoAContentType, condoBContentType, condoCContentType])
+      );
   });
 
   afterEach(() => {

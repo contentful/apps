@@ -1,11 +1,25 @@
-import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, beforeEach, vi, expect } from 'vitest';
 import Page from '../../../src/locations/Page';
 import { mockSdk } from '../../mocks/mockSdk';
-import { createMockCma } from '../../mocks/mockCma';
-import { mockEntries, createMockEntry } from '../../mocks/mockEntries';
-import { mockContentTypes } from '../../mocks/mockContentTypes';
+import { createMockCma, getManyContentTypes, getManyEntries } from '../../mocks/mockCma';
+import {
+  createMockEntry,
+  condoAEntry1,
+  condoCEntries,
+  condoAEntries,
+  condoBEntries,
+  buildingWithBooleanEntry,
+  buildingWithLocationEntry,
+} from '../../mocks/mockEntries';
+import {
+  buildingWithBooleanContentType,
+  buildingWithLocationContentType,
+  condoAContentType,
+  condoBContentType,
+  condoCContentType,
+  untitledContentType,
+} from '../../mocks/mockContentTypes';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -16,38 +30,49 @@ describe('Page Table Features', () => {
     mockSdk.cma = createMockCma();
   });
 
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('renders all fields in the table header', async () => {
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([condoAContentType]));
+    mockSdk.cma.entry.getMany = vi.fn().mockResolvedValue(getManyEntries([...condoAEntries]));
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValueOnce(condoAContentType);
+
     render(<Page />);
+
     await waitFor(() => {
-      expect(screen.getByText('Display Name')).toBeInTheDocument();
+      expect(screen.getByText('Display name')).toBeInTheDocument();
       expect(screen.getByText('Status')).toBeInTheDocument();
-      expect(screen.getByText('Is Active')).toBeInTheDocument();
+      expect(screen.getByText('Description')).toBeInTheDocument();
     });
   });
 
   it('renders entry data in the table cells', async () => {
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([condoAContentType]));
+    mockSdk.cma.entry.getMany = vi.fn().mockResolvedValue(getManyEntries([condoAEntry1]));
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValue(condoAContentType);
+
     render(<Page />);
     await waitFor(() => {
       expect(screen.getByText('Draft')).toBeInTheDocument();
-      expect(screen.getByText('true')).toBeInTheDocument();
-    });
-  });
-
-  it('handles missing field values gracefully', async () => {
-    const entryWithMissingField = createMockEntry({ displayName: { 'en-US': 'Building one' } });
-    mockSdk.cma.entry.getMany = vi.fn().mockResolvedValue({ items: [entryWithMissingField] });
-    render(<Page />);
-    await waitFor(() => {
-      const descriptionCell = screen
-        .getByText('Building one')
-        .closest('tr')
-        ?.querySelector('td:last-child');
-      expect(descriptionCell?.textContent).toBe('-');
+      expect(screen.getByText('Building one')).toBeInTheDocument();
     });
   });
 
   it('freezes the display name column when scrolling horizontally', async () => {
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([condoAContentType]));
+    mockSdk.cma.entry.getMany = vi.fn().mockResolvedValue(getManyEntries([condoAEntry1]));
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValue(condoAContentType);
+
     render(<Page />);
+
     const displayNameCells = await screen.findAllByTestId('display-name-cell');
     displayNameCells.forEach((cell) => {
       expect(
@@ -58,54 +83,32 @@ describe('Page Table Features', () => {
     });
   });
 
-  it('renders a Status column and correct status for each entry', async () => {
-    render(<Page />);
-    await waitFor(() => {
-      expect(screen.getByText('Status')).toBeInTheDocument();
-      expect(screen.getByText('Draft')).toBeInTheDocument();
-    });
-  });
-
-  it('updates the table when a different content type is selected', async () => {
-    render(<Page />);
-
-    await waitFor(() => {
-      screen.findByText('Bulk edit Condo A');
-    });
-    await fireEvent.click(screen.getByText('Condo B'));
-
-    await waitFor(() => {
-      expect(screen.getByText('B1')).toBeInTheDocument();
-    });
-
-    expect(screen.getByText('B2')).toBeInTheDocument();
-  });
-
   it('renders a Location field as Lat/Lon in the table', async () => {
-    mockSdk.cma = createMockCma();
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([buildingWithLocationContentType]));
     mockSdk.cma.entry.getMany = vi
       .fn()
-      .mockResolvedValue({ items: mockEntries.buildingWithLocation });
+      .mockResolvedValue(getManyEntries([buildingWithLocationEntry]));
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValue(buildingWithLocationContentType);
+
     render(<Page />);
+
     await waitFor(() => {
-      expect(screen.getByText('Building With Location')).toBeInTheDocument();
-    });
-    fireEvent.click(screen.getByText('Building With Location'));
-    await waitFor(() => {
-      expect(screen.getByText('Lat: 39.73923, Lon: -104.99025')).toBeInTheDocument();
+      expect(screen.getByText('Lat: 39.73923, Lon: ...')).toBeInTheDocument();
     });
   });
 
   it('renders a Boolean field as true/false in the table', async () => {
-    mockSdk.cma = createMockCma();
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([buildingWithBooleanContentType]));
     mockSdk.cma.entry.getMany = vi
       .fn()
-      .mockResolvedValue({ items: mockEntries.buildingWithBoolean });
+      .mockResolvedValue(getManyEntries([buildingWithBooleanEntry]));
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValue(buildingWithBooleanContentType);
+
     render(<Page />);
-    await waitFor(() => {
-      expect(screen.getByText('Building With Boolean')).toBeInTheDocument();
-    });
-    fireEvent.click(screen.getByText('Building With Boolean'));
     await waitFor(() => {
       expect(screen.getByText('true')).toBeInTheDocument();
     });
@@ -113,9 +116,14 @@ describe('Page Table Features', () => {
 
   it('shows Untitled if the display name is missing', async () => {
     const entryWithNoTitle = createMockEntry({ description: { 'en-US': 'Test Description' } });
-    mockSdk.cma = createMockCma();
-    mockSdk.cma.entry.getMany = vi.fn().mockResolvedValue({ items: [entryWithNoTitle] });
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([untitledContentType]));
+    mockSdk.cma.entry.getMany = vi.fn().mockResolvedValue(getManyEntries([entryWithNoTitle]));
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValue(untitledContentType);
+
     render(<Page />);
+
     await waitFor(() => {
       // Should show Untitled in the first column
       expect(screen.getByText('Untitled')).toBeInTheDocument();

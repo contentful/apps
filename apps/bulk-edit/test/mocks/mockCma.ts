@@ -1,73 +1,33 @@
 import { vi } from 'vitest';
-import { Collection, EntryProps } from 'contentful-management';
-import { mockContentTypes, mockContentType } from './mockContentTypes';
-import { mockEntries } from './mockEntries';
+import { Collection, ContentTypeProps, EntryProps } from 'contentful-management';
 
-export const createMockCma = (
-  options: {
-    delay?: number;
-    shouldError?: boolean;
-    errorMessage?: string;
-  } = {}
-) => {
-  const { delay = 0, shouldError = false, errorMessage = 'Failed to fetch' } = options;
-
-  const createDelayedPromise = <T>(value: T) => {
-    return new Promise<T>((resolve, reject) => {
-      setTimeout(() => {
-        if (shouldError) {
-          reject(new Error(errorMessage));
-        } else {
-          resolve(value);
-        }
-      }, delay);
-    });
-  };
-
+export const createMockCma = () => {
   return {
     contentType: {
-      getMany: vi.fn().mockImplementation(() =>
-        createDelayedPromise<Collection<typeof mockContentType, typeof mockContentType>>({
-          items: mockContentTypes,
-          total: mockContentTypes.length,
-          skip: 0,
-          limit: 100,
-          sys: { type: 'Array' },
-          toPlainObject: () => ({
-            items: mockContentTypes,
-            total: mockContentTypes.length,
-            skip: 0,
-            limit: 100,
-            sys: { type: 'Array' },
-          }),
-        })
-      ),
-      get: vi
-        .fn()
-        .mockImplementation(({ contentTypeId }) =>
-          createDelayedPromise(
-            mockContentTypes.find((ct) => ct.sys.id === contentTypeId) || mockContentType
-          )
-        ),
+      getMany: vi.fn(),
+      get: vi.fn(),
     },
     entry: {
-      getMany: vi.fn().mockImplementation(({ query }) => {
-        const entries = mockEntries[query.content_type] || [];
-        return createDelayedPromise<Collection<EntryProps, EntryProps>>({
-          items: entries,
-          total: entries.length,
-          skip: 0,
-          limit: 100,
-          sys: { type: 'Array' },
-          toPlainObject: () => ({
-            items: entries,
-            total: entries.length,
-            skip: 0,
-            limit: 100,
-            sys: { type: 'Array' },
-          }),
-        });
-      }),
+      getMany: vi.fn(),
     },
+  };
+};
+export const getManyContentTypes = (contentTypes: ContentTypeProps[]) => {
+  return {
+    items: contentTypes,
+    total: contentTypes.length,
+    skip: 0,
+    limit: 100,
+    sys: { type: 'Array' },
+  };
+};
+
+export const getManyEntries = (entries: EntryProps[]) => {
+  return {
+    items: entries,
+    total: entries.length,
+    skip: 0,
+    limit: 100,
+    sys: { type: 'Array' },
   };
 };

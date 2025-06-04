@@ -19,6 +19,9 @@ interface MockSDK extends Partial<AppExtensionSDK> {
   location: {
     is: (location: string) => boolean;
   };
+  locales: {
+    default: string;
+  };
 }
 
 const mockSdk: MockSDK = {
@@ -37,6 +40,9 @@ const mockSdk: MockSDK = {
   },
   location: {
     is: (location: string) => location === 'page',
+  },
+  locales: {
+    default: 'en-US',
   },
   cma: {
     contentType: {
