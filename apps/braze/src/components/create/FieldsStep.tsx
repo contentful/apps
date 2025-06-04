@@ -74,7 +74,7 @@ const FieldsStep = ({
           {allFields.map((field) => (
             <Multiselect.Option
               key={field.uniqueId()}
-              itemId={field.displayNameForCreate()}
+              itemId={field.uniqueId()}
               value={field.uniqueId()}
               label={field.displayNameForCreate()}
               onSelectItem={handleSelectField}
