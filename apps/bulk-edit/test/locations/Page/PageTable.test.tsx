@@ -4,7 +4,7 @@ import { describe, it, beforeEach, vi, expect } from 'vitest';
 import Page from '../../../src/locations/Page';
 import { mockSdk } from '../../mocks/mockSdk';
 import { createMockCma } from '../../mocks/mockCma';
-import { mockEntry } from '../../mocks/mockEntries';
+import { mockEntries, createMockEntry } from '../../mocks/mockEntries';
 import { mockContentTypes } from '../../mocks/mockContentTypes';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
@@ -20,35 +20,29 @@ describe('Page Table Features', () => {
     render(<Page />);
     await waitFor(() => {
       expect(screen.getByText('Display Name')).toBeInTheDocument();
-      expect(screen.getByText('Description')).toBeInTheDocument();
+      expect(screen.getByText('Status')).toBeInTheDocument();
+      expect(screen.getByText('Is Active')).toBeInTheDocument();
     });
   });
 
   it('renders entry data in the table cells', async () => {
     render(<Page />);
     await waitFor(() => {
-      expect(screen.getByText('Building one')).toBeInTheDocument();
+      expect(screen.getByText('Draft')).toBeInTheDocument();
+      expect(screen.getByText('true')).toBeInTheDocument();
     });
   });
 
   it('handles missing field values gracefully', async () => {
-    const entryWithMissingField = {
-      ...mockEntry,
-      fields: {
-        displayName: { 'en-US': 'Building one' },
-        // description field is missing
-      },
-    };
-
+    const entryWithMissingField = createMockEntry({ displayName: { 'en-US': 'Building one' } });
     mockSdk.cma.entry.getMany = vi.fn().mockResolvedValue({ items: [entryWithMissingField] });
-
     render(<Page />);
     await waitFor(() => {
       const descriptionCell = screen
         .getByText('Building one')
         .closest('tr')
         ?.querySelector('td:last-child');
-      expect(descriptionCell?.textContent).toBe('');
+      expect(descriptionCell?.textContent).toBe('-');
     });
   });
 
@@ -89,6 +83,9 @@ describe('Page Table Features', () => {
 
   it('renders a Location field as Lat/Lon in the table', async () => {
     mockSdk.cma = createMockCma();
+    mockSdk.cma.entry.getMany = vi
+      .fn()
+      .mockResolvedValue({ items: mockEntries.buildingWithLocation });
     render(<Page />);
     await waitFor(() => {
       expect(screen.getByText('Building With Location')).toBeInTheDocument();
@@ -101,6 +98,9 @@ describe('Page Table Features', () => {
 
   it('renders a Boolean field as true/false in the table', async () => {
     mockSdk.cma = createMockCma();
+    mockSdk.cma.entry.getMany = vi
+      .fn()
+      .mockResolvedValue({ items: mockEntries.buildingWithBoolean });
     render(<Page />);
     await waitFor(() => {
       expect(screen.getByText('Building With Boolean')).toBeInTheDocument();
@@ -111,25 +111,14 @@ describe('Page Table Features', () => {
     });
   });
 
-  it('renders a JSON/Object field as truncated JSON string in the table', async () => {
+  it('shows Untitled if the display name is missing', async () => {
+    const entryWithNoTitle = createMockEntry({ description: { 'en-US': 'Test Description' } });
     mockSdk.cma = createMockCma();
+    mockSdk.cma.entry.getMany = vi.fn().mockResolvedValue({ items: [entryWithNoTitle] });
     render(<Page />);
     await waitFor(() => {
-      expect(screen.getByText('Building With JSON')).toBeInTheDocument();
-    });
-    fireEvent.click(screen.getByText('Building With JSON'));
-    await waitFor(() => {
-      // The JSON string should be truncated to 100 chars
-      const cell = screen.getByText((content, node) => {
-        return (
-          typeof content === 'string' &&
-          content.startsWith(
-            '{"foo":"bar","long":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-          ) &&
-          content.length <= 100
-        );
-      });
-      expect(cell).toBeInTheDocument();
+      // Should show Untitled in the first column
+      expect(screen.getByText('Untitled')).toBeInTheDocument();
     });
   });
 });

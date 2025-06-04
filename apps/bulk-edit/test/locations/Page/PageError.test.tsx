@@ -15,9 +15,7 @@ describe('Page Error Handling', () => {
   });
 
   it('handles content type fetch error gracefully', async () => {
-    await act(async () => {
-      render(<Page />);
-    });
+    render(<Page />);
     await waitFor(() => {
       expect(screen.queryByText('Condo A')).not.toBeInTheDocument();
     });
@@ -30,9 +28,7 @@ describe('Page Error Handling', () => {
     });
     mockSdk.cma.entry.getMany = vi.fn().mockRejectedValue(new Error('Failed to fetch entries'));
 
-    await act(async () => {
-      render(<Page />);
-    });
+    render(<Page />);
     await waitFor(() => {
       expect(screen.queryByText('Building one')).not.toBeInTheDocument();
     });
