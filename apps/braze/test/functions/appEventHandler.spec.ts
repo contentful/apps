@@ -171,6 +171,9 @@ describe('updateContentBlocks', () => {
         },
       ],
     });
+    vi.mocked(global.fetch).mockResolvedValue(
+      new Response(JSON.stringify({ success: true }), { status: 200 })
+    );
 
     await handler(event as any, mockContext as any);
 
@@ -249,8 +252,16 @@ describe('updateContentBlocks', () => {
 
     await handler(event as any, mockContext as any);
 
-    expect(global.fetch).toHaveBeenCalledTimes(1);
-    expect(vi.mocked(updateConfig)).toHaveBeenCalledOnce();
+    expect(global.fetch).toHaveBeenCalledTimes(3);
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://test.braze.com/content_blocks/update',
+      expect.objectContaining({
+        body: JSON.stringify({
+          content_block_id: 'test-block-id',
+          content: 'test value',
+        }),
+      })
+    );
   });
 
   it('should update content block for each locale on entry save', async () => {

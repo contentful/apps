@@ -20,7 +20,7 @@ import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { getConfigAndConnectedFields, initContentfulManagementClient } from './common';
 import { CustomError } from './customError';
 
-const WAIT_TIMES = [0, 5000, 10000];
+const WAIT_TIMES = [1000, 2000];
 
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = async (
   event: AppEventRequest,
@@ -109,12 +109,8 @@ const entrySavedHandler = async (
     };
 
     try {
-      // TODO : add callAndRetry
-      await updateContentBlock(
-        brazeEndpoint,
-        brazeApiKey,
-        connectedField.contentBlockId,
-        fieldValue
+      await callAndRetry(() =>
+        updateContentBlock(brazeEndpoint, brazeApiKey, connectedField.contentBlockId, fieldValue)
       );
     } catch (error: any) {
       updateResult = {
@@ -134,16 +130,20 @@ const entrySavedHandler = async (
   }
 };
 
-async function callAndRetry(fn: () => Promise<any>, waitTimeIndex: number = 0): Promise<void> {
-  try {
-    await fn();
-  } catch (error) {
-    if (waitTimeIndex < WAIT_TIMES.length) {
-      await new Promise((resolve) => setTimeout(resolve, WAIT_TIMES[waitTimeIndex]));
-      return callAndRetry(fn, waitTimeIndex + 1);
+async function callAndRetry(fn: () => Promise<any>): Promise<void> {
+  let lastError: any;
+  for (let i = 0; i <= WAIT_TIMES.length; i++) {
+    try {
+      await fn();
+      return;
+    } catch (error) {
+      lastError = error;
+      if (i < WAIT_TIMES.length) {
+        await new Promise((resolve) => setTimeout(resolve, WAIT_TIMES[i]));
+      }
     }
-    throw error;
   }
+  throw lastError;
 }
 
 async function deleteConfigEntry(cma: PlainClientAPI) {
