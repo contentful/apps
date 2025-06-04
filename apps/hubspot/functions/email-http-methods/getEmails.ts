@@ -1,4 +1,5 @@
 import type { HubSpotRequestContext, HubSpotResponse, ContentBlock } from '../types';
+import { sanitizeUserInput } from '../utils';
 
 export async function getEmails(context: HubSpotRequestContext): Promise<HubSpotResponse> {
   console.log('GETTING FUNCTION HUBSPOT EMAIL');
@@ -29,9 +30,13 @@ export async function getEmails(context: HubSpotRequestContext): Promise<HubSpot
       if (email.content?.widgets) {
         Object.entries(email.content.widgets).forEach(([widgetId, widget]: [string, any]) => {
           if (widget.body?.html && widget.body.html.trim()) {
-            // Extract text content for preview
-            const textContent = widget.body.html
-              .replace(/<[^>]*>/g, '') // Remove HTML tags
+            // Safely extract text content for preview using secure sanitization
+            const rawHtml = String(widget.body.html);
+            const sanitizedHtml = sanitizeUserInput(rawHtml);
+
+            // Extract text content by removing HTML tags securely
+            const textContent = sanitizedHtml
+              .replace(/<[^>]*>/g, '') // Remove HTML tags from sanitized input
               .replace(/\s+/g, ' ') // Normalize whitespace
               .trim();
 
@@ -40,7 +45,7 @@ export async function getEmails(context: HubSpotRequestContext): Promise<HubSpot
               type: widget.type || 'unknown',
               order: widget.order || 0,
               name: widget.name || widget.id || widgetId,
-              html: widget.body.html,
+              html: rawHtml, // Keep original HTML for editing
               textContent,
               textPreview: textContent.substring(0, 100) + (textContent.length > 100 ? '...' : ''),
               characterCount: textContent.length,
