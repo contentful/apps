@@ -10,9 +10,11 @@ import {
   Text,
   Checkbox,
   Stack,
+  TextLink,
 } from '@contentful/f36-components';
 import { NavList } from '@contentful/f36-navlist';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 import { ContentType, ContentTypeField, Entry, Status } from './types';
 import { styles } from './styles';
@@ -141,6 +143,10 @@ const Page = () => {
     return String(value);
   };
 
+  const getEntryUrl = (entry: Entry): string => {
+    return `https://app.contentful.com/spaces/${sdk.ids.space}/environments/${sdk.ids.environment}/entries/${entry.sys.id}`;
+  };
+
   return (
     <Flex>
       <Box style={styles.mainContent} padding="spacingL">
@@ -207,7 +213,15 @@ const Page = () => {
                             <Table.Row key={entry.sys.id}>
                               {fields.length > 0 && (
                                 <Table.Cell testId="display-name-cell" style={styles.stickyCell}>
-                                  {getEntryTitle(entry, fields)}
+                                  <TextLink
+                                    href={getEntryUrl(entry)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    testId="entry-link"
+                                    icon={<ExternalLinkIcon />}
+                                    alignIcon="end">
+                                    {getEntryTitle(entry, fields)}
+                                  </TextLink>
                                 </Table.Cell>
                               )}
                               <Table.Cell testId="status-cell" style={styles.cell}>
