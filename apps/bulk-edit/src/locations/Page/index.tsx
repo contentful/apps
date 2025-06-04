@@ -178,15 +178,23 @@ const Page = () => {
                       <Table.Head>
                         <Table.Row>
                           {fields.length > 0 && (
-                            <Table.Cell as="th" key="displayName" style={styles.stickyHeader}>
-                              Display Name
+                            <Table.Cell
+                              as="th"
+                              key="displayName"
+                              style={styles.stickyHeader}
+                              isTruncated>
+                              Display name
                             </Table.Cell>
                           )}
-                          <Table.Cell as="th" key="status" style={styles.tableHeader}>
+                          <Table.Cell as="th" key="status" style={styles.tableHeader} isTruncated>
                             Status
                           </Table.Cell>
                           {fields.slice(1).map((field) => (
-                            <Table.Cell as="th" key={field.id} style={styles.tableHeader}>
+                            <Table.Cell
+                              as="th"
+                              key={field.id}
+                              style={styles.tableHeader}
+                              isTruncated>
                               {field.name}
                             </Table.Cell>
                           ))}
