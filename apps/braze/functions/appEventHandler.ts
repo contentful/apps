@@ -48,6 +48,10 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = a
     return;
   }
 
+  if (entryConnectedFields.length === 0) {
+    return;
+  }
+
   if (contentfulTopic.includes('Entry.delete')) {
     await entryDeletedHandler(cma, entryId, configEntry, connectedFields);
   } else if (
