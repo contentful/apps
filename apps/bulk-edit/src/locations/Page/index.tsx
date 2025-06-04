@@ -19,8 +19,6 @@ import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { ContentType, ContentTypeField, Entry, Status } from './types';
 import { styles } from './styles';
 
-const LOCALE = 'en-US';
-
 const Page = () => {
   const sdk = useSDK();
   const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
@@ -29,6 +27,7 @@ const Page = () => {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [entriesLoading, setEntriesLoading] = useState(false);
   const [fields, setFields] = useState<ContentTypeField[]>([]);
+  const LOCALE = sdk.locales.default;
 
   useEffect(() => {
     const fetchContentTypes = async (): Promise<void> => {
