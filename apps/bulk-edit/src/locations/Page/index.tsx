@@ -62,7 +62,13 @@ const Page = () => {
       setEntriesLoading(true);
       try {
         const ct = await sdk.cma.contentType.get({ contentTypeId: selectedContentTypeId });
-        setFields(ct.fields.map((f: any) => ({ id: f.id, name: f.name, type: f.type })));
+        setFields(
+          ct.fields.map((f: any) => ({
+            id: f.id,
+            name: f.name,
+            type: f.type,
+          }))
+        );
         const res = await sdk.cma.entry.getMany({
           spaceId: sdk.ids.space,
           environmentId: sdk.ids.environment,
@@ -110,10 +116,30 @@ const Page = () => {
     );
   };
 
-  const truncate = (str: string, max: number = 100) =>
+  const isLinkValue = (value: unknown): value is { sys: { linkType: string } } => {
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      'sys' in value &&
+      'linkType' in (value as any).sys
+    );
+  };
+
+  const truncate = (str: string, max: number = 20) =>
     str.length > max ? str.slice(0, max) + ' ...' : str;
 
   const renderFieldValue = (field: ContentTypeField, value: unknown): string => {
+    if (field.type === 'Array' && Array.isArray(value)) {
+      const count = value.length;
+      if (value[0]?.sys?.linkType === 'Entry') {
+        return count === 1 ? '1 reference field' : `${count} reference fields`;
+      } else if (value[0]?.sys?.linkType === 'Asset') {
+        return count === 1 ? '1 asset' : `${count} assets`;
+      } else {
+        return truncate(value.join(', '));
+      }
+    }
+
     if (field.type === 'Location' && isLocationValue(value)) {
       return truncate(`Lat: ${value.lat}, Lon: ${value.lon}`);
     }
@@ -123,10 +149,19 @@ const Page = () => {
     if (field.type === 'Object' && typeof value === 'object' && value !== null) {
       return truncate(JSON.stringify(value));
     }
+
+    if (field.type === 'Link' && isLinkValue(value) && value.sys.linkType === 'Asset') {
+      return `1 asset`;
+    }
+    if (field.type === 'Link' && isLinkValue(value) && value.sys.linkType === 'Entry') {
+      return `1 reference field`;
+    }
+
     if (typeof value === 'object' && value !== null) {
       return '';
     }
-    return value !== undefined && value !== null ? String(value) : '-';
+
+    return value !== undefined && value !== null ? truncate(String(value)) : '-';
   };
 
   const getEntryTitle = (entry: Entry, fields: ContentTypeField[]): string => {
@@ -184,24 +219,16 @@ const Page = () => {
                       <Table.Head>
                         <Table.Row>
                           {fields.length > 0 && (
-                            <Table.Cell
-                              as="th"
-                              key="displayName"
-                              style={styles.stickyHeader}
-                              isTruncated>
+                            <Table.Cell as="th" key="displayName" style={styles.stickyHeader}>
                               Display name
                             </Table.Cell>
                           )}
-                          <Table.Cell as="th" key="status" style={styles.tableHeader} isTruncated>
+                          <Table.Cell as="th" key="status" style={styles.tableHeader}>
                             Status
                           </Table.Cell>
                           {fields.slice(1).map((field) => (
-                            <Table.Cell
-                              as="th"
-                              key={field.id}
-                              style={styles.tableHeader}
-                              isTruncated>
-                              {field.name}
+                            <Table.Cell as="th" key={field.id} style={styles.tableHeader}>
+                              {truncate(field.name)}
                             </Table.Cell>
                           ))}
                         </Table.Row>

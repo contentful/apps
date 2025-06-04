@@ -17,7 +17,19 @@ export interface Entry {
     publishedVersion?: number;
     version: number;
   };
-  fields: { [key: string]: { [locale: string]: string } };
+  fields: {
+    [key: string]: {
+      [locale: string]:
+        | string
+        | number
+        | boolean
+        | { sys: { type: 'Link'; linkType: string; id: string } }
+        | Array<{ sys: { type: 'Link'; linkType: string; id: string } }>
+        | object
+        | null
+        | undefined;
+    };
+  };
 }
 
 export interface Status {

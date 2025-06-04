@@ -23,6 +23,7 @@ export const styles = {
   tableHeader: {
     background: tokens.gray200,
     borderRight: `1px solid ${tokens.gray300}`,
+    minWidth: '200px',
   },
   stickyHeader: {
     background: tokens.gray200,
@@ -30,9 +31,11 @@ export const styles = {
     left: 0,
     zIndex: 2,
     borderRight: `1px solid ${tokens.gray300}`,
+    width: '200px',
   },
   cell: {
     borderRight: `1px solid ${tokens.gray300}`,
+    width: '200px',
   },
   whiteBox: {
     background: tokens.colorWhite,
