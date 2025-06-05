@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, beforeEach, vi, expect, afterEach } from 'vitest';
 import Page from '../../../src/locations/Page';
 import { mockSdk } from '../../mocks/mockSdk';

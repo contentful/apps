@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, beforeEach, vi, expect } from 'vitest';
 import Page from '../../../src/locations/Page';
 import { mockSdk } from '../../mocks/mockSdk';
@@ -6,9 +6,7 @@ import { createMockCma, getManyContentTypes, getManyEntries } from '../../mocks/
 import {
   createMockEntry,
   condoAEntry1,
-  condoCEntries,
   condoAEntries,
-  condoBEntries,
   buildingWithBooleanEntry,
   buildingWithLocationEntry,
 } from '../../mocks/mockEntries';

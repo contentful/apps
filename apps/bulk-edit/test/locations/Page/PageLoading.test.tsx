@@ -3,8 +3,7 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import { describe, it, beforeEach, vi, expect } from 'vitest';
 import Page from '../../../src/locations/Page';
 import { mockSdk } from '../../mocks/mockSdk';
-import { createMockCma, getManyContentTypes, getManyEntries } from '../../mocks/mockCma';
-import { condoAEntry1 } from '../../mocks/mockEntries';
+import { createMockCma, getManyContentTypes } from '../../mocks/mockCma';
 import { condoAContentType } from '../../mocks/mockContentTypes';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
