@@ -1,5 +1,5 @@
 import React from 'react';
-import { Note, Box, Table, Button, Tooltip } from '@contentful/f36-components';
+import { Note, Box, Table, Button, Tooltip, TextLink } from '@contentful/f36-components';
 import { Track, AudioTrack, CaptionTrack } from '../../util/types';
 
 interface TrackListProps {
@@ -11,7 +11,13 @@ interface TrackListProps {
   type: 'caption' | 'audio';
 }
 
-const TrackList: React.FC<TrackListProps> = ({ tracks, onDeleteTrack, type }) => {
+const TrackList: React.FC<TrackListProps> = ({
+  tracks,
+  onDeleteTrack,
+  type,
+  playbackId,
+  domain,
+}) => {
   if (!tracks || tracks.length === 0) {
     return (
       <Box marginTop="spacingL" marginBottom="spacingL">
@@ -19,6 +25,13 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, onDeleteTrack, type }) =>
       </Box>
     );
   }
+
+  const getDownloadUrl = (track: Track): string | undefined => {
+    if (type === 'caption' && track.type === 'text' && playbackId) {
+      return `https://${domain || 'stream.mux.com'}/${playbackId}/text/${track.id}.vtt`;
+    }
+    return undefined;
+  };
 
   return (
     <Box marginBottom="spacingM">
@@ -30,6 +43,7 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, onDeleteTrack, type }) =>
               <Table.Cell>Language</Table.Cell>
               {type === 'caption' && <Table.Cell>Closed Captions</Table.Cell>}
               <Table.Cell>Status</Table.Cell>
+              {type === 'caption' && <Table.Cell>Download</Table.Cell>}
               <Table.Cell>Actions</Table.Cell>
             </Table.Row>
           </Table.Head>
@@ -46,6 +60,18 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, onDeleteTrack, type }) =>
                   </Table.Cell>
                 )}
                 <Table.Cell>{track.status}</Table.Cell>
+                {type === 'caption' && (
+                  <Table.Cell>
+                    {track.type === 'text' && track.status === 'ready' && (
+                      <TextLink
+                        href={getDownloadUrl(track)}
+                        target="_blank"
+                        rel="noopener noreferrer">
+                        Download
+                      </TextLink>
+                    )}
+                  </Table.Cell>
+                )}
                 <Table.Cell>
                   {type === 'audio' && (track as AudioTrack).primary ? (
                     <Tooltip content="Cannot delete the primary audio track">

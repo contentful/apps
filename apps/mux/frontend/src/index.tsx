@@ -1099,6 +1099,8 @@ export class App extends React.Component<AppProps, AppState> {
                     tracks={(this.state.value?.captions || []) as Track[]}
                     type="caption"
                     title="Add Caption"
+                    playbackId={this.state.value?.playbackId}
+                    domain={this.props.sdk.parameters.installation.domain}
                   />
                 </Tabs.Panel>
 

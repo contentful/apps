@@ -12,20 +12,20 @@ interface TrackFormProps {
   tracks: Track[];
   type: 'caption' | 'audio';
   title: string;
+  playbackId?: string;
+  domain?: string;
 }
 
-const TrackForm: React.FC<TrackFormProps> = ({ onSubmit, onDeleteTrack, tracks, type, title }) => {
+const TrackForm: React.FC<TrackFormProps> = ({
+  onSubmit,
+  onDeleteTrack,
+  tracks,
+  type,
+  title,
+  playbackId,
+  domain,
+}) => {
   const [languageCode, setLanguageCode] = useState('');
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    if (val) {
-      const language = countries.find((lang) => lang.name === val);
-      if (language) {
-        setLanguageCode(language.code);
-      }
-    }
-  };
 
   const clearForm = (form: HTMLFormElement) => {
     const urlInput = form.elements.namedItem('url') as HTMLInputElement;
@@ -39,14 +39,26 @@ const TrackForm: React.FC<TrackFormProps> = ({ onSubmit, onDeleteTrack, tracks, 
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    const form = e.target as HTMLFormElement;
     onSubmit(e);
-    clearForm(form);
+    clearForm(e.target as HTMLFormElement);
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedCountry = countries.find((country) => country.name === e.target.value);
+    if (selectedCountry) {
+      setLanguageCode(selectedCountry.code);
+    }
   };
 
   return (
     <>
-      <TrackList tracks={tracks} onDeleteTrack={onDeleteTrack} type={type} />
+      <TrackList
+        tracks={tracks}
+        onDeleteTrack={onDeleteTrack}
+        type={type}
+        playbackId={playbackId}
+        domain={domain}
+      />
       <Form onSubmit={handleSubmit}>
         <Heading as="h3">{title}</Heading>
         <FormControl isRequired>
