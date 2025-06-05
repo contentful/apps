@@ -16,12 +16,13 @@ import { NavList } from '@contentful/f36-navlist';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 
-import { ContentType, ContentTypeField, Entry, Status } from './types';
+import { ContentTypeField, Entry, Status } from './types';
 import { styles } from './styles';
+import { ContentTypeProps } from 'contentful-management';
 
 const Page = () => {
   const sdk = useSDK();
-  const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
+  const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [selectedContentTypeId, setSelectedContentTypeId] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -29,17 +30,39 @@ const Page = () => {
   const [fields, setFields] = useState<ContentTypeField[]>([]);
   const LOCALE = sdk.locales.default;
 
+  const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
+    const allContentTypes: ContentTypeProps[] = [];
+    let skip = 0;
+    const limit = 1000;
+    let fetched: number;
+
+    do {
+      const response = await sdk.cma.contentType.getMany({
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
+        query: { skip, limit },
+      });
+      const items = response.items as ContentTypeProps[];
+      allContentTypes.push(...items);
+      fetched = items.length;
+      skip += limit;
+    } while (fetched === limit);
+
+    return allContentTypes;
+  };
+
   useEffect(() => {
     const fetchContentTypes = async (): Promise<void> => {
       setLoading(true);
       try {
-        const res = await sdk.cma.contentType.getMany({});
-        const sorted = res.items
+        const contentTypes = await getAllContentTypes();
+        const sortedContentTypes = contentTypes
           .slice()
-          .sort((a: ContentType, b: ContentType) => a.name.localeCompare(b.name));
-        setContentTypes(sorted);
-        if (sorted.length > 0) {
-          setSelectedContentTypeId(sorted[0].sys.id);
+          .sort((a, b) => a.name.localeCompare(b.name));
+
+        setContentTypes(sortedContentTypes);
+        if (sortedContentTypes.length > 0) {
+          setSelectedContentTypeId(sortedContentTypes[0].sys.id);
         }
       } catch (e) {
         setContentTypes([]);
@@ -163,9 +186,15 @@ const Page = () => {
     return value !== undefined && value !== null ? truncate(String(value)) : '-';
   };
 
-  const getEntryTitle = (entry: Entry, fields: ContentTypeField[]): string => {
-    if (!fields.length) return 'Untitled';
-    const value = entry.fields[fields[0].id]?.[LOCALE];
+  const getEntryTitle = (
+    entry: Entry,
+    fields: ContentTypeField[],
+    contentType?: ContentTypeProps
+  ): string => {
+    let displayFieldId = contentType?.displayField;
+    if (!displayFieldId) return 'Untitled';
+
+    const value = entry.fields[displayFieldId]?.[LOCALE];
     if (
       value === undefined ||
       value === null ||
@@ -246,7 +275,7 @@ const Page = () => {
                                     testId="entry-link"
                                     icon={<ExternalLinkIcon />}
                                     alignIcon="end">
-                                    {getEntryTitle(entry, fields)}
+                                    {getEntryTitle(entry, fields, selectedContentType)}
                                   </TextLink>
                                 </Table.Cell>
                               )}

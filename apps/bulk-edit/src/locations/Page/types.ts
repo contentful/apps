@@ -1,9 +1,3 @@
-export interface ContentType {
-  sys: { id: string };
-  name: string;
-  fields?: ContentTypeField[];
-}
-
 export interface ContentTypeField {
   id: string;
   name: string;

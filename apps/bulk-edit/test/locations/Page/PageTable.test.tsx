@@ -14,8 +14,6 @@ import {
   buildingWithBooleanContentType,
   buildingWithLocationContentType,
   condoAContentType,
-  condoBContentType,
-  condoCContentType,
   untitledContentType,
 } from '../../mocks/mockContentTypes';
 
