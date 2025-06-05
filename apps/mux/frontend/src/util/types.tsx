@@ -24,6 +24,7 @@ export interface AppState {
   posterToken?: string;
   storyboardToken?: string;
   captionname?: string;
+  audioName?: string;
   playerPlaybackId?: string;
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   raw?: any;
@@ -52,7 +53,8 @@ export interface MuxContentfulObject {
   audioOnly?: boolean;
   duration?: number;
   created_at?: number;
-  captions?: Array<Captions>;
+  captions?: Array<Track>;
+  audioTracks?: Array<Track>;
   is_live?: boolean;
   live_stream_id?: string;
   static_renditions?: Array<StaticRendition>;
@@ -103,3 +105,32 @@ export interface captionListProps {
   domain: string;
   token: string | undefined;
 }
+
+export interface BaseTrack {
+  type: string;
+  id: string;
+  status?: string;
+  passthrough?: string;
+  name?: string;
+  language_code?: string;
+}
+
+export interface AudioTrack extends BaseTrack {
+  type: 'audio';
+  primary?: boolean;
+  max_channels?: number;
+  max_channel_layout?: string;
+  duration?: number;
+}
+
+export interface CaptionTrack extends BaseTrack {
+  type: 'text';
+  'text_type ': string;
+  name: string;
+  language_code: string;
+  closed_captions: boolean;
+  text_source?: string;
+  errored?: Error;
+}
+
+export type Track = AudioTrack | CaptionTrack;
