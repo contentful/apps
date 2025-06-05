@@ -14,8 +14,8 @@ interface TrackListProps {
 const TrackList: React.FC<TrackListProps> = ({ tracks, onDeleteTrack, type }) => {
   if (!tracks || tracks.length === 0) {
     return (
-      <Box marginTop="spacingM">
-        <Note>No {type === 'caption' ? 'Captions' : 'Audio Tracks'}</Note>
+      <Box marginTop="spacingL" marginBottom="spacingL">
+        <Note variant="neutral">No {type === 'caption' ? 'Captions' : 'Audio Tracks'}</Note>
       </Box>
     );
   }
