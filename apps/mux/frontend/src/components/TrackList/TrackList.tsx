@@ -21,43 +21,39 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, onDeleteTrack, type }) =>
   }
 
   return (
-    <Box marginTop="spacingL" marginBottom="spacingL">
-      <Table data-testid="track_table">
-        <Table.Head>
-          <Table.Row>
-            <Table.Cell>Name</Table.Cell>
-            <Table.Cell>Language Code</Table.Cell>
-            {type === 'caption' && <Table.Cell>Closed Captions</Table.Cell>}
-            {type === 'audio' && <Table.Cell>Primary</Table.Cell>}
-            <Table.Cell>Status</Table.Cell>
-            <Table.Cell>Actions</Table.Cell>
-          </Table.Row>
-        </Table.Head>
-        <Table.Body>
-          {tracks.map((track) => {
-            const isAudio = track.type === 'audio';
-            const audioTrack = isAudio ? (track as AudioTrack) : null;
-            const captionTrack = !isAudio ? (track as CaptionTrack) : null;
-
-            return (
+    <Box marginBottom="spacingM">
+      {tracks.length > 0 && (
+        <Table data-testid={type === 'caption' ? 'caption_table' : 'audio_table'}>
+          <Table.Head>
+            <Table.Row>
+              <Table.Cell>Name</Table.Cell>
+              <Table.Cell>Language</Table.Cell>
+              {type === 'caption' && <Table.Cell>Closed Captions</Table.Cell>}
+              <Table.Cell>Status</Table.Cell>
+              <Table.Cell>Actions</Table.Cell>
+            </Table.Row>
+          </Table.Head>
+          <Table.Body>
+            {tracks.map((track) => (
               <Table.Row key={track.id}>
-                <Table.Cell>
-                  {track.name || 'Default'}
-                  {captionTrack?.text_source?.includes('generated') ? ' (Auto)' : ''}
-                  {captionTrack?.text_source?.includes('final') ? ' (Final)' : ''}
-                </Table.Cell>
+                <Table.Cell>{track.name || '-'}</Table.Cell>
                 <Table.Cell>{track.language_code || '-'}</Table.Cell>
-                {type === 'caption' && captionTrack && (
-                  <Table.Cell>{captionTrack.closed_captions ? 'Yes' : 'No'}</Table.Cell>
+                {type === 'caption' && (
+                  <Table.Cell>
+                    {track.type === 'text' && (track as CaptionTrack).closed_captions
+                      ? 'Yes'
+                      : 'No'}
+                  </Table.Cell>
                 )}
-                {type === 'audio' && audioTrack && (
-                  <Table.Cell>{audioTrack.primary ? 'Yes' : 'No'}</Table.Cell>
-                )}
-                <Table.Cell>{track.status === 'preparing' ? 'Preparing' : 'Ready'}</Table.Cell>
+                <Table.Cell>{track.status}</Table.Cell>
                 <Table.Cell>
-                  {type === 'audio' && audioTrack?.primary ? (
-                    <Tooltip placement="top" content="Cannot delete the primary audio track">
-                      <Button variant="negative" size="small" data-track={track.id} isDisabled>
+                  {type === 'audio' && (track as AudioTrack).primary ? (
+                    <Tooltip content="Cannot delete the primary audio track">
+                      <Button
+                        variant="negative"
+                        size="small"
+                        isDisabled={true}
+                        data-track={track.id}>
                         Delete
                       </Button>
                     </Tooltip>
@@ -72,10 +68,10 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, onDeleteTrack, type }) =>
                   )}
                 </Table.Cell>
               </Table.Row>
-            );
-          })}
-        </Table.Body>
-      </Table>
+            ))}
+          </Table.Body>
+        </Table>
+      )}
     </Box>
   );
 };
