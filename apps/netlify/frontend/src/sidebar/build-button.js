@@ -56,10 +56,9 @@ export default class NeflifySidebarBuildButton extends React.Component {
     this.clearBuildTimeout();
     this.buildTimeoutId = setTimeout(() => {
       this.setState({
-        busy: false,
         buildTimedOut: true,
         ok: false,
-        info: 'Contentful lost connection to update the build status. Verify if the build has completed on Netlify.',
+        info: 'Contentful lost connection to update the build status. Verify if the build has completed in the Netlify app.',
       });
     }, 120000); // 2 minute timeout
   };
@@ -201,13 +200,11 @@ export default class NeflifySidebarBuildButton extends React.Component {
         {buildTimedOut && (
           <div className={styles.info}>
             <ValidationMessage>{info}</ValidationMessage>
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={this.resetBuild}
-              style={{ marginTop: tokens.spacingXS }}>
-              Reset build status
-            </Button>
+            <div style={{ marginTop: tokens.spacingS }}>
+              <Button variant="secondary" size="small" onClick={this.resetBuild}>
+                Reset build status
+              </Button>
+            </div>
           </div>
         )}
         {misconfigured && (
