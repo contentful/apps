@@ -41,6 +41,7 @@ describe('Page Table Features', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Display name')).toBeInTheDocument();
+      expect(screen.getByText('Display Name')).toBeInTheDocument();
       expect(screen.getByText('Status')).toBeInTheDocument();
       expect(screen.getByText('Description')).toBeInTheDocument();
     });
@@ -56,7 +57,7 @@ describe('Page Table Features', () => {
     render(<Page />);
     await waitFor(() => {
       expect(screen.getByText('Draft')).toBeInTheDocument();
-      expect(screen.getByText('Building one')).toBeInTheDocument();
+      expect(screen.getAllByText('Building one')).toHaveLength(2);
     });
   });
 

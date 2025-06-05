@@ -254,7 +254,7 @@ const Page = () => {
                           <Table.Cell as="th" key="status" style={styles.tableHeader}>
                             Status
                           </Table.Cell>
-                          {fields.slice(1).map((field) => (
+                          {fields.map((field) => (
                             <Table.Cell as="th" key={field.id} style={styles.tableHeader}>
                               {truncate(field.name)}
                             </Table.Cell>
@@ -282,7 +282,7 @@ const Page = () => {
                               <Table.Cell testId="status-cell" style={styles.cell}>
                                 <Badge variant={status.color}>{status.label}</Badge>
                               </Table.Cell>
-                              {fields.slice(1).map((field) => (
+                              {fields.map((field) => (
                                 <Table.Cell key={field.id} style={styles.cell}>
                                   {renderFieldValue(field, entry.fields[field.id]?.[LOCALE])}
                                 </Table.Cell>
