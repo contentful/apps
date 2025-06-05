@@ -11,6 +11,7 @@ import {
   Checkbox,
   Stack,
   TextLink,
+  Pagination,
 } from '@contentful/f36-components';
 import { NavList } from '@contentful/f36-navlist';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -18,6 +19,8 @@ import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 import { ContentTypeField, Entry, Status } from './types';
 import { styles } from './styles';
+
+const PAGE_SIZE_OPTIONS = [15, 50, 100];
 import { ContentTypeProps } from 'contentful-management';
 
 const Page = () => {
@@ -28,6 +31,9 @@ const Page = () => {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [entriesLoading, setEntriesLoading] = useState(false);
   const [fields, setFields] = useState<ContentTypeField[]>([]);
+  const [activePage, setActivePage] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(PAGE_SIZE_OPTIONS[0]);
+  const [totalEntries, setTotalEntries] = useState(0);
   const LOCALE = sdk.locales.default;
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
@@ -75,10 +81,15 @@ const Page = () => {
   }, [sdk]);
 
   useEffect(() => {
+    setActivePage(0);
+  }, [selectedContentTypeId]);
+
+  useEffect(() => {
     const fetchFieldsAndEntries = async (): Promise<void> => {
       if (!selectedContentTypeId) {
         setEntries([]);
         setFields([]);
+        setTotalEntries(0);
         return;
       }
       setEntriesLoading(true);
@@ -94,18 +105,24 @@ const Page = () => {
         const res = await sdk.cma.entry.getMany({
           spaceId: sdk.ids.space,
           environmentId: sdk.ids.environment,
-          query: { content_type: selectedContentTypeId },
+          query: {
+            content_type: selectedContentTypeId,
+            skip: activePage * itemsPerPage,
+            limit: itemsPerPage,
+          },
         });
         setEntries(res.items || []);
+        setTotalEntries(res.total || 0);
       } catch (e) {
         setEntries([]);
         setFields([]);
+        setTotalEntries(0);
       } finally {
         setEntriesLoading(false);
       }
     };
     void fetchFieldsAndEntries();
-  }, [sdk, selectedContentTypeId]);
+  }, [sdk, selectedContentTypeId, activePage, itemsPerPage]);
 
   const handleNavClick = (id: string): void => {
     setSelectedContentTypeId(id);
@@ -243,55 +260,69 @@ const Page = () => {
                   {entriesLoading ? (
                     <Spinner />
                   ) : (
-                    <Table testId="bulk-edit-table" style={styles.table}>
-                      <Table.Head>
-                        <Table.Row>
-                          {fields.length > 0 && (
-                            <Table.Cell as="th" key="displayName" style={styles.stickyHeader}>
-                              Display name
-                            </Table.Cell>
-                          )}
-                          <Table.Cell as="th" key="status" style={styles.tableHeader}>
-                            Status
-                          </Table.Cell>
-                          {fields.map((field) => (
-                            <Table.Cell as="th" key={field.id} style={styles.tableHeader}>
-                              {truncate(field.name)}
-                            </Table.Cell>
-                          ))}
-                        </Table.Row>
-                      </Table.Head>
-                      <Table.Body>
-                        {entries.map((entry) => {
-                          const status = getStatus(entry);
-                          return (
-                            <Table.Row key={entry.sys.id}>
-                              {fields.length > 0 && (
-                                <Table.Cell testId="display-name-cell" style={styles.stickyCell}>
-                                  <TextLink
-                                    href={getEntryUrl(entry)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    testId="entry-link"
-                                    icon={<ExternalLinkIcon />}
-                                    alignIcon="end">
-                                    {getEntryTitle(entry, fields, selectedContentType)}
-                                  </TextLink>
-                                </Table.Cell>
-                              )}
-                              <Table.Cell testId="status-cell" style={styles.cell}>
-                                <Badge variant={status.color}>{status.label}</Badge>
+                    <>
+                      <Table testId="bulk-edit-table" style={styles.table}>
+                        <Table.Head>
+                          <Table.Row>
+                            {fields.length > 0 && (
+                              <Table.Cell as="th" key="displayName" style={styles.stickyHeader}>
+                                Display name
                               </Table.Cell>
-                              {fields.map((field) => (
-                                <Table.Cell key={field.id} style={styles.cell}>
-                                  {renderFieldValue(field, entry.fields[field.id]?.[LOCALE])}
+                            )}
+                            <Table.Cell as="th" key="status" style={styles.tableHeader}>
+                              Status
+                            </Table.Cell>
+                            {fields.map((field) => (
+                              <Table.Cell as="th" key={field.id} style={styles.tableHeader}>
+                                {truncate(field.name)}
+                              </Table.Cell>
+                            ))}
+                          </Table.Row>
+                        </Table.Head>
+                        <Table.Body>
+                          {entries.map((entry) => {
+                            const status = getStatus(entry);
+                            return (
+                              <Table.Row key={entry.sys.id}>
+                                {fields.length > 0 && (
+                                  <Table.Cell testId="display-name-cell" style={styles.stickyCell}>
+                                    <TextLink
+                                      href={getEntryUrl(entry)}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      testId="entry-link"
+                                      icon={<ExternalLinkIcon />}
+                                      alignIcon="end">
+                                      {getEntryTitle(entry, fields, selectedContentType)}
+                                    </TextLink>
+                                  </Table.Cell>
+                                )}
+                                <Table.Cell testId="status-cell" style={styles.cell}>
+                                  <Badge variant={status.color}>{status.label}</Badge>
                                 </Table.Cell>
-                              ))}
-                            </Table.Row>
-                          );
-                        })}
-                      </Table.Body>
-                    </Table>
+                                {fields.map((field) => (
+                                  <Table.Cell key={field.id} style={styles.cell}>
+                                    {renderFieldValue(field, entry.fields[field.id]?.[LOCALE])}
+                                  </Table.Cell>
+                                ))}
+                              </Table.Row>
+                            );
+                          })}
+                        </Table.Body>
+                      </Table>
+                      <Box marginTop="spacingM">
+                        <Pagination
+                          activePage={activePage}
+                          onPageChange={setActivePage}
+                          totalItems={totalEntries}
+                          showViewPerPage
+                          viewPerPageOptions={PAGE_SIZE_OPTIONS}
+                          itemsPerPage={itemsPerPage}
+                          onViewPerPageChange={setItemsPerPage}
+                          aria-label="Pagination navigation"
+                        />
+                      </Box>
+                    </>
                   )}
                 </>
               )}
