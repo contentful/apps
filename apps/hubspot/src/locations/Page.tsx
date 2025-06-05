@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   Card,
@@ -15,6 +15,7 @@ import {
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { styles } from './Page.styles';
+import { C } from 'vitest/dist/chunks/reporters.d.C1ogPriE';
 
 interface HubSpotEmail {
   id: string;
@@ -93,6 +94,7 @@ const Page = () => {
     contentBlocks: {},
   });
   const [updating, setUpdating] = useState(false);
+  const [hubspotAppActionId, setHubspotEmailAction] = useState<string>('');
 
   // Helper function to extract individual text nodes from HTML
   const extractTextNodes = (html: string): TextNode[] => {
@@ -166,6 +168,20 @@ const Page = () => {
       });
   };
 
+  useEffect(() => {
+    const getAppActions = async () => {
+      const appActions = await cma.appAction.getManyForEnvironment({});
+      const hubspotEmailAction = appActions.items.find((appAction) => {
+        if (appAction.name === 'Hubspot Email Action') {
+          return appAction;
+        }
+      });
+      setHubspotEmailAction(hubspotEmailAction?.sys.id || '');
+    };
+
+    getAppActions();
+  }, []);
+
   // Test HubSpot connection and fetch emails
   const fetchHubSpotEmails = async () => {
     try {
@@ -175,7 +191,7 @@ const Page = () => {
       const res = await cma.appActionCall.createWithResponse(
         {
           appDefinitionId: sdk.ids.app || '',
-          appActionId: '3rpmmTblbOagoCcT2QVrtb',
+          appActionId: hubspotAppActionId,
         },
         {
           parameters: {
@@ -262,7 +278,7 @@ const Page = () => {
       const res = await cma.appActionCall.createWithResponse(
         {
           appDefinitionId: sdk.ids.app || '',
-          appActionId: '3rpmmTblbOagoCcT2QVrtb',
+          appActionId: hubspotAppActionId,
         },
         {
           parameters: {

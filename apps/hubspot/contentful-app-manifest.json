@@ -1,25 +1,13 @@
 {
-  "name": "Klaviyo",
-  "description": "Sync your Contentful content with Klaviyo",
-  "id": "klaviyo",
+  "name": "HubSpot Email Sync",
+  "description": "Sync your Contentful content with HubSpot Marketing Emails",
+  "id": "hubspot-email-sync",
   "category": "Marketing",
   "version": "0.1.0",
   "locations": [
     {
       "location": "app-config",
       "component": "ConfigScreen"
-    },
-    {
-      "location": "entry-sidebar",
-      "component": "Sidebar"
-    },
-    {
-      "location": "entry-field",
-      "component": "Field"
-    },
-    {
-      "location": "dialog",
-      "component": "FieldSelectDialog"
     },
     {
       "location": "page",
@@ -29,9 +17,9 @@
   "parameters": {
     "installation": [
       {
-        "id": "hubspotApiKey",
-        "name": "Hubspot API Key",
-        "description": "Your Hubspot API key from private app",
+        "id": "apiKey",
+        "name": "HubSpot API Key",
+        "description": "Your HubSpot private app API key (starts with 'pat-')",
         "type": "Symbol",
         "required": true
       }
@@ -39,9 +27,9 @@
   },
   "functions": [
     {
-      "id": "hubspotEmailFunction",
-      "name": "Hubspot Email Function",
-      "description": "Sync Contentful Entries to HubSpot Emails",
+      "id": "3rpmmTblbOagoCcT2QVrtb",
+      "name": "HubSpot Email Function",
+      "description": "Sync Contentful Entries to HubSpot Marketing Emails",
       "path": "functions/hubspotEmail.js",
       "entryFile": "functions/hubspotEmail.ts",
       "allowNetworks": [
@@ -49,7 +37,8 @@
       ],
       "accepts": [
         "appaction.call"
-      ]
+      ],
+      "timeout": 30
     }
   ]
 }
