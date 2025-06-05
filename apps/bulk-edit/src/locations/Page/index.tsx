@@ -8,10 +8,10 @@ import {
   Badge,
   Table,
   Text,
-  Checkbox,
-  Stack,
   TextLink,
   Pagination,
+  Menu,
+  IconButton,
 } from '@contentful/f36-components';
 import { NavList } from '@contentful/f36-navlist';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -22,6 +22,13 @@ import { styles } from './styles';
 
 const PAGE_SIZE_OPTIONS = [15, 50, 100];
 import { ContentTypeProps } from 'contentful-management';
+import { SortAscending } from '@phosphor-icons/react/dist/ssr/SortAscending';
+const SORT_OPTIONS = [
+  { value: 'displayName_asc', label: 'Display name: A-Z' },
+  { value: 'displayName_desc', label: 'Display name: Z-A' },
+  { value: 'updatedAt_desc', label: 'Updated: newest' },
+  { value: 'updatedAt_asc', label: 'Updated: oldest' },
+];
 
 const Page = () => {
   const sdk = useSDK();
@@ -35,6 +42,7 @@ const Page = () => {
   const [itemsPerPage, setItemsPerPage] = useState(PAGE_SIZE_OPTIONS[0]);
   const [totalEntries, setTotalEntries] = useState(0);
   const LOCALE = sdk.locales.default;
+  const [sortOption, setSortOption] = useState(SORT_OPTIONS[0].value);
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -82,7 +90,7 @@ const Page = () => {
 
   useEffect(() => {
     setActivePage(0);
-  }, [selectedContentTypeId]);
+  }, [selectedContentTypeId, sortOption]);
 
   useEffect(() => {
     const fetchFieldsAndEntries = async (): Promise<void> => {
@@ -102,6 +110,13 @@ const Page = () => {
             type: f.type,
           }))
         );
+        let order;
+        let displayField = ct.displayField || 'displayName';
+        if (sortOption === 'displayName_asc') order = `fields.${displayField}`;
+        else if (sortOption === 'displayName_desc') order = `-fields.${displayField}`;
+        else if (sortOption === 'updatedAt_desc') order = '-sys.updatedAt';
+        else if (sortOption === 'updatedAt_asc') order = 'sys.updatedAt';
+
         const res = await sdk.cma.entry.getMany({
           spaceId: sdk.ids.space,
           environmentId: sdk.ids.environment,
@@ -109,6 +124,7 @@ const Page = () => {
             content_type: selectedContentTypeId,
             skip: activePage * itemsPerPage,
             limit: itemsPerPage,
+            order,
           },
         });
         setEntries(res.items || []);
@@ -122,7 +138,7 @@ const Page = () => {
       }
     };
     void fetchFieldsAndEntries();
-  }, [sdk, selectedContentTypeId, activePage, itemsPerPage]);
+  }, [sdk, selectedContentTypeId, activePage, itemsPerPage, sortOption]);
 
   const handleNavClick = (id: string): void => {
     setSelectedContentTypeId(id);
@@ -257,6 +273,28 @@ const Page = () => {
                       ? `Bulk edit ${selectedContentType.name}`
                       : 'Bulk Edit App'}
                   </Heading>
+                  <Box marginBottom="spacingM" marginTop="spacingM" style={{ maxWidth: 320 }}>
+                    <Menu>
+                      <Menu.Trigger>
+                        <IconButton
+                          icon={<SortAscending size={16} />}
+                          variant="secondary"
+                          aria-label="Sort display name by">
+                          Sort display name by
+                        </IconButton>
+                      </Menu.Trigger>
+                      <Menu.List>
+                        {SORT_OPTIONS.map((opt) => (
+                          <Menu.Item
+                            key={opt.value}
+                            isActive={sortOption === opt.value}
+                            onClick={() => setSortOption(opt.value)}>
+                            {opt.label}
+                          </Menu.Item>
+                        ))}
+                      </Menu.List>
+                    </Menu>
+                  </Box>
                   {entriesLoading ? (
                     <Spinner />
                   ) : (

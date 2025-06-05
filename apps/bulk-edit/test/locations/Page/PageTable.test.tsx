@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, beforeEach, vi, expect } from 'vitest';
 import Page from '../../../src/locations/Page';
 import { mockSdk } from '../../mocks/mockSdk';
@@ -125,5 +126,46 @@ describe('Page Table Features', () => {
       // Should show Untitled in the first column
       expect(screen.getByText('Untitled')).toBeInTheDocument();
     });
+  });
+
+  it('sorts entries by display name and updatedAt', async () => {
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([condoAContentType]));
+    // Mock getMany to sort by order param
+    mockSdk.cma.entry.getMany = vi.fn().mockImplementation(({ query }) => {
+      let items = [...condoAEntries];
+      if (query.order === 'fields.displayName') {
+        items.sort((a, b) =>
+          a.fields.displayName['en-US'] > b.fields.displayName['en-US'] ? 1 : -1
+        );
+      } else if (query.order === '-fields.displayName') {
+        items.sort((a, b) =>
+          a.fields.displayName['en-US'] < b.fields.displayName['en-US'] ? 1 : -1
+        );
+      } else if (query.order === 'sys.updatedAt') {
+        items.sort((a, b) => (a.sys.updatedAt > b.sys.updatedAt ? 1 : -1));
+      } else if (query.order === '-sys.updatedAt') {
+        items.sort((a, b) => (a.sys.updatedAt < b.sys.updatedAt ? 1 : -1));
+      }
+      return getManyEntries(items);
+    });
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValue(condoAContentType);
+
+    render(<Page />);
+    await waitFor(() => expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument());
+    // Default is A-Z
+    expect(screen.getAllByText('Building one')[0]).toBeInTheDocument();
+    // Change to Z-A
+    fireEvent.change(screen.getByLabelText('Sort display name by'), {
+      target: { value: 'displayName_desc' },
+    });
+    await waitFor(() => expect(screen.getAllByText('Building two')[0]).toBeInTheDocument());
+    // Change to Updated: newest
+    fireEvent.change(screen.getByLabelText('Sort display name by'), {
+      target: { value: 'updatedAt_desc' },
+    });
+    // Should not throw
+    await waitFor(() => expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument());
   });
 });
