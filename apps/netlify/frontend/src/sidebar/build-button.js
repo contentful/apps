@@ -60,7 +60,7 @@ export default class NeflifySidebarBuildButton extends React.Component {
         ok: false,
         info: 'Contentful lost connection to update the build status. Verify if the build has completed in the Netlify app.',
       });
-    }, 120000); // 2 minute timeout
+    }, 120000); // 2 minute timeout for the "Triggering..." button
   };
 
   createPubSub = async () => {
@@ -83,7 +83,7 @@ export default class NeflifySidebarBuildButton extends React.Component {
       if (inOrder && notDuplicate) {
         const newState = messageToState(msg);
 
-        // Clear timeout since we received a message - we're no longer stuck on triggering
+        // Clear timeout after receiving a message indicating we are not stuck on triggering
         this.clearBuildTimeout();
 
         this.setState(({ history }) => {
@@ -107,7 +107,7 @@ export default class NeflifySidebarBuildButton extends React.Component {
       const latestMessage = filteredHistory[0];
       const messageState = messageToState(latestMessage);
 
-      // Check if the latest message is a stale busy state (older than 10 minutes)
+      // Check if the latest message is in a stale busy state (older than 10 minutes)
       const isStale = this.isMessageStale(latestMessage, 10 * 60 * 1000); // 10 minutes
       const isStuck = messageState.busy && isStale;
 
