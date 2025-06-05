@@ -1,8 +1,8 @@
-import { ModalData } from '../components/UploadConfiguration/ModalUploadAsset';
+import { ModalData } from '../components/AssetConfiguration/MuxAssetConfigurationModal';
 import { InstallationParams, ResolutionType } from './types';
 
 interface AssetSettings {
-  passthrough: string;
+  passthrough?: string;
   playback_policies: string[];
   video_quality: string;
   meta?: {
@@ -38,9 +38,8 @@ interface AssetInput {
   name?: string;
 }
 
-function buildAssetSettings(options: ModalData, passthroughId: string): AssetSettings {
+function buildAssetSettings(options: ModalData): AssetSettings {
   const settings: AssetSettings = {
-    passthrough: passthroughId,
     playback_policies: options.playbackPolicies,
     video_quality: options.videoQuality,
     inputs: [],
@@ -114,8 +113,7 @@ export async function addByURL(
   setAssetError: (msg: string) => void,
   pollForAssetDetails: () => Promise<void>
 ) {
-  const passthroughId = (sdk.entry.getSys() as { id: string }).id;
-  const settings = buildAssetSettings(options, passthroughId);
+  const settings = buildAssetSettings(options);
 
   const requestBody = {
     ...settings,
@@ -170,9 +168,8 @@ export async function getUploadUrl(
   options: ModalData,
   responseCheck: (res: any) => boolean | Promise<boolean>
 ) {
-  const passthroughId = (sdk.entry.getSys() as { id: string }).id;
   const { muxEnableAudioNormalize } = sdk.parameters.installation as InstallationParams;
-  const settings = buildAssetSettings(options, passthroughId);
+  const settings = buildAssetSettings(options);
 
   const requestBody = {
     cors_origin: window.location.origin,
@@ -210,4 +207,25 @@ export async function createStaticRendition(apiClient: any, assetId: string, typ
     `/video/v1/assets/${assetId}/static-renditions`,
     JSON.stringify({ resolution: type })
   );
+}
+
+export async function updateAsset(apiClient: any, assetId: string, options: ModalData) {
+  const requestBody: any = {
+    meta: {
+      title: '',
+      creator_id: '',
+      external_id: '',
+    },
+    passthrough: '',
+  };
+
+  if (options.metadataConfig.enabled) {
+    const { title, creatorId, externalId } = options.metadataConfig.standardMetadata ?? {};
+    requestBody.meta.title = title ?? '';
+    requestBody.meta.creator_id = creatorId ?? '';
+    requestBody.meta.external_id = externalId ?? '';
+    requestBody.passthrough = options.metadataConfig.customMetadata ?? '';
+  }
+
+  return await apiClient.patch(`/video/v1/assets/${assetId}`, JSON.stringify(requestBody));
 }

@@ -27,9 +27,11 @@ import Menu from './components/menu';
 import PlayerCode from './components/playercode';
 import CountryDatalist from './components/countryDatalist';
 import CaptionsList from './components/captionsList';
-import ModalUploadAsset, { ModalData } from './components/UploadConfiguration/ModalUploadAsset';
+import MuxAssetConfigurationModal, {
+  ModalData,
+} from './components/AssetConfiguration/MuxAssetConfigurationModal';
 import UploadArea from './components/UploadArea/UploadArea';
-import Mp4RenditionsPanel from './components/UploadConfiguration/Mp4RenditionsPanel';
+import Mp4RenditionsPanel from './components/AssetConfiguration/Mp4RenditionsPanel';
 
 import {
   type InstallationParams,
@@ -46,6 +48,7 @@ import {
   getUploadUrl,
   deleteStaticRendition,
   createStaticRendition,
+  updateAsset,
 } from './util/muxApi';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -96,10 +99,13 @@ export class App extends React.Component<AppProps, AppState> {
         field && ('playbackId' in field || 'signedPlaybackId' in field)
           ? field.playbackId || field.signedPlaybackId
           : undefined,
-      modalUploadAssetVisible: false,
+      modalAssetConfigurationVisible: false,
       file: null,
       showMuxUploaderUI: false,
       pendingUploadURL: null,
+      isPolling: false,
+      initialResyncDone: false,
+      isEditMode: false,
     };
   }
 
@@ -196,6 +202,13 @@ export class App extends React.Component<AppProps, AppState> {
     }
   }
 
+  componentDidUpdate(prevProps: AppProps, prevState: AppState) {
+    if (this.state.value?.assetId && !this.state.initialResyncDone) {
+      this.resync({ silent: true });
+      this.setState({ initialResyncDone: true });
+    }
+  }
+
   componentWillUnmount() {
     if (this.detachExternalChangeHandler) {
       this.detachExternalChangeHandler();
@@ -283,7 +296,7 @@ export class App extends React.Component<AppProps, AppState> {
     if (!input) return;
 
     if (this.isURL(input)) {
-      this.setState({ modalUploadAssetVisible: true, pendingUploadURL: input });
+      this.setState({ modalAssetConfigurationVisible: true, pendingUploadURL: input });
       return;
     }
 
@@ -296,7 +309,7 @@ export class App extends React.Component<AppProps, AppState> {
   handleFile = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       this.setState({ file: e.target.files[0] });
-      this.setState({ modalUploadAssetVisible: true });
+      this.setState({ modalAssetConfigurationVisible: true });
     }
   };
 
@@ -304,16 +317,33 @@ export class App extends React.Component<AppProps, AppState> {
     e.preventDefault();
     if (e.dataTransfer.files?.[0]) {
       this.setState({ file: e.dataTransfer.files[0] });
-      this.setState({ modalUploadAssetVisible: true });
+      this.setState({ modalAssetConfigurationVisible: true });
     }
   };
 
-  /**
-   * Configuration modal handles two distinct upload scenarios:
-   * 1. Direct URL submission: When a user provides a video URL to be processed by Mux
-   * 2. File upload: When a user selects a file through the UploadArea component
-   */
+  handleEditAsset = () => {
+    this.setState({ modalAssetConfigurationVisible: true, isEditMode: true });
+  };
+
+  handleUpdateAsset = async (options: ModalData) => {
+    if (!this.state.value?.assetId) return;
+
+    const res = await updateAsset(this.apiClient, this.state.value.assetId, options);
+
+    if (!this.responseCheck(res)) {
+      return;
+    }
+
+    await this.resync();
+    this.setState({ modalAssetConfigurationVisible: false, isEditMode: false });
+  };
+
   onConfirmModal = async (options: ModalData) => {
+    if (this.state.isEditMode) {
+      await this.handleUpdateAsset(options);
+      return;
+    }
+
     if (this.state.pendingUploadURL) {
       await addByURL(
         this.apiClient,
@@ -345,7 +375,7 @@ export class App extends React.Component<AppProps, AppState> {
 
       this.setState({ showMuxUploaderUI: true });
     }
-    this.setState({ modalUploadAssetVisible: false });
+    this.setState({ modalAssetConfigurationVisible: false });
   };
 
   onCloseModal = () => {
@@ -358,7 +388,7 @@ export class App extends React.Component<AppProps, AppState> {
         this.fileInputRef.current.value = '';
       }
     }
-    this.setState({ modalUploadAssetVisible: false });
+    this.setState({ modalAssetConfigurationVisible: false, isEditMode: false });
   };
 
   onUploadError = (progress: CustomEvent) => {
@@ -516,130 +546,149 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
-  pollForAssetDetails = async (): Promise<void> => {
+  pollForAssetDetails = async (isRecursiveCall = false): Promise<void> => {
+    if (!isRecursiveCall && this.state.isPolling) {
+      return;
+    }
+
     if (!this.state.value || !this.state.value.assetId) {
       throw Error('Something went wrong, because by this point we require an assetId.');
     }
 
-    const assetRes = await this.getAsset(this.state.value.assetId);
-
-    if (!assetRes) {
-      throw Error('Something went wrong, we were not able to get the asset.');
+    if (!isRecursiveCall) {
+      this.setState({ isPolling: true });
     }
 
-    this.setState({
-      raw: assetRes,
-    });
+    try {
+      const assetRes = await this.getAsset(this.state.value.assetId);
 
-    let assetError;
-    if ('error' in assetRes) {
-      assetError = assetRes.error.messages[0] || 'Unknown error';
-    }
-    if (assetRes.data?.status === 'errored') {
-      assetError = assetRes.data.errors.messages[0] || 'Unknown error';
-    }
+      if (!assetRes) {
+        throw Error('Something went wrong, we were not able to get the asset.');
+      }
 
-    if (assetError) {
-      this.setAssetError(assetError);
-      await this.props.sdk.field.setValue({
-        ...this.state.value,
-        error: assetError,
+      this.setState({
+        raw: assetRes,
       });
-      return;
-    }
 
-    const asset = assetRes.data;
+      let assetError;
+      if ('error' in assetRes) {
+        assetError = assetRes.error.messages[0] || 'Unknown error';
+      }
+      if (assetRes.data?.status === 'errored') {
+        assetError = assetRes.data.errors.messages[0] || 'Unknown error';
+      }
 
-    const publicPlayback = asset.playback_ids.find(
-      ({ policy }: { policy: string }) => policy === 'public'
-    );
-    const signedPlayback = asset.playback_ids.find(
-      ({ policy }: { policy: string }) => policy === 'signed'
-    );
+      if (assetError) {
+        this.setAssetError(assetError);
+        await this.props.sdk.field.setValue({
+          ...this.state.value,
+          error: assetError,
+        });
+        if (!isRecursiveCall) {
+          this.setState({ isPolling: false });
+        }
+        return;
+      }
 
-    const audioOnly =
-      'max_stored_resolution' in asset && asset.max_stored_resolution === 'Audio only'
-        ? true
-        : false;
+      const asset = assetRes.data;
 
-    const erroredTracks =
-      'tracks' in asset ? asset.tracks.filter((track) => track.status === 'errored') : undefined;
-
-    // Notifly of the error and delete any failed tracks (like captions) so the track can be re-uploaded.
-    if (erroredTracks && erroredTracks.length > 0) {
-      this.props.sdk.notifier.error(erroredTracks[0].error.messages[0]);
-      const res = await this.apiClient.del(
-        `/video/v1/assets/${this.state.value.assetId}/tracks/${erroredTracks[0].id}`
+      const publicPlayback = asset.playback_ids.find(
+        ({ policy }: { policy: string }) => policy === 'public'
       );
-      if (res.status !== 204) {
-        try {
-          const deleteError = await res.clone().json();
-          this.props.sdk.notifier.error('Error deleting caption: ' + deleteError.messages[0]);
-        } catch (error) {
-          const deleteError = await res.clone().text();
-          console.error(error, deleteError);
+      const signedPlayback = asset.playback_ids.find(
+        ({ policy }: { policy: string }) => policy === 'signed'
+      );
+
+      const audioOnly =
+        'max_stored_resolution' in asset && asset.max_stored_resolution === 'Audio only'
+          ? true
+          : false;
+
+      const erroredTracks =
+        'tracks' in asset ? asset.tracks.filter((track) => track.status === 'errored') : undefined;
+
+      // Notifly of the error and delete any failed tracks (like captions) so the track can be re-uploaded.
+      if (erroredTracks && erroredTracks.length > 0) {
+        this.props.sdk.notifier.error(erroredTracks[0].error.messages[0]);
+        const res = await this.apiClient.del(
+          `/video/v1/assets/${this.state.value.assetId}/tracks/${erroredTracks[0].id}`
+        );
+        if (res.status !== 204) {
+          try {
+            const deleteError = await res.clone().json();
+            this.props.sdk.notifier.error('Error deleting caption: ' + deleteError.messages[0]);
+          } catch (error) {
+            const deleteError = await res.clone().text();
+            console.error(error, deleteError);
+          }
         }
       }
-    }
 
-    const captions =
-      'tracks' in asset
-        ? asset.tracks.filter(
-            (track) =>
-              track.text_type === 'subtitles' &&
-              (track.status === 'ready' || track.status === 'preparing')
-          )
-        : undefined;
+      const captions =
+        'tracks' in asset
+          ? asset.tracks.filter(
+              (track) =>
+                track.text_type === 'subtitles' &&
+                (track.status === 'ready' || track.status === 'preparing')
+            )
+          : undefined;
 
-    await this.props.sdk.field.setValue({
-      version: 3,
-      uploadId: this.state.value.uploadId || undefined,
-      assetId: this.state.value.assetId,
-      playbackId: (publicPlayback && publicPlayback.id) || undefined,
-      signedPlaybackId: (signedPlayback && signedPlayback.id) || undefined,
-      ready: asset.status === 'ready',
-      ratio: asset.aspect_ratio || undefined,
-      max_stored_resolution: asset.max_stored_resolution || undefined,
-      max_stored_frame_rate: asset.max_stored_frame_rate || undefined,
-      duration: asset.duration || undefined,
-      audioOnly: audioOnly,
-      error: assetError || undefined,
-      created_at: asset.created_at ? Number(asset.created_at) : undefined,
-      captions: captions && captions.length > 0 ? captions : undefined,
-      static_renditions: asset.static_renditions?.files || undefined,
-      is_live: asset.is_live || undefined,
-      live_stream_id: asset.live_stream_id || undefined,
-    });
+      await this.props.sdk.field.setValue({
+        version: 3,
+        uploadId: this.state.value.uploadId || undefined,
+        assetId: this.state.value.assetId,
+        playbackId: (publicPlayback && publicPlayback.id) || undefined,
+        signedPlaybackId: (signedPlayback && signedPlayback.id) || undefined,
+        ready: asset.status === 'ready',
+        ratio: asset.aspect_ratio || undefined,
+        max_stored_resolution: asset.max_stored_resolution || undefined,
+        max_stored_frame_rate: asset.max_stored_frame_rate || undefined,
+        duration: asset.duration || undefined,
+        audioOnly: audioOnly,
+        error: assetError || undefined,
+        created_at: asset.created_at ? Number(asset.created_at) : undefined,
+        captions: captions && captions.length > 0 ? captions : undefined,
+        static_renditions: asset.static_renditions?.files || undefined,
+        is_live: asset.is_live || undefined,
+        live_stream_id: asset.live_stream_id || undefined,
+        meta: asset.meta || undefined,
+        passthrough: asset.passthrough || undefined,
+      });
 
-    if (publicPlayback && publicPlayback.id) {
-      this.setState({ playerPlaybackId: publicPlayback.id });
-    } else if (signedPlayback && signedPlayback.id) {
-      this.setState({ playerPlaybackId: signedPlayback.id });
-    }
+      if (publicPlayback && publicPlayback.id) {
+        this.setState({ playerPlaybackId: publicPlayback.id });
+      } else if (signedPlayback && signedPlayback.id) {
+        this.setState({ playerPlaybackId: signedPlayback.id });
+      }
 
-    if (signedPlayback) {
-      await this.setSignedPlayback(signedPlayback.id);
-    }
+      if (signedPlayback) {
+        await this.setSignedPlayback(signedPlayback.id);
+      }
 
-    const trackPreparing = captions
-      ? captions.find((track) => track.status === 'preparing')
-      : false;
+      const trackPreparing = captions
+        ? captions.find((track) => track.status === 'preparing')
+        : false;
 
-    const renditionPreparing = asset.static_renditions?.files
-      ? asset.static_renditions.files.find((rend) => rend.status === 'preparing')
-      : false;
+      const renditionPreparing = asset.static_renditions?.files
+        ? asset.static_renditions.files.find((rend) => rend.status === 'preparing')
+        : false;
 
-    // Contentful is not able to listen for Mux webhooks, so we poll for status changes.
-    // Users will need to leave their browser windows open until processses are complete.
-    // Webhooks are the recommended way to listen for status changes over polling.
-    if (asset.status === 'preparing' || trackPreparing || renditionPreparing) {
-      await delay(350);
-      await this.pollForAssetDetails();
-    }
+      // Contentful is not able to listen for Mux webhooks, so we poll for status changes.
+      // Users will need to leave their browser windows open until processses are complete.
+      // Webhooks are the recommended way to listen for status changes over polling.
+      if (asset.status === 'preparing' || trackPreparing || renditionPreparing) {
+        await delay(500);
+        await this.pollForAssetDetails(true);
+      }
 
-    if (asset.is_live === true) {
-      await delay(1000);
-      await this.pollForAssetDetails();
+      if (asset.is_live === true) {
+        await delay(1000);
+        await this.pollForAssetDetails(true);
+      }
+    } finally {
+      if (!isRecursiveCall) {
+        this.setState({ isPolling: false });
+      }
     }
   };
 
@@ -921,6 +970,17 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   render = () => {
+    const modal = (
+      <MuxAssetConfigurationModal
+        isShown={this.state.modalAssetConfigurationVisible}
+        onClose={this.onCloseModal}
+        onConfirm={this.onConfirmModal}
+        installationParams={this.props.sdk.parameters.installation as InstallationParams}
+        isEditMode={this.state.isEditMode}
+        asset={this.state.value}
+      />
+    );
+
     if (this.state.error) {
       return (
         <Note variant="negative" className="center" data-testid="terminalerror">
@@ -973,203 +1033,207 @@ export class App extends React.Component<AppProps, AppState> {
         (this.state.value.playbackId || this.state.value.signedPlaybackId)
       ) {
         return (
-          <div>
-            {this.isUsingSigned() && (
-              <Box marginBottom="spacingM">
-                <Note variant="neutral">
-                  This Mux asset is using a{' '}
-                  <TextLink
-                    href="https://docs.mux.com/docs/headless-cms-contentful#advanced-signed-urls"
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    signedPlaybackId
-                  </TextLink>
-                </Note>
-              </Box>
-            )}
-
-            {this.state.value.signedPlaybackId &&
-              !this.state.playbackToken &&
-              !this.state.isTokenLoading && (
+          <>
+            {modal}
+            <div>
+              {this.isUsingSigned() && (
                 <Box marginBottom="spacingM">
-                  <Note variant="negative" data-testid="nosigningtoken">
-                    No signing key to create a playback token. Preview playback may not work. Try
-                    toggling the global signing key settings.
+                  <Note variant="neutral">
+                    This Mux asset is using a{' '}
+                    <TextLink
+                      href="https://docs.mux.com/docs/headless-cms-contentful#advanced-signed-urls"
+                      target="_blank"
+                      rel="noopener noreferrer">
+                      signedPlaybackId
+                    </TextLink>
                   </Note>
                 </Box>
               )}
 
-            <section className="player" style={this.getPlayerAspectRatio()}>
-              {this.state.playerPlaybackId !== 'playback-test-123' &&
-              (this.state.value.playbackId || this.state.playbackToken) ? (
-                <MuxPlayer
-                  ref={this.muxPlayerRef}
-                  data-testid="muxplayer"
-                  style={{ height: '100%', width: '100%' }}
-                  playbackId={this.state.playerPlaybackId}
-                  streamType={this.getPlayerType()}
-                  poster={this.state.value.audioOnly ? '#' : undefined}
-                  customDomain={muxDomain && muxDomain !== 'mux.com' ? muxDomain : undefined}
-                  audio={this.state.value.audioOnly}
-                  metadata={{
-                    player_name: 'Contentful Admin Dashboard',
-                    viewer_user_id:
-                      'user' in this.props.sdk ? this.props.sdk.user.sys.id : undefined,
-                    page_type: 'Preview Player',
-                  }}
-                  tokens={{
-                    playback: this.isUsingSigned() ? this.state.playbackToken : undefined,
-                    thumbnail: this.isUsingSigned() ? this.state.posterToken : undefined,
-                    storyboard: this.isUsingSigned() ? this.state.storyboardToken : undefined,
-                  }}
-                />
-              ) : (
-                <Box>
-                  <Spinner size="small" /> Refreshing Player
-                </Box>
-              )}
-            </section>
-
-            {this.isLive() && (
-              <Box marginBottom="spacingM" marginTop="spacingM">
-                <Note variant="positive">Is Live</Note>
-              </Box>
-            )}
-
-            <Box marginTop="spacingM">
-              <Menu
-                requestRemoveAsset={this.requestRemoveAsset}
-                requestDeleteAsset={this.requestDeleteAsset}
-                resync={this.resync}
-                assetId={this.state.value.assetId}
-              />
-            </Box>
-
-            <Tabs defaultTab="captions">
-              <Tabs.List variant="horizontal-divider">
-                <Tabs.Tab panelId="captions">Captions</Tabs.Tab>
-                <Tabs.Tab panelId="playercode">Player Code</Tabs.Tab>
-                <Tabs.Tab panelId="debug">Data</Tabs.Tab>
-                <Tabs.Tab panelId="mp4renditions">MP4 Renditions</Tabs.Tab>
-              </Tabs.List>
-
-              <Tabs.Panel id="playercode">
-                {this.isUsingSigned() && (
-                  <Box marginBottom="spacingM" marginTop="spacingM">
-                    <Note variant="warning">
-                      This code snippet is for limited testing and expires after about 12 hours.
-                      Tokens should be generated seperately.
+              {this.state.value.signedPlaybackId &&
+                !this.state.playbackToken &&
+                !this.state.isTokenLoading && (
+                  <Box marginBottom="spacingM">
+                    <Note variant="negative" data-testid="nosigningtoken">
+                      No signing key to create a playback token. Preview playback may not work. Try
+                      toggling the global signing key settings.
                     </Note>
                   </Box>
                 )}
-                <PlayerCode params={this.playerParams()}></PlayerCode>
-              </Tabs.Panel>
 
-              <Tabs.Panel id="captions">
-                <Box marginTop="spacingL" marginBottom="spacingL">
-                  {this.state.value?.captions && this.state.value?.captions.length > 0 ? (
-                    <CaptionsList
-                      captions={this.state.value.captions}
-                      requestDeleteCaption={this.deleteCaption}
-                      playbackId={this.state.value.playbackId || this.state.value.signedPlaybackId}
-                      domain={this.props.sdk.parameters.installation.muxDomain}
-                      token={this.state.playbackToken}></CaptionsList>
-                  ) : (
-                    <Note variant="neutral">No Captions</Note>
-                  )}
-                </Box>
-
-                <Form onSubmit={this.uploadCaption}>
-                  <Heading as="h3">Add</Heading>
-                  <FormControl isRequired>
-                    <FormControl.Label>Caption or Subtitle File URL</FormControl.Label>
-                    <TextInput type="url" name="url" />
-                  </FormControl>
-                  <FormControl isRequired>
-                    <FormControl.Label>Language Name</FormControl.Label>
-                    <TextInput
-                      type="text"
-                      name="name"
-                      list="countrycodes"
-                      onChange={this.autofillCaptionCode}
-                    />
-                  </FormControl>
-                  <FormControl isRequired>
-                    <FormControl.Label>Language Code</FormControl.Label>
-                    <TextInput
-                      type="text"
-                      name="languagecode"
-                      value={this.state.captionname}
-                      onChange={this.updateLangCode}
-                    />
-                    <CountryDatalist used={this.state.value.captions}></CountryDatalist>
-                  </FormControl>
-                  <FormControl>
-                    <Checkbox name="closedcaptions"> Closed Captions</Checkbox>
-                  </FormControl>
-                  <Button variant="secondary" type="submit">
-                    Submit
-                  </Button>
-                </Form>
-              </Tabs.Panel>
-
-              <Tabs.Panel id="debug">
-                <Box marginTop="spacingS">
-                  <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingM">
-                    <Flex marginRight="spacingM">
-                      <Button id="resync" variant="secondary" onClick={this.resync}>
-                        Resync
-                      </Button>
-                    </Flex>
-                    <Flex>
-                      <Switch
-                        name="swap_signed_playback_id"
-                        id="swap_signed_playback_id"
-                        isChecked={this.isUsingSigned()}
-                        onChange={() => this.swapPlaybackIDs()}>
-                        {this.isUsingSigned() ? 'Signed Playback' : 'Signed Playback (off)'}
-                      </Switch>
-                    </Flex>
-                  </Flex>
-                </Box>
-
-                {this.state.raw?.data.playback_ids.length > 1 ? (
-                  <Note variant="warning">
-                    This Asset ID has multiple playback IDs in Mux. Only the first public or signed
-                    ID will be used in Contentful.
-                  </Note>
+              <section className="player" style={this.getPlayerAspectRatio()}>
+                {this.state.playerPlaybackId !== 'playback-test-123' &&
+                (this.state.value.playbackId || this.state.playbackToken) ? (
+                  <MuxPlayer
+                    ref={this.muxPlayerRef}
+                    data-testid="muxplayer"
+                    style={{ height: '100%', width: '100%' }}
+                    playbackId={this.state.playerPlaybackId}
+                    streamType={this.getPlayerType()}
+                    poster={this.state.value.audioOnly ? '#' : undefined}
+                    customDomain={muxDomain && muxDomain !== 'mux.com' ? muxDomain : undefined}
+                    audio={this.state.value.audioOnly}
+                    metadata={{
+                      player_name: 'Contentful Admin Dashboard',
+                      viewer_user_id:
+                        'user' in this.props.sdk ? this.props.sdk.user.sys.id : undefined,
+                      page_type: 'Preview Player',
+                    }}
+                    tokens={{
+                      playback: this.isUsingSigned() ? this.state.playbackToken : undefined,
+                      thumbnail: this.isUsingSigned() ? this.state.posterToken : undefined,
+                      storyboard: this.isUsingSigned() ? this.state.storyboardToken : undefined,
+                    }}
+                  />
                 ) : (
-                  ''
-                )}
-
-                <pre>
-                  <Box as="code" display="inline" marginRight="spacingL">
-                    {JSON.stringify(this.state.value, null, 2)}
+                  <Box>
+                    <Spinner size="small" /> Refreshing Player
                   </Box>
-                </pre>
-              </Tabs.Panel>
+                )}
+              </section>
 
-              <Tabs.Panel id="mp4renditions">
-                <Mp4RenditionsPanel
-                  asset={this.state.value}
-                  onCreateRendition={this.createStaticRenditionHandler}
-                  onDeleteRendition={this.deleteStaticRenditionHandler}
+              {this.isLive() && (
+                <Box marginBottom="spacingM" marginTop="spacingM">
+                  <Note variant="positive">Is Live</Note>
+                </Box>
+              )}
+
+              <Box marginTop="spacingM">
+                <Menu
+                  requestRemoveAsset={this.requestRemoveAsset}
+                  requestDeleteAsset={this.requestDeleteAsset}
+                  resync={this.resync}
+                  assetId={this.state.value.assetId}
+                  onEdit={this.handleEditAsset}
                 />
-              </Tabs.Panel>
-            </Tabs>
-          </div>
+              </Box>
+
+              <Tabs defaultTab="captions">
+                <Tabs.List variant="horizontal-divider">
+                  <Tabs.Tab panelId="captions">Captions</Tabs.Tab>
+                  <Tabs.Tab panelId="playercode">Player Code</Tabs.Tab>
+                  <Tabs.Tab panelId="mp4renditions">MP4 Renditions</Tabs.Tab>
+                  <Tabs.Tab panelId="debug">Data</Tabs.Tab>
+                </Tabs.List>
+
+                <Tabs.Panel id="playercode">
+                  {this.isUsingSigned() && (
+                    <Box marginBottom="spacingM" marginTop="spacingM">
+                      <Note variant="warning">
+                        This code snippet is for limited testing and expires after about 12 hours.
+                        Tokens should be generated seperately.
+                      </Note>
+                    </Box>
+                  )}
+                  <PlayerCode params={this.playerParams()}></PlayerCode>
+                </Tabs.Panel>
+
+                <Tabs.Panel id="captions">
+                  <Box marginTop="spacingL" marginBottom="spacingL">
+                    {this.state.value?.captions && this.state.value?.captions.length > 0 ? (
+                      <CaptionsList
+                        captions={this.state.value.captions}
+                        requestDeleteCaption={this.deleteCaption}
+                        playbackId={
+                          this.state.value.playbackId || this.state.value.signedPlaybackId
+                        }
+                        domain={this.props.sdk.parameters.installation.muxDomain}
+                        token={this.state.playbackToken}></CaptionsList>
+                    ) : (
+                      <Note variant="neutral">No Captions</Note>
+                    )}
+                  </Box>
+
+                  <Form onSubmit={this.uploadCaption}>
+                    <Heading as="h3">Add</Heading>
+                    <FormControl isRequired>
+                      <FormControl.Label>Caption or Subtitle File URL</FormControl.Label>
+                      <TextInput type="url" name="url" />
+                    </FormControl>
+                    <FormControl isRequired>
+                      <FormControl.Label>Language Name</FormControl.Label>
+                      <TextInput
+                        type="text"
+                        name="name"
+                        list="countrycodes"
+                        onChange={this.autofillCaptionCode}
+                      />
+                    </FormControl>
+                    <FormControl isRequired>
+                      <FormControl.Label>Language Code</FormControl.Label>
+                      <TextInput
+                        type="text"
+                        name="languagecode"
+                        value={this.state.captionname}
+                        onChange={this.updateLangCode}
+                      />
+                      <CountryDatalist used={this.state.value.captions}></CountryDatalist>
+                    </FormControl>
+                    <FormControl>
+                      <Checkbox name="closedcaptions"> Closed Captions</Checkbox>
+                    </FormControl>
+                    <Button variant="secondary" type="submit">
+                      Submit
+                    </Button>
+                  </Form>
+                </Tabs.Panel>
+
+                <Tabs.Panel id="debug">
+                  <Box marginTop="spacingS">
+                    <Flex
+                      justifyContent="space-between"
+                      alignItems="center"
+                      marginBottom="spacingM">
+                      <Flex marginRight="spacingM">
+                        <Button id="resync" variant="secondary" onClick={this.resync}>
+                          Resync
+                        </Button>
+                      </Flex>
+                      <Flex>
+                        <Switch
+                          name="swap_signed_playback_id"
+                          id="swap_signed_playback_id"
+                          isChecked={this.isUsingSigned()}
+                          onChange={() => this.swapPlaybackIDs()}>
+                          {this.isUsingSigned() ? 'Signed Playback' : 'Signed Playback (off)'}
+                        </Switch>
+                      </Flex>
+                    </Flex>
+                  </Box>
+
+                  {this.state.raw?.data.playback_ids.length > 1 ? (
+                    <Note variant="warning">
+                      This Asset ID has multiple playback IDs in Mux. Only the first public or
+                      signed ID will be used in Contentful.
+                    </Note>
+                  ) : (
+                    ''
+                  )}
+
+                  <pre>
+                    <Box as="code" display="inline" marginRight="spacingL">
+                      {JSON.stringify(this.state.value, null, 2)}
+                    </Box>
+                  </pre>
+                </Tabs.Panel>
+
+                <Tabs.Panel id="mp4renditions">
+                  <Mp4RenditionsPanel
+                    asset={this.state.value}
+                    onCreateRendition={this.createStaticRenditionHandler}
+                    onDeleteRendition={this.deleteStaticRenditionHandler}
+                  />
+                </Tabs.Panel>
+              </Tabs>
+            </div>
+          </>
         );
       }
     }
 
     return (
       <section>
-        <ModalUploadAsset
-          isShown={this.state.modalUploadAssetVisible}
-          onClose={this.onCloseModal}
-          onConfirm={this.onConfirmModal}
-          installationParams={this.props.sdk.parameters.installation as InstallationParams}
-        />
+        {modal}
         <UploadArea
           showMuxUploaderUI={this.state.showMuxUploaderUI}
           muxUploaderRef={this.muxUploaderRef}

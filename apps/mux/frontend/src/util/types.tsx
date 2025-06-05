@@ -27,10 +27,13 @@ export interface AppState {
   playerPlaybackId?: string;
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   raw?: any;
-  modalUploadAssetVisible: boolean;
+  modalAssetConfigurationVisible: boolean;
   file: File | null;
   showMuxUploaderUI: boolean;
   pendingUploadURL: string | null;
+  isPolling: boolean;
+  initialResyncDone: boolean;
+  isEditMode: boolean;
 }
 
 export type ResolutionType = 'highest' | 'audio-only';
@@ -53,6 +56,12 @@ export interface MuxContentfulObject {
   is_live?: boolean;
   live_stream_id?: string;
   static_renditions?: Array<StaticRendition>;
+  meta?: {
+    title?: string;
+    creator_id?: string;
+    external_id?: string;
+  };
+  passthrough?: string;
 }
 
 export interface Error {
