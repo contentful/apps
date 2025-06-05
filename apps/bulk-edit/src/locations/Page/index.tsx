@@ -213,9 +213,9 @@ const Page = () => {
   return (
     <Flex>
       <Box style={styles.mainContent} padding="spacingL">
-        <Box style={styles.whiteBox} padding="spacingL">
+        <Box style={styles.whiteBox} paddingTop="spacingL">
           <Flex>
-            <Flex style={styles.sidebar} padding="spacingL" flexDirection="column" gap="spacingXs">
+            <Flex style={styles.sidebar} padding="spacingM" flexDirection="column" gap="spacingXs">
               <Text fontColor="gray600">Content types</Text>
               <NavList aria-label="Content types" testId="content-types-nav">
                 {contentTypes.map((ct) => (
@@ -230,12 +230,13 @@ const Page = () => {
                 ))}
               </NavList>
             </Flex>
-            <Box padding="spacingL">
+            <div style={styles.stickySpacer} />
+            <Box>
               {loading ? (
                 <Spinner />
               ) : (
                 <>
-                  <Heading>
+                  <Heading style={styles.stickyPageHeader}>
                     {selectedContentType
                       ? `Bulk edit ${selectedContentType.name}`
                       : 'Bulk Edit App'}
@@ -244,10 +245,10 @@ const Page = () => {
                     <Spinner />
                   ) : (
                     <Table testId="bulk-edit-table" style={styles.table}>
-                      <Table.Head>
+                      <Table.Head style={styles.tableHead}>
                         <Table.Row>
                           {fields.length > 0 && (
-                            <Table.Cell as="th" key="displayName" style={styles.stickyHeader}>
+                            <Table.Cell as="th" key="displayName" style={styles.stickyTableHeader}>
                               Display name
                             </Table.Cell>
                           )}
