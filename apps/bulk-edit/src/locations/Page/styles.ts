@@ -2,6 +2,7 @@ import tokens from '@contentful/f36-tokens';
 
 const SIDEBAR_WIDTH = 220;
 const STICKY_SPACER_SPACING = 24;
+const CELL_WIDTH = 200;
 
 export const styles = {
   sidebar: {
@@ -19,22 +20,21 @@ export const styles = {
   },
   table: {
     marginTop: tokens.spacingL,
-    zIndex: 6,
-    minWidth: '800px',
+    minWidth: `${CELL_WIDTH * 4}px`,
     overflowX: 'auto',
   },
   stickyCell: {
     position: 'sticky',
     left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING,
-    zIndex: 2,
+    zIndex: 1,
     borderLeft: `1px solid ${tokens.gray300}`,
     borderRight: `1px solid ${tokens.gray300}`,
-    minWidth: '200px',
+    minWidth: `${CELL_WIDTH}px`,
   },
   tableHeader: {
     background: tokens.gray200,
     borderRight: `1px solid ${tokens.gray300}`,
-    minWidth: '200px',
+    minWidth: `${CELL_WIDTH}px`,
   },
   stickyHeader: {
     background: tokens.gray200,
@@ -46,13 +46,13 @@ export const styles = {
     background: tokens.gray200,
     position: 'sticky',
     left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING,
-    zIndex: 2,
+    zIndex: 1,
     borderRight: `1px solid ${tokens.gray300}`,
-    width: '200px',
+    minWidth: `${CELL_WIDTH}px`,
   },
   cell: {
     borderRight: `1px solid ${tokens.gray300}`,
-    width: '200px',
+    minWidth: `${CELL_WIDTH}px`,
   },
   whiteBox: {
     background: tokens.colorWhite,
@@ -64,7 +64,7 @@ export const styles = {
   stickyPageHeader: {
     position: 'sticky',
     left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING,
-    zIndex: 3,
+    zIndex: 1,
     background: tokens.colorWhite,
     paddingBottom: tokens.spacingM,
     width: 'fit-content',
@@ -78,5 +78,11 @@ export const styles = {
     width: STICKY_SPACER_SPACING,
     height: '100vh',
     display: 'block',
+  },
+  sortMenu: {
+    position: 'sticky',
+    left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING,
+    zIndex: 1,
+    width: 'fit-content',
   },
 } as const;

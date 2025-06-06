@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Menu, IconButton } from '@contentful/f36-components';
 import { SortAscending } from '@phosphor-icons/react/dist/ssr/SortAscending';
+import { styles } from '../styles';
 
 export const SORT_OPTIONS = [
   { value: 'displayName_asc', label: 'Display name: A-Z' },
@@ -16,7 +17,7 @@ interface SortMenuProps {
 
 export const SortMenu: React.FC<SortMenuProps> = ({ sortOption, onSortChange }) => {
   return (
-    <Box marginBottom="spacingM" marginTop="spacingM" style={{ maxWidth: 320 }}>
+    <Box marginBottom="spacingM" marginTop="spacingM" style={styles.sortMenu}>
       <Menu>
         <Menu.Trigger>
           <IconButton
