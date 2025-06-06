@@ -1,8 +1,9 @@
-export interface ContentTypeField {
+import { FieldType } from 'contentful-management';
+
+export type ContentTypeField = {
   id: string;
   name: string;
-  type?: string;
-}
+} & FieldType;
 
 export interface Entry {
   sys: {

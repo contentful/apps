@@ -98,3 +98,12 @@ export const getEntryTitle = (
 export const getEntryUrl = (entry: Entry, spaceId: string, environmentId: string): string => {
   return `https://app.contentful.com/spaces/${spaceId}/environments/${environmentId}/entries/${entry.sys.id}`;
 };
+
+export const isCheckboxAllowed = (field: ContentTypeField): boolean => {
+  const restrictedTypes = ['Location', 'Date', 'Asset', 'Array', 'Link', 'ResourceLink', 'Boolean'];
+
+  if (!field.type) return false;
+
+  if (restrictedTypes.includes(field.type)) return false;
+  return true;
+};
