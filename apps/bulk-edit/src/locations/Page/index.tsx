@@ -12,6 +12,8 @@ import {
   Pagination,
   Menu,
   IconButton,
+  Checkbox,
+  Stack,
 } from '@contentful/f36-components';
 import { NavList } from '@contentful/f36-navlist';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -19,10 +21,11 @@ import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 import { ContentTypeField, Entry, Status } from './types';
 import { styles } from './styles';
-
-const PAGE_SIZE_OPTIONS = [15, 50, 100];
 import { ContentTypeProps } from 'contentful-management';
 import { SortAscending } from '@phosphor-icons/react/dist/ssr/SortAscending';
+
+const PAGE_SIZE_OPTIONS = [15, 50, 100];
+
 const SORT_OPTIONS = [
   { value: 'displayName_asc', label: 'Display name: A-Z' },
   { value: 'displayName_desc', label: 'Display name: Z-A' },
@@ -246,9 +249,9 @@ const Page = () => {
   return (
     <Flex>
       <Box style={styles.mainContent} padding="spacingL">
-        <Box style={styles.whiteBox} padding="spacingL">
+        <Box style={styles.whiteBox} paddingTop="spacingL">
           <Flex>
-            <Flex style={styles.sidebar} padding="spacingL" flexDirection="column" gap="spacingXs">
+            <Flex style={styles.sidebar} padding="spacingM" flexDirection="column" gap="spacingXs">
               <Text fontColor="gray600">Content types</Text>
               <NavList aria-label="Content types" testId="content-types-nav">
                 {contentTypes.map((ct) => (
@@ -263,105 +266,113 @@ const Page = () => {
                 ))}
               </NavList>
             </Flex>
-            <Box padding="spacingL">
+            <div style={styles.stickySpacer} />
+            <Box>
               {loading ? (
                 <Spinner />
               ) : (
                 <>
-                  <Heading>
+                  <Heading style={styles.stickyPageHeader}>
                     {selectedContentType
                       ? `Bulk edit ${selectedContentType.name}`
                       : 'Bulk Edit App'}
                   </Heading>
-                  <Box marginBottom="spacingM" marginTop="spacingM" style={{ maxWidth: 320 }}>
-                    <Menu>
-                      <Menu.Trigger>
-                        <IconButton
-                          icon={<SortAscending size={16} />}
-                          variant="secondary"
-                          aria-label="Sort display name by">
-                          Sort display name by
-                        </IconButton>
-                      </Menu.Trigger>
-                      <Menu.List>
-                        {SORT_OPTIONS.map((opt) => (
-                          <Menu.Item
-                            key={opt.value}
-                            isActive={sortOption === opt.value}
-                            onClick={() => setSortOption(opt.value)}>
-                            {opt.label}
-                          </Menu.Item>
-                        ))}
-                      </Menu.List>
-                    </Menu>
-                  </Box>
-                  {entriesLoading ? (
-                    <Spinner />
-                  ) : (
-                    <>
-                      <Table testId="bulk-edit-table" style={styles.table}>
-                        <Table.Head>
-                          <Table.Row>
-                            {fields.length > 0 && (
-                              <Table.Cell as="th" key="displayName" style={styles.stickyHeader}>
-                                Display name
-                              </Table.Cell>
-                            )}
-                            <Table.Cell as="th" key="status" style={styles.tableHeader}>
-                              Status
-                            </Table.Cell>
-                            {fields.map((field) => (
-                              <Table.Cell as="th" key={field.id} style={styles.tableHeader}>
-                                {truncate(field.name)}
-                              </Table.Cell>
-                            ))}
-                          </Table.Row>
-                        </Table.Head>
-                        <Table.Body>
-                          {entries.map((entry) => {
-                            const status = getStatus(entry);
-                            return (
-                              <Table.Row key={entry.sys.id}>
-                                {fields.length > 0 && (
-                                  <Table.Cell testId="display-name-cell" style={styles.stickyCell}>
-                                    <TextLink
-                                      href={getEntryUrl(entry)}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      testId="entry-link"
-                                      icon={<ExternalLinkIcon />}
-                                      alignIcon="end">
-                                      {getEntryTitle(entry, fields, selectedContentType)}
-                                    </TextLink>
-                                  </Table.Cell>
-                                )}
-                                <Table.Cell testId="status-cell" style={styles.cell}>
-                                  <Badge variant={status.color}>{status.label}</Badge>
+                  <>
+                    <Box marginBottom="spacingM" marginTop="spacingM" style={{ maxWidth: 320 }}>
+                      <Menu>
+                        <Menu.Trigger>
+                          <IconButton
+                            icon={<SortAscending size={16} />}
+                            variant="secondary"
+                            aria-label="Sort display name by">
+                            Sort display name by
+                          </IconButton>
+                        </Menu.Trigger>
+                        <Menu.List>
+                          {SORT_OPTIONS.map((opt) => (
+                            <Menu.Item
+                              key={opt.value}
+                              isActive={sortOption === opt.value}
+                              onClick={() => setSortOption(opt.value)}>
+                              {opt.label}
+                            </Menu.Item>
+                          ))}
+                        </Menu.List>
+                      </Menu>
+                    </Box>
+                    {entriesLoading ? (
+                      <Spinner />
+                    ) : (
+                      <>
+                        <Table testId="bulk-edit-table" style={styles.table}>
+                          <Table.Head style={styles.tableHead}>
+                            <Table.Row>
+                              {fields.length > 0 && (
+                                <Table.Cell
+                                  as="th"
+                                  key="displayName"
+                                  style={styles.stickyTableHeader}>
+                                  Display name
                                 </Table.Cell>
-                                {fields.map((field) => (
-                                  <Table.Cell key={field.id} style={styles.cell}>
-                                    {renderFieldValue(field, entry.fields[field.id]?.[LOCALE])}
+                              )}
+                              <Table.Cell as="th" key="status" style={styles.tableHeader}>
+                                Status
+                              </Table.Cell>
+                              {fields.map((field) => (
+                                <Table.Cell as="th" key={field.id} style={styles.tableHeader}>
+                                  {truncate(field.name)}
+                                </Table.Cell>
+                              ))}
+                            </Table.Row>
+                          </Table.Head>
+                          <Table.Body>
+                            {entries.map((entry) => {
+                              const status = getStatus(entry);
+                              return (
+                                <Table.Row key={entry.sys.id}>
+                                  {fields.length > 0 && (
+                                    <Table.Cell
+                                      testId="display-name-cell"
+                                      style={styles.stickyCell}>
+                                      <TextLink
+                                        href={getEntryUrl(entry)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        testId="entry-link"
+                                        icon={<ExternalLinkIcon />}
+                                        alignIcon="end">
+                                        {getEntryTitle(entry, fields, selectedContentType)}
+                                      </TextLink>
+                                    </Table.Cell>
+                                  )}
+                                  <Table.Cell testId="status-cell" style={styles.cell}>
+                                    <Badge variant={status.color}>{status.label}</Badge>
                                   </Table.Cell>
-                                ))}
-                              </Table.Row>
-                            );
-                          })}
-                        </Table.Body>
-                      </Table>
-                      <Box marginTop="spacingM">
-                        <Pagination
-                          activePage={activePage}
-                          onPageChange={setActivePage}
-                          totalItems={totalEntries}
-                          showViewPerPage
-                          viewPerPageOptions={PAGE_SIZE_OPTIONS}
-                          itemsPerPage={itemsPerPage}
-                          onViewPerPageChange={setItemsPerPage}
-                          aria-label="Pagination navigation"
-                        />
-                      </Box>
-                    </>
-                  )}
+                                  {fields.map((field) => (
+                                    <Table.Cell key={field.id} style={styles.cell}>
+                                      {renderFieldValue(field, entry.fields[field.id]?.[LOCALE])}
+                                    </Table.Cell>
+                                  ))}
+                                </Table.Row>
+                              );
+                            })}
+                          </Table.Body>
+                        </Table>
+                        <Box marginTop="spacingM">
+                          <Pagination
+                            activePage={activePage}
+                            onPageChange={setActivePage}
+                            totalItems={totalEntries}
+                            showViewPerPage
+                            viewPerPageOptions={PAGE_SIZE_OPTIONS}
+                            itemsPerPage={itemsPerPage}
+                            onViewPerPageChange={setItemsPerPage}
+                            aria-label="Pagination navigation"
+                          />
+                        </Box>
+                      </>
+                    )}
+                  </>
                 </>
               )}
             </Box>

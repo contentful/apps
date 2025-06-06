@@ -10,8 +10,6 @@ import {
   condoCContentType,
 } from '../../mocks/mockContentTypes';
 
-// Correctly mock Forma 36 NavList component
-// Mock useSDK to return mockSdk
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
