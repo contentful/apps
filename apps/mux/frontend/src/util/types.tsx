@@ -19,7 +19,6 @@ export interface AppState {
   error: string | false;
   errorShowResetAction: boolean | false;
   isDeleting: boolean | false;
-  isReloading: boolean | false;
   isTokenLoading: boolean | false;
   playbackToken?: string;
   posterToken?: string;
