@@ -18,6 +18,7 @@ This Contentful App Function automatically syncs Contentful entries to Klaviyo w
 To deploy this function:
 
 1. Build the TypeScript files:
+
    ```bash
    cd apps/klaviyo/functions
    npm install
@@ -25,6 +26,7 @@ To deploy this function:
    ```
 
 2. Upload the function to Contentful using the Contentful CLI:
+
    ```bash
    contentful function create --space-id <SPACE_ID> --environment-id <ENV_ID> --name "Klaviyo Entry Sync" --bundle ./dist
    ```
@@ -46,6 +48,7 @@ The function requires the following parameters to be set in the app installation
 ## Troubleshooting
 
 Check the function logs in the Contentful web interface:
+
 - Go to Settings > Functions
 - Select the Klaviyo Entry Sync function
 - View the Logs tab

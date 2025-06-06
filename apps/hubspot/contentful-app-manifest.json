@@ -32,13 +32,69 @@
       "description": "Sync Contentful Entries to HubSpot Marketing Emails",
       "path": "functions/hubspotEmail.js",
       "entryFile": "functions/hubspotEmail.ts",
-      "allowNetworks": [
-        "api.hubapi.com"
+      "allowNetworks": ["api.hubapi.com"],
+      "accepts": ["appaction.call"]
+    }
+  ],
+  "actions": [
+    {
+      "name": "Sync to HubSpot",
+      "description": "Syncs the current entry to HubSpot as a marketing email.",
+      "type": "function-invocation",
+      "category": "Custom",
+      "functionId": "3rpmmTblbOagoCcT2QVrtb",
+      "parameters": [
+        {
+          "id": "method",
+          "name": "HTTP Method",
+          "description": "The HTTP method to use for the HubSpot API (GET, POST, PATCH, DELETE).",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "emailId",
+          "name": "Email ID",
+          "description": "The ID of the HubSpot email (required for PATCH and DELETE).",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "name",
+          "name": "Email Name",
+          "description": "The name of the HubSpot email (for POST and PATCH).",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "subject",
+          "name": "Subject",
+          "description": "The subject of the HubSpot email (for POST and PATCH).",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "fromName",
+          "name": "From Name",
+          "description": "The sender name for the HubSpot email (for POST and PATCH).",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "replyTo",
+          "name": "Reply To",
+          "description": "The reply-to address for the HubSpot email (for POST and PATCH).",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "contentBlocks",
+          "name": "Content Blocks",
+          "description": "The content blocks for the HubSpot email (for POST and PATCH).",
+          "type": "Symbol",
+          "required": false
+        }
       ],
-      "accepts": [
-        "appaction.call"
-      ],
-      "timeout": 30
+      "id": "64Ac5z8FW8F6vmldb6M9fv"
     }
   ]
 }

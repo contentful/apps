@@ -15,7 +15,6 @@ import {
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { styles } from './Page.styles';
-import { C } from 'vitest/dist/chunks/reporters.d.C1ogPriE';
 
 interface HubSpotEmail {
   id: string;
@@ -171,11 +170,10 @@ const Page = () => {
   useEffect(() => {
     const getAppActions = async () => {
       const appActions = await cma.appAction.getManyForEnvironment({});
-      const hubspotEmailAction = appActions.items.find((appAction) => {
-        if (appAction.name === 'Hubspot Email Action') {
-          return appAction;
-        }
+      const hubspotEmailAction = appActions.items.find((appAction: { name: string }) => {
+        return appAction.name === 'Sync to HubSpot';
       });
+      console.log('ACTION: ', hubspotEmailAction);
       setHubspotEmailAction(hubspotEmailAction?.sys.id || '');
     };
 
@@ -185,6 +183,11 @@ const Page = () => {
   // Test HubSpot connection and fetch emails
   const fetchHubSpotEmails = async () => {
     try {
+      if (!hubspotAppActionId) {
+        Notification.error('HubSpot App Action ID not found.');
+        return;
+      }
+
       setLoading(true);
       console.log('Fetching HubSpot emails...');
 
@@ -496,7 +499,7 @@ const Page = () => {
                           Content Blocks ({getContentBlocks(editingEmail).length})
                         </Box>
                         <Flex flexDirection="column" gap="spacingM">
-                          {getContentBlocks(editingEmail).map((block, index) => (
+                          {getContentBlocks(editingEmail).map((block) => (
                             <Box key={block.widgetId} className={styles.blockCard}>
                               <Flex
                                 justifyContent="space-between"
