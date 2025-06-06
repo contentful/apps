@@ -1,0 +1,44 @@
+{
+  "name": "HubSpot Email Sync",
+  "description": "Sync your Contentful content with HubSpot Marketing Emails",
+  "id": "hubspot-email-sync",
+  "category": "Marketing",
+  "version": "0.1.0",
+  "locations": [
+    {
+      "location": "app-config",
+      "component": "ConfigScreen"
+    },
+    {
+      "location": "page",
+      "component": "FieldMappingScreen"
+    }
+  ],
+  "parameters": {
+    "installation": [
+      {
+        "id": "apiKey",
+        "name": "HubSpot API Key",
+        "description": "Your HubSpot private app API key (starts with 'pat-')",
+        "type": "Symbol",
+        "required": true
+      }
+    ]
+  },
+  "functions": [
+    {
+      "id": "3rpmmTblbOagoCcT2QVrtb",
+      "name": "HubSpot Email Function",
+      "description": "Sync Contentful Entries to HubSpot Marketing Emails",
+      "path": "functions/hubspotEmail.js",
+      "entryFile": "functions/hubspotEmail.ts",
+      "allowNetworks": [
+        "api.hubapi.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ],
+      "timeout": 30
+    }
+  ]
+}

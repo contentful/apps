@@ -13,6 +13,6 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src"],
-  "exclude": ["actions", "functions"]
+  "include": ["src", "functions"],
+  "exclude": ["actions", "src/functions"]
 }
