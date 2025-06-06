@@ -1,37 +1,14 @@
 import React, { useEffect, useState } from 'react';
-
-import {
-  Box,
-  Heading,
-  Flex,
-  Spinner,
-  Badge,
-  Table,
-  Text,
-  TextLink,
-  Pagination,
-  Menu,
-  IconButton,
-  Checkbox,
-  Stack,
-} from '@contentful/f36-components';
-import { NavList } from '@contentful/f36-navlist';
+import { Box, Heading, Flex, Spinner } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
-
-import { ContentTypeField, Entry, Status } from './types';
-import { styles } from './styles';
 import { ContentTypeProps } from 'contentful-management';
-import { SortAscending } from '@phosphor-icons/react/dist/ssr/SortAscending';
+import { Entry, ContentTypeField } from './types';
+import { styles } from './styles';
+import { ContentTypeSidebar } from './components/ContentTypeSidebar';
+import { SortMenu, SORT_OPTIONS } from './components/SortMenu';
+import { EntryTable } from './components/EntryTable';
 
 const PAGE_SIZE_OPTIONS = [15, 50, 100];
-
-const SORT_OPTIONS = [
-  { value: 'displayName_asc', label: 'Display name: A-Z' },
-  { value: 'displayName_desc', label: 'Display name: Z-A' },
-  { value: 'updatedAt_desc', label: 'Updated: newest' },
-  { value: 'updatedAt_asc', label: 'Updated: oldest' },
-];
 
 const Page = () => {
   const sdk = useSDK();
@@ -44,8 +21,8 @@ const Page = () => {
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(PAGE_SIZE_OPTIONS[0]);
   const [totalEntries, setTotalEntries] = useState(0);
-  const LOCALE = sdk.locales.default;
   const [sortOption, setSortOption] = useState(SORT_OPTIONS[0].value);
+  const locale = sdk.locales.default;
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -143,129 +120,18 @@ const Page = () => {
     void fetchFieldsAndEntries();
   }, [sdk, selectedContentTypeId, activePage, itemsPerPage, sortOption]);
 
-  const handleNavClick = (id: string): void => {
-    setSelectedContentTypeId(id);
-  };
-
   const selectedContentType = contentTypes.find((ct) => ct.sys.id === selectedContentTypeId);
-
-  const getStatus = (entry: Entry): Status => {
-    const { sys } = entry;
-    if (!sys.publishedVersion) {
-      return { label: 'Draft', color: 'warning' };
-    }
-    if (sys.version >= sys.publishedVersion + 2) {
-      return { label: 'Changed', color: 'primary' };
-    }
-    if (sys.version === sys.publishedVersion + 1) {
-      return { label: 'Published', color: 'positive' };
-    }
-    return { label: 'Unknown', color: 'negative' };
-  };
-
-  const isLocationValue = (value: unknown): value is { lat: number; lon: number } => {
-    return (
-      typeof value === 'object' &&
-      value !== null &&
-      'lat' in value &&
-      'lon' in value &&
-      typeof (value as any).lat === 'number' &&
-      typeof (value as any).lon === 'number'
-    );
-  };
-
-  const isLinkValue = (value: unknown): value is { sys: { linkType: string } } => {
-    return (
-      typeof value === 'object' &&
-      value !== null &&
-      'sys' in value &&
-      'linkType' in (value as any).sys
-    );
-  };
-
-  const truncate = (str: string, max: number = 20) =>
-    str.length > max ? str.slice(0, max) + ' ...' : str;
-
-  const renderFieldValue = (field: ContentTypeField, value: unknown): string => {
-    if (field.type === 'Array' && Array.isArray(value)) {
-      const count = value.length;
-      if (value[0]?.sys?.linkType === 'Entry') {
-        return count === 1 ? '1 reference field' : `${count} reference fields`;
-      } else if (value[0]?.sys?.linkType === 'Asset') {
-        return count === 1 ? '1 asset' : `${count} assets`;
-      } else {
-        return truncate(value.join(', '));
-      }
-    }
-
-    if (field.type === 'Location' && isLocationValue(value)) {
-      return truncate(`Lat: ${value.lat}, Lon: ${value.lon}`);
-    }
-    if (field.type === 'Boolean' && typeof value === 'boolean') {
-      return value ? 'true' : 'false';
-    }
-    if (field.type === 'Object' && typeof value === 'object' && value !== null) {
-      return truncate(JSON.stringify(value));
-    }
-
-    if (field.type === 'Link' && isLinkValue(value) && value.sys.linkType === 'Asset') {
-      return `1 asset`;
-    }
-    if (field.type === 'Link' && isLinkValue(value) && value.sys.linkType === 'Entry') {
-      return `1 reference field`;
-    }
-
-    if (typeof value === 'object' && value !== null) {
-      return '';
-    }
-
-    return value !== undefined && value !== null ? truncate(String(value)) : '-';
-  };
-
-  const getEntryTitle = (
-    entry: Entry,
-    fields: ContentTypeField[],
-    contentType?: ContentTypeProps
-  ): string => {
-    let displayFieldId = contentType?.displayField;
-    if (!displayFieldId) return 'Untitled';
-
-    const value = entry.fields[displayFieldId]?.[LOCALE];
-    if (
-      value === undefined ||
-      value === null ||
-      value === '' ||
-      (typeof value === 'object' && value !== null)
-    ) {
-      return 'Untitled';
-    }
-    return String(value);
-  };
-
-  const getEntryUrl = (entry: Entry): string => {
-    return `https://app.contentful.com/spaces/${sdk.ids.space}/environments/${sdk.ids.environment}/entries/${entry.sys.id}`;
-  };
 
   return (
     <Flex>
       <Box style={styles.mainContent} padding="spacingL">
         <Box style={styles.whiteBox} paddingTop="spacingL">
           <Flex>
-            <Flex style={styles.sidebar} padding="spacingM" flexDirection="column" gap="spacingXs">
-              <Text fontColor="gray600">Content types</Text>
-              <NavList aria-label="Content types" testId="content-types-nav">
-                {contentTypes.map((ct) => (
-                  <NavList.Item
-                    as="button"
-                    key={ct.sys.id}
-                    isActive={ct.sys.id === selectedContentTypeId}
-                    onClick={() => handleNavClick(ct.sys.id)}
-                    testId="content-type-nav-item">
-                    {ct.name}
-                  </NavList.Item>
-                ))}
-              </NavList>
-            </Flex>
+            <ContentTypeSidebar
+              contentTypes={contentTypes}
+              selectedContentTypeId={selectedContentTypeId}
+              onContentTypeSelect={setSelectedContentTypeId}
+            />
             <div style={styles.stickySpacer} />
             <Box>
               {loading ? (
@@ -278,99 +144,24 @@ const Page = () => {
                       : 'Bulk Edit App'}
                   </Heading>
                   <>
-                    <Box marginBottom="spacingM" marginTop="spacingM" style={{ maxWidth: 320 }}>
-                      <Menu>
-                        <Menu.Trigger>
-                          <IconButton
-                            icon={<SortAscending size={16} />}
-                            variant="secondary"
-                            aria-label="Sort display name by">
-                            Sort display name by
-                          </IconButton>
-                        </Menu.Trigger>
-                        <Menu.List>
-                          {SORT_OPTIONS.map((opt) => (
-                            <Menu.Item
-                              key={opt.value}
-                              isActive={sortOption === opt.value}
-                              onClick={() => setSortOption(opt.value)}>
-                              {opt.label}
-                            </Menu.Item>
-                          ))}
-                        </Menu.List>
-                      </Menu>
-                    </Box>
+                    <SortMenu sortOption={sortOption} onSortChange={setSortOption} />
                     {entriesLoading ? (
                       <Spinner />
                     ) : (
-                      <>
-                        <Table testId="bulk-edit-table" style={styles.table}>
-                          <Table.Head style={styles.tableHead}>
-                            <Table.Row>
-                              {fields.length > 0 && (
-                                <Table.Cell
-                                  as="th"
-                                  key="displayName"
-                                  style={styles.stickyTableHeader}>
-                                  Display name
-                                </Table.Cell>
-                              )}
-                              <Table.Cell as="th" key="status" style={styles.tableHeader}>
-                                Status
-                              </Table.Cell>
-                              {fields.map((field) => (
-                                <Table.Cell as="th" key={field.id} style={styles.tableHeader}>
-                                  {truncate(field.name)}
-                                </Table.Cell>
-                              ))}
-                            </Table.Row>
-                          </Table.Head>
-                          <Table.Body>
-                            {entries.map((entry) => {
-                              const status = getStatus(entry);
-                              return (
-                                <Table.Row key={entry.sys.id}>
-                                  {fields.length > 0 && (
-                                    <Table.Cell
-                                      testId="display-name-cell"
-                                      style={styles.stickyCell}>
-                                      <TextLink
-                                        href={getEntryUrl(entry)}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        testId="entry-link"
-                                        icon={<ExternalLinkIcon />}
-                                        alignIcon="end">
-                                        {getEntryTitle(entry, fields, selectedContentType)}
-                                      </TextLink>
-                                    </Table.Cell>
-                                  )}
-                                  <Table.Cell testId="status-cell" style={styles.cell}>
-                                    <Badge variant={status.color}>{status.label}</Badge>
-                                  </Table.Cell>
-                                  {fields.map((field) => (
-                                    <Table.Cell key={field.id} style={styles.cell}>
-                                      {renderFieldValue(field, entry.fields[field.id]?.[LOCALE])}
-                                    </Table.Cell>
-                                  ))}
-                                </Table.Row>
-                              );
-                            })}
-                          </Table.Body>
-                        </Table>
-                        <Box marginTop="spacingM">
-                          <Pagination
-                            activePage={activePage}
-                            onPageChange={setActivePage}
-                            totalItems={totalEntries}
-                            showViewPerPage
-                            viewPerPageOptions={PAGE_SIZE_OPTIONS}
-                            itemsPerPage={itemsPerPage}
-                            onViewPerPageChange={setItemsPerPage}
-                            aria-label="Pagination navigation"
-                          />
-                        </Box>
-                      </>
+                      <EntryTable
+                        entries={entries}
+                        fields={fields}
+                        contentType={selectedContentType}
+                        spaceId={sdk.ids.space}
+                        environmentId={sdk.ids.environment}
+                        locale={locale}
+                        activePage={activePage}
+                        totalEntries={totalEntries}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={setActivePage}
+                        onItemsPerPageChange={setItemsPerPage}
+                        pageSizeOptions={PAGE_SIZE_OPTIONS}
+                      />
                     )}
                   </>
                 </>
