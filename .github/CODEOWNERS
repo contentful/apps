@@ -4,8 +4,8 @@
 
 # team tundra co-owns examples and function examples
 
-examples @contentful/team-tundra @contentful/team-extensibility @contentful/team-marketplace
-function-examples @contentful/team-tundra @contentful/team-extensibility
+examples @contentful/team-extensibility @contentful/team-marketplace
+function-examples @contentful/team-extensibility
 
 # team fusion co-owns delivery function examples
 
