@@ -32,10 +32,36 @@ export default class NeflifySidebarBuildButton extends React.Component {
   };
 
   state = { history: [] };
+  buildTimeoutId = null;
 
   componentDidMount() {
     this.createPubSub();
   }
+
+  componentWillUnmount() {
+    if (this.pubsub) {
+      this.pubsub.stop();
+    }
+    this.clearBuildTimeout();
+  }
+
+  clearBuildTimeout = () => {
+    if (this.buildTimeoutId) {
+      clearTimeout(this.buildTimeoutId);
+      this.buildTimeoutId = null;
+    }
+  };
+
+  startBuildTimeout = () => {
+    this.clearBuildTimeout();
+    this.buildTimeoutId = setTimeout(() => {
+      this.setState({
+        buildTimedOut: true,
+        ok: false,
+        info: 'Contentful lost connection to update the build status. Verify if the build has completed in the Netlify app.',
+      });
+    }, 120000); // 2 minute timeout for the "Triggering..." button
+  };
 
   createPubSub = async () => {
     const { site } = this.props;
@@ -55,10 +81,16 @@ export default class NeflifySidebarBuildButton extends React.Component {
       const notDuplicate = !isDuplicate(msg, this.state.history);
 
       if (inOrder && notDuplicate) {
+        const newState = messageToState(msg);
+
+        // Clear timeout after receiving a message indicating we are not stuck on triggering
+        this.clearBuildTimeout();
+
         this.setState(({ history }) => {
           return {
             history: [msg].concat(history),
-            ...messageToState(msg),
+            buildTimedOut: false,
+            ...newState,
           };
         });
       }
@@ -72,33 +104,61 @@ export default class NeflifySidebarBuildButton extends React.Component {
       .filter((msg, i, history) => !isDuplicate(msg, history.slice(i + 1)));
 
     if (filteredHistory.length > 0) {
-      this.setState({
-        history: filteredHistory,
-        ...messageToState(filteredHistory[0]),
-      });
+      const latestMessage = filteredHistory[0];
+      const messageState = messageToState(latestMessage);
+
+      // Check if the latest message is in a stale busy state (older than 10 minutes)
+      const isStale = this.isMessageStale(latestMessage, 10 * 60 * 1000); // 10 minutes
+      const isStuck = messageState.busy && isStale;
+
+      if (isStuck) {
+        // Ignore stale busy message and reset to fresh state
+        this.setState({
+          history: filteredHistory,
+          busy: false,
+          status: null,
+          info: null,
+          ok: true,
+        });
+      } else {
+        // Apply the latest message state normally
+        this.setState({
+          history: filteredHistory,
+          ...messageState,
+        });
+      }
     }
 
     this.setState({ ready: true });
   };
 
-  componentWillUnmount() {
-    if (this.pubsub) {
-      this.pubsub.stop();
-    }
-  }
-
   build = async () => {
+    this.setState({ buildTimedOut: false });
+
     this.pubsub.publish({
       contentful: true,
       event: EVENT_TRIGGERED,
       userId: this.props.userId,
     });
 
+    // Start timeout after publishing the trigger event
+    this.startBuildTimeout();
+
     const { buildHookId } = this.props.site;
     const buildHookUrl = `https://api.netlify.com/build_hooks/${buildHookId}`;
-    const res = await fetch(buildHookUrl, { method: 'POST' });
 
-    if (!res.ok) {
+    try {
+      const res = await fetch(buildHookUrl, { method: 'POST' });
+
+      if (!res.ok) {
+        this.clearBuildTimeout();
+        this.pubsub.publish({
+          contentful: true,
+          event: EVENT_TRIGGER_FAILED,
+        });
+      }
+    } catch (error) {
+      this.clearBuildTimeout();
       this.pubsub.publish({
         contentful: true,
         event: EVENT_TRIGGER_FAILED,
@@ -106,8 +166,26 @@ export default class NeflifySidebarBuildButton extends React.Component {
     }
   };
 
+  resetBuild = () => {
+    this.clearBuildTimeout();
+    this.setState({
+      busy: false,
+      buildTimedOut: false,
+      status: null,
+      info: null,
+      ok: true,
+    });
+  };
+
+  // Check if a message is older than the given threshold (in milliseconds)
+  isMessageStale = (message, thresholdMs) => {
+    if (!message.t) return false;
+    const messageAge = Date.now() - message.t.getTime();
+    return messageAge > thresholdMs;
+  };
+
   render() {
-    const { ready, busy, status, misconfigured, info, ok } = this.state;
+    const { ready, busy, status, misconfigured, info, ok, buildTimedOut } = this.state;
 
     return (
       <div className={styles.body}>
@@ -119,12 +197,22 @@ export default class NeflifySidebarBuildButton extends React.Component {
           onClick={this.build}>
           {busy && status ? status : 'Build website'}
         </Button>
+        {buildTimedOut && (
+          <div className={styles.info}>
+            <ValidationMessage>{info}</ValidationMessage>
+            <div style={{ marginTop: tokens.spacingS }}>
+              <Button variant="secondary" size="small" onClick={this.resetBuild}>
+                Reset build status
+              </Button>
+            </div>
+          </div>
+        )}
         {misconfigured && (
           <div className={styles.info}>
             <ValidationMessage>Check Netlify App configuration!</ValidationMessage>
           </div>
         )}
-        {info && (
+        {info && !buildTimedOut && (
           <div className={styles.info}>
             {ok && info}
             {!ok && <ValidationMessage>{info}</ValidationMessage>}
