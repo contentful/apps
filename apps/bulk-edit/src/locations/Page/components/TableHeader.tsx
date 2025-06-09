@@ -5,12 +5,13 @@ import { QuestionIcon } from '@phosphor-icons/react';
 import { ContentTypeField } from '../types';
 import { styles } from '../styles';
 import { truncate, isCheckboxAllowed } from '../utils/entryUtils';
+import { DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN } from '../utils/constants';
 
 interface TableHeaderProps {
   fields: ContentTypeField[];
-  headerCheckboxes: boolean[];
-  onHeaderCheckboxChange: (colIndex: number, checked: boolean) => void;
-  checkboxesDisabled: boolean[];
+  headerCheckboxes: Record<string, boolean>;
+  onHeaderCheckboxChange: (columnId: string, checked: boolean) => void;
+  checkboxesDisabled: Record<string, boolean>;
 }
 
 export const TableHeader: React.FC<TableHeaderProps> = ({
@@ -23,11 +24,11 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
     <Table.Head style={styles.tableHead}>
       <Table.Row>
         {fields.length > 0 && (
-          <Table.Cell as="th" key="displayName" style={styles.stickyTableHeader}>
+          <Table.Cell as="th" key={DISPLAY_NAME_COLUMN} style={styles.stickyTableHeader}>
             Display name
           </Table.Cell>
         )}
-        <Table.Cell as="th" key="status" style={styles.tableHeader}>
+        <Table.Cell as="th" key={ENTRY_STATUS_COLUMN} style={styles.tableHeader}>
           <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
             Status
             <Tooltip content="Bulk editing is not supported for Status" placement="top">
@@ -35,18 +36,18 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
             </Tooltip>
           </Flex>
         </Table.Cell>
-        {fields.map((field, idx) => {
-          const columnIndex = idx + 2;
+        {fields.map((field) => {
           const isAllowed = isCheckboxAllowed(field);
-          const isDisabled = checkboxesDisabled[columnIndex];
+          const isDisabled = checkboxesDisabled[field.id];
+
           if (isAllowed) {
             return (
               <Table.Cell as="th" key={field.id} style={styles.tableHeader} isTruncated>
                 <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
                   <Checkbox
-                    isChecked={headerCheckboxes[columnIndex]}
+                    isChecked={headerCheckboxes[field.id]}
                     isDisabled={isDisabled}
-                    onChange={(e) => onHeaderCheckboxChange(columnIndex, e.target.checked)}
+                    onChange={(e) => onHeaderCheckboxChange(field.id, e.target.checked)}
                     testId={`header-checkbox-${field.id}`}
                     aria-label={`Select all for ${truncate(field.name)}`}
                   />

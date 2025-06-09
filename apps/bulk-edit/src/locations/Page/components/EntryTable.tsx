@@ -5,7 +5,8 @@ import { ContentTypeProps } from 'contentful-management';
 import { styles } from '../styles';
 import { TableHeader } from './TableHeader';
 import { TableRow } from './TableRow';
-import { isCheckboxAllowed } from '../utils/entryUtils';
+import { isCheckboxAllowed as isBulkEditable } from '../utils/entryUtils';
+import { DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN } from '../utils/constants';
 
 interface EntryTableProps {
   entries: Entry[];
@@ -22,6 +23,37 @@ interface EntryTableProps {
   pageSizeOptions: number[];
 }
 
+function getColumnIds(fields: ContentTypeField[]): string[] {
+  return [DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN, ...fields.map((field) => field.id)];
+}
+
+function getBulkEditableColumns(fields: ContentTypeField[]): Record<string, boolean> {
+  const bulkEditableColumns = fields.map((field) => {
+    return [field.id, isBulkEditable(field)];
+  });
+
+  return {
+    [DISPLAY_NAME_COLUMN]: false,
+    [ENTRY_STATUS_COLUMN]: false,
+    ...Object.fromEntries(bulkEditableColumns),
+  };
+}
+
+function getInitialCheckboxState(columnIds: string[]): Record<string, boolean> {
+  return Object.fromEntries(columnIds.map((columnId) => [columnId, false]));
+}
+
+function getInitialRowCheckboxState(
+  entries: Entry[],
+  columnIds: string[]
+): Record<string, Record<string, boolean>> {
+  const entryCheckboxStates: Record<string, Record<string, boolean>> = {};
+  entries.forEach((entry) => {
+    entryCheckboxStates[entry.sys.id] = getInitialCheckboxState(columnIds);
+  });
+  return entryCheckboxStates;
+}
+
 export const EntryTable: React.FC<EntryTableProps> = ({
   entries,
   fields,
@@ -36,69 +68,65 @@ export const EntryTable: React.FC<EntryTableProps> = ({
   onItemsPerPageChange,
   pageSizeOptions,
 }) => {
-  const totalColumns = fields.length + 2;
-  const allowedColumns = [false, false, ...fields.map((f) => isCheckboxAllowed(f))];
+  const columnIds = getColumnIds(fields);
+  const allowedColumns = getBulkEditableColumns(fields);
 
-  const [headerCheckboxes, setHeaderCheckboxes] = useState<boolean[]>(
-    Array(totalColumns).fill(false)
+  const [headerCheckboxes, setHeaderCheckboxes] = useState<Record<string, boolean>>(
+    getInitialCheckboxState(columnIds)
   );
-  const [rowCheckboxes, setRowCheckboxes] = useState<Record<string, boolean[]>>(() => {
-    const obj: Record<string, boolean[]> = {};
-    entries.forEach((e) => {
-      obj[e.sys.id] = Array(totalColumns).fill(false);
-    });
-    return obj;
-  });
 
-  const checkedColumn = useMemo(() => {
-    // Check if any header checkbox for an allowed column is checked
-    const checkedHeaderColumnIndex = headerCheckboxes.findIndex(
-      (isChecked, columnIndex) => allowedColumns[columnIndex] && isChecked
-    );
-    if (checkedHeaderColumnIndex !== -1) return checkedHeaderColumnIndex;
+  const [rowCheckboxes, setRowCheckboxes] = useState<Record<string, Record<string, boolean>>>(
+    getInitialRowCheckboxState(entries, columnIds)
+  );
 
-    // If no header checkbox is checked, check all rows for a checked cell in an allowed column
-    for (const rowId in rowCheckboxes) {
-      const row = rowCheckboxes[rowId];
-      const checkedCellColumnIndex = row.findIndex(
-        (isChecked, columnIndex) => allowedColumns[columnIndex] && isChecked
-      );
-      if (checkedCellColumnIndex !== -1) return checkedCellColumnIndex;
+  const checkedColumnId = useMemo(() => {
+    // Check header first
+    const checkedHeaderId = columnIds.find((columnId) => headerCheckboxes[columnId]);
+    if (checkedHeaderId) return checkedHeaderId;
+    // Then check rows
+    for (const entryId in rowCheckboxes) {
+      const row = rowCheckboxes[entryId];
+      const checkedCellId = columnIds.find((columnId) => allowedColumns[columnId] && row[columnId]);
+      if (checkedCellId) return checkedCellId;
     }
-    // No checked column found
     return null;
-  }, [headerCheckboxes, rowCheckboxes, allowedColumns]);
+  }, [headerCheckboxes, rowCheckboxes, allowedColumns, columnIds]);
 
-  const headersVisibility = headerCheckboxes.map((checked) => checked);
-  const checkboxesDisabled = allowedColumns.map((allowed, idx) =>
-    allowed ? checkedColumn !== null && checkedColumn !== idx : true
+  const checkboxesDisabled = Object.fromEntries(
+    columnIds.map((columnId) => [
+      columnId,
+      allowedColumns[columnId] ? checkedColumnId !== null && checkedColumnId !== columnId : true,
+    ])
   );
 
-  const handleHeaderCheckboxChange = (columnIndex: number, checked: boolean) => {
-    setHeaderCheckboxes((prev) => {
-      const next = [...prev];
-      next[columnIndex] = checked;
-      return next;
-    });
-    setRowCheckboxes((prev) => {
-      const next: Record<string, boolean[]> = {};
-      Object.entries(prev).forEach(([rowId, arr]) => {
-        next[rowId] = arr.map((_, index) => (index === columnIndex ? checked : false));
-      });
-      return next;
-    });
-  };
+  function handleHeaderCheckboxChange(columnId: string, checked: boolean) {
+    setHeaderCheckboxes((previous) => ({ ...previous, [columnId]: checked }));
 
-  const handleCellCheckboxChange = (rowId: string, columnIndex: number, checked: boolean) => {
-    setRowCheckboxes((prev) => {
-      const next = { ...prev };
-      next[rowId] = prev[rowId].map((_, index) => (index === columnIndex ? checked : false));
-      return next;
+    setRowCheckboxes((previous) => {
+      const updated: Record<string, Record<string, boolean>> = {};
+      Object.entries(previous).forEach(([entryId, _]) => {
+        updated[entryId] = Object.fromEntries(
+          columnIds.map((id) => [id, id === columnId ? checked : false])
+        );
+      });
+      return updated;
     });
-    setHeaderCheckboxes((prev) =>
-      prev.map((value, index) => (index === columnIndex ? false : value))
-    );
-  };
+  }
+
+  function handleCellCheckboxChange(entryId: string, columnId: string, checked: boolean) {
+    setRowCheckboxes((previous) => {
+      const updated = { ...previous };
+      updated[entryId] = {
+        ...previous[entryId],
+        ...Object.fromEntries(columnIds.map((id) => [id, id === columnId ? checked : false])),
+      };
+      return updated;
+    });
+
+    setHeaderCheckboxes((previous) => ({
+      ...Object.fromEntries(columnIds.map((id) => [id, id === columnId ? false : previous[id]])),
+    }));
+  }
 
   return (
     <>
@@ -119,11 +147,11 @@ export const EntryTable: React.FC<EntryTableProps> = ({
               spaceId={spaceId}
               environmentId={environmentId}
               locale={locale}
-              rowCheckboxes={rowCheckboxes[entry.sys.id] || Array(totalColumns).fill(false)}
-              onCellCheckboxChange={handleCellCheckboxChange}
-              cellCheckboxesVisible={headersVisibility}
+              rowCheckboxes={rowCheckboxes[entry.sys.id]}
+              onCellCheckboxChange={(columnId, checked) =>
+                handleCellCheckboxChange(entry.sys.id, columnId, checked)
+              }
               cellCheckboxesDisabled={checkboxesDisabled}
-              headerCheckboxes={headerCheckboxes}
             />
           ))}
         </Table.Body>

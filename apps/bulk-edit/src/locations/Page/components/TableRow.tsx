@@ -10,6 +10,7 @@ import {
   getEntryTitle,
   getEntryUrl,
   isCheckboxAllowed,
+  truncate,
 } from '../utils/entryUtils';
 
 interface TableRowProps {
@@ -19,11 +20,9 @@ interface TableRowProps {
   spaceId: string;
   environmentId: string;
   locale: string;
-  rowCheckboxes: boolean[];
-  onCellCheckboxChange: (rowId: string, colIndex: number, checked: boolean) => void;
-  cellCheckboxesVisible: boolean[];
-  cellCheckboxesDisabled: boolean[];
-  headerCheckboxes: boolean[];
+  rowCheckboxes: Record<string, boolean>;
+  onCellCheckboxChange: (columnId: string, checked: boolean) => void;
+  cellCheckboxesDisabled: Record<string, boolean>;
 }
 
 export const TableRow: React.FC<TableRowProps> = ({
@@ -35,58 +34,53 @@ export const TableRow: React.FC<TableRowProps> = ({
   locale,
   rowCheckboxes,
   onCellCheckboxChange,
-  cellCheckboxesVisible,
   cellCheckboxesDisabled,
-  headerCheckboxes,
 }) => {
   const status = getStatus(entry);
-  const [hoveredColumn, setHoveredColumn] = useState<number | null>(null);
+  const [hoveredColumn, setHoveredColumn] = useState<string | null>(null);
+
+  const displayField = contentType?.displayField;
+  const displayValue = displayField ? entry.fields[displayField]?.[locale] : entry.sys.id;
 
   return (
     <Table.Row key={entry.sys.id}>
-      {fields.length > 0 && (
-        <Table.Cell testId="display-name-cell" style={styles.stickyCell} isTruncated>
-          <TextLink
-            href={getEntryUrl(entry, spaceId, environmentId)}
-            target="_blank"
-            rel="noopener noreferrer"
-            testId="entry-link"
-            icon={<ExternalLinkIcon />}
-            alignIcon="end">
-            {getEntryTitle(entry, fields, contentType, locale)}
-          </TextLink>
-        </Table.Cell>
-      )}
+      <Table.Cell testId="display-name-cell" style={styles.stickyCell} isTruncated>
+        <TextLink
+          href={getEntryUrl(entry, spaceId, environmentId)}
+          target="_blank"
+          rel="noopener noreferrer"
+          testId="entry-link"
+          icon={<ExternalLinkIcon />}
+          alignIcon="end">
+          {getEntryTitle(entry, fields, contentType, locale)}
+        </TextLink>
+      </Table.Cell>
       <Table.Cell testId="status-cell" style={styles.cell}>
         <Badge variant={status.color}>{status.label}</Badge>
       </Table.Cell>
-      {fields.map((field, idx) => {
-        const columnIndex = idx + 2;
-        if (isCheckboxAllowed(field)) {
-          const isChecked = rowCheckboxes[columnIndex];
-          const showCheckbox =
-            cellCheckboxesVisible[columnIndex] ||
-            isChecked ||
-            headerCheckboxes[columnIndex] ||
-            hoveredColumn === columnIndex;
+      {fields.map((field) => {
+        const isAllowed = isCheckboxAllowed(field);
+        const isDisabled = cellCheckboxesDisabled[field.id];
+        const isVisible = (hoveredColumn === field.id && !isDisabled) || rowCheckboxes[field.id];
+
+        if (isAllowed) {
           return (
             <Table.Cell
               key={field.id}
               style={styles.cell}
-              onMouseEnter={() => setHoveredColumn(columnIndex)}
+              onMouseEnter={() => setHoveredColumn(field.id)}
               onMouseLeave={() => setHoveredColumn(null)}
               isTruncated>
-              <Flex gap="spacingXs" alignItems="center">
-                <Checkbox
-                  isChecked={isChecked}
-                  isDisabled={cellCheckboxesDisabled[columnIndex]}
-                  onChange={(e) =>
-                    onCellCheckboxChange(entry.sys.id, columnIndex, e.target.checked)
-                  }
-                  inputProps={{ 'data-test-id': `cell-checkbox-${entry.sys.id}-${field.id}` }}
-                  aria-label={`Select for ${field.name}`}
-                  style={{ display: showCheckbox ? undefined : 'none' }}
-                />
+              <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
+                {isVisible && (
+                  <Checkbox
+                    isChecked={rowCheckboxes[field.id]}
+                    isDisabled={isDisabled}
+                    onChange={(e) => onCellCheckboxChange(field.id, e.target.checked)}
+                    testId={`cell-checkbox-${field.id}`}
+                    aria-label={`Select ${truncate(field.name)} for ${displayValue}`}
+                  />
+                )}
                 {renderFieldValue(field, entry.fields[field.id]?.[locale])}
               </Flex>
             </Table.Cell>
