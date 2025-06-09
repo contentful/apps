@@ -36,19 +36,12 @@ export const EntryTable: React.FC<EntryTableProps> = ({
   onItemsPerPageChange,
   pageSizeOptions,
 }) => {
-  // Calculate total columns: 0 = display name, 1 = status, 2+ = fields
   const totalColumns = fields.length + 2;
-  // Which columns are allowed for checkboxes
-  const allowedColumns = useMemo(
-    () => [false, false, ...fields.map((f) => isCheckboxAllowed(f))],
-    [fields]
-  );
+  const allowedColumns = [false, false, ...fields.map((f) => isCheckboxAllowed(f))];
 
-  // State: header checkboxes, row checkboxes (per row, per column)
   const [headerCheckboxes, setHeaderCheckboxes] = useState<boolean[]>(
     Array(totalColumns).fill(false)
   );
-  // rowCheckboxes: { [entryId]: boolean[] }
   const [rowCheckboxes, setRowCheckboxes] = useState<Record<string, boolean[]>>(() => {
     const obj: Record<string, boolean[]> = {};
     entries.forEach((e) => {
@@ -57,12 +50,10 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     return obj;
   });
 
-  // If any header or cell is checked, only that column is enabled, others are disabled
-  const activeCol = useMemo(() => {
-    // Check header
+  const checkedColumn = useMemo(() => {
     const headerIdx = headerCheckboxes.findIndex((checked, idx) => allowedColumns[idx] && checked);
     if (headerIdx !== -1) return headerIdx;
-    // Check cells
+
     for (const rowId in rowCheckboxes) {
       const arr = rowCheckboxes[rowId];
       const idx = arr.findIndex((checked, colIdx) => allowedColumns[colIdx] && checked);
@@ -71,7 +62,11 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     return null;
   }, [headerCheckboxes, rowCheckboxes, allowedColumns]);
 
-  // Handlers
+  const headersVisibility = headerCheckboxes.map((checked) => checked);
+  const checkboxesDisabled = allowedColumns.map((allowed, idx) =>
+    allowed ? checkedColumn !== null && checkedColumn !== idx : true
+  );
+
   const handleHeaderCheckboxChange = (colIndex: number, checked: boolean) => {
     setHeaderCheckboxes((prev) => {
       const next = [...prev];
@@ -96,22 +91,6 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     setHeaderCheckboxes((prev) => prev.map((v, idx) => (idx === colIndex ? false : v)));
   };
 
-  // Visibility: header checkboxes always visible; cell checkboxes visible if header checked, or cell checked, or hovered (hover handled in TableRow)
-  const cellCheckboxesVisible = useMemo(
-    () => headerCheckboxes.map((checked, idx) => checked),
-    [headerCheckboxes]
-  );
-
-  // Disabled: if any col is active, only that col is enabled
-  const checkboxesDisabled = useMemo(
-    () =>
-      allowedColumns.map((allowed, idx) =>
-        allowed ? activeCol !== null && activeCol !== idx : true
-      ),
-    [allowedColumns, activeCol]
-  );
-
-  // For each row, build rowCheckboxes, cellCheckboxesVisible, cellCheckboxesDisabled
   return (
     <>
       <Table testId="bulk-edit-table" style={styles.table}>
@@ -133,10 +112,9 @@ export const EntryTable: React.FC<EntryTableProps> = ({
               locale={locale}
               rowCheckboxes={rowCheckboxes[entry.sys.id] || Array(totalColumns).fill(false)}
               onCellCheckboxChange={handleCellCheckboxChange}
-              cellCheckboxesVisible={cellCheckboxesVisible}
+              cellCheckboxesVisible={headersVisibility}
               cellCheckboxesDisabled={checkboxesDisabled}
               headerCheckboxes={headerCheckboxes}
-              displayFieldId={contentType?.displayField}
             />
           ))}
         </Table.Body>

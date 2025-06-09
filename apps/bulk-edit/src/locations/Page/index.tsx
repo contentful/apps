@@ -45,6 +45,22 @@ const Page = () => {
     return allContentTypes;
   };
 
+  const buildQuery = (sortOption: string, displayField: string) => {
+    const getOrder = (sortOption: string) => {
+      if (sortOption === 'displayName_asc') return `fields.${displayField}`;
+      else if (sortOption === 'displayName_desc') return `-fields.${displayField}`;
+      else if (sortOption === 'updatedAt_desc') return '-sys.updatedAt';
+      else if (sortOption === 'updatedAt_asc') return 'sys.updatedAt';
+    };
+
+    return {
+      content_type: selectedContentTypeId,
+      skip: activePage * itemsPerPage,
+      limit: itemsPerPage,
+      order: getOrder(sortOption),
+    };
+  };
+
   useEffect(() => {
     const fetchContentTypes = async (): Promise<void> => {
       setLoading(true);
@@ -90,25 +106,15 @@ const Page = () => {
             type: f.type,
           }))
         );
-        let order;
-        let displayField = ct.displayField || 'displayName';
-        if (sortOption === 'displayName_asc') order = `fields.${displayField}`;
-        else if (sortOption === 'displayName_desc') order = `-fields.${displayField}`;
-        else if (sortOption === 'updatedAt_desc') order = '-sys.updatedAt';
-        else if (sortOption === 'updatedAt_asc') order = 'sys.updatedAt';
+        const displayField = ct.displayField || 'displayName';
 
-        const res = await sdk.cma.entry.getMany({
+        const { items, total } = await sdk.cma.entry.getMany({
           spaceId: sdk.ids.space,
           environmentId: sdk.ids.environment,
-          query: {
-            content_type: selectedContentTypeId,
-            skip: activePage * itemsPerPage,
-            limit: itemsPerPage,
-            order,
-          },
+          query: buildQuery(sortOption, displayField),
         });
-        setEntries(res.items || []);
-        setTotalEntries(res.total || 0);
+        setEntries(items || []);
+        setTotalEntries(total || 0);
       } catch (e) {
         setEntries([]);
         setFields([]);

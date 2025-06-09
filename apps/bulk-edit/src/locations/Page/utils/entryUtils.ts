@@ -84,12 +84,7 @@ export const getEntryTitle = (
   if (!displayFieldId) return 'Untitled';
 
   const value = entry.fields[displayFieldId]?.[locale];
-  if (
-    value === undefined ||
-    value === null ||
-    value === '' ||
-    (typeof value === 'object' && value !== null)
-  ) {
+  if (value === undefined || value === null || value === '') {
     return 'Untitled';
   }
   return String(value);
