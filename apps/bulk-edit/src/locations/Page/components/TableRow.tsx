@@ -40,7 +40,7 @@ export const TableRow: React.FC<TableRowProps> = ({
   headerCheckboxes,
 }) => {
   const status = getStatus(entry);
-  const [hoveredCol, setHoveredCol] = useState<number | null>(null);
+  const [hoveredColumn, setHoveredColumn] = useState<number | null>(null);
 
   return (
     <Table.Row key={entry.sys.id}>
@@ -61,27 +61,28 @@ export const TableRow: React.FC<TableRowProps> = ({
         <Badge variant={status.color}>{status.label}</Badge>
       </Table.Cell>
       {fields.map((field, idx) => {
-        const colIndex = idx + 2; // 0: display name, 1: status, 2+: fields
+        const columnIndex = idx + 2;
         if (isCheckboxAllowed(field)) {
-          const isChecked = rowCheckboxes[colIndex];
-          // Show checkbox if: header is checked, cell is checked, or hovered
+          const isChecked = rowCheckboxes[columnIndex];
           const showCheckbox =
-            cellCheckboxesVisible[colIndex] ||
+            cellCheckboxesVisible[columnIndex] ||
             isChecked ||
-            headerCheckboxes[colIndex] ||
-            hoveredCol === colIndex;
+            headerCheckboxes[columnIndex] ||
+            hoveredColumn === columnIndex;
           return (
             <Table.Cell
               key={field.id}
               style={styles.cell}
-              onMouseEnter={() => setHoveredCol(colIndex)}
-              onMouseLeave={() => setHoveredCol(null)}
+              onMouseEnter={() => setHoveredColumn(columnIndex)}
+              onMouseLeave={() => setHoveredColumn(null)}
               isTruncated>
               <Flex gap="spacingXs" alignItems="center">
                 <Checkbox
                   isChecked={isChecked}
-                  isDisabled={cellCheckboxesDisabled[colIndex]}
-                  onChange={(e) => onCellCheckboxChange(entry.sys.id, colIndex, e.target.checked)}
+                  isDisabled={cellCheckboxesDisabled[columnIndex]}
+                  onChange={(e) =>
+                    onCellCheckboxChange(entry.sys.id, columnIndex, e.target.checked)
+                  }
                   inputProps={{ 'data-test-id': `cell-checkbox-${entry.sys.id}-${field.id}` }}
                   aria-label={`Select for ${field.name}`}
                   style={{ display: showCheckbox ? undefined : 'none' }}
@@ -91,7 +92,6 @@ export const TableRow: React.FC<TableRowProps> = ({
             </Table.Cell>
           );
         }
-        // Disabled cell: render value in gray500
         return (
           <Table.Cell key={field.id} style={styles.cell}>
             <Text fontColor="gray500">

@@ -51,14 +51,21 @@ export const EntryTable: React.FC<EntryTableProps> = ({
   });
 
   const checkedColumn = useMemo(() => {
-    const headerIdx = headerCheckboxes.findIndex((checked, idx) => allowedColumns[idx] && checked);
-    if (headerIdx !== -1) return headerIdx;
+    // Check if any header checkbox for an allowed column is checked
+    const checkedHeaderColumnIndex = headerCheckboxes.findIndex(
+      (isChecked, columnIndex) => allowedColumns[columnIndex] && isChecked
+    );
+    if (checkedHeaderColumnIndex !== -1) return checkedHeaderColumnIndex;
 
+    // If no header checkbox is checked, check all rows for a checked cell in an allowed column
     for (const rowId in rowCheckboxes) {
-      const arr = rowCheckboxes[rowId];
-      const idx = arr.findIndex((checked, colIdx) => allowedColumns[colIdx] && checked);
-      if (idx !== -1) return idx;
+      const row = rowCheckboxes[rowId];
+      const checkedCellColumnIndex = row.findIndex(
+        (isChecked, columnIndex) => allowedColumns[columnIndex] && isChecked
+      );
+      if (checkedCellColumnIndex !== -1) return checkedCellColumnIndex;
     }
+    // No checked column found
     return null;
   }, [headerCheckboxes, rowCheckboxes, allowedColumns]);
 
@@ -67,28 +74,30 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     allowed ? checkedColumn !== null && checkedColumn !== idx : true
   );
 
-  const handleHeaderCheckboxChange = (colIndex: number, checked: boolean) => {
+  const handleHeaderCheckboxChange = (columnIndex: number, checked: boolean) => {
     setHeaderCheckboxes((prev) => {
       const next = [...prev];
-      next[colIndex] = checked;
+      next[columnIndex] = checked;
       return next;
     });
     setRowCheckboxes((prev) => {
       const next: Record<string, boolean[]> = {};
       Object.entries(prev).forEach(([rowId, arr]) => {
-        next[rowId] = arr.map((v, idx) => (idx === colIndex ? checked : false));
+        next[rowId] = arr.map((_, index) => (index === columnIndex ? checked : false));
       });
       return next;
     });
   };
 
-  const handleCellCheckboxChange = (rowId: string, colIndex: number, checked: boolean) => {
+  const handleCellCheckboxChange = (rowId: string, columnIndex: number, checked: boolean) => {
     setRowCheckboxes((prev) => {
       const next = { ...prev };
-      next[rowId] = prev[rowId].map((v, idx) => (idx === colIndex ? checked : false));
+      next[rowId] = prev[rowId].map((_, index) => (index === columnIndex ? checked : false));
       return next;
     });
-    setHeaderCheckboxes((prev) => prev.map((v, idx) => (idx === colIndex ? false : v)));
+    setHeaderCheckboxes((prev) =>
+      prev.map((value, index) => (index === columnIndex ? false : value))
+    );
   };
 
   return (

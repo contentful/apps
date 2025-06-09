@@ -36,16 +36,17 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           </Flex>
         </Table.Cell>
         {fields.map((field, idx) => {
-          const colIndex = idx + 2; // 0: display name, 1: status, 2+: fields
-          const isDisabled = checkboxesDisabled[colIndex];
-          if (isCheckboxAllowed(field)) {
+          const columnIndex = idx + 2;
+          const isAllowed = isCheckboxAllowed(field);
+          const isDisabled = checkboxesDisabled[columnIndex];
+          if (isAllowed) {
             return (
               <Table.Cell as="th" key={field.id} style={styles.tableHeader} isTruncated>
                 <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
                   <Checkbox
-                    isChecked={headerCheckboxes[colIndex]}
+                    isChecked={headerCheckboxes[columnIndex]}
                     isDisabled={isDisabled}
-                    onChange={(e) => onHeaderCheckboxChange(colIndex, e.target.checked)}
+                    onChange={(e) => onHeaderCheckboxChange(columnIndex, e.target.checked)}
                     testId={`header-checkbox-${field.id}`}
                     aria-label={`Select all for ${truncate(field.name)}`}
                   />
@@ -54,7 +55,6 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
               </Table.Cell>
             );
           }
-          // Disabled field: add Question icon with tooltip
           return (
             <Table.Cell as="th" key={field.id} style={styles.tableHeader}>
               <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
@@ -65,7 +65,6 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
                   <QuestionIcon
                     size={16}
                     aria-label={`Bulk editing not supported for ${field.name}`}
-                    tabIndex={0}
                   />
                 </Tooltip>
               </Flex>

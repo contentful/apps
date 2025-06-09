@@ -29,12 +29,12 @@ export const SortMenu: React.FC<SortMenuProps> = ({ sortOption, onSortChange }) 
           </IconButton>
         </Menu.Trigger>
         <Menu.List>
-          {SORT_OPTIONS.map((opt) => (
+          {SORT_OPTIONS.map((option) => (
             <Menu.Item
-              key={opt.value}
-              isActive={sortOption === opt.value}
-              onClick={() => onSortChange(opt.value)}>
-              {opt.label}
+              key={option.value}
+              isActive={sortOption === option.value}
+              onClick={() => onSortChange(option.value)}>
+              {option.label}
             </Menu.Item>
           ))}
         </Menu.List>
