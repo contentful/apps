@@ -58,6 +58,7 @@ export default class NeflifySidebarBuildButton extends React.Component {
         this.setState(({ history }) => {
           return {
             history: [msg].concat(history),
+            staleBuildDetected: false, // Clear warning when new messages arrive
             ...messageToState(msg),
           };
         });
@@ -67,16 +68,49 @@ export default class NeflifySidebarBuildButton extends React.Component {
     await this.pubsub.start();
 
     const history = await this.pubsub.getHistory();
-    const filteredHistory = history
+    const cleanHistory = history
       .filter((msg, i, history) => !isOutOfOrder(msg, history.slice(i + 1)))
       .filter((msg, i, history) => !isDuplicate(msg, history.slice(i + 1)));
 
-    if (filteredHistory.length > 0) {
-      this.setState({
-        history: filteredHistory,
-        ...messageToState(filteredHistory[0]),
-      });
+    let staleTriggeredMessageFound = false;
+
+    // Check if the most recent message is a stale triggered message
+    if (cleanHistory.length > 0) {
+      const latestMessage = cleanHistory[0];
+      if (latestMessage.event === EVENT_TRIGGERED && latestMessage.t) {
+        const messageAge = Date.now() - latestMessage.t.getTime();
+        const fiveMinutesMs = 5 * 60 * 1000;
+        if (messageAge > fiveMinutesMs) {
+          // This is a stale triggered message that was never completed
+          staleTriggeredMessageFound = true;
+        }
+      }
     }
+
+    const filteredHistory = cleanHistory.filter((msg) => {
+      // Filter out stale "triggered" messages older than 5 minutes
+      if (msg.event === EVENT_TRIGGERED && msg.t) {
+        const messageAge = Date.now() - msg.t.getTime();
+        const fiveMinutesMs = 5 * 60 * 1000;
+        if (messageAge > fiveMinutesMs) {
+          return false; // Filter out stale triggered message
+        }
+      }
+      return true;
+    });
+
+    const stateUpdate = { history: filteredHistory };
+
+    if (filteredHistory.length > 0) {
+      Object.assign(stateUpdate, messageToState(filteredHistory[0]));
+    }
+
+    // Only show warning if the most recent message was a stale triggered (truly stuck)
+    if (staleTriggeredMessageFound) {
+      stateUpdate.staleBuildDetected = true;
+    }
+
+    this.setState(stateUpdate);
 
     this.setState({ ready: true });
   };
@@ -107,7 +141,7 @@ export default class NeflifySidebarBuildButton extends React.Component {
   };
 
   render() {
-    const { ready, busy, status, misconfigured, info, ok } = this.state;
+    const { ready, busy, status, misconfigured, info, ok, staleBuildDetected } = this.state;
 
     return (
       <div className={styles.body}>
@@ -122,6 +156,14 @@ export default class NeflifySidebarBuildButton extends React.Component {
         {misconfigured && (
           <div className={styles.info}>
             <ValidationMessage>Check Netlify App configuration!</ValidationMessage>
+          </div>
+        )}
+        {staleBuildDetected && (
+          <div className={styles.info}>
+            <ValidationMessage>
+              Contentful lost connection to update the build status. Verify that your last build
+              completed successfully in the Netlify app.
+            </ValidationMessage>
           </div>
         )}
         {info && (
