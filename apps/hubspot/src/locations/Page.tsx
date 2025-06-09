@@ -201,6 +201,7 @@ const Page = () => {
       );
 
       console.log('HubSpot response:', res);
+      console.log('HubSpot response BODY:', JSON.parse(res.response.body));
 
       if (res.response) {
         const emailData = JSON.parse(res.response.body).results;
