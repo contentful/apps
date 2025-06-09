@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Table, TextLink, Badge, Checkbox, Flex } from '@contentful/f36-components';
+import { Table, TextLink, Badge, Checkbox, Flex, Text } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { Entry, ContentTypeField } from '../types';
 import { ContentTypeProps } from 'contentful-management';
@@ -91,9 +91,12 @@ export const TableRow: React.FC<TableRowProps> = ({
             </Table.Cell>
           );
         }
+        // Disabled cell: render value in gray500
         return (
           <Table.Cell key={field.id} style={styles.cell}>
-            {renderFieldValue(field, entry.fields[field.id]?.[locale])}
+            <Text fontColor="gray500">
+              {renderFieldValue(field, entry.fields[field.id]?.[locale])}
+            </Text>
           </Table.Cell>
         );
       })}

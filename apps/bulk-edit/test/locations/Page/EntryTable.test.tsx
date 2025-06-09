@@ -251,4 +251,34 @@ describe('EntryTable', () => {
     expect(cellCheckboxes[0]).toBeInTheDocument();
     expect(cellCheckboxes[0]).not.toBeChecked();
   });
+
+  it('shows the Status column tooltip on hover with correct text', async () => {
+    const fields: ContentTypeField[] = [
+      { id: 'name', name: 'Name', type: 'Symbol' },
+      { id: 'location', name: 'Location', type: 'Location' },
+      { id: 'cost', name: 'Cost', type: 'Number' },
+    ];
+    render(
+      <EntryTable
+        entries={mockEntries}
+        fields={fields}
+        contentType={mockContentType}
+        spaceId="space-1"
+        environmentId="env-1"
+        locale="en-US"
+        activePage={0}
+        totalEntries={2}
+        itemsPerPage={15}
+        onPageChange={() => {}}
+        onItemsPerPageChange={() => {}}
+        pageSizeOptions={[15, 50, 100]}
+      />
+    );
+
+    const statusIcon = screen.getByLabelText('Bulk editing not supported for Status');
+    expect(statusIcon).toBeInTheDocument();
+    fireEvent.mouseOver(statusIcon);
+
+    expect(await screen.findByText('Bulk editing is not supported for Status')).toBeInTheDocument();
+  });
 });

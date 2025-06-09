@@ -1,5 +1,7 @@
 import React from 'react';
 import { Table, Checkbox, Flex } from '@contentful/f36-components';
+import { Tooltip } from '@contentful/f36-tooltip';
+import { QuestionIcon } from '@phosphor-icons/react';
 import { ContentTypeField } from '../types';
 import { styles } from '../styles';
 import { truncate, isCheckboxAllowed } from '../utils/entryUtils';
@@ -26,17 +28,23 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           </Table.Cell>
         )}
         <Table.Cell as="th" key="status" style={styles.tableHeader}>
-          Status
+          <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
+            Status
+            <Tooltip content="Bulk editing is not supported for Status" placement="top">
+              <QuestionIcon size={16} aria-label="Bulk editing not supported for Status" />
+            </Tooltip>
+          </Flex>
         </Table.Cell>
         {fields.map((field, idx) => {
           const colIndex = idx + 2; // 0: display name, 1: status, 2+: fields
+          const isDisabled = checkboxesDisabled[colIndex];
           if (isCheckboxAllowed(field)) {
             return (
               <Table.Cell as="th" key={field.id} style={styles.tableHeader} isTruncated>
-                <Flex gap="spacingXs" alignItems="center">
+                <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
                   <Checkbox
                     isChecked={headerCheckboxes[colIndex]}
-                    isDisabled={checkboxesDisabled[colIndex]}
+                    isDisabled={isDisabled}
                     onChange={(e) => onHeaderCheckboxChange(colIndex, e.target.checked)}
                     testId={`header-checkbox-${field.id}`}
                     aria-label={`Select all for ${truncate(field.name)}`}
@@ -46,9 +54,21 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
               </Table.Cell>
             );
           }
+          // Disabled field: add Question icon with tooltip
           return (
             <Table.Cell as="th" key={field.id} style={styles.tableHeader}>
-              {truncate(field.name)}
+              <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
+                {truncate(field.name)}
+                <Tooltip
+                  content={`Bulk editing is not supported for the ${field.name} field type`}
+                  placement="top">
+                  <QuestionIcon
+                    size={16}
+                    aria-label={`Bulk editing not supported for ${field.name}`}
+                    tabIndex={0}
+                  />
+                </Tooltip>
+              </Flex>
             </Table.Cell>
           );
         })}
