@@ -1139,7 +1139,11 @@ export class App extends React.Component<AppProps, AppState> {
                 </Tabs.Panel>
 
                 <Tabs.Panel id="metadata">
-                  <MetadataPanel asset={this.state.value} onSubmit={this.updateMetadata} />
+                  <MetadataPanel
+                    asset={this.state.value}
+                    onSubmit={this.updateMetadata}
+                    sdk={this.props.sdk}
+                  />
                 </Tabs.Panel>
 
                 <Tabs.Panel id="playercode">

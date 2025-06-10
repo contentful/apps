@@ -10,6 +10,7 @@ import {
 } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { MuxContentfulObject } from '../../util/types';
+import { FieldExtensionSDK } from '@contentful/app-sdk';
 
 const metadataLink = 'https://www.mux.com/docs/guides/add-metadata-to-your-videos';
 
@@ -27,14 +28,17 @@ interface MetadataPanelProps {
     };
     customMetadata?: string;
   }) => void;
+  sdk: FieldExtensionSDK;
 }
 
-export const MetadataPanel: FC<MetadataPanelProps> = ({ asset, onSubmit }) => {
+export const MetadataPanel: FC<MetadataPanelProps> = ({ asset, onSubmit, sdk }) => {
   const [standardMetadata, setStandardMetadata] = useState({
     title: asset.meta?.title || '',
     creatorId: asset.meta?.creator_id || '',
     externalId: asset.meta?.external_id || '',
   });
+
+  const [hasTitleField, setHasTitleField] = useState(false);
 
   const [customMetadata, setCustomMetadata] = useState(asset.passthrough || '');
 
@@ -83,6 +87,35 @@ export const MetadataPanel: FC<MetadataPanelProps> = ({ asset, onSubmit }) => {
     validateAllFields();
   }, [standardMetadata, customMetadata]);
 
+  useEffect(() => {
+    const TITLE_FIELD_ID = 'title';
+    const titleField = sdk.entry.fields[TITLE_FIELD_ID];
+
+    if (!titleField) {
+      console.debug(`No ${TITLE_FIELD_ID} field detected. Skipping sync.`);
+      setHasTitleField(false);
+      return;
+    }
+
+    setHasTitleField(true);
+
+    const syncFromTitle = (newVal: string) => {
+      if (newVal !== standardMetadata.title) {
+        setStandardMetadata((prev) => ({ ...prev, title: newVal }));
+      }
+    };
+
+    syncFromTitle(titleField.getValue());
+
+    const detach = titleField.onValueChanged((newValue) => {
+      syncFromTitle(newValue);
+    });
+
+    return () => {
+      detach();
+    };
+  }, [sdk.entry.fields]);
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (validateAllFields()) {
@@ -103,10 +136,15 @@ export const MetadataPanel: FC<MetadataPanelProps> = ({ asset, onSubmit }) => {
           value={standardMetadata.title}
           onChange={(e) => setStandardMetadata({ ...standardMetadata, title: e.target.value })}
           placeholder="The video title"
+          isDisabled={hasTitleField}
         />
-        <FormControl.HelpText>
-          The video title that will be displayed in the player.
-        </FormControl.HelpText>
+        {hasTitleField && (
+          <FormControl.HelpText>
+            This field is synchronized with the "Title" field of the content model.
+            <br />
+            To modify the title, update the "Title" field in the main model.
+          </FormControl.HelpText>
+        )}
         {validationErrors.title && (
           <FormControl.ValidationMessage>{validationErrors.title}</FormControl.ValidationMessage>
         )}
