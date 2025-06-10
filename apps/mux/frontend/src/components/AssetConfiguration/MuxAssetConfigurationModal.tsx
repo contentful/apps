@@ -45,7 +45,6 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
       closedCaptions: null,
     },
     mp4Config: {
-      enabled: false,
       audioOnly: false,
       highestResolution: false,
     },
@@ -79,7 +78,6 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
           closedCaptions: null,
         },
         mp4Config: {
-          enabled: false,
           audioOnly: false,
           highestResolution: false,
         },
@@ -189,7 +187,6 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
                   onMp4ConfigChange={(config) =>
                     setModalData((prev) => ({ ...prev, mp4Config: config }))
                   }
-                  onValidationChange={(isValid) => handleValidationChange('mp4', isValid)}
                 />
               </Accordion.Item>
             </>

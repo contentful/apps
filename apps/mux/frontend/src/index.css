@@ -50,3 +50,98 @@ body {
   margin-left: 10px;
 }
 
+.tabs-scroll {
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: thin;
+  position: relative;
+  mask-image: linear-gradient(to right, black 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 80%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 5%, black 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 80%, transparent 100%);
+}
+
+.tabs-scroll > [role="tab"] {
+  flex: 0 0 auto;
+}
+
+.tabs-scroll:not(:hover) {
+  mask-image: linear-gradient(to right, black 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 80%, transparent 100%);
+}
+
+.tabs-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tabs-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.tabs-scroll::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.tab-nowrap {
+  flex: 0 0 auto;
+}
+
+.tabs-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.tabs-scroll-button {
+  position: absolute;
+  z-index: 1;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.tabs-container:hover .tabs-scroll-button {
+  opacity: 1;
+}
+
+.tabs-scroll-button-left {
+  left: 0;
+}
+
+.tabs-scroll-button-right {
+  right: 0;
+}
+
+.tabs-scroll-button:disabled {
+  opacity: 0;
+  cursor: default;
+}
+
+.tabs-scroll-button-icon {
+  width: 12px;
+  height: 12px;
+  border-style: solid;
+  border-width: 2px 2px 0 0;
+  border-color: #6B7280;
+}
+
+.tabs-scroll-button-left .tabs-scroll-button-icon {
+  transform: rotate(-135deg);
+  margin-left: 4px;
+}
+
+.tabs-scroll-button-right .tabs-scroll-button-icon {
+  transform: rotate(45deg);
+  margin-right: 4px;
+}
+

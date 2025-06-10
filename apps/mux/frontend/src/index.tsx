@@ -29,6 +29,7 @@ import MuxAssetConfigurationModal, {
 import UploadArea from './components/UploadArea/UploadArea';
 import Mp4RenditionsPanel from './components/AssetConfiguration/Mp4RenditionsPanel';
 import TrackForm from './components/TrackForm/TrackForm';
+import MetadataPanel from './components/AssetConfiguration/MetadataPanel';
 
 import {
   type InstallationParams,
@@ -50,6 +51,7 @@ import {
   uploadTrack,
   deleteTrack,
 } from './util/muxApi';
+import { AssetSettings } from './util/muxApi';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -105,7 +107,6 @@ export class App extends React.Component<AppProps, AppState> {
       pendingUploadURL: null,
       isPolling: false,
       initialResyncDone: false,
-      isEditMode: false,
       captionname: undefined,
       audioName: undefined,
       playbackToken: undefined,
@@ -327,29 +328,7 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
-  handleEditAsset = () => {
-    this.setState({ modalAssetConfigurationVisible: true, isEditMode: true });
-  };
-
-  handleUpdateAsset = async (options: ModalData) => {
-    if (!this.state.value?.assetId) return;
-
-    const res = await updateAsset(this.apiClient, this.state.value.assetId, options);
-
-    if (!this.responseCheck(res)) {
-      return;
-    }
-
-    await this.resync();
-    this.setState({ modalAssetConfigurationVisible: false, isEditMode: false });
-  };
-
   onConfirmModal = async (options: ModalData) => {
-    if (this.state.isEditMode) {
-      await this.handleUpdateAsset(options);
-      return;
-    }
-
     if (this.state.pendingUploadURL) {
       await addByURL(
         this.apiClient,
@@ -394,7 +373,7 @@ export class App extends React.Component<AppProps, AppState> {
         this.fileInputRef.current.value = '';
       }
     }
-    this.setState({ modalAssetConfigurationVisible: false, isEditMode: false });
+    this.setState({ modalAssetConfigurationVisible: false });
   };
 
   onUploadError = (progress: CustomEvent) => {
@@ -936,6 +915,42 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
+  updateMetadata = async (metadata: {
+    standardMetadata: {
+      title?: string;
+      creatorId?: string;
+      externalId?: string;
+    };
+    customMetadata?: string;
+  }) => {
+    if (!this.state.value?.assetId) {
+      this.props.sdk.notifier.error('No asset selected');
+      return;
+    }
+
+    try {
+      const settings: AssetSettings = {
+        meta: metadata.standardMetadata
+          ? {
+              title: metadata.standardMetadata.title || '',
+              creator_id: metadata.standardMetadata.creatorId || '',
+              external_id: metadata.standardMetadata.externalId || '',
+            }
+          : undefined,
+        passthrough: metadata.customMetadata,
+        playback_policies: [],
+        video_quality: '',
+        inputs: [],
+      };
+
+      await updateAsset(this.apiClient, this.state.value.assetId, settings);
+      await this.resync({ skipPlayerResync: true });
+    } catch (error) {
+      console.error('Error updating metadata:', error);
+      this.props.sdk.notifier.error('Error updating metadata');
+    }
+  };
+
   render = () => {
     const modal = (
       <MuxAssetConfigurationModal
@@ -943,7 +958,6 @@ export class App extends React.Component<AppProps, AppState> {
         onClose={this.onCloseModal}
         onConfirm={this.onConfirmModal}
         installationParams={this.props.sdk.parameters.installation as InstallationParams}
-        isEditMode={this.state.isEditMode}
         asset={this.state.value}
       />
     );
@@ -1071,14 +1085,15 @@ export class App extends React.Component<AppProps, AppState> {
                   requestDeleteAsset={this.requestDeleteAsset}
                   resync={this.resync}
                   assetId={this.state.value.assetId}
-                  onEdit={this.handleEditAsset}
                 />
               </Box>
 
               <Tabs defaultTab="captions">
-                <Tabs.List variant="horizontal-divider">
+                <Tabs.List variant="horizontal-divider" className="tabs-scroll">
                   <Tabs.Tab panelId="captions">Captions</Tabs.Tab>
                   <Tabs.Tab panelId="audio">Audio</Tabs.Tab>
+                  <Tabs.Tab panelId="metadata">Metadata</Tabs.Tab>
+                  <Tabs.Tab panelId="thumbnail">Thumbnail</Tabs.Tab>
                   <Tabs.Tab panelId="playercode">Player Code</Tabs.Tab>
                   <Tabs.Tab panelId="mp4renditions">MP4 Renditions</Tabs.Tab>
                   <Tabs.Tab panelId="debug">Data</Tabs.Tab>
@@ -1120,6 +1135,10 @@ export class App extends React.Component<AppProps, AppState> {
                     type="audio"
                     title="Add Audio track"
                   />
+                </Tabs.Panel>
+
+                <Tabs.Panel id="metadata">
+                  <MetadataPanel asset={this.state.value} onSubmit={this.updateMetadata} />
                 </Tabs.Panel>
 
                 <Tabs.Panel id="playercode">

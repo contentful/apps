@@ -6,7 +6,6 @@ interface MenuProps {
   requestDeleteAsset: () => void;
   resync: () => void;
   assetId: string;
-  onEdit: () => void;
 }
 
 class Menu extends React.Component<MenuProps, {}> {
@@ -20,11 +19,6 @@ class Menu extends React.Component<MenuProps, {}> {
             </Flex>
           </Flex>
           <Flex>
-            <Flex marginRight="spacingM">
-              <Button variant="secondary" onClick={this.props.onEdit} id="edit">
-                Edit
-              </Button>
-            </Flex>
             <Flex marginRight="spacingM">
               <Button variant="secondary" onClick={this.props.requestRemoveAsset} id="remove">
                 Remove

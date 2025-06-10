@@ -1,7 +1,7 @@
 import { ModalData } from '../components/AssetConfiguration/MuxAssetConfigurationModal';
 import { InstallationParams, ResolutionType } from './types';
 
-interface AssetSettings {
+export interface AssetSettings {
   passthrough?: string;
   playback_policies: string[];
   video_quality: string;
@@ -87,7 +87,7 @@ function buildAssetSettings(options: ModalData): AssetSettings {
   }
 
   // MP4 renditions case
-  if (options.mp4Config.enabled) {
+  if (options.mp4Config.highestResolution || options.mp4Config.audioOnly) {
     settings.static_renditions = [];
     if (options.mp4Config.audioOnly) {
       settings.static_renditions.push({
@@ -209,23 +209,15 @@ export async function createStaticRendition(apiClient: any, assetId: string, typ
   );
 }
 
-export async function updateAsset(apiClient: any, assetId: string, options: ModalData) {
+export async function updateAsset(apiClient: any, assetId: string, settings: AssetSettings) {
   const requestBody: any = {
-    meta: {
+    meta: settings.meta || {
       title: '',
       creator_id: '',
       external_id: '',
     },
-    passthrough: '',
+    passthrough: settings.passthrough || '',
   };
-
-  if (options.metadataConfig.enabled) {
-    const { title, creatorId, externalId } = options.metadataConfig.standardMetadata ?? {};
-    requestBody.meta.title = title ?? '';
-    requestBody.meta.creator_id = creatorId ?? '';
-    requestBody.meta.external_id = externalId ?? '';
-    requestBody.passthrough = options.metadataConfig.customMetadata ?? '';
-  }
 
   return await apiClient.patch(`/video/v1/assets/${assetId}`, JSON.stringify(requestBody));
 }

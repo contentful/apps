@@ -34,7 +34,6 @@ export interface AppState {
   pendingUploadURL: string | null;
   isPolling: boolean;
   initialResyncDone: boolean;
-  isEditMode: boolean;
 }
 
 export type ResolutionType = 'highest' | 'audio-only';
