@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, beforeEach, vi, expect } from 'vitest';
 import Page from '../../../src/locations/Page';
 import { mockSdk } from '../../mocks/mockSdk';
@@ -10,7 +10,7 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
-describe('Page Loading States', () => {
+describe('Page', () => {
   beforeEach(() => {
     mockSdk.cma = createMockCma();
     mockSdk.cma.contentType.getMany = vi
@@ -23,6 +23,14 @@ describe('Page Loading States', () => {
     expect(screen.getAllByTitle('Loading…')[0]).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.queryByTitle('Loading…')).not.toBeInTheDocument();
+    });
+  });
+
+  it('renders the main page structure', async () => {
+    render(<Page />);
+    await waitFor(() => {
+      expect(screen.getByTestId('content-types-nav')).toBeInTheDocument();
+      expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
     });
   });
 });

@@ -1,0 +1,173 @@
+import React, { useState, useMemo } from 'react';
+import { Table, Box, Pagination } from '@contentful/f36-components';
+import { Entry, ContentTypeField } from '../types';
+import { ContentTypeProps } from 'contentful-management';
+import { styles } from '../styles';
+import { TableHeader } from './TableHeader';
+import { TableRow } from './TableRow';
+import { isCheckboxAllowed as isBulkEditable } from '../utils/entryUtils';
+import { DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN } from '../utils/constants';
+
+interface EntryTableProps {
+  entries: Entry[];
+  fields: ContentTypeField[];
+  contentType?: ContentTypeProps;
+  spaceId: string;
+  environmentId: string;
+  locale: string;
+  activePage: number;
+  totalEntries: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
+  onItemsPerPageChange: (itemsPerPage: number) => void;
+  pageSizeOptions: number[];
+}
+
+function getColumnIds(fields: ContentTypeField[]): string[] {
+  return [DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN, ...fields.map((field) => field.id)];
+}
+
+function getBulkEditableColumns(fields: ContentTypeField[]): Record<string, boolean> {
+  const bulkEditableColumns = fields.map((field) => {
+    return [field.id, isBulkEditable(field)];
+  });
+
+  return {
+    [DISPLAY_NAME_COLUMN]: false,
+    [ENTRY_STATUS_COLUMN]: false,
+    ...Object.fromEntries(bulkEditableColumns),
+  };
+}
+
+function getInitialCheckboxState(columnIds: string[]): Record<string, boolean> {
+  return Object.fromEntries(columnIds.map((columnId) => [columnId, false]));
+}
+
+function getInitialRowCheckboxState(
+  entries: Entry[],
+  columnIds: string[]
+): Record<string, Record<string, boolean>> {
+  const entryCheckboxStates: Record<string, Record<string, boolean>> = {};
+  entries.forEach((entry) => {
+    entryCheckboxStates[entry.sys.id] = getInitialCheckboxState(columnIds);
+  });
+  return entryCheckboxStates;
+}
+
+export const EntryTable: React.FC<EntryTableProps> = ({
+  entries,
+  fields,
+  contentType,
+  spaceId,
+  environmentId,
+  locale,
+  activePage,
+  totalEntries,
+  itemsPerPage,
+  onPageChange,
+  onItemsPerPageChange,
+  pageSizeOptions,
+}) => {
+  const columnIds = getColumnIds(fields);
+  const allowedColumns = getBulkEditableColumns(fields);
+
+  const [headerCheckboxes, setHeaderCheckboxes] = useState<Record<string, boolean>>(
+    getInitialCheckboxState(columnIds)
+  );
+
+  const [rowCheckboxes, setRowCheckboxes] = useState<Record<string, Record<string, boolean>>>(
+    getInitialRowCheckboxState(entries, columnIds)
+  );
+
+  const checkedColumnId = useMemo(() => {
+    // Check header first
+    const checkedHeaderId = columnIds.find((columnId) => headerCheckboxes[columnId]);
+    if (checkedHeaderId) return checkedHeaderId;
+    // Then check rows
+    for (const entryId in rowCheckboxes) {
+      const row = rowCheckboxes[entryId];
+      const checkedCellId = columnIds.find((columnId) => allowedColumns[columnId] && row[columnId]);
+      if (checkedCellId) return checkedCellId;
+    }
+    return null;
+  }, [headerCheckboxes, rowCheckboxes, allowedColumns, columnIds]);
+
+  const checkboxesDisabled = Object.fromEntries(
+    columnIds.map((columnId) => [
+      columnId,
+      allowedColumns[columnId] ? checkedColumnId !== null && checkedColumnId !== columnId : true,
+    ])
+  );
+
+  function handleHeaderCheckboxChange(columnId: string, checked: boolean) {
+    setHeaderCheckboxes((previous) => ({ ...previous, [columnId]: checked }));
+
+    setRowCheckboxes((previous) => {
+      const updated: Record<string, Record<string, boolean>> = {};
+      Object.entries(previous).forEach(([entryId, _]) => {
+        updated[entryId] = Object.fromEntries(
+          columnIds.map((id) => [id, id === columnId ? checked : false])
+        );
+      });
+      return updated;
+    });
+  }
+
+  function handleCellCheckboxChange(entryId: string, columnId: string, checked: boolean) {
+    setRowCheckboxes((previous) => {
+      const updated = { ...previous };
+      updated[entryId] = {
+        ...previous[entryId],
+        ...Object.fromEntries(columnIds.map((id) => [id, id === columnId ? checked : false])),
+      };
+      return updated;
+    });
+
+    setHeaderCheckboxes((previous) => ({
+      ...Object.fromEntries(columnIds.map((id) => [id, id === columnId ? false : previous[id]])),
+    }));
+  }
+
+  return (
+    <>
+      <Table testId="bulk-edit-table" style={styles.table}>
+        <TableHeader
+          fields={fields}
+          headerCheckboxes={headerCheckboxes}
+          onHeaderCheckboxChange={handleHeaderCheckboxChange}
+          checkboxesDisabled={checkboxesDisabled}
+        />
+        <Table.Body>
+          {entries.map((entry) => (
+            <TableRow
+              key={entry.sys.id}
+              entry={entry}
+              fields={fields}
+              contentType={contentType}
+              spaceId={spaceId}
+              environmentId={environmentId}
+              locale={locale}
+              rowCheckboxes={rowCheckboxes[entry.sys.id]}
+              onCellCheckboxChange={(columnId, checked) =>
+                handleCellCheckboxChange(entry.sys.id, columnId, checked)
+              }
+              cellCheckboxesDisabled={checkboxesDisabled}
+            />
+          ))}
+        </Table.Body>
+      </Table>
+      <Box marginTop="spacingM">
+        <Pagination
+          activePage={activePage}
+          onPageChange={onPageChange}
+          totalItems={totalEntries}
+          showViewPerPage
+          viewPerPageOptions={pageSizeOptions}
+          itemsPerPage={itemsPerPage}
+          onViewPerPageChange={onItemsPerPageChange}
+          aria-label="Pagination navigation"
+        />
+      </Box>
+    </>
+  );
+};
