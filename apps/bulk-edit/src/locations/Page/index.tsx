@@ -7,6 +7,7 @@ import { styles } from './styles';
 import { ContentTypeSidebar } from './components/ContentTypeSidebar';
 import { SortMenu, SORT_OPTIONS } from './components/SortMenu';
 import { EntryTable } from './components/EntryTable';
+import { BulkEditModal } from './components/BulkEditModal';
 
 const PAGE_SIZE_OPTIONS = [15, 50, 100];
 
@@ -25,6 +26,8 @@ const Page = () => {
   const defaultLocale = sdk.locales.default;
   const [selectedEntryIds, setSelectedEntryIds] = useState<string[]>([]);
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalValue, setModalValue] = useState('');
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -142,6 +145,8 @@ const Page = () => {
   }, [sdk, selectedContentTypeId, activePage, itemsPerPage, sortOption]);
 
   const selectedContentType = contentTypes.find((ct) => ct.sys.id === selectedContentTypeId);
+  const selectedEntries = entries.filter((entry) => selectedEntryIds.includes(entry.sys.id));
+  const selectedField = fields.find((f) => f.id === selectedFieldId) || null;
 
   if (entriesLoading) {
     return (
@@ -173,8 +178,8 @@ const Page = () => {
                   <>
                     <SortMenu sortOption={sortOption} onSortChange={setSortOption} />
                     {selectedFieldId && selectedEntryIds.length > 0 && (
-                      <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
-                        <Button variant="primary">
+                      <Flex alignItems="center" gap="spacingS">
+                        <Button variant="primary" onClick={() => setIsModalOpen(true)}>
                           {selectedEntryIds.length === 1 ? 'Edit' : 'Bulk edit'}
                         </Button>
                         <Text fontColor="gray600">
@@ -208,6 +213,20 @@ const Page = () => {
           </Flex>
         </Box>
       </Box>
+      <BulkEditModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={(val) => {
+          setModalValue(val);
+          setIsModalOpen(false);
+          // TODO: implement actual save logic
+        }}
+        selectedEntries={selectedEntries}
+        selectedField={selectedField}
+        fields={fields}
+        contentType={selectedContentType}
+        locale={locale}
+      />
     </Flex>
   );
 };
