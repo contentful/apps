@@ -959,6 +959,7 @@ export class App extends React.Component<AppProps, AppState> {
         onConfirm={this.onConfirmModal}
         installationParams={this.props.sdk.parameters.installation as InstallationParams}
         asset={this.state.value}
+        sdk={this.props.sdk}
       />
     );
 

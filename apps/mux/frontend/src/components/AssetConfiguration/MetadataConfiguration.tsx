@@ -1,6 +1,7 @@
 import { FC, useState, useEffect } from 'react';
 import { FormControl, TextInput, Textarea, TextLink, Stack } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { FieldExtensionSDK } from '@contentful/app-sdk';
 
 export interface MetadataConfig {
   standardMetadata?: {
@@ -15,6 +16,7 @@ interface MetadataConfigurationProps {
   metadataConfig: MetadataConfig;
   onMetadataChange: (config: MetadataConfig) => void;
   onValidationChange: (isValid: boolean) => void;
+  sdk: FieldExtensionSDK;
 }
 
 const metadataLink = 'https://www.mux.com/docs/guides/add-metadata-to-your-videos';
@@ -27,6 +29,7 @@ export const MetadataConfiguration: FC<MetadataConfigurationProps> = ({
   metadataConfig,
   onMetadataChange,
   onValidationChange,
+  sdk,
 }) => {
   const [standardMetadata, setStandardMetadata] = useState<
     NonNullable<MetadataConfig['standardMetadata']>
@@ -38,6 +41,32 @@ export const MetadataConfiguration: FC<MetadataConfigurationProps> = ({
     externalId?: string;
     customMetadata?: string;
   }>({});
+
+  useEffect(() => {
+    const TITLE_FIELD_ID = 'title';
+    const titleField = sdk.entry.fields[TITLE_FIELD_ID];
+
+    if (!titleField) {
+      console.debug(`No ${TITLE_FIELD_ID} field detected. Skipping sync.`);
+      return;
+    }
+
+    const syncFromTitle = (newVal: string) => {
+      if (newVal !== standardMetadata.title) {
+        handleStandardMetadataChange('title', newVal);
+      }
+    };
+
+    syncFromTitle(titleField.getValue());
+
+    const detach = titleField.onValueChanged((newValue) => {
+      syncFromTitle(newValue);
+    });
+
+    return () => {
+      detach();
+    };
+  }, [sdk.entry.fields]);
 
   const validateField = (value: string, maxLength: number): string | undefined => {
     if (value.length > maxLength) {
