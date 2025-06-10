@@ -49,7 +49,6 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
       highestResolution: false,
     },
     metadataConfig: {
-      enabled: false,
       standardMetadata: {
         title: undefined,
         creatorId: undefined,
@@ -61,12 +60,6 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
 
   useEffect(() => {
     if (isEditMode && asset) {
-      const hasMetadata =
-        !!asset.meta?.title ||
-        !!asset.meta?.creator_id ||
-        !!asset.meta?.external_id ||
-        !!asset.passthrough;
-
       setModalData({
         videoQuality: 'plus',
         playbackPolicies: asset.signedPlaybackId ? ['signed'] : ['public'],
@@ -82,7 +75,6 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
           highestResolution: false,
         },
         metadataConfig: {
-          enabled: hasMetadata,
           standardMetadata: {
             title: asset.meta?.title,
             creatorId: asset.meta?.creator_id,

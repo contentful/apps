@@ -46,21 +46,18 @@ function buildAssetSettings(options: ModalData): AssetSettings {
   };
 
   // Metadata case
-  if (options.metadataConfig.enabled) {
-    // Standard metadata
-    if (options.metadataConfig.standardMetadata) {
-      const { title, creatorId, externalId } = options.metadataConfig.standardMetadata;
-      if (title || creatorId || externalId) {
-        settings.meta = {};
-        if (title) settings.meta.title = title;
-        if (creatorId) settings.meta.creator_id = creatorId;
-        if (externalId) settings.meta.external_id = externalId;
-      }
+  if (options.metadataConfig.standardMetadata) {
+    const { title, creatorId, externalId } = options.metadataConfig.standardMetadata;
+    if (title || creatorId || externalId) {
+      settings.meta = {};
+      if (title) settings.meta.title = title;
+      if (creatorId) settings.meta.creator_id = creatorId;
+      if (externalId) settings.meta.external_id = externalId;
     }
-    // Custom metadata
-    if (options.metadataConfig.customMetadata) {
-      settings.passthrough = options.metadataConfig.customMetadata;
-    }
+  }
+  // Custom metadata
+  if (options.metadataConfig.customMetadata) {
+    settings.passthrough = options.metadataConfig.customMetadata;
   }
 
   // Captions case
