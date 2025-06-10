@@ -29,6 +29,10 @@ export class AssetField extends Field {
   generateLiquidTagForType(template: string): string[] {
     return ASSET_FIELDS.map((assetField) => `{{${template}.${this.id}.${assetField}}}`);
   }
+
+  isEnabledForCreate(): boolean {
+    return false;
+  }
 }
 
 FieldRegistry.registerFieldType('AssetField', AssetField.fromSerialized);

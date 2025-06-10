@@ -88,6 +88,10 @@ export class ReferenceArrayField extends Field {
   private selectedItems(): ReferenceItem[] {
     return this.items.filter((item) => item.selected);
   }
+
+  isEnabledForCreate(): boolean {
+    return false;
+  }
 }
 
 FieldRegistry.registerFieldType('ReferenceArrayField', ReferenceArrayField.fromSerialized);
