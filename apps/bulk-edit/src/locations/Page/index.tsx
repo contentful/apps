@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Heading, Flex, Spinner } from '@contentful/f36-components';
+import { Box, Heading, Flex, Spinner, Button, Text } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentFields, ContentTypeProps, KeyValueMap } from 'contentful-management';
 import { Entry, ContentTypeField } from './types';
@@ -23,6 +23,8 @@ const Page = () => {
   const [sortOption, setSortOption] = useState(SORT_OPTIONS[0].value);
   const locales = sdk.locales.available;
   const defaultLocale = sdk.locales.default;
+  const [selectedEntryIds, setSelectedEntryIds] = useState<string[]>([]);
+  const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -152,7 +154,7 @@ const Page = () => {
   return (
     <Flex>
       <Box style={styles.mainContent} padding="spacingL">
-        <Box style={styles.whiteBox} paddingTop="spacingL">
+        <Box style={styles.whiteBox} paddingTop="spacingL" paddingRight="spacingL">
           <Flex>
             <ContentTypeSidebar
               contentTypes={contentTypes}
@@ -170,6 +172,17 @@ const Page = () => {
                 ) : (
                   <>
                     <SortMenu sortOption={sortOption} onSortChange={setSortOption} />
+                    {selectedFieldId && selectedEntryIds.length > 0 && (
+                      <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
+                        <Button variant="primary">
+                          {selectedEntryIds.length === 1 ? 'Edit' : 'Bulk edit'}
+                        </Button>
+                        <Text fontColor="gray600">
+                          {selectedEntryIds.length} entry field
+                          {selectedEntryIds.length === 1 ? '' : 's'} selected
+                        </Text>
+                      </Flex>
+                    )}
                     <EntryTable
                       entries={entries}
                       fields={fields}
@@ -183,6 +196,10 @@ const Page = () => {
                       onPageChange={setActivePage}
                       onItemsPerPageChange={setItemsPerPage}
                       pageSizeOptions={PAGE_SIZE_OPTIONS}
+                        onSelectionChange={({ selectedEntryIds, selectedFieldId }) => {
+                          setSelectedEntryIds(selectedEntryIds);
+                          setSelectedFieldId(selectedFieldId);
+                        }}
                     />
                   </>
                 )}

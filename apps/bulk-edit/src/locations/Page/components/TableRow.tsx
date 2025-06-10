@@ -64,6 +64,7 @@ export const TableRow: React.FC<TableRowProps> = ({
         const isVisible =
           (hoveredColumn === field.uniqueId && !isDisabled) || rowCheckboxes[field.uniqueId];
 
+
         if (isAllowed) {
           return (
             <Table.Cell

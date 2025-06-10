@@ -1,4 +1,5 @@
 import tokens from '@contentful/f36-tokens';
+import { SortMenu } from './components/SortMenu';
 
 const SIDEBAR_WIDTH = 220;
 const STICKY_SPACER_SPACING = 24;
@@ -19,7 +20,7 @@ export const styles = {
     flexGrow: 1,
   },
   table: {
-    marginTop: tokens.spacingL,
+    marginTop: tokens.spacingM,
     minWidth: `${CELL_WIDTH * 4}px`,
     overflowX: 'auto',
   },
@@ -102,5 +103,11 @@ export const styles = {
   },
   noContentTypeText: {
     fontWeight: 'bold',
+  },
+  editButton: {
+    position: 'sticky',
+    left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING,
+    zIndex: 1,
+    width: 'fit-content',
   },
 } as const;
