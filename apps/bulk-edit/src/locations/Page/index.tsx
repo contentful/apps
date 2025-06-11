@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Box, Heading, Flex, Spinner } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { ContentTypeProps } from 'contentful-management';
+import { ContentFields, ContentTypeProps, KeyValueMap } from 'contentful-management';
 import { Entry, ContentTypeField } from './types';
 import { styles } from './styles';
 import { ContentTypeSidebar } from './components/ContentTypeSidebar';
@@ -97,13 +97,28 @@ const Page = () => {
       setEntriesLoading(true);
       try {
         const ct = await sdk.cma.contentType.get({ contentTypeId: selectedContentTypeId });
-        setFields(
-          ct.fields.map((f: any) => ({
-            id: f.id,
-            name: f.name,
-            type: f.type,
-          }))
-        );
+        const newFields: ContentTypeField[] = [];
+        ct.fields.forEach((f: ContentFields<KeyValueMap>) => {
+          if (f.localized) {
+            locales.forEach((locale) => {
+              newFields.push({
+                id: f.id,
+                uniqueId: `${f.id}-${locale}`,
+                name: f.name,
+                type: f.type as any,
+                locale: locale,
+              });
+            });
+          } else {
+            newFields.push({
+              id: f.id,
+              uniqueId: f.id,
+              name: f.name,
+              type: f.type as any,
+            });
+          }
+        });
+        setFields(newFields);
         const displayField = ct.displayField || 'displayName';
 
         const { items, total } = await sdk.cma.entry.getMany({

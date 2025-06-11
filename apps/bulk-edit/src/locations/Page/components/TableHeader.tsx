@@ -38,28 +38,28 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
         </Table.Cell>
         {fields.map((field) => {
           const isAllowed = isCheckboxAllowed(field);
-          const isDisabled = checkboxesDisabled[field.id];
+          const isDisabled = checkboxesDisabled[field.uniqueId];
 
           if (isAllowed) {
             return (
-              <Table.Cell as="th" key={field.id} style={styles.tableHeader} isTruncated>
+              <Table.Cell as="th" key={field.uniqueId} style={styles.tableHeader} isTruncated>
                 <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
                   <Checkbox
-                    isChecked={headerCheckboxes[field.id]}
+                    isChecked={headerCheckboxes[field.uniqueId]}
                     isDisabled={isDisabled}
-                    onChange={(e) => onHeaderCheckboxChange(field.id, e.target.checked)}
-                    testId={`header-checkbox-${field.id}`}
+                    onChange={(e) => onHeaderCheckboxChange(field.uniqueId, e.target.checked)}
+                    testId={`header-checkbox-${field.uniqueId}`}
                     aria-label={`Select all for ${truncate(field.name)}`}
                   />
-                  {truncate(field.name)}
+                  {truncate(field.locale ? `(${field.locale}) ${field.name}` : field.name)}
                 </Flex>
               </Table.Cell>
             );
           }
           return (
-            <Table.Cell as="th" key={field.id} style={styles.tableHeader}>
+            <Table.Cell as="th" key={field.uniqueId} style={styles.tableHeader}>
               <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
-                {truncate(field.name)}
+                {truncate(field.locale ? `(${field.locale}) ${field.name}` : field.name)}
                 <Tooltip
                   content={`Bulk editing is not supported for the ${field.name} field type`}
                   placement="top">

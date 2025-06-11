@@ -60,36 +60,37 @@ export const TableRow: React.FC<TableRowProps> = ({
       </Table.Cell>
       {fields.map((field) => {
         const isAllowed = isCheckboxAllowed(field);
-        const isDisabled = cellCheckboxesDisabled[field.id];
-        const isVisible = (hoveredColumn === field.id && !isDisabled) || rowCheckboxes[field.id];
+        const isDisabled = cellCheckboxesDisabled[field.uniqueId];
+        const isVisible =
+          (hoveredColumn === field.uniqueId && !isDisabled) || rowCheckboxes[field.uniqueId];
 
         if (isAllowed) {
           return (
             <Table.Cell
-              key={field.id}
+              key={field.uniqueId}
               style={styles.cell}
-              onMouseEnter={() => setHoveredColumn(field.id)}
+              onMouseEnter={() => setHoveredColumn(field.uniqueId)}
               onMouseLeave={() => setHoveredColumn(null)}
               isTruncated>
               <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
                 {isVisible && (
                   <Checkbox
-                    isChecked={rowCheckboxes[field.id]}
+                    isChecked={rowCheckboxes[field.uniqueId]}
                     isDisabled={isDisabled}
-                    onChange={(e) => onCellCheckboxChange(field.id, e.target.checked)}
-                    testId={`cell-checkbox-${field.id}`}
+                    onChange={(e) => onCellCheckboxChange(field.uniqueId, e.target.checked)}
+                    testId={`cell-checkbox-${field.uniqueId}`}
                     aria-label={`Select ${truncate(field.name)} for ${displayValue}`}
                   />
                 )}
-                {renderFieldValue(field, entry.fields[field.id]?.[defaultLocale])}
+                {renderFieldValue(field, entry.fields[field.id]?.[field.locale || defaultLocale])}
               </Flex>
             </Table.Cell>
           );
         }
         return (
-          <Table.Cell key={field.id} style={styles.cell}>
+          <Table.Cell key={field.uniqueId} style={styles.cell}>
             <Text fontColor="gray500">
-              {renderFieldValue(field, entry.fields[field.id]?.[defaultLocale])}
+              {renderFieldValue(field, entry.fields[field.id]?.[field.locale || defaultLocale])}
             </Text>
           </Table.Cell>
         );

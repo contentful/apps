@@ -24,12 +24,12 @@ interface EntryTableProps {
 }
 
 function getColumnIds(fields: ContentTypeField[]): string[] {
-  return [DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN, ...fields.map((field) => field.id)];
+  return [DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN, ...fields.map((field) => field.uniqueId)];
 }
 
 function getBulkEditableColumns(fields: ContentTypeField[]): Record<string, boolean> {
   const bulkEditableColumns = fields.map((field) => {
-    return [field.id, isBulkEditable(field)];
+    return [field.uniqueId, isBulkEditable(field)];
   });
 
   return {
