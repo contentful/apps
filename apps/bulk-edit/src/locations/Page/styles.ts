@@ -87,12 +87,12 @@ export const styles = {
   },
   paginationContainer: {
     position: 'sticky',
-    left: '18%',
+    left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING,
     zIndex: 1,
     background: tokens.colorWhite,
     paddingBottom: tokens.spacingM,
-    maxWidth: `80vw`,
-    marginTop: '20px',
-    marginRight: '10px',
+    maxWidth: `81vw`,
+    marginTop: tokens.spacingL,
+    marginRight: tokens.spacingXs,
   },
 } as const;
