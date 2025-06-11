@@ -1,13 +1,15 @@
 import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Heading, Form, Paragraph, Flex } from '@contentful/f36-components';
+import { Heading, Form, Paragraph, Flex, TextInput } from '@contentful/f36-components';
 import { css } from 'emotion';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 
-export interface AppInstallationParameters {}
+export interface AppInstallationParameters {
+  apiKey: string;
+}
 
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>({});
+  const [parameters, setParameters] = useState<AppInstallationParameters>({ apiKey: '' });
   const sdk = useSDK<ConfigAppSDK>();
   /*
      To use the cma, inject it as follows.
@@ -61,6 +63,10 @@ const ConfigScreen = () => {
       <Form>
         <Heading>App Config</Heading>
         <Paragraph>Welcome to your contentful app. This is your config page.</Paragraph>
+        <TextInput
+          value={parameters.apiKey}
+          onChange={(e) => setParameters({ ...parameters, apiKey: e.target.value })}
+        />
       </Form>
     </Flex>
   );
