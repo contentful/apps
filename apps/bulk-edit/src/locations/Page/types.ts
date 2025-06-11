@@ -7,6 +7,32 @@ export type ContentTypeField = {
   locale?: string;
 } & FieldType;
 
+export interface Fields {
+  [key: string]: {
+    [locale: string]:
+      | string
+      | number
+      | boolean
+      | {
+          sys: {
+            type: 'Link';
+            linkType: string;
+            id: string;
+          };
+        }
+      | Array<{
+          sys: {
+            type: 'Link';
+            linkType: string;
+            id: string;
+          };
+        }>
+      | object
+      | null
+      | undefined;
+  };
+}
+
 export interface Entry {
   sys: {
     id: string;
@@ -14,19 +40,7 @@ export interface Entry {
     publishedVersion?: number;
     version: number;
   };
-  fields: {
-    [key: string]: {
-      [locale: string]:
-        | string
-        | number
-        | boolean
-        | { sys: { type: 'Link'; linkType: string; id: string } }
-        | Array<{ sys: { type: 'Link'; linkType: string; id: string } }>
-        | object
-        | null
-        | undefined;
-    };
-  };
+  fields: Fields;
 }
 
 export interface Status {

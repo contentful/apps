@@ -1,4 +1,4 @@
-import { Entry, ContentTypeField, Status } from '../types';
+import { Entry, ContentTypeField, Status, Fields } from '../types';
 import { ContentTypeProps } from 'contentful-management';
 
 export const getStatus = (entry: Entry): Status => {
@@ -101,3 +101,22 @@ export const isCheckboxAllowed = (field: ContentTypeField): boolean => {
   if (restrictedTypes.includes(field.type)) return false;
   return true;
 };
+
+/**
+ * Returns a new fields object with the given field updated for the specified locale.
+ * If the field or locale does not exist, it is created.
+ */
+export function updateEntryFieldLocalized(
+  fields: Fields,
+  fieldId: string,
+  value: any,
+  locale: string
+) {
+  return {
+    ...fields,
+    [fieldId]: {
+      ...(fields[fieldId] || {}),
+      [locale]: value,
+    },
+  };
+}

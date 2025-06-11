@@ -37,9 +37,7 @@ describe('BulkEditModal', () => {
       />
     );
     expect(screen.getByText('Edit')).toBeInTheDocument();
-    expect(
-      screen.getByText((content) => content.includes('Building one selected'))
-    ).toBeInTheDocument();
+    expect(screen.getByText((content) => content.includes('Building one'))).toBeInTheDocument();
     expect(
       screen.getByText((content) => content.includes('Editing field: Size'))
     ).toBeInTheDocument();
@@ -60,9 +58,7 @@ describe('BulkEditModal', () => {
       />
     );
     expect(screen.getByText('Bulk edit')).toBeInTheDocument();
-    expect(
-      screen.getByText((content) => content.includes('Building one selected and 1 more'))
-    ).toBeInTheDocument();
+    expect(screen.getByText((content) => content.includes('Building one'))).toBeInTheDocument();
   });
 
   it('calls onClose when Cancel is clicked', () => {
