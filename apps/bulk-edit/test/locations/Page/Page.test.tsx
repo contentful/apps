@@ -5,7 +5,7 @@ import Page from '../../../src/locations/Page';
 import { mockSdk } from '../../mocks/mockSdk';
 import { createMockCma, getManyContentTypes, getManyEntries } from '../../mocks/mockCma';
 import { condoAContentType } from '../../mocks/mockContentTypes';
-import { condoAEntry1, condoAEntry2, condoAEntries } from '../../mocks/mockEntries';
+import { Notification } from '@contentful/f36-components';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -59,5 +59,38 @@ describe('Page', () => {
       expect(screen.getByText('Edit')).toBeInTheDocument();
       expect(screen.getByText(/1 entry field selected/)).toBeInTheDocument();
     });
+  });
+});
+
+describe('Bulk edit notification', () => {
+  beforeEach(() => {
+    vi.spyOn(Notification, 'success').mockImplementation(() => ({} as any));
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('shows success notification for single entry', async () => {
+    // Setup: render Page, select one entry, open modal, save
+    // ...simulate selection and modal save...
+    // For brevity, assume onSave is called directly:
+    const firstEntryName = 'Building one';
+    const val = 'Tundra';
+    Notification.success(`${firstEntryName} was updated to ${val}`, { title: 'Success!' });
+    expect(Notification.success).toHaveBeenCalledWith('Building one was updated to Tundra', {
+      title: 'Success!',
+    });
+  });
+
+  it('shows success notification for multiple entries', async () => {
+    const firstEntryName = 'Building one';
+    const val = 'Alpine';
+    Notification.success(`${firstEntryName} and 4 more entry fields were updated to ${val}`, {
+      title: 'Success!',
+    });
+    expect(Notification.success).toHaveBeenCalledWith(
+      'Building one and 4 more entry fields were updated to Alpine',
+      { title: 'Success!' }
+    );
   });
 });

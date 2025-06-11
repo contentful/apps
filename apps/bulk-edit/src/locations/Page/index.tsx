@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Box, Heading, Flex, Spinner, Button, Text } from '@contentful/f36-components';
+import {
+  Box,
+  Heading,
+  Flex,
+  Spinner,
+  Button,
+  Text,
+  Notification,
+  Note,
+} from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentFields, ContentTypeProps, KeyValueMap, EntryProps } from 'contentful-management';
 import { Entry, ContentTypeField } from './types';
@@ -8,7 +17,9 @@ import { ContentTypeSidebar } from './components/ContentTypeSidebar';
 import { SortMenu, SORT_OPTIONS } from './components/SortMenu';
 import { EntryTable } from './components/EntryTable';
 import { BulkEditModal } from './components/BulkEditModal';
-import { updateEntryFieldLocalized } from './utils/entryUtils';
+import { updateEntryFieldLocalized, getEntryTitle } from './utils/entryUtils';
+import { OctagonIcon, WarningOctagonIcon } from '@phosphor-icons/react';
+import tokens from '@contentful/f36-tokens';
 
 const PAGE_SIZE_OPTIONS = [15, 50, 100];
 
@@ -30,7 +41,7 @@ const Page = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalValue, setModalValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const [failedUpdates, setFailedUpdates] = useState<EntryProps[]>([]);
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -151,34 +162,89 @@ const Page = () => {
   const selectedEntries = entries.filter((entry) => selectedEntryIds.includes(entry.sys.id));
   const selectedField = fields.find((f) => f.id === selectedFieldId) || null;
 
+  function successNotification({
+    firstEntryName,
+    value,
+    count,
+    onUndo,
+  }: {
+    firstEntryName: string;
+    value: string;
+    count: number;
+    onUndo: () => void;
+  }) {
+    const message =
+      count === 1
+        ? `${firstEntryName} was updated to ${value}`
+        : `${firstEntryName} and ${count - 1} more entry fields were updated to ${value}`;
+    const notification = Notification.success(message, {
+      title: 'Success!',
+      cta: {
+        label: 'Undo',
+        textLinkProps: {
+          variant: 'primary',
+          onClick: () => {
+            notification.then((item) => {
+              Notification.close(item.id);
+              onUndo();
+            });
+          },
+        },
+      },
+    });
+  }
+
   const onSave = async (val: string) => {
     setIsSaving(true);
-    setSaveError(null);
+    setFailedUpdates([]);
     try {
-      const updatedEntries: EntryProps[] = await Promise.all(
+      const results = await Promise.all(
         selectedEntries.map(async (entry: EntryProps) => {
-          if (!selectedFieldId) return entry;
-          const updatedFields = updateEntryFieldLocalized(
-            entry.fields,
-            selectedFieldId,
-            val,
-            locale
-          );
-          const updated = await sdk.cma.entry.update(
-            { entryId: entry.sys.id, spaceId: sdk.ids.space, environmentId: sdk.ids.environment },
-            { ...entry, fields: updatedFields }
-          );
-          // TODO: uncomment this when we have definition for publish
-          // await sdk.cma.entry.publish({ entryId: entry.sys.id, spaceId: sdk.ids.space, environmentId: sdk.ids.environment }, updated);
-          return updated;
+          if (!selectedFieldId) return { success: false, entry };
+          try {
+            const updatedFields = updateEntryFieldLocalized(
+              entry.fields,
+              selectedFieldId,
+              val,
+              locale
+            );
+            const updated = await sdk.cma.entry.update(
+              { entryId: entry.sys.id, spaceId: sdk.ids.space, environmentId: sdk.ids.environment },
+              { ...entry, fields: updatedFields }
+            );
+            return { success: true, entry: updated };
+          } catch {
+            return { success: false, entry };
+          }
         })
       );
+      const successful = results.filter((r) => r.success).map((r) => r.entry);
+      const failed = results.filter((r) => !r.success).map((r) => r.entry);
       setEntries((prev) =>
-        prev.map((entry) => updatedEntries.find((u) => u.sys.id === entry.sys.id) || entry)
+        prev.map((entry) => successful.find((u) => u.sys.id === entry.sys.id) || entry)
       );
+      setFailedUpdates(failed);
+      // Notification logic (only for successful updates)
+      if (successful.length > 0) {
+        const firstEntry = successful[0];
+        const firstEntryName = firstEntry
+          ? getEntryTitle(firstEntry, fields, selectedContentType, locale)
+          : '';
+        successNotification({
+          firstEntryName,
+          value: `${val}`,
+          count: successful.length,
+          onUndo: () => {
+            // TODO: implement undo logic
+            console.log('undo');
+          },
+        });
+      }
       setIsModalOpen(false);
     } catch (e: any) {
-      setSaveError(e.message || 'Failed to update entries');
+      if (failedUpdates.length === 0) {
+        setFailedUpdates(selectedEntries);
+      }
     } finally {
       setIsSaving(false);
     }
@@ -224,24 +290,53 @@ const Page = () => {
                         </Text>
                       </Flex>
                     )}
-                    <EntryTable
-                      entries={entries}
-                      fields={fields}
-                      contentType={selectedContentType}
-                      spaceId={sdk.ids.space}
-                      environmentId={sdk.ids.environment}
-                      defaultLocale={defaultLocale}
-                      activePage={activePage}
-                      totalEntries={totalEntries}
-                      itemsPerPage={itemsPerPage}
-                      onPageChange={setActivePage}
-                      onItemsPerPageChange={setItemsPerPage}
-                      pageSizeOptions={PAGE_SIZE_OPTIONS}
-                        onSelectionChange={({ selectedEntryIds, selectedFieldId }) => {
-                          setSelectedEntryIds(selectedEntryIds);
-                          setSelectedFieldId(selectedFieldId);
-                        }}
-                    />
+                    {entriesLoading ? (
+                      <Spinner />
+                    ) : (
+                      <>
+                        {failedUpdates.length > 0 && (
+                          <Note
+                            variant="negative"
+                            icon={
+                              <WarningOctagonIcon
+                                fill={tokens.red600}
+                                height={tokens.spacingM}
+                                width={tokens.spacingM}
+                              />
+                            }
+                            style={styles.errorNote}
+                            onClose={() => setFailedUpdates([])}
+                            withCloseButton>
+                            {`${failedUpdates.length} field${
+                              failedUpdates.length > 1 ? 's' : ''
+                            } did not update: `}
+                            {getEntryTitle(failedUpdates[0], fields, selectedContentType, locale)}
+                            {failedUpdates.length > 1 &&
+                              ` and ${failedUpdates.length - 1} more entry field${
+                                failedUpdates.length > 2 ? 's' : ''
+                              }`}
+                          </Note>
+                        )}
+                        <EntryTable
+                          entries={entries}
+                          fields={fields}
+                          contentType={selectedContentType}
+                          spaceId={sdk.ids.space}
+                          environmentId={sdk.ids.environment}
+                          defaultLocale={defaultLocale}
+                          activePage={activePage}
+                          totalEntries={totalEntries}
+                          itemsPerPage={itemsPerPage}
+                          onPageChange={setActivePage}
+                          onItemsPerPageChange={setItemsPerPage}
+                          pageSizeOptions={PAGE_SIZE_OPTIONS}
+                          onSelectionChange={({ selectedEntryIds, selectedFieldId }) => {
+                            setSelectedEntryIds(selectedEntryIds);
+                            setSelectedFieldId(selectedFieldId);
+                          }}
+                        />
+                      </>
+                    )}
                   </>
                 )}
               </>
@@ -259,8 +354,6 @@ const Page = () => {
         contentType={selectedContentType}
         locale={locale}
       />
-      {isSaving && <Text>Saving...</Text>}
-      {saveError && <Text fontColor="red600">{saveError}</Text>}
     </Flex>
   );
 };

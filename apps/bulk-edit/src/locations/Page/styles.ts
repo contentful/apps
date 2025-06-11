@@ -4,6 +4,7 @@ import { SortMenu } from './components/SortMenu';
 const SIDEBAR_WIDTH = 220;
 const STICKY_SPACER_SPACING = 24;
 const CELL_WIDTH = 200;
+const TABLE_WIDTH = CELL_WIDTH * 4;
 
 export const styles = {
   sidebar: {
@@ -109,5 +110,12 @@ export const styles = {
     left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING,
     zIndex: 1,
     width: 'fit-content',
+  },
+  errorNote: {
+    maxWidth: `${TABLE_WIDTH}px`,
+    marginTop: tokens.spacingM,
+    position: 'sticky',
+    left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING,
+    zIndex: 1,
   },
 } as const;
