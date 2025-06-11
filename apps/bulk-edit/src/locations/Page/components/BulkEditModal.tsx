@@ -37,8 +37,12 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
       <Modal.Content>
         <Flex gap="spacingM" flexDirection="column">
           <Flex>
-            <Text fontWeight="fontWeightDemiBold">{firstEntryName}</Text>
-            <Text>{entryCount === 1 ? ' selected' : ` selected and ${entryCount - 1} more`}</Text>
+            <Text>
+              <Text as="span" fontWeight="fontWeightDemiBold">
+                {firstEntryName}
+              </Text>{' '}
+              {entryCount === 1 ? 'selected' : `selected and ${entryCount - 1} more`}
+            </Text>
           </Flex>
           <Text>{selectedField ? `Editing field: ${selectedField.name}` : ''}</Text>
           <TextInput
