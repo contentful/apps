@@ -76,11 +76,10 @@ export const renderFieldValue = (field: ContentTypeField, value: unknown): strin
 
 export const getEntryTitle = (
   entry: Entry,
-  fields: ContentTypeField[],
-  contentType?: ContentTypeProps,
-  locale: string = 'en-US'
+  contentType: ContentTypeProps,
+  locale: string
 ): string => {
-  let displayFieldId = contentType?.displayField;
+  let displayFieldId = contentType.displayField;
   if (!displayFieldId) return 'Untitled';
 
   const value = entry.fields[displayFieldId]?.[locale];

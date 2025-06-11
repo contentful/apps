@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Text, Flex } from '@contentful/f36-components';
+import { Text, Flex } from '@contentful/f36-components';
 import { NavList } from '@contentful/f36-navlist';
 import { ContentTypeProps } from 'contentful-management';
 import { styles } from '../styles';

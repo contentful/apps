@@ -2,7 +2,9 @@ import { FieldType } from 'contentful-management';
 
 export type ContentTypeField = {
   id: string;
+  uniqueId: string;
   name: string;
+  locale?: string;
 } & FieldType;
 
 export interface Entry {

@@ -11,10 +11,10 @@ import { DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN } from '../utils/constants';
 interface EntryTableProps {
   entries: Entry[];
   fields: ContentTypeField[];
-  contentType?: ContentTypeProps;
+  contentType: ContentTypeProps;
   spaceId: string;
   environmentId: string;
-  locale: string;
+  defaultLocale: string;
   activePage: number;
   totalEntries: number;
   itemsPerPage: number;
@@ -24,12 +24,12 @@ interface EntryTableProps {
 }
 
 function getColumnIds(fields: ContentTypeField[]): string[] {
-  return [DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN, ...fields.map((field) => field.id)];
+  return [DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN, ...fields.map((field) => field.uniqueId)];
 }
 
 function getBulkEditableColumns(fields: ContentTypeField[]): Record<string, boolean> {
   const bulkEditableColumns = fields.map((field) => {
-    return [field.id, isBulkEditable(field)];
+    return [field.uniqueId, isBulkEditable(field)];
   });
 
   return {
@@ -60,7 +60,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
   contentType,
   spaceId,
   environmentId,
-  locale,
+  defaultLocale,
   activePage,
   totalEntries,
   itemsPerPage,
@@ -146,7 +146,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
               contentType={contentType}
               spaceId={spaceId}
               environmentId={environmentId}
-              locale={locale}
+              defaultLocale={defaultLocale}
               rowCheckboxes={rowCheckboxes[entry.sys.id]}
               onCellCheckboxChange={(columnId, checked) =>
                 handleCellCheckboxChange(entry.sys.id, columnId, checked)

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Checkbox, Flex } from '@contentful/f36-components';
+import { Table, Checkbox, Flex, Text } from '@contentful/f36-components';
 import { Tooltip } from '@contentful/f36-tooltip';
 import { QuestionIcon } from '@phosphor-icons/react';
 import { ContentTypeField } from '../types';
@@ -38,28 +38,40 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
         </Table.Cell>
         {fields.map((field) => {
           const isAllowed = isCheckboxAllowed(field);
-          const isDisabled = checkboxesDisabled[field.id];
+          const isDisabled = checkboxesDisabled[field.uniqueId];
 
           if (isAllowed) {
             return (
-              <Table.Cell as="th" key={field.id} style={styles.tableHeader} isTruncated>
-                <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
+              <Table.Cell as="th" key={field.uniqueId} style={styles.tableHeader} isTruncated>
+                <Flex gap="spacingXs">
                   <Checkbox
-                    isChecked={headerCheckboxes[field.id]}
+                    isChecked={headerCheckboxes[field.uniqueId]}
                     isDisabled={isDisabled}
-                    onChange={(e) => onHeaderCheckboxChange(field.id, e.target.checked)}
-                    testId={`header-checkbox-${field.id}`}
+                    onChange={(e) => onHeaderCheckboxChange(field.uniqueId, e.target.checked)}
+                    testId={`header-checkbox-${field.uniqueId}`}
                     aria-label={`Select all for ${truncate(field.name)}`}
                   />
-                  {truncate(field.name)}
+                  <Text
+                    fontSize="fontSizeS"
+                    fontWeight="fontWeightMedium"
+                    lineHeight="lineHeightS"
+                    fontColor="gray900">
+                    {truncate(field.locale ? `(${field.locale}) ${field.name}` : field.name)}
+                  </Text>
                 </Flex>
               </Table.Cell>
             );
           }
           return (
-            <Table.Cell as="th" key={field.id} style={styles.tableHeader}>
-              <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
-                {truncate(field.name)}
+            <Table.Cell as="th" key={field.uniqueId} style={styles.tableHeader}>
+              <Flex gap="spacingXs">
+                <Text
+                  fontSize="fontSizeS"
+                  fontWeight="fontWeightMedium"
+                  lineHeight="lineHeightS"
+                  fontColor="gray500">
+                  {truncate(field.locale ? `(${field.locale}) ${field.name}` : field.name)}
+                </Text>
                 <Tooltip
                   content={`Bulk editing is not supported for the ${field.name} field type`}
                   placement="top">

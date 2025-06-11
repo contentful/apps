@@ -21,6 +21,7 @@ interface MockSDK extends Partial<AppExtensionSDK> {
   };
   locales: {
     default: string;
+    available: string[];
   };
 }
 
@@ -43,6 +44,7 @@ const mockSdk: MockSDK = {
   },
   locales: {
     default: 'en-US',
+    available: ['en-US', 'es-AR'],
   },
   cma: {
     contentType: {
