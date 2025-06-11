@@ -192,7 +192,7 @@ const Page = () => {
     });
   }
 
-  const onSave = async (val: string) => {
+  const onSave = async (val: string | number) => {
     setIsSaving(true);
     setFailedUpdates([]);
     try {
@@ -361,6 +361,7 @@ const Page = () => {
         selectedField={selectedField}
         fields={fields}
         defaultLocale={defaultLocale}
+        isSaving={isSaving}
       />
     </Flex>
   );

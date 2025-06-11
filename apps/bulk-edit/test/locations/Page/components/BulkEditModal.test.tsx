@@ -34,6 +34,7 @@ describe('BulkEditModal', () => {
         selectedField={field}
         fields={fields}
         defaultLocale="en-US"
+        isSaving={false}
       />
     );
     expect(screen.getByText('Edit')).toBeInTheDocument();
@@ -53,6 +54,7 @@ describe('BulkEditModal', () => {
         selectedField={field}
         fields={fields}
         defaultLocale="en-US"
+        isSaving={false}
       />
     );
     expect(screen.getByText('Bulk edit')).toBeInTheDocument();
@@ -72,6 +74,7 @@ describe('BulkEditModal', () => {
         selectedField={field}
         fields={fields}
         defaultLocale="en-US"
+        isSaving={false}
       />
     );
     fireEvent.click(screen.getByTestId('bulk-edit-cancel'));
@@ -89,11 +92,37 @@ describe('BulkEditModal', () => {
         selectedField={field}
         fields={fields}
         defaultLocale="en-US"
+        isSaving={false}
       />
     );
     const input = screen.getByPlaceholderText('Enter your new value');
     fireEvent.change(input, { target: { value: '1234' } });
     fireEvent.click(screen.getByTestId('bulk-edit-save'));
-    expect(onSave).toHaveBeenCalledWith('1234');
+    expect(onSave).toHaveBeenCalledWith(1234);
+  });
+
+  it('shows validation message for decimal in integer field', () => {
+    const integerField: ContentTypeField = {
+      id: 'count',
+      uniqueId: 'count',
+      name: 'Count',
+      type: 'Integer',
+    };
+    render(
+      <BulkEditModal
+        isOpen={true}
+        onClose={vi.fn()}
+        onSave={vi.fn()}
+        selectedEntries={[entry1]}
+        selectedField={integerField}
+        fields={fields}
+        defaultLocale="en-US"
+        isSaving={false}
+      />
+    );
+    const input = screen.getByPlaceholderText('Enter your new value');
+    fireEvent.change(input, { target: { value: '1.5' } });
+    expect(screen.getByText('Integer field does not allow decimal')).toBeInTheDocument();
+    expect(screen.getByTestId('bulk-edit-save')).toBeDisabled();
   });
 });

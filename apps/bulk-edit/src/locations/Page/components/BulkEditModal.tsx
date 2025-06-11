@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Button, TextInput, Text, Flex } from '@contentful/f36-components';
+import { Modal, Button, TextInput, Text, Flex, FormControl } from '@contentful/f36-components';
 import type { Entry, ContentTypeField } from '../types';
 import { ContentTypeProps } from 'contentful-management';
 import { getEntryTitle, getEntryFieldValue } from '../utils/entryUtils';
@@ -7,11 +7,12 @@ import { getEntryTitle, getEntryFieldValue } from '../utils/entryUtils';
 interface BulkEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (newValue: string) => void;
+  onSave: (newValue: string | number) => void;
   selectedEntries: Entry[];
   selectedField: ContentTypeField | null;
   fields: ContentTypeField[];
   defaultLocale: string;
+  isSaving: boolean;
 }
 
 export const BulkEditModal: React.FC<BulkEditModalProps> = ({
@@ -22,6 +23,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   selectedField,
   fields,
   defaultLocale,
+  isSaving,
 }) => {
   const [value, setValue] = useState('');
   const entryCount = selectedEntries.length;
@@ -32,25 +34,39 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
       : '';
   const title = entryCount === 1 ? 'Edit' : 'Bulk edit';
 
+  const isNumber = selectedField?.type === 'Number' || selectedField?.type === 'Integer';
+  const isInvalid = selectedField?.type === 'Integer' && !Number.isInteger(Number(value));
+
   return (
     <Modal isShown={isOpen} onClose={onClose} size="medium" aria-label={title}>
       <Modal.Header title={title} />
       <Modal.Content>
         <Flex gap="spacingS" flexDirection="column">
-          <Text>{selectedField ? `Editing field: ${selectedField.name}` : ''}</Text>
+          <Text>
+            Editing field: <Text fontWeight="fontWeightDemiBold">{selectedField?.name}</Text>
+          </Text>
           <Flex>
             <Text>
               <Text fontWeight="fontWeightDemiBold">{firstValueToUpdate}</Text>{' '}
               {entryCount === 1 ? 'selected' : `selected and ${entryCount - 1} more`}
             </Text>
           </Flex>
-          <TextInput
-            name="bulk-edit-value"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="Enter your new value"
-            autoFocus
-          />
+          <FormControl isInvalid={isInvalid}>
+            <TextInput
+              name="bulk-edit-value"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              placeholder="Enter your new value"
+              type={isNumber ? 'number' : 'text'}
+              isInvalid={isInvalid}
+              autoFocus
+            />
+            {isInvalid && (
+              <FormControl.ValidationMessage>
+                Integer field does not allow decimal
+              </FormControl.ValidationMessage>
+            )}
+          </FormControl>
         </Flex>
       </Modal.Content>
       <Modal.Controls>
@@ -59,9 +75,14 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
         </Button>
         <Button
           variant="primary"
-          onClick={() => onSave(value)}
-          isDisabled={!value}
-          testId="bulk-edit-save">
+          onClick={() => {
+            if (isInvalid) return;
+            const finalValue = isNumber ? Number(value) : value;
+            onSave(finalValue);
+          }}
+          isDisabled={!value || isInvalid}
+          testId="bulk-edit-save"
+          isLoading={isSaving}>
           Save
         </Button>
       </Modal.Controls>
