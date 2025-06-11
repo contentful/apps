@@ -9,6 +9,7 @@ interface TrackListProps {
   domain?: string;
   token?: string;
   type: 'caption' | 'audio';
+  isSigned?: boolean;
 }
 
 const TrackList: React.FC<TrackListProps> = ({
@@ -17,6 +18,8 @@ const TrackList: React.FC<TrackListProps> = ({
   type,
   playbackId,
   domain,
+  token,
+  isSigned,
 }) => {
   if (!tracks || tracks.length === 0) {
     return (
@@ -26,9 +29,12 @@ const TrackList: React.FC<TrackListProps> = ({
     );
   }
 
-  const getDownloadUrl = (track: Track): string | undefined => {
+  const getDownloadUrl = (track: Track, format: 'vtt' | 'txt' = 'vtt'): string | undefined => {
     if (type === 'caption' && track.type === 'text' && playbackId) {
-      return `https://${domain || 'stream.mux.com'}/${playbackId}/text/${track.id}.vtt`;
+      const baseUrl = `https://${domain || 'stream.mux.com'}/${playbackId}/text/${
+        track.id
+      }.${format}`;
+      return isSigned && token ? `${baseUrl}?token=${token}` : baseUrl;
     }
     return undefined;
   };
@@ -43,7 +49,12 @@ const TrackList: React.FC<TrackListProps> = ({
               <Table.Cell>Language</Table.Cell>
               {type === 'caption' && <Table.Cell>Closed Captions</Table.Cell>}
               <Table.Cell>Status</Table.Cell>
-              {type === 'caption' && <Table.Cell>Download</Table.Cell>}
+              {type === 'caption' && (
+                <>
+                  <Table.Cell>VTT File</Table.Cell>
+                  <Table.Cell>Transcript (.txt)</Table.Cell>
+                </>
+              )}
               <Table.Cell>Actions</Table.Cell>
             </Table.Row>
           </Table.Head>
@@ -61,16 +72,28 @@ const TrackList: React.FC<TrackListProps> = ({
                 )}
                 <Table.Cell>{track.status}</Table.Cell>
                 {type === 'caption' && (
-                  <Table.Cell>
-                    {track.type === 'text' && track.status === 'ready' && (
-                      <TextLink
-                        href={getDownloadUrl(track)}
-                        target="_blank"
-                        rel="noopener noreferrer">
-                        Download
-                      </TextLink>
-                    )}
-                  </Table.Cell>
+                  <>
+                    <Table.Cell>
+                      {track.type === 'text' && track.status === 'ready' && (
+                        <TextLink
+                          href={getDownloadUrl(track, 'vtt')}
+                          target="_blank"
+                          rel="noopener noreferrer">
+                          Download
+                        </TextLink>
+                      )}
+                    </Table.Cell>
+                    <Table.Cell>
+                      {track.type === 'text' && track.status === 'ready' && (
+                        <TextLink
+                          href={getDownloadUrl(track, 'txt')}
+                          target="_blank"
+                          rel="noopener noreferrer">
+                          Download
+                        </TextLink>
+                      )}
+                    </Table.Cell>
+                  </>
                 )}
                 <Table.Cell>
                   {type === 'audio' && (track as AudioTrack).primary ? (

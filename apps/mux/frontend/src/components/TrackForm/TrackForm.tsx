@@ -14,6 +14,8 @@ interface TrackFormProps {
   title: string;
   playbackId?: string;
   domain?: string;
+  token?: string;
+  isSigned?: boolean;
 }
 
 const TrackForm: React.FC<TrackFormProps> = ({
@@ -24,6 +26,8 @@ const TrackForm: React.FC<TrackFormProps> = ({
   title,
   playbackId,
   domain,
+  token,
+  isSigned,
 }) => {
   const [languageCode, setLanguageCode] = useState('');
 
@@ -58,6 +62,8 @@ const TrackForm: React.FC<TrackFormProps> = ({
         type={type}
         playbackId={playbackId}
         domain={domain}
+        token={token}
+        isSigned={isSigned}
       />
       <Form onSubmit={handleSubmit}>
         <Heading as="h3">{title}</Heading>

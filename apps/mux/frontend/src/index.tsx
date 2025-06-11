@@ -1115,8 +1115,10 @@ export class App extends React.Component<AppProps, AppState> {
                     tracks={(this.state.value?.captions || []) as Track[]}
                     type="caption"
                     title="Add Caption"
-                    playbackId={this.state.value?.playbackId}
+                    playbackId={this.state.value?.playbackId || this.state.value?.signedPlaybackId}
                     domain={this.props.sdk.parameters.installation.domain}
+                    token={this.state.playbackToken}
+                    isSigned={this.isUsingSigned()}
                   />
                 </Tabs.Panel>
 
@@ -1135,6 +1137,10 @@ export class App extends React.Component<AppProps, AppState> {
                     tracks={this.state.value?.audioTracks || []}
                     type="audio"
                     title="Add Audio track"
+                    playbackId={this.state.value?.playbackId || this.state.value?.signedPlaybackId}
+                    domain={this.props.sdk.parameters.installation.domain}
+                    token={this.state.playbackToken}
+                    isSigned={this.isUsingSigned()}
                   />
                 </Tabs.Panel>
 
