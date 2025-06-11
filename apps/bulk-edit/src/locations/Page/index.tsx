@@ -37,9 +37,8 @@ const Page = () => {
   const locales = sdk.locales.available;
   const defaultLocale = sdk.locales.default;
   const [selectedEntryIds, setSelectedEntryIds] = useState<string[]>([]);
-  const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
+  const [selectedField, setSelectedField] = useState<ContentTypeField | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalValue, setModalValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [failedUpdates, setFailedUpdates] = useState<EntryProps[]>([]);
 
@@ -160,7 +159,6 @@ const Page = () => {
 
   const selectedContentType = contentTypes.find((ct) => ct.sys.id === selectedContentTypeId);
   const selectedEntries = entries.filter((entry) => selectedEntryIds.includes(entry.sys.id));
-  const selectedField = fields.find((f) => f.id === selectedFieldId) || null;
 
   function successNotification({
     firstEntryName,
@@ -200,13 +198,15 @@ const Page = () => {
     try {
       const results = await Promise.all(
         selectedEntries.map(async (entry: EntryProps) => {
-          if (!selectedFieldId) return { success: false, entry };
+          if (!selectedField) return { success: false, entry };
+          const fieldId = selectedField.id;
+          const fieldLocale = selectedField.locale || defaultLocale;
           try {
             const updatedFields = updateEntryFieldLocalized(
               entry.fields,
-              selectedFieldId,
+              fieldId,
               val,
-              locale
+              fieldLocale
             );
             const updated = await sdk.cma.entry.update(
               { entryId: entry.sys.id, spaceId: sdk.ids.space, environmentId: sdk.ids.environment },
@@ -226,10 +226,9 @@ const Page = () => {
       setFailedUpdates(failed);
       // Notification logic (only for successful updates)
       if (successful.length > 0) {
+        // TODO: Fix this
         const firstEntry = successful[0];
-        const firstEntryName = firstEntry
-          ? getEntryTitle(firstEntry, fields, selectedContentType, locale)
-          : '';
+        const firstEntryName = 'entryName';
         successNotification({
           firstEntryName,
           value: `${val}`,
@@ -279,7 +278,7 @@ const Page = () => {
                 ) : (
                   <>
                     <SortMenu sortOption={sortOption} onSortChange={setSortOption} />
-                    {selectedFieldId && selectedEntryIds.length > 0 && (
+                    {selectedField && selectedEntryIds.length > 0 && (
                       <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
                         <Button variant="primary" onClick={() => setIsModalOpen(true)}>
                           {selectedEntryIds.length === 1 ? 'Edit' : 'Bulk edit'}
@@ -310,7 +309,7 @@ const Page = () => {
                             {`${failedUpdates.length} field${
                               failedUpdates.length > 1 ? 's' : ''
                             } did not update: `}
-                            {getEntryTitle(failedUpdates[0], fields, selectedContentType, locale)}
+                            {/* TODO: Fix this */}
                             {failedUpdates.length > 1 &&
                               ` and ${failedUpdates.length - 1} more entry field${
                                 failedUpdates.length > 2 ? 's' : ''
@@ -332,7 +331,9 @@ const Page = () => {
                           pageSizeOptions={PAGE_SIZE_OPTIONS}
                           onSelectionChange={({ selectedEntryIds, selectedFieldId }) => {
                             setSelectedEntryIds(selectedEntryIds);
-                            setSelectedFieldId(selectedFieldId);
+                            setSelectedField(
+                              fields.find((f) => f.uniqueId === selectedFieldId) || null
+                            );
                           }}
                         />
                       </>
@@ -352,7 +353,6 @@ const Page = () => {
         selectedField={selectedField}
         fields={fields}
         contentType={selectedContentType}
-        locale={locale}
       />
     </Flex>
   );

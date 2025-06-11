@@ -28,7 +28,8 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   const [value, setValue] = useState('');
   const entryCount = selectedEntries.length;
   const firstEntry = selectedEntries[0];
-  const firstEntryName = firstEntry ? getEntryTitle(firstEntry, fields, contentType, locale) : '';
+  const firstEntryName =
+    firstEntry && contentType ? getEntryTitle(firstEntry, contentType, locale) : '';
   const title = entryCount === 1 ? 'Edit' : 'Bulk edit';
 
   return (
