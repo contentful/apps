@@ -156,7 +156,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
           ))}
         </Table.Body>
       </Table>
-      <Box marginTop="spacingM">
+      <Box style={styles.paginationContainer}>
         <Pagination
           activePage={activePage}
           onPageChange={onPageChange}

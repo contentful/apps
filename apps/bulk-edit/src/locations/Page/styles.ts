@@ -85,4 +85,14 @@ export const styles = {
     zIndex: 1,
     width: 'fit-content',
   },
+  paginationContainer: {
+    position: 'sticky',
+    left: '18%',
+    zIndex: 1,
+    background: tokens.colorWhite,
+    paddingBottom: tokens.spacingM,
+    maxWidth: `80vw`,
+    marginTop: '20px',
+    marginRight: '10px',
+  },
 } as const;
