@@ -1136,7 +1136,7 @@ export class App extends React.Component<AppProps, AppState> {
                     }}
                     tracks={this.state.value?.audioTracks || []}
                     type="audio"
-                    title="Add Audio track"
+                    title="Add Audio"
                     playbackId={this.state.value?.playbackId || this.state.value?.signedPlaybackId}
                     domain={this.props.sdk.parameters.installation.domain}
                     token={this.state.playbackToken}

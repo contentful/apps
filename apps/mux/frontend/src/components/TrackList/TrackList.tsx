@@ -70,7 +70,7 @@ const TrackList: React.FC<TrackListProps> = ({
                       : 'No'}
                   </Table.Cell>
                 )}
-                <Table.Cell>{track.status}</Table.Cell>
+                <Table.Cell>{track.status ?? 'ready'}</Table.Cell>
                 {type === 'caption' && (
                   <>
                     <Table.Cell>
