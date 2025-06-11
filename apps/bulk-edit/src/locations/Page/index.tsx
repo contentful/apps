@@ -155,9 +155,9 @@ const Page = () => {
     setIsSaving(true);
     setSaveError(null);
     try {
-      await Promise.all(
+      const updatedEntries: EntryProps[] = await Promise.all(
         selectedEntries.map(async (entry: EntryProps) => {
-          if (!selectedFieldId) return;
+          if (!selectedFieldId) return entry;
           const updatedFields = updateEntryFieldLocalized(
             entry.fields,
             selectedFieldId,
@@ -168,8 +168,13 @@ const Page = () => {
             { entryId: entry.sys.id, spaceId: sdk.ids.space, environmentId: sdk.ids.environment },
             { ...entry, fields: updatedFields }
           );
+          // TODO: uncomment this when we have definition for publish
           // await sdk.cma.entry.publish({ entryId: entry.sys.id, spaceId: sdk.ids.space, environmentId: sdk.ids.environment }, updated);
+          return updated;
         })
+      );
+      setEntries((prev) =>
+        prev.map((entry) => updatedEntries.find((u) => u.sys.id === entry.sys.id) || entry)
       );
       setIsModalOpen(false);
     } catch (e: any) {
