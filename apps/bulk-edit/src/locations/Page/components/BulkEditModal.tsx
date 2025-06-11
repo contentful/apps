@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Button, TextInput, Text, Flex } from '@contentful/f36-components';
 import type { Entry, ContentTypeField } from '../types';
 import { ContentTypeProps } from 'contentful-management';
-import { getEntryTitle } from '../utils/entryUtils';
+import { getEntryTitle, getEntryFieldValue } from '../utils/entryUtils';
 
 interface BulkEditModalProps {
   isOpen: boolean;
@@ -11,8 +11,7 @@ interface BulkEditModalProps {
   selectedEntries: Entry[];
   selectedField: ContentTypeField | null;
   fields: ContentTypeField[];
-  contentType?: ContentTypeProps;
-  locale?: string;
+  defaultLocale: string;
 }
 
 export const BulkEditModal: React.FC<BulkEditModalProps> = ({
@@ -22,30 +21,29 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   selectedEntries,
   selectedField,
   fields,
-  contentType,
-  locale = 'en-US',
+  defaultLocale,
 }) => {
   const [value, setValue] = useState('');
   const entryCount = selectedEntries.length;
   const firstEntry = selectedEntries[0];
-  const firstEntryName =
-    firstEntry && contentType ? getEntryTitle(firstEntry, contentType, locale) : '';
+  const firstValueToUpdate =
+    firstEntry && selectedField && defaultLocale
+      ? getEntryFieldValue(firstEntry, selectedField, defaultLocale)
+      : '';
   const title = entryCount === 1 ? 'Edit' : 'Bulk edit';
 
   return (
     <Modal isShown={isOpen} onClose={onClose} size="medium" aria-label={title}>
       <Modal.Header title={title} />
       <Modal.Content>
-        <Flex gap="spacingM" flexDirection="column">
+        <Flex gap="spacingS" flexDirection="column">
+          <Text>{selectedField ? `Editing field: ${selectedField.name}` : ''}</Text>
           <Flex>
             <Text>
-              <Text as="span" fontWeight="fontWeightDemiBold">
-                {firstEntryName}
-              </Text>{' '}
+              <Text fontWeight="fontWeightDemiBold">{firstValueToUpdate}</Text>{' '}
               {entryCount === 1 ? 'selected' : `selected and ${entryCount - 1} more`}
             </Text>
           </Flex>
-          <Text>{selectedField ? `Editing field: ${selectedField.name}` : ''}</Text>
           <TextInput
             name="bulk-edit-value"
             value={value}

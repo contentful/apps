@@ -17,8 +17,8 @@ import { ContentTypeSidebar } from './components/ContentTypeSidebar';
 import { SortMenu, SORT_OPTIONS } from './components/SortMenu';
 import { EntryTable } from './components/EntryTable';
 import { BulkEditModal } from './components/BulkEditModal';
-import { updateEntryFieldLocalized, getEntryTitle } from './utils/entryUtils';
-import { OctagonIcon, WarningOctagonIcon } from '@phosphor-icons/react';
+import { updateEntryFieldLocalized, getEntryFieldValue } from './utils/entryUtils';
+import { WarningOctagonIcon } from '@phosphor-icons/react';
 import tokens from '@contentful/f36-tokens';
 
 const PAGE_SIZE_OPTIONS = [15, 50, 100];
@@ -161,20 +161,20 @@ const Page = () => {
   const selectedEntries = entries.filter((entry) => selectedEntryIds.includes(entry.sys.id));
 
   function successNotification({
-    firstEntryName,
+    firstUpdatedValue,
     value,
     count,
     onUndo,
   }: {
-    firstEntryName: string;
+    firstUpdatedValue: string;
     value: string;
     count: number;
     onUndo: () => void;
   }) {
     const message =
       count === 1
-        ? `${firstEntryName} was updated to ${value}`
-        : `${firstEntryName} and ${count - 1} more entry fields were updated to ${value}`;
+        ? `${firstUpdatedValue} was updated to ${value}`
+        : `${firstUpdatedValue} and ${count - 1} more entry fields were updated to ${value}`;
     const notification = Notification.success(message, {
       title: 'Success!',
       cta: {
@@ -212,6 +212,7 @@ const Page = () => {
               { entryId: entry.sys.id, spaceId: sdk.ids.space, environmentId: sdk.ids.environment },
               { ...entry, fields: updatedFields }
             );
+
             return { success: true, entry: updated };
           } catch {
             return { success: false, entry };
@@ -220,17 +221,16 @@ const Page = () => {
       );
       const successful = results.filter((r) => r.success).map((r) => r.entry);
       const failed = results.filter((r) => !r.success).map((r) => r.entry);
+
       setEntries((prev) =>
         prev.map((entry) => successful.find((u) => u.sys.id === entry.sys.id) || entry)
       );
       setFailedUpdates(failed);
       // Notification logic (only for successful updates)
       if (successful.length > 0) {
-        // TODO: Fix this
-        const firstEntry = successful[0];
-        const firstEntryName = 'entryName';
+        const firstUpdatedValue = getEntryFieldValue(successful[0], selectedField, defaultLocale);
         successNotification({
-          firstEntryName,
+          firstUpdatedValue: firstUpdatedValue,
           value: `${val}`,
           count: successful.length,
           onUndo: () => {
@@ -293,29 +293,37 @@ const Page = () => {
                       <Spinner />
                     ) : (
                       <>
-                        {failedUpdates.length > 0 && (
-                          <Note
-                            variant="negative"
-                            icon={
-                              <WarningOctagonIcon
-                                fill={tokens.red600}
-                                height={tokens.spacingM}
-                                width={tokens.spacingM}
-                              />
-                            }
-                            style={styles.errorNote}
-                            onClose={() => setFailedUpdates([])}
-                            withCloseButton>
-                            {`${failedUpdates.length} field${
-                              failedUpdates.length > 1 ? 's' : ''
-                            } did not update: `}
-                            {/* TODO: Fix this */}
-                            {failedUpdates.length > 1 &&
-                              ` and ${failedUpdates.length - 1} more entry field${
-                                failedUpdates.length > 2 ? 's' : ''
-                              }`}
-                          </Note>
-                        )}
+                        {failedUpdates.length > 0 &&
+                          (() => {
+                            const firstFailedValue = getEntryFieldValue(
+                              failedUpdates[0],
+                              selectedField,
+                              defaultLocale
+                            );
+                            return (
+                              <Note
+                                variant="negative"
+                                icon={
+                                  <WarningOctagonIcon
+                                    fill={tokens.red600}
+                                    height={tokens.spacingM}
+                                    width={tokens.spacingM}
+                                  />
+                                }
+                                style={styles.errorNote}
+                                onClose={() => setFailedUpdates([])}
+                                withCloseButton>
+                                {`${failedUpdates.length} field${
+                                  failedUpdates.length > 1 ? 's' : ''
+                                } did not update: `}
+                                {firstFailedValue}
+                                {failedUpdates.length > 1 &&
+                                  ` and ${failedUpdates.length - 1} more entry field${
+                                    failedUpdates.length > 2 ? 's' : ''
+                                  }`}
+                              </Note>
+                            );
+                          })()}
                         <EntryTable
                           entries={entries}
                           fields={fields}
@@ -352,7 +360,7 @@ const Page = () => {
         selectedEntries={selectedEntries}
         selectedField={selectedField}
         fields={fields}
-        contentType={selectedContentType}
+        defaultLocale={defaultLocale}
       />
     </Flex>
   );

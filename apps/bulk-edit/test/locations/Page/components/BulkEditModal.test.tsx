@@ -6,9 +6,10 @@ import { Entry, ContentTypeField } from '../../../../src/locations/Page/types';
 import { ContentTypeProps } from 'contentful-management';
 
 describe('BulkEditModal', () => {
-  const field: ContentTypeField = { id: 'size', name: 'Size', type: 'Number' };
+  const field: ContentTypeField = { id: 'size', uniqueId: 'size', name: 'Size', type: 'Number' };
   const displayNameField: ContentTypeField = {
     id: 'displayName',
+    uniqueId: 'displayName',
     name: 'Display Name',
     type: 'Symbol',
   };
@@ -32,15 +33,13 @@ describe('BulkEditModal', () => {
         selectedEntries={[entry1]}
         selectedField={field}
         fields={fields}
-        contentType={contentType as ContentTypeProps}
-        locale="en-US"
+        defaultLocale="en-US"
       />
     );
     expect(screen.getByText('Edit')).toBeInTheDocument();
-    expect(screen.getByText((content) => content.includes('Building one'))).toBeInTheDocument();
-    expect(
-      screen.getByText((content) => content.includes('Editing field: Size'))
-    ).toBeInTheDocument();
+    expect(screen.getByText('1000')).toBeInTheDocument();
+    expect(screen.getByText('selected')).toBeInTheDocument();
+    expect(screen.getByText('Editing field: Size')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Enter your new value')).toBeInTheDocument();
   });
 
@@ -53,12 +52,13 @@ describe('BulkEditModal', () => {
         selectedEntries={[entry1, entry2]}
         selectedField={field}
         fields={fields}
-        contentType={contentType as ContentTypeProps}
-        locale="en-US"
+        defaultLocale="en-US"
       />
     );
     expect(screen.getByText('Bulk edit')).toBeInTheDocument();
-    expect(screen.getByText((content) => content.includes('Building one'))).toBeInTheDocument();
+    expect(screen.getByText('1000')).toBeInTheDocument();
+    expect(screen.getByText('selected and 1 more')).toBeInTheDocument();
+    expect(screen.getByText('Editing field: Size')).toBeInTheDocument();
   });
 
   it('calls onClose when Cancel is clicked', () => {
@@ -71,8 +71,7 @@ describe('BulkEditModal', () => {
         selectedEntries={[entry1]}
         selectedField={field}
         fields={fields}
-        contentType={contentType as ContentTypeProps}
-        locale="en-US"
+        defaultLocale="en-US"
       />
     );
     fireEvent.click(screen.getByTestId('bulk-edit-cancel'));
@@ -89,8 +88,7 @@ describe('BulkEditModal', () => {
         selectedEntries={[entry1]}
         selectedField={field}
         fields={fields}
-        contentType={contentType as ContentTypeProps}
-        locale="en-US"
+        defaultLocale="en-US"
       />
     );
     const input = screen.getByPlaceholderText('Enter your new value');

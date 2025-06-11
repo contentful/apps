@@ -120,3 +120,12 @@ export function updateEntryFieldLocalized(
     },
   };
 }
+
+export function getEntryFieldValue(
+  entry: any,
+  field: { id: string; locale?: string } | null | undefined,
+  defaultLocale: string
+): string {
+  if (!entry || !field || !field.id) return '';
+  return entry.fields[field.id]?.[field.locale || defaultLocale] || '';
+}
