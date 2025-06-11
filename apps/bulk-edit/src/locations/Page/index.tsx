@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Heading, Flex, Spinner } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentTypeProps } from 'contentful-management';
@@ -14,7 +14,6 @@ const Page = () => {
   const sdk = useSDK();
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [selectedContentTypeId, setSelectedContentTypeId] = useState<string | undefined>(undefined);
-  const [loading, setLoading] = useState(true);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [entriesLoading, setEntriesLoading] = useState(false);
   const [fields, setFields] = useState<ContentTypeField[]>([]);
@@ -22,7 +21,8 @@ const Page = () => {
   const [itemsPerPage, setItemsPerPage] = useState(PAGE_SIZE_OPTIONS[0]);
   const [totalEntries, setTotalEntries] = useState(0);
   const [sortOption, setSortOption] = useState(SORT_OPTIONS[0].value);
-  const locale = sdk.locales.default;
+  const locales = sdk.locales.available;
+  const defaultLocale = sdk.locales.default;
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -63,7 +63,6 @@ const Page = () => {
 
   useEffect(() => {
     const fetchContentTypes = async (): Promise<void> => {
-      setLoading(true);
       try {
         const contentTypes = await getAllContentTypes();
         const sortedContentTypes = contentTypes
@@ -78,7 +77,6 @@ const Page = () => {
         setContentTypes([]);
         setSelectedContentTypeId(undefined);
       } finally {
-        setLoading(false);
       }
     };
     void fetchContentTypes();
@@ -140,7 +138,7 @@ const Page = () => {
             />
             <div style={styles.stickySpacer} />
             <Box>
-              {loading ? (
+              {!selectedContentType ? (
                 <Spinner />
               ) : (
                 <>
@@ -160,7 +158,7 @@ const Page = () => {
                         contentType={selectedContentType}
                         spaceId={sdk.ids.space}
                         environmentId={sdk.ids.environment}
-                        locale={locale}
+                        defaultLocale={defaultLocale}
                         activePage={activePage}
                         totalEntries={totalEntries}
                         itemsPerPage={itemsPerPage}

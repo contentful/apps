@@ -16,10 +16,10 @@ import {
 interface TableRowProps {
   entry: Entry;
   fields: ContentTypeField[];
-  contentType?: ContentTypeProps;
+  contentType: ContentTypeProps;
   spaceId: string;
   environmentId: string;
-  locale: string;
+  defaultLocale: string;
   rowCheckboxes: Record<string, boolean>;
   onCellCheckboxChange: (columnId: string, checked: boolean) => void;
   cellCheckboxesDisabled: Record<string, boolean>;
@@ -31,7 +31,7 @@ export const TableRow: React.FC<TableRowProps> = ({
   contentType,
   spaceId,
   environmentId,
-  locale,
+  defaultLocale,
   rowCheckboxes,
   onCellCheckboxChange,
   cellCheckboxesDisabled,
@@ -39,8 +39,8 @@ export const TableRow: React.FC<TableRowProps> = ({
   const status = getStatus(entry);
   const [hoveredColumn, setHoveredColumn] = useState<string | null>(null);
 
-  const displayField = contentType?.displayField;
-  const displayValue = displayField ? entry.fields[displayField]?.[locale] : entry.sys.id;
+  const displayField = contentType.displayField;
+  const displayValue = displayField ? entry.fields[displayField]?.[defaultLocale] : entry.sys.id;
 
   return (
     <Table.Row key={entry.sys.id}>
@@ -52,7 +52,7 @@ export const TableRow: React.FC<TableRowProps> = ({
           testId="entry-link"
           icon={<ExternalLinkIcon />}
           alignIcon="end">
-          {getEntryTitle(entry, fields, contentType, locale)}
+          {getEntryTitle(entry, contentType, defaultLocale)}
         </TextLink>
       </Table.Cell>
       <Table.Cell testId="status-cell" style={styles.cell}>
@@ -81,7 +81,7 @@ export const TableRow: React.FC<TableRowProps> = ({
                     aria-label={`Select ${truncate(field.name)} for ${displayValue}`}
                   />
                 )}
-                {renderFieldValue(field, entry.fields[field.id]?.[locale])}
+                {renderFieldValue(field, entry.fields[field.id]?.[defaultLocale])}
               </Flex>
             </Table.Cell>
           );
@@ -89,7 +89,7 @@ export const TableRow: React.FC<TableRowProps> = ({
         return (
           <Table.Cell key={field.id} style={styles.cell}>
             <Text fontColor="gray500">
-              {renderFieldValue(field, entry.fields[field.id]?.[locale])}
+              {renderFieldValue(field, entry.fields[field.id]?.[defaultLocale])}
             </Text>
           </Table.Cell>
         );
