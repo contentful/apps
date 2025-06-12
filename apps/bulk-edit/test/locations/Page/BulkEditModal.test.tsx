@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
-import { BulkEditModal } from '../../../../src/locations/Page/components/BulkEditModal';
-import { Entry, ContentTypeField } from '../../../../src/locations/Page/types';
+import { BulkEditModal } from '../../../src/locations/Page/components/BulkEditModal';
+import { Entry, ContentTypeField } from '../../../src/locations/Page/types';
 import { ContentTypeProps } from 'contentful-management';
 
 describe('BulkEditModal', () => {
