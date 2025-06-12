@@ -39,6 +39,7 @@ const Page = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [failedUpdates, setFailedUpdates] = useState<EntryProps[]>([]);
+  const [lastUpdateBackup, setLastUpdateBackup] = useState<Record<string, EntryProps>>({});
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -194,21 +195,32 @@ const Page = () => {
     setIsSaving(true);
     setFailedUpdates([]);
     try {
+      // Create backups before making changes
+      const backups: Record<string, EntryProps> = {};
       const results = await Promise.all(
         selectedEntries.map(async (entry: EntryProps) => {
           if (!selectedField) return { success: false, entry };
           const fieldId = selectedField.id;
           const fieldLocale = selectedField.locale || defaultLocale;
           try {
+            // Get the latest version of the entry
+            const latestEntry = await sdk.cma.entry.get({
+              spaceId: sdk.ids.space,
+              environmentId: sdk.ids.environment,
+              entryId: entry.sys.id,
+            });
+            // Store backup of current state
+            backups[entry.sys.id] = { ...latestEntry };
+
             const updatedFields = updateEntryFieldLocalized(
-              entry.fields,
+              latestEntry.fields,
               fieldId,
               val,
               fieldLocale
             );
             const updated = await sdk.cma.entry.update(
               { entryId: entry.sys.id, spaceId: sdk.ids.space, environmentId: sdk.ids.environment },
-              { ...entry, fields: updatedFields }
+              { ...latestEntry, fields: updatedFields }
             );
 
             return { success: true, entry: updated };
@@ -224,6 +236,9 @@ const Page = () => {
         prev.map((entry) => successful.find((u) => u.sys.id === entry.sys.id) || entry)
       );
       setFailedUpdates(failed);
+      // Store the backup for undo functionality
+      setLastUpdateBackup(backups);
+
       // Notification logic (only for successful updates)
       if (successful.length > 0) {
         const firstUpdatedValue = getEntryFieldValue(
@@ -235,10 +250,7 @@ const Page = () => {
           firstUpdatedValue: firstUpdatedValue,
           value: `${val}`,
           count: successful.length,
-          onUndo: () => {
-            // TODO: implement undo logic
-            console.log('undo');
-          },
+          onUndo: () => undoUpdates(backups),
         });
       }
       setIsModalOpen(false);
@@ -246,6 +258,46 @@ const Page = () => {
       if (failedUpdates.length === 0) {
         setFailedUpdates(selectedEntries);
       }
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const undoUpdates = async (backupToUse: Record<string, EntryProps>) => {
+    if (Object.keys(backupToUse).length === 0) return;
+
+    setIsSaving(true);
+    try {
+      const undoPromises = Object.entries(backupToUse).map(async ([entryId, backupEntry]) => {
+        // Get the current entry to ensure we have the latest version
+        const currentEntry = await sdk.cma.entry.get({
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environment,
+          entryId,
+        });
+        // Restore the previous fields from backup
+        const restoredEntry = await sdk.cma.entry.update(
+          {
+            spaceId: sdk.ids.space,
+            environmentId: sdk.ids.environment,
+            entryId,
+          },
+          {
+            ...currentEntry,
+            fields: backupEntry.fields,
+          }
+        );
+        return restoredEntry;
+      });
+
+      const restoredEntries = await Promise.all(undoPromises);
+      setEntries((prev) =>
+        prev.map((entry) => restoredEntries.find((u) => u.sys.id === entry.sys.id) || entry)
+      );
+      // Clear the backup since we've used it
+      setLastUpdateBackup({});
+    } catch (e) {
+      console.error('Error undoing updates:', e);
     } finally {
       setIsSaving(false);
     }
