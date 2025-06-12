@@ -103,6 +103,7 @@ export const isCheckboxAllowed = (field: ContentTypeField): boolean => {
     'ResourceLink',
     'Boolean',
     'Object',
+    'RichText',
   ];
 
   if (!field.type) return false;
