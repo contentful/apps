@@ -7,7 +7,6 @@ import {
   Button,
   Text,
   Notification,
-  Note,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentFields, ContentTypeProps, KeyValueMap, EntryProps } from 'contentful-management';
@@ -18,8 +17,7 @@ import { SortMenu, SORT_OPTIONS } from './components/SortMenu';
 import { EntryTable } from './components/EntryTable';
 import { BulkEditModal } from './components/BulkEditModal';
 import { updateEntryFieldLocalized, getEntryFieldValue } from './utils/entryUtils';
-import { WarningOctagonIcon } from '@phosphor-icons/react';
-import tokens from '@contentful/f36-tokens';
+import { ErrorNote } from './components/ErrorNote';
 
 const PAGE_SIZE_OPTIONS = [15, 50, 100];
 
@@ -297,37 +295,14 @@ const Page = () => {
                       <Spinner />
                     ) : (
                       <>
-                        {failedUpdates.length > 0 &&
-                          (() => {
-                            const firstFailedValue = getEntryFieldValue(
-                              failedUpdates[0],
-                              selectedField,
-                              defaultLocale
-                            );
-                            return (
-                              <Note
-                                variant="negative"
-                                icon={
-                                  <WarningOctagonIcon
-                                    fill={tokens.red600}
-                                    height={tokens.spacingM}
-                                    width={tokens.spacingM}
-                                  />
-                                }
-                                style={styles.errorNote}
-                                onClose={() => setFailedUpdates([])}
-                                withCloseButton>
-                                {`${failedUpdates.length} field${
-                                  failedUpdates.length > 1 ? 's' : ''
-                                } did not update: `}
-                                {firstFailedValue}
-                                {failedUpdates.length > 1 &&
-                                  ` and ${failedUpdates.length - 1} more entry field${
-                                    failedUpdates.length > 2 ? 's' : ''
-                                  }`}
-                              </Note>
-                            );
-                          })()}
+                        {failedUpdates.length > 0 && (
+                          <ErrorNote
+                            failedUpdates={failedUpdates}
+                            selectedField={selectedField}
+                            defaultLocale={defaultLocale}
+                            onClose={() => setFailedUpdates([])}
+                          />
+                        )}
                         <EntryTable
                           entries={entries}
                           fields={fields}
