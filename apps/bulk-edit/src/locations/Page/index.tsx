@@ -228,7 +228,11 @@ const Page = () => {
       setFailedUpdates(failed);
       // Notification logic (only for successful updates)
       if (successful.length > 0) {
-        const firstUpdatedValue = getEntryFieldValue(successful[0], selectedField, defaultLocale);
+        const firstUpdatedValue = getEntryFieldValue(
+          selectedEntries[0],
+          selectedField,
+          defaultLocale
+        );
         successNotification({
           firstUpdatedValue: firstUpdatedValue,
           value: `${val}`,
