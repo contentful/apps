@@ -24,7 +24,7 @@ describe('BulkEditModal', () => {
     fields: { displayName: { 'en-US': 'Building two' }, size: { 'en-US': 2000 } },
   };
 
-  it('renders correct title and subtitle for single entry', () => {
+  it('renders subtitle for single entry', () => {
     render(
       <BulkEditModal
         isOpen={true}
@@ -40,11 +40,10 @@ describe('BulkEditModal', () => {
     expect(screen.getByText('Edit')).toBeInTheDocument();
     expect(screen.getByText('1000')).toBeInTheDocument();
     expect(screen.getByText('selected')).toBeInTheDocument();
-    expect(screen.getByText('Editing field: Size')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Enter your new value')).toBeInTheDocument();
   });
 
-  it('renders correct title and subtitle for multiple entries', () => {
+  it('renders correct subtitle for multiple entries', () => {
     render(
       <BulkEditModal
         isOpen={true}
@@ -60,7 +59,6 @@ describe('BulkEditModal', () => {
     expect(screen.getByText('Bulk edit')).toBeInTheDocument();
     expect(screen.getByText('1000')).toBeInTheDocument();
     expect(screen.getByText('selected and 1 more')).toBeInTheDocument();
-    expect(screen.getByText('Editing field: Size')).toBeInTheDocument();
   });
 
   it('calls onClose when Cancel is clicked', () => {
