@@ -94,7 +94,16 @@ export const getEntryUrl = (entry: Entry, spaceId: string, environmentId: string
 };
 
 export const isCheckboxAllowed = (field: ContentTypeField): boolean => {
-  const restrictedTypes = ['Location', 'Date', 'Asset', 'Array', 'Link', 'ResourceLink', 'Boolean'];
+  const restrictedTypes = [
+    'Location',
+    'Date',
+    'Asset',
+    'Array',
+    'Link',
+    'ResourceLink',
+    'Boolean',
+    'Object',
+  ];
 
   if (!field.type) return false;
 
