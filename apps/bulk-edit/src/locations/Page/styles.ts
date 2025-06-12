@@ -95,4 +95,12 @@ export const styles = {
     marginTop: tokens.spacingL,
     marginRight: tokens.spacingXs,
   },
+  noEntriesText: {
+    textAlign: 'start',
+    fontWeight: 'bold',
+    fontSize: tokens.fontSizeL,
+  },
+  noContentTypeText: {
+    fontWeight: 'bold',
+  },
 } as const;
