@@ -153,38 +153,38 @@ const Page = () => {
             />
             <div style={styles.stickySpacer} />
             <Box>
-              {!selectedContentType ? (
-                <Spinner />
-              ) : (
-                <>
-                  <Heading style={styles.stickyPageHeader}>
-                    {selectedContentType
-                      ? `Bulk edit ${selectedContentType.name}`
-                      : 'Bulk Edit App'}
-                  </Heading>
+              <>
+                <Heading style={styles.stickyPageHeader}>
+                  {selectedContentType ? `Bulk edit ${selectedContentType.name}` : 'Bulk Edit App'}
+                </Heading>
+                {(entries.length === 0 && !entriesLoading) || !selectedContentType ? (
+                  <Box style={styles.noEntriesText}>No entries found.</Box>
+                ) : (
                   <>
-                    <SortMenu sortOption={sortOption} onSortChange={setSortOption} />
                     {entriesLoading ? (
                       <Spinner />
                     ) : (
-                      <EntryTable
-                        entries={entries}
-                        fields={fields}
-                        contentType={selectedContentType}
-                        spaceId={sdk.ids.space}
-                        environmentId={sdk.ids.environment}
-                        defaultLocale={defaultLocale}
-                        activePage={activePage}
-                        totalEntries={totalEntries}
-                        itemsPerPage={itemsPerPage}
-                        onPageChange={setActivePage}
-                        onItemsPerPageChange={setItemsPerPage}
-                        pageSizeOptions={PAGE_SIZE_OPTIONS}
-                      />
+                      <>
+                        <SortMenu sortOption={sortOption} onSortChange={setSortOption} />
+                        <EntryTable
+                          entries={entries}
+                          fields={fields}
+                          contentType={selectedContentType}
+                          spaceId={sdk.ids.space}
+                          environmentId={sdk.ids.environment}
+                          defaultLocale={defaultLocale}
+                          activePage={activePage}
+                          totalEntries={totalEntries}
+                          itemsPerPage={itemsPerPage}
+                          onPageChange={setActivePage}
+                          onItemsPerPageChange={setItemsPerPage}
+                          pageSizeOptions={PAGE_SIZE_OPTIONS}
+                        />
+                      </>
                     )}
                   </>
-                </>
-              )}
+                )}
+              </>
             </Box>
           </Flex>
         </Box>
