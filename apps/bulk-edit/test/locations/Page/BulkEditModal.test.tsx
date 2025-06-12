@@ -32,7 +32,6 @@ describe('BulkEditModal', () => {
         onSave={vi.fn()}
         selectedEntries={[entry1]}
         selectedField={field}
-        fields={fields}
         defaultLocale="en-US"
         isSaving={false}
       />
@@ -51,7 +50,6 @@ describe('BulkEditModal', () => {
         onSave={vi.fn()}
         selectedEntries={[entry1, entry2]}
         selectedField={field}
-        fields={fields}
         defaultLocale="en-US"
         isSaving={false}
       />
@@ -70,7 +68,6 @@ describe('BulkEditModal', () => {
         onSave={vi.fn()}
         selectedEntries={[entry1]}
         selectedField={field}
-        fields={fields}
         defaultLocale="en-US"
         isSaving={false}
       />
@@ -88,7 +85,6 @@ describe('BulkEditModal', () => {
         onSave={onSave}
         selectedEntries={[entry1]}
         selectedField={field}
-        fields={fields}
         defaultLocale="en-US"
         isSaving={false}
       />

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Button, TextInput, Text, Flex, FormControl } from '@contentful/f36-components';
 import type { Entry, ContentTypeField } from '../types';
-import { ContentTypeProps } from 'contentful-management';
-import { getEntryTitle, getEntryFieldValue } from '../utils/entryUtils';
+import { getEntryFieldValue } from '../utils/entryUtils';
 
 interface BulkEditModalProps {
   isOpen: boolean;
@@ -10,7 +9,6 @@ interface BulkEditModalProps {
   onSave: (newValue: string | number) => void;
   selectedEntries: Entry[];
   selectedField: ContentTypeField | null;
-  fields: ContentTypeField[];
   defaultLocale: string;
   isSaving: boolean;
 }
@@ -21,7 +19,6 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   onSave,
   selectedEntries,
   selectedField,
-  fields,
   defaultLocale,
   isSaving,
 }) => {

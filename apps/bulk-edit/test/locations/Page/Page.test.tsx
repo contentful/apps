@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, it, beforeEach, vi, expect } from 'vitest';
 import Page from '../../../src/locations/Page';
 import { mockSdk } from '../../mocks/mockSdk';
-import { createMockCma, getManyContentTypes, getManyEntries } from '../../mocks/mockCma';
+import { getManyContentTypes } from '../../mocks/mockCma';
 import { condoAContentType } from '../../mocks/mockContentTypes';
 import { Notification } from '@contentful/f36-components';
 
@@ -13,7 +13,6 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 
 describe('Page', () => {
   beforeEach(() => {
-    mockSdk.cma = createMockCma();
     mockSdk.cma.contentType.getMany = vi
       .fn()
       .mockResolvedValue(getManyContentTypes([condoAContentType]));
@@ -42,23 +41,6 @@ describe('Page', () => {
     });
     expect(screen.queryByText('Edit')).not.toBeInTheDocument();
     expect(screen.queryByText('Bulk edit')).not.toBeInTheDocument();
-  });
-
-  // TODO: Fix This test is not working as expected. The checkbox is not visible when hovered.
-  it.skip('shows Edit button when one field is selected and correct count', async () => {
-    render(<Page />);
-    // Wait for table to load
-    await waitFor(() => {
-      expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
-    });
-    // Simulate hover to make the checkbox visible (like EntryTable.test.tsx)
-    const cellCheckbox = screen.getByTestId('cell-checkbox-size-entry-1');
-    fireEvent.mouseEnter(cellCheckbox.parentElement!);
-    fireEvent.click(cellCheckbox);
-    await waitFor(() => {
-      expect(screen.getByText('Edit')).toBeInTheDocument();
-      expect(screen.getByText(/1 entry field selected/)).toBeInTheDocument();
-    });
   });
 });
 

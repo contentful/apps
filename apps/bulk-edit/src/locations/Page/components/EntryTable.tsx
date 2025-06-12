@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Table, Box, Pagination, Button } from '@contentful/f36-components';
+import { Table, Box, Pagination } from '@contentful/f36-components';
 import { Entry, ContentTypeField } from '../types';
 import { ContentTypeProps } from 'contentful-management';
 import { styles } from '../styles';

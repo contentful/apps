@@ -359,7 +359,6 @@ const Page = () => {
         onSave={onSave}
         selectedEntries={selectedEntries}
         selectedField={selectedField}
-        fields={fields}
         defaultLocale={defaultLocale}
         isSaving={isSaving}
       />
