@@ -85,4 +85,14 @@ export const styles = {
     zIndex: 1,
     width: 'fit-content',
   },
+  paginationContainer: {
+    position: 'sticky',
+    left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING,
+    zIndex: 1,
+    background: tokens.colorWhite,
+    paddingBottom: tokens.spacingM,
+    maxWidth: `81vw`,
+    marginTop: tokens.spacingL,
+    marginRight: tokens.spacingXs,
+  },
 } as const;
