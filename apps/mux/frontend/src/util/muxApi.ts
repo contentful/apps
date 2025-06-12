@@ -247,3 +247,32 @@ export async function uploadTrack(
 export async function deleteTrack(apiClient: any, assetId: string, trackId: string) {
   return await apiClient.del(`/video/v1/assets/${assetId}/tracks/${trackId}`);
 }
+
+export async function generateAutoCaptions(
+  apiClient: any,
+  assetId: string,
+  trackId: string,
+  options: {
+    language_code: string;
+    name: string;
+  }
+) {
+  const result = await apiClient.post(
+    `/video/v1/assets/${assetId}/tracks/${trackId}/generate-subtitles`,
+    JSON.stringify({
+      generated_subtitles: [
+        {
+          language_code: options.language_code,
+          name: options.name,
+        },
+      ],
+    })
+  );
+
+  if (!result.ok) {
+    const error = await result.json();
+    throw new Error(error.error?.messages?.[0] || 'Error generating subtitles');
+  }
+
+  return await result.json();
+}

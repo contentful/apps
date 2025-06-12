@@ -24,7 +24,7 @@ const TrackList: React.FC<TrackListProps> = ({
   if (!tracks || tracks.length === 0) {
     return (
       <Box marginTop="spacingL" marginBottom="spacingL">
-        <Note variant="neutral">No {type === 'caption' ? 'Captions' : 'Audio Tracks'}</Note>
+        <Note variant="neutral">No {type === 'caption' ? 'Captions' : 'Audios'}</Note>
       </Box>
     );
   }
@@ -84,14 +84,24 @@ const TrackList: React.FC<TrackListProps> = ({
                       )}
                     </Table.Cell>
                     <Table.Cell>
-                      {track.type === 'text' && track.status === 'ready' && (
-                        <TextLink
-                          href={getDownloadUrl(track, 'txt')}
-                          target="_blank"
-                          rel="noopener noreferrer">
-                          Download
-                        </TextLink>
-                      )}
+                      {track.type === 'text' &&
+                        track.status === 'ready' &&
+                        (track.text_source === 'generated_vod' ? (
+                          <TextLink
+                            href={getDownloadUrl(track, 'txt')}
+                            target="_blank"
+                            rel="noopener noreferrer">
+                            Download
+                          </TextLink>
+                        ) : (
+                          <Tooltip
+                            content="Transcripts can only be downloaded for auto-generated captions"
+                            placement="top">
+                            <TextLink isDisabled href="#" onClick={(e) => e.preventDefault()}>
+                              Download
+                            </TextLink>
+                          </Tooltip>
+                        ))}
                     </Table.Cell>
                   </>
                 )}

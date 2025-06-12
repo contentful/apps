@@ -1,6 +1,6 @@
 {
   "name": "@contentful/mux-contentful-frontend",
-  "version": "1.10.14",
+  "version": "2.0.0",
   "private": true,
   "devDependencies": {
     "@testing-library/jest-dom": "5.17.0",

@@ -50,6 +50,7 @@ import {
   updateAsset,
   uploadTrack,
   deleteTrack,
+  generateAutoCaptions,
 } from './util/muxApi';
 import { AssetSettings } from './util/muxApi';
 
@@ -612,9 +613,7 @@ export class App extends React.Component<AppProps, AppState> {
       let trackPreparing = false;
       if ('tracks' in asset) {
         asset.tracks.forEach((track) => {
-          if (track.status === 'preparing') {
-            trackPreparing = true;
-          }
+          trackPreparing = track.status === 'preparing';
           if (track.type === 'audio') {
             audioTracks = [...(audioTracks || []), track];
           } else if (
@@ -687,24 +686,41 @@ export class App extends React.Component<AppProps, AppState> {
   uploadTrack = async (form: HTMLFormElement, type: 'audio' | 'caption') => {
     if (!this.state.value?.assetId) return;
 
+    const captionsTypeInput = form.elements.namedItem('captionsType') as HTMLSelectElement;
     const urlInput = form.elements.namedItem('url') as HTMLInputElement;
     const nameInput = form.elements.namedItem('name') as HTMLInputElement;
     const languageCodeInput = form.elements.namedItem('languagecode') as HTMLInputElement;
     const closedCaptionsInput = form.elements.namedItem('closedcaptions') as HTMLInputElement;
 
     try {
-      const options = {
-        url: urlInput.value,
-        name: nameInput.value,
-        language_code: languageCodeInput.value || 'en-US',
-        type: type === 'audio' ? ('audio' as const) : ('text' as const),
-        ...(type === 'caption' && {
-          text_type: 'subtitles',
-          closed_captions: closedCaptionsInput?.checked || false,
-        }),
-      };
+      if (type === 'caption' && captionsTypeInput?.value === 'auto') {
+        const audioTrack =
+          this.state.value.audioTracks?.find((track) => track.type === 'audio' && track.primary) ||
+          this.state.value.audioTracks?.[0];
 
-      await uploadTrack(this.apiClient, this.state.value.assetId, options);
+        if (!audioTrack) {
+          throw new Error('No audio track found to generate subtitles');
+        }
+
+        await generateAutoCaptions(this.apiClient, this.state.value.assetId, audioTrack.id, {
+          language_code: languageCodeInput.value,
+          name: nameInput.value,
+        });
+      } else {
+        const options = {
+          url: urlInput.value,
+          name: nameInput.value,
+          language_code: languageCodeInput.value || 'en-US',
+          type: type === 'audio' ? ('audio' as const) : ('text' as const),
+          ...(type === 'caption' && {
+            text_type: 'subtitles',
+            closed_captions: closedCaptionsInput?.checked || false,
+          }),
+        };
+
+        await uploadTrack(this.apiClient, this.state.value.assetId, options);
+      }
+
       await this.resync();
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -1094,7 +1110,6 @@ export class App extends React.Component<AppProps, AppState> {
                   <Tabs.Tab panelId="captions">Captions</Tabs.Tab>
                   <Tabs.Tab panelId="audio">Audio</Tabs.Tab>
                   <Tabs.Tab panelId="metadata">Metadata</Tabs.Tab>
-                  <Tabs.Tab panelId="thumbnail">Thumbnail</Tabs.Tab>
                   <Tabs.Tab panelId="playercode">Player Code</Tabs.Tab>
                   <Tabs.Tab panelId="mp4renditions">MP4 Renditions</Tabs.Tab>
                   <Tabs.Tab panelId="debug">Data</Tabs.Tab>
