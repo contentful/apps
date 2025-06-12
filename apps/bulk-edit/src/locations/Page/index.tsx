@@ -253,7 +253,7 @@ const Page = () => {
     }
   };
 
-  if (entriesLoading) {
+  if (!contentTypes) {
     return (
       <Flex alignItems="center" justifyContent="center" style={{ minHeight: '60vh' }}>
         <Spinner />

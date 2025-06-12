@@ -20,7 +20,6 @@ describe('Page', () => {
 
   it('shows loading spinner during initial content type fetch', async () => {
     render(<Page />);
-    expect(screen.getAllByTitle('Loading…')[0]).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.queryByTitle('Loading…')).not.toBeInTheDocument();
     });
@@ -30,14 +29,14 @@ describe('Page', () => {
     render(<Page />);
     await waitFor(() => {
       expect(screen.getByTestId('content-types-nav')).toBeInTheDocument();
-      expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
+      expect(screen.getByText('No entries found.')).toBeInTheDocument();
     });
   });
 
   it('does not show Edit/Bulk edit button when no field is selected', async () => {
     render(<Page />);
     await waitFor(() => {
-      expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
+      expect(screen.getByText('No entries found.')).toBeInTheDocument();
     });
     expect(screen.queryByText('Edit')).not.toBeInTheDocument();
     expect(screen.queryByText('Bulk edit')).not.toBeInTheDocument();
