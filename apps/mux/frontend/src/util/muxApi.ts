@@ -229,3 +229,32 @@ export async function updateAsset(apiClient: any, assetId: string, options: Moda
 
   return await apiClient.patch(`/video/v1/assets/${assetId}`, JSON.stringify(requestBody));
 }
+
+export async function uploadTrack(
+  apiClient: any,
+  assetId: string,
+  options: {
+    url: string;
+    name: string;
+    language_code: string;
+    type: 'text' | 'audio';
+    text_type?: string;
+    closed_captions?: boolean;
+  }
+) {
+  const result = await apiClient.post(
+    `/video/v1/assets/${assetId}/tracks`,
+    JSON.stringify(options)
+  );
+
+  if (!result.ok) {
+    const error = await result.json();
+    throw new Error(error.error?.messages?.[0] || 'Error uploading track');
+  }
+
+  return await result.json();
+}
+
+export async function deleteTrack(apiClient: any, assetId: string, trackId: string) {
+  return await apiClient.del(`/video/v1/assets/${assetId}/tracks/${trackId}`);
+}

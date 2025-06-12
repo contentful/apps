@@ -10,28 +10,25 @@ import {
   Spinner,
   TextLink,
   Tabs,
-  Heading,
   Box,
   Flex,
   Switch,
 } from '@contentful/f36-components';
-import { Form, FormControl, Checkbox, TextInput } from '@contentful/f36-forms';
+import { Form, FormControl, TextInput } from '@contentful/f36-forms';
 
 import MuxPlayer from '@mux/mux-player-react';
 
 import Config from './locations/config';
 import ApiClient from './util/apiClient';
-import { countries } from './util/countries';
 
 import Menu from './components/menu';
 import PlayerCode from './components/playercode';
-import CountryDatalist from './components/countryDatalist';
-import CaptionsList from './components/captionsList';
 import MuxAssetConfigurationModal, {
   ModalData,
 } from './components/AssetConfiguration/MuxAssetConfigurationModal';
 import UploadArea from './components/UploadArea/UploadArea';
 import Mp4RenditionsPanel from './components/AssetConfiguration/Mp4RenditionsPanel';
+import TrackForm from './components/TrackForm/TrackForm';
 
 import {
   type InstallationParams,
@@ -39,6 +36,7 @@ import {
   type AppState,
   AppProps,
   ResolutionType,
+  Track,
 } from './util/types';
 
 import './index.css';
@@ -49,6 +47,8 @@ import {
   deleteStaticRendition,
   createStaticRendition,
   updateAsset,
+  uploadTrack,
+  deleteTrack,
 } from './util/muxApi';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -106,6 +106,12 @@ export class App extends React.Component<AppProps, AppState> {
       isPolling: false,
       initialResyncDone: false,
       isEditMode: false,
+      captionname: undefined,
+      audioName: undefined,
+      playbackToken: undefined,
+      posterToken: undefined,
+      storyboardToken: undefined,
+      raw: undefined,
     };
   }
 
@@ -600,9 +606,7 @@ export class App extends React.Component<AppProps, AppState> {
       );
 
       const audioOnly =
-        'max_stored_resolution' in asset && asset.max_stored_resolution === 'Audio only'
-          ? true
-          : false;
+        'max_stored_resolution' in asset && asset.max_stored_resolution === 'Audio only';
 
       const erroredTracks =
         'tracks' in asset ? asset.tracks.filter((track) => track.status === 'errored') : undefined;
@@ -616,7 +620,7 @@ export class App extends React.Component<AppProps, AppState> {
         if (res.status !== 204) {
           try {
             const deleteError = await res.clone().json();
-            this.props.sdk.notifier.error('Error deleting caption: ' + deleteError.messages[0]);
+            this.props.sdk.notifier.error('Error deleting track: ' + deleteError.messages[0]);
           } catch (error) {
             const deleteError = await res.clone().text();
             console.error(error, deleteError);
@@ -624,14 +628,24 @@ export class App extends React.Component<AppProps, AppState> {
         }
       }
 
-      const captions =
-        'tracks' in asset
-          ? asset.tracks.filter(
-              (track) =>
-                track.text_type === 'subtitles' &&
-                (track.status === 'ready' || track.status === 'preparing')
-            )
-          : undefined;
+      let audioTracks: Track[] | undefined = undefined;
+      let captions: Track[] | undefined = undefined;
+      let trackPreparing = false;
+      if ('tracks' in asset) {
+        asset.tracks.forEach((track) => {
+          if (track.status === 'preparing') {
+            trackPreparing = true;
+          }
+          if (track.type === 'audio') {
+            audioTracks = [...(audioTracks || []), track];
+          } else if (
+            track.text_type === 'subtitles' &&
+            (track.status === 'ready' || track.status === 'preparing')
+          ) {
+            captions = [...(captions || []), track];
+          }
+        });
+      }
 
       await this.props.sdk.field.setValue({
         version: 3,
@@ -647,7 +661,8 @@ export class App extends React.Component<AppProps, AppState> {
         audioOnly: audioOnly,
         error: assetError || undefined,
         created_at: asset.created_at ? Number(asset.created_at) : undefined,
-        captions: captions && captions.length > 0 ? captions : undefined,
+        captions: captions,
+        audioTracks: audioTracks,
         static_renditions: asset.static_renditions?.files || undefined,
         is_live: asset.is_live || undefined,
         live_stream_id: asset.live_stream_id || undefined,
@@ -664,10 +679,6 @@ export class App extends React.Component<AppProps, AppState> {
       if (signedPlayback) {
         await this.setSignedPlayback(signedPlayback.id);
       }
-
-      const trackPreparing = captions
-        ? captions.find((track) => track.status === 'preparing')
-        : false;
 
       const renditionPreparing = asset.static_renditions?.files
         ? asset.static_renditions.files.find((rend) => rend.status === 'preparing')
@@ -694,103 +705,59 @@ export class App extends React.Component<AppProps, AppState> {
 
   onPlayerReady = () => this.props.sdk.window.updateHeight();
 
-  uploadCaption = async (e) => {
-    if (!this.state.value) return;
-    e.preventDefault();
-    const form = e.target;
+  uploadTrack = async (form: HTMLFormElement, type: 'audio' | 'caption') => {
+    if (!this.state.value?.assetId) return;
 
-    if (form.url.value === '') return;
-    if (form.name.value === '') return;
+    const urlInput = form.elements.namedItem('url') as HTMLInputElement;
+    const nameInput = form.elements.namedItem('name') as HTMLInputElement;
+    const languageCodeInput = form.elements.namedItem('languagecode') as HTMLInputElement;
+    const closedCaptionsInput = form.elements.namedItem('closedcaptions') as HTMLInputElement;
 
-    const result = await this.apiClient.post(
-      `/video/v1/assets/${this.state.value.assetId}/tracks`,
-      JSON.stringify({
-        url: form.url.value,
-        name: form.name.value,
-        language_code: form.languagecode.value || 'en-US',
-        closed_captions: form.closedcaptions.checked || false,
-        type: 'text',
-        text_type: 'subtitles',
-      })
-    );
+    try {
+      const options = {
+        url: urlInput.value,
+        name: nameInput.value,
+        language_code: languageCodeInput.value || 'en-US',
+        type: type === 'audio' ? ('audio' as const) : ('text' as const),
+        ...(type === 'caption' && {
+          text_type: 'subtitles',
+          closed_captions: closedCaptionsInput?.checked || false,
+        }),
+      };
 
-    if (!this.responseCheck(result)) {
-      return;
-    }
-
-    const response = await result.json();
-
-    if ('error' in response) {
-      this.props.sdk.notifier.error('Error Uploading Captions: ' + response.error.messages[0]);
-      return;
-    }
-
-    if (response.data.status === 'errored') {
-      this.props.sdk.notifier.error(
-        'Error Uploading Captions: ' + response.data.errors.messages[0]
-      );
-      return;
-    }
-
-    const captions = {
-      type: response.data.type,
-      'text_type ': response.data.text_type,
-      language_code: response.data.language_code,
-      name: response.data.name,
-      closed_captions: response.data.closed_captions,
-      //"status" : response.data.status, TODO Add or remove this.
-      id: response.data.id,
-      passthrough: response.data.passthrough,
-    };
-
-    this.state.value.captions = this.state.value.captions
-      ? [...this.state.value.captions, captions]
-      : [captions];
-
-    this.clearCaptionForm(form);
-    await this.resync();
-  };
-
-  clearCaptionForm = (form) => {
-    form.url.value = '';
-    form.name.value = '';
-    form.languagecode.value = '';
-  };
-
-  deleteCaption = async (e): Promise<void> => {
-    if (!this.state.value) return;
-    const trackID = e.target.closest('button').dataset.track;
-    const assetID = this.state.value.assetId || '';
-    const res = await this.apiClient.del(`/video/v1/assets/${assetID}/tracks/${trackID}`);
-    if (res.status === 204) {
-      await delay(500); // Hack, no webhook to wait for update, so we guess.
+      await uploadTrack(this.apiClient, this.state.value.assetId, options);
       await this.resync();
-    } else {
-      const errorRes = await res.json();
-      if (errorRes.error.messages[0]) {
-        this.props.sdk.notifier.error(errorRes.error.messages[0]);
-      }
-      this.resync({ silent: true });
-    }
-  };
-
-  autofillCaptionCode = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
-    const val = e.target.value;
-    if (val) {
-      const language = countries.find((lang) => lang.name === val);
-      if (language) {
-        this.setState({
-          captionname: language.code,
-        });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        this.props.sdk.notifier.error(error.message);
+      } else {
+        this.props.sdk.notifier.error('An unknown error occurred');
       }
     }
   };
 
-  updateLangCode = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    this.setState({
-      captionname: val,
-    });
+  deleteTrack = async (trackId: string) => {
+    if (!this.state.value?.assetId) return;
+
+    try {
+      const res = await deleteTrack(this.apiClient, this.state.value.assetId, trackId);
+
+      if (res.status === 204) {
+        await this.resync();
+      } else {
+        const errorRes = await res.json();
+        if (errorRes.error?.messages?.[0]) {
+          this.props.sdk.notifier.error(errorRes.error.messages[0]);
+        }
+        this.resync({ silent: true });
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        this.props.sdk.notifier.error(error.message);
+      } else {
+        this.props.sdk.notifier.error('An unknown error occurred');
+      }
+    }
   };
 
   reloadPlayer = async () => {
@@ -1111,10 +1078,49 @@ export class App extends React.Component<AppProps, AppState> {
               <Tabs defaultTab="captions">
                 <Tabs.List variant="horizontal-divider">
                   <Tabs.Tab panelId="captions">Captions</Tabs.Tab>
+                  <Tabs.Tab panelId="audio">Audio</Tabs.Tab>
                   <Tabs.Tab panelId="playercode">Player Code</Tabs.Tab>
                   <Tabs.Tab panelId="mp4renditions">MP4 Renditions</Tabs.Tab>
                   <Tabs.Tab panelId="debug">Data</Tabs.Tab>
                 </Tabs.List>
+
+                <Tabs.Panel id="captions">
+                  <TrackForm
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      this.uploadTrack(e.target as HTMLFormElement, 'caption');
+                    }}
+                    onDeleteTrack={(e) => {
+                      const trackId = e.currentTarget.dataset.track;
+                      if (trackId) {
+                        this.deleteTrack(trackId);
+                      }
+                    }}
+                    tracks={(this.state.value?.captions || []) as Track[]}
+                    type="caption"
+                    title="Add Caption"
+                    playbackId={this.state.value?.playbackId}
+                    domain={this.props.sdk.parameters.installation.domain}
+                  />
+                </Tabs.Panel>
+
+                <Tabs.Panel id="audio">
+                  <TrackForm
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      this.uploadTrack(e.target as HTMLFormElement, 'audio');
+                    }}
+                    onDeleteTrack={(e) => {
+                      const trackId = e.currentTarget.dataset.track;
+                      if (trackId) {
+                        this.deleteTrack(trackId);
+                      }
+                    }}
+                    tracks={this.state.value?.audioTracks || []}
+                    type="audio"
+                    title="Add Audio track"
+                  />
+                </Tabs.Panel>
 
                 <Tabs.Panel id="playercode">
                   {this.isUsingSigned() && (
@@ -1126,56 +1132,6 @@ export class App extends React.Component<AppProps, AppState> {
                     </Box>
                   )}
                   <PlayerCode params={this.playerParams()}></PlayerCode>
-                </Tabs.Panel>
-
-                <Tabs.Panel id="captions">
-                  <Box marginTop="spacingL" marginBottom="spacingL">
-                    {this.state.value?.captions && this.state.value?.captions.length > 0 ? (
-                      <CaptionsList
-                        captions={this.state.value.captions}
-                        requestDeleteCaption={this.deleteCaption}
-                        playbackId={
-                          this.state.value.playbackId || this.state.value.signedPlaybackId
-                        }
-                        domain={this.props.sdk.parameters.installation.muxDomain}
-                        token={this.state.playbackToken}></CaptionsList>
-                    ) : (
-                      <Note variant="neutral">No Captions</Note>
-                    )}
-                  </Box>
-
-                  <Form onSubmit={this.uploadCaption}>
-                    <Heading as="h3">Add</Heading>
-                    <FormControl isRequired>
-                      <FormControl.Label>Caption or Subtitle File URL</FormControl.Label>
-                      <TextInput type="url" name="url" />
-                    </FormControl>
-                    <FormControl isRequired>
-                      <FormControl.Label>Language Name</FormControl.Label>
-                      <TextInput
-                        type="text"
-                        name="name"
-                        list="countrycodes"
-                        onChange={this.autofillCaptionCode}
-                      />
-                    </FormControl>
-                    <FormControl isRequired>
-                      <FormControl.Label>Language Code</FormControl.Label>
-                      <TextInput
-                        type="text"
-                        name="languagecode"
-                        value={this.state.captionname}
-                        onChange={this.updateLangCode}
-                      />
-                      <CountryDatalist used={this.state.value.captions}></CountryDatalist>
-                    </FormControl>
-                    <FormControl>
-                      <Checkbox name="closedcaptions"> Closed Captions</Checkbox>
-                    </FormControl>
-                    <Button variant="secondary" type="submit">
-                      Submit
-                    </Button>
-                  </Form>
                 </Tabs.Panel>
 
                 <Tabs.Panel id="debug">
