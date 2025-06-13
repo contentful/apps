@@ -197,20 +197,24 @@ const Page = () => {
     try {
       // Create backups before making changes
       const backups: Record<string, EntryProps> = {};
+
+      // Get all latest versions of entries in one call
+      const latestEntries = await sdk.cma.entry.getMany({
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
+        query: {
+          'sys.id[in]': selectedEntries.map((entry) => entry.sys.id).join(','),
+        },
+      });
+
       const results = await Promise.all(
-        selectedEntries.map(async (entry: EntryProps) => {
-          if (!selectedField) return { success: false, entry };
+        latestEntries.items.map(async (latestEntry) => {
+          if (!selectedField) return { success: false, entry: latestEntry };
           const fieldId = selectedField.id;
           const fieldLocale = selectedField.locale || defaultLocale;
           try {
-            // Get the latest version of the entry
-            const latestEntry = await sdk.cma.entry.get({
-              spaceId: sdk.ids.space,
-              environmentId: sdk.ids.environment,
-              entryId: entry.sys.id,
-            });
             // Store backup of current state
-            backups[entry.sys.id] = { ...latestEntry };
+            backups[latestEntry.sys.id] = { ...latestEntry };
 
             const updatedFields = updateEntryFieldLocalized(
               latestEntry.fields,
@@ -218,14 +222,19 @@ const Page = () => {
               val,
               fieldLocale
             );
+
             const updated = await sdk.cma.entry.update(
-              { entryId: entry.sys.id, spaceId: sdk.ids.space, environmentId: sdk.ids.environment },
+              {
+                entryId: latestEntry.sys.id,
+                spaceId: sdk.ids.space,
+                environmentId: sdk.ids.environment,
+              },
               { ...latestEntry, fields: updatedFields }
             );
 
             return { success: true, entry: updated };
           } catch {
-            return { success: false, entry };
+            return { success: false, entry: latestEntry };
           }
         })
       );
@@ -268,19 +277,23 @@ const Page = () => {
 
     setIsSaving(true);
     try {
-      const undoPromises = Object.entries(backupToUse).map(async ([entryId, backupEntry]) => {
-        // Get the current entry to ensure we have the latest version
-        const currentEntry = await sdk.cma.entry.get({
-          spaceId: sdk.ids.space,
-          environmentId: sdk.ids.environment,
-          entryId,
-        });
+      // We want to make sure we have the freshest entries
+      const currentEntries = await sdk.cma.entry.getMany({
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
+        query: {
+          'sys.id[in]': Object.keys(backupToUse).join(','),
+        },
+      });
+
+      const undoPromises = currentEntries.items.map(async (currentEntry) => {
+        const backupEntry = backupToUse[currentEntry.sys.id];
         // Restore the previous fields from backup
         const restoredEntry = await sdk.cma.entry.update(
           {
             spaceId: sdk.ids.space,
             environmentId: sdk.ids.environment,
-            entryId,
+            entryId: currentEntry.sys.id,
           },
           {
             ...currentEntry,
