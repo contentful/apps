@@ -21,6 +21,10 @@ interface EntryTableProps {
   onPageChange: (page: number) => void;
   onItemsPerPageChange: (itemsPerPage: number) => void;
   pageSizeOptions: number[];
+  onSelectionChange?: (selection: {
+    selectedEntryIds: string[];
+    selectedFieldId: string | null;
+  }) => void;
 }
 
 function getColumnIds(fields: ContentTypeField[]): string[] {
@@ -67,6 +71,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
   onPageChange,
   onItemsPerPageChange,
   pageSizeOptions,
+  onSelectionChange,
 }) => {
   const columnIds = getColumnIds(fields);
   const allowedColumns = getBulkEditableColumns(fields);
@@ -79,11 +84,11 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     getInitialRowCheckboxState(entries, columnIds)
   );
 
-  const checkedColumnId = useMemo(() => {
-    // Check header first
+  // Compute selected field (column)
+  const selectedFieldId = useMemo(() => {
+    // Only one column can be selected at a time
     const checkedHeaderId = columnIds.find((columnId) => headerCheckboxes[columnId]);
-    if (checkedHeaderId) return checkedHeaderId;
-    // Then check rows
+    if (checkedHeaderId && allowedColumns[checkedHeaderId]) return checkedHeaderId;
     for (const entryId in rowCheckboxes) {
       const row = rowCheckboxes[entryId];
       const checkedCellId = columnIds.find((columnId) => allowedColumns[columnId] && row[columnId]);
@@ -92,12 +97,22 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     return null;
   }, [headerCheckboxes, rowCheckboxes, allowedColumns, columnIds]);
 
-  const checkboxesDisabled = Object.fromEntries(
-    columnIds.map((columnId) => [
-      columnId,
-      allowedColumns[columnId] ? checkedColumnId !== null && checkedColumnId !== columnId : true,
-    ])
-  );
+  // Compute selected entry IDs for the selected field
+  const selectedEntryIds = useMemo(() => {
+    if (!selectedFieldId) return [];
+    // If header is checked, all entries are selected
+    if (headerCheckboxes[selectedFieldId]) {
+      return entries.map((e) => e.sys.id);
+    }
+    // Otherwise, collect entry IDs where the cell is checked
+    return entries.filter((e) => rowCheckboxes[e.sys.id]?.[selectedFieldId]).map((e) => e.sys.id);
+  }, [selectedFieldId, headerCheckboxes, rowCheckboxes, entries]);
+
+  React.useEffect(() => {
+    if (onSelectionChange) {
+      onSelectionChange({ selectedEntryIds, selectedFieldId });
+    }
+  }, [selectedEntryIds, selectedFieldId, onSelectionChange]);
 
   function handleHeaderCheckboxChange(columnId: string, checked: boolean) {
     setHeaderCheckboxes((previous) => ({ ...previous, [columnId]: checked }));
@@ -135,7 +150,14 @@ export const EntryTable: React.FC<EntryTableProps> = ({
           fields={fields}
           headerCheckboxes={headerCheckboxes}
           onHeaderCheckboxChange={handleHeaderCheckboxChange}
-          checkboxesDisabled={checkboxesDisabled}
+          checkboxesDisabled={Object.fromEntries(
+            columnIds.map((columnId) => [
+              columnId,
+              allowedColumns[columnId]
+                ? selectedFieldId !== null && selectedFieldId !== columnId
+                : true,
+            ])
+          )}
         />
         <Table.Body>
           {entries.map((entry) => (
@@ -151,7 +173,14 @@ export const EntryTable: React.FC<EntryTableProps> = ({
               onCellCheckboxChange={(columnId, checked) =>
                 handleCellCheckboxChange(entry.sys.id, columnId, checked)
               }
-              cellCheckboxesDisabled={checkboxesDisabled}
+              cellCheckboxesDisabled={Object.fromEntries(
+                columnIds.map((columnId) => [
+                  columnId,
+                  allowedColumns[columnId]
+                    ? selectedFieldId !== null && selectedFieldId !== columnId
+                    : true,
+                ])
+              )}
             />
           ))}
         </Table.Body>

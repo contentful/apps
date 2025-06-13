@@ -1,4 +1,4 @@
-import { Entry, ContentTypeField, Status } from '../types';
+import { Entry, ContentTypeField, Status, Fields } from '../types';
 import { ContentTypeProps } from 'contentful-management';
 
 export const getStatus = (entry: Entry): Status => {
@@ -94,10 +94,48 @@ export const getEntryUrl = (entry: Entry, spaceId: string, environmentId: string
 };
 
 export const isCheckboxAllowed = (field: ContentTypeField): boolean => {
-  const restrictedTypes = ['Location', 'Date', 'Asset', 'Array', 'Link', 'ResourceLink', 'Boolean'];
+  const restrictedTypes = [
+    'Location',
+    'Date',
+    'Asset',
+    'Array',
+    'Link',
+    'ResourceLink',
+    'Boolean',
+    'Object',
+    'RichText',
+  ];
 
   if (!field.type) return false;
 
   if (restrictedTypes.includes(field.type)) return false;
   return true;
 };
+
+/**
+ * Returns a new fields object with the given field updated for the specified locale.
+ * If the field or locale does not exist, it is created.
+ */
+export function updateEntryFieldLocalized(
+  fields: Fields,
+  fieldId: string,
+  value: any,
+  locale: string
+) {
+  return {
+    ...fields,
+    [fieldId]: {
+      ...(fields[fieldId] || {}),
+      [locale]: value,
+    },
+  };
+}
+
+export function getEntryFieldValue(
+  entry: any,
+  field: { id: string; locale?: string } | null | undefined,
+  defaultLocale: string
+): string {
+  if (!entry || !field || !field.id) return '';
+  return entry.fields[field.id]?.[field.locale || defaultLocale] || '';
+}

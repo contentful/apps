@@ -9,6 +9,7 @@ interface MockSDK extends Partial<AppExtensionSDK> {
     };
     entry: {
       getMany: ReturnType<typeof vi.fn>;
+      update: ReturnType<typeof vi.fn>;
     };
   };
   ids: {
@@ -22,6 +23,10 @@ interface MockSDK extends Partial<AppExtensionSDK> {
   locales: {
     default: string;
     available: string[];
+    names: Record<string, string>;
+    fallbacks: Record<string, string>;
+    optional: Record<string, boolean>;
+    direction: Record<string, 'ltr' | 'rtl'>;
   };
 }
 
@@ -45,6 +50,22 @@ const mockSdk: MockSDK = {
   locales: {
     default: 'en-US',
     available: ['en-US', 'es-AR'],
+    names: {
+      'en-US': 'English (United States)',
+      'es-AR': 'Spanish (Argentina)',
+    },
+    fallbacks: {
+      'en-US': 'en-US',
+      'es-AR': 'en-US',
+    },
+    optional: {
+      'en-US': false,
+      'es-AR': true,
+    },
+    direction: {
+      'en-US': 'ltr',
+      'es-AR': 'ltr',
+    },
   },
   cma: {
     contentType: {
@@ -53,6 +74,7 @@ const mockSdk: MockSDK = {
     },
     entry: {
       getMany: vi.fn(),
+      update: vi.fn(),
     },
   },
 };
