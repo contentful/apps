@@ -1,8 +1,8 @@
-import React from 'react';
-import { Box, Menu, IconButton } from '@contentful/f36-components';
+import React, { useMemo, useState } from 'react';
+import { Box, Menu, Button } from '@contentful/f36-components';
 
 import { styles } from '../styles';
-import { SortDescendingIcon } from '@phosphor-icons/react';
+import { CaretDownIcon, CaretUpIcon, SortDescendingIcon } from '@phosphor-icons/react';
 
 export const SORT_OPTIONS = [
   { value: 'displayName_asc', label: 'Display name: A-Z' },
@@ -17,16 +17,25 @@ interface SortMenuProps {
 }
 
 export const SortMenu: React.FC<SortMenuProps> = ({ sortOption, onSortChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const sortOptionLabel = useMemo(() => {
+    const label = SORT_OPTIONS.find((option) => option.value === sortOption)?.label!;
+    return label.charAt(0).toLowerCase() + label.slice(1);
+  }, [sortOption]);
+
   return (
     <Box marginBottom="spacingM" marginTop="spacingM" style={styles.sortMenu}>
-      <Menu>
+      <Menu isFullWidth onOpen={() => setIsOpen(true)} onClose={() => setIsOpen(false)}>
         <Menu.Trigger>
-          <IconButton
-            icon={<SortDescendingIcon size={16} />}
+          <Button
             variant="secondary"
+            size="small"
+            startIcon={<SortDescendingIcon size={16} />}
+            endIcon={isOpen ? <CaretUpIcon size={16} /> : <CaretDownIcon size={16} />}
             aria-label="Sort display name by">
-            Sort display name by
-          </IconButton>
+            Sort by {sortOptionLabel}
+          </Button>
         </Menu.Trigger>
         <Menu.List>
           {SORT_OPTIONS.map((option) => (
