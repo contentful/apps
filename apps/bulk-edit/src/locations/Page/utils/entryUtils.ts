@@ -133,7 +133,7 @@ export function updateEntryFieldLocalized(
 
 export function getEntryFieldValue(
   entry: any,
-  field: ContentTypeField | null | undefined,
+  field: { id: string; locale?: string } | null | undefined,
   defaultLocale: string
 ): string {
   if (!entry || !field || !field.id) return '';
