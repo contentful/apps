@@ -1,6 +1,6 @@
-import Dialog from './Dialog';
+import Dialog from '../../src/locations/Dialog';
 import { render } from '@testing-library/react';
-import { mockCma, mockSdk } from '../../test/mocks';
+import { mockCma, mockSdk } from '../mocks';
 import { vi } from 'vitest';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
