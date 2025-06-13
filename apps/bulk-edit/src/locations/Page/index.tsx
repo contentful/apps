@@ -245,7 +245,6 @@ const Page = () => {
         prev.map((entry) => successful.find((u) => u.sys.id === entry.sys.id) || entry)
       );
       setFailedUpdates(failed);
-      // Store the backup for undo functionality
       setLastUpdateBackup(backups);
 
       // Notification logic (only for successful updates)
@@ -286,31 +285,45 @@ const Page = () => {
         },
       });
 
-      const undoPromises = currentEntries.items.map(async (currentEntry) => {
-        const backupEntry = backupToUse[currentEntry.sys.id];
-        // Restore the previous fields from backup
-        const restoredEntry = await sdk.cma.entry.update(
-          {
-            spaceId: sdk.ids.space,
-            environmentId: sdk.ids.environment,
-            entryId: currentEntry.sys.id,
-          },
-          {
-            ...currentEntry,
-            fields: backupEntry.fields,
+      const results = await Promise.all(
+        currentEntries.items.map(async (currentEntry) => {
+          const backupEntry = backupToUse[currentEntry.sys.id];
+          try {
+            const restoredEntry = await sdk.cma.entry.update(
+              {
+                spaceId: sdk.ids.space,
+                environmentId: sdk.ids.environment,
+                entryId: currentEntry.sys.id,
+              },
+              {
+                ...currentEntry,
+                fields: backupEntry.fields,
+              }
+            );
+            return { success: true, entry: restoredEntry };
+          } catch {
+            return { success: false, entry: currentEntry };
           }
-        );
-        return restoredEntry;
-      });
-
-      const restoredEntries = await Promise.all(undoPromises);
-      setEntries((prev) =>
-        prev.map((entry) => restoredEntries.find((u) => u.sys.id === entry.sys.id) || entry)
+        })
       );
-      // Clear the backup since we've used it
+
+      const successful = results.filter((r) => r.success).map((r) => r.entry);
+      const failed = results.filter((r) => !r.success).map((r) => r.entry);
+
+      setEntries((prev) =>
+        prev.map((entry) => successful.find((u) => u.sys.id === entry.sys.id) || entry)
+      );
       setLastUpdateBackup({});
-    } catch (e) {
-      console.error('Error undoing updates:', e);
+
+      if (failed.length > 0) {
+        setFailedUpdates(failed);
+      } else {
+        Notification.success('Undo complete');
+      }
+    } catch (e: any) {
+      if (failedUpdates.length === 0) {
+        setFailedUpdates(Object.values(backupToUse));
+      }
     } finally {
       setIsSaving(false);
     }
