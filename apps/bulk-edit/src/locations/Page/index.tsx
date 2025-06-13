@@ -318,7 +318,7 @@ const Page = () => {
       if (failed.length > 0) {
         setFailedUpdates(failed);
       } else {
-        Notification.success('Undo complete');
+        Notification.success('', { title: 'Undo complete' });
       }
     } catch (e: any) {
       if (failedUpdates.length === 0) {
