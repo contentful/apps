@@ -68,6 +68,15 @@ describe('Bulk edit functionality', () => {
       .fn()
       .mockResolvedValue(getManyEntries([condoAEntry1, condoAEntry2]));
 
+    // Mock entry get
+    mockSdk.cma.entry.get = vi.fn().mockImplementation(async (params) => {
+      if (params.entryId === condoAEntry1.sys.id) {
+        return condoAEntry1;
+      } else if (params.entryId === condoAEntry2.sys.id) {
+        return condoAEntry2;
+      }
+    });
+
     // Mock entry update
     mockSdk.cma.entry.update = vi.fn().mockImplementation(async (params, entry) => entry);
   });
