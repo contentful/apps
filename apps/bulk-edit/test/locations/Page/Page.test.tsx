@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, it, beforeEach, vi, expect } from 'vitest';
 import Page from '../../../src/locations/Page';
 import { mockSdk } from '../../mocks/mockSdk';
@@ -26,6 +26,10 @@ describe('Page', () => {
     mockSdk.cma.entry.getMany = vi
       .fn()
       .mockResolvedValue(getManyEntries([condoAEntry1, condoAEntry2]));
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   it('shows loading spinner during initial content type fetch', async () => {
@@ -72,7 +76,7 @@ describe('Bulk edit functionality', () => {
     mockSdk.cma.entry.update = vi.fn().mockImplementation(async (params, entry) => entry);
   });
   afterEach(() => {
-    vi.restoreAllMocks();
+    cleanup();
   });
 
   it('updates entry field value when saved in modal', async () => {
@@ -152,7 +156,7 @@ describe('Bulk edit notification', () => {
     vi.spyOn(Notification, 'success').mockImplementation(() => ({} as any));
   });
   afterEach(() => {
-    vi.restoreAllMocks();
+    cleanup();
   });
 
   it('shows success notification for single entry', async () => {
@@ -174,5 +178,68 @@ describe('Bulk edit notification', () => {
       'Building one and 4 more entry fields were updated to Alpine',
       { title: 'Success!' }
     );
+  });
+});
+
+describe('Undo functionality', () => {
+  beforeEach(() => {
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([condoAContentType]));
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValue(condoAContentType);
+    mockSdk.cma.entry.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyEntries([condoAEntry1, condoAEntry2]));
+    mockSdk.cma.entry.update = vi.fn().mockImplementation(async (params, entry) => entry);
+  });
+
+  it('restores entries to previous state on successful undo', async () => {
+    render(<Page />);
+    await waitFor(() => {
+      expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
+    });
+    const fieldCheckbox = screen.getByRole('checkbox', { name: 'Select all for Description' });
+    fireEvent.click(fieldCheckbox);
+    const editButton = screen.getByText('Bulk edit');
+    fireEvent.click(editButton);
+    const input = screen.getByPlaceholderText('Enter your new value');
+    fireEvent.change(input, { target: { value: 'New description' } });
+    fireEvent.click(screen.getByTestId('bulk-edit-save'));
+    await waitFor(() => {
+      expect(mockSdk.cma.entry.update).toHaveBeenCalled();
+    });
+    // Simulate clicking Undo in the notification
+    const undoButton = screen.getByText('Undo');
+    fireEvent.click(undoButton);
+    // Wait for entries to be restored (check for original value)
+    await waitFor(() => {
+      expect(screen.getByText('Undo complete')).toBeInTheDocument();
+    });
+  });
+
+  it('shows error note if undo fails for an entry', async () => {
+    render(<Page />);
+    await waitFor(() => {
+      expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
+    });
+    const fieldCheckbox = screen.getByRole('checkbox', { name: 'Select all for Description' });
+    fireEvent.click(fieldCheckbox);
+    const editButton = screen.getByText('Bulk edit');
+    fireEvent.click(editButton);
+    const input = screen.getByPlaceholderText('Enter your new value');
+    fireEvent.change(input, { target: { value: 'New description' } });
+    fireEvent.click(screen.getByTestId('bulk-edit-save'));
+    await waitFor(() => {
+      expect(mockSdk.cma.entry.update).toHaveBeenCalled();
+    });
+
+    // Mock update from undo to fail after successful update
+    mockSdk.cma.entry.update = vi.fn().mockRejectedValue(new Error('Update failed'));
+    const undoButton = screen.getByText('Undo');
+    fireEvent.click(undoButton);
+    // Wait for error note to appear
+    await waitFor(() => {
+      expect(screen.getByText(/did not update/)).toBeInTheDocument();
+    });
   });
 });
