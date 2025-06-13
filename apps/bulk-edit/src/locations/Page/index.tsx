@@ -16,6 +16,7 @@ import { ContentTypeSidebar } from './components/ContentTypeSidebar';
 import { SortMenu, SORT_OPTIONS } from './components/SortMenu';
 import { EntryTable } from './components/EntryTable';
 import { BulkEditModal } from './components/BulkEditModal';
+import { UndoBulkEditModal } from './components/UndoBulkEditModal';
 import { updateEntryFieldLocalized, getEntryFieldValue } from './utils/entryUtils';
 import { ErrorNote } from './components/ErrorNote';
 
@@ -40,6 +41,8 @@ const Page = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [failedUpdates, setFailedUpdates] = useState<EntryProps[]>([]);
   const [lastUpdateBackup, setLastUpdateBackup] = useState<Record<string, EntryProps>>({});
+  const [isUndoModalOpen, setIsUndoModalOpen] = useState(false);
+  const [undoFirstEntryFieldValue, setUndoFirstEntryFieldValue] = useState('');
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -163,12 +166,10 @@ const Page = () => {
     firstUpdatedValue,
     value,
     count,
-    onUndo,
   }: {
     firstUpdatedValue: string;
     value: string;
     count: number;
-    onUndo: () => void;
   }) {
     const message =
       count === 1
@@ -183,13 +184,19 @@ const Page = () => {
           onClick: () => {
             notification.then((item) => {
               Notification.close(item.id);
-              onUndo();
+              setUndoFirstEntryFieldValue(firstUpdatedValue);
+              setIsUndoModalOpen(true);
             });
           },
         },
       },
     });
   }
+
+  const handleUndoConfirm = async () => {
+    await undoUpdates(lastUpdateBackup);
+    setIsUndoModalOpen(false);
+  };
 
   const onSave = async (val: string | number) => {
     setIsSaving(true);
@@ -258,7 +265,6 @@ const Page = () => {
           firstUpdatedValue: firstUpdatedValue,
           value: `${val}`,
           count: successful.length,
-          onUndo: () => undoUpdates(backups),
         });
       }
       setIsModalOpen(false);
@@ -418,6 +424,14 @@ const Page = () => {
         selectedField={selectedField}
         defaultLocale={defaultLocale}
         isSaving={isSaving}
+      />
+      <UndoBulkEditModal
+        isOpen={isUndoModalOpen}
+        onClose={() => setIsUndoModalOpen(false)}
+        onUndo={handleUndoConfirm}
+        firstEntryFieldValue={undoFirstEntryFieldValue}
+        isSaving={isSaving}
+        entryCount={selectedEntryIds.length}
       />
     </Flex>
   );
