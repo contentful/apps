@@ -119,7 +119,7 @@ describe('BulkEditModal', () => {
     expect(screen.getByTestId('bulk-edit-save')).toBeDisabled();
   });
 
-  it('resets the input value when the modal is reopened', () => {
+  it('resets the input value when the modal is re-opened', () => {
     const onClose = vi.fn();
     const onSave = vi.fn();
     const modalComponent = (isOpened: boolean) => {
