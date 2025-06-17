@@ -28,8 +28,9 @@ const Page = () => {
   const defaultLocale = sdk.locales.default;
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [selectedContentTypeId, setSelectedContentTypeId] = useState<string | undefined>(undefined);
+  const [contentTypeLoading, setContentTypeLoading] = useState(true);
   const [entries, setEntries] = useState<EntryProps[]>([]);
-  const [entriesLoading, setEntriesLoading] = useState(false);
+  const [entriesLoading, setEntriesLoading] = useState(true);
   const [fields, setFields] = useState<ContentTypeField[]>([]);
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(PAGE_SIZE_OPTIONS[0]);
@@ -85,6 +86,7 @@ const Page = () => {
   useEffect(() => {
     const fetchContentTypes = async (): Promise<void> => {
       try {
+        setContentTypeLoading(true);
         const contentTypes = await getAllContentTypes();
         const sortedContentTypes = contentTypes
           .slice()
@@ -98,6 +100,7 @@ const Page = () => {
         setContentTypes([]);
         setSelectedContentTypeId(undefined);
       } finally {
+        setContentTypeLoading(false);
       }
     };
     void fetchContentTypes();
@@ -335,7 +338,7 @@ const Page = () => {
     }
   };
 
-  if (!selectedContentTypeId) {
+  if (contentTypeLoading) {
     return (
       <Flex alignItems="center" justifyContent="center" style={{ minHeight: '60vh' }}>
         <Spinner />
