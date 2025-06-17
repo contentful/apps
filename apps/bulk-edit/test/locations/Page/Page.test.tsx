@@ -7,6 +7,7 @@ import { getManyContentTypes, getManyEntries } from '../../mocks/mockCma';
 import { condoAContentType } from '../../mocks/mockContentTypes';
 import { condoAEntry1, condoAEntry2 } from '../../mocks/mockEntries';
 import { Notification } from '@contentful/f36-components';
+import type { ContentTypeProps } from 'contentful-management';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -178,5 +179,48 @@ describe('Bulk edit notification', () => {
       'Building one and 4 more entry fields were updated to Alpine',
       { title: 'Success!' }
     );
+  });
+});
+
+describe('Table display', () => {
+  beforeEach(() => {
+    // Mock content type fetch
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([condoAContentType]));
+
+    // Mock content type get for fields
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValue(condoAContentType);
+
+    // Mock entries fetch
+    mockSdk.cma.entry.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyEntries([condoAEntry1, condoAEntry2]));
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('displays table correctly when displayField is null', async () => {
+    const contentTypeWithoutDisplayField = {
+      ...condoAContentType,
+      displayField: null,
+    } as unknown as ContentTypeProps;
+
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([contentTypeWithoutDisplayField]));
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValue(contentTypeWithoutDisplayField);
+
+    render(<Page />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Condo A')).toBeInTheDocument();
+    expect(screen.getByTestId('cf-ui-table-body')).toBeInTheDocument();
+    expect(screen.getAllByText('Untitled').length).toBe(2);
   });
 });

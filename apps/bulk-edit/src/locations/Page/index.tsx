@@ -65,12 +65,13 @@ const Page = () => {
     return allContentTypes;
   };
 
-  const buildQuery = (sortOption: string, displayField: string) => {
+  const buildQuery = (sortOption: string, displayField: string | null) => {
     const getOrder = (sortOption: string) => {
-      if (sortOption === 'displayName_asc') return `fields.${displayField}`;
-      else if (sortOption === 'displayName_desc') return `-fields.${displayField}`;
-      else if (sortOption === 'updatedAt_desc') return '-sys.updatedAt';
+      if (sortOption === 'updatedAt_desc') return '-sys.updatedAt';
       else if (sortOption === 'updatedAt_asc') return 'sys.updatedAt';
+      else if (displayField === null) return undefined;
+      else if (sortOption === 'displayName_asc') return `fields.${displayField}`;
+      else if (sortOption === 'displayName_desc') return `-fields.${displayField}`;
     };
 
     return {
@@ -139,7 +140,7 @@ const Page = () => {
           }
         });
         setFields(newFields);
-        const displayField = ct.displayField || 'displayName';
+        const displayField = ct.displayField || null;
 
         const { items, total } = await sdk.cma.entry.getMany({
           spaceId: sdk.ids.space,
