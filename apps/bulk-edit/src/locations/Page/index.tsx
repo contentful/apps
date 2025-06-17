@@ -17,7 +17,7 @@ import { SortMenu, SORT_OPTIONS } from './components/SortMenu';
 import { EntryTable } from './components/EntryTable';
 import { BulkEditModal } from './components/BulkEditModal';
 import { UndoBulkEditModal } from './components/UndoBulkEditModal';
-import { updateEntryFieldLocalized, getEntryFieldValue } from './utils/entryUtils';
+import { updateEntryFieldLocalized, getEntryFieldValue, getEntryTitle } from './utils/entryUtils';
 import { ErrorNote } from './components/ErrorNote';
 
 const PAGE_SIZE_OPTIONS = [15, 50, 100];
@@ -385,7 +385,7 @@ const Page = () => {
                         {failedUpdates.length > 0 && (
                           <ErrorNote
                             failedUpdates={failedUpdates}
-                            selectedField={selectedField}
+                            selectedContentType={selectedContentType}
                             defaultLocale={defaultLocale}
                             onClose={() => setFailedUpdates([])}
                           />

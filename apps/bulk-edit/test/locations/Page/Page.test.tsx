@@ -147,7 +147,7 @@ describe('Bulk edit functionality', () => {
 
     // Verify error note appears
     await waitFor(() => {
-      expect(screen.getByText(/did not update/)).toBeInTheDocument();
+      expect(screen.getByText(/did not update: Building one/)).toBeInTheDocument();
     });
   });
 });
