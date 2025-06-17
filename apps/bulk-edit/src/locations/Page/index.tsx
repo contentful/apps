@@ -17,7 +17,7 @@ import { ContentTypeSidebar } from './components/ContentTypeSidebar';
 import { SortMenu, SORT_OPTIONS } from './components/SortMenu';
 import { EntryTable } from './components/EntryTable';
 import { BulkEditModal } from './components/BulkEditModal';
-import { updateEntryFieldLocalized, getEntryFieldValue } from './utils/entryUtils';
+import { updateEntryFieldLocalized, getEntryFieldValue, getEntryTitle } from './utils/entryUtils';
 import { WarningOctagonIcon } from '@phosphor-icons/react';
 import tokens from '@contentful/f36-tokens';
 
@@ -299,9 +299,9 @@ const Page = () => {
                       <>
                         {failedUpdates.length > 0 &&
                           (() => {
-                            const firstFailedValue = getEntryFieldValue(
+                            const firstFailedValue = getEntryTitle(
                               failedUpdates[0],
-                              selectedField,
+                              selectedContentType,
                               defaultLocale
                             );
                             return (
