@@ -1,7 +1,7 @@
 import { ModalData } from '../components/AssetConfiguration/MuxAssetConfigurationModal';
 import { InstallationParams, ResolutionType } from './types';
 
-interface AssetSettings {
+export interface AssetSettings {
   passthrough?: string;
   playback_policies: string[];
   video_quality: string;
@@ -46,21 +46,18 @@ function buildAssetSettings(options: ModalData): AssetSettings {
   };
 
   // Metadata case
-  if (options.metadataConfig.enabled) {
-    // Standard metadata
-    if (options.metadataConfig.standardMetadata) {
-      const { title, creatorId, externalId } = options.metadataConfig.standardMetadata;
-      if (title || creatorId || externalId) {
-        settings.meta = {};
-        if (title) settings.meta.title = title;
-        if (creatorId) settings.meta.creator_id = creatorId;
-        if (externalId) settings.meta.external_id = externalId;
-      }
+  if (options.metadataConfig.standardMetadata) {
+    const { title, creatorId, externalId } = options.metadataConfig.standardMetadata;
+    if (title || creatorId || externalId) {
+      settings.meta = {};
+      if (title) settings.meta.title = title;
+      if (creatorId) settings.meta.creator_id = creatorId;
+      if (externalId) settings.meta.external_id = externalId;
     }
-    // Custom metadata
-    if (options.metadataConfig.customMetadata) {
-      settings.passthrough = options.metadataConfig.customMetadata;
-    }
+  }
+  // Custom metadata
+  if (options.metadataConfig.customMetadata) {
+    settings.passthrough = options.metadataConfig.customMetadata;
   }
 
   // Captions case
@@ -87,7 +84,7 @@ function buildAssetSettings(options: ModalData): AssetSettings {
   }
 
   // MP4 renditions case
-  if (options.mp4Config.enabled) {
+  if (options.mp4Config.highestResolution || options.mp4Config.audioOnly) {
     settings.static_renditions = [];
     if (options.mp4Config.audioOnly) {
       settings.static_renditions.push({
@@ -209,23 +206,15 @@ export async function createStaticRendition(apiClient: any, assetId: string, typ
   );
 }
 
-export async function updateAsset(apiClient: any, assetId: string, options: ModalData) {
+export async function updateAsset(apiClient: any, assetId: string, settings: AssetSettings) {
   const requestBody: any = {
-    meta: {
+    meta: settings.meta || {
       title: '',
       creator_id: '',
       external_id: '',
     },
-    passthrough: '',
+    passthrough: settings.passthrough || '',
   };
-
-  if (options.metadataConfig.enabled) {
-    const { title, creatorId, externalId } = options.metadataConfig.standardMetadata ?? {};
-    requestBody.meta.title = title ?? '';
-    requestBody.meta.creator_id = creatorId ?? '';
-    requestBody.meta.external_id = externalId ?? '';
-    requestBody.passthrough = options.metadataConfig.customMetadata ?? '';
-  }
 
   return await apiClient.patch(`/video/v1/assets/${assetId}`, JSON.stringify(requestBody));
 }
@@ -257,4 +246,33 @@ export async function uploadTrack(
 
 export async function deleteTrack(apiClient: any, assetId: string, trackId: string) {
   return await apiClient.del(`/video/v1/assets/${assetId}/tracks/${trackId}`);
+}
+
+export async function generateAutoCaptions(
+  apiClient: any,
+  assetId: string,
+  trackId: string,
+  options: {
+    language_code: string;
+    name: string;
+  }
+) {
+  const result = await apiClient.post(
+    `/video/v1/assets/${assetId}/tracks/${trackId}/generate-subtitles`,
+    JSON.stringify({
+      generated_subtitles: [
+        {
+          language_code: options.language_code,
+          name: options.name,
+        },
+      ],
+    })
+  );
+
+  if (!result.ok) {
+    const error = await result.json();
+    throw new Error(error.error?.messages?.[0] || 'Error generating subtitles');
+  }
+
+  return await result.json();
 }

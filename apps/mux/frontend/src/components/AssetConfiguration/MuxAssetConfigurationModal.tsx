@@ -6,6 +6,7 @@ import { CaptionsConfiguration, CaptionsConfig } from './CaptionsConfiguration';
 import Mp4RenditionsConfiguration, { Mp4RenditionsConfig } from './Mp4RenditionsConfiguration';
 import MetadataConfiguration, { MetadataConfig } from './MetadataConfiguration';
 import { MuxContentfulObject } from '../../util/types';
+import { FieldExtensionSDK } from '@contentful/app-sdk';
 
 export interface ModalData {
   videoQuality: string;
@@ -24,6 +25,7 @@ interface MuxAssetConfigurationModalProps {
   };
   isEditMode?: boolean;
   asset?: MuxContentfulObject;
+  sdk: FieldExtensionSDK;
 }
 
 const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
@@ -33,6 +35,7 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
   installationParams,
   isEditMode = false,
   asset,
+  sdk,
 }) => {
   const [modalData, setModalData] = useState<ModalData>({
     videoQuality: 'plus',
@@ -45,12 +48,10 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
       closedCaptions: null,
     },
     mp4Config: {
-      enabled: false,
       audioOnly: false,
       highestResolution: false,
     },
     metadataConfig: {
-      enabled: false,
       standardMetadata: {
         title: undefined,
         creatorId: undefined,
@@ -62,12 +63,6 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
 
   useEffect(() => {
     if (isEditMode && asset) {
-      const hasMetadata =
-        !!asset.meta?.title ||
-        !!asset.meta?.creator_id ||
-        !!asset.meta?.external_id ||
-        !!asset.passthrough;
-
       setModalData({
         videoQuality: 'plus',
         playbackPolicies: asset.signedPlaybackId ? ['signed'] : ['public'],
@@ -79,12 +74,10 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
           closedCaptions: null,
         },
         mp4Config: {
-          enabled: false,
           audioOnly: false,
           highestResolution: false,
         },
         metadataConfig: {
-          enabled: hasMetadata,
           standardMetadata: {
             title: asset.meta?.title,
             creatorId: asset.meta?.creator_id,
@@ -168,6 +161,7 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
                 setModalData((prev) => ({ ...prev, metadataConfig: config }))
               }
               onValidationChange={(isValid) => handleValidationChange('metadata', isValid)}
+              sdk={sdk}
             />
           </Accordion.Item>
 
@@ -189,7 +183,6 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
                   onMp4ConfigChange={(config) =>
                     setModalData((prev) => ({ ...prev, mp4Config: config }))
                   }
-                  onValidationChange={(isValid) => handleValidationChange('mp4', isValid)}
                 />
               </Accordion.Item>
             </>

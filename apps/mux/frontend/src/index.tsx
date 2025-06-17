@@ -29,6 +29,7 @@ import MuxAssetConfigurationModal, {
 import UploadArea from './components/UploadArea/UploadArea';
 import Mp4RenditionsPanel from './components/AssetConfiguration/Mp4RenditionsPanel';
 import TrackForm from './components/TrackForm/TrackForm';
+import MetadataPanel from './components/AssetConfiguration/MetadataPanel';
 
 import {
   type InstallationParams,
@@ -49,7 +50,9 @@ import {
   updateAsset,
   uploadTrack,
   deleteTrack,
+  generateAutoCaptions,
 } from './util/muxApi';
+import { AssetSettings } from './util/muxApi';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -105,7 +108,6 @@ export class App extends React.Component<AppProps, AppState> {
       pendingUploadURL: null,
       isPolling: false,
       initialResyncDone: false,
-      isEditMode: false,
       captionname: undefined,
       audioName: undefined,
       playbackToken: undefined,
@@ -327,29 +329,7 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
-  handleEditAsset = () => {
-    this.setState({ modalAssetConfigurationVisible: true, isEditMode: true });
-  };
-
-  handleUpdateAsset = async (options: ModalData) => {
-    if (!this.state.value?.assetId) return;
-
-    const res = await updateAsset(this.apiClient, this.state.value.assetId, options);
-
-    if (!this.responseCheck(res)) {
-      return;
-    }
-
-    await this.resync();
-    this.setState({ modalAssetConfigurationVisible: false, isEditMode: false });
-  };
-
   onConfirmModal = async (options: ModalData) => {
-    if (this.state.isEditMode) {
-      await this.handleUpdateAsset(options);
-      return;
-    }
-
     if (this.state.pendingUploadURL) {
       await addByURL(
         this.apiClient,
@@ -394,7 +374,7 @@ export class App extends React.Component<AppProps, AppState> {
         this.fileInputRef.current.value = '';
       }
     }
-    this.setState({ modalAssetConfigurationVisible: false, isEditMode: false });
+    this.setState({ modalAssetConfigurationVisible: false });
   };
 
   onUploadError = (progress: CustomEvent) => {
@@ -633,9 +613,7 @@ export class App extends React.Component<AppProps, AppState> {
       let trackPreparing = false;
       if ('tracks' in asset) {
         asset.tracks.forEach((track) => {
-          if (track.status === 'preparing') {
-            trackPreparing = true;
-          }
+          trackPreparing = track.status === 'preparing';
           if (track.type === 'audio') {
             audioTracks = [...(audioTracks || []), track];
           } else if (
@@ -708,24 +686,41 @@ export class App extends React.Component<AppProps, AppState> {
   uploadTrack = async (form: HTMLFormElement, type: 'audio' | 'caption') => {
     if (!this.state.value?.assetId) return;
 
+    const captionsTypeInput = form.elements.namedItem('captionsType') as HTMLSelectElement;
     const urlInput = form.elements.namedItem('url') as HTMLInputElement;
     const nameInput = form.elements.namedItem('name') as HTMLInputElement;
     const languageCodeInput = form.elements.namedItem('languagecode') as HTMLInputElement;
     const closedCaptionsInput = form.elements.namedItem('closedcaptions') as HTMLInputElement;
 
     try {
-      const options = {
-        url: urlInput.value,
-        name: nameInput.value,
-        language_code: languageCodeInput.value || 'en-US',
-        type: type === 'audio' ? ('audio' as const) : ('text' as const),
-        ...(type === 'caption' && {
-          text_type: 'subtitles',
-          closed_captions: closedCaptionsInput?.checked || false,
-        }),
-      };
+      if (type === 'caption' && captionsTypeInput?.value === 'auto') {
+        const audioTrack =
+          this.state.value.audioTracks?.find((track) => track.type === 'audio' && track.primary) ||
+          this.state.value.audioTracks?.[0];
 
-      await uploadTrack(this.apiClient, this.state.value.assetId, options);
+        if (!audioTrack) {
+          throw new Error('No audio track found to generate subtitles');
+        }
+
+        await generateAutoCaptions(this.apiClient, this.state.value.assetId, audioTrack.id, {
+          language_code: languageCodeInput.value,
+          name: nameInput.value,
+        });
+      } else {
+        const options = {
+          url: urlInput.value,
+          name: nameInput.value,
+          language_code: languageCodeInput.value || 'en-US',
+          type: type === 'audio' ? ('audio' as const) : ('text' as const),
+          ...(type === 'caption' && {
+            text_type: 'subtitles',
+            closed_captions: closedCaptionsInput?.checked || false,
+          }),
+        };
+
+        await uploadTrack(this.apiClient, this.state.value.assetId, options);
+      }
+
       await this.resync();
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -936,6 +931,42 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
+  updateMetadata = async (metadata: {
+    standardMetadata: {
+      title?: string;
+      creatorId?: string;
+      externalId?: string;
+    };
+    customMetadata?: string;
+  }) => {
+    if (!this.state.value?.assetId) {
+      this.props.sdk.notifier.error('No asset selected');
+      return;
+    }
+
+    try {
+      const settings: AssetSettings = {
+        meta: metadata.standardMetadata
+          ? {
+              title: metadata.standardMetadata.title || '',
+              creator_id: metadata.standardMetadata.creatorId || '',
+              external_id: metadata.standardMetadata.externalId || '',
+            }
+          : undefined,
+        passthrough: metadata.customMetadata,
+        playback_policies: [],
+        video_quality: '',
+        inputs: [],
+      };
+
+      await updateAsset(this.apiClient, this.state.value.assetId, settings);
+      await this.resync({ skipPlayerResync: true });
+    } catch (error) {
+      console.error('Error updating metadata:', error);
+      this.props.sdk.notifier.error('Error updating metadata');
+    }
+  };
+
   render = () => {
     const modal = (
       <MuxAssetConfigurationModal
@@ -943,8 +974,8 @@ export class App extends React.Component<AppProps, AppState> {
         onClose={this.onCloseModal}
         onConfirm={this.onConfirmModal}
         installationParams={this.props.sdk.parameters.installation as InstallationParams}
-        isEditMode={this.state.isEditMode}
         asset={this.state.value}
+        sdk={this.props.sdk}
       />
     );
 
@@ -1071,14 +1102,14 @@ export class App extends React.Component<AppProps, AppState> {
                   requestDeleteAsset={this.requestDeleteAsset}
                   resync={this.resync}
                   assetId={this.state.value.assetId}
-                  onEdit={this.handleEditAsset}
                 />
               </Box>
 
               <Tabs defaultTab="captions">
-                <Tabs.List variant="horizontal-divider">
+                <Tabs.List variant="horizontal-divider" className="tabs-scroll">
                   <Tabs.Tab panelId="captions">Captions</Tabs.Tab>
                   <Tabs.Tab panelId="audio">Audio</Tabs.Tab>
+                  <Tabs.Tab panelId="metadata">Metadata</Tabs.Tab>
                   <Tabs.Tab panelId="playercode">Player Code</Tabs.Tab>
                   <Tabs.Tab panelId="mp4renditions">MP4 Renditions</Tabs.Tab>
                   <Tabs.Tab panelId="debug">Data</Tabs.Tab>
@@ -1099,8 +1130,10 @@ export class App extends React.Component<AppProps, AppState> {
                     tracks={(this.state.value?.captions || []) as Track[]}
                     type="caption"
                     title="Add Caption"
-                    playbackId={this.state.value?.playbackId}
+                    playbackId={this.state.value?.playbackId || this.state.value?.signedPlaybackId}
                     domain={this.props.sdk.parameters.installation.domain}
+                    token={this.state.playbackToken}
+                    isSigned={this.isUsingSigned()}
                   />
                 </Tabs.Panel>
 
@@ -1118,7 +1151,19 @@ export class App extends React.Component<AppProps, AppState> {
                     }}
                     tracks={this.state.value?.audioTracks || []}
                     type="audio"
-                    title="Add Audio track"
+                    title="Add Audio"
+                    playbackId={this.state.value?.playbackId || this.state.value?.signedPlaybackId}
+                    domain={this.props.sdk.parameters.installation.domain}
+                    token={this.state.playbackToken}
+                    isSigned={this.isUsingSigned()}
+                  />
+                </Tabs.Panel>
+
+                <Tabs.Panel id="metadata">
+                  <MetadataPanel
+                    asset={this.state.value}
+                    onSubmit={this.updateMetadata}
+                    sdk={this.props.sdk}
                   />
                 </Tabs.Panel>
 

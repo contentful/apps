@@ -34,7 +34,6 @@ export interface AppState {
   pendingUploadURL: string | null;
   isPolling: boolean;
   initialResyncDone: boolean;
-  isEditMode: boolean;
 }
 
 export type ResolutionType = 'highest' | 'audio-only';
@@ -125,7 +124,7 @@ export interface AudioTrack extends BaseTrack {
 
 export interface CaptionTrack extends BaseTrack {
   type: 'text';
-  'text_type ': string;
+  text_type: string;
   name: string;
   language_code: string;
   closed_captions: boolean;

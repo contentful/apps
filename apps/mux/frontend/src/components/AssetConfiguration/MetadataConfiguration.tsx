@@ -1,16 +1,9 @@
 import { FC, useState, useEffect } from 'react';
-import {
-  FormControl,
-  Switch,
-  TextInput,
-  Textarea,
-  TextLink,
-  Stack,
-} from '@contentful/f36-components';
+import { FormControl, TextInput, Textarea, TextLink, Stack } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { FieldExtensionSDK } from '@contentful/app-sdk';
 
 export interface MetadataConfig {
-  enabled: boolean;
   standardMetadata?: {
     title?: string;
     creatorId?: string;
@@ -23,6 +16,7 @@ interface MetadataConfigurationProps {
   metadataConfig: MetadataConfig;
   onMetadataChange: (config: MetadataConfig) => void;
   onValidationChange: (isValid: boolean) => void;
+  sdk: FieldExtensionSDK;
 }
 
 const metadataLink = 'https://www.mux.com/docs/guides/add-metadata-to-your-videos';
@@ -35,6 +29,7 @@ export const MetadataConfiguration: FC<MetadataConfigurationProps> = ({
   metadataConfig,
   onMetadataChange,
   onValidationChange,
+  sdk,
 }) => {
   const [standardMetadata, setStandardMetadata] = useState<
     NonNullable<MetadataConfig['standardMetadata']>
@@ -45,8 +40,33 @@ export const MetadataConfiguration: FC<MetadataConfigurationProps> = ({
     creatorId?: string;
     externalId?: string;
     customMetadata?: string;
-    general?: string;
   }>({});
+
+  useEffect(() => {
+    const TITLE_FIELD_ID = 'title';
+    const titleField = sdk.entry.fields[TITLE_FIELD_ID];
+
+    if (!titleField) {
+      console.debug(`No ${TITLE_FIELD_ID} field detected. Skipping sync.`);
+      return;
+    }
+
+    const syncFromTitle = (newVal: string) => {
+      if (newVal !== standardMetadata.title) {
+        handleStandardMetadataChange('title', newVal);
+      }
+    };
+
+    syncFromTitle(titleField.getValue());
+
+    const detach = titleField.onValueChanged((newValue) => {
+      syncFromTitle(newValue);
+    });
+
+    return () => {
+      detach();
+    };
+  }, [sdk.entry.fields]);
 
   const validateField = (value: string, maxLength: number): string | undefined => {
     if (value.length > maxLength) {
@@ -65,28 +85,17 @@ export const MetadataConfiguration: FC<MetadataConfigurationProps> = ({
   const validateAllFields = () => {
     const errors: typeof validationErrors = {};
 
-    if (metadataConfig.enabled) {
-      const hasStandardData =
-        standardMetadata.title || standardMetadata.creatorId || standardMetadata.externalId;
-      const hasCustomData =
-        metadataConfig.customMetadata && metadataConfig.customMetadata.trim().length > 0;
-
-      if (!hasStandardData && !hasCustomData) {
-        errors.general = 'At least one metadata field must be filled';
-      }
-
-      if (standardMetadata.title) {
-        errors.title = validateField(standardMetadata.title, MAX_TITLE_LENGTH);
-      }
-      if (standardMetadata.creatorId) {
-        errors.creatorId = validateField(standardMetadata.creatorId, MAX_ID_LENGTH);
-      }
-      if (standardMetadata.externalId) {
-        errors.externalId = validateField(standardMetadata.externalId, MAX_ID_LENGTH);
-      }
-      if (metadataConfig.customMetadata) {
-        errors.customMetadata = validateCustomMetadata(metadataConfig.customMetadata);
-      }
+    if (standardMetadata.title) {
+      errors.title = validateField(standardMetadata.title, MAX_TITLE_LENGTH);
+    }
+    if (standardMetadata.creatorId) {
+      errors.creatorId = validateField(standardMetadata.creatorId, MAX_ID_LENGTH);
+    }
+    if (standardMetadata.externalId) {
+      errors.externalId = validateField(standardMetadata.externalId, MAX_ID_LENGTH);
+    }
+    if (metadataConfig.customMetadata) {
+      errors.customMetadata = validateCustomMetadata(metadataConfig.customMetadata);
     }
 
     setValidationErrors(errors);
@@ -96,14 +105,7 @@ export const MetadataConfiguration: FC<MetadataConfigurationProps> = ({
 
   useEffect(() => {
     validateAllFields();
-  }, [standardMetadata, metadataConfig.enabled, metadataConfig.customMetadata]);
-
-  const handleSwitch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onMetadataChange({
-      ...metadataConfig,
-      enabled: e.target.checked,
-    });
-  };
+  }, [standardMetadata, metadataConfig.customMetadata]);
 
   const handleStandardMetadataChange = (
     field: keyof NonNullable<MetadataConfig['standardMetadata']>,
@@ -128,9 +130,6 @@ export const MetadataConfiguration: FC<MetadataConfigurationProps> = ({
     <>
       <FormControl>
         <Stack flexDirection="column" spacing="spacingS">
-          <Switch isChecked={metadataConfig.enabled} onChange={handleSwitch}>
-            Metadata
-          </Switch>
           <FormControl.HelpText>
             Provides additional descriptive information about your video assets.
             <br />
@@ -147,84 +146,69 @@ export const MetadataConfiguration: FC<MetadataConfigurationProps> = ({
         </Stack>
       </FormControl>
 
-      {metadataConfig.enabled && (
-        <>
-          {validationErrors.general && (
-            <FormControl isInvalid>
-              <FormControl.ValidationMessage>
-                {validationErrors.general}
-              </FormControl.ValidationMessage>
-            </FormControl>
-          )}
+      <FormControl isInvalid={!!validationErrors.title}>
+        <FormControl.Label>Title</FormControl.Label>
+        <TextInput
+          value={standardMetadata.title || ''}
+          onChange={(e) => handleStandardMetadataChange('title', e.target.value)}
+          placeholder="The video title"
+        />
+        <FormControl.HelpText>
+          The video title that will be displayed in the player.
+        </FormControl.HelpText>
+        {validationErrors.title && (
+          <FormControl.ValidationMessage>{validationErrors.title}</FormControl.ValidationMessage>
+        )}
+      </FormControl>
 
-          <FormControl isInvalid={!!validationErrors.title}>
-            <FormControl.Label>Title</FormControl.Label>
-            <TextInput
-              value={standardMetadata.title || ''}
-              onChange={(e) => handleStandardMetadataChange('title', e.target.value)}
-              placeholder="The video title"
-            />
-            <FormControl.HelpText>
-              The video title that will be displayed in the player.
-            </FormControl.HelpText>
-            {validationErrors.title && (
-              <FormControl.ValidationMessage>
-                {validationErrors.title}
-              </FormControl.ValidationMessage>
-            )}
-          </FormControl>
+      <FormControl isInvalid={!!validationErrors.creatorId}>
+        <FormControl.Label>Creator ID</FormControl.Label>
+        <TextInput
+          value={standardMetadata.creatorId || ''}
+          onChange={(e) => handleStandardMetadataChange('creatorId', e.target.value)}
+          placeholder="Identifier to track the creator of the video"
+        />
+        <FormControl.HelpText>
+          An identifier to keep track of the creator of the video.
+        </FormControl.HelpText>
+        {validationErrors.creatorId && (
+          <FormControl.ValidationMessage>
+            {validationErrors.creatorId}
+          </FormControl.ValidationMessage>
+        )}
+      </FormControl>
 
-          <FormControl isInvalid={!!validationErrors.creatorId}>
-            <FormControl.Label>Creator ID</FormControl.Label>
-            <TextInput
-              value={standardMetadata.creatorId || ''}
-              onChange={(e) => handleStandardMetadataChange('creatorId', e.target.value)}
-              placeholder="Identifier to track the creator of the video"
-            />
-            <FormControl.HelpText>
-              An identifier to keep track of the creator of the video.
-            </FormControl.HelpText>
-            {validationErrors.creatorId && (
-              <FormControl.ValidationMessage>
-                {validationErrors.creatorId}
-              </FormControl.ValidationMessage>
-            )}
-          </FormControl>
+      <FormControl isInvalid={!!validationErrors.externalId}>
+        <FormControl.Label>External ID</FormControl.Label>
+        <TextInput
+          value={standardMetadata.externalId || ''}
+          onChange={(e) => handleStandardMetadataChange('externalId', e.target.value)}
+          placeholder="Identifier to link the video to your own data"
+        />
+        <FormControl.HelpText>
+          An identifier to link the video to your own data.
+        </FormControl.HelpText>
+        {validationErrors.externalId && (
+          <FormControl.ValidationMessage>
+            {validationErrors.externalId}
+          </FormControl.ValidationMessage>
+        )}
+      </FormControl>
 
-          <FormControl isInvalid={!!validationErrors.externalId}>
-            <FormControl.Label>External ID</FormControl.Label>
-            <TextInput
-              value={standardMetadata.externalId || ''}
-              onChange={(e) => handleStandardMetadataChange('externalId', e.target.value)}
-              placeholder="Identifier to link the video to your own data"
-            />
-            <FormControl.HelpText>
-              An identifier to link the video to your own data.
-            </FormControl.HelpText>
-            {validationErrors.externalId && (
-              <FormControl.ValidationMessage>
-                {validationErrors.externalId}
-              </FormControl.ValidationMessage>
-            )}
-          </FormControl>
-
-          <FormControl isInvalid={!!validationErrors.customMetadata}>
-            <FormControl.Label>Custom Metadata</FormControl.Label>
-            <Textarea
-              value={metadataConfig.customMetadata || ''}
-              onChange={(e) => handleCustomMetadataChange(e.target.value)}
-              placeholder="Enter your custom metadata"
-              rows={5}
-            />
-            <FormControl.HelpText>This will be stored with your video.</FormControl.HelpText>
-            {validationErrors.customMetadata && (
-              <FormControl.ValidationMessage>
-                {validationErrors.customMetadata}
-              </FormControl.ValidationMessage>
-            )}
-          </FormControl>
-        </>
-      )}
+      <FormControl isInvalid={!!validationErrors.customMetadata}>
+        <FormControl.Label>Custom Metadata</FormControl.Label>
+        <Textarea
+          value={metadataConfig.customMetadata || ''}
+          onChange={(e) => handleCustomMetadataChange(e.target.value)}
+          placeholder="Enter your custom metadata"
+          rows={5}
+        />
+        {validationErrors.customMetadata && (
+          <FormControl.ValidationMessage>
+            {validationErrors.customMetadata}
+          </FormControl.ValidationMessage>
+        )}
+      </FormControl>
     </>
   );
 };
