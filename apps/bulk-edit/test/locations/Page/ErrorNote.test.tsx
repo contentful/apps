@@ -2,21 +2,13 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ErrorNote } from '../../../src/locations/Page/components/ErrorNote';
 import { condoAEntry1, condoAEntry2 } from '../../mocks/mockEntries';
-import { condoAContentType } from '../../mocks/mockContentTypes';
 import { vi } from 'vitest';
-import { ContentTypeField } from '../../../src/locations/Page/types';
+import { condoAContentType } from '../../mocks/mockContentTypes';
 
 describe('ErrorNote', () => {
-  const mockField: ContentTypeField = {
-    id: 'description',
-    uniqueId: 'description',
-    name: 'Description',
-    type: 'Text',
-  };
-
   const defaultProps = {
     failedUpdates: [condoAEntry1],
-    selectedField: mockField,
+    selectedContentType: condoAContentType,
     defaultLocale: 'en-US',
     onClose: vi.fn(),
   };
