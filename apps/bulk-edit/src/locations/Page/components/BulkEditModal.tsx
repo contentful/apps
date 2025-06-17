@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Button, TextInput, Text, Flex, FormControl } from '@contentful/f36-components';
 import type { Entry, ContentTypeField } from '../types';
 import { getEntryFieldValue } from '../utils/entryUtils';
@@ -33,6 +33,10 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
 
   const isNumber = selectedField?.type === 'Number' || selectedField?.type === 'Integer';
   const isInvalid = selectedField?.type === 'Integer' && !Number.isInteger(Number(value));
+
+  useEffect(() => {
+    setValue('');
+  }, [isOpen]);
 
   return (
     <Modal isShown={isOpen} onClose={onClose} size="medium" aria-label={title}>

@@ -10,7 +10,7 @@ import {
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentFields, ContentTypeProps, KeyValueMap, EntryProps } from 'contentful-management';
-import { Entry, ContentTypeField } from './types';
+import { ContentTypeField } from './types';
 import { styles } from './styles';
 import { ContentTypeSidebar } from './components/ContentTypeSidebar';
 import { SortMenu, SORT_OPTIONS } from './components/SortMenu';
@@ -359,7 +359,7 @@ const Page = () => {
                 <Heading style={styles.stickyPageHeader}>
                   {selectedContentType ? `Bulk edit ${selectedContentType.name}` : 'Bulk Edit App'}
                 </Heading>
-                {entries.length === 0 || !selectedContentType ? (
+                {(entries.length === 0 && !entriesLoading) || !selectedContentType ? (
                   <Box style={styles.noEntriesText}>No entries found.</Box>
                 ) : (
                   <>

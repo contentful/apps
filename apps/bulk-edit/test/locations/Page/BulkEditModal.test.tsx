@@ -118,4 +118,33 @@ describe('BulkEditModal', () => {
     expect(screen.getByText('Integer field does not allow decimal')).toBeInTheDocument();
     expect(screen.getByTestId('bulk-edit-save')).toBeDisabled();
   });
+
+  it('resets the input value when the modal is re-opened', () => {
+    const onClose = vi.fn();
+    const onSave = vi.fn();
+    const modalComponent = (isOpened: boolean) => {
+      return (
+        <BulkEditModal
+          isOpen={isOpened}
+          onClose={onClose}
+          onSave={onSave}
+          selectedEntries={[entry1]}
+          selectedField={field}
+          defaultLocale="en-US"
+          isSaving={false}
+        />
+      );
+    };
+    const { rerender } = render(modalComponent(true));
+
+    const input = screen.getByPlaceholderText('Enter your new value');
+    fireEvent.change(input, { target: { value: '999' } });
+    expect(input).toHaveValue(999);
+
+    rerender(modalComponent(false));
+
+    rerender(modalComponent(true));
+
+    expect(screen.getByPlaceholderText('Enter your new value')).toHaveValue(null);
+  });
 });
