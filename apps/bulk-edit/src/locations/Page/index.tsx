@@ -7,7 +7,6 @@ import {
   Button,
   Text,
   Notification,
-  Note,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentFields, ContentTypeProps, KeyValueMap, EntryProps } from 'contentful-management';
@@ -17,30 +16,34 @@ import { ContentTypeSidebar } from './components/ContentTypeSidebar';
 import { SortMenu, SORT_OPTIONS } from './components/SortMenu';
 import { EntryTable } from './components/EntryTable';
 import { BulkEditModal } from './components/BulkEditModal';
+import { UndoBulkEditModal } from './components/UndoBulkEditModal';
 import { updateEntryFieldLocalized, getEntryFieldValue } from './utils/entryUtils';
-import { WarningOctagonIcon } from '@phosphor-icons/react';
-import tokens from '@contentful/f36-tokens';
+import { ErrorNote } from './components/ErrorNote';
 
 const PAGE_SIZE_OPTIONS = [15, 50, 100];
 
 const Page = () => {
   const sdk = useSDK();
+  const locales = sdk.locales.available;
+  const defaultLocale = sdk.locales.default;
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [selectedContentTypeId, setSelectedContentTypeId] = useState<string | undefined>(undefined);
+  const [contentTypeLoading, setContentTypeLoading] = useState(true);
   const [entries, setEntries] = useState<EntryProps[]>([]);
-  const [entriesLoading, setEntriesLoading] = useState(false);
+  const [entriesLoading, setEntriesLoading] = useState(true);
   const [fields, setFields] = useState<ContentTypeField[]>([]);
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(PAGE_SIZE_OPTIONS[0]);
   const [totalEntries, setTotalEntries] = useState(0);
   const [sortOption, setSortOption] = useState(SORT_OPTIONS[0].value);
-  const locales = sdk.locales.available;
-  const defaultLocale = sdk.locales.default;
   const [selectedEntryIds, setSelectedEntryIds] = useState<string[]>([]);
   const [selectedField, setSelectedField] = useState<ContentTypeField | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [failedUpdates, setFailedUpdates] = useState<EntryProps[]>([]);
+  const [lastUpdateBackup, setLastUpdateBackup] = useState<Record<string, EntryProps>>({});
+  const [isUndoModalOpen, setIsUndoModalOpen] = useState(false);
+  const [undoFirstEntryFieldValue, setUndoFirstEntryFieldValue] = useState('');
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -63,12 +66,13 @@ const Page = () => {
     return allContentTypes;
   };
 
-  const buildQuery = (sortOption: string, displayField: string) => {
+  const buildQuery = (sortOption: string, displayField: string | null) => {
     const getOrder = (sortOption: string) => {
-      if (sortOption === 'displayName_asc') return `fields.${displayField}`;
-      else if (sortOption === 'displayName_desc') return `-fields.${displayField}`;
-      else if (sortOption === 'updatedAt_desc') return '-sys.updatedAt';
+      if (sortOption === 'updatedAt_desc') return '-sys.updatedAt';
       else if (sortOption === 'updatedAt_asc') return 'sys.updatedAt';
+      else if (displayField === null) return undefined;
+      else if (sortOption === 'displayName_asc') return `fields.${displayField}`;
+      else if (sortOption === 'displayName_desc') return `-fields.${displayField}`;
     };
 
     return {
@@ -82,6 +86,7 @@ const Page = () => {
   useEffect(() => {
     const fetchContentTypes = async (): Promise<void> => {
       try {
+        setContentTypeLoading(true);
         const contentTypes = await getAllContentTypes();
         const sortedContentTypes = contentTypes
           .slice()
@@ -95,6 +100,7 @@ const Page = () => {
         setContentTypes([]);
         setSelectedContentTypeId(undefined);
       } finally {
+        setContentTypeLoading(false);
       }
     };
     void fetchContentTypes();
@@ -137,7 +143,7 @@ const Page = () => {
           }
         });
         setFields(newFields);
-        const displayField = ct.displayField || 'displayName';
+        const displayField = ct.displayField || null;
 
         const { items, total } = await sdk.cma.entry.getMany({
           spaceId: sdk.ids.space,
@@ -164,12 +170,10 @@ const Page = () => {
     firstUpdatedValue,
     value,
     count,
-    onUndo,
   }: {
     firstUpdatedValue: string;
     value: string;
     count: number;
-    onUndo: () => void;
   }) {
     const message =
       count === 1
@@ -184,7 +188,8 @@ const Page = () => {
           onClick: () => {
             notification.then((item) => {
               Notification.close(item.id);
-              onUndo();
+              setUndoFirstEntryFieldValue(firstUpdatedValue);
+              setIsUndoModalOpen(true);
             });
           },
         },
@@ -192,41 +197,75 @@ const Page = () => {
     });
   }
 
+  const fetchLatestEntries = async (entryIds: string[]) => {
+    const response = await sdk.cma.entry.getMany({
+      spaceId: sdk.ids.space,
+      environmentId: sdk.ids.environment,
+      query: {
+        'sys.id[in]': entryIds.join(','),
+      },
+    });
+    return response.items;
+  };
+
+  const processBatchResults = (results: Array<{ success: boolean; entry: EntryProps }>) => {
+    const successful = results.filter((r) => r.success).map((r) => r.entry);
+    const failed = results.filter((r) => !r.success).map((r) => r.entry);
+    return { successful, failed };
+  };
+
+  const updateEntriesList = (successful: EntryProps[]) => {
+    setEntries((prev) =>
+      prev.map((entry) => successful.find((u) => u.sys.id === entry.sys.id) || entry)
+    );
+  };
+
   const onSave = async (val: string | number) => {
     setIsSaving(true);
     setFailedUpdates([]);
+
     try {
-      const results = await Promise.all(
-        selectedEntries.map(async (entry: EntryProps) => {
-          if (!selectedField) return { success: false, entry };
+      if (!selectedField) return;
+
+      const entryIds = selectedEntries.map((entry) => entry.sys.id);
+      const latestEntries = await fetchLatestEntries(entryIds);
+
+      const backups: Record<string, EntryProps> = {};
+      const updatePromises = latestEntries.map(async (latestEntry) => {
+        backups[latestEntry.sys.id] = { ...latestEntry };
+
+        try {
           const fieldId = selectedField.id;
           const fieldLocale = selectedField.locale || defaultLocale;
-          try {
-            const updatedFields = updateEntryFieldLocalized(
-              entry.fields,
-              fieldId,
-              val,
-              fieldLocale
-            );
-            const updated = await sdk.cma.entry.update(
-              { entryId: entry.sys.id, spaceId: sdk.ids.space, environmentId: sdk.ids.environment },
-              { ...entry, fields: updatedFields }
-            );
+          const updatedFields = updateEntryFieldLocalized(
+            latestEntry.fields,
+            fieldId,
+            val,
+            fieldLocale
+          );
 
-            return { success: true, entry: updated };
-          } catch {
-            return { success: false, entry };
-          }
-        })
-      );
-      const successful = results.filter((r) => r.success).map((r) => r.entry);
-      const failed = results.filter((r) => !r.success).map((r) => r.entry);
+          const updated = await sdk.cma.entry.update(
+            {
+              entryId: latestEntry.sys.id,
+              spaceId: sdk.ids.space,
+              environmentId: sdk.ids.environment,
+            },
+            { ...latestEntry, fields: updatedFields }
+          );
 
-      setEntries((prev) =>
-        prev.map((entry) => successful.find((u) => u.sys.id === entry.sys.id) || entry)
-      );
+          return { success: true, entry: updated };
+        } catch {
+          return { success: false, entry: latestEntry };
+        }
+      });
+
+      const results = await Promise.all(updatePromises);
+      const { successful, failed } = processBatchResults(results);
+
+      updateEntriesList(successful);
       setFailedUpdates(failed);
-      // Notification logic (only for successful updates)
+      setLastUpdateBackup(backups);
+
       if (successful.length > 0) {
         const firstUpdatedValue = getEntryFieldValue(
           selectedEntries[0],
@@ -237,14 +276,11 @@ const Page = () => {
           firstUpdatedValue: firstUpdatedValue,
           value: `${val}`,
           count: successful.length,
-          onUndo: () => {
-            // TODO: implement undo logic
-            console.log('undo');
-          },
         });
       }
+
       setIsModalOpen(false);
-    } catch (e: any) {
+    } catch (error) {
       if (failedUpdates.length === 0) {
         setFailedUpdates(selectedEntries);
       }
@@ -253,7 +289,56 @@ const Page = () => {
     }
   };
 
-  if (!selectedContentTypeId) {
+  const undoUpdates = async (backupToUse: Record<string, EntryProps>) => {
+    if (Object.keys(backupToUse).length === 0) return;
+
+    setIsSaving(true);
+
+    try {
+      const entryIds = Object.keys(backupToUse);
+      const currentEntries = await fetchLatestEntries(entryIds);
+
+      const restorePromises = currentEntries.map(async (currentEntry) => {
+        const backupEntry = backupToUse[currentEntry.sys.id];
+
+        try {
+          const restoredEntry = await sdk.cma.entry.update(
+            {
+              spaceId: sdk.ids.space,
+              environmentId: sdk.ids.environment,
+              entryId: currentEntry.sys.id,
+            },
+            {
+              ...currentEntry,
+              fields: backupEntry.fields,
+            }
+          );
+          return { success: true, entry: restoredEntry };
+        } catch {
+          return { success: false, entry: currentEntry };
+        }
+      });
+
+      const results = await Promise.all(restorePromises);
+      const { successful, failed } = processBatchResults(results);
+
+      updateEntriesList(successful);
+      setLastUpdateBackup({});
+      setFailedUpdates(failed);
+
+      if (successful.length > 0) {
+        Notification.success('', { title: 'Undo complete' });
+      }
+    } catch (error) {
+      if (failedUpdates.length === 0) {
+        setFailedUpdates(Object.values(backupToUse));
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (contentTypeLoading) {
     return (
       <Flex alignItems="center" justifyContent="center" style={{ minHeight: '60vh' }}>
         <Spinner />
@@ -297,37 +382,14 @@ const Page = () => {
                       <Spinner />
                     ) : (
                       <>
-                        {failedUpdates.length > 0 &&
-                          (() => {
-                            const firstFailedValue = getEntryFieldValue(
-                              failedUpdates[0],
-                              selectedField,
-                              defaultLocale
-                            );
-                            return (
-                              <Note
-                                variant="negative"
-                                icon={
-                                  <WarningOctagonIcon
-                                    fill={tokens.red600}
-                                    height={tokens.spacingM}
-                                    width={tokens.spacingM}
-                                  />
-                                }
-                                style={styles.errorNote}
-                                onClose={() => setFailedUpdates([])}
-                                withCloseButton>
-                                {`${failedUpdates.length} field${
-                                  failedUpdates.length > 1 ? 's' : ''
-                                } did not update: `}
-                                {firstFailedValue}
-                                {failedUpdates.length > 1 &&
-                                  ` and ${failedUpdates.length - 1} more entry field${
-                                    failedUpdates.length > 2 ? 's' : ''
-                                  }`}
-                              </Note>
-                            );
-                          })()}
+                        {failedUpdates.length > 0 && (
+                          <ErrorNote
+                            failedUpdates={failedUpdates}
+                            selectedField={selectedField}
+                            defaultLocale={defaultLocale}
+                            onClose={() => setFailedUpdates([])}
+                          />
+                        )}
                         <EntryTable
                           entries={entries}
                           fields={fields}
@@ -365,6 +427,17 @@ const Page = () => {
         selectedField={selectedField}
         defaultLocale={defaultLocale}
         isSaving={isSaving}
+      />
+      <UndoBulkEditModal
+        isOpen={isUndoModalOpen}
+        onClose={() => setIsUndoModalOpen(false)}
+        onUndo={async () => {
+          await undoUpdates(lastUpdateBackup);
+          setIsUndoModalOpen(false);
+        }}
+        firstEntryFieldValue={undoFirstEntryFieldValue}
+        isSaving={isSaving}
+        entryCount={selectedEntryIds.length}
       />
     </Flex>
   );

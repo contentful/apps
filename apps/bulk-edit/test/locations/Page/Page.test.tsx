@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, it, beforeEach, vi, expect } from 'vitest';
 import Page from '../../../src/locations/Page';
 import { mockSdk } from '../../mocks/mockSdk';
@@ -7,6 +7,7 @@ import { getManyContentTypes, getManyEntries } from '../../mocks/mockCma';
 import { condoAContentType } from '../../mocks/mockContentTypes';
 import { condoAEntry1, condoAEntry2 } from '../../mocks/mockEntries';
 import { Notification } from '@contentful/f36-components';
+import type { ContentTypeProps } from 'contentful-management';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -26,6 +27,10 @@ describe('Page', () => {
     mockSdk.cma.entry.getMany = vi
       .fn()
       .mockResolvedValue(getManyEntries([condoAEntry1, condoAEntry2]));
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   it('shows loading spinner during initial content type fetch', async () => {
@@ -72,7 +77,7 @@ describe('Bulk edit functionality', () => {
     mockSdk.cma.entry.update = vi.fn().mockImplementation(async (params, entry) => entry);
   });
   afterEach(() => {
-    vi.restoreAllMocks();
+    cleanup();
   });
 
   it('updates entry field value when saved in modal', async () => {
@@ -152,7 +157,7 @@ describe('Bulk edit notification', () => {
     vi.spyOn(Notification, 'success').mockImplementation(() => ({} as any));
   });
   afterEach(() => {
-    vi.restoreAllMocks();
+    cleanup();
   });
 
   it('shows success notification for single entry', async () => {
@@ -174,5 +179,48 @@ describe('Bulk edit notification', () => {
       'Building one and 4 more entry fields were updated to Alpine',
       { title: 'Success!' }
     );
+  });
+});
+
+describe('Table display', () => {
+  beforeEach(() => {
+    // Mock content type fetch
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([condoAContentType]));
+
+    // Mock content type get for fields
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValue(condoAContentType);
+
+    // Mock entries fetch
+    mockSdk.cma.entry.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyEntries([condoAEntry1, condoAEntry2]));
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('displays table correctly when displayField is null', async () => {
+    const contentTypeWithoutDisplayField = {
+      ...condoAContentType,
+      displayField: null,
+    } as unknown as ContentTypeProps;
+
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([contentTypeWithoutDisplayField]));
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValue(contentTypeWithoutDisplayField);
+
+    render(<Page />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Condo A')).toBeInTheDocument();
+    expect(screen.getByTestId('cf-ui-table-body')).toBeInTheDocument();
+    expect(screen.getAllByText('Untitled').length).toBe(2);
   });
 });
