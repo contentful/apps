@@ -24,6 +24,8 @@ const PAGE_SIZE_OPTIONS = [15, 50, 100];
 
 const Page = () => {
   const sdk = useSDK();
+  const locales = sdk.locales.available;
+  const defaultLocale = sdk.locales.default;
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [selectedContentTypeId, setSelectedContentTypeId] = useState<string | undefined>(undefined);
   const [entries, setEntries] = useState<EntryProps[]>([]);
@@ -33,8 +35,6 @@ const Page = () => {
   const [itemsPerPage, setItemsPerPage] = useState(PAGE_SIZE_OPTIONS[0]);
   const [totalEntries, setTotalEntries] = useState(0);
   const [sortOption, setSortOption] = useState(SORT_OPTIONS[0].value);
-  const locales = sdk.locales.available;
-  const defaultLocale = sdk.locales.default;
   const [selectedEntryIds, setSelectedEntryIds] = useState<string[]>([]);
   const [selectedField, setSelectedField] = useState<ContentTypeField | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -193,68 +193,75 @@ const Page = () => {
     });
   }
 
-  const handleUndoConfirm = async () => {
-    await undoUpdates(lastUpdateBackup);
-    setIsUndoModalOpen(false);
+  const fetchLatestEntries = async (entryIds: string[]) => {
+    const response = await sdk.cma.entry.getMany({
+      spaceId: sdk.ids.space,
+      environmentId: sdk.ids.environment,
+      query: {
+        'sys.id[in]': entryIds.join(','),
+      },
+    });
+    return response.items;
+  };
+
+  const processBatchResults = (results: Array<{ success: boolean; entry: EntryProps }>) => {
+    const successful = results.filter((r) => r.success).map((r) => r.entry);
+    const failed = results.filter((r) => !r.success).map((r) => r.entry);
+    return { successful, failed };
+  };
+
+  const updateEntriesList = (successful: EntryProps[]) => {
+    setEntries((prev) =>
+      prev.map((entry) => successful.find((u) => u.sys.id === entry.sys.id) || entry)
+    );
   };
 
   const onSave = async (val: string | number) => {
     setIsSaving(true);
     setFailedUpdates([]);
+
     try {
-      // Create backups before making changes
+      if (!selectedField) return;
+
+      const entryIds = selectedEntries.map((entry) => entry.sys.id);
+      const latestEntries = await fetchLatestEntries(entryIds);
+
       const backups: Record<string, EntryProps> = {};
+      const updatePromises = latestEntries.map(async (latestEntry) => {
+        backups[latestEntry.sys.id] = { ...latestEntry };
 
-      // Get all latest versions of entries in one call
-      const latestEntries = await sdk.cma.entry.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
-        query: {
-          'sys.id[in]': selectedEntries.map((entry) => entry.sys.id).join(','),
-        },
-      });
-
-      const results = await Promise.all(
-        latestEntries.items.map(async (latestEntry) => {
-          if (!selectedField) return { success: false, entry: latestEntry };
+        try {
           const fieldId = selectedField.id;
           const fieldLocale = selectedField.locale || defaultLocale;
-          try {
-            // Store backup of current state
-            backups[latestEntry.sys.id] = { ...latestEntry };
+          const updatedFields = updateEntryFieldLocalized(
+            latestEntry.fields,
+            fieldId,
+            val,
+            fieldLocale
+          );
 
-            const updatedFields = updateEntryFieldLocalized(
-              latestEntry.fields,
-              fieldId,
-              val,
-              fieldLocale
-            );
+          const updated = await sdk.cma.entry.update(
+            {
+              entryId: latestEntry.sys.id,
+              spaceId: sdk.ids.space,
+              environmentId: sdk.ids.environment,
+            },
+            { ...latestEntry, fields: updatedFields }
+          );
 
-            const updated = await sdk.cma.entry.update(
-              {
-                entryId: latestEntry.sys.id,
-                spaceId: sdk.ids.space,
-                environmentId: sdk.ids.environment,
-              },
-              { ...latestEntry, fields: updatedFields }
-            );
+          return { success: true, entry: updated };
+        } catch {
+          return { success: false, entry: latestEntry };
+        }
+      });
 
-            return { success: true, entry: updated };
-          } catch {
-            return { success: false, entry: latestEntry };
-          }
-        })
-      );
-      const successful = results.filter((r) => r.success).map((r) => r.entry);
-      const failed = results.filter((r) => !r.success).map((r) => r.entry);
+      const results = await Promise.all(updatePromises);
+      const { successful, failed } = processBatchResults(results);
 
-      setEntries((prev) =>
-        prev.map((entry) => successful.find((u) => u.sys.id === entry.sys.id) || entry)
-      );
+      updateEntriesList(successful);
       setFailedUpdates(failed);
       setLastUpdateBackup(backups);
 
-      // Notification logic (only for successful updates)
       if (successful.length > 0) {
         const firstUpdatedValue = getEntryFieldValue(
           selectedEntries[0],
@@ -267,8 +274,9 @@ const Page = () => {
           count: successful.length,
         });
       }
+
       setIsModalOpen(false);
-    } catch (e: any) {
+    } catch (error) {
       if (failedUpdates.length === 0) {
         setFailedUpdates(selectedEntries);
       }
@@ -281,52 +289,43 @@ const Page = () => {
     if (Object.keys(backupToUse).length === 0) return;
 
     setIsSaving(true);
+
     try {
-      // We want to make sure we have the freshest entries
-      const currentEntries = await sdk.cma.entry.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
-        query: {
-          'sys.id[in]': Object.keys(backupToUse).join(','),
-        },
+      const entryIds = Object.keys(backupToUse);
+      const currentEntries = await fetchLatestEntries(entryIds);
+
+      const restorePromises = currentEntries.map(async (currentEntry) => {
+        const backupEntry = backupToUse[currentEntry.sys.id];
+
+        try {
+          const restoredEntry = await sdk.cma.entry.update(
+            {
+              spaceId: sdk.ids.space,
+              environmentId: sdk.ids.environment,
+              entryId: currentEntry.sys.id,
+            },
+            {
+              ...currentEntry,
+              fields: backupEntry.fields,
+            }
+          );
+          return { success: true, entry: restoredEntry };
+        } catch {
+          return { success: false, entry: currentEntry };
+        }
       });
 
-      const results = await Promise.all(
-        currentEntries.items.map(async (currentEntry) => {
-          const backupEntry = backupToUse[currentEntry.sys.id];
-          try {
-            const restoredEntry = await sdk.cma.entry.update(
-              {
-                spaceId: sdk.ids.space,
-                environmentId: sdk.ids.environment,
-                entryId: currentEntry.sys.id,
-              },
-              {
-                ...currentEntry,
-                fields: backupEntry.fields,
-              }
-            );
-            return { success: true, entry: restoredEntry };
-          } catch {
-            return { success: false, entry: currentEntry };
-          }
-        })
-      );
+      const results = await Promise.all(restorePromises);
+      const { successful, failed } = processBatchResults(results);
 
-      const successful = results.filter((r) => r.success).map((r) => r.entry);
-      const failed = results.filter((r) => !r.success).map((r) => r.entry);
-
-      setEntries((prev) =>
-        prev.map((entry) => successful.find((u) => u.sys.id === entry.sys.id) || entry)
-      );
+      updateEntriesList(successful);
       setLastUpdateBackup({});
+      setFailedUpdates(failed);
 
-      if (failed.length > 0) {
-        setFailedUpdates(failed);
-      } else {
+      if (successful.length > 0) {
         Notification.success('', { title: 'Undo complete' });
       }
-    } catch (e: any) {
+    } catch (error) {
       if (failedUpdates.length === 0) {
         setFailedUpdates(Object.values(backupToUse));
       }
@@ -428,7 +427,10 @@ const Page = () => {
       <UndoBulkEditModal
         isOpen={isUndoModalOpen}
         onClose={() => setIsUndoModalOpen(false)}
-        onUndo={handleUndoConfirm}
+        onUndo={async () => {
+          await undoUpdates(lastUpdateBackup);
+          setIsUndoModalOpen(false);
+        }}
         firstEntryFieldValue={undoFirstEntryFieldValue}
         isSaving={isSaving}
         entryCount={selectedEntryIds.length}

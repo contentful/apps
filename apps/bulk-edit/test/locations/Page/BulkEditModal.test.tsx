@@ -109,7 +109,6 @@ describe('BulkEditModal', () => {
         onSave={vi.fn()}
         selectedEntries={[entry1]}
         selectedField={integerField}
-        fields={fields}
         defaultLocale="en-US"
         isSaving={false}
       />
