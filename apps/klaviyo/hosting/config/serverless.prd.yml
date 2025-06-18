@@ -2,8 +2,7 @@ variables:
 
 resources:
   Resources:
-
-    StaticSiteBucket:
+    KlaviyoBucket:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: cf-apps-klaviyo
