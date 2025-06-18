@@ -1,3 +1,4 @@
-variables: {}
+variables:
+  deploymentPrefix: sls-apps-klaviyo-hosting
 resources: {}
   

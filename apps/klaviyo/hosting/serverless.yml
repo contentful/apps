@@ -9,5 +9,8 @@ provider:
   name: aws
   stage: dev
   region: 'us-east-1'  
+  deploymentBucket:
+    name: cf-apps-serverless-deployment
+  deploymentPrefix: ${self:custom.deploymentPrefix}
 
 resources: ${file(./config/serverless.${opt:stage, 'dev'}.yml):resources}   

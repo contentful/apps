@@ -1,4 +1,5 @@
-variables: {}
+variables:
+  deploymentPrefix: sls-apps-klaviyo-hosting-test
 
 resources:
   Resources:
