@@ -1,2 +1,14 @@
 variables:
-  myStage: 'prd'
+
+resources:
+  Resources:
+
+    StaticSiteBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: cf-apps-klaviyo
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true

@@ -8,6 +8,6 @@ custom: ${file(./config/serverless.${opt:stage, 'dev'}.yml):variables}
 provider:
   name: aws
   stage: dev
-  region: 'us-east-1'
-    
-     
+  region: 'us-east-1'  
+
+resources: ${file(./config/serverless.${opt:stage, 'dev'}.yml):resources}   
