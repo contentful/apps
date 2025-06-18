@@ -225,6 +225,7 @@ workflows:
               only:
                 - master
                 - staging
+                - feat/integ-2789/klaviyo-cf-distro
       - build-deploy-prod:
           context:
             - vault
