@@ -1,67 +1,152 @@
-import { useCallback, useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box,
+  Flex,
+  Heading,
+  Text,
+  Form,
+  FormControl,
+  TextInput,
+  Paragraph,
+  Collapse,
+  IconButton,
+  Subheading,
+  TextLink,
+} from '@contentful/f36-components';
+import { ChevronDownIcon, ChevronUpIcon, ExternalLinkIcon } from '@contentful/f36-icons';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Heading, Form, Paragraph, Flex } from '@contentful/f36-components';
-import { css } from 'emotion';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-
-export interface AppInstallationParameters {}
+import Splitter from '../components/Splitter';
+import { styles } from './ConfigScreen.styles';
+import {
+  AppInstallationParameters,
+  CONFIG_SCREEN_INSTRUCTIONS,
+  HUBSPOT_PRIVATE_APPS_URL,
+} from '../utils';
 
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>({});
   const sdk = useSDK<ConfigAppSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [isHubspotTokenInvalid, setIsHubspotTokenInvalid] = useState(false);
+  const [parameters, setParameters] = useState<AppInstallationParameters>({
+    hubspotAccessToken: '',
+  });
+
+  function checkIfHasValue(value: string, setIsInvalid: (valid: boolean) => void) {
+    const hasValue = !!value?.trim();
+    setIsInvalid(!hasValue);
+    return hasValue;
+  }
 
   const onConfigure = useCallback(async () => {
-    // This method will be called when a user clicks on "Install"
-    // or "Save" in the configuration screen.
-    // for more details see https://www.contentful.com/developers/docs/extensibility/ui-extensions/sdk-reference/#register-an-app-configuration-hook
-
-    // Get current the state of EditorInterface and other entities
-    // related to this app installation
     const currentState = await sdk.app.getCurrentState();
 
+    const hubspotTokenHasValue = checkIfHasValue(
+      parameters.hubspotAccessToken,
+      setIsHubspotTokenInvalid
+    );
+
+    if (!hubspotTokenHasValue) {
+      sdk.notifier.error('Some fields are missing or invalid');
+      return false;
+    }
+
     return {
-      // Parameters to be persisted as the app configuration.
       parameters,
-      // In case you don't want to submit any update to app
-      // locations, you can just pass the currentState as is
       targetState: currentState,
     };
   }, [parameters, sdk]);
 
   useEffect(() => {
-    // `onConfigure` allows to configure a callback to be
-    // invoked when a user attempts to install the app or update
-    // its configuration.
     sdk.app.onConfigure(() => onConfigure());
   }, [sdk, onConfigure]);
 
   useEffect(() => {
     (async () => {
-      // Get current parameters of the app.
-      // If the app is not installed yet, `parameters` will be `null`.
       const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
 
       if (currentParameters) {
-        setParameters(currentParameters);
+        setParameters({
+          hubspotAccessToken: currentParameters.hubspotAccessToken ?? '',
+        });
       }
-
-      // Once preparation has finished, call `setReady` to hide
-      // the loading screen and present the app to a user.
       sdk.app.setReady();
     })();
   }, [sdk]);
 
   return (
-    <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
-      <Form>
-        <Heading>App Config</Heading>
-        <Paragraph>Welcome to your contentful app. This is your config page.</Paragraph>
-      </Form>
+    <Flex justifyContent="center" alignItems="center">
+      <Box className={styles.body}>
+        <Heading marginBottom="spacingS">Set up Hubspot</Heading>
+        <Paragraph>
+          Seamlessly sync Contentful entry content to email campaigns in Hubspot. Map entry fields
+          to custom email modules in Hubspot to continuously and automatically keep content
+          consistent at scale.
+        </Paragraph>
+        <Box marginTop="spacingXl" marginBottom="spacingXs">
+          <Subheading marginBottom="spacingXs">Configure access</Subheading>
+          <Paragraph marginBottom="spacingL">
+            To connect your organization's Hubspot account, enter the private app access token.
+          </Paragraph>
+          <Form>
+            <FormControl isRequired marginBottom="none">
+              <FormControl.Label>Private app access token</FormControl.Label>
+              <TextInput
+                name="hubspotAccessToken"
+                placeholder="Enter your access token"
+                value={parameters.hubspotAccessToken}
+                onChange={(e) =>
+                  setParameters({ ...parameters, hubspotAccessToken: e.target.value })
+                }
+                isRequired
+                type="password"
+                data-testid="hubspotAccessToken"
+              />
+            </FormControl>
+            {isHubspotTokenInvalid && (
+              <FormControl.ValidationMessage marginBottom="spacingS">
+                Invalid API key
+              </FormControl.ValidationMessage>
+            )}
+          </Form>
+        </Box>
+        <Splitter marginBottom="spacing2Xs" />
+        <Box padding="spacingXs">
+          <Flex alignItems="center" justifyContent="space-between">
+            <Text>Instructions to create a private app access token in Hubspot</Text>
+            <IconButton
+              variant="transparent"
+              aria-label={isExpanded ? 'Collapse instructions' : 'Expand instructions'}
+              icon={isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
+              onClick={() => setIsExpanded((v) => !v)}
+              size="small"
+            />
+          </Flex>
+          <Collapse isExpanded={isExpanded}>
+            <Paragraph marginBottom="none" fontColor="gray500">
+              To create a private app access token:
+            </Paragraph>
+            <ol className={styles.orderList}>
+              {CONFIG_SCREEN_INSTRUCTIONS.map((step, i) => (
+                <li key={i} className={styles.listItem}>
+                  {step}
+                </li>
+              ))}
+            </ol>
+            <Box marginTop="spacingS">
+              <TextLink
+                href={HUBSPOT_PRIVATE_APPS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                icon={<ExternalLinkIcon />}
+                alignIcon="end">
+                Read about creating private apps in Hubspot
+              </TextLink>
+            </Box>
+          </Collapse>
+        </Box>
+        <Splitter marginTop="spacing2Xs" marginBottom="none" />
+      </Box>
     </Flex>
   );
 };
