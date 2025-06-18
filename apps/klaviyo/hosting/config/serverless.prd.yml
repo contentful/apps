@@ -1,5 +1,3 @@
-variables:
-  myStage: 'prd'
-resources:
-  Resources:
+variables: {}
+resources: {}
   
