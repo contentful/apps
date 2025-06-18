@@ -1,0 +1,16 @@
+{
+  "name": "klaviyo-hosting",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Resources for hosting the Klaviyo Marketplace App",
+  "scripts": {
+    "deploy": "sls deploy --stage $STAGE",
+    "deploy:test": "sls deploy --stage test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "serverless": "^3.31.0"
+  }
+}

@@ -1,0 +1,13 @@
+service: sls-apps-klaviyo-hosting
+
+frameworkVersion: '>=3.0.0'
+variablesResolutionMode: 20210326
+
+custom: ${file(./config/serverless.${opt:stage, 'dev'}.yml):variables}
+
+provider:
+  name: aws
+  stage: dev
+  region: 'us-east-1'
+    
+     
