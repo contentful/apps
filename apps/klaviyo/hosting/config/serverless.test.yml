@@ -25,8 +25,16 @@ resources:
               Id: S3Origin
               OriginPath: /apps/klaviyo-test
           ViewerCertificate:
-            CloudFrontDefaultCertificate: false
             MinimumProtocolVersion: TLSv1.2_2021
             AcmCertificateArn: arn:aws:acm:us-east-1:017078452822:certificate/70f5004e-ee05-410d-9391-432b31032f6e
             SslSupportMethod: sni-only
+    Route53Record:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneName: ${self:custom.hostedZoneName}
+        Name: ${self:custom.domainName}
+        Type: CNAME
+        TTL: 300
+        ResourceRecords:
+          - !GetAtt CloudFrontDistribution.DomainName
           
