@@ -24,6 +24,8 @@ resources:
             - DomainName: cf-apps-klaviyo.s3.us-east-1.amazonaws.com
               Id: S3Origin
               OriginPath: /apps/klaviyo-test
+              S3OriginConfig:
+                OriginAccessIdentity: ""
           ViewerCertificate:
             MinimumProtocolVersion: TLSv1.2_2021
             AcmCertificateArn: arn:aws:acm:us-east-1:017078452822:certificate/70f5004e-ee05-410d-9391-432b31032f6e
