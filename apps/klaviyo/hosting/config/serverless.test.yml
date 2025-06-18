@@ -3,12 +3,30 @@ variables:
 
 resources:
   Resources:
-    KlaviyoBucket:
-      Type: AWS::S3::Bucket
+    CloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
       Properties:
-        BucketName: cf-apps-klaviyo-test
-        PublicAccessBlockConfiguration:
-          BlockPublicAcls: true
-          BlockPublicPolicy: true
-          IgnorePublicAcls: true
-          RestrictPublicBuckets: true
+        DistributionConfig:
+          Aliases:
+            - klaviyo-test.ctfapps.net
+          DefaultCacheBehavior:
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            ForwardedValues:
+              QueryString: true
+              Cookies:
+                Forward: none
+          Enabled: true
+          HttpVersion: http2
+          Origins:
+            - DomainName: cf-apps-klaviyo.s3.us-east-1.amazonaws.com
+              Id: S3Origin
+              OriginPath: /apps/klaviyo-test
+          ViewerCertificate:
+            CloudFrontDefaultCertificate: false
+            MinimumProtocolVersion: TLSv1.2_2021
+            AcmCertificateArn: arn:aws:acm:us-east-1:017078452822:certificate/70f5004e-ee05-410d-9391-432b31032f6e
+            SslSupportMethod: sni-only
+          
