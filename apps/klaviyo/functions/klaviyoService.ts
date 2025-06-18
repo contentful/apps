@@ -1,6 +1,5 @@
-import { error } from 'console';
+import { OAuthSDK } from './initiateOauth';
 
-// Define interfaces
 interface FieldMapping {
   contentfulFieldId: string;
   fieldType: 'text' | 'image' | 'entry' | 'reference-array' | 'richText' | 'json';
@@ -15,26 +14,14 @@ interface FieldMapping {
   klaviyoImageId?: string;
 }
 
-interface KlaviyoCredentials {
-  privateKey: string;
-  publicKey: string;
-  auth: string;
-}
-
 export class KlaviyoService {
-  private credentials: KlaviyoCredentials;
   private apiUrl: string;
   private apiRevision: string;
-
-  constructor(credentials: KlaviyoCredentials) {
-    this.credentials = credentials;
+  private oauthSdk: OAuthSDK;
+  constructor(oauthSdk: OAuthSDK) {
     this.apiUrl = 'https://a.klaviyo.com/api';
     this.apiRevision = '2025-04-15'; // Use this revision date as requested
-
-    // If auth string wasn't provided, construct it with the privateKey
-    if (!this.credentials.auth && this.credentials.privateKey) {
-      this.credentials.auth = `Klaviyo-API-Key ${this.credentials.privateKey}`;
-    }
+    this.oauthSdk = oauthSdk;
   }
 
   /**
@@ -119,7 +106,7 @@ export class KlaviyoService {
         }
       } else {
         // Send a separate content block for each mapping
-        const responses = [];
+        const responses: any[] = [];
         const processedFields = new Map<string, Set<string>>(); // Map of base field name to set of locales
 
         for (const mapping of fieldMappings) {
@@ -127,21 +114,25 @@ export class KlaviyoService {
             const contentfulFieldId = mapping.contentfulFieldId;
             let klaviyoBlockName = mapping.klaviyoBlockName || contentfulFieldId;
 
-            // Extract the last locale from the field name
+            // Extract the last locale from the field name, if present
             const lastLocaleMatch = klaviyoBlockName.match(/-([a-z]{2}(?:-[A-Z]{2})?)$/);
-            if (!lastLocaleMatch) {
-              console.log(`Skipping field ${klaviyoBlockName} - no valid locale found`);
-              continue;
+            let locale = '';
+            let baseName = klaviyoBlockName;
+            if (lastLocaleMatch) {
+              locale = lastLocaleMatch[1];
+              // Remove the locale suffix
+              baseName = klaviyoBlockName.replace(
+                /-[a-z]{2}(?:-[A-Z]{2})?(-[a-z]{2}(?:-[A-Z]{2})?)?$/,
+                ''
+              );
             }
-            const locale = lastLocaleMatch[1];
+            // Now, always process the field, with or without locale
+            const blockName = locale ? `${baseName}-${locale}` : baseName;
+            const externalId = locale
+              ? `${entryId}-${baseName}-${locale}`
+              : `${entryId}-${baseName}`;
 
-            // Get the base name by removing all locale suffixes
-            const baseName = klaviyoBlockName.replace(
-              /-[a-z]{2}(?:-[A-Z]{2})?(-[a-z]{2}(?:-[A-Z]{2})?)?$/,
-              ''
-            );
-
-            // Skip if we've already processed this base field for this locale
+            // Skip if we've already processed this base field for this locale (or for no-locale)
             if (!processedFields.has(baseName)) {
               processedFields.set(baseName, new Set());
             }
@@ -159,7 +150,7 @@ export class KlaviyoService {
               if (entry.fields && entry.fields[contentfulFieldId]) {
                 const field = entry.fields[contentfulFieldId];
 
-                if (typeof field === 'object' && !Array.isArray(field)) {
+                if (typeof field === 'object' && !Array.isArray(field) && locale) {
                   // Get the field value for the specific locale
                   value = field[locale];
 
@@ -176,21 +167,21 @@ export class KlaviyoService {
             }
 
             if (value === undefined || value === null || value === '') {
-              console.error(`Skipping empty value for ${baseName} in locale ${locale}`);
+              console.error(
+                `Skipping empty value for ${baseName}${locale ? ` in locale ${locale}` : ''}`
+              );
               continue;
             }
 
             const contentData: Record<string, any> = {};
             let imageUrl: string = '';
-            let altText = `${baseName} (${locale})`;
+            let altText = `${baseName}${locale ? ` (${locale})` : ''}`;
             let htmlContent = '';
 
-            // Construct the block name and external ID with a single locale
-            const blockName = `${baseName}-${locale}`;
-            const externalId = `${entryId}-${baseName}-${locale}`;
-
             console.log(
-              `Processing field ${baseName} with locale ${locale} - Block name: ${blockName}, External ID: ${externalId}`
+              `Processing field ${baseName}${
+                locale ? ` with locale ${locale}` : ''
+              } - Block name: ${blockName}, External ID: ${externalId}`
             );
 
             // Handle different field types
@@ -357,13 +348,7 @@ export class KlaviyoService {
         console.error('Error retrieving template list:', listError);
       }
       // Try with a few potential name formats, most specific first
-      const potentialNames = [
-        nameWithId,
-        `My Blog 2 ${idPattern}`,
-        `Blog ${idPattern}`,
-        `blog ${idPattern}`,
-        `Content ${idPattern}`,
-      ].filter(Boolean);
+      const potentialNames = [nameWithId, `${idPattern}`].filter(Boolean);
       for (const name of potentialNames) {
         try {
           const response = await this.makeRequest('GET', 'template-universal-content', {
@@ -815,16 +800,10 @@ export class KlaviyoService {
     const formattedEndpoint = endpoint.endsWith('/') ? endpoint : `${endpoint}/`;
     const url = `${this.apiUrl}/${formattedEndpoint}`;
 
-    // Check if we have a valid auth string
-    if (!this.credentials.auth) {
-      throw new Error('Klaviyo API key is required');
-    }
-
     const headers = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
       revision: this.apiRevision,
-      Authorization: this.credentials.auth,
     };
 
     let config: RequestInit = {
@@ -855,7 +834,7 @@ export class KlaviyoService {
     }
 
     try {
-      const response = await fetch(fullUrl, config);
+      const response = await this.oauthSdk.makeRequest(fullUrl, config);
 
       // Read the response text for debugging
       const responseText = await response.text();

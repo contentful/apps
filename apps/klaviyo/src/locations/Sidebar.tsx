@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ConfigAppSDK, locations, SidebarExtensionSDK } from '@contentful/app-sdk';
+import { SidebarAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { Button, Flex, Text, Note } from '@contentful/f36-components';
+import { Button, Flex } from '@contentful/f36-components';
 import { FieldData } from '../config/klaviyo';
 import {
   getEntryKlaviyoFieldMappings,
@@ -9,32 +9,15 @@ import {
 } from '../utils/field-mappings';
 import { getFieldDetails } from '../utils/field-utilities';
 import { logger } from '../utils/logger';
-import { registerPublishListener } from '../utils/entry-change-listener';
 import { useAutoResizer } from '@contentful/react-apps-toolkit';
 
-// Types
-type SDKType = SidebarExtensionSDK | ConfigAppSDK;
-
-// Component to determine if we're in configuration or sidebar mode
 export const Sidebar = () => {
   useAutoResizer();
-  const sdk = useSDK<SDKType>();
+  const sdk = useSDK<SidebarAppSDK>();
   const [mappings, setMappings] = useState<FieldData[]>([]);
-  const [showSuccess, setShowSuccess] = useState(false);
 
-  // Determine current component context (sidebar or config)
   const getCurrentComponent = () => {
-    const isSidebar = sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR);
-
-    return (
-      <SidebarComponent
-        sdk={sdk as SidebarExtensionSDK}
-        mappings={mappings}
-        setMappings={setMappings}
-        showSuccess={showSuccess}
-        setShowSuccess={setShowSuccess}
-      />
-    );
+    return <SidebarComponent sdk={sdk} mappings={mappings} setMappings={setMappings} />;
   };
 
   // Load saved mappings on component mount
@@ -68,14 +51,10 @@ const SidebarComponent = ({
   sdk,
   mappings,
   setMappings,
-  showSuccess,
-  setShowSuccess,
 }: {
-  sdk: SidebarExtensionSDK;
+  sdk: SidebarAppSDK;
   mappings: FieldData[];
   setMappings: React.Dispatch<React.SetStateAction<FieldData[]>>;
-  showSuccess: boolean;
-  setShowSuccess: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   // Handle field selection using Contentful's dialog
   const handleConfigureClick = useCallback(async () => {
@@ -100,20 +79,6 @@ const SidebarComponent = ({
       logger.log('[Sidebar] preSelectedFields:', preSelectedFields);
       logger.log('[Sidebar] validFields:', validFields);
 
-      // Try to get accessToken to pass to the dialog
-      let accessToken = '';
-
-      // From app installation parameters
-      if (sdk.parameters && sdk.parameters.installation) {
-        const { klaviyoApiKey, klaviyoCompanyId } = sdk.parameters.installation;
-        if (klaviyoApiKey) accessToken = klaviyoApiKey;
-        if (klaviyoCompanyId) accessToken = klaviyoCompanyId;
-      }
-
-      logger.log('[Sidebar] AccessToken available for dialog:', {
-        accessTokenAvailable: !!accessToken,
-      });
-
       // Fetch the entry with all locales
       const localizedEntry = await sdk.cma.entry.get({
         entryId: sdk.ids.entry,
@@ -130,7 +95,6 @@ const SidebarComponent = ({
           showSyncButton: true,
           contentTypeId,
           entryId,
-          accessToken,
         },
         width: 800,
       });
@@ -156,11 +120,7 @@ const SidebarComponent = ({
         await setEntryKlaviyoFieldMappings(sdk, entryId, updatedMappings);
       }
       // Check if we got field selections or sync result
-      else if (result.action === 'sync') {
-        // The dialog performed the sync directly
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
-      } else if (result.selectedFields && Array.isArray(result.selectedFields)) {
+      else if (result.selectedFields && Array.isArray(result.selectedFields)) {
         // Transform selected fields into FieldData format
         const newMappings = await Promise.all(
           result.selectedFields.map(async (fieldId: string) => {
@@ -181,10 +141,6 @@ const SidebarComponent = ({
           // Save to Contentful entry field
           const entryId = sdk.ids.entry;
           await setEntryKlaviyoFieldMappings(sdk, entryId, newMappings);
-
-          // Show success message
-          setShowSuccess(true);
-          setTimeout(() => setShowSuccess(false), 3000);
         } else {
           logger.error('[Sidebar] Failed to create mappings from selectedFields');
         }
@@ -194,40 +150,13 @@ const SidebarComponent = ({
     } catch (error) {
       logger.error('[Sidebar] Error in configure dialog:', error);
     }
-  }, [sdk, mappings, setMappings, setShowSuccess]);
-
-  // Set up automatic change detection and sync status updates
-  useEffect(() => {
-    // Set up publish event listener
-    const removePublishListener = registerPublishListener(sdk);
-
-    // Return combined cleanup function
-    return () => {
-      removePublishListener();
-    };
-  }, [sdk, mappings]);
-
-  // Listen for sys changes (like publish/unpublish)
-  useEffect(() => {
-    const handleChanged = () => {
-      setShowSuccess(false);
-    };
-
-    // Listen for field changes
-    const removeHandler = sdk.entry.onSysChanged(handleChanged);
-
-    return () => {
-      removeHandler();
-    };
-  }, [sdk, setShowSuccess]);
+  }, [sdk, mappings, setMappings]);
 
   return (
     <Flex flexDirection="column" gap="spacingM" style={{ maxWidth: '300px', height: '100%' }}>
       <Button variant="secondary" onClick={handleConfigureClick} isFullWidth>
         Sync fields to Klaviyo
       </Button>
-
-      {showSuccess && <Text fontColor="colorPositive">Successfully synced to Klaviyo!</Text>}
     </Flex>
   );
 };

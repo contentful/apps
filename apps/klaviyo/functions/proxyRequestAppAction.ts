@@ -29,11 +29,11 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   context: FunctionEventContext
 ) => {
   try {
-    let { endpoint, method, data, params, privateKey, publicKey } = event.body;
+    let { endpoint, method, data, params } = event.body;
+    const { oauthSdk } = context as any;
     // Parse data and params if they are strings
     console.log('data', data);
     console.log('params', params);
-    console.log('privateKey', privateKey);
     console.log('endpoint', endpoint);
     console.log('method', method);
 
@@ -50,10 +50,6 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
       }
     } catch (e) {
       console.error('Failed to parse params:', e);
-    }
-    if (!privateKey) {
-      console.error('Missing private key');
-      return { response: { error: 'Missing required private key' } };
     }
     if (!endpoint) {
       console.error('Missing endpoint');
@@ -78,7 +74,6 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
         'Content-Type': 'application/json',
         Accept: 'application/json',
         revision: KLAVIYO_API_REVISION,
-        Authorization: `Klaviyo-API-Key ${privateKey}`,
       },
     };
     if (fetchOptions.method === 'GET' && params) {
@@ -86,7 +81,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     } else if (fetchOptions.method !== 'GET') {
       fetchOptions.body = JSON.stringify(data);
     }
-    const response = await fetch(url, fetchOptions);
+    const response = await oauthSdk.makeRequest(url, fetchOptions);
     if (!response.ok) {
       throw new Error(
         `Klaviyo API error: ${response.status}. ${response.statusText} ${JSON.stringify(
@@ -95,6 +90,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
       );
     }
     const responseData = await response.json();
+    console.log('responseData', responseData);
     return responseData;
   } catch (error) {
     console.error('proxyRequest App Action error:', error);

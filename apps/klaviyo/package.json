@@ -37,7 +37,8 @@
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "proxy": "cd ../lambda && npm run dev",
-    "dev-with-proxy": "concurrently \"npm run dev\" \"npm run proxy\""
+    "dev-with-proxy": "concurrently \"npm run dev\" \"npm run proxy\"",
+    "upload-staging": "contentful-app-scripts upload --bundle-dir ./build --host api.flinkly.com --organization-id 7oPjKXwmGdQ9vnnjVe6MCy --definition-id TQDpclXMlILg5GAlaxU7y --token $CONTENTFUL_STAGING_ACCESS_TOKEN"
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -1,20 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   Box,
   Button,
   Checkbox,
   Flex,
   Form,
-  FormControl,
-  Heading,
   Stack,
   Text,
-  TextInput,
-  TextLink,
   Popover,
   Pill,
 } from '@contentful/f36-components';
-import { ExternalLinkIcon, ChevronDownIcon } from '@contentful/f36-icons';
+import { ChevronDownIcon } from '@contentful/f36-icons';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
@@ -24,7 +20,6 @@ import {
   getEntryKlaviyoFieldMappings,
   setEntryKlaviyoFieldMappings,
 } from '../utils/field-mappings';
-import ConnectionComponent from '../components/ConnectionComponent';
 import { useParams } from 'react-router-dom';
 
 // Helper to ensure klaviyoFieldMappings entry exists
@@ -59,40 +54,211 @@ const ensureKlaviyoFieldMappingsEntry = async (sdk: ConfigAppSDK) => {
   return entry;
 };
 
+// Build editor interface config based on selected locations and content types
+const buildEditorInterfaceConfig = (selectedContentTypes: Record<string, boolean>) => {
+  const targetContentTypes = Object.keys(selectedContentTypes).filter(
+    (contentTypeId) => selectedContentTypes[contentTypeId]
+  );
+
+  // Build target state for editor interface
+  const editorInterface: Record<string, any> = {};
+
+  // Always enable entry-sidebar
+  targetContentTypes.forEach((contentTypeId) => {
+    editorInterface[contentTypeId] = {
+      sidebar: {
+        position: 0,
+      },
+    };
+  });
+
+  return editorInterface;
+};
+
+const onConfigure = async (sdk: ConfigAppSDK, selectedContentTypes: Record<string, boolean>) => {
+  const currentParameters = await sdk.app.getParameters();
+  const localMappings = await getEntryKlaviyoFieldMappings(sdk, '');
+  const contentTypeMappings = currentParameters?.contentTypeMappings || {};
+  if (localMappings.length > 0) {
+    const mappingsByContentType: Record<string, any[]> = {};
+    localMappings.forEach((mapping) => {
+      if (mapping.contentTypeId) {
+        if (!mappingsByContentType[mapping.contentTypeId]) {
+          mappingsByContentType[mapping.contentTypeId] = [];
+        }
+        mappingsByContentType[mapping.contentTypeId].push(mapping);
+      }
+    });
+    Object.keys(mappingsByContentType).forEach((contentTypeId) => {
+      contentTypeMappings[contentTypeId] = mappingsByContentType[contentTypeId];
+    });
+  }
+  let allMappings: any[] = [];
+  Object.keys(contentTypeMappings).forEach((typeId) => {
+    const typeMappings = contentTypeMappings[typeId];
+    if (Array.isArray(typeMappings)) {
+      allMappings = [...allMappings, ...typeMappings];
+    }
+  });
+  const spaceId = sdk.ids.space;
+  const selectedLocations = { 'entry-sidebar': true };
+  const parameters = {
+    selectedLocations,
+    selectedContentTypes,
+    spaceId,
+    fieldMappings: allMappings,
+    contentTypeMappings,
+  };
+  const filteredSelectedContentTypes = Object.keys(selectedContentTypes)
+    .filter((id) => selectedContentTypes[id])
+    .reduce((acc, id) => {
+      acc[id] = true;
+      return acc;
+    }, {} as Record<string, boolean>);
+  const editorInterface = buildEditorInterfaceConfig(filteredSelectedContentTypes);
+  await ensureKlaviyoFieldMappingsEntry(sdk);
+  return {
+    parameters,
+    targetState: {
+      EditorInterface: editorInterface,
+    },
+  };
+};
+
 const ConfigScreen = () => {
-  const params = useParams();
-  console.log('Params:', params);
   const sdk = useSDK<ConfigAppSDK>();
-  const [clientId, setClientId] = useState('');
-  const [clientSecret, setClientSecret] = useState('');
-  const [accessToken, setAccessToken] = useState('');
   const [selectedContentTypes, setSelectedContentTypes] = useState<Record<string, boolean>>({});
   const [contentTypes, setContentTypes] = useState<any[]>([]);
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isOAuthLoading, setIsOAuthLoading] = useState(false);
+  const [isOAuthConnected, setIsOAuthConnected] = useState(false);
+  const [isHoveringConnected, setIsHoveringConnected] = useState(false);
+  const popupWindowRef = useRef<Window | null>(null);
+  const checkWindowIntervalRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    // Log the current URL of the hosted Contentful app
-    console.log('Contentful App URL:', window.location);
-    console.log('LocalStorage:', window.localStorage.getItem('Test'));
-  }, []);
+  const messageHandler = (event: MessageEvent) => {
+    if (event.data.type === 'oauth:complete') {
+      sdk.notifier.success('OAuth complete');
+      cleanup();
+      setIsOAuthLoading(false);
+      setIsOAuthConnected(true);
+    }
+  };
+
+  const cleanup = () => {
+    // Clear the interval
+    if (checkWindowIntervalRef.current) {
+      window.clearInterval(checkWindowIntervalRef.current);
+      checkWindowIntervalRef.current = null;
+    }
+    // Remove the message event listener
+    window.removeEventListener('message', messageHandler);
+    // Close the popup if it's still open
+    if (popupWindowRef.current && !popupWindowRef.current.closed) {
+      popupWindowRef.current.close();
+    }
+    popupWindowRef.current = null;
+  };
+
+  const handleOAuth = async () => {
+    setIsOAuthLoading(true);
+    // Add message event listener before opening the window
+    window.addEventListener('message', messageHandler);
+
+    try {
+      const appActions = await sdk.cma.appAction.getMany({
+        organizationId: sdk.ids.organization,
+        appDefinitionId: sdk.ids.app,
+      });
+      const initiateOauthAppAction = appActions.items.find(
+        (action) => action.name === 'Initiate Oauth'
+      );
+      const response = await sdk.cma.appActionCall.createWithResponse(
+        {
+          appActionId: initiateOauthAppAction?.sys.id || '',
+          appDefinitionId: sdk.ids.app,
+        },
+        {
+          parameters: {
+            environmentId: sdk.ids.environment,
+            spaceId: sdk.ids.space,
+          },
+        }
+      );
+      popupWindowRef.current = window.open(
+        JSON.parse(response.response.body).authorizationUrl,
+        '_blank',
+        'height=700,width=450'
+      );
+
+      // Check if the window was closed
+      checkWindowIntervalRef.current = window.setInterval(() => {
+        if (popupWindowRef.current?.closed) {
+          cleanup();
+          setIsOAuthLoading(false);
+        }
+      }, 1000);
+    } catch (error) {
+      console.error('Failed to initiate OAuth:', error);
+      cleanup();
+      setIsOAuthLoading(false);
+      sdk.notifier.error('Failed to initiate OAuth flow');
+    }
+  };
+
+  const handleDisconnect = async () => {
+    try {
+      const appActions = await sdk.cma.appAction.getMany({
+        organizationId: sdk.ids.organization,
+        appDefinitionId: sdk.ids.app,
+      });
+      const disconnectAppAction = appActions.items.find((action) => action.name === 'Disconnect');
+      await sdk.cma.appActionCall.create(
+        {
+          appActionId: disconnectAppAction?.sys.id || '',
+          appDefinitionId: sdk.ids.app,
+        },
+        { parameters: {} }
+      );
+      setIsOAuthConnected(false);
+      setIsHoveringConnected(false);
+      sdk.notifier.success('Disconnected from Klaviyo');
+    } catch (error) {
+      console.error('Failed to disconnect:', error);
+      sdk.notifier.error('Failed to disconnect from Klaviyo');
+    }
+  };
+
+  const getButtonText = () => {
+    if (isOAuthLoading) return 'Connecting...';
+    if (isOAuthConnected && isHoveringConnected) return 'Disconnect';
+    if (isOAuthConnected) return 'Connected';
+    return 'Connect';
+  };
+
+  const getButtonVariant = () => {
+    if (isOAuthConnected && !isHoveringConnected) return 'positive';
+    if (isOAuthConnected && isHoveringConnected) return 'negative';
+    return 'primary';
+  };
+
+  const handleButtonClick = () => {
+    if (isOAuthConnected && isHoveringConnected) {
+      handleDisconnect();
+    } else if (!isOAuthConnected && !isOAuthLoading) {
+      handleOAuth();
+    }
+  };
 
   useEffect(() => {
     const initializeApp = async () => {
       const parameters = await sdk.app.getParameters<KlaviyoAppConfig>();
-      console.log('Parameters:', parameters);
       if (parameters) {
-        setClientId(parameters.clientId || '');
-        setClientSecret(parameters.clientSecret || '');
-        setAccessToken(parameters.accessToken || '');
         setSelectedContentTypes(parameters.selectedContentTypes || {});
         if (parameters.fieldMappings || parameters.contentTypeMappings) {
-          try {
-            if (parameters.fieldMappings && Array.isArray(parameters.fieldMappings)) {
-              setEntryKlaviyoFieldMappings(sdk, '', parameters.fieldMappings);
-            }
-          } catch (e) {
-            console.error('Error saving mappings to persistence service:', e);
+          if (parameters.fieldMappings && Array.isArray(parameters.fieldMappings)) {
+            setEntryKlaviyoFieldMappings(sdk, '', parameters.fieldMappings);
           }
         }
       }
@@ -105,68 +271,8 @@ const ConfigScreen = () => {
   }, [sdk]);
 
   useEffect(() => {
-    sdk.app.onConfigure(async () => {
-      const currentParameters = await sdk.app.getParameters();
-      if (!clientId || !clientSecret) {
-        sdk.notifier.error('Please provide both Client ID and Client Secret');
-        return false;
-      }
-      let localMappings: any[] = [];
-      try {
-        localMappings = await getEntryKlaviyoFieldMappings(sdk, '');
-      } catch (e) {
-        console.error('Error getting local mappings:', e);
-      }
-      const contentTypeMappings = { ...(currentParameters?.contentTypeMappings || {}) };
-      if (localMappings.length > 0) {
-        const mappingsByContentType: Record<string, any[]> = {};
-        localMappings.forEach((mapping) => {
-          if (mapping.contentTypeId) {
-            if (!mappingsByContentType[mapping.contentTypeId]) {
-              mappingsByContentType[mapping.contentTypeId] = [];
-            }
-            mappingsByContentType[mapping.contentTypeId].push(mapping);
-          }
-        });
-        Object.keys(mappingsByContentType).forEach((contentTypeId) => {
-          contentTypeMappings[contentTypeId] = mappingsByContentType[contentTypeId];
-        });
-      }
-      let allMappings: any[] = [];
-      Object.keys(contentTypeMappings).forEach((typeId) => {
-        const typeMappings = contentTypeMappings[typeId];
-        if (Array.isArray(typeMappings)) {
-          allMappings = [...allMappings, ...typeMappings];
-        }
-      });
-      const spaceId = sdk.ids.space;
-      const selectedLocations = { 'entry-sidebar': true };
-      const parameters = {
-        clientId,
-        clientSecret,
-        accessToken,
-        selectedLocations,
-        selectedContentTypes,
-        spaceId,
-        fieldMappings: allMappings,
-        contentTypeMappings,
-      };
-      const filteredSelectedContentTypes = Object.keys(selectedContentTypes)
-        .filter((id) => selectedContentTypes[id])
-        .reduce((acc, id) => {
-          acc[id] = true;
-          return acc;
-        }, {} as Record<string, boolean>);
-      const editorInterface = buildEditorInterfaceConfig(filteredSelectedContentTypes);
-      await ensureKlaviyoFieldMappingsEntry(sdk);
-      return {
-        parameters,
-        targetState: {
-          EditorInterface: editorInterface,
-        },
-      };
-    });
-  }, [sdk, clientId, clientSecret, accessToken, selectedContentTypes]);
+    sdk.app.onConfigure(() => onConfigure(sdk, selectedContentTypes));
+  }, [sdk, selectedContentTypes]);
 
   // Load content types
   const loadContentTypes = async () => {
@@ -177,27 +283,6 @@ const ConfigScreen = () => {
       console.error('Error loading content types:', error);
       sdk.notifier.error('Failed to load content types');
     }
-  };
-
-  // Build editor interface config based on selected locations and content types
-  const buildEditorInterfaceConfig = (selectedContentTypes: Record<string, boolean>) => {
-    const targetContentTypes = Object.keys(selectedContentTypes).filter(
-      (contentTypeId) => selectedContentTypes[contentTypeId]
-    );
-
-    // Build target state for editor interface
-    const editorInterface: Record<string, any> = {};
-
-    // Always enable entry-sidebar
-    targetContentTypes.forEach((contentTypeId) => {
-      editorInterface[contentTypeId] = {
-        sidebar: {
-          position: 0,
-        },
-      };
-    });
-
-    return editorInterface;
   };
 
   // Helper to get content type name by ID
@@ -232,57 +317,52 @@ const ConfigScreen = () => {
     setSelectedContentTypes((prev) => ({ ...prev, [id]: false }));
   };
 
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      cleanup();
+    };
+  }, []);
+
   return (
     <Box style={{ maxWidth: '800px', margin: '64px auto' }}>
       <Box padding="spacingXl" style={{ border: '1px solid #E5EBED', borderRadius: '4px' }}>
+        {/* Title and Subtitle */}
+        <Stack
+          spacing="spacingS"
+          flexDirection="column"
+          alignItems="flex-start"
+          style={{ marginBottom: '32px' }}>
+          <Text fontSize="fontSizeXl" fontWeight="fontWeightMedium">
+            Set up Klaviyo
+          </Text>
+          <Text fontColor="gray500">
+            Seamlessly sync content from Contentful to Klaviyo, the only CRM built for B2C
+          </Text>
+        </Stack>
+
         {/* OAuth Connection Component Placeholder */}
         <Box style={{ marginBottom: '32px', width: '100%' }}>
-          <ConnectionComponent
-            clientId={clientId}
-            clientSecret={clientSecret}
-            redirectUri="https://app.contentful.com/spaces/u0ge3owcpcam/apps/35ZeiuUc1uciWR2AXbozas"
-            accessToken={accessToken}
-            onTokenChange={setAccessToken}
-          />
+          <Button
+            variant={getButtonVariant()}
+            onClick={handleButtonClick}
+            onMouseEnter={() => {
+              if (isOAuthConnected) {
+                setIsHoveringConnected(true);
+              }
+            }}
+            onMouseLeave={() => {
+              setIsHoveringConnected(false);
+            }}
+            isLoading={isOAuthLoading}
+            isDisabled={isOAuthLoading || !isReadOnly}>
+            {getButtonText()}
+          </Button>
         </Box>
         {/* End OAuth Connection Component Placeholder */}
         <Stack spacing="spacingXl" flexDirection="column" alignItems="flex-start">
-          <Stack spacing="spacingM" flexDirection="column" alignItems="flex-start">
-            <Heading>Configure access</Heading>
-            <Text>Input your Klaviyo OAuth credentials to connect your account.</Text>
-          </Stack>
-
           <Form style={{ width: '100%' }}>
             <Stack spacing="spacingXl" flexDirection="column" alignItems="flex-start">
-              <FormControl isRequired style={{ width: '100%', margin: '0' }}>
-                <FormControl.Label>Client ID</FormControl.Label>
-                <TextInput
-                  value={clientId}
-                  onChange={(e) => setClientId(e.target.value)}
-                  placeholder="Enter your OAuth client ID"
-                  style={{ width: '100%' }}
-                  isDisabled={isReadOnly}
-                />
-              </FormControl>
-
-              <FormControl isRequired style={{ width: '100%', margin: '0' }}>
-                <FormControl.Label>Client Secret</FormControl.Label>
-                <TextInput
-                  type="password"
-                  value={clientSecret}
-                  onChange={(e) => setClientSecret(e.target.value)}
-                  placeholder="Enter your OAuth client secret"
-                  style={{ width: '100%' }}
-                  isDisabled={isReadOnly}
-                />
-              </FormControl>
-              {/* Optionally show access token if available */}
-              {accessToken && (
-                <FormControl style={{ width: '100%', margin: '0' }}>
-                  <FormControl.Label>Access Token</FormControl.Label>
-                  <TextInput value={accessToken} isReadOnly style={{ width: '100%' }} />
-                </FormControl>
-              )}
               {/* Content Types Dropdown Section */}
               <Stack
                 spacing="spacingM"

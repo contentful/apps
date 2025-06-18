@@ -1,4 +1,8 @@
 /* Remove padding from Forma 36 modal content container */
 [data-test-id="cf-ui-modal-content"] {
   padding: 0 !important;
-} 
+}
+
+* {
+  font-family: 'Geist', sans-serif !important;
+}

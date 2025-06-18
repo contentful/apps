@@ -1,3 +1,4 @@
+import { BaseAppSDK } from '@contentful/app-sdk';
 import logger from './logger';
 
 /**
@@ -7,33 +8,16 @@ import logger from './logger';
  * @returns Array of field mappings for the entryId, or empty array if none found
  */
 export const getEntryKlaviyoFieldMappings = async (
-  sdkOrCma: any,
+  sdk: BaseAppSDK,
   entryId: string,
-  spaceId?: string,
-  environmentId?: string
+  spaceIdParam?: string,
+  environmentIdParam?: string
 ): Promise<any[]> => {
   try {
-    let cma: any;
-    let defaultLocale: string | undefined;
-    // Detect if this is the App SDK or plain CMA client
-    if (sdkOrCma.cma && sdkOrCma.ids) {
-      // App SDK
-      spaceId = sdkOrCma.ids.space;
-      environmentId = sdkOrCma.ids.environment;
-      cma = sdkOrCma.cma;
-      defaultLocale = sdkOrCma.locales?.default || 'en-US';
-    } else {
-      // Plain CMA client (lambda/app action)
-      cma = sdkOrCma;
-      // Use passed-in values if available
-      spaceId = spaceId || process.env.CONTENTFUL_SPACE_ID;
-      environmentId = environmentId || process.env.CONTENTFUL_ENVIRONMENT_ID || 'master';
-      defaultLocale = 'en-US'; // fallback
-    }
-    if (!spaceId || !environmentId) {
-      console.error('Missing spaceId or environmentId in getEntryKlaviyoFieldMappings');
-      return [];
-    }
+    const spaceId = spaceIdParam || sdk.ids.space;
+    const environmentId = environmentIdParam || sdk.ids.environment;
+    const cma = sdk.cma;
+    const defaultLocale = sdk.locales?.default || 'en-US';
     // Find the klaviyoFieldMappings entries
     const entries = await cma.entry.getMany({
       spaceId,
@@ -42,7 +26,7 @@ export const getEntryKlaviyoFieldMappings = async (
       limit: 100,
     } as any);
     // Find the first entry with a valid stringified mappings field
-    const localeKey = defaultLocale || 'en-US';
+    const localeKey = defaultLocale;
     const mappingEntry = entries.items.find(
       (item: any) =>
         item.fields &&
@@ -113,6 +97,40 @@ export const setEntryKlaviyoFieldMappings = async (
     );
     // If not found, create it
     if (!mappingEntry) {
+      // create the content type if it doesn't exist
+      const contentType = await sdk.cma.contentType.createWithId(
+        {
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environment,
+          contentTypeId: 'klaviyoFieldMappings',
+        },
+        {
+          name: 'Klaviyo Field Mappings',
+          fields: [
+            {
+              id: 'mappings',
+              name: 'Mappings',
+              type: 'Text',
+              required: true,
+              localized: false,
+            },
+          ],
+        }
+      );
+
+      // Publish the content type
+      await sdk.cma.contentType.publish(
+        {
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environment,
+          contentTypeId: 'klaviyoFieldMappings',
+        },
+        {
+          version: 1,
+          ...contentType,
+        }
+      );
+
       const defaultLocale = sdk.locales?.default || 'en-US';
       mappingEntry = await sdk.cma.entry.create(
         {

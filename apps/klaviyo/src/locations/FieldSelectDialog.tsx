@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { DialogExtensionSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { Box, Button, Flex, Checkbox, Text, Stack } from '@contentful/f36-components';
+import { Box, Button, Flex, Checkbox, Text, Stack, Heading } from '@contentful/f36-components';
 import { FieldMapping as BaseFieldMapping } from '../config/klaviyo';
 import logger from '../utils/logger';
 import {
@@ -93,7 +93,9 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
   useEffect(() => {
     if (fields.length && currentMappings.length) {
       // Find fields that are mapped
-      const mappedFieldIds = currentMappings.map((m) => m.contentfulFieldId);
+      const mappedFieldIds = currentMappings.map((m) => {
+        return m.id;
+      });
       setSelectedFields(fields.filter((f) => mappedFieldIds.includes(f.id)));
     }
   }, [fields, currentMappings]);
@@ -102,7 +104,7 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
   const fieldLocaleMap: Record<string, string[]> = React.useMemo(() => {
     const map: Record<string, string[]> = {};
     (currentMappings || []).forEach((m) => {
-      const fieldId = m.contentfulFieldId;
+      const fieldId = m.id;
       if (!map[fieldId]) map[fieldId] = [];
       if (m.locale && !map[fieldId].includes(m.locale)) {
         map[fieldId].push(m.locale);
@@ -113,7 +115,7 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
 
   // Total connected fields = number of unique field IDs in mappings
   const connectedFieldsCount = React.useMemo(() => {
-    const uniqueFieldIds = new Set((currentMappings || []).map((m) => m.contentfulFieldId));
+    const uniqueFieldIds = new Set((currentMappings || []).map((m) => m.id));
     return uniqueFieldIds.size;
   }, [currentMappings]);
 
@@ -149,7 +151,7 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
         }
       }
       setFields(updatedFields);
-      const mappedFieldIds = (currentMappings || []).map((m) => m.contentfulFieldId);
+      const mappedFieldIds = (currentMappings || []).map((m) => m.id);
       setSelectedFields(
         updatedFields.filter(
           (f) =>
@@ -226,7 +228,7 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
             selectedLocales.forEach((locale) => {
               const localizedValue = entry.fields?.[field.id]?.[locale] || fieldValue;
               newMappings.push({
-                contentfulFieldId: field.id,
+                id: field.id,
                 klaviyoBlockName: `${field.name}-${locale}`,
                 fieldType:
                   field.type.toLowerCase() === 'richtext' ? 'richtext' : field.type.toLowerCase(),
@@ -239,7 +241,7 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
           } else {
             // For non-localized fields, create a single mapping without locale
             newMappings.push({
-              contentfulFieldId: field.id,
+              id: field.id,
               klaviyoBlockName: field.name,
               fieldType:
                 field.type.toLowerCase() === 'richtext' ? 'richtext' : field.type.toLowerCase(),
@@ -252,16 +254,11 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
 
         await setEntryKlaviyoFieldMappings(sdk, entryId, newMappings);
 
-        const klaviyoService = new KlaviyoService(
-          {
-            accessToken: sdk.parameters.installation?.accessToken,
-          },
-          sdk.cma
-        );
+        const klaviyoService = new KlaviyoService(sdk.cma);
 
         // Use syncContent to sync the entry
         const response = await klaviyoService.syncContent(newMappings, entry, sdk.cma);
-        const hasErrors = response.some((r: any) => r.errors.length > 0);
+        const hasErrors = response.some((r: any) => r.errors?.length > 0);
         if (response && !hasErrors) {
           sdk.notifier.success('Fields successfully synced to Klaviyo!');
         } else {
@@ -269,11 +266,11 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
           sdk.notifier.error('Error syncing to Klaviyo');
         }
       }
-      // sdk.close({
-      //   selectedFields: selectedFields.map((f) => f.id),
-      //   selectedLocales,
-      //   success: true,
-      // });
+      sdk.close({
+        selectedFields: selectedFields.map((f) => f.id),
+        selectedLocales,
+        success: true,
+      });
     } catch (e) {
       console.error('Error syncing to Klaviyo:', e);
       sdk.notifier.error('Error syncing to Klaviyo');
@@ -343,7 +340,7 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
         <Button
           variant="secondary"
           onClick={handleClose}
-          style={{ minWidth: 120, marginRight: 16, color: '#d13438', borderColor: '#d13438' }}>
+          style={{ minWidth: 120, marginRight: 16 }}>
           Cancel
         </Button>
         {hasLocales ? (
@@ -428,7 +425,17 @@ export const FieldSelectDialog: React.FC<{ mappings?: FieldMapping[] }> = ({
         background: '#fff',
         borderRadius: 12,
         boxShadow: '0 2px 16px rgba(0,0,0,0.08)',
+        position: 'relative',
       }}>
+      <Flex justifyContent="space-between" alignItems="center">
+        <Heading>Connected fields</Heading>
+        <Button
+          variant="transparent"
+          onClick={handleClose}
+          startIcon={<span>x</span>}
+          style={{ padding: 4 }}
+        />
+      </Flex>
       {step === 1 && renderFieldStep()}
       {step === 2 && hasLocales && renderLocaleStep()}
     </Box>

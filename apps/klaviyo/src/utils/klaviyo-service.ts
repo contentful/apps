@@ -25,11 +25,9 @@ declare global {
 }
 
 export class KlaviyoService {
-  private credentials: KlaviyoCredentials;
   private cma: CMAClient;
 
-  constructor(credentials: KlaviyoCredentials, cma: CMAClient) {
-    this.credentials = credentials;
+  constructor(cma: CMAClient) {
     this.cma = cma;
   }
 
@@ -130,11 +128,14 @@ export class KlaviyoService {
 
       // Create a filter that matches the base name with or without a numeric suffix
       const filter = `starts-with(attributes.name,\"${name}\")`;
-      console.log('Searching for image with filter:', filter);
 
       const response: any = await this.cma.appActionCall.createWithResponse(
         {
-          appActionId: '5SUT62FpO3cuWVr9A7BrpK',
+          appActionId: await this.getAppActionIdByName(
+            'Proxy Request',
+            window.sdk.ids.environment,
+            window.sdk.ids.space
+          ),
           appDefinitionId: window.sdk.ids.app || '',
           environmentId: window.sdk.ids.environment,
           spaceId: window.sdk.ids.space,
@@ -145,26 +146,21 @@ export class KlaviyoService {
             method: 'GET',
             data: '{}',
             params: '{}',
-            accessToken: this.credentials.accessToken,
           },
         }
       );
-
-      console.log('Raw API response:', response);
 
       // Parse the response body if it's a string
       let parsedResponse;
       if (typeof response.response?.body === 'string') {
         try {
           parsedResponse = JSON.parse(response.response.body);
-          console.log('Parsed response body:', parsedResponse);
         } catch (e) {
           console.error('Error parsing response body:', e);
           return null;
         }
       } else {
         parsedResponse = response.response?.body;
-        console.log('Response body (not a string):', parsedResponse);
       }
 
       // Check for data in the response
@@ -173,20 +169,16 @@ export class KlaviyoService {
         Array.isArray(parsedResponse.data) &&
         parsedResponse.data.length > 0
       ) {
-        console.log('Found images:', parsedResponse.data);
         // Find the exact match or the one with the highest numeric suffix
         const matches = parsedResponse.data.filter(
           (img: KlaviyoImage) =>
             img.attributes.name === name || img.attributes.name.startsWith(`${name}.`)
         );
 
-        console.log('Matching images:', matches);
-
         if (matches.length > 0) {
           // If there's an exact match, use that
           const exactMatch = matches.find((img: KlaviyoImage) => img.attributes.name === name);
           if (exactMatch) {
-            console.log('Found exact match:', exactMatch);
             return exactMatch;
           }
 
@@ -196,11 +188,8 @@ export class KlaviyoService {
             const currentNum = parseInt(current.attributes.name.split('.').pop() || '0');
             return currentNum > latestNum ? current : latest;
           });
-          console.log('Found latest match:', latestMatch);
           return latestMatch;
         }
-      } else {
-        console.log('No images found in response');
       }
 
       return null;
@@ -208,6 +197,20 @@ export class KlaviyoService {
       console.error('Error finding image by name:', error);
       return null;
     }
+  }
+
+  private async getAppActionIdByName(
+    name: string,
+    environmentId: string,
+    spaceId: string
+  ): Promise<string> {
+    const appActions = await this.cma.appAction.getManyForEnvironment({ environmentId, spaceId });
+
+    const appAction = appActions.items.find((action) => action.name === name);
+    if (!appAction) {
+      throw new Error(`App action with name ${name} not found`);
+    }
+    return appAction.sys.id;
   }
 
   /**
@@ -221,7 +224,6 @@ export class KlaviyoService {
 
       // Check if image already exists
       const existingImage = await this.findImageByName(name);
-      console.log('Found existing image:', existingImage);
 
       // Construct the payload based on whether we're updating or creating
       const payload = existingImage
@@ -246,11 +248,13 @@ export class KlaviyoService {
             },
           };
 
-      console.log('Sending payload:', payload);
-
       const response: any = await this.cma.appActionCall.createWithResponse(
         {
-          appActionId: '5SUT62FpO3cuWVr9A7BrpK',
+          appActionId: await this.getAppActionIdByName(
+            'Proxy Request',
+            window.sdk.ids.environment,
+            window.sdk.ids.space
+          ),
           appDefinitionId: window.sdk.ids.app || '',
           environmentId: window.sdk.ids.environment,
           spaceId: window.sdk.ids.space,
@@ -261,12 +265,9 @@ export class KlaviyoService {
             method: existingImage ? 'PATCH' : 'POST',
             params: '{}',
             data: JSON.stringify(payload),
-            accessToken: this.credentials.accessToken,
           },
         }
       );
-
-      console.log('uploadImageToKlaviyo response:', response);
 
       // Parse the response body if it's a string
       let parsedResponse;
@@ -387,15 +388,10 @@ export class KlaviyoService {
             imageUrl = imageUrl || '';
             altText = altText || '';
 
-            // Handle different field types
-            console.log(`Processing field ${klaviyoBlockName} with value:`, value);
-            console.log(`Mapping:`, mapping.fieldType);
-
             switch (mapping.fieldType?.toLowerCase()) {
               case 'image':
               case 'asset':
               case 'link':
-                console.log('Processing image/link field:', value, typeof value, value.sys);
                 if (typeof value === 'object' && value.sys && value.sys.linkType === 'Asset') {
                   let assetId = value.sys.id;
 
@@ -475,25 +471,6 @@ export class KlaviyoService {
                   return null;
                 }
 
-              case 'entry':
-              case 'reference-array':
-                try {
-                  const processedValue = this.safeFieldValue(klaviyoBlockName, value);
-                  if (processedValue) {
-                    contentData[klaviyoBlockName] = processedValue;
-                    htmlContent = this.convertDataToHTML(contentData);
-                    return this.createOrUpdateContent(
-                      klaviyoBlockName,
-                      htmlContent,
-                      `${entryId}-${klaviyoBlockName}`,
-                      'text'
-                    );
-                  }
-                } catch (error) {
-                  console.error(`Error processing reference field ${klaviyoBlockName}:`, error);
-                }
-                return null;
-
               default:
                 // Handle text and other field types
                 try {
@@ -545,7 +522,11 @@ export class KlaviyoService {
       // Query for existing content by name
       const response: any = await this.cma.appActionCall.createWithResponse(
         {
-          appActionId: '5SUT62FpO3cuWVr9A7BrpK',
+          appActionId: await this.getAppActionIdByName(
+            'Proxy Request',
+            window.sdk.ids.environment,
+            window.sdk.ids.space
+          ),
           appDefinitionId: window.sdk.ids.app || '',
           environmentId: window.sdk.ids.environment,
           spaceId: window.sdk.ids.space,
@@ -556,12 +537,9 @@ export class KlaviyoService {
             data: '{}',
             method: 'GET',
             params: JSON.stringify({ filter: `equals(name,\"${nameWithId}\")`, 'page[size]': 1 }),
-            accessToken: this.credentials.accessToken,
           },
         }
       );
-
-      console.log('findContentByExternalId raw response:', response);
 
       // Parse the response body if it's a string
       let parsedResponse;
@@ -575,8 +553,6 @@ export class KlaviyoService {
       } else {
         parsedResponse = response.response?.body;
       }
-
-      console.log('findContentByExternalId parsed response:', parsedResponse);
 
       // Check for error in response
       if (parsedResponse?.response?.error) {
@@ -643,7 +619,6 @@ export class KlaviyoService {
 
     try {
       const existing = await this.findContentByExternalId(nameWithId);
-      console.log('existing', existing);
       if (existing && existing.id) {
         // Update existing content
         const updatePayload = {
@@ -655,7 +630,11 @@ export class KlaviyoService {
         };
         const response: any = await this.cma.appActionCall.createWithResponse(
           {
-            appActionId: '5SUT62FpO3cuWVr9A7BrpK',
+            appActionId: await this.getAppActionIdByName(
+              'Proxy Request',
+              window.sdk.ids.environment,
+              window.sdk.ids.space
+            ),
             appDefinitionId: window.sdk.ids.app || '',
             environmentId: window.sdk.ids.environment,
             spaceId: window.sdk.ids.space,
@@ -666,7 +645,6 @@ export class KlaviyoService {
               method: 'PATCH',
               params: '{}',
               data: JSON.stringify(updatePayload),
-              accessToken: this.credentials.accessToken,
             },
           }
         );
@@ -705,7 +683,11 @@ export class KlaviyoService {
         // Create new content
         const response: any = await this.cma.appActionCall.createWithResponse(
           {
-            appActionId: '5SUT62FpO3cuWVr9A7BrpK',
+            appActionId: await this.getAppActionIdByName(
+              'Proxy Request',
+              window.sdk.ids.environment,
+              window.sdk.ids.space
+            ),
             appDefinitionId: window.sdk.ids.app || '',
             environmentId: window.sdk.ids.environment,
             spaceId: window.sdk.ids.space,
@@ -716,7 +698,6 @@ export class KlaviyoService {
               method: 'POST',
               params: '{}',
               data: JSON.stringify(payload),
-              accessToken: this.credentials.accessToken,
             },
           }
         );

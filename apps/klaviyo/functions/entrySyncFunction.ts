@@ -1,10 +1,11 @@
 import * as contentful from 'contentful-management';
-import { KlaviyoService } from './klaviyo-service';
+import { KlaviyoService } from './klaviyoService';
 import console from 'console';
 import { getEntryKlaviyoFieldMappings } from '../src/utils/field-mappings';
+import { OAuthSDK } from './initiateOauth';
 
 // Define Event types similar to Contentful's App SDK
-interface AppEventHandlerRequest {
+export interface AppEventHandlerRequest {
   headers: {
     'X-Contentful-Topic': string;
     'x-contentful-space-id': string;
@@ -13,9 +14,11 @@ interface AppEventHandlerRequest {
   };
   body: any;
   type: string;
+  code?: string;
+  state?: string;
 }
 
-interface AppEventContext {
+export interface AppEventContext {
   appInstallationId: string;
   spaceId?: string;
   environmentId?: string;
@@ -27,7 +30,7 @@ interface AppEventContext {
   appInstallationParameters?: AppInstallationParameters;
 }
 
-interface AppEventHandlerResponse {
+export interface AppEventHandlerResponse {
   // Empty response for event handlers
 }
 
@@ -171,7 +174,7 @@ function extractEventData(event: AppEventHandlerRequest): {
 // The main handler function
 export const handler = async (
   event: AppEventHandlerRequest,
-  context: AppEventContext
+  context: AppEventContext & { oauthSdk: OAuthSDK }
 ): Promise<AppEventHandlerResponse> => {
   // Only process relevant Entry events
   const topic = event.headers['X-Contentful-Topic'];
@@ -188,7 +191,7 @@ export const handler = async (
       return {};
     }
 
-    const { entryId, contentTypeId, version, spaceId, environmentId, entryData } = eventData;
+    const { entryId, contentTypeId, spaceId, environmentId, entryData } = eventData;
 
     // Override with context values if available
     const effectiveSpaceId = context.spaceId || spaceId;
@@ -244,15 +247,6 @@ export const handler = async (
       parameters = {} as AppInstallationParameters;
     }
 
-    // Store app definition ID for later use
-    parameters.appDefinitionId = appDefinitionId;
-
-    // Store app definition ID in globalThis for potential access in other functions
-    if (appDefinitionId) {
-      (globalThis as any).context = (globalThis as any).context || {};
-      (globalThis as any).context.appInstallationId = appDefinitionId;
-    }
-
     if (!effectiveSpaceId || !effectiveEnvironmentId) {
       throw new Error('effectiveSpaceId or effectiveEnvironmentId is missing');
     }
@@ -265,47 +259,41 @@ export const handler = async (
     );
 
     // Process the field mappings
-    const processedMappings = fieldMappings.map((mapping: any) => {
-      // Support both legacy and new mapping keys
-      const contentfulFieldId = mapping.contentfulFieldId || mapping.id;
-      const klaviyoBlockName = mapping.klaviyoBlockName || mapping.name || contentfulFieldId;
-      const fieldType = mapping.fieldType || mapping.type || 'text';
-      return {
-        contentfulFieldId,
-        klaviyoBlockName,
-        fieldType,
-        contentTypeId: mapping.contentTypeId,
-        name: mapping.name || contentfulFieldId,
-        type: mapping.type || fieldType,
-        severity: 'info',
-        value: mapping.value,
-        isAssetField: mapping.isAssetField,
-        locale: mapping.locale,
-      };
-    });
-
-    // Get API keys from app parameters
-    const privateKey = parameters?.privateKey;
-    const publicKey = parameters?.publicKey;
-
-    if (!privateKey || !publicKey) {
-      console.error('API keys not found in app parameters:', {
-        hasPrivateKey: !!privateKey,
-        hasPublicKey: !!publicKey,
-        parameterKeys: Object.keys(parameters || {}),
-      });
-      return {};
-    }
-
-    // Create the auth string - Klaviyo expects "Klaviyo-API-Key {private-key}"
-    const auth = `Klaviyo-API-Key ${privateKey}`;
+    const processedMappings = fieldMappings.map(
+      (mapping: {
+        id?: string;
+        contentfulFieldId?: string;
+        klaviyoBlockName: string;
+        fieldType: string;
+        contentTypeId: string;
+        name: string;
+        type: string;
+        severity: string;
+        value: any;
+        isAssetField: boolean;
+        locale: string;
+      }) => {
+        // Support both legacy and new mapping keys
+        const contentfulFieldId = mapping.contentfulFieldId || mapping.id;
+        const klaviyoBlockName = mapping.klaviyoBlockName || mapping.name || contentfulFieldId;
+        const fieldType = mapping.fieldType || mapping.type || 'text';
+        return {
+          contentfulFieldId,
+          klaviyoBlockName,
+          fieldType,
+          contentTypeId: mapping.contentTypeId,
+          name: mapping.name || contentfulFieldId,
+          type: mapping.type || fieldType,
+          severity: 'info',
+          value: mapping.value,
+          isAssetField: mapping.isAssetField,
+          locale: mapping.locale,
+        };
+      }
+    );
 
     // Initialize the Klaviyo service
-    const klaviyoService = new KlaviyoService({
-      privateKey,
-      publicKey,
-      auth,
-    });
+    const klaviyoService = new KlaviyoService(context.oauthSdk);
 
     // Get the actual entry data with all fields
     let entry;
@@ -346,29 +334,24 @@ export const handler = async (
     // Create field mappings in the expected format for Klaviyo service
     const klaviyoFieldMappings: FieldMapping[] = [];
     for (const mapping of processedMappings) {
-      // Determine which locales this field actually has values for
-      let fieldLocales: string[] = [];
-      if (
-        entry.fields &&
-        entry.fields[mapping.contentfulFieldId] &&
-        typeof entry.fields[mapping.contentfulFieldId] === 'object'
-      ) {
-        fieldLocales = Object.keys(entry.fields[mapping.contentfulFieldId]).filter(
-          (locale) => entry.fields[mapping.contentfulFieldId][locale] !== undefined
-        );
-      }
-      const fieldIsLocalized = fieldLocales.length > 1;
-      for (const locale of selectedLocales) {
+      // Check if this mapping specifies a specific locale
+      const mappingLocale = mapping.locale;
+      const contentfulFieldId = mapping.contentfulFieldId || '';
+
+      if (mappingLocale) {
+        // This mapping is for a specific locale - only process that locale
         let fieldType = mapping.fieldType || 'text';
         let isAssetField = false;
-        // Only create a mapping if the field has a value for this locale
+
+        // Only create a mapping if the field has a value for this specific locale
         if (
           entry.fields &&
-          entry.fields[mapping.contentfulFieldId] &&
-          typeof entry.fields[mapping.contentfulFieldId] === 'object' &&
-          entry.fields[mapping.contentfulFieldId][locale] !== undefined
+          entry.fields[contentfulFieldId] &&
+          typeof entry.fields[contentfulFieldId] === 'object' &&
+          entry.fields[contentfulFieldId][mappingLocale] !== undefined
         ) {
-          let fieldValue = entry.fields[mapping.contentfulFieldId][locale];
+          let fieldValue = entry.fields[contentfulFieldId][mappingLocale];
+
           // Check if this is an asset field
           if (
             fieldValue &&
@@ -379,13 +362,10 @@ export const handler = async (
             isAssetField = true;
             fieldType = 'image';
           }
-          // Append locale to block name, name, and external_id only if the field is localized
-          const localeSuffix = fieldIsLocalized ? `-${locale}` : '';
 
           klaviyoFieldMappings.push({
-            contentfulFieldId: mapping.contentfulFieldId,
-            klaviyoBlockName:
-              (mapping.klaviyoBlockName || mapping.contentfulFieldId) + localeSuffix,
+            contentfulFieldId: contentfulFieldId,
+            klaviyoBlockName: mapping.klaviyoBlockName || contentfulFieldId,
             fieldType: fieldType as
               | 'text'
               | 'image'
@@ -394,13 +374,71 @@ export const handler = async (
               | 'richText'
               | 'json',
             contentTypeId,
-            name: (mapping.name || mapping.contentfulFieldId) + localeSuffix,
+            name: mapping.name || contentfulFieldId,
             type: mapping.type || fieldType,
             severity: 'info',
             value: fieldValue,
             isAssetField,
-            locale,
-            // external_id will be constructed in KlaviyoService using klaviyoBlockName (which now includes the locale if needed)
+            locale: mappingLocale,
+          });
+        }
+      } else {
+        // This mapping doesn't specify a locale - it's either non-localized or we need to process the default locale
+        let fieldType = mapping.fieldType || 'text';
+        let isAssetField = false;
+        let fieldValue;
+
+        // Check if the field is localized or not
+        if (
+          entry.fields &&
+          entry.fields[contentfulFieldId] &&
+          typeof entry.fields[contentfulFieldId] === 'object'
+        ) {
+          // Field is localized - use the first available locale or 'en-US' as fallback
+          const availableLocales = Object.keys(entry.fields[contentfulFieldId]).filter(
+            (locale) => entry.fields[contentfulFieldId][locale] !== undefined
+          );
+
+          if (availableLocales.length > 0) {
+            const defaultLocale = availableLocales.includes('en-US')
+              ? 'en-US'
+              : availableLocales[0];
+            fieldValue = entry.fields[contentfulFieldId][defaultLocale];
+          }
+        } else if (entry.fields && entry.fields[contentfulFieldId] !== undefined) {
+          // Field is not localized
+          fieldValue = entry.fields[contentfulFieldId];
+        }
+
+        if (fieldValue !== undefined && fieldValue !== null && fieldValue !== '') {
+          // Check if this is an asset field
+          if (
+            fieldValue &&
+            typeof fieldValue === 'object' &&
+            fieldValue.sys &&
+            (fieldValue.sys.linkType === 'Asset' || fieldValue.sys.type === 'Asset')
+          ) {
+            isAssetField = true;
+            fieldType = 'image';
+          }
+
+          klaviyoFieldMappings.push({
+            contentfulFieldId: contentfulFieldId,
+            klaviyoBlockName: mapping.klaviyoBlockName || contentfulFieldId,
+            fieldType: fieldType as
+              | 'text'
+              | 'image'
+              | 'entry'
+              | 'reference-array'
+              | 'richText'
+              | 'json',
+            contentTypeId,
+            name: mapping.name || contentfulFieldId,
+            type: mapping.type || fieldType,
+            severity: 'info',
+            value: fieldValue,
+            isAssetField,
+            locale: undefined, // No specific locale for non-localized fields
           });
         }
       }
@@ -426,133 +464,9 @@ export const handler = async (
 
     await klaviyoService.syncContent(klaviyoFieldMappings, entry, cma);
 
-    // Update sync status in app parameters
-    await updateSyncStatus(
-      cma,
-      entryId,
-      contentTypeId,
-      version,
-      effectiveSpaceId,
-      effectiveEnvironmentId,
-      parameters
-    );
-
     return {};
   } catch (error) {
     console.error('Error processing entry sync:', error);
     return {};
   }
 };
-
-// Update sync status in app parameters
-async function updateSyncStatus(
-  cma: contentful.PlainClientAPI,
-  entryId: string,
-  contentTypeId: string,
-  version: number,
-  spaceId: string,
-  environmentId: string,
-  currentParameters: AppInstallationParameters
-): Promise<void> {
-  try {
-    // Get existing sync data or initialize new
-    const syncData: SyncParameters = currentParameters?.syncData || {
-      syncStatuses: [],
-      lastUpdated: Date.now(),
-    };
-
-    // Find if this entry already has a status
-    const existingIndex = syncData.syncStatuses.findIndex(
-      (status) => status.entryId === entryId && status.contentTypeId === contentTypeId
-    );
-
-    const now = Date.now();
-
-    if (existingIndex >= 0) {
-      // Update existing status
-      syncData.syncStatuses[existingIndex].lastSynced = now;
-      syncData.syncStatuses[existingIndex].syncCompleted = true;
-      syncData.syncStatuses[existingIndex].needsSync = false;
-      syncData.syncStatuses[existingIndex].lastSyncedVersion = version;
-    } else {
-      // Add new status
-      syncData.syncStatuses.push({
-        entryId,
-        contentTypeId,
-        lastSynced: now,
-        needsSync: false,
-        syncCompleted: true,
-        lastSyncedVersion: version,
-      });
-    }
-
-    // Update timestamp
-    syncData.lastUpdated = now;
-
-    // Create updated parameters
-    const updatedParameters = {
-      ...currentParameters,
-      syncData,
-    };
-
-    // Ensure contentTypeMappings exists for this content type
-    if (!updatedParameters.contentTypeMappings) {
-      updatedParameters.contentTypeMappings = {};
-    }
-
-    // Ensure we have an entry for this content type in selectedContentTypes
-    if (!updatedParameters.selectedContentTypes) {
-      updatedParameters.selectedContentTypes = {};
-    }
-
-    updatedParameters.selectedContentTypes[contentTypeId] = true;
-
-    // If we don't have mappings for this content type but we have fieldMappings,
-    // check if any of them apply to this content type and organize them
-    if (
-      !updatedParameters.contentTypeMappings[contentTypeId] &&
-      Array.isArray(updatedParameters.fieldMappings) &&
-      updatedParameters.fieldMappings.length > 0
-    ) {
-      const relevantMappings = updatedParameters.fieldMappings.filter(
-        (mapping: any) => mapping.contentTypeId === contentTypeId || !mapping.contentTypeId
-      );
-
-      if (relevantMappings.length > 0) {
-        updatedParameters.contentTypeMappings[contentTypeId] = relevantMappings;
-      }
-    }
-
-    // Save back to app parameters using the contentful API
-    try {
-      // Look for app definition ID in multiple places
-      let appDefinitionId = currentParameters.appDefinitionId;
-
-      // Check in installation object if main level doesn't have it
-      if (
-        !appDefinitionId &&
-        currentParameters.installation &&
-        currentParameters.installation.appDefinitionId
-      ) {
-        appDefinitionId = currentParameters.installation.appDefinitionId;
-      }
-
-      // Check context as last resort
-      if (!appDefinitionId) {
-        // Try to get from globalThis or context
-        if ((globalThis as any)?.context?.appInstallationId) {
-          appDefinitionId = (globalThis as any).context.appInstallationId;
-        } else if ((global as any)?.context?.appInstallationId) {
-          appDefinitionId = (global as any).context.appInstallationId;
-        }
-      }
-
-      // Add the app definition ID to the parameters to ensure it's saved for future use
-      updatedParameters.appDefinitionId = appDefinitionId;
-    } catch (e) {
-      console.error('Error updating app installation parameters:', e);
-    }
-  } catch (error) {
-    console.error('Error updating sync status:', error);
-  }
-}

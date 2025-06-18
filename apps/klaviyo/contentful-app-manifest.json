@@ -49,19 +49,10 @@
       "id": "klaviyoEntrySync",
       "name": "Klaviyo Entry Sync",
       "description": "Automatically syncs Contentful entries to Klaviyo on publish/update",
-      "path": "functions/entry-sync-function.js",
-      "entryFile": "functions/entry-sync-function.ts",
+      "path": "functions/entrySyncFunction.js",
+      "entryFile": "functions/entrySyncFunction.ts",
       "allowNetworks": ["a.klaviyo.com"],
       "accepts": ["appevent.handler"]
-    },
-    {
-      "id": "validateCredentialsAppAction",
-      "name": "Validate Credentials",
-      "description": "Validates Klaviyo API credentials",
-      "path": "functions/validateCredentialsAppAction.js",
-      "entryFile": "functions/validateCredentialsAppAction.ts",
-      "allowNetworks": ["a.klaviyo.com"],
-      "accepts": ["appaction.call"]
     },
     {
       "id": "proxyRequestAppAction",
@@ -69,6 +60,33 @@
       "description": "Proxies requests to allowed Klaviyo endpoints",
       "path": "functions/proxyRequestAppAction.js",
       "entryFile": "functions/proxyRequestAppAction.ts",
+      "allowNetworks": ["a.klaviyo.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "initiateOauth",
+      "name": "Initiate OAuth",
+      "description": "Initiates the OAuth flow for Klaviyo",
+      "path": "functions/initiateOauth.js",
+      "entryFile": "functions/initiateOauth.ts",
+      "allowNetworks": ["www.klaviyo.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "completeOauth",
+      "name": "Complete OAuth",
+      "description": "Completes the OAuth flow for Klaviyo",
+      "path": "functions/completeOauth.js",
+      "entryFile": "functions/completeOauth.ts",
+      "allowNetworks": ["a.klaviyo.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "disconnect",
+      "name": "Disconnect",
+      "description": "Disconnects the Klaviyo app",
+      "path": "functions/disconnect.js",
+      "entryFile": "functions/disconnect.ts",
       "allowNetworks": ["a.klaviyo.com"],
       "accepts": ["appaction.call"]
     }
