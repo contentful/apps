@@ -122,7 +122,7 @@ async function runPendingActionsFromEntry(
                   logLabel: 'playbackId',
                 });
                 break;
-              case 'captions':
+              case 'caption':
               case 'audio':
                 await deleteMuxResource({
                   assetId: pendingActions.assetId,
@@ -132,7 +132,7 @@ async function runPendingActionsFromEntry(
                   logLabel: 'track',
                 });
                 break;
-              case 'staticRenditions':
+              case 'staticRendition':
                 await deleteMuxResource({
                   assetId: pendingActions.assetId,
                   resourceId: deleteAction.id,
