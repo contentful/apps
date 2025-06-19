@@ -38,6 +38,7 @@ import {
   AppProps,
   ResolutionType,
   Track,
+  type PendingActions,
 } from './util/types';
 
 import './index.css';
@@ -60,6 +61,22 @@ interface SignedTokens {
   playbackToken: string;
   posterToken: string;
   storyboardToken: string;
+}
+
+// Delete undefined keys and sort keys recursively
+function normalizeForDiff(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(normalizeForDiff);
+  } else if (obj && typeof obj === 'object') {
+    return Object.keys(obj)
+      .filter((k) => obj[k] !== undefined)
+      .sort()
+      .reduce((acc, k) => {
+        acc[k] = normalizeForDiff(obj[k]);
+        return acc;
+      }, {} as any);
+  }
+  return obj;
 }
 
 export class App extends React.Component<AppProps, AppState> {
@@ -119,6 +136,7 @@ export class App extends React.Component<AppProps, AppState> {
 
   // eslint-disable-next-line  @typescript-eslint/ban-types
   detachExternalChangeHandler: Function | null = null;
+  detachSysChangeHandler: Function | null = null;
 
   checkForValidAsset = async () => {
     if (!(this.state.value && this.state.value.assetId)) return false;
@@ -174,6 +192,19 @@ export class App extends React.Component<AppProps, AppState> {
     // Handler for external field value changes (e.g. when multiple authors are working on the same entry).
     this.detachExternalChangeHandler = this.props.sdk.field.onValueChanged(this.onExternalChange);
 
+    // Subscribe to any `sys` change to detect publish
+    const initialSys = this.props.sdk.entry.getSys();
+    this.detachSysChangeHandler = this.props.sdk.entry.onSysChanged(async (newSys) => {
+      const wasPublished =
+        !!newSys.publishedVersion && newSys.version === newSys.publishedVersion + 1;
+
+      const justNow = !initialSys.publishedAt || initialSys.publishedAt !== newSys.publishedAt;
+
+      if (wasPublished && justNow) {
+        await this.resync();
+      }
+    });
+
     if (this.state.error) return;
 
     // Just in case someone left an asset in a bad place, we'll do some additional checks first just to see if
@@ -221,6 +252,9 @@ export class App extends React.Component<AppProps, AppState> {
     if (this.detachExternalChangeHandler) {
       this.detachExternalChangeHandler();
     }
+    if (this.detachSysChangeHandler) {
+      this.detachSysChangeHandler();
+    }
   }
 
   onExternalChange = (value: MuxContentfulObject) => {
@@ -232,6 +266,21 @@ export class App extends React.Component<AppProps, AppState> {
     return this.state.value && this.state.value.signedPlaybackId && !this.state.value.playbackId
       ? true
       : false;
+  };
+
+  getSwitchCheckedState = (): boolean => {
+    // If there are pending actions of playback, use the state of the pending action
+    if (this.state.value?.pendingActions?.create) {
+      const playbackCreateAction = this.state.value.pendingActions.create.find(
+        (action) => action.type === 'playback'
+      );
+      if (playbackCreateAction) {
+        return playbackCreateAction.data?.policy === 'signed';
+      }
+    }
+
+    // If there are no pending actions, use the state of the asset
+    return this.isUsingSigned();
   };
 
   requestDeleteAsset = async () => {
@@ -625,8 +674,8 @@ export class App extends React.Component<AppProps, AppState> {
         });
       }
 
-      await this.props.sdk.field.setValue({
-        version: 3,
+      const newValue = {
+        version: this.state.value.version ?? 3,
         uploadId: this.state.value.uploadId || undefined,
         assetId: this.state.value.assetId,
         playbackId: (publicPlayback && publicPlayback.id) || undefined,
@@ -646,7 +695,13 @@ export class App extends React.Component<AppProps, AppState> {
         live_stream_id: asset.live_stream_id || undefined,
         meta: asset.meta || undefined,
         passthrough: asset.passthrough || undefined,
-      });
+        pendingActions: this.state.value.pendingActions || undefined,
+      };
+      const oldNorm = JSON.stringify(normalizeForDiff(this.state.value));
+      const newNorm = JSON.stringify(normalizeForDiff(newValue));
+      if (oldNorm !== newNorm) {
+        await this.props.sdk.field.setValue(newValue);
+      }
 
       if (publicPlayback && publicPlayback.id) {
         this.setState({ playerPlaybackId: publicPlayback.id });
@@ -807,45 +862,58 @@ export class App extends React.Component<AppProps, AppState> {
   swapPlaybackIDs = async () => {
     if (!this.state.value) return;
 
-    const assetId = this.state.value.assetId;
-    const playbackId = this.state.value.playbackId || this.state.value.signedPlaybackId;
+    const currentValue = this.state.value;
+    const currentPlaybackId = currentValue.playbackId || currentValue.signedPlaybackId;
 
-    const deleteRes = await this.apiClient.del(
-      `/video/v1/assets/${assetId}/playback-ids/${playbackId}`
-    );
+    // If there are pending actions of playback, delete them (cancel)
+    if (
+      currentValue.pendingActions?.create?.some((action) => action.type === 'playback') ||
+      currentValue.pendingActions?.delete?.some((action) => action.type === 'playback')
+    ) {
+      const updatedPendingActions = {
+        delete: currentValue.pendingActions.delete.filter((action) => action.type !== 'playback'),
+        create: currentValue.pendingActions.create.filter((action) => action.type !== 'playback'),
+      };
 
-    if (!this.responseCheck(deleteRes)) {
-      console.error('URL ', `/video/v1/assets/${assetId}/playback-ids/${playbackId}`);
+      // If there are no pending actions, delete the entire structure
+      const finalPendingActions =
+        updatedPendingActions.delete.length === 0 && updatedPendingActions.create.length === 0
+          ? undefined
+          : updatedPendingActions;
+
+      await this.props.sdk.field.setValue({
+        ...currentValue,
+        pendingActions: finalPendingActions,
+      });
+
       return;
     }
 
-    try {
-      const deleteResJson = await deleteRes.json();
-      if ('error' in deleteRes) {
-        this.props.sdk.notifier.error(deleteResJson.error.messages[0]);
-      }
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
+    // If there are no pending actions, create new ones
+    const isCurrentlySigned = this.isUsingSigned();
 
-    if (this.isUsingSigned()) {
-      const createRes = await this.apiClient.post(
-        `/video/v1/assets/${assetId}/playback-ids`,
-        JSON.stringify({
-          policy: 'public',
-        })
-      );
-      this.responseCheck(createRes);
-    } else {
-      const createRes = await this.apiClient.post(
-        `/video/v1/assets/${assetId}/playback-ids`,
-        JSON.stringify({
-          policy: 'signed',
-        })
-      );
-      this.responseCheck(createRes);
-    }
+    const pendingActions: PendingActions = {
+      delete: [
+        {
+          type: 'playback',
+          id: currentPlaybackId,
+        },
+      ],
+      create: [
+        {
+          type: 'playback',
+          data: {
+            policy: isCurrentlySigned ? 'public' : 'signed',
+            assetId: currentValue.assetId,
+          },
+        },
+      ],
+    };
 
-    this.resync();
+    await this.props.sdk.field.setValue({
+      ...currentValue,
+      pendingActions,
+    });
   };
 
   getPlayerAspectRatio = () => {
@@ -1194,9 +1262,11 @@ export class App extends React.Component<AppProps, AppState> {
                         <Switch
                           name="swap_signed_playback_id"
                           id="swap_signed_playback_id"
-                          isChecked={this.isUsingSigned()}
+                          isChecked={this.getSwitchCheckedState()}
                           onChange={() => this.swapPlaybackIDs()}>
-                          {this.isUsingSigned() ? 'Signed Playback' : 'Signed Playback (off)'}
+                          {this.getSwitchCheckedState()
+                            ? 'Signed Playback'
+                            : 'Signed Playback (off)'}
                         </Switch>
                       </Flex>
                     </Flex>

@@ -1,3 +1,5 @@
+import packageJson from '../../package.json';
+
 class ApiClient {
   tokenId: string;
   tokenSecret: string;
@@ -12,10 +14,14 @@ class ApiClient {
     this.tokenSecret = tokenSecret;
   }
 
-  requestHeaders = () => {
+  requestHeaders = (method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH') => {
     const headers = new Headers();
     headers.set('Authorization', 'Basic ' + btoa(`${this.tokenId}:${this.tokenSecret}`));
     headers.set('Content-Type', 'application/json');
+    // if (method !== 'GET') {
+    //   headers.set('x-source-platform', `Contentful | ${packageJson.version}`);
+    // }
+
     return headers;
   };
 
@@ -52,7 +58,7 @@ class ApiClient {
     return fetch(`https://api.mux.com${path}`, {
       ...this.baseOptions,
       method,
-      headers: this.requestHeaders(),
+      headers: this.requestHeaders(method),
       body,
     });
   };
