@@ -142,6 +142,7 @@ const CreateFlow = (props: CreateFlowProps) => {
       setStep(DRAFT_STEP);
       return;
     } else if (step === DRAFT_STEP) {
+      setCreationResultFields([]);
       setStep(CREATE_STEP);
     }
 

@@ -280,6 +280,8 @@ const CreateStep = ({
     description: '',
   });
   const [isNameValid, setIsNameValid] = useState(true);
+  // Track which errors should be cleared after save
+  const [clearedErrors, setClearedErrors] = useState<Set<string>>(new Set());
 
   const localizedFieldsIds = Array.from(selectedFields).flatMap((fieldId) => {
     const isLocalized = entry.fields.find((f) => f.id === fieldId)?.localized || false;
@@ -360,18 +362,53 @@ const CreateStep = ({
     }
   };
 
+  const hasNameChanged = (fieldId: string, newName: string): boolean => {
+    const previousName = contentBlocksData.names[fieldId];
+    return previousName !== newName;
+  };
+
   const handleSave = (fieldId: string) => {
     if (!isValidContentBlockName(editDraft.name)) {
       setIsNameValid(false);
       return;
     }
+
     setIsNameValid(true);
     setContentBlocksData((prev) => ({
       names: { ...prev.names, [fieldId]: editDraft.name },
       descriptions: { ...prev.descriptions, [fieldId]: editDraft.description },
     }));
+
+    // Only clear error if the name has actually changed
+    if (hasNameChanged(fieldId, editDraft.name)) {
+      setClearedErrors((prev) => new Set(prev).add(fieldId));
+    }
+
     setEditingField(null);
     setEditDraft({ name: '', description: '' });
+  };
+
+  const shouldShowError = (fieldId: string): boolean => {
+    const hasError = creationResultFields.some(
+      (result) => fieldId === localizeFieldId(result.fieldId, result.locale)
+    );
+    const isCleared = clearedErrors.has(fieldId);
+
+    return hasError && !isCleared;
+  };
+
+  const getErrorMessage = (fieldId: string): string | undefined => {
+    const errorResult = creationResultFields.find(
+      (result) => fieldId === localizeFieldId(result.fieldId, result.locale)
+    );
+
+    return shouldShowError(fieldId) ? errorResult?.message : undefined;
+  };
+
+  // Clear all errors when going back in the wizard
+  const handleBack = () => {
+    setClearedErrors(new Set());
+    handlePreviousStep();
   };
 
   return (
@@ -407,12 +444,7 @@ const CreateStep = ({
                         result.success &&
                         localizedFieldId === localizeFieldId(result.fieldId, result.locale)
                     )}
-                    error={
-                      creationResultFields.find(
-                        (result) =>
-                          localizedFieldId === localizeFieldId(result.fieldId, result.locale)
-                      )?.message
-                    }
+                    error={getErrorMessage(localizedFieldId)}
                   />
                 );
               });
@@ -434,18 +466,14 @@ const CreateStep = ({
                 isCreated={creationResultFields.some(
                   (result) => result.success && fieldId === result.fieldId
                 )}
-                error={creationResultFields.find((result) => fieldId === result.fieldId)?.message}
+                error={getErrorMessage(fieldId)}
               />,
             ];
           })}
         </Stack>
       </Box>
       <WizardFooter>
-        <Button
-          variant="secondary"
-          size="small"
-          onClick={handlePreviousStep}
-          data-testid="back-button">
+        <Button variant="secondary" size="small" onClick={handleBack} data-testid="back-button">
           Back
         </Button>
         <CreateButton

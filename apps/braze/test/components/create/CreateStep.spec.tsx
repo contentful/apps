@@ -218,5 +218,108 @@ describe('CreateStep', () => {
       const editButtons = screen.getAllByRole('button', { name: /Edit content block/i });
       expect(editButtons).toHaveLength(1);
     });
+
+    it('hides the error after saving a new value for the content block name', async () => {
+      const creationResultFields = [
+        {
+          fieldId: 'field1',
+          success: false,
+          statusCode: 400,
+          message: 'Content Block name already exists',
+        },
+      ];
+
+      await act(async () => {
+        render(<TestCreateStepWrapper creationResultFields={creationResultFields} />);
+      });
+
+      // Error is shown initially
+      expect(screen.getByText('Content Block name already exists')).toBeTruthy();
+
+      // Click edit button for the field with error
+      const editButtons = screen.getAllByRole('button', { name: /Edit content block/i });
+      fireEvent.click(editButtons[0]);
+
+      // Change the name to a new valid value
+      const inputName = screen.getByTestId('content-block-name-input') as HTMLInputElement;
+      fireEvent.change(inputName, { target: { value: 'NewName' } });
+
+      // Save the changes
+      const saveButton = screen.getByRole('button', { name: 'Save' });
+      fireEvent.click(saveButton);
+
+      // Error should no longer be shown
+      expect(screen.queryByText('Content Block name already exists')).toBeNull();
+    });
+
+    it('hides the error for a localized field after saving a new value', async () => {
+      const creationResultFields = [
+        {
+          fieldId: 'field2',
+          locale: 'en-US',
+          success: false,
+          statusCode: 400,
+          message: 'Content Block name already exists',
+        },
+      ];
+
+      await act(async () => {
+        render(<TestCreateStepWrapper creationResultFields={creationResultFields} />);
+      });
+
+      // Error is shown initially
+      expect(screen.getByText('Content Block name already exists')).toBeTruthy();
+
+      // Find and click edit button for the localized field with error
+      const editButtons = screen.getAllByRole('button', { name: /Edit content block/i });
+      // The second edit button corresponds to field2-en-US
+      fireEvent.click(editButtons[1]);
+
+      // Change the name to a new valid value
+      const inputName = screen.getByTestId('content-block-name-input') as HTMLInputElement;
+      fireEvent.change(inputName, { target: { value: 'NewLocalizedName' } });
+
+      // Save the changes
+      const saveButton = screen.getByRole('button', { name: 'Save' });
+      fireEvent.click(saveButton);
+
+      // Error should no longer be shown
+      expect(screen.queryByText('Content Block name already exists')).toBeNull();
+    });
+
+    it('calls handlePreviousStep when back button is clicked', async () => {
+      const creationResultFields = [
+        {
+          fieldId: 'field1',
+          success: false,
+          statusCode: 400,
+          message: 'Content Block name already exists',
+        },
+      ];
+
+      await act(async () => {
+        render(<TestCreateStepWrapper creationResultFields={creationResultFields} />);
+      });
+
+      // Error is shown initially
+      expect(screen.getByText('Content Block name already exists')).toBeTruthy();
+
+      // Click the back button
+      const backButton = screen.getByRole('button', { name: 'Back' });
+      fireEvent.click(backButton);
+
+      // Verify handlePreviousStep was called
+      expect(mockHandlePreviousStep).toHaveBeenCalled();
+    });
+
+    it('shows no errors when creationResultFields is empty', async () => {
+      await act(async () => {
+        render(<TestCreateStepWrapper creationResultFields={[]} />);
+      });
+
+      // No error messages should be shown
+      expect(screen.queryByText('Content Block name already exists')).toBeNull();
+      expect(screen.queryByText('Another error message')).toBeNull();
+    });
   });
 });
