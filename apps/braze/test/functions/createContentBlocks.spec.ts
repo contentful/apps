@@ -292,13 +292,166 @@ describe('createContentBlocks', () => {
           fieldId: 'title',
           success: false,
           statusCode: 401,
-          message: 'Error creating content block for field title: Unauthorized',
+          message:
+            'Error creating content block for field title: Invalid API Key or Braze Endpoint',
         },
         {
           fieldId: 'author',
           success: false,
           statusCode: 401,
-          message: 'Error creating content block for field author: Unauthorized',
+          message:
+            'Error creating content block for field author: Invalid API Key or Braze Endpoint',
+        },
+      ],
+    });
+  });
+
+  it('should handle 401 errors for localized fields', async () => {
+    // Mock Entry data
+    const entry = createEntryResponse({
+      title: { 'en-US': 'Test Title' },
+    });
+    const contentType = createContentTypeResponse(['title']);
+
+    // Mock API responses
+    vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+    vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: false,
+      status: 401,
+      json: () =>
+        Promise.resolve({
+          message: 'Unauthorized',
+        }),
+    } as Response);
+
+    const event: AppActionRequest<'Custom', AppActionParameters> = {
+      type: FunctionTypeEnum.AppActionCall,
+      body: {
+        entryId: 'entry-id',
+        fieldsData: JSON.stringify([
+          {
+            fieldId: 'title',
+            locale: 'en-US',
+            contentBlockName: 'custom-title-name',
+            contentBlockDescription: 'custom-title-description',
+          },
+        ]),
+      },
+      headers: {},
+    };
+
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      results: [
+        {
+          fieldId: 'title',
+          locale: 'en-US',
+          success: false,
+          statusCode: 401,
+          message:
+            'Error creating content block for field title and locale en-US: Invalid API Key or Braze Endpoint',
+        },
+      ],
+    });
+  });
+
+  it('should handle other API errors with custom messages', async () => {
+    // Mock Entry data
+    const entry = createEntryResponse({
+      title: { 'en-US': 'Test Title' },
+    });
+    const contentType = createContentTypeResponse(['title']);
+
+    // Mock API responses
+    vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+    vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: () =>
+        Promise.resolve({
+          message: 'Content block name already exists',
+        }),
+    } as Response);
+
+    const event: AppActionRequest<'Custom', AppActionParameters> = {
+      type: FunctionTypeEnum.AppActionCall,
+      body: {
+        entryId: 'entry-id',
+        fieldsData: JSON.stringify([
+          {
+            fieldId: 'title',
+            contentBlockName: 'custom-title-name',
+            contentBlockDescription: 'custom-title-description',
+          },
+        ]),
+      },
+      headers: {},
+    };
+
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      results: [
+        {
+          fieldId: 'title',
+          success: false,
+          statusCode: 400,
+          message:
+            'Error creating content block for field title: Content block name already exists',
+        },
+      ],
+    });
+  });
+
+  it('should handle other API errors for localized fields with custom messages', async () => {
+    // Mock Entry data
+    const entry = createEntryResponse({
+      title: { 'en-US': 'Test Title' },
+    });
+    const contentType = createContentTypeResponse(['title']);
+
+    // Mock API responses
+    vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+    vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: false,
+      status: 422,
+      json: () =>
+        Promise.resolve({
+          message: 'Invalid content format',
+        }),
+    } as Response);
+
+    const event: AppActionRequest<'Custom', AppActionParameters> = {
+      type: FunctionTypeEnum.AppActionCall,
+      body: {
+        entryId: 'entry-id',
+        fieldsData: JSON.stringify([
+          {
+            fieldId: 'title',
+            locale: 'en-US',
+            contentBlockName: 'custom-title-name',
+            contentBlockDescription: 'custom-title-description',
+          },
+        ]),
+      },
+      headers: {},
+    };
+
+    const result = await handler(event, mockContext);
+
+    expect(result).toEqual({
+      results: [
+        {
+          fieldId: 'title',
+          locale: 'en-US',
+          success: false,
+          statusCode: 422,
+          message:
+            'Error creating content block for field title and locale en-US: Invalid content format',
         },
       ],
     });

@@ -22,6 +22,15 @@ type FieldData = {
   contentBlockDescription: string;
 };
 
+const createBrazeErrorMessage = (
+  fieldId: string,
+  locale: string | undefined,
+  errorMessage: string
+): string => {
+  const fieldIdentifier = `field ${fieldId}` + (locale ? ` and locale ${locale}` : '');
+  return `Error creating content block for ${fieldIdentifier}: ${errorMessage}`;
+};
+
 export const handler: FunctionEventHandler<
   FunctionTypeEnum.AppActionCall,
   AppActionParameters
@@ -116,18 +125,24 @@ const createContentBlock = async (
     });
 
     const data = await response.json();
-
     if (!response.ok) {
-      return {
-        fieldId,
-        ...(locale ? { locale } : {}),
-        success: false,
-        statusCode: response.status,
-        message:
-          `Error creating content block for field ${fieldId}` +
-          (locale ? ` and locale ${locale}` : '') +
-          `: ${data.message}`,
-      };
+      if (response.status === 401) {
+        return {
+          fieldId,
+          ...(locale ? { locale } : {}),
+          success: false,
+          statusCode: response.status,
+          message: createBrazeErrorMessage(fieldId, locale, 'Invalid API Key or Braze Endpoint'),
+        };
+      } else {
+        return {
+          fieldId,
+          ...(locale ? { locale } : {}),
+          success: false,
+          statusCode: response.status,
+          message: createBrazeErrorMessage(fieldId, locale, data.message),
+        };
+      }
     }
 
     return {
