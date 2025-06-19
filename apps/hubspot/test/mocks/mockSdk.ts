@@ -7,6 +7,9 @@ const mockSdk: any = {
     setReady: vi.fn(),
     getCurrentState: vi.fn(),
   },
+  notifier: {
+    error: vi.fn(),
+  },
   ids: {
     app: 'test-app',
   },

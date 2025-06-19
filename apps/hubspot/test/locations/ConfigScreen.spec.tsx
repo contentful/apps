@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockSdk } from '../mocks';
 import ConfigScreen from '../../src/locations/ConfigScreen';
@@ -7,6 +7,10 @@ import ConfigScreen from '../../src/locations/ConfigScreen';
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
+
+async function saveAppInstallation() {
+  return await mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
+}
 
 describe('Config Screen component (Hubspot)', () => {
   beforeEach(() => {
@@ -41,33 +45,21 @@ describe('Config Screen component (Hubspot)', () => {
       const input = screen.getByPlaceholderText(/Enter your access token/i);
       expect(input).toBeRequired();
     });
-    /*
-    it('shows validation message if token is invalid', async () => {
-      const input = screen.getByPlaceholderText(/Enter your access token/i);
-      fireEvent.change(input, { target: { value: '' } });
-      // Wait for the validation message to appear
-      expect(await screen.findByText(/Invalid API key/i)).toBeTruthy();
-    });
 
-    it('renders the instructions section and can expand/collapse', () => {
-      expect(
-        screen.getByText(/Instructions to create a private app access token in Hubspot/i)
-      ).toBeTruthy();
-      // Should be expanded by default
-      expect(screen.getByText(/To create a private app access token:/i)).toBeTruthy();
-      // Collapse
-      const toggleBtn = screen.getByLabelText(/Collapse instructions|Expand instructions/i);
-      fireEvent.click(toggleBtn);
-      expect(screen.queryByText(/To create a private app access token:/i)).toBeFalsy();
-      // Expand again
-      fireEvent.click(toggleBtn);
-      expect(screen.getByText(/To create a private app access token:/i)).toBeTruthy();
-    });*/
+    it('shows a toast error if the hubspot api key is not set', async () => {
+      const input = screen.getByPlaceholderText(/Enter your access token/i);
+      expect(input).toHaveValue('');
+
+      await saveAppInstallation();
+
+      expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
+    });
 
     it('renders the external link with icon', () => {
       const link = screen.getByRole('link', {
         name: /Read about creating private apps in Hubspot/i,
       });
+
       expect(link).toBeTruthy();
       expect(link).toHaveAttribute('href');
       expect(link.querySelector('svg')).toBeTruthy();
