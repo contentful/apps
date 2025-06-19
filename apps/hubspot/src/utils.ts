@@ -11,3 +11,5 @@ export const CONFIG_SCREEN_INSTRUCTIONS = [
 export type AppInstallationParameters = {
   hubspotAccessToken: string;
 };
+
+export const CONFIG_CONTENT_TYPE_ID = 'hubspotConfig';
