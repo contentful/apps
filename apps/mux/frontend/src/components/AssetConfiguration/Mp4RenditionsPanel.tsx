@@ -13,6 +13,8 @@ interface Mp4RenditionsPanelProps {
   asset: MuxContentfulObject;
   onCreateRendition: (type: ResolutionType) => Promise<void>;
   onDeleteRendition: (id: string) => void;
+  onUndoDeleteRendition: (id: string) => void;
+  isRenditionPendingDelete: (id: string) => boolean;
 }
 
 const mapRendition = (
@@ -37,6 +39,8 @@ const Mp4RenditionsPanel: FC<Mp4RenditionsPanelProps> = ({
   asset,
   onCreateRendition,
   onDeleteRendition,
+  onUndoDeleteRendition,
+  isRenditionPendingDelete,
 }) => {
   const baseStaticRenditionURL = `https://stream.mux.com/${
     asset.playbackId ?? asset.signedPlaybackId
@@ -52,6 +56,8 @@ const Mp4RenditionsPanel: FC<Mp4RenditionsPanelProps> = ({
         audioOnly={audioOnly}
         onCreateRendition={onCreateRendition}
         onDeleteRendition={onDeleteRendition}
+        onUndoDeleteRendition={onUndoDeleteRendition}
+        isRenditionPendingDelete={isRenditionPendingDelete}
       />
     </Box>
   );

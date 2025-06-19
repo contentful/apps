@@ -1,10 +1,13 @@
 import React from 'react';
 import { Note, Box, Table, Button, Tooltip, TextLink } from '@contentful/f36-components';
 import { Track, AudioTrack, CaptionTrack } from '../../util/types';
+import DeleteUndoButton from '../DeleteUndoButton';
 
 interface TrackListProps {
   tracks: Track[];
-  onDeleteTrack: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onDeleteTrack: (trackId: string) => void;
+  onUndoDeleteTrack: (trackId: string) => void;
+  isTrackPendingDelete: (trackId: string) => boolean;
   playbackId?: string;
   domain?: string;
   token?: string;
@@ -15,6 +18,8 @@ interface TrackListProps {
 const TrackList: React.FC<TrackListProps> = ({
   tracks,
   onDeleteTrack,
+  onUndoDeleteTrack,
+  isTrackPendingDelete,
   type,
   playbackId,
   domain,
@@ -117,13 +122,11 @@ const TrackList: React.FC<TrackListProps> = ({
                       </Button>
                     </Tooltip>
                   ) : (
-                    <Button
-                      variant="negative"
-                      size="small"
-                      data-track={track.id}
-                      onClick={onDeleteTrack}>
-                      Delete
-                    </Button>
+                    <DeleteUndoButton
+                      isPendingDelete={isTrackPendingDelete(track.id)}
+                      onDelete={() => onDeleteTrack(track.id)}
+                      onUndo={() => onUndoDeleteTrack(track.id)}
+                    />
                   )}
                 </Table.Cell>
               </Table.Row>

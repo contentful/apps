@@ -79,6 +79,15 @@ function normalizeForDiff(obj: any): any {
   return obj;
 }
 
+// Helper for updating pendingActions
+const updatePendingActions = (value, newPendingActions) => {
+  const finalPendingActions =
+    newPendingActions.delete.length === 0 && newPendingActions.create.length === 0
+      ? undefined
+      : newPendingActions;
+  return { ...value, pendingActions: finalPendingActions };
+};
+
 export class App extends React.Component<AppProps, AppState> {
   apiClient: ApiClient;
   cmaClient: PlainClientAPI;
@@ -861,11 +870,8 @@ export class App extends React.Component<AppProps, AppState> {
 
   swapPlaybackIDs = async () => {
     if (!this.state.value) return;
-
     const currentValue = this.state.value;
     const currentPlaybackId = currentValue.playbackId || currentValue.signedPlaybackId;
-
-    // If there are pending actions of playback, delete them (cancel)
     if (
       currentValue.pendingActions?.create?.some((action) => action.type === 'playback') ||
       currentValue.pendingActions?.delete?.some((action) => action.type === 'playback')
@@ -874,32 +880,22 @@ export class App extends React.Component<AppProps, AppState> {
         delete: currentValue.pendingActions.delete.filter((action) => action.type !== 'playback'),
         create: currentValue.pendingActions.create.filter((action) => action.type !== 'playback'),
       };
-
-      // If there are no pending actions, delete the entire structure
-      const finalPendingActions =
-        updatedPendingActions.delete.length === 0 && updatedPendingActions.create.length === 0
-          ? undefined
-          : updatedPendingActions;
-
-      await this.props.sdk.field.setValue({
-        ...currentValue,
-        pendingActions: finalPendingActions,
-      });
-
+      await this.props.sdk.field.setValue(
+        updatePendingActions(currentValue, updatedPendingActions)
+      );
       return;
     }
-
-    // If there are no pending actions, create new ones
     const isCurrentlySigned = this.isUsingSigned();
-
     const pendingActions: PendingActions = {
       delete: [
+        ...(currentValue.pendingActions?.delete || []),
         {
           type: 'playback',
           id: currentPlaybackId,
         },
       ],
       create: [
+        ...(currentValue.pendingActions?.create || []),
         {
           type: 'playback',
           data: {
@@ -909,7 +905,6 @@ export class App extends React.Component<AppProps, AppState> {
         },
       ],
     };
-
     await this.props.sdk.field.setValue({
       ...currentValue,
       pendingActions,
@@ -1033,6 +1028,67 @@ export class App extends React.Component<AppProps, AppState> {
       console.error('Error updating metadata:', error);
       this.props.sdk.notifier.error('Error updating metadata');
     }
+  };
+
+  onDeleteTrack = async (trackId: string, type: 'caption' | 'audio') => {
+    const value = this.state.value;
+    if (!value) return;
+    const pending = value.pendingActions || { delete: [], create: [] };
+    const newDelete = [
+      ...pending.delete,
+      { type: type === 'caption' ? 'caption' : 'audio', id: trackId },
+    ];
+    const newPendingActions = { ...pending, delete: newDelete };
+    await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
+  };
+
+  onUndoDeleteTrack = async (trackId: string, type: 'caption' | 'audio') => {
+    const value = this.state.value;
+    if (!value || !value.pendingActions) return;
+    const newDelete = value.pendingActions.delete.filter(
+      (action) =>
+        !(action.type === (type === 'caption' ? 'caption' : 'audio') && action.id === trackId)
+    );
+    const newPendingActions = {
+      ...value.pendingActions,
+      delete: newDelete,
+    };
+    await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
+  };
+
+  onDeleteRendition = async (renditionId: string) => {
+    const value = this.state.value;
+    if (!value) return;
+    const pending = value.pendingActions || { delete: [], create: [] };
+    const newDelete = [...pending.delete, { type: 'staticRendition', id: renditionId }];
+    const newPendingActions = { ...pending, delete: newDelete };
+    await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
+  };
+
+  onUndoDeleteRendition = async (renditionId: string) => {
+    const value = this.state.value;
+    if (!value || !value.pendingActions) return;
+    const newDelete = value.pendingActions.delete.filter(
+      (action) => !(action.type === 'staticRendition' && action.id === renditionId)
+    );
+    const newPendingActions = {
+      ...value.pendingActions,
+      delete: newDelete,
+    };
+    await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
+  };
+
+  isTrackPendingDelete = (trackId: string, type: 'caption' | 'audio') => {
+    const pending = this.state.value?.pendingActions?.delete || [];
+    return pending.some(
+      (action) =>
+        action.type === (type === 'caption' ? 'caption' : 'audio') && action.id === trackId
+    );
+  };
+
+  isRenditionPendingDelete = (renditionId: string) => {
+    const pending = this.state.value?.pendingActions?.delete || [];
+    return pending.some((action) => action.type === 'staticRendition' && action.id === renditionId);
   };
 
   render = () => {
@@ -1189,12 +1245,11 @@ export class App extends React.Component<AppProps, AppState> {
                       e.preventDefault();
                       this.uploadTrack(e.target as HTMLFormElement, 'caption');
                     }}
-                    onDeleteTrack={(e) => {
-                      const trackId = e.currentTarget.dataset.track;
-                      if (trackId) {
-                        this.deleteTrack(trackId);
-                      }
-                    }}
+                    onDeleteTrack={(trackId) => this.onDeleteTrack(trackId, 'caption')}
+                    onUndoDeleteTrack={(trackId) => this.onUndoDeleteTrack(trackId, 'caption')}
+                    isTrackPendingDelete={(trackId) =>
+                      this.isTrackPendingDelete(trackId, 'caption')
+                    }
                     tracks={(this.state.value?.captions || []) as Track[]}
                     type="caption"
                     title="Add Caption"
@@ -1211,13 +1266,10 @@ export class App extends React.Component<AppProps, AppState> {
                       e.preventDefault();
                       this.uploadTrack(e.target as HTMLFormElement, 'audio');
                     }}
-                    onDeleteTrack={(e) => {
-                      const trackId = e.currentTarget.dataset.track;
-                      if (trackId) {
-                        this.deleteTrack(trackId);
-                      }
-                    }}
-                    tracks={this.state.value?.audioTracks || []}
+                    onDeleteTrack={(trackId) => this.onDeleteTrack(trackId, 'audio')}
+                    onUndoDeleteTrack={(trackId) => this.onUndoDeleteTrack(trackId, 'audio')}
+                    isTrackPendingDelete={(trackId) => this.isTrackPendingDelete(trackId, 'audio')}
+                    tracks={(this.state.value?.audioTracks || []) as Track[]}
                     type="audio"
                     title="Add Audio"
                     playbackId={this.state.value?.playbackId || this.state.value?.signedPlaybackId}
@@ -1292,7 +1344,9 @@ export class App extends React.Component<AppProps, AppState> {
                   <Mp4RenditionsPanel
                     asset={this.state.value}
                     onCreateRendition={this.createStaticRenditionHandler}
-                    onDeleteRendition={this.deleteStaticRenditionHandler}
+                    onDeleteRendition={this.onDeleteRendition}
+                    onUndoDeleteRendition={this.onUndoDeleteRendition}
+                    isRenditionPendingDelete={this.isRenditionPendingDelete}
                   />
                 </Tabs.Panel>
               </Tabs>
