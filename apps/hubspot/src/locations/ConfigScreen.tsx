@@ -12,6 +12,7 @@ import {
   IconButton,
   Subheading,
   TextLink,
+  List,
 } from '@contentful/f36-components';
 import { ChevronDownIcon, ChevronUpIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -26,7 +27,7 @@ import {
 
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isHubspotTokenInvalid, setIsHubspotTokenInvalid] = useState(false);
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     hubspotAccessToken: '',
@@ -66,9 +67,7 @@ const ConfigScreen = () => {
       const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
 
       if (currentParameters) {
-        setParameters({
-          hubspotAccessToken: currentParameters.hubspotAccessToken ?? '',
-        });
+        setParameters(currentParameters);
       }
       sdk.app.setReady();
     })();
@@ -126,13 +125,13 @@ const ConfigScreen = () => {
             <Paragraph marginBottom="none" fontColor="gray500">
               To create a private app access token:
             </Paragraph>
-            <ol className={styles.orderList}>
+            <List as="ol" className={styles.orderList}>
               {CONFIG_SCREEN_INSTRUCTIONS.map((step, i) => (
-                <li key={i} className={styles.listItem}>
+                <List.Item key={i} className={styles.listItem}>
                   {step}
-                </li>
+                </List.Item>
               ))}
-            </ol>
+            </List>
             <Box marginTop="spacingS">
               <TextLink
                 href={HUBSPOT_PRIVATE_APPS_URL}
