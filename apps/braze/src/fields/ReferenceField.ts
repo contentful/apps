@@ -75,7 +75,7 @@ export class ReferenceField extends Field {
     );
   }
 
-  displayName(): string {
+  displayNameForGenerate(): string {
     return `${this.name} > ${this.title} (${this.referenceContentTypeName})`;
   }
 
@@ -108,6 +108,10 @@ export class ReferenceField extends Field {
 
   selectedFields(): Field[] {
     return this.fields.filter((field) => field.selected);
+  }
+
+  isEnabledForCreate(): boolean {
+    return false;
   }
 }
 

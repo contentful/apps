@@ -1,10 +1,10 @@
 import { Box, Button, Checkbox, Paragraph, TextLink, Text } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
-import WizardFooter from './WizardFooter';
-import FieldCheckbox from './FieldCheckbox';
-import { Entry } from '../fields/Entry';
-import { useState } from 'react';
-import { Field } from '../fields/Field';
+import WizardFooter from '../WizardFooter';
+import FieldCheckbox from '../FieldCheckbox';
+import { Entry } from '../../fields/Entry';
+import React, { useState } from 'react';
+import { Field } from '../../fields/Field';
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
 
