@@ -6,43 +6,39 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import * as contentful from 'contentful-management';
 
-async function deleteMuxPlaybackId(assetId: string, playbackId: string, context: any) {
-  console.log(`Deleting playbackId ${playbackId} for assetId ${assetId}`);
+async function deleteMuxResource({
+  assetId,
+  resourceId,
+  context,
+  resourceType, // 'playback-ids', 'tracks', 'static-renditions', ''
+  logLabel,
+}: {
+  assetId: string;
+  resourceId?: string;
+  context: any;
+  resourceType: string;
+  logLabel: string;
+}) {
   const { muxAccessTokenId, muxAccessTokenSecret } = context.appInstallationParameters;
   const credentials = btoa(`${muxAccessTokenId}:${muxAccessTokenSecret}`);
 
-  const deleteRes = await fetch(
-    `https://api.mux.com/video/v1/assets/${assetId}/playback-ids/${playbackId}`,
-    {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Basic ${credentials}`,
-        'Content-Type': 'application/json',
-      },
-    }
-  );
-  if (!deleteRes.ok) {
-    const error = await deleteRes.json();
-    throw new Error(`Error deleting playbackId: ${error.error?.messages?.[0] || 'Unknown error'}`);
+  let endpoint = `https://api.mux.com/video/v1/assets/${assetId}`;
+  if (resourceType) {
+    endpoint += `/${resourceType}`;
+    if (resourceId) endpoint += `/${resourceId}`;
   }
-}
 
-async function createMuxPlaybackId(assetId: string, policy: string, context: any) {
-  console.log(`Creating playbackId for assetId ${assetId} with policy ${policy}`);
-  const { muxAccessTokenId, muxAccessTokenSecret } = context.appInstallationParameters;
-  const credentials = btoa(`${muxAccessTokenId}:${muxAccessTokenSecret}`);
-
-  const createRes = await fetch(`https://api.mux.com/video/v1/assets/${assetId}/playback-ids`, {
-    method: 'POST',
+  console.log(`Deleting ${logLabel} ${resourceId || ''} for assetId ${assetId}`);
+  const deleteRes = await fetch(endpoint, {
+    method: 'DELETE',
     headers: {
       Authorization: `Basic ${credentials}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ policy }),
   });
-  if (!createRes.ok) {
-    const error = await createRes.json();
-    throw new Error(`Error creating playbackId: ${error.error?.messages?.[0] || 'Unknown error'}`);
+  if (!deleteRes.ok) {
+    const error = await deleteRes.json();
+    throw new Error(`Error deleting ${logLabel}: ${error.error?.messages?.[0] || 'Unknown error'}`);
   }
 }
 
@@ -118,12 +114,41 @@ async function runPendingActionsFromEntry(
           try {
             switch (deleteAction.type) {
               case 'playback':
-                await deleteMuxPlaybackId(pendingActions.assetId, deleteAction.id, context);
+                await deleteMuxResource({
+                  assetId: pendingActions.assetId,
+                  resourceId: deleteAction.id,
+                  context,
+                  resourceType: 'playback-ids',
+                  logLabel: 'playbackId',
+                });
                 break;
               case 'captions':
-              case 'asset':
               case 'audio':
+                await deleteMuxResource({
+                  assetId: pendingActions.assetId,
+                  resourceId: deleteAction.id,
+                  context,
+                  resourceType: 'tracks',
+                  logLabel: 'track',
+                });
+                break;
               case 'staticRenditions':
+                await deleteMuxResource({
+                  assetId: pendingActions.assetId,
+                  resourceId: deleteAction.id,
+                  context,
+                  resourceType: 'static-renditions',
+                  logLabel: 'static rendition',
+                });
+                break;
+              case 'asset':
+                await deleteMuxResource({
+                  assetId: pendingActions.assetId,
+                  context,
+                  resourceType: '',
+                  logLabel: 'asset',
+                });
+                break;
               default:
                 console.warn(`Unsupported deleteAction type: ${deleteAction.type}`);
             }
@@ -144,10 +169,6 @@ async function runPendingActionsFromEntry(
                   context
                 );
                 break;
-              case 'captions':
-              case 'asset':
-              case 'audio':
-              case 'staticRenditions':
               default:
                 console.warn(`Unsupported deleteAction type: ${createAction.type}`);
             }
@@ -304,6 +325,25 @@ function findPendingActionsInMuxFields(fields: any): Record<string, any> {
 
   console.log('Pending actions map:', pendingActionsMap);
   return pendingActionsMap;
+}
+
+async function createMuxPlaybackId(assetId: string, policy: string, context: any) {
+  console.log(`Creating playbackId for assetId ${assetId} with policy ${policy}`);
+  const { muxAccessTokenId, muxAccessTokenSecret } = context.appInstallationParameters;
+  const credentials = btoa(`${muxAccessTokenId}:${muxAccessTokenSecret}`);
+
+  const createRes = await fetch(`https://api.mux.com/video/v1/assets/${assetId}/playback-ids`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${credentials}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ policy }),
+  });
+  if (!createRes.ok) {
+    const error = await createRes.json();
+    throw new Error(`Error creating playbackId: ${error.error?.messages?.[0] || 'Unknown error'}`);
+  }
 }
 
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = async (
