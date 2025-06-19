@@ -6,79 +6,11 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import * as contentful from 'contentful-management';
 
-type InstallationParameters = {
-  muxAccessTokenId: string;
-  muxAccessTokenSecret: string;
-};
-
-interface ExtendedContext {
-  appInstallationParameters: InstallationParameters;
-  cmaClientOptions: any;
-}
-
-type CombinedContext = ExtendedContext;
-
-// Use any for the event type since the Contentful types are complex
-type EventHandler = (event: any, context: CombinedContext) => Promise<void>;
-
-interface AssetSettings {
-  passthrough?: string;
-  meta?: {
-    title?: string;
-    creator_id?: string;
-    external_id?: string;
-  };
-}
-
-interface MuxFieldValue {
-  assetId: string;
-  [key: string]: any;
-}
-
-// Function to update assets using fetch directly to the Mux API
-async function updateAsset(context: any, assetId: string, settings: any) {
-  const { muxAccessTokenId, muxAccessTokenSecret } = context.appInstallationParameters;
-
-  // Create basic credentials for authentication
-  const credentials = btoa(`${muxAccessTokenId}:${muxAccessTokenSecret}`);
-
-  const requestBody: any = {
-    meta: settings.meta || {
-      title: '',
-      creator_id: '',
-      external_id: '',
-    },
-    passthrough: settings.passthrough || '',
-  };
-
-  const response = await fetch(`https://api.mux.com/video/v1/assets/${assetId}`, {
-    method: 'PATCH',
-    headers: {
-      Authorization: `Basic ${credentials}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(requestBody),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(`Error updating asset: ${error.error?.messages?.[0] || 'Unknown error'}`);
-  }
-
-  return response.json();
-}
-
-// Function to make the swap of playbackId using data from pendingActions
-async function swapPlaybackIdFromPendingActions(
-  assetId: string,
-  playbackId: string,
-  policy: string,
-  context: any
-) {
+async function deleteMuxPlaybackId(assetId: string, playbackId: string, context: any) {
+  console.log(`Deleting playbackId ${playbackId} for assetId ${assetId}`);
   const { muxAccessTokenId, muxAccessTokenSecret } = context.appInstallationParameters;
   const credentials = btoa(`${muxAccessTokenId}:${muxAccessTokenSecret}`);
 
-  // Delete old playbackId
   const deleteRes = await fetch(
     `https://api.mux.com/video/v1/assets/${assetId}/playback-ids/${playbackId}`,
     {
@@ -91,11 +23,15 @@ async function swapPlaybackIdFromPendingActions(
   );
   if (!deleteRes.ok) {
     const error = await deleteRes.json();
-    console.error('Error deleting playbackId:', error);
-    return;
+    throw new Error(`Error deleting playbackId: ${error.error?.messages?.[0] || 'Unknown error'}`);
   }
+}
 
-  // Create new playbackId
+async function createMuxPlaybackId(assetId: string, policy: string, context: any) {
+  console.log(`Creating playbackId for assetId ${assetId} with policy ${policy}`);
+  const { muxAccessTokenId, muxAccessTokenSecret } = context.appInstallationParameters;
+  const credentials = btoa(`${muxAccessTokenId}:${muxAccessTokenSecret}`);
+
   const createRes = await fetch(`https://api.mux.com/video/v1/assets/${assetId}/playback-ids`, {
     method: 'POST',
     headers: {
@@ -106,15 +42,46 @@ async function swapPlaybackIdFromPendingActions(
   });
   if (!createRes.ok) {
     const error = await createRes.json();
-    console.error('Error creating playbackId:', error);
-    return;
+    throw new Error(`Error creating playbackId: ${error.error?.messages?.[0] || 'Unknown error'}`);
   }
-
-  console.log(`PlaybackId ${playbackId} deleted and created a new one with policy ${policy}`);
 }
 
-// Function to delete pendingActions from the entry in Contentful and make swap if applicable
-async function deletePendingActionsFromEntry(entry: any, context: any) {
+async function removePendingActionsFromAllLocalesAndUpdate(
+  fieldKey: string,
+  cma: any,
+  entryId: string,
+  spaceId: string,
+  environmentId: string
+) {
+  try {
+    console.log(`Removing pendingActions and updating entry in Contentful for field ${fieldKey}.`);
+    const entryFromContentful = await cma.entry.get({ entryId, spaceId, environmentId });
+    const fieldValue = entryFromContentful.fields[fieldKey];
+    for (const locale of Object.keys(fieldValue)) {
+      if (
+        fieldValue[locale] &&
+        typeof fieldValue[locale] === 'object' &&
+        'pendingActions' in fieldValue[locale]
+      ) {
+        delete fieldValue[locale].pendingActions;
+      }
+    }
+    await cma.entry.update({ entryId, spaceId, environmentId }, entryFromContentful);
+  } catch (err) {
+    console.error(
+      `There was an error removing pendingActions from all locales in ${fieldKey}:`,
+      err
+    );
+    throw err;
+  }
+}
+
+async function runPendingActionsFromEntry(
+  entry: any,
+  context: any,
+  fieldsWithPendingActions: Record<string, any>
+) {
+  console.log('Running pending actions from entry');
   const {
     sys: {
       id: entryId,
@@ -132,104 +99,81 @@ async function deletePendingActionsFromEntry(entry: any, context: any) {
     type: 'plain',
   });
 
-  const entryFromContentful = await cma.entry.get({ entryId, spaceId, environmentId });
-  console.log('DEBUG entryFromContentful:', JSON.stringify(entryFromContentful, null, 2));
+  const failedPendingActions: Record<string, any> = {};
 
-  let hasPendingActions = false;
-
-  // Iterate over all fields and take only the first locale for swap, but delete pendingActions from all locales
-  for (const [fieldId, fieldValue] of Object.entries(entryFromContentful.fields)) {
-    if (fieldValue && typeof fieldValue === 'object') {
-      // Find the first locale with pendingActions and swap data
-      let swapDone = false;
-      for (const [locale, localeValue] of Object.entries(fieldValue)) {
-        if (localeValue && typeof localeValue === 'object' && 'pendingActions' in localeValue) {
-          const pending = (localeValue as any).pendingActions;
-          const deletePlayback = Array.isArray(pending.delete)
-            ? pending.delete.find((d: any) => d.type === 'playback' && d.id)
-            : null;
-          const createPlayback = Array.isArray(pending.create)
-            ? pending.create.find((c: any) => c.type === 'playback' && c.data?.policy)
-            : null;
-          const assetId = (localeValue as any).assetId;
-
-          // Call swap only once per field
-          if (!swapDone && deletePlayback && createPlayback && assetId) {
-            console.log(
-              `Executing swapPlaybackId for assetId ${assetId}, playbackId ${deletePlayback.id}, policy ${createPlayback.data.policy}`
-            );
-            await swapPlaybackIdFromPendingActions(
-              assetId,
-              deletePlayback.id,
-              createPlayback.data.policy,
-              context
-            );
-            swapDone = true;
-          }
-
-          // Delete pendingActions from all locales
-          console.log(`Deleting pendingActions from field ${fieldId}, locale ${locale}`);
-          delete (localeValue as any).pendingActions;
-          hasPendingActions = true;
-        }
-      }
-    }
-  }
-
-  if (hasPendingActions) {
-    console.log('Deleting pendingActions from entry in Contentful...');
-    const updated = await cma.entry.update(
-      { entryId, spaceId, environmentId },
-      entryFromContentful
+  for (const fieldKey of Object.keys(fieldsWithPendingActions)) {
+    await removePendingActionsFromAllLocalesAndUpdate(
+      fieldKey,
+      cma,
+      entryId,
+      spaceId,
+      environmentId
     );
-    // await cma.entry.publish({ entryId, spaceId, environmentId }, updated);
-    console.log('pendingActions deleted successfully from entry');
-  } else {
-    console.log('No pendingActions found in entry');
-  }
-}
+    const pendingActions = fieldsWithPendingActions[fieldKey];
+    const failedActions: { delete: any[]; create: any[] } = { delete: [], create: [] };
 
-// Function to process a Mux field independently of its locale
-async function processMuxField(fieldValue: any, context: any) {
-  console.log('Processing Mux field:', fieldValue);
-
-  if (fieldValue && typeof fieldValue === 'object') {
-    console.log('The field is an object, searching locales...');
-    const locales = Object.keys(fieldValue);
-    console.log('Locales found:', locales);
-
-    for (const localeValue of Object.values(fieldValue)) {
-      console.log('Processing value of locale:', localeValue);
-
-      if (localeValue && typeof localeValue === 'object' && 'assetId' in localeValue) {
-        console.log('Found assetId in the locale');
-        const assetId = (localeValue as any).assetId;
-        console.log('AssetId found:', assetId);
-
-        if (assetId) {
+    if (pendingActions) {
+      if (Array.isArray(pendingActions.delete)) {
+        for (const deleteAction of pendingActions.delete) {
           try {
-            console.log('Attempting to update asset:', assetId);
-            const response = await updateAsset(context, assetId, {
-              passthrough: 'Edited by the function!',
-            });
-            console.log('Mux response:', response);
-            console.log(`Asset ${assetId} updated successfully`);
-          } catch (error) {
-            console.error(`Error updating asset ${assetId}:`, error);
+            switch (deleteAction.type) {
+              case 'playback':
+                await deleteMuxPlaybackId(pendingActions.assetId, deleteAction.id, context);
+                break;
+              case 'captions':
+              case 'asset':
+              case 'audio':
+              case 'staticRenditions':
+              default:
+                console.warn(`Unsupported deleteAction type: ${deleteAction.type}`);
+            }
+          } catch (err) {
+            console.error(`Error in delete of Mux for ${fieldKey}:`, err);
+            failedActions.delete.push(deleteAction);
           }
-        } else {
-          console.log('AssetId is empty, skipping...');
         }
-      } else {
-        console.log('No assetId found in the locale or the value is not an object');
+      }
+      if (Array.isArray(pendingActions.create)) {
+        for (const createAction of pendingActions.create) {
+          try {
+            switch (createAction.type) {
+              case 'playback':
+                await createMuxPlaybackId(
+                  pendingActions.assetId,
+                  createAction.data?.policy,
+                  context
+                );
+                break;
+              case 'captions':
+              case 'asset':
+              case 'audio':
+              case 'staticRenditions':
+              default:
+                console.warn(`Unsupported deleteAction type: ${createAction.type}`);
+            }
+          } catch (err) {
+            console.error(`Error in create of Mux for ${fieldKey}:`, err);
+            failedActions.create.push(createAction);
+          }
+        }
       }
     }
-  } else {
-    console.log('The field is not an object, skipping...');
+
+    if (failedActions.delete.length > 0 || failedActions.create.length > 0) {
+      failedPendingActions[fieldKey] = {
+        delete: failedActions.delete,
+        create: failedActions.create,
+      };
+    }
   }
+
+  console.log(
+    'Finished running pending actions from entry. Failed pending actions:',
+    failedPendingActions
+  );
+  return failedPendingActions;
 }
 
-// Function to get Mux asset
 async function fetchMuxAsset(assetId: string, context: any) {
   const { muxAccessTokenId, muxAccessTokenSecret } = context.appInstallationParameters;
   const credentials = btoa(`${muxAccessTokenId}:${muxAccessTokenSecret}`);
@@ -250,8 +194,12 @@ async function fetchMuxAsset(assetId: string, context: any) {
   return data;
 }
 
-// Function to update Mux field in Contentful with fresh data from Mux asset
-async function updateEntryFieldWithMuxAsset(entry: any, context: any) {
+async function updateEntryFieldWithMuxAsset(
+  entry: any,
+  context: any,
+  entriesWithFailedActions: Record<string, any>
+) {
+  console.log('Updating entry field with Mux asset');
   const {
     sys: {
       id: entryId,
@@ -270,17 +218,15 @@ async function updateEntryFieldWithMuxAsset(entry: any, context: any) {
   });
 
   const entryFromContentful = await cma.entry.get({ entryId, spaceId, environmentId });
-  let updated = false;
 
   for (const [fieldId, fieldValue] of Object.entries(entryFromContentful.fields)) {
     if (fieldValue && typeof fieldValue === 'object') {
-      const [locale, localeValue] = Object.entries(fieldValue)[0] || [];
+      const [_, localeValue] = Object.entries(fieldValue)[0] || [];
       if (localeValue && typeof localeValue === 'object' && (localeValue as any).assetId) {
         const assetId = (localeValue as any).assetId;
         try {
           const muxAsset = await fetchMuxAsset(assetId, context);
 
-          // Adapt the asset structure for Contentful
           const publicPlayback = Array.isArray(muxAsset.playback_ids)
             ? muxAsset.playback_ids.find((p: any) => p.policy === 'public')
             : undefined;
@@ -288,7 +234,7 @@ async function updateEntryFieldWithMuxAsset(entry: any, context: any) {
             ? muxAsset.playback_ids.find((p: any) => p.policy === 'signed')
             : undefined;
 
-          const updatedField = {
+          let updatedField: any = {
             version: muxAsset.master?.version || 1,
             uploadId: muxAsset.upload_id || undefined,
             assetId: muxAsset.id,
@@ -309,15 +255,15 @@ async function updateEntryFieldWithMuxAsset(entry: any, context: any) {
             live_stream_id: muxAsset.live_stream_id || undefined,
             meta: muxAsset?.master?.meta || undefined,
             passthrough: muxAsset.passthrough || undefined,
-            // No add pendingActions because it was deleted
           };
 
-          console.log('NEW FIELDS IN CONTENTFUL:', JSON.stringify(updatedField, null, 2));
+          if (entriesWithFailedActions[fieldId]) {
+            updatedField.pendingActions = entriesWithFailedActions[fieldId];
+          }
 
-          // Update field in entry
-          entryFromContentful.fields[fieldId][locale] = updatedField;
-          updated = true;
-          console.log(`Field ${fieldId} updated with fresh Mux data for locale ${locale}`);
+          for (const locale of Object.keys(entryFromContentful.fields[fieldId])) {
+            entryFromContentful.fields[fieldId][locale] = updatedField;
+          }
         } catch (err) {
           console.error(`Error updating field ${fieldId} with assetId ${assetId}:`, err);
         }
@@ -325,16 +271,39 @@ async function updateEntryFieldWithMuxAsset(entry: any, context: any) {
     }
   }
 
-  if (updated) {
-    const updatedEntry = await cma.entry.update(
-      { entryId, spaceId, environmentId },
-      entryFromContentful
-    );
-    await cma.entry.publish({ entryId, spaceId, environmentId }, updatedEntry);
-    console.log('Entry updated and published with fresh Mux data');
-  } else {
-    console.log('No fields updated with Mux data');
+  const updatedEntry = await cma.entry.update(
+    { entryId, spaceId, environmentId },
+    entryFromContentful
+  );
+  await cma.entry.publish({ entryId, spaceId, environmentId }, updatedEntry);
+  console.log('Entry updated and published with fresh Mux data');
+}
+
+function findPendingActionsInMuxFields(fields: any): Record<string, any> {
+  const pendingActionsMap: Record<string, any> = {};
+  if (!fields || typeof fields !== 'object') {
+    return pendingActionsMap;
   }
+
+  for (const [fieldKey, fieldValue] of Object.entries(fields)) {
+    if (fieldValue && typeof fieldValue === 'object') {
+      const firstLocaleValue = Object.values(fieldValue)[0];
+      if (
+        firstLocaleValue &&
+        typeof firstLocaleValue === 'object' &&
+        'assetId' in firstLocaleValue &&
+        'pendingActions' in firstLocaleValue
+      ) {
+        pendingActionsMap[fieldKey] = {
+          ...firstLocaleValue.pendingActions,
+          assetId: firstLocaleValue.assetId,
+        };
+      }
+    }
+  }
+
+  console.log('Pending actions map:', pendingActionsMap);
+  return pendingActionsMap;
 }
 
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = async (
@@ -342,79 +311,31 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = a
   context: FunctionEventContext
 ) => {
   console.log('=== START OF HANDLER ===');
-  console.log('Event type:', event.type);
-  console.log('Event complete:', JSON.stringify(event, null, 2));
+  console.log('Event:', JSON.stringify(event, null, 2));
 
-  // Validate event type
   if (event.type !== 'appevent.handler') {
     console.log('Unsupported event type:', event.type);
     return;
   }
 
-  // Find pendingActions in Mux fields
-  const hasPendingActions = findPendingActionsInMuxFields((event.body as any)?.fields);
-  if (!hasPendingActions) {
+  const fieldsWithPendingActions = findPendingActionsInMuxFields((event.body as any)?.fields);
+  if (Object.keys(fieldsWithPendingActions).length === 0) {
     console.log('No pendingActions found in Mux fields, exiting...');
     return;
   }
 
-  console.log('pendingActions found in Mux fields, proceeding with processing...');
-
   try {
-    console.log('Processing event appevent.handler');
-    const entries = Array.isArray(event.body) ? event.body : [event.body];
-    console.log('Number of entries to process:', entries.length);
+    const entry = event.body;
 
-    for (const entry of entries) {
-      console.log('Processing entry:', entry.sys?.id);
-      console.log('Available fields:', Object.keys(entry.fields));
-
-      // Delete pendingActions from entry in Contentful
-      await deletePendingActionsFromEntry(entry, context);
-
-      // Process Mux fields
-      for (const [fieldId, fieldValue] of Object.entries(entry.fields)) {
-        console.log(`\nProcessing field: ${fieldId}`);
-        await processMuxField(fieldValue, context);
-      }
-
-      // Update Mux field in Contentful with fresh data from Mux asset
-      await updateEntryFieldWithMuxAsset(entry, context);
-    }
+    const entriesWithFailedActions = await runPendingActionsFromEntry(
+      entry,
+      context,
+      fieldsWithPendingActions
+    );
+    await updateEntryFieldWithMuxAsset(entry, context, entriesWithFailedActions);
   } catch (error) {
     console.error('Error processing event:', error);
     throw error;
   }
   console.log('=== END OF HANDLER ===');
 };
-
-// Function to find pendingActions in Mux fields
-function findPendingActionsInMuxFields(fields: any): boolean {
-  if (!fields || typeof fields !== 'object') {
-    return false;
-  }
-
-  for (const fieldValue of Object.values(fields)) {
-    if (fieldValue && typeof fieldValue === 'object') {
-      // Search only in the first locale
-      const firstLocaleValue = Object.values(fieldValue)[0];
-      if (
-        firstLocaleValue &&
-        typeof firstLocaleValue === 'object' &&
-        'assetId' in firstLocaleValue
-      ) {
-        // If we find an assetId, check if it has pendingActions
-        if ('pendingActions' in firstLocaleValue) {
-          console.log('Found pendingActions in Mux field');
-          return true;
-        } else {
-          // If we find an assetId but no pendingActions, exit the loop
-          console.log('Found assetId but no pendingActions, exiting...');
-          break;
-        }
-      }
-    }
-  }
-
-  return false;
-}
