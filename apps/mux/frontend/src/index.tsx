@@ -298,28 +298,15 @@ export class App extends React.Component<AppProps, AppState> {
     }
 
     const result = await this.props.sdk.dialogs.openConfirm({
-      title: 'Are you sure you want to delete this asset?',
-      message: 'This will delete the asset in both Mux and Contentful.',
+      title: 'Mark asset for deletion?',
+      message:
+        'This will mark the asset for deletion. The asset will be deleted from Mux and Contentful when you publish. You can undo this action before publishing.',
       intent: 'negative',
-      confirmLabel: 'Yes, Delete',
+      confirmLabel: 'Yes, Mark for Deletion',
       cancelLabel: 'Cancel',
     });
 
-    if (!result) {
-      this.setState({ isDeleting: false });
-      return;
-    }
-    this.setState({ isDeleting: true });
-
-    const res = await this.apiClient.del(`/video/v1/assets/${this.state.value.assetId}`);
-
-    if (!this.responseCheck(res)) {
-      this.resync({ silent: true });
-      return;
-    }
-
-    await this.resetField();
-    this.setState({ isDeleting: false });
+    await this.onDeleteAsset();
   };
 
   requestRemoveAsset = async () => {
@@ -1091,6 +1078,35 @@ export class App extends React.Component<AppProps, AppState> {
     return pending.some((action) => action.type === 'staticRendition' && action.id === renditionId);
   };
 
+  // Helper to check if asset is pending delete
+  isAssetPendingDelete = () => {
+    const assetId = this.state.value?.assetId;
+    if (!assetId) return false;
+    const pending = this.state.value?.pendingActions?.delete || [];
+    return pending.some((action) => action.type === 'asset' && action.id === assetId);
+  };
+
+  // Handler to add asset to pending delete
+  onDeleteAsset = async () => {
+    const value = this.state.value;
+    if (!value || !value.assetId) return;
+    const pending = value.pendingActions || { delete: [], create: [] };
+    const newDelete = [...pending.delete, { type: 'asset', id: value.assetId }];
+    const newPendingActions = { ...pending, delete: newDelete };
+    await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
+  };
+
+  // Handler to undo asset pending delete
+  onUndoDeleteAsset = async () => {
+    const value = this.state.value;
+    if (!value || !value.pendingActions || !value.assetId) return;
+    const newDelete = value.pendingActions.delete.filter(
+      (action) => !(action.type === 'asset' && action.id === value.assetId)
+    );
+    const newPendingActions = { ...value.pendingActions, delete: newDelete };
+    await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
+  };
+
   render = () => {
     const modal = (
       <MuxAssetConfigurationModal
@@ -1183,36 +1199,47 @@ export class App extends React.Component<AppProps, AppState> {
                   </Box>
                 )}
 
-              <section className="player" style={this.getPlayerAspectRatio()}>
-                {this.state.playerPlaybackId !== 'playback-test-123' &&
-                (this.state.value.playbackId || this.state.playbackToken) ? (
-                  <MuxPlayer
-                    ref={this.muxPlayerRef}
-                    data-testid="muxplayer"
-                    style={{ height: '100%', width: '100%' }}
-                    playbackId={this.state.playerPlaybackId}
-                    streamType={this.getPlayerType()}
-                    poster={this.state.value.audioOnly ? '#' : undefined}
-                    customDomain={muxDomain && muxDomain !== 'mux.com' ? muxDomain : undefined}
-                    audio={this.state.value.audioOnly}
-                    metadata={{
-                      player_name: 'Contentful Admin Dashboard',
-                      viewer_user_id:
-                        'user' in this.props.sdk ? this.props.sdk.user.sys.id : undefined,
-                      page_type: 'Preview Player',
-                    }}
-                    tokens={{
-                      playback: this.isUsingSigned() ? this.state.playbackToken : undefined,
-                      thumbnail: this.isUsingSigned() ? this.state.posterToken : undefined,
-                      storyboard: this.isUsingSigned() ? this.state.storyboardToken : undefined,
-                    }}
-                  />
-                ) : (
-                  <Box>
-                    <Spinner size="small" /> Refreshing Player
-                  </Box>
-                )}
-              </section>
+              {this.isAssetPendingDelete() && (
+                <Box marginBottom="spacingM">
+                  <Note variant="negative">
+                    This asset is <strong>marked for deletion</strong>. It will be deleted from Mux
+                    and Contentful when you publish. You can undo this action before publishing.
+                  </Note>
+                </Box>
+              )}
+
+              <div>
+                <section className="player" style={this.getPlayerAspectRatio()}>
+                  {this.state.playerPlaybackId !== 'playback-test-123' &&
+                  (this.state.value.playbackId || this.state.playbackToken) ? (
+                    <MuxPlayer
+                      ref={this.muxPlayerRef}
+                      data-testid="muxplayer"
+                      style={{ height: '100%', width: '100%' }}
+                      playbackId={this.state.playerPlaybackId}
+                      streamType={this.getPlayerType()}
+                      poster={this.state.value.audioOnly ? '#' : undefined}
+                      customDomain={muxDomain && muxDomain !== 'mux.com' ? muxDomain : undefined}
+                      audio={this.state.value.audioOnly}
+                      metadata={{
+                        player_name: 'Contentful Admin Dashboard',
+                        viewer_user_id:
+                          'user' in this.props.sdk ? this.props.sdk.user.sys.id : undefined,
+                        page_type: 'Preview Player',
+                      }}
+                      tokens={{
+                        playback: this.isUsingSigned() ? this.state.playbackToken : undefined,
+                        thumbnail: this.isUsingSigned() ? this.state.posterToken : undefined,
+                        storyboard: this.isUsingSigned() ? this.state.storyboardToken : undefined,
+                      }}
+                    />
+                  ) : (
+                    <Box>
+                      <Spinner size="small" /> Refreshing Player
+                    </Box>
+                  )}
+                </section>
+              </div>
 
               {this.isLive() && (
                 <Box marginBottom="spacingM" marginTop="spacingM">
@@ -1223,7 +1250,9 @@ export class App extends React.Component<AppProps, AppState> {
               <Box marginTop="spacingM">
                 <Menu
                   requestRemoveAsset={this.requestRemoveAsset}
-                  requestDeleteAsset={this.requestDeleteAsset}
+                  onDelete={this.requestDeleteAsset}
+                  onUndo={this.onUndoDeleteAsset}
+                  isPendingDelete={this.isAssetPendingDelete()}
                   resync={this.resync}
                   assetId={this.state.value.assetId}
                 />
