@@ -109,6 +109,30 @@ async function runPendingActionsFromEntry(
     const failedActions: { delete: any[]; create: any[] } = { delete: [], create: [] };
 
     if (pendingActions) {
+      // Top priority: Delete asset
+      const assetDeleteAction = Array.isArray(pendingActions.delete)
+        ? pendingActions.delete.find((action: any) => action.type === 'asset')
+        : undefined;
+      if (assetDeleteAction) {
+        try {
+          await deleteMuxResource({
+            assetId: pendingActions.assetId,
+            context,
+            resourceType: '',
+            logLabel: 'asset',
+          });
+        } catch (err) {
+          console.error(`Error in delete of asset for ${fieldKey}:`, err);
+          failedActions.delete.push(assetDeleteAction);
+        }
+        if (failedActions.delete.length > 0) {
+          failedPendingActions[fieldKey] = {
+            delete: failedActions.delete,
+            create: [],
+          };
+        }
+        continue;
+      }
       if (Array.isArray(pendingActions.delete)) {
         for (const deleteAction of pendingActions.delete) {
           try {
@@ -139,14 +163,6 @@ async function runPendingActionsFromEntry(
                   context,
                   resourceType: 'static-renditions',
                   logLabel: 'static rendition',
-                });
-                break;
-              case 'asset':
-                await deleteMuxResource({
-                  assetId: pendingActions.assetId,
-                  context,
-                  resourceType: '',
-                  logLabel: 'asset',
                 });
                 break;
               default:
