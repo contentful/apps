@@ -279,6 +279,9 @@ async function updateEntryFieldWithMuxAsset(
             ? muxAsset.playback_ids.find((p: any) => p.policy === 'signed')
             : undefined;
 
+          const audioTracks = muxAsset.tracks?.filter((t: any) => t.type === 'audio');
+          const captions = muxAsset.tracks?.filter((t: any) => t.type === 'text');
+
           let updatedField: any = {
             version: 1,
             uploadId: muxAsset.upload_id || undefined,
@@ -295,18 +298,17 @@ async function updateEntryFieldWithMuxAsset(
               muxAsset.max_stored_resolution === 'Audio only',
             error: muxAsset.errors?.length ? muxAsset.errors[0].message : undefined,
             created_at: muxAsset.created_at ? Number(muxAsset.created_at) : undefined,
-            captions: muxAsset.tracks?.filter((t: any) => t.type === 'text') || [],
-            audioTracks: muxAsset.tracks?.filter((t: any) => t.type === 'audio') || [],
+            ...(captions?.length && { captions }),
+            ...(audioTracks?.length && { audioTracks }),
             static_renditions: muxAsset.static_renditions?.files || undefined,
             is_live: muxAsset.is_live || undefined,
             live_stream_id: muxAsset.live_stream_id || undefined,
             meta: muxAsset.meta || undefined,
             passthrough: muxAsset.passthrough || undefined,
+            ...(entriesWithFailedActions[fieldId] && {
+              pendingActions: entriesWithFailedActions[fieldId],
+            }),
           };
-
-          if (entriesWithFailedActions[fieldId]) {
-            updatedField.pendingActions = entriesWithFailedActions[fieldId];
-          }
 
           for (const locale of Object.keys(entryFromContentful.fields[fieldId])) {
             entryFromContentful.fields[fieldId][locale] = updatedField;
