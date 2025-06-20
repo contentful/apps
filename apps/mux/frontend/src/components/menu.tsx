@@ -1,9 +1,12 @@
 import React from 'react';
 import { Button, Flex, CopyButton } from '@contentful/f36-components';
+import DeleteUndoButton from './DeleteUndoButton';
 
 interface MenuProps {
   requestRemoveAsset: () => void;
-  requestDeleteAsset: () => void;
+  onDelete: () => void;
+  onUndo: () => void;
+  isPendingDelete: boolean;
   resync: () => void;
   assetId: string;
 }
@@ -25,12 +28,11 @@ class Menu extends React.Component<MenuProps, {}> {
               </Button>
             </Flex>
             <Flex>
-              <Button
-                variant="negative"
-                onClick={this.props.requestDeleteAsset}
-                data-testid="deletebutton">
-                Delete
-              </Button>
+              <DeleteUndoButton
+                isPendingDelete={this.props.isPendingDelete}
+                onDelete={this.props.onDelete}
+                onUndo={this.props.onUndo}
+              />
             </Flex>
           </Flex>
         </Flex>
