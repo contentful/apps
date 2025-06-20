@@ -1,5 +1,5 @@
 import { FC, useEffect } from 'react';
-import { FormControl, Checkbox, TextLink } from '@contentful/f36-components';
+import { FormControl, Radio, TextLink } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 interface PlaybackPolicySelectorProps {
@@ -20,10 +20,7 @@ export const PlaybackPolicySelector: FC<PlaybackPolicySelectorProps> = ({
 }) => {
   const handlePolicyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    const newPolicies = event.target.checked
-      ? [...selectedPolicies, value]
-      : selectedPolicies.filter((p) => p !== value);
-    onPoliciesChange(newPolicies);
+    onPoliciesChange([value]);
   };
 
   useEffect(() => {
@@ -34,14 +31,14 @@ export const PlaybackPolicySelector: FC<PlaybackPolicySelectorProps> = ({
 
   return (
     <FormControl>
-      <Checkbox.Group
-        name="checkbox-playback-policies"
-        value={selectedPolicies}
+      <Radio.Group
+        name="radio-playback-policies"
+        value={selectedPolicies[0] ?? ''}
         onChange={handlePolicyChange}>
         <FormControl marginBottom="none">
-          <Checkbox value="signed" isDisabled={!enableSignedUrls}>
+          <Radio value="signed" isDisabled={!enableSignedUrls}>
             Protected
-          </Checkbox>
+          </Radio>
           <FormControl.HelpText>
             Require a valid JSON Web Token (JWT) to gain access.
             <TextLink
@@ -55,7 +52,7 @@ export const PlaybackPolicySelector: FC<PlaybackPolicySelectorProps> = ({
         </FormControl>
 
         <FormControl marginBottom="none">
-          <Checkbox value="public">Public</Checkbox>
+          <Radio value="public">Public</Radio>
           <FormControl.HelpText>
             Can be watched anywhere, at any time, without any restrictions.
             <TextLink
@@ -67,7 +64,7 @@ export const PlaybackPolicySelector: FC<PlaybackPolicySelectorProps> = ({
             />
           </FormControl.HelpText>
         </FormControl>
-      </Checkbox.Group>
+      </Radio.Group>
       {selectedPolicies.length === 0 && (
         <FormControl.ValidationMessage>
           Please select at least one privacy option

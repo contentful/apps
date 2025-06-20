@@ -36,6 +36,16 @@ const SDK_MOCK = {
   window: {
     startAutoResizer: () => null,
   },
+  entry: {
+    getSys: () => ({
+      id: 'entry-id',
+      publishedVersion: 1,
+      version: 2,
+      publishedAt: '2023-01-01T00:00:00Z',
+    }),
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onSysChanged: () => () => {},
+  },
 };
 
 const getById = queryByAttribute.bind(null, 'id');

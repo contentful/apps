@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import { Box, Table, Button, TextLink, Note, Spinner, Tooltip } from '@contentful/f36-components';
+import DeleteUndoButton from './DeleteUndoButton';
 
 interface RenditionInfo {
   status: 'ready' | 'in_progress' | 'none' | 'skipped';
@@ -12,6 +13,8 @@ export interface Mp4RenditionsListProps {
   audioOnly: RenditionInfo;
   onCreateRendition: (type: 'highest' | 'audio-only') => void;
   onDeleteRendition: (id: string) => void;
+  onUndoDeleteRendition: (id: string) => void;
+  isRenditionPendingDelete: (id: string) => boolean;
 }
 
 const statusLabel = {
@@ -26,6 +29,8 @@ const Mp4RenditionsList: FC<Mp4RenditionsListProps> = ({
   audioOnly,
   onCreateRendition,
   onDeleteRendition,
+  onUndoDeleteRendition,
+  isRenditionPendingDelete,
 }) => {
   const rows = [
     { label: 'Highest Resolution', key: 'highest', data: highest },
@@ -76,12 +81,11 @@ const Mp4RenditionsList: FC<Mp4RenditionsListProps> = ({
                   </Tooltip>
                 )}
                 {rendition.data.status === 'ready' && rendition.data.id && (
-                  <Button
-                    size="small"
-                    variant="negative"
-                    onClick={() => onDeleteRendition(rendition.data.id as string)}>
-                    Delete
-                  </Button>
+                  <DeleteUndoButton
+                    isPendingDelete={isRenditionPendingDelete(rendition.data.id)}
+                    onDelete={() => onDeleteRendition(rendition.data.id as string)}
+                    onUndo={() => onUndoDeleteRendition(rendition.data.id as string)}
+                  />
                 )}
               </Table.Cell>
             </Table.Row>

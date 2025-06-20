@@ -38,6 +38,20 @@ export interface AppState {
 
 export type ResolutionType = 'highest' | 'audio-only';
 
+export interface PendingAction {
+  type: 'playback' | 'asset' | 'caption' | 'staticRendition';
+  id?: string;
+  data?: {
+    policy?: 'signed' | 'public';
+    assetId?: string;
+  };
+}
+
+export interface PendingActions {
+  delete: PendingAction[];
+  create: PendingAction[];
+}
+
 export interface MuxContentfulObject {
   version: number;
   uploadId?: string;
@@ -63,6 +77,7 @@ export interface MuxContentfulObject {
     external_id?: string;
   };
   passthrough?: string;
+  pendingActions?: PendingActions;
 }
 
 export interface Error {
