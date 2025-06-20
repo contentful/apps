@@ -221,6 +221,9 @@ async function fetchMuxAsset(assetId: string, context: any) {
       'Content-Type': 'application/json',
     },
   });
+  if (res.status === 404) {
+    return undefined;
+  }
   if (!res.ok) {
     const error = await res.json();
     throw new Error(
@@ -263,6 +266,11 @@ async function updateEntryFieldWithMuxAsset(
         const assetId = (localeValue as any).assetId;
         try {
           const muxAsset = await fetchMuxAsset(assetId, context);
+
+          if (muxAsset === undefined) {
+            entryFromContentful.fields[fieldId] = undefined;
+            continue;
+          }
 
           const publicPlayback = Array.isArray(muxAsset.playback_ids)
             ? muxAsset.playback_ids.find((p: any) => p.policy === 'public')
