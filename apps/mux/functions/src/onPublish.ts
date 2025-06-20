@@ -272,7 +272,7 @@ async function updateEntryFieldWithMuxAsset(
             : undefined;
 
           let updatedField: any = {
-            version: muxAsset.master?.version || 1,
+            version: 1,
             uploadId: muxAsset.upload_id || undefined,
             assetId: muxAsset.id,
             playbackId: publicPlayback?.id || undefined,
@@ -282,7 +282,9 @@ async function updateEntryFieldWithMuxAsset(
             max_stored_resolution: muxAsset.max_stored_resolution || undefined,
             max_stored_frame_rate: muxAsset.max_stored_frame_rate || undefined,
             duration: muxAsset.duration || undefined,
-            audioOnly: muxAsset.master?.audio_only || false,
+            audioOnly:
+              'max_stored_resolution' in muxAsset &&
+              muxAsset.max_stored_resolution === 'Audio only',
             error: muxAsset.errors?.length ? muxAsset.errors[0].message : undefined,
             created_at: muxAsset.created_at ? Number(muxAsset.created_at) : undefined,
             captions: muxAsset.tracks?.filter((t: any) => t.type === 'text') || [],
@@ -290,7 +292,7 @@ async function updateEntryFieldWithMuxAsset(
             static_renditions: muxAsset.static_renditions?.files || undefined,
             is_live: muxAsset.is_live || undefined,
             live_stream_id: muxAsset.live_stream_id || undefined,
-            meta: muxAsset?.master?.meta || undefined,
+            meta: muxAsset.meta || undefined,
             passthrough: muxAsset.passthrough || undefined,
           };
 
