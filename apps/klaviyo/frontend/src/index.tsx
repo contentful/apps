@@ -16,17 +16,29 @@ import { storeAppDefinitionId } from './services/persistence-service';
 
 const root = document.getElementById('root');
 
-window.addEventListener('message', (event) => {
+// OAuth callback handler - this runs when the OAuth popup redirects back to the app
+const handleOAuthCallback = () => {
   const params = new URLSearchParams(window.location.search);
-  if (params.has('code') && window.opener) {
-    window.opener.postMessage({
-      type: 'oauth:complete',
-      code: params.get('code'),
-      state: params.get('state'),
-    });
+  console.log('OAuth callback params:', params);
+  if (params.has('code') && params.has('state') && window.opener) {
+    console.log('Sending OAuth completion message to parent window');
+    window.opener.postMessage(
+      {
+        type: 'oauth:complete',
+        code: params.get('code'),
+        state: params.get('state'),
+      },
+      '*'
+    );
+    // Close the popup window
     window.close();
   }
-});
+};
+
+// Check if this is an OAuth callback page
+if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
+  handleOAuthCallback();
+}
 
 init((sdk) => {
   logger.log('SDK Location:', sdk.location);

@@ -81,7 +81,17 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     } else if (fetchOptions.method !== 'GET') {
       fetchOptions.body = JSON.stringify(data);
     }
-    const response = await oauthSdk.makeRequest(url, fetchOptions);
+    // const response = await oauthSdk.makeRequest(url, fetchOptions);
+
+    console.log('oauthSdk', oauthSdk);
+    const token = await oauthSdk.token();
+    console.log('token', token);
+    fetchOptions.headers = {
+      ...fetchOptions.headers,
+      Authorization: `${token.tokenType} ${token.accessToken}`,
+    };
+    const response = await fetch(url, fetchOptions);
+
     if (!response.ok) {
       throw new Error(
         `Klaviyo API error: ${response.status}. ${response.statusText} ${JSON.stringify(

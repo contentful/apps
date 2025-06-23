@@ -8,17 +8,23 @@ import logger from './logger';
  * @returns Array of field mappings for the entryId, or empty array if none found
  */
 export const getEntryKlaviyoFieldMappings = async (
-  sdk: BaseAppSDK,
+  sdkOrCma: BaseAppSDK | any,
   entryId: string,
   spaceIdParam?: string,
   environmentIdParam?: string
 ): Promise<any[]> => {
   try {
-    const spaceId = spaceIdParam || sdk.ids.space;
-    const environmentId = environmentIdParam || sdk.ids.environment;
-    const cma = sdk.cma;
-    const defaultLocale = sdk.locales?.default || 'en-US';
+    const spaceId = spaceIdParam || sdkOrCma.ids.space;
+    const environmentId = environmentIdParam || sdkOrCma.ids.environment;
+    let cma;
+    if (sdkOrCma.cma) {
+      cma = sdkOrCma.cma;
+    } else {
+      cma = sdkOrCma;
+    }
+    const defaultLocale = sdkOrCma.locales?.default || 'en-US';
     // Find the klaviyoFieldMappings entries
+    console.log('Fetching klaviyoFieldMappings entries:', spaceId, environmentId, sdkOrCma);
     const entries = await cma.entry.getMany({
       spaceId,
       environmentId,

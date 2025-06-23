@@ -221,6 +221,8 @@ export const handler = async (
       );
     }
 
+    console.log('CMA:', cma);
+
     // Get parameters from context or by fetching from the API
     let parameters: AppInstallationParameters;
     const appDefinitionId = context.appInstallationId;
@@ -298,6 +300,7 @@ export const handler = async (
     // Get the actual entry data with all fields
     let entry;
     try {
+      console.log('Fetching entry data:', entryId, effectiveSpaceId, effectiveEnvironmentId, cma);
       entry = await cma.entry.get({
         entryId,
         spaceId: effectiveSpaceId,

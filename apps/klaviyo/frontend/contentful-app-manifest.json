@@ -55,11 +55,11 @@
       "accepts": ["appevent.handler"]
     },
     {
-      "id": "proxyRequestAppAction",
+      "id": "proxyRequest",
       "name": "Proxy Request",
       "description": "Proxies requests to allowed Klaviyo endpoints",
-      "path": "functions/proxyRequestAppAction.js",
-      "entryFile": "functions/proxyRequestAppAction.ts",
+      "path": "functions/proxyRequest.js",
+      "entryFile": "functions/proxyRequest.ts",
       "allowNetworks": ["a.klaviyo.com"],
       "accepts": ["appaction.call"]
     },
@@ -87,6 +87,15 @@
       "description": "Disconnects the Klaviyo app",
       "path": "functions/disconnect.js",
       "entryFile": "functions/disconnect.ts",
+      "allowNetworks": ["a.klaviyo.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "checkStatus",
+      "name": "Check Status",
+      "description": "Checks the status of the Klaviyo app",
+      "path": "functions/checkStatus.js",
+      "entryFile": "functions/checkStatus.ts",
       "allowNetworks": ["a.klaviyo.com"],
       "accepts": ["appaction.call"]
     }

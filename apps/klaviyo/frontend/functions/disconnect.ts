@@ -10,7 +10,7 @@ export const handler = async (
   const sdk = (context as any).oauthSdk;
 
   try {
-    await sdk.disconnect();
+    await sdk.revoke();
 
     return {
       statusCode: 200,

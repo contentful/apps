@@ -14,19 +14,39 @@ interface OAuthResponse {
   expiresIn?: number;
 }
 
-export interface OAuthSDK {
-  initiateOAuth: () => Promise<OAuthResponseUrl>;
-  completeOAuth: (code: string, state: string) => Promise<OAuthResponse>;
-  makeRequest: (url: string, config: RequestInit) => Promise<any>;
-}
+export type OAuthInitResponse = {
+  authorizeUrl: string;
+};
+
+export type OAuthExchangePayload = {
+  code: string;
+  state: string;
+};
+
+export type OAuthExchangeResponse = {
+  success: boolean;
+};
+
+export type OAuthTokenResponse = {
+  tokenType: string;
+  accessToken: string;
+  expiry: number;
+};
+
+export type OAuthSDK = {
+  init: () => Promise<OAuthInitResponse>;
+  exchange: (payload: OAuthExchangePayload) => Promise<OAuthExchangeResponse>;
+  token: () => Promise<OAuthTokenResponse>;
+  revoke: () => Promise<void>;
+};
 
 export async function initiateOauth(sdk: OAuthSDK): Promise<OAuthResponseUrl> {
   try {
     // Initialize OAuth flow using the SDK
-    const oauthResponse = await sdk.initiateOAuth();
+    const oauthResponse = await sdk.init();
 
     return {
-      authorizationUrl: oauthResponse.authorizationUrl,
+      authorizationUrl: oauthResponse.authorizeUrl,
     };
   } catch (error) {
     console.error('Failed to initialize OAuth flow:', error);

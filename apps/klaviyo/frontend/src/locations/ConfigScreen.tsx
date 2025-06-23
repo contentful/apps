@@ -20,7 +20,6 @@ import {
   getEntryKlaviyoFieldMappings,
   setEntryKlaviyoFieldMappings,
 } from '../utils/field-mappings';
-import { useParams } from 'react-router-dom';
 
 // Helper to ensure klaviyoFieldMappings entry exists
 const ensureKlaviyoFieldMappingsEntry = async (sdk: ConfigAppSDK) => {
@@ -134,26 +133,94 @@ const ConfigScreen = () => {
   const [isOAuthLoading, setIsOAuthLoading] = useState(false);
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const [isHoveringConnected, setIsHoveringConnected] = useState(false);
+  const [isCheckingStatus, setIsCheckingStatus] = useState(true);
   const popupWindowRef = useRef<Window | null>(null);
   const checkWindowIntervalRef = useRef<number | null>(null);
 
-  const messageHandler = (event: MessageEvent) => {
+  // Check Klaviyo connection status
+  const checkKlaviyoStatus = async () => {
+    try {
+      console.log('Checking Klaviyo connection status...');
+      const appActions = await sdk.cma.appAction.getMany({
+        organizationId: sdk.ids.organization,
+        appDefinitionId: sdk.ids.app,
+      });
+
+      const checkStatusAppAction = appActions.items.find(
+        (action) => action.name === 'Check Status'
+      );
+      if (!checkStatusAppAction) {
+        console.warn('Check Status app action not found');
+        setIsCheckingStatus(false);
+        return;
+      }
+
+      const response = await sdk.cma.appActionCall.createWithResponse(
+        {
+          appActionId: checkStatusAppAction.sys.id,
+          appDefinitionId: sdk.ids.app,
+        },
+        {
+          parameters: {},
+        }
+      );
+
+      const statusData = JSON.parse(response.response.body);
+      console.log('Klaviyo status response:', statusData);
+
+      // Assuming the response contains a connected field
+      const isConnected = statusData.connected === true;
+      setIsOAuthConnected(isConnected);
+      console.log('Klaviyo connection status:', isConnected);
+    } catch (error) {
+      console.error('Failed to check Klaviyo status:', error);
+      setIsOAuthConnected(false);
+    } finally {
+      setIsCheckingStatus(false);
+    }
+  };
+
+  const messageHandler = async (event: MessageEvent) => {
     if (event.data.type === 'oauth:complete') {
+      const appDefinitionId = sdk.ids.app;
+      // call app action to complete oauth
+      const appActions = await sdk.cma.appAction.getMany({
+        organizationId: sdk.ids.organization,
+        appDefinitionId,
+      });
+      const completeOauthAppAction = appActions.items.find(
+        (action) => action.name === 'Complete Oauth'
+      );
+      await sdk.cma.appActionCall.create(
+        { appDefinitionId, appActionId: completeOauthAppAction?.sys.id || '' },
+        {
+          parameters: {
+            code: event.data.code,
+            state: event.data.state,
+          },
+        }
+      );
+
       sdk.notifier.success('OAuth complete');
       cleanup();
       setIsOAuthLoading(false);
-      setIsOAuthConnected(true);
+
+      // Check the updated status after OAuth completion
+      await checkKlaviyoStatus();
     }
   };
 
   const cleanup = () => {
+    console.log('cleanup called');
     // Clear the interval
     if (checkWindowIntervalRef.current) {
       window.clearInterval(checkWindowIntervalRef.current);
       checkWindowIntervalRef.current = null;
     }
     // Remove the message event listener
+    console.log('Removing message event listener');
     window.removeEventListener('message', messageHandler);
+    console.log('Message event listener removed');
     // Close the popup if it's still open
     if (popupWindowRef.current && !popupWindowRef.current.closed) {
       popupWindowRef.current.close();
@@ -162,8 +229,10 @@ const ConfigScreen = () => {
   };
 
   const handleOAuth = async () => {
+    console.log('handleOAuth started');
     setIsOAuthLoading(true);
-    // Add message event listener before opening the window
+
+    window.removeEventListener('message', messageHandler);
     window.addEventListener('message', messageHandler);
 
     try {
@@ -171,34 +240,32 @@ const ConfigScreen = () => {
         organizationId: sdk.ids.organization,
         appDefinitionId: sdk.ids.app,
       });
+
       const initiateOauthAppAction = appActions.items.find(
         (action) => action.name === 'Initiate Oauth'
       );
+
       const response = await sdk.cma.appActionCall.createWithResponse(
         {
           appActionId: initiateOauthAppAction?.sys.id || '',
           appDefinitionId: sdk.ids.app,
         },
         {
-          parameters: {
-            environmentId: sdk.ids.environment,
-            spaceId: sdk.ids.space,
-          },
+          parameters: {},
         }
-      );
-      popupWindowRef.current = window.open(
-        JSON.parse(response.response.body).authorizationUrl,
-        '_blank',
-        'height=700,width=450'
       );
 
+      const authorizationUrl = JSON.parse(response.response.body).authorizationUrl;
+
+      popupWindowRef.current = window.open(authorizationUrl, '_blank', 'height=700,width=450');
+
       // Check if the window was closed
-      checkWindowIntervalRef.current = window.setInterval(() => {
-        if (popupWindowRef.current?.closed) {
-          cleanup();
-          setIsOAuthLoading(false);
-        }
-      }, 1000);
+      // checkWindowIntervalRef.current = window.setInterval(() => {
+      //   if (popupWindowRef.current?.closed) {
+      //     cleanup();
+      //     setIsOAuthLoading(false);
+      //   }
+      // }, 1000);
     } catch (error) {
       console.error('Failed to initiate OAuth:', error);
       cleanup();
@@ -221,7 +288,10 @@ const ConfigScreen = () => {
         },
         { parameters: {} }
       );
-      setIsOAuthConnected(false);
+
+      // Check the updated status after disconnection
+      await checkKlaviyoStatus();
+
       setIsHoveringConnected(false);
       sdk.notifier.success('Disconnected from Klaviyo');
     } catch (error) {
@@ -231,6 +301,7 @@ const ConfigScreen = () => {
   };
 
   const getButtonText = () => {
+    if (isCheckingStatus) return 'Checking...';
     if (isOAuthLoading) return 'Connecting...';
     if (isOAuthConnected && isHoveringConnected) return 'Disconnect';
     if (isOAuthConnected) return 'Connected';
@@ -238,12 +309,14 @@ const ConfigScreen = () => {
   };
 
   const getButtonVariant = () => {
+    if (isCheckingStatus) return 'secondary';
     if (isOAuthConnected && !isHoveringConnected) return 'positive';
     if (isOAuthConnected && isHoveringConnected) return 'negative';
     return 'primary';
   };
 
   const handleButtonClick = () => {
+    if (isCheckingStatus) return; // Don't allow clicks while checking status
     if (isOAuthConnected && isHoveringConnected) {
       handleDisconnect();
     } else if (!isOAuthConnected && !isOAuthLoading) {
@@ -265,6 +338,10 @@ const ConfigScreen = () => {
       const isInstalled = await sdk.app.isInstalled();
       setIsReadOnly(isInstalled);
       loadContentTypes();
+
+      // Check Klaviyo connection status
+      await checkKlaviyoStatus();
+
       sdk.app.setReady();
     };
     initializeApp();
@@ -355,7 +432,7 @@ const ConfigScreen = () => {
               setIsHoveringConnected(false);
             }}
             isLoading={isOAuthLoading}
-            isDisabled={isOAuthLoading || !isReadOnly}>
+            isDisabled={isOAuthLoading || isCheckingStatus || !isReadOnly}>
             {getButtonText()}
           </Button>
         </Box>

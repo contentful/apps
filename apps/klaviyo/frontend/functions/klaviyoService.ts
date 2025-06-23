@@ -828,13 +828,32 @@ export class KlaviyoService {
       if (queryString) {
         fullUrl = `${url}${url.includes('?') ? '&' : '?'}${queryString}`;
       }
-    } else if (data) {
-      // For other methods, add request body
+    } else if (data && method.toUpperCase() !== 'GET') {
+      // For non-GET methods, add request body
       config.body = JSON.stringify(data);
     }
 
     try {
-      const response = await this.oauthSdk.makeRequest(fullUrl, config);
+      const token = await this.oauthSdk.token();
+
+      // Ensure token is a string
+      let tokenString: string;
+      if (typeof token === 'string') {
+        tokenString = token;
+      } else if (token && typeof token === 'object' && 'accessToken' in token) {
+        tokenString = (token as any).accessToken;
+      } else if (token && typeof token === 'object' && 'access_token' in token) {
+        tokenString = (token as any).access_token;
+      } else if (token && typeof token === 'object' && 'token' in token) {
+        tokenString = (token as any).token;
+      } else {
+        console.error('Invalid token format:', token);
+        throw new Error('Invalid token format received from OAuth SDK');
+      }
+
+      headers['Authorization'] = `Bearer ${tokenString}`;
+
+      const response = await fetch(fullUrl, config);
 
       // Read the response text for debugging
       const responseText = await response.text();
