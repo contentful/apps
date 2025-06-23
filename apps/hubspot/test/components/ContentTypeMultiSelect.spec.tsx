@@ -1,7 +1,8 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ContentTypeMultiSelect, { ContentType } from '../../src/components/ContentTypeMultiSelect';
+import ContentTypeMultiSelect from '../../src/components/ContentTypeMultiSelect';
+import { ContentType } from '../../src/utils';
 
 describe('ContentTypeMultiSelect', () => {
   const availableContentTypes: ContentType[] = [

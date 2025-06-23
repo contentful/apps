@@ -8,6 +8,11 @@ export const CONFIG_SCREEN_INSTRUCTIONS = [
   'Paste your private app access token in the field above',
 ];
 
+export interface ContentType {
+  id: string;
+  name: string;
+}
+
 export type AppInstallationParameters = {
   hubspotAccessToken: string;
 };

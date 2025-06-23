@@ -23,10 +23,11 @@ import {
   AppInstallationParameters,
   CONFIG_CONTENT_TYPE_ID,
   CONFIG_SCREEN_INSTRUCTIONS,
+  ContentType,
   HUBSPOT_PRIVATE_APPS_URL,
 } from '../utils';
 import { ContentTypeProps, createClient, PlainClientAPI } from 'contentful-management';
-import ContentTypeMultiSelect, { ContentType } from '../components/ContentTypeMultiSelect';
+import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
@@ -35,9 +36,8 @@ const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     hubspotAccessToken: '',
   });
-  const [selectedContentTypes, setSelectedContentTypes] = useState<{ id: string; name: string }[]>(
-    []
-  );
+  const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
+  const [availableContentTypes, setAvailableContentTypes] = useState<ContentType[]>([]);
 
   const cma = createClient(
     { apiAdapter: sdk.cmaAdapter },
@@ -90,6 +90,30 @@ const ConfigScreen = () => {
     };
   }, [parameters, sdk, cma, selectedContentTypes]);
 
+  const fetchAllContentTypes = async (): Promise<ContentTypeProps[]> => {
+    let allContentTypes: ContentTypeProps[] = [];
+    let skip = 0;
+    const limit = 1000;
+    let areMoreContentTypes = true;
+
+    while (areMoreContentTypes) {
+      const response = await cma.contentType.getMany({
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
+        query: { skip, limit },
+      });
+      if (response.items) {
+        allContentTypes = allContentTypes.concat(response.items as ContentTypeProps[]);
+        areMoreContentTypes = response.items.length === limit;
+      } else {
+        areMoreContentTypes = false;
+      }
+      skip += limit;
+    }
+
+    return allContentTypes;
+  };
+
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
   }, [sdk, onConfigure]);
@@ -104,6 +128,34 @@ const ConfigScreen = () => {
       sdk.app.setReady();
     })();
   }, [sdk]);
+
+  useEffect(() => {
+    (async () => {
+      const currentState = await sdk.app.getCurrentState();
+      const currentContentTypesIds = Object.keys(currentState?.EditorInterface || {});
+      const excludedContentTypesIds = [CONFIG_CONTENT_TYPE_ID];
+
+      const allContentTypes = await fetchAllContentTypes();
+
+      const newAvailableContentTypes = allContentTypes
+        .filter((ct) => !excludedContentTypesIds.includes(ct.sys.id))
+        .map((ct) => ({
+          id: ct.sys.id,
+          name: ct.name,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      setAvailableContentTypes(newAvailableContentTypes);
+
+      // If we have current content types, set them as selected
+      if (currentContentTypesIds.length > 0) {
+        const currentContentTypes = allContentTypes
+          .filter((ct) => currentContentTypesIds.includes(ct.sys.id))
+          .map((ct) => ({ id: ct.sys.id, name: ct.name }));
+        setSelectedContentTypes(currentContentTypes);
+      }
+    })();
+  }, []);
 
   return (
     <Flex justifyContent="center" alignItems="center">
@@ -177,11 +229,10 @@ const ConfigScreen = () => {
           </Collapse>
         </Box>
         <Splitter marginTop="spacing2Xs" marginBottom="spacing2Xl" />
-        <ContentTypeSection
+        <ContentTypeMultiSelect
           selectedContentTypes={selectedContentTypes}
           setSelectedContentTypes={setSelectedContentTypes}
-          cma={cma}
-          sdk={sdk}
+          availableContentTypes={availableContentTypes}
         />
       </Box>
     </Flex>
@@ -212,76 +263,6 @@ async function addAppToSidebar(sdk: ConfigAppSDK, cma: PlainClientAPI, contentTy
       sdk.notifier.error(`Failed to add app to sidebar for content type ${contentTypeId}`);
     }
   }
-}
-
-function ContentTypeSection(props: {
-  selectedContentTypes: ContentType[];
-  setSelectedContentTypes: (contentTypes: ContentType[]) => void;
-  cma: PlainClientAPI;
-  sdk: ConfigAppSDK;
-}) {
-  const { selectedContentTypes, setSelectedContentTypes, cma, sdk } = props;
-  const [availableContentTypes, setAvailableContentTypes] = useState<ContentType[]>([]);
-
-  const fetchAllContentTypes = async (): Promise<ContentTypeProps[]> => {
-    let allContentTypes: ContentTypeProps[] = [];
-    let skip = 0;
-    const limit = 1000;
-    let areMoreContentTypes = true;
-
-    while (areMoreContentTypes) {
-      const response = await cma.contentType.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
-        query: { skip, limit },
-      });
-      if (response.items) {
-        allContentTypes = allContentTypes.concat(response.items as ContentTypeProps[]);
-        areMoreContentTypes = response.items.length === limit;
-      } else {
-        areMoreContentTypes = false;
-      }
-      skip += limit;
-    }
-
-    return allContentTypes;
-  };
-
-  useEffect(() => {
-    (async () => {
-      const currentState = await sdk.app.getCurrentState();
-      const currentContentTypesIds = Object.keys(currentState?.EditorInterface || {});
-      const excludedContentTypesIds = [CONFIG_CONTENT_TYPE_ID];
-
-      const allContentTypes = await fetchAllContentTypes();
-
-      const newAvailableContentTypes = allContentTypes
-        .filter((ct) => !excludedContentTypesIds.includes(ct.sys.id))
-        .map((ct) => ({
-          id: ct.sys.id,
-          name: ct.name,
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name));
-
-      setAvailableContentTypes(newAvailableContentTypes);
-
-      // If we have current content types, set them as selected
-      if (currentContentTypesIds.length > 0) {
-        const currentContentTypes = allContentTypes
-          .filter((ct) => currentContentTypesIds.includes(ct.sys.id))
-          .map((ct) => ({ id: ct.sys.id, name: ct.name }));
-        setSelectedContentTypes(currentContentTypes);
-      }
-    })();
-  }, []);
-
-  return (
-    <ContentTypeMultiSelect
-      selectedContentTypes={selectedContentTypes}
-      setSelectedContentTypes={setSelectedContentTypes}
-      availableContentTypes={availableContentTypes}
-    />
-  );
 }
 
 export default ConfigScreen;

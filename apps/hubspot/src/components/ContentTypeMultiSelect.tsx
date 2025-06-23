@@ -10,11 +10,7 @@ import {
   Paragraph,
 } from '@contentful/f36-components';
 import { styles } from '../locations/ConfigScreen.styles';
-
-export interface ContentType {
-  id: string;
-  name: string;
-}
+import { ContentType } from '../utils';
 
 interface ContentTypeMultiSelectProps {
   selectedContentTypes: ContentType[];
