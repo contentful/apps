@@ -6,7 +6,6 @@ export const handler = async (
   event: AppEventHandlerRequest,
   context: AppEventContext
 ): Promise<AppEventHandlerResponse> => {
-  console.log('Disconnect Event:', event);
   const sdk = (context as any).oauthSdk;
 
   try {

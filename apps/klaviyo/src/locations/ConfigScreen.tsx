@@ -134,60 +134,104 @@ const ConfigScreen = () => {
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const [isHoveringConnected, setIsHoveringConnected] = useState(false);
   const [isCheckingStatus, setIsCheckingStatus] = useState(true);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
   const popupWindowRef = useRef<Window | null>(null);
   const checkWindowIntervalRef = useRef<number | null>(null);
 
-  // Check Klaviyo connection status
-  const checkKlaviyoStatus = async () => {
-    try {
-      console.log('Checking Klaviyo connection status...');
-      const appActions = await sdk.cma.appAction.getMany({
-        organizationId: sdk.ids.organization,
-        appDefinitionId: sdk.ids.app,
-      });
+  // Check Klaviyo connection status with polling to handle race conditions
+  const checkKlaviyoStatus = async (
+    expectedStatus?: boolean,
+    maxRetries: number = 10
+  ): Promise<void> => {
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-      const checkStatusAppAction = appActions.items.find(
-        (action) => action.name === 'Check Status'
-      );
-      if (!checkStatusAppAction) {
-        console.warn('Check Status app action not found');
-        setIsCheckingStatus(false);
-        return;
-      }
-
-      const response = await sdk.cma.appActionCall.createWithResponse(
-        {
-          appActionId: checkStatusAppAction.sys.id,
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Checking Klaviyo connection status (attempt ${attempt}/${maxRetries})...`);
+        const appActions = await sdk.cma.appAction.getMany({
+          organizationId: sdk.ids.organization,
           appDefinitionId: sdk.ids.app,
-        },
-        {
-          parameters: {},
+        });
+
+        const checkStatusAppAction = appActions.items.find(
+          (action) => action.name === 'Check Status'
+        );
+        if (!checkStatusAppAction) {
+          console.warn('Check Status app action not found');
+          setIsCheckingStatus(false);
+          return;
         }
-      );
 
-      const statusData = JSON.parse(response.response.body);
-      console.log('Klaviyo status response:', statusData);
+        const response = await sdk.cma.appActionCall.createWithResponse(
+          {
+            appActionId: checkStatusAppAction.sys.id,
+            appDefinitionId: sdk.ids.app,
+          },
+          {
+            parameters: {},
+          }
+        );
 
-      // Assuming the response contains a connected field
-      const isConnected = statusData.connected === true;
-      setIsOAuthConnected(isConnected);
-      console.log('Klaviyo connection status:', isConnected);
-    } catch (error) {
-      console.error('Failed to check Klaviyo status:', error);
-      setIsOAuthConnected(false);
-    } finally {
-      setIsCheckingStatus(false);
+        const statusData = JSON.parse(response.response.body);
+        console.log(`Klaviyo status response (attempt ${attempt}):`, statusData);
+
+        // Assuming the response contains a connected field
+        const isConnected = statusData.connected === true;
+        console.log(`Klaviyo connection status (attempt ${attempt}):`, isConnected);
+
+        // If we have an expected status and it matches, or if we don't have an expected status, accept the result
+        if (expectedStatus === undefined || isConnected === expectedStatus) {
+          setIsOAuthConnected(isConnected);
+          console.log(`Status check resolved to expected value: ${isConnected}`);
+          break;
+        } else {
+          console.log(
+            `Status mismatch. Expected: ${expectedStatus}, Got: ${isConnected}. Retrying...`
+          );
+
+          // If this is the last attempt, accept the current result anyway
+          if (attempt === maxRetries) {
+            console.log(`Max retries reached. Accepting current status: ${isConnected}`);
+            setIsOAuthConnected(isConnected);
+            break;
+          }
+
+          // Wait before retrying (exponential backoff: 500ms, 1000ms, 1500ms, etc.)
+          const waitTime = 500 * attempt;
+          console.log(`Waiting ${waitTime}ms before retry...`);
+          await delay(waitTime);
+        }
+      } catch (error) {
+        console.error(`Failed to check Klaviyo status (attempt ${attempt}):`, error);
+
+        // If this is the last attempt, set status to false and give up
+        if (attempt === maxRetries) {
+          console.log('Max retries reached. Setting status to false due to errors.');
+          setIsOAuthConnected(false);
+          break;
+        }
+
+        // Wait before retrying on error
+        const waitTime = 500 * attempt;
+        console.log(`Waiting ${waitTime}ms before retry after error...`);
+        await delay(waitTime);
+      }
     }
+
+    setIsCheckingStatus(false);
+    console.log(`Status check polling completed. Final status: ${isOAuthConnected}`);
   };
 
   const messageHandler = async (event: MessageEvent) => {
     if (event.data.type === 'oauth:complete') {
+      console.log('oauth:complete');
       const appDefinitionId = sdk.ids.app;
       // call app action to complete oauth
       const appActions = await sdk.cma.appAction.getMany({
         organizationId: sdk.ids.organization,
         appDefinitionId,
       });
+      console.log('appActions', appActions);
       const completeOauthAppAction = appActions.items.find(
         (action) => action.name === 'Complete Oauth'
       );
@@ -200,13 +244,13 @@ const ConfigScreen = () => {
           },
         }
       );
+      console.log('completeOauthAppAction', completeOauthAppAction);
+      // Check the updated status after OAuth completion - expect it to be connected
+      await checkKlaviyoStatus(true);
 
       sdk.notifier.success('OAuth complete');
       cleanup();
       setIsOAuthLoading(false);
-
-      // Check the updated status after OAuth completion
-      await checkKlaviyoStatus();
     }
   };
 
@@ -275,6 +319,7 @@ const ConfigScreen = () => {
   };
 
   const handleDisconnect = async () => {
+    setIsDisconnecting(true);
     try {
       const appActions = await sdk.cma.appAction.getMany({
         organizationId: sdk.ids.organization,
@@ -289,18 +334,21 @@ const ConfigScreen = () => {
         { parameters: {} }
       );
 
-      // Check the updated status after disconnection
-      await checkKlaviyoStatus();
+      // Check the updated status after disconnection - expect it to be disconnected
+      await checkKlaviyoStatus(false);
 
       setIsHoveringConnected(false);
       sdk.notifier.success('Disconnected from Klaviyo');
     } catch (error) {
       console.error('Failed to disconnect:', error);
       sdk.notifier.error('Failed to disconnect from Klaviyo');
+    } finally {
+      setIsDisconnecting(false);
     }
   };
 
   const getButtonText = () => {
+    if (isDisconnecting) return 'Disconnecting...';
     if (isCheckingStatus) return 'Checking...';
     if (isOAuthLoading) return 'Connecting...';
     if (isOAuthConnected && isHoveringConnected) return 'Disconnect';
@@ -432,7 +480,7 @@ const ConfigScreen = () => {
               setIsHoveringConnected(false);
             }}
             isLoading={isOAuthLoading}
-            isDisabled={isOAuthLoading || isCheckingStatus || !isReadOnly}>
+            isDisabled={isOAuthLoading || isDisconnecting || isCheckingStatus || !isReadOnly}>
             {getButtonText()}
           </Button>
         </Box>

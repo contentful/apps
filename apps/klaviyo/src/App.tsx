@@ -44,8 +44,6 @@ const App = () => {
     // Find which location we're in and get the corresponding component
     for (const [location, Component] of Object.entries(ComponentLocationSettings)) {
       if (sdk.location.is(location)) {
-        const entry = (sdk as any).entry || {};
-
         return <Component mappings={mappings} />;
       }
     }

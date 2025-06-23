@@ -426,7 +426,6 @@ export class KlaviyoService {
           },
         },
       };
-      console.log('Creating content:', data);
       return await this.makeRequest('POST', 'template-universal-content', data);
     } catch (error) {
       console.error('Error creating content:', error);
@@ -504,22 +503,17 @@ export class KlaviyoService {
    * Safely format a field value for HTML output, converting rich text objects to HTML.
    */
   private safeFieldValue(key: string, value: any): string {
-    console.log(`Processing field ${key} with value:`, value);
-
     if (value === null || value === undefined) {
-      console.log(`Field ${key} is null or undefined`);
       return '';
     }
 
     if (typeof value === 'string') {
-      console.log(`Field ${key} is a string:`, value);
       return value;
     }
 
     // Handle rich text
     if (value && typeof value === 'object') {
       if (value.nodeType === 'document') {
-        console.log(`Field ${key} is a rich text document`);
         return this.processRichText(value);
       }
 
@@ -528,19 +522,16 @@ export class KlaviyoService {
         key.toLowerCase().includes('richtext') ||
         (value.content && Array.isArray(value.content))
       ) {
-        console.log(`Field ${key} appears to be rich text`);
         return this.processRichText(value);
       }
 
       // Handle arrays
       if (Array.isArray(value)) {
-        console.log(`Field ${key} is an array`);
         return value.map((item) => this.safeFieldValue(key, item)).join(', ');
       }
 
       // Handle objects with sys property (references)
       if (value.sys) {
-        console.log(`Field ${key} is a reference`);
         if (value.sys.type === 'Link') {
           return value.sys.id;
         }
@@ -549,7 +540,6 @@ export class KlaviyoService {
 
       // Handle objects with fields property (entries)
       if (value.fields) {
-        console.log(`Field ${key} has fields property`);
         const firstLocale = Object.keys(value.fields)[0] || 'en-US';
         const fieldValue = value.fields[firstLocale];
         if (fieldValue !== undefined) {
@@ -559,26 +549,21 @@ export class KlaviyoService {
 
       // Try to extract a display value
       if (value.title) {
-        console.log(`Field ${key} has title property`);
         return value.title;
       }
       if (value.name) {
-        console.log(`Field ${key} has name property`);
         return value.name;
       }
       if (value.value) {
-        console.log(`Field ${key} has value property`);
         return value.value;
       }
     }
 
     // Fallback: stringify
     try {
-      console.log(`Field ${key} using fallback stringify`);
       const stringified = JSON.stringify(value);
       return stringified === '{}' ? '' : stringified;
     } catch {
-      console.log(`Field ${key} using String() fallback`);
       return String(value);
     }
   }
@@ -587,7 +572,6 @@ export class KlaviyoService {
    * Convert structured data to HTML for Klaviyo
    */
   private convertDataToHTML(data: Record<string, any>): string {
-    console.log('Converting data to HTML:', data);
     const fieldKeys = Object.keys(data).filter((key) => key !== 'title' && key !== 'external_id');
     const heading = fieldKeys.length > 0 ? fieldKeys[0] : '';
     let html = `<!DOCTYPE html>
@@ -616,9 +600,7 @@ export class KlaviyoService {
       // Only one mapped field: just show the value, no label
       const key = fieldKeys[0];
       const value = data[key];
-      console.log(`Processing single field ${key} with value:`, value);
       const safeValue = this.safeFieldValue(key, value);
-      console.log(`Safe value for ${key}:`, safeValue);
       if (safeValue !== '') {
         if (
           key.includes('richText') ||
@@ -649,9 +631,7 @@ export class KlaviyoService {
           continue;
         }
         const value = data[key];
-        console.log(`Processing field ${key} with value:`, value);
         const safeValue = this.safeFieldValue(key, value);
-        console.log(`Safe value for ${key}:`, safeValue);
         if (safeValue === '') {
           continue;
         }
@@ -689,7 +669,6 @@ export class KlaviyoService {
       }
     }
     html += `\n </div>\n</body>\n</html>`;
-    console.log('Generated HTML:', html);
     return html;
   }
 

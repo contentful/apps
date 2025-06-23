@@ -14,7 +14,6 @@ interface CompleteOAuthParams {
 export async function checkStatus(sdk: OAuthSDK): Promise<boolean> {
   try {
     const token = await sdk.token();
-    console.log('Token:', token);
     if (!token) {
       return false;
     }
@@ -29,7 +28,6 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   event: AppActionRequest<'Custom', CompleteOAuthParams>,
   context: FunctionEventContext
 ): Promise<AppActionResponse> => {
-  console.log('Complete OAuth Event:', event);
   const sdk = (context as any).oauthSdk;
 
   if (!sdk) {
@@ -39,7 +37,6 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
       body: JSON.stringify({ error: 'No SDK available in context' }),
     };
   }
-  console.log('Complete OAuth SDK:', sdk, event, context);
 
   const connected = await checkStatus(sdk);
 

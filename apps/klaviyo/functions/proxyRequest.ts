@@ -31,11 +31,6 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   try {
     let { endpoint, method, data, params } = event.body;
     const { oauthSdk } = context as any;
-    // Parse data and params if they are strings
-    console.log('data', data);
-    console.log('params', params);
-    console.log('endpoint', endpoint);
-    console.log('method', method);
 
     try {
       if (typeof data === 'string') {
@@ -83,9 +78,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     }
     // const response = await oauthSdk.makeRequest(url, fetchOptions);
 
-    console.log('oauthSdk', oauthSdk);
     const token = await oauthSdk.token();
-    console.log('token', token);
     fetchOptions.headers = {
       ...fetchOptions.headers,
       Authorization: `${token.tokenType} ${token.accessToken}`,
@@ -100,7 +93,6 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
       );
     }
     const responseData = await response.json();
-    console.log('responseData', responseData);
     return responseData;
   } catch (error) {
     console.error('proxyRequest App Action error:', error);
