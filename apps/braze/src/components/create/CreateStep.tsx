@@ -388,20 +388,17 @@ const CreateStep = ({
     setEditDraft({ name: '', description: '' });
   };
 
-  const shouldShowError = (fieldId: string): boolean => {
-    const hasError = creationResultFields.some(
-      (result) => fieldId === localizeFieldId(result.fieldId, result.locale)
-    );
-    const isCleared = clearedErrors.has(fieldId);
+  const isFieldError = (result: CreationResultField, fieldId: string) =>
+    fieldId === localizeFieldId(result.fieldId, result.locale) && result.success === false;
 
+  const shouldShowError = (fieldId: string): boolean => {
+    const hasError = creationResultFields.some((result) => isFieldError(result, fieldId));
+    const isCleared = clearedErrors.has(fieldId);
     return hasError && !isCleared;
   };
 
   const getErrorMessage = (fieldId: string): string | undefined => {
-    const errorResult = creationResultFields.find(
-      (result) => fieldId === localizeFieldId(result.fieldId, result.locale)
-    );
-
+    const errorResult = creationResultFields.find((result) => isFieldError(result, fieldId));
     return shouldShowError(fieldId) ? errorResult?.message : undefined;
   };
 
