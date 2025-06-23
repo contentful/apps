@@ -26,19 +26,19 @@ export class OpenAiApiService {
 
   async createImage(params: CreateImageParams): Promise<OpenAI.Images.Image[]> {
     const { prompt, numImages: n, size } = params;
-    const imageEditResponse = await this.openAiApiClient.images.generate({ prompt, n, size });
-    return imageEditResponse.data;
+    const response = await this.openAiApiClient.images.generate({ prompt, n, size });
+    return response.data ?? [];
   }
 
   async editImage(params: EditImageParams): Promise<OpenAI.Images.Image[]> {
     const { prompt, numImages: n, size, image, mask } = params;
-    const imageEditResponse = await this.openAiApiClient.images.edit({
+    const response = await this.openAiApiClient.images.edit({
       prompt,
       n,
       size,
       image,
       mask,
     });
-    return imageEditResponse.data;
+    return response.data ?? [];
   }
 }

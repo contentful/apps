@@ -234,3 +234,45 @@ header img {
 
   }
  }
+
+.project-autocomplete {
+  &, input, [role='listbox'] {
+    width: 100%;
+    min-width: 320px;
+    max-width: 400px;
+  }
+  [role='listbox'] {
+    max-height: 600px;
+  }
+}
+
+.jira-config-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  width: 100%;
+}
+
+.selector {
+  min-width: 320px;
+  max-width: 400px;
+  flex: 1;
+}
+
+.project-autocomplete {
+  min-width: 320px;
+  max-width: 400px;
+  flex: 1;
+}
+
+.autocomplete-item {
+  background: white;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.autocomplete-item.selected {
+  background: #f3f4f6;
+  font-weight: bold;
+}

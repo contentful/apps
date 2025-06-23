@@ -21,7 +21,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "use-debounce": "^10.0.3",
-    "vite": "^5.4.18"
+    "vite": "^5.4.19"
   },
   "scripts": {
     "start": "vite",

@@ -11,7 +11,7 @@
   "dependencies": {
     "@commercetools/platform-sdk": "2.8.0",
     "@commercetools/sdk-client-v2": "1.4.2",
-    "@contentful/app-scripts": "1.2.0",
+    "@contentful/app-scripts": "1.33.2",
     "@contentful/app-sdk": "4.23.0",
     "@contentful/ecommerce-app-base": "3.6.0",
     "@contentful/f36-components": "4.67.0",
@@ -19,7 +19,7 @@
     "isomorphic-fetch": "^3.0.0",
     "react": "17.0.1",
     "react-dom": "17.0.1",
-    "vite": "^5.4.18"
+    "vite": "^5.4.19"
   },
   "scripts": {
     "start": "vite",

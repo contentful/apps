@@ -11,6 +11,7 @@ const JiraStep = () => (
       </Paragraph>
       <Paragraph>
         <Button
+          isFullWidth
           onClick={() => window.open('https://marketplace.atlassian.com/apps/1221865/', '_blank')}>
           Get companion app for Jira Cloud
         </Button>

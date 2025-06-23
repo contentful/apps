@@ -28,11 +28,11 @@ export const BRAZE_APP_DOCUMENTATION = 'https://www.contentful.com/help/apps/bra
 export const CONTENT_TYPE_DOCUMENTATION =
   'https://www.contentful.com/help/content-types/configure-content-type/';
 
-export async function callToContentful(url: string, newApiKey: string) {
+export async function callToContentful(sdk: ConfigAppSDK, apiKey: string) {
+  const url = `https://${sdk.hostnames.delivery}/spaces/${sdk.ids.space}/environments/${sdk.ids.environment}/entries?access_token=${apiKey}`;
   return await fetch(url, {
     method: 'GET',
     headers: {
-      Authorization: `Bearer ${newApiKey}`,
       'Content-Type': 'application/json',
     },
   });
@@ -52,8 +52,7 @@ const ConfigScreen = () => {
       return false;
     }
 
-    const url = `https://${sdk.hostnames.delivery}/spaces/${sdk.ids.space}`;
-    const response: Response = await callToContentful(url, apiKey);
+    const response: Response = await callToContentful(sdk, apiKey);
 
     const isValid = response.ok;
     setApiKeyIsValid(isValid);

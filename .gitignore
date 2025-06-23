@@ -16,3 +16,4 @@ examples/**/.npmrc
 .env
 .cursorindexingignore
 .specstory
+*/example-app
