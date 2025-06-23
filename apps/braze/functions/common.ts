@@ -52,17 +52,13 @@ export const stringifyFieldValue = (fieldValue: any, field: ContentFields<KeyVal
   switch (field.type) {
     case 'Symbol':
     case 'Text':
-      return String(fieldValue);
-
     case 'Integer':
     case 'Number':
+    case 'Boolean':
       return String(fieldValue);
 
     case 'Date':
       return new Date(fieldValue).toISOString();
-
-    case 'Boolean':
-      return String(fieldValue);
 
     case 'Object':
       return JSON.stringify(fieldValue);
