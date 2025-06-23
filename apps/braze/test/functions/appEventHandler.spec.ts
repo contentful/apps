@@ -781,7 +781,7 @@ describe('updateContentBlocks', () => {
       expect(global.fetch).not.toHaveBeenCalled();
     });
 
-    it('should skip Location fields', async () => {
+    it('should stringify Location fields', async () => {
       const event = {
         headers: {
           'X-Contentful-Topic': ['Entry.save'],
@@ -827,10 +827,21 @@ describe('updateContentBlocks', () => {
           },
         ],
       });
+      vi.mocked(global.fetch).mockResolvedValue(
+        new Response(JSON.stringify({ success: true }), { status: 200 })
+      );
 
       await handler(event as any, mockContext as any);
 
-      expect(global.fetch).not.toHaveBeenCalled();
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://test.braze.com/content_blocks/update',
+        expect.objectContaining({
+          body: JSON.stringify({
+            content_block_id: 'location-block-id',
+            content: 'lat:40.7128,long:-74.006',
+          }),
+        })
+      );
     });
 
     it('should skip Array fields', async () => {
@@ -912,6 +923,9 @@ describe('updateContentBlocks', () => {
             numberField: {
               'en-US': 42,
             },
+            locationField: {
+              'en-US': { lat: 40.7128, lon: -74.006 },
+            },
           },
         },
       };
@@ -932,6 +946,10 @@ describe('updateContentBlocks', () => {
                 {
                   fieldId: 'numberField',
                   contentBlockId: 'number-block-id',
+                },
+                {
+                  fieldId: 'locationField',
+                  contentBlockId: 'location-block-id',
                 },
               ],
             },
@@ -955,6 +973,10 @@ describe('updateContentBlocks', () => {
             id: 'numberField',
             type: 'Number',
           },
+          {
+            id: 'locationField',
+            type: 'Location',
+          },
         ],
       });
       vi.mocked(global.fetch).mockResolvedValue(
@@ -963,8 +985,8 @@ describe('updateContentBlocks', () => {
 
       await handler(event as any, mockContext as any);
 
-      // Should only update supported fields (text and number)
-      expect(global.fetch).toHaveBeenCalledTimes(2);
+      // Should update supported fields (text, number, and location)
+      expect(global.fetch).toHaveBeenCalledTimes(3);
       expect(global.fetch).toHaveBeenNthCalledWith(
         1,
         'https://test.braze.com/content_blocks/update',
@@ -982,6 +1004,16 @@ describe('updateContentBlocks', () => {
           body: JSON.stringify({
             content_block_id: 'number-block-id',
             content: '42',
+          }),
+        })
+      );
+      expect(global.fetch).toHaveBeenNthCalledWith(
+        3,
+        'https://test.braze.com/content_blocks/update',
+        expect.objectContaining({
+          body: JSON.stringify({
+            content_block_id: 'location-block-id',
+            content: 'lat:40.7128,long:-74.006',
           }),
         })
       );

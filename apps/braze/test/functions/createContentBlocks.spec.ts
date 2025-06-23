@@ -974,7 +974,7 @@ describe('createContentBlocks', () => {
       expect(global.fetch).not.toHaveBeenCalled();
     });
 
-    it('should reject Location fields', async () => {
+    it('should stringify Location fields', async () => {
       const entry = createEntryResponse({
         location: { 'en-US': { lat: 40.7128, lon: -74.006 } },
       });
@@ -982,6 +982,7 @@ describe('createContentBlocks', () => {
 
       vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
       vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
+      mockFetchSuccess({ content_block_id: 'block-id' });
 
       const event: AppActionRequest<'Custom', AppActionParameters> = {
         type: FunctionTypeEnum.AppActionCall,
@@ -1000,10 +1001,18 @@ describe('createContentBlocks', () => {
 
       const result = await handler(event, mockContext);
 
-      expect(result.results[0].success).toBe(false);
-      expect(result.results[0].statusCode).toBe(500);
-      expect(result.results[0].message).toBe("Field type 'Location' is not supported");
-      expect(global.fetch).not.toHaveBeenCalled();
+      expect(result.results[0].success).toBe(true);
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://test.braze.com/content_blocks/create',
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'location-field',
+            content: 'lat:40.7128,long:-74.006',
+            state: 'draft',
+            description: 'Location field test',
+          }),
+        })
+      );
     });
 
     it('should reject Array fields', async () => {

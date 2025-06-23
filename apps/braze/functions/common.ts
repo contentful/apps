@@ -70,6 +70,9 @@ export const stringifyFieldValue = (fieldValue: any, field: ContentFields<KeyVal
     case 'RichText':
       return documentToHtmlString(fieldValue);
 
+    case 'Location':
+      return `lat:${fieldValue.lat},long:${fieldValue.lon}`;
+
     default:
       throw new Error(`Field type '${field.type}' is not supported`);
   }
