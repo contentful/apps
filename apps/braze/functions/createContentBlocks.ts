@@ -7,7 +7,7 @@ import type {
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { AppInstallationParameters } from '../src/utils';
 import { initContentfulManagementClient } from './common';
-import { ContentTypeProps, EntryProps } from 'contentful-management';
+import { ContentTypeProps, EntryProps, ContentFields } from 'contentful-management';
 import { KeyValueMap } from 'contentful-management';
 
 export type AppActionParameters = {
@@ -20,6 +20,33 @@ type FieldData = {
   locale?: string;
   contentBlockName: string;
   contentBlockDescription: string;
+};
+
+const stringifyFieldValue = (fieldValue: any, field: ContentFields<KeyValueMap>): string => {
+  switch (field.type) {
+    case 'Symbol':
+    case 'Text':
+      return String(fieldValue);
+
+    case 'Integer':
+    case 'Number':
+      return String(fieldValue);
+
+    case 'Date':
+      return new Date(fieldValue).toISOString();
+
+    case 'Boolean':
+      return String(fieldValue);
+
+    case 'Object':
+      return JSON.stringify(fieldValue);
+
+    case 'RichText':
+      return documentToHtmlString(fieldValue);
+
+    default:
+      throw new Error(`Field type '${field.type}' is not supported`);
+  }
 };
 
 const createBrazeErrorMessage = (
@@ -104,11 +131,18 @@ const createContentBlock = async (
 
   try {
     const field = contentType.fields.find((f) => f.id === fieldId);
-    let content = fieldValue;
-
-    if (field?.type === 'RichText') {
-      content = documentToHtmlString(fieldValue);
+    if (!field) {
+      return {
+        fieldId,
+        ...(locale ? { locale } : {}),
+        success: false,
+        statusCode: 602,
+        message: `Field ${fieldId} not found in content type`,
+      };
     }
+
+    let content: string;
+    content = stringifyFieldValue(fieldValue, field);
 
     const response = await fetch(`${brazeEndpoint}/content_blocks/create`, {
       method: 'POST',

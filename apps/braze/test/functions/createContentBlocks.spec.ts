@@ -692,4 +692,382 @@ describe('createContentBlocks', () => {
       })
     );
   });
+
+  describe('field stringification', () => {
+    it('should stringify Symbol fields', async () => {
+      const entry = createEntryResponse({
+        title: { 'en-US': 'Test Symbol' },
+      });
+      const contentType = createContentTypeResponse(['title'], 'Symbol');
+
+      vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+      vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
+      mockFetchSuccess({ content_block_id: 'block-id' });
+
+      const event: AppActionRequest<'Custom', AppActionParameters> = {
+        type: FunctionTypeEnum.AppActionCall,
+        body: {
+          entryId: 'entry-id',
+          fieldsData: JSON.stringify([
+            {
+              fieldId: 'title',
+              contentBlockName: 'symbol-field',
+              contentBlockDescription: 'Symbol field test',
+            },
+          ]),
+        },
+        headers: {},
+      };
+
+      const result = await handler(event, mockContext);
+
+      expect(result.results[0].success).toBe(true);
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://test.braze.com/content_blocks/create',
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'symbol-field',
+            content: 'Test Symbol',
+            state: 'draft',
+            description: 'Symbol field test',
+          }),
+        })
+      );
+    });
+
+    it('should stringify Integer fields', async () => {
+      const entry = createEntryResponse({
+        count: { 'en-US': 42 },
+      });
+      const contentType = createContentTypeResponse(['count'], 'Integer');
+
+      vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+      vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
+      mockFetchSuccess({ content_block_id: 'block-id' });
+
+      const event: AppActionRequest<'Custom', AppActionParameters> = {
+        type: FunctionTypeEnum.AppActionCall,
+        body: {
+          entryId: 'entry-id',
+          fieldsData: JSON.stringify([
+            {
+              fieldId: 'count',
+              contentBlockName: 'integer-field',
+              contentBlockDescription: 'Integer field test',
+            },
+          ]),
+        },
+        headers: {},
+      };
+
+      const result = await handler(event, mockContext);
+
+      expect(result.results[0].success).toBe(true);
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://test.braze.com/content_blocks/create',
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'integer-field',
+            content: '42',
+            state: 'draft',
+            description: 'Integer field test',
+          }),
+        })
+      );
+    });
+
+    it('should stringify Number fields', async () => {
+      const entry = createEntryResponse({
+        price: { 'en-US': 99.99 },
+      });
+      const contentType = createContentTypeResponse(['price'], 'Number');
+
+      vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+      vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
+      mockFetchSuccess({ content_block_id: 'block-id' });
+
+      const event: AppActionRequest<'Custom', AppActionParameters> = {
+        type: FunctionTypeEnum.AppActionCall,
+        body: {
+          entryId: 'entry-id',
+          fieldsData: JSON.stringify([
+            {
+              fieldId: 'price',
+              contentBlockName: 'number-field',
+              contentBlockDescription: 'Number field test',
+            },
+          ]),
+        },
+        headers: {},
+      };
+
+      const result = await handler(event, mockContext);
+
+      expect(result.results[0].success).toBe(true);
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://test.braze.com/content_blocks/create',
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'number-field',
+            content: '99.99',
+            state: 'draft',
+            description: 'Number field test',
+          }),
+        })
+      );
+    });
+
+    it('should stringify Date fields', async () => {
+      const testDate = '2024-01-15T10:30:00Z';
+      const entry = createEntryResponse({
+        publishedAt: { 'en-US': testDate },
+      });
+      const contentType = createContentTypeResponse(['publishedAt'], 'Date');
+
+      vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+      vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
+      mockFetchSuccess({ content_block_id: 'block-id' });
+
+      const event: AppActionRequest<'Custom', AppActionParameters> = {
+        type: FunctionTypeEnum.AppActionCall,
+        body: {
+          entryId: 'entry-id',
+          fieldsData: JSON.stringify([
+            {
+              fieldId: 'publishedAt',
+              contentBlockName: 'date-field',
+              contentBlockDescription: 'Date field test',
+            },
+          ]),
+        },
+        headers: {},
+      };
+
+      const result = await handler(event, mockContext);
+
+      expect(result.results[0].success).toBe(true);
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://test.braze.com/content_blocks/create',
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'date-field',
+            content: '2024-01-15T10:30:00.000Z',
+            state: 'draft',
+            description: 'Date field test',
+          }),
+        })
+      );
+    });
+
+    it('should stringify Boolean fields', async () => {
+      const entry = createEntryResponse({
+        isPublished: { 'en-US': true },
+      });
+      const contentType = createContentTypeResponse(['isPublished'], 'Boolean');
+
+      vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+      vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
+      mockFetchSuccess({ content_block_id: 'block-id' });
+
+      const event: AppActionRequest<'Custom', AppActionParameters> = {
+        type: FunctionTypeEnum.AppActionCall,
+        body: {
+          entryId: 'entry-id',
+          fieldsData: JSON.stringify([
+            {
+              fieldId: 'isPublished',
+              contentBlockName: 'boolean-field',
+              contentBlockDescription: 'Boolean field test',
+            },
+          ]),
+        },
+        headers: {},
+      };
+
+      const result = await handler(event, mockContext);
+
+      expect(result.results[0].success).toBe(true);
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://test.braze.com/content_blocks/create',
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'boolean-field',
+            content: 'true',
+            state: 'draft',
+            description: 'Boolean field test',
+          }),
+        })
+      );
+    });
+
+    it('should stringify Object fields', async () => {
+      const objectValue = { key: 'value', number: 123, nested: { test: true } };
+      const entry = createEntryResponse({
+        metadata: { 'en-US': objectValue },
+      });
+      const contentType = createContentTypeResponse(['metadata'], 'Object');
+
+      vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+      vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
+      mockFetchSuccess({ content_block_id: 'block-id' });
+
+      const event: AppActionRequest<'Custom', AppActionParameters> = {
+        type: FunctionTypeEnum.AppActionCall,
+        body: {
+          entryId: 'entry-id',
+          fieldsData: JSON.stringify([
+            {
+              fieldId: 'metadata',
+              contentBlockName: 'object-field',
+              contentBlockDescription: 'Object field test',
+            },
+          ]),
+        },
+        headers: {},
+      };
+
+      const result = await handler(event, mockContext);
+
+      expect(result.results[0].success).toBe(true);
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://test.braze.com/content_blocks/create',
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'object-field',
+            content: JSON.stringify(objectValue),
+            state: 'draft',
+            description: 'Object field test',
+          }),
+        })
+      );
+    });
+
+    it('should reject Link fields', async () => {
+      const entry = createEntryResponse({
+        asset: { 'en-US': { sys: { type: 'Link', linkType: 'Asset', id: 'asset-id' } } },
+      });
+      const contentType = createContentTypeResponse(['asset'], 'Link');
+
+      vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+      vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
+
+      const event: AppActionRequest<'Custom', AppActionParameters> = {
+        type: FunctionTypeEnum.AppActionCall,
+        body: {
+          entryId: 'entry-id',
+          fieldsData: JSON.stringify([
+            {
+              fieldId: 'asset',
+              contentBlockName: 'link-field',
+              contentBlockDescription: 'Link field test',
+            },
+          ]),
+        },
+        headers: {},
+      };
+
+      const result = await handler(event, mockContext);
+
+      expect(result.results[0].success).toBe(false);
+      expect(result.results[0].statusCode).toBe(500);
+      expect(result.results[0].message).toBe("Field type 'Link' is not supported");
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('should reject Location fields', async () => {
+      const entry = createEntryResponse({
+        location: { 'en-US': { lat: 40.7128, lon: -74.006 } },
+      });
+      const contentType = createContentTypeResponse(['location'], 'Location');
+
+      vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+      vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
+
+      const event: AppActionRequest<'Custom', AppActionParameters> = {
+        type: FunctionTypeEnum.AppActionCall,
+        body: {
+          entryId: 'entry-id',
+          fieldsData: JSON.stringify([
+            {
+              fieldId: 'location',
+              contentBlockName: 'location-field',
+              contentBlockDescription: 'Location field test',
+            },
+          ]),
+        },
+        headers: {},
+      };
+
+      const result = await handler(event, mockContext);
+
+      expect(result.results[0].success).toBe(false);
+      expect(result.results[0].statusCode).toBe(500);
+      expect(result.results[0].message).toBe("Field type 'Location' is not supported");
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('should reject Array fields', async () => {
+      const entry = createEntryResponse({
+        tags: { 'en-US': ['tag1', 'tag2', 'tag3'] },
+      });
+      const contentType = createContentTypeResponse(['tags'], 'Array');
+
+      vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+      vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
+
+      const event: AppActionRequest<'Custom', AppActionParameters> = {
+        type: FunctionTypeEnum.AppActionCall,
+        body: {
+          entryId: 'entry-id',
+          fieldsData: JSON.stringify([
+            {
+              fieldId: 'tags',
+              contentBlockName: 'array-field',
+              contentBlockDescription: 'Array field test',
+            },
+          ]),
+        },
+        headers: {},
+      };
+
+      const result = await handler(event, mockContext);
+
+      expect(result.results[0].success).toBe(false);
+      expect(result.results[0].statusCode).toBe(500);
+      expect(result.results[0].message).toBe("Field type 'Array' is not supported");
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('should handle field not found in content type', async () => {
+      const entry = createEntryResponse({
+        title: { 'en-US': 'Test Title' },
+      });
+      const contentType = createContentTypeResponse(['title']);
+
+      vi.mocked(mockCma.entry.get).mockResolvedValue(entry);
+      vi.mocked(mockCma.contentType.get).mockResolvedValue(contentType);
+
+      const event: AppActionRequest<'Custom', AppActionParameters> = {
+        type: FunctionTypeEnum.AppActionCall,
+        body: {
+          entryId: 'entry-id',
+          fieldsData: JSON.stringify([
+            {
+              fieldId: 'nonexistent',
+              contentBlockName: 'nonexistent-field',
+              contentBlockDescription: 'Nonexistent field test',
+            },
+          ]),
+        },
+        headers: {},
+      };
+
+      const result = await handler(event, mockContext);
+
+      expect(result.results[0].success).toBe(false);
+      expect(result.results[0].statusCode).toBe(600);
+      expect(result.results[0].message).toBe('Field nonexistent does not exist or is empty');
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+  });
 });
