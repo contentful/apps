@@ -4,9 +4,8 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { AppInstallationParameters } from '../src/utils';
-import { initContentfulManagementClient } from './common';
+import { initContentfulManagementClient, stringifyFieldValue } from './common';
 import { ContentTypeProps, EntryProps, ContentFields } from 'contentful-management';
 import { KeyValueMap } from 'contentful-management';
 
@@ -20,33 +19,6 @@ type FieldData = {
   locale?: string;
   contentBlockName: string;
   contentBlockDescription: string;
-};
-
-const stringifyFieldValue = (fieldValue: any, field: ContentFields<KeyValueMap>): string => {
-  switch (field.type) {
-    case 'Symbol':
-    case 'Text':
-      return String(fieldValue);
-
-    case 'Integer':
-    case 'Number':
-      return String(fieldValue);
-
-    case 'Date':
-      return new Date(fieldValue).toISOString();
-
-    case 'Boolean':
-      return String(fieldValue);
-
-    case 'Object':
-      return JSON.stringify(fieldValue);
-
-    case 'RichText':
-      return documentToHtmlString(fieldValue);
-
-    default:
-      throw new Error(`Field type '${field.type}' is not supported`);
-  }
 };
 
 const createBrazeErrorMessage = (
@@ -141,8 +113,7 @@ const createContentBlock = async (
       };
     }
 
-    let content: string;
-    content = stringifyFieldValue(fieldValue, field);
+    const content = stringifyFieldValue(fieldValue, field);
 
     const response = await fetch(`${brazeEndpoint}/content_blocks/create`, {
       method: 'POST',
