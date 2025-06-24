@@ -1,16 +1,28 @@
-import { Paragraph } from '@contentful/f36-components';
+import { Button, Flex } from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
+  useAutoResizer();
 
-  return <Paragraph>Hello Sidebar Component (AppId: {sdk.ids.app})</Paragraph>;
+  return (
+    <Flex gap="spacingM" flexDirection="column">
+      <Button
+        variant="secondary"
+        isFullWidth={true}
+        onClick={() => sdk.dialogs.openCurrentApp({ title: 'Sync entry fields to Hubspot' })}>
+        Sync entry fields to Hubspot
+      </Button>
+
+      <Button
+        variant="secondary"
+        isFullWidth={true}
+        onClick={() => sdk.navigator.openCurrentAppPage()}>
+        View all connected entries
+      </Button>
+    </Flex>
+  );
 };
 
 export default Sidebar;
