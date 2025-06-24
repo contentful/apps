@@ -26,7 +26,7 @@ import {
   ContentType,
   HUBSPOT_PRIVATE_APPS_URL,
 } from '../utils';
-import { ContentTypeProps, createClient, PlainClientAPI } from 'contentful-management';
+import { ContentTypeProps, createClient } from 'contentful-management';
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 
 const ConfigScreen = () => {
@@ -57,8 +57,6 @@ const ConfigScreen = () => {
   }
 
   const onConfigure = useCallback(async () => {
-    const currentState = await sdk.app.getCurrentState();
-
     const hubspotTokenHasValue = checkIfHasValue(
       parameters.hubspotAccessToken,
       setIsHubspotTokenInvalid
@@ -68,12 +66,6 @@ const ConfigScreen = () => {
       sdk.notifier.error('Some fields are missing or invalid');
       return false;
     }
-
-    await addAppToSidebar(
-      sdk,
-      cma,
-      selectedContentTypes.map((contentType) => contentType.id)
-    );
 
     const editorInterface = selectedContentTypes.reduce((acc, contentType) => {
       return {
@@ -86,7 +78,7 @@ const ConfigScreen = () => {
 
     return {
       parameters,
-      targetState: { EditorInterface: { ...currentState?.EditorInterface, ...editorInterface } },
+      targetState: { EditorInterface: { ...editorInterface } },
     };
   }, [parameters, sdk, cma, selectedContentTypes]);
 
@@ -244,31 +236,5 @@ const ConfigScreen = () => {
     </Flex>
   );
 };
-
-async function addAppToSidebar(sdk: ConfigAppSDK, cma: PlainClientAPI, contentTypesId: string[]) {
-  for (const contentTypeId of contentTypesId) {
-    try {
-      const editorInterface = await cma.editorInterface.get({ contentTypeId });
-      const updatedSidebar = [
-        ...(editorInterface.sidebar || []),
-        {
-          widgetId: sdk.ids.app,
-          widgetNamespace: 'app',
-          settings: { position: 0 },
-        },
-      ];
-
-      await cma.editorInterface.update(
-        { contentTypeId },
-        {
-          ...editorInterface,
-          sidebar: updatedSidebar,
-        }
-      );
-    } catch (e) {
-      sdk.notifier.error(`Failed to add app to sidebar for content type ${contentTypeId}`);
-    }
-  }
-}
 
 export default ConfigScreen;

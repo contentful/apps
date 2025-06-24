@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ContentTypeMultiSelect from '../../src/components/ContentTypeMultiSelect';
 import { ContentType } from '../../src/utils';
@@ -10,6 +10,14 @@ describe('ContentTypeMultiSelect', () => {
     { id: 'article', name: 'Article' },
     { id: 'news', name: 'News' },
   ];
+
+  beforeEach(() => {
+    render(<TestWrapper />);
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
 
   const TestWrapper = ({ initialSelected = [] }: { initialSelected?: ContentType[] }) => {
     const [selected, setSelected] = React.useState<ContentType[]>(initialSelected);
@@ -23,26 +31,17 @@ describe('ContentTypeMultiSelect', () => {
   };
 
   it('renders available content types in the dropdown', async () => {
-    render(
-      <ContentTypeMultiSelect
-        selectedContentTypes={[]}
-        setSelectedContentTypes={() => {}}
-        availableContentTypes={availableContentTypes}
-      />
-    );
     expect(screen.getByText('Blog Post')).toBeTruthy();
     expect(screen.getByText('Article')).toBeTruthy();
     expect(screen.getByText('News')).toBeTruthy();
   });
 
   it('selects and deselects content types, showing and removing pills', async () => {
-    render(<TestWrapper />);
     const user = userEvent.setup();
 
     // Click to select 'Blog Post'
-    const blogPostOptions = screen.getAllByText('Blog Post');
-    const blogPostOption = blogPostOptions.find((el) => !el.closest('button[aria-label="Close"]'));
-    await user.click(blogPostOption!);
+    const blogPostOption = screen.getByText('Blog Post');
+    await user.click(blogPostOption);
     expect(await screen.findByLabelText('Close')).toBeInTheDocument();
 
     // Deselect by clicking the pill's close button
@@ -52,20 +51,17 @@ describe('ContentTypeMultiSelect', () => {
   });
 
   it('shows correct placeholder text', async () => {
-    render(<TestWrapper />);
     const user = userEvent.setup();
 
     // Select 'Blog Post'
-    const blogPostOptions = screen.getAllByText('Blog Post');
-    const blogPostOption = blogPostOptions.find((el) => !el.closest('button[aria-label="Close"]'));
-    await user.click(blogPostOption!);
+    const blogPostOption = screen.getByText('Blog Post');
+    await user.click(blogPostOption);
     let pill = screen.getByLabelText('Close').parentElement;
     expect(pill).toHaveTextContent('Blog Post');
 
     // Select 'Article'
-    const articleOptions = screen.getAllByText('Article');
-    const articleOption = articleOptions.find((el) => !el.closest('button[aria-label="Close"]'));
-    await user.click(articleOption!);
+    const articleOption = screen.getByText('Article');
+    await user.click(articleOption);
 
     // There should be two pills: 'Blog Post' and 'Article'
     const closeButtons = screen.getAllByLabelText('Close');
@@ -75,8 +71,11 @@ describe('ContentTypeMultiSelect', () => {
   });
 
   it('removes pill when close button is clicked', async () => {
-    render(<TestWrapper initialSelected={[{ id: 'blogPost', name: 'Blog Post' }]} />);
     const user = userEvent.setup();
+    // Select 'Blog Post'
+    const blogPostOption = screen.getByText('Blog Post');
+    await user.click(blogPostOption);
+
     const closeButton = screen.getByLabelText('Close');
     await user.click(closeButton);
 
@@ -84,7 +83,6 @@ describe('ContentTypeMultiSelect', () => {
   });
 
   it('shows the correct placeholder text', async () => {
-    render(<TestWrapper />);
     expect(screen.getByText('Select one or more')).toBeInTheDocument();
   });
 });

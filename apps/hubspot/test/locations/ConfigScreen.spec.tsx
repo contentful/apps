@@ -157,24 +157,5 @@ describe('Hubspot Config Screen ', () => {
         },
       });
     });
-
-    it('handles errors when adding app to sidebar', async () => {
-      const user = userEvent.setup();
-      await fillInHubspotAccessToken(user);
-      await selectContentTypes(user, 'Blog Post');
-      const closeButton = await screen.findByLabelText('Close');
-      const pill = closeButton.parentElement;
-      expect(pill).toHaveTextContent('Blog Post');
-
-      mockCma.editorInterface.get.mockRejectedValueOnce(
-        new Error('Failed to get editor interface')
-      );
-
-      await saveAppInstallation();
-
-      expect(mockSdk.notifier.error).toHaveBeenCalledWith(
-        'Failed to add app to sidebar for content type blogPost'
-      );
-    });
   });
 });
