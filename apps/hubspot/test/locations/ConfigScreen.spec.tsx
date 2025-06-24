@@ -1,20 +1,39 @@
 import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
+import userEvent, { UserEvent } from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockSdk } from '../mocks';
+import { mockCma, mockSdk } from '../mocks';
 import ConfigScreen from '../../src/locations/ConfigScreen';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
+vi.mock('contentful-management', () => ({
+  createClient: () => mockCma,
+}));
+
 async function saveAppInstallation() {
   return await mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
 }
 
-describe('Config Screen component (Hubspot)', () => {
+describe('Hubspot Config Screen ', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockCma.contentType.getMany.mockResolvedValue({
+      items: [
+        { sys: { id: 'blogPost' }, name: 'Blog Post' },
+        { sys: { id: 'article' }, name: 'Article' },
+        { sys: { id: 'news' }, name: 'News' },
+      ],
+      total: 3,
+      skip: 0,
+      limit: 100,
+      sys: { type: 'Array' },
+    });
+    mockSdk.app.getCurrentState.mockResolvedValue({
+      EditorInterface: {},
+    });
     render(<ConfigScreen />);
   });
 
@@ -55,14 +74,62 @@ describe('Config Screen component (Hubspot)', () => {
       expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
     });
 
-    it('renders the external link with icon', () => {
-      const link = screen.getByRole('link', {
+    it('renders the external link with icon', async () => {
+      const user = userEvent.setup();
+      const expandButton = screen.getByLabelText('Expand instructions');
+      await user.click(expandButton);
+
+      const link = await screen.findByRole('link', {
         name: /Read about creating private apps in Hubspot/i,
       });
 
       expect(link).toBeTruthy();
       expect(link).toHaveAttribute('href');
       expect(link.querySelector('svg')).toBeTruthy();
+    });
+
+    it('renders the content type multi-select', async () => {
+      expect(await screen.findByText('Select one or more')).toBeTruthy();
+    });
+  });
+
+  describe('Content type installation', () => {
+    const selectContentTypes = async (user: UserEvent, contentTypeName: string | RegExp) => {
+      const autocomplete = await screen.findByText('Select one or more');
+      await user.click(autocomplete);
+      const checkbox = await screen.findByRole('checkbox', { name: contentTypeName });
+      await user.click(checkbox);
+    };
+
+    const fillInHubspotAccessToken = async (user: UserEvent) => {
+      const hubspotAccessTokenInput = await screen.findByPlaceholderText('Enter your access token');
+      await user.type(hubspotAccessTokenInput, 'valid-api-key-123');
+    };
+
+    it('adds and removes app from sidebar for each content type', async () => {
+      const user = userEvent.setup();
+      await fillInHubspotAccessToken(user);
+
+      // adding the app for the content type
+      await selectContentTypes(user, 'Blog Post');
+      const closeButton = await screen.findByLabelText('Close');
+      const pill = closeButton.parentElement;
+      expect(pill).toHaveTextContent('Blog Post');
+
+      const saveAddingContentType = await saveAppInstallation();
+
+      expect(saveAddingContentType.targetState.EditorInterface).toEqual({
+        blogPost: {
+          sidebar: { position: 0 },
+        },
+      });
+
+      // removing the app from the content type
+      await user.click(closeButton);
+
+      const saveRemovingContentType = await saveAppInstallation();
+
+      expect(saveRemovingContentType.targetState.EditorInterface).toEqual({});
     });
   });
 });

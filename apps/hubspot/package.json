@@ -5,9 +5,11 @@
   "dependencies": {
     "@contentful/app-sdk": "^4.29.1",
     "@contentful/f36-components": "4.79.1",
+    "@contentful/f36-multiselect": "^4.26.1",
     "@contentful/f36-tokens": "4.2.0",
     "@contentful/field-editor-json": "^3.3.38",
     "@contentful/react-apps-toolkit": "1.2.16",
+    "@testing-library/user-event": "^14.6.1",
     "contentful-management": "^11.52.0",
     "emotion": "10.0.27",
     "react": "18.3.1",

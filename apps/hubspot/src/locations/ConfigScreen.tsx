@@ -22,8 +22,11 @@ import { styles } from './ConfigScreen.styles';
 import {
   AppInstallationParameters,
   CONFIG_SCREEN_INSTRUCTIONS,
+  ContentType,
   HUBSPOT_PRIVATE_APPS_URL,
 } from '../utils';
+import { createClient } from 'contentful-management';
+import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
@@ -32,6 +35,18 @@ const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     hubspotAccessToken: '',
   });
+  const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
+
+  const cma = createClient(
+    { apiAdapter: sdk.cmaAdapter },
+    {
+      type: 'plain',
+      defaults: {
+        environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
+        spaceId: sdk.ids.space,
+      },
+    }
+  );
 
   function checkIfHasValue(value: string, setIsInvalid: (valid: boolean) => void) {
     const hasValue = !!value?.trim();
@@ -40,8 +55,6 @@ const ConfigScreen = () => {
   }
 
   const onConfigure = useCallback(async () => {
-    const currentState = await sdk.app.getCurrentState();
-
     const hubspotTokenHasValue = checkIfHasValue(
       parameters.hubspotAccessToken,
       setIsHubspotTokenInvalid
@@ -52,11 +65,20 @@ const ConfigScreen = () => {
       return false;
     }
 
+    const editorInterface = selectedContentTypes.reduce((acc, contentType) => {
+      return {
+        ...acc,
+        [contentType.id]: {
+          sidebar: { position: 0 },
+        },
+      };
+    }, {});
+
     return {
       parameters,
-      targetState: currentState,
+      targetState: { EditorInterface: { ...editorInterface } },
     };
-  }, [parameters, sdk]);
+  }, [parameters, sdk, cma, selectedContentTypes]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -144,7 +166,19 @@ const ConfigScreen = () => {
             </Box>
           </Collapse>
         </Box>
-        <Splitter marginTop="spacing2Xs" marginBottom="none" />
+        <Splitter marginTop="spacing2Xs" marginBottom="spacing2Xl" />
+        <Subheading marginBottom="spacing2Xs">Assign content types</Subheading>
+        <Paragraph marginBottom="spacingM">
+          The Hubspot integration will be enabled for content types you assign, and the sidebar
+          widget will show up on these entry pages.
+        </Paragraph>
+        <Text fontWeight="fontWeightDemiBold">Content types</Text>
+        <ContentTypeMultiSelect
+          selectedContentTypes={selectedContentTypes}
+          setSelectedContentTypes={setSelectedContentTypes}
+          sdk={sdk}
+          cma={cma}
+        />
       </Box>
     </Flex>
   );
