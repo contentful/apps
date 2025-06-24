@@ -27,22 +27,7 @@
     }
   ],
   "parameters": {
-    "installation": [
-      {
-        "id": "klaviyoPublicKey",
-        "name": "Klaviyo Public API Key",
-        "description": "Your Klaviyo public API key (starts with pk_)",
-        "type": "Symbol",
-        "required": true
-      },
-      {
-        "id": "klaviyoPrivateKey",
-        "name": "Klaviyo Private API Key",
-        "description": "Your Klaviyo private API key (starts with pk_)",
-        "type": "Symbol",
-        "required": true
-      }
-    ]
+    "installation": []
   },
   "functions": [
     {

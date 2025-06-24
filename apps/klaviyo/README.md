@@ -4,16 +4,16 @@ This Contentful app integrates with Klaviyo's marketing automation platform to a
 
 ## Architecture
 
-The app uses a serverless architecture with two main components:
+The app uses Contentful's App Framework with two main components:
 
 1. **Frontend**: A React application that runs in the Contentful web interface
-2. **Lambda Function**: A serverless AWS Lambda function that handles communication with the Klaviyo API
+2. **App Functions**: Serverless functions that handle communication with the Klaviyo API
 
-The frontend app communicates with the Lambda function, which serves as a secure proxy to the Klaviyo API. This approach keeps your Klaviyo credentials secure.
+The frontend app communicates with the App Functions, which serve as a secure proxy to the Klaviyo API. This approach keeps your Klaviyo credentials secure.
 
 ## Features
 
-- API key-based authentication with Klaviyo
+- OAuth-based authentication with Klaviyo
 - Send tracking events to Klaviyo
 - Create and identify profiles in Klaviyo
 - Upload template content to Klaviyo
@@ -23,40 +23,37 @@ The frontend app communicates with the Lambda function, which serves as a secure
 ### Prerequisites
 
 - Klaviyo account with API access
-- AWS account for Lambda deployment
 - Contentful organization with app hosting capabilities
 
 ### Installation
 
-1. Deploy the Lambda function to AWS (see the `lambda` directory for deployment instructions)
-2. Obtain your Klaviyo API keys from your Klaviyo account:
-   - Public API Key (starts with pk_)
-   - Private API Key (starts with pk_)
+1. Install the app in your Contentful space
 
-3. Install the app in your Contentful space
-4. Configure the app with:
-   - Lambda API URL
-   - Klaviyo Public API Key
-   - Klaviyo Private API Key (securely stored)
+2. Connect your Klaviyo account via OAuth during app configuration
 
 ## Usage
 
 ### Authentication & Security
 
-The app uses API key authentication with Klaviyo:
+The app uses OAuth authentication with Klaviyo:
 
-1. **API Key Authentication**: The app uses Klaviyo's API key authentication for secure access.
+1. **OAuth Authentication**: The app uses Klaviyo's OAuth flow for secure access to your Klaviyo account.
 
-2. **Secure Credentials**: During app installation, users provide their Klaviyo Public and Private API keys, which are securely stored in Contentful's app parameters.
+2. **Secure Connection**: During app configuration, users connect their Klaviyo account via OAuth. This process:
+   - Redirects users to Klaviyo's authorization page
+   - Requests necessary permissions for the app to access Klaviyo data
+   - Securely stores access tokens for API communication
+   - Never exposes credentials to users or stores them in plain text
 
 The authentication process works as follows:
-- API keys are securely stored in Contentful's app parameters
-- The Lambda function uses these keys to authenticate with Klaviyo
-- All API requests are proxied through the Lambda function, keeping credentials secure
+- OAuth credentials are securely stored in Contentful's app parameters
+- The App Functions use OAuth tokens to authenticate with Klaviyo
+- All API requests are proxied through the App Functions, keeping credentials secure
+- Tokens are automatically refreshed as needed
 
 ### API Communication
 
-All API requests to Klaviyo are proxied through the Lambda function to ensure security:
+All API requests to Klaviyo are proxied through the App Functions to ensure security:
 
 ## Getting Started
 
@@ -83,16 +80,11 @@ npm install
 
 ### Development
 
-To start the app in development mode with the proxy server:
+To start the app in development mode:
 
 ```bash
-npm run dev-with-proxy
+npm run dev
 ```
-
-This will:
-1. Start the Contentful app on port 3000
-2. Start the lambda proxy on port 3001
-3. Configure the app to communicate with the proxy
 
 For local development, you'll need to configure your Contentful app to use `http://localhost:3000`.
 
@@ -103,6 +95,8 @@ Build the app for production:
 ```bash
 npm run build
 ```
+
+This will build both the frontend and the App Functions.
 
 ### Deployment
 
@@ -120,16 +114,21 @@ For CI/CD pipelines, use:
 npm run upload-ci
 ```
 
-## Proxy
+## App Functions
 
-The app includes a proxy that handles communication with the Klaviyo API. This proxy is necessary because Klaviyo's API doesn't support direct browser requests due to CORS restrictions. The proxy server securely forwards requests to Klaviyo and returns the responses to the app.
+The app includes several App Functions that handle communication with the Klaviyo API:
 
+- **Klaviyo Entry Sync**: Automatically syncs content to Klaviyo when entries are published or updated
+- **Proxy Request**: Proxies requests to allowed Klaviyo endpoints
+- **OAuth Functions**: Handle the OAuth authentication flow (initiate, complete, disconnect, check status)
+
+These functions are necessary because Klaviyo's API doesn't support direct browser requests due to CORS restrictions. The functions securely forward requests to Klaviyo using OAuth tokens and return the responses to the app.
 
 ## App Locations
 
 This app provides the following integration points in Contentful:
 
-- **App Configuration Screen**: Configure API keys and global settings
+- **App Configuration Screen**: Connect your Klaviyo account via OAuth and configure global settings
 - **Entry Sidebar**: Map fields and sync content to Klaviyo
 - **Entry Field**: Automatic content processing with the `onEntryUpdate` function
 
