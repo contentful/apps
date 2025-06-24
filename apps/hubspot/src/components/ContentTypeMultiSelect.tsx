@@ -1,9 +1,5 @@
 import React, { useCallback } from 'react';
-import {
-  Box,
-  Stack,
-  Pill,
-} from '@contentful/f36-components';
+import { Box, Stack, Pill } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { ContentType } from '../utils';
 
