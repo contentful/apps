@@ -13,6 +13,12 @@ const mockSdk: any = {
   ids: {
     app: 'test-app',
   },
+  dialogs: {
+    openCurrentApp: vi.fn(),
+  },
+  navigator: {
+    openCurrentAppPage: vi.fn(),
+  },
 };
 
 export { mockSdk };
