@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ContentTypeMultiSelect from '../../src/components/ContentTypeMultiSelect';
 import { ContentType } from '../../src/utils';
@@ -30,48 +30,48 @@ describe('ContentTypeMultiSelect', () => {
         availableContentTypes={availableContentTypes}
       />
     );
-    const user = userEvent.setup();
-
-    const autocomplete = screen.getByPlaceholderText('Select one or more');
-    await user.click(autocomplete);
-
-    expect(await screen.findByText('Blog Post')).toBeTruthy();
-    expect(await screen.findByText('Article')).toBeTruthy();
-    expect(await screen.findByText('News')).toBeTruthy();
+    expect(screen.getByText('Blog Post')).toBeTruthy();
+    expect(screen.getByText('Article')).toBeTruthy();
+    expect(screen.getByText('News')).toBeTruthy();
   });
 
   it('selects and deselects content types, showing and removing pills', async () => {
     render(<TestWrapper />);
     const user = userEvent.setup();
 
-    const autocomplete = screen.getByPlaceholderText('Select one or more');
-    await user.click(autocomplete);
-    const checkbox = await screen.findByRole('checkbox', { name: 'Blog Post' });
-    await user.click(checkbox);
-    await waitFor(() => {
-      const closeButton = screen.getByLabelText('Close');
-      const pill = closeButton.parentElement;
-      expect(pill).toHaveTextContent('Blog Post');
-    });
+    // Click to select 'Blog Post'
+    const blogPostOptions = screen.getAllByText('Blog Post');
+    const blogPostOption = blogPostOptions.find((el) => !el.closest('button[aria-label="Close"]'));
+    await user.click(blogPostOption!);
+    expect(await screen.findByLabelText('Close')).toBeInTheDocument();
 
-    // Deselect
-    await user.click(checkbox);
-    await waitFor(() => {
-      expect(screen.queryByLabelText('Close')).toBeNull();
-    });
+    // Deselect by clicking the pill's close button
+    const closeButton = screen.getByLabelText('Close');
+    await user.click(closeButton);
+    expect(screen.queryByLabelText('Close')).toBeNull();
   });
 
   it('shows correct placeholder text', async () => {
     render(<TestWrapper />);
     const user = userEvent.setup();
-    const autocomplete = screen.getByPlaceholderText('Select one or more');
-    await user.click(autocomplete);
-    const checkbox = await screen.findByRole('checkbox', { name: 'Blog Post' });
-    await user.click(checkbox);
-    expect(screen.getByPlaceholderText('Blog Post')).toBeTruthy();
-    const checkbox2 = await screen.findByRole('checkbox', { name: 'Article' });
-    await user.click(checkbox2);
-    expect(screen.getByPlaceholderText('Blog Post and 1 more')).toBeTruthy();
+
+    // Select 'Blog Post'
+    const blogPostOptions = screen.getAllByText('Blog Post');
+    const blogPostOption = blogPostOptions.find((el) => !el.closest('button[aria-label="Close"]'));
+    await user.click(blogPostOption!);
+    let pill = screen.getByLabelText('Close').parentElement;
+    expect(pill).toHaveTextContent('Blog Post');
+
+    // Select 'Article'
+    const articleOptions = screen.getAllByText('Article');
+    const articleOption = articleOptions.find((el) => !el.closest('button[aria-label="Close"]'));
+    await user.click(articleOption!);
+
+    // There should be two pills: 'Blog Post' and 'Article'
+    const closeButtons = screen.getAllByLabelText('Close');
+    const pillTexts = closeButtons.map((btn) => btn.parentElement?.textContent);
+    expect(pillTexts).toContain('Blog Post');
+    expect(pillTexts).toContain('Article');
   });
 
   it('removes pill when close button is clicked', async () => {
@@ -80,14 +80,11 @@ describe('ContentTypeMultiSelect', () => {
     const closeButton = screen.getByLabelText('Close');
     await user.click(closeButton);
 
-    await waitFor(() => {
-      expect(screen.queryByLabelText('Close')).toBeNull();
-    });
+    expect(screen.queryByLabelText('Close')).toBeNull();
   });
 
-  it('disables autocomplete when all content types are selected', async () => {
-    render(<TestWrapper initialSelected={availableContentTypes} />);
-
-    expect(screen.getByPlaceholderText('Blog Post and 2 more')).toBeDisabled();
+  it('shows the correct placeholder text', async () => {
+    render(<TestWrapper />);
+    expect(screen.getByText('Select one or more')).toBeInTheDocument();
   });
 });

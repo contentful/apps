@@ -229,6 +229,12 @@ const ConfigScreen = () => {
           </Collapse>
         </Box>
         <Splitter marginTop="spacing2Xs" marginBottom="spacing2Xl" />
+        <Subheading marginBottom="spacing2Xs">Assign content types</Subheading>
+        <Paragraph marginBottom="spacingM">
+          The Hubspot integration will be enabled for content types you assign, and the sidebar
+          widget will show up on these entry pages.
+        </Paragraph>
+        <Text fontWeight="fontWeightDemiBold">Content types</Text>
         <ContentTypeMultiSelect
           selectedContentTypes={selectedContentTypes}
           setSelectedContentTypes={setSelectedContentTypes}

@@ -3,13 +3,8 @@ import {
   Box,
   Stack,
   Pill,
-  Autocomplete,
-  Checkbox,
-  Text,
-  Subheading,
-  Paragraph,
 } from '@contentful/f36-components';
-import { styles } from '../locations/ConfigScreen.styles';
+import { Multiselect } from '@contentful/f36-multiselect';
 import { ContentType } from '../utils';
 
 interface ContentTypeMultiSelectProps {
@@ -23,65 +18,34 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   setSelectedContentTypes,
   availableContentTypes,
 }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-
-  const handleToggleContentType = useCallback(
-    (contentType: ContentType) => {
-      const isSelected = selectedContentTypes.some((ct) => ct.id === contentType.id);
-      if (isSelected) {
-        setSelectedContentTypes(selectedContentTypes.filter((ct) => ct.id !== contentType.id));
-      } else {
-        setSelectedContentTypes([...selectedContentTypes, contentType]);
-      }
-    },
-    [selectedContentTypes, setSelectedContentTypes]
-  );
-
   const getPlaceholderText = useCallback(() => {
     if (selectedContentTypes.length === 0) return 'Select one or more';
     if (selectedContentTypes.length === 1) return selectedContentTypes[0].name;
     return `${selectedContentTypes[0].name} and ${selectedContentTypes.length - 1} more`;
   }, [selectedContentTypes]);
 
-  const isAllSelected = selectedContentTypes.length === availableContentTypes.length;
-
   return (
     <>
-      <Subheading marginBottom="spacing2Xs">Assign content types</Subheading>
-      <Paragraph marginBottom="spacingM">
-        The Hubspot integration will be enabled for content types you assign, and the sidebar widget
-        will show up on these entry pages.
-      </Paragraph>
-      <Text fontWeight="fontWeightDemiBold">Content types</Text>
       <Stack marginTop="spacingXs" flexDirection="column" alignItems="start">
-        <Autocomplete
-          items={availableContentTypes}
-          placeholder={getPlaceholderText()}
-          onSelectItem={() => null}
-          isDisabled={isAllSelected}
-          itemToString={(item) => item.name}
-          renderItem={(item) => (
-            <Box
-              padding="spacingXs"
-              width="full"
-              onClick={() => handleToggleContentType(item)}
-              className={styles.dropdownItem}>
-              <Checkbox
-                id={`checkbox-${item.id}`}
-                isChecked={selectedContentTypes.some((ct) => ct.id === item.id)}
-                onClick={() => {}}>
-                {item.name}
-              </Checkbox>
-            </Box>
-          )}
-          textOnAfterSelect="clear"
-          closeAfterSelect={false}
-          listWidth="full"
-          isOpen={isOpen}
-          onOpen={() => setIsOpen(true)}
-          onClose={() => setIsOpen(false)}
-          isReadOnly
-        />
+        <Multiselect placeholder={getPlaceholderText()}>
+          {availableContentTypes.map((item) => (
+            <Multiselect.Option
+              key={item.id}
+              value={item.id}
+              itemId={item.id}
+              isChecked={selectedContentTypes.some((ct) => ct.id === item.id)}
+              onSelectItem={(e) => {
+                const checked = e.target.checked;
+                if (checked) {
+                  setSelectedContentTypes([...selectedContentTypes, item]);
+                } else {
+                  setSelectedContentTypes(selectedContentTypes.filter((ct) => ct.id !== item.id));
+                }
+              }}>
+              {item.name}
+            </Multiselect.Option>
+          ))}
+        </Multiselect>
 
         {selectedContentTypes.length > 0 && (
           <Box width="full" overflow="auto">
@@ -91,7 +55,11 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
                   key={index}
                   label={contentType.name}
                   isDraggable={false}
-                  onClose={() => handleToggleContentType(contentType)}
+                  onClose={() =>
+                    setSelectedContentTypes(
+                      selectedContentTypes.filter((ct) => ct.id !== contentType.id)
+                    )
+                  }
                 />
               ))}
             </Stack>

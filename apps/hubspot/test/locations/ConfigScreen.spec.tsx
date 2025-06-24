@@ -105,13 +105,13 @@ describe('Hubspot Config Screen ', () => {
     });
 
     it('renders the content type multi-select', async () => {
-      expect(await screen.findByPlaceholderText('Select one or more')).toBeTruthy();
+      expect(await screen.findByText('Select one or more')).toBeTruthy();
     });
   });
 
   describe('Content type installation', () => {
     const selectContentTypes = async (user: UserEvent, contentTypeName: string | RegExp) => {
-      const autocomplete = await screen.findByPlaceholderText('Select one or more');
+      const autocomplete = await screen.findByText('Select one or more');
       await user.click(autocomplete);
       const checkbox = await screen.findByRole('checkbox', { name: contentTypeName });
       await user.click(checkbox);
