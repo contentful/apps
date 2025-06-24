@@ -1,20 +1,16 @@
 import { FC } from 'react';
 import Mp4RenditionsList from '../Mp4RenditionsList';
 import { Box } from '@contentful/f36-components';
-import { MuxContentfulObject, StaticRendition, ResolutionType } from '../../util/types';
+import {
+  MuxContentfulObject,
+  StaticRendition,
+  ResolutionType,
+  RenditionActionsProps,
+} from '../../util/types';
+import { RenditionInfo } from '../../util/types';
 
-interface RenditionInfo {
-  status: 'ready' | 'in_progress' | 'none' | 'skipped';
-  url?: string;
-  id?: string;
-}
-
-interface Mp4RenditionsPanelProps {
+interface Mp4RenditionsPanelProps extends RenditionActionsProps {
   asset: MuxContentfulObject;
-  onCreateRendition: (type: ResolutionType) => Promise<void>;
-  onDeleteRendition: (id: string) => void;
-  onUndoDeleteRendition: (id: string) => void;
-  isRenditionPendingDelete: (id: string) => boolean;
 }
 
 const mapRendition = (
@@ -28,7 +24,7 @@ const mapRendition = (
   if (file) {
     if (file.status === 'ready')
       response = { status: 'ready', url: `${baseStaticRenditionURL}/${file.name}`, id: file.id };
-    else if (file.status === 'preparing') response = { status: 'in_progress', id: file.id };
+    else if (file.status === 'preparing') response = { status: 'inProgress', id: file.id };
     else if (file.status === 'skipped') response = { status: 'skipped', id: file.id };
     else response = { status: 'none', id: file.id };
   }

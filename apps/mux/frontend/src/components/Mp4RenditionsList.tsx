@@ -1,25 +1,16 @@
 import { FC } from 'react';
 import { Box, Table, Button, TextLink, Note, Spinner, Tooltip } from '@contentful/f36-components';
 import DeleteUndoButton from './DeleteUndoButton';
+import { RenditionActionsProps, RenditionInfo, ResolutionType } from '../util/types';
 
-interface RenditionInfo {
-  status: 'ready' | 'in_progress' | 'none' | 'skipped';
-  url?: string;
-  id?: string;
-}
-
-export interface Mp4RenditionsListProps {
+interface Mp4RenditionsListProps extends RenditionActionsProps {
   highest: RenditionInfo;
   audioOnly: RenditionInfo;
-  onCreateRendition: (type: 'highest' | 'audio-only') => void;
-  onDeleteRendition: (id: string) => void;
-  onUndoDeleteRendition: (id: string) => void;
-  isRenditionPendingDelete: (id: string) => boolean;
 }
 
 const statusLabel = {
   ready: 'Ready',
-  in_progress: 'In progress',
+  inProgress: 'In progress',
   none: 'Not created',
   skipped: 'Not available',
 };
@@ -52,7 +43,7 @@ const Mp4RenditionsList: FC<Mp4RenditionsListProps> = ({
             <Table.Row key={rendition.key}>
               <Table.Cell>{rendition.label}</Table.Cell>
               <Table.Cell>
-                {rendition.data.status === 'in_progress' && <Spinner size="small" />}{' '}
+                {rendition.data.status === 'inProgress' && <Spinner size="small" />}{' '}
                 {statusLabel[rendition.data.status]}
               </Table.Cell>
               <Table.Cell>
@@ -69,7 +60,7 @@ const Mp4RenditionsList: FC<Mp4RenditionsListProps> = ({
                   <Button
                     size="small"
                     variant="secondary"
-                    onClick={() => onCreateRendition(rendition.key as 'highest' | 'audio-only')}>
+                    onClick={() => onCreateRendition(rendition.key as ResolutionType)}>
                     Create
                   </Button>
                 )}

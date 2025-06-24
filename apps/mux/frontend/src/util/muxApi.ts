@@ -1,5 +1,5 @@
 import { ModalData } from '../components/AssetConfiguration/MuxAssetConfigurationModal';
-import { InstallationParams, ResolutionType } from './types';
+import { InstallationParams, ResolutionType, AddByURLConfig } from './types';
 
 export interface AssetSettings {
   passthrough?: string;
@@ -101,15 +101,15 @@ function buildAssetSettings(options: ModalData): AssetSettings {
   return settings;
 }
 
-export async function addByURL(
-  apiClient: any,
-  sdk: any,
-  remoteURL: string,
-  options: ModalData,
-  responseCheck: (res: any) => boolean | Promise<boolean>,
-  setAssetError: (msg: string) => void,
-  pollForAssetDetails: () => Promise<void>
-) {
+export async function addByURL({
+  apiClient,
+  sdk,
+  remoteURL,
+  options,
+  responseCheck,
+  setAssetError,
+  pollForAssetDetails,
+}: AddByURLConfig) {
   const settings = buildAssetSettings(options);
 
   const requestBody = {

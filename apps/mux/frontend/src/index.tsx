@@ -376,15 +376,15 @@ export class App extends React.Component<AppProps, AppState> {
 
   onConfirmModal = async (options: ModalData) => {
     if (this.state.pendingUploadURL) {
-      await addByURL(
-        this.apiClient,
-        this.props.sdk,
-        this.state.pendingUploadURL,
+      await addByURL({
+        apiClient: this.apiClient,
+        sdk: this.props.sdk,
+        remoteURL: this.state.pendingUploadURL,
         options,
-        async (res) => await this.responseCheck(res),
-        this.setAssetError,
-        this.pollForAssetDetails
-      );
+        responseCheck: async (res) => await this.responseCheck(res),
+        setAssetError: this.setAssetError,
+        pollForAssetDetails: this.pollForAssetDetails,
+      });
       this.setState({ pendingUploadURL: null });
     } else {
       const muxUploadUrl = await getUploadUrl(
