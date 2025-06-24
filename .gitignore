@@ -14,3 +14,4 @@ lerna-debug.log
 examples/**/package-lock.json
 examples/**/.npmrc
 .env
+*/example-app
