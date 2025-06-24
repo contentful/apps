@@ -475,12 +475,6 @@ describe('FieldsFactory', () => {
         'Titre Français'
       );
     });
-
-    it('should return string value when displayField is a direct string', () => {
-      const fieldValue = { fields: { name: 'John Doe' } };
-
-      expect((fieldsFactory as any).getDisplayFieldValue(fieldValue, 'name')).toBe('John Doe');
-    });
   });
 });
 

@@ -188,11 +188,9 @@ export class FieldsFactory {
   private getDisplayFieldValue(fieldValue: any, displayField: string | undefined): string {
     if (!displayField) return 'Untitled';
     const displayFieldValue = fieldValue.fields?.[displayField];
-    if (!displayFieldValue || displayFieldValue === null) return 'Untitled';
-    if (typeof displayFieldValue === 'object') {
-      return Object.values(displayFieldValue)[0] as string;
-    }
+    if (!displayFieldValue || typeof displayFieldValue !== 'object' || displayFieldValue === null)
+      return 'Untitled';
 
-    return String(displayFieldValue);
+    return Object.values(displayFieldValue)[0] as string;
   }
 }
