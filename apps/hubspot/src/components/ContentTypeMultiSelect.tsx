@@ -24,6 +24,15 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
     if (selectedContentTypes.length === 1) return selectedContentTypes[0].name;
     return `${selectedContentTypes[0].name} and ${selectedContentTypes.length - 1} more`;
   }, [selectedContentTypes]);
+  const [filteredItems, setFilteredItems] = React.useState<ContentType[]>([]);
+
+  const handleSearchValueChange = (event: { target: { value: any } }) => {
+    const value = event.target.value;
+    const newFilteredItems = availableContentTypes.filter((contentType) =>
+      contentType.name.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredItems(newFilteredItems);
+  };
 
   const fetchAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     let allContentTypes: ContentTypeProps[] = [];
@@ -66,6 +75,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
         .sort((a, b) => a.name.localeCompare(b.name));
 
       setAvailableContentTypes(newAvailableContentTypes);
+      setFilteredItems(newAvailableContentTypes);
 
       // If we have current content types, set them as selected
       if (currentContentTypesIds.length > 0) {
@@ -80,8 +90,13 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   return (
     <>
       <Stack marginTop="spacingXs" flexDirection="column" alignItems="start">
-        <Multiselect placeholder={getPlaceholderText()}>
-          {availableContentTypes.map((item) => (
+        <Multiselect
+          searchProps={{
+            searchPlaceholder: 'Search content types',
+            onSearchValueChange: handleSearchValueChange,
+          }}
+          placeholder={getPlaceholderText()}>
+          {filteredItems.map((item) => (
             <Multiselect.Option
               key={item.id}
               value={item.id}
