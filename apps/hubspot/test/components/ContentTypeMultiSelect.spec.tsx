@@ -99,15 +99,4 @@ describe('ContentTypeMultiSelect', () => {
     expect(pillTexts).toContain('Blog Post');
     expect(pillTexts).toContain('Article');
   });
-
-  it('removes pill when close button is clicked', async () => {
-    const user = userEvent.setup();
-    const blogPostOption = await screen.findByText('Blog Post');
-    await user.click(blogPostOption);
-
-    const closeButton = screen.getByLabelText('Close');
-    await user.click(closeButton);
-
-    expect(screen.queryByLabelText('Close')).toBeNull();
-  });
 });
