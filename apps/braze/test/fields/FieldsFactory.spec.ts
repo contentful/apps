@@ -418,6 +418,70 @@ describe('FieldsFactory', () => {
       level++;
     }
   });
+
+  describe('getDisplayFieldValue', () => {
+    let fieldsFactory: FieldsFactory;
+
+    beforeEach(() => {
+      fieldsFactory = new FieldsFactory(entryId, entryContentTypeId, mockCma as any);
+    });
+
+    it('should return "Untitled" when displayField is invalid (undefined, null, or empty string)', () => {
+      const fieldValue = { fields: { name: { 'en-US': 'John Doe' } } };
+
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValue, undefined)).toBe('Untitled');
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValue, null)).toBe('Untitled');
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValue, '')).toBe('Untitled');
+    });
+
+    it('should return "Untitled" when displayField does not exist in fields', () => {
+      const fieldValue = { fields: { name: { 'en-US': 'John Doe' } } };
+
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValue, 'nonexistent')).toBe(
+        'Untitled'
+      );
+    });
+
+    it('should return "Untitled" when displayField value is null, undefined, empty object, or object with only null values', () => {
+      const fieldValueNull = { fields: { name: null } };
+      const fieldValueUndef = { fields: { name: undefined } };
+      const fieldValueEmptyObj = { fields: { name: {} } };
+      const fieldValueNulls = { fields: { name: { 'en-US': null } } };
+
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValueNull, 'name')).toBe('Untitled');
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValueUndef, 'name')).toBe('Untitled');
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValueEmptyObj, 'name')).toBe(
+        undefined
+      );
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValueNulls, 'name')).toBe(null);
+    });
+
+    it('should return first locale value when displayField is a localized object (single or multiple locales)', () => {
+      const fieldValueSingle = { fields: { name: { 'en-US': 'John Doe' } } };
+      const fieldValueMulti = {
+        fields: {
+          title: {
+            'fr-FR': 'Titre Français',
+            'de-DE': 'Deutscher Titel',
+            'en-US': 'English Title',
+          },
+        },
+      };
+
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValueSingle, 'name')).toBe(
+        'John Doe'
+      );
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValueMulti, 'title')).toBe(
+        'Titre Français'
+      );
+    });
+
+    it('should return string value when displayField is a direct string', () => {
+      const fieldValue = { fields: { name: 'John Doe' } };
+
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValue, 'name')).toBe('John Doe');
+    });
+  });
 });
 
 async function createFields(

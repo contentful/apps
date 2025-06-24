@@ -140,9 +140,7 @@ export class FieldsFactory {
     currentDepth: number
   ): Promise<ReferenceField> {
     const fieldContentType = await this.getContentType(fieldValue.sys.contentType.sys.id);
-    const title = !!fieldContentType.displayField
-      ? Object.values(fieldValue.fields[fieldContentType.displayField] as { [key: string]: any })[0]
-      : 'Untitled';
+    const title = this.getDisplayFieldValue(fieldValue, fieldContentType.displayField);
 
     return new ReferenceField(
       fieldInfo.id,
@@ -169,7 +167,7 @@ export class FieldsFactory {
           crypto.randomUUID(),
           `${fieldInfo.name} item #${index + 1}`,
           contentType.sys.id,
-          Object.values(f.fields[fieldContentType.displayField] as { [key: string]: any })[0],
+          this.getDisplayFieldValue(f, fieldContentType.displayField),
           fieldInfo.localized,
           fieldContentType.sys.id,
           fieldContentType.name,
@@ -185,5 +183,16 @@ export class FieldsFactory {
       fieldInfo.localized,
       items
     );
+  }
+
+  private getDisplayFieldValue(fieldValue: any, displayField: string | undefined): string {
+    if (!displayField) return 'Untitled';
+    const displayFieldValue = fieldValue.fields?.[displayField];
+    if (!displayFieldValue || displayFieldValue === null) return 'Untitled';
+    if (typeof displayFieldValue === 'object') {
+      return Object.values(displayFieldValue)[0] as string;
+    }
+
+    return String(displayFieldValue);
   }
 }
