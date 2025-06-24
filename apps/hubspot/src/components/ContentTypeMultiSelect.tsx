@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Stack, Pill } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { CONFIG_CONTENT_TYPE_ID, ContentType } from '../utils';
@@ -19,11 +19,11 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   cma,
 }) => {
   const [availableContentTypes, setAvailableContentTypes] = useState<ContentType[]>([]);
-  const getPlaceholderText = useCallback(() => {
+  const getPlaceholderText = () => {
     if (selectedContentTypes.length === 0) return 'Select one or more';
     if (selectedContentTypes.length === 1) return selectedContentTypes[0].name;
     return `${selectedContentTypes[0].name} and ${selectedContentTypes.length - 1} more`;
-  }, [selectedContentTypes]);
+  };
   const [filteredItems, setFilteredItems] = React.useState<ContentType[]>([]);
 
   const handleSearchValueChange = (event: { target: { value: any } }) => {
