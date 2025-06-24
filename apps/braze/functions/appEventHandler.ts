@@ -16,8 +16,11 @@ import {
   ConnectedField,
 } from '../src/utils';
 import { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
-import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
-import { getConfigAndConnectedFields, initContentfulManagementClient } from './common';
+import {
+  getConfigAndConnectedFields,
+  initContentfulManagementClient,
+  stringifyFieldValue,
+} from './common';
 import { CustomError } from './customError';
 
 const WAIT_TIMES = [1000, 2000];
@@ -100,8 +103,6 @@ const entrySavedHandler = async (
       continue;
     }
 
-    fieldValue = fieldInfo.type === 'RichText' ? documentToHtmlString(fieldValue) : fieldValue;
-
     let updateResult: ConnectedField = {
       fieldId: connectedField.fieldId,
       locale,
@@ -109,8 +110,14 @@ const entrySavedHandler = async (
     };
 
     try {
+      const stringifiedValue = stringifyFieldValue(fieldValue, fieldInfo);
       await callAndRetry(() =>
-        updateContentBlock(brazeEndpoint, brazeApiKey, connectedField.contentBlockId, fieldValue)
+        updateContentBlock(
+          brazeEndpoint,
+          brazeApiKey,
+          connectedField.contentBlockId,
+          stringifiedValue
+        )
       );
     } catch (error: any) {
       updateResult = {

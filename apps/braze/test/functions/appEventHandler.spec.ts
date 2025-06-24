@@ -346,4 +346,677 @@ describe('updateContentBlocks', () => {
       })
     );
   });
+
+  describe('field stringification in updates', () => {
+    it('should stringify Symbol fields', async () => {
+      const event = {
+        headers: {
+          'X-Contentful-Topic': ['Entry.save'],
+        },
+        body: {
+          sys: {
+            id: 'test-entry-id',
+            contentType: {
+              sys: {
+                id: 'test-content-type',
+              },
+            },
+          },
+          fields: {
+            symbolField: {
+              'en-US': 'Test Symbol',
+            },
+          },
+        },
+      };
+
+      const mockConfigEntry = {
+        fields: {
+          connectedFields: {
+            'en-US': {
+              'test-entry-id': [
+                {
+                  fieldId: 'symbolField',
+                  contentBlockId: 'symbol-block-id',
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      vi.mocked(getConfigEntry).mockResolvedValue(mockConfigEntry as any);
+      mockCma.contentType.get.mockResolvedValue({
+        fields: [
+          {
+            id: 'symbolField',
+            type: 'Symbol',
+          },
+        ],
+      });
+      vi.mocked(global.fetch).mockResolvedValue(
+        new Response(JSON.stringify({ success: true }), { status: 200 })
+      );
+
+      await handler(event as any, mockContext as any);
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://test.braze.com/content_blocks/update',
+        expect.objectContaining({
+          body: JSON.stringify({
+            content_block_id: 'symbol-block-id',
+            content: 'Test Symbol',
+          }),
+        })
+      );
+    });
+
+    it('should stringify Integer fields', async () => {
+      const event = {
+        headers: {
+          'X-Contentful-Topic': ['Entry.save'],
+        },
+        body: {
+          sys: {
+            id: 'test-entry-id',
+            contentType: {
+              sys: {
+                id: 'test-content-type',
+              },
+            },
+          },
+          fields: {
+            integerField: {
+              'en-US': 42,
+            },
+          },
+        },
+      };
+
+      const mockConfigEntry = {
+        fields: {
+          connectedFields: {
+            'en-US': {
+              'test-entry-id': [
+                {
+                  fieldId: 'integerField',
+                  contentBlockId: 'integer-block-id',
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      vi.mocked(getConfigEntry).mockResolvedValue(mockConfigEntry as any);
+      mockCma.contentType.get.mockResolvedValue({
+        fields: [
+          {
+            id: 'integerField',
+            type: 'Integer',
+          },
+        ],
+      });
+      vi.mocked(global.fetch).mockResolvedValue(
+        new Response(JSON.stringify({ success: true }), { status: 200 })
+      );
+
+      await handler(event as any, mockContext as any);
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://test.braze.com/content_blocks/update',
+        expect.objectContaining({
+          body: JSON.stringify({
+            content_block_id: 'integer-block-id',
+            content: '42',
+          }),
+        })
+      );
+    });
+
+    it('should stringify Number fields', async () => {
+      const event = {
+        headers: {
+          'X-Contentful-Topic': ['Entry.save'],
+        },
+        body: {
+          sys: {
+            id: 'test-entry-id',
+            contentType: {
+              sys: {
+                id: 'test-content-type',
+              },
+            },
+          },
+          fields: {
+            numberField: {
+              'en-US': 99.99,
+            },
+          },
+        },
+      };
+
+      const mockConfigEntry = {
+        fields: {
+          connectedFields: {
+            'en-US': {
+              'test-entry-id': [
+                {
+                  fieldId: 'numberField',
+                  contentBlockId: 'number-block-id',
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      vi.mocked(getConfigEntry).mockResolvedValue(mockConfigEntry as any);
+      mockCma.contentType.get.mockResolvedValue({
+        fields: [
+          {
+            id: 'numberField',
+            type: 'Number',
+          },
+        ],
+      });
+      vi.mocked(global.fetch).mockResolvedValue(
+        new Response(JSON.stringify({ success: true }), { status: 200 })
+      );
+
+      await handler(event as any, mockContext as any);
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://test.braze.com/content_blocks/update',
+        expect.objectContaining({
+          body: JSON.stringify({
+            content_block_id: 'number-block-id',
+            content: '99.99',
+          }),
+        })
+      );
+    });
+
+    it('should stringify Date fields', async () => {
+      const testDate = '2024-01-15T10:30:00Z';
+      const event = {
+        headers: {
+          'X-Contentful-Topic': ['Entry.save'],
+        },
+        body: {
+          sys: {
+            id: 'test-entry-id',
+            contentType: {
+              sys: {
+                id: 'test-content-type',
+              },
+            },
+          },
+          fields: {
+            dateField: {
+              'en-US': testDate,
+            },
+          },
+        },
+      };
+
+      const mockConfigEntry = {
+        fields: {
+          connectedFields: {
+            'en-US': {
+              'test-entry-id': [
+                {
+                  fieldId: 'dateField',
+                  contentBlockId: 'date-block-id',
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      vi.mocked(getConfigEntry).mockResolvedValue(mockConfigEntry as any);
+      mockCma.contentType.get.mockResolvedValue({
+        fields: [
+          {
+            id: 'dateField',
+            type: 'Date',
+          },
+        ],
+      });
+      vi.mocked(global.fetch).mockResolvedValue(
+        new Response(JSON.stringify({ success: true }), { status: 200 })
+      );
+
+      await handler(event as any, mockContext as any);
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://test.braze.com/content_blocks/update',
+        expect.objectContaining({
+          body: JSON.stringify({
+            content_block_id: 'date-block-id',
+            content: '2024-01-15T10:30:00.000Z',
+          }),
+        })
+      );
+    });
+
+    it('should stringify Boolean fields', async () => {
+      const event = {
+        headers: {
+          'X-Contentful-Topic': ['Entry.save'],
+        },
+        body: {
+          sys: {
+            id: 'test-entry-id',
+            contentType: {
+              sys: {
+                id: 'test-content-type',
+              },
+            },
+          },
+          fields: {
+            booleanField: {
+              'en-US': true,
+            },
+          },
+        },
+      };
+
+      const mockConfigEntry = {
+        fields: {
+          connectedFields: {
+            'en-US': {
+              'test-entry-id': [
+                {
+                  fieldId: 'booleanField',
+                  contentBlockId: 'boolean-block-id',
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      vi.mocked(getConfigEntry).mockResolvedValue(mockConfigEntry as any);
+      mockCma.contentType.get.mockResolvedValue({
+        fields: [
+          {
+            id: 'booleanField',
+            type: 'Boolean',
+          },
+        ],
+      });
+      vi.mocked(global.fetch).mockResolvedValue(
+        new Response(JSON.stringify({ success: true }), { status: 200 })
+      );
+
+      await handler(event as any, mockContext as any);
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://test.braze.com/content_blocks/update',
+        expect.objectContaining({
+          body: JSON.stringify({
+            content_block_id: 'boolean-block-id',
+            content: 'true',
+          }),
+        })
+      );
+    });
+
+    it('should stringify Object fields', async () => {
+      const objectValue = { key: 'value', number: 123, nested: { test: true } };
+      const event = {
+        headers: {
+          'X-Contentful-Topic': ['Entry.save'],
+        },
+        body: {
+          sys: {
+            id: 'test-entry-id',
+            contentType: {
+              sys: {
+                id: 'test-content-type',
+              },
+            },
+          },
+          fields: {
+            objectField: {
+              'en-US': objectValue,
+            },
+          },
+        },
+      };
+
+      const mockConfigEntry = {
+        fields: {
+          connectedFields: {
+            'en-US': {
+              'test-entry-id': [
+                {
+                  fieldId: 'objectField',
+                  contentBlockId: 'object-block-id',
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      vi.mocked(getConfigEntry).mockResolvedValue(mockConfigEntry as any);
+      mockCma.contentType.get.mockResolvedValue({
+        fields: [
+          {
+            id: 'objectField',
+            type: 'Object',
+          },
+        ],
+      });
+      vi.mocked(global.fetch).mockResolvedValue(
+        new Response(JSON.stringify({ success: true }), { status: 200 })
+      );
+
+      await handler(event as any, mockContext as any);
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://test.braze.com/content_blocks/update',
+        expect.objectContaining({
+          body: JSON.stringify({
+            content_block_id: 'object-block-id',
+            content: JSON.stringify(objectValue),
+          }),
+        })
+      );
+    });
+
+    it('should skip Link fields', async () => {
+      const event = {
+        headers: {
+          'X-Contentful-Topic': ['Entry.save'],
+        },
+        body: {
+          sys: {
+            id: 'test-entry-id',
+            contentType: {
+              sys: {
+                id: 'test-content-type',
+              },
+            },
+          },
+          fields: {
+            linkField: {
+              'en-US': { sys: { type: 'Link', linkType: 'Asset', id: 'asset-id' } },
+            },
+          },
+        },
+      };
+
+      const mockConfigEntry = {
+        fields: {
+          connectedFields: {
+            'en-US': {
+              'test-entry-id': [
+                {
+                  fieldId: 'linkField',
+                  contentBlockId: 'link-block-id',
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      vi.mocked(getConfigEntry).mockResolvedValue(mockConfigEntry as any);
+      mockCma.contentType.get.mockResolvedValue({
+        fields: [
+          {
+            id: 'linkField',
+            type: 'Link',
+            linkType: 'Asset',
+          },
+        ],
+      });
+
+      await handler(event as any, mockContext as any);
+
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('should stringify Location fields', async () => {
+      const event = {
+        headers: {
+          'X-Contentful-Topic': ['Entry.save'],
+        },
+        body: {
+          sys: {
+            id: 'test-entry-id',
+            contentType: {
+              sys: {
+                id: 'test-content-type',
+              },
+            },
+          },
+          fields: {
+            locationField: {
+              'en-US': { lat: 40.7128, lon: -74.006 },
+            },
+          },
+        },
+      };
+
+      const mockConfigEntry = {
+        fields: {
+          connectedFields: {
+            'en-US': {
+              'test-entry-id': [
+                {
+                  fieldId: 'locationField',
+                  contentBlockId: 'location-block-id',
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      vi.mocked(getConfigEntry).mockResolvedValue(mockConfigEntry as any);
+      mockCma.contentType.get.mockResolvedValue({
+        fields: [
+          {
+            id: 'locationField',
+            type: 'Location',
+          },
+        ],
+      });
+      vi.mocked(global.fetch).mockResolvedValue(
+        new Response(JSON.stringify({ success: true }), { status: 200 })
+      );
+
+      await handler(event as any, mockContext as any);
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://test.braze.com/content_blocks/update',
+        expect.objectContaining({
+          body: JSON.stringify({
+            content_block_id: 'location-block-id',
+            content: 'lat:40.7128,long:-74.006',
+          }),
+        })
+      );
+    });
+
+    it('should skip Array fields', async () => {
+      const event = {
+        headers: {
+          'X-Contentful-Topic': ['Entry.save'],
+        },
+        body: {
+          sys: {
+            id: 'test-entry-id',
+            contentType: {
+              sys: {
+                id: 'test-content-type',
+              },
+            },
+          },
+          fields: {
+            arrayField: {
+              'en-US': ['tag1', 'tag2', 'tag3'],
+            },
+          },
+        },
+      };
+
+      const mockConfigEntry = {
+        fields: {
+          connectedFields: {
+            'en-US': {
+              'test-entry-id': [
+                {
+                  fieldId: 'arrayField',
+                  contentBlockId: 'array-block-id',
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      vi.mocked(getConfigEntry).mockResolvedValue(mockConfigEntry as any);
+      mockCma.contentType.get.mockResolvedValue({
+        fields: [
+          {
+            id: 'arrayField',
+            type: 'Array',
+            items: {
+              type: 'Symbol',
+            },
+          },
+        ],
+      });
+
+      await handler(event as any, mockContext as any);
+
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('should handle mixed field types correctly', async () => {
+      const event = {
+        headers: {
+          'X-Contentful-Topic': ['Entry.save'],
+        },
+        body: {
+          sys: {
+            id: 'test-entry-id',
+            contentType: {
+              sys: {
+                id: 'test-content-type',
+              },
+            },
+          },
+          fields: {
+            textField: {
+              'en-US': 'Text value',
+            },
+            linkField: {
+              'en-US': { sys: { type: 'Link', linkType: 'Asset', id: 'asset-id' } },
+            },
+            numberField: {
+              'en-US': 42,
+            },
+            locationField: {
+              'en-US': { lat: 40.7128, lon: -74.006 },
+            },
+          },
+        },
+      };
+
+      const mockConfigEntry = {
+        fields: {
+          connectedFields: {
+            'en-US': {
+              'test-entry-id': [
+                {
+                  fieldId: 'textField',
+                  contentBlockId: 'text-block-id',
+                },
+                {
+                  fieldId: 'linkField',
+                  contentBlockId: 'link-block-id',
+                },
+                {
+                  fieldId: 'numberField',
+                  contentBlockId: 'number-block-id',
+                },
+                {
+                  fieldId: 'locationField',
+                  contentBlockId: 'location-block-id',
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      vi.mocked(getConfigEntry).mockResolvedValue(mockConfigEntry as any);
+      mockCma.contentType.get.mockResolvedValue({
+        fields: [
+          {
+            id: 'textField',
+            type: 'Text',
+          },
+          {
+            id: 'linkField',
+            type: 'Link',
+            linkType: 'Asset',
+          },
+          {
+            id: 'numberField',
+            type: 'Number',
+          },
+          {
+            id: 'locationField',
+            type: 'Location',
+          },
+        ],
+      });
+      vi.mocked(global.fetch).mockResolvedValue(
+        new Response(JSON.stringify({ success: true }), { status: 200 })
+      );
+
+      await handler(event as any, mockContext as any);
+
+      // Should update supported fields (text, number, and location)
+      expect(global.fetch).toHaveBeenCalledTimes(3);
+      expect(global.fetch).toHaveBeenNthCalledWith(
+        1,
+        'https://test.braze.com/content_blocks/update',
+        expect.objectContaining({
+          body: JSON.stringify({
+            content_block_id: 'text-block-id',
+            content: 'Text value',
+          }),
+        })
+      );
+      expect(global.fetch).toHaveBeenNthCalledWith(
+        2,
+        'https://test.braze.com/content_blocks/update',
+        expect.objectContaining({
+          body: JSON.stringify({
+            content_block_id: 'number-block-id',
+            content: '42',
+          }),
+        })
+      );
+      expect(global.fetch).toHaveBeenNthCalledWith(
+        3,
+        'https://test.braze.com/content_blocks/update',
+        expect.objectContaining({
+          body: JSON.stringify({
+            content_block_id: 'location-block-id',
+            content: 'lat:40.7128,long:-74.006',
+          }),
+        })
+      );
+    });
+  });
 });

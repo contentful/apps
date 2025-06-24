@@ -1,5 +1,12 @@
 import { FunctionEventContext } from '@contentful/node-apps-toolkit';
-import { createClient, EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
+import {
+  createClient,
+  EntryProps,
+  KeyValueMap,
+  PlainClientAPI,
+  ContentFields,
+} from 'contentful-management';
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import {
   ConnectedFields,
   EntryConnectedFields,
@@ -40,3 +47,29 @@ export async function getConfigAndConnectedFields(
   const entryConnectedFields = connectedFields[entryId] || [];
   return { configEntry, connectedFields, entryConnectedFields };
 }
+
+export const stringifyFieldValue = (fieldValue: any, field: ContentFields<KeyValueMap>): string => {
+  switch (field.type) {
+    case 'Symbol':
+    case 'Text':
+    case 'Integer':
+    case 'Number':
+    case 'Boolean':
+      return String(fieldValue);
+
+    case 'Date':
+      return new Date(fieldValue).toISOString();
+
+    case 'Object':
+      return JSON.stringify(fieldValue);
+
+    case 'RichText':
+      return documentToHtmlString(fieldValue);
+
+    case 'Location':
+      return `lat:${fieldValue.lat},long:${fieldValue.lon}`;
+
+    default:
+      throw new Error(`Field type '${field.type}' is not supported`);
+  }
+};

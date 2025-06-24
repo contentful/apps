@@ -4,10 +4,9 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { AppInstallationParameters } from '../src/utils';
-import { initContentfulManagementClient } from './common';
-import { ContentTypeProps, EntryProps } from 'contentful-management';
+import { initContentfulManagementClient, stringifyFieldValue } from './common';
+import { ContentTypeProps, EntryProps, ContentFields } from 'contentful-management';
 import { KeyValueMap } from 'contentful-management';
 
 export type AppActionParameters = {
@@ -104,11 +103,17 @@ const createContentBlock = async (
 
   try {
     const field = contentType.fields.find((f) => f.id === fieldId);
-    let content = fieldValue;
-
-    if (field?.type === 'RichText') {
-      content = documentToHtmlString(fieldValue);
+    if (!field) {
+      return {
+        fieldId,
+        ...(locale ? { locale } : {}),
+        success: false,
+        statusCode: 602,
+        message: `Field ${fieldId} not found in content type`,
+      };
     }
+
+    const content = stringifyFieldValue(fieldValue, field);
 
     const response = await fetch(`${brazeEndpoint}/content_blocks/create`, {
       method: 'POST',
