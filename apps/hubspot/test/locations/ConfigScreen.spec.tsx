@@ -2,24 +2,8 @@ import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockSdk } from '../mocks';
+import { mockCma, mockSdk } from '../mocks';
 import ConfigScreen from '../../src/locations/ConfigScreen';
-
-const mockCma = {
-  contentType: {
-    get: vi.fn(),
-    createWithId: vi.fn(),
-    publish: vi.fn(),
-    getMany: vi.fn(),
-  },
-  entry: {
-    createWithId: vi.fn(),
-  },
-  editorInterface: {
-    get: vi.fn(),
-    update: vi.fn(),
-  },
-};
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -122,40 +106,30 @@ describe('Hubspot Config Screen ', () => {
       await user.type(hubspotAccessTokenInput, 'valid-api-key-123');
     };
 
-    it('adds app to sidebar for each content type', async () => {
-      mockCma.editorInterface.get.mockResolvedValueOnce({
-        sidebar: [],
-        sys: { contentType: { sys: { id: 'blogPost' } } },
-      });
-      mockCma.editorInterface.update.mockResolvedValueOnce({});
-
+    it('adds and removes app from sidebar for each content type', async () => {
       const user = userEvent.setup();
       await fillInHubspotAccessToken(user);
+
+      // adding the app for the content type
       await selectContentTypes(user, 'Blog Post');
       const closeButton = await screen.findByLabelText('Close');
       const pill = closeButton.parentElement;
       expect(pill).toHaveTextContent('Blog Post');
 
-      const result = await saveAppInstallation();
+      const saveAddingContentType = await saveAppInstallation();
 
-      expect(mockCma.editorInterface.get).toHaveBeenCalledWith({ contentTypeId: 'blogPost' });
-      expect(mockCma.editorInterface.update).toHaveBeenCalledWith(
-        { contentTypeId: 'blogPost' },
-        expect.objectContaining({
-          sidebar: expect.arrayContaining([
-            expect.objectContaining({
-              widgetId: mockSdk.ids.app,
-              widgetNamespace: 'app',
-            }),
-          ]),
-        })
-      );
-
-      expect(result.targetState.EditorInterface).toEqual({
+      expect(saveAddingContentType.targetState.EditorInterface).toEqual({
         blogPost: {
           sidebar: { position: 0 },
         },
       });
+
+      // removing the app from the content type
+      await user.click(closeButton);
+
+      const saveRemovingContentType = await saveAppInstallation();
+
+      expect(saveRemovingContentType.targetState.EditorInterface).toEqual({});
     });
   });
 });
