@@ -170,14 +170,6 @@ function ConnectedFieldsModal({
                     {entry.title}
                   </Text>
                 </Flex>
-                <Flex flexDirection="column">
-                  <Text fontColor="gray600" marginBottom="spacing2Xs">
-                    Connected fields
-                  </Text>
-                  <Text data-testid="modal-fields-length" fontWeight="fontWeightDemiBold">
-                    {entryConnectedFields.length}
-                  </Text>
-                </Flex>
                 <Button
                   variant="secondary"
                   size="small"
@@ -211,7 +203,9 @@ function ConnectedFieldsModal({
                       />
                     </Table.Cell>
                     <Table.Cell className={styles.baseCell}>
-                      <Text>Select all fields</Text>
+                      <Text fontColor="gray600">
+                        Select all fields ({entryConnectedFields.length})
+                      </Text>
                     </Table.Cell>
                   </Table.Row>
                 </Table.Head>
