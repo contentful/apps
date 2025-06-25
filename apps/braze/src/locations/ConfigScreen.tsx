@@ -457,13 +457,10 @@ function ContentBlockSection({
           )}
         </Form>
       </Box>
-      <InformationWithLink
-        marginBottom="spacingL"
-        fontColor="gray500"
-        linkText="Braze REST API Keys page"
-        url={BRAZE_API_KEY_DOCUMENTATION}>
-        Enter your Braze REST API key. If you need to generate a key, visit your
-      </InformationWithLink>
+      <Paragraph fontColor={'gray500'} marginBottom={'spacingL'} marginTop={'spacingXs'}>
+        Enter your Braze REST API key. If you need to generate a key, visit the APIs and Identifiers
+        page under Settings on your Braze dashboard.
+      </Paragraph>
       <Subheading className={styles.subheading}>Select your Braze REST endpoint</Subheading>
       <InformationWithLink
         linkText="here"
