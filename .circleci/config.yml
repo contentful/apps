@@ -114,6 +114,7 @@ jobs:
           command: |
             STATIC_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1" \
                 STATIC_JIRA_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1/jira" \
+                STATIC_KLAVIYO_S3_BASE="s3://cf-apps-klaviyo/apps" \
                 REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
                 REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
                 STAGE='test' npm run deploy:test
@@ -154,6 +155,7 @@ jobs:
           command: |
             STATIC_S3_BASE="s3://cf-apps-static/apps" \
                 STATIC_JIRA_S3_BASE="s3://cf-apps-jira" \
+                STATIC_KLAVIYO_S3_BASE="s3://cf-apps-klaviyo/apps" \
                 REACT_APP_BACKEND_BASE_URL=$APP_SLACK_BACKEND_BASE_URL_PROD \
                 REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_PROD \
                 STAGE='prd' npm run deploy
