@@ -21,12 +21,19 @@ export class FieldsFactory {
   private entryId: string;
   private entryContentTypeId: string;
   private cma: PlainClientAPI;
+  private defaultLocale: string;
   NESTED_DEPTH = 5;
 
-  public constructor(entryId: string, entryContentTypeId: string, cma: PlainClientAPI) {
+  public constructor(
+    entryId: string,
+    entryContentTypeId: string,
+    cma: PlainClientAPI,
+    defaultLocale: string
+  ) {
     this.entryId = entryId;
     this.entryContentTypeId = entryContentTypeId;
     this.cma = cma;
+    this.defaultLocale = defaultLocale;
     this.contentTypes = {};
   }
 
@@ -140,9 +147,7 @@ export class FieldsFactory {
     currentDepth: number
   ): Promise<ReferenceField> {
     const fieldContentType = await this.getContentType(fieldValue.sys.contentType.sys.id);
-    const title = !!fieldContentType.displayField
-      ? Object.values(fieldValue.fields[fieldContentType.displayField] as { [key: string]: any })[0]
-      : 'Untitled';
+    const title = this.getDisplayFieldValue(fieldValue, fieldContentType.displayField);
 
     return new ReferenceField(
       fieldInfo.id,
@@ -169,7 +174,7 @@ export class FieldsFactory {
           crypto.randomUUID(),
           `${fieldInfo.name} item #${index + 1}`,
           contentType.sys.id,
-          Object.values(f.fields[fieldContentType.displayField] as { [key: string]: any })[0],
+          this.getDisplayFieldValue(f, fieldContentType.displayField),
           fieldInfo.localized,
           fieldContentType.sys.id,
           fieldContentType.name,
@@ -185,5 +190,14 @@ export class FieldsFactory {
       fieldInfo.localized,
       items
     );
+  }
+
+  private getDisplayFieldValue(fieldValue: any, displayField: string | undefined): string {
+    if (!displayField) return 'Untitled';
+    const displayFieldValue = fieldValue.fields?.[displayField];
+    if (!displayFieldValue || typeof displayFieldValue !== 'object' || displayFieldValue === null)
+      return 'Untitled';
+
+    return displayFieldValue[this.defaultLocale] || 'Untitled';
   }
 }
