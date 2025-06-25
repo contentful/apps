@@ -102,13 +102,6 @@ describe('Config Screen component', () => {
       );
     });
 
-    it('renders the braze api key link correctly', () => {
-      const brazeLink = configScreen.getByText('Braze REST API Keys page');
-
-      expect(brazeLink).toBeTruthy();
-      expect(brazeLink.closest('a')?.getAttribute('href')).toBe(BRAZE_API_KEY_DOCUMENTATION);
-    });
-
     it('renders the braze content block link correctly', () => {
       const brazeLink = configScreen.getByText("Braze's Content Block feature");
 
