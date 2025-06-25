@@ -230,13 +230,13 @@ describe('createContentBlocks', () => {
           locale: 'en-US',
           success: false,
           statusCode: 600,
-          message: 'Field title with locale en-US does not exist or is empty',
+          message: 'Field title with locale en-US is empty',
         },
         {
           fieldId: 'author',
           success: false,
           statusCode: 600,
-          message: 'Field author does not exist or is empty',
+          message: 'Field author is empty',
         },
       ],
     });
@@ -1075,7 +1075,7 @@ describe('createContentBlocks', () => {
 
       expect(result.results[0].success).toBe(false);
       expect(result.results[0].statusCode).toBe(600);
-      expect(result.results[0].message).toBe('Field nonexistent does not exist or is empty');
+      expect(result.results[0].message).toBe('Field nonexistent is empty');
       expect(global.fetch).not.toHaveBeenCalled();
     });
   });

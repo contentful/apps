@@ -94,10 +94,7 @@ const createContentBlock = async (
       ...(locale ? { locale } : {}),
       success: false,
       statusCode: 600,
-      message:
-        `Field ${fieldId}` +
-        (locale ? ` with locale ${locale}` : '') +
-        ' does not exist or is empty',
+      message: `Field ${fieldId}` + (locale ? ` with locale ${locale}` : '') + ' is empty',
     };
   }
 
