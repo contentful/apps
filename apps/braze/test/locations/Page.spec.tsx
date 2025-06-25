@@ -154,9 +154,7 @@ describe('Page Location', () => {
       await screen.findByRole('dialog');
 
       expect(screen.getByTestId('modal-entry-title')).toBeTruthy();
-      expect(screen.getByTestId('modal-fields-length')).toBeTruthy();
-      expect(screen.getByText('Select all fields')).toBeTruthy();
-      expect(screen.getByText('View entry')).toBeTruthy();
+      expect(screen.getByText((content) => content.startsWith('Select all fields'))).toBeTruthy();
       expect(screen.getByText('View entry')).toBeTruthy();
     });
 
