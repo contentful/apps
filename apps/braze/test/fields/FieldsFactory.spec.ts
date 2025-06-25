@@ -423,7 +423,7 @@ describe('FieldsFactory', () => {
     let fieldsFactory: FieldsFactory;
 
     beforeEach(() => {
-      fieldsFactory = new FieldsFactory(entryId, entryContentTypeId, mockCma as any);
+      fieldsFactory = new FieldsFactory(entryId, entryContentTypeId, mockCma as any, 'en-US');
     });
 
     it('should return "Untitled" when displayField is invalid (undefined, null, or empty string)', () => {
@@ -451,12 +451,12 @@ describe('FieldsFactory', () => {
       expect((fieldsFactory as any).getDisplayFieldValue(fieldValueNull, 'name')).toBe('Untitled');
       expect((fieldsFactory as any).getDisplayFieldValue(fieldValueUndef, 'name')).toBe('Untitled');
       expect((fieldsFactory as any).getDisplayFieldValue(fieldValueEmptyObj, 'name')).toBe(
-        undefined
+        'Untitled'
       );
-      expect((fieldsFactory as any).getDisplayFieldValue(fieldValueNulls, 'name')).toBe(null);
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValueNulls, 'name')).toBe('Untitled');
     });
 
-    it('should return first locale value when displayField is a localized object (single or multiple locales)', () => {
+    it('should return default locale value when displayField is a localized object (single or multiple locales)', () => {
       const fieldValueSingle = { fields: { name: { 'en-US': 'John Doe' } } };
       const fieldValueMulti = {
         fields: {
@@ -472,7 +472,7 @@ describe('FieldsFactory', () => {
         'John Doe'
       );
       expect((fieldsFactory as any).getDisplayFieldValue(fieldValueMulti, 'title')).toBe(
-        'Titre Français'
+        'English Title'
       );
     });
   });
@@ -486,7 +486,7 @@ async function createFields(
     entry: { references: Mock };
   }
 ) {
-  const fieldsFactory = new FieldsFactory(entryId, entryContentTypeId, mockCma as any);
+  const fieldsFactory = new FieldsFactory(entryId, entryContentTypeId, mockCma as any, 'en-US');
   const cmaEntry = await fieldsFactory.getEntry();
   return await fieldsFactory.createFieldsForEntry(cmaEntry.fields);
 }

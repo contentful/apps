@@ -56,7 +56,8 @@ const Dialog = () => {
       const fieldsFactory = new FieldsFactory(
         invocationParams.entryId!,
         invocationParams.contentTypeId!,
-        cma
+        cma,
+        sdk.locales.default
       );
       const cmaEntry = await fieldsFactory.getEntry();
       fieldsRef.current = await fieldsFactory.createFieldsForEntry(cmaEntry.fields);

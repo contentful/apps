@@ -37,7 +37,7 @@ export async function fetchBrazeConnectedEntries(
       const entryConnectedFields: EntryConnectedFields = entries[entryId];
       const connectedFieldIds = entryConnectedFields.map((f) => f.fieldId);
 
-      const fieldsFactory = new FieldsFactory(entryId, entryContentTypeId, cma);
+      const fieldsFactory = new FieldsFactory(entryId, entryContentTypeId, cma, defaultLocale);
       const fields = await fieldsFactory.createFieldsForConnectedEntry(connectedFieldIds);
       const entryTitle = rawEntry.fields[fields.title]?.[defaultLocale] || 'Untitled';
 

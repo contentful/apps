@@ -21,12 +21,19 @@ export class FieldsFactory {
   private entryId: string;
   private entryContentTypeId: string;
   private cma: PlainClientAPI;
+  private defaultLocale: string;
   NESTED_DEPTH = 5;
 
-  public constructor(entryId: string, entryContentTypeId: string, cma: PlainClientAPI) {
+  public constructor(
+    entryId: string,
+    entryContentTypeId: string,
+    cma: PlainClientAPI,
+    defaultLocale: string
+  ) {
     this.entryId = entryId;
     this.entryContentTypeId = entryContentTypeId;
     this.cma = cma;
+    this.defaultLocale = defaultLocale;
     this.contentTypes = {};
   }
 
@@ -191,6 +198,6 @@ export class FieldsFactory {
     if (!displayFieldValue || typeof displayFieldValue !== 'object' || displayFieldValue === null)
       return 'Untitled';
 
-    return Object.values(displayFieldValue)[0] as string;
+    return displayFieldValue[this.defaultLocale] || 'Untitled';
   }
 }
