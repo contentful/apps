@@ -62,16 +62,18 @@ const Sidebar = () => {
     getContentBlocksData();
   }, []);
 
-  const initialInvocationParams: InvocationParams = {
-    mode: GENERATE_DIALOG_MODE,
-    entryId: sdk.ids.entry,
-    contentTypeId: sdk.ids.contentType,
-    title: sdk.entry.fields[sdk.contentType.displayField].getValue(),
+  const initialInvocationParams = (): InvocationParams => {
+    return {
+      mode: GENERATE_DIALOG_MODE,
+      entryId: sdk.ids.entry,
+      contentTypeId: sdk.ids.contentType,
+      title: sdk.entry.fields[sdk.contentType.displayField].getValue(),
+    };
   };
 
   const openDialogLogic = async (
     step: string,
-    parameters: InvocationParams = initialInvocationParams,
+    parameters: InvocationParams = initialInvocationParams(),
     mode: string
   ) => {
     const width = step === 'codeBlocks' ? 'fullWidth' : 'large';
