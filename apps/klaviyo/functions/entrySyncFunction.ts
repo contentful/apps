@@ -37,7 +37,7 @@ export interface AppEventHandlerResponse {
 // Use types from our existing code
 interface FieldMapping {
   contentfulFieldId: string;
-  fieldType: 'text' | 'image' | 'entry' | 'reference-array' | 'richText' | 'json';
+  fieldType: 'text' | 'image' | 'entry' | 'reference-array' | 'richtext' | 'json';
   klaviyoBlockName: string;
   contentTypeId?: string;
   fields?: any;
@@ -371,7 +371,7 @@ export const handler = async (
               | 'image'
               | 'entry'
               | 'reference-array'
-              | 'richText'
+              | 'richtext'
               | 'json',
             contentTypeId,
             name: mapping.name || contentfulFieldId,
@@ -430,7 +430,7 @@ export const handler = async (
               | 'image'
               | 'entry'
               | 'reference-array'
-              | 'richText'
+              | 'richtext'
               | 'json',
             contentTypeId,
             name: mapping.name || contentfulFieldId,

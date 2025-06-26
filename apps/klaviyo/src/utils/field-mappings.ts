@@ -24,7 +24,6 @@ export const getEntryKlaviyoFieldMappings = async (
     }
     const defaultLocale = sdkOrCma.locales?.default || 'en-US';
     // Find the klaviyoFieldMappings entries
-    console.log('Fetching klaviyoFieldMappings entries:', spaceId, environmentId, sdkOrCma);
     const entries = await cma.entry.getMany({
       spaceId,
       environmentId,
