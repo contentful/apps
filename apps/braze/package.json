@@ -31,7 +31,8 @@
     "build:functions": "contentful-app-scripts build-functions --ci",
     "deploy:dev": "source .env && contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id \"$DEFINITIONS_ORG_ID\" --definition-id gWLhC7MnK2rgcvifgE4do --token \"$CONTENTFUL_CMA_TOKEN\"",
     "upload-ci:dev": "source .env && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\"",
-    "upsert-actions:dev": "source .env && contentful-app-scripts upsert-actions --ci --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\""
+    "upsert-actions:dev": "source .env && contentful-app-scripts upsert-actions --ci --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\"",
+    "create-app-event": "tsx -r dotenv/config ./src/tools/create-app-event.ts"
   },
   "devDependencies": {
     "@contentful/app-scripts": "^2.3.0",
