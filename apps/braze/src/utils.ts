@@ -97,6 +97,7 @@ export const CONFIG_ENTRY_ID = 'brazeConfig';
 export const CONFIG_FIELD_ID = 'connectedFields';
 
 export type AppInstallationParameters = {
+  apiKey?: string;
   contentfulApiKey: string;
   brazeApiKey: string;
   brazeEndpoint: string;
