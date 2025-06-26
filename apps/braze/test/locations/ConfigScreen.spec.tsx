@@ -6,14 +6,12 @@ import ConfigScreen from '../../src/locations/ConfigScreen';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import { queries, waitFor } from '@testing-library/dom';
 import {
-  BRAZE_API_KEY_DOCUMENTATION,
   BRAZE_APP_DOCUMENTATION,
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
   BRAZE_ENDPOINTS_DOCUMENTATION,
   BRAZE_ENDPOINTS,
   CONTENT_TYPE_DOCUMENTATION,
 } from '../../src/utils';
-import { createContentTypeResponse } from '../mocks/contentTypeResponse';
 
 const mockCma = {
   contentType: {
@@ -160,6 +158,22 @@ describe('Config Screen component', () => {
           EditorInterface: {},
         },
       });
+    });
+
+    it('uses apiKey if contentfulApiKey is empty', async () => {
+      // Clear the existing mock and set up a new one
+      mockSdk.app.getParameters.mockReset();
+      mockSdk.app.getParameters.mockResolvedValue({ apiKey: 'contentful-key' });
+
+      // Re-render the component after setting up the mock
+      cleanup();
+      render(<ConfigScreen />);
+
+      const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
+
+      await waitFor(() =>
+        expect((contentfulApiKeyInput as HTMLInputElement).value).toEqual('contentful-key')
+      );
     });
 
     it('shows a toast error if the contentful api key is not set or invalid', async () => {
