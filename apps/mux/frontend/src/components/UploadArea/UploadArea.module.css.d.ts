@@ -5,4 +5,4 @@ declare const styles: {
   uploadButton: string;
   muxUploaderContainer: string;
 };
-export default styles; 
+export default styles;

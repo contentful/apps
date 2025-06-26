@@ -1,41 +1,41 @@
 {
-    "name": "mux-functions",
-    "version": "0.1.0",
-    "private": true,
-    "dependencies": {
-        "@contentful/app-sdk": "4.29.7",
-        "@contentful/node-apps-toolkit": "^3.12.0"
-    },
-    "scripts": {
-        "deploy": "npm run build && npm run upload",
-        "build": "npm run build:functions",
-        "upload": "contentful-app-scripts upload --bundle-dir ./build",
-        "build:functions": "contentful-app-scripts build-functions --ci"
-    },
-    "eslintConfig": {
-        "extends": "react-app"
-    },
-    "browserslist": {
-        "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
-        ],
-        "development": [
-            "last 1 chrome version",
-            "last 1 firefox version",
-            "last 1 safari version"
-        ]
-    },
-    "devDependencies": {
-        "@contentful/app-scripts": "^2.3.0",
-        "@contentful/node-apps-toolkit": "^3.12.0",
-        "@tsconfig/recommended": "^1.0.8",
-        "@types/node": "^22.15.32",
-        "cross-env": "7.0.3",
-        "typescript": "4.9.5",
-        "vite": "^6.2.2",
-        "vitest": "^3.0.9"
-    },
-    "homepage": "."
+  "name": "mux-functions",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@contentful/app-sdk": "4.29.7",
+    "@contentful/node-apps-toolkit": "^3.12.0"
+  },
+  "scripts": {
+    "deploy": "npm run build && npm run upload",
+    "build": "npm run build:functions",
+    "upload": "contentful-app-scripts upload --bundle-dir ./build",
+    "build:functions": "contentful-app-scripts build-functions --ci"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "^2.3.0",
+    "@contentful/node-apps-toolkit": "^3.12.0",
+    "@tsconfig/recommended": "^1.0.8",
+    "@types/node": "^22.15.32",
+    "cross-env": "7.0.3",
+    "typescript": "4.9.5",
+    "vite": "^6.2.2",
+    "vitest": "^3.0.9"
+  },
+  "homepage": "."
 }

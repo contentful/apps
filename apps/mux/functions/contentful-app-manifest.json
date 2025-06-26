@@ -1,14 +1,13 @@
 {
-    "functions": [
-      {
-        "id": "onPublish",
-        "name": "onPublish",
-        "description": "This function handles the 'Entry Publish' webhook event from Contentful to update any pending Mux Asset data in Mux, based on entries in Contentful.",
-        "path": "src/onPublish.js",
-        "entryFile": "src/onPublish.ts",
-        "allowNetworks": ["https://api.mux.com"],
-        "accepts": ["appevent.handler"]
-      }
-    ]
-  }
-  
+  "functions": [
+    {
+      "id": "onPublish",
+      "name": "onPublish",
+      "description": "This function handles the 'Entry Publish' webhook event from Contentful to update any pending Mux Asset data in Mux, based on entries in Contentful.",
+      "path": "src/onPublish.js",
+      "entryFile": "src/onPublish.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appevent.handler"]
+    }
+  ]
+}
