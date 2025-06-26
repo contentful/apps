@@ -32,7 +32,7 @@
     "deploy:dev": "source .env && contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id \"$DEFINITIONS_ORG_ID\" --definition-id gWLhC7MnK2rgcvifgE4do --token \"$CONTENTFUL_CMA_TOKEN\"",
     "upload-ci:dev": "source .env && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\"",
     "upsert-actions:dev": "source .env && contentful-app-scripts upsert-actions --ci --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\"",
-    "create-app-event": "tsx -r dotenv/config ./src/tools/create-app-event.ts"
+    "create-app-event": "tsx -r dotenv/config src/scripts/createAppEvents.ts"
   },
   "devDependencies": {
     "@contentful/app-scripts": "^2.3.0",
@@ -45,6 +45,8 @@
     "@types/react-dom": "18.3.0",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@vitejs/plugin-react": "4.3.4",
+    "dotenv": "^16.5.0",
+    "tsx": "^4.20.3",
     "typescript": "5.1.6",
     "vite": "6.3.4",
     "vitest": "3.0.9"

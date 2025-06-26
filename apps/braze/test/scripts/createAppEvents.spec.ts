@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { createAppEventSubscription } from '../../src/scripts/createAppEvents';
+import { client } from '../../src/scripts/contentfulClientAndImports';
 
 // Mock the contentful-management client
 vi.mock('contentful-management', () => ({
@@ -22,22 +24,34 @@ vi.mock('../../src/scripts/contentfulClientAndImports', () => {
   };
 });
 
-// Import the function to test
-import { createAppEventSubscription } from '../../src/scripts/createAppEvents';
-import { client } from '../../src/scripts/contentfulClientAndImports';
-
 describe('createAppEventSubscription', () => {
   const mockEventSubscription = {
     sys: {
       id: 'test-subscription-id',
-      type: 'AppEventSubscription',
+      type: 'AppEventSubscription' as const,
+      createdAt: '2025-06-26T15:25:42.330Z',
+      updatedAt: '2025-06-26T15:25:42.330Z',
+      appDefinition: {
+        sys: {
+          type: 'Link' as const,
+          linkType: 'AppDefinition' as const,
+          id: 'test-app-def-id',
+        },
+      },
+      organization: {
+        sys: {
+          type: 'Link' as const,
+          linkType: 'Organization' as const,
+          id: 'test-org-id',
+        },
+      },
     },
     topics: ['Entry.save', 'Entry.auto_save', 'Entry.delete', 'AppInstallation.delete'],
     functions: {
       handler: {
         sys: {
-          type: 'Link',
-          linkType: 'Function',
+          type: 'Link' as const,
+          linkType: 'Function' as const,
           id: 'test-function-id',
         },
       },
@@ -68,8 +82,8 @@ describe('createAppEventSubscription', () => {
         functions: {
           handler: {
             sys: {
-              type: 'Link',
-              linkType: 'Function',
+              type: 'Link' as const,
+              linkType: 'Function' as const,
               id: 'test-function-id',
             },
           },
@@ -97,8 +111,8 @@ describe('createAppEventSubscription', () => {
         functions: {
           handler: {
             sys: {
-              type: 'Link',
-              linkType: 'Function',
+              type: 'Link' as const,
+              linkType: 'Function' as const,
               id: 'test-function-id',
             },
           },
@@ -135,64 +149,5 @@ describe('createAppEventSubscription', () => {
     expect(console.error).toHaveBeenCalledWith(apiError);
     expect(console.log).not.toHaveBeenCalled();
     expect(console.dir).not.toHaveBeenCalled();
-  });
-
-  it('should call upsert with correct parameters structure', async () => {
-    vi.mocked(client.appEventSubscription.upsert).mockResolvedValue(mockEventSubscription);
-
-    await createAppEventSubscription();
-
-    const upsertCall = vi.mocked(client.appEventSubscription.upsert).mock.calls[0];
-    expect(upsertCall).toHaveLength(2);
-
-    // Check first parameter (filter)
-    expect(upsertCall[0]).toEqual({
-      organizationId: 'test-org-id',
-      appDefinitionId: 'test-app-def-id',
-    });
-
-    // Check second parameter (data)
-    expect(upsertCall[1]).toEqual({
-      topics: ['Entry.save', 'Entry.auto_save', 'Entry.delete', 'AppInstallation.delete'],
-      functions: {
-        handler: {
-          sys: {
-            type: 'Link',
-            linkType: 'Function',
-            id: 'test-function-id',
-          },
-        },
-      },
-    });
-  });
-
-  it('should include all required topics in the subscription', async () => {
-    vi.mocked(client.appEventSubscription.upsert).mockResolvedValue(mockEventSubscription);
-
-    await createAppEventSubscription();
-
-    const upsertCall = vi.mocked(client.appEventSubscription.upsert).mock.calls[0];
-    const topics = upsertCall[1].topics;
-
-    expect(topics).toContain('Entry.save');
-    expect(topics).toContain('Entry.auto_save');
-    expect(topics).toContain('Entry.delete');
-    expect(topics).toContain('AppInstallation.delete');
-    expect(topics).toHaveLength(4);
-  });
-
-  it('should configure the function handler correctly', async () => {
-    vi.mocked(client.appEventSubscription.upsert).mockResolvedValue(mockEventSubscription);
-
-    await createAppEventSubscription();
-
-    const upsertCall = vi.mocked(client.appEventSubscription.upsert).mock.calls[0];
-    const functions = upsertCall[1].functions;
-
-    expect(functions.handler.sys).toEqual({
-      type: 'Link',
-      linkType: 'Function',
-      id: 'test-function-id',
-    });
   });
 });
