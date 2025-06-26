@@ -9,6 +9,7 @@ import {
   Text,
   Popover,
   Pill,
+  Tooltip,
 } from '@contentful/f36-components';
 import { ChevronDownIcon } from '@contentful/f36-icons';
 import { ConfigAppSDK } from '@contentful/app-sdk';
@@ -388,7 +389,9 @@ const ConfigScreen = () => {
       loadContentTypes();
 
       // Check Klaviyo connection status
-      await checkKlaviyoStatus();
+      if (isInstalled) {
+        await checkKlaviyoStatus();
+      }
 
       sdk.app.setReady();
     };
@@ -468,21 +471,26 @@ const ConfigScreen = () => {
 
         {/* OAuth Connection Component Placeholder */}
         <Box style={{ marginBottom: '32px', width: '100%' }}>
-          <Button
-            variant={getButtonVariant()}
-            onClick={handleButtonClick}
-            onMouseEnter={() => {
-              if (isOAuthConnected) {
-                setIsHoveringConnected(true);
-              }
-            }}
-            onMouseLeave={() => {
-              setIsHoveringConnected(false);
-            }}
-            isLoading={isOAuthLoading}
-            isDisabled={isOAuthLoading || isDisconnecting || isCheckingStatus || !isReadOnly}>
-            {getButtonText()}
-          </Button>
+          <Tooltip
+            content="App must be installed to connect"
+            isDisabled={isReadOnly}
+            placement="top">
+            <Button
+              variant={getButtonVariant()}
+              onClick={handleButtonClick}
+              onMouseEnter={() => {
+                if (isOAuthConnected) {
+                  setIsHoveringConnected(true);
+                }
+              }}
+              onMouseLeave={() => {
+                setIsHoveringConnected(false);
+              }}
+              isLoading={isOAuthLoading}
+              isDisabled={isOAuthLoading || isDisconnecting || isCheckingStatus || !isReadOnly}>
+              {getButtonText()}
+            </Button>
+          </Tooltip>
         </Box>
         {/* End OAuth Connection Component Placeholder */}
         <Stack spacing="spacingXl" flexDirection="column" alignItems="flex-start">

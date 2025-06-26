@@ -2,7 +2,7 @@ import { OAuthSDK } from './initiateOauth';
 
 interface FieldMapping {
   contentfulFieldId: string;
-  fieldType: 'text' | 'image' | 'entry' | 'reference-array' | 'richText' | 'json';
+  fieldType: 'text' | 'image' | 'entry' | 'reference-array' | 'richtext' | 'json';
   klaviyoBlockName: string;
   contentTypeId?: string;
   fields?: any;

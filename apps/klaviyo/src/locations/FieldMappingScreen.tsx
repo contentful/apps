@@ -211,15 +211,39 @@ export const FieldMappingScreen: React.FC = () => {
   const onSave = async () => {
     if (modalEntryId && modalAvailableFields.length > 0) {
       try {
+        // Get the actual entry data to extract field values
+        const entry = await sdk.cma.entry.get({
+          entryId: modalEntryId,
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environment,
+        });
+
         // Build new mappings for checked fields and selected locales
         const newMappings: any[] = [];
         for (const field of modalAvailableFields.filter((f) => checkedFields.includes(f.id))) {
           for (const locale of selectedLocales) {
+            // Extract the actual field value from the entry data
+            let fieldValue = '';
+            if (entry.fields && entry.fields[field.id]) {
+              const fieldData = entry.fields[field.id];
+              if (typeof fieldData === 'object' && !Array.isArray(fieldData)) {
+                // Handle localized fields
+                fieldValue = fieldData[locale] || fieldData['en-US'] || '';
+              } else {
+                // Handle non-localized fields
+                fieldValue = fieldData || '';
+              }
+            }
+
             newMappings.push({
               id: field.id,
               name: field.name,
               type: field.type,
-              value: '',
+              fieldType:
+                field.type?.toLowerCase() === 'richtext' || field.type === 'RichText'
+                  ? 'richtext'
+                  : field.type?.toLowerCase(),
+              value: fieldValue,
               isAsset: field.type === 'Asset' || field.type === 'AssetLink' || false,
               locale,
             });
