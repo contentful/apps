@@ -46,6 +46,7 @@ const Sidebar = () => {
         ...linkType,
         ...items,
         supported: supported,
+        value: field.getValue(),
       });
     } else {
       for (const locale of field.locales) {
@@ -58,10 +59,13 @@ const Sidebar = () => {
           ...linkType,
           ...items,
           supported: supported,
+          value: field.getValue(locale),
         });
       }
     }
   }
+
+  console.log('FIELDS: ', fields);
 
   const dialogParams = {
     title: 'Sync entry fields to Hubspot',

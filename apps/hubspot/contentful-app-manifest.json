@@ -1,0 +1,34 @@
+{
+  "functions": [
+    {
+      "id": "createModulesFunction",
+      "name": "Create Hubspot modules function",
+      "description": "Function to create Hubspot modules from an App Action",
+      "path": "functions/createModules.js",
+      "entryFile": "functions/createModules.ts",
+      "allowNetworks": [
+        "https://api.hubapi.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "createModulesAction",
+      "name": "Create Hubspot modules",
+      "type": "function-invocation",
+      "functionId": "createModulesFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "fields",
+          "name": "Fields",
+          "type": "Symbol",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

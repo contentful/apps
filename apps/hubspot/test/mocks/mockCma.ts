@@ -14,6 +14,9 @@ const mockCma = {
     get: vi.fn(),
     update: vi.fn(),
   },
+  appActionCall: {
+    createWithResponse: vi.fn(),
+  },
 };
 
 export { mockCma };

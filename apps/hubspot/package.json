@@ -18,12 +18,17 @@
   "scripts": {
     "start": "vite",
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --outDir build && npm run build:functions",
     "preview": "vite preview",
     "test": "vitest",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "add-locations": "contentful-app-scripts add-locations",
-    "deploy:staging": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${TEST_ORG_ID} --definition-id 1p60PoDynErXJmD8UYlvM8 --token ${TEST_CMA_TOKEN}"
+    "deploy:staging": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${TEST_ORG_ID} --definition-id 1p60PoDynErXJmD8UYlvM8 --token ${TEST_CMA_TOKEN}",
+    "upload": "contentful-app-scripts upload --bundle-dir ./build",
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
+    "upsert-actions": "contentful-app-scripts upsert-actions --ci --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
+    "build:functions": "contentful-app-scripts build-functions --ci",
+    "upsert-actions:dev": "source .env && contentful-app-scripts upsert-actions --ci --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\""
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -52,7 +57,9 @@
     "jsdom": "^26.0.0",
     "typescript": "4.9.5",
     "vite": "^6.2.2",
-    "vitest": "^3.0.9"
+    "vitest": "^3.0.9",
+    "@contentful/node-apps-toolkit": "^3.11.1",
+    "@tsconfig/recommended": "1.0.8"
   },
   "homepage": "."
 }
