@@ -12,6 +12,12 @@ const mockSdk: any = {
   },
   ids: {
     app: 'test-app',
+    space: 'test-space',
+    environment: 'test-environment',
+    environmentAlias: 'test-environment-alias',
+  },
+  cmaAdapter: {
+    // Mock CMA adapter for testing
   },
   dialogs: {
     openCurrentApp: vi.fn(),
@@ -32,6 +38,7 @@ const mockSdk: any = {
         omitted: false,
         linkType: undefined,
         items: undefined,
+        getValue: () => 'title value',
       },
       {
         id: 'description',
@@ -44,6 +51,7 @@ const mockSdk: any = {
         omitted: false,
         linkType: undefined,
         items: undefined,
+        getValue: (locale: string) => (locale == 'en-US' ? 'description value' : 'descripcion'),
       },
       {
         id: 'image',
@@ -56,6 +64,8 @@ const mockSdk: any = {
         omitted: false,
         linkType: 'Asset',
         items: undefined,
+        getValue: () => 'placeholder value',
+        // TODO: add getValue
       },
       {
         id: 'tags',
@@ -71,6 +81,7 @@ const mockSdk: any = {
           type: 'Symbol',
           linkType: undefined,
         },
+        getValue: () => ['tag1', 'tag2'],
       },
       {
         id: 'boolean',
@@ -83,6 +94,7 @@ const mockSdk: any = {
         omitted: false,
         linkType: undefined,
         items: undefined,
+        getValue: () => true,
       },
       {
         id: 'author',
@@ -95,6 +107,8 @@ const mockSdk: any = {
         omitted: false,
         linkType: 'Entry',
         items: undefined,
+        getValue: () => 'placeholder value',
+        // TODO: add getValue
       },
     ],
   },
@@ -107,6 +121,7 @@ export const expectedFields = [
     uniqueId: 'title',
     name: 'Title',
     supported: true,
+    value: 'title value',
   },
   {
     type: 'Text',
@@ -115,6 +130,7 @@ export const expectedFields = [
     name: 'Description',
     locale: 'en-US',
     supported: true,
+    value: 'description value',
   },
   {
     type: 'Text',
@@ -123,6 +139,7 @@ export const expectedFields = [
     name: 'Description',
     locale: 'es-AR',
     supported: true,
+    value: 'descripcion',
   },
   {
     type: 'Link',
@@ -131,6 +148,8 @@ export const expectedFields = [
     name: 'Image',
     linkType: 'Asset',
     supported: true,
+    value: 'placeholder value',
+    // TODO: add getValue
   },
   {
     type: 'Array',
@@ -139,6 +158,7 @@ export const expectedFields = [
     name: 'Tags',
     items: { type: 'Symbol', linkType: undefined },
     supported: true,
+    value: ['tag1', 'tag2'],
   },
   {
     type: 'Boolean',
@@ -146,6 +166,7 @@ export const expectedFields = [
     uniqueId: 'boolean',
     name: 'Boolean',
     supported: false,
+    value: true,
   },
   {
     type: 'Link',
@@ -154,6 +175,8 @@ export const expectedFields = [
     name: 'Author',
     linkType: 'Entry',
     supported: false,
+    value: 'placeholder value',
+    // TODO: add getValue
   },
 ];
 

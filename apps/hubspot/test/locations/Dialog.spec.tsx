@@ -4,6 +4,11 @@ import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { mockSdk, expectedFields } from '../mocks';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { mockCma } from '../mocks/mockCma';
+
+vi.mock('contentful-management', () => ({
+  createClient: () => mockCma,
+}));
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => ({
@@ -144,5 +149,41 @@ describe('Dialog component', () => {
     const selectAllCheckbox = screen.getByLabelText('Select all fields (7)');
     await user.click(selectAllCheckbox);
     expect(nextButton).not.toBeDisabled();
+  });
+
+  it('should call app action when next button is clicked', async () => {
+    const user = userEvent.setup();
+    const mockCreateWithResponse = vi.fn().mockResolvedValue({
+      response: {
+        body: JSON.stringify({ success: true }),
+      },
+    });
+
+    mockCma.appActionCall.createWithResponse = mockCreateWithResponse;
+
+    render(<Dialog />);
+
+    // Select a field to enable the next button
+    const titleCheckbox = screen.getByLabelText('Title', { exact: false });
+    await user.click(titleCheckbox);
+
+    // Click the next button
+    const nextButton = screen.getByRole('button', { name: 'Next' });
+    await user.click(nextButton);
+
+    // Verify that the app action was called with correct parameters
+    expect(mockCreateWithResponse).toHaveBeenCalledWith(
+      {
+        spaceId: 'test-space',
+        environmentId: 'test-environment-alias',
+        appDefinitionId: 'test-app',
+        appActionId: 'createModulesAction',
+      },
+      {
+        parameters: {
+          fields: JSON.stringify([expectedFields[0]]), // title field
+        },
+      }
+    );
   });
 });

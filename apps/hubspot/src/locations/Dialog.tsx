@@ -1,22 +1,10 @@
 import { Box, Button, Flex } from '@contentful/f36-components';
-import { DialogAppSDK, FieldType } from '@contentful/app-sdk';
+import { DialogAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useState } from 'react';
 import FieldSelection from '../components/FieldSelection';
-
-export type SdkField = {
-  type: FieldType;
-  id: string;
-  uniqueId: string;
-  name: string;
-  locale?: string;
-  linkType?: string; // FieldLinkType
-  items?: {
-    type: string;
-    linkType: string;
-  }; // Items
-  supported: boolean;
-};
+import { createClient } from 'contentful-management';
+import { SdkField } from '../utils';
 
 export type InvocationParams = {
   fields: SdkField[];
@@ -24,10 +12,47 @@ export type InvocationParams = {
 
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
+  const cma = createClient(
+    { apiAdapter: sdk.cmaAdapter },
+    {
+      type: 'plain',
+      defaults: {
+        environmentId: sdk.ids.environment,
+        spaceId: sdk.ids.space,
+      },
+    }
+  );
   useAutoResizer();
   const invocationParams = sdk.parameters.invocation as InvocationParams;
   const fields = invocationParams.fields;
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
+
+  const callAction = async () => {
+    console.log('Starting call action');
+    const fieldsToSend = selectedFields.map((field) => {
+      return fields.find((f) => f.uniqueId === field);
+    });
+
+    try {
+      const response = await cma.appActionCall.createWithResponse(
+        {
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
+          appDefinitionId: sdk.ids.app!,
+          appActionId: 'createModulesAction',
+        },
+        {
+          parameters: {
+            fields: JSON.stringify(fieldsToSend),
+          },
+        }
+      );
+      const responseData = JSON.parse(response.response.body);
+      console.log('Response data: ', responseData);
+    } catch (error) {
+      console.error('Error creating modules: ', error);
+    }
+  };
 
   return (
     <Box margin="spacingL" marginTop="spacingM">
@@ -50,7 +75,7 @@ const Dialog = () => {
         <Button
           variant="primary"
           size="small"
-          onClick={() => {}} // TODO: add next step
+          onClick={callAction}
           isDisabled={selectedFields.length === 0}>
           Next
         </Button>
