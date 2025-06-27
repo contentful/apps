@@ -1,14 +1,14 @@
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { Box, Skeleton } from '@contentful/f36-components';
+import { Skeleton } from '@contentful/f36-components';
 import { useEffect, useRef, useState } from 'react';
-import FieldsSelectionStep from '../components/FieldsSelectionStep';
-import CodeBlocksStep from '../components/CodeBlocksStep';
-import LocalesSelectionStep from '../components/LocalesSelectionStep';
 import { createClient } from 'contentful-management';
 import { FieldsFactory } from '../fields/FieldsFactory';
 import { Entry } from '../fields/Entry';
 import { Field } from '../fields/Field';
+import GenerateFlow from '../components/generate/GenerateFlow';
+import CreateFlow from '../components/create/CreateFlow';
+import { FIELDS_STEP } from '../utils';
 
 export type InvocationParams = {
   step?: string;
@@ -18,11 +18,8 @@ export type InvocationParams = {
   selectedFields?: string[];
   selectedLocales?: string[];
   serializedEntry?: {};
+  mode: string;
 };
-
-const FIELDS_STEP = 'fields';
-const LOCALES_STEP = 'locales';
-const CODE_BLOCKS_STEP = 'codeBlocks';
 
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
@@ -35,12 +32,8 @@ const Dialog = () => {
   const currentEntry = invocationParams.serializedEntry
     ? Entry.fromSerialized(invocationParams.serializedEntry)
     : undefined;
+  const mode = invocationParams.mode;
 
-  const locales = sdk.locales.available;
-
-  const [step, setStep] = useState(currentStep);
-  const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set(currentSelectedFields));
-  const [selectedLocales, setSelectedLocales] = useState<string[]>(currentSelectedLocales);
   const [entry, setEntry] = useState<Entry | undefined>(currentEntry);
   const fieldsRef = useRef<Field[]>(currentEntry ? currentEntry.fields : []);
 
@@ -60,12 +53,14 @@ const Dialog = () => {
     );
 
     const fetchEntry = async () => {
-      const fields = await new FieldsFactory(
+      const fieldsFactory = new FieldsFactory(
         invocationParams.entryId!,
         invocationParams.contentTypeId!,
-        cma
-      ).createFields();
-      fieldsRef.current = fields;
+        cma,
+        sdk.locales.default
+      );
+      const cmaEntry = await fieldsFactory.getEntry();
+      fieldsRef.current = await fieldsFactory.createFieldsForEntry(cmaEntry.fields);
       const entry = new Entry(
         invocationParams.entryId,
         invocationParams.contentTypeId,
@@ -73,7 +68,9 @@ const Dialog = () => {
         fieldsRef.current,
         sdk.ids.space,
         sdk.ids.environment,
-        sdk.parameters.installation.apiKey
+        sdk.parameters.installation.contentfulApiKey,
+        cmaEntry.sys.publishedAt,
+        cmaEntry.sys.updatedAt
       );
       setEntry(entry);
     };
@@ -88,70 +85,22 @@ const Dialog = () => {
     );
   }
 
-  const shouldChooseLocales = locales.length > 1 && entry.anyFieldIsLocalized();
-
-  return (
-    <Box
-      paddingBottom="spacingM"
-      paddingTop="spacingM"
-      paddingLeft="spacingL"
-      paddingRight="spacingL">
-      {step === FIELDS_STEP && (
-        <FieldsSelectionStep
-          entry={entry}
-          selectedFields={selectedFields}
-          setSelectedFields={setSelectedFields}
-          handleNextStep={() =>
-            shouldChooseLocales
-              ? setStep(LOCALES_STEP)
-              : sdk.close({
-                  step: CODE_BLOCKS_STEP,
-                  entryId: invocationParams.entryId,
-                  contentTypeId: invocationParams.contentTypeId,
-                  title: invocationParams.title,
-                  serializedEntry: entry.serialize(),
-                })
-          }
-        />
-      )}
-      {step === LOCALES_STEP && (
-        <LocalesSelectionStep
-          locales={locales}
-          selectedLocales={selectedLocales}
-          setSelectedLocales={setSelectedLocales}
-          handlePreviousStep={() => setStep(FIELDS_STEP)}
-          handleNextStep={() =>
-            sdk.close({
-              step: CODE_BLOCKS_STEP,
-              entryId: invocationParams.entryId,
-              contentTypeId: invocationParams.contentTypeId,
-              title: invocationParams.title,
-              serializedEntry: entry.serialize(),
-              selectedFields: selectedFields,
-              selectedLocales: selectedLocales,
-            })
-          }
-        />
-      )}
-      {step === CODE_BLOCKS_STEP && (
-        <CodeBlocksStep
-          entry={entry}
-          selectedLocales={selectedLocales}
-          handlePreviousStep={() =>
-            sdk.close({
-              step: shouldChooseLocales ? LOCALES_STEP : FIELDS_STEP,
-              entryId: invocationParams.entryId,
-              contentTypeId: invocationParams.contentTypeId,
-              title: invocationParams.title,
-              selectedFields: selectedFields,
-              selectedLocales: selectedLocales,
-              serializedEntry: entry.serialize(),
-            })
-          }
-          handleClose={() => sdk.close({ step: 'close' })}
-        />
-      )}
-    </Box>
+  return mode === 'generate' ? (
+    <GenerateFlow
+      sdk={sdk}
+      entry={entry}
+      invocationParams={invocationParams}
+      initialStep={currentStep}
+      initialSelectedFields={currentSelectedFields}
+      initialSelectedLocales={currentSelectedLocales}
+    />
+  ) : (
+    <CreateFlow
+      sdk={sdk}
+      entry={entry}
+      invocationParams={invocationParams}
+      initialSelectedFields={currentSelectedFields}
+    />
   );
 };
 

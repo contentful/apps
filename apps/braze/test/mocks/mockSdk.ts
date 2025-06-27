@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import { BRAZE_ENDPOINTS } from '../../src/utils';
 
 const mockSdk: any = {
   app: {
@@ -8,6 +9,7 @@ const mockSdk: any = {
     getCurrentState: vi.fn(),
   },
   ids: {
+    entry: 'testEntryId',
     app: 'test-app',
     spaceId: 'test-spaceId',
   },
@@ -16,7 +18,9 @@ const mockSdk: any = {
   },
   parameters: {
     installation: {
-      apiKey: 'test-apiKey',
+      contentfulApiKey: 'test-contentful-apiKey',
+      brazeApiKey: 'test-braze-apiKey',
+      brazeEndpoint: BRAZE_ENDPOINTS[0].url,
     },
     invocation: {
       id: 'test-entryId',
@@ -42,6 +46,11 @@ const mockSdk: any = {
   },
   hostnames: {
     delivery: 'cdn.contentful.com',
+  },
+  navigator: {
+    openEntry: vi.fn(),
+    openCurrentAppPage: vi.fn(),
+    openAppConfig: vi.fn(),
   },
 };
 

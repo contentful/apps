@@ -10,7 +10,7 @@ describe('FieldCheckbox component', () => {
     const { getByText, container } = render(
       <FieldCheckbox field={richTextField} handleToggle={() => {}} selectedFields={new Set()} />
     );
-    expect(getByText(richTextField.displayName())).toBeTruthy();
+    expect(getByText(richTextField.displayNameForGenerate())).toBeTruthy();
     const checkbox = container.querySelector('input[type="checkbox"]') as HTMLInputElement;
     expect(checkbox?.disabled).toBe(true);
   });
