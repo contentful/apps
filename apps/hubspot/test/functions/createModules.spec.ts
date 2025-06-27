@@ -10,7 +10,7 @@ describe('createModules', () => {
     vi.clearAllMocks();
   });
 
-  test('should successfully create a module for a text field', async () => {
+  it('should successfully create a module for a text field', async () => {
     // Mock successful fetch responses
     const mockFetch = vi.mocked(fetch);
     mockFetch.mockResolvedValue({
