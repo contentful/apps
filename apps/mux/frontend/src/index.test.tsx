@@ -36,6 +36,16 @@ const SDK_MOCK = {
   window: {
     startAutoResizer: () => null,
   },
+  entry: {
+    getSys: () => ({
+      id: 'entry-id',
+      publishedVersion: 1,
+      version: 2,
+      publishedAt: '2023-01-01T00:00:00Z',
+    }),
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onSysChanged: () => () => {},
+  },
 };
 
 const getById = queryByAttribute.bind(null, 'id');
@@ -87,11 +97,11 @@ describe('Mux frontend app', () => {
     expect(error.innerText || error.textContent).toContain('No signing key');
   });
 
-  it('Displays Mux Uploader before user does anything.', () => {
+  it('Displays Uploader dropzone before user does anything and Mux Uploader is hidden.', () => {
     const mockedSdk = { ...SDK_MOCK };
-
     const dom = render(<App sdk={mockedSdk as any} />);
-    expect(getById(dom.container, 'muxuploader')).toBeVisible(); // Add prop to Note
+    expect(getById(dom.container, 'muxuploader')).not.toBeVisible(); // Add prop to Note
+    expect(getById(dom.container, 'uploaderDropzone')).toBeVisible();
     expect(getByName(dom.container, 'muxvideoinput')).toBeVisible(); // Add prop to Note
   });
 
