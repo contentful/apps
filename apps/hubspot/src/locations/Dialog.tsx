@@ -1,16 +1,62 @@
-import { Paragraph } from '@contentful/f36-components';
-import { DialogAppSDK } from '@contentful/app-sdk';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { Box, Button, Flex } from '@contentful/f36-components';
+import { DialogAppSDK, FieldType } from '@contentful/app-sdk';
+import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
+import { useState } from 'react';
+import FieldSelection from '../components/FieldSelection';
+
+export type SdkField = {
+  type: FieldType;
+  id: string;
+  uniqueId: string;
+  name: string;
+  locale?: string;
+  linkType?: string; // FieldLinkType
+  items?: {
+    type: string;
+    linkType: string;
+  }; // Items
+  supported: boolean;
+};
+
+export type InvocationParams = {
+  fields: SdkField[];
+};
 
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
+  useAutoResizer();
+  const invocationParams = sdk.parameters.invocation as InvocationParams;
+  const fields = invocationParams.fields;
+  const [selectedFields, setSelectedFields] = useState<string[]>([]);
 
-  return <Paragraph>Hello Dialog Component (AppId: {sdk.ids.app})</Paragraph>;
+  return (
+    <Box margin="spacingL" marginTop="spacingM">
+      <FieldSelection
+        fields={fields}
+        selectedFields={selectedFields}
+        setSelectedFields={setSelectedFields}
+      />
+
+      <Flex
+        paddingTop="spacingM"
+        paddingBottom="spacingM"
+        gap="spacingM"
+        justifyContent="end"
+        style={{
+          position: 'sticky',
+          bottom: 0,
+          background: 'white',
+        }}>
+        <Button
+          variant="primary"
+          size="small"
+          onClick={() => {}} // TODO: add next step
+          isDisabled={selectedFields.length === 0}>
+          Next
+        </Button>
+      </Flex>
+    </Box>
+  );
 };
 
 export default Dialog;

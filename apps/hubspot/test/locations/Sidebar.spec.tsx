@@ -1,6 +1,7 @@
 import Sidebar from '../../src/locations/Sidebar';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { mockSdk } from '../mocks';
+import { expectedFields } from '../mocks/mockSdk';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import React from 'react';
 
@@ -25,6 +26,9 @@ describe('Sidebar component', () => {
     expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledTimes(1);
     expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledWith({
       title: 'Sync entry fields to Hubspot',
+      parameters: {
+        fields: expectedFields,
+      },
     });
   });
 
