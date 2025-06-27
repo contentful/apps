@@ -87,7 +87,7 @@ describe('createModules', () => {
     );
   });
 
-  test('should handle API errors and return failed fields', async () => {
+  it('should handle API errors and return failed fields', async () => {
     // Mock failed fetch response
     const mockFetch = vi.mocked(fetch);
     mockFetch.mockResolvedValueOnce({
