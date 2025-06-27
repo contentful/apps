@@ -3,6 +3,7 @@ import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
 import { useMemo } from 'react';
 import { SdkField } from '../locations/Dialog';
+import { styles } from './FieldSelection.styles';
 
 type FieldsSelectionProps = {
   fields: SdkField[];
@@ -30,18 +31,8 @@ const FieldSelection = (props: FieldsSelectionProps) => {
         in Hubspot emails. If edits are made in Contentful, content will update automatically.
       </Paragraph>
 
-      <Box
-        className={css({
-          border: `1px solid ${tokens.gray300}`,
-          borderRadius: tokens.borderRadiusSmall,
-        })}>
-        <Box
-          paddingLeft="spacingS"
-          paddingTop="spacingXs"
-          paddingBottom="spacingXs"
-          className={css({
-            borderBottom: `1px solid ${tokens.gray300}`,
-          })}>
+      <Box className={styles.box}>
+        <Box paddingLeft="spacingS" paddingTop="spacingXs" paddingBottom="spacingXs">
           <Checkbox isChecked={allSelected} onChange={onSelectAll}>
             <Text fontSize="fontSizeS" fontColor="gray700" lineHeight="lineHeightS">
               Select all fields ({fields.length})
