@@ -26,7 +26,7 @@ If you want to create a new app that includes the function template, run:
 npx create-contentful-app@latest --function appaction-call
 ```
 
-This command will generate a basic app template that includes: 
+This command will generate a basic app template that includes:
 
 - A `functions` folder that contains the template, instructions, and relevant config files.
 - All necessary scripts for building and deploying your function
@@ -47,6 +47,7 @@ npx --no-install @contentful/app-scripts generate-function
 ```
 
 The interactive process will guide you through:
+
 1. Selecting a function name
 2. Choosing from available function examples
 3. Selecting your preferred language (JavaScript or TypeScript)
@@ -151,20 +152,20 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   // Access the CMA client
   const cma = context.cma!;
 
-try {
-  // Extract parameters from the request
-const { contentTypeId, fields } = event.body;
+  try {
+    // Extract parameters from the request
+    const { contentTypeId, fields } = event.body;
 
-  // Get the space and environment from the context
+    // Get the space and environment from the context
     const spaceId = context.spaceId;
     const environmentId = context.environmentId;
-  
-  if (!contentTypeId || !fields) {
-  return {
-    error: 'Missing required parameters: contentTypeId and fields are required'
+
+    if (!contentTypeId || !fields) {
+      return {
+        error: 'Missing required parameters: contentTypeId and fields are required',
       };
     }
-    
+
     // Create an entry using the CMA client
     const entry = await cma.entry.create({
       spaceId,
@@ -173,22 +174,22 @@ const { contentTypeId, fields } = event.body;
       fields: Object.entries(fields).reduce((acc, [key, value]) => {
         acc[key] = { 'en-US': value };
         return acc;
-      }, {})
+      }, {}),
     });
-    
+
     return {
       success: true,
       entry: {
         id: entry.sys.id,
         contentType: entry.sys.contentType.sys.id,
-        createdAt: entry.sys.createdAt
-      }
+        createdAt: entry.sys.createdAt,
+      },
     };
   } catch (error) {
     console.error('Error executing App Action:', error);
     return {
       success: false,
-      error: error.message || 'An error occurred while processing your request'
+      error: error.message || 'An error occurred while processing your request',
     };
   }
 };
@@ -252,7 +253,7 @@ If you're adding actions programmatically, you must update the `actions` array i
     "name": "Your Custom Action Name",    // Display name shown in the UI
     "type": "function-invocation",        // Keep this as is for function-based actions
     "functionId": "appactionCall",            // Must match the function ID in the functions array
-    "category": "Custom",                 // Action category 
+    "category": "Custom",                 // Action category
     "parameters": []                      // Parameters needed by the action
   }
 ]

@@ -32,6 +32,7 @@ const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isHubspotTokenInvalid, setIsHubspotTokenInvalid] = useState(false);
+  const [hubspotTokenScopeError, setHubspotTokenScopeError] = useState<string | null>(null);
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     hubspotAccessToken: '',
   });
@@ -54,7 +55,10 @@ const ConfigScreen = () => {
     return hasValue;
   }
 
-  const onConfigure = useCallback(async () => {
+  const validateAccessToken = async () => {
+    setIsHubspotTokenInvalid(false);
+    setHubspotTokenScopeError(null);
+
     const hubspotTokenHasValue = checkIfHasValue(
       parameters.hubspotAccessToken,
       setIsHubspotTokenInvalid
@@ -62,6 +66,47 @@ const ConfigScreen = () => {
 
     if (!hubspotTokenHasValue) {
       sdk.notifier.error('Some fields are missing or invalid');
+      return false;
+    }
+
+    try {
+      const response = await cma.appActionCall.createWithResponse(
+        {
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
+          appDefinitionId: sdk.ids.app!,
+          appActionId: 'validateHubspotToken',
+        },
+        {
+          parameters: {
+            token: parameters.hubspotAccessToken,
+          },
+        }
+      );
+
+      const responseData = JSON.parse(response.response.body);
+
+      if (!responseData.valid) {
+        setIsHubspotTokenInvalid(true);
+        sdk.notifier.error('Invalid HubSpot access token');
+        return false;
+      }
+
+      if (!responseData.hasContentScope) {
+        setHubspotTokenScopeError('The HubSpot token is missing the required "content" scope.');
+        sdk.notifier.error('The HubSpot token is missing the required "content" scope.');
+        return false;
+      }
+    } catch (error) {
+      sdk.notifier.error('Error validating HubSpot token');
+      return false;
+    }
+    return true;
+  };
+
+  const onConfigure = useCallback(async () => {
+    const isTokenValid = await validateAccessToken();
+    if (!isTokenValid) {
       return false;
     }
 
@@ -127,6 +172,11 @@ const ConfigScreen = () => {
             {isHubspotTokenInvalid && (
               <FormControl.ValidationMessage marginBottom="spacingS">
                 Invalid API key
+              </FormControl.ValidationMessage>
+            )}
+            {hubspotTokenScopeError && (
+              <FormControl.ValidationMessage marginBottom="spacingS">
+                {hubspotTokenScopeError}
               </FormControl.ValidationMessage>
             )}
           </Form>
