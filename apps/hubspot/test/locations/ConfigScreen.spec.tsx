@@ -145,7 +145,13 @@ describe('Hubspot Config Screen ', () => {
     it('blocks saving and shows error if the access token is invalid', async () => {
       const user = userEvent.setup();
       mockCma.appActionCall.createWithResponse.mockResolvedValueOnce({
-        response: { body: JSON.stringify({ valid: false, hasContentScope: false }) },
+        response: {
+          body: JSON.stringify({
+            valid: false,
+            hasContentScope: false,
+            error: 'Invalid HubSpot access token',
+          }),
+        },
       });
 
       await fillInHubspotAccessToken(user, 'invalid-token');
@@ -158,7 +164,13 @@ describe('Hubspot Config Screen ', () => {
     it('blocks saving and shows error if the access token is missing the content scope', async () => {
       const user = userEvent.setup();
       mockCma.appActionCall.createWithResponse.mockResolvedValueOnce({
-        response: { body: JSON.stringify({ valid: true, hasContentScope: false }) },
+        response: {
+          body: JSON.stringify({
+            valid: true,
+            hasContentScope: false,
+            error: 'The HubSpot token is missing the required "content" scope.',
+          }),
+        },
       });
 
       await fillInHubspotAccessToken(user, 'token-without-content-scope');

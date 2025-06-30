@@ -31,8 +31,7 @@ import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isHubspotTokenInvalid, setIsHubspotTokenInvalid] = useState(false);
-  const [hubspotTokenScopeError, setHubspotTokenScopeError] = useState<string | null>(null);
+  const [hubspotTokenError, setHubspotTokenError] = useState<string | null>(null);
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     hubspotAccessToken: '',
   });
@@ -49,19 +48,18 @@ const ConfigScreen = () => {
     }
   );
 
-  function checkIfHasValue(value: string, setIsInvalid: (valid: boolean) => void) {
+  function checkIfHasValue(value: string, setError: (error: string | null) => void) {
     const hasValue = !!value?.trim();
-    setIsInvalid(!hasValue);
+    setError(hasValue ? null : 'Some fields are missing or invalid');
     return hasValue;
   }
 
   const validateAccessToken = async () => {
-    setIsHubspotTokenInvalid(false);
-    setHubspotTokenScopeError(null);
+    setHubspotTokenError(null);
 
     const hubspotTokenHasValue = checkIfHasValue(
       parameters.hubspotAccessToken,
-      setIsHubspotTokenInvalid
+      setHubspotTokenError
     );
 
     if (!hubspotTokenHasValue) {
@@ -86,18 +84,13 @@ const ConfigScreen = () => {
 
       const responseData = JSON.parse(response.response.body);
 
-      if (!responseData.valid) {
-        setIsHubspotTokenInvalid(true);
-        sdk.notifier.error('Invalid HubSpot access token');
-        return false;
-      }
-
-      if (!responseData.hasContentScope) {
-        setHubspotTokenScopeError('The HubSpot token is missing the required "content" scope.');
-        sdk.notifier.error('The HubSpot token is missing the required "content" scope.');
+      if (responseData.error) {
+        setHubspotTokenError(responseData.error);
+        sdk.notifier.error(responseData.error);
         return false;
       }
     } catch (error) {
+      setHubspotTokenError('Error validating HubSpot token');
       sdk.notifier.error('Error validating HubSpot token');
       return false;
     }
@@ -169,14 +162,9 @@ const ConfigScreen = () => {
                 data-testid="hubspotAccessToken"
               />
             </FormControl>
-            {isHubspotTokenInvalid && (
+            {hubspotTokenError && (
               <FormControl.ValidationMessage marginBottom="spacingS">
-                Invalid API key
-              </FormControl.ValidationMessage>
-            )}
-            {hubspotTokenScopeError && (
-              <FormControl.ValidationMessage marginBottom="spacingS">
-                {hubspotTokenScopeError}
+                {hubspotTokenError}
               </FormControl.ValidationMessage>
             )}
           </Form>

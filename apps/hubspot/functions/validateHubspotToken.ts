@@ -14,41 +14,51 @@ type AppActionParameters = {
   token: string;
 };
 
+const ENDPOINT_WITHOUT_SCOPE_CHECK = 'https://api.hubapi.com/integrations/v1/me';
+const ENDPOINT_WITH_SCOPE_CHECK =
+  'https://api.hubapi.com/cms/v3/source-code/draft/metadata/@hubspot';
+
+const INVALID_ACCESS_TOKEN = 'Invalid HubSpot access token';
+const INVALID_ACCESS_TOKEN_SCOPE = 'The HubSpot token is missing the required "content" scope.';
+const UNKNOWN_ACCESS_TOKEN_ERROR = 'Unknown error';
+
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
   event: AppActionRequest<'Custom', AppActionParameters>
 ) => {
   const token = event.body.token;
 
   // Step 1: Basic token validation
-  const basicCheck = await fetch('https://api.hubapi.com/integrations/v1/me', {
+  const basicCheck = await fetch(ENDPOINT_WITHOUT_SCOPE_CHECK, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
   if (!basicCheck.ok) {
-    return { valid: false, hasContentScope: false };
+    return { valid: false, hasContentScope: false, error: INVALID_ACCESS_TOKEN };
   }
 
   // Step 2: Check for 'content' scope
-  const contentCheck = await fetch(
-    'https://api.hubapi.com/cms/v3/source-code/draft/metadata/@hubspot',
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const contentCheck = await fetch(ENDPOINT_WITH_SCOPE_CHECK, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   if (contentCheck.status === 200) {
-    return { valid: true, hasContentScope: true };
+    return { valid: true, hasContentScope: true, error: null };
   } else {
     const error = await contentCheck.json();
 
     if (error?.category === 'MISSING_SCOPES') {
-      return { valid: true, hasContentScope: false };
+      return {
+        valid: true,
+        hasContentScope: false,
+        error: INVALID_ACCESS_TOKEN_SCOPE,
+      };
     }
 
-    return { valid: true, hasContentScope: false };
+    // Unknown error
+    return { valid: true, hasContentScope: true, reason: UNKNOWN_ACCESS_TOKEN_ERROR };
   }
 };
