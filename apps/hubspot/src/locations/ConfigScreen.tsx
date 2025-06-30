@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Flex,
@@ -153,7 +153,7 @@ const ConfigScreen = () => {
               <TextInput
                 name="hubspotAccessToken"
                 placeholder="Enter your access token"
-                value={parameters.hubspotAccessToken}
+                value={parameters.hubspotAccessToken || ''}
                 onChange={(e) =>
                   setParameters({ ...parameters, hubspotAccessToken: e.target.value })
                 }

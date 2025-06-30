@@ -3,7 +3,6 @@ import Dialog from '../../src/locations/Dialog';
 import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { mockSdk, expectedFields } from '../mocks';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mockCma } from '../mocks/mockCma';
 
 vi.mock('contentful-management', () => ({

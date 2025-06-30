@@ -2,8 +2,6 @@ import Sidebar from '../../src/locations/Sidebar';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { mockSdk } from '../mocks';
 import { expectedFields } from '../mocks/mockSdk';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import React from 'react';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,

@@ -1,9 +1,8 @@
 import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ContentTypeMultiSelect from '../../src/components/ContentTypeMultiSelect';
 import { ContentType } from '../../src/utils';
-import { vi } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
 import type { ConfigAppSDK } from '@contentful/app-sdk';
 import { createClient } from 'contentful-management';
@@ -31,7 +30,6 @@ describe('ContentTypeMultiSelect', () => {
       limit: 100,
       sys: { type: 'Array' },
     });
-    render(<TestWrapper />);
   });
 
   afterEach(() => {
@@ -62,41 +60,67 @@ describe('ContentTypeMultiSelect', () => {
   };
 
   it('shows the correct input placeholder text', async () => {
-    expect(screen.getByText('Select one or more')).toBeInTheDocument();
+    render(<TestWrapper />);
+    // Wait for the component to finish loading content types
+    await waitFor(() => {
+      expect(screen.getByText('Select one or more')).toBeInTheDocument();
+    });
   });
 
   it('renders available content types in the dropdown', async () => {
-    expect(await screen.findByText('Blog Post')).toBeTruthy();
+    render(<TestWrapper />);
+    // Wait for content types to be loaded and rendered
+    await waitFor(() => {
+      expect(screen.getByText('Blog Post')).toBeTruthy();
+    });
+
     expect(screen.getByText('Article')).toBeTruthy();
     expect(screen.getByText('News')).toBeTruthy();
   });
 
   it('selects and deselects content types, showing and removing pills', async () => {
+    render(<TestWrapper />);
     const user = userEvent.setup();
 
-    const blogPostOption = await screen.findByText('Blog Post');
+    // Wait for content types to be loaded
+    const blogPostOption = await waitFor(() => screen.findByText('Blog Post'));
+
     await user.click(blogPostOption);
-    expect(await screen.findByLabelText('Close')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Close')).toBeInTheDocument();
+    });
 
     const closeButton = screen.getByLabelText('Close');
     await user.click(closeButton);
-    expect(screen.queryByLabelText('Close')).toBeNull();
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Close')).toBeNull();
+    });
   });
 
   it('shows correct pill placeholder text', async () => {
+    render(<TestWrapper />);
     const user = userEvent.setup();
 
-    const blogPostOption = await screen.findByText('Blog Post');
+    // Wait for content types to be loaded
+    const blogPostOption = await waitFor(() => screen.findByText('Blog Post'));
+
     await user.click(blogPostOption);
-    let pill = screen.getByLabelText('Close').parentElement;
-    expect(pill).toHaveTextContent('Blog Post');
+
+    await waitFor(() => {
+      const pill = screen.getByLabelText('Close').parentElement;
+      expect(pill).toHaveTextContent('Blog Post');
+    });
 
     const articleOption = screen.getByText('Article');
     await user.click(articleOption);
 
-    const closeButtons = screen.getAllByLabelText('Close');
-    const pillTexts = closeButtons.map((btn) => btn.parentElement?.textContent);
-    expect(pillTexts).toContain('Blog Post');
-    expect(pillTexts).toContain('Article');
+    await waitFor(() => {
+      const closeButtons = screen.getAllByLabelText('Close');
+      const pillTexts = closeButtons.map((btn) => btn.parentElement?.textContent);
+      expect(pillTexts).toContain('Blog Post');
+      expect(pillTexts).toContain('Article');
+    });
   });
 });
