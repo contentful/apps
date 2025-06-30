@@ -60,11 +60,6 @@ describe('Hubspot Config Screen ', () => {
       expect(screen.getByPlaceholderText(/Enter your access token/i)).toBeTruthy();
     });
 
-    it('shows the input as required', () => {
-      const input = screen.getByPlaceholderText(/Enter your access token/i);
-      expect(input).toBeRequired();
-    });
-
     it('shows a toast error if the hubspot api key is not set', async () => {
       const input = screen.getByPlaceholderText(/Enter your access token/i);
       expect(input).toHaveValue('');
@@ -108,6 +103,10 @@ describe('Hubspot Config Screen ', () => {
 
     it('adds and removes app from sidebar for each content type', async () => {
       const user = userEvent.setup();
+      // Always mock the token validation as valid for this test
+      mockCma.appActionCall.createWithResponse.mockResolvedValue({
+        response: { body: JSON.stringify({ valid: true, hasContentScope: true }) },
+      });
       await fillInHubspotAccessToken(user);
 
       // adding the app for the content type
@@ -117,7 +116,6 @@ describe('Hubspot Config Screen ', () => {
       expect(pill).toHaveTextContent('Blog Post');
 
       const saveAddingContentType = await saveAppInstallation();
-
       expect(saveAddingContentType.targetState.EditorInterface).toEqual({
         blogPost: {
           sidebar: { position: 0 },
@@ -128,8 +126,77 @@ describe('Hubspot Config Screen ', () => {
       await user.click(closeButton);
 
       const saveRemovingContentType = await saveAppInstallation();
-
       expect(saveRemovingContentType.targetState.EditorInterface).toEqual({});
+    });
+  });
+
+  describe('HubSpot access token validation', () => {
+    const fillInHubspotAccessToken = async (user: UserEvent, value: string) => {
+      const hubspotAccessTokenInput = await screen.findByPlaceholderText('Enter your access token');
+      await user.clear(hubspotAccessTokenInput);
+      await user.type(hubspotAccessTokenInput, value);
+    };
+
+    it('shows the input as required', () => {
+      const input = screen.getByPlaceholderText(/Enter your access token/i);
+      expect(input).toBeRequired();
+    });
+
+    it('blocks saving and shows error if the access token is invalid', async () => {
+      const user = userEvent.setup();
+      mockCma.appActionCall.createWithResponse.mockResolvedValueOnce({
+        response: {
+          body: JSON.stringify({
+            valid: false,
+            hasContentScope: false,
+            error: 'Invalid HubSpot access token',
+          }),
+        },
+      });
+
+      await fillInHubspotAccessToken(user, 'invalid-token');
+      const result = await saveAppInstallation();
+
+      expect(result).toBe(false);
+      expect(mockSdk.notifier.error).toHaveBeenCalledWith('Invalid HubSpot access token');
+    });
+
+    it('blocks saving and shows error if the access token is missing the content scope', async () => {
+      const user = userEvent.setup();
+      mockCma.appActionCall.createWithResponse.mockResolvedValueOnce({
+        response: {
+          body: JSON.stringify({
+            valid: true,
+            hasContentScope: false,
+            error: 'The HubSpot token is missing the required "content" scope.',
+          }),
+        },
+      });
+
+      await fillInHubspotAccessToken(user, 'token-without-content-scope');
+      const result = await saveAppInstallation();
+
+      expect(result).toBe(false);
+      expect(mockSdk.notifier.error).toHaveBeenCalledWith(
+        'The HubSpot token is missing the required "content" scope.'
+      );
+    });
+
+    it('allows saving if the access token is valid and has content scope', async () => {
+      const user = userEvent.setup();
+      mockCma.appActionCall.createWithResponse.mockResolvedValueOnce({
+        response: { body: JSON.stringify({ valid: true, hasContentScope: true }) },
+      });
+
+      await fillInHubspotAccessToken(user, 'valid-token');
+      const result = await saveAppInstallation();
+
+      expect(result).not.toBe(false);
+      // Should not show error
+      expect(mockSdk.notifier.error).not.toHaveBeenCalledWith('Invalid HubSpot access token');
+      expect(mockSdk.notifier.error).not.toHaveBeenCalledWith(
+        'The HubSpot token is missing the required "content" scope.'
+      );
     });
   });
 });
