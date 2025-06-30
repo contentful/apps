@@ -1,79 +1,29 @@
 import { Button, Flex } from '@contentful/f36-components';
-import { EntryFieldAPI, SidebarAppSDK } from '@contentful/app-sdk';
+import { SidebarAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { SdkField } from '../utils';
+import { processFields } from '../utils/fieldsProcessing';
+import { createClient } from 'contentful-management';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
-  useAutoResizer();
-  const SUPPORTED_FIELD_TYPES = [
-    'Symbol',
-    'Text',
-    'RichText',
-    'Number',
-    'Integer',
-    'Array',
-    'Link',
-    'Date',
-    'Location',
-  ];
-
-  const isSupported = (field: EntryFieldAPI) => {
-    if (field.type === 'Link') {
-      return field.linkType === 'Asset';
-    } else if (field.type === 'Array') {
-      return field.items.type === 'Symbol' || field.items.linkType === 'Asset';
-    }
-    return SUPPORTED_FIELD_TYPES.includes(field.type);
-  };
-
-  const fields: SdkField[] = [];
-  for (const field of Object.values(sdk.entry.fields)) {
-    const linkType = (field as any).linkType && { linkType: (field as any).linkType };
-    const items = (field as any).items && {
-      items: {
-        type: (field as any).items.type,
-        linkType: (field as any).items.linkType,
+  const cma = createClient(
+    { apiAdapter: sdk.cmaAdapter },
+    {
+      type: 'plain',
+      defaults: {
+        environmentId: sdk.ids.environment,
+        spaceId: sdk.ids.space,
       },
-    };
-    const supported = isSupported(field);
-
-    if (field.locales.length === 1) {
-      fields.push({
-        type: field.type,
-        id: field.id,
-        uniqueId: field.id,
-        name: field.name,
-        ...linkType,
-        ...items,
-        supported: supported,
-        value: field.getValue(),
-      });
-    } else {
-      for (const locale of field.locales) {
-        fields.push({
-          type: field.type,
-          id: field.id,
-          uniqueId: `${field.id}-${locale}`,
-          name: field.name,
-          locale: locale,
-          ...linkType,
-          ...items,
-          supported: supported,
-          value: field.getValue(locale),
-        });
-      }
     }
-  }
+  );
+  useAutoResizer();
 
-  console.log('FIELDS: ', fields);
-
-  const dialogParams = () => {
+  const dialogParams = async () => {
     return {
       title: 'Sync entry fields to Hubspot',
       parameters: {
         entryTitle: sdk.entry.fields[sdk.contentType.displayField].getValue(),
-        fields: fields,
+        fields: await processFields(Object.values(sdk.entry.fields), cma, sdk.locales.default),
       },
     };
   };
@@ -83,7 +33,7 @@ const Sidebar = () => {
       <Button
         variant="secondary"
         isFullWidth={true}
-        onClick={() => sdk.dialogs.openCurrentApp(dialogParams())}>
+        onClick={async () => sdk.dialogs.openCurrentApp(await dialogParams())}>
         Sync entry fields to Hubspot
       </Button>
 

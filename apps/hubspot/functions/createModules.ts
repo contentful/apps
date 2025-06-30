@@ -9,6 +9,8 @@ import {
   DATE_MODULE_TEMPLATE,
   DATETIME_FIELD_TEMPLATE,
   DATETIME_MODULE_TEMPLATE,
+  IMAGE_FIELD_TEMPLATE,
+  IMAGE_MODULE_TEMPLATE,
   META_JSON_TEMPLATE,
   NUMBER_FIELD_TEMPLATE,
   NUMBER_MODULE_TEMPLATE,
@@ -17,7 +19,7 @@ import {
   TEXT_FIELD_TEMPLATE,
   TEXT_MODULE_TEMPLATE,
 } from './templates';
-import { SdkField } from '../src/utils';
+import { SdkField } from '../src/utils/utils';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 
 type AppActionParameters = {
@@ -95,19 +97,22 @@ const getFields = (field: SdkField): string => {
   switch (type) {
     case 'Symbol':
       fields = structuredClone(TEXT_FIELD_TEMPLATE);
-      fields[0].default = field.value;
+      if (field.value) fields[0].default = field.value;
       break;
     case 'RichText':
       fields = structuredClone(RICH_TEXT_FIELD_TEMPLATE);
-      fields[0].default = documentToHtmlString(field.value);
+      if (field.value) fields[0].default = documentToHtmlString(field.value);
       break;
     case 'Number':
+    case 'Integer':
       fields = structuredClone(NUMBER_FIELD_TEMPLATE);
-      fields[0].default = field.value;
+      if (field.value) fields[0].default = field.value;
       break;
     case 'Date':
       const value = field.value as string;
-      if (value.includes('T')) {
+      if (!value) {
+        fields = structuredClone(DATETIME_FIELD_TEMPLATE);
+      } else if (value.includes('T')) {
         fields = structuredClone(DATETIME_FIELD_TEMPLATE);
         fields[0].default = new Date(value).getTime();
       } else {
@@ -117,11 +122,23 @@ const getFields = (field: SdkField): string => {
       break;
     case 'Location':
       fields = structuredClone(TEXT_FIELD_TEMPLATE);
-      fields[0].default = `lat:${field.value.lat}, long:${field.value.lon}`;
+      if (field.value) fields[0].default = `lat:${field.value.lat}, long:${field.value.lon}`;
+      break;
+    case 'Array':
+      fields = structuredClone(TEXT_FIELD_TEMPLATE);
+      if (field.value) fields[0].default = field.value.join(', ');
+      break;
+    case 'Link':
+      fields = structuredClone(IMAGE_FIELD_TEMPLATE);
+      if (field.value) {
+        fields[0].default.src = field.value.url;
+        fields[0].default.width = field.value.width;
+        fields[0].default.height = field.value.height;
+      }
       break;
     default:
       fields = structuredClone(TEXT_FIELD_TEMPLATE);
-      fields[0].default = field.value;
+      if (field.value) fields[0].default = field.value;
       break;
   }
   return JSON.stringify(fields);
@@ -135,6 +152,7 @@ const getModule = (field: SdkField): string => {
     case 'RichText':
       return RICH_TEXT_MODULE_TEMPLATE;
     case 'Number':
+    case 'Integer':
       return NUMBER_MODULE_TEMPLATE;
     case 'Date':
       const value = field.value as string;
@@ -144,6 +162,10 @@ const getModule = (field: SdkField): string => {
         return DATE_MODULE_TEMPLATE;
       }
     case 'Location':
+      return TEXT_MODULE_TEMPLATE;
+    case 'Link':
+      return IMAGE_MODULE_TEMPLATE;
+    case 'Array':
       return TEXT_MODULE_TEMPLATE;
     default:
       return TEXT_MODULE_TEMPLATE;

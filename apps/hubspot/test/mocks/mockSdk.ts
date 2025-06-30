@@ -28,6 +28,9 @@ const mockSdk: any = {
   contentType: {
     displayField: 'title',
   },
+  locales: {
+    default: 'en-US',
+  },
   entry: {
     fields: {
       title: {
@@ -67,8 +70,15 @@ const mockSdk: any = {
         omitted: false,
         linkType: 'Asset',
         items: undefined,
-        getValue: () => 'placeholder value',
-        // TODO: add getValue
+        getValue: () => {
+          return {
+            sys: {
+              type: 'Link',
+              linkType: 'Asset',
+              id: 'asset-id',
+            },
+          };
+        },
       },
       tags: {
         id: 'tags',
@@ -110,8 +120,15 @@ const mockSdk: any = {
         omitted: false,
         linkType: 'Entry',
         items: undefined,
-        getValue: () => 'placeholder value',
-        // TODO: add getValue
+        getValue: () => {
+          return {
+            sys: {
+              type: 'Link',
+              linkType: 'Entry',
+              id: 'entry-id',
+            },
+          };
+        },
       },
     },
   },
@@ -151,8 +168,12 @@ export const expectedFields = [
     name: 'Image',
     linkType: 'Asset',
     supported: true,
-    value: 'placeholder value',
-    // TODO: add getValue
+    value: {
+      url: 'https://example.com/image.jpg',
+      contentType: 'image/jpeg',
+      width: 100,
+      height: 100,
+    },
   },
   {
     type: 'Array',
@@ -178,8 +199,13 @@ export const expectedFields = [
     name: 'Author',
     linkType: 'Entry',
     supported: false,
-    value: 'placeholder value',
-    // TODO: add getValue
+    value: {
+      sys: {
+        type: 'Link',
+        linkType: 'Entry',
+        id: 'entry-id',
+      },
+    },
   },
 ];
 

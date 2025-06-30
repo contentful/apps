@@ -1,5 +1,5 @@
 import { handler } from '../../functions/createModules';
-import type { SdkField } from '../../src/utils';
+import type { SdkField } from '../../src/utils/utils';
 import {
   META_JSON_TEMPLATE,
   TEXT_FIELD_TEMPLATE,
@@ -12,6 +12,8 @@ import {
   DATE_MODULE_TEMPLATE,
   DATETIME_FIELD_TEMPLATE,
   DATETIME_MODULE_TEMPLATE,
+  IMAGE_FIELD_TEMPLATE,
+  IMAGE_MODULE_TEMPLATE,
 } from '../../functions/templates';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 
@@ -224,6 +226,58 @@ describe('createModules', () => {
     expect(thirdFile.type).toBe('text/html');
     const thirdContent = await thirdFile.text();
     expect(thirdContent).toBe(TEXT_MODULE_TEMPLATE);
+  });
+
+  it('should successfully create a module for a text field without a value', async () => {
+    // Mock successful fetch responses
+    const mockFetch = vi.mocked(fetch);
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ success: true }),
+    } as Response);
+
+    const mockField: SdkField = {
+      type: 'Text',
+      id: 'test-field-id',
+      uniqueId: 'test-module',
+      name: 'Test Field',
+      supported: true,
+      value: undefined,
+    };
+
+    const mockEvent = {
+      body: {
+        entryTitle: 'test-entry-title',
+        fields: JSON.stringify([mockField]),
+      },
+    };
+
+    const mockContext = {
+      appInstallationParameters: {
+        hubspotAccessToken: 'test-token',
+      },
+    };
+
+    const result = await handler(mockEvent as any, mockContext as any);
+
+    // Verify the result
+    expect(result).toEqual({
+      success: [mockField],
+      failed: [],
+    });
+
+    // Verify fetch was called 3 times (once for each file: meta.json, fields.json, module.html)
+    expect(mockFetch).toHaveBeenCalledTimes(3);
+
+    // Verify the file contents being sent
+    const secondCall = mockFetch.mock.calls[1];
+
+    // Check fields.json content
+    const secondFormData = secondCall[1]?.body as FormData;
+    const secondFile = secondFormData.get('file') as Blob;
+    expect(secondFile.type).toBe('application/json');
+    const secondContent = await secondFile.text();
+    expect(JSON.parse(secondContent)).toEqual(TEXT_FIELD_TEMPLATE);
   });
 
   it('should successfully create a module for a RichText field', async () => {
@@ -579,5 +633,82 @@ describe('createModules', () => {
     const thirdFile = thirdFormData.get('file') as Blob;
     const thirdContent = await thirdFile.text();
     expect(thirdContent).toBe(TEXT_MODULE_TEMPLATE);
+  });
+
+  it('should successfully create a module for an Asset field', async () => {
+    // Mock successful fetch responses
+    const mockFetch = vi.mocked(fetch);
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ success: true }),
+    } as Response);
+
+    const mockField: SdkField = {
+      type: 'Link',
+      id: 'test-field-id',
+      uniqueId: 'test-asset-module',
+      name: 'Test Asset Field',
+      supported: true,
+      value: {
+        url: 'https://example.com/image.jpg',
+        width: 100,
+        height: 100,
+        contentType: 'image/jpeg',
+      },
+    };
+
+    const mockEvent = {
+      body: {
+        entryTitle: 'test-entry-title',
+        fields: JSON.stringify([mockField]),
+      },
+    };
+
+    const mockContext = {
+      appInstallationParameters: {
+        hubspotAccessToken: 'test-token',
+      },
+    };
+
+    const result = await handler(mockEvent as any, mockContext as any);
+
+    // Verify the result
+    expect(result).toEqual({
+      success: [mockField],
+      failed: [],
+    });
+
+    // Verify fetch was called 3 times
+    expect(mockFetch).toHaveBeenCalledTimes(3);
+
+    // Verify the file contents being sent for Asset field
+    const firstCall = mockFetch.mock.calls[0];
+    const secondCall = mockFetch.mock.calls[1];
+    const thirdCall = mockFetch.mock.calls[2];
+
+    // Check meta.json content
+    const firstFormData = firstCall[1]?.body as FormData;
+    const firstFile = firstFormData.get('file') as Blob;
+    const firstContent = await firstFile.text();
+    expect(JSON.parse(firstContent)).toEqual(META_JSON_TEMPLATE);
+
+    // Check fields.json content for Location
+    const secondFormData = secondCall[1]?.body as FormData;
+    const secondFile = secondFormData.get('file') as Blob;
+    const secondContent = await secondFile.text();
+    const expectedFields = structuredClone(IMAGE_FIELD_TEMPLATE);
+    expectedFields[0].default = {
+      src: 'https://example.com/image.jpg',
+      loading: 'lazy',
+      width: 100,
+      height: 100,
+    };
+    expect(JSON.parse(secondContent)).toEqual(expectedFields);
+
+    // Check module.html content for Location
+    const thirdFormData = thirdCall[1]?.body as FormData;
+    const thirdFile = thirdFormData.get('file') as Blob;
+    const thirdContent = await thirdFile.text();
+    expect(thirdContent).toBe(IMAGE_MODULE_TEMPLATE);
   });
 });

@@ -2,7 +2,7 @@ import React from 'react';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ContentTypeMultiSelect from '../../src/components/ContentTypeMultiSelect';
-import { ContentType } from '../../src/utils';
+import { ContentType } from '../../src/utils/utils';
 import { mockCma, mockSdk } from '../mocks';
 import type { ConfigAppSDK } from '@contentful/app-sdk';
 import { createClient } from 'contentful-management';

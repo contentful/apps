@@ -24,7 +24,7 @@ import {
   CONFIG_SCREEN_INSTRUCTIONS,
   ContentType,
   HUBSPOT_PRIVATE_APPS_URL,
-} from '../utils';
+} from '../utils/utils';
 import { createClient } from 'contentful-management';
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 

@@ -4,7 +4,7 @@ import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useState } from 'react';
 import FieldSelection from '../components/FieldSelection';
 import { createClient } from 'contentful-management';
-import { SdkField } from '../utils';
+import { SdkField } from '../utils/utils';
 
 export type InvocationParams = {
   entryTitle: string;
@@ -30,7 +30,6 @@ const Dialog = () => {
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
 
   const callAction = async () => {
-    console.log('Starting call action');
     const fieldsToSend = selectedFields.map((field) => {
       return fields.find((f) => f.uniqueId === field);
     });
@@ -51,7 +50,6 @@ const Dialog = () => {
         }
       );
       const responseData = JSON.parse(response.response.body);
-      console.log('Response data: ', responseData);
     } catch (error) {
       console.error('Error creating modules: ', error);
     }

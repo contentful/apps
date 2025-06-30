@@ -2,7 +2,7 @@ import { Box, Checkbox, Paragraph, Text } from '@contentful/f36-components';
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
 import { useMemo } from 'react';
-import { SdkField } from '../utils';
+import { SdkField } from '../utils/utils';
 import { styles } from './FieldSelection.styles';
 
 type FieldsSelectionProps = {
