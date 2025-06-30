@@ -27,6 +27,7 @@ describe('Sidebar component', () => {
     expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledWith({
       title: 'Sync entry fields to Hubspot',
       parameters: {
+        entryTitle: 'title value',
         fields: expectedFields,
       },
     });

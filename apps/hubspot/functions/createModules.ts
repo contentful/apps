@@ -4,10 +4,24 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { META_JSON_TEMPLATE, TEXT_FIELD_TEMPLATE, TEXT_MODULES_TEMPLATE } from './templates';
+import {
+  DATE_FIELD_TEMPLATE,
+  DATE_MODULE_TEMPLATE,
+  DATETIME_FIELD_TEMPLATE,
+  DATETIME_MODULE_TEMPLATE,
+  META_JSON_TEMPLATE,
+  NUMBER_FIELD_TEMPLATE,
+  NUMBER_MODULE_TEMPLATE,
+  RICH_TEXT_FIELD_TEMPLATE,
+  RICH_TEXT_MODULE_TEMPLATE,
+  TEXT_FIELD_TEMPLATE,
+  TEXT_MODULE_TEMPLATE,
+} from './templates';
 import { SdkField } from '../src/utils';
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 
 type AppActionParameters = {
+  entryTitle: string;
   fields: string;
 };
 
@@ -23,9 +37,10 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 ) => {
   const success = [];
   const failed = [];
+  const entryTitle = event.body.entryTitle;
   for (const field of JSON.parse(event.body.fields)) {
     try {
-      await createModule(field, context.appInstallationParameters.hubspotAccessToken);
+      await createModule(field, context.appInstallationParameters.hubspotAccessToken, entryTitle);
       success.push(field);
     } catch (error) {
       failed.push(field);
@@ -37,16 +52,13 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   };
 };
 
-const createModule = async (field: SdkField, token: string) => {
-  // TODO: change templates to use depending on field type
-  // TODO: transform field value depending on field type
-  await createModuleFile(JSON.stringify(META_JSON_TEMPLATE), 'meta.json', field.uniqueId, token);
-
-  const fields = TEXT_FIELD_TEMPLATE;
-  fields[0].default = field.value;
-  await createModuleFile(JSON.stringify(fields), 'fields.json', field.uniqueId, token);
-
-  await createModuleFile(TEXT_MODULES_TEMPLATE, 'module.html', field.uniqueId, token);
+const createModule = async (field: SdkField, token: string, entryTitle: string) => {
+  const fields = getFields(field);
+  const module = getModule(field);
+  const moduleName = `${entryTitle}-${field.uniqueId}`;
+  await createModuleFile(JSON.stringify(META_JSON_TEMPLATE), 'meta.json', moduleName, token);
+  await createModuleFile(fields, 'fields.json', moduleName, token);
+  await createModuleFile(module, 'module.html', moduleName, token);
 };
 
 const createModuleFile = async (
@@ -74,5 +86,66 @@ const createModuleFile = async (
     throw new Error(
       `HubSpot API request failed: ${response.status} ${response.statusText} - ${errorData}`
     );
+  }
+};
+
+const getFields = (field: SdkField): string => {
+  const { type } = field;
+  let fields;
+  switch (type) {
+    case 'Symbol':
+      fields = structuredClone(TEXT_FIELD_TEMPLATE);
+      fields[0].default = field.value;
+      break;
+    case 'RichText':
+      fields = structuredClone(RICH_TEXT_FIELD_TEMPLATE);
+      fields[0].default = documentToHtmlString(field.value);
+      break;
+    case 'Number':
+      fields = structuredClone(NUMBER_FIELD_TEMPLATE);
+      fields[0].default = field.value;
+      break;
+    case 'Date':
+      const value = field.value as string;
+      if (value.includes('T')) {
+        fields = structuredClone(DATETIME_FIELD_TEMPLATE);
+        fields[0].default = new Date(value).getTime();
+      } else {
+        fields = structuredClone(DATE_FIELD_TEMPLATE);
+        fields[0].default = new Date(value).getTime();
+      }
+      break;
+    case 'Location':
+      fields = structuredClone(TEXT_FIELD_TEMPLATE);
+      fields[0].default = `lat:${field.value.lat}, long:${field.value.lon}`;
+      break;
+    default:
+      fields = structuredClone(TEXT_FIELD_TEMPLATE);
+      fields[0].default = field.value;
+      break;
+  }
+  return JSON.stringify(fields);
+};
+
+const getModule = (field: SdkField): string => {
+  const { type } = field;
+  switch (type) {
+    case 'Symbol':
+      return TEXT_MODULE_TEMPLATE;
+    case 'RichText':
+      return RICH_TEXT_MODULE_TEMPLATE;
+    case 'Number':
+      return NUMBER_MODULE_TEMPLATE;
+    case 'Date':
+      const value = field.value as string;
+      if (value.includes('T')) {
+        return DATETIME_MODULE_TEMPLATE;
+      } else {
+        return DATE_MODULE_TEMPLATE;
+      }
+    case 'Location':
+      return TEXT_MODULE_TEMPLATE;
+    default:
+      return TEXT_MODULE_TEMPLATE;
   }
 };

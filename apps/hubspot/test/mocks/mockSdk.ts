@@ -25,9 +25,12 @@ const mockSdk: any = {
   navigator: {
     openCurrentAppPage: vi.fn(),
   },
+  contentType: {
+    displayField: 'title',
+  },
   entry: {
-    fields: [
-      {
+    fields: {
+      title: {
         id: 'title',
         name: 'Title',
         type: 'Symbol',
@@ -40,7 +43,7 @@ const mockSdk: any = {
         items: undefined,
         getValue: () => 'title value',
       },
-      {
+      description: {
         id: 'description',
         name: 'Description',
         type: 'Text',
@@ -53,7 +56,7 @@ const mockSdk: any = {
         items: undefined,
         getValue: (locale: string) => (locale == 'en-US' ? 'description value' : 'descripcion'),
       },
-      {
+      iamge: {
         id: 'image',
         name: 'Image',
         type: 'Link',
@@ -67,7 +70,7 @@ const mockSdk: any = {
         getValue: () => 'placeholder value',
         // TODO: add getValue
       },
-      {
+      tags: {
         id: 'tags',
         name: 'Tags',
         type: 'Array',
@@ -83,7 +86,7 @@ const mockSdk: any = {
         },
         getValue: () => ['tag1', 'tag2'],
       },
-      {
+      boolean: {
         id: 'boolean',
         name: 'Boolean',
         type: 'Boolean',
@@ -96,7 +99,7 @@ const mockSdk: any = {
         items: undefined,
         getValue: () => true,
       },
-      {
+      author: {
         id: 'author',
         name: 'Author',
         type: 'Link',
@@ -110,7 +113,7 @@ const mockSdk: any = {
         getValue: () => 'placeholder value',
         // TODO: add getValue
       },
-    ],
+    },
   },
 };
 

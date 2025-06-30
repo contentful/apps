@@ -15,6 +15,7 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
     ...mockSdk,
     parameters: {
       invocation: {
+        entryTitle: 'test-entry-title',
         fields: expectedFields,
       },
     },
@@ -181,6 +182,7 @@ describe('Dialog component', () => {
       },
       {
         parameters: {
+          entryTitle: 'test-entry-title',
           fields: JSON.stringify([expectedFields[0]]), // title field
         },
       }

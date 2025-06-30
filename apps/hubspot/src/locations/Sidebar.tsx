@@ -1,6 +1,7 @@
 import { Button, Flex } from '@contentful/f36-components';
 import { EntryFieldAPI, SidebarAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
+import { SdkField } from '../utils';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
@@ -26,7 +27,7 @@ const Sidebar = () => {
     return SUPPORTED_FIELD_TYPES.includes(field.type);
   };
 
-  const fields = [];
+  const fields: SdkField[] = [];
   for (const field of Object.values(sdk.entry.fields)) {
     const linkType = (field as any).linkType && { linkType: (field as any).linkType };
     const items = (field as any).items && {
@@ -67,11 +68,14 @@ const Sidebar = () => {
 
   console.log('FIELDS: ', fields);
 
-  const dialogParams = {
-    title: 'Sync entry fields to Hubspot',
-    parameters: {
-      fields: fields,
-    },
+  const dialogParams = () => {
+    return {
+      title: 'Sync entry fields to Hubspot',
+      parameters: {
+        entryTitle: sdk.entry.fields[sdk.contentType.displayField].getValue(),
+        fields: fields,
+      },
+    };
   };
 
   return (
@@ -79,7 +83,7 @@ const Sidebar = () => {
       <Button
         variant="secondary"
         isFullWidth={true}
-        onClick={() => sdk.dialogs.openCurrentApp(dialogParams)}>
+        onClick={() => sdk.dialogs.openCurrentApp(dialogParams())}>
         Sync entry fields to Hubspot
       </Button>
 

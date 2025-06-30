@@ -7,6 +7,7 @@ import { createClient } from 'contentful-management';
 import { SdkField } from '../utils';
 
 export type InvocationParams = {
+  entryTitle: string;
   fields: SdkField[];
 };
 
@@ -25,6 +26,7 @@ const Dialog = () => {
   useAutoResizer();
   const invocationParams = sdk.parameters.invocation as InvocationParams;
   const fields = invocationParams.fields;
+  const entryTitle = invocationParams.entryTitle;
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
 
   const callAction = async () => {
@@ -43,6 +45,7 @@ const Dialog = () => {
         },
         {
           parameters: {
+            entryTitle: entryTitle,
             fields: JSON.stringify(fieldsToSend),
           },
         }

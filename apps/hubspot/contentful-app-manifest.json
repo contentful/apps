@@ -32,6 +32,12 @@
           "name": "Fields",
           "type": "Symbol",
           "required": true
+        },
+        {
+          "id": "entryTitle",
+          "name": "Entry title",
+          "type": "Symbol",
+          "required": true
         }
       ]
     },
