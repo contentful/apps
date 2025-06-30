@@ -136,6 +136,9 @@ export function getEntryFieldValue(
   field: { id: string; locale?: string } | null | undefined,
   defaultLocale: string
 ): string {
-  if (!entry || !field || !field.id) return '';
-  return entry.fields[field.id]?.[field.locale || defaultLocale].toString() || 'empty field';
+  if (!entry || !field || !field.id) return 'empty field';
+  const fieldValue = entry.fields[field.id]?.[field.locale || defaultLocale];
+  if (fieldValue === undefined || fieldValue === null) return 'empty field';
+
+  return String(fieldValue) || 'empty field';
 }
