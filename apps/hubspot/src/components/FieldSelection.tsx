@@ -35,7 +35,7 @@ const FieldSelection = (props: FieldsSelectionProps) => {
         <Box paddingLeft="spacingS" paddingTop="spacingXs" paddingBottom="spacingXs">
           <Checkbox isChecked={allSelected} onChange={onSelectAll}>
             <Text fontSize="fontSizeS" fontColor="gray700" lineHeight="lineHeightS">
-              Select all fields ({fields.length})
+              Select all fields ({supportedFields.length})
             </Text>
           </Checkbox>
         </Box>
