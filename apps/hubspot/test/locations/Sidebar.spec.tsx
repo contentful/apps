@@ -1,13 +1,15 @@
 import Sidebar from '../../src/locations/Sidebar';
-import { cleanup, fireEvent, render } from '@testing-library/react';
-import { mockSdk } from '../mocks';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import { mockCma, mockSdk } from '../mocks';
 import { expectedFields } from '../mocks/mockSdk';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import React from 'react';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useAutoResizer: () => {},
+}));
+
+vi.mock('contentful-management', () => ({
+  createClient: () => mockCma,
 }));
 
 describe('Sidebar component', () => {
@@ -17,16 +19,32 @@ describe('Sidebar component', () => {
 
   afterEach(cleanup);
 
-  it('Sync button opens dialog', () => {
+  it('Sync button opens dialog', async () => {
+    mockCma.asset.get.mockResolvedValue({
+      fields: {
+        file: {
+          'en-US': {
+            url: 'https://example.com/image.jpg',
+            contentType: 'image/jpeg',
+            details: {
+              image: { width: 100, height: 100 },
+            },
+          },
+        },
+      },
+    });
     const { getByText } = render(<Sidebar />);
 
     const syncButton = getByText('Sync entry fields to Hubspot');
     fireEvent.click(syncButton);
 
-    expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledTimes(1);
+    });
     expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledWith({
       title: 'Sync entry fields to Hubspot',
       parameters: {
+        entryTitle: 'title value',
         fields: expectedFields,
       },
     });

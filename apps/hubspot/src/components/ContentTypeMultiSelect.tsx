@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Stack, Pill } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
-import { CONFIG_CONTENT_TYPE_ID, ContentType } from '../utils';
+import { CONFIG_CONTENT_TYPE_ID, ContentType } from '../utils/utils';
 import { ContentTypeProps, PlainClientAPI } from 'contentful-management';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 

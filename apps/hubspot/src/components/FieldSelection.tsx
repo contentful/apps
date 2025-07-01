@@ -2,7 +2,7 @@ import { Box, Checkbox, Paragraph, Text } from '@contentful/f36-components';
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
 import { useMemo } from 'react';
-import { SdkField } from '../utils';
+import { SdkField } from '../utils/fieldsProcessing';
 import { styles } from './FieldSelection.styles';
 
 type FieldsSelectionProps = {
@@ -35,7 +35,7 @@ const FieldSelection = (props: FieldsSelectionProps) => {
         <Box paddingLeft="spacingS" paddingTop="spacingXs" paddingBottom="spacingXs">
           <Checkbox isChecked={allSelected} onChange={onSelectAll}>
             <Text fontSize="fontSizeS" fontColor="gray700" lineHeight="lineHeightS">
-              Select all fields ({fields.length})
+              Select all fields ({supportedFields.length})
             </Text>
           </Checkbox>
         </Box>

@@ -1,7 +1,6 @@
 import Page from '../../src/locations/Page';
 import { render } from '@testing-library/react';
 import { mockCma, mockSdk } from '../mocks';
-import { vi } from 'vitest';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
