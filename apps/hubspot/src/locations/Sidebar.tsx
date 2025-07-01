@@ -18,11 +18,22 @@ const Sidebar = () => {
   );
   useAutoResizer();
 
+  const getEntryTitle = (): string => {
+    let displayFieldId = sdk.contentType.displayField;
+    if (!displayFieldId) return 'Untitled';
+
+    const value = sdk.entry.fields[displayFieldId].getValue();
+    if (value === undefined || value === null || value === '') {
+      return 'Untitled';
+    }
+    return String(value);
+  };
+
   const dialogParams = async () => {
     return {
       title: 'Sync entry fields to Hubspot',
       parameters: {
-        entryTitle: sdk.entry.fields[sdk.contentType.displayField].getValue(),
+        entryTitle: getEntryTitle(),
         fields: await processFields(Object.values(sdk.entry.fields), cma, sdk.locales.default),
       },
     };
