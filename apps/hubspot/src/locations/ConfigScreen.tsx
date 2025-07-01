@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Flex,
@@ -26,7 +26,7 @@ import {
   CONFIG_SCREEN_INSTRUCTIONS,
   ContentType,
   HUBSPOT_PRIVATE_APPS_URL,
-} from '../utils';
+} from '../utils/utils';
 import { createClient } from 'contentful-management';
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 
@@ -128,7 +128,7 @@ const ConfigScreen = () => {
     (async () => {
       const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
 
-      if (currentParameters) {
+      if (currentParameters && currentParameters.hubspotAccessToken) {
         setParameters(currentParameters);
       }
       sdk.app.setReady();

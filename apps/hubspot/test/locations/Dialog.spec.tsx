@@ -3,7 +3,6 @@ import Dialog from '../../src/locations/Dialog';
 import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { mockSdk, expectedFields } from '../mocks';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mockCma } from '../mocks/mockCma';
 
 vi.mock('contentful-management', () => ({
@@ -15,6 +14,7 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
     ...mockSdk,
     parameters: {
       invocation: {
+        entryTitle: 'test-entry-title',
         fields: expectedFields,
       },
     },
@@ -36,7 +36,7 @@ describe('Dialog component', () => {
     render(<Dialog />);
 
     // Check that the select all checkbox text is displayed correctly
-    expect(screen.getByText('Select all fields (7)')).toBeInTheDocument();
+    expect(screen.getByText('Select all fields (5)')).toBeInTheDocument();
 
     // Check that individual field checkboxes display correctly
     expect(screen.getByText('Title')).toBeInTheDocument();
@@ -89,7 +89,7 @@ describe('Dialog component', () => {
     const user = userEvent.setup();
     render(<Dialog />);
 
-    const selectAllCheckbox = screen.getByLabelText('Select all fields (7)');
+    const selectAllCheckbox = screen.getByLabelText('Select all fields (5)');
     const titleCheckbox = screen.getByLabelText('Title', { exact: false });
     const descriptionEnCheckbox = screen.getByLabelText('Description (en-US)', { exact: false });
     const descriptionEsCheckbox = screen.getByLabelText('Description (es-AR)', { exact: false });
@@ -146,7 +146,7 @@ describe('Dialog component', () => {
     expect(nextButton).toBeDisabled();
 
     // Select multiple fields
-    const selectAllCheckbox = screen.getByLabelText('Select all fields (7)');
+    const selectAllCheckbox = screen.getByLabelText('Select all fields (5)');
     await user.click(selectAllCheckbox);
     expect(nextButton).not.toBeDisabled();
   });
@@ -181,6 +181,7 @@ describe('Dialog component', () => {
       },
       {
         parameters: {
+          entryTitle: 'test-entry-title',
           fields: JSON.stringify([expectedFields[0]]), // title field
         },
       }

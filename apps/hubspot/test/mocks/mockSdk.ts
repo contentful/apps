@@ -25,9 +25,15 @@ const mockSdk: any = {
   navigator: {
     openCurrentAppPage: vi.fn(),
   },
+  contentType: {
+    displayField: 'title',
+  },
+  locales: {
+    default: 'en-US',
+  },
   entry: {
-    fields: [
-      {
+    fields: {
+      title: {
         id: 'title',
         name: 'Title',
         type: 'Symbol',
@@ -40,7 +46,7 @@ const mockSdk: any = {
         items: undefined,
         getValue: () => 'title value',
       },
-      {
+      description: {
         id: 'description',
         name: 'Description',
         type: 'Text',
@@ -53,7 +59,7 @@ const mockSdk: any = {
         items: undefined,
         getValue: (locale: string) => (locale == 'en-US' ? 'description value' : 'descripcion'),
       },
-      {
+      iamge: {
         id: 'image',
         name: 'Image',
         type: 'Link',
@@ -64,10 +70,17 @@ const mockSdk: any = {
         omitted: false,
         linkType: 'Asset',
         items: undefined,
-        getValue: () => 'placeholder value',
-        // TODO: add getValue
+        getValue: () => {
+          return {
+            sys: {
+              type: 'Link',
+              linkType: 'Asset',
+              id: 'asset-id',
+            },
+          };
+        },
       },
-      {
+      tags: {
         id: 'tags',
         name: 'Tags',
         type: 'Array',
@@ -83,7 +96,7 @@ const mockSdk: any = {
         },
         getValue: () => ['tag1', 'tag2'],
       },
-      {
+      boolean: {
         id: 'boolean',
         name: 'Boolean',
         type: 'Boolean',
@@ -96,7 +109,7 @@ const mockSdk: any = {
         items: undefined,
         getValue: () => true,
       },
-      {
+      author: {
         id: 'author',
         name: 'Author',
         type: 'Link',
@@ -107,10 +120,17 @@ const mockSdk: any = {
         omitted: false,
         linkType: 'Entry',
         items: undefined,
-        getValue: () => 'placeholder value',
-        // TODO: add getValue
+        getValue: () => {
+          return {
+            sys: {
+              type: 'Link',
+              linkType: 'Entry',
+              id: 'entry-id',
+            },
+          };
+        },
       },
-    ],
+    },
   },
 };
 
@@ -148,8 +168,12 @@ export const expectedFields = [
     name: 'Image',
     linkType: 'Asset',
     supported: true,
-    value: 'placeholder value',
-    // TODO: add getValue
+    value: {
+      url: 'https://example.com/image.jpg',
+      contentType: 'image/jpeg',
+      width: 100,
+      height: 100,
+    },
   },
   {
     type: 'Array',
@@ -175,8 +199,13 @@ export const expectedFields = [
     name: 'Author',
     linkType: 'Entry',
     supported: false,
-    value: 'placeholder value',
-    // TODO: add getValue
+    value: {
+      sys: {
+        type: 'Link',
+        linkType: 'Entry',
+        id: 'entry-id',
+      },
+    },
   },
 ];
 
