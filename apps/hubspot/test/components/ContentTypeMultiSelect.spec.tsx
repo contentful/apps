@@ -61,18 +61,12 @@ describe('ContentTypeMultiSelect', () => {
 
   it('shows the correct input placeholder text', async () => {
     render(<TestWrapper />);
-    // Wait for the component to finish loading content types
-    await waitFor(() => {
-      expect(screen.getByText('Select one or more')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Select one or more')).toBeInTheDocument();
   });
 
   it('renders available content types in the dropdown', async () => {
     render(<TestWrapper />);
-    // Wait for content types to be loaded and rendered
-    await waitFor(() => {
-      expect(screen.getByText('Blog Post')).toBeTruthy();
-    });
+    expect(await screen.findByText('Blog Post')).toBeTruthy();
 
     expect(screen.getByText('Article')).toBeTruthy();
     expect(screen.getByText('News')).toBeTruthy();
@@ -83,13 +77,11 @@ describe('ContentTypeMultiSelect', () => {
     const user = userEvent.setup();
 
     // Wait for content types to be loaded
-    const blogPostOption = await waitFor(() => screen.findByText('Blog Post'));
+    const blogPostOption = await screen.findByText('Blog Post');
 
     await user.click(blogPostOption);
 
-    await waitFor(() => {
-      expect(screen.getByLabelText('Close')).toBeInTheDocument();
-    });
+    expect(await screen.findByLabelText('Close')).toBeInTheDocument();
 
     const closeButton = screen.getByLabelText('Close');
     await user.click(closeButton);
@@ -104,23 +96,19 @@ describe('ContentTypeMultiSelect', () => {
     const user = userEvent.setup();
 
     // Wait for content types to be loaded
-    const blogPostOption = await waitFor(() => screen.findByText('Blog Post'));
+    const blogPostOption = await screen.findByText('Blog Post');
 
     await user.click(blogPostOption);
 
-    await waitFor(() => {
-      const pill = screen.getByLabelText('Close').parentElement;
-      expect(pill).toHaveTextContent('Blog Post');
-    });
+    const pill = (await screen.findByLabelText('Close')).parentElement;
+    expect(pill).toHaveTextContent('Blog Post');
 
     const articleOption = screen.getByText('Article');
     await user.click(articleOption);
 
-    await waitFor(() => {
-      const closeButtons = screen.getAllByLabelText('Close');
-      const pillTexts = closeButtons.map((btn) => btn.parentElement?.textContent);
-      expect(pillTexts).toContain('Blog Post');
-      expect(pillTexts).toContain('Article');
-    });
+    const closeButtons = await screen.findAllByLabelText('Close');
+    const pillTexts = closeButtons.map((btn) => btn.parentElement?.textContent);
+    expect(pillTexts).toContain('Blog Post');
+    expect(pillTexts).toContain('Article');
   });
 });

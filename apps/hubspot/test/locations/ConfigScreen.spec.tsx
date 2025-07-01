@@ -1,5 +1,4 @@
-import React from 'react';
-import { cleanup, render, screen, act, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, act } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import { mockCma, mockSdk } from '../mocks';
 import ConfigScreen from '../../src/locations/ConfigScreen';
@@ -43,9 +42,7 @@ describe('Hubspot Config Screen ', () => {
     it('renders the main heading and description', async () => {
       render(<ConfigScreen />);
 
-      await waitFor(() => {
-        expect(screen.getByRole('heading', { name: /Set up Hubspot/i })).toBeTruthy();
-      });
+      expect(await screen.findByRole('heading', { name: /Set up Hubspot/i })).toBeTruthy();
       expect(
         screen.getByText(/Seamlessly sync Contentful entry content to email campaigns in Hubspot/i)
       ).toBeTruthy();
@@ -54,9 +51,7 @@ describe('Hubspot Config Screen ', () => {
     it('renders the Configure access section and input', async () => {
       render(<ConfigScreen />);
 
-      await waitFor(() => {
-        expect(screen.getByText(/Configure access/i)).toBeTruthy();
-      });
+      expect(await screen.findByText(/Configure access/i)).toBeTruthy();
       expect(
         screen.getByText(
           /To connect your organization's Hubspot account, enter the private app access token/i
@@ -69,9 +64,7 @@ describe('Hubspot Config Screen ', () => {
     it('shows a toast error if the hubspot api key is not set', async () => {
       render(<ConfigScreen />);
 
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText(/Enter your access token/i)).toBeTruthy();
-      });
+      expect(await screen.findByPlaceholderText(/Enter your access token/i)).toBeTruthy();
 
       const input = screen.getByPlaceholderText(/Enter your access token/i);
       expect(input).toHaveValue('');
@@ -86,9 +79,7 @@ describe('Hubspot Config Screen ', () => {
     it('renders the external link with icon', async () => {
       render(<ConfigScreen />);
 
-      await waitFor(() => {
-        expect(screen.getByLabelText('Expand instructions')).toBeTruthy();
-      });
+      expect(await screen.findByLabelText('Expand instructions')).toBeTruthy();
 
       const user = userEvent.setup();
       const expandButton = screen.getByLabelText('Expand instructions');
@@ -106,9 +97,7 @@ describe('Hubspot Config Screen ', () => {
     it('renders the content type multi-select', async () => {
       render(<ConfigScreen />);
 
-      await waitFor(() => {
-        expect(screen.getByText('Select one or more')).toBeTruthy();
-      });
+      expect(await screen.findByText('Select one or more')).toBeTruthy();
     });
   });
 
@@ -128,9 +117,7 @@ describe('Hubspot Config Screen ', () => {
     it('adds and removes app from sidebar for each content type', async () => {
       render(<ConfigScreen />);
 
-      await waitFor(() => {
-        expect(screen.getByText('Select one or more')).toBeTruthy();
-      });
+      expect(await screen.findByText('Select one or more')).toBeTruthy();
 
       const user = userEvent.setup();
       // Always mock the token validation as valid for this test
@@ -174,9 +161,7 @@ describe('Hubspot Config Screen ', () => {
     it('shows the input as required', async () => {
       render(<ConfigScreen />);
 
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText(/Enter your access token/i)).toBeTruthy();
-      });
+      expect(await screen.findByPlaceholderText(/Enter your access token/i)).toBeTruthy();
 
       const input = screen.getByPlaceholderText(/Enter your access token/i);
       expect(input).toBeRequired();
@@ -185,9 +170,7 @@ describe('Hubspot Config Screen ', () => {
     it('blocks saving and shows error if the access token is invalid', async () => {
       render(<ConfigScreen />);
 
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText(/Enter your access token/i)).toBeTruthy();
-      });
+      expect(await screen.findByPlaceholderText(/Enter your access token/i)).toBeTruthy();
 
       const user = userEvent.setup();
       mockCma.appActionCall.createWithResponse.mockResolvedValueOnce({
@@ -212,9 +195,7 @@ describe('Hubspot Config Screen ', () => {
     it('blocks saving and shows error if the access token is missing the content scope', async () => {
       render(<ConfigScreen />);
 
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText(/Enter your access token/i)).toBeTruthy();
-      });
+      expect(await screen.findByPlaceholderText(/Enter your access token/i)).toBeTruthy();
 
       const user = userEvent.setup();
       mockCma.appActionCall.createWithResponse.mockResolvedValueOnce({
@@ -241,9 +222,7 @@ describe('Hubspot Config Screen ', () => {
     it('allows saving if the access token is valid and has content scope', async () => {
       render(<ConfigScreen />);
 
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText(/Enter your access token/i)).toBeTruthy();
-      });
+      expect(await screen.findByPlaceholderText(/Enter your access token/i)).toBeTruthy();
 
       const user = userEvent.setup();
       mockCma.appActionCall.createWithResponse.mockResolvedValueOnce({

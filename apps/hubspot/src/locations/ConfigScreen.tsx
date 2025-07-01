@@ -126,7 +126,7 @@ const ConfigScreen = () => {
     (async () => {
       const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
 
-      if (currentParameters) {
+      if (currentParameters && currentParameters.hubspotAccessToken) {
         setParameters(currentParameters);
       }
       sdk.app.setReady();
@@ -153,7 +153,7 @@ const ConfigScreen = () => {
               <TextInput
                 name="hubspotAccessToken"
                 placeholder="Enter your access token"
-                value={parameters.hubspotAccessToken || ''}
+                value={parameters.hubspotAccessToken}
                 onChange={(e) =>
                   setParameters({ ...parameters, hubspotAccessToken: e.target.value })
                 }
