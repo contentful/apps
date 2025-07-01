@@ -1,5 +1,16 @@
-import { CMAClient, EntryFieldAPI } from '@contentful/app-sdk';
-import { SdkField } from './utils';
+import { CMAClient, EntryFieldAPI, FieldLinkType, FieldType, Items } from '@contentful/app-sdk';
+
+export type SdkField = {
+  type: FieldType;
+  id: string;
+  uniqueId: string;
+  name: string;
+  locale?: string;
+  linkType?: FieldLinkType;
+  items?: Items;
+  supported: boolean;
+  value: any;
+};
 
 const SUPPORTED_FIELD_TYPES = [
   'Symbol',
@@ -21,13 +32,13 @@ export const processFields = async (
   const processedFields: SdkField[] = [];
 
   for (const field of fields) {
-    const linkType = (field as any).linkType && { linkType: (field as any).linkType };
-    const items = (field as any).items && {
-      items: {
-        type: (field as any).items.type,
-        linkType: (field as any).items.linkType,
-      },
-    };
+    const linkType = field.type === 'Link' ? { linkType: field.linkType } : {};
+    const items =
+      field.type === 'Array'
+        ? field.items.type === 'Link'
+          ? { items: { type: field.items.type, linkType: field.items.linkType } }
+          : { items: { type: field.items.type } }
+        : {};
 
     if (field.locales.length === 1) {
       const rawValue = field.getValue();

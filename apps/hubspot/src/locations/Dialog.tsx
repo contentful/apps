@@ -4,7 +4,7 @@ import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useState } from 'react';
 import FieldSelection from '../components/FieldSelection';
 import { createClient } from 'contentful-management';
-import { SdkField } from '../utils/utils';
+import { SdkField } from '../utils/fieldsProcessing';
 
 export type InvocationParams = {
   entryTitle: string;
