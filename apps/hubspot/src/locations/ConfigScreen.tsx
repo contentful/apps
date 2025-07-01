@@ -5,6 +5,7 @@ import {
   Heading,
   Text,
   Form,
+  Image,
   FormControl,
   TextInput,
   Paragraph,
@@ -14,6 +15,7 @@ import {
   TextLink,
   List,
 } from '@contentful/f36-components';
+import hubspotGif from '../assets/hubspot.gif';
 import { ChevronDownIcon, ChevronUpIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
@@ -191,7 +193,7 @@ const ConfigScreen = () => {
                 </List.Item>
               ))}
             </List>
-            <Box marginTop="spacingS">
+            <Box marginTop="spacingS" marginBottom="spacingS">
               <TextLink
                 href={HUBSPOT_PRIVATE_APPS_URL}
                 target="_blank"
@@ -201,6 +203,12 @@ const ConfigScreen = () => {
                 Read about creating private apps in Hubspot
               </TextLink>
             </Box>
+            <Image
+              alt="GIF showing how to get an access token from Hubspot"
+              height="100%"
+              width="100%"
+              src={hubspotGif}
+            />
           </Collapse>
         </Box>
         <Splitter marginTop="spacing2Xs" marginBottom="spacing2Xl" />
