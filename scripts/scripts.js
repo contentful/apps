@@ -19,21 +19,22 @@ const client = contentful.createClient({
   accessToken: accessToken,
 });
 
-const appDefinition = await createAppDefinition(client, organizationId, appName).catch(console.error);
+const appDefinitionStaging = await createAppDefinition(client, organizationId, appName + ' (staging)').catch(console.error);
+const appDefinitionProduction = await createAppDefinition(client, organizationId, appName + ' (production)').catch(console.error);
 
-const productionSpace = await createSpace(client, organizationId, appName + ' (production)').catch(console.error);
 const stagingSpace = await createSpace(client, organizationId, appName + ' (staging)').catch(console.error);
-
+const productionSpace = await createSpace(client, organizationId, appName + ' (production)').catch(console.error);
 
 const teamSpaceMembershipStaging = await addTeamToSpace(client, stagingSpace.sys.id, teamId).catch(console.error);
 const teamSpaceMembershipProduction = await addTeamToSpace(client, productionSpace.sys.id, teamId).catch(console.error);
 
 
-const appInstallatioStaging = await installApp(client, stagingSpace.sys.id, environmentId, appDefinition.sys.id).catch(console.error);
-const appInstallationProduction = await installApp(client, productionSpace.sys.id, environmentId, appDefinition.sys.id).catch(console.error);
+const appInstallatioStaging = await installApp(client, stagingSpace.sys.id, environmentId, appDefinitionStaging.sys.id).catch(console.error);
+const appInstallationProduction = await installApp(client, productionSpace.sys.id, environmentId, appDefinitionProduction.sys.id).catch(console.error);
 
-
-console.log("\n ⚙️  Finish configuring the app definition here: https://app.contentful.com/account/organizations/" + organizationId + "/apps/definitions/" + appDefinition.sys.id + "/general")
+console.log("\n Finish configuring the app definitions here:\n")
+console.log("\n ⚙️  Staging: https://app.contentful.com/account/organizations/" + organizationId + "/apps/definitions/" + appDefinitionStaging.sys.id + "/general")
+console.log("\n ⚙️  Production: https://app.contentful.com/account/organizations/" + organizationId + "/apps/definitions/" + appDefinitionProduction.sys.id + "/general")
 
 
 // UNDO - comment out for testing 
