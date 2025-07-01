@@ -1,5 +1,5 @@
 import { handler } from '../../functions/createModules';
-import type { SdkField } from '../../src/utils/utils';
+import type { SdkField } from '../../src/utils/fieldsProcessing';
 import {
   META_JSON_TEMPLATE,
   TEXT_FIELD_TEMPLATE,
@@ -25,13 +25,24 @@ describe('createModules', () => {
     vi.clearAllMocks();
   });
 
-  it('should create three files for a module', async () => {
-    // Mock successful fetch responses
+  const mockedFetch = () => {
     const mockFetch = vi.mocked(fetch);
     mockFetch.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ success: true }),
     } as Response);
+    return mockFetch;
+  };
+
+  const mockedContext = (token: string) => ({
+    appInstallationParameters: {
+      hubspotAccessToken: token,
+    },
+  });
+
+  it('should create three files for a module', async () => {
+    // Mock successful fetch responses
+    const mockFetch = mockedFetch();
 
     const mockField: SdkField = {
       type: 'Text',
@@ -49,13 +60,7 @@ describe('createModules', () => {
       },
     };
 
-    const mockContext = {
-      appInstallationParameters: {
-        hubspotAccessToken: 'test-token',
-      },
-    };
-
-    const result = await handler(mockEvent as any, mockContext as any);
+    const result = await handler(mockEvent as any, mockedContext('test-token') as any);
 
     // Verify the result
     expect(result).toEqual({
@@ -129,13 +134,7 @@ describe('createModules', () => {
       },
     };
 
-    const mockContext = {
-      appInstallationParameters: {
-        hubspotAccessToken: 'invalid-token',
-      },
-    };
-
-    const result = await handler(mockEvent as any, mockContext as any);
+    const result = await handler(mockEvent as any, mockedContext('invalid-token') as any);
 
     // Verify the result
     expect(result).toEqual({
@@ -160,11 +159,7 @@ describe('createModules', () => {
 
   it('should successfully create a module for a text field', async () => {
     // Mock successful fetch responses
-    const mockFetch = vi.mocked(fetch);
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ success: true }),
-    } as Response);
+    const mockFetch = mockedFetch();
 
     const mockField: SdkField = {
       type: 'Text',
@@ -182,13 +177,7 @@ describe('createModules', () => {
       },
     };
 
-    const mockContext = {
-      appInstallationParameters: {
-        hubspotAccessToken: 'test-token',
-      },
-    };
-
-    const result = await handler(mockEvent as any, mockContext as any);
+    const result = await handler(mockEvent as any, mockedContext('test-token') as any);
 
     // Verify the result
     expect(result).toEqual({
@@ -230,11 +219,7 @@ describe('createModules', () => {
 
   it('should successfully create a module for a text field without a value', async () => {
     // Mock successful fetch responses
-    const mockFetch = vi.mocked(fetch);
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ success: true }),
-    } as Response);
+    const mockFetch = mockedFetch();
 
     const mockField: SdkField = {
       type: 'Text',
@@ -252,13 +237,7 @@ describe('createModules', () => {
       },
     };
 
-    const mockContext = {
-      appInstallationParameters: {
-        hubspotAccessToken: 'test-token',
-      },
-    };
-
-    const result = await handler(mockEvent as any, mockContext as any);
+    const result = await handler(mockEvent as any, mockedContext('test-token') as any);
 
     // Verify the result
     expect(result).toEqual({
@@ -282,11 +261,7 @@ describe('createModules', () => {
 
   it('should successfully create a module for a RichText field', async () => {
     // Mock successful fetch responses
-    const mockFetch = vi.mocked(fetch);
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ success: true }),
-    } as Response);
+    const mockFetch = mockedFetch();
 
     const mockField: SdkField = {
       type: 'RichText',
@@ -321,13 +296,7 @@ describe('createModules', () => {
       },
     };
 
-    const mockContext = {
-      appInstallationParameters: {
-        hubspotAccessToken: 'test-token',
-      },
-    };
-
-    const result = await handler(mockEvent as any, mockContext as any);
+    const result = await handler(mockEvent as any, mockedContext('test-token') as any);
 
     // Verify the result
     expect(result).toEqual({
@@ -366,11 +335,7 @@ describe('createModules', () => {
 
   it('should successfully create a module for a Number field', async () => {
     // Mock successful fetch responses
-    const mockFetch = vi.mocked(fetch);
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ success: true }),
-    } as Response);
+    const mockFetch = mockedFetch();
 
     const mockField: SdkField = {
       type: 'Number',
@@ -388,13 +353,7 @@ describe('createModules', () => {
       },
     };
 
-    const mockContext = {
-      appInstallationParameters: {
-        hubspotAccessToken: 'test-token',
-      },
-    };
-
-    const result = await handler(mockEvent as any, mockContext as any);
+    const result = await handler(mockEvent as any, mockedContext('test-token') as any);
 
     // Verify the result
     expect(result).toEqual({
@@ -433,11 +392,7 @@ describe('createModules', () => {
 
   it('should successfully create a module for a Date field without time', async () => {
     // Mock successful fetch responses
-    const mockFetch = vi.mocked(fetch);
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ success: true }),
-    } as Response);
+    const mockFetch = mockedFetch();
 
     const mockField: SdkField = {
       type: 'Date',
@@ -455,13 +410,7 @@ describe('createModules', () => {
       },
     };
 
-    const mockContext = {
-      appInstallationParameters: {
-        hubspotAccessToken: 'test-token',
-      },
-    };
-
-    const result = await handler(mockEvent as any, mockContext as any);
+    const result = await handler(mockEvent as any, mockedContext('test-token') as any);
 
     // Verify the result
     expect(result).toEqual({
@@ -500,11 +449,7 @@ describe('createModules', () => {
 
   it('should successfully create a module for a Date field with time', async () => {
     // Mock successful fetch responses
-    const mockFetch = vi.mocked(fetch);
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ success: true }),
-    } as Response);
+    const mockFetch = mockedFetch();
 
     const mockField: SdkField = {
       type: 'Date',
@@ -522,13 +467,7 @@ describe('createModules', () => {
       },
     };
 
-    const mockContext = {
-      appInstallationParameters: {
-        hubspotAccessToken: 'test-token',
-      },
-    };
-
-    const result = await handler(mockEvent as any, mockContext as any);
+    const result = await handler(mockEvent as any, mockedContext('test-token') as any);
 
     // Verify the result
     expect(result).toEqual({
@@ -567,11 +506,7 @@ describe('createModules', () => {
 
   it('should successfully create a module for a Location field', async () => {
     // Mock successful fetch responses
-    const mockFetch = vi.mocked(fetch);
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ success: true }),
-    } as Response);
+    const mockFetch = mockedFetch();
 
     const mockField: SdkField = {
       type: 'Location',
@@ -592,13 +527,7 @@ describe('createModules', () => {
       },
     };
 
-    const mockContext = {
-      appInstallationParameters: {
-        hubspotAccessToken: 'test-token',
-      },
-    };
-
-    const result = await handler(mockEvent as any, mockContext as any);
+    const result = await handler(mockEvent as any, mockedContext('test-token') as any);
 
     // Verify the result
     expect(result).toEqual({
@@ -637,11 +566,7 @@ describe('createModules', () => {
 
   it('should successfully create a module for an Asset field', async () => {
     // Mock successful fetch responses
-    const mockFetch = vi.mocked(fetch);
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ success: true }),
-    } as Response);
+    const mockFetch = mockedFetch();
 
     const mockField: SdkField = {
       type: 'Link',
@@ -664,13 +589,7 @@ describe('createModules', () => {
       },
     };
 
-    const mockContext = {
-      appInstallationParameters: {
-        hubspotAccessToken: 'test-token',
-      },
-    };
-
-    const result = await handler(mockEvent as any, mockContext as any);
+    const result = await handler(mockEvent as any, mockedContext('test-token') as any);
 
     // Verify the result
     expect(result).toEqual({

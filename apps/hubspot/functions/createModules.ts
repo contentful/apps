@@ -19,7 +19,7 @@ import {
   TEXT_FIELD_TEMPLATE,
   TEXT_MODULE_TEMPLATE,
 } from './templates';
-import { SdkField } from '../src/utils/utils';
+import { SdkField } from '../src/utils/fieldsProcessing';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 
 type AppActionParameters = {
@@ -55,12 +55,11 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 };
 
 const createModule = async (field: SdkField, token: string, entryTitle: string) => {
-  const fields = getFields(field);
-  const module = getModule(field);
+  const { fieldsFile, moduleFile } = getFiles(field);
   const moduleName = `${entryTitle}-${field.uniqueId}`;
   await createModuleFile(JSON.stringify(META_JSON_TEMPLATE), 'meta.json', moduleName, token);
-  await createModuleFile(fields, 'fields.json', moduleName, token);
-  await createModuleFile(module, 'module.html', moduleName, token);
+  await createModuleFile(fieldsFile, 'fields.json', moduleName, token);
+  await createModuleFile(moduleFile, 'module.html', moduleName, token);
 };
 
 const createModuleFile = async (
@@ -91,83 +90,60 @@ const createModuleFile = async (
   }
 };
 
-const getFields = (field: SdkField): string => {
+const getFiles = (field: SdkField): { fieldsFile: string; moduleFile: string } => {
   const { type } = field;
-  let fields;
+  let fieldsFile;
+  let moduleFile;
   switch (type) {
     case 'Symbol':
-      fields = structuredClone(TEXT_FIELD_TEMPLATE);
-      if (field.value) fields[0].default = field.value;
+    case 'Text':
+      fieldsFile = structuredClone(TEXT_FIELD_TEMPLATE);
+      if (field.value) fieldsFile[0].default = field.value;
+      moduleFile = TEXT_MODULE_TEMPLATE;
       break;
     case 'RichText':
-      fields = structuredClone(RICH_TEXT_FIELD_TEMPLATE);
-      if (field.value) fields[0].default = documentToHtmlString(field.value);
+      fieldsFile = structuredClone(RICH_TEXT_FIELD_TEMPLATE);
+      if (field.value) fieldsFile[0].default = documentToHtmlString(field.value);
+      moduleFile = RICH_TEXT_MODULE_TEMPLATE;
       break;
     case 'Number':
     case 'Integer':
-      fields = structuredClone(NUMBER_FIELD_TEMPLATE);
-      if (field.value) fields[0].default = field.value;
+      fieldsFile = structuredClone(NUMBER_FIELD_TEMPLATE);
+      if (field.value) fieldsFile[0].default = field.value;
+      moduleFile = NUMBER_MODULE_TEMPLATE;
       break;
     case 'Date':
       const value = field.value as string;
-      if (!value) {
-        fields = structuredClone(DATETIME_FIELD_TEMPLATE);
-      } else if (value.includes('T')) {
-        fields = structuredClone(DATETIME_FIELD_TEMPLATE);
-        fields[0].default = new Date(value).getTime();
+      if (!value || value.includes('T')) {
+        fieldsFile = structuredClone(DATETIME_FIELD_TEMPLATE);
+        moduleFile = DATETIME_MODULE_TEMPLATE;
       } else {
-        fields = structuredClone(DATE_FIELD_TEMPLATE);
-        fields[0].default = new Date(value).getTime();
+        fieldsFile = structuredClone(DATE_FIELD_TEMPLATE);
+        moduleFile = DATE_MODULE_TEMPLATE;
       }
+      fieldsFile[0].default = new Date(value).getTime();
       break;
     case 'Location':
-      fields = structuredClone(TEXT_FIELD_TEMPLATE);
-      if (field.value) fields[0].default = `lat:${field.value.lat}, long:${field.value.lon}`;
+      fieldsFile = structuredClone(TEXT_FIELD_TEMPLATE);
+      if (field.value) fieldsFile[0].default = `lat:${field.value.lat}, long:${field.value.lon}`;
+      moduleFile = TEXT_MODULE_TEMPLATE;
       break;
     case 'Array':
-      fields = structuredClone(TEXT_FIELD_TEMPLATE);
-      if (field.value) fields[0].default = field.value.join(', ');
+      fieldsFile = structuredClone(TEXT_FIELD_TEMPLATE);
+      if (field.value) fieldsFile[0].default = field.value.join(', ');
+      moduleFile = TEXT_MODULE_TEMPLATE;
       break;
     case 'Link':
-      fields = structuredClone(IMAGE_FIELD_TEMPLATE);
+      fieldsFile = structuredClone(IMAGE_FIELD_TEMPLATE);
       if (field.value) {
-        fields[0].default.src = field.value.url;
-        fields[0].default.width = field.value.width;
-        fields[0].default.height = field.value.height;
+        fieldsFile[0].default.src = field.value.url;
+        fieldsFile[0].default.width = field.value.width;
+        fieldsFile[0].default.height = field.value.height;
       }
+      moduleFile = IMAGE_MODULE_TEMPLATE;
       break;
     default:
-      fields = structuredClone(TEXT_FIELD_TEMPLATE);
-      if (field.value) fields[0].default = field.value;
-      break;
+      throw new Error(`Unsupported field type: ${type}`);
   }
-  return JSON.stringify(fields);
-};
-
-const getModule = (field: SdkField): string => {
-  const { type } = field;
-  switch (type) {
-    case 'Symbol':
-      return TEXT_MODULE_TEMPLATE;
-    case 'RichText':
-      return RICH_TEXT_MODULE_TEMPLATE;
-    case 'Number':
-    case 'Integer':
-      return NUMBER_MODULE_TEMPLATE;
-    case 'Date':
-      const value = field.value as string;
-      if (value.includes('T')) {
-        return DATETIME_MODULE_TEMPLATE;
-      } else {
-        return DATE_MODULE_TEMPLATE;
-      }
-    case 'Location':
-      return TEXT_MODULE_TEMPLATE;
-    case 'Link':
-      return IMAGE_MODULE_TEMPLATE;
-    case 'Array':
-      return TEXT_MODULE_TEMPLATE;
-    default:
-      return TEXT_MODULE_TEMPLATE;
-  }
+  return { fieldsFile: JSON.stringify(fieldsFile), moduleFile };
 };
