@@ -139,8 +139,7 @@ const ConfigScreen = () => {
         <Heading marginBottom="spacingS">Set up Hubspot</Heading>
         <Paragraph>
           Seamlessly sync Contentful entry content to email campaigns in Hubspot. Map entry fields
-          to custom email modules in Hubspot to continuously and automatically keep content
-          consistent at scale.
+          to custom email modules in Hubspot to automatically keep content consistent at scale.
         </Paragraph>
         <Box marginTop="spacingXl" marginBottom="spacingXs">
           <Subheading marginBottom="spacingXs">Configure access</Subheading>
@@ -207,8 +206,8 @@ const ConfigScreen = () => {
         <Splitter marginTop="spacing2Xs" marginBottom="spacing2Xl" />
         <Subheading marginBottom="spacing2Xs">Assign content types</Subheading>
         <Paragraph marginBottom="spacingM">
-          The Hubspot integration will be enabled for content types you assign, and the sidebar
-          widget will show up on these entry pages.
+          The Hubspot integration will only be enabled for the content types you assign. The sidebar
+          widget will be displayed on these entry pages.
         </Paragraph>
         <Text fontWeight="fontWeightDemiBold">Content types</Text>
         <ContentTypeMultiSelect
