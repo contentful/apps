@@ -1,7 +1,7 @@
 import { cleanup, render, screen, act } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import { mockCma, mockSdk } from '../mocks';
-import ConfigScreen from '../../src/locations/ConfigScreen';
+import ConfigScreen, { EMPTY_MESSAGE } from '../../src/locations/ConfigScreen';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -90,7 +90,7 @@ describe('Hubspot Config Screen ', () => {
         await saveAppInstallation();
       });
 
-      expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing');
+      expect(mockSdk.notifier.error).toHaveBeenCalledWith(EMPTY_MESSAGE);
     });
 
     it('renders the external link with icon', async () => {

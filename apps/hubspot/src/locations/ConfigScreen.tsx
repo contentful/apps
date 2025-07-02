@@ -29,6 +29,8 @@ import {
 import { createClient } from 'contentful-management';
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 
+export const EMPTY_MESSAGE = 'Some fields are missing';
+
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -60,18 +62,16 @@ const ConfigScreen = () => {
   }
 
   const validateAccessToken = async () => {
-    const emptyMessage = 'Some fields are missing';
-
     setHubspotTokenError(null);
 
     const hubspotTokenHasValue = checkIfHasValue(
       parameters.hubspotAccessToken,
       setHubspotTokenError,
-      emptyMessage
+      EMPTY_MESSAGE
     );
 
     if (!hubspotTokenHasValue) {
-      sdk.notifier.error(emptyMessage);
+      sdk.notifier.error(EMPTY_MESSAGE);
       return false;
     }
 
