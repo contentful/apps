@@ -1,25 +1,15 @@
 import { useCallback, useState, useEffect } from 'react';
-import { ConfigAppSDK, ContentType } from '@contentful/app-sdk';
-import {
-  Heading,
-  Form,
-  Paragraph,
-  Flex,
-  FormControl,
-  HelpText,
-  Box,
-} from '@contentful/f36-components';
+import { ConfigAppSDK } from '@contentful/app-sdk';
+import { Heading, Paragraph, Flex, FormControl, Box, TextLink } from '@contentful/f36-components';
 import { css } from 'emotion';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 import ContentfulApiKeyInput, {
   validateContentfulApiKey,
 } from '../components/ContentfulApiKeyInput';
-import { useCMA } from '@contentful/react-apps-toolkit';
 
-export interface AppInstallationParameters {
-  accessToken: string;
-}
+import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { AppInstallationParameters, ContentType } from '../utils';
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({
@@ -27,7 +17,6 @@ const ConfigScreen = () => {
   });
   const [contentfulApiKeyIsValid, setContentfulApiKeyIsValid] = useState(true);
   const sdk = useSDK<ConfigAppSDK>();
-  const cma = useCMA();
   const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
 
   const onConfigure = useCallback(async () => {
@@ -73,58 +62,80 @@ const ConfigScreen = () => {
     })();
   }, [sdk]);
 
+  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setParameters((prev) => ({ ...prev, accessToken: e.target.value }));
+  };
+
   return (
     <Flex
       justifyContent="center"
       alignItems="flex-start"
-      style={{ minHeight: '100vh', background: 'transparent' }}>
-      <Box margin="spacingL">
-        <Heading as="h2" marginBottom="spacingM">
+      style={{ minHeight: '724px', minWidth: '852px' }}>
+      <Box margin="spacing2Xl">
+        <Heading as="h2" marginBottom="spacingS">
           Set up Iterable
         </Heading>
-        <Paragraph marginBottom="spacingL">
+        <Paragraph marginBottom="spacingXl">
           Sync content directly from Contentful to Iterable, reducing manual work, ensuring brand
           consistency, and accelerating campaign creation.
         </Paragraph>
-
-        {/* Configure access section */}
         <Box marginBottom="spacing2Xl">
+          <Box marginBottom="spacingL">
+            <Heading as="h3" marginBottom="spacingXs">
+              Configure access
+            </Heading>
+            <Paragraph marginBottom="spacing2Xs">
+              Input the Contentful Delivery API - access token that Iterable will use to request
+              your content via API at send time.
+            </Paragraph>
+            <Box marginBottom="spacingM">
+              <TextLink
+                href={`https://app.contentful.com/spaces/${sdk.ids.space}/api/keys`}
+                target="_blank"
+                rel="noopener noreferrer"
+                alignIcon="end"
+                icon={<ExternalLinkIcon />}>
+                Manage API keys
+              </TextLink>
+            </Box>
+          </Box>
           <ContentfulApiKeyInput
             value={parameters.accessToken}
-            onChange={(e) => setParameters({ ...parameters, accessToken: e.target.value })}
+            onChange={handleApiKeyChange}
             spaceId={sdk.ids.space}
             isInvalid={!contentfulApiKeyIsValid}
             dataTestId="contentfulApiKey"
           />
         </Box>
-
-        {/* Assign content types section */}
         <Box marginBottom="spacing2Xl">
           <Heading as="h3" marginBottom="spacingXs">
             Assign content types
           </Heading>
-          <Paragraph marginBottom="spacingS">
+          <Paragraph marginBottom="spacingL">
             The Iterable integration will only be enabled for the content types you assign. The
             sidebar widget will be displayed on these entry pages.
           </Paragraph>
-          <FormControl id="contentTypes" marginBottom="spacingM">
+          <FormControl id="contentTypes">
             <FormControl.Label>Content types</FormControl.Label>
             <ContentTypeMultiSelect
               selectedContentTypes={selectedContentTypes}
               setSelectedContentTypes={setSelectedContentTypes}
               sdk={sdk}
-              cma={cma}
+              cma={sdk.cma}
             />
-            <HelpText>Select one or more</HelpText>
           </FormControl>
         </Box>
-
-        {/* Getting started section */}
         <Box>
           <Heading as="h3" marginBottom="spacingXs">
             Getting started
           </Heading>
-          <Paragraph>Add copy here</Paragraph>
+          <Paragraph>
+            Learn more about how to connect Contentful with Iterable and configure the Iterable app{' '}
+            <TextLink href="" target="_blank" rel="noopener noreferrer">
+              here
+            </TextLink>
+            .
+          </Paragraph>
         </Box>
       </Box>
     </Flex>
