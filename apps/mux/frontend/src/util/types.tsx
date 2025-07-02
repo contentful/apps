@@ -1,5 +1,6 @@
 import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { ModalData } from '../components/AssetConfiguration/MuxAssetConfigurationModal';
+import ApiClient from './apiClient';
 
 export interface AppProps {
   sdk: FieldExtensionSDK;
@@ -153,11 +154,11 @@ export interface CaptionTrack extends BaseTrack {
 export type Track = AudioTrack | CaptionTrack;
 
 export interface AddByURLConfig {
-  apiClient: any;
-  sdk: any;
+  apiClient: ApiClient;
+  sdk: FieldExtensionSDK;
   remoteURL: string;
   options: ModalData;
-  responseCheck: (res: any) => boolean | Promise<boolean>;
+  responseCheck: (res: Response) => boolean | Promise<boolean>;
   setAssetError: (msg: string) => void;
   pollForAssetDetails: () => Promise<void>;
 }
@@ -173,4 +174,9 @@ export interface RenditionActionsProps {
   onDeleteRendition: (id: string) => void;
   onUndoDeleteRendition: (id: string) => void;
   isRenditionPendingDelete: (id: string) => boolean;
+}
+
+export interface ResyncParams {
+  silent?: boolean;
+  skipPlayerResync?: boolean;
 }

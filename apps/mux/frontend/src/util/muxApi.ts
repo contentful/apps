@@ -1,4 +1,6 @@
+import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { ModalData } from '../components/AssetConfiguration/MuxAssetConfigurationModal';
+import ApiClient from './apiClient';
 import { InstallationParams, ResolutionType, AddByURLConfig } from './types';
 
 export interface AssetSettings {
@@ -160,10 +162,10 @@ export async function addByURL({
 }
 
 export async function getUploadUrl(
-  apiClient: any,
-  sdk: any,
+  apiClient: ApiClient,
+  sdk: FieldExtensionSDK,
   options: ModalData,
-  responseCheck: (res: any) => boolean | Promise<boolean>
+  responseCheck: (res: Response) => boolean | Promise<boolean>
 ) {
   const { muxEnableAudioNormalize } = sdk.parameters.installation as InstallationParams;
   const settings = buildAssetSettings(options);
@@ -192,22 +194,26 @@ export async function getUploadUrl(
 }
 
 export async function deleteStaticRendition(
-  apiClient: any,
+  apiClient: ApiClient,
   assetId: string,
   staticRenditionId: string
 ) {
   return await apiClient.del(`/video/v1/assets/${assetId}/static-renditions/${staticRenditionId}`);
 }
 
-export async function createStaticRendition(apiClient: any, assetId: string, type: ResolutionType) {
+export async function createStaticRendition(
+  apiClient: ApiClient,
+  assetId: string,
+  type: ResolutionType
+) {
   return await apiClient.post(
     `/video/v1/assets/${assetId}/static-renditions`,
     JSON.stringify({ resolution: type })
   );
 }
 
-export async function updateAsset(apiClient: any, assetId: string, settings: AssetSettings) {
-  const requestBody: any = {
+export async function updateAsset(apiClient: ApiClient, assetId: string, settings: AssetSettings) {
+  const requestBody: Partial<AssetSettings> = {
     meta: settings.meta || {
       title: '',
       creator_id: '',
@@ -220,7 +226,7 @@ export async function updateAsset(apiClient: any, assetId: string, settings: Ass
 }
 
 export async function uploadTrack(
-  apiClient: any,
+  apiClient: ApiClient,
   assetId: string,
   options: {
     url: string;
@@ -244,12 +250,12 @@ export async function uploadTrack(
   return await result.json();
 }
 
-export async function deleteTrack(apiClient: any, assetId: string, trackId: string) {
+export async function deleteTrack(apiClient: ApiClient, assetId: string, trackId: string) {
   return await apiClient.del(`/video/v1/assets/${assetId}/tracks/${trackId}`);
 }
 
 export async function generateAutoCaptions(
-  apiClient: any,
+  apiClient: ApiClient,
   assetId: string,
   trackId: string,
   options: {

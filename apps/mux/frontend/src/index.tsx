@@ -36,7 +36,7 @@ import {
   AppProps,
   ResolutionType,
   Track,
-  PendingAction,
+  ResyncParams,
 } from './util/types';
 
 import './index.css';
@@ -63,17 +63,17 @@ interface SignedTokens {
 }
 
 // Delete undefined keys and sort keys recursively
-function normalizeForDiff(obj: any): any {
+function normalizeForDiff<T>(obj: T): T {
   if (Array.isArray(obj)) {
-    return obj.map(normalizeForDiff);
+    return obj.map(normalizeForDiff) as unknown as T;
   } else if (obj && typeof obj === 'object') {
     return Object.keys(obj)
-      .filter((k) => obj[k] !== undefined)
+      .filter((k) => (obj as Record<string, unknown>)[k] !== undefined)
       .sort()
       .reduce((acc, k) => {
-        acc[k] = normalizeForDiff(obj[k]);
+        (acc as Record<string, unknown>)[k] = normalizeForDiff((obj as Record<string, unknown>)[k]);
         return acc;
-      }, {} as any);
+      }, {} as Record<string, unknown>) as T;
   }
   return obj;
 }
@@ -91,9 +91,9 @@ export class App extends React.Component<AppProps, AppState> {
   apiClient: ApiClient;
   cmaClient: PlainClientAPI;
   resolveRef = createRef<(value: string | null) => void>();
-  muxUploaderRef = createRef<any>();
+  muxUploaderRef = createRef<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
   fileInputRef = React.createRef<HTMLInputElement>();
-  muxPlayerRef = React.createRef<any>();
+  muxPlayerRef = React.createRef<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
 
   constructor(props: AppProps) {
     super(props);
@@ -249,7 +249,7 @@ export class App extends React.Component<AppProps, AppState> {
     }
   }
 
-  componentDidUpdate(prevProps: AppProps, prevState: AppState) {
+  componentDidUpdate() {
     if (this.state.value?.assetId && !this.state.initialResyncDone) {
       this.resync({ silent: true });
       this.setState({ initialResyncDone: true });
@@ -566,7 +566,7 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
-  resync = async (params?: any) => {
+  resync = async (params?: ResyncParams) => {
     await this.pollForAssetDetails();
 
     if (!params?.silent) {
@@ -1363,7 +1363,7 @@ export class App extends React.Component<AppProps, AppState> {
                         alignItems="center"
                         marginBottom="spacingM">
                         <Flex marginRight="spacingM">
-                          <Button id="resync" variant="secondary" onClick={this.resync}>
+                          <Button id="resync" variant="secondary" onClick={() => this.resync()}>
                             Resync
                           </Button>
                         </Flex>
