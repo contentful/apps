@@ -14,6 +14,7 @@ import {
   TextInput,
   TextLink,
 } from '@contentful/f36-components';
+import demoVideo from '../assets/hubspot.mp4';
 import { ChevronDownIcon, ChevronUpIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
@@ -155,8 +156,7 @@ const ConfigScreen = () => {
         <Heading marginBottom="spacingS">Set up Hubspot</Heading>
         <Paragraph>
           Seamlessly sync Contentful entry content to email campaigns in Hubspot. Map entry fields
-          to custom email modules in Hubspot to continuously and automatically keep content
-          consistent at scale.
+          to custom email modules in Hubspot to automatically keep content consistent at scale.
         </Paragraph>
         <Box marginTop="spacingXl" marginBottom="spacingXs">
           <Subheading marginBottom="spacingXs">Configure access</Subheading>
@@ -208,7 +208,7 @@ const ConfigScreen = () => {
                 </List.Item>
               ))}
             </List>
-            <Box marginTop="spacingS">
+            <Box marginTop="spacingS" marginBottom="spacingS">
               <TextLink
                 href={HUBSPOT_PRIVATE_APPS_URL}
                 target="_blank"
@@ -218,13 +218,16 @@ const ConfigScreen = () => {
                 Read about creating private apps in Hubspot
               </TextLink>
             </Box>
+            <video controls width="100%">
+              <source src={demoVideo} type="video/mp4" />
+            </video>
           </Collapse>
         </Box>
         <Splitter marginTop="spacing2Xs" marginBottom="spacing2Xl" />
         <Subheading marginBottom="spacing2Xs">Assign content types</Subheading>
         <Paragraph marginBottom="spacingM">
-          The Hubspot integration will be enabled for content types you assign, and the sidebar
-          widget will show up on these entry pages.
+          The Hubspot integration will only be enabled for the content types you assign. The sidebar
+          widget will be displayed on these entry pages.
         </Paragraph>
         <Text fontWeight="fontWeightDemiBold">Content types</Text>
         <ContentTypeMultiSelect

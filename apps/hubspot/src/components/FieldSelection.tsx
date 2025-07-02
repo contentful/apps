@@ -28,7 +28,7 @@ const FieldSelection = (props: FieldsSelectionProps) => {
     <>
       <Paragraph lineHeight="lineHeightCondensed">
         Select fields that you want to sync. Each field will map to a custom module that can be used
-        in Hubspot emails. If edits are made in Contentful, content will update automatically.
+        in Hubspot emails. Content is automatically updated if edits are made in Contentful.
       </Paragraph>
 
       <Box className={styles.box}>
