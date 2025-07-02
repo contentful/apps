@@ -31,7 +31,7 @@ export async function createConfig(cma: PlainClientAPI) {
 export async function createContentType(cma: PlainClientAPI) {
   const contentTypeBody = {
     name: CONFIG_CONTENT_TYPE_ID,
-    description: 'Content Type used by the Braze app. Do not delete or modify manually.',
+    description: 'Content Type used by the Hubspot app. Do not delete or modify manually.',
     fields: [
       {
         id: CONFIG_FIELD_ID,
