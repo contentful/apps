@@ -8,6 +8,7 @@ import {
   Heading,
   IconButton,
   List,
+  Note,
   Paragraph,
   Subheading,
   Text,
@@ -153,11 +154,17 @@ const ConfigScreen = () => {
     <Flex justifyContent="center" alignItems="center">
       <Box className={styles.body}>
         <Heading marginBottom="spacingS">Set up Hubspot</Heading>
-        <Paragraph>
+        <Paragraph marginBottom="spacing2Xs">
           Seamlessly sync Contentful entry content to email campaigns in Hubspot. Map entry fields
           to custom email modules in Hubspot to continuously and automatically keep content
           consistent at scale.
         </Paragraph>
+        <Box marginTop="spacingS" marginBottom="spacing2Xl">
+          <Note variant="neutral">
+            The Hubspot app will create a content type labeled "hubspotConfig". Do not delete or
+            modify manually.
+          </Note>
+        </Box>
         <Box marginTop="spacingXl" marginBottom="spacingXs">
           <Subheading marginBottom="spacingXs">Configure access</Subheading>
           <Paragraph marginBottom="spacingL">
