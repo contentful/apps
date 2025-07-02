@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Stack, Pill } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
-import { CONFIG_CONTENT_TYPE_ID, ContentType } from '../utils';
+import { ContentType } from '../utils.ts';
 import { ContentTypeProps, PlainClientAPI } from 'contentful-management';
 import { ConfigAppSDK, CMAClient } from '@contentful/app-sdk';
 
@@ -10,6 +10,7 @@ interface ContentTypeMultiSelectProps {
   setSelectedContentTypes: (contentTypes: ContentType[]) => void;
   sdk: ConfigAppSDK;
   cma: PlainClientAPI | CMAClient;
+  excludedContentTypesIds?: string[];
 }
 
 const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
@@ -17,6 +18,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   setSelectedContentTypes,
   sdk,
   cma,
+  excludedContentTypesIds = [],
 }) => {
   const [availableContentTypes, setAvailableContentTypes] = useState<ContentType[]>([]);
   const getPlaceholderText = () => {
@@ -62,7 +64,6 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
     (async () => {
       const currentState = await sdk.app.getCurrentState();
       const currentContentTypesIds = Object.keys(currentState?.EditorInterface || {});
-      const excludedContentTypesIds = [CONFIG_CONTENT_TYPE_ID];
 
       const allContentTypes = await fetchAllContentTypes();
 
@@ -121,6 +122,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
               {selectedContentTypes.map((contentType, index) => (
                 <Pill
                   key={index}
+                  testId={`pill-${contentType.name}`}
                   label={contentType.name}
                   isDraggable={false}
                   onClose={() =>
