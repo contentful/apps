@@ -115,7 +115,7 @@ const ConfigScreen = () => {
       await createConfig(cma);
     } catch (e) {
       console.error(e);
-      sdk.notifier.error('Error creating config entry');
+      sdk.notifier.error('Error creating configuration entry');
       return false;
     }
 
