@@ -131,7 +131,13 @@ const ConfigScreen = () => {
           </Heading>
           <Paragraph>
             Learn more about how to connect Contentful with Iterable and configure the Iterable app{' '}
-            <TextLink href="" target="_blank" rel="noopener noreferrer">
+            {/* TODO: Add link to documentation */}
+            <TextLink
+              href=""
+              target="_blank"
+              rel="noopener noreferrer"
+              alignIcon="end"
+              icon={<ExternalLinkIcon />}>
               here
             </TextLink>
             .
