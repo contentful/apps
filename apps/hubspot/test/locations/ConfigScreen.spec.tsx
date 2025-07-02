@@ -1,7 +1,7 @@
 import { cleanup, render, screen, act } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import { mockCma, mockSdk } from '../mocks';
-import ConfigScreen from '../../src/locations/ConfigScreen';
+import ConfigScreen, { EMPTY_MESSAGE } from '../../src/locations/ConfigScreen';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -13,6 +13,25 @@ vi.mock('contentful-management', () => ({
 
 async function saveAppInstallation() {
   return await mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
+}
+
+const selectContentTypes = async (user: UserEvent, contentTypeName: string | RegExp) => {
+  const autocomplete = await screen.findByText('Select one or more');
+  await user.click(autocomplete);
+  const checkbox = await screen.findByRole('checkbox', { name: contentTypeName });
+  await user.click(checkbox);
+};
+
+const fillInHubspotAccessToken = async (user: UserEvent, value: string) => {
+  const hubspotAccessTokenInput = await screen.findByPlaceholderText('Enter your access token');
+  await user.clear(hubspotAccessTokenInput);
+  await user.type(hubspotAccessTokenInput, value);
+};
+
+function mockSuccessTokenValidation() {
+  mockCma.appActionCall.createWithResponse.mockResolvedValue({
+    response: { body: JSON.stringify({ valid: true, hasContentScope: true, error: null }) },
+  });
 }
 
 describe('Hubspot Config Screen ', () => {
@@ -63,28 +82,24 @@ describe('Hubspot Config Screen ', () => {
 
     it('shows a toast error if the hubspot api key is not set', async () => {
       render(<ConfigScreen />);
-
       expect(await screen.findByPlaceholderText(/Enter your access token/i)).toBeTruthy();
 
       const input = screen.getByPlaceholderText(/Enter your access token/i);
       expect(input).toHaveValue('');
-
       await act(async () => {
         await saveAppInstallation();
       });
 
-      expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
+      expect(mockSdk.notifier.error).toHaveBeenCalledWith(EMPTY_MESSAGE);
     });
 
     it('renders the external link with icon', async () => {
       render(<ConfigScreen />);
-
       expect(await screen.findByLabelText('Expand instructions')).toBeTruthy();
-
       const user = userEvent.setup();
+
       const expandButton = screen.getByLabelText('Expand instructions');
       await user.click(expandButton);
-
       const link = await screen.findByRole('link', {
         name: /Read about creating private apps in Hubspot/i,
       });
@@ -102,29 +117,15 @@ describe('Hubspot Config Screen ', () => {
   });
 
   describe('Content type installation', () => {
-    const selectContentTypes = async (user: UserEvent, contentTypeName: string | RegExp) => {
-      const autocomplete = await screen.findByText('Select one or more');
-      await user.click(autocomplete);
-      const checkbox = await screen.findByRole('checkbox', { name: contentTypeName });
-      await user.click(checkbox);
-    };
-
-    const fillInHubspotAccessToken = async (user: UserEvent) => {
-      const hubspotAccessTokenInput = await screen.findByPlaceholderText('Enter your access token');
-      await user.type(hubspotAccessTokenInput, 'valid-api-key-123');
-    };
-
     it('adds and removes app from sidebar for each content type', async () => {
       render(<ConfigScreen />);
-
       expect(await screen.findByText('Select one or more')).toBeTruthy();
-
       const user = userEvent.setup();
       // Always mock the token validation as valid for this test
       mockCma.appActionCall.createWithResponse.mockResolvedValue({
         response: { body: JSON.stringify({ valid: true, hasContentScope: true }) },
       });
-      await fillInHubspotAccessToken(user);
+      await fillInHubspotAccessToken(user, 'valid-token');
 
       // adding the app for the content type
       await selectContentTypes(user, 'Blog Post');
@@ -152,15 +153,8 @@ describe('Hubspot Config Screen ', () => {
   });
 
   describe('HubSpot access token validation', () => {
-    const fillInHubspotAccessToken = async (user: UserEvent, value: string) => {
-      const hubspotAccessTokenInput = await screen.findByPlaceholderText('Enter your access token');
-      await user.clear(hubspotAccessTokenInput);
-      await user.type(hubspotAccessTokenInput, value);
-    };
-
     it('shows the input as required', async () => {
       render(<ConfigScreen />);
-
       expect(await screen.findByPlaceholderText(/Enter your access token/i)).toBeTruthy();
 
       const input = screen.getByPlaceholderText(/Enter your access token/i);
@@ -169,9 +163,7 @@ describe('Hubspot Config Screen ', () => {
 
     it('blocks saving and shows error if the access token is invalid', async () => {
       render(<ConfigScreen />);
-
       expect(await screen.findByPlaceholderText(/Enter your access token/i)).toBeTruthy();
-
       const user = userEvent.setup();
       mockCma.appActionCall.createWithResponse.mockResolvedValueOnce({
         response: {
@@ -194,9 +186,7 @@ describe('Hubspot Config Screen ', () => {
 
     it('blocks saving and shows error if the access token is missing the content scope', async () => {
       render(<ConfigScreen />);
-
       expect(await screen.findByPlaceholderText(/Enter your access token/i)).toBeTruthy();
-
       const user = userEvent.setup();
       mockCma.appActionCall.createWithResponse.mockResolvedValueOnce({
         response: {
@@ -221,13 +211,9 @@ describe('Hubspot Config Screen ', () => {
 
     it('allows saving if the access token is valid and has content scope', async () => {
       render(<ConfigScreen />);
-
       expect(await screen.findByPlaceholderText(/Enter your access token/i)).toBeTruthy();
-
       const user = userEvent.setup();
-      mockCma.appActionCall.createWithResponse.mockResolvedValueOnce({
-        response: { body: JSON.stringify({ valid: true, hasContentScope: true }) },
-      });
+      mockSuccessTokenValidation();
 
       await fillInHubspotAccessToken(user, 'valid-token');
       const result = await act(async () => {
@@ -240,6 +226,42 @@ describe('Hubspot Config Screen ', () => {
       expect(mockSdk.notifier.error).not.toHaveBeenCalledWith(
         'The HubSpot token is missing the required "content" scope.'
       );
+    });
+  });
+
+  describe('createContentType', () => {
+    it('creates content type and entry if they do not exist', async () => {
+      render(<ConfigScreen />);
+      expect(await screen.findByPlaceholderText(/Enter your access token/i)).toBeTruthy();
+      mockSuccessTokenValidation();
+      const user = userEvent.setup();
+      await fillInHubspotAccessToken(user, 'valid-token');
+
+      await saveAppInstallation();
+
+      expect(mockCma.contentType.createWithId).toHaveBeenCalled();
+      expect(mockCma.contentType.publish).toHaveBeenCalled();
+      expect(mockCma.entry.createWithId).toHaveBeenCalled();
+    });
+
+    it('does not create content type if it already exists', async () => {
+      render(<ConfigScreen />);
+      expect(await screen.findByPlaceholderText(/Enter your access token/i)).toBeTruthy();
+      mockSuccessTokenValidation();
+      // Mock content type and entry creation to throw VersionMismatch error
+      const versionMismatchError = { code: 'VersionMismatch' };
+      mockCma.contentType.createWithId.mockResolvedValue(versionMismatchError);
+      mockCma.contentType.publish.mockResolvedValue(versionMismatchError);
+      mockCma.entry.createWithId.mockResolvedValue(versionMismatchError);
+      const user = userEvent.setup();
+      await fillInHubspotAccessToken(user, 'valid-token');
+
+      await saveAppInstallation();
+
+      expect(mockCma.contentType.createWithId).toHaveBeenCalled();
+      expect(mockCma.contentType.publish).toHaveBeenCalled();
+      expect(mockCma.entry.createWithId).toHaveBeenCalled();
+      expect(mockSdk.notifier.error).not.toHaveBeenCalled();
     });
   });
 });

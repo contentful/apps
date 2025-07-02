@@ -8,6 +8,7 @@ const mockCma = {
     getMany: vi.fn(),
   },
   entry: {
+    get: vi.fn(),
     createWithId: vi.fn(),
   },
   editorInterface: {
