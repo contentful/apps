@@ -68,6 +68,25 @@ export const MetadataConfiguration: FC<MetadataConfigurationProps> = ({
     };
   }, [sdk.entry.fields]);
 
+  useEffect(() => {
+    const entryId = sdk.entry.getSys().id;
+    const fieldId = sdk.field.id;
+    const externalId = `${entryId}:${fieldId}`;
+    if (standardMetadata.externalId !== externalId) {
+      setStandardMetadata((prev) => ({
+        ...prev,
+        externalId,
+      }));
+    }
+  }, [sdk.entry, sdk.field]);
+
+  useEffect(() => {
+    onMetadataChange({
+      ...metadataConfig,
+      standardMetadata,
+    });
+  }, [standardMetadata]);
+
   const validateField = (value: string, maxLength: number): string | undefined => {
     if (value.length > maxLength) {
       return `Maximum length is ${maxLength} code points`;
@@ -182,7 +201,7 @@ export const MetadataConfiguration: FC<MetadataConfigurationProps> = ({
         <FormControl.Label>External ID</FormControl.Label>
         <TextInput
           value={standardMetadata.externalId || ''}
-          onChange={(e) => handleStandardMetadataChange('externalId', e.target.value)}
+          isDisabled
           placeholder="Identifier to link the video to your own data"
         />
         <FormControl.HelpText>

@@ -1,6 +1,5 @@
 import { FC } from 'react';
 import Mp4RenditionsList from '../Mp4RenditionsList';
-import { Box } from '@contentful/f36-components';
 import {
   MuxContentfulObject,
   StaticRendition,
@@ -46,7 +45,7 @@ const Mp4RenditionsPanel: FC<Mp4RenditionsPanelProps> = ({
   const audioOnly = mapRendition(files, 'audio-only', baseStaticRenditionURL);
 
   return (
-    <Box>
+    <>
       <Mp4RenditionsList
         highest={highest}
         audioOnly={audioOnly}
@@ -55,7 +54,7 @@ const Mp4RenditionsPanel: FC<Mp4RenditionsPanelProps> = ({
         onUndoDeleteRendition={onUndoDeleteRendition}
         isRenditionPendingDelete={isRenditionPendingDelete}
       />
-    </Box>
+    </>
   );
 };
 

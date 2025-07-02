@@ -1,10 +1,11 @@
 import { FC, useEffect } from 'react';
 import { FormControl, Radio, TextLink } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { PolicyType } from '../../util/types';
 
 interface PlaybackPolicySelectorProps {
-  selectedPolicies: string[];
-  onPoliciesChange: (policies: string[]) => void;
+  selectedPolicies: PolicyType[];
+  onPoliciesChange: (policies: PolicyType[]) => void;
   enableSignedUrls: boolean;
   onValidationChange?: (isValid: boolean) => void;
 }
@@ -19,7 +20,7 @@ export const PlaybackPolicySelector: FC<PlaybackPolicySelectorProps> = ({
   onValidationChange,
 }) => {
   const handlePolicyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
+    const value = event.target.value as PolicyType;
     onPoliciesChange([value]);
   };
 

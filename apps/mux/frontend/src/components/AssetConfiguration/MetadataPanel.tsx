@@ -171,8 +171,8 @@ export const MetadataPanel: FC<MetadataPanelProps> = ({ asset, onSubmit, sdk }) 
         <FormControl.Label>External ID</FormControl.Label>
         <TextInput
           value={standardMetadata.externalId}
-          onChange={(e) => setStandardMetadata({ ...standardMetadata, externalId: e.target.value })}
           placeholder="Identifier to link the video to your own data"
+          isDisabled={true}
         />
         <FormControl.HelpText>
           An identifier to link the video to your own data.

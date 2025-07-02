@@ -39,11 +39,13 @@ export interface AppState {
 
 export type ResolutionType = 'highest' | 'audio-only';
 
+export type PolicyType = 'signed' | 'public';
+
 export interface PendingAction {
   type: 'playback' | 'asset' | 'caption' | 'staticRendition';
   id?: string;
   data?: {
-    policy?: 'signed' | 'public';
+    policy?: PolicyType;
     assetId?: string;
   };
 }
