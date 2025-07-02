@@ -1,4 +1,3 @@
-import { FieldType } from '@contentful/app-sdk';
 import { PlainClientAPI } from 'contentful-management';
 
 export const CONFIG_CONTENT_TYPE_ID = 'hubspotConfig';
@@ -22,21 +21,6 @@ export interface ContentType {
 
 export type AppInstallationParameters = {
   hubspotAccessToken: string;
-};
-
-export type SdkField = {
-  type: FieldType;
-  id: string;
-  uniqueId: string;
-  name: string;
-  locale?: string;
-  linkType?: string; // FieldLinkType
-  items?: {
-    type: string;
-    linkType: string;
-  }; // Items
-  supported: boolean;
-  value: any;
 };
 
 export async function createConfig(cma: PlainClientAPI) {
