@@ -13,14 +13,14 @@ import { AppInstallationParameters, ContentType } from '../utils';
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({
-    accessToken: '',
+    contentfulApiKey: '',
   });
   const [contentfulApiKeyIsValid, setContentfulApiKeyIsValid] = useState(true);
   const sdk = useSDK<ConfigAppSDK>();
   const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
 
   const onConfigure = useCallback(async () => {
-    const isContentfulKeyValid = await validateContentfulApiKey(parameters.accessToken, sdk);
+    const isContentfulKeyValid = await validateContentfulApiKey(parameters.contentfulApiKey, sdk);
     setContentfulApiKeyIsValid(isContentfulKeyValid);
 
     if (!isContentfulKeyValid) {
@@ -63,7 +63,7 @@ const ConfigScreen = () => {
   }, [sdk]);
 
   const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setParameters((prev) => ({ ...prev, accessToken: e.target.value }));
+    setParameters((prev) => ({ ...prev, contentfulApiKey: e.target.value }));
   };
 
   return (
@@ -100,7 +100,7 @@ const ConfigScreen = () => {
             </Box>
           </Box>
           <ContentfulApiKeyInput
-            value={parameters.accessToken}
+            value={parameters.contentfulApiKey}
             onChange={handleApiKeyChange}
             spaceId={sdk.ids.space}
             isInvalid={!contentfulApiKeyIsValid}

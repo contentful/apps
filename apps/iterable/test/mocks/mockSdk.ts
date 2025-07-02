@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import { mockCma } from './mockCma';
 
 const mockSdk: any = {
   app: {
@@ -10,7 +11,10 @@ const mockSdk: any = {
   ids: {
     app: 'test-app',
   },
-  cma: undefined,
+  cma: mockCma,
+  hostnames: {
+    delivery: 'test-delivery.contentful.com',
+  },
 };
 
 export { mockSdk };

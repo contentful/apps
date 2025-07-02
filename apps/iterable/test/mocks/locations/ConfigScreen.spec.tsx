@@ -1,13 +1,17 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest';
-import ConfigScreen from './ConfigScreen';
-import { mockSdk, mockCma } from '../../test/mocks';
+import ConfigScreen from '../../../src/locations/ConfigScreen';
+import { mockSdk, mockCma } from '..';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
+
+async function saveAppInstallation() {
+  return await mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
+}
 
 describe('ConfigScreen', () => {
   beforeEach(() => {
@@ -79,6 +83,22 @@ describe('ConfigScreen', () => {
     const autocomplete = await screen.findByPlaceholderText('Search content types');
     await userEvent.click(autocomplete);
     expect(screen.queryByText('No matches found')).toBeInTheDocument();
+  });
+
+  it('shows a toast error if the contentful api key is not set or invalid', async () => {
+    const user = userEvent.setup();
+    render(<ConfigScreen />);
+    const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
+
+    await user.type(contentfulApiKeyInput, 'invalid-api-key-123');
+
+    vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
+      return { ok: false, status: 401 };
+    });
+
+    await saveAppInstallation();
+
+    expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
   });
 
   it('all required fields are marked as required', () => {

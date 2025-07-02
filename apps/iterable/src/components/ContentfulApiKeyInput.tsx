@@ -1,15 +1,5 @@
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import {
-  Box,
-  Form,
-  FormControl,
-  TextInput,
-  Text,
-  Heading,
-  HelpText,
-  TextLink,
-} from '@contentful/f36-components';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { FormControl, TextInput } from '@contentful/f36-components';
 
 export async function validateContentfulApiKey(apiKey: string, sdk: ConfigAppSDK) {
   if (!apiKey) {

@@ -4,5 +4,5 @@ export interface ContentType {
 }
 
 export interface AppInstallationParameters {
-  accessToken: string;
+  contentfulApiKey: string;
 }
