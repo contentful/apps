@@ -5,7 +5,6 @@ import {
   Heading,
   Text,
   Form,
-  Image,
   FormControl,
   TextInput,
   Paragraph,
@@ -15,7 +14,7 @@ import {
   TextLink,
   List,
 } from '@contentful/f36-components';
-import hubspotGif from '../assets/hubspot.gif';
+import demoVideo from '../assets/hubspot.mp4';
 import { ChevronDownIcon, ChevronUpIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
@@ -203,12 +202,9 @@ const ConfigScreen = () => {
                 Read about creating private apps in Hubspot
               </TextLink>
             </Box>
-            <Image
-              alt="GIF showing how to get an access token from Hubspot"
-              height="100%"
-              width="100%"
-              src={hubspotGif}
-            />
+            <video controls width="100%">
+              <source src={demoVideo} type="video/mp4" />
+            </video>
           </Collapse>
         </Box>
         <Splitter marginTop="spacing2Xs" marginBottom="spacing2Xl" />
