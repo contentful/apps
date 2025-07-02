@@ -63,7 +63,7 @@ const ConfigScreen = () => {
   }, [sdk]);
 
   const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setParameters((prev) => ({ ...prev, contentfulApiKey: e.target.value }));
+    setParameters({ ...parameters, contentfulApiKey: e.target.value });
   };
 
   return (
@@ -100,7 +100,7 @@ const ConfigScreen = () => {
             </Box>
           </Box>
           <ContentfulApiKeyInput
-            value={parameters.contentfulApiKey}
+            value={parameters.contentfulApiKey || ''}
             onChange={handleApiKeyChange}
             spaceId={sdk.ids.space}
             isInvalid={!contentfulApiKeyIsValid}

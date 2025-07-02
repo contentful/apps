@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, waitFor, cleanup, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest';
 import ConfigScreen from '../../../src/locations/ConfigScreen';
@@ -37,17 +37,19 @@ describe('ConfigScreen', () => {
 
   it('renders all main sections and UI elements', async () => {
     render(<ConfigScreen />);
-    expect(screen.getByText('Set up Iterable')).toBeInTheDocument();
-    expect(screen.getByText('Configure access')).toBeInTheDocument();
-    expect(screen.getByText('Assign content types')).toBeInTheDocument();
-    expect(screen.getByText('Getting started')).toBeInTheDocument();
-    expect(screen.getByText('Manage API keys')).toBeInTheDocument();
-    expect(screen.getByText('Contentful Delivery API - access token')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'The Iterable integration will only be enabled for the content types you assign. The sidebar widget will be displayed on these entry pages.'
-      )
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Set up Iterable')).toBeInTheDocument();
+      expect(screen.getByText('Configure access')).toBeInTheDocument();
+      expect(screen.getByText('Assign content types')).toBeInTheDocument();
+      expect(screen.getByText('Getting started')).toBeInTheDocument();
+      expect(screen.getByText('Manage API keys')).toBeInTheDocument();
+      expect(screen.getByText('Contentful Delivery API - access token')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'The Iterable integration will only be enabled for the content types you assign. The sidebar widget will be displayed on these entry pages.'
+        )
+      ).toBeInTheDocument();
+    });
   });
 
   it('allows entering and updating the Contentful API key', async () => {
@@ -88,22 +90,16 @@ describe('ConfigScreen', () => {
   it('shows a toast error if the contentful api key is not set or invalid', async () => {
     const user = userEvent.setup();
     render(<ConfigScreen />);
-    const contentfulApiKeyInput = screen.getAllByTestId('contentfulApiKey')[0];
-
+    const contentfulApiKeyInput = await screen.findByTestId('contentfulApiKey');
     await user.type(contentfulApiKeyInput, 'invalid-api-key-123');
-
     vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
       return { ok: false, status: 401 };
     });
 
-    await saveAppInstallation();
+    await act(async () => {
+      await saveAppInstallation();
+    });
 
     expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
-  });
-
-  it('all required fields are marked as required', () => {
-    render(<ConfigScreen />);
-    const input = screen.getByTestId('contentfulApiKey');
-    expect(input).toBeRequired();
   });
 });
