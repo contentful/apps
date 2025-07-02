@@ -1,22 +1,89 @@
+import React from 'react';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest';
 import ConfigScreen from './ConfigScreen';
-import { render } from '@testing-library/react';
-import { mockCma, mockSdk } from '../../test/mocks';
-import { vi } from 'vitest';
+import { mockSdk, mockCma } from '../../test/mocks';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
-  useCMA: () => mockCma,
 }));
 
-describe('Config Screen component', () => {
-  it('Component text exists', async () => {
-    const { getByText } = render(<ConfigScreen />);
+describe('ConfigScreen', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockSdk.app.getParameters.mockResolvedValue({ accessToken: '' });
+    mockSdk.app.getCurrentState.mockResolvedValue({});
+    mockSdk.app.setReady.mockResolvedValue();
+    mockSdk.app.onConfigure.mockImplementation((cb: () => Promise<any>) => {
+      // Simulate Contentful's onConfigure callback registration
+      mockSdk._onConfigure = cb;
+    });
+    mockSdk.ids.space = 'test-space';
+    mockSdk.notifier = { error: vi.fn(), success: vi.fn() };
+    mockSdk.cma = mockCma;
+    mockCma.contentType = {
+      getMany: vi.fn().mockResolvedValue({ items: [] }),
+    };
+  });
 
-    // simulate the user clicking the install button
-    await mockSdk.app.onConfigure.mock.calls[0][0]();
+  afterEach(() => {
+    cleanup();
+  });
 
+  it('renders all main sections and UI elements', async () => {
+    render(<ConfigScreen />);
+    expect(screen.getByText('Set up Iterable')).toBeInTheDocument();
+    expect(screen.getByText('Configure access')).toBeInTheDocument();
+    expect(screen.getByText('Assign content types')).toBeInTheDocument();
+    expect(screen.getByText('Getting started')).toBeInTheDocument();
+    expect(screen.getByText('Manage API keys')).toBeInTheDocument();
+    expect(screen.getByText('Contentful Delivery API - access token')).toBeInTheDocument();
     expect(
-      getByText('Welcome to your contentful app. This is your config page.')
+      screen.getByText(
+        'The Iterable integration will only be enabled for the content types you assign. The sidebar widget will be displayed on these entry pages.'
+      )
     ).toBeInTheDocument();
+  });
+
+  it('allows entering and updating the Contentful API key', async () => {
+    render(<ConfigScreen />);
+    const input = screen.getByTestId('contentfulApiKey');
+    await userEvent.type(input, 'my-api-key');
+    expect(input).toHaveValue('my-api-key');
+  });
+
+  it('renders content type multi-select and allows selection', async () => {
+    mockCma.contentType.getMany.mockResolvedValue({
+      items: [
+        { sys: { id: 'blogPost' }, name: 'Blog Post' },
+        { sys: { id: 'article' }, name: 'Article' },
+      ],
+    });
+    render(<ConfigScreen />);
+    // Open the autocomplete
+    const autocomplete = await screen.findByPlaceholderText('Search content types');
+    await userEvent.click(autocomplete);
+    // Type to filter
+    await userEvent.type(autocomplete, 'Blog');
+    // Select the option
+    const option = await screen.findByText('Blog Post');
+    await userEvent.click(option);
+    // Pill should appear
+    expect(await screen.findByTestId('pill-Blog Post')).toBeInTheDocument();
+  });
+
+  it('handles empty state for content types', async () => {
+    mockCma.contentType.getMany.mockResolvedValue({ items: [] });
+    render(<ConfigScreen />);
+    const autocomplete = await screen.findByPlaceholderText('Search content types');
+    await userEvent.click(autocomplete);
+    expect(screen.queryByText('No matches found')).toBeInTheDocument();
+  });
+
+  it('all required fields are marked as required', () => {
+    render(<ConfigScreen />);
+    const input = screen.getByTestId('contentfulApiKey');
+    expect(input).toBeRequired();
   });
 });
