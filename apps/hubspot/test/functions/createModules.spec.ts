@@ -1,5 +1,5 @@
 import { handler } from '../../functions/createModules';
-import type { SdkField } from '../../src/utils/fieldsProcessing';
+import type { SelectedSdkField } from '../../src/utils/fieldsProcessing';
 import {
   META_JSON_TEMPLATE,
   TEXT_FIELD_TEMPLATE,
@@ -44,18 +44,18 @@ describe('createModules', () => {
     // Mock successful fetch responses
     const mockFetch = mockedFetch();
 
-    const mockField: SdkField = {
+    const mockField: SelectedSdkField = {
       type: 'Text',
       id: 'test-field-id',
       uniqueId: 'test-module',
       name: 'Test Field',
       supported: true,
       value: 'Hello World',
+      moduleName: 'Entry title - Test Field',
     };
 
     const mockEvent = {
       body: {
-        entryTitle: 'test-entry-title',
         fields: JSON.stringify([mockField]),
       },
     };
@@ -74,7 +74,7 @@ describe('createModules', () => {
     // Verify the first call (meta.json)
     expect(mockFetch).toHaveBeenNthCalledWith(
       1,
-      'https://api.hubapi.com/cms/v3/source-code/published/content/test-entry-title-test-module.module/meta.json',
+      'https://api.hubapi.com/cms/v3/source-code/published/content/Entry title - Test Field.module/meta.json',
       expect.objectContaining({
         method: 'PUT',
         headers: {
@@ -86,7 +86,7 @@ describe('createModules', () => {
     // Verify the second call (fields.json)
     expect(mockFetch).toHaveBeenNthCalledWith(
       2,
-      'https://api.hubapi.com/cms/v3/source-code/published/content/test-entry-title-test-module.module/fields.json',
+      'https://api.hubapi.com/cms/v3/source-code/published/content/Entry title - Test Field.module/fields.json',
       expect.objectContaining({
         method: 'PUT',
         headers: {
@@ -98,7 +98,7 @@ describe('createModules', () => {
     // Verify the third call (module.html)
     expect(mockFetch).toHaveBeenNthCalledWith(
       3,
-      'https://api.hubapi.com/cms/v3/source-code/published/content/test-entry-title-test-module.module/module.html',
+      'https://api.hubapi.com/cms/v3/source-code/published/content/Entry title - Test Field.module/module.html',
       expect.objectContaining({
         method: 'PUT',
         headers: {
@@ -118,18 +118,18 @@ describe('createModules', () => {
       text: () => Promise.resolve('Invalid token'),
     } as Response);
 
-    const mockField: SdkField = {
+    const mockField: SelectedSdkField = {
       type: 'Text',
       id: 'test-field-id',
       uniqueId: 'test-module',
       name: 'Test Field',
       supported: true,
       value: 'Hello World',
+      moduleName: 'Entry title - Test Field',
     };
 
     const mockEvent = {
       body: {
-        entryTitle: 'test-entry-title',
         fields: JSON.stringify([mockField]),
       },
     };
@@ -147,7 +147,7 @@ describe('createModules', () => {
 
     // Verify the error call
     expect(mockFetch).toHaveBeenCalledWith(
-      'https://api.hubapi.com/cms/v3/source-code/published/content/test-entry-title-test-module.module/meta.json',
+      'https://api.hubapi.com/cms/v3/source-code/published/content/Entry title - Test Field.module/meta.json',
       expect.objectContaining({
         method: 'PUT',
         headers: {
@@ -161,18 +161,18 @@ describe('createModules', () => {
     // Mock successful fetch responses
     const mockFetch = mockedFetch();
 
-    const mockField: SdkField = {
+    const mockField: SelectedSdkField = {
       type: 'Text',
       id: 'test-field-id',
       uniqueId: 'test-module',
       name: 'Test Field',
       supported: true,
       value: 'Hello World',
+      moduleName: 'Entry title - Test Field',
     };
 
     const mockEvent = {
       body: {
-        entryTitle: 'test-entry-title',
         fields: JSON.stringify([mockField]),
       },
     };
@@ -221,18 +221,18 @@ describe('createModules', () => {
     // Mock successful fetch responses
     const mockFetch = mockedFetch();
 
-    const mockField: SdkField = {
+    const mockField: SelectedSdkField = {
       type: 'Text',
       id: 'test-field-id',
       uniqueId: 'test-module',
       name: 'Test Field',
       supported: true,
       value: undefined,
+      moduleName: 'Entry title - Test Field',
     };
 
     const mockEvent = {
       body: {
-        entryTitle: 'test-entry-title',
         fields: JSON.stringify([mockField]),
       },
     };
@@ -263,7 +263,7 @@ describe('createModules', () => {
     // Mock successful fetch responses
     const mockFetch = mockedFetch();
 
-    const mockField: SdkField = {
+    const mockField: SelectedSdkField = {
       type: 'RichText',
       id: 'test-field-id',
       uniqueId: 'test-richtext-module',
@@ -287,11 +287,11 @@ describe('createModules', () => {
           },
         ],
       },
+      moduleName: 'Entry title - Test RichText Field',
     };
 
     const mockEvent = {
       body: {
-        entryTitle: 'test-entry-title',
         fields: JSON.stringify([mockField]),
       },
     };
@@ -337,18 +337,18 @@ describe('createModules', () => {
     // Mock successful fetch responses
     const mockFetch = mockedFetch();
 
-    const mockField: SdkField = {
+    const mockField: SelectedSdkField = {
       type: 'Number',
       id: 'test-field-id',
       uniqueId: 'test-number-module',
       name: 'Test Number Field',
       supported: true,
       value: 42,
+      moduleName: 'Entry title - Test Number Field',
     };
 
     const mockEvent = {
       body: {
-        entryTitle: 'test-entry-title',
         fields: JSON.stringify([mockField]),
       },
     };
@@ -394,18 +394,18 @@ describe('createModules', () => {
     // Mock successful fetch responses
     const mockFetch = mockedFetch();
 
-    const mockField: SdkField = {
+    const mockField: SelectedSdkField = {
       type: 'Date',
       id: 'test-field-id',
       uniqueId: 'test-date-module',
       name: 'Test Date Field',
       supported: true,
       value: '2023-12-25',
+      moduleName: 'Entry title - Test Date Field',
     };
 
     const mockEvent = {
       body: {
-        entryTitle: 'test-entry-title',
         fields: JSON.stringify([mockField]),
       },
     };
@@ -451,18 +451,18 @@ describe('createModules', () => {
     // Mock successful fetch responses
     const mockFetch = mockedFetch();
 
-    const mockField: SdkField = {
+    const mockField: SelectedSdkField = {
       type: 'Date',
       id: 'test-field-id',
       uniqueId: 'test-datetime-module',
       name: 'Test DateTime Field',
       supported: true,
       value: '2023-12-25T14:30:00Z',
+      moduleName: 'Entry title - Test DateTime Field',
     };
 
     const mockEvent = {
       body: {
-        entryTitle: 'test-entry-title',
         fields: JSON.stringify([mockField]),
       },
     };
@@ -508,7 +508,7 @@ describe('createModules', () => {
     // Mock successful fetch responses
     const mockFetch = mockedFetch();
 
-    const mockField: SdkField = {
+    const mockField: SelectedSdkField = {
       type: 'Location',
       id: 'test-field-id',
       uniqueId: 'test-location-module',
@@ -518,11 +518,11 @@ describe('createModules', () => {
         lat: 40.7128,
         lon: -74.006,
       },
+      moduleName: 'Entry title - Test Location Field',
     };
 
     const mockEvent = {
       body: {
-        entryTitle: 'test-entry-title',
         fields: JSON.stringify([mockField]),
       },
     };
@@ -568,7 +568,7 @@ describe('createModules', () => {
     // Mock successful fetch responses
     const mockFetch = mockedFetch();
 
-    const mockField: SdkField = {
+    const mockField: SelectedSdkField = {
       type: 'Link',
       id: 'test-field-id',
       uniqueId: 'test-asset-module',
@@ -580,11 +580,11 @@ describe('createModules', () => {
         height: 100,
         contentType: 'image/jpeg',
       },
+      moduleName: 'Entry title - Test Asset Field',
     };
 
     const mockEvent = {
       body: {
-        entryTitle: 'test-entry-title',
         fields: JSON.stringify([mockField]),
       },
     };

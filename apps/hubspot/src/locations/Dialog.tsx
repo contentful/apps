@@ -1,15 +1,21 @@
 import { Box, Button, Flex } from '@contentful/f36-components';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import FieldSelection from '../components/FieldSelection';
+import FieldModuleNameMapping from '../components/FieldModuleNameMapping';
 import { createClient } from 'contentful-management';
-import { SdkField } from '../utils/fieldsProcessing';
+import { SdkField, SelectedSdkField } from '../utils/fieldsProcessing';
 
 export type InvocationParams = {
   entryTitle: string;
   fields: SdkField[];
 };
+
+enum Step {
+  FieldSelection,
+  ModuleNameMapping,
+}
 
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
@@ -24,14 +30,37 @@ const Dialog = () => {
     }
   );
   useAutoResizer();
-  const invocationParams = sdk.parameters.invocation as InvocationParams;
+  const invocationParams = sdk.parameters.invocation as unknown as InvocationParams;
   const fields = invocationParams.fields;
   const entryTitle = invocationParams.entryTitle;
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
+  const [step, setStep] = useState<Step>(Step.FieldSelection);
+  const [moduleNameMapping, setModuleNameMapping] = useState<{ [fieldId: string]: string }>({});
+  const [isSending, setIsSending] = useState(false);
 
-  const callAction = async () => {
-    const fieldsToSend = selectedFields.map((field) => {
-      return fields.find((f) => f.uniqueId === field);
+  const selectedFieldObjects = useMemo(
+    () => fields.filter((f) => selectedFields.includes(f.uniqueId)),
+    [selectedFields]
+  );
+
+  const handleNext = () => {
+    const initialNameMapping: { [fieldId: string]: string } = {};
+    selectedFieldObjects.forEach((field) => {
+      initialNameMapping[field.uniqueId] =
+        moduleNameMapping[field.uniqueId] ?? `${entryTitle} - ${field.name}`;
+    });
+    setModuleNameMapping(initialNameMapping);
+    setStep(Step.ModuleNameMapping);
+  };
+
+  const handleCancel = () => {
+    sdk.close();
+  };
+
+  const handleSaveAndSync = async () => {
+    setIsSending(true);
+    const fieldsToSend: SelectedSdkField[] = selectedFieldObjects.map((field) => {
+      return { ...field, moduleName: moduleNameMapping[field.uniqueId] };
     });
 
     try {
@@ -44,43 +73,82 @@ const Dialog = () => {
         },
         {
           parameters: {
-            entryTitle: entryTitle,
             fields: JSON.stringify(fieldsToSend),
           },
         }
       );
       const responseData = JSON.parse(response.response.body);
+      // TODO: show success message
+      sdk.close();
     } catch (error) {
       console.error('Error creating modules: ', error);
+    } finally {
+      setIsSending(false);
     }
   };
 
   return (
     <Box margin="spacingL" marginTop="spacingM">
-      <FieldSelection
-        fields={fields}
-        selectedFields={selectedFields}
-        setSelectedFields={setSelectedFields}
-      />
-
-      <Flex
-        paddingTop="spacingM"
-        paddingBottom="spacingM"
-        gap="spacingM"
-        justifyContent="end"
-        style={{
-          position: 'sticky',
-          bottom: 0,
-          background: 'white',
-        }}>
-        <Button
-          variant="primary"
-          size="small"
-          onClick={callAction}
-          isDisabled={selectedFields.length === 0}>
-          Next
-        </Button>
-      </Flex>
+      {step === Step.FieldSelection && (
+        <>
+          <FieldSelection
+            fields={fields}
+            selectedFields={selectedFields}
+            setSelectedFields={setSelectedFields}
+          />
+          <Flex
+            paddingTop="spacingM"
+            paddingBottom="spacingM"
+            gap="spacingM"
+            justifyContent="end"
+            style={{ position: 'sticky', bottom: 0, background: 'white' }}>
+            <Button variant="negative" size="small" onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              size="small"
+              onClick={handleNext}
+              isDisabled={selectedFields.length === 0}>
+              Next
+            </Button>
+          </Flex>
+        </>
+      )}
+      {step === Step.ModuleNameMapping && (
+        <>
+          <FieldModuleNameMapping
+            selectedFields={selectedFieldObjects}
+            moduleNameMapping={moduleNameMapping}
+            setModuleNameMapping={setModuleNameMapping}
+          />
+          <Flex
+            paddingTop="spacingM"
+            paddingBottom="spacingM"
+            gap="spacingM"
+            justifyContent="end"
+            style={{ position: 'sticky', bottom: 0, background: 'white' }}>
+            <Button variant="negative" size="small" isDisabled={isSending} onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={() => setStep(Step.FieldSelection)}
+              isDisabled={isSending}>
+              Previous
+            </Button>
+            <Button
+              variant="primary"
+              size="small"
+              onClick={handleSaveAndSync}
+              isDisabled={isSending}
+              isLoading={isSending}>
+              Save and sync
+            </Button>
+          </Flex>
+        </>
+      )}
     </Box>
   );
 };

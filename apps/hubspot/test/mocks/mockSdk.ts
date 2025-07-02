@@ -31,6 +31,7 @@ const mockSdk: any = {
   locales: {
     default: 'en-US',
   },
+  close: vi.fn(),
   entry: {
     fields: {
       title: {

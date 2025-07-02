@@ -19,11 +19,10 @@ import {
   TEXT_FIELD_TEMPLATE,
   TEXT_MODULE_TEMPLATE,
 } from './templates';
-import { SdkField } from '../src/utils/fieldsProcessing';
+import { SelectedSdkField } from '../src/utils/fieldsProcessing';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 
 type AppActionParameters = {
-  entryTitle: string;
   fields: string;
 };
 
@@ -39,10 +38,9 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 ) => {
   const success = [];
   const failed = [];
-  const entryTitle = event.body.entryTitle;
   for (const field of JSON.parse(event.body.fields)) {
     try {
-      await createModule(field, context.appInstallationParameters.hubspotAccessToken, entryTitle);
+      await createModule(field, context.appInstallationParameters.hubspotAccessToken);
       success.push(field);
     } catch (error) {
       failed.push(field);
@@ -54,9 +52,9 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   };
 };
 
-const createModule = async (field: SdkField, token: string, entryTitle: string) => {
+const createModule = async (field: SelectedSdkField, token: string) => {
   const { fieldsFile, moduleFile } = getFiles(field);
-  const moduleName = `${entryTitle}-${field.uniqueId}`;
+  const moduleName = field.moduleName;
   await createModuleFile(JSON.stringify(META_JSON_TEMPLATE), 'meta.json', moduleName, token);
   await createModuleFile(fieldsFile, 'fields.json', moduleName, token);
   await createModuleFile(moduleFile, 'module.html', moduleName, token);
@@ -90,7 +88,7 @@ const createModuleFile = async (
   }
 };
 
-const getFiles = (field: SdkField): { fieldsFile: string; moduleFile: string } => {
+const getFiles = (field: SelectedSdkField): { fieldsFile: string; moduleFile: string } => {
   const { type } = field;
   let fieldsFile;
   let moduleFile;

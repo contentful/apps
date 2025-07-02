@@ -6,12 +6,8 @@
       "description": "Function to create Hubspot modules from an App Action",
       "path": "functions/createModules.js",
       "entryFile": "functions/createModules.ts",
-      "allowNetworks": [
-        "https://api.hubapi.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["https://api.hubapi.com"],
+      "accepts": ["appaction.call"]
     },
     {
       "id": "validateHubspotToken",
@@ -19,12 +15,8 @@
       "description": "Function to validate Hubspot access token of the config screen from an App Action",
       "path": "functions/validateHubspotToken.js",
       "entryFile": "functions/validateHubspotToken.ts",
-      "allowNetworks": [
-        "https://api.hubapi.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["https://api.hubapi.com"],
+      "accepts": ["appaction.call"]
     }
   ],
   "actions": [
@@ -38,12 +30,6 @@
         {
           "id": "fields",
           "name": "Fields",
-          "type": "Symbol",
-          "required": true
-        },
-        {
-          "id": "entryTitle",
-          "name": "Entry title",
           "type": "Symbol",
           "required": true
         }
