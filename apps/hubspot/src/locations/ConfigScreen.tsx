@@ -1,18 +1,18 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Box,
+  Collapse,
   Flex,
-  Heading,
-  Text,
   Form,
   FormControl,
-  TextInput,
-  Paragraph,
-  Collapse,
+  Heading,
   IconButton,
-  Subheading,
-  TextLink,
   List,
+  Paragraph,
+  Subheading,
+  Text,
+  TextInput,
+  TextLink,
 } from '@contentful/f36-components';
 import { ChevronDownIcon, ChevronUpIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -23,6 +23,7 @@ import {
   AppInstallationParameters,
   CONFIG_SCREEN_INSTRUCTIONS,
   ContentType,
+  createConfig,
   HUBSPOT_PRIVATE_APPS_URL,
 } from '../utils/utils';
 import { createClient } from 'contentful-management';
@@ -48,22 +49,29 @@ const ConfigScreen = () => {
     }
   );
 
-  function checkIfHasValue(value: string, setError: (error: string | null) => void) {
+  function checkIfHasValue(
+    value: string,
+    setError: (error: string | null) => void,
+    errorMessage: string
+  ) {
     const hasValue = !!value?.trim();
-    setError(hasValue ? null : 'Some fields are missing or invalid');
+    setError(hasValue ? null : errorMessage);
     return hasValue;
   }
 
   const validateAccessToken = async () => {
+    const emptyMessage = 'Some fields are missing';
+
     setHubspotTokenError(null);
 
     const hubspotTokenHasValue = checkIfHasValue(
       parameters.hubspotAccessToken,
-      setHubspotTokenError
+      setHubspotTokenError,
+      emptyMessage
     );
 
     if (!hubspotTokenHasValue) {
-      sdk.notifier.error('Some fields are missing or invalid');
+      sdk.notifier.error(emptyMessage);
       return false;
     }
 
@@ -100,6 +108,14 @@ const ConfigScreen = () => {
   const onConfigure = useCallback(async () => {
     const isTokenValid = await validateAccessToken();
     if (!isTokenValid) {
+      return false;
+    }
+
+    try {
+      await createConfig(cma);
+    } catch (e) {
+      console.error(e);
+      sdk.notifier.error('Error creating config entry');
       return false;
     }
 
