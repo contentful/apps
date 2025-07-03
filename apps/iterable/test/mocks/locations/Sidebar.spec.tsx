@@ -1,7 +1,8 @@
-import Sidebar from './Sidebar';
+import React from 'react';
 import { render } from '@testing-library/react';
-import { mockCma, mockSdk } from '../../test/mocks';
 import { vi } from 'vitest';
+import { mockSdk, mockCma } from '..';
+import Sidebar from '../../../src/locations/Sidebar';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -9,9 +10,9 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 describe('Sidebar component', () => {
-  it('Component text exists', () => {
+  it('Component text exists', async () => {
     const { getByText } = render(<Sidebar />);
 
-    expect(getByText('Hello Sidebar Component (AppId: test-app)')).toBeInTheDocument();
+    await expect(getByText('Hello Sidebar Component (AppId: test-app)')).toBeInTheDocument();
   });
 });
