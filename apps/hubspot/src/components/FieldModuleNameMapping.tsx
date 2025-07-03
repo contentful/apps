@@ -8,12 +8,14 @@ interface FieldModuleNameMappingProps {
   selectedFields: SdkField[];
   moduleNameMapping: { [fieldId: string]: string };
   setModuleNameMapping: (mapping: { [fieldId: string]: string }) => void;
+  inputDisabled: boolean;
 }
 
 const FieldModuleNameMapping = ({
   selectedFields,
   moduleNameMapping,
   setModuleNameMapping,
+  inputDisabled,
 }: FieldModuleNameMappingProps) => {
   return (
     <Box>
@@ -28,6 +30,7 @@ const FieldModuleNameMapping = ({
           field={field}
           moduleNameMapping={moduleNameMapping}
           setModuleNameMapping={setModuleNameMapping}
+          inputDisabled={inputDisabled}
         />
       ))}
     </Box>
@@ -38,10 +41,12 @@ const SingleFieldModuleNameMapping = ({
   field,
   moduleNameMapping,
   setModuleNameMapping,
+  inputDisabled,
 }: {
   field: SdkField;
   moduleNameMapping: { [fieldId: string]: string };
   setModuleNameMapping: (mapping: { [fieldId: string]: string }) => void;
+  inputDisabled: boolean;
 }) => {
   const [isValid, setIsValid] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -94,6 +99,7 @@ const SingleFieldModuleNameMapping = ({
             <FormControl.Label>Hubspot module name</FormControl.Label>
             <TextInput
               value={moduleNameMapping[field.uniqueId]}
+              isDisabled={inputDisabled}
               onChange={handleInputChange}
               aria-label={`Hubspot module name for ${field.name}`}
             />

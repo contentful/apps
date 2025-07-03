@@ -146,6 +146,7 @@ const Dialog = () => {
             selectedFields={selectedFieldObjects}
             moduleNameMapping={moduleNameMapping}
             setModuleNameMapping={setModuleNameMapping}
+            inputDisabled={isSending}
           />
           <Flex
             paddingTop="spacingM"
