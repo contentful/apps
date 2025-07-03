@@ -112,7 +112,7 @@ const ConfigScreen = () => {
     }
 
     try {
-      const configService = new ConfigEntryService(cma);
+      const configService = new ConfigEntryService(cma, sdk.locales.default);
       await configService.createConfig();
     } catch (e) {
       sdk.notifier.error('The app configuration was not saved. Please try again.');

@@ -4,9 +4,11 @@ import { CONFIG_CONTENT_TYPE_ID, CONFIG_ENTRY_ID, CONFIG_FIELD_ID, ConnectedFiel
 class ConfigEntryService {
   private cma: PlainClientAPI;
   private configEntry?: EntryProps<KeyValueMap>;
+  private defaultLocale: string;
 
-  constructor(cma: PlainClientAPI) {
+  constructor(cma: PlainClientAPI, defaultLocale: string) {
     this.cma = cma;
+    this.defaultLocale = defaultLocale;
   }
 
   async createConfig() {
@@ -14,11 +16,40 @@ class ConfigEntryService {
     await this.createEntry();
   }
 
-  async createContentType() {
+  async getConfigEntry(): Promise<EntryProps<KeyValueMap>> {
+    if (!this.configEntry) {
+      this.configEntry = await this.cma.entry.get({ entryId: CONFIG_ENTRY_ID });
+    }
+    return this.configEntry;
+  }
+
+  async updateConfig(connectedFields: ConnectedFields, cma: PlainClientAPI) {
+    const configEntry = await this.getConfigEntry();
+
+    if (!configEntry.fields[CONFIG_FIELD_ID]) {
+      configEntry.fields[CONFIG_FIELD_ID] = {};
+    }
+
+    configEntry.fields[CONFIG_FIELD_ID][this.getDefaultLocale()] = connectedFields;
+    const updatedEntry = await cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
+    this.configEntry = updatedEntry;
+
+    return updatedEntry;
+  }
+
+  private async createContentType() {
     const contentTypeBody = {
       name: CONFIG_CONTENT_TYPE_ID,
       description: 'Content Type used by the Hubspot app. Do not delete or modify manually.',
+      displayField: 'title',
       fields: [
+        {
+          id: 'title',
+          name: 'Title',
+          required: true,
+          localized: false,
+          type: 'Text',
+        },
         {
           id: CONFIG_FIELD_ID,
           name: CONFIG_FIELD_ID,
@@ -45,11 +76,15 @@ class ConfigEntryService {
     }
   }
 
-  async createEntry() {
+  private async createEntry() {
     try {
       await this.cma.entry.createWithId(
         { contentTypeId: CONFIG_CONTENT_TYPE_ID, entryId: CONFIG_ENTRY_ID },
-        { fields: {} }
+        {
+          fields: {
+            title: { [this.getDefaultLocale()]: 'Hubspot App Configuration' },
+          },
+        }
       );
     } catch (e: any) {
       // Only ignore error if entry already exists
@@ -59,25 +94,8 @@ class ConfigEntryService {
     }
   }
 
-  async getConfigEntry(): Promise<EntryProps<KeyValueMap>> {
-    if (!this.configEntry) {
-      this.configEntry = await this.cma.entry.get({ entryId: CONFIG_ENTRY_ID });
-    }
-    return this.configEntry;
-  }
-
-  async updateConfig(connectedFields: ConnectedFields, cma: PlainClientAPI, defaultLocale: string) {
-    const configEntry = await this.getConfigEntry();
-
-    if (!configEntry.fields[CONFIG_FIELD_ID]) {
-      configEntry.fields[CONFIG_FIELD_ID] = {};
-    }
-
-    configEntry.fields[CONFIG_FIELD_ID][defaultLocale] = connectedFields;
-    const updatedEntry = await cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
-    this.configEntry = updatedEntry;
-
-    return updatedEntry;
+  private getDefaultLocale(): string {
+    return this.defaultLocale;
   }
 }
 
