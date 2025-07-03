@@ -9,7 +9,10 @@ import ContentfulApiKeyInput, {
 } from '../components/ContentfulApiKeyInput';
 
 import { ExternalLinkIcon } from '@contentful/f36-icons';
-import { AppInstallationParameters, ContentType } from '../utils';
+import { ContentType } from '../utils';
+interface AppInstallationParameters {
+  contentfulApiKey: string;
+}
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({
