@@ -21,7 +21,6 @@ export async function validateContentfulApiKey(apiKey: string, sdk: ConfigAppSDK
 interface ContentfulApiKeyInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  spaceId: string;
   isInvalid?: boolean;
   dataTestId?: string;
 }

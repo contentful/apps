@@ -100,9 +100,8 @@ const ConfigScreen = () => {
             </Box>
           </Box>
           <ContentfulApiKeyInput
-            value={parameters.contentfulApiKey || ''}
+            value={parameters.contentfulApiKey}
             onChange={handleApiKeyChange}
-            spaceId={sdk.ids.space}
             isInvalid={!contentfulApiKeyIsValid}
             dataTestId="contentfulApiKey"
           />
