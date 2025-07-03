@@ -43,7 +43,7 @@ export type ResolutionType = 'highest' | 'audio-only';
 export type PolicyType = 'signed' | 'public';
 
 export interface PendingAction {
-  type: 'playback' | 'asset' | 'caption' | 'staticRendition';
+  type: 'playback' | 'asset' | 'caption' | 'staticRendition' | 'audio';
   id?: string;
   data?: {
     policy?: PolicyType;
