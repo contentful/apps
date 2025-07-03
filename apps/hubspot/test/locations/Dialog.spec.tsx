@@ -173,13 +173,13 @@ describe('Dialog component', () => {
 
     expect(
       screen.getByText(
-        'Optionally, name the Hubspot custom modules that will be synced to entry field content.'
+        `Optionally, name the Hubspot custom modules that will be synced to entry field content. Hubspot module names can include numbers, letters, hyphens (-), and underscores (_) but no spaces or special characters.`
       )
     ).toBeInTheDocument();
 
     const titleModuleNameInput = screen.getByLabelText('Hubspot module name for Title');
     await user.clear(titleModuleNameInput);
-    await user.type(titleModuleNameInput, 'Custom Title Module');
+    await user.type(titleModuleNameInput, 'Custom-Title-Module');
 
     const saveAndSyncButton = screen.getByRole('button', { name: 'Save and sync' });
     await user.click(saveAndSyncButton);
@@ -196,11 +196,11 @@ describe('Dialog component', () => {
           fields: JSON.stringify([
             {
               ...expectedFields[0],
-              moduleName: 'Custom Title Module',
+              moduleName: 'Custom-Title-Module',
             },
             {
               ...expectedFields[1],
-              moduleName: 'test-entry-title - Description',
+              moduleName: 'test-entry-title_Description',
             },
           ]),
         },

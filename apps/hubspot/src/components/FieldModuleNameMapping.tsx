@@ -1,6 +1,8 @@
-import { Box, Flex, Text, TextInput } from '@contentful/f36-components';
+import { Box, Flex, FormControl, Paragraph, Text, TextInput } from '@contentful/f36-components';
 import { SdkField } from '../utils/fieldsProcessing';
 import tokens from '@contentful/f36-tokens';
+import { useState } from 'react';
+import { MODULE_NAME_PATTERN } from '../utils/utils';
 
 interface FieldModuleNameMappingProps {
   selectedFields: SdkField[];
@@ -13,57 +15,96 @@ const FieldModuleNameMapping = ({
   moduleNameMapping,
   setModuleNameMapping,
 }: FieldModuleNameMappingProps) => {
-  const handleInputChange = (fieldId: string, value: string) => {
-    setModuleNameMapping({ ...moduleNameMapping, [fieldId]: value });
+  return (
+    <Box>
+      <Paragraph>
+        Optionally, name the Hubspot custom modules that will be synced to entry field content.
+        Hubspot module names can include numbers, letters, hyphens (-), and underscores (_) but no
+        spaces or special characters.
+      </Paragraph>
+      {selectedFields.map((field) => (
+        <SingleFieldModuleNameMapping
+          key={field.uniqueId}
+          field={field}
+          moduleNameMapping={moduleNameMapping}
+          setModuleNameMapping={setModuleNameMapping}
+        />
+      ))}
+    </Box>
+  );
+};
+
+const SingleFieldModuleNameMapping = ({
+  field,
+  moduleNameMapping,
+  setModuleNameMapping,
+}: {
+  field: SdkField;
+  moduleNameMapping: { [fieldId: string]: string };
+  setModuleNameMapping: (mapping: { [fieldId: string]: string }) => void;
+}) => {
+  const [isValid, setIsValid] = useState<boolean>(true);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setModuleNameMapping({ ...moduleNameMapping, [field.uniqueId]: value });
+
+    if (MODULE_NAME_PATTERN.test(value)) {
+      setIsValid(true);
+      setErrorMessage('');
+    } else {
+      setIsValid(false);
+      if (value.includes(' ')) {
+        const valueWithoutSpaces = value.replace(/\s/g, '');
+        if (!MODULE_NAME_PATTERN.test(valueWithoutSpaces)) {
+          setErrorMessage('No spaces or invalid characters');
+        } else {
+          setErrorMessage('No spaces');
+        }
+      } else {
+        setErrorMessage('Invalid special character');
+      }
+    }
   };
 
   return (
-    <Box>
-      <Text as="p" marginBottom="spacingM">
-        Optionally, name the Hubspot custom modules that will be synced to entry field content.
-      </Text>
-      {selectedFields.map((field) => (
-        <Box
-          key={field.uniqueId}
-          marginBottom="spacingM"
-          padding="spacingM"
-          style={{
-            border: `1px solid ${tokens.gray300}`,
-            borderRadius: tokens.borderRadiusSmall,
-          }}>
-          <Flex gap="spacingM" fullWidth>
-            <Flex flex="1" flexDirection="column">
-              <Text
-                as="p"
-                fontColor="gray900"
-                fontWeight="fontWeightMedium"
-                marginBottom="spacingXs">
-                Field name
-              </Text>
-              <TextInput
-                value={field.name}
-                isDisabled
-                aria-label={`Field name for ${field.name}`}
-                style={{ color: tokens.gray500 }}
-              />
-            </Flex>
-            <Flex flex="1" flexDirection="column">
-              <Text
-                as="p"
-                fontColor="gray900"
-                fontWeight="fontWeightMedium"
-                marginBottom="spacingXs">
-                Hubspot module name
-              </Text>
-              <TextInput
-                value={moduleNameMapping[field.uniqueId]}
-                onChange={(e) => handleInputChange(field.uniqueId, e.target.value)}
-                aria-label={`Hubspot module name for ${field.name}`}
-              />
-            </Flex>
-          </Flex>
-        </Box>
-      ))}
+    <Box
+      key={field.uniqueId}
+      marginBottom="spacingM"
+      padding="spacingM"
+      style={{
+        border: `1px solid ${tokens.gray300}`,
+        borderRadius: tokens.borderRadiusSmall,
+      }}>
+      <Flex gap="spacingM" fullWidth>
+        <Flex flex="1" flexDirection="column">
+          <FormControl marginBottom="none">
+            <FormControl.Label>Field name</FormControl.Label>
+            <TextInput
+              value={field.name}
+              isDisabled
+              aria-label={`Field name for ${field.name}`}
+              style={{ color: tokens.gray500 }}
+            />
+          </FormControl>
+        </Flex>
+        <Flex flex="1" flexDirection="column">
+          <FormControl isInvalid={!isValid} marginBottom="none">
+            <FormControl.Label>Hubspot module name</FormControl.Label>
+            <TextInput
+              value={moduleNameMapping[field.uniqueId]}
+              onChange={handleInputChange}
+              aria-label={`Hubspot module name for ${field.name}`}
+            />
+            {!isValid && (
+              <FormControl.ValidationMessage marginTop="spacingXs">
+                {errorMessage}
+              </FormControl.ValidationMessage>
+            )}
+          </FormControl>
+        </Flex>
+      </Flex>
     </Box>
   );
 };

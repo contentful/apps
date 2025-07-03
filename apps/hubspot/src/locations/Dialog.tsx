@@ -7,6 +7,7 @@ import FieldModuleNameMapping from '../components/FieldModuleNameMapping';
 import { createClient } from 'contentful-management';
 import { SdkField, SelectedSdkField } from '../utils/fieldsProcessing';
 import { styles } from './Dialog.styles';
+import { MODULE_NAME_PATTERN } from '../utils/utils';
 
 export type InvocationParams = {
   entryTitle: string;
@@ -44,13 +45,19 @@ const Dialog = () => {
     [selectedFields]
   );
 
-  const handleNext = () => {
+  const initializeModuleNameMapping = () => {
     const initialNameMapping: { [fieldId: string]: string } = {};
     selectedFieldObjects.forEach((field) => {
+      const updatedEntryTitle = entryTitle.replace(/\s+/g, '-').replace(/[^A-Za-z0-9_-]/g, '');
+      const updatedFieldName = field.name.replace(/\s+/g, '-').replace(/[^A-Za-z0-9_-]/g, '');
       initialNameMapping[field.uniqueId] =
-        moduleNameMapping[field.uniqueId] ?? `${entryTitle} - ${field.name}`;
+        moduleNameMapping[field.uniqueId] ?? `${updatedEntryTitle}_${updatedFieldName}`;
     });
     setModuleNameMapping(initialNameMapping);
+  };
+
+  const handleNext = () => {
+    initializeModuleNameMapping();
     setStep(Step.ModuleNameMapping);
   };
 
@@ -160,7 +167,12 @@ const Dialog = () => {
               variant="primary"
               size="small"
               onClick={handleSaveAndSync}
-              isDisabled={isSending}
+              isDisabled={
+                isSending ||
+                Object.values(moduleNameMapping).some(
+                  (moduleName) => !MODULE_NAME_PATTERN.test(moduleName)
+                )
+              }
               isLoading={isSending}>
               Save and sync
             </Button>

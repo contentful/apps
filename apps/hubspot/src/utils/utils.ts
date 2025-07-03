@@ -14,6 +14,8 @@ export const CONFIG_SCREEN_INSTRUCTIONS = [
   'Paste your private app access token in the field above',
 ];
 
+export const MODULE_NAME_PATTERN = /^[a-zA-Z0-9_\-]+$/;
+
 export interface ContentType {
   id: string;
   name: string;
