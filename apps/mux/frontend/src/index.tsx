@@ -19,7 +19,7 @@ import Config from './locations/config';
 import ApiClient from './util/apiClient';
 
 import Menu from './components/menu';
-import PlayerCode from './components/PlayerSnippet';
+import PlayerCode from './components/PlayerCode';
 import MuxAssetConfigurationModal, {
   ModalData,
 } from './components/AssetConfiguration/MuxAssetConfigurationModal';

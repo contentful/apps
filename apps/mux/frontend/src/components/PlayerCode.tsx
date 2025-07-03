@@ -94,14 +94,6 @@ const PlayerCode: React.FC<PlayerCodeProps> = ({ params }) => {
           <Tabs.Tab panelId="mux-player">Mux Player</Tabs.Tab>
           <Tabs.Tab panelId="iframe">iframe</Tabs.Tab>
         </Tabs.List>
-        <Tabs.Panel id="mux-player" style={{ padding: 0 }}>
-          {/* required children */}
-          <></>
-        </Tabs.Panel>
-        <Tabs.Panel id="iframe" style={{ padding: 0 }}>
-          {/* required children */}
-          <></>
-        </Tabs.Panel>
       </Tabs>
       <Box marginTop="spacingM" marginBottom="spacingS">
         <Textarea value={codeSnippet} isReadOnly={true} className="copycodearea" />
