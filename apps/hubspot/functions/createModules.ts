@@ -41,9 +41,9 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   for (const field of JSON.parse(event.body.fields)) {
     try {
       await createModule(field, context.appInstallationParameters.hubspotAccessToken);
-      success.push(field);
+      success.push(field.uniqueId);
     } catch (error) {
-      failed.push(field);
+      failed.push(field.uniqueId);
     }
   }
   return {

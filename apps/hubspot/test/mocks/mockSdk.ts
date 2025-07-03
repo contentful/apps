@@ -9,6 +9,8 @@ const mockSdk: any = {
   },
   notifier: {
     error: vi.fn(),
+    warning: vi.fn(),
+    success: vi.fn(),
   },
   ids: {
     app: 'test-app',

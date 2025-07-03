@@ -78,13 +78,30 @@ const Dialog = () => {
           },
         }
       );
-      const responseData = JSON.parse(response.response.body);
-      // TODO: show success message
+      const { success, failed } = JSON.parse(response.response.body);
+      showResults(success, failed);
       sdk.close();
     } catch (error) {
       console.error('Error creating modules: ', error);
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const showResults = (success: SelectedSdkField[] = [], failed: SelectedSdkField[] = []) => {
+    const successMessage = `${success.length} entry field${
+      success.length === 1 ? '' : 's'
+    } successfully synced.`;
+    const failedMessage = `${failed.length} entry field${
+      failed.length === 1 ? '' : 's'
+    } did not sync, please try again.`;
+
+    if (failed.length > 0 && success.length > 0) {
+      sdk.notifier.warning(`${successMessage}\n${failedMessage}`);
+    } else if (failed.length > 0) {
+      sdk.notifier.error(failedMessage);
+    } else {
+      sdk.notifier.success(successMessage);
     }
   };
 

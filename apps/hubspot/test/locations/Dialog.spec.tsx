@@ -150,11 +150,11 @@ describe('Dialog component', () => {
     expect(nextButton).not.toBeDisabled();
   });
 
-  it('should complete the full flow: select fields, map module names, and send data', async () => {
+  it('should complete the full flow: select fields, map module names, send data and show results', async () => {
     const user = userEvent.setup();
     const mockCreateWithResponse = vi.fn().mockResolvedValue({
       response: {
-        body: JSON.stringify({ success: true }),
+        body: JSON.stringify({ success: ['title', 'description-en-us'], failed: [] }),
       },
     });
 
@@ -206,5 +206,7 @@ describe('Dialog component', () => {
         },
       }
     );
+
+    expect(mockSdk.notifier.success).toHaveBeenCalledWith('2 entry fields successfully synced.');
   });
 });

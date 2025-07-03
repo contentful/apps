@@ -64,7 +64,7 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField],
+      success: [mockField.uniqueId],
       failed: [],
     });
 
@@ -139,7 +139,7 @@ describe('createModules', () => {
     // Verify the result
     expect(result).toEqual({
       success: [],
-      failed: [mockField],
+      failed: [mockField.uniqueId],
     });
 
     // Verify fetch was called once (fails on first call)
@@ -181,7 +181,7 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField],
+      success: [mockField.uniqueId],
       failed: [],
     });
 
@@ -241,7 +241,7 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField],
+      success: [mockField.uniqueId],
       failed: [],
     });
 
@@ -300,7 +300,7 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField],
+      success: [mockField.uniqueId],
       failed: [],
     });
 
@@ -357,7 +357,7 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField],
+      success: [mockField.uniqueId],
       failed: [],
     });
 
@@ -414,7 +414,7 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField],
+      success: [mockField.uniqueId],
       failed: [],
     });
 
@@ -471,7 +471,7 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField],
+      success: [mockField.uniqueId],
       failed: [],
     });
 
@@ -531,7 +531,7 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField],
+      success: [mockField.uniqueId],
       failed: [],
     });
 
@@ -593,7 +593,7 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField],
+      success: [mockField.uniqueId],
       failed: [],
     });
 
