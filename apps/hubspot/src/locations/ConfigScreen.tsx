@@ -25,11 +25,11 @@ import {
   AppInstallationParameters,
   CONFIG_SCREEN_INSTRUCTIONS,
   ContentType,
-  createConfig,
   HUBSPOT_PRIVATE_APPS_URL,
 } from '../utils/utils';
 import { createClient } from 'contentful-management';
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
+import ConfigEntryService from '../utils/ConfigEntryService';
 
 export const EMPTY_MESSAGE = 'Some fields are missing';
 
@@ -114,10 +114,10 @@ const ConfigScreen = () => {
     }
 
     try {
-      await createConfig(cma);
+      const configService = new ConfigEntryService(cma, sdk.locales.default);
+      await configService.createConfig();
     } catch (e) {
-      console.error(e);
-      sdk.notifier.error('Error creating configuration entry');
+      sdk.notifier.error('The app configuration was not saved. Please try again.');
       return false;
     }
 
