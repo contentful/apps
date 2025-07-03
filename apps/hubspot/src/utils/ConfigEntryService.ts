@@ -9,6 +9,7 @@ import {
 
 class ConfigEntryService {
   private cma: PlainClientAPI;
+  private configEntry?: EntryProps<KeyValueMap>;
 
   constructor(cma: PlainClientAPI) {
     this.cma = cma;
@@ -65,21 +66,29 @@ class ConfigEntryService {
   }
 
   async getConfigEntry(): Promise<EntryProps<KeyValueMap>> {
-    return this.cma.entry.get({ entryId: CONFIG_ENTRY_ID });
+    if (!this.configEntry) {
+      this.configEntry = await this.cma.entry.get({ entryId: CONFIG_ENTRY_ID });
+    }
+    return this.configEntry;
   }
 
   async updateConfig(
-    configEntry: EntryProps<KeyValueMap>,
     connectedFields: ConnectedFields,
     cma: PlainClientAPI,
     defaultLocale?: string
   ) {
+    const configEntry = await this.getConfigEntry();
+
     if (!configEntry.fields[CONFIG_FIELD_ID]) {
       configEntry.fields[CONFIG_FIELD_ID] = {};
     }
+
     defaultLocale ||= await getDefaultLocale(cma);
     configEntry.fields[CONFIG_FIELD_ID][defaultLocale] = connectedFields;
-    return await cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
+    const updatedEntry = await cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
+    this.configEntry = updatedEntry;
+
+    return updatedEntry;
   }
 }
 
