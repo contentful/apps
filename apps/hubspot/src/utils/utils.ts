@@ -26,7 +26,8 @@ export type AppInstallationParameters = {
 export type ConnectedField = {
   fieldId: string;
   locale: string;
-  contentBlockId: string;
+  moduleId: string;
+  updatedAt: string;
   error?: { status: number; message: string };
 };
 
