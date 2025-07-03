@@ -6,6 +6,7 @@ import FieldSelection from '../components/FieldSelection';
 import FieldModuleNameMapping from '../components/FieldModuleNameMapping';
 import { createClient } from 'contentful-management';
 import { SdkField, SelectedSdkField } from '../utils/fieldsProcessing';
+import { styles } from './Dialog.styles';
 
 export type InvocationParams = {
   entryTitle: string;
@@ -101,7 +102,7 @@ const Dialog = () => {
             paddingBottom="spacingM"
             gap="spacingM"
             justifyContent="end"
-            style={{ position: 'sticky', bottom: 0, background: 'white' }}>
+            className={styles.footer}>
             <Button variant="negative" size="small" onClick={handleCancel}>
               Cancel
             </Button>
@@ -127,7 +128,7 @@ const Dialog = () => {
             paddingBottom="spacingM"
             gap="spacingM"
             justifyContent="end"
-            style={{ position: 'sticky', bottom: 0, background: 'white' }}>
+            className={styles.footer}>
             <Button variant="negative" size="small" isDisabled={isSending} onClick={handleCancel}>
               Cancel
             </Button>
