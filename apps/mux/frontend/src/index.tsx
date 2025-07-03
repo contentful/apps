@@ -19,7 +19,7 @@ import Config from './locations/config';
 import ApiClient from './util/apiClient';
 
 import Menu from './components/menu';
-import PlayerCode from './components/playercode';
+import PlayerCode from './components/PlayerSnippet';
 import MuxAssetConfigurationModal, {
   ModalData,
 } from './components/AssetConfiguration/MuxAssetConfigurationModal';
@@ -824,6 +824,10 @@ export class App extends React.Component<AppProps, AppState> {
         name: 'stream-type',
         value: this.getPlayerType(),
       },
+      {
+        name: 'video-title',
+        value: this.state.value.meta?.title,
+      },
     ];
     if (this.state.value.signedPlaybackId) {
       params.push(
@@ -1342,7 +1346,7 @@ export class App extends React.Component<AppProps, AppState> {
                         </Note>
                       </Box>
                     )}
-                    <PlayerCode params={this.playerParams()}></PlayerCode>
+                    <PlayerCode params={this.playerParams() || []} />
                   </Tabs.Panel>
 
                   <Tabs.Panel id="playback">
