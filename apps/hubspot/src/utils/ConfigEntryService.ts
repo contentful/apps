@@ -1,11 +1,5 @@
 import { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
-import {
-  CONFIG_CONTENT_TYPE_ID,
-  CONFIG_ENTRY_ID,
-  CONFIG_FIELD_ID,
-  ConnectedFields,
-  getDefaultLocale,
-} from './utils';
+import { CONFIG_CONTENT_TYPE_ID, CONFIG_ENTRY_ID, CONFIG_FIELD_ID, ConnectedFields } from './utils';
 
 class ConfigEntryService {
   private cma: PlainClientAPI;
@@ -72,18 +66,13 @@ class ConfigEntryService {
     return this.configEntry;
   }
 
-  async updateConfig(
-    connectedFields: ConnectedFields,
-    cma: PlainClientAPI,
-    defaultLocale?: string
-  ) {
+  async updateConfig(connectedFields: ConnectedFields, cma: PlainClientAPI, defaultLocale: string) {
     const configEntry = await this.getConfigEntry();
 
     if (!configEntry.fields[CONFIG_FIELD_ID]) {
       configEntry.fields[CONFIG_FIELD_ID] = {};
     }
 
-    defaultLocale ||= await getDefaultLocale(cma);
     configEntry.fields[CONFIG_FIELD_ID][defaultLocale] = connectedFields;
     const updatedEntry = await cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
     this.configEntry = updatedEntry;

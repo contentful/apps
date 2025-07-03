@@ -1,5 +1,3 @@
-import { PlainClientAPI } from 'contentful-management';
-
 export const CONFIG_CONTENT_TYPE_ID = 'hubspotConfig';
 export const CONFIG_ENTRY_ID = 'hubspotConfig';
 export const CONFIG_FIELD_ID = 'connectedFields';
@@ -36,15 +34,3 @@ export type EntryConnectedFields = ConnectedField[];
 export type ConnectedFields = {
   [entryId: string]: EntryConnectedFields;
 };
-
-export async function getDefaultLocale(cma: PlainClientAPI): Promise<string> {
-  const fallbackLocale = 'en-US';
-  try {
-    const locales = await cma.locale.getMany({ query: { limit: 1000 } });
-    const defaultLocale = locales.items.find((locale) => locale.default);
-    return defaultLocale?.code || fallbackLocale;
-  } catch (error) {
-    console.error('Error fetching default locale:', error);
-    return fallbackLocale;
-  }
-}
