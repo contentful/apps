@@ -1,7 +1,6 @@
 import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Heading, Paragraph, Flex, FormControl, Box, TextLink } from '@contentful/f36-components';
-import { css } from 'emotion';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 import ContentfulApiKeyInput, {
@@ -10,6 +9,7 @@ import ContentfulApiKeyInput, {
 
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { ContentType } from '../utils';
+import { configScreenContainer } from './ConfigScreen.styles';
 interface AppInstallationParameters {
   contentfulApiKey: string;
 }
@@ -70,10 +70,7 @@ const ConfigScreen = () => {
   };
 
   return (
-    <Flex
-      justifyContent="center"
-      alignItems="flex-start"
-      style={{ minHeight: '724px', minWidth: '852px' }}>
+    <Flex justifyContent="center" alignItems="flex-start" className={configScreenContainer}>
       <Box margin="spacing2Xl">
         <Heading as="h2" marginBottom="spacingS">
           Set up Iterable
