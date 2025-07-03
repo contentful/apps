@@ -1,27 +1,23 @@
 import { CopyButton, Flex, Paragraph, TextInput, TextLink, Text } from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
-import { /* useCMA, */ useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { CopyIcon, ExternalLinkIcon } from '@contentful/f36-icons';
+import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
   useAutoResizer();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
 
-  const value = 'a link';
+  const link = `https://cdn.contentful.com/spaces/${sdk.ids.space}/environments/master/entries?access_token=${sdk.parameters.installation.contentfulApiKey}&sys.id=${sdk.ids.entry}&include=2`;
+
   return (
     <Flex flexDirection="column">
       <Text fontWeight="fontWeightDemiBold" marginBottom="spacingXs">
         Data feed link
       </Text>
       <TextInput.Group>
-        <TextInput isDisabled isReadOnly value={value} />
-        <CopyButton value={value} tooltipProps={{ placement: 'right', usePortal: true }} />
+        <TextInput isDisabled isReadOnly value={link} />
+        <CopyButton value={link} tooltipProps={{ placement: 'right', usePortal: true }} />
       </TextInput.Group>
       <Paragraph marginTop="spacingXs" fontColor={'gray500'}>
         Copy and paste this link into your Iterable data feed. Content automatically syncs when the
