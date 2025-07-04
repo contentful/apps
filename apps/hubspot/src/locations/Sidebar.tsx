@@ -1,8 +1,11 @@
-import { Button, Flex } from '@contentful/f36-components';
+import { Button, Flex, Text, RelativeDateTime } from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { processFields } from '../utils/fieldsProcessing';
 import { createClient } from 'contentful-management';
+import { useEffect, useState } from 'react';
+import ConfigEntryService from '../utils/ConfigEntryService';
+import { EntryConnectedFields } from '../utils/utils';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
@@ -39,14 +42,40 @@ const Sidebar = () => {
     };
   };
 
+  const [connectedFields, setConnectedFields] = useState<EntryConnectedFields | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    const getConfig = async () => {
+      try {
+        const connectedFields = await new ConfigEntryService(
+          cma,
+          sdk.locales.default
+        ).getConnectedFields();
+        setConnectedFields(connectedFields[sdk.ids.entry]);
+      } catch (error) {}
+    };
+    getConfig();
+  }, []);
+
   return (
     <Flex gap="spacingM" flexDirection="column">
-      <Button
-        variant="secondary"
-        isFullWidth={true}
-        onClick={async () => sdk.dialogs.openCurrentApp(await dialogParams())}>
-        Sync entry fields to Hubspot
-      </Button>
+      <Flex gap="spacingXs" flexDirection="column">
+        <Button
+          variant="secondary"
+          isFullWidth={true}
+          onClick={async () => sdk.dialogs.openCurrentApp(await dialogParams())}>
+          Sync entry fields to Hubspot
+        </Button>
+
+        {connectedFields && connectedFields.length > 0 && (
+          <Text lineHeight="lineHeightCondensed" fontColor="gray500">
+            {`${connectedFields.length} field${connectedFields.length === 1 ? '' : 's'} synced `}
+            <RelativeDateTime date={connectedFields[0].updatedAt} />
+          </Text>
+        )}
+      </Flex>
 
       <Button
         variant="secondary"
