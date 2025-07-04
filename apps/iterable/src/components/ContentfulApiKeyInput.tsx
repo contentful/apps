@@ -43,7 +43,11 @@ const ContentfulApiKeyInput = ({
       type="password"
       isRequired
     />
-    {isInvalid && <FormControl.ValidationMessage>Invalid API key</FormControl.ValidationMessage>}
+    {isInvalid && (
+      <FormControl.ValidationMessage>
+        Invalid delivery API - access token
+      </FormControl.ValidationMessage>
+    )}
   </FormControl>
 );
 

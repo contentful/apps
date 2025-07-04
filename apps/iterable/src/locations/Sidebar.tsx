@@ -1,14 +1,31 @@
-import { CopyButton, Flex, Paragraph, TextInput, TextLink, Text } from '@contentful/f36-components';
+import {
+  CopyButton,
+  Flex,
+  Paragraph,
+  TextInput,
+  TextLink,
+  Text,
+  IconButton,
+  Skeleton,
+} from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { WarningOctagonIcon } from '@phosphor-icons/react';
 import tokens from '@contentful/f36-tokens';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
   useAutoResizer();
 
-  const link = `https://cdn.contentful.com/spaces/${sdk.ids.space}/environments/master/entries?access_token=${sdk.parameters.installation.contentfulApiKey}&sys.id=${sdk.ids.entry}&include=2`;
+  const space = sdk.ids.space;
+  const apiKey = sdk.parameters.installation.contentfulApiKey;
+  const entryId = sdk.ids.entry;
+
+  const hasError = !space || !apiKey || !entryId;
+  const link = hasError
+    ? ''
+    : `https://cdn.contentful.com/spaces/${space}/environments/master/entries?access_token=${apiKey}&sys.id=${entryId}&include=2`;
 
   return (
     <Flex flexDirection="column">
@@ -16,14 +33,18 @@ const Sidebar = () => {
         Data feed link
       </Text>
       <TextInput.Group>
-        <TextInput isDisabled isReadOnly value={link} />
-        <CopyButton value={link} tooltipProps={{ placement: 'right', usePortal: true }} />
+        <TextInput isDisabled isReadOnly value={link} isInvalid={hasError} />
+        <CopyButton
+          value={link}
+          variant={hasError ? 'negative' : 'secondary'}
+          isDisabled={hasError}
+          tooltipProps={{ placement: 'right', usePortal: true }}
+        />
       </TextInput.Group>
-      <Paragraph marginTop="spacingXs" fontColor={'gray500'}>
+      <Paragraph marginTop="spacingXs" fontColor="gray500">
         Copy and paste this link into your Iterable data feed. Content automatically syncs when the
-        entry is published.{' '}
+        entry is published. {/* TODO: Add link to documentation */}
         <TextLink
-          href=""
           target="_blank"
           rel="noopener noreferrer"
           alignIcon="end"
@@ -31,6 +52,12 @@ const Sidebar = () => {
           Learn more
         </TextLink>
       </Paragraph>
+      {hasError && (
+        <Flex alignItems="center" gap="spacing2Xs">
+          <WarningOctagonIcon size={16} color={tokens.red600} />
+          <Text fontColor="red600">Link generation error</Text>
+        </Flex>
+      )}
     </Flex>
   );
 };
