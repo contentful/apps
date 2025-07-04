@@ -5,7 +5,7 @@ import styles from './UploadArea.module.css';
 
 interface UploadAreaProps {
   showMuxUploaderUI: boolean;
-  muxUploaderRef: React.RefObject<any>;
+  muxUploaderRef: React.RefObject<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   onSuccess: () => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;

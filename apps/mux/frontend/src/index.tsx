@@ -3,17 +3,14 @@
 import React, { ChangeEvent, createRef } from 'react';
 import { render } from 'react-dom';
 
-import { init, locations, AppExtensionSDK, FieldExtensionSDK } from '@contentful/app-sdk';
 import {
-  Button,
-  Note,
-  Spinner,
-  TextLink,
-  Tabs,
-  Box,
-  Flex,
-  Switch,
-} from '@contentful/f36-components';
+  init,
+  locations,
+  AppExtensionSDK,
+  FieldExtensionSDK,
+  SidebarExtensionSDK,
+} from '@contentful/app-sdk';
+import { Button, Note, Spinner, TextLink, Tabs, Box, Flex } from '@contentful/f36-components';
 import { Form, FormControl, TextInput } from '@contentful/f36-forms';
 
 import MuxPlayer from '@mux/mux-player-react';
@@ -22,7 +19,7 @@ import Config from './locations/config';
 import ApiClient from './util/apiClient';
 
 import Menu from './components/menu';
-import PlayerCode from './components/playercode';
+import PlayerCode from './components/PlayerCode';
 import MuxAssetConfigurationModal, {
   ModalData,
 } from './components/AssetConfiguration/MuxAssetConfigurationModal';
@@ -30,6 +27,7 @@ import UploadArea from './components/UploadArea/UploadArea';
 import Mp4RenditionsPanel from './components/AssetConfiguration/Mp4RenditionsPanel';
 import TrackForm from './components/TrackForm/TrackForm';
 import MetadataPanel from './components/AssetConfiguration/MetadataPanel';
+import PlaybackSwitcher from './components/AssetConfiguration/Playback/PlaybackSwitcher';
 
 import {
   type InstallationParams,
@@ -38,7 +36,9 @@ import {
   AppProps,
   ResolutionType,
   Track,
-  type PendingActions,
+  ResyncParams,
+  PendingActions,
+  PendingAction,
 } from './util/types';
 
 import './index.css';
@@ -48,12 +48,11 @@ import {
   getUploadUrl,
   deleteStaticRendition,
   createStaticRendition,
-  updateAsset,
   uploadTrack,
   deleteTrack,
   generateAutoCaptions,
 } from './util/muxApi';
-import { AssetSettings } from './util/muxApi';
+import Sidebar from './locations/Sidebar';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -64,17 +63,17 @@ interface SignedTokens {
 }
 
 // Delete undefined keys and sort keys recursively
-function normalizeForDiff(obj: any): any {
+function normalizeForDiff<T>(obj: T): T {
   if (Array.isArray(obj)) {
-    return obj.map(normalizeForDiff);
+    return obj.map(normalizeForDiff) as unknown as T;
   } else if (obj && typeof obj === 'object') {
     return Object.keys(obj)
-      .filter((k) => obj[k] !== undefined)
+      .filter((k) => (obj as Record<string, unknown>)[k] !== undefined)
       .sort()
       .reduce((acc, k) => {
-        acc[k] = normalizeForDiff(obj[k]);
+        (acc as Record<string, unknown>)[k] = normalizeForDiff((obj as Record<string, unknown>)[k]);
         return acc;
-      }, {} as any);
+      }, {} as Record<string, unknown>) as T;
   }
   return obj;
 }
@@ -82,7 +81,9 @@ function normalizeForDiff(obj: any): any {
 // Helper for updating pendingActions
 const updatePendingActions = (value, newPendingActions) => {
   const finalPendingActions =
-    newPendingActions.delete.length === 0 && newPendingActions.create.length === 0
+    newPendingActions.delete.length === 0 &&
+    newPendingActions.create.length === 0 &&
+    newPendingActions.update.length === 0
       ? undefined
       : newPendingActions;
   return { ...value, pendingActions: finalPendingActions };
@@ -92,9 +93,9 @@ export class App extends React.Component<AppProps, AppState> {
   apiClient: ApiClient;
   cmaClient: PlainClientAPI;
   resolveRef = createRef<(value: string | null) => void>();
-  muxUploaderRef = createRef<any>();
+  muxUploaderRef = createRef<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
   fileInputRef = React.createRef<HTMLInputElement>();
-  muxPlayerRef = React.createRef<any>();
+  muxPlayerRef = React.createRef<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
 
   constructor(props: AppProps) {
     super(props);
@@ -250,7 +251,7 @@ export class App extends React.Component<AppProps, AppState> {
     }
   }
 
-  componentDidUpdate(prevProps: AppProps, prevState: AppState) {
+  componentDidUpdate() {
     if (this.state.value?.assetId && !this.state.initialResyncDone) {
       this.resync({ silent: true });
       this.setState({ initialResyncDone: true });
@@ -306,7 +307,9 @@ export class App extends React.Component<AppProps, AppState> {
       cancelLabel: 'Cancel',
     });
 
-    await this.onDeleteAsset();
+    if (result) {
+      await this.onDeleteAsset();
+    }
   };
 
   requestRemoveAsset = async () => {
@@ -565,7 +568,7 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
-  resync = async (params?: any) => {
+  resync = async (params?: ResyncParams) => {
     await this.pollForAssetDetails();
 
     if (!params?.silent) {
@@ -583,7 +586,7 @@ export class App extends React.Component<AppProps, AppState> {
     }
 
     if (!this.state.value || !this.state.value.assetId) {
-      throw Error('Something went wrong, because by this point we require an assetId.');
+      return;
     }
 
     if (!isRecursiveCall) {
@@ -823,6 +826,10 @@ export class App extends React.Component<AppProps, AppState> {
         name: 'stream-type',
         value: this.getPlayerType(),
       },
+      {
+        name: 'video-title',
+        value: this.state.value.meta?.title,
+      },
     ];
     if (this.state.value.signedPlaybackId) {
       params.push(
@@ -855,47 +862,56 @@ export class App extends React.Component<AppProps, AppState> {
     return params;
   };
 
-  swapPlaybackIDs = async () => {
+  swapPlaybackIDs = async (policy: 'public' | 'signed') => {
     if (!this.state.value) return;
+
     const currentValue = this.state.value;
     const currentPlaybackId = currentValue.playbackId || currentValue.signedPlaybackId;
-    if (
-      currentValue.pendingActions?.create?.some((action) => action.type === 'playback') ||
-      currentValue.pendingActions?.delete?.some((action) => action.type === 'playback')
-    ) {
-      const updatedPendingActions = {
-        delete: currentValue.pendingActions.delete.filter((action) => action.type !== 'playback'),
-        create: currentValue.pendingActions.create.filter((action) => action.type !== 'playback'),
-      };
+    const totalPendingActions =
+      (currentValue.pendingActions?.create?.length || 0) +
+      (currentValue.pendingActions?.delete?.length || 0);
+
+    const updatedPendingActions: PendingActions = {
+      delete: currentValue.pendingActions?.delete
+        ? currentValue.pendingActions.delete.filter((action) => action.type !== 'playback')
+        : [],
+      create: currentValue.pendingActions?.create
+        ? currentValue.pendingActions.create.filter((action) => action.type !== 'playback')
+        : [],
+      update: currentValue.pendingActions?.update ?? [],
+    };
+
+    const hasPending =
+      updatedPendingActions.create.length + updatedPendingActions.delete.length <
+      totalPendingActions;
+
+    if (hasPending) {
       await this.props.sdk.field.setValue(
         updatePendingActions(currentValue, updatedPendingActions)
       );
       return;
     }
+
     const isCurrentlySigned = this.isUsingSigned();
-    const pendingActions: PendingActions = {
-      delete: [
-        ...(currentValue.pendingActions?.delete || []),
-        {
-          type: 'playback',
-          id: currentPlaybackId,
-        },
-      ],
-      create: [
-        ...(currentValue.pendingActions?.create || []),
-        {
-          type: 'playback',
-          data: {
-            policy: isCurrentlySigned ? 'public' : 'signed',
-            assetId: currentValue.assetId,
-          },
-        },
-      ],
-    };
-    await this.props.sdk.field.setValue({
-      ...currentValue,
-      pendingActions,
+    const currentPolicy = isCurrentlySigned ? 'signed' : 'public';
+    let targetPolicy: 'public' | 'signed';
+
+    if (policy) {
+      if (policy === currentPolicy) return;
+      targetPolicy = policy;
+    } else {
+      targetPolicy = isCurrentlySigned ? 'public' : 'signed';
+    }
+
+    updatedPendingActions.delete.push({ type: 'playback', id: currentPlaybackId });
+    updatedPendingActions.create.push({
+      type: 'playback',
+      data: {
+        policy: targetPolicy,
+        assetId: currentValue.assetId,
+      },
     });
+    await this.props.sdk.field.setValue(updatePendingActions(currentValue, updatedPendingActions));
   };
 
   getPlayerAspectRatio = () => {
@@ -981,51 +997,15 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
-  updateMetadata = async (metadata: {
-    standardMetadata: {
-      title?: string;
-      creatorId?: string;
-      externalId?: string;
-    };
-    customMetadata?: string;
-  }) => {
-    if (!this.state.value?.assetId) {
-      this.props.sdk.notifier.error('No asset selected');
-      return;
-    }
-
-    try {
-      const settings: AssetSettings = {
-        meta: metadata.standardMetadata
-          ? {
-              title: metadata.standardMetadata.title || '',
-              creator_id: metadata.standardMetadata.creatorId || '',
-              external_id: metadata.standardMetadata.externalId || '',
-            }
-          : undefined,
-        passthrough: metadata.customMetadata,
-        playback_policies: [],
-        video_quality: '',
-        inputs: [],
-      };
-
-      await updateAsset(this.apiClient, this.state.value.assetId, settings);
-      await this.resync({ skipPlayerResync: true });
-    } catch (error) {
-      console.error('Error updating metadata:', error);
-      this.props.sdk.notifier.error('Error updating metadata');
-    }
-  };
-
   onDeleteTrack = async (trackId: string, type: 'caption' | 'audio') => {
     const value = this.state.value;
     if (!value) return;
-    const pending = value.pendingActions || { delete: [], create: [] };
-    const newDelete = [
+    const pending: PendingActions = value.pendingActions || { delete: [], create: [], update: [] };
+    const newDelete: PendingAction[] = [
       ...pending.delete,
       { type: type === 'caption' ? 'caption' : 'audio', id: trackId },
     ];
-    const newPendingActions = { ...pending, delete: newDelete };
+    const newPendingActions: PendingActions = { ...pending, delete: newDelete };
     await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
   };
 
@@ -1036,7 +1016,7 @@ export class App extends React.Component<AppProps, AppState> {
       (action) =>
         !(action.type === (type === 'caption' ? 'caption' : 'audio') && action.id === trackId)
     );
-    const newPendingActions = {
+    const newPendingActions: PendingActions = {
       ...value.pendingActions,
       delete: newDelete,
     };
@@ -1046,9 +1026,12 @@ export class App extends React.Component<AppProps, AppState> {
   onDeleteRendition = async (renditionId: string) => {
     const value = this.state.value;
     if (!value) return;
-    const pending = value.pendingActions || { delete: [], create: [] };
-    const newDelete = [...pending.delete, { type: 'staticRendition', id: renditionId }];
-    const newPendingActions = { ...pending, delete: newDelete };
+    const pending: PendingActions = value.pendingActions || { delete: [], create: [], update: [] };
+    const newDelete = [
+      ...pending.delete,
+      { type: 'staticRendition', id: renditionId } as PendingAction,
+    ];
+    const newPendingActions: PendingActions = { ...pending, delete: newDelete };
     await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
   };
 
@@ -1058,7 +1041,7 @@ export class App extends React.Component<AppProps, AppState> {
     const newDelete = value.pendingActions.delete.filter(
       (action) => !(action.type === 'staticRendition' && action.id === renditionId)
     );
-    const newPendingActions = {
+    const newPendingActions: PendingActions = {
       ...value.pendingActions,
       delete: newDelete,
     };
@@ -1090,7 +1073,7 @@ export class App extends React.Component<AppProps, AppState> {
   onDeleteAsset = async () => {
     const value = this.state.value;
     if (!value || !value.assetId) return;
-    const pending = value.pendingActions || { delete: [], create: [] };
+    const pending: PendingActions = value.pendingActions || { delete: [], create: [], update: [] };
     const newDelete = [...pending.delete, { type: 'asset', id: value.assetId }];
     const newPendingActions = { ...pending, delete: newDelete };
     await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
@@ -1104,6 +1087,22 @@ export class App extends React.Component<AppProps, AppState> {
       (action) => !(action.type === 'asset' && action.id === value.assetId)
     );
     const newPendingActions = { ...value.pendingActions, delete: newDelete };
+    await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
+  };
+
+  onUpdateMetadata = async ({ standardMetadata }: { standardMetadata: { title?: string } }) => {
+    const value = this.state.value;
+    if (!value) return;
+    const currentTitle = value.meta?.title || '';
+    const newTitle = standardMetadata.title || '';
+    const pending: PendingActions = value.pendingActions || { delete: [], create: [], update: [] };
+    let newUpdate: PendingAction[] =
+      pending.update?.filter((action) => action.type !== 'metadata') ?? [];
+
+    if (currentTitle !== newTitle) {
+      newUpdate = [...newUpdate, { type: 'metadata', data: { title: newTitle } }];
+    }
+    const newPendingActions = { ...pending, update: newUpdate };
     await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
   };
 
@@ -1261,123 +1260,131 @@ export class App extends React.Component<AppProps, AppState> {
               <Tabs defaultTab="captions">
                 <Tabs.List variant="horizontal-divider" className="tabs-scroll">
                   <Tabs.Tab panelId="captions">Captions</Tabs.Tab>
-                  <Tabs.Tab panelId="audio">Audio</Tabs.Tab>
+                  <Tabs.Tab panelId="audio">Audio Tracks</Tabs.Tab>
                   <Tabs.Tab panelId="metadata">Metadata</Tabs.Tab>
-                  <Tabs.Tab panelId="playercode">Player Code</Tabs.Tab>
                   <Tabs.Tab panelId="mp4renditions">MP4 Renditions</Tabs.Tab>
+                  <Tabs.Tab panelId="playback">Playback</Tabs.Tab>
+                  <Tabs.Tab panelId="playercode">Player Code</Tabs.Tab>
                   <Tabs.Tab panelId="debug">Data</Tabs.Tab>
                 </Tabs.List>
 
-                <Tabs.Panel id="captions">
-                  <TrackForm
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      this.uploadTrack(e.target as HTMLFormElement, 'caption');
-                    }}
-                    onDeleteTrack={(trackId) => this.onDeleteTrack(trackId, 'caption')}
-                    onUndoDeleteTrack={(trackId) => this.onUndoDeleteTrack(trackId, 'caption')}
-                    isTrackPendingDelete={(trackId) =>
-                      this.isTrackPendingDelete(trackId, 'caption')
-                    }
-                    tracks={(this.state.value?.captions || []) as Track[]}
-                    type="caption"
-                    title="Add Caption"
-                    playbackId={this.state.value?.playbackId || this.state.value?.signedPlaybackId}
-                    domain={this.props.sdk.parameters.installation.domain}
-                    token={this.state.playbackToken}
-                    isSigned={this.isUsingSigned()}
-                  />
-                </Tabs.Panel>
+                <Box marginTop="spacingL" marginBottom="spacingL">
+                  <Tabs.Panel id="captions">
+                    <TrackForm
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        this.uploadTrack(e.target as HTMLFormElement, 'caption');
+                      }}
+                      onDeleteTrack={(trackId) => this.onDeleteTrack(trackId, 'caption')}
+                      onUndoDeleteTrack={(trackId) => this.onUndoDeleteTrack(trackId, 'caption')}
+                      isTrackPendingDelete={(trackId) =>
+                        this.isTrackPendingDelete(trackId, 'caption')
+                      }
+                      tracks={(this.state.value?.captions || []) as Track[]}
+                      type="caption"
+                      title="Add Caption"
+                      playbackId={
+                        this.state.value?.playbackId || this.state.value?.signedPlaybackId
+                      }
+                      domain={this.props.sdk.parameters.installation.domain}
+                      token={this.state.playbackToken}
+                      isSigned={this.isUsingSigned()}
+                    />
+                  </Tabs.Panel>
 
-                <Tabs.Panel id="audio">
-                  <TrackForm
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      this.uploadTrack(e.target as HTMLFormElement, 'audio');
-                    }}
-                    onDeleteTrack={(trackId) => this.onDeleteTrack(trackId, 'audio')}
-                    onUndoDeleteTrack={(trackId) => this.onUndoDeleteTrack(trackId, 'audio')}
-                    isTrackPendingDelete={(trackId) => this.isTrackPendingDelete(trackId, 'audio')}
-                    tracks={(this.state.value?.audioTracks || []) as Track[]}
-                    type="audio"
-                    title="Add Audio"
-                    playbackId={this.state.value?.playbackId || this.state.value?.signedPlaybackId}
-                    domain={this.props.sdk.parameters.installation.domain}
-                    token={this.state.playbackToken}
-                    isSigned={this.isUsingSigned()}
-                  />
-                </Tabs.Panel>
+                  <Tabs.Panel id="audio">
+                    <TrackForm
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        this.uploadTrack(e.target as HTMLFormElement, 'audio');
+                      }}
+                      onDeleteTrack={(trackId) => this.onDeleteTrack(trackId, 'audio')}
+                      onUndoDeleteTrack={(trackId) => this.onUndoDeleteTrack(trackId, 'audio')}
+                      isTrackPendingDelete={(trackId) =>
+                        this.isTrackPendingDelete(trackId, 'audio')
+                      }
+                      tracks={(this.state.value?.audioTracks || []) as Track[]}
+                      type="audio"
+                      title="Add Audio Track"
+                      playbackId={
+                        this.state.value?.playbackId || this.state.value?.signedPlaybackId
+                      }
+                      domain={this.props.sdk.parameters.installation.domain}
+                      token={this.state.playbackToken}
+                      isSigned={this.isUsingSigned()}
+                    />
+                  </Tabs.Panel>
 
-                <Tabs.Panel id="metadata">
-                  <MetadataPanel
-                    asset={this.state.value}
-                    onSubmit={this.updateMetadata}
-                    sdk={this.props.sdk}
-                  />
-                </Tabs.Panel>
+                  <Tabs.Panel id="metadata">
+                    <MetadataPanel
+                      asset={this.state.value}
+                      onUpdateMetadata={this.onUpdateMetadata}
+                    />
+                  </Tabs.Panel>
 
-                <Tabs.Panel id="playercode">
-                  {this.isUsingSigned() && (
-                    <Box marginBottom="spacingM" marginTop="spacingM">
+                  <Tabs.Panel id="playercode">
+                    {this.isUsingSigned() && (
+                      <Box marginBottom="spacingM" marginTop="spacingM">
+                        <Note variant="warning">
+                          This code snippet is for limited testing and expires after about 12 hours.
+                          Tokens should be generated seperately.
+                        </Note>
+                      </Box>
+                    )}
+                    <PlayerCode params={this.playerParams() || []} />
+                  </Tabs.Panel>
+
+                  <Tabs.Panel id="playback">
+                    <PlaybackSwitcher
+                      value={this.state.value}
+                      onSwapPlaybackIDs={this.swapPlaybackIDs}
+                      enableSignedUrls={
+                        (this.props.sdk.parameters.installation as InstallationParams)
+                          .muxEnableSignedUrls
+                      }
+                    />
+                  </Tabs.Panel>
+
+                  <Tabs.Panel id="debug">
+                    <Box marginTop="spacingS">
+                      <Flex
+                        justifyContent="space-between"
+                        alignItems="center"
+                        marginBottom="spacingM">
+                        <Flex marginRight="spacingM">
+                          <Button id="resync" variant="secondary" onClick={() => this.resync()}>
+                            Resync
+                          </Button>
+                        </Flex>
+                      </Flex>
+                    </Box>
+
+                    {this.state.raw?.data.playback_ids.length > 1 ? (
                       <Note variant="warning">
-                        This code snippet is for limited testing and expires after about 12 hours.
-                        Tokens should be generated seperately.
+                        This Asset ID has multiple playback IDs in Mux. Only the first public or
+                        signed ID will be used in Contentful.
                       </Note>
-                    </Box>
-                  )}
-                  <PlayerCode params={this.playerParams()}></PlayerCode>
-                </Tabs.Panel>
+                    ) : (
+                      ''
+                    )}
 
-                <Tabs.Panel id="debug">
-                  <Box marginTop="spacingS">
-                    <Flex
-                      justifyContent="space-between"
-                      alignItems="center"
-                      marginBottom="spacingM">
-                      <Flex marginRight="spacingM">
-                        <Button id="resync" variant="secondary" onClick={this.resync}>
-                          Resync
-                        </Button>
-                      </Flex>
-                      <Flex>
-                        <Switch
-                          name="swap_signed_playback_id"
-                          id="swap_signed_playback_id"
-                          isChecked={this.getSwitchCheckedState()}
-                          onChange={() => this.swapPlaybackIDs()}>
-                          {this.getSwitchCheckedState()
-                            ? 'Signed Playback'
-                            : 'Signed Playback (off)'}
-                        </Switch>
-                      </Flex>
-                    </Flex>
-                  </Box>
+                    <pre>
+                      <Box as="code" display="inline" marginRight="spacingL">
+                        {JSON.stringify(this.state.value, null, 2)}
+                      </Box>
+                    </pre>
+                  </Tabs.Panel>
 
-                  {this.state.raw?.data.playback_ids.length > 1 ? (
-                    <Note variant="warning">
-                      This Asset ID has multiple playback IDs in Mux. Only the first public or
-                      signed ID will be used in Contentful.
-                    </Note>
-                  ) : (
-                    ''
-                  )}
-
-                  <pre>
-                    <Box as="code" display="inline" marginRight="spacingL">
-                      {JSON.stringify(this.state.value, null, 2)}
-                    </Box>
-                  </pre>
-                </Tabs.Panel>
-
-                <Tabs.Panel id="mp4renditions">
-                  <Mp4RenditionsPanel
-                    asset={this.state.value}
-                    onCreateRendition={this.createStaticRenditionHandler}
-                    onDeleteRendition={this.onDeleteRendition}
-                    onUndoDeleteRendition={this.onUndoDeleteRendition}
-                    isRenditionPendingDelete={this.isRenditionPendingDelete}
-                  />
-                </Tabs.Panel>
+                  <Tabs.Panel id="mp4renditions">
+                    <Mp4RenditionsPanel
+                      asset={this.state.value}
+                      onCreateRendition={this.createStaticRenditionHandler}
+                      onDeleteRendition={this.onDeleteRendition}
+                      onUndoDeleteRendition={this.onUndoDeleteRendition}
+                      isRenditionPendingDelete={this.isRenditionPendingDelete}
+                    />
+                  </Tabs.Panel>
+                </Box>
               </Tabs>
             </div>
           </>
@@ -1416,6 +1423,8 @@ export class App extends React.Component<AppProps, AppState> {
 init((sdk) => {
   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
     render(<Config sdk={sdk as AppExtensionSDK} />, document.getElementById('root'));
+  } else if (sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)) {
+    render(<Sidebar sdk={sdk as SidebarExtensionSDK} />, document.getElementById('root'));
   } else {
     render(<App sdk={sdk as FieldExtensionSDK} />, document.getElementById('root'));
   }

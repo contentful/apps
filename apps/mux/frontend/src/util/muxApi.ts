@@ -1,4 +1,6 @@
+import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { ModalData } from '../components/AssetConfiguration/MuxAssetConfigurationModal';
+import ApiClient from './apiClient';
 import { InstallationParams, ResolutionType, AddByURLConfig } from './types';
 
 export interface AssetSettings {
@@ -47,17 +49,12 @@ function buildAssetSettings(options: ModalData): AssetSettings {
 
   // Metadata case
   if (options.metadataConfig.standardMetadata) {
-    const { title, creatorId, externalId } = options.metadataConfig.standardMetadata;
-    if (title || creatorId || externalId) {
+    const { title, externalId } = options.metadataConfig.standardMetadata;
+    if (title || externalId) {
       settings.meta = {};
       if (title) settings.meta.title = title;
-      if (creatorId) settings.meta.creator_id = creatorId;
       if (externalId) settings.meta.external_id = externalId;
     }
-  }
-  // Custom metadata
-  if (options.metadataConfig.customMetadata) {
-    settings.passthrough = options.metadataConfig.customMetadata;
   }
 
   // Captions case
@@ -160,10 +157,10 @@ export async function addByURL({
 }
 
 export async function getUploadUrl(
-  apiClient: any,
-  sdk: any,
+  apiClient: ApiClient,
+  sdk: FieldExtensionSDK,
   options: ModalData,
-  responseCheck: (res: any) => boolean | Promise<boolean>
+  responseCheck: (res: Response) => boolean | Promise<boolean>
 ) {
   const { muxEnableAudioNormalize } = sdk.parameters.installation as InstallationParams;
   const settings = buildAssetSettings(options);
@@ -192,35 +189,26 @@ export async function getUploadUrl(
 }
 
 export async function deleteStaticRendition(
-  apiClient: any,
+  apiClient: ApiClient,
   assetId: string,
   staticRenditionId: string
 ) {
   return await apiClient.del(`/video/v1/assets/${assetId}/static-renditions/${staticRenditionId}`);
 }
 
-export async function createStaticRendition(apiClient: any, assetId: string, type: ResolutionType) {
+export async function createStaticRendition(
+  apiClient: ApiClient,
+  assetId: string,
+  type: ResolutionType
+) {
   return await apiClient.post(
     `/video/v1/assets/${assetId}/static-renditions`,
     JSON.stringify({ resolution: type })
   );
 }
 
-export async function updateAsset(apiClient: any, assetId: string, settings: AssetSettings) {
-  const requestBody: any = {
-    meta: settings.meta || {
-      title: '',
-      creator_id: '',
-      external_id: '',
-    },
-    passthrough: settings.passthrough || '',
-  };
-
-  return await apiClient.patch(`/video/v1/assets/${assetId}`, JSON.stringify(requestBody));
-}
-
 export async function uploadTrack(
-  apiClient: any,
+  apiClient: ApiClient,
   assetId: string,
   options: {
     url: string;
@@ -244,12 +232,12 @@ export async function uploadTrack(
   return await result.json();
 }
 
-export async function deleteTrack(apiClient: any, assetId: string, trackId: string) {
+export async function deleteTrack(apiClient: ApiClient, assetId: string, trackId: string) {
   return await apiClient.del(`/video/v1/assets/${assetId}/tracks/${trackId}`);
 }
 
 export async function generateAutoCaptions(
-  apiClient: any,
+  apiClient: ApiClient,
   assetId: string,
   trackId: string,
   options: {

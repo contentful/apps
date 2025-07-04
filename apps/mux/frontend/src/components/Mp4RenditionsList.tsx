@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Box, Table, Button, TextLink, Note, Spinner, Tooltip } from '@contentful/f36-components';
+import { Table, Button, TextLink, Note, Spinner, Tooltip } from '@contentful/f36-components';
 import DeleteUndoButton from './DeleteUndoButton';
 import { RenditionActionsProps, RenditionInfo, ResolutionType } from '../util/types';
 
@@ -28,7 +28,7 @@ const Mp4RenditionsList: FC<Mp4RenditionsListProps> = ({
     { label: 'Audio Only', key: 'audio-only', data: audioOnly },
   ];
   return (
-    <Box marginTop="spacingL" marginBottom="spacingL">
+    <>
       <Table>
         <Table.Head>
           <Table.Row>
@@ -87,7 +87,7 @@ const Mp4RenditionsList: FC<Mp4RenditionsListProps> = ({
         MP4 renditions allow you to download your video in different formats. If a rendition is not
         available, click "Create" to generate it.
       </Note>
-    </Box>
+    </>
   );
 };
 
