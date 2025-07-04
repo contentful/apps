@@ -102,6 +102,22 @@ const Sidebar: FC<SidebarProps> = ({ sdk }) => {
     return `${name} will be removed`;
   }
 
+  function renderUpdatePendingAction(action: PendingAction, entryValue: MuxContentfulObject) {
+    let name = '';
+
+    switch (action.type) {
+      case 'metadata': {
+        const oldTitle = entryValue.meta?.title ?? 'empty';
+        name = `The asset's title will be updated to '${action.data?.title}' (formerly '${oldTitle}')`;
+        break;
+      }
+      default:
+        return `Pending action: ${action.type}`;
+    }
+
+    return name;
+  }
+
   function getPlaybackSwitchText(pendingActions: PendingActions) {
     const createPlayback = (pendingActions.create || []).find(
       (a: PendingAction) => a.type === 'playback'
@@ -136,6 +152,15 @@ const Sidebar: FC<SidebarProps> = ({ sdk }) => {
                       </ListItem>
                     )
                   )}
+                </>
+              )}
+              {pendingActions.update && pendingActions.update.length > 0 && (
+                <>
+                  {pendingActions.update.map((action: PendingAction, idx: number) => (
+                    <ListItem key={`update-${idx}`}>
+                      {renderUpdatePendingAction(action, entryValue)}
+                    </ListItem>
+                  ))}
                 </>
               )}
             </List>

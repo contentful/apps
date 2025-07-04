@@ -1,15 +1,13 @@
 import { FC, useState, useEffect } from 'react';
-import { FormControl, TextInput, Textarea, TextLink, Stack } from '@contentful/f36-components';
+import { FormControl, TextInput, TextLink, Stack } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
 
 export interface MetadataConfig {
   standardMetadata?: {
     title?: string;
-    creatorId?: string;
     externalId?: string;
   };
-  customMetadata?: string;
 }
 
 interface MetadataConfigurationProps {
@@ -22,8 +20,6 @@ interface MetadataConfigurationProps {
 const metadataLink = 'https://www.mux.com/docs/guides/add-metadata-to-your-videos';
 
 const MAX_TITLE_LENGTH = 512;
-const MAX_ID_LENGTH = 128;
-const MAX_CUSTOM_METADATA_LENGTH = 255;
 
 export const MetadataConfiguration: FC<MetadataConfigurationProps> = ({
   metadataConfig,
@@ -37,9 +33,6 @@ export const MetadataConfiguration: FC<MetadataConfigurationProps> = ({
 
   const [validationErrors, setValidationErrors] = useState<{
     title?: string;
-    creatorId?: string;
-    externalId?: string;
-    customMetadata?: string;
   }>({});
 
   useEffect(() => {
@@ -94,27 +87,11 @@ export const MetadataConfiguration: FC<MetadataConfigurationProps> = ({
     return undefined;
   };
 
-  const validateCustomMetadata = (value: string): string | undefined => {
-    if (value.length > MAX_CUSTOM_METADATA_LENGTH) {
-      return `Maximum length is ${MAX_CUSTOM_METADATA_LENGTH} characters`;
-    }
-    return undefined;
-  };
-
   const validateAllFields = () => {
     const errors: typeof validationErrors = {};
 
     if (standardMetadata.title) {
       errors.title = validateField(standardMetadata.title, MAX_TITLE_LENGTH);
-    }
-    if (standardMetadata.creatorId) {
-      errors.creatorId = validateField(standardMetadata.creatorId, MAX_ID_LENGTH);
-    }
-    if (standardMetadata.externalId) {
-      errors.externalId = validateField(standardMetadata.externalId, MAX_ID_LENGTH);
-    }
-    if (metadataConfig.customMetadata) {
-      errors.customMetadata = validateCustomMetadata(metadataConfig.customMetadata);
     }
 
     setValidationErrors(errors);
@@ -124,7 +101,7 @@ export const MetadataConfiguration: FC<MetadataConfigurationProps> = ({
 
   useEffect(() => {
     validateAllFields();
-  }, [standardMetadata, metadataConfig.customMetadata]);
+  }, [standardMetadata]);
 
   const handleStandardMetadataChange = (
     field: keyof NonNullable<MetadataConfig['standardMetadata']>,
@@ -135,13 +112,6 @@ export const MetadataConfiguration: FC<MetadataConfigurationProps> = ({
     onMetadataChange({
       ...metadataConfig,
       standardMetadata: newStandardMetadata,
-    });
-  };
-
-  const handleCustomMetadataChange = (value: string) => {
-    onMetadataChange({
-      ...metadataConfig,
-      customMetadata: value,
     });
   };
 
@@ -177,55 +147,6 @@ export const MetadataConfiguration: FC<MetadataConfigurationProps> = ({
         </FormControl.HelpText>
         {validationErrors.title && (
           <FormControl.ValidationMessage>{validationErrors.title}</FormControl.ValidationMessage>
-        )}
-      </FormControl>
-
-      <FormControl isInvalid={!!validationErrors.creatorId}>
-        <FormControl.Label>Creator ID</FormControl.Label>
-        <TextInput
-          value={standardMetadata.creatorId || ''}
-          onChange={(e) => handleStandardMetadataChange('creatorId', e.target.value)}
-          placeholder="Identifier to track the creator of the video"
-        />
-        <FormControl.HelpText>
-          An identifier to keep track of the creator of the video.
-        </FormControl.HelpText>
-        {validationErrors.creatorId && (
-          <FormControl.ValidationMessage>
-            {validationErrors.creatorId}
-          </FormControl.ValidationMessage>
-        )}
-      </FormControl>
-
-      <FormControl isInvalid={!!validationErrors.externalId}>
-        <FormControl.Label>External ID</FormControl.Label>
-        <TextInput
-          value={standardMetadata.externalId || ''}
-          isDisabled
-          placeholder="Identifier to link the video to your own data"
-        />
-        <FormControl.HelpText>
-          An identifier to link the video to your own data.
-        </FormControl.HelpText>
-        {validationErrors.externalId && (
-          <FormControl.ValidationMessage>
-            {validationErrors.externalId}
-          </FormControl.ValidationMessage>
-        )}
-      </FormControl>
-
-      <FormControl isInvalid={!!validationErrors.customMetadata}>
-        <FormControl.Label>Custom Metadata</FormControl.Label>
-        <Textarea
-          value={metadataConfig.customMetadata || ''}
-          onChange={(e) => handleCustomMetadataChange(e.target.value)}
-          placeholder="Enter your custom metadata"
-          rows={5}
-        />
-        {validationErrors.customMetadata && (
-          <FormControl.ValidationMessage>
-            {validationErrors.customMetadata}
-          </FormControl.ValidationMessage>
         )}
       </FormControl>
     </>

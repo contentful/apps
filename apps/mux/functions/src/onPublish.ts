@@ -1,9 +1,3 @@
-import type {
-  FunctionEventHandler,
-  FunctionTypeEnum,
-  AppEventRequest,
-  FunctionEventContext,
-} from '@contentful/node-apps-toolkit';
 import * as contentful from 'contentful-management';
 
 async function deleteMuxResource({
@@ -43,6 +37,7 @@ async function deleteMuxResource({
 }
 
 async function removePendingActionsFromAllLocalesAndUpdate(
+  webhookEntry: any,
   fieldKey: string,
   cma: any,
   entryId: string,
@@ -51,8 +46,7 @@ async function removePendingActionsFromAllLocalesAndUpdate(
 ) {
   try {
     console.log(`Removing pendingActions and updating entry in Contentful for field ${fieldKey}.`);
-    const entryFromContentful = await cma.entry.get({ entryId, spaceId, environmentId });
-    const fieldValue = entryFromContentful.fields[fieldKey];
+    const fieldValue = webhookEntry.fields[fieldKey];
     for (const locale of Object.keys(fieldValue)) {
       if (
         fieldValue[locale] &&
@@ -62,7 +56,9 @@ async function removePendingActionsFromAllLocalesAndUpdate(
         delete fieldValue[locale].pendingActions;
       }
     }
-    await cma.entry.update({ entryId, spaceId, environmentId }, entryFromContentful);
+    const updatedEntryFromContentful = await cma.entry.get({ entryId, spaceId, environmentId });
+    webhookEntry.sys.version = updatedEntryFromContentful.sys.version;
+    await cma.entry.update({ entryId, spaceId, environmentId }, webhookEntry);
   } catch (err) {
     console.error(
       `There was an error removing pendingActions from all locales in ${fieldKey}:`,
@@ -99,6 +95,7 @@ async function runPendingActionsFromEntry(
 
   for (const fieldKey of Object.keys(fieldsWithPendingActions)) {
     await removePendingActionsFromAllLocalesAndUpdate(
+      entry,
       fieldKey,
       cma,
       entryId,
@@ -106,7 +103,11 @@ async function runPendingActionsFromEntry(
       environmentId
     );
     const pendingActions = fieldsWithPendingActions[fieldKey];
-    const failedActions: { delete: any[]; create: any[] } = { delete: [], create: [] };
+    const failedActions: { delete: any[]; create: any[]; update: any[] } = {
+      delete: [],
+      create: [],
+      update: [],
+    };
 
     if (pendingActions) {
       // Top priority: Delete asset
@@ -194,12 +195,33 @@ async function runPendingActionsFromEntry(
           }
         }
       }
+      if (Array.isArray(pendingActions.update)) {
+        for (const updateAction of pendingActions.update) {
+          try {
+            switch (updateAction.type) {
+              case 'metadata':
+                await updateMuxAsset(pendingActions.assetId, updateAction.data, context);
+                break;
+              default:
+                console.warn(`Unsupported deleteAction type: ${updateAction.type}`);
+            }
+          } catch (err) {
+            console.error(`Error in update of Mux for ${fieldKey}:`, err);
+            failedActions.update.push(updateAction);
+          }
+        }
+      }
     }
 
-    if (failedActions.delete.length > 0 || failedActions.create.length > 0) {
+    if (
+      failedActions.delete.length > 0 ||
+      failedActions.create.length > 0 ||
+      failedActions.update.length > 0
+    ) {
       failedPendingActions[fieldKey] = {
         delete: failedActions.delete,
         create: failedActions.create,
+        update: failedActions.update,
       };
     }
   }
@@ -257,9 +279,7 @@ async function updateEntryFieldWithMuxAsset(
     type: 'plain',
   });
 
-  const entryFromContentful = await cma.entry.get({ entryId, spaceId, environmentId });
-
-  for (const [fieldId, fieldValue] of Object.entries(entryFromContentful.fields)) {
+  for (const [fieldId, fieldValue] of Object.entries(entry.fields)) {
     if (fieldValue && typeof fieldValue === 'object') {
       const [_, localeValue] = Object.entries(fieldValue)[0] || [];
       if (localeValue && typeof localeValue === 'object' && (localeValue as any).assetId) {
@@ -268,7 +288,7 @@ async function updateEntryFieldWithMuxAsset(
           const muxAsset = await fetchMuxAsset(assetId, context);
 
           if (muxAsset === undefined) {
-            entryFromContentful.fields[fieldId] = undefined;
+            entry.fields[fieldId] = undefined;
             continue;
           }
 
@@ -310,8 +330,8 @@ async function updateEntryFieldWithMuxAsset(
             }),
           };
 
-          for (const locale of Object.keys(entryFromContentful.fields[fieldId])) {
-            entryFromContentful.fields[fieldId][locale] = updatedField;
+          for (const locale of Object.keys(entry.fields[fieldId])) {
+            entry.fields[fieldId][locale] = updatedField;
           }
         } catch (err) {
           console.error(`Error updating field ${fieldId} with assetId ${assetId}:`, err);
@@ -320,10 +340,10 @@ async function updateEntryFieldWithMuxAsset(
     }
   }
 
-  const updatedEntry = await cma.entry.update(
-    { entryId, spaceId, environmentId },
-    entryFromContentful
-  );
+  const entryFromContentful = await cma.entry.get({ entryId, spaceId, environmentId });
+  entry.sys.version = entryFromContentful.sys.version;
+
+  const updatedEntry = await cma.entry.update({ entryId, spaceId, environmentId }, entry);
   await cma.entry.publish({ entryId, spaceId, environmentId }, updatedEntry);
   console.log('Entry updated and published with fresh Mux data');
 }
@@ -374,10 +394,33 @@ async function createMuxPlaybackId(assetId: string, policy: string, context: any
   }
 }
 
-export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = async (
-  event: AppEventRequest,
-  context: FunctionEventContext
-) => {
+async function updateMuxAsset(assetId: string, data: any, context: any) {
+  console.log(`Updating Mux asset for assetId ${assetId} with data ${data}`);
+  const { muxAccessTokenId, muxAccessTokenSecret } = context.appInstallationParameters;
+  const credentials = btoa(`${muxAccessTokenId}:${muxAccessTokenSecret}`);
+
+  const requestBody = JSON.stringify({
+    meta: {
+      title: data.title,
+    },
+  });
+
+  const updateRes = await fetch(`https://api.mux.com/video/v1/assets/${assetId}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Basic ${credentials}`,
+      'Content-Type': 'application/json',
+    },
+    body: requestBody,
+  });
+
+  if (!updateRes.ok) {
+    const error = await updateRes.json();
+    throw new Error(`Error updating Mux asset: ${error.error?.messages?.[0] || 'Unknown error'}`);
+  }
+}
+
+export const handler = async (event: any, context: any) => {
   console.log('=== START OF HANDLER ===');
   console.log('Event:', JSON.stringify(event, null, 2));
 

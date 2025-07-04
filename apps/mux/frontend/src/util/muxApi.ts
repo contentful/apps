@@ -49,17 +49,12 @@ function buildAssetSettings(options: ModalData): AssetSettings {
 
   // Metadata case
   if (options.metadataConfig.standardMetadata) {
-    const { title, creatorId, externalId } = options.metadataConfig.standardMetadata;
-    if (title || creatorId || externalId) {
+    const { title, externalId } = options.metadataConfig.standardMetadata;
+    if (title || externalId) {
       settings.meta = {};
       if (title) settings.meta.title = title;
-      if (creatorId) settings.meta.creator_id = creatorId;
       if (externalId) settings.meta.external_id = externalId;
     }
-  }
-  // Custom metadata
-  if (options.metadataConfig.customMetadata) {
-    settings.passthrough = options.metadataConfig.customMetadata;
   }
 
   // Captions case
@@ -210,19 +205,6 @@ export async function createStaticRendition(
     `/video/v1/assets/${assetId}/static-renditions`,
     JSON.stringify({ resolution: type })
   );
-}
-
-export async function updateAsset(apiClient: ApiClient, assetId: string, settings: AssetSettings) {
-  const requestBody: Partial<AssetSettings> = {
-    meta: settings.meta || {
-      title: '',
-      creator_id: '',
-      external_id: '',
-    },
-    passthrough: settings.passthrough || '',
-  };
-
-  return await apiClient.patch(`/video/v1/assets/${assetId}`, JSON.stringify(requestBody));
 }
 
 export async function uploadTrack(

@@ -43,17 +43,19 @@ export type ResolutionType = 'highest' | 'audio-only';
 export type PolicyType = 'signed' | 'public';
 
 export interface PendingAction {
-  type: 'playback' | 'asset' | 'caption' | 'staticRendition' | 'audio';
+  type: 'playback' | 'asset' | 'caption' | 'staticRendition' | 'audio' | 'metadata';
   id?: string;
   data?: {
     policy?: PolicyType;
     assetId?: string;
+    title?: string;
   };
 }
 
 export interface PendingActions {
   delete: PendingAction[];
   create: PendingAction[];
+  update: PendingAction[];
 }
 
 export interface MuxContentfulObject {

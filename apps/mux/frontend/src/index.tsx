@@ -37,6 +37,8 @@ import {
   ResolutionType,
   Track,
   ResyncParams,
+  PendingActions,
+  PendingAction,
 } from './util/types';
 
 import './index.css';
@@ -46,12 +48,10 @@ import {
   getUploadUrl,
   deleteStaticRendition,
   createStaticRendition,
-  updateAsset,
   uploadTrack,
   deleteTrack,
   generateAutoCaptions,
 } from './util/muxApi';
-import { AssetSettings } from './util/muxApi';
 import Sidebar from './locations/Sidebar';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -81,7 +81,9 @@ function normalizeForDiff<T>(obj: T): T {
 // Helper for updating pendingActions
 const updatePendingActions = (value, newPendingActions) => {
   const finalPendingActions =
-    newPendingActions.delete.length === 0 && newPendingActions.create.length === 0
+    newPendingActions.delete.length === 0 &&
+    newPendingActions.create.length === 0 &&
+    newPendingActions.update.length === 0
       ? undefined
       : newPendingActions;
   return { ...value, pendingActions: finalPendingActions };
@@ -584,7 +586,7 @@ export class App extends React.Component<AppProps, AppState> {
     }
 
     if (!this.state.value || !this.state.value.assetId) {
-      throw Error('Something went wrong, because by this point we require an assetId.');
+      return;
     }
 
     if (!isRecursiveCall) {
@@ -869,13 +871,14 @@ export class App extends React.Component<AppProps, AppState> {
       (currentValue.pendingActions?.create?.length || 0) +
       (currentValue.pendingActions?.delete?.length || 0);
 
-    const updatedPendingActions = {
+    const updatedPendingActions: PendingActions = {
       delete: currentValue.pendingActions?.delete
         ? currentValue.pendingActions.delete.filter((action) => action.type !== 'playback')
         : [],
       create: currentValue.pendingActions?.create
         ? currentValue.pendingActions.create.filter((action) => action.type !== 'playback')
         : [],
+      update: currentValue.pendingActions?.update ?? [],
     };
 
     const hasPending =
@@ -994,51 +997,15 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
-  updateMetadata = async (metadata: {
-    standardMetadata: {
-      title?: string;
-      creatorId?: string;
-      externalId?: string;
-    };
-    customMetadata?: string;
-  }) => {
-    if (!this.state.value?.assetId) {
-      this.props.sdk.notifier.error('No asset selected');
-      return;
-    }
-
-    try {
-      const settings: AssetSettings = {
-        meta: metadata.standardMetadata
-          ? {
-              title: metadata.standardMetadata.title || '',
-              creator_id: metadata.standardMetadata.creatorId || '',
-              external_id: metadata.standardMetadata.externalId || '',
-            }
-          : undefined,
-        passthrough: metadata.customMetadata,
-        playback_policies: [],
-        video_quality: '',
-        inputs: [],
-      };
-
-      await updateAsset(this.apiClient, this.state.value.assetId, settings);
-      await this.resync({ skipPlayerResync: true });
-    } catch (error) {
-      console.error('Error updating metadata:', error);
-      this.props.sdk.notifier.error('Error updating metadata');
-    }
-  };
-
   onDeleteTrack = async (trackId: string, type: 'caption' | 'audio') => {
     const value = this.state.value;
     if (!value) return;
-    const pending = value.pendingActions || { delete: [], create: [] };
-    const newDelete = [
+    const pending: PendingActions = value.pendingActions || { delete: [], create: [], update: [] };
+    const newDelete: PendingAction[] = [
       ...pending.delete,
       { type: type === 'caption' ? 'caption' : 'audio', id: trackId },
     ];
-    const newPendingActions = { ...pending, delete: newDelete };
+    const newPendingActions: PendingActions = { ...pending, delete: newDelete };
     await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
   };
 
@@ -1049,7 +1016,7 @@ export class App extends React.Component<AppProps, AppState> {
       (action) =>
         !(action.type === (type === 'caption' ? 'caption' : 'audio') && action.id === trackId)
     );
-    const newPendingActions = {
+    const newPendingActions: PendingActions = {
       ...value.pendingActions,
       delete: newDelete,
     };
@@ -1059,9 +1026,12 @@ export class App extends React.Component<AppProps, AppState> {
   onDeleteRendition = async (renditionId: string) => {
     const value = this.state.value;
     if (!value) return;
-    const pending = value.pendingActions || { delete: [], create: [] };
-    const newDelete = [...pending.delete, { type: 'staticRendition', id: renditionId }];
-    const newPendingActions = { ...pending, delete: newDelete };
+    const pending: PendingActions = value.pendingActions || { delete: [], create: [], update: [] };
+    const newDelete = [
+      ...pending.delete,
+      { type: 'staticRendition', id: renditionId } as PendingAction,
+    ];
+    const newPendingActions: PendingActions = { ...pending, delete: newDelete };
     await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
   };
 
@@ -1071,7 +1041,7 @@ export class App extends React.Component<AppProps, AppState> {
     const newDelete = value.pendingActions.delete.filter(
       (action) => !(action.type === 'staticRendition' && action.id === renditionId)
     );
-    const newPendingActions = {
+    const newPendingActions: PendingActions = {
       ...value.pendingActions,
       delete: newDelete,
     };
@@ -1103,7 +1073,7 @@ export class App extends React.Component<AppProps, AppState> {
   onDeleteAsset = async () => {
     const value = this.state.value;
     if (!value || !value.assetId) return;
-    const pending = value.pendingActions || { delete: [], create: [] };
+    const pending: PendingActions = value.pendingActions || { delete: [], create: [], update: [] };
     const newDelete = [...pending.delete, { type: 'asset', id: value.assetId }];
     const newPendingActions = { ...pending, delete: newDelete };
     await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
@@ -1117,6 +1087,22 @@ export class App extends React.Component<AppProps, AppState> {
       (action) => !(action.type === 'asset' && action.id === value.assetId)
     );
     const newPendingActions = { ...value.pendingActions, delete: newDelete };
+    await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
+  };
+
+  onUpdateMetadata = async ({ standardMetadata }: { standardMetadata: { title?: string } }) => {
+    const value = this.state.value;
+    if (!value) return;
+    const currentTitle = value.meta?.title || '';
+    const newTitle = standardMetadata.title || '';
+    const pending: PendingActions = value.pendingActions || { delete: [], create: [], update: [] };
+    let newUpdate: PendingAction[] =
+      pending.update?.filter((action) => action.type !== 'metadata') ?? [];
+
+    if (currentTitle !== newTitle) {
+      newUpdate = [...newUpdate, { type: 'metadata', data: { title: newTitle } }];
+    }
+    const newPendingActions = { ...pending, update: newUpdate };
     await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
   };
 
@@ -1332,8 +1318,7 @@ export class App extends React.Component<AppProps, AppState> {
                   <Tabs.Panel id="metadata">
                     <MetadataPanel
                       asset={this.state.value}
-                      onSubmit={this.updateMetadata}
-                      sdk={this.props.sdk}
+                      onUpdateMetadata={this.onUpdateMetadata}
                     />
                   </Tabs.Panel>
 
