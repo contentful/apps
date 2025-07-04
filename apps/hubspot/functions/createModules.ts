@@ -38,17 +38,29 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 ) => {
   const success = [];
   const failed = [];
+  let invalidToken = false;
+  let missingScopes = false;
   for (const field of JSON.parse(event.body.fields)) {
     try {
       await createModule(field, context.appInstallationParameters.hubspotAccessToken);
       success.push(field.uniqueId);
     } catch (error) {
+      if (error instanceof InvalidHubspotTokenError) {
+        invalidToken = true;
+        break;
+      }
+      if (error instanceof MissingHubspotScopesError) {
+        missingScopes = true;
+        break;
+      }
       failed.push(field.uniqueId);
     }
   }
   return {
     success,
     failed,
+    invalidToken,
+    missingScopes,
   };
 };
 
@@ -81,6 +93,13 @@ const createModuleFile = async (
   });
 
   if (!response.ok) {
+    const error = await response.json();
+    if (error?.category === 'INVALID_AUTHENTICATION') {
+      throw new InvalidHubspotTokenError(error.message);
+    }
+    if (error?.category === 'MISSING_SCOPES') {
+      throw new MissingHubspotScopesError(error.message);
+    }
     const errorData = await response.text();
     throw new Error(
       `HubSpot API request failed: ${response.status} ${response.statusText} - ${errorData}`
@@ -145,3 +164,17 @@ const getFiles = (field: SelectedSdkField): { fieldsFile: string; moduleFile: st
   }
   return { fieldsFile: JSON.stringify(fieldsFile), moduleFile };
 };
+
+class InvalidHubspotTokenError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidHubspotTokenError';
+  }
+}
+
+class MissingHubspotScopesError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'MissingHubspotScopesError';
+  }
+}

@@ -85,8 +85,8 @@ const Dialog = () => {
           },
         }
       );
-      const { success, failed } = JSON.parse(response.response.body);
-      showResults(success, failed);
+      const { success, failed, invalidToken, missingScopes } = JSON.parse(response.response.body);
+      showResults(success, failed, invalidToken, missingScopes);
       sdk.close();
     } catch (error) {
       console.error('Error creating modules: ', error);
@@ -95,20 +95,30 @@ const Dialog = () => {
     }
   };
 
-  const showResults = (success: SelectedSdkField[] = [], failed: SelectedSdkField[] = []) => {
+  const showResults = (
+    success: SelectedSdkField[] = [],
+    failed: SelectedSdkField[] = [],
+    invalidToken: boolean,
+    missingScopes: boolean
+  ) => {
     const successMessage = `${success.length} entry field${
       success.length === 1 ? '' : 's'
-    } successfully synced.`;
+    } successfully synced`;
     const failedMessage = `${failed.length} entry field${
       failed.length === 1 ? '' : 's'
-    } did not sync, please try again.`;
+    } did not sync, please try again`;
+    const mixedMessage = `${successMessage} but ${failedMessage}`;
 
-    if (failed.length > 0 && success.length > 0) {
-      sdk.notifier.warning(`${successMessage}\n${failedMessage}`);
+    if (invalidToken) {
+      sdk.notifier.error('Invalid Hubspot access token.');
+    } else if (missingScopes) {
+      sdk.notifier.error('The Hubspot token is missing the required "content" scope.');
+    } else if (failed.length > 0 && success.length > 0) {
+      sdk.notifier.warning(mixedMessage);
     } else if (failed.length > 0) {
-      sdk.notifier.error(failedMessage);
+      sdk.notifier.error(`${failedMessage}.`);
     } else {
-      sdk.notifier.success(successMessage);
+      sdk.notifier.success(`${successMessage}.`);
     }
   };
 
