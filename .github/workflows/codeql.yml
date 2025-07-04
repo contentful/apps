@@ -1,17 +1,15 @@
 ---
-name: "CodeQL Scan for GitHub Actions Workflows"
+name: "CodeQL Scan: Actions + JS/TS"
 
 on:
   push:
     branches: [master]
-    paths: [".github/workflows/**"]
   pull_request:
     branches: [master]
-    paths: [".github/workflows/**"]
 
 jobs:
   analyze:
-    name: Analyze GitHub Actions workflows
+    name: Analyze workflows and JS/TS
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -24,9 +22,9 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: actions
+          languages: |
+            actions
+            javascript-typescript
 
-      - name: Run CodeQL Analysis
+      - name: Autobuild and analyze
         uses: github/codeql-action/analyze@v3
-        with:
-          category: actions
