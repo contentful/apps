@@ -1,4 +1,3 @@
-import React from 'react';
 import Dialog from '../../src/locations/Dialog';
 import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -151,11 +150,11 @@ describe('Dialog component', () => {
     expect(nextButton).not.toBeDisabled();
   });
 
-  it('should call app action when next button is clicked', async () => {
+  it('should complete the full flow: select fields, map module names, send data and show results', async () => {
     const user = userEvent.setup();
     const mockCreateWithResponse = vi.fn().mockResolvedValue({
       response: {
-        body: JSON.stringify({ success: true }),
+        body: JSON.stringify({ success: ['title', 'description-en-us'], failed: [] }),
       },
     });
 
@@ -163,15 +162,28 @@ describe('Dialog component', () => {
 
     render(<Dialog />);
 
-    // Select a field to enable the next button
     const titleCheckbox = screen.getByLabelText('Title', { exact: false });
-    await user.click(titleCheckbox);
+    const descriptionEnCheckbox = screen.getByLabelText('Description (en-US)', { exact: false });
 
-    // Click the next button
+    await user.click(titleCheckbox);
+    await user.click(descriptionEnCheckbox);
+
     const nextButton = screen.getByRole('button', { name: 'Next' });
     await user.click(nextButton);
 
-    // Verify that the app action was called with correct parameters
+    expect(
+      screen.getByText(
+        `Optionally, name the Hubspot custom modules that will be synced to entry field content. Hubspot module names can include numbers, letters, hyphens (-), and underscores (_) but no spaces or special characters.`
+      )
+    ).toBeInTheDocument();
+
+    const titleModuleNameInput = screen.getByLabelText('Hubspot module name for Title');
+    await user.clear(titleModuleNameInput);
+    await user.type(titleModuleNameInput, 'Custom-Title-Module');
+
+    const saveAndSyncButton = screen.getByRole('button', { name: 'Save and sync' });
+    await user.click(saveAndSyncButton);
+
     expect(mockCreateWithResponse).toHaveBeenCalledWith(
       {
         spaceId: 'test-space',
@@ -181,10 +193,20 @@ describe('Dialog component', () => {
       },
       {
         parameters: {
-          entryTitle: 'test-entry-title',
-          fields: JSON.stringify([expectedFields[0]]), // title field
+          fields: JSON.stringify([
+            {
+              ...expectedFields[0],
+              moduleName: 'Custom-Title-Module',
+            },
+            {
+              ...expectedFields[1],
+              moduleName: 'test-entry-title_Description',
+            },
+          ]),
         },
       }
     );
+
+    expect(mockSdk.notifier.success).toHaveBeenCalledWith('2 entry fields successfully synced.');
   });
 });

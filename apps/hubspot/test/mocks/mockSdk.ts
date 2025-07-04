@@ -9,6 +9,8 @@ const mockSdk: any = {
   },
   notifier: {
     error: vi.fn(),
+    warning: vi.fn(),
+    success: vi.fn(),
   },
   ids: {
     app: 'test-app',
@@ -31,6 +33,7 @@ const mockSdk: any = {
   locales: {
     default: 'en-US',
   },
+  close: vi.fn(),
   entry: {
     fields: {
       title: {
