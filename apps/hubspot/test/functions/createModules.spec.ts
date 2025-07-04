@@ -66,6 +66,8 @@ describe('createModules', () => {
     expect(result).toEqual({
       success: [mockField.uniqueId],
       failed: [],
+      invalidToken: false,
+      missingScopes: false,
     });
 
     // Verify fetch was called 3 times (once for each file: meta.json, fields.json, module.html)
@@ -113,11 +115,63 @@ describe('createModules', () => {
     const mockFetch = vi.mocked(fetch);
     mockFetch.mockResolvedValueOnce({
       ok: false,
-      status: 401,
-      statusText: 'Unauthorized',
-      text: () => Promise.resolve('Invalid token'),
+      status: 400,
+      statusText: 'Bad Request',
+      text: () => Promise.resolve('Invalid file'),
+      json: () => Promise.resolve({ message: 'Invalid file' }),
     } as Response);
 
+    const mockField: SelectedSdkField = {
+      type: 'Text',
+      id: 'test-field-id',
+      uniqueId: 'test-module',
+      name: 'Test Field',
+      supported: true,
+      value: 'Hello World',
+      moduleName: 'Entry title - Test Field',
+    };
+
+    const mockEvent = {
+      body: {
+        fields: JSON.stringify([mockField]),
+      },
+    };
+
+    const result = await handler(mockEvent as any, mockedContext('test-token') as any);
+
+    // Verify the result
+    expect(result).toEqual({
+      success: [],
+      failed: [mockField.uniqueId],
+      invalidToken: false,
+      missingScopes: false,
+    });
+
+    // Verify fetch was called once (fails on first call)
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    // Verify the error call
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://api.hubapi.com/cms/v3/source-code/published/content/Entry title - Test Field.module/meta.json',
+      expect.objectContaining({
+        method: 'PUT',
+        headers: {
+          Authorization: 'Bearer test-token',
+        },
+      })
+    );
+  });
+
+  it('should handle API errors when the token is invalid', async () => {
+    // Mock failed fetch response
+    const mockFetch = vi.mocked(fetch);
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+      statusText: 'Unauthorized',
+      text: () => Promise.resolve('Invalid credentials'),
+      json: () => Promise.resolve({ category: 'INVALID_AUTHENTICATION' }),
+    } as Response);
     const mockField: SelectedSdkField = {
       type: 'Text',
       id: 'test-field-id',
@@ -139,22 +193,50 @@ describe('createModules', () => {
     // Verify the result
     expect(result).toEqual({
       success: [],
-      failed: [mockField.uniqueId],
+      failed: [],
+      invalidToken: true,
+      missingScopes: false,
     });
-
-    // Verify fetch was called once (fails on first call)
     expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
 
-    // Verify the error call
-    expect(mockFetch).toHaveBeenCalledWith(
-      'https://api.hubapi.com/cms/v3/source-code/published/content/Entry title - Test Field.module/meta.json',
-      expect.objectContaining({
-        method: 'PUT',
-        headers: {
-          Authorization: 'Bearer invalid-token',
-        },
-      })
-    );
+  it('should handle API errors when the token is missing scopes', async () => {
+    // Mock failed fetch response
+    const mockFetch = vi.mocked(fetch);
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+      statusText: 'Unauthorized',
+      text: () => Promise.resolve('Invalid credentials'),
+      json: () => Promise.resolve({ category: 'MISSING_SCOPES' }),
+    } as Response);
+
+    const mockField: SelectedSdkField = {
+      type: 'Text',
+      id: 'test-field-id',
+      uniqueId: 'test-module',
+      name: 'Test Field',
+      supported: true,
+      value: 'Hello World',
+      moduleName: 'Entry title - Test Field',
+    };
+
+    const mockEvent = {
+      body: {
+        fields: JSON.stringify([mockField]),
+      },
+    };
+
+    const result = await handler(mockEvent as any, mockedContext('test-token') as any);
+
+    // Verify the result
+    expect(result).toEqual({
+      success: [],
+      failed: [],
+      invalidToken: false,
+      missingScopes: true,
+    });
+    expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
   it('should successfully create a module for a text field', async () => {
@@ -183,6 +265,8 @@ describe('createModules', () => {
     expect(result).toEqual({
       success: [mockField.uniqueId],
       failed: [],
+      invalidToken: false,
+      missingScopes: false,
     });
 
     // Verify fetch was called 3 times (once for each file: meta.json, fields.json, module.html)
@@ -243,6 +327,8 @@ describe('createModules', () => {
     expect(result).toEqual({
       success: [mockField.uniqueId],
       failed: [],
+      invalidToken: false,
+      missingScopes: false,
     });
 
     // Verify fetch was called 3 times (once for each file: meta.json, fields.json, module.html)
@@ -302,6 +388,8 @@ describe('createModules', () => {
     expect(result).toEqual({
       success: [mockField.uniqueId],
       failed: [],
+      invalidToken: false,
+      missingScopes: false,
     });
 
     // Verify fetch was called 3 times
@@ -359,6 +447,8 @@ describe('createModules', () => {
     expect(result).toEqual({
       success: [mockField.uniqueId],
       failed: [],
+      invalidToken: false,
+      missingScopes: false,
     });
 
     // Verify fetch was called 3 times
@@ -416,6 +506,8 @@ describe('createModules', () => {
     expect(result).toEqual({
       success: [mockField.uniqueId],
       failed: [],
+      invalidToken: false,
+      missingScopes: false,
     });
 
     // Verify fetch was called 3 times
@@ -473,6 +565,8 @@ describe('createModules', () => {
     expect(result).toEqual({
       success: [mockField.uniqueId],
       failed: [],
+      invalidToken: false,
+      missingScopes: false,
     });
 
     // Verify fetch was called 3 times
@@ -533,6 +627,8 @@ describe('createModules', () => {
     expect(result).toEqual({
       success: [mockField.uniqueId],
       failed: [],
+      invalidToken: false,
+      missingScopes: false,
     });
 
     // Verify fetch was called 3 times
@@ -595,6 +691,8 @@ describe('createModules', () => {
     expect(result).toEqual({
       success: [mockField.uniqueId],
       failed: [],
+      invalidToken: false,
+      missingScopes: false,
     });
 
     // Verify fetch was called 3 times
