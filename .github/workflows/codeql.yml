@@ -1,5 +1,5 @@
 ---
-name: "CodeQL Scan: Actions + JS/TS"
+name: "CodeQL Scan: Actions+existing"
 
 on:
   push:
