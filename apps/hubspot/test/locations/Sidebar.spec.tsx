@@ -1,5 +1,5 @@
 import Sidebar from '../../src/locations/Sidebar';
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor, screen } from '@testing-library/react';
 import { mockCma, mockSdk } from '../mocks';
 import { expectedFields } from '../mocks/mockSdk';
 
@@ -12,9 +12,16 @@ vi.mock('contentful-management', () => ({
   createClient: () => mockCma,
 }));
 
+const mockGetConnectedFields = vi.fn();
+vi.mock('../../src/utils/ConfigEntryService', () => ({
+  default: vi.fn().mockImplementation(() => ({
+    getConnectedFields: mockGetConnectedFields,
+  })),
+}));
+
 describe('Sidebar component', () => {
   beforeEach(() => {
-    vi.clearAllMocks(); // Clear mocks before each test
+    vi.clearAllMocks();
   });
 
   afterEach(cleanup);
@@ -57,5 +64,45 @@ describe('Sidebar component', () => {
     fireEvent.click(pageButton);
 
     expect(mockSdk.navigator.openCurrentAppPage).toHaveBeenCalledTimes(1);
+  });
+
+  it('displays warning when connected fields have errors', async () => {
+    mockGetConnectedFields.mockResolvedValue({
+      'test-entry-id': [
+        {
+          fieldId: 'title',
+          locale: 'en-US',
+          moduleId: 'test-module',
+          updatedAt: '2024-01-01T00:00:00Z',
+          error: { status: 400, message: 'Bad Request' },
+        },
+      ],
+    });
+
+    render(<Sidebar />);
+    expect(await screen.findByText('Unable to sync content', { exact: false })).toBeInTheDocument();
+  });
+
+  it('displays synced fields count message', async () => {
+    mockGetConnectedFields.mockResolvedValue({
+      'test-entry-id': [
+        {
+          fieldId: 'title',
+          locale: 'en-US',
+          moduleId: 'test-module',
+          updatedAt: '2024-01-01T00:00:00Z',
+        },
+        {
+          fieldId: 'description',
+          locale: 'en-US',
+          moduleId: 'test-module',
+          updatedAt: '2024-01-01T00:00:00Z',
+        },
+      ],
+    });
+
+    render(<Sidebar />);
+
+    expect(await screen.findByText('2 fields synced', { exact: false })).toBeInTheDocument();
   });
 });

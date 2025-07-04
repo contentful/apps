@@ -17,6 +17,7 @@ const mockSdk: any = {
     space: 'test-space',
     environment: 'test-environment',
     environmentAlias: 'test-environment-alias',
+    entry: 'test-entry-id',
   },
   cmaAdapter: {
     // Mock CMA adapter for testing

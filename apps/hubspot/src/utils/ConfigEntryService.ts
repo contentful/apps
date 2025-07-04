@@ -16,11 +16,16 @@ class ConfigEntryService {
     await this.createEntry();
   }
 
-  async getConfigEntry(): Promise<EntryProps<KeyValueMap>> {
+  private async getConfigEntry(): Promise<EntryProps<KeyValueMap>> {
     if (!this.configEntry) {
       this.configEntry = await this.cma.entry.get({ entryId: CONFIG_ENTRY_ID });
     }
     return this.configEntry;
+  }
+
+  async getConnectedFields(): Promise<ConnectedFields> {
+    const configEntry = await this.getConfigEntry();
+    return configEntry.fields[CONFIG_FIELD_ID][this.getDefaultLocale()];
   }
 
   async updateConfig(connectedFields: ConnectedFields, cma: PlainClientAPI) {
