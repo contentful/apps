@@ -107,6 +107,12 @@ describe('app event handler', () => {
                 moduleId: 'test-module-id',
               },
             ],
+            'another-entry-id': [
+              {
+                fieldId: 'anotherField',
+                moduleId: 'another-module-id',
+              },
+            ],
           },
         },
       },
@@ -123,5 +129,15 @@ describe('app event handler', () => {
 
     expect(getConfigEntryMock).toHaveBeenCalled();
     expect(updateConfigMock).toHaveBeenCalled();
+
+    const expectedConnectedFields = {
+      'another-entry-id': [
+        {
+          fieldId: 'anotherField',
+          moduleId: 'another-module-id',
+        },
+      ],
+    };
+    expect(updateConfigMock).toHaveBeenCalledWith(expectedConnectedFields);
   });
 });
