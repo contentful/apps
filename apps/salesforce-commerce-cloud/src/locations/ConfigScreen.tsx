@@ -1,8 +1,10 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Heading, Form, TextInput, FormControl } from '@contentful/f36-components';
-import { Workbench } from '@contentful/f36-workbench';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import { Layout } from '@contentful/f36-layout-alpha';
+import tokens from '@contentful/f36-tokens';
+import { css } from '@emotion/react';
 
 export interface AppInstallationParameters {
   clientId: string;
@@ -11,6 +13,14 @@ export interface AppInstallationParameters {
   shortCode: string;
   siteId: string;
 }
+
+const styles = {
+  body: css({ paddingTop: 0 }),
+  form: css({
+    maxWidth: tokens.contentWidthDefault,
+    margin: `${tokens.spacingL} auto 0`,
+  }),
+};
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({
@@ -149,22 +159,24 @@ const ConfigScreen = () => {
   }, [sdk]);
 
   return (
-    <Workbench.Content>
-      <Form>
-        <Heading>App Config</Heading>
-        {salesforceInputs.map((input) => (
-          <FormInput
-            key={input.id}
-            input={input}
-            value={parameters[input.id as keyof AppInstallationParameters]}
-            isInvalid={valid[input.id] !== null && !valid[input.id]}
-            onInputChange={onInputChange}
-            onInputFocus={onInputFocus}
-            onInputBlur={onInputBlur}
-          />
-        ))}
-      </Form>
-    </Workbench.Content>
+    <Layout variant="fullscreen" offsetTop={0}>
+      <Layout.Body css={styles.body}>
+        <Form css={styles.form}>
+          <Heading>App Config</Heading>
+          {salesforceInputs.map((input) => (
+            <FormInput
+              key={input.id}
+              input={input}
+              value={parameters[input.id as keyof AppInstallationParameters]}
+              isInvalid={valid[input.id] !== null && !valid[input.id]}
+              onInputChange={onInputChange}
+              onInputFocus={onInputFocus}
+              onInputBlur={onInputBlur}
+            />
+          ))}
+        </Form>
+      </Layout.Body>
+    </Layout>
   );
 };
 

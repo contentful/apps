@@ -6,9 +6,9 @@ import 'graphiql/graphiql.min.css';
 import { Box } from '@contentful/f36-components';
 import { css } from '@emotion/css';
 
-//TODO:  make it 100% height :)
 const style = css({
   height: '800px',
+  minHeight: '100vh',
 });
 
 type Props = {

@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
+import { css } from '@emotion/css';
 import { GraphiqlView } from './GraphiqlView';
-import { Workbench } from '@contentful/f36-workbench';
 import { useQuery } from '@tanstack/react-query';
-import { Card, Modal, ModalContent, Note } from '@contentful/f36-components';
+import { Card, GlobalStyles, Modal, ModalContent, Note } from '@contentful/f36-components';
+import { Layout } from '@contentful/f36-layout-alpha';
 
 interface PageProps {
   sdk: PageAppSDK;
 }
+
+export const styles = {
+  body: css({
+    // emotion version mismatch between this app and F36 requires this override
+    padding: '0 !important',
+  }),
+};
 
 const Page = (props: PageProps) => {
   const { sdk } = props;
@@ -37,20 +45,19 @@ const Page = (props: PageProps) => {
   });
 
   return cpaToken ? (
-    <Workbench>
-      <Workbench.Content type={'full'}>
+    <Layout variant="fullscreen" offsetTop={0}>
+      <Layout.Body className={styles.body}>
         <GraphiqlView
           spaceId={spaceId}
           environmentId={spaceEnvironmentAlias || spaceEnvironment}
           cpaToken={cpaToken}
           graphqlHost={sdk.hostnames.graphql}
         />
-
         <Modal isShown={isModelOpen} onClose={() => setModelOpen(false)}>
           <ModalContent>Go Vikas</ModalContent>
         </Modal>
-      </Workbench.Content>
-    </Workbench>
+      </Layout.Body>
+    </Layout>
   ) : (
     <Card style={{ margin: '1em' }}>
       <Note variant="warning">
