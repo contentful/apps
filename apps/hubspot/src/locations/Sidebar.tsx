@@ -62,14 +62,14 @@ const Sidebar = () => {
 
   return (
     <Flex gap="spacingM" flexDirection="column">
-      {connectedFields?.some(field => field.error) && (
-          <Note variant="negative" icon={<ErrorCircleOutlineIcon />}>
-            <Text lineHeight="lineHeightCondensed" fontColor="gray800">
-              Unable to sync content. Review your connected or{' '}
-              <TextLink onClick={() => sdk.navigator.openAppConfig()}>app configuration</TextLink>.
-            </Text>
-          </Note>
-        )}
+      {connectedFields?.some((field) => field.error) && (
+        <Note variant="negative" icon={<ErrorCircleOutlineIcon />}>
+          <Text lineHeight="lineHeightCondensed" fontColor="gray800">
+            Unable to sync content. Review your connected or{' '}
+            <TextLink onClick={() => sdk.navigator.openAppConfig()}>app configuration</TextLink>.
+          </Text>
+        </Note>
+      )}
 
       <Flex gap="spacingXs" flexDirection="column">
         <Button
