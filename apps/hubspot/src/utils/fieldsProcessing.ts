@@ -12,6 +12,10 @@ export type SdkField = {
   value: any;
 };
 
+export type SelectedSdkField = SdkField & {
+  moduleName: string;
+};
+
 const SUPPORTED_FIELD_TYPES = [
   'Symbol',
   'Text',

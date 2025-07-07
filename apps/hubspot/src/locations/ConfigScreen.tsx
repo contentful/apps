@@ -76,34 +76,6 @@ const ConfigScreen = () => {
       sdk.notifier.error(EMPTY_MESSAGE);
       return false;
     }
-
-    try {
-      const response = await cma.appActionCall.createWithResponse(
-        {
-          spaceId: sdk.ids.space,
-          environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
-          appDefinitionId: sdk.ids.app!,
-          appActionId: 'validateHubspotToken',
-        },
-        {
-          parameters: {
-            token: parameters.hubspotAccessToken,
-          },
-        }
-      );
-
-      const responseData = JSON.parse(response.response.body);
-
-      if (responseData.error) {
-        setHubspotTokenError(responseData.error);
-        sdk.notifier.error(responseData.error);
-        return false;
-      }
-    } catch (error) {
-      setHubspotTokenError('Error validating HubSpot token');
-      sdk.notifier.error('Error validating HubSpot token');
-      return false;
-    }
     return true;
   };
 
@@ -178,7 +150,7 @@ const ConfigScreen = () => {
                 placeholder="Enter your access token"
                 value={parameters.hubspotAccessToken}
                 onChange={(e) =>
-                  setParameters({ ...parameters, hubspotAccessToken: e.target.value })
+                  setParameters({ ...parameters, hubspotAccessToken: e.target.value.trim() })
                 }
                 isRequired
                 type="password"

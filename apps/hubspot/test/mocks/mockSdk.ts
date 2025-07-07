@@ -9,12 +9,15 @@ const mockSdk: any = {
   },
   notifier: {
     error: vi.fn(),
+    warning: vi.fn(),
+    success: vi.fn(),
   },
   ids: {
     app: 'test-app',
     space: 'test-space',
     environment: 'test-environment',
     environmentAlias: 'test-environment-alias',
+    entry: 'test-entry-id',
   },
   cmaAdapter: {
     // Mock CMA adapter for testing
@@ -31,6 +34,7 @@ const mockSdk: any = {
   locales: {
     default: 'en-US',
   },
+  close: vi.fn(),
   entry: {
     fields: {
       title: {

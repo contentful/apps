@@ -41,27 +41,6 @@
           "name": "Fields",
           "type": "Symbol",
           "required": true
-        },
-        {
-          "id": "entryTitle",
-          "name": "Entry title",
-          "type": "Symbol",
-          "required": true
-        }
-      ]
-    },
-    {
-      "id": "validateHubspotToken",
-      "name": "Validate Hubspot config screen token",
-      "type": "function-invocation",
-      "functionId": "validateHubspotToken",
-      "category": "Custom",
-      "parameters": [
-        {
-          "id": "token",
-          "name": "Token",
-          "type": "Symbol",
-          "required": true
         }
       ]
     }
