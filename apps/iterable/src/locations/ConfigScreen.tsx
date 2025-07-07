@@ -66,7 +66,7 @@ const ConfigScreen = () => {
   }, [sdk]);
 
   const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setParameters({ ...parameters, contentfulApiKey: e.target.value });
+    setParameters({ ...parameters, contentfulApiKey: e.target.value.trim() });
   };
 
   return (
