@@ -1,14 +1,20 @@
 import { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
-import { CONFIG_CONTENT_TYPE_ID, CONFIG_ENTRY_ID, CONFIG_FIELD_ID, ConnectedFields } from './utils';
+import {
+  CONFIG_CONTENT_TYPE_ID,
+  CONFIG_ENTRY_ID,
+  CONFIG_FIELD_ID,
+  ConnectedFields,
+  EntryConnectedFields,
+} from './utils';
 
 class ConfigEntryService {
   private cma: PlainClientAPI;
   private configEntry?: EntryProps<KeyValueMap>;
   private defaultLocale: string;
 
-  constructor(cma: PlainClientAPI, defaultLocale: string) {
+  constructor(cma: PlainClientAPI, defaultLocale?: string) {
     this.cma = cma;
-    this.defaultLocale = defaultLocale;
+    this.defaultLocale = defaultLocale || 'en-US';
   }
 
   async createConfig() {
@@ -23,7 +29,7 @@ class ConfigEntryService {
     return this.configEntry;
   }
 
-  async updateConfig(connectedFields: ConnectedFields, cma: PlainClientAPI) {
+  async updateConfig(connectedFields: ConnectedFields) {
     const configEntry = await this.getConfigEntry();
 
     if (!configEntry.fields[CONFIG_FIELD_ID]) {
@@ -31,10 +37,25 @@ class ConfigEntryService {
     }
 
     configEntry.fields[CONFIG_FIELD_ID][this.getDefaultLocale()] = connectedFields;
-    const updatedEntry = await cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
+    const updatedEntry = await this.cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
     this.configEntry = updatedEntry;
 
     return updatedEntry;
+  }
+
+  async getConnectedFields(): Promise<ConnectedFields> {
+    const configEntry: EntryProps = await this.getConfigEntry();
+    const configField = configEntry.fields[CONFIG_FIELD_ID];
+    if (!configField) {
+      console.error(`Configuration field ${CONFIG_FIELD_ID} not found`);
+      throw new Error(`Configuration field ${CONFIG_FIELD_ID} not found`);
+    }
+    return Object.values(configField)[0] as ConnectedFields;
+  }
+
+  async getEntryConnectedFields(entryId: string): Promise<EntryConnectedFields> {
+    const connectedFields = await this.getConnectedFields();
+    return connectedFields[entryId] || [];
   }
 
   private async createContentType() {
