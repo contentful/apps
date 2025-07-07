@@ -62,9 +62,7 @@ const Sidebar = () => {
 
   return (
     <Flex gap="spacingM" flexDirection="column">
-      {connectedFields &&
-        connectedFields.length > 0 &&
-        connectedFields.some((field) => field.error) && (
+      {connectedFields?.some(field => field.error) && (
           <Note variant="negative" icon={<ErrorCircleOutlineIcon />}>
             <Text lineHeight="lineHeightCondensed" fontColor="gray800">
               Unable to sync content. Review your connected or{' '}
