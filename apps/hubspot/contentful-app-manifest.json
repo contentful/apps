@@ -10,15 +10,6 @@
       "accepts": ["appaction.call"]
     },
     {
-      "id": "validateHubspotToken",
-      "name": "Validate Hubspot config screen token",
-      "description": "Function to validate Hubspot access token of the config screen from an App Action",
-      "path": "functions/validateHubspotToken.js",
-      "entryFile": "functions/validateHubspotToken.ts",
-      "allowNetworks": ["https://api.hubapi.com"],
-      "accepts": ["appaction.call"]
-    },
-    {
       "id": "appEventHandler",
       "name": "App event handler function",
       "description": "Function to handle App Events.",
