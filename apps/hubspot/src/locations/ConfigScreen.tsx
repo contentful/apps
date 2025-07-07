@@ -150,7 +150,7 @@ const ConfigScreen = () => {
                 placeholder="Enter your access token"
                 value={parameters.hubspotAccessToken}
                 onChange={(e) =>
-                  setParameters({ ...parameters, hubspotAccessToken: e.target.value })
+                  setParameters({ ...parameters, hubspotAccessToken: e.target.value.trim() })
                 }
                 isRequired
                 type="password"
