@@ -16,18 +16,6 @@ describe('ConfigEntryService', () => {
     service = new ConfigEntryService(cmaMock, defaultLocale);
   });
 
-  it('getConfigEntry fetches and caches the config entry', async () => {
-    const fakeEntry = { sys: { id: 'config' }, fields: {} };
-    cmaMock.entry.get.mockResolvedValue(fakeEntry);
-
-    const result1 = await service.getConfigEntry();
-    const result2 = await service.getConfigEntry();
-
-    expect(result1).toBe(fakeEntry);
-    expect(result2).toBe(fakeEntry);
-    expect(cmaMock.entry.get).toHaveBeenCalledTimes(1); // Only fetched once due to caching
-  });
-
   it('updateConfig updates the config entry and returns the updated entry', async () => {
     const initialEntry = { sys: { id: 'config' }, fields: {} };
     const updatedEntry = {
@@ -66,5 +54,64 @@ describe('ConfigEntryService', () => {
         fields: expect.objectContaining({ connectedFields: { [defaultLocale]: { test: 123 } } }),
       })
     );
+  });
+
+  it('getConnectedFields returns the correct fields for the default locale', async () => {
+    const connectedFields = { foo: [{ fieldId: 'bar', moduleId: 'baz' }] };
+    const configEntry = {
+      sys: { id: 'config' },
+      fields: { connectedFields: { [defaultLocale]: connectedFields } },
+    };
+    cmaMock.entry.get.mockResolvedValue(configEntry);
+
+    service = new ConfigEntryService(cmaMock, defaultLocale);
+    const result = await service.getConnectedFields();
+
+    expect(result).toEqual(connectedFields);
+  });
+
+  it('getConnectedFields throws if config field is missing', async () => {
+    const configEntry = {
+      sys: { id: 'config' },
+      fields: {},
+    };
+    cmaMock.entry.get.mockResolvedValue(configEntry);
+
+    service = new ConfigEntryService(cmaMock, defaultLocale);
+
+    await expect(service.getConnectedFields()).rejects.toThrow();
+  });
+
+  it('getEntryConnectedFields returns the correct fields for an entryId', async () => {
+    const connectedFields = {
+      foo: [{ fieldId: 'bar', moduleId: 'baz' }],
+      test: [{ fieldId: 'f', moduleId: 'm' }],
+    };
+    const configEntry = {
+      sys: { id: 'config' },
+      fields: { connectedFields: { [defaultLocale]: connectedFields } },
+    };
+    cmaMock.entry.get.mockResolvedValue(configEntry);
+
+    service = new ConfigEntryService(cmaMock, defaultLocale);
+    const result = await service.getEntryConnectedFields('test');
+
+    expect(result).toEqual([{ fieldId: 'f', moduleId: 'm' }]);
+  });
+
+  it('getEntryConnectedFields returns an empty array if entryId not found', async () => {
+    const connectedFields = {
+      foo: [{ fieldId: 'bar', moduleId: 'baz' }],
+    };
+    const configEntry = {
+      sys: { id: 'config' },
+      fields: { connectedFields: { [defaultLocale]: connectedFields } },
+    };
+    cmaMock.entry.get.mockResolvedValue(configEntry);
+
+    service = new ConfigEntryService(cmaMock, defaultLocale);
+    const result = await service.getEntryConnectedFields('notfound');
+
+    expect(result).toEqual([]);
   });
 });

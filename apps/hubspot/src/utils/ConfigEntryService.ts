@@ -22,7 +22,7 @@ class ConfigEntryService {
     await this.createEntry();
   }
 
-  async getConfigEntry(): Promise<EntryProps<KeyValueMap>> {
+  private async getConfigEntry(): Promise<EntryProps<KeyValueMap>> {
     if (!this.configEntry) {
       this.configEntry = await this.cma.entry.get({ entryId: CONFIG_ENTRY_ID });
     }
@@ -44,13 +44,8 @@ class ConfigEntryService {
   }
 
   async getConnectedFields(): Promise<ConnectedFields> {
-    const configEntry: EntryProps = await this.getConfigEntry();
-    const configField = configEntry.fields[CONFIG_FIELD_ID];
-    if (!configField) {
-      console.error(`Configuration field ${CONFIG_FIELD_ID} not found`);
-      throw new Error(`Configuration field ${CONFIG_FIELD_ID} not found`);
-    }
-    return Object.values(configField)[0] as ConnectedFields;
+    const configEntry = await this.getConfigEntry();
+    return configEntry.fields[CONFIG_FIELD_ID][this.getDefaultLocale()];
   }
 
   async getEntryConnectedFields(entryId: string): Promise<EntryConnectedFields> {

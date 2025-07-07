@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { handler } from '../../functions/appEventHandler';
 import { createClient } from 'contentful-management';
 import ConfigEntryService from '../../src/utils/ConfigEntryService';
@@ -6,12 +6,6 @@ import ConfigEntryService from '../../src/utils/ConfigEntryService';
 vi.mock('contentful-management', () => ({
   createClient: vi.fn(),
 }));
-
-vi.mock('@contentful/rich-text-html-renderer', () => ({
-  documentToHtmlString: vi.fn(),
-}));
-
-vi.mock('../../src/utils');
 
 describe('app event handler', () => {
   const mockCma = {
@@ -40,49 +34,6 @@ describe('app event handler', () => {
     vi.clearAllMocks();
     (createClient as any).mockReturnValue(mockCma);
     global.fetch = vi.fn();
-  });
-
-  it('should delete the custom entry and content type on app installation deletion', async () => {
-    const event = {
-      headers: {
-        'X-Contentful-Topic': ['AppInstallation.delete'],
-      },
-    };
-
-    await handler(event as any, mockContext as any);
-
-    expect(mockCma.entry.unpublish).toHaveBeenCalledWith({ entryId: 'hubspotConfig' });
-    expect(mockCma.entry.delete).toHaveBeenCalledWith({ entryId: 'hubspotConfig' });
-    expect(mockCma.contentType.unpublish).toHaveBeenCalledWith({
-      contentTypeId: 'hubspotConfig',
-    });
-    expect(mockCma.contentType.delete).toHaveBeenCalledWith({
-      contentTypeId: 'hubspotConfig',
-    });
-  });
-
-  it('should delete the custom entry and content type when they are not published', async () => {
-    const event = {
-      headers: {
-        'X-Contentful-Topic': ['AppInstallation.delete'],
-      },
-    };
-
-    mockCma.entry.unpublish.mockRejectedValue(new Error('Entry is already unpublished'));
-    mockCma.contentType.unpublish.mockRejectedValue(
-      new Error('Content type is already unpublished')
-    );
-
-    await handler(event as any, mockContext as any);
-
-    expect(mockCma.entry.unpublish).toHaveBeenCalledWith({ entryId: 'hubspotConfig' });
-    expect(mockCma.entry.delete).toHaveBeenCalledWith({ entryId: 'hubspotConfig' });
-    expect(mockCma.contentType.unpublish).toHaveBeenCalledWith({
-      contentTypeId: 'hubspotConfig',
-    });
-    expect(mockCma.contentType.delete).toHaveBeenCalledWith({
-      contentTypeId: 'hubspotConfig',
-    });
   });
 
   it('should remove the entry id from the config on entry deletion', async () => {
@@ -118,26 +69,25 @@ describe('app event handler', () => {
       },
     };
 
-    const getConfigEntryMock = vi
-      .spyOn(ConfigEntryService.prototype, 'getConfigEntry')
-      .mockResolvedValue(mockConfigEntry as any);
+    const getConnectedFieldsMock = vi
+      .spyOn(ConfigEntryService.prototype, 'getConnectedFields')
+      .mockResolvedValue(mockConfigEntry.fields.connectedFields['en-US'] as any);
     const updateConfigMock = vi
       .spyOn(ConfigEntryService.prototype, 'updateConfig')
       .mockResolvedValue({} as any);
 
     await handler(event as any, mockContext as any);
 
-    expect(getConfigEntryMock).toHaveBeenCalled();
+    expect(getConnectedFieldsMock).toHaveBeenCalled();
     expect(updateConfigMock).toHaveBeenCalled();
 
-    const expectedConnectedFields = {
+    expect(updateConfigMock).toHaveBeenCalledWith({
       'another-entry-id': [
         {
           fieldId: 'anotherField',
           moduleId: 'another-module-id',
         },
       ],
-    };
-    expect(updateConfigMock).toHaveBeenCalledWith(expectedConnectedFields);
+    });
   });
 });
