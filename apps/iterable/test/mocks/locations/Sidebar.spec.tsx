@@ -2,22 +2,9 @@ import React from 'react';
 import { render, screen, cleanup } from '@testing-library/react';
 import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest';
 import Sidebar from '../../../src/locations/Sidebar';
-
-// Default mockSdk
-const defaultMockSdk = {
-  ids: {
-    space: 'space-id',
-    entry: 'entry-id',
-  },
-  parameters: {
-    installation: {
-      contentfulApiKey: 'api-key',
-    },
-  },
-};
+import { defaultMockSdk } from '../mockSdk';
 
 let mockSdk;
-
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useAutoResizer: () => {},

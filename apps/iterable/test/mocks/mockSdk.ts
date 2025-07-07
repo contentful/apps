@@ -17,4 +17,16 @@ const mockSdk: any = {
   },
 };
 
-export { mockSdk };
+const defaultMockSdk = {
+  ids: {
+    space: 'space-id',
+    entry: 'entry-id',
+  },
+  parameters: {
+    installation: {
+      contentfulApiKey: 'api-key',
+    },
+  },
+};
+
+export { mockSdk, defaultMockSdk };
