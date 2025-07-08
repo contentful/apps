@@ -21,11 +21,13 @@ const Sidebar = () => {
   const space = sdk.ids.space;
   const apiKey = sdk.parameters.installation.contentfulApiKey;
   const entryId = sdk.ids.entry;
+  const localization = sdk.locales.available.length > 1 ? `&locale=*` : '';
 
   const hasError = !space || !apiKey || !entryId;
+
   const link = hasError
     ? ''
-    : `https://cdn.contentful.com/spaces/${space}/environments/master/entries?access_token=${apiKey}&sys.id=${entryId}&include=2`;
+    : `https://cdn.contentful.com/spaces/${space}/environments/master/entries?access_token=${apiKey}&sys.id=${entryId}${localization}&include=2`;
 
   return (
     <Flex flexDirection="column">

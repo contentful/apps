@@ -27,6 +27,9 @@ const defaultMockSdk = {
       contentfulApiKey: 'api-key',
     },
   },
+  locales: {
+    available: ['en-US'],
+  },
 };
 
 export { mockSdk, defaultMockSdk };
