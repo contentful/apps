@@ -38,7 +38,11 @@ const Sidebar = () => {
       title: 'Sync entry fields to Hubspot',
       parameters: {
         entryTitle: getEntryTitle(),
-        fields: await processFields(Object.values(sdk.entry.fields), cma, sdk.locales.default),
+        fields: JSON.parse(
+          JSON.stringify(
+            await processFields(Object.values(sdk.entry.fields), cma, sdk.locales.default)
+          )
+        ),
       },
     };
   };
@@ -50,11 +54,10 @@ const Sidebar = () => {
   useEffect(() => {
     const getConfig = async () => {
       try {
-        const connectedFields = await new ConfigEntryService(
-          cma,
-          sdk.locales.default
-        ).getConnectedFields();
-        setConnectedFields(connectedFields[sdk.ids.entry]);
+        const entryConnectedFields = await new ConfigEntryService(cma).getEntryConnectedFields(
+          sdk.ids.entry
+        );
+        setConnectedFields(entryConnectedFields);
       } catch (error) {}
     };
     getConfig();

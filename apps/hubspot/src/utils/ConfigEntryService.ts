@@ -10,11 +10,9 @@ import {
 class ConfigEntryService {
   private cma: PlainClientAPI;
   private configEntry?: EntryProps<KeyValueMap>;
-  private defaultLocale: string;
 
-  constructor(cma: PlainClientAPI, defaultLocale?: string) {
+  constructor(cma: PlainClientAPI) {
     this.cma = cma;
-    this.defaultLocale = defaultLocale || 'en-US';
   }
 
   async createConfig() {
@@ -36,7 +34,7 @@ class ConfigEntryService {
       configEntry.fields[CONFIG_FIELD_ID] = {};
     }
 
-    configEntry.fields[CONFIG_FIELD_ID][this.getDefaultLocale()] = connectedFields;
+    configEntry.fields[CONFIG_FIELD_ID][await this.getDefaultLocale()] = connectedFields;
     const updatedEntry = await this.cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
     this.configEntry = updatedEntry;
 
@@ -45,7 +43,7 @@ class ConfigEntryService {
 
   async getConnectedFields(): Promise<ConnectedFields> {
     const configEntry = await this.getConfigEntry();
-    return configEntry.fields[CONFIG_FIELD_ID][this.getDefaultLocale()];
+    return configEntry.fields[CONFIG_FIELD_ID][await this.getDefaultLocale()];
   }
 
   async getEntryConnectedFields(entryId: string): Promise<EntryConnectedFields> {
@@ -98,7 +96,7 @@ class ConfigEntryService {
         { contentTypeId: CONFIG_CONTENT_TYPE_ID, entryId: CONFIG_ENTRY_ID },
         {
           fields: {
-            title: { [this.getDefaultLocale()]: 'Hubspot App Configuration' },
+            title: { [await this.getDefaultLocale()]: 'Hubspot App Configuration' },
           },
         }
       );
@@ -110,8 +108,16 @@ class ConfigEntryService {
     }
   }
 
-  private getDefaultLocale(): string {
-    return this.defaultLocale;
+  private async getDefaultLocale(): Promise<string> {
+    const fallbackLocale = 'en-US';
+    try {
+      const locales = await this.cma.locale.getMany({ query: { limit: 1000 } });
+      const defaultLocale = locales.items.find((locale) => locale.default);
+      return defaultLocale?.code || fallbackLocale;
+    } catch (error) {
+      console.error('Error fetching default locale:', error);
+      return fallbackLocale;
+    }
   }
 }
 

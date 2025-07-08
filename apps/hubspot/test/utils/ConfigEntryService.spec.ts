@@ -12,8 +12,16 @@ describe('ConfigEntryService', () => {
         get: vi.fn(),
         update: vi.fn(),
       },
+      locale: {
+        getMany: vi.fn().mockResolvedValue({
+          items: [
+            { default: true, code: 'en-US' },
+            { default: false, code: 'es-ES' },
+          ],
+        }),
+      },
     };
-    service = new ConfigEntryService(cmaMock, defaultLocale);
+    service = new ConfigEntryService(cmaMock);
   });
 
   it('updateConfig updates the config entry and returns the updated entry', async () => {
@@ -64,7 +72,7 @@ describe('ConfigEntryService', () => {
     };
     cmaMock.entry.get.mockResolvedValue(configEntry);
 
-    service = new ConfigEntryService(cmaMock, defaultLocale);
+    service = new ConfigEntryService(cmaMock);
     const result = await service.getConnectedFields();
 
     expect(result).toEqual(connectedFields);
@@ -77,7 +85,7 @@ describe('ConfigEntryService', () => {
     };
     cmaMock.entry.get.mockResolvedValue(configEntry);
 
-    service = new ConfigEntryService(cmaMock, defaultLocale);
+    service = new ConfigEntryService(cmaMock);
 
     await expect(service.getConnectedFields()).rejects.toThrow();
   });
@@ -93,7 +101,7 @@ describe('ConfigEntryService', () => {
     };
     cmaMock.entry.get.mockResolvedValue(configEntry);
 
-    service = new ConfigEntryService(cmaMock, defaultLocale);
+    service = new ConfigEntryService(cmaMock);
     const result = await service.getEntryConnectedFields('test');
 
     expect(result).toEqual([{ fieldId: 'f', moduleId: 'm' }]);
@@ -109,7 +117,7 @@ describe('ConfigEntryService', () => {
     };
     cmaMock.entry.get.mockResolvedValue(configEntry);
 
-    service = new ConfigEntryService(cmaMock, defaultLocale);
+    service = new ConfigEntryService(cmaMock);
     const result = await service.getEntryConnectedFields('notfound');
 
     expect(result).toEqual([]);
