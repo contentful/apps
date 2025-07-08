@@ -101,4 +101,32 @@ describe('Sidebar component', () => {
 
     expect(await screen.findByText('2 fields synced', { exact: false })).toBeInTheDocument();
   });
+
+  it('displays error when dialog returns true', async () => {
+    mockCma.asset.get.mockResolvedValue({
+      fields: {
+        file: {
+          'en-US': {
+            url: 'https://example.com/image.jpg',
+            contentType: 'image/jpeg',
+            details: {
+              image: { width: 100, height: 100 },
+            },
+          },
+        },
+      },
+    });
+    mockSdk.dialogs.openCurrentApp.mockResolvedValue(true);
+    const { getByText } = render(<Sidebar />);
+
+    const syncButton = getByText('Sync entry fields to Hubspot');
+    fireEvent.click(syncButton);
+
+    expect(
+      await screen.findByText(
+        'There is an error with your Hubspot private app access token, and entry fields did not sync.',
+        { exact: false }
+      )
+    ).toBeInTheDocument();
+  });
 });

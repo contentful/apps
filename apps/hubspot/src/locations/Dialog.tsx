@@ -87,7 +87,6 @@ const Dialog = () => {
       );
       const { success, failed, invalidToken, missingScopes } = JSON.parse(response.response.body);
       showResults(success, failed, invalidToken, missingScopes);
-      sdk.close();
     } catch (error) {
       console.error('Error creating modules: ', error);
     } finally {
@@ -101,24 +100,29 @@ const Dialog = () => {
     invalidToken: boolean,
     missingScopes: boolean
   ) => {
-    const successMessage = `${success.length} entry field${
-      success.length === 1 ? '' : 's'
-    } successfully synced`;
-    const failedMessage = `${failed.length} entry field${
-      failed.length === 1 ? '' : 's'
-    } did not sync, please try again`;
-    const mixedMessage = `${successMessage} but ${failedMessage}`;
+    const resultMessage = (fields: SelectedSdkField[]): string => {
+      return `${fields.length} entry field${fields.length === 1 ? '' : 's'}`;
+    };
 
-    if (invalidToken) {
-      sdk.notifier.error('Invalid Hubspot access token.');
-    } else if (missingScopes) {
-      sdk.notifier.error('The Hubspot token is missing the required "content" scope.');
+    const successMessage = `${resultMessage(success)} successfully synced.`;
+    const failedMessage = `${resultMessage(failed)} did not sync, please try again.`;
+    const errorMessage =
+      'There is an error with your Hubspot private app access token, and entry fields did not sync.';
+
+    if (invalidToken || missingScopes) {
+      sdk.notifier.error(errorMessage);
     } else if (failed.length > 0 && success.length > 0) {
-      sdk.notifier.warning(mixedMessage);
+      sdk.notifier.warning(`${successMessage} ${failedMessage}`);
     } else if (failed.length > 0) {
-      sdk.notifier.error(`${failedMessage}.`);
+      sdk.notifier.error(failedMessage);
     } else {
-      sdk.notifier.success(`${successMessage}.`);
+      sdk.notifier.success(successMessage);
+    }
+
+    if (invalidToken || missingScopes) {
+      sdk.close(true);
+    } else {
+      sdk.close(false);
     }
   };
 

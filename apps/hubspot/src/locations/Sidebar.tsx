@@ -22,6 +22,11 @@ const Sidebar = () => {
   );
   useAutoResizer();
 
+  const [connectedFields, setConnectedFields] = useState<EntryConnectedFields | undefined>(
+    undefined
+  );
+  const [showTokenError, setShowTokenError] = useState(false);
+
   const getEntryTitle = (): string => {
     let displayFieldId = sdk.contentType.displayField;
     if (!displayFieldId) return 'Untitled';
@@ -47,9 +52,11 @@ const Sidebar = () => {
     };
   };
 
-  const [connectedFields, setConnectedFields] = useState<EntryConnectedFields | undefined>(
-    undefined
-  );
+  const openDialog = async () => {
+    const params = await dialogParams();
+    const showError = await sdk.dialogs.openCurrentApp(params);
+    setShowTokenError(showError);
+  };
 
   useEffect(() => {
     const getConfig = async () => {
@@ -69,17 +76,23 @@ const Sidebar = () => {
       {connectedFields?.some((field) => field.error) && (
         <Note variant="negative" icon={<ErrorCircleOutlineIcon />}>
           <Text lineHeight="lineHeightCondensed" fontColor="gray800">
-            Unable to sync content. Review your connected or{' '}
+            Unable to sync content. Review your connected fields or{' '}
+            <TextLink onClick={() => sdk.navigator.openAppConfig()}>app configuration</TextLink>.
+          </Text>
+        </Note>
+      )}
+      {showTokenError && (
+        <Note variant="negative" icon={<ErrorCircleOutlineIcon />}>
+          <Text lineHeight="lineHeightCondensed" fontColor="gray800">
+            There is an error with your Hubspot private app access token, and entry fields did not
+            sync. View instructions on the{' '}
             <TextLink onClick={() => sdk.navigator.openAppConfig()}>app configuration</TextLink>.
           </Text>
         </Note>
       )}
 
       <Flex gap="spacingXs" flexDirection="column">
-        <Button
-          variant="secondary"
-          isFullWidth={true}
-          onClick={async () => sdk.dialogs.openCurrentApp(await dialogParams())}>
+        <Button variant="secondary" isFullWidth={true} onClick={openDialog}>
           Sync entry fields to Hubspot
         </Button>
 
