@@ -21,9 +21,32 @@ import {
 } from './templates';
 import { SelectedSdkField } from '../src/utils/fieldsProcessing';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
+import { EntryConnectedFields } from '../src/utils/utils';
+import { PlainClientAPI } from 'contentful-management';
+import ConfigEntryService from '../src/utils/ConfigEntryService';
+import { initContentfulManagementClient } from './common';
 
 type AppActionParameters = {
+  entryId: string;
   fields: string;
+};
+
+const updateConnectedFields = async (
+  cma: PlainClientAPI,
+  entryId: string,
+  fields: SelectedSdkField[],
+  updatedAt: string
+) => {
+  const newFields: EntryConnectedFields = fields.map((field) => {
+    return {
+      fieldId: field.id,
+      ...(field.locale ? { locale: field.locale } : {}),
+      moduleName: field.moduleName,
+      updatedAt: updatedAt,
+    };
+  });
+  const configEntryService = new ConfigEntryService(cma);
+  await configEntryService.updateEntryConnectedFields(entryId, newFields);
 };
 
 /**
@@ -36,14 +59,16 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   event: AppActionRequest<'Custom', AppActionParameters>,
   context: FunctionEventContext
 ) => {
-  const success = [];
-  const failed = [];
+  const cma = initContentfulManagementClient(context);
+
+  const successFields: SelectedSdkField[] = [];
+  const failedFields: SelectedSdkField[] = [];
   let invalidToken = false;
   let missingScopes = false;
   for (const field of JSON.parse(event.body.fields)) {
     try {
       await createModule(field, context.appInstallationParameters.hubspotAccessToken);
-      success.push(field.uniqueId);
+      successFields.push(field);
     } catch (error) {
       if (error instanceof InvalidHubspotTokenError) {
         invalidToken = true;
@@ -53,12 +78,17 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
         missingScopes = true;
         break;
       }
-      failed.push(field.uniqueId);
+      failedFields.push(field);
     }
   }
+
+  if (successFields.length > 0 && !invalidToken && !missingScopes) {
+    updateConnectedFields(cma, event.body.entryId, successFields, new Date().toISOString());
+  }
+
   return {
-    success,
-    failed,
+    successQuantity: successFields.length,
+    failedQuantity: failedFields.length,
     invalidToken,
     missingScopes,
   };

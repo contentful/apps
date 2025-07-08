@@ -20,6 +20,25 @@ import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 // Mock fetch globally
 global.fetch = vi.fn();
 
+const mockCma = {
+  entry: {
+    get: vi.fn().mockResolvedValue({
+      fields: {
+        connectedFields: {
+          'en-US': {
+            'test-entry-id': [],
+          },
+        },
+      },
+    }),
+    update: vi.fn(),
+  },
+};
+
+vi.mock('contentful-management', () => ({
+  createClient: () => mockCma,
+}));
+
 describe('createModules', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -38,6 +57,9 @@ describe('createModules', () => {
     appInstallationParameters: {
       hubspotAccessToken: token,
     },
+    cmaClientOptions: {},
+    spaceId: 'test-space',
+    environmentId: 'test-env',
   });
 
   it('should create three files for a module', async () => {
@@ -64,8 +86,8 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField.uniqueId],
-      failed: [],
+      successQuantity: 1,
+      failedQuantity: 0,
       invalidToken: false,
       missingScopes: false,
     });
@@ -141,8 +163,8 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [],
-      failed: [mockField.uniqueId],
+      successQuantity: 0,
+      failedQuantity: 1,
       invalidToken: false,
       missingScopes: false,
     });
@@ -192,8 +214,8 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [],
-      failed: [],
+      successQuantity: 0,
+      failedQuantity: 0,
       invalidToken: true,
       missingScopes: false,
     });
@@ -231,8 +253,8 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [],
-      failed: [],
+      successQuantity: 0,
+      failedQuantity: 0,
       invalidToken: false,
       missingScopes: true,
     });
@@ -263,8 +285,8 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField.uniqueId],
-      failed: [],
+      successQuantity: 1,
+      failedQuantity: 0,
       invalidToken: false,
       missingScopes: false,
     });
@@ -325,8 +347,8 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField.uniqueId],
-      failed: [],
+      successQuantity: 1,
+      failedQuantity: 0,
       invalidToken: false,
       missingScopes: false,
     });
@@ -386,8 +408,8 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField.uniqueId],
-      failed: [],
+      successQuantity: 1,
+      failedQuantity: 0,
       invalidToken: false,
       missingScopes: false,
     });
@@ -445,8 +467,8 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField.uniqueId],
-      failed: [],
+      successQuantity: 1,
+      failedQuantity: 0,
       invalidToken: false,
       missingScopes: false,
     });
@@ -504,8 +526,8 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField.uniqueId],
-      failed: [],
+      successQuantity: 1,
+      failedQuantity: 0,
       invalidToken: false,
       missingScopes: false,
     });
@@ -563,8 +585,8 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField.uniqueId],
-      failed: [],
+      successQuantity: 1,
+      failedQuantity: 0,
       invalidToken: false,
       missingScopes: false,
     });
@@ -625,8 +647,8 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField.uniqueId],
-      failed: [],
+      successQuantity: 1,
+      failedQuantity: 0,
       invalidToken: false,
       missingScopes: false,
     });
@@ -689,8 +711,8 @@ describe('createModules', () => {
 
     // Verify the result
     expect(result).toEqual({
-      success: [mockField.uniqueId],
-      failed: [],
+      successQuantity: 1,
+      failedQuantity: 0,
       invalidToken: false,
       missingScopes: false,
     });

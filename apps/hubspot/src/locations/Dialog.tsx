@@ -85,8 +85,10 @@ const Dialog = () => {
           },
         }
       );
-      const { success, failed, invalidToken, missingScopes } = JSON.parse(response.response.body);
-      showResults(success, failed, invalidToken, missingScopes);
+      const { successQuantity, failedQuantity, invalidToken, missingScopes } = JSON.parse(
+        response.response.body
+      );
+      showResults(successQuantity, failedQuantity, invalidToken, missingScopes);
     } catch (error) {
       console.error('Error creating modules: ', error);
     } finally {
@@ -95,25 +97,25 @@ const Dialog = () => {
   };
 
   const showResults = (
-    success: SelectedSdkField[] = [],
-    failed: SelectedSdkField[] = [],
+    successQuantity: number,
+    failedQuantity: number,
     invalidToken: boolean,
     missingScopes: boolean
   ) => {
-    const resultMessage = (fields: SelectedSdkField[]): string => {
-      return `${fields.length} entry field${fields.length === 1 ? '' : 's'}`;
+    const resultMessage = (fieldsQuantity: number): string => {
+      return `${fieldsQuantity} entry field${fieldsQuantity === 1 ? '' : 's'}`;
     };
 
-    const successMessage = `${resultMessage(success)} successfully synced.`;
-    const failedMessage = `${resultMessage(failed)} did not sync, please try again.`;
+    const successMessage = `${resultMessage(successQuantity)} successfully synced.`;
+    const failedMessage = `${resultMessage(failedQuantity)} did not sync, please try again.`;
     const errorMessage =
       'There is an error with your Hubspot private app access token, and entry fields did not sync.';
 
     if (invalidToken || missingScopes) {
       sdk.notifier.error(errorMessage);
-    } else if (failed.length > 0 && success.length > 0) {
+    } else if (failedQuantity > 0 && successQuantity > 0) {
       sdk.notifier.warning(`${successMessage} ${failedMessage}`);
-    } else if (failed.length > 0) {
+    } else if (failedQuantity > 0) {
       sdk.notifier.error(failedMessage);
     } else {
       sdk.notifier.success(successMessage);
