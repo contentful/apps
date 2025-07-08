@@ -100,25 +100,30 @@ const Dialog = () => {
     invalidToken: boolean,
     missingScopes: boolean
   ) => {
-    const successfullFields = `${success.length} entry field${success.length === 1 ? '' : 's'}`;
-    const failedFields = `${failed.length} entry field${failed.length === 1 ? '' : 's'}`;
+    const resultMessage = (fields: SelectedSdkField[]): string => {
+      return `${fields.length} entry field${fields.length === 1 ? '' : 's'}`;
+    };
+
+    const successMessage = `${resultMessage(success)} successfully synced.`;
+    const failedMessage = `${resultMessage(failed)} did not sync, please try again.`;
+    const errorMessage =
+      'There is an error with your Hubspot private app access token, and entry fields did not sync.';
 
     if (invalidToken || missingScopes) {
-      sdk.notifier.error(
-        'There is an error with your Hubspot private app access token, and entry fields did not sync.'
-      );
-      sdk.close(true);
-      return;
+      sdk.notifier.error(errorMessage);
     } else if (failed.length > 0 && success.length > 0) {
-      sdk.notifier.warning(
-        `${successfullFields} were successfully synced, but ${failedFields} did not sync.`
-      );
+      sdk.notifier.warning(`${successMessage} ${failedMessage}`);
     } else if (failed.length > 0) {
-      sdk.notifier.error(`${failedFields} did not sync, please try again.`);
+      sdk.notifier.error(failedMessage);
     } else {
-      sdk.notifier.success(`${successfullFields} successfully synced.`);
+      sdk.notifier.success(successMessage);
     }
-    sdk.close(false);
+
+    if (invalidToken || missingScopes) {
+      sdk.close(true);
+    } else {
+      sdk.close(false);
+    }
   };
 
   return (
