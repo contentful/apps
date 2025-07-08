@@ -1,17 +1,11 @@
 #!/usr/bin/env node
 
-/*
- * This script generates a content type with all possible field types for the Iterable app.
- * It uses the Content Management API to create a comprehensive content type that can be used
- * for testing and demonstration purposes.
- */
-
 import * as contentful from 'contentful-management';
 import 'dotenv/config';
 
-const { SPACE_ID, ENVIRONMENT_ID, CMA_TOKEN } = process.env;
+const { SPACE_ID, ENVIRONMENT_ID, CONTENTFUL_ACCESS_TOKEN } = process.env;
 
-if (!CMA_TOKEN || !SPACE_ID || !ENVIRONMENT_ID) {
+if (!CONTENTFUL_ACCESS_TOKEN || !SPACE_ID || !ENVIRONMENT_ID) {
   console.error(
     'Missing required environment variables. Please set CMA_TOKEN, SPACE_ID, and ENVIRONMENT_ID'
   );
@@ -20,7 +14,7 @@ if (!CMA_TOKEN || !SPACE_ID || !ENVIRONMENT_ID) {
 
 const client = contentful.createClient(
   {
-    accessToken: CMA_TOKEN,
+    accessToken: CONTENTFUL_ACCESS_TOKEN,
   },
   {
     type: 'plain',
@@ -159,8 +153,8 @@ const FIELD_TYPES = [
 ];
 
 async function createContentTypeWithAllFields() {
-  const contentTypeId = 'iterable-all-field-types';
-  const contentTypeName = 'Iterable - All Field Types';
+  const contentTypeId = 'all-field-types';
+  const contentTypeName = 'All Field Types - Including non working ones';
 
   console.log(`Creating content type: ${contentTypeName}`);
 
@@ -199,7 +193,7 @@ async function createContentTypeWithAllFields() {
     name: contentTypeName,
     displayField: 'shortText',
     description:
-      'A comprehensive content type with all possible field types for testing the Iterable app integration',
+      'A comprehensive content type with all possible field types for testing the app integration',
     fields,
   };
 
@@ -280,22 +274,6 @@ async function createSampleEntry(contentTypeId: string) {
     location: { 'en-US': { lat: 40.7128, lon: -74.006 } },
     symbolArray: { 'en-US': ['Item 1', 'Item 2', 'Item 3'] },
     textArray: { 'en-US': ['Long text item 1', 'Long text item 2'] },
-    integerArray: { 'en-US': [1, 2, 3, 4, 5] },
-    numberArray: { 'en-US': [1.1, 2.2, 3.3] },
-    booleanArray: { 'en-US': [true, false, true] },
-    dateArray: { 'en-US': ['2024-01-01T00:00:00.000Z', '2024-01-02T00:00:00.000Z'] },
-    locationArray: {
-      'en-US': [
-        { lat: 40.7128, lon: -74.006 },
-        { lat: 34.0522, lon: -118.2437 },
-      ],
-    },
-    objectArray: {
-      'en-US': [
-        { name: 'Object 1', value: 100 },
-        { name: 'Object 2', value: 200 },
-      ],
-    },
   };
 
   const body = {
@@ -319,7 +297,7 @@ async function createSampleEntry(contentTypeId: string) {
 
 async function main() {
   try {
-    console.log('🚀 Starting content type generation for Iterable app...\n');
+    console.log('🚀 Starting content type generation for app...\n');
 
     // Create content type with all field types
     const contentTypeId = await createContentTypeWithAllFields();
@@ -332,7 +310,7 @@ async function main() {
     console.log(`   • Content Type ID: ${contentTypeId}`);
     console.log(`   • Total Fields: ${FIELD_TYPES.length}`);
     console.log(`   • Field Types: ${FIELD_TYPES.map((f) => f.type).join(', ')}`);
-    console.log(`\n🔗 You can now use this content type to test the Iterable app integration.`);
+    console.log(`\n🔗 You can now use this content type to test app integration.`);
     console.log(`   Visit your Contentful space to see the new content type and sample entry.`);
   } catch (error) {
     console.error('\n❌ Script failed:', error);
