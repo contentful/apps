@@ -9,7 +9,7 @@
 import * as contentful from 'contentful-management';
 import 'dotenv/config';
 
-const { ORG_ID, SPACE_ID, ENVIRONMENT_ID, CMA_TOKEN } = process.env;
+const { SPACE_ID, ENVIRONMENT_ID, CMA_TOKEN } = process.env;
 
 if (!CMA_TOKEN || !SPACE_ID || !ENVIRONMENT_ID) {
   console.error(
