@@ -10,9 +10,11 @@ import {
 class ConfigEntryService {
   private cma: PlainClientAPI;
   private configEntry?: EntryProps<KeyValueMap>;
+  private defaultLocale: string | undefined;
 
-  constructor(cma: PlainClientAPI) {
+  constructor(cma: PlainClientAPI, defaultLocale?: string) {
     this.cma = cma;
+    this.defaultLocale = defaultLocale;
   }
 
   async createConfig() {
@@ -109,15 +111,18 @@ class ConfigEntryService {
   }
 
   private async getDefaultLocale(): Promise<string> {
-    const fallbackLocale = 'en-US';
-    try {
-      const locales = await this.cma.locale.getMany({ query: { limit: 1000 } });
-      const defaultLocale = locales.items.find((locale) => locale.default);
-      return defaultLocale?.code || fallbackLocale;
-    } catch (error) {
-      console.error('Error fetching default locale:', error);
-      return fallbackLocale;
+    if (!this.defaultLocale) {
+      const fallbackLocale = 'en-US';
+      try {
+        const locales = await this.cma.locale.getMany({ query: { limit: 1000 } });
+        const defaultLocale = locales.items.find((locale) => locale.default);
+        this.defaultLocale = defaultLocale?.code || fallbackLocale;
+      } catch (error) {
+        this.defaultLocale = fallbackLocale;
+      }
     }
+
+    return this.defaultLocale;
   }
 }
 

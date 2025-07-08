@@ -54,9 +54,10 @@ const Sidebar = () => {
   useEffect(() => {
     const getConfig = async () => {
       try {
-        const entryConnectedFields = await new ConfigEntryService(cma).getEntryConnectedFields(
-          sdk.ids.entry
-        );
+        const entryConnectedFields = await new ConfigEntryService(
+          cma,
+          sdk.locales.default
+        ).getEntryConnectedFields(sdk.ids.entry);
         setConnectedFields(entryConnectedFields);
       } catch (error) {}
     };
