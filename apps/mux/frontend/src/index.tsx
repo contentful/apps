@@ -903,13 +903,14 @@ export class App extends React.Component<AppProps, AppState> {
       targetPolicy = isCurrentlySigned ? 'public' : 'signed';
     }
 
-    updatedPendingActions.delete.push({ type: 'playback', id: currentPlaybackId });
+    updatedPendingActions.delete.push({ type: 'playback', id: currentPlaybackId, retry: 0 });
     updatedPendingActions.create.push({
       type: 'playback',
       data: {
         policy: targetPolicy,
         assetId: currentValue.assetId,
       },
+      retry: 0,
     });
     await this.props.sdk.field.setValue(updatePendingActions(currentValue, updatedPendingActions));
   };
@@ -1003,7 +1004,7 @@ export class App extends React.Component<AppProps, AppState> {
     const pending: PendingActions = value.pendingActions || { delete: [], create: [], update: [] };
     const newDelete: PendingAction[] = [
       ...pending.delete,
-      { type: type === 'caption' ? 'caption' : 'audio', id: trackId },
+      { type: type === 'caption' ? 'caption' : 'audio', id: trackId, retry: 0 },
     ];
     const newPendingActions: PendingActions = { ...pending, delete: newDelete };
     await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
@@ -1029,7 +1030,7 @@ export class App extends React.Component<AppProps, AppState> {
     const pending: PendingActions = value.pendingActions || { delete: [], create: [], update: [] };
     const newDelete = [
       ...pending.delete,
-      { type: 'staticRendition', id: renditionId } as PendingAction,
+      { type: 'staticRendition', id: renditionId, retry: 0 } as PendingAction,
     ];
     const newPendingActions: PendingActions = { ...pending, delete: newDelete };
     await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
@@ -1074,7 +1075,7 @@ export class App extends React.Component<AppProps, AppState> {
     const value = this.state.value;
     if (!value || !value.assetId) return;
     const pending: PendingActions = value.pendingActions || { delete: [], create: [], update: [] };
-    const newDelete = [...pending.delete, { type: 'asset', id: value.assetId }];
+    const newDelete = [...pending.delete, { type: 'asset', id: value.assetId, retry: 0 }];
     const newPendingActions = { ...pending, delete: newDelete };
     await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));
   };
@@ -1100,7 +1101,12 @@ export class App extends React.Component<AppProps, AppState> {
       pending.update?.filter((action) => action.type !== 'metadata') ?? [];
 
     if (currentTitle !== newTitle) {
-      newUpdate = [...newUpdate, { type: 'metadata', data: { title: newTitle } }];
+      newUpdate = [
+        ...newUpdate.map((action) => ({ ...action, retry: action.retry ?? 0 })),
+        { type: 'metadata', data: { title: newTitle }, retry: 0 },
+      ];
+    } else {
+      newUpdate = newUpdate.map((action) => ({ ...action, retry: action.retry ?? 0 }));
     }
     const newPendingActions = { ...pending, update: newUpdate };
     await this.props.sdk.field.setValue(updatePendingActions(value, newPendingActions));

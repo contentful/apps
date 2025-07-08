@@ -50,6 +50,7 @@ export interface PendingAction {
     assetId?: string;
     title?: string;
   };
+  retry: number;
 }
 
 export interface PendingActions {

@@ -37,7 +37,6 @@ async function deleteMuxResource({
 }
 
 async function removePendingActionsFromAllLocalesAndUpdate(
-  webhookEntry: any,
   fieldKey: string,
   cma: any,
   entryId: string,
@@ -46,19 +45,18 @@ async function removePendingActionsFromAllLocalesAndUpdate(
 ) {
   try {
     console.log(`Removing pendingActions and updating entry in Contentful for field ${fieldKey}.`);
-    const fieldValue = webhookEntry.fields[fieldKey];
+    const updatedEntryFromContentful = await cma.entry.get({ entryId, spaceId, environmentId });
+    const fieldValue = updatedEntryFromContentful.fields[fieldKey];
     for (const locale of Object.keys(fieldValue)) {
       if (
         fieldValue[locale] &&
         typeof fieldValue[locale] === 'object' &&
         'pendingActions' in fieldValue[locale]
       ) {
-        delete fieldValue[locale].pendingActions;
+        fieldValue[locale].pendingActions = null;
       }
     }
-    const updatedEntryFromContentful = await cma.entry.get({ entryId, spaceId, environmentId });
-    webhookEntry.sys.version = updatedEntryFromContentful.sys.version;
-    await cma.entry.update({ entryId, spaceId, environmentId }, webhookEntry);
+    await cma.entry.update({ entryId, spaceId, environmentId }, updatedEntryFromContentful);
   } catch (err) {
     console.error(
       `There was an error removing pendingActions from all locales in ${fieldKey}:`,
@@ -95,7 +93,6 @@ async function runPendingActionsFromEntry(
 
   for (const fieldKey of Object.keys(fieldsWithPendingActions)) {
     await removePendingActionsFromAllLocalesAndUpdate(
-      entry,
       fieldKey,
       cma,
       entryId,
@@ -124,7 +121,9 @@ async function runPendingActionsFromEntry(
           });
         } catch (err) {
           console.error(`Error in delete of asset for ${fieldKey}:`, err);
-          failedActions.delete.push(assetDeleteAction);
+          const retry =
+            typeof assetDeleteAction.retry === 'number' ? assetDeleteAction.retry + 1 : 1;
+          failedActions.delete.push({ ...assetDeleteAction, retry });
         }
         if (failedActions.delete.length > 0) {
           failedPendingActions[fieldKey] = {
@@ -171,7 +170,8 @@ async function runPendingActionsFromEntry(
             }
           } catch (err) {
             console.error(`Error in delete of Mux for ${fieldKey}:`, err);
-            failedActions.delete.push(deleteAction);
+            const retry = typeof deleteAction.retry === 'number' ? deleteAction.retry + 1 : 1;
+            failedActions.delete.push({ ...deleteAction, retry });
           }
         }
       }
@@ -191,7 +191,8 @@ async function runPendingActionsFromEntry(
             }
           } catch (err) {
             console.error(`Error in create of Mux for ${fieldKey}:`, err);
-            failedActions.create.push(createAction);
+            const retry = typeof createAction.retry === 'number' ? createAction.retry + 1 : 1;
+            failedActions.create.push({ ...createAction, retry });
           }
         }
       }
@@ -207,7 +208,8 @@ async function runPendingActionsFromEntry(
             }
           } catch (err) {
             console.error(`Error in update of Mux for ${fieldKey}:`, err);
-            failedActions.update.push(updateAction);
+            const retry = typeof updateAction.retry === 'number' ? updateAction.retry + 1 : 1;
+            failedActions.update.push({ ...updateAction, retry });
           }
         }
       }
@@ -279,7 +281,9 @@ async function updateEntryFieldWithMuxAsset(
     type: 'plain',
   });
 
-  for (const [fieldId, fieldValue] of Object.entries(entry.fields)) {
+  const entryFromContentful = await cma.entry.get({ entryId, spaceId, environmentId });
+
+  for (const [fieldId, fieldValue] of Object.entries(entryFromContentful.fields)) {
     if (fieldValue && typeof fieldValue === 'object') {
       const [_, localeValue] = Object.entries(fieldValue)[0] || [];
       if (localeValue && typeof localeValue === 'object' && (localeValue as any).assetId) {
@@ -288,7 +292,7 @@ async function updateEntryFieldWithMuxAsset(
           const muxAsset = await fetchMuxAsset(assetId, context);
 
           if (muxAsset === undefined) {
-            entry.fields[fieldId] = undefined;
+            entryFromContentful.fields[fieldId] = undefined;
             continue;
           }
 
@@ -330,8 +334,8 @@ async function updateEntryFieldWithMuxAsset(
             }),
           };
 
-          for (const locale of Object.keys(entry.fields[fieldId])) {
-            entry.fields[fieldId][locale] = updatedField;
+          for (const locale of Object.keys(entryFromContentful.fields[fieldId])) {
+            entryFromContentful.fields[fieldId][locale] = updatedField;
           }
         } catch (err) {
           console.error(`Error updating field ${fieldId} with assetId ${assetId}:`, err);
@@ -340,10 +344,10 @@ async function updateEntryFieldWithMuxAsset(
     }
   }
 
-  const entryFromContentful = await cma.entry.get({ entryId, spaceId, environmentId });
-  entry.sys.version = entryFromContentful.sys.version;
-
-  const updatedEntry = await cma.entry.update({ entryId, spaceId, environmentId }, entry);
+  const updatedEntry = await cma.entry.update(
+    { entryId, spaceId, environmentId },
+    entryFromContentful
+  );
   await cma.entry.publish({ entryId, spaceId, environmentId }, updatedEntry);
   console.log('Entry updated and published with fresh Mux data');
 }
@@ -363,10 +367,26 @@ function findPendingActionsInMuxFields(fields: any): Record<string, any> {
         'assetId' in firstLocaleValue &&
         'pendingActions' in firstLocaleValue
       ) {
-        pendingActionsMap[fieldKey] = {
-          ...firstLocaleValue.pendingActions,
-          assetId: firstLocaleValue.assetId,
-        };
+        const pendingActions = firstLocaleValue.pendingActions;
+        const filteredActions: any = {};
+        let hasValidAction = false;
+        ['delete', 'create', 'update'].forEach((actionType) => {
+          if (Array.isArray(pendingActions[actionType])) {
+            const filtered = pendingActions[actionType].filter(
+              (action: any) => typeof action.retry === 'number' && action.retry <= 3
+            );
+            if (filtered.length > 0) {
+              filteredActions[actionType] = filtered;
+              hasValidAction = true;
+            }
+          }
+        });
+        if (hasValidAction) {
+          pendingActionsMap[fieldKey] = {
+            ...filteredActions,
+            assetId: firstLocaleValue.assetId,
+          };
+        }
       }
     }
   }
