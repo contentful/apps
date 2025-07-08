@@ -21,6 +21,14 @@ const mockCma = {
   asset: {
     get: vi.fn(),
   },
+  locale: {
+    getMany: vi.fn().mockResolvedValue({
+      items: [
+        { default: true, code: 'en-US' },
+        { default: false, code: 'es-ES' },
+      ],
+    }),
+  },
 };
 
 export { mockCma };

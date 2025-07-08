@@ -1,12 +1,18 @@
 import { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
-import { CONFIG_CONTENT_TYPE_ID, CONFIG_ENTRY_ID, CONFIG_FIELD_ID, ConnectedFields } from './utils';
+import {
+  CONFIG_CONTENT_TYPE_ID,
+  CONFIG_ENTRY_ID,
+  CONFIG_FIELD_ID,
+  ConnectedFields,
+  EntryConnectedFields,
+} from './utils';
 
 class ConfigEntryService {
   private cma: PlainClientAPI;
   private configEntry?: EntryProps<KeyValueMap>;
-  private defaultLocale: string;
+  private defaultLocale: string | undefined;
 
-  constructor(cma: PlainClientAPI, defaultLocale: string) {
+  constructor(cma: PlainClientAPI, defaultLocale?: string) {
     this.cma = cma;
     this.defaultLocale = defaultLocale;
   }
@@ -23,23 +29,28 @@ class ConfigEntryService {
     return this.configEntry;
   }
 
-  async getConnectedFields(): Promise<ConnectedFields> {
-    const configEntry = await this.getConfigEntry();
-    return configEntry.fields[CONFIG_FIELD_ID][this.getDefaultLocale()];
-  }
-
-  async updateConfig(connectedFields: ConnectedFields, cma: PlainClientAPI) {
+  async updateConfig(connectedFields: ConnectedFields) {
     const configEntry = await this.getConfigEntry();
 
     if (!configEntry.fields[CONFIG_FIELD_ID]) {
       configEntry.fields[CONFIG_FIELD_ID] = {};
     }
 
-    configEntry.fields[CONFIG_FIELD_ID][this.getDefaultLocale()] = connectedFields;
-    const updatedEntry = await cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
+    configEntry.fields[CONFIG_FIELD_ID][await this.getDefaultLocale()] = connectedFields;
+    const updatedEntry = await this.cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
     this.configEntry = updatedEntry;
 
     return updatedEntry;
+  }
+
+  async getConnectedFields(): Promise<ConnectedFields> {
+    const configEntry = await this.getConfigEntry();
+    return configEntry.fields[CONFIG_FIELD_ID][await this.getDefaultLocale()];
+  }
+
+  async getEntryConnectedFields(entryId: string): Promise<EntryConnectedFields> {
+    const connectedFields = await this.getConnectedFields();
+    return connectedFields[entryId] || [];
   }
 
   private async createContentType() {
@@ -87,7 +98,7 @@ class ConfigEntryService {
         { contentTypeId: CONFIG_CONTENT_TYPE_ID, entryId: CONFIG_ENTRY_ID },
         {
           fields: {
-            title: { [this.getDefaultLocale()]: 'Hubspot App Configuration' },
+            title: { [await this.getDefaultLocale()]: 'Hubspot App Configuration' },
           },
         }
       );
@@ -99,7 +110,18 @@ class ConfigEntryService {
     }
   }
 
-  private getDefaultLocale(): string {
+  private async getDefaultLocale(): Promise<string> {
+    if (!this.defaultLocale) {
+      const fallbackLocale = 'en-US';
+      try {
+        const locales = await this.cma.locale.getMany({ query: { limit: 1000 } });
+        const defaultLocale = locales.items.find((locale) => locale.default);
+        this.defaultLocale = defaultLocale?.code || fallbackLocale;
+      } catch (error) {
+        this.defaultLocale = fallbackLocale;
+      }
+    }
+
     return this.defaultLocale;
   }
 }
