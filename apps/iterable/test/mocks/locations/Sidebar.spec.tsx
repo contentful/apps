@@ -51,4 +51,17 @@ describe('Sidebar', () => {
     expect(screen.getByText('Link generation error')).toBeTruthy();
     expect(screen.getByRole('button', { name: /copy/i })).toHaveProperty('disabled', true);
   });
+  it('includes &locale=* in the link when multiple locales are available', () => {
+    mockSdk = {
+      ...mockSdk,
+      locales: {
+        available: ['en-US', 'fr-FR'],
+      },
+    };
+    render(<Sidebar />);
+    const input = screen.getByDisplayValue(
+      /https:\/\/cdn\.contentful\.com\/spaces\/space-id\/environments\/master\/entries\?access_token=.+&sys\.id=entry-id&locale=\*&include=2/
+    );
+    expect(input).toBeTruthy();
+  });
 });
