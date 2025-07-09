@@ -56,12 +56,12 @@ Convert the existing Contentful space setup script into a CLI tool called `cfdev
 - [x] Define TypeScript interfaces for API responses
 
 ### Task 2.2: Organization ID Fetching
-- [ ] Create function to fetch available organizations with types
-- [ ] Implement interactive organization selection with numbered list
-- [ ] Add manual organization ID override option
-- [ ] Handle single organization auto-selection
-- [ ] Add error handling for API failures
-- [ ] Define Organization interface/types
+- [x] Create function to fetch available organizations with types
+- [x] Implement interactive organization selection with numbered list
+- [x] Add manual organization ID override option
+- [x] Handle single organization auto-selection
+- [x] Add error handling for API failures
+- [x] Define Organization interface/types
 
 ### Task 2.3: Team ID Fetching
 - [ ] Create function to fetch teams for selected organization
