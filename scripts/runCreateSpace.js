@@ -2,7 +2,7 @@ import contentful from 'contentful-management';
 import { createSpace } from './actions/createSpace.js';
 
 // Configuration values
-const accessToken = 'YOUR_CONTENTFUL_ACCESS_TOKEN';
+const accessToken = '';
 const organizationId = '6B7UvF9RgdtICSBSvSIUMY';
 const appName = 'Your App Name';
 
