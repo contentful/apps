@@ -1,0 +1,60 @@
+{
+  "name": "cfdev",
+  "version": "0.1.0",
+  "description": "CLI tool for Contentful app development and space management",
+  "main": "dist/index.js",
+  "bin": {
+    "cfdev": "dist/cli.js"
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "start": "npm run build && node dist/cli.js",
+    "dev": "npm run build:watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --watchAll=false",
+    "lint": "eslint src/ --ext .ts",
+    "clean": "rm -rf dist coverage",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "contentful",
+    "cli",
+    "development",
+    "app",
+    "space",
+    "management",
+    "marketplace"
+  ],
+  "author": "Marketplace Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "type": "commonjs",
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "commander": "^14.0.0",
+    "contentful-management": "^11.54.1",
+    "inquirer": "^12.7.0",
+    "ora": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.14.11",
+    "eslint": "^9.30.1",
+    "jest": "^30.0.4",
+    "ts-jest": "^29.2.2",
+    "typescript": "^5.5.3"
+  }
+}

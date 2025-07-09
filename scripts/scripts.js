@@ -9,10 +9,10 @@ import { deleteAppDefinition } from './actions/deleteAppDefinition.js';
 
 // Fill out before running the script
 const accessToken = 'YOUR_CONTENTFUL_ACCESS_TOKEN';
-const organizationId = 'YOUR_ORGANIZATION_ID';
+const organizationId = '6B7UvF9RgdtICSBSvSIUMY';
 const appName = 'Your App Name';
-const teamId = 'YOUR_TEAM_ID'; 
-const environmentId = 'master'; // Usually 'master'
+const teamId = '3LQ6MMsQXIfb1oCg2W1RZ3'; 
+const environmentId = 'master'; 
 
 
 const client = contentful.createClient({
