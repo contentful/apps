@@ -80,12 +80,18 @@ function normalizeForDiff<T>(obj: T): T {
 
 // Helper for updating pendingActions
 const updatePendingActions = (value, newPendingActions) => {
+  const safePendingActions = {
+    delete: Array.isArray(newPendingActions.delete) ? newPendingActions.delete : [],
+    create: Array.isArray(newPendingActions.create) ? newPendingActions.create : [],
+    update: Array.isArray(newPendingActions.update) ? newPendingActions.update : [],
+  };
+
   const finalPendingActions =
-    newPendingActions.delete.length === 0 &&
-    newPendingActions.create.length === 0 &&
-    newPendingActions.update.length === 0
+    safePendingActions.delete.length === 0 &&
+    safePendingActions.create.length === 0 &&
+    safePendingActions.update.length === 0
       ? undefined
-      : newPendingActions;
+      : safePendingActions;
   return { ...value, pendingActions: finalPendingActions };
 };
 

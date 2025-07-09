@@ -129,6 +129,7 @@ async function runPendingActionsFromEntry(
           failedPendingActions[fieldKey] = {
             delete: failedActions.delete,
             create: [],
+            update: [],
           };
         }
         continue;
