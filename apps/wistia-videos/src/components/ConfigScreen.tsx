@@ -13,7 +13,7 @@ import {
   Menu,
   GlobalStyles,
 } from '@contentful/f36-components';
-import { Layout } from '@contentful/f36-layout-alpha';
+import { Layout } from '@contentful/f36-layout';
 import { css } from 'emotion';
 import { fetchProjects } from '../functions/getVideos';
 import { ProjectReduced, WistiaError } from './helpers/types';

@@ -7,7 +7,7 @@
     "@contentful/app-sdk": "^4.16.0",
     "@contentful/dam-app-base": "2.0.32",
     "@contentful/f36-components": "^4.70.0",
-    "@contentful/f36-layout-alpha": "npm:@contentful/f36-layout@5.0.0-alpha.18",
+    "@contentful/f36-layout": "5.0.0-alpha.18",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^12.0.0",
     "@types/node": "^20.0.0",

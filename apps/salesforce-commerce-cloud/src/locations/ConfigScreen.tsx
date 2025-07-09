@@ -2,7 +2,7 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Heading, Form, TextInput, FormControl } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { Layout } from '@contentful/f36-layout-alpha';
+import { Layout } from '@contentful/f36-layout';
 import tokens from '@contentful/f36-tokens';
 import { css } from '@emotion/react';
 

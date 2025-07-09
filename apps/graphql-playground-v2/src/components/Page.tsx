@@ -4,7 +4,7 @@ import { css } from '@emotion/css';
 import { GraphiqlView } from './GraphiqlView';
 import { useQuery } from '@tanstack/react-query';
 import { Card, GlobalStyles, Modal, ModalContent, Note } from '@contentful/f36-components';
-import { Layout } from '@contentful/f36-layout-alpha';
+import { Layout } from '@contentful/f36-layout';
 
 interface PageProps {
   sdk: PageAppSDK;
