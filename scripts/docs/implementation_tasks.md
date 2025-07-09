@@ -48,12 +48,12 @@ Convert the existing Contentful space setup script into a CLI tool called `cfdev
 ## Phase 2: Authentication & ID Fetching
 
 ### Task 2.1: Token Management Utilities
-- [ ] Create `utils/auth.ts` module with proper TypeScript types
-- [ ] Implement environment variable detection (`CONTENTFUL_ACCESS_TOKEN`)
-- [ ] Create secure token prompt function
-- [ ] Implement token validation with `/users/me` endpoint
-- [ ] Add error handling for invalid/expired tokens
-- [ ] Define TypeScript interfaces for API responses
+- [x] Create `utils/auth.ts` module with proper TypeScript types
+- [x] Implement environment variable detection (`CONTENTFUL_ACCESS_TOKEN`)
+- [x] Create secure token prompt function
+- [x] Implement token validation with `/users/me` endpoint
+- [x] Add error handling for invalid/expired tokens
+- [x] Define TypeScript interfaces for API responses
 
 ### Task 2.2: Organization ID Fetching
 - [ ] Create function to fetch available organizations with types
