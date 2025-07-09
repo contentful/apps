@@ -8,10 +8,10 @@ import { deleteAppDefinition } from './actions/deleteAppDefinition.js';
 
 
 // Fill out before running the script
-const accessToken = 'YOUR_CONTENTFUL_ACCESS_TOKEN';
-const organizationId = '6B7UvF9RgdtICSBSvSIUMY';
+const accessToken = '';
+const organizationId = '';
 const appName = 'Your App Name';
-const teamId = '3LQ6MMsQXIfb1oCg2W1RZ3'; 
+const teamId = ''; 
 const environmentId = 'master'; 
 
 
