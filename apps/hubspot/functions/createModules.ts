@@ -83,7 +83,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   }
 
   if (successFields.length > 0 && !invalidToken && !missingScopes) {
-    updateConnectedFields(cma, event.body.entryId, successFields, new Date().toISOString());
+    await updateConnectedFields(cma, event.body.entryId, successFields, new Date().toISOString());
   }
 
   return {

@@ -43,6 +43,7 @@ const Sidebar = () => {
       title: 'Sync entry fields to Hubspot',
       parameters: {
         entryTitle: getEntryTitle(),
+        entryId: sdk.ids.entry,
         fields: JSON.parse(
           JSON.stringify(
             await processFields(Object.values(sdk.entry.fields), cma, sdk.locales.default)

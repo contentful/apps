@@ -11,6 +11,7 @@ import { MODULE_NAME_PATTERN } from '../utils/utils';
 
 export type InvocationParams = {
   entryTitle: string;
+  entryId: string;
   fields: SdkField[];
 };
 
@@ -81,6 +82,7 @@ const Dialog = () => {
         },
         {
           parameters: {
+            entryId: invocationParams.entryId,
             fields: JSON.stringify(fieldsToSend),
           },
         }

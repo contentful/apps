@@ -16,6 +16,9 @@ import {
   IMAGE_MODULE_TEMPLATE,
 } from '../../functions/templates';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
+import { expect, vi } from 'vitest';
+import ConfigEntryService from '../../src/utils/ConfigEntryService';
+import { ConnectedField } from '../../src/utils/utils';
 
 // Mock fetch globally
 global.fetch = vi.fn();
@@ -749,5 +752,58 @@ describe('createModules', () => {
     const thirdFile = thirdFormData.get('file') as Blob;
     const thirdContent = await thirdFile.text();
     expect(thirdContent).toBe(IMAGE_MODULE_TEMPLATE);
+  });
+
+  it('should call config entry service with expected params', async () => {
+    vi.useFakeTimers();
+    mockedFetch();
+
+    // Mock successful fetch responses
+    const mockField: SelectedSdkField = {
+      type: 'Text',
+      id: 'test-field-id',
+      uniqueId: 'test-module',
+      name: 'Test Field',
+      supported: true,
+      value: 'Hello World',
+      moduleName: 'entry-title-test-field',
+    };
+
+    const mockDate = new Date();
+    vi.setSystemTime(mockDate);
+
+    const mockEvent = {
+      body: {
+        entryId: 'entry-id',
+        fields: JSON.stringify([mockField]),
+      },
+    };
+
+    const updateEntryConnectedFieldsMock = vi.spyOn(
+      ConfigEntryService.prototype,
+      'updateEntryConnectedFields'
+    );
+
+    const result = await handler(mockEvent as any, mockedContext('test-token') as any);
+
+    // Verify the result
+    expect(result).toEqual({
+      successQuantity: 1,
+      failedQuantity: 0,
+      invalidToken: false,
+      missingScopes: false,
+    });
+
+    const expectedConnectedField: ConnectedField = {
+      fieldId: 'test-field-id',
+      moduleName: 'entry-title-test-field',
+      updatedAt: mockDate.toISOString(),
+    };
+
+    expect(updateEntryConnectedFieldsMock).toHaveBeenCalledWith(mockEvent.body.entryId, [
+      expectedConnectedField,
+    ]);
+
+    vi.useRealTimers();
   });
 });
