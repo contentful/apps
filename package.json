@@ -1,6 +1,7 @@
 {
   "name": "@contentful/apps",
   "private": true,
+  "type": "module",
   "engines": {
     "node": ">=16.0.0",
     "npm": ">=8.0.0"
@@ -31,7 +32,9 @@
     "sentry-release": "SENTRY_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug new -p marketplace-apps $SENTRY_RELEASE && sentry-cli releases --log-level=debug set-commits --auto --ignore-missing $SENTRY_RELEASE && sentry-cli releases --log-level=debug finalize $SENTRY_RELEASE && sentry-cli releases --log-level=debug deploys $SENTRY_RELEASE new -e production"
   },
   "dependencies": {
-    "lerna": "6.6.2"
+    "lerna": "6.6.2",
+    "dotenv": "^16.0.0",
+    "contentful-management": "^11.52.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
