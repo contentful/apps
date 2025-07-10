@@ -11,8 +11,9 @@ import {
   Pill,
   TextInput,
   Menu,
+  GlobalStyles,
 } from '@contentful/f36-components';
-import { Workbench } from '@contentful/f36-workbench';
+import { Layout } from '@contentful/f36-layout';
 import { css } from 'emotion';
 import { fetchProjects } from '../functions/getVideos';
 import { ProjectReduced, WistiaError } from './helpers/types';
@@ -157,100 +158,103 @@ const Config = (props: ConfigProps) => {
 
   return (
     <>
-      <Workbench className={css({ margin: '80px 80px 0px 80px' })}>
-        <Flex flexDirection="column" fullHeight fullWidth>
-          <Heading>Wistia Videos App Configuration</Heading>
-          <Paragraph>Please provide your access bearer token for the Wistia Data API.</Paragraph>
-          <Flex flexDirection="column" marginTop="spacingM">
-            <div style={{ marginBottom: '20px' }}>
-              <FormControl id="apiBearerTokenInput">
-                <FormControl.Label>=Wistia Data API access bearer token</FormControl.Label>
-                <TextInput
-                  isRequired
-                  name="apiBearerTokenInput"
-                  onChange={() => setShowButton(true)}
-                  value={parameters.apiBearerToken}
-                />
-                <FormControl.ValidationMessage>
-                  {requiredMessage || ''}
-                </FormControl.ValidationMessage>
-              </FormControl>
-            </div>
-            <div style={{ marginBottom: '5px' }}>
-              <Paragraph>
-                It's very important to provide a bearer token with "read only" permissions and the
-                "all project and video data" options enabled. The token saved in this app will be
-                accessible by the users of this Contentful space.
-              </Paragraph>
-            </div>
-            <TextLink
-              href="https://wistia.com/support/account-and-billing/setup#api-access"
-              target="_blank"
-              rel="noreferrer">
-              How to find your access bearer token
-            </TextLink>
-          </Flex>
-          {(!fetchedProjects?.length || showButton) && (
-            <Flex marginTop="spacingL">
-              <Button onClick={() => getInputValue()} isLoading={loading}>
-                Display Wistia projects
-              </Button>
+      <GlobalStyles />
+      <Layout variant="fullscreen" offsetTop={0}>
+        <Layout.Body className={css(styles.body)}>
+          <Flex flexDirection="column" className={css(styles.form)}>
+            <Heading>Wistia Videos App Configuration</Heading>
+            <Paragraph>Please provide your access bearer token for the Wistia Data API.</Paragraph>
+            <Flex flexDirection="column" marginTop="spacingM">
+              <div style={{ marginBottom: '20px' }}>
+                <FormControl id="apiBearerTokenInput">
+                  <FormControl.Label>Wistia Data API access bearer token</FormControl.Label>
+                  <TextInput
+                    isRequired
+                    name="apiBearerTokenInput"
+                    onChange={() => setShowButton(true)}
+                    value={parameters.apiBearerToken}
+                  />
+                  <FormControl.ValidationMessage>
+                    {requiredMessage || ''}
+                  </FormControl.ValidationMessage>
+                </FormControl>
+              </div>
+              <div style={{ marginBottom: '5px' }}>
+                <Paragraph>
+                  It's very important to provide a bearer token with "read only" permissions and the
+                  "all project and video data" options enabled. The token saved in this app will be
+                  accessible by the users of this Contentful space.
+                </Paragraph>
+              </div>
+              <TextLink
+                href="https://wistia.com/support/account-and-billing/setup#api-access"
+                target="_blank"
+                rel="noreferrer">
+                How to find your access bearer token
+              </TextLink>
             </Flex>
-          )}
-          <Flex flexDirection="column" marginTop={'spacingXl'} fullHeight>
-            {!!fetchedProjects?.length && (
-              <>
-                <Flex marginBottom="spacingXs">
-                  <Heading as="h2">Choose projects to exclude from the app.</Heading>
-                </Flex>
-                <Flex marginBottom="spacingL">
-                  <Paragraph>
-                    Choose any projects that you think aren't relevant to what editors are doing in
-                    this Contentful space.
-                  </Paragraph>
-                </Flex>
-                {!!parameters.excludedProjects?.length && (
-                  <Flex marginBottom="spacingM" flexWrap="wrap">
-                    {parameters.excludedProjects.map((item) => (
-                      <Pill
-                        style={{ width: 200, marginRight: 10, marginBottom: 10 }}
-                        label={item.name}
-                        onClose={() => removeExcludedProject(item.hashedId)}
-                        key={item.id}
-                      />
-                    ))}
-                  </Flex>
-                )}
-                {fetchedProjects.length > 0 ? (
-                  <div className={css(styles.projectMenu)}>
-                    <Menu
-                      isOpen
-                      isFullWidth
-                      isAutoalignmentEnabled={false}
-                      usePortal={false}
-                      placement="bottom-end">
-                      <Menu.List style={{ position: 'unset' }}>
-                        {fetchedProjects.map((item) => (
-                          <Menu.Item
-                            onClick={() => addExcludedProject(item)}
-                            isActive={
-                              parameters.excludedProjects?.findIndex(
-                                (project) => project.hashedId === item?.hashedId
-                              ) !== -1
-                            }
-                            key={`key-${item.id}`}>
-                            {item.name}
-                          </Menu.Item>
-                        ))}
-                      </Menu.List>
-                    </Menu>
-                  </div>
-                ) : null}
-              </>
+            {(!fetchedProjects?.length || showButton) && (
+              <Flex marginTop="spacingL">
+                <Button onClick={() => getInputValue()} isLoading={loading}>
+                  Display Wistia projects
+                </Button>
+              </Flex>
             )}
+            <Flex flexDirection="column" marginTop={'spacingXl'} fullHeight>
+              {!!fetchedProjects?.length && (
+                <>
+                  <Flex marginBottom="spacingXs">
+                    <Heading as="h2">Choose projects to exclude from the app.</Heading>
+                  </Flex>
+                  <Flex marginBottom="spacingL">
+                    <Paragraph>
+                      Choose any projects that you think aren't relevant to what editors are doing
+                      in this Contentful space.
+                    </Paragraph>
+                  </Flex>
+                  {!!parameters.excludedProjects?.length && (
+                    <Flex marginBottom="spacingM" flexWrap="wrap">
+                      {parameters.excludedProjects.map((item) => (
+                        <Pill
+                          style={{ width: 200, marginRight: 10, marginBottom: 10 }}
+                          label={item.name}
+                          onClose={() => removeExcludedProject(item.hashedId)}
+                          key={item.id}
+                        />
+                      ))}
+                    </Flex>
+                  )}
+                  {fetchedProjects.length > 0 ? (
+                    <div className={css(styles.projectMenu)}>
+                      <Menu
+                        isOpen
+                        isFullWidth
+                        isAutoalignmentEnabled={false}
+                        usePortal={false}
+                        placement="bottom-end">
+                        <Menu.List style={{ position: 'unset' }}>
+                          {fetchedProjects.map((item) => (
+                            <Menu.Item
+                              onClick={() => addExcludedProject(item)}
+                              isActive={
+                                parameters.excludedProjects?.findIndex(
+                                  (project) => project.hashedId === item?.hashedId
+                                ) !== -1
+                              }
+                              key={`key-${item.id}`}>
+                              {item.name}
+                            </Menu.Item>
+                          ))}
+                        </Menu.List>
+                      </Menu>
+                    </div>
+                  ) : null}
+                </>
+              )}
+            </Flex>
           </Flex>
-        </Flex>
-      </Workbench>
+        </Layout.Body>
+      </Layout>
     </>
   );
 };
