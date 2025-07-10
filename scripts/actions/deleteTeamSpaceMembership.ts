@@ -1,7 +1,24 @@
+import contentful from "contentful-management";
+import { createCMAClient } from "./createCMAClient.ts";
 
-export async function deleteTeamSpaceMemberShip(client, organizationId, spaceId, teamId) {
+interface DeleteTeamSpaceMembershipProps {
+  client?: any;
+  organizationId: string;
+  spaceId: string;
+  teamId: string;
+}
+
+export async function deleteTeamSpaceMemberShip({
+  client,
+  organizationId,
+  spaceId,
+  teamId,
+}: DeleteTeamSpaceMembershipProps) : Promise<void> {
 
   try {
+    if (!client) {
+      client = await createCMAClient();
+    }
 
     const organization = await client.getOrganization(organizationId)
     const team = await organization.getTeam(teamId)

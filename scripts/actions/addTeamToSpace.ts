@@ -1,6 +1,22 @@
-export async function addTeamToSpace(client, spaceId, teamId) {
+import contentful from "contentful-management";
+import { createCMAClient } from "./createCMAClient.ts";
+
+interface AddTeamToSpaceProps {
+    client?: any;
+    spaceId: string;
+    teamId: string;
+  }
+
+export async function addTeamToSpace({
+    client,
+    spaceId, 
+    teamId,
+}: AddTeamToSpaceProps) {
 
     try {
+      if (!client) {
+        client = await createCMAClient();
+      }
       const space = await client.getSpace(spaceId);
       
       // Check if team already has access

@@ -1,4 +1,20 @@
-export async function createAppDefinition(client, organizationId, appName) {
+import { createCMAClient } from "./createCMAClient.ts";
+
+interface CreateAppDefinitionProps {
+    client?: any;
+    organizationId: string;
+    appName: string;
+  }
+
+export async function createAppDefinition({
+    client,
+    organizationId,
+    appName,
+}: CreateAppDefinitionProps) {
+
+    if (!client) {
+        client = await createCMAClient();
+      }
 
     const organization = await client.getOrganization(organizationId);
     const appDefinition = await organization.createAppDefinition({
