@@ -52,6 +52,7 @@ describe('Sidebar component', () => {
       title: 'Sync entry fields to Hubspot',
       parameters: {
         entryTitle: 'title value',
+        entryId: 'test-entry-id',
         fields: expectedFields,
       },
     });
