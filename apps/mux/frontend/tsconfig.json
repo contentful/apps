@@ -7,10 +7,7 @@
     "noImplicitAny": false,
     "rootDir": "./src",
     "esModuleInterop": true,
-    "lib": [
-      "dom",
-      "es2015"
-    ],
+    "lib": ["dom", "es2015"],
     "resolveJsonModule": true,
     "allowJs": true,
     "skipLibCheck": true,
@@ -21,7 +18,5 @@
     "isolatedModules": true,
     "noEmit": true
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }
