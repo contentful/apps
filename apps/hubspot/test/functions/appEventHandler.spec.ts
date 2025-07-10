@@ -1,26 +1,27 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { handler } from '../../functions/appEventHandler';
-import { createClient } from 'contentful-management';
 import ConfigEntryService from '../../src/utils/ConfigEntryService';
 
+const mockCma = {
+  entry: {
+    get: vi.fn().mockResolvedValue({
+      fields: {
+        connectedFields: {
+          'en-US': {
+            'test-entry-id': [],
+          },
+        },
+      },
+    }),
+    update: vi.fn(),
+  },
+};
+
 vi.mock('contentful-management', () => ({
-  createClient: vi.fn(),
+  createClient: () => mockCma,
 }));
 
 describe('app event handler', () => {
-  const mockCma = {
-    contentType: {
-      get: vi.fn(),
-      unpublish: vi.fn(),
-      delete: vi.fn(),
-    },
-    entry: {
-      unpublish: vi.fn(),
-      delete: vi.fn(),
-      update: vi.fn(),
-    },
-  };
-
   const mockContext = {
     appInstallationParameters: {
       hubspotAccessToken: 'test-api-key',
@@ -32,8 +33,6 @@ describe('app event handler', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (createClient as any).mockReturnValue(mockCma);
-    global.fetch = vi.fn();
   });
 
   it('should remove the entry id from the config on entry deletion', async () => {
@@ -48,46 +47,14 @@ describe('app event handler', () => {
       },
     };
 
-    const mockConfigEntry = {
-      fields: {
-        connectedFields: {
-          'en-US': {
-            'test-entry-id': [
-              {
-                fieldId: 'testField',
-                moduleId: 'test-module-id',
-              },
-            ],
-            'another-entry-id': [
-              {
-                fieldId: 'anotherField',
-                moduleId: 'another-module-id',
-              },
-            ],
-          },
-        },
-      },
-    };
-
-    const getConnectedFieldsMock = vi
-      .spyOn(ConfigEntryService.prototype, 'getConnectedFields')
-      .mockResolvedValue(mockConfigEntry.fields.connectedFields['en-US'] as any);
-    const updateConfigMock = vi
-      .spyOn(ConfigEntryService.prototype, 'updateConfig')
-      .mockResolvedValue({} as any);
+    const removeEntryConnectedFieldsMock = vi.spyOn(
+      ConfigEntryService.prototype,
+      'removeEntryConnectedFields'
+    );
 
     await handler(event as any, mockContext as any);
 
-    expect(getConnectedFieldsMock).toHaveBeenCalled();
-    expect(updateConfigMock).toHaveBeenCalled();
-
-    expect(updateConfigMock).toHaveBeenCalledWith({
-      'another-entry-id': [
-        {
-          fieldId: 'anotherField',
-          moduleId: 'another-module-id',
-        },
-      ],
-    });
+    expect(removeEntryConnectedFieldsMock).toHaveBeenCalled();
+    expect(removeEntryConnectedFieldsMock).toHaveBeenCalledWith(event.body.sys.id);
   });
 });

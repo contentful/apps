@@ -154,7 +154,12 @@ describe('Dialog component', () => {
     const user = userEvent.setup();
     const mockCreateWithResponse = vi.fn().mockResolvedValue({
       response: {
-        body: JSON.stringify({ success: ['title', 'description-en-us'], failed: [] }),
+        body: JSON.stringify({
+          successQuantity: 2,
+          failedQuantity: 0,
+          invalidToken: false,
+          missingScopes: false,
+        }),
       },
     });
 

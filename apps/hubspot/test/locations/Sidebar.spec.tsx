@@ -71,7 +71,7 @@ describe('Sidebar component', () => {
       {
         fieldId: 'title',
         locale: 'en-US',
-        moduleId: 'test-module',
+        moduleName: 'test-module',
         updatedAt: '2024-01-01T00:00:00Z',
         error: { status: 400, message: 'Bad Request' },
       },
@@ -86,13 +86,13 @@ describe('Sidebar component', () => {
       {
         fieldId: 'title',
         locale: 'en-US',
-        moduleId: 'test-module',
+        moduleName: 'test-module',
         updatedAt: '2024-01-01T00:00:00Z',
       },
       {
         fieldId: 'description',
         locale: 'en-US',
-        moduleId: 'test-module',
+        moduleName: 'test-module',
         updatedAt: '2024-01-01T00:00:00Z',
       },
     ]);

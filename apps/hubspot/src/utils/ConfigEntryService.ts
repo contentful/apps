@@ -22,35 +22,56 @@ class ConfigEntryService {
     await this.createEntry();
   }
 
-  private async getConfigEntry(): Promise<EntryProps<KeyValueMap>> {
-    if (!this.configEntry) {
-      this.configEntry = await this.cma.entry.get({ entryId: CONFIG_ENTRY_ID });
+  async getConnectedFields(): Promise<ConnectedFields> {
+    const configEntry = await this.getConfigEntry();
+    const connectedFields = configEntry.fields[CONFIG_FIELD_ID];
+    if (!connectedFields) {
+      return {};
     }
-    return this.configEntry;
+    const entryConnectedFields = connectedFields[await this.getDefaultLocale()];
+    return entryConnectedFields || {};
   }
 
-  async updateConfig(connectedFields: ConnectedFields) {
+  async getEntryConnectedFields(entryId: string): Promise<EntryConnectedFields> {
+    const connectedFields = await this.getConnectedFields();
+    return connectedFields[entryId] || [];
+  }
+
+  async updateEntryConnectedFields(entryId: string, entryConnectedFields: EntryConnectedFields) {
     const configEntry = await this.getConfigEntry();
-
+    const defaultLocale = await this.getDefaultLocale();
     if (!configEntry.fields[CONFIG_FIELD_ID]) {
-      configEntry.fields[CONFIG_FIELD_ID] = {};
+      configEntry.fields[CONFIG_FIELD_ID] = { [defaultLocale]: {} };
     }
+    const connectedFields = configEntry.fields[CONFIG_FIELD_ID][defaultLocale];
 
-    configEntry.fields[CONFIG_FIELD_ID][await this.getDefaultLocale()] = connectedFields;
+    connectedFields[entryId] = entryConnectedFields;
     const updatedEntry = await this.cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
     this.configEntry = updatedEntry;
 
     return updatedEntry;
   }
 
-  async getConnectedFields(): Promise<ConnectedFields> {
+  async removeEntryConnectedFields(entryId: string) {
     const configEntry = await this.getConfigEntry();
-    return configEntry.fields[CONFIG_FIELD_ID][await this.getDefaultLocale()];
+    const defaultLocale = await this.getDefaultLocale();
+    const connectedFields = configEntry.fields[CONFIG_FIELD_ID]?.[defaultLocale];
+    if (!connectedFields || !connectedFields[entryId]) {
+      return;
+    }
+
+    delete connectedFields[entryId];
+    const updatedEntry = await this.cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
+    this.configEntry = updatedEntry;
+
+    return updatedEntry;
   }
 
-  async getEntryConnectedFields(entryId: string): Promise<EntryConnectedFields> {
-    const connectedFields = await this.getConnectedFields();
-    return connectedFields[entryId] || [];
+  private async getConfigEntry(): Promise<EntryProps<KeyValueMap>> {
+    if (!this.configEntry) {
+      this.configEntry = await this.cma.entry.get({ entryId: CONFIG_ENTRY_ID });
+    }
+    return this.configEntry;
   }
 
   private async createContentType() {

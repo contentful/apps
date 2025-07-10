@@ -4,7 +4,6 @@ import {
   FunctionEventContext,
   AppEventRequest,
 } from '@contentful/node-apps-toolkit';
-import { ConnectedFields, EntryConnectedFields } from '../src/utils/utils';
 import ConfigEntryService from '../src/utils/ConfigEntryService';
 import { initContentfulManagementClient } from './common';
 
@@ -22,30 +21,10 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = a
   const entryId = body.sys.id;
 
   const configService = new ConfigEntryService(cma);
-  let connectedFields: ConnectedFields | undefined;
-  let entryConnectedFields: EntryConnectedFields | undefined;
-
-  await callAndRetry(async () => {
-    connectedFields = await configService.getConnectedFields();
-    entryConnectedFields = await configService.getEntryConnectedFields(entryId);
-  });
-
-  if (!entryConnectedFields || entryConnectedFields.length === 0) {
-    return;
-  }
 
   if (contentfulTopic.includes('Entry.delete')) {
-    await entryDeletedHandler(configService, entryId, connectedFields!);
+    await callAndRetry(() => configService.removeEntryConnectedFields(entryId));
   }
-};
-
-const entryDeletedHandler = async (
-  configService: ConfigEntryService,
-  entryId: string,
-  connectedFields: ConnectedFields
-) => {
-  delete connectedFields[entryId];
-  await callAndRetry(() => configService.updateConfig(connectedFields));
 };
 
 async function callAndRetry(fn: () => Promise<any>): Promise<void> {
