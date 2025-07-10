@@ -3,7 +3,7 @@ class ApiClient {
   tokenSecret: string;
   baseOptions?: {
     mode: 'cors';
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
     headers: Headers;
   };
 
@@ -16,6 +16,7 @@ class ApiClient {
     const headers = new Headers();
     headers.set('Authorization', 'Basic ' + btoa(`${this.tokenId}:${this.tokenSecret}`));
     headers.set('Content-Type', 'application/json');
+
     return headers;
   };
 
@@ -39,8 +40,16 @@ class ApiClient {
     return this.request('DELETE', path);
   };
 
+  patch = async (path: string, body?: string) => {
+    return this.request('PATCH', path, body);
+  };
+
   // This is an exception for Contentful made by Mux to allow client-side API requests.
-  request = async (method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: string) => {
+  request = async (
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
+    path: string,
+    body?: string
+  ) => {
     return fetch(`https://api.mux.com${path}`, {
       ...this.baseOptions,
       method,
