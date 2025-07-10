@@ -1,7 +1,8 @@
-import { Button, FormControl, Paragraph } from '@contentful/f36-components';
+import { Box, Button, FormControl, Paragraph } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { Dispatch, SetStateAction } from 'react';
-import WizardFooter from './WizardFooter';
+import WizardFooter from '../WizardFooter';
+import { MULTISELECT_DIALOG_HEIGHT } from '../../utils';
 
 type LocalesSelectionStepProps = {
   locales: string[];
@@ -30,12 +31,14 @@ const LocalesSelectionStep = (props: LocalesSelectionStepProps) => {
         Select the locales you want to reference in Braze messages.
       </Paragraph>
 
-      <FormControl isRequired isInvalid={selectedLocales.length === 0} marginBottom="spacing4Xl">
+      <FormControl
+        isRequired
+        isInvalid={selectedLocales.length === 0}
+        style={{ marginBottom: '7rem' }}>
         <FormControl.Label>Locales</FormControl.Label>
-
         <Multiselect
           currentSelection={selectedLocales}
-          popoverProps={{ isFullWidth: true, listMaxHeight: 108 }}
+          popoverProps={{ isFullWidth: true, listMaxHeight: MULTISELECT_DIALOG_HEIGHT }}
           placeholder="Select one or more">
           {locales.map((local) => {
             const val = local.toLowerCase().replace(/\s/g, '-');
