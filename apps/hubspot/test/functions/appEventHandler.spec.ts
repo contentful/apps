@@ -26,8 +26,9 @@ vi.mock('contentful-management', () => ({
 }));
 
 vi.mock('../../functions/common', async () => {
-  const actual =
-    await vi.importActual<typeof import('../../functions/common')>('../../functions/common');
+  const actual = await vi.importActual<typeof import('../../functions/common')>(
+    '../../functions/common'
+  );
   return {
     ...actual,
     createModuleFile: vi.fn(),
