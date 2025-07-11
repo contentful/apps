@@ -16,8 +16,9 @@ import {
   NUMBER_MODULE_TEMPLATE,
   RICH_TEXT_FIELD_TEMPLATE,
   RICH_TEXT_MODULE_TEMPLATE,
-  TEXT_FIELD_TEMPLATE,
   TEXT_MODULE_TEMPLATE,
+  TEXT_FIELD_TEMPLATE,
+  LONG_TEXT_MODULE_TEMPLATE,
 } from './templates';
 import { SelectedSdkField } from '../src/utils/fieldsProcessing';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
@@ -143,10 +144,17 @@ const getFiles = (field: SelectedSdkField): { fieldsFile: string; moduleFile: st
   let moduleFile;
   switch (type) {
     case 'Symbol':
-    case 'Text':
       fieldsFile = structuredClone(TEXT_FIELD_TEMPLATE);
       if (field.value) fieldsFile[0].default = field.value;
       moduleFile = TEXT_MODULE_TEMPLATE;
+      break;
+    case 'Text':
+      fieldsFile = structuredClone(RICH_TEXT_FIELD_TEMPLATE);
+      if (field.value) {
+        const lines: string[] = field.value.split('\n');
+        fieldsFile[0].default = lines.map((line) => `<p>${line}</p>`).join('');
+      }
+      moduleFile = LONG_TEXT_MODULE_TEMPLATE;
       break;
     case 'RichText':
       fieldsFile = structuredClone(RICH_TEXT_FIELD_TEMPLATE);
