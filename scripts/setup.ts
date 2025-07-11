@@ -17,7 +17,6 @@ const appName = process.env.CONTENTFUL_APP_NAME || 'Test App';
 const teamId = process.env.CONTENTFUL_TEAM_ID;
 const environmentId = process.env.CONTENTFUL_ENVIRONMENT || 'master';
 
-
 // Validate required environment variables
 if (!accessToken) {
   console.error(
@@ -48,47 +47,47 @@ try {
   const appDefinitionStaging = await createAppDefinition({
     client,
     organizationId,
-    appName: appName + ' (staging)'
+    appName: appName + ' (staging)',
   });
   const appDefinitionProduction = await createAppDefinition({
     client,
     organizationId,
-    appName: appName + ' (production)'
+    appName: appName + ' (production)',
   });
 
   const stagingSpace = await createSpace({
     client,
     organizationId,
-    spaceName: appName + ' (staging)'
+    spaceName: appName + ' (staging)',
   });
   const productionSpace = await createSpace({
     client,
     organizationId,
-    spaceName: appName + ' (production)'
+    spaceName: appName + ' (production)',
   });
 
   const teamSpaceMembershipStaging = await addTeamToSpace({
     client,
     spaceId: stagingSpace.sys.id,
-    teamId
+    teamId,
   });
   const teamSpaceMembershipProduction = await addTeamToSpace({
     client,
     spaceId: productionSpace.sys.id,
-    teamId
+    teamId,
   });
 
   const appInstallationStaging = await installApp({
     client,
     spaceId: stagingSpace.sys.id,
     environmentId,
-    appDefinitionId: appDefinitionStaging.sys.id
+    appDefinitionId: appDefinitionStaging.sys.id,
   });
   const appInstallationProduction = await installApp({
     client,
     spaceId: productionSpace.sys.id,
     environmentId,
-    appDefinitionId: appDefinitionProduction.sys.id
+    appDefinitionId: appDefinitionProduction.sys.id,
   });
 
   console.log('\n✅ Setup complete! Finish configuring the app definitions here:\n');
@@ -109,10 +108,18 @@ try {
 
   // UNDO - comment out for testing
   try {
-    await deleteSpace({client, spaceId: productionSpace.sys.id});
-    await deleteSpace({client, spaceId: stagingSpace.sys.id});
-    await deleteAppDefinition({client, organizationId, appDefinitionId: appDefinitionProduction.sys.id});
-    await deleteAppDefinition({client, organizationId, appDefinitionId: appDefinitionStaging.sys.id});
+    await deleteSpace({ client, spaceId: productionSpace.sys.id });
+    await deleteSpace({ client, spaceId: stagingSpace.sys.id });
+    await deleteAppDefinition({
+      client,
+      organizationId,
+      appDefinitionId: appDefinitionProduction.sys.id,
+    });
+    await deleteAppDefinition({
+      client,
+      organizationId,
+      appDefinitionId: appDefinitionStaging.sys.id,
+    });
     console.log('🗑️  Cleanup completed successfully');
   } catch (cleanupError) {
     console.error('❌ Cleanup failed:', cleanupError);

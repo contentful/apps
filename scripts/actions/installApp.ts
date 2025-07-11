@@ -1,5 +1,5 @@
-import contentful from "contentful-management";
-import { createCMAClient } from "./createCMAClient.ts";
+import contentful from 'contentful-management';
+import { createCMAClient } from './createCMAClient.ts';
 
 interface InstallAppProps {
   client?: any;
@@ -14,8 +14,6 @@ export async function installApp({
   environmentId = 'master',
   appDefinitionId,
 }: InstallAppProps) {
-
-
   if (!client) {
     client = await createCMAClient();
   }
@@ -24,12 +22,21 @@ export async function installApp({
   const environment = await space.getEnvironment(environmentId);
 
   await environment.createAppInstallation(appDefinitionId, {
-    parameters: {
-    },
+    parameters: {},
   });
 
-  console.log('\n🚀 App ', '(', appDefinitionId,')',' installed successfully!', 'in space:', space.name,'(', space.sys.id,')', 'in environment:', environment.sys.id);
+  console.log(
+    '\n🚀 App ',
+    '(',
+    appDefinitionId,
+    ')',
+    ' installed successfully!',
+    'in space:',
+    space.name,
+    '(',
+    space.sys.id,
+    ')',
+    'in environment:',
+    environment.sys.id
+  );
 }
-
-
-

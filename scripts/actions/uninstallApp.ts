@@ -1,5 +1,5 @@
-import contentful from "contentful-management";
-import { createCMAClient } from "./createCMAClient.ts";
+import contentful from 'contentful-management';
+import { createCMAClient } from './createCMAClient.ts';
 
 interface UninstallAppProps {
   client?: any;
@@ -8,8 +8,12 @@ interface UninstallAppProps {
   appDefinitionId: string;
 }
 
-export async function uninstallApp({ client, spaceId, environmentId, appDefinitionId }: UninstallAppProps) {
-
+export async function uninstallApp({
+  client,
+  spaceId,
+  environmentId,
+  appDefinitionId,
+}: UninstallAppProps) {
   if (!client) {
     client = await createCMAClient();
   }

@@ -7,12 +7,7 @@ interface CreateSpaceOptions {
   spaceName: string;
 }
 
-export async function createSpace({
-  client,
-  organizationId,
-  spaceName,
-}: CreateSpaceOptions) {
-
+export async function createSpace({ client, organizationId, spaceName }: CreateSpaceOptions) {
   if (!client) {
     client = await createCMAClient();
   }
