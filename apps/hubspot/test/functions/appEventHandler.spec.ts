@@ -97,7 +97,7 @@ describe('app event handler', () => {
         updatedAt: new Date().toISOString(),
       },
     ];
-    const cma = makeCmaWithContentType([{ id: 'textField', type: 'Text' }]);
+    const cma = getCmaWithContentType([{ id: 'textField', type: 'Text' }]);
 
     mockConfigEntryServiceMethods(connectedFields);
     vi.spyOn(common, 'createModuleFile').mockResolvedValue(undefined);
@@ -137,7 +137,7 @@ describe('app event handler', () => {
         updatedAt: new Date().toISOString(),
       },
     ];
-    const cma = makeCmaWithContentType([{ id: 'richTextField', type: 'RichText' }]);
+    const cma = getCmaWithContentType([{ id: 'richTextField', type: 'RichText' }]);
 
     mockConfigEntryServiceMethods(connectedFields);
     vi.spyOn(common, 'createModuleFile').mockResolvedValue(undefined);
@@ -181,7 +181,7 @@ describe('app event handler', () => {
         updatedAt: new Date().toISOString(),
       },
     ];
-    const cma = makeCmaWithContentType([{ id: 'textField', type: 'Text' }]);
+    const cma = getCmaWithContentType([{ id: 'textField', type: 'Text' }]);
 
     const { updateEntryConnectedFieldsMock } = mockConfigEntryServiceMethods(connectedFields);
     mockCommonMethods(cma, true);
@@ -199,7 +199,7 @@ describe('app event handler', () => {
   });
 });
 
-function makeCmaWithContentType(contentTypeFields: { id: string; type: string }[]) {
+function getCmaWithContentType(contentTypeFields: { id: string; type: string }[]) {
   const contentType = { fields: contentTypeFields };
   return {
     contentType: {
