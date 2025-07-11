@@ -60,7 +60,7 @@ describe('Sidebar', () => {
     };
     render(<Sidebar />);
     const input = screen.getByDisplayValue(
-      /https:\/\/cdn\.contentful\.com\/spaces\/space-id\/environments\/master\/entries\?access_token=.+&sys\.id=entry-id&locale=\*&include=2/
+      /https:\/\/cdn\.contentful\.com\/spaces\/space-id\/environments\/master\/entries\/entry-id\?access_token=.+&locale=\*/
     );
     expect(input).toBeTruthy();
   });
