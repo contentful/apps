@@ -6,10 +6,7 @@ import {
 } from '@contentful/node-apps-toolkit';
 import ConfigEntryService from '../src/utils/ConfigEntryService';
 import { createModuleFile, getFiles, initContentfulManagementClient } from './common';
-import {
-  AppInstallationParameters,
-  ConnectedField,
-} from '../src/utils/utils';
+import { AppInstallationParameters, ConnectedField } from '../src/utils/utils';
 import { PlainClientAPI } from 'contentful-management';
 
 const WAIT_TIMES = [1000, 2000];

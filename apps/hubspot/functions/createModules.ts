@@ -4,9 +4,7 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import {
-  META_JSON_TEMPLATE,
-} from './templates';
+import { META_JSON_TEMPLATE } from './templates';
 import { SelectedSdkField } from '../src/utils/fieldsProcessing';
 import { EntryConnectedFields } from '../src/utils/utils';
 import { PlainClientAPI } from 'contentful-management';
