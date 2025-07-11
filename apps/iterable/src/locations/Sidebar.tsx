@@ -27,7 +27,7 @@ const Sidebar = () => {
 
   const link = hasError
     ? ''
-    : `https://cdn.contentful.com/spaces/${space}/environments/master/entries?access_token=${apiKey}&sys.id=${entryId}${localization}&include=10`;
+    : `https://cdn.contentful.com/spaces/${space}/environments/master/entries/${sdk.ids.entry}?access_token=${apiKey}${localization}`;
 
   return (
     <Flex flexDirection="column">
