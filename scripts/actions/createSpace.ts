@@ -1,4 +1,3 @@
-import contentful from 'contentful-management';
 import { createCMAClient } from './createCMAClient.ts';
 
 interface CreateSpaceOptions {

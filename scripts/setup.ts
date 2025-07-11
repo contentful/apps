@@ -92,18 +92,10 @@ try {
 
   console.log('\n✅ Setup complete! Finish configuring the app definitions here:\n');
   console.log(
-    '\n ⚙️  Staging: https://app.contentful.com/account/organizations/' +
-      organizationId +
-      '/apps/definitions/' +
-      appDefinitionStaging.sys.id +
-      '/general'
+    `\n ⚙️  Staging: https://app.contentful.com/account/organizations/${organizationId}/apps/definitions/${appDefinitionStaging.sys.id}/general`
   );
   console.log(
-    '\n ⚙️  Production: https://app.contentful.com/account/organizations/' +
-      organizationId +
-      '/apps/definitions/' +
-      appDefinitionProduction.sys.id +
-      '/general'
+    `\n ⚙️  Production: https://app.contentful.com/account/organizations/${organizationId}/apps/definitions/${appDefinitionProduction.sys.id}/general`
   );
 
   // UNDO - comment out for testing

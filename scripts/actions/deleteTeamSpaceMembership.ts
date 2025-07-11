@@ -1,4 +1,3 @@
-import contentful from 'contentful-management';
 import { createCMAClient } from './createCMAClient.ts';
 
 interface DeleteTeamSpaceMembershipProps {
@@ -32,24 +31,15 @@ export async function deleteTeamSpaceMemberShip({
 
     if (team_membership) {
       console.log(
-        'deleting team space membership: ',
-        team.name +
-          ' (' +
-          team.sys.id +
-          ')' +
-          ' in space: ' +
-          space.name +
-          ' (' +
-          space.sys.id +
-          ')'
+        `Deleting team space membership: ${team.name} (${team.sys.id}) in space: ${space.name} (${space.sys.id})`
       );
       await team_membership.delete();
-      console.log('deleted team space membership successfully');
+      console.log(`Deleted team space membership successfully`);
     } else {
-      console.log('No team membership found to delete for team:', teamId);
+      console.log(`No team membership found to delete for team: ${teamId}`);
     }
   } catch (error) {
-    console.error('❌ Failed to delete team space membership:', error.message || error);
+    console.error(`❌ Failed to delete team space membership: ${error.message || error}`);
     throw error;
   }
 }

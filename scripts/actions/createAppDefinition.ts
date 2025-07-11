@@ -1,5 +1,4 @@
 import { createCMAClient } from './createCMAClient.ts';
-
 interface CreateAppDefinitionProps {
   client?: any;
   organizationId: string;
@@ -21,16 +20,7 @@ export async function createAppDefinition({
   });
 
   console.log(
-    '\n🚀 App definition created:',
-    appDefinition.name,
-    '(',
-    appDefinition.sys.id,
-    ')',
-    'in organization:',
-    organization.name,
-    '(',
-    organization.sys.id,
-    ')'
+    `\n🚀 App definition created: ${appDefinition.name} (${appDefinition.sys.id}) in organization: ${organization.name} (${organization.sys.id})`
   );
 
   return appDefinition;

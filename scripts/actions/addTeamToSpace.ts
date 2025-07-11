@@ -1,4 +1,3 @@
-import contentful from 'contentful-management';
 import { createCMAClient } from './createCMAClient.ts';
 
 interface AddTeamToSpaceProps {
@@ -21,7 +20,9 @@ export async function addTeamToSpace({ client, spaceId, teamId }: AddTeamToSpace
     );
 
     if (existingMembership) {
-      console.log('👥 Team already has access to space:', existingMembership.sys.id);
+      console.log(
+        `👥 Team already has access to space - no action taken. Existing membership ID: ${existingMembership.sys.id}`
+      );
       return existingMembership;
     }
 
@@ -32,14 +33,11 @@ export async function addTeamToSpace({ client, spaceId, teamId }: AddTeamToSpace
     });
 
     console.log(
-      '\n👥 Team',
-      ' assigned to space ',
-      space.name + ' (' + space.sys.id + ')' + ' successfully:',
-      teamSpaceMembership.sys.id
+      `\n👥 Team assigned to space ${space.name} (${space.sys.id}) successfully: ${teamSpaceMembership.sys.id}`
     );
     return teamSpaceMembership;
   } catch (error) {
-    console.error('❌ Failed to assign team to space:', error.message);
+    console.error(`❌ Failed to assign team to space: ${error.message}`);
     throw error;
   }
 }
