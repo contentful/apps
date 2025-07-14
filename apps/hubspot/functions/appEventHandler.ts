@@ -30,7 +30,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = a
     contentfulTopic.includes('Entry.save') ||
     contentfulTopic.includes('Entry.auto_save')
   ) {
-    await entrySavedHandler(cma, context, body, configService);
+    await callAndRetry(() => entrySavedHandler(cma, context, body, configService));
   }
 };
 
@@ -69,8 +69,11 @@ const entrySavedHandler = async (
 
     try {
       const { fieldsFile } = getFiles(fieldInfo.type, fieldValue);
-      await callAndRetry(() =>
-        createModuleFile(fieldsFile, 'fields.json', connectedField.moduleName, hubspotAccessToken)
+      await createModuleFile(
+        fieldsFile,
+        'fields.json',
+        connectedField.moduleName,
+        hubspotAccessToken
       );
     } catch (error: any) {
       updateResult = {
