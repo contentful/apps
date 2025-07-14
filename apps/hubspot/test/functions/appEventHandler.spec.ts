@@ -50,6 +50,36 @@ describe('app event handler', () => {
     vi.clearAllMocks();
   });
 
+  it('should return early if entry is not tracked in config (no connected fields)', async () => {
+    const event = {
+      headers: {
+        'X-Contentful-Topic': 'Entry.save',
+      },
+      body: {
+        sys: {
+          id: 'untracked-entry-id',
+          contentType: { sys: { id: 'test-content-type' } },
+        },
+        fields: {},
+      },
+    };
+    vi.spyOn(ConfigEntryService.prototype, 'getEntryConnectedFields').mockResolvedValue([]);
+    const removeEntryConnectedFieldsMock = vi.spyOn(
+      ConfigEntryService.prototype,
+      'removeEntryConnectedFields'
+    );
+    const updateEntryConnectedFieldsMock = vi.spyOn(
+      ConfigEntryService.prototype,
+      'updateEntryConnectedFields'
+    );
+    vi.spyOn(common, 'initContentfulManagementClient').mockReturnValue({} as any);
+
+    await handler(event as any, mockContext as any);
+
+    expect(removeEntryConnectedFieldsMock).not.toHaveBeenCalled();
+    expect(updateEntryConnectedFieldsMock).not.toHaveBeenCalled();
+  });
+
   it('should remove the entry id from the config on entry deletion', async () => {
     const event = {
       headers: {

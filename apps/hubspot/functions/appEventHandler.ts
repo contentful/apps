@@ -24,6 +24,12 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = a
 
   const configService = new ConfigEntryService(cma);
 
+  const entryConnectedFields = await configService.getEntryConnectedFields(entryId);
+  if (!entryConnectedFields || entryConnectedFields.length === 0) {
+    // Entry is not tracked in config, skip the function
+    return;
+  }
+
   if (contentfulTopic.includes('Entry.delete')) {
     await callAndRetry(() => configService.removeEntryConnectedFields(entryId));
   } else if (
