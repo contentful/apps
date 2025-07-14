@@ -87,11 +87,7 @@ const FieldCheckbox = (props: FieldCheckboxProps) => {
   };
 
   return (
-    <Tooltip
-      isDisabled={field.supported}
-      isVisible={!field.supported}
-      content="Syncing not supported"
-      placement="auto-start">
+    <Tooltip isDisabled={field.supported} content="Syncing not supported" placement="auto-start">
       <Box
         paddingLeft="spacingS"
         paddingTop="spacingXs"
