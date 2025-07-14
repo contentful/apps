@@ -92,6 +92,15 @@ describe('app event handler', () => {
       },
     };
 
+    vi.spyOn(ConfigEntryService.prototype, 'getEntryConnectedFields').mockResolvedValue([
+      {
+        fieldId: 'someField',
+        locale: 'en-US',
+        moduleName: 'test-module',
+        updatedAt: new Date().toISOString(),
+      },
+    ]);
+
     const removeEntryConnectedFieldsMock = vi.spyOn(
       ConfigEntryService.prototype,
       'removeEntryConnectedFields'
