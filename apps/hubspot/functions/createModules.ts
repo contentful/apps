@@ -9,7 +9,8 @@ import { SelectedSdkField } from '../src/utils/fieldsProcessing';
 import { EntryConnectedFields } from '../src/utils/utils';
 import { PlainClientAPI } from 'contentful-management';
 import ConfigEntryService from '../src/utils/ConfigEntryService';
-import { getFiles, initContentfulManagementClient } from './common';
+import { createModuleFile, getFiles, initContentfulManagementClient } from './common';
+import { InvalidHubspotTokenError, MissingHubspotScopesError } from './exceptions';
 
 type AppActionParameters = {
   entryId: string;
@@ -86,52 +87,3 @@ const createModule = async (field: SelectedSdkField, token: string) => {
   await createModuleFile(fieldsFile, 'fields.json', moduleName, token);
   await createModuleFile(moduleFile, 'module.html', moduleName, token);
 };
-
-const createModuleFile = async (
-  file: string,
-  fileName: string,
-  moduleName: string,
-  token: string
-) => {
-  const fileBuffer = Buffer.from(file);
-  const url = `https://api.hubapi.com/cms/v3/source-code/published/content/${moduleName}.module/${fileName}`;
-  const formData = new FormData();
-  const type = fileName.endsWith('json') ? 'application/json' : 'text/html';
-  formData.append('file', new Blob([fileBuffer], { type: type }), fileName);
-
-  const response = await fetch(url, {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: formData,
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    if (error?.category === 'INVALID_AUTHENTICATION') {
-      throw new InvalidHubspotTokenError(error.message);
-    }
-    if (error?.category === 'MISSING_SCOPES') {
-      throw new MissingHubspotScopesError(error.message);
-    }
-    const errorData = await response.text();
-    throw new Error(
-      `HubSpot API request failed: ${response.status} ${response.statusText} - ${errorData}`
-    );
-  }
-};
-
-class InvalidHubspotTokenError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'InvalidHubspotTokenError';
-  }
-}
-
-class MissingHubspotScopesError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'MissingHubspotScopesError';
-  }
-}
