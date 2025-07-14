@@ -98,10 +98,17 @@ export const getFiles = (type: string, value: any): { fieldsFile: string; module
   let moduleFile;
   switch (type) {
     case 'Symbol':
-    case 'Text':
       fieldsFile = structuredClone(TEXT_FIELD_TEMPLATE);
       if (value) fieldsFile[0].default = value;
       moduleFile = TEXT_MODULE_TEMPLATE;
+      break;
+    case 'Text':
+      fieldsFile = structuredClone(RICH_TEXT_FIELD_TEMPLATE);
+      if (value) {
+        const lines: string[] = value.split('\n');
+        fieldsFile[0].default = lines.map((line) => `<p>${line}</p>`).join('');
+      }
+      moduleFile = RICH_TEXT_MODULE_TEMPLATE;
       break;
     case 'RichText':
       fieldsFile = structuredClone(RICH_TEXT_FIELD_TEMPLATE);

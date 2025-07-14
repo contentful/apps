@@ -9,7 +9,7 @@ import { SelectedSdkField } from '../src/utils/fieldsProcessing';
 import { EntryConnectedFields } from '../src/utils/utils';
 import { PlainClientAPI } from 'contentful-management';
 import ConfigEntryService from '../src/utils/ConfigEntryService';
-import { createModuleFile, getFiles, initContentfulManagementClient } from './common';
+import { getFiles, initContentfulManagementClient } from './common';
 
 type AppActionParameters = {
   entryId: string;
