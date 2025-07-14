@@ -146,7 +146,7 @@ describe('app event handler', () => {
     await handler(event as any, mockContext as any);
 
     expect(common.createModuleFile).toHaveBeenCalledWith(
-      JSON.stringify([{ ...TEXT_FIELD_TEMPLATE[0], default: 'Hello World' }]),
+      JSON.stringify([{ ...RICH_TEXT_FIELD_TEMPLATE[0], default: '<p>Hello World</p>' }]),
       'fields.json',
       'test-module',
       'test-api-key'
