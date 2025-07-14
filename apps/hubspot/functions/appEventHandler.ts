@@ -30,18 +30,18 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = a
     contentfulTopic.includes('Entry.save') ||
     contentfulTopic.includes('Entry.auto_save')
   ) {
-    await callAndRetry(() => entrySavedHandler(cma, context, body, configService));
+    const { hubspotAccessToken } = context.appInstallationParameters as AppInstallationParameters;
+    await callAndRetry(() => entrySavedHandler(cma, hubspotAccessToken, body, configService));
   }
 };
 
 const entrySavedHandler = async (
   cma: PlainClientAPI,
-  context: FunctionEventContext,
+  hubspotAccessToken: string,
   body: any,
   configService: ConfigEntryService
 ) => {
   const entryConnectedFields = await configService.getEntryConnectedFields(body.sys.id);
-  const { hubspotAccessToken } = context.appInstallationParameters as AppInstallationParameters;
 
   const contentType = await cma.contentType.get({
     contentTypeId: body.sys.contentType.sys.id,
