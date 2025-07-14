@@ -76,9 +76,6 @@ export const TEXT_MODULE_TEMPLATE =
 export const RICH_TEXT_MODULE_TEMPLATE =
   '{% inline_rich_text field="richtext_field" value="{{ module.richtext_field }}" %}';
 
-export const LONG_TEXT_MODULE_TEMPLATE =
-  '{% inline_rich_text field="longtext_field" value="{{ module.richtext_field }}" %}';
-
 export const NUMBER_MODULE_TEMPLATE = '{{ module.number_field }}';
 
 export const DATE_MODULE_TEMPLATE = '{{ module.date_field }}';

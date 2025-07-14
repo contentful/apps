@@ -139,7 +139,7 @@ const getFiles = (field: SelectedSdkField): { fieldsFile: string; moduleFile: st
         const lines: string[] = field.value.split('\n');
         fieldsFile[0].default = lines.map((line) => `<p>${line}</p>`).join('');
       }
-      moduleFile = LONG_TEXT_MODULE_TEMPLATE;
+      moduleFile = RICH_TEXT_MODULE_TEMPLATE;
       break;
     case 'RichText':
       fieldsFile = structuredClone(RICH_TEXT_FIELD_TEMPLATE);
