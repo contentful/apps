@@ -1,4 +1,4 @@
-import { Box, Checkbox, Paragraph, Text } from '@contentful/f36-components';
+import { Box, Checkbox, Paragraph, Text, Tooltip } from '@contentful/f36-components';
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
 import { useMemo } from 'react';
@@ -87,25 +87,31 @@ const FieldCheckbox = (props: FieldCheckboxProps) => {
   };
 
   return (
-    <Box
-      paddingLeft="spacingS"
-      paddingTop="spacingXs"
-      paddingBottom="spacingXs"
-      className={css({
-        borderTop: `1px solid ${tokens.gray300}`,
-      })}>
-      <Checkbox
-        key={field.uniqueId}
-        id={field.uniqueId}
-        isChecked={checked}
-        onChange={onFieldSelected}
-        isDisabled={!field.supported}>
-        <Text fontColor={field.supported ? 'gray900' : 'gray500'} fontWeight="fontWeightMedium">
-          {displayName}
-        </Text>
-        <Text fontColor="gray500">({displayType(field)})</Text>
-      </Checkbox>
-    </Box>
+    <Tooltip
+      isDisabled={field.supported}
+      isVisible={!field.supported}
+      content="Syncing not supported"
+      placement="auto-start">
+      <Box
+        paddingLeft="spacingS"
+        paddingTop="spacingXs"
+        paddingBottom="spacingXs"
+        className={css({
+          borderTop: `1px solid ${tokens.gray300}`,
+        })}>
+        <Checkbox
+          key={field.uniqueId}
+          id={field.uniqueId}
+          isChecked={checked}
+          onChange={onFieldSelected}
+          isDisabled={!field.supported}>
+          <Text fontColor={field.supported ? 'gray900' : 'gray500'} fontWeight="fontWeightMedium">
+            {displayName}
+          </Text>
+          <Text fontColor="gray500">({displayType(field)})</Text>
+        </Checkbox>
+      </Box>
+    </Tooltip>
   );
 };
 
