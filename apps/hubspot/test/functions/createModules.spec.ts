@@ -264,7 +264,7 @@ describe('createModules', () => {
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
-  it('should successfully create a module for a text field', async () => {
+  it('should successfully create a module for a text field with single line', async () => {
     // Mock successful fetch responses
     const mockFetch = mockedFetch();
 
@@ -309,21 +309,21 @@ describe('createModules', () => {
     const firstContent = await firstFile.text();
     expect(JSON.parse(firstContent)).toEqual(META_JSON_TEMPLATE);
 
-    // Check fields.json content
+    // Check fields.json content - Text fields use RICH_TEXT_FIELD_TEMPLATE
     const secondFormData = secondCall[1]?.body as FormData;
     const secondFile = secondFormData.get('file') as Blob;
     expect(secondFile.type).toBe('application/json');
     const secondContent = await secondFile.text();
-    const expectedFields = structuredClone(TEXT_FIELD_TEMPLATE);
-    expectedFields[0].default = 'Hello World';
+    const expectedFields = structuredClone(RICH_TEXT_FIELD_TEMPLATE);
+    expectedFields[0].default = '<p>Hello World</p>';
     expect(JSON.parse(secondContent)).toEqual(expectedFields);
 
-    // Check module.html content
+    // Check module.html content - Text fields use RICH_TEXT_MODULE_TEMPLATE
     const thirdFormData = thirdCall[1]?.body as FormData;
     const thirdFile = thirdFormData.get('file') as Blob;
     expect(thirdFile.type).toBe('text/html');
     const thirdContent = await thirdFile.text();
-    expect(thirdContent).toBe(TEXT_MODULE_TEMPLATE);
+    expect(thirdContent).toBe(RICH_TEXT_MODULE_TEMPLATE);
   });
 
   it('should successfully create a module for a text field without a value', async () => {
@@ -360,14 +360,90 @@ describe('createModules', () => {
     expect(mockFetch).toHaveBeenCalledTimes(3);
 
     // Verify the file contents being sent
+    const firstCall = mockFetch.mock.calls[0];
     const secondCall = mockFetch.mock.calls[1];
+    const thirdCall = mockFetch.mock.calls[2];
 
-    // Check fields.json content
+    // Check meta.json content
+    const firstFormData = firstCall[1]?.body as FormData;
+    const firstFile = firstFormData.get('file') as Blob;
+    const firstContent = await firstFile.text();
+    expect(JSON.parse(firstContent)).toEqual(META_JSON_TEMPLATE);
+
+    // Check fields.json content - Text fields use RICH_TEXT_FIELD_TEMPLATE
     const secondFormData = secondCall[1]?.body as FormData;
     const secondFile = secondFormData.get('file') as Blob;
     expect(secondFile.type).toBe('application/json');
     const secondContent = await secondFile.text();
-    expect(JSON.parse(secondContent)).toEqual(TEXT_FIELD_TEMPLATE);
+    expect(JSON.parse(secondContent)).toEqual(RICH_TEXT_FIELD_TEMPLATE);
+
+    // Check module.html content - Text fields use RICH_TEXT_MODULE_TEMPLATE
+    const thirdFormData = thirdCall[1]?.body as FormData;
+    const thirdFile = thirdFormData.get('file') as Blob;
+    expect(thirdFile.type).toBe('text/html');
+    const thirdContent = await thirdFile.text();
+    expect(thirdContent).toBe(RICH_TEXT_MODULE_TEMPLATE);
+  });
+
+  it('should successfully create a module for a text field with multiple lines', async () => {
+    // Mock successful fetch responses
+    const mockFetch = mockedFetch();
+
+    const mockField: SelectedSdkField = {
+      type: 'Text',
+      id: 'test-field-id',
+      uniqueId: 'test-multiline-module',
+      name: 'Test Multi-line Field',
+      supported: true,
+      value: 'First line\nSecond line\nThird line',
+      moduleName: 'Entry title - Test Multi-line Field',
+    };
+
+    const mockEvent = {
+      body: {
+        fields: JSON.stringify([mockField]),
+      },
+    };
+
+    const result = await handler(mockEvent as any, mockedContext('test-token') as any);
+
+    // Verify the result
+    expect(result).toEqual({
+      successQuantity: 1,
+      failedQuantity: 0,
+      invalidToken: false,
+      missingScopes: false,
+    });
+
+    // Verify fetch was called 3 times
+    expect(mockFetch).toHaveBeenCalledTimes(3);
+
+    // Verify the file contents being sent
+    const firstCall = mockFetch.mock.calls[0];
+    const secondCall = mockFetch.mock.calls[1];
+    const thirdCall = mockFetch.mock.calls[2];
+
+    // Check meta.json content
+    const firstFormData = firstCall[1]?.body as FormData;
+    const firstFile = firstFormData.get('file') as Blob;
+    const firstContent = await firstFile.text();
+    expect(JSON.parse(firstContent)).toEqual(META_JSON_TEMPLATE);
+
+    // Check fields.json content - Text fields use RICH_TEXT_FIELD_TEMPLATE with processed multi-line value
+    const secondFormData = secondCall[1]?.body as FormData;
+    const secondFile = secondFormData.get('file') as Blob;
+    expect(secondFile.type).toBe('application/json');
+    const secondContent = await secondFile.text();
+    const expectedFields = structuredClone(RICH_TEXT_FIELD_TEMPLATE);
+    expectedFields[0].default = '<p>First line</p><p>Second line</p><p>Third line</p>';
+    expect(JSON.parse(secondContent)).toEqual(expectedFields);
+
+    // Check module.html content - Text fields use RICH_TEXT_MODULE_TEMPLATE
+    const thirdFormData = thirdCall[1]?.body as FormData;
+    const thirdFile = thirdFormData.get('file') as Blob;
+    expect(thirdFile.type).toBe('text/html');
+    const thirdContent = await thirdFile.text();
+    expect(thirdContent).toBe(RICH_TEXT_MODULE_TEMPLATE);
   });
 
   it('should successfully create a module for a RichText field', async () => {

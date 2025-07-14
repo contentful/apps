@@ -10,7 +10,6 @@ import { EntryConnectedFields } from '../src/utils/utils';
 import { PlainClientAPI } from 'contentful-management';
 import ConfigEntryService from '../src/utils/ConfigEntryService';
 import { createModuleFile, getFiles, initContentfulManagementClient } from './common';
-import { InvalidHubspotTokenError, MissingHubspotScopesError } from './exceptions';
 
 type AppActionParameters = {
   entryId: string;
@@ -121,71 +120,6 @@ const createModuleFile = async (
       `HubSpot API request failed: ${response.status} ${response.statusText} - ${errorData}`
     );
   }
-};
-
-const getFiles = (field: SelectedSdkField): { fieldsFile: string; moduleFile: string } => {
-  const { type } = field;
-  let fieldsFile;
-  let moduleFile;
-  switch (type) {
-    case 'Symbol':
-      fieldsFile = structuredClone(TEXT_FIELD_TEMPLATE);
-      if (field.value) fieldsFile[0].default = field.value;
-      moduleFile = TEXT_MODULE_TEMPLATE;
-      break;
-    case 'Text':
-      fieldsFile = structuredClone(RICH_TEXT_FIELD_TEMPLATE);
-      if (field.value) {
-        const lines: string[] = field.value.split('\n');
-        fieldsFile[0].default = lines.map((line) => `<p>${line}</p>`).join('');
-      }
-      moduleFile = RICH_TEXT_MODULE_TEMPLATE;
-      break;
-    case 'RichText':
-      fieldsFile = structuredClone(RICH_TEXT_FIELD_TEMPLATE);
-      if (field.value) fieldsFile[0].default = documentToHtmlString(field.value);
-      moduleFile = RICH_TEXT_MODULE_TEMPLATE;
-      break;
-    case 'Number':
-    case 'Integer':
-      fieldsFile = structuredClone(NUMBER_FIELD_TEMPLATE);
-      if (field.value) fieldsFile[0].default = field.value;
-      moduleFile = NUMBER_MODULE_TEMPLATE;
-      break;
-    case 'Date':
-      const value = field.value as string;
-      if (!value || value.includes('T')) {
-        fieldsFile = structuredClone(DATETIME_FIELD_TEMPLATE);
-        moduleFile = DATETIME_MODULE_TEMPLATE;
-      } else {
-        fieldsFile = structuredClone(DATE_FIELD_TEMPLATE);
-        moduleFile = DATE_MODULE_TEMPLATE;
-      }
-      fieldsFile[0].default = new Date(value).getTime();
-      break;
-    case 'Location':
-      fieldsFile = structuredClone(TEXT_FIELD_TEMPLATE);
-      if (field.value) fieldsFile[0].default = `lat:${field.value.lat}, long:${field.value.lon}`;
-      moduleFile = TEXT_MODULE_TEMPLATE;
-      break;
-    case 'Array':
-      fieldsFile = structuredClone(TEXT_FIELD_TEMPLATE);
-      if (field.value) fieldsFile[0].default = field.value.join(', ');
-      moduleFile = TEXT_MODULE_TEMPLATE;
-      break;
-    case 'Link':
-      fieldsFile = structuredClone(IMAGE_FIELD_TEMPLATE);
-      if (field.value) {
-        fieldsFile[0].default.src = field.value.url;
-        fieldsFile[0].default.width = field.value.width;
-        fieldsFile[0].default.height = field.value.height;
-      }
-      moduleFile = IMAGE_MODULE_TEMPLATE;
-      break;
-    default:
-      throw new Error(`Unsupported field type: ${type}`);
-  }
-  return { fieldsFile: JSON.stringify(fieldsFile), moduleFile };
 };
 
 class InvalidHubspotTokenError extends Error {
