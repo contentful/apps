@@ -175,7 +175,7 @@ const ConnectedEntriesTable = ({
           <Table.Cell>
             <Text fontWeight="fontWeightDemiBold">Connected fields</Text>
           </Table.Cell>
-          <Table.Cell align="right" style={{ minWidth: 140 }}>
+          <Table.Cell className={styles.rightCell}>
             <Text fontColor="gray600" fontSize="fontSizeS">
               Connected entries: {entries.length}/25
             </Text>
@@ -201,7 +201,7 @@ const ConnectedEntriesTable = ({
                   <Text>{connectedCount}</Text>
                 </Flex>
               </Table.Cell>
-              <Table.Cell align="right">
+              <Table.Cell className={styles.rightCell}>
                 <Button
                   variant="secondary"
                   size="small"
