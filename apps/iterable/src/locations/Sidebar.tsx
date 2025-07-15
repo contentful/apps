@@ -45,11 +45,12 @@ const Sidebar = () => {
       </TextInput.Group>
       <Paragraph marginTop="spacingXs" fontColor="gray500">
         Copy and paste this link into your Iterable data feed. Content automatically syncs when the
-        entry is published. {/* TODO: Add link to documentation */}
+        entry is published.
         <TextLink
           target="_blank"
           rel="noopener noreferrer"
           alignIcon="end"
+          href="https://www.contentful.com/help/apps/iterable/"
           icon={<ExternalLinkIcon />}>
           Learn more
         </TextLink>
