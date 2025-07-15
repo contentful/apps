@@ -8,7 +8,7 @@
   },
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
+  "type": "module",
   "main": "setup.ts",
   "scripts": {
     "setup": "npx tsx setup.ts"
@@ -16,5 +16,9 @@
   "dependencies": {
     "contentful-management": "^11.54.1",
     "dotenv": "^17.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
   }
 }
