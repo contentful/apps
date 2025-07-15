@@ -119,7 +119,7 @@ class ConfigEntryService {
         { contentTypeId: CONFIG_CONTENT_TYPE_ID, entryId: CONFIG_ENTRY_ID },
         {
           fields: {
-            title: { [await this.getDefaultLocale()]: 'Hubspot App Configuration' },
+            title: { [await this.getDefaultLocale()]: 'Hubspot App Configuration (Do not delete)' },
           },
         }
       );

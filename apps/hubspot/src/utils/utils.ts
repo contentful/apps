@@ -5,11 +5,13 @@ export const CONFIG_FIELD_ID = 'connectedFields';
 export const HUBSPOT_PRIVATE_APPS_URL = 'https://developers.hubspot.com/docs/api/private-apps';
 
 export const CONFIG_SCREEN_INSTRUCTIONS = [
-  'Navigate to your Hubspot account settings',
-  "In the left hand navigation, click 'Integrations' and select 'Private apps' from the sub menu",
+  'Navigate to your Hubspot account settings and select ‘Profile and Preferences’',
+  'In the left hand navigation, click ‘Integrations’ and select ‘Private apps’ from the sub menu',
   'Create a new private app',
-  "Your private app must include the scope 'content'",
-  "Within your private app, navigate to the 'Auth' tab. There, you can view and copy your private app access token.",
+  'Within the ‘Scopes’ tab, add a new scope: ‘content’. Your app must include this scope.',
+  'After you finish and click ‘Create’ you will see a confirmation modal, and then a modal with your private app access token.',
+  'In the private app access token modal, show the token, and then copy it. ',
+  'At any time, within your private app, navigate to the ‘Auth’ tab. There, you can view and copy your private app access token.',
   'Paste your private app access token in the field above',
 ];
 
