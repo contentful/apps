@@ -4,15 +4,20 @@ import { createSpace } from './actions/createSpace.ts';
 import { createAppDefinition } from './actions/createAppDefinition.ts';
 import { addTeamToSpace } from './actions/addTeamToSpace.ts';
 import { installApp } from './actions/installApp.ts';
-import { deleteSpace } from './actions/deleteSpace.ts';
-import { deleteAppDefinition } from './actions/deleteAppDefinition.ts';
+import { teardown } from './actions/teardown.ts';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Load environment variables
-dotenv.config();
+// Get the directory of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables from .env file in scripts directory
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 // Configuration from environment variables
-const accessToken = process.env.TEST_CMA_TOKEN || process.env.CONTENTFUL_ACCESS_TOKEN;
-const organizationId = process.env.TEST_ORG_ID || process.env.CONTENTFUL_ORGANIZATION_ID;
+const accessToken = process.env.CONTENTFUL_ACCESS_TOKEN || process.env.TEST_CMA_TOKEN;
+const organizationId = process.env.CONTENTFUL_ORGANIZATION_ID || process.env.TEST_ORG_ID;
 const appName = process.env.CONTENTFUL_APP_NAME || 'Test App';
 const teamId = process.env.CONTENTFUL_TEAM_ID;
 const environmentId = process.env.CONTENTFUL_ENVIRONMENT || 'master';
@@ -98,24 +103,15 @@ try {
     `\n ⚙️  Production: https://app.contentful.com/account/organizations/${organizationId}/apps/definitions/${appDefinitionProduction.sys.id}/general`
   );
 
-  // UNDO - comment out for testing
-  try {
-    await deleteSpace({ client, spaceId: productionSpace.sys.id });
-    await deleteSpace({ client, spaceId: stagingSpace.sys.id });
-    await deleteAppDefinition({
-      client,
-      organizationId,
-      appDefinitionId: appDefinitionProduction.sys.id,
-    });
-    await deleteAppDefinition({
-      client,
-      organizationId,
-      appDefinitionId: appDefinitionStaging.sys.id,
-    });
-    console.log('🗑️  Cleanup completed successfully');
-  } catch (cleanupError) {
-    console.error('❌ Cleanup failed:', cleanupError);
-  }
+  // // FOR TESTING - uncomment to undo setup
+  // await teardown({
+  //   client,
+  //   organizationId,
+  //   spaceIdStaging: stagingSpace.sys.id,
+  //   spaceIdProduction: productionSpace.sys.id,
+  //   appDefinitionIdStaging: appDefinitionStaging.sys.id,
+  //   appDefinitionIdProduction: appDefinitionProduction.sys.id,
+  // });
 } catch (error) {
   console.error('❌ Setup failed:', error);
   process.exit(1);
