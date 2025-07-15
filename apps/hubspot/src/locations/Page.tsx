@@ -80,7 +80,6 @@ const Page = () => {
     const contentTypeId = entry.sys.contentType.sys.id;
     const contentType = await cma.contentType.get({ contentTypeId });
     const title = getEntryTitle(entry, contentType, sdk.locales.default);
-    console.log('modal entry ', entry);
     setModalEntry(entry);
     setModalEntryTitle(title);
     setModalOpen(true);

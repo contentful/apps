@@ -134,7 +134,18 @@ describe('Page Location', () => {
         'entry-id': [
           { fieldId: 'title', moduleName: 'mod1', updatedAt: '2024-05-01T10:00:00Z' },
           { fieldId: 'description', moduleName: 'mod2', updatedAt: '2024-05-01T10:00:00Z' },
-          { fieldId: 'greeting', moduleName: 'mod3', updatedAt: '2024-05-01T10:00:00Z' },
+          {
+            fieldId: 'greeting',
+            moduleName: 'mod3',
+            updatedAt: '2024-05-01T10:00:00Z',
+            locale: 'es-AR',
+          },
+          {
+            fieldId: 'greeting',
+            moduleName: 'mod4',
+            updatedAt: '2024-05-01T10:00:00Z',
+            locale: 'en-US',
+          },
         ],
       });
       mockCma.entry.get.mockResolvedValueOnce({
