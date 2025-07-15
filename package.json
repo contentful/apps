@@ -33,8 +33,6 @@
     "sentry-release": "SENTRY_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug new -p marketplace-apps $SENTRY_RELEASE && sentry-cli releases --log-level=debug set-commits --auto --ignore-missing $SENTRY_RELEASE && sentry-cli releases --log-level=debug finalize $SENTRY_RELEASE && sentry-cli releases --log-level=debug deploys $SENTRY_RELEASE new -e production"
   },
   "dependencies": {
-    "contentful-management": "^11.52.0",
-    "dotenv": "^16.0.0",
     "lerna": "6.6.2"
   },
   "lint-staged": {

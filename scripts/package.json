@@ -1,0 +1,20 @@
+{
+  "name": "scripts",
+  "version": "1.0.0",
+  "description": "space setup management scripts",
+  "repository": {
+    "type": "git",
+    "url": "apps"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "setup.ts",
+  "scripts": {
+    "test": "setup"
+  },
+  "dependencies": {
+    "contentful-management": "^11.54.1",
+    "dotenv": "^17.2.0"
+  }
+}
