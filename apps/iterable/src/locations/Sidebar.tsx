@@ -45,7 +45,7 @@ const Sidebar = () => {
       </TextInput.Group>
       <Paragraph marginTop="spacingXs" fontColor="gray500">
         Copy and paste this link into your Iterable data feed. Content automatically syncs when the
-        entry is published.
+        entry is published.{' '}
         <TextLink
           target="_blank"
           rel="noopener noreferrer"
