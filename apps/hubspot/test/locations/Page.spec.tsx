@@ -31,7 +31,6 @@ vi.mock('contentful-management', () => ({
 const mockGetConnectedFields = vi.fn();
 vi.mock('../../src/utils/ConfigEntryService', () => {
   return {
-    __esModule: true,
     default: vi.fn().mockImplementation(() => ({
       getConnectedFields: mockGetConnectedFields,
     })),
