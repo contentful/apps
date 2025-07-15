@@ -25,15 +25,15 @@ export async function deleteTeamSpaceMemberShip({
     // Get team space memberships for this specific space
     const teamSpaceMemberships = await space.getTeamSpaceMemberships();
 
-    const team_membership = teamSpaceMemberships.items.find(
+    const teamMembership = teamSpaceMemberships.items.find(
       (membership) => membership.sys.team.sys.id === teamId
     );
 
-    if (team_membership) {
+    if (teamMembership) {
       console.log(
         `Deleting team space membership: ${team.name} (${team.sys.id}) in space: ${space.name} (${space.sys.id})`
       );
-      await team_membership.delete();
+      await teamMembership.delete();
       console.log(`Deleted team space membership successfully`);
     } else {
       console.log(`No team membership found to delete for team: ${teamId}`);

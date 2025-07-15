@@ -15,15 +15,13 @@ export async function addTeamToSpace({ client, spaceId, teamId }: AddTeamToSpace
 
     // Check if team already has access
     const existingMemberships = await space.getTeamSpaceMemberships();
-    const existingMembership = existingMemberships.items.find(
+    const teamHasSpaceAccess = existingMemberships.items.some(
       (membership) => membership.sys.team.sys.id === teamId
     );
 
-    if (existingMembership) {
-      console.log(
-        `👥 Team already has access to space - no action taken. Existing membership ID: ${existingMembership.sys.id}`
-      );
-      return existingMembership;
+    if (teamHasSpaceAccess) {
+      console.log(`👥 Team already has access to space - no action taken.`);
+      return;
     }
 
     // Create team space membership with admin privileges
