@@ -6,6 +6,7 @@ import ConfigEntryService from '../utils/ConfigEntryService';
 import { styles } from './Page.styles';
 import { ConnectedFields } from '../utils/utils';
 import ConnectedEntriesTable from '../components/ConnectedEntriesTable';
+import DisplayMessage from '../components/DisplayMessage';
 
 const Page = () => {
   const sdk = useSDK();
@@ -85,7 +86,10 @@ const Page = () => {
           content.
         </Text>
         {loading ? (
-          <EmptyState />
+          <Flex alignItems="center" justifyContent="center" className={styles.loading}>
+            <Spinner size="large" />
+            <Text marginLeft="spacingM">Loading...</Text>
+          </Flex>
         ) : error ? (
           <DisplayMessage
             title="The app cannot load content."
@@ -109,33 +113,5 @@ const Page = () => {
     </Flex>
   );
 };
-
-function EmptyState() {
-  return (
-    <Flex alignItems="center" justifyContent="center" className={styles.loading}>
-      <Spinner size="large" />
-      <Text marginLeft="spacingM">Loading...</Text>
-    </Flex>
-  );
-}
-
-type MessageProps = {
-  title: string;
-  message: string;
-};
-function DisplayMessage({ title, message }: MessageProps) {
-  return (
-    <Flex
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      className={styles.emptyComponentContainer}>
-      <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold" marginBottom="spacingXs">
-        {title}
-      </Text>
-      <Text fontColor="gray600">{message}</Text>
-    </Flex>
-  );
-}
 
 export default Page;
