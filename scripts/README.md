@@ -51,6 +51,33 @@ This script automates the complete setup of Contentful spaces for your app, incl
 3. The team ID is in the URL: `app.contentful.com/account/organizations/{ORG_ID}/teams/{TEAM_ID}`
 4. Copy this ID to `CONTENTFUL_TEAM_ID` in your `.env` file
 
+## Testing
+
+### Teardown Function
+
+For testing purposes, the script includes a teardown function that completely removes all created resources.
+
+#### How to Enable Teardown
+
+1. **Uncomment the teardown section** at the bottom of the file `scripts/setup.ts`:
+
+   ```typescript
+   // FOR TESTING - uncomment to undo setup
+   await teardown({
+     client,
+     organizationId,
+     spaceIdStaging: stagingSpace.sys.id,
+     spaceIdProduction: productionSpace.sys.id,
+     appDefinitionIdStaging: appDefinitionStaging.sys.id,
+     appDefinitionIdProduction: appDefinitionProduction.sys.id,
+   });
+   ```
+
+2. **Run the setup script** as normal:
+   ```bash
+   npm run setup
+   ```
+
 ## How to Run
 
 1. **Navigate to the scripts directory:**
@@ -85,7 +112,7 @@ This script automates the complete setup of Contentful spaces for your app, incl
 
 - **Production**: `{appName} (production)`
 - **Staging**: `{appName} (staging)`
-- **Team Access**: Admin privileges for specified team
+- **Team Access**: Admin privileges for all members in specified team
 - **App Installation**: Your app installed in both spaces
 
 ## 📝 Next Steps
