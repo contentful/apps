@@ -11,7 +11,7 @@
   "type": "commonjs",
   "main": "setup.ts",
   "scripts": {
-    "test": "setup"
+    "setup": "npx tsx setup.ts"
   },
   "dependencies": {
     "contentful-management": "^11.54.1",
