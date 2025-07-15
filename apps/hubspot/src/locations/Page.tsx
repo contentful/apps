@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Text, Spinner, Flex, Heading } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { createClient, EntryProps, KeyValueMap } from 'contentful-management';
+import { ContentTypeProps, createClient, EntryProps, KeyValueMap } from 'contentful-management';
 import ConfigEntryService from '../utils/ConfigEntryService';
 import { styles } from './Page.styles';
 import { ConnectedFields } from '../utils/utils';
 import ConnectedEntriesTable from '../components/ConnectedEntriesTable';
 import DisplayMessage from '../components/DisplayMessage';
+import ConnectedFieldsModal from '../components/ConnectedFieldsModal';
 
 const Page = () => {
   const sdk = useSDK();
@@ -16,22 +17,26 @@ const Page = () => {
   const [connectedFields, setConnectedFields] = useState<ConnectedFields>({});
   const [displayFieldId, setDisplayFieldId] = useState('title');
   const [locale, setLocale] = useState('en-US');
+  const [modalEntry, setModalEntry] = useState<EntryProps<KeyValueMap> | null>(null);
+  const [modalEntryTitle, setModalEntryTitle] = useState<string>('');
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const cma = createClient(
+    { apiAdapter: sdk.cmaAdapter },
+    {
+      type: 'plain',
+      defaults: {
+        environmentId: sdk.ids.environment,
+        spaceId: sdk.ids.space,
+      },
+    }
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const cma = createClient(
-          { apiAdapter: sdk.cmaAdapter },
-          {
-            type: 'plain',
-            defaults: {
-              environmentId: sdk.ids.environment,
-              spaceId: sdk.ids.space,
-            },
-          }
-        );
         const configService = new ConfigEntryService(cma, sdk.locales.default);
         const connected = await configService.getConnectedFields();
         setConnectedFields(connected);
@@ -71,8 +76,41 @@ const Page = () => {
     fetchData();
   }, [sdk]);
 
-  const handleManageFields = (entry: EntryProps<KeyValueMap>) => {
-    // todo : implement
+  const handleManageFields = async (entry: EntryProps<KeyValueMap>) => {
+    const contentTypeId = entry.sys.contentType.sys.id;
+    const contentType = await cma.contentType.get({ contentTypeId });
+    const title = getEntryTitle(entry, contentType, sdk.locales.default);
+    console.log('modal entry ', entry);
+    setModalEntry(entry);
+    setModalEntryTitle(title);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setModalEntry(null);
+    setModalEntryTitle('');
+  };
+
+  const handleViewEntry = () => {
+    if (modalEntry) {
+      sdk.navigator.openEntry(modalEntry.sys.id);
+    }
+  };
+
+  const getEntryTitle = (
+    entry: EntryProps<KeyValueMap>,
+    contentType: ContentTypeProps,
+    locale: string
+  ): string => {
+    let displayFieldId = contentType.displayField;
+    if (!displayFieldId) return 'Untitled';
+
+    const value = entry.fields[displayFieldId]?.[locale];
+    if (value === undefined || value === null || value === '') {
+      return 'Untitled';
+    }
+    return String(value);
   };
 
   return (
@@ -107,6 +145,16 @@ const Page = () => {
             displayFieldId={displayFieldId}
             locale={locale}
             onManageFields={handleManageFields}
+          />
+        )}
+        {modalEntry && modalEntryTitle && (
+          <ConnectedFieldsModal
+            entry={modalEntry}
+            isShown={modalOpen}
+            onClose={handleCloseModal}
+            onViewEntry={handleViewEntry}
+            entryConnectedFields={connectedFields[modalEntry.sys.id]}
+            entryTitle={modalEntryTitle}
           />
         )}
       </Box>

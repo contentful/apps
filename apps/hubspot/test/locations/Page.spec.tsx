@@ -1,7 +1,8 @@
 import React from 'react';
-import { render, waitFor, screen, cleanup } from '@testing-library/react';
+import { render, waitFor, screen, cleanup, fireEvent } from '@testing-library/react';
 import { vi, describe, beforeEach, it, expect, afterEach } from 'vitest';
 import Page from '../../src/locations/Page';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 const mockNavigator = { openEntry: vi.fn() };
 const mockSdk = {
@@ -78,7 +79,7 @@ describe('Page Location', () => {
     mockGetConnectedFields.mockResolvedValue({
       'entry-1': [
         { fieldId: 'title', moduleName: 'mod1', updatedAt: '2024-05-01T10:00:00Z' },
-        { fieldId: 'desc', moduleName: 'mod2', updatedAt: '2024-05-01T10:00:00Z' },
+        { fieldId: 'description', moduleName: 'mod2', updatedAt: '2024-05-01T10:00:00Z' },
       ],
       'entry-2': [
         {
@@ -96,7 +97,10 @@ describe('Page Location', () => {
           updatedAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
           publishedAt: new Date().toISOString(),
         },
-        fields: { title: { 'en-US': 'Banana' } },
+        fields: {
+          title: { 'en-US': 'Banana' },
+          description: { 'en-US': 'Description value' },
+        },
       })
       .mockResolvedValueOnce({
         sys: {
@@ -121,6 +125,91 @@ describe('Page Location', () => {
       expect(screen.getAllByText('Manage fields').length).toBe(2);
       expect(screen.getByText('2')).toBeTruthy();
       expect(screen.getByText('1')).toBeTruthy();
+    });
+  });
+
+  describe('Connected Fields Modal', () => {
+    beforeEach(() => {
+      mockGetConnectedFields.mockResolvedValue({
+        'entry-id': [
+          { fieldId: 'title', moduleName: 'mod1', updatedAt: '2024-05-01T10:00:00Z' },
+          { fieldId: 'description', moduleName: 'mod2', updatedAt: '2024-05-01T10:00:00Z' },
+          { fieldId: 'greeting', moduleName: 'mod3', updatedAt: '2024-05-01T10:00:00Z' },
+        ],
+      });
+      mockCma.entry.get.mockResolvedValueOnce({
+        sys: {
+          id: 'entry-id',
+          contentType: { sys: { id: 'Fruits' } },
+          updatedAt: new Date().toISOString(),
+          publishedAt: new Date().toISOString(),
+        },
+        fields: {
+          title: { 'en-US': 'Banana' },
+          description: { 'en-US': 'Description value' },
+          greeting: { 'en-US': 'Hello', 'es-AR': 'Hola' },
+        },
+      });
+      mockCma.contentType.get.mockResolvedValue({ displayField: 'title' });
+    });
+
+    it('opens modal and displays entry title when Manage fields is clicked', async () => {
+      render(<Page />);
+      const btn = await screen.findByRole('button', { name: /Manage fields/i });
+      fireEvent.click(btn);
+      await waitFor(() => {
+        expect(screen.getByTestId('modal-entry-title')).toHaveTextContent('Banana');
+      });
+    });
+
+    it('displays entry name, connected fields count, and View entry button', async () => {
+      render(<Page />);
+      const btn = await screen.findByRole('button', { name: /Manage fields/i });
+      fireEvent.click(btn);
+      await screen.findByRole('dialog');
+      expect(screen.getByTestId('modal-entry-title')).toBeTruthy();
+      expect(screen.getByText((content) => content.startsWith('Select all fields'))).toBeTruthy();
+      expect(screen.getByText('View entry')).toBeTruthy();
+      expect(screen.getByText('title')).toBeTruthy();
+      expect(screen.getByText('description')).toBeTruthy();
+      expect(screen.getByText('greeting (en-US)')).toBeTruthy();
+      expect(screen.getByText('greeting (es-AR)')).toBeTruthy();
+    });
+
+    it('selects/deselects all fields with header checkbox', async () => {
+      render(<Page />);
+      const btn = await screen.findByRole('button', { name: /Manage fields/i });
+      fireEvent.click(btn);
+      await screen.findByRole('dialog');
+      const selectAll = screen.getByTestId('select-all-fields');
+      // Select all
+      fireEvent.click(selectAll);
+      expect((screen.getByLabelText('description') as HTMLInputElement).checked).toBe(true);
+      // Deselect all
+      fireEvent.click(selectAll);
+      expect((screen.getByLabelText('description') as HTMLInputElement).checked).toBe(false);
+    });
+
+    it('toggles individual field selection', async () => {
+      render(<Page />);
+      const btn = await screen.findByRole('button', { name: /Manage fields/i });
+      fireEvent.click(btn);
+      await screen.findByRole('dialog');
+      const descriptionCheckbox = screen.getByLabelText('description') as HTMLInputElement;
+      expect(descriptionCheckbox.checked).toBe(false);
+      fireEvent.click(descriptionCheckbox);
+      expect(descriptionCheckbox.checked).toBe(true);
+      fireEvent.click(descriptionCheckbox);
+      expect(descriptionCheckbox.checked).toBe(false);
+    });
+
+    it('calls navigation when View entry is clicked', async () => {
+      render(<Page />);
+      const btn = await screen.findByRole('button', { name: /Manage fields/i });
+      fireEvent.click(btn);
+      await screen.findByRole('dialog');
+      screen.getByRole('button', { name: /View entry/i }).click();
+      expect(mockSdk.navigator.openEntry).toHaveBeenCalledWith('entry-id');
     });
   });
 });
