@@ -1,12 +1,14 @@
 {
   "name": "@contentful/apps",
   "private": true,
+  "type": "module",
   "engines": {
     "node": ">=16.0.0",
     "npm": ">=8.0.0"
   },
   "devDependencies": {
     "@sentry/cli": "^2.14.4",
+    "@types/node": "^24.0.13",
     "eslint": "^7.32.0",
     "husky": "^8.0.0",
     "lint-staged": "^13.0.0",
