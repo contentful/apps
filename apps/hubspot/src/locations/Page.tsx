@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Text, Spinner, Flex, Heading } from '@contentful/f36-components';
+import { Box, Flex, Heading, Spinner, Text } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentTypeProps, createClient, EntryProps, KeyValueMap } from 'contentful-management';
 import ConfigEntryService from '../utils/ConfigEntryService';
@@ -11,14 +11,18 @@ import ConnectedFieldsModal from '../components/ConnectedFieldsModal';
 
 const Page = () => {
   const sdk = useSDK();
-  const [entries, setEntries] = useState<EntryProps<KeyValueMap>[]>([]);
+  const [entries, setEntries] = useState<
+    { entry: EntryProps<KeyValueMap>; contentType: ContentTypeProps }[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [connectedFields, setConnectedFields] = useState<ConnectedFields>({});
-  const [displayFieldId, setDisplayFieldId] = useState('title');
   const [locale, setLocale] = useState('en-US');
-  const [modalEntry, setModalEntry] = useState<EntryProps<KeyValueMap> | null>(null);
-  const [modalEntryTitle, setModalEntryTitle] = useState<string>('');
+  const [modalEntry, setModalEntry] = useState<{
+    entry: EntryProps<KeyValueMap>;
+    contentType: ContentTypeProps;
+  } | null>(null);
+  const [modalEntryDefaultLocale, setModalEntryDefaultLocale] = useState<string>('en-US');
   const [modalOpen, setModalOpen] = useState(false);
 
   const cma = createClient(
@@ -41,29 +45,26 @@ const Page = () => {
         const connected = await configService.getConnectedFields();
         setConnectedFields(connected);
         setLocale(sdk.locales.default);
-        let displayField = 'title';
         const entryIds = Object.keys(connected);
         if (entryIds.length === 0) {
           setEntries([]);
-          setDisplayFieldId('title');
           setLoading(false);
           return;
         }
+
         const fetchedEntries = [];
-        for (const entryId of entryIds) {
-          try {
-            const entry = await cma.entry.get({ entryId });
-            fetchedEntries.push(entry);
-            if (fetchedEntries.length === 1) {
-              const ct = await cma.contentType.get({ contentTypeId: entry.sys.contentType.sys.id });
-              displayField = ct.displayField || 'title';
-            }
-          } catch (e) {
-            // skip missing entry
+        try {
+          const entries = await cma.entry.getMany({
+            query: { 'sys.id[in]': entryIds },
+          });
+          for (const entry of entries.items) {
+            const ct = await cma.contentType.get({ contentTypeId: entry.sys.contentType.sys.id });
+            fetchedEntries.push({ entry, contentType: ct });
           }
+        } catch (e) {
+          // skip missing entry
         }
         setEntries(fetchedEntries);
-        setDisplayFieldId(displayField);
       } catch (e) {
         setEntries([]);
         setError(
@@ -76,40 +77,24 @@ const Page = () => {
     fetchData();
   }, [sdk]);
 
-  const handleManageFields = async (entry: EntryProps<KeyValueMap>) => {
-    const contentTypeId = entry.sys.contentType.sys.id;
-    const contentType = await cma.contentType.get({ contentTypeId });
-    const title = getEntryTitle(entry, contentType, sdk.locales.default);
+  const handleManageFields = async (entry: {
+    entry: EntryProps<KeyValueMap>;
+    contentType: ContentTypeProps;
+  }) => {
     setModalEntry(entry);
-    setModalEntryTitle(title);
     setModalOpen(true);
   };
 
   const handleCloseModal = () => {
+    setModalEntryDefaultLocale(sdk.locales.default);
     setModalOpen(false);
     setModalEntry(null);
-    setModalEntryTitle('');
   };
 
   const handleViewEntry = () => {
     if (modalEntry) {
-      sdk.navigator.openEntry(modalEntry.sys.id);
+      sdk.navigator.openEntry(modalEntry.entry.sys.id);
     }
-  };
-
-  const getEntryTitle = (
-    entry: EntryProps<KeyValueMap>,
-    contentType: ContentTypeProps,
-    locale: string
-  ): string => {
-    let displayFieldId = contentType.displayField;
-    if (!displayFieldId) return 'Untitled';
-
-    const value = entry.fields[displayFieldId]?.[locale];
-    if (value === undefined || value === null || value === '') {
-      return 'Untitled';
-    }
-    return String(value);
   };
 
   return (
@@ -141,19 +126,18 @@ const Page = () => {
           <ConnectedEntriesTable
             entries={entries}
             connectedFields={connectedFields}
-            displayFieldId={displayFieldId}
             locale={locale}
             onManageFields={handleManageFields}
           />
         )}
-        {modalEntry && modalEntryTitle && (
+        {modalEntry && (
           <ConnectedFieldsModal
             entry={modalEntry}
             isShown={modalOpen}
             onClose={handleCloseModal}
             onViewEntry={handleViewEntry}
-            entryConnectedFields={connectedFields[modalEntry.sys.id]}
-            entryTitle={modalEntryTitle}
+            entryConnectedFields={connectedFields[modalEntry.entry.sys.id]}
+            defaultLocale={modalEntryDefaultLocale}
           />
         )}
       </Box>

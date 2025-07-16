@@ -1,3 +1,5 @@
+import { ContentTypeProps, EntryProps, KeyValueMap } from 'contentful-management';
+
 export const CONFIG_CONTENT_TYPE_ID = 'hubspotConfig';
 export const CONFIG_ENTRY_ID = 'hubspotConfig';
 export const CONFIG_FIELD_ID = 'connectedFields';
@@ -38,4 +40,35 @@ export type EntryConnectedFields = ConnectedField[];
 
 export type ConnectedFields = {
   [entryId: string]: EntryConnectedFields;
+};
+
+export const displayType = (type: string, linkType?: string, items?: any) => {
+  switch (type) {
+    case 'Symbol':
+      return 'Short text';
+    case 'RichText':
+      return 'Rich text';
+    case 'Link':
+      return linkType === 'Entry' ? 'Reference' : 'Media';
+    case 'Array':
+      if (items?.type === 'Symbol') return 'Short text list';
+      return items?.linkType === 'Entry' ? 'Reference list' : 'Media list';
+    default:
+      return type;
+  }
+};
+
+export const getEntryTitle = (
+  entry: EntryProps<KeyValueMap>,
+  contentType: ContentTypeProps,
+  locale: string
+): string => {
+  let displayFieldId = contentType.displayField;
+  if (!displayFieldId) return 'Untitled';
+
+  const value = entry.fields[displayFieldId]?.[locale];
+  if (value === undefined || value === null || value === '') {
+    return 'Untitled';
+  }
+  return String(value);
 };

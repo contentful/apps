@@ -1,6 +1,6 @@
-import { EntryProps, KeyValueMap } from 'contentful-management';
+import { ContentTypeProps, EntryProps, KeyValueMap } from 'contentful-management';
 import { useState } from 'react';
-import { EntryConnectedFields } from '../utils/utils';
+import { displayType, EntryConnectedFields, getEntryTitle } from '../utils/utils';
 import { Box, Button, Checkbox, Flex, Modal, Stack, Table, Text } from '@contentful/f36-components';
 import { styles } from './ConnectedFieldsModal.styles';
 
@@ -14,14 +14,14 @@ function ConnectedFieldsModal({
   onClose,
   onViewEntry,
   entryConnectedFields,
-  entryTitle,
+  defaultLocale,
 }: {
-  entry: EntryProps<KeyValueMap>;
+  entry: { entry: EntryProps<KeyValueMap>; contentType: ContentTypeProps };
   isShown: boolean;
   onClose: () => void;
   onViewEntry: () => void;
   entryConnectedFields: EntryConnectedFields;
-  entryTitle: string;
+  defaultLocale: string;
 }) {
   const [selectedFields, setSelectedFields] = useState<Set<string>>(() => new Set());
   const allFieldIds = entryConnectedFields.map((field) =>
@@ -55,9 +55,10 @@ function ConnectedFieldsModal({
   };
 
   const getFieldDisplayName = (fieldId: string, locale?: string) => {
-    const value = entry.fields[fieldId];
-    if (!value) return fieldId;
-    return locale ? `${fieldId} (${locale})` : fieldId;
+    const field = entry.contentType.fields.find((f) => f.id === fieldId);
+    if (!field) return fieldId;
+    const type = displayType(field.type, field.linkType, field.items);
+    return locale ? `${field.name} (${locale}) (${type})` : field.name;
   };
 
   return (
@@ -71,7 +72,7 @@ function ConnectedFieldsModal({
                 Entry name
               </Text>
               <Text testId="modal-entry-title" fontWeight="fontWeightDemiBold">
-                {entryTitle}
+                {getEntryTitle(entry.entry, entry.contentType, defaultLocale)}
               </Text>
             </Flex>
             <Button
