@@ -1222,6 +1222,7 @@ export class App extends React.Component<AppProps, AppState> {
               <div>
                 <section className="player" style={this.getPlayerAspectRatio()}>
                   {this.state.playerPlaybackId !== 'playback-test-123' &&
+                  (!this.isUsingSigned() || !this.state.isTokenLoading) &&
                   (this.state.value.playbackId || this.state.playbackToken) ? (
                     <MuxPlayer
                       ref={this.muxPlayerRef}
