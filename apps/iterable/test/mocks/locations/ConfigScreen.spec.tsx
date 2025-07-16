@@ -102,4 +102,11 @@ describe('ConfigScreen', () => {
 
     expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
   });
+
+  it("renders the 'here' link with the correct href in the Getting started section", async () => {
+    render(<ConfigScreen />);
+    const link = await screen.findByRole('link', { name: /^here$/i });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', 'https://www.contentful.com/help/apps/iterable/');
+  });
 });

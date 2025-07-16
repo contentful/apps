@@ -13,6 +13,7 @@ import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { WarningOctagonIcon } from '@phosphor-icons/react';
 import tokens from '@contentful/f36-tokens';
+import { ITERABLE_DOCUMENTATION } from '../utils';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
@@ -45,11 +46,12 @@ const Sidebar = () => {
       </TextInput.Group>
       <Paragraph marginTop="spacingXs" fontColor="gray500">
         Copy and paste this link into your Iterable data feed. Content automatically syncs when the
-        entry is published. {/* TODO: Add link to documentation */}
+        entry is published.{' '}
         <TextLink
           target="_blank"
           rel="noopener noreferrer"
           alignIcon="end"
+          href={ITERABLE_DOCUMENTATION}
           icon={<ExternalLinkIcon />}>
           Learn more
         </TextLink>

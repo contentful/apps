@@ -64,4 +64,10 @@ describe('Sidebar', () => {
     );
     expect(input).toBeTruthy();
   });
+  it("renders the 'Learn more' link with the correct href", () => {
+    render(<Sidebar />);
+    const link = screen.getByRole('link', { name: /learn more/i });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', 'https://www.contentful.com/help/apps/iterable/');
+  });
 });
