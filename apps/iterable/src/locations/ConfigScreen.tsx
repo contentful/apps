@@ -8,7 +8,7 @@ import ContentfulApiKeyInput, {
 } from '../components/ContentfulApiKeyInput';
 
 import { ExternalLinkIcon } from '@contentful/f36-icons';
-import { ContentType } from '../utils';
+import { ContentType, ITERABLE_DOCUMENTATION } from '../utils';
 import { configScreenContainer } from './ConfigScreen.styles';
 interface AppInstallationParameters {
   contentfulApiKey: string;
