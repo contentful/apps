@@ -134,7 +134,7 @@ const ConfigScreen = () => {
               target="_blank"
               rel="noopener noreferrer"
               alignIcon="end"
-              href="https://www.contentful.com/help/apps/iterable/"
+              href={ITERABLE_DOCUMENTATION}
               icon={<ExternalLinkIcon />}>
               here
             </TextLink>

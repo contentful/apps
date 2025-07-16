@@ -13,6 +13,7 @@ import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { WarningOctagonIcon } from '@phosphor-icons/react';
 import tokens from '@contentful/f36-tokens';
+import { ITERABLE_DOCUMENTATION } from '../utils';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
@@ -50,7 +51,7 @@ const Sidebar = () => {
           target="_blank"
           rel="noopener noreferrer"
           alignIcon="end"
-          href="https://www.contentful.com/help/apps/iterable/"
+          href={ITERABLE_DOCUMENTATION}
           icon={<ExternalLinkIcon />}>
           Learn more
         </TextLink>
