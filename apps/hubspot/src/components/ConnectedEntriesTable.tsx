@@ -1,7 +1,6 @@
 import { ContentTypeProps, EntryProps, KeyValueMap } from 'contentful-management';
 import { ConnectedFields, getEntryTitle } from '../utils/utils';
 import { Badge, Box, Button, Flex, Table, Text } from '@contentful/f36-components';
-import React from 'react';
 import { styles } from './ConnectedEntriesTable.styles';
 
 const getStatusBadge = (entry: EntryProps<KeyValueMap>) => {
@@ -32,12 +31,12 @@ const getLastUpdatedTime = (dateString: string | undefined) => {
 const ConnectedEntriesTable = ({
   entries,
   connectedFields,
-  locale,
+  defaultLocale,
   onManageFields,
 }: {
   entries: { entry: EntryProps<KeyValueMap>; contentType: ContentTypeProps }[];
   connectedFields: ConnectedFields;
-  locale: string;
+  defaultLocale: string;
   onManageFields: (entry: {
     entry: EntryProps<KeyValueMap>;
     contentType: ContentTypeProps;
@@ -71,7 +70,7 @@ const ConnectedEntriesTable = ({
       </Table.Head>
       <Table.Body>
         {entries.map(({ entry, contentType }) => {
-          const name = getEntryTitle(entry, contentType, locale);
+          const name = getEntryTitle(entry, contentType, defaultLocale);
           const contentTypeId = contentType.sys?.id;
           const updated = getLastUpdatedTime(entry.sys.updatedAt);
           const status = getStatusBadge(entry);

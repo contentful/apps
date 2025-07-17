@@ -9,21 +9,20 @@ import ConnectedEntriesTable from '../components/ConnectedEntriesTable';
 import DisplayMessage from '../components/DisplayMessage';
 import ConnectedFieldsModal from '../components/ConnectedFieldsModal';
 
-const Page = () => {
+interface EntryWithContentType {
+  entry: EntryProps<KeyValueMap>;
+  contentType: ContentTypeProps;
+}
+
+const Page: React.FC = () => {
   const sdk = useSDK();
-  const [entries, setEntries] = useState<
-    { entry: EntryProps<KeyValueMap>; contentType: ContentTypeProps }[]
-  >([]);
-  const [loading, setLoading] = useState(true);
+  const [entriesWithContentType, setEntriesWithContentType] = useState<EntryWithContentType[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [connectedFields, setConnectedFields] = useState<ConnectedFields>({});
-  const [locale, setLocale] = useState('en-US');
-  const [modalEntry, setModalEntry] = useState<{
-    entry: EntryProps<KeyValueMap>;
-    contentType: ContentTypeProps;
-  } | null>(null);
-  const [modalEntryDefaultLocale, setModalEntryDefaultLocale] = useState<string>('en-US');
-  const [modalOpen, setModalOpen] = useState(false);
+  const defaultLocale = sdk.locales.default;
+  const [modalEntry, setModalEntry] = useState<EntryWithContentType | null>(null);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   const cma = createClient(
     { apiAdapter: sdk.cmaAdapter },
@@ -37,36 +36,37 @@ const Page = () => {
   );
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchConnectedEntries = async () => {
       setLoading(true);
       setError(null);
       try {
-        const configService = new ConfigEntryService(cma, sdk.locales.default);
-        const connected = await configService.getConnectedFields();
-        setConnectedFields(connected);
-        setLocale(sdk.locales.default);
-        const entryIds = Object.keys(connected);
+        const configService = new ConfigEntryService(cma, defaultLocale);
+        const connectedFields = await configService.getConnectedFields();
+        setConnectedFields(connectedFields);
+        const entryIds = Object.keys(connectedFields);
         if (entryIds.length === 0) {
-          setEntries([]);
+          setEntriesWithContentType([]);
           setLoading(false);
           return;
         }
 
-        const fetchedEntries = [];
-        try {
-          const entries = await cma.entry.getMany({
-            query: { 'sys.id[in]': entryIds },
-          });
-          for (const entry of entries.items) {
-            const ct = await cma.contentType.get({ contentTypeId: entry.sys.contentType.sys.id });
-            fetchedEntries.push({ entry, contentType: ct });
-          }
-        } catch (e) {
-          // skip missing entry
-        }
-        setEntries(fetchedEntries);
+        const entriesResponse = await cma.entry.getMany({ query: { 'sys.id[in]': entryIds } });
+        const fetchEntriesWithContentType = await Promise.all(
+          entriesResponse.items.map(async (entry) => {
+            try {
+              const contentType = await cma.contentType.get({
+                contentTypeId: entry.sys.contentType.sys.id,
+              });
+              return { entry, contentType };
+            } catch (err) {
+              return null;
+            }
+          })
+        );
+
+        setEntriesWithContentType(fetchEntriesWithContentType.filter((e) => e !== null));
       } catch (e) {
-        setEntries([]);
+        setEntriesWithContentType([]);
         setError(
           'The app cannot load content. Try refreshing, or reviewing your app configuration.'
         );
@@ -74,28 +74,26 @@ const Page = () => {
         setLoading(false);
       }
     };
-    fetchData();
+    fetchConnectedEntries();
   }, [sdk]);
 
-  const handleManageFields = async (entry: {
-    entry: EntryProps<KeyValueMap>;
-    contentType: ContentTypeProps;
-  }) => {
+  function handleManageFields(entry: EntryWithContentType) {
     setModalEntry(entry);
     setModalOpen(true);
-  };
+  }
 
-  const handleCloseModal = () => {
-    setModalEntryDefaultLocale(sdk.locales.default);
+  function handleCloseModal() {
     setModalOpen(false);
     setModalEntry(null);
-  };
+  }
 
-  const handleViewEntry = () => {
+  function handleViewEntry() {
     if (modalEntry) {
       sdk.navigator.openEntry(modalEntry.entry.sys.id);
     }
-  };
+  }
+
+  const connectedFieldsForEntry = modalEntry ? connectedFields[modalEntry.entry.sys.id] : undefined;
 
   return (
     <Flex justifyContent="center" paddingLeft="spacing2Xl" paddingRight="spacing2Xl">
@@ -117,27 +115,27 @@ const Page = () => {
             title="The app cannot load content."
             message="Try refreshing, or reviewing your app configuration"
           />
-        ) : entries.length === 0 ? (
+        ) : entriesWithContentType.length === 0 ? (
           <DisplayMessage
             title="No active Hubspot modules"
-            message="Once you have created modules, they will display here."
+            message="Once you have created modules, they will display here"
           />
         ) : (
           <ConnectedEntriesTable
-            entries={entries}
+            entries={entriesWithContentType}
             connectedFields={connectedFields}
-            locale={locale}
+            defaultLocale={defaultLocale}
             onManageFields={handleManageFields}
           />
         )}
-        {modalEntry && (
+        {modalEntry && connectedFieldsForEntry && (
           <ConnectedFieldsModal
             entry={modalEntry}
             isShown={modalOpen}
             onClose={handleCloseModal}
             onViewEntry={handleViewEntry}
-            entryConnectedFields={connectedFields[modalEntry.entry.sys.id]}
-            defaultLocale={modalEntryDefaultLocale}
+            entryConnectedFields={connectedFieldsForEntry}
+            defaultLocale={defaultLocale}
           />
         )}
       </Box>
