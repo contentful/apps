@@ -113,12 +113,12 @@ const Page: React.FC = () => {
         ) : error ? (
           <DisplayMessage
             title="The app cannot load content."
-            message="Try refreshing, or reviewing your app configuration"
+            message="Try refreshing, or reviewing your app configuration."
           />
         ) : entriesWithContentType.length === 0 ? (
           <DisplayMessage
             title="No active Hubspot modules"
-            message="Once you have created modules, they will display here"
+            message="Once you have created modules, they will display here."
           />
         ) : (
           <ConnectedEntriesTable

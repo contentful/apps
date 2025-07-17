@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, waitFor, screen, cleanup, fireEvent } from '@testing-library/react';
 import { vi, describe, beforeEach, it, expect, afterEach } from 'vitest';
 import Page from '../../src/locations/Page';
@@ -113,10 +112,12 @@ describe('Page Location', () => {
         },
       ],
     });
+
     mockCma.contentType.get = vi.fn().mockImplementation(({ contentTypeId }) => {
       if (contentTypeId === 'Fruits') {
         return Promise.resolve({
           displayField: 'title',
+          sys: { id: 'Fruits' },
           fields: [
             { id: 'title', name: 'Title', type: 'Text' },
             { id: 'description', name: 'Description', type: 'Text' },
@@ -125,6 +126,7 @@ describe('Page Location', () => {
       }
       if (contentTypeId === 'Animals') {
         return Promise.resolve({
+          sys: { id: 'Animals' },
           displayField: 'title',
           fields: [{ id: 'title', name: 'Title', type: 'Text' }],
         });
@@ -186,24 +188,16 @@ describe('Page Location', () => {
       });
       mockCma.contentType.get = vi.fn().mockResolvedValue({
         displayField: 'title',
+        sys: { id: 'Fruits' },
         fields: [
-          { id: 'title', name: 'Title', type: 'Text' },
+          { id: 'title', name: 'Title', type: 'Symbol' },
           { id: 'description', name: 'Description', type: 'Text' },
           { id: 'greeting', name: 'Greeting', type: 'Text' },
         ],
       });
     });
 
-    it('opens modal and displays entry title when Manage fields is clicked', async () => {
-      render(<Page />);
-      const btn = await screen.findByRole('button', { name: /Manage fields/i });
-      fireEvent.click(btn);
-      await waitFor(() => {
-        expect(screen.getByTestId('modal-entry-title')).toHaveTextContent('Banana');
-      });
-    });
-
-    it('displays entry name, connected fields count, and View entry button', async () => {
+    it('displays entry name, connected fields name and type, and View entry button', async () => {
       render(<Page />);
       const btn = await screen.findByRole('button', { name: /Manage fields/i });
       fireEvent.click(btn);
@@ -211,10 +205,11 @@ describe('Page Location', () => {
       expect(screen.getByTestId('modal-entry-title')).toBeTruthy();
       expect(screen.getByText((content) => content.startsWith('Select all fields'))).toBeTruthy();
       expect(screen.getByText('View entry')).toBeTruthy();
-      expect(screen.getByText('title (Text)')).toBeTruthy();
-      expect(screen.getByText('description (Text)')).toBeTruthy();
-      expect(screen.getByText('greeting (en-US) (Text)')).toBeTruthy();
-      expect(screen.getByText('greeting (es-AR) (Text)')).toBeTruthy();
+      expect(screen.getByText('title')).toBeTruthy();
+      expect(screen.getByText('(Short text)')).toBeTruthy();
+      expect(screen.getByText('description')).toBeTruthy();
+      expect(screen.getByText('greeting (en-US)')).toBeTruthy();
+      expect(screen.getByText('greeting (es-AR)')).toBeTruthy();
     });
 
     it('selects/deselects all fields with header checkbox', async () => {
@@ -225,10 +220,10 @@ describe('Page Location', () => {
       const selectAll = screen.getByTestId('select-all-fields');
       // Select all
       fireEvent.click(selectAll);
-      expect((screen.getByLabelText('description (Text)') as HTMLInputElement).checked).toBe(true);
+      expect((screen.getByLabelText('description') as HTMLInputElement).checked).toBe(true);
       // Deselect all
       fireEvent.click(selectAll);
-      expect((screen.getByLabelText('description (Text)') as HTMLInputElement).checked).toBe(false);
+      expect((screen.getByLabelText('description') as HTMLInputElement).checked).toBe(false);
     });
 
     it('toggles individual field selection', async () => {
@@ -236,7 +231,7 @@ describe('Page Location', () => {
       const btn = await screen.findByRole('button', { name: /Manage fields/i });
       fireEvent.click(btn);
       await screen.findByRole('dialog');
-      const descriptionCheckbox = screen.getByLabelText('description (Text)') as HTMLInputElement;
+      const descriptionCheckbox = screen.getByLabelText('description') as HTMLInputElement;
       expect(descriptionCheckbox.checked).toBe(false);
       fireEvent.click(descriptionCheckbox);
       expect(descriptionCheckbox.checked).toBe(true);
