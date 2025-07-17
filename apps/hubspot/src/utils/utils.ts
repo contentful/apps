@@ -42,7 +42,12 @@ export type ConnectedFields = {
   [entryId: string]: EntryConnectedFields;
 };
 
-export const displayType = (type: string, linkType?: string, items?: any) => {
+export type FieldItems = {
+  type: string;
+  linkType?: string;
+};
+
+export const displayType = (type: string, linkType?: string, items?: FieldItems) => {
   switch (type) {
     case 'Symbol':
       return 'Short text';
