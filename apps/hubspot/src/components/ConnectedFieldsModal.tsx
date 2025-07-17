@@ -58,7 +58,7 @@ function ConnectedFieldsModal({
     const field = entry.contentType.fields.find((f) => f.id === fieldId);
     if (!field) return fieldId;
     const type = displayType(field.type, field.linkType, field.items);
-    return locale ? `${field.name} (${locale}) (${type})` : field.name;
+    return locale ? `${field.id} (${locale}) (${type})` : `${field.id} (${type})`;
   };
 
   return (

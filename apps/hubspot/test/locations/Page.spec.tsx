@@ -2,7 +2,6 @@ import React from 'react';
 import { render, waitFor, screen, cleanup, fireEvent } from '@testing-library/react';
 import { vi, describe, beforeEach, it, expect, afterEach } from 'vitest';
 import Page from '../../src/locations/Page';
-import { useSDK } from '@contentful/react-apps-toolkit';
 
 const mockNavigator = { openEntry: vi.fn() };
 const mockSdk = {
@@ -15,6 +14,7 @@ const mockSdk = {
 const mockCma = {
   entry: {
     get: vi.fn(),
+    getMany: vi.fn(),
   },
   contentType: {
     get: vi.fn(),
@@ -89,29 +89,48 @@ describe('Page Location', () => {
         },
       ],
     });
-    mockCma.entry.get
-      .mockResolvedValueOnce({
-        sys: {
-          id: 'entry-1',
-          contentType: { sys: { id: 'Fruits' } },
-          updatedAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-          publishedAt: new Date().toISOString(),
+    mockCma.entry.getMany = vi.fn().mockResolvedValue({
+      items: [
+        {
+          sys: {
+            id: 'entry-1',
+            contentType: { sys: { id: 'Fruits' } },
+            updatedAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+            publishedAt: new Date().toISOString(),
+          },
+          fields: {
+            title: { 'en-US': 'Banana' },
+          },
         },
-        fields: {
-          title: { 'en-US': 'Banana' },
-          description: { 'en-US': 'Description value' },
+        {
+          sys: {
+            id: 'entry-2',
+            contentType: { sys: { id: 'Animals' } },
+            updatedAt: new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString(),
+            publishedAt: undefined,
+          },
+          fields: { title: { 'en-US': 'Dog' } },
         },
-      })
-      .mockResolvedValueOnce({
-        sys: {
-          id: 'entry-2',
-          contentType: { sys: { id: 'Animals' } },
-          updatedAt: new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString(),
-          publishedAt: undefined,
-        },
-        fields: { title: { 'en-US': 'Dog' } },
-      });
-    mockCma.contentType.get.mockResolvedValue({ displayField: 'title' });
+      ],
+    });
+    mockCma.contentType.get = vi.fn().mockImplementation(({ contentTypeId }) => {
+      if (contentTypeId === 'Fruits') {
+        return Promise.resolve({
+          displayField: 'title',
+          fields: [
+            { id: 'title', name: 'Title', type: 'Text' },
+            { id: 'description', name: 'Description', type: 'Text' },
+          ],
+        });
+      }
+      if (contentTypeId === 'Animals') {
+        return Promise.resolve({
+          displayField: 'title',
+          fields: [{ id: 'title', name: 'Title', type: 'Text' }],
+        });
+      }
+      return Promise.resolve({ displayField: 'title', fields: [] });
+    });
 
     render(<Page />);
 
@@ -148,20 +167,31 @@ describe('Page Location', () => {
           },
         ],
       });
-      mockCma.entry.get.mockResolvedValueOnce({
-        sys: {
-          id: 'entry-id',
-          contentType: { sys: { id: 'Fruits' } },
-          updatedAt: new Date().toISOString(),
-          publishedAt: new Date().toISOString(),
-        },
-        fields: {
-          title: { 'en-US': 'Banana' },
-          description: { 'en-US': 'Description value' },
-          greeting: { 'en-US': 'Hello', 'es-AR': 'Hola' },
-        },
+      mockCma.entry.getMany = vi.fn().mockResolvedValue({
+        items: [
+          {
+            sys: {
+              id: 'entry-id',
+              contentType: { sys: { id: 'Fruits' } },
+              updatedAt: new Date().toISOString(),
+              publishedAt: new Date().toISOString(),
+            },
+            fields: {
+              title: { 'en-US': 'Banana' },
+              description: { 'en-US': 'Description value' },
+              greeting: { 'en-US': 'Hello', 'es-AR': 'Hola' },
+            },
+          },
+        ],
       });
-      mockCma.contentType.get.mockResolvedValue({ displayField: 'title' });
+      mockCma.contentType.get = vi.fn().mockResolvedValue({
+        displayField: 'title',
+        fields: [
+          { id: 'title', name: 'Title', type: 'Text' },
+          { id: 'description', name: 'Description', type: 'Text' },
+          { id: 'greeting', name: 'Greeting', type: 'Text' },
+        ],
+      });
     });
 
     it('opens modal and displays entry title when Manage fields is clicked', async () => {
@@ -181,10 +211,10 @@ describe('Page Location', () => {
       expect(screen.getByTestId('modal-entry-title')).toBeTruthy();
       expect(screen.getByText((content) => content.startsWith('Select all fields'))).toBeTruthy();
       expect(screen.getByText('View entry')).toBeTruthy();
-      expect(screen.getByText('title')).toBeTruthy();
-      expect(screen.getByText('description')).toBeTruthy();
-      expect(screen.getByText('greeting (en-US)')).toBeTruthy();
-      expect(screen.getByText('greeting (es-AR)')).toBeTruthy();
+      expect(screen.getByText('title (Text)')).toBeTruthy();
+      expect(screen.getByText('description (Text)')).toBeTruthy();
+      expect(screen.getByText('greeting (en-US) (Text)')).toBeTruthy();
+      expect(screen.getByText('greeting (es-AR) (Text)')).toBeTruthy();
     });
 
     it('selects/deselects all fields with header checkbox', async () => {
@@ -195,10 +225,10 @@ describe('Page Location', () => {
       const selectAll = screen.getByTestId('select-all-fields');
       // Select all
       fireEvent.click(selectAll);
-      expect((screen.getByLabelText('description') as HTMLInputElement).checked).toBe(true);
+      expect((screen.getByLabelText('description (Text)') as HTMLInputElement).checked).toBe(true);
       // Deselect all
       fireEvent.click(selectAll);
-      expect((screen.getByLabelText('description') as HTMLInputElement).checked).toBe(false);
+      expect((screen.getByLabelText('description (Text)') as HTMLInputElement).checked).toBe(false);
     });
 
     it('toggles individual field selection', async () => {
@@ -206,7 +236,7 @@ describe('Page Location', () => {
       const btn = await screen.findByRole('button', { name: /Manage fields/i });
       fireEvent.click(btn);
       await screen.findByRole('dialog');
-      const descriptionCheckbox = screen.getByLabelText('description') as HTMLInputElement;
+      const descriptionCheckbox = screen.getByLabelText('description (Text)') as HTMLInputElement;
       expect(descriptionCheckbox.checked).toBe(false);
       fireEvent.click(descriptionCheckbox);
       expect(descriptionCheckbox.checked).toBe(true);
