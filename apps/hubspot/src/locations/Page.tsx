@@ -64,7 +64,10 @@ const Page: React.FC = () => {
           })
         );
 
-        setEntriesWithContentType(fetchEntriesWithContentType.filter((e) => e !== null));
+        const filteredEntries: EntryWithContentType[] = fetchEntriesWithContentType.filter(
+          (e): e is EntryWithContentType => e !== null
+        );
+        setEntriesWithContentType(filteredEntries);
       } catch (e) {
         setEntriesWithContentType([]);
         setError(
