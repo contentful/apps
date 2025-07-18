@@ -1,0 +1,95 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+## CODE STYLE
+- Follow standard TypeScript and React coding conventions.
+- Use consistent indentation (2 spaces).
+- Maintain a clean and well-documented codebase.
+- Use the entire project as context — prefer existing utility functions over reimplementing logic.
+- Make intelligent, human-like decisions: weigh alternatives, reason about architecture, and implement the best solution.
+- Organize code the way an experienced engineer would, with thoughtful structure and naming.
+
+## FOLDER ORGANIZATION
+- All apps must reside in the `/apps` directory.
+- Each app should be self-contained and avoid cross-app dependencies.
+- App folders should include a standard structure (`src`, `public`, config files, etc.).
+
+## TECH STACK
+- TypeScript
+- React
+- @contentful/app-sdk
+- @contentful/react-apps-toolkit
+- @contentful/f36-components (^4.0.0)
+- @contentful/f36-icons (^4.0.0)
+- @contentful/f36-forms (^4.0.0)
+- @contentful/f36-modal (preferred over `@contentful/f36-dialog`)
+- axios
+- formik
+- yup
+- express
+- cors
+- dotenv
+- concurrently
+- @types/formik
+- @types/yup
+- @jridgewell/sourcemap-codec
+- create-contentful-app
+- Node.js v23.3.0+
+- npm
+
+## DEPENDENCY MANAGEMENT
+- Keep dependencies up to date and relevant to your app only.
+- Dependabot is enabled — review and merge updates as needed.
+- Do not modify deployment scripts added by Contentful.
+- Audit for security vulnerabilities regularly.
+
+## DEPLOYMENT
+- Apps are deployed by Contentful to a shared space — do not handle your own deployment.
+- Contentful will manage deploy script setup.
+- Do not edit deployment configuration in later PRs once initialized.
+
+## COMMITS AND PULL REQUESTS
+- Follow @Conventional Commits:
+  - e.g., `feat(my-app): add new feature`, `fix(my-app): resolve bug`
+- PR titles must conform to Conventional Commits — enforced by GitHub Actions.
+- PRs should include:
+  - Clear and specific title
+  - Descriptive body with context and media (screenshots, videos, etc.)
+  - Developer/company attribution
+- Only modify files within your app’s folder.
+- Comment non-obvious decisions inline for reviewer clarity.
+
+## TESTING
+- Use existing testing tools (e.g., Jest).
+- Place tests in a `__tests__` directory inside your app.
+- Cover critical logic paths and edge cases.
+- Prefer tests that resemble real user scenarios.
+
+## APP CONFIGURATION
+- Define Contentful App locations as needed:
+  - App Configuration, Entry Field, Entry Sidebar, Dialog, etc.
+- Only request the permissions your app truly needs.
+- Follow all guidelines for Contentful App Framework compatibility.
+
+## RELEASES
+- Add your app to `release-please-config.json` to participate in automated changelog/versioning.
+- Use semantic versioning (major.minor.patch).
+- Document changes clearly for each release.
+
+## DOCUMENTATION
+- Each app must include a `README.md` with:
+  - Overview
+  - Installation
+  - Usage
+  - Configuration
+  - Development
+  - License
+- Add any additional documentation that helps future devs understand your app.
+
+## SECURITY & ENVIRONMENT
+- Never commit secrets, API keys, or credentials.
+- Use `.env` files and environment variables for all config/secrets.
+- Monitor and fix known vulnerabilities in your dependencies.
+
