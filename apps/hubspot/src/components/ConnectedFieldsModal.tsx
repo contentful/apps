@@ -69,8 +69,12 @@ const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
 
   return (
     <Modal isShown={isShown} onClose={onClose} size="medium" testId="connected-fields-modal">
-      <Modal.Header title="Manage synced entry fields" onClose={onClose} />
-      <Modal.Content>
+      <Modal.Header
+        title="Manage synced entry fields"
+        onClose={onClose}
+        className={styles.modalHeaderFrame}
+      />
+      <Modal.Content className={styles.modalContentFrame}>
         <Box className={styles.modalMainContainer}>
           <Box paddingBottom="spacingS">
             <Text>Selected fields are dynamically synced to Hubspot email modules.</Text>
