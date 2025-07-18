@@ -76,27 +76,27 @@ const FieldCheckbox = (props: FieldCheckboxProps) => {
   };
 
   return (
-    <Tooltip isDisabled={field.supported} content="Syncing not supported" placement="auto-start">
-      <Box
-        paddingLeft="spacingS"
-        paddingTop="spacingXs"
-        paddingBottom="spacingXs"
-        className={css({
-          borderTop: `1px solid ${tokens.gray300}`,
-        })}>
-        <Checkbox
-          key={field.uniqueId}
-          id={field.uniqueId}
-          isChecked={checked}
-          onChange={onFieldSelected}
-          isDisabled={!field.supported}>
+    <Box
+      paddingLeft="spacingS"
+      paddingTop="spacingXs"
+      paddingBottom="spacingXs"
+      className={css({
+        borderTop: `1px solid ${tokens.gray300}`,
+      })}>
+      <Checkbox
+        key={field.uniqueId}
+        id={field.uniqueId}
+        isChecked={checked}
+        onChange={onFieldSelected}
+        isDisabled={!field.supported}>
+        <Tooltip isDisabled={field.supported} content="Syncing not supported" placement="right">
           <Text fontColor={field.supported ? 'gray900' : 'gray500'} fontWeight="fontWeightMedium">
-            {displayName}
+            {displayName}{' '}
           </Text>
           <Text fontColor="gray500">({displayType(field.type, field.linkType, field.items)})</Text>
-        </Checkbox>
-      </Box>
-    </Tooltip>
+        </Tooltip>
+      </Checkbox>
+    </Box>
   );
 };
 
