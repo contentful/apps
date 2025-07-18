@@ -1,6 +1,6 @@
 import { ContentTypeProps, EntryProps, KeyValueMap } from 'contentful-management';
 import React, { useState } from 'react';
-import { ConnectedField, displayType, EntryConnectedFields, getEntryTitle } from '../utils/utils';
+import { displayType, EntryConnectedFields, getEntryTitle } from '../utils/utils';
 import { Box, Button, Checkbox, Flex, Modal, Stack, Table, Text } from '@contentful/f36-components';
 import { styles } from './ConnectedFieldsModal.styles';
 
@@ -69,9 +69,12 @@ const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
 
   return (
     <Modal isShown={isShown} onClose={onClose} size="medium" testId="connected-fields-modal">
-      <Modal.Header title="Connected fields" onClose={onClose} />
+      <Modal.Header title="Manage synced entry fields" onClose={onClose} />
       <Modal.Content>
         <Box className={styles.modalMainContainer}>
+          <Box paddingBottom="spacingS">
+            <Text>Selected fields are dynamically synced to Hubspot email modules.</Text>
+          </Box>
           <Box className={styles.modalEntryContainer}>
             <Flex flexDirection="column">
               <Text fontColor="gray600" marginBottom="spacing2Xs">
