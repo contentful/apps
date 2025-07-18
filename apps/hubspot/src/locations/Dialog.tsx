@@ -51,8 +51,9 @@ const Dialog = () => {
     selectedFieldObjects.forEach((field) => {
       const updatedEntryTitle = entryTitle.replace(/\s+/g, '-').replace(/[^A-Za-z0-9_-]/g, '');
       const updatedFieldName = field.name.replace(/\s+/g, '-').replace(/[^A-Za-z0-9_-]/g, '');
+      const locale = field.locale ? `-${field.locale}` : '';
       initialNameMapping[field.uniqueId] =
-        moduleNameMapping[field.uniqueId] ?? `${updatedEntryTitle}_${updatedFieldName}`;
+        moduleNameMapping[field.uniqueId] ?? `${updatedEntryTitle}-${updatedFieldName}${locale}`;
     });
     setModuleNameMapping(initialNameMapping);
   };

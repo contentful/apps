@@ -205,7 +205,7 @@ describe('Dialog component', () => {
             },
             {
               ...expectedFields[1],
-              moduleName: 'test-entry-title_Description',
+              moduleName: 'test-entry-title-Description-en-US',
             },
           ]),
         },
