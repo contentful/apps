@@ -4,6 +4,7 @@ import tokens from '@contentful/f36-tokens';
 import { useMemo } from 'react';
 import { SdkField } from '../utils/fieldsProcessing';
 import { styles } from './FieldSelection.styles';
+import { displayType } from '../utils/utils';
 
 type FieldsSelectionProps = {
   fields: SdkField[];
@@ -74,18 +75,6 @@ const FieldCheckbox = (props: FieldCheckboxProps) => {
     );
   };
 
-  const displayType = (field: SdkField) => {
-    if (field.type === 'Symbol') return 'Short text';
-    else if (field.type === 'RichText') return 'Rich text';
-    else if (field.type === 'Link') return field.linkType === 'Entry' ? 'Reference' : 'Media';
-    else if (field.type === 'Array') {
-      if (field.items?.type === 'Symbol') return 'Short text list';
-      return field.items?.linkType === 'Entry' ? 'Reference list' : 'Media list';
-    }
-
-    return field.type;
-  };
-
   return (
     <Tooltip isDisabled={field.supported} content="Syncing not supported" placement="auto-start">
       <Box
@@ -104,7 +93,7 @@ const FieldCheckbox = (props: FieldCheckboxProps) => {
           <Text fontColor={field.supported ? 'gray900' : 'gray500'} fontWeight="fontWeightMedium">
             {displayName}
           </Text>
-          <Text fontColor="gray500">({displayType(field)})</Text>
+          <Text fontColor="gray500">({displayType(field.type, field.linkType, field.items)})</Text>
         </Checkbox>
       </Box>
     </Tooltip>
