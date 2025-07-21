@@ -45,7 +45,21 @@ class ConfigEntryService {
     }
     const connectedFields = configEntry.fields[CONFIG_FIELD_ID][defaultLocale];
 
-    connectedFields[entryId] = entryConnectedFields;
+    const currentFields: EntryConnectedFields = connectedFields[entryId] || [];
+
+    // Merge: replace if same fieldId+locale, else add
+    entryConnectedFields.forEach((newField) => {
+      const idx = currentFields.findIndex(
+        (f) => f.fieldId === newField.fieldId && f.locale === newField.locale
+      );
+      if (idx !== -1) {
+        currentFields[idx] = newField;
+      } else {
+        currentFields.push(newField);
+      }
+    });
+
+    connectedFields[entryId] = currentFields;
     const updatedEntry = await this.cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
     this.configEntry = updatedEntry;
 
