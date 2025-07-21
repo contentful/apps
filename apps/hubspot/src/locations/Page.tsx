@@ -1,66 +1,69 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Text, Spinner, Flex, Heading } from '@contentful/f36-components';
+import { Box, Flex, Heading, Spinner, Text, Note, TextLink } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { createClient, EntryProps, KeyValueMap } from 'contentful-management';
+import { createClient } from 'contentful-management';
 import ConfigEntryService from '../utils/ConfigEntryService';
 import { styles } from './Page.styles';
-import { ConnectedFields } from '../utils/utils';
+import { ConnectedFields, EntryWithContentType } from '../utils/utils';
 import ConnectedEntriesTable from '../components/ConnectedEntriesTable';
-import DisplayMessage from '../components/DisplayMessage';
+import ConnectedFieldsModal from '../components/ConnectedFieldsModal';
 
-const Page = () => {
+const Page: React.FC = () => {
   const sdk = useSDK();
-  const [entries, setEntries] = useState<EntryProps<KeyValueMap>[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [entriesWithContentType, setEntriesWithContentType] = useState<EntryWithContentType[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [connectedFields, setConnectedFields] = useState<ConnectedFields>({});
-  const [displayFieldId, setDisplayFieldId] = useState('title');
-  const [locale, setLocale] = useState('en-US');
+  const defaultLocale = sdk.locales.default;
+  const [modalEntry, setModalEntry] = useState<EntryWithContentType | null>(null);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+
+  const cma = createClient(
+    { apiAdapter: sdk.cmaAdapter },
+    {
+      type: 'plain',
+      defaults: {
+        environmentId: sdk.ids.environment,
+        spaceId: sdk.ids.space,
+      },
+    }
+  );
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchConnectedEntries = async () => {
       setLoading(true);
       setError(null);
       try {
-        const cma = createClient(
-          { apiAdapter: sdk.cmaAdapter },
-          {
-            type: 'plain',
-            defaults: {
-              environmentId: sdk.ids.environment,
-              spaceId: sdk.ids.space,
-            },
-          }
-        );
-        const configService = new ConfigEntryService(cma, sdk.locales.default);
-        const connected = await configService.getConnectedFields();
-        setConnectedFields(connected);
-        setLocale(sdk.locales.default);
-        let displayField = 'title';
-        const entryIds = Object.keys(connected);
+        const configService = new ConfigEntryService(cma, defaultLocale);
+        const connectedFields = await configService.getConnectedFields();
+        setConnectedFields(connectedFields);
+        const entryIds = Object.keys(connectedFields);
         if (entryIds.length === 0) {
-          setEntries([]);
-          setDisplayFieldId('title');
+          setEntriesWithContentType([]);
           setLoading(false);
           return;
         }
-        const fetchedEntries = [];
-        for (const entryId of entryIds) {
-          try {
-            const entry = await cma.entry.get({ entryId });
-            fetchedEntries.push(entry);
-            if (fetchedEntries.length === 1) {
-              const ct = await cma.contentType.get({ contentTypeId: entry.sys.contentType.sys.id });
-              displayField = ct.displayField || 'title';
+
+        const entriesResponse = await cma.entry.getMany({ query: { 'sys.id[in]': entryIds } });
+        const fetchEntriesWithContentType = await Promise.all(
+          entriesResponse.items.map(async (entry) => {
+            try {
+              const contentType = await cma.contentType.get({
+                contentTypeId: entry.sys.contentType.sys.id,
+              });
+              return { entry, contentType };
+            } catch (err) {
+              return null;
             }
-          } catch (e) {
-            // skip missing entry
-          }
-        }
-        setEntries(fetchedEntries);
-        setDisplayFieldId(displayField);
+          })
+        );
+
+        const filteredEntries: EntryWithContentType[] = fetchEntriesWithContentType.filter(
+          (e): e is EntryWithContentType => e !== null
+        );
+        setEntriesWithContentType(filteredEntries);
       } catch (e) {
-        setEntries([]);
+        setEntriesWithContentType([]);
         setError(
           'The app cannot load content. Try refreshing, or reviewing your app configuration.'
         );
@@ -68,12 +71,26 @@ const Page = () => {
         setLoading(false);
       }
     };
-    fetchData();
+    fetchConnectedEntries();
   }, [sdk]);
 
-  const handleManageFields = (entry: EntryProps<KeyValueMap>) => {
-    // todo : implement
-  };
+  function handleManageFields(entry: EntryWithContentType) {
+    setModalEntry(entry);
+    setModalOpen(true);
+  }
+
+  function handleCloseModal() {
+    setModalOpen(false);
+    setModalEntry(null);
+  }
+
+  function handleViewEntry() {
+    if (modalEntry) {
+      sdk.navigator.openEntry(modalEntry.entry.sys.id);
+    }
+  }
+
+  const connectedFieldsForEntry = modalEntry ? connectedFields[modalEntry.entry.sys.id] : undefined;
 
   return (
     <Flex justifyContent="center" paddingLeft="spacing2Xl" paddingRight="spacing2Xl">
@@ -81,32 +98,50 @@ const Page = () => {
         <Heading as="h1" marginBottom="spacingM">
           Hubspot
         </Heading>
-        <Text fontColor="gray600" marginBottom="spacingL">
-          View the details of your synced entry fields. Click Manage fields to connect or disconnect
-          content.
-        </Text>
         {loading ? (
           <Flex alignItems="center" justifyContent="center" className={styles.loading}>
             <Spinner size="large" />
             <Text marginLeft="spacingM">Loading...</Text>
           </Flex>
         ) : error ? (
-          <DisplayMessage
+          <Note
+            variant="negative"
             title="The app cannot load content."
-            message="Try refreshing, or reviewing your app configuration"
-          />
-        ) : entries.length === 0 ? (
-          <DisplayMessage
-            title="No active Hubspot modules"
-            message="Once you have created modules, they will display here."
-          />
+            className={styles.errorBanner}>
+            <Text>
+              Try refreshing, or reviewing your{' '}
+              <TextLink href="#" onClick={() => sdk.navigator.openAppConfig()}>
+                app configuration
+              </TextLink>
+              .
+            </Text>
+          </Note>
+        ) : entriesWithContentType.length === 0 ? (
+          <Text fontColor="gray600" marginTop="spacingL">
+            No connected content. Sync entry fields from the entry page sidebar to get started.
+          </Text>
         ) : (
-          <ConnectedEntriesTable
-            entries={entries}
-            connectedFields={connectedFields}
-            displayFieldId={displayFieldId}
-            locale={locale}
-            onManageFields={handleManageFields}
+          <>
+            <Text fontColor="gray600" marginBottom="spacingL">
+              View the details of your synced entry fields. Click Manage fields to connect or
+              disconnect content.
+            </Text>
+            <ConnectedEntriesTable
+              entries={entriesWithContentType}
+              connectedFields={connectedFields}
+              defaultLocale={defaultLocale}
+              onManageFields={handleManageFields}
+            />
+          </>
+        )}
+        {modalEntry && connectedFieldsForEntry && (
+          <ConnectedFieldsModal
+            entryWithContentType={modalEntry}
+            isShown={modalOpen}
+            onClose={handleCloseModal}
+            onViewEntry={handleViewEntry}
+            entryConnectedFields={connectedFieldsForEntry}
+            defaultLocale={defaultLocale}
           />
         )}
       </Box>

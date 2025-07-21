@@ -1,7 +1,6 @@
 import { EntryProps, KeyValueMap } from 'contentful-management';
-import { ConnectedFields } from '../utils/utils';
+import { ConnectedFields, EntryWithContentType, getEntryTitle } from '../utils/utils';
 import { Badge, Box, Button, Flex, Table, Text } from '@contentful/f36-components';
-import React from 'react';
 import { styles } from './ConnectedEntriesTable.styles';
 
 const getStatusBadge = (entry: EntryProps<KeyValueMap>) => {
@@ -32,15 +31,13 @@ const getLastUpdatedTime = (dateString: string | undefined) => {
 const ConnectedEntriesTable = ({
   entries,
   connectedFields,
-  displayFieldId,
-  locale,
+  defaultLocale,
   onManageFields,
 }: {
-  entries: EntryProps<KeyValueMap>[];
+  entries: EntryWithContentType[];
   connectedFields: ConnectedFields;
-  displayFieldId: string;
-  locale: string;
-  onManageFields: (entry: EntryProps<KeyValueMap>) => void;
+  defaultLocale: string;
+  onManageFields: (entry: EntryWithContentType) => void;
 }) => (
   <Box marginTop="spacingXl">
     <Table>
@@ -69,9 +66,9 @@ const ConnectedEntriesTable = ({
         </Table.Row>
       </Table.Head>
       <Table.Body>
-        {entries.map((entry) => {
-          const name = entry.fields?.[displayFieldId]?.[locale] || 'Untitled';
-          const contentType = entry.sys.contentType.sys.id;
+        {entries.map(({ entry, contentType }) => {
+          const name = getEntryTitle(entry, contentType, defaultLocale);
+          const contentTypeId = contentType.sys?.id;
           const updated = getLastUpdatedTime(entry.sys.updatedAt);
           const status = getStatusBadge(entry);
           const connected = connectedFields[entry.sys.id] || [];
@@ -79,7 +76,7 @@ const ConnectedEntriesTable = ({
           return (
             <Table.Row key={entry.sys.id}>
               <Table.Cell>{name}</Table.Cell>
-              <Table.Cell>{contentType}</Table.Cell>
+              <Table.Cell>{contentTypeId}</Table.Cell>
               <Table.Cell>{updated}</Table.Cell>
               <Table.Cell>{status}</Table.Cell>
               <Table.Cell>
@@ -91,7 +88,7 @@ const ConnectedEntriesTable = ({
                 <Button
                   variant="secondary"
                   size="small"
-                  onClick={() => onManageFields(entry)}
+                  onClick={() => onManageFields({ entry, contentType })}
                   testId={`manage-fields-${entry.sys.id}`}>
                   Manage fields
                 </Button>

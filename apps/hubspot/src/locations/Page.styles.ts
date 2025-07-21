@@ -13,4 +13,10 @@ export const styles = {
   loading: css({
     height: '80vh',
   }),
+  errorBanner: css({
+    marginTop: tokens.spacingL,
+    marginBottom: tokens.spacingL,
+    borderRadius: tokens.spacingXs,
+    fontWeight: 'normal',
+  }),
 };
