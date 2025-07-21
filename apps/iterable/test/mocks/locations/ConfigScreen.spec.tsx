@@ -100,7 +100,9 @@ describe('ConfigScreen', () => {
       await saveAppInstallation();
     });
 
-    expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
+    expect(mockSdk.notifier.error).toHaveBeenCalledWith(
+      'The app configuration was not saved. Please try again.'
+    );
   });
 
   it("renders the 'here' link with the correct href in the Getting started section", async () => {

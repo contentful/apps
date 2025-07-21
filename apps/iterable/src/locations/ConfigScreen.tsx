@@ -27,7 +27,7 @@ const ConfigScreen = () => {
     setContentfulApiKeyIsValid(isContentfulKeyValid);
 
     if (!isContentfulKeyValid) {
-      sdk.notifier.error('Some fields are missing or invalid');
+      sdk.notifier.error('The app configuration was not saved. Please try again.');
       return false;
     }
 
