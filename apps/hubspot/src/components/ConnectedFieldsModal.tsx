@@ -1,11 +1,15 @@
-import { ContentTypeProps, EntryProps, KeyValueMap } from 'contentful-management';
 import React, { useState } from 'react';
-import { displayType, EntryConnectedFields, getEntryTitle } from '../utils/utils';
+import {
+  displayType,
+  EntryConnectedFields,
+  EntryWithContentType,
+  getEntryTitle,
+} from '../utils/utils';
 import { Box, Button, Checkbox, Flex, Modal, Stack, Table, Text } from '@contentful/f36-components';
 import { styles } from './ConnectedFieldsModal.styles';
 
 type ConnectedFieldsModalProps = {
-  entry: { entry: EntryProps<KeyValueMap>; contentType: ContentTypeProps };
+  entryWithContentType: EntryWithContentType;
   isShown: boolean;
   onClose: () => void;
   onViewEntry: () => void;
@@ -14,7 +18,7 @@ type ConnectedFieldsModalProps = {
 };
 
 const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
-  entry,
+  entryWithContentType,
   isShown,
   onClose,
   onViewEntry,
@@ -58,7 +62,7 @@ const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
   }
 
   function getFieldDisplayType(fieldId: string) {
-    const field = entry.contentType.fields.find((f) => f.id === fieldId);
+    const field = entryWithContentType.contentType.fields.find((f) => f.id === fieldId);
     if (!field) return '';
     return displayType(field.type, field.linkType, field.items);
   }
@@ -85,7 +89,11 @@ const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
                 Entry name
               </Text>
               <Text testId="modal-entry-title" fontWeight="fontWeightDemiBold">
-                {getEntryTitle(entry.entry, entry.contentType, defaultLocale)}
+                {getEntryTitle(
+                  entryWithContentType.entry,
+                  entryWithContentType.contentType,
+                  defaultLocale
+                )}
               </Text>
             </Flex>
             <Button

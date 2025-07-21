@@ -14,9 +14,9 @@ export const styles = {
     height: '80vh',
   }),
   errorBanner: css({
-    marginTop: '24px',
-    marginBottom: '24px',
-    borderRadius: '8px',
-    fontWeight: 400,
+    marginTop: tokens.spacingL,
+    marginBottom: tokens.spacingL,
+    borderRadius: tokens.spacingXs,
+    fontWeight: 'normal',
   }),
 };

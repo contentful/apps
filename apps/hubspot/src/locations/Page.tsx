@@ -1,17 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Flex, Heading, Spinner, Text, Note, TextLink } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { ContentTypeProps, createClient, EntryProps, KeyValueMap } from 'contentful-management';
+import { createClient } from 'contentful-management';
 import ConfigEntryService from '../utils/ConfigEntryService';
 import { styles } from './Page.styles';
-import { ConnectedFields } from '../utils/utils';
+import { ConnectedFields, EntryWithContentType } from '../utils/utils';
 import ConnectedEntriesTable from '../components/ConnectedEntriesTable';
 import ConnectedFieldsModal from '../components/ConnectedFieldsModal';
-
-interface EntryWithContentType {
-  entry: EntryProps<KeyValueMap>;
-  contentType: ContentTypeProps;
-}
 
 const Page: React.FC = () => {
   const sdk = useSDK();
@@ -141,7 +136,7 @@ const Page: React.FC = () => {
         )}
         {modalEntry && connectedFieldsForEntry && (
           <ConnectedFieldsModal
-            entry={modalEntry}
+            entryWithContentType={modalEntry}
             isShown={modalOpen}
             onClose={handleCloseModal}
             onViewEntry={handleViewEntry}

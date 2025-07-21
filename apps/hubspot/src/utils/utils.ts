@@ -47,6 +47,11 @@ export type FieldItems = {
   linkType?: string;
 };
 
+export type EntryWithContentType = {
+  entry: EntryProps<KeyValueMap>;
+  contentType: ContentTypeProps;
+};
+
 export const displayType = (type: string, linkType?: string, items?: FieldItems) => {
   switch (type) {
     case 'Symbol':

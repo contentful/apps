@@ -1,5 +1,5 @@
-import { ContentTypeProps, EntryProps, KeyValueMap } from 'contentful-management';
-import { ConnectedFields, getEntryTitle } from '../utils/utils';
+import { EntryProps, KeyValueMap } from 'contentful-management';
+import { ConnectedFields, EntryWithContentType, getEntryTitle } from '../utils/utils';
 import { Badge, Box, Button, Flex, Table, Text } from '@contentful/f36-components';
 import { styles } from './ConnectedEntriesTable.styles';
 
@@ -34,13 +34,10 @@ const ConnectedEntriesTable = ({
   defaultLocale,
   onManageFields,
 }: {
-  entries: { entry: EntryProps<KeyValueMap>; contentType: ContentTypeProps }[];
+  entries: EntryWithContentType[];
   connectedFields: ConnectedFields;
   defaultLocale: string;
-  onManageFields: (entry: {
-    entry: EntryProps<KeyValueMap>;
-    contentType: ContentTypeProps;
-  }) => void;
+  onManageFields: (entry: EntryWithContentType) => void;
 }) => (
   <Box marginTop="spacingXl">
     <Table>
