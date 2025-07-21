@@ -82,3 +82,7 @@ export const getEntryTitle = (
   }
   return String(value);
 };
+
+export const getUniqueFieldId = (fieldId: string, locale?: string): string => {
+  return locale ? `${fieldId}.${locale}` : fieldId;
+};

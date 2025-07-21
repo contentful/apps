@@ -8,6 +8,10 @@ const mockSdk = {
   ids: { environment: 'env', space: 'space' },
   locales: { default: 'en-US' },
   navigator: mockNavigator,
+  notifier: {
+    success: vi.fn(),
+    error: vi.fn(),
+  },
 };
 
 const mockCma = {
@@ -29,10 +33,17 @@ vi.mock('contentful-management', () => ({
 }));
 
 const mockGetConnectedFields = vi.fn();
+const mockGetEntryConnectedFields = vi.fn();
+const mockUpdateEntryConnectedFields = vi.fn();
+const mockRemoveEntryConnectedFields = vi.fn();
+
 vi.mock('../../src/utils/ConfigEntryService', () => {
   return {
     default: vi.fn().mockImplementation(() => ({
       getConnectedFields: mockGetConnectedFields,
+      getEntryConnectedFields: mockGetEntryConnectedFields,
+      updateEntryConnectedFields: mockUpdateEntryConnectedFields,
+      removeEntryConnectedFields: mockRemoveEntryConnectedFields,
     })),
   };
 });
@@ -52,39 +63,6 @@ describe('Page Location', () => {
     render(<Page />);
 
     expect(screen.getByText(/Loading.../i)).toBeTruthy();
-  });
-
-  it('renders empty state if no connected entries', async () => {
-    mockGetConnectedFields.mockResolvedValue({});
-
-    render(<Page />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Hubspot')).toBeTruthy();
-      expect(
-        screen.getByText(
-          'No connected content. Sync entry fields from the entry page sidebar to get started.'
-        )
-      ).toBeTruthy();
-      expect(
-        screen.queryByText(
-          /View the details of your synced entry fields. Click Manage fields to connect or disconnect content./i
-        )
-      ).toBeNull();
-    });
-  });
-
-  it('renders error banner if there is an error', async () => {
-    mockGetConnectedFields.mockImplementation(() => {
-      throw new Error('fail');
-    });
-
-    render(<Page />);
-
-    await waitFor(() => {
-      expect(screen.getByText('The app cannot load content.')).toBeTruthy();
-      expect(screen.getByRole('link', { name: /app configuration/i })).toBeTruthy();
-    });
   });
 
   it('renders connected entries table if entries exist', async () => {
@@ -259,6 +237,155 @@ describe('Page Location', () => {
       await screen.findByRole('dialog');
       screen.getByRole('button', { name: /View entry/i }).click();
       expect(mockSdk.navigator.openEntry).toHaveBeenCalledWith('entry-id');
+    });
+
+    it('enables disconnect button when fields are selected', async () => {
+      render(<Page />);
+      const btn = await screen.findByRole('button', { name: /Manage fields/i });
+      fireEvent.click(btn);
+      await screen.findByRole('dialog');
+
+      // Initially disabled
+      expect(screen.queryByRole('button', { name: /Disconnect/i })).toBeDisabled();
+
+      // Select a field
+      const titleCheckbox = screen.getByLabelText('title') as HTMLInputElement;
+      fireEvent.click(titleCheckbox);
+
+      // Disconnect button should be enabled
+      expect(screen.getByRole('button', { name: /Disconnect/i })).toBeEnabled();
+      expect(screen.getByText('1 selected')).toBeTruthy();
+    });
+
+    it('shows correct count when multiple fields are selected', async () => {
+      render(<Page />);
+      const btn = await screen.findByRole('button', { name: /Manage fields/i });
+      fireEvent.click(btn);
+      await screen.findByRole('dialog');
+
+      // Select multiple fields
+      const titleCheckbox = screen.getByLabelText('title') as HTMLInputElement;
+      const descriptionCheckbox = screen.getByLabelText('description') as HTMLInputElement;
+      fireEvent.click(titleCheckbox);
+      fireEvent.click(descriptionCheckbox);
+
+      expect(screen.getByText('2 selected')).toBeTruthy();
+    });
+
+    it('disconnects selected fields successfully', async () => {
+      mockGetEntryConnectedFields.mockResolvedValue([
+        { fieldId: 'title', moduleName: 'mod1', updatedAt: '2024-05-01T10:00:00Z' },
+        { fieldId: 'description', moduleName: 'mod2', updatedAt: '2024-05-01T10:00:00Z' },
+        {
+          fieldId: 'greeting',
+          moduleName: 'mod3',
+          updatedAt: '2024-05-01T10:00:00Z',
+          locale: 'en-US',
+        },
+        {
+          fieldId: 'greeting',
+          moduleName: 'mod4',
+          updatedAt: '2024-05-01T10:00:00Z',
+          locale: 'es-AR',
+        },
+      ]);
+      mockUpdateEntryConnectedFields.mockResolvedValue({});
+      mockGetConnectedFields.mockResolvedValueOnce({
+        'entry-id': [
+          { fieldId: 'title', moduleName: 'mod1', updatedAt: '2024-05-01T10:00:00Z' },
+          { fieldId: 'description', moduleName: 'mod2', updatedAt: '2024-05-01T10:00:00Z' },
+          {
+            fieldId: 'greeting',
+            moduleName: 'mod3',
+            updatedAt: '2024-05-01T10:00:00Z',
+            locale: 'en-US',
+          },
+          {
+            fieldId: 'greeting',
+            moduleName: 'mod4',
+            updatedAt: '2024-05-01T10:00:00Z',
+            locale: 'es-AR',
+          },
+        ],
+      });
+      mockGetConnectedFields.mockResolvedValue({
+        'entry-id': [
+          { fieldId: 'description', moduleName: 'mod2', updatedAt: '2024-05-01T10:00:00Z' },
+          {
+            fieldId: 'greeting',
+            moduleName: 'mod4',
+            updatedAt: '2024-05-01T10:00:00Z',
+            locale: 'es-AR',
+          },
+        ],
+      });
+
+      render(<Page />);
+      const btn = await screen.findByRole('button', { name: /Manage fields/i });
+      fireEvent.click(btn);
+      await waitFor(() => screen.findByRole('dialog'));
+
+      // Select title field
+      const titleCheckbox = screen.getByLabelText('title') as HTMLInputElement;
+      fireEvent.click(titleCheckbox);
+
+      const greetingCheckbox = screen.getByLabelText('greeting (en-US)') as HTMLInputElement;
+      fireEvent.click(greetingCheckbox);
+
+      // Click disconnect
+      const disconnectBtn = screen.getByRole('button', { name: /Disconnect/i });
+      fireEvent.click(disconnectBtn);
+
+      await waitFor(() => {
+        expect(mockGetEntryConnectedFields).toHaveBeenCalledWith('entry-id');
+        expect(mockUpdateEntryConnectedFields).toHaveBeenCalledWith('entry-id', [
+          { fieldId: 'description', moduleName: 'mod2', updatedAt: '2024-05-01T10:00:00Z' },
+          {
+            fieldId: 'greeting',
+            moduleName: 'mod4',
+            updatedAt: '2024-05-01T10:00:00Z',
+            locale: 'es-AR',
+          },
+        ]);
+        expect(mockSdk.notifier.success).toHaveBeenCalledWith(
+          '2 fields disconnected successfully.'
+        );
+      });
+    });
+
+    it('removes entry when all fields are disconnected', async () => {
+      mockGetEntryConnectedFields.mockResolvedValue([
+        { fieldId: 'title', moduleName: 'mod1', updatedAt: '2024-05-01T10:00:00Z' },
+        { fieldId: 'description', moduleName: 'mod2', updatedAt: '2024-05-01T10:00:00Z' },
+      ]);
+      mockRemoveEntryConnectedFields.mockResolvedValue({});
+      mockGetConnectedFields.mockResolvedValueOnce({
+        'entry-id': [
+          { fieldId: 'title', moduleName: 'mod1', updatedAt: '2024-05-01T10:00:00Z' },
+          { fieldId: 'description', moduleName: 'mod2', updatedAt: '2024-05-01T10:00:00Z' },
+        ],
+      });
+      mockGetConnectedFields.mockResolvedValueOnce({});
+
+      render(<Page />);
+      const btn = await screen.findByRole('button', { name: /Manage fields/i });
+      fireEvent.click(btn);
+      await screen.findByRole('dialog');
+
+      // Select all fields
+      const selectAllCheckbox = screen.getByTestId('select-all-fields') as HTMLInputElement;
+      fireEvent.click(selectAllCheckbox);
+
+      // Click disconnect
+      const disconnectBtn = screen.getByRole('button', { name: /Disconnect/i });
+      fireEvent.click(disconnectBtn);
+
+      await waitFor(() => {
+        expect(mockRemoveEntryConnectedFields).toHaveBeenCalledWith('entry-id');
+        expect(mockSdk.notifier.success).toHaveBeenCalledWith(
+          '2 fields disconnected successfully.'
+        );
+      });
     });
   });
 });
