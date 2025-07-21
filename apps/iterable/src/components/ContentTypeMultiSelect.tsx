@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Stack, Pill } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
-import { ContentType } from '../utils.ts';
+import { ContentType } from '../utils';
 import { ContentTypeProps, PlainClientAPI } from 'contentful-management';
 import { ConfigAppSDK, CMAClient } from '@contentful/app-sdk';
 
@@ -49,7 +49,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
         query: { skip, limit },
       });
       if (response.items) {
-        allContentTypes = allContentTypes.concat(response.items as ContentTypeProps[]);
+        allContentTypes = allContentTypes.concat(response.items);
         areMoreContentTypes = response.items.length === limit;
       } else {
         areMoreContentTypes = false;
