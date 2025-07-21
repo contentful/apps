@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Flex, Heading, Spinner, Text } from '@contentful/f36-components';
+import { Box, Flex, Heading, Spinner, Text, Note, TextLink } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentTypeProps, createClient, EntryProps, KeyValueMap } from 'contentful-management';
 import ConfigEntryService from '../utils/ConfigEntryService';
 import { styles } from './Page.styles';
 import { ConnectedFields } from '../utils/utils';
 import ConnectedEntriesTable from '../components/ConnectedEntriesTable';
-import DisplayMessage from '../components/DisplayMessage';
 import ConnectedFieldsModal from '../components/ConnectedFieldsModal';
 
 interface EntryWithContentType {
@@ -104,32 +103,41 @@ const Page: React.FC = () => {
         <Heading as="h1" marginBottom="spacingM">
           Hubspot
         </Heading>
-        <Text fontColor="gray600" marginBottom="spacingL">
-          View the details of your synced entry fields. Click Manage fields to connect or disconnect
-          content.
-        </Text>
         {loading ? (
           <Flex alignItems="center" justifyContent="center" className={styles.loading}>
             <Spinner size="large" />
             <Text marginLeft="spacingM">Loading...</Text>
           </Flex>
         ) : error ? (
-          <DisplayMessage
+          <Note
+            variant="negative"
             title="The app cannot load content."
-            message="Try refreshing, or reviewing your app configuration."
-          />
+            className={styles.errorBanner}>
+            <Text>
+              Try refreshing, or reviewing your{' '}
+              <TextLink href="#" onClick={() => sdk.navigator.openAppConfig()}>
+                app configuration
+              </TextLink>
+              .
+            </Text>
+          </Note>
         ) : entriesWithContentType.length === 0 ? (
-          <DisplayMessage
-            title="No active Hubspot modules"
-            message="Once you have created modules, they will display here."
-          />
+          <Text fontColor="gray600" marginTop="spacingL">
+            No connected content. Sync entry fields from the entry page sidebar to get started.
+          </Text>
         ) : (
-          <ConnectedEntriesTable
-            entries={entriesWithContentType}
-            connectedFields={connectedFields}
-            defaultLocale={defaultLocale}
-            onManageFields={handleManageFields}
-          />
+          <>
+            <Text fontColor="gray600" marginBottom="spacingL">
+              View the details of your synced entry fields. Click Manage fields to connect or
+              disconnect content.
+            </Text>
+            <ConnectedEntriesTable
+              entries={entriesWithContentType}
+              connectedFields={connectedFields}
+              defaultLocale={defaultLocale}
+              onManageFields={handleManageFields}
+            />
+          </>
         )}
         {modalEntry && connectedFieldsForEntry && (
           <ConnectedFieldsModal
