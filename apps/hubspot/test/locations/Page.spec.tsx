@@ -54,7 +54,7 @@ describe('Page Location', () => {
     expect(screen.getByText(/Loading.../i)).toBeTruthy();
   });
 
-  it('renders empty table if no connected entries', async () => {
+  it('renders empty state if no connected entries', async () => {
     mockGetConnectedFields.mockResolvedValue({});
 
     render(<Page />);
@@ -63,14 +63,27 @@ describe('Page Location', () => {
       expect(screen.getByText('Hubspot')).toBeTruthy();
       expect(
         screen.getByText(
-          /View the details of your synced entry fields. Click Manage fields to connect or disconnect content./i
+          'No connected content. Sync entry fields from the entry page sidebar to get started.'
         )
       ).toBeTruthy();
-      expect(screen.getByText('No active Hubspot modules')).toBeTruthy();
       expect(
-        screen.getByText('Once you have created modules, they will display here.')
-      ).toBeTruthy();
-      expect(screen.queryByRole('row', { name: /Manage fields/i })).toBeNull();
+        screen.queryByText(
+          /View the details of your synced entry fields. Click Manage fields to connect or disconnect content./i
+        )
+      ).toBeNull();
+    });
+  });
+
+  it('renders error banner if there is an error', async () => {
+    mockGetConnectedFields.mockImplementation(() => {
+      throw new Error('fail');
+    });
+
+    render(<Page />);
+
+    await waitFor(() => {
+      expect(screen.getByText('The app cannot load content.')).toBeTruthy();
+      expect(screen.getByRole('link', { name: /app configuration/i })).toBeTruthy();
     });
   });
 
