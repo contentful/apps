@@ -2,6 +2,7 @@ import { EntryProps, KeyValueMap } from 'contentful-management';
 import { ConnectedFields, EntryWithContentType, getEntryTitle } from '../utils/utils';
 import { Badge, Box, Button, Flex, Table, Text } from '@contentful/f36-components';
 import { styles } from './ConnectedEntriesTable.styles';
+import WarningOctagonIcon from './WarningOctagonIcon';
 
 const getStatusBadge = (entry: EntryProps<KeyValueMap>) => {
   const isPublished = Boolean(entry.sys.publishedAt);
@@ -73,6 +74,8 @@ const ConnectedEntriesTable = ({
           const status = getStatusBadge(entry);
           const connected = connectedFields[entry.sys.id] || [];
           const connectedCount = connected.length;
+          const hasErrors = Object.values(connected)?.some((field) => field.error);
+
           return (
             <Table.Row key={entry.sys.id}>
               <Table.Cell>{name}</Table.Cell>
@@ -82,6 +85,11 @@ const ConnectedEntriesTable = ({
               <Table.Cell>
                 <Flex flexDirection="row" gap="spacingS" alignItems="center">
                   <Text>{connectedCount}</Text>
+                  {hasErrors && (
+                    <Badge variant="negative" startIcon={<WarningOctagonIcon />}>
+                      Connection error
+                    </Badge>
+                  )}
                 </Flex>
               </Table.Cell>
               <Table.Cell className={styles.rightCell}>

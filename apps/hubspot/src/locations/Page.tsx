@@ -7,9 +7,10 @@ import { styles } from './Page.styles';
 import { ConnectedFields, EntryWithContentType } from '../utils/utils';
 import ConnectedEntriesTable from '../components/ConnectedEntriesTable';
 import ConnectedFieldsModal from '../components/ConnectedFieldsModal';
+import { PageAppSDK } from '@contentful/app-sdk';
 
 const Page: React.FC = () => {
-  const sdk = useSDK();
+  const sdk = useSDK<PageAppSDK>();
   const [entriesWithContentType, setEntriesWithContentType] = useState<EntryWithContentType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -142,6 +143,7 @@ const Page: React.FC = () => {
             onViewEntry={handleViewEntry}
             entryConnectedFields={connectedFieldsForEntry}
             defaultLocale={defaultLocale}
+            sdk={sdk}
           />
         )}
       </Box>

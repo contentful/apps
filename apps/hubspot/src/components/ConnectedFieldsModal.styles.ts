@@ -20,27 +20,6 @@ export const styles = {
     minWidth: 400,
     maxHeight: '50vh',
   }),
-  modalErrorBanner: css({
-    background: tokens.red100,
-    border: `1px solid ${tokens.red500}`,
-    borderRadius: tokens.borderRadiusMedium,
-    padding: tokens.spacingM,
-    marginBottom: tokens.spacingS,
-    color: tokens.red700,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacing2Xs,
-  }),
-  modalErrorTitle: css({
-    color: tokens.red700,
-    fontWeight: 'bold',
-    fontSize: tokens.fontSizeM,
-    marginBottom: tokens.spacing2Xs,
-  }),
-  modalErrorMessage: css({
-    color: tokens.red700,
-    fontSize: tokens.fontSizeS,
-  }),
   modalEntryContainer: css({
     border: `1px solid ${tokens.gray300}`,
     borderRadius: tokens.borderRadiusMedium,
@@ -51,6 +30,9 @@ export const styles = {
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: tokens.spacingM,
+  }),
+  modalErrorBanner: css({
+    marginBottom: tokens.spacingM,
   }),
   viewEntryButton: css({
     marginLeft: tokens.spacingL,
@@ -65,5 +47,9 @@ export const styles = {
     width: 40,
     paddingRight: tokens.spacingXs,
     verticalAlign: 'middle',
+  }),
+  badgeStyle: css({
+    marginLeft: 'auto',
+    alignSelf: 'center',
   }),
 };
