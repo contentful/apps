@@ -5,8 +5,8 @@
   "dependencies": {
     "@contentful/app-sdk": "^4.23.1",
     "@contentful/f36-components": "^4.54.0",
+    "@contentful/f36-layout": "5.0.0-alpha.18",
     "@contentful/f36-tokens": "^4.0.2",
-    "@contentful/f36-workbench": "^4.21.0",
     "@contentful/react-apps-toolkit": "^1.2.16",
     "@emotion/css": "^11.13.4",
     "@graphiql/toolkit": "^0.10.0",

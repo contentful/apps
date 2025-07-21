@@ -11,21 +11,21 @@
 
 ## Contentful app setup
 
-* Use the Mux (dev) contentful app and make sure it is pointed to http://localhost:3000 for development
-* Create a development app in Contentful. Try to only select the resources needed.
-* You will have to go into your browser settings and disable mixed content warnings for this to work
-* Contentful uses Conventional Commits.
-* Squash commit history.
-* Use Node 14.
-* Use Prettier for formatting.
+- Use the Mux (dev) contentful app and make sure it is pointed to http://localhost:3000 for development
+- Create a development app in Contentful. Try to only select the resources needed.
+- You will have to go into your browser settings and disable mixed content warnings for this to work
+- Contentful uses Conventional Commits.
+- Squash commit history.
+- Use Node 14.
+- Use Prettier for formatting.
 
 ## Existing Videos and Captions
 
-Captions and subtitles (using the terms interchangeably here) are bundled and delivered with the video during playback, and is ultimately the source of truth. For other UI uses, the captions are included in the data object so the video manifest does not have to be downloaded. For existing videos, workflows may have already added captions on some videos, and will continue to work in players even if they are not reflected in data stored in Contentful.  To update the Contentful data on the video, press the "resync" button to sync to the latest state of the video.
+Captions and subtitles (using the terms interchangeably here) are bundled and delivered with the video during playback, and is ultimately the source of truth. For other UI uses, the captions are included in the data object so the video manifest does not have to be downloaded. For existing videos, workflows may have already added captions on some videos, and will continue to work in players even if they are not reflected in data stored in Contentful. To update the Contentful data on the video, press the "resync" button to sync to the latest state of the video.
 
 ## Deploy
 
-* This gets deployed and hosted by Contentful
+- This gets deployed and hosted by Contentful
 
 ## Object Version
 
