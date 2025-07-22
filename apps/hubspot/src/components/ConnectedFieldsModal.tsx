@@ -114,17 +114,17 @@ const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
                 </Button>
               </Box>
               {fieldsWithErrors.length > 0 && (
-            <Note
-              variant="negative"
-              icon={<WarningOctagonIcon className={styles.warningIconNote} />}
-              className={styles.modalErrorBanner}>
-              <Text lineHeight="lineHeightCondensed" fontColor="gray800">
-                Unable to sync content. Review your connected fields or{' '}
-                <TextLink onClick={() => onAppConfigRedirect()}>app configuration</TextLink>.
-              </Text>
-            </Note>
-          )}
-          {selectedFields.size > 0 && (
+                <Note
+                  variant="negative"
+                  icon={<WarningOctagonIcon className={styles.warningIconNote} />}
+                  className={styles.modalErrorBanner}>
+                  <Text lineHeight="lineHeightCondensed" fontColor="gray800">
+                    Unable to sync content. Review your connected fields or{' '}
+                    <TextLink onClick={() => onAppConfigRedirect()}>app configuration</TextLink>.
+                  </Text>
+                </Note>
+              )}
+              {selectedFields.size > 0 && (
                 <Stack
                   flexDirection="column"
                   spacing="spacing2Xs"
@@ -171,14 +171,14 @@ const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
                             </Text>
                             <Text fontColor="gray500">({getFieldDisplayType(field.fieldId)})</Text>
                             {field.error && (
-                          <Badge
-                            className={styles.badgeStyle}
-                            variant="negative"
-                            startIcon={
-                              <WarningOctagonIcon className={styles.warningIconBadge} />
-                            }>{`Connection error`}</Badge>
-                        )}
-                      </Flex>
+                              <Badge
+                                className={styles.badgeStyle}
+                                variant="negative"
+                                startIcon={
+                                  <WarningOctagonIcon className={styles.warningIconBadge} />
+                                }>{`Connection error`}</Badge>
+                            )}
+                          </Flex>
                         </Table.Cell>
                       </Table.Row>
                     );
