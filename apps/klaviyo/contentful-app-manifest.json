@@ -1,0 +1,100 @@
+{
+  "name": "Klaviyo",
+  "description": "Sync your Contentful content with Klaviyo",
+  "id": "klaviyo",
+  "category": "Marketing",
+  "version": "0.1.0",
+  "locations": [
+    {
+      "location": "app-config",
+      "component": "ConfigScreen"
+    },
+    {
+      "location": "entry-sidebar",
+      "component": "Sidebar"
+    },
+    {
+      "location": "entry-field",
+      "component": "Field"
+    },
+    {
+      "location": "dialog",
+      "component": "FieldSelectDialog"
+    },
+    {
+      "location": "page",
+      "component": "FieldMappingScreen"
+    }
+  ],
+  "parameters": {
+    "installation": []
+  },
+  "functions": [
+    {
+      "id": "klaviyoEntrySync",
+      "name": "Klaviyo Entry Sync",
+      "description": "Automatically syncs Contentful entries to Klaviyo on publish/update",
+      "path": "functions/entrySyncFunction.js",
+      "entryFile": "functions/entrySyncFunction.ts",
+      "allowNetworks": ["a.klaviyo.com"],
+      "accepts": ["appevent.handler"]
+    },
+    {
+      "id": "proxyRequest",
+      "name": "Proxy Request",
+      "description": "Proxies requests to allowed Klaviyo endpoints",
+      "path": "functions/proxyRequest.js",
+      "entryFile": "functions/proxyRequest.ts",
+      "allowNetworks": ["a.klaviyo.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "initiateOauth",
+      "name": "Initiate OAuth",
+      "description": "Initiates the OAuth flow for Klaviyo",
+      "path": "functions/initiateOauth.js",
+      "entryFile": "functions/initiateOauth.ts",
+      "allowNetworks": ["www.klaviyo.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "completeOauth",
+      "name": "Complete OAuth",
+      "description": "Completes the OAuth flow for Klaviyo",
+      "path": "functions/completeOauth.js",
+      "entryFile": "functions/completeOauth.ts",
+      "allowNetworks": ["a.klaviyo.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "disconnect",
+      "name": "Disconnect",
+      "description": "Disconnects the Klaviyo app",
+      "path": "functions/disconnect.js",
+      "entryFile": "functions/disconnect.ts",
+      "allowNetworks": ["a.klaviyo.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "checkStatus",
+      "name": "Check Status",
+      "description": "Checks the status of the Klaviyo app",
+      "path": "functions/checkStatus.js",
+      "entryFile": "functions/checkStatus.ts",
+      "allowNetworks": ["a.klaviyo.com"],
+      "accepts": ["appaction.call"]
+    }
+  ],
+  "appEventHandlers": [
+    {
+      "functionId": "klaviyoEntrySync",
+      "name": "Auto-sync to Klaviyo",
+      "description": "Automatically syncs content to Klaviyo when entries are published or updated",
+      "topics": [
+        "ContentManagement.Entry.publish",
+        "ContentManagement.Entry.auto_save",
+        "ContentManagement.Entry.save"
+      ]
+    }
+  ]
+} 

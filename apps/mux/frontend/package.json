@@ -1,6 +1,6 @@
 {
   "name": "@contentful/mux-contentful-frontend",
-  "version": "1.10.14",
+  "version": "2.0.0",
   "private": true,
   "devDependencies": {
     "@testing-library/jest-dom": "5.17.0",
@@ -23,7 +23,7 @@
     "@contentful/dam-app-base": "2.0.46",
     "@contentful/f36-components": "4.67.0",
     "@contentful/react-apps-toolkit": "1.2.16",
-    "@mux/mux-player-react": "2.9.1",
+    "@mux/mux-player-react": "3.4.0",
     "@mux/mux-uploader-react": "1.0.1",
     "@vitejs/plugin-react": "^4.3.2",
     "jsdom": "^25.0.1",

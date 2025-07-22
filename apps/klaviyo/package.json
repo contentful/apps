@@ -1,0 +1,77 @@
+{
+  "name": "klaviyo",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@contentful/app-sdk": "^4.29.1",
+    "@contentful/f36-components": "^4.79.1",
+    "@contentful/f36-forms": "^4.0.0",
+    "@contentful/f36-icons": "^4.0.0",
+    "@contentful/f36-tokens": "^4.0.0",
+    "@contentful/node-apps-toolkit": "^3.13.0",
+    "@contentful/react-apps-toolkit": "1.2.16",
+    "@contentful/rich-text-html-renderer": "^17.0.0",
+    "contentful-management": "10.46.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "emotion": "10.0.27",
+    "formik": "^2.4.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "^6.30.0",
+    "rimraf": "^5.0.10",
+    "uuid": "^11.1.0",
+    "yup": "^1.3.3"
+  },
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "rimraf build && npm run build:frontend && npm run build:functions",
+    "build:frontend": "rm -rf build && tsc && vite build",
+    "build:functions": "contentful-app-scripts build-functions --ci",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "add-locations": "contentful-app-scripts add-locations",
+    "upload": "contentful-app-scripts upload --bundle-dir ./build",
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id 2x4lsvuxPAGS2UUHwWVYee --token $CONTENTFUL_ACCESS_TOKEN",
+    "proxy": "cd ../lambda && npm run dev",
+    "deploy": "aws s3 sync ./build ${STATIC_KLAVIYO_S3_BASE}/klaviyo --acl public-read",
+    "deploy:test": "aws s3 sync ./build ${STATIC_KLAVIYO_S3_BASE}/klaviyo-test --acl public-read",
+    "deploy:staging": "npm run build && contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${TEST_ORG_ID} --definition-id TQDpclXMlILg5GAlaxU7y --token ${TEST_CMA_TOKEN}",
+    "dev-with-proxy": "concurrently \"npm run dev\" \"npm run proxy\"",
+    "upload-staging": "contentful-app-scripts upload --bundle-dir ./build --host api.flinkly.com --organization-id 7oPjKXwmGdQ9vnnjVe6MCy --definition-id TQDpclXMlILg5GAlaxU7y --token $CONTENTFUL_STAGING_ACCESS_TOKEN"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "^2.3.0",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^14.3.1",
+    "@types/node": "^22.13.5",
+    "@types/react": "18.3.13",
+    "@types/react-dom": "18.3.1",
+    "@vitejs/plugin-react": "^4.0.3",
+    "concurrently": "^8.2.2",
+    "cross-env": "7.0.3",
+    "jsdom": "^26.0.0",
+    "typescript": "4.9.5",
+    "vite": "^6.2.2",
+    "vitest": "^3.0.9"
+  },
+  "homepage": "."
+}

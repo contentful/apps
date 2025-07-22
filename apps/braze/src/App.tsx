@@ -4,11 +4,13 @@ import { useMemo } from 'react';
 import ConfigScreen from './locations/ConfigScreen';
 import Dialog from './locations/Dialog';
 import Sidebar from './locations/Sidebar';
+import Page from './locations/Page';
 
 const ComponentLocationSettings = {
   [locations.LOCATION_APP_CONFIG]: ConfigScreen,
   [locations.LOCATION_DIALOG]: Dialog,
   [locations.LOCATION_ENTRY_SIDEBAR]: Sidebar,
+  [locations.LOCATION_PAGE]: Page,
 };
 
 const App = () => {

@@ -34,12 +34,16 @@ export class RichTextField extends Field {
     throw new Error('Rich text not supported');
   }
 
-  isEnabled(): boolean {
+  isEnabledForGenerate(): boolean {
     return false;
   }
 
-  displayName(): string {
+  displayNameForGenerate(): string {
     return `${this.name} (Support for rich text fields coming soon)`;
+  }
+
+  displayNameForCreate(): string {
+    return this.name;
   }
 }
 

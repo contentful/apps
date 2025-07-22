@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { FieldsFactory } from '../../src/fields/FieldsFactory';
 import { BasicField } from '../../src/fields/BasicField';
 import { AssetField } from '../../src/fields/AssetField';
@@ -53,12 +53,7 @@ describe('FieldsFactory', () => {
       },
     });
 
-    const result = await new FieldsFactory(
-      entryId,
-      entryContentTypeId,
-      mockCma as any
-    ).createFields();
-
+    const result = await createFields(entryId, entryContentTypeId, mockCma);
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(BasicField);
     const fieldInstance = result[0] as BasicField;
@@ -88,11 +83,7 @@ describe('FieldsFactory', () => {
       },
     });
 
-    const result = await new FieldsFactory(
-      entryId,
-      entryContentTypeId,
-      mockCma as any
-    ).createFields();
+    const result = await createFields(entryId, entryContentTypeId, mockCma);
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(AssetField);
     const fieldInstance = result[0] as AssetField;
@@ -153,11 +144,7 @@ describe('FieldsFactory', () => {
       }
     });
 
-    const result = await new FieldsFactory(
-      entryId,
-      entryContentTypeId,
-      mockCma as any
-    ).createFields();
+    const result = await createFields(entryId, entryContentTypeId, mockCma);
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(ReferenceField);
     const fieldInstance = result[0] as ReferenceField;
@@ -171,6 +158,43 @@ describe('FieldsFactory', () => {
     expect(fieldInstance.fields[0].id).toBe('name');
     expect(fieldInstance.fields[1]).toBeInstanceOf(BasicField);
     expect(fieldInstance.fields[1].id).toBe('bio');
+  });
+
+  it('should skip reference fields with null content type', async () => {
+    const mockReferencedEntry = {
+      sys: {
+        contentType: null,
+      },
+      fields: {},
+    };
+
+    const mockEntry = [
+      {
+        sys: {
+          contentType: {
+            sys: { id: 'article' },
+          },
+        },
+        fields: {
+          author: {
+            'en-US': mockReferencedEntry,
+          },
+        },
+      },
+    ];
+    (resolveResponse as any).mockReturnValue(mockEntry);
+
+    mockCma.contentType.get.mockResolvedValue({
+      fields: [{ id: 'author', type: 'Link', linkType: 'Entry', localized: false }],
+      displayField: '',
+      sys: {
+        id: 'article',
+      },
+    });
+
+    const result = await createFields(entryId, entryContentTypeId, mockCma);
+    expect(result).toHaveLength(0);
+    expect(result.find((f) => f instanceof ReferenceField)).toBeUndefined();
   });
 
   it('should create a BasicArrayField instance with correct properties', async () => {
@@ -190,12 +214,7 @@ describe('FieldsFactory', () => {
       },
     });
 
-    const result = await new FieldsFactory(
-      entryId,
-      entryContentTypeId,
-      mockCma as any
-    ).createFields();
-
+    const result = await createFields(entryId, entryContentTypeId, mockCma);
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(TextArrayField);
     const fieldInstance = result[0] as TextArrayField;
@@ -233,11 +252,7 @@ describe('FieldsFactory', () => {
       },
     });
 
-    const result = await new FieldsFactory(
-      entryId,
-      entryContentTypeId,
-      mockCma as any
-    ).createFields();
+    const result = await createFields(entryId, entryContentTypeId, mockCma);
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(AssetArrayField);
     const fieldInstance = result[0] as AssetArrayField;
@@ -312,11 +327,7 @@ describe('FieldsFactory', () => {
       }
     });
 
-    const result = await new FieldsFactory(
-      entryId,
-      entryContentTypeId,
-      mockCma as any
-    ).createFields();
+    const result = await createFields(entryId, entryContentTypeId, mockCma);
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(ReferenceArrayField);
     const fieldInstance = result[0] as ReferenceArrayField;
@@ -382,12 +393,7 @@ describe('FieldsFactory', () => {
       };
     });
 
-    const result = await new FieldsFactory(
-      entryId,
-      entryContentTypeId,
-      mockCma as any
-    ).createFields();
-
+    const result = await createFields(entryId, entryContentTypeId, mockCma);
     expect(result).toHaveLength(2); // name and nestedRef
     expect(result[0].id).toEqual('name');
     expect(result[1]).toBeInstanceOf(ReferenceField);
@@ -412,4 +418,75 @@ describe('FieldsFactory', () => {
       level++;
     }
   });
+
+  describe('getDisplayFieldValue', () => {
+    let fieldsFactory: FieldsFactory;
+
+    beforeEach(() => {
+      fieldsFactory = new FieldsFactory(entryId, entryContentTypeId, mockCma as any, 'en-US');
+    });
+
+    it('should return "Untitled" when displayField is invalid (undefined, null, or empty string)', () => {
+      const fieldValue = { fields: { name: { 'en-US': 'John Doe' } } };
+
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValue, undefined)).toBe('Untitled');
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValue, null)).toBe('Untitled');
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValue, '')).toBe('Untitled');
+    });
+
+    it('should return "Untitled" when displayField does not exist in fields', () => {
+      const fieldValue = { fields: { name: { 'en-US': 'John Doe' } } };
+
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValue, 'nonexistent')).toBe(
+        'Untitled'
+      );
+    });
+
+    it('should return "Untitled" when displayField value is null, undefined, empty object, or object with only null values', () => {
+      const fieldValueNull = { fields: { name: null } };
+      const fieldValueUndef = { fields: { name: undefined } };
+      const fieldValueEmptyObj = { fields: { name: {} } };
+      const fieldValueNulls = { fields: { name: { 'en-US': null } } };
+
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValueNull, 'name')).toBe('Untitled');
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValueUndef, 'name')).toBe('Untitled');
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValueEmptyObj, 'name')).toBe(
+        'Untitled'
+      );
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValueNulls, 'name')).toBe('Untitled');
+    });
+
+    it('should return default locale value when displayField is a localized object (single or multiple locales)', () => {
+      const fieldValueSingle = { fields: { name: { 'en-US': 'John Doe' } } };
+      const fieldValueMulti = {
+        fields: {
+          title: {
+            'fr-FR': 'Titre Français',
+            'de-DE': 'Deutscher Titel',
+            'en-US': 'English Title',
+          },
+        },
+      };
+
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValueSingle, 'name')).toBe(
+        'John Doe'
+      );
+      expect((fieldsFactory as any).getDisplayFieldValue(fieldValueMulti, 'title')).toBe(
+        'English Title'
+      );
+    });
+  });
 });
+
+async function createFields(
+  entryId: string,
+  entryContentTypeId: string,
+  mockCma: {
+    contentType: { get: Mock };
+    entry: { references: Mock };
+  }
+) {
+  const fieldsFactory = new FieldsFactory(entryId, entryContentTypeId, mockCma as any, 'en-US');
+  const cmaEntry = await fieldsFactory.getEntry();
+  return await fieldsFactory.createFieldsForEntry(cmaEntry.fields);
+}
