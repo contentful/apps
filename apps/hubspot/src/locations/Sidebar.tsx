@@ -5,7 +5,7 @@ import { processFields } from '../utils/fieldsProcessing';
 import { createClient } from 'contentful-management';
 import { useEffect, useState } from 'react';
 import ConfigEntryService from '../utils/ConfigEntryService';
-import { AppInstallationParameters, EntryConnectedFields } from '../utils/utils';
+import { EntryConnectedFields } from '../utils/utils';
 import { ErrorCircleOutlineIcon } from '@contentful/f36-icons';
 
 const Sidebar = () => {
