@@ -52,4 +52,13 @@ export const styles = {
     marginLeft: 'auto',
     alignSelf: 'center',
   }),
+  warningIconNote: css({
+    width: 20,
+    height: 20,
+    color: tokens.colorNegative,
+  }),
+  warningIconBadge: css({
+    width: 14,
+    height: 14,
+  }),
 };

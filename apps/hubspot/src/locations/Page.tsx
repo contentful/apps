@@ -143,7 +143,7 @@ const Page: React.FC = () => {
             onViewEntry={handleViewEntry}
             entryConnectedFields={connectedFieldsForEntry}
             defaultLocale={defaultLocale}
-            sdk={sdk}
+            onAppConfigRedirect={() => sdk.navigator.openAppConfig()}
           />
         )}
       </Box>

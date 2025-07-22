@@ -19,8 +19,7 @@ import {
   TextLink,
 } from '@contentful/f36-components';
 import { styles } from './ConnectedFieldsModal.styles';
-import WarningOctagonIcon from './WarningOctagonIcon';
-import { PageAppSDK } from '@contentful/app-sdk';
+import { WarningOctagonIcon } from '@phosphor-icons/react';
 
 type ConnectedFieldsModalProps = {
   entryWithContentType: EntryWithContentType;
@@ -29,7 +28,7 @@ type ConnectedFieldsModalProps = {
   onViewEntry: () => void;
   entryConnectedFields: EntryConnectedFields;
   defaultLocale: string;
-  sdk: PageAppSDK;
+  onAppConfigRedirect: () => void;
 };
 
 const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
@@ -39,7 +38,7 @@ const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
   onViewEntry,
   entryConnectedFields,
   defaultLocale,
-  sdk,
+  onAppConfigRedirect,
 }) => {
   const [selectedFields, setSelectedFields] = useState<Set<string>>(() => new Set());
 
@@ -124,12 +123,11 @@ const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
           {fieldsWithErrors.length > 0 && (
             <Note
               variant="negative"
-              icon={<WarningOctagonIcon />}
+              icon={<WarningOctagonIcon className={styles.warningIconNote} />}
               className={styles.modalErrorBanner}>
               <Text lineHeight="lineHeightCondensed" fontColor="gray800">
                 Unable to sync content. Review your connected fields or{' '}
-                <TextLink onClick={() => sdk.navigator.openAppConfig()}>app configuration</TextLink>
-                .
+                <TextLink onClick={() => onAppConfigRedirect()}>app configuration</TextLink>.
               </Text>
             </Note>
           )}
@@ -184,7 +182,9 @@ const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
                           <Badge
                             className={styles.badgeStyle}
                             variant="negative"
-                            startIcon={<WarningOctagonIcon />}>{`Connection error`}</Badge>
+                            startIcon={
+                              <WarningOctagonIcon className={styles.warningIconBadge} />
+                            }>{`Connection error`}</Badge>
                         )}
                       </Flex>
                     </Table.Cell>

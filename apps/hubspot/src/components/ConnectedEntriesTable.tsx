@@ -2,7 +2,7 @@ import { EntryProps, KeyValueMap } from 'contentful-management';
 import { ConnectedFields, EntryWithContentType, getEntryTitle } from '../utils/utils';
 import { Badge, Box, Button, Flex, Table, Text } from '@contentful/f36-components';
 import { styles } from './ConnectedEntriesTable.styles';
-import WarningOctagonIcon from './WarningOctagonIcon';
+import { WarningOctagonIcon } from '@phosphor-icons/react';
 
 const getStatusBadge = (entry: EntryProps<KeyValueMap>) => {
   const isPublished = Boolean(entry.sys.publishedAt);
@@ -86,7 +86,9 @@ const ConnectedEntriesTable = ({
                 <Flex flexDirection="row" gap="spacingS" alignItems="center">
                   <Text>{connectedCount}</Text>
                   {hasErrors && (
-                    <Badge variant="negative" startIcon={<WarningOctagonIcon />}>
+                    <Badge
+                      variant="negative"
+                      startIcon={<WarningOctagonIcon className={styles.warningIconBadge} />}>
                       Connection error
                     </Badge>
                   )}
