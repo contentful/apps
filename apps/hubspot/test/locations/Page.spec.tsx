@@ -262,3 +262,58 @@ describe('Page Location', () => {
     });
   });
 });
+
+describe('Error handling', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetConnectedFields.mockResolvedValue({
+      'entry-1': [
+        {
+          fieldId: 'title',
+          moduleName: 'mod1',
+          updatedAt: '2024-05-01T10:00:00Z',
+          error: { status: 400, message: 'Sync error' },
+        },
+      ],
+    });
+    mockCma.entry.getMany = vi.fn().mockResolvedValue({
+      items: [
+        {
+          sys: {
+            id: 'entry-1',
+            contentType: { sys: { id: 'Fruits' } },
+            updatedAt: new Date().toISOString(),
+            publishedAt: new Date().toISOString(),
+          },
+          fields: {
+            title: { 'en-US': 'Banana' },
+          },
+        },
+      ],
+    });
+    mockCma.contentType.get = vi.fn().mockResolvedValue({
+      displayField: 'title',
+      sys: { id: 'Fruits' },
+      fields: [{ id: 'title', name: 'Title', type: 'Text' }],
+    });
+  });
+
+  it('shows error banner in the table if any config entry has an error', async () => {
+    render(<Page />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Connection error')).toBeTruthy();
+    });
+  });
+
+  it('shows error banner in the modal for a field with an error', async () => {
+    render(<Page />);
+
+    const btn = await screen.findByRole('button', { name: /Manage fields/i });
+    fireEvent.click(btn);
+    await screen.findByRole('dialog');
+
+    expect(screen.getByText(/Unable to sync content/i)).toBeTruthy();
+    expect(screen.getAllByText('Connection error')).toBeTruthy();
+  });
+});

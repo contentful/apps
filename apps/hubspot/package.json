@@ -10,6 +10,7 @@
     "@contentful/field-editor-json": "^3.3.38",
     "@contentful/react-apps-toolkit": "1.2.16",
     "@contentful/rich-text-html-renderer": "^17.0.1",
+    "@phosphor-icons/react": "^2.1.10",
     "@testing-library/user-event": "^14.6.1",
     "contentful-management": "^11.52.0",
     "emotion": "10.0.27",

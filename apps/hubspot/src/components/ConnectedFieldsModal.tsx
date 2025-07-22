@@ -5,8 +5,21 @@ import {
   EntryWithContentType,
   getEntryTitle,
 } from '../utils/utils';
-import { Box, Button, Checkbox, Flex, Modal, Stack, Table, Text } from '@contentful/f36-components';
+import {
+  Badge,
+  Box,
+  Button,
+  Checkbox,
+  Flex,
+  Modal,
+  Note,
+  Stack,
+  Table,
+  Text,
+  TextLink,
+} from '@contentful/f36-components';
 import { styles } from './ConnectedFieldsModal.styles';
+import { WarningOctagonIcon } from '@phosphor-icons/react';
 
 type ConnectedFieldsModalProps = {
   entryWithContentType: EntryWithContentType;
@@ -15,6 +28,7 @@ type ConnectedFieldsModalProps = {
   onViewEntry: () => void;
   entryConnectedFields: EntryConnectedFields;
   defaultLocale: string;
+  onAppConfigRedirect: () => void;
 };
 
 const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
@@ -24,6 +38,7 @@ const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
   onViewEntry,
   entryConnectedFields,
   defaultLocale,
+  onAppConfigRedirect,
 }) => {
   const [selectedFields, setSelectedFields] = useState<Set<string>>(() => new Set());
 
@@ -32,6 +47,7 @@ const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
   );
   const allSelected = allFieldIds.length > 0 && allFieldIds.every((id) => selectedFields.has(id));
   const someSelected = allFieldIds.some((id) => selectedFields.has(id));
+  const fieldsWithErrors = entryConnectedFields.filter((field) => field.error);
 
   function handleSelectAll() {
     if (allSelected) {
@@ -104,6 +120,17 @@ const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
               View entry
             </Button>
           </Box>
+          {fieldsWithErrors.length > 0 && (
+            <Note
+              variant="negative"
+              icon={<WarningOctagonIcon className={styles.warningIconNote} />}
+              className={styles.modalErrorBanner}>
+              <Text lineHeight="lineHeightCondensed" fontColor="gray800">
+                Unable to sync content. Review your connected fields or{' '}
+                <TextLink onClick={() => onAppConfigRedirect()}>app configuration</TextLink>.
+              </Text>
+            </Note>
+          )}
           {selectedFields.size > 0 && (
             <Stack
               flexDirection="column"
@@ -151,6 +178,14 @@ const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
                           {getFieldDisplayName(field.fieldId, field.locale)}
                         </Text>
                         <Text fontColor="gray500">({getFieldDisplayType(field.fieldId)})</Text>
+                        {field.error && (
+                          <Badge
+                            className={styles.badgeStyle}
+                            variant="negative"
+                            startIcon={
+                              <WarningOctagonIcon className={styles.warningIconBadge} />
+                            }>{`Connection error`}</Badge>
+                        )}
                       </Flex>
                     </Table.Cell>
                   </Table.Row>

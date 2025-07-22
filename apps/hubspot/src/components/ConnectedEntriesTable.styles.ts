@@ -5,4 +5,8 @@ export const styles = {
     minWidth: 140,
     textAlign: 'right',
   }),
+  warningIconBadge: css({
+    width: 14,
+    height: 14,
+  }),
 };
