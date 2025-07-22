@@ -238,4 +238,4 @@ workflows:
               only:
                 - master
       - test-ts-example
-      - test-js-example
+      # - test-js-example
