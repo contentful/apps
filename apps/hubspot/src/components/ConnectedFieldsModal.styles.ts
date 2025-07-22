@@ -22,6 +22,9 @@ export const styles = {
     justifyContent: 'space-between',
     gap: tokens.spacingM,
   }),
+  modalErrorBanner: css({
+    marginBottom: tokens.spacingM,
+  }),
   baseCell: css({
     ...baseTableCell,
     paddingLeft: 0,
