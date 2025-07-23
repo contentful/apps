@@ -1,5 +1,6 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import Dialog from '../../src/locations/Dialog';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { mockSdk, expectedFields } from '../mocks';
 import { mockCma } from '../mocks/mockCma';
@@ -21,6 +22,21 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useAutoResizer: vi.fn(),
 }));
 
+vi.mock('../../src/utils/ConfigEntryService', () => {
+  return {
+    default: vi.fn().mockImplementation(() => ({
+      getEntryConnectedFields: vi.fn().mockResolvedValue([
+        {
+          fieldId: 'description',
+          moduleName: 'mod1',
+          updatedAt: '2024-05-01T10:00:00Z',
+          locale: 'es-AR',
+        },
+      ]),
+    })),
+  };
+});
+
 describe('Dialog component', () => {
   beforeEach(() => {
     // Clear any previous renders
@@ -35,28 +51,30 @@ describe('Dialog component', () => {
     render(<Dialog />);
 
     // Check that the select all checkbox text is displayed correctly
-    expect(screen.getByText('Select all fields (5)')).toBeInTheDocument();
+    waitFor(() => {
+      expect(screen.getByText('Select all fields (5)')).toBeInTheDocument();
 
-    // Check that individual field checkboxes display correctly
-    expect(screen.getByText('Title')).toBeInTheDocument();
-    expect(screen.getByText('(Short text)')).toBeInTheDocument();
+      // Check that individual field checkboxes display correctly
+      expect(screen.getByText('Title')).toBeInTheDocument();
+      expect(screen.getByText('(Short text)')).toBeInTheDocument();
 
-    expect(screen.getByText('Description (en-US)')).toBeInTheDocument();
-    expect(screen.getAllByText('(Text)')).toHaveLength(2);
+      expect(screen.getByText('Description (en-US)')).toBeInTheDocument();
+      expect(screen.getAllByText('(Text)')).toHaveLength(2);
 
-    expect(screen.getByText('Description (es-AR)')).toBeInTheDocument();
+      expect(screen.getByText('Description (es-AR)')).toBeInTheDocument();
 
-    expect(screen.getByText('Image')).toBeInTheDocument();
-    expect(screen.getByText('(Media)')).toBeInTheDocument();
+      expect(screen.getByText('Image')).toBeInTheDocument();
+      expect(screen.getByText('(Media)')).toBeInTheDocument();
 
-    expect(screen.getByText('Tags')).toBeInTheDocument();
-    expect(screen.getByText('(Short text list)')).toBeInTheDocument();
+      expect(screen.getByText('Tags')).toBeInTheDocument();
+      expect(screen.getByText('(Short text list)')).toBeInTheDocument();
 
-    expect(screen.getByText('Boolean')).toBeInTheDocument();
-    expect(screen.getByText('(Boolean)')).toBeInTheDocument();
+      expect(screen.getByText('Boolean')).toBeInTheDocument();
+      expect(screen.getByText('(Boolean)')).toBeInTheDocument();
 
-    expect(screen.getByText('Author')).toBeInTheDocument();
-    expect(screen.getByText('(Reference)')).toBeInTheDocument();
+      expect(screen.getByText('Author')).toBeInTheDocument();
+      expect(screen.getByText('(Reference)')).toBeInTheDocument();
+    });
   });
 
   it('should allow checking supported fields but not unsupported fields', async () => {
@@ -213,5 +231,14 @@ describe('Dialog component', () => {
     );
 
     expect(mockSdk.notifier.success).toHaveBeenCalledWith('2 entry fields successfully synced.');
+  });
+
+  it('should disable checkboxes for fields that are already connected', async () => {
+    render(<Dialog />);
+    // Wait for the Dialog to render and async effect to run
+    const descriptionEnCheckbox = await screen.findByLabelText('Description (es-AR)', {
+      exact: false,
+    });
+    expect(descriptionEnCheckbox).toBeDisabled();
   });
 });

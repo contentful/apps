@@ -1,13 +1,14 @@
 import { Box, Button, Flex } from '@contentful/f36-components';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import FieldSelection from '../components/FieldSelection';
 import FieldModuleNameMapping from '../components/FieldModuleNameMapping';
 import { createClient } from 'contentful-management';
 import { SdkField, SelectedSdkField } from '../utils/fieldsProcessing';
 import { styles } from './Dialog.styles';
 import { MODULE_NAME_PATTERN } from '../utils/utils';
+import ConfigEntryService from '../utils/ConfigEntryService';
 
 export type InvocationParams = {
   entryTitle: string;
@@ -40,6 +41,23 @@ const Dialog = () => {
   const [step, setStep] = useState<Step>(Step.FieldSelection);
   const [moduleNameMapping, setModuleNameMapping] = useState<{ [fieldId: string]: string }>({});
   const [isSending, setIsSending] = useState(false);
+  const [connectedFieldIds, setConnectedFieldIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchConnectedFields = async () => {
+      const configService = new ConfigEntryService(cma, sdk.locales.default);
+      const entryConnectedFields = await configService.getEntryConnectedFields(
+        invocationParams.entryId
+      );
+
+      const ids = entryConnectedFields.map((f) =>
+        f.locale ? `${f.fieldId}-${f.locale}` : f.fieldId
+      );
+
+      setConnectedFieldIds(ids);
+    };
+    fetchConnectedFields();
+  }, [invocationParams.entryId]);
 
   const selectedFieldObjects = useMemo(
     () => fields.filter((f) => selectedFields.includes(f.uniqueId)),
@@ -139,6 +157,7 @@ const Dialog = () => {
             fields={fields}
             selectedFields={selectedFields}
             setSelectedFields={setSelectedFields}
+            connectedFieldIds={connectedFieldIds}
           />
           <Flex
             paddingTop="spacingM"
