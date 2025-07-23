@@ -4,6 +4,7 @@ import {
   EntryConnectedFields,
   EntryWithContentType,
   getEntryTitle,
+  getUniqueFieldId,
 } from '../utils/utils';
 import {
   Badge,
@@ -29,6 +30,7 @@ type ConnectedFieldsModalProps = {
   entryConnectedFields: EntryConnectedFields;
   defaultLocale: string;
   onAppConfigRedirect: () => void;
+  onDisconnect: (selectedFieldIds: string[]) => void;
 };
 
 const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
@@ -39,6 +41,7 @@ const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
   entryConnectedFields,
   defaultLocale,
   onAppConfigRedirect,
+  onDisconnect,
 }) => {
   const [selectedFields, setSelectedFields] = useState<Set<string>>(() => new Set());
 
@@ -70,7 +73,7 @@ const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
   }
 
   function handleDisconnect() {
-    // TODO: Implement disconnect logic
+    onDisconnect(Array.from(selectedFields));
   }
 
   function getFieldDisplayName(fieldId: string, locale?: string) {
@@ -83,123 +86,121 @@ const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
     return displayType(field.type, field.linkType, field.items);
   }
 
-  function getUniqueFieldId(fieldId: string, locale?: string) {
-    return locale ? `${fieldId}.${locale}` : fieldId;
-  }
-
   return (
     <Modal isShown={isShown} onClose={onClose} size="medium" testId="connected-fields-modal">
-      <Modal.Header
-        title="Manage synced entry fields"
-        onClose={onClose}
-        className={styles.modalHeaderFrame}
-      />
-      <Modal.Content className={styles.modalContentFrame}>
-        <Box className={styles.modalMainContainer}>
-          <Box paddingBottom="spacingS">
-            <Text>Selected fields are dynamically synced to Hubspot email modules.</Text>
-          </Box>
-          <Box className={styles.modalEntryContainer}>
-            <Flex flexDirection="column">
-              <Text fontColor="gray600" marginBottom="spacing2Xs">
-                Entry name
-              </Text>
-              <Text testId="modal-entry-title" fontWeight="fontWeightDemiBold">
-                {getEntryTitle(
-                  entryWithContentType.entry,
-                  entryWithContentType.contentType,
-                  defaultLocale
-                )}
-              </Text>
-            </Flex>
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={onViewEntry}
-              className={styles.viewEntryButton}>
-              View entry
-            </Button>
-          </Box>
-          {fieldsWithErrors.length > 0 && (
-            <Note
-              variant="negative"
-              icon={<WarningOctagonIcon className={styles.warningIconNote} />}
-              className={styles.modalErrorBanner}>
-              <Text lineHeight="lineHeightCondensed" fontColor="gray800">
-                Unable to sync content. Review your connected fields or{' '}
-                <TextLink onClick={() => onAppConfigRedirect()}>app configuration</TextLink>.
-              </Text>
-            </Note>
-          )}
-          {selectedFields.size > 0 && (
-            <Stack
-              flexDirection="column"
-              spacing="spacing2Xs"
-              marginBottom="spacingM"
-              alignItems="start">
-              <Text fontColor="gray600">{selectedFields.size} selected</Text>
-              <Button variant="negative" size="small" onClick={handleDisconnect}>
-                Disconnect
-              </Button>
-            </Stack>
-          )}
-          <Table>
-            <Table.Head>
-              <Table.Row>
-                <Table.Cell className={styles.checkboxCell}>
-                  <Checkbox
-                    isChecked={allSelected}
-                    isIndeterminate={!allSelected && someSelected}
-                    onChange={handleSelectAll}
-                    testId="select-all-fields"
-                    aria-label="Select all fields"
-                  />
-                </Table.Cell>
-                <Table.Cell className={styles.baseCell}>
-                  <Text fontColor="gray600">Select all fields ({entryConnectedFields.length})</Text>
-                </Table.Cell>
-              </Table.Row>
-            </Table.Head>
-            <Table.Body>
-              {entryConnectedFields.map((field, index) => {
-                const uniqueFieldId = getUniqueFieldId(field.fieldId, field.locale);
-                return (
-                  <Table.Row key={`${uniqueFieldId}-${index}`}>
+      {() => (
+        <>
+          <Modal.Header title="Manage synced entry fields" onClose={onClose} />
+          <Modal.Content className={styles.modalMainContainer}>
+            <Box paddingBottom="spacingS">
+              <Box paddingBottom="spacingS">
+                <Text>Selected fields are dynamically synced to Hubspot email modules.</Text>
+              </Box>
+              <Box className={styles.modalEntryContainer}>
+                <Flex flexDirection="column">
+                  <Text fontColor="gray600" marginBottom="spacing2Xs">
+                    Entry name
+                  </Text>
+                  <Text testId="modal-entry-title" fontWeight="fontWeightDemiBold">
+                    {getEntryTitle(
+                      entryWithContentType.entry,
+                      entryWithContentType.contentType,
+                      defaultLocale
+                    )}
+                  </Text>
+                </Flex>
+                <Button variant="secondary" size="small" onClick={onViewEntry}>
+                  View entry
+                </Button>
+              </Box>
+              {fieldsWithErrors.length > 0 && (
+                <Note
+                  variant="negative"
+                  icon={<WarningOctagonIcon className={styles.warningIconNote} />}
+                  className={styles.modalErrorBanner}>
+                  <Text lineHeight="lineHeightCondensed" fontColor="gray800">
+                    Unable to sync content. Review your connected fields or{' '}
+                    <TextLink onClick={() => onAppConfigRedirect()}>app configuration</TextLink>.
+                  </Text>
+                </Note>
+              )}
+              {selectedFields.size > 0 && (
+                <Stack
+                  flexDirection="column"
+                  spacing="spacing2Xs"
+                  marginBottom="spacingM"
+                  alignItems="start">
+                  <Text fontColor="gray600">{selectedFields.size} selected</Text>
+                </Stack>
+              )}
+              <Table>
+                <Table.Head>
+                  <Table.Row>
                     <Table.Cell className={styles.checkboxCell}>
                       <Checkbox
-                        isChecked={selectedFields.has(uniqueFieldId)}
-                        onChange={() => handleFieldToggle(uniqueFieldId)}
-                        aria-label={getFieldDisplayName(field.fieldId, field.locale)}
+                        isChecked={allSelected}
+                        isIndeterminate={!allSelected && someSelected}
+                        onChange={handleSelectAll}
+                        testId="select-all-fields"
+                        aria-label="Select all fields"
                       />
                     </Table.Cell>
                     <Table.Cell className={styles.baseCell}>
-                      <Flex flexDirection="row" gap="spacing2Xs">
-                        <Text fontWeight="fontWeightDemiBold">
-                          {getFieldDisplayName(field.fieldId, field.locale)}
-                        </Text>
-                        <Text fontColor="gray500">({getFieldDisplayType(field.fieldId)})</Text>
-                        {field.error && (
-                          <Badge
-                            className={styles.badgeStyle}
-                            variant="negative"
-                            startIcon={
-                              <WarningOctagonIcon className={styles.warningIconBadge} />
-                            }>{`Connection error`}</Badge>
-                        )}
-                      </Flex>
+                      <Text fontColor="gray600">
+                        Select all fields ({entryConnectedFields.length})
+                      </Text>
                     </Table.Cell>
                   </Table.Row>
-                );
-              })}
-            </Table.Body>
-          </Table>
-        </Box>
-      </Modal.Content>
-      <Modal.Controls>
-        <Button variant="secondary" size="small" onClick={onClose}>
-          Close
-        </Button>
-      </Modal.Controls>
+                </Table.Head>
+                <Table.Body>
+                  {entryConnectedFields.map((field, index) => {
+                    const uniqueFieldId = getUniqueFieldId(field.fieldId, field.locale);
+                    return (
+                      <Table.Row key={`${uniqueFieldId}-${index}`}>
+                        <Table.Cell className={styles.checkboxCell}>
+                          <Checkbox
+                            isChecked={selectedFields.has(uniqueFieldId)}
+                            onChange={() => handleFieldToggle(uniqueFieldId)}
+                            aria-label={getFieldDisplayName(field.fieldId, field.locale)}
+                          />
+                        </Table.Cell>
+                        <Table.Cell className={styles.baseCell}>
+                          <Flex flexDirection="row" gap="spacing2Xs">
+                            <Text fontWeight="fontWeightDemiBold">
+                              {getFieldDisplayName(field.fieldId, field.locale)}
+                            </Text>
+                            <Text fontColor="gray500">({getFieldDisplayType(field.fieldId)})</Text>
+                            {field.error && (
+                              <Badge
+                                className={styles.badgeStyle}
+                                variant="negative"
+                                startIcon={
+                                  <WarningOctagonIcon className={styles.warningIconBadge} />
+                                }>{`Connection error`}</Badge>
+                            )}
+                          </Flex>
+                        </Table.Cell>
+                      </Table.Row>
+                    );
+                  })}
+                </Table.Body>
+              </Table>
+            </Box>
+          </Modal.Content>
+          <Modal.Controls>
+            <Button variant="negative" size="small" onClick={onClose}>
+              Close
+            </Button>
+            <Button
+              variant="primary"
+              size="small"
+              onClick={handleDisconnect}
+              isDisabled={selectedFields.size === 0}>
+              Disconnect
+            </Button>
+          </Modal.Controls>
+        </>
+      )}
     </Modal>
   );
 };

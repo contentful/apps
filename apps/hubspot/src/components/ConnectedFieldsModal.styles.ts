@@ -7,15 +7,6 @@ const baseTableCell = {
 };
 
 export const styles = {
-  modalHeaderFrame: css({
-    paddingTop: tokens.spacingS,
-  }),
-  modalContentFrame: css({
-    paddingTop: tokens.spacingS,
-    paddingLeft: tokens.spacing2Xs,
-    paddingRight: tokens.spacing2Xs,
-    paddingBottom: tokens.spacing2Xs,
-  }),
   modalMainContainer: css({
     minWidth: 400,
     maxHeight: '50vh',
@@ -33,9 +24,6 @@ export const styles = {
   }),
   modalErrorBanner: css({
     marginBottom: tokens.spacingM,
-  }),
-  viewEntryButton: css({
-    marginLeft: tokens.spacingL,
   }),
   baseCell: css({
     ...baseTableCell,

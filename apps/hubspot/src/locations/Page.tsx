@@ -4,7 +4,7 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { createClient } from 'contentful-management';
 import ConfigEntryService from '../utils/ConfigEntryService';
 import { styles } from './Page.styles';
-import { ConnectedFields, EntryWithContentType } from '../utils/utils';
+import { ConnectedFields, EntryWithContentType, getUniqueFieldId } from '../utils/utils';
 import ConnectedEntriesTable from '../components/ConnectedEntriesTable';
 import ConnectedFieldsModal from '../components/ConnectedFieldsModal';
 import { PageAppSDK } from '@contentful/app-sdk';
@@ -91,6 +91,40 @@ const Page: React.FC = () => {
     }
   }
 
+  async function handleDisconnectFields(selectedFieldIds: string[]) {
+    if (!modalEntry) return;
+    const entryId = modalEntry.entry.sys.id;
+    const configService = new ConfigEntryService(cma, defaultLocale);
+
+    try {
+      const currentFields = await configService.getEntryConnectedFields(entryId);
+
+      const filteredFields = currentFields.filter((field) => {
+        const uniqueId = getUniqueFieldId(field.fieldId, field.locale);
+        return !selectedFieldIds.includes(uniqueId);
+      });
+
+      if (filteredFields.length === 0) {
+        await configService.removeEntryConnectedFields(entryId);
+      } else {
+        await configService.updateEntryConnectedFields(entryId, filteredFields);
+      }
+
+      const updatedConnectedFields = await configService.getConnectedFields();
+      setConnectedFields(updatedConnectedFields);
+      setModalOpen(false);
+      setModalEntry(null);
+
+      sdk.notifier.success(
+        selectedFieldIds.length === 1
+          ? 'Field disconnected successfully.'
+          : `${selectedFieldIds.length} fields disconnected successfully.`
+      );
+    } catch (e) {
+      sdk.notifier.error('Failed to disconnect field(s). Please try again.');
+    }
+  }
+
   const connectedFieldsForEntry = modalEntry ? connectedFields[modalEntry.entry.sys.id] : undefined;
 
   return (
@@ -144,6 +178,7 @@ const Page: React.FC = () => {
             entryConnectedFields={connectedFieldsForEntry}
             defaultLocale={defaultLocale}
             onAppConfigRedirect={() => sdk.navigator.openAppConfig()}
+            onDisconnect={handleDisconnectFields}
           />
         )}
       </Box>
