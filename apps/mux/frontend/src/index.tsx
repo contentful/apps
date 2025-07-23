@@ -102,6 +102,7 @@ export class App extends React.Component<AppProps, AppState> {
   muxUploaderRef = createRef<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
   fileInputRef = React.createRef<HTMLInputElement>();
   muxPlayerRef = React.createRef<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
+  getSignedTokenActionId: string;
 
   constructor(props: AppProps) {
     super(props);
@@ -121,6 +122,7 @@ export class App extends React.Component<AppProps, AppState> {
       }
     );
 
+    this.getSignedTokenActionId = '';
     const field = props.sdk.field.getValue();
 
     this.state = {
@@ -203,6 +205,13 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   async componentDidMount() {
+    const appActionsResponse = await this.cmaClient.appAction.getMany({
+      organizationId: this.props.sdk.ids.organization,
+      appDefinitionId: this.props.sdk.ids.app!,
+    });
+    this.getSignedTokenActionId =
+      appActionsResponse.items.find((x) => x.name === 'getSignedUrlTokens')?.sys.id ?? '';
+
     this.props.sdk.window.startAutoResizer();
 
     // Handler for external field value changes (e.g. when multiple authors are working on the same entry).
@@ -493,12 +502,17 @@ export class App extends React.Component<AppProps, AppState> {
     this.setState({ isTokenLoading: true });
 
     try {
+      if (!this.getSignedTokenActionId) {
+        throw new Error('App Action for Get Signed Token not found.');
+      }
+
       const {
         response: { body },
       } = await this.cmaClient.appActionCall.createWithResponse(
         {
+          organizationId: this.props.sdk.ids.organization,
           appDefinitionId: this.props.sdk.ids.app!,
-          appActionId: 'muxGetSignedUrlTokens',
+          appActionId: this.getSignedTokenActionId,
         },
         { parameters: { playbackId } }
       );

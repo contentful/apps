@@ -4,6 +4,20 @@ import React from 'react';
 import { render, queryByAttribute } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { App } from '.';
+import { vi } from 'vitest';
+
+vi.mock('contentful-management', () => ({
+  createClient: vi.fn(() => ({
+    appAction: {
+      getMany: vi.fn(() => Promise.resolve({ items: [] })),
+    },
+    appActionCall: {
+      createWithResponse: vi.fn(() =>
+        Promise.resolve({ response: { body: JSON.stringify({ ok: true, data: {} }) } })
+      ),
+    },
+  })),
+}));
 
 /*
  * This was a valid private key, but it has since been revoked
@@ -121,9 +135,16 @@ describe('Mux frontend app', () => {
     expect(dom.getByTestId('waitingtoplay')).toBeVisible();
   });
 
-  it('displays an error if the asset is errored', () => {
+  it('displays an error if the asset is errored', async () => {
     const mockedSdk = {
       ...SDK_MOCK,
+      parameters: {
+        installation: {
+          muxAccessTokenId: 'abcd1234',
+          muxAccessTokenSecret: 'efgh5678',
+          muxDomain: 'mux.com',
+        },
+      },
       field: {
         ...SDK_MOCK.field,
         getValue: () => ({
@@ -133,7 +154,7 @@ describe('Mux frontend app', () => {
     };
 
     const dom = render(<App sdk={mockedSdk as any} />);
-    const error = dom.getByTestId('terminalerror');
+    const error = await dom.findByTestId('terminalerror');
     expect(error.innerText || error.textContent).toContain(
       'Input file does not contain a duration'
     );
