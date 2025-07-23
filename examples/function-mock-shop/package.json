@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@contentful/app-sdk": "4.32.0",
-    "@contentful/f36-components": "4.80.5",
+    "@contentful/app-sdk": "4.34.0",
+    "@contentful/f36-components": "4.81.0",
     "@contentful/f36-tokens": "4.2.0",
     "@contentful/react-apps-toolkit": "1.2.16",
     "@tanstack/react-query": "^5.66.11",
