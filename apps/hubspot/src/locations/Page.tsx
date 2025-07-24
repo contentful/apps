@@ -112,6 +112,13 @@ const Page: React.FC = () => {
 
       const updatedConnectedFields = await configService.getConnectedFields();
       setConnectedFields(updatedConnectedFields);
+
+      const updatedConnectedEntries = entriesWithContentType.filter(
+        ({ entry }: EntryWithContentType) =>
+          updatedConnectedFields[entry.sys.id] && updatedConnectedFields[entry.sys.id].length > 0
+      );
+      setEntriesWithContentType(updatedConnectedEntries);
+
       setModalOpen(false);
       setModalEntry(null);
 
