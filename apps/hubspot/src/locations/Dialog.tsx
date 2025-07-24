@@ -57,7 +57,7 @@ const Dialog = () => {
       setConnectedFieldIds(ids);
     };
     fetchConnectedFields();
-  }, [invocationParams.entryId]);
+  }, []);
 
   const selectedFieldObjects = useMemo(
     () => fields.filter((f) => selectedFields.includes(f.uniqueId)),
