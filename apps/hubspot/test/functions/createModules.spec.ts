@@ -18,7 +18,7 @@ import {
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { expect, vi } from 'vitest';
 import ConfigEntryService from '../../src/utils/ConfigEntryService';
-import { ConnectedField } from '../../src/utils/utils';
+import { ConnectedField, EntryConnectedFields } from '../../src/utils/utils';
 
 // Mock fetch globally
 global.fetch = vi.fn();
@@ -879,6 +879,93 @@ describe('createModules', () => {
     expect(updateEntryConnectedFieldsMock).toHaveBeenCalledWith(mockEvent.body.entryId, [
       expectedConnectedField,
     ]);
+
+    vi.useRealTimers();
+  });
+
+  it('lala', async () => {
+    // Mock successful fetch responses
+    const mockFetch = mockedFetch();
+
+    const mockFieldNew: SelectedSdkField = {
+      type: 'Text',
+      id: 'test-field-id-new',
+      uniqueId: 'test-multiline-module',
+      name: 'Test Multi-line Field New',
+      supported: true,
+      value: 'First line\nSecond line\nThird line',
+      moduleName: 'Entry title - Test Multi-line Field New',
+    };
+
+    const mockDate = new Date();
+    vi.setSystemTime(mockDate);
+
+    const mockEvent = {
+      body: {
+        entryId: 'test-entry-id',
+        fields: JSON.stringify([mockFieldNew]),
+      },
+    };
+
+    mockCma.entry.get.mockResolvedValue({
+      fields: {
+        title: {
+          'en-US': 'Hubspot App Configuration (Do not delete)',
+        },
+        connectedFields: {
+          'en-US': {
+            'test-entry-id': [
+              {
+                fieldId: 'test-field-id-existing',
+                moduleName: 'test-field-module-existing',
+                updatedAt: '2025-07-24T13:21:56.456Z',
+              },
+            ],
+          },
+        },
+      },
+    });
+
+    const updateEntryConnectedFieldsMock = vi.spyOn(
+      ConfigEntryService.prototype,
+      'updateEntryConnectedFields'
+    );
+
+    const result = await handler(mockEvent as any, mockedContext('test-token') as any);
+
+    // Verify the result
+    expect(result).toEqual({
+      successQuantity: 1,
+      failedQuantity: 0,
+      invalidToken: false,
+      missingScopes: false,
+    });
+
+    // Verify fetch was called 3 times
+    expect(mockFetch).toHaveBeenCalledTimes(3);
+
+    // Verify the file contents being sent
+    mockFetch.mock.calls[0];
+    mockFetch.mock.calls[1];
+    mockFetch.mock.calls[2];
+
+    const expectedConnectedField: EntryConnectedFields = [
+      {
+        fieldId: 'test-field-id-existing',
+        moduleName: 'test-field-module-existing',
+        updatedAt: '2025-07-24T13:21:56.456Z',
+      },
+      {
+        fieldId: 'test-field-id-new',
+        moduleName: 'Entry title - Test Multi-line Field New',
+        updatedAt: mockDate.toISOString(),
+      },
+    ];
+
+    expect(updateEntryConnectedFieldsMock).toHaveBeenCalledWith(
+      'test-entry-id',
+      expectedConnectedField
+    );
 
     vi.useRealTimers();
   });

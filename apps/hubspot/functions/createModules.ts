@@ -32,7 +32,20 @@ const updateConnectedFields = async (
     };
   });
   const configEntryService = new ConfigEntryService(cma);
-  await configEntryService.updateEntryConnectedFields(entryId, newFields);
+  const currentFields = await configEntryService.getEntryConnectedFields(entryId);
+  const mergedFields: EntryConnectedFields = [...currentFields];
+  newFields.forEach((newField) => {
+    const idx = mergedFields.findIndex(
+      (f) => f.fieldId === newField.fieldId && f.locale === newField.locale
+    );
+    if (idx !== -1) {
+      mergedFields[idx] = newField;
+    } else {
+      mergedFields.push(newField);
+    }
+  });
+
+  await configEntryService.updateEntryConnectedFields(entryId, mergedFields);
 };
 
 /**
