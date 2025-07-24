@@ -10,10 +10,11 @@ type FieldsSelectionProps = {
   fields: SdkField[];
   selectedFields: string[];
   setSelectedFields: React.Dispatch<React.SetStateAction<string[]>>;
+  connectedFieldIds: string[];
 };
 
 const FieldSelection = (props: FieldsSelectionProps) => {
-  const { fields, selectedFields, setSelectedFields } = props;
+  const { fields, selectedFields, setSelectedFields, connectedFieldIds } = props;
   const supportedFields = fields.filter((field) => field.supported);
 
   const allSelected = useMemo(() => {
@@ -48,6 +49,7 @@ const FieldSelection = (props: FieldsSelectionProps) => {
               key={field.uniqueId}
               selectedFields={selectedFields}
               setSelectedFields={setSelectedFields}
+              isConnected={connectedFieldIds.includes(field.uniqueId)}
             />
           );
         })}
@@ -60,10 +62,11 @@ type FieldCheckboxProps = {
   field: SdkField;
   selectedFields: string[];
   setSelectedFields: React.Dispatch<React.SetStateAction<string[]>>;
+  isConnected: boolean;
 };
 
 const FieldCheckbox = (props: FieldCheckboxProps) => {
-  const { field, selectedFields, setSelectedFields } = props;
+  const { field, selectedFields, setSelectedFields, isConnected } = props;
 
   const displayName = field.locale ? `${field.name} (${field.locale})` : field.name;
   const checked = useMemo(() => selectedFields.includes(field.uniqueId), [selectedFields]);
@@ -74,6 +77,16 @@ const FieldCheckbox = (props: FieldCheckboxProps) => {
       checked ? [...prev, id] : prev.filter((fieldId) => id !== fieldId)
     );
   };
+
+  function getTooltipContent() {
+    if (!field.supported) {
+      return 'Syncing not supported';
+    }
+    if (isConnected) {
+      return 'Previously synced to Hubspot';
+    }
+    return '';
+  }
 
   return (
     <Box
@@ -88,9 +101,14 @@ const FieldCheckbox = (props: FieldCheckboxProps) => {
         id={field.uniqueId}
         isChecked={checked}
         onChange={onFieldSelected}
-        isDisabled={!field.supported}>
-        <Tooltip isDisabled={field.supported} content="Syncing not supported" placement="right">
-          <Text fontColor={field.supported ? 'gray900' : 'gray500'} fontWeight="fontWeightMedium">
+        isDisabled={!field.supported || isConnected}>
+        <Tooltip
+          isDisabled={field.supported && !isConnected}
+          content={<span style={{ textWrap: 'nowrap' }}>{getTooltipContent()}</span>}
+          placement="right">
+          <Text
+            fontColor={field.supported && !isConnected ? 'gray900' : 'gray500'}
+            fontWeight="fontWeightMedium">
             {displayName}{' '}
           </Text>
           <Text fontColor="gray500">({displayType(field.type, field.linkType, field.items)})</Text>
