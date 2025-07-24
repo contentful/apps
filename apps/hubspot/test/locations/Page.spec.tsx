@@ -386,7 +386,7 @@ describe('Page Location', () => {
       });
     });
 
-    it('removes entry when all fields are disconnected', async () => {
+    it('removes entry from config and table when all fields are disconnected', async () => {
       mockGetEntryConnectedFields.mockResolvedValue([
         { fieldId: 'title', moduleName: 'mod1', updatedAt: '2024-05-01T10:00:00Z' },
         { fieldId: 'description', moduleName: 'mod2', updatedAt: '2024-05-01T10:00:00Z' },
@@ -398,26 +398,60 @@ describe('Page Location', () => {
           { fieldId: 'description', moduleName: 'mod2', updatedAt: '2024-05-01T10:00:00Z' },
         ],
       });
+      // After disconnect: entry is removed
       mockGetConnectedFields.mockResolvedValueOnce({});
+      mockCma.entry.getMany = vi.fn().mockResolvedValue({
+        items: [
+          {
+            sys: {
+              id: 'entry-id',
+              contentType: { sys: { id: 'Fruits' } },
+              updatedAt: new Date().toISOString(),
+              publishedAt: new Date().toISOString(),
+            },
+            fields: {
+              title: { 'en-US': 'Banana' },
+              description: { 'en-US': 'Description value' },
+            },
+          },
+        ],
+      });
+      mockCma.contentType.get = vi.fn().mockResolvedValue({
+        displayField: 'title',
+        sys: { id: 'Fruits' },
+        fields: [
+          { id: 'title', name: 'Title', type: 'Text' },
+          { id: 'description', name: 'Description', type: 'Text' },
+        ],
+      });
 
       render(<Page />);
+      // Table should show the entry
+      expect(await screen.findByText('Banana')).toBeInTheDocument();
+      expect(screen.getByText('2')).toBeInTheDocument();
+
       const btn = await screen.findByRole('button', { name: /Manage fields/i });
       fireEvent.click(btn);
       await screen.findByRole('dialog');
 
-      // Select all fields
       const selectAllCheckbox = screen.getByTestId('select-all-fields') as HTMLInputElement;
       fireEvent.click(selectAllCheckbox);
 
-      // Click disconnect
       const disconnectBtn = screen.getByRole('button', { name: /Disconnect/i });
       fireEvent.click(disconnectBtn);
 
+      // After disconnect, entry should be removed from config and table, and notification shown
       await waitFor(() => {
         expect(mockRemoveEntryConnectedFields).toHaveBeenCalledWith('entry-id');
         expect(mockSdk.notifier.success).toHaveBeenCalledWith(
           '2 fields disconnected successfully.'
         );
+        expect(screen.queryByText('Banana')).not.toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'No connected content. Sync entry fields from the entry page sidebar to get started.'
+          )
+        ).toBeInTheDocument();
       });
     });
   });
