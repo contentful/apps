@@ -76,13 +76,22 @@ const ConnectedFieldsModal: React.FC<ConnectedFieldsModalProps> = ({
     onDisconnect(Array.from(selectedFields));
   }
 
+  function getContentTypeField(fieldId: string) {
+    return entryWithContentType.contentType.fields.find(
+      (contentTypeField) => contentTypeField.id === fieldId
+    );
+  }
+
   function getFieldDisplayName(fieldId: string, locale?: string) {
-    return locale ? `${fieldId} (${locale})` : `${fieldId}`;
+    const field = getContentTypeField(fieldId);
+
+    return locale ? `${field?.name} (${locale})` : `${field?.name}`;
   }
 
   function getFieldDisplayType(fieldId: string) {
-    const field = entryWithContentType.contentType.fields.find((f) => f.id === fieldId);
+    const field = getContentTypeField(fieldId);
     if (!field) return '';
+
     return displayType(field.type, field.linkType, field.items);
   }
 
