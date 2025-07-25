@@ -1,8 +1,8 @@
-import {EntryProps, KeyValueMap} from 'contentful-management';
-import {ConnectedFields, EntryWithContentType, getEntryTitle} from '../utils/utils';
-import {Badge, Box, Button, Flex, Table, Text} from '@contentful/f36-components';
-import {styles} from './ConnectedEntriesTable.styles';
-import {WarningOctagonIcon} from '@phosphor-icons/react';
+import { EntryProps, KeyValueMap } from 'contentful-management';
+import { ConnectedFields, EntryWithContentType, getEntryTitle } from '../utils/utils';
+import { Badge, Box, Button, Flex, Table, Text } from '@contentful/f36-components';
+import { styles } from './ConnectedEntriesTable.styles';
+import { WarningOctagonIcon } from '@phosphor-icons/react';
 
 const getStatusBadge = (entry: EntryProps<KeyValueMap>) => {
   const isPublished = Boolean(entry.sys.publishedAt);
