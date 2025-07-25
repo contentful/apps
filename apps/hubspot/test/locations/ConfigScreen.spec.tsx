@@ -108,6 +108,30 @@ describe('Hubspot Config Screen ', () => {
 
       expect(await screen.findByText('Select one or more')).toBeTruthy();
     });
+
+    it('renders the Getting started section with all steps and images', async () => {
+      render(<ConfigScreen />);
+
+      expect(await screen.findByText('Getting started')).toBeTruthy();
+      expect(
+        screen.getByText(
+          '1. After you install the app, you can sync content from the entry editor sidebar.'
+        )
+      ).toBeTruthy();
+      expect(
+        screen.getByText('2. You can manage all synced content from the app’s full page location.')
+      ).toBeTruthy();
+      expect(
+        screen.getByText(
+          '3. In Hubspot, synced content will appear as modules within the Design manager, and within the Email editor.'
+        )
+      ).toBeTruthy();
+
+      // Check for all three images by alt text
+      expect(screen.getByAltText('Contentful Sidebar with sync button')).toBeTruthy();
+      expect(screen.getByAltText('Contentful Page view with table of synced content')).toBeTruthy();
+      expect(screen.getByAltText('Hubspot Design manager with synced modules')).toBeTruthy();
+    });
   });
 
   describe('Content type installation', () => {

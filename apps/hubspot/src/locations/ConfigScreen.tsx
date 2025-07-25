@@ -14,13 +14,14 @@ import {
   Text,
   TextInput,
   TextLink,
+  Image,
 } from '@contentful/f36-components';
 import demoVideo from '../assets/hubspot.mp4';
 import { ChevronDownIcon, ChevronUpIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import Splitter from '../components/Splitter';
-import { styles } from './ConfigScreen.styles';
+import { IMAGE_HEIGHT, IMAGE_WIDTH, styles } from './ConfigScreen.styles';
 import {
   AppInstallationParameters,
   CONFIG_SCREEN_INSTRUCTIONS,
@@ -30,6 +31,9 @@ import {
 import { createClient } from 'contentful-management';
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 import ConfigEntryService from '../utils/ConfigEntryService';
+import sidebarExample from '../assets/sidebar-example.png';
+import pageTableExample from '../assets/page-table-example.png';
+import hubspotModuleExample from '../assets/hubspot-module-example.png';
 
 export const EMPTY_MESSAGE = 'Some fields are missing';
 
@@ -215,7 +219,50 @@ const ConfigScreen = () => {
           sdk={sdk}
           cma={cma}
         />
+        <Subheading marginTop="spacing2Xl" marginBottom="spacingS">
+          Getting started
+        </Subheading>
+        <Paragraph marginBottom="spacingM">
+          The Hubspot integration will only be enabled for the content types you assign. The sidebar
+          widget will be displayed on these entry pages.
+        </Paragraph>
+        <Flex flexDirection="column" gap="spacingM">
+          <GettingStartedStep
+            title="1. After you install the app, you can sync content from the entry editor sidebar."
+            image={sidebarExample}
+            alt="Contentful Sidebar with sync button"
+          />
+          <GettingStartedStep
+            title="2. You can manage all synced content from the app’s full page location."
+            image={pageTableExample}
+            alt="Contentful Page view with table of synced content"
+          />
+          <GettingStartedStep
+            title="3. In Hubspot, synced content will appear as modules within the Design manager, and within the Email editor."
+            image={hubspotModuleExample}
+            alt="Hubspot Design manager with synced modules"
+          />
+        </Flex>
       </Box>
+    </Flex>
+  );
+};
+
+const GettingStartedStep = ({
+  title,
+  image,
+  alt,
+}: {
+  title: string;
+  image: string;
+  alt: string;
+}) => {
+  return (
+    <Flex className={styles.itemContainer}>
+      <Text marginBottom="spacingXs">{title}</Text>
+      <Flex className={styles.imageContainer} marginLeft="spacingM">
+        <Image src={image} alt={alt} height={IMAGE_HEIGHT} width={IMAGE_WIDTH} />
+      </Flex>
     </Flex>
   );
 };
