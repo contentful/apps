@@ -69,7 +69,7 @@ const ConnectedEntriesTable = ({
       <Table.Body>
         {entries.map(({ entry, contentType }) => {
           const name = getEntryTitle(entry, contentType, defaultLocale);
-          const contentTypeId = contentType.sys?.id;
+          const contentTypeName = contentType.name;
           const updated = getLastUpdatedTime(entry.sys.updatedAt);
           const status = getStatusBadge(entry);
           const connected = connectedFields[entry.sys.id] || [];
@@ -79,7 +79,7 @@ const ConnectedEntriesTable = ({
           return (
             <Table.Row key={entry.sys.id}>
               <Table.Cell>{name}</Table.Cell>
-              <Table.Cell>{contentTypeId}</Table.Cell>
+              <Table.Cell>{contentTypeName}</Table.Cell>
               <Table.Cell>{updated}</Table.Cell>
               <Table.Cell>{status}</Table.Cell>
               <Table.Cell>

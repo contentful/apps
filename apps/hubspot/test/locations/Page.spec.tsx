@@ -117,7 +117,7 @@ describe('Page Location', () => {
         {
           sys: {
             id: 'entry-1',
-            contentType: { sys: { id: 'Fruits' } },
+            contentType: { sys: { id: 'fruits' } },
             updatedAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
             publishedAt: new Date().toISOString(),
           },
@@ -128,7 +128,7 @@ describe('Page Location', () => {
         {
           sys: {
             id: 'entry-2',
-            contentType: { sys: { id: 'Animals' } },
+            contentType: { sys: { id: 'animals' } },
             updatedAt: new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString(),
             publishedAt: undefined,
           },
@@ -138,19 +138,21 @@ describe('Page Location', () => {
     });
 
     mockCma.contentType.get = vi.fn().mockImplementation(({ contentTypeId }) => {
-      if (contentTypeId === 'Fruits') {
+      if (contentTypeId === 'fruits') {
         return Promise.resolve({
           displayField: 'title',
-          sys: { id: 'Fruits' },
+          name: 'Fruits',
+          sys: { id: 'fruits' },
           fields: [
             { id: 'title', name: 'Title', type: 'Text' },
             { id: 'description', name: 'Description', type: 'Text' },
           ],
         });
       }
-      if (contentTypeId === 'Animals') {
+      if (contentTypeId === 'animals') {
         return Promise.resolve({
-          sys: { id: 'Animals' },
+          name: 'Animals',
+          sys: { id: 'animals' },
           displayField: 'title',
           fields: [{ id: 'title', name: 'Title', type: 'Text' }],
         });
@@ -198,7 +200,7 @@ describe('Page Location', () => {
           {
             sys: {
               id: 'entry-id',
-              contentType: { sys: { id: 'Fruits' } },
+              contentType: { sys: { id: 'fruits' } },
               updatedAt: new Date().toISOString(),
               publishedAt: new Date().toISOString(),
             },
@@ -212,7 +214,8 @@ describe('Page Location', () => {
       });
       mockCma.contentType.get = vi.fn().mockResolvedValue({
         displayField: 'title',
-        sys: { id: 'Fruits' },
+        name: 'Fruits',
+        sys: { id: 'fruits' },
         fields: [
           { id: 'title', name: 'Title', type: 'Symbol' },
           { id: 'description', name: 'Description', type: 'Text' },
