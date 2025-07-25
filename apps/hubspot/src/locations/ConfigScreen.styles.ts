@@ -21,11 +21,11 @@ export const styles = {
     padding: tokens.spacing2Xs,
   }),
   imageContainer: css({
-    minWidth: '566px',
-    minHeight: '245px',
+    minWidth: IMAGE_WIDTH,
+    minHeight: IMAGE_HEIGHT,
   }),
   itemContainer: css({
     minWidth: CONFIG_SCREEN_WIDTH,
-    minHeight: '245px',
+    minHeight: IMAGE_HEIGHT,
   }),
 };

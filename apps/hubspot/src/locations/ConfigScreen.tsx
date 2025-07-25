@@ -21,7 +21,7 @@ import { ChevronDownIcon, ChevronUpIcon, ExternalLinkIcon } from '@contentful/f3
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import Splitter from '../components/Splitter';
-import { CONFIG_SCREEN_WIDTH, IMAGE_HEIGHT, IMAGE_WIDTH, styles } from './ConfigScreen.styles';
+import { IMAGE_HEIGHT, IMAGE_WIDTH, styles } from './ConfigScreen.styles';
 import {
   AppInstallationParameters,
   CONFIG_SCREEN_INSTRUCTIONS,
@@ -31,10 +31,9 @@ import {
 import { createClient } from 'contentful-management';
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 import ConfigEntryService from '../utils/ConfigEntryService';
-import getStarted1 from '../assets/get-started-1.png';
-import getStarted2 from '../assets/get-started-2.png';
-import getStarted3 from '../assets/get-started-3.png';
-import tokens from '@contentful/f36-tokens';
+import sidebarExample from '../assets/sidebar-example.png';
+import pageTableExample from '../assets/page-table-example.png';
+import hubspotModuleExample from '../assets/hubspot-module-example.png';
 
 export const EMPTY_MESSAGE = 'Some fields are missing';
 
@@ -220,8 +219,9 @@ const ConfigScreen = () => {
           sdk={sdk}
           cma={cma}
         />
-        <Splitter marginTop="spacing2Xl" marginBottom="spacingL" />
-        <Subheading marginBottom="spacingS">Getting started</Subheading>
+        <Subheading marginTop="spacing2Xl" marginBottom="spacingS">
+          Getting started
+        </Subheading>
         <Paragraph marginBottom="spacingM">
           The Hubspot integration will only be enabled for the content types you assign. The sidebar
           widget will be displayed on these entry pages.
@@ -229,17 +229,17 @@ const ConfigScreen = () => {
         <Flex flexDirection="column" gap="spacingM">
           <GettingStartedStep
             title="1. After you install the app, you can sync content from the entry editor sidebar."
-            image={getStarted1}
+            image={sidebarExample}
             alt="Contentful Sidebar with sync button"
           />
           <GettingStartedStep
             title="2. You can manage all synced content from the app’s full page location."
-            image={getStarted2}
+            image={pageTableExample}
             alt="Contentful Page view with table of synced content"
           />
           <GettingStartedStep
             title="3. In Hubspot, synced content will appear as modules within the Design manager, and within the Email editor."
-            image={getStarted3}
+            image={hubspotModuleExample}
             alt="Hubspot Design manager with synced modules"
           />
         </Flex>
