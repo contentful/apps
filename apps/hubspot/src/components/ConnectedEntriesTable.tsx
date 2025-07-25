@@ -1,8 +1,8 @@
-import { EntryProps, KeyValueMap } from 'contentful-management';
-import { ConnectedFields, EntryWithContentType, getEntryTitle } from '../utils/utils';
-import { Badge, Box, Button, Flex, Table, Text } from '@contentful/f36-components';
-import { styles } from './ConnectedEntriesTable.styles';
-import { WarningOctagonIcon } from '@phosphor-icons/react';
+import {EntryProps, KeyValueMap} from 'contentful-management';
+import {ConnectedFields, EntryWithContentType, getEntryTitle} from '../utils/utils';
+import {Badge, Box, Button, Flex, Table, Text} from '@contentful/f36-components';
+import {styles} from './ConnectedEntriesTable.styles';
+import {WarningOctagonIcon} from '@phosphor-icons/react';
 
 const getStatusBadge = (entry: EntryProps<KeyValueMap>) => {
   const isPublished = Boolean(entry.sys.publishedAt);
@@ -69,7 +69,6 @@ const ConnectedEntriesTable = ({
       <Table.Body>
         {entries.map(({ entry, contentType }) => {
           const name = getEntryTitle(entry, contentType, defaultLocale);
-          const contentTypeName = contentType.name;
           const updated = getLastUpdatedTime(entry.sys.updatedAt);
           const status = getStatusBadge(entry);
           const connected = connectedFields[entry.sys.id] || [];
@@ -79,7 +78,7 @@ const ConnectedEntriesTable = ({
           return (
             <Table.Row key={entry.sys.id}>
               <Table.Cell>{name}</Table.Cell>
-              <Table.Cell>{contentTypeName}</Table.Cell>
+              <Table.Cell>{contentType.name}</Table.Cell>
               <Table.Cell>{updated}</Table.Cell>
               <Table.Cell>{status}</Table.Cell>
               <Table.Cell>
