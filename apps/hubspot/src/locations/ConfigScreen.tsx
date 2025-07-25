@@ -230,14 +230,17 @@ const ConfigScreen = () => {
           <GettingStartedStep
             title="1. After you install the app, you can sync content from the entry editor sidebar."
             image={getStarted1}
+            alt="Contentful Sidebar with sync button"
           />
           <GettingStartedStep
             title="2. You can manage all synced content from the app’s full page location."
             image={getStarted2}
+            alt="Contentful Page view with table of synced content"
           />
           <GettingStartedStep
             title="3. In Hubspot, synced content will appear as modules within the Design manager, and within the Email editor."
             image={getStarted3}
+            alt="Hubspot Design manager with synced modules"
           />
         </Flex>
       </Box>
@@ -245,12 +248,20 @@ const ConfigScreen = () => {
   );
 };
 
-const GettingStartedStep = ({ title, image }: { title: string; image: string }) => {
+const GettingStartedStep = ({
+  title,
+  image,
+  alt,
+}: {
+  title: string;
+  image: string;
+  alt: string;
+}) => {
   return (
     <Flex className={styles.itemContainer}>
       <Text marginBottom="spacingXs">{title}</Text>
       <Flex className={styles.imageContainer} marginLeft="spacingM">
-        <Image src={image} alt={title} height={IMAGE_HEIGHT} width={IMAGE_WIDTH} />
+        <Image src={image} alt={alt} height={IMAGE_HEIGHT} width={IMAGE_WIDTH} />
       </Flex>
     </Flex>
   );
