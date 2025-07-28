@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import Dialog from '../../src/locations/Dialog';
-import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { mockSdk, expectedFields } from '../mocks';
-import { mockCma } from '../mocks/mockCma';
+import { mockCma } from '../mocks';
 
 vi.mock('contentful-management', () => ({
   createClient: () => mockCma,
@@ -240,5 +240,84 @@ describe('Dialog component', () => {
       exact: false,
     });
     expect(descriptionEnCheckbox).toBeDisabled();
+  });
+
+  it('should validate duplicate module names and show error messages', async () => {
+    const user = userEvent.setup();
+    render(<Dialog />);
+
+    const titleCheckbox = screen.getByLabelText('Title', { exact: false });
+    const descriptionEnCheckbox = screen.getByLabelText('Description (en-US)', { exact: false });
+
+    await user.click(titleCheckbox);
+    await user.click(descriptionEnCheckbox);
+
+    const nextButton = screen.getByRole('button', { name: 'Next' });
+    await user.click(nextButton);
+
+    const titleModuleNameInput = screen.getByLabelText('Hubspot module name for Title');
+    const descriptionModuleNameInput = screen.getByLabelText('Hubspot module name for Description');
+
+    await user.clear(titleModuleNameInput);
+    await user.clear(descriptionModuleNameInput);
+
+    await user.type(titleModuleNameInput, 'test-module');
+    await user.type(descriptionModuleNameInput, 'test-module');
+
+    await waitFor(() => {
+      const errorMessages = screen.getAllByText('Module name already exists');
+      expect(errorMessages).toHaveLength(2);
+    });
+
+    const saveAndSyncButton = screen.getByRole('button', { name: 'Save and sync' });
+    expect(saveAndSyncButton).toBeDisabled();
+
+    await user.clear(descriptionModuleNameInput);
+    await user.type(descriptionModuleNameInput, 'different-module');
+
+    await waitFor(() => {
+      const errorMessages = screen.queryAllByText('Module name already exists');
+      expect(errorMessages).toHaveLength(0);
+    });
+
+    expect(saveAndSyncButton).not.toBeDisabled();
+  });
+
+  it('should validate module name format and show appropriate error messages', async () => {
+    const user = userEvent.setup();
+    render(<Dialog />);
+
+    const titleCheckbox = screen.getByLabelText('Title', { exact: false });
+    await user.click(titleCheckbox);
+
+    const nextButton = screen.getByRole('button', { name: 'Next' });
+    await user.click(nextButton);
+
+    const titleModuleNameInput = screen.getByLabelText('Hubspot module name for Title');
+
+    await user.clear(titleModuleNameInput);
+    await user.type(titleModuleNameInput, 'invalid@module');
+
+    await waitFor(() => {
+      expect(screen.getByText('Invalid special character')).toBeInTheDocument();
+    });
+
+    await user.clear(titleModuleNameInput);
+    await user.type(titleModuleNameInput, 'module with spaces');
+
+    await waitFor(() => {
+      expect(screen.getByText('No spaces')).toBeInTheDocument();
+    });
+
+    await user.clear(titleModuleNameInput);
+    await user.type(titleModuleNameInput, 'valid-module_123');
+
+    await waitFor(() => {
+      expect(screen.queryByText('Invalid special character')).not.toBeInTheDocument();
+      expect(screen.queryByText('No spaces')).not.toBeInTheDocument();
+    });
+
+    const saveAndSyncButton = screen.getByRole('button', { name: 'Save and sync' });
+    expect(saveAndSyncButton).not.toBeDisabled();
   });
 });

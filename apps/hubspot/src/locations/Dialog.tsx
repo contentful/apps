@@ -7,7 +7,6 @@ import FieldModuleNameMapping from '../components/FieldModuleNameMapping';
 import { createClient } from 'contentful-management';
 import { SdkField, SelectedSdkField } from '../utils/fieldsProcessing';
 import { styles } from './Dialog.styles';
-import { MODULE_NAME_PATTERN } from '../utils/utils';
 import ConfigEntryService from '../utils/ConfigEntryService';
 
 export type InvocationParams = {
@@ -42,6 +41,7 @@ const Dialog = () => {
   const [moduleNameMapping, setModuleNameMapping] = useState<{ [fieldId: string]: string }>({});
   const [isSending, setIsSending] = useState(false);
   const [connectedFieldIds, setConnectedFieldIds] = useState<string[]>([]);
+  const [hasValidationErrors, setHasValidationErrors] = useState(false);
 
   useEffect(() => {
     const fetchConnectedFields = async () => {
@@ -185,6 +185,7 @@ const Dialog = () => {
             moduleNameMapping={moduleNameMapping}
             setModuleNameMapping={setModuleNameMapping}
             inputDisabled={isSending}
+            onValidationChange={(isValid) => setHasValidationErrors(!isValid)}
           />
           <Flex
             paddingTop="spacingM"
@@ -206,12 +207,7 @@ const Dialog = () => {
               variant="primary"
               size="small"
               onClick={handleSaveAndSync}
-              isDisabled={
-                isSending ||
-                Object.values(moduleNameMapping).some(
-                  (moduleName) => !MODULE_NAME_PATTERN.test(moduleName)
-                )
-              }
+              isDisabled={isSending || hasValidationErrors}
               isLoading={isSending}>
               Save and sync
             </Button>

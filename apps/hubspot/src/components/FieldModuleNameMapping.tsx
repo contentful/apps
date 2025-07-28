@@ -1,7 +1,7 @@
-import { Box, Flex, FormControl, Paragraph, Text, TextInput } from '@contentful/f36-components';
+import { Box, Flex, FormControl, Paragraph, TextInput } from '@contentful/f36-components';
 import { SdkField } from '../utils/fieldsProcessing';
 import tokens from '@contentful/f36-tokens';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MODULE_NAME_PATTERN } from '../utils/utils';
 
 interface FieldModuleNameMappingProps {
@@ -9,6 +9,7 @@ interface FieldModuleNameMappingProps {
   moduleNameMapping: { [fieldId: string]: string };
   setModuleNameMapping: (mapping: { [fieldId: string]: string }) => void;
   inputDisabled: boolean;
+  onValidationChange: (isValid: boolean) => void;
 }
 
 const FieldModuleNameMapping = ({
@@ -16,7 +17,18 @@ const FieldModuleNameMapping = ({
   moduleNameMapping,
   setModuleNameMapping,
   inputDisabled,
+  onValidationChange,
 }: FieldModuleNameMappingProps) => {
+  const [fieldValidations, setFieldValidations] = useState<{ [fieldId: string]: boolean }>({});
+
+  // Check if all fields are valid and notify parent
+  useEffect(() => {
+    const allFieldsValid = selectedFields.every(
+      (field) => fieldValidations[field.uniqueId]
+    );
+    onValidationChange(allFieldsValid);
+  }, [fieldValidations, selectedFields, onValidationChange]);
+
   return (
     <Box>
       <Paragraph>
@@ -31,6 +43,13 @@ const FieldModuleNameMapping = ({
           moduleNameMapping={moduleNameMapping}
           setModuleNameMapping={setModuleNameMapping}
           inputDisabled={inputDisabled}
+          selectedFields={selectedFields}
+          onValidationChange={(isValid) => {
+            setFieldValidations((prev) => ({
+              ...prev,
+              [field.uniqueId]: isValid,
+            }));
+          }}
         />
       ))}
     </Box>
@@ -42,36 +61,64 @@ const SingleFieldModuleNameMapping = ({
   moduleNameMapping,
   setModuleNameMapping,
   inputDisabled,
+  selectedFields,
+  onValidationChange,
 }: {
   field: SdkField;
   moduleNameMapping: { [fieldId: string]: string };
   setModuleNameMapping: (mapping: { [fieldId: string]: string }) => void;
   inputDisabled: boolean;
+  selectedFields: SdkField[];
+  onValidationChange: (isValid: boolean) => void;
 }) => {
   const [isValid, setIsValid] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setModuleNameMapping({ ...moduleNameMapping, [field.uniqueId]: value });
+  const validateFieldModuleName = (fieldId: string, value: string) => {
+    if (!value) {
+      return { isValid: true, errorMessage: '' };
+    }
 
-    if (MODULE_NAME_PATTERN.test(value)) {
-      setIsValid(true);
-      setErrorMessage('');
-    } else {
-      setIsValid(false);
+    const isFormatValid = MODULE_NAME_PATTERN.test(value);
+
+    if (!isFormatValid) {
       if (value.includes(' ')) {
         const valueWithoutSpaces = value.replace(/\s/g, '');
         if (!MODULE_NAME_PATTERN.test(valueWithoutSpaces)) {
-          setErrorMessage('No spaces or invalid characters');
+          return { isValid: false, errorMessage: 'No spaces or invalid characters' };
         } else {
-          setErrorMessage('No spaces');
+          return { isValid: false, errorMessage: 'No spaces' };
         }
       } else {
-        setErrorMessage('Invalid special character');
+        return { isValid: false, errorMessage: 'Invalid special character' };
       }
     }
+
+    const isDuplicate = selectedFields.some(
+      (otherField) =>
+        otherField.uniqueId !== fieldId && moduleNameMapping[otherField.uniqueId] === value
+    );
+
+    if (isDuplicate) {
+      return { isValid: false, errorMessage: 'Module name already exists' };
+    }
+
+    return { isValid: true, errorMessage: '' };
   };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const newModuleNameMapping = { ...moduleNameMapping, [field.uniqueId]: value };
+    setModuleNameMapping(newModuleNameMapping);
+  };
+
+  useEffect(() => {
+    const currentValue = moduleNameMapping[field.uniqueId] || '';
+    const validation = validateFieldModuleName(field.uniqueId, currentValue);
+    setIsValid(validation.isValid);
+    setErrorMessage(validation.errorMessage);
+    onValidationChange(validation.isValid);
+  }, [moduleNameMapping, field.uniqueId, selectedFields]);
 
   return (
     <Box
