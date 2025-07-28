@@ -128,9 +128,11 @@ describe('Hubspot Config Screen ', () => {
       ).toBeTruthy();
 
       // Check for all three images by alt text
-      expect(screen.getByAltText('Contentful Sidebar with sync button')).toBeTruthy();
-      expect(screen.getByAltText('Contentful Page view with table of synced content')).toBeTruthy();
-      expect(screen.getByAltText('Hubspot Design manager with synced modules')).toBeTruthy();
+      expect(screen.getByAltText('Contentful Sidebar with sync button.')).toBeTruthy();
+      expect(
+        screen.getByAltText('Contentful Page view with table of synced content.')
+      ).toBeTruthy();
+      expect(screen.getByAltText('Hubspot Design manager with synced modules.')).toBeTruthy();
     });
   });
 
