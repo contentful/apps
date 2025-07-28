@@ -5,7 +5,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/setupTests.ts', 'dotenv/config'],
+    setupFiles: ['./src/setupTests.ts'],
     env: loadEnv('test', process.cwd(), ''),
   },
 });
