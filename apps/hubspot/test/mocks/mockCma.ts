@@ -6,6 +6,8 @@ const mockCma = {
     createWithId: vi.fn(),
     publish: vi.fn(),
     getMany: vi.fn(),
+    unpublish: vi.fn(),
+    delete: vi.fn(),
   },
   entry: {
     get: vi.fn(),
