@@ -198,7 +198,7 @@ const ConfigScreen = () => {
                 rel="noopener noreferrer"
                 icon={<ExternalLinkIcon />}
                 alignIcon="end">
-                Read about creating private apps in Hubspot
+                Read about creating private apps in Hubspot.
               </TextLink>
             </Box>
             <video controls width="100%">
@@ -230,17 +230,17 @@ const ConfigScreen = () => {
           <GettingStartedStep
             title="1. After you install the app, you can sync content from the entry editor sidebar."
             image={sidebarExample}
-            alt="Contentful Sidebar with sync button"
+            alt="Contentful Sidebar with sync button."
           />
           <GettingStartedStep
             title="2. You can manage all synced content from the app’s full page location."
             image={pageTableExample}
-            alt="Contentful Page view with table of synced content"
+            alt="Contentful Page view with table of synced content."
           />
           <GettingStartedStep
             title="3. In Hubspot, synced content will appear as modules within the Design manager, and within the Email editor."
             image={hubspotModuleExample}
-            alt="Hubspot Design manager with synced modules"
+            alt="Hubspot Design manager with synced modules."
           />
         </Flex>
       </Box>
