@@ -13,9 +13,11 @@
     "@phosphor-icons/react": "^2.1.10",
     "@testing-library/user-event": "^14.6.1",
     "contentful-management": "^11.52.0",
+    "dotenv": "^17.2.1",
     "emotion": "10.0.27",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "tsx": "^4.20.3"
   },
   "scripts": {
     "start": "vite",
@@ -30,7 +32,8 @@
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "upsert-actions": "contentful-app-scripts upsert-actions --ci --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "build:functions": "contentful-app-scripts build-functions --ci",
-    "upsert-actions:dev": "source .env && contentful-app-scripts upsert-actions --ci --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\""
+    "upsert-actions:dev": "source .env && contentful-app-scripts upsert-actions --ci --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\"",
+    "upsert-events": "tsx -r dotenv/config src/scripts/createAppEventSubscription.ts"
   },
   "eslintConfig": {
     "extends": "react-app"
