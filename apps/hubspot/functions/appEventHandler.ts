@@ -6,7 +6,12 @@ import {
 } from '@contentful/node-apps-toolkit';
 import ConfigEntryService from '../src/utils/ConfigEntryService';
 import { createModuleFile, getFiles, initContentfulManagementClient } from './common';
-import { AppInstallationParameters, ConnectedField } from '../src/utils/utils';
+import {
+  AppInstallationParameters,
+  CONFIG_CONTENT_TYPE_ID,
+  CONFIG_ENTRY_ID,
+  ConnectedField,
+} from '../src/utils/utils';
 import { PlainClientAPI } from 'contentful-management';
 
 const WAIT_TIMES = [1000, 2000];
@@ -18,6 +23,10 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = a
   const cma = initContentfulManagementClient(context);
 
   const contentfulTopic = event.headers['X-Contentful-Topic'];
+
+  if (contentfulTopic.includes('AppInstallation.delete')) {
+    return await callAndRetry(() => deleteConfigEntry(cma));
+  }
 
   const body = event.body as any;
   const entryId = body.sys.id;
@@ -113,4 +122,19 @@ async function callAndRetry(fn: () => Promise<any>): Promise<void> {
     }
   }
   throw lastError;
+}
+
+async function deleteConfigEntry(cma: PlainClientAPI) {
+  try {
+    await cma.entry.unpublish({ entryId: CONFIG_ENTRY_ID });
+  } catch (e) {}
+  try {
+    await cma.entry.delete({ entryId: CONFIG_ENTRY_ID });
+  } catch (e) {}
+  try {
+    await cma.contentType.unpublish({ contentTypeId: CONFIG_CONTENT_TYPE_ID });
+  } catch (e) {}
+  try {
+    await cma.contentType.delete({ contentTypeId: CONFIG_CONTENT_TYPE_ID });
+  } catch (e) {}
 }

@@ -5,6 +5,7 @@ import { RICH_TEXT_FIELD_TEMPLATE, TEXT_FIELD_TEMPLATE } from '../../functions/t
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { BLOCKS, Document } from '@contentful/rich-text-types';
 import * as common from '../../functions/common';
+import { CONFIG_CONTENT_TYPE_ID, CONFIG_ENTRY_ID } from '../../src/utils/utils';
 
 const mockCma = {
   entry: {
@@ -18,6 +19,12 @@ const mockCma = {
       },
     }),
     update: vi.fn(),
+    unpublish: vi.fn(),
+    delete: vi.fn(),
+  },
+  contentType: {
+    unpublish: vi.fn(),
+    delete: vi.fn(),
   },
 };
 
@@ -236,6 +243,51 @@ describe('app event handler', () => {
         error: expect.objectContaining({ message: expect.stringContaining('Failed to update') }),
       }),
     ]);
+  });
+
+  it('should delete the custom entry and content type on app installation deletion', async () => {
+    const event = {
+      headers: {
+        'X-Contentful-Topic': ['AppInstallation.delete'],
+      },
+    };
+    mockCommonMethods(mockCma, true);
+
+    await handler(event as any, mockContext as any);
+
+    expect(mockCma.entry.unpublish).toHaveBeenCalledWith({ entryId: CONFIG_ENTRY_ID });
+    expect(mockCma.entry.delete).toHaveBeenCalledWith({ entryId: CONFIG_ENTRY_ID });
+    expect(mockCma.contentType.unpublish).toHaveBeenCalledWith({
+      contentTypeId: CONFIG_CONTENT_TYPE_ID,
+    });
+    expect(mockCma.contentType.delete).toHaveBeenCalledWith({
+      contentTypeId: CONFIG_CONTENT_TYPE_ID,
+    });
+  });
+
+  it('should delete the custom entry and content type when they are not published', async () => {
+    const event = {
+      headers: {
+        'X-Contentful-Topic': ['AppInstallation.delete'],
+      },
+    };
+
+    mockCma.entry.unpublish.mockRejectedValue(new Error('Entry is already unpublished'));
+    mockCma.contentType.unpublish.mockRejectedValue(
+      new Error('Content type is already unpublished')
+    );
+    mockCommonMethods(mockCma, true);
+
+    await handler(event as any, mockContext as any);
+
+    expect(mockCma.entry.unpublish).toHaveBeenCalledWith({ entryId: CONFIG_ENTRY_ID });
+    expect(mockCma.entry.delete).toHaveBeenCalledWith({ entryId: CONFIG_ENTRY_ID });
+    expect(mockCma.contentType.unpublish).toHaveBeenCalledWith({
+      contentTypeId: CONFIG_CONTENT_TYPE_ID,
+    });
+    expect(mockCma.contentType.delete).toHaveBeenCalledWith({
+      contentTypeId: CONFIG_CONTENT_TYPE_ID,
+    });
   });
 });
 
