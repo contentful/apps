@@ -21,11 +21,8 @@ const FieldModuleNameMapping = ({
 }: FieldModuleNameMappingProps) => {
   const [fieldValidations, setFieldValidations] = useState<{ [fieldId: string]: boolean }>({});
 
-  // Check if all fields are valid and notify parent
   useEffect(() => {
-    const allFieldsValid = selectedFields.every(
-      (field) => fieldValidations[field.uniqueId]
-    );
+    const allFieldsValid = selectedFields.every((field) => fieldValidations[field.uniqueId]);
     onValidationChange(allFieldsValid);
   }, [fieldValidations, selectedFields, onValidationChange]);
 
