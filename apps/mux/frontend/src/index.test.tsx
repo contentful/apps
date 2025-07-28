@@ -19,6 +19,15 @@ vi.mock('contentful-management', () => ({
   })),
 }));
 
+// Mock the API client
+vi.mock('./util/apiClient', () => ({
+  default: vi.fn().mockImplementation(() => ({
+    get: vi.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({ data: {} }) })),
+    post: vi.fn(() => Promise.resolve({ ok: true })),
+    del: vi.fn(() => Promise.resolve({ ok: true })),
+  })),
+}));
+
 /*
  * This was a valid private key, but it has since been revoked
  */
@@ -30,6 +39,8 @@ const SDK_MOCK = {
   ids: {
     environment: 'environment-id',
     space: 'space-id',
+    organization: 'org-id',
+    app: 'app-id',
   },
   parameters: {
     installation: {
@@ -60,6 +71,16 @@ const SDK_MOCK = {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     onSysChanged: () => () => {},
   },
+  cmaAdapter: {
+    // Mock for contentful-management client
+  },
+  notifier: {
+    error: vi.fn(),
+    success: vi.fn(),
+  },
+  dialogs: {
+    openConfirm: vi.fn(() => Promise.resolve(true)),
+  },
 };
 
 const getById = queryByAttribute.bind(null, 'id');
@@ -86,8 +107,12 @@ describe('Mux frontend app', () => {
   it('displays an error when we have a signed playbackId but no signing keys', async () => {
     const mockedSdk = {
       ...SDK_MOCK,
-      state: {
-        playbackToken: undefined,
+      parameters: {
+        installation: {
+          muxAccessTokenId: 'abcd1234',
+          muxAccessTokenSecret: 'efgh5678',
+          muxDomain: 'mux.com',
+        },
       },
       field: {
         ...SDK_MOCK.field,
@@ -106,9 +131,13 @@ describe('Mux frontend app', () => {
     };
 
     const dom = render(<App sdk={mockedSdk as any} />);
-    const error = dom.getByTestId('nosigningtoken');
+
+    // Wait for the component to finish its async operations and state updates
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const error = await dom.findByTestId('terminalerror');
     expect(error).toBeVisible();
-    expect(error.innerText || error.textContent).toContain('No signing key');
+    expect(error.innerText || error.textContent).toContain('signing keys do not exist');
   });
 
   it('Displays Uploader dropzone before user does anything and Mux Uploader is hidden.', () => {
@@ -127,6 +156,7 @@ describe('Mux frontend app', () => {
         getValue: () => ({
           assetId: 'abcd1234',
           ready: false,
+          playbackId: 'playback-test-123',
         }),
       },
     };

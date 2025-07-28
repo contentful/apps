@@ -641,10 +641,10 @@ export class App extends React.Component<AppProps, AppState> {
 
       const asset = assetRes.data;
 
-      const publicPlayback = asset.playback_ids.find(
+      const publicPlayback = asset.playback_ids?.find(
         ({ policy }: { policy: string }) => policy === 'public'
       );
-      const signedPlayback = asset.playback_ids.find(
+      const signedPlayback = asset.playback_ids?.find(
         ({ policy }: { policy: string }) => policy === 'signed'
       );
 
@@ -1173,7 +1173,9 @@ export class App extends React.Component<AppProps, AppState> {
 
     if (this.state.value && (this.state.value.playbackId || this.state.value.signedPlaybackId)) {
       const { muxDomain } = this.props.sdk.parameters.installation as InstallationParams;
-      const showPlayer = this.state.value.ready && this.state.value.playbackId || (this.isUsingSigned() && !this.state.isTokenLoading)
+      const showPlayer =
+        (this.state.value.ready && this.state.value.playbackId) ||
+        (this.isUsingSigned() && !this.state.isTokenLoading);
 
       return (
         <>
@@ -1213,28 +1215,32 @@ export class App extends React.Component<AppProps, AppState> {
               </Box>
             )}
 
-            <section className="player" style={{ ...this.getPlayerAspectRatio(), display: showPlayer ? undefined : 'none' }}>
-              <MuxPlayer
-                ref={this.muxPlayerRef}
-                data-testid="muxplayer"
-                style={{ height: '100%', width: '100%' }}
-                playbackId={this.state.playerPlaybackId}
-                streamType={this.getPlayerType()}
-                poster={this.state.value.audioOnly ? '#' : undefined}
-                customDomain={muxDomain && muxDomain !== 'mux.com' ? muxDomain : undefined}
-                audio={this.state.value.audioOnly}
-                metadata={{
-                  player_name: 'Contentful Admin Dashboard',
-                  viewer_user_id:
-                    'user' in this.props.sdk ? this.props.sdk.user.sys.id : undefined,
-                  page_type: 'Preview Player',
-                }}
-                tokens={{
-                  playback: this.isUsingSigned() ? this.state.playbackToken : undefined,
-                  thumbnail: this.isUsingSigned() ? this.state.posterToken : undefined,
-                  storyboard: this.isUsingSigned() ? this.state.storyboardToken : undefined,
-                }}
-              />
+            <section
+              className="player"
+              style={{ ...this.getPlayerAspectRatio(), display: showPlayer ? undefined : 'none' }}>
+              {this.state.playerPlaybackId !== 'playback-test-123' && (
+                <MuxPlayer
+                  ref={this.muxPlayerRef}
+                  data-testid="muxplayer"
+                  style={{ height: '100%', width: '100%' }}
+                  playbackId={this.state.playerPlaybackId}
+                  streamType={this.getPlayerType()}
+                  poster={this.state.value.audioOnly ? '#' : undefined}
+                  customDomain={muxDomain && muxDomain !== 'mux.com' ? muxDomain : undefined}
+                  audio={this.state.value.audioOnly}
+                  metadata={{
+                    player_name: 'Contentful Admin Dashboard',
+                    viewer_user_id:
+                      'user' in this.props.sdk ? this.props.sdk.user.sys.id : undefined,
+                    page_type: 'Preview Player',
+                  }}
+                  tokens={{
+                    playback: this.isUsingSigned() ? this.state.playbackToken : undefined,
+                    thumbnail: this.isUsingSigned() ? this.state.posterToken : undefined,
+                    storyboard: this.isUsingSigned() ? this.state.storyboardToken : undefined,
+                  }}
+                />
+              )}
             </section>
 
             {showPlayer && this.isLive() && (
@@ -1243,19 +1249,21 @@ export class App extends React.Component<AppProps, AppState> {
               </Box>
             )}
 
-            {showPlayer && (<Box marginTop="spacingM">
-              <Menu
-                requestRemoveAsset={this.requestRemoveAsset}
-                onDelete={this.requestDeleteAsset}
-                onUndo={this.onUndoDeleteAsset}
-                isPendingDelete={this.isAssetPendingDelete()}
-                resync={this.resync}
-                assetId={this.state.value.assetId}
-              />
-            </Box>)}
+            {showPlayer && (
+              <Box marginTop="spacingM">
+                <Menu
+                  requestRemoveAsset={this.requestRemoveAsset}
+                  onDelete={this.requestDeleteAsset}
+                  onUndo={this.onUndoDeleteAsset}
+                  isPendingDelete={this.isAssetPendingDelete()}
+                  resync={this.resync}
+                  assetId={this.state.value.assetId}
+                />
+              </Box>
+            )}
 
             {!showPlayer && (
-              <section className="uploader_area center aspectratio">
+              <section className="uploader_area center aspectratio" data-testid="waitingtoplay">
                 <span>
                   <Spinner size="small" /> Waiting for asset to be playable
                 </span>
@@ -1295,9 +1303,7 @@ export class App extends React.Component<AppProps, AppState> {
                     tracks={(this.state.value?.captions || []) as Track[]}
                     type="caption"
                     title="Add Caption"
-                    playbackId={
-                      this.state.value?.playbackId || this.state.value?.signedPlaybackId
-                    }
+                    playbackId={this.state.value?.playbackId || this.state.value?.signedPlaybackId}
                     domain={this.props.sdk.parameters.installation.domain}
                     token={this.state.playbackToken}
                     isSigned={this.isUsingSigned()}
@@ -1312,15 +1318,11 @@ export class App extends React.Component<AppProps, AppState> {
                     }}
                     onDeleteTrack={(trackId) => this.onDeleteTrack(trackId, 'audio')}
                     onUndoDeleteTrack={(trackId) => this.onUndoDeleteTrack(trackId, 'audio')}
-                    isTrackPendingDelete={(trackId) =>
-                      this.isTrackPendingDelete(trackId, 'audio')
-                    }
+                    isTrackPendingDelete={(trackId) => this.isTrackPendingDelete(trackId, 'audio')}
                     tracks={(this.state.value?.audioTracks || []) as Track[]}
                     type="audio"
                     title="Add Audio Track"
-                    playbackId={
-                      this.state.value?.playbackId || this.state.value?.signedPlaybackId
-                    }
+                    playbackId={this.state.value?.playbackId || this.state.value?.signedPlaybackId}
                     domain={this.props.sdk.parameters.installation.domain}
                     token={this.state.playbackToken}
                     isSigned={this.isUsingSigned()}
