@@ -40,7 +40,8 @@ const FieldModuleNameMapping = ({
 
     const isDuplicate = selectedFields.some(
       (otherField) =>
-        otherField.uniqueId !== fieldId && currentMapping[otherField.uniqueId] === value
+        otherField.uniqueId !== fieldId &&
+        currentMapping[otherField.uniqueId].toLowerCase() === value.toLowerCase()
     );
 
     return isDuplicate ? 'Module name already exists' : '';
@@ -61,8 +62,7 @@ const FieldModuleNameMapping = ({
 
     setFieldErrors(newErrors);
 
-    const allFieldsValid = selectedFields.every((field) => !fieldErrors[field.uniqueId]);
-    onValidationChange(!allFieldsValid);
+    onValidationChange(Object.keys(newErrors).length > 0);
   };
 
   return (

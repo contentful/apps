@@ -185,7 +185,7 @@ const Dialog = () => {
             moduleNameMapping={moduleNameMapping}
             setModuleNameMapping={setModuleNameMapping}
             inputDisabled={isSending}
-            onValidationChange={(isValid) => setHasValidationErrors(!isValid)}
+            onValidationChange={(isValid) => setHasValidationErrors(isValid)}
           />
           <Flex
             paddingTop="spacingM"
