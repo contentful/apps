@@ -1,4 +1,4 @@
-import { Box, Flex, FormControl, Paragraph, Text, TextInput } from '@contentful/f36-components';
+import { Box, Flex, FormControl, Paragraph, TextInput } from '@contentful/f36-components';
 import { SdkField } from '../utils/fieldsProcessing';
 import tokens from '@contentful/f36-tokens';
 import { useState } from 'react';
@@ -9,6 +9,7 @@ interface FieldModuleNameMappingProps {
   moduleNameMapping: { [fieldId: string]: string };
   setModuleNameMapping: (mapping: { [fieldId: string]: string }) => void;
   inputDisabled: boolean;
+  onValidationChange: (isValid: boolean) => void;
 }
 
 const FieldModuleNameMapping = ({
@@ -16,7 +17,54 @@ const FieldModuleNameMapping = ({
   moduleNameMapping,
   setModuleNameMapping,
   inputDisabled,
+  onValidationChange,
 }: FieldModuleNameMappingProps) => {
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const validateFieldModuleName = (
+    fieldId: string,
+    value: string,
+    currentMapping: Record<string, string>
+  ) => {
+    if (!value) return '';
+
+    if (!MODULE_NAME_PATTERN.test(value)) {
+      if (value.includes(' ')) {
+        const valueWithoutSpaces = value.replace(/\s/g, '');
+        return MODULE_NAME_PATTERN.test(valueWithoutSpaces)
+          ? 'No spaces'
+          : 'No spaces or invalid characters';
+      }
+      return 'Invalid special character';
+    }
+
+    const isDuplicate = selectedFields.some(
+      (otherField) =>
+        otherField.uniqueId !== fieldId &&
+        currentMapping[otherField.uniqueId].toLowerCase() === value.toLowerCase()
+    );
+
+    return isDuplicate ? 'Module name already exists' : '';
+  };
+
+  const handleFieldInputChange = (fieldId: string, value: string) => {
+    const newModuleNameMapping = { ...moduleNameMapping, [fieldId]: value };
+    setModuleNameMapping(newModuleNameMapping);
+
+    const newErrors: Record<string, string> = {};
+    selectedFields.forEach((field) => {
+      const fieldValue = newModuleNameMapping[field.uniqueId] || '';
+      const error = validateFieldModuleName(field.uniqueId, fieldValue, newModuleNameMapping);
+      if (error !== '') {
+        newErrors[field.uniqueId] = error;
+      }
+    });
+
+    setFieldErrors(newErrors);
+
+    onValidationChange(Object.keys(newErrors).length > 0);
+  };
+
   return (
     <Box>
       <Paragraph>
@@ -28,9 +76,10 @@ const FieldModuleNameMapping = ({
         <SingleFieldModuleNameMapping
           key={field.uniqueId}
           field={field}
-          moduleNameMapping={moduleNameMapping}
-          setModuleNameMapping={setModuleNameMapping}
+          moduleName={moduleNameMapping[field.uniqueId]}
           inputDisabled={inputDisabled}
+          fieldError={fieldErrors[field.uniqueId]}
+          onInputChange={handleFieldInputChange}
         />
       ))}
     </Box>
@@ -39,38 +88,19 @@ const FieldModuleNameMapping = ({
 
 const SingleFieldModuleNameMapping = ({
   field,
-  moduleNameMapping,
-  setModuleNameMapping,
+  moduleName,
   inputDisabled,
+  fieldError,
+  onInputChange,
 }: {
   field: SdkField;
-  moduleNameMapping: { [fieldId: string]: string };
-  setModuleNameMapping: (mapping: { [fieldId: string]: string }) => void;
+  moduleName: string;
   inputDisabled: boolean;
+  fieldError: string;
+  onInputChange: (fieldId: string, value: string) => void;
 }) => {
-  const [isValid, setIsValid] = useState<boolean>(true);
-  const [errorMessage, setErrorMessage] = useState<string>('');
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setModuleNameMapping({ ...moduleNameMapping, [field.uniqueId]: value });
-
-    if (MODULE_NAME_PATTERN.test(value)) {
-      setIsValid(true);
-      setErrorMessage('');
-    } else {
-      setIsValid(false);
-      if (value.includes(' ')) {
-        const valueWithoutSpaces = value.replace(/\s/g, '');
-        if (!MODULE_NAME_PATTERN.test(valueWithoutSpaces)) {
-          setErrorMessage('No spaces or invalid characters');
-        } else {
-          setErrorMessage('No spaces');
-        }
-      } else {
-        setErrorMessage('Invalid special character');
-      }
-    }
+    onInputChange(field.uniqueId, e.target.value);
   };
 
   return (
@@ -95,17 +125,17 @@ const SingleFieldModuleNameMapping = ({
           </FormControl>
         </Flex>
         <Flex flex="1" flexDirection="column">
-          <FormControl isInvalid={!isValid} marginBottom="none">
+          <FormControl isInvalid={!!fieldError} marginBottom="none">
             <FormControl.Label>Hubspot module name</FormControl.Label>
             <TextInput
-              value={moduleNameMapping[field.uniqueId]}
+              value={moduleName}
               isDisabled={inputDisabled}
               onChange={handleInputChange}
               aria-label={`Hubspot module name for ${field.name}`}
             />
-            {!isValid && (
+            {fieldError && (
               <FormControl.ValidationMessage marginTop="spacingXs">
-                {errorMessage}
+                {fieldError}
               </FormControl.ValidationMessage>
             )}
           </FormControl>
