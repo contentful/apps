@@ -19,12 +19,53 @@ const FieldModuleNameMapping = ({
   inputDisabled,
   onValidationChange,
 }: FieldModuleNameMappingProps) => {
-  const [fieldValidations, setFieldValidations] = useState<{ [fieldId: string]: boolean }>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const validateFieldModuleName = (
+    fieldId: string,
+    value: string,
+    currentMapping: Record<string, string>
+  ) => {
+    if (!value) return '';
+
+    if (!MODULE_NAME_PATTERN.test(value)) {
+      if (value.includes(' ')) {
+        const valueWithoutSpaces = value.replace(/\s/g, '');
+        return MODULE_NAME_PATTERN.test(valueWithoutSpaces)
+          ? 'No spaces'
+          : 'No spaces or invalid characters';
+      }
+      return 'Invalid special character';
+    }
+
+    const isDuplicate = selectedFields.some(
+      (otherField) =>
+        otherField.uniqueId !== fieldId && currentMapping[otherField.uniqueId] === value
+    );
+
+    return isDuplicate ? 'Module name already exists' : '';
+  };
+
+  const handleFieldInputChange = (fieldId: string, value: string) => {
+    const newModuleNameMapping = { ...moduleNameMapping, [fieldId]: value };
+    setModuleNameMapping(newModuleNameMapping);
+
+    const newErrors: Record<string, string> = {};
+    selectedFields.forEach((field) => {
+      const fieldValue = newModuleNameMapping[field.uniqueId] || '';
+      const error = validateFieldModuleName(field.uniqueId, fieldValue, newModuleNameMapping);
+      if (error !== '') {
+        newErrors[field.uniqueId] = error;
+      }
+    });
+
+    setFieldErrors(newErrors);
+  };
 
   useEffect(() => {
-    const allFieldsValid = selectedFields.every((field) => fieldValidations[field.uniqueId]);
+    const allFieldsValid = selectedFields.every((field) => !fieldErrors[field.uniqueId]);
     onValidationChange(allFieldsValid);
-  }, [fieldValidations, selectedFields, onValidationChange]);
+  }, [fieldErrors, selectedFields, onValidationChange]);
 
   return (
     <Box>
@@ -37,16 +78,10 @@ const FieldModuleNameMapping = ({
         <SingleFieldModuleNameMapping
           key={field.uniqueId}
           field={field}
-          moduleNameMapping={moduleNameMapping}
-          setModuleNameMapping={setModuleNameMapping}
+          moduleName={moduleNameMapping[field.uniqueId]}
           inputDisabled={inputDisabled}
-          selectedFields={selectedFields}
-          onValidationChange={(isValid) => {
-            setFieldValidations((prev) => ({
-              ...prev,
-              [field.uniqueId]: isValid,
-            }));
-          }}
+          fieldError={fieldErrors[field.uniqueId]}
+          onInputChange={handleFieldInputChange}
         />
       ))}
     </Box>
@@ -55,67 +90,20 @@ const FieldModuleNameMapping = ({
 
 const SingleFieldModuleNameMapping = ({
   field,
-  moduleNameMapping,
-  setModuleNameMapping,
+  moduleName,
   inputDisabled,
-  selectedFields,
-  onValidationChange,
+  fieldError,
+  onInputChange,
 }: {
   field: SdkField;
-  moduleNameMapping: { [fieldId: string]: string };
-  setModuleNameMapping: (mapping: { [fieldId: string]: string }) => void;
+  moduleName: string;
   inputDisabled: boolean;
-  selectedFields: SdkField[];
-  onValidationChange: (isValid: boolean) => void;
+  fieldError: string;
+  onInputChange: (fieldId: string, value: string) => void;
 }) => {
-  const [isValid, setIsValid] = useState<boolean>(true);
-  const [errorMessage, setErrorMessage] = useState<string>('');
-
-  const validateFieldModuleName = (fieldId: string, value: string) => {
-    if (!value) {
-      return { isValid: true, errorMessage: '' };
-    }
-
-    const isFormatValid = MODULE_NAME_PATTERN.test(value);
-
-    if (!isFormatValid) {
-      if (value.includes(' ')) {
-        const valueWithoutSpaces = value.replace(/\s/g, '');
-        if (!MODULE_NAME_PATTERN.test(valueWithoutSpaces)) {
-          return { isValid: false, errorMessage: 'No spaces or invalid characters' };
-        } else {
-          return { isValid: false, errorMessage: 'No spaces' };
-        }
-      } else {
-        return { isValid: false, errorMessage: 'Invalid special character' };
-      }
-    }
-
-    const isDuplicate = selectedFields.some(
-      (otherField) =>
-        otherField.uniqueId !== fieldId && moduleNameMapping[otherField.uniqueId] === value
-    );
-
-    if (isDuplicate) {
-      return { isValid: false, errorMessage: 'Module name already exists' };
-    }
-
-    return { isValid: true, errorMessage: '' };
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const newModuleNameMapping = { ...moduleNameMapping, [field.uniqueId]: value };
-    setModuleNameMapping(newModuleNameMapping);
+    onInputChange(field.uniqueId, e.target.value);
   };
-
-  useEffect(() => {
-    const currentValue = moduleNameMapping[field.uniqueId] || '';
-    const validation = validateFieldModuleName(field.uniqueId, currentValue);
-    setIsValid(validation.isValid);
-    setErrorMessage(validation.errorMessage);
-    onValidationChange(validation.isValid);
-  }, [moduleNameMapping, field.uniqueId, selectedFields]);
 
   return (
     <Box
@@ -139,17 +127,17 @@ const SingleFieldModuleNameMapping = ({
           </FormControl>
         </Flex>
         <Flex flex="1" flexDirection="column">
-          <FormControl isInvalid={!isValid} marginBottom="none">
+          <FormControl isInvalid={!!fieldError} marginBottom="none">
             <FormControl.Label>Hubspot module name</FormControl.Label>
             <TextInput
-              value={moduleNameMapping[field.uniqueId]}
+              value={moduleName}
               isDisabled={inputDisabled}
               onChange={handleInputChange}
               aria-label={`Hubspot module name for ${field.name}`}
             />
-            {!isValid && (
+            {fieldError && (
               <FormControl.ValidationMessage marginTop="spacingXs">
-                {errorMessage}
+                {fieldError}
               </FormControl.ValidationMessage>
             )}
           </FormControl>
