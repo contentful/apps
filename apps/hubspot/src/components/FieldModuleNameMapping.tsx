@@ -26,7 +26,7 @@ const FieldModuleNameMapping = ({
     value: string,
     currentMapping: Record<string, string>
   ) => {
-    if (!value) return '';
+    if (!value) return 'Module name is required';
 
     if (!MODULE_NAME_PATTERN.test(value)) {
       if (value.includes(' ')) {
