@@ -1,7 +1,7 @@
 import { Box, Flex, FormControl, Paragraph, TextInput } from '@contentful/f36-components';
 import { SdkField } from '../utils/fieldsProcessing';
 import tokens from '@contentful/f36-tokens';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { MODULE_NAME_PATTERN } from '../utils/utils';
 
 interface FieldModuleNameMappingProps {
@@ -60,12 +60,10 @@ const FieldModuleNameMapping = ({
     });
 
     setFieldErrors(newErrors);
-  };
 
-  useEffect(() => {
     const allFieldsValid = selectedFields.every((field) => !fieldErrors[field.uniqueId]);
-    onValidationChange(allFieldsValid);
-  }, [fieldErrors, selectedFields, onValidationChange]);
+    onValidationChange(!allFieldsValid);
+  };
 
   return (
     <Box>
