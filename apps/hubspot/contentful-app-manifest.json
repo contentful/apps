@@ -1,0 +1,45 @@
+{
+  "functions": [
+    {
+      "id": "createModulesFunction",
+      "name": "Create Hubspot modules function",
+      "description": "Function to create Hubspot modules from an App Action",
+      "path": "functions/createModules.js",
+      "entryFile": "functions/createModules.ts",
+      "allowNetworks": ["https://api.hubapi.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "appEventHandler",
+      "name": "App event handler function",
+      "description": "Function to handle App Events.",
+      "path": "functions/appEventHandler.js",
+      "entryFile": "functions/appEventHandler.ts",
+      "allowNetworks": ["https://api.hubapi.com"],
+      "accepts": ["appevent.handler"]
+    }
+  ],
+  "actions": [
+    {
+      "id": "createModulesAction",
+      "name": "Create Hubspot modules",
+      "type": "function-invocation",
+      "functionId": "createModulesFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "fields",
+          "name": "Fields",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "entryId",
+          "name": "EntryId",
+          "type": "Symbol",
+          "required": true
+        }
+      ]
+    }
+  ]
+}
