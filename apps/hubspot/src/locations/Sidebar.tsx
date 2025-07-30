@@ -2,7 +2,6 @@ import { Button, Flex, Text, RelativeDateTime, Note, TextLink } from '@contentfu
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { processFields } from '../utils/fieldsProcessing';
-import { createClient } from 'contentful-management';
 import { useEffect, useState } from 'react';
 import ConfigEntryService from '../utils/ConfigEntryService';
 import { EntryConnectedFields } from '../utils/utils';
@@ -10,16 +9,6 @@ import { ErrorCircleOutlineIcon } from '@contentful/f36-icons';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
-  const cma = createClient(
-    { apiAdapter: sdk.cmaAdapter },
-    {
-      type: 'plain',
-      defaults: {
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      },
-    }
-  );
   useAutoResizer();
 
   const [connectedFields, setConnectedFields] = useState<EntryConnectedFields | undefined>(
@@ -46,7 +35,7 @@ const Sidebar = () => {
         entryId: sdk.ids.entry,
         fields: JSON.parse(
           JSON.stringify(
-            await processFields(Object.values(sdk.entry.fields), cma, sdk.locales.default)
+            await processFields(Object.values(sdk.entry.fields), sdk.cma, sdk.locales.default)
           )
         ),
       },
@@ -63,7 +52,7 @@ const Sidebar = () => {
     const getConfig = async () => {
       try {
         const entryConnectedFields = await new ConfigEntryService(
-          cma,
+          sdk.cma,
           sdk.locales.default
         ).getEntryConnectedFields(sdk.ids.entry);
         setConnectedFields(entryConnectedFields);

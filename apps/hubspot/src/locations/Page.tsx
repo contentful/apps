@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Flex, Heading, Spinner, Text, Note, TextLink } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { createClient } from 'contentful-management';
 import ConfigEntryService from '../utils/ConfigEntryService';
 import { styles } from './Page.styles';
 import { ConnectedFields, EntryWithContentType, getUniqueFieldId } from '../utils/utils';
@@ -19,23 +18,12 @@ const Page: React.FC = () => {
   const [modalEntry, setModalEntry] = useState<EntryWithContentType | null>(null);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
-  const cma = createClient(
-    { apiAdapter: sdk.cmaAdapter },
-    {
-      type: 'plain',
-      defaults: {
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      },
-    }
-  );
-
   useEffect(() => {
     const fetchConnectedEntries = async () => {
       setLoading(true);
       setError(null);
       try {
-        const configService = new ConfigEntryService(cma, defaultLocale);
+        const configService = new ConfigEntryService(sdk.cma, defaultLocale);
         const connectedFields = await configService.getConnectedFields();
         setConnectedFields(connectedFields);
         const entryIds = Object.keys(connectedFields);
@@ -45,11 +33,11 @@ const Page: React.FC = () => {
           return;
         }
 
-        const entriesResponse = await cma.entry.getMany({ query: { 'sys.id[in]': entryIds } });
+        const entriesResponse = await sdk.cma.entry.getMany({ query: { 'sys.id[in]': entryIds } });
         const fetchEntriesWithContentType = await Promise.all(
           entriesResponse.items.map(async (entry) => {
             try {
-              const contentType = await cma.contentType.get({
+              const contentType = await sdk.cma.contentType.get({
                 contentTypeId: entry.sys.contentType.sys.id,
               });
               return { entry, contentType };
@@ -94,7 +82,7 @@ const Page: React.FC = () => {
   async function handleDisconnectFields(selectedFieldIds: string[]) {
     if (!modalEntry) return;
     const entryId = modalEntry.entry.sys.id;
-    const configService = new ConfigEntryService(cma, defaultLocale);
+    const configService = new ConfigEntryService(sdk.cma, defaultLocale);
 
     try {
       const currentFields = await configService.getEntryConnectedFields(entryId);
