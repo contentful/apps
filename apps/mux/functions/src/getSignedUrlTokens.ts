@@ -65,7 +65,6 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   }
 
   const signedTokens = await sign(mux, playbackId, muxSigningKeyId, muxSigningKeyPrivate);
-  console.log('Tokens:', signedTokens);
 
   return {
     ok: true,
