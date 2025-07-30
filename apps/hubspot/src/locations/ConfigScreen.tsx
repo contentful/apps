@@ -57,28 +57,21 @@ const ConfigScreen = () => {
     }
   );
 
-  function checkIfHasValue(
-    value: string,
-    setError: (error: string | null) => void,
-    errorMessage: string
-  ) {
-    const hasValue = !!value?.trim();
-    setError(hasValue ? null : errorMessage);
-    return hasValue;
+  function checkIfHasValue(value: string) {
+    return !!value?.trim();
   }
 
   const validateAccessToken = async () => {
     setHubspotTokenError(null);
 
-    const hubspotTokenHasValue = checkIfHasValue(
-      parameters.hubspotAccessToken,
-      setHubspotTokenError,
-      EMPTY_MESSAGE
-    );
+    const hubspotTokenHasValue = checkIfHasValue(parameters.hubspotAccessToken);
 
     if (!hubspotTokenHasValue) {
+      setHubspotTokenError(EMPTY_MESSAGE);
       sdk.notifier.error(EMPTY_MESSAGE);
       return false;
+    } else {
+      setHubspotTokenError(null);
     }
     return true;
   };
