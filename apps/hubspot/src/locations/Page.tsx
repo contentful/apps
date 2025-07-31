@@ -36,21 +36,14 @@ const Page: React.FC = () => {
         const entriesResponse = await sdk.cma.entry.getMany({ query: { 'sys.id[in]': entryIds } });
         const fetchEntriesWithContentType = await Promise.all(
           entriesResponse.items.map(async (entry) => {
-            try {
-              const contentType = await sdk.cma.contentType.get({
-                contentTypeId: entry.sys.contentType.sys.id,
-              });
-              return { entry, contentType };
-            } catch (err) {
-              return null;
-            }
+            const contentType = await sdk.cma.contentType.get({
+              contentTypeId: entry.sys.contentType.sys.id,
+            });
+            return { entry, contentType };
           })
         );
 
-        const filteredEntries: EntryWithContentType[] = fetchEntriesWithContentType.filter(
-          (e): e is EntryWithContentType => e !== null
-        );
-        setEntriesWithContentType(filteredEntries);
+        setEntriesWithContentType(fetchEntriesWithContentType);
       } catch (e) {
         setEntriesWithContentType([]);
         setError(
