@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { mockCma, mockSdk } from '../../test/mocks';
 import Dialog from '../../src/locations/Dialog';
@@ -12,6 +12,6 @@ describe('Dialog component', () => {
   it('Component text exists', () => {
     const { getByText } = render(<Dialog />);
 
-    expect(getByText('Hello Dialog Component (AppId: test-app)')).toBeTruthy();
+    expect(getByText('Hello Dialog Component (AppId: test-app)')).toBeInTheDocument();
   });
 });
