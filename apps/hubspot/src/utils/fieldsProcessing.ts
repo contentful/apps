@@ -1,4 +1,5 @@
 import { CMAClient, EntryFieldAPI, FieldLinkType, FieldType, Items } from '@contentful/app-sdk';
+import { PlainClientAPI } from 'contentful-management';
 
 export type SdkField = {
   type: FieldType;
@@ -30,7 +31,7 @@ const SUPPORTED_FIELD_TYPES = [
 
 export const processFields = async (
   fields: EntryFieldAPI[],
-  cma: CMAClient,
+  cma: CMAClient | PlainClientAPI,
   defaultLocale: string
 ) => {
   const processedFields: SdkField[] = [];

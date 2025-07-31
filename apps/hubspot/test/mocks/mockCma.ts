@@ -11,6 +11,7 @@ const mockCma = {
   },
   entry: {
     get: vi.fn(),
+    getMany: vi.fn(),
     createWithId: vi.fn(),
   },
   editorInterface: {

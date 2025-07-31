@@ -6,13 +6,14 @@ import {
   ConnectedFields,
   EntryConnectedFields,
 } from './utils';
+import { CMAClient } from '@contentful/app-sdk';
 
 class ConfigEntryService {
-  private cma: PlainClientAPI;
+  private cma: CMAClient;
   private configEntry?: EntryProps<KeyValueMap>;
   private defaultLocale: string | undefined;
 
-  constructor(cma: PlainClientAPI, defaultLocale?: string) {
+  constructor(cma: CMAClient | PlainClientAPI, defaultLocale?: string) {
     this.cma = cma;
     this.defaultLocale = defaultLocale;
   }

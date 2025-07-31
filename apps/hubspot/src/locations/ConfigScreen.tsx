@@ -28,7 +28,6 @@ import {
   ContentType,
   HUBSPOT_PRIVATE_APPS_URL,
 } from '../utils/utils';
-import { createClient } from 'contentful-management';
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 import ConfigEntryService from '../utils/ConfigEntryService';
 import sidebarExample from '../assets/sidebar-example.png';
@@ -46,39 +45,21 @@ const ConfigScreen = () => {
   });
   const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
 
-  const cma = createClient(
-    { apiAdapter: sdk.cmaAdapter },
-    {
-      type: 'plain',
-      defaults: {
-        environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      },
-    }
-  );
-
-  function checkIfHasValue(
-    value: string,
-    setError: (error: string | null) => void,
-    errorMessage: string
-  ) {
-    const hasValue = !!value?.trim();
-    setError(hasValue ? null : errorMessage);
-    return hasValue;
+  function checkIfHasValue(value: string) {
+    return !!value?.trim();
   }
 
   const validateAccessToken = async () => {
     setHubspotTokenError(null);
 
-    const hubspotTokenHasValue = checkIfHasValue(
-      parameters.hubspotAccessToken,
-      setHubspotTokenError,
-      EMPTY_MESSAGE
-    );
+    const hubspotTokenHasValue = checkIfHasValue(parameters.hubspotAccessToken);
 
     if (!hubspotTokenHasValue) {
+      setHubspotTokenError(EMPTY_MESSAGE);
       sdk.notifier.error(EMPTY_MESSAGE);
       return false;
+    } else {
+      setHubspotTokenError(null);
     }
     return true;
   };
@@ -90,7 +71,7 @@ const ConfigScreen = () => {
     }
 
     try {
-      const configService = new ConfigEntryService(cma, sdk.locales.default);
+      const configService = new ConfigEntryService(sdk.cma, sdk.locales.default);
       await configService.createConfig();
     } catch (e) {
       sdk.notifier.error('The app configuration was not saved. Please try again.');
@@ -110,7 +91,7 @@ const ConfigScreen = () => {
       parameters,
       targetState: { EditorInterface: { ...editorInterface } },
     };
-  }, [parameters, sdk, cma, selectedContentTypes]);
+  }, [parameters, sdk, selectedContentTypes]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -217,7 +198,6 @@ const ConfigScreen = () => {
           selectedContentTypes={selectedContentTypes}
           setSelectedContentTypes={setSelectedContentTypes}
           sdk={sdk}
-          cma={cma}
         />
         <Subheading marginTop="spacing2Xl" marginBottom="spacingS">
           Getting started

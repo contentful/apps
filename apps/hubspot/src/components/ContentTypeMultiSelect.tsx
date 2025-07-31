@@ -2,21 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { Box, Stack, Pill } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { CONFIG_CONTENT_TYPE_ID, ContentType } from '../utils/utils';
-import { ContentTypeProps, PlainClientAPI } from 'contentful-management';
+import { ContentTypeProps } from 'contentful-management';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 
 interface ContentTypeMultiSelectProps {
   selectedContentTypes: ContentType[];
   setSelectedContentTypes: (contentTypes: ContentType[]) => void;
   sdk: ConfigAppSDK;
-  cma: PlainClientAPI;
 }
 
 const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   selectedContentTypes,
   setSelectedContentTypes,
   sdk,
-  cma,
 }) => {
   const [availableContentTypes, setAvailableContentTypes] = useState<ContentType[]>([]);
   const getPlaceholderText = () => {
@@ -41,7 +39,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
     let areMoreContentTypes = true;
 
     while (areMoreContentTypes) {
-      const response = await cma.contentType.getMany({
+      const response = await sdk.cma.contentType.getMany({
         spaceId: sdk.ids.space,
         environmentId: sdk.ids.environment,
         query: { skip, limit },
