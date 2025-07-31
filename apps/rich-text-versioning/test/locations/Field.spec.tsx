@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { mockCma, mockSdk } from '../../test/mocks';
-import Field from './Field';
+import Field from '../../src/locations/Field';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,

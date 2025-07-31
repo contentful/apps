@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { mockCma, mockSdk } from '../../test/mocks';
-import Dialog from './Dialog';
+import Dialog from '../../src/locations/Dialog';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
