@@ -31,7 +31,7 @@ const Field = () => {
   useEffect(() => {
     // You would typically get the CDA token from app parameters or environment
     // For demo purposes, you might want to add this to your app configuration
-    const token = 'lyM24A412WTMUxrD85eezmxX93075npm8pBlvl7s0qs';
+    const token = 'no-token';
     setCdaToken(token);
   }, []);
 
