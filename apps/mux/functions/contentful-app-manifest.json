@@ -8,6 +8,15 @@
       "entryFile": "src/onPublish.ts",
       "allowNetworks": ["https://api.mux.com"],
       "accepts": ["appevent.handler"]
+    },
+    {
+      "id": "getSignedUrlTokens",
+      "name": "Get signed URL tokens",
+      "description": "This action returns signed JWT tokens for securing Mux video playback.",
+      "path": "src/getSignedUrlTokens.js",
+      "entryFile": "src/getSignedUrlTokens.ts",
+      "allowNetworks": ["api.contentful.com", "https://api.mux.com"],
+      "accepts": ["appaction.call"]
     }
   ]
 }
