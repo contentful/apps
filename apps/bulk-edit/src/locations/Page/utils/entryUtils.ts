@@ -1,3 +1,5 @@
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
+import { Document } from '@contentful/rich-text-types';
 import { Entry, ContentTypeField, Status, Fields } from '../types';
 import { ContentTypeProps } from 'contentful-management';
 
@@ -65,6 +67,10 @@ export const renderFieldValue = (field: ContentTypeField, value: unknown): strin
   }
   if (field.type === 'Link' && isLinkValue(value) && value.sys.linkType === 'Entry') {
     return `1 reference field`;
+  }
+
+  if (field.type === 'RichText' && typeof value === 'object' && value !== null) {
+    return truncate(documentToHtmlString(value as Document));
   }
 
   if (typeof value === 'object' && value !== null) {
