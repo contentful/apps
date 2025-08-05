@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "create-app-definition": "contentful-app-scripts create-app-definition",
-    "build": "rimraf ./build && npm run build-frontend",
+    "build:functions": "contentful-app-scripts build-functions --ci",
+    "build": "rimraf ./build && npm run build-frontend && npm run build:functions",
     "build-frontend": "cd frontend && npm ci --include=dev && BUILD_PATH=../build npm run build",
     "build:dev": "rimraf ./build && npm run build-frontend",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5l4WmuXdhJGcADHfCm1v4k --token ${CONTENTFUL_CMA_TOKEN}",
