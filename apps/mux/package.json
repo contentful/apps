@@ -4,16 +4,13 @@
   "private": true,
   "scripts": {
     "create-app-definition": "contentful-app-scripts create-app-definition",
-    "build": "rimraf ./build && npm run build-frontend && npm run build-app-actions",
-    "build-app-actions": "cd app-actions && npm ci && cd .. && node build-actions.js",
+    "build": "rimraf ./build && npm run build-frontend",
     "build-frontend": "cd frontend && npm ci --include=dev && BUILD_PATH=../build npm run build",
-    "build:dev": "rimraf ./build && npm run build-frontend && npm run build-app-actions:dev",
-    "build-app-actions:dev": "cd app-actions && npm ci && cd .. && NODE_ENV=development node build-actions.js",
+    "build:dev": "rimraf ./build && npm run build-frontend",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5l4WmuXdhJGcADHfCm1v4k --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:local": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 5ZIZdgWubBwSDCds1awbqE --token ${TEST_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 2Z5q0FnYZjRN79MjTE4ofn --token ${TEST_CMA_TOKEN}",
-    "deploy:sandbox": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 1qaCyx8VYCtc5ij1wAdNbP --token ${TEST_CMA_TOKEN}",
-    "call-app-action": "npx ts-node scripts/call-app-action.ts"
+    "deploy:sandbox": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 1qaCyx8VYCtc5ij1wAdNbP --token ${TEST_CMA_TOKEN}"
   },
   "dependencies": {
     "@contentful/app-scripts": "^1.29.0",
