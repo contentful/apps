@@ -9,6 +9,10 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useCMA: () => mockCma,
 }));
 
+async function saveAppInstallation() {
+  return await mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
+}
+
 describe('Config Screen component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -21,6 +25,10 @@ describe('Config Screen component', () => {
     // Mock space and environment IDs
     mockSdk.ids.space = 'test-space';
     mockSdk.ids.environment = 'test-environment';
+    mockSdk.hostnames = { delivery: 'cdn.contentful.com' };
+    mockSdk.notifier = {
+      error: vi.fn(),
+    };
   });
 
   it('should display the main heading and description', async () => {
@@ -54,10 +62,10 @@ describe('Config Screen component', () => {
       render(<ConfigScreen />);
     });
 
-    const tokenInput = screen.getByLabelText(/Contentful Delivery API - access token/i);
+    const tokenInput = screen.getByTestId('contentfulApiKey');
+
     expect(tokenInput).toBeInTheDocument();
-    expect(tokenInput).toHaveAttribute('type', 'password');
-    expect(tokenInput).toBeRequired();
+    expect(screen.getByLabelText(/Contentful Delivery API - access token/)).toBeInTheDocument();
   });
 
   it('should display the manage API keys link', async () => {
@@ -66,6 +74,7 @@ describe('Config Screen component', () => {
     });
 
     const link = screen.getByRole('link', { name: 'Manage API keys' });
+
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', 'https://app.contentful.com/spaces/test-space/api/keys');
     expect(link).toHaveAttribute('target', '_blank');
@@ -83,87 +92,33 @@ describe('Config Screen component', () => {
     ).toBeInTheDocument();
   });
 
-  it('should show loading state for content types initially', async () => {
-    // Mock a delayed response to simulate loading
-    mockCma.contentType.getMany.mockImplementation(
-      () =>
-        new Promise((resolve) =>
-          setTimeout(
-            () =>
-              resolve({
-                items: [],
-                total: 0,
-              }),
-            100
-          )
-        )
-    );
-
+  it('should display the content type implementation note', async () => {
     await act(async () => {
       render(<ConfigScreen />);
     });
 
-    expect(screen.getByText('Loading content types...')).toBeInTheDocument();
+    expect(
+      screen.getByText('Implement content type selection checkboxes in the next step')
+    ).toBeInTheDocument();
   });
 
-  it('should load and display content types when CMA is available', async () => {
-    const mockContentTypes = [
-      { sys: { id: 'blogPost' }, name: 'Blog Post' },
-      { sys: { id: 'article' }, name: 'Article' },
-    ];
-
-    mockCma.contentType.getMany.mockResolvedValue({
-      items: mockContentTypes,
-      total: 2,
-    });
-
-    await act(async () => {
-      render(<ConfigScreen />);
-    });
-
-    await waitFor(() => {
-      expect(
-        screen.getByText(
-          '2 content type(s) loaded successfully. Selection functionality will be implemented next.'
-        )
-      ).toBeInTheDocument();
-    });
-  });
-
-  it('should handle API token input changes', async () => {
+  it('should allow entering and updating the Contentful API key', async () => {
     const user = userEvent.setup();
     await act(async () => {
       render(<ConfigScreen />);
     });
 
-    const tokenInput = screen.getByLabelText(/Contentful Delivery API - access token/i);
-    await user.type(tokenInput, 'test-token-123');
-
-    expect(tokenInput).toHaveValue('test-token-123');
-  });
-
-  it('should validate required API token on configuration', async () => {
-    const user = userEvent.setup();
-    await act(async () => {
-      render(<ConfigScreen />);
-    });
-
-    // Simulate configuration attempt without token
-    await act(async () => {
-      await mockSdk.app.onConfigureCallback();
-    });
-
-    // Should show validation error
-    expect(screen.getByText(/API token is required/i)).toBeInTheDocument();
+    const tokenInput = screen.getByTestId('contentfulApiKey');
+    await user.type(tokenInput, 'my-api-key');
+    expect(tokenInput).toHaveValue('my-api-key');
   });
 
   it('should save configuration with valid parameters', async () => {
     const user = userEvent.setup();
-    const mockContentTypes = [{ sys: { id: 'blogPost' }, name: 'Blog Post' }];
 
-    mockCma.contentType.getMany.mockResolvedValue({
-      items: mockContentTypes,
-      total: 1,
+    // Mock successful fetch response
+    vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
+      return { ok: true, status: 200 };
     });
 
     await act(async () => {
@@ -171,12 +126,12 @@ describe('Config Screen component', () => {
     });
 
     // Enter API token
-    const tokenInput = screen.getByLabelText(/Contentful Delivery API - access token/i);
+    const tokenInput = screen.getByTestId('contentfulApiKey');
     await user.type(tokenInput, 'valid-token-123');
 
     // Simulate configuration
     await act(async () => {
-      await mockSdk.app.onConfigureCallback();
+      await saveAppInstallation();
     });
 
     // Verify parameters were saved
@@ -185,8 +140,7 @@ describe('Config Screen component', () => {
 
   it('should load existing parameters on mount', async () => {
     const existingParams = {
-      apiToken: 'existing-token',
-      selectedContentTypes: ['blogPost'],
+      contentfulApiKey: 'existing-token',
     };
 
     mockSdk.app.getParameters.mockResolvedValue(existingParams);
@@ -196,43 +150,48 @@ describe('Config Screen component', () => {
     });
 
     await waitFor(() => {
-      const tokenInput = screen.getByLabelText(/Contentful Delivery API - access token/i);
+      const tokenInput = screen.getByTestId('contentfulApiKey');
       expect(tokenInput).toHaveValue('existing-token');
     });
   });
 
-  it('should handle content types loading error gracefully', async () => {
-    mockCma.contentType.getMany.mockRejectedValue(new Error('Failed to load content types'));
+  it('should show error notification when validation fails', async () => {
+    const user = userEvent.setup();
+
+    // Mock failed fetch response
+    vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
+      return { ok: false, status: 401 };
+    });
 
     await act(async () => {
       render(<ConfigScreen />);
     });
 
-    await waitFor(() => {
-      expect(screen.getByText(/Error loading content types/i)).toBeInTheDocument();
+    const contentfulApiKeyInput = screen.getByTestId('contentfulApiKey');
+    await user.type(contentfulApiKeyInput, 'invalid-api-key-123');
+
+    // Simulate configuration attempt
+    await act(async () => {
+      await saveAppInstallation();
     });
+
+    // Verify error notification was shown
+    expect(mockSdk.notifier.error).toHaveBeenCalledWith(
+      'The app configuration was not saved. Please try again.'
+    );
   });
 
-  it('should show progress indicator during content types loading', async () => {
-    // Mock a slow response to test progress
-    mockCma.contentType.getMany.mockImplementation(
-      () =>
-        new Promise((resolve) =>
-          setTimeout(
-            () =>
-              resolve({
-                items: [],
-                total: 0,
-              }),
-            100
-          )
-        )
-    );
-
+  it('should handle empty API key validation', async () => {
     await act(async () => {
       render(<ConfigScreen />);
     });
 
-    expect(screen.getByText('Loading content types...')).toBeInTheDocument();
+    await act(async () => {
+      await saveAppInstallation();
+    });
+
+    expect(mockSdk.notifier.error).toHaveBeenCalledWith(
+      'The app configuration was not saved. Please try again.'
+    );
   });
 });
