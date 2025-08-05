@@ -2,10 +2,13 @@ import { vi } from 'vitest';
 
 const mockSdk: any = {
   app: {
-    onConfigure: vi.fn(),
+    onConfigure: vi.fn().mockImplementation((callback: () => Promise<any>) => {
+      mockSdk.app.onConfigureCallback = callback;
+    }),
     getParameters: vi.fn().mockReturnValueOnce({}),
     setReady: vi.fn(),
     getCurrentState: vi.fn(),
+    onConfigureCallback: null as (() => Promise<any>) | null,
   },
   ids: {
     app: 'test-app',
