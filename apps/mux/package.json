@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "create-app-definition": "contentful-app-scripts create-app-definition",
-    "build:functions": "contentful-app-scripts build-functions --ci",
+    "build:functions": "cd functions && npm ci && cd .. && contentful-app-scripts build-functions --ci",
     "build": "rimraf ./build && npm run build-frontend && npm run build:functions",
     "build-frontend": "cd frontend && npm ci --include=dev && BUILD_PATH=../build npm run build",
     "build:dev": "rimraf ./build && npm run build-frontend",
