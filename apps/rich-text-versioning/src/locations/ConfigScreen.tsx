@@ -1,5 +1,13 @@
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Box, Flex, Heading, Note, Paragraph, TextLink } from '@contentful/f36-components';
+import {
+  Box,
+  Flex,
+  Heading,
+  Note,
+  Paragraph,
+  TextLink,
+  FormControl,
+} from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
@@ -7,6 +15,8 @@ import { styles } from './ConfigScreen.styles';
 import ContentfulApiKeyInput, {
   validateContentfulApiKey,
 } from '../components/ContentfulApiKeyInput';
+import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
+import { ContentType, getRichTextFields, TargetState } from '../utils';
 
 interface AppInstallationParameters {
   contentfulApiKey: string;
@@ -17,6 +27,7 @@ const ConfigScreen = () => {
     contentfulApiKey: '',
   });
   const [contentfulApiKeyIsValid, setContentfulApiKeyIsValid] = useState(true);
+  const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
   const sdk = useSDK<ConfigAppSDK>();
 
   const onConfigure = useCallback(async () => {
@@ -30,11 +41,39 @@ const ConfigScreen = () => {
 
     const currentState = await sdk.app.getCurrentState();
 
+    const targetState: TargetState = {
+      EditorInterface: {
+        ...currentState?.EditorInterface,
+      },
+    };
+
+    for (const contentType of selectedContentTypes) {
+      try {
+        const contentTypeData = await sdk.cma.contentType.get({
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environment,
+          contentTypeId: contentType.id,
+        });
+
+        const richTextFields = getRichTextFields(contentTypeData);
+
+        if (richTextFields.length > 0) {
+          targetState.EditorInterface[contentType.id] = {
+            controls: richTextFields.map((field) => ({
+              fieldId: field.id,
+            })),
+          };
+        }
+      } catch (error) {
+        console.error(`Error fetching content type ${contentType.id}:`, error);
+      }
+    }
+
     return {
       parameters,
-      targetState: currentState,
+      targetState,
     };
-  }, [parameters, sdk]);
+  }, [parameters, selectedContentTypes, sdk]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -103,11 +142,20 @@ const ConfigScreen = () => {
             this anytime by clicking 'Edit' on the rich text field type and adjust the Appearance
             settings in your content type.
           </Paragraph>
-          <Box marginBottom="spacingM">
-            <Note variant="neutral">
-              Implement content type selection checkboxes in the next step
-            </Note>
-          </Box>
+
+          <FormControl id="contentTypes">
+            <FormControl.Label>Content types</FormControl.Label>
+            <ContentTypeMultiSelect
+              selectedContentTypes={selectedContentTypes}
+              setSelectedContentTypes={setSelectedContentTypes}
+              sdk={sdk}
+              cma={sdk.cma}
+              filterContentTypes={(contentType) => {
+                const richTextFields = getRichTextFields(contentType);
+                return richTextFields.length > 0;
+              }}
+            />
+          </FormControl>
         </Box>
       </Box>
     </Flex>

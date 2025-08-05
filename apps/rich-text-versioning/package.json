@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@contentful/app-sdk": "4.36.0",
+    "@contentful/app-sdk": "4.39.0",
     "@contentful/f36-components": "4.81.1",
+    "@contentful/f36-multiselect": "^4.81.1",
     "@contentful/f36-tokens": "4.2.0",
     "@contentful/react-apps-toolkit": "1.2.16",
     "contentful-management": "11.54.4",

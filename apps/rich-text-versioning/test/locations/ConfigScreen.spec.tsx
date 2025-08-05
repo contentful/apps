@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { mockCma, mockSdk } from '../../test/mocks';
 import ConfigScreen from '../../src/locations/ConfigScreen';
+import { OnConfigureHandlerReturn } from '@contentful/app-sdk';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -19,9 +20,11 @@ describe('Config Screen component', () => {
     // Reset mock implementations
     mockSdk.app.getParameters.mockResolvedValue({});
     mockSdk.app.getCurrentState.mockResolvedValue({});
-    mockSdk.app.onConfigure.mockImplementation((callback: () => Promise<any>) => {
-      mockSdk.app.onConfigureCallback = callback;
-    });
+    mockSdk.app.onConfigure.mockImplementation(
+      (callback: () => Promise<OnConfigureHandlerReturn>) => {
+        mockSdk.app.onConfigureCallback = callback;
+      }
+    );
     // Mock space and environment IDs
     mockSdk.ids.space = 'test-space';
     mockSdk.ids.environment = 'test-environment';
@@ -92,14 +95,13 @@ describe('Config Screen component', () => {
     ).toBeInTheDocument();
   });
 
-  it('should display the content type implementation note', async () => {
+  it('should display the content type multiselect', async () => {
     await act(async () => {
       render(<ConfigScreen />);
     });
 
-    expect(
-      screen.getByText('Implement content type selection checkboxes in the next step')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Content types')).toBeInTheDocument();
+    expect(screen.getByText('Select one or more')).toBeInTheDocument();
   });
 
   it('should allow entering and updating the Contentful API key', async () => {
