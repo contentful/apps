@@ -1,21 +1,22 @@
 {
-  "actions": [
+  "functions": [
     {
-      "id": "muxGetSignedUrlTokens",
+      "id": "onPublish",
+      "name": "onPublish",
+      "description": "This function handles the 'Entry Publish' webhook event from Contentful to update any pending Mux Asset data in Mux, based on entries in Contentful.",
+      "path": "functions/src/onPublish.js",
+      "entryFile": "functions/src/onPublish.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appevent.handler"]
+    },
+    {
+      "id": "getSignedUrlTokens",
       "name": "Get signed URL tokens",
-      "category": "Custom",
-      "description": "This action returns signed JWT tokens for securing Mux video playback",
-      "type": "function",
-      "path": "actions/get-jwt-tokens.js",
-      "entryFile": "./app-actions/src/actions/get-jwt-tokens.ts",
-      "allowNetworks": [],
-      "parameters": [
-        {
-          "id": "playbackId",
-          "name": "playbackId",
-          "type": "Symbol"
-        }
-      ]
+      "description": "This action returns signed JWT tokens for securing Mux video playback.",
+      "path": "functions/src/getSignedUrlTokens.js",
+      "entryFile": "functions/src/getSignedUrlTokens.ts",
+      "allowNetworks": ["api.contentful.com", "https://api.mux.com"],
+      "accepts": ["appaction.call"]
     }
   ]
 }

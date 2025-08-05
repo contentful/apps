@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@mux/mux-node": "^12.2.0",
     "contentful-management": "^11.54.1"
   },
   "scripts": {
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@contentful/app-scripts": "^2.5.5",
+    "@contentful/node-apps-toolkit": "^3.13.1",
     "@tsconfig/recommended": "^1.0.8",
     "@types/node": "^22.15.32",
     "cross-env": "7.0.3",
