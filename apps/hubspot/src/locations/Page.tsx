@@ -1,16 +1,177 @@
-import { Paragraph } from '@contentful/f36-components';
+import React, { useEffect, useState } from 'react';
+import { Box, Flex, Heading, Spinner, Text, Note, TextLink } from '@contentful/f36-components';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import ConfigEntryService from '../utils/ConfigEntryService';
+import { styles } from './Page.styles';
+import { ConnectedFields, EntryWithContentType, getUniqueFieldId } from '../utils/utils';
+import ConnectedEntriesTable from '../components/ConnectedEntriesTable';
+import ConnectedFieldsModal from '../components/ConnectedFieldsModal';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 
-const Page = () => {
+const Page: React.FC = () => {
   const sdk = useSDK<PageAppSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
+  const [entriesWithContentType, setEntriesWithContentType] = useState<EntryWithContentType[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [connectedFields, setConnectedFields] = useState<ConnectedFields>({});
+  const defaultLocale = sdk.locales.default;
+  const [modalEntry, setModalEntry] = useState<EntryWithContentType | null>(null);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
-  return <Paragraph>Hello Page Component (AppId: {sdk.ids.app})</Paragraph>;
+  useEffect(() => {
+    const fetchConnectedEntries = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const configService = new ConfigEntryService(sdk.cma, defaultLocale);
+        const connectedFields = await configService.getConnectedFields();
+        setConnectedFields(connectedFields);
+        const entryIds = Object.keys(connectedFields);
+        if (entryIds.length === 0) {
+          setEntriesWithContentType([]);
+          setLoading(false);
+          return;
+        }
+
+        const entriesResponse = await sdk.cma.entry.getMany({ query: { 'sys.id[in]': entryIds } });
+        const fetchEntriesWithContentType = await Promise.all(
+          entriesResponse.items.map(async (entry) => {
+            const contentType = await sdk.cma.contentType.get({
+              contentTypeId: entry.sys.contentType.sys.id,
+            });
+            return { entry, contentType };
+          })
+        );
+
+        setEntriesWithContentType(fetchEntriesWithContentType);
+      } catch (e) {
+        setEntriesWithContentType([]);
+        setError(
+          'The app cannot load content. Try refreshing, or reviewing your app configuration.'
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchConnectedEntries();
+  }, [sdk]);
+
+  function handleManageFields(entry: EntryWithContentType) {
+    setModalEntry(entry);
+    setModalOpen(true);
+  }
+
+  function handleCloseModal() {
+    setModalOpen(false);
+    setModalEntry(null);
+  }
+
+  function handleViewEntry() {
+    if (modalEntry) {
+      sdk.navigator.openEntry(modalEntry.entry.sys.id);
+    }
+  }
+
+  async function handleDisconnectFields(selectedFieldIds: string[]) {
+    if (!modalEntry) return;
+    const entryId = modalEntry.entry.sys.id;
+    const configService = new ConfigEntryService(sdk.cma, defaultLocale);
+
+    try {
+      const currentFields = await configService.getEntryConnectedFields(entryId);
+
+      const filteredFields = currentFields.filter((field) => {
+        const uniqueId = getUniqueFieldId(field.fieldId, field.locale);
+        return !selectedFieldIds.includes(uniqueId);
+      });
+
+      if (filteredFields.length === 0) {
+        await configService.removeEntryConnectedFields(entryId);
+      } else {
+        await configService.updateEntryConnectedFields(entryId, filteredFields);
+      }
+
+      const updatedConnectedFields = await configService.getConnectedFields();
+      setConnectedFields(updatedConnectedFields);
+
+      const updatedConnectedEntries = entriesWithContentType.filter(
+        ({ entry }: EntryWithContentType) =>
+          updatedConnectedFields[entry.sys.id] && updatedConnectedFields[entry.sys.id].length > 0
+      );
+      setEntriesWithContentType(updatedConnectedEntries);
+
+      setModalOpen(false);
+      setModalEntry(null);
+
+      sdk.notifier.success(
+        selectedFieldIds.length === 1
+          ? 'Field disconnected successfully.'
+          : `${selectedFieldIds.length} fields disconnected successfully.`
+      );
+    } catch (e) {
+      sdk.notifier.error('Failed to disconnect field(s). Please try again.');
+    }
+  }
+
+  const connectedFieldsForEntry = modalEntry ? connectedFields[modalEntry.entry.sys.id] : undefined;
+
+  return (
+    <Flex justifyContent="center" paddingLeft="spacing2Xl" paddingRight="spacing2Xl">
+      <Box className={styles.container} padding="spacingL">
+        <Heading as="h1" marginBottom="spacingM">
+          Hubspot
+        </Heading>
+        {loading ? (
+          <Flex alignItems="center" justifyContent="center" className={styles.loading}>
+            <Spinner size="large" />
+            <Text marginLeft="spacingM">Loading...</Text>
+          </Flex>
+        ) : error ? (
+          <Note
+            variant="negative"
+            title="The app cannot load content."
+            className={styles.errorBanner}>
+            <Text>
+              Try refreshing, or reviewing your{' '}
+              <TextLink href="#" onClick={() => sdk.navigator.openAppConfig()}>
+                app configuration
+              </TextLink>
+              .
+            </Text>
+          </Note>
+        ) : entriesWithContentType.length === 0 ? (
+          <Text fontColor="gray600" marginTop="spacingL">
+            No connected content. Sync entry fields from the entry page sidebar to get started.
+          </Text>
+        ) : (
+          <>
+            <Text fontColor="gray600" marginBottom="spacingL">
+              View the details of your synced entry fields. Click Manage fields to connect or
+              disconnect content.
+            </Text>
+            <ConnectedEntriesTable
+              entries={entriesWithContentType}
+              connectedFields={connectedFields}
+              defaultLocale={defaultLocale}
+              onManageFields={handleManageFields}
+            />
+          </>
+        )}
+        {modalEntry && connectedFieldsForEntry && (
+          <ConnectedFieldsModal
+            entryWithContentType={modalEntry}
+            isShown={modalOpen}
+            onClose={handleCloseModal}
+            onViewEntry={handleViewEntry}
+            entryConnectedFields={connectedFieldsForEntry}
+            defaultLocale={defaultLocale}
+            onAppConfigRedirect={() => sdk.navigator.openAppConfig()}
+            onDisconnect={handleDisconnectFields}
+          />
+        )}
+      </Box>
+    </Flex>
+  );
 };
 
 export default Page;
