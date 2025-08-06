@@ -164,9 +164,9 @@ const ConfigScreen = () => {
             Set up Rich Text Versioning
           </Heading>
           <Paragraph marginBottom="spacing2Xl">
-            Select the content type(s) you want to use with Rich Text Versioning. You can change
-            this anytime by clicking 'Edit' on the rich text field type and adjust the Appearance
-            settings in your content type.
+            This app allows content creators to visually compare changes in a rich text field
+            against the last published version. A two-column view highlights added, removed, and
+            modified content, including referenced entries and assets.
           </Paragraph>
 
           {/* Configure Access Section */}
@@ -205,9 +205,9 @@ const ConfigScreen = () => {
               Assign rich text fields
             </Heading>
             <Paragraph marginBottom="spacingL">
-              Select the specific rich text fields you want to use with Rich Text Versioning. You
-              can change this anytime by clicking 'Edit' on the rich text field type and adjust the
-              Appearance settings in your content type.
+              Select the content type(s) you want to use with Rich Text Versioning. You can change
+              this anytime by clicking 'Edit' on the rich text field type and adjust the Appearance
+              settings in your content type.
             </Paragraph>
             {
               <FormControl id="richTextFields">
