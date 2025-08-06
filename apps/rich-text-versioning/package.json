@@ -5,11 +5,17 @@
   "dependencies": {
     "@contentful/app-sdk": "4.36.0",
     "@contentful/f36-components": "4.81.1",
+    "@contentful/f36-multiselect": "^4.81.1",
     "@contentful/f36-tokens": "4.2.0",
+    "@contentful/field-editor-rich-text": "3.16.14",
     "@contentful/react-apps-toolkit": "1.2.16",
+    "@contentful/rich-text-html-renderer": "^17.1.0",
+    "@contentful/rich-text-react-renderer": "^16.1.0",
+    "contentful": "^11.7.15",
     "contentful-management": "11.54.4",
     "emotion": "10.0.0",
     "happy-dom": "^18.0.1",
+    "html-diff-ts": "^1.4.2",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
