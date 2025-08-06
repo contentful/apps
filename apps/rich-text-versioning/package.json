@@ -16,6 +16,7 @@
     "contentful-management": "11.54.4",
     "emotion": "10.0.27",
     "happy-dom": "^18.0.1",
+    "html-diff-ts": "^1.4.2",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },

@@ -30,33 +30,18 @@ const Field = () => {
       console.error('Error creating CDA client:', error);
       return null;
     }
-  }, []);
+  }, [sdk.ids.space, sdk.ids.environment, sdk.parameters]);
 
   useAutoResizer();
 
   useEffect(() => {
-    // Fetch initial value
-    setFieldValue(sdk.field.getValue());
-
-    // Set up listener for future changes
-    const detachValueChangeHandler = sdk.field.onValueChanged(async (value: Document) => {
-      setFieldValue(value);
-    });
-
-    return detachValueChangeHandler;
-  }, [sdk.field]);
-
-  useEffect(() => {
-    // Fetch initial value
-    setEntrySys(sdk.entry.getSys());
-
-    // Set up listener for future changes
-    const detachValueChangeHandler = sdk.entry.onSysChanged(async (sys: EntrySys) => {
-      setEntrySys(sys);
-    });
-
-    return detachValueChangeHandler;
-  }, [sdk.entry]);
+    try {
+      setFieldValue(sdk.field.getValue());
+      setEntrySys(sdk.entry.getSys());
+    } catch (error) {
+      console.error('Error fetching field value:', error);
+    }
+  }, []);
 
   const isChanged = (sys: EntrySys) => {
     return !!sys?.publishedVersion && sys?.version >= sys?.publishedVersion + 2;
@@ -97,7 +82,6 @@ const Field = () => {
       <RichTextEditor sdk={sdk} isInitiallyDisabled={false} />
       {fieldValue && entrySys && (
         <Button
-          testId="view-diff-button"
           variant="primary"
           size="small"
           style={{ marginTop: tokens.spacingM }}

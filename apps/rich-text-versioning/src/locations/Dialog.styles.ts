@@ -1,6 +1,14 @@
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
 
+const sectionHeadingBase = {
+  color: tokens.gray900,
+  fontFamily: 'Geist',
+  fontWeight: tokens.fontWeightDemiBold,
+  fontSize: tokens.fontSizeXl,
+  fontStyle: 'normal',
+};
+
 const styles = css({
   '.grid-item': {
     border: `1px solid ${tokens.gray200}`,
@@ -10,13 +18,17 @@ const styles = css({
     minHeight: 'auto',
   },
 
-  '.change-badge': {
-    marginLeft: 'auto',
+  '.section-heading-base': {
+    ...sectionHeadingBase,
   },
 
-  // Add spacing between all HTML blocks
-  '.diff > *': {
+  '.section-heading-margin': {
+    ...sectionHeadingBase,
     marginBottom: tokens.spacingL,
+  },
+
+  '.change-badge': {
+    marginLeft: 'auto',
   },
 });
 

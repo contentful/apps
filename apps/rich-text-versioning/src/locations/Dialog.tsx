@@ -1,5 +1,13 @@
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { Badge, Button, Flex, Grid, GridItem, Box, Subheading } from '@contentful/f36-components';
+import {
+  Badge,
+  Button,
+  Flex,
+  Grid,
+  GridItem,
+  SectionHeading,
+  Box,
+} from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import { Document } from '@contentful/rich-text-types';
@@ -32,25 +40,23 @@ const Dialog = () => {
         marginRight="spacingM">
         <GridItem className="grid-item">
           <Flex alignItems="space-between">
-            <Subheading>Current version</Subheading>
+            <SectionHeading className="section-heading-margin">Current version</SectionHeading>
             <Badge variant="secondary" className="change-badge">
               {changeCount} change{changeCount !== 1 ? 's' : ''}
             </Badge>
           </Flex>
-          {publishedField && (
-            <HtmlDiffViewer
-              currentField={currentField}
-              publishedField={publishedField}
-              onChangeCount={setChangeCount}
-            />
-          )}
+          <HtmlDiffViewer
+            currentField={currentField}
+            publishedField={publishedField}
+            onChangeCount={setChangeCount}
+          />
         </GridItem>
         <GridItem className="grid-item">
-          <Subheading>Published version</Subheading>
+          <SectionHeading className="section-heading-base">Published version</SectionHeading>
           <Box className="diff">{documentToReactComponents(publishedField)}</Box>
         </GridItem>
       </Grid>
-      <Flex justifyContent="flex-end" margin="spacingM">
+      <Flex justifyContent="flex-end" marginBottom="spacingM" marginRight="spacingM">
         <Button
           variant="secondary"
           size="small"
