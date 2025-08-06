@@ -9,7 +9,7 @@
     "@contentful/f36-tokens": "4.2.0",
     "@contentful/react-apps-toolkit": "1.2.16",
     "contentful-management": "11.54.4",
-    "emotion": "10.0.0",
+    "emotion": "10.0.27",
     "happy-dom": "^18.0.1",
     "react": "18.3.1",
     "react-dom": "18.3.1"
