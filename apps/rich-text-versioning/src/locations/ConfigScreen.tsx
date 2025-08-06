@@ -19,7 +19,7 @@ import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 import {
   getRichTextFields,
   TargetState,
-  RichTextFieldWithContext,
+  FieldWithContext,
   processContentTypesToFields,
   restoreSelectedFields,
 } from '../utils';
@@ -34,8 +34,8 @@ const ConfigScreen = () => {
     contentfulApiKey: '',
   });
   const [contentfulApiKeyIsValid, setContentfulApiKeyIsValid] = useState(true);
-  const [availableFields, setAvailableFields] = useState<RichTextFieldWithContext[]>([]);
-  const [selectedFields, setSelectedFields] = useState<RichTextFieldWithContext[]>([]);
+  const [availableFields, setAvailableFields] = useState<FieldWithContext[]>([]);
+  const [selectedFields, setSelectedFields] = useState<FieldWithContext[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const sdk = useSDK<ConfigAppSDK>();
 
@@ -102,7 +102,7 @@ const ConfigScreen = () => {
     };
 
     // Group selected fields by content type
-    const fieldsByContentType = selectedFields.reduce<Record<string, RichTextFieldWithContext[]>>(
+    const fieldsByContentType = selectedFields.reduce<Record<string, FieldWithContext[]>>(
       (acc, field) => {
         if (!acc[field.contentTypeId]) {
           acc[field.contentTypeId] = [];

@@ -6,13 +6,13 @@ export interface ContentType {
   name: string;
 }
 
-export interface RichTextField {
+export interface Field {
   id: string;
   name: string;
   type: string;
 }
 
-export interface RichTextFieldWithContext {
+export interface FieldWithContext {
   fieldUniqueId: string;
   displayName: string;
   contentTypeId: string;
@@ -23,9 +23,7 @@ export interface TargetState {
   EditorInterface: AppState['EditorInterface'];
 }
 
-export const getRichTextFields = (contentType: {
-  fields?: ContentTypeField[];
-}): RichTextField[] => {
+export const getRichTextFields = (contentType: { fields?: ContentTypeField[] }): Field[] => {
   if (!contentType.fields) return [];
 
   return contentType.fields
@@ -39,7 +37,7 @@ export const getRichTextFields = (contentType: {
 
 export const processContentTypesToFields = (
   contentTypes: ContentTypeProps[]
-): RichTextFieldWithContext[] => {
+): FieldWithContext[] => {
   return contentTypes
     .filter((ct) => getRichTextFields(ct).length > 0)
     .flatMap((contentType) =>
@@ -54,9 +52,9 @@ export const processContentTypesToFields = (
 };
 
 export const restoreSelectedFields = (
-  availableFields: RichTextFieldWithContext[],
+  availableFields: FieldWithContext[],
   currentState: TargetState
-): RichTextFieldWithContext[] => {
+): FieldWithContext[] => {
   const currentEditorInterface = currentState?.EditorInterface || {};
 
   return availableFields.filter((field) => {

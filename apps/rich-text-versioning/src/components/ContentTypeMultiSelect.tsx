@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Box, Stack, Pill, Paragraph, Flex } from '@contentful/f36-components';
+import { Box, Stack, Pill } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
-import { RichTextFieldWithContext } from '../utils';
+import { FieldWithContext as FieldWithContext } from '../utils';
 
 interface ContentTypeMultiSelectProps {
-  availableFields: RichTextFieldWithContext[];
-  selectedFields: RichTextFieldWithContext[];
-  onSelectionChange: (fields: RichTextFieldWithContext[]) => void;
+  availableFields: FieldWithContext[];
+  selectedFields: FieldWithContext[];
+  onSelectionChange: (fields: FieldWithContext[]) => void;
   placeholder?: string;
   searchPlaceholder?: string;
   isDisabled?: boolean;
@@ -20,9 +20,8 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   placeholder = 'Select one or more',
   searchPlaceholder = 'Search content types',
   isDisabled = false,
-  isLoading = false,
 }) => {
-  const [filteredFields, setFilteredFields] = useState<RichTextFieldWithContext[]>(availableFields);
+  const [filteredFields, setFilteredFields] = useState<FieldWithContext[]>(availableFields);
 
   const getPlaceholderText = () => {
     if (selectedFields.length === 0) return placeholder;
@@ -38,7 +37,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
     setFilteredFields(newFilteredFields);
   };
 
-  const handleFieldToggle = (field: RichTextFieldWithContext, checked: boolean) => {
+  const handleFieldToggle = (field: FieldWithContext, checked: boolean) => {
     if (checked) {
       onSelectionChange([...selectedFields, field]);
     } else {
