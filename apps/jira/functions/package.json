@@ -29,7 +29,7 @@
     "mocha": "^10.7.3",
     "nock": "^11.9.1",
     "rimraf": "^3.0.2",
-    "serverless": "^3.31.0",
+    "serverless": "^4.18.0",
     "serverless-domain-manager": "3.3.2",
     "serverless-offline": "^8.8.0",
     "sinon": "^7.5.0",
