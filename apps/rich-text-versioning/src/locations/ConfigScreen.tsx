@@ -159,11 +159,11 @@ const ConfigScreen = () => {
   return (
     <Flex justifyContent="center" alignItems="center">
       <Flex justifyContent="center" className={styles.configScreenContainer}>
-        <Box margin="spacing2Xl">
+        <Box margin="spacingL">
           <Heading as="h2" marginBottom="spacingS">
             Set up Rich Text Versioning
           </Heading>
-          <Paragraph marginBottom="spacingXl">
+          <Paragraph marginBottom="spacing2Xl">
             Select the content type(s) you want to use with Rich Text Versioning. You can change
             this anytime by clicking 'Edit' on the rich text field type and adjust the Appearance
             settings in your content type.
@@ -200,7 +200,7 @@ const ConfigScreen = () => {
           </Box>
 
           {/* Assign Rich Text Fields Section */}
-          <Box marginBottom="spacing2Xl">
+          <Box>
             <Heading as="h3" marginBottom="spacingXs">
               Assign rich text fields
             </Heading>
