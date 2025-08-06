@@ -1,22 +1,21 @@
 import { Field } from './Field';
 import { FieldRegistry } from './fieldRegistry';
 
-// We are not supporting rich text fields for now
-export class RichTextField extends Field {
+export class ExternalResourceField extends Field {
   constructor(id: string, name: string, entryContentTypeId: string, localized: boolean) {
     super(id, name, entryContentTypeId, localized);
   }
 
   get type(): string {
-    return 'RichTextField';
+    return 'ExternalResourceField';
   }
 
   public override set selected(value: boolean) {
     return;
   }
 
-  static fromSerialized(serializedField: any): RichTextField {
-    const field = new RichTextField(
+  static fromSerialized(serializedField: any): ExternalResourceField {
+    const field = new ExternalResourceField(
       serializedField.id,
       serializedField.name,
       serializedField.entryContentTypeId,
@@ -26,16 +25,20 @@ export class RichTextField extends Field {
   }
 
   generateQuery(): string {
-    throw new Error('Rich text not supported');
+    throw new Error('External resource not supported');
   }
 
   generateLiquidTagForType(template: string): string[] {
-    throw new Error('Rich text not supported');
+    throw new Error('External resource not supported');
   }
 
   isEnabledForGenerate(): boolean {
     return false;
   }
+
+  isEnabledForCreate(): boolean {
+    return false;
+  }
 }
 
-FieldRegistry.registerFieldType('RichTextField', RichTextField.fromSerialized);
+FieldRegistry.registerFieldType('ExternalResourceField', ExternalResourceField.fromSerialized);

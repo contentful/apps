@@ -17,6 +17,7 @@ vi.mock('contentful-resolve-response', () => {
 
 // Import the mocked function for use in tests
 import resolveResponse from 'contentful-resolve-response';
+import { ExternalResourceField } from '../../src/fields/ExternalResourceField';
 
 describe('FieldsFactory', () => {
   const mockCma = {
@@ -474,6 +475,34 @@ describe('FieldsFactory', () => {
       expect((fieldsFactory as any).getDisplayFieldValue(fieldValueMulti, 'title')).toBe(
         'English Title'
       );
+    });
+
+    it('should create an ExternalResourceField instance with correct properties', async () => {
+      const mockEntry = [
+        {
+          fields: {
+            externalReference: {
+              sys: { type: 'ResourceLink', linkType: 'Contentful:Entry', urn: 'an-id' },
+            },
+          },
+        },
+      ];
+      (resolveResponse as any).mockReturnValue(mockEntry);
+
+      mockCma.contentType.get.mockResolvedValue({
+        fields: [{ id: 'externalReference', type: 'ResourceLink', localized: false }],
+        sys: {
+          id: 'externalArticle',
+        },
+      });
+
+      const result = await createFields(entryId, entryContentTypeId, mockCma);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toBeInstanceOf(ExternalResourceField);
+      const fieldInstance = result[0] as ExternalResourceField;
+      expect(fieldInstance.id).toBe('externalReference');
+      expect(fieldInstance.entryContentTypeId).toBe('externalArticle');
+      expect(fieldInstance.localized).toBe(false);
     });
   });
 });

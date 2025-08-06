@@ -15,6 +15,7 @@ import { ReferenceItem } from './ReferenceItem';
 import { RichTextField } from './RichTextField';
 import { TextArrayField } from './TextArrayField';
 import resolveResponse from 'contentful-resolve-response';
+import { ExternalResourceField } from './ExternalResourceField';
 
 export class FieldsFactory {
   private contentTypes: { [key: string]: ContentTypeProps };
@@ -134,6 +135,8 @@ export class FieldsFactory {
       fieldClass = RichTextField;
     } else if (fieldInfo.type === 'Location') {
       fieldClass = LocationField;
+    } else if (fieldInfo.type === 'ResourceLink') {
+      fieldClass = ExternalResourceField;
     } else {
       fieldClass = BasicField;
     }
