@@ -9,18 +9,65 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useCMA: () => mockCma,
 }));
 
+interface RichTextFieldWithContext {
+  id: string;
+  name: string;
+  contentTypeId: string;
+  contentTypeName: string;
+  displayName: string;
+}
+
 describe('ContentTypeMultiSelect component', () => {
-  const mockContentTypes: ContentType[] = [
-    { id: 'blog-post', name: 'Blog Post' },
-    { id: 'article', name: 'Article' },
-    { id: 'page', name: 'Page' },
+  const mockRichTextFields: RichTextFieldWithContext[] = [
+    {
+      id: 'blog-post.content',
+      name: 'content',
+      contentTypeId: 'blog-post',
+      contentTypeName: 'Blog Post',
+      displayName: 'Blog Post > content',
+    },
+    {
+      id: 'article.body',
+      name: 'body',
+      contentTypeId: 'article',
+      contentTypeName: 'Article',
+      displayName: 'Article > body',
+    },
+    {
+      id: 'page.description',
+      name: 'description',
+      contentTypeId: 'page',
+      contentTypeName: 'Page',
+      displayName: 'Page > description',
+    },
   ];
 
   const mockCmaResponse = {
     items: [
-      { sys: { id: 'blog-post' }, name: 'Blog Post' },
-      { sys: { id: 'article' }, name: 'Article' },
-      { sys: { id: 'page' }, name: 'Page' },
+      {
+        sys: { id: 'blog-post' },
+        name: 'Blog Post',
+        fields: [
+          { id: 'content', name: 'content', type: 'RichText' },
+          { id: 'title', name: 'title', type: 'Text' },
+        ],
+      },
+      {
+        sys: { id: 'article' },
+        name: 'Article',
+        fields: [
+          { id: 'body', name: 'body', type: 'RichText' },
+          { id: 'author', name: 'author', type: 'Text' },
+        ],
+      },
+      {
+        sys: { id: 'page' },
+        name: 'Page',
+        fields: [
+          { id: 'description', name: 'description', type: 'RichText' },
+          { id: 'slug', name: 'slug', type: 'Text' },
+        ],
+      },
     ],
     total: 3,
   };
@@ -34,13 +81,13 @@ describe('ContentTypeMultiSelect component', () => {
   });
 
   it('should render the multiselect component', async () => {
-    const setSelectedContentTypes = vi.fn();
+    const setSelectedRichTextFields = vi.fn();
 
     await act(async () => {
       render(
         <ContentTypeMultiSelect
-          selectedContentTypes={[]}
-          setSelectedContentTypes={setSelectedContentTypes}
+          selectedRichTextFields={[]}
+          setSelectedRichTextFields={setSelectedRichTextFields}
           sdk={mockSdk}
           cma={mockCma}
         />
@@ -48,18 +95,18 @@ describe('ContentTypeMultiSelect component', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Select one or more')).toBeInTheDocument();
+      expect(screen.getByText('Select one or more rich text fields')).toBeInTheDocument();
     });
   });
 
-  it('should display selected content types as pills', async () => {
-    const setSelectedContentTypes = vi.fn();
+  it('should display selected rich text fields as pills', async () => {
+    const setSelectedRichTextFields = vi.fn();
 
     await act(async () => {
       render(
         <ContentTypeMultiSelect
-          selectedContentTypes={mockContentTypes}
-          setSelectedContentTypes={setSelectedContentTypes}
+          selectedRichTextFields={mockRichTextFields}
+          setSelectedRichTextFields={setSelectedRichTextFields}
           sdk={mockSdk}
           cma={mockCma}
         />
@@ -67,20 +114,20 @@ describe('ContentTypeMultiSelect component', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Blog Post')).toBeInTheDocument();
-      expect(screen.getByText('Article')).toBeInTheDocument();
-      expect(screen.getByText('Page')).toBeInTheDocument();
+      expect(screen.getByTestId('pill-Blog-Post-->-content')).toBeInTheDocument();
+      expect(screen.getByTestId('pill-Article-->-body')).toBeInTheDocument();
+      expect(screen.getByTestId('pill-Page-->-description')).toBeInTheDocument();
     });
   });
 
-  it('should show placeholder text when no content types are selected', async () => {
-    const setSelectedContentTypes = vi.fn();
+  it('should show placeholder text when no rich text fields are selected', async () => {
+    const setSelectedRichTextFields = vi.fn();
 
     await act(async () => {
       render(
         <ContentTypeMultiSelect
-          selectedContentTypes={[]}
-          setSelectedContentTypes={setSelectedContentTypes}
+          selectedRichTextFields={[]}
+          setSelectedRichTextFields={setSelectedRichTextFields}
           sdk={mockSdk}
           cma={mockCma}
         />
@@ -88,18 +135,18 @@ describe('ContentTypeMultiSelect component', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Select one or more')).toBeInTheDocument();
+      expect(screen.getByText('Select one or more rich text fields')).toBeInTheDocument();
     });
   });
 
-  it('should show single content type name when one is selected', async () => {
-    const setSelectedContentTypes = vi.fn();
+  it('should show single rich text field name when one is selected', async () => {
+    const setSelectedRichTextFields = vi.fn();
 
     await act(async () => {
       render(
         <ContentTypeMultiSelect
-          selectedContentTypes={[mockContentTypes[0]]}
-          setSelectedContentTypes={setSelectedContentTypes}
+          selectedRichTextFields={[mockRichTextFields[0]]}
+          setSelectedRichTextFields={setSelectedRichTextFields}
           sdk={mockSdk}
           cma={mockCma}
         />
@@ -107,18 +154,18 @@ describe('ContentTypeMultiSelect component', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('pill-Blog Post')).toBeInTheDocument();
+      expect(screen.getByTestId('pill-Blog-Post-->-content')).toBeInTheDocument();
     });
   });
 
-  it('should show multiple content types with count when more than one is selected', async () => {
-    const setSelectedContentTypes = vi.fn();
+  it('should show multiple rich text fields with count when more than one is selected', async () => {
+    const setSelectedRichTextFields = vi.fn();
 
     await act(async () => {
       render(
         <ContentTypeMultiSelect
-          selectedContentTypes={mockContentTypes}
-          setSelectedContentTypes={setSelectedContentTypes}
+          selectedRichTextFields={mockRichTextFields}
+          setSelectedRichTextFields={setSelectedRichTextFields}
           sdk={mockSdk}
           cma={mockCma}
         />
@@ -126,10 +173,10 @@ describe('ContentTypeMultiSelect component', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Blog Post and 2 more')).toBeInTheDocument();
-      expect(screen.getByTestId('pill-Blog Post')).toBeInTheDocument();
-      expect(screen.getByTestId('pill-Article')).toBeInTheDocument();
-      expect(screen.getByTestId('pill-Page')).toBeInTheDocument();
+      expect(screen.getByText('Blog Post > content and 2 more')).toBeInTheDocument();
+      expect(screen.getByTestId('pill-Blog-Post-->-content')).toBeInTheDocument();
+      expect(screen.getByTestId('pill-Article-->-body')).toBeInTheDocument();
+      expect(screen.getByTestId('pill-Page-->-description')).toBeInTheDocument();
     });
   });
 });

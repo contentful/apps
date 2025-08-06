@@ -1,37 +1,49 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Stack, Pill } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
-import { ContentType, getRichTextFields } from '../utils';
+import { ContentType, getRichTextFields, RichTextField } from '../utils';
 import { ContentTypeProps, PlainClientAPI } from 'contentful-management';
 import { ConfigAppSDK, CMAClient } from '@contentful/app-sdk';
 
+interface RichTextFieldWithContext {
+  id: string;
+  name: string;
+  contentTypeId: string;
+  contentTypeName: string;
+  displayName: string; // "Content type > Field name"
+}
+
 interface ContentTypeMultiSelectProps {
-  selectedContentTypes: ContentType[];
-  setSelectedContentTypes: (contentTypes: ContentType[]) => void;
+  selectedRichTextFields: RichTextFieldWithContext[];
+  setSelectedRichTextFields: (fields: RichTextFieldWithContext[]) => void;
   sdk: ConfigAppSDK;
   cma: PlainClientAPI | CMAClient;
   filterContentTypes?: (contentType: ContentTypeProps) => boolean;
 }
 
 const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
-  selectedContentTypes,
-  setSelectedContentTypes,
+  selectedRichTextFields,
+  setSelectedRichTextFields,
   sdk,
   cma,
   filterContentTypes = () => true,
 }) => {
-  const [availableContentTypes, setAvailableContentTypes] = useState<ContentType[]>([]);
+  const [availableRichTextFields, setAvailableRichTextFields] = useState<
+    RichTextFieldWithContext[]
+  >([]);
+
   const getPlaceholderText = () => {
-    if (selectedContentTypes.length === 0) return 'Select one or more';
-    if (selectedContentTypes.length === 1) return selectedContentTypes[0].name;
-    return `${selectedContentTypes[0].name} and ${selectedContentTypes.length - 1} more`;
+    if (selectedRichTextFields.length === 0) return 'Select one or more rich text fields';
+    if (selectedRichTextFields.length === 1) return selectedRichTextFields[0].displayName;
+    return `${selectedRichTextFields[0].displayName} and ${selectedRichTextFields.length - 1} more`;
   };
-  const [filteredItems, setFilteredItems] = React.useState<ContentType[]>([]);
+
+  const [filteredItems, setFilteredItems] = React.useState<RichTextFieldWithContext[]>([]);
 
   const handleSearchValueChange = (event: { target: { value: any } }) => {
     const value = event.target.value;
-    const newFilteredItems = availableContentTypes.filter((contentType) =>
-      contentType.name.toLowerCase().includes(value.toLowerCase())
+    const newFilteredItems = availableRichTextFields.filter((field) =>
+      field.displayName.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredItems(newFilteredItems);
   };
@@ -63,27 +75,52 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   useEffect(() => {
     (async () => {
       const currentState = await sdk.app.getCurrentState();
-      const currentContentTypesIds = Object.keys(currentState?.EditorInterface || {});
+      const currentEditorInterface = currentState?.EditorInterface || {};
 
       const allContentTypes = await fetchAllContentTypes();
 
-      const newAvailableContentTypes = allContentTypes
+      // Extract all rich text fields from all content types
+      const allRichTextFields: RichTextFieldWithContext[] = [];
+
+      allContentTypes
         .filter((ct) => filterContentTypes(ct))
-        .map((ct) => ({
-          id: ct.sys.id,
-          name: ct.name,
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name));
+        .forEach((contentType) => {
+          const richTextFields = getRichTextFields(contentType);
+          richTextFields.forEach((field) => {
+            allRichTextFields.push({
+              id: `${contentType.sys.id}.${field.id}`, // Unique identifier combining content type and field
+              name: field.name,
+              contentTypeId: contentType.sys.id,
+              contentTypeName: contentType.name,
+              displayName: `${contentType.name} > ${field.name}`,
+            });
+          });
+        });
 
-      setAvailableContentTypes(newAvailableContentTypes);
-      setFilteredItems(newAvailableContentTypes);
+      // Sort by display name for consistent ordering
+      const sortedFields = allRichTextFields.sort((a, b) =>
+        a.displayName.localeCompare(b.displayName)
+      );
 
-      // If we have current content types, set them as selected
-      if (currentContentTypesIds.length > 0) {
-        const currentContentTypes = allContentTypes
-          .filter((ct) => currentContentTypesIds.includes(ct.sys.id))
-          .map((ct) => ({ id: ct.sys.id, name: ct.name }));
-        setSelectedContentTypes(currentContentTypes);
+      setAvailableRichTextFields(sortedFields);
+      setFilteredItems(sortedFields);
+
+      // Restore selected fields from saved state
+      const currentFields: RichTextFieldWithContext[] = [];
+
+      Object.entries(currentEditorInterface).forEach(([contentTypeId, config]) => {
+        const fieldIds = config.controls?.map((control) => control.fieldId) || [];
+
+        // Find fields that match both content type and field IDs
+        const matchingFields = sortedFields.filter(
+          (field) => field.contentTypeId === contentTypeId && fieldIds.includes(field.name)
+        );
+
+        currentFields.push(...matchingFields);
+      });
+
+      if (currentFields.length > 0) {
+        setSelectedRichTextFields(currentFields);
       }
     })();
   }, []);
@@ -93,7 +130,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
       <Stack marginTop="spacingXs" flexDirection="column" alignItems="start">
         <Multiselect
           searchProps={{
-            searchPlaceholder: 'Search content types',
+            searchPlaceholder: 'Search rich text fields',
             onSearchValueChange: handleSearchValueChange,
           }}
           placeholder={getPlaceholderText()}>
@@ -102,32 +139,34 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
               key={item.id}
               value={item.id}
               itemId={item.id}
-              isChecked={selectedContentTypes.some((ct) => ct.id === item.id)}
+              isChecked={selectedRichTextFields.some((field) => field.id === item.id)}
               onSelectItem={(e) => {
                 const checked = e.target.checked;
                 if (checked) {
-                  setSelectedContentTypes([...selectedContentTypes, item]);
+                  setSelectedRichTextFields([...selectedRichTextFields, item]);
                 } else {
-                  setSelectedContentTypes(selectedContentTypes.filter((ct) => ct.id !== item.id));
+                  setSelectedRichTextFields(
+                    selectedRichTextFields.filter((field) => field.id !== item.id)
+                  );
                 }
               }}>
-              {item.name}
+              {item.displayName}
             </Multiselect.Option>
           ))}
         </Multiselect>
 
-        {selectedContentTypes.length > 0 && (
+        {selectedRichTextFields.length > 0 && (
           <Box width="full" overflow="auto">
             <Stack flexDirection="row" spacing="spacing2Xs" flexWrap="wrap">
-              {selectedContentTypes.map((contentType, index) => (
+              {selectedRichTextFields.map((field, index) => (
                 <Pill
                   key={index}
-                  testId={`pill-${contentType.name}`}
-                  label={contentType.name}
+                  testId={`pill-${field.displayName.replace(/\s+/g, '-').replace(/>/g, '->')}`}
+                  label={field.displayName}
                   isDraggable={false}
                   onClose={() =>
-                    setSelectedContentTypes(
-                      selectedContentTypes.filter((ct) => ct.id !== contentType.id)
+                    setSelectedRichTextFields(
+                      selectedRichTextFields.filter((f) => f.id !== field.id)
                     )
                   }
                 />

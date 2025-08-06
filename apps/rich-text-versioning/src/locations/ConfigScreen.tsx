@@ -18,6 +18,14 @@ import ContentfulApiKeyInput, {
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 import { ContentType, getRichTextFields, TargetState } from '../utils';
 
+interface RichTextFieldWithContext {
+  id: string;
+  name: string;
+  contentTypeId: string;
+  contentTypeName: string;
+  displayName: string;
+}
+
 interface AppInstallationParameters {
   contentfulApiKey: string;
 }
@@ -27,7 +35,9 @@ const ConfigScreen = () => {
     contentfulApiKey: '',
   });
   const [contentfulApiKeyIsValid, setContentfulApiKeyIsValid] = useState(true);
-  const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
+  const [selectedRichTextFields, setSelectedRichTextFields] = useState<RichTextFieldWithContext[]>(
+    []
+  );
   const sdk = useSDK<ConfigAppSDK>();
 
   const onConfigure = useCallback(async () => {
@@ -39,41 +49,33 @@ const ConfigScreen = () => {
       return false;
     }
 
-    const currentState = await sdk.app.getCurrentState();
-
     const targetState: TargetState = {
-      EditorInterface: {
-        ...currentState?.EditorInterface,
-      },
+      EditorInterface: {},
     };
 
-    for (const contentType of selectedContentTypes) {
-      try {
-        const contentTypeData = await sdk.cma.contentType.get({
-          spaceId: sdk.ids.space,
-          environmentId: sdk.ids.environment,
-          contentTypeId: contentType.id,
-        });
-
-        const richTextFields = getRichTextFields(contentTypeData);
-
-        if (richTextFields.length > 0) {
-          targetState.EditorInterface[contentType.id] = {
-            controls: richTextFields.map((field) => ({
-              fieldId: field.id,
-            })),
-          };
-        }
-      } catch (error) {
-        console.error(`Error fetching content type ${contentType.id}:`, error);
+    // Group selected fields by content type
+    const fieldsByContentType = selectedRichTextFields.reduce((acc, field) => {
+      if (!acc[field.contentTypeId]) {
+        acc[field.contentTypeId] = [];
       }
+      acc[field.contentTypeId].push(field);
+      return acc;
+    }, {} as Record<string, RichTextFieldWithContext[]>);
+
+    // Apply the app to selected content types with their specific fields
+    for (const [contentTypeId, fields] of Object.entries(fieldsByContentType)) {
+      targetState.EditorInterface[contentTypeId] = {
+        controls: fields.map((field) => ({
+          fieldId: field.name, // Use the field name (not the combined ID)
+        })),
+      };
     }
 
     return {
       parameters,
       targetState,
     };
-  }, [parameters, selectedContentTypes, sdk]);
+  }, [parameters, selectedRichTextFields, sdk]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -132,22 +134,22 @@ const ConfigScreen = () => {
           />
         </Box>
 
-        {/* Assign Content Types Section */}
+        {/* Assign Rich Text Fields Section */}
         <Box marginBottom="spacing2Xl">
           <Heading as="h3" marginBottom="spacingXs">
-            Assign content types
+            Assign rich text fields
           </Heading>
           <Paragraph marginBottom="spacingL">
-            Select the content type(s) you want to use with Rich Text Versioning. You can change
-            this anytime by clicking 'Edit' on the rich text field type and adjust the Appearance
-            settings in your content type.
+            Select the specific rich text fields you want to use with Rich Text Versioning. You can
+            change this anytime by clicking 'Edit' on the rich text field type and adjust the
+            Appearance settings in your content type.
           </Paragraph>
 
-          <FormControl id="contentTypes">
-            <FormControl.Label>Content types</FormControl.Label>
+          <FormControl id="richTextFields">
+            <FormControl.Label>Rich text fields</FormControl.Label>
             <ContentTypeMultiSelect
-              selectedContentTypes={selectedContentTypes}
-              setSelectedContentTypes={setSelectedContentTypes}
+              selectedRichTextFields={selectedRichTextFields}
+              setSelectedRichTextFields={setSelectedRichTextFields}
               sdk={sdk}
               cma={sdk.cma}
               filterContentTypes={(contentType) => {

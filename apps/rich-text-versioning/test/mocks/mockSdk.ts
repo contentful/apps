@@ -18,8 +18,25 @@ const mockSdk: any = {
   cma: {
     contentType: {
       getMany: vi.fn().mockResolvedValue({
-        items: [],
-        total: 0,
+        items: [
+          {
+            sys: { id: 'blog-post' },
+            name: 'Blog Post',
+            fields: [
+              { id: 'title', name: 'Title', type: 'Text' },
+              { id: 'content', name: 'Content', type: 'RichText' },
+            ],
+          },
+          {
+            sys: { id: 'article' },
+            name: 'Article',
+            fields: [
+              { id: 'title', name: 'Title', type: 'Text' },
+              { id: 'body', name: 'Body', type: 'RichText' },
+            ],
+          },
+        ],
+        total: 2,
       }),
       get: vi.fn().mockResolvedValue({
         sys: { id: 'test-content-type' },
