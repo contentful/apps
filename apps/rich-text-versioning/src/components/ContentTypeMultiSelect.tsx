@@ -1,181 +1,93 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Stack, Pill } from '@contentful/f36-components';
+import React, { useState } from 'react';
+import { Box, Stack, Pill, Paragraph, Flex } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
-import { ContentType, getRichTextFields, RichTextField } from '../utils';
-import { ContentTypeProps, PlainClientAPI } from 'contentful-management';
-import { ConfigAppSDK, CMAClient } from '@contentful/app-sdk';
-
-interface RichTextFieldWithContext {
-  id: string;
-  name: string;
-  contentTypeId: string;
-  contentTypeName: string;
-  displayName: string; // "Content type > Field name"
-}
+import { RichTextFieldWithContext } from '../utils';
 
 interface ContentTypeMultiSelectProps {
-  selectedRichTextFields: RichTextFieldWithContext[];
-  setSelectedRichTextFields: (fields: RichTextFieldWithContext[]) => void;
-  sdk: ConfigAppSDK;
-  cma: PlainClientAPI | CMAClient;
-  filterContentTypes?: (contentType: ContentTypeProps) => boolean;
+  availableFields: RichTextFieldWithContext[];
+  selectedFields: RichTextFieldWithContext[];
+  onSelectionChange: (fields: RichTextFieldWithContext[]) => void;
+  placeholder?: string;
+  searchPlaceholder?: string;
+  isDisabled?: boolean;
+  isLoading?: boolean;
 }
 
 const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
-  selectedRichTextFields,
-  setSelectedRichTextFields,
-  sdk,
-  cma,
-  filterContentTypes = () => true,
+  availableFields,
+  selectedFields,
+  onSelectionChange,
+  placeholder = 'Select one or more',
+  searchPlaceholder = 'Search content types',
+  isDisabled = false,
+  isLoading = false,
 }) => {
-  const [availableRichTextFields, setAvailableRichTextFields] = useState<
-    RichTextFieldWithContext[]
-  >([]);
+  const [filteredFields, setFilteredFields] = useState<RichTextFieldWithContext[]>(availableFields);
 
   const getPlaceholderText = () => {
-    if (selectedRichTextFields.length === 0) return 'Select one or more rich text fields';
-    if (selectedRichTextFields.length === 1) return selectedRichTextFields[0].displayName;
-    return `${selectedRichTextFields[0].displayName} and ${selectedRichTextFields.length - 1} more`;
+    if (selectedFields.length === 0) return placeholder;
+    if (selectedFields.length === 1) return selectedFields[0].displayName;
+    return `${selectedFields[0].displayName} and ${selectedFields.length - 1} more`;
   };
 
-  const [filteredItems, setFilteredItems] = React.useState<RichTextFieldWithContext[]>([]);
-
-  const handleSearchValueChange = (event: { target: { value: any } }) => {
+  const handleSearchValueChange = (event: { target: { value: string } }) => {
     const value = event.target.value;
-    const newFilteredItems = availableRichTextFields.filter((field) =>
+    const newFilteredFields = availableFields.filter((field) =>
       field.displayName.toLowerCase().includes(value.toLowerCase())
     );
-    setFilteredItems(newFilteredItems);
+    setFilteredFields(newFilteredFields);
   };
 
-  const fetchAllContentTypes = async (): Promise<ContentTypeProps[]> => {
-    let allContentTypes: ContentTypeProps[] = [];
-    let skip = 0;
-    const limit = 1000;
-    let areMoreContentTypes = true;
-
-    while (areMoreContentTypes) {
-      const response = await cma.contentType.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
-        query: { skip, limit },
-      });
-      if (response.items) {
-        allContentTypes = allContentTypes.concat(response.items);
-        areMoreContentTypes = response.items.length === limit;
-      } else {
-        areMoreContentTypes = false;
-      }
-      skip += limit;
+  const handleFieldToggle = (field: RichTextFieldWithContext, checked: boolean) => {
+    if (checked) {
+      onSelectionChange([...selectedFields, field]);
+    } else {
+      onSelectionChange(selectedFields.filter((f) => f.fieldUniqueId !== field.fieldUniqueId));
     }
-
-    return allContentTypes;
   };
 
-  useEffect(() => {
-    (async () => {
-      const currentState = await sdk.app.getCurrentState();
-      const currentEditorInterface = currentState?.EditorInterface || {};
-
-      const allContentTypes = await fetchAllContentTypes();
-
-      // Extract all rich text fields from all content types
-      const allRichTextFields: RichTextFieldWithContext[] = [];
-
-      allContentTypes
-        .filter((ct) => filterContentTypes(ct))
-        .forEach((contentType) => {
-          const richTextFields = getRichTextFields(contentType);
-          richTextFields.forEach((field) => {
-            allRichTextFields.push({
-              id: `${contentType.sys.id}.${field.id}`, // Unique identifier combining content type and field
-              name: field.name,
-              contentTypeId: contentType.sys.id,
-              contentTypeName: contentType.name,
-              displayName: `${contentType.name} > ${field.name}`,
-            });
-          });
-        });
-
-      // Sort by display name for consistent ordering
-      const sortedFields = allRichTextFields.sort((a, b) =>
-        a.displayName.localeCompare(b.displayName)
-      );
-
-      setAvailableRichTextFields(sortedFields);
-      setFilteredItems(sortedFields);
-
-      // Restore selected fields from saved state
-      const currentFields: RichTextFieldWithContext[] = [];
-
-      Object.entries(currentEditorInterface).forEach(([contentTypeId, config]) => {
-        const fieldIds = config.controls?.map((control) => control.fieldId) || [];
-
-        // Find fields that match both content type and field IDs
-        const matchingFields = sortedFields.filter(
-          (field) => field.contentTypeId === contentTypeId && fieldIds.includes(field.name)
-        );
-
-        currentFields.push(...matchingFields);
-      });
-
-      if (currentFields.length > 0) {
-        setSelectedRichTextFields(currentFields);
-      }
-    })();
-  }, []);
+  const handleFieldRemove = (fieldId: string) => {
+    onSelectionChange(selectedFields.filter((f) => f.fieldUniqueId !== fieldId));
+  };
 
   return (
-    <>
-      <Stack marginTop="spacingXs" flexDirection="column" alignItems="start">
-        <Multiselect
-          searchProps={{
-            searchPlaceholder: 'Search rich text fields',
-            onSearchValueChange: handleSearchValueChange,
-          }}
-          placeholder={getPlaceholderText()}>
-          {filteredItems.map((item) => (
-            <Multiselect.Option
-              key={item.id}
-              value={item.id}
-              itemId={item.id}
-              isChecked={selectedRichTextFields.some((field) => field.id === item.id)}
-              onSelectItem={(e) => {
-                const checked = e.target.checked;
-                if (checked) {
-                  setSelectedRichTextFields([...selectedRichTextFields, item]);
-                } else {
-                  setSelectedRichTextFields(
-                    selectedRichTextFields.filter((field) => field.id !== item.id)
-                  );
-                }
-              }}>
-              {item.displayName}
-            </Multiselect.Option>
-          ))}
-        </Multiselect>
+    <Stack marginTop="spacingXs" flexDirection="column" alignItems="start">
+      <Multiselect
+        searchProps={{
+          searchPlaceholder,
+          onSearchValueChange: handleSearchValueChange,
+        }}
+        placeholder={getPlaceholderText()}
+        popoverProps={{ isFullWidth: true }}
+        triggerButtonProps={{ isDisabled }}>
+        {filteredFields.map((field) => (
+          <Multiselect.Option
+            key={field.fieldUniqueId}
+            value={field.fieldUniqueId}
+            itemId={field.fieldUniqueId}
+            isChecked={selectedFields.some((f) => f.fieldUniqueId === field.fieldUniqueId)}
+            onSelectItem={(e) => handleFieldToggle(field, e.target.checked)}>
+            {field.displayName}
+          </Multiselect.Option>
+        ))}
+      </Multiselect>
 
-        {selectedRichTextFields.length > 0 && (
-          <Box width="full" overflow="auto">
-            <Stack flexDirection="row" spacing="spacing2Xs" flexWrap="wrap">
-              {selectedRichTextFields.map((field, index) => (
-                <Pill
-                  key={index}
-                  testId={`pill-${field.displayName.replace(/\s+/g, '-').replace(/>/g, '->')}`}
-                  label={field.displayName}
-                  isDraggable={false}
-                  onClose={() =>
-                    setSelectedRichTextFields(
-                      selectedRichTextFields.filter((f) => f.id !== field.id)
-                    )
-                  }
-                />
-              ))}
-            </Stack>
-          </Box>
-        )}
-      </Stack>
-    </>
+      {selectedFields.length > 0 && (
+        <Box width="full" overflow="auto">
+          <Stack flexDirection="row" spacing="spacing2Xs" flexWrap="wrap">
+            {selectedFields.map((field) => (
+              <Pill
+                key={field.fieldUniqueId}
+                testId={`pill-${field.displayName.replace(/\s+/g, '-').replace(/>/g, '->')}`}
+                label={field.displayName}
+                isDraggable={false}
+                onClose={() => handleFieldRemove(field.fieldUniqueId)}
+              />
+            ))}
+          </Stack>
+        </Box>
+      )}
+    </Stack>
   );
 };
 
