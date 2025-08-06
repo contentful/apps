@@ -164,9 +164,9 @@ const ConfigScreen = () => {
             Set up Rich Text Versioning
           </Heading>
           <Paragraph marginBottom="spacingXl">
-            This app allows content creators to visually compare changes in a rich text field
-            against the last published version. A two-column view highlights added, removed, and
-            modified content, including referenced entries and assets.
+            Select the content type(s) you want to use with Rich Text Versioning. You can change
+            this anytime by clicking 'Edit' on the rich text field type and adjust the Appearance
+            settings in your content type.
           </Paragraph>
 
           {/* Configure Access Section */}
