@@ -85,26 +85,13 @@ describe('Config Screen component', () => {
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
   });
 
-  it('should display the assign rich text fields section', async () => {
-    await act(async () => {
-      render(<ConfigScreen />);
-    });
-
-    expect(screen.getByText('Assign rich text fields')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        /Select the specific rich text fields you want to use with Rich Text Versioning/
-      )
-    ).toBeInTheDocument();
-  });
-
   it('should display the rich text fields multiselect', async () => {
     await act(async () => {
       render(<ConfigScreen />);
     });
 
     expect(screen.getByText('Rich text fields')).toBeInTheDocument();
-    expect(screen.getByText('Select one or more rich text fields')).toBeInTheDocument();
+    expect(screen.getByText('Select one or more')).toBeInTheDocument();
   });
 
   it('should allow entering and updating the Contentful API key', async () => {
