@@ -15,7 +15,7 @@ import { styles } from './ConfigScreen.styles';
 import ContentfulApiKeyInput, {
   validateContentfulApiKey,
 } from '../components/ContentfulApiKeyInput';
-import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
+import ContentTypeFieldMultiSelect from '../components/ContentTypeFieldMultiSelect';
 import {
   getRichTextFields,
   TargetState,
@@ -212,7 +212,7 @@ const ConfigScreen = () => {
             {
               <FormControl id="richTextFields">
                 <FormControl.Label>Rich text fields</FormControl.Label>
-                <ContentTypeMultiSelect
+                <ContentTypeFieldMultiSelect
                   availableFields={availableFields}
                   selectedFields={selectedFields}
                   onSelectionChange={setSelectedFields}

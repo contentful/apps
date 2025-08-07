@@ -1,9 +1,9 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { FieldWithContext } from '../../src/utils';
-import ContentTypeMultiSelect from '../../src/components/ContentTypeMultiSelect';
+import ContentTypeFieldMultiSelect from '../../src/components/ContentTypeFieldMultiSelect';
 
-describe('ContentTypeMultiSelect component', () => {
+describe('ContentTypeFieldMultiSelect component', () => {
   const mockAvailableFields: FieldWithContext[] = [
     {
       fieldUniqueId: 'blog-post.content',
@@ -38,7 +38,7 @@ describe('ContentTypeMultiSelect component', () => {
 
     await act(async () => {
       render(
-        <ContentTypeMultiSelect
+        <ContentTypeFieldMultiSelect
           availableFields={mockAvailableFields}
           selectedFields={[]}
           onSelectionChange={onSelectionChange}
@@ -56,7 +56,7 @@ describe('ContentTypeMultiSelect component', () => {
 
     await act(async () => {
       render(
-        <ContentTypeMultiSelect
+        <ContentTypeFieldMultiSelect
           availableFields={mockAvailableFields}
           selectedFields={mockAvailableFields}
           onSelectionChange={onSelectionChange}
@@ -76,7 +76,7 @@ describe('ContentTypeMultiSelect component', () => {
 
     await act(async () => {
       render(
-        <ContentTypeMultiSelect
+        <ContentTypeFieldMultiSelect
           availableFields={mockAvailableFields}
           selectedFields={mockSelectedFields}
           onSelectionChange={onSelectionChange}
@@ -94,7 +94,7 @@ describe('ContentTypeMultiSelect component', () => {
 
     await act(async () => {
       render(
-        <ContentTypeMultiSelect
+        <ContentTypeFieldMultiSelect
           availableFields={mockAvailableFields}
           selectedFields={mockAvailableFields}
           onSelectionChange={onSelectionChange}

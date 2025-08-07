@@ -7,24 +7,20 @@ interface ContentTypeMultiSelectProps {
   availableFields: FieldWithContext[];
   selectedFields: FieldWithContext[];
   onSelectionChange: (fields: FieldWithContext[]) => void;
-  placeholder?: string;
-  searchPlaceholder?: string;
   isDisabled?: boolean;
   isLoading?: boolean;
 }
 
-const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
+const ContentTypeFieldMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   availableFields,
   selectedFields,
   onSelectionChange,
-  placeholder = 'Select one or more',
-  searchPlaceholder = 'Search content types',
   isDisabled = false,
 }) => {
   const [filteredFields, setFilteredFields] = useState<FieldWithContext[]>(availableFields);
 
   const getPlaceholderText = () => {
-    if (selectedFields.length === 0) return placeholder;
+    if (selectedFields.length === 0) return 'Select one or more';
     if (selectedFields.length === 1) return selectedFields[0].displayName;
     return `${selectedFields[0].displayName} and ${selectedFields.length - 1} more`;
   };
@@ -53,7 +49,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
     <Stack marginTop="spacingXs" flexDirection="column" alignItems="start">
       <Multiselect
         searchProps={{
-          searchPlaceholder,
+          searchPlaceholder: 'Search content types',
           onSearchValueChange: handleSearchValueChange,
         }}
         placeholder={getPlaceholderText()}
@@ -90,4 +86,4 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   );
 };
 
-export default ContentTypeMultiSelect;
+export default ContentTypeFieldMultiSelect;
