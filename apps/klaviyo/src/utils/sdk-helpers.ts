@@ -34,3 +34,11 @@ export const getGlobalSDK = async (retries = MAX_RETRIES): Promise<any | null> =
     }, RETRY_DELAY);
   });
 };
+
+const APP_ORGANIZATION_ID = '5EJGHo8tYJcjnEhYWDxivp';
+const APP_DEFINITION_ID = '2x4lsvuxPAGS2UUHwWVYee';
+
+export const getOrgIdForSdk = (sdk: any) => {
+  const isMarketplaceVersion = sdk.ids.app === APP_DEFINITION_ID;
+  return isMarketplaceVersion ? APP_ORGANIZATION_ID : sdk.ids.organization;
+};
