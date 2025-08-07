@@ -21,6 +21,7 @@ import {
   getEntryKlaviyoFieldMappings,
   setEntryKlaviyoFieldMappings,
 } from '../utils/field-mappings';
+import { APPS_ORGANIZATION_ID } from '../constants';
 
 // Helper to ensure klaviyoFieldMappings entry exists
 const ensureKlaviyoFieldMappingsEntry = async (sdk: ConfigAppSDK) => {
@@ -150,7 +151,7 @@ const ConfigScreen = () => {
       try {
         console.log(`Checking Klaviyo connection status (attempt ${attempt}/${maxRetries})...`);
         const appActions = await sdk.cma.appAction.getMany({
-          organizationId: sdk.ids.organization,
+          organizationId: APPS_ORGANIZATION_ID,
           appDefinitionId: sdk.ids.app,
         });
 
@@ -282,7 +283,7 @@ const ConfigScreen = () => {
 
     try {
       const appActions = await sdk.cma.appAction.getMany({
-        organizationId: sdk.ids.organization,
+        organizationId: APPS_ORGANIZATION_ID,
         appDefinitionId: sdk.ids.app,
       });
 
