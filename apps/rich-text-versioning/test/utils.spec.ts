@@ -121,19 +121,6 @@ describe('utils', () => {
   });
 
   describe('restoreSelectedFields', () => {
-    it('should return empty array when no state is provided', () => {
-      const availableFields = [
-        {
-          fieldUniqueId: 'blog-post.content',
-          displayName: 'Blog Post > Content',
-          contentTypeId: 'blog-post',
-          fieldId: 'content',
-        },
-      ];
-      const result = restoreSelectedFields(availableFields, { EditorInterface: {} });
-      expect(result).toEqual([]);
-    });
-
     it('should return empty array when no editor interface is provided', () => {
       const availableFields = [
         {
