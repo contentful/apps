@@ -30,6 +30,11 @@ const styles = css({
   '.change-badge': {
     marginLeft: 'auto',
   },
+
+  // Add spacing between all HTML blocks
+  '.diff > *': {
+    marginBottom: tokens.spacingL,
+  },
 });
 
 export { styles };
