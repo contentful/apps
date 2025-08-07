@@ -53,6 +53,7 @@ import {
   generateAutoCaptions,
 } from './util/muxApi';
 import Sidebar from './locations/Sidebar';
+import { APP_ORGANIZATION_ID, isMarketplaceVersion } from './util/constants';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -207,7 +208,9 @@ export class App extends React.Component<AppProps, AppState> {
 
   async componentDidMount() {
     const appActionsResponse = await this.cmaClient.appAction.getMany({
-      organizationId: this.props.sdk.ids.organization,
+      organizationId: isMarketplaceVersion({ appId: this.props.sdk.ids.app })
+        ? APP_ORGANIZATION_ID
+        : this.props.sdk.ids.organization,
       appDefinitionId: this.props.sdk.ids.app!,
     });
     this.getSignedTokenActionId =
@@ -503,7 +506,9 @@ export class App extends React.Component<AppProps, AppState> {
         response: { body },
       } = await this.cmaClient.appActionCall.createWithResponse(
         {
-          organizationId: this.props.sdk.ids.organization,
+          organizationId: isMarketplaceVersion({ appId: this.props.sdk.ids.app })
+            ? APP_ORGANIZATION_ID
+            : this.props.sdk.ids.organization,
           appDefinitionId: this.props.sdk.ids.app!,
           appActionId: this.getSignedTokenActionId,
         },
