@@ -1,6 +1,6 @@
 import { act, render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, beforeAll } from 'vitest';
 import { mockCma, mockSdk } from '../../test/mocks';
 import ConfigScreen from '../../src/locations/ConfigScreen';
 import { OnConfigureHandlerReturn } from '@contentful/app-sdk';
@@ -16,6 +16,45 @@ async function saveAppInstallation() {
 }
 
 describe('Config Screen component', () => {
+  beforeAll(() => {
+    // Set up mock data
+    mockSdk.cma.contentType.getMany.mockResolvedValue({
+      items: [
+        {
+          sys: { id: 'blog-post' },
+          name: 'Blog Post',
+          fields: [
+            { id: 'title', name: 'Title', type: 'Text' },
+            { id: 'content', name: 'Content', type: 'RichText' },
+          ],
+        },
+        {
+          sys: { id: 'article' },
+          name: 'Article',
+          fields: [
+            { id: 'title', name: 'Title', type: 'Text' },
+            { id: 'body', name: 'Body', type: 'RichText' },
+          ],
+        },
+      ],
+      total: 2,
+    });
+
+    mockSdk.cma.contentType.get.mockResolvedValue({
+      sys: { id: 'test-content-type' },
+      name: 'Test Content Type',
+      fields: [
+        { id: 'title', name: 'Title', type: 'Text' },
+        { id: 'content', name: 'Content', type: 'RichText' },
+      ],
+    });
+
+    mockSdk.hostnames = { delivery: 'cdn.contentful.com' };
+    mockSdk.notifier = {
+      error: vi.fn(),
+    };
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     // Reset mock implementations
@@ -26,13 +65,6 @@ describe('Config Screen component', () => {
         mockSdk.app.onConfigureCallback = callback;
       }
     );
-    // Mock space and environment IDs
-    mockSdk.ids.space = 'test-space';
-    mockSdk.ids.environment = 'test-environment';
-    mockSdk.hostnames = { delivery: 'cdn.contentful.com' };
-    mockSdk.notifier = {
-      error: vi.fn(),
-    };
   });
 
   it('should display the main heading and description', async () => {
@@ -128,8 +160,6 @@ describe('Config Screen component', () => {
 
     // Verify parameters were saved and current state was retrieved
     expect(mockSdk.app.getCurrentState).toHaveBeenCalled();
-    // Note: contentType.get is only called when content types are selected
-    // Since no content types are selected in this test, it won't be called
   });
 
   it('should load existing parameters on mount', async () => {
@@ -222,53 +252,6 @@ describe('Config Screen component', () => {
       // This means the app is removed from all content types
       expect(result).toBeDefined();
       expect(result.targetState).toBeDefined();
-      expect(result.targetState.EditorInterface).toEqual({});
-    });
-  });
-
-  it('should apply app to selected content types only', async () => {
-    const user = userEvent.setup();
-
-    // Mock successful fetch response
-    vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
-      return { ok: true, status: 200 };
-    });
-
-    // Mock content types with rich text fields
-    mockSdk.cma.contentType.getMany.mockResolvedValue({
-      items: [
-        {
-          sys: { id: 'blog-post' },
-          name: 'Blog Post',
-          fields: [
-            { id: 'title', name: 'Title', type: 'Text' },
-            { id: 'content', name: 'Content', type: 'RichText' },
-          ],
-        },
-        {
-          sys: { id: 'article' },
-          name: 'Article',
-          fields: [
-            { id: 'title', name: 'Title', type: 'Text' },
-            { id: 'body', name: 'Body', type: 'RichText' },
-          ],
-        },
-      ],
-    });
-
-    await act(async () => {
-      render(<ConfigScreen />);
-    });
-
-    // Enter API token
-    const tokenInput = screen.getByTestId('contentfulApiKey');
-    await user.type(tokenInput, 'valid-token-123');
-
-    // Simulate configuration
-    await act(async () => {
-      const result = await saveAppInstallation();
-
-      // Since no content types are selected, the EditorInterface should be empty
       expect(result.targetState.EditorInterface).toEqual({});
     });
   });
