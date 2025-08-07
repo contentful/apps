@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@ali-tas/htmldiff-js": "^2.0.1",
     "@contentful/app-sdk": "4.36.0",
     "@contentful/f36-components": "4.81.1",
     "@contentful/f36-multiselect": "^4.81.1",

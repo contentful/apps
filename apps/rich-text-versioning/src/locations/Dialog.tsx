@@ -45,11 +45,13 @@ const Dialog = () => {
               {changeCount} change{changeCount !== 1 ? 's' : ''}
             </Badge>
           </Flex>
-          <HtmlDiffViewer
-            currentField={currentField}
-            publishedField={publishedField}
-            onChangeCount={setChangeCount}
-          />
+          {publishedField && (
+            <HtmlDiffViewer
+              currentField={currentField}
+              publishedField={publishedField}
+              onChangeCount={setChangeCount}
+            />
+          )}
         </GridItem>
         <GridItem className="grid-item">
           <SectionHeading className="section-heading-base">Published version</SectionHeading>
