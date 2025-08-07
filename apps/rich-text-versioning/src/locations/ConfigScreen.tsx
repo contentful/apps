@@ -40,25 +40,22 @@ const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
 
   const fetchAllContentTypes = async (): Promise<ContentTypeProps[]> => {
-    let allContentTypes: ContentTypeProps[] = [];
+    const allContentTypes: ContentTypeProps[] = [];
     let skip = 0;
     const limit = 1000;
-    let areMoreContentTypes = true;
+    let fetched: number;
 
-    while (areMoreContentTypes) {
+    do {
       const response = await sdk.cma.contentType.getMany({
         spaceId: sdk.ids.space,
         environmentId: sdk.ids.environment,
         query: { skip, limit },
       });
-      if (response.items) {
-        allContentTypes = allContentTypes.concat(response.items);
-        areMoreContentTypes = response.items.length === limit;
-      } else {
-        areMoreContentTypes = false;
-      }
+      const items = response.items as ContentTypeProps[];
+      allContentTypes.push(...items);
+      fetched = items.length;
       skip += limit;
-    }
+    } while (fetched === limit);
 
     return allContentTypes;
   };
@@ -66,12 +63,9 @@ const ConfigScreen = () => {
   const loadFieldsAndRestoreState = async () => {
     try {
       setIsLoading(true);
-
-      // Fetch content types and process them into fields
       const contentTypes = await fetchAllContentTypes();
-      const fields = processContentTypesToFields(
-        contentTypes.filter((ct) => getRichTextFields(ct).length > 0)
-      );
+      const richTextContentTypes = contentTypes.filter((ct) => getRichTextFields(ct).length > 0);
+      const fields = processContentTypesToFields(richTextContentTypes);
 
       // Restore selected fields from saved state
       const currentState = (await sdk.app.getCurrentState()) || { EditorInterface: {} };
@@ -209,24 +203,21 @@ const ConfigScreen = () => {
               this anytime by clicking 'Edit' on the rich text field type and adjust the Appearance
               settings in your content type.
             </Paragraph>
-            {
-              <FormControl id="richTextFields">
-                <FormControl.Label>Rich text fields</FormControl.Label>
-                <ContentTypeFieldMultiSelect
-                  availableFields={availableFields}
-                  selectedFields={selectedFields}
-                  onSelectionChange={setSelectedFields}
-                  isDisabled={availableFields.length === 0}
-                  isLoading={isLoading}
-                />
-                {availableFields.length === 0 && (
-                  <Note variant="warning" className={styles.warningNote}>
-                    There are no Rich Text field types to select to use with Rich Text Versioning.
-                    Once you have added one to a content type, it will appear here.
-                  </Note>
-                )}
-              </FormControl>
-            }
+            <FormControl id="richTextFields">
+              <FormControl.Label>Rich text fields</FormControl.Label>
+              <ContentTypeFieldMultiSelect
+                availableFields={availableFields}
+                selectedFields={selectedFields}
+                onSelectionChange={setSelectedFields}
+                isDisabled={availableFields.length === 0}
+              />
+              {availableFields.length === 0 && (
+                <Note variant="warning" className={styles.warningNote}>
+                  There are no Rich Text field types to select to use with Rich Text Versioning.
+                  Once you have added one to a content type, it will appear here.
+                </Note>
+              )}
+            </FormControl>
           </Box>
         </Box>
       </Flex>

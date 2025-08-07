@@ -8,7 +8,6 @@ interface ContentTypeMultiSelectProps {
   selectedFields: FieldWithContext[];
   onSelectionChange: (fields: FieldWithContext[]) => void;
   isDisabled?: boolean;
-  isLoading?: boolean;
 }
 
 const ContentTypeFieldMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
