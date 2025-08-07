@@ -4,24 +4,20 @@ import { mockCma, mockSdk } from '../mocks';
 import Field from '../../src/locations/Field';
 import { Document, BLOCKS } from '@contentful/rich-text-types';
 
-// Mock the contentful client
 vi.mock('contentful', () => ({
   createClient: vi.fn(() => ({
     getEntry: vi.fn(),
   })),
 }));
 
-// Mock the rich text editor
 vi.mock('@contentful/field-editor-rich-text', () => ({
   RichTextEditor: ({ sdk }: { sdk: any }) => (
     <div data-testid="rich-text-editor">Rich Text Editor</div>
   ),
 }));
 
-// Mock the dialog
 const mockOpenCurrentApp = vi.fn();
 
-// Extend the existing mockSdk for Field-specific functionality
 const fieldMockSdk = {
   ...mockSdk,
   field: {
@@ -77,7 +73,7 @@ describe('Field component', () => {
   it('shows View Diff button when field value and entry sys are available', () => {
     render(<Field />);
 
-    expect(screen.getByText('View Diff')).toBeInTheDocument();
+    expect(screen.getByTestId('view-diff-button')).toBeInTheDocument();
   });
 
   it('disables View Diff button when entry is not changed', async () => {
@@ -93,7 +89,20 @@ describe('Field component', () => {
     expect(button).toBeDisabled();
   });
 
-  it('enables View Diff button when entry is changed', () => {
+  it('disables View Diff button when entry is in draft', async () => {
+    fieldMockSdk.entry.getSys.mockReturnValue({
+      id: 'test-entry',
+      version: 1,
+      publishedVersion: 1,
+    });
+
+    render(<Field />);
+
+    const button = screen.getByTestId('view-diff-button');
+    expect(button).toBeDisabled();
+  });
+
+  it('enables View Diff button when entry has changes', () => {
     fieldMockSdk.entry.getSys.mockReturnValue({
       id: 'test-entry',
       version: 3,
@@ -101,8 +110,21 @@ describe('Field component', () => {
     });
 
     render(<Field />);
-    const button = screen.getByText('View Diff');
+    const button = screen.getByTestId('view-diff-button');
+
     expect(button).not.toBeDisabled();
+  });
+
+  it('disables View Diff button when entry has no publishedVersion', () => {
+    fieldMockSdk.entry.getSys.mockReturnValue({
+      id: 'test-entry',
+      version: 1,
+    });
+
+    render(<Field />);
+    const button = screen.getByTestId('view-diff-button');
+
+    expect(button).toBeDisabled();
   });
 
   it('opens dialog when View Diff button is clicked', async () => {
