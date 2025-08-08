@@ -1,10 +1,10 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { FieldWithContext } from '../../src/utils';
+import { RichTextFieldInfo } from '../../src/utils';
 import ContentTypeFieldMultiSelect from '../../src/components/ContentTypeFieldMultiSelect';
 
 describe('ContentTypeFieldMultiSelect component', () => {
-  const mockAvailableFields: FieldWithContext[] = [
+  const mockAvailableFields: RichTextFieldInfo[] = [
     {
       fieldUniqueId: 'blog-post.content',
       displayName: 'Blog Post > content',
@@ -25,7 +25,7 @@ describe('ContentTypeFieldMultiSelect component', () => {
     },
   ];
 
-  const mockSelectedFields: FieldWithContext[] = [
+  const mockSelectedFields: RichTextFieldInfo[] = [
     mockAvailableFields[0], // Blog Post > content
   ];
 

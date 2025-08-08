@@ -1,7 +1,7 @@
 import { AppState, ContentTypeField } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
 
-export interface FieldWithContext {
+export interface RichTextFieldInfo {
   fieldUniqueId: string;
   displayName: string;
   contentTypeId: string;
@@ -18,7 +18,7 @@ export const getRichTextFields = (contentType: { fields?: ContentTypeField[] }) 
 
 export const processContentTypesToFields = (
   contentTypes: ContentTypeProps[]
-): FieldWithContext[] => {
+): RichTextFieldInfo[] => {
   return contentTypes
     .flatMap((contentType) => {
       const richTextFields = getRichTextFields(contentType);
@@ -34,9 +34,9 @@ export const processContentTypesToFields = (
 };
 
 export const restoreSelectedFields = (
-  availableFields: FieldWithContext[],
+  availableFields: RichTextFieldInfo[],
   currentState: TargetState
-): FieldWithContext[] => {
+): RichTextFieldInfo[] => {
   const editorInterface = currentState?.EditorInterface || {};
 
   return availableFields.filter((field) => {

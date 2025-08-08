@@ -11,8 +11,7 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 async function saveAppInstallation() {
-  const result = await mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
-  return result;
+  return await mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
 }
 
 describe('Config Screen component', () => {
