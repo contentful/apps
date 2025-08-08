@@ -53,6 +53,7 @@ import {
   generateAutoCaptions,
 } from './util/muxApi';
 import Sidebar from './locations/Sidebar';
+import { APP_ORGANIZATION_ID, isMarketplaceVersion } from './util/constants';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -104,6 +105,7 @@ export class App extends React.Component<AppProps, AppState> {
   muxPlayerRef = React.createRef<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
   getSignedTokenActionId: string;
   private pollPending = false;
+  orgId: string;
 
   constructor(props: AppProps) {
     super(props);
@@ -151,6 +153,10 @@ export class App extends React.Component<AppProps, AppState> {
       storyboardToken: undefined,
       raw: undefined,
     };
+
+    this.orgId = isMarketplaceVersion({ appId: this.props.sdk.ids.app })
+      ? APP_ORGANIZATION_ID
+      : this.props.sdk.ids.organization;
   }
 
   // eslint-disable-next-line  @typescript-eslint/ban-types
@@ -207,7 +213,7 @@ export class App extends React.Component<AppProps, AppState> {
 
   async componentDidMount() {
     const appActionsResponse = await this.cmaClient.appAction.getMany({
-      organizationId: this.props.sdk.ids.organization,
+      organizationId: this.orgId,
       appDefinitionId: this.props.sdk.ids.app!,
     });
     this.getSignedTokenActionId =
@@ -503,7 +509,7 @@ export class App extends React.Component<AppProps, AppState> {
         response: { body },
       } = await this.cmaClient.appActionCall.createWithResponse(
         {
-          organizationId: this.props.sdk.ids.organization,
+          organizationId: this.orgId,
           appDefinitionId: this.props.sdk.ids.app!,
           appActionId: this.getSignedTokenActionId,
         },
