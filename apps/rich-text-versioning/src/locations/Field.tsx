@@ -30,7 +30,7 @@ const Field = () => {
       console.error('Error creating CDA client:', error);
       return null;
     }
-  }, [sdk.ids.space, sdk.ids.environment, sdk.parameters]);
+  }, []);
 
   useAutoResizer();
 

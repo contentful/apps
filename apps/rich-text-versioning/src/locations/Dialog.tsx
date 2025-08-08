@@ -1,13 +1,5 @@
 import { DialogAppSDK } from '@contentful/app-sdk';
-import {
-  Badge,
-  Button,
-  Flex,
-  Grid,
-  GridItem,
-  SectionHeading,
-  Box,
-} from '@contentful/f36-components';
+import { Badge, Button, Flex, Grid, GridItem, Box, Subheading } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import { Document } from '@contentful/rich-text-types';
@@ -40,7 +32,7 @@ const Dialog = () => {
         marginRight="spacingM">
         <GridItem className="grid-item">
           <Flex alignItems="space-between">
-            <SectionHeading className="section-heading-margin">Current version</SectionHeading>
+            <Subheading className="section-heading-margin">Current version</Subheading>
             <Badge variant="secondary" className="change-badge">
               {changeCount} change{changeCount !== 1 ? 's' : ''}
             </Badge>
@@ -54,7 +46,7 @@ const Dialog = () => {
           )}
         </GridItem>
         <GridItem className="grid-item">
-          <SectionHeading className="section-heading-base">Published version</SectionHeading>
+          <Subheading className="section-heading-base">Published version</Subheading>
           <Box className="diff">{documentToReactComponents(publishedField)}</Box>
         </GridItem>
       </Grid>
