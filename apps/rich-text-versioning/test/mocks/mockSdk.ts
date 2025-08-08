@@ -12,6 +12,17 @@ const mockSdk: any = {
   },
   ids: {
     app: 'test-app',
+    space: 'test-space',
+    environment: 'test-environment',
+  },
+  cma: {
+    contentType: {
+      getMany: vi.fn(),
+      get: vi.fn(),
+    },
+  },
+  notifier: {
+    error: vi.fn(),
   },
 };
 
