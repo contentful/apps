@@ -21,6 +21,7 @@ import {
   getEntryKlaviyoFieldMappings,
   setEntryKlaviyoFieldMappings,
 } from '../utils/field-mappings';
+import { getOrgIdForSdk } from '../utils/sdk-helpers';
 
 // Helper to ensure klaviyoFieldMappings entry exists
 const ensureKlaviyoFieldMappingsEntry = async (sdk: ConfigAppSDK) => {
@@ -138,6 +139,7 @@ const ConfigScreen = () => {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const popupWindowRef = useRef<Window | null>(null);
   const checkWindowIntervalRef = useRef<number | null>(null);
+  const orgId = getOrgIdForSdk(sdk);
 
   // Check Klaviyo connection status with polling to handle race conditions
   const checkKlaviyoStatus = async (
@@ -150,7 +152,7 @@ const ConfigScreen = () => {
       try {
         console.log(`Checking Klaviyo connection status (attempt ${attempt}/${maxRetries})...`);
         const appActions = await sdk.cma.appAction.getMany({
-          organizationId: sdk.ids.organization,
+          organizationId: orgId,
           appDefinitionId: sdk.ids.app,
         });
 
@@ -229,7 +231,7 @@ const ConfigScreen = () => {
       const appDefinitionId = sdk.ids.app;
       // call app action to complete oauth
       const appActions = await sdk.cma.appAction.getMany({
-        organizationId: sdk.ids.organization,
+        organizationId: orgId,
         appDefinitionId,
       });
       console.log('appActions', appActions);
@@ -282,7 +284,7 @@ const ConfigScreen = () => {
 
     try {
       const appActions = await sdk.cma.appAction.getMany({
-        organizationId: sdk.ids.organization,
+        organizationId: orgId,
         appDefinitionId: sdk.ids.app,
       });
 
@@ -323,7 +325,7 @@ const ConfigScreen = () => {
     setIsDisconnecting(true);
     try {
       const appActions = await sdk.cma.appAction.getMany({
-        organizationId: sdk.ids.organization,
+        organizationId: orgId,
         appDefinitionId: sdk.ids.app,
       });
       const disconnectAppAction = appActions.items.find((action) => action.name === 'Disconnect');
