@@ -1,3 +1,4 @@
+import { ConfigAppSDK } from '@contentful/app-sdk';
 import { logger } from './logger';
 
 // The key used to store the app definition ID in localStorage
@@ -38,7 +39,7 @@ export const getGlobalSDK = async (retries = MAX_RETRIES): Promise<any | null> =
 const APP_ORGANIZATION_ID = '5EJGHo8tYJcjnEhYWDxivp';
 const APP_DEFINITION_ID = '2x4lsvuxPAGS2UUHwWVYee';
 
-export const getOrgIdForSdk = (sdk: any) => {
+export const getOrgIdForSdk = (sdk: ConfigAppSDK) => {
   const isMarketplaceVersion = sdk.ids.app === APP_DEFINITION_ID;
   return isMarketplaceVersion ? APP_ORGANIZATION_ID : sdk.ids.organization;
 };
