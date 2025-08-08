@@ -1,17 +1,169 @@
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { mockCma, mockSdk } from '../../test/mocks';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { mockCma, mockSdk } from '../mocks';
 import Field from '../../src/locations/Field';
+import { Document, BLOCKS } from '@contentful/rich-text-types';
+
+vi.mock('contentful', () => ({
+  createClient: vi.fn(() => ({
+    getEntry: vi.fn(),
+  })),
+}));
+
+vi.mock('@contentful/field-editor-rich-text', () => ({
+  RichTextEditor: ({ sdk }: { sdk: any }) => (
+    <div data-testid="rich-text-editor">Rich Text Editor</div>
+  ),
+}));
+
+const mockOpenCurrentApp = vi.fn();
+
+const fieldMockSdk = {
+  ...mockSdk,
+  field: {
+    getValue: vi.fn(),
+    onValueChanged: vi.fn(),
+  },
+  entry: {
+    getSys: vi.fn(),
+    onSysChanged: vi.fn(),
+  },
+  dialogs: {
+    openCurrentApp: mockOpenCurrentApp,
+  },
+  parameters: {
+    installation: {
+      contentfulApiKey: 'test-api-key',
+    },
+  },
+  ids: {
+    space: 'test-space',
+    environment: 'test-environment',
+    entry: 'test-entry',
+  },
+};
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
-  useSDK: () => mockSdk,
+  useSDK: () => fieldMockSdk,
   useCMA: () => mockCma,
+  useAutoResizer: vi.fn(),
 }));
 
 describe('Field component', () => {
-  it('Component text exists', () => {
-    const { getByText } = render(<Field />);
+  beforeEach(() => {
+    vi.clearAllMocks();
+    fieldMockSdk.field.getValue.mockReturnValue({
+      nodeType: BLOCKS.DOCUMENT,
+      data: {},
+      content: [],
+    });
+    fieldMockSdk.entry.getSys.mockReturnValue({
+      id: 'test-entry',
+      version: 3,
+      publishedVersion: 1,
+    });
+  });
 
-    expect(getByText('Hello Entry Field Component (AppId: test-app)')).toBeInTheDocument();
+  it('renders RichTextEditor', () => {
+    render(<Field />);
+
+    expect(screen.getByText('Rich Text Editor')).toBeInTheDocument();
+  });
+
+  it('shows View Diff button when field value and entry sys are available', () => {
+    render(<Field />);
+
+    expect(screen.getByTestId('view-diff-button')).toBeInTheDocument();
+  });
+
+  it('disables View Diff button when entry is not changed', async () => {
+    fieldMockSdk.entry.getSys.mockReturnValue({
+      id: 'test-entry',
+      version: 1,
+      publishedVersion: 1,
+    });
+
+    render(<Field />);
+
+    const button = screen.getByTestId('view-diff-button');
+    expect(button).toBeDisabled();
+  });
+
+  it('disables View Diff button when entry is in draft', async () => {
+    fieldMockSdk.entry.getSys.mockReturnValue({
+      id: 'test-entry',
+      version: 1,
+      publishedVersion: 1,
+    });
+
+    render(<Field />);
+
+    const button = screen.getByTestId('view-diff-button');
+    expect(button).toBeDisabled();
+  });
+
+  it('enables View Diff button when entry has changes', () => {
+    fieldMockSdk.entry.getSys.mockReturnValue({
+      id: 'test-entry',
+      version: 3,
+      publishedVersion: 1,
+    });
+
+    render(<Field />);
+    const button = screen.getByTestId('view-diff-button');
+
+    expect(button).not.toBeDisabled();
+  });
+
+  it('disables View Diff button when entry has no publishedVersion', () => {
+    fieldMockSdk.entry.getSys.mockReturnValue({
+      id: 'test-entry',
+      version: 1,
+    });
+
+    render(<Field />);
+    const button = screen.getByTestId('view-diff-button');
+
+    expect(button).toBeDisabled();
+  });
+
+  it('opens dialog when View Diff button is clicked', async () => {
+    const mockFieldValue: Document = {
+      nodeType: BLOCKS.DOCUMENT,
+      data: {},
+      content: [
+        {
+          nodeType: BLOCKS.PARAGRAPH,
+          data: {},
+          content: [
+            {
+              nodeType: 'text',
+              value: 'Test content',
+              marks: [],
+              data: {},
+            },
+          ],
+        },
+      ],
+    };
+
+    fieldMockSdk.field.getValue.mockReturnValue(mockFieldValue);
+
+    render(<Field />);
+
+    const button = screen.getByText('View Diff');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(mockOpenCurrentApp).toHaveBeenCalledWith({
+        title: 'Version Comparison',
+        width: 1200,
+        minHeight: 500,
+        parameters: {
+          currentField: mockFieldValue,
+          publishedField: undefined,
+        },
+      });
+    });
   });
 });

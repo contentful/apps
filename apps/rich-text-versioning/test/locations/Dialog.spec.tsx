@@ -1,17 +1,87 @@
-import { render, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { mockCma, mockSdk } from '../../test/mocks';
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { mockCma, mockSdk } from '../mocks';
 import Dialog from '../../src/locations/Dialog';
+import { BLOCKS } from '@contentful/rich-text-types';
+
+// Extend the existing mockSdk for Dialog-specific functionality
+const dialogMockSdk = {
+  ...mockSdk,
+  close: vi.fn(),
+  parameters: {
+    invocation: {
+      currentField: {
+        nodeType: BLOCKS.DOCUMENT,
+        data: {},
+        content: [
+          {
+            nodeType: BLOCKS.PARAGRAPH,
+            data: {},
+            content: [
+              {
+                nodeType: 'text',
+                value: 'Current content',
+                marks: [],
+                data: {},
+              },
+            ],
+          },
+        ],
+      },
+      publishedField: {
+        nodeType: BLOCKS.DOCUMENT,
+        data: {},
+        content: [
+          {
+            nodeType: BLOCKS.PARAGRAPH,
+            data: {},
+            content: [
+              {
+                nodeType: 'text',
+                value: 'Published content',
+                marks: [],
+                data: {},
+              },
+            ],
+          },
+        ],
+      },
+    },
+  },
+};
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
-  useSDK: () => mockSdk,
+  useSDK: () => dialogMockSdk,
   useCMA: () => mockCma,
+  useAutoResizer: vi.fn(),
 }));
 
 describe('Dialog component', () => {
-  it('Component text exists', () => {
-    const { getByText } = render(<Dialog />);
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
-    expect(getByText('Hello Dialog Component (AppId: test-app)')).toBeInTheDocument();
+  it('renders the dialog with correct layout', () => {
+    render(<Dialog />);
+
+    expect(screen.getByText('Current version')).toBeInTheDocument();
+    expect(screen.getByText('Published version')).toBeInTheDocument();
+    expect(screen.getByText('Close')).toBeInTheDocument();
+  });
+
+  it('displays change count badge', () => {
+    render(<Dialog />);
+
+    expect(screen.getByText('2 changes')).toBeInTheDocument();
+  });
+
+  it('renders crossed text for deleted content', async () => {
+    render(<Dialog />);
+
+    const delElement = document.querySelector('del');
+    expect(delElement).toBeInTheDocument();
+    expect(delElement).toHaveStyle('text-decoration: line-through');
+
+    expect(delElement?.textContent).toContain('Published');
   });
 });
