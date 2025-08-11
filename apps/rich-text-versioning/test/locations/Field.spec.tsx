@@ -62,6 +62,18 @@ const mockFieldValue: Document = {
   ],
 };
 
+const mockPublishedField = {
+  items: [
+    {
+      fields: {
+        text: {
+          'en-US': 'Test content',
+        },
+      },
+    },
+  ],
+};
+
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => fieldMockSdk,
   useCMA: () => mockCma,
@@ -148,6 +160,7 @@ describe('Field component', () => {
 
   it('opens dialog when View Diff button is clicked', async () => {
     fieldMockSdk.field.getValue.mockReturnValue(mockFieldValue);
+    fieldMockSdk.cma.entry.getPublished.mockReturnValue(mockPublishedField);
 
     render(<Field />);
 
@@ -171,9 +184,8 @@ describe('Field component', () => {
   });
 
   it('open the modal with errors when the content could not be loaded correctly', async () => {
-    fieldMockSdk.parameters.installation.contentfulApiKey = '';
-
     fieldMockSdk.field.getValue.mockReturnValue(mockFieldValue);
+    fieldMockSdk.cma.entry.getPublished.mockRejectedValue(new Error());
 
     render(<Field />);
     const button = screen.getByText('View Diff');
@@ -189,8 +201,8 @@ describe('Field component', () => {
           publishedField: undefined,
           errorInfo: {
             hasError: true,
-            errorCode: '401',
-            errorMessage: 'Unauthorized - API key not configured',
+            errorCode: '500',
+            errorMessage: 'Error loading content',
           },
         },
       });

@@ -24,6 +24,11 @@ const mockSdk: any = {
   notifier: {
     error: vi.fn(),
   },
+  cma: {
+    entry: {
+      getPublished: vi.fn(),
+    },
+  },
 };
 
 export { mockSdk };

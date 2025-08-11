@@ -88,14 +88,12 @@ describe('Dialog component', () => {
   it('renders a note if there was an error loading the content', async () => {
     dialogMockSdk.parameters.invocation.errorInfo = {
       hasError: true,
-      errorCode: '401',
-      errorMessage: 'Unauthorized - API key not configured',
+      errorCode: '500',
+      errorMessage: 'Error loading content',
     };
 
     render(<Dialog />);
 
-    expect(
-      screen.getByText('Error 401 - Unauthorized - API key not configured')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Error 500 - Error loading content')).toBeInTheDocument();
   });
 });
