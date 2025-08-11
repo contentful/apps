@@ -1,6 +1,12 @@
 import { AppState, ContentTypeField } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
 
+export type ErrorInfo = {
+  hasError: boolean;
+  errorCode?: string;
+  errorMessage?: string;
+};
+
 export interface RichTextFieldInfo {
   fieldUniqueId: string;
   displayName: string;

@@ -7,27 +7,38 @@ import { RichTextEditor } from '@contentful/field-editor-rich-text';
 import { Document } from '@contentful/rich-text-types';
 import { EntrySys } from '@contentful/app-sdk/dist/types/utils';
 import { createClient } from 'contentful';
+import { ErrorInfo } from '../utils';
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   const [fieldValue, setFieldValue] = useState<Document | null>(null);
   const [entrySys, setEntrySys] = useState<EntrySys | null>(null);
+  const [errorInfo, setErrorInfo] = useState<ErrorInfo>({ hasError: false });
 
   const client = useMemo(() => {
     try {
       const accessToken = sdk.parameters.installation?.contentfulApiKey;
       if (!accessToken) {
-        console.error('Access token not found in app installation parameters');
+        setErrorInfo({
+          hasError: true,
+          errorCode: '401',
+          errorMessage: 'Unauthorized - API key not configured',
+        });
         return null;
       }
 
+      setErrorInfo({ hasError: false });
       return createClient({
         space: sdk.ids.space,
         environment: sdk.ids.environment,
         accessToken: accessToken,
       });
     } catch (error) {
-      console.error('Error creating CDA client:', error);
+      setErrorInfo({
+        hasError: true,
+        errorCode: '500',
+        errorMessage: 'Failed to create API client',
+      });
       return null;
     }
   }, [sdk.ids.space, sdk.ids.environment, sdk.parameters]);
@@ -35,10 +46,8 @@ const Field = () => {
   useAutoResizer();
 
   useEffect(() => {
-    // Fetch initial value
     setFieldValue(sdk.field.getValue());
 
-    // Set up listener for future changes
     const detachValueChangeHandler = sdk.field.onValueChanged(async (value: Document) => {
       setFieldValue(value);
     });
@@ -47,10 +56,8 @@ const Field = () => {
   }, [sdk.field]);
 
   useEffect(() => {
-    // Fetch initial value
     setEntrySys(sdk.entry.getSys());
 
-    // Set up listener for future changes
     const detachValueChangeHandler = sdk.entry.onSysChanged(async (sys: EntrySys) => {
       setEntrySys(sys);
     });
@@ -64,21 +71,30 @@ const Field = () => {
 
   const onButtonClick = async (value: Document) => {
     let publishedField: Document | undefined;
+    let currentErrorInfo = errorInfo;
 
-    try {
-      if (!client) {
-        console.error('CDA client not available');
-        return;
+    if (client) {
+      try {
+        const publishedEntry = await client.getEntry(sdk.ids.entry);
+
+        if (publishedEntry?.fields?.[sdk.field.id]) {
+          const fieldData = publishedEntry.fields[sdk.field.id];
+          publishedField = fieldData as Document;
+        }
+
+        setErrorInfo({ hasError: false });
+      } catch (error: any) {
+        switch (Object.values(error)[0]) {
+          default:
+            currentErrorInfo = {
+              hasError: true,
+              errorCode: '500',
+              errorMessage: 'Error loading content',
+            };
+        }
+
+        setErrorInfo(currentErrorInfo);
       }
-
-      const publishedEntry = await client.getEntry(sdk.ids.entry);
-
-      if (publishedEntry?.fields?.[sdk.field.id]) {
-        const fieldData = publishedEntry.fields[sdk.field.id];
-        publishedField = fieldData as Document;
-      }
-    } catch (error) {
-      console.error('Error fetching published entry:', error);
     }
 
     await sdk.dialogs.openCurrentApp({
@@ -88,6 +104,7 @@ const Field = () => {
       parameters: {
         currentField: JSON.parse(JSON.stringify(value)),
         publishedField: publishedField ? JSON.parse(JSON.stringify(publishedField)) : undefined,
+        errorInfo: JSON.parse(JSON.stringify(currentErrorInfo)),
       },
     });
   };

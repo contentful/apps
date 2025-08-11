@@ -43,6 +43,25 @@ const fieldMockSdk = {
   },
 };
 
+const mockFieldValue: Document = {
+  nodeType: BLOCKS.DOCUMENT,
+  data: {},
+  content: [
+    {
+      nodeType: BLOCKS.PARAGRAPH,
+      data: {},
+      content: [
+        {
+          nodeType: 'text',
+          value: 'Test content',
+          marks: [],
+          data: {},
+        },
+      ],
+    },
+  ],
+};
+
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => fieldMockSdk,
   useCMA: () => mockCma,
@@ -128,25 +147,6 @@ describe('Field component', () => {
   });
 
   it('opens dialog when View Diff button is clicked', async () => {
-    const mockFieldValue: Document = {
-      nodeType: BLOCKS.DOCUMENT,
-      data: {},
-      content: [
-        {
-          nodeType: BLOCKS.PARAGRAPH,
-          data: {},
-          content: [
-            {
-              nodeType: 'text',
-              value: 'Test content',
-              marks: [],
-              data: {},
-            },
-          ],
-        },
-      ],
-    };
-
     fieldMockSdk.field.getValue.mockReturnValue(mockFieldValue);
 
     render(<Field />);
@@ -162,6 +162,36 @@ describe('Field component', () => {
         parameters: {
           currentField: mockFieldValue,
           publishedField: undefined,
+          errorInfo: {
+            hasError: false,
+          },
+        },
+      });
+    });
+  });
+
+  it('open the modal with errors when the content could not be loaded correctly', async () => {
+    fieldMockSdk.parameters.installation.contentfulApiKey = '';
+
+    fieldMockSdk.field.getValue.mockReturnValue(mockFieldValue);
+
+    render(<Field />);
+    const button = screen.getByText('View Diff');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(mockOpenCurrentApp).toHaveBeenCalledWith({
+        title: 'Version Comparison',
+        width: 1200,
+        minHeight: 500,
+        parameters: {
+          currentField: mockFieldValue,
+          publishedField: undefined,
+          errorInfo: {
+            hasError: true,
+            errorCode: '401',
+            errorMessage: 'Unauthorized - API key not configured',
+          },
         },
       });
     });

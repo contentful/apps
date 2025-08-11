@@ -84,4 +84,18 @@ describe('Dialog component', () => {
 
     expect(delElement?.textContent).toContain('Published');
   });
+
+  it('renders a note if there was an error loading the content', async () => {
+    dialogMockSdk.parameters.invocation.errorInfo = {
+      hasError: true,
+      errorCode: '401',
+      errorMessage: 'Unauthorized - API key not configured',
+    };
+
+    render(<Dialog />);
+
+    expect(
+      screen.getByText('Error 401 - Unauthorized - API key not configured')
+    ).toBeInTheDocument();
+  });
 });
