@@ -1,5 +1,6 @@
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
+import { DIALOG_MIN_HEIGHT } from '../utils';
 
 const sectionHeadingBase = {
   color: tokens.gray900,
@@ -12,7 +13,7 @@ const sectionHeadingBase = {
 export const styles = {
   modalContent: css({
     height: '100%',
-    minHeight: '500px',
+    minHeight: DIALOG_MIN_HEIGHT,
     padding: tokens.spacingL,
   }),
 

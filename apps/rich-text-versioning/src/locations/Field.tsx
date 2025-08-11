@@ -6,7 +6,10 @@ import { useEffect, useState } from 'react';
 import { RichTextEditor } from '@contentful/field-editor-rich-text';
 import { Document } from '@contentful/rich-text-types';
 import { EntrySys } from '@contentful/app-sdk/dist/types/utils';
-import { ErrorInfo } from '../utils';
+import { convertToSerializableJson, DIALOG_MIN_HEIGHT, ErrorInfo } from '../utils';
+
+const DIALOG_STANDARD_WIDTH = 1200;
+const DIALOG_WIDTH_WITH_ERROR = 500;
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
@@ -75,14 +78,14 @@ const Field = () => {
 
     await sdk.dialogs.openCurrentApp({
       title: 'Version Comparison',
-      width: 1200,
-      minHeight: 500,
+      width: errorInfo.hasError ? DIALOG_WIDTH_WITH_ERROR : DIALOG_STANDARD_WIDTH,
+      minHeight: DIALOG_MIN_HEIGHT,
       parameters: {
-        currentField: JSON.parse(JSON.stringify(value)),
+        currentField: convertToSerializableJson(value),
         publishedField: publishedField
-          ? JSON.parse(JSON.stringify(publishedField))[sdk.locales.default]
+          ? convertToSerializableJson(publishedField)[sdk.locales.default]
           : undefined,
-        errorInfo: JSON.parse(JSON.stringify(currentErrorInfo)),
+        errorInfo: convertToSerializableJson(currentErrorInfo),
       },
     });
   };

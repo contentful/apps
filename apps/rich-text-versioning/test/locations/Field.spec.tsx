@@ -171,7 +171,7 @@ describe('Field component', () => {
       expect(mockOpenCurrentApp).toHaveBeenCalledWith({
         title: 'Version Comparison',
         width: 1200,
-        minHeight: 500,
+        minHeight: 170,
         parameters: {
           currentField: mockFieldValue,
           publishedField: undefined,
@@ -195,7 +195,7 @@ describe('Field component', () => {
       expect(mockOpenCurrentApp).toHaveBeenCalledWith({
         title: 'Version Comparison',
         width: 1200,
-        minHeight: 500,
+        minHeight: 170,
         parameters: {
           currentField: mockFieldValue,
           publishedField: undefined,
