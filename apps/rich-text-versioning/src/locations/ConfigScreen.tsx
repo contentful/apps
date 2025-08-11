@@ -131,12 +131,13 @@ const ConfigScreen = () => {
   useEffect(() => {
     (async () => {
       const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
+
       if (currentParameters) {
         setParameters(currentParameters);
       }
 
       await loadFieldsAndRestoreState();
-      sdk.app.setReady();
+      await sdk.app.setReady();
     })();
   }, [sdk]);
 
