@@ -1,5 +1,13 @@
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Box, Flex, Heading, Note, Paragraph, TextLink } from '@contentful/f36-components';
+import {
+  Box,
+  Flex,
+  Heading,
+  Note,
+  Paragraph,
+  TextLink,
+  FormControl,
+} from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
@@ -7,6 +15,15 @@ import { styles } from './ConfigScreen.styles';
 import ContentfulApiKeyInput, {
   validateContentfulApiKey,
 } from '../components/ContentfulApiKeyInput';
+import ContentTypeFieldMultiSelect from '../components/ContentTypeFieldMultiSelect';
+import {
+  getRichTextFields,
+  TargetState,
+  RichTextFieldInfo,
+  processContentTypesToFields,
+  restoreSelectedFields,
+} from '../utils';
+import { ContentTypeProps } from 'contentful-management';
 
 interface AppInstallationParameters {
   contentfulApiKey: string;
@@ -17,7 +34,53 @@ const ConfigScreen = () => {
     contentfulApiKey: '',
   });
   const [contentfulApiKeyIsValid, setContentfulApiKeyIsValid] = useState(true);
+  const [availableFields, setAvailableFields] = useState<RichTextFieldInfo[]>([]);
+  const [selectedFields, setSelectedFields] = useState<RichTextFieldInfo[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const sdk = useSDK<ConfigAppSDK>();
+
+  const fetchAllContentTypes = async (): Promise<ContentTypeProps[]> => {
+    const allContentTypes: ContentTypeProps[] = [];
+    let skip = 0;
+    const limit = 1000;
+    let fetched: number;
+
+    do {
+      const response = await sdk.cma.contentType.getMany({
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
+        query: { skip, limit },
+      });
+      const items = response.items as ContentTypeProps[];
+      allContentTypes.push(...items);
+      fetched = items.length;
+      skip += limit;
+    } while (fetched === limit);
+
+    return allContentTypes;
+  };
+
+  const loadFieldsAndRestoreState = async () => {
+    try {
+      setIsLoading(true);
+      const contentTypes = await fetchAllContentTypes();
+      const richTextContentTypes = contentTypes.filter((ct) => getRichTextFields(ct).length > 0);
+      const fields = processContentTypesToFields(richTextContentTypes);
+
+      // Restore selected fields from saved state
+      const currentState = (await sdk.app.getCurrentState()) || { EditorInterface: {} };
+      const restoredFields = restoreSelectedFields(fields, currentState);
+
+      setAvailableFields(fields);
+      if (restoredFields.length > 0) {
+        setSelectedFields(restoredFields);
+      }
+    } catch (error) {
+      console.error('Error loading fields:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const onConfigure = useCallback(async () => {
     const isContentfulKeyValid = await validateContentfulApiKey(parameters.contentfulApiKey, sdk);
@@ -28,13 +91,38 @@ const ConfigScreen = () => {
       return false;
     }
 
-    const currentState = await sdk.app.getCurrentState();
+    const targetState: TargetState = {
+      EditorInterface: {},
+    };
+
+    // Group selected fields by content type
+    const fieldsByContentType = selectedFields.reduce<Record<string, RichTextFieldInfo[]>>(
+      (acc, field) => {
+        if (!acc[field.contentTypeId]) {
+          acc[field.contentTypeId] = [];
+        }
+
+        acc[field.contentTypeId].push(field);
+
+        return acc;
+      },
+      {}
+    );
+
+    // Apply the app to selected content types with their specific fields
+    for (const [contentTypeId, fields] of Object.entries(fieldsByContentType)) {
+      targetState.EditorInterface[contentTypeId] = {
+        controls: fields.map((field) => ({
+          fieldId: field.fieldId,
+        })),
+      };
+    }
 
     return {
       parameters,
-      targetState: currentState,
+      targetState,
     };
-  }, [parameters, sdk]);
+  }, [parameters, selectedFields, sdk]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -48,69 +136,92 @@ const ConfigScreen = () => {
         setParameters(currentParameters);
       }
 
+      await loadFieldsAndRestoreState();
       await sdk.app.setReady();
     })();
   }, [sdk]);
 
+  if (isLoading) {
+    return (
+      <Flex justifyContent="center" alignItems="center">
+        <Box margin="spacing2Xl">
+          <Paragraph>Loading rich text fields...</Paragraph>
+        </Box>
+      </Flex>
+    );
+  }
+
   return (
-    <Flex justifyContent="center" alignItems="flex-start" className={styles.configScreenContainer}>
-      <Box margin="spacing2Xl">
-        <Heading as="h2" marginBottom="spacingS">
-          Set up Rich Text Versioning
-        </Heading>
-        <Paragraph marginBottom="spacingXl">
-          This app allows content creators to visually compare changes in a rich text field against
-          the last published version. A two-column view highlights added, removed, and modified
-          content, including referenced entries and assets.
-        </Paragraph>
-
-        {/* Configure Access Section */}
-        <Box marginBottom="spacing2Xl">
-          <Box marginBottom="spacingL">
-            <Heading as="h3" marginBottom="spacingXs">
-              Configure access
-            </Heading>
-            <Paragraph marginBottom="spacing2Xs">
-              Input the Contentful Delivery API - access token that will be used to request your
-              content via API at send time.
-            </Paragraph>
-            <Box marginBottom="spacingM">
-              <TextLink
-                href={`https://app.contentful.com/spaces/${sdk.ids.space}/api/keys`}
-                target="_blank"
-                rel="noopener noreferrer"
-                alignIcon="end"
-                icon={<ExternalLinkIcon />}>
-                Manage API keys
-              </TextLink>
-            </Box>
-          </Box>
-          <ContentfulApiKeyInput
-            value={parameters.contentfulApiKey}
-            onChange={(e) => {
-              setParameters({ ...parameters, contentfulApiKey: e.target.value.trim() });
-            }}
-            isInvalid={!contentfulApiKeyIsValid}
-          />
-        </Box>
-
-        {/* Assign Content Types Section */}
-        <Box marginBottom="spacing2Xl">
-          <Heading as="h3" marginBottom="spacingXs">
-            Assign content types
+    <Flex justifyContent="center" alignItems="center">
+      <Flex justifyContent="center" className={styles.configScreenContainer}>
+        <Box margin="spacingL">
+          <Heading as="h2" marginBottom="spacingS">
+            Set up Rich Text Versioning
           </Heading>
-          <Paragraph marginBottom="spacingL">
-            Select the content type(s) you want to use with Rich Text Versioning. You can change
-            this anytime by clicking 'Edit' on the rich text field type and adjust the Appearance
-            settings in your content type.
+          <Paragraph marginBottom="spacing2Xl">
+            This app allows content creators to visually compare changes in a rich text field
+            against the last published version. A two-column view highlights added, removed, and
+            modified content, including referenced entries and assets.
           </Paragraph>
-          <Box marginBottom="spacingM">
-            <Note variant="neutral">
-              Implement content type selection checkboxes in the next step
-            </Note>
+
+          {/* Configure Access Section */}
+          <Box marginBottom="spacing2Xl">
+            <Box marginBottom="spacingL">
+              <Heading as="h3" marginBottom="spacingXs">
+                Configure access
+              </Heading>
+              <Paragraph marginBottom="spacing2Xs">
+                Input the Contentful Delivery API - access token that will be used to request your
+                content via API at send time.
+              </Paragraph>
+              <Box marginBottom="spacingM">
+                <TextLink
+                  href={`https://app.contentful.com/spaces/${sdk.ids.space}/api/keys`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  alignIcon="end"
+                  icon={<ExternalLinkIcon />}>
+                  Manage API keys
+                </TextLink>
+              </Box>
+            </Box>
+            <ContentfulApiKeyInput
+              value={parameters.contentfulApiKey}
+              onChange={(e) => {
+                setParameters({ ...parameters, contentfulApiKey: e.target.value.trim() });
+              }}
+              isInvalid={!contentfulApiKeyIsValid}
+            />
+          </Box>
+
+          {/* Assign Rich Text Fields Section */}
+          <Box>
+            <Heading as="h3" marginBottom="spacingXs">
+              Assign rich text fields
+            </Heading>
+            <Paragraph marginBottom="spacingL">
+              Select the content type(s) you want to use with Rich Text Versioning. You can change
+              this anytime by clicking 'Edit' on the rich text field type and adjust the Appearance
+              settings in your content type.
+            </Paragraph>
+            <FormControl id="richTextFields">
+              <FormControl.Label>Rich text fields</FormControl.Label>
+              <ContentTypeFieldMultiSelect
+                availableFields={availableFields}
+                selectedFields={selectedFields}
+                onSelectionChange={setSelectedFields}
+                isDisabled={availableFields.length === 0}
+              />
+              {availableFields.length === 0 && (
+                <Note variant="warning" className={styles.warningNote}>
+                  There are no Rich Text field types to select to use with Rich Text Versioning.
+                  Once you have added one to a content type, it will appear here.
+                </Note>
+              )}
+            </FormControl>
           </Box>
         </Box>
-      </Box>
+      </Flex>
     </Flex>
   );
 };

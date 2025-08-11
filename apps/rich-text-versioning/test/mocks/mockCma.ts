@@ -2,10 +2,8 @@ import { vi } from 'vitest';
 
 const mockCma: any = {
   contentType: {
-    getMany: vi.fn().mockResolvedValue({
-      items: [],
-      total: 0,
-    }),
+    getMany: vi.fn(),
+    get: vi.fn(),
   },
 };
 

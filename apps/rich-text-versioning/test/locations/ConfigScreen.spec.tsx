@@ -1,8 +1,9 @@
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, beforeAll } from 'vitest';
 import { mockCma, mockSdk } from '../../test/mocks';
 import ConfigScreen from '../../src/locations/ConfigScreen';
+import { OnConfigureHandlerReturn } from '@contentful/app-sdk';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -14,21 +15,55 @@ async function saveAppInstallation() {
 }
 
 describe('Config Screen component', () => {
+  beforeAll(() => {
+    // Set up mock data
+    mockSdk.cma.contentType.getMany.mockResolvedValue({
+      items: [
+        {
+          sys: { id: 'blog-post' },
+          name: 'Blog Post',
+          fields: [
+            { id: 'title', name: 'Title', type: 'Text' },
+            { id: 'content', name: 'Content', type: 'RichText' },
+          ],
+        },
+        {
+          sys: { id: 'article' },
+          name: 'Article',
+          fields: [
+            { id: 'title', name: 'Title', type: 'Text' },
+            { id: 'body', name: 'Body', type: 'RichText' },
+          ],
+        },
+      ],
+      total: 2,
+    });
+
+    mockSdk.cma.contentType.get.mockResolvedValue({
+      sys: { id: 'test-content-type' },
+      name: 'Test Content Type',
+      fields: [
+        { id: 'title', name: 'Title', type: 'Text' },
+        { id: 'content', name: 'Content', type: 'RichText' },
+      ],
+    });
+
+    mockSdk.hostnames = { delivery: 'cdn.contentful.com' };
+    mockSdk.notifier = {
+      error: vi.fn(),
+    };
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     // Reset mock implementations
     mockSdk.app.getParameters.mockResolvedValue({});
     mockSdk.app.getCurrentState.mockResolvedValue({});
-    mockSdk.app.onConfigure.mockImplementation((callback: () => Promise<any>) => {
-      mockSdk.app.onConfigureCallback = callback;
-    });
-    // Mock space and environment IDs
-    mockSdk.ids.space = 'test-space';
-    mockSdk.ids.environment = 'test-environment';
-    mockSdk.hostnames = { delivery: 'cdn.contentful.com' };
-    mockSdk.notifier = {
-      error: vi.fn(),
-    };
+    mockSdk.app.onConfigure.mockImplementation(
+      (callback: () => Promise<OnConfigureHandlerReturn>) => {
+        mockSdk.app.onConfigureCallback = callback;
+      }
+    );
   });
 
   it('should display the main heading and description', async () => {
@@ -81,25 +116,13 @@ describe('Config Screen component', () => {
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
   });
 
-  it('should display the assign content types section', async () => {
+  it('should display the rich text fields multiselect', async () => {
     await act(async () => {
       render(<ConfigScreen />);
     });
 
-    expect(screen.getByText('Assign content types')).toBeInTheDocument();
-    expect(
-      screen.getByText(/Select the content type\(s\) you want to use with Rich Text Versioning/)
-    ).toBeInTheDocument();
-  });
-
-  it('should display the content type implementation note', async () => {
-    await act(async () => {
-      render(<ConfigScreen />);
-    });
-
-    expect(
-      screen.getByText('Implement content type selection checkboxes in the next step')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Rich text fields')).toBeInTheDocument();
+    expect(screen.getByText('Select one or more')).toBeInTheDocument();
   });
 
   it('should allow entering and updating the Contentful API key', async () => {
@@ -134,7 +157,7 @@ describe('Config Screen component', () => {
       await saveAppInstallation();
     });
 
-    // Verify parameters were saved
+    // Verify parameters were saved and current state was retrieved
     expect(mockSdk.app.getCurrentState).toHaveBeenCalled();
   });
 
@@ -193,5 +216,42 @@ describe('Config Screen component', () => {
     expect(mockSdk.notifier.error).toHaveBeenCalledWith(
       'The app configuration was not saved. Please try again.'
     );
+  });
+
+  it('should reset content types when none are selected', async () => {
+    // Mock current state with existing app configuration
+    mockSdk.app.getCurrentState.mockResolvedValue({
+      EditorInterface: {
+        'existing-content-type': {
+          controls: [{ fieldId: 'content' }],
+        },
+      },
+    });
+
+    // Mock successful API validation
+    vi.spyOn(window, 'fetch').mockImplementationOnce((): any => {
+      return { ok: true, status: 200 };
+    });
+
+    await act(async () => {
+      render(<ConfigScreen />);
+    });
+
+    // Enter a valid API key
+    const tokenInput = screen.getByTestId('contentfulApiKey');
+    await act(async () => {
+      fireEvent.change(tokenInput, { target: { value: 'valid-token' } });
+    });
+
+    // Simulate configuration with no content types selected
+    await act(async () => {
+      const result = await saveAppInstallation();
+
+      // Verify that the target state has an empty EditorInterface
+      // This means the app is removed from all content types
+      expect(result).toBeDefined();
+      expect(result.targetState).toBeDefined();
+      expect(result.targetState.EditorInterface).toEqual({});
+    });
   });
 });

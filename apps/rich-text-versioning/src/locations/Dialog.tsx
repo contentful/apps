@@ -32,7 +32,7 @@ const Dialog = () => {
         marginRight="spacingM">
         <GridItem className="grid-item">
           <Flex alignItems="space-between">
-            <Subheading className="section-heading-margin">Current version</Subheading>
+            <Subheading>Current version</Subheading>
             <Badge variant="secondary" className="change-badge">
               {changeCount} change{changeCount !== 1 ? 's' : ''}
             </Badge>
@@ -46,11 +46,11 @@ const Dialog = () => {
           )}
         </GridItem>
         <GridItem className="grid-item">
-          <Subheading className="section-heading-base">Published version</Subheading>
+          <Subheading>Published version</Subheading>
           <Box className="diff">{documentToReactComponents(publishedField)}</Box>
         </GridItem>
       </Grid>
-      <Flex justifyContent="flex-end" marginBottom="spacingM" marginRight="spacingM">
+      <Flex justifyContent="flex-end" margin="spacingM">
         <Button
           variant="secondary"
           size="small"
