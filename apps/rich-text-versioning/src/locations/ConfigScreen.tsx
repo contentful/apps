@@ -1,12 +1,5 @@
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import {
-  Box,
-  Flex,
-  Heading,
-  Note,
-  Paragraph,
-  FormControl,
-} from '@contentful/f36-components';
+import { Box, Flex, Heading, Note, Paragraph, FormControl } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
 import { styles } from './ConfigScreen.styles';
