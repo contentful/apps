@@ -5,16 +5,11 @@ import {
   Heading,
   Note,
   Paragraph,
-  TextLink,
   FormControl,
 } from '@contentful/f36-components';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
 import { styles } from './ConfigScreen.styles';
-import ContentfulApiKeyInput, {
-  validateContentfulApiKey,
-} from '../components/ContentfulApiKeyInput';
 import ContentTypeFieldMultiSelect from '../components/ContentTypeFieldMultiSelect';
 import {
   getRichTextFields,
@@ -25,15 +20,7 @@ import {
 } from '../utils';
 import { ContentTypeProps } from 'contentful-management';
 
-interface AppInstallationParameters {
-  contentfulApiKey: string;
-}
-
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>({
-    contentfulApiKey: '',
-  });
-  const [contentfulApiKeyIsValid, setContentfulApiKeyIsValid] = useState(true);
   const [availableFields, setAvailableFields] = useState<RichTextFieldInfo[]>([]);
   const [selectedFields, setSelectedFields] = useState<RichTextFieldInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -83,14 +70,6 @@ const ConfigScreen = () => {
   };
 
   const onConfigure = useCallback(async () => {
-    const isContentfulKeyValid = await validateContentfulApiKey(parameters.contentfulApiKey, sdk);
-    setContentfulApiKeyIsValid(isContentfulKeyValid);
-
-    if (!isContentfulKeyValid) {
-      sdk.notifier.error('The app configuration was not saved. Please try again.');
-      return false;
-    }
-
     const targetState: TargetState = {
       EditorInterface: {},
     };
@@ -119,10 +98,9 @@ const ConfigScreen = () => {
     }
 
     return {
-      parameters,
       targetState,
     };
-  }, [parameters, selectedFields, sdk]);
+  }, [selectedFields, sdk]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -130,12 +108,6 @@ const ConfigScreen = () => {
 
   useEffect(() => {
     (async () => {
-      const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
-
-      if (currentParameters) {
-        setParameters(currentParameters);
-      }
-
       await loadFieldsAndRestoreState();
       await sdk.app.setReady();
     })();
@@ -163,36 +135,6 @@ const ConfigScreen = () => {
             against the last published version. A two-column view highlights added, removed, and
             modified content, including referenced entries and assets.
           </Paragraph>
-
-          {/* Configure Access Section */}
-          <Box marginBottom="spacing2Xl">
-            <Box marginBottom="spacingL">
-              <Heading as="h3" marginBottom="spacingXs">
-                Configure access
-              </Heading>
-              <Paragraph marginBottom="spacing2Xs">
-                Input the Contentful Delivery API - access token that will be used to request your
-                content via API at send time.
-              </Paragraph>
-              <Box marginBottom="spacingM">
-                <TextLink
-                  href={`https://app.contentful.com/spaces/${sdk.ids.space}/api/keys`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  alignIcon="end"
-                  icon={<ExternalLinkIcon />}>
-                  Manage API keys
-                </TextLink>
-              </Box>
-            </Box>
-            <ContentfulApiKeyInput
-              value={parameters.contentfulApiKey}
-              onChange={(e) => {
-                setParameters({ ...parameters, contentfulApiKey: e.target.value.trim() });
-              }}
-              isInvalid={!contentfulApiKeyIsValid}
-            />
-          </Box>
 
           {/* Assign Rich Text Fields Section */}
           <Box>
