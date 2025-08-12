@@ -42,6 +42,7 @@ const Dialog = () => {
               currentField={currentField}
               publishedField={publishedField}
               onChangeCount={setChangeCount}
+              sdk={sdk}
             />
           )}
         </GridItem>
