@@ -9,12 +9,13 @@ import { EntryCard, Skeleton, InlineEntryCard } from '@contentful/f36-components
 import { createRoot } from 'react-dom/client';
 import tokens from '@contentful/f36-tokens';
 import React from 'react';
+import { FieldAppSDK } from '@contentful/app-sdk';
 
 interface HtmlDiffViewerProps {
   currentField: Document;
   publishedField: Document;
   onChangeCount: (count: number) => void;
-  sdk?: any;
+  sdk: FieldAppSDK;
 }
 
 const HtmlDiffViewer = ({
@@ -74,9 +75,7 @@ const HtmlDiffViewer = ({
       setLoading(false);
     };
 
-    if (sdk) {
-      fetchTitles();
-    }
+    fetchTitles();
   }, [currentField, sdk]);
 
   // Helper function to convert React component to HTML string
