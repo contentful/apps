@@ -42,7 +42,6 @@ const HtmlDiffViewer = ({
         const entryId = entry.sys.id;
         const contentType = entryContentTypes[entryId] || { name: UNKNOWN };
         const title = entryTitles[entryId] || UNTITLED;
-        console.log('entryTitles', entryTitles);
 
         // Create a wrapper div to avoid prop issues
         return (

@@ -51,15 +51,15 @@ const Dialog = () => {
 
       const extractEntryIds = (doc: Document): string[] => {
         const ids: string[] = [];
-        const traverse = (node: any) => {
+        const getEntryIdsFromDoc = (node: any) => {
           if (node.nodeType === BLOCK_ENTRY_NODE_TYPE || node.nodeType === INLINE_ENTRY_NODE_TYPE) {
             ids.push(node.data.target.sys.id);
           }
           if (node.content) {
-            node.content.forEach(traverse);
+            node.content.forEach(getEntryIdsFromDoc);
           }
         };
-        doc.content?.forEach(traverse);
+        doc.content?.forEach(getEntryIdsFromDoc);
         return ids;
       };
 
