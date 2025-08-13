@@ -64,11 +64,12 @@ const Field = () => {
 
       setErrorInfo({ hasError: false });
     } catch (error) {
-      setErrorInfo({
+      currentErrorInfo = {
         hasError: true,
         errorCode: '500',
         errorMessage: 'Error loading content',
-      });
+      };
+      setErrorInfo(currentErrorInfo);
     }
 
     await sdk.dialogs.openCurrentApp({
