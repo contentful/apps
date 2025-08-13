@@ -162,11 +162,11 @@ const HtmlDiffViewer = ({
           const title = entryTitles[entryId || ''] || entryId;
 
           if (entryId) {
-            // Check if this entry is inside an <ins> or <del> tag
+            //TODO: MAKE THIS WORK
             const isAddition = entry.closest('ins') !== null;
             const isDeletion = entry.closest('del') !== null;
 
-            // Determine border color based on diff status
+            //TODO: MAKE THIS WORK
             let borderColor = tokens.gray300; // default
             if (isAddition) {
               borderColor = tokens.green300;
