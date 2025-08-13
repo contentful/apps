@@ -99,8 +99,7 @@ const HtmlDiffViewer = ({
     });
   };
 
-  // Create renderers for embedded entries
-  const createRenderers = () => ({
+  const createOptions = () => ({
     renderNode: {
       [BLOCKS.EMBEDDED_ENTRY]: (node: any, _children: any) => {
         const entry = node.data.target;
@@ -147,8 +146,8 @@ const HtmlDiffViewer = ({
 
     const processDiff = async () => {
       // Convert current field to React components with embedded entry renderers
-      const currentComponents = documentToReactComponents(currentField, createRenderers());
-      const publishedComponents = documentToReactComponents(publishedField, createRenderers());
+      const currentComponents = documentToReactComponents(currentField, createOptions());
+      const publishedComponents = documentToReactComponents(publishedField, createOptions());
 
       // Convert React components to HTML strings
       const currentHtml = await componentToHtml(<>{currentComponents}</>);
