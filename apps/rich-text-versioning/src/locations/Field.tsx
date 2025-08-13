@@ -63,17 +63,12 @@ const Field = () => {
       }
 
       setErrorInfo({ hasError: false });
-    } catch (error: any) {
-      switch (Object.values(error)[0]) {
-        default:
-          currentErrorInfo = {
-            hasError: true,
-            errorCode: '500',
-            errorMessage: 'Error loading content',
-          };
-      }
-
-      setErrorInfo(currentErrorInfo);
+    } catch (error) {
+      setErrorInfo({
+        hasError: true,
+        errorCode: '500',
+        errorMessage: 'Error loading content',
+      });
     }
 
     await sdk.dialogs.openCurrentApp({

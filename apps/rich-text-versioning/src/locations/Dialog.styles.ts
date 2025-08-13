@@ -2,14 +2,6 @@ import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
 import { DIALOG_MIN_HEIGHT } from '../utils';
 
-const sectionHeadingBase = {
-  color: tokens.gray900,
-  fontFamily: 'Geist',
-  fontWeight: tokens.fontWeightDemiBold,
-  fontSize: tokens.fontSizeXl,
-  fontStyle: 'normal',
-};
-
 export const styles = {
   modalContent: css({
     height: '100%',
@@ -23,15 +15,6 @@ export const styles = {
     padding: tokens.spacingS,
     height: 'fit-content',
     minHeight: 'auto',
-  }),
-
-  sectionHeadingBase: css({
-    ...sectionHeadingBase,
-  }),
-
-  sectionHeadingMargin: css({
-    ...sectionHeadingBase,
-    marginBottom: tokens.spacingL,
   }),
 
   changeBadge: css({

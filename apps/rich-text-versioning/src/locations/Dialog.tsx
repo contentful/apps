@@ -5,7 +5,7 @@ import {
   Flex,
   Grid,
   GridItem,
-  SectionHeading,
+  Subheading,
   Box,
   Note,
   Text,
@@ -72,7 +72,7 @@ const Dialog = () => {
         marginRight="spacingM">
         <GridItem className={styles.gridItem}>
           <Flex alignItems="space-between">
-            <SectionHeading className={styles.sectionHeadingMargin}>Current version</SectionHeading>
+            <Subheading>Current version</Subheading>
             <Badge variant="secondary" className={styles.changeBadge}>
               {changeCount} change{changeCount !== 1 ? 's' : ''}
             </Badge>
@@ -86,7 +86,7 @@ const Dialog = () => {
           )}
         </GridItem>
         <GridItem className={styles.gridItem}>
-          <SectionHeading className={styles.sectionHeadingBase}>Published version</SectionHeading>
+          <Subheading>Published version</Subheading>
           <Box className={styles.diff}>{documentToReactComponents(publishedField)}</Box>
         </GridItem>
       </Grid>
