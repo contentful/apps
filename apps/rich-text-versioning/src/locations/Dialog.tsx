@@ -78,6 +78,7 @@ const Dialog = () => {
           });
           entries.push(...fetchedEntries.items);
         } catch (error) {
+          entries = [];
           console.error('Error fetching entries:', error);
         }
         if (entries.length > 0) {
@@ -96,8 +97,8 @@ const Dialog = () => {
                 contentTypes[entryId] = contentType;
               } catch (error) {
                 console.error(`Error fetching content type for entry ${entryId}:`, error);
-                titles[entryId] = title;
-                contentTypes[entryId] = { name: UNKNOWN } as ContentTypeProps;
+                titles[entryId] = 'Reference is missing';
+                contentTypes[entryId] = { name: 'Reference is missing' } as ContentTypeProps;
               }
             })
           );
@@ -120,7 +121,7 @@ const Dialog = () => {
         const entry = node.data.target;
         const contentType = entryContentTypes[entry.sys.id];
         const contentTypeName = contentType?.name || UNKNOWN;
-        const title = entryTitles[entry.sys.id] || UNTITLED;
+        const title = entryTitles[entry.sys.id] || 'Reference is missing';
 
         return <EntryCard contentType={contentTypeName} title={title} />;
       },
@@ -128,7 +129,7 @@ const Dialog = () => {
         const entry = node.data.target;
         const contentType = entryContentTypes[entry.sys.id];
         const contentTypeName = contentType?.name || UNKNOWN;
-        const title = entryTitles[entry.sys.id] || UNTITLED;
+        const title = entryTitles[entry.sys.id] || 'Reference is missing';
 
         return (
           <InlineEntryCard contentType={contentTypeName} title={title}>

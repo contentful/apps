@@ -41,29 +41,26 @@ const HtmlDiffViewer = ({
         const entry = node.data.target;
         const entryId = entry.sys.id;
         const contentType = entryContentTypes[entryId] || { name: UNKNOWN };
-        const title = entryTitles[entryId] || UNTITLED;
+        const title = entryTitles[entryId] || 'Reference is missing';
 
         // Create a wrapper div to avoid prop issues
         return (
           <div>
-            <EntryCard contentType={contentType.name} title={title || UNTITLED} />
+            <EntryCard contentType={contentType.name} title={title} />
           </div>
         );
       },
       [INLINES.EMBEDDED_ENTRY]: (node: any, _children: any) => {
         const entry = node.data.target;
         const entryId = entry.sys.id;
-        const contentType = entryContentTypes[entryId] || 'Unknown';
-        const title = entryTitles[entryId] || 'Untitled';
+        const contentType = entryContentTypes[entryId] || { name: UNKNOWN };
+        const title = entryTitles[entryId] || 'Reference is missing';
 
         // Create a wrapper span to avoid prop issues
         return (
           <span>
-            <InlineEntryCard
-              actions={[]}
-              contentType={contentType.name}
-              title={title || 'Untitled'}>
-              {title || 'Untitled'}
+            <InlineEntryCard actions={[]} contentType={contentType.name} title={title}>
+              {title}
             </InlineEntryCard>
           </span>
         );
