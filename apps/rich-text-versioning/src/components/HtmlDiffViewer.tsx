@@ -172,7 +172,7 @@ const HtmlDiffViewer = ({
     processDiff();
   }, [currentField, publishedField, onChangeCount, entryTitles, entryContentTypes, loading]);
 
-  if (loading) {
+  if (loading || !diffHtml) {
     return (
       <Skeleton.Container>
         <Skeleton.BodyText numberOfLines={4} />
