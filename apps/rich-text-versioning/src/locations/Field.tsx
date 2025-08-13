@@ -2,43 +2,26 @@ import { FieldAppSDK } from '@contentful/app-sdk';
 import { Button } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { RichTextEditor } from '@contentful/field-editor-rich-text';
 import { Document } from '@contentful/rich-text-types';
 import { EntrySys } from '@contentful/app-sdk/dist/types/utils';
-import { createClient } from 'contentful';
+import { convertToSerializableJson, DIALOG_MIN_HEIGHT, ErrorInfo } from '../utils';
+
+const DIALOG_STANDARD_WIDTH = 1200;
+const DIALOG_WIDTH_WITH_ERROR = 500;
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   const [fieldValue, setFieldValue] = useState<Document | null>(null);
   const [entrySys, setEntrySys] = useState<EntrySys | null>(null);
-
-  const client = useMemo(() => {
-    try {
-      const accessToken = sdk.parameters.installation?.contentfulApiKey;
-      if (!accessToken) {
-        console.error('Access token not found in app installation parameters');
-        return null;
-      }
-
-      return createClient({
-        space: sdk.ids.space,
-        environment: sdk.ids.environment,
-        accessToken: accessToken,
-      });
-    } catch (error) {
-      console.error('Error creating CDA client:', error);
-      return null;
-    }
-  }, []);
+  const [errorInfo, setErrorInfo] = useState<ErrorInfo>({ hasError: false });
 
   useAutoResizer();
 
   useEffect(() => {
-    // Fetch initial value
     setFieldValue(sdk.field.getValue());
 
-    // Set up listener for future changes
     const detachValueChangeHandler = sdk.field.onValueChanged(async (value: Document) => {
       setFieldValue(value);
     });
@@ -47,10 +30,8 @@ const Field = () => {
   }, [sdk.field]);
 
   useEffect(() => {
-    // Fetch initial value
     setEntrySys(sdk.entry.getSys());
 
-    // Set up listener for future changes
     const detachValueChangeHandler = sdk.entry.onSysChanged(async (sys: EntrySys) => {
       setEntrySys(sys);
     });
@@ -62,32 +43,44 @@ const Field = () => {
     return !!sys?.publishedVersion && sys?.version >= sys?.publishedVersion + 2;
   };
 
-  const onButtonClick = async (value: Document) => {
+  const onButtonClick = async (value: Document | null) => {
+    if (!value) {
+      return;
+    }
+
     let publishedField: Document | undefined;
+    let currentErrorInfo = errorInfo;
 
     try {
-      if (!client) {
-        console.error('CDA client not available');
-        return;
-      }
-
-      const publishedEntry = await client.getEntry(sdk.ids.entry);
+      const publishedEntries = await sdk.cma.entry.getPublished({
+        query: { 'sys.id': sdk.ids.entry },
+      });
+      const publishedEntry = publishedEntries.items[0];
 
       if (publishedEntry?.fields?.[sdk.field.id]) {
         const fieldData = publishedEntry.fields[sdk.field.id];
         publishedField = fieldData as Document;
       }
+
+      setErrorInfo({ hasError: false });
     } catch (error) {
-      console.error('Error fetching published entry:', error);
+      setErrorInfo({
+        hasError: true,
+        errorCode: '500',
+        errorMessage: 'Error loading content',
+      });
     }
 
     await sdk.dialogs.openCurrentApp({
       title: 'Version Comparison',
-      width: 1200,
-      minHeight: 500,
+      width: errorInfo.hasError ? DIALOG_WIDTH_WITH_ERROR : DIALOG_STANDARD_WIDTH,
+      minHeight: DIALOG_MIN_HEIGHT,
       parameters: {
-        currentField: JSON.parse(JSON.stringify(value)),
-        publishedField: publishedField ? JSON.parse(JSON.stringify(publishedField)) : undefined,
+        currentField: convertToSerializableJson(value),
+        publishedField: publishedField
+          ? convertToSerializableJson(publishedField)[sdk.locales.default]
+          : undefined,
+        errorInfo: convertToSerializableJson(currentErrorInfo),
       },
     });
   };
@@ -95,18 +88,16 @@ const Field = () => {
   return (
     <>
       <RichTextEditor sdk={sdk} isInitiallyDisabled={false} />
-      {fieldValue && entrySys && (
-        <Button
-          testId="view-diff-button"
-          variant="primary"
-          size="small"
-          style={{ marginTop: tokens.spacingM }}
-          isFullWidth={true}
-          isDisabled={!isChanged(entrySys)}
-          onClick={() => onButtonClick(fieldValue)}>
-          View Diff
-        </Button>
-      )}
+      <Button
+        testId="view-diff-button"
+        variant="primary"
+        size="small"
+        style={{ marginTop: tokens.spacingM }}
+        isFullWidth={true}
+        isDisabled={!fieldValue || !entrySys || !isChanged(entrySys)}
+        onClick={() => onButtonClick(fieldValue)}>
+        View Diff
+      </Button>
     </>
   );
 };
