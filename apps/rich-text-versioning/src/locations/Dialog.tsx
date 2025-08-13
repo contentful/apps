@@ -53,7 +53,7 @@ const Dialog = () => {
             variant="secondary"
             size="small"
             onClick={() => {
-              sdk.close();
+              sdk.close({ errorInfo });
             }}>
             Close
           </Button>
@@ -95,7 +95,7 @@ const Dialog = () => {
           variant="secondary"
           size="small"
           onClick={() => {
-            sdk.close();
+            sdk.close({ errorInfo });
           }}>
           Close
         </Button>

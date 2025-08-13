@@ -44,12 +44,13 @@ const Field = () => {
   };
 
   const onButtonClick = async (value: Document | null) => {
+    let currentErrorInfo: ErrorInfo = { hasError: false };
+
     if (!value) {
       return;
     }
 
     let publishedField: Document | undefined;
-    let currentErrorInfo = errorInfo;
 
     try {
       const publishedEntries = await sdk.cma.entry.getPublished({
@@ -62,7 +63,7 @@ const Field = () => {
         publishedField = fieldData as Document;
       }
 
-      setErrorInfo({ hasError: false });
+      setErrorInfo(currentErrorInfo);
     } catch (error) {
       currentErrorInfo = {
         hasError: true,
@@ -72,9 +73,9 @@ const Field = () => {
       setErrorInfo(currentErrorInfo);
     }
 
-    await sdk.dialogs.openCurrentApp({
+    const errorState = await sdk.dialogs.openCurrentApp({
       title: 'Version Comparison',
-      width: errorInfo.hasError ? DIALOG_WIDTH_WITH_ERROR : DIALOG_STANDARD_WIDTH,
+      width: currentErrorInfo.hasError ? 'small' : 'fullWidth',
       minHeight: DIALOG_MIN_HEIGHT,
       parameters: {
         currentField: convertToSerializableJson(value),
@@ -84,6 +85,8 @@ const Field = () => {
         errorInfo: convertToSerializableJson(currentErrorInfo),
       },
     });
+
+    setErrorInfo(errorState);
   };
 
   return (
