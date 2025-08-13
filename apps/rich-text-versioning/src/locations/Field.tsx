@@ -50,7 +50,7 @@ const Field = () => {
 
     try {
       const publishedEntries = await sdk.cma.entry.getPublished({
-        query: { sysid: sdk.ids.entry },
+        query: { 'sys.id': sdk.ids.entry },
       });
       const publishedEntry = publishedEntries.items[0];
 
