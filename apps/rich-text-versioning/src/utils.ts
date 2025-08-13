@@ -3,8 +3,6 @@ import { ContentTypeProps } from 'contentful-management';
 
 import { Document } from '@contentful/rich-text-types';
 
-export const DIALOG_MIN_HEIGHT = 170;
-
 export function convertToSerializableJson(value: Document | ErrorInfo) {
   return JSON.parse(JSON.stringify(value));
 }

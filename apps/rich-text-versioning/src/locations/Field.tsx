@@ -6,16 +6,12 @@ import { useEffect, useState } from 'react';
 import { RichTextEditor } from '@contentful/field-editor-rich-text';
 import { Document } from '@contentful/rich-text-types';
 import { EntrySys } from '@contentful/app-sdk/dist/types/utils';
-import { convertToSerializableJson, DIALOG_MIN_HEIGHT, ErrorInfo } from '../utils';
-
-const DIALOG_STANDARD_WIDTH = 1200;
-const DIALOG_WIDTH_WITH_ERROR = 500;
+import { convertToSerializableJson, ErrorInfo } from '../utils';
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   const [fieldValue, setFieldValue] = useState<Document | null>(null);
   const [entrySys, setEntrySys] = useState<EntrySys | null>(null);
-  const [errorInfo, setErrorInfo] = useState<ErrorInfo>({ hasError: false });
 
   useAutoResizer();
 
@@ -54,7 +50,7 @@ const Field = () => {
 
     try {
       const publishedEntries = await sdk.cma.entry.getPublished({
-        query: { 'sys.id': sdk.ids.entry },
+        query: { sysid: sdk.ids.entry },
       });
       const publishedEntry = publishedEntries.items[0];
 
@@ -62,21 +58,17 @@ const Field = () => {
         const fieldData = publishedEntry.fields[sdk.field.id];
         publishedField = fieldData as Document;
       }
-
-      setErrorInfo(currentErrorInfo);
     } catch (error) {
       currentErrorInfo = {
         hasError: true,
         errorCode: '500',
         errorMessage: 'Error loading content',
       };
-      setErrorInfo(currentErrorInfo);
     }
 
-    const errorState = await sdk.dialogs.openCurrentApp({
+    await sdk.dialogs.openCurrentApp({
       title: 'Version Comparison',
       width: currentErrorInfo.hasError ? 'small' : 'fullWidth',
-      minHeight: DIALOG_MIN_HEIGHT,
       parameters: {
         currentField: convertToSerializableJson(value),
         publishedField: publishedField
@@ -85,8 +77,6 @@ const Field = () => {
         errorInfo: convertToSerializableJson(currentErrorInfo),
       },
     });
-
-    setErrorInfo(errorState);
   };
 
   return (
