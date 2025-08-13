@@ -9,16 +9,15 @@ import { EntryCard, Skeleton, InlineEntryCard } from '@contentful/f36-components
 import { renderToString } from 'react-dom/server';
 import tokens from '@contentful/f36-tokens';
 import React from 'react';
+import { ContentTypeProps } from 'contentful-management';
 interface HtmlDiffViewerProps {
   currentField: Document;
   publishedField: Document;
   onChangeCount: (count: number) => void;
   entryTitles: Record<string, string>;
-  entryContentTypes: Record<string, string>;
+  entryContentTypes: Record<string, ContentTypeProps>;
 }
 
-const BLOCK_ENTRY_NODE_TYPE = 'embedded-entry-block';
-const INLINE_ENTRY_NODE_TYPE = 'embedded-entry-inline';
 const UNTITLED = 'Untitled';
 const UNKNOWN = 'Unknown';
 
@@ -30,7 +29,6 @@ const HtmlDiffViewer = ({
   entryContentTypes,
 }: HtmlDiffViewerProps) => {
   const [diffHtml, setDiffHtml] = useState<string>('');
-  const [loading, setLoading] = useState(false);
 
   // Helper function to convert React component to HTML string
   const componentToHtml = (component: React.ReactElement): string => {
@@ -42,19 +40,14 @@ const HtmlDiffViewer = ({
       [BLOCKS.EMBEDDED_ENTRY]: (node: any, _children: any) => {
         const entry = node.data.target;
         const entryId = entry.sys.id;
-        const contentType = entryContentTypes[entryId] || UNKNOWN;
+        const contentType = entryContentTypes[entryId] || { name: UNKNOWN };
         const title = entryTitles[entryId] || UNTITLED;
         console.log('entryTitles', entryTitles);
 
         // Create a wrapper div to avoid prop issues
         return (
           <div>
-            <EntryCard
-              status="published"
-              contentType={contentType}
-              title={title || UNTITLED}
-              description={`ID: ${entryId}`}
-            />
+            <EntryCard contentType={contentType.name} title={title || UNTITLED} />
           </div>
         );
       },
@@ -68,8 +61,8 @@ const HtmlDiffViewer = ({
         return (
           <span>
             <InlineEntryCard
-              status="published"
-              contentType={contentType}
+              actions={[]}
+              contentType={contentType.name}
               title={title || 'Untitled'}>
               {title || 'Untitled'}
             </InlineEntryCard>
@@ -80,8 +73,6 @@ const HtmlDiffViewer = ({
   });
 
   useEffect(() => {
-    if (loading) return;
-
     const processDiff = async () => {
       // Convert current field to React components with embedded entry renderers
       const currentComponents = documentToReactComponents(currentField, createOptions());
@@ -90,10 +81,6 @@ const HtmlDiffViewer = ({
       // Convert React components to HTML strings
       const currentHtml = componentToHtml(<>{currentComponents}</>);
       const publishedHtml = componentToHtml(<>{publishedComponents}</>);
-
-      console.log('currentField', currentField);
-      console.log('currentHtml', currentHtml);
-      console.log('publishedHtml', publishedHtml);
 
       // Perform diff
       const diff = Diff.execute(publishedHtml, currentHtml);

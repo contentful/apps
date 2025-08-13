@@ -17,6 +17,7 @@ import { BLOCKS, Document, INLINES } from '@contentful/rich-text-types';
 import { useState, useEffect } from 'react';
 import { styles } from './Dialog.styles';
 import HtmlDiffViewer from '../components/HtmlDiffViewer';
+import { ContentTypeProps, EntryProps } from 'contentful-management';
 
 interface InvocationParameters {
   currentField: Document;
@@ -33,7 +34,7 @@ const Dialog = () => {
   const invocationParams = sdk.parameters.invocation as unknown as InvocationParameters;
   const [changeCount, setChangeCount] = useState(0);
   const [entryTitles, setEntryTitles] = useState<Record<string, string>>({});
-  const [entryContentTypes, setEntryContentTypes] = useState<Record<string, string>>({});
+  const [entryContentTypes, setEntryContentTypes] = useState<Record<string, ContentTypeProps>>({});
   const [loading, setLoading] = useState(true);
 
   useAutoResizer();
@@ -46,7 +47,7 @@ const Dialog = () => {
     const fetchReferences = async () => {
       setLoading(true);
       const titles: Record<string, string> = {};
-      const contentTypes: Record<string, string> = {};
+      const contentTypes: Record<string, ContentTypeProps> = {};
 
       const extractEntryIds = (doc: Document): string[] => {
         const ids: string[] = [];
@@ -67,17 +68,39 @@ const Dialog = () => {
       const publishedEntryIds = extractEntryIds(publishedField);
       const allEntryIds = [...new Set([...currentEntryIds, ...publishedEntryIds])];
 
-      // Fetch titles and content types for each reference
-      for (const entryId of allEntryIds) {
+      if (allEntryIds.length > 0) {
+        let entries: EntryProps[] = [];
         try {
-          const entry = await sdk.cma.entry.get({ entryId });
-          const title = entry.fields?.name?.['en-US'] || entry.fields?.title?.['en-US'] || UNTITLED;
-          const contentType = entry.sys.contentType?.sys?.id || UNKNOWN;
-          titles[entryId] = title;
-          contentTypes[entryId] = contentType;
+          const fetchedEntries = await sdk.cma.entry.getMany({
+            query: {
+              'sys.id[in]': allEntryIds.join(','),
+            },
+          });
+          entries.push(...fetchedEntries.items);
         } catch (error) {
-          titles[entryId] = UNTITLED;
-          contentTypes[entryId] = UNKNOWN;
+          console.error('Error fetching entries:', error);
+        }
+        if (entries.length > 0) {
+          // Use Promise.all to properly handle async operations
+          await Promise.all(
+            entries.map(async (entry) => {
+              const entryId = entry.sys.id;
+              const title =
+                entry.fields?.name?.['en-US'] || entry.fields?.title?.['en-US'] || UNTITLED;
+
+              try {
+                const contentType = await sdk.cma.contentType.get({
+                  contentTypeId: entry.sys.contentType.sys.id,
+                });
+                titles[entryId] = title;
+                contentTypes[entryId] = contentType;
+              } catch (error) {
+                console.error(`Error fetching content type for entry ${entryId}:`, error);
+                titles[entryId] = title;
+                contentTypes[entryId] = { name: UNKNOWN } as ContentTypeProps;
+              }
+            })
+          );
         }
       }
 
@@ -95,19 +118,21 @@ const Dialog = () => {
     renderNode: {
       [BLOCKS.EMBEDDED_ENTRY]: (node: any, children: any) => {
         const entry = node.data.target;
-        return (
-          <EntryCard
-            contentType={entry.sys.contentType.sys.id}
-            size="small"
-            title={entry.fields.title}
-          />
-        );
+        const contentType = entryContentTypes[entry.sys.id];
+        const contentTypeName = contentType?.name || UNKNOWN;
+        const title = entryTitles[entry.sys.id] || UNTITLED;
+
+        return <EntryCard contentType={contentTypeName} title={title} />;
       },
       [INLINES.EMBEDDED_ENTRY]: (node: any, children: any) => {
         const entry = node.data.target;
+        const contentType = entryContentTypes[entry.sys.id];
+        const contentTypeName = contentType?.name || UNKNOWN;
+        const title = entryTitles[entry.sys.id] || UNTITLED;
+
         return (
-          <InlineEntryCard contentType={entry.sys.contentType.sys.id} title={entry.fields.title}>
-            {entry.fields.title}
+          <InlineEntryCard contentType={contentTypeName} title={title}>
+            {title}
           </InlineEntryCard>
         );
       },
