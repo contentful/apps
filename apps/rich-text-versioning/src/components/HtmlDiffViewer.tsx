@@ -1,101 +1,40 @@
 import { Document } from '@contentful/rich-text-types';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Diff } from '@ali-tas/htmldiff-js';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { styles } from './HtmlDiffViewer.styles';
 import { BLOCKS, INLINES } from '@contentful/rich-text-types';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import { EntryCard, Skeleton, InlineEntryCard } from '@contentful/f36-components';
-import { createRoot } from 'react-dom/client';
+import { renderToString } from 'react-dom/server';
 import tokens from '@contentful/f36-tokens';
 import React from 'react';
-import { FieldAppSDK } from '@contentful/app-sdk';
-
 interface HtmlDiffViewerProps {
   currentField: Document;
   publishedField: Document;
   onChangeCount: (count: number) => void;
-  sdk: FieldAppSDK;
+  entryTitles: Record<string, string>;
+  entryContentTypes: Record<string, string>;
 }
+
+const BLOCK_ENTRY_NODE_TYPE = 'embedded-entry-block';
+const INLINE_ENTRY_NODE_TYPE = 'embedded-entry-inline';
+const UNTITLED = 'Untitled';
+const UNKNOWN = 'Unknown';
 
 const HtmlDiffViewer = ({
   currentField,
   publishedField,
   onChangeCount,
-  sdk,
+  entryTitles,
+  entryContentTypes,
 }: HtmlDiffViewerProps) => {
   const [diffHtml, setDiffHtml] = useState<string>('');
-  const [entryTitles, setEntryTitles] = useState<Record<string, string>>({});
-  const [entryContentTypes, setEntryContentTypes] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(true);
-
-  // Fetch entry titles first
-  useEffect(() => {
-    const fetchTitles = async () => {
-      setLoading(true);
-      const titles: Record<string, string> = {};
-      const contentTypes: Record<string, string> = {};
-
-      const extractEntryIds = (doc: Document): string[] => {
-        const ids: string[] = [];
-        const traverse = (node: any) => {
-          if (
-            node.nodeType === 'embedded-entry-block' ||
-            node.nodeType === 'embedded-entry-inline'
-          ) {
-            ids.push(node.data.target.sys.id);
-          }
-          if (node.content) {
-            node.content.forEach(traverse);
-          }
-        };
-        doc.content?.forEach(traverse);
-        return ids;
-      };
-
-      const entryIds = extractEntryIds(currentField);
-
-      // Fetch titles and content types for each entry
-      for (const entryId of entryIds) {
-        try {
-          const entry = await sdk.cma.entry.get({ entryId });
-          const title =
-            entry.fields?.name?.['en-US'] || entry.fields?.title?.['en-US'] || 'Untitled';
-          const contentType = entry.sys.contentType?.sys?.id || 'Unknown';
-          titles[entryId] = title;
-          contentTypes[entryId] = contentType;
-        } catch (error) {
-          titles[entryId] = entryId;
-          contentTypes[entryId] = 'Unknown';
-        }
-      }
-
-      setEntryTitles(titles);
-      setEntryContentTypes(contentTypes);
-      setLoading(false);
-    };
-
-    fetchTitles();
-  }, [currentField, sdk]);
+  const [loading, setLoading] = useState(false);
 
   // Helper function to convert React component to HTML string
-  const componentToHtml = (component: React.ReactElement): Promise<string> => {
-    return new Promise((resolve) => {
-      const container = document.createElement('div');
-      const root = createRoot(container);
-
-      root.render(component);
-
-      // Using setTimeout to ensure React has finished rendering
-      //This was causing a race condition where the diff was not being
-      // rendered correctly
-      // TODO: Make this work without setTimeout
-      setTimeout(() => {
-        const html = container.innerHTML;
-        root.unmount();
-        resolve(html);
-      }, 0);
-    });
+  const componentToHtml = (component: React.ReactElement): string => {
+    return renderToString(component);
   };
 
   const createOptions = () => ({
@@ -103,8 +42,8 @@ const HtmlDiffViewer = ({
       [BLOCKS.EMBEDDED_ENTRY]: (node: any, _children: any) => {
         const entry = node.data.target;
         const entryId = entry.sys.id;
-        const contentType = entryContentTypes[entryId] || 'Unknown';
-        const title = entryTitles[entryId] || 'Untitled';
+        const contentType = entryContentTypes[entryId] || UNKNOWN;
+        const title = entryTitles[entryId] || UNTITLED;
         console.log('entryTitles', entryTitles);
 
         // Create a wrapper div to avoid prop issues
@@ -113,7 +52,7 @@ const HtmlDiffViewer = ({
             <EntryCard
               status="published"
               contentType={contentType}
-              title={title || 'Untitled'}
+              title={title || UNTITLED}
               description={`ID: ${entryId}`}
             />
           </div>
@@ -149,8 +88,8 @@ const HtmlDiffViewer = ({
       const publishedComponents = documentToReactComponents(publishedField, createOptions());
 
       // Convert React components to HTML strings
-      const currentHtml = await componentToHtml(<>{currentComponents}</>);
-      const publishedHtml = await componentToHtml(<>{publishedComponents}</>);
+      const currentHtml = componentToHtml(<>{currentComponents}</>);
+      const publishedHtml = componentToHtml(<>{publishedComponents}</>);
 
       console.log('currentField', currentField);
       console.log('currentHtml', currentHtml);
@@ -169,9 +108,9 @@ const HtmlDiffViewer = ({
     };
 
     processDiff();
-  }, [currentField, publishedField, onChangeCount, entryTitles, entryContentTypes, loading]);
+  }, [currentField, publishedField, onChangeCount, entryTitles, entryContentTypes]);
 
-  if (loading || !diffHtml) {
+  if (!diffHtml) {
     return (
       <Skeleton.Container>
         <Skeleton.BodyText numberOfLines={4} />
