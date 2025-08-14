@@ -1,4 +1,4 @@
-import { Document } from '@contentful/rich-text-types';
+import { Block, Document, Inline } from '@contentful/rich-text-types';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Diff } from '@ali-tas/htmldiff-js';
 import { useEffect, useState, useMemo } from 'react';
@@ -9,24 +9,26 @@ import { EntryCard, Skeleton, InlineEntryCard } from '@contentful/f36-components
 import { renderToString } from 'react-dom/server';
 import tokens from '@contentful/f36-tokens';
 import React from 'react';
-import { ContentTypeProps } from 'contentful-management';
+import { ContentTypeProps, EntryProps } from 'contentful-management';
+import { getEntryTitle, getEntryStatus } from '../utils';
+import { Node } from '@contentful/rich-text-types';
+import { createOptions } from './createOptions';
 interface HtmlDiffViewerProps {
   currentField: Document;
   publishedField: Document;
   onChangeCount: (count: number) => void;
-  entryTitles: Record<string, string>;
+  entries: EntryProps[];
   entryContentTypes: Record<string, ContentTypeProps>;
+  defaultLocale: string;
 }
-
-const UNTITLED = 'Untitled';
-const UNKNOWN = 'Unknown';
 
 const HtmlDiffViewer = ({
   currentField,
   publishedField,
   onChangeCount,
-  entryTitles,
+  entries,
   entryContentTypes,
+  defaultLocale,
 }: HtmlDiffViewerProps) => {
   const [diffHtml, setDiffHtml] = useState<string>('');
 
@@ -35,44 +37,17 @@ const HtmlDiffViewer = ({
     return renderToString(component);
   };
 
-  const createOptions = () => ({
-    renderNode: {
-      [BLOCKS.EMBEDDED_ENTRY]: (node: any, _children: any) => {
-        const entry = node.data.target;
-        const entryId = entry.sys.id;
-        const contentType = entryContentTypes[entryId] || { name: UNKNOWN };
-        const title = entryTitles[entryId] || 'Reference is missing';
-
-        // Create a wrapper div to avoid prop issues
-        return (
-          <div>
-            <EntryCard contentType={contentType.name} title={title} />
-          </div>
-        );
-      },
-      [INLINES.EMBEDDED_ENTRY]: (node: any, _children: any) => {
-        const entry = node.data.target;
-        const entryId = entry.sys.id;
-        const contentType = entryContentTypes[entryId] || { name: UNKNOWN };
-        const title = entryTitles[entryId] || 'Reference is missing';
-
-        // Create a wrapper span to avoid prop issues
-        return (
-          <span>
-            <InlineEntryCard actions={[]} contentType={contentType.name} title={title}>
-              {title}
-            </InlineEntryCard>
-          </span>
-        );
-      },
-    },
-  });
-
   useEffect(() => {
     const processDiff = async () => {
       // Convert current field to React components with embedded entry renderers
-      const currentComponents = documentToReactComponents(currentField, createOptions());
-      const publishedComponents = documentToReactComponents(publishedField, createOptions());
+      const currentComponents = documentToReactComponents(
+        currentField,
+        createOptions(entries, entryContentTypes, defaultLocale)
+      );
+      const publishedComponents = documentToReactComponents(
+        publishedField,
+        createOptions(entries, entryContentTypes, defaultLocale)
+      );
 
       // Convert React components to HTML strings
       const currentHtml = componentToHtml(<>{currentComponents}</>);
@@ -91,7 +66,7 @@ const HtmlDiffViewer = ({
     };
 
     processDiff();
-  }, [currentField, publishedField, onChangeCount, entryTitles, entryContentTypes]);
+  }, [currentField, publishedField, onChangeCount, entries, entryContentTypes]);
 
   if (!diffHtml) {
     return (

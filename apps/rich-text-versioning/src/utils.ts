@@ -1,5 +1,6 @@
 import { AppState, ContentTypeField } from '@contentful/app-sdk';
-import { ContentTypeProps } from 'contentful-management';
+import { EntityStatus } from '@contentful/f36-components';
+import { ContentTypeProps, Entry, EntryProps } from 'contentful-management';
 
 export interface RichTextFieldInfo {
   fieldUniqueId: string;
@@ -43,4 +44,33 @@ export const restoreSelectedFields = (
     const config = editorInterface[field.contentTypeId];
     return config?.controls?.some((control) => control.fieldId === field.fieldId);
   });
+};
+
+export const getEntryTitle = (
+  entry: EntryProps,
+  contentType: ContentTypeProps,
+  locale: string
+): string => {
+  let displayFieldId = contentType.displayField;
+  if (!displayFieldId) return 'Untitled';
+
+  const value = entry.fields[displayFieldId]?.[locale];
+  if (value === undefined || value === null || value === '') {
+    return 'Untitled';
+  }
+  return String(value);
+};
+
+export const getEntryStatus = (entry: EntryProps): EntityStatus | undefined => {
+  const { sys } = entry;
+  if (!sys.publishedVersion) {
+    return 'draft';
+  }
+  if (sys.version >= sys.publishedVersion + 2) {
+    return 'changed';
+  }
+  if (sys.version === sys.publishedVersion + 1) {
+    return 'published';
+  }
+  return undefined;
 };
