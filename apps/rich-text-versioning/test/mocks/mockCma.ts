@@ -5,6 +5,10 @@ const mockCma: any = {
     getMany: vi.fn(),
     get: vi.fn(),
   },
+  entry: {
+    getMany: vi.fn(),
+    get: vi.fn(),
+  },
 };
 
 export { mockCma };
