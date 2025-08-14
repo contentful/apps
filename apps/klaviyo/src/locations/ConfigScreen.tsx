@@ -21,7 +21,6 @@ import {
   getEntryKlaviyoFieldMappings,
   setEntryKlaviyoFieldMappings,
 } from '../utils/field-mappings';
-import { getOrgIdForSdk } from '../utils/sdk-helpers';
 
 // Helper to ensure klaviyoFieldMappings entry exists
 const ensureKlaviyoFieldMappingsEntry = async (sdk: ConfigAppSDK) => {
@@ -139,7 +138,6 @@ const ConfigScreen = () => {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const popupWindowRef = useRef<Window | null>(null);
   const checkWindowIntervalRef = useRef<number | null>(null);
-  const orgId = getOrgIdForSdk(sdk);
 
   // Check Klaviyo connection status with polling to handle race conditions
   const checkKlaviyoStatus = async (
@@ -151,9 +149,9 @@ const ConfigScreen = () => {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`Checking Klaviyo connection status (attempt ${attempt}/${maxRetries})...`);
-        const appActions = await sdk.cma.appAction.getMany({
-          organizationId: orgId,
-          appDefinitionId: sdk.ids.app,
+        const appActions = await sdk.cma.appAction.getManyForEnvironment({
+          environmentId: sdk.ids.environment,
+          spaceId: sdk.ids.space,
         });
 
         const checkStatusAppAction = appActions.items.find(
@@ -230,9 +228,9 @@ const ConfigScreen = () => {
       console.log('oauth:complete');
       const appDefinitionId = sdk.ids.app;
       // call app action to complete oauth
-      const appActions = await sdk.cma.appAction.getMany({
-        organizationId: orgId,
-        appDefinitionId,
+      const appActions = await sdk.cma.appAction.getManyForEnvironment({
+        environmentId: sdk.ids.environment,
+        spaceId: sdk.ids.space,
       });
       console.log('appActions', appActions);
       const completeOauthAppAction = appActions.items.find(
@@ -283,9 +281,9 @@ const ConfigScreen = () => {
     window.addEventListener('message', messageHandler);
 
     try {
-      const appActions = await sdk.cma.appAction.getMany({
-        organizationId: orgId,
-        appDefinitionId: sdk.ids.app,
+      const appActions = await sdk.cma.appAction.getManyForEnvironment({
+        environmentId: sdk.ids.environment,
+        spaceId: sdk.ids.space,
       });
 
       const initiateOauthAppAction = appActions.items.find(
@@ -324,9 +322,9 @@ const ConfigScreen = () => {
   const handleDisconnect = async () => {
     setIsDisconnecting(true);
     try {
-      const appActions = await sdk.cma.appAction.getMany({
-        organizationId: orgId,
-        appDefinitionId: sdk.ids.app,
+      const appActions = await sdk.cma.appAction.getManyForEnvironment({
+        environmentId: sdk.ids.environment,
+        spaceId: sdk.ids.space,
       });
       const disconnectAppAction = appActions.items.find((action) => action.name === 'Disconnect');
       await sdk.cma.appActionCall.create(
