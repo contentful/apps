@@ -109,10 +109,6 @@ describe('Dialog component', () => {
     cleanup();
   });
 
-  afterEach(() => {
-    cleanup();
-  });
-
   it('renders the dialog with correct layout', () => {
     render(<Dialog />);
 
