@@ -268,6 +268,30 @@ describe('Dialog component', () => {
       expect(screen.getByText('Current version')).toBeInTheDocument();
       expect(screen.getByText('Published version')).toBeInTheDocument();
     });
+
+    it('handles missing block embedded entries gracefully', async () => {
+      mockSdk.cma.entry.getMany = vi.fn().mockResolvedValue({
+        items: [], // No entries found
+      });
+
+      mockSdk.cma.contentType.get = vi.fn().mockResolvedValue({
+        displayField: 'title',
+        name: 'Fruits',
+        sys: { id: 'fruits' },
+        fields: [{ id: 'title', name: 'Title', type: 'Symbol' }],
+      });
+
+      render(<Dialog />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Entry')).toBeInTheDocument();
+        expect(screen.getByText('not found')).toBeInTheDocument();
+        expect(screen.getByText('Unknown')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText('Current version')).toBeInTheDocument();
+      expect(screen.getByText('Published version')).toBeInTheDocument();
+    });
   });
 
   describe('Reference inline embedded entries', () => {
@@ -345,6 +369,28 @@ describe('Dialog component', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Banana')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText('Current version')).toBeInTheDocument();
+      expect(screen.getByText('Published version')).toBeInTheDocument();
+    });
+
+    it('handles missing inline embedded entries gracefully', async () => {
+      mockSdk.cma.entry.getMany = vi.fn().mockResolvedValue({
+        items: [], // No entries found
+      });
+
+      mockSdk.cma.contentType.get = vi.fn().mockResolvedValue({
+        displayField: 'title',
+        name: 'Fruits',
+        sys: { id: 'fruits' },
+        fields: [{ id: 'title', name: 'Title', type: 'Symbol' }],
+      });
+
+      render(<Dialog />);
+
+      await waitFor(() => {
+        expect(screen.getByText('not found')).toBeInTheDocument();
       });
 
       expect(screen.getByText('Current version')).toBeInTheDocument();
