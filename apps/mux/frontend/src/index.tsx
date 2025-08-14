@@ -206,7 +206,10 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   async componentDidMount() {
-    const appActionsResponse = await this.cmaClient.appAction.getManyForEnvironment({});
+    const appActionsResponse = await this.cmaClient.appAction.getManyForEnvironment({
+      environmentId: this.props.sdk.ids.environment,
+      spaceId: this.props.sdk.ids.space,
+    });
     this.getSignedTokenActionId =
       appActionsResponse.items.find((x) => x.name === 'getSignedUrlTokens')?.sys.id ?? '';
 
