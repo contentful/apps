@@ -75,7 +75,6 @@ const Dialog = () => {
           console.error('Error fetching entries:', error);
         }
         if (entries.length > 0) {
-          // Use Promise.all to properly handle async operations
           await Promise.all(
             entries.map(async (entry) => {
               const entryId = entry.sys.id;
@@ -100,7 +99,7 @@ const Dialog = () => {
     if (currentField && publishedField) {
       fetchReferences();
     }
-  }, [currentField, publishedField, sdk.cma.entry]);
+  }, []);
 
   if (loading) {
     return (

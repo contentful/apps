@@ -4,6 +4,8 @@ import { getEntryTitle, getEntryStatus } from '../utils';
 import { Block, BLOCKS, Inline, INLINES } from '@contentful/rich-text-types';
 
 const UNKNOWN = 'Unknown';
+const NOT_FOUND = 'Entry not found';
+const DELETED = 'deleted';
 
 export const createOptions = (
   entries: EntryProps[],
@@ -14,7 +16,7 @@ export const createOptions = (
     [BLOCKS.EMBEDDED_ENTRY]: (node: Block | Inline) => {
       const entry = entries.find((e) => e.sys.id === node.data.target.sys.id);
       if (!entry) {
-        return <div>Reference is missing</div>;
+        return <EntryCard contentType={UNKNOWN} title={NOT_FOUND} status={DELETED} />;
       }
       const contentType = entryContentTypes[entry.sys.id];
       const contentTypeName = contentType?.name || UNKNOWN;
@@ -27,7 +29,7 @@ export const createOptions = (
       const entry = entries.find((e) => e.sys.id === node.data.target.sys.id);
 
       if (!entry) {
-        return <div>Reference is missing</div>;
+        return <InlineEntryCard contentType={UNKNOWN} title={NOT_FOUND} status={DELETED} />;
       }
 
       const contentType = entryContentTypes[entry.sys.id];
