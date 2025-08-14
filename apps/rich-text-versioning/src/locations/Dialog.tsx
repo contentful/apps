@@ -23,8 +23,6 @@ interface InvocationParameters {
   publishedField: Document;
 }
 
-const UNKNOWN = 'Unknown';
-
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
   const invocationParams = sdk.parameters.invocation as unknown as InvocationParameters;
@@ -70,7 +68,8 @@ const Dialog = () => {
               'sys.id[in]': allEntryIds.join(','),
             },
           });
-          entries.push(...fetchedEntries.items);
+          entries = fetchedEntries.items;
+          setEntries(entries);
         } catch (error) {
           entries = [];
           console.error('Error fetching entries:', error);
@@ -94,8 +93,6 @@ const Dialog = () => {
           );
         }
       }
-
-      setEntries(entries);
       setEntryContentTypes(contentTypes);
       setLoading(false);
     };
