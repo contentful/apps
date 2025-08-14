@@ -9,7 +9,7 @@ import { vi } from 'vitest';
 vi.mock('contentful-management', () => ({
   createClient: vi.fn(() => ({
     appAction: {
-      getMany: vi.fn(() => Promise.resolve({ items: [] })),
+      getManyForEnvironment: vi.fn(() => Promise.resolve({ items: [] })),
     },
     appActionCall: {
       createWithResponse: vi.fn(() =>
