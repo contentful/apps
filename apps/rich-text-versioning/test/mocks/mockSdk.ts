@@ -20,6 +20,9 @@ const mockSdk: any = {
       getMany: vi.fn(),
       get: vi.fn(),
     },
+    entry: {
+      getPublished: vi.fn(),
+    },
   },
   notifier: {
     error: vi.fn(),

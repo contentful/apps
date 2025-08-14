@@ -1,23 +1,29 @@
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
 
-const styles = css({
-  '.grid-item': {
+export const styles = {
+  modalContent: css({
+    height: '100%',
+    gap: tokens.spacingL,
+    padding: tokens.spacingL,
+  }),
+
+  gridItem: css({
     border: `1px solid ${tokens.gray200}`,
     borderRadius: tokens.borderRadiusSmall,
     padding: tokens.spacingS,
     height: 'fit-content',
     minHeight: 'auto',
-  },
+  }),
 
-  '.change-badge': {
+  changeBadge: css({
     marginLeft: 'auto',
-  },
+  }),
 
-  // Add spacing between all HTML blocks
-  '.diff > *': {
-    marginBottom: tokens.spacingL,
-  },
-});
-
-export { styles };
+  diff: css({
+    // Add spacing between all HTML blocks
+    '& > *': {
+      marginBottom: tokens.spacingL,
+    },
+  }),
+};

@@ -43,6 +43,37 @@ const fieldMockSdk = {
   },
 };
 
+const mockFieldValue: Document = {
+  nodeType: BLOCKS.DOCUMENT,
+  data: {},
+  content: [
+    {
+      nodeType: BLOCKS.PARAGRAPH,
+      data: {},
+      content: [
+        {
+          nodeType: 'text',
+          value: 'Test content',
+          marks: [],
+          data: {},
+        },
+      ],
+    },
+  ],
+};
+
+const mockPublishedField = {
+  items: [
+    {
+      fields: {
+        text: {
+          'en-US': 'Test content',
+        },
+      },
+    },
+  ],
+};
+
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => fieldMockSdk,
   useCMA: () => mockCma,
@@ -128,26 +159,8 @@ describe('Field component', () => {
   });
 
   it('opens dialog when View Diff button is clicked', async () => {
-    const mockFieldValue: Document = {
-      nodeType: BLOCKS.DOCUMENT,
-      data: {},
-      content: [
-        {
-          nodeType: BLOCKS.PARAGRAPH,
-          data: {},
-          content: [
-            {
-              nodeType: 'text',
-              value: 'Test content',
-              marks: [],
-              data: {},
-            },
-          ],
-        },
-      ],
-    };
-
     fieldMockSdk.field.getValue.mockReturnValue(mockFieldValue);
+    fieldMockSdk.cma.entry.getPublished.mockReturnValue(mockPublishedField);
 
     render(<Field />);
 
@@ -157,11 +170,38 @@ describe('Field component', () => {
     await waitFor(() => {
       expect(mockOpenCurrentApp).toHaveBeenCalledWith({
         title: 'Version Comparison',
-        width: 1200,
-        minHeight: 500,
+        width: 'fullWidth',
         parameters: {
           currentField: mockFieldValue,
           publishedField: undefined,
+          errorInfo: {
+            hasError: false,
+          },
+        },
+      });
+    });
+  });
+
+  it('open the modal with errors when the content could not be loaded correctly', async () => {
+    fieldMockSdk.field.getValue.mockReturnValue(mockFieldValue);
+    fieldMockSdk.cma.entry.getPublished.mockRejectedValue(new Error());
+
+    render(<Field />);
+    const button = screen.getByText('View Diff');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(mockOpenCurrentApp).toHaveBeenCalledWith({
+        title: 'Version Comparison',
+        width: 'small',
+        parameters: {
+          currentField: mockFieldValue,
+          publishedField: undefined,
+          errorInfo: {
+            hasError: true,
+            errorCode: '500',
+            errorMessage: 'Error loading content',
+          },
         },
       });
     });

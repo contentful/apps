@@ -2,6 +2,18 @@ import { AppState, ContentTypeField } from '@contentful/app-sdk';
 import { EntityStatus } from '@contentful/f36-components';
 import { ContentTypeProps, Entry, EntryProps } from 'contentful-management';
 
+import { Document } from '@contentful/rich-text-types';
+
+export function convertToSerializableJson(value: Document | ErrorInfo) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+export type ErrorInfo = {
+  hasError: boolean;
+  errorCode?: string;
+  errorMessage?: string;
+};
+
 export interface RichTextFieldInfo {
   fieldUniqueId: string;
   displayName: string;
