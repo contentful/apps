@@ -77,7 +77,7 @@ const Dialog = () => {
               {changeCount} change{changeCount !== 1 ? 's' : ''}
             </Badge>
           </Flex>
-          {publishedField && (
+          {(publishedField || currentField) && (
             <HtmlDiffViewer
               currentField={currentField}
               publishedField={publishedField}
