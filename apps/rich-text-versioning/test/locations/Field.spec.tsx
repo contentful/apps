@@ -170,8 +170,7 @@ describe('Field component', () => {
     await waitFor(() => {
       expect(mockOpenCurrentApp).toHaveBeenCalledWith({
         title: 'Version Comparison',
-        width: 1200,
-        minHeight: 170,
+        width: 'fullWidth',
         parameters: {
           currentField: mockFieldValue,
           publishedField: undefined,
@@ -194,8 +193,7 @@ describe('Field component', () => {
     await waitFor(() => {
       expect(mockOpenCurrentApp).toHaveBeenCalledWith({
         title: 'Version Comparison',
-        width: 1200,
-        minHeight: 170,
+        width: 'small',
         parameters: {
           currentField: mockFieldValue,
           publishedField: undefined,
