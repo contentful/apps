@@ -1,4 +1,4 @@
-import { EntryCard, InlineEntryCard } from '@contentful/f36-components';
+import { Box, EntryCard, InlineEntryCard } from '@contentful/f36-components';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { getEntryTitle, getEntryStatus } from '../utils';
 import { Block, BLOCKS, Inline, INLINES } from '@contentful/rich-text-types';
@@ -17,14 +17,22 @@ export const createOptions = (
     [BLOCKS.EMBEDDED_ENTRY]: (node: any) => {
       const entry = entries.find((e) => e.sys.id === node.data.target.sys.id);
       if (!entry) {
-        return <EntryCard contentType={UNKNOWN} title={NOT_FOUND} status={DELETED} />;
+        return (
+          <Box marginBottom="spacingM">
+            <EntryCard contentType={UNKNOWN} title={NOT_FOUND} status={DELETED} />
+          </Box>
+        );
       }
       const contentType = entryContentTypes[entry.sys.id];
       const contentTypeName = contentType?.name || UNKNOWN;
       const title = getEntryTitle(entry, contentType, defaultLocale);
       const status = getEntryStatus(entry);
 
-      return <EntryCard contentType={contentTypeName} title={title} status={status} />;
+      return (
+        <Box marginBottom="spacingM">
+          <EntryCard contentType={contentTypeName} title={title} status={status} />
+        </Box>
+      );
     },
     [INLINES.EMBEDDED_ENTRY]: (node: any) => {
       const entry = entries.find((e) => e.sys.id === node.data.target.sys.id);
