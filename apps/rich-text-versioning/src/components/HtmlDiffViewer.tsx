@@ -3,15 +3,11 @@ import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Diff } from '@ali-tas/htmldiff-js';
 import { useEffect, useState, useMemo } from 'react';
 import { styles } from './HtmlDiffViewer.styles';
-import { BLOCKS, INLINES } from '@contentful/rich-text-types';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
-import { EntryCard, Skeleton, InlineEntryCard } from '@contentful/f36-components';
+import { Skeleton } from '@contentful/f36-components';
 import { renderToString } from 'react-dom/server';
-import tokens from '@contentful/f36-tokens';
 import React from 'react';
 import { ContentTypeProps, EntryProps } from 'contentful-management';
-import { getEntryTitle, getEntryStatus } from '../utils';
-import { Node } from '@contentful/rich-text-types';
 import { createOptions } from './createOptions';
 interface HtmlDiffViewerProps {
   currentField: Document;
