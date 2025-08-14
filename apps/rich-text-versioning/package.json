@@ -5,6 +5,7 @@
   "dependencies": {
     "@ali-tas/htmldiff-js": "^2.0.1",
     "@contentful/app-sdk": "4.40.0",
+    "@contentful/rich-text-types": "^16.1.0",
     "@contentful/f36-components": "4.81.1",
     "@contentful/f36-multiselect": "^4.81.1",
     "@contentful/f36-tokens": "4.2.0",
