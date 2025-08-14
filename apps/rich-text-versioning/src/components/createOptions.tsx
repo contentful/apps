@@ -2,6 +2,7 @@ import { EntryCard, InlineEntryCard } from '@contentful/f36-components';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { getEntryTitle, getEntryStatus } from '../utils';
 import { Block, BLOCKS, Inline, INLINES } from '@contentful/rich-text-types';
+import { NodeRenderer, Options } from '@contentful/rich-text-react-renderer';
 
 const UNKNOWN = 'Unknown';
 const NOT_FOUND = 'Entry not found';
@@ -11,9 +12,9 @@ export const createOptions = (
   entries: EntryProps[],
   entryContentTypes: Record<string, ContentTypeProps>,
   defaultLocale: string
-) => ({
+): Options => ({
   renderNode: {
-    [BLOCKS.EMBEDDED_ENTRY]: (node: Block | Inline) => {
+    [BLOCKS.EMBEDDED_ENTRY]: (node: any) => {
       const entry = entries.find((e) => e.sys.id === node.data.target.sys.id);
       if (!entry) {
         return <EntryCard contentType={UNKNOWN} title={NOT_FOUND} status={DELETED} />;
@@ -25,7 +26,7 @@ export const createOptions = (
 
       return <EntryCard contentType={contentTypeName} title={title} status={status} />;
     },
-    [INLINES.EMBEDDED_ENTRY]: (node: Block | Inline) => {
+    [INLINES.EMBEDDED_ENTRY]: (node: any) => {
       const entry = entries.find((e) => e.sys.id === node.data.target.sys.id);
 
       if (!entry) {

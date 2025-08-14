@@ -9,20 +9,11 @@ import {
   Box,
   Note,
   Text,
-} from '@contentful/f36-components';
-import {
-  Badge,
-  Button,
-  Flex,
-  Grid,
-  GridItem,
-  Box,
-  Subheading,
   Skeleton,
 } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
-import { Block, BLOCKS, Document, Inline, INLINES, Text } from '@contentful/rich-text-types';
+import { Block, BLOCKS, Document, Inline, INLINES } from '@contentful/rich-text-types';
 import { useState, useEffect } from 'react';
 import { styles } from './Dialog.styles';
 import HtmlDiffViewer from '../components/HtmlDiffViewer';
@@ -52,7 +43,7 @@ const Dialog = () => {
 
   const getEntryIdsFromDocument = (doc: Document): string[] => {
     const ids: string[] = [];
-    const getEntryIdsFromNode = (node: Block | Inline | Text) => {
+    const getEntryIdsFromNode = (node: any) => {
       if (node.nodeType === BLOCKS.EMBEDDED_ENTRY || node.nodeType === INLINES.EMBEDDED_ENTRY) {
         ids.push(node.data.target.sys.id);
       }
