@@ -20,6 +20,7 @@ const Field = () => {
 
     const detachValueChangeHandler = sdk.field.onValueChanged(async (value: Document) => {
       setFieldValue(value);
+      sdk.entry.save();
     });
 
     return detachValueChangeHandler;

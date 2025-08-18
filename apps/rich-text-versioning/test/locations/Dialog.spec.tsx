@@ -3,9 +3,8 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
 import Dialog from '../../src/locations/Dialog';
 import { BLOCKS, INLINES } from '@contentful/rich-text-types';
-import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
-// Extend the existing mockSdk for Dialog-specific functionality
 const currentField = {
   nodeType: BLOCKS.DOCUMENT,
   data: {},
@@ -94,7 +93,6 @@ const dialogMockSdk = (currentField?: any, publishedField?: any) => ({
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: vi.fn(),
-  useCMA: vi.fn(),
   useAutoResizer: vi.fn(),
 }));
 
@@ -102,7 +100,6 @@ describe('Dialog component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useSDK).mockReturnValue(dialogMockSdk(currentField, publishedField));
-    vi.mocked(useCMA).mockReturnValue(mockCma);
   });
 
   afterEach(() => {
@@ -225,7 +222,6 @@ describe('Dialog component', () => {
 
       vi.clearAllMocks();
       vi.mocked(useSDK).mockReturnValue(dialogMockSdk(currentFieldWithEntry, publishedField));
-      vi.mocked(useCMA).mockReturnValue(mockCma);
     });
 
     it('handles block embedded entries in rich text content', async () => {
@@ -280,8 +276,7 @@ describe('Dialog component', () => {
       render(<Dialog />);
 
       await waitFor(() => {
-        expect(screen.getByText('Entry')).toBeInTheDocument();
-        expect(screen.getByText('not found')).toBeInTheDocument();
+        expect(screen.getByText('Entry not found')).toBeInTheDocument();
         expect(screen.getByText('Unknown')).toBeInTheDocument();
       });
 
@@ -332,7 +327,6 @@ describe('Dialog component', () => {
 
       vi.clearAllMocks();
       vi.mocked(useSDK).mockReturnValue(dialogMockSdk(currentFieldWithEntry, publishedField));
-      vi.mocked(useCMA).mockReturnValue(mockCma);
     });
 
     it('handles block embedded entries in rich text content', async () => {
@@ -386,7 +380,95 @@ describe('Dialog component', () => {
       render(<Dialog />);
 
       await waitFor(() => {
-        expect(screen.getByText('not found')).toBeInTheDocument();
+        expect(screen.getByText('Entry not found')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText('Current version')).toBeInTheDocument();
+      expect(screen.getByText('Published version')).toBeInTheDocument();
+    });
+  });
+
+  describe('Reference block embedded assets', () => {
+    beforeEach(() => {
+      const currentFieldWithEntry = {
+        nodeType: BLOCKS.DOCUMENT,
+        data: {},
+        content: [
+          {
+            nodeType: BLOCKS.PARAGRAPH,
+            data: {},
+            content: [
+              {
+                nodeType: 'text',
+                value: '',
+                marks: [],
+                data: {},
+              },
+              {
+                nodeType: BLOCKS.EMBEDDED_ASSET,
+                data: {
+                  target: {
+                    sys: {
+                      id: 'asset-id',
+                      type: 'Link',
+                      linkType: 'Asset',
+                    },
+                  },
+                },
+                content: [],
+              },
+              {
+                nodeType: 'text',
+                value: '',
+                marks: [],
+                data: {},
+              },
+            ],
+          },
+        ],
+      };
+
+      vi.clearAllMocks();
+      vi.mocked(useSDK).mockReturnValue(dialogMockSdk(currentFieldWithEntry, publishedField));
+    });
+
+    it('handles block embedded assets in rich text content', async () => {
+      mockSdk.cma.asset.getMany = vi.fn().mockResolvedValue({
+        items: [
+          {
+            sys: {
+              id: 'asset-id',
+              updatedAt: new Date().toISOString(),
+              publishedAt: new Date().toISOString(),
+              publishedVersion: 2,
+              version: 1,
+            },
+            fields: {
+              title: { 'en-US': 'Banana' },
+            },
+          },
+        ],
+      });
+
+      render(<Dialog />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Banana')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText('Current version')).toBeInTheDocument();
+      expect(screen.getByText('Published version')).toBeInTheDocument();
+    });
+
+    it('handles missing block embedded assets gracefully', async () => {
+      mockSdk.cma.asset.getMany = vi.fn().mockResolvedValue({
+        items: [], // No entries found
+      });
+
+      render(<Dialog />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Asset not found')).toBeInTheDocument();
       });
 
       expect(screen.getByText('Current version')).toBeInTheDocument();

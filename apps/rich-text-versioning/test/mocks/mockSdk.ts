@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import { mockCma } from './mockCma';
 
 const mockSdk: any = {
   app: {
@@ -15,15 +16,7 @@ const mockSdk: any = {
     space: 'test-space',
     environment: 'test-environment',
   },
-  cma: {
-    contentType: {
-      getMany: vi.fn(),
-      get: vi.fn(),
-    },
-    entry: {
-      getPublished: vi.fn(),
-    },
-  },
+  cma: mockCma,
   notifier: {
     error: vi.fn(),
   },

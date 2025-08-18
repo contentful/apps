@@ -76,7 +76,6 @@ const mockPublishedField = {
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => fieldMockSdk,
-  useCMA: () => mockCma,
   useAutoResizer: vi.fn(),
 }));
 
