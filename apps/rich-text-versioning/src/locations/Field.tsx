@@ -78,7 +78,7 @@ const Field = () => {
       parameters: {
         currentField: convertToSerializableJson(value),
         publishedField: publishedField
-          ? convertToSerializableJson(publishedField)[sdk.locales.default]
+          ? convertToSerializableJson(publishedField)[sdk.field.locale]
           : undefined,
         errorInfo: convertToSerializableJson(currentErrorInfo),
         locale: sdk.field.locale,
