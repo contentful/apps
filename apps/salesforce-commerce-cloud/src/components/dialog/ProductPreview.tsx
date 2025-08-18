@@ -7,7 +7,7 @@ const ProductPreview = (props: { product: any }) => {
   const { product } = props;
 
   let description = 'Description';
-  if (product.shortDescription.default) {
+  if (product.shortDescription?.default) {
     description =
       product.shortDescription.default.markup.length > descriptionLength
         ? `${product.shortDescription.default.markup.substring(0, descriptionLength)}...`
@@ -18,10 +18,17 @@ const ProductPreview = (props: { product: any }) => {
 
   return (
     <>
-      {imageUrl && <img src={imageUrl} alt={product.image.alt.default} height="75" width="75" />}
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt={product.image?.alt?.default || 'Product image'}
+          height="75"
+          width="75"
+        />
+      )}
       <Flex flexDirection="column" marginLeft="spacingS">
         <Text as="div" fontWeight="fontWeightDemiBold">
-          {product.name.default} (ID: {product.id})
+          {product.name?.default || 'Untitled Product'} (ID: {product.id})
         </Text>
         <Text as="div">{description}</Text>
       </Flex>

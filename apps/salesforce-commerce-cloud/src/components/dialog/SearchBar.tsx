@@ -42,20 +42,17 @@ const SearchBar = (props: SearchBarProps) => {
 
   const headerStyles = css`
     border-bottom: 1px solid ${tokens.gray300};
-    padding-bottom: ${tokens.spacingL};
-    @media screen and (min-height: ${props.stickyHeaderBreakpoint}px) {
-      background-color: white;
-      position: fixed;
-      top: 0;
-      z-index: 1;
-      width: calc(100% - 2rem);
-    }
+    padding: ${tokens.spacingM} ${tokens.spacingL} ${tokens.spacingL} ${tokens.spacingL};
+    background-color: white;
+    position: sticky;
+    top: 0;
+    z-index: 1;
   `;
 
   const controlProps = { ...props, fieldType };
 
   return (
-    <Flex as="header" justifyContent="space-between" alignItems="flex-start" css={headerStyles}>
+    <Flex as="header" justifyContent="space-between" alignItems="center" css={headerStyles}>
       <LeftSideControls {...controlProps} />
       <RightSideControls {...controlProps} />
     </Flex>
@@ -112,7 +109,7 @@ const LeftSideControls = (props: SearchControlProps) => {
 
 const RightSideControls = (props: SearchControlProps) => {
   return (
-    <Flex justifyContent="flex-end" flexGrow={1}>
+    <Flex justifyContent="flex-end" alignItems="center" flexGrow={1} gap="spacingM">
       <SelectionList
         items={props.selectedItems}
         itemsInfo={props.selectedData}
@@ -148,12 +145,7 @@ const SelectionList = (props: SelectionListProps) => {
   };
 
   return (
-    <Grid
-      columns={9}
-      justifyContent="space-between"
-      columnGap="spacingXs"
-      rowGap="spacingXs"
-      marginRight="spacingXs">
+    <Flex gap="spacingXs" flexWrap="wrap" alignItems="center">
       {items &&
         items.map((itemId: string) => (
           <SelectionListItem
@@ -164,7 +156,7 @@ const SelectionList = (props: SelectionListProps) => {
             fieldType={props.fieldType}
           />
         ))}
-    </Grid>
+    </Flex>
   );
 };
 

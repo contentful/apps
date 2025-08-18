@@ -32,10 +32,10 @@ const Dialog = () => {
   };
 
   return (
-    <Flex flexDirection="column">
+    <>
       <Modal.Header title={makeTitle(selectMultiple, fieldType)} onClose={() => sdk.close()} />
       <SearchPicker />
-    </Flex>
+    </>
   );
 };
 
