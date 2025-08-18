@@ -25,6 +25,7 @@ interface InvocationParameters {
   currentField: Document;
   publishedField: Document;
   errorInfo: ErrorInfo;
+  locale: string;
 }
 
 const Dialog = () => {
@@ -39,7 +40,8 @@ const Dialog = () => {
   useAutoResizer();
 
   const currentField = invocationParams?.currentField;
-  const publishedField = invocationParams?.publishedField;
+  const publishedField = invocationParams?.publishedField || { content: [] };
+  const locale = invocationParams?.locale;
 
   const getEntryIdsFromDocument = (doc: Document): string[] => {
     const ids: string[] = [];
@@ -63,7 +65,6 @@ const Dialog = () => {
       const currentEntryIds = getEntryIdsFromDocument(currentField);
       const publishedEntryIds = getEntryIdsFromDocument(publishedField);
       const allEntryIds = [...new Set([...currentEntryIds, ...publishedEntryIds])];
-
       if (allEntryIds.length > 0) {
         let entries: EntryProps[] = [];
         try {
@@ -95,12 +96,12 @@ const Dialog = () => {
             })
           );
         }
+        setEntryContentTypes(contentTypes);
       }
-      setEntryContentTypes(contentTypes);
       setLoading(false);
     };
 
-    if (currentField && publishedField) {
+    if (currentField || publishedField) {
       fetchReferences();
     }
   }, []);
@@ -158,7 +159,7 @@ const Dialog = () => {
               {changeCount} change{changeCount !== 1 ? 's' : ''}
             </Badge>
           </Flex>
-          {(publishedField || currentField) && !loading && (
+          {(publishedField || currentField) && (
             <HtmlDiffViewer
               currentField={currentField}
               publishedField={publishedField}
@@ -174,7 +175,7 @@ const Dialog = () => {
           <Box className={styles.diff}>
             {documentToReactComponents(
               publishedField,
-              createOptions(entries, entryContentTypes, sdk.locales.default)
+              createOptions(entries, entryContentTypes, locale)
             )}
           </Box>
         </GridItem>

@@ -1,7 +1,6 @@
-import { Block, Document, Inline } from '@contentful/rich-text-types';
-import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
+import { Document } from '@contentful/rich-text-types';
 import { Diff } from '@ali-tas/htmldiff-js';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { styles } from './HtmlDiffViewer.styles';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import { Skeleton } from '@contentful/f36-components';
@@ -28,11 +27,6 @@ const HtmlDiffViewer = ({
 }: HtmlDiffViewerProps) => {
   const [diffHtml, setDiffHtml] = useState<string>('');
 
-  // Helper function to convert React component to HTML string
-  const componentToHtml = (component: React.ReactElement): string => {
-    return renderToString(component);
-  };
-
   useEffect(() => {
     const processDiff = async () => {
       // Convert current field to React components with embedded entry renderers
@@ -46,8 +40,8 @@ const HtmlDiffViewer = ({
       );
 
       // Convert React components to HTML strings
-      const currentHtml = componentToHtml(<>{currentComponents}</>);
-      const publishedHtml = componentToHtml(<>{publishedComponents}</>);
+      const currentHtml = renderToString(<>{currentComponents}</>);
+      const publishedHtml = renderToString(<>{publishedComponents}</>);
 
       // Perform diff
       const diff = Diff.execute(publishedHtml, currentHtml);

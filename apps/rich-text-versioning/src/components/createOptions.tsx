@@ -1,8 +1,8 @@
 import { Box, EntryCard, InlineEntryCard } from '@contentful/f36-components';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
-import { getEntryTitle, getEntryStatus } from '../utils';
-import { Block, BLOCKS, Inline, INLINES } from '@contentful/rich-text-types';
-import { NodeRenderer, Options } from '@contentful/rich-text-react-renderer';
+import { getEntryStatus, getEntryTitle } from '../utils';
+import { BLOCKS, INLINES } from '@contentful/rich-text-types';
+import { Options } from '@contentful/rich-text-react-renderer';
 
 const UNKNOWN = 'Unknown';
 const NOT_FOUND = 'Entry not found';
@@ -11,7 +11,7 @@ const DELETED = 'deleted';
 export const createOptions = (
   entries: EntryProps[],
   entryContentTypes: Record<string, ContentTypeProps>,
-  defaultLocale: string
+  locale: string
 ): Options => ({
   renderNode: {
     [BLOCKS.EMBEDDED_ENTRY]: (node: any) => {
@@ -25,8 +25,8 @@ export const createOptions = (
       }
       const contentType = entryContentTypes[entry.sys.id];
       const contentTypeName = contentType?.name || UNKNOWN;
-      const title = getEntryTitle(entry, contentType, defaultLocale);
-      const status = getEntryStatus(entry);
+      const title = getEntryTitle(entry, contentType, locale);
+      const status = entry.sys.fieldStatus?.['*']?.[locale];
 
       return (
         <Box marginBottom="spacingM">
@@ -43,8 +43,8 @@ export const createOptions = (
 
       const contentType = entryContentTypes[entry.sys.id];
       const contentTypeName = contentType?.name || UNKNOWN;
-      const title = getEntryTitle(entry, contentType, defaultLocale);
-      const status = getEntryStatus(entry);
+      const title = getEntryTitle(entry, contentType, locale);
+      const status = entry.sys.fieldStatus?.['*']?.[locale];
 
       return (
         <InlineEntryCard contentType={contentTypeName} title={title} status={status}>
