@@ -27,6 +27,15 @@ const mockSdk: any = {
   notifier: {
     error: vi.fn(),
   },
+  parameters: {
+    invocation: {
+      currentField: null,
+      publishedField: null,
+    },
+  },
+  locales: {
+    default: 'en-US',
+  },
 };
 
 export { mockSdk };

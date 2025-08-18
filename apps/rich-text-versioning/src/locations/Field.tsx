@@ -75,6 +75,7 @@ const Field = () => {
           ? convertToSerializableJson(publishedField)[sdk.locales.default]
           : undefined,
         errorInfo: convertToSerializableJson(currentErrorInfo),
+        locale: sdk.field.locale,
       },
     });
   };
