@@ -3,7 +3,6 @@ import { EntryProps, ContentTypeProps, AssetProps } from 'contentful-management'
 import { getEntryTitle } from '../utils';
 import { Block, BLOCKS, Inline, INLINES } from '@contentful/rich-text-types';
 import { Options } from '@contentful/rich-text-react-renderer';
-import { css } from 'emotion';
 
 const UNKNOWN = 'Unknown';
 const ENTRY_NOT_FOUND = 'Entry not found';
@@ -59,7 +58,7 @@ export const createOptions = (
         </InlineEntryCard>
       );
     },
-    [BLOCKS.EMBEDDED_ASSET]: (node: Block | Inline) => {
+    [BLOCKS.EMBEDDED_ASSET]: (node: any) => {
       const asset = assets.find((a) => a.sys.id === node.data.target.sys.id);
 
       if (!asset) {
