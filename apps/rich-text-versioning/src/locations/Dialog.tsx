@@ -13,11 +13,11 @@ import {
 } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
-import { Block, BLOCKS, Document, Inline, INLINES } from '@contentful/rich-text-types';
+import { BLOCKS, Document, INLINES } from '@contentful/rich-text-types';
 import { useState, useEffect } from 'react';
 import { styles } from './Dialog.styles';
 import HtmlDiffViewer from '../components/HtmlDiffViewer';
-import { ContentTypeProps, EntryProps } from 'contentful-management';
+import { AssetProps, ContentTypeProps, EntryProps } from 'contentful-management';
 import { createOptions } from '../components/createOptions';
 import { ErrorInfo } from '../utils';
 
@@ -34,7 +34,7 @@ const Dialog = () => {
   const [changeCount, setChangeCount] = useState(0);
   const [entries, setEntries] = useState<EntryProps[]>([]);
   const [entryContentTypes, setEntryContentTypes] = useState<Record<string, ContentTypeProps>>({});
-
+  const [assets, setAssets] = useState<AssetProps[]>([]);
   const [loading, setLoading] = useState(true);
 
   useAutoResizer();
@@ -43,10 +43,10 @@ const Dialog = () => {
   const publishedField = invocationParams?.publishedField || { content: [] };
   const locale = invocationParams?.locale;
 
-  const getEntryIdsFromDocument = (doc: Document): string[] => {
+  const getReferenceIdsFromDocument = (doc: Document, types: string[]): string[] => {
     const ids: string[] = [];
     const getEntryIdsFromNode = (node: any) => {
-      if (node.nodeType === BLOCKS.EMBEDDED_ENTRY || node.nodeType === INLINES.EMBEDDED_ENTRY) {
+      if (types.includes(node.nodeType)) {
         ids.push(node.data.target.sys.id);
       }
       if ('content' in node) {
@@ -62,9 +62,21 @@ const Dialog = () => {
       setLoading(true);
       const contentTypes: Record<string, ContentTypeProps> = {};
 
-      const currentEntryIds = getEntryIdsFromDocument(currentField);
-      const publishedEntryIds = getEntryIdsFromDocument(publishedField);
+      const currentEntryIds = getReferenceIdsFromDocument(currentField, [
+        BLOCKS.EMBEDDED_ENTRY,
+        INLINES.EMBEDDED_ENTRY,
+      ]);
+      const publishedEntryIds = getReferenceIdsFromDocument(publishedField, [
+        BLOCKS.EMBEDDED_ENTRY,
+        INLINES.EMBEDDED_ENTRY,
+      ]);
+      const currentAssetIds = getReferenceIdsFromDocument(currentField, [BLOCKS.EMBEDDED_ASSET]);
+      const publishedAssetIds = getReferenceIdsFromDocument(publishedField, [
+        BLOCKS.EMBEDDED_ASSET,
+      ]);
       const allEntryIds = [...new Set([...currentEntryIds, ...publishedEntryIds])];
+      const allAssetIds = [...new Set([...currentAssetIds, ...publishedAssetIds])];
+
       if (allEntryIds.length > 0) {
         let entries: EntryProps[] = [];
         try {
@@ -97,6 +109,18 @@ const Dialog = () => {
           );
         }
         setEntryContentTypes(contentTypes);
+      }
+      if (allAssetIds.length > 0) {
+        try {
+          const fetchedAssets = await sdk.cma.asset.getMany({
+            query: {
+              'sys.id[in]': allAssetIds.join(','),
+            },
+          });
+          setAssets(fetchedAssets.items);
+        } catch (error) {
+          console.error('Error fetching assets:', error);
+        }
       }
       setLoading(false);
     };
@@ -166,7 +190,8 @@ const Dialog = () => {
               onChangeCount={setChangeCount}
               entries={entries}
               entryContentTypes={entryContentTypes}
-              defaultLocale={sdk.locales.default}
+              locale={sdk.locales.default}
+              assets={assets}
             />
           )}
         </GridItem>
@@ -175,7 +200,7 @@ const Dialog = () => {
           <Box className={styles.diff}>
             {documentToReactComponents(
               publishedField,
-              createOptions(entries, entryContentTypes, locale)
+              createOptions(entries, entryContentTypes, assets, locale)
             )}
           </Box>
         </GridItem>

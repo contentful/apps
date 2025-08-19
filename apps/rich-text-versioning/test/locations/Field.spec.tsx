@@ -1,14 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { mockCma, mockSdk } from '../mocks';
+import { mockSdk } from '../mocks';
 import Field from '../../src/locations/Field';
 import { Document, BLOCKS } from '@contentful/rich-text-types';
-
-vi.mock('contentful', () => ({
-  createClient: vi.fn(() => ({
-    getEntry: vi.fn(),
-  })),
-}));
 
 vi.mock('@contentful/field-editor-rich-text', () => ({
   RichTextEditor: ({ sdk }: { sdk: any }) => (
@@ -23,6 +17,7 @@ const fieldMockSdk = {
   field: {
     getValue: vi.fn(),
     onValueChanged: vi.fn(),
+    locale: 'en-US',
   },
   entry: {
     getSys: vi.fn(),
@@ -76,7 +71,6 @@ const mockPublishedField = {
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => fieldMockSdk,
-  useCMA: () => mockCma,
   useAutoResizer: vi.fn(),
 }));
 
@@ -90,8 +84,11 @@ describe('Field component', () => {
     });
     fieldMockSdk.entry.getSys.mockReturnValue({
       id: 'test-entry',
-      version: 3,
-      publishedVersion: 1,
+      fieldStatus: {
+        '*': {
+          'en-US': 'changed',
+        },
+      },
     });
   });
 
@@ -110,8 +107,11 @@ describe('Field component', () => {
   it('disables View Diff button when entry is not changed', async () => {
     fieldMockSdk.entry.getSys.mockReturnValue({
       id: 'test-entry',
-      version: 1,
-      publishedVersion: 1,
+      fieldStatus: {
+        '*': {
+          'en-US': 'published',
+        },
+      },
     });
 
     render(<Field />);
@@ -123,8 +123,11 @@ describe('Field component', () => {
   it('disables View Diff button when entry is in draft', async () => {
     fieldMockSdk.entry.getSys.mockReturnValue({
       id: 'test-entry',
-      version: 1,
-      publishedVersion: 1,
+      fieldStatus: {
+        '*': {
+          'en-US': 'draft',
+        },
+      },
     });
 
     render(<Field />);
@@ -136,26 +139,17 @@ describe('Field component', () => {
   it('enables View Diff button when entry has changes', () => {
     fieldMockSdk.entry.getSys.mockReturnValue({
       id: 'test-entry',
-      version: 3,
-      publishedVersion: 1,
+      fieldStatus: {
+        '*': {
+          'en-US': 'changed',
+        },
+      },
     });
 
     render(<Field />);
     const button = screen.getByTestId('view-diff-button');
 
     expect(button).not.toBeDisabled();
-  });
-
-  it('disables View Diff button when entry has no publishedVersion', () => {
-    fieldMockSdk.entry.getSys.mockReturnValue({
-      id: 'test-entry',
-      version: 1,
-    });
-
-    render(<Field />);
-    const button = screen.getByTestId('view-diff-button');
-
-    expect(button).toBeDisabled();
   });
 
   it('opens dialog when View Diff button is clicked', async () => {
@@ -174,6 +168,7 @@ describe('Field component', () => {
         parameters: {
           currentField: mockFieldValue,
           publishedField: undefined,
+          locale: 'en-US',
           errorInfo: {
             hasError: false,
           },
@@ -197,6 +192,7 @@ describe('Field component', () => {
         parameters: {
           currentField: mockFieldValue,
           publishedField: undefined,
+          locale: 'en-US',
           errorInfo: {
             hasError: true,
             errorCode: '500',

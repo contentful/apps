@@ -6,7 +6,6 @@ import { OnConfigureHandlerReturn } from '@contentful/app-sdk';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
-  useCMA: () => mockCma,
 }));
 
 async function saveAppInstallation() {

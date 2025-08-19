@@ -1,16 +1,18 @@
-import { Box, EntryCard, InlineEntryCard } from '@contentful/f36-components';
-import { EntryProps, ContentTypeProps } from 'contentful-management';
-import { getEntryStatus, getEntryTitle } from '../utils';
+import { AssetCard, Box, EntryCard, InlineEntryCard } from '@contentful/f36-components';
+import { EntryProps, ContentTypeProps, AssetProps } from 'contentful-management';
+import { getEntryTitle } from '../utils';
 import { BLOCKS, INLINES } from '@contentful/rich-text-types';
 import { Options } from '@contentful/rich-text-react-renderer';
 
 const UNKNOWN = 'Unknown';
-const NOT_FOUND = 'Entry not found';
+const ENTRY_NOT_FOUND = 'Entry not found';
+const ASSET_NOT_FOUND = 'Asset not found';
 const DELETED = 'deleted';
 
 export const createOptions = (
   entries: EntryProps[],
   entryContentTypes: Record<string, ContentTypeProps>,
+  assets: AssetProps[],
   locale: string
 ): Options => ({
   renderNode: {
@@ -19,7 +21,7 @@ export const createOptions = (
       if (!entry) {
         return (
           <Box marginBottom="spacingM">
-            <EntryCard contentType={UNKNOWN} title={NOT_FOUND} status={DELETED} />
+            <EntryCard contentType={UNKNOWN} title={ENTRY_NOT_FOUND} status={DELETED} />
           </Box>
         );
       }
@@ -38,7 +40,11 @@ export const createOptions = (
       const entry = entries.find((e) => e.sys.id === node.data.target.sys.id);
 
       if (!entry) {
-        return <InlineEntryCard contentType={UNKNOWN} title={NOT_FOUND} status={DELETED} />;
+        return (
+          <InlineEntryCard contentType={UNKNOWN} status={DELETED}>
+            {ENTRY_NOT_FOUND}
+          </InlineEntryCard>
+        );
       }
 
       const contentType = entryContentTypes[entry.sys.id];
@@ -47,9 +53,29 @@ export const createOptions = (
       const status = entry.sys.fieldStatus?.['*']?.[locale];
 
       return (
-        <InlineEntryCard contentType={contentTypeName} title={title} status={status}>
+        <InlineEntryCard contentType={contentTypeName} status={status}>
           {title}
         </InlineEntryCard>
+      );
+    },
+    [BLOCKS.EMBEDDED_ASSET]: (node: any) => {
+      const asset = assets.find((a) => a.sys.id === node.data.target.sys.id);
+
+      if (!asset) {
+        return (
+          <Box margin="spacingM">
+            <AssetCard title={ASSET_NOT_FOUND} status={DELETED} size="small" />
+          </Box>
+        );
+      }
+
+      const status = asset.sys?.fieldStatus?.['*']?.[locale];
+      const title = asset.fields.title[locale];
+
+      return (
+        <Box margin="spacingM">
+          <AssetCard status={status} title={title} size="small" />
+        </Box>
       );
     },
   },

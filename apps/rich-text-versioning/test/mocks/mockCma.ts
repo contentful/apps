@@ -8,6 +8,10 @@ const mockCma: any = {
   entry: {
     getMany: vi.fn(),
     get: vi.fn(),
+    getPublished: vi.fn(),
+  },
+  asset: {
+    getMany: vi.fn(),
   },
 };
 

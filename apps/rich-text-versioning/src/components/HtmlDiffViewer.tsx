@@ -5,8 +5,7 @@ import { styles } from './HtmlDiffViewer.styles';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import { Skeleton } from '@contentful/f36-components';
 import { renderToString } from 'react-dom/server';
-import React from 'react';
-import { ContentTypeProps, EntryProps } from 'contentful-management';
+import { AssetProps, ContentTypeProps, EntryProps } from 'contentful-management';
 import { createOptions } from './createOptions';
 interface HtmlDiffViewerProps {
   currentField: Document;
@@ -14,7 +13,8 @@ interface HtmlDiffViewerProps {
   onChangeCount: (count: number) => void;
   entries: EntryProps[];
   entryContentTypes: Record<string, ContentTypeProps>;
-  defaultLocale: string;
+  locale: string;
+  assets: AssetProps[];
 }
 
 const HtmlDiffViewer = ({
@@ -23,7 +23,8 @@ const HtmlDiffViewer = ({
   onChangeCount,
   entries,
   entryContentTypes,
-  defaultLocale,
+  locale,
+  assets,
 }: HtmlDiffViewerProps) => {
   const [diffHtml, setDiffHtml] = useState<string>('');
 
@@ -32,11 +33,11 @@ const HtmlDiffViewer = ({
       // Convert current field to React components with embedded entry renderers
       const currentComponents = documentToReactComponents(
         currentField,
-        createOptions(entries, entryContentTypes, defaultLocale)
+        createOptions(entries, entryContentTypes, assets, locale)
       );
       const publishedComponents = documentToReactComponents(
         publishedField,
-        createOptions(entries, entryContentTypes, defaultLocale)
+        createOptions(entries, entryContentTypes, assets, locale)
       );
 
       // Convert React components to HTML strings
@@ -44,7 +45,7 @@ const HtmlDiffViewer = ({
       const publishedHtml = renderToString(<>{publishedComponents}</>);
 
       // Perform diff
-      const diff = Diff.execute(publishedHtml, currentHtml);
+      const diff = Diff.execute(publishedHtml, currentHtml, { combineWords: true });
       setDiffHtml(diff);
 
       const diffString = diff || '';
