@@ -233,8 +233,6 @@ describe('Dialog component', () => {
               contentType: { sys: { id: 'fruits' } },
               updatedAt: new Date().toISOString(),
               publishedAt: new Date().toISOString(),
-              publishedVersion: 2,
-              version: 1,
             },
             fields: {
               title: { 'en-US': 'Banana' },
@@ -338,8 +336,6 @@ describe('Dialog component', () => {
               contentType: { sys: { id: 'fruits' } },
               updatedAt: new Date().toISOString(),
               publishedAt: new Date().toISOString(),
-              publishedVersion: 2,
-              version: 1,
             },
             fields: {
               title: { 'en-US': 'Banana' },
@@ -440,8 +436,6 @@ describe('Dialog component', () => {
               id: 'asset-id',
               updatedAt: new Date().toISOString(),
               publishedAt: new Date().toISOString(),
-              publishedVersion: 2,
-              version: 1,
             },
             fields: {
               title: { 'en-US': 'Banana' },

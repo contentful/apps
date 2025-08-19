@@ -1,7 +1,7 @@
 import { AssetCard, Box, EntryCard, InlineEntryCard } from '@contentful/f36-components';
 import { EntryProps, ContentTypeProps, AssetProps } from 'contentful-management';
 import { getEntryTitle } from '../utils';
-import { Block, BLOCKS, Inline, INLINES } from '@contentful/rich-text-types';
+import { BLOCKS, INLINES } from '@contentful/rich-text-types';
 import { Options } from '@contentful/rich-text-react-renderer';
 
 const UNKNOWN = 'Unknown';

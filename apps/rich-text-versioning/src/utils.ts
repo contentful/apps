@@ -72,17 +72,3 @@ export const getEntryTitle = (
   }
   return String(value);
 };
-
-export const getEntryStatus = (entry: EntryProps): EntityStatus | undefined => {
-  const { sys } = entry;
-  if (!sys.publishedVersion) {
-    return 'draft';
-  }
-  if (sys.version >= sys.publishedVersion + 2) {
-    return 'changed';
-  }
-  if (sys.version === sys.publishedVersion + 1) {
-    return 'published';
-  }
-  return undefined;
-};

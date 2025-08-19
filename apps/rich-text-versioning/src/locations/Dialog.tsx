@@ -122,7 +122,6 @@ const Dialog = () => {
           console.error('Error fetching assets:', error);
         }
       }
-      setEntryContentTypes(contentTypes);
       setLoading(false);
     };
 
