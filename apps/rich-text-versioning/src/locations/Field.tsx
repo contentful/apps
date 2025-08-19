@@ -7,11 +7,12 @@ import { RichTextEditor } from '@contentful/field-editor-rich-text';
 import { Document } from '@contentful/rich-text-types';
 import { EntrySys } from '@contentful/app-sdk/dist/types/utils';
 import { convertToSerializableJson, ErrorInfo } from '../utils';
+import { ReleaseEntrySys } from '@contentful/app-sdk/dist/types/entry.types';
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   const [fieldValue, setFieldValue] = useState<Document | null>(null);
-  const [entrySys, setEntrySys] = useState<EntrySys | null>(null);
+  const [entrySys, setEntrySys] = useState<EntrySys | ReleaseEntrySys | null>(null);
 
   useAutoResizer();
 
@@ -36,8 +37,13 @@ const Field = () => {
     return detachValueChangeHandler;
   }, [sdk.entry]);
 
-  const isChanged = (sys: EntrySys) => {
-    return !!sys?.publishedVersion && sys?.version >= sys?.publishedVersion + 2;
+  const isChanged = (sys: EntrySys | ReleaseEntrySys) => {
+    if ('fieldStatus' in sys && sys.fieldStatus) {
+      const fieldStatus = sys.fieldStatus as Record<string, Record<string, string>>;
+      return fieldStatus['*']?.[sdk.field.locale] === 'changed';
+    }
+
+    return false;
   };
 
   const onButtonClick = async (value: Document | null) => {
@@ -73,7 +79,7 @@ const Field = () => {
       parameters: {
         currentField: convertToSerializableJson(value),
         publishedField: publishedField
-          ? convertToSerializableJson(publishedField)[sdk.locales.default]
+          ? convertToSerializableJson(publishedField)[sdk.field.locale]
           : undefined,
         errorInfo: convertToSerializableJson(currentErrorInfo),
         locale: sdk.field.locale,
