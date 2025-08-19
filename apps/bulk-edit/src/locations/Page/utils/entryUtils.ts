@@ -148,3 +148,40 @@ export function getEntryFieldValue(
 
   return String(fieldValue) || 'empty field';
 }
+
+/**
+ * Processes entries in batches with configurable delays to avoid rate limiting.
+ * @param entries - Array of entries to process
+ * @param updateFunction - Function to call for each entry
+ * @param batchSize - Number of entries to process in each batch
+ * @param delayMs - Delay in milliseconds between batches
+ * @returns Promise that resolves to array of results from updateFunction
+ */
+//TODO: Remove generic type and batchSize and delayMs as parameters
+export async function processEntriesInBatches<T, R>(
+  entries: T[],
+  updateFunction: (entry: T) => Promise<R>,
+  batchSize: number,
+  delayMs: number
+): Promise<R[]> {
+  if (entries.length === 0) {
+    return [];
+  }
+
+  const results: R[] = [];
+
+  for (let i = 0; i < entries.length; i += batchSize) {
+    const batch = entries.slice(i, i + batchSize);
+
+    // Process current batch
+    const batchResults = await Promise.all(batch.map((entry) => updateFunction(entry)));
+    results.push(...batchResults);
+
+    // Add delay between batches (except for the last batch)
+    if (i + batchSize < entries.length) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+
+  return results;
+}

@@ -1,5 +1,9 @@
-import { describe, it, expect } from 'vitest';
-import { getEntryFieldValue, renderFieldValue } from '../../../src/locations/Page/utils/entryUtils';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import {
+  getEntryFieldValue,
+  renderFieldValue,
+  processEntriesInBatches,
+} from '../../../src/locations/Page/utils/entryUtils';
 import { ContentTypeField } from '../../../src/locations/Page/types';
 
 describe('entryUtils', () => {
@@ -246,6 +250,127 @@ describe('entryUtils', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Array' } as ContentTypeField;
       const result = renderFieldValue(field, []);
       expect(result).toBe('');
+    });
+  });
+
+  describe('processEntriesInBatches', () => {
+    const mockUpdateFunction = vi.fn();
+    const mockDelay = vi.fn();
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('should process entries in batches with delays', async () => {
+      const entries = Array.from({ length: 10 }, (_, i) => ({ id: `entry-${i}` }));
+      const batchSize = 3;
+      const delayMs = 200;
+
+      const processPromise = processEntriesInBatches(
+        entries,
+        mockUpdateFunction,
+        batchSize,
+        delayMs
+      );
+
+      // Fast-forward time to complete all batches
+      await vi.runAllTimersAsync();
+
+      const results = await processPromise;
+
+      expect(mockUpdateFunction).toHaveBeenCalledTimes(10);
+      expect(results).toHaveLength(10);
+    });
+
+    it('should handle empty entries array', async () => {
+      const results = await processEntriesInBatches([], mockUpdateFunction, 3, 200);
+
+      expect(mockUpdateFunction).not.toHaveBeenCalled();
+      expect(results).toHaveLength(0);
+    });
+
+    it('should handle single batch', async () => {
+      const entries = Array.from({ length: 2 }, (_, i) => ({ id: `entry-${i}` }));
+      const batchSize = 5;
+
+      const processPromise = processEntriesInBatches(entries, mockUpdateFunction, batchSize, 200);
+
+      await vi.runAllTimersAsync();
+      const results = await processPromise;
+
+      expect(mockUpdateFunction).toHaveBeenCalledTimes(2);
+      expect(results).toHaveLength(2);
+    });
+
+    it('should simulate realistic entry updates with delays', async () => {
+      const mockEntries = [
+        { sys: { id: 'entry-1' }, fields: {} },
+        { sys: { id: 'entry-2' }, fields: {} },
+        { sys: { id: 'entry-3' }, fields: {} },
+        { sys: { id: 'entry-4' }, fields: {} },
+        { sys: { id: 'entry-5' }, fields: {} },
+        { sys: { id: 'entry-6' }, fields: {} },
+      ];
+
+      let callCount = 0;
+      const mockUpdateFunction = vi.fn().mockImplementation(async (entry) => {
+        callCount++;
+        // Simulate some processing time
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        return { success: true, entry };
+      });
+
+      const batchSize = 2;
+      const delayMs = 200;
+
+      const processPromise = processEntriesInBatches(
+        mockEntries,
+        mockUpdateFunction,
+        batchSize,
+        delayMs
+      );
+
+      // Fast-forward time to complete all batches
+      await vi.runAllTimersAsync();
+
+      const results = await processPromise;
+
+      expect(mockUpdateFunction).toHaveBeenCalledTimes(6);
+      expect(results).toHaveLength(6);
+      expect(results.every((r: any) => r.success)).toBe(true);
+    });
+
+    it('should handle large numbers of entries efficiently', async () => {
+      const largeEntryArray = Array.from({ length: 150 }, (_, i) => ({
+        sys: { id: `entry-${i}` },
+        fields: {},
+      }));
+
+      const mockUpdateFunction = vi.fn().mockImplementation(async (entry) => {
+        return { success: true, entry };
+      });
+
+      const batchSize = 10;
+      const delayMs = 200;
+
+      const processPromise = processEntriesInBatches(
+        largeEntryArray,
+        mockUpdateFunction,
+        batchSize,
+        delayMs
+      );
+
+      await vi.runAllTimersAsync();
+      const results = await processPromise;
+
+      expect(mockUpdateFunction).toHaveBeenCalledTimes(150);
+      expect(results).toHaveLength(150);
+      expect(results.every((r: any) => r.success)).toBe(true);
     });
   });
 });

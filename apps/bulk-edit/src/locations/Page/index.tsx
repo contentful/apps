@@ -17,10 +17,15 @@ import { SortMenu, SORT_OPTIONS } from './components/SortMenu';
 import { EntryTable } from './components/EntryTable';
 import { BulkEditModal } from './components/BulkEditModal';
 import { UndoBulkEditModal } from './components/UndoBulkEditModal';
-import { updateEntryFieldLocalized, getEntryFieldValue } from './utils/entryUtils';
+import {
+  updateEntryFieldLocalized,
+  getEntryFieldValue,
+  processEntriesInBatches,
+} from './utils/entryUtils';
+import { BATCH_PROCESSING, API_LIMITS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
 
-const PAGE_SIZE_OPTIONS = [15, 50, 100];
+const PAGE_SIZE_OPTIONS = [50, 75, 100, 300, 1000];
 
 const Page = () => {
   const sdk = useSDK();
@@ -44,11 +49,12 @@ const Page = () => {
   const [lastUpdateBackup, setLastUpdateBackup] = useState<Record<string, EntryProps>>({});
   const [isUndoModalOpen, setIsUndoModalOpen] = useState(false);
   const [undoFirstEntryFieldValue, setUndoFirstEntryFieldValue] = useState('');
+  const [pageSizeOptions, setPageSizeOptions] = useState(PAGE_SIZE_OPTIONS);
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
     let skip = 0;
-    const limit = 1000;
+    const limit = API_LIMITS.DEFAULT_PAGINATION_LIMIT;
     let fetched: number;
 
     do {
@@ -197,15 +203,30 @@ const Page = () => {
     });
   }
 
+  // TODO: Figure out if we need to use this function or not
   const fetchLatestEntries = async (entryIds: string[]) => {
-    const response = await sdk.cma.entry.getMany({
-      spaceId: sdk.ids.space,
-      environmentId: sdk.ids.environment,
-      query: {
-        'sys.id[in]': entryIds.join(','),
-      },
-    });
-    return response.items;
+    const allEntries: EntryProps[] = [];
+    let skip = 0;
+    const limit = API_LIMITS.DEFAULT_PAGINATION_LIMIT;
+    let fetched: number;
+
+    do {
+      const response = await sdk.cma.entry.getMany({
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
+        query: {
+          'sys.id[in]': entryIds.join(','),
+          skip,
+          limit,
+        },
+      });
+      const items = response.items as EntryProps[];
+      allEntries.push(...items);
+      fetched = items.length;
+      skip += limit;
+    } while (fetched === limit);
+
+    return allEntries;
   };
 
   const processBatchResults = (results: Array<{ success: boolean; entry: EntryProps }>) => {
@@ -231,7 +252,9 @@ const Page = () => {
       const latestEntries = await fetchLatestEntries(entryIds);
 
       const backups: Record<string, EntryProps> = {};
-      const updatePromises = latestEntries.map(async (latestEntry) => {
+
+      // Create update function for batch processing
+      const updateEntry = async (latestEntry: EntryProps) => {
         backups[latestEntry.sys.id] = { ...latestEntry };
 
         try {
@@ -257,9 +280,16 @@ const Page = () => {
         } catch {
           return { success: false, entry: latestEntry };
         }
-      });
+      };
 
-      const results = await Promise.all(updatePromises);
+      // Process entries in batches with rate limiting
+      const results = await processEntriesInBatches(
+        latestEntries,
+        updateEntry,
+        BATCH_PROCESSING.DEFAULT_BATCH_SIZE,
+        BATCH_PROCESSING.DEFAULT_DELAY_MS
+      );
+
       const { successful, failed } = processBatchResults(results);
 
       updateEntriesList(successful);
@@ -293,12 +323,14 @@ const Page = () => {
     if (Object.keys(backupToUse).length === 0) return;
 
     setIsSaving(true);
+    setFailedUpdates([]);
 
     try {
       const entryIds = Object.keys(backupToUse);
       const currentEntries = await fetchLatestEntries(entryIds);
 
-      const restorePromises = currentEntries.map(async (currentEntry) => {
+      // Create restore function for batch processing
+      const restoreEntry = async (currentEntry: EntryProps) => {
         const backupEntry = backupToUse[currentEntry.sys.id];
 
         try {
@@ -317,9 +349,16 @@ const Page = () => {
         } catch {
           return { success: false, entry: currentEntry };
         }
-      });
+      };
 
-      const results = await Promise.all(restorePromises);
+      // Process entries in batches with rate limiting
+      const results = await processEntriesInBatches(
+        currentEntries,
+        restoreEntry,
+        BATCH_PROCESSING.DEFAULT_BATCH_SIZE,
+        BATCH_PROCESSING.DEFAULT_DELAY_MS
+      );
+
       const { successful, failed } = processBatchResults(results);
 
       updateEntriesList(successful);
@@ -402,7 +441,7 @@ const Page = () => {
                           itemsPerPage={itemsPerPage}
                           onPageChange={setActivePage}
                           onItemsPerPageChange={setItemsPerPage}
-                          pageSizeOptions={PAGE_SIZE_OPTIONS}
+                          pageSizeOptions={pageSizeOptions}
                           onSelectionChange={({ selectedEntryIds, selectedFieldId }) => {
                             setSelectedEntryIds(selectedEntryIds);
                             setSelectedField(
