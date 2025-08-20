@@ -260,7 +260,6 @@ const Page = () => {
 
       const entryIds = selectedEntries.map((entry) => entry.sys.id);
       const latestEntries = await fetchLatestEntries(entryIds);
-      console.log('latestEntries', latestEntries.length);
 
       const backups: Record<string, EntryProps> = {};
 

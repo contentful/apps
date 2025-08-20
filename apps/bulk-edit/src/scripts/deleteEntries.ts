@@ -127,4 +127,4 @@ async function deleteEntries() {
   }
 }
 
-main();
+deleteEntries();
