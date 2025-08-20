@@ -25,7 +25,7 @@ import {
 import { BATCH_PROCESSING, API_LIMITS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
 
-const PAGE_SIZE_OPTIONS = [50, 75, 100, 300, 1000];
+const PAGE_SIZE_OPTIONS = [50, 75, 100, 300, 500, 1000];
 
 const Page = () => {
   const sdk = useSDK();
@@ -203,28 +203,38 @@ const Page = () => {
     });
   }
 
-  // TODO: Figure out if we need to use this function or not
   const fetchLatestEntries = async (entryIds: string[]) => {
     const allEntries: EntryProps[] = [];
-    let skip = 0;
+    const corsLimit = API_LIMITS.CORS_QUERY_PARAM_LIMIT;
     const limit = API_LIMITS.DEFAULT_PAGINATION_LIMIT;
-    let fetched: number;
 
-    do {
-      const response = await sdk.cma.entry.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
-        query: {
-          'sys.id[in]': entryIds.join(','),
-          skip,
-          limit,
-        },
-      });
-      const items = response.items as EntryProps[];
-      allEntries.push(...items);
-      fetched = items.length;
-      skip += limit;
-    } while (fetched === limit);
+    // Process entry IDs in batches to respect CORS limit
+    for (let i = 0; i < entryIds.length; i += corsLimit) {
+      const batchIds = entryIds.slice(i, i + corsLimit);
+      let skip = 0;
+      let fetched: number;
+
+      do {
+        const response = await sdk.cma.entry.getMany({
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environment,
+          query: {
+            'sys.id[in]': batchIds.join(','),
+            skip,
+            limit,
+          },
+        });
+        const items = response.items as EntryProps[];
+        allEntries.push(...items);
+        fetched = items.length;
+        skip += limit;
+      } while (fetched === limit);
+
+      // Small delay between batches
+      if (i + corsLimit < entryIds.length) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    }
 
     return allEntries;
   };
@@ -250,6 +260,7 @@ const Page = () => {
 
       const entryIds = selectedEntries.map((entry) => entry.sys.id);
       const latestEntries = await fetchLatestEntries(entryIds);
+      console.log('latestEntries', latestEntries.length);
 
       const backups: Record<string, EntryProps> = {};
 

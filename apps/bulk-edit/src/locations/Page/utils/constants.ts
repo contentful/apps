@@ -19,4 +19,5 @@ export const BATCH_PROCESSING = {
 
 export const API_LIMITS = {
   DEFAULT_PAGINATION_LIMIT: 1000,
+  CORS_QUERY_PARAM_LIMIT: 300, // Maximum number of IDs that can be passed in a single query parameter
 } as const;
