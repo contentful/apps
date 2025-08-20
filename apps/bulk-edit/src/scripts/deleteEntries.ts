@@ -68,7 +68,9 @@ async function deleteAllEntriesForContentType(contentTypeId: string): Promise<vo
     const batch = entries.slice(i, i + batchSize);
 
     console.log(
-      `\n📦 Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(entries.length / batchSize)}`
+      `\n📦 Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(
+        entries.length / batchSize
+      )}`
     );
 
     const batchPromises = batch.map(async (entry) => {
@@ -92,7 +94,7 @@ async function deleteAllEntriesForContentType(contentTypeId: string): Promise<vo
   console.log(`   📊 Total processed: ${entries.length} entries`);
 }
 
-async function main() {
+async function deleteEntries() {
   try {
     console.log('🗑️  Contentful Entry Deletion Script\n');
 

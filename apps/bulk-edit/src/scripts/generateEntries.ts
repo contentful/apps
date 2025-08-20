@@ -234,7 +234,7 @@ async function createSampleEntry(contentTypeId: string, index: number) {
   }
 }
 
-async function main() {
+async function generateEntries() {
   try {
     console.log('🚀 Starting content type generation for app...\n');
 
@@ -255,7 +255,9 @@ async function main() {
       );
 
       console.log(
-        `\n📦 Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(numberOfEntries / batchSize)}`
+        `\n📦 Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(
+          numberOfEntries / batchSize
+        )}`
       );
 
       try {
@@ -293,4 +295,4 @@ async function main() {
   }
 }
 
-main();
+generateEntries();
