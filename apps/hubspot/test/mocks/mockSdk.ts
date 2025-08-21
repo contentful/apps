@@ -1,6 +1,8 @@
 import { vi } from 'vitest';
+import { mockCma } from './mockCma';
 
 const mockSdk: any = {
+  cma: mockCma,
   app: {
     onConfigure: vi.fn(),
     getParameters: vi.fn().mockReturnValueOnce({}),
@@ -26,6 +28,7 @@ const mockSdk: any = {
     openCurrentApp: vi.fn(),
   },
   navigator: {
+    openEntry: vi.fn(),
     openCurrentAppPage: vi.fn(),
   },
   contentType: {

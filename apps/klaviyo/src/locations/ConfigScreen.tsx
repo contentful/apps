@@ -149,9 +149,9 @@ const ConfigScreen = () => {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`Checking Klaviyo connection status (attempt ${attempt}/${maxRetries})...`);
-        const appActions = await sdk.cma.appAction.getMany({
-          organizationId: sdk.ids.organization,
-          appDefinitionId: sdk.ids.app,
+        const appActions = await sdk.cma.appAction.getManyForEnvironment({
+          environmentId: sdk.ids.environment,
+          spaceId: sdk.ids.space,
         });
 
         const checkStatusAppAction = appActions.items.find(
@@ -228,9 +228,9 @@ const ConfigScreen = () => {
       console.log('oauth:complete');
       const appDefinitionId = sdk.ids.app;
       // call app action to complete oauth
-      const appActions = await sdk.cma.appAction.getMany({
-        organizationId: sdk.ids.organization,
-        appDefinitionId,
+      const appActions = await sdk.cma.appAction.getManyForEnvironment({
+        environmentId: sdk.ids.environment,
+        spaceId: sdk.ids.space,
       });
       console.log('appActions', appActions);
       const completeOauthAppAction = appActions.items.find(
@@ -281,9 +281,9 @@ const ConfigScreen = () => {
     window.addEventListener('message', messageHandler);
 
     try {
-      const appActions = await sdk.cma.appAction.getMany({
-        organizationId: sdk.ids.organization,
-        appDefinitionId: sdk.ids.app,
+      const appActions = await sdk.cma.appAction.getManyForEnvironment({
+        environmentId: sdk.ids.environment,
+        spaceId: sdk.ids.space,
       });
 
       const initiateOauthAppAction = appActions.items.find(
@@ -322,9 +322,9 @@ const ConfigScreen = () => {
   const handleDisconnect = async () => {
     setIsDisconnecting(true);
     try {
-      const appActions = await sdk.cma.appAction.getMany({
-        organizationId: sdk.ids.organization,
-        appDefinitionId: sdk.ids.app,
+      const appActions = await sdk.cma.appAction.getManyForEnvironment({
+        environmentId: sdk.ids.environment,
+        spaceId: sdk.ids.space,
       });
       const disconnectAppAction = appActions.items.find((action) => action.name === 'Disconnect');
       await sdk.cma.appActionCall.create(

@@ -89,11 +89,16 @@ const ItemPreview = (props: ItemPreviewProps) => {
   return (
     <>
       {useImage && imageUrl && (
-        <img src={imageUrl} alt={itemData.image.alt.default} height="75" width="75" />
+        <img
+          src={imageUrl}
+          alt={itemData.image?.alt?.default || 'Product image'}
+          height="75"
+          width="75"
+        />
       )}
       <Flex flexDirection="column" marginLeft="spacingS">
         <Text as="div" fontWeight="fontWeightDemiBold" fontSize="fontSizeM">
-          {itemData.name.default}
+          {itemData.name?.default || 'Untitled Item'}
         </Text>
         <Text as="div" fontWeight="fontWeightMedium" fontSize="fontSizeS" fontColor="gray600">
           ID: {itemData.id}
@@ -107,7 +112,7 @@ const ItemPreview = (props: ItemPreviewProps) => {
                 |
               </Box>
               <Box as="span" css={categoryStyle}>
-                Catalog: {itemData.name?.default ? itemData.name.default : itemData.catalogId}
+                Catalog: {itemData.name?.default || itemData.catalogId}
               </Box>
             </>
           )}

@@ -1,35 +1,11 @@
 import { render, waitFor, screen, cleanup, fireEvent } from '@testing-library/react';
 import { vi, describe, beforeEach, it, expect, afterEach } from 'vitest';
 import Page from '../../src/locations/Page';
-
-const mockNavigator = { openEntry: vi.fn() };
-const mockSdk = {
-  cmaAdapter: {},
-  ids: { environment: 'env', space: 'space' },
-  locales: { default: 'en-US' },
-  navigator: mockNavigator,
-  notifier: {
-    success: vi.fn(),
-    error: vi.fn(),
-  },
-};
-
-const mockCma = {
-  entry: {
-    get: vi.fn(),
-    getMany: vi.fn(),
-  },
-  contentType: {
-    get: vi.fn(),
-  },
-};
+import { mockSdk } from '../mocks/mockSdk';
+import { mockCma } from '../mocks/mockCma';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
-}));
-
-vi.mock('contentful-management', () => ({
-  createClient: () => mockCma,
 }));
 
 const mockGetConnectedFields = vi.fn();

@@ -102,6 +102,8 @@ export class App extends React.Component<AppProps, AppState> {
   muxUploaderRef = createRef<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
   fileInputRef = React.createRef<HTMLInputElement>();
   muxPlayerRef = React.createRef<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
+  getSignedTokenActionId: string;
+  private pollPending = false;
 
   constructor(props: AppProps) {
     super(props);
@@ -121,12 +123,13 @@ export class App extends React.Component<AppProps, AppState> {
       }
     );
 
+    this.getSignedTokenActionId = '';
     const field = props.sdk.field.getValue();
 
     this.state = {
       value: field,
       isDeleting: false,
-      isTokenLoading: false,
+      isTokenLoading: true,
       error:
         (!muxAccessTokenId || !muxAccessTokenSecret) &&
         "It doesn't look like you've specified your Mux Access Token ID or Secret in the extension configuration.",
@@ -203,6 +206,13 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   async componentDidMount() {
+    const appActionsResponse = await this.cmaClient.appAction.getManyForEnvironment({
+      environmentId: this.props.sdk.ids.environment,
+      spaceId: this.props.sdk.ids.space,
+    });
+    this.getSignedTokenActionId =
+      appActionsResponse.items.find((x) => x.name === 'getSignedUrlTokens')?.sys.id ?? '';
+
     this.props.sdk.window.startAutoResizer();
 
     // Handler for external field value changes (e.g. when multiple authors are working on the same entry).
@@ -482,23 +492,20 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   private fetchSignedTokens = async (playbackId: string): Promise<SignedTokens> => {
-    if (this.state.isTokenLoading) {
-      return {
-        playbackToken: 'loading',
-        posterToken: 'loading',
-        storyboardToken: 'loading',
-      };
-    }
-
     this.setState({ isTokenLoading: true });
 
     try {
+      if (!this.getSignedTokenActionId) {
+        throw new Error('App Action for Get Signed Token not found.');
+      }
+
       const {
         response: { body },
       } = await this.cmaClient.appActionCall.createWithResponse(
         {
+          organizationId: this.props.sdk.ids.organization,
           appDefinitionId: this.props.sdk.ids.app!,
-          appActionId: 'muxGetSignedUrlTokens',
+          appActionId: this.getSignedTokenActionId,
         },
         { parameters: { playbackId } }
       );
@@ -575,6 +582,7 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   resync = async (params?: ResyncParams) => {
+    this.setState({ isTokenLoading: true });
     await this.pollForAssetDetails();
 
     if (!params?.silent) {
@@ -588,6 +596,7 @@ export class App extends React.Component<AppProps, AppState> {
 
   pollForAssetDetails = async (isRecursiveCall = false): Promise<void> => {
     if (!isRecursiveCall && this.state.isPolling) {
+      this.pollPending = true;
       return;
     }
 
@@ -632,10 +641,10 @@ export class App extends React.Component<AppProps, AppState> {
 
       const asset = assetRes.data;
 
-      const publicPlayback = asset.playback_ids.find(
+      const publicPlayback = asset.playback_ids?.find(
         ({ policy }: { policy: string }) => policy === 'public'
       );
-      const signedPlayback = asset.playback_ids.find(
+      const signedPlayback = asset.playback_ids?.find(
         ({ policy }: { policy: string }) => policy === 'signed'
       );
 
@@ -736,7 +745,12 @@ export class App extends React.Component<AppProps, AppState> {
       }
     } finally {
       if (!isRecursiveCall) {
-        this.setState({ isPolling: false });
+        this.setState({ isPolling: false }, () => {
+          if (this.pollPending) {
+            this.pollPending = false;
+            this.pollForAssetDetails();
+          }
+        });
       }
     }
   };
@@ -1157,108 +1171,85 @@ export class App extends React.Component<AppProps, AppState> {
       );
     }
 
-    if (this.state.value) {
-      if (this.state.value.assetId && !this.state.value.ready) {
-        return (
-          <section data-testid="waitingtoplay" className="uploader_area center aspectratio">
-            <span>
-              <Spinner size="small" /> Waiting for asset to be playable
-            </span>
-            <Button
-              variant="negative"
-              size="small"
-              onClick={this.resetField}
-              className="reset-field-button">
-              Reset this field
-            </Button>
-          </section>
-        );
-      }
-
+    if (this.state.value && (this.state.value.playbackId || this.state.value.signedPlaybackId)) {
       const { muxDomain } = this.props.sdk.parameters.installation as InstallationParams;
+      const showPlayer =
+        (this.state.value.ready && this.state.value.playbackId) ||
+        (this.isUsingSigned() && !this.state.isTokenLoading);
 
-      if (
-        this.state.value.ready &&
-        (this.state.value.playbackId || this.state.value.signedPlaybackId)
-      ) {
-        return (
-          <>
-            {modal}
-            <div>
-              {this.isUsingSigned() && (
+      return (
+        <>
+          {modal}
+          <div>
+            {this.isUsingSigned() && (
+              <Box marginBottom="spacingM">
+                <Note variant="neutral">
+                  This Mux asset is using a{' '}
+                  <TextLink
+                    href="https://docs.mux.com/docs/headless-cms-contentful#advanced-signed-urls"
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    signedPlaybackId
+                  </TextLink>
+                </Note>
+              </Box>
+            )}
+
+            {this.state.value.signedPlaybackId &&
+              !this.state.playbackToken &&
+              !this.state.isTokenLoading && (
                 <Box marginBottom="spacingM">
-                  <Note variant="neutral">
-                    This Mux asset is using a{' '}
-                    <TextLink
-                      href="https://docs.mux.com/docs/headless-cms-contentful#advanced-signed-urls"
-                      target="_blank"
-                      rel="noopener noreferrer">
-                      signedPlaybackId
-                    </TextLink>
+                  <Note variant="negative" data-testid="nosigningtoken">
+                    No signing key to create a playback token. Preview playback may not work. Try
+                    toggling the global signing key settings.
                   </Note>
                 </Box>
               )}
 
-              {this.state.value.signedPlaybackId &&
-                !this.state.playbackToken &&
-                !this.state.isTokenLoading && (
-                  <Box marginBottom="spacingM">
-                    <Note variant="negative" data-testid="nosigningtoken">
-                      No signing key to create a playback token. Preview playback may not work. Try
-                      toggling the global signing key settings.
-                    </Note>
-                  </Box>
-                )}
+            {this.isAssetPendingDelete() && (
+              <Box marginBottom="spacingM">
+                <Note variant="negative">
+                  This asset is <strong>marked for deletion</strong>. It will be deleted from Mux
+                  and Contentful when you publish. You can undo this action before publishing.
+                </Note>
+              </Box>
+            )}
 
-              {this.isAssetPendingDelete() && (
-                <Box marginBottom="spacingM">
-                  <Note variant="negative">
-                    This asset is <strong>marked for deletion</strong>. It will be deleted from Mux
-                    and Contentful when you publish. You can undo this action before publishing.
-                  </Note>
-                </Box>
+            <section
+              className="player"
+              style={{ ...this.getPlayerAspectRatio(), display: showPlayer ? undefined : 'none' }}>
+              {this.state.playerPlaybackId !== 'playback-test-123' && (
+                <MuxPlayer
+                  ref={this.muxPlayerRef}
+                  data-testid="muxplayer"
+                  style={{ height: '100%', width: '100%' }}
+                  playbackId={this.state.playerPlaybackId}
+                  streamType={this.getPlayerType()}
+                  poster={this.state.value.audioOnly ? '#' : undefined}
+                  customDomain={muxDomain && muxDomain !== 'mux.com' ? muxDomain : undefined}
+                  audio={this.state.value.audioOnly}
+                  metadata={{
+                    player_name: 'Contentful Admin Dashboard',
+                    viewer_user_id:
+                      'user' in this.props.sdk ? this.props.sdk.user.sys.id : undefined,
+                    page_type: 'Preview Player',
+                  }}
+                  tokens={{
+                    playback: this.isUsingSigned() ? this.state.playbackToken : undefined,
+                    thumbnail: this.isUsingSigned() ? this.state.posterToken : undefined,
+                    storyboard: this.isUsingSigned() ? this.state.storyboardToken : undefined,
+                  }}
+                />
               )}
+            </section>
 
-              <div>
-                <section className="player" style={this.getPlayerAspectRatio()}>
-                  {this.state.playerPlaybackId !== 'playback-test-123' &&
-                  (!this.isUsingSigned() || !this.state.isTokenLoading) &&
-                  (this.state.value.playbackId || this.state.playbackToken) ? (
-                    <MuxPlayer
-                      ref={this.muxPlayerRef}
-                      data-testid="muxplayer"
-                      style={{ height: '100%', width: '100%' }}
-                      playbackId={this.state.playerPlaybackId}
-                      streamType={this.getPlayerType()}
-                      poster={this.state.value.audioOnly ? '#' : undefined}
-                      customDomain={muxDomain && muxDomain !== 'mux.com' ? muxDomain : undefined}
-                      audio={this.state.value.audioOnly}
-                      metadata={{
-                        player_name: 'Contentful Admin Dashboard',
-                        viewer_user_id:
-                          'user' in this.props.sdk ? this.props.sdk.user.sys.id : undefined,
-                        page_type: 'Preview Player',
-                      }}
-                      tokens={{
-                        playback: this.isUsingSigned() ? this.state.playbackToken : undefined,
-                        thumbnail: this.isUsingSigned() ? this.state.posterToken : undefined,
-                        storyboard: this.isUsingSigned() ? this.state.storyboardToken : undefined,
-                      }}
-                    />
-                  ) : (
-                    <Box>
-                      <Spinner size="small" /> Refreshing Player
-                    </Box>
-                  )}
-                </section>
-              </div>
+            {showPlayer && this.isLive() && (
+              <Box marginBottom="spacingM" marginTop="spacingM">
+                <Note variant="positive">Is Live</Note>
+              </Box>
+            )}
 
-              {this.isLive() && (
-                <Box marginBottom="spacingM" marginTop="spacingM">
-                  <Note variant="positive">Is Live</Note>
-                </Box>
-              )}
-
+            {showPlayer && (
               <Box marginTop="spacingM">
                 <Menu
                   requestRemoveAsset={this.requestRemoveAsset}
@@ -1269,140 +1260,149 @@ export class App extends React.Component<AppProps, AppState> {
                   assetId={this.state.value.assetId}
                 />
               </Box>
+            )}
 
-              <Tabs defaultTab="captions">
-                <Tabs.List variant="horizontal-divider" className="tabs-scroll">
-                  <Tabs.Tab panelId="captions">Captions</Tabs.Tab>
-                  <Tabs.Tab panelId="audio">Audio Tracks</Tabs.Tab>
-                  <Tabs.Tab panelId="metadata">Metadata</Tabs.Tab>
-                  <Tabs.Tab panelId="mp4renditions">MP4 Renditions</Tabs.Tab>
-                  <Tabs.Tab panelId="playback">Playback</Tabs.Tab>
-                  <Tabs.Tab panelId="playercode">Player Code</Tabs.Tab>
-                  <Tabs.Tab panelId="debug">Data</Tabs.Tab>
-                </Tabs.List>
+            {!showPlayer && (
+              <section className="uploader_area center aspectratio" data-testid="waitingtoplay">
+                <span>
+                  <Spinner size="small" /> Waiting for asset to be playable
+                </span>
+                <Button
+                  variant="negative"
+                  size="small"
+                  onClick={this.resetField}
+                  className="reset-field-button">
+                  Reset this field
+                </Button>
+              </section>
+            )}
 
-                <Box marginTop="spacingL" marginBottom="spacingL">
-                  <Tabs.Panel id="captions">
-                    <TrackForm
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        this.uploadTrack(e.target as HTMLFormElement, 'caption');
-                      }}
-                      onDeleteTrack={(trackId) => this.onDeleteTrack(trackId, 'caption')}
-                      onUndoDeleteTrack={(trackId) => this.onUndoDeleteTrack(trackId, 'caption')}
-                      isTrackPendingDelete={(trackId) =>
-                        this.isTrackPendingDelete(trackId, 'caption')
-                      }
-                      tracks={(this.state.value?.captions || []) as Track[]}
-                      type="caption"
-                      title="Add Caption"
-                      playbackId={
-                        this.state.value?.playbackId || this.state.value?.signedPlaybackId
-                      }
-                      domain={this.props.sdk.parameters.installation.domain}
-                      token={this.state.playbackToken}
-                      isSigned={this.isUsingSigned()}
-                    />
-                  </Tabs.Panel>
+            <Tabs defaultTab="captions">
+              <Tabs.List variant="horizontal-divider" className="tabs-scroll">
+                <Tabs.Tab panelId="captions">Captions</Tabs.Tab>
+                <Tabs.Tab panelId="audio">Audio Tracks</Tabs.Tab>
+                <Tabs.Tab panelId="metadata">Metadata</Tabs.Tab>
+                <Tabs.Tab panelId="mp4renditions">MP4 Renditions</Tabs.Tab>
+                <Tabs.Tab panelId="playback">Playback</Tabs.Tab>
+                <Tabs.Tab panelId="playercode">Player Code</Tabs.Tab>
+                <Tabs.Tab panelId="debug">Data</Tabs.Tab>
+              </Tabs.List>
 
-                  <Tabs.Panel id="audio">
-                    <TrackForm
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        this.uploadTrack(e.target as HTMLFormElement, 'audio');
-                      }}
-                      onDeleteTrack={(trackId) => this.onDeleteTrack(trackId, 'audio')}
-                      onUndoDeleteTrack={(trackId) => this.onUndoDeleteTrack(trackId, 'audio')}
-                      isTrackPendingDelete={(trackId) =>
-                        this.isTrackPendingDelete(trackId, 'audio')
-                      }
-                      tracks={(this.state.value?.audioTracks || []) as Track[]}
-                      type="audio"
-                      title="Add Audio Track"
-                      playbackId={
-                        this.state.value?.playbackId || this.state.value?.signedPlaybackId
-                      }
-                      domain={this.props.sdk.parameters.installation.domain}
-                      token={this.state.playbackToken}
-                      isSigned={this.isUsingSigned()}
-                    />
-                  </Tabs.Panel>
+              <Box marginTop="spacingL" marginBottom="spacingL">
+                <Tabs.Panel id="captions">
+                  <TrackForm
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      this.uploadTrack(e.target as HTMLFormElement, 'caption');
+                    }}
+                    onDeleteTrack={(trackId) => this.onDeleteTrack(trackId, 'caption')}
+                    onUndoDeleteTrack={(trackId) => this.onUndoDeleteTrack(trackId, 'caption')}
+                    isTrackPendingDelete={(trackId) =>
+                      this.isTrackPendingDelete(trackId, 'caption')
+                    }
+                    tracks={(this.state.value?.captions || []) as Track[]}
+                    type="caption"
+                    title="Add Caption"
+                    playbackId={this.state.value?.playbackId || this.state.value?.signedPlaybackId}
+                    domain={this.props.sdk.parameters.installation.domain}
+                    token={this.state.playbackToken}
+                    isSigned={this.isUsingSigned()}
+                  />
+                </Tabs.Panel>
 
-                  <Tabs.Panel id="metadata">
-                    <MetadataPanel
-                      asset={this.state.value}
-                      onUpdateMetadata={this.onUpdateMetadata}
-                    />
-                  </Tabs.Panel>
+                <Tabs.Panel id="audio">
+                  <TrackForm
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      this.uploadTrack(e.target as HTMLFormElement, 'audio');
+                    }}
+                    onDeleteTrack={(trackId) => this.onDeleteTrack(trackId, 'audio')}
+                    onUndoDeleteTrack={(trackId) => this.onUndoDeleteTrack(trackId, 'audio')}
+                    isTrackPendingDelete={(trackId) => this.isTrackPendingDelete(trackId, 'audio')}
+                    tracks={(this.state.value?.audioTracks || []) as Track[]}
+                    type="audio"
+                    title="Add Audio Track"
+                    playbackId={this.state.value?.playbackId || this.state.value?.signedPlaybackId}
+                    domain={this.props.sdk.parameters.installation.domain}
+                    token={this.state.playbackToken}
+                    isSigned={this.isUsingSigned()}
+                  />
+                </Tabs.Panel>
 
-                  <Tabs.Panel id="playercode">
-                    {this.isUsingSigned() && (
-                      <Box marginBottom="spacingM" marginTop="spacingM">
-                        <Note variant="warning">
-                          This code snippet is for limited testing and expires after about 12 hours.
-                          Tokens should be generated seperately.
-                        </Note>
-                      </Box>
-                    )}
-                    <PlayerCode params={this.playerParams() || []} />
-                  </Tabs.Panel>
+                <Tabs.Panel id="metadata">
+                  <MetadataPanel
+                    asset={this.state.value}
+                    onUpdateMetadata={this.onUpdateMetadata}
+                  />
+                </Tabs.Panel>
 
-                  <Tabs.Panel id="playback">
-                    <PlaybackSwitcher
-                      value={this.state.value}
-                      onSwapPlaybackIDs={this.swapPlaybackIDs}
-                      enableSignedUrls={
-                        (this.props.sdk.parameters.installation as InstallationParams)
-                          .muxEnableSignedUrls
-                      }
-                    />
-                  </Tabs.Panel>
-
-                  <Tabs.Panel id="debug">
-                    <Box marginTop="spacingS">
-                      <Flex
-                        justifyContent="space-between"
-                        alignItems="center"
-                        marginBottom="spacingM">
-                        <Flex marginRight="spacingM">
-                          <Button id="resync" variant="secondary" onClick={() => this.resync()}>
-                            Resync
-                          </Button>
-                        </Flex>
-                      </Flex>
-                    </Box>
-
-                    {this.state.raw?.data.playback_ids.length > 1 ? (
+                <Tabs.Panel id="playercode">
+                  {this.isUsingSigned() && (
+                    <Box marginBottom="spacingM" marginTop="spacingM">
                       <Note variant="warning">
-                        This Asset ID has multiple playback IDs in Mux. Only the first public or
-                        signed ID will be used in Contentful.
+                        This code snippet is for limited testing and expires after about 12 hours.
+                        Tokens should be generated seperately.
                       </Note>
-                    ) : (
-                      ''
-                    )}
+                    </Box>
+                  )}
+                  <PlayerCode params={this.playerParams() || []} />
+                </Tabs.Panel>
 
-                    <pre>
-                      <Box as="code" display="inline" marginRight="spacingL">
-                        {JSON.stringify(this.state.value, null, 2)}
-                      </Box>
-                    </pre>
-                  </Tabs.Panel>
+                <Tabs.Panel id="playback">
+                  <PlaybackSwitcher
+                    value={this.state.value}
+                    onSwapPlaybackIDs={this.swapPlaybackIDs}
+                    enableSignedUrls={
+                      (this.props.sdk.parameters.installation as InstallationParams)
+                        .muxEnableSignedUrls
+                    }
+                  />
+                </Tabs.Panel>
 
-                  <Tabs.Panel id="mp4renditions">
-                    <Mp4RenditionsPanel
-                      asset={this.state.value}
-                      onCreateRendition={this.createStaticRenditionHandler}
-                      onDeleteRendition={this.onDeleteRendition}
-                      onUndoDeleteRendition={this.onUndoDeleteRendition}
-                      isRenditionPendingDelete={this.isRenditionPendingDelete}
-                    />
-                  </Tabs.Panel>
-                </Box>
-              </Tabs>
-            </div>
-          </>
-        );
-      }
+                <Tabs.Panel id="debug">
+                  <Box marginTop="spacingS">
+                    <Flex
+                      justifyContent="space-between"
+                      alignItems="center"
+                      marginBottom="spacingM">
+                      <Flex marginRight="spacingM">
+                        <Button id="resync" variant="secondary" onClick={() => this.resync()}>
+                          Resync
+                        </Button>
+                      </Flex>
+                    </Flex>
+                  </Box>
+
+                  {this.state.raw?.data?.playback_ids?.length > 1 ? (
+                    <Note variant="warning">
+                      This Asset ID has multiple playback IDs in Mux. Only the first public or
+                      signed ID will be used in Contentful.
+                    </Note>
+                  ) : (
+                    ''
+                  )}
+
+                  <pre>
+                    <Box as="code" display="inline" marginRight="spacingL">
+                      {JSON.stringify(this.state.value, null, 2)}
+                    </Box>
+                  </pre>
+                </Tabs.Panel>
+
+                <Tabs.Panel id="mp4renditions">
+                  <Mp4RenditionsPanel
+                    asset={this.state.value}
+                    onCreateRendition={this.createStaticRenditionHandler}
+                    onDeleteRendition={this.onDeleteRendition}
+                    onUndoDeleteRendition={this.onUndoDeleteRendition}
+                    isRenditionPendingDelete={this.isRenditionPendingDelete}
+                  />
+                </Tabs.Panel>
+              </Box>
+            </Tabs>
+          </div>
+        </>
+      );
     }
 
     return (

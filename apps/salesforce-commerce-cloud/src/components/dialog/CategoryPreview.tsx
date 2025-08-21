@@ -13,7 +13,7 @@ const CategoryPreview = (props: { category: any }) => {
           <Text as="span" fontWeight="fontWeightDemiBold">
             {category.name?.default}
           </Text>{' '}
-          (Catalog: {catalogInfo?.name?.default ? catalogInfo.name.default : category.catalogId})
+          (Catalog: {catalogInfo?.name?.default || category.catalogId})
         </Text>
         {category.pageDescription?.default && (
           <Text as="div">{category.pageDescription.default}</Text>

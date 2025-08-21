@@ -17,10 +17,7 @@ const CategorySearchResults = (props: SearchResultsProps) => {
   const resultsWrapperStyle = css`
     max-height: ${height}px;
     padding: ${tokens.spacingL};
-    padding-bottom: 0;
-    @media screen and (min-height: ${stickyHeaderBreakpoint}px;) {
-      padding-top: ${tokens.spacingL + headerHeight}px;
-    }
+    overflow-y: auto;
   `;
 
   return (
@@ -58,7 +55,7 @@ const CategorySearchResult = (props: SearchResultProps) => {
           <TagsIcon />
           <Flex flexDirection="column" marginLeft="spacingS">
             <Text as="div" fontWeight="fontWeightDemiBold" fontSize="fontSizeM">
-              {result.name.default}
+              {result.name?.default || 'Untitled Category'}
             </Text>
             <Text as="div" fontWeight="fontWeightMedium" fontSize="fontSizeS" fontColor="gray600">
               ID: {result.id}
@@ -70,7 +67,7 @@ const CategorySearchResult = (props: SearchResultProps) => {
                 |
               </Box>
               <Box as="span" css={categoryStyle}>
-                Catalog: {result.name?.default ? result.name.default : result.catalogId}
+                Catalog: {result.name?.default || result.catalogId}
               </Box>
             </Text>
           </Flex>

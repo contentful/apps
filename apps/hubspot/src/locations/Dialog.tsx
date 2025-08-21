@@ -4,7 +4,6 @@ import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useMemo, useState, useEffect } from 'react';
 import FieldSelection from '../components/FieldSelection';
 import FieldModuleNameMapping from '../components/FieldModuleNameMapping';
-import { createClient } from 'contentful-management';
 import { SdkField, SelectedSdkField } from '../utils/fieldsProcessing';
 import { styles } from './Dialog.styles';
 import ConfigEntryService from '../utils/ConfigEntryService';
@@ -22,16 +21,6 @@ enum Step {
 
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
-  const cma = createClient(
-    { apiAdapter: sdk.cmaAdapter },
-    {
-      type: 'plain',
-      defaults: {
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      },
-    }
-  );
   useAutoResizer();
   const invocationParams = sdk.parameters.invocation as unknown as InvocationParams;
   const fields = invocationParams.fields;
@@ -45,7 +34,7 @@ const Dialog = () => {
 
   useEffect(() => {
     const fetchConnectedFields = async () => {
-      const configService = new ConfigEntryService(cma, sdk.locales.default);
+      const configService = new ConfigEntryService(sdk.cma, sdk.locales.default);
       const entryConnectedFields = await configService.getEntryConnectedFields(
         invocationParams.entryId
       );
@@ -92,7 +81,7 @@ const Dialog = () => {
     });
 
     try {
-      const response = await cma.appActionCall.createWithResponse(
+      const response = await sdk.cma.appActionCall.createWithResponse(
         {
           spaceId: sdk.ids.space,
           environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,

@@ -16,10 +16,8 @@ import {
 const ProductSearchResults = (props: SearchResultsProps) => {
   const resultsStyles = css`
     max-height: ${height}px;
-    padding: ${tokens.spacingL} ${tokens.spacingL} 0 ${tokens.spacingL};
-    @media screen and (min-height: ${stickyHeaderBreakpoint}px;) {
-      padding: calc(${tokens.spacingL + headerHeight}px) ${tokens.spacingL} 0 ${tokens.spacingL};
-    }
+    padding: ${tokens.spacingL};
+    overflow-y: auto;
   `;
 
   return (
@@ -147,12 +145,12 @@ const ProductSearchResult = (props: SearchResultProps) => {
               onError={() => setImageHasErrored(true)}
               style={{ display: imageHasLoaded ? 'block' : 'none' }}
               src={result.image?.absUrl}
-              alt={result.image?.alt.default}
+              alt={result.image?.alt?.default || 'Product image'}
               data-test-id="image"
             />
           </div>
         )}
-        <p css={resultNameStyles}>{result.name.default}</p>
+        <p css={resultNameStyles}>{result.name?.default || 'Untitled Product'}</p>
         <p css={resultIdStyles}>ID: {result.id}</p>
         {fieldType === 'category' && <p css={resultIdStyles}>Catalog ID: {result.catalogId}</p>}
       </div>
