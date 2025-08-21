@@ -79,6 +79,7 @@ export async function getEntriesByContentType(
     const response = await client.entry.getMany({
       query: {
         content_type: contentTypeId,
+        limit: 1000,
       },
     });
 
@@ -102,8 +103,17 @@ export async function askForEntryCount(rl: Interface): Promise<number> {
   return numberOfEntries;
 }
 
-export async function askForContentTypeName(rl: Interface): Promise<string> {
-  const contentTypeName = await askQuestion(rl, 'Enter the name of the content type: ');
+export async function askForContentTypeName(
+  rl: Interface,
+  deleteContentTypeName: string | undefined
+): Promise<string> {
+  let contentTypeName: string | undefined;
+
+  if (deleteContentTypeName) {
+    contentTypeName = deleteContentTypeName;
+  } else {
+    contentTypeName = await askQuestion(rl, 'Enter the name of the content type: ');
+  }
 
   if (!contentTypeName) {
     console.log('❌ Content type name cannot be empty.');

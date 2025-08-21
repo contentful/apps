@@ -15,12 +15,10 @@ import {
   getEntriesByContentType,
   validateEnvironment,
 } from './utils';
+import { PlainClientAPI } from 'contentful-management';
+import { Interface } from 'readline';
 
-validateEnvironment();
-const client = createContentfulClient();
-const rl = createReadlineInterface();
-
-async function deleteEntry(entryId: string): Promise<boolean> {
+export async function deleteEntry(entryId: string, client: PlainClientAPI): Promise<boolean> {
   try {
     try {
       const entry = await client.entry.get({ entryId });
@@ -39,7 +37,12 @@ async function deleteEntry(entryId: string): Promise<boolean> {
   }
 }
 
-async function deleteAllEntriesForContentType(contentTypeId: string): Promise<void> {
+export async function deleteAllEntriesForContentType(
+  contentTypeId: string,
+  client: PlainClientAPI,
+  rl: Interface,
+  deleteContentTypeName: string | undefined
+): Promise<void> {
   console.log(`\n🔍 Fetching all entries for content type: ${contentTypeId}`);
 
   const entries = await getEntriesByContentType(client, contentTypeId);
@@ -51,7 +54,12 @@ async function deleteAllEntriesForContentType(contentTypeId: string): Promise<vo
 
   console.log(`📊 Found ${entries.length} entries to delete.`);
 
-  const confirmed = await confirmDeletion(rl, entries.length);
+  let confirmed: boolean;
+  if (deleteContentTypeName) {
+    confirmed = true;
+  } else {
+    confirmed = await confirmDeletion(rl, entries.length);
+  }
 
   if (!confirmed) {
     console.log('❌ Operation cancelled by user.');
@@ -74,7 +82,7 @@ async function deleteAllEntriesForContentType(contentTypeId: string): Promise<vo
     );
 
     const batchPromises = batch.map(async (entry) => {
-      return await deleteEntry(entry.sys.id);
+      return await deleteEntry(entry.sys.id, client);
     });
 
     const results = await Promise.all(batchPromises);
@@ -94,11 +102,16 @@ async function deleteAllEntriesForContentType(contentTypeId: string): Promise<vo
   console.log(`   📊 Total processed: ${entries.length} entries`);
 }
 
-async function deleteEntries() {
+export async function deleteEntries() {
+  validateEnvironment();
+  const client = createContentfulClient();
+  const rl = createReadlineInterface();
+  const { DELETE_CONTENT_TYPE_NAME } = process.env;
+
   try {
     console.log('🗑️  Contentful Entry Deletion Script\n');
 
-    const contentTypeName = await askForContentTypeName(rl);
+    const contentTypeName = await askForContentTypeName(rl, DELETE_CONTENT_TYPE_NAME);
 
     if (!contentTypeName) {
       console.log('❌ Content type name cannot be empty.');
@@ -116,7 +129,7 @@ async function deleteEntries() {
 
     console.log(`✅ Found content type: ${contentTypeName} (ID: ${contentTypeId})`);
 
-    await deleteAllEntriesForContentType(contentTypeId);
+    await deleteAllEntriesForContentType(contentTypeId, client, rl, DELETE_CONTENT_TYPE_NAME);
 
     console.log('\n🎉 Script completed successfully!');
   } catch (error) {
@@ -127,4 +140,6 @@ async function deleteEntries() {
   }
 }
 
-deleteEntries();
+if (require.main === module) {
+  deleteEntries();
+}
