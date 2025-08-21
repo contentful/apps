@@ -1,11 +1,5 @@
 #!/usr/bin/env node
 
-/*
- * This script generates 1000 entries with all possible field types
- * It uses the Content Management API to create a comprehensive content type and 1000 entries
- * of that content type for testing and demonstration purposes.
- */
-
 import 'dotenv/config';
 import {
   validateEnvironment,
@@ -13,10 +7,7 @@ import {
   createReadlineInterface,
   askForEntryCount,
 } from './utils';
-
-validateEnvironment();
-const client = createContentfulClient();
-const rl = createReadlineInterface();
+import { KeyValueMap, PlainClientAPI } from 'contentful-management';
 
 const FIELD_TYPES = [
   {
@@ -95,8 +86,7 @@ const FIELD_TYPES = [
   },
 ];
 
-async function createContentTypeWithAllFields() {
-  const contentTypeId = 'all-field-types';
+export async function createContentTypeWithAllFields(client: PlainClientAPI) {
   const contentTypeName = 'All Field Types';
 
   console.log(`Creating content type: ${contentTypeName}`);
@@ -141,44 +131,27 @@ async function createContentTypeWithAllFields() {
   };
 
   try {
-    try {
-      const existingContentType = await client.contentType.get({ contentTypeId });
-      console.log(`Content type ${contentTypeId} already exists. Updating...`);
+    const contentTypeProps = await client.contentType.create({}, body);
+    console.log(`Created content type: ${contentTypeProps.sys.id}`);
 
-      const updatedContentType = await client.contentType.update(
-        { contentTypeId },
-        {
-          ...existingContentType,
-          ...body,
-        }
-      );
+    await client.contentType.publish({ contentTypeId: contentTypeProps.sys.id }, contentTypeProps);
 
-      await client.contentType.publish({ contentTypeId }, updatedContentType);
-
-      console.log(`✅ Updated and published content type: ${contentTypeId}`);
-      return contentTypeId;
-    } catch (error) {
-      const contentTypeProps = await client.contentType.create({}, body);
-      console.log(`Created content type: ${contentTypeProps.sys.id}`);
-
-      await client.contentType.publish(
-        { contentTypeId: contentTypeProps.sys.id },
-        contentTypeProps
-      );
-
-      console.log(`✅ Created and published content type: ${contentTypeProps.sys.id}`);
-      return contentTypeProps.sys.id;
-    }
+    console.log(`✅ Created and published content type: ${contentTypeProps.sys.id}`);
+    return contentTypeProps.sys.id;
   } catch (err) {
     console.error(`❌ Content type creation failed: ${err instanceof Error ? err.message : err}`);
     throw err;
   }
 }
 
-async function createSampleEntry(contentTypeId: string, index: number) {
+export async function createSampleEntry(
+  contentTypeId: string,
+  index: number,
+  client: PlainClientAPI
+) {
   console.log(`Creating sample entry ${index + 1}...`);
 
-  const fields: any = {
+  const fields: KeyValueMap = {
     shortText: { 'en-US': 'Sample Short Text' },
     longText: {
       'en-US':
@@ -234,65 +207,83 @@ async function createSampleEntry(contentTypeId: string, index: number) {
   }
 }
 
-async function generateEntries() {
-  try {
-    console.log('🚀 Starting content type generation for app...\n');
+export async function batchEntries(
+  numberOfEntries: number,
+  contentTypeId: string,
+  client: PlainClientAPI
+) {
+  console.log(`Creating ${numberOfEntries} entries in batches...`);
 
-    const numberOfEntries = await askForEntryCount(rl);
+  const batchSize = 10;
+  let successCount = 0;
+  let failureCount = 0;
 
-    const contentTypeId = await createContentTypeWithAllFields();
+  for (let i = 0; i < numberOfEntries; i += batchSize) {
+    const batch = Array.from(
+      { length: Math.min(batchSize, numberOfEntries - i) },
+      (_, batchIndex) => createSampleEntry(contentTypeId, i + batchIndex, client)
+    );
 
-    console.log(`Creating ${numberOfEntries} entries in batches...`);
+    console.log(
+      `\n📦 Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(
+        numberOfEntries / batchSize
+      )}`
+    );
 
-    const batchSize = 10;
-    let successCount = 0;
-    let failureCount = 0;
-
-    for (let i = 0; i < numberOfEntries; i += batchSize) {
-      const batch = Array.from(
-        { length: Math.min(batchSize, numberOfEntries - i) },
-        (_, batchIndex) => createSampleEntry(contentTypeId, i + batchIndex)
-      );
-
-      console.log(
-        `\n📦 Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(
-          numberOfEntries / batchSize
-        )}`
-      );
-
-      try {
-        const batchResults = await Promise.all(batch);
-        successCount += batchResults.length;
-        console.log(`✅ Completed batch ${Math.floor(i / batchSize) + 1}`);
-      } catch (error) {
-        failureCount += batch.length;
-        console.error(`❌ Batch ${Math.floor(i / batchSize) + 1} failed:`, error);
-      }
-
-      if (i + batchSize < numberOfEntries) {
-        console.log('⏳ Waiting 1 second before next batch...');
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-      }
+    try {
+      const batchResults = await Promise.all(batch);
+      successCount += batchResults.length;
+      console.log(`✅ Completed batch ${Math.floor(i / batchSize) + 1}`);
+    } catch (error) {
+      failureCount += batch.length;
+      console.error(`❌ Batch ${Math.floor(i / batchSize) + 1} failed:`, error);
     }
 
-    console.log(`\n📊 Creation Summary:`);
-    console.log(`   ✅ Successfully created: ${successCount} entries`);
-    console.log(`   ❌ Failed to create: ${failureCount} entries`);
-    console.log(`   📊 Total processed: ${numberOfEntries} entries`);
+    if (i + batchSize < numberOfEntries) {
+      console.log('⏳ Waiting 1 second before next batch...');
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
+  }
 
-    console.log('\n🎉 Success! Content type generation complete.');
-    console.log(`\n📋 Summary:`);
-    console.log(`   • Content Type ID: ${contentTypeId}`);
-    console.log(`   • Total Fields: ${FIELD_TYPES.length}`);
-    console.log(`   • Field Types: ${FIELD_TYPES.map((f) => f.type).join(', ')}`);
-    console.log(`\n🔗 You can now use this content type to test the app integration.`);
-    console.log(`   Visit your Contentful space to see the new content type and sample entry.`);
-  } catch (error) {
-    console.error('\n❌ Script failed:', error);
-    throw error;
-  } finally {
-    rl.close();
+  console.log(`\n📊 Creation Summary:`);
+  console.log(`   ✅ Successfully created: ${successCount} entries`);
+  console.log(`   ❌ Failed to create: ${failureCount} entries`);
+  console.log(`   📊 Total processed: ${numberOfEntries} entries`);
+
+  console.log('\n🎉 Success! Content type generation complete.');
+  console.log(`\n📋 Summary:`);
+  console.log(`   • Content Type ID: ${contentTypeId}`);
+  console.log(`   • Total Fields: ${FIELD_TYPES.length}`);
+  console.log(`   • Field Types: ${FIELD_TYPES.map((f) => f.type).join(', ')}`);
+  console.log(`\n🔗 You can now use this content type to test the app integration.`);
+  console.log(`   Visit your Contentful space to see the new content type and sample entry.`);
+}
+
+export async function generateEntries() {
+  validateEnvironment();
+  const client = createContentfulClient();
+  const rl = createReadlineInterface();
+  const { AMOUNT_OF_ENTRIES } = process.env;
+
+  const contentTypeId = await createContentTypeWithAllFields(client);
+
+  if (!AMOUNT_OF_ENTRIES) {
+    try {
+      const numberOfEntries = await askForEntryCount(rl);
+      await batchEntries(numberOfEntries, contentTypeId, client);
+    } catch (error) {
+      console.error('❌ Script failed:', error);
+      throw error;
+    } finally {
+      rl.close();
+    }
+  } else {
+    const numberOfEntries = parseInt(AMOUNT_OF_ENTRIES);
+
+    await batchEntries(numberOfEntries, contentTypeId, client);
   }
 }
 
-generateEntries();
+if (require.main === module) {
+  generateEntries();
+}

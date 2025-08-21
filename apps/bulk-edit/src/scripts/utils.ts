@@ -1,5 +1,5 @@
-import * as contentful from 'contentful-management';
-import * as readline from 'readline';
+import { createClient, EntryProps, PlainClientAPI } from 'contentful-management';
+import { Interface, createInterface } from 'readline';
 
 const { SPACE_ID, ENVIRONMENT_ID, CONTENTFUL_ACCESS_TOKEN } = process.env;
 
@@ -13,7 +13,7 @@ export function validateEnvironment(): void {
 }
 
 export function createContentfulClient() {
-  return contentful.createClient(
+  return createClient(
     {
       accessToken: CONTENTFUL_ACCESS_TOKEN!,
     },
@@ -27,14 +27,14 @@ export function createContentfulClient() {
   );
 }
 
-export function createReadlineInterface(): readline.Interface {
-  return readline.createInterface({
+export function createReadlineInterface(): Interface {
+  return createInterface({
     input: process.stdin,
     output: process.stdout,
   });
 }
 
-export function askQuestion(rl: readline.Interface, question: string): Promise<string> {
+export function askQuestion(rl: Interface, question: string): Promise<string> {
   return new Promise((resolve) => {
     rl.question(question, (answer) => {
       resolve(answer.trim());
@@ -69,13 +69,18 @@ export async function getContentTypeIdByName(
   }
 }
 
-export async function getEntriesByContentType(client: any, contentTypeId: string): Promise<any[]> {
+export async function getEntriesByContentType(
+  client: PlainClientAPI,
+  contentTypeId: string
+): Promise<EntryProps[]> {
   try {
     console.log(`   📄 Fetching all entries for content type: ${contentTypeId}...`);
 
     const response = await client.entry.getMany({
-      content_type: contentTypeId,
-    } as any);
+      query: {
+        content_type: contentTypeId,
+      },
+    });
 
     console.log(`   📊 Got ${response.items.length} entries for this content type`);
     return response.items;
@@ -85,7 +90,7 @@ export async function getEntriesByContentType(client: any, contentTypeId: string
   }
 }
 
-export async function askForEntryCount(rl: readline.Interface): Promise<number> {
+export async function askForEntryCount(rl: Interface): Promise<number> {
   const entriesInput = await askQuestion(rl, 'Enter the number of entries to create: ');
   const numberOfEntries = Number.parseInt(entriesInput);
 
@@ -97,7 +102,7 @@ export async function askForEntryCount(rl: readline.Interface): Promise<number> 
   return numberOfEntries;
 }
 
-export async function askForContentTypeName(rl: readline.Interface): Promise<string> {
+export async function askForContentTypeName(rl: Interface): Promise<string> {
   const contentTypeName = await askQuestion(rl, 'Enter the name of the content type: ');
 
   if (!contentTypeName) {
@@ -108,10 +113,7 @@ export async function askForContentTypeName(rl: readline.Interface): Promise<str
   return contentTypeName;
 }
 
-export async function confirmDeletion(
-  rl: readline.Interface,
-  entryCount: number
-): Promise<boolean> {
+export async function confirmDeletion(rl: Interface, entryCount: number): Promise<boolean> {
   const confirmation = await askQuestion(
     rl,
     `\n⚠️  Are you sure you want to delete ALL ${entryCount} entries? (yes/no): `
