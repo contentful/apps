@@ -74,7 +74,7 @@ const Field = () => {
     }
 
     await sdk.dialogs.openCurrentApp({
-      title: 'Version Comparison',
+      title: 'Version comparison',
       width: currentErrorInfo.hasError ? 'small' : 'fullWidth',
       parameters: {
         currentField: convertToSerializableJson(value),

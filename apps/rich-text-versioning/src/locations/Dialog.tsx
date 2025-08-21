@@ -205,7 +205,7 @@ const Dialog = () => {
           </Box>
         </GridItem>
       </Grid>
-      <Flex justifyContent="flex-end" marginBottom="spacingM" marginRight="spacingM">
+      <Flex justifyContent="flex-end" margin="spacingM">
         <Button
           variant="secondary"
           size="small"
