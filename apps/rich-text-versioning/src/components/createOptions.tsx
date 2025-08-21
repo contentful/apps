@@ -27,11 +27,10 @@ export const createOptions = (
       const contentType = entryContentTypes[entry.sys.id];
       const contentTypeName = contentType?.name || UNKNOWN;
       const title = getEntryTitle(entry, contentType, locale);
-      const status = entry.sys.fieldStatus?.['*']?.[locale];
 
       return (
         <Box marginBottom="spacingM">
-          <EntryCard contentType={contentTypeName} title={title} status={status} />
+          <EntryCard contentType={contentTypeName} title={title} />
         </Box>
       );
     },
@@ -45,13 +44,8 @@ export const createOptions = (
       const contentType = entryContentTypes[entry.sys.id];
       const contentTypeName = contentType?.name || UNKNOWN;
       const title = getEntryTitle(entry, contentType, locale);
-      const status = entry.sys.fieldStatus?.['*']?.[locale];
 
-      return (
-        <InlineEntryCard contentType={contentTypeName} status={status}>
-          {title}
-        </InlineEntryCard>
-      );
+      return <InlineEntryCard contentType={contentTypeName}>{title}</InlineEntryCard>;
     },
     [BLOCKS.EMBEDDED_ASSET]: (node: any) => {
       const asset = assets.find((a) => a.sys.id === node.data.target.sys.id);
@@ -64,12 +58,11 @@ export const createOptions = (
         );
       }
 
-      const status = asset.sys?.fieldStatus?.['*']?.[locale];
       const title = asset.fields.title[locale];
 
       return (
         <Box margin="spacingM">
-          <AssetCard status={status} title={title} size="small" />
+          <AssetCard title={title} size="small" />
         </Box>
       );
     },
