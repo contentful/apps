@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Button, TextInput, Text, Flex, FormControl } from '@contentful/f36-components';
 import type { Entry, ContentTypeField } from '../types';
-import { getEntryFieldValue } from '../utils/entryUtils';
+import { getEntryFieldValue, truncate } from '../utils/entryUtils';
 
 interface BulkEditModalProps {
   isOpen: boolean;
@@ -48,7 +48,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
           </Text>
           <Flex>
             <Text>
-              <Text fontWeight="fontWeightDemiBold">{firstValueToUpdate}</Text>{' '}
+              <Text fontWeight="fontWeightDemiBold">{truncate(firstValueToUpdate, 100)}</Text>{' '}
               {entryCount === 1 ? 'selected' : `selected and ${entryCount - 1} more`}
             </Text>
           </Flex>

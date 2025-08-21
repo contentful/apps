@@ -21,6 +21,7 @@ import {
   updateEntryFieldLocalized,
   getEntryFieldValue,
   processEntriesInBatches,
+  truncate,
 } from './utils/entryUtils';
 import { BATCH_PROCESSING, API_LIMITS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
@@ -184,7 +185,10 @@ const Page = () => {
     const message =
       count === 1
         ? `${firstUpdatedValue} was updated to ${value}`
-        : `${firstUpdatedValue} and ${count - 1} more entry fields were updated to ${value}`;
+        : `${firstUpdatedValue} and ${count - 1} more entry fields were updated to ${truncate(
+            value,
+            300
+          )}`;
     const notification = Notification.success(message, {
       title: 'Success!',
       cta: {
