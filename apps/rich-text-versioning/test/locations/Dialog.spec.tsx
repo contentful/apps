@@ -274,7 +274,7 @@ describe('Dialog component', () => {
       render(<Dialog />);
 
       await waitFor(() => {
-        expect(screen.getByText('Entry not found')).toBeInTheDocument();
+        expect(screen.getByText('Entry missing or inaccessible')).toBeInTheDocument();
         expect(screen.getByText('Unknown')).toBeInTheDocument();
       });
 
@@ -376,7 +376,7 @@ describe('Dialog component', () => {
       render(<Dialog />);
 
       await waitFor(() => {
-        expect(screen.getByText('Entry not found')).toBeInTheDocument();
+        expect(screen.getByText('Entry missing or inaccessible')).toBeInTheDocument();
       });
 
       expect(screen.getByText('Current version')).toBeInTheDocument();
@@ -462,7 +462,7 @@ describe('Dialog component', () => {
       render(<Dialog />);
 
       await waitFor(() => {
-        expect(screen.getByText('Asset not found')).toBeInTheDocument();
+        expect(screen.getByText('Asset missing or inaccessible')).toBeInTheDocument();
       });
 
       expect(screen.getByText('Current version')).toBeInTheDocument();

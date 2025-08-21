@@ -98,13 +98,13 @@ describe('Field component', () => {
     expect(screen.getByText('Rich Text Editor')).toBeInTheDocument();
   });
 
-  it('shows View Diff button when field value and entry sys are available', () => {
+  it('shows Compare versions button when field value and entry sys are available', () => {
     render(<Field />);
 
     expect(screen.getByTestId('view-diff-button')).toBeInTheDocument();
   });
 
-  it('disables View Diff button when entry is not changed', async () => {
+  it('disables Compare versions button when entry is not changed', async () => {
     fieldMockSdk.entry.getSys.mockReturnValue({
       id: 'test-entry',
       fieldStatus: {
@@ -120,7 +120,7 @@ describe('Field component', () => {
     expect(button).toBeDisabled();
   });
 
-  it('disables View Diff button when entry is in draft', async () => {
+  it('disables Compare versions button when entry is in draft', async () => {
     fieldMockSdk.entry.getSys.mockReturnValue({
       id: 'test-entry',
       fieldStatus: {
@@ -136,7 +136,7 @@ describe('Field component', () => {
     expect(button).toBeDisabled();
   });
 
-  it('enables View Diff button when entry has changes', () => {
+  it('enables Compare versions button when entry has changes', () => {
     fieldMockSdk.entry.getSys.mockReturnValue({
       id: 'test-entry',
       fieldStatus: {
@@ -152,13 +152,13 @@ describe('Field component', () => {
     expect(button).not.toBeDisabled();
   });
 
-  it('opens dialog when View Diff button is clicked', async () => {
+  it('opens dialog when Compare versions button is clicked', async () => {
     fieldMockSdk.field.getValue.mockReturnValue(mockFieldValue);
     fieldMockSdk.cma.entry.getPublished.mockReturnValue(mockPublishedField);
 
     render(<Field />);
 
-    const button = screen.getByText('View Diff');
+    const button = screen.getByText('Compare versions');
     fireEvent.click(button);
 
     await waitFor(() => {
@@ -182,7 +182,7 @@ describe('Field component', () => {
     fieldMockSdk.cma.entry.getPublished.mockRejectedValue(new Error());
 
     render(<Field />);
-    const button = screen.getByText('View Diff');
+    const button = screen.getByText('Compare versions');
     fireEvent.click(button);
 
     await waitFor(() => {

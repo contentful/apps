@@ -1,5 +1,5 @@
 import { FieldAppSDK } from '@contentful/app-sdk';
-import { Button } from '@contentful/f36-components';
+import { Button, Tooltip } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useState } from 'react';
@@ -87,19 +87,26 @@ const Field = () => {
     });
   };
 
+  const isDisabled = !fieldValue || !entrySys || !isChanged(entrySys);
+
   return (
     <>
       <RichTextEditor sdk={sdk} isInitiallyDisabled={false} />
-      <Button
-        testId="view-diff-button"
-        variant="primary"
-        size="small"
-        style={{ marginTop: tokens.spacingM }}
-        isFullWidth={true}
-        isDisabled={!fieldValue || !entrySys || !isChanged(entrySys)}
-        onClick={() => onButtonClick(fieldValue)}>
-        View Diff
-      </Button>
+      <Tooltip
+        placement="top"
+        content={
+          isDisabled ? 'Versions can be viewed once the entry is published with content.' : ''
+        }>
+        <Button
+          testId="view-diff-button"
+          variant="secondary"
+          size="small"
+          style={{ marginTop: tokens.spacingXs }}
+          isDisabled={isDisabled}
+          onClick={() => onButtonClick(fieldValue)}>
+          Compare versions
+        </Button>
+      </Tooltip>
     </>
   );
 };

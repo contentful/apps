@@ -5,9 +5,8 @@ import { BLOCKS, INLINES } from '@contentful/rich-text-types';
 import { Options } from '@contentful/rich-text-react-renderer';
 
 const UNKNOWN = 'Unknown';
-const ENTRY_NOT_FOUND = 'Entry not found';
-const ASSET_NOT_FOUND = 'Asset not found';
-const DELETED = 'deleted';
+const ENTRY_NOT_FOUND = 'Entry missing or inaccessible';
+const ASSET_NOT_FOUND = 'Asset missing or inaccessible';
 
 export const createOptions = (
   entries: EntryProps[],
@@ -21,18 +20,17 @@ export const createOptions = (
       if (!entry) {
         return (
           <Box marginBottom="spacingM">
-            <EntryCard contentType={UNKNOWN} title={ENTRY_NOT_FOUND} status={DELETED} />
+            <EntryCard contentType={UNKNOWN} title={ENTRY_NOT_FOUND} />
           </Box>
         );
       }
       const contentType = entryContentTypes[entry.sys.id];
       const contentTypeName = contentType?.name || UNKNOWN;
       const title = getEntryTitle(entry, contentType, locale);
-      const status = entry.sys.fieldStatus?.['*']?.[locale];
 
       return (
         <Box marginBottom="spacingM">
-          <EntryCard contentType={contentTypeName} title={title} status={status} />
+          <EntryCard contentType={contentTypeName} title={title} />
         </Box>
       );
     },
@@ -40,23 +38,14 @@ export const createOptions = (
       const entry = entries.find((e) => e.sys.id === node.data.target.sys.id);
 
       if (!entry) {
-        return (
-          <InlineEntryCard contentType={UNKNOWN} status={DELETED}>
-            {ENTRY_NOT_FOUND}
-          </InlineEntryCard>
-        );
+        return <InlineEntryCard contentType={UNKNOWN}>{ENTRY_NOT_FOUND}</InlineEntryCard>;
       }
 
       const contentType = entryContentTypes[entry.sys.id];
       const contentTypeName = contentType?.name || UNKNOWN;
       const title = getEntryTitle(entry, contentType, locale);
-      const status = entry.sys.fieldStatus?.['*']?.[locale];
 
-      return (
-        <InlineEntryCard contentType={contentTypeName} status={status}>
-          {title}
-        </InlineEntryCard>
-      );
+      return <InlineEntryCard contentType={contentTypeName}>{title}</InlineEntryCard>;
     },
     [BLOCKS.EMBEDDED_ASSET]: (node: any) => {
       const asset = assets.find((a) => a.sys.id === node.data.target.sys.id);
@@ -64,17 +53,16 @@ export const createOptions = (
       if (!asset) {
         return (
           <Box margin="spacingM">
-            <AssetCard title={ASSET_NOT_FOUND} status={DELETED} size="small" />
+            <AssetCard title={ASSET_NOT_FOUND} size="small" />
           </Box>
         );
       }
 
-      const status = asset.sys?.fieldStatus?.['*']?.[locale];
       const title = asset.fields.title[locale];
 
       return (
         <Box margin="spacingM">
-          <AssetCard status={status} title={title} size="small" />
+          <AssetCard title={title} size="small" />
         </Box>
       );
     },
