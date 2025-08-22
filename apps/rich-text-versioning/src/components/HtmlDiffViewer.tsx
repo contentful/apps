@@ -7,6 +7,8 @@ import { Skeleton } from '@contentful/f36-components';
 import { renderToString } from 'react-dom/server';
 import { AssetProps, ContentTypeProps, EntryProps } from 'contentful-management';
 import { createOptions } from './createOptions';
+import DOMPurify from 'dompurify';
+
 interface HtmlDiffViewerProps {
   currentField: Document;
   publishedField: Document;
@@ -46,9 +48,13 @@ const HtmlDiffViewer = ({
 
       // Perform diff
       const diff = Diff.execute(publishedHtml, currentHtml, { combineWords: true });
-      setDiffHtml(diff);
 
-      const diffString = diff || '';
+      // Sanitize the diff HTML to prevent XSS attacks
+      const sanitizedDiff = DOMPurify.sanitize(diff);
+
+      setDiffHtml(sanitizedDiff);
+
+      const diffString = sanitizedDiff || '';
       const additions = (diffString.match(/<ins[^>]*>/g) || []).length;
       const deletions = (diffString.match(/<del[^>]*>/g) || []).length;
       const totalChanges = additions + deletions;
@@ -57,7 +63,7 @@ const HtmlDiffViewer = ({
     };
 
     processDiff();
-  }, [currentField, publishedField, onChangeCount, entries, entryContentTypes]);
+  }, [currentField, publishedField, onChangeCount, entries, entryContentTypes, locale, assets]);
 
   if (!diffHtml) {
     return (
@@ -72,7 +78,7 @@ const HtmlDiffViewer = ({
       <div
         className={styles}
         dangerouslySetInnerHTML={{
-          __html: diffHtml,
+          __html: diffHtml, // Now sanitized HTML from DOMPurify
         }}
       />
     </>

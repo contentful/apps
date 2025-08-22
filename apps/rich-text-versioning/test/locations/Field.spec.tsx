@@ -163,7 +163,7 @@ describe('Field component', () => {
 
     await waitFor(() => {
       expect(mockOpenCurrentApp).toHaveBeenCalledWith({
-        title: 'Version Comparison',
+        title: 'Version comparison',
         width: 'fullWidth',
         parameters: {
           currentField: mockFieldValue,
@@ -187,7 +187,7 @@ describe('Field component', () => {
 
     await waitFor(() => {
       expect(mockOpenCurrentApp).toHaveBeenCalledWith({
-        title: 'Version Comparison',
+        title: 'Version comparison',
         width: 'small',
         parameters: {
           currentField: mockFieldValue,
