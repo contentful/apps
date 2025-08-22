@@ -47,7 +47,10 @@ const HtmlDiffViewer = ({
       const publishedHtml = renderToString(<>{publishedComponents}</>);
 
       // Perform diff
-      const diff = Diff.execute(publishedHtml, currentHtml, { combineWords: true });
+      const diff = Diff.execute(publishedHtml, currentHtml, {
+        combineWords: true,
+        ignoreWhiteSpaceDifferences: false,
+      });
 
       // Sanitize the diff HTML to prevent XSS attacks
       const sanitizedDiff = DOMPurify.sanitize(diff);

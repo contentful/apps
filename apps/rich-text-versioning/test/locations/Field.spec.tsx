@@ -165,6 +165,8 @@ describe('Field component', () => {
       expect(mockOpenCurrentApp).toHaveBeenCalledWith({
         title: 'Version comparison',
         width: 'fullWidth',
+        shouldCloseOnOverlayClick: true,
+        shouldCloseOnEscapePress: true,
         parameters: {
           currentField: mockFieldValue,
           publishedField: undefined,
@@ -189,6 +191,8 @@ describe('Field component', () => {
       expect(mockOpenCurrentApp).toHaveBeenCalledWith({
         title: 'Version comparison',
         width: 'small',
+        shouldCloseOnOverlayClick: true,
+        shouldCloseOnEscapePress: true,
         parameters: {
           currentField: mockFieldValue,
           publishedField: undefined,
