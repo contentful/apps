@@ -40,10 +40,13 @@
     "@types/node": "24.1.0",
     "@types/react": "19.1.9",
     "@types/react-dom": "19.1.7",
-    "@vitejs/plugin-react": "5.0.0",
-    "jsdom": "^26.1.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "jsdom": "^24.1.0",
     "typescript": "5.9.2",
-    "vite": "^7.1.0",
-    "vitest": "3.2.4"
+    "vite": "^5.4.0",
+    "vitest": "^1.6.0"
+  },
+  "overrides": {
+    "@contentful/rich-text-types": "^16.1.0"
   }
 }

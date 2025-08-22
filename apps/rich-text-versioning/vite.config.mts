@@ -10,5 +10,9 @@ export default defineConfig(() => ({
   build: {
     outDir: 'build',
     sourcemap: false,
+    target: 'es2020',
+  },
+  esbuild: {
+    target: 'es2020',
   },
 }));
