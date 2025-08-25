@@ -1,7 +1,8 @@
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Document } from '@contentful/rich-text-types';
 import { Entry, ContentTypeField, Status, Fields } from '../types';
-import { ContentTypeProps } from 'contentful-management';
+import { ContentTypeProps, EntryProps } from 'contentful-management';
+import { BATCH_FETCHING } from './constants';
 
 export const getStatus = (entry: Entry): Status => {
   const { sys } = entry;
@@ -147,4 +148,118 @@ export function getEntryFieldValue(
   if (fieldValue === undefined || fieldValue === null) return 'empty field';
 
   return String(fieldValue) || 'empty field';
+}
+
+/**
+ * Processes entries in batches with configurable delays to avoid rate limiting.
+ * @param entries - Array of entries to process
+ * @param updateFunction - Function to call for each entry
+ * @param batchSize - Number of entries to process in each batch
+ * @param delayMs - Delay in milliseconds between batches
+ * @returns Promise that resolves to array of results from updateFunction
+ */
+//TODO: Remove generic type and batchSize and delayMs as parameters
+export async function processEntriesInBatches<T, R>(
+  entries: T[],
+  updateFunction: (entry: T) => Promise<R>,
+  batchSize: number,
+  delayMs: number
+): Promise<R[]> {
+  if (entries.length === 0) {
+    return [];
+  }
+
+  const results: R[] = [];
+
+  for (let i = 0; i < entries.length; i += batchSize) {
+    const batch = entries.slice(i, i + batchSize);
+
+    // Process current batch
+    const batchResults = await Promise.all(batch.map((entry) => updateFunction(entry)));
+    results.push(...batchResults);
+
+    // Add delay between batches (except for the last batch)
+    if (i + batchSize < entries.length) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Fetches entries in batches to avoid API response size limits
+ * @param sdk - Contentful SDK instance
+ * @param query - Base query parameters
+ * @param batchSize - Number of entries to fetch per batch
+ * @param maxEntries - Maximum total entries to fetch (optional)
+ * @returns Promise that resolves to array of entries and total count
+ */
+export async function fetchEntriesInBatches(
+  sdk: any,
+  query: any,
+  batchSize: number = BATCH_FETCHING.DEFAULT_BATCH_SIZE,
+  maxEntries?: number
+): Promise<{ entries: EntryProps[]; total: number }> {
+  const allEntries: EntryProps[] = [];
+  let skip = 0;
+  let total = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    try {
+      const batchQuery = {
+        ...query,
+        skip,
+        limit: batchSize,
+      };
+
+      const response = await sdk.cma.entry.getMany({
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
+        query: batchQuery,
+      });
+
+      const items = response.items as EntryProps[];
+      const batchTotal = response.total || 0;
+
+      // Set total on first batch
+      if (total === 0) {
+        total = batchTotal;
+      }
+
+      allEntries.push(...items);
+
+      // Check if we should continue
+      hasMore =
+        items.length === batchSize &&
+        (maxEntries === undefined || allEntries.length < maxEntries) &&
+        allEntries.length < total;
+
+      skip += batchSize;
+
+      // Add small delay between batches to avoid rate limiting
+      if (hasMore) {
+        await new Promise((resolve) => setTimeout(resolve, BATCH_FETCHING.BATCH_DELAY_MS));
+      }
+    } catch (error: any) {
+      // If we hit response size limit, reduce batch size and retry
+      if (error.message && error.message.includes('Response size too big')) {
+        if (batchSize > BATCH_FETCHING.MIN_BATCH_SIZE) {
+          const newBatchSize = Math.floor(batchSize / 2);
+          console.warn(
+            `Response size limit hit, reducing batch size from ${batchSize} to ${newBatchSize}`
+          );
+          return fetchEntriesInBatches(sdk, query, newBatchSize, maxEntries);
+        } else {
+          throw new Error(
+            'Unable to fetch entries: response size too large even with minimal batch size'
+          );
+        }
+      }
+      throw error;
+    }
+  }
+
+  return { entries: allEntries, total };
 }
