@@ -21,12 +21,17 @@ import {
   updateEntryFieldLocalized,
   getEntryFieldValue,
   processEntriesInBatches,
+  fetchEntriesInBatches,
   truncate,
 } from './utils/entryUtils';
-import { BATCH_PROCESSING, API_LIMITS } from './utils/constants';
+import {
+  BATCH_PROCESSING,
+  API_LIMITS,
+  PAGE_SIZE_OPTIONS,
+  ERROR_MESSAGES,
+  BATCH_FETCHING,
+} from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
-
-const PAGE_SIZE_OPTIONS = [50, 75, 100, 300, 500, 1000];
 
 const Page = () => {
   const sdk = useSDK();
@@ -39,7 +44,7 @@ const Page = () => {
   const [entriesLoading, setEntriesLoading] = useState(true);
   const [fields, setFields] = useState<ContentTypeField[]>([]);
   const [activePage, setActivePage] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(PAGE_SIZE_OPTIONS[0]);
+  const [itemsPerPage, setItemsPerPage] = useState(PAGE_SIZE_OPTIONS[0] as number);
   const [totalEntries, setTotalEntries] = useState(0);
   const [sortOption, setSortOption] = useState(SORT_OPTIONS[0].value);
   const [selectedEntryIds, setSelectedEntryIds] = useState<string[]>([]);
@@ -50,7 +55,6 @@ const Page = () => {
   const [lastUpdateBackup, setLastUpdateBackup] = useState<Record<string, EntryProps>>({});
   const [isUndoModalOpen, setIsUndoModalOpen] = useState(false);
   const [undoFirstEntryFieldValue, setUndoFirstEntryFieldValue] = useState('');
-  const [pageSizeOptions, setPageSizeOptions] = useState(PAGE_SIZE_OPTIONS);
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -152,13 +156,29 @@ const Page = () => {
         setFields(newFields);
         const displayField = ct.displayField || null;
 
-        const { items, total } = await sdk.cma.entry.getMany({
-          spaceId: sdk.ids.space,
-          environmentId: sdk.ids.environment,
-          query: buildQuery(sortOption, displayField),
-        });
-        setEntries(items || []);
-        setTotalEntries(total || 0);
+        // Use batch fetching to handle large datasets
+        const baseQuery = {
+          content_type: selectedContentTypeId,
+          order: buildQuery(sortOption, displayField).order,
+        };
+
+        // For pagination, we need to calculate the correct skip and limit
+        const startIndex = activePage * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+
+        // Fetch all entries up to the end of current page
+        const { entries: allEntries, total } = await fetchEntriesInBatches(
+          sdk,
+          baseQuery,
+          BATCH_FETCHING.DEFAULT_BATCH_SIZE, // Batch size
+          endIndex // Max entries to fetch
+        );
+
+        // Slice to get only the current page
+        const pageEntries = allEntries.slice(startIndex, endIndex);
+
+        setEntries(pageEntries);
+        setTotalEntries(total);
       } catch (e) {
         setEntries([]);
         setFields([]);
@@ -261,10 +281,6 @@ const Page = () => {
 
     try {
       if (!selectedField) return;
-
-      const entryIds = selectedEntries.map((entry) => entry.sys.id);
-      const latestEntries = await fetchLatestEntries(entryIds);
-
       const backups: Record<string, EntryProps> = {};
 
       // Create update function for batch processing
@@ -298,7 +314,7 @@ const Page = () => {
 
       // Process entries in batches with rate limiting
       const results = await processEntriesInBatches(
-        latestEntries,
+        selectedEntries,
         updateEntry,
         BATCH_PROCESSING.DEFAULT_BATCH_SIZE,
         BATCH_PROCESSING.DEFAULT_DELAY_MS
@@ -455,7 +471,7 @@ const Page = () => {
                           itemsPerPage={itemsPerPage}
                           onPageChange={setActivePage}
                           onItemsPerPageChange={setItemsPerPage}
-                          pageSizeOptions={pageSizeOptions}
+                          pageSizeOptions={PAGE_SIZE_OPTIONS}
                           onSelectionChange={({ selectedEntryIds, selectedFieldId }) => {
                             setSelectedEntryIds(selectedEntryIds);
                             setSelectedField(

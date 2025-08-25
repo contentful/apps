@@ -1,7 +1,8 @@
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Document } from '@contentful/rich-text-types';
 import { Entry, ContentTypeField, Status, Fields } from '../types';
-import { ContentTypeProps } from 'contentful-management';
+import { ContentTypeProps, EntryProps } from 'contentful-management';
+import { BATCH_FETCHING } from './constants';
 
 export const getStatus = (entry: Entry): Status => {
   const { sys } = entry;
@@ -184,4 +185,81 @@ export async function processEntriesInBatches<T, R>(
   }
 
   return results;
+}
+
+/**
+ * Fetches entries in batches to avoid API response size limits
+ * @param sdk - Contentful SDK instance
+ * @param query - Base query parameters
+ * @param batchSize - Number of entries to fetch per batch
+ * @param maxEntries - Maximum total entries to fetch (optional)
+ * @returns Promise that resolves to array of entries and total count
+ */
+export async function fetchEntriesInBatches(
+  sdk: any,
+  query: any,
+  batchSize: number = BATCH_FETCHING.DEFAULT_BATCH_SIZE,
+  maxEntries?: number
+): Promise<{ entries: EntryProps[]; total: number }> {
+  const allEntries: EntryProps[] = [];
+  let skip = 0;
+  let total = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    try {
+      const batchQuery = {
+        ...query,
+        skip,
+        limit: batchSize,
+      };
+
+      const response = await sdk.cma.entry.getMany({
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
+        query: batchQuery,
+      });
+
+      const items = response.items as EntryProps[];
+      const batchTotal = response.total || 0;
+
+      // Set total on first batch
+      if (total === 0) {
+        total = batchTotal;
+      }
+
+      allEntries.push(...items);
+
+      // Check if we should continue
+      hasMore =
+        items.length === batchSize &&
+        (maxEntries === undefined || allEntries.length < maxEntries) &&
+        allEntries.length < total;
+
+      skip += batchSize;
+
+      // Add small delay between batches to avoid rate limiting
+      if (hasMore) {
+        await new Promise((resolve) => setTimeout(resolve, BATCH_FETCHING.BATCH_DELAY_MS));
+      }
+    } catch (error: any) {
+      // If we hit response size limit, reduce batch size and retry
+      if (error.message && error.message.includes('Response size too big')) {
+        if (batchSize > BATCH_FETCHING.MIN_BATCH_SIZE) {
+          const newBatchSize = Math.floor(batchSize / 2);
+          console.warn(
+            `Response size limit hit, reducing batch size from ${batchSize} to ${newBatchSize}`
+          );
+          return fetchEntriesInBatches(sdk, query, newBatchSize, maxEntries);
+        } else {
+          throw new Error(
+            'Unable to fetch entries: response size too large even with minimal batch size'
+          );
+        }
+      }
+      throw error;
+    }
+  }
+
+  return { entries: allEntries, total };
 }
