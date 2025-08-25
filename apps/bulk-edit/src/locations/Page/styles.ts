@@ -14,7 +14,7 @@ export const styles = {
     position: 'sticky',
     left: 0,
     top: 0,
-    zIndex: 3,
+    zIndex: 4,
     background: tokens.colorWhite,
   },
   mainContent: {
@@ -52,6 +52,12 @@ export const styles = {
     borderRight: `1px solid ${tokens.gray300}`,
     minWidth: `${CELL_WIDTH}px`,
   },
+  stickyTableRow: {
+    background: tokens.colorWhite,
+    position: 'sticky',
+    top: 0,
+    zIndex: 2,
+  },
   cell: {
     borderRight: `1px solid ${tokens.gray300}`,
     minWidth: `${CELL_WIDTH}px`,
@@ -74,7 +80,7 @@ export const styles = {
   stickySpacer: {
     position: 'sticky',
     left: SIDEBAR_WIDTH,
-    zIndex: 1,
+    zIndex: 3,
     top: 0,
     background: tokens.colorWhite,
     width: STICKY_SPACER_SPACING,
