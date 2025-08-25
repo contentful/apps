@@ -1,5 +1,4 @@
 import tokens from '@contentful/f36-tokens';
-import { SortMenu } from './components/SortMenu';
 
 const SIDEBAR_WIDTH = 220;
 const STICKY_SPACER_SPACING = 24;
