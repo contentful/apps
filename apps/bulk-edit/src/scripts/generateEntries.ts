@@ -152,7 +152,7 @@ export async function createSampleEntry(
   console.log(`Creating sample entry ${index + 1}...`);
 
   const fields: KeyValueMap = {
-    shortText: { 'en-US': 'Sample Short Text' },
+    shortText: { 'en-US': 'Sample Short Text ' + (index + 1) },
     longText: {
       'en-US':
         'This is a sample long text field with multiple lines.\nIt can contain paragraphs and formatting.',

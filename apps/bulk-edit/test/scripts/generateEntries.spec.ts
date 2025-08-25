@@ -185,7 +185,7 @@ describe('generateEntries.ts', () => {
         expect.objectContaining({
           title: { 'en-US': 'Sample Entry 1' },
           fields: expect.objectContaining({
-            shortText: { 'en-US': 'Sample Short Text' },
+            shortText: { 'en-US': expect.stringContaining('Sample Short Text') },
             longText: { 'en-US': expect.stringContaining('This is a sample long text field') },
             richText: { 'en-US': expect.objectContaining({ nodeType: 'document' }) },
             integerNumber: { 'en-US': 42 },
