@@ -187,22 +187,14 @@ export async function processEntriesInBatches<T, R>(
   return results;
 }
 
-/**
- * Fetches entries in batches to avoid API response size limits
- * @param sdk - Contentful SDK instance
- * @param query - Base query parameters
- * @param batchSize - Number of entries to fetch per batch
- * @param maxEntries - Maximum total entries to fetch (optional)
- * @returns Promise that resolves to array of entries and total count
- */
-export async function fetchEntriesInBatches(
+export async function fetchEntriesWithBatching(
   sdk: any,
-  query: any,
-  batchSize: number = BATCH_FETCHING.DEFAULT_BATCH_SIZE,
-  maxEntries?: number
+  query: { skip: number; limit: number },
+  batchSize: number
 ): Promise<{ entries: EntryProps[]; total: number }> {
   const allEntries: EntryProps[] = [];
-  let skip = 0;
+  const { skip, limit } = query;
+  let batchSkip = skip;
   let total = 0;
   let hasMore = true;
 
@@ -210,7 +202,7 @@ export async function fetchEntriesInBatches(
     try {
       const batchQuery = {
         ...query,
-        skip,
+        skip: batchSkip,
         limit: batchSize,
       };
 
@@ -233,12 +225,11 @@ export async function fetchEntriesInBatches(
       // Check if we should continue
       hasMore =
         items.length === batchSize &&
-        (maxEntries === undefined || allEntries.length < maxEntries) &&
+        (limit === undefined || allEntries.length < limit) &&
         allEntries.length < total;
 
-      skip += batchSize;
+      batchSkip += batchSize;
 
-      // Add small delay between batches to avoid rate limiting
       if (hasMore) {
         await new Promise((resolve) => setTimeout(resolve, BATCH_FETCHING.BATCH_DELAY_MS));
       }
@@ -250,14 +241,15 @@ export async function fetchEntriesInBatches(
           console.warn(
             `Response size limit hit, reducing batch size from ${batchSize} to ${newBatchSize}`
           );
-          return fetchEntriesInBatches(sdk, query, newBatchSize, maxEntries);
+          return fetchEntriesWithBatching(sdk, query, newBatchSize);
         } else {
           throw new Error(
             'Unable to fetch entries: response size too large even with minimal batch size'
           );
         }
+      } else {
+        throw error;
       }
-      throw error;
     }
   }
 

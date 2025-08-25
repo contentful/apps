@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchEntriesInBatches } from '../src/locations/Page/utils/entryUtils';
+import { fetchEntriesWithBatching } from '../src/locations/Page/utils/entryUtils';
 
 // Mock Contentful SDK
 const mockSdk = {
@@ -14,7 +14,7 @@ const mockSdk = {
   },
 };
 
-describe('fetchEntriesInBatches', () => {
+describe('fetchEntriesWithBatching', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -47,8 +47,8 @@ describe('fetchEntriesInBatches', () => {
       total: 250,
     });
 
-    const query = { content_type: 'test-content-type' };
-    const result = await fetchEntriesInBatches(mockSdk, query, 100, 250);
+    const query = { content_type: 'test-content-type', skip: 0, limit: 250 };
+    const result = await fetchEntriesWithBatching(mockSdk, query, 100);
 
     expect(result.entries).toHaveLength(250);
     expect(result.total).toBe(250);
@@ -70,15 +70,15 @@ describe('fetchEntriesInBatches', () => {
       total: 50,
     });
 
-    const query = { content_type: 'test-content-type' };
-    const result = await fetchEntriesInBatches(mockSdk, query, 100, 50);
+    const query = { content_type: 'test-content-type', skip: 0, limit: 50 };
+    const result = await fetchEntriesWithBatching(mockSdk, query, 100);
 
     expect(result.entries).toHaveLength(50);
     expect(result.total).toBe(50);
     expect(mockSdk.cma.entry.getMany).toHaveBeenCalledTimes(2);
   });
 
-  it('should respect maxEntries limit', async () => {
+  it('should respect limit parameter', async () => {
     // Mock response for first batch
     mockSdk.cma.entry.getMany.mockResolvedValueOnce({
       items: Array.from({ length: 100 }, (_, i) => ({
@@ -88,8 +88,8 @@ describe('fetchEntriesInBatches', () => {
       total: 1000,
     });
 
-    const query = { content_type: 'test-content-type' };
-    const result = await fetchEntriesInBatches(mockSdk, query, 100, 100);
+    const query = { content_type: 'test-content-type', skip: 0, limit: 100 };
+    const result = await fetchEntriesWithBatching(mockSdk, query, 100);
 
     expect(result.entries).toHaveLength(100);
     expect(result.total).toBe(1000);
@@ -102,11 +102,34 @@ describe('fetchEntriesInBatches', () => {
       total: 0,
     });
 
-    const query = { content_type: 'test-content-type' };
-    const result = await fetchEntriesInBatches(mockSdk, query, 100);
+    const query = { content_type: 'test-content-type', skip: 0, limit: 100 };
+    const result = await fetchEntriesWithBatching(mockSdk, query, 100);
 
     expect(result.entries).toHaveLength(0);
     expect(result.total).toBe(0);
     expect(mockSdk.cma.entry.getMany).toHaveBeenCalledTimes(1);
+  });
+
+  it('should handle pagination with skip parameter', async () => {
+    // Mock response for paginated request
+    mockSdk.cma.entry.getMany.mockResolvedValueOnce({
+      items: Array.from({ length: 25 }, (_, i) => ({
+        sys: { id: `entry-${i + 25}`, type: 'Entry' },
+        fields: { title: { 'en-US': `Entry ${i + 25}` } },
+      })),
+      total: 100,
+    });
+
+    const query = { content_type: 'test-content-type', skip: 25, limit: 25 };
+    const result = await fetchEntriesWithBatching(mockSdk, query, 25);
+
+    expect(result.entries).toHaveLength(25);
+    expect(result.total).toBe(100);
+    expect(mockSdk.cma.entry.getMany).toHaveBeenCalledTimes(1);
+    expect(mockSdk.cma.entry.getMany).toHaveBeenCalledWith({
+      spaceId: 'test-space',
+      environmentId: 'test-environment',
+      query: { content_type: 'test-content-type', skip: 25, limit: 25 },
+    });
   });
 });

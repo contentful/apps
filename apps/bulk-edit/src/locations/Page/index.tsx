@@ -21,17 +21,12 @@ import {
   updateEntryFieldLocalized,
   getEntryFieldValue,
   processEntriesInBatches,
-  fetchEntriesInBatches,
   truncate,
+  fetchEntriesWithBatching,
 } from './utils/entryUtils';
-import {
-  BATCH_PROCESSING,
-  API_LIMITS,
-  PAGE_SIZE_OPTIONS,
-  ERROR_MESSAGES,
-  BATCH_FETCHING,
-} from './utils/constants';
+import { BATCH_PROCESSING, API_LIMITS, PAGE_SIZE_OPTIONS, BATCH_FETCHING } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
+import { KnownSDK } from '@contentful/app-sdk';
 
 const Page = () => {
   const sdk = useSDK();
@@ -88,9 +83,9 @@ const Page = () => {
 
     return {
       content_type: selectedContentTypeId,
+      order: getOrder(sortOption),
       skip: activePage * itemsPerPage,
       limit: itemsPerPage,
-      order: getOrder(sortOption),
     };
   };
 
@@ -156,28 +151,11 @@ const Page = () => {
         setFields(newFields);
         const displayField = ct.displayField || null;
 
-        // Use batch fetching to handle large datasets
-        const baseQuery = {
-          content_type: selectedContentTypeId,
-          order: buildQuery(sortOption, displayField).order,
-        };
+        const baseQuery = buildQuery(sortOption, displayField);
 
-        // For pagination, we need to calculate the correct skip and limit
-        const startIndex = activePage * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
+        const { entries, total } = await fetchEntriesWithBatching(sdk, baseQuery, baseQuery.limit);
 
-        // Fetch all entries up to the end of current page
-        const { entries: allEntries, total } = await fetchEntriesInBatches(
-          sdk,
-          baseQuery,
-          BATCH_FETCHING.DEFAULT_BATCH_SIZE, // Batch size
-          endIndex // Max entries to fetch
-        );
-
-        // Slice to get only the current page
-        const pageEntries = allEntries.slice(startIndex, endIndex);
-
-        setEntries(pageEntries);
+        setEntries(entries);
         setTotalEntries(total);
       } catch (e) {
         setEntries([]);
