@@ -22,7 +22,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
 }) => {
   return (
     <Table.Head style={styles.tableHead}>
-      <Table.Row>
+      <Table.Row style={styles.stickyTableRow}>
         {fields.length > 0 && (
           <Table.Cell as="th" key={DISPLAY_NAME_COLUMN} style={styles.stickyTableHeader}>
             Display name
