@@ -34,6 +34,7 @@ import {
 } from './utils/entryUtils';
 import { BATCH_PROCESSING, API_LIMITS, PAGE_SIZE_OPTIONS, BATCH_FETCHING } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
+import FilterColumns from './components/FilterColumns';
 
 const Page = () => {
   const sdk = useSDK();
@@ -59,6 +60,7 @@ const Page = () => {
   const [undoFirstEntryFieldValue, setUndoFirstEntryFieldValue] = useState('');
   const [totalUpdateCount, setTotalUpdateCount] = useState<number>(0);
   const [editionCount, setEditionCount] = useState<number>(0);
+  const [selectedFields, setSelectedFields] = useState<{ label: string; value: string }[]>([]);
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -101,6 +103,7 @@ const Page = () => {
   const clearState = () => {
     setEntries([]);
     setFields([]);
+    setSelectedFields([]);
     setTotalEntries(0);
   };
 
@@ -129,6 +132,7 @@ const Page = () => {
 
   useEffect(() => {
     clearState();
+    setSelectedFields(fields.map((field) => ({ label: field.name, value: field.id })));
   }, [selectedContentTypeId, sortOption]);
 
   useEffect(() => {
@@ -162,6 +166,9 @@ const Page = () => {
           }
         });
         setFields(newFields);
+        if (selectedFields.length === 0) {
+          setSelectedFields(newFields.map((field) => ({ label: field.name, value: field.id })));
+        }
         const displayField = ct.displayField || null;
 
         const baseQuery = buildQuery(sortOption, displayField);
@@ -411,6 +418,7 @@ const Page = () => {
             <div style={styles.stickySpacer} />
             <Box>
               <>
+                {/* Heading */}
                 <Heading style={styles.stickyPageHeader}>
                   {selectedContentType ? `Bulk edit ${selectedContentType.name}` : 'Bulk Edit App'}
                 </Heading>
@@ -418,6 +426,11 @@ const Page = () => {
                   <Box style={styles.noEntriesText}>No entries found.</Box>
                 ) : (
                   <>
+                    <FilterColumns
+                      options={fields.map((field) => ({ label: field.name, value: field.id }))}
+                      selectedFields={selectedFields}
+                      setSelectedFields={setSelectedFields}
+                    />
                     <SortMenu
                       sortOption={sortOption}
                       onSortChange={(newSort) => {
@@ -454,7 +467,9 @@ const Page = () => {
                         )}
                         <EntryTable
                           entries={entries}
-                          fields={fields}
+                          fields={selectedFields.flatMap(
+                            (field) => fields.find((f) => f.id === field.value) || []
+                          )}
                           contentType={selectedContentType}
                           spaceId={sdk.ids.space}
                           environmentId={sdk.ids.environment}
