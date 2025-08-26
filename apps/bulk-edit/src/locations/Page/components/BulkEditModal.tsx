@@ -71,7 +71,11 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
         </Flex>
       </Modal.Content>
       <Modal.Controls>
-        <Button variant="secondary" onClick={onClose} testId="bulk-edit-cancel">
+        <Button
+          variant="secondary"
+          onClick={onClose}
+          testId="bulk-edit-cancel"
+          isDisabled={isSaving}>
           Cancel
         </Button>
         <Button

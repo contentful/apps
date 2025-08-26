@@ -41,7 +41,11 @@ export const UndoBulkEditModal: React.FC<UndoBulkEditModalProps> = ({
         </Flex>
       </Modal.Content>
       <Modal.Controls>
-        <Button variant="secondary" onClick={onClose} testId="undo-bulk-cancel">
+        <Button
+          variant="secondary"
+          onClick={onClose}
+          testId="undo-bulk-cancel"
+          isDisabled={isSaving}>
           Cancel
         </Button>
         <Button variant="primary" onClick={onUndo} testId="undo-bulk-confirm" isLoading={isSaving}>
