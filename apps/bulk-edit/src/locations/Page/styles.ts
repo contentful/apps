@@ -118,4 +118,7 @@ export const styles = {
     left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING,
     zIndex: 1,
   },
+  tableBorder: {
+    border: `1px solid ${tokens.gray200}`,
+  },
 } as const;
