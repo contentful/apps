@@ -381,7 +381,7 @@ const Page = () => {
                       </Flex>
                     )}
                     {entriesLoading ? (
-                      <Table style={styles.tableBorder}>
+                      <Table style={styles.loadingTableBorder}>
                         <Table.Body>
                           <Skeleton.Row rowCount={5} columnCount={5} />
                         </Table.Body>
