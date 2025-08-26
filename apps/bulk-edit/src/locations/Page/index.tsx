@@ -185,7 +185,7 @@ const Page = () => {
         ? `${firstUpdatedValue} was updated to ${value}`
         : `${firstUpdatedValue} and ${count - 1} more entry fields were updated to ${truncate(
             value,
-            300
+            30
           )}`;
     const notification = Notification.success(message, {
       title: 'Success!',
