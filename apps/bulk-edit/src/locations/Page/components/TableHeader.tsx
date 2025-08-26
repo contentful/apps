@@ -24,12 +24,10 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
     <Table.Head style={styles.tableHead}>
       <Table.Row style={styles.stickyTableRow}>
         <Box style={styles.stickyMainColumnsOrFields}>
-          {fields.length > 0 && (
             <Table.Cell as="th" key={DISPLAY_NAME_COLUMN} style={styles.tableHeader}>
-              Display name
-            </Table.Cell>
-          )}
-          <Table.Cell as="th" key={ENTRY_STATUS_COLUMN} style={styles.tableHeader}>
+            Display name
+          </Table.Cell>
+            <Table.Cell as="th" key={ENTRY_STATUS_COLUMN} style={styles.tableHeader}>
             <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
               Status
               <Tooltip content="Bulk editing is not supported for Status" placement="top">
