@@ -1,6 +1,6 @@
 import tokens from '@contentful/f36-tokens';
 
-const SIDEBAR_WIDTH = 220;
+const SIDEBAR_WIDTH = 205;
 const STICKY_SPACER_SPACING = 24;
 const CELL_WIDTH = 200;
 const TABLE_WIDTH = CELL_WIDTH * 4;
@@ -43,10 +43,10 @@ export const styles = {
     left: 0,
     borderTop: `transparent`,
   },
-  stickyTableHeader: {
+  stickyMainColumnsOrFields: {
     background: tokens.gray200,
     position: 'sticky',
-    left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING,
+    left: STICKY_SPACER_SPACING + CELL_WIDTH,
     zIndex: 1,
     borderRight: `1px solid ${tokens.gray300}`,
     minWidth: `${CELL_WIDTH}px`,
@@ -85,6 +85,7 @@ export const styles = {
     width: STICKY_SPACER_SPACING,
     height: '100vh',
     display: 'block',
+    marginRight: tokens.spacing2Xs,
   },
   sortMenu: {
     position: 'sticky',
