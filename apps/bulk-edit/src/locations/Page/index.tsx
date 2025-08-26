@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Heading,
@@ -7,6 +7,8 @@ import {
   Button,
   Text,
   Notification,
+  Skeleton,
+  Table,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentFields, ContentTypeProps, KeyValueMap, EntryProps } from 'contentful-management';
@@ -379,7 +381,11 @@ const Page = () => {
                       </Flex>
                     )}
                     {entriesLoading ? (
-                      <Spinner />
+                      <Table style={styles.loadingTableBorder}>
+                        <Table.Body>
+                          <Skeleton.Row rowCount={5} columnCount={5} />
+                        </Table.Body>
+                      </Table>
                     ) : (
                       <>
                         {failedUpdates.length > 0 && (
