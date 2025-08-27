@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Button, TextInput, Text, Flex, FormControl } from '@contentful/f36-components';
+import {
+  Modal,
+  Button,
+  TextInput,
+  Text,
+  Flex,
+  FormControl,
+  Stack,
+} from '@contentful/f36-components';
 import type { Entry, ContentTypeField } from '../types';
 import { getEntryFieldValue, truncate } from '../utils/entryUtils';
 
@@ -11,6 +19,8 @@ interface BulkEditModalProps {
   selectedField: ContentTypeField | null;
   defaultLocale: string;
   isSaving: boolean;
+  totalUpdateCount: number;
+  editionCount: number;
 }
 
 export const BulkEditModal: React.FC<BulkEditModalProps> = ({
@@ -21,6 +31,8 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   selectedField,
   defaultLocale,
   isSaving,
+  totalUpdateCount,
+  editionCount,
 }) => {
   const [value, setValue] = useState('');
   const entryCount = selectedEntries.length;
@@ -39,7 +51,12 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   }, [isOpen]);
 
   return (
-    <Modal isShown={isOpen} onClose={onClose} size="medium" aria-label={title}>
+    <Modal
+      isShown={isOpen}
+      onClose={onClose}
+      size="medium"
+      aria-label={title}
+      key={`bulk-edit-modal-${isOpen ? 'open' : 'closed'}`}>
       <Modal.Header title={title} />
       <Modal.Content>
         <Flex gap="spacingS" flexDirection="column">
@@ -69,6 +86,13 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
             )}
           </FormControl>
         </Flex>
+        {totalUpdateCount > 0 && isSaving && (
+          <Stack spacing="spacing2Xs" flexDirection="column" alignItems="start">
+            <Text fontColor="gray500" fontWeight="fontWeightMedium">
+              {`Edited ${editionCount} ${editionCount === 1 ? 'entry' : 'entries'} out of ${totalUpdateCount}.`}
+            </Text>
+          </Stack>
+        )}
       </Modal.Content>
       <Modal.Controls>
         <Button

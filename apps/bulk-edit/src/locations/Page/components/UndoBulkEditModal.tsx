@@ -22,7 +22,12 @@ export const UndoBulkEditModal: React.FC<UndoBulkEditModalProps> = ({
   const title = entryCount === 1 ? 'Edit' : 'Bulk edit';
 
   return (
-    <Modal isShown={isOpen} onClose={onClose} size="medium" aria-label={title}>
+    <Modal
+      isShown={isOpen}
+      onClose={onClose}
+      size="medium"
+      aria-label={title}
+      key={`undo-bulk-edit-modal-${isOpen ? 'open' : 'closed'}`}>
       <Modal.Header title={title} />
       <Modal.Content>
         <Flex gap="spacingS" flexDirection="column">
