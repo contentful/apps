@@ -3,6 +3,7 @@ import {
   getEntryFieldValue,
   renderFieldValue,
   processEntriesInBatches,
+  fetchEntriesWithBatching,
 } from '../../../src/locations/Page/utils/entryUtils';
 import { ContentTypeField } from '../../../src/locations/Page/types';
 
@@ -371,6 +372,118 @@ describe('entryUtils', () => {
       expect(mockUpdateFunction).toHaveBeenCalledTimes(150);
       expect(results).toHaveLength(150);
       expect(results.every((r: any) => r.success)).toBe(true);
+    });
+  });
+
+  describe('processEntriesInBatches', () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('processes entries correctly with batching and delays', async () => {
+      const entries = Array.from({ length: 10 }, (_, i) => ({ id: `entry-${i}` }));
+      const mockUpdateFunction = vi.fn().mockResolvedValue({ success: true });
+
+      const processPromise = processEntriesInBatches(entries, mockUpdateFunction, 3, 200);
+      await vi.runAllTimersAsync();
+      const results = await processPromise;
+
+      expect(mockUpdateFunction).toHaveBeenCalledTimes(10);
+      expect(results).toHaveLength(10);
+    });
+
+    it('handles edge cases', async () => {
+      const mockUpdateFunction = vi.fn();
+
+      // Empty array
+      const emptyResults = await processEntriesInBatches([], mockUpdateFunction, 3, 200);
+      expect(emptyResults).toHaveLength(0);
+      expect(mockUpdateFunction).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('fetchEntriesWithBatching', () => {
+    const mockSdk = {
+      cma: {
+        entry: {
+          getMany: vi.fn(),
+        },
+      },
+      ids: {
+        space: 'test-space',
+        environment: 'test-environment',
+      },
+    };
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it('fetches entries with batching and error handling', async () => {
+      // Mock successful batch responses
+      mockSdk.cma.entry.getMany
+        .mockResolvedValueOnce({
+          items: Array.from({ length: 100 }, (_, i) => ({
+            sys: { id: `entry-${i}`, type: 'Entry' },
+            fields: { title: { 'en-US': `Entry ${i}` } },
+          })),
+          total: 250,
+        })
+        .mockResolvedValueOnce({
+          items: Array.from({ length: 50 }, (_, i) => ({
+            sys: { id: `entry-${i + 100}`, type: 'Entry' },
+            fields: { title: { 'en-US': `Entry ${i + 100}` } },
+          })),
+          total: 250,
+        });
+
+      const query = { content_type: 'test-content-type', skip: 0, limit: 250 };
+      const result = await fetchEntriesWithBatching(mockSdk, query, 100);
+
+      expect(result.entries).toHaveLength(150);
+      expect(result.total).toBe(250);
+      expect(mockSdk.cma.entry.getMany).toHaveBeenCalledTimes(2);
+    });
+
+    it('should handle response size errors by reducing batch size', async () => {
+      // Mock response size error on first call
+      mockSdk.cma.entry.getMany.mockRejectedValueOnce({
+        message: 'Response size too big. Maximum allowed response size: 7340032B.',
+      });
+
+      // Mock successful response with smaller batch size
+      mockSdk.cma.entry.getMany.mockResolvedValueOnce({
+        items: Array.from({ length: 50 }, (_, i) => ({
+          sys: { id: `entry-${i}`, type: 'Entry' },
+          fields: { title: { 'en-US': `Entry ${i}` } },
+        })),
+        total: 50,
+      });
+
+      const query = { content_type: 'test-content-type', skip: 0, limit: 50 };
+      const result = await fetchEntriesWithBatching(mockSdk, query, 100);
+
+      expect(result.entries).toHaveLength(50);
+      expect(result.total).toBe(50);
+      expect(mockSdk.cma.entry.getMany).toHaveBeenCalledTimes(2);
+    });
+
+    it('should handle empty results', async () => {
+      mockSdk.cma.entry.getMany.mockResolvedValueOnce({
+        items: [],
+        total: 0,
+      });
+
+      const query = { content_type: 'test-content-type', skip: 0, limit: 100 };
+      const result = await fetchEntriesWithBatching(mockSdk, query, 100);
+
+      expect(result.entries).toHaveLength(0);
+      expect(result.total).toBe(0);
+      expect(mockSdk.cma.entry.getMany).toHaveBeenCalledTimes(1);
     });
   });
 });
