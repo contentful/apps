@@ -6,6 +6,7 @@ import {
   fetchEntriesWithBatching,
 } from '../../../src/locations/Page/utils/entryUtils';
 import { ContentTypeField } from '../../../src/locations/Page/types';
+import { EntryProps } from 'contentful-management';
 
 describe('entryUtils', () => {
   describe('getEntryFieldValue', () => {
@@ -267,8 +268,11 @@ describe('entryUtils', () => {
       vi.useRealTimers();
     });
 
-    it('should process entries in batches with delays', async () => {
-      const entries = Array.from({ length: 10 }, (_, i) => ({ id: `entry-${i}` }));
+    it('should process entries in batches', async () => {
+      const entries = Array.from({ length: 10 }, (_, i) => ({
+        sys: { id: `entry-${i}` } as any,
+        fields: {},
+      }));
       const batchSize = 3;
       const delayMs = 200;
 
@@ -296,7 +300,10 @@ describe('entryUtils', () => {
     });
 
     it('should handle single batch', async () => {
-      const entries = Array.from({ length: 2 }, (_, i) => ({ id: `entry-${i}` }));
+      const entries = Array.from({ length: 2 }, (_, i) => ({
+        sys: { id: `entry-${i}` } as any,
+        fields: {},
+      }));
       const batchSize = 5;
 
       const processPromise = processEntriesInBatches(entries, mockUpdateFunction, batchSize, 200);
@@ -330,7 +337,7 @@ describe('entryUtils', () => {
       const delayMs = 200;
 
       const processPromise = processEntriesInBatches(
-        mockEntries,
+        mockEntries as EntryProps[],
         mockUpdateFunction,
         batchSize,
         delayMs
@@ -360,7 +367,7 @@ describe('entryUtils', () => {
       const delayMs = 200;
 
       const processPromise = processEntriesInBatches(
-        largeEntryArray,
+        largeEntryArray as EntryProps[],
         mockUpdateFunction,
         batchSize,
         delayMs
@@ -386,7 +393,10 @@ describe('entryUtils', () => {
     });
 
     it('processes entries correctly with batching and delays', async () => {
-      const entries = Array.from({ length: 10 }, (_, i) => ({ id: `entry-${i}` }));
+      const entries = Array.from({ length: 10 }, (_, i) => ({
+        sys: { id: `entry-${i}` } as any,
+        fields: {},
+      }));
       const mockUpdateFunction = vi.fn().mockResolvedValue({ success: true });
 
       const processPromise = processEntriesInBatches(entries, mockUpdateFunction, 3, 200);

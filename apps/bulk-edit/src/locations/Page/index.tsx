@@ -72,7 +72,7 @@ const Page = () => {
     return allContentTypes;
   };
 
-  const buildQuery = (sortOption: string, displayField: string | null) => {
+  const buildQuery = (sortOption: string, displayField: string | null): QueryOptions => {
     const getOrder = (sortOption: string) => {
       if (sortOption === 'updatedAt_desc') return '-sys.updatedAt';
       else if (sortOption === 'updatedAt_asc') return 'sys.updatedAt';

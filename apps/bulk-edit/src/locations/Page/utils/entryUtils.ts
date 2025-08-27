@@ -1,7 +1,7 @@
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Document } from '@contentful/rich-text-types';
 import { Entry, ContentTypeField, Status, Fields } from '../types';
-import { ContentTypeProps, EntryProps } from 'contentful-management';
+import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
 import { BATCH_FETCHING } from './constants';
 
 export const getStatus = (entry: Entry): Status => {
@@ -158,18 +158,20 @@ export function getEntryFieldValue(
  * @param delayMs - Delay in milliseconds between batches
  * @returns Promise that resolves to array of results from updateFunction
  */
-//TODO: Remove generic type and batchSize and delayMs as parameters
-export async function processEntriesInBatches<T, R>(
-  entries: T[],
-  updateFunction: (entry: T) => Promise<R>,
+export async function processEntriesInBatches(
+  entries: EntryProps[],
+  updateFunction: (entry: EntryProps) => Promise<{
+    success: boolean;
+    entry: EntryProps;
+  }>,
   batchSize: number,
   delayMs: number
-): Promise<R[]> {
+): Promise<{ success: boolean; entry: EntryProps }[]> {
   if (entries.length === 0) {
     return [];
   }
 
-  const results: R[] = [];
+  const results = [];
 
   for (let i = 0; i < entries.length; i += batchSize) {
     const batch = entries.slice(i, i + batchSize);
@@ -189,7 +191,7 @@ export async function processEntriesInBatches<T, R>(
 
 export async function fetchEntriesWithBatching(
   sdk: any,
-  query: { skip: number; limit: number },
+  query: QueryOptions,
   batchSize: number
 ): Promise<{ entries: EntryProps[]; total: number }> {
   const allEntries: EntryProps[] = [];
@@ -229,10 +231,6 @@ export async function fetchEntriesWithBatching(
         allEntries.length < total;
 
       batchSkip += batchSize;
-
-      if (hasMore) {
-        await new Promise((resolve) => setTimeout(resolve, BATCH_FETCHING.BATCH_DELAY_MS));
-      }
     } catch (error: any) {
       // If we hit response size limit, reduce batch size and retry
       if (error.message && error.message.includes('Response size too big')) {
