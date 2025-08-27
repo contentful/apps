@@ -189,6 +189,7 @@ export async function processEntriesInBatches(
   return results;
 }
 
+// Fetch entries in batches to avoid response size limits
 export async function fetchEntriesWithBatching(
   sdk: any,
   query: QueryOptions,
@@ -196,7 +197,7 @@ export async function fetchEntriesWithBatching(
 ): Promise<{ entries: EntryProps[]; total: number }> {
   const allEntries: EntryProps[] = [];
   const { skip, limit } = query;
-  let batchSkip = skip;
+  let batchSkip = skip || 0;
   let total = 0;
   let hasMore = true;
 

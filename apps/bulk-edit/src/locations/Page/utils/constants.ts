@@ -5,7 +5,7 @@ export const PAGE_DESCRIPTION = 'Bulk edit your content entries';
 
 export const BATCH_FETCHING = {
   DEFAULT_BATCH_SIZE: 100,
-  MIN_BATCH_SIZE: 25,
+  MIN_BATCH_SIZE: 2,
 } as const;
 
 export const BATCH_PROCESSING = {

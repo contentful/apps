@@ -9,7 +9,13 @@ import {
   Notification,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { ContentFields, ContentTypeProps, KeyValueMap, EntryProps } from 'contentful-management';
+import {
+  ContentFields,
+  ContentTypeProps,
+  KeyValueMap,
+  EntryProps,
+  QueryOptions,
+} from 'contentful-management';
 import { ContentTypeField } from './types';
 import { styles } from './styles';
 import { ContentTypeSidebar } from './components/ContentTypeSidebar';
@@ -26,7 +32,6 @@ import {
 } from './utils/entryUtils';
 import { BATCH_PROCESSING, API_LIMITS, PAGE_SIZE_OPTIONS, BATCH_FETCHING } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
-import { KnownSDK } from '@contentful/app-sdk';
 
 const Page = () => {
   const sdk = useSDK();
@@ -153,7 +158,11 @@ const Page = () => {
 
         const baseQuery = buildQuery(sortOption, displayField);
 
-        const { entries, total } = await fetchEntriesWithBatching(sdk, baseQuery, baseQuery.limit);
+        const { entries, total } = await fetchEntriesWithBatching(
+          sdk,
+          baseQuery,
+          baseQuery.limit || BATCH_FETCHING.DEFAULT_BATCH_SIZE
+        );
 
         setEntries(entries);
         setTotalEntries(total);
@@ -182,11 +191,10 @@ const Page = () => {
   }) {
     const message =
       count === 1
-        ? `${firstUpdatedValue} was updated to ${value}`
-        : `${firstUpdatedValue} and ${count - 1} more entry fields were updated to ${truncate(
-            value,
-            30
-          )}`;
+        ? `${truncate(firstUpdatedValue, 30)} was updated to ${truncate(value, 30)}`
+        : `${truncate(firstUpdatedValue, 30)} and ${
+            count - 1
+          } more entry fields were updated to ${truncate(value, 30)}`;
     const notification = Notification.success(message, {
       title: 'Success!',
       cta: {
@@ -204,42 +212,6 @@ const Page = () => {
       },
     });
   }
-
-  const fetchLatestEntries = async (entryIds: string[]) => {
-    const allEntries: EntryProps[] = [];
-    const corsLimit = API_LIMITS.CORS_QUERY_PARAM_LIMIT;
-    const limit = API_LIMITS.DEFAULT_PAGINATION_LIMIT;
-
-    // Process entry IDs in batches to respect CORS limit
-    for (let i = 0; i < entryIds.length; i += corsLimit) {
-      const batchIds = entryIds.slice(i, i + corsLimit);
-      let skip = 0;
-      let fetched: number;
-
-      do {
-        const response = await sdk.cma.entry.getMany({
-          spaceId: sdk.ids.space,
-          environmentId: sdk.ids.environment,
-          query: {
-            'sys.id[in]': batchIds.join(','),
-            skip,
-            limit,
-          },
-        });
-        const items = response.items as EntryProps[];
-        allEntries.push(...items);
-        fetched = items.length;
-        skip += limit;
-      } while (fetched === limit);
-
-      // Small delay between batches
-      if (i + corsLimit < entryIds.length) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
-    }
-
-    return allEntries;
-  };
 
   const processBatchResults = (results: Array<{ success: boolean; entry: EntryProps }>) => {
     const successful = results.filter((r) => r.success).map((r) => r.entry);
@@ -335,7 +307,18 @@ const Page = () => {
 
     try {
       const entryIds = Object.keys(backupToUse);
-      const currentEntries = await fetchLatestEntries(entryIds);
+      const currentEntries: EntryProps[] = [];
+
+      // Fetch current entries in smaller chunks to avoid request size limits from the entries ids param in the query
+      for (let i = 0; i < entryIds.length; i += API_LIMITS.CORS_QUERY_PARAM_LIMIT) {
+        const chunk = entryIds.slice(i, i + API_LIMITS.CORS_QUERY_PARAM_LIMIT);
+        const { entries } = await fetchEntriesWithBatching(
+          sdk,
+          { 'sys.id[in]': chunk.join(','), skip: 0, limit: chunk.length },
+          BATCH_FETCHING.DEFAULT_BATCH_SIZE
+        );
+        currentEntries.push(...entries);
+      }
 
       // Create restore function for batch processing
       const restoreEntry = async (currentEntry: EntryProps) => {
