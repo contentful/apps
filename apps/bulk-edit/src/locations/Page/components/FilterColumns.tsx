@@ -2,11 +2,7 @@ import { Flex, Text } from '@contentful/f36-components';
 import { Multiselect, MultiselectOption } from '@contentful/f36-multiselect';
 import { css } from 'emotion';
 import { useMemo } from 'react';
-
-const options = [
-  { label: 'Display name', value: 'displayName' },
-  { label: 'Updated at', value: 'updatedAt' },
-];
+import { truncate } from '../utils/entryUtils';
 
 const FilterColumns = ({
   options,
@@ -18,8 +14,8 @@ const FilterColumns = ({
   setSelectedFields: (fields: { label: string; value: string }[]) => void;
 }) => {
   const getPlaceholderText = () => {
-    if (selectedFields.length === options.length || selectedFields.length === 0)
-      return 'Filter columns';
+    if (selectedFields.length === 0) return 'No fields selected';
+    if (selectedFields.length === options.length) return 'Filter fields';
     if (selectedFields.length === 1) return selectedFields[0].label;
     return `${selectedFields[0].label} and ${selectedFields.length - 1} more`;
   };
@@ -50,7 +46,7 @@ const FilterColumns = ({
               font-size: 12px;
             `}
             key={option.value}
-            label={option.label}
+            label={truncate(option.label, 30)}
             value={option.value}
             itemId={option.value}
             isChecked={selectedFields.some((field) => field.value === option.value)}

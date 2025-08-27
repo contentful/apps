@@ -61,6 +61,7 @@ const Page = () => {
   const [totalUpdateCount, setTotalUpdateCount] = useState<number>(0);
   const [editionCount, setEditionCount] = useState<number>(0);
   const [selectedFields, setSelectedFields] = useState<{ label: string; value: string }[]>([]);
+  const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -125,11 +126,11 @@ const Page = () => {
 
   useEffect(() => {
     setActivePage(0);
-    setSelectedFields(fields.map((field) => ({ label: field.name, value: field.id })));
   }, [selectedContentTypeId, sortOption]);
 
+  // Fetch content type and fields when selectedContentTypeId changes
   useEffect(() => {
-    const fetchFieldsAndEntries = async (): Promise<void> => {
+    const fetchContentTypeAndFields = async (): Promise<void> => {
       if (!selectedContentTypeId) {
         setEntries([]);
         setFields([]);
@@ -137,7 +138,7 @@ const Page = () => {
         setTotalEntries(0);
         return;
       }
-      setEntriesLoading(true);
+
       try {
         const ct = await sdk.cma.contentType.get({ contentTypeId: selectedContentTypeId });
         const newFields: ContentTypeField[] = [];
@@ -162,10 +163,34 @@ const Page = () => {
           }
         });
         setFields(newFields);
-        if (selectedFields.length === 0) {
-          setSelectedFields(newFields.map((field) => ({ label: field.name, value: field.id })));
-        }
-        const displayField = ct.displayField || null;
+        setSelectedFields(
+          newFields.map((field) => ({
+            label: field.locale ? `(${field.locale}) ${field.name}` : field.name,
+            value: field.uniqueId,
+          }))
+        );
+        setCurrentContentType(ct);
+      } catch (e) {
+        setEntries([]);
+        setFields([]);
+        setSelectedFields([]);
+        setTotalEntries(0);
+        setCurrentContentType(null);
+      }
+    };
+    void fetchContentTypeAndFields();
+  }, [sdk, selectedContentTypeId, locales]);
+
+  // Fetch entries when pagination, sorting, or content type changes
+  useEffect(() => {
+    const fetchEntries = async (): Promise<void> => {
+      if (fields.length === 0 || !currentContentType) {
+        return;
+      }
+
+      setEntriesLoading(true);
+      try {
+        const displayField = currentContentType.displayField || null;
 
         const baseQuery = buildQuery(sortOption, displayField);
 
@@ -179,15 +204,13 @@ const Page = () => {
         setTotalEntries(total);
       } catch (e) {
         setEntries([]);
-        setFields([]);
-        setSelectedFields([]);
         setTotalEntries(0);
       } finally {
         setEntriesLoading(false);
       }
     };
-    void fetchFieldsAndEntries();
-  }, [sdk, selectedContentTypeId, activePage, itemsPerPage, sortOption]);
+    void fetchEntries();
+  }, [sdk, activePage, itemsPerPage, sortOption, currentContentType]);
 
   const selectedContentType = contentTypes.find((ct) => ct.sys.id === selectedContentTypeId);
   const selectedEntries = entries.filter((entry) => selectedEntryIds.includes(entry.sys.id));
@@ -425,7 +448,10 @@ const Page = () => {
                     <Flex gap="spacingS" alignItems="center">
                       <SortMenu sortOption={sortOption} onSortChange={setSortOption} />
                       <FilterColumns
-                        options={fields.map((field) => ({ label: field.name, value: field.id }))}
+                        options={fields.map((field) => ({
+                          label: field.locale ? `(${field.locale}) ${field.name}` : field.name,
+                          value: field.uniqueId,
+                        }))}
                         selectedFields={selectedFields}
                         setSelectedFields={setSelectedFields}
                       />
@@ -460,7 +486,7 @@ const Page = () => {
                         <EntryTable
                           entries={entries}
                           fields={selectedFields.flatMap(
-                            (field) => fields.find((f) => f.id === field.value) || []
+                            (field) => fields.find((f) => f.uniqueId === field.value) || []
                           )}
                           contentType={selectedContentType}
                           spaceId={sdk.ids.space}
