@@ -426,18 +426,17 @@ const Page = () => {
                   <Box style={styles.noEntriesText}>No entries found.</Box>
                 ) : (
                   <>
-                    <FilterColumns
-                      options={fields.map((field) => ({ label: field.name, value: field.id }))}
-                      selectedFields={selectedFields}
-                      setSelectedFields={setSelectedFields}
-                    />
-                    <SortMenu
-                      sortOption={sortOption}
-                      onSortChange={(newSort) => {
-                        setSortOption(newSort);
-                        setActivePage(0);
-                      }}
-                    />
+                    <Flex gap="spacingS" alignItems="center">
+                      <SortMenu sortOption={sortOption} onSortChange={(newSort) => {
+                          setSortOption(newSort);
+                          setActivePage(0);
+                      }} />
+                      <FilterColumns
+                        options={fields.map((field) => ({ label: field.name, value: field.id }))}
+                        selectedFields={selectedFields}
+                        setSelectedFields={setSelectedFields}
+                      />
+                    </Flex>
                     {selectedField && selectedEntryIds.length > 0 && !entriesLoading && (
                       <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
                         <Button variant="primary" onClick={() => setIsModalOpen(true)}>

@@ -1,9 +1,7 @@
 import { Flex, Text } from '@contentful/f36-components';
 import { Multiselect, MultiselectOption } from '@contentful/f36-multiselect';
-import { useMemo, useState } from 'react';
 import { css } from 'emotion';
-import tokens from '@contentful/f36-tokens';
-import { multiselectOverrides } from './FieldColumns.styles';
+import { useMemo } from 'react';
 
 const options = [
   { label: 'Display name', value: 'displayName' },
@@ -19,6 +17,13 @@ const FilterColumns = ({
   selectedFields: { label: string; value: string }[];
   setSelectedFields: (fields: { label: string; value: string }[]) => void;
 }) => {
+  const getPlaceholderText = () => {
+    if (selectedFields.length === options.length || selectedFields.length === 0)
+      return 'Filter columns';
+    if (selectedFields.length === 1) return selectedFields[0].label;
+    return `${selectedFields[0].label} and ${selectedFields.length - 1} more`;
+  };
+
   const toggleAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
     if (checked) {
@@ -33,11 +38,17 @@ const FilterColumns = ({
   }, [selectedFields, options]);
 
   return (
-    <Flex style={{ maxWidth: '500px' }} gap="spacing2Xs" flexDirection="column">
-      <Multiselect placeholder="Filter columns" css={multiselectOverrides}>
+    <Flex style={{ minWidth: '300px' }} gap="spacing2Xs" flexDirection="column">
+      <Multiselect
+        placeholder={getPlaceholderText()}
+        triggerButtonProps={{ size: 'small' }}
+        popoverProps={{ isFullWidth: true }}>
         <Multiselect.SelectAll onSelectItem={toggleAll} isChecked={areAllSelected} />
         {options.map((option) => (
           <MultiselectOption
+            className={css`
+              font-size: 12px;
+            `}
             key={option.value}
             label={option.label}
             value={option.value}
