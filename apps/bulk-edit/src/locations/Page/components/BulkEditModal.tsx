@@ -1,15 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Modal,
-  Button,
-  TextInput,
-  Text,
-  Flex,
-  FormControl,
-  Stack,
-} from '@contentful/f36-components';
+import { Modal, Button, TextInput, Text, Flex, FormControl } from '@contentful/f36-components';
 import type { Entry, ContentTypeField } from '../types';
 import { getEntryFieldValue, truncate } from '../utils/entryUtils';
+import { styles } from './BulkEditModal.styles';
+import { ProgressMessage } from './ProgressMessage';
 
 interface BulkEditModalProps {
   isOpen: boolean;
@@ -87,13 +81,11 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
           </FormControl>
         </Flex>
         {totalUpdateCount > 0 && isSaving && (
-          <Stack spacing="spacing2Xs" flexDirection="column" alignItems="start">
-            <Text fontColor="gray500" fontWeight="fontWeightMedium">
-              {`Edited ${editionCount} ${
-                editionCount === 1 ? 'entry' : 'entries'
-              } out of ${totalUpdateCount}.`}
-            </Text>
-          </Stack>
+          <ProgressMessage
+            totalCount={totalUpdateCount}
+            currentCount={editionCount}
+            styles={styles.editProgress}
+          />
         )}
       </Modal.Content>
       <Modal.Controls>

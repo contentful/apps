@@ -169,28 +169,8 @@ describe('BulkEditModal', () => {
       />
     );
 
-    expect(screen.getByText('Edited 1 entry out of 2.')).toBeInTheDocument();
-  });
-
-  it('shows progress message with plural entries during saving', () => {
-    const onClose = vi.fn();
-    const onSave = vi.fn();
-
-    render(
-      <BulkEditModal
-        isOpen={true}
-        onClose={onClose}
-        onSave={onSave}
-        selectedEntries={[entry1, entry2]}
-        selectedField={field}
-        defaultLocale="en-US"
-        isSaving={true}
-        totalUpdateCount={2}
-        editionCount={2}
-      />
-    );
-
-    expect(screen.getByText('Edited 2 entries out of 2.')).toBeInTheDocument();
+    expect(screen.getByText('1 of 2 completed')).toBeInTheDocument();
+    expect(screen.getByText('Updating entries')).toBeInTheDocument();
   });
 
   it('does not show progress message when not saving', () => {
@@ -211,6 +191,6 @@ describe('BulkEditModal', () => {
       />
     );
 
-    expect(screen.queryByText(/Edited \d+ entr/)).not.toBeInTheDocument();
+    expect(screen.queryByText('Updating entries')).not.toBeInTheDocument();
   });
 });
