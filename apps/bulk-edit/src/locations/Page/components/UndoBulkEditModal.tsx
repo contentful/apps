@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, Button, Text, Flex } from '@contentful/f36-components';
+import { truncate } from '../utils/entryUtils';
 
 interface UndoBulkEditModalProps {
   isOpen: boolean;
@@ -28,19 +29,23 @@ export const UndoBulkEditModal: React.FC<UndoBulkEditModalProps> = ({
           <Text>
             {entryCount === 1 ? (
               <>
-                The update for <b>{firstEntryFieldValue}</b> will be reverted.
+                The update for <b>{truncate(firstEntryFieldValue, 100)}</b> will be reverted.
               </>
             ) : (
               <>
-                The update for <b>{firstEntryFieldValue}</b> and <b>{entryCount - 1}</b> more entry
-                fields will be reverted.
+                The update for <b>{truncate(firstEntryFieldValue, 100)}</b> and{' '}
+                <b>{entryCount - 1}</b> more entry fields will be reverted.
               </>
             )}
           </Text>
         </Flex>
       </Modal.Content>
       <Modal.Controls>
-        <Button variant="secondary" onClick={onClose} testId="undo-bulk-cancel">
+        <Button
+          variant="secondary"
+          onClick={onClose}
+          testId="undo-bulk-cancel"
+          isDisabled={isSaving}>
           Cancel
         </Button>
         <Button variant="primary" onClick={onUndo} testId="undo-bulk-confirm" isLoading={isSaving}>
