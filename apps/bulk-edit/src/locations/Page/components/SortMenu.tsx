@@ -33,8 +33,8 @@ export const SortMenu: React.FC<SortMenuProps> = ({ sortOption, onSortChange }) 
             size="small"
             startIcon={<SortDescendingIcon size={16} />}
             endIcon={isOpen ? <CaretUpIcon size={16} /> : <CaretDownIcon size={16} />}
-            aria-label="Sort display name by">
-            Sort by {sortOptionLabel}
+            aria-label="Sort by">
+            Sort by
           </Button>
         </Menu.Trigger>
         <Menu.List>
