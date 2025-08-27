@@ -238,9 +238,9 @@ const Page = () => {
     try {
       if (!selectedField) return;
 
-        setTotalUpdateCount(selectedEntries.length);
+      setTotalUpdateCount(selectedEntries.length);
 
-        const backups: Record<string, EntryProps> = {};
+      const backups: Record<string, EntryProps> = {};
 
       // Create update function for batch processing
       const updateEntry = async (latestEntry: EntryProps) => {
