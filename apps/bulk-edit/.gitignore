@@ -15,6 +15,7 @@
 .env
 .env.*
 !.env*.example
+!.env.test
 
 # misc
 .DS_Store
@@ -23,10 +24,4 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# dotenv environment variables file
-.env
-.env.*
-!.env*.example
-!.env.test
 
