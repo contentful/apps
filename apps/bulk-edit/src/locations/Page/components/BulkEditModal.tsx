@@ -89,7 +89,9 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
         {totalUpdateCount > 0 && isSaving && (
           <Stack spacing="spacing2Xs" flexDirection="column" alignItems="start">
             <Text fontColor="gray500" fontWeight="fontWeightMedium">
-              {`Edited ${editionCount} ${editionCount === 1 ? 'entry' : 'entries'} out of ${totalUpdateCount}.`}
+              {`Edited ${editionCount} ${
+                editionCount === 1 ? 'entry' : 'entries'
+              } out of ${totalUpdateCount}.`}
             </Text>
           </Stack>
         )}
