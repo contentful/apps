@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Button, TextInput, Text, Flex, FormControl } from '@contentful/f36-components';
+import {
+  Modal,
+  Button,
+  TextInput,
+  Text,
+  Flex,
+  FormControl,
+  Note,
+} from '@contentful/f36-components';
 import type { Entry, ContentTypeField } from '../types';
 import { getEntryFieldValue, truncate } from '../utils/entryUtils';
-import { styles } from './BulkEditModal.styles';
-import { ProgressMessage } from './ProgressMessage';
+import { ClockIcon } from '@contentful/f36-icons';
 
 interface BulkEditModalProps {
   isOpen: boolean;
@@ -81,11 +88,9 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
           </FormControl>
         </Flex>
         {totalUpdateCount > 0 && isSaving && (
-          <ProgressMessage
-            totalCount={totalUpdateCount}
-            currentCount={editionCount}
-            styles={styles.editProgress}
-          />
+          <Note title="Updating entries" variant="neutral" icon={<ClockIcon variant="muted" />}>
+            {`${editionCount} of ${totalUpdateCount} completed`}
+          </Note>
         )}
       </Modal.Content>
       <Modal.Controls>
