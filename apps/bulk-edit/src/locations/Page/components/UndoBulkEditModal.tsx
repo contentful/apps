@@ -10,7 +10,7 @@ interface UndoBulkEditModalProps {
   firstEntryFieldValue: string;
   isSaving: boolean;
   entryCount: number;
-  editionCount?: number;
+  editionCount: number;
 }
 
 export const UndoBulkEditModal: React.FC<UndoBulkEditModalProps> = ({
