@@ -1,5 +1,7 @@
 import React from 'react';
-import { Modal, Button, Text, Flex } from '@contentful/f36-components';
+import { Modal, Button, Text, Flex, Note } from '@contentful/f36-components';
+import { truncate } from '../utils/entryUtils';
+import { ClockIcon } from '@contentful/f36-icons';
 
 interface UndoBulkEditModalProps {
   isOpen: boolean;
@@ -8,6 +10,7 @@ interface UndoBulkEditModalProps {
   firstEntryFieldValue: string;
   isSaving: boolean;
   entryCount: number;
+  editionCount: number;
 }
 
 export const UndoBulkEditModal: React.FC<UndoBulkEditModalProps> = ({
@@ -17,30 +20,48 @@ export const UndoBulkEditModal: React.FC<UndoBulkEditModalProps> = ({
   firstEntryFieldValue,
   isSaving,
   entryCount,
+  editionCount,
 }) => {
   const title = entryCount === 1 ? 'Edit' : 'Bulk edit';
 
   return (
-    <Modal isShown={isOpen} onClose={onClose} size="medium" aria-label={title}>
+    <Modal
+      isShown={isOpen}
+      onClose={onClose}
+      size="medium"
+      aria-label={title}
+      key={`undo-bulk-edit-modal-${isOpen ? 'open' : 'closed'}`}>
       <Modal.Header title={title} />
       <Modal.Content>
-        <Flex gap="spacingS" flexDirection="column">
+        <Flex
+          gap="spacingS"
+          flexDirection="column"
+          marginBottom={isSaving ? 'spacingM' : undefined}>
           <Text>
             {entryCount === 1 ? (
               <>
-                The update for <b>{firstEntryFieldValue}</b> will be reverted.
+                The update for <b>{truncate(firstEntryFieldValue, 100)}</b> will be reverted.
               </>
             ) : (
               <>
-                The update for <b>{firstEntryFieldValue}</b> and <b>{entryCount - 1}</b> more entry
-                fields will be reverted.
+                The update for <b>{truncate(firstEntryFieldValue, 100)}</b> and{' '}
+                <b>{entryCount - 1}</b> more entry fields will be reverted.
               </>
             )}
           </Text>
         </Flex>
+        {entryCount > 0 && isSaving && (
+          <Note title="Updating entries" variant="neutral" icon={<ClockIcon variant="muted" />}>
+            {`${editionCount} of ${entryCount} completed`}
+          </Note>
+        )}
       </Modal.Content>
       <Modal.Controls>
-        <Button variant="secondary" onClick={onClose} testId="undo-bulk-cancel">
+        <Button
+          variant="secondary"
+          onClick={onClose}
+          testId="undo-bulk-cancel"
+          isDisabled={isSaving}>
           Cancel
         </Button>
         <Button variant="primary" onClick={onUndo} testId="undo-bulk-confirm" isLoading={isSaving}>

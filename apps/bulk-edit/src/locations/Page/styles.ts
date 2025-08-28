@@ -1,7 +1,6 @@
 import tokens from '@contentful/f36-tokens';
-import { SortMenu } from './components/SortMenu';
 
-const SIDEBAR_WIDTH = 220;
+const SIDEBAR_WIDTH = 205;
 const STICKY_SPACER_SPACING = 24;
 const CELL_WIDTH = 200;
 const TABLE_WIDTH = CELL_WIDTH * 4;
@@ -14,7 +13,7 @@ export const styles = {
     position: 'sticky',
     left: 0,
     top: 0,
-    zIndex: 3,
+    zIndex: 4,
     background: tokens.colorWhite,
   },
   mainContent: {
@@ -44,13 +43,19 @@ export const styles = {
     left: 0,
     borderTop: `transparent`,
   },
-  stickyTableHeader: {
+  stickyMainColumnsOrFields: {
     background: tokens.gray200,
     position: 'sticky',
-    left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING,
+    left: STICKY_SPACER_SPACING + CELL_WIDTH,
     zIndex: 1,
     borderRight: `1px solid ${tokens.gray300}`,
     minWidth: `${CELL_WIDTH}px`,
+  },
+  stickyTableRow: {
+    background: tokens.colorWhite,
+    position: 'sticky',
+    top: 0,
+    zIndex: 2,
   },
   cell: {
     borderRight: `1px solid ${tokens.gray300}`,
@@ -74,12 +79,13 @@ export const styles = {
   stickySpacer: {
     position: 'sticky',
     left: SIDEBAR_WIDTH,
-    zIndex: 1,
+    zIndex: 3,
     top: 0,
     background: tokens.colorWhite,
     width: STICKY_SPACER_SPACING,
     height: '100vh',
     display: 'block',
+    marginRight: tokens.spacing2Xs,
   },
   sortMenu: {
     position: 'sticky',
@@ -117,5 +123,8 @@ export const styles = {
     position: 'sticky',
     left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING,
     zIndex: 1,
+  },
+  loadingTableBorder: {
+    border: `1px solid ${tokens.gray200}`,
   },
 } as const;

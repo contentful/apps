@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Checkbox, Flex, Text } from '@contentful/f36-components';
+import { Table, Checkbox, Flex, Text, Box } from '@contentful/f36-components';
 import { Tooltip } from '@contentful/f36-tooltip';
 import { QuestionIcon } from '@phosphor-icons/react';
 import { ContentTypeField } from '../types';
@@ -22,20 +22,22 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
 }) => {
   return (
     <Table.Head style={styles.tableHead}>
-      <Table.Row>
-        {fields.length > 0 && (
-          <Table.Cell as="th" key={DISPLAY_NAME_COLUMN} style={styles.stickyTableHeader}>
-            Display name
+      <Table.Row style={styles.stickyTableRow}>
+        <Box style={styles.stickyMainColumnsOrFields}>
+          {fields.length > 0 && (
+            <Table.Cell as="th" key={DISPLAY_NAME_COLUMN} style={styles.tableHeader}>
+              Display name
+            </Table.Cell>
+          )}
+          <Table.Cell as="th" key={ENTRY_STATUS_COLUMN} style={styles.tableHeader}>
+            <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
+              Status
+              <Tooltip content="Bulk editing is not supported for Status" placement="top">
+                <QuestionIcon size={16} aria-label="Bulk editing not supported for Status" />
+              </Tooltip>
+            </Flex>
           </Table.Cell>
-        )}
-        <Table.Cell as="th" key={ENTRY_STATUS_COLUMN} style={styles.tableHeader}>
-          <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
-            Status
-            <Tooltip content="Bulk editing is not supported for Status" placement="top">
-              <QuestionIcon size={16} aria-label="Bulk editing not supported for Status" />
-            </Tooltip>
-          </Flex>
-        </Table.Cell>
+        </Box>
         {fields.map((field) => {
           const isAllowed = isCheckboxAllowed(field);
           const isDisabled = checkboxesDisabled[field.uniqueId];

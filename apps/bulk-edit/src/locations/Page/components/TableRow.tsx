@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Table, TextLink, Badge, Checkbox, Flex, Text } from '@contentful/f36-components';
+import { Table, TextLink, Badge, Checkbox, Flex, Text, Box } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { Entry, ContentTypeField } from '../types';
 import { ContentTypeProps } from 'contentful-management';
@@ -44,20 +44,22 @@ export const TableRow: React.FC<TableRowProps> = ({
 
   return (
     <Table.Row key={entry.sys.id}>
-      <Table.Cell testId="display-name-cell" style={styles.stickyCell} isTruncated>
-        <TextLink
-          href={getEntryUrl(entry, spaceId, environmentId)}
-          target="_blank"
-          rel="noopener noreferrer"
-          testId="entry-link"
-          icon={<ExternalLinkIcon />}
-          alignIcon="end">
-          {getEntryTitle(entry, contentType, defaultLocale)}
-        </TextLink>
-      </Table.Cell>
-      <Table.Cell testId="status-cell" style={styles.cell}>
-        <Badge variant={status.color}>{status.label}</Badge>
-      </Table.Cell>
+      <Box style={styles.stickyMainColumnsOrFields}>
+        <Table.Cell testId="display-name-cell" style={styles.cell}>
+          <TextLink
+            href={getEntryUrl(entry, spaceId, environmentId)}
+            target="_blank"
+            rel="noopener noreferrer"
+            testId="entry-link"
+            icon={<ExternalLinkIcon />}
+            alignIcon="end">
+            {getEntryTitle(entry, contentType, defaultLocale)}
+          </TextLink>
+        </Table.Cell>
+        <Table.Cell testId="status-cell" style={styles.cell}>
+          <Badge variant={status.color}>{status.label}</Badge>
+        </Table.Cell>
+      </Box>
       {fields.map((field) => {
         const isAllowed = isCheckboxAllowed(field);
         const isDisabled = cellCheckboxesDisabled[field.uniqueId];
