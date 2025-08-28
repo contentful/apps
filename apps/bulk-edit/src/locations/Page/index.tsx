@@ -57,6 +57,8 @@ const Page = () => {
   const [lastUpdateBackup, setLastUpdateBackup] = useState<Record<string, EntryProps>>({});
   const [isUndoModalOpen, setIsUndoModalOpen] = useState(false);
   const [undoFirstEntryFieldValue, setUndoFirstEntryFieldValue] = useState('');
+  const [totalUpdateCount, setTotalUpdateCount] = useState<number>(0);
+  const [editionCount, setEditionCount] = useState<number>(0);
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -228,11 +230,16 @@ const Page = () => {
   };
 
   const onSave = async (val: string | number) => {
+    setTotalUpdateCount(0);
+    setEditionCount(0);
     setIsSaving(true);
     setFailedUpdates([]);
 
     try {
       if (!selectedField) return;
+
+      setTotalUpdateCount(selectedEntries.length);
+
       const backups: Record<string, EntryProps> = {};
 
       // Create update function for batch processing
@@ -257,6 +264,8 @@ const Page = () => {
             },
             { ...latestEntry, fields: updatedFields }
           );
+
+          setEditionCount((editionCount) => editionCount + 1);
 
           return { success: true, entry: updated };
         } catch {
@@ -463,6 +472,8 @@ const Page = () => {
         selectedField={selectedField}
         defaultLocale={defaultLocale}
         isSaving={isSaving}
+        totalUpdateCount={totalUpdateCount}
+        editionCount={editionCount}
       />
       <UndoBulkEditModal
         isOpen={isUndoModalOpen}
