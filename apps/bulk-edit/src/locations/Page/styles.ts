@@ -1,9 +1,17 @@
 import tokens from '@contentful/f36-tokens';
+import { CSSProperties } from 'react';
 
-const SIDEBAR_WIDTH = 205;
+const SIDEBAR_WIDTH = 200;
 const STICKY_SPACER_SPACING = 24;
 const CELL_WIDTH = 200;
 const TABLE_WIDTH = CELL_WIDTH * 4;
+
+const stickyCell: CSSProperties = {
+  position: 'sticky',
+  zIndex: 1,
+  borderRight: `1px solid ${tokens.gray300}`,
+  minWidth: `${CELL_WIDTH}px`,
+};
 
 export const styles = {
   sidebar: {
@@ -24,14 +32,6 @@ export const styles = {
     minWidth: `${CELL_WIDTH * 4}px`,
     overflowX: 'auto',
   },
-  stickyCell: {
-    position: 'sticky',
-    left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING,
-    zIndex: 1,
-    borderLeft: `1px solid ${tokens.gray300}`,
-    borderRight: `1px solid ${tokens.gray300}`,
-    minWidth: `${CELL_WIDTH}px`,
-  },
   tableHeader: {
     background: tokens.gray200,
     borderRight: `1px solid ${tokens.gray300}`,
@@ -43,13 +43,24 @@ export const styles = {
     left: 0,
     borderTop: `transparent`,
   },
-  stickyMainColumnsOrFields: {
+  displayNameHeader: {
+    ...stickyCell,
     background: tokens.gray200,
-    position: 'sticky',
     left: STICKY_SPACER_SPACING + CELL_WIDTH,
-    zIndex: 1,
-    borderRight: `1px solid ${tokens.gray300}`,
-    minWidth: `${CELL_WIDTH}px`,
+  },
+  statusHeader: {
+    ...stickyCell,
+    background: tokens.gray200,
+    left: STICKY_SPACER_SPACING + CELL_WIDTH * 2,
+  },
+  displayNameCell: {
+    ...stickyCell,
+    borderLeft: `1px solid ${tokens.gray300}`,
+    left: STICKY_SPACER_SPACING + CELL_WIDTH,
+  },
+  statusCell: {
+    ...stickyCell,
+    left: STICKY_SPACER_SPACING + CELL_WIDTH * 2,
   },
   stickyTableRow: {
     background: tokens.colorWhite,
