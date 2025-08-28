@@ -311,6 +311,9 @@ const Page = () => {
   };
 
   const undoUpdates = async (backupToUse: Record<string, EntryProps>) => {
+    setTotalUpdateCount(0);
+    setEditionCount(0);
+
     if (Object.keys(backupToUse).length === 0) return;
 
     setIsSaving(true);
@@ -347,6 +350,9 @@ const Page = () => {
               fields: backupEntry.fields,
             }
           );
+
+          setEditionCount((editionCount) => editionCount + 1);
+
           return { success: true, entry: restoredEntry };
         } catch {
           return { success: false, entry: currentEntry };
@@ -485,6 +491,7 @@ const Page = () => {
         firstEntryFieldValue={undoFirstEntryFieldValue}
         isSaving={isSaving}
         entryCount={selectedEntryIds.length}
+        editionCount={editionCount}
       />
     </Flex>
   );
