@@ -414,7 +414,7 @@ const Page = () => {
                 ) : (
                   <>
                     <SortMenu sortOption={sortOption} onSortChange={setSortOption} />
-                    {selectedField && selectedEntryIds.length > 0 && (
+                    {selectedField && selectedEntryIds.length > 0 && !entriesLoading && (
                       <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
                         <Button variant="primary" onClick={() => setIsModalOpen(true)}>
                           {selectedEntryIds.length === 1 ? 'Edit' : 'Bulk edit'}
