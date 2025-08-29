@@ -98,6 +98,12 @@ const Page = () => {
     };
   };
 
+  const clearState = () => {
+    setEntries([]);
+    setFields([]);
+    setTotalEntries(0);
+  };
+
   useEffect(() => {
     const fetchContentTypes = async (): Promise<void> => {
       try {
@@ -122,15 +128,13 @@ const Page = () => {
   }, [sdk]);
 
   useEffect(() => {
-    setActivePage(0);
+    clearState();
   }, [selectedContentTypeId, sortOption]);
 
   useEffect(() => {
     const fetchFieldsAndEntries = async (): Promise<void> => {
       if (!selectedContentTypeId) {
-        setEntries([]);
-        setFields([]);
-        setTotalEntries(0);
+        clearState();
         return;
       }
       setEntriesLoading(true);
@@ -171,15 +175,13 @@ const Page = () => {
         setEntries(entries);
         setTotalEntries(total);
       } catch (e) {
-        setEntries([]);
-        setFields([]);
-        setTotalEntries(0);
+        clearState();
       } finally {
         setEntriesLoading(false);
       }
     };
     void fetchFieldsAndEntries();
-  }, [sdk, selectedContentTypeId, activePage, itemsPerPage, sortOption]);
+  }, [sdk, selectedContentTypeId, sortOption, activePage, itemsPerPage]);
 
   const selectedContentType = contentTypes.find((ct) => ct.sys.id === selectedContentTypeId);
   const selectedEntries = entries.filter((entry) => selectedEntryIds.includes(entry.sys.id));
@@ -401,7 +403,10 @@ const Page = () => {
             <ContentTypeSidebar
               contentTypes={contentTypes}
               selectedContentTypeId={selectedContentTypeId}
-              onContentTypeSelect={setSelectedContentTypeId}
+              onContentTypeSelect={(newCT) => {
+                setSelectedContentTypeId(newCT);
+                setActivePage(0);
+              }}
             />
             <div style={styles.stickySpacer} />
             <Box>
@@ -413,7 +418,13 @@ const Page = () => {
                   <Box style={styles.noEntriesText}>No entries found.</Box>
                 ) : (
                   <>
-                    <SortMenu sortOption={sortOption} onSortChange={setSortOption} />
+                    <SortMenu
+                      sortOption={sortOption}
+                      onSortChange={(newSort) => {
+                        setSortOption(newSort);
+                        setActivePage(0);
+                      }}
+                    />
                     {selectedField && selectedEntryIds.length > 0 && !entriesLoading && (
                       <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
                         <Button variant="primary" onClick={() => setIsModalOpen(true)}>
