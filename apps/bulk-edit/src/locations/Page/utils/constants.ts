@@ -22,4 +22,4 @@ export const API_LIMITS = {
   CORS_QUERY_PARAM_LIMIT: 300,
 } as const;
 
-export const PAGE_SIZE_OPTIONS = [25, 50, 100, 200, 300, 500];
+export const PAGE_SIZE_OPTIONS = [25, 50, 100, 200, 500];
