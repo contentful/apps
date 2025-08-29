@@ -34,7 +34,7 @@ import {
 } from './utils/entryUtils';
 import { BATCH_PROCESSING, API_LIMITS, PAGE_SIZE_OPTIONS, BATCH_FETCHING } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
-import FilterColumns from './components/FilterColumns';
+import ColumnMultiselect from './components/ColumnMultiselect';
 
 const Page = () => {
   const sdk = useSDK();
@@ -456,7 +456,7 @@ const Page = () => {
                           setSortOption(newSort);
                           setActivePage(0);
                       }} />
-                      <FilterColumns
+                      <ColumnMultiselect
                         options={fields.map((field) => ({
                           label: field.locale ? `(${field.locale}) ${field.name}` : field.name,
                           value: field.uniqueId,

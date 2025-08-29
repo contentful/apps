@@ -4,7 +4,7 @@ import { css } from 'emotion';
 import { useMemo } from 'react';
 import { truncate } from '../utils/entryUtils';
 
-const FilterColumns = ({
+const ColumnMultiselect = ({
   options,
   selectedFields,
   setSelectedFields,
@@ -65,4 +65,4 @@ const FilterColumns = ({
   );
 };
 
-export default FilterColumns;
+export default ColumnMultiselect;
