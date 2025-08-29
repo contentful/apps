@@ -34,6 +34,7 @@ import {
 } from './utils/entryUtils';
 import { BATCH_PROCESSING, API_LIMITS, PAGE_SIZE_OPTIONS, BATCH_FETCHING } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
+import ColumnMultiselect from './components/ColumnMultiselect';
 
 const Page = () => {
   const sdk = useSDK();
@@ -59,6 +60,8 @@ const Page = () => {
   const [undoFirstEntryFieldValue, setUndoFirstEntryFieldValue] = useState('');
   const [totalUpdateCount, setTotalUpdateCount] = useState<number>(0);
   const [editionCount, setEditionCount] = useState<number>(0);
+  const [selectedFields, setSelectedFields] = useState<{ label: string; value: string }[]>([]);
+  const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -125,15 +128,17 @@ const Page = () => {
     setActivePage(0);
   }, [selectedContentTypeId, sortOption]);
 
+  // Fetch content type and fields when selectedContentTypeId changes
   useEffect(() => {
-    const fetchFieldsAndEntries = async (): Promise<void> => {
+    const fetchContentTypeAndFields = async (): Promise<void> => {
       if (!selectedContentTypeId) {
         setEntries([]);
         setFields([]);
+        setSelectedFields([]);
         setTotalEntries(0);
         return;
       }
-      setEntriesLoading(true);
+
       try {
         const ct = await sdk.cma.contentType.get({ contentTypeId: selectedContentTypeId });
         const newFields: ContentTypeField[] = [];
@@ -158,7 +163,34 @@ const Page = () => {
           }
         });
         setFields(newFields);
-        const displayField = ct.displayField || null;
+        setSelectedFields(
+          newFields.map((field) => ({
+            label: field.locale ? `(${field.locale}) ${field.name}` : field.name,
+            value: field.uniqueId,
+          }))
+        );
+        setCurrentContentType(ct);
+      } catch (e) {
+        setEntries([]);
+        setFields([]);
+        setSelectedFields([]);
+        setTotalEntries(0);
+        setCurrentContentType(null);
+      }
+    };
+    void fetchContentTypeAndFields();
+  }, [sdk, selectedContentTypeId, locales]);
+
+  // Fetch entries when pagination, sorting, or content type changes
+  useEffect(() => {
+    const fetchEntries = async (): Promise<void> => {
+      if (fields.length === 0 || !currentContentType) {
+        return;
+      }
+
+      setEntriesLoading(true);
+      try {
+        const displayField = currentContentType.displayField || null;
 
         const baseQuery = buildQuery(sortOption, displayField);
 
@@ -172,14 +204,13 @@ const Page = () => {
         setTotalEntries(total);
       } catch (e) {
         setEntries([]);
-        setFields([]);
         setTotalEntries(0);
       } finally {
         setEntriesLoading(false);
       }
     };
-    void fetchFieldsAndEntries();
-  }, [sdk, selectedContentTypeId, activePage, itemsPerPage, sortOption]);
+    void fetchEntries();
+  }, [sdk, activePage, itemsPerPage, sortOption, currentContentType]);
 
   const selectedContentType = contentTypes.find((ct) => ct.sys.id === selectedContentTypeId);
   const selectedEntries = entries.filter((entry) => selectedEntryIds.includes(entry.sys.id));
@@ -406,6 +437,7 @@ const Page = () => {
             <div style={styles.stickySpacer} />
             <Box>
               <>
+                {/* Heading */}
                 <Heading style={styles.stickyPageHeader}>
                   {selectedContentType ? `Bulk edit ${selectedContentType.name}` : 'Bulk Edit App'}
                 </Heading>
@@ -413,7 +445,17 @@ const Page = () => {
                   <Box style={styles.noEntriesText}>No entries found.</Box>
                 ) : (
                   <>
-                    <SortMenu sortOption={sortOption} onSortChange={setSortOption} />
+                    <Flex gap="spacingS" alignItems="center">
+                      <SortMenu sortOption={sortOption} onSortChange={setSortOption} />
+                      <ColumnMultiselect
+                        options={fields.map((field) => ({
+                          label: field.locale ? `(${field.locale}) ${field.name}` : field.name,
+                          value: field.uniqueId,
+                        }))}
+                        selectedFields={selectedFields}
+                        setSelectedFields={setSelectedFields}
+                      />
+                    </Flex>
                     {selectedField && selectedEntryIds.length > 0 && (
                       <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
                         <Button variant="primary" onClick={() => setIsModalOpen(true)}>
@@ -443,7 +485,9 @@ const Page = () => {
                         )}
                         <EntryTable
                           entries={entries}
-                          fields={fields}
+                          fields={selectedFields.flatMap(
+                            (field) => fields.find((f) => f.uniqueId === field.value) || []
+                          )}
                           contentType={selectedContentType}
                           spaceId={sdk.ids.space}
                           environmentId={sdk.ids.environment}
