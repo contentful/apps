@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Button, TextInput, Text, Flex, FormControl } from '@contentful/f36-components';
+import {
+  Modal,
+  Button,
+  TextInput,
+  Text,
+  Flex,
+  FormControl,
+  Note,
+} from '@contentful/f36-components';
 import type { Entry, ContentTypeField } from '../types';
-import { getEntryFieldValue } from '../utils/entryUtils';
+import { getEntryFieldValue, truncate } from '../utils/entryUtils';
+import { ClockIcon } from '@contentful/f36-icons';
 
 interface BulkEditModalProps {
   isOpen: boolean;
@@ -11,6 +20,8 @@ interface BulkEditModalProps {
   selectedField: ContentTypeField | null;
   defaultLocale: string;
   isSaving: boolean;
+  totalUpdateCount: number;
+  editionCount: number;
 }
 
 export const BulkEditModal: React.FC<BulkEditModalProps> = ({
@@ -21,6 +32,8 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   selectedField,
   defaultLocale,
   isSaving,
+  totalUpdateCount,
+  editionCount,
 }) => {
   const [value, setValue] = useState('');
   const entryCount = selectedEntries.length;
@@ -39,7 +52,12 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   }, [isOpen]);
 
   return (
-    <Modal isShown={isOpen} onClose={onClose} size="medium" aria-label={title}>
+    <Modal
+      isShown={isOpen}
+      onClose={onClose}
+      size="medium"
+      aria-label={title}
+      key={`bulk-edit-modal-${isOpen ? 'open' : 'closed'}`}>
       <Modal.Header title={title} />
       <Modal.Content>
         <Flex gap="spacingS" flexDirection="column">
@@ -48,7 +66,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
           </Text>
           <Flex>
             <Text>
-              <Text fontWeight="fontWeightDemiBold">{firstValueToUpdate}</Text>{' '}
+              <Text fontWeight="fontWeightDemiBold">{truncate(firstValueToUpdate, 100)}</Text>{' '}
               {entryCount === 1 ? 'selected' : `selected and ${entryCount - 1} more`}
             </Text>
           </Flex>
@@ -69,9 +87,18 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
             )}
           </FormControl>
         </Flex>
+        {totalUpdateCount > 0 && isSaving && (
+          <Note title="Updating entries" variant="neutral" icon={<ClockIcon variant="muted" />}>
+            {`${editionCount} of ${totalUpdateCount} completed`}
+          </Note>
+        )}
       </Modal.Content>
       <Modal.Controls>
-        <Button variant="secondary" onClick={onClose} testId="bulk-edit-cancel">
+        <Button
+          variant="secondary"
+          onClick={onClose}
+          testId="bulk-edit-cancel"
+          isDisabled={isSaving}>
           Cancel
         </Button>
         <Button

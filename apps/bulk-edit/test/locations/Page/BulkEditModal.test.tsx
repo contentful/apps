@@ -3,18 +3,9 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import { BulkEditModal } from '../../../src/locations/Page/components/BulkEditModal';
 import { Entry, ContentTypeField } from '../../../src/locations/Page/types';
-import { ContentTypeProps } from 'contentful-management';
 
 describe('BulkEditModal', () => {
   const field: ContentTypeField = { id: 'size', uniqueId: 'size', name: 'Size', type: 'Number' };
-  const displayNameField: ContentTypeField = {
-    id: 'displayName',
-    uniqueId: 'displayName',
-    name: 'Display Name',
-    type: 'Symbol',
-  };
-  const fields: ContentTypeField[] = [displayNameField, field];
-  const contentType: Partial<ContentTypeProps> = { displayField: 'displayName' };
   const entry1: Entry = {
     sys: { id: '1', contentType: { sys: { id: 'condoA' } }, version: 1 },
     fields: { displayName: { 'en-US': 'Building one' }, size: { 'en-US': 1000 } },
@@ -34,6 +25,8 @@ describe('BulkEditModal', () => {
         selectedField={field}
         defaultLocale="en-US"
         isSaving={false}
+        totalUpdateCount={0}
+        editionCount={0}
       />
     );
     expect(screen.getByText('Edit')).toBeInTheDocument();
@@ -52,6 +45,8 @@ describe('BulkEditModal', () => {
         selectedField={field}
         defaultLocale="en-US"
         isSaving={false}
+        totalUpdateCount={0}
+        editionCount={0}
       />
     );
     expect(screen.getByText('Bulk edit')).toBeInTheDocument();
@@ -70,6 +65,8 @@ describe('BulkEditModal', () => {
         selectedField={field}
         defaultLocale="en-US"
         isSaving={false}
+        totalUpdateCount={0}
+        editionCount={0}
       />
     );
     fireEvent.click(screen.getByTestId('bulk-edit-cancel'));
@@ -87,6 +84,8 @@ describe('BulkEditModal', () => {
         selectedField={field}
         defaultLocale="en-US"
         isSaving={false}
+        totalUpdateCount={0}
+        editionCount={0}
       />
     );
     const input = screen.getByPlaceholderText('Enter your new value');
@@ -111,6 +110,8 @@ describe('BulkEditModal', () => {
         selectedField={integerField}
         defaultLocale="en-US"
         isSaving={false}
+        totalUpdateCount={0}
+        editionCount={0}
       />
     );
     const input = screen.getByPlaceholderText('Enter your new value');
@@ -132,6 +133,8 @@ describe('BulkEditModal', () => {
           selectedField={field}
           defaultLocale="en-US"
           isSaving={false}
+          totalUpdateCount={0}
+          editionCount={0}
         />
       );
     };
@@ -146,5 +149,48 @@ describe('BulkEditModal', () => {
     rerender(modalComponent(true));
 
     expect(screen.getByPlaceholderText('Enter your new value')).toHaveValue(null);
+  });
+
+  it('shows progress message during saving', () => {
+    const onClose = vi.fn();
+    const onSave = vi.fn();
+
+    render(
+      <BulkEditModal
+        isOpen={true}
+        onClose={onClose}
+        onSave={onSave}
+        selectedEntries={[entry1, entry2]}
+        selectedField={field}
+        defaultLocale="en-US"
+        isSaving={true}
+        totalUpdateCount={2}
+        editionCount={1}
+      />
+    );
+
+    expect(screen.getByText('1 of 2 completed')).toBeInTheDocument();
+    expect(screen.getByText('Updating entries')).toBeInTheDocument();
+  });
+
+  it('does not show progress message when not saving', () => {
+    const onClose = vi.fn();
+    const onSave = vi.fn();
+
+    render(
+      <BulkEditModal
+        isOpen={true}
+        onClose={onClose}
+        onSave={onSave}
+        selectedEntries={[entry1, entry2]}
+        selectedField={field}
+        defaultLocale="en-US"
+        isSaving={false}
+        totalUpdateCount={0}
+        editionCount={0}
+      />
+    );
+
+    expect(screen.queryByText('Updating entries')).not.toBeInTheDocument();
   });
 });
