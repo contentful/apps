@@ -463,6 +463,7 @@ const Page = () => {
                         }))}
                         selectedFields={selectedFields}
                         setSelectedFields={setSelectedFields}
+                        style={styles.columnMultiselect}
                       />
                     </Flex>
                     {selectedField && selectedEntryIds.length > 0 && !entriesLoading && (

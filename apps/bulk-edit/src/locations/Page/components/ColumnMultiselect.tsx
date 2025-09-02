@@ -1,17 +1,19 @@
 import { Flex, Text } from '@contentful/f36-components';
 import { Multiselect, MultiselectOption } from '@contentful/f36-multiselect';
 import { css } from 'emotion';
-import { useMemo } from 'react';
+import { CSSProperties, useMemo } from 'react';
 import { truncate } from '../utils/entryUtils';
 
 const ColumnMultiselect = ({
   options,
   selectedFields,
   setSelectedFields,
+  style,
 }: {
   options: { label: string; value: string }[];
   selectedFields: { label: string; value: string }[];
   setSelectedFields: (fields: { label: string; value: string }[]) => void;
+  style?: CSSProperties;
 }) => {
   const getPlaceholderText = () => {
     if (selectedFields.length === 0) return 'No fields selected';
@@ -34,7 +36,7 @@ const ColumnMultiselect = ({
   }, [selectedFields, options]);
 
   return (
-    <Flex style={{ minWidth: '300px' }} gap="spacing2Xs" flexDirection="column">
+    <Flex gap="spacing2Xs" flexDirection="column" style={style}>
       <Multiselect
         placeholder={getPlaceholderText()}
         triggerButtonProps={{ size: 'small' }}

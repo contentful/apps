@@ -5,6 +5,7 @@ const SIDEBAR_WIDTH = 200;
 const STICKY_SPACER_SPACING = 24;
 const CELL_WIDTH = 200;
 const TABLE_WIDTH = CELL_WIDTH * 4;
+const BUTTON_WIDTH = 124;
 
 const stickyCell: CSSProperties = {
   position: 'sticky',
@@ -137,5 +138,11 @@ export const styles = {
   },
   loadingTableBorder: {
     border: `1px solid ${tokens.gray200}`,
+  },
+  columnMultiselect: {
+    position: 'sticky',
+    left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING + BUTTON_WIDTH,
+    zIndex: 1,
+    minWidth: '300px',
   },
 } as const;
