@@ -18,7 +18,7 @@ import {
   EntryProps,
   QueryOptions,
 } from 'contentful-management';
-import { ContentTypeField } from './types';
+import { ColumnOption, ContentTypeField } from './types';
 import { styles } from './styles';
 import { ContentTypeSidebar } from './components/ContentTypeSidebar';
 import { SortMenu, SORT_OPTIONS } from './components/SortMenu';
@@ -60,7 +60,7 @@ const Page = () => {
   const [undoFirstEntryFieldValue, setUndoFirstEntryFieldValue] = useState('');
   const [totalUpdateCount, setTotalUpdateCount] = useState<number>(0);
   const [editionCount, setEditionCount] = useState<number>(0);
-  const [selectedFields, setSelectedFields] = useState<{ label: string; value: string }[]>([]);
+  const [selectedFields, setSelectedFields] = useState<ColumnOption[]>([]);
   const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
@@ -135,6 +135,13 @@ const Page = () => {
     clearState();
   }, [selectedContentTypeId, sortOption]);
 
+  const getFieldsMapped = (fields: ContentTypeField[]) => {
+    return fields.map((field) => ({
+      label: field.locale ? `(${field.locale}) ${field.name}` : field.name,
+      value: field.uniqueId,
+    }));
+  };
+
   // Fetch content type and fields when selectedContentTypeId changes
   useEffect(() => {
     const fetchContentTypeAndFields = async (): Promise<void> => {
@@ -167,12 +174,7 @@ const Page = () => {
           }
         });
         setFields(newFields);
-        setSelectedFields(
-          newFields.map((field) => ({
-            label: field.locale ? `(${field.locale}) ${field.name}` : field.name,
-            value: field.uniqueId,
-          }))
-        );
+        setSelectedFields(getFieldsMapped(newFields));
         setCurrentContentType(ct);
       } catch (e) {
         setEntries([]);
@@ -457,10 +459,7 @@ const Page = () => {
                           setActivePage(0);
                       }} />
                       <ColumnMultiselect
-                        options={fields.map((field) => ({
-                          label: field.locale ? `(${field.locale}) ${field.name}` : field.name,
-                          value: field.uniqueId,
-                        }))}
+                        options={getFieldsMapped(fields)}
                         selectedFields={selectedFields}
                         setSelectedFields={setSelectedFields}
                         style={styles.columnMultiselect}

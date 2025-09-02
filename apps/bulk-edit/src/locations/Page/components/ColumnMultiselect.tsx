@@ -1,8 +1,10 @@
-import { Flex, Text } from '@contentful/f36-components';
+import { Flex } from '@contentful/f36-components';
 import { Multiselect, MultiselectOption } from '@contentful/f36-multiselect';
 import { css } from 'emotion';
 import { CSSProperties, useMemo } from 'react';
 import { truncate } from '../utils/entryUtils';
+import { ColumnOption } from '../types';
+import tokens from '@contentful/f36-tokens';
 
 const ColumnMultiselect = ({
   options,
@@ -10,9 +12,9 @@ const ColumnMultiselect = ({
   setSelectedFields,
   style,
 }: {
-  options: { label: string; value: string }[];
-  selectedFields: { label: string; value: string }[];
-  setSelectedFields: (fields: { label: string; value: string }[]) => void;
+  options: ColumnOption[];
+  selectedFields: ColumnOption[];
+  setSelectedFields: (fields: ColumnOption[]) => void;
   style?: CSSProperties;
 }) => {
   const getPlaceholderText = () => {
@@ -45,7 +47,7 @@ const ColumnMultiselect = ({
         {options.map((option) => (
           <MultiselectOption
             className={css`
-              font-size: 12px;
+              font-size: ${tokens.fontSizeS};
             `}
             key={option.value}
             label={truncate(option.label, 30)}
