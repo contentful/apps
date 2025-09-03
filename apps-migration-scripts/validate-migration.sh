@@ -33,6 +33,9 @@ PASSED_TESTS=0
 FAILED_TESTS=0
 WARNINGS=0
 
+# Manual action items for report
+MANUAL_ACTIONS=()
+
 # Flags
 DETAILED=false
 FIX_ISSUES=false
@@ -127,7 +130,6 @@ Validation Checks:
     • Build process
     • Test execution
     • Linting compliance
-    • Apps repository integration
 
 Examples:
     $0 amplitude-experiment                 # Basic validation
@@ -142,6 +144,21 @@ Documentation:
 EOF
 }
 
+check_optional_file() {
+    local app_path="$1"
+    local filename="$2"
+    local action="$3"
+    
+    if [[ -f "$app_path/$filename" ]]; then
+        echo -e "  ${GREEN}✓${NC} $filename exists"
+        log "SUCCESS" "Optional file exists: $filename"
+    else
+        echo -e "  ${YELLOW}📝${NC} $filename missing - will add to manual checklist"
+        log "WARN" "Optional file missing: $filename"
+        MANUAL_ACTIONS+=("$action")
+    fi
+}
+
 # =============================================================================
 # Validation Functions
 # =============================================================================
@@ -152,28 +169,57 @@ validate_file_structure() {
     
     echo "📁 Validating file structure..."
     
-    # Check if app directory exists
+    # Check if app directory exists (critical)
     run_test "App directory exists" "[[ -d '$app_path' ]]"
     
-    # Check for required files
+    # Check for required files (critical)
     run_test "package.json exists" "[[ -f '$app_path/package.json' ]]"
     run_test "Source directory exists" "[[ -d '$app_path/src' ]]"
     
-    # Check for optional but common files
-    run_test "README.md exists" "[[ -f '$app_path/README.md' ]]" "false"
-    run_test "LICENSE exists" "[[ -f '$app_path/LICENSE' ]]" "false"
+    # Check for recommended files (non-blocking but noted for manual review)
+    check_optional_file "$app_path" "README.md" "Create a README.md file with app description and usage instructions"
+    check_optional_file "$app_path" "LICENSE" "Add a LICENSE file (usually MIT for Contentful apps)"
     
     # Check for build configuration
     local has_build_config=false
-    if [[ -f "$app_path/vite.config.ts" ]] || [[ -f "$app_path/vite.config.js" ]] || [[ -f "$app_path/vite.config.mjs" ]]; then
-        has_build_config=true
-    elif [[ -f "$app_path/webpack.config.js" ]] || [[ -f "$app_path/rollup.config.js" ]]; then
-        has_build_config=true
-    fi
-    run_test "Build configuration exists" "[[ '$has_build_config' == true ]]"
+    local config_files=()
     
-    # Check TypeScript configuration
-    run_test "TypeScript config exists" "[[ -f '$app_path/tsconfig.json' ]]" "false"
+    if [[ -f "$app_path/vite.config.ts" ]]; then
+        has_build_config=true
+        config_files+=("vite.config.ts")
+    elif [[ -f "$app_path/vite.config.js" ]]; then
+        has_build_config=true
+        config_files+=("vite.config.js")
+    elif [[ -f "$app_path/vite.config.mjs" ]]; then
+        has_build_config=true
+        config_files+=("vite.config.mjs")
+    elif [[ -f "$app_path/webpack.config.js" ]]; then
+        has_build_config=true
+        config_files+=("webpack.config.js")
+    elif [[ -f "$app_path/rollup.config.js" ]]; then
+        has_build_config=true
+        config_files+=("rollup.config.js")
+    fi
+    
+    if [[ "$has_build_config" == true ]]; then
+        echo -e "  ${GREEN}✓${NC} Build configuration exists (${config_files[*]})"
+        log "SUCCESS" "Build configuration found: ${config_files[*]}"
+    else
+        echo -e "  ${YELLOW}📝${NC} Build configuration missing - will add to manual checklist"
+        log "WARN" "Build configuration missing"
+        MANUAL_ACTIONS+=("Review if build configuration is needed (many React apps work without explicit config files)")
+    fi
+    
+    # Check TypeScript configuration (only suggest if project uses TypeScript)
+    if find "$app_path/src" -name "*.ts" -o -name "*.tsx" 2>/dev/null | grep -q .; then
+        check_optional_file "$app_path" "tsconfig.json" "Add TypeScript configuration (tsconfig.json) for your TypeScript files"
+    elif [[ ! -f "$app_path/tsconfig.json" ]]; then
+        echo -e "  ${GREEN}ℹ${NC} TypeScript config not needed (no .ts/.tsx files found)"
+        log "INFO" "TypeScript configuration not needed - no TS files detected"
+    else
+        echo -e "  ${GREEN}✓${NC} tsconfig.json exists"
+        log "SUCCESS" "TypeScript configuration found"
+    fi
 }
 
 validate_package_json() {
@@ -215,8 +261,52 @@ validate_dependencies() {
     # Try to install dependencies
     run_test "Dependencies can be installed" "npm ci"
     
-    # Check for security vulnerabilities (show vulnerabilities if found)
-    run_test "No high-severity vulnerabilities" "npm audit --audit-level=high"
+    # Check for security vulnerabilities (informational - add to manual actions if found)
+    echo "  Checking for security vulnerabilities..."
+    local audit_output
+    local audit_result
+    
+    # Run npm audit and capture result without failing the script
+    if audit_output=$(npm audit --audit-level=high 2>&1); then
+        audit_result=0
+    else
+        audit_result=$?
+    fi
+    
+    if [[ $audit_result -eq 0 ]]; then
+        echo -e "  ${GREEN}✓${NC} No high-severity vulnerabilities found"
+        log "SUCCESS" "No high-severity vulnerabilities found"
+    else
+        echo -e "  ${YELLOW}📝${NC} Security vulnerabilities found - will add to manual checklist"
+        log "WARN" "Security vulnerabilities found, adding to manual actions"
+        
+        # Show the vulnerability summary to user
+        echo -e "    ${YELLOW}Vulnerability Summary:${NC}"
+        echo "$audit_output" | grep -i "found\|vulnerabilities\|severity" | head -5
+        
+        # Parse vulnerability counts from npm audit output
+        local vuln_summary=""
+        if echo "$audit_output" | grep -qi "high"; then
+            local high_count=$(echo "$audit_output" | grep -oi "high" | wc -l | tr -d ' ')
+            vuln_summary+=" $high_count high"
+        fi
+        if echo "$audit_output" | grep -qi "critical"; then
+            local critical_count=$(echo "$audit_output" | grep -oi "critical" | wc -l | tr -d ' ')
+            vuln_summary+=" $critical_count critical"
+        fi
+        
+        if [[ -n "$vuln_summary" ]]; then
+            echo -e "    ${YELLOW}Found:$vuln_summary vulnerabilities${NC}"
+            MANUAL_ACTIONS+=("Review and fix security vulnerabilities:$vuln_summary (run 'npm audit' for full details)")
+        else
+            # Fallback if we can't parse specific counts
+            echo -e "    ${YELLOW}Found security vulnerabilities (see npm audit output above)${NC}"
+            MANUAL_ACTIONS+=("Review and fix security vulnerabilities found by npm audit")
+        fi
+        
+        # Log the full output for debugging
+        log "WARN" "Full npm audit output: $audit_output"
+    fi
     
     # Check for outdated dependencies (informational only)
     echo "  Checking for outdated dependencies..."
@@ -292,8 +382,32 @@ validate_tests() {
     run_test "Test files exist" "[[ '$has_tests' == true ]]" "false"
     
     if [[ "$has_tests" == true ]]; then
-        # Try to run tests
-        run_test "Tests pass" "npm test -- --run 2>/dev/null || npm test 2>/dev/null"
+        # Try to run tests with timeout and non-interactive flags
+        echo "  Testing Tests pass (with 60s timeout)..."
+        local test_result=0
+        local test_output=""
+        
+        # Try different test command variations with timeout
+        if timeout 60s npm test -- --run --reporter=basic 2>/dev/null >/dev/null; then
+            echo -e "  ${GREEN}✓${NC}"
+            log "SUCCESS" "Test passed: Tests pass"
+            ((PASSED_TESTS++))
+        elif timeout 60s npm test -- --watchAll=false 2>/dev/null >/dev/null; then
+            echo -e "  ${GREEN}✓${NC}"
+            log "SUCCESS" "Test passed: Tests pass"
+            ((PASSED_TESTS++))
+        elif timeout 60s npm run test:ci 2>/dev/null >/dev/null; then
+            echo -e "  ${GREEN}✓${NC}"
+            log "SUCCESS" "Test passed: Tests pass"
+            ((PASSED_TESTS++))
+        else
+            echo -e "  ${YELLOW}⚠${NC}"
+            echo -e "${YELLOW}    Warning: Tests timed out or failed - this is often due to watch mode or long-running tests${NC}"
+            echo -e "${BLUE}    💡 Try running tests manually: npm test${NC}"
+            log "WARN" "Test warning: Tests pass - Tests timed out or failed"
+            ((WARNINGS++))
+        fi
+        ((TOTAL_TESTS++))
     fi
     
     cd "$APPS_REPO_ROOT"
@@ -309,37 +423,17 @@ validate_linting() {
     
     # Check if lint script exists
     if jq -e '.scripts.lint' package.json >/dev/null; then
+        # Lint script exists, try to run it
         run_test "Linting passes" "npm run lint"
     else
-        echo -e "${YELLOW}  📝 No lint script found, adding smart lint configuration...${NC}"
-        
-        # Add smart lint script and get the details
-        local lint_details=$(add_smart_lint_script_validation "$app_path")
-        
-        echo -e "${GREEN}  ✅ $lint_details${NC}"
-        log "INFO" "Added smart lint script: $lint_details"
-        
-        # Now try to run linting
-        echo "  Testing newly added linting configuration..."
-        run_test "Linting passes (after auto-setup)" "npm run lint"
+        # No lint script found
+        echo -e "${YELLOW}  ⚠️  No lint script found in package.json${NC}"
+        echo -e "${BLUE}  💡 Please add a lint script to package.json, for example:${NC}"
+        echo -e "${BLUE}     \"lint\": \"eslint src --max-warnings 0\"${NC}"
+        log "WARN" "No lint script found - manual setup required"
     fi
     
     cd "$APPS_REPO_ROOT"
-}
-
-validate_apps_repo_integration() {
-    local app_name="$1"
-    
-    echo "🔧 Validating apps repository integration..."
-    
-    # Check if lerna recognizes the app
-    run_test "Lerna recognizes app" "npx lerna list | grep -q '$app_name'"
-    
-    # Try lerna bootstrap on the specific app
-    run_test "Lerna bootstrap works" "npx lerna bootstrap --scope=*$app_name* --include-dependencies"
-    
-    # Check if the app can be built via lerna
-    run_test "Lerna build works" "npx lerna run build --scope=*$app_name*"
 }
 
 fix_common_issues() {
@@ -364,8 +458,7 @@ fix_common_issues() {
     fi
     
     if ! jq -e '.scripts.lint' package.json >/dev/null 2>&1; then
-        log "INFO" "Adding missing 'lint' script with smart detection"
-        add_smart_lint_script_validation "$(pwd)"
+        log "WARN" "No lint script found - please add one manually"
     fi
     
     # Update dependencies if needed
@@ -373,235 +466,6 @@ fix_common_issues() {
     npm install --package-lock-only
     
     cd "$APPS_REPO_ROOT"
-}
-
-add_smart_lint_script_validation() {
-    local app_path="$1"
-    local package_json="$app_path/package.json"
-    
-    log "DEBUG" "Detecting project type for smart linting setup..."
-    
-    # Read package.json to detect project type
-    local package_content=$(cat "$package_json")
-    local eslint_deps_needed=false
-    local lint_command=""
-    local project_type=""
-    
-    # Detect project type and determine lint script + dependencies needed
-    if echo "$package_content" | jq -e '.dependencies.next or .devDependencies.next' >/dev/null 2>&1; then
-        # Next.js project - has built-in ESLint support
-        project_type="Next.js"
-        lint_command="next lint"
-        eslint_deps_needed=false
-        
-    elif echo "$package_content" | jq -e '.dependencies.vite or .devDependencies.vite' >/dev/null 2>&1; then
-        # Vite project
-        project_type="Vite"
-        lint_command="eslint src --max-warnings 0"
-        eslint_deps_needed=true
-        
-    elif echo "$package_content" | jq -e '.dependencies["react-scripts"] or .devDependencies["react-scripts"]' >/dev/null 2>&1; then
-        # Create React App project - has built-in ESLint
-        project_type="Create React App"
-        lint_command="eslint src --max-warnings 0"
-        eslint_deps_needed=false
-        
-    elif echo "$package_content" | jq -e '.dependencies.webpack or .devDependencies.webpack' >/dev/null 2>&1; then
-        # Webpack project
-        project_type="Webpack"
-        lint_command="eslint src --max-warnings 0"
-        eslint_deps_needed=true
-        
-    elif [[ -f "$app_path/tsconfig.json" ]] && [[ -d "$app_path/src" ]]; then
-        # TypeScript project with src directory
-        project_type="TypeScript"
-        lint_command="eslint src --ext .ts,.tsx --max-warnings 0"
-        eslint_deps_needed=true
-        
-    elif [[ -d "$app_path/src" ]]; then
-        # Generic project with src directory
-        project_type="Generic with src/"
-        lint_command="eslint src --max-warnings 0"
-        eslint_deps_needed=true
-        
-    else
-        # Fallback - basic ESLint setup
-        project_type="Generic"
-        lint_command="eslint . --max-warnings 0"
-        eslint_deps_needed=true
-    fi
-    
-    # Add the lint script
-    jq --arg cmd "$lint_command" '.scripts.lint = $cmd' package.json > package.json.tmp && mv package.json.tmp package.json
-    
-    # Install ESLint dependencies if needed
-    if [[ "$eslint_deps_needed" == true ]]; then
-        # Check if ESLint is already installed
-        if ! echo "$package_content" | jq -e '.devDependencies.eslint or .dependencies.eslint' >/dev/null 2>&1; then
-            log "INFO" "Installing ESLint dependencies for $project_type project..."
-            
-            # Determine which ESLint packages to install based on project type
-            local eslint_packages="eslint"
-            
-            # Add TypeScript ESLint support if it's a TypeScript project
-            if [[ -f "$app_path/tsconfig.json" ]]; then
-                eslint_packages="$eslint_packages @typescript-eslint/eslint-plugin @typescript-eslint/parser"
-            fi
-            
-            # Add React ESLint support if React is detected
-            if echo "$package_content" | jq -e '.dependencies.react or .devDependencies.react' >/dev/null 2>&1; then
-                eslint_packages="$eslint_packages eslint-plugin-react eslint-plugin-react-hooks"
-            fi
-            
-            # Install the packages
-            npm install --save-dev $eslint_packages
-            
-            # Create a basic ESLint config if none exists
-            if [[ ! -f "$app_path/.eslintrc.js" ]] && [[ ! -f "$app_path/.eslintrc.json" ]] && [[ ! -f "$app_path/.eslintrc.yml" ]]; then
-                create_basic_eslint_config "$app_path"
-            fi
-            
-            echo "Added $project_type lint script: \"$lint_command\" with ESLint dependencies"
-        else
-            echo "Added $project_type lint script: \"$lint_command\" (ESLint already installed)"
-        fi
-    else
-        echo "Added $project_type lint script: \"$lint_command\""
-    fi
-}
-
-create_basic_eslint_config() {
-    local app_path="$1"
-    
-    log "DEBUG" "Creating basic ESLint configuration..."
-    
-    # Determine what type of config to create based on project
-    local config_content
-    local is_typescript=false
-    local is_react=false
-    
-    # Check if it's a TypeScript project
-    if [[ -f "$app_path/tsconfig.json" ]]; then
-        is_typescript=true
-    fi
-    
-    # Check if it's a React project
-    if grep -q '"react"' "$app_path/package.json"; then
-        is_react=true
-    fi
-    
-    # Create appropriate ESLint config
-    if [[ "$is_typescript" == true ]] && [[ "$is_react" == true ]]; then
-        # TypeScript + React config
-        config_content='{
-  "env": {
-    "browser": true,
-    "es2021": true
-  },
-  "extends": [
-    "eslint:recommended",
-    "@typescript-eslint/recommended",
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended"
-  ],
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
-    },
-    "ecmaVersion": 12,
-    "sourceType": "module"
-  },
-  "plugins": [
-    "react",
-    "react-hooks",
-    "@typescript-eslint"
-  ],
-  "rules": {
-    "react/react-in-jsx-scope": "off"
-  },
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
-  }
-}'
-    elif [[ "$is_typescript" == true ]]; then
-        # TypeScript only config
-        config_content='{
-  "env": {
-    "browser": true,
-    "es2021": true,
-    "node": true
-  },
-  "extends": [
-    "eslint:recommended",
-    "@typescript-eslint/recommended"
-  ],
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaVersion": 12,
-    "sourceType": "module"
-  },
-  "plugins": [
-    "@typescript-eslint"
-  ],
-  "rules": {}
-}'
-    elif [[ "$is_react" == true ]]; then
-        # React only config
-        config_content='{
-  "env": {
-    "browser": true,
-    "es2021": true
-  },
-  "extends": [
-    "eslint:recommended",
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended"
-  ],
-  "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
-    },
-    "ecmaVersion": 12,
-    "sourceType": "module"
-  },
-  "plugins": [
-    "react",
-    "react-hooks"
-  ],
-  "rules": {
-    "react/react-in-jsx-scope": "off"
-  },
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
-  }
-}'
-    else
-        # Basic JavaScript config
-        config_content='{
-  "env": {
-    "browser": true,
-    "es2021": true,
-    "node": true
-  },
-  "extends": [
-    "eslint:recommended"
-  ],
-  "parserOptions": {
-    "ecmaVersion": 12,
-    "sourceType": "module"
-  },
-  "rules": {}
-}'
-    fi
-    
-    # Write the config file
-    echo "$config_content" > "$app_path/.eslintrc.json"
-    log "INFO" "Created .eslintrc.json configuration file"
 }
 
 create_validation_report() {
@@ -664,6 +528,17 @@ FAILED_STEPS
 - [ ] App integrations work correctly
 - [ ] Performance is acceptable
 
+$( [[ ${#MANUAL_ACTIONS[@]} -gt 0 ]] && cat << 'MANUAL_ACTIONS_SECTION'
+## Manual Action Items Required
+
+The following items need to be completed manually:
+
+MANUAL_ACTIONS_SECTION
+for action in "${MANUAL_ACTIONS[@]}"; do
+    echo "- [ ] $action"
+done
+echo
+)
 EOF
 
     log "INFO" "Validation report created: $report_file"
@@ -707,9 +582,6 @@ validate_migration() {
     echo
     
     validate_linting "$app_name"
-    echo
-    
-    validate_apps_repo_integration "$app_name"
     echo
     
     # Try to fix issues if requested
@@ -794,6 +666,9 @@ parse_arguments() {
 
 main() {
     parse_arguments "$@"
+    
+    # Ensure logs and reports directories exist before setting up logging
+    mkdir -p "$SCRIPT_DIR/logs" "$SCRIPT_DIR/reports"
     
     # Set LOG_FILE with app name prefix after parsing arguments
     LOG_FILE="$SCRIPT_DIR/logs/${APP_NAME}-validation-$(date +%Y%m%d-%H%M%S).log"

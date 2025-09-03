@@ -56,8 +56,10 @@ Pick an app that's **simple to start with** (avoid complex multi-service apps fo
 
 **What to look for:**
 - ✅ No error messages
-- ✅ Files listed look reasonable
+- ✅ Files listed look reasonable  
 - ✅ Package.json changes make sense
+- ✅ TypeScript config adaptations (if applicable)
+- ✅ Dependency updates look correct
 
 ### Step 3: Run the Migration
 
@@ -70,8 +72,10 @@ If the dry-run looked good:
 **This will:**
 - Copy all app files
 - Adapt package.json for apps repository
-- Update dependencies
+- Update dependencies  
 - Add missing config files
+- Fix TypeScript configurations (if needed)
+- Add missing test imports (`vi` from `vitest`)
 - Run lerna bootstrap
 
 ### Step 4: Validate Everything Works
@@ -83,15 +87,24 @@ If the dry-run looked good:
 **This tests:**
 - File structure is correct
 - Package.json is valid
-- Dependencies resolve
+- Dependencies resolve (with security checks)
 - App builds successfully
-- Tests pass (if any)
-- Lerna integration works
+- Tests pass (with 60s timeout protection)
+- Linting works (if configured)
 
-**If validation fails:**
+**✨ Smart validation features:**
+- **Missing files** → Warnings + manual checklist (not failures)
+- **Test timeouts** → Graceful handling of watch mode
+- **Security issues** → Documented for follow-up (non-blocking)
+- **Outdated dependencies** → Listed for manual review
+
+**If validation has issues:**
 ```bash
-# Try auto-fixing common issues
-./validate-migration.sh <app-name> --fix-issues
+# Check the detailed report
+cat reports/<app-name>-validation-report-*.md
+
+# For verbose debugging
+./validate-migration.sh <app-name> --detailed
 ```
 
 ### Step 5: Manual Testing
@@ -161,18 +174,23 @@ rm -rf ../apps/<app-name>
 ./migrate-app.sh <app-name> --verbose
 ```
 
-### Validation Failed
+### Validation Issues
 
 ```bash
-# Check the validation report
-cat validation-report-*.md
+# Check the validation report (most important!)
+cat reports/<app-name>-validation-report-*.md
 
-# Try auto-fixing
-./validate-migration.sh <app-name> --fix-issues
+# Check manual action items that need your attention
+grep "Manual Action" reports/<app-name>-validation-report-*.md
+
+# For detailed debugging
+./validate-migration.sh <app-name> --detailed
 
 # Check specific issues in logs
-cat logs/validation-*.log
+cat logs/<app-name>-validation-*.log
 ```
+
+**Note:** Modern validation is designed to be helpful, not blocking. Most "issues" are just items for your manual checklist!
 
 ### Build Failed
 

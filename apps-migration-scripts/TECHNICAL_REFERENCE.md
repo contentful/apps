@@ -27,17 +27,20 @@ MPA_REPO_PATH="../../marketplace-partner-apps"
 
 ```
 apps-migration-scripts/
-├── logs/                          # All script logs (with app name prefix)
+├── logs/                          # All script logs (auto-created, app name prefix)
 │   ├── <app-name>-migration-YYYYMMDD-HHMMSS.log
 │   ├── <app-name>-validation-YYYYMMDD-HHMMSS.log
 │   └── <app-name>-cleanup-YYYYMMDD-HHMMSS.log
-├── reports/                       # Migration reports (organized by app)
+├── reports/                       # Migration reports (auto-created, organized by app)
 │   ├── <app-name>-migration-report-YYYYMMDD-HHMMSS.md
 │   ├── <app-name>-validation-report-YYYYMMDD-HHMMSS.md
 │   └── <app-name>-cleanup-report-YYYYMMDD-HHMMSS.md
-└── backups/                       # Cleanup backups
+└── backups/                       # Cleanup backups (auto-created for safety)
     └── marketplace-partner-apps-<app>-YYYYMMDD-HHMMSS.tar.gz
 ```
+
+**New: Auto-Directory Creation**
+All directories (`logs/`, `reports/`, `backups/`) are automatically created by scripts when needed.
 
 ## 🔄 Migration Process Internals
 
@@ -73,14 +76,25 @@ echo "$original_json" | jq '
         "test:ci": (.scripts.test // "vitest"),
         "lint": (.scripts.lint // "eslint src --max-warnings 0"),
         "verify-config": (.scripts["verify-config"] // "echo \"No config verification needed\"")
-    } |
-    
-    # Remove marketplace-partner-apps specific scripts
-    # Note: install-ci is kept as it's a legitimate script in apps repository
+    }
+    # Note: install-ci is retained (not deprecated in apps repository)
 ' > "$package_json.tmp"
 ```
 
-**4. Configuration File Addition:**
+**4. TypeScript Configuration Fixes:**
+```bash
+# Fix vitest/globals issues in tsconfig.json
+if [[ -f "tsconfig.json" ]]; then
+    sed -i '' 's/"vitest\/globals"/"node"/g' tsconfig.json
+fi
+
+# Add missing vi imports in test files
+find test -name "*.ts" -type f -exec sed -i '' '1i\
+import { vi } from '\''vitest'\'';
+' {} \;
+```
+
+**5. Configuration File Addition:**
 - `tsconfig.json` (if missing and using TypeScript)
 - `vite.config.ts` (if missing and using Vite)
 - `vitest.config.ts` (if tests exist but no config)
@@ -89,19 +103,21 @@ echo "$original_json" | jq '
 
 **Test Categories:**
 
-1. **File Structure Validation**
+1. **File Structure Validation** (Smart Mode)
    - Required files exist
    - Source directory structure
    - Build configuration presence
+   - **Missing optional files** → Warnings + manual checklist (not failures)
 
 2. **Package.json Validation**
    - Required scripts exist
    - Naming conventions
    - Dependencies structure
 
-3. **Dependencies Validation**
+3. **Dependencies Validation** (Enhanced)
    - Installation succeeds
-   - Security audit passes
+   - **Security audit** → Documented vulnerabilities (non-blocking)
+   - **Outdated dependencies** → Listed for manual review
    - Version compatibility
 
 4. **Build Process Validation**
@@ -109,10 +125,55 @@ echo "$original_json" | jq '
    - Build artifacts created
    - Asset compilation
 
-5. **Integration Validation**
-   - Lerna recognition
-   - Bootstrap process
-   - Build system integration
+5. **Test Execution** (Timeout Protected)
+   - **60-second timeout** prevents hanging in watch mode
+   - Multiple test command strategies
+   - Graceful failure handling
+
+6. **Linting Validation** (Smart Detection)
+   - Detects existing lint configuration
+   - Suggests adding if missing
+   - Non-blocking if not configured
+
+### Modern Validation Approach
+
+**Key Innovation: Non-Blocking Validation**
+- Traditional approach: Missing files = validation failure
+- Modern approach: Missing files = manual action items in report
+
+**Manual Actions System:**
+```bash
+# Global array to collect manual action items
+MANUAL_ACTIONS=()
+
+# Function to handle optional files gracefully
+check_optional_file() {
+    local file_path="$1"
+    local file_description="$2"
+    
+    if [[ ! -f "$file_path" ]]; then
+        echo -e "  ${YELLOW}📝${NC} $file_description missing - will add to manual checklist"
+        MANUAL_ACTIONS+=("Create $file_description")
+        return 1
+    fi
+    return 0
+}
+```
+
+**Timeout Protection for Tests:**
+```bash
+# Multiple test strategies with timeout
+if timeout 60s npm test -- --run --reporter=basic 2>/dev/null >/dev/null; then
+    # Success
+elif timeout 60s npm test -- --watchAll=false 2>/dev/null >/dev/null; then
+    # Alternative approach for Jest
+elif timeout 60s npm run test:ci 2>/dev/null >/dev/null; then
+    # CI-specific test script
+else
+    # Graceful failure with guidance
+    echo "Tests timed out - likely in watch mode"
+fi
+```
 
 ### Phase 3: Cleanup (`cleanup-migrated-app.sh`)
 
@@ -216,13 +277,13 @@ bash -x ./migrate-app.sh app-name --verbose
 **Parse Logs for Specific Issues:**
 ```bash
 # Find all error messages
-grep "\[ERROR\]" logs/migration-*.log
+grep "\[ERROR\]" logs/<app-name>-migration-*.log
 
 # Find specific operation failures
-grep "npm run build" logs/validation-*.log
+grep "npm run build" logs/<app-name>-validation-*.log
 
 # Check timing information
-grep "$(date +%Y-%m-%d)" logs/*.log
+grep "$(date +%Y-%m-%d)" logs/<app-name>-*.log
 ```
 
 ## 📊 Performance Considerations
@@ -359,3 +420,4 @@ record_migration_result() {
 ---
 
 This technical reference covers the internals and advanced customization options. For day-to-day usage, refer to the other documentation files.
+

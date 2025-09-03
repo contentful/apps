@@ -1,6 +1,6 @@
 # 🚀 App Migration Scripts
 
-Migrate apps from `marketplace-partner-apps` to the `apps` repository with automated scripts and comprehensive validation.
+Migrate apps from `marketplace-partner-apps` to the `apps` repository with automated scripts, intelligent validation, and comprehensive safety features.
 
 ## 🎯 Choose Your Starting Point
 
@@ -8,7 +8,7 @@ Migrate apps from `marketplace-partner-apps` to the `apps` repository with autom
 ```bash
 ./getting-started.sh
 ```
-Interactive tutorial that walks you through your first migration step-by-step.
+Interactive tutorial with app selection, safety checks, and guided first migration.
 
 ### 📚 **Want the Complete Guide?**
 ```bash
@@ -20,7 +20,7 @@ Comprehensive tutorial with examples, troubleshooting, and best practices.
 ```bash
 ./migration-summary.sh
 ```
-See all available apps and get command reminders.
+See all available apps and get command reminders (auto-exits when done).
 
 ### 🔧 **Advanced User?**
 ```bash
@@ -34,17 +34,23 @@ Complete command reference, options, and technical details.
 # 1. Preview (always start here!)
 ./migrate-app.sh <app-name> --dry-run
 
-# 2. Migrate 
+# 2. Migrate with automatic fixes
 ./migrate-app.sh <app-name>
 
-# 3. Validate
+# 3. Validate with smart handling
 ./validate-migration.sh <app-name>
 
-# 4. Test manually in Contentful
+# 4. Test manually in Contentful (essential!)
 
-# 5. Cleanup (destructive - be sure!)
+# 5. Cleanup when fully verified (destructive!)
 ./cleanup-migrated-app.sh <app-name>
 ```
+
+✨ **New Features:**
+- **Smart validation** - Handles missing files gracefully, adds items to manual checklist instead of failing
+- **Timeout protection** - Tests won't hang in watch mode (60s limit)
+- **Enhanced error reporting** - Clear, actionable error messages with context
+- **TypeScript fixes** - Automatic `vitest/globals` → `node` fixes and `vi` import handling
 
 ## 📁 What's In This Directory
 
@@ -62,9 +68,9 @@ Complete command reference, options, and technical details.
 | `USAGE_GUIDE.md` | Complete command reference |
 | `TECHNICAL_REFERENCE.md` | Advanced technical details |
 | **Generated** | |
-| `logs/` | All script logs (with app name prefix) |
-| `reports/` | Migration reports (organized by app) |
-| `backups/` | Cleanup backups |
+| `logs/` | All script logs (auto-created, app name prefixed) |
+| `reports/` | Migration reports (auto-created, organized by app) |
+| `backups/` | Cleanup backups (auto-created for safety) |
 
 ## ⚠️ Prerequisites
 
@@ -77,6 +83,8 @@ your-projects-folder/
 ```
 
 **Required tools:** Node.js 16+, npm, git, jq
+
+**✅ Auto-setup:** The scripts automatically create `logs/`, `reports/`, and `backups/` directories as needed.
 
 ## 🆘 Need Help?
 

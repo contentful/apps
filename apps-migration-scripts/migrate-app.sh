@@ -321,252 +321,10 @@ import { vi } from '\''vitest'\'';
         fi
     fi
     
-    # Add smart lint script if missing
-    add_smart_lint_script "$temp_app_path"
-}
-
-add_smart_lint_script() {
-    local temp_app_path="$1"
-    local package_json="$temp_app_path/package.json"
-    
-    # Check if lint script already exists
-    if jq -e '.scripts.lint' "$package_json" >/dev/null 2>&1; then
-        log "DEBUG" "Lint script already exists, skipping auto-detection"
-        return
+    # Check if lint script exists and inform user if missing
+    if ! jq -e '.scripts.lint' "$temp_app_path/package.json" >/dev/null 2>&1; then
+        log "WARN" "No lint script found - consider adding one manually for better code quality"
     fi
-    
-    log "DEBUG" "No lint script found, detecting project type for smart linting setup..."
-    
-    # Read package.json to detect project type
-    local package_content=$(cat "$package_json")
-    
-    # Detect project type and determine lint script + dependencies needed
-    local eslint_deps_needed=false
-    local lint_command=""
-    local project_type=""
-    
-    if echo "$package_content" | jq -e '.dependencies.next or .devDependencies.next' >/dev/null 2>&1; then
-        # Next.js project - has built-in ESLint support
-        project_type="Next.js"
-        lint_command="next lint"
-        eslint_deps_needed=false
-        
-    elif echo "$package_content" | jq -e '.dependencies.vite or .devDependencies.vite' >/dev/null 2>&1; then
-        # Vite project
-        project_type="Vite"
-        lint_command="eslint src --max-warnings 0"
-        eslint_deps_needed=true
-        
-    elif echo "$package_content" | jq -e '.dependencies["react-scripts"] or .devDependencies["react-scripts"]' >/dev/null 2>&1; then
-        # Create React App project - has built-in ESLint
-        project_type="Create React App"
-        lint_command="eslint src --max-warnings 0"
-        eslint_deps_needed=false
-        
-    elif echo "$package_content" | jq -e '.dependencies.webpack or .devDependencies.webpack' >/dev/null 2>&1; then
-        # Webpack project
-        project_type="Webpack"
-        lint_command="eslint src --max-warnings 0"
-        eslint_deps_needed=true
-        
-    elif [[ -f "$temp_app_path/tsconfig.json" ]] && [[ -d "$temp_app_path/src" ]]; then
-        # TypeScript project with src directory
-        project_type="TypeScript"
-        lint_command="eslint src --ext .ts,.tsx --max-warnings 0"
-        eslint_deps_needed=true
-        
-    elif [[ -d "$temp_app_path/src" ]]; then
-        # Generic project with src directory
-        project_type="Generic with src/"
-        lint_command="eslint src --max-warnings 0"
-        eslint_deps_needed=true
-        
-    else
-        # Fallback - basic ESLint setup
-        project_type="Generic"
-        lint_command="eslint . --max-warnings 0"
-        eslint_deps_needed=true
-    fi
-    
-    log "INFO" "Detected $project_type project, adding appropriate lint setup"
-    
-    # Add the lint script
-    echo "$package_content" | jq --arg cmd "$lint_command" '.scripts.lint = $cmd' > "$package_json.tmp" && mv "$package_json.tmp" "$package_json"
-    
-    # Add ESLint dependencies if needed
-    if [[ "$eslint_deps_needed" == true ]]; then
-        # Check if ESLint is already installed
-        if ! echo "$package_content" | jq -e '.devDependencies.eslint or .dependencies.eslint' >/dev/null 2>&1; then
-            log "INFO" "Adding ESLint dependencies for $project_type project..."
-            
-            # Start with updated package content
-            local current_content=$(cat "$package_json")
-            
-            # Add base ESLint dependency
-            current_content=$(echo "$current_content" | jq '.devDependencies.eslint = "^9.0.0"')
-            
-            # Add TypeScript ESLint support if it's a TypeScript project
-            if [[ -f "$temp_app_path/tsconfig.json" ]]; then
-                current_content=$(echo "$current_content" | jq '.devDependencies["@typescript-eslint/eslint-plugin"] = "^8.0.0"')
-                current_content=$(echo "$current_content" | jq '.devDependencies["@typescript-eslint/parser"] = "^8.0.0"')
-            fi
-            
-            # Add React ESLint support if React is detected
-            if echo "$package_content" | jq -e '.dependencies.react or .devDependencies.react' >/dev/null 2>&1; then
-                current_content=$(echo "$current_content" | jq '.devDependencies["eslint-plugin-react"] = "^7.35.0"')
-                current_content=$(echo "$current_content" | jq '.devDependencies["eslint-plugin-react-hooks"] = "^4.6.0"')
-            fi
-            
-            echo "$current_content" > "$package_json"
-            
-            # Create a basic ESLint config if none exists
-            if [[ ! -f "$temp_app_path/.eslintrc.js" ]] && [[ ! -f "$temp_app_path/.eslintrc.json" ]] && [[ ! -f "$temp_app_path/.eslintrc.yml" ]]; then
-                create_basic_eslint_config_migration "$temp_app_path"
-            fi
-            
-            log "INFO" "Added $project_type lint script with ESLint dependencies"
-        else
-            log "INFO" "Added $project_type lint script (ESLint already present)"
-        fi
-    else
-        log "INFO" "Added $project_type lint script"
-    fi
-    
-    log "DEBUG" "Smart lint script added successfully"
-}
-
-create_basic_eslint_config_migration() {
-    local temp_app_path="$1"
-    
-    log "DEBUG" "Creating basic ESLint configuration..."
-    
-    # Determine what type of config to create based on project
-    local config_content
-    local is_typescript=false
-    local is_react=false
-    
-    # Check if it's a TypeScript project
-    if [[ -f "$temp_app_path/tsconfig.json" ]]; then
-        is_typescript=true
-    fi
-    
-    # Check if it's a React project
-    if grep -q '"react"' "$temp_app_path/package.json"; then
-        is_react=true
-    fi
-    
-    # Create appropriate ESLint config
-    if [[ "$is_typescript" == true ]] && [[ "$is_react" == true ]]; then
-        # TypeScript + React config
-        config_content='{
-  "env": {
-    "browser": true,
-    "es2021": true
-  },
-  "extends": [
-    "eslint:recommended",
-    "@typescript-eslint/recommended",
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended"
-  ],
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
-    },
-    "ecmaVersion": 12,
-    "sourceType": "module"
-  },
-  "plugins": [
-    "react",
-    "react-hooks",
-    "@typescript-eslint"
-  ],
-  "rules": {
-    "react/react-in-jsx-scope": "off"
-  },
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
-  }
-}'
-    elif [[ "$is_typescript" == true ]]; then
-        # TypeScript only config
-        config_content='{
-  "env": {
-    "browser": true,
-    "es2021": true,
-    "node": true
-  },
-  "extends": [
-    "eslint:recommended",
-    "@typescript-eslint/recommended"
-  ],
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaVersion": 12,
-    "sourceType": "module"
-  },
-  "plugins": [
-    "@typescript-eslint"
-  ],
-  "rules": {}
-}'
-    elif [[ "$is_react" == true ]]; then
-        # React only config
-        config_content='{
-  "env": {
-    "browser": true,
-    "es2021": true
-  },
-  "extends": [
-    "eslint:recommended",
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended"
-  ],
-  "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
-    },
-    "ecmaVersion": 12,
-    "sourceType": "module"
-  },
-  "plugins": [
-    "react",
-    "react-hooks"
-  ],
-  "rules": {
-    "react/react-in-jsx-scope": "off"
-  },
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
-  }
-}'
-    else
-        # Basic JavaScript config
-        config_content='{
-  "env": {
-    "browser": true,
-    "es2021": true,
-    "node": true
-  },
-  "extends": [
-    "eslint:recommended"
-  ],
-  "parserOptions": {
-    "ecmaVersion": 12,
-    "sourceType": "module"
-  },
-  "rules": {}
-}'
-    fi
-    
-    # Write the config file
-    echo "$config_content" > "$temp_app_path/.eslintrc.json"
-    log "INFO" "Created .eslintrc.json configuration file"
 }
 
 update_dependencies() {
@@ -643,7 +401,12 @@ run_post_migration_setup() {
 
 create_migration_report() {
     local app_name="$1"
-    local report_file="$SCRIPT_DIR/reports/$app_name-migration-report-$(date +%Y%m%d-%H%M%S).md"
+    local report_file
+    if [[ "$DRY_RUN" == true ]]; then
+        report_file="$SCRIPT_DIR/reports/$app_name-migration-dry-run-report-$(date +%Y%m%d-%H%M%S).md"
+    else
+        report_file="$SCRIPT_DIR/reports/$app_name-migration-report-$(date +%Y%m%d-%H%M%S).md"
+    fi
     
     cat > "$report_file" << EOF
 # Migration Report: $app_name
@@ -778,8 +541,15 @@ main() {
     
     parse_arguments "$@"
     
+    # Ensure logs and reports directories exist before setting up logging
+    mkdir -p "$SCRIPT_DIR/logs" "$SCRIPT_DIR/reports"
+    
     # Set LOG_FILE with app name prefix after parsing arguments
-    LOG_FILE="$SCRIPT_DIR/logs/${APP_NAME}-migration-$(date +%Y%m%d-%H%M%S).log"
+    if [[ "$DRY_RUN" == true ]]; then
+        LOG_FILE="$SCRIPT_DIR/logs/${APP_NAME}-migration-dry-run-$(date +%Y%m%d-%H%M%S).log"
+    else
+        LOG_FILE="$SCRIPT_DIR/logs/${APP_NAME}-migration-$(date +%Y%m%d-%H%M%S).log"
+    fi
     
     check_prerequisites
     migrate_app "$APP_NAME"

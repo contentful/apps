@@ -18,7 +18,7 @@ set -euo pipefail
 # Script configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APPS_REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-MPA_REPO_PATH="../../marketplace-partner-apps"
+MPA_REPO_PATH="$(cd "$APPS_REPO_ROOT/../marketplace-partner-apps" && pwd)"
 LOG_FILE="" # Will be set after app name is parsed
 
 # Disable colors for better compatibility
@@ -450,6 +450,9 @@ main() {
     echo
     
     parse_arguments "$@"
+    
+    # Ensure logs, reports, and backups directories exist before setting up logging
+    mkdir -p "$SCRIPT_DIR/logs" "$SCRIPT_DIR/reports" "$SCRIPT_DIR/backups"
     
     # Set LOG_FILE with app name prefix after parsing arguments
     LOG_FILE="$SCRIPT_DIR/logs/${APP_NAME}-cleanup-$(date +%Y%m%d-%H%M%S).log"

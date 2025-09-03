@@ -50,6 +50,8 @@ Comprehensive documentation for all migration commands, options, and advanced us
 - ✅ Adapts package.json for apps repository conventions
 - ✅ Adds missing configuration files
 - ✅ Updates dependencies
+- ✅ Fixes TypeScript configurations (`vitest/globals` → `node`)
+- ✅ Adds missing test imports (`vi` from `vitest`)
 - ✅ Integrates with Lerna build system
 - ✅ Generates migration report
 
@@ -86,13 +88,19 @@ Comprehensive documentation for all migration commands, options, and advanced us
 ```
 
 **Validation checks:**
-- 📁 File structure validation
+- 📁 File structure validation (missing files → warnings + checklist)
 - 📦 Package.json compatibility
-- 🔗 Dependency resolution
+- 🔗 Dependency resolution (with security audit)
 - 🔨 Build process
-- 🧪 Test execution
-- 🔍 Linting compliance
+- 🧪 Test execution (with 60s timeout protection)
+- 🔍 Linting compliance (smart detection)
 - 🔧 Apps repository integration
+
+**✨ Smart Features:**
+- **Missing optional files** → Added to manual checklist, not failures
+- **Security vulnerabilities** → Documented for review, not blocking
+- **Test timeouts** → Graceful handling (no more hanging!)
+- **Outdated dependencies** → Listed for manual update
 
 **Output files:**
 - `logs/<app-name>-validation-YYYYMMDD-HHMMSS.log` - Detailed log
@@ -255,19 +263,25 @@ rm -rf node_modules package-lock.json
 npm install
 npm audit fix
 npm run build
+
+# TypeScript errors? Check if you need:
+# - vitest/globals → node in tsconfig.json
+# - import { vi } from 'vitest' in test files
 ```
 
-**Validation Fails**
+**Validation Issues (Modern Approach)**
 ```bash
-# Get detailed error information
+# First, check the report - most "issues" are just checklist items
+cat reports/<app-name>-validation-report-*.md
+
+# For detailed debugging
 ./validate-migration.sh <app-name> --detailed
 
-# Try auto-fixing
-./validate-migration.sh <app-name> --fix-issues
-
-# Check specific issues
-cat logs/validation-*.log | grep ERROR
+# Check specific log entries
+cat logs/<app-name>-validation-*.log | grep -E "ERROR|WARN"
 ```
+
+**Remember:** Modern validation is helpful, not blocking! Most warnings are manual action items, not failures.
 
 **Lerna Integration Issues**
 ```bash
