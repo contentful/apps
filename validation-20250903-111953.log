@@ -1,0 +1,40 @@
+[INFO] Starting validation of migrated app: amplitude-experiment
+[2025-09-03 11:19:53] [INFO] Starting validation of migrated app: amplitude-experiment
+[SUCCESS] Test passed: App directory exists
+[2025-09-03 11:19:53] [SUCCESS] Test passed: App directory exists
+[SUCCESS] Test passed: package.json exists
+[2025-09-03 11:19:53] [SUCCESS] Test passed: package.json exists
+[SUCCESS] Test passed: Source directory exists
+[2025-09-03 11:19:53] [SUCCESS] Test passed: Source directory exists
+[SUCCESS] Test passed: README.md exists
+[2025-09-03 11:19:53] [SUCCESS] Test passed: README.md exists
+[SUCCESS] Test passed: LICENSE exists
+[2025-09-03 11:19:53] [SUCCESS] Test passed: LICENSE exists
+[SUCCESS] Test passed: Build configuration exists
+[2025-09-03 11:19:54] [SUCCESS] Test passed: Build configuration exists
+[SUCCESS] Test passed: TypeScript config exists
+[2025-09-03 11:19:54] [SUCCESS] Test passed: TypeScript config exists
+[SUCCESS] Test passed: start script exists
+[2025-09-03 11:19:54] [SUCCESS] Test passed: start script exists
+[SUCCESS] Test passed: build script exists
+[2025-09-03 11:19:54] [SUCCESS] Test passed: build script exists
+[SUCCESS] Test passed: test script exists
+[2025-09-03 11:19:54] [SUCCESS] Test passed: test script exists
+[SUCCESS] Test passed: Has @contentful scope
+[2025-09-03 11:19:54] [SUCCESS] Test passed: Has @contentful scope
+[SUCCESS] Test passed: Is marked as private
+[2025-09-03 11:19:54] [SUCCESS] Test passed: Is marked as private
+[SUCCESS] Test passed: Has @contentful/app-sdk
+[2025-09-03 11:19:54] [SUCCESS] Test passed: Has @contentful/app-sdk
+[SUCCESS] Test passed: Has React dependency
+[2025-09-03 11:19:54] [SUCCESS] Test passed: Has React dependency
+[SUCCESS] Test passed: No deprecated MPA scripts
+[2025-09-03 11:19:54] [SUCCESS] Test passed: No deprecated MPA scripts
+[SUCCESS] Test passed: package-lock.json exists
+[2025-09-03 11:19:54] [SUCCESS] Test passed: package-lock.json exists
+[SUCCESS] Test passed: Dependencies can be installed
+[2025-09-03 11:20:09] [SUCCESS] Test passed: Dependencies can be installed
+[SUCCESS] Test passed: No high-severity vulnerabilities
+[2025-09-03 11:20:11] [SUCCESS] Test passed: No high-severity vulnerabilities
+[WARN] Test warning: Dependencies are up to date
+[2025-09-03 11:20:13] [WARN] Test warning: Dependencies are up to date
