@@ -1,38 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box,
-  Heading,
-  Flex,
-  Spinner,
   Button,
-  Text,
+  Flex,
+  Heading,
   Notification,
   Skeleton,
+  Spinner,
   Table,
+  Text,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import {
   ContentFields,
   ContentTypeProps,
-  KeyValueMap,
   EntryProps,
+  KeyValueMap,
   QueryOptions,
 } from 'contentful-management';
 import { ColumnOption, ContentTypeField } from './types';
 import { styles } from './styles';
 import { ContentTypeSidebar } from './components/ContentTypeSidebar';
-import { SortMenu, SORT_OPTIONS } from './components/SortMenu';
+import { SORT_OPTIONS, SortMenu } from './components/SortMenu';
 import { EntryTable } from './components/EntryTable';
 import { BulkEditModal } from './components/BulkEditModal';
 import { UndoBulkEditModal } from './components/UndoBulkEditModal';
 import {
-  updateEntryFieldLocalized,
+  fetchEntriesWithBatching,
   getEntryFieldValue,
   processEntriesInBatches,
   truncate,
-  fetchEntriesWithBatching,
+  updateEntryFieldLocalized,
 } from './utils/entryUtils';
-import { BATCH_PROCESSING, API_LIMITS, PAGE_SIZE_OPTIONS, BATCH_FETCHING } from './utils/constants';
+import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
 import ColumnMultiselect from './components/ColumnMultiselect';
 
@@ -101,13 +101,6 @@ const Page = () => {
     };
   };
 
-  const clearState = () => {
-    setEntries([]);
-    setFields([]);
-    setSelectedFields([]);
-    setTotalEntries(0);
-  };
-
   useEffect(() => {
     const fetchContentTypes = async (): Promise<void> => {
       try {
@@ -131,10 +124,6 @@ const Page = () => {
     void fetchContentTypes();
   }, [sdk]);
 
-  useEffect(() => {
-    clearState();
-  }, [selectedContentTypeId, sortOption]);
-
   const getFieldsMapped = (fields: ContentTypeField[]) => {
     return fields.map((field) => ({
       label: field.locale ? `(${field.locale}) ${field.name}` : field.name,
@@ -142,11 +131,17 @@ const Page = () => {
     }));
   };
 
+  const clearBasicState = () => {
+    setEntries([]);
+    setFields([]);
+    setTotalEntries(0);
+  };
+
   // Fetch content type and fields when selectedContentTypeId changes
   useEffect(() => {
     const fetchContentTypeAndFields = async (): Promise<void> => {
       if (!selectedContentTypeId) {
-        clearState();
+        clearBasicState();
         return;
       }
 
@@ -177,10 +172,8 @@ const Page = () => {
         setSelectedFields(getFieldsMapped(newFields));
         setCurrentContentType(ct);
       } catch (e) {
-        setEntries([]);
-        setFields([]);
+        clearBasicState();
         setSelectedFields([]);
-        setTotalEntries(0);
         setCurrentContentType(null);
       }
     };
@@ -209,7 +202,7 @@ const Page = () => {
         setEntries(entries);
         setTotalEntries(total);
       } catch (e) {
-        clearState();
+        clearBasicState();
       } finally {
         setEntriesLoading(false);
       }
@@ -439,6 +432,7 @@ const Page = () => {
               selectedContentTypeId={selectedContentTypeId}
               onContentTypeSelect={(newCT) => {
                 setSelectedContentTypeId(newCT);
+                setSortOption(SORT_OPTIONS[0].value);
                 setActivePage(0);
               }}
             />
@@ -454,10 +448,13 @@ const Page = () => {
                 ) : (
                   <>
                     <Flex gap="spacingS" alignItems="center">
-                      <SortMenu sortOption={sortOption} onSortChange={(newSort) => {
+                      <SortMenu
+                        sortOption={sortOption}
+                        onSortChange={(newSort) => {
                           setSortOption(newSort);
                           setActivePage(0);
-                      }} />
+                        }}
+                      />
                       <ColumnMultiselect
                         options={getFieldsMapped(fields)}
                         selectedFields={selectedFields}

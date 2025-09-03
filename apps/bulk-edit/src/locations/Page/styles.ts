@@ -105,6 +105,9 @@ export const styles = {
     zIndex: 1,
     width: 'fit-content',
   },
+  sortMenuList: {
+    width: 'fit-content',
+  },
   paginationContainer: {
     position: 'sticky',
     left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING,
