@@ -10,6 +10,7 @@ Before starting, ensure you have:
   ```
   your-projects-folder/
   ├── apps/                          # This repository
+  │   └── apps-migration-scripts/    # These migration scripts
   └── marketplace-partner-apps/      # Partner apps repository
   ```
 
@@ -30,7 +31,10 @@ Before starting, ensure you have:
   cd ../apps
   ```
 
-- [ ] **You're in the apps repository root** (where the scripts are located)
+- [ ] **You're in the apps-migration-scripts directory** (where the scripts are located)
+  ```bash
+  cd apps/apps-migration-scripts
+  ```
 
 ## 🎯 Step-by-Step Migration Process
 
@@ -43,7 +47,7 @@ First, see what apps are available to migrate:
 ./migration-summary.sh
 
 # Or list apps manually
-ls ../marketplace-partner-apps/apps/
+ls ../../marketplace-partner-apps/apps/
 ```
 
 ### Step 2: Run a Dry-Run Migration
@@ -135,7 +139,7 @@ Run comprehensive validation to ensure everything works:
 Navigate to your migrated app and test it thoroughly:
 
 ```bash
-cd apps/<app-name>
+cd ../apps/<app-name>
 
 # Install dependencies
 npm install
@@ -363,7 +367,7 @@ The scripts include multiple safety features:
 3. **Review the report** - Check the migration report for issues
 4. **Delete the partially migrated app**:
    ```bash
-   rm -rf apps/<app-name>
+   rm -rf ../apps/<app-name>
    ```
 5. **Start over** with a dry-run to understand the issue
 
@@ -376,8 +380,8 @@ The scripts include multiple safety features:
 
 2. **Restore from backup**:
    ```bash
-   cd ../marketplace-partner-apps/apps
-   tar -xzf ../../apps/backups/marketplace-partner-apps-<app-name>-*.tar.gz
+   cd ../../marketplace-partner-apps/apps
+   tar -xzf ../../apps/apps-migration-scripts/backups/marketplace-partner-apps-<app-name>-*.tar.gz
    cd ..
    git add apps/<app-name>
    git commit -m "Restore <app-name> from backup"
@@ -385,7 +389,7 @@ The scripts include multiple safety features:
 
 3. **Remove from apps repository**:
    ```bash
-   cd ../apps
+   cd ../../apps
    rm -rf apps/<app-name>
    ```
 

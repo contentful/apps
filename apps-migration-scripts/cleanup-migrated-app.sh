@@ -17,9 +17,9 @@ set -euo pipefail
 
 # Script configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APPS_REPO_ROOT="$SCRIPT_DIR"
-MPA_REPO_PATH="../marketplace-partner-apps"
-LOG_FILE="$SCRIPT_DIR/cleanup-$(date +%Y%m%d-%H%M%S).log"
+APPS_REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+MPA_REPO_PATH="../../marketplace-partner-apps"
+LOG_FILE="$SCRIPT_DIR/logs/cleanup-$(date +%Y%m%d-%H%M%S).log"
 
 # Disable colors for better compatibility
 RED=''
@@ -179,7 +179,7 @@ verify_app_migrated_successfully() {
 create_backup() {
     local app_name="$1"
     local mpa_path="$MPA_REPO_PATH/apps/$app_name"
-    local backup_dir="$APPS_REPO_ROOT/backups"
+    local backup_dir="$APPS_REPO_ROOT/apps-migration-scripts/backups"
     local backup_file="$backup_dir/marketplace-partner-apps-$app_name-$(date +%Y%m%d-%H%M%S).tar.gz"
     
     log "INFO" "Creating backup before cleanup..."

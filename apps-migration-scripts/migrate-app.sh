@@ -15,10 +15,10 @@ set -euo pipefail
 
 # Script configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APPS_REPO_ROOT="$SCRIPT_DIR"
-MPA_REPO_PATH="../marketplace-partner-apps"
+APPS_REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+MPA_REPO_PATH="../../marketplace-partner-apps"
 TEMP_DIR="/tmp/app-migration-$$"
-LOG_FILE="$SCRIPT_DIR/migration-$(date +%Y%m%d-%H%M%S).log"
+LOG_FILE="$SCRIPT_DIR/logs/migration-$(date +%Y%m%d-%H%M%S).log"
 
 # Disable colors for better compatibility
 RED=''

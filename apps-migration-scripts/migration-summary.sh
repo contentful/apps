@@ -55,9 +55,9 @@ ${GREEN}🔍 Available Apps in marketplace-partner-apps:${NC}
 
 EOF
 
-    if [[ -d "../marketplace-partner-apps/apps" ]]; then
+    if [[ -d "../../marketplace-partner-apps/apps" ]]; then
         # Get all apps and display them in columns
-        local apps=($(ls -1 "../marketplace-partner-apps/apps/" 2>/dev/null))
+        local apps=($(ls -1 "../../marketplace-partner-apps/apps/" 2>/dev/null))
         local total_apps=${#apps[@]}
         
         if [[ $total_apps -eq 0 ]]; then
@@ -82,7 +82,7 @@ EOF
             echo "  ${GREEN}Total: $total_apps apps available${NC}"
         fi
     else
-        echo "  ${YELLOW}marketplace-partner-apps not found at ../marketplace-partner-apps${NC}"
+        echo "  ${YELLOW}marketplace-partner-apps not found at ../../marketplace-partner-apps${NC}"
     fi
 
     cat << EOF

@@ -41,8 +41,8 @@ if [[ ! -f "migrate-app.sh" ]] || [[ ! -f "lerna.json" ]]; then
     exit 1
 fi
 
-# Check for marketplace-partner-apps
-if [[ ! -d "../marketplace-partner-apps" ]]; then
+    # Check for marketplace-partner-apps
+    if [[ ! -d "../../marketplace-partner-apps" ]]; then
     echo -e "${RED}❌ Error: marketplace-partner-apps repository not found.${NC}"
     echo
     echo -e "${YELLOW}Expected structure:${NC}"
@@ -92,7 +92,7 @@ echo -e "${GREEN}Here are the apps available in marketplace-partner-apps:${NC}"
 echo
 
 # List apps with numbers
-mapfile -t APPS < <(ls ../marketplace-partner-apps/apps/ 2>/dev/null | head -20)
+mapfile -t APPS < <(ls ../../marketplace-partner-apps/apps/ 2>/dev/null | head -20)
 
 if [[ ${#APPS[@]} -eq 0 ]]; then
     echo -e "${RED}❌ No apps found in marketplace-partner-apps/apps/${NC}"
@@ -103,7 +103,7 @@ for i in "${!APPS[@]}"; do
     printf "%2d. %s\n" $((i+1)) "${APPS[i]}"
 done
 
-TOTAL_APPS=$(ls -1 ../marketplace-partner-apps/apps/ | wc -l)
+TOTAL_APPS=$(ls -1 ../../marketplace-partner-apps/apps/ | wc -l)
 if [[ $TOTAL_APPS -gt 20 ]]; then
     echo "    ... and $((TOTAL_APPS - 20)) more"
 fi
@@ -167,18 +167,18 @@ if [[ "$APP_NAME" == "skip" ]] || [[ -z "$APP_NAME" ]]; then
 fi
 
 # Validate app name
-if [[ ! -d "../marketplace-partner-apps/apps/$APP_NAME" ]]; then
+if [[ ! -d "../../marketplace-partner-apps/apps/$APP_NAME" ]]; then
     echo -e "${RED}❌ App '$APP_NAME' not found in marketplace-partner-apps/apps/${NC}"
     echo
     echo -e "${YELLOW}Available apps:${NC}"
-    ls -1 ../marketplace-partner-apps/apps/ | head -10
+    ls -1 ../../marketplace-partner-apps/apps/ | head -10
     echo
     echo -e "${YELLOW}You can run this script again or use the exact app name.${NC}"
     exit 1
 fi
 
 # Check if app already exists
-if [[ -d "apps/$APP_NAME" ]]; then
+if [[ -d "../apps/$APP_NAME" ]]; then
     echo -e "${RED}❌ App '$APP_NAME' already exists in apps repository.${NC}"
     echo -e "${YELLOW}   Please choose a different app or remove the existing one.${NC}"
     exit 1
