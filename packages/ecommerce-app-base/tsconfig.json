@@ -23,7 +23,6 @@
   "exclude": [
     "node_modules",
     "lib",
-    "**/*.stories.tsx",
     "src/__mocks__"
   ]
 }

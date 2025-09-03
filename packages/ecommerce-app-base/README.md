@@ -52,10 +52,6 @@ setup({
 
 [Type Documentation](docs/README.md)
 
-## Components
-- [Storybook Components](https://ecommerce-app-base-components.netlify.app/) 
-
-
 ## Apps
 
 These Contentful apps use `@contentful/ecommerce-app-base`. Look at their source code to learn how they utilize this library:
