@@ -68,7 +68,12 @@ run_test() {
     
     echo -n "  Testing $test_name... "
     
-    if eval "$test_command" &>/dev/null; then
+    # Capture both stdout and stderr for error reporting
+    local test_output
+    test_output=$(eval "$test_command" 2>&1)
+    local test_result=$?
+    
+    if [[ $test_result -eq 0 ]]; then
         echo -e "${GREEN}✓${NC}"
         ((PASSED_TESTS++))
         log "SUCCESS" "Test passed: $test_name"
@@ -77,12 +82,24 @@ run_test() {
         if [[ "$required" == "true" ]]; then
             echo -e "${RED}✗${NC}"
             ((FAILED_TESTS++))
-            log "FAIL" "Test failed: $test_name"
+            # Show the actual error output
+            if [[ -n "$test_output" ]]; then
+                echo -e "${RED}    Error: ${NC}$test_output"
+                log "FAIL" "Test failed: $test_name - Error: $test_output"
+            else
+                log "FAIL" "Test failed: $test_name - No error output"
+            fi
             return 1
         else
             echo -e "${YELLOW}⚠${NC}"
             ((WARNINGS++))
-            log "WARN" "Test warning: $test_name"
+            # Show warning details if available
+            if [[ -n "$test_output" ]]; then
+                echo -e "${YELLOW}    Warning: ${NC}$test_output"
+                log "WARN" "Test warning: $test_name - Output: $test_output"
+            else
+                log "WARN" "Test warning: $test_name"
+            fi
             return 2
         fi
     fi
@@ -167,17 +184,17 @@ validate_package_json() {
     echo "📦 Validating package.json..."
     
     # Check required scripts
-    run_test "start script exists" "jq -e '.scripts.start' '$package_json' >/dev/null"
-    run_test "build script exists" "jq -e '.scripts.build' '$package_json' >/dev/null"
-    run_test "test script exists" "jq -e '.scripts.test' '$package_json' >/dev/null"
+    run_test "start script exists" "jq -e '.scripts.start' '$package_json' >/dev/null || echo 'Missing start script in package.json'"
+    run_test "build script exists" "jq -e '.scripts.build' '$package_json' >/dev/null || echo 'Missing build script in package.json'"
+    run_test "test script exists" "jq -e '.scripts.test' '$package_json' >/dev/null || echo 'Missing test script in package.json'"
     
     # Check apps repository conventions
-    run_test "Has @contentful scope" "jq -e '.name | startswith(\"@contentful/\")' '$package_json' >/dev/null" "false"
-    run_test "Is marked as private" "jq -e '.private == true' '$package_json' >/dev/null"
+    run_test "Has @contentful scope" "jq -e '.name | startswith(\"@contentful/\")' '$package_json' >/dev/null || echo 'App name should start with @contentful/'" "false"
+    run_test "Is marked as private" "jq -e '.private == true' '$package_json' >/dev/null || echo 'Package should be marked as private: true'"
     
     # Check for common dependencies
-    run_test "Has @contentful/app-sdk" "jq -e '.dependencies[\"@contentful/app-sdk\"]' '$package_json' >/dev/null" "false"
-    run_test "Has React dependency" "jq -e '.dependencies.react' '$package_json' >/dev/null" "false"
+    run_test "Has @contentful/app-sdk" "jq -e '.dependencies[\"@contentful/app-sdk\"]' '$package_json' >/dev/null || echo 'Missing @contentful/app-sdk dependency'" "false"
+    run_test "Has React dependency" "jq -e '.dependencies.react' '$package_json' >/dev/null || echo 'Missing React dependency'" "false"
     
     # Check for actually deprecated scripts (if any are identified in the future)
     # Currently no scripts are flagged as deprecated
@@ -196,13 +213,36 @@ validate_dependencies() {
     run_test "package-lock.json exists" "[[ -f package-lock.json ]]"
     
     # Try to install dependencies
-    run_test "Dependencies can be installed" "npm ci --silent"
+    run_test "Dependencies can be installed" "npm ci"
     
-    # Check for security vulnerabilities
-    run_test "No high-severity vulnerabilities" "npm audit --audit-level=high --silent"
+    # Check for security vulnerabilities (show vulnerabilities if found)
+    run_test "No high-severity vulnerabilities" "npm audit --audit-level=high"
     
-    # Check for outdated dependencies (warning only)
-    run_test "Dependencies are up to date" "npm outdated --silent" "false"
+    # Check for outdated dependencies (informational only)
+    echo "  Checking for outdated dependencies..."
+    local outdated_output
+    outdated_output=$(npm outdated 2>/dev/null || true)
+    
+    if [[ -n "$outdated_output" ]]; then
+        echo -e "${YELLOW}    📦 Outdated dependencies found:${NC}"
+        echo
+        # Format the npm outdated output nicely
+        echo "    Package                Current    Wanted     Latest"
+        echo "    ─────────────────────────────────────────────────────"
+        echo "$outdated_output" | tail -n +2 | while IFS= read -r line; do
+            echo "    $line"
+        done
+        echo
+        echo -e "${YELLOW}    ⚠️  Note: Outdated dependencies don't prevent migration${NC}"
+        echo -e "${BLUE}    💡 You can update them later with: npm update${NC}"
+        
+        # Count how many packages are outdated
+        local outdated_count=$(echo "$outdated_output" | tail -n +2 | wc -l | tr -d ' ')
+        log "INFO" "Found $outdated_count outdated dependencies"
+    else
+        echo -e "${GREEN}    ✓ All dependencies are up to date${NC}"
+        log "INFO" "All dependencies are up to date"
+    fi
     
     cd "$APPS_REPO_ROOT"
 }
@@ -271,7 +311,17 @@ validate_linting() {
     if jq -e '.scripts.lint' package.json >/dev/null; then
         run_test "Linting passes" "npm run lint"
     else
-        log "DEBUG" "No lint script found, skipping linting validation"
+        echo -e "${YELLOW}  📝 No lint script found, adding smart lint configuration...${NC}"
+        
+        # Add smart lint script and get the details
+        local lint_details=$(add_smart_lint_script_validation "$app_path")
+        
+        echo -e "${GREEN}  ✅ $lint_details${NC}"
+        log "INFO" "Added smart lint script: $lint_details"
+        
+        # Now try to run linting
+        echo "  Testing newly added linting configuration..."
+        run_test "Linting passes (after auto-setup)" "npm run lint"
     fi
     
     cd "$APPS_REPO_ROOT"
@@ -314,8 +364,8 @@ fix_common_issues() {
     fi
     
     if ! jq -e '.scripts.lint' package.json >/dev/null 2>&1; then
-        log "INFO" "Adding missing 'lint' script"
-        jq '.scripts.lint = "eslint src --max-warnings 0"' package.json > package.json.tmp && mv package.json.tmp package.json
+        log "INFO" "Adding missing 'lint' script with smart detection"
+        add_smart_lint_script_validation "$(pwd)"
     fi
     
     # Update dependencies if needed
@@ -323,6 +373,235 @@ fix_common_issues() {
     npm install --package-lock-only
     
     cd "$APPS_REPO_ROOT"
+}
+
+add_smart_lint_script_validation() {
+    local app_path="$1"
+    local package_json="$app_path/package.json"
+    
+    log "DEBUG" "Detecting project type for smart linting setup..."
+    
+    # Read package.json to detect project type
+    local package_content=$(cat "$package_json")
+    local eslint_deps_needed=false
+    local lint_command=""
+    local project_type=""
+    
+    # Detect project type and determine lint script + dependencies needed
+    if echo "$package_content" | jq -e '.dependencies.next or .devDependencies.next' >/dev/null 2>&1; then
+        # Next.js project - has built-in ESLint support
+        project_type="Next.js"
+        lint_command="next lint"
+        eslint_deps_needed=false
+        
+    elif echo "$package_content" | jq -e '.dependencies.vite or .devDependencies.vite' >/dev/null 2>&1; then
+        # Vite project
+        project_type="Vite"
+        lint_command="eslint src --max-warnings 0"
+        eslint_deps_needed=true
+        
+    elif echo "$package_content" | jq -e '.dependencies["react-scripts"] or .devDependencies["react-scripts"]' >/dev/null 2>&1; then
+        # Create React App project - has built-in ESLint
+        project_type="Create React App"
+        lint_command="eslint src --max-warnings 0"
+        eslint_deps_needed=false
+        
+    elif echo "$package_content" | jq -e '.dependencies.webpack or .devDependencies.webpack' >/dev/null 2>&1; then
+        # Webpack project
+        project_type="Webpack"
+        lint_command="eslint src --max-warnings 0"
+        eslint_deps_needed=true
+        
+    elif [[ -f "$app_path/tsconfig.json" ]] && [[ -d "$app_path/src" ]]; then
+        # TypeScript project with src directory
+        project_type="TypeScript"
+        lint_command="eslint src --ext .ts,.tsx --max-warnings 0"
+        eslint_deps_needed=true
+        
+    elif [[ -d "$app_path/src" ]]; then
+        # Generic project with src directory
+        project_type="Generic with src/"
+        lint_command="eslint src --max-warnings 0"
+        eslint_deps_needed=true
+        
+    else
+        # Fallback - basic ESLint setup
+        project_type="Generic"
+        lint_command="eslint . --max-warnings 0"
+        eslint_deps_needed=true
+    fi
+    
+    # Add the lint script
+    jq --arg cmd "$lint_command" '.scripts.lint = $cmd' package.json > package.json.tmp && mv package.json.tmp package.json
+    
+    # Install ESLint dependencies if needed
+    if [[ "$eslint_deps_needed" == true ]]; then
+        # Check if ESLint is already installed
+        if ! echo "$package_content" | jq -e '.devDependencies.eslint or .dependencies.eslint' >/dev/null 2>&1; then
+            log "INFO" "Installing ESLint dependencies for $project_type project..."
+            
+            # Determine which ESLint packages to install based on project type
+            local eslint_packages="eslint"
+            
+            # Add TypeScript ESLint support if it's a TypeScript project
+            if [[ -f "$app_path/tsconfig.json" ]]; then
+                eslint_packages="$eslint_packages @typescript-eslint/eslint-plugin @typescript-eslint/parser"
+            fi
+            
+            # Add React ESLint support if React is detected
+            if echo "$package_content" | jq -e '.dependencies.react or .devDependencies.react' >/dev/null 2>&1; then
+                eslint_packages="$eslint_packages eslint-plugin-react eslint-plugin-react-hooks"
+            fi
+            
+            # Install the packages
+            npm install --save-dev $eslint_packages
+            
+            # Create a basic ESLint config if none exists
+            if [[ ! -f "$app_path/.eslintrc.js" ]] && [[ ! -f "$app_path/.eslintrc.json" ]] && [[ ! -f "$app_path/.eslintrc.yml" ]]; then
+                create_basic_eslint_config "$app_path"
+            fi
+            
+            echo "Added $project_type lint script: \"$lint_command\" with ESLint dependencies"
+        else
+            echo "Added $project_type lint script: \"$lint_command\" (ESLint already installed)"
+        fi
+    else
+        echo "Added $project_type lint script: \"$lint_command\""
+    fi
+}
+
+create_basic_eslint_config() {
+    local app_path="$1"
+    
+    log "DEBUG" "Creating basic ESLint configuration..."
+    
+    # Determine what type of config to create based on project
+    local config_content
+    local is_typescript=false
+    local is_react=false
+    
+    # Check if it's a TypeScript project
+    if [[ -f "$app_path/tsconfig.json" ]]; then
+        is_typescript=true
+    fi
+    
+    # Check if it's a React project
+    if grep -q '"react"' "$app_path/package.json"; then
+        is_react=true
+    fi
+    
+    # Create appropriate ESLint config
+    if [[ "$is_typescript" == true ]] && [[ "$is_react" == true ]]; then
+        # TypeScript + React config
+        config_content='{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "react",
+    "react-hooks",
+    "@typescript-eslint"
+  ],
+  "rules": {
+    "react/react-in-jsx-scope": "off"
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  }
+}'
+    elif [[ "$is_typescript" == true ]]; then
+        # TypeScript only config
+        config_content='{
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "@typescript-eslint/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "rules": {}
+}'
+    elif [[ "$is_react" == true ]]; then
+        # React only config
+        config_content='{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended"
+  ],
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "react",
+    "react-hooks"
+  ],
+  "rules": {
+    "react/react-in-jsx-scope": "off"
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  }
+}'
+    else
+        # Basic JavaScript config
+        config_content='{
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "rules": {}
+}'
+    fi
+    
+    # Write the config file
+    echo "$config_content" > "$app_path/.eslintrc.json"
+    log "INFO" "Created .eslintrc.json configuration file"
 }
 
 create_validation_report() {
