@@ -1,116 +1,89 @@
 # 🚀 App Migration Scripts
 
-This directory contains all the scripts and documentation needed to migrate apps from the `marketplace-partner-apps` repository to the `apps` repository.
+Migrate apps from `marketplace-partner-apps` to the `apps` repository with automated scripts and comprehensive validation.
 
-## 📁 Directory Structure
+## 🎯 Choose Your Starting Point
 
-```
-apps-migration-scripts/
-├── migrate-app.sh              # Main migration script
-├── validate-migration.sh       # Validation script
-├── cleanup-migrated-app.sh     # Cleanup script
-├── getting-started.sh          # Interactive tutorial
-├── migration-summary.sh        # Quick reference
-├── README.md                   # This file
-├── USAGE_GUIDE.md             # Detailed step-by-step guide
-├── MIGRATION_README.md         # Technical documentation
-├── MIGRATION_SCRIPTS_README.md # Overview and entry points
-├── logs/                      # All script logs go here
-└── backups/                   # Created during cleanup
-```
-
-## 🚀 Quick Start
-
-**First time users:**
+### 🆕 **New to Migration?**
 ```bash
-cd apps-migration-scripts
 ./getting-started.sh
 ```
+Interactive tutorial that walks you through your first migration step-by-step.
 
-**Quick reference:**
+### 📚 **Want the Complete Guide?**
 ```bash
-cd apps-migration-scripts
+cat GETTING_STARTED.md
+```
+Comprehensive tutorial with examples, troubleshooting, and best practices.
+
+### ⚡ **Quick Reference Needed?**
+```bash
 ./migration-summary.sh
 ```
+See all available apps and get command reminders.
 
-**Standard workflow:**
+### 🔧 **Advanced User?**
 ```bash
-cd apps-migration-scripts
+cat USAGE_GUIDE.md
+```
+Complete command reference, options, and technical details.
 
-# 1. Preview migration (safe)
+## 📋 The Migration Process
+
+```bash
+# 1. Preview (always start here!)
 ./migrate-app.sh <app-name> --dry-run
 
-# 2. Migrate the app
+# 2. Migrate 
 ./migrate-app.sh <app-name>
 
-# 3. Validate migration
+# 3. Validate
 ./validate-migration.sh <app-name>
 
 # 4. Test manually in Contentful
 
-# 5. Cleanup (after thorough testing!)
+# 5. Cleanup (destructive - be sure!)
 ./cleanup-migrated-app.sh <app-name>
 ```
 
-## 📋 Prerequisites
+## 📁 What's In This Directory
 
-- Both repositories cloned side-by-side:
-  ```
-  your-projects-folder/
-  ├── apps/                          # This repository
-  │   └── apps-migration-scripts/    # These scripts
-  └── marketplace-partner-apps/      # Partner apps repository
-  ```
-- Node.js 16+, npm, git, jq installed
-- Run scripts from the `apps-migration-scripts` directory
+| File | Purpose |
+|------|---------|
+| **Scripts** | |
+| `migrate-app.sh` | Main migration script |
+| `validate-migration.sh` | Test migration success |
+| `cleanup-migrated-app.sh` | Remove from marketplace-partner-apps |
+| `getting-started.sh` | Interactive tutorial |
+| `migration-summary.sh` | Quick reference tool |
+| **Documentation** | |
+| `README.md` | This overview (start here) |
+| `GETTING_STARTED.md` | Step-by-step tutorial |
+| `USAGE_GUIDE.md` | Complete command reference |
+| `TECHNICAL_REFERENCE.md` | Advanced technical details |
+| **Generated** | |
+| `logs/` | All script logs |
+| `backups/` | Cleanup backups |
+| `*-report-*.md` | Migration reports |
 
-## 📖 Documentation
+## ⚠️ Prerequisites
 
-- **USAGE_GUIDE.md** - Complete step-by-step instructions
-- **MIGRATION_README.md** - Technical reference
-- **MIGRATION_SCRIPTS_README.md** - Quick overview
-
-## 📁 File Locations
-
-All generated files are organized as follows:
-
-- **Logs**: `logs/migration-*.log`, `logs/validation-*.log`, `logs/cleanup-*.log`
-- **Reports**: Generated in this directory as `*-report-*.md`
-- **Backups**: `backups/marketplace-partner-apps-*.tar.gz`
-
-## ⚠️ Important Notes
-
-1. **Always run from this directory** - The scripts are configured for their current location
-2. **Logs are automatically saved** in the `logs/` subdirectory
-3. **Backups are created** during cleanup in the `backups/` subdirectory
-4. **Start with dry-run** to preview changes safely
-
-## 🔧 Path Configuration
-
-The scripts automatically detect their location and set paths relative to:
-- Apps repository root: `../` (parent directory)
-- Marketplace-partner-apps: `../../marketplace-partner-apps`
-- Logs directory: `logs/`
-- Backups directory: `backups/`
-
-## 🆘 Getting Help
-
-```bash
-# General help
-./migrate-app.sh --help
-./validate-migration.sh --help
-./cleanup-migrated-app.sh --help
-
-# Interactive tutorial
-./getting-started.sh
-
-# Quick reference
-./migration-summary.sh
-
-# Read the guides
-cat USAGE_GUIDE.md
+Ensure you have this structure:
+```
+your-projects-folder/
+├── apps/                          # This repository
+│   └── apps-migration-scripts/    # You are here
+└── marketplace-partner-apps/      # Source repository
 ```
 
----
+**Required tools:** Node.js 16+, npm, git, jq
 
-**🎉 Ready to migrate? Start with `./getting-started.sh` for an interactive walkthrough!**
+## 🆘 Need Help?
+
+- **Can't decide where to start?** → Run `./getting-started.sh`
+- **Script not working?** → Check `GETTING_STARTED.md` troubleshooting section
+- **Advanced customization?** → See `TECHNICAL_REFERENCE.md`
+- **Command options?** → Use `<script-name> --help` or check `USAGE_GUIDE.md`
+
+---
+**🎉 Ready? Most users should start with `./getting-started.sh`**

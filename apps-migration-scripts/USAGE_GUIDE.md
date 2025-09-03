@@ -1,190 +1,179 @@
-# 🚀 Migration Scripts Usage Guide
+# 📖 Migration Scripts - Complete Command Reference
 
-A step-by-step guide for migrating apps from marketplace-partner-apps to the apps repository.
+Comprehensive documentation for all migration commands, options, and advanced usage patterns.
 
-## 📋 Prerequisites Checklist
+> **New to migration?** Check out `GETTING_STARTED.md` for a step-by-step tutorial first.
 
-Before starting, ensure you have:
+## 📋 Quick Reference
 
-- [ ] **Both repositories cloned side-by-side:**
-  ```
-  your-projects-folder/
-  ├── apps/                          # This repository
-  │   └── apps-migration-scripts/    # These migration scripts
-  └── marketplace-partner-apps/      # Partner apps repository
-  ```
+| Script | Purpose | Basic Usage |
+|--------|---------|-------------|
+| `migrate-app.sh` | Transfer app from MPA to apps repo | `./migrate-app.sh <app-name>` |
+| `validate-migration.sh` | Test migration success | `./validate-migration.sh <app-name>` |
+| `cleanup-migrated-app.sh` | Remove from marketplace-partner-apps | `./cleanup-migrated-app.sh <app-name>` |
+| `getting-started.sh` | Interactive tutorial | `./getting-started.sh` |
+| `migration-summary.sh` | Quick reference and app list | `./migration-summary.sh` |
 
-- [ ] **Required tools installed:**
-  - Node.js 16+ (`node --version`)
-  - npm 8+ (`npm --version`)
-  - Git (`git --version`)
-  - jq (`jq --version`)
+## 🔧 Detailed Command Documentation
 
-- [ ] **Repositories are up to date:**
-  ```bash
-  # In apps repository
-  git pull origin master
-  
-  # In marketplace-partner-apps repository
-  cd ../marketplace-partner-apps
-  git pull origin main
-  cd ../apps
-  ```
+### `migrate-app.sh` - Main Migration Script
 
-- [ ] **You're in the apps-migration-scripts directory** (where the scripts are located)
-  ```bash
-  cd apps/apps-migration-scripts
-  ```
+**Purpose:** Transfer an app from marketplace-partner-apps to apps repository
 
-## 🎯 Step-by-Step Migration Process
-
-### Step 1: Choose Your App
-
-First, see what apps are available to migrate:
-
+**Basic Usage:**
 ```bash
-# Quick summary of available scripts and apps
-./migration-summary.sh
-
-# Or list apps manually
-ls ../../marketplace-partner-apps/apps/
+./migrate-app.sh <app-name> [options]
 ```
 
-### Step 2: Run a Dry-Run Migration
+**Options:**
+- `--dry-run` - Preview changes without making them (always start here!)
+- `--verbose` - Enable detailed logging
+- `--help` - Show help message
 
-**Always start with a dry-run** to see what would happen:
-
+**Examples:**
 ```bash
-./migrate-app.sh <app-name> --dry-run --verbose
-```
+# Preview migration (safe)
+./migrate-app.sh amplitude-experiment --dry-run
 
-**Example:**
-```bash
+# Preview with detailed output
 ./migrate-app.sh amplitude-experiment --dry-run --verbose
-```
 
-**What to look for:**
-- ✅ No error messages
-- ✅ Files are being copied correctly
-- ✅ Package.json adaptations look reasonable
-- ✅ Configuration files are being added appropriately
-
-### Step 3: Perform the Actual Migration
-
-If the dry-run looks good, run the real migration:
-
-```bash
-./migrate-app.sh <app-name>
-```
-
-**Example:**
-```bash
+# Actual migration
 ./migrate-app.sh amplitude-experiment
+
+# Migration with detailed logging
+./migrate-app.sh amplitude-experiment --verbose
 ```
 
-**Expected output:**
-```
-=============================================================================
-  Marketplace Partner Apps to Apps Repository Migration Script
-=============================================================================
+**What it does:**
+- ✅ Copies all app files (excluding build artifacts)
+- ✅ Adapts package.json for apps repository conventions
+- ✅ Adds missing configuration files
+- ✅ Updates dependencies
+- ✅ Integrates with Lerna build system
+- ✅ Generates migration report
 
-[INFO] Checking prerequisites...
-[INFO] Prerequisites check passed
-[INFO] Starting migration of app: amplitude-experiment
-[INFO] Mode: LIVE
-[INFO] App 'amplitude-experiment' found and validated
-[INFO] Creating temporary workspace...
-[INFO] Copying app files from marketplace-partner-apps...
-[INFO] Adapting package.json for apps repository structure...
-[INFO] Adding missing configuration files...
-[INFO] Updating dependencies to match apps repository standards...
-[INFO] Migrating app to apps repository...
-[INFO] Running post-migration setup...
-[INFO] Migration completed successfully!
-```
+**Output files:**
+- `logs/migration-YYYYMMDD-HHMMSS.log` - Detailed log
+- `migration-report-<app>-YYYYMMDD-HHMMSS.md` - Summary report
 
-### Step 4: Validate the Migration
+---
 
-Run comprehensive validation to ensure everything works:
+### `validate-migration.sh` - Validation Script
 
+**Purpose:** Comprehensive testing of migrated app
+
+**Basic Usage:**
 ```bash
-./validate-migration.sh <app-name> --detailed
+./validate-migration.sh <app-name> [options]
 ```
 
-**Example:**
+**Options:**
+- `--detailed` - Show verbose debug information
+- `--fix-issues` - Automatically fix common issues
+- `--help` - Show help message
+
+**Examples:**
 ```bash
+# Basic validation
+./validate-migration.sh amplitude-experiment
+
+# Detailed validation with debug info
 ./validate-migration.sh amplitude-experiment --detailed
+
+# Try to auto-fix issues
+./validate-migration.sh amplitude-experiment --fix-issues
 ```
 
-**What gets tested:**
+**Validation checks:**
 - 📁 File structure validation
-- 📦 Package.json compatibility  
+- 📦 Package.json compatibility
 - 🔗 Dependency resolution
 - 🔨 Build process
 - 🧪 Test execution
 - 🔍 Linting compliance
 - 🔧 Apps repository integration
 
-**If validation fails:**
-```bash
-# Try auto-fixing common issues
-./validate-migration.sh amplitude-experiment --fix-issues
+**Output files:**
+- `logs/validation-YYYYMMDD-HHMMSS.log` - Detailed log
+- `validation-report-<app>-YYYYMMDD-HHMMSS.md` - Test results
 
-# Then re-run validation
-./validate-migration.sh amplitude-experiment
+---
+
+### `cleanup-migrated-app.sh` - Cleanup Script
+
+**Purpose:** Remove successfully migrated app from marketplace-partner-apps
+
+⚠️ **DESTRUCTIVE OPERATION** - Only use after thorough testing!
+
+**Basic Usage:**
+```bash
+./cleanup-migrated-app.sh <app-name> [options]
 ```
 
-### Step 5: Manual Testing
+**Options:**
+- `--dry-run` - Preview what would be deleted
+- `--force` - Skip interactive confirmations
+- `--help` - Show help message
 
-Navigate to your migrated app and test it thoroughly:
-
+**Examples:**
 ```bash
-cd ../apps/<app-name>
+# Preview cleanup (safe)
+./cleanup-migrated-app.sh amplitude-experiment --dry-run
 
-# Install dependencies
-npm install
+# Interactive cleanup (recommended)
+./cleanup-migrated-app.sh amplitude-experiment
 
-# Start the app
-npm start
+# Skip confirmations (dangerous!)
+./cleanup-migrated-app.sh amplitude-experiment --force
 ```
 
-**Testing checklist:**
-- [ ] App builds successfully (`npm run build`)
-- [ ] App starts without errors (`npm start`)
-- [ ] Tests pass (`npm test`)
-- [ ] Linting passes (`npm run lint`)
-- [ ] App loads correctly in Contentful
-- [ ] All app functionality works as expected
-- [ ] App configuration is preserved
-- [ ] App integrations work correctly
+**Safety features:**
+- 🔒 Requires typing "DELETE" to confirm
+- 💾 Creates backup before deletion
+- ✅ Verifies app works in apps repository
+- 📝 Updates release configuration files
 
-### Step 6: Test in Contentful
+**Output files:**
+- `logs/cleanup-YYYYMMDD-HHMMSS.log` - Detailed log
+- `cleanup-report-<app>-YYYYMMDD-HHMMSS.md` - Summary report
+- `backups/marketplace-partner-apps-<app>-YYYYMMDD-HHMMSS.tar.gz` - Backup
 
-1. **Create or use an existing app definition** in Contentful
-2. **Upload the built app** to test it works
-3. **Test all app features** thoroughly
-4. **Verify configuration screens** work correctly
-5. **Test entry editor integrations** if applicable
+---
 
-### Step 7: Cleanup (Danger Zone!)
+### `migration-summary.sh` - Quick Reference
 
-⚠️ **ONLY after thorough testing and confirmation that everything works!**
+**Purpose:** Show available apps and quick command reference
 
-First, run a cleanup dry-run to see what would be deleted:
-
+**Usage:**
 ```bash
-./cleanup-migrated-app.sh <app-name> --dry-run
+./migration-summary.sh
 ```
 
-If you're satisfied, run the actual cleanup:
+**What it shows:**
+- List of all available apps in marketplace-partner-apps
+- Quick command reference
+- Documentation links
+- Recent migration activity
 
+---
+
+### `getting-started.sh` - Interactive Tutorial
+
+**Purpose:** Interactive guide for first-time users
+
+**Usage:**
 ```bash
-./cleanup-migrated-app.sh <app-name>
+./getting-started.sh
 ```
 
-**You'll be prompted to type "DELETE" to confirm** - this is intentional for safety!
+**Features:**
+- Checks prerequisites automatically
+- Shows available apps
+- Guides through first migration
+- Provides safety warnings
 
-## 🔧 Advanced Usage
+## 🔧 Advanced Usage Patterns
 
 ### Migrating Multiple Apps
 
@@ -192,207 +181,215 @@ If you're satisfied, run the actual cleanup:
 # List all apps you want to migrate
 APPS_TO_MIGRATE=("amplitude-experiment" "bynder" "shopify")
 
-# Migrate each app
+# Migrate each app (recommended: one at a time)
 for app in "${APPS_TO_MIGRATE[@]}"; do
-    echo "Migrating $app..."
-    ./migrate-app.sh "$app"
+    echo "=== Migrating $app ==="
+    ./migrate-app.sh "$app" --verbose
     ./validate-migration.sh "$app"
-    echo "Manual testing required for $app before cleanup!"
+    echo "=== $app migration complete - test before cleanup! ==="
 done
 ```
 
-### Fixing Common Issues
+### Batch Validation
 
 ```bash
-# If validation fails, try auto-fixing
-./validate-migration.sh <app-name> --fix-issues
-
-# If build fails, check dependencies
-cd apps/<app-name>
-npm audit fix
-npm update
-
-# If lerna integration fails
-cd ..
-npm run clean
-npm run bootstrap
+# Validate multiple migrated apps
+for app in ../apps/*/; do
+    app_name=$(basename "$app")
+    echo "Validating $app_name..."
+    ./validate-migration.sh "$app_name" --detailed
+done
 ```
 
-### Verbose Logging
+### Custom Workflows
 
-For debugging issues, use verbose flags:
-
+**Migration with custom validation:**
 ```bash
-./migrate-app.sh <app-name> --verbose
-./validate-migration.sh <app-name> --detailed
+# Migrate with extra validation steps
+./migrate-app.sh my-app --verbose
+./validate-migration.sh my-app --detailed
+
+# Custom tests
+cd ../apps/my-app
+npm run custom-test
+npm run security-scan
+
+# Cleanup if all good
+cd ../apps-migration-scripts
+./cleanup-migrated-app.sh my-app
 ```
 
-## 📊 Understanding Reports
+**Conditional cleanup:**
+```bash
+# Only cleanup if validation passes
+if ./validate-migration.sh my-app; then
+    echo "Validation passed - safe to cleanup"
+    ./cleanup-migrated-app.sh my-app
+else
+    echo "Validation failed - manual review needed"
+fi
+```
 
-Each script generates detailed reports:
-
-### Migration Report
-- Summary of what was migrated
-- List of changes made
-- Next steps checklist
-- Links to log files
-
-### Validation Report  
-- Test results with pass/fail status
-- Success rate percentage
-- Issues found and recommendations
-- Manual testing checklist
-
-### Cleanup Report
-- What was removed from marketplace-partner-apps
-- Backup information
-- Git commit details
-- Recovery instructions
-
-## 🚨 Troubleshooting
+## 🚨 Troubleshooting Guide
 
 ### Common Issues and Solutions
 
-**"App not found in marketplace-partner-apps"**
+**Migration Fails - "App not found"**
 ```bash
-# Check if the app exists
-ls ../marketplace-partner-apps/apps/
-# Make sure you're using the exact folder name
+# Check app name spelling
+ls ../../marketplace-partner-apps/apps/
+
+# Verify repository structure
+pwd  # Should be in apps-migration-scripts
+ls ../../marketplace-partner-apps  # Should show apps/ directory
 ```
 
-**"Prerequisites check failed"**
+**Build Fails After Migration**
 ```bash
-# Check Node.js version
-node --version  # Should be 16+
+# Check the specific error
+cd ../apps/<app-name>
+npm run build 2>&1 | tee build-error.log
 
-# Check if jq is installed
-brew install jq  # macOS
-sudo apt-get install jq  # Ubuntu
-```
-
-**"Build fails after migration"**
-```bash
-cd apps/<app-name>
+# Common fixes:
 rm -rf node_modules package-lock.json
 npm install
+npm audit fix
 npm run build
 ```
 
-**"Lerna bootstrap fails"**
+**Validation Fails**
 ```bash
-# Clean everything and start fresh
-npm run clean
-rm -rf node_modules
-npm ci
-npm run bootstrap
-```
+# Get detailed error information
+./validate-migration.sh <app-name> --detailed
 
-**"Validation fails"**
-```bash
-# Try auto-fixing first
+# Try auto-fixing
 ./validate-migration.sh <app-name> --fix-issues
 
-# Check the validation report for specific issues
-cat validation-report-<app-name>-*.md
+# Check specific issues
+cat logs/validation-*.log | grep ERROR
 ```
 
-### Getting Detailed Information
-
+**Lerna Integration Issues**
 ```bash
-# View all available help
-./migrate-app.sh --help
-./validate-migration.sh --help
-./cleanup-migrated-app.sh --help
+# From apps repository root
+cd ..
+npm run clean
+npm run bootstrap
 
-# Check recent activity
-./migration-summary.sh
-
-# View log files
-ls -la *.log
+# Check if app is recognized
+npx lerna list | grep <app-name>
 ```
 
-## 📁 File Structure After Migration
+**Permission Errors**
+```bash
+# Fix script permissions
+chmod +x *.sh
 
-Your apps repository will look like this:
-
-```
-apps/
-├── apps/
-│   ├── existing-apps/...
-│   └── your-migrated-app/          # 🆕 Your migrated app
-│       ├── src/
-│       ├── package.json            # Adapted for apps repo
-│       ├── tsconfig.json
-│       ├── vite.config.ts
-│       └── ...
-├── migrate-app.sh                  # Migration script
-├── validate-migration.sh           # Validation script  
-├── cleanup-migrated-app.sh         # Cleanup script
-├── migration-summary.sh            # Quick reference
-├── USAGE_GUIDE.md                  # This guide
-├── MIGRATION_README.md             # Technical documentation
-└── backups/                        # 🆕 Created after cleanup
-    └── marketplace-partner-apps-*.tar.gz
+# Fix app file permissions
+find ../apps/<app-name> -name "*.sh" -exec chmod +x {} \;
 ```
 
-## ✅ Success Criteria
+### Log Analysis
 
-Your migration is successful when:
+**Find specific errors:**
+```bash
+# All errors from latest migration
+grep "\[ERROR\]" logs/migration-*.log | tail -20
 
-- [ ] All validation tests pass
-- [ ] App builds without errors
-- [ ] App starts and runs correctly
-- [ ] All functionality works in Contentful
-- [ ] No regressions from original app
-- [ ] Apps repository CI/CD pipeline accepts the app
-- [ ] Lerna recognizes and can build the app
+# Build-related issues
+grep -i "build\|compile\|error" logs/validation-*.log
 
-## 🔒 Safety Features
+# Dependency issues
+grep -i "npm\|dependency\|package" logs/migration-*.log
+```
 
-The scripts include multiple safety features:
+**Check timing and performance:**
+```bash
+# Migration timing
+grep "completed\|started" logs/migration-*.log
 
-- **Dry-run mode** - Preview changes before making them
-- **Interactive confirmations** - Prevents accidental deletions
-- **Automatic backups** - Created before any destructive operations
-- **Comprehensive validation** - Ensures migration success before cleanup
-- **Detailed logging** - Full audit trail of all operations
-- **Rollback instructions** - How to undo changes if needed
+# Validation results summary
+grep "SUCCESS\|FAIL" logs/validation-*.log
+```
 
-## 🆘 Emergency Procedures
+### Recovery Procedures
 
-### If Something Goes Wrong During Migration
+**Partial Migration Cleanup**
+```bash
+# Remove incomplete migration
+rm -rf ../apps/<app-name>
 
-1. **Stop immediately** - Don't proceed with cleanup
-2. **Check the logs** - Look at the generated log files
-3. **Review the report** - Check the migration report for issues
-4. **Delete the partially migrated app**:
-   ```bash
-   rm -rf ../apps/<app-name>
-   ```
-5. **Start over** with a dry-run to understand the issue
+# Clean temporary files
+rm -f *-report-<app-name>-*.md
 
-### If You Need to Rollback After Cleanup
+# Start over
+./migrate-app.sh <app-name> --dry-run
+```
 
-1. **Find the backup**:
-   ```bash
-   ls backups/marketplace-partner-apps-<app-name>-*.tar.gz
-   ```
+**Rollback After Cleanup**
+```bash
+# Find backup
+ls backups/marketplace-partner-apps-<app-name>-*.tar.gz
 
-2. **Restore from backup**:
-   ```bash
-   cd ../../marketplace-partner-apps/apps
-   tar -xzf ../../apps/apps-migration-scripts/backups/marketplace-partner-apps-<app-name>-*.tar.gz
-   cd ..
-   git add apps/<app-name>
-   git commit -m "Restore <app-name> from backup"
-   ```
+# Restore marketplace-partner-apps
+cd ../../marketplace-partner-apps/apps
+tar -xzf ../../apps/apps-migration-scripts/backups/marketplace-partner-apps-<app-name>-*.tar.gz
+cd .. && git add . && git commit -m "Restore <app-name>"
 
-3. **Remove from apps repository**:
-   ```bash
-   cd ../../apps
-   rm -rf apps/<app-name>
-   ```
+# Remove from apps repository  
+cd ../apps && rm -rf apps/<app-name>
+```
+
+## 📊 Generated Files Reference
+
+### Log Files (`logs/`)
+
+| File Pattern | Content | When Created |
+|--------------|---------|--------------|
+| `migration-YYYYMMDD-HHMMSS.log` | Detailed migration log | Every migration |
+| `validation-YYYYMMDD-HHMMSS.log` | Validation test results | Every validation |
+| `cleanup-YYYYMMDD-HHMMSS.log` | Cleanup operation log | Every cleanup |
+
+### Report Files
+
+| File Pattern | Content | Purpose |
+|--------------|---------|---------|
+| `migration-report-<app>-YYYYMMDD-HHMMSS.md` | Migration summary | Next steps guidance |
+| `validation-report-<app>-YYYYMMDD-HHMMSS.md` | Test results | Issue identification |
+| `cleanup-report-<app>-YYYYMMDD-HHMMSS.md` | Cleanup summary | Confirmation & recovery info |
+
+### Backup Files (`backups/`)
+
+| File Pattern | Content | When Created |
+|--------------|---------|--------------|
+| `marketplace-partner-apps-<app>-YYYYMMDD-HHMMSS.tar.gz` | Complete app backup | Before cleanup |
+
+## 🎯 Best Practices
+
+### For Successful Migrations
+
+1. **Always start with dry-run** - Preview changes before making them
+2. **Test thoroughly** - Don't rush to cleanup 
+3. **One app at a time** - Avoid parallel migrations initially
+4. **Read the reports** - They contain valuable troubleshooting info
+5. **Keep logs** - Essential for debugging issues
+
+### For Troubleshooting
+
+1. **Check prerequisites first** - Most issues stem from setup problems
+2. **Use verbose logging** - Get detailed information about failures
+3. **Read error messages carefully** - They usually indicate the exact problem
+4. **Test in isolation** - Isolate issues by testing individual components
+5. **Document custom fixes** - Help improve the scripts for others
+
+### For Production Use
+
+1. **Practice on simple apps first** - Build confidence with the process
+2. **Have rollback plan** - Know how to recover if something goes wrong
+3. **Coordinate with team** - Ensure others are aware of migration activities
+4. **Update documentation** - Note any app-specific requirements or issues
+5. **Test in staging first** - Never migrate directly to production apps
 
 ---
 
-**🎉 You're ready to migrate! Start with a dry-run and take it step by step.**
+For technical details about script internals, see `TECHNICAL_REFERENCE.md`.

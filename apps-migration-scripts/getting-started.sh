@@ -34,10 +34,11 @@ read -r
 echo -e "${CYAN}Step 1: Checking Prerequisites...${NC}"
 echo
 
-# Check if we're in the right directory
-if [[ ! -f "migrate-app.sh" ]] || [[ ! -f "lerna.json" ]]; then
-    echo -e "${RED}❌ Error: You must run this script from the apps repository root directory.${NC}"
-    echo -e "${YELLOW}   Make sure you're in the directory that contains migrate-app.sh${NC}"
+# Check if we're in the right directory (apps-migration-scripts)
+if [[ ! -f "migrate-app.sh" ]] || [[ ! -f "../lerna.json" ]]; then
+    echo -e "${RED}❌ Error: You must run this script from the apps-migration-scripts directory.${NC}"
+    echo -e "${YELLOW}   Make sure you're in: apps/apps-migration-scripts/${NC}"
+    echo -e "${YELLOW}   Expected files: ./migrate-app.sh and ../lerna.json${NC}"
     exit 1
 fi
 
@@ -91,16 +92,25 @@ echo
 echo -e "${GREEN}Here are the apps available in marketplace-partner-apps:${NC}"
 echo
 
-# List apps with numbers
-mapfile -t APPS < <(ls ../../marketplace-partner-apps/apps/ 2>/dev/null | head -20)
+# List apps with numbers (compatible approach)
+APPS_LIST=$(ls ../../marketplace-partner-apps/apps/ 2>/dev/null | head -20)
 
-if [[ ${#APPS[@]} -eq 0 ]]; then
+if [[ -z "$APPS_LIST" ]]; then
     echo -e "${RED}❌ No apps found in marketplace-partner-apps/apps/${NC}"
     exit 1
 fi
 
-for i in "${!APPS[@]}"; do
-    printf "%2d. %s\n" $((i+1)) "${APPS[i]}"
+# Convert to array using compatible method
+APPS=()
+while IFS= read -r line; do
+    [[ -n "$line" ]] && APPS+=("$line")
+done <<< "$APPS_LIST"
+
+# Display numbered list
+counter=1
+for app in "${APPS[@]}"; do
+    printf "%2d. %s\n" "$counter" "$app"
+    ((counter++))
 done
 
 TOTAL_APPS=$(ls -1 ../../marketplace-partner-apps/apps/ | wc -l)
@@ -140,11 +150,22 @@ echo -e "${CYAN}Step 4: Choose an App to Migrate${NC}"
 echo
 echo -e "${GREEN}Let's practice with a real app migration!${NC}"
 echo
-echo -e "Enter the name of an app to migrate (or 'skip' to just see documentation):"
-echo -e "${YELLOW}App name: ${NC}"
-read -r APP_NAME
+echo -e "Select an app by entering its number (or 's' to skip to documentation):"
+echo
 
-if [[ "$APP_NAME" == "skip" ]] || [[ -z "$APP_NAME" ]]; then
+# Show the numbered list again for easy reference
+counter=1
+for app in "${APPS[@]}"; do
+    printf "%2d. %s\n" "$counter" "$app"
+    ((counter++))
+done
+
+echo
+echo -e "${YELLOW}Enter choice (1-${#APPS[@]}, or 's' to skip): ${NC}"
+read -r CHOICE
+
+# Handle skip option
+if [[ "$CHOICE" == "s" ]] || [[ "$CHOICE" == "skip" ]] || [[ -z "$CHOICE" ]]; then
     echo
     echo -e "${GREEN}No problem! Here's where to find more information:${NC}"
     echo
@@ -152,7 +173,7 @@ if [[ "$APP_NAME" == "skip" ]] || [[ -z "$APP_NAME" ]]; then
     echo -e "   cat USAGE_GUIDE.md"
     echo
     echo -e "${YELLOW}📖 Read the technical documentation:${NC}"
-    echo -e "   cat MIGRATION_README.md"
+    echo -e "   cat TECHNICAL_REFERENCE.md"
     echo
     echo -e "${YELLOW}🔍 Get a quick summary anytime:${NC}"
     echo -e "   ./migration-summary.sh"
@@ -166,14 +187,21 @@ if [[ "$APP_NAME" == "skip" ]] || [[ -z "$APP_NAME" ]]; then
     exit 0
 fi
 
-# Validate app name
-if [[ ! -d "../../marketplace-partner-apps/apps/$APP_NAME" ]]; then
-    echo -e "${RED}❌ App '$APP_NAME' not found in marketplace-partner-apps/apps/${NC}"
+# Validate and convert number choice to app name
+if [[ "$CHOICE" =~ ^[0-9]+$ ]] && [[ "$CHOICE" -ge 1 ]] && [[ "$CHOICE" -le "${#APPS[@]}" ]]; then
+    # Convert to array index (subtract 1 since arrays are 0-based)
+    APP_INDEX=$((CHOICE - 1))
+    APP_NAME="${APPS[$APP_INDEX]}"
+    
     echo
-    echo -e "${YELLOW}Available apps:${NC}"
-    ls -1 ../../marketplace-partner-apps/apps/ | head -10
+    echo -e "${GREEN}✅ Selected: $APP_NAME${NC}"
     echo
-    echo -e "${YELLOW}You can run this script again or use the exact app name.${NC}"
+else
+    echo
+    echo -e "${RED}❌ Error: Invalid selection '$CHOICE'${NC}"
+    echo -e "${YELLOW}Please enter a number between 1 and ${#APPS[@]}, or 's' to skip${NC}"
+    echo
+    echo -e "${YELLOW}Tip: Run this script again to try another selection${NC}"
     exit 1
 fi
 
