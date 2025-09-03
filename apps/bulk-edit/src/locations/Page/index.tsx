@@ -101,12 +101,6 @@ const Page = () => {
     };
   };
 
-  const clearState = () => {
-    setEntries([]);
-    setFields([]);
-    setTotalEntries(0);
-  };
-
   useEffect(() => {
     const fetchContentTypes = async (): Promise<void> => {
       try {
