@@ -62,9 +62,9 @@ Complete command reference, options, and technical details.
 | `USAGE_GUIDE.md` | Complete command reference |
 | `TECHNICAL_REFERENCE.md` | Advanced technical details |
 | **Generated** | |
-| `logs/` | All script logs |
+| `logs/` | All script logs (with app name prefix) |
+| `reports/` | Migration reports (organized by app) |
 | `backups/` | Cleanup backups |
-| `*-report-*.md` | Migration reports |
 
 ## ⚠️ Prerequisites
 

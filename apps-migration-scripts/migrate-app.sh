@@ -18,7 +18,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APPS_REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 MPA_REPO_PATH="../../marketplace-partner-apps"
 TEMP_DIR="/tmp/app-migration-$$"
-LOG_FILE="$SCRIPT_DIR/logs/migration-$(date +%Y%m%d-%H%M%S).log"
+LOG_FILE="" # Will be set after app name is parsed
 
 # Disable colors for better compatibility
 RED=''
@@ -207,9 +207,6 @@ adapt_package_json() {
         # Update deploy scripts to match apps repository pattern (remove for now)
         .scripts = .scripts | del(.deploy) | del(."deploy:staging") | del(."deploy:production") |
         
-        # Remove marketplace-partner-apps specific scripts
-        .scripts = .scripts | del(."install-ci") |
-        
         # Ensure @contentful/app-scripts version is compatible with apps repo
         .dependencies = (.dependencies // {}) |
         .devDependencies = (.devDependencies // {})
@@ -291,6 +288,39 @@ export default defineConfig({
 EOF
         fi
     fi
+    
+    # Fix existing tsconfig.json for apps repository compatibility
+    if [[ -f "$temp_app_path/tsconfig.json" ]]; then
+        log "DEBUG" "Fixing existing tsconfig.json for apps repository compatibility"
+        
+        # Read and fix tsconfig.json
+        local tsconfig_content=$(cat "$temp_app_path/tsconfig.json")
+        
+        # Replace vitest/globals with node in types array
+        echo "$tsconfig_content" | jq '
+            if .compilerOptions.types then
+                .compilerOptions.types = (.compilerOptions.types | map(if . == "vitest/globals" then "node" else . end))
+            else
+                .
+            end
+        ' > "$temp_app_path/tsconfig.json.tmp" && mv "$temp_app_path/tsconfig.json.tmp" "$temp_app_path/tsconfig.json"
+        
+        log "DEBUG" "Fixed tsconfig.json types configuration"
+        
+        # Fix test files that use vi globals without imports
+        if [[ -d "$temp_app_path/test" ]]; then
+            log "DEBUG" "Fixing vi imports in test files..."
+            find "$temp_app_path/test" -name "*.ts" -o -name "*.tsx" | while read -r test_file; do
+                if grep -q "vi\." "$test_file" && ! grep -q "import.*vi.*from.*vitest" "$test_file"; then
+                    log "DEBUG" "Adding vi import to $test_file"
+                    # Add import to the top of the file
+                    sed -i.bak '1i\
+import { vi } from '\''vitest'\'';
+' "$test_file" && rm "$test_file.bak"
+                fi
+            done
+        fi
+    fi
 }
 
 update_dependencies() {
@@ -348,9 +378,13 @@ run_post_migration_setup() {
         log "INFO" "Running lerna bootstrap for the new app..."
         npm run bootstrap
         
+        # Install dependencies in the migrated app
+        log "INFO" "Installing dependencies in migrated app..."
+        cd "$target_path"
+        npm install
+        
         # Try to build the app to verify it works
         log "INFO" "Testing app build..."
-        cd "$target_path"
         npm run build || log "WARN" "App build failed - manual fixes may be required"
         
         cd "$APPS_REPO_ROOT"
@@ -363,7 +397,7 @@ run_post_migration_setup() {
 
 create_migration_report() {
     local app_name="$1"
-    local report_file="$APPS_REPO_ROOT/migration-report-$app_name-$(date +%Y%m%d-%H%M%S).md"
+    local report_file="$SCRIPT_DIR/reports/$app_name-migration-report-$(date +%Y%m%d-%H%M%S).md"
     
     cat > "$report_file" << EOF
 # Migration Report: $app_name
@@ -497,6 +531,10 @@ main() {
     echo
     
     parse_arguments "$@"
+    
+    # Set LOG_FILE with app name prefix after parsing arguments
+    LOG_FILE="$SCRIPT_DIR/logs/${APP_NAME}-migration-$(date +%Y%m%d-%H%M%S).log"
+    
     check_prerequisites
     migrate_app "$APP_NAME"
     

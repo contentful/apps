@@ -27,13 +27,16 @@ MPA_REPO_PATH="../../marketplace-partner-apps"
 
 ```
 apps-migration-scripts/
-├── logs/                          # All script logs
-│   ├── migration-YYYYMMDD-HHMMSS.log
-│   ├── validation-YYYYMMDD-HHMMSS.log
-│   └── cleanup-YYYYMMDD-HHMMSS.log
-├── backups/                       # Cleanup backups
-│   └── marketplace-partner-apps-<app>-YYYYMMDD-HHMMSS.tar.gz
-└── *-report-<app>-YYYYMMDD-HHMMSS.md  # Generated reports
+├── logs/                          # All script logs (with app name prefix)
+│   ├── <app-name>-migration-YYYYMMDD-HHMMSS.log
+│   ├── <app-name>-validation-YYYYMMDD-HHMMSS.log
+│   └── <app-name>-cleanup-YYYYMMDD-HHMMSS.log
+├── reports/                       # Migration reports (organized by app)
+│   ├── <app-name>-migration-report-YYYYMMDD-HHMMSS.md
+│   ├── <app-name>-validation-report-YYYYMMDD-HHMMSS.md
+│   └── <app-name>-cleanup-report-YYYYMMDD-HHMMSS.md
+└── backups/                       # Cleanup backups
+    └── marketplace-partner-apps-<app>-YYYYMMDD-HHMMSS.tar.gz
 ```
 
 ## 🔄 Migration Process Internals
@@ -73,7 +76,7 @@ echo "$original_json" | jq '
     } |
     
     # Remove marketplace-partner-apps specific scripts
-    .scripts = .scripts | del(."install-ci")
+    # Note: install-ci is kept as it's a legitimate script in apps repository
 ' > "$package_json.tmp"
 ```
 

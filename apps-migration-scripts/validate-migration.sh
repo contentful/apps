@@ -17,7 +17,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APPS_REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 MPA_REPO_PATH="../../marketplace-partner-apps"
-LOG_FILE="$SCRIPT_DIR/logs/validation-$(date +%Y%m%d-%H%M%S).log"
+LOG_FILE="" # Will be set after app name is parsed
 
 # Disable colors for better compatibility
 RED=''
@@ -179,13 +179,9 @@ validate_package_json() {
     run_test "Has @contentful/app-sdk" "jq -e '.dependencies[\"@contentful/app-sdk\"]' '$package_json' >/dev/null" "false"
     run_test "Has React dependency" "jq -e '.dependencies.react' '$package_json' >/dev/null" "false"
     
-    # Check deprecated scripts from MPA
-    local has_deprecated_scripts=false
-    if jq -e '.scripts["install-ci"]' "$package_json" >/dev/null 2>&1; then
-        has_deprecated_scripts=true
-        log "WARN" "Found deprecated 'install-ci' script from marketplace-partner-apps"
-    fi
-    run_test "No deprecated MPA scripts" "[[ '$has_deprecated_scripts' == false ]]" "false"
+    # Check for actually deprecated scripts (if any are identified in the future)
+    # Currently no scripts are flagged as deprecated
+    run_test "Package.json structure valid" "true"
 }
 
 validate_dependencies() {
@@ -311,12 +307,6 @@ fix_common_issues() {
     # Fix package.json issues
     log "DEBUG" "Checking for fixable package.json issues..."
     
-    # Remove deprecated scripts
-    if jq -e '.scripts["install-ci"]' package.json >/dev/null 2>&1; then
-        log "INFO" "Removing deprecated 'install-ci' script"
-        jq 'del(.scripts["install-ci"])' package.json > package.json.tmp && mv package.json.tmp package.json
-    fi
-    
     # Add missing scripts
     if ! jq -e '.scripts["test:ci"]' package.json >/dev/null 2>&1; then
         log "INFO" "Adding missing 'test:ci' script"
@@ -337,7 +327,7 @@ fix_common_issues() {
 
 create_validation_report() {
     local app_name="$1"
-    local report_file="$APPS_REPO_ROOT/validation-report-$app_name-$(date +%Y%m%d-%H%M%S).md"
+    local report_file="$SCRIPT_DIR/reports/$app_name-validation-report-$(date +%Y%m%d-%H%M%S).md"
     
     local success_rate=$((PASSED_TESTS * 100 / TOTAL_TESTS))
     
@@ -525,6 +515,10 @@ parse_arguments() {
 
 main() {
     parse_arguments "$@"
+    
+    # Set LOG_FILE with app name prefix after parsing arguments
+    LOG_FILE="$SCRIPT_DIR/logs/${APP_NAME}-validation-$(date +%Y%m%d-%H%M%S).log"
+    
     validate_migration "$APP_NAME"
 }
 

@@ -19,7 +19,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APPS_REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 MPA_REPO_PATH="../../marketplace-partner-apps"
-LOG_FILE="$SCRIPT_DIR/logs/cleanup-$(date +%Y%m%d-%H%M%S).log"
+LOG_FILE="" # Will be set after app name is parsed
 
 # Disable colors for better compatibility
 RED=''
@@ -314,7 +314,7 @@ confirm_cleanup() {
 
 create_cleanup_report() {
     local app_name="$1"
-    local report_file="$APPS_REPO_ROOT/cleanup-report-$app_name-$(date +%Y%m%d-%H%M%S).md"
+    local report_file="$SCRIPT_DIR/reports/$app_name-cleanup-report-$(date +%Y%m%d-%H%M%S).md"
     
     cat > "$report_file" << EOF
 # Cleanup Report: $app_name
@@ -450,6 +450,10 @@ main() {
     echo
     
     parse_arguments "$@"
+    
+    # Set LOG_FILE with app name prefix after parsing arguments
+    LOG_FILE="$SCRIPT_DIR/logs/${APP_NAME}-cleanup-$(date +%Y%m%d-%H%M%S).log"
+    
     check_prerequisites
     cleanup_migrated_app "$APP_NAME"
 }

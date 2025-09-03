@@ -54,8 +54,8 @@ Comprehensive documentation for all migration commands, options, and advanced us
 - ✅ Generates migration report
 
 **Output files:**
-- `logs/migration-YYYYMMDD-HHMMSS.log` - Detailed log
-- `migration-report-<app>-YYYYMMDD-HHMMSS.md` - Summary report
+- `logs/<app-name>-migration-YYYYMMDD-HHMMSS.log` - Detailed log
+- `reports/<app-name>-migration-report-YYYYMMDD-HHMMSS.md` - Summary report
 
 ---
 
@@ -95,8 +95,8 @@ Comprehensive documentation for all migration commands, options, and advanced us
 - 🔧 Apps repository integration
 
 **Output files:**
-- `logs/validation-YYYYMMDD-HHMMSS.log` - Detailed log
-- `validation-report-<app>-YYYYMMDD-HHMMSS.md` - Test results
+- `logs/<app-name>-validation-YYYYMMDD-HHMMSS.log` - Detailed log
+- `reports/<app-name>-validation-report-YYYYMMDD-HHMMSS.md` - Test results
 
 ---
 
@@ -135,8 +135,8 @@ Comprehensive documentation for all migration commands, options, and advanced us
 - 📝 Updates release configuration files
 
 **Output files:**
-- `logs/cleanup-YYYYMMDD-HHMMSS.log` - Detailed log
-- `cleanup-report-<app>-YYYYMMDD-HHMMSS.md` - Summary report
+- `logs/<app-name>-cleanup-YYYYMMDD-HHMMSS.log` - Detailed log
+- `reports/<app-name>-cleanup-report-YYYYMMDD-HHMMSS.md` - Summary report
 - `backups/marketplace-partner-apps-<app>-YYYYMMDD-HHMMSS.tar.gz` - Backup
 
 ---
@@ -294,22 +294,22 @@ find ../apps/<app-name> -name "*.sh" -exec chmod +x {} \;
 **Find specific errors:**
 ```bash
 # All errors from latest migration
-grep "\[ERROR\]" logs/migration-*.log | tail -20
+grep "\[ERROR\]" logs/<app-name>-migration-*.log | tail -20
 
 # Build-related issues
-grep -i "build\|compile\|error" logs/validation-*.log
+grep -i "build\|compile\|error" logs/<app-name>-validation-*.log
 
 # Dependency issues
-grep -i "npm\|dependency\|package" logs/migration-*.log
+grep -i "npm\|dependency\|package" logs/<app-name>-migration-*.log
 ```
 
 **Check timing and performance:**
 ```bash
 # Migration timing
-grep "completed\|started" logs/migration-*.log
+grep "completed\|started" logs/<app-name>-migration-*.log
 
 # Validation results summary
-grep "SUCCESS\|FAIL" logs/validation-*.log
+grep "SUCCESS\|FAIL" logs/<app-name>-validation-*.log
 ```
 
 ### Recovery Procedures
@@ -320,7 +320,7 @@ grep "SUCCESS\|FAIL" logs/validation-*.log
 rm -rf ../apps/<app-name>
 
 # Clean temporary files
-rm -f *-report-<app-name>-*.md
+rm -f reports/<app-name>-*-report-*.md
 
 # Start over
 ./migrate-app.sh <app-name> --dry-run
@@ -346,17 +346,17 @@ cd ../apps && rm -rf apps/<app-name>
 
 | File Pattern | Content | When Created |
 |--------------|---------|--------------|
-| `migration-YYYYMMDD-HHMMSS.log` | Detailed migration log | Every migration |
-| `validation-YYYYMMDD-HHMMSS.log` | Validation test results | Every validation |
-| `cleanup-YYYYMMDD-HHMMSS.log` | Cleanup operation log | Every cleanup |
+| `<app-name>-migration-YYYYMMDD-HHMMSS.log` | Detailed migration log | Every migration |
+| `<app-name>-validation-YYYYMMDD-HHMMSS.log` | Validation test results | Every validation |
+| `<app-name>-cleanup-YYYYMMDD-HHMMSS.log` | Cleanup operation log | Every cleanup |
 
-### Report Files
+### Report Files (`reports/`)
 
 | File Pattern | Content | Purpose |
 |--------------|---------|---------|
-| `migration-report-<app>-YYYYMMDD-HHMMSS.md` | Migration summary | Next steps guidance |
-| `validation-report-<app>-YYYYMMDD-HHMMSS.md` | Test results | Issue identification |
-| `cleanup-report-<app>-YYYYMMDD-HHMMSS.md` | Cleanup summary | Confirmation & recovery info |
+| `<app-name>-migration-report-YYYYMMDD-HHMMSS.md` | Migration summary | Next steps guidance |
+| `<app-name>-validation-report-YYYYMMDD-HHMMSS.md` | Test results | Issue identification |
+| `<app-name>-cleanup-report-YYYYMMDD-HHMMSS.md` | Cleanup summary | Confirmation & recovery info |
 
 ### Backup Files (`backups/`)
 

@@ -92,8 +92,8 @@ echo
 echo -e "${GREEN}Here are the apps available in marketplace-partner-apps:${NC}"
 echo
 
-# List apps with numbers (compatible approach)
-APPS_LIST=$(ls ../../marketplace-partner-apps/apps/ 2>/dev/null | head -20)
+# List all apps with numbers (compatible approach)
+APPS_LIST=$(ls ../../marketplace-partner-apps/apps/ 2>/dev/null)
 
 if [[ -z "$APPS_LIST" ]]; then
     echo -e "${RED}❌ No apps found in marketplace-partner-apps/apps/${NC}"
@@ -106,17 +106,15 @@ while IFS= read -r line; do
     [[ -n "$line" ]] && APPS+=("$line")
 done <<< "$APPS_LIST"
 
-# Display numbered list
+# Display numbered list in columns for better readability
 counter=1
 for app in "${APPS[@]}"; do
     printf "%2d. %s\n" "$counter" "$app"
     ((counter++))
 done
 
-TOTAL_APPS=$(ls -1 ../../marketplace-partner-apps/apps/ | wc -l)
-if [[ $TOTAL_APPS -gt 20 ]]; then
-    echo "    ... and $((TOTAL_APPS - 20)) more"
-fi
+echo
+echo -e "${GREEN}Total: ${#APPS[@]} apps available${NC}"
 
 echo
 echo -e "${YELLOW}Press Enter to continue...${NC}"
