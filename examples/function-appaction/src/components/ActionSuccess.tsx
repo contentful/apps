@@ -14,11 +14,55 @@ interface Props {
 const ActionSuccess = (props: Props) => {
   const { actionResult, accordionState, handleCollapse, handleExpand, handleCopy } = props;
   const { data, timestamp, actionId } = actionResult;
-  const statusCode = data?.response?.statusCode;
-  const duration =
-    data && new Date(data.responseAt).getMilliseconds() - new Date(timestamp).getMilliseconds();
-  const requestBody = JSON.stringify(JSON.parse(data?.request?.body || ''), null, 2);
-  const responseBody = JSON.stringify(JSON.parse(data?.response?.body || ''), null, 2);
+  const statusCode = data?.response?.statusCode ?? (data as any)?.status;
+
+  const getHeaderValue = (
+    headers: Record<string, unknown> | undefined,
+    key: string
+  ): string | undefined => {
+    if (!headers) return undefined;
+    const entries = Object.entries(headers) as Array<[string, unknown]>;
+    const match = entries.find(([k]) => k.toLowerCase() === key.toLowerCase());
+    return (match?.[1] ?? undefined) as string | undefined;
+  };
+
+  const isJsonLike = (body: unknown, contentType?: string): boolean => {
+    if (body == null) return false;
+    if (typeof body !== 'string') return true;
+    if (contentType && contentType.toLowerCase().includes('json')) return true;
+    const trimmed = body.trim();
+    return (
+      (trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+      (trimmed.startsWith('[') && trimmed.endsWith(']'))
+    );
+  };
+
+  const formatBodyForDisplay = (body?: unknown, contentType?: string): string => {
+    if (body == null) return '';
+    if (isJsonLike(body, contentType)) {
+      try {
+        const parsed = typeof body === 'string' ? JSON.parse(body) : body;
+        return JSON.stringify(parsed, null, 2);
+      } catch {
+        return typeof body === 'string' ? body : JSON.stringify(body, null, 2);
+      }
+    }
+    return typeof body === 'string' ? body : JSON.stringify(body, null, 2);
+  };
+
+  const requestContentType =
+    getHeaderValue((data as any)?.request?.headers as any, 'content-type') ||
+    getHeaderValue((data as any)?.request?.headers as any, 'Content-Type');
+
+  const responseContentType =
+    getHeaderValue((data as any)?.response?.headers as any, 'content-type') ||
+    getHeaderValue((data as any)?.response?.headers as any, 'Content-Type');
+
+  const requestSource = (data as any)?.request?.body;
+  const responseSource = (data as any)?.response?.body ?? (data as any)?.result;
+
+  const requestBody = formatBodyForDisplay(requestSource, requestContentType);
+  const responseBody = formatBodyForDisplay(responseSource, responseContentType);
 
   return (
     <Accordion key={`${actionId}-${timestamp}`} className={styles.accordion}>
@@ -68,7 +112,7 @@ const ActionSuccess = (props: Props) => {
                     variant="transparent"
                     icon={<CopyIcon />}
                     aria-label="Copy request body"
-                    onClick={() => handleCopy(data?.response?.body || '', 'request body')}
+                    onClick={() => handleCopy(requestBody, 'request body')}
                     className={styles.copyButton}
                   />
                 </Flex>
