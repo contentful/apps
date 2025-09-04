@@ -165,7 +165,7 @@ describe('EntryTable Keyboard Navigation', () => {
     expect(table).toHaveFocus();
   });
 
-  it('should handle Cmd+Space for column selection on Mac', () => {
+  it('should handle Option+Space for column selection on Mac', () => {
     // Mock navigator.platform for Mac
     Object.defineProperty(navigator, 'platform', {
       value: 'MacIntel',
@@ -177,8 +177,8 @@ describe('EntryTable Keyboard Navigation', () => {
     const table = screen.getByRole('grid');
     table.focus();
 
-    // Test Cmd+Space key
-    fireEvent.keyDown(table, { key: ' ', metaKey: true });
+    // Test Option+Space key
+    fireEvent.keyDown(table, { key: ' ', altKey: true });
 
     expect(table).toHaveFocus();
   });
