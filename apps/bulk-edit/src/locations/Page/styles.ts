@@ -148,4 +148,12 @@ export const styles = {
     zIndex: 1,
     minWidth: '300px',
   },
+  // Keyboard navigation styles
+  focusedCell: {
+    outline: `2px solid ${tokens.blue600}`,
+    outlineOffset: '-2px',
+  },
+  selectedCell: {
+    backgroundColor: tokens.blue100,
+  },
 } as const;
