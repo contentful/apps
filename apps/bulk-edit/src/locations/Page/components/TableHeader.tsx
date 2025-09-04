@@ -3,19 +3,10 @@ import { Table, Checkbox, Flex, Text, Box } from '@contentful/f36-components';
 import { Tooltip } from '@contentful/f36-tooltip';
 import { QuestionIcon } from '@phosphor-icons/react';
 import { ContentTypeField } from '../types';
-import { styles } from '../styles';
+import { styles, getCellStyle } from '../styles';
 import { truncate, isCheckboxAllowed } from '../utils/entryUtils';
 import { DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN } from '../utils/constants';
-
-interface FocusPosition {
-  row: number;
-  column: number;
-}
-
-interface SelectionRange {
-  start: FocusPosition;
-  end: FocusPosition;
-}
+import { FocusPosition, SelectionRange } from '../hooks/useKeyboardNavigation';
 
 interface TableHeaderProps {
   fields: ContentTypeField[];
@@ -62,11 +53,11 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
         <Table.Cell
           as="th"
           key={DISPLAY_NAME_COLUMN}
-          style={{
-            ...styles.displayNameHeader,
-            ...(isCellFocused(getColumnIndex(DISPLAY_NAME_COLUMN)) && styles.focusedCell),
-            ...(isCellSelected(getColumnIndex(DISPLAY_NAME_COLUMN)) && styles.selectedCell),
-          }}
+          style={getCellStyle(
+            styles.displayNameHeader,
+            isCellFocused(getColumnIndex(DISPLAY_NAME_COLUMN)),
+            isCellSelected(getColumnIndex(DISPLAY_NAME_COLUMN))
+          )}
           onClick={() => onCellFocus({ row: -1, column: getColumnIndex(DISPLAY_NAME_COLUMN) })}
           role="columnheader"
           tabIndex={-1}>
@@ -75,11 +66,11 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
         <Table.Cell
           as="th"
           key={ENTRY_STATUS_COLUMN}
-          style={{
-            ...styles.statusHeader,
-            ...(isCellFocused(getColumnIndex(ENTRY_STATUS_COLUMN)) && styles.focusedCell),
-            ...(isCellSelected(getColumnIndex(ENTRY_STATUS_COLUMN)) && styles.selectedCell),
-          }}
+          style={getCellStyle(
+            styles.statusHeader,
+            isCellFocused(getColumnIndex(ENTRY_STATUS_COLUMN)),
+            isCellSelected(getColumnIndex(ENTRY_STATUS_COLUMN))
+          )}
           onClick={() => onCellFocus({ row: -1, column: getColumnIndex(ENTRY_STATUS_COLUMN) })}
           role="columnheader"
           tabIndex={-1}>
@@ -94,68 +85,58 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           const isAllowed = isCheckboxAllowed(field);
           const isDisabled = checkboxesDisabled[field.uniqueId];
           const columnIndex = getColumnIndex(field);
+          const fieldName = truncate(field.locale ? `(${field.locale}) ${field.name}` : field.name);
 
-          if (isAllowed) {
-            return (
-              <Table.Cell
-                as="th"
-                key={field.uniqueId}
-                style={{
-                  ...styles.tableHeader,
-                  ...(isCellFocused(columnIndex) && styles.focusedCell),
-                  ...(isCellSelected(columnIndex) && styles.selectedCell),
-                }}
-                isTruncated
-                onClick={() => onCellFocus({ row: -1, column: columnIndex })}
-                role="columnheader"
-                tabIndex={-1}>
-                <Flex gap="spacingXs">
-                  <Checkbox
-                    isChecked={headerCheckboxes[field.uniqueId]}
-                    isDisabled={isDisabled}
-                    onChange={(e) => onHeaderCheckboxChange(field.uniqueId, e.target.checked)}
-                    testId={`header-checkbox-${field.uniqueId}`}
-                    aria-label={`Select all for ${truncate(field.name)}`}
-                  />
-                  <Text
-                    fontSize="fontSizeS"
-                    fontWeight="fontWeightMedium"
-                    lineHeight="lineHeightS"
-                    fontColor="gray900">
-                    {truncate(field.locale ? `(${field.locale}) ${field.name}` : field.name)}
-                  </Text>
-                </Flex>
-              </Table.Cell>
-            );
-          }
           return (
             <Table.Cell
               as="th"
               key={field.uniqueId}
-              style={{
-                ...styles.tableHeader,
-                ...(isCellFocused(columnIndex) && styles.focusedCell),
-                ...(isCellSelected(columnIndex) && styles.selectedCell),
-              }}
+              style={getCellStyle(
+                styles.tableHeader,
+                isCellFocused(columnIndex),
+                isCellSelected(columnIndex)
+              )}
+              isTruncated
               onClick={() => onCellFocus({ row: -1, column: columnIndex })}
               role="columnheader"
               tabIndex={-1}>
               <Flex gap="spacingXs">
-                <Text
-                  fontSize="fontSizeS"
-                  fontWeight="fontWeightMedium"
-                  lineHeight="lineHeightS"
-                  fontColor="gray500">
-                  {truncate(field.locale ? `(${field.locale}) ${field.name}` : field.name)}
-                </Text>
-                <Tooltip
-                  content={`Bulk editing is not supported for the ${field.name} field type`}
-                  placement="top">
-                  <QuestionIcon
-                    size={16}
-                    aria-label={`Bulk editing not supported for ${field.name}`}
-                  />
-                </Tooltip>
+                {isAllowed ? (
+                  <>
+                    <Checkbox
+                      isChecked={headerCheckboxes[field.uniqueId]}
+                      isDisabled={isDisabled}
+                      onChange={(e) => onHeaderCheckboxChange(field.uniqueId, e.target.checked)}
+                      testId={`header-checkbox-${field.uniqueId}`}
+                      aria-label={`Select all for ${fieldName}`}
+                    />
+                    <Text
+                      fontSize="fontSizeS"
+                      fontWeight="fontWeightMedium"
+                      lineHeight="lineHeightS"
+                      fontColor="gray900">
+                      {fieldName}
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Text
+                      fontSize="fontSizeS"
+                      fontWeight="fontWeightMedium"
+                      lineHeight="lineHeightS"
+                      fontColor="gray500">
+                      {fieldName}
+                    </Text>
+                    <Tooltip
+                      content={`Bulk editing is not supported for the ${field.name} field type`}
+                      placement="top">
+                      <QuestionIcon
+                        size={16}
+                        aria-label={`Bulk editing not supported for ${field.name}`}
+                      />
+                    </Tooltip>
+                  </>
+                )}
               </Flex>
             </Table.Cell>
           );

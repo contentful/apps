@@ -39,19 +39,6 @@ export const useKeyboardNavigation = ({
   const [selectionRange, setSelectionRange] = useState<SelectionRange | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
 
-  // Helper function to validate position
-  const isValidPosition = useCallback(
-    (position: FocusPosition) => {
-      return (
-        position.row >= -1 &&
-        position.row < entriesLength &&
-        position.column >= 0 &&
-        position.column < totalColumns
-      );
-    },
-    [entriesLength, totalColumns]
-  );
-
   // Internal navigation functions
   const moveFocus = useCallback(
     (direction: 'up' | 'down' | 'left' | 'right', extendSelection = false) => {
@@ -59,6 +46,8 @@ export const useKeyboardNavigation = ({
 
       let newPosition = { ...focusedCell };
 
+      //Moves across the table in the specified direction
+      // If you reach the edge of the table, you will not be able to move further
       switch (direction) {
         case 'up':
           newPosition.row = Math.max(-1, focusedCell.row - 1);
@@ -74,25 +63,23 @@ export const useKeyboardNavigation = ({
           break;
       }
 
-      if (isValidPosition(newPosition)) {
-        if (extendSelection) {
-          if (!isSelecting) {
-            setIsSelecting(true);
-            setSelectionRange({ start: focusedCell, end: newPosition });
-          } else {
-            setSelectionRange((prev) => (prev ? { ...prev, end: newPosition } : null));
-          }
+      if (extendSelection) {
+        if (!isSelecting) {
+          setIsSelecting(true);
+          setSelectionRange({ start: focusedCell, end: newPosition });
         } else {
-          setIsSelecting(false);
-          setSelectionRange(null);
+          setSelectionRange((prev) => (prev ? { ...prev, end: newPosition } : null));
         }
-        setFocusedCell(newPosition);
+      } else {
+        setIsSelecting(false);
+        setSelectionRange(null);
       }
+      setFocusedCell(newPosition);
     },
-    [focusedCell, entriesLength, totalColumns, isSelecting, isValidPosition]
+    [focusedCell, entriesLength, totalColumns, isSelecting]
   );
 
-  const extendSelectionToEdge = useCallback(
+  const extendFocusToEdge = useCallback(
     (direction: 'up' | 'down' | 'left' | 'right') => {
       if (!focusedCell) return;
 
@@ -113,17 +100,15 @@ export const useKeyboardNavigation = ({
           break;
       }
 
-      if (isValidPosition(newPosition)) {
-        if (!isSelecting) {
-          setIsSelecting(true);
-          setSelectionRange({ start: focusedCell, end: newPosition });
-        } else {
-          setSelectionRange((prev) => (prev ? { ...prev, end: newPosition } : null));
-        }
-        setFocusedCell(newPosition);
+      if (!isSelecting) {
+        setIsSelecting(true);
+        setSelectionRange({ start: focusedCell, end: newPosition });
+      } else {
+        setSelectionRange((prev) => (prev ? { ...prev, end: newPosition } : null));
       }
+      setFocusedCell(newPosition);
     },
-    [focusedCell, entriesLength, totalColumns, isSelecting, isValidPosition]
+    [focusedCell, entriesLength, totalColumns, isSelecting]
   );
 
   // Focus column function
@@ -148,17 +133,9 @@ export const useKeyboardNavigation = ({
       if (!focusedCell) return;
 
       const { key, shiftKey, altKey, metaKey, code } = event;
-      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const isMac = navigator.userAgent.includes('Mac');
       const isEdgeSelectKey = isMac ? metaKey : altKey;
 
-      // Handle Alt+Space / Option+Space for column selection
-      if (code === 'Space' && altKey) {
-        event.preventDefault();
-        focusColumn(focusedCell.column);
-        return;
-      }
-
-      // Handle other keys
       const handledKeys = [
         'ArrowUp',
         'ArrowDown',
@@ -173,25 +150,32 @@ export const useKeyboardNavigation = ({
         event.preventDefault();
       }
 
+      const moveKeyDirection = (direction: 'up' | 'down' | 'left' | 'right') => {
+        if (isEdgeSelectKey && shiftKey) {
+          extendFocusToEdge(direction);
+        } else if (shiftKey) {
+          moveFocus(direction, true);
+        } else {
+          moveFocus(direction);
+        }
+      };
+
+      if (code === 'Space' && altKey) {
+        event.preventDefault();
+        focusColumn(focusedCell.column);
+        return;
+      }
+
       switch (key) {
         case 'ArrowUp':
-        case 'ArrowDown':
-        case 'ArrowLeft':
-        case 'ArrowRight':
-          const direction = key.replace('Arrow', '').toLowerCase() as
-            | 'up'
-            | 'down'
-            | 'left'
-            | 'right';
-          if (isEdgeSelectKey && shiftKey) {
-            extendSelectionToEdge(direction);
-          } else if (shiftKey) {
-            moveFocus(direction, true);
-          } else {
-            moveFocus(direction);
-          }
+          moveKeyDirection('up');
           break;
-
+        case 'ArrowDown':
+          moveKeyDirection('down');
+          break;
+        case 'ArrowLeft':
+          moveKeyDirection('left');
+          break;
         case 'Tab':
           moveFocus(shiftKey ? 'left' : 'right');
           break;
@@ -218,28 +202,17 @@ export const useKeyboardNavigation = ({
           break;
       }
     },
-    [focusedCell, moveFocus, onToggleSelection, extendSelectionToEdge, focusColumn]
+    [focusedCell, moveFocus, onToggleSelection, extendFocusToEdge, focusColumn]
   );
 
   // Add keyboard event listeners
   useEffect(() => {
     const tableElement = tableRef.current;
     if (tableElement) {
-      // Global event listener to catch Alt+Space even when table is not focused
-      const handleGlobalKeyDown = (event: KeyboardEvent) => {
-        if (event.key === ' ' && event.altKey && focusedCell) {
-          event.preventDefault();
-          event.stopPropagation();
-          focusColumn(focusedCell.column);
-        }
-      };
-
       tableElement.addEventListener('keydown', handleKeyDown);
-      document.addEventListener('keydown', handleGlobalKeyDown);
 
       return () => {
         tableElement.removeEventListener('keydown', handleKeyDown);
-        document.removeEventListener('keydown', handleGlobalKeyDown);
       };
     }
   }, [handleKeyDown, focusedCell, focusColumn]);

@@ -36,6 +36,13 @@ export const styles = {
     minWidth: `${CELL_WIDTH * 4}px`,
     overflowX: 'auto',
   },
+  tableFocused: {
+    marginTop: tokens.spacingM,
+    minWidth: `${CELL_WIDTH * 4}px`,
+    overflowX: 'auto',
+    outline: `2px solid ${tokens.blue500}`,
+    outlineOffset: '2px',
+  },
   tableHeader: {
     background: tokens.gray200,
     borderRight: `1px solid ${tokens.gray300}`,
@@ -178,6 +185,19 @@ export const styles = {
     outlineOffset: '-2px',
   },
   selectedCell: {
-    backgroundColor: tokens.blue100,
+    background: tokens.blue100,
   },
 } as const;
+
+// Helper function to combine cell styles
+export const getCellStyle = (
+  baseStyle: React.CSSProperties,
+  isFocused: boolean,
+  isSelected: boolean
+): React.CSSProperties => {
+  return {
+    ...baseStyle,
+    ...(isFocused && styles.focusedCell),
+    ...(isSelected && styles.selectedCell),
+  };
+};

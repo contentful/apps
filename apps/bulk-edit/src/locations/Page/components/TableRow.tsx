@@ -3,7 +3,7 @@ import { Table, TextLink, Badge, Checkbox, Flex, Text } from '@contentful/f36-co
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { Entry, ContentTypeField } from '../types';
 import { ContentTypeProps } from 'contentful-management';
-import { styles } from '../styles';
+import { styles, getCellStyle } from '../styles';
 import {
   getStatusFromEntry,
   renderFieldValue,
@@ -14,16 +14,7 @@ import {
   getStatusColor,
 } from '../utils/entryUtils';
 import { DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN } from '../utils/constants';
-
-interface FocusPosition {
-  row: number;
-  column: number;
-}
-
-interface SelectionRange {
-  start: FocusPosition;
-  end: FocusPosition;
-}
+import { FocusPosition, SelectionRange } from '../hooks/useKeyboardNavigation';
 
 interface TableRowProps {
   entry: Entry;
@@ -86,15 +77,17 @@ export const TableRow: React.FC<TableRowProps> = ({
     return allColumns.indexOf(fieldId);
   };
 
+  // Helper function to get cell style
+  const getCellStyleForColumn = (baseStyle: React.CSSProperties, columnId: string) => {
+    const columnIndex = getColumnIndex(columnId);
+    return getCellStyle(baseStyle, isCellFocused(columnIndex), isCellSelected(columnIndex));
+  };
+
   return (
     <Table.Row key={entry.sys.id}>
       <Table.Cell
         testId="display-name-cell"
-        style={{
-          ...styles.displayNameCell,
-          ...(isCellFocused(getColumnIndex(DISPLAY_NAME_COLUMN)) && styles.focusedCell),
-          ...(isCellSelected(getColumnIndex(DISPLAY_NAME_COLUMN)) && styles.selectedCell),
-        }}
+        style={getCellStyleForColumn(styles.displayNameCell, DISPLAY_NAME_COLUMN)}
         onClick={() => onCellFocus({ row: rowIndex, column: getColumnIndex(DISPLAY_NAME_COLUMN) })}
         role="gridcell"
         tabIndex={-1}>
@@ -110,11 +103,7 @@ export const TableRow: React.FC<TableRowProps> = ({
       </Table.Cell>
       <Table.Cell
         testId="status-cell"
-        style={{
-          ...styles.statusCell,
-          ...(isCellFocused(getColumnIndex(ENTRY_STATUS_COLUMN)) && styles.focusedCell),
-          ...(isCellSelected(getColumnIndex(ENTRY_STATUS_COLUMN)) && styles.selectedCell),
-        }}
+        style={getCellStyleForColumn(styles.statusCell, ENTRY_STATUS_COLUMN)}
         onClick={() => onCellFocus({ row: rowIndex, column: getColumnIndex(ENTRY_STATUS_COLUMN) })}
         role="gridcell"
         tabIndex={-1}>
@@ -126,22 +115,23 @@ export const TableRow: React.FC<TableRowProps> = ({
         const isVisible =
           (hoveredColumn === field.uniqueId && !isDisabled) || rowCheckboxes[field.uniqueId];
         const columnIndex = getColumnIndex(field);
+        const fieldValue = entry.fields[field.id]?.[field.locale || defaultLocale];
 
-        if (isAllowed) {
-          return (
-            <Table.Cell
-              key={field.uniqueId}
-              style={{
-                ...styles.cell,
-                ...(isCellFocused(columnIndex) && styles.focusedCell),
-                ...(isCellSelected(columnIndex) && styles.selectedCell),
-              }}
-              onMouseEnter={() => setHoveredColumn(field.uniqueId)}
-              onMouseLeave={() => setHoveredColumn(null)}
-              onClick={() => onCellFocus({ row: rowIndex, column: columnIndex })}
-              role="gridcell"
-              tabIndex={-1}
-              isTruncated>
+        return (
+          <Table.Cell
+            key={field.uniqueId}
+            style={getCellStyle(
+              styles.cell,
+              isCellFocused(columnIndex),
+              isCellSelected(columnIndex)
+            )}
+            onMouseEnter={() => setHoveredColumn(field.uniqueId)}
+            onMouseLeave={() => setHoveredColumn(null)}
+            onClick={() => onCellFocus({ row: rowIndex, column: columnIndex })}
+            role="gridcell"
+            tabIndex={-1}
+            isTruncated>
+            {isAllowed ? (
               <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
                 {isVisible && (
                   <Checkbox
@@ -152,25 +142,11 @@ export const TableRow: React.FC<TableRowProps> = ({
                     aria-label={`Select ${truncate(field.name)} for ${displayValue}`}
                   />
                 )}
-                {renderFieldValue(field, entry.fields[field.id]?.[field.locale || defaultLocale])}
+                {renderFieldValue(field, fieldValue)}
               </Flex>
-            </Table.Cell>
-          );
-        }
-        return (
-          <Table.Cell
-            key={field.uniqueId}
-            style={{
-              ...styles.cell,
-              ...(isCellFocused(columnIndex) && styles.focusedCell),
-              ...(isCellSelected(columnIndex) && styles.selectedCell),
-            }}
-            onClick={() => onCellFocus({ row: rowIndex, column: columnIndex })}
-            role="gridcell"
-            tabIndex={-1}>
-            <Text fontColor="gray500">
-              {renderFieldValue(field, entry.fields[field.id]?.[field.locale || defaultLocale])}
-            </Text>
+            ) : (
+              <Text fontColor="gray500">{renderFieldValue(field, fieldValue)}</Text>
+            )}
           </Table.Cell>
         );
       })}
