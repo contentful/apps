@@ -44,11 +44,22 @@ const AppActionCard = (props: Props) => {
       )) as unknown as ActionResultData;
 
       const timestamp = new Date().toLocaleString();
+      const call: any = result as any;
+      const base = { timestamp, actionId: action.sys.id } as const;
 
-      setActionResults((prev) => [
-        { success: true, data: result, timestamp, actionId: action.sys.id },
-        ...prev,
-      ]);
+      if (call?.status === 'succeeded') {
+        setActionResults((prev) => [{ success: true, data: call, ...base }, ...prev]);
+      } else if (call?.status === 'failed') {
+        setActionResults((prev) => [
+          { success: false, error: call?.error || new Error('App action failed'), ...base },
+          ...prev,
+        ]);
+      } else {
+        setActionResults((prev) => [
+          { success: false, error: new Error('App action still processing'), ...base },
+          ...prev,
+        ]);
+      }
     } catch (error) {
       const timestamp = new Date().toLocaleString();
       setActionResults((prev) => [
