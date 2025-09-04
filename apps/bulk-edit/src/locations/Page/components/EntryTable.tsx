@@ -100,50 +100,19 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     },
   });
 
-  const getColumnId = useCallback(
-    (columnIndex: number) => {
-      return columnIds[columnIndex];
-    },
-    [columnIds]
-  );
+  const getColumnId = (columnIndex: number) => {
+    return columnIds[columnIndex];
+  };
 
-  const isBulkEditableColumn = useCallback(
-    (columnIndex: number) => {
-      const columnId = getColumnId(columnIndex);
-      return allowedColumns[columnId] || false;
-    },
-    [getColumnId, allowedColumns]
-  );
+  const isBulkEditableColumn = (columnIndex: number) => {
+    const columnId = getColumnId(columnIndex);
+    return allowedColumns[columnId] || false;
+  };
 
-  const getEntryId = useCallback(
-    (rowIndex: number) => {
-      if (rowIndex < 0 || rowIndex >= entries.length) return null;
-      return entries[rowIndex].sys.id;
-    },
-    [entries]
-  );
-
-  const toggleCheckbox = useCallback(
-    (position: FocusPosition) => {
-      const columnId = getColumnId(position.column);
-
-      if (position.row === -1) {
-        // Header checkbox
-        if (isBulkEditableColumn(position.column)) {
-          const currentState = headerCheckboxes[columnId];
-          handleHeaderCheckboxChange(columnId, !currentState);
-        }
-      } else {
-        // Row checkbox
-        const entryId = getEntryId(position.row);
-        if (entryId && isBulkEditableColumn(position.column)) {
-          const currentState = rowCheckboxes[entryId]?.[columnId];
-          handleCellCheckboxChange(entryId, columnId, !currentState);
-        }
-      }
-    },
-    [getColumnId, isBulkEditableColumn, headerCheckboxes, getEntryId, rowCheckboxes]
-  );
+  const getEntryId = (rowIndex: number) => {
+    if (rowIndex < 0 || rowIndex >= entries.length) return null;
+    return entries[rowIndex].sys.id;
+  };
 
   // Initialize focus on first render
   useEffect(() => {
@@ -219,6 +188,28 @@ export const EntryTable: React.FC<EntryTableProps> = ({
       }));
     },
     [columnIds]
+  );
+
+  const toggleCheckbox = useCallback(
+    (position: FocusPosition) => {
+      const columnId = getColumnId(position.column);
+
+      if (position.row === -1) {
+        // Header checkbox
+        if (isBulkEditableColumn(position.column)) {
+          const currentState = headerCheckboxes[columnId];
+          handleHeaderCheckboxChange(columnId, !currentState);
+        }
+      } else {
+        // Row checkbox
+        const entryId = getEntryId(position.row);
+        if (entryId && isBulkEditableColumn(position.column)) {
+          const currentState = rowCheckboxes[entryId]?.[columnId];
+          handleCellCheckboxChange(entryId, columnId, !currentState);
+        }
+      }
+    },
+    [headerCheckboxes, rowCheckboxes, handleHeaderCheckboxChange, handleCellCheckboxChange]
   );
 
   const toggleSelectionCheckboxes = useCallback(() => {
@@ -302,10 +293,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     selectionRange,
     focusedCell,
     toggleCheckbox,
-    isBulkEditableColumn,
-    getColumnId,
     headerCheckboxes,
-    getEntryId,
     rowCheckboxes,
     handleHeaderCheckboxChange,
     handleCellCheckboxChange,
