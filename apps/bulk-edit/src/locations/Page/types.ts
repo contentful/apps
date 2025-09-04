@@ -1,5 +1,10 @@
 import { FieldType } from 'contentful-management';
 
+export type ColumnOption = {
+  label: string;
+  value: string;
+};
+
 export type ContentTypeField = {
   id: string;
   uniqueId: string;

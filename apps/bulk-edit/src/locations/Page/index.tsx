@@ -1,39 +1,40 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box,
-  Heading,
-  Flex,
-  Spinner,
   Button,
-  Text,
+  Flex,
+  Heading,
   Notification,
   Skeleton,
+  Spinner,
   Table,
+  Text,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import {
   ContentFields,
   ContentTypeProps,
-  KeyValueMap,
   EntryProps,
+  KeyValueMap,
   QueryOptions,
 } from 'contentful-management';
-import { ContentTypeField } from './types';
+import { ColumnOption, ContentTypeField } from './types';
 import { styles } from './styles';
 import { ContentTypeSidebar } from './components/ContentTypeSidebar';
-import { SortMenu, SORT_OPTIONS } from './components/SortMenu';
+import { SORT_OPTIONS, SortMenu } from './components/SortMenu';
 import { EntryTable } from './components/EntryTable';
 import { BulkEditModal } from './components/BulkEditModal';
 import { UndoBulkEditModal } from './components/UndoBulkEditModal';
 import {
-  updateEntryFieldLocalized,
+  fetchEntriesWithBatching,
   getEntryFieldValue,
   processEntriesInBatches,
   truncate,
-  fetchEntriesWithBatching,
+  updateEntryFieldLocalized,
 } from './utils/entryUtils';
-import { BATCH_PROCESSING, API_LIMITS, PAGE_SIZE_OPTIONS, BATCH_FETCHING } from './utils/constants';
+import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
+import ColumnMultiselect from './components/ColumnMultiselect';
 
 const Page = () => {
   const sdk = useSDK();
@@ -59,6 +60,8 @@ const Page = () => {
   const [undoFirstEntryFieldValue, setUndoFirstEntryFieldValue] = useState('');
   const [totalUpdateCount, setTotalUpdateCount] = useState<number>(0);
   const [editionCount, setEditionCount] = useState<number>(0);
+  const [selectedFields, setSelectedFields] = useState<ColumnOption[]>([]);
+  const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -121,19 +124,27 @@ const Page = () => {
     void fetchContentTypes();
   }, [sdk]);
 
-  useEffect(() => {
-    setActivePage(0);
-  }, [selectedContentTypeId, sortOption]);
+  const getFieldsMapped = (fields: ContentTypeField[]) => {
+    return fields.map((field) => ({
+      label: field.locale ? `(${field.locale}) ${field.name}` : field.name,
+      value: field.uniqueId,
+    }));
+  };
 
+  const clearBasicState = () => {
+    setEntries([]);
+    setFields([]);
+    setTotalEntries(0);
+  };
+
+  // Fetch content type and fields when selectedContentTypeId changes
   useEffect(() => {
-    const fetchFieldsAndEntries = async (): Promise<void> => {
+    const fetchContentTypeAndFields = async (): Promise<void> => {
       if (!selectedContentTypeId) {
-        setEntries([]);
-        setFields([]);
-        setTotalEntries(0);
+        clearBasicState();
         return;
       }
-      setEntriesLoading(true);
+
       try {
         const ct = await sdk.cma.contentType.get({ contentTypeId: selectedContentTypeId });
         const newFields: ContentTypeField[] = [];
@@ -158,7 +169,27 @@ const Page = () => {
           }
         });
         setFields(newFields);
-        const displayField = ct.displayField || null;
+        setSelectedFields(getFieldsMapped(newFields));
+        setCurrentContentType(ct);
+      } catch (e) {
+        clearBasicState();
+        setSelectedFields([]);
+        setCurrentContentType(null);
+      }
+    };
+    void fetchContentTypeAndFields();
+  }, [sdk, selectedContentTypeId, locales]);
+
+  // Fetch entries when pagination, sorting, or content type changes
+  useEffect(() => {
+    const fetchEntries = async (): Promise<void> => {
+      if (fields.length === 0 || !currentContentType) {
+        return;
+      }
+
+      setEntriesLoading(true);
+      try {
+        const displayField = currentContentType.displayField || null;
 
         const baseQuery = buildQuery(sortOption, displayField);
 
@@ -171,15 +202,13 @@ const Page = () => {
         setEntries(entries);
         setTotalEntries(total);
       } catch (e) {
-        setEntries([]);
-        setFields([]);
-        setTotalEntries(0);
+        clearBasicState();
       } finally {
         setEntriesLoading(false);
       }
     };
-    void fetchFieldsAndEntries();
-  }, [sdk, selectedContentTypeId, activePage, itemsPerPage, sortOption]);
+    void fetchEntries();
+  }, [sdk, activePage, itemsPerPage, sortOption, currentContentType]);
 
   const selectedContentType = contentTypes.find((ct) => ct.sys.id === selectedContentTypeId);
   const selectedEntries = entries.filter((entry) => selectedEntryIds.includes(entry.sys.id));
@@ -401,11 +430,16 @@ const Page = () => {
             <ContentTypeSidebar
               contentTypes={contentTypes}
               selectedContentTypeId={selectedContentTypeId}
-              onContentTypeSelect={setSelectedContentTypeId}
+              onContentTypeSelect={(newCT) => {
+                setSelectedContentTypeId(newCT);
+                setSortOption(SORT_OPTIONS[0].value);
+                setActivePage(0);
+              }}
             />
             <div style={styles.stickySpacer} />
             <Box>
               <>
+                {/* Heading */}
                 <Heading style={styles.stickyPageHeader}>
                   {selectedContentType ? `Bulk edit ${selectedContentType.name}` : 'Bulk Edit App'}
                 </Heading>
@@ -413,8 +447,22 @@ const Page = () => {
                   <Box style={styles.noEntriesText}>No entries found.</Box>
                 ) : (
                   <>
-                    <SortMenu sortOption={sortOption} onSortChange={setSortOption} />
-                    {selectedField && selectedEntryIds.length > 0 && (
+                    <Flex gap="spacingS" alignItems="center">
+                      <SortMenu
+                        sortOption={sortOption}
+                        onSortChange={(newSort) => {
+                          setSortOption(newSort);
+                          setActivePage(0);
+                        }}
+                      />
+                      <ColumnMultiselect
+                        options={getFieldsMapped(fields)}
+                        selectedFields={selectedFields}
+                        setSelectedFields={setSelectedFields}
+                        style={styles.columnMultiselect}
+                      />
+                    </Flex>
+                    {selectedField && selectedEntryIds.length > 0 && !entriesLoading && (
                       <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
                         <Button variant="primary" onClick={() => setIsModalOpen(true)}>
                           {selectedEntryIds.length === 1 ? 'Edit' : 'Bulk edit'}
@@ -443,7 +491,9 @@ const Page = () => {
                         )}
                         <EntryTable
                           entries={entries}
-                          fields={fields}
+                          fields={selectedFields.flatMap(
+                            (field) => fields.find((f) => f.uniqueId === field.value) || []
+                          )}
                           contentType={selectedContentType}
                           spaceId={sdk.ids.space}
                           environmentId={sdk.ids.environment}
