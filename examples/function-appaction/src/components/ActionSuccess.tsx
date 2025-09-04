@@ -76,11 +76,6 @@ const ActionSuccess = (props: Props) => {
                 (Function: <strong>{data?.request?.function}</strong>)
               </Text>
             )}
-            {typeof duration === 'number' && (
-              <Text className={styles.accordionTitleMargin}>
-                Duration: <strong>{duration}</strong> ms
-              </Text>
-            )}
           </Text>
         }
         isExpanded={accordionState[`outer-${actionId}-${timestamp}`]}
