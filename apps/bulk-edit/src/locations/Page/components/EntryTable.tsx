@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Table, Box, Pagination } from '@contentful/f36-components';
 import { Entry, ContentTypeField } from '../types';
 import { ContentTypeProps } from 'contentful-management';
@@ -7,6 +7,11 @@ import { TableHeader } from './TableHeader';
 import { TableRow } from './TableRow';
 import { isCheckboxAllowed as isBulkEditable } from '../utils/entryUtils';
 import { DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN } from '../utils/constants';
+import {
+  useKeyboardNavigation,
+  FocusPosition,
+  SelectionRange,
+} from '../hooks/useKeyboardNavigation';
 
 interface EntryTableProps {
   entries: Entry[];
@@ -25,16 +30,6 @@ interface EntryTableProps {
     selectedEntryIds: string[];
     selectedFieldId: string | null;
   }) => void;
-}
-
-interface FocusPosition {
-  row: number; // -1 for header, 0+ for data rows
-  column: number;
-}
-
-interface SelectionRange {
-  start: FocusPosition;
-  end: FocusPosition;
 }
 
 function getColumnIds(fields: ContentTypeField[]): string[] {
@@ -85,7 +80,6 @@ export const EntryTable: React.FC<EntryTableProps> = ({
 }) => {
   const columnIds = getColumnIds(fields);
   const allowedColumns = getBulkEditableColumns(fields);
-  const tableRef = useRef<HTMLTableElement>(null);
 
   const [headerCheckboxes, setHeaderCheckboxes] = useState<Record<string, boolean>>(
     getInitialCheckboxState(columnIds)
@@ -95,31 +89,16 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     getInitialRowCheckboxState(entries, columnIds)
   );
 
-  // Focus and selection state
-  const [focusedCell, setFocusedCell] = useState<FocusPosition | null>(null);
-  const [selectionRange, setSelectionRange] = useState<SelectionRange | null>(null);
-  const [isSelecting, setIsSelecting] = useState(false);
-
-  // Helper functions for keyboard navigation
-  const getTotalRows = useCallback(() => {
-    return entries.length + 1; // +1 for header row
-  }, [entries.length]);
-
-  const getTotalColumns = useCallback(() => {
-    return columnIds.length;
-  }, [columnIds.length]);
-
-  const isValidPosition = useCallback(
-    (position: FocusPosition) => {
-      return (
-        position.row >= -1 &&
-        position.row < entries.length &&
-        position.column >= 0 &&
-        position.column < getTotalColumns()
-      );
+  // Custom keyboard navigation hook
+  const { focusedCell, selectionRange, setFocusedCell, tableRef } = useKeyboardNavigation({
+    totalColumns: columnIds.length,
+    entriesLength: entries.length,
+    onFocusColumn: (columnIndex: number) => {},
+    onToggleSelection: () => {
+      // This will be called when selection should be toggled
+      toggleSelectionCheckboxes();
     },
-    [entries.length, getTotalColumns]
-  );
+  });
 
   const getColumnId = useCallback(
     (columnIndex: number) => {
@@ -144,46 +123,6 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     [entries]
   );
 
-  // Keyboard navigation functions
-  const moveFocus = useCallback(
-    (direction: 'up' | 'down' | 'left' | 'right', extendSelection = false) => {
-      if (!focusedCell) return;
-
-      let newPosition = { ...focusedCell };
-
-      switch (direction) {
-        case 'up':
-          newPosition.row = Math.max(-1, focusedCell.row - 1);
-          break;
-        case 'down':
-          newPosition.row = Math.min(entries.length - 1, focusedCell.row + 1);
-          break;
-        case 'left':
-          newPosition.column = Math.max(0, focusedCell.column - 1);
-          break;
-        case 'right':
-          newPosition.column = Math.min(getTotalColumns() - 1, focusedCell.column + 1);
-          break;
-      }
-
-      if (isValidPosition(newPosition)) {
-        if (extendSelection) {
-          if (!isSelecting) {
-            setIsSelecting(true);
-            setSelectionRange({ start: focusedCell, end: newPosition });
-          } else {
-            setSelectionRange((prev) => (prev ? { ...prev, end: newPosition } : null));
-          }
-        } else {
-          setIsSelecting(false);
-          setSelectionRange(null);
-        }
-        setFocusedCell(newPosition);
-      }
-    },
-    [focusedCell, entries.length, getTotalColumns, isValidPosition, isSelecting]
-  );
-
   const toggleCheckbox = useCallback(
     (position: FocusPosition) => {
       const columnId = getColumnId(position.column);
@@ -205,83 +144,6 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     },
     [getColumnId, isBulkEditableColumn, headerCheckboxes, getEntryId, rowCheckboxes]
   );
-
-  const focusColumn = useCallback(
-    (columnIndex: number) => {
-      if (columnIndex >= 0 && columnIndex < getTotalColumns()) {
-        const newPosition: FocusPosition = { row: -1, column: columnIndex };
-        setFocusedCell(newPosition);
-        setIsSelecting(false);
-        setSelectionRange(null);
-      }
-    },
-    [getTotalColumns]
-  );
-
-  const selectColumn = useCallback(
-    (columnIndex: number) => {
-      const columnId = getColumnId(columnIndex);
-      if (isBulkEditableColumn(columnIndex)) {
-        // Select all cells in the column
-        const allEntryIds = entries.map((entry) => entry.sys.id);
-        allEntryIds.forEach((entryId) => {
-          handleCellCheckboxChange(entryId, columnId, true);
-        });
-      }
-    },
-    [getColumnId, isBulkEditableColumn, entries]
-  );
-
-  const extendSelectionToEdge = useCallback(
-    (direction: 'up' | 'down' | 'left' | 'right') => {
-      if (!focusedCell) return;
-
-      let newPosition = { ...focusedCell };
-
-      switch (direction) {
-        case 'up':
-          newPosition.row = -1; // Header row
-          break;
-        case 'down':
-          newPosition.row = entries.length - 1; // Last row
-          break;
-        case 'left':
-          newPosition.column = 0; // First column
-          break;
-        case 'right':
-          newPosition.column = getTotalColumns() - 1; // Last column
-          break;
-      }
-
-      if (isValidPosition(newPosition)) {
-        if (!isSelecting) {
-          setIsSelecting(true);
-          setSelectionRange({ start: focusedCell, end: newPosition });
-        } else {
-          setSelectionRange((prev) => (prev ? { ...prev, end: newPosition } : null));
-        }
-        setFocusedCell(newPosition);
-      }
-    },
-    [focusedCell, entries.length, getTotalColumns, isValidPosition, isSelecting]
-  );
-
-  // Add click-away listener to unfocus cells when clicking outside the table
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const tableElement = tableRef.current;
-      if (tableElement && !tableElement.contains(event.target as Node)) {
-        setFocusedCell(null);
-        setIsSelecting(false);
-        setSelectionRange(null);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   // Initialize focus on first render
   useEffect(() => {
@@ -318,7 +180,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     return entries.filter((e) => rowCheckboxes[e.sys.id]?.[selectedFieldId]).map((e) => e.sys.id);
   }, [selectedFieldId, headerCheckboxes, rowCheckboxes, entries]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (onSelectionChange) {
       onSelectionChange({ selectedEntryIds, selectedFieldId });
     }
@@ -377,6 +239,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     // Check if all checkboxes in the selection are currently checked
     let allChecked = true;
     let hasAnyCheckbox = false;
+    const columnsWithHeaderSelection = new Set<string>();
 
     for (let row = minRow; row <= maxRow; row++) {
       for (let col = minCol; col <= maxCol; col++) {
@@ -387,6 +250,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
 
         if (row === -1) {
           // Header checkbox
+          columnsWithHeaderSelection.add(columnId);
           if (!headerCheckboxes[columnId]) {
             allChecked = false;
             break;
@@ -409,16 +273,23 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     // Toggle all checkboxes in the selection
     const newState = !allChecked;
 
+    // First, handle header checkboxes for columns that have header selection
+    // This must be done first because handleHeaderCheckboxChange affects all rows
+    for (const columnId of columnsWithHeaderSelection) {
+      handleHeaderCheckboxChange(columnId, newState);
+    }
+
+    // Then handle individual row checkboxes for columns that don't have header selection
     for (let row = minRow; row <= maxRow; row++) {
       for (let col = minCol; col <= maxCol; col++) {
         if (!isBulkEditableColumn(col)) continue;
 
         const columnId = getColumnId(col);
 
-        if (row === -1) {
-          // Header checkbox
-          handleHeaderCheckboxChange(columnId, newState);
-        } else {
+        // Skip if this column already had its header checkbox handled
+        if (columnsWithHeaderSelection.has(columnId)) continue;
+
+        if (row !== -1) {
           // Row checkbox
           const entryId = getEntryId(row);
           if (entryId) {
@@ -439,121 +310,6 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     handleHeaderCheckboxChange,
     handleCellCheckboxChange,
   ]);
-
-  // Keyboard event handler
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (!focusedCell) return;
-
-      const { key, shiftKey, altKey, metaKey } = event;
-
-      // Detect platform for modifier key handling
-      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-      const isColumnSelectKey = isMac ? metaKey : altKey;
-      const isEdgeSelectKey = isMac ? metaKey : altKey;
-
-      // Prevent default behavior for handled keys
-      const handledKeys = [
-        'ArrowUp',
-        'ArrowDown',
-        'ArrowLeft',
-        'ArrowRight',
-        'Tab',
-        'Enter',
-        'Escape',
-        ' ',
-      ];
-      if (handledKeys.includes(key)) {
-        event.preventDefault();
-      }
-
-      switch (key) {
-        case 'ArrowUp':
-          if (isEdgeSelectKey && shiftKey) {
-            extendSelectionToEdge('up');
-          } else if (shiftKey) {
-            moveFocus('up', true);
-          } else {
-            moveFocus('up');
-          }
-          break;
-
-        case 'ArrowDown':
-          if (isEdgeSelectKey && shiftKey) {
-            extendSelectionToEdge('down');
-          } else if (shiftKey) {
-            moveFocus('down', true);
-          } else {
-            moveFocus('down');
-          }
-          break;
-
-        case 'ArrowLeft':
-          if (isEdgeSelectKey && shiftKey) {
-            extendSelectionToEdge('left');
-          } else if (shiftKey) {
-            moveFocus('left', true);
-          } else {
-            moveFocus('left');
-          }
-          break;
-
-        case 'ArrowRight':
-          if (isEdgeSelectKey && shiftKey) {
-            extendSelectionToEdge('right');
-          } else if (shiftKey) {
-            moveFocus('right', true);
-          } else {
-            moveFocus('right');
-          }
-          break;
-
-        case 'Tab':
-          if (shiftKey) {
-            moveFocus('left');
-          } else {
-            moveFocus('right');
-          }
-          break;
-
-        case 'Enter':
-          if (shiftKey) {
-            moveFocus('up');
-          } else {
-            toggleSelectionCheckboxes();
-            moveFocus('down');
-          }
-          break;
-
-        case 'Escape':
-          setFocusedCell(null);
-          setIsSelecting(false);
-          setSelectionRange(null);
-          break;
-
-        case ' ':
-          if (isColumnSelectKey) {
-            // Alt+Space (Windows/Linux) or Cmd+Space (Mac): Focus all cells in current column
-            selectColumn(focusedCell.column);
-          } else {
-            toggleSelectionCheckboxes();
-          }
-          break;
-      }
-    },
-    [focusedCell, moveFocus, toggleSelectionCheckboxes, extendSelectionToEdge, selectColumn]
-  );
-
-  // Add keyboard event listener
-  useEffect(() => {
-    const tableElement = tableRef.current;
-    if (tableElement) {
-      tableElement.addEventListener('keydown', handleKeyDown);
-      return () => {
-        tableElement.removeEventListener('keydown', handleKeyDown);
-      };
-    }
-  }, [handleKeyDown]);
 
   return (
     <>
