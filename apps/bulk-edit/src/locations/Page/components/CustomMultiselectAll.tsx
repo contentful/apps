@@ -1,6 +1,6 @@
 import { Box, Checkbox, Text } from '@contentful/f36-components';
-import { selectAllCheckboxStyles, selectAllTextStyles } from './CustomMultiselectAll.styles';
 import Splitter from './Splitter';
+import { selectAllCheckboxStyles, selectAllTextStyles } from './GenericMultiselect.styles';
 
 interface CustomMultiselectAllProps {
   areAllSelected: boolean;

@@ -2,9 +2,9 @@ import { Flex } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { useMemo } from 'react';
 import { truncate } from '../utils/entryUtils';
-import { optionStyles } from './CustomMultiselectAll.styles';
 import CustomMultiselectAll from './CustomMultiselectAll';
 import { styles } from '../styles';
+import { optionStyles } from './GenericMultiselect.styles';
 
 export interface BaseMultiselectOption {
   label: string;
