@@ -62,7 +62,7 @@ const GenericMultiselect = <T extends BaseMultiselectOption>({
     <Flex gap="spacing2Xs" flexDirection="column" style={styles.columnMultiselect}>
       <Multiselect
         placeholder={getPlaceholderText()}
-        triggerButtonProps={{ size: 'small' }}
+        triggerButtonProps={{ size: 'small', isDisabled: disabled }}
         popoverProps={{ isFullWidth: true }}>
         <CustomMultiselectAll
           areAllSelected={areAllSelected}

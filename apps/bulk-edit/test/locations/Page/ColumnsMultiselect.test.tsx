@@ -16,7 +16,7 @@ const mockLocalizedOptions = [
   { label: '(es-AR) Description', value: 'description-es-AR' },
 ];
 
-describe('GenericMultiselect for Columns', () => {
+describe('ColumnsMultiselect', () => {
   const defaultProps = {
     options: mockOptions,
     selectedItems: [],
@@ -59,7 +59,8 @@ describe('GenericMultiselect for Columns', () => {
       const selectedFields = [{ label: 'Display name', value: 'displayName' }];
       render(<GenericMultiselect<ColumnOption> {...defaultProps} selectedItems={selectedFields} />);
       await waitFor(() => {
-        expect(screen.findAllByText('Display name')).toBeTruthy();
+        const button = screen.getByRole('button');
+        expect(button).toHaveTextContent('Display name');
       });
     });
 
