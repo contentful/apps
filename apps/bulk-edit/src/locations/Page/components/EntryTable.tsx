@@ -6,7 +6,12 @@ import { styles } from '../styles';
 import { TableHeader } from './TableHeader';
 import { TableRow } from './TableRow';
 import { isCheckboxAllowed as isBulkEditable } from '../utils/entryUtils';
-import { DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN } from '../utils/constants';
+import {
+  DISPLAY_NAME_COLUMN,
+  DISPLAY_NAME_INDEX,
+  ENTRY_STATUS_COLUMN,
+  HEADERS_ROW,
+} from '../utils/constants';
 import {
   useKeyboardNavigation,
   FocusPosition,
@@ -84,46 +89,32 @@ export const EntryTable: React.FC<EntryTableProps> = ({
   const [headerCheckboxes, setHeaderCheckboxes] = useState<Record<string, boolean>>(
     getInitialCheckboxState(columnIds)
   );
-
   const [rowCheckboxes, setRowCheckboxes] = useState<Record<string, Record<string, boolean>>>(
     getInitialRowCheckboxState(entries, columnIds)
   );
 
   // Custom keyboard navigation hook
-  const { focusedCell, selectionRange, setFocusedCell, tableRef } = useKeyboardNavigation({
-    totalColumns: columnIds.length,
-    entriesLength: entries.length,
-    onFocusColumn: (columnIndex: number) => {},
-    onToggleSelection: () => {
-      // This will be called when selection should be toggled
-      toggleSelectionCheckboxes();
-    },
-  });
-
-  const getColumnId = (columnIndex: number) => {
-    return columnIds[columnIndex];
-  };
-
-  const isBulkEditableColumn = (columnIndex: number) => {
-    const columnId = getColumnId(columnIndex);
-    return allowedColumns[columnId] || false;
-  };
+  const { focusedCell, selectionRange, setFocusedCell, focusCell, tableRef } =
+    useKeyboardNavigation({
+      totalColumns: columnIds.length,
+      entriesLength: entries.length,
+      onFocusColumn: (columnIndex: number) => {},
+      onToggleSelection: () => {
+        // This will be called when selection should be toggled
+        toggleSelectionCheckboxes();
+      },
+    });
 
   const getEntryId = (rowIndex: number) => {
-    if (rowIndex < 0 || rowIndex >= entries.length) return null;
-    return entries[rowIndex].sys.id;
+    return entries[rowIndex]?.sys.id || null;
   };
 
   // Initialize focus on first render
   useEffect(() => {
     if (!focusedCell && entries.length > 0) {
-      // Focus on the first bulk-editable column in the header
-      const firstBulkEditableColumn = columnIds.findIndex((columnId) => allowedColumns[columnId]);
-      if (firstBulkEditableColumn !== -1) {
-        setFocusedCell({ row: -1, column: firstBulkEditableColumn });
-      }
+      setFocusedCell({ row: HEADERS_ROW, column: DISPLAY_NAME_INDEX });
     }
-  }, [focusedCell, entries.length, columnIds, allowedColumns]);
+  }, [focusedCell, entries, allowedColumns]);
 
   // Compute selected field (column)
   const selectedFieldId = useMemo(() => {
@@ -192,29 +183,23 @@ export const EntryTable: React.FC<EntryTableProps> = ({
 
   const toggleCheckbox = useCallback(
     (position: FocusPosition) => {
-      const columnId = getColumnId(position.column);
+      const columnId = columnIds[position.column];
+      if (!allowedColumns[columnId]) return;
 
-      if (position.row === -1) {
-        // Header checkbox
-        if (isBulkEditableColumn(position.column)) {
-          const currentState = headerCheckboxes[columnId];
-          handleHeaderCheckboxChange(columnId, !currentState);
-        }
+      if (position.row === HEADERS_ROW) {
+        handleHeaderCheckboxChange(columnId, !headerCheckboxes[columnId]);
       } else {
-        // Row checkbox
         const entryId = getEntryId(position.row);
-        if (entryId && isBulkEditableColumn(position.column)) {
-          const currentState = rowCheckboxes[entryId]?.[columnId];
-          handleCellCheckboxChange(entryId, columnId, !currentState);
+        if (entryId) {
+          handleCellCheckboxChange(entryId, columnId, !rowCheckboxes[entryId]?.[columnId]);
         }
       }
     },
-    [headerCheckboxes, rowCheckboxes, handleHeaderCheckboxChange, handleCellCheckboxChange]
+    [columnIds, handleHeaderCheckboxChange, handleCellCheckboxChange]
   );
 
-  const toggleSelectionCheckboxes = useCallback(() => {
+  const toggleSelectionCheckboxes = () => {
     if (!selectionRange) {
-      // No selection, just toggle the focused cell
       if (focusedCell) {
         toggleCheckbox(focusedCell);
       }
@@ -224,80 +209,48 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     const { start, end } = selectionRange;
     const minRow = Math.min(start.row, end.row);
     const maxRow = Math.max(start.row, end.row);
-    const minCol = Math.min(start.column, end.column);
-    const maxCol = Math.max(start.column, end.column);
+    const column = start.column; // Single column selection
+
+    const columnId = columnIds[column];
+    if (!allowedColumns[columnId]) return;
 
     // Check if all checkboxes in the selection are currently checked
     let allChecked = true;
-    let hasAnyCheckbox = false;
-    const columnsWithHeaderSelection = new Set<string>();
-
+    let hasHeaderSelection = false;
     for (let row = minRow; row <= maxRow; row++) {
-      for (let col = minCol; col <= maxCol; col++) {
-        if (!isBulkEditableColumn(col)) continue;
-
-        hasAnyCheckbox = true;
-        const columnId = getColumnId(col);
-
-        if (row === -1) {
-          // Header checkbox
-          columnsWithHeaderSelection.add(columnId);
-          if (!headerCheckboxes[columnId]) {
-            allChecked = false;
-            break;
-          }
-        } else {
-          // Row checkbox
-          const entryId = getEntryId(row);
-          if (entryId && !rowCheckboxes[entryId]?.[columnId]) {
-            allChecked = false;
-            break;
-          }
+      if (row === HEADERS_ROW) {
+        // Header checkbox
+        hasHeaderSelection = true;
+        if (!headerCheckboxes[columnId]) {
+          allChecked = false;
+          break;
+        }
+      } else {
+        // Row checkbox
+        const entryId = getEntryId(row);
+        if (entryId && !rowCheckboxes[entryId]?.[columnId]) {
+          allChecked = false;
+          break;
         }
       }
-      if (!allChecked) break;
     }
-
-    // If no checkboxes in selection, don't do anything
-    if (!hasAnyCheckbox) return;
 
     // Toggle all checkboxes in the selection
     const newState = !allChecked;
 
-    // First, handle header checkboxes for columns that have header selection
-    // This must be done first because handleHeaderCheckboxChange affects all rows
-    for (const columnId of columnsWithHeaderSelection) {
+    // First, handle header checkbox if it's in the selection
+    if (hasHeaderSelection) {
       handleHeaderCheckboxChange(columnId, newState);
-    }
-
-    // Then handle individual row checkboxes for columns that don't have header selection
-    for (let row = minRow; row <= maxRow; row++) {
-      for (let col = minCol; col <= maxCol; col++) {
-        if (!isBulkEditableColumn(col)) continue;
-
-        const columnId = getColumnId(col);
-
-        // Skip if this column already had its header checkbox handled
-        if (columnsWithHeaderSelection.has(columnId)) continue;
-
-        if (row !== -1) {
-          // Row checkbox
-          const entryId = getEntryId(row);
-          if (entryId) {
-            handleCellCheckboxChange(entryId, columnId, newState);
-          }
+    } else {
+      // Handle individual row checkboxes
+      for (let row = minRow; row <= maxRow; row++) {
+        const entryId = getEntryId(row);
+        if (entryId) {
+          handleCellCheckboxChange(entryId, columnId, newState);
         }
       }
     }
-  }, [
-    selectionRange,
-    focusedCell,
-    toggleCheckbox,
-    headerCheckboxes,
-    rowCheckboxes,
-    handleHeaderCheckboxChange,
-    handleCellCheckboxChange,
-  ]);
+  };
 
   return (
     <>
@@ -322,7 +275,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
           )}
           focusedCell={focusedCell}
           selectionRange={selectionRange}
-          onCellFocus={(position) => setFocusedCell(position)}
+          onCellFocus={(position) => focusCell(position)}
         />
         <Table.Body>
           {entries.map((entry, rowIndex) => (
@@ -349,7 +302,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
               rowIndex={rowIndex}
               focusedCell={focusedCell}
               selectionRange={selectionRange}
-              onCellFocus={(position) => setFocusedCell(position)}
+              onCellFocus={(position) => focusCell(position)}
             />
           ))}
         </Table.Body>

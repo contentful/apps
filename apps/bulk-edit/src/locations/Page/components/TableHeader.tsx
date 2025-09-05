@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Table, Checkbox, Flex, Text, Box } from '@contentful/f36-components';
 import { Tooltip } from '@contentful/f36-tooltip';
 import { QuestionIcon } from '@phosphor-icons/react';
 import { ContentTypeField } from '../types';
 import { styles, getCellStyle } from '../styles';
 import { truncate, isCheckboxAllowed } from '../utils/entryUtils';
-import { DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN } from '../utils/constants';
+import { DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN, HEADERS_ROW } from '../utils/constants';
 import { FocusPosition, SelectionRange } from '../hooks/useKeyboardNavigation';
 
 interface TableHeaderProps {
@@ -28,7 +28,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
   onCellFocus,
 }) => {
   const isCellFocused = (columnIndex: number) => {
-    return focusedCell?.row === -1 && focusedCell?.column === columnIndex;
+    return focusedCell?.row === HEADERS_ROW && focusedCell?.column === columnIndex;
   };
 
   const isCellSelected = (columnIndex: number) => {
@@ -36,10 +36,9 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
     const { start, end } = selectionRange;
     const minRow = Math.min(start.row, end.row);
     const maxRow = Math.max(start.row, end.row);
-    const minCol = Math.min(start.column, end.column);
-    const maxCol = Math.max(start.column, end.column);
+    const column = start.column; // Single column selection
 
-    return -1 >= minRow && -1 <= maxRow && columnIndex >= minCol && columnIndex <= maxCol;
+    return -1 >= minRow && -1 <= maxRow && columnIndex === column;
   };
 
   const getColumnIndex = (field: ContentTypeField | string) => {
@@ -58,7 +57,9 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
             isCellFocused(getColumnIndex(DISPLAY_NAME_COLUMN)),
             isCellSelected(getColumnIndex(DISPLAY_NAME_COLUMN))
           )}
-          onClick={() => onCellFocus({ row: -1, column: getColumnIndex(DISPLAY_NAME_COLUMN) })}
+          onClick={() =>
+            onCellFocus({ row: HEADERS_ROW, column: getColumnIndex(DISPLAY_NAME_COLUMN) })
+          }
           role="columnheader"
           tabIndex={-1}>
           Display name
@@ -71,7 +72,9 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
             isCellFocused(getColumnIndex(ENTRY_STATUS_COLUMN)),
             isCellSelected(getColumnIndex(ENTRY_STATUS_COLUMN))
           )}
-          onClick={() => onCellFocus({ row: -1, column: getColumnIndex(ENTRY_STATUS_COLUMN) })}
+          onClick={() =>
+            onCellFocus({ row: HEADERS_ROW, column: getColumnIndex(ENTRY_STATUS_COLUMN) })
+          }
           role="columnheader"
           tabIndex={-1}>
           <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
@@ -97,7 +100,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
                 isCellSelected(columnIndex)
               )}
               isTruncated
-              onClick={() => onCellFocus({ row: -1, column: columnIndex })}
+              onClick={() => onCellFocus({ row: HEADERS_ROW, column: columnIndex })}
               role="columnheader"
               tabIndex={-1}>
               <Flex gap="spacingXs">

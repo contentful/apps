@@ -1,5 +1,8 @@
 export const DISPLAY_NAME_COLUMN = 'notfield_displayName';
+export const DISPLAY_NAME_INDEX = 0;
 export const ENTRY_STATUS_COLUMN = 'notfield_status';
+export const ENTRY_STATUS_INDEX = 1;
+export const HEADERS_ROW = -1;
 export const PAGE_TITLE = 'Bulk Edit';
 export const PAGE_DESCRIPTION = 'Bulk edit your content entries';
 
