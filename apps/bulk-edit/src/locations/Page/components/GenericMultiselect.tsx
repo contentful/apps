@@ -1,5 +1,5 @@
 import { Flex } from '@contentful/f36-components';
-import { Multiselect, MultiselectOption } from '@contentful/f36-multiselect';
+import { Multiselect } from '@contentful/f36-multiselect';
 import { useMemo } from 'react';
 import { truncate } from '../utils/entryUtils';
 import { optionStyles } from './CustomMultiselectAll.styles';
@@ -70,7 +70,7 @@ const GenericMultiselect = <T extends BaseMultiselectOption>({
           onChange={toggleAll}
         />
         {options.map((option) => (
-          <MultiselectOption
+          <Multiselect.Option
             isDisabled={disabled}
             className={optionStyles}
             key={getItemKey(option)}
