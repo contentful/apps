@@ -6,53 +6,37 @@
 # Quick reference guide for the marketplace-partner-apps migration scripts
 # =============================================================================
 
-# Disable colors for better compatibility
-GREEN=''
-YELLOW=''
-BLUE=''
-PURPLE=''
-NC=''
-
 show_summary() {
     cat << EOF
-${BLUE}=============================================================================
+=============================================================================
   Marketplace Partner Apps Migration Scripts - Quick Reference
-=============================================================================${NC}
+=============================================================================
+📋 Available Scripts:  
+1. migrate-app.sh         - Transfer app from marketplace-partner-apps to apps repo
+2. validate-migration.sh  - Validate successful migration
+3. cleanup-migrated-app.sh - Remove app from marketplace-partner-apps (DESTRUCTIVE!)
 
-${GREEN}📋 Available Scripts:${NC}
+🚀 Quick Start (First Time Users):
+Read the step-by-step guide: cat USAGE_GUIDE.md  
+Start with a dry-run:  ./migrate-app.sh <app-name> --dry-run
   
-${YELLOW}1. migrate-app.sh${NC}         - Transfer app from marketplace-partner-apps to apps repo
-${YELLOW}2. validate-migration.sh${NC}  - Validate successful migration
-${YELLOW}3. cleanup-migrated-app.sh${NC} - Remove app from marketplace-partner-apps (DESTRUCTIVE!)
-
-${GREEN}🚀 Quick Start (First Time Users):${NC}
-
-  ${PURPLE}Read the step-by-step guide:${NC} ${YELLOW}cat USAGE_GUIDE.md${NC}
-  
-  ${PURPLE}Start with a dry-run:${NC}
-  ./migrate-app.sh <app-name> --dry-run
-  
-  ${PURPLE}Then follow the complete workflow:${NC}
-  1. ./migrate-app.sh <app-name>
+Then follow the complete workflow:  1. ./migrate-app.sh <app-name>
   2. ./validate-migration.sh <app-name>
   3. Test manually in Contentful
   4. ./cleanup-migrated-app.sh <app-name>
 
-${GREEN}📖 Documentation:${NC}
-  
-  ${YELLOW}USAGE_GUIDE.md${NC}        - Step-by-step instructions (START HERE!)
-  ${YELLOW}MIGRATION_README.md${NC}   - Technical documentation
-  ${YELLOW}<script> --help${NC}       - Individual script help
+📖 Documentation:  
+USAGE_GUIDE.md        - Step-by-step instructions (START HERE!)
+MIGRATION_README.md   - Technical documentation
+<script> --help       - Individual script help
 
-${GREEN}💡 Pro Tips:${NC}
-  
-  • Always use ${YELLOW}--dry-run${NC} first to preview changes
-  • Use ${YELLOW}--verbose${NC} or ${YELLOW}--detailed${NC} for debugging
+💡 Pro Tips:  
+  • Always use --dry-run first to preview changes
+  • Use --verbose or --detailed for debugging
   • Check generated reports and logs for details
   • Only run cleanup after thorough testing!
 
-${GREEN}🔍 Available Apps in marketplace-partner-apps:${NC}
-
+🔍 Available Apps in marketplace-partner-apps:
 EOF
 
     if [[ -d "../../marketplace-partner-apps/apps" ]]; then
@@ -61,7 +45,7 @@ EOF
         local total_apps=${#apps[@]}
         
         if [[ $total_apps -eq 0 ]]; then
-            echo "  ${YELLOW}No apps found in marketplace-partner-apps/apps/${NC}"
+            echo "  No apps found in marketplace-partner-apps/apps/"
         else
             # Display apps in 3 columns
             local cols=3
@@ -79,16 +63,15 @@ EOF
             done
             
             echo
-            echo "  ${GREEN}Total: $total_apps apps available${NC}"
+            echo "  Total: $total_apps apps available"
         fi
     else
-        echo "  ${YELLOW}marketplace-partner-apps not found at ../../marketplace-partner-apps${NC}"
+        echo "  marketplace-partner-apps not found at ../../marketplace-partner-apps"
     fi
 
     cat << EOF
 
-${GREEN}📁 Migration Status:${NC}
-
+📁 Migration Status:
 EOF
 
     # Check for any existing migration reports
@@ -107,13 +90,9 @@ EOF
 
     cat << EOF
 
-${BLUE}=============================================================================${NC}
-
-For detailed documentation: ${YELLOW}cat USAGE_GUIDE.md${NC}
-For script help: ${YELLOW}<script-name> --help${NC}
-
-${PURPLE}⚠️  Remember: Always test thoroughly before running cleanup!${NC}
-
+=============================================================================
+For detailed documentation: cat USAGE_GUIDE.mdFor script help: <script-name> --help
+⚠️  Remember: Always test thoroughly before running cleanup!
 EOF
 }
 

@@ -51,14 +51,17 @@ log() {
     local message="$@"
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
+    # Print to console
     case "$level" in
-        "INFO")  echo -e "${GREEN}[INFO]${NC} $message" | tee -a "$LOG_FILE" ;;
-        "WARN")  echo -e "${YELLOW}[WARN]${NC} $message" | tee -a "$LOG_FILE" ;;
-        "ERROR") echo -e "${RED}[ERROR]${NC} $message" | tee -a "$LOG_FILE" ;;
-        "DEBUG") [[ "$DETAILED" == true ]] && echo -e "${BLUE}[DEBUG]${NC} $message" | tee -a "$LOG_FILE" ;;
-        "SUCCESS") echo -e "${GREEN}[SUCCESS]${NC} $message" | tee -a "$LOG_FILE" ;;
-        "FAIL") echo -e "${RED}[FAIL]${NC} $message" | tee -a "$LOG_FILE" ;;
+        "INFO")  echo "[INFO] $message" ;;
+        "WARN")  echo "[WARN] $message" ;;
+        "ERROR") echo "[ERROR] $message" ;;
+        "DEBUG") [[ "$DETAILED" == true ]] && echo "[DEBUG] $message" ;;
+        "SUCCESS") echo "[SUCCESS] $message" ;;
+        "FAIL") echo "[FAIL] $message" ;;
     esac
+    
+    # Write to log file with timestamp
     echo "[$timestamp] [$level] $message" >> "$LOG_FILE"
 }
 
@@ -77,28 +80,28 @@ run_test() {
     local test_result=$?
     
     if [[ $test_result -eq 0 ]]; then
-        echo -e "${GREEN}✓${NC}"
+        echo "✓"
         ((PASSED_TESTS++))
         log "SUCCESS" "Test passed: $test_name"
         return 0
     else
         if [[ "$required" == "true" ]]; then
-            echo -e "${RED}✗${NC}"
+            echo "✗"
             ((FAILED_TESTS++))
             # Show the actual error output
             if [[ -n "$test_output" ]]; then
-                echo -e "${RED}    Error: ${NC}$test_output"
+                echo "    Error: $test_output"
                 log "FAIL" "Test failed: $test_name - Error: $test_output"
             else
                 log "FAIL" "Test failed: $test_name - No error output"
             fi
             return 1
         else
-            echo -e "${YELLOW}⚠${NC}"
+            echo "⚠"
             ((WARNINGS++))
             # Show warning details if available
             if [[ -n "$test_output" ]]; then
-                echo -e "${YELLOW}    Warning: ${NC}$test_output"
+                echo "    Warning: $test_output"
                 log "WARN" "Test warning: $test_name - Output: $test_output"
             else
                 log "WARN" "Test warning: $test_name"
@@ -150,10 +153,10 @@ check_optional_file() {
     local action="$3"
     
     if [[ -f "$app_path/$filename" ]]; then
-        echo -e "  ${GREEN}✓${NC} $filename exists"
+        echo "  ✓ $filename exists"
         log "SUCCESS" "Optional file exists: $filename"
     else
-        echo -e "  ${YELLOW}📝${NC} $filename missing - will add to manual checklist"
+        echo "  📝 $filename missing - will add to manual checklist"
         log "WARN" "Optional file missing: $filename"
         MANUAL_ACTIONS+=("$action")
     fi
@@ -202,64 +205,77 @@ validate_file_structure() {
     fi
     
     if [[ "$has_build_config" == true ]]; then
-        echo -e "  ${GREEN}✓${NC} Build configuration exists (${config_files[*]})"
+        echo "  ✓ Build configuration exists (${config_files[*]})"
         log "SUCCESS" "Build configuration found: ${config_files[*]}"
     else
-        echo -e "  ${YELLOW}📝${NC} Build configuration missing - will add to manual checklist"
+        echo "  📝 Build configuration missing - will add to manual checklist"
         log "WARN" "Build configuration missing"
         MANUAL_ACTIONS+=("Review if build configuration is needed (many React apps work without explicit config files)")
     fi
     
     # Check TypeScript configuration (only suggest if project uses TypeScript)
-    if find "$app_path/src" -name "*.ts" -o -name "*.tsx" 2>/dev/null | grep -q .; then
+    if [[ -d "$app_path/src" ]] && find "$app_path/src" -name "*.ts" -o -name "*.tsx" 2>/dev/null | grep -q .; then
         check_optional_file "$app_path" "tsconfig.json" "Add TypeScript configuration (tsconfig.json) for your TypeScript files"
     elif [[ ! -f "$app_path/tsconfig.json" ]]; then
-        echo -e "  ${GREEN}ℹ${NC} TypeScript config not needed (no .ts/.tsx files found)"
+        echo "  ℹ TypeScript config not needed (no .ts/.tsx files found)"
         log "INFO" "TypeScript configuration not needed - no TS files detected"
     else
-        echo -e "  ${GREEN}✓${NC} tsconfig.json exists"
+        echo "  ✓ tsconfig.json exists"
         log "SUCCESS" "TypeScript configuration found"
     fi
+    
+    # Return success (this function doesn't fail on warnings)
+    return 0
 }
 
 validate_package_json() {
     local app_name="$1"
     local app_path="$APPS_REPO_ROOT/apps/$app_name"
     local package_json="$app_path/package.json"
+    local critical_failures=0
     
     echo "📦 Validating package.json..."
     
     # Check required scripts
-    run_test "start script exists" "jq -e '.scripts.start' '$package_json' >/dev/null || echo 'Missing start script in package.json'"
-    run_test "build script exists" "jq -e '.scripts.build' '$package_json' >/dev/null || echo 'Missing build script in package.json'"
-    run_test "test script exists" "jq -e '.scripts.test' '$package_json' >/dev/null || echo 'Missing test script in package.json'"
+    run_test "start script exists" "jq -e '.scripts.start' '$package_json' >/dev/null || (echo 'Missing start script in package.json' >&2 && false)" || ((critical_failures++))
+    run_test "build script exists" "jq -e '.scripts.build' '$package_json' >/dev/null || (echo 'Missing build script in package.json' >&2 && false)" || ((critical_failures++))
+    run_test "test script exists" "jq -e '.scripts.test' '$package_json' >/dev/null || (echo 'Missing test script in package.json' >&2 && false)" || ((critical_failures++))
     
-    # Check apps repository conventions
-    run_test "Has @contentful scope" "jq -e '.name | startswith(\"@contentful/\")' '$package_json' >/dev/null || echo 'App name should start with @contentful/'" "false"
-    run_test "Is marked as private" "jq -e '.private == true' '$package_json' >/dev/null || echo 'Package should be marked as private: true'"
+    # Check apps repository conventions (non-critical)
+    run_test "Has @contentful scope" "jq -e '.name | startswith(\"@contentful/\")' '$package_json' >/dev/null || (echo 'App name should start with @contentful/' >&2 && false)" "false"
+    run_test "Is marked as private" "jq -e '.private == true' '$package_json' >/dev/null || (echo 'Package should be marked as private: true' >&2 && false)" || ((critical_failures++))
     
-    # Check for common dependencies
-    run_test "Has @contentful/app-sdk" "jq -e '.dependencies[\"@contentful/app-sdk\"]' '$package_json' >/dev/null || echo 'Missing @contentful/app-sdk dependency'" "false"
-    run_test "Has React dependency" "jq -e '.dependencies.react' '$package_json' >/dev/null || echo 'Missing React dependency'" "false"
+    # Check for common dependencies (non-critical)
+    run_test "Has @contentful/app-sdk" "jq -e '.dependencies[\"@contentful/app-sdk\"]' '$package_json' >/dev/null || (echo 'Missing @contentful/app-sdk dependency' >&2 && false)" "false"
+    run_test "Has React dependency" "jq -e '.dependencies.react' '$package_json' >/dev/null || (echo 'Missing React dependency' >&2 && false)" "false"
     
     # Check for actually deprecated scripts (if any are identified in the future)
     # Currently no scripts are flagged as deprecated
-    run_test "Package.json structure valid" "true"
+    run_test "Package.json structure valid" "true" || ((critical_failures++))
+    
+    # Return failure if any critical tests failed
+    if [[ $critical_failures -gt 0 ]]; then
+        log "ERROR" "Package.json validation failed with $critical_failures critical errors"
+        return 1
+    fi
+    
+    return 0
 }
 
 validate_dependencies() {
     local app_name="$1"
     local app_path="$APPS_REPO_ROOT/apps/$app_name"
+    local critical_failures=0
     
     echo "🔗 Validating dependencies..."
     
     cd "$app_path"
     
     # Check if package-lock.json exists
-    run_test "package-lock.json exists" "[[ -f package-lock.json ]]"
+    run_test "package-lock.json exists" "[[ -f package-lock.json ]]" || ((critical_failures++))
     
     # Try to install dependencies
-    run_test "Dependencies can be installed" "npm ci"
+    run_test "Dependencies can be installed" "npm ci" || ((critical_failures++))
     
     # Check for security vulnerabilities (informational - add to manual actions if found)
     echo "  Checking for security vulnerabilities..."
@@ -274,14 +290,14 @@ validate_dependencies() {
     fi
     
     if [[ $audit_result -eq 0 ]]; then
-        echo -e "  ${GREEN}✓${NC} No high-severity vulnerabilities found"
+        echo "  ✓ No high-severity vulnerabilities found"
         log "SUCCESS" "No high-severity vulnerabilities found"
     else
-        echo -e "  ${YELLOW}📝${NC} Security vulnerabilities found - will add to manual checklist"
+        echo "  📝 Security vulnerabilities found - will add to manual checklist"
         log "WARN" "Security vulnerabilities found, adding to manual actions"
         
         # Show the vulnerability summary to user
-        echo -e "    ${YELLOW}Vulnerability Summary:${NC}"
+        echo "    Vulnerability Summary:"
         echo "$audit_output" | grep -i "found\|vulnerabilities\|severity" | head -5
         
         # Parse vulnerability counts from npm audit output
@@ -296,11 +312,11 @@ validate_dependencies() {
         fi
         
         if [[ -n "$vuln_summary" ]]; then
-            echo -e "    ${YELLOW}Found:$vuln_summary vulnerabilities${NC}"
+            echo "    Found:$vuln_summary vulnerabilities"
             MANUAL_ACTIONS+=("Review and fix security vulnerabilities:$vuln_summary (run 'npm audit' for full details)")
         else
             # Fallback if we can't parse specific counts
-            echo -e "    ${YELLOW}Found security vulnerabilities (see npm audit output above)${NC}"
+            echo "    Found security vulnerabilities (see npm audit output above)"
             MANUAL_ACTIONS+=("Review and fix security vulnerabilities found by npm audit")
         fi
         
@@ -314,7 +330,7 @@ validate_dependencies() {
     outdated_output=$(npm outdated 2>/dev/null || true)
     
     if [[ -n "$outdated_output" ]]; then
-        echo -e "${YELLOW}    📦 Outdated dependencies found:${NC}"
+        echo "    📦 Outdated dependencies found:"
         echo
         # Format the npm outdated output nicely
         echo "    Package                Current    Wanted     Latest"
@@ -323,30 +339,39 @@ validate_dependencies() {
             echo "    $line"
         done
         echo
-        echo -e "${YELLOW}    ⚠️  Note: Outdated dependencies don't prevent migration${NC}"
-        echo -e "${BLUE}    💡 You can update them later with: npm update${NC}"
+        echo "    ⚠️  Note: Outdated dependencies don't prevent migration"
+        echo "    💡 You can update them later with: npm update"
         
         # Count how many packages are outdated
         local outdated_count=$(echo "$outdated_output" | tail -n +2 | wc -l | tr -d ' ')
         log "INFO" "Found $outdated_count outdated dependencies"
     else
-        echo -e "${GREEN}    ✓ All dependencies are up to date${NC}"
+        echo "    ✓ All dependencies are up to date"
         log "INFO" "All dependencies are up to date"
     fi
     
     cd "$APPS_REPO_ROOT"
+    
+    # Return failure if any critical tests failed
+    if [[ $critical_failures -gt 0 ]]; then
+        log "ERROR" "Dependencies validation failed with $critical_failures critical errors"
+        return 1
+    fi
+    
+    return 0
 }
 
 validate_build_process() {
     local app_name="$1"
     local app_path="$APPS_REPO_ROOT/apps/$app_name"
+    local critical_failures=0
     
     echo "🔨 Validating build process..."
     
     cd "$app_path"
     
     # Try to build the app
-    run_test "App builds successfully" "npm run build"
+    run_test "App builds successfully" "npm run build" || ((critical_failures++))
     
     # Check if build artifacts are created
     local build_dir=""
@@ -357,12 +382,20 @@ validate_build_process() {
     fi
     
     if [[ -n "$build_dir" ]]; then
-        run_test "Build artifacts created" "[[ -d '$build_dir' && \$(find '$build_dir' -type f | wc -l) -gt 0 ]]"
+        run_test "Build artifacts created" "[[ -d '$build_dir' && \$(find '$build_dir' -type f | wc -l) -gt 0 ]]" || ((critical_failures++))
         run_test "Build includes HTML file" "find '$build_dir' -name '*.html' | grep -q ." "false"
-        run_test "Build includes JS files" "find '$build_dir' -name '*.js' | grep -q ."
+        run_test "Build includes JS files" "find '$build_dir' -name '*.js' | grep -q ." || ((critical_failures++))
     fi
     
     cd "$APPS_REPO_ROOT"
+    
+    # Return failure if any critical tests failed
+    if [[ $critical_failures -gt 0 ]]; then
+        log "ERROR" "Build process validation failed with $critical_failures critical errors"
+        return 1
+    fi
+    
+    return 0
 }
 
 validate_tests() {
@@ -388,29 +421,45 @@ validate_tests() {
         local test_output=""
         
         # Try different test command variations with timeout
-        if timeout 60s npm test -- --run --reporter=basic 2>/dev/null >/dev/null; then
-            echo -e "  ${GREEN}✓${NC}"
-            log "SUCCESS" "Test passed: Tests pass"
-            ((PASSED_TESTS++))
-        elif timeout 60s npm test -- --watchAll=false 2>/dev/null >/dev/null; then
-            echo -e "  ${GREEN}✓${NC}"
-            log "SUCCESS" "Test passed: Tests pass"
-            ((PASSED_TESTS++))
-        elif timeout 60s npm run test:ci 2>/dev/null >/dev/null; then
-            echo -e "  ${GREEN}✓${NC}"
+        test_output=$(timeout 60s npm test -- --run --reporter=basic 2>&1)
+        test_result=$?
+        if [[ $test_result -eq 0 ]]; then
+            echo "  ✓"
             log "SUCCESS" "Test passed: Tests pass"
             ((PASSED_TESTS++))
         else
-            echo -e "  ${YELLOW}⚠${NC}"
-            echo -e "${YELLOW}    Warning: Tests timed out or failed - this is often due to watch mode or long-running tests${NC}"
-            echo -e "${BLUE}    💡 Try running tests manually: npm test${NC}"
-            log "WARN" "Test warning: Tests pass - Tests timed out or failed"
-            ((WARNINGS++))
+            test_output=$(timeout 60s npm test -- --watchAll=false 2>&1)
+            test_result=$?
+            if [[ $test_result -eq 0 ]]; then
+                echo "  ✓"
+                log "SUCCESS" "Test passed: Tests pass"
+                ((PASSED_TESTS++))
+            else
+                test_output=$(timeout 60s npm run test:ci 2>&1)
+                test_result=$?
+                if [[ $test_result -eq 0 ]]; then
+                    echo "  ✓"
+                    log "SUCCESS" "Test passed: Tests pass"
+                    ((PASSED_TESTS++))
+                else
+                    echo "  ⚠"
+                    echo "    Warning: Tests timed out or failed - this is often due to watch mode or long-running tests"
+                    if [[ -n "$test_output" ]]; then
+                        echo "    Error output: ${test_output:0:200}$([ ${#test_output} -gt 200 ] && echo '...')"
+                    fi
+                    echo "    💡 Try running tests manually: npm test"
+                    log "WARN" "Test warning: Tests pass - Tests timed out or failed. Output: $test_output"
+                    ((WARNINGS++))
+                fi
+            fi
         fi
         ((TOTAL_TESTS++))
     fi
     
     cd "$APPS_REPO_ROOT"
+    
+    # Tests are generally non-critical for migration validation
+    return 0
 }
 
 validate_linting() {
@@ -427,13 +476,16 @@ validate_linting() {
         run_test "Linting passes" "npm run lint"
     else
         # No lint script found
-        echo -e "${YELLOW}  ⚠️  No lint script found in package.json${NC}"
-        echo -e "${BLUE}  💡 Please add a lint script to package.json, for example:${NC}"
-        echo -e "${BLUE}     \"lint\": \"eslint src --max-warnings 0\"${NC}"
+        echo "  ⚠️  No lint script found in package.json"
+        echo "  💡 Please add a lint script to package.json, for example:"
+        echo "     \"lint\": \"eslint src --max-warnings 0\""
         log "WARN" "No lint script found - manual setup required"
     fi
     
     cd "$APPS_REPO_ROOT"
+    
+    # Linting is generally non-critical for migration validation
+    return 0
 }
 
 fix_common_issues() {
@@ -565,30 +617,62 @@ validate_migration() {
         exit 1
     fi
     
-    # Run validation tests
-    validate_file_structure "$app_name"
+    # Run validation tests with error handling
+    log "INFO" "Step 1/6: Validating file structure..."
+    if ! validate_file_structure "$app_name"; then
+        log "ERROR" "❌ File structure validation failed - stopping validation"
+        echo "❌ Validation failed at Step 1: File structure validation"
+        exit 1
+    fi
     echo
     
-    validate_package_json "$app_name"
+    log "INFO" "Step 2/6: Validating package.json..."
+    if ! validate_package_json "$app_name"; then
+        log "ERROR" "❌ Package.json validation failed - stopping validation"
+        echo "❌ Validation failed at Step 2: Package.json validation"
+        exit 1
+    fi
     echo
     
-    validate_dependencies "$app_name"
+    log "INFO" "Step 3/6: Validating dependencies..."
+    if ! validate_dependencies "$app_name"; then
+        log "ERROR" "❌ Dependencies validation failed - stopping validation"
+        echo "❌ Validation failed at Step 3: Dependencies validation"
+        exit 1
+    fi
     echo
     
-    validate_build_process "$app_name"
+    log "INFO" "Step 4/6: Validating build process..."
+    if ! validate_build_process "$app_name"; then
+        log "ERROR" "❌ Build process validation failed - stopping validation"
+        echo "❌ Validation failed at Step 4: Build process validation"
+        exit 1
+    fi
     echo
     
-    validate_tests "$app_name"
+    log "INFO" "Step 5/6: Validating tests..."
+    if ! validate_tests "$app_name"; then
+        log "ERROR" "❌ Tests validation failed - stopping validation"
+        echo "❌ Validation failed at Step 5: Tests validation"
+        exit 1
+    fi
     echo
     
-    validate_linting "$app_name"
+    log "INFO" "Step 6/6: Validating linting..."
+    if ! validate_linting "$app_name"; then
+        log "ERROR" "❌ Linting validation failed - stopping validation"
+        echo "❌ Validation failed at Step 6: Linting validation"
+        exit 1
+    fi
     echo
     
     # Try to fix issues if requested
+    log "INFO" "Running post-validation fixes..."
     fix_common_issues "$app_name"
     echo
     
     # Generate report
+    log "INFO" "Creating validation report..."
     create_validation_report "$app_name"
     
     # Final summary
@@ -597,18 +681,18 @@ validate_migration() {
     echo "============================================================================="
     echo
     echo "Total Tests: $TOTAL_TESTS"
-    echo "Passed: ${GREEN}$PASSED_TESTS${NC}"
-    echo "Failed: ${RED}$FAILED_TESTS${NC}"
-    echo "Warnings: ${YELLOW}$WARNINGS${NC}"
+    echo "Passed: $PASSED_TESTS"
+    echo "Failed: $FAILED_TESTS"
+    echo "Warnings: $WARNINGS"
     echo
     
     if [[ $FAILED_TESTS -eq 0 ]]; then
-        echo -e "${GREEN}🎉 Migration validation successful!${NC}"
+        echo "🎉 Migration validation successful!"
         echo "The app appears to be ready for use in the apps repository."
         echo
         echo "Next step: Run './cleanup-migrated-app.sh $app_name' after manual testing"
     else
-        echo -e "${RED}❌ Migration validation failed!${NC}"
+        echo "❌ Migration validation failed!"
         echo "Please fix the issues before proceeding with cleanup."
         echo
         echo "Try running with --fix-issues to automatically fix common problems"

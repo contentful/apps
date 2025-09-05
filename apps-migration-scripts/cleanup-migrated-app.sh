@@ -21,14 +21,6 @@ APPS_REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 MPA_REPO_PATH="$(cd "$APPS_REPO_ROOT/../marketplace-partner-apps" && pwd)"
 LOG_FILE="" # Will be set after app name is parsed
 
-# Disable colors for better compatibility
-RED=''
-GREEN=''
-YELLOW=''
-BLUE=''
-PURPLE=''
-NC=''
-
 # Flags
 DRY_RUN=false
 FORCE=false
@@ -44,13 +36,16 @@ log() {
     local message="$@"
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
+    # Print to console
     case "$level" in
-        "INFO")  echo -e "${GREEN}[INFO]${NC} $message" | tee -a "$LOG_FILE" ;;
-        "WARN")  echo -e "${YELLOW}[WARN]${NC} $message" | tee -a "$LOG_FILE" ;;
-        "ERROR") echo -e "${RED}[ERROR]${NC} $message" | tee -a "$LOG_FILE" ;;
-        "DEBUG") echo -e "${BLUE}[DEBUG]${NC} $message" | tee -a "$LOG_FILE" ;;
-        "DANGER") echo -e "${PURPLE}[DANGER]${NC} $message" | tee -a "$LOG_FILE" ;;
+        "INFO")  echo "[INFO] $message" ;;
+        "WARN")  echo "[WARN] $message" ;;
+        "ERROR") echo "[ERROR] $message" ;;
+        "DEBUG") echo "[DEBUG] $message" ;;
+        "DANGER") echo "[DANGER] $message" ;;
     esac
+    
+    # Write to log file with timestamp
     echo "[$timestamp] [$level] $message" >> "$LOG_FILE"
 }
 
