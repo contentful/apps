@@ -40,76 +40,61 @@ export const useKeyboardNavigation = ({
   const [isSelecting, setIsSelecting] = useState(false);
 
   // Internal navigation functions
-  const moveFocus = useCallback(
-    (direction: 'up' | 'down' | 'left' | 'right', extendSelection = false) => {
-      if (!focusedCell) return;
+  const moveFocus = (direction: 'up' | 'down' | 'left' | 'right', extendSelection = false) => {
+    if (!focusedCell) return;
 
-      let newPosition = { ...focusedCell };
+    let newPosition = { ...focusedCell };
 
-      //Moves across the table in the specified direction
-      // If you reach the edge of the table, you will not be able to move further
-      switch (direction) {
-        case 'up':
-          newPosition.row = Math.max(-1, focusedCell.row - 1);
-          break;
-        case 'down':
-          newPosition.row = Math.min(entriesLength - 1, focusedCell.row + 1);
-          break;
-        case 'left':
-          newPosition.column = Math.max(0, focusedCell.column - 1);
-          break;
-        case 'right':
-          newPosition.column = Math.min(totalColumns - 1, focusedCell.column + 1);
-          break;
-      }
+    //Moves across the table in the specified direction
+    // If you reach the edge of the table, you will not be able to move further
+    switch (direction) {
+      case 'up':
+        newPosition.row = Math.max(-1, focusedCell.row - 1);
+        break;
+      case 'down':
+        newPosition.row = Math.min(entriesLength - 1, focusedCell.row + 1);
+        break;
+      case 'left':
+        newPosition.column = Math.max(0, focusedCell.column - 1);
+        break;
+      case 'right':
+        newPosition.column = Math.min(totalColumns - 1, focusedCell.column + 1);
+        break;
+    }
 
-      if (extendSelection) {
-        if (!isSelecting) {
-          setIsSelecting(true);
-          setSelectionRange({ start: focusedCell, end: newPosition });
-        } else {
-          setSelectionRange((prev) => (prev ? { ...prev, end: newPosition } : null));
-        }
-      } else {
-        setIsSelecting(false);
-        setSelectionRange(null);
-      }
-      setFocusedCell(newPosition);
-    },
-    [focusedCell, entriesLength, totalColumns, isSelecting]
-  );
-
-  const extendFocusToEdge = useCallback(
-    (direction: 'up' | 'down' | 'left' | 'right') => {
-      if (!focusedCell) return;
-
-      let newPosition = { ...focusedCell };
-
-      switch (direction) {
-        case 'up':
-          newPosition.row = -1; // Header row
-          break;
-        case 'down':
-          newPosition.row = entriesLength - 1; // Last row
-          break;
-        case 'left':
-          newPosition.column = 0; // First column
-          break;
-        case 'right':
-          newPosition.column = totalColumns - 1; // Last column
-          break;
-      }
-
+    if (extendSelection) {
       if (!isSelecting) {
         setIsSelecting(true);
         setSelectionRange({ start: focusedCell, end: newPosition });
       } else {
         setSelectionRange((prev) => (prev ? { ...prev, end: newPosition } : null));
       }
-      setFocusedCell(newPosition);
-    },
-    [focusedCell, entriesLength, totalColumns, isSelecting]
-  );
+    } else {
+      setIsSelecting(false);
+      setSelectionRange(null);
+    }
+    setFocusedCell(newPosition);
+  };
+
+  const extendFocusToEdge = (direction: 'up' | 'down') => {
+    if (!focusedCell) return;
+
+    let newPosition = { ...focusedCell };
+
+    if (direction === 'up') {
+      newPosition.row = -1; // Header row
+    } else {
+      newPosition.row = entriesLength - 1; // Last row
+    }
+
+    if (!isSelecting) {
+      setIsSelecting(true);
+      setSelectionRange({ start: focusedCell, end: newPosition });
+    } else {
+      setSelectionRange((prev) => (prev ? { ...prev, end: newPosition } : null));
+    }
+    setFocusedCell(newPosition);
+  };
 
   // Focus column function
   const focusColumn = useCallback(
@@ -150,7 +135,9 @@ export const useKeyboardNavigation = ({
         event.preventDefault();
       }
 
-      const moveKeyDirection = (direction: 'up' | 'down' | 'left' | 'right') => {
+      //It doesnt make sense to expand left or right selection in the table
+      //Because we don't allow editing multiple fields at once
+      const moveKeyVertically = (direction: 'up' | 'down') => {
         if (isEdgeSelectKey && shiftKey) {
           extendFocusToEdge(direction);
         } else if (shiftKey) {
@@ -168,13 +155,16 @@ export const useKeyboardNavigation = ({
 
       switch (key) {
         case 'ArrowUp':
-          moveKeyDirection('up');
+          moveKeyVertically('up');
           break;
         case 'ArrowDown':
-          moveKeyDirection('down');
+          moveKeyVertically('down');
           break;
         case 'ArrowLeft':
-          moveKeyDirection('left');
+          moveFocus('left');
+          break;
+        case 'ArrowRight':
+          moveFocus('right');
           break;
         case 'Tab':
           moveFocus(shiftKey ? 'left' : 'right');
@@ -202,7 +192,7 @@ export const useKeyboardNavigation = ({
           break;
       }
     },
-    [focusedCell, moveFocus, onToggleSelection, extendFocusToEdge, focusColumn]
+    [focusedCell, onToggleSelection, focusColumn]
   );
 
   // Add keyboard event listeners
