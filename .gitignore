@@ -17,3 +17,5 @@ examples/**/.npmrc
 .cursorindexingignore
 .specstory
 */example-app
+apps-migration-scripts/reports/
+apps-migration-scripts/logs/
