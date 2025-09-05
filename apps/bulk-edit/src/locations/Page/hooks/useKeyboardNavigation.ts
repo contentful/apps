@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { HEADERS_ROW } from '../utils/constants';
 
 export interface FocusPosition {
-  row: number; // -1 for header, 0+ for data rows
+  row: number; // HEADER_ROW for header, 0+ for data rows
   column: number;
 }
 
@@ -22,6 +23,7 @@ interface UseKeyboardNavigationReturn {
   selectionRange: SelectionRange | null;
   isSelecting: boolean;
   setFocusedCell: (position: FocusPosition | null) => void;
+  focusCell: (position: FocusPosition) => void;
   focusColumn: (columnIndex: number) => void;
   tableRef: React.RefObject<HTMLTableElement>;
 }
@@ -49,7 +51,7 @@ export const useKeyboardNavigation = ({
     // If you reach the edge of the table, you will not be able to move further
     switch (direction) {
       case 'up':
-        newPosition.row = Math.max(-1, focusedCell.row - 1);
+        newPosition.row = Math.max(HEADERS_ROW, focusedCell.row - 1);
         break;
       case 'down':
         newPosition.row = Math.min(entriesLength - 1, focusedCell.row + 1);
@@ -69,20 +71,21 @@ export const useKeyboardNavigation = ({
       } else {
         setSelectionRange((prev) => (prev ? { ...prev, end: newPosition } : null));
       }
+      setFocusedCell(newPosition);
     } else {
+      // When not extending selection, clear selection and set new focus
       setIsSelecting(false);
       setSelectionRange(null);
+      setFocusedCell(newPosition);
     }
-    setFocusedCell(newPosition);
   };
 
   const extendFocusToEdge = (direction: 'up' | 'down') => {
     if (!focusedCell) return;
 
     let newPosition = { ...focusedCell };
-
     if (direction === 'up') {
-      newPosition.row = -1; // Header row
+      newPosition.row = HEADERS_ROW; // Header row
     } else {
       newPosition.row = entriesLength - 1; // Last row
     }
@@ -96,11 +99,18 @@ export const useKeyboardNavigation = ({
     setFocusedCell(newPosition);
   };
 
+  // Focus cell function - clears selection when focusing on a new cell
+  const focusCell = useCallback((position: FocusPosition) => {
+    setFocusedCell(position);
+    setIsSelecting(false);
+    setSelectionRange(null);
+  }, []);
+
   // Focus column function
   const focusColumn = useCallback(
     (columnIndex: number) => {
       if (columnIndex >= 0 && columnIndex < totalColumns) {
-        const startPosition: FocusPosition = { row: -1, column: columnIndex };
+        const startPosition: FocusPosition = { row: HEADERS_ROW, column: columnIndex };
         const endPosition: FocusPosition = { row: entriesLength - 1, column: columnIndex };
 
         setFocusedCell(startPosition);
@@ -175,7 +185,7 @@ export const useKeyboardNavigation = ({
             moveFocus('up');
           } else {
             onToggleSelection();
-            if (focusedCell.row !== -1) {
+            if (focusedCell.row !== HEADERS_ROW) {
               moveFocus('down');
             }
           }
@@ -229,6 +239,7 @@ export const useKeyboardNavigation = ({
     selectionRange,
     isSelecting,
     setFocusedCell,
+    focusCell,
     focusColumn,
     tableRef,
   };

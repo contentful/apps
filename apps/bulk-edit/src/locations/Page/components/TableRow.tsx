@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Table, TextLink, Badge, Checkbox, Flex, Text } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { Entry, ContentTypeField } from '../types';
@@ -63,12 +63,8 @@ export const TableRow: React.FC<TableRowProps> = ({
     const { start, end } = selectionRange;
     const minRow = Math.min(start.row, end.row);
     const maxRow = Math.max(start.row, end.row);
-    const minCol = Math.min(start.column, end.column);
-    const maxCol = Math.max(start.column, end.column);
 
-    return (
-      rowIndex >= minRow && rowIndex <= maxRow && columnIndex >= minCol && columnIndex <= maxCol
-    );
+    return rowIndex >= minRow && rowIndex <= maxRow && columnIndex === start.column;
   };
 
   const getColumnIndex = (field: ContentTypeField | string) => {
