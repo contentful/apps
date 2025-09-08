@@ -534,7 +534,7 @@ const Page = () => {
                       setSelectedStatuses(statuses);
                       setActivePage(0);
                     }}
-                    disabled={entriesLoading || !selectedContentType}
+                    disabled={(entries.length === 0 && !entriesLoading) || !selectedContentType}
                     placeholderConfig={{
                       noneSelected: 'No statuses selected',
                       allSelected: 'Filter by status',

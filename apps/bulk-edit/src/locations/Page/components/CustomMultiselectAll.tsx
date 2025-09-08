@@ -1,6 +1,13 @@
 import { Box, Checkbox, Text } from '@contentful/f36-components';
 import Splitter from './Splitter';
-import { selectAllCheckboxStyles, selectAllTextStyles } from './GenericMultiselect.styles';
+import {
+  selectAllCheckboxBaseStyles,
+  selectAllCheckboxSelectedStyles,
+  selectAllCheckboxUnselectedStyles,
+  selectAllTextStyles,
+  selectAllCheckboxDisabledStyles,
+  selectAllTextDisabledStyles,
+} from './GenericMultiselect.styles';
 
 interface CustomMultiselectAllProps {
   areAllSelected: boolean;
@@ -16,11 +23,13 @@ const CustomMultiselectAll = ({
   return (
     <Box>
       <Checkbox
-        className={selectAllCheckboxStyles(areAllSelected)}
+        className={`${selectAllCheckboxBaseStyles} ${
+          areAllSelected ? selectAllCheckboxSelectedStyles : selectAllCheckboxUnselectedStyles
+        } ${disabled ? selectAllCheckboxDisabledStyles : ''}`}
         isDisabled={disabled}
         isChecked={areAllSelected}
         onChange={onChange}>
-        <Text className={selectAllTextStyles}>
+        <Text className={`${selectAllTextStyles} ${disabled ? selectAllTextDisabledStyles : ''}`}>
           {areAllSelected ? 'Deselect All' : 'Select All'}
         </Text>
       </Checkbox>
