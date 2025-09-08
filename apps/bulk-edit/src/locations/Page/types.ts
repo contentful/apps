@@ -1,6 +1,6 @@
 import { FieldType } from 'contentful-management';
 
-export type ColumnOption = {
+export type FilterOption = {
   label: string;
   value: string;
 };

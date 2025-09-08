@@ -18,7 +18,7 @@ import {
   KeyValueMap,
   QueryOptions,
 } from 'contentful-management';
-import { ColumnOption, ContentTypeField, Status } from './types';
+import { ContentTypeField, FilterOption } from './types';
 import { styles } from './styles';
 import { ContentTypeSidebar } from './components/ContentTypeSidebar';
 import { SORT_OPTIONS, SortMenu } from './components/SortMenu';
@@ -36,7 +36,7 @@ import {
 } from './utils/entryUtils';
 import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
-import GenericMultiselect from './components/GenericMultiselect';
+import FilterMultiselect from './components/FilterMultiselect';
 
 const Page = () => {
   const sdk = useSDK();
@@ -62,8 +62,10 @@ const Page = () => {
   const [undoFirstEntryFieldValue, setUndoFirstEntryFieldValue] = useState('');
   const [totalUpdateCount, setTotalUpdateCount] = useState<number>(0);
   const [editionCount, setEditionCount] = useState<number>(0);
-  const [selectedColumns, setSelectedColumns] = useState<ColumnOption[]>([]);
-  const [selectedStatuses, setSelectedStatuses] = useState<Status[]>(getAllStatuses);
+  const [selectedColumns, setSelectedColumns] = useState<FilterOption[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<FilterOption[]>(
+    getAllStatuses().map((s) => ({ label: s.label, value: s.label.toLowerCase() }))
+  );
   const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
@@ -95,7 +97,7 @@ const Page = () => {
     else if (sortOption === 'displayName_desc') return `-fields.${displayField}`;
   };
 
-  const getStatusFilter = (statuses: Status[]) => {
+  const getStatusFilter = (statuses: FilterOption[]) => {
     // If no statuses selected, return a filter that matches nothing
     if (statuses.length === 0) {
       return { 'sys.id[in]': 'nonexistent-id' };
@@ -119,7 +121,7 @@ const Page = () => {
   };
 
   // We cannot differentiate throw the query changed and published
-  const filterEntriesByStatus = (entries: EntryProps[], statuses: Status[]): EntryProps[] => {
+  const filterEntriesByStatus = (entries: EntryProps[], statuses: FilterOption[]): EntryProps[] => {
     // If no statuses selected, return empty array
     if (statuses.length === 0) return [];
 
@@ -504,7 +506,9 @@ const Page = () => {
               onContentTypeSelect={(newCT) => {
                 setSelectedContentTypeId(newCT);
                 setSortOption(SORT_OPTIONS[0].value);
-                setSelectedStatuses(getAllStatuses);
+                setSelectedStatuses(
+                  getAllStatuses().map((s) => ({ label: s.label, value: s.label.toLowerCase() }))
+                );
                 setActivePage(0);
               }}
             />
@@ -524,7 +528,8 @@ const Page = () => {
                     }}
                     disabled={(entries.length === 0 && !entriesLoading) || !selectedContentType}
                   />
-                  <GenericMultiselect<Status>
+                  <FilterMultiselect
+                    id="status"
                     options={getAllStatuses().map((s) => ({
                       label: s.label,
                       value: s.label.toLowerCase(),
@@ -542,10 +547,11 @@ const Page = () => {
                       multipleSelected: '',
                     }}
                     isItemSelected={(item, selectedItems) =>
-                      selectedItems.some((status) => status.label === item.label)
+                      selectedItems.some((status) => status.value === item.value)
                     }
                   />
-                  <GenericMultiselect<ColumnOption>
+                  <FilterMultiselect
+                    id="column"
                     options={getFieldsMapped(fields)}
                     selectedItems={selectedColumns}
                     setSelectedItems={(selectedColumns) => {

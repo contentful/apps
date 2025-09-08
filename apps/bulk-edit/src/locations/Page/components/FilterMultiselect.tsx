@@ -2,19 +2,15 @@ import { Flex } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { useMemo } from 'react';
 import { truncate } from '../utils/entryUtils';
-import CustomMultiselectAll from './CustomMultiselectAll';
 import { styles } from '../styles';
 import { optionStyles } from './GenericMultiselect.styles';
+import { FilterOption } from '../types';
 
-export interface FilterOption {
-  label: string;
-  value: string;
-}
-
-interface GenericMultiselectProps<T> {
+interface FilterMultiselectProps {
+  id?: string;
   options: FilterOption[];
-  selectedItems: T[];
-  setSelectedItems: (items: T[]) => void;
+  selectedItems: FilterOption[];
+  setSelectedItems: (items: FilterOption[]) => void;
   disabled?: boolean;
   placeholderConfig: {
     noneSelected: string;
@@ -22,47 +18,32 @@ interface GenericMultiselectProps<T> {
     singleSelected: string;
     multipleSelected: string;
   };
-  isItemSelected: (item: FilterOption, selectedItems: T[]) => boolean;
+  isItemSelected: (item: FilterOption, selectedItems: FilterOption[]) => boolean;
 }
 
-const GenericMultiselect = <T,>({
+const FilterMultiselect = ({
+  id,
   options,
   selectedItems,
   setSelectedItems,
   disabled,
   placeholderConfig,
   isItemSelected,
-}: GenericMultiselectProps<T>) => {
-  const getItemLabel = (item: T): string => {
-    if (typeof item === 'object' && item !== null && 'label' in item) {
-      return (item as { label: string }).label;
-    }
-
-    return String(item);
-  };
-
-  const getItemValue = (item: T): string => {
-    if (typeof item === 'object' && item !== null && 'value' in item) {
-      return (item as { value: string }).value;
-    }
-
-    return getItemLabel(item).toLowerCase();
-  };
-
+}: FilterMultiselectProps) => {
   const getPlaceholderText = () => {
     if (selectedItems.length === 0) return placeholderConfig.noneSelected;
     if (selectedItems.length === options.length) return placeholderConfig.allSelected;
     if (selectedItems.length === 1) {
-      return getItemLabel(selectedItems[0]);
+      return selectedItems[0].label;
     }
-    const firstLabel = getItemLabel(selectedItems[0]);
+    const firstLabel = selectedItems[0].label;
     return `${firstLabel} and ${selectedItems.length - 1} more`;
   };
 
   const toggleAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
     if (checked) {
-      setSelectedItems(options as T[]);
+      setSelectedItems(options);
     } else {
       setSelectedItems([]);
     }
@@ -78,10 +59,11 @@ const GenericMultiselect = <T,>({
         placeholder={getPlaceholderText()}
         triggerButtonProps={{ size: 'small', isDisabled: disabled }}
         popoverProps={{ isFullWidth: true }}>
-        <CustomMultiselectAll
-          areAllSelected={areAllSelected}
-          disabled={disabled}
-          onChange={toggleAll}
+        <Multiselect.SelectAll
+          itemId={`selectAll-${id}`}
+          onSelectItem={toggleAll}
+          isDisabled={disabled}
+          isChecked={areAllSelected}
         />
         {options.map((option) => (
           <Multiselect.Option
@@ -90,16 +72,16 @@ const GenericMultiselect = <T,>({
             key={option.value}
             label={truncate(option.label, 30)}
             value={option.value}
-            itemId={option.value}
+            itemId={`option-${id}-${option.value}`}
             isChecked={isItemSelected(option, selectedItems)}
             onSelectItem={(e) => {
               const checked = e.target.checked;
               if (checked) {
-                setSelectedItems([...selectedItems, option as T]);
+                setSelectedItems([...selectedItems, option]);
               } else {
                 setSelectedItems(
                   selectedItems.filter((field) => {
-                    return getItemValue(field) !== option.value;
+                    return field.value !== option.value;
                   })
                 );
               }
@@ -111,4 +93,4 @@ const GenericMultiselect = <T,>({
   );
 };
 
-export default GenericMultiselect;
+export default FilterMultiselect;

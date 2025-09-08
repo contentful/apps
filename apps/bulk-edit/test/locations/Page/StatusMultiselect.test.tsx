@@ -1,16 +1,19 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import GenericMultiselect from '../../../src/locations/Page/components/GenericMultiselect';
-import { Status } from '../../../src/locations/Page/types';
+import { FilterOption } from '../../../src/locations/Page/types';
 import { getAllStatuses } from '../../../src/locations/Page/utils/entryUtils';
+import FilterMultiselect from '../../../src/locations/Page/components/FilterMultiselect';
 
 describe('StatusMultiselect', () => {
   const statusOptions = getAllStatuses();
 
   const defaultStatusProps = {
-    options: statusOptions,
-    selectedItems: statusOptions, // All statuses selected by default
+    options: statusOptions.map((status) => ({
+      label: status.label,
+      value: status.label.toLowerCase(),
+    })),
+    selectedItems: statusOptions.map((s) => ({ label: s.label, value: s.label.toLowerCase() })),
     setSelectedItems: vi.fn(),
     placeholderConfig: {
       noneSelected: 'No statuses selected',
@@ -19,9 +22,7 @@ describe('StatusMultiselect', () => {
       multipleSelected: '',
     },
     truncateLength: 20,
-    getItemKey: (item: Status) => item.label,
-    getItemValue: (item: Status) => item.label,
-    isItemSelected: (item: Status, selectedItems: Status[]) =>
+    isItemSelected: (item: FilterOption, selectedItems: FilterOption[]) =>
       selectedItems.some((status) => status.label === item.label),
   };
 
@@ -32,7 +33,7 @@ describe('StatusMultiselect', () => {
 
   describe('Status filter basic functionality', () => {
     it('renders all status options correctly', async () => {
-      render(<GenericMultiselect<Status> {...defaultStatusProps} />);
+      render(<FilterMultiselect {...defaultStatusProps} />);
 
       const triggerButton = screen.getByRole('button');
       fireEvent.click(triggerButton);
@@ -45,7 +46,7 @@ describe('StatusMultiselect', () => {
     });
 
     it('shows "Filter by status" when all statuses are selected', async () => {
-      render(<GenericMultiselect<Status> {...defaultStatusProps} />);
+      render(<FilterMultiselect {...defaultStatusProps} />);
 
       await waitFor(() => {
         expect(screen.getByText('Filter by status')).toBeInTheDocument();
@@ -57,7 +58,7 @@ describe('StatusMultiselect', () => {
         ...defaultStatusProps,
         selectedItems: [],
       };
-      render(<GenericMultiselect<Status> {...noStatusProps} />);
+      render(<FilterMultiselect {...noStatusProps} />);
 
       await waitFor(() => {
         expect(screen.getByText('No statuses selected')).toBeInTheDocument();
@@ -67,9 +68,9 @@ describe('StatusMultiselect', () => {
     it('shows individual status when only one is selected', async () => {
       const singleStatusProps = {
         ...defaultStatusProps,
-        selectedItems: [{ label: 'Draft', color: 'warning' as const }],
+        selectedItems: [{ label: 'Draft', value: 'draft' }],
       };
-      render(<GenericMultiselect<Status> {...singleStatusProps} />);
+      render(<FilterMultiselect {...singleStatusProps} />);
 
       await waitFor(() => {
         const button = screen.getByRole('button');
@@ -84,7 +85,7 @@ describe('StatusMultiselect', () => {
         ...defaultStatusProps,
         selectedItems: [],
       };
-      render(<GenericMultiselect<Status> {...noStatusProps} />);
+      render(<FilterMultiselect {...noStatusProps} />);
 
       const triggerButton = screen.getByRole('button');
       fireEvent.click(triggerButton);
@@ -97,12 +98,14 @@ describe('StatusMultiselect', () => {
       fireEvent.click(selectAllCheckbox);
 
       await waitFor(() => {
-        expect(defaultStatusProps.setSelectedItems).toHaveBeenCalledWith(statusOptions);
+        expect(defaultStatusProps.setSelectedItems).toHaveBeenCalledWith(
+          statusOptions.map((s) => ({ label: s.label, value: s.label.toLowerCase() }))
+        );
       });
     });
 
     it('calls setSelectedItems with empty array when select all is unchecked', async () => {
-      render(<GenericMultiselect<Status> {...defaultStatusProps} />);
+      render(<FilterMultiselect {...defaultStatusProps} />);
 
       const triggerButton = await waitFor(() => screen.getByRole('button'));
       fireEvent.click(triggerButton);
@@ -122,7 +125,7 @@ describe('StatusMultiselect', () => {
         ...defaultStatusProps,
         selectedItems: [],
       };
-      render(<GenericMultiselect<Status> {...noStatusProps} />);
+      render(<FilterMultiselect {...noStatusProps} />);
 
       const triggerButton = await waitFor(() => screen.getByRole('button'));
       fireEvent.click(triggerButton);
@@ -132,7 +135,7 @@ describe('StatusMultiselect', () => {
 
       await waitFor(() => {
         expect(defaultStatusProps.setSelectedItems).toHaveBeenCalledWith([
-          { label: 'Draft', color: 'warning' as const },
+          { label: 'Draft', value: 'draft' },
         ]);
       });
     });
@@ -140,9 +143,9 @@ describe('StatusMultiselect', () => {
     it('removes status from selection when individual option is unchecked', async () => {
       const singleStatusProps = {
         ...defaultStatusProps,
-        selectedItems: [{ label: 'Draft', color: 'warning' as const }],
+        selectedItems: [{ label: 'Draft', value: 'draft' }],
       };
-      render(<GenericMultiselect<Status> {...singleStatusProps} />);
+      render(<FilterMultiselect {...singleStatusProps} />);
 
       const triggerButton = await waitFor(() => screen.getByRole('button'));
       fireEvent.click(triggerButton);
@@ -157,11 +160,11 @@ describe('StatusMultiselect', () => {
       const twoStatusProps = {
         ...defaultStatusProps,
         selectedItems: [
-          { label: 'Draft', color: 'warning' as const },
-          { label: 'Published', color: 'positive' as const },
+          { label: 'Draft', value: 'draft' },
+          { label: 'Published', value: 'published' },
         ],
       };
-      render(<GenericMultiselect<Status> {...twoStatusProps} />);
+      render(<FilterMultiselect {...twoStatusProps} />);
 
       const triggerButton = await waitFor(() => screen.getByRole('button'));
       fireEvent.click(triggerButton);
@@ -180,7 +183,7 @@ describe('StatusMultiselect', () => {
         ...defaultStatusProps,
         disabled: true,
       };
-      render(<GenericMultiselect<Status> {...disabledProps} />);
+      render(<FilterMultiselect {...disabledProps} />);
 
       const triggerButton = screen.getByRole('button');
       expect(triggerButton).toBeDisabled();
@@ -195,10 +198,13 @@ describe('StatusMultiselect', () => {
 
       const specialProps = {
         ...defaultStatusProps,
-        options: specialStatusOptions,
+        options: specialStatusOptions.map((status) => ({
+          label: status.label,
+          value: status.label.toLowerCase(),
+        })),
         selectedItems: [],
       };
-      render(<GenericMultiselect<Status> {...specialProps} />);
+      render(<FilterMultiselect {...specialProps} />);
 
       const triggerButton = await waitFor(() => screen.getByRole('button'));
       fireEvent.click(triggerButton);
@@ -211,7 +217,7 @@ describe('StatusMultiselect', () => {
     });
 
     it('maintains correct selection state when options change', async () => {
-      const { rerender } = render(<GenericMultiselect<Status> {...defaultStatusProps} />);
+      const { rerender } = render(<FilterMultiselect {...defaultStatusProps} />);
 
       await waitFor(() => {
         expect(screen.getByText('Filter by status')).toBeInTheDocument();
@@ -220,9 +226,9 @@ describe('StatusMultiselect', () => {
       // Change to only draft selected
       const draftOnlyProps = {
         ...defaultStatusProps,
-        selectedItems: [{ label: 'Draft', color: 'warning' as const }],
+        selectedItems: [{ label: 'Draft', value: 'draft' }],
       };
-      rerender(<GenericMultiselect<Status> {...draftOnlyProps} />);
+      rerender(<FilterMultiselect {...draftOnlyProps} />);
 
       await waitFor(() => {
         const button = screen.getByRole('button');

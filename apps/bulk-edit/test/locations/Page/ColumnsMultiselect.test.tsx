@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import GenericMultiselect from '../../../src/locations/Page/components/GenericMultiselect';
-import { ColumnOption } from '../../../src/locations/Page/types';
+import FilterMultiselect from '../../../src/locations/Page/components/FilterMultiselect';
+import { FilterOption } from '../../../src/locations/Page/types';
 
 const mockOptions = [
   { label: 'Display name', value: 'displayName' },
@@ -27,10 +27,7 @@ describe('ColumnsMultiselect', () => {
       singleSelected: '',
       multipleSelected: '',
     },
-    truncateLength: 30,
-    getItemKey: (item: ColumnOption) => item.value,
-    getItemValue: (item: ColumnOption) => item.value,
-    isItemSelected: (item: ColumnOption, selectedItems: ColumnOption[]) =>
+    isItemSelected: (item: FilterOption, selectedItems: FilterOption[]) =>
       selectedItems.some((field) => field.value === item.value),
   };
 
@@ -41,7 +38,7 @@ describe('ColumnsMultiselect', () => {
 
   describe('Basic functionality', () => {
     it('renders the multiselect component', async () => {
-      render(<GenericMultiselect<ColumnOption> {...defaultProps} />);
+      render(<FilterMultiselect {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByRole('button')).toBeInTheDocument();
@@ -49,7 +46,7 @@ describe('ColumnsMultiselect', () => {
     });
 
     it('shows "No fields selected" when no fields are selected', async () => {
-      render(<GenericMultiselect<ColumnOption> {...defaultProps} />);
+      render(<FilterMultiselect {...defaultProps} />);
       await waitFor(() => {
         expect(screen.getByText('No fields selected')).toBeInTheDocument();
       });
@@ -57,7 +54,7 @@ describe('ColumnsMultiselect', () => {
 
     it('shows field name when one field is selected', async () => {
       const selectedFields = [{ label: 'Display name', value: 'displayName' }];
-      render(<GenericMultiselect<ColumnOption> {...defaultProps} selectedItems={selectedFields} />);
+      render(<FilterMultiselect {...defaultProps} selectedItems={selectedFields} />);
       await waitFor(() => {
         const button = screen.getByRole('button');
         expect(button).toHaveTextContent('Display name');
@@ -69,7 +66,7 @@ describe('ColumnsMultiselect', () => {
         { label: 'Display name', value: 'displayName' },
         { label: 'Updated at', value: 'updatedAt' },
       ];
-      render(<GenericMultiselect<ColumnOption> {...defaultProps} selectedItems={selectedFields} />);
+      render(<FilterMultiselect {...defaultProps} selectedItems={selectedFields} />);
       await waitFor(() => {
         expect(screen.getByText('Filter fields')).toBeInTheDocument();
       });
@@ -78,7 +75,7 @@ describe('ColumnsMultiselect', () => {
 
   describe('Selection functionality', () => {
     it('calls setSelectedFields with all options when select all is checked', async () => {
-      render(<GenericMultiselect<ColumnOption> {...defaultProps} />);
+      render(<FilterMultiselect {...defaultProps} />);
 
       const triggerButton = screen.getByRole('button');
       fireEvent.click(triggerButton);
@@ -100,7 +97,7 @@ describe('ColumnsMultiselect', () => {
         { label: 'Display name', value: 'displayName' },
         { label: 'Updated at', value: 'updatedAt' },
       ];
-      render(<GenericMultiselect<ColumnOption> {...defaultProps} selectedItems={selectedFields} />);
+      render(<FilterMultiselect {...defaultProps} selectedItems={selectedFields} />);
 
       const triggerButton = await waitFor(() => screen.getByRole('button'));
       fireEvent.click(triggerButton);
@@ -116,7 +113,7 @@ describe('ColumnsMultiselect', () => {
     });
 
     it('adds field to selection when individual option is checked', async () => {
-      render(<GenericMultiselect<ColumnOption> {...defaultProps} />);
+      render(<FilterMultiselect {...defaultProps} />);
 
       const triggerButton = await waitFor(() => screen.getByRole('button'));
       fireEvent.click(triggerButton);
@@ -135,7 +132,7 @@ describe('ColumnsMultiselect', () => {
 
     it('removes field from selection when individual option is unchecked', async () => {
       const selectedFields = [{ label: 'Display name', value: 'displayName' }];
-      render(<GenericMultiselect<ColumnOption> {...defaultProps} selectedItems={selectedFields} />);
+      render(<FilterMultiselect {...defaultProps} selectedItems={selectedFields} />);
 
       const triggerButton = await waitFor(() => screen.getByRole('button'));
       fireEvent.click(triggerButton);
@@ -155,7 +152,7 @@ describe('ColumnsMultiselect', () => {
         ...defaultProps,
         options: mockLocalizedOptions,
       };
-      render(<GenericMultiselect<ColumnOption> {...localizedProps} />);
+      render(<FilterMultiselect {...localizedProps} />);
 
       const triggerButton = screen.getByRole('button');
       fireEvent.click(triggerButton);
@@ -173,7 +170,7 @@ describe('ColumnsMultiselect', () => {
         ...defaultProps,
         options: mockLocalizedOptions,
       };
-      render(<GenericMultiselect<ColumnOption> {...localizedProps} />);
+      render(<FilterMultiselect {...localizedProps} />);
 
       const triggerButton = await waitFor(() => screen.getByRole('button'));
       fireEvent.click(triggerButton);
@@ -195,7 +192,7 @@ describe('ColumnsMultiselect', () => {
         ...defaultProps,
         options: [],
       };
-      render(<GenericMultiselect<ColumnOption> {...emptyProps} />);
+      render(<FilterMultiselect {...emptyProps} />);
       await waitFor(() => {
         expect(screen.getByText('No fields selected')).toBeInTheDocument();
       });
@@ -206,7 +203,7 @@ describe('ColumnsMultiselect', () => {
         ...defaultProps,
         options: [{ label: 'Single Field', value: 'single' }],
       };
-      render(<GenericMultiselect<ColumnOption> {...singleOptionProps} />);
+      render(<FilterMultiselect {...singleOptionProps} />);
 
       const triggerButton = await waitFor(() => screen.getByRole('button'));
       fireEvent.click(triggerButton);
@@ -225,7 +222,7 @@ describe('ColumnsMultiselect', () => {
         ...defaultProps,
         options: specialOptions,
       };
-      render(<GenericMultiselect<ColumnOption> {...specialProps} />);
+      render(<FilterMultiselect {...specialProps} />);
 
       const triggerButton = await waitFor(() => screen.getByRole('button'));
       fireEvent.click(triggerButton);
