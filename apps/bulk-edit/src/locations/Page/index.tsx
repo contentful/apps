@@ -38,6 +38,17 @@ import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from 
 import { ErrorNote } from './components/ErrorNote';
 import FilterMultiselect from './components/FilterMultiselect';
 
+const getFieldsMapped = (fields: ContentTypeField[]) => {
+  return fields.map((field) => ({
+    label: field.locale ? `(${field.locale}) ${field.name}` : field.name,
+    value: field.uniqueId,
+  }));
+};
+
+const getStatusesMapped = (): FilterOption[] => {
+  return getAllStatuses().map((s) => ({ label: s, value: s.toLowerCase() }));
+};
+
 const Page = () => {
   const sdk = useSDK();
   const locales = sdk.locales.available;
@@ -63,9 +74,7 @@ const Page = () => {
   const [totalUpdateCount, setTotalUpdateCount] = useState<number>(0);
   const [editionCount, setEditionCount] = useState<number>(0);
   const [selectedColumns, setSelectedColumns] = useState<FilterOption[]>([]);
-  const [selectedStatuses, setSelectedStatuses] = useState<FilterOption[]>(
-    getAllStatuses().map((s) => ({ label: s.label, value: s.label.toLowerCase() }))
-  );
+  const [selectedStatuses, setSelectedStatuses] = useState<FilterOption[]>(getStatusesMapped);
   const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
@@ -103,9 +112,9 @@ const Page = () => {
       return { 'sys.id[in]': 'nonexistent-id' };
     }
 
-    const hasDraft = statuses.some((s) => s.label === 'Draft');
-    const hasPublished = statuses.some((s) => s.label === 'Published');
-    const hasChanged = statuses.some((s) => s.label === 'Changed');
+    const hasDraft = statuses.includes(getStatusesMapped()[0]);
+    const hasPublished = statuses.includes(getStatusesMapped()[1]);
+    const hasChanged = statuses.includes(getStatusesMapped()[2]);
 
     // Single status filtering
     if (hasDraft && statuses.length === 1) {
@@ -135,9 +144,9 @@ const Page = () => {
   };
 
   function needsClientFiltering() {
-    const hasDraft = selectedStatuses.some((s) => s.label === 'Draft');
-    const hasPublished = selectedStatuses.some((s) => s.label === 'Published');
-    const hasChanged = selectedStatuses.some((s) => s.label === 'Changed');
+    const hasDraft = selectedStatuses.includes(getStatusesMapped()[0]);
+    const hasPublished = selectedStatuses.includes(getStatusesMapped()[1]);
+    const hasChanged = selectedStatuses.includes(getStatusesMapped()[2]);
 
     // If we need client-side filtering, fetch all entries
     return (
@@ -182,13 +191,6 @@ const Page = () => {
     };
     void fetchContentTypes();
   }, []);
-
-  const getFieldsMapped = (fields: ContentTypeField[]) => {
-    return fields.map((field) => ({
-      label: field.locale ? `(${field.locale}) ${field.name}` : field.name,
-      value: field.uniqueId,
-    }));
-  };
 
   const clearBasicState = () => {
     setEntries([]);
@@ -506,9 +508,7 @@ const Page = () => {
               onContentTypeSelect={(newCT) => {
                 setSelectedContentTypeId(newCT);
                 setSortOption(SORT_OPTIONS[0].value);
-                setSelectedStatuses(
-                  getAllStatuses().map((s) => ({ label: s.label, value: s.label.toLowerCase() }))
-                );
+                setSelectedStatuses(getStatusesMapped);
                 setActivePage(0);
               }}
             />
@@ -530,10 +530,7 @@ const Page = () => {
                   />
                   <FilterMultiselect
                     id="status"
-                    options={getAllStatuses().map((s) => ({
-                      label: s.label,
-                      value: s.label.toLowerCase(),
-                    }))}
+                    options={getStatusesMapped()}
                     selectedItems={selectedStatuses}
                     setSelectedItems={(statuses) => {
                       setSelectedStatuses(statuses);

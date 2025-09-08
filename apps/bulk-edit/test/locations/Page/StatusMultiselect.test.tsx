@@ -10,10 +10,10 @@ describe('StatusMultiselect', () => {
 
   const defaultStatusProps = {
     options: statusOptions.map((status) => ({
-      label: status.label,
-      value: status.label.toLowerCase(),
+      label: status,
+      value: status.toLowerCase(),
     })),
-    selectedItems: statusOptions.map((s) => ({ label: s.label, value: s.label.toLowerCase() })),
+    selectedItems: statusOptions.map((s) => ({ label: s, value: s.toLowerCase() })),
     setSelectedItems: vi.fn(),
     placeholderConfig: {
       noneSelected: 'No statuses selected',
@@ -99,7 +99,7 @@ describe('StatusMultiselect', () => {
 
       await waitFor(() => {
         expect(defaultStatusProps.setSelectedItems).toHaveBeenCalledWith(
-          statusOptions.map((s) => ({ label: s.label, value: s.label.toLowerCase() }))
+          statusOptions.map((s) => ({ label: s, value: s.toLowerCase() }))
         );
       });
     });
