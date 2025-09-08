@@ -6,12 +6,13 @@ import CustomMultiselectAll from './CustomMultiselectAll';
 import { styles } from '../styles';
 import { optionStyles } from './GenericMultiselect.styles';
 
-export interface BaseMultiselectOption {
+export interface FilterOption {
   label: string;
+  value: string;
 }
 
-interface GenericMultiselectProps<T extends BaseMultiselectOption> {
-  options: T[];
+interface GenericMultiselectProps<T> {
+  options: FilterOption[];
   selectedItems: T[];
   setSelectedItems: (items: T[]) => void;
   disabled?: boolean;
@@ -21,34 +22,47 @@ interface GenericMultiselectProps<T extends BaseMultiselectOption> {
     singleSelected: string;
     multipleSelected: string;
   };
-  truncateLength?: number;
-  getItemKey: (item: T) => string;
-  getItemValue: (item: T) => string;
-  isItemSelected: (item: T, selectedItems: T[]) => boolean;
+  isItemSelected: (item: FilterOption, selectedItems: T[]) => boolean;
 }
 
-const GenericMultiselect = <T extends BaseMultiselectOption>({
+const GenericMultiselect = <T,>({
   options,
   selectedItems,
   setSelectedItems,
   disabled,
   placeholderConfig,
-  truncateLength = 30,
-  getItemKey,
-  getItemValue,
   isItemSelected,
 }: GenericMultiselectProps<T>) => {
+  const getItemLabel = (item: T): string => {
+    if (typeof item === 'object' && item !== null && 'label' in item) {
+      return (item as { label: string }).label;
+    }
+
+    return String(item);
+  };
+
+  const getItemValue = (item: T): string => {
+    if (typeof item === 'object' && item !== null && 'value' in item) {
+      return (item as { value: string }).value;
+    }
+
+    return getItemLabel(item).toLowerCase();
+  };
+
   const getPlaceholderText = () => {
     if (selectedItems.length === 0) return placeholderConfig.noneSelected;
     if (selectedItems.length === options.length) return placeholderConfig.allSelected;
-    if (selectedItems.length === 1) return selectedItems[0].label;
-    return `${selectedItems[0].label} and ${selectedItems.length - 1} more`;
+    if (selectedItems.length === 1) {
+      return getItemLabel(selectedItems[0]);
+    }
+    const firstLabel = getItemLabel(selectedItems[0]);
+    return `${firstLabel} and ${selectedItems.length - 1} more`;
   };
 
   const toggleAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
     if (checked) {
-      setSelectedItems(options);
+      setSelectedItems(options as T[]);
     } else {
       setSelectedItems([]);
     }
@@ -73,18 +87,20 @@ const GenericMultiselect = <T extends BaseMultiselectOption>({
           <Multiselect.Option
             isDisabled={disabled}
             className={optionStyles}
-            key={getItemKey(option)}
-            label={truncate(option.label, truncateLength)}
-            value={getItemValue(option)}
-            itemId={getItemKey(option)}
+            key={option.value}
+            label={truncate(option.label, 30)}
+            value={option.value}
+            itemId={option.value}
             isChecked={isItemSelected(option, selectedItems)}
             onSelectItem={(e) => {
               const checked = e.target.checked;
               if (checked) {
-                setSelectedItems([...selectedItems, option]);
+                setSelectedItems([...selectedItems, option as T]);
               } else {
                 setSelectedItems(
-                  selectedItems.filter((item) => getItemKey(item) !== getItemKey(option))
+                  selectedItems.filter((field) => {
+                    return getItemValue(field) !== option.value;
+                  })
                 );
               }
             }}

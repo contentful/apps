@@ -525,7 +525,10 @@ const Page = () => {
                     disabled={(entries.length === 0 && !entriesLoading) || !selectedContentType}
                   />
                   <GenericMultiselect<Status>
-                    options={getAllStatuses()}
+                    options={getAllStatuses().map((s) => ({
+                      label: s.label,
+                      value: s.label.toLowerCase(),
+                    }))}
                     selectedItems={selectedStatuses}
                     setSelectedItems={(statuses) => {
                       setSelectedStatuses(statuses);
@@ -538,9 +541,6 @@ const Page = () => {
                       singleSelected: '',
                       multipleSelected: '',
                     }}
-                    truncateLength={20}
-                    getItemKey={(item) => item.label}
-                    getItemValue={(item) => item.label}
                     isItemSelected={(item, selectedItems) =>
                       selectedItems.some((status) => status.label === item.label)
                     }
@@ -559,9 +559,6 @@ const Page = () => {
                       singleSelected: '',
                       multipleSelected: '',
                     }}
-                    truncateLength={30}
-                    getItemKey={(item) => item.value}
-                    getItemValue={(item) => item.value}
                     isItemSelected={(item, selectedItems) =>
                       selectedItems.some((field) => field.value === item.value)
                     }
