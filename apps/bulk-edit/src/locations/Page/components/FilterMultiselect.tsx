@@ -18,7 +18,6 @@ interface FilterMultiselectProps {
     singleSelected: string;
     multipleSelected: string;
   };
-  isItemSelected: (item: FilterOption, selectedItems: FilterOption[]) => boolean;
 }
 
 const FilterMultiselect = ({
@@ -28,7 +27,6 @@ const FilterMultiselect = ({
   setSelectedItems,
   disabled,
   placeholderConfig,
-  isItemSelected,
 }: FilterMultiselectProps) => {
   const getPlaceholderText = () => {
     if (selectedItems.length === 0) return placeholderConfig.noneSelected;
@@ -50,8 +48,8 @@ const FilterMultiselect = ({
   };
 
   const areAllSelected = useMemo(() => {
-    return options.every((option) => isItemSelected(option, selectedItems));
-  }, [selectedItems, options, isItemSelected]);
+    return options.every((option) => selectedItems.some((item) => item.value === option.value));
+  }, [selectedItems, options]);
 
   return (
     <Flex gap="spacing2Xs" flexDirection="column" style={styles.columnMultiselect}>
@@ -73,17 +71,13 @@ const FilterMultiselect = ({
             label={truncate(option.label, 30)}
             value={option.value}
             itemId={`option-${id}-${option.value}`}
-            isChecked={isItemSelected(option, selectedItems)}
+            isChecked={selectedItems.some((item) => item.value === option.value)}
             onSelectItem={(e) => {
               const checked = e.target.checked;
               if (checked) {
                 setSelectedItems([...selectedItems, option]);
               } else {
-                setSelectedItems(
-                  selectedItems.filter((field) => {
-                    return field.value !== option.value;
-                  })
-                );
+                setSelectedItems(selectedItems.filter((item) => item.value !== option.value));
               }
             }}
           />

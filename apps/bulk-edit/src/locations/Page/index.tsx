@@ -546,9 +546,6 @@ const Page = () => {
                       singleSelected: '',
                       multipleSelected: '',
                     }}
-                    isItemSelected={(item, selectedItems) =>
-                      selectedItems.some((status) => status.value === item.value)
-                    }
                   />
                   <FilterMultiselect
                     id="column"
@@ -565,9 +562,6 @@ const Page = () => {
                       singleSelected: '',
                       multipleSelected: '',
                     }}
-                    isItemSelected={(item, selectedItems) =>
-                      selectedItems.some((field) => field.value === item.value)
-                    }
                   />
                 </Flex>
                 {selectedField && selectedEntryIds.length > 0 && !entriesLoading && (
