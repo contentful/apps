@@ -13,12 +13,29 @@ interface Props {
 
 const ActionSuccess = (props: Props) => {
   const { actionResult, accordionState, handleCollapse, handleExpand, handleCopy } = props;
-  const { data, timestamp, actionId } = actionResult;
+  const { data, timestamp, actionId, parameters } = actionResult;
   const statusCode = data?.response?.statusCode;
   const duration =
     data && new Date(data.responseAt).getMilliseconds() - new Date(timestamp).getMilliseconds();
-  const requestBody = JSON.stringify(JSON.parse(data?.request?.body || ''), null, 2);
-  const responseBody = JSON.stringify(JSON.parse(data?.response?.body || ''), null, 2);
+  const requestBody = (() => {
+    try {
+      return JSON.stringify(parameters ?? {}, null, 2);
+    } catch (e) {
+      return JSON.stringify({}, null, 2);
+    }
+  })();
+  const responseBody = (() => {
+    try {
+      const body = data?.response?.body ?? '';
+      return typeof body === 'string'
+        ? JSON.stringify(JSON.parse(body), null, 2)
+        : JSON.stringify(body, null, 2);
+    } catch (e) {
+      return typeof data?.response?.body === 'string'
+        ? data?.response?.body
+        : JSON.stringify(data?.response?.body ?? '', null, 2);
+    }
+  })();
 
   return (
     <Accordion key={`${actionId}-${timestamp}`} className={styles.accordion}>
@@ -50,16 +67,7 @@ const ActionSuccess = (props: Props) => {
             onCollapse={() => handleCollapse(`request-${actionId}-${timestamp}`)}>
             <Stack flexDirection="column" alignItems="left" marginLeft="spacingXs">
               <Text>
-                <strong>Request Headers:</strong>{' '}
-                {data?.request?.headers &&
-                  Object.entries(data?.request?.headers).map(([key, value]) => (
-                    <div className={styles.requestHeaders} key={key}>
-                      <strong>{key}:</strong> {`${value}`}
-                    </div>
-                  ))}
-              </Text>
-              <Text>
-                <strong>Request Body:</strong>
+                <strong>Parameters:</strong>
                 <Flex className={styles.bodyContainer}>
                   <pre className={styles.body}>
                     <code>{requestBody}</code>
@@ -67,8 +75,8 @@ const ActionSuccess = (props: Props) => {
                   <IconButton
                     variant="transparent"
                     icon={<CopyIcon />}
-                    aria-label="Copy request body"
-                    onClick={() => handleCopy(data?.response?.body || '', 'request body')}
+                    aria-label="Copy request parameters"
+                    onClick={() => handleCopy(requestBody, 'request parameters')}
                     className={styles.copyButton}
                   />
                 </Flex>

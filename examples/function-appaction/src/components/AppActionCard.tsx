@@ -47,13 +47,25 @@ const AppActionCard = (props: Props) => {
       const timestamp = new Date().toLocaleString();
 
       setActionResults(() => [
-        { success: true, data: result, timestamp, actionId: action.sys.id },
+        {
+          success: true,
+          data: result,
+          timestamp,
+          actionId: action.sys.id,
+          parameters: actionParameters[action.sys.id] || {},
+        },
         ...actionResults,
       ]);
     } catch (error) {
       const timestamp = new Date().toLocaleString();
       setActionResults(() => [
-        { success: false, error, timestamp, actionId: action.sys.id },
+        {
+          success: false,
+          error,
+          timestamp,
+          actionId: action.sys.id,
+          parameters: actionParameters[action.sys.id] || {},
+        },
         ...actionResults,
       ]);
     } finally {

@@ -31,6 +31,7 @@ export interface ActionResultType {
   error?: unknown;
   timestamp: string;
   actionId: string;
+  parameters?: Record<string, any>;
 }
 
 const Page = () => {
