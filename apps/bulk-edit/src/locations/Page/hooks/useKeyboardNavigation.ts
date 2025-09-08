@@ -104,6 +104,10 @@ export const useKeyboardNavigation = ({
     setFocusedCell(position);
     setIsSelecting(false);
     setSelectionRange(null);
+    // Ensure the table element gets focus so keyboard events are captured
+    if (tableRef.current) {
+      tableRef.current.focus();
+    }
   }, []);
 
   // Focus column function
@@ -117,6 +121,10 @@ export const useKeyboardNavigation = ({
         setIsSelecting(true);
         setSelectionRange({ start: startPosition, end: endPosition });
         onFocusColumn(columnIndex);
+        // Ensure the table element gets focus so keyboard events are captured
+        if (tableRef.current) {
+          tableRef.current.focus();
+        }
       }
     },
     [totalColumns, entriesLength, onFocusColumn]

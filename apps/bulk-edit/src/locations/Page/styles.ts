@@ -32,6 +32,7 @@ export const styles = {
     marginTop: tokens.spacingM,
     minWidth: `${CELL_WIDTH * 4}px`,
     overflowX: 'auto',
+    outline: 'none', // Remove default focus outline
   },
   tableFocused: {
     marginTop: tokens.spacingM,
