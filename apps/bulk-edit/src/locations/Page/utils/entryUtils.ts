@@ -4,6 +4,10 @@ import { Entry, ContentTypeField, Status, Fields } from '../types';
 import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
 import { BATCH_FETCHING } from './constants';
 
+export const getAllStatuses = (): string[] => {
+  return ['Draft', 'Changed', 'Published'];
+};
+
 export const getStatus = (entry: Entry): Status => {
   const { sys } = entry;
   if (!sys.publishedVersion) {

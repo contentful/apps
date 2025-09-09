@@ -18,7 +18,7 @@ import {
   KeyValueMap,
   QueryOptions,
 } from 'contentful-management';
-import { ColumnOption, ContentTypeField } from './types';
+import { ContentTypeField, FilterOption } from './types';
 import { styles } from './styles';
 import { ContentTypeSidebar } from './components/ContentTypeSidebar';
 import { SORT_OPTIONS, SortMenu } from './components/SortMenu';
@@ -27,14 +27,27 @@ import { BulkEditModal } from './components/BulkEditModal';
 import { UndoBulkEditModal } from './components/UndoBulkEditModal';
 import {
   fetchEntriesWithBatching,
+  getAllStatuses,
   getEntryFieldValue,
+  getStatus,
   processEntriesInBatches,
   truncate,
   updateEntryFieldLocalized,
 } from './utils/entryUtils';
 import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
-import ColumnMultiselect from './components/ColumnMultiselect';
+import FilterMultiselect from './components/FilterMultiselect';
+
+const getFieldsMapped = (fields: ContentTypeField[]) => {
+  return fields.map((field) => ({
+    label: field.locale ? `(${field.locale}) ${field.name}` : field.name,
+    value: field.uniqueId,
+  }));
+};
+
+const getStatusesMapped = (): FilterOption[] => {
+  return getAllStatuses().map((s) => ({ label: s, value: s.toLowerCase() }));
+};
 
 const Page = () => {
   const sdk = useSDK();
@@ -60,7 +73,8 @@ const Page = () => {
   const [undoFirstEntryFieldValue, setUndoFirstEntryFieldValue] = useState('');
   const [totalUpdateCount, setTotalUpdateCount] = useState<number>(0);
   const [editionCount, setEditionCount] = useState<number>(0);
-  const [selectedFields, setSelectedFields] = useState<ColumnOption[]>([]);
+  const [selectedColumns, setSelectedColumns] = useState<FilterOption[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<FilterOption[]>(getStatusesMapped);
   const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
@@ -84,20 +98,74 @@ const Page = () => {
     return allContentTypes;
   };
 
-  const buildQuery = (sortOption: string, displayField: string | null): QueryOptions => {
-    const getOrder = (sortOption: string) => {
-      if (sortOption === 'updatedAt_desc') return '-sys.updatedAt';
-      else if (sortOption === 'updatedAt_asc') return 'sys.updatedAt';
-      else if (displayField === null) return undefined;
-      else if (sortOption === 'displayName_asc') return `fields.${displayField}`;
-      else if (sortOption === 'displayName_desc') return `-fields.${displayField}`;
-    };
+  const getOrder = (sortOption: string, displayField: string | null) => {
+    if (sortOption === 'updatedAt_desc') return '-sys.updatedAt';
+    else if (sortOption === 'updatedAt_asc') return 'sys.updatedAt';
+    else if (displayField === null) return undefined;
+    else if (sortOption === 'displayName_asc') return `fields.${displayField}`;
+    else if (sortOption === 'displayName_desc') return `-fields.${displayField}`;
+  };
 
+  const getStatusFilter = (statuses: FilterOption[]) => {
+    // If no statuses selected, return a filter that matches nothing
+    if (statuses.length === 0) {
+      return { 'sys.id[in]': 'nonexistent-id' };
+    }
+
+    const hasDraft = statuses.includes(getStatusesMapped()[0]);
+    const hasPublished = statuses.includes(getStatusesMapped()[1]);
+    const hasChanged = statuses.includes(getStatusesMapped()[2]);
+
+    // Single status filtering
+    if (hasDraft && statuses.length === 1) {
+      return { 'sys.publishedAt[exists]': false };
+    }
+
+    if (!hasDraft && (hasPublished || hasChanged)) {
+      return { 'sys.publishedAt[exists]': true, 'sys.archivedAt[exists]': false };
+    }
+
+    // Other combinations does not filter anything
+    return {};
+  };
+
+  // We cannot differentiate throw the query changed and published
+  const filterEntriesByStatus = (entries: EntryProps[], statuses: FilterOption[]): EntryProps[] => {
+    // If no statuses selected, return empty array
+    if (statuses.length === 0) return [];
+
+    // If all statuses selected, return all entries
+    if (statuses.length === 3) return entries;
+
+    return entries.filter((entry) => {
+      const entryStatus = getStatus(entry);
+      return statuses.some((status) => status.label === entryStatus.label);
+    });
+  };
+
+  function needsClientFiltering() {
+    const hasDraft = selectedStatuses.includes(getStatusesMapped()[0]);
+    const hasPublished = selectedStatuses.includes(getStatusesMapped()[1]);
+    const hasChanged = selectedStatuses.includes(getStatusesMapped()[2]);
+
+    // If we need client-side filtering, fetch all entries
+    return (
+      selectedStatuses.length > 0 &&
+      ((hasDraft && (hasPublished || hasChanged)) || (hasPublished && hasChanged))
+    );
+  }
+
+  const buildQuery = (
+    sortOption: string,
+    displayField: string | null,
+    fetchAll: boolean = false
+  ): QueryOptions => {
     return {
       content_type: selectedContentTypeId,
-      order: getOrder(sortOption),
-      skip: activePage * itemsPerPage,
-      limit: itemsPerPage,
+      order: getOrder(sortOption, displayField),
+      skip: fetchAll || needsClientFiltering() ? 0 : activePage * itemsPerPage,
+      limit: fetchAll || needsClientFiltering() ? 1000 : itemsPerPage,
+      ...getStatusFilter(selectedStatuses),
     };
   };
 
@@ -122,14 +190,7 @@ const Page = () => {
       }
     };
     void fetchContentTypes();
-  }, [sdk]);
-
-  const getFieldsMapped = (fields: ContentTypeField[]) => {
-    return fields.map((field) => ({
-      label: field.locale ? `(${field.locale}) ${field.name}` : field.name,
-      value: field.uniqueId,
-    }));
-  };
+  }, []);
 
   const clearBasicState = () => {
     setEntries([]);
@@ -169,16 +230,16 @@ const Page = () => {
           }
         });
         setFields(newFields);
-        setSelectedFields(getFieldsMapped(newFields));
+        setSelectedColumns(getFieldsMapped(newFields));
         setCurrentContentType(ct);
       } catch (e) {
         clearBasicState();
-        setSelectedFields([]);
+        setSelectedColumns([]);
         setCurrentContentType(null);
       }
     };
     void fetchContentTypeAndFields();
-  }, [sdk, selectedContentTypeId, locales]);
+  }, [sdk, selectedContentTypeId]);
 
   // Fetch entries when pagination, sorting, or content type changes
   useEffect(() => {
@@ -199,8 +260,22 @@ const Page = () => {
           baseQuery.limit || BATCH_FETCHING.DEFAULT_BATCH_SIZE
         );
 
-        setEntries(entries);
-        setTotalEntries(total);
+        // Apply client-side status filtering
+        const filteredEntries = filterEntriesByStatus(entries, selectedStatuses);
+
+        if (needsClientFiltering()) {
+          // Client-side pagination
+          const startIndex = activePage * itemsPerPage;
+          const endIndex = startIndex + itemsPerPage;
+          const paginatedEntries = filteredEntries.slice(startIndex, endIndex);
+
+          setEntries(paginatedEntries);
+          setTotalEntries(filteredEntries.length);
+        } else {
+          // Server-side pagination
+          setEntries(filteredEntries);
+          setTotalEntries(total);
+        }
       } catch (e) {
         clearBasicState();
       } finally {
@@ -208,7 +283,7 @@ const Page = () => {
       }
     };
     void fetchEntries();
-  }, [sdk, activePage, itemsPerPage, sortOption, currentContentType]);
+  }, [sdk, activePage, itemsPerPage, sortOption, currentContentType, selectedStatuses]);
 
   const selectedContentType = contentTypes.find((ct) => ct.sys.id === selectedContentTypeId);
   const selectedEntries = entries.filter((entry) => selectedEntryIds.includes(entry.sys.id));
@@ -433,6 +508,7 @@ const Page = () => {
               onContentTypeSelect={(newCT) => {
                 setSelectedContentTypeId(newCT);
                 setSortOption(SORT_OPTIONS[0].value);
+                setSelectedStatuses(getStatusesMapped);
                 setActivePage(0);
               }}
             />
@@ -443,42 +519,69 @@ const Page = () => {
                 <Heading style={styles.stickyPageHeader}>
                   {selectedContentType ? `Bulk edit ${selectedContentType.name}` : 'Bulk Edit App'}
                 </Heading>
-                {(entries.length === 0 && !entriesLoading) || !selectedContentType ? (
-                  <Box style={styles.noEntriesText}>No entries found.</Box>
+                <Flex gap="spacingS" alignItems="center">
+                  <SortMenu
+                    sortOption={sortOption}
+                    onSortChange={(newSort) => {
+                      setSortOption(newSort);
+                      setActivePage(0);
+                    }}
+                    disabled={(entries.length === 0 && !entriesLoading) || !selectedContentType}
+                  />
+                  <FilterMultiselect
+                    id="status"
+                    options={getStatusesMapped()}
+                    selectedItems={selectedStatuses}
+                    setSelectedItems={(statuses) => {
+                      setSelectedStatuses(statuses);
+                      setActivePage(0);
+                    }}
+                    disabled={(entries.length === 0 && !entriesLoading) || !selectedContentType}
+                    placeholderConfig={{
+                      noneSelected: 'No statuses selected',
+                      allSelected: 'Filter by status',
+                      singleSelected: '',
+                      multipleSelected: '',
+                    }}
+                  />
+                  <FilterMultiselect
+                    id="column"
+                    options={getFieldsMapped(fields)}
+                    selectedItems={selectedColumns}
+                    setSelectedItems={(selectedColumns) => {
+                      setSelectedColumns(selectedColumns);
+                      setActivePage(0);
+                    }}
+                    disabled={(entries.length === 0 && !entriesLoading) || !selectedContentType}
+                    placeholderConfig={{
+                      noneSelected: 'No fields selected',
+                      allSelected: 'Filter fields',
+                      singleSelected: '',
+                      multipleSelected: '',
+                    }}
+                  />
+                </Flex>
+                {selectedField && selectedEntryIds.length > 0 && !entriesLoading && (
+                  <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
+                    <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+                      {selectedEntryIds.length === 1 ? 'Edit' : 'Bulk edit'}
+                    </Button>
+                    <Text fontColor="gray600">
+                      {selectedEntryIds.length} entry field
+                      {selectedEntryIds.length === 1 ? '' : 's'} selected
+                    </Text>
+                  </Flex>
+                )}
+                {entriesLoading ? (
+                  <Table style={styles.loadingTableBorder}>
+                    <Table.Body>
+                      <Skeleton.Row rowCount={5} columnCount={5} />
+                    </Table.Body>
+                  </Table>
                 ) : (
                   <>
-                    <Flex gap="spacingS" alignItems="center">
-                      <SortMenu
-                        sortOption={sortOption}
-                        onSortChange={(newSort) => {
-                          setSortOption(newSort);
-                          setActivePage(0);
-                        }}
-                      />
-                      <ColumnMultiselect
-                        options={getFieldsMapped(fields)}
-                        selectedFields={selectedFields}
-                        setSelectedFields={setSelectedFields}
-                        style={styles.columnMultiselect}
-                      />
-                    </Flex>
-                    {selectedField && selectedEntryIds.length > 0 && !entriesLoading && (
-                      <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
-                        <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-                          {selectedEntryIds.length === 1 ? 'Edit' : 'Bulk edit'}
-                        </Button>
-                        <Text fontColor="gray600">
-                          {selectedEntryIds.length} entry field
-                          {selectedEntryIds.length === 1 ? '' : 's'} selected
-                        </Text>
-                      </Flex>
-                    )}
-                    {entriesLoading ? (
-                      <Table style={styles.loadingTableBorder}>
-                        <Table.Body>
-                          <Skeleton.Row rowCount={5} columnCount={5} />
-                        </Table.Body>
-                      </Table>
+                    {entries.length === 0 || !selectedContentType ? (
+                      <Box style={styles.noEntriesText}>No entries found.</Box>
                     ) : (
                       <>
                         {failedUpdates.length > 0 && (
@@ -491,7 +594,7 @@ const Page = () => {
                         )}
                         <EntryTable
                           entries={entries}
-                          fields={selectedFields.flatMap(
+                          fields={selectedColumns.flatMap(
                             (field) => fields.find((f) => f.uniqueId === field.value) || []
                           )}
                           contentType={selectedContentType}
@@ -502,7 +605,10 @@ const Page = () => {
                           totalEntries={totalEntries}
                           itemsPerPage={itemsPerPage}
                           onPageChange={setActivePage}
-                          onItemsPerPageChange={setItemsPerPage}
+                          onItemsPerPageChange={(itemsPerPage) => {
+                            setItemsPerPage(itemsPerPage);
+                            setActivePage(0);
+                          }}
                           pageSizeOptions={PAGE_SIZE_OPTIONS}
                           onSelectionChange={({ selectedEntryIds, selectedFieldId }) => {
                             setSelectedEntryIds(selectedEntryIds);
