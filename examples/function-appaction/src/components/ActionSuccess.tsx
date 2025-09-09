@@ -64,6 +64,15 @@ const ActionSuccess = (props: Props) => {
   const requestBody = formatBodyForDisplay(requestSource, requestContentType);
   const responseBody = formatBodyForDisplay(responseSource, responseContentType);
 
+  // Prefer structured call timestamps (sys.createdAt -> sys.updatedAt),
+  // fall back to legacy webhook timestamps (requestAt -> responseAt)
+  const createdAt = (data as any)?.sys?.createdAt ?? (data as any)?.requestAt;
+  const updatedAt = (data as any)?.sys?.updatedAt ?? (data as any)?.responseAt;
+  const duration =
+    createdAt && updatedAt
+      ? new Date(updatedAt).getTime() - new Date(createdAt).getTime()
+      : undefined;
+
   return (
     <Accordion key={`${actionId}-${timestamp}`} className={styles.accordion}>
       <Accordion.Item
@@ -74,6 +83,11 @@ const ActionSuccess = (props: Props) => {
             {'function' in (data?.request || {}) && (
               <Text className={styles.accordionTitleMargin}>
                 (Function: <strong>{data?.request?.function}</strong>)
+              </Text>
+            )}
+            {typeof duration === 'number' && (
+              <Text className={styles.accordionTitleMargin}>
+                Duration: <strong>{duration}</strong> ms
               </Text>
             )}
           </Text>
