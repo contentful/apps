@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { Table, Box, Pagination } from '@contentful/f36-components';
 import { Entry, ContentTypeField } from '../types';
 import { ContentTypeProps } from 'contentful-management';
@@ -7,6 +7,7 @@ import { TableHeader } from './TableHeader';
 import { TableRow } from './TableRow';
 import { isCheckboxAllowed as isBulkEditable } from '../utils/entryUtils';
 import { DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN } from '../utils/constants';
+import { useTableKeyboardNavigation } from '../hooks/useTableKeyboardNavigation';
 
 interface EntryTableProps {
   entries: Entry[];
@@ -75,6 +76,49 @@ export const EntryTable: React.FC<EntryTableProps> = ({
 }) => {
   const columnIds = getColumnIds(fields);
   const allowedColumns = getBulkEditableColumns(fields);
+
+  // Create refs to track focusable elements
+  const focusableElementsRef = useRef<Map<string, HTMLElement>>(new Map());
+
+  const registerFocusableElement = useCallback((key: string, element: HTMLElement | null) => {
+    if (element) {
+      focusableElementsRef.current.set(key, element);
+    } else {
+      focusableElementsRef.current.delete(key);
+    }
+  }, []);
+
+  const getFocusableElement = useCallback(
+    (rowIndex: number, columnIndex: number): HTMLElement | null => {
+      const key = `${rowIndex}-${columnIndex}`;
+      return focusableElementsRef.current.get(key) || null;
+    },
+    []
+  );
+
+  // Use keyboard navigation hook
+  const { tableRef, handleKeyDown, focusCell } = useTableKeyboardNavigation({
+    totalRows: entries.length + 1, // +1 for header row
+    totalColumns: columnIds.length,
+    onToggleCheckbox: (rowIndex: number, columnIndex: number) => {
+      const columnId = columnIds[columnIndex];
+      if (!columnId || !allowedColumns[columnId]) return;
+
+      if (rowIndex === 0) {
+        // Header checkbox
+        const currentState = headerCheckboxes[columnId];
+        handleHeaderCheckboxChange(columnId, !currentState);
+      } else {
+        // Row checkbox
+        const entry = entries[rowIndex - 1]; // -1 because header is row 0
+        if (entry) {
+          const currentState = rowCheckboxes[entry.sys.id]?.[columnId] || false;
+          handleCellCheckboxChange(entry.sys.id, columnId, !currentState);
+        }
+      }
+    },
+    onGetFocusableElement: getFocusableElement,
+  });
 
   const [headerCheckboxes, setHeaderCheckboxes] = useState<Record<string, boolean>>(
     getInitialCheckboxState(columnIds)
@@ -145,7 +189,13 @@ export const EntryTable: React.FC<EntryTableProps> = ({
 
   return (
     <>
-      <Table testId="bulk-edit-table" style={styles.table}>
+      <Table
+        ref={tableRef}
+        testId="bulk-edit-table"
+        style={styles.table}
+        onKeyDown={handleKeyDown}
+        role="grid"
+        aria-label="Bulk edit table with keyboard navigation">
         <TableHeader
           fields={fields}
           headerCheckboxes={headerCheckboxes}
@@ -158,9 +208,11 @@ export const EntryTable: React.FC<EntryTableProps> = ({
                 : true,
             ])
           )}
+          onCellFocus={focusCell}
+          onRegisterFocusableElement={registerFocusableElement}
         />
         <Table.Body>
-          {entries.map((entry) => (
+          {entries.map((entry, index) => (
             <TableRow
               key={entry.sys.id}
               entry={entry}
@@ -181,6 +233,9 @@ export const EntryTable: React.FC<EntryTableProps> = ({
                     : true,
                 ])
               )}
+              rowIndex={index + 1} // +1 because header is row 0
+              onCellFocus={focusCell}
+              onRegisterFocusableElement={registerFocusableElement}
             />
           ))}
         </Table.Body>

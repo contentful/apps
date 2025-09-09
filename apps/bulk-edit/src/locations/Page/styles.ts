@@ -148,4 +148,16 @@ export const styles = {
     zIndex: 1,
     minWidth: '300px',
   },
+  statusBadge: {
+    marginRight: tokens.spacingXs,
+  },
+  focusedBadge: {
+    border: `2px solid ${tokens.blue300}`,
+    outline: 'none',
+  },
+  focusedHeader: {
+    border: `2px solid ${tokens.blue300}`,
+    outline: 'none',
+    borderRadius: tokens.borderRadiusSmall,
+  },
 } as const;
