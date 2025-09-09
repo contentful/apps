@@ -61,7 +61,8 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
             onCellFocus({ row: HEADERS_ROW, column: getColumnIndex(DISPLAY_NAME_COLUMN) })
           }
           role="columnheader"
-          tabIndex={-1}>
+          tabIndex={-1}
+          aria-label="Column header: Display name">
           Display name
         </Table.Cell>
         <Table.Cell
@@ -76,7 +77,8 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
             onCellFocus({ row: HEADERS_ROW, column: getColumnIndex(ENTRY_STATUS_COLUMN) })
           }
           role="columnheader"
-          tabIndex={-1}>
+          tabIndex={-1}
+          aria-label="Column header: Status">
           <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
             Status
             <Tooltip content="Bulk editing is not supported for Status" placement="top">
@@ -112,6 +114,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
                       onChange={(e) => onHeaderCheckboxChange(field.uniqueId, e.target.checked)}
                       testId={`header-checkbox-${field.uniqueId}`}
                       aria-label={`Select all for ${fieldName}`}
+                      tabIndex={-1}
                     />
                     <Text
                       fontSize="fontSizeS"

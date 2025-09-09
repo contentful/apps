@@ -41,20 +41,24 @@ export const useKeyboardNavigation = ({
   const [selectionRange, setSelectionRange] = useState<SelectionRange | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
 
-  // Internal navigation functions
-  const moveFocus = (direction: 'up' | 'down' | 'left' | 'right', extendSelection = false) => {
+  // Unified movement function
+  const moveFocus = (
+    direction: 'up' | 'down' | 'left' | 'right',
+    extendSelection = false,
+    toEdge = false
+  ) => {
     if (!focusedCell) return;
 
     let newPosition = { ...focusedCell };
 
-    //Moves across the table in the specified direction
-    // If you reach the edge of the table, you will not be able to move further
     switch (direction) {
       case 'up':
-        newPosition.row = Math.max(HEADERS_ROW, focusedCell.row - 1);
+        newPosition.row = toEdge ? HEADERS_ROW : Math.max(HEADERS_ROW, focusedCell.row - 1);
         break;
       case 'down':
-        newPosition.row = Math.min(entriesLength - 1, focusedCell.row + 1);
+        newPosition.row = toEdge
+          ? entriesLength - 1
+          : Math.min(entriesLength - 1, focusedCell.row + 1);
         break;
       case 'left':
         newPosition.column = Math.max(0, focusedCell.column - 1);
@@ -64,6 +68,7 @@ export const useKeyboardNavigation = ({
         break;
     }
 
+    // Update selection state
     if (extendSelection) {
       if (!isSelecting) {
         setIsSelecting(true);
@@ -71,44 +76,33 @@ export const useKeyboardNavigation = ({
       } else {
         setSelectionRange((prev) => (prev ? { ...prev, end: newPosition } : null));
       }
-      setFocusedCell(newPosition);
     } else {
-      // When not extending selection, clear selection and set new focus
       setIsSelecting(false);
       setSelectionRange(null);
-      setFocusedCell(newPosition);
-    }
-  };
-
-  const extendFocusToEdge = (direction: 'up' | 'down') => {
-    if (!focusedCell) return;
-
-    let newPosition = { ...focusedCell };
-    if (direction === 'up') {
-      newPosition.row = HEADERS_ROW; // Header row
-    } else {
-      newPosition.row = entriesLength - 1; // Last row
     }
 
-    if (!isSelecting) {
-      setIsSelecting(true);
-      setSelectionRange({ start: focusedCell, end: newPosition });
-    } else {
-      setSelectionRange((prev) => (prev ? { ...prev, end: newPosition } : null));
-    }
     setFocusedCell(newPosition);
   };
 
-  // Focus cell function - clears selection when focusing on a new cell
-  const focusCell = useCallback((position: FocusPosition) => {
-    setFocusedCell(position);
+  // Clear focus helper
+  const clearFocus = useCallback(() => {
+    setFocusedCell(null);
     setIsSelecting(false);
     setSelectionRange(null);
-    // Ensure the table element gets focus so keyboard events are captured
-    if (tableRef.current) {
-      tableRef.current.focus();
-    }
+    // Also blur the table element to ensure focus moves to next element
+    tableRef.current?.blur();
   }, []);
+
+  // Focus cell function - clears selection when focusing on a new cell
+  const focusCell = useCallback(
+    (position: FocusPosition) => {
+      clearFocus();
+      setFocusedCell(position);
+      // Ensure the table element gets focus so keyboard events are captured
+      tableRef.current?.focus();
+    },
+    [clearFocus]
+  );
 
   // Focus column function
   const focusColumn = useCallback(
@@ -130,21 +124,66 @@ export const useKeyboardNavigation = ({
     [totalColumns, entriesLength, onFocusColumn]
   );
 
-  // Keyboard event handler
+  // Simplified keyboard event handler
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (!focusedCell) return;
 
-      const { key, shiftKey, altKey, metaKey, code } = event;
+      const { key, shiftKey, altKey, metaKey } = event;
       const isMac = navigator.userAgent.includes('Mac');
       const isEdgeSelectKey = isMac ? metaKey : altKey;
 
+      // Check if we're at table boundaries for Tab navigation
+      const isAtRightEdge = focusedCell.column === totalColumns - 1;
+      const isAtLeftEdge = focusedCell.column === 0;
+      const isAtFirstRow = focusedCell.row === HEADERS_ROW;
+      const isAtLastRow = focusedCell.row === entriesLength - 1;
+
+      // Handle Tab key specially for table exit and row wrapping
+      if (key === 'Tab') {
+        // Exit conditions: first cell with Shift+Tab, or last cell with Tab
+        const shouldExitLeft = shiftKey && isAtLeftEdge && isAtFirstRow;
+        const shouldExitRight = !shiftKey && isAtRightEdge && isAtLastRow;
+
+        if (shouldExitLeft || shouldExitRight) {
+          // Exit table - let browser handle natural tab navigation
+          clearFocus();
+          return;
+        }
+
+        event.preventDefault();
+
+        // Handle row wrapping for Tab navigation
+        if (!shiftKey && isAtRightEdge && !isAtLastRow) {
+          // Move to first column of next row
+          setFocusedCell({ row: focusedCell.row + 1, column: 0 });
+          setIsSelecting(false);
+          setSelectionRange(null);
+        } else if (shiftKey && isAtLeftEdge && !isAtFirstRow) {
+          // Move to last column of previous row
+          setFocusedCell({ row: focusedCell.row - 1, column: totalColumns - 1 });
+          setIsSelecting(false);
+          setSelectionRange(null);
+        } else {
+          // Normal left/right movement within the row
+          moveFocus(shiftKey ? 'left' : 'right');
+        }
+        return;
+      }
+
+      // Handle special key combinations
+      if (key === ' ' && altKey) {
+        event.preventDefault();
+        focusColumn(focusedCell.column);
+        return;
+      }
+
+      // Prevent default for handled keys
       const handledKeys = [
         'ArrowUp',
         'ArrowDown',
         'ArrowLeft',
         'ArrowRight',
-        'Tab',
         'Enter',
         'Escape',
         ' ',
@@ -153,30 +192,12 @@ export const useKeyboardNavigation = ({
         event.preventDefault();
       }
 
-      //It doesnt make sense to expand left or right selection in the table
-      //Because we don't allow editing multiple fields at once
-      const moveKeyVertically = (direction: 'up' | 'down') => {
-        if (isEdgeSelectKey && shiftKey) {
-          extendFocusToEdge(direction);
-        } else if (shiftKey) {
-          moveFocus(direction, true);
-        } else {
-          moveFocus(direction);
-        }
-      };
-
-      if (code === 'Space' && altKey) {
-        event.preventDefault();
-        focusColumn(focusedCell.column);
-        return;
-      }
-
+      // Handle key actions
       switch (key) {
         case 'ArrowUp':
-          moveKeyVertically('up');
-          break;
         case 'ArrowDown':
-          moveKeyVertically('down');
+          const toEdge = isEdgeSelectKey && shiftKey;
+          moveFocus(key === 'ArrowUp' ? 'up' : 'down', shiftKey, toEdge);
           break;
         case 'ArrowLeft':
           moveFocus('left');
@@ -184,10 +205,6 @@ export const useKeyboardNavigation = ({
         case 'ArrowRight':
           moveFocus('right');
           break;
-        case 'Tab':
-          moveFocus(shiftKey ? 'left' : 'right');
-          break;
-
         case 'Enter':
           if (shiftKey) {
             moveFocus('up');
@@ -198,49 +215,50 @@ export const useKeyboardNavigation = ({
             }
           }
           break;
-
         case 'Escape':
-          setFocusedCell(null);
-          setIsSelecting(false);
-          setSelectionRange(null);
+          clearFocus();
           break;
-
         case ' ':
           onToggleSelection();
           break;
       }
     },
-    [focusedCell, onToggleSelection, focusColumn]
+    [focusedCell, onToggleSelection, focusColumn, totalColumns, clearFocus]
   );
 
-  // Add keyboard event listeners
-  useEffect(() => {
-    const tableElement = tableRef.current;
-    if (tableElement) {
-      tableElement.addEventListener('keydown', handleKeyDown);
-
-      return () => {
-        tableElement.removeEventListener('keydown', handleKeyDown);
-      };
+  // Handle table focus - set initial focus when table receives focus
+  const handleTableFocus = useCallback(() => {
+    if (!focusedCell && entriesLength > 0) {
+      setFocusedCell({ row: HEADERS_ROW, column: 0 });
     }
-  }, [handleKeyDown, focusedCell, focusColumn]);
+  }, [focusedCell, entriesLength]);
 
-  // Add click-away listener to unfocus cells when clicking outside the table
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+  // Handle click outside table
+  const handleClickOutside = useCallback(
+    (event: MouseEvent) => {
       const tableElement = tableRef.current;
       if (tableElement && !tableElement.contains(event.target as Node)) {
-        setFocusedCell(null);
-        setIsSelecting(false);
-        setSelectionRange(null);
+        clearFocus();
       }
-    };
+    },
+    [clearFocus]
+  );
 
+  // Setup event listeners
+  useEffect(() => {
+    const tableElement = tableRef.current;
+    if (!tableElement) return;
+
+    tableElement.addEventListener('keydown', handleKeyDown);
+    tableElement.addEventListener('focus', handleTableFocus);
     document.addEventListener('mousedown', handleClickOutside);
+
     return () => {
+      tableElement.removeEventListener('keydown', handleKeyDown);
+      tableElement.removeEventListener('focus', handleTableFocus);
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [handleKeyDown, handleTableFocus, handleClickOutside]);
 
   return {
     focusedCell,
