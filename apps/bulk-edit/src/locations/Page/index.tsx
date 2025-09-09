@@ -155,7 +155,7 @@ const Page = () => {
 
     return entries.filter((entry) => {
       const entryStatus = getStatus(entry);
-      return statuses.some((status) => status.label === entryStatus.label);
+      return statuses.map((status) => status.label).includes(entryStatus);
     });
   };
 

@@ -47,8 +47,3 @@ export interface Entry {
   };
   fields: Fields;
 }
-
-export interface Status {
-  label: string;
-  color: 'primary' | 'positive' | 'negative' | 'warning';
-}
