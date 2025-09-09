@@ -1,4 +1,6 @@
 import { Accordion, Flex, IconButton, Stack, Text } from '@contentful/f36-components';
+import { getHeaderValue, formatBodyForDisplay, computeDuration } from '../utils/response';
+import RawResponseViewer from './RawResponseViewer';
 import { ActionResultType } from '../locations/Page';
 import { CopyIcon } from '@contentful/f36-icons';
 import { styles } from './Action.styles';
@@ -15,40 +17,6 @@ const ActionSuccess = (props: Props) => {
   const { actionResult, accordionState, handleCollapse, handleExpand, handleCopy } = props;
   const { data, timestamp, actionId } = actionResult;
   const statusCode = data?.response?.statusCode ?? (data as any)?.status;
-
-  const getHeaderValue = (
-    headers: Record<string, unknown> | undefined,
-    key: string
-  ): string | undefined => {
-    if (!headers) return undefined;
-    const entries = Object.entries(headers) as Array<[string, unknown]>;
-    const match = entries.find(([k]) => k.toLowerCase() === key.toLowerCase());
-    return (match?.[1] ?? undefined) as string | undefined;
-  };
-
-  const isJsonLike = (body: unknown, contentType?: string): boolean => {
-    if (body == null) return false;
-    if (typeof body !== 'string') return true;
-    if (contentType && contentType.toLowerCase().includes('json')) return true;
-    const trimmed = body.trim();
-    return (
-      (trimmed.startsWith('{') && trimmed.endsWith('}')) ||
-      (trimmed.startsWith('[') && trimmed.endsWith(']'))
-    );
-  };
-
-  const formatBodyForDisplay = (body?: unknown, contentType?: string): string => {
-    if (body == null) return '';
-    if (isJsonLike(body, contentType)) {
-      try {
-        const parsed = typeof body === 'string' ? JSON.parse(body) : body;
-        return JSON.stringify(parsed, null, 2);
-      } catch {
-        return typeof body === 'string' ? body : JSON.stringify(body, null, 2);
-      }
-    }
-    return typeof body === 'string' ? body : JSON.stringify(body, null, 2);
-  };
 
   const requestContentType =
     getHeaderValue((data as any)?.request?.headers as any, 'content-type') ||
@@ -68,10 +36,7 @@ const ActionSuccess = (props: Props) => {
   // fall back to legacy webhook timestamps (requestAt -> responseAt)
   const createdAt = (data as any)?.sys?.createdAt ?? (data as any)?.requestAt;
   const updatedAt = (data as any)?.sys?.updatedAt ?? (data as any)?.responseAt;
-  const duration =
-    createdAt && updatedAt
-      ? new Date(updatedAt).getTime() - new Date(createdAt).getTime()
-      : undefined;
+  const duration = computeDuration(createdAt, updatedAt);
 
   return (
     <Accordion key={`${actionId}-${timestamp}`} className={styles.accordion}>
@@ -157,6 +122,9 @@ const ActionSuccess = (props: Props) => {
                   </>
                 )}
               </Text>
+              {actionResult.callId && (
+                <RawResponseViewer actionId={actionId} callId={actionResult.callId} />
+              )}
             </Stack>
           </Accordion.Item>
         </Accordion>
