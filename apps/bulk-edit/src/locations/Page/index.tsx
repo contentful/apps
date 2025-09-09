@@ -25,6 +25,7 @@ import { SORT_OPTIONS, SortMenu } from './components/SortMenu';
 import { EntryTable } from './components/EntryTable';
 import { BulkEditModal } from './components/BulkEditModal';
 import { UndoBulkEditModal } from './components/UndoBulkEditModal';
+import { SearchFilter } from './components/SearchFilter';
 import {
   fetchEntriesWithBatching,
   getAllStatuses,
@@ -76,6 +77,7 @@ const Page = () => {
   const [selectedColumns, setSelectedColumns] = useState<FilterOption[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<FilterOption[]>(getStatusesMapped);
   const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -160,13 +162,19 @@ const Page = () => {
     displayField: string | null,
     fetchAll: boolean = false
   ): QueryOptions => {
-    return {
+    const query: QueryOptions = {
       content_type: selectedContentTypeId,
       order: getOrder(sortOption, displayField),
       skip: fetchAll || needsClientFiltering() ? 0 : activePage * itemsPerPage,
       limit: fetchAll || needsClientFiltering() ? 1000 : itemsPerPage,
       ...getStatusFilter(selectedStatuses),
     };
+
+    if (searchQuery.trim()) {
+      query.query = searchQuery.trim();
+    }
+
+    return query;
   };
 
   useEffect(() => {
@@ -283,7 +291,15 @@ const Page = () => {
       }
     };
     void fetchEntries();
-  }, [sdk, activePage, itemsPerPage, sortOption, currentContentType, selectedStatuses]);
+  }, [
+    sdk,
+    activePage,
+    itemsPerPage,
+    sortOption,
+    currentContentType,
+    selectedStatuses,
+    searchQuery,
+  ]);
 
   const selectedContentType = contentTypes.find((ct) => ct.sys.id === selectedContentTypeId);
   const selectedEntries = entries.filter((entry) => selectedEntryIds.includes(entry.sys.id));
@@ -510,6 +526,7 @@ const Page = () => {
                 setSortOption(SORT_OPTIONS[0].value);
                 setSelectedStatuses(getStatusesMapped);
                 setActivePage(0);
+                setSearchQuery(''); // Reset search when changing content type
               }}
             />
             <div style={styles.stickySpacer} />
@@ -519,6 +536,19 @@ const Page = () => {
                 <Heading style={styles.stickyPageHeader}>
                   {selectedContentType ? `Bulk edit ${selectedContentType.name}` : 'Bulk Edit App'}
                 </Heading>
+
+                {/* Search Section */}
+                <SearchFilter
+                  searchQuery={searchQuery}
+                  onSearchChange={(query) => {
+                    setSearchQuery(query);
+                    setActivePage(0);
+                  }}
+                  isDisabled={(entries.length === 0 && !entriesLoading) || !selectedContentType}
+                  debounceDelay={300}
+                />
+
+                {/* Multiselects Filters Section */}
                 <Flex gap="spacingS" alignItems="center">
                   <SortMenu
                     sortOption={sortOption}
@@ -543,6 +573,7 @@ const Page = () => {
                       singleSelected: '',
                       multipleSelected: '',
                     }}
+                    style={styles.columnMultiselectStatuses}
                   />
                   <FilterMultiselect
                     id="column"
@@ -559,6 +590,7 @@ const Page = () => {
                       singleSelected: '',
                       multipleSelected: '',
                     }}
+                    style={styles.columnMultiselectColumns}
                   />
                 </Flex>
                 {selectedField && selectedEntryIds.length > 0 && !entriesLoading && (
