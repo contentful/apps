@@ -3,7 +3,7 @@ import { Multiselect } from '@contentful/f36-multiselect';
 import { useMemo } from 'react';
 import { truncate } from '../utils/entryUtils';
 import { styles } from '../styles';
-import { optionStyles } from './GenericMultiselect.styles';
+import { optionStyles } from './FilterMultiselect.styles';
 import { FilterOption } from '../types';
 
 interface FilterMultiselectProps {
