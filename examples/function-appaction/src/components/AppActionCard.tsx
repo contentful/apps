@@ -33,7 +33,7 @@ const AppActionCard = (props: Props) => {
   const callAction = async (action: AppActionProps) => {
     setLoadingAction(action.sys.id);
     try {
-      const result = (await sdk.cma.appActionCall.createWithResult(
+      const result = (await sdk.cma.appActionCall.createWithResponse(
         {
           appDefinitionId: sdk.ids.app || '',
           appActionId: action.sys.id,
@@ -45,18 +45,24 @@ const AppActionCard = (props: Props) => {
 
       const timestamp = new Date().toLocaleString();
       const call: any = result as any;
-      const base = { timestamp, actionId: action.sys.id } as const;
+      const callId = (call as any)?.sys?.id;
+      const base = { timestamp, actionId: action.sys.id, callId } as const;
 
       if (call?.status === 'succeeded') {
         setActionResults((prev) => [{ success: true, data: call, ...base }, ...prev]);
       } else if (call?.status === 'failed') {
         setActionResults((prev) => [
-          { success: false, error: call?.error || new Error('App action failed'), ...base },
+          {
+            success: false,
+            data: call,
+            error: call?.error || new Error('App action failed'),
+            ...base,
+          },
           ...prev,
         ]);
       } else {
         setActionResults((prev) => [
-          { success: false, error: new Error('App action still processing'), ...base },
+          { success: false, data: call, error: new Error('App action still processing'), ...base },
           ...prev,
         ]);
       }
@@ -169,7 +175,8 @@ const AppActionCard = (props: Props) => {
           </Button>
         </Box>
       </Flex>
-      {(action as { parameters: any[] }).parameters.length ? (
+      {Array.isArray((action as any).parameters) &&
+      (action as { parameters: any[] }).parameters.length ? (
         <Box marginTop="spacingS">
           <Box marginBottom="spacingM">
             <Subheading as="h4">Parameters</Subheading>
