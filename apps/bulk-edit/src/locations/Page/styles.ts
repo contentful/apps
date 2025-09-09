@@ -182,11 +182,9 @@ export const styles = {
   },
   // Keyboard navigation styles
   focusedCell: {
-    outline: `2px solid ${tokens.blue600}`,
-    outlineOffset: '-2px',
-  },
-  selectedCell: {
-    background: tokens.blue100,
+    outline: `3px solid ${tokens.blue300}`,
+    borderRadius: tokens.borderRadiusSmall,
+    outlineOffset: '-3px',
   },
 } as const;
 
@@ -198,7 +196,6 @@ export const getCellStyle = (
 ): React.CSSProperties => {
   return {
     ...baseStyle,
-    ...(isFocused && styles.focusedCell),
-    ...(isSelected && styles.selectedCell),
+    ...((isFocused || isSelected) && styles.focusedCell),
   };
 };

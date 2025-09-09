@@ -109,17 +109,6 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     return entries[rowIndex]?.sys.id || null;
   };
 
-  // Initialize focus on first render
-  useEffect(() => {
-    if (!focusedCell && entries.length > 0) {
-      setFocusedCell({ row: HEADERS_ROW, column: DISPLAY_NAME_INDEX });
-      // Ensure the table element gets focus so keyboard events are captured
-      if (tableRef.current) {
-        tableRef.current.focus();
-      }
-    }
-  }, [focusedCell, entries, allowedColumns]);
-
   // Compute selected field (column)
   const selectedFieldId = useMemo(() => {
     // Only one column can be selected at a time

@@ -84,6 +84,7 @@ export const TableRow: React.FC<TableRowProps> = ({
       <Table.Cell
         testId="display-name-cell"
         style={getCellStyleForColumn(styles.displayNameCell, DISPLAY_NAME_COLUMN)}
+        aria-label={`Display name for ${displayValue}`}
         onClick={() => onCellFocus({ row: rowIndex, column: getColumnIndex(DISPLAY_NAME_COLUMN) })}
         role="gridcell"
         tabIndex={-1}>
@@ -93,12 +94,14 @@ export const TableRow: React.FC<TableRowProps> = ({
           rel="noopener noreferrer"
           testId="entry-link"
           icon={<ExternalLinkIcon />}
-          alignIcon="end">
+          alignIcon="end"
+          tabIndex={-1}>
           {getEntryTitle(entry, contentType, defaultLocale)}
         </TextLink>
       </Table.Cell>
       <Table.Cell
         testId="status-cell"
+        aria-label={`Status for ${displayValue}`}
         style={getCellStyleForColumn(styles.statusCell, ENTRY_STATUS_COLUMN)}
         onClick={() => onCellFocus({ row: rowIndex, column: getColumnIndex(ENTRY_STATUS_COLUMN) })}
         role="gridcell"
@@ -129,15 +132,14 @@ export const TableRow: React.FC<TableRowProps> = ({
             isTruncated>
             {isAllowed ? (
               <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
-                {isVisible && (
-                  <Checkbox
-                    isChecked={rowCheckboxes[field.uniqueId]}
-                    isDisabled={isDisabled}
-                    onChange={(e) => onCellCheckboxChange(field.uniqueId, e.target.checked)}
-                    testId={`cell-checkbox-${field.uniqueId}`}
-                    aria-label={`Select ${truncate(field.name)} for ${displayValue}`}
-                  />
-                )}
+                <Checkbox
+                  isChecked={rowCheckboxes[field.uniqueId]}
+                  isDisabled={isDisabled}
+                  onChange={(e) => onCellCheckboxChange(field.uniqueId, e.target.checked)}
+                  testId={`cell-checkbox-${field.uniqueId}`}
+                  aria-label={`Select ${truncate(field.name)} for ${displayValue}`}
+                  tabIndex={-1}
+                />
                 {renderFieldValue(field, fieldValue)}
               </Flex>
             ) : (
