@@ -79,6 +79,20 @@ const Page = () => {
   const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
+  const hasActiveFilters = () => {
+    const hasSearchQuery = searchQuery.trim() !== '';
+    const hasStatusFilter = selectedStatuses.length !== getStatusesMapped().length;
+    const hasColumnFilter = selectedColumns.length !== getFieldsMapped(fields).length;
+    return hasSearchQuery || hasStatusFilter || hasColumnFilter;
+  };
+
+  const resetFilters = () => {
+    setSearchQuery('');
+    setSelectedStatuses(getStatusesMapped());
+    setSelectedColumns(getFieldsMapped(fields));
+    setActivePage(0);
+  };
+
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
     let skip = 0;
@@ -592,6 +606,16 @@ const Page = () => {
                     }}
                     style={styles.columnMultiselectColumns}
                   />
+                  {hasActiveFilters() && (
+                    <Button
+                      variant="secondary"
+                      size="small"
+                      onClick={resetFilters}
+                      isDisabled={(entries.length === 0 && !entriesLoading) || !selectedContentType}
+                      style={styles.resetFiltersButton}>
+                      Reset filters
+                    </Button>
+                  )}
                 </Flex>
                 {selectedField && selectedEntryIds.length > 0 && !entriesLoading && (
                   <Flex alignItems="center" gap="spacingS" style={styles.editButton}>

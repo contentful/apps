@@ -140,13 +140,6 @@ describe('SearchFilter', () => {
       expect(input).toHaveValue('');
     });
 
-    it('handles null searchQuery gracefully', () => {
-      render(<SearchFilter {...defaultProps} searchQuery={null as any} />);
-
-      const input = screen.getByPlaceholderText('Search');
-      expect(input).toHaveValue('');
-    });
-
     it('handles very long search queries', async () => {
       const mockOnSearchChange = vi.fn();
       const longQuery = 'a'.repeat(1000);

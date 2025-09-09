@@ -163,4 +163,18 @@ export const styles = {
     zIndex: 1,
     minWidth: FILTER_MULTISELECT_WIDTH,
   },
+  resetFiltersButton: {
+    position: 'sticky',
+    left:
+      SIDEBAR_WIDTH +
+      STICKY_SPACER_SPACING +
+      GAP_BETWEEN_BUTTON +
+      BUTTON_WIDTH +
+      GAP_BETWEEN_BUTTON +
+      FILTER_MULTISELECT_WIDTH +
+      GAP_BETWEEN_BUTTON +
+      FILTER_MULTISELECT_WIDTH,
+    zIndex: 1,
+    width: 'fit-content',
+  },
 } as const;

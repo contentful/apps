@@ -185,7 +185,7 @@ describe('StatusMultiselect', () => {
       };
       render(<FilterMultiselect {...disabledProps} />);
 
-      const triggerButton = screen.getByRole('button');
+      const triggerButton = await screen.findByRole('button');
       expect(triggerButton).toBeDisabled();
     });
 
