@@ -554,6 +554,7 @@ const Page = () => {
                 setSearchQuery('');
                 setInitialTotal(0);
               }}
+              disabled={entriesLoading}
             />
             <div style={styles.stickySpacer} />
             <Box>
