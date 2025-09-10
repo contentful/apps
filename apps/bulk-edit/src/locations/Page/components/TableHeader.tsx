@@ -46,6 +46,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
     const allColumns = [DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN, ...fields.map((f) => f.uniqueId)];
     return allColumns.indexOf(fieldId);
   };
+
   return (
     <Table.Head style={styles.tableHead}>
       <Table.Row style={styles.stickyTableRow}>
