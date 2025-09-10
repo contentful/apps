@@ -9,23 +9,23 @@
       "path": "actions/handle-app-event.js",
       "entryFile": "./app-actions/src/actions/handle-app-event.ts",
       "allowNetworks": [],
-      "parameters": [
-        {
-          "id": "payload",
-          "name": "payload",
-          "type": "Symbol"
+      "parametersSchema": { "type": "object",
+        "properties": {
+          "payload": {
+            "type": "string",
+            "title": "payload"
+          },
+          "topic": {
+            "type": "string",
+            "title": "topic"
+          },
+          "eventDatetime": {
+            "type": "string",
+            "title": "eventDatetime"
+          }
         },
-        {
-          "id": "topic",
-          "name": "topic",
-          "type": "Symbol"
-        },
-        {
-          "id": "eventDatetime",
-          "name": "eventDatetime",
-          "type": "Symbol"
-        }
-      ]
+        "additionalProperties": false
+      }
     },
     {
       "id": "msteamsSendTestMessage",
@@ -36,23 +36,24 @@
       "path": "actions/send-test.js",
       "entryFile": "./app-actions/src/actions/send-test.ts",
       "allowNetworks": [],
-      "parameters": [
-        {
-          "id": "channelId",
-          "name": "channelId",
-          "type": "Symbol"
+      "parametersSchema": {
+        "type": "object",
+        "properties": {
+          "channelId": {
+            "type": "string",
+            "title": "channelId"
+          },
+          "teamId": {
+            "type": "string",
+            "title": "teamId"
+          },
+          "contentTypeId": {
+            "type": "string",
+            "title": "contentTypeId"
+          }
         },
-        {
-          "id": "teamId",
-          "name": "teamId",
-          "type": "Symbol"
-        },
-        {
-          "id": "contentTypeId",
-          "name": "contentTypeId",
-          "type": "Symbol"
-        }
-      ]
+        "additionalProperties": false
+      }
     },
     {
       "id": "msteamsListChannels",
@@ -63,13 +64,16 @@
       "path": "actions/list-channels.js",
       "entryFile": "./app-actions/src/actions/list-channels.ts",
       "allowNetworks": [],
-      "parameters": [
-        {
-          "id": "tenantId",
-          "name": "tenantId",
-          "type": "Symbol"
-        }
-      ]
+      "parametersSchema": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "title": "tenantId"
+          }
+        },
+        "additionalProperties": false
+      }
     }
   ]
 }
