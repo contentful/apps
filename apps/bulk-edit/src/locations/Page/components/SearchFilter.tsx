@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Flex, Text, TextInput } from '@contentful/f36-components';
 import { SearchIcon } from '@contentful/f36-icons';
 import { useDebounce } from 'use-debounce';
@@ -19,13 +19,17 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
 }) => {
   const [inputValue, setInputValue] = useState(searchQuery);
   const [debouncedValue] = useDebounce(inputValue, debounceDelay);
+  const prevDebouncedValueRef = useRef<string>(debouncedValue);
 
   useEffect(() => {
     setInputValue(searchQuery);
   }, [searchQuery]);
 
   useEffect(() => {
-    onSearchChange(debouncedValue);
+    if (prevDebouncedValueRef.current !== debouncedValue) {
+      onSearchChange(debouncedValue);
+      prevDebouncedValueRef.current = debouncedValue;
+    }
   }, [debouncedValue, onSearchChange]);
 
   return (

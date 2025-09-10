@@ -38,6 +38,7 @@ import {
 import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
 import FilterMultiselect from './components/FilterMultiselect';
+import { EmptyState } from './components/EmptyState';
 
 const getFieldsMapped = (fields: ContentTypeField[]) => {
   return fields.map((field) => ({
@@ -275,7 +276,6 @@ const Page = () => {
       if (fields.length === 0 || !currentContentType) {
         return;
       }
-
       setEntriesLoading(true);
       try {
         const displayField = currentContentType.displayField || null;
@@ -649,27 +649,10 @@ const Page = () => {
                 ) : (
                   <>
                     {entries.length === 0 || !selectedContentType ? (
-                      <Flex
-                        alignItems="center"
-                        justifyContent="center"
-                        flexDirection="column"
-                        padding="spacing2Xl"
-                        style={styles.noEntriesText}>
-                        {initialTotal === 0 ? (
-                          <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold">
-                            No entries found.
-                          </Text>
-                        ) : (
-                          <>
-                            <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold">
-                              We couldn't find any matches.
-                            </Text>
-                            <Text fontSize="fontSizeM">
-                              Try adjusting your filters or resetting them to broaden your search.
-                            </Text>
-                          </>
-                        )}
-                      </Flex>
+                      <EmptyState
+                        hasEntries={entries.length > 0}
+                        hasInitialEntries={initialTotal > 0}
+                      />
                     ) : (
                       <>
                         {failedUpdates.length > 0 && (

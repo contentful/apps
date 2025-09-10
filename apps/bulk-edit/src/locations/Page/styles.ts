@@ -121,10 +121,6 @@ export const styles = {
     marginTop: tokens.spacingL,
     marginRight: tokens.spacingXs,
   },
-  noEntriesText: {
-    background: tokens.gray100,
-    borderRadius: tokens.borderRadiusMedium,
-  },
   noContentTypeText: {
     fontWeight: 'bold',
   },

@@ -67,18 +67,6 @@ describe('SearchFilter', () => {
       });
     });
 
-    it('handles empty input correctly', async () => {
-      const mockOnSearchChange = vi.fn();
-      render(<SearchFilter {...defaultProps} onSearchChange={mockOnSearchChange} />);
-
-      const input = screen.getByPlaceholderText('Search');
-      fireEvent.change(input, { target: { value: '' } });
-
-      await waitFor(() => {
-        expect(mockOnSearchChange).toHaveBeenCalledWith('');
-      });
-    });
-
     it('handles special characters in search input', async () => {
       const mockOnSearchChange = vi.fn();
       render(<SearchFilter {...defaultProps} onSearchChange={mockOnSearchChange} />);
