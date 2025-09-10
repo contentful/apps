@@ -122,9 +122,8 @@ export const styles = {
     marginRight: tokens.spacingXs,
   },
   noEntriesText: {
-    textAlign: 'start',
-    fontWeight: 'bold',
-    fontSize: tokens.fontSizeL,
+    background: tokens.gray100,
+    borderRadius: tokens.borderRadiusMedium,
   },
   noContentTypeText: {
     fontWeight: 'bold',

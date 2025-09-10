@@ -78,6 +78,7 @@ const Page = () => {
   const [selectedStatuses, setSelectedStatuses] = useState<FilterOption[]>(getStatusesMapped);
   const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [initialTotal, setInitialTotal] = useState(0);
 
   const hasActiveFilters = () => {
     const hasSearchQuery = searchQuery.trim() !== '';
@@ -91,6 +92,10 @@ const Page = () => {
     setSelectedStatuses(getStatusesMapped());
     setSelectedColumns(getFieldsMapped(fields));
     setActivePage(0);
+  };
+
+  const shouldDisableFilters = () => {
+    return (entries.length === 0 && !entriesLoading && initialTotal === 0) || !selectedContentType;
   };
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
@@ -218,6 +223,7 @@ const Page = () => {
     setEntries([]);
     setFields([]);
     setTotalEntries(0);
+    setInitialTotal(0);
   };
 
   // Fetch content type and fields when selectedContentTypeId changes
@@ -297,6 +303,11 @@ const Page = () => {
           // Server-side pagination
           setEntries(filteredEntries);
           setTotalEntries(total);
+        }
+
+        // Determine empty state type
+        if (initialTotal === 0 && total > 0) {
+          setInitialTotal(total);
         }
       } catch (e) {
         clearBasicState();
@@ -540,7 +551,8 @@ const Page = () => {
                 setSortOption(SORT_OPTIONS[0].value);
                 setSelectedStatuses(getStatusesMapped);
                 setActivePage(0);
-                setSearchQuery(''); // Reset search when changing content type
+                setSearchQuery('');
+                setInitialTotal(0);
               }}
             />
             <div style={styles.stickySpacer} />
@@ -558,7 +570,7 @@ const Page = () => {
                     setSearchQuery(query);
                     setActivePage(0);
                   }}
-                  isDisabled={(entries.length === 0 && !entriesLoading) || !selectedContentType}
+                  isDisabled={shouldDisableFilters()}
                   debounceDelay={300}
                 />
 
@@ -570,7 +582,7 @@ const Page = () => {
                       setSortOption(newSort);
                       setActivePage(0);
                     }}
-                    disabled={(entries.length === 0 && !entriesLoading) || !selectedContentType}
+                    disabled={shouldDisableFilters()}
                   />
                   <FilterMultiselect
                     id="status"
@@ -580,7 +592,7 @@ const Page = () => {
                       setSelectedStatuses(statuses);
                       setActivePage(0);
                     }}
-                    disabled={(entries.length === 0 && !entriesLoading) || !selectedContentType}
+                    disabled={shouldDisableFilters()}
                     placeholderConfig={{
                       noneSelected: 'No statuses selected',
                       allSelected: 'Filter by status',
@@ -597,7 +609,7 @@ const Page = () => {
                       setSelectedColumns(selectedColumns);
                       setActivePage(0);
                     }}
-                    disabled={(entries.length === 0 && !entriesLoading) || !selectedContentType}
+                    disabled={shouldDisableFilters()}
                     placeholderConfig={{
                       noneSelected: 'No fields selected',
                       allSelected: 'Filter fields',
@@ -611,7 +623,7 @@ const Page = () => {
                       variant="secondary"
                       size="small"
                       onClick={resetFilters}
-                      isDisabled={(entries.length === 0 && !entriesLoading) || !selectedContentType}
+                      isDisabled={shouldDisableFilters()}
                       style={styles.resetFiltersButton}>
                       Reset filters
                     </Button>
@@ -637,7 +649,27 @@ const Page = () => {
                 ) : (
                   <>
                     {entries.length === 0 || !selectedContentType ? (
-                      <Box style={styles.noEntriesText}>No entries found.</Box>
+                      <Flex
+                        alignItems="center"
+                        justifyContent="center"
+                        flexDirection="column"
+                        padding="spacing2Xl"
+                        style={styles.noEntriesText}>
+                        {initialTotal === 0 ? (
+                          <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold">
+                            No entries found.
+                          </Text>
+                        ) : (
+                          <>
+                            <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold">
+                              We couldn't find any matches.
+                            </Text>
+                            <Text fontSize="fontSizeM">
+                              Try adjusting your filters or resetting them to broaden your search.
+                            </Text>
+                          </>
+                        )}
+                      </Flex>
                     ) : (
                       <>
                         {failedUpdates.length > 0 && (

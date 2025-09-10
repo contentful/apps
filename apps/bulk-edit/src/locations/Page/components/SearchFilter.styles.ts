@@ -6,6 +6,6 @@ export const styles = {
     position: 'sticky',
     left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING,
     zIndex: 1,
-    width: 1645,
+    width: 1400,
   }),
 };
