@@ -5,7 +5,7 @@ import { ContentTypeProps } from 'contentful-management';
 import { styles } from '../styles';
 import { TableHeader } from './TableHeader';
 import { TableRow } from './TableRow';
-import { isCheckboxAllowed as isBulkEditable } from '../utils/entryUtils';
+import { isCheckboxAllowed as isBulkEditable, getEntryUrl } from '../utils/entryUtils';
 import {
   DISPLAY_NAME_COLUMN,
   DISPLAY_NAME_INDEX,
@@ -92,18 +92,6 @@ export const EntryTable: React.FC<EntryTableProps> = ({
   const [rowCheckboxes, setRowCheckboxes] = useState<Record<string, Record<string, boolean>>>(
     getInitialRowCheckboxState(entries, columnIds)
   );
-
-  // Custom keyboard navigation hook
-  const { focusedCell, selectionRange, setFocusedCell, focusCell, tableRef } =
-    useKeyboardNavigation({
-      totalColumns: columnIds.length,
-      entriesLength: entries.length,
-      onFocusColumn: (columnIndex: number) => {},
-      onToggleSelection: () => {
-        // This will be called when selection should be toggled
-        toggleSelectionCheckboxes();
-      },
-    });
 
   const getEntryId = (rowIndex: number) => {
     return entries[rowIndex]?.sys.id || null;
@@ -244,6 +232,32 @@ export const EntryTable: React.FC<EntryTableProps> = ({
       }
     }
   };
+
+  // Handle cell actions based on column type
+  const handleCellAction = (rowIndex: number, columnIndex: number) => {
+    const columnId = columnIds[columnIndex];
+    const isHeaderRow = rowIndex === HEADERS_ROW;
+
+    if (columnIndex === DISPLAY_NAME_INDEX && !isHeaderRow) {
+      // Display name column - open entry link
+      const entry = entries[rowIndex];
+      if (entry) {
+        const url = getEntryUrl(entry, spaceId, environmentId);
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+    } else if (allowedColumns[columnId]) {
+      // Checkbox columns - toggle selection
+      toggleSelectionCheckboxes();
+    }
+    // Other columns (like status) - do nothing
+  };
+
+  // Custom keyboard navigation hook
+  const { focusedCell, selectionRange, focusCell, tableRef } = useKeyboardNavigation({
+    totalColumns: columnIds.length,
+    entriesLength: entries.length,
+    onCellAction: handleCellAction,
+  });
 
   return (
     <>
