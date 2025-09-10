@@ -1,5 +1,5 @@
 {
-  "name": "@contentful/smartling-lambda",
+  "name": "@carrotfertility/contentful-smartling-lambda",
   "version": "1.4.71",
   "private": true,
   "scripts": {
@@ -13,7 +13,7 @@
     "deploy:test": "DEPLOY_TIME_UNIX=$(date \"+%s\") sls deploy --stage test"
   },
   "dependencies": {
-    "@contentful/smartling-frontend": "^1.7.71",
+    "@carrotfertility/contentful-smartling-frontend": "^1.7.71",
     "@contentful/app-sdk": "^4.29.3",
     "braces": "^3.0.3",
     "jest": "^29.7.0",

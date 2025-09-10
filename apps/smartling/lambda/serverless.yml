@@ -33,7 +33,7 @@ package:
     - 'built/**'
     - '!.git/**'
     - '!**/*.ts'
-    - '!node_modules/@contentful/smartling-frontend/node_modules/**'
+    - '!node_modules/@carrotfertility/contentful-smartling-frontend/node_modules/**'
 
 functions:
   app:

@@ -146,7 +146,7 @@ export function makeApp(fetchFn: any, issuer: any) {
 
     app.use(
       '/frontend',
-      express.static(path.dirname(require.resolve('@contentful/smartling-frontend')), {
+      express.static(path.dirname(require.resolve('@carrotfertility/contentful-smartling-frontend')), {
         lastModified,
         setHeaders: (res: any) => {
           res.set('Last-Modified', lastModified);
