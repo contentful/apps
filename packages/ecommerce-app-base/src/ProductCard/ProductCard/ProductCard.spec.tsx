@@ -1,5 +1,4 @@
 import { ProductCard } from './ProductCard';
-import userEvent from '@testing-library/user-event';
 import { cleanup, render, screen } from '@testing-library/react';
 import { productsList } from '../../__mocks__';
 import React from 'react';
@@ -25,12 +24,11 @@ describe('ProductCard component', () => {
   });
 
   it('handles onSelect', async () => {
-    userEvent.setup();
     const mockOnSelect = vi.fn();
     render(<ProductCard title="Kleenex product" onSelect={mockOnSelect} resource={product} />);
 
     const productName = product.name!;
-    await userEvent.click(getByText(productName));
+    getByText(productName).click();
 
     expect(mockOnSelect).toHaveBeenCalled();
   });
