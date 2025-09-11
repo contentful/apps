@@ -85,6 +85,18 @@ export const useKeyboardNavigation = ({
     }
   };
 
+  // Select entire column function
+  const selectColumn = useCallback(() => {
+    if (!focusedCell) return;
+
+    const columnStart = { row: HEADERS_ROW, column: focusedCell.column };
+    const columnEnd = { row: LAST_ROW, column: focusedCell.column };
+
+    setIsSelecting(true);
+    setSelectionRange({ start: columnStart, end: columnEnd });
+    setFocusedCell(columnStart); // Focus on header of the column
+  }, [focusedCell, LAST_ROW]);
+
   // Clear focus helper
   const clearFocus = useCallback(() => {
     setFocusedCell(null);
@@ -107,7 +119,7 @@ export const useKeyboardNavigation = ({
     (event: KeyboardEvent) => {
       if (!focusedCell) return;
 
-      const { key, shiftKey, altKey } = event;
+      const { key, shiftKey, altKey, code } = event;
 
       // Prevent default for handled keys
       const handledKeys = [
@@ -119,6 +131,14 @@ export const useKeyboardNavigation = ({
         'Escape',
         ' ',
       ];
+
+      //Special case for Alt + Space to select entire column
+      if (code === 'Space' && altKey) {
+        event.preventDefault();
+        selectColumn();
+        return;
+      }
+
       if (handledKeys.includes(key)) {
         event.preventDefault();
       }
@@ -196,7 +216,7 @@ export const useKeyboardNavigation = ({
           break;
       }
     },
-    [focusedCell, onCellAction, totalColumns]
+    [focusedCell, onCellAction, totalColumns, selectColumn]
   );
 
   // Handle click outside table
