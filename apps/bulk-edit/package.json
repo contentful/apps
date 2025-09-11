@@ -15,7 +15,8 @@
     "contentful-management": "^11.52.0",
     "emotion": "10.0.27",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "use-debounce": "^10.0.6"
   },
   "scripts": {
     "start": "vite",

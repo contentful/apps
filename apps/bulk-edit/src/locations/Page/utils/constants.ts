@@ -23,3 +23,11 @@ export const API_LIMITS = {
 } as const;
 
 export const PAGE_SIZE_OPTIONS = [25, 50, 100, 200, 500];
+
+export const SIDEBAR_WIDTH = 200;
+export const STICKY_SPACER_SPACING = 24;
+export const CELL_WIDTH = 200;
+export const TABLE_WIDTH = CELL_WIDTH * 4;
+export const BUTTON_WIDTH = 110;
+export const GAP_BETWEEN_BUTTON = 15;
+export const FILTER_MULTISELECT_WIDTH = 300;

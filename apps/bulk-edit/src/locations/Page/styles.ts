@@ -1,11 +1,14 @@
 import tokens from '@contentful/f36-tokens';
 import { CSSProperties } from 'react';
-
-const SIDEBAR_WIDTH = 200;
-const STICKY_SPACER_SPACING = 24;
-const CELL_WIDTH = 200;
-const TABLE_WIDTH = CELL_WIDTH * 4;
-const BUTTON_WIDTH = 124;
+import {
+  BUTTON_WIDTH,
+  CELL_WIDTH,
+  FILTER_MULTISELECT_WIDTH,
+  GAP_BETWEEN_BUTTON,
+  SIDEBAR_WIDTH,
+  STICKY_SPACER_SPACING,
+  TABLE_WIDTH,
+} from './utils/constants';
 
 const stickyCell: CSSProperties = {
   position: 'sticky',
@@ -118,11 +121,6 @@ export const styles = {
     marginTop: tokens.spacingL,
     marginRight: tokens.spacingXs,
   },
-  noEntriesText: {
-    textAlign: 'start',
-    fontWeight: 'bold',
-    fontSize: tokens.fontSizeL,
-  },
   noContentTypeText: {
     fontWeight: 'bold',
   },
@@ -142,10 +140,36 @@ export const styles = {
   loadingTableBorder: {
     border: `1px solid ${tokens.gray200}`,
   },
-  columnMultiselect: {
+  columnMultiselectStatuses: {
     position: 'sticky',
-    left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING + BUTTON_WIDTH,
+    left: SIDEBAR_WIDTH + STICKY_SPACER_SPACING + GAP_BETWEEN_BUTTON + BUTTON_WIDTH,
     zIndex: 1,
-    minWidth: '300px',
+    minWidth: FILTER_MULTISELECT_WIDTH,
+  },
+  columnMultiselectColumns: {
+    position: 'sticky',
+    left:
+      SIDEBAR_WIDTH +
+      STICKY_SPACER_SPACING +
+      GAP_BETWEEN_BUTTON +
+      BUTTON_WIDTH +
+      GAP_BETWEEN_BUTTON +
+      FILTER_MULTISELECT_WIDTH,
+    zIndex: 1,
+    minWidth: FILTER_MULTISELECT_WIDTH,
+  },
+  resetFiltersButton: {
+    position: 'sticky',
+    left:
+      SIDEBAR_WIDTH +
+      STICKY_SPACER_SPACING +
+      GAP_BETWEEN_BUTTON +
+      BUTTON_WIDTH +
+      GAP_BETWEEN_BUTTON +
+      FILTER_MULTISELECT_WIDTH +
+      GAP_BETWEEN_BUTTON +
+      FILTER_MULTISELECT_WIDTH,
+    zIndex: 1,
+    width: 'fit-content',
   },
 } as const;

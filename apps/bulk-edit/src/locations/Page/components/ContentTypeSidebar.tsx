@@ -8,12 +8,14 @@ interface ContentTypeSidebarProps {
   contentTypes: ContentTypeProps[];
   selectedContentTypeId: string | undefined;
   onContentTypeSelect: (id: string) => void;
+  disabled?: boolean;
 }
 
 export const ContentTypeSidebar: React.FC<ContentTypeSidebarProps> = ({
   contentTypes,
   selectedContentTypeId,
   onContentTypeSelect,
+  disabled = false,
 }) => {
   return (
     <Flex style={styles.sidebar} padding="spacingM" flexDirection="column" gap="spacingXs">
@@ -27,7 +29,8 @@ export const ContentTypeSidebar: React.FC<ContentTypeSidebarProps> = ({
               as="button"
               key={ct.sys.id}
               isActive={ct.sys.id === selectedContentTypeId}
-              onClick={() => onContentTypeSelect(ct.sys.id)}
+              onClick={disabled ? undefined : () => onContentTypeSelect(ct.sys.id)}
+              isDisabled={disabled}
               testId="content-type-nav-item">
               {ct.name}
             </NavList.Item>
