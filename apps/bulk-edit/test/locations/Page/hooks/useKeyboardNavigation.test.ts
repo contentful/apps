@@ -379,5 +379,19 @@ describe('useKeyboardNavigation', () => {
 
       expect(result.current.focusedCell).toEqual({ row: 1, column: 2 });
     });
+
+    it('should maintain cell focus without interference from table focus', () => {
+      const { result } = renderHook(() => useKeyboardNavigation(mockProps));
+
+      // Simulate clicking on a specific cell
+      act(() => {
+        result.current.focusCell({ row: 2, column: 1 });
+      });
+
+      expect(result.current.focusedCell).toEqual({ row: 2, column: 1 });
+
+      // Focus should remain stable (no table focus handler to interfere)
+      expect(result.current.focusedCell).toEqual({ row: 2, column: 1 });
+    });
   });
 });

@@ -97,9 +97,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     return entries[rowIndex]?.sys.id || null;
   };
 
-  // Compute selected field (column)
   const selectedFieldId = useMemo(() => {
-    // Only one column can be selected at a time
     const checkedHeaderId = columnIds.find((columnId) => headerCheckboxes[columnId]);
     if (checkedHeaderId && allowedColumns[checkedHeaderId]) return checkedHeaderId;
     for (const entryId in rowCheckboxes) {
@@ -110,14 +108,12 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     return null;
   }, [headerCheckboxes, rowCheckboxes, allowedColumns, columnIds]);
 
-  // Compute selected entry IDs for the selected field
   const selectedEntryIds = useMemo(() => {
     if (!selectedFieldId) return [];
-    // If header is checked, all entries are selected
+
     if (headerCheckboxes[selectedFieldId]) {
       return entries.map((e) => e.sys.id);
     }
-    // Otherwise, collect entry IDs where the cell is checked
     return entries.filter((e) => rowCheckboxes[e.sys.id]?.[selectedFieldId]).map((e) => e.sys.id);
   }, [selectedFieldId, headerCheckboxes, rowCheckboxes, entries]);
 
@@ -233,26 +229,21 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     }
   };
 
-  // Handle cell actions based on column type
   const handleCellAction = (rowIndex: number, columnIndex: number) => {
     const columnId = columnIds[columnIndex];
     const isHeaderRow = rowIndex === HEADERS_ROW;
 
     if (columnIndex === DISPLAY_NAME_INDEX && !isHeaderRow) {
-      // Display name column - open entry link
       const entry = entries[rowIndex];
       if (entry) {
         const url = getEntryUrl(entry, spaceId, environmentId);
         window.open(url, '_blank', 'noopener,noreferrer');
       }
     } else if (allowedColumns[columnId]) {
-      // Checkbox columns - toggle selection
       toggleSelectionCheckboxes();
     }
-    // Other columns (like status) - do nothing
   };
 
-  // Custom keyboard navigation hook
   const { focusedCell, selectionRange, focusCell, tableRef } = useKeyboardNavigation({
     totalColumns: columnIds.length,
     entriesLength: entries.length,

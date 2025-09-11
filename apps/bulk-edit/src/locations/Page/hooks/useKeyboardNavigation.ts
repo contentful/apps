@@ -95,23 +95,19 @@ export const useKeyboardNavigation = ({
   }, []);
 
   // Focus cell function - clears selection when focusing on a new cell
-  const focusCell = useCallback(
-    (position: FocusPosition) => {
-      clearFocus();
-      setFocusedCell(position);
-      // Ensure the table element gets focus so keyboard events are captured
-      tableRef.current?.focus();
-    },
-    [clearFocus]
-  );
+  const focusCell = useCallback((position: FocusPosition) => {
+    setFocusedCell(position);
+    setIsSelecting(false);
+    setSelectionRange(null);
+    // Ensure the table element gets focus so keyboard events are captured
+    tableRef.current?.focus();
+  }, []);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (!focusedCell) return;
 
-      const { key, shiftKey, altKey, metaKey } = event;
-      const isMac = navigator.userAgent.includes('Mac');
-      const isEdgeSelectKey = isMac ? metaKey : altKey;
+      const { key, shiftKey, altKey } = event;
 
       // Prevent default for handled keys
       const handledKeys = [
@@ -130,11 +126,11 @@ export const useKeyboardNavigation = ({
       // Handle key actions
       switch (key) {
         case 'ArrowUp':
-          const selectToEdgeUp = isEdgeSelectKey && shiftKey;
+          const selectToEdgeUp = altKey && shiftKey;
           moveFocus('up', shiftKey, selectToEdgeUp);
           break;
         case 'ArrowDown':
-          const selectToEdgeDown = isEdgeSelectKey && shiftKey;
+          const selectToEdgeDown = altKey && shiftKey;
           moveFocus('down', shiftKey, selectToEdgeDown);
           break;
         case 'ArrowLeft':
@@ -203,13 +199,6 @@ export const useKeyboardNavigation = ({
     [focusedCell, onCellAction, totalColumns]
   );
 
-  // Handle table focus - set initial focus when table receives focus
-  const handleTableFocus = useCallback(() => {
-    if (!focusedCell && entriesLength > 0) {
-      setFocusedCell({ row: HEADERS_ROW, column: 0 });
-    }
-  }, [focusedCell, entriesLength]);
-
   // Handle click outside table
   const handleClickOutside = useCallback(
     (event: MouseEvent) => {
@@ -227,15 +216,13 @@ export const useKeyboardNavigation = ({
     if (!tableElement) return;
 
     tableElement.addEventListener('keydown', handleKeyDown);
-    tableElement.addEventListener('focus', handleTableFocus);
     document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
       tableElement.removeEventListener('keydown', handleKeyDown);
-      tableElement.removeEventListener('focus', handleTableFocus);
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [handleKeyDown, handleTableFocus, handleClickOutside]);
+  }, [handleKeyDown, handleClickOutside]);
 
   return {
     focusedCell,
