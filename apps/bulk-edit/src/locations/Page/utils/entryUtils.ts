@@ -1,25 +1,39 @@
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Document } from '@contentful/rich-text-types';
-import { Entry, ContentTypeField, Status, Fields } from '../types';
+import { Entry, ContentTypeField, Fields } from '../types';
 import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
 import { BATCH_FETCHING } from './constants';
+import { BadgeVariant } from '@contentful/f36-components';
 
 export const getAllStatuses = (): string[] => {
   return ['Draft', 'Changed', 'Published'];
 };
 
-export const getStatus = (entry: Entry): Status => {
+export const getStatus = (entry: Entry): string => {
   const { sys } = entry;
   if (!sys.publishedVersion) {
-    return { label: 'Draft', color: 'warning' };
+    return 'Draft';
   }
   if (sys.version >= sys.publishedVersion + 2) {
-    return { label: 'Changed', color: 'primary' };
+    return 'Changed';
   }
   if (sys.version === sys.publishedVersion + 1) {
-    return { label: 'Published', color: 'positive' };
+    return 'Published';
   }
-  return { label: 'Unknown', color: 'negative' };
+  return 'Unknown';
+};
+
+export const getStatusColor = (status: string): BadgeVariant => {
+  switch (status) {
+    case 'Draft':
+      return 'warning';
+    case 'Changed':
+      return 'primary';
+    case 'Published':
+      return 'positive';
+    default:
+      return 'negative';
+  }
 };
 
 export const isLocationValue = (value: unknown): value is { lat: number; lon: number } => {

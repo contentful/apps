@@ -25,6 +25,7 @@ import { SORT_OPTIONS, SortMenu } from './components/SortMenu';
 import { EntryTable } from './components/EntryTable';
 import { BulkEditModal } from './components/BulkEditModal';
 import { UndoBulkEditModal } from './components/UndoBulkEditModal';
+import { SearchBar } from './components/SearchBar';
 import {
   fetchEntriesWithBatching,
   getAllStatuses,
@@ -37,6 +38,7 @@ import {
 import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
 import FilterMultiselect from './components/FilterMultiselect';
+import { EmptyEntryBanner } from './components/EmptyEntryBanner';
 
 const getFieldsMapped = (fields: ContentTypeField[]) => {
   return fields.map((field) => ({
@@ -76,6 +78,26 @@ const Page = () => {
   const [selectedColumns, setSelectedColumns] = useState<FilterOption[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<FilterOption[]>(getStatusesMapped);
   const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [initialTotal, setInitialTotal] = useState(0);
+
+  const hasActiveFilters = () => {
+    const hasSearchQuery = searchQuery.trim() !== '';
+    const hasStatusFilter = selectedStatuses.length !== getStatusesMapped().length;
+    const hasColumnFilter = selectedColumns.length !== getFieldsMapped(fields).length;
+    return hasSearchQuery || hasStatusFilter || hasColumnFilter;
+  };
+
+  const resetFilters = () => {
+    setSearchQuery('');
+    setSelectedStatuses(getStatusesMapped());
+    setSelectedColumns(getFieldsMapped(fields));
+    setActivePage(0);
+  };
+
+  const shouldDisableFilters = () => {
+    return (entries.length === 0 && !entriesLoading && initialTotal === 0) || !selectedContentType;
+  };
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -139,7 +161,7 @@ const Page = () => {
 
     return entries.filter((entry) => {
       const entryStatus = getStatus(entry);
-      return statuses.some((status) => status.label === entryStatus.label);
+      return statuses.map((status) => status.label).includes(entryStatus);
     });
   };
 
@@ -160,13 +182,19 @@ const Page = () => {
     displayField: string | null,
     fetchAll: boolean = false
   ): QueryOptions => {
-    return {
+    const query: QueryOptions = {
       content_type: selectedContentTypeId,
       order: getOrder(sortOption, displayField),
       skip: fetchAll || needsClientFiltering() ? 0 : activePage * itemsPerPage,
       limit: fetchAll || needsClientFiltering() ? 1000 : itemsPerPage,
       ...getStatusFilter(selectedStatuses),
     };
+
+    if (searchQuery.trim()) {
+      query.query = searchQuery.trim();
+    }
+
+    return query;
   };
 
   useEffect(() => {
@@ -196,6 +224,7 @@ const Page = () => {
     setEntries([]);
     setFields([]);
     setTotalEntries(0);
+    setInitialTotal(0);
   };
 
   // Fetch content type and fields when selectedContentTypeId changes
@@ -247,7 +276,6 @@ const Page = () => {
       if (fields.length === 0 || !currentContentType) {
         return;
       }
-
       setEntriesLoading(true);
       try {
         const displayField = currentContentType.displayField || null;
@@ -276,6 +304,11 @@ const Page = () => {
           setEntries(filteredEntries);
           setTotalEntries(total);
         }
+
+        // Determine empty state type
+        if (initialTotal === 0 && total > 0) {
+          setInitialTotal(total);
+        }
       } catch (e) {
         clearBasicState();
       } finally {
@@ -283,7 +316,15 @@ const Page = () => {
       }
     };
     void fetchEntries();
-  }, [sdk, activePage, itemsPerPage, sortOption, currentContentType, selectedStatuses]);
+  }, [
+    sdk,
+    activePage,
+    itemsPerPage,
+    sortOption,
+    currentContentType,
+    selectedStatuses,
+    searchQuery,
+  ]);
 
   const selectedContentType = contentTypes.find((ct) => ct.sys.id === selectedContentTypeId);
   const selectedEntries = entries.filter((entry) => selectedEntryIds.includes(entry.sys.id));
@@ -510,7 +551,10 @@ const Page = () => {
                 setSortOption(SORT_OPTIONS[0].value);
                 setSelectedStatuses(getStatusesMapped);
                 setActivePage(0);
+                setSearchQuery('');
+                setInitialTotal(0);
               }}
+              disabled={entriesLoading}
             />
             <div style={styles.stickySpacer} />
             <Box>
@@ -519,6 +563,19 @@ const Page = () => {
                 <Heading style={styles.stickyPageHeader}>
                   {selectedContentType ? `Bulk edit ${selectedContentType.name}` : 'Bulk Edit App'}
                 </Heading>
+
+                {/* Search Section */}
+                <SearchBar
+                  searchQuery={searchQuery}
+                  onSearchChange={(query) => {
+                    setSearchQuery(query);
+                    setActivePage(0);
+                  }}
+                  isDisabled={shouldDisableFilters()}
+                  debounceDelay={300}
+                />
+
+                {/* Multiselects Filters Section */}
                 <Flex gap="spacingS" alignItems="center">
                   <SortMenu
                     sortOption={sortOption}
@@ -526,7 +583,7 @@ const Page = () => {
                       setSortOption(newSort);
                       setActivePage(0);
                     }}
-                    disabled={(entries.length === 0 && !entriesLoading) || !selectedContentType}
+                    disabled={shouldDisableFilters()}
                   />
                   <FilterMultiselect
                     id="status"
@@ -536,13 +593,14 @@ const Page = () => {
                       setSelectedStatuses(statuses);
                       setActivePage(0);
                     }}
-                    disabled={(entries.length === 0 && !entriesLoading) || !selectedContentType}
+                    disabled={shouldDisableFilters()}
                     placeholderConfig={{
                       noneSelected: 'No statuses selected',
                       allSelected: 'Filter by status',
                       singleSelected: '',
                       multipleSelected: '',
                     }}
+                    style={styles.columnMultiselectStatuses}
                   />
                   <FilterMultiselect
                     id="column"
@@ -552,14 +610,25 @@ const Page = () => {
                       setSelectedColumns(selectedColumns);
                       setActivePage(0);
                     }}
-                    disabled={(entries.length === 0 && !entriesLoading) || !selectedContentType}
+                    disabled={shouldDisableFilters()}
                     placeholderConfig={{
                       noneSelected: 'No fields selected',
                       allSelected: 'Filter fields',
                       singleSelected: '',
                       multipleSelected: '',
                     }}
+                    style={styles.columnMultiselectColumns}
                   />
+                  {hasActiveFilters() && (
+                    <Button
+                      variant="secondary"
+                      size="small"
+                      onClick={resetFilters}
+                      isDisabled={shouldDisableFilters()}
+                      style={styles.resetFiltersButton}>
+                      Reset filters
+                    </Button>
+                  )}
                 </Flex>
                 {selectedField && selectedEntryIds.length > 0 && !entriesLoading && (
                   <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
@@ -581,7 +650,10 @@ const Page = () => {
                 ) : (
                   <>
                     {entries.length === 0 || !selectedContentType ? (
-                      <Box style={styles.noEntriesText}>No entries found.</Box>
+                      <EmptyEntryBanner
+                        hasEntries={entries.length > 0}
+                        hasInitialEntries={initialTotal > 0}
+                      />
                     ) : (
                       <>
                         {failedUpdates.length > 0 && (

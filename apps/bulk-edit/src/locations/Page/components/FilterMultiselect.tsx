@@ -2,7 +2,6 @@ import { Flex } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { useMemo } from 'react';
 import { truncate } from '../utils/entryUtils';
-import { styles } from '../styles';
 import { optionStyles } from './FilterMultiselect.styles';
 import { FilterOption } from '../types';
 
@@ -18,6 +17,7 @@ interface FilterMultiselectProps {
     singleSelected: string;
     multipleSelected: string;
   };
+  style?: React.CSSProperties | undefined;
 }
 
 const FilterMultiselect = ({
@@ -27,6 +27,7 @@ const FilterMultiselect = ({
   setSelectedItems,
   disabled,
   placeholderConfig,
+  style,
 }: FilterMultiselectProps) => {
   const getPlaceholderText = () => {
     if (selectedItems.length === 0) return placeholderConfig.noneSelected;
@@ -52,7 +53,7 @@ const FilterMultiselect = ({
   }, [selectedItems, options]);
 
   return (
-    <Flex gap="spacing2Xs" flexDirection="column" style={styles.columnMultiselect}>
+    <Flex gap="spacing2Xs" flexDirection="column" style={{ ...style }}>
       <Multiselect
         placeholder={getPlaceholderText()}
         triggerButtonProps={{ size: 'small', isDisabled: disabled }}
