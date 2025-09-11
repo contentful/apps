@@ -3,7 +3,7 @@ import { Table, TextLink, Badge, Checkbox, Flex, Text } from '@contentful/f36-co
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { Entry, ContentTypeField } from '../types';
 import { ContentTypeProps } from 'contentful-management';
-import { styles, getCellStyle } from '../styles';
+import { rowStyles, getCellStyle } from './TableRow.styles';
 import {
   getStatusFromEntry,
   renderFieldValue,
@@ -83,7 +83,7 @@ export const TableRow: React.FC<TableRowProps> = ({
     <Table.Row key={entry.sys.id}>
       <Table.Cell
         testId="display-name-cell"
-        style={getCellStyleForColumn(styles.displayNameCell, DISPLAY_NAME_COLUMN)}
+        style={getCellStyleForColumn(rowStyles.displayNameCell, DISPLAY_NAME_COLUMN)}
         aria-label={`Display name for ${displayValue}`}
         onClick={() => onCellFocus({ row: rowIndex, column: getColumnIndex(DISPLAY_NAME_COLUMN) })}
         role="gridcell"
@@ -102,7 +102,7 @@ export const TableRow: React.FC<TableRowProps> = ({
       <Table.Cell
         testId="status-cell"
         aria-label={`Status for ${displayValue}`}
-        style={getCellStyleForColumn(styles.statusCell, ENTRY_STATUS_COLUMN)}
+        style={getCellStyleForColumn(rowStyles.statusCell, ENTRY_STATUS_COLUMN)}
         onClick={() => onCellFocus({ row: rowIndex, column: getColumnIndex(ENTRY_STATUS_COLUMN) })}
         role="gridcell"
         tabIndex={-1}>
@@ -120,7 +120,7 @@ export const TableRow: React.FC<TableRowProps> = ({
           <Table.Cell
             key={field.uniqueId}
             style={getCellStyle(
-              styles.cell,
+              rowStyles.cell,
               isCellFocused(columnIndex),
               isCellSelected(columnIndex)
             )}
