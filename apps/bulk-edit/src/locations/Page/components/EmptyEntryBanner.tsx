@@ -1,13 +1,13 @@
 import React from 'react';
 import { Flex, Text } from '@contentful/f36-components';
-import { emptyStateStyles } from './EmptyState.styles';
+import { emptyEntryBannerStyles } from './EmptyEntryBanner.styles';
 
 interface EmptyStateProps {
   hasEntries: boolean;
   hasInitialEntries: boolean;
 }
 
-export const EmptyState: React.FC<EmptyStateProps> = ({ hasEntries, hasInitialEntries }) => {
+export const EmptyEntryBanner: React.FC<EmptyStateProps> = ({ hasEntries, hasInitialEntries }) => {
   if (hasEntries) {
     return null;
   }
@@ -19,7 +19,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ hasEntries, hasInitialEn
         justifyContent="center"
         flexDirection="column"
         padding="spacing2Xl"
-        className={emptyStateStyles.container}>
+        className={emptyEntryBannerStyles.container}>
         <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold">
           No entries found.
         </Text>
@@ -33,7 +33,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ hasEntries, hasInitialEn
       justifyContent="center"
       flexDirection="column"
       padding="spacing2Xl"
-      className={emptyStateStyles.container}>
+      className={emptyEntryBannerStyles.container}>
       <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold">
         We couldn't find any matches.
       </Text>

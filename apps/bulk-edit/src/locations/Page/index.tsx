@@ -25,7 +25,7 @@ import { SORT_OPTIONS, SortMenu } from './components/SortMenu';
 import { EntryTable } from './components/EntryTable';
 import { BulkEditModal } from './components/BulkEditModal';
 import { UndoBulkEditModal } from './components/UndoBulkEditModal';
-import { SearchFilter } from './components/SearchFilter';
+import { SearchBar } from './components/SearchBar';
 import {
   fetchEntriesWithBatching,
   getAllStatuses,
@@ -38,7 +38,7 @@ import {
 import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
 import FilterMultiselect from './components/FilterMultiselect';
-import { EmptyState } from './components/EmptyState';
+import { EmptyEntryBanner } from './components/EmptyEntryBanner';
 
 const getFieldsMapped = (fields: ContentTypeField[]) => {
   return fields.map((field) => ({
@@ -565,7 +565,7 @@ const Page = () => {
                 </Heading>
 
                 {/* Search Section */}
-                <SearchFilter
+                <SearchBar
                   searchQuery={searchQuery}
                   onSearchChange={(query) => {
                     setSearchQuery(query);
@@ -650,7 +650,7 @@ const Page = () => {
                 ) : (
                   <>
                     {entries.length === 0 || !selectedContentType ? (
-                      <EmptyState
+                      <EmptyEntryBanner
                         hasEntries={entries.length > 0}
                         hasInitialEntries={initialTotal > 0}
                       />

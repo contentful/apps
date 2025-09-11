@@ -4,14 +4,14 @@ import { SearchIcon } from '@contentful/f36-icons';
 import { useDebounce } from 'use-debounce';
 import { styles } from './SearchFilter.styles';
 
-interface SearchFilterProps {
+interface SearchBarProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   isDisabled?: boolean;
   debounceDelay?: number;
 }
 
-export const SearchFilter: React.FC<SearchFilterProps> = ({
+export const SearchBar: React.FC<SearchBarProps> = ({
   searchQuery,
   onSearchChange,
   isDisabled = false,

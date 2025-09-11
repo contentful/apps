@@ -1,7 +1,7 @@
 import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { SearchFilter } from '../../../src/locations/Page/components/SearchFilter';
+import { SearchBar } from '../../../src/locations/Page/components/SearchBar';
 
 vi.mock('use-debounce', () => ({
   useDebounce: (value: string, delay: number) => {
@@ -29,7 +29,7 @@ describe('SearchFilter', () => {
 
   describe('Basic rendering', () => {
     it('renders the search filter component', () => {
-      render(<SearchFilter {...defaultProps} />);
+      render(<SearchBar {...defaultProps} />);
 
       expect(screen.getByText('Search entries')).toBeInTheDocument();
       expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
@@ -38,7 +38,7 @@ describe('SearchFilter', () => {
 
     it('shows the correct initial value', () => {
       const initialQuery = 'test search';
-      render(<SearchFilter {...defaultProps} searchQuery={initialQuery} />);
+      render(<SearchBar {...defaultProps} searchQuery={initialQuery} />);
 
       const input = screen.getByPlaceholderText('Search');
       expect(input).toHaveValue(initialQuery);
@@ -47,7 +47,7 @@ describe('SearchFilter', () => {
 
   describe('User interactions', () => {
     it('updates input value when user types', () => {
-      render(<SearchFilter {...defaultProps} />);
+      render(<SearchBar {...defaultProps} />);
 
       const input = screen.getByPlaceholderText('Search');
       fireEvent.change(input, { target: { value: 'new search' } });
@@ -57,7 +57,7 @@ describe('SearchFilter', () => {
 
     it('calls onSearchChange when input value changes', async () => {
       const mockOnSearchChange = vi.fn();
-      render(<SearchFilter {...defaultProps} onSearchChange={mockOnSearchChange} />);
+      render(<SearchBar {...defaultProps} onSearchChange={mockOnSearchChange} />);
 
       const input = screen.getByPlaceholderText('Search');
       fireEvent.change(input, { target: { value: 'test query' } });
@@ -69,7 +69,7 @@ describe('SearchFilter', () => {
 
     it('handles special characters in search input', async () => {
       const mockOnSearchChange = vi.fn();
-      render(<SearchFilter {...defaultProps} onSearchChange={mockOnSearchChange} />);
+      render(<SearchBar {...defaultProps} onSearchChange={mockOnSearchChange} />);
 
       const input = screen.getByPlaceholderText('Search');
       const specialQuery = 'test@#$%^&*()_+-=[]{}|;:,.<>?';
@@ -83,14 +83,14 @@ describe('SearchFilter', () => {
 
   describe('Disabled state', () => {
     it('disables input when isDisabled is true', () => {
-      render(<SearchFilter {...defaultProps} isDisabled={true} />);
+      render(<SearchBar {...defaultProps} isDisabled={true} />);
 
       const input = screen.getByPlaceholderText('Search');
       expect(input).toBeDisabled();
     });
 
     it('enables input when isDisabled is false', () => {
-      render(<SearchFilter {...defaultProps} isDisabled={false} />);
+      render(<SearchBar {...defaultProps} isDisabled={false} />);
 
       const input = screen.getByPlaceholderText('Search');
       expect(input).not.toBeDisabled();
@@ -99,22 +99,22 @@ describe('SearchFilter', () => {
 
   describe('Props synchronization', () => {
     it('updates input value when searchQuery prop changes', () => {
-      const { rerender } = render(<SearchFilter {...defaultProps} searchQuery="initial" />);
+      const { rerender } = render(<SearchBar {...defaultProps} searchQuery="initial" />);
 
       const input = screen.getByPlaceholderText('Search');
       expect(input).toHaveValue('initial');
 
-      rerender(<SearchFilter {...defaultProps} searchQuery="updated" />);
+      rerender(<SearchBar {...defaultProps} searchQuery="updated" />);
       expect(input).toHaveValue('updated');
     });
 
     it('handles searchQuery prop changes from external source', () => {
-      const { rerender } = render(<SearchFilter {...defaultProps} searchQuery="" />);
+      const { rerender } = render(<SearchBar {...defaultProps} searchQuery="" />);
 
       const input = screen.getByPlaceholderText('Search');
 
       // Simulate external prop change (e.g., content type change)
-      rerender(<SearchFilter {...defaultProps} searchQuery="external change" />);
+      rerender(<SearchBar {...defaultProps} searchQuery="external change" />);
 
       expect(input).toHaveValue('external change');
     });
@@ -122,7 +122,7 @@ describe('SearchFilter', () => {
 
   describe('Edge cases', () => {
     it('handles undefined searchQuery gracefully', () => {
-      render(<SearchFilter {...defaultProps} searchQuery={undefined as any} />);
+      render(<SearchBar {...defaultProps} searchQuery={undefined as any} />);
 
       const input = screen.getByPlaceholderText('Search');
       expect(input).toHaveValue('');
@@ -132,7 +132,7 @@ describe('SearchFilter', () => {
       const mockOnSearchChange = vi.fn();
       const longQuery = 'a'.repeat(1000);
 
-      render(<SearchFilter {...defaultProps} onSearchChange={mockOnSearchChange} />);
+      render(<SearchBar {...defaultProps} onSearchChange={mockOnSearchChange} />);
 
       const input = screen.getByPlaceholderText('Search');
       fireEvent.change(input, { target: { value: longQuery } });
@@ -144,7 +144,7 @@ describe('SearchFilter', () => {
 
     it('handles rapid typing without errors', async () => {
       const mockOnSearchChange = vi.fn();
-      render(<SearchFilter {...defaultProps} onSearchChange={mockOnSearchChange} />);
+      render(<SearchBar {...defaultProps} onSearchChange={mockOnSearchChange} />);
 
       const input = screen.getByPlaceholderText('Search');
 
