@@ -1,4 +1,4 @@
-import { Accordion, Text } from '@contentful/f36-components';
+import { Accordion, Text, Flex } from '@contentful/f36-components';
 import { ActionResultType } from '../locations/Page';
 import useParseError from '../hooks/useParseError';
 import { styles } from './Action.styles';
@@ -15,6 +15,9 @@ interface Props {
 const ActionFailure = (props: Props) => {
   const { actionResult, accordionState, handleCollapse, handleExpand } = props;
   const { error, timestamp, actionId } = actionResult;
+  const details: string | undefined = (actionResult.data as any)?.error?.details as
+    | string
+    | undefined;
   const data: any = actionResult.data;
   const createdAt = data?.sys?.createdAt ?? data?.requestAt;
   const updatedAt = data?.sys?.updatedAt ?? data?.responseAt;
@@ -39,6 +42,16 @@ const ActionFailure = (props: Props) => {
         onExpand={() => handleExpand(`outer-${actionId}-${timestamp}`)}
         onCollapse={() => handleCollapse(`outer-${actionId}-${timestamp}`)}>
         <strong>Error Message:</strong> <Text>{message}</Text>
+        {details && (
+          <Text>
+            <strong>Error Details:</strong>
+            <Flex className={styles.bodyContainer}>
+              <pre className={styles.body}>
+                <code>{details}</code>
+              </pre>
+            </Flex>
+          </Text>
+        )}
         {actionResult.callId && (
           <RawResponseViewer actionId={actionId} callId={actionResult.callId} />
         )}
