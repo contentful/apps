@@ -3,7 +3,7 @@ import { Table, Checkbox, Flex, Text, Box } from '@contentful/f36-components';
 import { Tooltip } from '@contentful/f36-tooltip';
 import { QuestionIcon } from '@phosphor-icons/react';
 import { ContentTypeField } from '../types';
-import { styles, getCellStyle } from '../styles';
+import { headerStyles, getCellStyle } from './TableHeader.styles';
 import { truncate, isCheckboxAllowed } from '../utils/entryUtils';
 import { DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN, HEADERS_ROW } from '../utils/constants';
 import { FocusPosition, SelectionRange } from '../hooks/useKeyboardNavigation';
@@ -48,13 +48,13 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
   };
 
   return (
-    <Table.Head style={styles.tableHead}>
-      <Table.Row style={styles.stickyTableRow}>
+    <Table.Head style={headerStyles.tableHead}>
+      <Table.Row style={headerStyles.stickyTableRow}>
         <Table.Cell
           as="th"
           key={DISPLAY_NAME_COLUMN}
           style={getCellStyle(
-            styles.displayNameHeader,
+            headerStyles.displayNameHeader,
             isCellFocused(getColumnIndex(DISPLAY_NAME_COLUMN)),
             isCellSelected(getColumnIndex(DISPLAY_NAME_COLUMN))
           )}
@@ -70,7 +70,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           as="th"
           key={ENTRY_STATUS_COLUMN}
           style={getCellStyle(
-            styles.statusHeader,
+            headerStyles.statusHeader,
             isCellFocused(getColumnIndex(ENTRY_STATUS_COLUMN)),
             isCellSelected(getColumnIndex(ENTRY_STATUS_COLUMN))
           )}
@@ -98,7 +98,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
               as="th"
               key={field.uniqueId}
               style={getCellStyle(
-                styles.tableHeader,
+                headerStyles.tableHeader,
                 isCellFocused(columnIndex),
                 isCellSelected(columnIndex)
               )}
