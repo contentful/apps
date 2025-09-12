@@ -1,4 +1,6 @@
 import { Accordion, Flex, IconButton, Stack, Text } from '@contentful/f36-components';
+import { getHeaderValue, formatBodyForDisplay, computeDuration } from '../utils/response';
+import RawResponseViewer from './RawResponseViewer';
 import { ActionResultType } from '../locations/Page';
 import { CopyIcon } from '@contentful/f36-icons';
 import { styles } from './Action.styles';
@@ -14,11 +16,27 @@ interface Props {
 const ActionSuccess = (props: Props) => {
   const { actionResult, accordionState, handleCollapse, handleExpand, handleCopy } = props;
   const { data, timestamp, actionId } = actionResult;
-  const statusCode = data?.response?.statusCode;
-  const duration =
-    data && new Date(data.responseAt).getMilliseconds() - new Date(timestamp).getMilliseconds();
-  const requestBody = JSON.stringify(JSON.parse(data?.request?.body || ''), null, 2);
-  const responseBody = JSON.stringify(JSON.parse(data?.response?.body || ''), null, 2);
+  const statusCode = data?.response?.statusCode ?? (data as any)?.status;
+
+  const requestContentType =
+    getHeaderValue((data as any)?.request?.headers as any, 'content-type') ||
+    getHeaderValue((data as any)?.request?.headers as any, 'Content-Type');
+
+  const responseContentType =
+    getHeaderValue((data as any)?.response?.headers as any, 'content-type') ||
+    getHeaderValue((data as any)?.response?.headers as any, 'Content-Type');
+
+  const requestSource = (data as any)?.request?.body;
+  const responseSource = (data as any)?.response?.body ?? (data as any)?.result;
+
+  const requestBody = formatBodyForDisplay(requestSource, requestContentType);
+  const responseBody = formatBodyForDisplay(responseSource, responseContentType);
+
+  // Prefer structured call timestamps (sys.createdAt -> sys.updatedAt),
+  // fall back to legacy webhook timestamps (requestAt -> responseAt)
+  const createdAt = (data as any)?.sys?.createdAt ?? (data as any)?.requestAt;
+  const updatedAt = (data as any)?.sys?.updatedAt ?? (data as any)?.responseAt;
+  const duration = computeDuration(createdAt, updatedAt);
 
   return (
     <Accordion key={`${actionId}-${timestamp}`} className={styles.accordion}>
@@ -68,7 +86,7 @@ const ActionSuccess = (props: Props) => {
                     variant="transparent"
                     icon={<CopyIcon />}
                     aria-label="Copy request body"
-                    onClick={() => handleCopy(data?.response?.body || '', 'request body')}
+                    onClick={() => handleCopy(requestBody, 'request body')}
                     className={styles.copyButton}
                   />
                 </Flex>
@@ -104,6 +122,9 @@ const ActionSuccess = (props: Props) => {
                   </>
                 )}
               </Text>
+              {actionResult.callId && (
+                <RawResponseViewer actionId={actionId} callId={actionResult.callId} />
+              )}
             </Stack>
           </Accordion.Item>
         </Accordion>
