@@ -5,6 +5,7 @@ import { PageAppSDK } from '@contentful/app-sdk';
 import { useState } from 'react';
 import { formatBodyForDisplay, getHeaderValue, computeDuration } from '../utils/response';
 import { styles } from './Action.styles';
+import { useClipboard } from '../hooks/useClipboard';
 
 interface Props {
   actionId: string;
@@ -24,13 +25,9 @@ const RawResponseViewer = ({
   const [raw, setRaw] = useState<any | undefined>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
   const [mode, setMode] = useState<'pretty' | 'raw'>('pretty');
+  const { copy } = useClipboard();
 
-  const handleCopy = (text: string, description: string) => {
-    navigator.clipboard.writeText(text).then(
-      () => sdk.notifier.success(`Copied ${description} to clipboard.`),
-      () => sdk.notifier.error(`Failed to copy ${description}.`)
-    );
-  };
+  const handleCopy = (text: string, description: string) => copy(text, description);
 
   const onGet = async () => {
     if (!callId) return;

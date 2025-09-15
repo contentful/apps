@@ -110,7 +110,7 @@ const ActionSuccess = (props: Props) => {
                     variant="transparent"
                     icon={<CopyIcon />}
                     aria-label="Copy response body"
-                    onClick={() => handleCopy(data?.response?.body || '', 'response body')}
+                    onClick={() => handleCopy(responseBody, 'response body')}
                     className={styles.copyButton}
                   />
                 </Flex>
