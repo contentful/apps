@@ -14,8 +14,6 @@ interface FilterMultiselectProps {
   placeholderConfig: {
     noneSelected: string;
     allSelected: string;
-    singleSelected: string;
-    multipleSelected: string;
   };
   style?: React.CSSProperties | undefined;
 }

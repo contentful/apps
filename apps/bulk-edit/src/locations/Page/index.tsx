@@ -608,8 +608,6 @@ const Page = () => {
                     placeholderConfig={{
                       noneSelected: 'No statuses selected',
                       allSelected: 'Filter by status',
-                      singleSelected: '',
-                      multipleSelected: '',
                     }}
                     style={styles.columnMultiselectStatuses}
                   />
@@ -625,8 +623,6 @@ const Page = () => {
                     placeholderConfig={{
                       noneSelected: 'No fields selected',
                       allSelected: 'Filter fields',
-                      singleSelected: '',
-                      multipleSelected: '',
                     }}
                     style={styles.columnMultiselectColumns}
                   />
