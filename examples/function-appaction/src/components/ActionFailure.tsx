@@ -19,8 +19,8 @@ const ActionFailure = (props: Props) => {
     | string
     | undefined;
   const data: any = actionResult.data;
-  const createdAt = data?.sys?.createdAt ?? data?.requestAt;
-  const updatedAt = data?.sys?.updatedAt ?? data?.responseAt;
+  const createdAt = data?.sys?.createdAt;
+  const updatedAt = data?.sys?.updatedAt;
   const duration = computeDuration(createdAt, updatedAt);
   const { message, statusCode } = useParseError(error);
 
