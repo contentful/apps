@@ -1,4 +1,4 @@
-import { Accordion, Text, Flex } from '@contentful/f36-components';
+import { Accordion, Text, Flex, Badge } from '@contentful/f36-components';
 import { ActionResultType } from '../locations/Page';
 import useParseError from '../hooks/useParseError';
 import { styles } from './Action.styles';
@@ -29,8 +29,8 @@ const ActionFailure = (props: Props) => {
       <Accordion.Item
         title={
           <Text>
-            <span className={styles.accordionTitleFailure}>'Failed' [{statusCode}]</span> -{' '}
-            {timestamp}
+            <Badge variant="negative">Failed</Badge>
+            <Text className={styles.accordionTitleMargin}>[{statusCode}]</Text> - {timestamp}
             {typeof duration === 'number' && (
               <Text className={styles.accordionTitleMargin}>
                 Duration: <strong>{duration}</strong> ms

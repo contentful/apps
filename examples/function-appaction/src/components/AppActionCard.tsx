@@ -33,7 +33,7 @@ const AppActionCard = (props: Props) => {
   const callAction = async (action: AppActionProps) => {
     setLoadingAction(action.sys.id);
     try {
-      const result = (await sdk.cma.appActionCall.createWithResponse(
+      const result = (await sdk.cma.appActionCall.createWithResult(
         {
           appDefinitionId: sdk.ids.app || '',
           appActionId: action.sys.id,

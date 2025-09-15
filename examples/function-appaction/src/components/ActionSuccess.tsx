@@ -1,4 +1,4 @@
-import { Accordion, Flex, IconButton, Stack, Text } from '@contentful/f36-components';
+import { Accordion, Flex, IconButton, Stack, Text, Badge } from '@contentful/f36-components';
 import { getHeaderValue, formatBodyForDisplay, computeDuration } from '../utils/response';
 import RawResponseViewer from './RawResponseViewer';
 import { ActionResultType } from '../locations/Page';
@@ -34,8 +34,8 @@ const ActionSuccess = (props: Props) => {
       <Accordion.Item
         title={
           <Text>
-            <span className={styles.accordionTitleSuccess}>'Success' [{statusCode}]</span> -{' '}
-            {timestamp}
+            <Badge variant="positive">Success</Badge>
+            <Text className={styles.accordionTitleMargin}>[{statusCode}]</Text> - {timestamp}
             {typeof duration === 'number' && (
               <Text className={styles.accordionTitleMargin}>
                 Duration: <strong>{duration}</strong> ms
@@ -67,6 +67,14 @@ const ActionSuccess = (props: Props) => {
                     className={styles.copyButton}
                   />
                 </Flex>
+              </Text>
+              <Text>
+                {(data as any)?.sys?.updatedAt && (
+                  <>
+                    <strong>Completed at:</strong>{' '}
+                    {new Date((data as any).sys.updatedAt).toLocaleString()}
+                  </>
+                )}
               </Text>
               {actionResult.callId && (
                 <RawResponseViewer actionId={actionId} callId={actionResult.callId} />
