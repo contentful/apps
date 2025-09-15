@@ -34,6 +34,8 @@ import {
   processEntriesInBatches,
   truncate,
   updateEntryFieldLocalized,
+  filterEntriesByNumericSearch,
+  isNumericSearch,
 } from './utils/entryUtils';
 import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
@@ -172,8 +174,9 @@ const Page = () => {
 
     // If we need client-side filtering, fetch all entries
     return (
-      selectedStatuses.length > 0 &&
-      ((hasDraft && (hasPublished || hasChanged)) || (hasPublished && hasChanged))
+      (selectedStatuses.length > 0 &&
+        ((hasDraft && (hasPublished || hasChanged)) || (hasPublished && hasChanged))) ||
+      isNumericSearch(searchQuery)
     );
   }
 
@@ -289,19 +292,27 @@ const Page = () => {
         );
 
         // Apply client-side status filtering
-        const filteredEntries = filterEntriesByStatus(entries, selectedStatuses);
+        const statusFilteredEntries = filterEntriesByStatus(entries, selectedStatuses);
+
+        // Apply numeric search filtering if needed
+        const searchFilteredEntries = filterEntriesByNumericSearch(
+          statusFilteredEntries,
+          searchQuery,
+          fields,
+          defaultLocale
+        );
 
         if (needsClientFiltering()) {
           // Client-side pagination
           const startIndex = activePage * itemsPerPage;
           const endIndex = startIndex + itemsPerPage;
-          const paginatedEntries = filteredEntries.slice(startIndex, endIndex);
+          const paginatedEntries = searchFilteredEntries.slice(startIndex, endIndex);
 
           setEntries(paginatedEntries);
-          setTotalEntries(filteredEntries.length);
+          setTotalEntries(searchFilteredEntries.length);
         } else {
           // Server-side pagination
-          setEntries(filteredEntries);
+          setEntries(searchFilteredEntries);
           setTotalEntries(total);
         }
 

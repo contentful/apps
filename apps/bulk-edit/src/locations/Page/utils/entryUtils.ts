@@ -272,3 +272,29 @@ export async function fetchEntriesWithBatching(
 
   return { entries: allEntries, total };
 }
+
+export const isNumericSearch = (query: string): boolean => {
+  return /^\d+$/.test(query.trim());
+};
+
+export const filterEntriesByNumericSearch = (
+  entries: EntryProps[],
+  query: string,
+  fields: ContentTypeField[],
+  defaultLocale: string
+): EntryProps[] => {
+  if (!query.trim() || !isNumericSearch(query)) return entries;
+
+  return entries.filter((entry) => {
+    // Search in all Symbol fields (like displayName)
+    return fields.some((field) => {
+      if (field.type !== 'Symbol') return false;
+
+      const fieldValue = entry.fields[field.id]?.[field.locale || defaultLocale];
+      if (fieldValue === undefined || fieldValue === null) return false;
+
+      // Check if the field value contains the numeric string
+      return String(fieldValue).includes(query);
+    });
+  });
+};
