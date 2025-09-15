@@ -14,7 +14,7 @@ import {
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { AppActionProps } from 'contentful-management';
 import { useState } from 'react';
-import { ActionResultType } from '../locations/Page';
+import { ActionResultData, ActionResultType } from '../locations/Page';
 import ActionResult from './ActionResult';
 import { styles } from './AppActionCard.styles';
 
@@ -33,28 +33,44 @@ const AppActionCard = (props: Props) => {
   const callAction = async (action: AppActionProps) => {
     setLoadingAction(action.sys.id);
     try {
-      const result = await sdk.cma.appActionCall.createWithResponse(
+      const result = (await sdk.cma.appActionCall.createWithResult(
         {
-          organizationId: sdk.ids.organization,
           appDefinitionId: sdk.ids.app || '',
           appActionId: action.sys.id,
         },
         {
           parameters: actionParameters[action.sys.id] || {},
         }
-      );
+      )) as unknown as ActionResultData;
 
       const timestamp = new Date().toLocaleString();
+      const call: any = result as any;
+      const callId = (call as any)?.sys?.id;
+      const base = { timestamp, actionId: action.sys.id, callId } as const;
 
-      setActionResults(() => [
-        { success: true, data: result, timestamp, actionId: action.sys.id },
-        ...actionResults,
-      ]);
+      if (call?.status === 'succeeded') {
+        setActionResults((prev) => [{ success: true, data: call, ...base }, ...prev]);
+      } else if (call?.status === 'failed') {
+        setActionResults((prev) => [
+          {
+            success: false,
+            data: call,
+            error: call?.error || new Error('App action failed'),
+            ...base,
+          },
+          ...prev,
+        ]);
+      } else {
+        setActionResults((prev) => [
+          { success: false, data: call, error: new Error('App action still processing'), ...base },
+          ...prev,
+        ]);
+      }
     } catch (error) {
       const timestamp = new Date().toLocaleString();
-      setActionResults(() => [
+      setActionResults((prev) => [
         { success: false, error, timestamp, actionId: action.sys.id },
-        ...actionResults,
+        ...prev,
       ]);
     } finally {
       setLoadingAction(null);
@@ -120,16 +136,12 @@ const AppActionCard = (props: Props) => {
   };
 
   const isButtonDisabled = () => {
-    const requiredParameters =
-      'parameters' in action ? action.parameters?.filter((param) => param.required) : [];
+    const parameters = (action as any).parameters as any[] | undefined;
+    const requiredParameters = parameters?.filter((param: any) => param.required) ?? [];
 
-    const hasEmptyRequiredParameters = requiredParameters.find((param) => {
+    const hasEmptyRequiredParameters = requiredParameters.find((param: any) => {
       const paramValue = actionParameters[action.sys.id]?.[param.id];
-      if (!paramValue) {
-        return true;
-      } else {
-        return false;
-      }
+      return !paramValue;
     });
 
     return Boolean(hasEmptyRequiredParameters);
@@ -163,7 +175,8 @@ const AppActionCard = (props: Props) => {
           </Button>
         </Box>
       </Flex>
-      {(action as { parameters: any[] }).parameters.length ? (
+      {Array.isArray((action as any).parameters) &&
+      (action as { parameters: any[] }).parameters.length ? (
         <Box marginTop="spacingS">
           <Box marginBottom="spacingM">
             <Subheading as="h4">Parameters</Subheading>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ActionResultType } from '../locations/Page';
 import ActionFailure from './ActionFailure';
 import ActionSuccess from './ActionSuccess';
+import { useClipboard } from '../hooks/useClipboard';
 
 interface Props {
   actionResult: ActionResultType;
@@ -15,6 +16,7 @@ const ActionResult = (props: Props) => {
 
   const { actionResult } = props;
   const { success } = actionResult;
+  const { copy } = useClipboard();
 
   const handleExpand = (itemKey: string) => () =>
     setAccordionState((prevState: any) => ({ ...prevState, [itemKey]: true }));
@@ -22,16 +24,7 @@ const ActionResult = (props: Props) => {
   const handleCollapse = (itemKey: string) => () =>
     setAccordionState((prevState: any) => ({ ...prevState, [itemKey]: false }));
 
-  const handleCopy = (text: string, entityDescription: string) => {
-    navigator.clipboard.writeText(text).then(
-      () => {
-        sdk.notifier.success(`Copied ${entityDescription || 'item'} to clipboard.`);
-      },
-      () => {
-        sdk.notifier.error(`Failed to copy ${entityDescription || 'item'} to clipboard.`);
-      }
-    );
-  };
+  const handleCopy = (text: string, entityDescription: string) => copy(text, entityDescription);
 
   return (
     <>
