@@ -136,9 +136,9 @@ const Page = () => {
       return { 'sys.id[in]': 'nonexistent-id' };
     }
 
-    const hasDraft = statuses.includes(getStatusesMapped()[0]);
-    const hasPublished = statuses.includes(getStatusesMapped()[1]);
-    const hasChanged = statuses.includes(getStatusesMapped()[2]);
+    const hasDraft = statuses.map((status) => status.label).includes(getAllStatuses()[0]);
+    const hasPublished = statuses.map((status) => status.label).includes(getAllStatuses()[1]);
+    const hasChanged = statuses.map((status) => status.label).includes(getAllStatuses()[2]);
 
     // Single status filtering
     if (hasDraft && statuses.length === 1) {
@@ -168,9 +168,11 @@ const Page = () => {
   };
 
   function needsClientFiltering() {
-    const hasDraft = selectedStatuses.includes(getStatusesMapped()[0]);
-    const hasPublished = selectedStatuses.includes(getStatusesMapped()[1]);
-    const hasChanged = selectedStatuses.includes(getStatusesMapped()[2]);
+    const hasDraft = selectedStatuses.map((status) => status.label).includes(getAllStatuses()[0]);
+    const hasPublished = selectedStatuses
+      .map((status) => status.label)
+      .includes(getAllStatuses()[1]);
+    const hasChanged = selectedStatuses.map((status) => status.label).includes(getAllStatuses()[2]);
 
     // If we need client-side filtering, fetch all entries
     return (
