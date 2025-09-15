@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Flex, Text, TextInput } from '@contentful/f36-components';
 import { SearchIcon } from '@contentful/f36-icons';
 import { useDebounce } from 'use-debounce';
-import { styles } from './SearchFilter.styles';
+import { styles } from './SearchBar.styles';
 
 interface SearchBarProps {
   searchQuery: string;
