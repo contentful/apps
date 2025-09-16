@@ -67,8 +67,8 @@ export const TableRow: React.FC<TableRowProps> = ({
     const columnIndex = getColumnIndex(columnId, fields);
     return getCellStyle(
       baseStyle,
-      isCellFocused(rowIndex, columnIndex, focusedCell) ||
-        isCellInFocusRange(rowIndex, columnIndex, focusRange)
+      isCellFocused({ row: rowIndex, column: columnIndex }, focusedCell) ||
+        isCellInFocusRange({ row: rowIndex, column: columnIndex }, focusRange)
     );
   };
 
@@ -112,8 +112,8 @@ export const TableRow: React.FC<TableRowProps> = ({
             key={field.uniqueId}
             style={getCellStyle(
               rowStyles.cell,
-              isCellFocused(rowIndex, columnIndex, focusedCell) ||
-                isCellInFocusRange(rowIndex, columnIndex, focusRange)
+              isCellFocused({ row: rowIndex, column: columnIndex }, focusedCell) ||
+                isCellInFocusRange({ row: rowIndex, column: columnIndex }, focusRange)
             )}
             onClick={() => onCellFocus({ row: rowIndex, column: columnIndex })}
             role="gridcell"

@@ -183,7 +183,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     [columnIds, handleHeaderCheckboxChange, handleCellCheckboxChange]
   );
 
-  const toggleRangeCheckboxes = () => {
+  const toggleCheckboxes = () => {
     if (!focusRange) {
       if (focusedCell) {
         toggleCheckbox(focusedCell);
@@ -236,7 +236,8 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     }
   };
 
-  const handleCellAction = (rowIndex: number, columnIndex: number) => {
+  const handleCellAction = (position: FocusPosition) => {
+    const { row: rowIndex, column: columnIndex } = position;
     const columnId = columnIds[columnIndex];
     const isHeaderRow = rowIndex === HEADERS_ROW;
 
@@ -247,7 +248,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
         window.open(url, '_blank', 'noopener,noreferrer');
       }
     } else if (allowedColumns[columnId]) {
-      toggleRangeCheckboxes();
+      toggleCheckboxes();
     }
   };
 

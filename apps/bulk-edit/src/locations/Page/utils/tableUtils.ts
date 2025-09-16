@@ -24,16 +24,14 @@ export const getColumnIndex = (
 };
 
 export const isCellFocused = (
-  rowIndex: number,
-  columnIndex: number,
+  position: FocusPosition,
   focusedCell: FocusPosition | null
 ): boolean => {
-  return focusedCell?.row === rowIndex && focusedCell?.column === columnIndex;
+  return focusedCell?.row === position.row && focusedCell?.column === position.column;
 };
 
 export const isCellInFocusRange = (
-  rowIndex: number,
-  columnIndex: number,
+  position: FocusPosition,
   selectionRange: FocusRange | null
 ): boolean => {
   if (!selectionRange) return false;
@@ -41,5 +39,5 @@ export const isCellInFocusRange = (
   const minRow = Math.min(start.row, end.row);
   const maxRow = Math.max(start.row, end.row);
 
-  return rowIndex >= minRow && rowIndex <= maxRow && columnIndex === start.column;
+  return position.row >= minRow && position.row <= maxRow && position.column === start.column;
 };

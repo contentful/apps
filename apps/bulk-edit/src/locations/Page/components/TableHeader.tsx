@@ -47,8 +47,8 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           key={DISPLAY_NAME_COLUMN}
           style={getCellStyle(
             headerStyles.displayNameHeader,
-            isCellFocused(HEADERS_ROW, DISPLAY_NAME_INDEX, focusedCell) ||
-              isCellInFocusRange(HEADERS_ROW, DISPLAY_NAME_INDEX, focusRange)
+            isCellFocused({ row: HEADERS_ROW, column: DISPLAY_NAME_INDEX }, focusedCell) ||
+              isCellInFocusRange({ row: HEADERS_ROW, column: DISPLAY_NAME_INDEX }, focusRange)
           )}
           onClick={() => onCellFocus({ row: HEADERS_ROW, column: DISPLAY_NAME_INDEX })}
           role="columnheader"
@@ -61,8 +61,8 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           key={ENTRY_STATUS_COLUMN}
           style={getCellStyle(
             headerStyles.statusHeader,
-            isCellFocused(HEADERS_ROW, ENTRY_STATUS_INDEX, focusedCell) ||
-              isCellInFocusRange(HEADERS_ROW, ENTRY_STATUS_INDEX, focusRange)
+            isCellFocused({ row: HEADERS_ROW, column: ENTRY_STATUS_INDEX }, focusedCell) ||
+              isCellInFocusRange({ row: HEADERS_ROW, column: ENTRY_STATUS_INDEX }, focusRange)
           )}
           onClick={() => onCellFocus({ row: HEADERS_ROW, column: ENTRY_STATUS_INDEX })}
           role="columnheader"
@@ -87,8 +87,8 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
               key={field.uniqueId}
               style={getCellStyle(
                 headerStyles.tableHeader,
-                isCellFocused(HEADERS_ROW, columnIndex, focusedCell) ||
-                  isCellInFocusRange(HEADERS_ROW, columnIndex, focusRange)
+                isCellFocused({ row: HEADERS_ROW, column: columnIndex }, focusedCell) ||
+                  isCellInFocusRange({ row: HEADERS_ROW, column: columnIndex }, focusRange)
               )}
               isTruncated
               onClick={() => onCellFocus({ row: HEADERS_ROW, column: columnIndex })}

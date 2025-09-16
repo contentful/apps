@@ -194,7 +194,7 @@ describe('useKeyboardNavigation', () => {
         mockTableElement.dispatchEvent(event);
       });
 
-      expect(onCellAction).toHaveBeenCalledWith(0, 1);
+      expect(onCellAction).toHaveBeenCalledWith({ row: 0, column: 1 });
       expect(result.current.focusedCell).toEqual({ row: 1, column: 1 });
     });
 
@@ -222,7 +222,7 @@ describe('useKeyboardNavigation', () => {
         mockTableElement.dispatchEvent(event);
       });
 
-      expect(onCellAction).toHaveBeenCalledWith(1, 2);
+      expect(onCellAction).toHaveBeenCalledWith({ row: 1, column: 2 });
     });
 
     it('should handle Escape key to clear focus', () => {

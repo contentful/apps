@@ -14,7 +14,7 @@ export interface FocusRange {
 interface UseKeyboardNavigationProps {
   totalColumns: number;
   entriesLength: number;
-  onCellAction?: (rowIndex: number, columnIndex: number) => void;
+  onCellAction?: (position: FocusPosition) => void;
 }
 
 type Direction = 'up' | 'down' | 'left' | 'right';
@@ -164,7 +164,7 @@ export const useKeyboardNavigation = ({
           break;
         case ' ':
           if (onCellAction) {
-            onCellAction(focusedCell.row, focusedCell.column);
+            onCellAction(focusedCell);
           }
           break;
         case 'Tab':
@@ -205,7 +205,7 @@ export const useKeyboardNavigation = ({
           } else {
             // Let the parent component decide what action to take for this cell
             if (onCellAction) {
-              onCellAction(focusedCell.row, focusedCell.column);
+              onCellAction(focusedCell);
             }
 
             // Move focus down if we're not on the header row
