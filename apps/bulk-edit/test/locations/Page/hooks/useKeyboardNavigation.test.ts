@@ -195,7 +195,7 @@ describe('useKeyboardNavigation', () => {
       });
 
       expect(onCellAction).toHaveBeenCalledWith({ row: 0, column: 1 });
-      expect(result.current.focusedCell).toEqual({ row: 1, column: 1 });
+      expect(result.current.focusedCell).toEqual({ row: 0, column: 1 });
     });
 
     it('should handle Space key to trigger cell action', () => {
@@ -246,30 +246,6 @@ describe('useKeyboardNavigation', () => {
       });
 
       expect(result.current.focusedCell).toBeNull();
-    });
-
-    it('should handle Shift+Enter to move focus up', () => {
-      const { result } = renderHook(() => useKeyboardNavigation(mockProps));
-
-      const mockTableElement = document.createElement('table');
-      Object.defineProperty(result.current.tableRef, 'current', {
-        value: mockTableElement,
-        writable: true,
-      });
-
-      act(() => {
-        result.current.focusCell({ row: 1, column: 1 });
-      });
-
-      act(() => {
-        const event = new KeyboardEvent('keydown', {
-          key: 'Enter',
-          shiftKey: true,
-        });
-        mockTableElement.dispatchEvent(event);
-      });
-
-      expect(result.current.focusedCell).toEqual({ row: 0, column: 1 });
     });
 
     it('should respect table boundaries', () => {
