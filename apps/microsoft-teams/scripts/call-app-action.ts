@@ -1,5 +1,5 @@
 import { AppActionProps, PlainClientAPI, createClient } from 'contentful-management';
-import { WebhookCallDetailsProps } from 'contentful-management/dist/typings/entities/webhook';
+import { AppActionCallResponse } from 'contentful-management/dist/typings/entities/app-action-call';
 import { parseArgs } from 'node:util';
 import util from 'util';
 
@@ -21,7 +21,7 @@ class AppActionRunner {
     );
   }
 
-  async run(): Promise<WebhookCallDetailsProps | undefined> {
+  async run(): Promise<AppActionCallResponse | undefined> {
     const appAction = await this.getInstalledAction();
     if (!appAction) {
       console.error('No app action found with id');
@@ -38,8 +38,8 @@ class AppActionRunner {
 
   private async callAppAction(
     appAction: AppActionProps
-  ): Promise<WebhookCallDetailsProps | undefined> {
-    return await this.client.appActionCall.createWithResponse(
+  ): Promise<AppActionCallResponse | undefined> {
+    const result = await this.client.appActionCall.createWithResult(
       {
         appActionId: appAction.sys.id,
         environmentId: this.environmentId,
@@ -51,6 +51,11 @@ class AppActionRunner {
         parameters: this.params,
       }
     );
+    if (result.status === 'succeeded') {
+      return result.result as AppActionCallResponse;
+    }
+
+    return undefined;
   }
 
   private async getInstalledAction(): Promise<AppActionProps | undefined> {

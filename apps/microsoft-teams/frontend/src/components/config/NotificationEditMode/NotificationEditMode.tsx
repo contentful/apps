@@ -16,6 +16,7 @@ import CancelModal from '@components/config/CancelModal/CancelModal';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { editModeFooter } from '@constants/configCopy';
+import { isSendTestMessageResult } from '../../../types/appActionResults';
 
 interface Props {
   index: number;
@@ -60,24 +61,22 @@ const NotificationEditMode = (props: Props) => {
         contentTypeId: notification.contentTypeId,
       };
 
-      const { response } = await sdk.cma.appActionCall.createWithResponse(
+      const { result, error } = await sdk.cma.appActionCall.createWithResult(
         {
           appActionId: 'msteamsSendTestMessage',
           environmentId: sdk.ids.environment,
           spaceId: sdk.ids.space,
           appDefinitionId: sdk.ids.app!,
-          userId: sdk.ids.user,
         },
         {
           parameters,
         }
       );
-      const body = JSON.parse(response.body);
 
-      if (body.ok) {
+      if (result && isSendTestMessageResult(result) && result.ok) {
         sdk.notifier.success(editModeFooter.testSuccess);
-      } else {
-        throw new Error(`${editModeFooter.testError}: ${body.error.message}`);
+      } else if (error) {
+        throw new Error(`${editModeFooter.testError}: ${error.message}`);
       }
     } catch (error) {
       if (error instanceof Error) {

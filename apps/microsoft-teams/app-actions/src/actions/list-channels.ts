@@ -5,16 +5,14 @@ import helpers from '../helpers';
 import { withAsyncAppActionErrorHandling } from '../helpers/error-handling';
 
 export const handler = withAsyncAppActionErrorHandling(
-  async (
-    _payload: {},
-    context: AppActionCallContext
-  ): Promise<AppActionCallResponse<Channel[]>> => {
+  async (context: AppActionCallContext): Promise<AppActionCallResponse<Channel[]>> => {
     const {
       cma,
       appActionCallContext: { appInstallationId, userId, environmentId, spaceId },
     } = context;
 
     const tenantId = await fetchTenantId(cma, appInstallationId);
+
     const channels = await helpers.getChannelsList(tenantId, {
       appInstallationId,
       userId,

@@ -2,6 +2,7 @@ import { useEffect, useCallback, useState } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { TeamsChannel } from '@customTypes/configPage';
+import { isListChannelsResult } from '../types/appActionResults';
 
 const useGetTeamsChannels = () => {
   const [channels, setChannels] = useState<TeamsChannel[]>([]);
@@ -12,21 +13,20 @@ const useGetTeamsChannels = () => {
   const getAllChannels = useCallback(async () => {
     try {
       setLoading(true);
-      const { response } = await sdk.cma.appActionCall.createWithResponse(
+      const { result } = await sdk.cma.appActionCall.createWithResult(
         {
           appActionId: 'msteamsListChannels',
           environmentId: sdk.ids.environment,
           spaceId: sdk.ids.space,
           appDefinitionId: sdk.ids.app!,
-          userId: sdk.ids.user,
         },
         {
           parameters: {},
         }
       );
-      const body = JSON.parse(response.body);
-      if (body.ok) {
-        setChannels(body.data);
+
+      if (result && isListChannelsResult(result) && result.ok) {
+        setChannels(result.channels || []);
         setError(undefined);
       } else {
         const error = new Error('Failed to fetch Teams channels');

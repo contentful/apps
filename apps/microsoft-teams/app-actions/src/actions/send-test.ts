@@ -1,5 +1,5 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import { AppActionCallResponse, MessageResponse } from '../types';
+import { MessageResponse, MsTeamsBotServiceResponse } from '../types';
 import { fetchTenantId } from '../utils';
 import { config } from '../config';
 import { withAsyncAppActionErrorHandling } from '../helpers/error-handling';
@@ -14,7 +14,7 @@ export const handler = withAsyncAppActionErrorHandling(
   async (
     payload: AppActionCallParameters,
     context: AppActionCallContext
-  ): Promise<AppActionCallResponse<MessageResponse>> => {
+  ): Promise<MsTeamsBotServiceResponse<MessageResponse>> => {
     const { channelId, teamId, contentTypeId } = payload;
     const {
       cma,

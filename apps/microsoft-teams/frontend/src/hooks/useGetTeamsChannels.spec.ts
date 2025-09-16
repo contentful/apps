@@ -10,13 +10,12 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 
 describe('useGetTeamsChannels', () => {
   it('should return channels and accurate loading state', async () => {
-    mockSdk.cma.appActionCall.createWithResponse = vi.fn().mockReturnValueOnce({
-      response: {
-        body: JSON.stringify({
-          ok: true,
-          data: mockChannels,
-        }),
+    mockSdk.cma.appActionCall.createWithResult = vi.fn().mockReturnValueOnce({
+      result: {
+        ok: true,
+        channels: mockChannels,
       },
+      status: 'processing',
     });
     const { result } = renderHook(() => useGetTeamsChannels());
     expect(result.current.loading).toBe(true);
@@ -27,11 +26,14 @@ describe('useGetTeamsChannels', () => {
   });
 
   it('should return correct error if response is not ok', async () => {
-    mockSdk.cma.appActionCall.createWithResponse = vi.fn().mockReturnValueOnce({
-      response: {
+    mockSdk.cma.appActionCall.createWithResult = vi.fn().mockReturnValueOnce({
+      result: {
         body: JSON.stringify({
           ok: false,
-          data: {},
+          error: {
+            type: 'Error',
+            message: 'Failed to fetch Teams channels',
+          },
         }),
       },
     });
@@ -44,7 +46,7 @@ describe('useGetTeamsChannels', () => {
   });
 
   it('should return generalized error if error is thrown', async () => {
-    mockSdk.cma.appActionCall.createWithResponse = vi.fn().mockRejectedValueOnce(new Error());
+    mockSdk.cma.appActionCall.createWithResult = vi.fn().mockRejectedValueOnce(new Error());
     const { result } = renderHook(() => useGetTeamsChannels());
     expect(result.current.loading).toBe(true);
     await waitFor(() => {
