@@ -2,14 +2,14 @@ import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Document } from '@contentful/rich-text-types';
 import { Entry, ContentTypeField, Fields } from '../types';
 import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
-import { BATCH_FETCHING } from './constants';
+import { BATCH_FETCHING, DRAFT_STATUS, CHANGED_STATUS, PUBLISHED_STATUS } from './constants';
 import { BadgeVariant } from '@contentful/f36-components';
 
-export const getAllStatuses = (): string[] => {
+export const getStatusesOptions = (): string[] => {
   return ['Draft', 'Changed', 'Published'];
 };
 
-export const getStatus = (entry: Entry): string => {
+export const getStatusFromEntry = (entry: Entry): string => {
   const { sys } = entry;
   if (!sys.publishedVersion) {
     return 'Draft';
@@ -34,6 +34,14 @@ export const getStatusColor = (status: string): BadgeVariant => {
     default:
       return 'negative';
   }
+};
+
+export const getStatusFlags = (statusLabels: string[]) => {
+  return {
+    hasDraft: statusLabels.includes(DRAFT_STATUS),
+    hasChanged: statusLabels.includes(CHANGED_STATUS),
+    hasPublished: statusLabels.includes(PUBLISHED_STATUS),
+  };
 };
 
 export const isLocationValue = (value: unknown): value is { lat: number; lon: number } => {

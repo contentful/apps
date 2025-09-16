@@ -5,7 +5,7 @@ import { Entry, ContentTypeField } from '../types';
 import { ContentTypeProps } from 'contentful-management';
 import { styles } from '../styles';
 import {
-  getStatus,
+  getStatusFromEntry,
   renderFieldValue,
   getEntryTitle,
   getEntryUrl,
@@ -37,7 +37,7 @@ export const TableRow: React.FC<TableRowProps> = ({
   onCellCheckboxChange,
   cellCheckboxesDisabled,
 }) => {
-  const status = getStatus(entry);
+  const status = getStatusFromEntry(entry);
   const statusColor = getStatusColor(status);
   const [hoveredColumn, setHoveredColumn] = useState<string | null>(null);
 

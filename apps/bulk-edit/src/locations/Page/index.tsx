@@ -28,9 +28,10 @@ import { UndoBulkEditModal } from './components/UndoBulkEditModal';
 import { SearchBar } from './components/SearchBar';
 import {
   fetchEntriesWithBatching,
-  getAllStatuses,
+  getStatusesOptions,
   getEntryFieldValue,
-  getStatus,
+  getStatusFromEntry,
+  getStatusFlags,
   processEntriesInBatches,
   truncate,
   updateEntryFieldLocalized,
@@ -50,7 +51,7 @@ const getFieldsMapped = (fields: ContentTypeField[]) => {
 };
 
 const getStatusesMapped = (): FilterOption[] => {
-  return getAllStatuses().map((s) => ({ label: s, value: s.toLowerCase() }));
+  return getStatusesOptions().map((s) => ({ label: s, value: s.toLowerCase() }));
 };
 
 const Page = () => {
@@ -130,18 +131,16 @@ const Page = () => {
     else if (sortOption === 'displayName_desc') return `-fields.${displayField}`;
   };
 
-  const getStatusFilter = (statuses: FilterOption[]) => {
+  const getStatusFilter = (statusLabels: string[]) => {
     // If no statuses selected, return a filter that matches nothing
-    if (statuses.length === 0) {
+    if (statusLabels.length === 0) {
       return { 'sys.id[in]': 'nonexistent-id' };
     }
 
-    const hasDraft = statuses.map((status) => status.label).includes(getAllStatuses()[0]);
-    const hasPublished = statuses.map((status) => status.label).includes(getAllStatuses()[1]);
-    const hasChanged = statuses.map((status) => status.label).includes(getAllStatuses()[2]);
+    const { hasDraft, hasPublished, hasChanged } = getStatusFlags(statusLabels);
 
     // Single status filtering
-    if (hasDraft && statuses.length === 1) {
+    if (hasDraft && statusLabels.length === 1) {
       return { 'sys.publishedAt[exists]': false };
     }
 
@@ -154,25 +153,22 @@ const Page = () => {
   };
 
   // We cannot differentiate throw the query changed and published
-  const filterEntriesByStatus = (entries: EntryProps[], statuses: FilterOption[]): EntryProps[] => {
+  const filterEntriesByStatus = (entries: EntryProps[], statusLabels: string[]): EntryProps[] => {
     // If no statuses selected, return empty array
-    if (statuses.length === 0) return [];
+    if (statusLabels.length === 0) return [];
 
     // If all statuses selected, return all entries
-    if (statuses.length === 3) return entries;
+    if (statusLabels.length === 3) return entries;
 
     return entries.filter((entry) => {
-      const entryStatus = getStatus(entry);
-      return statuses.map((status) => status.label).includes(entryStatus);
+      const entryStatus = getStatusFromEntry(entry);
+      return statusLabels.includes(entryStatus);
     });
   };
 
   function needsClientFiltering() {
-    const hasDraft = selectedStatuses.map((status) => status.label).includes(getAllStatuses()[0]);
-    const hasPublished = selectedStatuses
-      .map((status) => status.label)
-      .includes(getAllStatuses()[1]);
-    const hasChanged = selectedStatuses.map((status) => status.label).includes(getAllStatuses()[2]);
+    const statusLabels = selectedStatuses.map((status) => status.label);
+    const { hasDraft, hasPublished, hasChanged } = getStatusFlags(statusLabels);
 
     // If we need client-side filtering, fetch all entries
     return (
@@ -185,6 +181,7 @@ const Page = () => {
   const buildQuery = (
     sortOption: string,
     displayField: string | null,
+    statusLabels: string[],
     fetchAll: boolean = false
   ): QueryOptions => {
     const query: QueryOptions = {
@@ -192,7 +189,7 @@ const Page = () => {
       order: getOrder(sortOption, displayField),
       skip: fetchAll || needsClientFiltering() ? 0 : activePage * itemsPerPage,
       limit: fetchAll || needsClientFiltering() ? 1000 : itemsPerPage,
-      ...getStatusFilter(selectedStatuses),
+      ...getStatusFilter(statusLabels),
     };
 
     if (searchQuery.trim()) {
@@ -284,8 +281,9 @@ const Page = () => {
       setEntriesLoading(true);
       try {
         const displayField = currentContentType.displayField || null;
+        const statusLabels = selectedStatuses.map((status) => status.label);
 
-        const baseQuery = buildQuery(sortOption, displayField);
+        const baseQuery = buildQuery(sortOption, displayField, statusLabels);
 
         const { entries, total } = await fetchEntriesWithBatching(
           sdk,
@@ -294,7 +292,7 @@ const Page = () => {
         );
 
         // Apply client-side status filtering
-        const statusFilteredEntries = filterEntriesByStatus(entries, selectedStatuses);
+        const statusFilteredEntries = filterEntriesByStatus(entries, statusLabels);
 
         // Apply numeric search filtering if needed
         const searchFilteredEntries = filterEntriesByNumericSearch(
