@@ -291,8 +291,6 @@ export const filterEntriesByNumericSearch = (
   fields: ContentTypeField[],
   defaultLocale: string
 ): EntryProps[] => {
-  if (!query.trim() || !isNumericSearch(query)) return entries;
-
   return entries.filter((entry) => {
     // Search in all Symbol fields (like displayName)
     return fields.some((field) => {

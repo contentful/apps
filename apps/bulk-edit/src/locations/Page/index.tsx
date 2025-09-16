@@ -294,13 +294,17 @@ const Page = () => {
         // Apply client-side status filtering
         const statusFilteredEntries = filterEntriesByStatus(entries, statusLabels);
 
-        // Apply numeric search filtering if needed
-        const searchFilteredEntries = filterEntriesByNumericSearch(
-          statusFilteredEntries,
-          searchQuery,
-          fields,
-          defaultLocale
-        );
+        let searchFilteredEntries;
+        if (!searchQuery.trim() || !isNumericSearch(searchQuery)) {
+          searchFilteredEntries = entries;
+        } else {
+          searchFilteredEntries = filterEntriesByNumericSearch(
+            statusFilteredEntries,
+            searchQuery,
+            fields,
+            defaultLocale
+          );
+        }
 
         if (needsClientFiltering()) {
           // Client-side pagination
