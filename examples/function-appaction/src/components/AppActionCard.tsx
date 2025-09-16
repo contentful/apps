@@ -12,9 +12,9 @@ import {
   TextInput,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { AppActionProps } from 'contentful-management';
+import { AppActionCallRawResponseProps, AppActionProps } from 'contentful-management';
 import { useState } from 'react';
-import { ActionResultData, ActionResultType } from '../locations/Page';
+import { ActionResultType } from '../locations/Page';
 import ActionResult from './ActionResult';
 import { styles } from './AppActionCard.styles';
 import Form from './rjsf/Forma36Form';
@@ -35,8 +35,9 @@ const AppActionCard = (props: Props) => {
 
   const callAction = async (action: AppActionProps) => {
     setLoadingAction(action.sys.id);
+    let response: AppActionCallRawResponseProps | undefined;
     try {
-      const result = (await sdk.cma.appActionCall.createWithResult(
+      const result = await sdk.cma.appActionCall.createWithResult(
         {
           appDefinitionId: sdk.ids.app || '',
           appActionId: action.sys.id,
@@ -44,20 +45,28 @@ const AppActionCard = (props: Props) => {
         {
           parameters: actionParameters[action.sys.id] || {},
         }
-      )) as unknown as ActionResultData;
+      );
 
       const timestamp = new Date().toLocaleString();
-      const call: any = result as any;
-      const callId = (call as any)?.sys?.id;
+      const call = result;
+      const callId = call?.sys?.id;
       const base = { timestamp, actionId: action.sys.id, callId } as const;
+      if (call.sys.appActionCallResponse) {
+        response = await sdk.cma.appActionCall.getResponse({
+          appDefinitionId: sdk.ids.app || '',
+          appActionId: action.sys.id,
+          callId: callId,
+        });
+      }
 
       if (call?.status === 'succeeded') {
-        setActionResults((prev) => [{ success: true, data: call, ...base }, ...prev]);
+        setActionResults((prev) => [{ success: true, call, ...base }, ...prev]);
       } else if (call?.status === 'failed') {
         setActionResults((prev) => [
           {
             success: false,
-            data: call,
+            call,
+            response,
             error: call?.error || new Error('App action failed'),
             ...base,
           },
@@ -65,14 +74,20 @@ const AppActionCard = (props: Props) => {
         ]);
       } else {
         setActionResults((prev) => [
-          { success: false, data: call, error: new Error('App action still processing'), ...base },
+          {
+            success: false,
+            call,
+            response,
+            error: new Error('App action still processing'),
+            ...base,
+          },
           ...prev,
         ]);
       }
     } catch (error) {
       const timestamp = new Date().toLocaleString();
       setActionResults((prev) => [
-        { success: false, error, timestamp, actionId: action.sys.id },
+        { success: false, error, timestamp, actionId: action.sys.id, response },
         ...prev,
       ]);
     } finally {
@@ -142,9 +157,9 @@ const AppActionCard = (props: Props) => {
     const actionId = action.sys.id;
     const formData = actionParameters[actionId] || {};
 
-    const hasSchema = (action as any).parametersSchema;
+    const hasSchema = action.parametersSchema;
     if (hasSchema) {
-      const schema = (action as any).parametersSchema as any;
+      const schema = action.parametersSchema;
       const requiredKeys: string[] = Array.isArray(schema?.required) ? schema.required : [];
       const hasEmptyRequired = requiredKeys.some((key) => {
         const value = formData?.[key];
@@ -209,7 +224,7 @@ const AppActionCard = (props: Props) => {
             liveValidate
             showErrorList={false}
             uiSchema={{ 'ui:submitButtonOptions': { norender: true } }}
-            onChange={(e) => {
+            onChange={(e: any) => {
               setActionParameters({
                 ...actionParameters,
                 [action.sys.id]: e.formData,
