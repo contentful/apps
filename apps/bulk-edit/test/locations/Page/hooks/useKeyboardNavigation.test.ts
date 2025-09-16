@@ -23,7 +23,7 @@ describe('useKeyboardNavigation', () => {
       const { result } = renderHook(() => useKeyboardNavigation(mockProps));
 
       expect(result.current.focusedCell).toBeNull();
-      expect(result.current.selectionRange).toBeNull();
+      expect(result.current.focusRange).toBeNull();
       expect(result.current.isSelecting).toBe(false);
     });
 
@@ -43,7 +43,7 @@ describe('useKeyboardNavigation', () => {
       });
 
       expect(result.current.focusedCell).toEqual({ row: 0, column: 1 });
-      expect(result.current.selectionRange).toBeNull();
+      expect(result.current.focusRange).toBeNull();
       expect(result.current.isSelecting).toBe(false);
 
       // Focus a different cell - should update focus
@@ -52,7 +52,7 @@ describe('useKeyboardNavigation', () => {
       });
 
       expect(result.current.focusedCell).toEqual({ row: 1, column: 2 });
-      expect(result.current.selectionRange).toBeNull();
+      expect(result.current.focusRange).toBeNull();
       expect(result.current.isSelecting).toBe(false);
     });
   });
@@ -97,7 +97,7 @@ describe('useKeyboardNavigation', () => {
       const { result } = renderHook(() => useKeyboardNavigation(propsWithCallback));
 
       expect(result.current.focusedCell).toBeNull();
-      expect(result.current.selectionRange).toBeNull();
+      expect(result.current.focusRange).toBeNull();
       expect(result.current.isSelecting).toBe(false);
 
       act(() => {
@@ -116,7 +116,7 @@ describe('useKeyboardNavigation', () => {
       const { result } = renderHook(() => useKeyboardNavigation(propsWithoutCallback));
 
       expect(result.current.focusedCell).toBeNull();
-      expect(result.current.selectionRange).toBeNull();
+      expect(result.current.focusRange).toBeNull();
       expect(result.current.isSelecting).toBe(false);
 
       act(() => {
@@ -339,7 +339,7 @@ describe('useKeyboardNavigation', () => {
       });
 
       expect(result.current.focusedCell).toEqual({ row: 1, column: 2 });
-      expect(result.current.selectionRange).toBeNull();
+      expect(result.current.focusRange).toBeNull();
       expect(result.current.isSelecting).toBe(false);
 
       act(() => {
@@ -352,7 +352,7 @@ describe('useKeyboardNavigation', () => {
       });
 
       expect(result.current.focusedCell).toEqual({ row: HEADERS_ROW, column: 2 });
-      expect(result.current.selectionRange).toEqual({
+      expect(result.current.focusRange).toEqual({
         start: { row: HEADERS_ROW, column: 2 },
         end: { row: 1, column: 2 },
       });

@@ -6,7 +6,7 @@ export interface FocusPosition {
   column: number;
 }
 
-export interface SelectionRange {
+export interface FocusRange {
   start: FocusPosition;
   end: FocusPosition;
 }
@@ -21,7 +21,7 @@ type Direction = 'up' | 'down' | 'left' | 'right';
 
 interface UseKeyboardNavigationReturn {
   focusedCell: FocusPosition | null;
-  selectionRange: SelectionRange | null;
+  focusRange: FocusRange | null;
   isSelecting: boolean;
   setFocusedCell: (position: FocusPosition | null) => void;
   focusCell: (position: FocusPosition) => void;
@@ -37,7 +37,7 @@ export const useKeyboardNavigation = ({
 
   // Focus and selection state
   const [focusedCell, setFocusedCell] = useState<FocusPosition | null>(null);
-  const [selectionRange, setSelectionRange] = useState<SelectionRange | null>(null);
+  const [focusRange, setFocusRange] = useState<FocusRange | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
 
   const LAST_ROW = entriesLength - 1;
@@ -70,7 +70,7 @@ export const useKeyboardNavigation = ({
       extendSelectionToEdge(focusedCell, newPosition);
     } else {
       setIsSelecting(false);
-      setSelectionRange(null);
+      setFocusRange(null);
     }
 
     setFocusedCell(newPosition);
@@ -79,9 +79,9 @@ export const useKeyboardNavigation = ({
   const extendSelectionToEdge = (focusedCell: FocusPosition, newPosition: FocusPosition) => {
     if (!isSelecting) {
       setIsSelecting(true);
-      setSelectionRange({ start: focusedCell, end: newPosition });
+      setFocusRange({ start: focusedCell, end: newPosition });
     } else {
-      setSelectionRange((prev) => (prev ? { ...prev, end: newPosition } : null));
+      setFocusRange((prev) => (prev ? { ...prev, end: newPosition } : null));
     }
   };
 
@@ -93,7 +93,7 @@ export const useKeyboardNavigation = ({
     const columnEnd = { row: LAST_ROW, column: focusedCell.column };
 
     setIsSelecting(true);
-    setSelectionRange({ start: columnStart, end: columnEnd });
+    setFocusRange({ start: columnStart, end: columnEnd });
     setFocusedCell(columnStart); // Focus on header of the column
   }, [focusedCell, LAST_ROW]);
 
@@ -101,7 +101,7 @@ export const useKeyboardNavigation = ({
   const clearFocus = useCallback(() => {
     setFocusedCell(null);
     setIsSelecting(false);
-    setSelectionRange(null);
+    setFocusRange(null);
     // Also blur the table element to ensure focus moves to next element
     tableRef.current?.blur();
   }, []);
@@ -110,7 +110,7 @@ export const useKeyboardNavigation = ({
   const focusCell = useCallback((position: FocusPosition) => {
     setFocusedCell(position);
     setIsSelecting(false);
-    setSelectionRange(null);
+    setFocusRange(null);
     // Ensure the table element gets focus so keyboard events are captured
     tableRef.current?.focus();
   }, []);
@@ -187,12 +187,12 @@ export const useKeyboardNavigation = ({
             // Move to first column of next row
             setFocusedCell({ row: focusedCell.row + 1, column: FIRST_COLUMN });
             setIsSelecting(false);
-            setSelectionRange(null);
+            setFocusRange(null);
           } else if (shiftKey && isAtLeftEdge && !isAtFirstRow) {
             // Move to last column of previous row
             setFocusedCell({ row: focusedCell.row - 1, column: totalColumns - 1 });
             setIsSelecting(false);
-            setSelectionRange(null);
+            setFocusRange(null);
           } else {
             // Normal left/right movement within the row
             moveFocus(shiftKey ? 'left' : 'right');
@@ -246,7 +246,7 @@ export const useKeyboardNavigation = ({
 
   return {
     focusedCell,
-    selectionRange,
+    focusRange,
     isSelecting,
     setFocusedCell,
     focusCell,

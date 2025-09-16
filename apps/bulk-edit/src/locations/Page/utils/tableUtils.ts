@@ -1,17 +1,16 @@
 import tokens from '@contentful/f36-tokens';
 import { ContentTypeField } from '../types';
 import { DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN } from './constants';
-import { FocusPosition, SelectionRange } from '../hooks/useKeyboardNavigation';
+import { FocusPosition, FocusRange } from '../hooks/useKeyboardNavigation';
 import { focusedCell } from '../styles';
 
 export const getCellStyle = (
   baseStyle: React.CSSProperties,
-  isFocused: boolean,
-  isSelected: boolean
+  isFocused: boolean
 ): React.CSSProperties => {
   return {
     ...baseStyle,
-    ...((isFocused || isSelected) && focusedCell),
+    ...(isFocused && focusedCell),
   };
 };
 
@@ -32,10 +31,10 @@ export const isCellFocused = (
   return focusedCell?.row === rowIndex && focusedCell?.column === columnIndex;
 };
 
-export const isCellSelected = (
+export const isCellInFocusRange = (
   rowIndex: number,
   columnIndex: number,
-  selectionRange: SelectionRange | null
+  selectionRange: FocusRange | null
 ): boolean => {
   if (!selectionRange) return false;
   const { start, end } = selectionRange;

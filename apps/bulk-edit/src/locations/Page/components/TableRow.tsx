@@ -19,8 +19,13 @@ import {
   ENTRY_STATUS_COLUMN,
   ENTRY_STATUS_INDEX,
 } from '../utils/constants';
-import { FocusPosition, SelectionRange } from '../hooks/useKeyboardNavigation';
-import { getColumnIndex, isCellFocused, isCellSelected, getCellStyle } from '../utils/tableUtils';
+import { FocusPosition, FocusRange } from '../hooks/useKeyboardNavigation';
+import {
+  getColumnIndex,
+  isCellFocused,
+  isCellInFocusRange,
+  getCellStyle,
+} from '../utils/tableUtils';
 
 interface TableRowProps {
   entry: Entry;
@@ -34,7 +39,7 @@ interface TableRowProps {
   cellCheckboxesDisabled: Record<string, boolean>;
   rowIndex: number;
   focusedCell: FocusPosition | null;
-  selectionRange: SelectionRange | null;
+  focusRange: FocusRange | null;
   onCellFocus: (position: FocusPosition) => void;
 }
 
@@ -50,7 +55,7 @@ export const TableRow: React.FC<TableRowProps> = ({
   cellCheckboxesDisabled,
   rowIndex,
   focusedCell,
-  selectionRange,
+  focusRange,
   onCellFocus,
 }) => {
   const status = getStatusFromEntry(entry);
@@ -62,8 +67,8 @@ export const TableRow: React.FC<TableRowProps> = ({
     const columnIndex = getColumnIndex(columnId, fields);
     return getCellStyle(
       baseStyle,
-      isCellFocused(rowIndex, columnIndex, focusedCell),
-      isCellSelected(rowIndex, columnIndex, selectionRange)
+      isCellFocused(rowIndex, columnIndex, focusedCell) ||
+        isCellInFocusRange(rowIndex, columnIndex, focusRange)
     );
   };
 
@@ -107,8 +112,8 @@ export const TableRow: React.FC<TableRowProps> = ({
             key={field.uniqueId}
             style={getCellStyle(
               rowStyles.cell,
-              isCellFocused(rowIndex, columnIndex, focusedCell),
-              isCellSelected(rowIndex, columnIndex, selectionRange)
+              isCellFocused(rowIndex, columnIndex, focusedCell) ||
+                isCellInFocusRange(rowIndex, columnIndex, focusRange)
             )}
             onClick={() => onCellFocus({ row: rowIndex, column: columnIndex })}
             role="gridcell"

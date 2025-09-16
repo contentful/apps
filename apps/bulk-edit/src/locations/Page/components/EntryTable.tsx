@@ -12,11 +12,7 @@ import {
   ENTRY_STATUS_COLUMN,
   HEADERS_ROW,
 } from '../utils/constants';
-import {
-  useKeyboardNavigation,
-  FocusPosition,
-  SelectionRange,
-} from '../hooks/useKeyboardNavigation';
+import { useKeyboardNavigation, FocusPosition, FocusRange } from '../hooks/useKeyboardNavigation';
 
 interface EntryTableProps {
   entries: Entry[];
@@ -125,7 +121,11 @@ export const EntryTable: React.FC<EntryTableProps> = ({
 
   const handleHeaderCheckboxChange = useCallback(
     (columnId: string, checked: boolean) => {
-      setHeaderCheckboxes((previous) => ({ ...previous, [columnId]: checked }));
+      // Clear all header checkboxes and set only the target one
+      // This is to avoid the issue where multiple header checkboxes are checked simultaneously
+      setHeaderCheckboxes((previous) =>
+        Object.fromEntries(columnIds.map((id) => [id, id === columnId ? checked : false]))
+      );
 
       setRowCheckboxes((previous) => {
         const updated: Record<string, Record<string, boolean>> = {};
@@ -143,17 +143,25 @@ export const EntryTable: React.FC<EntryTableProps> = ({
   const handleCellCheckboxChange = useCallback(
     (entryId: string, columnId: string, checked: boolean) => {
       setRowCheckboxes((previous) => {
-        const updated = { ...previous };
-        updated[entryId] = {
-          ...previous[entryId],
-          ...Object.fromEntries(columnIds.map((id) => [id, id === columnId ? checked : false])),
-        };
+        const updated: Record<string, Record<string, boolean>> = {};
+        Object.entries(previous).forEach(([currentEntryId, currentRow]) => {
+          updated[currentEntryId] = Object.fromEntries(
+            columnIds.map((id) => {
+              if (id === columnId) {
+                // For the target column, set the checkbox state for the target entry
+                return [id, currentEntryId === entryId ? checked : currentRow[id]];
+              } else {
+                // Clear all other checkboxes
+                return [id, false];
+              }
+            })
+          );
+        });
         return updated;
       });
 
-      setHeaderCheckboxes((previous) => ({
-        ...Object.fromEntries(columnIds.map((id) => [id, id === columnId ? false : previous[id]])),
-      }));
+      // Clear all header checkboxes when a cell is selected
+      setHeaderCheckboxes(Object.fromEntries(columnIds.map((id) => [id, false])));
     },
     [columnIds]
   );
@@ -175,15 +183,15 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     [columnIds, handleHeaderCheckboxChange, handleCellCheckboxChange]
   );
 
-  const toggleSelectionCheckboxes = () => {
-    if (!selectionRange) {
+  const toggleRangeCheckboxes = () => {
+    if (!focusRange) {
       if (focusedCell) {
         toggleCheckbox(focusedCell);
       }
       return;
     }
 
-    const { start, end } = selectionRange;
+    const { start, end } = focusRange;
     const minRow = Math.min(start.row, end.row);
     const maxRow = Math.max(start.row, end.row);
     const column = start.column; // Single column selection
@@ -191,19 +199,17 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     const columnId = columnIds[column];
     if (!allowedColumns[columnId]) return;
 
-    // Check if all checkboxes in the selection are currently checked
+    const hasHeaderFocused = minRow <= HEADERS_ROW && maxRow >= HEADERS_ROW;
+
     let allChecked = true;
-    let hasHeaderSelection = false;
-    for (let row = minRow; row <= maxRow; row++) {
-      if (row === HEADERS_ROW) {
-        // Header checkbox
-        hasHeaderSelection = true;
-        if (!headerCheckboxes[columnId]) {
-          allChecked = false;
-          break;
-        }
-      } else {
-        // Row checkbox
+
+    if (hasHeaderFocused) {
+      // If header is in range, we need to check if the header checkbox is checked
+      // When header is checked, it represents ALL entries being selected
+      allChecked = headerCheckboxes[columnId];
+    } else {
+      // Check if all row checkboxes in the selection are currently checked
+      for (let row = minRow; row <= maxRow; row++) {
         const entryId = getEntryId(row);
         if (entryId && !rowCheckboxes[entryId]?.[columnId]) {
           allChecked = false;
@@ -215,8 +221,9 @@ export const EntryTable: React.FC<EntryTableProps> = ({
     // Toggle all checkboxes in the selection
     const newState = !allChecked;
 
-    // First, handle header checkbox if it's in the selection
-    if (hasHeaderSelection) {
+    if (hasHeaderFocused) {
+      // If header is in range, toggle the header checkbox
+      // This will automatically handle all row checkboxes via handleHeaderCheckboxChange
       handleHeaderCheckboxChange(columnId, newState);
     } else {
       // Handle individual row checkboxes
@@ -240,11 +247,11 @@ export const EntryTable: React.FC<EntryTableProps> = ({
         window.open(url, '_blank', 'noopener,noreferrer');
       }
     } else if (allowedColumns[columnId]) {
-      toggleSelectionCheckboxes();
+      toggleRangeCheckboxes();
     }
   };
 
-  const { focusedCell, selectionRange, focusCell, tableRef } = useKeyboardNavigation({
+  const { focusedCell, focusRange, focusCell, tableRef } = useKeyboardNavigation({
     totalColumns: columnIds.length,
     entriesLength: entries.length,
     onCellAction: handleCellAction,
@@ -272,7 +279,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
             ])
           )}
           focusedCell={focusedCell}
-          selectionRange={selectionRange}
+          focusRange={focusRange}
           onCellFocus={(position) => focusCell(position)}
         />
         <Table.Body>
@@ -299,7 +306,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
               )}
               rowIndex={rowIndex}
               focusedCell={focusedCell}
-              selectionRange={selectionRange}
+              focusRange={focusRange}
               onCellFocus={(position) => focusCell(position)}
             />
           ))}

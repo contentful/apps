@@ -12,8 +12,13 @@ import {
   ENTRY_STATUS_INDEX,
   HEADERS_ROW,
 } from '../utils/constants';
-import { FocusPosition, SelectionRange } from '../hooks/useKeyboardNavigation';
-import { getColumnIndex, isCellFocused, isCellSelected, getCellStyle } from '../utils/tableUtils';
+import { FocusPosition, FocusRange } from '../hooks/useKeyboardNavigation';
+import {
+  getColumnIndex,
+  isCellFocused,
+  isCellInFocusRange,
+  getCellStyle,
+} from '../utils/tableUtils';
 
 interface TableHeaderProps {
   fields: ContentTypeField[];
@@ -21,7 +26,7 @@ interface TableHeaderProps {
   onHeaderCheckboxChange: (columnId: string, checked: boolean) => void;
   checkboxesDisabled: Record<string, boolean>;
   focusedCell: FocusPosition | null;
-  selectionRange: SelectionRange | null;
+  focusRange: FocusRange | null;
   onCellFocus: (position: FocusPosition) => void;
 }
 
@@ -31,7 +36,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
   onHeaderCheckboxChange,
   checkboxesDisabled,
   focusedCell,
-  selectionRange,
+  focusRange,
   onCellFocus,
 }) => {
   return (
@@ -42,8 +47,8 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           key={DISPLAY_NAME_COLUMN}
           style={getCellStyle(
             headerStyles.displayNameHeader,
-            isCellFocused(HEADERS_ROW, DISPLAY_NAME_INDEX, focusedCell),
-            isCellSelected(HEADERS_ROW, DISPLAY_NAME_INDEX, selectionRange)
+            isCellFocused(HEADERS_ROW, DISPLAY_NAME_INDEX, focusedCell) ||
+              isCellInFocusRange(HEADERS_ROW, DISPLAY_NAME_INDEX, focusRange)
           )}
           onClick={() => onCellFocus({ row: HEADERS_ROW, column: DISPLAY_NAME_INDEX })}
           role="columnheader"
@@ -56,8 +61,8 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           key={ENTRY_STATUS_COLUMN}
           style={getCellStyle(
             headerStyles.statusHeader,
-            isCellFocused(HEADERS_ROW, ENTRY_STATUS_INDEX, focusedCell),
-            isCellSelected(HEADERS_ROW, ENTRY_STATUS_INDEX, selectionRange)
+            isCellFocused(HEADERS_ROW, ENTRY_STATUS_INDEX, focusedCell) ||
+              isCellInFocusRange(HEADERS_ROW, ENTRY_STATUS_INDEX, focusRange)
           )}
           onClick={() => onCellFocus({ row: HEADERS_ROW, column: ENTRY_STATUS_INDEX })}
           role="columnheader"
@@ -82,8 +87,8 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
               key={field.uniqueId}
               style={getCellStyle(
                 headerStyles.tableHeader,
-                isCellFocused(HEADERS_ROW, columnIndex, focusedCell),
-                isCellSelected(HEADERS_ROW, columnIndex, selectionRange)
+                isCellFocused(HEADERS_ROW, columnIndex, focusedCell) ||
+                  isCellInFocusRange(HEADERS_ROW, columnIndex, focusRange)
               )}
               isTruncated
               onClick={() => onCellFocus({ row: HEADERS_ROW, column: columnIndex })}
