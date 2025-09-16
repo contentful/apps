@@ -156,5 +156,19 @@ describe('SearchFilter', () => {
       // Should not throw any errors
       expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
     });
+
+    it('should handle pure numeric search queries like "3"', async () => {
+      const mockOnSearchChange = vi.fn();
+      render(<SearchBar {...defaultProps} onSearchChange={mockOnSearchChange} />);
+
+      const input = screen.getByPlaceholderText('Search');
+
+      // Test searching for pure number "3"
+      fireEvent.change(input, { target: { value: '3' } });
+
+      await waitFor(() => {
+        expect(mockOnSearchChange).toHaveBeenCalledWith('3');
+      });
+    });
   });
 });

@@ -14,8 +14,6 @@ interface FilterMultiselectProps {
   placeholderConfig: {
     noneSelected: string;
     allSelected: string;
-    singleSelected: string;
-    multipleSelected: string;
   };
   style?: React.CSSProperties | undefined;
 }
@@ -48,9 +46,14 @@ const FilterMultiselect = ({
     }
   };
 
+  const selectedValuesSet = useMemo(
+    () => new Set(selectedItems.map((item) => item.value)),
+    [selectedItems]
+  );
+
   const areAllSelected = useMemo(() => {
-    return options.every((option) => selectedItems.some((item) => item.value === option.value));
-  }, [selectedItems, options]);
+    return options.every((option) => selectedValuesSet.has(option.value));
+  }, [selectedValuesSet, options]);
 
   return (
     <Flex gap="spacing2Xs" flexDirection="column" style={{ ...style }}>
@@ -72,7 +75,7 @@ const FilterMultiselect = ({
             label={truncate(option.label, 30)}
             value={option.value}
             itemId={`option-${id}-${option.value}`}
-            isChecked={selectedItems.some((item) => item.value === option.value)}
+            isChecked={selectedValuesSet.has(option.value)}
             onSelectItem={(e) => {
               const checked = e.target.checked;
               if (checked) {

@@ -2,11 +2,11 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { FilterOption } from '../../../src/locations/Page/types';
-import { getAllStatuses } from '../../../src/locations/Page/utils/entryUtils';
+import { getStatusesOptions } from '../../../src/locations/Page/utils/entryUtils';
 import FilterMultiselect from '../../../src/locations/Page/components/FilterMultiselect';
 
 describe('StatusMultiselect', () => {
-  const statusOptions = getAllStatuses();
+  const statusOptions = getStatusesOptions();
 
   const defaultStatusProps = {
     options: statusOptions.map((status) => ({

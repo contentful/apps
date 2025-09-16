@@ -3,6 +3,10 @@ export const ENTRY_STATUS_COLUMN = 'notfield_status';
 export const PAGE_TITLE = 'Bulk Edit';
 export const PAGE_DESCRIPTION = 'Bulk edit your content entries';
 
+export const DRAFT_STATUS = 'Draft';
+export const CHANGED_STATUS = 'Changed';
+export const PUBLISHED_STATUS = 'Published';
+
 export const BATCH_FETCHING = {
   DEFAULT_BATCH_SIZE: 100,
   MIN_BATCH_SIZE: 2,
