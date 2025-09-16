@@ -3,7 +3,7 @@ import { Table, TextLink, Badge, Checkbox, Flex, Text } from '@contentful/f36-co
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { Entry, ContentTypeField } from '../types';
 import { ContentTypeProps } from 'contentful-management';
-import { rowStyles, getCellStyle } from './TableRow.styles';
+import { rowStyles } from './TableRow.styles';
 import {
   getStatusFromEntry,
   renderFieldValue,
@@ -13,8 +13,14 @@ import {
   truncate,
   getStatusColor,
 } from '../utils/entryUtils';
-import { DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN } from '../utils/constants';
+import {
+  DISPLAY_NAME_COLUMN,
+  DISPLAY_NAME_INDEX,
+  ENTRY_STATUS_COLUMN,
+  ENTRY_STATUS_INDEX,
+} from '../utils/constants';
 import { FocusPosition, SelectionRange } from '../hooks/useKeyboardNavigation';
+import { getColumnIndex, isCellFocused, isCellSelected, getCellStyle } from '../utils/tableUtils';
 
 interface TableRowProps {
   entry: Entry;
@@ -49,34 +55,16 @@ export const TableRow: React.FC<TableRowProps> = ({
 }) => {
   const status = getStatusFromEntry(entry);
   const statusColor = getStatusColor(status);
-  const [hoveredColumn, setHoveredColumn] = useState<string | null>(null);
-
   const displayField = contentType.displayField;
   const displayValue = displayField ? entry.fields[displayField]?.[defaultLocale] : entry.sys.id;
 
-  const isCellFocused = (columnIndex: number) => {
-    return focusedCell?.row === rowIndex && focusedCell?.column === columnIndex;
-  };
-
-  const isCellSelected = (columnIndex: number) => {
-    if (!selectionRange) return false;
-    const { start, end } = selectionRange;
-    const minRow = Math.min(start.row, end.row);
-    const maxRow = Math.max(start.row, end.row);
-
-    return rowIndex >= minRow && rowIndex <= maxRow && columnIndex === start.column;
-  };
-
-  const getColumnIndex = (field: ContentTypeField | string) => {
-    const fieldId = typeof field === 'string' ? field : field.uniqueId;
-    const allColumns = [DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN, ...fields.map((f) => f.uniqueId)];
-    return allColumns.indexOf(fieldId);
-  };
-
-  // Helper function to get cell style
   const getCellStyleForColumn = (baseStyle: React.CSSProperties, columnId: string) => {
-    const columnIndex = getColumnIndex(columnId);
-    return getCellStyle(baseStyle, isCellFocused(columnIndex), isCellSelected(columnIndex));
+    const columnIndex = getColumnIndex(columnId, fields);
+    return getCellStyle(
+      baseStyle,
+      isCellFocused(rowIndex, columnIndex, focusedCell),
+      isCellSelected(rowIndex, columnIndex, selectionRange)
+    );
   };
 
   return (
@@ -85,7 +73,7 @@ export const TableRow: React.FC<TableRowProps> = ({
         testId="display-name-cell"
         style={getCellStyleForColumn(rowStyles.displayNameCell, DISPLAY_NAME_COLUMN)}
         aria-label={`Display name for ${displayValue}`}
-        onClick={() => onCellFocus({ row: rowIndex, column: getColumnIndex(DISPLAY_NAME_COLUMN) })}
+        onClick={() => onCellFocus({ row: rowIndex, column: DISPLAY_NAME_INDEX })}
         role="gridcell"
         tabIndex={-1}>
         <TextLink
@@ -103,7 +91,7 @@ export const TableRow: React.FC<TableRowProps> = ({
         testId="status-cell"
         aria-label={`Status for ${displayValue}`}
         style={getCellStyleForColumn(rowStyles.statusCell, ENTRY_STATUS_COLUMN)}
-        onClick={() => onCellFocus({ row: rowIndex, column: getColumnIndex(ENTRY_STATUS_COLUMN) })}
+        onClick={() => onCellFocus({ row: rowIndex, column: ENTRY_STATUS_INDEX })}
         role="gridcell"
         tabIndex={-1}>
         <Badge variant={statusColor}>{status}</Badge>
@@ -111,9 +99,7 @@ export const TableRow: React.FC<TableRowProps> = ({
       {fields.map((field) => {
         const isAllowed = isCheckboxAllowed(field);
         const isDisabled = cellCheckboxesDisabled[field.uniqueId];
-        const isVisible =
-          (hoveredColumn === field.uniqueId && !isDisabled) || rowCheckboxes[field.uniqueId];
-        const columnIndex = getColumnIndex(field);
+        const columnIndex = getColumnIndex(field, fields);
         const fieldValue = entry.fields[field.id]?.[field.locale || defaultLocale];
 
         return (
@@ -121,11 +107,9 @@ export const TableRow: React.FC<TableRowProps> = ({
             key={field.uniqueId}
             style={getCellStyle(
               rowStyles.cell,
-              isCellFocused(columnIndex),
-              isCellSelected(columnIndex)
+              isCellFocused(rowIndex, columnIndex, focusedCell),
+              isCellSelected(rowIndex, columnIndex, selectionRange)
             )}
-            onMouseEnter={() => setHoveredColumn(field.uniqueId)}
-            onMouseLeave={() => setHoveredColumn(null)}
             onClick={() => onCellFocus({ row: rowIndex, column: columnIndex })}
             role="gridcell"
             tabIndex={-1}

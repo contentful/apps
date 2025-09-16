@@ -17,6 +17,12 @@ export const stickyCell: CSSProperties = {
   minWidth: `${CELL_WIDTH}px`,
 };
 
+export const focusedCell: CSSProperties = {
+  outline: `3px solid ${tokens.blue300}`,
+  borderRadius: tokens.borderRadiusSmall,
+  outlineOffset: '-3px',
+};
+
 export const styles = {
   sidebar: {
     minWidth: `${SIDEBAR_WIDTH}px`,

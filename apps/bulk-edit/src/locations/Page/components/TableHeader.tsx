@@ -3,10 +3,17 @@ import { Table, Checkbox, Flex, Text, Box } from '@contentful/f36-components';
 import { Tooltip } from '@contentful/f36-tooltip';
 import { QuestionIcon } from '@phosphor-icons/react';
 import { ContentTypeField } from '../types';
-import { headerStyles, getCellStyle } from './TableHeader.styles';
+import { headerStyles } from './TableHeader.styles';
 import { truncate, isCheckboxAllowed } from '../utils/entryUtils';
-import { DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN, HEADERS_ROW } from '../utils/constants';
+import {
+  DISPLAY_NAME_COLUMN,
+  DISPLAY_NAME_INDEX,
+  ENTRY_STATUS_COLUMN,
+  ENTRY_STATUS_INDEX,
+  HEADERS_ROW,
+} from '../utils/constants';
 import { FocusPosition, SelectionRange } from '../hooks/useKeyboardNavigation';
+import { getColumnIndex, isCellFocused, isCellSelected, getCellStyle } from '../utils/tableUtils';
 
 interface TableHeaderProps {
   fields: ContentTypeField[];
@@ -27,26 +34,6 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
   selectionRange,
   onCellFocus,
 }) => {
-  const isCellFocused = (columnIndex: number) => {
-    return focusedCell?.row === HEADERS_ROW && focusedCell?.column === columnIndex;
-  };
-
-  const isCellSelected = (columnIndex: number) => {
-    if (!selectionRange) return false;
-    const { start, end } = selectionRange;
-    const minRow = Math.min(start.row, end.row);
-    const maxRow = Math.max(start.row, end.row);
-    const column = start.column; // Single column selection
-
-    return -1 >= minRow && -1 <= maxRow && columnIndex === column;
-  };
-
-  const getColumnIndex = (field: ContentTypeField | string) => {
-    const fieldId = typeof field === 'string' ? field : field.uniqueId;
-    const allColumns = [DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN, ...fields.map((f) => f.uniqueId)];
-    return allColumns.indexOf(fieldId);
-  };
-
   return (
     <Table.Head style={headerStyles.tableHead}>
       <Table.Row style={headerStyles.stickyTableRow}>
@@ -55,12 +42,10 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           key={DISPLAY_NAME_COLUMN}
           style={getCellStyle(
             headerStyles.displayNameHeader,
-            isCellFocused(getColumnIndex(DISPLAY_NAME_COLUMN)),
-            isCellSelected(getColumnIndex(DISPLAY_NAME_COLUMN))
+            isCellFocused(HEADERS_ROW, DISPLAY_NAME_INDEX, focusedCell),
+            isCellSelected(HEADERS_ROW, DISPLAY_NAME_INDEX, selectionRange)
           )}
-          onClick={() =>
-            onCellFocus({ row: HEADERS_ROW, column: getColumnIndex(DISPLAY_NAME_COLUMN) })
-          }
+          onClick={() => onCellFocus({ row: HEADERS_ROW, column: DISPLAY_NAME_INDEX })}
           role="columnheader"
           tabIndex={-1}
           aria-label="Column header: Display name">
@@ -71,12 +56,10 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           key={ENTRY_STATUS_COLUMN}
           style={getCellStyle(
             headerStyles.statusHeader,
-            isCellFocused(getColumnIndex(ENTRY_STATUS_COLUMN)),
-            isCellSelected(getColumnIndex(ENTRY_STATUS_COLUMN))
+            isCellFocused(HEADERS_ROW, ENTRY_STATUS_INDEX, focusedCell),
+            isCellSelected(HEADERS_ROW, ENTRY_STATUS_INDEX, selectionRange)
           )}
-          onClick={() =>
-            onCellFocus({ row: HEADERS_ROW, column: getColumnIndex(ENTRY_STATUS_COLUMN) })
-          }
+          onClick={() => onCellFocus({ row: HEADERS_ROW, column: ENTRY_STATUS_INDEX })}
           role="columnheader"
           tabIndex={-1}
           aria-label="Column header: Status">
@@ -90,7 +73,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
         {fields.map((field) => {
           const isAllowed = isCheckboxAllowed(field);
           const isDisabled = checkboxesDisabled[field.uniqueId];
-          const columnIndex = getColumnIndex(field);
+          const columnIndex = getColumnIndex(field, fields);
           const fieldName = truncate(field.locale ? `(${field.locale}) ${field.name}` : field.name);
 
           return (
@@ -99,8 +82,8 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
               key={field.uniqueId}
               style={getCellStyle(
                 headerStyles.tableHeader,
-                isCellFocused(columnIndex),
-                isCellSelected(columnIndex)
+                isCellFocused(HEADERS_ROW, columnIndex, focusedCell),
+                isCellSelected(HEADERS_ROW, columnIndex, selectionRange)
               )}
               isTruncated
               onClick={() => onCellFocus({ row: HEADERS_ROW, column: columnIndex })}
