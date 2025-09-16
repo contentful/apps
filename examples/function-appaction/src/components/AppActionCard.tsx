@@ -17,6 +17,8 @@ import { useState } from 'react';
 import { ActionResultData, ActionResultType } from '../locations/Page';
 import ActionResult from './ActionResult';
 import { styles } from './AppActionCard.styles';
+import Form from './rjsf/Forma36Form';
+import validator from '@rjsf/validator-ajv8';
 
 interface Props {
   action: AppActionProps;
@@ -26,6 +28,7 @@ const AppActionCard = (props: Props) => {
   const [actionResults, setActionResults] = useState<ActionResultType[]>([]);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [actionParameters, setActionParameters] = useState<any>({});
+  const [schemaErrorsByAction, setSchemaErrorsByAction] = useState<Record<string, number>>({});
 
   const sdk = useSDK<PageAppSDK>();
   const { action } = props;
@@ -136,12 +139,31 @@ const AppActionCard = (props: Props) => {
   };
 
   const isButtonDisabled = () => {
-    const parameters = (action as any).parameters as any[] | undefined;
-    const requiredParameters = parameters?.filter((param: any) => param.required) ?? [];
+    const actionId = action.sys.id;
+    const formData = actionParameters[actionId] || {};
 
-    const hasEmptyRequiredParameters = requiredParameters.find((param: any) => {
-      const paramValue = actionParameters[action.sys.id]?.[param.id];
-      return !paramValue;
+    const hasSchema = (action as any).parametersSchema;
+    if (hasSchema) {
+      const schema = (action as any).parametersSchema as any;
+      const requiredKeys: string[] = Array.isArray(schema?.required) ? schema.required : [];
+      const hasEmptyRequired = requiredKeys.some((key) => {
+        const value = formData?.[key];
+        if (value === undefined || value === null) return true;
+        if (typeof value === 'string' && value.trim() === '') return true;
+        if (typeof value === 'number' && Number.isNaN(value)) return true;
+        return false;
+      });
+      const hasErrors = Boolean(schemaErrorsByAction[actionId]);
+      return hasErrors || hasEmptyRequired;
+    }
+
+    const customAction = action as unknown as {
+      parameters?: Array<{ id: string; required?: boolean }>;
+    };
+    const requiredParameters = customAction.parameters?.filter((param) => param.required) || [];
+    const hasEmptyRequiredParameters = requiredParameters.some((param) => {
+      const paramValue = formData?.[param.id];
+      return paramValue === undefined || paramValue === null || paramValue === '';
     });
 
     return Boolean(hasEmptyRequiredParameters);
@@ -175,8 +197,34 @@ const AppActionCard = (props: Props) => {
           </Button>
         </Box>
       </Flex>
-      {Array.isArray((action as any).parameters) &&
-      (action as { parameters: any[] }).parameters.length ? (
+      {(action as any).parametersSchema ? (
+        <Box marginTop="spacingS">
+          <Box marginBottom="spacingM">
+            <Subheading as="h4">Parameters</Subheading>
+          </Box>
+          <Form
+            schema={(action as any).parametersSchema}
+            formData={actionParameters[action.sys.id] || {}}
+            validator={validator}
+            liveValidate
+            showErrorList={false}
+            uiSchema={{ 'ui:submitButtonOptions': { norender: true } }}
+            onChange={(e) => {
+              setActionParameters({
+                ...actionParameters,
+                [action.sys.id]: e.formData,
+              });
+              const errorCount = Array.isArray((e as any).errors) ? (e as any).errors.length : 0;
+              setSchemaErrorsByAction({
+                ...schemaErrorsByAction,
+                [action.sys.id]: errorCount,
+              });
+            }}>
+            <></>
+          </Form>
+        </Box>
+      ) : Array.isArray((action as any).parameters) &&
+        (action as { parameters: any[] }).parameters.length ? (
         <Box marginTop="spacingS">
           <Box marginBottom="spacingM">
             <Subheading as="h4">Parameters</Subheading>
