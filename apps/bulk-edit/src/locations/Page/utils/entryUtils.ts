@@ -1,21 +1,47 @@
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Document } from '@contentful/rich-text-types';
-import { Entry, ContentTypeField, Status, Fields } from '../types';
+import { Entry, ContentTypeField, Fields } from '../types';
 import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
-import { BATCH_FETCHING } from './constants';
+import { BATCH_FETCHING, DRAFT_STATUS, CHANGED_STATUS, PUBLISHED_STATUS } from './constants';
+import { BadgeVariant } from '@contentful/f36-components';
 
-export const getStatus = (entry: Entry): Status => {
+export const getStatusesOptions = (): string[] => {
+  return ['Draft', 'Changed', 'Published'];
+};
+
+export const getStatusFromEntry = (entry: Entry): string => {
   const { sys } = entry;
   if (!sys.publishedVersion) {
-    return { label: 'Draft', color: 'warning' };
+    return 'Draft';
   }
   if (sys.version >= sys.publishedVersion + 2) {
-    return { label: 'Changed', color: 'primary' };
+    return 'Changed';
   }
   if (sys.version === sys.publishedVersion + 1) {
-    return { label: 'Published', color: 'positive' };
+    return 'Published';
   }
-  return { label: 'Unknown', color: 'negative' };
+  return 'Unknown';
+};
+
+export const getStatusColor = (status: string): BadgeVariant => {
+  switch (status) {
+    case 'Draft':
+      return 'warning';
+    case 'Changed':
+      return 'primary';
+    case 'Published':
+      return 'positive';
+    default:
+      return 'negative';
+  }
+};
+
+export const getStatusFlags = (statusLabels: string[]) => {
+  return {
+    hasDraft: statusLabels.includes(DRAFT_STATUS),
+    hasChanged: statusLabels.includes(CHANGED_STATUS),
+    hasPublished: statusLabels.includes(PUBLISHED_STATUS),
+  };
 };
 
 export const isLocationValue = (value: unknown): value is { lat: number; lon: number } => {
@@ -254,3 +280,27 @@ export async function fetchEntriesWithBatching(
 
   return { entries: allEntries, total };
 }
+
+export const isNumericSearch = (query: string): boolean => {
+  return /^\d+$/.test(query.trim());
+};
+
+export const filterEntriesByNumericSearch = (
+  entries: EntryProps[],
+  query: string,
+  fields: ContentTypeField[],
+  defaultLocale: string
+): EntryProps[] => {
+  return entries.filter((entry) => {
+    // Search in all Symbol fields (like displayName)
+    return fields.some((field) => {
+      if (field.type !== 'Symbol') return false;
+
+      const fieldValue = entry.fields[field.id]?.[field.locale || defaultLocale];
+      if (fieldValue === undefined || fieldValue === null) return false;
+
+      // Check if the field value contains the numeric string
+      return String(fieldValue).includes(query);
+    });
+  });
+};

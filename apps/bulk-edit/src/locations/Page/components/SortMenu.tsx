@@ -14,9 +14,10 @@ export const SORT_OPTIONS = [
 interface SortMenuProps {
   sortOption: string;
   onSortChange: (value: string) => void;
+  disabled?: boolean;
 }
 
-export const SortMenu: React.FC<SortMenuProps> = ({ sortOption, onSortChange }) => {
+export const SortMenu: React.FC<SortMenuProps> = ({ sortOption, onSortChange, disabled }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -28,13 +29,15 @@ export const SortMenu: React.FC<SortMenuProps> = ({ sortOption, onSortChange }) 
             size="small"
             startIcon={<SortDescendingIcon size={16} />}
             endIcon={isOpen ? <CaretUpIcon size={16} /> : <CaretDownIcon size={16} />}
-            aria-label="Sort by">
+            aria-label="Sort by"
+            isDisabled={disabled}>
             Sort by
           </Button>
         </Menu.Trigger>
         <Menu.List style={styles.sortMenuList}>
           {SORT_OPTIONS.map((option) => (
             <Menu.Item
+              isDisabled={disabled}
               key={option.value}
               isActive={sortOption === option.value}
               onClick={() => onSortChange(option.value)}>

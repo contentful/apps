@@ -1,6 +1,6 @@
 import { FieldType } from 'contentful-management';
 
-export type ColumnOption = {
+export type FilterOption = {
   label: string;
   value: string;
 };
@@ -46,9 +46,4 @@ export interface Entry {
     version: number;
   };
   fields: Fields;
-}
-
-export interface Status {
-  label: string;
-  color: 'primary' | 'positive' | 'negative' | 'warning';
 }

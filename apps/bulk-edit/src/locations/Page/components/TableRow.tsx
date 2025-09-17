@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { Table, TextLink, Badge, Checkbox, Flex, Text, Box } from '@contentful/f36-components';
+import { Table, TextLink, Badge, Checkbox, Flex, Text } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { Entry, ContentTypeField } from '../types';
 import { ContentTypeProps } from 'contentful-management';
 import { styles } from '../styles';
 import {
-  getStatus,
+  getStatusFromEntry,
   renderFieldValue,
   getEntryTitle,
   getEntryUrl,
   isCheckboxAllowed,
   truncate,
+  getStatusColor,
 } from '../utils/entryUtils';
 
 interface TableRowProps {
@@ -36,7 +37,8 @@ export const TableRow: React.FC<TableRowProps> = ({
   onCellCheckboxChange,
   cellCheckboxesDisabled,
 }) => {
-  const status = getStatus(entry);
+  const status = getStatusFromEntry(entry);
+  const statusColor = getStatusColor(status);
   const [hoveredColumn, setHoveredColumn] = useState<string | null>(null);
 
   const displayField = contentType.displayField;
@@ -56,7 +58,7 @@ export const TableRow: React.FC<TableRowProps> = ({
         </TextLink>
       </Table.Cell>
       <Table.Cell testId="status-cell" style={styles.statusCell}>
-        <Badge variant={status.color}>{status.label}</Badge>
+        <Badge variant={statusColor}>{status}</Badge>
       </Table.Cell>
       {fields.map((field) => {
         const isAllowed = isCheckboxAllowed(field);

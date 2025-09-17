@@ -18,23 +18,41 @@ import {
   KeyValueMap,
   QueryOptions,
 } from 'contentful-management';
-import { ColumnOption, ContentTypeField } from './types';
+import { ContentTypeField, FilterOption } from './types';
 import { styles } from './styles';
 import { ContentTypeSidebar } from './components/ContentTypeSidebar';
 import { SORT_OPTIONS, SortMenu } from './components/SortMenu';
 import { EntryTable } from './components/EntryTable';
 import { BulkEditModal } from './components/BulkEditModal';
 import { UndoBulkEditModal } from './components/UndoBulkEditModal';
+import { SearchBar } from './components/SearchBar';
 import {
   fetchEntriesWithBatching,
+  getStatusesOptions,
   getEntryFieldValue,
+  getStatusFromEntry,
+  getStatusFlags,
   processEntriesInBatches,
   truncate,
   updateEntryFieldLocalized,
+  filterEntriesByNumericSearch,
+  isNumericSearch,
 } from './utils/entryUtils';
 import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
-import ColumnMultiselect from './components/ColumnMultiselect';
+import FilterMultiselect from './components/FilterMultiselect';
+import { EmptyEntryBanner } from './components/EmptyEntryBanner';
+
+const getFieldsMapped = (fields: ContentTypeField[]) => {
+  return fields.map((field) => ({
+    label: field.locale ? `(${field.locale}) ${field.name}` : field.name,
+    value: field.uniqueId,
+  }));
+};
+
+const getStatusesMapped = (): FilterOption[] => {
+  return getStatusesOptions().map((s) => ({ label: s, value: s.toLowerCase() }));
+};
 
 const Page = () => {
   const sdk = useSDK();
@@ -60,8 +78,29 @@ const Page = () => {
   const [undoFirstEntryFieldValue, setUndoFirstEntryFieldValue] = useState('');
   const [totalUpdateCount, setTotalUpdateCount] = useState<number>(0);
   const [editionCount, setEditionCount] = useState<number>(0);
-  const [selectedFields, setSelectedFields] = useState<ColumnOption[]>([]);
+  const [selectedColumns, setSelectedColumns] = useState<FilterOption[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<FilterOption[]>(getStatusesMapped);
   const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [initialTotal, setInitialTotal] = useState(0);
+
+  const hasActiveFilters = () => {
+    const hasSearchQuery = searchQuery.trim() !== '';
+    const hasStatusFilter = selectedStatuses.length !== getStatusesMapped().length;
+    const hasColumnFilter = selectedColumns.length !== getFieldsMapped(fields).length;
+    return hasSearchQuery || hasStatusFilter || hasColumnFilter;
+  };
+
+  const resetFilters = () => {
+    setSearchQuery('');
+    setSelectedStatuses(getStatusesMapped());
+    setSelectedColumns(getFieldsMapped(fields));
+    setActivePage(0);
+  };
+
+  const shouldDisableFilters = () => {
+    return (entries.length === 0 && !entriesLoading && initialTotal === 0) || !selectedContentType;
+  };
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
@@ -84,21 +123,80 @@ const Page = () => {
     return allContentTypes;
   };
 
-  const buildQuery = (sortOption: string, displayField: string | null): QueryOptions => {
-    const getOrder = (sortOption: string) => {
-      if (sortOption === 'updatedAt_desc') return '-sys.updatedAt';
-      else if (sortOption === 'updatedAt_asc') return 'sys.updatedAt';
-      else if (displayField === null) return undefined;
-      else if (sortOption === 'displayName_asc') return `fields.${displayField}`;
-      else if (sortOption === 'displayName_desc') return `-fields.${displayField}`;
+  const getOrder = (sortOption: string, displayField: string | null) => {
+    if (sortOption === 'updatedAt_desc') return '-sys.updatedAt';
+    else if (sortOption === 'updatedAt_asc') return 'sys.updatedAt';
+    else if (displayField === null) return undefined;
+    else if (sortOption === 'displayName_asc') return `fields.${displayField}`;
+    else if (sortOption === 'displayName_desc') return `-fields.${displayField}`;
+  };
+
+  const getStatusFilter = (statusLabels: string[]) => {
+    // If no statuses selected, return a filter that matches nothing
+    if (statusLabels.length === 0) {
+      return { 'sys.id[in]': 'nonexistent-id' };
+    }
+
+    const { hasDraft, hasPublished, hasChanged } = getStatusFlags(statusLabels);
+
+    // Single status filtering
+    if (hasDraft && statusLabels.length === 1) {
+      return { 'sys.publishedAt[exists]': false };
+    }
+
+    if (!hasDraft && (hasPublished || hasChanged)) {
+      return { 'sys.publishedAt[exists]': true, 'sys.archivedAt[exists]': false };
+    }
+
+    // Other combinations does not filter anything
+    return {};
+  };
+
+  // We cannot differentiate throw the query changed and published
+  const filterEntriesByStatus = (entries: EntryProps[], statusLabels: string[]): EntryProps[] => {
+    // If no statuses selected, return empty array
+    if (statusLabels.length === 0) return [];
+
+    // If all statuses selected, return all entries
+    if (statusLabels.length === 3) return entries;
+
+    return entries.filter((entry) => {
+      const entryStatus = getStatusFromEntry(entry);
+      return statusLabels.includes(entryStatus);
+    });
+  };
+
+  function needsClientFiltering() {
+    const statusLabels = selectedStatuses.map((status) => status.label);
+    const { hasDraft, hasPublished, hasChanged } = getStatusFlags(statusLabels);
+
+    // If we need client-side filtering, fetch all entries
+    return (
+      (selectedStatuses.length > 0 &&
+        ((hasDraft && (hasPublished || hasChanged)) || (hasPublished && hasChanged))) ||
+      isNumericSearch(searchQuery)
+    );
+  }
+
+  const buildQuery = (
+    sortOption: string,
+    displayField: string | null,
+    statusLabels: string[],
+    fetchAll: boolean = false
+  ): QueryOptions => {
+    const query: QueryOptions = {
+      content_type: selectedContentTypeId,
+      order: getOrder(sortOption, displayField),
+      skip: fetchAll || needsClientFiltering() ? 0 : activePage * itemsPerPage,
+      limit: fetchAll || needsClientFiltering() ? 1000 : itemsPerPage,
+      ...getStatusFilter(statusLabels),
     };
 
-    return {
-      content_type: selectedContentTypeId,
-      order: getOrder(sortOption),
-      skip: activePage * itemsPerPage,
-      limit: itemsPerPage,
-    };
+    if (searchQuery.trim()) {
+      query.query = searchQuery.trim();
+    }
+
+    return query;
   };
 
   useEffect(() => {
@@ -122,19 +220,13 @@ const Page = () => {
       }
     };
     void fetchContentTypes();
-  }, [sdk]);
-
-  const getFieldsMapped = (fields: ContentTypeField[]) => {
-    return fields.map((field) => ({
-      label: field.locale ? `(${field.locale}) ${field.name}` : field.name,
-      value: field.uniqueId,
-    }));
-  };
+  }, []);
 
   const clearBasicState = () => {
     setEntries([]);
     setFields([]);
     setTotalEntries(0);
+    setInitialTotal(0);
   };
 
   // Fetch content type and fields when selectedContentTypeId changes
@@ -169,16 +261,16 @@ const Page = () => {
           }
         });
         setFields(newFields);
-        setSelectedFields(getFieldsMapped(newFields));
+        setSelectedColumns(getFieldsMapped(newFields));
         setCurrentContentType(ct);
       } catch (e) {
         clearBasicState();
-        setSelectedFields([]);
+        setSelectedColumns([]);
         setCurrentContentType(null);
       }
     };
     void fetchContentTypeAndFields();
-  }, [sdk, selectedContentTypeId, locales]);
+  }, [sdk, selectedContentTypeId]);
 
   // Fetch entries when pagination, sorting, or content type changes
   useEffect(() => {
@@ -186,12 +278,12 @@ const Page = () => {
       if (fields.length === 0 || !currentContentType) {
         return;
       }
-
       setEntriesLoading(true);
       try {
         const displayField = currentContentType.displayField || null;
+        const statusLabels = selectedStatuses.map((status) => status.label);
 
-        const baseQuery = buildQuery(sortOption, displayField);
+        const baseQuery = buildQuery(sortOption, displayField, statusLabels);
 
         const { entries, total } = await fetchEntriesWithBatching(
           sdk,
@@ -199,8 +291,39 @@ const Page = () => {
           baseQuery.limit || BATCH_FETCHING.DEFAULT_BATCH_SIZE
         );
 
-        setEntries(entries);
-        setTotalEntries(total);
+        // Apply client-side status filtering
+        const statusFilteredEntries = filterEntriesByStatus(entries, statusLabels);
+
+        let searchFilteredEntries;
+        if (!searchQuery.trim() || !isNumericSearch(searchQuery)) {
+          searchFilteredEntries = entries;
+        } else {
+          searchFilteredEntries = filterEntriesByNumericSearch(
+            statusFilteredEntries,
+            searchQuery,
+            fields,
+            defaultLocale
+          );
+        }
+
+        if (needsClientFiltering()) {
+          // Client-side pagination
+          const startIndex = activePage * itemsPerPage;
+          const endIndex = startIndex + itemsPerPage;
+          const paginatedEntries = searchFilteredEntries.slice(startIndex, endIndex);
+
+          setEntries(paginatedEntries);
+          setTotalEntries(searchFilteredEntries.length);
+        } else {
+          // Server-side pagination
+          setEntries(searchFilteredEntries);
+          setTotalEntries(total);
+        }
+
+        // Determine empty state type
+        if (initialTotal === 0 && total > 0) {
+          setInitialTotal(total);
+        }
       } catch (e) {
         clearBasicState();
       } finally {
@@ -208,7 +331,15 @@ const Page = () => {
       }
     };
     void fetchEntries();
-  }, [sdk, activePage, itemsPerPage, sortOption, currentContentType]);
+  }, [
+    sdk,
+    activePage,
+    itemsPerPage,
+    sortOption,
+    currentContentType,
+    selectedStatuses,
+    searchQuery,
+  ]);
 
   const selectedContentType = contentTypes.find((ct) => ct.sys.id === selectedContentTypeId);
   const selectedEntries = entries.filter((entry) => selectedEntryIds.includes(entry.sys.id));
@@ -433,8 +564,12 @@ const Page = () => {
               onContentTypeSelect={(newCT) => {
                 setSelectedContentTypeId(newCT);
                 setSortOption(SORT_OPTIONS[0].value);
+                setSelectedStatuses(getStatusesMapped);
                 setActivePage(0);
+                setSearchQuery('');
+                setInitialTotal(0);
               }}
+              disabled={entriesLoading}
             />
             <div style={styles.stickySpacer} />
             <Box>
@@ -443,42 +578,93 @@ const Page = () => {
                 <Heading style={styles.stickyPageHeader}>
                   {selectedContentType ? `Bulk edit ${selectedContentType.name}` : 'Bulk Edit App'}
                 </Heading>
-                {(entries.length === 0 && !entriesLoading) || !selectedContentType ? (
-                  <Box style={styles.noEntriesText}>No entries found.</Box>
+
+                {/* Search Section */}
+                <SearchBar
+                  searchQuery={searchQuery}
+                  onSearchChange={(query) => {
+                    setSearchQuery(query);
+                    setActivePage(0);
+                  }}
+                  isDisabled={shouldDisableFilters()}
+                  debounceDelay={300}
+                />
+
+                {/* Multiselects Filters Section */}
+                <Flex gap="spacingS" alignItems="center">
+                  <SortMenu
+                    sortOption={sortOption}
+                    onSortChange={(newSort) => {
+                      setSortOption(newSort);
+                      setActivePage(0);
+                    }}
+                    disabled={shouldDisableFilters()}
+                  />
+                  <FilterMultiselect
+                    id="status"
+                    options={getStatusesMapped()}
+                    selectedItems={selectedStatuses}
+                    setSelectedItems={(statuses) => {
+                      setSelectedStatuses(statuses);
+                      setActivePage(0);
+                    }}
+                    disabled={shouldDisableFilters()}
+                    placeholderConfig={{
+                      noneSelected: 'No statuses selected',
+                      allSelected: 'Filter by status',
+                    }}
+                    style={styles.columnMultiselectStatuses}
+                  />
+                  <FilterMultiselect
+                    id="column"
+                    options={getFieldsMapped(fields)}
+                    selectedItems={selectedColumns}
+                    setSelectedItems={(selectedColumns) => {
+                      setSelectedColumns(selectedColumns);
+                      setActivePage(0);
+                    }}
+                    disabled={shouldDisableFilters()}
+                    placeholderConfig={{
+                      noneSelected: 'No fields selected',
+                      allSelected: 'Filter fields',
+                    }}
+                    style={styles.columnMultiselectColumns}
+                  />
+                  {hasActiveFilters() && (
+                    <Button
+                      variant="secondary"
+                      size="small"
+                      onClick={resetFilters}
+                      isDisabled={shouldDisableFilters()}
+                      style={styles.resetFiltersButton}>
+                      Reset filters
+                    </Button>
+                  )}
+                </Flex>
+                {selectedField && selectedEntryIds.length > 0 && !entriesLoading && (
+                  <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
+                    <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+                      {selectedEntryIds.length === 1 ? 'Edit' : 'Bulk edit'}
+                    </Button>
+                    <Text fontColor="gray600">
+                      {selectedEntryIds.length} entry field
+                      {selectedEntryIds.length === 1 ? '' : 's'} selected
+                    </Text>
+                  </Flex>
+                )}
+                {entriesLoading ? (
+                  <Table style={styles.loadingTableBorder}>
+                    <Table.Body>
+                      <Skeleton.Row rowCount={5} columnCount={5} />
+                    </Table.Body>
+                  </Table>
                 ) : (
                   <>
-                    <Flex gap="spacingS" alignItems="center">
-                      <SortMenu
-                        sortOption={sortOption}
-                        onSortChange={(newSort) => {
-                          setSortOption(newSort);
-                          setActivePage(0);
-                        }}
+                    {entries.length === 0 || !selectedContentType ? (
+                      <EmptyEntryBanner
+                        hasEntries={entries.length > 0}
+                        hasInitialEntries={initialTotal > 0}
                       />
-                      <ColumnMultiselect
-                        options={getFieldsMapped(fields)}
-                        selectedFields={selectedFields}
-                        setSelectedFields={setSelectedFields}
-                        style={styles.columnMultiselect}
-                      />
-                    </Flex>
-                    {selectedField && selectedEntryIds.length > 0 && !entriesLoading && (
-                      <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
-                        <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-                          {selectedEntryIds.length === 1 ? 'Edit' : 'Bulk edit'}
-                        </Button>
-                        <Text fontColor="gray600">
-                          {selectedEntryIds.length} entry field
-                          {selectedEntryIds.length === 1 ? '' : 's'} selected
-                        </Text>
-                      </Flex>
-                    )}
-                    {entriesLoading ? (
-                      <Table style={styles.loadingTableBorder}>
-                        <Table.Body>
-                          <Skeleton.Row rowCount={5} columnCount={5} />
-                        </Table.Body>
-                      </Table>
                     ) : (
                       <>
                         {failedUpdates.length > 0 && (
@@ -491,7 +677,7 @@ const Page = () => {
                         )}
                         <EntryTable
                           entries={entries}
-                          fields={selectedFields.flatMap(
+                          fields={selectedColumns.flatMap(
                             (field) => fields.find((f) => f.uniqueId === field.value) || []
                           )}
                           contentType={selectedContentType}
@@ -502,7 +688,10 @@ const Page = () => {
                           totalEntries={totalEntries}
                           itemsPerPage={itemsPerPage}
                           onPageChange={setActivePage}
-                          onItemsPerPageChange={setItemsPerPage}
+                          onItemsPerPageChange={(itemsPerPage) => {
+                            setItemsPerPage(itemsPerPage);
+                            setActivePage(0);
+                          }}
                           pageSizeOptions={PAGE_SIZE_OPTIONS}
                           onSelectionChange={({ selectedEntryIds, selectedFieldId }) => {
                             setSelectedEntryIds(selectedEntryIds);
