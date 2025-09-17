@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Table, Checkbox, Flex, Text } from '@contentful/f36-components';
 import { Tooltip } from '@contentful/f36-tooltip';
 import { QuestionIcon } from '@phosphor-icons/react';
