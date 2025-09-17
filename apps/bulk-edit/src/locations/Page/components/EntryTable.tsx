@@ -7,14 +7,12 @@ import { styles } from '../styles';
 import { TableHeader } from './TableHeader';
 import { TableRow } from './TableRow';
 import { isCheckboxAllowed as isBulkEditable, getEntryUrl } from '../utils/entryUtils';
-import {
-  DISPLAY_NAME_COLUMN,
-  DISPLAY_NAME_INDEX,
-  ENTRY_STATUS_COLUMN,
-  ESTIMATED_ROW_HEIGHT,
-  HEADERS_ROW,
-} from '../utils/constants';
-import { useKeyboardNavigation, FocusPosition } from '../hooks/useKeyboardNavigation';
+import {   DISPLAY_NAME_COLUMN,
+    DISPLAY_NAME_INDEX,
+    ENTRY_STATUS_COLUMN,
+    ESTIMATED_ROW_HEIGHT,
+    HEADERS_ROW, } from '../utils/constants';
+import { useKeyboardNavigation, FocusPosition, FocusRange } from '../hooks/useKeyboardNavigation';
 import { tableStyles } from './EntryTable.styles';
 
 interface EntryTableProps {
