@@ -351,7 +351,7 @@
             "type": "boolean",
             "description": "Whether channels were successfully retrieved"
           },
-          "channels": {
+          "data": {
             "type": "array",
             "description": "List of available channels. Present when ok: true",
             "items": {

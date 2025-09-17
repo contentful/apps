@@ -2,7 +2,7 @@
 
 export interface ListChannelsResult {
   ok: boolean;
-  channels?: ChannelResult[];
+  data?: ChannelResult[];
   error?: {
     type: string;
     message: string;
@@ -40,8 +40,8 @@ export function isListChannelsResult(value: unknown): value is ListChannelsResul
 
   return (
     typeof obj.ok === 'boolean' &&
-    ((obj.channels === undefined && obj.error !== undefined) ||
-      (obj.channels !== undefined && obj.error === undefined))
+    ((obj.data === undefined && obj.error !== undefined) ||
+      (obj.data !== undefined && obj.error === undefined))
   );
 }
 

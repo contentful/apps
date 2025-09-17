@@ -26,7 +26,7 @@ const useGetTeamsChannels = () => {
       );
 
       if (result && isListChannelsResult(result) && result.ok) {
-        setChannels(result.channels || []);
+        setChannels(result.data || []);
         setError(undefined);
       } else {
         const error = new Error('Failed to fetch Teams channels');
