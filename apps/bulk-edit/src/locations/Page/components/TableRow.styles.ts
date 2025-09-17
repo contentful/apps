@@ -1,5 +1,6 @@
 import tokens from '@contentful/f36-tokens';
-import { CELL_WIDTH, stickyCell, STICKY_SPACER_SPACING } from '../styles';
+import { CELL_WIDTH, STICKY_SPACER_SPACING } from '../utils/constants';
+import { stickyCell } from '../styles';
 
 export const rowStyles = {
   cell: {

@@ -1,5 +1,6 @@
 import tokens from '@contentful/f36-tokens';
-import { CELL_WIDTH, STICKY_SPACER_SPACING, stickyCell } from '../styles';
+import { stickyCell } from '../styles';
+import { CELL_WIDTH, STICKY_SPACER_SPACING } from '../utils/constants';
 
 export const headerStyles = {
   tableHead: {
