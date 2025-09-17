@@ -10,11 +10,17 @@ import {
   TABLE_WIDTH,
 } from './utils/constants';
 
-const stickyCell: CSSProperties = {
+export const stickyCell: CSSProperties = {
   position: 'sticky',
   zIndex: 1,
   borderRight: `1px solid ${tokens.gray300}`,
   minWidth: `${CELL_WIDTH}px`,
+};
+
+export const focusedCell: CSSProperties = {
+  outline: `3px solid ${tokens.blue300}`,
+  borderRadius: tokens.borderRadiusSmall,
+  outlineOffset: '-3px',
 };
 
 export const styles = {
@@ -35,53 +41,11 @@ export const styles = {
     marginTop: tokens.spacingM,
     minWidth: `${CELL_WIDTH * 4}px`,
     overflowX: 'auto',
-  },
-  tableHeader: {
-    background: tokens.gray200,
-    borderRight: `1px solid ${tokens.gray300}`,
-    minWidth: `${CELL_WIDTH}px`,
-  },
-  stickyHeader: {
-    background: tokens.gray200,
-    position: 'sticky',
-    left: 0,
-    borderTop: `transparent`,
-  },
-  displayNameHeader: {
-    ...stickyCell,
-    background: tokens.gray200,
-    left: STICKY_SPACER_SPACING + CELL_WIDTH,
-  },
-  statusHeader: {
-    ...stickyCell,
-    background: tokens.gray200,
-    left: STICKY_SPACER_SPACING + CELL_WIDTH * 2,
-  },
-  displayNameCell: {
-    ...stickyCell,
-    borderLeft: `1px solid ${tokens.gray300}`,
-    left: STICKY_SPACER_SPACING + CELL_WIDTH,
-  },
-  statusCell: {
-    ...stickyCell,
-    left: STICKY_SPACER_SPACING + CELL_WIDTH * 2,
-  },
-  stickyTableRow: {
-    background: tokens.colorWhite,
-    position: 'sticky',
-    top: 0,
-    zIndex: 2,
-  },
-  cell: {
-    borderRight: `1px solid ${tokens.gray300}`,
-    minWidth: `${CELL_WIDTH}px`,
+    outline: 'none', // Remove default focus outline
   },
   whiteBox: {
     background: tokens.colorWhite,
     borderRadius: tokens.borderRadiusMedium,
-  },
-  tableHead: {
-    borderTop: `transparent`,
   },
   stickyPageHeader: {
     position: 'sticky',
