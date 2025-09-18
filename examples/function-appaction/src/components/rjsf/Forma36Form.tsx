@@ -75,7 +75,7 @@ const ObjectFieldTemplate = (props: ObjectFieldTemplateProps) => {
   if (isRoot) {
     return (
       <Box>
-        {properties.map((p: any) => (
+        {properties.map((p) => (
           <div key={p.name}>{p.content}</div>
         ))}
       </Box>
@@ -98,7 +98,7 @@ const ObjectFieldTemplate = (props: ObjectFieldTemplateProps) => {
         </Subheading>
       ) : null}
       {description}
-      {properties.map((p: any) => (
+      {properties.map((p) => (
         <div key={p.name}>{p.content}</div>
       ))}
     </Box>

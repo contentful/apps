@@ -20,6 +20,7 @@ import ActionResult from './ActionResult';
 import { styles } from './AppActionCard.styles';
 import Forma36Form from './rjsf/Forma36Form';
 import validator from '@rjsf/validator-ajv8';
+import type { IChangeEvent } from '@rjsf/core';
 
 interface Props {
   action: AppActionProps;
@@ -225,12 +226,12 @@ const AppActionCard = (props: Props) => {
             liveValidate
             showErrorList={false}
             uiSchema={{ 'ui:submitButtonOptions': { norender: true } }}
-            onChange={(e: any) => {
+            onChange={(e: IChangeEvent<Record<string, unknown>>) => {
               setActionParameters({
                 ...actionParameters,
                 [action.sys.id]: e.formData,
               });
-              const errorCount = Array.isArray((e as any).errors) ? (e as any).errors.length : 0;
+              const errorCount = Array.isArray(e.errors) ? e.errors.length : 0;
               setSchemaErrorsByAction({
                 ...schemaErrorsByAction,
                 [action.sys.id]: errorCount,
