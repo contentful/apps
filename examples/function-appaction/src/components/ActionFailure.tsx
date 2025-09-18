@@ -15,12 +15,10 @@ interface Props {
 const ActionFailure = (props: Props) => {
   const { actionResult, accordionState, handleCollapse, handleExpand } = props;
   const { error, timestamp, actionId } = actionResult;
-  const details: string | undefined = (actionResult.data as any)?.error?.details as
-    | string
-    | undefined;
-  const data: any = actionResult.data;
-  const createdAt = data?.sys?.createdAt;
-  const updatedAt = data?.sys?.updatedAt;
+  const details: string | undefined = actionResult.call?.error?.details as string | undefined;
+  const call = actionResult.call;
+  const createdAt = call?.sys?.createdAt;
+  const updatedAt = call?.sys?.updatedAt;
   const duration = computeDuration(createdAt, updatedAt);
   const { message, statusCode } = useParseError(error);
 

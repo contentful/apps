@@ -6,6 +6,7 @@ import {
   CopyButton,
   Flex,
   FormControl,
+  SectionHeading,
   Stack,
   Subheading,
   Text,
@@ -17,7 +18,7 @@ import { useState } from 'react';
 import { ActionResultType } from '../locations/Page';
 import ActionResult from './ActionResult';
 import { styles } from './AppActionCard.styles';
-import Form from './rjsf/Forma36Form';
+import Forma36Form from './rjsf/Forma36Form';
 import validator from '@rjsf/validator-ajv8';
 
 interface Props {
@@ -212,13 +213,13 @@ const AppActionCard = (props: Props) => {
           </Button>
         </Box>
       </Flex>
-      {(action as any).parametersSchema ? (
+      {action.parametersSchema ? (
         <Box marginTop="spacingS">
-          <Box marginBottom="spacingM">
-            <Subheading as="h4">Parameters</Subheading>
+          <Box marginBottom="spacingS">
+            <SectionHeading as="h4">Parameters</SectionHeading>
           </Box>
-          <Form
-            schema={(action as any).parametersSchema}
+          <Forma36Form
+            schema={action.parametersSchema}
             formData={actionParameters[action.sys.id] || {}}
             validator={validator}
             liveValidate
@@ -236,7 +237,7 @@ const AppActionCard = (props: Props) => {
               });
             }}>
             <></>
-          </Form>
+          </Forma36Form>
         </Box>
       ) : Array.isArray((action as any).parameters) &&
         (action as { parameters: any[] }).parameters.length ? (

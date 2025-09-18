@@ -40,7 +40,7 @@ const FieldTemplate = (props: FieldTemplateProps) => {
   const isInvalid = rawErrors.length > 0;
 
   // Avoid duplicate headings for object fields; let ObjectFieldTemplate render the section title
-  const isObjectField = (props as any)?.schema?.type === 'object';
+  const isObjectField = props?.schema?.type === 'object';
   if (isObjectField) {
     return <>{children}</>;
   }
@@ -69,7 +69,7 @@ const FieldTemplate = (props: FieldTemplateProps) => {
 };
 
 const ObjectFieldTemplate = (props: ObjectFieldTemplateProps) => {
-  const { idSchema, title, description, properties, required } = props as any;
+  const { idSchema, title, description, properties, required } = props;
   const isRoot = idSchema && idSchema.$id === 'root';
 
   if (isRoot) {
@@ -89,9 +89,10 @@ const ObjectFieldTemplate = (props: ObjectFieldTemplateProps) => {
         borderRadius: '6px',
         padding: tokens.spacingM,
         marginTop: tokens.spacingS,
+        marginBottom: tokens.spacingM,
       }}>
       {title ? (
-        <Subheading as="h5" marginBottom="spacingS">
+        <Subheading as="h5">
           {title}
           {required ? ' *' : ''}
         </Subheading>
@@ -170,7 +171,7 @@ const TextWidget = (props: WidgetProps) => {
     onFocus,
     options,
   } = props;
-  const inputType = (options && (options.inputType as string)) || 'text';
+  const inputType = (options && options.inputType) || 'text';
   return (
     <TextInput
       id={id}
@@ -185,6 +186,10 @@ const TextWidget = (props: WidgetProps) => {
       onFocus={(e) => onFocus && onFocus(id, e.target.value)}
     />
   );
+};
+
+const EmailWidget = (props: WidgetProps) => {
+  return <TextWidget {...props} options={{ ...(props.options || {}), inputType: 'email' }} />;
 };
 
 const TextareaWidget = (props: WidgetProps) => {
@@ -243,7 +248,7 @@ const CheckboxWidget = (props: WidgetProps) => {
 
 const SelectWidget = (props: WidgetProps) => {
   const { id, value, required, disabled, readonly, placeholder, onChange, options } = props;
-  const { enumOptions = [], multiple } = options as any;
+  const { enumOptions = [], multiple } = options;
 
   if (multiple) {
     return (
@@ -279,7 +284,7 @@ const SelectWidget = (props: WidgetProps) => {
       isRequired={required}
       isDisabled={disabled || readonly}
       value={value ?? ''}
-      onChange={(e) => onChange((e.target as HTMLSelectElement).value)}>
+      onChange={(e) => onChange(e.target.value)}>
       {placeholder ? (
         <option value="" disabled>
           {placeholder}
@@ -296,7 +301,7 @@ const SelectWidget = (props: WidgetProps) => {
 
 const RadioWidget = (props: WidgetProps) => {
   const { id, value, required, disabled, readonly, onChange, options } = props;
-  const { enumOptions = [] } = options as any;
+  const { enumOptions = [] } = options;
   return (
     <Radio.Group
       name={id}
@@ -313,6 +318,7 @@ const RadioWidget = (props: WidgetProps) => {
 
 const widgets: RegistryWidgetsType = {
   TextWidget,
+  EmailWidget,
   TextareaWidget,
   NumberWidget,
   CheckboxWidget,
@@ -329,6 +335,6 @@ const theme = {
   },
 };
 
-const Forma36Form: any = withTheme(theme as any);
+const Forma36Form = withTheme(theme);
 
 export default Forma36Form;

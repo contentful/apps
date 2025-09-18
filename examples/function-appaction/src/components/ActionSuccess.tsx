@@ -16,7 +16,7 @@ interface Props {
 const ActionSuccess = (props: Props) => {
   const { actionResult, accordionState, handleCollapse, handleExpand, handleCopy } = props;
   const { call, response, timestamp, actionId } = actionResult;
-  const status = (response?.response as any)?.statusCode ?? call?.status; // TODO remove cast after merging https://github.com/contentful/contentful-management.js/pull/2748
+  const statusCode = response?.response?.statusCode;
 
   const responseContentType =
     getHeaderValue(response?.response?.headers, 'content-type') ||
@@ -34,7 +34,9 @@ const ActionSuccess = (props: Props) => {
         title={
           <Text>
             <Badge variant="positive">Success</Badge>
-            <Text className={styles.accordionTitleMargin}>[{status}]</Text> - {timestamp}
+            {statusCode && (
+              <Text className={styles.accordionTitleMargin}>[{statusCode}]</Text>
+            )} - {timestamp}
             {typeof duration === 'number' && (
               <Text className={styles.accordionTitleMargin}>
                 Duration: <strong>{duration}</strong> ms
