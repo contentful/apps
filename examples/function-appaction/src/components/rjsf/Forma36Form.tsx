@@ -217,7 +217,7 @@ const NumberWidget = (props: WidgetProps) => {
       type="number"
       value={value ?? ''}
       isRequired={required}
-      isDisabled={disabled}
+      isDisabled={disabled || readonly}
       isReadOnly={readonly}
       placeholder={placeholder}
       onChange={(e) => {

@@ -56,7 +56,7 @@ const AppActionCard = (props: Props) => {
         response = await sdk.cma.appActionCall.getResponse({
           appDefinitionId: sdk.ids.app || '',
           appActionId: action.sys.id,
-          callId: callId,
+          callId,
         });
       }
 
