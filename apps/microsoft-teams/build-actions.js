@@ -66,10 +66,12 @@ const main = async (watch = false) => {
       target: 'es2022',
       external: ['node:*'],
       define: {
-        'process.env.MSTEAMS_BOT_SERVICE_BASE_URL': JSON.stringify(
-          process.env.MSTEAMS_BOT_SERVICE_BASE_URL
+        'process.env.VITE_MSTEAMS_BOT_SERVICE_BASE_URL': JSON.stringify(
+          process.env.VITE_MSTEAMS_BOT_SERVICE_BASE_URL
         ),
-        'process.env.MSTEAMS_CLIENT_API_KEY': JSON.stringify(process.env.MSTEAMS_CLIENT_API_KEY),
+        'process.env.VITE_MSTEAMS_CLIENT_API_KEY': JSON.stringify(
+          process.env.VITE_MSTEAMS_CLIENT_API_KEY
+        ),
       },
     };
 
