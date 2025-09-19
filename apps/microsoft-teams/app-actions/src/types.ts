@@ -2,7 +2,7 @@ import { ChannelInfo as MSChannelInfo, TeamDetails as MSTeamDetails } from 'botb
 import { TOPIC_ACTION_MAP } from './constants';
 import { EntryProps } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-
+import { Channel } from '../../types';
 export interface ActionError {
   type: string;
   message: string;
@@ -29,14 +29,6 @@ export enum AppEventKey {
   ENTRY_ARCHIVE = 'ContentManagement.Entry.archive',
   ENTRY_UNARCHIVE = 'ContentManagement.Entry.unarchive',
 }
-
-export type Channel = {
-  id: string;
-  tenantId: string;
-  name: string;
-  teamId: string;
-  teamName: string;
-};
 
 // same object as the MS parent, but with required id and name
 export interface TeamDetails extends MSTeamDetails {

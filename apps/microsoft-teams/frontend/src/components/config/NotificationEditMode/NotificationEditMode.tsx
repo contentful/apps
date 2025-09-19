@@ -16,6 +16,11 @@ import CancelModal from '@components/config/CancelModal/CancelModal';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { editModeFooter } from '@constants/configCopy';
+import {
+  assertIsSendTestMessageError,
+  assertIsSendTestMessageSuccess,
+  SendTestMessageError,
+} from '../../../types/appActionResults';
 
 interface Props {
   index: number;
@@ -60,24 +65,34 @@ const NotificationEditMode = (props: Props) => {
         contentTypeId: notification.contentTypeId,
       };
 
-      const { response } = await sdk.cma.appActionCall.createWithResponse(
+      const { result, error: appActionError } = await sdk.cma.appActionCall.createWithResult(
         {
           appActionId: 'msteamsSendTestMessage',
           environmentId: sdk.ids.environment,
           spaceId: sdk.ids.space,
           appDefinitionId: sdk.ids.app!,
-          userId: sdk.ids.user,
         },
         {
           parameters,
         }
       );
-      const body = JSON.parse(response.body);
 
-      if (body.ok) {
-        sdk.notifier.success(editModeFooter.testSuccess);
+      if (result) {
+        if (assertIsSendTestMessageSuccess(result)) {
+          sdk.notifier.success(editModeFooter.testSuccess);
+        } else if (assertIsSendTestMessageError(result)) {
+          throw new Error(
+            `${editModeFooter.testError}: ${(result as SendTestMessageError).error.message}`
+          );
+        } else {
+          throw new Error(`${editModeFooter.testError}: An unknown error occurred.`);
+        }
+      } else if (appActionError) {
+        throw new Error(
+          `${editModeFooter.testError}: An error occurred while invoking the app action - ${appActionError.message}`
+        );
       } else {
-        throw new Error(`${editModeFooter.testError}: ${body.error.message}`);
+        throw new Error(`${editModeFooter.testError}: An unknown error occurred.`);
       }
     } catch (error) {
       if (error instanceof Error) {
