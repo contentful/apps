@@ -34,22 +34,18 @@ const RawResponseViewer = ({
     setLoading(true);
     setError(undefined);
     try {
-      const response = (await sdk.cma.appActionCall.getResponse({
+      const response = await sdk.cma.appActionCall.getResponse({
         appDefinitionId: sdk.ids.app || '',
         appActionId: actionId,
         callId,
-      })) as any;
+      });
       setRaw(response);
       const contentType =
-        getHeaderValue(response?.response?.headers as any, 'content-type') ||
-        getHeaderValue(response?.response?.headers as any, 'Content-Type') ||
-        getHeaderValue(response?.response?.headers as any, 'contentType');
+        getHeaderValue(response?.response?.headers, 'content-type') ||
+        getHeaderValue(response?.response?.headers, 'Content-Type') ||
+        getHeaderValue(response?.response?.headers, 'contentType');
       const formatted = formatBodyForDisplay(response?.response?.body, contentType);
-      const duration = computeDuration(
-        response?.sys?.createdAt ?? response?.requestAt,
-        response?.sys?.updatedAt ?? response?.responseAt
-      );
-      onLoaded?.({ contentType, body: formatted, duration });
+      onLoaded?.({ contentType, body: formatted });
     } catch (e: any) {
       setError(e?.message || 'Failed to fetch raw response');
     } finally {
@@ -58,9 +54,9 @@ const RawResponseViewer = ({
   };
 
   const contentType =
-    getHeaderValue(raw?.response?.headers as any, 'content-type') ||
-    getHeaderValue(raw?.response?.headers as any, 'Content-Type') ||
-    getHeaderValue(raw?.response?.headers as any, 'contentType');
+    getHeaderValue(raw?.response?.headers, 'content-type') ||
+    getHeaderValue(raw?.response?.headers, 'Content-Type') ||
+    getHeaderValue(raw?.response?.headers, 'contentType');
 
   return (
     <>

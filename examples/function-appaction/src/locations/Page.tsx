@@ -10,10 +10,6 @@ import {
   TextLink,
 } from '@contentful/f36-components';
 import { CycleIcon, ExternalLinkIcon } from '@contentful/f36-icons';
-import {
-  WebhookCallDetailsProps,
-  WebhookCallRequest,
-} from 'contentful-management/dist/typings/entities/webhook';
 import { useEffect } from 'react';
 import AppActionCard from '../components/AppActionCard';
 import EmptyFishbowl from '../components/EmptyFishbowl';
@@ -21,13 +17,11 @@ import useGetAppActions from '../hooks/useGetAppActions';
 import tokens from '@contentful/f36-tokens';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { PageAppSDK } from '@contentful/app-sdk';
-
-export interface ActionResultData extends WebhookCallDetailsProps {
-  request: WebhookCallRequest & { function?: string };
-}
+import { AppActionCallProps, AppActionCallRawResponseProps } from 'contentful-management';
 export interface ActionResultType {
   success: boolean;
-  data?: ActionResultData;
+  call?: AppActionCallProps;
+  response?: AppActionCallRawResponseProps;
   error?: unknown;
   timestamp: string;
   actionId: string;
