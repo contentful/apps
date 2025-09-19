@@ -1,75 +1,151 @@
+import { AppActionError, Channel } from '../../../types';
+
 // Types that match the backend app action result schemas
 
-export interface ListChannelsResult {
-  ok: boolean;
-  data?: ChannelResult[];
-  error?: {
-    type: string;
-    message: string;
-    details?: Record<string, unknown>;
-  };
+export interface ListChannelsSuccess {
+  ok: true;
+  data: Channel[];
 }
 
-export interface ChannelResult {
-  id: string;
-  tenantId: string;
-  name: string;
-  teamId: string;
-  teamName: string;
+export interface ListChannelsError {
+  ok: false;
+  error: AppActionError;
 }
 
-export interface SendTestMessageResult {
-  ok: boolean;
-  data?: {
+export type ListChannelsResult = ListChannelsSuccess | ListChannelsError;
+
+export interface SendTestMessageSuccess {
+  ok: true;
+  data: {
     messageResponseId: string;
   };
-  error?: {
-    type: string;
-    message: string;
-    details?: Record<string, unknown>;
-  };
 }
 
-// Type guards for runtime validation
-export function isListChannelsResult(value: unknown): value is ListChannelsResult {
+export interface SendTestMessageError {
+  ok: false;
+  error: AppActionError;
+}
+
+export type SendTestMessageResult = SendTestMessageSuccess | SendTestMessageError;
+
+// Assertion functions for runtime validation
+// List Channels
+export function assertIsListChannelsResult(value: unknown): asserts value is ListChannelsResult {
   if (typeof value !== 'object' || value === null) {
-    return false;
+    throw new Error('Expected ListChannelsResult to be an object, but received null or non-object');
   }
 
   const obj = value as Record<string, unknown>;
 
-  return (
-    typeof obj.ok === 'boolean' &&
-    ((obj.data === undefined && obj.error !== undefined) ||
-      (obj.data !== undefined && obj.error === undefined))
-  );
+  if (typeof obj.ok !== 'boolean') {
+    console.dir(obj, { depth: null });
+    throw new Error(`Expected ListChannelsResult.ok to be boolean, but received ${typeof obj.ok}`);
+  }
+
+  if (obj.ok === true) {
+    if (!Array.isArray(obj.data)) {
+      throw new Error(
+        `Expected ListChannelsResult.data to be an array when ok=true, but received ${typeof obj.data}`
+      );
+    }
+    if (obj.error !== undefined) {
+      throw new Error(
+        'Expected ListChannelsResult.error to be undefined when ok=true, but error was present'
+      );
+    }
+  } else {
+    if (obj.data !== undefined) {
+      throw new Error(
+        'Expected ListChannelsResult.data to be undefined when ok=false, but data was present'
+      );
+    }
+    if (obj.error === undefined) {
+      throw new Error(
+        'Expected ListChannelsResult.error to be defined when ok=false, but error was undefined'
+      );
+    }
+  }
 }
 
-export function isChannelResult(value: unknown): value is ChannelResult {
-  if (typeof value !== 'object' || value === null) {
+export function assertIsListChannelsSuccess(value: unknown): boolean {
+  assertIsListChannelsResult(value);
+  if (!value.ok) {
     return false;
+  }
+  return value.ok == true;
+}
+
+export function assertIsListChannelsError(value: unknown): boolean {
+  assertIsListChannelsResult(value);
+  if (value.ok) {
+    return false;
+  }
+  return value.ok == false;
+}
+
+// Send Test Message
+export function assertIsSendTestMessageResult(
+  value: unknown
+): asserts value is SendTestMessageResult {
+  if (typeof value !== 'object' || value === null) {
+    throw new Error(
+      'Expected SendTestMessageResult to be an object, but received null or non-object'
+    );
   }
 
   const obj = value as Record<string, unknown>;
 
-  return (
-    typeof obj.ok === 'boolean' &&
-    ((obj.channels === undefined && obj.error !== undefined) ||
-      (obj.channels !== undefined && obj.error === undefined))
-  );
-}
-
-export function isSendTestMessageResult(value: unknown): value is SendTestMessageResult {
-  if (typeof value !== 'object' || value === null) {
-    return false;
+  if (typeof obj.ok !== 'boolean') {
+    throw new Error(
+      `Expected SendTestMessageResult.ok to be boolean, but received ${typeof obj.ok}`
+    );
   }
 
-  const obj = value as Record<string, unknown>;
+  if (obj.ok === true) {
+    if (obj.data === undefined || typeof obj.data !== 'object' || obj.data === null) {
+      throw new Error(
+        `Expected SendTestMessageResult.data to be an object when ok=true, but received ${typeof obj.data}`
+      );
+    }
 
-  return (
-    typeof obj.ok === 'boolean' &&
-    obj.ok === true &&
-    ((obj.data === undefined && obj.error !== undefined) ||
-      (obj.data !== undefined && obj.error === undefined))
-  );
+    const dataObj = obj.data as Record<string, unknown>;
+    if (typeof dataObj.messageResponseId !== 'string') {
+      throw new Error(
+        `Expected SendTestMessageResult.data.messageResponseId to be string, but received ${typeof dataObj.messageResponseId}`
+      );
+    }
+
+    if (obj.error !== undefined) {
+      throw new Error(
+        'Expected SendTestMessageResult.error to be undefined when ok=true, but error was present'
+      );
+    }
+  } else {
+    if (obj.data !== undefined) {
+      throw new Error(
+        'Expected SendTestMessageResult.data to be undefined when ok=false, but data was present'
+      );
+    }
+    if (obj.error === undefined) {
+      throw new Error(
+        'Expected SendTestMessageResult.error to be defined when ok=false, but error was undefined'
+      );
+    }
+  }
+}
+
+export function assertIsSendTestMessageSuccess(value: unknown): boolean {
+  assertIsSendTestMessageResult(value);
+  if (!value.ok) {
+    throw new Error('Expected SendTestMessageSuccess but received SendTestMessageError');
+  }
+  return value.ok == true;
+}
+
+export function assertIsSendTestMessageError(value: unknown): boolean {
+  assertIsSendTestMessageResult(value);
+  if (value.ok) {
+    throw new Error('Expected SendTestMessageError but received SendTestMessageSuccess');
+  }
+  return value.ok == false;
 }

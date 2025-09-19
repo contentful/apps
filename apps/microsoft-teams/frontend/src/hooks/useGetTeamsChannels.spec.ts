@@ -15,7 +15,7 @@ describe('useGetTeamsChannels', () => {
         ok: true,
         data: mockChannels,
       },
-      status: 'processing',
+      status: 'succeeded',
     });
     const { result } = renderHook(() => useGetTeamsChannels());
     expect(result.current.loading).toBe(true);
@@ -28,19 +28,19 @@ describe('useGetTeamsChannels', () => {
   it('should return correct error if response is not ok', async () => {
     mockSdk.cma.appActionCall.createWithResult = vi.fn().mockReturnValueOnce({
       result: {
-        body: JSON.stringify({
-          ok: false,
-          error: {
-            type: 'Error',
-            message: 'Failed to fetch Teams channels',
-          },
-        }),
+        ok: false,
+        error: {
+          type: 'Error',
+          message: 'This is an error',
+        },
       },
     });
     const { result } = renderHook(() => useGetTeamsChannels());
     expect(result.current.loading).toBe(true);
     await waitFor(() => {
-      expect(result.current.error?.message).toEqual('Failed to fetch Teams channels');
+      expect(result.current.error?.message).toEqual(
+        'Failed to fetch Teams channels: This is an error'
+      );
       expect(result.current.loading).toEqual(false);
     });
   });

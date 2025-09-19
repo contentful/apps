@@ -1,7 +1,17 @@
 import { AppActionProps, PlainClientAPI, createClient } from 'contentful-management';
-import { AppActionCallResponse } from 'contentful-management/dist/typings/entities/app-action-call';
+import {
+  AppActionCallErrorProps,
+  AppActionCallProps,
+  AppActionCallResponse,
+} from 'contentful-management/dist/typings/entities/app-action-call';
 import { parseArgs } from 'node:util';
 import util from 'util';
+
+type AppActionCallResult =
+  | AppActionCallResponse
+  | AppActionCallProps
+  | AppActionCallErrorProps
+  | undefined;
 
 class AppActionRunner {
   private readonly client: PlainClientAPI;
@@ -21,7 +31,7 @@ class AppActionRunner {
     );
   }
 
-  async run(): Promise<AppActionCallResponse | undefined> {
+  async run(): Promise<AppActionCallResult> {
     const appAction = await this.getInstalledAction();
     if (!appAction) {
       console.error('No app action found with id');
@@ -36,10 +46,8 @@ class AppActionRunner {
     return appActionResult;
   }
 
-  private async callAppAction(
-    appAction: AppActionProps
-  ): Promise<AppActionCallResponse | undefined> {
-    const result = await this.client.appActionCall.createWithResult(
+  private async callAppAction(appAction: AppActionProps): Promise<AppActionCallResult> {
+    const appActionCall = await this.client.appActionCall.createWithResult(
       {
         appActionId: appAction.sys.id,
         environmentId: this.environmentId,
@@ -51,11 +59,11 @@ class AppActionRunner {
         parameters: this.params,
       }
     );
-    if (result.status === 'succeeded') {
-      return result.result as AppActionCallResponse;
+    if (appActionCall.status === 'succeeded') {
+      return appActionCall;
     }
 
-    return undefined;
+    return appActionCall.error;
   }
 
   private async getInstalledAction(): Promise<AppActionProps | undefined> {

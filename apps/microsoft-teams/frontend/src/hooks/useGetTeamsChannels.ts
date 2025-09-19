@@ -2,7 +2,12 @@ import { useEffect, useCallback, useState } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { TeamsChannel } from '@customTypes/configPage';
-import { isListChannelsResult } from '../types/appActionResults';
+import {
+  assertIsListChannelsError,
+  assertIsListChannelsSuccess,
+  ListChannelsError,
+  ListChannelsSuccess,
+} from '../types/appActionResults';
 
 const useGetTeamsChannels = () => {
   const [channels, setChannels] = useState<TeamsChannel[]>([]);
@@ -13,7 +18,7 @@ const useGetTeamsChannels = () => {
   const getAllChannels = useCallback(async () => {
     try {
       setLoading(true);
-      const { result } = await sdk.cma.appActionCall.createWithResult(
+      const { result, error: appActionError } = await sdk.cma.appActionCall.createWithResult(
         {
           appActionId: 'msteamsListChannels',
           environmentId: sdk.ids.environment,
@@ -25,11 +30,29 @@ const useGetTeamsChannels = () => {
         }
       );
 
-      if (result && isListChannelsResult(result) && result.ok) {
-        setChannels(result.data || []);
-        setError(undefined);
+      if (result) {
+        if (assertIsListChannelsSuccess(result)) {
+          setChannels((result as ListChannelsSuccess).data || []);
+          setError(undefined);
+        } else if (assertIsListChannelsError(result)) {
+          const error = new Error(
+            `Failed to fetch Teams channels: ${(result as ListChannelsError).error.message}`
+          );
+          setError(error);
+          throw error;
+        } else {
+          const error = new Error('Failed to fetch Teams channels. An unknown error occurred.');
+          setError(error);
+          throw error;
+        }
+      } else if (appActionError) {
+        const errorMessage = new Error(
+          `There was an error invoking the app action: ${appActionError}`
+        );
+        setError(errorMessage);
+        throw errorMessage;
       } else {
-        const error = new Error('Failed to fetch Teams channels');
+        const error = new Error('Failed to fetch Teams channels. An unknown error occurred.');
         setError(error);
         throw error;
       }
