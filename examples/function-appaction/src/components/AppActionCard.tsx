@@ -6,17 +6,21 @@ import {
   CopyButton,
   Flex,
   FormControl,
+  SectionHeading,
   Stack,
   Subheading,
   Text,
   TextInput,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { AppActionProps } from 'contentful-management';
+import { AppActionCallRawResponseProps, AppActionProps } from 'contentful-management';
 import { useState } from 'react';
-import { ActionResultData, ActionResultType } from '../locations/Page';
+import { ActionResultType } from '../locations/Page';
 import ActionResult from './ActionResult';
 import { styles } from './AppActionCard.styles';
+import Forma36Form from './rjsf/Forma36Form';
+import validator from '@rjsf/validator-ajv8';
+import type { IChangeEvent } from '@rjsf/core';
 
 interface Props {
   action: AppActionProps;
@@ -26,14 +30,16 @@ const AppActionCard = (props: Props) => {
   const [actionResults, setActionResults] = useState<ActionResultType[]>([]);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [actionParameters, setActionParameters] = useState<any>({});
+  const [schemaErrorsByAction, setSchemaErrorsByAction] = useState<Record<string, number>>({});
 
   const sdk = useSDK<PageAppSDK>();
   const { action } = props;
 
   const callAction = async (action: AppActionProps) => {
     setLoadingAction(action.sys.id);
+    let response: AppActionCallRawResponseProps | undefined;
     try {
-      const result = (await sdk.cma.appActionCall.createWithResult(
+      const result = await sdk.cma.appActionCall.createWithResult(
         {
           appDefinitionId: sdk.ids.app || '',
           appActionId: action.sys.id,
@@ -41,20 +47,28 @@ const AppActionCard = (props: Props) => {
         {
           parameters: actionParameters[action.sys.id] || {},
         }
-      )) as unknown as ActionResultData;
+      );
 
       const timestamp = new Date().toLocaleString();
-      const call: any = result as any;
-      const callId = (call as any)?.sys?.id;
+      const call = result;
+      const callId = call?.sys?.id;
       const base = { timestamp, actionId: action.sys.id, callId } as const;
+      if (call.sys.appActionCallResponse) {
+        response = await sdk.cma.appActionCall.getResponse({
+          appDefinitionId: sdk.ids.app || '',
+          appActionId: action.sys.id,
+          callId,
+        });
+      }
 
       if (call?.status === 'succeeded') {
-        setActionResults((prev) => [{ success: true, data: call, ...base }, ...prev]);
+        setActionResults((prev) => [{ success: true, call, ...base }, ...prev]);
       } else if (call?.status === 'failed') {
         setActionResults((prev) => [
           {
             success: false,
-            data: call,
+            call,
+            response,
             error: call?.error || new Error('App action failed'),
             ...base,
           },
@@ -62,14 +76,20 @@ const AppActionCard = (props: Props) => {
         ]);
       } else {
         setActionResults((prev) => [
-          { success: false, data: call, error: new Error('App action still processing'), ...base },
+          {
+            success: false,
+            call,
+            response,
+            error: new Error('App action still processing'),
+            ...base,
+          },
           ...prev,
         ]);
       }
     } catch (error) {
       const timestamp = new Date().toLocaleString();
       setActionResults((prev) => [
-        { success: false, error, timestamp, actionId: action.sys.id },
+        { success: false, error, timestamp, actionId: action.sys.id, response },
         ...prev,
       ]);
     } finally {
@@ -136,12 +156,31 @@ const AppActionCard = (props: Props) => {
   };
 
   const isButtonDisabled = () => {
-    const parameters = (action as any).parameters as any[] | undefined;
-    const requiredParameters = parameters?.filter((param: any) => param.required) ?? [];
+    const actionId = action.sys.id;
+    const formData = actionParameters[actionId] || {};
 
-    const hasEmptyRequiredParameters = requiredParameters.find((param: any) => {
-      const paramValue = actionParameters[action.sys.id]?.[param.id];
-      return !paramValue;
+    const hasSchema = action.parametersSchema;
+    if (hasSchema) {
+      const schema = action.parametersSchema;
+      const requiredKeys: string[] = Array.isArray(schema?.required) ? schema.required : [];
+      const hasEmptyRequired = requiredKeys.some((key) => {
+        const value = formData?.[key];
+        if (value === undefined || value === null) return true;
+        if (typeof value === 'string' && value.trim() === '') return true;
+        if (typeof value === 'number' && Number.isNaN(value)) return true;
+        return false;
+      });
+      const hasErrors = Boolean(schemaErrorsByAction[actionId]);
+      return hasErrors || hasEmptyRequired;
+    }
+
+    const customAction = action as unknown as {
+      parameters?: Array<{ id: string; required?: boolean }>;
+    };
+    const requiredParameters = customAction.parameters?.filter((param) => param.required) || [];
+    const hasEmptyRequiredParameters = requiredParameters.some((param) => {
+      const paramValue = formData?.[param.id];
+      return paramValue === undefined || paramValue === null || paramValue === '';
     });
 
     return Boolean(hasEmptyRequiredParameters);
@@ -175,8 +214,34 @@ const AppActionCard = (props: Props) => {
           </Button>
         </Box>
       </Flex>
-      {Array.isArray((action as any).parameters) &&
-      (action as { parameters: any[] }).parameters.length ? (
+      {action.parametersSchema ? (
+        <Box marginTop="spacingS">
+          <Box marginBottom="spacingS">
+            <SectionHeading as="h4">Parameters</SectionHeading>
+          </Box>
+          <Forma36Form
+            schema={action.parametersSchema}
+            formData={actionParameters[action.sys.id] || {}}
+            validator={validator}
+            liveValidate
+            showErrorList={false}
+            uiSchema={{ 'ui:submitButtonOptions': { norender: true } }}
+            onChange={(e: IChangeEvent<Record<string, unknown>>) => {
+              setActionParameters({
+                ...actionParameters,
+                [action.sys.id]: e.formData,
+              });
+              const errorCount = Array.isArray(e.errors) ? e.errors.length : 0;
+              setSchemaErrorsByAction({
+                ...schemaErrorsByAction,
+                [action.sys.id]: errorCount,
+              });
+            }}>
+            <></>
+          </Forma36Form>
+        </Box>
+      ) : Array.isArray((action as any).parameters) &&
+        (action as { parameters: any[] }).parameters.length ? (
         <Box marginTop="spacingS">
           <Box marginBottom="spacingM">
             <Subheading as="h4">Parameters</Subheading>

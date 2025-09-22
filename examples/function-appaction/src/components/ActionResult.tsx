@@ -12,7 +12,6 @@ interface Props {
 
 const ActionResult = (props: Props) => {
   const [accordionState, setAccordionState] = useState<any>({});
-  const sdk = useSDK<PageAppSDK>();
 
   const { actionResult } = props;
   const { success } = actionResult;

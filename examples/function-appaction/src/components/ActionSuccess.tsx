@@ -15,18 +15,17 @@ interface Props {
 
 const ActionSuccess = (props: Props) => {
   const { actionResult, accordionState, handleCollapse, handleExpand, handleCopy } = props;
-  const { data, timestamp, actionId } = actionResult;
-  const statusCode = data?.response?.statusCode ?? (data as any)?.status;
+  const { call, response, timestamp, actionId } = actionResult;
+  const statusCode = response?.response?.statusCode;
 
   const responseContentType =
-    getHeaderValue((data as any)?.response?.headers as any, 'content-type') ||
-    getHeaderValue((data as any)?.response?.headers as any, 'Content-Type');
-  const responseSource = (data as any)?.response?.body ?? (data as any)?.result;
+    getHeaderValue(response?.response?.headers, 'content-type') ||
+    getHeaderValue(response?.response?.headers, 'Content-Type');
+  const responseSource = response?.response?.body ?? call?.result;
   const responseBody = formatBodyForDisplay(responseSource, responseContentType);
 
-  // Prefer structured call timestamps (sys.createdAt -> sys.updatedAt) only
-  const createdAt = (data as any)?.sys?.createdAt;
-  const updatedAt = (data as any)?.sys?.updatedAt;
+  const createdAt = call?.sys?.createdAt;
+  const updatedAt = call?.sys?.updatedAt;
   const duration = computeDuration(createdAt, updatedAt);
 
   return (
@@ -35,7 +34,9 @@ const ActionSuccess = (props: Props) => {
         title={
           <Text>
             <Badge variant="positive">Success</Badge>
-            <Text className={styles.accordionTitleMargin}>[{statusCode}]</Text> - {timestamp}
+            {statusCode && (
+              <Text className={styles.accordionTitleMargin}>[{statusCode}]</Text>
+            )} - {timestamp}
             {typeof duration === 'number' && (
               <Text className={styles.accordionTitleMargin}>
                 Duration: <strong>{duration}</strong> ms
@@ -69,10 +70,9 @@ const ActionSuccess = (props: Props) => {
                 </Flex>
               </Text>
               <Text>
-                {(data as any)?.sys?.updatedAt && (
+                {call?.sys?.updatedAt && (
                   <>
-                    <strong>Completed at:</strong>{' '}
-                    {new Date((data as any).sys.updatedAt).toLocaleString()}
+                    <strong>Completed at:</strong> {new Date(call.sys.updatedAt).toLocaleString()}
                   </>
                 )}
               </Text>
