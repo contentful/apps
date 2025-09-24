@@ -13,9 +13,8 @@ import {
   TextInput,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { AppActionCallRawResponseProps, AppActionProps } from 'contentful-management';
+import { AppActionCallProps, AppActionProps } from 'contentful-management';
 import { useState } from 'react';
-import { ActionResultType } from '../locations/Page';
 import ActionResult from './ActionResult';
 import { styles } from './AppActionCard.styles';
 import Forma36Form from './rjsf/Forma36Form';
@@ -27,7 +26,7 @@ interface Props {
 }
 
 const AppActionCard = (props: Props) => {
-  const [actionResults, setActionResults] = useState<ActionResultType[]>([]);
+  const [appActionCalls, setAppActionCalls] = useState<AppActionCallProps[]>([]);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [actionParameters, setActionParameters] = useState<any>({});
   const [schemaErrorsByAction, setSchemaErrorsByAction] = useState<Record<string, number>>({});
@@ -37,9 +36,8 @@ const AppActionCard = (props: Props) => {
 
   const callAction = async (action: AppActionProps) => {
     setLoadingAction(action.sys.id);
-    let response: AppActionCallRawResponseProps | undefined;
     try {
-      const result = await sdk.cma.appActionCall.createWithResult(
+      const appActionCallWithResult = await sdk.cma.appActionCall.createWithResult(
         {
           appDefinitionId: sdk.ids.app || '',
           appActionId: action.sys.id,
@@ -49,49 +47,9 @@ const AppActionCard = (props: Props) => {
         }
       );
 
-      const timestamp = new Date().toLocaleString();
-      const call = result;
-      const callId = call?.sys?.id;
-      const base = { timestamp, actionId: action.sys.id, callId } as const;
-      if (call.sys.appActionCallResponse) {
-        response = await sdk.cma.appActionCall.getResponse({
-          appDefinitionId: sdk.ids.app || '',
-          appActionId: action.sys.id,
-          callId,
-        });
-      }
-
-      if (call?.status === 'succeeded') {
-        setActionResults((prev) => [{ success: true, call, ...base }, ...prev]);
-      } else if (call?.status === 'failed') {
-        setActionResults((prev) => [
-          {
-            success: false,
-            call,
-            response,
-            error: call?.error || new Error('App action failed'),
-            ...base,
-          },
-          ...prev,
-        ]);
-      } else {
-        setActionResults((prev) => [
-          {
-            success: false,
-            call,
-            response,
-            error: new Error('App action still processing'),
-            ...base,
-          },
-          ...prev,
-        ]);
-      }
+      setAppActionCalls((prev) => [appActionCallWithResult, ...prev]);
     } catch (error) {
-      const timestamp = new Date().toLocaleString();
-      setActionResults((prev) => [
-        { success: false, error, timestamp, actionId: action.sys.id, response },
-        ...prev,
-      ]);
+      sdk.notifier.error(`Failed to call action: ${error}`);
     } finally {
       setLoadingAction(null);
     }
@@ -255,10 +213,15 @@ const AppActionCard = (props: Props) => {
         </Box>
       ) : null}
 
-      {actionResults
-        .filter((result) => result.actionId === action.sys.id)
-        .map((result) => (
-          <ActionResult actionResult={result} key={`${result.timestamp}`} />
+      {appActionCalls
+        .filter(
+          (appActionCallWithResult) => appActionCallWithResult.sys.action.sys.id === action.sys.id
+        )
+        .map((appActionCallWithResult) => (
+          <ActionResult
+            appActionCall={appActionCallWithResult}
+            key={`${appActionCallWithResult.sys.createdAt}`}
+          />
         ))}
     </Box>
   );
