@@ -298,7 +298,7 @@ const Page = () => {
 
         let searchFilteredEntries;
         if (!searchQuery.trim() || !isNumericSearch(searchQuery)) {
-          searchFilteredEntries = entries;
+          searchFilteredEntries = statusFilteredEntries;
         } else {
           searchFilteredEntries = filterEntriesByNumericSearch(
             statusFilteredEntries,
