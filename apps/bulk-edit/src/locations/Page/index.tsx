@@ -194,7 +194,7 @@ const Page = () => {
       ...getStatusFilter(statusLabels),
     };
 
-    if (searchQuery.trim()) {
+    if (!isNumericSearch(searchQuery) && searchQuery.trim()) {
       query.query = searchQuery.trim();
     }
 

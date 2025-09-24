@@ -286,7 +286,9 @@ export async function fetchEntriesWithBatching(
 }
 
 export const isNumericSearch = (query: string): boolean => {
-  return /^\d+$/.test(query.trim());
+  const decimalPattern = /^-?\d*\.?\d+$/;
+  const integerPattern = /^-?\d+$/;
+  return decimalPattern.test(query.trim()) || integerPattern.test(query.trim());
 };
 
 export const filterEntriesByNumericSearch = (
@@ -298,7 +300,8 @@ export const filterEntriesByNumericSearch = (
   return entries.filter((entry) => {
     // Search in all Symbol fields (like displayName)
     return fields.some((field) => {
-      if (field.type !== 'Symbol') return false;
+      if (field.type !== 'Symbol' && field.type !== 'Integer' && field.type !== 'Number')
+        return false;
 
       const fieldValue = entry.fields[field.id]?.[field.locale || defaultLocale];
       if (fieldValue === undefined || fieldValue === null) return false;
