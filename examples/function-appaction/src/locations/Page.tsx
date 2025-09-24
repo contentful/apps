@@ -17,16 +17,6 @@ import useGetAppActions from '../hooks/useGetAppActions';
 import tokens from '@contentful/f36-tokens';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { AppActionCallProps, AppActionCallRawResponseProps } from 'contentful-management';
-export interface ActionResultType {
-  success: boolean;
-  call?: AppActionCallProps;
-  response?: AppActionCallRawResponseProps;
-  error?: unknown;
-  timestamp: string;
-  actionId: string;
-  callId?: string;
-}
 
 const Page = () => {
   const { getAllAppActions, appActions, loading, error } = useGetAppActions();

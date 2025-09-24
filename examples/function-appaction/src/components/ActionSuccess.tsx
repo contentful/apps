@@ -1,12 +1,12 @@
 import { Accordion, Flex, IconButton, Stack, Text, Badge } from '@contentful/f36-components';
-import { getHeaderValue, formatBodyForDisplay, computeDuration } from '../utils/response';
+import { formatBodyForDisplay, computeDuration } from '../utils/response';
 import RawResponseViewer from './RawResponseViewer';
-import { ActionResultType } from '../locations/Page';
 import { CopyIcon } from '@contentful/f36-icons';
 import { styles } from './Action.styles';
+import { AppActionCallProps } from 'contentful-management';
 
 interface Props {
-  actionResult: ActionResultType;
+  appActionCall: AppActionCallProps;
   accordionState: any;
   handleExpand: (itemKey: string) => void;
   handleCollapse: (itemKey: string) => void;
@@ -14,29 +14,24 @@ interface Props {
 }
 
 const ActionSuccess = (props: Props) => {
-  const { actionResult, accordionState, handleCollapse, handleExpand, handleCopy } = props;
-  const { call, response, timestamp, actionId } = actionResult;
-  const statusCode = response?.response?.statusCode;
+  const { appActionCall, accordionState, handleCollapse, handleExpand, handleCopy } = props;
+  if (appActionCall.sys.status !== 'succeeded') {
+    throw new Error('App action call is not succeeded');
+  }
 
-  const responseContentType =
-    getHeaderValue(response?.response?.headers, 'content-type') ||
-    getHeaderValue(response?.response?.headers, 'Content-Type');
-  const responseSource = response?.response?.body ?? call?.result;
-  const responseBody = formatBodyForDisplay(responseSource, responseContentType);
-
-  const createdAt = call?.sys?.createdAt;
-  const updatedAt = call?.sys?.updatedAt;
+  const responseBody = formatBodyForDisplay(appActionCall.sys.result);
+  const createdAt = appActionCall.sys.createdAt;
+  const updatedAt = appActionCall.sys.updatedAt;
   const duration = computeDuration(createdAt, updatedAt);
+  const timestamp = appActionCall.sys.createdAt;
+  const actionId = appActionCall.sys.action.sys.id;
 
   return (
     <Accordion key={`${actionId}-${timestamp}`} className={styles.accordion}>
       <Accordion.Item
         title={
           <Text>
-            <Badge variant="positive">Success</Badge>
-            {statusCode && (
-              <Text className={styles.accordionTitleMargin}>[{statusCode}]</Text>
-            )} - {timestamp}
+            <Badge variant="positive">Success</Badge>- {updatedAt}
             {typeof duration === 'number' && (
               <Text className={styles.accordionTitleMargin}>
                 Duration: <strong>{duration}</strong> ms
@@ -70,14 +65,18 @@ const ActionSuccess = (props: Props) => {
                 </Flex>
               </Text>
               <Text>
-                {call?.sys?.updatedAt && (
+                {appActionCall.sys.updatedAt && (
                   <>
-                    <strong>Completed at:</strong> {new Date(call.sys.updatedAt).toLocaleString()}
+                    <strong>Completed at:</strong>{' '}
+                    {new Date(appActionCall.sys.updatedAt).toLocaleString()}
                   </>
                 )}
               </Text>
-              {actionResult.callId && (
-                <RawResponseViewer actionId={actionId} callId={actionResult.callId} />
+              {appActionCall.sys.appActionCallResponse && (
+                <RawResponseViewer
+                  actionId={actionId}
+                  callId={appActionCall.sys.appActionCallResponse.sys.id}
+                />
               )}
             </Stack>
           </Accordion.Item>
