@@ -28,7 +28,6 @@ import { UndoBulkEditModal } from './components/UndoBulkEditModal';
 import { SearchBar } from './components/SearchBar';
 import {
   fetchEntriesWithBatching,
-  getStatusesOptions,
   getEntryFieldValue,
   getStatusFromEntry,
   getStatusFlags,
@@ -37,6 +36,7 @@ import {
   updateEntryFieldLocalized,
   filterEntriesByNumericSearch,
   isNumericSearch,
+  STATUSES,
 } from './utils/entryUtils';
 import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
@@ -50,9 +50,10 @@ const getFieldsMapped = (fields: ContentTypeField[]) => {
   }));
 };
 
-const getStatusesMapped = (): FilterOption[] => {
-  return getStatusesOptions().map((s) => ({ label: s, value: s.toLowerCase() }));
-};
+const statusOptions: FilterOption[] = STATUSES.map((status) => ({
+  label: status,
+  value: status.toLowerCase(),
+}));
 
 const Page = () => {
   const sdk = useSDK();
@@ -79,21 +80,21 @@ const Page = () => {
   const [totalUpdateCount, setTotalUpdateCount] = useState<number>(0);
   const [editionCount, setEditionCount] = useState<number>(0);
   const [selectedColumns, setSelectedColumns] = useState<FilterOption[]>([]);
-  const [selectedStatuses, setSelectedStatuses] = useState<FilterOption[]>(getStatusesMapped);
+  const [selectedStatuses, setSelectedStatuses] = useState<FilterOption[]>(statusOptions);
   const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [initialTotal, setInitialTotal] = useState(0);
 
   const hasActiveFilters = () => {
     const hasSearchQuery = searchQuery.trim() !== '';
-    const hasStatusFilter = selectedStatuses.length !== getStatusesMapped().length;
+    const hasStatusFilter = selectedStatuses.length !== statusOptions.length;
     const hasColumnFilter = selectedColumns.length !== getFieldsMapped(fields).length;
     return hasSearchQuery || hasStatusFilter || hasColumnFilter;
   };
 
   const resetFilters = () => {
     setSearchQuery('');
-    setSelectedStatuses(getStatusesMapped());
+    setSelectedStatuses(statusOptions);
     setSelectedColumns(getFieldsMapped(fields));
     setActivePage(0);
   };
@@ -171,9 +172,11 @@ const Page = () => {
     const { hasDraft, hasPublished, hasChanged } = getStatusFlags(statusLabels);
 
     // If we need client-side filtering, fetch all entries
+    const allStatusesSelected = hasDraft && hasPublished && hasChanged;
+    const isPublishedOrChanged = hasPublished || hasChanged;
+
     return (
-      (selectedStatuses.length > 0 &&
-        ((hasDraft && (hasPublished || hasChanged)) || (hasPublished && hasChanged))) ||
+      (selectedStatuses.length > 0 && !allStatusesSelected && isPublishedOrChanged) ||
       isNumericSearch(searchQuery)
     );
   }
@@ -181,14 +184,13 @@ const Page = () => {
   const buildQuery = (
     sortOption: string,
     displayField: string | null,
-    statusLabels: string[],
-    fetchAll: boolean = false
+    statusLabels: string[]
   ): QueryOptions => {
     const query: QueryOptions = {
       content_type: selectedContentTypeId,
       order: getOrder(sortOption, displayField),
-      skip: fetchAll || needsClientFiltering() ? 0 : activePage * itemsPerPage,
-      limit: fetchAll || needsClientFiltering() ? 1000 : itemsPerPage,
+      skip: needsClientFiltering() ? 0 : activePage * itemsPerPage,
+      limit: needsClientFiltering() ? 1000 : itemsPerPage,
       ...getStatusFilter(statusLabels),
     };
 
@@ -564,7 +566,7 @@ const Page = () => {
               onContentTypeSelect={(newCT) => {
                 setSelectedContentTypeId(newCT);
                 setSortOption(SORT_OPTIONS[0].value);
-                setSelectedStatuses(getStatusesMapped);
+                setSelectedStatuses(statusOptions);
                 setActivePage(0);
                 setSearchQuery('');
                 setInitialTotal(0);
@@ -602,7 +604,7 @@ const Page = () => {
                   />
                   <FilterMultiselect
                     id="status"
-                    options={getStatusesMapped()}
+                    options={statusOptions}
                     selectedItems={selectedStatuses}
                     setSelectedItems={(statuses) => {
                       setSelectedStatuses(statuses);
