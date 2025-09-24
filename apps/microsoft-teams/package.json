@@ -11,16 +11,18 @@
     "build-app-actions:dev": "cd app-actions && npm ci && cd .. && NODE_ENV=development node build-actions.js",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 7lcE2IF8TiXXKiMj2UGM8k --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 73UaKZLqfCJTTqayKn73Rv --token ${TEST_CMA_TOKEN}",
-    "deploy:sandbox": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 1qjevmbpYM840jFygQREbD --token ${TEST_CMA_TOKEN}",
+    "deploy:sandbox": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 4BaHsPHryAsKkDuNFdKRVM --token ${TEST_CMA_TOKEN}",
     "call-app-action": "npx ts-node scripts/call-app-action.ts"
   },
   "dependencies": {
-    "@contentful/app-scripts": "^1.30.1",
+    "@contentful/app-scripts": "^1.31.0",
     "dotenv": "^16.3.1",
-    "esbuild": "^0.23.0"
+    "esbuild": "^0.23.0",
+    "type-fest": "^4.41.0"
   },
   "devDependencies": {
-    "contentful-management": "^11.3.0",
+    "@types/json-schema": "^7.0.15",
+    "contentful-management": "^11.58.1",
     "ts-node": "^10.9.1"
   }
 }
