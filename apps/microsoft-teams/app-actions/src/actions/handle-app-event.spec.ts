@@ -4,14 +4,12 @@ import sinonChai from 'sinon-chai';
 import { AppInstallationProps } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import {
-  AppActionCallResponseError,
-  AppActionCallResponseSuccess,
   EntryActivity,
   SendEntryActivityMessageResult,
   MsTeamsBotServiceResponse,
-  MessageResponse,
   SendWorkflowUpdateMessageResult,
 } from '../types';
+import { MessageResponse, AppActionResultSuccess, AppActionResultError } from '../../../types';
 import { makeMockAppActionCallContext, mockAppInstallation, mockEntry } from '../../test/mocks';
 import { handler } from './handle-app-event';
 import helpers from '../helpers';
@@ -53,7 +51,7 @@ describe('handle-app-event.handler', () => {
         eventDatetime: '2024-01-18T21:43:54.267Z',
       },
       context
-    )) as AppActionCallResponseSuccess<SendEntryActivityMessageResult[]>;
+    )) as AppActionResultSuccess<SendEntryActivityMessageResult[]>;
 
     expect(result).to.have.property('ok', true);
     expect(result.data).to.deep.include({
@@ -89,7 +87,7 @@ describe('handle-app-event.handler', () => {
             eventDatetime: '2024-01-18T21:43:54.267Z',
           },
           context
-        )) as AppActionCallResponseSuccess<SendWorkflowUpdateMessageResult>;
+        )) as AppActionResultSuccess<SendWorkflowUpdateMessageResult>;
 
         expect(result.ok).to.equal(true);
         expect(result.data.sendWorkflowUpdateResult.ok).to.equal(true);
@@ -113,7 +111,7 @@ describe('handle-app-event.handler', () => {
           eventDatetime: '2024-01-18T21:43:54.267Z',
         },
         context
-      )) as AppActionCallResponseError;
+      )) as AppActionResultError;
 
       expect(result).to.have.property('ok', false);
       expect(result.error).to.have.property('type', 'Error');

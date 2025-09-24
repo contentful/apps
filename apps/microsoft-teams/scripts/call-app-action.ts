@@ -1,7 +1,17 @@
 import { AppActionProps, PlainClientAPI, createClient } from 'contentful-management';
-import { WebhookCallDetailsProps } from 'contentful-management/dist/typings/entities/webhook';
+import {
+  AppActionCallErrorProps,
+  AppActionCallProps,
+  AppActionCallResponse,
+} from 'contentful-management/dist/typings/entities/app-action-call';
 import { parseArgs } from 'node:util';
 import util from 'util';
+
+type AppActionCallResult =
+  | AppActionCallResponse
+  | AppActionCallProps
+  | AppActionCallErrorProps
+  | undefined;
 
 class AppActionRunner {
   private readonly client: PlainClientAPI;
@@ -11,7 +21,8 @@ class AppActionRunner {
     private readonly appActionId: string,
     private readonly spaceId: string,
     private readonly environmentId: string,
-    private readonly params: Record<string, any>
+    private readonly params: Record<string, any>,
+    private readonly useResponse: boolean
   ) {
     this.client = createClient(
       {
@@ -21,7 +32,7 @@ class AppActionRunner {
     );
   }
 
-  async run(): Promise<WebhookCallDetailsProps | undefined> {
+  async run(): Promise<AppActionCallResult> {
     const appAction = await this.getInstalledAction();
     if (!appAction) {
       console.error('No app action found with id');
@@ -36,21 +47,40 @@ class AppActionRunner {
     return appActionResult;
   }
 
-  private async callAppAction(
-    appAction: AppActionProps
-  ): Promise<WebhookCallDetailsProps | undefined> {
-    return await this.client.appActionCall.createWithResponse(
-      {
-        appActionId: appAction.sys.id,
-        environmentId: this.environmentId,
-        spaceId: this.spaceId,
-        appDefinitionId: appAction.sys.appDefinition.sys.id,
-        retries: 15,
-      },
-      {
-        parameters: this.params,
+  private async callAppAction(appAction: AppActionProps): Promise<AppActionCallResult> {
+    if (!this.useResponse) {
+      const appActionCall = await this.client.appActionCall.createWithResult(
+        {
+          appActionId: appAction.sys.id,
+          environmentId: this.environmentId,
+          spaceId: this.spaceId,
+          appDefinitionId: appAction.sys.appDefinition.sys.id,
+          retries: 15,
+        },
+        {
+          parameters: this.params,
+        }
+      );
+      if (appActionCall.status === 'succeeded') {
+        return appActionCall;
       }
-    );
+
+      return appActionCall.error;
+    } else {
+      const appActionCall = await this.client.appActionCall.createWithResponse(
+        {
+          appActionId: appAction.sys.id,
+          environmentId: this.environmentId,
+          spaceId: this.spaceId,
+          appDefinitionId: appAction.sys.appDefinition.sys.id,
+          retries: 15,
+        },
+        {
+          parameters: this.params,
+        }
+      );
+      return appActionCall;
+    }
   }
 
   private async getInstalledAction(): Promise<AppActionProps | undefined> {
@@ -91,6 +121,11 @@ const main = async () => {
         short: 'p',
         default: '{}',
       },
+      useResponse: {
+        type: 'string',
+        default: 'true',
+        short: 'r',
+      },
     },
   });
   const accessToken = process.env['ACCESS_TOKEN'] || args.accessToken;
@@ -128,7 +163,8 @@ const main = async () => {
     appActionId,
     spaceId,
     environmentId,
-    callParams
+    callParams,
+    args.useResponse === 'true'
   );
 
   return appActionRunner.run();

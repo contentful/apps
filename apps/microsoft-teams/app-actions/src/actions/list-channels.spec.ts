@@ -4,7 +4,8 @@ import sinonChai from 'sinon-chai';
 import { AppInstallationProps, SysLink } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { handler } from './list-channels';
-import { AppActionCallResponseSuccess, Channel } from '../types';
+import { AppActionResultSuccess } from '../../../types';
+import { Channel } from '../../../types';
 import { makeMockAppActionCallContext, mockChannels } from '../../test/mocks';
 import helpers from '../helpers';
 
@@ -22,6 +23,7 @@ describe('listChannels.handler', () => {
         appDefinition: {} as SysLink,
         environment: {} as SysLink,
         space: {} as SysLink,
+        organization: {} as SysLink,
         version: 1,
         createdAt: 'createdAt',
         updatedAt: 'updatedAt',
@@ -44,7 +46,7 @@ describe('listChannels.handler', () => {
         tenantId,
       },
       context
-    )) as AppActionCallResponseSuccess<Channel[]>;
+    )) as AppActionResultSuccess<Channel[]>;
 
     expect(result).to.have.property('ok', true);
     expect(result).to.have.property('data', mockChannels);
