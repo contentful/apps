@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import { withAsyncAppActionErrorHandling } from './error-handling';
-import { AppActionCallResponse } from '../types';
+import { AppActionResult } from '../../../types';
 
 describe('withAsyncAppActionErrorHandling', () => {
-  const testHandler = async (arg: string): Promise<AppActionCallResponse<string>> => {
+  const testHandler = async (arg: string): Promise<AppActionResult<string>> => {
     return { ok: true, data: arg };
   };
 
@@ -14,7 +14,7 @@ describe('withAsyncAppActionErrorHandling', () => {
   });
 
   describe('when handler throws an error', () => {
-    const testHandler = async (_arg: string): Promise<AppActionCallResponse<string>> => {
+    const testHandler = async (_arg: string): Promise<AppActionResult<string>> => {
       throw new TypeError('boom!');
     };
 

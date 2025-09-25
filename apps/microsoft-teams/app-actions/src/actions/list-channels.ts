@@ -1,22 +1,20 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import { AppActionCallResponse, Channel } from '../types';
+import { AppActionResult, Channel } from '../../../types';
 import { fetchTenantId } from '../utils';
 import helpers from '../helpers';
 import { withAsyncAppActionErrorHandling } from '../helpers/error-handling';
 
 export const handler = withAsyncAppActionErrorHandling(
-  async (
-    _payload: {},
-    context: AppActionCallContext
-  ): Promise<AppActionCallResponse<Channel[]>> => {
+  async (_payload: {}, context: AppActionCallContext): Promise<AppActionResult<Channel[]>> => {
     const {
       cma,
-      appActionCallContext: { appInstallationId, userId, environmentId, spaceId },
+      appActionCallContext: { appInstallationId: appDefinitionId, userId, environmentId, spaceId },
     } = context;
 
-    const tenantId = await fetchTenantId(cma, appInstallationId);
-    const channels = await helpers.getChannelsList(tenantId, {
-      appInstallationId,
+    const tenantId = await fetchTenantId(cma, appDefinitionId);
+    let channels: Channel[] = [];
+    channels = await helpers.getChannelsList(tenantId, {
+      appInstallationId: appDefinitionId,
       userId,
       environmentId,
       spaceId,

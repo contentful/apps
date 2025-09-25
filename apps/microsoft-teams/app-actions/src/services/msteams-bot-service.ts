@@ -1,12 +1,12 @@
 import {
   AppActionRequestContext,
   EntryActivityMessage,
-  MessageResponse,
   MsTeamsBotServiceResponse,
   TeamInstallation,
   TestMessage,
   WorkflowUpdateMessage,
 } from '../types';
+import { MessageResponse } from '../../../types';
 
 export class MsTeamsBotService {
   constructor(public readonly botServiceUrl: string, public readonly apiKey: string) {}

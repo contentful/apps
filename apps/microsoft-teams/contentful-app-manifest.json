@@ -9,23 +9,251 @@
       "path": "actions/handle-app-event.js",
       "entryFile": "./app-actions/src/actions/handle-app-event.ts",
       "allowNetworks": [],
-      "parameters": [
-        {
-          "id": "payload",
-          "name": "payload",
-          "type": "Symbol"
+      "parametersSchema": {
+        "type": "object",
+        "properties": {
+          "payload": {
+            "type": "string",
+            "title": "Event Payload",
+            "description": "JSON string containing the event data to be processed",
+            "minLength": 1
+          },
+          "topic": {
+            "type": "string",
+            "title": "Event Topic",
+            "description": "The type of event being processed (e.g., entry creation, update, deletion)",
+            "minLength": 1
+          },
+          "eventDatetime": {
+            "type": "string",
+            "title": "Event Timestamp",
+            "description": "ISO datetime string when the event occurred"
+          }
         },
-        {
-          "id": "topic",
-          "name": "topic",
-          "type": "Symbol"
+        "required": [
+          "payload",
+          "topic",
+          "eventDatetime"
+        ],
+        "additionalProperties": false
+      },
+      "resultSchema": {
+        "type": "object",
+        "title": "AppActionCallResponse",
+        "description": "Response from app action call - can be success with entry activities, success with workflow update, or error",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Indicates if the operation was successful"
+          },
+          "data": {
+            "description": "Response data when successful - either array of entry activity results or single workflow update result",
+            "type": ["object", "array"],
+            "properties": {
+              "workflowUpdateMessage": {
+                "type": "object",
+                "properties": {
+                  "channel": {
+                    "type": "object",
+                    "properties": {
+                      "teamId": {
+                        "type": "string"
+                      },
+                      "channelId": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["teamId", "channelId"],
+                    "additionalProperties": false
+                  },
+                  "workflowUpdate": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string"
+                      },
+                      "currentStep": {
+                        "type": "string"
+                      },
+                      "currentStepColor": {
+                        "type": "string"
+                      },
+                      "previousStep": {
+                        "type": "string"
+                      },
+                      "previousStepColor": {
+                        "type": "string"
+                      },
+                      "contentType": {
+                        "type": "string"
+                      },
+                      "callToActionUrl": {
+                        "type": "string"
+                      },
+                      "eventDatetime": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["title", "currentStep", "currentStepColor", "previousStep", "previousStepColor", "contentType", "callToActionUrl", "eventDatetime"],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["channel", "workflowUpdate"],
+                "additionalProperties": false
+              },
+              "sendWorkflowUpdateResult": {
+                "type": "object",
+                "properties": {
+                  "ok": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "messageResponseId": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["messageResponseId"],
+                    "additionalProperties": false
+                  },
+                  "error": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "message": {
+                        "type": ["object", "string"],
+                        "description": "Human-readable error message",
+                        "additionalProperties": true
+                      },
+                      "details": {
+                        "type": "object"
+                      }
+                    },
+                    "required": ["type", "message"],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["ok"],
+                "additionalProperties": false
+              }
+            },
+            "items": {
+              "type": "object",
+              "properties": {
+                "entryActivityMessage": {
+                  "type": "object",
+                  "properties": {
+                    "channel": {
+                      "type": "object",
+                      "properties": {
+                        "teamId": {
+                          "type": "string"
+                        },
+                        "channelId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": ["teamId", "channelId"],
+                      "additionalProperties": false
+                    },
+                    "entryActivity": {
+                      "type": "object",
+                      "properties": {
+                        "contentTypeName": {
+                          "type": "string"
+                        },
+                        "entryTitle": {
+                          "type": "string"
+                        },
+                        "action": {
+                          "type": "string"
+                        },
+                        "eventDatetime": {
+                          "type": "string"
+                        },
+                        "entryUrl": {
+                          "type": "string"
+                        },
+                        "entryId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": ["contentTypeName", "entryTitle", "action", "eventDatetime", "entryUrl", "entryId"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["channel", "entryActivity"],
+                  "additionalProperties": false
+                },
+                "sendMessageResult": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "messageResponseId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": ["messageResponseId"],
+                      "additionalProperties": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": ["object", "string"],
+                          "description": "Human-readable error message",
+                          "additionalProperties": true
+                        },
+                        "details": {
+                          "type": "object"
+                        }
+                      },
+                      "required": ["type", "message"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok"],
+                  "additionalProperties": false
+                }
+              },
+              "required": ["entryActivityMessage", "sendMessageResult"],
+              "additionalProperties": false
+            }
+          },
+          "error": {
+            "type": "object",
+            "description": "Error details when operation failed",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "message": {
+                "type": ["object", "string"],
+                "description": "Human-readable error message",
+                "additionalProperties": true
+              },
+              "details": {
+                "type": "object"
+              }
+            },
+            "required": ["type", "message"],
+            "additionalProperties": false
+          }
         },
-        {
-          "id": "eventDatetime",
-          "name": "eventDatetime",
-          "type": "Symbol"
-        }
-      ]
+        "required": ["ok"],
+        "additionalProperties": false
+      }
     },
     {
       "id": "msteamsSendTestMessage",
@@ -36,23 +264,83 @@
       "path": "actions/send-test.js",
       "entryFile": "./app-actions/src/actions/send-test.ts",
       "allowNetworks": [],
-      "parameters": [
-        {
-          "id": "channelId",
-          "name": "channelId",
-          "type": "Symbol"
+      "parametersSchema": {
+        "type": "object",
+        "properties": {
+          "channelId": {
+            "type": "string",
+            "title": "Channel ID",
+            "description": "Microsoft Teams channel identifier where the test message will be sent",
+            "minLength": 1
+          },
+          "teamId": {
+            "type": "string",
+            "title": "Team ID",
+            "description": "Microsoft Teams team identifier that contains the target channel",
+            "minLength": 1
+          },
+          "contentTypeId": {
+            "type": "string",
+            "title": "Content Type ID",
+            "description": "Contentful content type identifier to include in the test message",
+            "minLength": 1
+          }
         },
-        {
-          "id": "teamId",
-          "name": "teamId",
-          "type": "Symbol"
+        "required": [
+          "channelId",
+          "teamId",
+          "contentTypeId"
+        ],
+        "additionalProperties": false
+      },
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Indicates whether the operation was successful"
+          },
+          "data": {
+            "type": "object",
+            "description": "Success response data (present when ok: true)",
+            "properties": {
+              "messageResponseId": {
+                "type": "string",
+                "description": "Microsoft Teams message ID"
+              }
+            }
+          },
+          "error": {
+            "type": "object",
+            "description": "Error information (present when ok: false)",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Error type identifier"
+              },
+              "message": {
+                "type": ["object", "string"],
+                "description": "Human-readable error message",
+                "additionalProperties": true
+              },
+              "details": {
+                "type": "object",
+                "description": "Additional error details",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "type",
+              "message"
+            ],
+            "additionalProperties": false
+          }
         },
-        {
-          "id": "contentTypeId",
-          "name": "contentTypeId",
-          "type": "Symbol"
-        }
-      ]
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      }
     },
     {
       "id": "msteamsListChannels",
@@ -63,13 +351,80 @@
       "path": "actions/list-channels.js",
       "entryFile": "./app-actions/src/actions/list-channels.ts",
       "allowNetworks": [],
-      "parameters": [
-        {
-          "id": "tenantId",
-          "name": "tenantId",
-          "type": "Symbol"
-        }
-      ]
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether channels were successfully retrieved"
+          },
+          "data": {
+            "type": "array",
+            "description": "List of available channels. Present when ok: true",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Channel ID"
+                },
+                "tenantId": {
+                  "type": "string",
+                  "description": "Channel tenant ID"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Channel name"
+                },
+                "teamId": {
+                  "type": "string",
+                  "description": "Parent team ID"
+                },
+                "teamName": {
+                  "type": "string",
+                  "description": "Parent team name"
+                }
+              },
+              "required": [
+                "id",
+                "tenantId",
+                "name",
+                "teamId",
+                "teamName"
+              ]
+            }
+          },
+          "error": {
+            "type": "object",
+            "description": "Error information (present when ok: false)",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Error type identifier"
+              },
+              "message": {
+                "type": ["object", "string"],
+                "description": "Human-readable error message",
+                "additionalProperties": true
+              },
+              "details": {
+                "type": "object",
+                "description": "Additional error details",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "type",
+              "message"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      }
     }
   ]
 }
