@@ -1,6 +1,7 @@
 import { config } from '../config';
 import { ApiError } from '../errors';
-import { AppActionRequestContext, Channel, TeamInstallation } from '../types';
+import { AppActionRequestContext, TeamInstallation } from '../types';
+import { Channel } from '../../../types';
 
 const GENERAL_CHANNEL_NAME = 'general';
 

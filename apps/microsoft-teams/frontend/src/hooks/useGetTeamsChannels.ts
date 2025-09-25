@@ -2,6 +2,11 @@ import { useEffect, useCallback, useState } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { TeamsChannel } from '@customTypes/configPage';
+import {
+  assertAppActionResult,
+  assertAppActionResultFailure,
+  assertAppActionResultSuccess,
+} from '../utils/assertAppActionResult';
 
 const useGetTeamsChannels = () => {
   const [channels, setChannels] = useState<TeamsChannel[]>([]);
@@ -12,24 +17,42 @@ const useGetTeamsChannels = () => {
   const getAllChannels = useCallback(async () => {
     try {
       setLoading(true);
-      const { response } = await sdk.cma.appActionCall.createWithResponse(
+      const { sys: appActionCallSys } = await sdk.cma.appActionCall.createWithResult(
         {
           appActionId: 'msteamsListChannels',
           environmentId: sdk.ids.environment,
           spaceId: sdk.ids.space,
           appDefinitionId: sdk.ids.app!,
-          userId: sdk.ids.user,
         },
         {
           parameters: {},
         }
       );
-      const body = JSON.parse(response.body);
-      if (body.ok) {
-        setChannels(body.data);
-        setError(undefined);
+
+      if (appActionCallSys.status === 'succeeded') {
+        const { result: appActionResult } = appActionCallSys;
+        assertAppActionResult<TeamsChannel[]>(appActionResult);
+
+        if (appActionResult.ok) {
+          assertAppActionResultSuccess<TeamsChannel[]>(appActionResult);
+          setChannels(appActionResult.data || []);
+          setError(undefined);
+        } else {
+          assertAppActionResultFailure<TeamsChannel[]>(appActionResult);
+          const error = new Error(
+            `Failed to fetch Teams channels: ${appActionResult.error.message}`
+          );
+          setError(error);
+          throw error;
+        }
+      } else if (appActionCallSys.status === 'failed') {
+        const errorMessage = new Error(
+          `There was an error invoking the app action: ${appActionCallSys.error?.message}`
+        );
+        setError(errorMessage);
+        throw errorMessage;
       } else {
-        const error = new Error('Failed to fetch Teams channels');
+        const error = new Error('Failed to fetch Teams channels. An unknown error occurred.');
         setError(error);
         throw error;
       }
