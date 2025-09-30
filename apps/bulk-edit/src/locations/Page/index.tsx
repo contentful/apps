@@ -622,7 +622,12 @@ const Page = () => {
                     options={getFieldsMapped(fields)}
                     selectedItems={selectedColumns}
                     setSelectedItems={(selectedColumns) => {
-                      setSelectedColumns(selectedColumns);
+                      const sortedSelectedColumns = selectedColumns.toSorted((a, b) => {
+                        const aIndex = fields.findIndex((f) => f.uniqueId === a.value);
+                        const bIndex = fields.findIndex((f) => f.uniqueId === b.value);
+                        return aIndex - bIndex;
+                      });
+                      setSelectedColumns(sortedSelectedColumns);
                       setActivePage(0);
                     }}
                     disabled={shouldDisableFilters()}
