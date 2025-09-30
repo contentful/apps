@@ -9,6 +9,48 @@ import {
 } from './types';
 import { getMockShopUrl, withBadge, withUrn } from './utils';
 
+// Basic Product fragment for standard queries
+const BASIC_PRODUCT_FRAGMENT = /* GraphQL */ `
+  fragment BasicProductFields on Product {
+    id
+    title
+    featuredImage {
+      url
+      altText
+    }
+  }
+`;
+
+// Extended Product fragment for Content Delivery/Preview API
+const EXTENDED_PRODUCT_FRAGMENT = /* GraphQL */ `
+  fragment ExtendedProductFields on Product {
+    id
+    title
+    description
+    compareAtPriceRange {
+      maxVariantPrice {
+        amount
+        currencyCode
+      }
+    }
+    adjacentVariants {
+      availableForSale
+      barcode
+      currentlyNotInStock
+      image {
+        url
+      }
+    }
+    featuredImage {
+      id
+      url
+      altText
+      width
+      height
+    }
+  }
+`;
+
 const resourceTypeMappingHandler: MappingHandler = (event) => {
   const mappings = event.resourceTypes.map(({ resourceTypeId }) => ({
     resourceTypeId,
@@ -92,22 +134,32 @@ const lookupHandler: ResourcesLookupHandler = async (event, context) => {
 
   const mockShopUrl = getMockShopUrl(context);
 
-  const response = await fetch(mockShopUrl, {
-    body: JSON.stringify({
-      query: /* GraphQL */ `
-        query searchProducts($ids: [ID!]!) {
+  const isContentDeliveryApi = ['cda', 'cpa'].includes(
+    // @ts-ignore - context.originalRequest is not in the types yet
+    context.originalRequest?.headers['contentful-api']
+  );
+
+  const query = isContentDeliveryApi
+    ? /* GraphQL */ `
+        ${EXTENDED_PRODUCT_FRAGMENT}
+        query lookupProducts($ids: [ID!]!) {
           nodes(ids: $ids) {
-            ... on Product {
-              id
-              title
-              featuredImage {
-                url
-                altText
-              }
-            }
+            ...ExtendedProductFields
           }
         }
-      `,
+      `
+    : /* GraphQL */ `
+        ${BASIC_PRODUCT_FRAGMENT}
+        query lookupProducts($ids: [ID!]!) {
+          nodes(ids: $ids) {
+            ...BasicProductFields
+          }
+        }
+      `;
+
+  const response = await fetch(mockShopUrl, {
+    body: JSON.stringify({
+      query,
       variables: { ids: urns },
     }),
     method: 'POST',
