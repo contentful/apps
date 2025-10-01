@@ -5,13 +5,13 @@ import { ContentType } from '../types';
 import { ContentTypeProps, PlainClientAPI } from 'contentful-management';
 import { ConfigAppSDK, CMAClient } from '@contentful/app-sdk';
 
-interface ContentTypeMultiSelectProps {
+type ContentTypeMultiSelectProps = {
   selectedContentTypes: ContentType[];
   setSelectedContentTypes: (contentTypes: ContentType[]) => void;
   sdk: ConfigAppSDK;
   cma: PlainClientAPI | CMAClient;
   excludedContentTypesIds?: string[];
-}
+};
 
 const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   selectedContentTypes,
