@@ -2,34 +2,38 @@ import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Document } from '@contentful/rich-text-types';
 import { Entry, ContentTypeField, Fields } from '../types';
 import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
-import { BATCH_FETCHING, DRAFT_STATUS, CHANGED_STATUS, PUBLISHED_STATUS } from './constants';
+import {
+  BATCH_FETCHING,
+  DRAFT_STATUS,
+  CHANGED_STATUS,
+  PUBLISHED_STATUS,
+  UNKNOWN_STATUS,
+} from './constants';
 import { BadgeVariant } from '@contentful/f36-components';
 
-export const getStatusesOptions = (): string[] => {
-  return ['Draft', 'Changed', 'Published'];
-};
+export const STATUSES = [DRAFT_STATUS, CHANGED_STATUS, PUBLISHED_STATUS];
 
 export const getStatusFromEntry = (entry: Entry): string => {
   const { sys } = entry;
   if (!sys.publishedVersion) {
-    return 'Draft';
+    return DRAFT_STATUS;
   }
   if (sys.version >= sys.publishedVersion + 2) {
-    return 'Changed';
+    return CHANGED_STATUS;
   }
   if (sys.version === sys.publishedVersion + 1) {
-    return 'Published';
+    return PUBLISHED_STATUS;
   }
-  return 'Unknown';
+  return UNKNOWN_STATUS;
 };
 
 export const getStatusColor = (status: string): BadgeVariant => {
   switch (status) {
-    case 'Draft':
+    case DRAFT_STATUS:
       return 'warning';
-    case 'Changed':
+    case CHANGED_STATUS:
       return 'primary';
-    case 'Published':
+    case PUBLISHED_STATUS:
       return 'positive';
     default:
       return 'negative';
@@ -282,7 +286,9 @@ export async function fetchEntriesWithBatching(
 }
 
 export const isNumericSearch = (query: string): boolean => {
-  return /^\d+$/.test(query.trim());
+  const decimalPattern = /^-?\d*\.?\d+$/;
+  const integerPattern = /^-?\d+$/;
+  return decimalPattern.test(query.trim()) || integerPattern.test(query.trim());
 };
 
 export const filterEntriesByNumericSearch = (
@@ -294,7 +300,8 @@ export const filterEntriesByNumericSearch = (
   return entries.filter((entry) => {
     // Search in all Symbol fields (like displayName)
     return fields.some((field) => {
-      if (field.type !== 'Symbol') return false;
+      if (field.type !== 'Symbol' && field.type !== 'Integer' && field.type !== 'Number')
+        return false;
 
       const fieldValue = entry.fields[field.id]?.[field.locale || defaultLocale];
       if (fieldValue === undefined || fieldValue === null) return false;
