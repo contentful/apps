@@ -92,10 +92,46 @@ const lookupHandler: ResourcesLookupHandler = async (event, context) => {
 
   const mockShopUrl = getMockShopUrl(context);
 
-  const response = await fetch(mockShopUrl, {
-    body: JSON.stringify({
-      query: /* GraphQL */ `
-        query searchProducts($ids: [ID!]!) {
+  const isContentDeliveryApi = ['cda', 'cpa'].includes(
+    // @ts-ignore - context.originalRequest is not in the types yet
+    context.originalRequest?.headers['contentful-api']
+  );
+
+  const query = isContentDeliveryApi
+    ? /* GraphQL */ `
+        query lookupProducts($ids: [ID!]!) {
+          nodes(ids: $ids) {
+            ... on Product {
+              id
+              title
+              description
+              compareAtPriceRange {
+                maxVariantPrice {
+                  amount
+                  currencyCode
+                }
+              }
+              adjacentVariants {
+                availableForSale
+                barcode
+                currentlyNotInStock
+                image {
+                  url
+                }
+              }
+              featuredImage {
+                id
+                url
+                altText
+                width
+                height
+              }
+            }
+          }
+        }
+      `
+    : /* GraphQL */ `
+        query lookupProducts($ids: [ID!]!) {
           nodes(ids: $ids) {
             ... on Product {
               id
@@ -107,7 +143,11 @@ const lookupHandler: ResourcesLookupHandler = async (event, context) => {
             }
           }
         }
-      `,
+      `;
+
+  const response = await fetch(mockShopUrl, {
+    body: JSON.stringify({
+      query,
       variables: { ids: urns },
     }),
     method: 'POST',
