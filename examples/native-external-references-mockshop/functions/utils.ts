@@ -1,7 +1,6 @@
-import { FunctionEventContext } from '@contentful/node-apps-toolkit';
 import { Product } from './types';
 
-export const getMockShopUrl = (context: FunctionEventContext<Record<string, any>>) => {
+export const getMockShopUrl = (context: { appInstallationParameters?: Record<string, any> }) => {
   const mockShopUrl = context.appInstallationParameters?.apiEndpoint;
 
   if (!mockShopUrl) {

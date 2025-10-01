@@ -181,11 +181,11 @@ const lookupHandler: ResourcesLookupHandler = async (event, context) => {
  */
 
 export const handler: EventHandler = (event, context) => {
-  if (event.type === 'resources.search') {
+  if (event.type === 'resources.search' && 'cma' in context) {
     return searchHandler(event, context);
   }
 
-  if (event.type === 'resources.lookup') {
+  if (event.type === 'resources.lookup' && 'cma' in context) {
     return lookupHandler(event, context);
   }
 
