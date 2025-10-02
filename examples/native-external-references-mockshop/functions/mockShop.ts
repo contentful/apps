@@ -90,7 +90,7 @@ const searchHandler: ResourcesSearchHandler = async (event, context) => {
 const lookupHandler: ResourcesLookupHandler = async (event, context) => {
   const { urns } = event.lookupBy;
 
-  const mockShopUrl = getMockShopUrl(context);
+  const mockShopUrl = getMockShopUrl(context.appInstallationParameters);
 
   const isContentDeliveryApi = ['cda', 'cpa'].includes(
     // @ts-ignore - context.originalRequest is not in the types yet
@@ -181,11 +181,11 @@ const lookupHandler: ResourcesLookupHandler = async (event, context) => {
  */
 
 export const handler: EventHandler = (event, context) => {
-  if (event.type === 'resources.search' && 'cma' in context) {
+  if (event.type === 'resources.search' && 'cmaHost' in context) {
     return searchHandler(event, context);
   }
 
-  if (event.type === 'resources.lookup' && 'cma' in context) {
+  if (event.type === 'resources.lookup') {
     return lookupHandler(event, context);
   }
 

@@ -1,9 +1,6 @@
 import { FunctionEventHandler, FunctionTypeEnum } from '@contentful/node-apps-toolkit';
 
-export type InstallationParameters = {
-  apiEndpoint: string;
-  url: string;
-};
+export type InstallationParameters = Record<string, any>;
 
 export type EventHandler = FunctionEventHandler<FunctionTypeEnum, InstallationParameters>;
 export type QueryHandler = FunctionEventHandler<

@@ -1,7 +1,7 @@
-import { Product } from './types';
+import { InstallationParameters, Product } from './types';
 
-export const getMockShopUrl = (context: { appInstallationParameters?: Record<string, any> }) => {
-  const mockShopUrl = context.appInstallationParameters?.apiEndpoint;
+export const getMockShopUrl = (parameters: InstallationParameters) => {
+  const mockShopUrl = parameters.apiEndpoint;
 
   if (!mockShopUrl) {
     console.warn(`No API url configured, using default: https://mock.shop/api`);
