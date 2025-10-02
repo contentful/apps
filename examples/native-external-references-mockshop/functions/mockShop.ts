@@ -93,7 +93,6 @@ const lookupHandler: ResourcesLookupHandler = async (event, context) => {
   const mockShopUrl = getMockShopUrl(context);
 
   const isContentDeliveryApi = ['cda', 'cpa'].includes(
-    // @ts-ignore - context.originalRequest is not in the types yet
     context.originalRequest?.headers['contentful-api']
   );
 
