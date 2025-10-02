@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Stack, Pill, Skeleton, Paragraph } from '@contentful/f36-components';
+import { Box, Paragraph, Pill, Skeleton, Stack } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { ContentType } from '../types';
-import { ContentTypeProps, PlainClientAPI } from 'contentful-management';
-import { ConfigAppSDK, CMAClient } from '@contentful/app-sdk';
+import { PlainClientAPI } from 'contentful-management';
+import { CMAClient, ConfigAppSDK } from '@contentful/app-sdk';
+import { getContentTypesWithoutLivePreview } from '../utils/livePreviewUtils';
 
 type ContentTypeMultiSelectProps = {
   selectedContentTypes: ContentType[];
@@ -39,51 +40,6 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
     setFilteredItems(newFilteredItems);
   };
 
-  const fetchAllContentTypes = async (): Promise<ContentTypeProps[]> => {
-    let allContentTypes: ContentTypeProps[] = [];
-    let skip = 0;
-    const limit = 1000;
-    let areMoreContentTypes = true;
-
-    while (areMoreContentTypes) {
-      const response = await cma.contentType.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
-        query: { skip, limit },
-      });
-      if (response.items) {
-        allContentTypes = allContentTypes.concat(response.items);
-        areMoreContentTypes = response.items.length === limit;
-      } else {
-        areMoreContentTypes = false;
-      }
-      skip += limit;
-    }
-
-    return allContentTypes;
-  };
-
-  const checkContentTypeHasLivePreview = async (contentTypeId: string): Promise<boolean> => {
-    try {
-      // Fetch a few entries of this content type to check if any have a slug field
-      const entries = await cma.entry.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
-        query: {
-          content_type: contentTypeId,
-          limit: 10, // Check up to 10 entries to determine if this content type has live preview
-        },
-      });
-
-      // Check if any entry has a slug field
-      return entries.items.some((entry) => entry.fields.slug);
-    } catch (error) {
-      console.error(`Error checking live preview for content type ${contentTypeId}:`, error);
-      // If we can't determine, assume it doesn't have live preview to be safe
-      return false;
-    }
-  };
-
   useEffect(() => {
     (async () => {
       try {
@@ -93,21 +49,11 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
         const currentState = await sdk.app.getCurrentState();
         const currentContentTypesIds = Object.keys(currentState?.EditorInterface || {});
 
-        const allContentTypes = await fetchAllContentTypes();
-
-        // Filter out content types that have live preview (entries with slug field)
-        const contentTypesWithoutLivePreview: ContentTypeProps[] = [];
-
-        for (const contentType of allContentTypes) {
-          if (excludedContentTypesIds.includes(contentType.sys.id)) {
-            continue; // Skip explicitly excluded content types
-          }
-
-          const hasLivePreview = await checkContentTypeHasLivePreview(contentType.sys.id);
-          if (!hasLivePreview) {
-            contentTypesWithoutLivePreview.push(contentType);
-          }
-        }
+        const contentTypesWithoutLivePreview = await getContentTypesWithoutLivePreview(
+          cma,
+          sdk,
+          excludedContentTypesIds
+        );
 
         const newAvailableContentTypes = contentTypesWithoutLivePreview
           .map((ct) => ({
@@ -119,9 +65,8 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
         setAvailableContentTypes(newAvailableContentTypes);
         setFilteredItems(newAvailableContentTypes);
 
-        // If we have current content types, set them as selected
         if (currentContentTypesIds.length > 0) {
-          const currentContentTypes = allContentTypes
+          const currentContentTypes = contentTypesWithoutLivePreview
             .filter((ct) => currentContentTypesIds.includes(ct.sys.id))
             .map((ct) => ({ id: ct.sys.id, name: ct.name }));
           setSelectedContentTypes(currentContentTypes);
