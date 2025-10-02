@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Stack, Pill } from '@contentful/f36-components';
+import { Box, Stack, Pill, Skeleton, Paragraph } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { ContentType } from '../types';
 import { ContentTypeProps, PlainClientAPI } from 'contentful-management';
@@ -21,6 +21,9 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   excludedContentTypesIds = [],
 }) => {
   const [availableContentTypes, setAvailableContentTypes] = useState<ContentType[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
   const getPlaceholderText = () => {
     if (selectedContentTypes.length === 0) return 'Select one or more';
     if (selectedContentTypes.length === 1) return selectedContentTypes[0].name;
@@ -60,42 +63,93 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
     return allContentTypes;
   };
 
-  useEffect(() => {
-    (async () => {
-      const currentState = await sdk.app.getCurrentState();
-      const currentContentTypesIds = Object.keys(currentState?.EditorInterface || {});
-
-      const allContentTypes = await fetchAllContentTypes();
-
-      // Add this after fetching content types
-      const editorInterfaces = await sdk.cma.editorInterface.getMany({
+  const checkContentTypeHasLivePreview = async (contentTypeId: string): Promise<boolean> => {
+    try {
+      // Fetch a few entries of this content type to check if any have a slug field
+      const entries = await cma.entry.getMany({
         spaceId: sdk.ids.space,
         environmentId: sdk.ids.environment,
+        query: {
+          content_type: contentTypeId,
+          limit: 10, // Check up to 10 entries to determine if this content type has live preview
+        },
       });
 
-      console.log('=== EDITOR INTERFACES FROM CMA ===');
-      console.log('editorInterfaces:', editorInterfaces);
+      // Check if any entry has a slug field
+      return entries.items.some((entry) => entry.fields.slug);
+    } catch (error) {
+      console.error(`Error checking live preview for content type ${contentTypeId}:`, error);
+      // If we can't determine, assume it doesn't have live preview to be safe
+      return false;
+    }
+  };
 
-      const newAvailableContentTypes = allContentTypes
-        .filter((ct) => !excludedContentTypesIds.includes(ct.sys.id))
-        .map((ct) => ({
-          id: ct.sys.id,
-          name: ct.name,
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name));
+  useEffect(() => {
+    (async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-      setAvailableContentTypes(newAvailableContentTypes);
-      setFilteredItems(newAvailableContentTypes);
+        const currentState = await sdk.app.getCurrentState();
+        const currentContentTypesIds = Object.keys(currentState?.EditorInterface || {});
 
-      // If we have current content types, set them as selected
-      if (currentContentTypesIds.length > 0) {
-        const currentContentTypes = allContentTypes
-          .filter((ct) => currentContentTypesIds.includes(ct.sys.id))
-          .map((ct) => ({ id: ct.sys.id, name: ct.name }));
-        setSelectedContentTypes(currentContentTypes);
+        const allContentTypes = await fetchAllContentTypes();
+
+        // Filter out content types that have live preview (entries with slug field)
+        const contentTypesWithoutLivePreview: ContentTypeProps[] = [];
+
+        for (const contentType of allContentTypes) {
+          if (excludedContentTypesIds.includes(contentType.sys.id)) {
+            continue; // Skip explicitly excluded content types
+          }
+
+          const hasLivePreview = await checkContentTypeHasLivePreview(contentType.sys.id);
+          if (!hasLivePreview) {
+            contentTypesWithoutLivePreview.push(contentType);
+          }
+        }
+
+        const newAvailableContentTypes = contentTypesWithoutLivePreview
+          .map((ct) => ({
+            id: ct.sys.id,
+            name: ct.name,
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name));
+
+        setAvailableContentTypes(newAvailableContentTypes);
+        setFilteredItems(newAvailableContentTypes);
+
+        // If we have current content types, set them as selected
+        if (currentContentTypesIds.length > 0) {
+          const currentContentTypes = allContentTypes
+            .filter((ct) => currentContentTypesIds.includes(ct.sys.id))
+            .map((ct) => ({ id: ct.sys.id, name: ct.name }));
+          setSelectedContentTypes(currentContentTypes);
+        }
+      } catch (err) {
+        console.error('Error loading content types:', err);
+        setError('Failed to load content types. Please try again.');
+      } finally {
+        setIsLoading(false);
       }
     })();
   }, []);
+
+  if (isLoading) {
+    return (
+      <Skeleton.Container>
+        <Skeleton.BodyText numberOfLines={2} />
+      </Skeleton.Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box>
+        <Paragraph color="negative">{error}</Paragraph>
+      </Box>
+    );
+  }
 
   return (
     <>

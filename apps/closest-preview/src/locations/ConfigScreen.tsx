@@ -1,13 +1,12 @@
 import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Heading, Form, Paragraph, Flex, Box, FormControl } from '@contentful/f36-components';
-import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 import { ContentType } from '../types';
 
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
-  const cma = useCMA();
   const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
 
   const onConfigure = useCallback(async () => {
@@ -66,7 +65,7 @@ const ConfigScreen = () => {
                 selectedContentTypes={selectedContentTypes}
                 setSelectedContentTypes={setSelectedContentTypes}
                 sdk={sdk}
-                cma={cma}
+                cma={sdk.cma}
               />
             </FormControl>
           </Box>
