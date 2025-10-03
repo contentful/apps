@@ -17,7 +17,6 @@ async function saveAppInstallation() {
 describe('ConfigScreen', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSdk.app.getParameters.mockResolvedValue({});
     mockSdk.app.getCurrentState.mockResolvedValue({});
     mockSdk.app.setReady.mockResolvedValue();
     mockSdk.app.onConfigure.mockImplementation((cb: () => Promise<any>) => {
@@ -107,7 +106,6 @@ describe('ConfigScreen', () => {
     });
 
     expect(result).toEqual({
-      parameters: {},
       targetState: {
         EditorInterface: {
           blogPost: {
@@ -129,22 +127,9 @@ describe('ConfigScreen', () => {
     });
 
     expect(result).toEqual({
-      parameters: {},
       targetState: {
         EditorInterface: {},
       },
-    });
-  });
-
-  it('loads existing parameters on mount', async () => {
-    const existingParameters = { someParam: 'value' };
-    mockSdk.app.getParameters.mockResolvedValue(existingParameters);
-
-    render(<ConfigScreen />);
-
-    await waitFor(() => {
-      expect(mockSdk.app.getParameters).toHaveBeenCalled();
-      expect(mockSdk.app.setReady).toHaveBeenCalled();
     });
   });
 
