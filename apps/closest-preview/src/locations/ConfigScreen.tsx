@@ -1,67 +1,76 @@
 import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Heading, Form, Paragraph, Flex } from '@contentful/f36-components';
-import { css } from 'emotion';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-
-export interface AppInstallationParameters {}
+import { Heading, Form, Paragraph, Flex, Box, FormControl } from '@contentful/f36-components';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
+import { ContentType } from '../types';
 
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>({});
   const sdk = useSDK<ConfigAppSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
+  const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
 
   const onConfigure = useCallback(async () => {
-    // This method will be called when a user clicks on "Install"
-    // or "Save" in the configuration screen.
-    // for more details see https://www.contentful.com/developers/docs/extensibility/ui-extensions/sdk-reference/#register-an-app-configuration-hook
+    const editorInterface = selectedContentTypes.reduce((acc, contentType) => {
+      return {
+        ...acc,
+        [contentType.id]: {
+          sidebar: { position: 0 },
+        },
+      };
+    }, {});
 
-    // Get current the state of EditorInterface and other entities
-    // related to this app installation
     const currentState = await sdk.app.getCurrentState();
 
     return {
-      // Parameters to be persisted as the app configuration.
-      parameters,
-      // In case you don't want to submit any update to app
-      // locations, you can just pass the currentState as is
-      targetState: currentState,
+      targetState: {
+        ...currentState,
+        EditorInterface: editorInterface,
+      },
     };
-  }, [parameters, sdk]);
+  }, [sdk, selectedContentTypes]);
 
   useEffect(() => {
-    // `onConfigure` allows to configure a callback to be
-    // invoked when a user attempts to install the app or update
-    // its configuration.
     sdk.app.onConfigure(() => onConfigure());
   }, [sdk, onConfigure]);
 
   useEffect(() => {
     (async () => {
-      // Get current parameters of the app.
-      // If the app is not installed yet, `parameters` will be `null`.
-      const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
-
-      if (currentParameters) {
-        setParameters(currentParameters);
-      }
-
-      // Once preparation has finished, call `setReady` to hide
-      // the loading screen and present the app to a user.
       sdk.app.setReady();
     })();
-  }, [sdk]);
+  }, []);
 
   return (
-    <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
-      <Form>
-        <Heading>App Config</Heading>
-        <Paragraph>Welcome to your contentful app. This is your config page.</Paragraph>
-      </Form>
+    <Flex justifyContent="center" alignItems="flex-start">
+      <Box margin="spacing2Xl">
+        <Form>
+          <Heading as="h2" marginBottom="spacingS">
+            Set up Closest Preview
+          </Heading>
+          <Paragraph marginBottom="spacingXl">
+            Closest Preview allows users to quickly navigate to the closest page level element for a
+            given entry in order to preview the item.
+          </Paragraph>
+
+          <Box marginBottom="spacing2Xl">
+            <Heading as="h3" marginBottom="spacingXs">
+              Assign content types
+            </Heading>
+            <Paragraph marginBottom="spacingL">
+              Select the content type(s) you want to use with Closest Preview. You can change this
+              anytime by navigating to the 'Sidebar' tab in your content model.
+            </Paragraph>
+            <FormControl id="contentTypes">
+              <FormControl.Label>Content types</FormControl.Label>
+              <ContentTypeMultiSelect
+                selectedContentTypes={selectedContentTypes}
+                setSelectedContentTypes={setSelectedContentTypes}
+                sdk={sdk}
+                cma={sdk.cma}
+              />
+            </FormControl>
+          </Box>
+        </Form>
+      </Box>
     </Flex>
   );
 };
