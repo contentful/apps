@@ -39,6 +39,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
   focusRange,
   onCellFocus,
 }) => {
+  // Using Tooltip props: isDisabled to prevent showing unless the header is focused
   return (
     <Table.Head style={headerStyles.tableHead}>
       <Table.Row style={headerStyles.stickyTableRow}>
@@ -70,7 +71,19 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           aria-label="Column header: Status">
           <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
             Status
-            <Tooltip content="Bulk editing is not supported for Status" placement="top">
+            <Tooltip
+              content="Bulk editing is not supported for Status"
+              placement="top"
+              showDelay={0}
+              hideDelay={0}
+              isVisible={true}
+              isDisabled={
+                !(
+                  focusedCell &&
+                  focusedCell.row === HEADERS_ROW &&
+                  focusedCell.column === ENTRY_STATUS_INDEX
+                )
+              }>
               <QuestionIcon size={16} aria-label="Bulk editing not supported for Status" />
             </Tooltip>
           </Flex>
@@ -124,7 +137,17 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
                     </Text>
                     <Tooltip
                       content={`Bulk editing is not supported for the ${field.name} field type`}
-                      placement="top">
+                      placement="top"
+                      showDelay={0}
+                      hideDelay={0}
+                      isVisible={true}
+                      isDisabled={
+                        !(
+                          focusedCell &&
+                          focusedCell.row === HEADERS_ROW &&
+                          focusedCell.column === columnIndex
+                        )
+                      }>
                       <QuestionIcon
                         size={16}
                         aria-label={`Bulk editing not supported for ${field.name}`}
