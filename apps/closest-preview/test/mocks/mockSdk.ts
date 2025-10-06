@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import { mockCma } from './mockCma';
 
 const mockSdk: any = {
   app: {
@@ -12,7 +13,10 @@ const mockSdk: any = {
     space: 'test-space',
     environment: 'master',
   },
-  cma: null,
+  cma: mockCma,
+  hostnames: {
+    webapp: 'app.contentful.com',
+  },
   notifier: {
     error: vi.fn(),
     success: vi.fn(),
