@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Table, Checkbox, Flex, Text, Box } from '@contentful/f36-components';
+import React from 'react';
+import { Table, Checkbox, Flex, Text } from '@contentful/f36-components';
 import { Tooltip } from '@contentful/f36-tooltip';
 import { QuestionIcon } from '@phosphor-icons/react';
 import { ContentTypeField } from '../types';
@@ -30,6 +30,26 @@ interface TableHeaderProps {
   onCellFocus: (position: FocusPosition) => void;
 }
 
+interface FocusedTooltipProps {
+  content: string;
+  isFocused: boolean;
+  children: React.ReactNode;
+}
+
+const FocusedTooltip: React.FC<FocusedTooltipProps> = ({ content, isFocused, children }) => {
+  return (
+    <Tooltip
+      content={content}
+      placement="top"
+      showDelay={0}
+      hideDelay={0}
+      key={`tooltip-${isFocused ? 'focused' : 'not-focused'}`}
+      isVisible={isFocused}>
+      {children}
+    </Tooltip>
+  );
+};
+
 export const TableHeader: React.FC<TableHeaderProps> = ({
   fields,
   headerCheckboxes,
@@ -39,6 +59,9 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
   focusRange,
   onCellFocus,
 }) => {
+  const isStatusFocused =
+    focusedCell?.row === HEADERS_ROW && focusedCell?.column === ENTRY_STATUS_INDEX;
+
   return (
     <Table.Head style={headerStyles.tableHead}>
       <Table.Row style={headerStyles.stickyTableRow}>
@@ -70,22 +93,11 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           aria-label="Column header: Status">
           <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
             Status
-            {focusedCell &&
-            focusedCell.row === HEADERS_ROW &&
-            focusedCell.column === ENTRY_STATUS_INDEX ? (
-              <Tooltip
-                content="Bulk editing is not supported for Status"
-                placement="top"
-                showDelay={0}
-                hideDelay={0}
-                isVisible>
-                <QuestionIcon size={16} aria-label="Bulk editing not supported for Status" />
-              </Tooltip>
-            ) : (
-              <Tooltip content="Bulk editing is not supported for Status" placement="top">
-                <QuestionIcon size={16} aria-label="Bulk editing not supported for Status" />
-              </Tooltip>
-            )}
+            <FocusedTooltip
+              content="Bulk editing is not supported for Status"
+              isFocused={isStatusFocused}>
+              <QuestionIcon size={16} aria-label="Bulk editing not supported for Status" />
+            </FocusedTooltip>
           </Flex>
         </Table.Cell>
         {fields.map((field) => {
@@ -93,6 +105,8 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           const isDisabled = checkboxesDisabled[field.uniqueId];
           const columnIndex = getColumnIndex(field, fields);
           const fieldName = truncate(field.locale ? `(${field.locale}) ${field.name}` : field.name);
+          const isFieldFocused =
+            focusedCell?.row === HEADERS_ROW && focusedCell?.column === columnIndex;
 
           return (
             <Table.Cell
@@ -135,30 +149,14 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
                       fontColor="gray500">
                       {fieldName}
                     </Text>
-                    {focusedCell &&
-                    focusedCell.row === HEADERS_ROW &&
-                    focusedCell.column === columnIndex ? (
-                      <Tooltip
-                        content={`Bulk editing is not supported for the ${field.name} field type`}
-                        placement="top"
-                        showDelay={0}
-                        hideDelay={0}
-                        isVisible>
-                        <QuestionIcon
-                          size={16}
-                          aria-label={`Bulk editing not supported for ${field.name}`}
-                        />
-                      </Tooltip>
-                    ) : (
-                      <Tooltip
-                        content={`Bulk editing is not supported for the ${field.name} field type`}
-                        placement="top">
-                        <QuestionIcon
-                          size={16}
-                          aria-label={`Bulk editing not supported for ${field.name}`}
-                        />
-                      </Tooltip>
-                    )}
+                    <FocusedTooltip
+                      content={`Bulk editing is not supported for the ${field.name} field type`}
+                      isFocused={isFieldFocused}>
+                      <QuestionIcon
+                        size={16}
+                        aria-label={`Bulk editing not supported for ${field.name}`}
+                      />
+                    </FocusedTooltip>
                   </>
                 )}
               </Flex>
