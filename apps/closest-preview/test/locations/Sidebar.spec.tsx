@@ -9,12 +9,12 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 describe('Sidebar component', () => {
-  it('Renders entry list with titles and relative dates', async () => {
+  it('Renders entry list with ids and relative dates', async () => {
     const { getAllByText } = render(<Sidebar />);
 
     await waitFor(() => {
-      const entryTitles = getAllByText('Entry id', { exact: false });
-      expect(entryTitles).toHaveLength(5);
+      const entryIds = getAllByText('Entry id', { exact: false });
+      expect(entryIds).toHaveLength(5);
     });
 
     const updatedTexts = getAllByText(/Updated/);
