@@ -26,6 +26,6 @@
   },
   "homepage": ".",
   "dependencies": {
-    "@contentful/node-apps-toolkit": "^3.12.0"
+    "@contentful/node-apps-toolkit": "^3.15.0"
   }
 }
