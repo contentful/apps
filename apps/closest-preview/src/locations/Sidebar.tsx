@@ -9,7 +9,7 @@ import {
 import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { EntryProps, QueryOptions } from 'contentful-management';
+import { EntryProps, KeyValueMap } from 'contentful-management';
 import { useCallback, useEffect, useState } from 'react';
 
 const MAX_DEPTH = 5;
@@ -43,6 +43,26 @@ const Sidebar = () => {
     [sdk.ids.space, sdk.ids.environment]
   );
 
+  const splitEntriesFromRoot = (
+    entry: EntryProps<KeyValueMap>,
+    checkedEntries: Set<string>,
+    rootEntryData: EntryProps[]
+  ) => {
+    const entryId = entry?.sys?.id;
+    if (!entryId || checkedEntries.has(entryId)) {
+      return false;
+    }
+
+    checkedEntries.add(entryId);
+    const slug = entry.fields.slug?.[defaultLocale];
+    if (slug) {
+      rootEntryData.push(entry);
+      return false;
+    }
+
+    return true;
+  };
+
   const getUpstreamEntries = useCallback(
     async (id: string): Promise<EntryProps[]> => {
       const rootEntryData: EntryProps[] = [];
@@ -70,16 +90,7 @@ const Sidebar = () => {
 
         childEntries = relatedEntries.flatMap((rEntry) =>
           rEntry.filter((item: EntryProps) => {
-            if (item && item.sys.id && !checkedEntries.has(item.sys.id)) {
-              checkedEntries.add(item.sys.id);
-              const slug = item.fields.slug?.[defaultLocale];
-              if (slug) {
-                rootEntryData.push(item);
-                return false;
-              }
-              return true;
-            }
-            return false;
+            return splitEntriesFromRoot(item, checkedEntries, rootEntryData);
           })
         );
 
