@@ -12,7 +12,9 @@ const mockSdk: any = {
     app: 'test-app',
     space: 'test-space',
     environment: 'master',
+    entry: 'root-entry',
   },
+  locales: { default: 'en-US' },
   cma: mockCma,
   hostnames: {
     webapp: 'app.contentful.com',
