@@ -4,6 +4,7 @@ import {
   Paragraph,
   RelativeDateTime,
   Skeleton,
+  Text,
   TextLink,
 } from '@contentful/f36-components';
 import { ArrowSquareOutIcon } from '@contentful/f36-icons';
@@ -12,13 +13,14 @@ import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { EntryProps, KeyValueMap } from 'contentful-management';
 import { useCallback, useEffect, useState } from 'react';
 
-const MAX_DEPTH = 5;
+const MAX_DEPTH = 10;
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
   useAutoResizer();
   const [entries, setEntries] = useState<EntryProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [maxDepthReached, setMaxDepthReached] = useState<boolean>(false);
   const defaultLocale = sdk.locales.default;
 
   const getRelatedEntries = useCallback(
@@ -63,13 +65,14 @@ const Sidebar = () => {
     return true;
   };
 
-  const getUpstreamEntries = useCallback(
-    async (id: string): Promise<EntryProps[]> => {
+  const getRootEntries = useCallback(
+    async (id: string): Promise<{ entries: EntryProps[]; maxDepthReached: boolean }> => {
       const rootEntryData: EntryProps[] = [];
       let childEntries: EntryProps[] = [];
       const checkedEntries: Set<string> = new Set([id]);
       let depth = 0;
       const maxDepth = MAX_DEPTH;
+      let depthReached = false;
 
       try {
         const initialEntry = await sdk.cma.entry.get({
@@ -80,7 +83,7 @@ const Sidebar = () => {
         childEntries = [initialEntry];
       } catch (error) {
         console.error('Failed to fetch initial entry:', error);
-        return [];
+        return { entries: [], maxDepthReached: false };
       }
 
       while (childEntries.length > 0 && depth < maxDepth) {
@@ -98,10 +101,10 @@ const Sidebar = () => {
       }
 
       if (depth >= maxDepth && rootEntryData.length === 0) {
-        console.log(`Max depth of ${maxDepth} reached for entry ID: ${id}`);
+        depthReached = true;
       }
 
-      return rootEntryData;
+      return { entries: rootEntryData, maxDepthReached: depthReached };
     },
     [getRelatedEntries, sdk.ids.space, sdk.ids.environment, defaultLocale]
   );
@@ -109,13 +112,14 @@ const Sidebar = () => {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      const rootEntries = await getUpstreamEntries(sdk.ids.entry);
+      const result = await getRootEntries(sdk.ids.entry);
 
-      setEntries(rootEntries);
+      setEntries(result.entries);
+      setMaxDepthReached(result.maxDepthReached);
       setIsLoading(false);
     };
     fetchData();
-  }, [getUpstreamEntries, sdk.ids.entry]);
+  }, [getRootEntries, sdk.ids.entry]);
 
   if (isLoading) {
     return (
@@ -123,6 +127,10 @@ const Sidebar = () => {
         <Skeleton.BodyText numberOfLines={3} />
       </Skeleton.Container>
     );
+  }
+
+  if (maxDepthReached) {
+    return <Text>Max depth of {MAX_DEPTH} reached for entry.</Text>;
   }
 
   return (
