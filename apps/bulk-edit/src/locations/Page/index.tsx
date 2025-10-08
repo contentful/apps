@@ -99,7 +99,7 @@ const Page = () => {
   };
 
   const shouldDisableFilters = () => {
-    return (entries.length === 0 && !entriesLoading && initialTotal === 0) || !selectedContentType;
+    return (entries.length === 0 && initialTotal === 0) || !selectedContentType || entriesLoading;
   };
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
