@@ -97,7 +97,9 @@ const Field = () => {
       <Tooltip
         placement="top"
         content={
-          isDisabled ? 'Versions can be viewed once the entry is published with content.' : ''
+          isDisabled
+            ? 'Versions can be viewed once the entry is published with content and changes are made to the field.'
+            : ''
         }>
         <Button
           testId="view-diff-button"
