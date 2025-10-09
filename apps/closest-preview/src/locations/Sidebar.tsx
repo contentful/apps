@@ -4,7 +4,6 @@ import {
   Paragraph,
   RelativeDateTime,
   Skeleton,
-  Text,
   TextLink,
 } from '@contentful/f36-components';
 import { ArrowSquareOutIcon } from '@contentful/f36-icons';
