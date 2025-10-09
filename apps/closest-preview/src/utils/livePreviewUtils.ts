@@ -48,7 +48,6 @@ export const getRelatedEntries = async (sdk: SidebarAppSDK, id: string): Promise
       query: {
         links_to_entry: id,
         order: '-sys.updatedAt',
-        limit: 5,
       },
       spaceId: sdk.ids.space,
       environmentId: sdk.ids.environment,
@@ -82,6 +81,12 @@ export const splitEntriesFromRoot = (
   return true;
 };
 
+export const filterAndOrderEntries = (entries: EntryProps[], limit: number = 5): EntryProps[] => {
+  return entries
+    .sort((a, b) => new Date(b.sys.updatedAt).getTime() - new Date(a.sys.updatedAt).getTime())
+    .slice(0, limit);
+};
+
 export const getRootEntries = async (sdk: SidebarAppSDK): Promise<EntryProps[]> => {
   const rootEntryData: EntryProps[] = [];
   let childEntries: EntryProps[] = [];
@@ -107,5 +112,5 @@ export const getRootEntries = async (sdk: SidebarAppSDK): Promise<EntryProps[]> 
     );
   }
 
-  return rootEntryData;
+  return filterAndOrderEntries(rootEntryData);
 };
