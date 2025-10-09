@@ -11,15 +11,11 @@ import {
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { CreateContentTypeProps } from 'contentful-management';
 import { useCallback, useEffect, useState } from 'react';
+import { CONTENT_TYPE_ID, MARKDOWN_ID, TITLE_ID } from '../consts';
 
 export interface AppInstallationParameters {}
 
-const CONTENT_TYPE_ID = 'HOMEBASE';
-
 const createContentType = async (sdk: ConfigAppSDK) => {
-  const MARKDOWN_ID = 'markdown';
-  const TITLE_ID = 'title';
-
   const contentTypeBody: CreateContentTypeProps = {
     name: CONTENT_TYPE_ID,
     description: 'Content type used by the Homebase app to render the Contentful home page.',
@@ -39,6 +35,7 @@ const createContentType = async (sdk: ConfigAppSDK) => {
         localized: false,
       },
     ],
+    displayField: TITLE_ID,
   };
   try {
     const contentTypeProps = await sdk.cma.contentType.createWithId(
