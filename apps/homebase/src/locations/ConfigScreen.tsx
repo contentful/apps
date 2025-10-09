@@ -1,5 +1,13 @@
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Flex, Form, Heading, Paragraph } from '@contentful/f36-components';
+import {
+  Flex,
+  Form,
+  Heading,
+  Paragraph,
+  Subheading,
+  List,
+  ListItem,
+} from '@contentful/f36-components';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 import { css } from 'emotion';
 import { useCallback, useEffect, useState } from 'react';
@@ -58,10 +66,31 @@ const ConfigScreen = () => {
   }, [sdk]);
 
   return (
-    <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
+    <Flex flexDirection="column" alignItems="center">
       <Form>
-        <Heading>App Config</Heading>
-        <Paragraph>Welcome to your contentful app. This is your config page.</Paragraph>
+        <Heading>Set up Homebase</Heading>
+        <Paragraph>The Homebase app enables you to customize your Contentful home page.</Paragraph>
+
+        <Subheading marginTop="spacingXl">How it works</Subheading>
+        <List as="ol">
+          <ListItem>The app creates a unique content type called HOMEBASE.</ListItem>
+          <ListItem>
+            With the HOMEBASE content type, create entries that power the content on the home page.
+          </ListItem>
+          <ListItem>
+            In the entry, use markdown within the rich text editor to edit the content and layout.
+          </ListItem>
+          <ListItem>
+            Anyone with permissions to edit this content type can customize the homepage within the
+            shared space.
+          </ListItem>
+        </List>
+
+        <Subheading marginTop="spacingXl">Disclaimer</Subheading>
+        <Paragraph>
+          The Homebase app will create a content type labeled "HOMEBASE". If deleted, the app will
+          not work.
+        </Paragraph>
       </Form>
     </Flex>
   );
