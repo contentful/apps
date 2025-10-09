@@ -29,20 +29,20 @@ describe('Sidebar component', () => {
     expect(await screen.findByRole('list')).toBeInTheDocument();
   });
 
-  it('Shows proper titles and fallbacks for different entry types', async () => {
+  it('Shows proper display field values and fallbacks for different entry types', async () => {
     render(<Sidebar />);
 
     await waitFor(() => {
-      // Entry with proper title should show the title
+      // Entries with proper titles should show display field values
       expect(screen.getByRole('link', { name: 'Entry Title 1' })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Entry Title 4' })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Entry Title 5' })).toBeInTheDocument();
     });
 
-    // Entries without titles should show ID prefix (first 8 chars)
+    // Entries without titles should show 'Untitled' fallback
     const links = await screen.findAllByRole('link');
-    const fallbackLinks = links.filter((link) => link.textContent === 'Entry id');
-    expect(fallbackLinks).toHaveLength(2); // Entry id 2 and Entry id 3
+    const fallbackLinks = links.filter((link) => link.textContent === 'Untitled');
+    expect(fallbackLinks).toHaveLength(2); // Entry id 2 (empty title) and Entry id 3 (undefined title)
   });
 
   it('Builds correct web app entry link', async () => {

@@ -3,13 +3,26 @@ import { vi } from 'vitest';
 const mockCma: any = {
   contentType: {
     getMany: vi.fn().mockResolvedValue({ items: [] }),
+    get: vi.fn().mockResolvedValue({
+      sys: { id: 'blogPost' },
+      name: 'Blog Post',
+      displayField: 'title',
+      fields: [
+        { id: 'title', type: 'Symbol' },
+        { id: 'slug', type: 'Symbol' },
+      ],
+    }),
   },
   editorInterface: {
     getMany: vi.fn().mockResolvedValue({ items: [] }),
   },
   entry: {
     get: vi.fn().mockResolvedValue({
-      sys: { id: 'root-entry', updatedAt: '2021-01-01' },
+      sys: {
+        id: 'root-entry',
+        updatedAt: '2021-01-01',
+        contentType: { sys: { id: 'blogPost' } },
+      },
       fields: { title: { 'en-US': 'Root Entry' }, slug: { 'en-US': undefined } },
     }),
     getMany: vi.fn().mockResolvedValue({
@@ -18,6 +31,7 @@ const mockCma: any = {
           sys: {
             id: 'Entry id 1',
             updatedAt: '2021-01-01',
+            contentType: { sys: { id: 'blogPost' } },
           },
           fields: { title: { 'en-US': 'Entry Title 1' }, slug: { 'en-US': 'entry-1' } },
         },
@@ -25,6 +39,7 @@ const mockCma: any = {
           sys: {
             id: 'Entry id 2',
             updatedAt: '2021-01-01',
+            contentType: { sys: { id: 'blogPost' } },
           },
           fields: { title: { 'en-US': '' }, slug: { 'en-US': 'entry-2' } },
         },
@@ -32,6 +47,7 @@ const mockCma: any = {
           sys: {
             id: 'Entry id 3',
             updatedAt: '2021-01-01',
+            contentType: { sys: { id: 'blogPost' } },
           },
           fields: { title: { 'en-US': undefined }, slug: { 'en-US': 'entry-3' } },
         },
@@ -39,6 +55,7 @@ const mockCma: any = {
           sys: {
             id: 'Entry id 4',
             updatedAt: '2021-01-01',
+            contentType: { sys: { id: 'blogPost' } },
           },
           fields: { title: { 'en-US': 'Entry Title 4' }, slug: { 'en-US': 'entry-4' } },
         },
@@ -46,6 +63,7 @@ const mockCma: any = {
           sys: {
             id: 'Entry id 5',
             updatedAt: '2021-01-01',
+            contentType: { sys: { id: 'blogPost' } },
           },
           fields: { title: { 'en-US': 'Entry Title 5' }, slug: { 'en-US': 'entry-5' } },
         },
@@ -53,6 +71,7 @@ const mockCma: any = {
           sys: {
             id: 'Entry id 6',
             updatedAt: '2021-01-01',
+            contentType: { sys: { id: 'blogPost' } },
           },
           fields: { title: { 'en-US': 'Non-root (no slug)' }, slug: { 'en-US': undefined } },
         },
