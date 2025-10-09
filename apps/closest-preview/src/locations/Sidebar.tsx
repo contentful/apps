@@ -10,10 +10,10 @@ import {
 import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { EntryProps, KeyValueMap } from 'contentful-management';
-import { useCallback, useEffect, useState } from 'react';
-
-const MAX_DEPTH = 10;
+import { EntryProps } from 'contentful-management';
+import { useEffect, useState } from 'react';
+import { getRootEntries, MAX_DEPTH } from '../utils/livePreviewUtils';
+import { getContentTypesForEntries, getDisplayField } from '../utils/entryUtils';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
@@ -21,105 +21,24 @@ const Sidebar = () => {
   const [entries, setEntries] = useState<EntryProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [maxDepthReached, setMaxDepthReached] = useState<boolean>(false);
+  const [contentTypes, setContentTypes] = useState<Record<string, any>>({});
   const defaultLocale = sdk.locales.default;
-
-  const getRelatedEntries = useCallback(
-    async (id: string): Promise<EntryProps[]> => {
-      try {
-        const response = await sdk.cma.entry.getMany({
-          query: {
-            links_to_entry: id,
-            order: '-sys.updatedAt',
-            limit: 5,
-          },
-          spaceId: sdk.ids.space,
-          environmentId: sdk.ids.environment,
-        });
-
-        return response.items;
-      } catch (error) {
-        console.error(error);
-        return [];
-      }
-    },
-    [sdk.ids.space, sdk.ids.environment]
-  );
-
-  const splitEntriesFromRoot = (
-    entry: EntryProps<KeyValueMap>,
-    checkedEntries: Set<string>,
-    rootEntryData: EntryProps[]
-  ) => {
-    const entryId = entry?.sys?.id;
-    if (!entryId || checkedEntries.has(entryId)) {
-      return false;
-    }
-
-    checkedEntries.add(entryId);
-    const slug = entry.fields.slug?.[defaultLocale];
-    if (slug) {
-      rootEntryData.push(entry);
-      return false;
-    }
-
-    return true;
-  };
-
-  const getRootEntries = useCallback(
-    async (id: string): Promise<{ entries: EntryProps[]; maxDepthReached: boolean }> => {
-      const rootEntryData: EntryProps[] = [];
-      let childEntries: EntryProps[] = [];
-      const checkedEntries: Set<string> = new Set([id]);
-      let depth = 0;
-      const maxDepth = MAX_DEPTH;
-      let depthReached = false;
-
-      try {
-        const initialEntry = await sdk.cma.entry.get({
-          entryId: id,
-          spaceId: sdk.ids.space,
-          environmentId: sdk.ids.environment,
-        });
-        childEntries = [initialEntry];
-      } catch (error) {
-        console.error('Failed to fetch initial entry:', error);
-        return { entries: [], maxDepthReached: false };
-      }
-
-      while (childEntries.length > 0 && depth < maxDepth) {
-        const relatedEntries = await Promise.all(
-          childEntries.map((entry) => getRelatedEntries(entry.sys.id))
-        );
-
-        childEntries = relatedEntries.flatMap((rEntry) =>
-          rEntry.filter((item: EntryProps) => {
-            return splitEntriesFromRoot(item, checkedEntries, rootEntryData);
-          })
-        );
-
-        depth++;
-      }
-
-      if (depth >= maxDepth && rootEntryData.length === 0) {
-        depthReached = true;
-      }
-
-      return { entries: rootEntryData, maxDepthReached: depthReached };
-    },
-    [getRelatedEntries, sdk.ids.space, sdk.ids.environment, defaultLocale]
-  );
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      const result = await getRootEntries(sdk.ids.entry);
+      const result = await getRootEntries(sdk);
 
       setEntries(result.entries);
       setMaxDepthReached(result.maxDepthReached);
+
+      const contentTypeMap = await getContentTypesForEntries(sdk, result.entries);
+      setContentTypes(contentTypeMap);
+
       setIsLoading(false);
     };
     fetchData();
-  }, [getRootEntries, sdk.ids.entry]);
+  }, []);
 
   if (isLoading) {
     return (
@@ -129,12 +48,15 @@ const Sidebar = () => {
     );
   }
 
-  if (maxDepthReached) {
-    return <Text>Max depth of {MAX_DEPTH} reached for entry.</Text>;
-  }
-
   return (
     <List>
+      {maxDepthReached && (
+        <Box marginBottom="spacingS">
+          <Text fontSize="fontSizeS" fontColor="gray600">
+            Max depth of {MAX_DEPTH} reached. Showing partial results.
+          </Text>
+        </Box>
+      )}
       {entries.map((entry: EntryProps) => {
         const entryLink = `https://${sdk.hostnames.webapp}/spaces/${sdk.ids.space}/environments/${sdk.ids.environment}/entries/${entry.sys.id}`;
         return (
@@ -146,7 +68,7 @@ const Sidebar = () => {
                 rel="noopener noreferrer"
                 icon={<ArrowSquareOutIcon />}
                 alignIcon="end">
-                {entry.fields.title?.[defaultLocale] || entry.sys.id.slice(0, 8)}
+                {getDisplayField(entry, contentTypes, defaultLocale)}
               </TextLink>
               <br />
               <Paragraph fontSize="fontSizeM" fontColor="gray500" fontWeight="fontWeightMedium">
