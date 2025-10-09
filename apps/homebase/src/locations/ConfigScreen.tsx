@@ -9,6 +9,7 @@ import {
   ListItem,
 } from '@contentful/f36-components';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { ContentTypeProps } from 'contentful-management';
 import { useCallback, useEffect, useState } from 'react';
 import { C } from 'vitest/dist/chunks/environment.d.cL3nLXbE';
 
