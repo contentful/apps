@@ -3,15 +3,14 @@ import {
   Flex,
   Form,
   Heading,
-  Paragraph,
-  Subheading,
   List,
   ListItem,
+  Paragraph,
+  Subheading,
 } from '@contentful/f36-components';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-import { ContentTypeProps } from 'contentful-management';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { CreateContentTypeProps } from 'contentful-management';
 import { useCallback, useEffect, useState } from 'react';
-import { C } from 'vitest/dist/chunks/environment.d.cL3nLXbE';
 
 export interface AppInstallationParameters {}
 
@@ -21,7 +20,7 @@ const createContentType = async (sdk: ConfigAppSDK) => {
   const MARKDOWN_ID = 'markdown';
   const TITLE_ID = 'title';
 
-  const contentTypeBody: ContentTypeProps = {
+  const contentTypeBody: CreateContentTypeProps = {
     name: CONTENT_TYPE_ID,
     description: 'Content type used by the Homebase app to render the Contentful home page.',
     fields: [
