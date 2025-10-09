@@ -1,23 +1,49 @@
-import { Box, RelativeDateTime, TextLink, List, Paragraph } from '@contentful/f36-components';
+import {
+  Box,
+  List,
+  Paragraph,
+  RelativeDateTime,
+  Skeleton,
+  TextLink,
+} from '@contentful/f36-components';
 import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 import { SidebarAppSDK } from '@contentful/app-sdk';
-import { useSDK, useAutoResizer } from '@contentful/react-apps-toolkit';
+import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { EntryProps } from 'contentful-management';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { getRootEntries } from '../utils/livePreviewUtils';
+import { getContentTypesForEntries, getDisplayField } from '../utils/entryUtils';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
   useAutoResizer();
   const [entries, setEntries] = useState<EntryProps[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [contentTypes, setContentTypes] = useState<Record<string, any>>({});
+  const defaultLocale = sdk.locales.default;
 
-  // TODO: use entries with Live Preview. Using any entries for now.
   useEffect(() => {
-    const fetchEntries = async () => {
-      const response = await sdk.cma.entry.getMany({});
-      setEntries(response.items.slice(0, 5));
+    const fetchData = async () => {
+      setIsLoading(true);
+      const entries = await getRootEntries(sdk);
+
+      setEntries(entries);
+
+      const contentTypeMap = await getContentTypesForEntries(sdk, entries);
+      setContentTypes(contentTypeMap);
+
+      setIsLoading(false);
     };
-    fetchEntries();
+    fetchData();
   }, []);
+
+  if (isLoading) {
+    return (
+      <Skeleton.Container>
+        <Skeleton.BodyText numberOfLines={3} />
+      </Skeleton.Container>
+    );
+  }
 
   return (
     <List>
@@ -32,8 +58,7 @@ const Sidebar = () => {
                 rel="noopener noreferrer"
                 icon={<ArrowSquareOutIcon />}
                 alignIcon="end">
-                {/* TODO: get the title of the entry */}
-                {entry.sys.id.slice(0, 8)}
+                {getDisplayField(entry, contentTypes, defaultLocale)}
               </TextLink>
               <br />
               <Paragraph fontSize="fontSizeM" fontColor="gray500" fontWeight="fontWeightMedium">
