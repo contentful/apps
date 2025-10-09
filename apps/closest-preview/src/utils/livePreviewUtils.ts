@@ -60,25 +60,16 @@ export const getRelatedEntries = async (sdk: SidebarAppSDK, id: string): Promise
   }
 };
 
-export const splitEntriesFromRoot = (
+export const hasSlug = (entry: EntryProps<KeyValueMap>, defaultLocale: string): boolean => {
+  return !!entry.fields.slug?.[defaultLocale];
+};
+
+export const isNotChecked = (
   entry: EntryProps<KeyValueMap>,
-  checkedEntries: Set<string>,
-  rootEntryData: EntryProps[],
-  defaultLocale: string
-) => {
+  checkedEntries: Set<string>
+): boolean => {
   const entryId = entry?.sys?.id;
-  if (!entryId || checkedEntries.has(entryId)) {
-    return false;
-  }
-
-  checkedEntries.add(entryId);
-  const slug = entry.fields.slug?.[defaultLocale];
-  if (slug) {
-    rootEntryData.push(entry);
-    return false;
-  }
-
-  return true;
+  return !!entryId && !checkedEntries.has(entryId);
 };
 
 export const filterAndOrderEntries = (entries: EntryProps[], limit: number = 5): EntryProps[] => {
@@ -105,11 +96,26 @@ export const getRootEntries = async (sdk: SidebarAppSDK): Promise<EntryProps[]> 
       childEntries.map((entry) => getRelatedEntries(sdk, entry.sys.id))
     );
 
-    childEntries = relatedEntries.flatMap((rEntry) =>
-      rEntry.filter((item: EntryProps) => {
-        return splitEntriesFromRoot(item, checkedEntries, rootEntryData, sdk.locales.default);
-      })
-    );
+    const allRelatedEntries = relatedEntries.flat();
+
+    const entriesWithSlugs: EntryProps[] = [];
+    const entriesWithoutSlugs: EntryProps[] = [];
+
+    allRelatedEntries.forEach((entry) => {
+      if (isNotChecked(entry, checkedEntries)) {
+        checkedEntries.add(entry.sys.id);
+
+        if (hasSlug(entry, sdk.locales.default)) {
+          entriesWithSlugs.push(entry);
+        } else {
+          entriesWithoutSlugs.push(entry);
+        }
+      }
+    });
+
+    rootEntryData.push(...entriesWithSlugs);
+
+    childEntries = entriesWithoutSlugs;
   }
 
   return filterAndOrderEntries(rootEntryData);
