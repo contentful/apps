@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import { mockCma } from './mockCma';
 
 const mockSdk: any = {
   app: {
@@ -7,6 +8,7 @@ const mockSdk: any = {
     setReady: vi.fn(),
     getCurrentState: vi.fn(),
   },
+  cma: mockCma,
   ids: {
     app: 'test-app',
   },
