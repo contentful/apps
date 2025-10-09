@@ -12,7 +12,7 @@ import { SidebarAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { EntryProps } from 'contentful-management';
 import { useEffect, useState } from 'react';
-import { getRootEntries, MAX_DEPTH } from '../utils/livePreviewUtils';
+import { getRootEntries } from '../utils/livePreviewUtils';
 import { getContentTypesForEntries, getDisplayField } from '../utils/entryUtils';
 
 const Sidebar = () => {
@@ -20,19 +20,17 @@ const Sidebar = () => {
   useAutoResizer();
   const [entries, setEntries] = useState<EntryProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [maxDepthReached, setMaxDepthReached] = useState<boolean>(false);
   const [contentTypes, setContentTypes] = useState<Record<string, any>>({});
   const defaultLocale = sdk.locales.default;
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      const result = await getRootEntries(sdk);
+      const entries = await getRootEntries(sdk);
 
-      setEntries(result.entries);
-      setMaxDepthReached(result.maxDepthReached);
+      setEntries(entries);
 
-      const contentTypeMap = await getContentTypesForEntries(sdk, result.entries);
+      const contentTypeMap = await getContentTypesForEntries(sdk, entries);
       setContentTypes(contentTypeMap);
 
       setIsLoading(false);
@@ -50,13 +48,6 @@ const Sidebar = () => {
 
   return (
     <List>
-      {maxDepthReached && (
-        <Box marginBottom="spacingS">
-          <Text fontSize="fontSizeS" fontColor="gray600">
-            Max depth of {MAX_DEPTH} reached. Showing partial results.
-          </Text>
-        </Box>
-      )}
       {entries.map((entry: EntryProps) => {
         const entryLink = `https://${sdk.hostnames.webapp}/spaces/${sdk.ids.space}/environments/${sdk.ids.environment}/entries/${entry.sys.id}`;
         return (

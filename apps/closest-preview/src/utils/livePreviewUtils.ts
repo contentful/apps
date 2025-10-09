@@ -2,8 +2,6 @@ import { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
 import { CMAClient, ConfigAppSDK, SidebarAppSDK } from '@contentful/app-sdk';
 import { getEntry } from './entryUtils';
 
-export const MAX_DEPTH = 10;
-
 export const getContentTypesWithoutLivePreview = async (
   cma: PlainClientAPI | CMAClient,
   sdk: ConfigAppSDK,
@@ -84,24 +82,20 @@ export const splitEntriesFromRoot = (
   return true;
 };
 
-export const getRootEntries = async (
-  sdk: SidebarAppSDK
-): Promise<{ entries: EntryProps[]; maxDepthReached: boolean }> => {
+export const getRootEntries = async (sdk: SidebarAppSDK): Promise<EntryProps[]> => {
   const rootEntryData: EntryProps[] = [];
   let childEntries: EntryProps[] = [];
   const checkedEntries: Set<string> = new Set([sdk.ids.entry]);
-  let depth = 0;
-  let depthReached = false;
 
   const initialEntry = await getEntry(sdk);
 
   if (!initialEntry) {
-    return { entries: [], maxDepthReached: false };
+    return [];
   }
 
   childEntries = [initialEntry];
 
-  while (childEntries.length > 0 && depth < MAX_DEPTH) {
+  while (childEntries.length > 0) {
     const relatedEntries = await Promise.all(
       childEntries.map((entry) => getRelatedEntries(sdk, entry.sys.id))
     );
@@ -111,13 +105,7 @@ export const getRootEntries = async (
         return splitEntriesFromRoot(item, checkedEntries, rootEntryData, sdk.locales.default);
       })
     );
-
-    depth++;
   }
 
-  if (depth >= MAX_DEPTH) {
-    depthReached = true;
-  }
-
-  return { entries: rootEntryData, maxDepthReached: depthReached };
+  return rootEntryData;
 };

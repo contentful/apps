@@ -23,12 +23,11 @@ export const getContentTypesForEntries = async (
 
   for (const id of contentTypeIds) {
     try {
-      const contentType = await sdk.cma.contentType.get({
+      contentTypeMap[id] = await sdk.cma.contentType.get({
         contentTypeId: id,
         spaceId: sdk.ids.space,
         environmentId: sdk.ids.environment,
       });
-      contentTypeMap[id] = contentType;
     } catch (error) {
       console.error('Error fetching content type:', error);
     }
