@@ -6,6 +6,10 @@ const mockCma: any = {
     createWithId: vi.fn(),
     publish: vi.fn(),
   },
+  uiConfig: {
+    get: vi.fn(),
+    update: vi.fn(),
+  },
 };
 
 export { mockCma };

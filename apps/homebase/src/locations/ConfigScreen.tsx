@@ -64,6 +64,25 @@ const ConfigScreen = () => {
       await createContentType(sdk);
     }
 
+    try {
+      const currentUIConfig = await sdk.cma.uiConfig.get({});
+      await sdk.cma.uiConfig.update(
+        {},
+        {
+          ...currentUIConfig,
+          homeViews: [
+            {
+              widgetNamespace: 'app',
+              widgetId: sdk.ids.app,
+            },
+          ],
+        }
+      );
+    } catch (e) {
+      sdk.notifier.error('Failed to configure Home location. Please try again.');
+      throw e;
+    }
+
     return {
       parameters,
       targetState: currentState,

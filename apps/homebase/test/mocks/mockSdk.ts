@@ -12,6 +12,9 @@ const mockSdk: any = {
   ids: {
     app: 'test-app',
   },
+  notifier: {
+    error: vi.fn(),
+  },
 };
 
 export { mockSdk };
