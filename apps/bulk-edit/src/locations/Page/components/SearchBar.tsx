@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Flex, Text, TextInput } from '@contentful/f36-components';
-import { SearchIcon } from '@contentful/f36-icons';
+import { MagnifyingGlassIcon } from '@contentful/f36-icons';
 import { useDebounce } from 'use-debounce';
 import { styles } from './SearchBar.styles';
 
@@ -41,7 +41,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         placeholder="Search"
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
-        icon={<SearchIcon />}
+        icon={<MagnifyingGlassIcon />}
         isDisabled={isDisabled}
       />
     </Flex>
