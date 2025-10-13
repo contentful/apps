@@ -1,11 +1,13 @@
 import { HomeAppSDK } from '@contentful/app-sdk';
-import { Button, Flex, Menu, Paragraph } from '@contentful/f36-components';
+import { Box, Button, Flex, Menu, Paragraph } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { CONTENT_TYPE_ID, MARKDOWN_ID, TITLE_ID } from '../consts';
 import { useEffect, useState } from 'react';
 import { EntryProps } from 'contentful-management';
 import MarkdownPreview from '../components/MarkdownPreview';
 import { styles } from './Home.styles';
+import Splitter from '../components/Splitter';
+import tokens from '@contentful/f36-tokens';
 
 const Home = () => {
   const sdk = useSDK<HomeAppSDK>();
@@ -33,33 +35,34 @@ const Home = () => {
   }
 
   return (
-    <>
-      <Flex gap="spacingM" flexDirection="column" margin="spacingM" style={styles.home}>
-        <Flex justifyContent="flex-end" margin="spacingM">
-          <Menu>
-            <Menu.Trigger>
-              <Button>Select entry</Button>
-            </Menu.Trigger>
-            <Menu.List>
-              {entries.map((entry) => (
-                <Menu.Item key={entry.sys.id} onClick={() => setSelectedEntry(entry)}>
-                  {entry.fields[TITLE_ID]?.[defaultLocale]}
-                </Menu.Item>
-              ))}
-            </Menu.List>
-          </Menu>
-        </Flex>
-        <Flex flexDirection="column" marginTop="spacingS" padding="spacingXs">
-          {selectedEntry && (
-            <MarkdownPreview
-              value={selectedEntry.fields[MARKDOWN_ID]?.[defaultLocale] || ''}
-              mode={'fullPage'}
-              direction={'ltr'}
-            />
-          )}
-        </Flex>
+    <Flex flexDirection="column" marginLeft="spacingL" marginRight="spacingL" style={styles.home}>
+      <Flex justifyContent="flex-end" marginTop="spacingS" marginRight="spacingS">
+        <Menu>
+          <Menu.Trigger>
+            <Button>Select entry</Button>
+          </Menu.Trigger>
+          <Menu.List>
+            {entries.map((entry) => (
+              <Menu.Item key={entry.sys.id} onClick={() => setSelectedEntry(entry)}>
+                {entry.fields[TITLE_ID]?.[defaultLocale]}
+              </Menu.Item>
+            ))}
+          </Menu.List>
+        </Menu>
       </Flex>
-    </>
+      <Box>
+        <Splitter marginTop="spacingS" style={styles.splitter} />
+      </Box>
+      <Flex flexDirection="column">
+        {selectedEntry && (
+          <MarkdownPreview
+            value={selectedEntry.fields[MARKDOWN_ID]?.[defaultLocale] || ''}
+            mode={'fullPage'}
+            direction={'ltr'}
+          />
+        )}
+      </Flex>
+    </Flex>
   );
 };
 

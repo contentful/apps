@@ -5,6 +5,10 @@ export const styles = {
     backgroundColor: 'white',
     minHeight: '100vh',
     borderRadius: tokens.borderRadiusMedium,
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+
+    boxShadow: `0 4px 20px -4px ${tokens.gray300}`,
+  },
+  splitter: {
+    backgroundColor: tokens.gray200,
   },
 };
