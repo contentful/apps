@@ -44,6 +44,7 @@ const createContentType = async (sdk: ConfigAppSDK) => {
     );
     await sdk.cma.contentType.publish({ contentTypeId: CONTENT_TYPE_ID }, contentTypeProps);
   } catch (e: any) {
+    sdk.notifier.error('Failed to create HOMEBASE content type. Please try again.');
     throw e;
   }
 };
