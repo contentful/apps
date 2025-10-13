@@ -20,8 +20,6 @@ const Sidebar = () => {
   const [entries, setEntries] = useState<EntryProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [contentTypes, setContentTypes] = useState<Record<string, any>>({});
-  const defaultLocale = sdk.locales.default;
-
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -58,7 +56,7 @@ const Sidebar = () => {
                 rel="noopener noreferrer"
                 icon={<ArrowSquareOutIcon />}
                 alignIcon="end">
-                {getDisplayField(entry, contentTypes, defaultLocale)}
+                {getDisplayField(entry, contentTypes, sdk.locales.default)}
               </TextLink>
               <br />
               <Paragraph fontSize="fontSizeM" fontColor="gray500" fontWeight="fontWeightMedium">

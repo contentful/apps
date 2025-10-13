@@ -47,7 +47,6 @@ export const getRelatedEntries = async (sdk: SidebarAppSDK, id: string): Promise
     const response = await sdk.cma.entry.getMany({
       query: {
         links_to_entry: id,
-        order: '-sys.updatedAt',
       },
       spaceId: sdk.ids.space,
       environmentId: sdk.ids.environment,
@@ -60,7 +59,7 @@ export const getRelatedEntries = async (sdk: SidebarAppSDK, id: string): Promise
   }
 };
 
-export const hasSlug = (entry: EntryProps<KeyValueMap>, defaultLocale: string): boolean => {
+export const hasLivePreview = (entry: EntryProps<KeyValueMap>, defaultLocale: string): boolean => {
   return !!entry.fields.slug?.[defaultLocale];
 };
 
@@ -98,24 +97,24 @@ export const getRootEntries = async (sdk: SidebarAppSDK): Promise<EntryProps[]> 
 
     const allRelatedEntries = relatedEntries.flat();
 
-    const entriesWithSlugs: EntryProps[] = [];
-    const entriesWithoutSlugs: EntryProps[] = [];
+    const entriesWithLivePreview: EntryProps[] = [];
+    const entriesWithoutLivePreview: EntryProps[] = [];
 
     allRelatedEntries.forEach((entry) => {
       if (isNotChecked(entry, checkedEntries)) {
         checkedEntries.add(entry.sys.id);
 
-        if (hasSlug(entry, sdk.locales.default)) {
-          entriesWithSlugs.push(entry);
+        if (hasLivePreview(entry, sdk.locales.default)) {
+          entriesWithLivePreview.push(entry);
         } else {
-          entriesWithoutSlugs.push(entry);
+          entriesWithoutLivePreview.push(entry);
         }
       }
     });
 
-    rootEntryData.push(...entriesWithSlugs);
+    rootEntryData.push(...entriesWithLivePreview);
 
-    childEntries = entriesWithoutSlugs;
+    childEntries = entriesWithoutLivePreview;
   }
 
   return filterAndOrderEntries(rootEntryData);
