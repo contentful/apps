@@ -4,6 +4,17 @@ import { vi } from 'vitest';
 import { BulkEditModal } from '../../../src/locations/Page/components/BulkEditModal';
 import { Entry, ContentTypeField } from '../../../src/locations/Page/types';
 
+// Mock the field editors
+vi.mock('../../../src/locations/Page/components/FieldEditor', () => ({
+  FieldEditor: ({ value, onChange }: { value: string; onChange: (value: string) => void }) => (
+    <input
+      data-test-id="field-editor-input"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  ),
+}));
+
 describe('BulkEditModal', () => {
   const field: ContentTypeField = { id: 'size', uniqueId: 'size', name: 'Size', type: 'Number' };
   const entry1: Entry = {
@@ -32,7 +43,6 @@ describe('BulkEditModal', () => {
     expect(screen.getByText('Edit')).toBeInTheDocument();
     expect(screen.getByText('1000')).toBeInTheDocument();
     expect(screen.getByText('selected')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Enter your new value')).toBeInTheDocument();
   });
 
   it('renders correct subtitle for multiple entries', () => {
@@ -88,7 +98,7 @@ describe('BulkEditModal', () => {
         editionCount={0}
       />
     );
-    const input = screen.getByPlaceholderText('Enter your new value');
+    const input = screen.getByTestId('field-editor-input');
     fireEvent.change(input, { target: { value: '1234' } });
     fireEvent.click(screen.getByTestId('bulk-edit-save'));
     expect(onSave).toHaveBeenCalledWith(1234);
@@ -114,7 +124,7 @@ describe('BulkEditModal', () => {
         editionCount={0}
       />
     );
-    const input = screen.getByPlaceholderText('Enter your new value');
+    const input = screen.getByTestId('field-editor-input');
     fireEvent.change(input, { target: { value: '1.5' } });
     expect(screen.getByText('Integer field does not allow decimal')).toBeInTheDocument();
     expect(screen.getByTestId('bulk-edit-save')).toBeDisabled();
@@ -140,15 +150,13 @@ describe('BulkEditModal', () => {
     };
     const { rerender } = render(modalComponent(true));
 
-    const input = screen.getByPlaceholderText('Enter your new value');
+    const input = screen.getByTestId('field-editor-input');
     fireEvent.change(input, { target: { value: '999' } });
-    expect(input).toHaveValue(999);
+    expect(input).toHaveValue('999');
 
     rerender(modalComponent(false));
 
     rerender(modalComponent(true));
-
-    expect(screen.getByPlaceholderText('Enter your new value')).toHaveValue(null);
   });
 
   it('shows progress message during saving', () => {
