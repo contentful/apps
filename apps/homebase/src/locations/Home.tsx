@@ -51,7 +51,7 @@ const Home = () => {
         </Menu>
       </Flex>
       <Box>
-        <Splitter marginTop="spacingS" style={styles.splitter} />
+        <Splitter marginTop="spacingS" style={styles.splitter} data-test-id="splitter" />
       </Box>
       <Flex flexDirection="column">
         {selectedEntry && (
@@ -59,6 +59,7 @@ const Home = () => {
             value={selectedEntry.fields[MARKDOWN_ID]?.[defaultLocale] || ''}
             mode={'fullPage'}
             direction={'ltr'}
+            data-testid="markdown-preview"
           />
         )}
       </Flex>

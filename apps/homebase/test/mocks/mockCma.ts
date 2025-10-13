@@ -10,6 +10,15 @@ const mockCma: any = {
     get: vi.fn(),
     update: vi.fn(),
   },
+  entry: {
+    get: vi.fn(),
+    getMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    publish: vi.fn(),
+    unpublish: vi.fn(),
+  },
 };
 
 export { mockCma };
