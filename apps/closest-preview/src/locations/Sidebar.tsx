@@ -43,7 +43,7 @@ const Sidebar = () => {
     );
   }
 
-  return (
+  return entries.length > 0 ? (
     <List>
       {entries.map((entry: EntryProps) => {
         const entryLink = `https://${sdk.hostnames.webapp}/spaces/${sdk.ids.space}/environments/${sdk.ids.environment}/entries/${entry.sys.id}`;
@@ -67,6 +67,8 @@ const Sidebar = () => {
         );
       })}
     </List>
+  ) : (
+    <Paragraph>No other entries with Live Preview link to this entry.</Paragraph>
   );
 };
 
