@@ -13,7 +13,7 @@ const Home = () => {
   const sdk = useSDK<HomeAppSDK>();
   const [entries, setEntries] = useState<EntryProps[]>([]);
   const [selectedEntry, setSelectedEntry] = useState<EntryProps | null>(null);
-  const defaultLocale = sdk.locales?.default || 'en-US';
+  const defaultLocale = sdk.locales.default;
 
   useEffect(() => {
     const getEntries = async () => {
@@ -58,7 +58,7 @@ const Home = () => {
           <MarkdownPreview
             value={selectedEntry.fields[MARKDOWN_ID]?.[defaultLocale] || ''}
             mode={'fullPage'}
-            direction={'ltr'}
+            direction={sdk.locales.direction[defaultLocale]}
             data-testid="markdown-preview"
           />
         )}

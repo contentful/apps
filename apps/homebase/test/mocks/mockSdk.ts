@@ -15,6 +15,10 @@ const mockSdk: any = {
   locales: {
     default: 'en-US',
     available: ['en-US', 'es-ES'],
+    direction: {
+      'en-US': 'ltr',
+      'es-ES': 'ltr',
+    },
   },
   notifier: {
     error: vi.fn(),

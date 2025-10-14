@@ -6,8 +6,6 @@ import { css, cx } from 'emotion';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import remarkGfm from 'remark-gfm';
-import { EditorDirection, PreviewComponents } from '../types';
-import { replaceMailtoAmp } from '../utils';
 
 const styles = {
   root: css`
@@ -180,6 +178,18 @@ type MarkdownLinkProps = React.PropsWithChildren<{
   className?: string;
   Embedly?: React.ComponentType<{ url: string }>;
 }>;
+
+type EditorDirection = 'ltr' | 'rtl';
+
+type PreviewComponents = {
+  embedly?: React.ComponentType<{ url: string }>;
+};
+
+const replaceMailtoAmp = (string: string) => {
+  return string.replace(/href="mailto:[^"]*&amp;/g, function (match) {
+    return match.replace(/&amp;/g, '&');
+  });
+};
 
 function MarkdownLink(props: MarkdownLinkProps) {
   const { Embedly, children, ...rest } = props;
