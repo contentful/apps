@@ -74,6 +74,20 @@ export const useKeyboardNavigation = ({
     }
 
     setFocusedCell(newPosition);
+
+    // Scroll to the focused cell
+    const { row, column } = newPosition;
+    const cell = tableRef.current?.querySelector(
+      `[data-row="${row}"][data-column="${column}"]`
+    ) as HTMLElement;
+
+    if (cell) {
+      cell.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'nearest',
+      });
+    }
   };
 
   const extendSelectionToEdge = (focusedCell: FocusPosition, newPosition: FocusPosition) => {

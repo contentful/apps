@@ -641,13 +641,16 @@ const Page = () => {
                     </Button>
                   )}
                 </Flex>
-                {selectedField && selectedEntryIds.length > 0 && !entriesLoading && (
+                {!entriesLoading && (
                   <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
-                    <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-                      {selectedEntryIds.length === 1 ? 'Edit' : 'Bulk edit'}
+                    <Button
+                      variant="primary"
+                      onClick={() => setIsModalOpen(true)}
+                      isDisabled={!selectedField || selectedEntryIds.length === 0}>
+                      {selectedEntryIds.length > 1 ? 'Bulk edit' : 'Edit'}
                     </Button>
                     <Text fontColor="gray600">
-                      {selectedEntryIds.length} entry field
+                      {selectedEntryIds.length || 'No'} entry field
                       {selectedEntryIds.length === 1 ? '' : 's'} selected
                     </Text>
                   </Flex>

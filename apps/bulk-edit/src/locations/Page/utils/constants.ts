@@ -38,3 +38,4 @@ export const TABLE_WIDTH = CELL_WIDTH * 4;
 export const BUTTON_WIDTH = 110;
 export const GAP_BETWEEN_BUTTON = 15;
 export const FILTER_MULTISELECT_WIDTH = 300;
+export const ESTIMATED_ROW_HEIGHT = 50;
