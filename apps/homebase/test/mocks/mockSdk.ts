@@ -12,8 +12,18 @@ const mockSdk: any = {
   ids: {
     app: 'test-app',
   },
+  locales: {
+    default: 'en-US',
+    available: ['en-US', 'es-ES'],
+    direction: {
+      'en-US': 'ltr',
+      'es-ES': 'ltr',
+    },
+  },
   notifier: {
     error: vi.fn(),
+    success: vi.fn(),
+    warning: vi.fn(),
   },
 };
 
