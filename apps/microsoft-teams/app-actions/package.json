@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@contentful/node-apps-toolkit": "^2.6.0",
-    "contentful-management": "^11.38.0",
+    "contentful-management": "^11.56.0",
     "mocha": "^10.8.2",
     "sinon": "^19.0.2"
   },

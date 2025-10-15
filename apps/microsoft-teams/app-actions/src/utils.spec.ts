@@ -17,6 +17,7 @@ describe('fetchTenantId', () => {
       appDefinition: {} as SysLink,
       environment: {} as SysLink,
       space: {} as SysLink,
+      organization: {} as SysLink,
       createdAt: 'createdAt',
       version: 1,
       updatedAt: 'updatedAt',

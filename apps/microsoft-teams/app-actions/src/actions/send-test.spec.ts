@@ -9,8 +9,8 @@ import {
   AppInstallationProps,
 } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import helpers from '../helpers';
-import { AppActionCallResponseSuccess, MessageResponse, MsTeamsBotServiceResponse } from '../types';
+import { MsTeamsBotServiceResponse } from '../types';
+import { AppActionResultSuccess, MessageResponse } from '../../../types';
 import { MsTeamsBotService } from '../services/msteams-bot-service';
 import { config } from '../config';
 
@@ -51,6 +51,7 @@ describe('sendTestMessage.handler', () => {
         appDefinition: {} as SysLink,
         environment: {} as SysLink,
         space: {} as SysLink,
+        organization: {} as SysLink,
         version: 1,
         createdAt: 'createdAt',
         updatedAt: 'updatedAt',
@@ -78,10 +79,7 @@ describe('sendTestMessage.handler', () => {
   });
 
   it('returns the ok result', async () => {
-    const result = (await handler(
-      parameters,
-      context
-    )) as AppActionCallResponseSuccess<MessageResponse>;
+    const result = (await handler(parameters, context)) as AppActionResultSuccess<MessageResponse>;
     expect(result).to.have.property('ok', true);
     expect(result.data).to.have.property('messageResponseId', 'message-response-id');
   });

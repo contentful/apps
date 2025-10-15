@@ -11,7 +11,8 @@ import {
   createClient,
 } from 'contentful-management';
 import sinon from 'sinon';
-import { AppInstallationParameters, EntryEvent, TeamInstallation, Channel } from '../src/types';
+import { AppInstallationParameters, EntryEvent, TeamInstallation } from '../src/types';
+import { Channel } from '../../types';
 
 export const makeMockPlainClient = (responses: any[], stub: sinon.SinonStub): PlainClientAPI => {
   for (const [callNumber, response] of responses.entries()) {
@@ -172,6 +173,7 @@ export const mockAppInstallation: AppInstallationProps = {
     appDefinition: {} as SysLink,
     environment: {} as SysLink,
     space: {} as SysLink,
+    organization: {} as SysLink,
     version: 1,
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',

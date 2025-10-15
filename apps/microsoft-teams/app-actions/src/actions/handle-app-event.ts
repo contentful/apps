@@ -1,6 +1,5 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import {
-  AppActionCallResponse,
   EntryActivityMessage,
   SendEntryActivityMessageResult,
   SendWorkflowUpdateMessageResult,
@@ -8,6 +7,7 @@ import {
   WorkflowPayload,
   WorkflowUpdateMessage,
 } from '../types';
+import { AppActionResult } from '../../../types';
 import { EntryProps } from 'contentful-management/types';
 import helpers from '../helpers';
 import { parametersFromAppInstallation } from '../helpers/app-installation';
@@ -26,7 +26,7 @@ export const handler = withAsyncAppActionErrorHandling(
     parameters: AppActionCallParameters,
     context: AppActionCallContext
   ): Promise<
-    AppActionCallResponse<SendEntryActivityMessageResult[] | SendWorkflowUpdateMessageResult>
+    AppActionResult<SendEntryActivityMessageResult[] | SendWorkflowUpdateMessageResult>
   > => {
     const {
       cma,

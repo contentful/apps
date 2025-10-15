@@ -2,24 +2,7 @@ import { ChannelInfo as MSChannelInfo, TeamDetails as MSTeamDetails } from 'botb
 import { TOPIC_ACTION_MAP } from './constants';
 import { EntryProps } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-
-export interface ActionError {
-  type: string;
-  message: string;
-  details?: Record<string, any>;
-}
-
-export interface AppActionCallResponseSuccess<TResult> {
-  ok: true;
-  data: TResult;
-}
-
-export interface AppActionCallResponseError {
-  ok: false;
-  error: ActionError;
-}
-
-export type AppActionCallResponse<T> = AppActionCallResponseSuccess<T> | AppActionCallResponseError;
+import { Channel, MessageResponse } from '../../types';
 
 export enum AppEventKey {
   ENTRY_PUBLISH = 'ContentManagement.Entry.publish',
@@ -29,14 +12,6 @@ export enum AppEventKey {
   ENTRY_ARCHIVE = 'ContentManagement.Entry.archive',
   ENTRY_UNARCHIVE = 'ContentManagement.Entry.unarchive',
 }
-
-export type Channel = {
-  id: string;
-  tenantId: string;
-  name: string;
-  teamId: string;
-  teamName: string;
-};
 
 // same object as the MS parent, but with required id and name
 export interface TeamDetails extends MSTeamDetails {
@@ -121,10 +96,6 @@ export interface TestMessage {
     channelId: string;
   };
   contentTypeName: string;
-}
-
-export interface MessageResponse {
-  messageResponseId: string;
 }
 
 export interface MsTeamsBotServiceSuccessResponse<T> {
