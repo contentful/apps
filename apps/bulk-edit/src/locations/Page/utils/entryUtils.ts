@@ -1,12 +1,8 @@
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Document } from '@contentful/rich-text-types';
-import { Entry, ContentTypeField, Fields } from '../types';
+import { ContentTypeField, Entry, Fields } from '../types';
 import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
-import {
-  BATCH_FETCHING,
-  DRAFT_STATUS,
-  CHANGED_STATUS,
-  PUBLISHED_STATUS,
+import { BATCH_FETCHING, CHANGED_STATUS, DRAFT_STATUS, PUBLISHED_STATUS,
   UNKNOWN_STATUS,
 } from './constants';
 import { BadgeVariant } from '@contentful/f36-components';
@@ -131,22 +127,15 @@ export const getEntryUrl = (entry: Entry, spaceId: string, environmentId: string
 };
 
 export const isCheckboxAllowed = (field: ContentTypeField): boolean => {
-  const restrictedTypes = [
-    'Location',
-    'Date',
-    'Asset',
-    'Array',
-    'Link',
-    'ResourceLink',
-    'Boolean',
-    'Object',
-    'RichText',
-  ];
+  if (!field || !field.type) return false;
 
-  if (!field.type) return false;
+  const restrictedTypes = ['Location', 'Asset', 'Link', 'ResourceLink', 'RichText'];
 
-  if (restrictedTypes.includes(field.type)) return false;
-  return true;
+  if (field.type === 'Array') {
+    return field.items?.type === 'Symbol';
+  }
+
+  return !restrictedTypes.includes(field.type);
 };
 
 /**

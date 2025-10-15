@@ -1,22 +1,15 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { SingleLineEditor } from '@contentful/field-editor-single-line';
 import { MultipleLineEditor } from '@contentful/field-editor-multiple-line';
 import { NumberEditor } from '@contentful/field-editor-number';
-import type { FieldAPI, LocalesAPI } from '@contentful/field-editor-shared';
+import { DateEditor } from '@contentful/field-editor-date';
+import { TagsEditor } from '@contentful/field-editor-tags';
+import { BooleanEditor } from '@contentful/field-editor-boolean';
+import { JsonEditor } from '@contentful/field-editor-json';
 import type { ContentTypeField } from '../types';
 import { TextInput } from '@contentful/f36-components';
-import { isInvalid, isNumber } from './BulkEditModal';
-
-/**
- * FieldEditor component that renders the appropriate Contentful field editor
- * based on the field type:
- * - SingleLineEditor for Symbol fields (Short text)
- * - MultipleLineEditor for Text fields (Long text)
- * - NumberEditor for Number and Integer fields
- *
- * Uses FieldAPI and LocalesAPI from @contentful/field-editor-shared
- * to provide the proper interface that the field editors expect.
- */
+import { i18n } from '@lingui/core';
+import { createFieldAPI, createLocalesAPI } from '../utils/fieldEditorUtils';
 
 interface FieldEditorProps {
   field: ContentTypeField;
@@ -25,53 +18,22 @@ interface FieldEditorProps {
   defaultLocale: string;
 }
 
-const createFieldAPI = (
-  field: ContentTypeField,
-  value: string,
-  onChange: (value: string) => void,
-  defaultLocale: string
-): FieldAPI => {
-  const locale = field.locale || defaultLocale;
-
-  return {
-    id: field.id,
-    name: field.name,
-    locale: locale,
-    type: field.type as any,
-    required: false,
-    validations: [],
-    getValue: () => value,
-    setValue: async (newValue: any) => {
-      onChange(String(newValue));
-      return newValue;
-    },
-    removeValue: async () => {
-      onChange('');
-    },
-    setInvalid: () => {},
-    onValueChanged: () => () => {},
-    getIsDisabled: () => false,
-    onIsDisabledChanged: () => () => {},
-    getSchemaErrors: () => [],
-    onSchemaErrorsChanged: () => () => {},
-  };
-};
-
-const createLocalesAPI = (defaultLocale: string): LocalesAPI => ({
-  default: defaultLocale,
-  available: [defaultLocale],
-  names: { [defaultLocale]: defaultLocale },
-  fallbacks: {},
-  optional: { [defaultLocale]: false },
-  direction: { [defaultLocale]: 'ltr' },
-});
-
 export const FieldEditor: React.FC<FieldEditorProps> = ({
   field,
   value,
   onChange,
   defaultLocale,
 }) => {
+  // Ensure Lingui i18n is activated for editors that rely on it (e.g., JsonEditor)
+  useEffect(() => {
+    if (i18n.locale !== defaultLocale) {
+      try {
+        i18n.load(defaultLocale, {});
+        i18n.activate(defaultLocale);
+      } catch {}
+    }
+  }, [defaultLocale]);
+
   const fieldApi = useMemo(
     () => createFieldAPI(field, value, onChange, defaultLocale),
     [field, value, onChange, defaultLocale]
@@ -80,47 +42,43 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({
   const localesApi = useMemo(() => createLocalesAPI(defaultLocale), [defaultLocale]);
 
   const renderEditor = () => {
-    try {
-      switch (field.type) {
-        case 'Symbol':
-          return (
-            <SingleLineEditor
-              isInitiallyDisabled={false}
-              withCharValidation={true}
-              field={fieldApi}
-              locales={localesApi}
-            />
-          );
-        case 'Text':
-          return (
-            <MultipleLineEditor field={fieldApi} locales={localesApi} isInitiallyDisabled={false} />
-          );
-        case 'Number':
-        case 'Integer':
-          return <NumberEditor field={fieldApi} isInitiallyDisabled={false} />;
-        default:
-          return (
-            <SingleLineEditor
-              isInitiallyDisabled={false}
-              withCharValidation={true}
-              field={fieldApi}
-              locales={localesApi}
-            />
-          );
-      }
-    } catch (error) {
-      console.error('Error rendering field editor:', error);
-      return (
-        <TextInput
-          name="bulk-edit-value"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="Enter your new value"
-          type={isNumber(field) ? 'number' : 'text'}
-          isInvalid={isInvalid(field, value)}
-          autoFocus
-        />
-      );
+    switch (field.type) {
+      case 'Symbol':
+        return (
+          <SingleLineEditor
+            isInitiallyDisabled={false}
+            withCharValidation={true}
+            field={fieldApi}
+            locales={localesApi}
+          />
+        );
+      case 'Text':
+        return (
+          <MultipleLineEditor field={fieldApi} locales={localesApi} isInitiallyDisabled={false} />
+        );
+      case 'Number':
+      case 'Integer':
+        return <NumberEditor field={fieldApi} isInitiallyDisabled={false} />;
+      case 'Date':
+        return <DateEditor field={fieldApi} isInitiallyDisabled={false} />;
+      case 'Array':
+        // Short text array: items.type === 'Symbol'
+        return <TagsEditor field={fieldApi} isInitiallyDisabled={false} />;
+      case 'Boolean':
+        return <BooleanEditor field={fieldApi} isInitiallyDisabled={false} />;
+      case 'Object':
+        return <JsonEditor field={fieldApi} isInitiallyDisabled={false} />;
+      default:
+        return (
+          <TextInput
+            name="bulk-edit-value"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Enter your new value"
+            type="text"
+            autoFocus
+          />
+        );
     }
   };
 
