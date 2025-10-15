@@ -554,10 +554,10 @@ const Page = () => {
   }
 
   return (
-    <Flex>
-      <Box style={styles.mainContent} padding="spacingL">
-        <Box style={styles.whiteBox} paddingTop="spacingL" paddingRight="spacingL">
-          <Flex>
+    <Flex style={{ overflow: 'hidden' }}>
+      <Box style={styles.mainContent} paddingY="spacingL" paddingLeft="spacingL">
+        <Box style={{ ...styles.whiteBox, minWidth: 0 }} paddingTop="spacingL">
+          <Flex style={{ minWidth: 0 }}>
             <ContentTypeSidebar
               contentTypes={contentTypes}
               selectedContentTypeId={selectedContentTypeId}
@@ -571,11 +571,11 @@ const Page = () => {
               }}
               disabled={entriesLoading}
             />
-            <div style={styles.stickySpacer} />
-            <Box>
+            <div style={styles.spacer} />
+            <Box style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
               <>
                 {/* Heading */}
-                <Heading style={styles.stickyPageHeader}>
+                <Heading style={styles.pageHeader}>
                   {selectedContentType ? `Bulk edit ${selectedContentType.name}` : 'Bulk Edit App'}
                 </Heading>
 

@@ -1,5 +1,6 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { Table, Box, Pagination } from '@contentful/f36-components';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { Entry, ContentTypeField } from '../types';
 import { ContentTypeProps } from 'contentful-management';
 import { styles } from '../styles';
@@ -10,9 +11,10 @@ import {
   DISPLAY_NAME_COLUMN,
   DISPLAY_NAME_INDEX,
   ENTRY_STATUS_COLUMN,
+  ESTIMATED_ROW_HEIGHT,
   HEADERS_ROW,
 } from '../utils/constants';
-import { useKeyboardNavigation, FocusPosition, FocusRange } from '../hooks/useKeyboardNavigation';
+import { useKeyboardNavigation, FocusPosition } from '../hooks/useKeyboardNavigation';
 
 interface EntryTableProps {
   entries: Entry[];
@@ -88,6 +90,16 @@ export const EntryTable: React.FC<EntryTableProps> = ({
   const [rowCheckboxes, setRowCheckboxes] = useState<Record<string, Record<string, boolean>>>(
     getInitialRowCheckboxState(entries, columnIds)
   );
+
+  // Virtual scrolling setup
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: entries.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => ESTIMATED_ROW_HEIGHT, // Estimated row height in pixels
+    overscan: 10, // Extra rows rendered for smooth scrolling
+  });
 
   const getEntryId = (rowIndex: number) => {
     return entries[rowIndex]?.sys.id || null;
@@ -253,59 +265,105 @@ export const EntryTable: React.FC<EntryTableProps> = ({
 
   return (
     <>
-      <Table
-        ref={tableRef}
-        testId="bulk-edit-table"
-        style={styles.table}
-        tabIndex={0}
-        role="grid"
-        aria-label="Bulk edit table with keyboard navigation">
-        <TableHeader
-          fields={fields}
-          headerCheckboxes={headerCheckboxes}
-          onHeaderCheckboxChange={handleHeaderCheckboxChange}
-          checkboxesDisabled={Object.fromEntries(
-            columnIds.map((columnId) => [
-              columnId,
-              allowedColumns[columnId]
-                ? selectedFieldId !== null && selectedFieldId !== columnId
-                : true,
-            ])
-          )}
-          focusedCell={focusedCell}
-          focusRange={focusRange}
-          onCellFocus={(position) => focusCell(position)}
-        />
-        <Table.Body>
-          {entries.map((entry, rowIndex) => (
-            <TableRow
-              key={entry.sys.id}
-              entry={entry}
-              fields={fields}
-              contentType={contentType}
-              spaceId={spaceId}
-              environmentId={environmentId}
-              defaultLocale={defaultLocale}
-              rowCheckboxes={rowCheckboxes[entry.sys.id]}
-              onCellCheckboxChange={(columnId, checked) =>
-                handleCellCheckboxChange(entry.sys.id, columnId, checked)
-              }
-              cellCheckboxesDisabled={Object.fromEntries(
-                columnIds.map((columnId) => [
-                  columnId,
-                  allowedColumns[columnId]
-                    ? selectedFieldId !== null && selectedFieldId !== columnId
-                    : true,
-                ])
-              )}
-              rowIndex={rowIndex}
-              focusedCell={focusedCell}
-              focusRange={focusRange}
-              onCellFocus={(position) => focusCell(position)}
-            />
-          ))}
-        </Table.Body>
-      </Table>
+      <div
+        ref={scrollContainerRef}
+        style={{
+          maxHeight: '600px',
+          width: '100%',
+          overflow: 'auto',
+        }}>
+        <Table
+          ref={tableRef}
+          testId="bulk-edit-table"
+          style={styles.table}
+          tabIndex={0}
+          role="grid"
+          aria-label="Bulk edit table with keyboard navigation">
+          <TableHeader
+            fields={fields}
+            headerCheckboxes={headerCheckboxes}
+            onHeaderCheckboxChange={handleHeaderCheckboxChange}
+            checkboxesDisabled={Object.fromEntries(
+              columnIds.map((columnId) => [
+                columnId,
+                allowedColumns[columnId]
+                  ? selectedFieldId !== null && selectedFieldId !== columnId
+                  : true,
+              ])
+            )}
+            focusedCell={focusedCell}
+            focusRange={focusRange}
+            onCellFocus={(position) => focusCell(position)}
+          />
+          <Table.Body>
+            {/* Top spacer row */}
+            {rowVirtualizer.getVirtualItems().length > 0 && (
+              <tr>
+                <td
+                  colSpan={columnIds.length}
+                  style={{
+                    height: `${rowVirtualizer.getVirtualItems()[0]?.start || 0}px`,
+                    padding: 0,
+                    border: 'none',
+                  }}
+                />
+              </tr>
+            )}
+
+            {/* Virtualized rows */}
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const entry = entries[virtualRow.index];
+              if (!entry) return null;
+
+              return (
+                <TableRow
+                  key={entry.sys.id}
+                  entry={entry}
+                  fields={fields}
+                  contentType={contentType}
+                  spaceId={spaceId}
+                  environmentId={environmentId}
+                  defaultLocale={defaultLocale}
+                  rowCheckboxes={rowCheckboxes[entry.sys.id]}
+                  onCellCheckboxChange={(columnId, checked) =>
+                    handleCellCheckboxChange(entry.sys.id, columnId, checked)
+                  }
+                  cellCheckboxesDisabled={Object.fromEntries(
+                    columnIds.map((columnId) => [
+                      columnId,
+                      allowedColumns[columnId]
+                        ? selectedFieldId !== null && selectedFieldId !== columnId
+                        : true,
+                    ])
+                  )}
+                  rowIndex={virtualRow.index}
+                  focusedCell={focusedCell}
+                  focusRange={focusRange}
+                  onCellFocus={(position) => focusCell(position)}
+                />
+              );
+            })}
+
+            {/* Bottom spacer row */}
+            {rowVirtualizer.getVirtualItems().length > 0 && (
+              <tr>
+                <td
+                  colSpan={columnIds.length}
+                  style={{
+                    height: `${
+                      rowVirtualizer.getTotalSize() -
+                      (rowVirtualizer.getVirtualItems()[rowVirtualizer.getVirtualItems().length - 1]
+                        ?.end || 0)
+                    }px`,
+                    padding: 0,
+                    border: 'none',
+                  }}
+                />
+              </tr>
+            )}
+          </Table.Body>
+        </Table>
+      </div>
       <Box style={styles.paginationContainer}>
         <Pagination
           activePage={activePage}

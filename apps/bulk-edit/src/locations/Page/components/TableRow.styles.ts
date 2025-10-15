@@ -1,5 +1,5 @@
 import tokens from '@contentful/f36-tokens';
-import { CELL_WIDTH, STICKY_SPACER_SPACING } from '../utils/constants';
+import { CELL_WIDTH } from '../utils/constants';
 import { stickyCell } from '../styles';
 
 export const rowStyles = {
@@ -10,10 +10,10 @@ export const rowStyles = {
   displayNameCell: {
     ...stickyCell,
     borderLeft: `1px solid ${tokens.gray300}`,
-    left: STICKY_SPACER_SPACING + CELL_WIDTH,
+    left: 0,
   },
   statusCell: {
     ...stickyCell,
-    left: STICKY_SPACER_SPACING + CELL_WIDTH * 2,
+    left: CELL_WIDTH,
   },
 } as const;
