@@ -33,3 +33,26 @@ export const createFieldAPI = (
     onSchemaErrorsChanged: () => () => {},
   };
 };
+
+export const createLocalesAPI = (defaultLocale: string): LocalesAPI => ({
+  default: defaultLocale,
+  available: [defaultLocale],
+  names: { [defaultLocale]: defaultLocale },
+  fallbacks: {},
+  optional: { [defaultLocale]: false },
+  direction: { [defaultLocale]: 'ltr' },
+});
+
+// Convert editor output back to string format
+const convertValueToString = (fieldType: string, newValue: any): string => {
+  switch (fieldType) {
+    case 'Array':
+      return Array.isArray(newValue) ? newValue.join(', ') : String(newValue);
+    case 'Boolean':
+      return String(newValue);
+    case 'Object':
+      return typeof newValue === 'string' ? newValue : JSON.stringify(newValue);
+    default:
+      return String(newValue);
+  }
+};

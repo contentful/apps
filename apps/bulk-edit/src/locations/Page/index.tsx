@@ -11,7 +11,14 @@ import {
   Text,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
+import {
+  ContentFields,
+  ContentTypeProps,
+  EntryProps,
+  KeyValueMap,
+    FieldType,
+  QueryOptions,
+} from 'contentful-management';
 import { ContentTypeField, FilterOption } from './types';
 import { styles } from './styles';
 import { ContentTypeSidebar } from './components/ContentTypeSidebar';
@@ -25,9 +32,9 @@ import {
   filterEntriesByNumericSearch,
   getEntryFieldValue,
   getStatusFlags,
-  getStatusFromEntry,
   isNumericSearch,
   mapContentTypePropsToFields,
+  getStatusFromEntry,
   processEntriesInBatches,
   STATUSES,
   truncate,

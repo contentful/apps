@@ -1,17 +1,12 @@
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Document } from '@contentful/rich-text-types';
 import { ContentTypeField, Entry, Fields } from '../types';
-import {
-  ContentFields,
+import {ContentFields,
   ContentTypeProps,
   EntryProps,
   KeyValueMap,
-  QueryOptions,
-} from 'contentful-management';
-import {
-  BATCH_FETCHING,
-  CHANGED_STATUS,
-  DRAFT_STATUS,
+  QueryOptions,} from 'contentful-management';
+import { BATCH_FETCHING, CHANGED_STATUS, DRAFT_STATUS,
   PUBLISHED_STATUS,
   UNKNOWN_STATUS,
 } from './constants';
