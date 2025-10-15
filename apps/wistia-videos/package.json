@@ -15,7 +15,7 @@
     "@types/react-dom": "^18.0.11",
     "@types/styled-components": "^5.1.26",
     "@vitejs/plugin-react": "^4.3.1",
-    "happy-dom": "^14.12.3",
+    "happy-dom": "^20.0.2",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
     "react-sortable-hoc": "^2.0.0",
