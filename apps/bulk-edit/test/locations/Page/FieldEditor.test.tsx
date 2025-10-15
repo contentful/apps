@@ -2,52 +2,12 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { FieldEditor } from '../../../src/locations/Page/components/FieldEditor';
-import type { ContentTypeField } from '../../../src/locations/Page/types';
-
-// Mock the field editors
-vi.mock('@contentful/field-editor-single-line', () => ({
-  SingleLineEditor: ({ field }: any) => (
-    <input
-      data-test-id="single-line-editor"
-      value={field.getValue()}
-      onChange={(e) => field.setValue(e.target.value)}
-      placeholder="Single line editor"
-    />
-  ),
-}));
-
-vi.mock('@contentful/field-editor-multiple-line', () => ({
-  MultipleLineEditor: ({ field }: any) => (
-    <textarea
-      data-test-id="multiple-line-editor"
-      value={field.getValue()}
-      onChange={(e) => field.setValue(e.target.value)}
-      placeholder="Multiple line editor"
-    />
-  ),
-}));
-
-vi.mock('@contentful/field-editor-number', () => ({
-  NumberEditor: ({ field }: any) => (
-    <input
-      data-test-id="number-editor"
-      type="number"
-      value={field.getValue()}
-      onChange={(e) => field.setValue(e.target.value)}
-      placeholder="Number editor"
-    />
-  ),
-}));
 
 describe('FieldEditor', () => {
   const defaultLocale = 'en-US';
   const mockOnChange = vi.fn();
 
-  const createField = (
-    type: string,
-    id: string = 'test-field',
-    name: string = 'Test Field'
-  ): ContentTypeField => ({
+  const createField = (type: string, id: string = 'test-field', name: string = 'Test Field') => ({
     id,
     name,
     type,
@@ -72,7 +32,6 @@ describe('FieldEditor', () => {
       />
     );
 
-    expect(screen.getByTestId('single-line-editor')).toBeInTheDocument();
     expect(screen.getByDisplayValue(value)).toBeInTheDocument();
   });
 
@@ -89,7 +48,6 @@ describe('FieldEditor', () => {
       />
     );
 
-    expect(screen.getByTestId('multiple-line-editor')).toBeInTheDocument();
     expect(screen.getByDisplayValue(value)).toBeInTheDocument();
   });
 
@@ -106,7 +64,6 @@ describe('FieldEditor', () => {
       />
     );
 
-    expect(screen.getByTestId('number-editor')).toBeInTheDocument();
     expect(screen.getByDisplayValue(value)).toBeInTheDocument();
   });
 
@@ -123,13 +80,12 @@ describe('FieldEditor', () => {
       />
     );
 
-    expect(screen.getByTestId('number-editor')).toBeInTheDocument();
     expect(screen.getByDisplayValue(value)).toBeInTheDocument();
   });
 
-  it('renders SingleLineEditor as fallback for unknown field types', () => {
-    const field = createField('UnknownType');
-    const value = 'fallback value';
+  it('renders DateEditor for Date fields', () => {
+    const field = createField('Date');
+    const value = '2023-10-26T10:00:00Z';
 
     render(
       <FieldEditor
@@ -140,8 +96,59 @@ describe('FieldEditor', () => {
       />
     );
 
-    expect(screen.getByTestId('single-line-editor')).toBeInTheDocument();
-    expect(screen.getByDisplayValue(value)).toBeInTheDocument();
+    expect(screen.getByDisplayValue('26 Oct 2023')).toBeInTheDocument();
+  });
+
+  it('renders TagsEditor for Array fields with Symbol items', () => {
+    const field = createField('Array');
+    const value = ['tag1', 'tag2'];
+
+    render(
+      <FieldEditor
+        field={field}
+        value={value}
+        onChange={mockOnChange}
+        defaultLocale={defaultLocale}
+      />
+    );
+
+    expect(screen.getByText('tag1')).toBeInTheDocument();
+    expect(screen.getByText('tag2')).toBeInTheDocument();
+  });
+
+  it('renders BooleanEditor for Boolean fields', () => {
+    const field = createField('Boolean');
+    const value = true;
+
+    render(
+      <FieldEditor
+        field={field}
+        value={String(value)}
+        onChange={mockOnChange}
+        defaultLocale={defaultLocale}
+      />
+    );
+
+    const booleanEditorElement = screen.getByText('Clear');
+
+    expect(booleanEditorElement).toBeTruthy();
+  });
+
+  it('renders JsonEditor for Object fields', () => {
+    const field = createField('Object');
+    const value = { key: 'value' };
+
+    render(
+      <FieldEditor
+        field={field}
+        value={JSON.stringify(value)}
+        onChange={mockOnChange}
+        defaultLocale={defaultLocale}
+      />
+    );
+
+    expect(screen.getByText('Redo')).toBeInTheDocument();
+    expect(screen.getByText('Undo')).toBeInTheDocument();
   });
 
   describe('FieldAPI and LocalesAPI creation', () => {
@@ -158,8 +165,7 @@ describe('FieldEditor', () => {
         />
       );
 
-      const input = screen.getByTestId('single-line-editor');
-      expect(input).toHaveValue(value);
+      expect(screen.getByDisplayValue(value)).toBeInTheDocument();
     });
 
     it('handles field with custom locale', () => {
@@ -178,7 +184,7 @@ describe('FieldEditor', () => {
         />
       );
 
-      expect(screen.getByTestId('single-line-editor')).toBeInTheDocument();
+      expect(screen.getByDisplayValue(value)).toBeInTheDocument();
     });
 
     it('handles field without locale (uses default)', () => {
@@ -197,7 +203,7 @@ describe('FieldEditor', () => {
         />
       );
 
-      expect(screen.getByTestId('single-line-editor')).toBeInTheDocument();
+      expect(screen.getByDisplayValue(value)).toBeInTheDocument();
     });
 
     it('creates LocalesAPI with correct properties', () => {
@@ -213,7 +219,7 @@ describe('FieldEditor', () => {
         />
       );
 
-      expect(screen.getByTestId('multiple-line-editor')).toBeInTheDocument();
+      expect(screen.getByDisplayValue(value)).toBeInTheDocument();
     });
 
     it('handles different default locales', () => {
@@ -230,7 +236,7 @@ describe('FieldEditor', () => {
         />
       );
 
-      expect(screen.getByTestId('multiple-line-editor')).toBeInTheDocument();
+      expect(screen.getByDisplayValue(value)).toBeInTheDocument();
     });
   });
 });

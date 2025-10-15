@@ -15,6 +15,7 @@ import {
   ContentFields,
   ContentTypeProps,
   EntryProps,
+  FieldType,
   KeyValueMap,
   QueryOptions,
 } from 'contentful-management';
@@ -28,15 +29,15 @@ import { UndoBulkEditModal } from './components/UndoBulkEditModal';
 import { SearchBar } from './components/SearchBar';
 import {
   fetchEntriesWithBatching,
-  getStatusesOptions,
+  filterEntriesByNumericSearch,
   getEntryFieldValue,
-  getStatusFromEntry,
+  getStatusesOptions,
   getStatusFlags,
+  getStatusFromEntry,
+  isNumericSearch,
   processEntriesInBatches,
   truncate,
   updateEntryFieldLocalized,
-  filterEntriesByNumericSearch,
-  isNumericSearch,
 } from './utils/entryUtils';
 import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
@@ -241,14 +242,21 @@ const Page = () => {
         const ct = await sdk.cma.contentType.get({ contentTypeId: selectedContentTypeId });
         const newFields: ContentTypeField[] = [];
         ct.fields.forEach((f: ContentFields<KeyValueMap>) => {
+          let obj: FieldType;
+          if (f.items) {
+            obj = { type: f.type as any, items: f.items as any };
+          } else {
+            obj = { type: f.type as any };
+          }
+
           if (f.localized) {
             locales.forEach((locale) => {
               newFields.push({
                 id: f.id,
                 uniqueId: `${f.id}-${locale}`,
                 name: f.name,
-                type: f.type as any,
                 locale: locale,
+                ...obj,
               });
             });
           } else {
@@ -256,7 +264,7 @@ const Page = () => {
               id: f.id,
               uniqueId: f.id,
               name: f.name,
-              type: f.type as any,
+              ...obj,
             });
           }
         });
