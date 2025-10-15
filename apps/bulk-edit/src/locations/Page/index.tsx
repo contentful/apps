@@ -11,14 +11,7 @@ import {
   Text,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import {
-  ContentFields,
-  ContentTypeProps,
-  EntryProps,
-  FieldType,
-  KeyValueMap,
-  QueryOptions,
-} from 'contentful-management';
+import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
 import { ContentTypeField, FilterOption } from './types';
 import { styles } from './styles';
 import { ContentTypeSidebar } from './components/ContentTypeSidebar';
@@ -28,6 +21,7 @@ import { BulkEditModal } from './components/BulkEditModal';
 import { UndoBulkEditModal } from './components/UndoBulkEditModal';
 import { SearchBar } from './components/SearchBar';
 import {
+  createContentTypeFields,
   fetchEntriesWithBatching,
   getEntryFieldValue,
   getStatusFromEntry,
@@ -243,34 +237,7 @@ const Page = () => {
 
       try {
         const ct = await sdk.cma.contentType.get({ contentTypeId: selectedContentTypeId });
-        const newFields: ContentTypeField[] = [];
-        ct.fields.forEach((f: ContentFields<KeyValueMap>) => {
-          let obj: FieldType;
-          if (f.items) {
-            obj = { type: f.type as any, items: f.items as any };
-          } else {
-            obj = { type: f.type as any };
-          }
-
-          if (f.localized) {
-            locales.forEach((locale) => {
-              newFields.push({
-                id: f.id,
-                uniqueId: `${f.id}-${locale}`,
-                name: f.name,
-                locale: locale,
-                ...obj,
-              });
-            });
-          } else {
-            newFields.push({
-              id: f.id,
-              uniqueId: f.id,
-              name: f.name,
-              ...obj,
-            });
-          }
-        });
+        const newFields = createContentTypeFields(ct.fields, locales);
         setFields(newFields);
         setSelectedColumns(getFieldsMapped(newFields));
         setCurrentContentType(ct);

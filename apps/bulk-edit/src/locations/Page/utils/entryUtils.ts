@@ -1,7 +1,13 @@
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Document } from '@contentful/rich-text-types';
 import { ContentTypeField, Entry, Fields } from '../types';
-import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
+import {
+  ContentFields,
+  ContentTypeProps,
+  EntryProps,
+  KeyValueMap,
+  QueryOptions,
+} from 'contentful-management';
 import { BATCH_FETCHING, CHANGED_STATUS, DRAFT_STATUS, PUBLISHED_STATUS,
   UNKNOWN_STATUS,
 } from './constants';
@@ -299,4 +305,36 @@ export const filterEntriesByNumericSearch = (
       return String(fieldValue).includes(query);
     });
   });
+};
+
+export const createContentTypeFields = (
+  fields: ContentFields<KeyValueMap>[],
+  locales: string[]
+): ContentTypeField[] => {
+  const newFields: ContentTypeField[] = [];
+
+  fields.forEach((f) => {
+    if (f.localized) {
+      locales.forEach((locale) => {
+        newFields.push({
+          id: f.id,
+          uniqueId: `${f.id}-${locale}`,
+          name: f.name,
+          locale: locale,
+          type: f.type,
+          items: f?.items,
+        });
+      });
+    } else {
+      newFields.push({
+        id: f.id,
+        uniqueId: f.id,
+        name: f.name,
+        type: f.type,
+        items: f?.items,
+      });
+    }
+  });
+
+  return newFields;
 };
