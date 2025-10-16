@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Button, Text, Flex, FormControl, Note } from '@contentful/f36-components';
-import type { Entry, ContentTypeField } from '../types';
-import { getEntryFieldValue, truncate } from '../utils/entryUtils';
+import { Button, Flex, FormControl, Modal, Note, Text } from '@contentful/f36-components';
+import type { ContentTypeField, Entry } from '../types';
+import { getEntryFieldValue, isInvalid, isNumber, truncate } from '../utils/entryUtils';
 import { ClockIcon } from '@contentful/f36-icons';
 import { FieldEditor } from './FieldEditor';
 
@@ -16,12 +16,6 @@ interface BulkEditModalProps {
   totalUpdateCount: number;
   editionCount: number;
 }
-
-export const isNumber = (selectedField: ContentTypeField | null) => {
-  return selectedField?.type === 'Number' || selectedField?.type === 'Integer';
-};
-export const isInvalid = (selectedField: ContentTypeField | null, value: string) =>
-  selectedField?.type === 'Integer' && !Number.isInteger(Number(value));
 
 export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   isOpen,
