@@ -22,12 +22,12 @@ interface FieldEditorProps {
 const ERROR_MESSAGE = 'Failed to initialize field editor. Please try again.';
 export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange, locales }) => {
   const [error, setError] = useState('');
+  const locale = field.locale ? field.locale : locales.default;
 
   // Ensure Lingui i18n is activated for editors that rely on it (e.g., JsonEditor)
   useEffect(() => {
     if (!i18n.locale) {
       try {
-        const locale = field.locale ? field.locale : locales.default;
         i18n.load(locale, {});
         i18n.activate(locale);
         setError('');
@@ -37,10 +37,9 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
     }
   }, []);
 
-  const fieldApi = useMemo(
-    () => createFieldAPI(field, value, onChange, locales.default),
-    [field, value, onChange, locales.default]
-  );
+  const fieldApi = useMemo(() => {
+    return createFieldAPI(field, value, onChange, locale);
+  }, [field, value, onChange, locales.default]);
 
   const renderEditor = () => {
     try {
