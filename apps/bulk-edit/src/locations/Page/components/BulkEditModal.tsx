@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Flex, FormControl, Modal, Note, Text } from '@contentful/f36-components';
 import type { ContentTypeField, Entry } from '../types';
-import { getEntryFieldValue, isInvalid, isNumber, truncate } from '../utils/entryUtils';
+import { getEntryFieldValue, truncate } from '../utils/entryUtils';
 import { ClockIcon } from '@contentful/f36-icons';
 import { FieldEditor } from './FieldEditor';
 import type { LocalesAPI } from '@contentful/field-editor-shared';
@@ -29,7 +29,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   totalUpdateCount,
   editionCount,
 }) => {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState<any>('');
   const entryCount = selectedEntries.length;
   const firstEntry = selectedEntries[0];
   const firstValueToUpdate =
@@ -61,7 +61,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
               {entryCount === 1 ? 'selected' : `selected and ${entryCount - 1} more`}
             </Text>
           </Flex>
-          <FormControl isInvalid={isInvalid(selectedField, value)}>
+          <FormControl>
             {selectedField && (
               <FieldEditor
                 field={selectedField}
@@ -69,11 +69,6 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
                 onChange={setValue}
                 locales={locales}
               />
-            )}
-            {isInvalid(selectedField, value) && (
-              <FormControl.ValidationMessage>
-                Integer field does not allow decimal
-              </FormControl.ValidationMessage>
             )}
           </FormControl>
         </Flex>
@@ -93,12 +88,8 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
         </Button>
         <Button
           variant="primary"
-          onClick={() => {
-            if (isInvalid(selectedField, value)) return;
-            const finalValue = isNumber(selectedField) ? Number(value) : value;
-            onSave(finalValue);
-          }}
-          isDisabled={value === '' || isInvalid(selectedField, value)}
+          onClick={() => onSave(value)}
+          isDisabled={value === ''}
           testId="bulk-edit-save"
           isLoading={isSaving}>
           Save
