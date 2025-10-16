@@ -397,4 +397,205 @@ describe('EntryTable', () => {
 
     expect(await screen.findByText('Bulk editing is not supported for Status')).toBeInTheDocument();
   });
+
+  it('maintains consistent state when toggling header checkbox multiple times', () => {
+    const onSelectionChange = vi.fn();
+    render(
+      <EntryTable
+        entries={mockEntries}
+        fields={mockFields}
+        contentType={mockContentType}
+        spaceId="space-1"
+        environmentId="env-1"
+        defaultLocale="en-US"
+        activePage={0}
+        totalEntries={2}
+        itemsPerPage={15}
+        onPageChange={() => {}}
+        onItemsPerPageChange={() => {}}
+        pageSizeOptions={[15, 50, 100]}
+        onSelectionChange={onSelectionChange}
+      />
+    );
+
+    // Find the first allowed field for checkbox
+    const allowedField = mockFields.find(isCheckboxAllowed);
+    if (!allowedField) return;
+
+    const headerCheckbox = screen
+      .getByTestId(`header-checkbox-${allowedField.id}`)
+      .querySelector('input[type="checkbox"]');
+
+    // Toggle header checkbox multiple times and verify state consistency
+    for (let i = 0; i < 3; i++) {
+      // Check header
+      fireEvent.click(headerCheckbox!);
+      expect(headerCheckbox).toBeChecked();
+      expect(onSelectionChange).toHaveBeenLastCalledWith({
+        selectedEntryIds: mockEntries.map((e) => e.sys.id),
+        selectedFieldId: allowedField.uniqueId,
+      });
+
+      // Uncheck header
+      fireEvent.click(headerCheckbox!);
+      expect(headerCheckbox).not.toBeChecked();
+      expect(onSelectionChange).toHaveBeenLastCalledWith({
+        selectedEntryIds: [],
+        selectedFieldId: null,
+      });
+    }
+  });
+
+  it('prevents multiple header checkboxes from being checked simultaneously', () => {
+    const onSelectionChange = vi.fn();
+    render(
+      <EntryTable
+        entries={mockEntries}
+        fields={mockFields}
+        contentType={mockContentType}
+        spaceId="space-1"
+        environmentId="env-1"
+        defaultLocale="en-US"
+        activePage={0}
+        totalEntries={2}
+        itemsPerPage={15}
+        onPageChange={() => {}}
+        onItemsPerPageChange={() => {}}
+        pageSizeOptions={[15, 50, 100]}
+        onSelectionChange={onSelectionChange}
+      />
+    );
+
+    // Find all allowed fields for checkboxes
+    const allowedFields = mockFields.filter(isCheckboxAllowed);
+    if (allowedFields.length < 2) return; // Need at least 2 fields to test
+
+    const firstHeaderCheckbox = screen
+      .getByTestId(`header-checkbox-${allowedFields[0].id}`)
+      .querySelector('input[type="checkbox"]');
+
+    const secondHeaderCheckbox = screen
+      .getByTestId(`header-checkbox-${allowedFields[1].id}`)
+      .querySelector('input[type="checkbox"]');
+
+    // Check first header checkbox
+    fireEvent.click(firstHeaderCheckbox!);
+    expect(firstHeaderCheckbox).toBeChecked();
+    expect(secondHeaderCheckbox).not.toBeChecked();
+
+    // Check second header checkbox - should uncheck first
+    fireEvent.click(secondHeaderCheckbox!);
+    expect(firstHeaderCheckbox).not.toBeChecked();
+    expect(secondHeaderCheckbox).toBeChecked();
+
+    // Verify only the second field is selected
+    expect(onSelectionChange).toHaveBeenLastCalledWith({
+      selectedEntryIds: mockEntries.map((e) => e.sys.id),
+      selectedFieldId: allowedFields[1].uniqueId,
+    });
+  });
+
+  it('prevents multiple cell checkboxes from being checked across different columns', () => {
+    const onSelectionChange = vi.fn();
+    render(
+      <EntryTable
+        entries={mockEntries}
+        fields={mockFields}
+        contentType={mockContentType}
+        spaceId="space-1"
+        environmentId="env-1"
+        defaultLocale="en-US"
+        activePage={0}
+        totalEntries={2}
+        itemsPerPage={15}
+        onPageChange={() => {}}
+        onItemsPerPageChange={() => {}}
+        pageSizeOptions={[15, 50, 100]}
+        onSelectionChange={onSelectionChange}
+      />
+    );
+
+    // Find all allowed fields for checkboxes
+    const allowedFields = mockFields.filter(isCheckboxAllowed);
+    if (allowedFields.length < 2) return; // Need at least 2 fields to test
+
+    // Get cell checkboxes for first field, first entry
+    const firstFieldCellCheckboxes = screen.getAllByTestId(
+      `cell-checkbox-${allowedFields[0].uniqueId}`
+    );
+    const firstFieldFirstEntryCheckbox =
+      firstFieldCellCheckboxes[0].querySelector('input[type="checkbox"]');
+
+    // Get cell checkboxes for second field, second entry
+    const secondFieldCellCheckboxes = screen.getAllByTestId(
+      `cell-checkbox-${allowedFields[1].uniqueId}`
+    );
+    const secondFieldSecondEntryCheckbox =
+      secondFieldCellCheckboxes[1].querySelector('input[type="checkbox"]');
+
+    // Check first field, first entry
+    fireEvent.click(firstFieldFirstEntryCheckbox!);
+    expect(firstFieldFirstEntryCheckbox).toBeChecked();
+    expect(onSelectionChange).toHaveBeenLastCalledWith({
+      selectedEntryIds: [mockEntries[0].sys.id],
+      selectedFieldId: allowedFields[0].uniqueId,
+    });
+
+    // Check second field, second entry - should uncheck the first one
+    fireEvent.click(secondFieldSecondEntryCheckbox!);
+    expect(firstFieldFirstEntryCheckbox).not.toBeChecked();
+    expect(secondFieldSecondEntryCheckbox).toBeChecked();
+    expect(onSelectionChange).toHaveBeenLastCalledWith({
+      selectedEntryIds: [mockEntries[1].sys.id],
+      selectedFieldId: allowedFields[1].uniqueId,
+    });
+  });
+
+  it('allows multiple cell checkboxes within the same column', () => {
+    const onSelectionChange = vi.fn();
+    render(
+      <EntryTable
+        entries={mockEntries}
+        fields={mockFields}
+        contentType={mockContentType}
+        spaceId="space-1"
+        environmentId="env-1"
+        defaultLocale="en-US"
+        activePage={0}
+        totalEntries={2}
+        itemsPerPage={15}
+        onPageChange={() => {}}
+        onItemsPerPageChange={() => {}}
+        pageSizeOptions={[15, 50, 100]}
+        onSelectionChange={onSelectionChange}
+      />
+    );
+
+    // Find the first allowed field for checkboxes
+    const allowedField = mockFields.find(isCheckboxAllowed);
+    if (!allowedField) return;
+
+    // Get cell checkboxes for the same field across different entries
+    const cellCheckboxes = screen.getAllByTestId(`cell-checkbox-${allowedField.uniqueId}`);
+    const firstEntryCheckbox = cellCheckboxes[0].querySelector('input[type="checkbox"]');
+    const secondEntryCheckbox = cellCheckboxes[1].querySelector('input[type="checkbox"]');
+
+    // Check first entry
+    fireEvent.click(firstEntryCheckbox!);
+    expect(firstEntryCheckbox).toBeChecked();
+    expect(secondEntryCheckbox).not.toBeChecked();
+    expect(onSelectionChange).toHaveBeenLastCalledWith({
+      selectedEntryIds: [mockEntries[0].sys.id],
+      selectedFieldId: allowedField.uniqueId,
+    });
+
+    // Check second entry in the same column - should keep both checked
+    fireEvent.click(secondEntryCheckbox!);
+    expect(firstEntryCheckbox).toBeChecked();
+    expect(secondEntryCheckbox).toBeChecked();
+    expect(onSelectionChange).toHaveBeenLastCalledWith({
+      selectedEntryIds: mockEntries.map((e) => e.sys.id),
+      selectedFieldId: allowedField.uniqueId,
+    });
+  });
 });

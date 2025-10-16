@@ -100,7 +100,7 @@ const Page = () => {
   };
 
   const shouldDisableFilters = () => {
-    return (entries.length === 0 && !entriesLoading && initialTotal === 0) || !selectedContentType;
+    return (entries.length === 0 && initialTotal === 0) || !selectedContentType || entriesLoading;
   };
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
@@ -556,10 +556,10 @@ const Page = () => {
   }
 
   return (
-    <Flex>
-      <Box style={styles.mainContent} padding="spacingL">
-        <Box style={styles.whiteBox} paddingTop="spacingL" paddingRight="spacingL">
-          <Flex>
+    <Flex style={{ overflow: 'hidden' }}>
+      <Box style={styles.mainContent} paddingY="spacingL" paddingLeft="spacingL">
+        <Box style={{ ...styles.whiteBox, minWidth: 0 }} paddingTop="spacingL">
+          <Flex style={{ minWidth: 0 }}>
             <ContentTypeSidebar
               contentTypes={contentTypes}
               selectedContentTypeId={selectedContentTypeId}
@@ -573,11 +573,11 @@ const Page = () => {
               }}
               disabled={entriesLoading}
             />
-            <div style={styles.stickySpacer} />
-            <Box>
+            <div style={styles.spacer} />
+            <Box style={styles.tableContainer}>
               <>
                 {/* Heading */}
-                <Heading style={styles.stickyPageHeader}>
+                <Heading style={styles.pageHeader}>
                   {selectedContentType ? `Bulk edit ${selectedContentType.name}` : 'Bulk Edit App'}
                 </Heading>
 
@@ -648,13 +648,16 @@ const Page = () => {
                     </Button>
                   )}
                 </Flex>
-                {selectedField && selectedEntryIds.length > 0 && !entriesLoading && (
+                {!entriesLoading && (
                   <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
-                    <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-                      {selectedEntryIds.length === 1 ? 'Edit' : 'Bulk edit'}
+                    <Button
+                      variant="primary"
+                      onClick={() => setIsModalOpen(true)}
+                      isDisabled={!selectedField || selectedEntryIds.length === 0}>
+                      {selectedEntryIds.length > 1 ? 'Bulk edit' : 'Edit'}
                     </Button>
                     <Text fontColor="gray600">
-                      {selectedEntryIds.length} entry field
+                      {selectedEntryIds.length || 'No'} entry field
                       {selectedEntryIds.length === 1 ? '' : 's'} selected
                     </Text>
                   </Flex>
