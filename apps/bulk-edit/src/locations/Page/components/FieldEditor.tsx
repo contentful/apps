@@ -28,6 +28,7 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
   useEffect(() => {
     if (!i18n.locale) {
       try {
+        const locale = field.locale ? field.locale : locales.default;
         i18n.load(locale, {});
         i18n.activate(locale);
         setError('');

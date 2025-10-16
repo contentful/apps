@@ -35,6 +35,8 @@ import {
   isNumericSearch,
   mapContentTypePropsToFields,
   getStatusFromEntry,
+  isNumericSearch,
+  mapContentTypePropsToFields,
   processEntriesInBatches,
   STATUSES,
   truncate,
