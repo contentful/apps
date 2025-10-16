@@ -80,7 +80,9 @@ export const TableRow: React.FC<TableRowProps> = ({
         aria-label={`Display name for ${displayValue}`}
         onClick={() => onCellFocus({ row: rowIndex, column: DISPLAY_NAME_INDEX })}
         role="gridcell"
-        tabIndex={-1}>
+        tabIndex={-1}
+        data-row={rowIndex}
+        data-column={DISPLAY_NAME_INDEX}>
         <TextLink
           href={getEntryUrl(entry, spaceId, environmentId)}
           target="_blank"
@@ -98,7 +100,9 @@ export const TableRow: React.FC<TableRowProps> = ({
         style={getCellStyleForColumn(rowStyles.statusCell, ENTRY_STATUS_COLUMN)}
         onClick={() => onCellFocus({ row: rowIndex, column: ENTRY_STATUS_INDEX })}
         role="gridcell"
-        tabIndex={-1}>
+        tabIndex={-1}
+        data-row={rowIndex}
+        data-column={ENTRY_STATUS_INDEX}>
         <Badge variant={statusColor}>{status}</Badge>
       </Table.Cell>
       {fields.map((field) => {
@@ -118,7 +122,9 @@ export const TableRow: React.FC<TableRowProps> = ({
             onClick={() => onCellFocus({ row: rowIndex, column: columnIndex })}
             role="gridcell"
             tabIndex={-1}
-            isTruncated>
+            isTruncated
+            data-row={rowIndex}
+            data-column={columnIndex}>
             {isAllowed ? (
               <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
                 <Checkbox

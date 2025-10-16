@@ -1,6 +1,11 @@
 import tokens from '@contentful/f36-tokens';
 import { ContentTypeField } from '../types';
-import { DISPLAY_NAME_COLUMN, ENTRY_STATUS_COLUMN } from './constants';
+import {
+  CELL_WIDTH,
+  DISPLAY_NAME_COLUMN,
+  ENTRY_STATUS_COLUMN,
+  ESTIMATED_ROW_HEIGHT,
+} from './constants';
 import { FocusPosition, FocusRange } from '../hooks/useKeyboardNavigation';
 import { focusedCell } from '../styles';
 
@@ -9,6 +14,12 @@ export const getCellStyle = (
   isFocused: boolean
 ): React.CSSProperties => {
   return {
+    ...{
+      scrollMarginBottom: ESTIMATED_ROW_HEIGHT,
+      scrollMarginTop: ESTIMATED_ROW_HEIGHT * 2,
+      scrollMarginLeft: CELL_WIDTH * 2,
+      scrollMarginRight: CELL_WIDTH,
+    },
     ...baseStyle,
     ...(isFocused && focusedCell),
   };

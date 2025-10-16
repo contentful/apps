@@ -76,7 +76,9 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           onClick={() => onCellFocus({ row: HEADERS_ROW, column: DISPLAY_NAME_INDEX })}
           role="columnheader"
           tabIndex={-1}
-          aria-label="Column header: Display name">
+          aria-label="Column header: Display name"
+          data-row={HEADERS_ROW}
+          data-column={DISPLAY_NAME_INDEX}>
           Display name
         </Table.Cell>
         <Table.Cell
@@ -90,7 +92,9 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           onClick={() => onCellFocus({ row: HEADERS_ROW, column: ENTRY_STATUS_INDEX })}
           role="columnheader"
           tabIndex={-1}
-          aria-label="Column header: Status">
+          aria-label="Column header: Status"
+          data-row={HEADERS_ROW}
+          data-column={ENTRY_STATUS_INDEX}>
           <Flex gap="spacingXs" alignItems="center" justifyContent="flex-start">
             Status
             <FocusedTooltip
@@ -120,7 +124,9 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
               isTruncated
               onClick={() => onCellFocus({ row: HEADERS_ROW, column: columnIndex })}
               role="columnheader"
-              tabIndex={-1}>
+              tabIndex={-1}
+              data-row={HEADERS_ROW}
+              data-column={columnIndex}>
               <Flex gap="spacingXs">
                 {isAllowed ? (
                   <>
