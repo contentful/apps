@@ -13,7 +13,7 @@ import { CreateContentTypeProps } from 'contentful-management';
 import { useCallback, useEffect, useState } from 'react';
 import { CONTENT_TYPE_ID, MARKDOWN_ID, TITLE_ID } from '../consts';
 
-export interface AppInstallationParameters {}
+export type AppInstallationParameters = Record<string, unknown>;
 
 const createContentType = async (sdk: ConfigAppSDK) => {
   const contentTypeBody: CreateContentTypeProps = {
@@ -50,7 +50,7 @@ const createContentType = async (sdk: ConfigAppSDK) => {
 };
 
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>({});
+  const [parameters, setParameters] = useState<Record<string, unknown>>({});
   const sdk = useSDK<ConfigAppSDK>();
 
   const onConfigure = useCallback(async () => {
@@ -58,7 +58,7 @@ const ConfigScreen = () => {
 
     try {
       await sdk.cma.contentType.get({ contentTypeId: CONTENT_TYPE_ID });
-    } catch (e) {
+    } catch {
       await createContentType(sdk);
     }
 
@@ -93,7 +93,7 @@ const ConfigScreen = () => {
 
   useEffect(() => {
     (async () => {
-      const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
+      const currentParameters = await sdk.app.getParameters();
 
       if (currentParameters) {
         setParameters(currentParameters);
@@ -126,7 +126,7 @@ const ConfigScreen = () => {
 
         <Subheading marginTop="spacingXl">Disclaimer</Subheading>
         <Paragraph>
-          The Homebase app will create a content type labeled "HOMEBASE". If deleted, the app will
+          The Homebase app will create a content type labeled {'HOMEBASE'}. If deleted, the app will
           not work.
         </Paragraph>
       </Form>
