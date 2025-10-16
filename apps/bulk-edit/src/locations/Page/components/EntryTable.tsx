@@ -15,6 +15,7 @@ import {
   HEADERS_ROW,
 } from '../utils/constants';
 import { useKeyboardNavigation, FocusPosition } from '../hooks/useKeyboardNavigation';
+import { tableStyles } from './EntryTable.styles';
 
 interface EntryTableProps {
   entries: Entry[];
@@ -265,17 +266,11 @@ export const EntryTable: React.FC<EntryTableProps> = ({
 
   return (
     <>
-      <div
-        ref={scrollContainerRef}
-        style={{
-          maxHeight: '600px',
-          width: '100%',
-          overflow: 'auto',
-        }}>
+      <Box ref={scrollContainerRef} style={tableStyles.tableContainer}>
         <Table
           ref={tableRef}
           testId="bulk-edit-table"
-          style={styles.table}
+          style={tableStyles.table}
           tabIndex={0}
           role="grid"
           aria-label="Bulk edit table with keyboard navigation">
@@ -299,14 +294,7 @@ export const EntryTable: React.FC<EntryTableProps> = ({
             {/* Top spacer row */}
             {rowVirtualizer.getVirtualItems().length > 0 && (
               <tr>
-                <td
-                  colSpan={columnIds.length}
-                  style={{
-                    height: `${rowVirtualizer.getVirtualItems()[0]?.start || 0}px`,
-                    padding: 0,
-                    border: 'none',
-                  }}
-                />
+                <td colSpan={columnIds.length} style={tableStyles.topSpacer(rowVirtualizer)} />
               </tr>
             )}
 
@@ -347,23 +335,12 @@ export const EntryTable: React.FC<EntryTableProps> = ({
             {/* Bottom spacer row */}
             {rowVirtualizer.getVirtualItems().length > 0 && (
               <tr>
-                <td
-                  colSpan={columnIds.length}
-                  style={{
-                    height: `${
-                      rowVirtualizer.getTotalSize() -
-                      (rowVirtualizer.getVirtualItems()[rowVirtualizer.getVirtualItems().length - 1]
-                        ?.end || 0)
-                    }px`,
-                    padding: 0,
-                    border: 'none',
-                  }}
-                />
+                <td colSpan={columnIds.length} style={tableStyles.bottomSpacer(rowVirtualizer)} />
               </tr>
             )}
           </Table.Body>
         </Table>
-      </div>
+      </Box>
       <Box style={styles.paginationContainer}>
         <Pagination
           activePage={activePage}

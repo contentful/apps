@@ -32,11 +32,10 @@ export const styles = {
     flexGrow: 1,
     minWidth: 0,
   },
-  table: {
-    marginTop: tokens.spacingM,
-    minWidth: `${CELL_WIDTH * 4}px`,
-    overflowX: 'auto',
-    outline: 'none', // Remove default focus outline
+  tableContainer: {
+    flex: 1,
+    minWidth: 0,
+    overflow: 'hidden',
   },
   whiteBox: {
     background: tokens.colorWhite,

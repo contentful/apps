@@ -572,7 +572,7 @@ const Page = () => {
               disabled={entriesLoading}
             />
             <div style={styles.spacer} />
-            <Box style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+            <Box style={styles.tableContainer}>
               <>
                 {/* Heading */}
                 <Heading style={styles.pageHeader}>
