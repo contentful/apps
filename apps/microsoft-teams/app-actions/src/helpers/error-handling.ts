@@ -1,16 +1,16 @@
 import { ApiError } from '../errors';
-import { AppActionCallResponse, AppActionCallResponseError } from '../types';
+import { AppActionResult, AppActionResultError } from '../../../types';
 
 // for the purposes of the error handler, a HandlerFunction is one that can take any arguments and return any value -- provided
 // it _can_ return an AppActionCallResponseError
 type HandlerFunction<TFnReturn, TFnArgs extends unknown[]> = (
   ...args: TFnArgs
-) => Promise<TFnReturn | AppActionCallResponseError>;
+) => Promise<TFnReturn | AppActionResultError>;
 
 // function wrapper intended of handlers (but really any function that returns our AppActionCallResponse type)
 export const withAsyncAppActionErrorHandling = <
   TResponseType,
-  TFnReturn extends AppActionCallResponse<TResponseType>,
+  TFnReturn extends AppActionResult<TResponseType>,
   TFnArgs extends unknown[]
 >(
   fn: HandlerFunction<TFnReturn, TFnArgs>

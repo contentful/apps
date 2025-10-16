@@ -1,27 +1,28 @@
 import { Accordion, Text, Flex, Badge } from '@contentful/f36-components';
-import { ActionResultType } from '../locations/Page';
 import useParseError from '../hooks/useParseError';
 import { styles } from './Action.styles';
 import RawResponseViewer from './RawResponseViewer';
 import { computeDuration } from '../utils/response';
+import type { AppActionCallProps } from 'contentful-management';
 
 interface Props {
-  actionResult: ActionResultType;
+  appActionCall: AppActionCallProps;
   accordionState: any;
   handleExpand: (itemKey: string) => void;
   handleCollapse: (itemKey: string) => void;
 }
 
 const ActionFailure = (props: Props) => {
-  const { actionResult, accordionState, handleCollapse, handleExpand } = props;
-  const { error, timestamp, actionId } = actionResult;
-  const details: string | undefined = (actionResult.data as any)?.error?.details as
-    | string
-    | undefined;
-  const data: any = actionResult.data;
-  const createdAt = data?.sys?.createdAt;
-  const updatedAt = data?.sys?.updatedAt;
-  const duration = computeDuration(createdAt, updatedAt);
+  const { appActionCall, accordionState, handleCollapse, handleExpand } = props;
+  const { sys } = appActionCall;
+  if (sys.status !== 'failed') {
+    throw new Error('App action call is not failed');
+  }
+  const { error } = sys;
+  const details = error.details;
+  const duration = computeDuration(sys.createdAt, sys.updatedAt);
+  const timestamp = sys.createdAt;
+  const actionId = sys.action.sys.id;
   const { message, statusCode } = useParseError(error);
 
   return (
@@ -30,7 +31,7 @@ const ActionFailure = (props: Props) => {
         title={
           <Text>
             <Badge variant="negative">Failed</Badge>
-            <Text className={styles.accordionTitleMargin}>[{statusCode}]</Text> - {timestamp}
+            <Text className={styles.accordionTitleMargin}>[{statusCode}]</Text> - {sys.updatedAt}
             {typeof duration === 'number' && (
               <Text className={styles.accordionTitleMargin}>
                 Duration: <strong>{duration}</strong> ms
@@ -47,13 +48,16 @@ const ActionFailure = (props: Props) => {
             <strong>Error Details:</strong>
             <Flex className={styles.bodyContainer}>
               <pre className={styles.body}>
-                <code>{details}</code>
+                <code>{JSON.stringify(details, null, 2)}</code>
               </pre>
             </Flex>
           </Text>
         )}
-        {actionResult.callId && (
-          <RawResponseViewer actionId={actionId} callId={actionResult.callId} />
+        {appActionCall.sys.appActionCallResponse && (
+          <RawResponseViewer
+            actionId={actionId}
+            callId={appActionCall.sys.appActionCallResponse.sys.id}
+          />
         )}
       </Accordion.Item>
     </Accordion>

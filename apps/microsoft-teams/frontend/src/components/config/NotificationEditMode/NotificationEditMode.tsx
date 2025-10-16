@@ -16,6 +16,11 @@ import CancelModal from '@components/config/CancelModal/CancelModal';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { editModeFooter } from '@constants/configCopy';
+import {
+  assertAppActionResult,
+  assertAppActionResultFailure,
+} from '../../../utils/assertAppActionResult';
+import { SendTestMessageResult } from '../../../../../types';
 
 interface Props {
   index: number;
@@ -60,24 +65,34 @@ const NotificationEditMode = (props: Props) => {
         contentTypeId: notification.contentTypeId,
       };
 
-      const { response } = await sdk.cma.appActionCall.createWithResponse(
+      const { sys: appActionCallSys } = await sdk.cma.appActionCall.createWithResult(
         {
           appActionId: 'msteamsSendTestMessage',
           environmentId: sdk.ids.environment,
           spaceId: sdk.ids.space,
           appDefinitionId: sdk.ids.app!,
-          userId: sdk.ids.user,
         },
         {
           parameters,
         }
       );
-      const body = JSON.parse(response.body);
 
-      if (body.ok) {
-        sdk.notifier.success(editModeFooter.testSuccess);
+      if (appActionCallSys.status === 'succeeded') {
+        const { result: appActionResult } = appActionCallSys;
+        assertAppActionResult<SendTestMessageResult>(appActionResult);
+
+        if (appActionResult.ok) {
+          sdk.notifier.success(editModeFooter.testSuccess);
+        } else {
+          assertAppActionResultFailure<SendTestMessageResult>(appActionResult);
+          throw new Error(`${editModeFooter.testError}: ${appActionResult.error.message}`);
+        }
+      } else if (appActionCallSys.status === 'failed') {
+        throw new Error(
+          `${editModeFooter.testError}: An error occurred while invoking the app action - ${appActionCallSys.error?.message}`
+        );
       } else {
-        throw new Error(`${editModeFooter.testError}: ${body.error.message}`);
+        throw new Error(`${editModeFooter.testError}: An unknown error occurred.`);
       }
     } catch (error) {
       if (error instanceof Error) {

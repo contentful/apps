@@ -10,12 +10,13 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 
 describe('useGetTeamsChannels', () => {
   it('should return channels and accurate loading state', async () => {
-    mockSdk.cma.appActionCall.createWithResponse = vi.fn().mockReturnValueOnce({
-      response: {
-        body: JSON.stringify({
+    mockSdk.cma.appActionCall.createWithResult = vi.fn().mockReturnValueOnce({
+      sys: {
+        result: {
           ok: true,
           data: mockChannels,
-        }),
+        },
+        status: 'succeeded',
       },
     });
     const { result } = renderHook(() => useGetTeamsChannels());
@@ -27,24 +28,30 @@ describe('useGetTeamsChannels', () => {
   });
 
   it('should return correct error if response is not ok', async () => {
-    mockSdk.cma.appActionCall.createWithResponse = vi.fn().mockReturnValueOnce({
-      response: {
-        body: JSON.stringify({
+    mockSdk.cma.appActionCall.createWithResult = vi.fn().mockReturnValueOnce({
+      sys: {
+        status: 'succeeded',
+        result: {
           ok: false,
-          data: {},
-        }),
+          error: {
+            type: 'Error',
+            message: 'This is an error',
+          },
+        },
       },
     });
     const { result } = renderHook(() => useGetTeamsChannels());
     expect(result.current.loading).toBe(true);
     await waitFor(() => {
-      expect(result.current.error?.message).toEqual('Failed to fetch Teams channels');
+      expect(result.current.error?.message).toEqual(
+        'Failed to fetch Teams channels: This is an error'
+      );
       expect(result.current.loading).toEqual(false);
     });
   });
 
   it('should return generalized error if error is thrown', async () => {
-    mockSdk.cma.appActionCall.createWithResponse = vi.fn().mockRejectedValueOnce(new Error());
+    mockSdk.cma.appActionCall.createWithResult = vi.fn().mockRejectedValueOnce(new Error());
     const { result } = renderHook(() => useGetTeamsChannels());
     expect(result.current.loading).toBe(true);
     await waitFor(() => {

@@ -52,6 +52,7 @@ export const styles = {
     height: '100vh',
     display: 'block',
     marginRight: tokens.spacing2Xs,
+    flexShrink: 0, // Spacer is inside a flex container and should not shrink
   },
   sortMenu: {
     width: 'fit-content',
@@ -68,6 +69,7 @@ export const styles = {
   },
   noContentTypeText: {
     fontWeight: 'bold',
+    padding: `${tokens.spacingXs} 0`,
   },
   editButton: {
     width: 'fit-content',

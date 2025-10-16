@@ -1,21 +1,17 @@
-import { PageAppSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
 import { useState } from 'react';
-import { ActionResultType } from '../locations/Page';
 import ActionFailure from './ActionFailure';
 import ActionSuccess from './ActionSuccess';
 import { useClipboard } from '../hooks/useClipboard';
-
+import { AppActionCallProps } from 'contentful-management';
 interface Props {
-  actionResult: ActionResultType;
+  appActionCall: AppActionCallProps;
 }
 
 const ActionResult = (props: Props) => {
   const [accordionState, setAccordionState] = useState<any>({});
-  const sdk = useSDK<PageAppSDK>();
 
-  const { actionResult } = props;
-  const { success } = actionResult;
+  const { appActionCall } = props;
+  const success = appActionCall.sys.status === 'succeeded';
   const { copy } = useClipboard();
 
   const handleExpand = (itemKey: string) => () =>
@@ -31,7 +27,7 @@ const ActionResult = (props: Props) => {
       {success ? (
         <ActionSuccess
           accordionState={accordionState}
-          actionResult={actionResult}
+          appActionCall={appActionCall}
           handleCollapse={handleCollapse}
           handleExpand={handleExpand}
           handleCopy={handleCopy}
@@ -39,7 +35,7 @@ const ActionResult = (props: Props) => {
       ) : (
         <ActionFailure
           accordionState={accordionState}
-          actionResult={actionResult}
+          appActionCall={appActionCall}
           handleCollapse={handleCollapse}
           handleExpand={handleExpand}
         />

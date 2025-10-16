@@ -6,26 +6,30 @@ import {
   CopyButton,
   Flex,
   FormControl,
+  SectionHeading,
   Stack,
   Subheading,
   Text,
   TextInput,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { AppActionProps } from 'contentful-management';
+import { AppActionCallProps, AppActionProps } from 'contentful-management';
 import { useState } from 'react';
-import { ActionResultData, ActionResultType } from '../locations/Page';
 import ActionResult from './ActionResult';
 import { styles } from './AppActionCard.styles';
+import Forma36Form from './rjsf/Forma36Form';
+import validator from '@rjsf/validator-ajv8';
+import type { IChangeEvent } from '@rjsf/core';
 
 interface Props {
   action: AppActionProps;
 }
 
 const AppActionCard = (props: Props) => {
-  const [actionResults, setActionResults] = useState<ActionResultType[]>([]);
+  const [appActionCalls, setAppActionCalls] = useState<AppActionCallProps[]>([]);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [actionParameters, setActionParameters] = useState<any>({});
+  const [schemaErrorsByAction, setSchemaErrorsByAction] = useState<Record<string, number>>({});
 
   const sdk = useSDK<PageAppSDK>();
   const { action } = props;
@@ -33,7 +37,7 @@ const AppActionCard = (props: Props) => {
   const callAction = async (action: AppActionProps) => {
     setLoadingAction(action.sys.id);
     try {
-      const result = (await sdk.cma.appActionCall.createWithResult(
+      const appActionCallWithResult = await sdk.cma.appActionCall.createWithResult(
         {
           appDefinitionId: sdk.ids.app || '',
           appActionId: action.sys.id,
@@ -41,37 +45,11 @@ const AppActionCard = (props: Props) => {
         {
           parameters: actionParameters[action.sys.id] || {},
         }
-      )) as unknown as ActionResultData;
+      );
 
-      const timestamp = new Date().toLocaleString();
-      const call: any = result as any;
-      const callId = (call as any)?.sys?.id;
-      const base = { timestamp, actionId: action.sys.id, callId } as const;
-
-      if (call?.status === 'succeeded') {
-        setActionResults((prev) => [{ success: true, data: call, ...base }, ...prev]);
-      } else if (call?.status === 'failed') {
-        setActionResults((prev) => [
-          {
-            success: false,
-            data: call,
-            error: call?.error || new Error('App action failed'),
-            ...base,
-          },
-          ...prev,
-        ]);
-      } else {
-        setActionResults((prev) => [
-          { success: false, data: call, error: new Error('App action still processing'), ...base },
-          ...prev,
-        ]);
-      }
+      setAppActionCalls((prev) => [appActionCallWithResult, ...prev]);
     } catch (error) {
-      const timestamp = new Date().toLocaleString();
-      setActionResults((prev) => [
-        { success: false, error, timestamp, actionId: action.sys.id },
-        ...prev,
-      ]);
+      sdk.notifier.error(`Failed to call action: ${error}`);
     } finally {
       setLoadingAction(null);
     }
@@ -136,12 +114,31 @@ const AppActionCard = (props: Props) => {
   };
 
   const isButtonDisabled = () => {
-    const parameters = (action as any).parameters as any[] | undefined;
-    const requiredParameters = parameters?.filter((param: any) => param.required) ?? [];
+    const actionId = action.sys.id;
+    const formData = actionParameters[actionId] || {};
 
-    const hasEmptyRequiredParameters = requiredParameters.find((param: any) => {
-      const paramValue = actionParameters[action.sys.id]?.[param.id];
-      return !paramValue;
+    const hasSchema = action.parametersSchema;
+    if (hasSchema) {
+      const schema = action.parametersSchema;
+      const requiredKeys: string[] = Array.isArray(schema?.required) ? schema.required : [];
+      const hasEmptyRequired = requiredKeys.some((key) => {
+        const value = formData?.[key];
+        if (value === undefined || value === null) return true;
+        if (typeof value === 'string' && value.trim() === '') return true;
+        if (typeof value === 'number' && Number.isNaN(value)) return true;
+        return false;
+      });
+      const hasErrors = Boolean(schemaErrorsByAction[actionId]);
+      return hasErrors || hasEmptyRequired;
+    }
+
+    const customAction = action as unknown as {
+      parameters?: Array<{ id: string; required?: boolean }>;
+    };
+    const requiredParameters = customAction.parameters?.filter((param) => param.required) || [];
+    const hasEmptyRequiredParameters = requiredParameters.some((param) => {
+      const paramValue = formData?.[param.id];
+      return paramValue === undefined || paramValue === null || paramValue === '';
     });
 
     return Boolean(hasEmptyRequiredParameters);
@@ -175,8 +172,34 @@ const AppActionCard = (props: Props) => {
           </Button>
         </Box>
       </Flex>
-      {Array.isArray((action as any).parameters) &&
-      (action as { parameters: any[] }).parameters.length ? (
+      {action.parametersSchema ? (
+        <Box marginTop="spacingS">
+          <Box marginBottom="spacingS">
+            <SectionHeading as="h4">Parameters</SectionHeading>
+          </Box>
+          <Forma36Form
+            schema={action.parametersSchema}
+            formData={actionParameters[action.sys.id] || {}}
+            validator={validator}
+            liveValidate
+            showErrorList={false}
+            uiSchema={{ 'ui:submitButtonOptions': { norender: true } }}
+            onChange={(e: IChangeEvent<Record<string, unknown>>) => {
+              setActionParameters({
+                ...actionParameters,
+                [action.sys.id]: e.formData,
+              });
+              const errorCount = Array.isArray(e.errors) ? e.errors.length : 0;
+              setSchemaErrorsByAction({
+                ...schemaErrorsByAction,
+                [action.sys.id]: errorCount,
+              });
+            }}>
+            <></>
+          </Forma36Form>
+        </Box>
+      ) : Array.isArray((action as any).parameters) &&
+        (action as { parameters: any[] }).parameters.length ? (
         <Box marginTop="spacingS">
           <Box marginBottom="spacingM">
             <Subheading as="h4">Parameters</Subheading>
@@ -190,10 +213,15 @@ const AppActionCard = (props: Props) => {
         </Box>
       ) : null}
 
-      {actionResults
-        .filter((result) => result.actionId === action.sys.id)
-        .map((result) => (
-          <ActionResult actionResult={result} key={`${result.timestamp}`} />
+      {appActionCalls
+        .filter(
+          (appActionCallWithResult) => appActionCallWithResult.sys.action.sys.id === action.sys.id
+        )
+        .map((appActionCallWithResult) => (
+          <ActionResult
+            appActionCall={appActionCallWithResult}
+            key={`${appActionCallWithResult.sys.createdAt}`}
+          />
         ))}
     </Box>
   );
