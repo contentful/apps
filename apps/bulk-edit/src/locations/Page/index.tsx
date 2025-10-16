@@ -11,13 +11,7 @@ import {
   Text,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import {
-  ContentFields,
-  ContentTypeProps,
-  EntryProps,
-  KeyValueMap,
-  QueryOptions,
-} from 'contentful-management';
+import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
 import { ContentTypeField, FilterOption } from './types';
 import { styles } from './styles';
 import { ContentTypeSidebar } from './components/ContentTypeSidebar';
@@ -28,15 +22,16 @@ import { UndoBulkEditModal } from './components/UndoBulkEditModal';
 import { SearchBar } from './components/SearchBar';
 import {
   fetchEntriesWithBatching,
-  getStatusesOptions,
+  filterEntriesByNumericSearch,
   getEntryFieldValue,
-  getStatusFromEntry,
+  getStatusesOptions,
   getStatusFlags,
+  getStatusFromEntry,
+  isNumericSearch,
+  processContentTypeFields,
   processEntriesInBatches,
   truncate,
   updateEntryFieldLocalized,
-  filterEntriesByNumericSearch,
-  isNumericSearch,
 } from './utils/entryUtils';
 import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
@@ -239,27 +234,7 @@ const Page = () => {
 
       try {
         const ct = await sdk.cma.contentType.get({ contentTypeId: selectedContentTypeId });
-        const newFields: ContentTypeField[] = [];
-        ct.fields.forEach((f: ContentFields<KeyValueMap>) => {
-          if (f.localized) {
-            locales.forEach((locale) => {
-              newFields.push({
-                id: f.id,
-                uniqueId: `${f.id}-${locale}`,
-                name: f.name,
-                type: f.type as any,
-                locale: locale,
-              });
-            });
-          } else {
-            newFields.push({
-              id: f.id,
-              uniqueId: f.id,
-              name: f.name,
-              type: f.type as any,
-            });
-          }
-        });
+        const newFields = processContentTypeFields(ct.fields, locales);
         setFields(newFields);
         setSelectedColumns(getFieldsMapped(newFields));
         setCurrentContentType(ct);

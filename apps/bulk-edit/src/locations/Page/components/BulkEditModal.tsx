@@ -1,16 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Modal,
-  Button,
-  TextInput,
-  Text,
-  Flex,
-  FormControl,
-  Note,
-} from '@contentful/f36-components';
-import type { Entry, ContentTypeField } from '../types';
-import { getEntryFieldValue, truncate } from '../utils/entryUtils';
+import { Button, Flex, FormControl, Modal, Note, Text } from '@contentful/f36-components';
+import type { ContentTypeField, Entry } from '../types';
+import { getEntryFieldValue, isInvalid, isNumber, truncate } from '../utils/entryUtils';
 import { ClockIcon } from '@contentful/f36-icons';
+import { FieldEditor } from './FieldEditor';
 
 interface BulkEditModalProps {
   isOpen: boolean;
@@ -44,9 +37,6 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
       : '';
   const title = entryCount === 1 ? 'Edit' : 'Bulk edit';
 
-  const isNumber = selectedField?.type === 'Number' || selectedField?.type === 'Integer';
-  const isInvalid = selectedField?.type === 'Integer' && !Number.isInteger(Number(value));
-
   useEffect(() => {
     setValue('');
   }, [isOpen]);
@@ -70,17 +60,16 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
               {entryCount === 1 ? 'selected' : `selected and ${entryCount - 1} more`}
             </Text>
           </Flex>
-          <FormControl isInvalid={isInvalid}>
-            <TextInput
-              name="bulk-edit-value"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              placeholder="Enter your new value"
-              type={isNumber ? 'number' : 'text'}
-              isInvalid={isInvalid}
-              autoFocus
-            />
-            {isInvalid && (
+          <FormControl isInvalid={isInvalid(selectedField, value)}>
+            {selectedField && (
+              <FieldEditor
+                field={selectedField}
+                value={value}
+                onChange={setValue}
+                defaultLocale={defaultLocale}
+              />
+            )}
+            {isInvalid(selectedField, value) && (
               <FormControl.ValidationMessage>
                 Integer field does not allow decimal
               </FormControl.ValidationMessage>
@@ -104,11 +93,11 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
         <Button
           variant="primary"
           onClick={() => {
-            if (isInvalid) return;
-            const finalValue = isNumber ? Number(value) : value;
+            if (isInvalid(selectedField, value)) return;
+            const finalValue = isNumber(selectedField) ? Number(value) : value;
             onSave(finalValue);
           }}
-          isDisabled={!value || isInvalid}
+          isDisabled={value === '' || isInvalid(selectedField, value)}
           testId="bulk-edit-save"
           isLoading={isSaving}>
           Save

@@ -1,8 +1,14 @@
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Document } from '@contentful/rich-text-types';
-import { Entry, ContentTypeField, Fields } from '../types';
-import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
-import { BATCH_FETCHING, DRAFT_STATUS, CHANGED_STATUS, PUBLISHED_STATUS } from './constants';
+import { ContentTypeField, Entry, Fields } from '../types';
+import {
+  ContentFields,
+  ContentTypeProps,
+  EntryProps,
+  KeyValueMap,
+  QueryOptions,
+} from 'contentful-management';
+import { BATCH_FETCHING, CHANGED_STATUS, DRAFT_STATUS, PUBLISHED_STATUS } from './constants';
 import { BadgeVariant } from '@contentful/f36-components';
 
 export const getStatusesOptions = (): string[] => {
@@ -127,23 +133,23 @@ export const getEntryUrl = (entry: Entry, spaceId: string, environmentId: string
 };
 
 export const isCheckboxAllowed = (field: ContentTypeField): boolean => {
-  const restrictedTypes = [
-    'Location',
-    'Date',
-    'Asset',
-    'Array',
-    'Link',
-    'ResourceLink',
-    'Boolean',
-    'Object',
-    'RichText',
-  ];
+  if (!field || !field.type) return false;
 
-  if (!field.type) return false;
+  const restrictedTypes = ['Location', 'Asset', 'Link', 'ResourceLink', 'RichText'];
 
-  if (restrictedTypes.includes(field.type)) return false;
-  return true;
+  if (field.type === 'Array') {
+    return field.items?.type === 'Symbol';
+  }
+
+  return !restrictedTypes.includes(field.type);
 };
+
+export const isNumber = (selectedField: ContentTypeField | null) => {
+  return selectedField?.type === 'Number' || selectedField?.type === 'Integer';
+};
+
+export const isInvalid = (selectedField: ContentTypeField | null, value: string) =>
+  selectedField?.type === 'Integer' && !Number.isInteger(Number(value));
 
 /**
  * Returns a new fields object with the given field updated for the specified locale.
@@ -303,4 +309,36 @@ export const filterEntriesByNumericSearch = (
       return String(fieldValue).includes(query);
     });
   });
+};
+
+export const processContentTypeFields = (
+  fields: ContentFields<KeyValueMap>[],
+  locales: string[]
+): ContentTypeField[] => {
+  const newFields: ContentTypeField[] = [];
+
+  fields.forEach((f) => {
+    if (f.localized) {
+      locales.forEach((locale) => {
+        newFields.push({
+          id: f.id,
+          uniqueId: `${f.id}-${locale}`,
+          name: f.name,
+          locale: locale,
+          type: f.type,
+          items: f?.items,
+        });
+      });
+    } else {
+      newFields.push({
+        id: f.id,
+        uniqueId: f.id,
+        name: f.name,
+        type: f.type,
+        items: f?.items,
+      });
+    }
+  });
+
+  return newFields;
 };
