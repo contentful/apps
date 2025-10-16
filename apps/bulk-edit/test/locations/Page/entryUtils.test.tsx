@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   fetchEntriesWithBatching,
   getEntryFieldValue,
-  processContentTypeFields,
+  mapContentTypePropsToFields,
   processEntriesInBatches,
   renderFieldValue,
 } from '../../../src/locations/Page/utils/entryUtils';
@@ -535,7 +535,7 @@ describe('entryUtils', () => {
       mockSdk.cma.contentType.get.mockResolvedValue(mockContentType);
 
       const ct = await mockSdk.cma.contentType.get({ contentTypeId: 'test-content-type' });
-      const result = processContentTypeFields(ct.fields, mockLocales);
+      const result = mapContentTypePropsToFields(ct.fields, mockLocales);
 
       expect(mockSdk.cma.contentType.get).toHaveBeenCalledWith({
         contentTypeId: 'test-content-type',
@@ -557,7 +557,7 @@ describe('entryUtils', () => {
       mockSdk.cma.contentType.get.mockResolvedValue(mockContentType);
 
       const ct = await mockSdk.cma.contentType.get({ contentTypeId: 'test-content-type' });
-      const result = processContentTypeFields(ct.fields, mockLocales);
+      const result = mapContentTypePropsToFields(ct.fields, mockLocales);
 
       expect(mockSdk.cma.contentType.get).toHaveBeenCalledWith({
         contentTypeId: 'test-content-type',
@@ -596,7 +596,7 @@ describe('entryUtils', () => {
       mockSdk.cma.contentType.get.mockResolvedValue(mockContentType);
 
       const ct = await mockSdk.cma.contentType.get({ contentTypeId: 'test-content-type' });
-      const result = processContentTypeFields(ct.fields, mockLocales);
+      const result = mapContentTypePropsToFields(ct.fields, mockLocales);
 
       expect(mockSdk.cma.contentType.get).toHaveBeenCalledWith({
         contentTypeId: 'test-content-type',
@@ -630,7 +630,7 @@ describe('entryUtils', () => {
       mockSdk.cma.contentType.get.mockResolvedValue(mockContentType);
 
       const ct = await mockSdk.cma.contentType.get({ contentTypeId: 'test-content-type' });
-      const result = processContentTypeFields(ct.fields, mockLocales);
+      const result = mapContentTypePropsToFields(ct.fields, mockLocales);
 
       expect(mockSdk.cma.contentType.get).toHaveBeenCalledWith({
         contentTypeId: 'test-content-type',

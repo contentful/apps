@@ -1,8 +1,9 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { vi } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { expect, vi } from 'vitest';
 import { BulkEditModal } from '../../../src/locations/Page/components/BulkEditModal';
-import { Entry, ContentTypeField } from '../../../src/locations/Page/types';
+import { ContentTypeField, Entry } from '../../../src/locations/Page/types';
+import { mockSdk } from '../../mocks';
 
 // Mock the field editors
 vi.mock('../../../src/locations/Page/components/FieldEditor', () => ({
@@ -34,7 +35,7 @@ describe('BulkEditModal', () => {
         onSave={vi.fn()}
         selectedEntries={[entry1]}
         selectedField={field}
-        defaultLocale="en-US"
+        locales={mockSdk.locales}
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
@@ -53,7 +54,7 @@ describe('BulkEditModal', () => {
         onSave={vi.fn()}
         selectedEntries={[entry1, entry2]}
         selectedField={field}
-        defaultLocale="en-US"
+        locales={mockSdk.locales}
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
@@ -73,7 +74,7 @@ describe('BulkEditModal', () => {
         onSave={vi.fn()}
         selectedEntries={[entry1]}
         selectedField={field}
-        defaultLocale="en-US"
+        locales={mockSdk.locales}
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
@@ -92,7 +93,7 @@ describe('BulkEditModal', () => {
         onSave={onSave}
         selectedEntries={[entry1]}
         selectedField={field}
-        defaultLocale="en-US"
+        locales={mockSdk.locales}
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
@@ -118,7 +119,7 @@ describe('BulkEditModal', () => {
         onSave={vi.fn()}
         selectedEntries={[entry1]}
         selectedField={integerField}
-        defaultLocale="en-US"
+        locales={mockSdk.locales}
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
@@ -141,7 +142,7 @@ describe('BulkEditModal', () => {
           onSave={onSave}
           selectedEntries={[entry1]}
           selectedField={field}
-          defaultLocale="en-US"
+          locales={mockSdk.locales}
           isSaving={false}
           totalUpdateCount={0}
           editionCount={0}
@@ -170,7 +171,7 @@ describe('BulkEditModal', () => {
         onSave={onSave}
         selectedEntries={[entry1, entry2]}
         selectedField={field}
-        defaultLocale="en-US"
+        locales={mockSdk.locales}
         isSaving={true}
         totalUpdateCount={2}
         editionCount={1}
@@ -192,7 +193,7 @@ describe('BulkEditModal', () => {
         onSave={onSave}
         selectedEntries={[entry1, entry2]}
         selectedField={field}
-        defaultLocale="en-US"
+        locales={mockSdk.locales}
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}

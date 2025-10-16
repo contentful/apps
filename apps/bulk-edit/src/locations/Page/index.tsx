@@ -25,7 +25,7 @@ import {
   getEntryFieldValue,
   getStatusFromEntry,
   isNumericSearch,
-  processContentTypeFields,
+  mapContentTypePropsToFields,
   processEntriesInBatches,
     getStatusFlags,
   truncate,
@@ -237,7 +237,7 @@ const Page = () => {
 
       try {
         const ct = await sdk.cma.contentType.get({ contentTypeId: selectedContentTypeId });
-        const newFields = processContentTypeFields(ct.fields, locales);
+        const newFields = mapContentTypePropsToFields(ct.fields, locales);
         setFields(newFields);
         setSelectedColumns(getFieldsMapped(newFields));
         setCurrentContentType(ct);
@@ -701,7 +701,7 @@ const Page = () => {
         onSave={onSave}
         selectedEntries={selectedEntries}
         selectedField={selectedField}
-        defaultLocale={defaultLocale}
+        locales={sdk.locales}
         isSaving={isSaving}
         totalUpdateCount={totalUpdateCount}
         editionCount={editionCount}

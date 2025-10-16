@@ -1,18 +1,18 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FieldEditor } from '../../../src/locations/Page/components/FieldEditor';
+import { mockSdk } from '../../mocks';
 
 describe('FieldEditor', () => {
-  const defaultLocale = 'en-US';
   const mockOnChange = vi.fn();
 
   const createField = (type: string, id: string = 'test-field', name: string = 'Test Field') => ({
     id,
     name,
     type,
-    locale: defaultLocale,
-    uniqueId: `${id}-${defaultLocale}`,
+    locale: mockSdk.locales.default,
+    uniqueId: `${id}-${mockSdk.locales.default}`,
   });
 
   beforeEach(() => {
@@ -24,12 +24,7 @@ describe('FieldEditor', () => {
     const value = 'test value';
 
     render(
-      <FieldEditor
-        field={field}
-        value={value}
-        onChange={mockOnChange}
-        defaultLocale={defaultLocale}
-      />
+      <FieldEditor field={field} value={value} onChange={mockOnChange} locales={mockSdk.locales} />
     );
 
     expect(screen.getByDisplayValue(value)).toBeInTheDocument();
@@ -40,12 +35,7 @@ describe('FieldEditor', () => {
     const value = 'multiline text value';
 
     render(
-      <FieldEditor
-        field={field}
-        value={value}
-        onChange={mockOnChange}
-        defaultLocale={defaultLocale}
-      />
+      <FieldEditor field={field} value={value} onChange={mockOnChange} locales={mockSdk.locales} />
     );
 
     expect(screen.getByDisplayValue(value)).toBeInTheDocument();
@@ -56,12 +46,7 @@ describe('FieldEditor', () => {
     const value = '123.45';
 
     render(
-      <FieldEditor
-        field={field}
-        value={value}
-        onChange={mockOnChange}
-        defaultLocale={defaultLocale}
-      />
+      <FieldEditor field={field} value={value} onChange={mockOnChange} locales={mockSdk.locales} />
     );
 
     expect(screen.getByDisplayValue(value)).toBeInTheDocument();
@@ -72,12 +57,7 @@ describe('FieldEditor', () => {
     const value = '42';
 
     render(
-      <FieldEditor
-        field={field}
-        value={value}
-        onChange={mockOnChange}
-        defaultLocale={defaultLocale}
-      />
+      <FieldEditor field={field} value={value} onChange={mockOnChange} locales={mockSdk.locales} />
     );
 
     expect(screen.getByDisplayValue(value)).toBeInTheDocument();
@@ -88,12 +68,7 @@ describe('FieldEditor', () => {
     const value = '2023-10-26T10:00:00Z';
 
     render(
-      <FieldEditor
-        field={field}
-        value={value}
-        onChange={mockOnChange}
-        defaultLocale={defaultLocale}
-      />
+      <FieldEditor field={field} value={value} onChange={mockOnChange} locales={mockSdk.locales} />
     );
 
     expect(screen.getByDisplayValue('26 Oct 2023')).toBeInTheDocument();
@@ -104,12 +79,7 @@ describe('FieldEditor', () => {
     const value = ['tag1', 'tag2'];
 
     render(
-      <FieldEditor
-        field={field}
-        value={value}
-        onChange={mockOnChange}
-        defaultLocale={defaultLocale}
-      />
+      <FieldEditor field={field} value={value} onChange={mockOnChange} locales={mockSdk.locales} />
     );
 
     expect(screen.getByText('tag1')).toBeInTheDocument();
@@ -125,7 +95,7 @@ describe('FieldEditor', () => {
         field={field}
         value={String(value)}
         onChange={mockOnChange}
-        defaultLocale={defaultLocale}
+        locales={mockSdk.locales}
       />
     );
 
@@ -143,7 +113,7 @@ describe('FieldEditor', () => {
         field={field}
         value={JSON.stringify(value)}
         onChange={mockOnChange}
-        defaultLocale={defaultLocale}
+        locales={mockSdk.locales}
       />
     );
 
@@ -161,7 +131,7 @@ describe('FieldEditor', () => {
           field={field}
           value={value}
           onChange={mockOnChange}
-          defaultLocale={defaultLocale}
+          locales={mockSdk.locales}
         />
       );
 
@@ -180,7 +150,7 @@ describe('FieldEditor', () => {
           field={field}
           value={value}
           onChange={mockOnChange}
-          defaultLocale={defaultLocale}
+          locales={mockSdk.locales}
         />
       );
 
@@ -199,7 +169,7 @@ describe('FieldEditor', () => {
           field={field}
           value={value}
           onChange={mockOnChange}
-          defaultLocale={defaultLocale}
+          locales={mockSdk.locales}
         />
       );
 
@@ -215,7 +185,7 @@ describe('FieldEditor', () => {
           field={field}
           value={value}
           onChange={mockOnChange}
-          defaultLocale={defaultLocale}
+          locales={mockSdk.locales}
         />
       );
 
@@ -225,15 +195,13 @@ describe('FieldEditor', () => {
     it('handles different default locales', () => {
       const field = createField('Text');
       const value = 'test value';
-      const customLocale = 'es-ES';
+      const customLocales = {
+        ...mockSdk.locales,
+        default: 'es-ES',
+      };
 
       render(
-        <FieldEditor
-          field={field}
-          value={value}
-          onChange={mockOnChange}
-          defaultLocale={customLocale}
-        />
+        <FieldEditor field={field} value={value} onChange={mockOnChange} locales={customLocales} />
       );
 
       expect(screen.getByDisplayValue(value)).toBeInTheDocument();
