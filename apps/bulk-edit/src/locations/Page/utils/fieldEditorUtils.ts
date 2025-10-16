@@ -1,4 +1,4 @@
-import type { FieldAPI, LocalesAPI } from '@contentful/field-editor-shared';
+import type { LocalesAPI } from '@contentful/field-editor-shared';
 import type { ContentTypeField } from '../types';
 
 // API creation utilities
@@ -7,14 +7,14 @@ export const createFieldAPI = (
   value: string,
   onChange: (value: string) => void,
   defaultLocale: string
-): FieldAPI => {
+) => {
   const locale = field.locale || defaultLocale;
 
   return {
     id: field.id,
     name: field.name,
     locale: locale,
-    type: field.type as any,
+    type: field.type,
     required: false,
     validations: [],
     getValue: () => value,
