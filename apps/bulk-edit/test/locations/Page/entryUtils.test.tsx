@@ -276,7 +276,6 @@ describe('entryUtils', () => {
 
   describe('processEntriesInBatches', () => {
     const mockUpdateFunction = vi.fn();
-    const mockDelay = vi.fn();
 
     beforeEach(() => {
       vi.clearAllMocks();
