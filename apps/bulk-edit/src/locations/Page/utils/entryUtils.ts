@@ -304,7 +304,7 @@ export const filterEntriesByNumericSearch = (
   });
 };
 
-export const createContentTypeFields = (
+export const processContentTypeFields = (
   fields: ContentFields<KeyValueMap>[],
   locales: string[]
 ): ContentTypeField[] => {
