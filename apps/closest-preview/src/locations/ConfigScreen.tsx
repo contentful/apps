@@ -70,7 +70,7 @@ const ConfigScreen = () => {
               />
             </FormControl>
           </Box>
-          <Note>
+          <Note variant="neutral">
             This app assumes that all content types with Live Preview enabled include a field whose
             id is 'slug'. If that field is missing or uses a different id, the app will not function
             correctly.
