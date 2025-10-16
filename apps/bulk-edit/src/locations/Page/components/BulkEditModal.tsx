@@ -97,7 +97,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
             const finalValue = isNumber(selectedField) ? Number(value) : value;
             onSave(finalValue);
           }}
-          isDisabled={!value || isInvalid(selectedField, value)}
+          isDisabled={value === '' || isInvalid(selectedField, value)}
           testId="bulk-edit-save"
           isLoading={isSaving}>
           Save
