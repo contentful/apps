@@ -144,13 +144,6 @@ export const isCheckboxAllowed = (field: ContentTypeField): boolean => {
   return !restrictedTypes.includes(field.type);
 };
 
-export const isNumber = (selectedField: ContentTypeField | null) => {
-  return selectedField?.type === 'Number' || selectedField?.type === 'Integer';
-};
-
-export const isInvalid = (selectedField: ContentTypeField | null, value: string) =>
-  selectedField?.type === 'Integer' && !Number.isInteger(Number(value));
-
 /**
  * Returns a new fields object with the given field updated for the specified locale.
  * If the field or locale does not exist, it is created.

@@ -102,33 +102,7 @@ describe('BulkEditModal', () => {
     const input = screen.getByTestId('field-editor-input');
     fireEvent.change(input, { target: { value: '1234' } });
     fireEvent.click(screen.getByTestId('bulk-edit-save'));
-    expect(onSave).toHaveBeenCalledWith(1234);
-  });
-
-  it('shows validation message for decimal in integer field', () => {
-    const integerField: ContentTypeField = {
-      id: 'count',
-      uniqueId: 'count',
-      name: 'Count',
-      type: 'Integer',
-    };
-    render(
-      <BulkEditModal
-        isOpen={true}
-        onClose={vi.fn()}
-        onSave={vi.fn()}
-        selectedEntries={[entry1]}
-        selectedField={integerField}
-        locales={mockSdk.locales}
-        isSaving={false}
-        totalUpdateCount={0}
-        editionCount={0}
-      />
-    );
-    const input = screen.getByTestId('field-editor-input');
-    fireEvent.change(input, { target: { value: '1.5' } });
-    expect(screen.getByText('Integer field does not allow decimal')).toBeInTheDocument();
-    expect(screen.getByTestId('bulk-edit-save')).toBeDisabled();
+    expect(onSave).toHaveBeenCalledWith('1234');
   });
 
   it('resets the input value when the modal is re-opened', () => {
