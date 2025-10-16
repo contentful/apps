@@ -21,13 +21,13 @@ import { BulkEditModal } from './components/BulkEditModal';
 import { UndoBulkEditModal } from './components/UndoBulkEditModal';
 import { SearchBar } from './components/SearchBar';
 import {
-  createContentTypeFields,
   fetchEntriesWithBatching,
   getEntryFieldValue,
   getStatusFromEntry,
   isNumericSearch,
+  processContentTypeFields,
+  processEntriesInBatches,
     getStatusFlags,
-    processEntriesInBatches,
   truncate,
   updateEntryFieldLocalized,
   filterEntriesByNumericSearch,
@@ -237,7 +237,7 @@ const Page = () => {
 
       try {
         const ct = await sdk.cma.contentType.get({ contentTypeId: selectedContentTypeId });
-        const newFields = createContentTypeFields(ct.fields, locales);
+        const newFields = processContentTypeFields(ct.fields, locales);
         setFields(newFields);
         setSelectedColumns(getFieldsMapped(newFields));
         setCurrentContentType(ct);
