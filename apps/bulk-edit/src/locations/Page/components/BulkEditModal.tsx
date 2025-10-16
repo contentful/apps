@@ -4,6 +4,7 @@ import type { ContentTypeField, Entry } from '../types';
 import { getEntryFieldValue, isInvalid, isNumber, truncate } from '../utils/entryUtils';
 import { ClockIcon } from '@contentful/f36-icons';
 import { FieldEditor } from './FieldEditor';
+import type { LocalesAPI } from '@contentful/field-editor-shared';
 
 interface BulkEditModalProps {
   isOpen: boolean;
@@ -11,7 +12,7 @@ interface BulkEditModalProps {
   onSave: (newValue: string | number) => void;
   selectedEntries: Entry[];
   selectedField: ContentTypeField | null;
-  defaultLocale: string;
+  locales: LocalesAPI;
   isSaving: boolean;
   totalUpdateCount: number;
   editionCount: number;
@@ -23,7 +24,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   onSave,
   selectedEntries,
   selectedField,
-  defaultLocale,
+  locales,
   isSaving,
   totalUpdateCount,
   editionCount,
@@ -32,8 +33,8 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   const entryCount = selectedEntries.length;
   const firstEntry = selectedEntries[0];
   const firstValueToUpdate =
-    firstEntry && selectedField && defaultLocale
-      ? getEntryFieldValue(firstEntry, selectedField, defaultLocale)
+    firstEntry && selectedField && locales.default
+      ? getEntryFieldValue(firstEntry, selectedField, locales.default)
       : '';
   const title = entryCount === 1 ? 'Edit' : 'Bulk edit';
 
@@ -66,7 +67,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
                 field={selectedField}
                 value={value}
                 onChange={setValue}
-                defaultLocale={defaultLocale}
+                locales={locales}
               />
             )}
             {isInvalid(selectedField, value) && (
