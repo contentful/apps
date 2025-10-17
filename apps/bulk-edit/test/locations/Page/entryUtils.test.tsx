@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   fetchEntriesWithBatching,
+  formatValueForDisplay,
   getEntryFieldValue,
   mapContentTypePropsToFields,
   processEntriesInBatches,
@@ -91,16 +92,16 @@ describe('entryUtils', () => {
       expect(result).toBe('test value');
     });
 
-    it('returns string representation when field value is a number', () => {
+    it('returns number representation when field value is a number', () => {
       const entry = { fields: { testField: { 'en-US': 123 } } };
       const result = getEntryFieldValue(entry, field, defaultLocale);
-      expect(result).toBe('123');
+      expect(result).toBe(123);
     });
 
-    it('returns string representation when field value is a boolean', () => {
+    it('returns boolean representation when field value is a boolean', () => {
       const entry = { fields: { testField: { 'en-US': true } } };
       const result = getEntryFieldValue(entry, field, defaultLocale);
-      expect(result).toBe('true');
+      expect(result).toBe(true);
     });
 
     it('uses default locale when field locale is not specified', () => {
@@ -640,6 +641,30 @@ describe('entryUtils', () => {
         ...expected,
         uniqueId: 'relatedEntries',
       });
+    });
+  });
+
+  describe('formatValueForDisplay', () => {
+    it('formats arrays with first 3 items and count', () => {
+      const array = [1, 2, 3, 4, 5];
+      expect(formatValueForDisplay(array, 20)).toBe('[1, 2, 3 +2 more] ...');
+    });
+
+    it('formats empty arrays as empty list', () => {
+      const emptyArray: any[] = [];
+      expect(formatValueForDisplay(emptyArray, 20)).toBe('[Empty list]');
+    });
+
+    it('formats JSON objects with first 3 keys and count', () => {
+      const obj = { a: 1, b: 2, c: 3, d: 4, e: 5 };
+      expect(formatValueForDisplay(obj, 20)).toBe('{a, b, c +2 more} ...');
+    });
+
+    it('handles non-object values with truncation', () => {
+      expect(formatValueForDisplay('very long string that exceeds limit', 10)).toBe(
+        'very long  ...'
+      );
+      expect(formatValueForDisplay(123, 5)).toBe('123');
     });
   });
 });
