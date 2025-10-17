@@ -23,6 +23,7 @@ import { SearchBar } from './components/SearchBar';
 import {
   fetchEntriesWithBatching,
   filterEntriesByNumericSearch,
+  formatValueForDisplay,
   getEntryFieldValue,
   getStatusesOptions,
   getStatusFlags,
@@ -30,7 +31,6 @@ import {
   isNumericSearch,
   mapContentTypePropsToFields,
   processEntriesInBatches,
-  truncate,
   updateEntryFieldLocalized,
 } from './utils/entryUtils';
 import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
@@ -324,16 +324,19 @@ const Page = () => {
     value,
     count,
   }: {
-    firstUpdatedValue: string;
-    value: string;
+    firstUpdatedValue: unknown;
+    value: unknown;
     count: number;
   }) {
+    const formattedFirstValue = formatValueForDisplay(firstUpdatedValue, 30);
+    const formattedNewValue = formatValueForDisplay(value, 30);
+
     const message =
       count === 1
-        ? `${truncate(firstUpdatedValue, 30)} was updated to ${truncate(value, 30)}`
-        : `${truncate(firstUpdatedValue, 30)} and ${
+        ? `${formattedFirstValue} was updated to ${formattedNewValue}`
+        : `${formattedFirstValue} and ${
             count - 1
-          } more entry fields were updated to ${truncate(value, 30)}`;
+          } more entry fields were updated to ${formattedNewValue}`;
     const notification = Notification.success(message, {
       title: 'Success!',
       cta: {
@@ -343,7 +346,7 @@ const Page = () => {
           onClick: () => {
             notification.then((item) => {
               Notification.close(item.id);
-              setUndoFirstEntryFieldValue(firstUpdatedValue);
+              setUndoFirstEntryFieldValue(String(firstUpdatedValue));
               setIsUndoModalOpen(true);
             });
           },
@@ -430,7 +433,7 @@ const Page = () => {
         );
         successNotification({
           firstUpdatedValue: firstUpdatedValue,
-          value: `${val}`,
+          value: val,
           count: successful.length,
         });
       }
