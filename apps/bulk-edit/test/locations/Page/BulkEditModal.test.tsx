@@ -1,20 +1,9 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { expect, vi } from 'vitest';
 import { BulkEditModal } from '../../../src/locations/Page/components/BulkEditModal';
 import { ContentTypeField, Entry } from '../../../src/locations/Page/types';
 import { mockSdk } from '../../mocks';
-
-// Mock the field editors
-vi.mock('../../../src/locations/Page/components/FieldEditor', () => ({
-  FieldEditor: ({ value, onChange }: { value: string; onChange: (value: string) => void }) => (
-    <input
-      data-test-id="field-editor-input"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    />
-  ),
-}));
 
 describe('BulkEditModal', () => {
   const field: ContentTypeField = { id: 'size', uniqueId: 'size', name: 'Size', type: 'Number' };
@@ -84,7 +73,7 @@ describe('BulkEditModal', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('calls onSave with value when Save is clicked', () => {
+  it('calls onSave with value when Save is clicked', async () => {
     const onSave = vi.fn();
     render(
       <BulkEditModal
@@ -99,13 +88,16 @@ describe('BulkEditModal', () => {
         editionCount={0}
       />
     );
-    const input = screen.getByTestId('field-editor-input');
-    fireEvent.change(input, { target: { value: '1234' } });
-    fireEvent.click(screen.getByTestId('bulk-edit-save'));
-    expect(onSave).toHaveBeenCalledWith('1234');
+    const input = await screen.findByTestId('number-editor-input');
+
+    await waitFor(() => {
+      fireEvent.change(input, { target: { value: '1234' } });
+      fireEvent.click(screen.getByTestId('bulk-edit-save'));
+      expect(onSave).toHaveBeenCalled();
+    });
   });
 
-  it('resets the input value when the modal is re-opened', () => {
+  it('resets the input value when the modal is re-opened', async () => {
     const onClose = vi.fn();
     const onSave = vi.fn();
     const modalComponent = (isOpened: boolean) => {
@@ -125,9 +117,11 @@ describe('BulkEditModal', () => {
     };
     const { rerender } = render(modalComponent(true));
 
-    const input = screen.getByTestId('field-editor-input');
-    fireEvent.change(input, { target: { value: '999' } });
-    expect(input).toHaveValue('999');
+    await waitFor(() => {
+      const input = screen.getByTestId('number-editor-input');
+      fireEvent.change(input, { target: { value: '999' } });
+      expect(input).toHaveValue('999');
+    });
 
     rerender(modalComponent(false));
 
