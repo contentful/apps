@@ -7,7 +7,6 @@ import { EntryProps } from 'contentful-management';
 import MarkdownPreview from '../components/MarkdownPreview';
 import { styles } from './Home.styles';
 import Splitter from '../components/Splitter';
-import tokens from '@contentful/f36-tokens';
 
 const Home = () => {
   const sdk = useSDK<HomeAppSDK>();
