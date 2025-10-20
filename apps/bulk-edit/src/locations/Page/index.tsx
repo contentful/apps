@@ -30,7 +30,6 @@ import { SearchBar } from './components/SearchBar';
 import {
   fetchEntriesWithBatching,
   filterEntriesByNumericSearch,
-  formatValueForDisplay,
   getEntryFieldValue,
   getStatusFlags,
   isNumericSearch,
@@ -43,6 +42,7 @@ import {
   truncate,
   updateEntryFieldLocalized,
 } from './utils/entryUtils';
+import { successNotification } from './utils/notifications';
 import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
 import FilterMultiselect from './components/FilterMultiselect';
@@ -331,42 +331,6 @@ const Page = () => {
   const selectedContentType = contentTypes.find((ct) => ct.sys.id === selectedContentTypeId);
   const selectedEntries = entries.filter((entry) => selectedEntryIds.includes(entry.sys.id));
 
-  function successNotification({
-    firstUpdatedValue,
-    value,
-    count,
-  }: {
-    firstUpdatedValue: unknown;
-    value: unknown;
-    count: number;
-  }) {
-    const formattedFirstValue = formatValueForDisplay(firstUpdatedValue, 30);
-    const formattedNewValue = formatValueForDisplay(value, 30);
-
-    const message =
-      count === 1
-        ? `${formattedFirstValue} was updated to ${formattedNewValue}`
-        : `${formattedFirstValue} and ${
-            count - 1
-          } more entry fields were updated to ${formattedNewValue}`;
-    const notification = Notification.success(message, {
-      title: 'Success!',
-      cta: {
-        label: 'Undo',
-        textLinkProps: {
-          variant: 'primary',
-          onClick: () => {
-            notification.then((item) => {
-              Notification.close(item.id);
-              setUndoFirstEntryFieldValue(String(firstUpdatedValue));
-              setIsUndoModalOpen(true);
-            });
-          },
-        },
-      },
-    });
-  }
-
   const processBatchResults = (results: Array<{ success: boolean; entry: EntryProps }>) => {
     const successful = results.filter((r) => r.success).map((r) => r.entry);
     const failed = results.filter((r) => !r.success).map((r) => r.entry);
@@ -447,6 +411,10 @@ const Page = () => {
           firstUpdatedValue: firstUpdatedValue,
           value: val,
           count: successful.length,
+          onUndo: (formattedFirstValue) => {
+            setUndoFirstEntryFieldValue(formattedFirstValue);
+            setIsUndoModalOpen(true);
+          },
         });
       }
 
