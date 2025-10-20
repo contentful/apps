@@ -645,24 +645,19 @@ describe('entryUtils', () => {
   });
 
   describe('formatValueForDisplay', () => {
-    it('formats arrays with first 3 items and count', () => {
-      const array = [1, 2, 3, 4, 5];
-      expect(formatValueForDisplay(array, 20)).toBe('[1, 2, 3 +2 more] ...');
+    it('handles arrays with truncation', () => {
+      const array = ['one', 'two', 'three', 'four', 'five'];
+      expect(formatValueForDisplay(array, 30)).toBe('["one","two","three","four","f ...');
     });
 
-    it('formats empty arrays as empty list', () => {
-      const emptyArray: any[] = [];
-      expect(formatValueForDisplay(emptyArray, 20)).toBe('[Empty list]');
-    });
-
-    it('formats JSON objects with first 3 keys and count', () => {
+    it('handles JSON objects with truncation', () => {
       const obj = { a: 1, b: 2, c: 3, d: 4, e: 5 };
-      expect(formatValueForDisplay(obj, 20)).toBe('{a, b, c +2 more} ...');
+      expect(formatValueForDisplay(obj, 30)).toBe('{"a":1,"b":2,"c":3,"d":4,"e":5 ...');
     });
 
     it('handles non-object values with truncation', () => {
-      expect(formatValueForDisplay('very long string that exceeds limit', 10)).toBe(
-        'very long  ...'
+      expect(formatValueForDisplay('very long string that exceeds limit', 30)).toBe(
+        'very long string that exceeds  ...'
       );
       expect(formatValueForDisplay(123, 5)).toBe('123');
     });

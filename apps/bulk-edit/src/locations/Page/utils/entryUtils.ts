@@ -73,49 +73,14 @@ export const isLinkValue = (value: unknown): value is { sys: { linkType: string 
 export const truncate = (str: string, max: number = 20) =>
   str.length > max ? str.slice(0, max) + ' ...' : str;
 
-const formatArrayForDisplay = (array: unknown[]): string => {
-  if (array.length === 0) {
-    return '[Empty list]';
-  }
-
-  const firstThree = array.slice(0, 3);
-  const preview = firstThree
-    .map((item) => (typeof item === 'string' ? `"${item}"` : String(item)))
-    .join(', ');
-
-  const moreItems = array.length > 3 ? ` +${array.length - 3} more` : '';
-  return `[${preview}${moreItems}] ...`;
-};
-
-const formatJsonObjectForDisplay = (value: object, maxLength: number): string => {
-  try {
-    const jsonString = JSON.stringify(value);
-    if (jsonString.length <= maxLength) {
-      return jsonString;
-    }
-
-    const parsed = JSON.parse(jsonString);
-    const keys = Object.keys(parsed);
-    const keyPreview = keys.slice(0, 3).join(', ');
-    const moreKeys = keys.length > 3 ? ` +${keys.length - 3} more` : '';
-
-    return `{${keyPreview}${moreKeys}} ...`;
-  } catch {
-    return '[Invalid JSON]';
-  }
-};
-
 export const formatValueForDisplay = (value: unknown, maxLength: number = 30): string => {
   if (value === null || value === undefined) {
     return '-';
   }
 
   if (typeof value === 'object') {
-    if (Array.isArray(value)) {
-      return formatArrayForDisplay(value);
-    }
-
-    return formatJsonObjectForDisplay(value, maxLength);
+    const jsonString = JSON.stringify(value);
+    return truncate(jsonString, maxLength);
   }
 
   return truncate(String(value), maxLength);
