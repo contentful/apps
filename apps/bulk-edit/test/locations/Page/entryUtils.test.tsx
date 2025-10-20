@@ -655,11 +655,32 @@ describe('entryUtils', () => {
       expect(formatValueForDisplay(obj, 30)).toBe('{"a":1,"b":2,"c":3,"d":4,"e":5 ...');
     });
 
-    it('handles non-object values with truncation', () => {
+    it('handles text values with truncation', () => {
       expect(formatValueForDisplay('very long string that exceeds limit', 30)).toBe(
         'very long string that exceeds  ...'
       );
-      expect(formatValueForDisplay(123, 5)).toBe('123');
+    });
+
+    it('handles boolean values', () => {
+      expect(formatValueForDisplay(true, 30)).toBe('true');
+      expect(formatValueForDisplay(false, 30)).toBe('false');
+    });
+
+    it('handles integer values', () => {
+      expect(formatValueForDisplay(42, 30)).toBe('42');
+      expect(formatValueForDisplay(0, 30)).toBe('0');
+      expect(formatValueForDisplay(-123, 30)).toBe('-123');
+    });
+
+    it('handles number values', () => {
+      expect(formatValueForDisplay(3.14, 30)).toBe('3.14');
+      expect(formatValueForDisplay(0.5, 30)).toBe('0.5');
+      expect(formatValueForDisplay(-2.718, 30)).toBe('-2.718');
+    });
+
+    it('handles date values', () => {
+      const dateString = '2025-10-10T00:00-03:00';
+      expect(formatValueForDisplay(dateString, 30)).toBe('Fri Oct 10 2025 00:00:00 UTC-0 ...');
     });
   });
 });

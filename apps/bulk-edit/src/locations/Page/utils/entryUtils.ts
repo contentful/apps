@@ -78,6 +78,12 @@ export const formatValueForDisplay = (value: unknown, maxLength: number = 30): s
     return '-';
   }
 
+  if (typeof value === 'string' && !isNaN(Date.parse(value))) {
+    const date = new Date(value);
+    const dateString = date.toString().replace('GMT', 'UTC');
+    return truncate(dateString, maxLength);
+  }
+
   if (typeof value === 'object') {
     const jsonString = JSON.stringify(value);
     return truncate(jsonString, maxLength);
