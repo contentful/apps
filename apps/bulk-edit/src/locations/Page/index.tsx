@@ -22,17 +22,16 @@ import { UndoBulkEditModal } from './components/UndoBulkEditModal';
 import { SearchBar } from './components/SearchBar';
 import {
   fetchEntriesWithBatching,
+  filterEntriesByNumericSearch,
   getEntryFieldValue,
+  getStatusFlags,
   getStatusFromEntry,
   isNumericSearch,
   mapContentTypePropsToFields,
   processEntriesInBatches,
-    getStatusFlags,
+  STATUSES,
   truncate,
   updateEntryFieldLocalized,
-  filterEntriesByNumericSearch,
-  isNumericSearch,
-  STATUSES,
 } from './utils/entryUtils';
 import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
@@ -598,7 +597,7 @@ const Page = () => {
                     options={getFieldsMapped(fields)}
                     selectedItems={selectedColumns}
                     setSelectedItems={(selectedColumns) => {
-                      const sortedSelectedColumns = selectedColumns.toSorted((a, b) => {
+                      const sortedSelectedColumns = [...selectedColumns].sort((a, b) => {
                         const aIndex = fields.findIndex((f) => f.uniqueId === a.value);
                         const bIndex = fields.findIndex((f) => f.uniqueId === b.value);
                         return aIndex - bIndex;

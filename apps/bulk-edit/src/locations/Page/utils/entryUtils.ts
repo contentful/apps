@@ -8,7 +8,11 @@ import {
   KeyValueMap,
   QueryOptions,
 } from 'contentful-management';
-import { BATCH_FETCHING, CHANGED_STATUS, DRAFT_STATUS, PUBLISHED_STATUS,
+import {
+  BATCH_FETCHING,
+  CHANGED_STATUS,
+  DRAFT_STATUS,
+  PUBLISHED_STATUS,
   UNKNOWN_STATUS,
 } from './constants';
 import { BadgeVariant } from '@contentful/f36-components';

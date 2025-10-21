@@ -1,6 +1,6 @@
 import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, it, beforeEach, vi, expect } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Page from '../../../src/locations/Page';
 import { mockSdk } from '../../mocks';
 import { getManyContentTypes, getManyEntries } from '../../mocks/mockCma';
@@ -23,6 +23,17 @@ vi.mock('../../../src/locations/Page/components/FieldEditor', () => ({
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
+}));
+
+// Mock the virtualizer to render all items in tests
+vi.mock('@tanstack/react-virtual', () => ({
+  useVirtualizer: () => ({
+    getVirtualItems: () => [
+      { index: 0, start: 0, size: 50, end: 50 },
+      { index: 1, start: 50, size: 50, end: 100 },
+    ],
+    getTotalSize: () => 100,
+  }),
 }));
 
 describe('Page', () => {
@@ -60,13 +71,12 @@ describe('Page', () => {
     });
   });
 
-  it('does not show Edit/Bulk edit button when no field is selected', async () => {
+  it('show Edit/Bulk edit button when no field is selected', async () => {
     render(<Page />);
     await waitFor(() => {
       expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
+      expect(screen.queryByText('Edit')).toBeInTheDocument();
     });
-    expect(screen.queryByText('Edit')).not.toBeInTheDocument();
-    expect(screen.queryByText('Bulk edit')).not.toBeInTheDocument();
   });
 });
 

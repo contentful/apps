@@ -1,18 +1,20 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { Table, Box, Pagination } from '@contentful/f36-components';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Box, Pagination, Table } from '@contentful/f36-components';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Entry, ContentTypeField } from '../types';
+import { ContentTypeField, Entry } from '../types';
 import { ContentTypeProps } from 'contentful-management';
 import { styles } from '../styles';
 import { TableHeader } from './TableHeader';
 import { TableRow } from './TableRow';
-import { isCheckboxAllowed as isBulkEditable, getEntryUrl } from '../utils/entryUtils';
-import {   DISPLAY_NAME_COLUMN,
-    DISPLAY_NAME_INDEX,
-    ENTRY_STATUS_COLUMN,
-    ESTIMATED_ROW_HEIGHT,
-    HEADERS_ROW, } from '../utils/constants';
-import { useKeyboardNavigation, FocusPosition, FocusRange } from '../hooks/useKeyboardNavigation';
+import { getEntryUrl, isCheckboxAllowed as isBulkEditable } from '../utils/entryUtils';
+import {
+  DISPLAY_NAME_COLUMN,
+  DISPLAY_NAME_INDEX,
+  ENTRY_STATUS_COLUMN,
+  ESTIMATED_ROW_HEIGHT,
+  HEADERS_ROW,
+} from '../utils/constants';
+import { FocusPosition, useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
 import { tableStyles } from './EntryTable.styles';
 
 interface EntryTableProps {
