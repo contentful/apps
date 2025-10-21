@@ -6,6 +6,17 @@ import { Entry, ContentTypeField } from '../../../src/locations/Page/types';
 import { ContentTypeProps } from 'contentful-management';
 import { isCheckboxAllowed } from '../../../src/locations/Page/utils/entryUtils';
 
+// Mock the virtualizer to render all items in tests
+vi.mock('@tanstack/react-virtual', () => ({
+  useVirtualizer: () => ({
+    getVirtualItems: () => [
+      { index: 0, start: 0, size: 50, end: 50 },
+      { index: 1, start: 50, size: 50, end: 100 },
+    ],
+    getTotalSize: () => 100,
+  }),
+}));
+
 const mockFields: ContentTypeField[] = [
   { id: 'displayName', uniqueId: 'displayName', name: 'Display Name', type: 'Symbol' },
   { id: 'description', uniqueId: 'description', name: 'Description', type: 'Text' },

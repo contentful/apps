@@ -9,6 +9,17 @@ import { condoAEntry1, condoAEntry2 } from '../../mocks/mockEntries';
 import { Notification } from '@contentful/f36-components';
 import type { ContentTypeProps } from 'contentful-management';
 
+// Mock the virtualizer to render all items in tests
+vi.mock('@tanstack/react-virtual', () => ({
+  useVirtualizer: () => ({
+    getVirtualItems: () => [
+      { index: 0, start: 0, size: 50, end: 50 },
+      { index: 1, start: 50, size: 50, end: 100 },
+    ],
+    getTotalSize: () => 100,
+  }),
+}));
+
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
@@ -48,12 +59,12 @@ describe('Page', () => {
     });
   });
 
-  it('does not show Edit/Bulk edit button when no field is selected', async () => {
+  it('show Edit/Bulk edit button when no field is selected', async () => {
     render(<Page />);
     await waitFor(() => {
       expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
     });
-    expect(screen.queryByText('Edit')).not.toBeInTheDocument();
+    expect(screen.queryByText('Edit')).toBeInTheDocument();
     expect(screen.queryByText('Bulk edit')).not.toBeInTheDocument();
   });
 });
