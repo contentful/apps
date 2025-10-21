@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Flex, FormControl, Modal, Note, Text } from '@contentful/f36-components';
 import type { ContentTypeField, Entry } from '../types';
-import { getEntryFieldValue, truncate } from '../utils/entryUtils';
+import { formatValueForDisplay, getEntryFieldValue } from '../utils/entryUtils';
 import { ClockIcon } from '@contentful/f36-icons';
 import { FieldEditor } from './FieldEditor';
 import type { LocalesAPI } from '@contentful/field-editor-shared';
@@ -57,7 +57,9 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
           </Text>
           <Flex>
             <Text>
-              <Text fontWeight="fontWeightDemiBold">{truncate(firstValueToUpdate, 100)}</Text>{' '}
+              <Text fontWeight="fontWeightDemiBold">
+                {formatValueForDisplay(firstValueToUpdate, 30)}
+              </Text>{' '}
               {entryCount === 1 ? 'selected' : `selected and ${entryCount - 1} more`}
             </Text>
           </Flex>
@@ -68,6 +70,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
                 value={value}
                 onChange={setValue}
                 locales={locales}
+                datatest-id="field-editor"
               />
             )}
           </FormControl>

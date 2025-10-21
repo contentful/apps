@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   fetchEntriesWithBatching,
+  formatValueForDisplay,
   getEntryFieldValue,
   mapContentTypePropsToFields,
   processEntriesInBatches,
@@ -91,16 +92,16 @@ describe('entryUtils', () => {
       expect(result).toBe('test value');
     });
 
-    it('returns string representation when field value is a number', () => {
+    it('returns number representation when field value is a number', () => {
       const entry = { fields: { testField: { 'en-US': 123 } } };
       const result = getEntryFieldValue(entry, field, defaultLocale);
-      expect(result).toBe('123');
+      expect(result).toBe(123);
     });
 
-    it('returns string representation when field value is a boolean', () => {
+    it('returns boolean representation when field value is a boolean', () => {
       const entry = { fields: { testField: { 'en-US': true } } };
       const result = getEntryFieldValue(entry, field, defaultLocale);
-      expect(result).toBe('true');
+      expect(result).toBe(true);
     });
 
     it('uses default locale when field locale is not specified', () => {
@@ -640,6 +641,46 @@ describe('entryUtils', () => {
         ...expected,
         uniqueId: 'relatedEntries',
       });
+    });
+  });
+
+  describe('formatValueForDisplay', () => {
+    it('handles arrays with truncation', () => {
+      const array = ['one', 'two', 'three', 'four', 'five'];
+      expect(formatValueForDisplay(array, 30)).toBe('["one","two","three","four","f ...');
+    });
+
+    it('handles JSON objects with truncation', () => {
+      const obj = { a: 1, b: 2, c: 3, d: 4, e: 5 };
+      expect(formatValueForDisplay(obj, 30)).toBe('{"a":1,"b":2,"c":3,"d":4,"e":5 ...');
+    });
+
+    it('handles text values with truncation', () => {
+      expect(formatValueForDisplay('very long string that exceeds limit', 30)).toBe(
+        'very long string that exceeds  ...'
+      );
+    });
+
+    it('handles boolean values', () => {
+      expect(formatValueForDisplay(true, 30)).toBe('true');
+      expect(formatValueForDisplay(false, 30)).toBe('false');
+    });
+
+    it('handles integer values', () => {
+      expect(formatValueForDisplay(42, 30)).toBe('42');
+      expect(formatValueForDisplay(0, 30)).toBe('0');
+      expect(formatValueForDisplay(-123, 30)).toBe('-123');
+    });
+
+    it('handles number values', () => {
+      expect(formatValueForDisplay(3.14, 30)).toBe('3.14');
+      expect(formatValueForDisplay(0.5, 30)).toBe('0.5');
+      expect(formatValueForDisplay(-2.718, 30)).toBe('-2.718');
+    });
+
+    it('handles date values', () => {
+      const dateString = '2025-10-10T00:00-03:00';
+      expect(formatValueForDisplay(dateString, 30)).toBe('Fri Oct 10 2025 00:00:00 UTC-0 ...');
     });
   });
 });

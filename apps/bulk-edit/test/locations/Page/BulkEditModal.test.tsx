@@ -4,6 +4,7 @@ import { expect, vi } from 'vitest';
 import { BulkEditModal } from '../../../src/locations/Page/components/BulkEditModal';
 import { ContentTypeField, Entry } from '../../../src/locations/Page/types';
 import { mockSdk } from '../../mocks';
+import { mockSdk } from '../../mocks';
 
 describe('BulkEditModal', () => {
   const field: ContentTypeField = { id: 'size', uniqueId: 'size', name: 'Size', type: 'Number' };

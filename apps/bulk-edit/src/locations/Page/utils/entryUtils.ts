@@ -77,6 +77,25 @@ export const isLinkValue = (value: unknown): value is { sys: { linkType: string 
 export const truncate = (str: string, max: number = 20) =>
   str.length > max ? str.slice(0, max) + ' ...' : str;
 
+export const formatValueForDisplay = (value: unknown, maxLength: number = 30): string => {
+  if (value === null || value === undefined) {
+    return '-';
+  }
+
+  if (typeof value === 'string' && !isNaN(Date.parse(value))) {
+    const date = new Date(value);
+    const dateString = date.toString().replace('GMT', 'UTC');
+    return truncate(dateString, maxLength);
+  }
+
+  if (typeof value === 'object') {
+    const jsonString = JSON.stringify(value);
+    return truncate(jsonString, maxLength);
+  }
+
+  return truncate(String(value), maxLength);
+};
+
 export const renderFieldValue = (field: ContentTypeField, value: unknown): string => {
   if (field.type === 'Array' && Array.isArray(value)) {
     const count = value.length;
@@ -176,7 +195,7 @@ export function getEntryFieldValue(
   const fieldValue = entry.fields[field.id]?.[field.locale || defaultLocale];
   if (fieldValue === undefined || fieldValue === null) return 'empty field';
 
-  return String(fieldValue) || 'empty field';
+  return fieldValue || 'empty field';
 }
 
 /**
