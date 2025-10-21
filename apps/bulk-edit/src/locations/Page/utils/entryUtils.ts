@@ -1,11 +1,17 @@
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Document } from '@contentful/rich-text-types';
-import { Entry, ContentTypeField, Fields } from '../types';
-import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
+import { ContentTypeField, Entry, Fields } from '../types';
+import {
+  ContentFields,
+  ContentTypeProps,
+  EntryProps,
+  KeyValueMap,
+  QueryOptions,
+} from 'contentful-management';
 import {
   BATCH_FETCHING,
-  DRAFT_STATUS,
   CHANGED_STATUS,
+  DRAFT_STATUS,
   PUBLISHED_STATUS,
   UNKNOWN_STATUS,
 } from './constants';
@@ -71,6 +77,25 @@ export const isLinkValue = (value: unknown): value is { sys: { linkType: string 
 export const truncate = (str: string, max: number = 20) =>
   str.length > max ? str.slice(0, max) + ' ...' : str;
 
+export const formatValueForDisplay = (value: unknown, maxLength: number = 30): string => {
+  if (value === null || value === undefined) {
+    return '-';
+  }
+
+  if (typeof value === 'string' && !isNaN(Date.parse(value))) {
+    const date = new Date(value);
+    const dateString = date.toString().replace('GMT', 'UTC');
+    return truncate(dateString, maxLength);
+  }
+
+  if (typeof value === 'object') {
+    const jsonString = JSON.stringify(value);
+    return truncate(jsonString, maxLength);
+  }
+
+  return truncate(String(value), maxLength);
+};
+
 export const renderFieldValue = (field: ContentTypeField, value: unknown): string => {
   if (field.type === 'Array' && Array.isArray(value)) {
     const count = value.length;
@@ -131,22 +156,15 @@ export const getEntryUrl = (entry: Entry, spaceId: string, environmentId: string
 };
 
 export const isCheckboxAllowed = (field: ContentTypeField): boolean => {
-  const restrictedTypes = [
-    'Location',
-    'Date',
-    'Asset',
-    'Array',
-    'Link',
-    'ResourceLink',
-    'Boolean',
-    'Object',
-    'RichText',
-  ];
+  if (!field || !field.type) return false;
 
-  if (!field.type) return false;
+  const restrictedTypes = ['Location', 'Asset', 'Link', 'ResourceLink', 'RichText'];
 
-  if (restrictedTypes.includes(field.type)) return false;
-  return true;
+  if (field.type === 'Array') {
+    return field.items?.type === 'Symbol';
+  }
+
+  return !restrictedTypes.includes(field.type);
 };
 
 /**
@@ -177,7 +195,7 @@ export function getEntryFieldValue(
   const fieldValue = entry.fields[field.id]?.[field.locale || defaultLocale];
   if (fieldValue === undefined || fieldValue === null) return 'empty field';
 
-  return String(fieldValue) || 'empty field';
+  return fieldValue || 'empty field';
 }
 
 /**
@@ -310,4 +328,36 @@ export const filterEntriesByNumericSearch = (
       return String(fieldValue).includes(query);
     });
   });
+};
+
+export const mapContentTypePropsToFields = (
+  fields: ContentFields<KeyValueMap>[],
+  locales: string[]
+): ContentTypeField[] => {
+  const newFields: ContentTypeField[] = [];
+
+  fields.forEach((f) => {
+    if (f.localized) {
+      locales.forEach((locale) => {
+        newFields.push({
+          id: f.id,
+          uniqueId: `${f.id}-${locale}`,
+          name: f.name,
+          locale: locale,
+          type: f.type,
+          items: f?.items,
+        });
+      });
+    } else {
+      newFields.push({
+        id: f.id,
+        uniqueId: f.id,
+        name: f.name,
+        type: f.type,
+        items: f?.items,
+      });
+    }
+  });
+
+  return newFields;
 };

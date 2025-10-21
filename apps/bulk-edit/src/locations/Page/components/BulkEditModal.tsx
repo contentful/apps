@@ -1,16 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Modal,
-  Button,
-  TextInput,
-  Text,
-  Flex,
-  FormControl,
-  Note,
-} from '@contentful/f36-components';
-import type { Entry, ContentTypeField } from '../types';
-import { getEntryFieldValue, truncate } from '../utils/entryUtils';
+import { Button, Flex, FormControl, Modal, Note, Text } from '@contentful/f36-components';
+import type { ContentTypeField, Entry } from '../types';
+import { formatValueForDisplay, getEntryFieldValue } from '../utils/entryUtils';
 import { ClockIcon } from '@contentful/f36-icons';
+import { FieldEditor } from './FieldEditor';
+import type { LocalesAPI } from '@contentful/field-editor-shared';
 
 interface BulkEditModalProps {
   isOpen: boolean;
@@ -18,7 +12,7 @@ interface BulkEditModalProps {
   onSave: (newValue: string | number) => void;
   selectedEntries: Entry[];
   selectedField: ContentTypeField | null;
-  defaultLocale: string;
+  locales: LocalesAPI;
   isSaving: boolean;
   totalUpdateCount: number;
   editionCount: number;
@@ -30,22 +24,19 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   onSave,
   selectedEntries,
   selectedField,
-  defaultLocale,
+  locales,
   isSaving,
   totalUpdateCount,
   editionCount,
 }) => {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState<any>('');
   const entryCount = selectedEntries.length;
   const firstEntry = selectedEntries[0];
   const firstValueToUpdate =
-    firstEntry && selectedField && defaultLocale
-      ? getEntryFieldValue(firstEntry, selectedField, defaultLocale)
+    firstEntry && selectedField && locales.default
+      ? getEntryFieldValue(firstEntry, selectedField, locales.default)
       : '';
   const title = entryCount === 1 ? 'Edit' : 'Bulk edit';
-
-  const isNumber = selectedField?.type === 'Number' || selectedField?.type === 'Integer';
-  const isInvalid = selectedField?.type === 'Integer' && !Number.isInteger(Number(value));
 
   useEffect(() => {
     setValue('');
@@ -66,24 +57,21 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
           </Text>
           <Flex>
             <Text>
-              <Text fontWeight="fontWeightDemiBold">{truncate(firstValueToUpdate, 100)}</Text>{' '}
+              <Text fontWeight="fontWeightDemiBold">
+                {formatValueForDisplay(firstValueToUpdate, 30)}
+              </Text>{' '}
               {entryCount === 1 ? 'selected' : `selected and ${entryCount - 1} more`}
             </Text>
           </Flex>
-          <FormControl isInvalid={isInvalid}>
-            <TextInput
-              name="bulk-edit-value"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              placeholder="Enter your new value"
-              type={isNumber ? 'number' : 'text'}
-              isInvalid={isInvalid}
-              autoFocus
-            />
-            {isInvalid && (
-              <FormControl.ValidationMessage>
-                Integer field does not allow decimal
-              </FormControl.ValidationMessage>
+          <FormControl>
+            {selectedField && (
+              <FieldEditor
+                field={selectedField}
+                value={value}
+                onChange={setValue}
+                locales={locales}
+                datatest-id="field-editor"
+              />
             )}
           </FormControl>
         </Flex>
@@ -103,12 +91,8 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
         </Button>
         <Button
           variant="primary"
-          onClick={() => {
-            if (isInvalid) return;
-            const finalValue = isNumber ? Number(value) : value;
-            onSave(finalValue);
-          }}
-          isDisabled={!value || isInvalid}
+          onClick={() => onSave(value)}
+          isDisabled={value === ''}
           testId="bulk-edit-save"
           isLoading={isSaving}>
           Save

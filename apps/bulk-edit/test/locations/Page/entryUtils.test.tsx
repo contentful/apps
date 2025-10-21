@@ -1,12 +1,32 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  getEntryFieldValue,
-  renderFieldValue,
-  processEntriesInBatches,
   fetchEntriesWithBatching,
+  formatValueForDisplay,
+  getEntryFieldValue,
+  mapContentTypePropsToFields,
+  processEntriesInBatches,
+  renderFieldValue,
 } from '../../../src/locations/Page/utils/entryUtils';
 import { ContentTypeField } from '../../../src/locations/Page/types';
-import { EntryProps } from 'contentful-management';
+import { ContentTypeProps, EntryProps } from 'contentful-management';
+import { mockSdk } from '../../mocks';
+
+// Helper function to create test content types
+const createTestContentType = (fields: any[]): ContentTypeProps => ({
+  sys: {
+    id: 'test-content-type',
+    type: 'ContentType',
+    version: 1,
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt: '2024-01-01T00:00:00.000Z',
+    space: { sys: { type: 'Link', linkType: 'Space', id: 'space-id' } },
+    environment: { sys: { type: 'Link', linkType: 'Environment', id: 'master' } },
+  },
+  name: 'Test Content Type',
+  description: 'Test description',
+  displayField: fields[0]?.id || 'title',
+  fields,
+});
 
 describe('entryUtils', () => {
   describe('getEntryFieldValue', () => {
@@ -72,16 +92,16 @@ describe('entryUtils', () => {
       expect(result).toBe('test value');
     });
 
-    it('returns string representation when field value is a number', () => {
+    it('returns number representation when field value is a number', () => {
       const entry = { fields: { testField: { 'en-US': 123 } } };
       const result = getEntryFieldValue(entry, field, defaultLocale);
-      expect(result).toBe('123');
+      expect(result).toBe(123);
     });
 
-    it('returns string representation when field value is a boolean', () => {
+    it('returns boolean representation when field value is a boolean', () => {
       const entry = { fields: { testField: { 'en-US': true } } };
       const result = getEntryFieldValue(entry, field, defaultLocale);
-      expect(result).toBe('true');
+      expect(result).toBe(true);
     });
 
     it('uses default locale when field locale is not specified', () => {
@@ -257,7 +277,6 @@ describe('entryUtils', () => {
 
   describe('processEntriesInBatches', () => {
     const mockUpdateFunction = vi.fn();
-    const mockDelay = vi.fn();
 
     beforeEach(() => {
       vi.clearAllMocks();
@@ -494,6 +513,174 @@ describe('entryUtils', () => {
       expect(result.entries).toHaveLength(0);
       expect(result.total).toBe(0);
       expect(mockSdk.cma.entry.getMany).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('processContentTypeFields', () => {
+    const mockLocales = ['en-US', 'es-ES'];
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it('creates Symbol field correctly for non-localized field', async () => {
+      const expected = { id: 'title', name: 'Title', type: 'Symbol', items: undefined };
+      const mockContentType = createTestContentType([
+        {
+          ...expected,
+          localized: false,
+          required: false,
+        },
+      ]);
+
+      mockSdk.cma.contentType.get.mockResolvedValue(mockContentType);
+
+      const ct = await mockSdk.cma.contentType.get({ contentTypeId: 'test-content-type' });
+      const result = mapContentTypePropsToFields(ct.fields, mockLocales);
+
+      expect(mockSdk.cma.contentType.get).toHaveBeenCalledWith({
+        contentTypeId: 'test-content-type',
+      });
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({ ...expected, uniqueId: 'title' });
+    });
+
+    it('creates localized Symbol field correctly', async () => {
+      const expected = { id: 'description', name: 'Description', type: 'Symbol', items: undefined };
+      const mockContentType = createTestContentType([
+        {
+          ...expected,
+          localized: true,
+          required: false,
+        },
+      ]);
+
+      mockSdk.cma.contentType.get.mockResolvedValue(mockContentType);
+
+      const ct = await mockSdk.cma.contentType.get({ contentTypeId: 'test-content-type' });
+      const result = mapContentTypePropsToFields(ct.fields, mockLocales);
+
+      expect(mockSdk.cma.contentType.get).toHaveBeenCalledWith({
+        contentTypeId: 'test-content-type',
+      });
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        ...expected,
+        uniqueId: 'description-en-US',
+        locale: 'en-US',
+      });
+      expect(result[1]).toEqual({
+        ...expected,
+        uniqueId: 'description-es-ES',
+        locale: 'es-ES',
+      });
+    });
+
+    it('creates Array field with Symbol items correctly', async () => {
+      const expected = {
+        id: 'tags',
+        name: 'Tags',
+        type: 'Array',
+        items: {
+          type: 'Symbol',
+          validations: [],
+        },
+      };
+      const mockContentType = createTestContentType([
+        {
+          ...expected,
+          localized: false,
+          required: false,
+        },
+      ]);
+
+      mockSdk.cma.contentType.get.mockResolvedValue(mockContentType);
+
+      const ct = await mockSdk.cma.contentType.get({ contentTypeId: 'test-content-type' });
+      const result = mapContentTypePropsToFields(ct.fields, mockLocales);
+
+      expect(mockSdk.cma.contentType.get).toHaveBeenCalledWith({
+        contentTypeId: 'test-content-type',
+      });
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        ...expected,
+        uniqueId: 'tags',
+      });
+    });
+
+    it('creates Array field with Link items correctly', async () => {
+      const expected = {
+        id: 'relatedEntries',
+        name: 'Related Entries',
+        type: 'Array',
+        items: {
+          type: 'Link',
+          linkType: 'Entry',
+          validations: [],
+        },
+      };
+      const mockContentType = createTestContentType([
+        {
+          ...expected,
+          localized: false,
+          required: false,
+        },
+      ]);
+
+      mockSdk.cma.contentType.get.mockResolvedValue(mockContentType);
+
+      const ct = await mockSdk.cma.contentType.get({ contentTypeId: 'test-content-type' });
+      const result = mapContentTypePropsToFields(ct.fields, mockLocales);
+
+      expect(mockSdk.cma.contentType.get).toHaveBeenCalledWith({
+        contentTypeId: 'test-content-type',
+      });
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        ...expected,
+        uniqueId: 'relatedEntries',
+      });
+    });
+  });
+
+  describe('formatValueForDisplay', () => {
+    it('handles arrays with truncation', () => {
+      const array = ['one', 'two', 'three', 'four', 'five'];
+      expect(formatValueForDisplay(array, 30)).toBe('["one","two","three","four","f ...');
+    });
+
+    it('handles JSON objects with truncation', () => {
+      const obj = { a: 1, b: 2, c: 3, d: 4, e: 5 };
+      expect(formatValueForDisplay(obj, 30)).toBe('{"a":1,"b":2,"c":3,"d":4,"e":5 ...');
+    });
+
+    it('handles text values with truncation', () => {
+      expect(formatValueForDisplay('very long string that exceeds limit', 30)).toBe(
+        'very long string that exceeds  ...'
+      );
+    });
+
+    it('handles boolean values', () => {
+      expect(formatValueForDisplay(true, 30)).toBe('true');
+      expect(formatValueForDisplay(false, 30)).toBe('false');
+    });
+
+    it('handles integer values', () => {
+      expect(formatValueForDisplay(42, 30)).toBe('42');
+      expect(formatValueForDisplay(0, 30)).toBe('0');
+      expect(formatValueForDisplay(-123, 30)).toBe('-123');
+    });
+
+    it('handles number values', () => {
+      expect(formatValueForDisplay(3.14, 30)).toBe('3.14');
+      expect(formatValueForDisplay(0.5, 30)).toBe('0.5');
+      expect(formatValueForDisplay(-2.718, 30)).toBe('-2.718');
+    });
+
+    it('handles date values', () => {
+      const dateString = '2025-10-10T00:00-03:00';
+      expect(formatValueForDisplay(dateString, 30)).toBe('Fri Oct 10 2025 00:00:00 UTC-0 ...');
     });
   });
 });

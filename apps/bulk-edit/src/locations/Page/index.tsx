@@ -11,13 +11,7 @@ import {
   Text,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import {
-  ContentFields,
-  ContentTypeProps,
-  EntryProps,
-  KeyValueMap,
-  QueryOptions,
-} from 'contentful-management';
+import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
 import { ContentTypeField, FilterOption } from './types';
 import { styles } from './styles';
 import { ContentTypeSidebar } from './components/ContentTypeSidebar';
@@ -28,16 +22,17 @@ import { UndoBulkEditModal } from './components/UndoBulkEditModal';
 import { SearchBar } from './components/SearchBar';
 import {
   fetchEntriesWithBatching,
-  getEntryFieldValue,
-  getStatusFromEntry,
-  getStatusFlags,
-  processEntriesInBatches,
-  truncate,
-  updateEntryFieldLocalized,
   filterEntriesByNumericSearch,
+  getEntryFieldValue,
+  getStatusFlags,
+  getStatusFromEntry,
   isNumericSearch,
+  mapContentTypePropsToFields,
+  processEntriesInBatches,
   STATUSES,
+  updateEntryFieldLocalized,
 } from './utils/entryUtils';
+import { successNotification } from './utils/successNotification';
 import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
 import FilterMultiselect from './components/FilterMultiselect';
@@ -241,27 +236,7 @@ const Page = () => {
 
       try {
         const ct = await sdk.cma.contentType.get({ contentTypeId: selectedContentTypeId });
-        const newFields: ContentTypeField[] = [];
-        ct.fields.forEach((f: ContentFields<KeyValueMap>) => {
-          if (f.localized) {
-            locales.forEach((locale) => {
-              newFields.push({
-                id: f.id,
-                uniqueId: `${f.id}-${locale}`,
-                name: f.name,
-                type: f.type as any,
-                locale: locale,
-              });
-            });
-          } else {
-            newFields.push({
-              id: f.id,
-              uniqueId: f.id,
-              name: f.name,
-              type: f.type as any,
-            });
-          }
-        });
+        const newFields = mapContentTypePropsToFields(ct.fields, locales);
         setFields(newFields);
         setSelectedColumns(getFieldsMapped(newFields));
         setCurrentContentType(ct);
@@ -346,39 +321,6 @@ const Page = () => {
   const selectedContentType = contentTypes.find((ct) => ct.sys.id === selectedContentTypeId);
   const selectedEntries = entries.filter((entry) => selectedEntryIds.includes(entry.sys.id));
 
-  function successNotification({
-    firstUpdatedValue,
-    value,
-    count,
-  }: {
-    firstUpdatedValue: string;
-    value: string;
-    count: number;
-  }) {
-    const message =
-      count === 1
-        ? `${truncate(firstUpdatedValue, 30)} was updated to ${truncate(value, 30)}`
-        : `${truncate(firstUpdatedValue, 30)} and ${
-            count - 1
-          } more entry fields were updated to ${truncate(value, 30)}`;
-    const notification = Notification.success(message, {
-      title: 'Success!',
-      cta: {
-        label: 'Undo',
-        textLinkProps: {
-          variant: 'primary',
-          onClick: () => {
-            notification.then((item) => {
-              Notification.close(item.id);
-              setUndoFirstEntryFieldValue(firstUpdatedValue);
-              setIsUndoModalOpen(true);
-            });
-          },
-        },
-      },
-    });
-  }
-
   const processBatchResults = (results: Array<{ success: boolean; entry: EntryProps }>) => {
     const successful = results.filter((r) => r.success).map((r) => r.entry);
     const failed = results.filter((r) => !r.success).map((r) => r.entry);
@@ -457,8 +399,12 @@ const Page = () => {
         );
         successNotification({
           firstUpdatedValue: firstUpdatedValue,
-          value: `${val}`,
+          value: val,
           count: successful.length,
+          onUndo: (formattedFirstValue) => {
+            setUndoFirstEntryFieldValue(formattedFirstValue);
+            setIsUndoModalOpen(true);
+          },
         });
       }
 
@@ -622,7 +568,7 @@ const Page = () => {
                     options={getFieldsMapped(fields)}
                     selectedItems={selectedColumns}
                     setSelectedItems={(selectedColumns) => {
-                      const sortedSelectedColumns = selectedColumns.toSorted((a, b) => {
+                      const sortedSelectedColumns = [...selectedColumns].sort((a, b) => {
                         const aIndex = fields.findIndex((f) => f.uniqueId === a.value);
                         const bIndex = fields.findIndex((f) => f.uniqueId === b.value);
                         return aIndex - bIndex;
@@ -725,7 +671,7 @@ const Page = () => {
         onSave={onSave}
         selectedEntries={selectedEntries}
         selectedField={selectedField}
-        defaultLocale={defaultLocale}
+        locales={sdk.locales}
         isSaving={isSaving}
         totalUpdateCount={totalUpdateCount}
         editionCount={editionCount}

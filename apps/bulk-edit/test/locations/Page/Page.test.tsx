@@ -1,6 +1,6 @@
 import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, it, beforeEach, vi, expect } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Page from '../../../src/locations/Page';
 import { mockSdk } from '../../mocks';
 import { getManyContentTypes, getManyEntries } from '../../mocks/mockCma';
@@ -9,8 +9,31 @@ import { condoAEntry1, condoAEntry2 } from '../../mocks/mockEntries';
 import { Notification } from '@contentful/f36-components';
 import type { ContentTypeProps } from 'contentful-management';
 
+// Mock the field editors
+vi.mock('../../../src/locations/Page/components/FieldEditor', () => ({
+  FieldEditor: ({ value, onChange }: { value: string; onChange: (value: string) => void }) => (
+    <input
+      data-test-id="field-editor-input"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder="Enter your new value"
+    />
+  ),
+}));
+
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
+}));
+
+// Mock the virtualizer to render all items in tests
+vi.mock('@tanstack/react-virtual', () => ({
+  useVirtualizer: () => ({
+    getVirtualItems: () => [
+      { index: 0, start: 0, size: 50, end: 50 },
+      { index: 1, start: 50, size: 50, end: 100 },
+    ],
+    getTotalSize: () => 100,
+  }),
 }));
 
 describe('Page', () => {
@@ -48,13 +71,12 @@ describe('Page', () => {
     });
   });
 
-  it('does not show Edit/Bulk edit button when no field is selected', async () => {
+  it('show Edit/Bulk edit button when no field is selected', async () => {
     render(<Page />);
     await waitFor(() => {
       expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
+      expect(screen.queryByText('Edit')).toBeInTheDocument();
     });
-    expect(screen.queryByText('Edit')).not.toBeInTheDocument();
-    expect(screen.queryByText('Bulk edit')).not.toBeInTheDocument();
   });
 });
 
@@ -104,10 +126,9 @@ describe('Bulk edit functionality', () => {
     // Modal should open
     await waitFor(() => {
       expect(screen.getByText('Editing field:')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('Enter your new value')).toBeInTheDocument();
     });
 
-    const input = screen.getByPlaceholderText('Enter your new value');
+    const input = screen.getByTestId('field-editor-input');
     fireEvent.change(input, { target: { value: 'New description' } });
     fireEvent.click(screen.getByTestId('bulk-edit-save'));
 
@@ -141,7 +162,7 @@ describe('Bulk edit functionality', () => {
     fireEvent.click(editButton);
 
     // Enter new value and save
-    const input = screen.getByPlaceholderText('Enter your new value');
+    const input = screen.getByTestId('field-editor-input');
     fireEvent.change(input, { target: { value: 'New description' } });
     fireEvent.click(screen.getByTestId('bulk-edit-save'));
 

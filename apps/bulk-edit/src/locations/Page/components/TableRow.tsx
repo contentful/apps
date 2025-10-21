@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Table, TextLink, Badge, Checkbox, Flex, Text } from '@contentful/f36-components';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 import { Entry, ContentTypeField } from '../types';
 import { ContentTypeProps } from 'contentful-management';
 import { rowStyles } from './TableRow.styles';
@@ -88,7 +88,7 @@ export const TableRow: React.FC<TableRowProps> = ({
           target="_blank"
           rel="noopener noreferrer"
           testId="entry-link"
-          icon={<ExternalLinkIcon />}
+          icon={<ArrowSquareOutIcon />}
           alignIcon="end"
           tabIndex={-1}>
           {getEntryTitle(entry, contentType, defaultLocale)}

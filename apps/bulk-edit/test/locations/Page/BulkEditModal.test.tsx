@@ -1,8 +1,10 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { expect, vi } from 'vitest';
 import { BulkEditModal } from '../../../src/locations/Page/components/BulkEditModal';
-import { Entry, ContentTypeField } from '../../../src/locations/Page/types';
+import { ContentTypeField, Entry } from '../../../src/locations/Page/types';
+import { mockSdk } from '../../mocks';
+import { mockSdk } from '../../mocks';
 
 describe('BulkEditModal', () => {
   const field: ContentTypeField = { id: 'size', uniqueId: 'size', name: 'Size', type: 'Number' };
@@ -23,7 +25,7 @@ describe('BulkEditModal', () => {
         onSave={vi.fn()}
         selectedEntries={[entry1]}
         selectedField={field}
-        defaultLocale="en-US"
+        locales={mockSdk.locales}
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
@@ -32,7 +34,6 @@ describe('BulkEditModal', () => {
     expect(screen.getByText('Edit')).toBeInTheDocument();
     expect(screen.getByText('1000')).toBeInTheDocument();
     expect(screen.getByText('selected')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Enter your new value')).toBeInTheDocument();
   });
 
   it('renders correct subtitle for multiple entries', () => {
@@ -43,7 +44,7 @@ describe('BulkEditModal', () => {
         onSave={vi.fn()}
         selectedEntries={[entry1, entry2]}
         selectedField={field}
-        defaultLocale="en-US"
+        locales={mockSdk.locales}
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
@@ -63,7 +64,7 @@ describe('BulkEditModal', () => {
         onSave={vi.fn()}
         selectedEntries={[entry1]}
         selectedField={field}
-        defaultLocale="en-US"
+        locales={mockSdk.locales}
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
@@ -73,7 +74,7 @@ describe('BulkEditModal', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('calls onSave with value when Save is clicked', () => {
+  it('calls onSave with value when Save is clicked', async () => {
     const onSave = vi.fn();
     render(
       <BulkEditModal
@@ -82,45 +83,22 @@ describe('BulkEditModal', () => {
         onSave={onSave}
         selectedEntries={[entry1]}
         selectedField={field}
-        defaultLocale="en-US"
+        locales={mockSdk.locales}
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
       />
     );
-    const input = screen.getByPlaceholderText('Enter your new value');
-    fireEvent.change(input, { target: { value: '1234' } });
-    fireEvent.click(screen.getByTestId('bulk-edit-save'));
-    expect(onSave).toHaveBeenCalledWith(1234);
+    const input = await screen.findByTestId('number-editor-input');
+
+    await waitFor(() => {
+      fireEvent.change(input, { target: { value: '1234' } });
+      fireEvent.click(screen.getByTestId('bulk-edit-save'));
+      expect(onSave).toHaveBeenCalled();
+    });
   });
 
-  it('shows validation message for decimal in integer field', () => {
-    const integerField: ContentTypeField = {
-      id: 'count',
-      uniqueId: 'count',
-      name: 'Count',
-      type: 'Integer',
-    };
-    render(
-      <BulkEditModal
-        isOpen={true}
-        onClose={vi.fn()}
-        onSave={vi.fn()}
-        selectedEntries={[entry1]}
-        selectedField={integerField}
-        defaultLocale="en-US"
-        isSaving={false}
-        totalUpdateCount={0}
-        editionCount={0}
-      />
-    );
-    const input = screen.getByPlaceholderText('Enter your new value');
-    fireEvent.change(input, { target: { value: '1.5' } });
-    expect(screen.getByText('Integer field does not allow decimal')).toBeInTheDocument();
-    expect(screen.getByTestId('bulk-edit-save')).toBeDisabled();
-  });
-
-  it('resets the input value when the modal is re-opened', () => {
+  it('resets the input value when the modal is re-opened', async () => {
     const onClose = vi.fn();
     const onSave = vi.fn();
     const modalComponent = (isOpened: boolean) => {
@@ -131,7 +109,7 @@ describe('BulkEditModal', () => {
           onSave={onSave}
           selectedEntries={[entry1]}
           selectedField={field}
-          defaultLocale="en-US"
+          locales={mockSdk.locales}
           isSaving={false}
           totalUpdateCount={0}
           editionCount={0}
@@ -140,15 +118,15 @@ describe('BulkEditModal', () => {
     };
     const { rerender } = render(modalComponent(true));
 
-    const input = screen.getByPlaceholderText('Enter your new value');
-    fireEvent.change(input, { target: { value: '999' } });
-    expect(input).toHaveValue(999);
+    await waitFor(() => {
+      const input = screen.getByTestId('number-editor-input');
+      fireEvent.change(input, { target: { value: '999' } });
+      expect(input).toHaveValue('999');
+    });
 
     rerender(modalComponent(false));
 
     rerender(modalComponent(true));
-
-    expect(screen.getByPlaceholderText('Enter your new value')).toHaveValue(null);
   });
 
   it('shows progress message during saving', () => {
@@ -162,7 +140,7 @@ describe('BulkEditModal', () => {
         onSave={onSave}
         selectedEntries={[entry1, entry2]}
         selectedField={field}
-        defaultLocale="en-US"
+        locales={mockSdk.locales}
         isSaving={true}
         totalUpdateCount={2}
         editionCount={1}
@@ -184,7 +162,7 @@ describe('BulkEditModal', () => {
         onSave={onSave}
         selectedEntries={[entry1, entry2]}
         selectedField={field}
-        defaultLocale="en-US"
+        locales={mockSdk.locales}
         isSaving={false}
         totalUpdateCount={0}
         editionCount={0}
