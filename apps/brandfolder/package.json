@@ -10,7 +10,7 @@
     "@contentful/dam-app-base": "2.0.55",
     "react": "16.12.0",
     "react-dom": "16.12.0",
-    "vite": "^5.4.19"
+    "vite": "^5.4.21"
   },
   "scripts": {
     "start": "vite",
