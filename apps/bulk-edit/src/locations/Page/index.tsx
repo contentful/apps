@@ -32,7 +32,7 @@ import {
   STATUSES,
   updateEntryFieldLocalized,
 } from './utils/entryUtils';
-import { successNotification } from './utils/notifications';
+import { successNotification } from './utils/successNotification';
 import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
 import FilterMultiselect from './components/FilterMultiselect';
