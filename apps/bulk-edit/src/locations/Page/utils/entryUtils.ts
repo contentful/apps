@@ -77,46 +77,59 @@ export const isLinkValue = (value: unknown): value is { sys: { linkType: string 
 export const truncate = (str: string, max: number = 20) =>
   str.length > max ? str.slice(0, max) + ' ...' : str;
 
-export const getFieldDisplayValue = (field: ContentTypeField | null, value: unknown): string => {
+export const getFieldDisplayValue = (
+  field: ContentTypeField | null,
+  value: unknown,
+  maxLength: number = 30
+): string => {
   if (!field) return '-';
+  if (!value) return '-';
+
+  let displayValue = '-';
+
+  if (
+    field.type === 'Symbol' ||
+    field.type === 'Text' ||
+    field.type === 'Integer' ||
+    field.type === 'Number' ||
+    field.type === 'Date'
+  ) {
+    displayValue = String(value);
+  }
 
   if (field.type === 'Array' && Array.isArray(value)) {
     const count = value.length;
     if (value[0]?.sys?.linkType === 'Entry') {
-      return count === 1 ? '1 reference field' : `${count} reference fields`;
+      displayValue = count === 1 ? '1 reference field' : `${count} reference fields`;
     } else if (value[0]?.sys?.linkType === 'Asset') {
-      return count === 1 ? '1 asset' : `${count} assets`;
+      displayValue = count === 1 ? '1 asset' : `${count} assets`;
     } else {
-      return truncate(value.join(', '));
+      displayValue = value.join(', ');
     }
   }
 
   if (field.type === 'Location' && isLocationValue(value)) {
-    return truncate(`Lat: ${value.lat}, Lon: ${value.lon}`);
+    displayValue = `Lat: ${value.lat}, Lon: ${value.lon}`;
   }
   if (field.type === 'Boolean' && typeof value === 'boolean') {
-    return value ? 'true' : 'false';
+    displayValue = value ? 'true' : 'false';
   }
-  if (field.type === 'Object' && typeof value === 'object' && value !== null) {
-    return truncate(JSON.stringify(value));
+  if (field.type === 'Object' && typeof value === 'object') {
+    displayValue = JSON.stringify(value);
   }
 
   if (field.type === 'Link' && isLinkValue(value) && value.sys.linkType === 'Asset') {
-    return `1 asset`;
+    displayValue = `1 asset`;
   }
   if (field.type === 'Link' && isLinkValue(value) && value.sys.linkType === 'Entry') {
-    return `1 reference field`;
+    displayValue = `1 reference field`;
   }
 
-  if (field.type === 'RichText' && typeof value === 'object' && value !== null) {
-    return truncate(documentToHtmlString(value as Document));
+  if (field.type === 'RichText' && typeof value === 'object') {
+    displayValue = documentToHtmlString(value as Document);
   }
 
-  if (typeof value === 'object' && value !== null) {
-    return '';
-  }
-
-  return value !== undefined && value !== null ? truncate(String(value)) : '-';
+  return maxLength ? truncate(displayValue, maxLength) : displayValue;
 };
 
 export const getEntryTitle = (

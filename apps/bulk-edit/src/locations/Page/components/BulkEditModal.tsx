@@ -58,7 +58,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
           <Flex>
             <Text>
               <Text fontWeight="fontWeightDemiBold">
-                {getFieldDisplayValue(selectedField, firstValueToUpdate)}
+                {getFieldDisplayValue(selectedField, firstValueToUpdate, 30)}
               </Text>{' '}
               {entryCount === 1 ? 'selected' : `selected and ${entryCount - 1} more`}
             </Text>

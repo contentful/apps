@@ -124,55 +124,59 @@ describe('entryUtils', () => {
     });
   });
 
-  describe('renderFieldValue', () => {
+  describe('getFieldDisplayValue', () => {
     it('returns truncated string for Symbol field with string value', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Symbol' } as ContentTypeField;
-      const result = getFieldDisplayValue(field, 'This is a long string that should be truncated');
+      const result = getFieldDisplayValue(
+        field,
+        'This is a long string that should be truncated',
+        20
+      );
       expect(result).toBe('This is a long strin ...');
     });
 
     it('returns truncated string for Text field with string value', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Text' } as ContentTypeField;
-      const result = getFieldDisplayValue(field, 'This is a text field with long content');
+      const result = getFieldDisplayValue(field, 'This is a text field with long content', 20);
       expect(result).toBe('This is a text field ...');
     });
 
     it('returns truncated string for Integer field with number value', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Integer' } as ContentTypeField;
-      const result = getFieldDisplayValue(field, 42);
+      const result = getFieldDisplayValue(field, 42, 20);
       expect(result).toBe('42');
     });
 
     it('returns truncated string for Number field with decimal value', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Number' } as ContentTypeField;
-      const result = getFieldDisplayValue(field, 3.14159);
+      const result = getFieldDisplayValue(field, 3.14159, 20);
       expect(result).toBe('3.14159');
     });
 
     it('returns truncated string for Date field with date value', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Date' } as ContentTypeField;
       const dateValue = '2023-12-25';
-      const result = getFieldDisplayValue(field, dateValue);
+      const result = getFieldDisplayValue(field, dateValue, 20);
       expect(result).toBe('2023-12-25');
     });
 
     it('returns location string for Location field', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Location' } as ContentTypeField;
       const locationValue = { lat: 40.7128, lon: -74.006 };
-      const result = getFieldDisplayValue(field, locationValue);
+      const result = getFieldDisplayValue(field, locationValue, 20);
       expect(result).toBe('Lat: 40.7128, Lon: - ...');
     });
 
     it('returns "true" for Boolean field with true value', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Boolean' } as ContentTypeField;
-      const result = getFieldDisplayValue(field, true);
+      const result = getFieldDisplayValue(field, true, 20);
       expect(result).toBe('true');
     });
 
     it('returns truncated JSON string for Object field', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Object' } as ContentTypeField;
       const objectValue = { name: 'John', age: 30, city: 'New York' };
-      const result = getFieldDisplayValue(field, objectValue);
+      const result = getFieldDisplayValue(field, objectValue, 20);
       expect(result).toBe('{"name":"John","age" ...');
     });
 
@@ -197,7 +201,7 @@ describe('entryUtils', () => {
         ],
       };
 
-      const result = getFieldDisplayValue(field, richTextValue);
+      const result = getFieldDisplayValue(field, richTextValue, 20);
 
       expect(result).toBe('<p>this is a test va ...');
     });
@@ -205,35 +209,35 @@ describe('entryUtils', () => {
     it('returns "1 asset" for Link field with Asset reference', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Link' } as ContentTypeField;
       const linkValue = { sys: { linkType: 'Asset' } };
-      const result = getFieldDisplayValue(field, linkValue);
+      const result = getFieldDisplayValue(field, linkValue, 20);
       expect(result).toBe('1 asset');
     });
 
     it('returns "1 reference field" for Link field with Entry reference', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Link' } as ContentTypeField;
       const linkValue = { sys: { linkType: 'Entry' } };
-      const result = getFieldDisplayValue(field, linkValue);
+      const result = getFieldDisplayValue(field, linkValue, 20);
       expect(result).toBe('1 reference field');
     });
 
     it('returns "1 reference field" for Array field with single Entry reference', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Array' } as ContentTypeField;
       const arrayValue = [{ sys: { linkType: 'Entry' } }];
-      const result = getFieldDisplayValue(field, arrayValue);
+      const result = getFieldDisplayValue(field, arrayValue, 20);
       expect(result).toBe('1 reference field');
     });
 
     it('returns "2 reference fields" for Array field with multiple Entry references', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Array' } as ContentTypeField;
       const arrayValue = [{ sys: { linkType: 'Entry' } }, { sys: { linkType: 'Entry' } }];
-      const result = getFieldDisplayValue(field, arrayValue);
+      const result = getFieldDisplayValue(field, arrayValue, 20);
       expect(result).toBe('2 reference fields');
     });
 
     it('returns "1 asset" for Array field with single Asset reference', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Array' } as ContentTypeField;
       const arrayValue = [{ sys: { linkType: 'Asset' } }];
-      const result = getFieldDisplayValue(field, arrayValue);
+      const result = getFieldDisplayValue(field, arrayValue, 20);
       expect(result).toBe('1 asset');
     });
 
@@ -244,32 +248,32 @@ describe('entryUtils', () => {
         { sys: { linkType: 'Asset' } },
         { sys: { linkType: 'Asset' } },
       ];
-      const result = getFieldDisplayValue(field, arrayValue);
+      const result = getFieldDisplayValue(field, arrayValue, 20);
       expect(result).toBe('3 assets');
     });
 
     it('returns truncated string for Array field with string values', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Array' } as ContentTypeField;
       const arrayValue = ['apple', 'banana', 'cherry'];
-      const result = getFieldDisplayValue(field, arrayValue);
+      const result = getFieldDisplayValue(field, arrayValue, 20);
       expect(result).toBe('apple, banana, cherr ...');
     });
 
     it('returns "-" for undefined value', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Symbol' } as ContentTypeField;
-      const result = getFieldDisplayValue(field, undefined);
+      const result = getFieldDisplayValue(field, undefined, 20);
       expect(result).toBe('-');
     });
 
     it('returns "-" for null value', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Symbol' } as ContentTypeField;
-      const result = getFieldDisplayValue(field, null);
+      const result = getFieldDisplayValue(field, null, 20);
       expect(result).toBe('-');
     });
 
     it('returns truncated string for empty array', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Array' } as ContentTypeField;
-      const result = getFieldDisplayValue(field, []);
+      const result = getFieldDisplayValue(field, [], 20);
       expect(result).toBe('');
     });
   });

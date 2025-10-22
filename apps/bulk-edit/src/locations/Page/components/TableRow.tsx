@@ -135,10 +135,10 @@ export const TableRow: React.FC<TableRowProps> = ({
                   aria-label={`Select ${truncate(field.name)} for ${displayValue}`}
                   tabIndex={-1}
                 />
-                {getFieldDisplayValue(field, fieldValue)}
+                {getFieldDisplayValue(field, fieldValue, 30)}
               </Flex>
             ) : (
-              <Text fontColor="gray500">{getFieldDisplayValue(field, fieldValue)}</Text>
+              <Text fontColor="gray500">{getFieldDisplayValue(field, fieldValue, 30)}</Text>
             )}
           </Table.Cell>
         );

@@ -17,8 +17,8 @@ export function successNotification({
   field,
   onUndo,
 }: SuccessNotificationParams) {
-  const formattedFirstValue = getFieldDisplayValue(field, firstUpdatedValue);
-  const formattedNewValue = getFieldDisplayValue(field, value);
+  const formattedFirstValue = getFieldDisplayValue(field, firstUpdatedValue, 30);
+  const formattedNewValue = getFieldDisplayValue(field, value, 30);
 
   const message =
     count === 1
