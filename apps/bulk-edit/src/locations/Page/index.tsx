@@ -401,6 +401,7 @@ const Page = () => {
           firstUpdatedValue: firstUpdatedValue,
           value: val,
           count: successful.length,
+          field: selectedField,
           onUndo: (formattedFirstValue) => {
             setUndoFirstEntryFieldValue(formattedFirstValue);
             setIsUndoModalOpen(true);

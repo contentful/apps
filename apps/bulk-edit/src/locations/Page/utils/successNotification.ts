@@ -1,10 +1,12 @@
 import { Notification } from '@contentful/f36-components';
-import { formatValueForDisplay } from './entryUtils';
+import { getFieldDisplayValue } from './entryUtils';
+import { ContentTypeField } from '../types';
 
 export interface SuccessNotificationParams {
   firstUpdatedValue: unknown;
   value: unknown;
   count: number;
+  field: ContentTypeField;
   onUndo: (formattedFirstValue: string) => void;
 }
 
@@ -12,10 +14,11 @@ export function successNotification({
   firstUpdatedValue,
   value,
   count,
+  field,
   onUndo,
 }: SuccessNotificationParams) {
-  const formattedFirstValue = formatValueForDisplay(firstUpdatedValue, 30);
-  const formattedNewValue = formatValueForDisplay(value, 30);
+  const formattedFirstValue = getFieldDisplayValue(field, firstUpdatedValue);
+  const formattedNewValue = getFieldDisplayValue(field, value);
 
   const message =
     count === 1

@@ -6,7 +6,7 @@ import { ContentTypeProps } from 'contentful-management';
 import { rowStyles } from './TableRow.styles';
 import {
   getStatusFromEntry,
-  renderFieldValue,
+  getFieldDisplayValue,
   getEntryTitle,
   getEntryUrl,
   isCheckboxAllowed,
@@ -135,10 +135,10 @@ export const TableRow: React.FC<TableRowProps> = ({
                   aria-label={`Select ${truncate(field.name)} for ${displayValue}`}
                   tabIndex={-1}
                 />
-                {renderFieldValue(field, fieldValue)}
+                {getFieldDisplayValue(field, fieldValue)}
               </Flex>
             ) : (
-              <Text fontColor="gray500">{renderFieldValue(field, fieldValue)}</Text>
+              <Text fontColor="gray500">{getFieldDisplayValue(field, fieldValue)}</Text>
             )}
           </Table.Cell>
         );
