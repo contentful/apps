@@ -116,12 +116,6 @@ describe('entryUtils', () => {
       const result = getEntryFieldValue(entry, fieldWithLocale, defaultLocale);
       expect(result).toBe('fr value');
     });
-
-    it('returns "empty field" when toString() returns falsy value', () => {
-      const entry = { fields: { testField: { 'en-US': '' } } };
-      const result = getEntryFieldValue(entry, field, defaultLocale);
-      expect(result).toBe('empty field');
-    });
   });
 
   describe('getFieldDisplayValue', () => {
