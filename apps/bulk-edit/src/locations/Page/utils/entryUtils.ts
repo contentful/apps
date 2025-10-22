@@ -77,23 +77,28 @@ export const isLinkValue = (value: unknown): value is { sys: { linkType: string 
 export const truncate = (str: string, max: number = 20) =>
   str.length > max ? str.slice(0, max) + ' ...' : str;
 
+function isBasicField(field: ContentTypeField) {
+  return (
+    field.type === 'Symbol' ||
+    field.type === 'Text' ||
+    field.type === 'Integer' ||
+    field.type === 'Number' ||
+    field.type === 'Date' ||
+    field.type === 'Boolean'
+  );
+}
+
 export const getFieldDisplayValue = (
   field: ContentTypeField | null,
   value: unknown,
   maxLength: number = 30
 ): string => {
   if (!field) return '-';
-  if (!value) return '-';
+  if (value === undefined || value === null) return '-';
 
   let displayValue = '-';
 
-  if (
-    field.type === 'Symbol' ||
-    field.type === 'Text' ||
-    field.type === 'Integer' ||
-    field.type === 'Number' ||
-    field.type === 'Date'
-  ) {
+  if (isBasicField(field)) {
     displayValue = String(value);
   }
 
@@ -110,9 +115,6 @@ export const getFieldDisplayValue = (
 
   if (field.type === 'Location' && isLocationValue(value)) {
     displayValue = `Lat: ${value.lat}, Lon: ${value.lon}`;
-  }
-  if (field.type === 'Boolean' && typeof value === 'boolean') {
-    displayValue = value ? 'true' : 'false';
   }
   if (field.type === 'Object' && typeof value === 'object') {
     displayValue = JSON.stringify(value);
@@ -187,11 +189,16 @@ export function getEntryFieldValue(
   field: { id: string; locale?: string } | null | undefined,
   defaultLocale: string
 ): string {
-  if (!entry || !field || !field.id) return 'empty field';
+  if (!entry || !field || !field.id) {
+    return 'empty field';
+  }
   const fieldValue = entry.fields[field.id]?.[field.locale || defaultLocale];
-  if (fieldValue === undefined || fieldValue === null) return 'empty field';
 
-  return fieldValue || 'empty field';
+  if (fieldValue === undefined || fieldValue === null) {
+    return 'empty field';
+  }
+
+  return fieldValue;
 }
 
 /**

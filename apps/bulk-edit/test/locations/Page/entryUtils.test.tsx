@@ -173,6 +173,12 @@ describe('entryUtils', () => {
       expect(result).toBe('true');
     });
 
+    it('returns "false" for Boolean field with false value', () => {
+      const field = { id: 'testField', locale: 'en-US', type: 'Boolean' } as ContentTypeField;
+      const result = getFieldDisplayValue(field, false, 20);
+      expect(result).toBe('false');
+    });
+
     it('returns truncated JSON string for Object field', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Object' } as ContentTypeField;
       const objectValue = { name: 'John', age: 30, city: 'New York' };
