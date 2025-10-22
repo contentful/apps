@@ -9,8 +9,9 @@ export interface AppInstallationParameters {
 }
 
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>({});
-  const [enableAllTools, setEnableAllTools] = useState<boolean>(false);
+  const [parameters, setParameters] = useState<AppInstallationParameters>({
+    enableAllTools: false,
+  });
   const sdk = useSDK<ConfigAppSDK>();
   /*
      To use the cma, inject it as follows.
@@ -29,14 +30,12 @@ const ConfigScreen = () => {
 
     return {
       // Parameters to be persisted as the app configuration.
-      parameters: {
-        enableAllTools,
-      },
+      parameters,
       // In case you don't want to submit any update to app
       // locations, you can just pass the currentState as is
       targetState: currentState,
     };
-  }, [enableAllTools, sdk]);
+  }, [parameters, sdk]);
 
   useEffect(() => {
     // `onConfigure` allows to configure a callback to be
@@ -53,7 +52,6 @@ const ConfigScreen = () => {
 
       if (currentParameters) {
         setParameters(currentParameters);
-        setEnableAllTools(currentParameters.enableAllTools || false);
       }
 
       // Once preparation has finished, call `setReady` to hide
@@ -67,7 +65,11 @@ const ConfigScreen = () => {
       <Form>
         <Heading>App Config</Heading>
         <Paragraph>Contentful Remote MCP (Public Alpha)</Paragraph>
-        <Checkbox isChecked={enableAllTools} onChange={() => setEnableAllTools(!enableAllTools)}>
+        <Checkbox
+          isChecked={parameters.enableAllTools}
+          onChange={() =>
+            setParameters({ ...parameters, enableAllTools: !parameters.enableAllTools })
+          }>
           Enable All Tools
         </Checkbox>
       </Form>
