@@ -1,0 +1,56 @@
+{
+  "name": "remote-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@contentful/app-sdk": "^4.29.1",
+    "@contentful/f36-components": "4.80.5",
+    "@contentful/f36-tokens": "4.2.0",
+    "@contentful/react-apps-toolkit": "1.2.16",
+    "contentful-management": "10.46.4",
+    "emotion": "10.0.27",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "add-locations": "contentful-app-scripts add-locations",
+    "upload": "contentful-app-scripts upload --bundle-dir ./build",
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id 7bLFvA64YOm5h7ATxlqe2c --token $CONTENTFUL_ACCESS_TOKEN"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "^2.3.0",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^14.3.1",
+    "@types/node": "^22.13.5",
+    "@types/react": "18.3.13",
+    "@types/react-dom": "18.3.1",
+    "@vitejs/plugin-react": "^4.0.3",
+    "cross-env": "7.0.3",
+    "jsdom": "^26.0.0",
+    "typescript": "4.9.5",
+    "vite": "^6.2.2",
+    "vitest": "^3.0.9"
+  },
+  "homepage": "."
+}
