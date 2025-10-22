@@ -16,7 +16,7 @@ describe('Config Screen component', () => {
     await mockSdk.app.onConfigure.mock.calls[0][0]();
 
     expect(
-      getByText('Welcome to your contentful app. This is your config page.')
+      getByText('Contentful Remote MCP (Public Alpha)')
     ).toBeInTheDocument();
   });
 });
