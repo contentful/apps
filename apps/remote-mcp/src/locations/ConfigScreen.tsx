@@ -66,7 +66,7 @@ const ConfigScreen = () => {
     <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
       <Form>
         <Heading>App Config</Heading>
-        <Paragraph>Contentful Remote MCP</Paragraph>
+        <Paragraph>Contentful Remote MCP (Public Alpha)</Paragraph>
         <Checkbox
           isChecked={enableAllTools}
           onChange={() => setEnableAllTools(!enableAllTools)}>
