@@ -15,8 +15,6 @@ describe('Config Screen component', () => {
     // simulate the user clicking the install button
     await mockSdk.app.onConfigure.mock.calls[0][0]();
 
-    expect(
-      getByText('Contentful Remote MCP (Public Alpha)')
-    ).toBeInTheDocument();
+    expect(getByText('Contentful Remote MCP (Public Alpha)')).toBeInTheDocument();
   });
 });

@@ -67,9 +67,7 @@ const ConfigScreen = () => {
       <Form>
         <Heading>App Config</Heading>
         <Paragraph>Contentful Remote MCP (Public Alpha)</Paragraph>
-        <Checkbox
-          isChecked={enableAllTools}
-          onChange={() => setEnableAllTools(!enableAllTools)}>
+        <Checkbox isChecked={enableAllTools} onChange={() => setEnableAllTools(!enableAllTools)}>
           Enable All Tools
         </Checkbox>
       </Form>
