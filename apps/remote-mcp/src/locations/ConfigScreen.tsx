@@ -4,10 +4,13 @@ import { Heading, Form, Paragraph, Flex, Checkbox } from '@contentful/f36-compon
 import { css } from 'emotion';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 
-export interface AppInstallationParameters {}
+export interface AppInstallationParameters {
+  enableAllTools?: boolean;
+}
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
+  const [enableAllTools, setEnableAllTools] = useState<boolean>(false);
   const sdk = useSDK<ConfigAppSDK>();
   /*
      To use the cma, inject it as follows.
@@ -26,12 +29,14 @@ const ConfigScreen = () => {
 
     return {
       // Parameters to be persisted as the app configuration.
-      parameters,
+      parameters: {
+        enableAllTools,
+      },
       // In case you don't want to submit any update to app
       // locations, you can just pass the currentState as is
       targetState: currentState,
     };
-  }, [parameters, sdk]);
+  }, [enableAllTools, sdk]);
 
   useEffect(() => {
     // `onConfigure` allows to configure a callback to be
@@ -48,6 +53,7 @@ const ConfigScreen = () => {
 
       if (currentParameters) {
         setParameters(currentParameters);
+        setEnableAllTools(currentParameters.enableAllTools || false);
       }
 
       // Once preparation has finished, call `setReady` to hide
@@ -60,8 +66,12 @@ const ConfigScreen = () => {
     <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
       <Form>
         <Heading>App Config</Heading>
-        <Paragraph>Welcome to your contentful app. This is your config page.HELLO!</Paragraph>
-        <Checkbox>Enable All Tools</Checkbox>
+        <Paragraph>Contentful Remote MCP</Paragraph>
+        <Checkbox
+          isChecked={enableAllTools}
+          onChange={() => setEnableAllTools(!enableAllTools)}>
+          Enable All Tools
+        </Checkbox>
       </Form>
     </Flex>
   );
