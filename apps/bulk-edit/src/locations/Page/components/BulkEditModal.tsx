@@ -5,15 +5,13 @@ import { getEntryFieldValue, getFieldDisplayValue } from '../utils/entryUtils';
 import { ClockIcon } from '@contentful/f36-icons';
 import { FieldEditor } from './FieldEditor';
 import type { LocalesAPI } from '@contentful/field-editor-shared';
-import { KnownAppSDK } from '@contentful/app-sdk';
 
 interface BulkEditModalProps {
-  sdk: KnownAppSDK;
   isOpen: boolean;
   onClose: () => void;
   onSave: (newValue: string | number) => void;
   selectedEntries: Entry[];
-  selectedField: ContentTypeField;
+  selectedField: ContentTypeField | null;
   locales: LocalesAPI;
   isSaving: boolean;
   totalUpdateCount: number;
@@ -21,7 +19,6 @@ interface BulkEditModalProps {
 }
 
 export const BulkEditModal: React.FC<BulkEditModalProps> = ({
-  sdk,
   isOpen,
   onClose,
   onSave,
@@ -69,7 +66,6 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
           <FormControl>
             {selectedField && (
               <FieldEditor
-                sdk={sdk}
                 field={selectedField}
                 value={value}
                 onChange={setValue}
