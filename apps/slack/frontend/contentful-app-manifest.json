@@ -1,0 +1,116 @@
+{
+  "actions": [
+    {
+      "id": "sendMessage",
+      "name": "Send Slack Message",
+      "category": "Custom",
+      "description": "Sends a message to a specified Slack channel or user",
+      "type": "endpoint",
+      "url": "/api/messages", 
+      "allowNetworks": [],
+      "parametersSchema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message Content",
+            "description": "The content of the message to be sent to Slack",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "channelId": {
+            "type": "string",
+            "title": "Slack Channel ID",
+            "description": "The Slack channel ID to send the message to",
+            "minLength": 1
+          },
+          "workspaceId": {
+            "type": "string",
+            "title": "Slack Workspace ID",
+            "description": "The Slack workspace ID where the message should be sent",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "message",
+          "channelId"
+        ],
+        "additionalProperties": false
+      },
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Indicates whether the message was sent successfully"
+          },
+          "channel": {
+            "type": "string",
+            "description": "The channel ID where the message was sent"
+          },
+          "ts": {
+            "type": "string",
+            "description": "The timestamp of the message"
+          },
+          "message": {
+            "type": "object",
+            "description": "The message object that was sent",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The type of message"
+              },
+              "text": {
+                "type": "string",
+                "description": "The text content of the message"
+              },
+              "user": {
+                "type": "string",
+                "description": "The user ID who sent the message"
+              },
+              "ts": {
+                "type": "string",
+                "description": "The timestamp of the message"
+              },
+              "team": {
+                "type": "string",
+                "description": "The team ID"
+              },
+              "bot_id": {
+                "type": "string",
+                "description": "The bot ID that sent the message"
+              }
+            }
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message when operation fails (present when ok: false)"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of error messages (present when ok: false)"
+          },
+          "response_metadata": {
+            "type": "object",
+            "description": "Additional metadata about the response",
+            "properties": {
+              "warnings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}
