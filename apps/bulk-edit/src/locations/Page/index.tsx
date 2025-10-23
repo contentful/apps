@@ -670,12 +670,11 @@ const Page = () => {
         </Box>
       </Box>
       <BulkEditModal
-        sdk={sdk}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={onSave}
         selectedEntries={selectedEntries}
-        selectedField={selectedField!}
+        selectedField={selectedField}
         locales={sdk.locales}
         isSaving={isSaving}
         totalUpdateCount={totalUpdateCount}

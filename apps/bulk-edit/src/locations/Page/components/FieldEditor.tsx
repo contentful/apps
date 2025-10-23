@@ -15,11 +15,11 @@ import {
   getBooleanEditorParameters,
 } from '../utils/fieldEditorUtils';
 import type { LocalesAPI } from '@contentful/field-editor-shared';
-import { KnownAppSDK } from '@contentful/app-sdk';
+import { PageAppSDK } from '@contentful/app-sdk';
 import { EditorInterfaceProps } from 'contentful-management';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 interface FieldEditorProps {
-  sdk: KnownAppSDK;
   field: ContentTypeField;
   value: string;
   onChange: (value: string) => void;
@@ -27,13 +27,8 @@ interface FieldEditorProps {
 }
 
 const ERROR_MESSAGE = 'Failed to initialize field editor. Please try again.';
-export const FieldEditor: React.FC<FieldEditorProps> = ({
-  sdk,
-  field,
-  value,
-  onChange,
-  locales,
-}) => {
+export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange, locales }) => {
+  const sdk = useSDK<PageAppSDK>();
   const [error, setError] = useState('');
   const [editorInterface, setEditorInterface] = useState<EditorInterfaceProps | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
