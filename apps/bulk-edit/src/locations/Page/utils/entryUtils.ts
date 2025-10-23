@@ -77,63 +77,61 @@ export const isLinkValue = (value: unknown): value is { sys: { linkType: string 
 export const truncate = (str: string, max: number = 20) =>
   str.length > max ? str.slice(0, max) + ' ...' : str;
 
-export const formatValueForDisplay = (value: unknown, maxLength: number = 30): string => {
-  if (value === null || value === undefined) {
-    return '-';
+function isBasicField(field: ContentTypeField) {
+  return (
+    field.type === 'Symbol' ||
+    field.type === 'Text' ||
+    field.type === 'Integer' ||
+    field.type === 'Number' ||
+    field.type === 'Date' ||
+    field.type === 'Boolean'
+  );
+}
+
+export const getFieldDisplayValue = (
+  field: ContentTypeField | null,
+  value: unknown,
+  maxLength: number = 30
+): string => {
+  if (!field) return '-';
+  if (value === undefined || value === null) return '-';
+
+  let displayValue = '-';
+
+  if (isBasicField(field)) {
+    displayValue = String(value);
   }
 
-  if (typeof value === 'string' && !isNaN(Date.parse(value))) {
-    const date = new Date(value);
-    const dateString = date.toString().replace('GMT', 'UTC');
-    return truncate(dateString, maxLength);
-  }
-
-  if (typeof value === 'object') {
-    const jsonString = JSON.stringify(value);
-    return truncate(jsonString, maxLength);
-  }
-
-  return truncate(String(value), maxLength);
-};
-
-export const renderFieldValue = (field: ContentTypeField, value: unknown): string => {
   if (field.type === 'Array' && Array.isArray(value)) {
     const count = value.length;
     if (value[0]?.sys?.linkType === 'Entry') {
-      return count === 1 ? '1 reference field' : `${count} reference fields`;
+      displayValue = count === 1 ? '1 reference field' : `${count} reference fields`;
     } else if (value[0]?.sys?.linkType === 'Asset') {
-      return count === 1 ? '1 asset' : `${count} assets`;
+      displayValue = count === 1 ? '1 asset' : `${count} assets`;
     } else {
-      return truncate(value.join(', '));
+      displayValue = value.join(', ');
     }
   }
 
   if (field.type === 'Location' && isLocationValue(value)) {
-    return truncate(`Lat: ${value.lat}, Lon: ${value.lon}`);
+    displayValue = `Lat: ${value.lat}, Lon: ${value.lon}`;
   }
-  if (field.type === 'Boolean' && typeof value === 'boolean') {
-    return value ? 'true' : 'false';
-  }
-  if (field.type === 'Object' && typeof value === 'object' && value !== null) {
-    return truncate(JSON.stringify(value));
+  if (field.type === 'Object' && typeof value === 'object') {
+    displayValue = JSON.stringify(value);
   }
 
   if (field.type === 'Link' && isLinkValue(value) && value.sys.linkType === 'Asset') {
-    return `1 asset`;
+    displayValue = `1 asset`;
   }
   if (field.type === 'Link' && isLinkValue(value) && value.sys.linkType === 'Entry') {
-    return `1 reference field`;
+    displayValue = `1 reference field`;
   }
 
-  if (field.type === 'RichText' && typeof value === 'object' && value !== null) {
-    return truncate(documentToHtmlString(value as Document));
+  if (field.type === 'RichText' && typeof value === 'object') {
+    displayValue = documentToHtmlString(value as Document);
   }
 
-  if (typeof value === 'object' && value !== null) {
-    return '';
-  }
-
-  return value !== undefined && value !== null ? truncate(String(value)) : '-';
+  return maxLength ? truncate(displayValue, maxLength) : displayValue;
 };
 
 export const getEntryTitle = (
@@ -191,11 +189,16 @@ export function getEntryFieldValue(
   field: { id: string; locale?: string } | null | undefined,
   defaultLocale: string
 ): string {
-  if (!entry || !field || !field.id) return 'empty field';
+  if (!entry || !field || !field.id) {
+    return 'empty field';
+  }
   const fieldValue = entry.fields[field.id]?.[field.locale || defaultLocale];
-  if (fieldValue === undefined || fieldValue === null) return 'empty field';
 
-  return fieldValue || 'empty field';
+  if (fieldValue === undefined || fieldValue === null) {
+    return 'empty field';
+  }
+
+  return fieldValue;
 }
 
 /**
