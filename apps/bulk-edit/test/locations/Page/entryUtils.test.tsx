@@ -527,7 +527,13 @@ describe('entryUtils', () => {
     });
 
     it('creates Symbol field correctly for non-localized field', async () => {
-      const expected = { id: 'title', name: 'Title', type: 'Symbol', items: undefined };
+      const expected = {
+        contentTypeId: 'test-content-type',
+        id: 'title',
+        name: 'Title',
+        type: 'Symbol',
+        items: undefined,
+      };
       const mockContentType = createTestContentType([
         {
           ...expected,
@@ -539,7 +545,7 @@ describe('entryUtils', () => {
       mockSdk.cma.contentType.get.mockResolvedValue(mockContentType);
 
       const ct = await mockSdk.cma.contentType.get({ contentTypeId: 'test-content-type' });
-      const result = mapContentTypePropsToFields(ct.fields, mockLocales);
+      const result = mapContentTypePropsToFields(ct, mockLocales);
 
       expect(mockSdk.cma.contentType.get).toHaveBeenCalledWith({
         contentTypeId: 'test-content-type',
@@ -549,7 +555,13 @@ describe('entryUtils', () => {
     });
 
     it('creates localized Symbol field correctly', async () => {
-      const expected = { id: 'description', name: 'Description', type: 'Symbol', items: undefined };
+      const expected = {
+        contentTypeId: 'test-content-type',
+        id: 'description',
+        name: 'Description',
+        type: 'Symbol',
+        items: undefined,
+      };
       const mockContentType = createTestContentType([
         {
           ...expected,
@@ -561,7 +573,7 @@ describe('entryUtils', () => {
       mockSdk.cma.contentType.get.mockResolvedValue(mockContentType);
 
       const ct = await mockSdk.cma.contentType.get({ contentTypeId: 'test-content-type' });
-      const result = mapContentTypePropsToFields(ct.fields, mockLocales);
+      const result = mapContentTypePropsToFields(ct, mockLocales);
 
       expect(mockSdk.cma.contentType.get).toHaveBeenCalledWith({
         contentTypeId: 'test-content-type',
@@ -581,6 +593,7 @@ describe('entryUtils', () => {
 
     it('creates Array field with Symbol items correctly', async () => {
       const expected = {
+        contentTypeId: 'test-content-type',
         id: 'tags',
         name: 'Tags',
         type: 'Array',
@@ -600,7 +613,7 @@ describe('entryUtils', () => {
       mockSdk.cma.contentType.get.mockResolvedValue(mockContentType);
 
       const ct = await mockSdk.cma.contentType.get({ contentTypeId: 'test-content-type' });
-      const result = mapContentTypePropsToFields(ct.fields, mockLocales);
+      const result = mapContentTypePropsToFields(ct, mockLocales);
 
       expect(mockSdk.cma.contentType.get).toHaveBeenCalledWith({
         contentTypeId: 'test-content-type',
@@ -614,6 +627,7 @@ describe('entryUtils', () => {
 
     it('creates Array field with Link items correctly', async () => {
       const expected = {
+        contentTypeId: 'test-content-type',
         id: 'relatedEntries',
         name: 'Related Entries',
         type: 'Array',
@@ -634,7 +648,7 @@ describe('entryUtils', () => {
       mockSdk.cma.contentType.get.mockResolvedValue(mockContentType);
 
       const ct = await mockSdk.cma.contentType.get({ contentTypeId: 'test-content-type' });
-      const result = mapContentTypePropsToFields(ct.fields, mockLocales);
+      const result = mapContentTypePropsToFields(ct, mockLocales);
 
       expect(mockSdk.cma.contentType.get).toHaveBeenCalledWith({
         contentTypeId: 'test-content-type',

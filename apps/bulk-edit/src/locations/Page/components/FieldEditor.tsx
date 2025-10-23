@@ -9,7 +9,11 @@ import { JsonEditor } from '@contentful/field-editor-json';
 import type { ContentTypeField } from '../types';
 import { Note, Skeleton } from '@contentful/f36-components';
 import { i18n } from '@lingui/core';
-import { createFieldAPI } from '../utils/fieldEditorUtils';
+import {
+  createFieldAPI,
+  getBooleanLabels,
+  getBooleanEditorParameters,
+} from '../utils/fieldEditorUtils';
 import type { LocalesAPI } from '@contentful/field-editor-shared';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { EditorInterfaceProps } from 'contentful-management';
@@ -91,11 +95,7 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
           // Short text array: items.type === 'Symbol'
           return <TagsEditor field={fieldApi} isInitiallyDisabled={false} />;
         case 'Boolean':
-          const booleanSettings = editorInterface?.controls?.find(
-            (c) => c.fieldId === field.id
-          )?.settings;
-          const trueLabel = booleanSettings?.trueLabel;
-          const falseLabel = booleanSettings?.falseLabel;
+          const { trueLabel, falseLabel } = getBooleanLabels(editorInterface, field.id);
 
           return loading ? (
             <Skeleton.Container>
@@ -105,14 +105,7 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
             <BooleanEditor
               field={fieldApi}
               isInitiallyDisabled={false}
-              parameters={{
-                installation: {},
-                instance: {
-                  trueLabel: trueLabel ? String(trueLabel) : 'True',
-                  falseLabel: falseLabel ? String(falseLabel) : 'False',
-                },
-                invocation: {},
-              }}
+              parameters={getBooleanEditorParameters(trueLabel, falseLabel)}
             />
           );
 
