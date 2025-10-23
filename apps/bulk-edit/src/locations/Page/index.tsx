@@ -236,7 +236,7 @@ const Page = () => {
 
       try {
         const ct = await sdk.cma.contentType.get({ contentTypeId: selectedContentTypeId });
-        const newFields = mapContentTypePropsToFields(ct.fields, locales);
+        const newFields = mapContentTypePropsToFields(ct, locales);
         setFields(newFields);
         setSelectedColumns(getFieldsMapped(newFields));
         setCurrentContentType(ct);
@@ -667,11 +667,12 @@ const Page = () => {
         </Box>
       </Box>
       <BulkEditModal
+        sdk={sdk}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={onSave}
         selectedEntries={selectedEntries}
-        selectedField={selectedField}
+        selectedField={selectedField!}
         locales={sdk.locales}
         isSaving={isSaving}
         totalUpdateCount={totalUpdateCount}

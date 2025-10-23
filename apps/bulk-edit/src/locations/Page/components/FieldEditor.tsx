@@ -7,12 +7,15 @@ import { TagsEditor } from '@contentful/field-editor-tags';
 import { BooleanEditor } from '@contentful/field-editor-boolean';
 import { JsonEditor } from '@contentful/field-editor-json';
 import type { ContentTypeField } from '../types';
-import { Note } from '@contentful/f36-components';
+import { Note, Skeleton } from '@contentful/f36-components';
 import { i18n } from '@lingui/core';
 import { createFieldAPI } from '../utils/fieldEditorUtils';
 import type { LocalesAPI } from '@contentful/field-editor-shared';
+import { KnownAppSDK } from '@contentful/app-sdk';
+import { EditorInterfaceProps } from 'contentful-management';
 
 interface FieldEditorProps {
+  sdk: KnownAppSDK;
   field: ContentTypeField;
   value: string;
   onChange: (value: string) => void;
@@ -20,8 +23,16 @@ interface FieldEditorProps {
 }
 
 const ERROR_MESSAGE = 'Failed to initialize field editor. Please try again.';
-export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange, locales }) => {
+export const FieldEditor: React.FC<FieldEditorProps> = ({
+  sdk,
+  field,
+  value,
+  onChange,
+  locales,
+}) => {
   const [error, setError] = useState('');
+  const [editorInterface, setEditorInterface] = useState<EditorInterfaceProps | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const locale = field.locale ? field.locale : locales.default;
 
   // Ensure Lingui i18n is activated for editors that rely on it (e.g., JsonEditor)
@@ -36,6 +47,24 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
         setError(ERROR_MESSAGE);
       }
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchEditorInterface = async (): Promise<void> => {
+      try {
+        setLoading(true);
+        setEditorInterface(
+          await sdk.cma.editorInterface.get({
+            contentTypeId: field.contentTypeId,
+          })
+        );
+      } catch (e) {
+        setEditorInterface(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    void fetchEditorInterface();
   }, []);
 
   const fieldApi = useMemo(() => {
@@ -67,7 +96,31 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
           // Short text array: items.type === 'Symbol'
           return <TagsEditor field={fieldApi} isInitiallyDisabled={false} />;
         case 'Boolean':
-          return <BooleanEditor field={fieldApi} isInitiallyDisabled={false} />;
+          const booleanSettings = editorInterface?.controls?.find(
+            (c) => c.fieldId === field.id
+          )?.settings;
+          const trueLabel = booleanSettings?.trueLabel;
+          const falseLabel = booleanSettings?.falseLabel;
+
+          return loading ? (
+            <Skeleton.Container>
+              <Skeleton.BodyText numberOfLines={1} />
+            </Skeleton.Container>
+          ) : (
+            <BooleanEditor
+              field={fieldApi}
+              isInitiallyDisabled={false}
+              parameters={{
+                installation: {},
+                instance: {
+                  trueLabel: trueLabel ? String(trueLabel) : 'True',
+                  falseLabel: falseLabel ? String(falseLabel) : 'False',
+                },
+                invocation: {},
+              }}
+            />
+          );
+
         case 'Object':
           return <JsonEditor field={fieldApi} isInitiallyDisabled={false} />;
         default:

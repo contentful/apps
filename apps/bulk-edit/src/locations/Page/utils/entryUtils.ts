@@ -334,15 +334,16 @@ export const filterEntriesByNumericSearch = (
 };
 
 export const mapContentTypePropsToFields = (
-  fields: ContentFields<KeyValueMap>[],
+  ct: ContentTypeProps,
   locales: string[]
 ): ContentTypeField[] => {
   const newFields: ContentTypeField[] = [];
 
-  fields.forEach((f) => {
+  ct.fields.forEach((f) => {
     if (f.localized) {
       locales.forEach((locale) => {
         newFields.push({
+          contentTypeId: ct.sys.id,
           id: f.id,
           uniqueId: `${f.id}-${locale}`,
           name: f.name,
@@ -353,6 +354,7 @@ export const mapContentTypePropsToFields = (
       });
     } else {
       newFields.push({
+        contentTypeId: ct.sys.id,
         id: f.id,
         uniqueId: f.id,
         name: f.name,

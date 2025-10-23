@@ -8,6 +8,7 @@ export type FilterOption = {
 };
 
 export type ContentTypeField = {
+  contentTypeId: string;
   id: string;
   uniqueId: string;
   name: string;
