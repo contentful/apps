@@ -33,7 +33,7 @@ export const FieldEditorValidator: React.FC<ModalEditorValidatorProps> = ({
   return (
     <>
       {validations.length > 0 &&
-        validations.map((validationString, index) => (
+        validations.map((validationString) => (
           <Flex alignItems="center" gap="spacingXs">
             <Icon as={WarningOctagonIcon} variant="negative" size="tiny"></Icon>
             <Text as="p" fontColor="red600">
