@@ -5,6 +5,7 @@ import { getEntryFieldValue, getFieldDisplayValue } from '../utils/entryUtils';
 import { ClockIcon } from '@contentful/f36-icons';
 import { FieldEditor } from './FieldEditor';
 import type { LocalesAPI } from '@contentful/field-editor-shared';
+import { FieldEditorValidator } from './FieldEditorValidator';
 
 interface BulkEditModalProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   editionCount,
 }) => {
   const [value, setValue] = useState<any>('');
+  const [validations, setValidations] = useState<string[]>([]);
   const entryCount = selectedEntries.length;
   const firstEntry = selectedEntries[0];
   const firstValueToUpdate =
@@ -65,13 +67,20 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
           </Flex>
           <FormControl>
             {selectedField && (
-              <FieldEditor
-                field={selectedField}
-                value={value}
-                onChange={setValue}
-                locales={locales}
-                datatest-id="field-editor"
-              />
+              <>
+                <FieldEditor
+                  field={selectedField}
+                  value={value}
+                  onChange={setValue}
+                  locales={locales}
+                  datatest-id="field-editor"
+                />
+                <FieldEditorValidator
+                  value={value}
+                  validations={validations}
+                  setValidations={setValidations}
+                />
+              </>
             )}
           </FormControl>
         </Flex>
@@ -92,7 +101,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
         <Button
           variant="primary"
           onClick={() => onSave(value)}
-          isDisabled={value === ''}
+          isDisabled={validations.length > 0}
           testId="bulk-edit-save"
           isLoading={isSaving}>
           Save

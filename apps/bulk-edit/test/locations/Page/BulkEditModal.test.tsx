@@ -1,10 +1,10 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { BulkEditModal } from '../../../src/locations/Page/components/BulkEditModal';
 import { ContentTypeField, Entry } from '../../../src/locations/Page/types';
 import { mockSdk } from '../../mocks';
-import { mockSdk } from '../../mocks';
+import { createField } from '../../utils/testHelpers';
 
 describe('BulkEditModal', () => {
   const field: ContentTypeField = { id: 'size', uniqueId: 'size', name: 'Size', type: 'Number' };
@@ -170,5 +170,199 @@ describe('BulkEditModal', () => {
     );
 
     expect(screen.queryByText('Updating entries')).not.toBeInTheDocument();
+  });
+
+  describe('Field validations', () => {
+    it('shows validation message for empty Boolean field in modal', async () => {
+      const booleanField = createField('Boolean', 'isActive', 'Is Active');
+
+      render(
+        <BulkEditModal
+          isOpen={true}
+          onClose={vi.fn()}
+          onSave={vi.fn()}
+          selectedEntries={[entry1]}
+          selectedField={booleanField}
+          locales={mockSdk.locales}
+          isSaving={false}
+          totalUpdateCount={0}
+          editionCount={0}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('This field is required')).toBeInTheDocument();
+      });
+    });
+
+    it('shows validation message for empty Symbol field in modal', async () => {
+      const symbolField = createField('Symbol', 'title', 'Title');
+
+      render(
+        <BulkEditModal
+          isOpen={true}
+          onClose={vi.fn()}
+          onSave={vi.fn()}
+          selectedEntries={[entry1]}
+          selectedField={symbolField}
+          locales={mockSdk.locales}
+          isSaving={false}
+          totalUpdateCount={0}
+          editionCount={0}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('This field is required')).toBeInTheDocument();
+      });
+    });
+
+    it('shows validation message for empty Number field in modal', async () => {
+      const numberField = createField('Number', 'price', 'Price');
+
+      render(
+        <BulkEditModal
+          isOpen={true}
+          onClose={vi.fn()}
+          onSave={vi.fn()}
+          selectedEntries={[entry1]}
+          selectedField={numberField}
+          locales={mockSdk.locales}
+          isSaving={false}
+          totalUpdateCount={0}
+          editionCount={0}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('This field is required')).toBeInTheDocument();
+      });
+    });
+
+    it('shows validation message for empty JSON field in modal', async () => {
+      const jsonField = createField('Object', 'metadata', 'Metadata');
+
+      render(
+        <BulkEditModal
+          isOpen={true}
+          onClose={vi.fn()}
+          onSave={vi.fn()}
+          selectedEntries={[entry1]}
+          selectedField={jsonField}
+          locales={mockSdk.locales}
+          isSaving={false}
+          totalUpdateCount={0}
+          editionCount={0}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('This field is required')).toBeInTheDocument();
+      });
+    });
+
+    it('shows validation message for empty Array field in modal', async () => {
+      const arrayField = createField('Array', 'tags', 'Tags');
+
+      render(
+        <BulkEditModal
+          isOpen={true}
+          onClose={vi.fn()}
+          onSave={vi.fn()}
+          selectedEntries={[entry1]}
+          selectedField={arrayField}
+          locales={mockSdk.locales}
+          isSaving={false}
+          totalUpdateCount={0}
+          editionCount={0}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('This field is required')).toBeInTheDocument();
+      });
+    });
+
+    it('disables Save button when validation errors are present', async () => {
+      const booleanField = createField('Boolean', 'isActive', 'Is Active');
+
+      render(
+        <BulkEditModal
+          isOpen={true}
+          onClose={vi.fn()}
+          onSave={vi.fn()}
+          selectedEntries={[entry1]}
+          selectedField={booleanField}
+          locales={mockSdk.locales}
+          isSaving={false}
+          totalUpdateCount={0}
+          editionCount={0}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('This field is required')).toBeInTheDocument();
+        expect(screen.getByTestId('bulk-edit-save')).toBeDisabled();
+      });
+    });
+
+    it('enables Save button when validation errors are resolved', async () => {
+      const symbolField = createField('Symbol', 'title', 'Title');
+
+      render(
+        <BulkEditModal
+          isOpen={true}
+          onClose={vi.fn()}
+          onSave={vi.fn()}
+          selectedEntries={[entry1]}
+          selectedField={symbolField}
+          locales={mockSdk.locales}
+          isSaving={false}
+          totalUpdateCount={0}
+          editionCount={0}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulk-edit-save')).toBeDisabled();
+      });
+
+      const input = screen.getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'Test Title' } });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulk-edit-save')).not.toBeDisabled();
+        expect(screen.queryByText('This field is required')).not.toBeInTheDocument();
+      });
+    });
+
+    it('clears validation message when field gets a value', async () => {
+      const numberField = createField('Number', 'price', 'Price');
+
+      render(
+        <BulkEditModal
+          isOpen={true}
+          onClose={vi.fn()}
+          onSave={vi.fn()}
+          selectedEntries={[entry1]}
+          selectedField={numberField}
+          locales={mockSdk.locales}
+          isSaving={false}
+          totalUpdateCount={0}
+          editionCount={0}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('This field is required')).toBeInTheDocument();
+      });
+
+      const input = await screen.findByTestId('number-editor-input');
+      fireEvent.change(input, { target: { value: '100' } });
+
+      await waitFor(() => {
+        expect(screen.queryByText('This field is required')).not.toBeInTheDocument();
+      });
+    });
   });
 });

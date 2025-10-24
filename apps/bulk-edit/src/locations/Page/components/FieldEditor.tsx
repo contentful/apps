@@ -14,7 +14,7 @@ import type { LocalesAPI } from '@contentful/field-editor-shared';
 
 interface FieldEditorProps {
   field: ContentTypeField;
-  value: string;
+  value: any;
   onChange: (value: string) => void;
   locales: LocalesAPI;
 }

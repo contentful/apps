@@ -3,17 +3,10 @@ import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FieldEditor } from '../../../src/locations/Page/components/FieldEditor';
 import { mockSdk } from '../../mocks';
+import { createField } from '../../utils/testHelpers';
 
 describe('FieldEditor', () => {
   const mockOnChange = vi.fn();
-
-  const createField = (type: string, id: string = 'test-field', name: string = 'Test Field') => ({
-    id,
-    name,
-    type,
-    locale: mockSdk.locales.default,
-    uniqueId: `${id}-${mockSdk.locales.default}`,
-  });
 
   beforeEach(() => {
     vi.clearAllMocks();

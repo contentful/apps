@@ -4,7 +4,7 @@ import type { ContentTypeField } from '../types';
 // API creation utilities
 export const createFieldAPI = (
   field: ContentTypeField,
-  value: string,
+  value: any,
   onChange: (value: string) => void,
   defaultLocale: string
 ): FieldAPI => {
