@@ -1,11 +1,7 @@
 #!/usr/bin/env node
 
 import 'dotenv/config';
-import contentful, {
-  AppActionProps,
-  CreateAppActionProps,
-  createClient,
-} from 'contentful-management';
+import contentful, { createClient } from 'contentful-management';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -38,9 +34,6 @@ interface AppManifest {
   actions: AppAction[];
 }
 
-/**
- * Creates a CMA client using environment variables
- */
 async function createCMAClient(): Promise<contentful.PlainClientAPI> {
   if (!process.env.CONTENTFUL_ACCESS_TOKEN) {
     throw new Error('Cannot find CMA token. Set CONTENTFUL_ACCESS_TOKEN environment variable.');
@@ -57,9 +50,6 @@ async function createCMAClient(): Promise<contentful.PlainClientAPI> {
   return client;
 }
 
-/**
- * Gets the backend URL from environment variables
- */
 function getBackendUrl(): string {
   const backendUrl = process.env.REACT_APP_BACKEND_BASE_URL;
 
@@ -71,9 +61,6 @@ function getBackendUrl(): string {
   return backendUrl;
 }
 
-/**
- * Validates required environment variables
- */
 function validateEnvironment(): void {
   const requiredVars = [
     'CONTENTFUL_ACCESS_TOKEN',
@@ -94,15 +81,6 @@ function validateEnvironment(): void {
   }
 }
 
-/**
- * Upserts (creates or updates) a specific Slack app action using the manifest file
- *
- * @param props - Configuration object
- * @param props.client - Optional CMA client (will create one if not provided)
- * @param props.organizationId - Contentful organization ID
- * @param props.appDefinitionId - App definition ID
- * @param props.appActionId - Specific app action ID to upsert
- */
 export async function upsertSlackAppAction({
   client,
   organizationId,
@@ -221,20 +199,8 @@ export async function upsertSlackAppAction({
   }
 }
 
-/**
- * Helper function to upsert Slack app action from command line using environment variables
- * Usage: npx ts-node scripts/upsertAppAction.ts
- *
- * Required environment variables:
- * - CONTENTFUL_ACCESS_TOKEN: Contentful CMA token
- * - CONTENTFUL_ORG_ID: Contentful organization ID
- * - CONTENTFUL_APP_DEF_ID: Slack app definition ID
- * - APP_ACTION_ID: Specific app action ID to upsert
- * - REACT_APP_BACKEND_BASE_URL: Backend URL for the action endpoint
- */
 export async function upsertSlackAppActionFromCLI() {
   try {
-    // Validate environment variables
     validateEnvironment();
 
     const organizationId = process.env.CONTENTFUL_ORG_ID!;
