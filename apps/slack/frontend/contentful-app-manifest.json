@@ -6,7 +6,7 @@
       "category": "Custom",
       "description": "Sends a message to a specified Slack channel or user",
       "type": "endpoint",
-      "url": "/api/messages", 
+      "url": "/messages",
       "allowNetworks": [],
       "parametersSchema": {
         "type": "object",
