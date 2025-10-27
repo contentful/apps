@@ -1,7 +1,7 @@
 import { ChatPostMessageResponse } from '@slack/web-api';
 import { createStubInstance, SinonStubbedInstance, stub } from 'sinon';
 import { assert, mockRequest, mockResponse, runHandler } from '../../../test/utils';
-import { UnprocessableEntityException, ConflictException, NotFoundException } from '../../errors';
+import { UnprocessableEntityException, ConflictException } from '../../errors';
 import { AuthToken } from '../../interfaces';
 import { AuthTokenRepository } from '../auth-token';
 import { MessagesController } from './controller';
