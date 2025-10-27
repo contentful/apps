@@ -1,7 +1,7 @@
 import { ChatPostMessageResponse } from '@slack/web-api';
 import { createStubInstance, SinonStubbedInstance, stub } from 'sinon';
 import { assert, mockRequest, mockResponse, runHandler } from '../../../test/utils';
-import { UnprocessableEntityException } from '../../errors';
+import { UnprocessableEntityException, ConflictException, NotFoundException } from '../../errors';
 import { AuthToken } from '../../interfaces';
 import { AuthTokenRepository } from '../auth-token';
 import { MessagesController } from './controller';
@@ -20,42 +20,75 @@ describe('MessagesController', () => {
   });
 
   describe('#post', () => {
-    it('throws a UnprocessableEntityException for invalid body', async () => {
-      oAuthRepository.get.resolves({ token: 'token' } as AuthToken);
-      messagesRepository.create.resolves({
-        result: 'ok',
-      } as unknown as ChatPostMessageResponse);
+    it('throws UnprocessableEntityException for invalid body', async () => {
       const request = mockRequest({
         body: {
           not: 'the',
           correct: 'body',
           values: '.',
         },
+        headers: {
+          ['x-contentful-space-id']: 'space123',
+          ['x-contentful-environment-id']: 'env123',
+          ['x-contentful-crn']: 'crn:contentful:space:space123',
+        },
       });
       const next = stub();
-      await runHandler(instance.post(request, mockResponse(), next));
+      const response = mockResponse();
+
+      await runHandler(instance.post(request, response, next));
 
       const error = next.getCall(0).args[0];
       assert.instanceOf(error, UnprocessableEntityException);
     });
 
-    it('returns correct status', async () => {
-      const result = { ok: true };
-      messagesRepository.create.resolves(result);
-      oAuthRepository.get.resolves({ token: 'token' } as AuthToken);
-
+    it('throws ConflictException when required headers are missing', async () => {
       const request = mockRequest({
-        body: { workspaceId: 'lol', message: 'message', channelId: 'channel' },
-        headers: {
-          ['x-contentful-space-id']: 'space',
-          ['x-contentful-environment-id']: 'env',
-        },
+        body: { workspaceId: 'workspace123', message: 'Hello World!', channelId: 'channel123' },
+        headers: {},
       });
       const next = stub();
       const response = mockResponse();
+
       await runHandler(instance.post(request, response, next));
 
-      assert.calledWith(response.sendStatus, 204);
+      const error = next.getCall(0).args[0];
+      assert.instanceOf(error, ConflictException);
+      assert.include(error.details?.errMessage, 'EnvironmentId or spaceId not found in headers');
+    });
+
+    it('returns correct response on successful message creation', async () => {
+      const slackResponse = {
+        ok: true,
+        channel: 'channel123',
+        ts: '1234567890.123456',
+        message: { text: 'Hello World!' },
+      } as ChatPostMessageResponse;
+
+      oAuthRepository.get.resolves({ token: 'slack-token-123' } as AuthToken);
+      messagesRepository.create.resolves(slackResponse);
+
+      const request = mockRequest({
+        body: { workspaceId: 'workspace123', message: 'Hello World!', channelId: 'channel123' },
+        headers: {
+          ['x-contentful-space-id']: 'space123',
+          ['x-contentful-environment-id']: 'env123',
+          ['x-contentful-crn']: 'crn:contentful:space:space123',
+        },
+      });
+      const next = stub();
+      const statusStub = stub().returnsThis();
+      const jsonStub = stub().returnsThis();
+      const response = mockResponse({
+        status: statusStub,
+        json: jsonStub,
+      });
+
+      await runHandler(instance.post(request, response, next));
+
+      assert.calledWith(statusStub, 200);
+      assert.calledWith(jsonStub, slackResponse);
+      assert.notCalled(next);
     });
   });
 });
