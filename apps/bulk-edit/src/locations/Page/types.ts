@@ -11,9 +11,11 @@ export type ContentTypeField = {
   id: string;
   uniqueId: string;
   name: string;
+  required: boolean;
   locale?: string;
   type: string;
   items?: Item;
+  validations?: ContentTypeFieldValidation[];
 };
 
 export interface Fields {

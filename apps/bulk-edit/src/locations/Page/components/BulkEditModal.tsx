@@ -76,6 +76,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
                   datatest-id="field-editor"
                 />
                 <FieldEditorValidator
+                  field={selectedField}
                   value={value}
                   validations={validations}
                   setValidations={setValidations}

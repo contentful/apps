@@ -346,9 +346,11 @@ export const mapContentTypePropsToFields = (
           id: f.id,
           uniqueId: `${f.id}-${locale}`,
           name: f.name,
+          required: f.required,
           locale: locale,
           type: f.type,
-          items: f?.items,
+          items: f.items,
+          validations: f.validations,
         });
       });
     } else {
@@ -356,8 +358,10 @@ export const mapContentTypePropsToFields = (
         id: f.id,
         uniqueId: f.id,
         name: f.name,
+        required: f.required,
         type: f.type,
-        items: f?.items,
+        items: f.items,
+        validations: f.validations,
       });
     }
   });

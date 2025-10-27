@@ -527,12 +527,18 @@ describe('entryUtils', () => {
     });
 
     it('creates Symbol field correctly for non-localized field', async () => {
-      const expected = { id: 'title', name: 'Title', type: 'Symbol', items: undefined };
+      const expected = {
+        id: 'title',
+        name: 'Title',
+        required: false,
+        type: 'Symbol',
+        items: undefined,
+        validations: [],
+      };
       const mockContentType = createTestContentType([
         {
           ...expected,
           localized: false,
-          required: false,
         },
       ]);
 
@@ -549,12 +555,18 @@ describe('entryUtils', () => {
     });
 
     it('creates localized Symbol field correctly', async () => {
-      const expected = { id: 'description', name: 'Description', type: 'Symbol', items: undefined };
+      const expected = {
+        id: 'description',
+        name: 'Description',
+        required: false,
+        type: 'Symbol',
+        items: undefined,
+        validations: [],
+      };
       const mockContentType = createTestContentType([
         {
           ...expected,
           localized: true,
-          required: false,
         },
       ]);
 
@@ -583,17 +595,18 @@ describe('entryUtils', () => {
       const expected = {
         id: 'tags',
         name: 'Tags',
+        required: false,
         type: 'Array',
         items: {
           type: 'Symbol',
           validations: [],
         },
+        validations: [],
       };
       const mockContentType = createTestContentType([
         {
           ...expected,
           localized: false,
-          required: false,
         },
       ]);
 
@@ -616,6 +629,7 @@ describe('entryUtils', () => {
       const expected = {
         id: 'relatedEntries',
         name: 'Related Entries',
+        required: false,
         type: 'Array',
         items: {
           type: 'Link',
@@ -627,7 +641,6 @@ describe('entryUtils', () => {
         {
           ...expected,
           localized: false,
-          required: false,
         },
       ]);
 

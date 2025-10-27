@@ -173,8 +173,8 @@ describe('BulkEditModal', () => {
   });
 
   describe('Field validations', () => {
-    it('shows validation message for empty Boolean field in modal', async () => {
-      const booleanField = createField('Boolean', 'isActive', 'Is Active');
+    it('shows validation message for empty Boolean field in modal when required validation is configured', async () => {
+      const booleanField = createField('Boolean', 'isActive', 'Is Active', true);
 
       render(
         <BulkEditModal
@@ -195,8 +195,8 @@ describe('BulkEditModal', () => {
       });
     });
 
-    it('shows validation message for empty Symbol field in modal', async () => {
-      const symbolField = createField('Symbol', 'title', 'Title');
+    it('shows validation message for empty Symbol field in modal when required validation is configured', async () => {
+      const symbolField = createField('Symbol', 'title', 'Title', true);
 
       render(
         <BulkEditModal
@@ -217,8 +217,8 @@ describe('BulkEditModal', () => {
       });
     });
 
-    it('shows validation message for empty Number field in modal', async () => {
-      const numberField = createField('Number', 'price', 'Price');
+    it('shows validation message for empty Number field in modal when required validation is configured', async () => {
+      const numberField = createField('Number', 'price', 'Price', true);
 
       render(
         <BulkEditModal
@@ -239,8 +239,8 @@ describe('BulkEditModal', () => {
       });
     });
 
-    it('shows validation message for empty JSON field in modal', async () => {
-      const jsonField = createField('Object', 'metadata', 'Metadata');
+    it('shows validation message for empty JSON field in modal when required validation is configured', async () => {
+      const jsonField = createField('Object', 'metadata', 'Metadata', true);
 
       render(
         <BulkEditModal
@@ -261,8 +261,8 @@ describe('BulkEditModal', () => {
       });
     });
 
-    it('shows validation message for empty Array field in modal', async () => {
-      const arrayField = createField('Array', 'tags', 'Tags');
+    it('shows validation message for empty Array field in modal when required validation is configured', async () => {
+      const arrayField = createField('Array', 'tags', 'Tags', true);
 
       render(
         <BulkEditModal
@@ -283,8 +283,8 @@ describe('BulkEditModal', () => {
       });
     });
 
-    it('disables Save button when validation errors are present', async () => {
-      const booleanField = createField('Boolean', 'isActive', 'Is Active');
+    it('disables Save button when required validation is configured', async () => {
+      const booleanField = createField('Boolean', 'isActive', 'Is Active', true);
 
       render(
         <BulkEditModal
@@ -306,8 +306,30 @@ describe('BulkEditModal', () => {
       });
     });
 
+    it('does not disable the save button when required validation is not configured', async () => {
+      const booleanField = createField('Boolean', 'isActive', 'Is Active');
+
+      render(
+        <BulkEditModal
+          isOpen={true}
+          onClose={vi.fn()}
+          onSave={vi.fn()}
+          selectedEntries={[entry1]}
+          selectedField={booleanField}
+          locales={mockSdk.locales}
+          isSaving={false}
+          totalUpdateCount={0}
+          editionCount={0}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulk-edit-save')).not.toBeDisabled();
+      });
+    });
+
     it('enables Save button when validation errors are resolved', async () => {
-      const symbolField = createField('Symbol', 'title', 'Title');
+      const symbolField = createField('Symbol', 'title', 'Title', true);
 
       render(
         <BulkEditModal
@@ -332,35 +354,6 @@ describe('BulkEditModal', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('bulk-edit-save')).not.toBeDisabled();
-        expect(screen.queryByText('This field is required')).not.toBeInTheDocument();
-      });
-    });
-
-    it('clears validation message when field gets a value', async () => {
-      const numberField = createField('Number', 'price', 'Price');
-
-      render(
-        <BulkEditModal
-          isOpen={true}
-          onClose={vi.fn()}
-          onSave={vi.fn()}
-          selectedEntries={[entry1]}
-          selectedField={numberField}
-          locales={mockSdk.locales}
-          isSaving={false}
-          totalUpdateCount={0}
-          editionCount={0}
-        />
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('This field is required')).toBeInTheDocument();
-      });
-
-      const input = await screen.findByTestId('number-editor-input');
-      fireEvent.change(input, { target: { value: '100' } });
-
-      await waitFor(() => {
         expect(screen.queryByText('This field is required')).not.toBeInTheDocument();
       });
     });
