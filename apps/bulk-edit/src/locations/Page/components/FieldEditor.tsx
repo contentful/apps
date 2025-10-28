@@ -7,7 +7,7 @@ import { TagsEditor } from '@contentful/field-editor-tags';
 import { BooleanEditor } from '@contentful/field-editor-boolean';
 import { JsonEditor } from '@contentful/field-editor-json';
 import type { ContentTypeField } from '../types';
-import { Note, Skeleton } from '@contentful/f36-components';
+import { Note } from '@contentful/f36-components';
 import { i18n } from '@lingui/core';
 import {
   createFieldAPI,
