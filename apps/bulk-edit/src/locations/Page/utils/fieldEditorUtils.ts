@@ -1,6 +1,6 @@
 import type { FieldAPI } from '@contentful/field-editor-shared';
 import type { ContentTypeField } from '../types';
-import { Control, EditorInterfaceProps } from 'contentful-management';
+import { Control } from 'contentful-management';
 
 // API creation utilities
 export const createFieldAPI = (
