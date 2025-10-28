@@ -1,8 +1,10 @@
 import React from 'react';
 import { Button, Card, Flex, Text } from '@contentful/f36-components';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 import { styles } from './styles';
 import { ConnectedWorkspace, useWorkspaceStore } from '../../workspace.store';
+import { TestConnection } from './TestConnection';
 
 interface Props {
   workspace: ConnectedWorkspace;
@@ -10,6 +12,9 @@ interface Props {
 
 export const ConnectedWorkspacePanel = ({ workspace }: Props) => {
   const removeConnectedWorkspace = useWorkspaceStore((state) => state.removeConnectedWorkspace);
+
+  // Check if we're in development environment
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
   const disconnectWorkspace = () => {
     // todo remove workspace from database
@@ -33,6 +38,7 @@ export const ConnectedWorkspacePanel = ({ workspace }: Props) => {
           Disconnect
         </Button>
       </Flex>
+      {isDevelopment && <TestConnection workspaceId={workspace.id} />}
     </Card>
   );
 };
