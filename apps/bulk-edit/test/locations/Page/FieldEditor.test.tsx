@@ -188,8 +188,8 @@ describe('FieldEditor', () => {
 
       // Wait for the editor interface to be fetched and BooleanEditor to render
       await vi.waitFor(() => {
-        expect(screen.getByText('True')).toBeInTheDocument();
-        expect(screen.getByText('False')).toBeInTheDocument();
+        expect(screen.getByText('Yes')).toBeInTheDocument();
+        expect(screen.getByText('No')).toBeInTheDocument();
       });
     });
   });

@@ -161,16 +161,16 @@ describe('entryUtils', () => {
       expect(result).toBe('Lat: 40.7128, Lon: - ...');
     });
 
-    it('returns "true" for Boolean field with true value', () => {
+    it('returns "Yes" for Boolean field with true value', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Boolean' } as ContentTypeField;
       const result = getFieldDisplayValue(field, true, 20);
-      expect(result).toBe('true');
+      expect(result).toBe('Yes');
     });
 
-    it('returns "false" for Boolean field with false value', () => {
+    it('returns "No" for Boolean field with false value', () => {
       const field = { id: 'testField', locale: 'en-US', type: 'Boolean' } as ContentTypeField;
       const result = getFieldDisplayValue(field, false, 20);
-      expect(result).toBe('false');
+      expect(result).toBe('No');
     });
 
     it('returns truncated JSON string for Object field', () => {
@@ -545,7 +545,10 @@ describe('entryUtils', () => {
       mockSdk.cma.contentType.get.mockResolvedValue(mockContentType);
 
       const ct = await mockSdk.cma.contentType.get({ contentTypeId: 'test-content-type' });
-      const result = mapContentTypePropsToFields(ct, mockLocales);
+      const editorInterface = await mockSdk.cma.editorInterface.get({
+        contentTypeId: 'test-content-type',
+      });
+      const result = mapContentTypePropsToFields(ct, editorInterface, mockLocales);
 
       expect(mockSdk.cma.contentType.get).toHaveBeenCalledWith({
         contentTypeId: 'test-content-type',
@@ -573,7 +576,10 @@ describe('entryUtils', () => {
       mockSdk.cma.contentType.get.mockResolvedValue(mockContentType);
 
       const ct = await mockSdk.cma.contentType.get({ contentTypeId: 'test-content-type' });
-      const result = mapContentTypePropsToFields(ct, mockLocales);
+      const editorInterface = await mockSdk.cma.editorInterface.get({
+        contentTypeId: 'test-content-type',
+      });
+      const result = mapContentTypePropsToFields(ct, editorInterface, mockLocales);
 
       expect(mockSdk.cma.contentType.get).toHaveBeenCalledWith({
         contentTypeId: 'test-content-type',
@@ -613,7 +619,10 @@ describe('entryUtils', () => {
       mockSdk.cma.contentType.get.mockResolvedValue(mockContentType);
 
       const ct = await mockSdk.cma.contentType.get({ contentTypeId: 'test-content-type' });
-      const result = mapContentTypePropsToFields(ct, mockLocales);
+      const editorInterface = await mockSdk.cma.editorInterface.get({
+        contentTypeId: 'test-content-type',
+      });
+      const result = mapContentTypePropsToFields(ct, editorInterface, mockLocales);
 
       expect(mockSdk.cma.contentType.get).toHaveBeenCalledWith({
         contentTypeId: 'test-content-type',
@@ -648,7 +657,10 @@ describe('entryUtils', () => {
       mockSdk.cma.contentType.get.mockResolvedValue(mockContentType);
 
       const ct = await mockSdk.cma.contentType.get({ contentTypeId: 'test-content-type' });
-      const result = mapContentTypePropsToFields(ct, mockLocales);
+      const editorInterface = await mockSdk.cma.editorInterface.get({
+        contentTypeId: 'test-content-type',
+      });
+      const result = mapContentTypePropsToFields(ct, editorInterface, mockLocales);
 
       expect(mockSdk.cma.contentType.get).toHaveBeenCalledWith({
         contentTypeId: 'test-content-type',

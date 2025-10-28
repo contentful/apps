@@ -2,10 +2,9 @@ import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Document } from '@contentful/rich-text-types';
 import { ContentTypeField, Entry, Fields } from '../types';
 import {
-  ContentFields,
   ContentTypeProps,
+  EditorInterfaceProps,
   EntryProps,
-  KeyValueMap,
   QueryOptions,
 } from 'contentful-management';
 import {
@@ -16,6 +15,7 @@ import {
   UNKNOWN_STATUS,
 } from './constants';
 import { BadgeVariant } from '@contentful/f36-components';
+import { getCustomBooleanLabels } from './fieldEditorUtils';
 
 export const STATUSES = [DRAFT_STATUS, CHANGED_STATUS, PUBLISHED_STATUS];
 
@@ -83,8 +83,7 @@ function isBasicField(field: ContentTypeField) {
     field.type === 'Text' ||
     field.type === 'Integer' ||
     field.type === 'Number' ||
-    field.type === 'Date' ||
-    field.type === 'Boolean'
+    field.type === 'Date'
   );
 }
 
@@ -94,12 +93,17 @@ export const getFieldDisplayValue = (
   maxLength: number = 30
 ): string => {
   if (!field) return '-';
-  if (value === undefined || value === null) return '-';
+  if (value === undefined || value === null || value === '') return '-';
 
   let displayValue = '-';
 
   if (isBasicField(field)) {
     displayValue = String(value);
+  }
+
+  if (field.type === 'Boolean') {
+    const { trueLabel, falseLabel } = getCustomBooleanLabels(field.fieldControl);
+    displayValue = value ? trueLabel : falseLabel;
   }
 
   if (field.type === 'Array' && Array.isArray(value)) {
@@ -334,32 +338,36 @@ export const filterEntriesByNumericSearch = (
 };
 
 export const mapContentTypePropsToFields = (
-  ct: ContentTypeProps,
+  contentTypeProps: ContentTypeProps,
+  editorInterface: EditorInterfaceProps,
   locales: string[]
 ): ContentTypeField[] => {
   const newFields: ContentTypeField[] = [];
 
-  ct.fields.forEach((f) => {
+  contentTypeProps.fields.forEach((f) => {
+    const fieldControl = editorInterface?.controls?.find((c) => c.fieldId === f.id);
     if (f.localized) {
       locales.forEach((locale) => {
         newFields.push({
-          contentTypeId: ct.sys.id,
+          contentTypeId: contentTypeProps.sys.id,
           id: f.id,
           uniqueId: `${f.id}-${locale}`,
           name: f.name,
           locale: locale,
           type: f.type,
           items: f?.items,
+          fieldControl: fieldControl,
         });
       });
     } else {
       newFields.push({
-        contentTypeId: ct.sys.id,
+        contentTypeId: contentTypeProps.sys.id,
         id: f.id,
         uniqueId: f.id,
         name: f.name,
         type: f.type,
         items: f?.items,
+        fieldControl: fieldControl,
       });
     }
   });
