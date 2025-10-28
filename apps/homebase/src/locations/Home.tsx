@@ -1,5 +1,5 @@
 import { HomeAppSDK } from '@contentful/app-sdk';
-import { Box, Button, Flex, Menu, Paragraph } from '@contentful/f36-components';
+import { Box, Button, Card, Flex, Menu, Paragraph, Text } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { CONTENT_TYPE_ID, MARKDOWN_ID, TITLE_ID } from '../consts';
 import { useEffect, useState } from 'react';
@@ -7,6 +7,7 @@ import { EntryProps } from 'contentful-management';
 import MarkdownPreview from '../components/MarkdownPreview';
 import { styles } from './Home.styles';
 import Splitter from '../components/Splitter';
+import ButtonMenu from '../components/ButonMenu';
 
 const Home = () => {
   const sdk = useSDK<HomeAppSDK>();
@@ -29,6 +30,16 @@ const Home = () => {
     getEntries();
   }, []);
 
+  const handleCreateEntry = async () => {
+    await sdk.navigator.openNewEntry(CONTENT_TYPE_ID, {
+      slideIn: {
+        waitForClose: true,
+      },
+    });
+  };
+
+  const noEntries = entries.length === 0 && !selectedEntry;
+
   if (!entries) {
     return <Paragraph>Loading...</Paragraph>;
   }
@@ -36,18 +47,13 @@ const Home = () => {
   return (
     <Flex flexDirection="column" marginLeft="spacingL" marginRight="spacingL" style={styles.home}>
       <Flex justifyContent="flex-end" marginTop="spacingS" marginRight="spacingS">
-        <Menu>
-          <Menu.Trigger>
-            <Button>Select entry</Button>
-          </Menu.Trigger>
-          <Menu.List>
-            {entries.map((entry) => (
-              <Menu.Item key={entry.sys.id} onClick={() => setSelectedEntry(entry)}>
-                {entry.fields[TITLE_ID]?.[defaultLocale]}
-              </Menu.Item>
-            ))}
-          </Menu.List>
-        </Menu>
+        <ButtonMenu buttonLabel="Select entry" isDisabled={noEntries}>
+          {entries.map((entry) => (
+            <Menu.Item key={entry.sys.id} onClick={() => setSelectedEntry(entry)}>
+              {entry.fields[TITLE_ID]?.[defaultLocale]}
+            </Menu.Item>
+          ))}
+        </ButtonMenu>
       </Flex>
       <Box>
         <Splitter marginTop="spacingS" style={styles.splitter} data-test-id="splitter" />
@@ -60,6 +66,23 @@ const Home = () => {
             direction={sdk.locales.direction[defaultLocale]}
             data-testid="markdown-preview"
           />
+        )}
+        {!selectedEntry && entries.length === 0 && (
+          <Flex alignItems="center" justifyContent="center" marginTop="spacingL">
+            <Card style={styles.card}>
+              <Flex flexDirection="column" alignItems="center">
+                <Text fontWeight="fontWeightDemiBold" fontSize="fontSizeL">
+                  No Homebase entry to display.
+                </Text>
+                <Paragraph marginTop="spacingXs" marginBottom="spacingL" fontSize="fontSizeM">
+                  Create an entry using the HOMEBASE content type.
+                </Paragraph>
+                <Button onClick={handleCreateEntry} variant="primary">
+                  Create entry
+                </Button>
+              </Flex>
+            </Card>
+          </Flex>
         )}
       </Flex>
     </Flex>
