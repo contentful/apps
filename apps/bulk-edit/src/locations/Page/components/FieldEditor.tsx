@@ -15,9 +15,6 @@ import {
   getBooleanEditorParameters,
 } from '../utils/fieldEditorUtils';
 import type { LocalesAPI } from '@contentful/field-editor-shared';
-import { PageAppSDK } from '@contentful/app-sdk';
-import { EditorInterfaceProps } from 'contentful-management';
-import { useSDK } from '@contentful/react-apps-toolkit';
 
 interface FieldEditorProps {
   field: ContentTypeField;
@@ -28,10 +25,7 @@ interface FieldEditorProps {
 
 const ERROR_MESSAGE = 'Failed to initialize field editor. Please try again.';
 export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange, locales }) => {
-  const sdk = useSDK<PageAppSDK>();
   const [error, setError] = useState('');
-  const [editorInterface, setEditorInterface] = useState<EditorInterfaceProps | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
   const locale = field.locale ? field.locale : locales.default;
 
   // Ensure Lingui i18n is activated for editors that rely on it (e.g., JsonEditor)
@@ -46,24 +40,6 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
         setError(ERROR_MESSAGE);
       }
     }
-  }, []);
-
-  useEffect(() => {
-    const fetchEditorInterface = async (): Promise<void> => {
-      try {
-        setLoading(true);
-        setEditorInterface(
-          await sdk.cma.editorInterface.get({
-            contentTypeId: field.contentTypeId,
-          })
-        );
-      } catch (e) {
-        setEditorInterface(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    void fetchEditorInterface();
   }, []);
 
   const fieldApi = useMemo(() => {
