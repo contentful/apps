@@ -16,7 +16,6 @@ updates:
     - dependency-name: "*"
       update-types: ["version-update:semver-major"]
     - dependency-name: "@contentful/app-sdk"
-    - dependency-name: '@contentful/field-editor-rich-text'
     - dependency-name: "prettier"
     - dependency-name: "serverless"
       versions:
