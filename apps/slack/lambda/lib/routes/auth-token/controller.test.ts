@@ -50,15 +50,15 @@ describe('AuthTokenController', () => {
 
         const error = next.getCall(0).args[0];
 
-        assert.include(error.details?.error[0], {
+        assert.include(error.details[0], {
           schemaPath: '#/required',
           keyword: 'required',
         });
-        assert.include(error.details?.error[1], {
+        assert.include(error.details[1], {
           schemaPath: '#/properties/code/type',
           keyword: 'type',
         });
-        assert.include(error.details?.error[2], {
+        assert.include(error.details[2], {
           schemaPath: '#/properties/spaceId/type',
           keyword: 'type',
         });
@@ -146,7 +146,7 @@ describe('AuthTokenController', () => {
 
         const error = next.getCall(0).args[0];
 
-        assert.include(error.details?.error[0], {
+        assert.include(error.details[0], {
           schemaPath: '#/properties/refreshToken/type',
           keyword: 'type',
         });

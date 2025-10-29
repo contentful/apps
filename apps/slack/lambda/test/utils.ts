@@ -26,19 +26,16 @@ export const mockResponse = ({
   status,
   header,
   send,
-  json,
 }: {
   status?: sinon.SinonStub;
   header?: sinon.SinonStub;
   send?: sinon.SinonStub;
-  json?: sinon.SinonStub;
 } = {}) => {
   return {
     status: status ?? sinon.stub().returnsThis(),
     sendStatus: status ?? sinon.stub().returnsThis(),
     header: header ?? sinon.stub().returnsThis(),
     send: send ?? sinon.stub().returnsThis(),
-    json: json ?? sinon.stub().returnsThis(),
   } as unknown as SinonStubbedInstance<Response>;
 };
 

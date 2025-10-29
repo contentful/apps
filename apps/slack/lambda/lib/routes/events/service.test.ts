@@ -3,7 +3,7 @@ import { EventsService } from './service';
 import { ACCEPTED_EVENTS } from './constants';
 import { assert } from '../../../test/utils';
 import { NotFoundException } from '../../errors';
-import { createStubInstance, SinonStubbedInstance, stub, restore } from 'sinon';
+import { createStubInstance, SinonStubbedInstance, stub } from 'sinon';
 import { PlainClientAPI } from 'contentful-management';
 import {
   EventEntity,
@@ -24,10 +24,6 @@ describe('EventsService', () => {
 
   before(() => {
     stub(helpers, 'getInstallationParametersFromCma').resolves(expectedParams);
-  });
-
-  after(() => {
-    restore();
   });
 
   beforeEach(() => {
