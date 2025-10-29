@@ -17,7 +17,8 @@ export const createFieldAPI = (
     locale: locale,
     type: field.type as any,
     required: false,
-    validations: [],
+    validations: field.validations as any,
+    items: field.items as any,
     getValue: () => value,
     setValue: async (newValue: any) => {
       onChange(newValue);
