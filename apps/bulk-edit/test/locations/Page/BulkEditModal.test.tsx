@@ -16,6 +16,8 @@ describe('BulkEditModal', () => {
     uniqueId: 'size',
     name: 'Size',
     type: 'Number',
+    fieldControl: { fieldId: 'size', widgetId: 'numberEditor' },
+    validations: [],
   };
   const entry1: Entry = {
     sys: { id: '1', contentType: { sys: { id: 'condoA' } }, version: 1 },

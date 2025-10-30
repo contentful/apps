@@ -356,6 +356,7 @@ export const mapContentTypePropsToFields = (
           locale: locale,
           type: f.type,
           items: f?.items,
+          validations: f.validations,
           fieldControl: fieldControl,
         });
       });
@@ -367,6 +368,7 @@ export const mapContentTypePropsToFields = (
         name: f.name,
         type: f.type,
         items: f?.items,
+        validations: f.validations,
         fieldControl: fieldControl,
       });
     }

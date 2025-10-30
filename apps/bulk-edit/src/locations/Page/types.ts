@@ -16,6 +16,7 @@ export type ContentTypeField = {
   type: string;
   items?: Item;
   fieldControl?: Control;
+  validations?: ContentTypeFieldValidation[];
 };
 
 export interface Fields {
