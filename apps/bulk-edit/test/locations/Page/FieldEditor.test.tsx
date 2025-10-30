@@ -4,6 +4,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FieldEditor } from '../../../src/locations/Page/components/FieldEditor';
 import { mockSdk } from '../../mocks';
 
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+}));
+
 describe('FieldEditor', () => {
   const mockOnChange = vi.fn();
 
@@ -86,24 +90,6 @@ describe('FieldEditor', () => {
     expect(screen.getByText('tag2')).toBeInTheDocument();
   });
 
-  it('renders BooleanEditor for Boolean fields', () => {
-    const field = createField('Boolean');
-    const value = true;
-
-    render(
-      <FieldEditor
-        field={field}
-        value={String(value)}
-        onChange={mockOnChange}
-        locales={mockSdk.locales}
-      />
-    );
-
-    const booleanEditorElement = screen.getByText('Clear');
-
-    expect(booleanEditorElement).toBeTruthy();
-  });
-
   it('renders JsonEditor for Object fields', () => {
     const field = createField('Object');
     const value = { key: 'value' };
@@ -119,6 +105,93 @@ describe('FieldEditor', () => {
 
     expect(screen.getByText('Redo')).toBeInTheDocument();
     expect(screen.getByText('Undo')).toBeInTheDocument();
+  });
+
+  it('renders BooleanEditor for Boolean fields', async () => {
+    const field = createField('Boolean');
+    const value = true;
+
+    render(
+      <FieldEditor
+        field={field}
+        value={String(value)}
+        onChange={mockOnChange}
+        locales={mockSdk.locales}
+      />
+    );
+
+    const booleanEditorElement = await screen.findByText('Clear');
+
+    expect(booleanEditorElement).toBeTruthy();
+  });
+
+  describe('Boolean field editor with custom labels', () => {
+    it('renders BooleanEditor with default labels when editor interface is null', async () => {
+      const field = createField('Boolean');
+      const value = true;
+
+      // Mock the SDK to return null for editor interface
+      vi.mocked(mockSdk.cma.editorInterface.get).mockResolvedValue(null);
+
+      render(
+        <FieldEditor
+          field={field}
+          value={value}
+          onChange={mockOnChange}
+          locales={mockSdk.locales}
+        />
+      );
+
+      // Wait for the editor interface to be fetched
+      await vi.waitFor(() => {
+        expect(screen.getByText('Yes')).toBeInTheDocument();
+        expect(screen.getByText('No')).toBeInTheDocument();
+      });
+    });
+
+    it('renders BooleanEditor with custom labels from editor interface', async () => {
+      const field = createField('Boolean');
+      const value = true;
+
+      // Mock editor interface with custom labels
+      const mockEditorInterface = {
+        sys: {
+          id: 'test-editor-interface',
+          type: 'EditorInterface',
+          version: 1,
+          createdAt: '2023-01-01T00:00:00Z',
+          updatedAt: '2023-01-01T00:00:00Z',
+        },
+        controls: [
+          {
+            fieldId: 'test-field',
+            widgetId: 'boolean',
+            widgetNamespace: 'builtin',
+            settings: {
+              trueLabel: 'True',
+              falseLabel: 'False',
+            },
+          },
+        ],
+      };
+
+      vi.mocked(mockSdk.cma.editorInterface.get).mockResolvedValue(mockEditorInterface);
+
+      render(
+        <FieldEditor
+          field={field}
+          value={value}
+          onChange={mockOnChange}
+          locales={mockSdk.locales}
+        />
+      );
+
+      // Wait for the editor interface to be fetched and BooleanEditor to render
+      await vi.waitFor(() => {
+        expect(screen.getByText('Yes')).toBeInTheDocument();
+        expect(screen.getByText('No')).toBeInTheDocument();
+      });
+    });
   });
 
   describe('FieldAPI and LocalesAPI creation', () => {

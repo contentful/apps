@@ -236,7 +236,10 @@ const Page = () => {
 
       try {
         const ct = await sdk.cma.contentType.get({ contentTypeId: selectedContentTypeId });
-        const newFields = mapContentTypePropsToFields(ct.fields, locales);
+        const editorInterface = await sdk.cma.editorInterface.get({
+          contentTypeId: ct.sys.id,
+        });
+        const newFields = mapContentTypePropsToFields(ct, editorInterface, locales);
         setFields(newFields);
         setSelectedColumns(getFieldsMapped(newFields));
         setCurrentContentType(ct);

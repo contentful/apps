@@ -4,10 +4,19 @@ import { expect, vi } from 'vitest';
 import { BulkEditModal } from '../../../src/locations/Page/components/BulkEditModal';
 import { ContentTypeField, Entry } from '../../../src/locations/Page/types';
 import { mockSdk } from '../../mocks';
-import { mockSdk } from '../../mocks';
+
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+}));
 
 describe('BulkEditModal', () => {
-  const field: ContentTypeField = { id: 'size', uniqueId: 'size', name: 'Size', type: 'Number' };
+  const field: ContentTypeField = {
+    contentTypeId: 'test-content-type',
+    id: 'size',
+    uniqueId: 'size',
+    name: 'Size',
+    type: 'Number',
+  };
   const entry1: Entry = {
     sys: { id: '1', contentType: { sys: { id: 'condoA' } }, version: 1 },
     fields: { displayName: { 'en-US': 'Building one' }, size: { 'en-US': 1000 } },

@@ -9,7 +9,11 @@ import { JsonEditor } from '@contentful/field-editor-json';
 import type { ContentTypeField } from '../types';
 import { Note } from '@contentful/f36-components';
 import { i18n } from '@lingui/core';
-import { createFieldAPI } from '../utils/fieldEditorUtils';
+import {
+  createFieldAPI,
+  getCustomBooleanLabels,
+  getBooleanEditorParameters,
+} from '../utils/fieldEditorUtils';
 import type { LocalesAPI } from '@contentful/field-editor-shared';
 
 interface FieldEditorProps {
@@ -67,7 +71,16 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
           // Short text array: items.type === 'Symbol'
           return <TagsEditor field={fieldApi} isInitiallyDisabled={false} />;
         case 'Boolean':
-          return <BooleanEditor field={fieldApi} isInitiallyDisabled={false} />;
+          const { trueLabel, falseLabel } = getCustomBooleanLabels(field.fieldControl);
+
+          return (
+            <BooleanEditor
+              field={fieldApi}
+              isInitiallyDisabled={false}
+              parameters={getBooleanEditorParameters(trueLabel, falseLabel)}
+            />
+          );
+
         case 'Object':
           return <JsonEditor field={fieldApi} isInitiallyDisabled={false} />;
         default:

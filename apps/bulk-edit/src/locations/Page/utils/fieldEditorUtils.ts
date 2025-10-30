@@ -1,5 +1,6 @@
 import type { FieldAPI } from '@contentful/field-editor-shared';
 import type { ContentTypeField } from '../types';
+import { Control } from 'contentful-management';
 
 // API creation utilities
 export const createFieldAPI = (
@@ -31,5 +32,25 @@ export const createFieldAPI = (
     onIsDisabledChanged: () => () => {},
     getSchemaErrors: () => [],
     onSchemaErrorsChanged: () => () => {},
+  };
+};
+
+export const getCustomBooleanLabels = (fieldControl?: Control) => {
+  const booleanSettings = fieldControl?.settings;
+
+  return {
+    trueLabel: booleanSettings?.trueLabel ? String(booleanSettings.trueLabel) : 'Yes',
+    falseLabel: booleanSettings?.falseLabel ? String(booleanSettings.falseLabel) : 'No',
+  };
+};
+
+export const getBooleanEditorParameters = (trueLabel: string, falseLabel: string) => {
+  return {
+    installation: {},
+    instance: {
+      trueLabel,
+      falseLabel,
+    },
+    invocation: {},
   };
 };

@@ -1,4 +1,4 @@
-import { ContentTypeFieldValidation } from 'contentful-management';
+import { ContentTypeFieldValidation, Control } from 'contentful-management';
 
 export type Item = { type: string; linkType?: string; validations?: ContentTypeFieldValidation[] };
 
@@ -8,12 +8,14 @@ export type FilterOption = {
 };
 
 export type ContentTypeField = {
+  contentTypeId: string;
   id: string;
   uniqueId: string;
   name: string;
   locale?: string;
   type: string;
   items?: Item;
+  fieldControl?: Control;
 };
 
 export interface Fields {
