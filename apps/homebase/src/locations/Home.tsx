@@ -1,5 +1,16 @@
 import { HomeAppSDK } from '@contentful/app-sdk';
-import { Box, Button, Card, Flex, Menu, Paragraph, Text } from '@contentful/f36-components';
+import {
+  Box,
+  Button,
+  Card,
+  Flex,
+  Menu,
+  Paragraph,
+  SkeletonBodyText,
+  SkeletonContainer,
+  SkeletonRow,
+  Text,
+} from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { CONTENT_TYPE_ID, MARKDOWN_ID, TITLE_ID } from '../consts';
 import { useEffect, useState } from 'react';
@@ -13,10 +24,12 @@ const Home = () => {
   const sdk = useSDK<HomeAppSDK>();
   const [entries, setEntries] = useState<EntryProps[]>([]);
   const [selectedEntry, setSelectedEntry] = useState<EntryProps | null>(null);
+  const [loading, setLoading] = useState(true);
   const defaultLocale = sdk.locales.default;
 
   useEffect(() => {
     const getEntries = async () => {
+      setLoading(true);
       const entries = await sdk.cma.entry.getMany({
         query: {
           'sys.contentType.sys.id': CONTENT_TYPE_ID,
@@ -26,6 +39,7 @@ const Home = () => {
       if (entries.items.length > 0) {
         setSelectedEntry(entries.items[0]);
       }
+      setLoading(false);
     };
     getEntries();
   }, []);
@@ -40,19 +54,30 @@ const Home = () => {
 
   const noEntries = entries.length === 0 && !selectedEntry;
 
-  if (!entries) {
-    return <Paragraph>Loading...</Paragraph>;
+  if (loading) {
+    return (
+      <Flex flexDirection="column" marginLeft="spacingL" marginRight="spacingL" style={styles.home}>
+        <Flex justifyContent="flex-end" marginTop="spacingS" marginRight="spacingS">
+          <SkeletonRow rowCount={1} columnCount={1} />
+        </Flex>
+        <Box>
+          <Splitter marginTop="spacingS" style={styles.splitter} data-test-id="splitter" />
+        </Box>
+      </Flex>
+    );
   }
 
   return (
     <Flex flexDirection="column" marginLeft="spacingL" marginRight="spacingL" style={styles.home}>
       <Flex justifyContent="flex-end" marginTop="spacingS" marginRight="spacingS">
         <ButtonMenu buttonLabel="Select entry" isDisabled={noEntries}>
-          {entries.map((entry) => (
-            <Menu.Item key={entry.sys.id} onClick={() => setSelectedEntry(entry)}>
-              {entry.fields[TITLE_ID]?.[defaultLocale]}
-            </Menu.Item>
-          ))}
+          <Menu.List>
+            {entries.map((entry) => (
+              <Menu.Item key={entry.sys.id} onClick={() => setSelectedEntry(entry)}>
+                {entry.fields[TITLE_ID]?.[defaultLocale]}
+              </Menu.Item>
+            ))}
+          </Menu.List>
         </ButtonMenu>
       </Flex>
       <Box>
@@ -67,7 +92,7 @@ const Home = () => {
             data-testid="markdown-preview"
           />
         )}
-        {!selectedEntry && entries.length === 0 && (
+        {entries.length === 0 && (
           <Flex alignItems="center" justifyContent="center" marginTop="spacingL">
             <Card style={styles.card}>
               <Flex flexDirection="column" alignItems="center">
