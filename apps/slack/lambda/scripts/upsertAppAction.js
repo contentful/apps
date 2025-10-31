@@ -184,6 +184,5 @@ if (require.main === module) {
 }
 
 module.exports = {
-  upsertSlackAppAction,
   upsertSlackAppActionFromCLI,
 };
