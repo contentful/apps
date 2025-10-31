@@ -27,7 +27,6 @@ export class ValidationExecutor {
       .map((error) => error!);
 
     return {
-      isValid: errors.length === 0,
       errors,
     };
   }

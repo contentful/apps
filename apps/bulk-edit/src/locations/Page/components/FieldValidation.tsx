@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { FormControl } from '@contentful/f36-components';
-import { useDebounce } from 'use-debounce';
+import { Flex, Text, Icon } from '@contentful/f36-components';
 import { ValidationExecutor } from '../../../validations';
 import type { ContentTypeField } from '../types';
+import { WarningOctagonIcon } from '@contentful/f36-icons';
 
 interface FieldValidationProps {
   field: ContentTypeField;
@@ -17,23 +17,21 @@ export const FieldValidation: React.FC<FieldValidationProps> = ({
 }) => {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  const [debouncedValue] = useDebounce(value, 500);
-
   const validationExecutor = useMemo(() => {
     return new ValidationExecutor(field);
   }, [field]);
 
   useEffect(() => {
-    const result = validationExecutor.validate(debouncedValue);
+    const result = validationExecutor.validate(value);
     const errorMessages = result.errors.map((err) => err.message);
     setValidationErrors(errorMessages);
 
-    const hasErrors = !result.isValid;
+    const hasErrors = result.errors.length > 0;
 
     if (onValidationChange) {
       onValidationChange(hasErrors);
     }
-  }, [debouncedValue, validationExecutor, onValidationChange]);
+  }, [value, validationExecutor, onValidationChange]);
 
   if (validationErrors.length === 0) {
     return null;
@@ -42,7 +40,12 @@ export const FieldValidation: React.FC<FieldValidationProps> = ({
   return (
     <>
       {validationErrors.map((error, index) => (
-        <FormControl.ValidationMessage key={index}>{error}</FormControl.ValidationMessage>
+        <Flex key={index} alignItems="center" gap="spacingXs">
+          <Icon as={WarningOctagonIcon} variant="negative" size="tiny"></Icon>
+          <Text as="p" fontColor="red600">
+            {error}
+          </Text>
+        </Flex>
       ))}
     </>
   );

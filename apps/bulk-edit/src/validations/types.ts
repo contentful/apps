@@ -6,7 +6,6 @@ export interface ValidationError {
 }
 
 export interface ValidationResult {
-  isValid: boolean;
   errors: ValidationError[];
 }
 

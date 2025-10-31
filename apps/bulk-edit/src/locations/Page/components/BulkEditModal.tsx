@@ -67,7 +67,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
             </Text>
           </Flex>
           {selectedField && (
-            <FormControl isInvalid={hasValidationErrors}>
+            <>
               <FieldEditor
                 field={selectedField}
                 value={value}
@@ -80,7 +80,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
                 value={value}
                 onValidationChange={setHasValidationErrors}
               />
-            </FormControl>
+            </>
           )}
         </Flex>
         {totalUpdateCount > 0 && isSaving && (
