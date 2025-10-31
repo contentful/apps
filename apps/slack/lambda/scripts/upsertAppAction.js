@@ -1,40 +1,10 @@
 #!/usr/bin/env node
 
-import 'dotenv/config';
-import contentful, { createClient } from 'contentful-management';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+const { createClient } = require('contentful-management');
+const { readFileSync } = require('fs');
+const { join } = require('path');
 
-interface UpsertAppActionProps {
-  client?: contentful.PlainClientAPI;
-  organizationId: string;
-  appDefinitionId: string;
-  appActionId: string;
-  stage?: string;
-}
-
-interface AppAction {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  type: string;
-  url?: string;
-  allowNetworks: string[];
-  parametersSchema?: any;
-  resultSchema?: any;
-}
-
-interface AppManifest {
-  name: string;
-  description: string;
-  id: string;
-  category: string;
-  version: string;
-  actions: AppAction[];
-}
-
-async function createCMAClient(): Promise<contentful.PlainClientAPI> {
+async function createCMAClient() {
   if (!process.env.CONTENTFUL_ACCESS_TOKEN) {
     throw new Error('Cannot find CMA token. Set CONTENTFUL_ACCESS_TOKEN environment variable.');
   }
@@ -50,23 +20,23 @@ async function createCMAClient(): Promise<contentful.PlainClientAPI> {
   return client;
 }
 
-function getBackendUrl(): string {
-  const backendUrl = process.env.REACT_APP_BACKEND_BASE_URL;
+function getBackendUrl() {
+  const backendUrl = process.env.APP_BACKEND_BASE_URL;
 
   if (!backendUrl) {
-    throw new Error(`Backend URL not found. Set REACT_APP_BACKEND_BASE_URL environment variable.`);
+    throw new Error(`Backend URL not found. Set APP_BACKEND_BASE_URL environment variable.`);
   }
 
   console.log(`🔗 Using backend URL: ${backendUrl}`);
   return backendUrl;
 }
 
-function validateEnvironment(): void {
+function validateEnvironment() {
   const requiredVars = [
     'CONTENTFUL_ACCESS_TOKEN',
     'CONTENTFUL_ORG_ID',
     'CONTENTFUL_APP_DEF_ID',
-    'APP_ACTION_ID',
+    'APP_BACKEND_BASE_URL',
   ];
 
   const missingVars = requiredVars.filter((varName) => !process.env[varName]);
@@ -81,29 +51,21 @@ function validateEnvironment(): void {
   }
 }
 
-export async function upsertSlackAppAction({
-  client,
-  organizationId,
-  appDefinitionId,
-  appActionId,
-}: UpsertAppActionProps) {
+async function upsertSlackAppAction({ client, organizationId, appDefinitionId, appActionId }) {
   if (!client) {
     client = await createCMAClient();
   }
 
   try {
-    // Get the backend URL
     const backendUrl = getBackendUrl();
 
-    // Read the manifest file from the Slack app directory
-    const manifestPath = join(__dirname, '../contentful-app-manifest.json');
+    const manifestPath = join(__dirname, '../../contentful-app-manifest.json');
     const manifestContent = readFileSync(manifestPath, 'utf8');
-    const manifest: AppManifest = JSON.parse(manifestContent);
+    const manifest = JSON.parse(manifestContent);
 
     console.log(`📖 Reading Slack app manifest from: ${manifestPath}`);
     console.log(`📋 Found ${manifest.actions?.length || 0} actions in manifest`);
 
-    // Find the specific action in the manifest
     const actionToUpdate = manifest.actions?.find((action) => action.id === appActionId);
 
     if (!actionToUpdate) {
@@ -125,23 +87,24 @@ export async function upsertSlackAppAction({
 
     // Prefer matching by explicit ID. If not found, fall back to matching by name from manifest
     const existingAction =
-      existingActions.items.find((action) => action.sys.id === appActionId) ||
-      existingActions.items.find((action) => action.name === actionToUpdate.name);
+      appActionId &&
+      (existingActions.items.find((action) => action.sys.id === appActionId) ||
+        existingActions.items.find((action) => action.name === actionToUpdate.name));
+
+    // Update the existing action
+    const endpointPath = `${backendUrl}${actionToUpdate.url}`;
+    const payload = {
+      name: actionToUpdate.name,
+      category: actionToUpdate.category,
+      description: actionToUpdate.description,
+      parametersSchema: actionToUpdate.parametersSchema,
+      resultSchema: actionToUpdate.resultSchema,
+      type: 'endpoint',
+      url: endpointPath,
+    };
 
     if (existingAction) {
       console.log(`🔄 Updating existing action: ${existingAction.name} (${existingAction.sys.id})`);
-
-      // Update the existing action
-      const endpointPath = `${backendUrl}${actionToUpdate.url}`;
-      const updateData: any = {
-        name: actionToUpdate.name,
-        category: actionToUpdate.category as 'Entries.v1.0' | 'Notification.v1.0' | 'Custom',
-        description: actionToUpdate.description,
-        parametersSchema: actionToUpdate.parametersSchema,
-        resultSchema: actionToUpdate.resultSchema,
-        type: 'endpoint',
-        url: endpointPath,
-      };
 
       const updatedAction = await client.appAction.update(
         {
@@ -149,7 +112,7 @@ export async function upsertSlackAppAction({
           appDefinitionId,
           appActionId,
         },
-        updateData
+        payload
       );
 
       console.log(
@@ -165,25 +128,12 @@ export async function upsertSlackAppAction({
     } else {
       console.log(`🆕 Creating new action: ${actionToUpdate.name} (${actionToUpdate.id})`);
 
-      // Create a new action
-      const endpointPath = `${backendUrl}${actionToUpdate.url}`;
-      const actionData: any = {
-        name: actionToUpdate.name,
-        category:
-          (actionToUpdate.category as 'Entries.v1.0' | 'Notification.v1.0' | 'Custom') || 'Custom',
-        description: actionToUpdate.description,
-        parametersSchema: actionToUpdate.parametersSchema,
-        resultSchema: actionToUpdate.resultSchema,
-        type: 'endpoint',
-        url: endpointPath,
-      };
-
       const createdAction = await client.appAction.create(
         {
           organizationId,
           appDefinitionId,
         },
-        actionData
+        payload
       );
 
       console.log(
@@ -203,13 +153,13 @@ export async function upsertSlackAppAction({
   }
 }
 
-export async function upsertSlackAppActionFromCLI() {
+async function upsertSlackAppActionFromCLI() {
   try {
     validateEnvironment();
 
-    const organizationId = process.env.CONTENTFUL_ORG_ID!;
-    const appDefinitionId = process.env.CONTENTFUL_APP_DEF_ID!;
-    const appActionId = process.env.APP_ACTION_ID!;
+    const organizationId = process.env.CONTENTFUL_ORG_ID;
+    const appDefinitionId = process.env.CONTENTFUL_APP_DEF_ID;
+    const appActionId = process.env.APP_ACTION_ID;
 
     console.log('🚀 Starting Slack app action upsert...');
     console.log(`📋 Organization ID: ${organizationId}`);
@@ -229,7 +179,11 @@ export async function upsertSlackAppActionFromCLI() {
   }
 }
 
-// Run from command line if this file is executed directly
 if (require.main === module) {
   upsertSlackAppActionFromCLI();
 }
+
+module.exports = {
+  upsertSlackAppAction,
+  upsertSlackAppActionFromCLI,
+};

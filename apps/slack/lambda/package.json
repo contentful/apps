@@ -15,7 +15,7 @@
     "dev": "node ./scripts/dev.js",
     "create_table": "node ./scripts/create_table",
     "docs": "node ./scripts/openapi.js",
-    "upsert-app-action": "tsx -r dotenv/config ./scripts/upsertAppAction.ts"
+    "upsert-app-action": "node ./scripts/upsertAppAction.js"
   },
   "keywords": [],
   "author": "",
