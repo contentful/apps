@@ -4,6 +4,7 @@ import {
   SinonStubbedInstance,
   useFakeTimers,
   stub,
+  restore,
 } from 'sinon';
 
 import { AuthTokenRepository } from './repository';
@@ -49,6 +50,10 @@ describe('AuthTokenRepository', () => {
 
   afterEach(() => {
     clock.restore();
+  });
+
+  after(() => {
+    restore();
   });
 
   describe('#validate', () => {

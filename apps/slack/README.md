@@ -99,6 +99,8 @@ This sections explains how to run the Slack app locally.
 
 ### Lambda
 
+- Change Dockerfile node version to 18. It should look like: `FROM node:18-alpine AS base`
+- Change serverless.yml runtime node version to 18. It should look like  `runtime: nodejs18.x`
 - Copy `lambda/config/serverless.dev.yml.example` to `lambda/config/serverless.dev.yml`
 - Create a new Contentful app, if this has not been done already.
   - Set frontend URL to `http://localhost:1234`
