@@ -14,9 +14,10 @@ export type ContentTypeField = {
   name: string;
   locale?: string;
   type: string;
+  required: boolean;
   items?: Item;
   fieldControl?: Control;
-  validations?: ContentTypeFieldValidation[];
+  validations: ContentTypeFieldValidation[];
 };
 
 export interface Fields {
