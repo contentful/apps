@@ -4,6 +4,7 @@ import type { ContentTypeField, Entry } from '../types';
 import { getEntryFieldValue, getFieldDisplayValue } from '../utils/entryUtils';
 import { ClockIcon } from '@contentful/f36-icons';
 import { FieldEditor } from './FieldEditor';
+import { FieldValidation } from './FieldValidation';
 import type { LocalesAPI } from '@contentful/field-editor-shared';
 
 interface BulkEditModalProps {
@@ -30,6 +31,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
   editionCount,
 }) => {
   const [value, setValue] = useState<any>('');
+  const [hasValidationErrors, setHasValidationErrors] = useState(false);
   const entryCount = selectedEntries.length;
   const firstEntry = selectedEntries[0];
   const firstValueToUpdate =
@@ -40,6 +42,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
 
   useEffect(() => {
     setValue('');
+    setHasValidationErrors(false);
   }, [isOpen]);
 
   return (
@@ -63,8 +66,8 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
               {entryCount === 1 ? 'selected' : `selected and ${entryCount - 1} more`}
             </Text>
           </Flex>
-          <FormControl>
-            {selectedField && (
+          {selectedField && (
+            <FormControl isInvalid={hasValidationErrors}>
               <FieldEditor
                 field={selectedField}
                 value={value}
@@ -72,8 +75,13 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
                 locales={locales}
                 datatest-id="field-editor"
               />
-            )}
-          </FormControl>
+              <FieldValidation
+                field={selectedField}
+                value={value}
+                onValidationChange={setHasValidationErrors}
+              />
+            </FormControl>
+          )}
         </Flex>
         {totalUpdateCount > 0 && isSaving && (
           <Note title="Updating entries" variant="neutral" icon={<ClockIcon variant="muted" />}>
@@ -92,7 +100,7 @@ export const BulkEditModal: React.FC<BulkEditModalProps> = ({
         <Button
           variant="primary"
           onClick={() => onSave(value)}
-          isDisabled={value === ''}
+          isDisabled={hasValidationErrors || isSaving}
           testId="bulk-edit-save"
           isLoading={isSaving}>
           Save
