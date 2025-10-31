@@ -123,7 +123,10 @@ export async function upsertSlackAppAction({
       appDefinitionId,
     });
 
-    const existingAction = existingActions.items.find((action) => action.sys.id === appActionId);
+    // Prefer matching by explicit ID. If not found, fall back to matching by name from manifest
+    const existingAction =
+      existingActions.items.find((action) => action.sys.id === appActionId) ||
+      existingActions.items.find((action) => action.name === actionToUpdate.name);
 
     if (existingAction) {
       console.log(`🔄 Updating existing action: ${existingAction.name} (${existingAction.sys.id})`);
@@ -166,7 +169,8 @@ export async function upsertSlackAppAction({
       const endpointPath = `${backendUrl}${actionToUpdate.url}`;
       const actionData: any = {
         name: actionToUpdate.name,
-        category: 'Custom',
+        category:
+          (actionToUpdate.category as 'Entries.v1.0' | 'Notification.v1.0' | 'Custom') || 'Custom',
         description: actionToUpdate.description,
         parametersSchema: actionToUpdate.parametersSchema,
         resultSchema: actionToUpdate.resultSchema,
