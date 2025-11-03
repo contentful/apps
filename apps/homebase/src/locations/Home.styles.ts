@@ -11,4 +11,12 @@ export const styles = {
   splitter: {
     backgroundColor: tokens.gray200,
   },
+  card: {
+    maxWidth: 652,
+    width: '100%',
+    padding: tokens.spacingXl,
+  },
+  skeletonContainer: {
+    maxWidth: '100px',
+  },
 };
