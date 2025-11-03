@@ -532,7 +532,9 @@ describe('entryUtils', () => {
         id: 'title',
         name: 'Title',
         type: 'Symbol',
+        required: false,
         items: undefined,
+        validations: [],
       };
       const mockContentType = createTestContentType([
         {
@@ -563,7 +565,9 @@ describe('entryUtils', () => {
         id: 'description',
         name: 'Description',
         type: 'Symbol',
+        required: false,
         items: undefined,
+        validations: [],
       };
       const mockContentType = createTestContentType([
         {
@@ -603,10 +607,12 @@ describe('entryUtils', () => {
         id: 'tags',
         name: 'Tags',
         type: 'Array',
+        required: false,
         items: {
           type: 'Symbol',
           validations: [],
         },
+        validations: [],
       };
       const mockContentType = createTestContentType([
         {
@@ -640,11 +646,13 @@ describe('entryUtils', () => {
         id: 'relatedEntries',
         name: 'Related Entries',
         type: 'Array',
+        required: false,
         items: {
           type: 'Link',
           linkType: 'Entry',
           validations: [],
         },
+        validations: [],
       };
       const mockContentType = createTestContentType([
         {

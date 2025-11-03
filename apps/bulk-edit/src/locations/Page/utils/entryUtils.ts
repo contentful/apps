@@ -355,8 +355,9 @@ export const mapContentTypePropsToFields = (
           name: f.name,
           locale: locale,
           type: f.type,
+          required: f.required,
           items: f?.items,
-          validations: f.validations,
+          validations: f.validations || [],
           fieldControl: fieldControl,
         });
       });
@@ -367,8 +368,9 @@ export const mapContentTypePropsToFields = (
         uniqueId: f.id,
         name: f.name,
         type: f.type,
+        required: f.required,
         items: f?.items,
-        validations: f.validations,
+        validations: f.validations || [],
         fieldControl: fieldControl,
       });
     }
