@@ -7,7 +7,6 @@ import {
   Menu,
   Paragraph,
   SkeletonBodyText,
-  SkeletonContainer,
   SkeletonRow,
   Text,
 } from '@contentful/f36-components';
