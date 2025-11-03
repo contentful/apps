@@ -14,7 +14,8 @@
     "deploy:test": "sls deploy --stage test",
     "dev": "node ./scripts/dev.js",
     "create_table": "node ./scripts/create_table",
-    "docs": "node ./scripts/openapi.js"
+    "docs": "node ./scripts/openapi.js",
+    "upsert-app-action": "node ./scripts/upsertAppAction.js"
   },
   "keywords": [],
   "author": "",
@@ -23,13 +24,13 @@
   "devDependencies": {
     "@contentful/eslint-config-extension": "^0.4.3",
     "@tsconfig/node14": "^1.0.3",
-    "@types/aws-lambda": "^8.10.156",
+    "@types/aws-lambda": "^8.10.157",
     "@types/aws-sdk": "^2.7.4",
     "@types/chai": "^4.3.11",
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.21",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^22.18.12",
+    "@types/node": "^22.19.0",
     "@types/sinon": "^10.0.16",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "chai": "^4.5.0",
