@@ -14,7 +14,8 @@
     "deploy:test": "sls deploy --stage test",
     "dev": "node ./scripts/dev.js",
     "create_table": "node ./scripts/create_table",
-    "docs": "node ./scripts/openapi.js"
+    "docs": "node ./scripts/openapi.js",
+    "upsert-app-action": "node ./scripts/upsertAppAction.js"
   },
   "keywords": [],
   "author": "",
