@@ -16,4 +16,7 @@ export const styles = {
     width: '100%',
     padding: tokens.spacingXl,
   },
+  skeletonContainer: {
+    maxWidth: '100px',
+  },
 };

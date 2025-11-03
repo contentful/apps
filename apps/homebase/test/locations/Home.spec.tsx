@@ -97,5 +97,43 @@ describe('Home component', () => {
         expect(screen.queryByTestId('markdown-preview')).not.toBeInTheDocument();
       });
     });
+
+    it('should render empty state UI and disable entry menu when no entries', async () => {
+      mockCma.entry.getMany.mockResolvedValue({ items: mockEmptyEntries });
+
+      render(<Home />);
+
+      await waitFor(() => {
+        // Button label is present and disabled
+        const selectButton = screen.getByRole('button', { name: 'Select entry' });
+        expect(selectButton).toBeDisabled();
+
+        // Empty state messaging
+        expect(screen.getByText('No Homebase entry to display.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Create an entry using the HOMEBASE content type.')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('should open create entry dialog when clicking Create entry', async () => {
+      mockCma.entry.getMany.mockResolvedValue({ items: mockEmptyEntries });
+
+      render(<Home />);
+
+      // Wait for empty state to appear
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Create entry' })).toBeInTheDocument();
+      });
+
+      // Click create
+      fireEvent.click(screen.getByRole('button', { name: 'Create entry' }));
+
+      await waitFor(() => {
+        expect(mockSdk.navigator.openNewEntry).toHaveBeenCalledWith(CONTENT_TYPE_ID, {
+          slideIn: { waitForClose: true },
+        });
+      });
+    });
   });
 });

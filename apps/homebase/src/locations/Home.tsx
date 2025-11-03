@@ -6,8 +6,9 @@ import {
   Flex,
   Menu,
   Paragraph,
-  SkeletonRow,
+  SkeletonContainer,
   Text,
+  SkeletonDisplayText,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { CONTENT_TYPE_ID, MARKDOWN_ID, TITLE_ID } from '../consts';
@@ -56,11 +57,13 @@ const Home = () => {
     return (
       <Flex flexDirection="column" marginLeft="spacingL" marginRight="spacingL" style={styles.home}>
         <Flex justifyContent="flex-end" marginTop="spacingS" marginRight="spacingS">
-          <SkeletonRow rowCount={1} columnCount={1} />
+          <SkeletonContainer style={styles.skeletonContainer}>
+            <SkeletonDisplayText />
+          </SkeletonContainer>
         </Flex>
-        <Box>
+        <Flex>
           <Splitter marginTop="spacingS" style={styles.splitter} data-test-id="splitter" />
-        </Box>
+        </Flex>
       </Flex>
     );
   }
