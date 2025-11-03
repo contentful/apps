@@ -12,6 +12,9 @@ const mockSdk: any = {
   ids: {
     app: 'test-app',
   },
+  navigator: {
+    openNewEntry: vi.fn(),
+  },
   locales: {
     default: 'en-US',
     available: ['en-US', 'es-ES'],
