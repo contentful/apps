@@ -1,66 +1,35 @@
 {
   "functions": [
     {
-      "id": "createContentBlocksFunction",
+      "id": "createEntriesFromDocumentFunction",
       "name": "Create content blocks function",
       "description": "Function to create content blocks from App Action.",
-      "path": "functions/createContentBlocks.js",
-      "entryFile": "functions/createContentBlocks.ts",
-      "allowNetworks": ["https://*.braze.com", "https://*.braze.eu"],
-      "accepts": ["appaction.call"]
-    },
-    {
-      "id": "getContentBlocksFunction",
-      "name": "Get content blocks function",
-      "description": "Function to get content blocks from App Action.",
-      "path": "functions/getContentBlocks.js",
-      "entryFile": "functions/getContentBlocks.ts",
-      "allowNetworks": ["https://*.braze.com", "https://*.braze.eu"],
-      "accepts": ["appaction.call"]
-    },
-    {
-      "id": "appEventHandler",
-      "name": "App event handler function",
-      "description": "Function to handle App Events.",
-      "path": "functions/appEventHandler.js",
-      "entryFile": "functions/appEventHandler.ts",
-      "allowNetworks": ["https://*.braze.com", "https://*.braze.eu"],
-      "accepts": ["appevent.handler"]
+      "path": "functions/createEntriesFromDocument.js",
+      "entryFile": "functions/createEntriesFromDocument.ts",
+      "allowNetworks": [],
+      "accepts": [
+        "appaction.call"
+      ]
     }
   ],
   "actions": [
     {
-      "id": "createContentBlocksAction",
-      "name": "Create content blocks action",
+      "id": "createEntriesFromDocumentAction",
+      "name": "Create entries from an uploaded document",
       "type": "function-invocation",
-      "functionId": "createContentBlocksFunction",
+      "functionId": "createEntriesFromDocumentFunction",
       "category": "Custom",
       "parameters": [
         {
-          "id": "entryId",
-          "name": "Entry ID",
+          "id": "contentType",
+          "name": "Content Type",
           "type": "Symbol",
           "required": true
         },
         {
-          "id": "fieldsData",
-          "name": "Fields data",
-          "type": "Symbol",
-          "required": true
-        }
-      ]
-    },
-    {
-      "id": "getContentBlocksAction",
-      "name": "Get content blocks action",
-      "type": "function-invocation",
-      "functionId": "getContentBlocksFunction",
-      "category": "Custom",
-      "parameters": [
-        {
-          "id": "entryId",
-          "name": "Entry ID",
-          "type": "Symbol",
+          "id": "prompt",
+          "name": "Prompt fromt he user",
+          "type": "String",
           "required": true
         }
       ]

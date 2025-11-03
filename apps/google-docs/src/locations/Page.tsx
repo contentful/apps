@@ -1,7 +1,10 @@
 import { Paragraph } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
+/*
+ * INTEG-3258: Page Component
+ */
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
   /*
