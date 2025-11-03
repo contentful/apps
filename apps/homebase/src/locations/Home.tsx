@@ -6,7 +6,6 @@ import {
   Flex,
   Menu,
   Paragraph,
-  SkeletonBodyText,
   SkeletonRow,
   Text,
 } from '@contentful/f36-components';
