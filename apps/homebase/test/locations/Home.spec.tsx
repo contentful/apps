@@ -1,13 +1,36 @@
 import { render, screen, waitFor, fireEvent, cleanup } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
 import Home from '../../src/locations/Home';
-import { CONTENT_TYPE_ID, TITLE_ID, MARKDOWN_ID } from '../../src/consts';
+import {
+  CONTENT_TYPE_ID,
+  TITLE_ID,
+  MARKDOWN_ID,
+  DEFAULT_SELECT_LABEL,
+  STORAGE_KEY,
+} from '../../src/consts';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));
+
+// Mock localStorage
+const createLocalStorageMock = () => {
+  let store: Record<string, string> = {};
+
+  return {
+    getItem: (key: string): string | null => {
+      return store[key] || null;
+    },
+    setItem: (key: string, value: string): void => {
+      store[key] = value.toString();
+    },
+    clear: (): void => {
+      store = {};
+    },
+  };
+};
 
 describe('Home component', () => {
   const mockEntries = [
@@ -29,13 +52,31 @@ describe('Home component', () => {
 
   const mockEmptyEntries: never[] = [];
 
+  let localStorageMock: ReturnType<typeof createLocalStorageMock>;
+  const originalLocalStorage = window.localStorage; // Save original
+
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorageMock = createLocalStorageMock();
+
+    // Replace global localStorage with our mock
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+    });
     mockCma.entry.getMany.mockResolvedValue({ items: mockEntries });
   });
 
   afterEach(() => {
     cleanup();
+    localStorageMock.clear();
+
+    // Restore original localStorage
+    Object.defineProperty(window, 'localStorage', {
+      value: originalLocalStorage,
+      writable: true,
+      configurable: true,
+    });
   });
 
   describe('Loading and Initial State', () => {
@@ -51,14 +92,11 @@ describe('Home component', () => {
       });
     });
 
-    it('should select first entry by default when entries are loaded', async () => {
+    it('should display default placeholder when entries are loaded if there is no entry persisted', async () => {
       render(<Home />);
 
       await waitFor(() => {
-        expect(screen.getByText('First Entry')).toBeInTheDocument();
-        expect(screen.getByText('Select entry')).toBeInTheDocument();
-        expect(screen.getByTestId('splitter')).toBeInTheDocument();
-        expect(screen.getByTestId('markdown-preview')).toBeInTheDocument();
+        expect(screen.getByText(DEFAULT_SELECT_LABEL)).toBeInTheDocument();
       });
     });
   });
@@ -68,11 +106,11 @@ describe('Home component', () => {
       render(<Home />);
 
       await waitFor(() => {
-        expect(screen.getByText('Select entry')).toBeInTheDocument();
+        expect(screen.getByText(DEFAULT_SELECT_LABEL)).toBeInTheDocument();
       });
 
       // Click to open the menu
-      fireEvent.click(screen.getByText('Select entry'));
+      fireEvent.click(screen.getByText(DEFAULT_SELECT_LABEL));
 
       // Wait for menu items to appear
       await waitFor(
@@ -92,7 +130,7 @@ describe('Home component', () => {
       render(<Home />);
 
       await waitFor(() => {
-        expect(screen.getByText('Select entry')).toBeInTheDocument();
+        expect(screen.getByText(DEFAULT_SELECT_LABEL)).toBeInTheDocument();
         // Should not show any markdown preview when no entries
         expect(screen.queryByTestId('markdown-preview')).not.toBeInTheDocument();
       });
@@ -105,7 +143,7 @@ describe('Home component', () => {
 
       await waitFor(() => {
         // Button label is present and disabled
-        const selectButton = screen.getByRole('button', { name: 'Select entry' });
+        const selectButton = screen.getByRole('button', { name: DEFAULT_SELECT_LABEL });
         expect(selectButton).toBeDisabled();
 
         // Empty state messaging
@@ -132,6 +170,125 @@ describe('Home component', () => {
       await waitFor(() => {
         expect(mockSdk.navigator.openNewEntry).toHaveBeenCalledWith(CONTENT_TYPE_ID, {
           slideIn: { waitForClose: true },
+        });
+      });
+    });
+  });
+
+  describe('localStorage Persistence', () => {
+    it('should save selected entry to localStorage when entry is selected', async () => {
+      render(<Home />);
+
+      await waitFor(() => {
+        expect(screen.getByText(DEFAULT_SELECT_LABEL)).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText(DEFAULT_SELECT_LABEL));
+      await waitFor(() => {
+        expect(screen.getByText('First Entry Title')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText('First Entry Title'));
+
+      await waitFor(() => {
+        expect(localStorageMock.getItem(STORAGE_KEY)).toBe('entry-1');
+      });
+    });
+
+    it('should restore previous selected entry from localStorage on mount', async () => {
+      localStorageMock.setItem(STORAGE_KEY, 'entry-1');
+
+      render(<Home />);
+
+      await waitFor(() => {
+        expect(screen.getByText('First Entry Title')).toBeInTheDocument();
+        expect(screen.queryByText(DEFAULT_SELECT_LABEL)).not.toBeInTheDocument();
+      });
+    });
+
+    it('should not restore entry if saved entry ID does not exist in entries', async () => {
+      localStorageMock.setItem(STORAGE_KEY, 'non-existent-entry');
+
+      render(<Home />);
+
+      await waitFor(() => {
+        expect(screen.getByText(DEFAULT_SELECT_LABEL)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Edit Button', () => {
+    const getEditButton = (container: HTMLElement) => {
+      const buttons = Array.from(container.querySelectorAll('button'));
+      const selectButton = buttons.find(
+        (btn) =>
+          btn.textContent?.includes(DEFAULT_SELECT_LABEL) ||
+          btn.textContent?.includes('First Entry') ||
+          btn.textContent?.includes('Second Entry')
+      );
+      // The edit button is the other button
+      return buttons.find((btn) => btn !== selectButton);
+    };
+
+    it('should disable edit button when no entry is selected', async () => {
+      const { container } = render(<Home />);
+
+      await waitFor(() => {
+        expect(screen.getByText(DEFAULT_SELECT_LABEL)).toBeInTheDocument();
+      });
+
+      const editButton = getEditButton(container);
+      expect(editButton).toBeDisabled();
+    });
+
+    it('should enable edit button when entry is selected', async () => {
+      const { container } = render(<Home />);
+
+      await waitFor(() => {
+        expect(screen.getByText(DEFAULT_SELECT_LABEL)).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText(DEFAULT_SELECT_LABEL));
+      await waitFor(() => {
+        expect(screen.getByText('First Entry Title')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText('First Entry Title'));
+
+      await waitFor(() => {
+        const editButton = getEditButton(container);
+        expect(editButton).not.toBeDisabled();
+      });
+    });
+
+    it('should call navigator.openEntry when edit button is clicked', async () => {
+      const { container } = render(<Home />);
+
+      await waitFor(() => {
+        expect(screen.getByText(DEFAULT_SELECT_LABEL)).toBeInTheDocument();
+      });
+
+      // Select an entry
+      fireEvent.click(screen.getByText(DEFAULT_SELECT_LABEL));
+      await waitFor(() => {
+        expect(screen.getByText('First Entry Title')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText('First Entry Title'));
+
+      await waitFor(() => {
+        const editButton = getEditButton(container);
+        expect(editButton).not.toBeDisabled();
+      });
+
+      const editButton = getEditButton(container);
+      if (editButton) {
+        fireEvent.click(editButton);
+      }
+
+      await waitFor(() => {
+        expect(mockSdk.navigator.openEntry).toHaveBeenCalledWith('entry-1', {
+          slideIn: true,
         });
       });
     });

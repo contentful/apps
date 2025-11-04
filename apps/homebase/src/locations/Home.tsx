@@ -8,16 +8,23 @@ import {
   Paragraph,
   SkeletonContainer,
   Text,
-  SkeletonDisplayText,
+  SkeletonBodyText,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { CONTENT_TYPE_ID, MARKDOWN_ID, TITLE_ID } from '../consts';
+import {
+  CONTENT_TYPE_ID,
+  DEFAULT_SELECT_LABEL,
+  MARKDOWN_ID,
+  STORAGE_KEY,
+  TITLE_ID,
+} from '../consts';
 import { useEffect, useState } from 'react';
 import { EntryProps } from 'contentful-management';
 import MarkdownPreview from '../components/MarkdownPreview';
 import { styles } from './Home.styles';
 import Splitter from '../components/Splitter';
 import ButtonMenu from '../components/ButonMenu';
+import { CaretDownIcon, EyeIcon } from '@contentful/f36-icons';
 
 const Home = () => {
   const sdk = useSDK<HomeAppSDK>();
@@ -35,13 +42,27 @@ const Home = () => {
         },
       });
       setEntries(entries.items);
-      if (entries.items.length > 0) {
-        setSelectedEntry(entries.items[0]);
+
+      const savedEntryId = localStorage.getItem(STORAGE_KEY);
+      if (savedEntryId) {
+        const savedEntry = entries.items.find((entry) => entry.sys.id === savedEntryId);
+        if (savedEntry) {
+          setSelectedEntry(savedEntry);
+          setLoading(false);
+          return;
+        }
       }
+
       setLoading(false);
     };
     getEntries();
   }, []);
+
+  useEffect(() => {
+    if (selectedEntry) {
+      localStorage.setItem(STORAGE_KEY, selectedEntry.sys.id);
+    }
+  }, [selectedEntry]);
 
   const handleCreateEntry = async () => {
     await sdk.navigator.openNewEntry(CONTENT_TYPE_ID, {
@@ -51,14 +72,29 @@ const Home = () => {
     });
   };
 
+  const handleEditEntry = () => {
+    if (selectedEntry) {
+      sdk.navigator.openEntry(selectedEntry.sys.id, {
+        slideIn: true,
+      });
+    }
+  };
+
   const noEntries = entries.length === 0 && !selectedEntry;
+
+  const displayName = (entry: EntryProps) => {
+    return entry.fields[TITLE_ID]?.[defaultLocale];
+  };
 
   if (loading) {
     return (
       <Flex flexDirection="column" marginLeft="spacingL" marginRight="spacingL" style={styles.home}>
-        <Flex justifyContent="flex-end" marginTop="spacingS" marginRight="spacingS">
-          <SkeletonContainer style={styles.skeletonContainer}>
-            <SkeletonDisplayText />
+        <Flex justifyContent="flex-end" marginTop="spacingS" marginRight="spacingS" gap="spacingS">
+          <SkeletonContainer style={styles.skeletonSelectButton}>
+            <SkeletonBodyText numberOfLines={1} />
+          </SkeletonContainer>
+          <SkeletonContainer style={styles.skeletonEditButton}>
+            <SkeletonBodyText numberOfLines={1} />
           </SkeletonContainer>
         </Flex>
         <Flex>
@@ -70,16 +106,25 @@ const Home = () => {
 
   return (
     <Flex flexDirection="column" marginLeft="spacingL" marginRight="spacingL" style={styles.home}>
-      <Flex justifyContent="flex-end" marginTop="spacingS" marginRight="spacingS">
-        <ButtonMenu buttonLabel="Select entry" isDisabled={noEntries}>
+      <Flex justifyContent="flex-end" marginTop="spacingS" marginRight="spacingS" gap="spacingS">
+        <ButtonMenu
+          buttonLabel={selectedEntry ? displayName(selectedEntry) : DEFAULT_SELECT_LABEL}
+          isDisabled={noEntries}
+          buttonProps={{ endIcon: <CaretDownIcon /> }}>
           <Menu.List>
             {entries.map((entry) => (
               <Menu.Item key={entry.sys.id} onClick={() => setSelectedEntry(entry)}>
-                {entry.fields[TITLE_ID]?.[defaultLocale]}
+                {displayName(entry)}
               </Menu.Item>
             ))}
           </Menu.List>
         </ButtonMenu>
+        <Button
+          variant="secondary"
+          onClick={handleEditEntry}
+          isDisabled={!selectedEntry}
+          startIcon={<EyeIcon />}
+        />
       </Flex>
       <Box>
         <Splitter marginTop="spacingS" style={styles.splitter} data-test-id="splitter" />
