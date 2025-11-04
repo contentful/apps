@@ -179,13 +179,17 @@ export function updateEntryFieldLocalized(
   value: any,
   locale: string
 ) {
-  return {
+  const newFields = {
     ...fields,
     [fieldId]: {
       ...(fields[fieldId] || {}),
       [locale]: value,
     },
   };
+  if (value === null) {
+    delete newFields[fieldId][locale];
+  }
+  return newFields;
 }
 
 export function getEntryFieldValue(

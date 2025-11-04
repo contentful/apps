@@ -336,11 +336,12 @@ const Page = () => {
     );
   };
 
-  const onSave = async (val: string | number) => {
+  const onSave = async (val: any) => {
     setTotalUpdateCount(0);
     setEditionCount(0);
     setIsSaving(true);
     setFailedUpdates([]);
+    val = val === '' ? null : val;
 
     try {
       if (!selectedField) return;
