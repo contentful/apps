@@ -8,6 +8,7 @@ import { Document } from '@contentful/rich-text-types';
 import { EntrySys } from '@contentful/app-sdk/dist/types/utils';
 import { convertToSerializableJson, ErrorInfo } from '../utils';
 import { ReleaseEntrySys } from '@contentful/app-sdk/dist/types/entry.types';
+import './Field.styles.css';
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
@@ -93,7 +94,9 @@ const Field = () => {
 
   return (
     <>
-      <RichTextEditor sdk={sdk} isInitiallyDisabled={false} />
+      <div className="rich-text-editor-container">
+        <RichTextEditor sdk={sdk} isInitiallyDisabled={false} />
+      </div>
       <Tooltip
         placement="top"
         content={

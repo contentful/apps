@@ -1,0 +1,20 @@
+/* Make the rich text editor toolbar sticky */
+.rich-text-editor-container {
+  position: relative;
+  overflow: visible;
+}
+
+/* Target the toolbar in the rich text editor */
+.rich-text-editor-container [class*="Toolbar"],
+.rich-text-editor-container [class*="toolbar"] {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Make editor scrollable with fixed height */
+.rich-text-editor-container [data-slate-editor="true"] {
+  max-height: 500px; /* Fixed height to enable scrolling - adjust as needed */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
