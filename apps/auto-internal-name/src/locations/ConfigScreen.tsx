@@ -4,6 +4,7 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { css } from 'emotion';
 import { useCallback, useEffect, useState } from 'react';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface AppInstallationParameters {}
 
 const ConfigScreen = () => {
