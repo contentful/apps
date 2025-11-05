@@ -4,11 +4,8 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { css } from 'emotion';
 import { useCallback, useEffect, useState } from 'react';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface AppInstallationParameters {}
-
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>({});
+  const [parameters, setParameters] = useState({});
   const sdk = useSDK<ConfigAppSDK>();
 
   const onConfigure = useCallback(async () => {
@@ -26,7 +23,7 @@ const ConfigScreen = () => {
 
   useEffect(() => {
     (async () => {
-      const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
+      const currentParameters = await sdk.app.getParameters();
 
       if (currentParameters) {
         setParameters(currentParameters);

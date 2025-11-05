@@ -20,8 +20,8 @@
     "test": "vitest",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "add-locations": "contentful-app-scripts add-locations",
-    "upload": "contentful-app-scripts upload --bundle-dir ./dist",
-    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
+    "upload": "contentful-app-scripts upload --bundle-dir ./build",
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:write": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
   },
