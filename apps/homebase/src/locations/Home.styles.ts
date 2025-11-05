@@ -19,4 +19,10 @@ export const styles = {
   skeletonContainer: {
     maxWidth: '100px',
   },
+  skeletonSelectButton: {
+    width: '150px',
+  },
+  skeletonEditButton: {
+    width: '80px',
+  },
 };

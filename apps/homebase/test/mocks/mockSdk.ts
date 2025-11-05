@@ -14,6 +14,7 @@ const mockSdk: any = {
   },
   navigator: {
     openNewEntry: vi.fn(),
+    openEntry: vi.fn(),
   },
   locales: {
     default: 'en-US',
