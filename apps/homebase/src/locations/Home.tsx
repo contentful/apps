@@ -53,6 +53,10 @@ const Home = () => {
         }
       }
 
+      if (entries.items.length > 0) {
+        setSelectedEntry(entries.items[0]);
+      }
+
       setLoading(false);
     };
     getEntries();

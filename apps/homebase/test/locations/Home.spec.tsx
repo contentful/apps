@@ -32,6 +32,18 @@ const createLocalStorageMock = () => {
   };
 };
 
+const getEditButton = (container: HTMLElement) => {
+  const buttons = Array.from(container.querySelectorAll('button'));
+  const selectButton = buttons.find(
+    (btn) =>
+      btn.textContent?.includes(DEFAULT_SELECT_LABEL) ||
+      btn.textContent?.includes('First Entry') ||
+      btn.textContent?.includes('Second Entry')
+  );
+  // The edit button is the other button
+  return buttons.find((btn) => btn !== selectButton);
+};
+
 describe('Home component', () => {
   const mockEntries = [
     {
@@ -92,11 +104,11 @@ describe('Home component', () => {
       });
     });
 
-    it('should display default placeholder when entries are loaded if there is no entry persisted', async () => {
+    it('should display the first entry when loaded if there is no entry persisted', async () => {
       render(<Home />);
 
       await waitFor(() => {
-        expect(screen.getByText(DEFAULT_SELECT_LABEL)).toBeInTheDocument();
+        expect(screen.getByText('First Entry Title')).toBeInTheDocument();
       });
     });
   });
@@ -106,20 +118,70 @@ describe('Home component', () => {
       render(<Home />);
 
       await waitFor(() => {
-        expect(screen.getByText(DEFAULT_SELECT_LABEL)).toBeInTheDocument();
+        expect(screen.getByText('First Entry Title')).toBeInTheDocument();
       });
 
       // Click to open the menu
-      fireEvent.click(screen.getByText(DEFAULT_SELECT_LABEL));
+      fireEvent.click(screen.getByText('First Entry Title'));
 
       // Wait for menu items to appear
       await waitFor(
         () => {
-          expect(screen.getByText('First Entry Title')).toBeInTheDocument();
+          expect(screen.getAllByText('First Entry Title').length).toBe(2);
           expect(screen.getByText('Second Entry Title')).toBeInTheDocument();
         },
         { timeout: 3000 }
       );
+    });
+  });
+
+  it('should disable edit button when no entry is selected', async () => {
+    mockCma.entry.getMany.mockResolvedValue({ items: mockEmptyEntries });
+
+    const { container } = render(<Home />);
+
+    await waitFor(() => {
+      expect(screen.getByText(DEFAULT_SELECT_LABEL)).toBeInTheDocument();
+    });
+
+    const editButton = getEditButton(container);
+    expect(editButton).toBeDisabled();
+  });
+
+  it('should enable edit button when entry is selected', async () => {
+    const { container } = render(<Home />);
+
+    await waitFor(() => {
+      expect(screen.getByText('First Entry Title')).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      const editButton = getEditButton(container);
+      expect(editButton).not.toBeDisabled();
+    });
+  });
+
+  it('should call navigator.openEntry when edit button is clicked', async () => {
+    const { container } = render(<Home />);
+
+    await waitFor(() => {
+      expect(screen.getByText('First Entry Title')).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      const editButton = getEditButton(container);
+      expect(editButton).not.toBeDisabled();
+    });
+
+    const editButton = getEditButton(container);
+    if (editButton) {
+      fireEvent.click(editButton);
+    }
+
+    await waitFor(() => {
+      expect(mockSdk.navigator.openEntry).toHaveBeenCalledWith('entry-1', {
+        slideIn: true,
+      });
     });
   });
 
@@ -180,29 +242,28 @@ describe('Home component', () => {
       render(<Home />);
 
       await waitFor(() => {
-        expect(screen.getByText(DEFAULT_SELECT_LABEL)).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByText(DEFAULT_SELECT_LABEL));
-      await waitFor(() => {
         expect(screen.getByText('First Entry Title')).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByText('First Entry Title'));
+      await waitFor(() => {
+        expect(screen.getByText('Second Entry Title')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText('Second Entry Title'));
 
       await waitFor(() => {
-        expect(localStorageMock.getItem(STORAGE_KEY)).toBe('entry-1');
+        expect(localStorageMock.getItem(STORAGE_KEY)).toBe('entry-2');
       });
     });
 
     it('should restore previous selected entry from localStorage on mount', async () => {
-      localStorageMock.setItem(STORAGE_KEY, 'entry-1');
+      localStorageMock.setItem(STORAGE_KEY, 'entry-2');
 
       render(<Home />);
 
       await waitFor(() => {
-        expect(screen.getByText('First Entry Title')).toBeInTheDocument();
-        expect(screen.queryByText(DEFAULT_SELECT_LABEL)).not.toBeInTheDocument();
+        expect(screen.getByText('Second Entry Title')).toBeInTheDocument();
       });
     });
 
@@ -212,84 +273,7 @@ describe('Home component', () => {
       render(<Home />);
 
       await waitFor(() => {
-        expect(screen.getByText(DEFAULT_SELECT_LABEL)).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Edit Button', () => {
-    const getEditButton = (container: HTMLElement) => {
-      const buttons = Array.from(container.querySelectorAll('button'));
-      const selectButton = buttons.find(
-        (btn) =>
-          btn.textContent?.includes(DEFAULT_SELECT_LABEL) ||
-          btn.textContent?.includes('First Entry') ||
-          btn.textContent?.includes('Second Entry')
-      );
-      // The edit button is the other button
-      return buttons.find((btn) => btn !== selectButton);
-    };
-
-    it('should disable edit button when no entry is selected', async () => {
-      const { container } = render(<Home />);
-
-      await waitFor(() => {
-        expect(screen.getByText(DEFAULT_SELECT_LABEL)).toBeInTheDocument();
-      });
-
-      const editButton = getEditButton(container);
-      expect(editButton).toBeDisabled();
-    });
-
-    it('should enable edit button when entry is selected', async () => {
-      const { container } = render(<Home />);
-
-      await waitFor(() => {
-        expect(screen.getByText(DEFAULT_SELECT_LABEL)).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByText(DEFAULT_SELECT_LABEL));
-      await waitFor(() => {
         expect(screen.getByText('First Entry Title')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByText('First Entry Title'));
-
-      await waitFor(() => {
-        const editButton = getEditButton(container);
-        expect(editButton).not.toBeDisabled();
-      });
-    });
-
-    it('should call navigator.openEntry when edit button is clicked', async () => {
-      const { container } = render(<Home />);
-
-      await waitFor(() => {
-        expect(screen.getByText(DEFAULT_SELECT_LABEL)).toBeInTheDocument();
-      });
-
-      // Select an entry
-      fireEvent.click(screen.getByText(DEFAULT_SELECT_LABEL));
-      await waitFor(() => {
-        expect(screen.getByText('First Entry Title')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByText('First Entry Title'));
-
-      await waitFor(() => {
-        const editButton = getEditButton(container);
-        expect(editButton).not.toBeDisabled();
-      });
-
-      const editButton = getEditButton(container);
-      if (editButton) {
-        fireEvent.click(editButton);
-      }
-
-      await waitFor(() => {
-        expect(mockSdk.navigator.openEntry).toHaveBeenCalledWith('entry-1', {
-          slideIn: true,
-        });
       });
     });
   });
