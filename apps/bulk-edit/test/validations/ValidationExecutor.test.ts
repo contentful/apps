@@ -71,4 +71,25 @@ describe('ValidationExecutor', () => {
 
     expect(executor.validate('any value').errors.length).toBe(0);
   });
+
+  it('should validate array field with items validations', () => {
+    const field: ContentTypeField = {
+      contentTypeId: 'test',
+      id: 'items',
+      uniqueId: 'items',
+      name: 'Items',
+      type: 'Array',
+      required: false,
+      items: {
+        type: 'Symbol',
+        validations: [{ size: { min: 5, max: 100 } }],
+      },
+      validations: [],
+    };
+
+    const executor = new ValidationExecutor(field);
+
+    expect(executor.validate(['Hello World', 'Hello']).errors.length).toBe(0);
+    expect(executor.validate(['Hello', 'Hi']).errors.length).toBe(1);
+  });
 });

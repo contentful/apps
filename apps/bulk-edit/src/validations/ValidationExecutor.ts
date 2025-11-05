@@ -14,10 +14,12 @@ import {
 export class ValidationExecutor {
   private readonly field: ContentTypeField;
   private readonly validationCommands: ValidationCommand[];
+  private readonly itemsValidationCommands: ValidationCommand[];
 
   constructor(field: ContentTypeField) {
     this.field = field;
     this.validationCommands = this.createValidationCommands();
+    this.itemsValidationCommands = this.createItemsValidationCommands();
   }
 
   validate(value: any): ValidationResult {
@@ -26,9 +28,16 @@ export class ValidationExecutor {
       .filter((error) => error !== null)
       .map((error) => error!);
 
-    return {
-      errors,
-    };
+    if (Array.isArray(value)) {
+      const itemsErrors = this.itemsValidationCommands
+        .flatMap((command) => value.map((item: any) => command.validate(item)))
+        .filter((error) => error !== null)
+        .map((error) => error!);
+
+      errors.push(...itemsErrors);
+    }
+
+    return { errors };
   }
 
   private createValidationCommands(): ValidationCommand[] {
@@ -49,6 +58,25 @@ export class ValidationExecutor {
           }
         } catch (error) {
           console.warn(`Failed to create validation command for field ${this.field.id}:`, error);
+        }
+      }
+    }
+
+    return commands;
+  }
+
+  private createItemsValidationCommands(): ValidationCommand[] {
+    const commands: ValidationCommand[] = [];
+
+    if (
+      this.field.items &&
+      this.field.items.validations &&
+      this.field.items.validations.length > 0
+    ) {
+      for (const validationConfig of this.field.items.validations) {
+        const command = this.createCommandFromConfig(validationConfig);
+        if (command) {
+          commands.push(command);
         }
       }
     }
