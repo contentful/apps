@@ -6,6 +6,7 @@ import { MessagesRepository } from './repository';
 import { PostMessageBody, postMessageWorkspacesBodySchema } from './validation';
 import { getWorkspaceId } from '../../helpers/getWorkspaceId';
 import { getHost } from '../../helpers/getHost';
+import { ChatPostMessageResponse } from '@slack/web-api';
 
 const extractFromSignedHeaders = (request: Request) => {
   const spaceId = request.header('x-contentful-space-id');
@@ -54,8 +55,12 @@ export class MessagesController {
       host
     );
 
-    await this.messagesRepository.create(token, channelId, { text: message });
+    const slackResponse: ChatPostMessageResponse = await this.messagesRepository.create(
+      token,
+      channelId,
+      { text: message }
+    );
 
-    response.sendStatus(204);
+    response.status(200).json(slackResponse);
   });
 }

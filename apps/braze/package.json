@@ -14,7 +14,7 @@
     "contentful-management": "11.48.3",
     "contentful-resolve-response": "^1.9.2",
     "emotion": "10.0.27",
-    "happy-dom": "^17.4.4",
+    "happy-dom": "^20.0.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-syntax-highlighter": "^15.6.1"
@@ -48,7 +48,7 @@
     "dotenv": "^16.5.0",
     "tsx": "^4.20.3",
     "typescript": "5.1.6",
-    "vite": "6.3.4",
+    "vite": "6.4.1",
     "vitest": "3.0.9"
   }
 }

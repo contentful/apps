@@ -4,11 +4,11 @@
   "private": true,
   "dependencies": {
     "@ali-tas/htmldiff-js": "^2.0.1",
-    "@contentful/app-sdk": "4.40.0",
+    "@contentful/app-sdk": "^4.42.0",
     "@contentful/f36-components": "4.81.1",
     "@contentful/f36-multiselect": "^4.81.1",
     "@contentful/f36-tokens": "4.2.0",
-    "@contentful/field-editor-rich-text": "3.16.14",
+    "@contentful/field-editor-rich-text": "4.16.0",
     "@contentful/react-apps-toolkit": "1.2.16",
     "@contentful/rich-text-html-renderer": "^17.1.0",
     "@contentful/rich-text-react-renderer": "^16.1.0",
@@ -17,7 +17,7 @@
     "contentful-management": "11.54.4",
     "dompurify": "^3.0.8",
     "emotion": "10.0.27",
-    "happy-dom": "^18.0.1",
+    "happy-dom": "^20.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
@@ -43,10 +43,12 @@
     "@vitejs/plugin-react": "^4.3.1",
     "jsdom": "^24.1.0",
     "typescript": "5.9.2",
-    "vite": "^7.1.5",
+    "vite": "^7.1.11",
     "vitest": "^3.2.4"
   },
   "overrides": {
-    "@contentful/rich-text-types": "^16.1.0"
+    "@contentful/rich-text-types": "^16.1.0",
+    "slate": "0.94.1",
+    "slate-react": "0.102.0"
   }
 }
