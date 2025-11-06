@@ -201,7 +201,11 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
 
                   {/* Rule Editor (when expanded) */}
                   {isExpanded && isEditing && (
-                    <Flex padding="spacingL" flexDirection="column" gap="spacingM">
+                    <Flex
+                      padding="spacingL"
+                      flexDirection="column"
+                      gap="spacingM"
+                      style={{ backgroundColor: '#f5f7f8' }}>
                       <RuleEditor
                         rule={editingRule}
                         availableFields={availableFields}

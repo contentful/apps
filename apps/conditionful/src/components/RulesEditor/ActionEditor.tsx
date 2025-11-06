@@ -105,20 +105,14 @@ export const ActionEditor: React.FC<ActionEditorProps> = ({
               flexWrap="wrap"
               gap="spacingXs"
               style={{ minHeight: '32px', alignItems: 'center' }}>
-              {action.fieldIds.length === 0 ? (
-                <Text fontColor="gray500" fontSize="fontSizeS">
-                  No fields selected
-                </Text>
-              ) : (
-                action.fieldIds.map((fieldId) => (
-                  <Pill
-                    key={fieldId}
-                    label={getFieldName(fieldId)}
-                    onClose={() => handleRemoveField(fieldId)}
-                    onDrag={undefined}
-                  />
-                ))
-              )}
+              {action.fieldIds.map((fieldId) => (
+                <Pill
+                  key={fieldId}
+                  label={getFieldName(fieldId)}
+                  onClose={() => handleRemoveField(fieldId)}
+                  onDrag={undefined}
+                />
+              ))}
             </Flex>
             <Button
               variant="secondary"

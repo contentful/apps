@@ -131,6 +131,7 @@ export const ConditionEditor: React.FC<ConditionEditorProps> = ({
         aria-label="Delete condition"
         onClick={onDelete}
         isDisabled={disabled}
+        style={{ alignSelf: 'center' }}
       />
     </Flex>
   );

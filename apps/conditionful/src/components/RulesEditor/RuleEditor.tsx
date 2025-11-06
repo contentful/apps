@@ -154,7 +154,7 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
         </Flex>
 
         {rule.conditions.map((condition, index) => (
-          <Flex marginLeft="spacingL">
+          <Flex marginLeft="spacingXl">
             <ConditionEditor
               key={condition.id}
               condition={condition}
@@ -167,7 +167,7 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
         ))}
 
         {rule.conditions.length === 0 && (
-          <Text fontColor="gray500" fontSize="fontSizeS">
+          <Text fontColor="gray500" fontSize="fontSizeS" style={{ alignSelf: 'center' }}>
             No conditions yet
           </Text>
         )}
@@ -198,7 +198,7 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
         </Text>
 
         {rule.actions.map((action, index) => (
-          <Flex marginLeft="spacingL">
+          <Flex marginLeft="spacingXl">
             <ActionEditor
               key={action.id}
               action={action}
@@ -211,7 +211,7 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
         ))}
 
         {rule.actions.length === 0 && (
-          <Text fontColor="gray500" fontSize="fontSizeS">
+          <Text fontColor="gray500" fontSize="fontSizeS" style={{ alignSelf: 'center' }}>
             No actions yet
           </Text>
         )}
