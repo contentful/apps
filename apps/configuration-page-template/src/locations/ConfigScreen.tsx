@@ -183,7 +183,7 @@ const ConfigScreen = () => {
                     value={item.id}
                     itemId={item.id}
                     isChecked={selectedContentTypes.some((ct) => ct.id === item.id)}
-                    onSelectItem={(e) => {
+                    onSelectItem={(e: React.ChangeEvent<HTMLInputElement>) => {
                       const checked = e.target.checked;
                       if (checked) {
                         setSelectedContentTypes([...selectedContentTypes, item]);
