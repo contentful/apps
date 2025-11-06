@@ -14,6 +14,7 @@ const mainContentStyles = {
   tabsList: {
     borderBottom: '1px solid #E3E8EE',
     padding: '0 32px',
+    height: '52px',
   },
   tabPanel: {
     flex: 1,

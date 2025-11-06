@@ -1,11 +1,11 @@
 import { FC } from 'react';
 import { Box, Flex, Text } from '@contentful/f36-components';
 import { ChatThread } from './ChatThread';
+import { Thread } from '../assistant-ui/thread';
 
 const sidebarStyles = {
   root: {
     width: '320px',
-    height: '100%',
     borderRight: '1px solid #E3E8EE',
     display: 'flex',
     flexDirection: 'column' as const,
@@ -14,6 +14,7 @@ const sidebarStyles = {
   header: {
     padding: '16px',
     borderBottom: '1px solid #E3E8EE',
+    height: '52px',
   },
   icon: {
     fontSize: '16px',
@@ -33,9 +34,7 @@ export const ChatSidebar: FC = () => {
         </Text>
       </Flex>
 
-      <Box style={{ flex: 1, overflow: 'hidden' }}>
-        <ChatThread />
-      </Box>
+      <Thread />
     </Box>
   );
 };

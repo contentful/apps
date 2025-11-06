@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Flex } from '@contentful/f36-components';
-import { css } from 'emotion';
+
 import { useSDK } from '@contentful/react-apps-toolkit';
 import TopLevelHeader from '../components/templates/TopLevelHeader';
 import ConfigureAccessInputs from '../components/templates/ConfigureAccessInputs';
@@ -60,11 +60,8 @@ const ConfigScreen = () => {
       alignItems="center"
       justifyContent="center"
       fullWidth
-      className={css({ padding: '80px 20px' })}>
-      <Flex
-        flexDirection="column"
-        gap="spacing2Xl"
-        className={css({ width: '100%', maxWidth: '852px' })}>
+      style={{ padding: '80px 20px' }}>
+      <Flex flexDirection="column" gap="spacing2Xl" style={{ width: '100%', maxWidth: '852px' }}>
         <TopLevelHeader />
         <ConfigureAccessInputs />
         <AssignContentTypeDropdown

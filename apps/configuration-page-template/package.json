@@ -21,6 +21,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "contentful-management": "10.46.4",
+    "emotion": "^11.0.0",
     "lucide-react": "^0.552.0",
     "motion": "^12.23.24",
     "react": "18.3.1",

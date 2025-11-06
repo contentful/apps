@@ -17,8 +17,8 @@ const ConfigPage = () => {
     <AssistantRuntimeProvider runtime={runtime}>
       <Box
         style={{
-          height: '100vh',
           display: 'flex',
+          height: '100%',
           flexDirection: 'column',
           overflow: 'hidden',
         }}>

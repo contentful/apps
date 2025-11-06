@@ -1,15 +1,13 @@
 import {
   ArrowDownIcon,
+  CheckCircleIcon,
   ArrowUpIcon,
-  CheckIcon,
+  CopyIcon,
+  ReferencesIcon,
+  EditIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  CopyIcon,
-  PencilIcon,
-  RefreshCwIcon,
-  Square,
-} from 'lucide-react';
-
+} from '@contentful/f36-icons';
 import {
   ActionBarPrimitive,
   BranchPickerPrimitive,
@@ -34,6 +32,8 @@ import {
 } from '../../components/assistant-ui/attachment';
 
 import { cn } from '../../lib/utils';
+import { IconButton, TextInput } from '@contentful/f36-components';
+import { XSquareIcon } from 'lucide-react';
 
 export const Thread: FC = () => {
   return (
@@ -43,6 +43,7 @@ export const Thread: FC = () => {
           className="aui-root aui-thread-root @container flex h-full flex-col bg-background"
           style={{
             ['--thread-max-width' as string]: '44rem',
+            height: 'calc(100vh - 101px)',
           }}>
           <ThreadPrimitive.Viewport className="aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-scroll px-4">
             <ThreadPrimitive.If empty>
@@ -164,8 +165,15 @@ const Composer: FC = () => {
   return (
     <div className="aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col gap-4 overflow-visible rounded-t-3xl bg-background pb-4 md:pb-6">
       <ThreadScrollToBottom />
-      <ComposerPrimitive.Root className="aui-composer-root group/input-group relative flex w-full flex-col rounded-3xl border border-input bg-background px-1 pt-2 shadow-xs transition-[color,box-shadow] outline-none has-[textarea:focus-visible]:border-ring has-[textarea:focus-visible]:ring-[3px] has-[textarea:focus-visible]:ring-ring/50 dark:bg-background">
+      <ComposerPrimitive.Root
+        style={{
+          border: '1px solid #E3E8EE',
+          borderRadius: '8px',
+          padding: '8px',
+          backgroundColor: 'white',
+        }}>
         <ComposerAttachments />
+
         <ComposerPrimitive.Input
           placeholder="Send a message..."
           className="aui-composer-input mb-1 max-h-32 min-h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-3 text-base outline-none placeholder:text-muted-foreground focus-visible:ring-0"
@@ -182,33 +190,29 @@ const Composer: FC = () => {
 const ComposerAction: FC = () => {
   return (
     <div className="aui-composer-action-wrapper relative mx-1 mt-2 mb-2 flex items-center justify-between">
-      <ComposerAddAttachment />
-
+      {/* <ComposerAddAttachment /> */}
+      <div />
       <ThreadPrimitive.If running={false}>
         <ComposerPrimitive.Send asChild>
-          <TooltipIconButton
-            tooltip="Send message"
-            side="bottom"
-            type="submit"
-            variant="default"
-            size="icon"
-            className="aui-composer-send size-[34px] rounded-full p-1"
-            aria-label="Send message">
-            <ArrowUpIcon className="aui-composer-send-icon size-5" />
-          </TooltipIconButton>
+          <IconButton
+            icon={<ArrowUpIcon />}
+            variant="primary"
+            aria-label="Send message"
+            size="small"
+            style={{ borderRadius: '50%' }}
+          />
         </ComposerPrimitive.Send>
       </ThreadPrimitive.If>
 
       <ThreadPrimitive.If running>
         <ComposerPrimitive.Cancel asChild>
-          <Button
-            type="button"
-            variant="default"
-            size="icon"
-            className="aui-composer-cancel size-[34px] rounded-full border border-muted-foreground/60 hover:bg-primary/75 dark:border-muted-foreground/90"
-            aria-label="Stop generating">
-            <Square className="aui-composer-cancel-icon size-3.5 fill-white dark:fill-black" />
-          </Button>
+          <IconButton
+            icon={<XSquareIcon />}
+            variant="primary"
+            aria-label="Send message"
+            size="small"
+            style={{ borderRadius: '50%', height: '32px', width: '32px', padding: '6px' }}
+          />
         </ComposerPrimitive.Cancel>
       </ThreadPrimitive.If>
     </div>
@@ -260,7 +264,7 @@ const AssistantActionBar: FC = () => {
       <ActionBarPrimitive.Copy asChild>
         <TooltipIconButton tooltip="Copy">
           <MessagePrimitive.If copied>
-            <CheckIcon />
+            <CheckCircleIcon />
           </MessagePrimitive.If>
           <MessagePrimitive.If copied={false}>
             <CopyIcon />
@@ -269,7 +273,7 @@ const AssistantActionBar: FC = () => {
       </ActionBarPrimitive.Copy>
       <ActionBarPrimitive.Reload asChild>
         <TooltipIconButton tooltip="Refresh">
-          <RefreshCwIcon />
+          <ReferencesIcon />
         </TooltipIconButton>
       </ActionBarPrimitive.Reload>
     </ActionBarPrimitive.Root>
@@ -307,7 +311,7 @@ const UserActionBar: FC = () => {
       className="aui-user-action-bar-root flex flex-col items-end">
       <ActionBarPrimitive.Edit asChild>
         <TooltipIconButton tooltip="Edit" className="aui-user-action-edit p-4">
-          <PencilIcon />
+          <EditIcon />
         </TooltipIconButton>
       </ActionBarPrimitive.Edit>
     </ActionBarPrimitive.Root>
