@@ -17,19 +17,6 @@ export default function ConfigureAccessInputs() {
 
   return (
     <Flex flexDirection="column" gap="spacing3Xl" fullWidth>
-      {/* Page Header */}
-      <Flex flexDirection="column" gap="spacingS">
-        <Heading as="h1" marginBottom="none">
-          Set up my marketplace app
-        </Heading>
-        <Paragraph marginBottom="none">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-          ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-          ullamco laboris nisi ut aliquip ex ea commodo consequat.
-        </Paragraph>
-      </Flex>
-
-      {/* Configure Access Section */}
       <Flex flexDirection="column" gap="spacingL">
         <Flex flexDirection="column" gap="spacingS">
           <Subheading marginBottom="none">Configure access</Subheading>
