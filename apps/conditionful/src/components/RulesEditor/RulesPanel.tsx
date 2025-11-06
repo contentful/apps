@@ -160,17 +160,12 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
             const editingRule = isEditing ? { ...rule } : rule;
 
             return (
-              <Card
-                key={rule.id}
-                padding="none"
-                style={{ width: '100%' }}
-                onClick={() => handleToggleExpand(rule.id)}>
+              <Card key={rule.id} padding="none" style={{ width: '100%' }}>
                 <Stack flexDirection="column" spacing="none" alignItems="stretch">
                   {/* Rule Header */}
                   <Flex
                     padding="spacingM"
                     justifyContent="space-between"
-                    // alignItems="flex-start"
                     style={{
                       borderBottom: isExpanded ? '1px solid #e5ebed' : 'none',
                     }}>
