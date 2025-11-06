@@ -68,7 +68,7 @@ const defaultComponents = memoizeMarkdownComponents({
   h1: ({ className, ...props }) => (
     <h1
       className={cn(
-        'aui-md-h1 mb-8 scroll-m-20 text-4xl font-extrabold tracking-tight last:mb-0',
+        'aui-md-h1 mb-4 scroll-m-20 text-lg font-semibold tracking-tight last:mb-0',
         className
       )}
       {...props}
@@ -77,7 +77,7 @@ const defaultComponents = memoizeMarkdownComponents({
   h2: ({ className, ...props }) => (
     <h2
       className={cn(
-        'aui-md-h2 mt-8 mb-4 scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0 last:mb-0',
+        'aui-md-h2 mt-4 mb-3 scroll-m-20 text-base font-semibold tracking-tight first:mt-0 last:mb-0',
         className
       )}
       {...props}
@@ -86,7 +86,7 @@ const defaultComponents = memoizeMarkdownComponents({
   h3: ({ className, ...props }) => (
     <h3
       className={cn(
-        'aui-md-h3 mt-6 mb-4 scroll-m-20 text-2xl font-semibold tracking-tight first:mt-0 last:mb-0',
+        'aui-md-h3 mt-3 mb-2 scroll-m-20 text-sm font-semibold tracking-tight first:mt-0 last:mb-0',
         className
       )}
       {...props}
@@ -95,7 +95,7 @@ const defaultComponents = memoizeMarkdownComponents({
   h4: ({ className, ...props }) => (
     <h4
       className={cn(
-        'aui-md-h4 mt-6 mb-4 scroll-m-20 text-xl font-semibold tracking-tight first:mt-0 last:mb-0',
+        'aui-md-h4 mt-3 mb-2 scroll-m-20 text-sm font-semibold tracking-tight first:mt-0 last:mb-0',
         className
       )}
       {...props}
@@ -103,15 +103,21 @@ const defaultComponents = memoizeMarkdownComponents({
   ),
   h5: ({ className, ...props }) => (
     <h5
-      className={cn('aui-md-h5 my-4 text-lg font-semibold first:mt-0 last:mb-0', className)}
+      className={cn('aui-md-h5 my-2 text-xs font-semibold first:mt-0 last:mb-0', className)}
       {...props}
     />
   ),
   h6: ({ className, ...props }) => (
-    <h6 className={cn('aui-md-h6 my-4 font-semibold first:mt-0 last:mb-0', className)} {...props} />
+    <h6
+      className={cn('aui-md-h6 my-2 text-xs font-semibold first:mt-0 last:mb-0', className)}
+      {...props}
+    />
   ),
   p: ({ className, ...props }) => (
-    <p className={cn('aui-md-p mt-5 mb-5 leading-7 first:mt-0 last:mb-0', className)} {...props} />
+    <p
+      className={cn('aui-md-p mt-2 mb-2 text-sm leading-relaxed first:mt-0 last:mb-0', className)}
+      {...props}
+    />
   ),
   a: ({ className, ...props }) => (
     <a
@@ -123,18 +129,21 @@ const defaultComponents = memoizeMarkdownComponents({
     <blockquote className={cn('aui-md-blockquote border-l-2 pl-6 italic', className)} {...props} />
   ),
   ul: ({ className, ...props }) => (
-    <ul className={cn('aui-md-ul my-5 ml-6 list-disc [&>li]:mt-2', className)} {...props} />
+    <ul className={cn('aui-md-ul my-2 ml-4 list-disc text-sm [&>li]:mt-1', className)} {...props} />
   ),
   ol: ({ className, ...props }) => (
-    <ol className={cn('aui-md-ol my-5 ml-6 list-decimal [&>li]:mt-2', className)} {...props} />
+    <ol
+      className={cn('aui-md-ol my-2 ml-4 list-decimal text-sm [&>li]:mt-1', className)}
+      {...props}
+    />
   ),
   hr: ({ className, ...props }) => (
-    <hr className={cn('aui-md-hr my-5 border-b', className)} {...props} />
+    <hr className={cn('aui-md-hr my-3 border-b', className)} {...props} />
   ),
   table: ({ className, ...props }) => (
     <table
       className={cn(
-        'aui-md-table my-5 w-full border-separate border-spacing-0 overflow-y-auto',
+        'aui-md-table my-3 w-full border-separate border-spacing-0 overflow-y-auto text-sm',
         className
       )}
       {...props}
@@ -184,7 +193,7 @@ const defaultComponents = memoizeMarkdownComponents({
     return (
       <code
         className={cn(
-          !isCodeBlock && 'aui-md-inline-code rounded border bg-muted font-semibold',
+          !isCodeBlock && 'aui-md-inline-code rounded border bg-muted text-xs font-semibold',
           className
         )}
         {...props}

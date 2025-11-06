@@ -9,7 +9,7 @@ import {
   TextInput,
   TextLink,
 } from '@contentful/f36-components';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { LinkSimpleIcon } from '@contentful/f36-icons';
 
 export default function ConfigureAccessInputs() {
   const [apiKey, setApiKey] = useState('');
@@ -33,7 +33,7 @@ export default function ConfigureAccessInputs() {
             />
             <FormControl.HelpText>
               Help text with{' '}
-              <TextLink href="#" icon={<ExternalLinkIcon />} alignIcon="end">
+              <TextLink href="#" icon={<LinkSimpleIcon />} alignIcon="end">
                 link out
               </TextLink>
             </FormControl.HelpText>

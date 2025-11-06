@@ -2,11 +2,11 @@ import {
   ArrowDownIcon,
   CheckCircleIcon,
   ArrowUpIcon,
-  CopyIcon,
-  ReferencesIcon,
-  EditIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
+  CopySimpleIcon,
+  PencilSimpleIcon,
+  CaretLeftIcon,
+  CaretRightIcon,
+  CubesThreeIcon,
 } from '@contentful/f36-icons';
 import {
   ActionBarPrimitive,
@@ -21,21 +21,24 @@ import type { FC } from 'react';
 import { LazyMotion, MotionConfig, domAnimation } from 'motion/react';
 import * as m from 'motion/react-m';
 
-import { Button } from '../../components/ui/button';
 import { MarkdownText } from '../../components/assistant-ui/markdown-text';
 import { ToolFallback } from '../../components/assistant-ui/tool-fallback';
 import { TooltipIconButton } from '../../components/assistant-ui/tooltip-icon-button';
 import {
-  ComposerAddAttachment,
   ComposerAttachments,
   UserMessageAttachments,
 } from '../../components/assistant-ui/attachment';
 
 import { cn } from '../../lib/utils';
-import { IconButton, TextInput } from '@contentful/f36-components';
+import { IconButton, Paragraph, Button } from '@contentful/f36-components';
 import { XSquareIcon } from 'lucide-react';
+import tokens from '@contentful/f36-tokens';
 
-export const Thread: FC = () => {
+export interface ThreadProps {
+  onSuggestionClick?: () => void;
+}
+
+export const Thread: FC<ThreadProps> = ({ onSuggestionClick }) => {
   return (
     <LazyMotion features={domAnimation}>
       <MotionConfig reducedMotion="user">
@@ -47,7 +50,7 @@ export const Thread: FC = () => {
           }}>
           <ThreadPrimitive.Viewport className="aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-scroll px-4">
             <ThreadPrimitive.If empty>
-              <ThreadWelcome />
+              <ThreadWelcome onSuggestionClick={onSuggestionClick} />
             </ThreadPrimitive.If>
 
             <ThreadPrimitive.Messages
@@ -83,80 +86,58 @@ const ThreadScrollToBottom: FC = () => {
   );
 };
 
-const ThreadWelcome: FC = () => {
+interface ThreadWelcomeProps {
+  onSuggestionClick?: () => void;
+}
+
+const ThreadWelcome: FC<ThreadWelcomeProps> = ({ onSuggestionClick }) => {
   return (
     <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-grow flex-col">
       <div className="aui-thread-welcome-center flex w-full flex-grow flex-col items-center justify-center">
-        <div className="aui-thread-welcome-message flex size-full flex-col justify-center px-8">
-          <m.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="aui-thread-welcome-message-motion-1 text-2xl font-semibold">
-            Hello there!
-          </m.div>
-          <m.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ delay: 0.1 }}
-            className="aui-thread-welcome-message-motion-2 text-2xl text-muted-foreground/65">
-            How can I help you today?
-          </m.div>
-        </div>
+        <Paragraph
+          style={{
+            textAlign: 'center',
+            fontSize: tokens.fontSizeXl,
+            fontWeight: tokens.fontWeightDemiBold,
+            lineHeight: tokens.lineHeightXl,
+            maxWidth: '220px',
+          }}>
+          Let's build your app's configuration page
+        </Paragraph>
+        <ThreadSuggestions onSuggestionClick={onSuggestionClick} />
       </div>
-      <ThreadSuggestions />
     </div>
   );
 };
 
-const ThreadSuggestions: FC = () => {
+interface ThreadSuggestionsProps {
+  onSuggestionClick?: () => void;
+}
+
+const ThreadSuggestions: FC<ThreadSuggestionsProps> = ({ onSuggestionClick }) => {
   return (
-    <div className="aui-thread-welcome-suggestions grid w-full gap-2 pb-4 @md:grid-cols-2">
-      {[
-        {
-          title: "What's the weather",
-          label: 'in San Francisco?',
-          action: "What's the weather in San Francisco?",
-        },
-        {
-          title: 'Explain React hooks',
-          label: 'like useState and useEffect',
-          action: 'Explain React hooks like useState and useEffect',
-        },
-        {
-          title: 'Write a SQL query',
-          label: 'to find top customers',
-          action: 'Write a SQL query to find top customers',
-        },
-        {
-          title: 'Create a meal plan',
-          label: 'for healthy weight loss',
-          action: 'Create a meal plan for healthy weight loss',
-        },
-      ].map((suggestedAction, index) => (
-        <m.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          transition={{ delay: 0.05 * index }}
-          key={`suggested-action-${suggestedAction.title}-${index}`}
-          className="aui-thread-welcome-suggestion-display [&:nth-child(n+3)]:hidden @md:[&:nth-child(n+3)]:block">
-          <ThreadPrimitive.Suggestion prompt={suggestedAction.action} send asChild>
-            <Button
-              variant="ghost"
-              className="aui-thread-welcome-suggestion h-auto w-full flex-1 flex-wrap items-start justify-start gap-1 rounded-3xl border px-5 py-4 text-left text-sm @md:flex-col dark:hover:bg-accent/60"
-              aria-label={suggestedAction.action}>
-              <span className="aui-thread-welcome-suggestion-text-1 font-medium">
-                {suggestedAction.title}
-              </span>
-              <span className="aui-thread-welcome-suggestion-text-2 text-muted-foreground">
-                {suggestedAction.label}
-              </span>
-            </Button>
-          </ThreadPrimitive.Suggestion>
-        </m.div>
-      ))}
+    <div className="aui-thread-welcome-suggestions pb-4">
+      <m.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 20 }}
+        transition={{ delay: 0.05 }}
+        key={`suggested-action`}
+        className="aui-thread-welcome-suggestion-display">
+        <Button
+          startIcon={<CubesThreeIcon color={tokens.gray700} />}
+          onClick={onSuggestionClick}
+          style={{ borderRadius: '50px' }}>
+          <Paragraph
+            style={{
+              fontSize: tokens.fontSizeS,
+              fontWeight: tokens.fontWeightMedium,
+              margin: '0',
+            }}>
+            Add UI building blocks
+          </Paragraph>
+        </Button>
+      </m.div>
     </div>
   );
 };
@@ -267,13 +248,13 @@ const AssistantActionBar: FC = () => {
             <CheckCircleIcon />
           </MessagePrimitive.If>
           <MessagePrimitive.If copied={false}>
-            <CopyIcon />
+            <CopySimpleIcon />
           </MessagePrimitive.If>
         </TooltipIconButton>
       </ActionBarPrimitive.Copy>
       <ActionBarPrimitive.Reload asChild>
         <TooltipIconButton tooltip="Refresh">
-          <ReferencesIcon />
+          <PencilSimpleIcon />
         </TooltipIconButton>
       </ActionBarPrimitive.Reload>
     </ActionBarPrimitive.Root>
@@ -311,7 +292,7 @@ const UserActionBar: FC = () => {
       className="aui-user-action-bar-root flex flex-col items-end">
       <ActionBarPrimitive.Edit asChild>
         <TooltipIconButton tooltip="Edit" className="aui-user-action-edit p-4">
-          <EditIcon />
+          <PencilSimpleIcon />
         </TooltipIconButton>
       </ActionBarPrimitive.Edit>
     </ActionBarPrimitive.Root>
@@ -329,12 +310,12 @@ const EditComposer: FC = () => {
 
         <div className="aui-edit-composer-footer mx-3 mb-3 flex items-center justify-center gap-2 self-end">
           <ComposerPrimitive.Cancel asChild>
-            <Button variant="ghost" size="sm" aria-label="Cancel edit">
+            <Button variant="transparent" aria-label="Cancel edit">
               Cancel
             </Button>
           </ComposerPrimitive.Cancel>
           <ComposerPrimitive.Send asChild>
-            <Button size="sm" aria-label="Update message">
+            <Button variant="primary" aria-label="Update message">
               Update
             </Button>
           </ComposerPrimitive.Send>
@@ -355,7 +336,7 @@ const BranchPicker: FC<BranchPickerPrimitive.Root.Props> = ({ className, ...rest
       {...rest}>
       <BranchPickerPrimitive.Previous asChild>
         <TooltipIconButton tooltip="Previous">
-          <ChevronLeftIcon />
+          <CaretLeftIcon />
         </TooltipIconButton>
       </BranchPickerPrimitive.Previous>
       <span className="aui-branch-picker-state font-medium">
@@ -363,7 +344,7 @@ const BranchPicker: FC<BranchPickerPrimitive.Root.Props> = ({ className, ...rest
       </span>
       <BranchPickerPrimitive.Next asChild>
         <TooltipIconButton tooltip="Next">
-          <ChevronRightIcon />
+          <CaretRightIcon />
         </TooltipIconButton>
       </BranchPickerPrimitive.Next>
     </BranchPickerPrimitive.Root>

@@ -22,7 +22,11 @@ const mainContentStyles = {
   },
 };
 
-export const MainContent: FC = () => {
+interface MainContentProps {
+  selectedBlocks: string[];
+}
+
+export const MainContent: FC<MainContentProps> = ({ selectedBlocks }) => {
   return (
     <Box style={mainContentStyles.root}>
       <Tabs defaultTab="experience">
@@ -32,11 +36,11 @@ export const MainContent: FC = () => {
         </Tabs.List>
 
         <Tabs.Panel id="experience" style={mainContentStyles.tabPanel}>
-          <ExperienceView />
+          <ExperienceView selectedBlocks={selectedBlocks} />
         </Tabs.Panel>
 
         <Tabs.Panel id="code" style={mainContentStyles.tabPanel}>
-          <CodeView />
+          <CodeView selectedBlocks={selectedBlocks} />
         </Tabs.Panel>
       </Tabs>
     </Box>
