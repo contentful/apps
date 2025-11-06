@@ -120,8 +120,11 @@ export const ConditionEditor: React.FC<ConditionEditorProps> = ({
             value={condition.value?.toString() || ''}
             onChange={handleValueChange}
             isDisabled={disabled}
-            placeholder="Enter value"
+            placeholder={selectedField?.type === 'Link' ? 'Enter entry ID' : 'Enter value'}
           />
+          {selectedField?.type === 'Link' && (
+            <FormControl.HelpText>Enter the entry ID to match against</FormControl.HelpText>
+          )}
         </FormControl>
       )}
 

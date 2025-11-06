@@ -11,6 +11,7 @@ import {
   NumberOperator,
   DateOperator,
   BooleanOperator,
+  ReferenceOperator,
   ConditionOperator,
 } from '../types/rules';
 
@@ -29,6 +30,8 @@ export function getOperatorsForFieldType(fieldType: FieldType): ConditionOperato
       return Object.values(DateOperator);
     case 'Boolean':
       return Object.values(BooleanOperator);
+    case 'Link':
+      return Object.values(ReferenceOperator);
     default:
       return [];
   }
@@ -64,6 +67,12 @@ export function getOperatorLabel(operator: ConditionOperator): string {
     // Boolean operators
     [BooleanOperator.IS_TRUE]: 'Is true',
     [BooleanOperator.IS_FALSE]: 'Is false',
+
+    // Reference operators
+    [ReferenceOperator.EQUALS]: 'Equals',
+    [ReferenceOperator.NOT_EQUALS]: 'Does not equal',
+    [ReferenceOperator.IS_EMPTY]: 'Is empty',
+    [ReferenceOperator.IS_NOT_EMPTY]: 'Is not empty',
   };
 
   return labels[operator] || operator;
@@ -79,9 +88,11 @@ export function operatorRequiresValue(operator: ConditionOperator): boolean {
     TextOperator.IS_NOT_EMPTY,
     BooleanOperator.IS_TRUE,
     BooleanOperator.IS_FALSE,
+    ReferenceOperator.IS_EMPTY,
+    ReferenceOperator.IS_NOT_EMPTY,
   ];
 
-  return !noValueOperators.includes(operator as TextOperator | BooleanOperator);
+  return !noValueOperators.includes(operator as TextOperator | BooleanOperator | ReferenceOperator);
 }
 
 /**
@@ -99,6 +110,8 @@ export function getInputTypeForFieldType(fieldType: FieldType): string {
       return 'date';
     case 'Boolean':
       return 'checkbox';
+    case 'Link':
+      return 'text'; // Entry ID as text
     default:
       return 'text';
   }

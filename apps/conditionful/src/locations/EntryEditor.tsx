@@ -1,6 +1,7 @@
 /**
  * Entry Editor Location
  *
+ *
  * Provides a custom tab in the Contentful Entry Editor for managing
  * conditional field visibility rules and displaying fields with real-time rule evaluation
  */
@@ -84,6 +85,7 @@ const Entry = () => {
           'Number',
           'Date',
           'Boolean',
+          'Link',
         ];
         return supportedTypes.includes(field.type as FieldType);
       })

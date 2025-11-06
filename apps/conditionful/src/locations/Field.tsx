@@ -10,9 +10,16 @@ import { FieldAppSDK } from '@contentful/app-sdk';
 import { Box, Spinner, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { useSDK, useCMA, useAutoResizer } from '@contentful/react-apps-toolkit';
+import { i18n } from '@lingui/core';
 import { FieldValues, Rule } from '../types/rules';
 import { getFieldHidingRules } from '../utils/rulesEngine';
 import { SettingsService } from '../utils/settingsService';
+
+// Initialize Lingui for field editors that require it (like reference editor)
+if (!i18n.locale) {
+  i18n.load('en', {});
+  i18n.activate('en');
+}
 
 // Lazy load field editors
 const BooleanEditor = lazy(() =>
@@ -42,6 +49,12 @@ const SingleLineEditor = lazy(() =>
 const MultipleLineEditor = lazy(() =>
   import('@contentful/field-editor-multiple-line').then((m) => ({
     default: m.MultipleLineEditor,
+  }))
+);
+
+const SingleEntryReferenceEditor = lazy(() =>
+  import('@contentful/field-editor-reference').then((m) => ({
+    default: m.SingleEntryReferenceEditor,
   }))
 );
 
@@ -189,6 +202,23 @@ const Field = () => {
 
       case 'Boolean':
         fieldEditor = <BooleanEditor field={sdk.field} isInitiallyDisabled={isHidden} />;
+        break;
+
+      case 'Link':
+        fieldEditor = (
+          <SingleEntryReferenceEditor
+            sdk={sdk}
+            viewType="card"
+            hasCardEditActions
+            isInitiallyDisabled={isHidden}
+            parameters={{
+              instance: {
+                showCreateEntityAction: true,
+                showLinkEntityAction: true,
+              },
+            }}
+          />
+        );
         break;
 
       default:

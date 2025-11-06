@@ -1,13 +1,13 @@
 /**
  * Conditionful Rules Engine - Type Definitions
- * 
+ *
  * This file defines the core types for the conditional field visibility rules system.
  */
 
 /**
  * Supported Contentful field types for conditional logic
  */
-export type FieldType = 'Symbol' | 'Text' | 'Integer' | 'Number' | 'Date' | 'Boolean';
+export type FieldType = 'Symbol' | 'Text' | 'Integer' | 'Number' | 'Date' | 'Boolean' | 'Link';
 
 /**
  * Operators for text-based fields (Symbol, Text)
@@ -52,9 +52,24 @@ export enum BooleanOperator {
 }
 
 /**
+ * Operators for reference fields (Link)
+ */
+export enum ReferenceOperator {
+  EQUALS = 'equals',
+  NOT_EQUALS = 'notEquals',
+  IS_EMPTY = 'isEmpty',
+  IS_NOT_EMPTY = 'isNotEmpty',
+}
+
+/**
  * Union type of all possible operators
  */
-export type ConditionOperator = TextOperator | NumberOperator | DateOperator | BooleanOperator;
+export type ConditionOperator =
+  | TextOperator
+  | NumberOperator
+  | DateOperator
+  | BooleanOperator
+  | ReferenceOperator;
 
 /**
  * Match mode for combining multiple conditions in a rule
@@ -126,9 +141,28 @@ export interface RulesConfig {
 }
 
 /**
+ * Reference value structure from Contentful
+ */
+export interface ReferenceValue {
+  sys: {
+    id: string;
+    type: 'Link';
+    linkType: 'Entry' | 'Asset';
+  };
+}
+
+/**
  * Helper type for field values from entry
  */
-export type FieldValue = string | number | boolean | Date | null | undefined;
+export type FieldValue =
+  | string
+  | number
+  | boolean
+  | Date
+  | ReferenceValue
+  | ReferenceValue[]
+  | null
+  | undefined;
 
 /**
  * Map of field IDs to their current values
@@ -136,4 +170,3 @@ export type FieldValue = string | number | boolean | Date | null | undefined;
 export interface FieldValues {
   [fieldId: string]: FieldValue;
 }
-

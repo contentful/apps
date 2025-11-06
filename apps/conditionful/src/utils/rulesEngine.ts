@@ -13,10 +13,12 @@ import {
   MatchMode,
   FieldValue,
   FieldValues,
+  ReferenceValue,
   TextOperator,
   NumberOperator,
   DateOperator,
   BooleanOperator,
+  ReferenceOperator,
 } from '../types/rules';
 
 /**
@@ -115,6 +117,56 @@ export function evaluateCondition(condition: Condition, fieldValue: FieldValue):
         return boolValue === true;
       case BooleanOperator.IS_FALSE:
         return boolValue === false;
+      default:
+        return false;
+    }
+  }
+
+  // Handle reference fields (Link)
+  if (fieldType === 'Link') {
+    const isEmptyRef = !fieldValue || (Array.isArray(fieldValue) && fieldValue.length === 0);
+
+    switch (operator as ReferenceOperator) {
+      case ReferenceOperator.IS_EMPTY:
+        return isEmptyRef;
+      case ReferenceOperator.IS_NOT_EMPTY:
+        return !isEmptyRef;
+      case ReferenceOperator.EQUALS: {
+        if (!fieldValue || !conditionValue) return false;
+
+        const compareId =
+          typeof conditionValue === 'string'
+            ? conditionValue
+            : (conditionValue as ReferenceValue).sys?.id;
+
+        // Handle single reference
+        if (!Array.isArray(fieldValue)) {
+          const refValue = fieldValue as ReferenceValue;
+          return refValue.sys?.id === compareId;
+        }
+
+        // Handle multiple references - check if any match
+        const refArray = fieldValue as ReferenceValue[];
+        return refArray.some((ref) => ref.sys?.id === compareId);
+      }
+      case ReferenceOperator.NOT_EQUALS: {
+        if (!fieldValue || !conditionValue) return true;
+
+        const compareId =
+          typeof conditionValue === 'string'
+            ? conditionValue
+            : (conditionValue as ReferenceValue).sys?.id;
+
+        // Handle single reference
+        if (!Array.isArray(fieldValue)) {
+          const refValue = fieldValue as ReferenceValue;
+          return refValue.sys?.id !== compareId;
+        }
+
+        // Handle multiple references - check if none match
+        const refArray = fieldValue as ReferenceValue[];
+        return !refArray.some((ref) => ref.sys?.id === compareId);
+      }
       default:
         return false;
     }
