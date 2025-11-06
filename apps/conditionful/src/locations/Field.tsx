@@ -276,7 +276,7 @@ const Field = () => {
       const ruleNames = hidingRules.map((r) => r.name).join(', ');
       const message =
         hidingRules.length === 1
-          ? `⚠️ Hidden by rule: "${ruleNames}"`
+          ? `⚠️ Hidden by rule: ${ruleNames}`
           : `⚠️ Hidden by rules: ${ruleNames}`;
 
       return (

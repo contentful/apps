@@ -57,49 +57,76 @@ export const ConditionEditor: React.FC<ConditionEditorProps> = ({
 
   const [isEntrySelectorOpen, setIsEntrySelectorOpen] = useState(false);
   const [selectedEntryTitle, setSelectedEntryTitle] = useState<string>('');
+  const [selectedEntries, setSelectedEntries] = useState<Array<{ id: string; title: string }>>([]);
   const [isLoadingEntry, setIsLoadingEntry] = useState(false);
 
-  // Load entry title when condition has a value
+  // Load entry title(s) when condition has a value
   useEffect(() => {
     if (!isReferenceField || !condition.value || typeof condition.value !== 'string') {
+      setSelectedEntries([]);
+      setSelectedEntryTitle('');
       return;
     }
 
-    const loadEntryTitle = async () => {
+    const loadEntryTitles = async () => {
       setIsLoadingEntry(true);
       try {
-        const entry = await cma.entry.get({
-          spaceId: sdk.ids.space,
-          environmentId: sdk.ids.environment,
-          entryId: condition.value as string,
-        });
+        const valueStr = String(condition.value);
 
-        // Try to get a meaningful title from the entry
-        let title = 'Untitled Entry';
-        if (entry.fields) {
-          const titleFields = ['title', 'name', 'label', 'heading'];
-          for (const fieldName of titleFields) {
-            if (entry.fields[fieldName]) {
-              const fieldValue = entry.fields[fieldName];
-              const localeValue = Object.values(fieldValue)[0];
-              if (localeValue && typeof localeValue === 'string') {
-                title = localeValue;
-                break;
+        // Check if it's multiple entries (comma-separated)
+        const entryIds = valueStr.includes(',')
+          ? valueStr.split(',').map((id: string) => id.trim())
+          : [valueStr];
+
+        // Load all entries
+        const entryPromises = entryIds.map(async (entryId: string) => {
+          try {
+            const entry = await cma.entry.get({
+              spaceId: sdk.ids.space,
+              environmentId: sdk.ids.environment,
+              entryId,
+            });
+
+            // Try to get a meaningful title from the entry
+            let title = 'Untitled Entry';
+            if (entry.fields) {
+              const titleFields = ['title', 'name', 'label', 'heading'];
+              for (const fieldName of titleFields) {
+                if (entry.fields[fieldName]) {
+                  const fieldValue = entry.fields[fieldName];
+                  const localeValue = Object.values(fieldValue)[0];
+                  if (localeValue && typeof localeValue === 'string') {
+                    title = localeValue;
+                    break;
+                  }
+                }
               }
             }
-          }
-        }
 
-        setSelectedEntryTitle(title);
+            return { id: entryId, title };
+          } catch (err) {
+            console.error('Error loading entry:', entryId, err);
+            return { id: entryId, title: 'Unknown Entry' };
+          }
+        });
+
+        const loadedEntries = await Promise.all(entryPromises);
+        setSelectedEntries(loadedEntries);
+
+        // For backward compatibility, also set single title
+        if (loadedEntries.length === 1) {
+          setSelectedEntryTitle(loadedEntries[0].title);
+        }
       } catch (err) {
-        console.error('Error loading entry title:', err);
+        console.error('Error loading entry titles:', err);
+        setSelectedEntries([]);
         setSelectedEntryTitle('Unknown Entry');
       } finally {
         setIsLoadingEntry(false);
       }
     };
 
-    loadEntryTitle();
+    loadEntryTitles();
   }, [isReferenceField, condition.value, cma, sdk.ids.space, sdk.ids.environment]);
 
   const handleFieldChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -154,12 +181,43 @@ export const ConditionEditor: React.FC<ConditionEditorProps> = ({
     });
   };
 
-  const handleRemoveEntry = () => {
-    setSelectedEntryTitle('');
+  const handleMultipleEntriesSelect = (entries: Array<{ id: string; title: string }>) => {
+    // For multiple entries, store as comma-separated IDs
+    const entryIds = entries.map((e) => e.id).join(',');
+    setSelectedEntries(entries);
     onChange({
       ...condition,
-      value: undefined,
+      value: entryIds,
     });
+  };
+
+  const handleRemoveEntry = (entryIdToRemove?: string) => {
+    if (!entryIdToRemove) {
+      // Remove all (for single reference)
+      setSelectedEntryTitle('');
+      setSelectedEntries([]);
+      onChange({
+        ...condition,
+        value: undefined,
+      });
+    } else {
+      // Remove specific entry (for multiple references)
+      const remainingEntries = selectedEntries.filter((e) => e.id !== entryIdToRemove);
+      setSelectedEntries(remainingEntries);
+
+      if (remainingEntries.length === 0) {
+        onChange({
+          ...condition,
+          value: undefined,
+        });
+      } else {
+        const entryIds = remainingEntries.map((e) => e.id).join(',');
+        onChange({
+          ...condition,
+          value: entryIds,
+        });
+      }
+    }
   };
 
   return (
@@ -196,18 +254,39 @@ export const ConditionEditor: React.FC<ConditionEditorProps> = ({
           {isReferenceField ? (
             <Flex flexDirection="column" gap="spacingXs" style={{ width: '100%' }}>
               {condition.value && (
-                <Pill
-                  label={selectedEntryTitle || `Entry: ${condition.value}`}
-                  onClose={handleRemoveEntry}
-                  onDrag={undefined}
-                />
+                <>
+                  {selectedField?.type === 'Array' && selectedEntries.length > 0 ? (
+                    <Flex flexWrap="wrap" gap="spacingXs">
+                      {selectedEntries.map((entry) => (
+                        <Pill
+                          key={entry.id}
+                          label={entry.title}
+                          onClose={() => handleRemoveEntry(entry.id)}
+                          onDrag={undefined}
+                        />
+                      ))}
+                    </Flex>
+                  ) : (
+                    <Pill
+                      label={selectedEntryTitle || `Entry: ${condition.value}`}
+                      onClose={() => handleRemoveEntry()}
+                      onDrag={undefined}
+                    />
+                  )}
+                </>
               )}
               <Button
                 variant="secondary"
                 startIcon={<PlusIcon />}
                 onClick={() => setIsEntrySelectorOpen(true)}
                 isDisabled={disabled}>
-                {condition.value ? 'Change Entry' : 'Select Entry'}
+                {condition.value
+                  ? selectedField?.type === 'Array'
+                    ? 'Edit Entries'
+                    : 'Change Entry'
+                  : selectedField?.type === 'Array'
+                  ? 'Select Entries'
+                  : 'Select Entry'}
               </Button>
             </Flex>
           ) : (
@@ -236,8 +315,11 @@ export const ConditionEditor: React.FC<ConditionEditorProps> = ({
           isOpen={isEntrySelectorOpen}
           onClose={() => setIsEntrySelectorOpen(false)}
           onSelect={handleEntrySelect}
+          onSelectMultiple={handleMultipleEntriesSelect}
           spaceId={sdk.ids.space}
           environmentId={sdk.ids.environment}
+          allowMultiple={selectedField?.type === 'Array'}
+          initialSelectedIds={selectedEntries.map((e) => e.id)}
         />
       )}
     </Flex>

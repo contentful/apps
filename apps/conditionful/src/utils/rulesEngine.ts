@@ -134,38 +134,50 @@ export function evaluateCondition(condition: Condition, fieldValue: FieldValue):
       case ReferenceOperator.EQUALS: {
         if (!fieldValue || !conditionValue) return false;
 
-        const compareId =
-          typeof conditionValue === 'string'
-            ? conditionValue
-            : (conditionValue as ReferenceValue).sys?.id;
+        // Support multiple entry IDs (comma-separated)
+        let compareIds: string[] = [];
+        if (typeof conditionValue === 'string') {
+          // Check if it's comma-separated IDs
+          compareIds = conditionValue.includes(',')
+            ? conditionValue.split(',').map((id) => id.trim())
+            : [conditionValue];
+        } else {
+          compareIds = [(conditionValue as ReferenceValue).sys?.id];
+        }
 
         // Handle single reference
         if (!Array.isArray(fieldValue)) {
           const refValue = fieldValue as ReferenceValue;
-          return refValue.sys?.id === compareId;
+          return compareIds.includes(refValue.sys?.id);
         }
 
         // Handle multiple references - check if any match
         const refArray = fieldValue as ReferenceValue[];
-        return refArray.some((ref) => ref.sys?.id === compareId);
+        return refArray.some((ref) => compareIds.includes(ref.sys?.id));
       }
       case ReferenceOperator.NOT_EQUALS: {
         if (!fieldValue || !conditionValue) return true;
 
-        const compareId =
-          typeof conditionValue === 'string'
-            ? conditionValue
-            : (conditionValue as ReferenceValue).sys?.id;
+        // Support multiple entry IDs (comma-separated)
+        let compareIds: string[] = [];
+        if (typeof conditionValue === 'string') {
+          // Check if it's comma-separated IDs
+          compareIds = conditionValue.includes(',')
+            ? conditionValue.split(',').map((id) => id.trim())
+            : [conditionValue];
+        } else {
+          compareIds = [(conditionValue as ReferenceValue).sys?.id];
+        }
 
         // Handle single reference
         if (!Array.isArray(fieldValue)) {
           const refValue = fieldValue as ReferenceValue;
-          return refValue.sys?.id !== compareId;
+          return !compareIds.includes(refValue.sys?.id);
         }
 
         // Handle multiple references - check if none match
         const refArray = fieldValue as ReferenceValue[];
-        return !refArray.some((ref) => ref.sys?.id === compareId);
+        return !refArray.some((ref) => compareIds.includes(ref.sys?.id));
       }
       default:
         return false;
