@@ -8,6 +8,7 @@ import Sidebar from './locations/Sidebar';
 import Page from './locations/Page';
 import Home from './locations/Home';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import { jsx } from '@emotion/core';
 
 const ComponentLocationSettings = {
   [locations.LOCATION_APP_CONFIG]: ConfigScreen,
