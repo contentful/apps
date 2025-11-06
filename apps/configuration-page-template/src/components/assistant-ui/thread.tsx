@@ -17,7 +17,7 @@ import {
   ThreadPrimitive,
 } from '@assistant-ui/react';
 
-import type { FC } from 'react';
+import React, { type FC } from 'react';
 import { LazyMotion, MotionConfig, domAnimation } from 'motion/react';
 import * as m from 'motion/react-m';
 
@@ -34,11 +34,19 @@ import { IconButton, Paragraph, Button } from '@contentful/f36-components';
 import { XSquareIcon } from 'lucide-react';
 import tokens from '@contentful/f36-tokens';
 
-export interface ThreadProps {
-  onSuggestionClick?: () => void;
+interface PendingCodeChange {
+  newCode: string;
+  newBlocks?: string[];
+  messageId: string;
 }
 
-export const Thread: FC<ThreadProps> = ({ onSuggestionClick }) => {
+export interface ThreadProps {
+  onSuggestionClick?: () => void;
+  selectedBlocks?: string[];
+  onPendingChange?: (change: PendingCodeChange | null) => void;
+}
+
+export const Thread: FC<ThreadProps> = ({ onSuggestionClick, selectedBlocks, onPendingChange }) => {
   return (
     <LazyMotion features={domAnimation}>
       <MotionConfig reducedMotion="user">
@@ -220,7 +228,6 @@ const AssistantMessage: FC = () => {
           <MessagePrimitive.Parts
             components={{
               Text: MarkdownText,
-              tools: { Fallback: ToolFallback },
             }}
           />
           <MessageError />

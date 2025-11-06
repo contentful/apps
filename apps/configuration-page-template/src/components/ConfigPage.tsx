@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useChatRuntime, AssistantChatTransport } from '@assistant-ui/react-ai-sdk';
 import { AssistantRuntimeProvider } from '@assistant-ui/react';
 import { Box, Flex } from '@contentful/f36-components';
 import { ConfigPageHeader } from './config/ConfigPageHeader';
 import { ChatSidebar } from './config/ChatSidebar';
 import { MainContent } from './config/MainContent';
+import { GenerateCodeTool } from './tools/generateCodeTool';
+import { CodeGenerationToolUI } from './tools/CodeGenerationToolUI';
 
 const ConfigPage = () => {
-  const [selectedBlocks, setSelectedBlocks] = useState<string[]>([]);
-
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
       api: 'https://template-config-hack-api-rho.colorfuldemo.com/api/chat',
@@ -27,8 +27,10 @@ const ConfigPage = () => {
         <ConfigPageHeader />
 
         <Flex>
-          <ChatSidebar selectedBlocks={selectedBlocks} onSelectionChange={setSelectedBlocks} />
-          <MainContent selectedBlocks={selectedBlocks} />
+          <ChatSidebar />
+          <MainContent />
+          <GenerateCodeTool />
+          <CodeGenerationToolUI />
         </Flex>
       </Box>
     </AssistantRuntimeProvider>

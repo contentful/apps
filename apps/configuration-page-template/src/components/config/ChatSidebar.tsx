@@ -5,6 +5,7 @@ import tokens from '@contentful/f36-tokens';
 import { Thread } from '../assistant-ui/thread';
 import { UIBlocks } from './UIBlocks';
 import { SparkleIcon } from '@contentful/f36-icons';
+import { useConfigStore } from '../../store/configStore';
 
 const sidebarStyles = {
   root: {
@@ -33,13 +34,11 @@ const sidebarStyles = {
 
 type ViewMode = 'chat' | 'ui-blocks';
 
-interface ChatSidebarProps {
-  selectedBlocks: string[];
-  onSelectionChange: (selectedBlocks: string[]) => void;
-}
-
-export const ChatSidebar: FC<ChatSidebarProps> = ({ selectedBlocks, onSelectionChange }) => {
+export const ChatSidebar: FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('chat');
+  const selectedBlocks = useConfigStore((state) => state.selectedBlocks);
+  const setSelectedBlocks = useConfigStore((state) => state.setSelectedBlocks);
+  const setPendingChange = useConfigStore((state) => state.setPendingChange);
 
   const handleSuggestionClick = () => {
     setViewMode('ui-blocks');
@@ -85,9 +84,15 @@ export const ChatSidebar: FC<ChatSidebarProps> = ({ selectedBlocks, onSelectionC
         </Flex>
       </Box>
 
-      {viewMode === 'chat' && <Thread onSuggestionClick={handleSuggestionClick} />}
+      {viewMode === 'chat' && (
+        <Thread
+          onSuggestionClick={handleSuggestionClick}
+          selectedBlocks={selectedBlocks}
+          onPendingChange={setPendingChange}
+        />
+      )}
       {viewMode === 'ui-blocks' && (
-        <UIBlocks selectedBlocks={selectedBlocks} onSelectionChange={onSelectionChange} />
+        <UIBlocks selectedBlocks={selectedBlocks} onSelectionChange={setSelectedBlocks} />
       )}
     </Box>
   );

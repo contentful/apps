@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { Box, Tabs } from '@contentful/f36-components';
 import { ExperienceView } from './ExperienceView';
 import { CodeView } from './CodeView';
+import { useConfigStore } from '../../store/configStore';
 
 const mainContentStyles = {
   root: {
@@ -22,11 +23,12 @@ const mainContentStyles = {
   },
 };
 
-interface MainContentProps {
-  selectedBlocks: string[];
-}
-
-export const MainContent: FC<MainContentProps> = ({ selectedBlocks }) => {
+export const MainContent: FC = () => {
+  const selectedBlocks = useConfigStore((state) => state.selectedBlocks);
+  const suggestedChange = useConfigStore((state) => state.suggestedChange);
+  const acceptSuggestedChange = useConfigStore((state) => state.acceptSuggestedChange);
+  const rejectSuggestedChange = useConfigStore((state) => state.rejectSuggestedChange);
+  const getCurrentCode = useConfigStore((state) => state.getCurrentCode);
   return (
     <Box style={mainContentStyles.root}>
       <Tabs defaultTab="experience">
@@ -40,7 +42,12 @@ export const MainContent: FC<MainContentProps> = ({ selectedBlocks }) => {
         </Tabs.Panel>
 
         <Tabs.Panel id="code" style={mainContentStyles.tabPanel}>
-          <CodeView selectedBlocks={selectedBlocks} />
+          <CodeView
+            currentCode={getCurrentCode()}
+            suggestedCode={suggestedChange?.suggestedCode || null}
+            onAcceptChange={acceptSuggestedChange}
+            onRejectChange={rejectSuggestedChange}
+          />
         </Tabs.Panel>
       </Tabs>
     </Box>
