@@ -31,7 +31,13 @@ interface ConditionEditorProps {
   /** The condition being edited */
   condition: Condition;
   /** Available fields from the content type */
-  availableFields: Array<{ id: string; name: string; type: FieldType }>;
+  availableFields: Array<{
+    id: string;
+    name: string;
+    type: FieldType;
+    validations?: any[];
+    items?: any;
+  }>;
   /** Callback when condition changes */
   onChange: (condition: Condition) => void;
   /** Callback when delete is requested */

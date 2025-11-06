@@ -1,15 +1,18 @@
 import { Paragraph } from '@contentful/f36-components';
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import EntrySelectionDialog from './EntrySelectionDialog';
 
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
 
+  // Check if this is an entry selection dialog
+  const params = sdk.parameters.invocation as any;
+  if (params && params.allowedEntryIds) {
+    return <EntrySelectionDialog />;
+  }
+
+  // Default dialog content
   return <Paragraph>Hello Dialog Component (AppId: {sdk.ids.app})</Paragraph>;
 };
 

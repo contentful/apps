@@ -313,3 +313,47 @@ export function getFieldVisibilityMap(
 
   return visibilityMap;
 }
+
+/**
+ * Get the allowed entry IDs for a reference field based on SET_OPTIONS actions
+ * Returns null if no restrictions apply, or an array of allowed entry IDs
+ */
+export function getAllowedEntriesForField(
+  fieldId: string,
+  rules: Rule[],
+  fieldValues: FieldValues
+): string[] | null {
+  let allowedEntries: string[] | null = null;
+
+  rules.forEach((rule) => {
+    if (!rule.enabled) return;
+
+    const ruleMatches = evaluateRule(rule, fieldValues);
+
+    if (ruleMatches) {
+      // Check if this rule has a SET_OPTIONS action for the target field
+      rule.actions.forEach((action) => {
+        if (
+          action.type === ActionType.SET_OPTIONS &&
+          action.fieldIds.includes(fieldId) &&
+          action.allowedEntries &&
+          action.allowedEntries.length > 0
+        ) {
+          console.log(
+            `[Conditionful] Setting allowed entries for field "${fieldId}" from rule "${rule.name}":`,
+            action.allowedEntries
+          );
+
+          // If we already have restrictions, merge them (intersection)
+          if (allowedEntries) {
+            allowedEntries = allowedEntries.filter((id) => action.allowedEntries!.includes(id));
+          } else {
+            allowedEntries = [...action.allowedEntries];
+          }
+        }
+      });
+    }
+  });
+
+  return allowedEntries;
+}

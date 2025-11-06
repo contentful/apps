@@ -89,11 +89,12 @@ export enum MatchMode {
 }
 
 /**
- * Action type - determines whether to show or hide fields
+ * Action type - determines whether to show or hide fields, or set options for reference fields
  */
 export enum ActionType {
   SHOW = 'show',
   HIDE = 'hide',
+  SET_OPTIONS = 'setOptions',
 }
 
 /**
@@ -113,15 +114,17 @@ export interface Condition {
 }
 
 /**
- * An action that affects the visibility of one or more fields
+ * An action that affects the visibility of one or more fields, or sets allowed options for reference fields
  */
 export interface Action {
   /** Unique identifier for the action */
   id: string;
-  /** Whether to show or hide the target fields */
+  /** Whether to show or hide the target fields, or set options for reference fields */
   type: ActionType;
-  /** Array of field IDs to show or hide */
+  /** Array of field IDs to show or hide (or single field ID for SET_OPTIONS) */
   fieldIds: string[];
+  /** For SET_OPTIONS action: array of entry IDs that are allowed to be selected */
+  allowedEntries?: string[];
 }
 
 /**

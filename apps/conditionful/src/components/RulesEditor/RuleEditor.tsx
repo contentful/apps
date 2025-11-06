@@ -25,7 +25,13 @@ interface RuleEditorProps {
   /** The rule being edited */
   rule: Rule;
   /** Available fields from the content type */
-  availableFields: Array<{ id: string; name: string; type: FieldType }>;
+  availableFields: Array<{
+    id: string;
+    name: string;
+    type: FieldType;
+    validations?: any[];
+    items?: any;
+  }>;
   /** Callback when rule changes */
   onChange: (rule: Rule) => void;
   /** Whether the editor is disabled */

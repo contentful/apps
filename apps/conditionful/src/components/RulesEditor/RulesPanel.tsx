@@ -26,7 +26,13 @@ interface RulesPanelProps {
   /** List of rules for the current content type */
   rules: Rule[];
   /** Available fields from the content type */
-  availableFields: Array<{ id: string; name: string; type: FieldType }>;
+  availableFields: Array<{
+    id: string;
+    name: string;
+    type: FieldType;
+    validations?: any[];
+    items?: any;
+  }>;
   /** Callback when rules change */
   onChange: (rules: Rule[]) => void;
   /** Whether the panel is disabled */

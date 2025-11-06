@@ -12,7 +12,7 @@ import tokens from '@contentful/f36-tokens';
 import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
 import { i18n } from '@lingui/core';
 import { FieldValues, Rule } from '../types/rules';
-import { getFieldHidingRules } from '../utils/rulesEngine';
+import { getFieldHidingRules, getAllowedEntriesForField } from '../utils/rulesEngine';
 import { SettingsService } from '../utils/settingsService';
 
 // Initialize Lingui for field editors that require it (like reference editor)
@@ -82,6 +82,7 @@ const Field = () => {
   const [hidingRules, setHidingRules] = useState<Rule[]>([]);
   const [fieldValues, setFieldValues] = useState<FieldValues>({});
   const [rulesForContentType, setRulesForContentType] = useState<Rule[]>([]);
+  const [allowedEntries, setAllowedEntries] = useState<string[] | null>(null);
 
   // Initialize and load rules
   useEffect(() => {
@@ -132,6 +133,10 @@ const Field = () => {
         setIsHidden(hidden);
         setHidingRules(hiding);
 
+        // Check if current field has entry restrictions (for reference fields)
+        const entries = getAllowedEntriesForField(currentFieldId, rules, initialValues);
+        setAllowedEntries(entries);
+
         // Listen for field value changes
         Object.entries(sdk.entry.fields).forEach(([fieldId, fieldApi]) => {
           fieldApi.onValueChanged((newValue) => {
@@ -150,6 +155,10 @@ const Field = () => {
 
               setIsHidden(nowHidden);
               setHidingRules(nowHiding);
+
+              // Re-evaluate entry restrictions for reference fields
+              const entries = getAllowedEntriesForField(currentFieldId, rules, updated);
+              setAllowedEntries(entries);
 
               return updated;
             });
@@ -214,17 +223,69 @@ const Field = () => {
         fieldEditor = <BooleanEditor field={sdk.field} isInitiallyDisabled={isHidden} />;
         break;
 
-      case 'Link':
+      case 'Link': {
+        // Create a custom SDK wrapper that opens our custom dialog
+        const customSdk = allowedEntries
+          ? {
+              ...sdk,
+              dialogs: {
+                ...sdk.dialogs,
+                selectSingleEntry: async (options: any = {}) => {
+                  console.log('[Field] Opening custom entry selection dialog');
+
+                  try {
+                    // Get currently selected entry
+                    let currentlySelected: string[] = [];
+                    try {
+                      const currentValue = sdk.field.getValue();
+                      if (currentValue?.sys?.id) {
+                        currentlySelected = [currentValue.sys.id];
+                      }
+                    } catch (e) {
+                      // No current value
+                    }
+
+                    // Open our custom dialog
+                    const result = await sdk.dialogs.openCurrentApp({
+                      position: 'center',
+                      title: 'Select Entry',
+                      shouldCloseOnOverlayClick: false,
+                      shouldCloseOnEscapePress: true,
+                      parameters: {
+                        allowedEntryIds: allowedEntries,
+                        multiple: false,
+                        currentlySelected,
+                        defaultLocale: sdk.locales.default,
+                      },
+                      width: 1000,
+                      minHeight: 600,
+                    });
+
+                    // Return the first entry (single selection)
+                    if (result && Array.isArray(result) && result.length > 0) {
+                      return result[0];
+                    }
+
+                    return null;
+                  } catch (error) {
+                    console.error('[Field] Error opening entry selection dialog:', error);
+                    return null;
+                  }
+                },
+              },
+            }
+          : sdk;
+
         fieldEditor = (
           <div style={{ minHeight: 150 }}>
             <SingleEntryReferenceEditor
-              sdk={sdk}
+              sdk={customSdk as any}
               viewType="card"
               hasCardEditActions
               isInitiallyDisabled={isHidden}
               parameters={{
                 instance: {
-                  showCreateEntityAction: true,
+                  showCreateEntityAction: false,
                   showLinkEntityAction: true,
                 },
               }}
@@ -232,6 +293,7 @@ const Field = () => {
           </div>
         );
         break;
+      }
 
       case 'Array': {
         // Check if this is an array of references (links)
@@ -240,17 +302,69 @@ const Field = () => {
           fieldDefinition?.items?.type === 'Link' && fieldDefinition?.items?.linkType === 'Entry';
 
         if (isReferenceArray) {
+          // Create a custom SDK wrapper that opens our custom dialog
+          const customSdk = allowedEntries
+            ? {
+                ...sdk,
+                dialogs: {
+                  ...sdk.dialogs,
+                  selectMultipleEntries: async (options: any = {}) => {
+                    console.log('[Field] Opening custom entry selection dialog (multiple)');
+
+                    try {
+                      // Get currently selected entries
+                      let currentlySelected: string[] = [];
+                      try {
+                        const currentValue = sdk.field.getValue();
+                        if (Array.isArray(currentValue)) {
+                          currentlySelected = currentValue.map((ref: any) => ref.sys.id);
+                        }
+                      } catch (e) {
+                        // No current value
+                      }
+
+                      // Open our custom dialog
+                      const result = await sdk.dialogs.openCurrentApp({
+                        position: 'center',
+                        title: 'Select Entries',
+                        shouldCloseOnOverlayClick: false,
+                        shouldCloseOnEscapePress: true,
+                        parameters: {
+                          allowedEntryIds: allowedEntries,
+                          multiple: true,
+                          currentlySelected,
+                          defaultLocale: sdk.locales.default,
+                        },
+                        width: 1000,
+                        minHeight: 600,
+                      });
+
+                      // Return the entries array
+                      if (result && Array.isArray(result)) {
+                        return result;
+                      }
+
+                      return [];
+                    } catch (error) {
+                      console.error('[Field] Error opening entry selection dialog:', error);
+                      return [];
+                    }
+                  },
+                },
+              }
+            : sdk;
+
           fieldEditor = (
             <div style={{ minHeight: 150 }}>
               <MultipleEntryReferenceEditor
-                sdk={sdk}
+                sdk={customSdk as any}
                 viewType="card"
                 hasCardEditActions
                 hasCardRemoveActions
                 isInitiallyDisabled={isHidden}
                 parameters={{
                   instance: {
-                    showCreateEntityAction: true,
+                    showCreateEntityAction: false,
                     showLinkEntityAction: true,
                   },
                 }}
@@ -302,7 +416,7 @@ const Field = () => {
     }
 
     return fieldEditor;
-  }, [isLoading, isHidden, hidingRules, fieldType, sdk.field, sdk.locales]);
+  }, [isLoading, isHidden, hidingRules, allowedEntries, fieldType, sdk, currentFieldId]);
 
   return <Suspense fallback={<Spinner size="small" />}>{renderFieldEditor}</Suspense>;
 };

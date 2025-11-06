@@ -99,6 +99,8 @@ const Entry = () => {
         id: field.id,
         name: field.name,
         type: field.type as FieldType,
+        validations: field.validations,
+        items: field.items, // Include items for Array fields
       }));
   }, [sdk.contentType.fields]);
 
