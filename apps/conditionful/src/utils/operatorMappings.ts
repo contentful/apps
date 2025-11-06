@@ -1,6 +1,6 @@
 /**
  * Conditionful Rules Engine - Operator Mappings
- * 
+ *
  * This file provides mappings and helper functions for working with operators
  * based on field types.
  */
@@ -46,7 +46,7 @@ export function getOperatorLabel(operator: ConditionOperator): string {
     [TextOperator.NOT_CONTAINS]: 'Does not contain',
     [TextOperator.IS_EMPTY]: 'Is empty',
     [TextOperator.IS_NOT_EMPTY]: 'Is not empty',
-    
+
     // Number operators
     [NumberOperator.EQUALS]: 'Equals',
     [NumberOperator.NOT_EQUALS]: 'Does not equal',
@@ -54,13 +54,13 @@ export function getOperatorLabel(operator: ConditionOperator): string {
     [NumberOperator.LESS_THAN]: 'Less than',
     [NumberOperator.GREATER_THAN_OR_EQUAL]: 'Greater than or equal to',
     [NumberOperator.LESS_THAN_OR_EQUAL]: 'Less than or equal to',
-    
+
     // Date operators
-    [DateOperator.EQUALS]: 'Is on',
-    [DateOperator.NOT_EQUALS]: 'Is not on',
+    [DateOperator.EQUALS]: 'Equals',
+    [DateOperator.NOT_EQUALS]: 'Does not equal',
     [DateOperator.BEFORE]: 'Is before',
     [DateOperator.AFTER]: 'Is after',
-    
+
     // Boolean operators
     [BooleanOperator.IS_TRUE]: 'Is true',
     [BooleanOperator.IS_FALSE]: 'Is false',
@@ -114,4 +114,3 @@ export function isValidOperatorForFieldType(
   const validOperators = getOperatorsForFieldType(fieldType);
   return validOperators.includes(operator);
 }
-

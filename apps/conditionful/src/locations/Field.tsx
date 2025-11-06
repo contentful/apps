@@ -1,6 +1,6 @@
 /**
  * Field Location
- * 
+ *
  * Controls field visibility based on conditional rules.
  * Shows/hides fields using the rules engine.
  */
@@ -65,7 +65,7 @@ const Field = () => {
     const initializeRules = async () => {
       try {
         console.log('[Field] Initializing for field:', currentFieldId, 'type:', fieldType);
-        
+
         const defaultLocale = sdk.locales.default;
         const settingsService = new SettingsService({
           cma,
@@ -78,8 +78,13 @@ const Field = () => {
         const allRules = await settingsService.loadRules();
         const rules = allRules[contentTypeId] || [];
         setRulesForContentType(rules);
-        
-        console.log('[Field] Rules loaded for content type:', contentTypeId, rules);
+
+        console.log(
+          '[Conditionful] Rules loaded:',
+          rules.length,
+          'rules for content type:',
+          contentTypeId
+        );
 
         // Get all field values from the entry
         const initialValues: FieldValues = {};
@@ -87,9 +92,8 @@ const Field = () => {
           try {
             const value = fieldApi.getValue();
             initialValues[fieldId] = value;
-            console.log('[Field] Initial value for', fieldId, '=', value);
           } catch (error) {
-            console.error('[Field] Error accessing field', fieldId, ':', error);
+            console.error('[Conditionful] Error accessing field', fieldId, ':', error);
           }
         });
 
@@ -101,30 +105,29 @@ const Field = () => {
           rules,
           initialValues
         );
-        console.log('[Field] Field', currentFieldId, 'is hidden:', hidden, 'by rules:', hiding.map(r => r.name));
+
         setIsHidden(hidden);
         setHidingRules(hiding);
 
         // Listen for field value changes
         Object.entries(sdk.entry.fields).forEach(([fieldId, fieldApi]) => {
           fieldApi.onValueChanged((newValue) => {
-            console.log('[Field] Field value changed:', fieldId, '=', newValue);
             setFieldValues((prev) => {
               const updated = {
                 ...prev,
                 [fieldId]: newValue,
               };
-              
+
               // Re-evaluate if current field should be hidden and get which rules are hiding it
               const { isHidden: nowHidden, hidingRules: nowHiding } = getFieldHidingRules(
                 currentFieldId,
                 rules,
                 updated
               );
-              console.log('[Field] Re-evaluated field', currentFieldId, 'is hidden:', nowHidden, 'by rules:', nowHiding.map(r => r.name));
+
               setIsHidden(nowHidden);
               setHidingRules(nowHiding);
-              
+
               return updated;
             });
           });
@@ -177,30 +180,15 @@ const Field = () => {
 
       case 'Integer':
       case 'Number':
-        fieldEditor = (
-          <NumberEditor
-            field={sdk.field}
-            isInitiallyDisabled={isHidden}
-          />
-        );
+        fieldEditor = <NumberEditor field={sdk.field} isInitiallyDisabled={isHidden} />;
         break;
 
       case 'Date':
-        fieldEditor = (
-          <DateEditor
-            field={sdk.field}
-            isInitiallyDisabled={isHidden}
-          />
-        );
+        fieldEditor = <DateEditor field={sdk.field} isInitiallyDisabled={isHidden} />;
         break;
 
       case 'Boolean':
-        fieldEditor = (
-          <BooleanEditor
-            field={sdk.field}
-            isInitiallyDisabled={isHidden}
-          />
-        );
+        fieldEditor = <BooleanEditor field={sdk.field} isInitiallyDisabled={isHidden} />;
         break;
 
       default:
@@ -211,11 +199,12 @@ const Field = () => {
 
     // Wrap the field editor with disabled styling if hidden by rules
     if (isHidden) {
-      const ruleNames = hidingRules.map(r => r.name).join(', ');
-      const message = hidingRules.length === 1
-        ? `⚠️ Hidden by rule: "${ruleNames}"`
-        : `⚠️ Hidden by rules: ${ruleNames}`;
-      
+      const ruleNames = hidingRules.map((r) => r.name).join(', ');
+      const message =
+        hidingRules.length === 1
+          ? `⚠️ Hidden by rule: "${ruleNames}"`
+          : `⚠️ Hidden by rules: ${ruleNames}`;
+
       return (
         <Box
           style={{
@@ -225,14 +214,12 @@ const Field = () => {
             borderRadius: tokens.borderRadiusMedium,
             padding: tokens.spacingXs,
             transition: 'opacity 0.2s ease-in-out',
-          }}
-        >
+          }}>
           <Text
             fontSize="fontSizeS"
             fontColor="gray500"
             marginBottom="spacingXs"
-            fontWeight="fontWeightDemiBold"
-          >
+            fontWeight="fontWeightDemiBold">
             {message}
           </Text>
           {fieldEditor}
@@ -243,11 +230,7 @@ const Field = () => {
     return fieldEditor;
   }, [isLoading, isHidden, hidingRules, fieldType, sdk.field, sdk.locales]);
 
-  return (
-    <Suspense fallback={<Spinner size="small" />}>
-      {renderFieldEditor}
-    </Suspense>
-  );
+  return <Suspense fallback={<Spinner size="small" />}>{renderFieldEditor}</Suspense>;
 };
 
 export default Field;
