@@ -1,20 +1,33 @@
-/* Make the rich text editor toolbar sticky */
+/**
+ * Rich Text Editor - Sticky Toolbar
+ * Makes the formatting toolbar remain visible when scrolling through content
+ */
+
+:root {
+  --rte-editor-max-height: 500px;
+  --rte-toolbar-z-index: 100;
+}
+
 .rich-text-editor-container {
   position: relative;
   overflow: visible;
 }
 
-/* Target the toolbar in the rich text editor */
+/* Sticky toolbar positioning */
 .rich-text-editor-container [class*="Toolbar"],
 .rich-text-editor-container [class*="toolbar"] {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: var(--rte-toolbar-z-index);
 }
 
-/* Make editor scrollable with fixed height */
+/* Scrollable editor content area */
 .rich-text-editor-container [data-slate-editor="true"] {
-  max-height: 500px; /* Fixed height to enable scrolling - adjust as needed */
+  max-height: var(--rte-editor-max-height);
   overflow-y: auto;
   overflow-x: hidden;
+  /* Smooth scrolling for better UX */
+  scroll-behavior: smooth;
+  /* Prevent scroll chaining to parent */
+  overscroll-behavior: contain;
 }
