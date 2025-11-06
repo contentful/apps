@@ -9,7 +9,7 @@ import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { Box, Spinner, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import { useSDK, useCMA, useAutoResizer } from '@contentful/react-apps-toolkit';
+import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
 import { i18n } from '@lingui/core';
 import { FieldValues, Rule } from '../types/rules';
 import { getFieldHidingRules } from '../utils/rulesEngine';
@@ -67,7 +67,11 @@ const MultipleEntryReferenceEditor = lazy(() =>
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   const cma = useCMA();
-  useAutoResizer();
+
+  // Start auto-resizer for proper iframe height management (especially for dropdowns)
+  React.useEffect(() => {
+    sdk.window.startAutoResizer();
+  }, [sdk.window]);
 
   const contentTypeId = sdk.contentType.sys.id;
   const currentFieldId = sdk.field.id;
@@ -212,18 +216,20 @@ const Field = () => {
 
       case 'Link':
         fieldEditor = (
-          <SingleEntryReferenceEditor
-            sdk={sdk}
-            viewType="card"
-            hasCardEditActions
-            isInitiallyDisabled={isHidden}
-            parameters={{
-              instance: {
-                showCreateEntityAction: true,
-                showLinkEntityAction: true,
-              },
-            }}
-          />
+          <div style={{ minHeight: 150 }}>
+            <SingleEntryReferenceEditor
+              sdk={sdk}
+              viewType="card"
+              hasCardEditActions
+              isInitiallyDisabled={isHidden}
+              parameters={{
+                instance: {
+                  showCreateEntityAction: true,
+                  showLinkEntityAction: true,
+                },
+              }}
+            />
+          </div>
         );
         break;
 
@@ -235,19 +241,21 @@ const Field = () => {
 
         if (isReferenceArray) {
           fieldEditor = (
-            <MultipleEntryReferenceEditor
-              sdk={sdk}
-              viewType="card"
-              hasCardEditActions
-              hasCardRemoveActions
-              isInitiallyDisabled={isHidden}
-              parameters={{
-                instance: {
-                  showCreateEntityAction: true,
-                  showLinkEntityAction: true,
-                },
-              }}
-            />
+            <div style={{ minHeight: 150 }}>
+              <MultipleEntryReferenceEditor
+                sdk={sdk}
+                viewType="card"
+                hasCardEditActions
+                hasCardRemoveActions
+                isInitiallyDisabled={isHidden}
+                parameters={{
+                  instance: {
+                    showCreateEntityAction: true,
+                    showLinkEntityAction: true,
+                  },
+                }}
+              />
+            </div>
           );
         } else {
           // Not a reference array, let default editor handle it
