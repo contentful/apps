@@ -1,20 +1,13 @@
 /**
  * Entry Editor Location
- * 
+ *
  * Provides a custom tab in the Contentful Entry Editor for managing
  * conditional field visibility rules and displaying fields with real-time rule evaluation
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { EditorAppSDK } from '@contentful/app-sdk';
-import {
-  Stack,
-  Box,
-  Note,
-  Spinner,
-  Button,
-  Flex,
-} from '@contentful/f36-components';
+import { Stack, Box, Note, Spinner, Button, Flex } from '@contentful/f36-components';
 import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
 import { RulesPanel } from '../components/RulesEditor/RulesPanel';
 import { Rule, FieldType } from '../types/rules';
@@ -37,10 +30,13 @@ const Entry = () => {
     const initializeSettings = async () => {
       try {
         setIsLoading(true);
-        
+
         const defaultLocale = sdk.locales.default;
-        console.log('[Conditionful] Initializing settings service for content type:', contentTypeId);
-        
+        console.log(
+          '[Conditionful] Initializing settings service for content type:',
+          contentTypeId
+        );
+
         const service = new SettingsService({
           cma,
           spaceId: sdk.ids.space,
@@ -54,11 +50,16 @@ const Entry = () => {
         // Load rules for this content type
         const allRules = await service.loadRules();
         console.log('[Conditionful] All rules loaded:', allRules);
-        
+
         const rulesForContentType = allRules[contentTypeId] || [];
-        console.log('[Conditionful] Rules for content type', contentTypeId, ':', rulesForContentType);
+        console.log(
+          '[Conditionful] Rules for content type',
+          contentTypeId,
+          ':',
+          rulesForContentType
+        );
         console.log('[Conditionful] Number of rules:', rulesForContentType.length);
-        
+
         setRules(rulesForContentType);
       } catch (error) {
         console.error('[Conditionful] Error initializing settings:', error);
@@ -76,7 +77,14 @@ const Entry = () => {
     return sdk.contentType.fields
       .filter((field) => {
         // Only include supported field types
-        const supportedTypes: FieldType[] = ['Symbol', 'Text', 'Integer', 'Number', 'Date', 'Boolean'];
+        const supportedTypes: FieldType[] = [
+          'Symbol',
+          'Text',
+          'Integer',
+          'Number',
+          'Date',
+          'Boolean',
+        ];
         return supportedTypes.includes(field.type as FieldType);
       })
       .map((field) => ({
@@ -102,10 +110,10 @@ const Entry = () => {
 
     try {
       setIsSaving(true);
-      
+
       // Load current rules to get other content types' rules
       const allRules = await settingsService.loadRules();
-      
+
       // Update rules for this content type
       const updatedRules = {
         ...allRules,
@@ -114,7 +122,7 @@ const Entry = () => {
 
       // Save to settings entry
       await settingsService.saveRules(updatedRules);
-      
+
       sdk.notifier.success('Rules saved successfully!');
       setHasUnsavedChanges(false);
     } catch (error) {
@@ -139,33 +147,23 @@ const Entry = () => {
     <Box style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
       <Stack flexDirection="column" spacing="spacingM">
         {/* Header with Save Button */}
-        <Flex justifyContent="space-between" alignItems="center">
-          <Box />
-          {hasUnsavedChanges && (
+        {hasUnsavedChanges && (
+          <Flex justifyContent="space-between" alignItems="center">
+            <Note variant="warning" style={{ flex: 1, marginRight: '16px' }}>
+              You have unsaved changes
+            </Note>
             <Button
               variant="positive"
               onClick={handleSaveRules}
               isLoading={isSaving}
-              isDisabled={isSaving}
-              size="small"
-            >
-              Save Rules
+              isDisabled={isSaving}>
+              Save Changes
             </Button>
-          )}
-        </Flex>
-
-        {hasUnsavedChanges && (
-          <Note variant="warning">
-            You have unsaved changes. Click "Save Rules" to persist your changes.
-          </Note>
+          </Flex>
         )}
 
         {/* Rules Panel */}
-        <RulesPanel
-          rules={rules}
-          availableFields={availableFields}
-          onChange={handleRulesChange}
-        />
+        <RulesPanel rules={rules} availableFields={availableFields} onChange={handleRulesChange} />
       </Stack>
     </Box>
   );

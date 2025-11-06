@@ -1,17 +1,11 @@
 /**
  * ConditionEditor Component
- * 
+ *
  * Allows users to configure a single condition (field, operator, value)
  */
 
 import React from 'react';
-import {
-  FormControl,
-  Select,
-  TextInput,
-  IconButton,
-  Stack,
-} from '@contentful/f36-components';
+import { FormControl, Select, TextInput, IconButton, Flex } from '@contentful/f36-components';
 import { DeleteIcon } from '@contentful/f36-icons';
 import { Condition, FieldType, ConditionOperator } from '../../types/rules';
 import {
@@ -42,16 +36,14 @@ export const ConditionEditor: React.FC<ConditionEditorProps> = ({
   disabled = false,
 }) => {
   const selectedField = availableFields.find((f) => f.id === condition.fieldId);
-  const availableOperators = selectedField
-    ? getOperatorsForFieldType(selectedField.type)
-    : [];
+  const availableOperators = selectedField ? getOperatorsForFieldType(selectedField.type) : [];
 
   const showValueInput = operatorRequiresValue(condition.operator);
 
   const handleFieldChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const fieldId = event.target.value;
     const field = availableFields.find((f) => f.id === fieldId);
-    
+
     if (field) {
       // Reset operator and value when field changes
       const newOperators = getOperatorsForFieldType(field.type);
@@ -93,14 +85,10 @@ export const ConditionEditor: React.FC<ConditionEditorProps> = ({
   };
 
   return (
-    <Stack flexDirection="row" alignItems="flex-end" spacing="spacingS">
+    <Flex alignItems="flex-end" gap="spacingS">
       <FormControl isRequired style={{ flex: 1, minWidth: '200px' }}>
         <FormControl.Label>Field</FormControl.Label>
-        <Select
-          value={condition.fieldId}
-          onChange={handleFieldChange}
-          isDisabled={disabled}
-        >
+        <Select value={condition.fieldId} onChange={handleFieldChange} isDisabled={disabled}>
           <Select.Option value="">Select a field</Select.Option>
           {availableFields.map((field) => (
             <Select.Option key={field.id} value={field.id}>
@@ -111,12 +99,11 @@ export const ConditionEditor: React.FC<ConditionEditorProps> = ({
       </FormControl>
 
       <FormControl isRequired style={{ flex: 1, minWidth: '150px' }}>
-        <FormControl.Label>Condition</FormControl.Label>
+        <FormControl.Label>Operator</FormControl.Label>
         <Select
           value={condition.operator}
           onChange={handleOperatorChange}
-          isDisabled={disabled || !selectedField}
-        >
+          isDisabled={disabled || !selectedField}>
           {availableOperators.map((op) => (
             <Select.Option key={op} value={op}>
               {getOperatorLabel(op)}
@@ -144,9 +131,7 @@ export const ConditionEditor: React.FC<ConditionEditorProps> = ({
         aria-label="Delete condition"
         onClick={onDelete}
         isDisabled={disabled}
-        size="small"
       />
-    </Stack>
+    </Flex>
   );
 };
-

@@ -1,6 +1,6 @@
 /**
  * RuleEditor Component
- * 
+ *
  * Form to edit a complete rule including name, match mode, conditions, and actions
  */
 
@@ -11,10 +11,9 @@ import {
   Select,
   Button,
   Stack,
-  Card,
-  Heading,
   Text,
   Box,
+  Flex,
 } from '@contentful/f36-components';
 import { PlusIcon } from '@contentful/f36-icons';
 import { Rule, Condition, Action, MatchMode, ActionType, FieldType } from '../../types/rules';
@@ -116,50 +115,46 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
   };
 
   return (
-    <Card padding="large">
-      <Stack flexDirection="column" spacing="spacingL">
-        {/* Rule Name */}
-        <FormControl isRequired>
-          <FormControl.Label>Rule Name</FormControl.Label>
-          <TextInput
-            value={rule.name}
-            onChange={handleNameChange}
-            placeholder="Enter rule name"
-            isDisabled={disabled}
-          />
-        </FormControl>
-
-        <Box
-          style={{
-            height: '1px',
-            backgroundColor: '#d3dce0',
-            margin: '0 -24px',
-          }}
+    <Stack flexDirection="column" alignItems="stretch" spacing="spacingM" style={{ width: '100%' }}>
+      {/* Rule Name */}
+      <FormControl isRequired>
+        <FormControl.Label>Rule Name</FormControl.Label>
+        <TextInput
+          value={rule.name}
+          onChange={handleNameChange}
+          placeholder="Enter rule name"
+          isDisabled={disabled}
         />
+      </FormControl>
 
-        {/* Conditions Section */}
-        <Stack flexDirection="column" spacing="spacingM">
-          <Stack flexDirection="row" alignItems="center" spacing="spacingS">
-            <Heading as="h3" marginBottom="none">
-              If
-            </Heading>
-            <Select
-              value={rule.matchMode}
-              onChange={handleMatchModeChange}
-              isDisabled={disabled}
-              style={{ width: 'auto' }}
-            >
-              <Select.Option value={MatchMode.ALL}>All</Select.Option>
-              <Select.Option value={MatchMode.ANY}>Any</Select.Option>
-            </Select>
-            <Text>of the following conditions are met:</Text>
-          </Stack>
+      <Box
+        style={{
+          height: '1px',
+          backgroundColor: '#e5ebed',
+          margin: '0',
+        }}
+      />
 
-          {rule.conditions.length === 0 && (
-            <Text fontColor="gray500">No conditions added yet</Text>
-          )}
+      {/* Conditions Section */}
+      <Stack flexDirection="column" spacing="spacingM" alignItems="stretch">
+        <Flex alignItems="center" gap="spacingS">
+          <Text fontWeight="fontWeightMedium" fontSize="fontSizeL">
+            If
+          </Text>
+          <Select
+            value={rule.matchMode}
+            onChange={handleMatchModeChange}
+            isDisabled={disabled}
+            size="small"
+            style={{ width: '80px' }}>
+            <Select.Option value={MatchMode.ALL}>All</Select.Option>
+            <Select.Option value={MatchMode.ANY}>Any</Select.Option>
+          </Select>
+          <Text fontColor="gray700">of the following conditions are met:</Text>
+        </Flex>
 
-          {rule.conditions.map((condition, index) => (
+        {rule.conditions.map((condition, index) => (
+          <Flex marginLeft="spacingL">
             <ConditionEditor
               key={condition.id}
               condition={condition}
@@ -168,36 +163,42 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
               onDelete={() => handleDeleteCondition(index)}
               disabled={disabled}
             />
-          ))}
+          </Flex>
+        ))}
 
-          <Button
-            variant="secondary"
-            size="small"
-            startIcon={<PlusIcon />}
-            onClick={handleAddCondition}
-            isDisabled={disabled}
-          >
-            Add Condition
-          </Button>
-        </Stack>
+        {rule.conditions.length === 0 && (
+          <Text fontColor="gray500" fontSize="fontSizeS">
+            No conditions yet
+          </Text>
+        )}
 
-        <Box
-          style={{
-            height: '1px',
-            backgroundColor: '#d3dce0',
-            margin: '0 -24px',
-          }}
-        />
+        <Button
+          variant="secondary"
+          size="small"
+          startIcon={<PlusIcon />}
+          onClick={handleAddCondition}
+          isDisabled={disabled}
+          style={{ alignSelf: 'center' }}>
+          Add Condition
+        </Button>
+      </Stack>
 
-        {/* Actions Section */}
-        <Stack flexDirection="column" spacing="spacingM">
-          <Heading as="h3">Perform the following actions:</Heading>
+      <Box
+        style={{
+          height: '1px',
+          backgroundColor: '#e5ebed',
+          margin: '0',
+        }}
+      />
 
-          {rule.actions.length === 0 && (
-            <Text fontColor="gray500">No actions added yet</Text>
-          )}
+      {/* Actions Section */}
+      <Stack flexDirection="column" spacing="spacingM" alignItems="stretch">
+        <Text fontWeight="fontWeightMedium" fontSize="fontSizeL">
+          Perform the following actions:
+        </Text>
 
-          {rule.actions.map((action, index) => (
+        {rule.actions.map((action, index) => (
+          <Flex marginLeft="spacingL">
             <ActionEditor
               key={action.id}
               action={action}
@@ -206,20 +207,25 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
               onDelete={() => handleDeleteAction(index)}
               disabled={disabled}
             />
-          ))}
+          </Flex>
+        ))}
 
-          <Button
-            variant="secondary"
-            size="small"
-            startIcon={<PlusIcon />}
-            onClick={handleAddAction}
-            isDisabled={disabled}
-          >
-            Add Action
-          </Button>
-        </Stack>
+        {rule.actions.length === 0 && (
+          <Text fontColor="gray500" fontSize="fontSizeS">
+            No actions yet
+          </Text>
+        )}
+
+        <Button
+          variant="secondary"
+          size="small"
+          startIcon={<PlusIcon />}
+          onClick={handleAddAction}
+          isDisabled={disabled}
+          style={{ alignSelf: 'center' }}>
+          Add Action
+        </Button>
       </Stack>
-    </Card>
+    </Stack>
   );
 };
-

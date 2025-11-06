@@ -1,6 +1,6 @@
 /**
  * ActionEditor Component
- * 
+ *
  * Allows users to configure a single action (show/hide fields)
  */
 
@@ -41,9 +41,7 @@ export const ActionEditor: React.FC<ActionEditorProps> = ({
   disabled = false,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedFieldIds, setSelectedFieldIds] = useState<Set<string>>(
-    new Set(action.fieldIds)
-  );
+  const [selectedFieldIds, setSelectedFieldIds] = useState<Set<string>>(new Set(action.fieldIds));
 
   const handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const type = event.target.value as ActionType;
@@ -91,36 +89,36 @@ export const ActionEditor: React.FC<ActionEditorProps> = ({
 
   return (
     <>
-      <Stack flexDirection="row" alignItems="flex-start" spacing="spacingS">
+      <Flex alignItems="flex-start" gap="spacingS">
         <FormControl isRequired style={{ flex: '0 0 150px' }}>
-          <FormControl.Label>Show or Hide</FormControl.Label>
-          <Select
-            value={action.type}
-            onChange={handleTypeChange}
-            isDisabled={disabled}
-          >
+          <FormControl.Label>Action</FormControl.Label>
+          <Select value={action.type} onChange={handleTypeChange} isDisabled={disabled}>
             <Select.Option value={ActionType.SHOW}>Show</Select.Option>
             <Select.Option value={ActionType.HIDE}>Hide</Select.Option>
           </Select>
         </FormControl>
 
         <FormControl isRequired style={{ flex: 1 }}>
-          <FormControl.Label>Field (required)</FormControl.Label>
-          <Flex flexDirection="column" gap="spacingS">
-            <Flex flexWrap="wrap" gap="spacingXs">
-              {action.fieldIds.length === 0 && (
-                <Text fontColor="gray500" fontSize="fontSizeM">
+          <FormControl.Label>Fields</FormControl.Label>
+          <Flex flexDirection="column" gap="spacingXs">
+            <Flex
+              flexWrap="wrap"
+              gap="spacingXs"
+              style={{ minHeight: '32px', alignItems: 'center' }}>
+              {action.fieldIds.length === 0 ? (
+                <Text fontColor="gray500" fontSize="fontSizeS">
                   No fields selected
                 </Text>
+              ) : (
+                action.fieldIds.map((fieldId) => (
+                  <Pill
+                    key={fieldId}
+                    label={getFieldName(fieldId)}
+                    onClose={() => handleRemoveField(fieldId)}
+                    onDrag={undefined}
+                  />
+                ))
               )}
-              {action.fieldIds.map((fieldId) => (
-                <Pill
-                  key={fieldId}
-                  label={getFieldName(fieldId)}
-                  onClose={() => handleRemoveField(fieldId)}
-                  onDrag={undefined}
-                />
-              ))}
             </Flex>
             <Button
               variant="secondary"
@@ -128,7 +126,7 @@ export const ActionEditor: React.FC<ActionEditorProps> = ({
               startIcon={<PlusIcon />}
               onClick={handleOpenModal}
               isDisabled={disabled}
-            >
+              style={{ alignSelf: 'flex-start' }}>
               Select Fields
             </Button>
           </Flex>
@@ -140,46 +138,36 @@ export const ActionEditor: React.FC<ActionEditorProps> = ({
           aria-label="Delete action"
           onClick={onDelete}
           isDisabled={disabled}
-          size="small"
           style={{ marginTop: '28px' }}
         />
-      </Stack>
+      </Flex>
 
       <Modal onClose={() => setIsModalOpen(false)} isShown={isModalOpen}>
         {() => (
           <>
-            <Modal.Header
-              title="Select Fields"
-              onClose={() => setIsModalOpen(false)}
-            />
+            <Modal.Header title="Select Fields" onClose={() => setIsModalOpen(false)} />
             <Modal.Content>
               <Stack flexDirection="column" spacing="spacingS">
                 <Text>
-                  Select the fields that should be {action.type === ActionType.SHOW ? 'shown' : 'hidden'}:
+                  Select the fields that should be{' '}
+                  {action.type === ActionType.SHOW ? 'shown' : 'hidden'}:
                 </Text>
                 {availableFields.map((field) => (
                   <Checkbox
                     key={field.id}
                     id={`field-${field.id}`}
                     isChecked={selectedFieldIds.has(field.id)}
-                    onChange={() => handleToggleField(field.id)}
-                  >
+                    onChange={() => handleToggleField(field.id)}>
                     {field.name} ({field.type})
                   </Checkbox>
                 ))}
               </Stack>
             </Modal.Content>
             <Modal.Controls>
-              <Button
-                variant="transparent"
-                onClick={() => setIsModalOpen(false)}
-              >
+              <Button variant="transparent" onClick={() => setIsModalOpen(false)}>
                 Cancel
               </Button>
-              <Button
-                variant="positive"
-                onClick={handleSaveSelection}
-              >
+              <Button variant="positive" onClick={handleSaveSelection}>
                 Save Selection
               </Button>
             </Modal.Controls>
@@ -189,4 +177,3 @@ export const ActionEditor: React.FC<ActionEditorProps> = ({
     </>
   );
 };
-

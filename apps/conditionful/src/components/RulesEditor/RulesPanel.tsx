@@ -1,6 +1,6 @@
 /**
  * RulesPanel Component
- * 
+ *
  * Main panel showing list of rules with enable/disable toggles and management options
  */
 
@@ -17,7 +17,7 @@ import {
   Modal,
   Note,
 } from '@contentful/f36-components';
-import { PlusIcon, EditIcon, DeleteIcon, ChevronDownIcon, ChevronUpIcon } from '@contentful/f36-icons';
+import { PlusIcon, DeleteIcon, ChevronDownIcon, ChevronUpIcon } from '@contentful/f36-icons';
 import { Rule, MatchMode, FieldType } from '../../types/rules';
 import { RuleEditor } from './RuleEditor';
 
@@ -70,10 +70,26 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
     setExpandedRuleIds(new Set([...expandedRuleIds, ruleId]));
   };
 
+  const handleToggleExpand = (ruleId: string) => {
+    const isCurrentlyExpanded = expandedRuleIds.has(ruleId);
+
+    if (isCurrentlyExpanded) {
+      // Collapse and exit editing mode
+      const newExpanded = new Set(expandedRuleIds);
+      newExpanded.delete(ruleId);
+      setExpandedRuleIds(newExpanded);
+      if (editingRuleId === ruleId) {
+        setEditingRuleId(null);
+      }
+    } else {
+      // Expand and enter editing mode
+      setExpandedRuleIds(new Set([...expandedRuleIds, ruleId]));
+      setEditingRuleId(ruleId);
+    }
+  };
+
   const handleSaveRule = (updatedRule: Rule) => {
-    const updatedRules = rules.map((rule) =>
-      rule.id === updatedRule.id ? updatedRule : rule
-    );
+    const updatedRules = rules.map((rule) => (rule.id === updatedRule.id ? updatedRule : rule));
     onChange(updatedRules);
     setEditingRuleId(null);
   };
@@ -101,97 +117,82 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
     setRuleToDelete(null);
   };
 
-  const toggleExpanded = (ruleId: string) => {
-    const newExpanded = new Set(expandedRuleIds);
-    if (newExpanded.has(ruleId)) {
-      newExpanded.delete(ruleId);
-    } else {
-      newExpanded.add(ruleId);
-    }
-    setExpandedRuleIds(newExpanded);
-  };
-
   const getRuleSummary = (rule: Rule) => {
     const conditionsCount = rule.conditions.length;
     const actionsCount = rule.actions.length;
-    return `${conditionsCount} condition${conditionsCount !== 1 ? 's' : ''}, ${actionsCount} action${actionsCount !== 1 ? 's' : ''}`;
+    return `${conditionsCount} condition${
+      conditionsCount !== 1 ? 's' : ''
+    }, ${actionsCount} action${actionsCount !== 1 ? 's' : ''}`;
   };
 
   return (
     <>
       <Stack flexDirection="column" spacing="spacingM" style={{ width: '100%' }}>
-        <Flex justifyContent="flex-end" alignItems="center">
+        <Flex justifyContent="flex-end" alignItems="center" alignSelf="flex-end">
           <Button
             variant="primary"
             startIcon={<PlusIcon />}
             onClick={handleAddRule}
-            isDisabled={disabled}
-            size="small"
-          >
+            isDisabled={disabled}>
             Add Rule
           </Button>
         </Flex>
 
         {rules.length === 0 && (
-          <Note variant="primary">
-            No rules configured yet. Click "Add Rule" to create your first rule.
-          </Note>
+          <Flex
+            flexDirection="column"
+            alignItems="center"
+            padding="spacingXl"
+            style={{ textAlign: 'center' }}>
+            <Text fontSize="fontSizeL" fontColor="gray600" marginBottom="spacingS">
+              No rules configured yet
+            </Text>
+            <Text fontSize="fontSizeM" fontColor="gray500">
+              Create your first rule to control field visibility
+            </Text>
+          </Flex>
         )}
 
-        <Stack flexDirection="column" spacing="spacingS">
+        <Stack flexDirection="column" spacing="spacingS" style={{ width: '100%' }}>
           {rules.map((rule) => {
             const isExpanded = expandedRuleIds.has(rule.id);
             const isEditing = editingRuleId === rule.id;
             const editingRule = isEditing ? { ...rule } : rule;
 
             return (
-              <Card key={rule.id} padding="none">
-                <Stack flexDirection="column" spacing="none">
+              <Card
+                key={rule.id}
+                padding="none"
+                style={{ width: '100%' }}
+                onClick={() => handleToggleExpand(rule.id)}>
+                <Stack flexDirection="column" spacing="none" alignItems="stretch">
                   {/* Rule Header */}
                   <Flex
-                    padding="spacingS"
+                    padding="spacingM"
                     justifyContent="space-between"
-                    alignItems="center"
+                    // alignItems="flex-start"
                     style={{
-                      borderBottom: isExpanded ? '1px solid #d3dce0' : 'none',
-                    }}
-                  >
-                    <Flex alignItems="center" gap="spacingXs" style={{ flex: 1 }}>
+                      borderBottom: isExpanded ? '1px solid #e5ebed' : 'none',
+                    }}>
+                    <Flex alignItems="center" gap="spacingS">
                       <IconButton
                         variant="transparent"
                         icon={isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
                         aria-label={isExpanded ? 'Collapse rule' : 'Expand rule'}
-                        onClick={() => toggleExpanded(rule.id)}
-                        size="small"
+                        onClick={() => handleToggleExpand(rule.id)}
                       />
-                      <Stack flexDirection="column" spacing="spacing2Xs" style={{ flex: 1 }}>
-                        <Flex alignItems="center" gap="spacingXs">
-                          <Text fontWeight="fontWeightDemiBold" fontSize="fontSizeM">{rule.name}</Text>
-                          {!rule.enabled && (
-                            <Badge variant="secondary" size="small">Disabled</Badge>
-                          )}
-                        </Flex>
-                        <Text fontSize="fontSizeS" fontColor="gray500">
-                          {getRuleSummary(rule)}
-                        </Text>
-                      </Stack>
+                      <Text fontWeight="fontWeightMedium" fontSize="fontSizeL">
+                        {rule.name}
+                      </Text>
+                      {!rule.enabled && <Badge variant="secondary">Disabled</Badge>}
                     </Flex>
 
-                    <Flex alignItems="center" gap="spacingXs">
+                    <Flex alignItems="center" gap="spacingM">
                       <Switch
                         id={`rule-enabled-${rule.id}`}
                         isChecked={rule.enabled}
                         onChange={() => handleToggleRule(rule.id)}
                         isDisabled={disabled}
-                        size="small"
-                      />
-                      <IconButton
-                        variant="transparent"
-                        icon={<EditIcon />}
-                        aria-label="Edit rule"
-                        onClick={() => handleEditRule(rule.id)}
-                        isDisabled={disabled}
-                        size="small"
                       />
                       <IconButton
                         variant="transparent"
@@ -199,69 +200,40 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
                         aria-label="Delete rule"
                         onClick={() => handleDeleteRule(rule.id)}
                         isDisabled={disabled}
-                        size="small"
                       />
                     </Flex>
                   </Flex>
 
                   {/* Rule Editor (when expanded) */}
-                  {isExpanded && (
-                    <div style={{ padding: '12px' }}>
-                      {isEditing ? (
-                        <Stack flexDirection="column" spacing="spacingS">
-                          <RuleEditor
-                            rule={editingRule}
-                            availableFields={availableFields}
-                            onChange={(updated) => {
-                              // Update in real-time while editing
-                              const updatedRules = rules.map((r) =>
-                                r.id === updated.id ? updated : r
-                              );
-                              onChange(updatedRules);
-                            }}
-                            disabled={disabled}
-                          />
-                          <Flex justifyContent="flex-end" gap="spacingXs">
-                            <Button
-                              variant="secondary"
-                              onClick={handleCancelEdit}
-                              isDisabled={disabled}
-                              size="small"
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              variant="positive"
-                              onClick={() => handleSaveRule(editingRule)}
-                              isDisabled={disabled}
-                              size="small"
-                            >
-                              Save Rule
-                            </Button>
-                          </Flex>
-                        </Stack>
-                      ) : (
-                        <Stack flexDirection="column" spacing="spacingXs">
-                          <Text fontSize="fontSizeS">
-                            <strong>Match:</strong> {rule.matchMode === MatchMode.ALL ? 'All' : 'Any'} conditions
-                          </Text>
-                          <Text fontSize="fontSizeS">
-                            <strong>Conditions:</strong> {rule.conditions.length}
-                          </Text>
-                          <Text fontSize="fontSizeS">
-                            <strong>Actions:</strong> {rule.actions.length}
-                          </Text>
-                          <Button
-                            variant="secondary"
-                            size="small"
-                            onClick={() => handleEditRule(rule.id)}
-                            isDisabled={disabled}
-                          >
-                            Edit Details
-                          </Button>
-                        </Stack>
-                      )}
-                    </div>
+                  {isExpanded && isEditing && (
+                    <Flex padding="spacingL" flexDirection="column" gap="spacingM">
+                      <RuleEditor
+                        rule={editingRule}
+                        availableFields={availableFields}
+                        onChange={(updated) => {
+                          // Update in real-time while editing
+                          const updatedRules = rules.map((r) =>
+                            r.id === updated.id ? updated : r
+                          );
+                          onChange(updatedRules);
+                        }}
+                        disabled={disabled}
+                      />
+                      <Flex justifyContent="flex-end" gap="spacingS">
+                        <Button
+                          variant="secondary"
+                          onClick={handleCancelEdit}
+                          isDisabled={disabled}>
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="positive"
+                          onClick={() => handleSaveRule(editingRule)}
+                          isDisabled={disabled}>
+                          Done
+                        </Button>
+                      </Flex>
+                    </Flex>
                   )}
                 </Stack>
               </Card>
@@ -274,26 +246,15 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
       <Modal onClose={() => setIsDeleteModalOpen(false)} isShown={isDeleteModalOpen}>
         {() => (
           <>
-            <Modal.Header
-              title="Delete Rule"
-              onClose={() => setIsDeleteModalOpen(false)}
-            />
+            <Modal.Header title="Delete Rule" onClose={() => setIsDeleteModalOpen(false)} />
             <Modal.Content>
-              <Text>
-                Are you sure you want to delete this rule? This action cannot be undone.
-              </Text>
+              <Text>Are you sure you want to delete this rule? This action cannot be undone.</Text>
             </Modal.Content>
             <Modal.Controls>
-              <Button
-                variant="transparent"
-                onClick={() => setIsDeleteModalOpen(false)}
-              >
+              <Button variant="transparent" onClick={() => setIsDeleteModalOpen(false)}>
                 Cancel
               </Button>
-              <Button
-                variant="negative"
-                onClick={handleConfirmDelete}
-              >
+              <Button variant="negative" onClick={handleConfirmDelete}>
                 Delete Rule
               </Button>
             </Modal.Controls>
@@ -303,4 +264,3 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
     </>
   );
 };
-
