@@ -144,6 +144,7 @@ export const ConditionEditor: React.FC<ConditionEditorProps> = ({
         aria-label="Delete condition"
         onClick={onDelete}
         isDisabled={disabled}
+        size="small"
       />
     </Stack>
   );

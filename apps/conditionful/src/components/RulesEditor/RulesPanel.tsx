@@ -7,7 +7,6 @@
 import React, { useState } from 'react';
 import {
   Stack,
-  Heading,
   Button,
   Card,
   Switch,
@@ -120,14 +119,14 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
 
   return (
     <>
-      <Stack flexDirection="column" spacing="spacingL" style={{ width: '100%' }}>
-        <Flex justifyContent="space-between" alignItems="center">
-          <Heading as="h2">Field Visibility Rules</Heading>
+      <Stack flexDirection="column" spacing="spacingM" style={{ width: '100%' }}>
+        <Flex justifyContent="flex-end" alignItems="center">
           <Button
             variant="primary"
             startIcon={<PlusIcon />}
             onClick={handleAddRule}
             isDisabled={disabled}
+            size="small"
           >
             Add Rule
           </Button>
@@ -139,7 +138,7 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
           </Note>
         )}
 
-        <Stack flexDirection="column" spacing="spacingM">
+        <Stack flexDirection="column" spacing="spacingS">
           {rules.map((rule) => {
             const isExpanded = expandedRuleIds.has(rule.id);
             const isEditing = editingRuleId === rule.id;
@@ -150,14 +149,14 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
                 <Stack flexDirection="column" spacing="none">
                   {/* Rule Header */}
                   <Flex
-                    padding="spacingM"
+                    padding="spacingS"
                     justifyContent="space-between"
                     alignItems="center"
                     style={{
                       borderBottom: isExpanded ? '1px solid #d3dce0' : 'none',
                     }}
                   >
-                    <Flex alignItems="center" gap="spacingS" style={{ flex: 1 }}>
+                    <Flex alignItems="center" gap="spacingXs" style={{ flex: 1 }}>
                       <IconButton
                         variant="transparent"
                         icon={isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
@@ -165,11 +164,11 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
                         onClick={() => toggleExpanded(rule.id)}
                         size="small"
                       />
-                      <Stack flexDirection="column" spacing="spacingXs" style={{ flex: 1 }}>
+                      <Stack flexDirection="column" spacing="spacing2Xs" style={{ flex: 1 }}>
                         <Flex alignItems="center" gap="spacingXs">
-                          <Text fontWeight="fontWeightDemiBold">{rule.name}</Text>
+                          <Text fontWeight="fontWeightDemiBold" fontSize="fontSizeM">{rule.name}</Text>
                           {!rule.enabled && (
-                            <Badge variant="secondary">Disabled</Badge>
+                            <Badge variant="secondary" size="small">Disabled</Badge>
                           )}
                         </Flex>
                         <Text fontSize="fontSizeS" fontColor="gray500">
@@ -184,6 +183,7 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
                         isChecked={rule.enabled}
                         onChange={() => handleToggleRule(rule.id)}
                         isDisabled={disabled}
+                        size="small"
                       />
                       <IconButton
                         variant="transparent"
@@ -206,9 +206,9 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
 
                   {/* Rule Editor (when expanded) */}
                   {isExpanded && (
-                    <div style={{ padding: '16px' }}>
+                    <div style={{ padding: '12px' }}>
                       {isEditing ? (
-                        <Stack flexDirection="column" spacing="spacingM">
+                        <Stack flexDirection="column" spacing="spacingS">
                           <RuleEditor
                             rule={editingRule}
                             availableFields={availableFields}
@@ -221,11 +221,12 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
                             }}
                             disabled={disabled}
                           />
-                          <Flex justifyContent="flex-end" gap="spacingS">
+                          <Flex justifyContent="flex-end" gap="spacingXs">
                             <Button
                               variant="secondary"
                               onClick={handleCancelEdit}
                               isDisabled={disabled}
+                              size="small"
                             >
                               Cancel
                             </Button>
@@ -233,20 +234,21 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
                               variant="positive"
                               onClick={() => handleSaveRule(editingRule)}
                               isDisabled={disabled}
+                              size="small"
                             >
                               Save Rule
                             </Button>
                           </Flex>
                         </Stack>
                       ) : (
-                        <Stack flexDirection="column" spacing="spacingS">
-                          <Text>
+                        <Stack flexDirection="column" spacing="spacingXs">
+                          <Text fontSize="fontSizeS">
                             <strong>Match:</strong> {rule.matchMode === MatchMode.ALL ? 'All' : 'Any'} conditions
                           </Text>
-                          <Text>
+                          <Text fontSize="fontSizeS">
                             <strong>Conditions:</strong> {rule.conditions.length}
                           </Text>
-                          <Text>
+                          <Text fontSize="fontSizeS">
                             <strong>Actions:</strong> {rule.actions.length}
                           </Text>
                           <Button

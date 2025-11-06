@@ -140,6 +140,7 @@ export const ActionEditor: React.FC<ActionEditorProps> = ({
           aria-label="Delete action"
           onClick={onDelete}
           isDisabled={disabled}
+          size="small"
           style={{ marginTop: '28px' }}
         />
       </Stack>
