@@ -121,36 +121,54 @@ export function evaluateCondition(condition: Condition, fieldValue: FieldValue):
  * Evaluate all conditions in a rule based on the match mode
  */
 export function evaluateRule(rule: Rule, fieldValues: FieldValues): boolean {
+  console.log('[RulesEngine] Evaluating rule:', rule.name);
+  
   // Skip disabled rules
   if (!rule.enabled) {
+    console.log('[RulesEngine] Rule is disabled, skipping');
     return false;
   }
 
   // If there are no conditions, the rule doesn't match
   if (rule.conditions.length === 0) {
+    console.log('[RulesEngine] Rule has no conditions, skipping');
     return false;
   }
 
   // Evaluate each condition
   const conditionResults = rule.conditions.map((condition) => {
     const fieldValue = fieldValues[condition.fieldId];
-    return evaluateCondition(condition, fieldValue);
+    const result = evaluateCondition(condition, fieldValue);
+    console.log('[RulesEngine] Condition result:', {
+      fieldId: condition.fieldId,
+      operator: condition.operator,
+      expectedValue: condition.value,
+      actualValue: fieldValue,
+      result,
+    });
+    return result;
   });
 
   // Apply match mode (all/any)
+  let ruleMatches: boolean;
   if (rule.matchMode === MatchMode.ALL) {
     // ALL conditions must be true
-    return conditionResults.every((result) => result === true);
+    ruleMatches = conditionResults.every((result) => result === true);
   } else {
     // ANY condition must be true
-    return conditionResults.some((result) => result === true);
+    ruleMatches = conditionResults.some((result) => result === true);
   }
+  
+  console.log('[RulesEngine] Rule', rule.name, 'matches:', ruleMatches, '(mode:', rule.matchMode + ')');
+  return ruleMatches;
 }
 
 /**
  * Get the set of field IDs that should be hidden based on all rules
  */
 export function getHiddenFields(rules: Rule[], fieldValues: FieldValues): Set<string> {
+  console.log('[RulesEngine] getHiddenFields called with', rules.length, 'rules');
+  
   const hiddenFields = new Set<string>();
   const shownFields = new Set<string>();
 
@@ -159,21 +177,30 @@ export function getHiddenFields(rules: Rule[], fieldValues: FieldValues): Set<st
     const ruleMatches = evaluateRule(rule, fieldValues);
 
     if (ruleMatches) {
+      console.log('[RulesEngine] Rule matched, applying actions:', rule.actions);
+      
       // Apply each action in the rule
       rule.actions.forEach((action: Action) => {
+        console.log('[RulesEngine] Applying action:', action.type, 'to fields:', action.fieldIds);
+        
         action.fieldIds.forEach((fieldId) => {
           if (action.type === ActionType.HIDE) {
             hiddenFields.add(fieldId);
             shownFields.delete(fieldId); // Remove from shown if previously added
+            console.log('[RulesEngine] Hiding field:', fieldId);
           } else if (action.type === ActionType.SHOW) {
             shownFields.add(fieldId);
             hiddenFields.delete(fieldId); // Remove from hidden if previously added
+            console.log('[RulesEngine] Showing field:', fieldId);
           }
         });
       });
     }
   });
 
+  console.log('[RulesEngine] Final hidden fields:', Array.from(hiddenFields));
+  console.log('[RulesEngine] Final shown fields:', Array.from(shownFields));
+  
   // Return the final set of hidden fields
   // (shown fields take precedence if there's a conflict)
   return hiddenFields;

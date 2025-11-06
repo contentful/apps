@@ -46,6 +46,8 @@ const Entry = () => {
         setIsLoading(true);
         
         const defaultLocale = sdk.locales.default;
+        console.log('[Conditionful] Initializing settings service for content type:', contentTypeId);
+        
         const service = new SettingsService({
           cma,
           spaceId: sdk.ids.space,
@@ -58,10 +60,15 @@ const Entry = () => {
 
         // Load rules for this content type
         const allRules = await service.loadRules();
+        console.log('[Conditionful] All rules loaded:', allRules);
+        
         const rulesForContentType = allRules[contentTypeId] || [];
+        console.log('[Conditionful] Rules for content type', contentTypeId, ':', rulesForContentType);
+        console.log('[Conditionful] Number of rules:', rulesForContentType.length);
+        
         setRules(rulesForContentType);
       } catch (error) {
-        console.error('Error initializing settings:', error);
+        console.error('[Conditionful] Error initializing settings:', error);
         sdk.notifier.error('Failed to load rules configuration');
       } finally {
         setIsLoading(false);
@@ -73,6 +80,7 @@ const Entry = () => {
 
   // Get available fields from content type
   const availableFields = useMemo(() => {
+    console.log('availableFields', sdk.contentType.fields)
     return sdk.contentType.fields
       .filter((field) => {
         // Only include supported field types
@@ -91,14 +99,18 @@ const Entry = () => {
     const initialValues: FieldValues = {};
     const detachFunctions: Array<() => void> = [];
 
+    console.log('[Conditionful] Setting up field value listeners');
+
     // Get initial values for all fields
     Object.entries(sdk.entry.fields).forEach(([fieldId, fieldApi]) => {
       try {
         const value = fieldApi.getValue();
         initialValues[fieldId] = value;
+        console.log('[Conditionful] Initial field value:', fieldId, '=', value);
 
         // Listen for changes
         const detach = fieldApi.onValueChanged((newValue) => {
+          console.log('[Conditionful] Field value changed:', fieldId, '=', newValue);
           setFieldValues((prev) => ({
             ...prev,
             [fieldId]: newValue,
@@ -106,10 +118,11 @@ const Entry = () => {
         });
         detachFunctions.push(detach);
       } catch (error) {
-        console.error(`Error accessing field ${fieldId}:`, error);
+        console.error(`[Conditionful] Error accessing field ${fieldId}:`, error);
       }
     });
 
+    console.log('[Conditionful] All initial field values:', initialValues);
     setFieldValues(initialValues);
 
     // Cleanup listeners on unmount
@@ -120,11 +133,19 @@ const Entry = () => {
 
   // Calculate hidden fields based on current rules and field values
   const hiddenFieldIds = useMemo(() => {
-    return getHiddenFields(rules, fieldValues);
+    console.log('[Conditionful] Evaluating rules with:');
+    console.log('  - Rules:', rules);
+    console.log('  - Field values:', fieldValues);
+    
+    const hidden = getHiddenFields(rules, fieldValues);
+    console.log('[Conditionful] Hidden fields:', Array.from(hidden));
+    
+    return hidden;
   }, [rules, fieldValues]);
 
   // Handle rules changes
   const handleRulesChange = useCallback((updatedRules: Rule[]) => {
+    console.log('[Conditionful] Rules changed:', updatedRules);
     setRules(updatedRules);
     setHasUnsavedChanges(true);
   }, []);

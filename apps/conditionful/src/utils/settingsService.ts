@@ -47,21 +47,28 @@ export class SettingsService {
    */
   async loadRules(): Promise<RulesConfig> {
     try {
+      console.log('[SettingsService] Loading rules from settings entry');
       const entry = await this.getSettingsEntry();
+      console.log('[SettingsService] Settings entry:', entry);
       
       if (entry.fields[SETTINGS_FIELD_ID]?.[this.defaultLocale]) {
         const rulesJson = entry.fields[SETTINGS_FIELD_ID][this.defaultLocale];
+        console.log('[SettingsService] Raw rules JSON:', rulesJson);
         
         // If it's a string, parse it. If it's already an object, return it
         if (typeof rulesJson === 'string') {
-          return JSON.parse(rulesJson);
+          const parsed = JSON.parse(rulesJson);
+          console.log('[SettingsService] Parsed rules:', parsed);
+          return parsed;
         }
+        console.log('[SettingsService] Rules already parsed:', rulesJson);
         return rulesJson as RulesConfig;
       }
       
+      console.log('[SettingsService] No rules found in settings entry, returning empty');
       return {};
     } catch (error) {
-      console.error('Error loading rules from settings entry:', error);
+      console.error('[SettingsService] Error loading rules from settings entry:', error);
       return {};
     }
   }
@@ -71,7 +78,12 @@ export class SettingsService {
    */
   async saveRules(rules: RulesConfig): Promise<void> {
     try {
+      console.log('[SettingsService] Saving rules:', rules);
       const entry = await this.getSettingsEntry();
+      console.log('[SettingsService] Current entry:', entry);
+      
+      const rulesJson = JSON.stringify(rules);
+      console.log('[SettingsService] Serialized rules:', rulesJson);
       
       // Update the entry with new rules
       const updatedEntry = await this.cma.entry.update(
@@ -85,14 +97,15 @@ export class SettingsService {
           fields: {
             ...entry.fields,
             [SETTINGS_FIELD_ID]: {
-              [this.defaultLocale]: JSON.stringify(rules),
+              [this.defaultLocale]: rulesJson,
             },
           },
         }
       );
+      console.log('[SettingsService] Entry updated:', updatedEntry);
 
       // Publish the updated entry
-      await this.cma.entry.publish(
+      const publishedEntry = await this.cma.entry.publish(
         {
           entryId: updatedEntry.sys.id,
           spaceId: this.spaceId,
@@ -100,11 +113,13 @@ export class SettingsService {
         },
         updatedEntry
       );
+      console.log('[SettingsService] Entry published:', publishedEntry);
 
       // Update local cache
-      this.settingsEntry = updatedEntry;
+      this.settingsEntry = publishedEntry;
+      console.log('[SettingsService] Rules saved successfully');
     } catch (error) {
-      console.error('Error saving rules to settings entry:', error);
+      console.error('[SettingsService] Error saving rules to settings entry:', error);
       throw new Error('Failed to save rules configuration');
     }
   }
