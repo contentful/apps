@@ -87,6 +87,12 @@ const Entry = () => {
           'Boolean',
           'Link',
         ];
+
+        // Include Array type only if it's an array of references
+        if (field.type === 'Array') {
+          return field.items?.type === 'Link' && field.items?.linkType === 'Entry';
+        }
+
         return supportedTypes.includes(field.type as FieldType);
       })
       .map((field) => ({

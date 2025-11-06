@@ -6,8 +6,17 @@
 
 /**
  * Supported Contentful field types for conditional logic
+ * Note: 'Array' is used for multiple references (array of Link items)
  */
-export type FieldType = 'Symbol' | 'Text' | 'Integer' | 'Number' | 'Date' | 'Boolean' | 'Link';
+export type FieldType =
+  | 'Symbol'
+  | 'Text'
+  | 'Integer'
+  | 'Number'
+  | 'Date'
+  | 'Boolean'
+  | 'Link'
+  | 'Array';
 
 /**
  * Operators for text-based fields (Symbol, Text)

@@ -120,10 +120,17 @@ export const ConditionEditor: React.FC<ConditionEditorProps> = ({
             value={condition.value?.toString() || ''}
             onChange={handleValueChange}
             isDisabled={disabled}
-            placeholder={selectedField?.type === 'Link' ? 'Enter entry ID' : 'Enter value'}
+            placeholder={
+              selectedField?.type === 'Link' || selectedField?.type === 'Array'
+                ? 'Enter entry ID'
+                : 'Enter value'
+            }
           />
-          {selectedField?.type === 'Link' && (
-            <FormControl.HelpText>Enter the entry ID to match against</FormControl.HelpText>
+          {(selectedField?.type === 'Link' || selectedField?.type === 'Array') && (
+            <FormControl.HelpText>
+              Enter the entry ID to match against
+              {selectedField?.type === 'Array' && ' (checks if any reference matches)'}
+            </FormControl.HelpText>
           )}
         </FormControl>
       )}

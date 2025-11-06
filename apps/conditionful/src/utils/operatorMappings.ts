@@ -31,6 +31,7 @@ export function getOperatorsForFieldType(fieldType: FieldType): ConditionOperato
     case 'Boolean':
       return Object.values(BooleanOperator);
     case 'Link':
+    case 'Array': // Multiple references use same operators as single references
       return Object.values(ReferenceOperator);
     default:
       return [];
@@ -111,6 +112,7 @@ export function getInputTypeForFieldType(fieldType: FieldType): string {
     case 'Boolean':
       return 'checkbox';
     case 'Link':
+    case 'Array': // Multiple references also use Entry ID
       return 'text'; // Entry ID as text
     default:
       return 'text';

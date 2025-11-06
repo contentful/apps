@@ -122,8 +122,8 @@ export function evaluateCondition(condition: Condition, fieldValue: FieldValue):
     }
   }
 
-  // Handle reference fields (Link)
-  if (fieldType === 'Link') {
+  // Handle reference fields (Link for single, Array for multiple)
+  if (fieldType === 'Link' || fieldType === 'Array') {
     const isEmptyRef = !fieldValue || (Array.isArray(fieldValue) && fieldValue.length === 0);
 
     switch (operator as ReferenceOperator) {

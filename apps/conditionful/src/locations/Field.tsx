@@ -58,6 +58,12 @@ const SingleEntryReferenceEditor = lazy(() =>
   }))
 );
 
+const MultipleEntryReferenceEditor = lazy(() =>
+  import('@contentful/field-editor-reference').then((m) => ({
+    default: m.MultipleEntryReferenceEditor,
+  }))
+);
+
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   const cma = useCMA();
@@ -220,6 +226,36 @@ const Field = () => {
           />
         );
         break;
+
+      case 'Array': {
+        // Check if this is an array of references (links)
+        const fieldDefinition = sdk.contentType.fields.find((f) => f.id === currentFieldId);
+        const isReferenceArray =
+          fieldDefinition?.items?.type === 'Link' && fieldDefinition?.items?.linkType === 'Entry';
+
+        if (isReferenceArray) {
+          fieldEditor = (
+            <MultipleEntryReferenceEditor
+              sdk={sdk}
+              viewType="card"
+              hasCardEditActions
+              hasCardRemoveActions
+              isInitiallyDisabled={isHidden}
+              parameters={{
+                instance: {
+                  showCreateEntityAction: true,
+                  showLinkEntityAction: true,
+                },
+              }}
+            />
+          );
+        } else {
+          // Not a reference array, let default editor handle it
+          console.warn('[Field] Array field is not a reference array:', currentFieldId);
+          return null;
+        }
+        break;
+      }
 
       default:
         console.warn('[Field] Unsupported field type:', fieldType);
