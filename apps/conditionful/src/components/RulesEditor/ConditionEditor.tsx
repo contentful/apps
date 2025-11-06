@@ -4,9 +4,20 @@
  * Allows users to configure a single condition (field, operator, value)
  */
 
-import React from 'react';
-import { FormControl, Select, TextInput, IconButton, Flex } from '@contentful/f36-components';
-import { DeleteIcon } from '@contentful/f36-icons';
+import React, { useState, useEffect } from 'react';
+import {
+  FormControl,
+  Select,
+  TextInput,
+  IconButton,
+  Flex,
+  Button,
+  Pill,
+  Text,
+} from '@contentful/f36-components';
+import { DeleteIcon, PlusIcon } from '@contentful/f36-icons';
+import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
+import { EditorAppSDK } from '@contentful/app-sdk';
 import { Condition, FieldType, ConditionOperator } from '../../types/rules';
 import {
   getOperatorsForFieldType,
@@ -14,6 +25,7 @@ import {
   operatorRequiresValue,
   getInputTypeForFieldType,
 } from '../../utils/operatorMappings';
+import { EntrySelector } from './EntrySelector';
 
 interface ConditionEditorProps {
   /** The condition being edited */
@@ -35,10 +47,60 @@ export const ConditionEditor: React.FC<ConditionEditorProps> = ({
   onDelete,
   disabled = false,
 }) => {
+  const sdk = useSDK<EditorAppSDK>();
+  const cma = useCMA();
   const selectedField = availableFields.find((f) => f.id === condition.fieldId);
   const availableOperators = selectedField ? getOperatorsForFieldType(selectedField.type) : [];
 
   const showValueInput = operatorRequiresValue(condition.operator);
+  const isReferenceField = selectedField?.type === 'Link' || selectedField?.type === 'Array';
+
+  const [isEntrySelectorOpen, setIsEntrySelectorOpen] = useState(false);
+  const [selectedEntryTitle, setSelectedEntryTitle] = useState<string>('');
+  const [isLoadingEntry, setIsLoadingEntry] = useState(false);
+
+  // Load entry title when condition has a value
+  useEffect(() => {
+    if (!isReferenceField || !condition.value || typeof condition.value !== 'string') {
+      return;
+    }
+
+    const loadEntryTitle = async () => {
+      setIsLoadingEntry(true);
+      try {
+        const entry = await cma.entry.get({
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environment,
+          entryId: condition.value as string,
+        });
+
+        // Try to get a meaningful title from the entry
+        let title = 'Untitled Entry';
+        if (entry.fields) {
+          const titleFields = ['title', 'name', 'label', 'heading'];
+          for (const fieldName of titleFields) {
+            if (entry.fields[fieldName]) {
+              const fieldValue = entry.fields[fieldName];
+              const localeValue = Object.values(fieldValue)[0];
+              if (localeValue && typeof localeValue === 'string') {
+                title = localeValue;
+                break;
+              }
+            }
+          }
+        }
+
+        setSelectedEntryTitle(title);
+      } catch (err) {
+        console.error('Error loading entry title:', err);
+        setSelectedEntryTitle('Unknown Entry');
+      } finally {
+        setIsLoadingEntry(false);
+      }
+    };
+
+    loadEntryTitle();
+  }, [isReferenceField, condition.value, cma, sdk.ids.space, sdk.ids.environment]);
 
   const handleFieldChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const fieldId = event.target.value;
@@ -84,6 +146,22 @@ export const ConditionEditor: React.FC<ConditionEditorProps> = ({
     });
   };
 
+  const handleEntrySelect = (entryId: string, entryTitle: string) => {
+    setSelectedEntryTitle(entryTitle);
+    onChange({
+      ...condition,
+      value: entryId,
+    });
+  };
+
+  const handleRemoveEntry = () => {
+    setSelectedEntryTitle('');
+    onChange({
+      ...condition,
+      value: undefined,
+    });
+  };
+
   return (
     <Flex alignItems="flex-end" gap="spacingS">
       <FormControl isRequired style={{ flex: 1, minWidth: '200px' }}>
@@ -115,22 +193,31 @@ export const ConditionEditor: React.FC<ConditionEditorProps> = ({
       {showValueInput && (
         <FormControl isRequired style={{ flex: 1, minWidth: '150px' }}>
           <FormControl.Label>Value</FormControl.Label>
-          <TextInput
-            type={selectedField ? getInputTypeForFieldType(selectedField.type) : 'text'}
-            value={condition.value?.toString() || ''}
-            onChange={handleValueChange}
-            isDisabled={disabled}
-            placeholder={
-              selectedField?.type === 'Link' || selectedField?.type === 'Array'
-                ? 'Enter entry ID'
-                : 'Enter value'
-            }
-          />
-          {(selectedField?.type === 'Link' || selectedField?.type === 'Array') && (
-            <FormControl.HelpText>
-              Enter the entry ID to match against
-              {selectedField?.type === 'Array' && ' (checks if any reference matches)'}
-            </FormControl.HelpText>
+          {isReferenceField ? (
+            <Flex flexDirection="column" gap="spacingXs" style={{ width: '100%' }}>
+              {condition.value && (
+                <Pill
+                  label={selectedEntryTitle || `Entry: ${condition.value}`}
+                  onClose={handleRemoveEntry}
+                  onDrag={undefined}
+                />
+              )}
+              <Button
+                variant="secondary"
+                startIcon={<PlusIcon />}
+                onClick={() => setIsEntrySelectorOpen(true)}
+                isDisabled={disabled}>
+                {condition.value ? 'Change Entry' : 'Select Entry'}
+              </Button>
+            </Flex>
+          ) : (
+            <TextInput
+              type={selectedField ? getInputTypeForFieldType(selectedField.type) : 'text'}
+              value={condition.value?.toString() || ''}
+              onChange={handleValueChange}
+              isDisabled={disabled}
+              placeholder="Enter value"
+            />
           )}
         </FormControl>
       )}
@@ -143,6 +230,16 @@ export const ConditionEditor: React.FC<ConditionEditorProps> = ({
         isDisabled={disabled}
         style={{ alignSelf: 'center' }}
       />
+
+      {isReferenceField && (
+        <EntrySelector
+          isOpen={isEntrySelectorOpen}
+          onClose={() => setIsEntrySelectorOpen(false)}
+          onSelect={handleEntrySelect}
+          spaceId={sdk.ids.space}
+          environmentId={sdk.ids.environment}
+        />
+      )}
     </Flex>
   );
 };

@@ -90,7 +90,7 @@ export const ActionEditor: React.FC<ActionEditorProps> = ({
   return (
     <>
       <Flex alignItems="flex-end" gap="spacingS">
-        <FormControl isRequired style={{ flex: '0 0 150px' }}>
+        <FormControl isRequired style={{ flex: '0 0 150px' }} marginBottom="none">
           <FormControl.Label>Action</FormControl.Label>
           <Select value={action.type} onChange={handleTypeChange} isDisabled={disabled}>
             <Select.Option value={ActionType.SHOW}>Show</Select.Option>
@@ -98,7 +98,7 @@ export const ActionEditor: React.FC<ActionEditorProps> = ({
           </Select>
         </FormControl>
 
-        <FormControl isRequired style={{ flex: 1 }}>
+        <FormControl isRequired style={{ flex: 1 }} marginBottom="none">
           <FormControl.Label>Fields</FormControl.Label>
           <Flex flexDirection="column" gap="spacingXs" style={{ width: '100%' }}>
             {action.fieldIds.length > 0 && (
@@ -115,7 +115,6 @@ export const ActionEditor: React.FC<ActionEditorProps> = ({
             )}
             <Button
               variant="secondary"
-              size="small"
               startIcon={<PlusIcon />}
               onClick={handleOpenModal}
               isDisabled={disabled}>
