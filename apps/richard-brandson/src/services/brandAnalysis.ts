@@ -2,6 +2,9 @@ export interface BrandInsights {
   brandVoice: string;
   toneDescription: string;
   writingStyle: string;
+  writingPrinciples?: string[];
+  grammarAndMechanics?: string;
+  vocabularyGuidance?: string;
   keyThemes: string[];
   messagingPillars: string[];
   doAndDonts: {
@@ -10,6 +13,7 @@ export interface BrandInsights {
   };
   contentPatterns: string;
   visualStyleNotes: string;
+  contentTypeGuidelines?: string;
 }
 
 export interface ContentData {
@@ -28,22 +32,63 @@ export async function analyzeBrandContent(
   // Prepare a comprehensive content summary for analysis
   const contentSummary = prepareContentSummary(contentData);
 
-  const prompt = `You are a brand strategist analyzing content from a content management system. Based on the following content, generate comprehensive brand guidelines.
+  const prompt = `You are an expert brand strategist creating comprehensive brand guidelines. Use brand.contentful.com as the gold standard example of excellent brand guidelines.
+
+Draw inspiration from these industry-leading brand guidelines:
+- Contentful: Clear, professional, developer-focused with strong voice and tone guidance
+- Spotify (Polaris): Clean design system with strong voice principles
+- Slack: Conversational, human tone with clear dos and don'ts
+- Intuit: Content design focused with user-centric principles
+- MailChimp: Personality-driven with approachable, friendly voice
+
+Based on the following content from the user's CMS, generate professional brand guidelines:
 
 ${contentSummary}
 
-Please analyze this content and provide:
+Create comprehensive brand guidelines with these sections:
 
-1. **Brand Voice**: Describe the overall brand voice (e.g., professional, friendly, authoritative, playful)
-2. **Tone Description**: Explain the tone used across content (formal, casual, empathetic, etc.)
-3. **Writing Style**: Describe the writing style, sentence structure, and language patterns
-4. **Key Themes**: List 3-5 main themes or topics that appear frequently
-5. **Messaging Pillars**: Identify 3-5 core messaging pillars or value propositions
-6. **Do's and Don'ts**: Create practical do's and don'ts for content creation
-7. **Content Patterns**: Describe any patterns in how content is structured or presented
-8. **Visual Style Notes**: Based on asset naming and structure, infer visual style preferences
+1. **Brand Voice & Personality** (2-3 sentences)
+   - Define the core brand personality (e.g., "Bold and innovative yet approachable")
+   - Describe how the brand should sound (professional, conversational, technical, friendly, etc.)
+   - Include what makes this brand unique
 
-Provide your response in a structured format that can be used to create brand guidelines.`;
+2. **Tone Spectrum** (Describe variations)
+   - Formal situations (e.g., legal, technical documentation)
+   - Conversational situations (e.g., blog posts, social media)
+   - Supportive situations (e.g., help content, error messages)
+
+3. **Writing Principles** (4-6 core principles)
+   - Clear, actionable writing rules
+   - Each principle should be a short phrase (e.g., "Be clear, not clever" or "Show, don't tell")
+
+4. **Grammar & Mechanics** (Specific rules)
+   - Capitalization preferences
+   - Punctuation style
+   - Number formatting
+   - Abbreviations and acronyms
+
+5. **Vocabulary & Word Choice**
+   - Preferred terms vs. terms to avoid
+   - Industry-specific terminology usage
+   - Level of technical language
+
+6. **Content Do's** (5-8 specific recommendations)
+   - Actionable guidelines for creating content
+   - What makes content effective for this brand
+
+7. **Content Don'ts** (5-8 specific warnings)
+   - Common mistakes to avoid
+   - What doesn't fit the brand voice
+
+8. **Messaging Pillars** (3-5 key messages)
+   - Core value propositions
+   - Key themes to emphasize across all content
+
+9. **Content Type Guidelines**
+   - Brief recommendations for different content types identified in the analysis
+   - How tone/style should adapt for each type
+
+Provide your response in a clear, structured format with each section labeled. Be specific and actionable, like the best brand guidelines from Contentful, Slack, and MailChimp.`;
 
   try {
     const response = await fetch('https://models.github.ai/inference/chat/completions', {
@@ -182,23 +227,31 @@ function parseAIResponse(response: string): BrandInsights {
     brandVoice: '',
     toneDescription: '',
     writingStyle: '',
+    writingPrinciples: [],
+    grammarAndMechanics: '',
+    vocabularyGuidance: '',
     keyThemes: [],
     messagingPillars: [],
     doAndDonts: { dos: [], donts: [] },
     contentPatterns: '',
     visualStyleNotes: '',
+    contentTypeGuidelines: '',
   };
 
   // Extract sections using regex patterns
   const sections = {
-    brandVoice: /brand voice[:\s]*([^\n]+(?:\n(?![*#\d]).*)*)/i,
-    tone: /tone description[:\s]*([^\n]+(?:\n(?![*#\d]).*)*)/i,
-    writingStyle: /writing style[:\s]*([^\n]+(?:\n(?![*#\d]).*)*)/i,
-    keyThemes: /key themes[:\s]*([\s\S]*?)(?=\n\n|\n[*#\d]|messaging pillars|$)/i,
-    messagingPillars: /messaging pillars[:\s]*([\s\S]*?)(?=\n\n|\n[*#\d]|do'?s and don'?ts|$)/i,
-    dosDonts: /do'?s and don'?ts[:\s]*([\s\S]*?)(?=\n\n[A-Z]|content patterns|$)/i,
-    contentPatterns: /content patterns[:\s]*([^\n]+(?:\n(?![*#\d]).*)*)/i,
-    visualStyle: /visual style notes[:\s]*([^\n]+(?:\n(?![*#\d]).*)*)/i,
+    brandVoice: /brand voice.*?[:\s]*([\s\S]*?)(?=\n\n\d+\.|tone spectrum|$)/i,
+    tone: /tone.*?(?:spectrum|description)[:\s]*([\s\S]*?)(?=\n\n\d+\.|writing principles|$)/i,
+    writingStyle: /writing style[:\s]*([\s\S]*?)(?=\n\n\d+\.|writing principles|$)/i,
+    writingPrinciples: /writing principles[:\s]*([\s\S]*?)(?=\n\n\d+\.|grammar|$)/i,
+    grammar: /grammar.*?mechanics[:\s]*([\s\S]*?)(?=\n\n\d+\.|vocabulary|$)/i,
+    vocabulary: /vocabulary.*?word choice[:\s]*([\s\S]*?)(?=\n\n\d+\.|content do|$)/i,
+    keyThemes: /key themes[:\s]*([\s\S]*?)(?=\n\n\d+\.|messaging pillars|$)/i,
+    messagingPillars: /messaging pillars[:\s]*([\s\S]*?)(?=\n\n\d+\.|content type|$)/i,
+    dosDonts: /content do'?s.*?don'?ts?[:\s]*([\s\S]*?)(?=\n\n\d+\.|messaging|$)/i,
+    contentPatterns: /content patterns[:\s]*([\s\S]*?)(?=\n\n\d+\.|visual|$)/i,
+    visualStyle: /visual style[:\s]*([\s\S]*?)(?=\n\n\d+\.|$)/i,
+    contentTypes: /content type guidelines[:\s]*([\s\S]*?)$/i,
   };
 
   // Extract brand voice
@@ -240,9 +293,27 @@ function parseAIResponse(response: string): BrandInsights {
   const patternsMatch = response.match(sections.contentPatterns);
   if (patternsMatch) insights.contentPatterns = patternsMatch[1].trim();
 
+  // Extract writing principles
+  const principlesMatch = response.match(sections.writingPrinciples);
+  if (principlesMatch) {
+    insights.writingPrinciples = extractListItems(principlesMatch[1]);
+  }
+
+  // Extract grammar and mechanics
+  const grammarMatch = response.match(sections.grammar);
+  if (grammarMatch) insights.grammarAndMechanics = grammarMatch[1].trim();
+
+  // Extract vocabulary guidance
+  const vocabMatch = response.match(sections.vocabulary);
+  if (vocabMatch) insights.vocabularyGuidance = vocabMatch[1].trim();
+
   // Extract visual style notes
   const visualMatch = response.match(sections.visualStyle);
   if (visualMatch) insights.visualStyleNotes = visualMatch[1].trim();
+
+  // Extract content type guidelines
+  const contentTypesMatch = response.match(sections.contentTypes);
+  if (contentTypesMatch) insights.contentTypeGuidelines = contentTypesMatch[1].trim();
 
   // If parsing failed, put the entire response in brandVoice as fallback
   if (!insights.brandVoice && !insights.toneDescription) {
@@ -261,6 +332,12 @@ function extractListItems(text: string): string[] {
   
   for (const line of lines) {
     const trimmed = line.trim();
+    
+    // Skip markdown headers like "## 6." or "### Section"
+    if (trimmed.match(/^#{1,6}\s/)) {
+      continue;
+    }
+    
     // Match lines starting with bullets, numbers, or dashes
     const match = trimmed.match(/^[-*•\d.]+\s+(.+)/);
     if (match) {
