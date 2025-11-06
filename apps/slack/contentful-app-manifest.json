@@ -24,7 +24,7 @@
           "workspaceId": {
             "type": "string",
             "title": "Workspace Id",
-            "description": "The Slack workspace ID where the message should be sent. When leave empty, the action app will use the workspace configured for the slack app in the environment."
+            "description": "The Slack workspace ID where the message should be sent. When left empty, the action app will use the workspace configured for the slack app in the environment."
           }
         },
         "required": [
