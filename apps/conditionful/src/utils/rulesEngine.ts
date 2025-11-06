@@ -215,6 +215,42 @@ export function isFieldHidden(fieldId: string, rules: Rule[], fieldValues: Field
 }
 
 /**
+ * Get information about which rules are hiding a specific field
+ */
+export function getFieldHidingRules(
+  fieldId: string,
+  rules: Rule[],
+  fieldValues: FieldValues
+): { isHidden: boolean; hidingRules: Rule[] } {
+  const hidingRules: Rule[] = [];
+  let isHidden = false;
+
+  rules.forEach((rule) => {
+    if (!rule.enabled) return;
+
+    const ruleMatches = evaluateRule(rule, fieldValues);
+    if (ruleMatches) {
+      // Check if this rule has an action that hides the target field
+      rule.actions.forEach((action) => {
+        if (action.type === ActionType.HIDE && action.fieldIds.includes(fieldId)) {
+          hidingRules.push(rule);
+          isHidden = true;
+        } else if (action.type === ActionType.SHOW && action.fieldIds.includes(fieldId)) {
+          // Show action takes precedence, remove from hiding rules
+          const index = hidingRules.findIndex((r) => r.id === rule.id);
+          if (index > -1) {
+            hidingRules.splice(index, 1);
+          }
+          isHidden = false;
+        }
+      });
+    }
+  });
+
+  return { isHidden, hidingRules };
+}
+
+/**
  * Get a map of field IDs to their visibility state
  */
 export function getFieldVisibilityMap(

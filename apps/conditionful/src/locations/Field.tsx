@@ -7,10 +7,11 @@
 
 import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { FieldAppSDK } from '@contentful/app-sdk';
-import { Box, Spinner } from '@contentful/f36-components';
+import { Box, Spinner, Text } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 import { useSDK, useCMA, useAutoResizer } from '@contentful/react-apps-toolkit';
-import { FieldValues } from '../types/rules';
-import { isFieldHidden } from '../utils/rulesEngine';
+import { FieldValues, Rule } from '../types/rules';
+import { getFieldHidingRules } from '../utils/rulesEngine';
 import { SettingsService } from '../utils/settingsService';
 
 // Lazy load field editors
@@ -55,7 +56,9 @@ const Field = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isHidden, setIsHidden] = useState(false);
+  const [hidingRules, setHidingRules] = useState<Rule[]>([]);
   const [fieldValues, setFieldValues] = useState<FieldValues>({});
+  const [rulesForContentType, setRulesForContentType] = useState<Rule[]>([]);
 
   // Initialize and load rules
   useEffect(() => {
@@ -73,9 +76,10 @@ const Field = () => {
 
         await settingsService.initialize();
         const allRules = await settingsService.loadRules();
-        const rulesForContentType = allRules[contentTypeId] || [];
+        const rules = allRules[contentTypeId] || [];
+        setRulesForContentType(rules);
         
-        console.log('[Field] Rules loaded for content type:', contentTypeId, rulesForContentType);
+        console.log('[Field] Rules loaded for content type:', contentTypeId, rules);
 
         // Get all field values from the entry
         const initialValues: FieldValues = {};
@@ -91,10 +95,15 @@ const Field = () => {
 
         setFieldValues(initialValues);
 
-        // Check if current field should be hidden
-        const hidden = isFieldHidden(currentFieldId, rulesForContentType, initialValues);
-        console.log('[Field] Field', currentFieldId, 'is hidden:', hidden);
+        // Check if current field should be hidden and get which rules are hiding it
+        const { isHidden: hidden, hidingRules: hiding } = getFieldHidingRules(
+          currentFieldId,
+          rules,
+          initialValues
+        );
+        console.log('[Field] Field', currentFieldId, 'is hidden:', hidden, 'by rules:', hiding.map(r => r.name));
         setIsHidden(hidden);
+        setHidingRules(hiding);
 
         // Listen for field value changes
         Object.entries(sdk.entry.fields).forEach(([fieldId, fieldApi]) => {
@@ -106,10 +115,15 @@ const Field = () => {
                 [fieldId]: newValue,
               };
               
-              // Re-evaluate if current field should be hidden
-              const nowHidden = isFieldHidden(currentFieldId, rulesForContentType, updated);
-              console.log('[Field] Re-evaluated field', currentFieldId, 'is hidden:', nowHidden);
+              // Re-evaluate if current field should be hidden and get which rules are hiding it
+              const { isHidden: nowHidden, hidingRules: nowHiding } = getFieldHidingRules(
+                currentFieldId,
+                rules,
+                updated
+              );
+              console.log('[Field] Re-evaluated field', currentFieldId, 'is hidden:', nowHidden, 'by rules:', nowHiding.map(r => r.name));
               setIsHidden(nowHidden);
+              setHidingRules(nowHiding);
               
               return updated;
             });
@@ -136,64 +150,98 @@ const Field = () => {
       );
     }
 
-    if (isHidden) {
-      console.log('[Field] Rendering: Field is hidden by rules');
-      return null; // Hide the field completely
-    }
-
-    console.log('[Field] Rendering: Field editor for type', fieldType);
+    console.log('[Field] Rendering: Field editor for type', fieldType, 'isHidden:', isHidden);
 
     // Render appropriate field editor based on field type
+    let fieldEditor;
     switch (fieldType) {
       case 'Symbol':
-        return (
+        fieldEditor = (
           <SingleLineEditor
             field={sdk.field}
             locales={sdk.locales}
-            isInitiallyDisabled={false}
+            isInitiallyDisabled={isHidden}
           />
         );
+        break;
 
       case 'Text':
-        return (
+        fieldEditor = (
           <MultipleLineEditor
             field={sdk.field}
             locales={sdk.locales}
-            isInitiallyDisabled={false}
+            isInitiallyDisabled={isHidden}
           />
         );
+        break;
 
       case 'Integer':
       case 'Number':
-        return (
+        fieldEditor = (
           <NumberEditor
             field={sdk.field}
-            isInitiallyDisabled={false}
+            isInitiallyDisabled={isHidden}
           />
         );
+        break;
 
       case 'Date':
-        return (
+        fieldEditor = (
           <DateEditor
             field={sdk.field}
-            isInitiallyDisabled={false}
+            isInitiallyDisabled={isHidden}
           />
         );
+        break;
 
       case 'Boolean':
-        return (
+        fieldEditor = (
           <BooleanEditor
             field={sdk.field}
-            isInitiallyDisabled={false}
+            isInitiallyDisabled={isHidden}
           />
         );
+        break;
 
       default:
         console.warn('[Field] Unsupported field type:', fieldType);
         // Return null for unsupported types - let default editor handle it
         return null;
     }
-  }, [isLoading, isHidden, fieldType, sdk.field, sdk.locales]);
+
+    // Wrap the field editor with disabled styling if hidden by rules
+    if (isHidden) {
+      const ruleNames = hidingRules.map(r => r.name).join(', ');
+      const message = hidingRules.length === 1
+        ? `⚠️ Hidden by rule: "${ruleNames}"`
+        : `⚠️ Hidden by rules: ${ruleNames}`;
+      
+      return (
+        <Box
+          style={{
+            opacity: 0.5,
+            pointerEvents: 'none',
+            backgroundColor: tokens.gray100,
+            borderRadius: tokens.borderRadiusMedium,
+            padding: tokens.spacingXs,
+            transition: 'opacity 0.2s ease-in-out',
+          }}
+        >
+          <Text
+            fontSize="fontSizeS"
+            fontColor="gray500"
+            marginBottom="spacingXs"
+            fontWeight="fontWeightDemiBold"
+          >
+            {message}
+          </Text>
+          {fieldEditor}
+        </Box>
+      );
+    }
+
+    return fieldEditor;
+  }, [isLoading, isHidden, hidingRules, fieldType, sdk.field, sdk.locales]);
 
   return (
     <Suspense fallback={<Spinner size="small" />}>
