@@ -1,26 +1,17 @@
+import React, { useState } from 'react';
 import {
   Flex,
+  Form,
+  FormControl,
   Heading,
   Paragraph,
   Subheading,
-  Form,
-  FormControl,
   TextInput,
   TextLink,
 } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
-import { PageAppSDK } from '@contentful/app-sdk';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-import { useState } from 'react';
 
-const Page = () => {
-  const sdk = useSDK<PageAppSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
-
+export default function ConfigureAccessInputs() {
   const [apiKey, setApiKey] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
 
@@ -74,6 +65,4 @@ const Page = () => {
       </Flex>
     </Flex>
   );
-};
-
-export default Page;
+}
