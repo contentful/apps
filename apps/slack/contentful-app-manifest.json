@@ -18,13 +18,13 @@
           },
           "channelId": {
             "type": "string",
-            "title": "Slack Channel ID",
-            "description": "The Slack channel ID to send the message to"
+            "title": "Slack channel name or id",
+            "description": "The Slack channel to send the message to (e.g: my-channel – no hashtag needed)"
           },
           "workspaceId": {
             "type": "string",
-            "title": "Slack Workspace ID",
-            "description": "The Slack workspace ID where the message should be sent"
+            "title": "Workspace Id",
+            "description": "The Slack workspace ID where the message should be sent. When leave empty, the action app will use the workspace configured for the slack app in the environment."
           }
         },
         "required": [
