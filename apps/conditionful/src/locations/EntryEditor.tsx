@@ -13,28 +13,63 @@ import {
   Box,
   Heading,
   Note,
+  Spinner,
+  Button,
+  Flex,
 } from '@contentful/f36-components';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
 import { RulesPanel } from '../components/RulesEditor/RulesPanel';
 import { FieldRenderer } from '../components/FieldRenderer';
 import { Rule, FieldType, FieldValues } from '../types/rules';
 import { getHiddenFields } from '../utils/rulesEngine';
-import { AppInstallationParameters } from './ConfigScreen';
+import { SettingsService } from '../utils/settingsService';
 
 const Entry = () => {
   const sdk = useSDK<EditorAppSDK>();
+  const cma = useCMA();
   const contentTypeId = sdk.contentType.sys.id;
 
-  // Get installation parameters with rules
-  const installationParams = sdk.parameters.installation as AppInstallationParameters;
-  const rulesForContentType = installationParams?.rules?.[contentTypeId] || [];
-
-  // State for rules (local copy for editing)
-  const [rules, setRules] = useState<Rule[]>(rulesForContentType);
+  // State for rules (loaded from settings entry)
+  const [rules, setRules] = useState<Rule[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [settingsService, setSettingsService] = useState<SettingsService | null>(null);
 
   // State for field values (for rule evaluation)
   const [fieldValues, setFieldValues] = useState<FieldValues>({});
+
+  // Initialize settings service and load rules
+  useEffect(() => {
+    const initializeSettings = async () => {
+      try {
+        setIsLoading(true);
+        
+        const defaultLocale = sdk.locales.default;
+        const service = new SettingsService({
+          cma,
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environment,
+          defaultLocale,
+        });
+
+        await service.initialize();
+        setSettingsService(service);
+
+        // Load rules for this content type
+        const allRules = await service.loadRules();
+        const rulesForContentType = allRules[contentTypeId] || [];
+        setRules(rulesForContentType);
+      } catch (error) {
+        console.error('Error initializing settings:', error);
+        sdk.notifier.error('Failed to load rules configuration');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeSettings();
+  }, [sdk, cma, contentTypeId]);
 
   // Get available fields from content type
   const availableFields = useMemo(() => {
@@ -94,28 +129,37 @@ const Entry = () => {
     setHasUnsavedChanges(true);
   }, []);
 
-  // Save rules to installation parameters
+  // Save rules to settings entry
   const handleSaveRules = useCallback(async () => {
+    if (!settingsService) {
+      sdk.notifier.error('Settings service not initialized');
+      return;
+    }
+
     try {
-      // Get current installation parameters
-      const currentParams = (sdk.parameters.installation as AppInstallationParameters) || {};
+      setIsSaving(true);
+      
+      // Load current rules to get other content types' rules
+      const allRules = await settingsService.loadRules();
       
       // Update rules for this content type
       const updatedRules = {
-        ...currentParams.rules,
+        ...allRules,
         [contentTypeId]: rules,
       };
 
-      // Note: Installation parameters can only be updated through the config screen
-      // We'll store them temporarily in entry metadata or use a different approach
-      // For now, we'll show a message to the user
-      sdk.notifier.success('Rules updated successfully! Note: Rules are saved per session.');
+      // Save to settings entry
+      await settingsService.saveRules(updatedRules);
+      
+      sdk.notifier.success('Rules saved successfully!');
       setHasUnsavedChanges(false);
     } catch (error) {
       console.error('Error saving rules:', error);
       sdk.notifier.error('Failed to save rules. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
-  }, [sdk, contentTypeId, rules]);
+  }, [settingsService, sdk, contentTypeId, rules]);
 
   // Handle field value changes
   const handleFieldChange = useCallback((fieldId: string, value: string | number | boolean | null) => {
@@ -134,15 +178,43 @@ const Entry = () => {
     }
   }, [sdk.entry.fields, sdk.notifier]);
 
+  if (isLoading) {
+    return (
+      <Box padding="spacingL">
+        <Flex alignItems="center" justifyContent="center" style={{ minHeight: '200px' }}>
+          <Spinner size="large" />
+        </Flex>
+      </Box>
+    );
+  }
+
   return (
     <Box padding="spacingL">
       <Stack flexDirection="column" spacing="spacingL">
-        <Heading as="h1">Conditionful - Field Visibility Rules</Heading>
+        <Flex justifyContent="space-between" alignItems="center">
+          <Heading as="h1">Conditionful - Field Visibility Rules</Heading>
+          {hasUnsavedChanges && (
+            <Button
+              variant="positive"
+              onClick={handleSaveRules}
+              isLoading={isSaving}
+              isDisabled={isSaving}
+            >
+              Save Rules
+            </Button>
+          )}
+        </Flex>
 
         <Note variant="primary">
           Configure rules to conditionally show or hide fields based on other field values.
           Rules are evaluated in real-time as you edit field values.
         </Note>
+
+        {hasUnsavedChanges && (
+          <Note variant="warning">
+            You have unsaved changes. Click "Save Rules" to persist your changes.
+          </Note>
+        )}
 
         <Tabs defaultTab="rules">
           <Tabs.List>
@@ -158,13 +230,6 @@ const Entry = () => {
                 availableFields={availableFields}
                 onChange={handleRulesChange}
               />
-
-              {hasUnsavedChanges && (
-                <Note variant="warning" style={{ marginTop: '16px' }}>
-                  You have unsaved changes. Note: Rules are currently saved per session only.
-                  For persistent storage, use the App Configuration screen.
-                </Note>
-              )}
             </Box>
           </Tabs.Panel>
 

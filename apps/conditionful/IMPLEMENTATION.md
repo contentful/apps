@@ -41,9 +41,11 @@ Conditionful is a Contentful app that enables conditional field visibility rules
    - Clear visual indicator showing "(Hidden by rules)"
 
 7. **Data Persistence**
-   - Rules stored in installation parameters
-   - Organized by content type ID
+   - Rules stored in a dedicated Settings entry (content type: `conditionfulSettings`)
+   - Organized by content type ID as JSON
+   - Automatically creates content type and entry on first use
    - Shared across all users in the environment
+   - Can be saved directly from Entry Editor
 
 ## Architecture
 
@@ -55,7 +57,8 @@ src/
 │   └── rules.ts                    # Type definitions for rules system
 ├── utils/
 │   ├── rulesEngine.ts              # Core evaluation logic
-│   └── operatorMappings.ts         # Operator helpers and labels
+│   ├── operatorMappings.ts         # Operator helpers and labels
+│   └── settingsService.ts          # Settings entry management
 ├── components/
 │   ├── RulesEditor/
 │   │   ├── RulesPanel.tsx          # Main panel listing all rules
@@ -87,11 +90,19 @@ test/
 - In-place editing with save/cancel
 - Delete confirmation modal
 
-#### 3. Entry Editor (`src/locations/EntryEditor.tsx`)
+#### 3. Settings Service (`src/utils/settingsService.ts`)
+- Manages settings content type and entry creation
+- Loads rules from settings entry on initialization
+- Saves rules to settings entry with automatic publishing
+- Handles content type creation if it doesn't exist
+
+#### 4. Entry Editor (`src/locations/EntryEditor.tsx`)
 - Tabbed interface (Rules Configuration / Field Preview)
 - Real-time field value tracking with `onValueChanged` listeners
 - Automatic rule re-evaluation on field changes
 - Field rendering with disabled state
+- "Save Rules" button to persist changes to settings entry
+- Loading state while fetching rules
 
 ## Data Model
 
@@ -141,7 +152,8 @@ interface Action {
    - Select the field, operator, and value for each condition
    - Add actions by clicking "Add Action"
    - Select show/hide and choose target fields
-5. Click "Save Rule"
+5. Click "Save Rule" in the rule editor
+6. Click the "Save Rules" button at the top to persist to the settings entry
 
 ### Field Preview
 
@@ -203,10 +215,10 @@ npm test
 ## Known Limitations & Future Enhancements
 
 ### Current Limitations
-1. Rules are evaluated per session (not persisted to installation params via Entry Editor)
-2. Only basic field types supported (no Arrays, Links, RichText)
-3. No rule import/export functionality
-4. No rule validation warnings
+1. Only basic field types supported (no Arrays, Links, RichText)
+2. No rule import/export functionality
+3. No rule validation warnings
+4. Settings entry visible in content browser (could be hidden via API)
 
 ### Potential Enhancements
 1. Add support for Array and Link field types

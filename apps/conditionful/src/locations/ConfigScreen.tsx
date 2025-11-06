@@ -1,9 +1,10 @@
 import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Heading, Form, Paragraph, Flex } from '@contentful/f36-components';
+import { Heading, Form, Paragraph, Flex, Spinner } from '@contentful/f36-components';
 import { css } from 'emotion';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
 import { RulesConfig } from '../types/rules';
+import { SettingsService } from '../utils/settingsService';
 
 export interface AppInstallationParameters {
   /** Rules organized by content type ID */
@@ -12,12 +13,9 @@ export interface AppInstallationParameters {
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
+  const [isLoadingRules, setIsLoadingRules] = useState(true);
   const sdk = useSDK<ConfigAppSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
+  const cma = useCMA();
 
   const onConfigure = useCallback(async () => {
     // This method will be called when a user clicks on "Install"
@@ -46,19 +44,47 @@ const ConfigScreen = () => {
 
   useEffect(() => {
     (async () => {
-      // Get current parameters of the app.
-      // If the app is not installed yet, `parameters` will be `null`.
-      const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
+      try {
+        // Get current parameters of the app.
+        // If the app is not installed yet, `parameters` will be `null`.
+        const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
 
-      if (currentParameters) {
-        setParameters(currentParameters);
+        if (currentParameters) {
+          setParameters(currentParameters);
+        }
+
+        // Load rules from settings entry
+        try {
+          const defaultLocale = sdk.locales.default;
+          const settingsService = new SettingsService({
+            cma,
+            spaceId: sdk.ids.space,
+            environmentId: sdk.ids.environment,
+            defaultLocale,
+          });
+
+          await settingsService.initialize();
+          const rules = await settingsService.loadRules();
+          
+          setParameters((prev) => ({
+            ...prev,
+            rules,
+          }));
+        } catch (error) {
+          console.error('Error loading rules from settings entry:', error);
+        } finally {
+          setIsLoadingRules(false);
+        }
+
+        // Once preparation has finished, call `setReady` to hide
+        // the loading screen and present the app to a user.
+        sdk.app.setReady();
+      } catch (error) {
+        console.error('Error initializing config screen:', error);
+        sdk.app.setReady();
       }
-
-      // Once preparation has finished, call `setReady` to hide
-      // the loading screen and present the app to a user.
-      sdk.app.setReady();
     })();
-  }, [sdk]);
+  }, [sdk, cma]);
 
   // Count rules by content type
   const rulesCount = parameters.rules
@@ -79,7 +105,12 @@ const ConfigScreen = () => {
         </Paragraph>
         
         <Heading as="h3" marginTop="spacingL">Rules Summary</Heading>
-        {totalRules === 0 ? (
+        {isLoadingRules ? (
+          <Flex alignItems="center" gap="spacingS">
+            <Spinner size="small" />
+            <Paragraph>Loading rules configuration...</Paragraph>
+          </Flex>
+        ) : totalRules === 0 ? (
           <Paragraph>
             No rules configured yet. Navigate to an entry's "Conditionful" tab to create your first rule.
           </Paragraph>
@@ -104,12 +135,15 @@ const ConfigScreen = () => {
           <li>Navigate to any entry in your space</li>
           <li>Look for the "Conditionful" tab in the entry editor</li>
           <li>Create rules to show or hide fields based on conditions</li>
+          <li>Click "Save Rules" to persist your changes</li>
           <li>Switch between tabs to see rules in action</li>
         </ol>
 
-        <Paragraph marginTop="spacingM">
-          <strong>Note:</strong> Rules are stored in the app installation parameters and are shared
-          across all users in this environment.
+        <Heading as="h3" marginTop="spacingL">Storage</Heading>
+        <Paragraph>
+          Rules are stored in a special "Conditionful Settings" entry in your space.
+          This entry is automatically created and managed by the app.
+          Rules are shared across all users in this environment.
         </Paragraph>
       </Form>
     </Flex>
