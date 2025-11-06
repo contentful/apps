@@ -16,6 +16,7 @@ import {
   Badge,
   Modal,
   Note,
+  Box,
 } from '@contentful/f36-components';
 import { PlusIcon, DeleteIcon, ChevronDownIcon, ChevronUpIcon } from '@contentful/f36-icons';
 import { Rule, MatchMode, FieldType } from '../../types/rules';
@@ -30,6 +31,12 @@ interface RulesPanelProps {
   onChange: (rules: Rule[]) => void;
   /** Whether the panel is disabled */
   disabled?: boolean;
+  /** Whether there are unsaved changes */
+  hasUnsavedChanges?: boolean;
+  /** Callback to save rules */
+  onSave?: () => void;
+  /** Whether save is in progress */
+  isSaving?: boolean;
 }
 
 export const RulesPanel: React.FC<RulesPanelProps> = ({
@@ -37,6 +44,9 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
   availableFields,
   onChange,
   disabled = false,
+  hasUnsavedChanges = false,
+  onSave,
+  isSaving = false,
 }) => {
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
   const [expandedRuleIds, setExpandedRuleIds] = useState<Set<string>>(new Set());
@@ -128,14 +138,40 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
   return (
     <>
       <Stack flexDirection="column" spacing="spacingM" style={{ width: '100%' }}>
-        <Flex justifyContent="flex-end" alignItems="center" alignSelf="flex-end">
-          <Button
-            variant="primary"
-            startIcon={<PlusIcon />}
-            onClick={handleAddRule}
-            isDisabled={disabled}>
-            Add Rule
-          </Button>
+        <Flex justifyContent="space-between" alignItems="stretch">
+          {hasUnsavedChanges && onSave ? (
+            <Note
+              variant="warning"
+              style={{
+                margin: 0,
+                flex: 1,
+                marginRight: '16px',
+                display: 'flex',
+                alignItems: 'center',
+              }}>
+              You have unsaved changes
+            </Note>
+          ) : (
+            <Box style={{ flex: 1 }} />
+          )}
+          <Flex alignItems="center" gap="spacingS">
+            {hasUnsavedChanges && onSave && (
+              <Button
+                variant="positive"
+                onClick={onSave}
+                isLoading={isSaving}
+                isDisabled={isSaving}>
+                Save Changes
+              </Button>
+            )}
+            <Button
+              variant="primary"
+              startIcon={<PlusIcon />}
+              onClick={handleAddRule}
+              isDisabled={disabled}>
+              Add Rule
+            </Button>
+          </Flex>
         </Flex>
 
         {rules.length === 0 && (
@@ -168,7 +204,8 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
                     justifyContent="space-between"
                     style={{
                       borderBottom: isExpanded ? '1px solid #e5ebed' : 'none',
-                    }}>
+                    }}
+                    onClick={() => handleToggleExpand(rule.id)}>
                     <Flex alignItems="center" gap="spacingS">
                       <IconButton
                         variant="transparent"

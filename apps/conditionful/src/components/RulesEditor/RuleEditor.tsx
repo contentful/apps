@@ -154,23 +154,53 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
         </Flex>
 
         {rule.conditions.map((condition, index) => (
-          <Flex marginLeft="spacingXl">
-            <ConditionEditor
-              key={condition.id}
-              condition={condition}
-              availableFields={availableFields}
-              onChange={(updated) => handleConditionChange(index, updated)}
-              onDelete={() => handleDeleteCondition(index)}
-              disabled={disabled}
-            />
-          </Flex>
+          <React.Fragment key={condition.id}>
+            {index > 0 && rule.conditions.length > 1 && (
+              <Flex alignItems="center" justifyContent="flex-start" style={{ height: '12px' }}>
+                <Flex flexDirection="column" alignItems="center" style={{ width: '28px' }}>
+                  <Box
+                    style={{
+                      width: '2px',
+                      height: '24px',
+                      backgroundColor: '#d3dce0',
+                    }}
+                  />
+                  <Flex
+                    justifyContent="center"
+                    alignItems="center"
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      backgroundColor: '#fff',
+                      border: '2px solid #d3dce0',
+                      color: '#7f8c95',
+                      fontSize: '14px',
+                      fontWeight: 600,
+                    }}>
+                    &
+                  </Flex>
+                  <Box
+                    style={{
+                      width: '2px',
+                      height: '24px',
+                      backgroundColor: '#d3dce0',
+                    }}
+                  />
+                </Flex>
+              </Flex>
+            )}
+            <Flex marginLeft="spacingXl">
+              <ConditionEditor
+                condition={condition}
+                availableFields={availableFields}
+                onChange={(updated) => handleConditionChange(index, updated)}
+                onDelete={() => handleDeleteCondition(index)}
+                disabled={disabled}
+              />
+            </Flex>
+          </React.Fragment>
         ))}
-
-        {rule.conditions.length === 0 && (
-          <Text fontColor="gray500" fontSize="fontSizeS" style={{ alignSelf: 'center' }}>
-            No conditions yet
-          </Text>
-        )}
 
         <Button
           variant="secondary"
@@ -198,23 +228,53 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
         </Text>
 
         {rule.actions.map((action, index) => (
-          <Flex marginLeft="spacingXl">
-            <ActionEditor
-              key={action.id}
-              action={action}
-              availableFields={availableFields}
-              onChange={(updated) => handleActionChange(index, updated)}
-              onDelete={() => handleDeleteAction(index)}
-              disabled={disabled}
-            />
-          </Flex>
+          <React.Fragment key={action.id}>
+            {index > 0 && rule.actions.length > 1 && (
+              <Flex alignItems="center" justifyContent="flex-start" style={{ height: '12px' }}>
+                <Flex flexDirection="column" alignItems="center" style={{ width: '28px' }}>
+                  <Box
+                    style={{
+                      width: '2px',
+                      height: '24px',
+                      backgroundColor: '#d3dce0',
+                    }}
+                  />
+                  <Flex
+                    justifyContent="center"
+                    alignItems="center"
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      backgroundColor: '#fff',
+                      border: '2px solid #d3dce0',
+                      color: '#7f8c95',
+                      fontSize: '14px',
+                      fontWeight: 600,
+                    }}>
+                    &
+                  </Flex>
+                  <Box
+                    style={{
+                      width: '2px',
+                      height: '24px',
+                      backgroundColor: '#d3dce0',
+                    }}
+                  />
+                </Flex>
+              </Flex>
+            )}
+            <Flex marginLeft="spacingXl">
+              <ActionEditor
+                action={action}
+                availableFields={availableFields}
+                onChange={(updated) => handleActionChange(index, updated)}
+                onDelete={() => handleDeleteAction(index)}
+                disabled={disabled}
+              />
+            </Flex>
+          </React.Fragment>
         ))}
-
-        {rule.actions.length === 0 && (
-          <Text fontColor="gray500" fontSize="fontSizeS" style={{ alignSelf: 'center' }}>
-            No actions yet
-          </Text>
-        )}
 
         <Button
           variant="secondary"

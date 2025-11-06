@@ -146,24 +146,15 @@ const Entry = () => {
   return (
     <Box style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
       <Stack flexDirection="column" spacing="spacingM">
-        {/* Header with Save Button */}
-        {hasUnsavedChanges && (
-          <Flex justifyContent="space-between" alignItems="center">
-            <Note variant="warning" style={{ flex: 1, marginRight: '16px' }}>
-              You have unsaved changes
-            </Note>
-            <Button
-              variant="positive"
-              onClick={handleSaveRules}
-              isLoading={isSaving}
-              isDisabled={isSaving}>
-              Save Changes
-            </Button>
-          </Flex>
-        )}
-
         {/* Rules Panel */}
-        <RulesPanel rules={rules} availableFields={availableFields} onChange={handleRulesChange} />
+        <RulesPanel
+          rules={rules}
+          availableFields={availableFields}
+          onChange={handleRulesChange}
+          hasUnsavedChanges={hasUnsavedChanges}
+          onSave={handleSaveRules}
+          isSaving={isSaving}
+        />
       </Stack>
     </Box>
   );

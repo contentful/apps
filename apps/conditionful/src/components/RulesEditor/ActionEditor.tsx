@@ -89,7 +89,7 @@ export const ActionEditor: React.FC<ActionEditorProps> = ({
 
   return (
     <>
-      <Flex alignItems="flex-start" gap="spacingS">
+      <Flex alignItems="flex-end" gap="spacingS">
         <FormControl isRequired style={{ flex: '0 0 150px' }}>
           <FormControl.Label>Action</FormControl.Label>
           <Select value={action.type} onChange={handleTypeChange} isDisabled={disabled}>
@@ -100,28 +100,26 @@ export const ActionEditor: React.FC<ActionEditorProps> = ({
 
         <FormControl isRequired style={{ flex: 1 }}>
           <FormControl.Label>Fields</FormControl.Label>
-          <Flex flexDirection="column" gap="spacingXs">
-            <Flex
-              flexWrap="wrap"
-              gap="spacingXs"
-              style={{ minHeight: '32px', alignItems: 'center' }}>
-              {action.fieldIds.map((fieldId) => (
-                <Pill
-                  key={fieldId}
-                  label={getFieldName(fieldId)}
-                  onClose={() => handleRemoveField(fieldId)}
-                  onDrag={undefined}
-                />
-              ))}
-            </Flex>
+          <Flex flexDirection="column" gap="spacingXs" style={{ width: '100%' }}>
+            {action.fieldIds.length > 0 && (
+              <Flex flexWrap="wrap" gap="spacingXs">
+                {action.fieldIds.map((fieldId) => (
+                  <Pill
+                    key={fieldId}
+                    label={getFieldName(fieldId)}
+                    onClose={() => handleRemoveField(fieldId)}
+                    onDrag={undefined}
+                  />
+                ))}
+              </Flex>
+            )}
             <Button
               variant="secondary"
               size="small"
               startIcon={<PlusIcon />}
               onClick={handleOpenModal}
-              isDisabled={disabled}
-              style={{ alignSelf: 'flex-start' }}>
-              Select Fields
+              isDisabled={disabled}>
+              {action.fieldIds.length === 0 ? 'Select Fields' : 'Edit Fields'}
             </Button>
           </Flex>
         </FormControl>
@@ -132,7 +130,6 @@ export const ActionEditor: React.FC<ActionEditorProps> = ({
           aria-label="Delete action"
           onClick={onDelete}
           isDisabled={disabled}
-          style={{ marginTop: '28px' }}
         />
       </Flex>
 
