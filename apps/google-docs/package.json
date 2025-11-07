@@ -18,18 +18,16 @@
   "scripts": {
     "start": "vite",
     "dev": "vite",
-    "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
+    "build": "rimraf build && npm run build:frontend && npm run build:functions",
+    "build:frontend": "rm -rf build && tsc && vite build",
+    "build:functions": "contentful-app-scripts build-functions --ci",
     "create-app-definition": "contentful-app-scripts create-app-definition",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id {3EaGZUMKRKVZUyrcoNJ4o4} --token ${CONTENTFUL_CMA_TOKEN}",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
-    "upsert-actions": "contentful-app-scripts upsert-actions --ci --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
-    "build:functions": "contentful-app-scripts build-functions --ci",
-    "deploy:dev": "source .env && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id \"$DEFINITIONS_ORG_ID\" --definition-id {653vTnuQw3j5onU1tUoH6t} --token \"$CONTENTFUL_CMA_TOKEN\"",
-    "upload-ci:dev": "source .env && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\"",
-    "upsert-actions:dev": "source .env && contentful-app-scripts upsert-actions --ci --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\""
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3EaGZUMKRKVZUyrcoNJ4o4 --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:dev": "source .env && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id \"$DEFINITIONS_ORG_ID\" --definition-id 653vTnuQw3j5onU1tUoH6t --token \"$CONTENTFUL_CMA_TOKEN\""
   },
   "eslintConfig": {
     "extends": "react-app"
