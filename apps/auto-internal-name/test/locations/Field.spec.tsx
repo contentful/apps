@@ -4,7 +4,7 @@ import { mockCma, mockSdk } from '../../test/mocks';
 import Field from '../../src/locations/Field';
 
 const mockUseAutoResizer = vi.fn();
-const mockSingleLineEditor = vi.fn(({ field, locales, withCharValidation }: any) => (
+const mockSingleLineEditor = vi.fn(({ field, locales }: any) => (
   <div data-test-id="single-line-editor">
     <input
       value={field.getValue() || ''}
