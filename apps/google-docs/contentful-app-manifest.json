@@ -1,0 +1,38 @@
+{
+  "functions": [
+    {
+      "id": "createEntriesFromDocumentFunction",
+      "name": "Create content blocks function",
+      "description": "Function to create content blocks from App Action.",
+      "path": "functions/createEntriesFromDocument.js",
+      "entryFile": "functions/createEntriesFromDocument.ts",
+      "allowNetworks": [],
+      "accepts": [
+        "appaction.call"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "createEntriesFromDocumentAction",
+      "name": "Create entries from an uploaded document",
+      "type": "function-invocation",
+      "functionId": "createEntriesFromDocumentFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "contentType",
+          "name": "Content Type",
+          "type": "Symbol",
+          "required": true
+        },
+        {
+          "id": "prompt",
+          "name": "Prompt fromt he user",
+          "type": "String",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "name": "google-docs",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@ai-sdk/openai": "^2.0.56",
+    "@contentful/app-sdk": "^4.45.0",
+    "@contentful/f36-components": "^5.6.0",
+    "@contentful/f36-tokens": "^5.1.0",
+    "@contentful/field-editor-json": "^3.3.38",
+    "@contentful/react-apps-toolkit": "^1.2.16",
+    "@emotion/css": "^11.13.4",
+    "ai": "^5.0.81",
+    "contentful-management": "^11.61.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id {3EaGZUMKRKVZUyrcoNJ4o4} --token ${CONTENTFUL_CMA_TOKEN}",
+    "upload": "contentful-app-scripts upload --bundle-dir ./build",
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
+    "upsert-actions": "contentful-app-scripts upsert-actions --ci --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
+    "build:functions": "contentful-app-scripts build-functions --ci",
+    "deploy:dev": "source .env && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id \"$DEFINITIONS_ORG_ID\" --definition-id {653vTnuQw3j5onU1tUoH6t} --token \"$CONTENTFUL_CMA_TOKEN\"",
+    "upload-ci:dev": "source .env && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\"",
+    "upsert-actions:dev": "source .env && contentful-app-scripts upsert-actions --ci --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\""
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "^2.3.0",
+    "@contentful/node-apps-toolkit": "^3.11.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/node": "^22.13.5",
+    "@types/react": "^18.3.13",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "cross-env": "^7.0.3",
+    "jsdom": "^26.0.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.2.2",
+    "vitest": "^3.0.9"
+  },
+  "homepage": "."
+}
