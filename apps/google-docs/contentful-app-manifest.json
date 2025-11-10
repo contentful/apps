@@ -1,4 +1,14 @@
 {
+  "parameters": {
+    "installation": [
+      {
+        "id": "apiKey",
+        "type": "Secret",
+        "name": "API Key",
+        "description": "API Key for the app to use the OpenAI API."
+      }
+    ]
+  },
   "functions": [
     {
       "id": "createEntriesFromDocumentFunction",
