@@ -28,8 +28,8 @@
         },
         {
           "id": "prompt",
-          "name": "Prompt fromt he user",
-          "type": "String",
+          "name": "Prompt from the user",
+          "type": "Symbol",
           "required": true
         }
       ]
