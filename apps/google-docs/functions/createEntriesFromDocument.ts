@@ -12,7 +12,7 @@ import { createDocument } from './agents/documentParser.agent';
 // import { createEntries, createAssets } from './service/entryService';
 
 export type AppActionParameters = {
-  contentType: string;
+  contentTypeId: string;
   prompt: string;
 };
 interface AppInstallationParameters {
@@ -30,7 +30,7 @@ export const handler: FunctionEventHandler<
   event: AppActionRequest<'Custom', AppActionParameters>,
   context: FunctionEventContext
 ) => {
-  const { contentType, prompt } = event.body;
+  const { contentTypeId, prompt } = event.body;
   const { openAiApiKey } = context.appInstallationParameters as AppInstallationParameters;
 
   // INTEG-3262 and INTEG-3263: Take in Content Type, Prompt, and Upload File from user

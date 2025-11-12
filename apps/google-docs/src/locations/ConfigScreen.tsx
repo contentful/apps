@@ -404,6 +404,29 @@ const ConfigScreen = () => {
                 style={{ flex: 1 }}
               />
             </Box>
+            <Button
+              onClick={async () => {
+                const appActions = await sdk.cma.appAction.getManyForEnvironment({
+                  environmentId: sdk.ids.environment,
+                  spaceId: sdk.ids.space,
+                });
+                const initiateOauthAppAction = appActions.items.find(
+                  (action) => action.name === 'createEntriesFromDocumentAction'
+                );
+                const response = await sdk.cma.appActionCall.createWithResponse(
+                  {
+                    appActionId: initiateOauthAppAction?.sys.id || '',
+                    appDefinitionId: sdk.ids.app,
+                  },
+                  {
+                    parameters: {},
+                  }
+                );
+
+                console.log(JSON.parse(response.response.body));
+              }}>
+              Create entries from document
+            </Button>
             <Paragraph marginTop="spacingS">
               Find your OpenAPI key{' '}
               <a
