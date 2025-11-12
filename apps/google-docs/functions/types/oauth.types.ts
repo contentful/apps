@@ -16,6 +16,10 @@ export interface AppEventHandlerRequest {
   state?: string;
 }
 
+export interface AppEventHandlerResponse {
+  // Empty response for event handlers
+}
+
 export interface OAuthResponseUrl {
   authorizationUrl: string;
 }
