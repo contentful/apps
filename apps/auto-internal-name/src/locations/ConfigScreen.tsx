@@ -54,11 +54,6 @@ const ConfigScreen = () => {
     (async () => {
       const currentParameters: AppParameters | null = await sdk.app.getParameters();
 
-      console.log(currentParameters);
-      console.log(currentParameters?.separator);
-      console.log(currentParameters?.sourceFieldId);
-      console.log(currentParameters?.overrides);
-
       if (currentParameters) {
         setSeparator(currentParameters.separator || '');
         setSourceFieldId(currentParameters.sourceFieldId || '');
