@@ -33,8 +33,8 @@
       ]
     },
     {
-      "id": "initiateOauth",
-      "name": "Initiate OAuth",
+      "id": "initiateGdocOauth",
+      "name": "Initiate Gdoc OAuth Flow",
       "description": "Initiates the OAuth flow for Google Docs",
       "path": "functions/initiateOauth.js",
       "entryFile": "functions/initiateOauth.ts",
@@ -46,8 +46,8 @@
       ]
     },
     {
-      "id": "completeOauth",
-      "name": "Complete OAuth",
+      "id": "completeGdocOauth",
+      "name": "Complete Gdoc OAuth Flow",
       "description": "Completes the OAuth flow for Google Docs",
       "path": "functions/completeOauth.js",
       "entryFile": "functions/completeOauth.ts",
@@ -59,9 +59,9 @@
       ]
     },
     {
-      "id": "disconnect",
-      "name": "Disconnect",
-      "description": "Disconnects the Google Docs app",
+      "id": "revokeGdocOauthToken",
+      "name": "Revoke Gdoc OAuth Token",
+      "description": "Revoke token for the Google Docs app to disconnect from the app",
       "path": "functions/disconnect.js",
       "entryFile": "functions/disconnect.ts",
       "allowNetworks": [
@@ -72,9 +72,9 @@
       ]
     },
     {
-      "id": "checkStatus",
-      "name": "Check Status",
-      "description": "Checks the status of the Google Docs app",
+      "id": "checkGdocOauthTokenStatus",
+      "name": "Check Gdoc OAuth Token Status",
+      "description": "Checks the status of the Google Docs OAuth token to see if it is valid",
       "path": "functions/checkStatus.js",
       "entryFile": "functions/checkStatus.ts",
       "allowNetworks": [
