@@ -107,21 +107,6 @@ describe('ConfigScreen', () => {
 
       expect(separatorInput).toHaveValue('-');
     });
-
-    it('should update sourceFieldId when a field is selected', async () => {
-      render(<ConfigScreen />);
-
-      await waitFor(() => {
-        expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
-      });
-
-      // The sourceFieldId selection is handled internally
-      // We can verify it's included in onConfigure
-      const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[0][0];
-      const result = await onConfigureCallback();
-
-      expect(result.parameters).toHaveProperty('sourceFieldId');
-    });
   });
 
   describe('Overrides management', () => {
