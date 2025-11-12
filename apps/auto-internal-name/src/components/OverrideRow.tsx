@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Autocomplete, Flex, FormControl, IconButton } from '@contentful/f36-components';
+import { Autocomplete, Flex, FormControl, IconButton, Box } from '@contentful/f36-components';
 import { styles } from '../locations/ConfigScreen.styles';
 import { TrashSimpleIcon } from '@contentful/f36-icons';
 import { ContentTypeProps } from 'contentful-management';
@@ -16,10 +16,16 @@ import {
 type OverrideRowProps = {
   contentTypes: ContentTypeProps[];
   overrideItem: Override;
+  overrideError: { contentTypeId: boolean; fieldId: boolean };
   setOverrides: (items: (prev: Override[]) => Override[]) => void;
 };
 
-const OverrideRow: React.FC<OverrideRowProps> = ({ contentTypes, overrideItem, setOverrides }) => {
+const OverrideRow: React.FC<OverrideRowProps> = ({
+  contentTypes,
+  overrideItem,
+  overrideError,
+  setOverrides,
+}) => {
   const [filteredContentTypes, setFilteredContentTypes] = useState<ContentTypeProps[]>([]);
   const [filteredFields, setfilteredFields] = useState<AutocompleteItem[]>([]);
   const [selectedContentType, setSelectedContentType] =
@@ -137,8 +143,11 @@ const OverrideRow: React.FC<OverrideRowProps> = ({ contentTypes, overrideItem, s
 
   return (
     <>
-      <Flex flexDirection="row" alignItems="center" gap="spacingS" key={overrideItem.id}>
-        <FormControl id="contentTypeId" className={styles.formControl}>
+      <Flex flexDirection="row" alignItems="space-evenly" gap="spacingS" key={overrideItem.id}>
+        <FormControl
+          id="contentTypeId"
+          className={styles.formControl}
+          isInvalid={overrideError?.contentTypeId}>
           <FormControl.Label marginBottom="spacingS">Content type</FormControl.Label>
           <Autocomplete
             key={`${overrideItem.id}-content-type`}
@@ -150,8 +159,14 @@ const OverrideRow: React.FC<OverrideRowProps> = ({ contentTypes, overrideItem, s
             onSelectItem={(item: AutocompleteItem) => handleCTItemSelection(item)}
             placeholder="Content type name"
           />
+          {overrideError?.contentTypeId && (
+            <FormControl.ValidationMessage>Content type is required</FormControl.ValidationMessage>
+          )}
         </FormControl>
-        <FormControl id="fieldName" className={styles.formControl}>
+        <FormControl
+          id="fieldName"
+          className={styles.formControl}
+          isInvalid={overrideError?.fieldId}>
           <FormControl.Label marginBottom="spacingS">Field name</FormControl.Label>
           <Autocomplete
             key={`${overrideItem.id}-field`}
@@ -164,13 +179,18 @@ const OverrideRow: React.FC<OverrideRowProps> = ({ contentTypes, overrideItem, s
             onSelectItem={(item: AutocompleteItem) => handleFieldItemSelection(item)}
             placeholder="Field name"
           />
+          {overrideError?.fieldId && (
+            <FormControl.ValidationMessage>Field name is required</FormControl.ValidationMessage>
+          )}
         </FormControl>
-        <IconButton
-          aria-label="Delete override"
-          icon={<TrashSimpleIcon />}
-          variant="secondary"
-          onClick={() => deleteOverride(overrideItem)}
-        />
+        <Box marginTop="spacingXl">
+          <IconButton
+            aria-label="Delete override"
+            icon={<TrashSimpleIcon />}
+            variant="secondary"
+            onClick={() => deleteOverride(overrideItem)}
+          />
+        </Box>
       </Flex>
     </>
   );

@@ -39,8 +39,31 @@ const ConfigScreen = () => {
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [fields, setFields] = useState<SimplifiedField[]>([]);
 
+  const [errors, setErrors] = useState<{
+    separator: boolean;
+    sourceFieldId: boolean;
+    overrides: Record<string, { contentTypeId: boolean; fieldId: boolean }>;
+  }>({ separator: false, sourceFieldId: false, overrides: {} });
+
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
+
+    const overrideErrors: Record<string, { contentTypeId: boolean; fieldId: boolean }> = {};
+    overrides.forEach((override) => {
+      overrideErrors[override.id] = {
+        contentTypeId: !override.contentTypeId,
+        fieldId: !override.fieldId,
+      };
+    });
+    setErrors({ separator: !separator, sourceFieldId: !sourceFieldId, overrides: overrideErrors });
+
+    const hasOverrideErrors = Object.values(overrideErrors).some(
+      (error) => error.contentTypeId || error.fieldId
+    );
+    if (!separator || !sourceFieldId || hasOverrideErrors) {
+      sdk.notifier.error('Some fields are missing or invalid');
+      return false;
+    }
 
     return {
       parameters,
@@ -98,6 +121,12 @@ const ConfigScreen = () => {
   };
 
   const handleSourceFieldInputChange = (name: string) => {
+    if (!name) {
+      setSourceFieldId('');
+      setFilteredSourceFields(fields);
+      return;
+    }
+
     const newFilteredItems = fields.filter((item) =>
       normalizeString(item.name).includes(normalizeString(name))
     );
@@ -120,6 +149,8 @@ const ConfigScreen = () => {
     }));
   };
 
+  console.log('lala');
+
   return (
     <Form>
       <Flex
@@ -141,7 +172,7 @@ const ConfigScreen = () => {
 
         <Box>
           <Heading as="h3">Configure</Heading>
-          <FormControl id="separator">
+          <FormControl id="separator" isInvalid={errors.separator}>
             <FormControl.Label marginBottom="spacingS">Separator</FormControl.Label>
             <TextInput
               value={parameters.separator}
@@ -151,7 +182,7 @@ const ConfigScreen = () => {
               The separator can be any character or symbol and will append to the entry name.
             </FormControl.HelpText>
           </FormControl>
-          <FormControl id="sourceFieldId">
+          <FormControl id="sourceFieldId" isInvalid={errors.sourceFieldId}>
             <FormControl.Label marginBottom="spacingS" isRequired>
               Source field ID
             </FormControl.Label>
@@ -162,6 +193,11 @@ const ConfigScreen = () => {
               onSelectItem={handleSourceFieldIdSelection}
               placeholder="Search field name"
             />
+            {errors.sourceFieldId && (
+              <FormControl.ValidationMessage>
+                Source field ID is required
+              </FormControl.ValidationMessage>
+            )}
             <FormControl.HelpText marginTop="spacingS">
               The source field ID should be the name of the field that you want to use from the
               parent entry. This will be applied to any content types that include the same field
@@ -181,6 +217,7 @@ const ConfigScreen = () => {
               key={override.id}
               contentTypes={contentTypes}
               overrideItem={override}
+              overrideError={errors.overrides[override.id]}
               setOverrides={setOverrides}></OverrideRow>
           ))}
           <Box marginBottom="spacingXl">
