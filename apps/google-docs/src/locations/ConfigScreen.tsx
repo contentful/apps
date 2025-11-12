@@ -1,6 +1,15 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Box, Form, FormControl, Heading, Paragraph, TextInput } from '@contentful/f36-components';
+import {
+  Box,
+  Form,
+  FormControl,
+  Heading,
+  Paragraph,
+  TextInput,
+  Button,
+  Tooltip,
+} from '@contentful/f36-components';
 import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
@@ -18,6 +27,248 @@ const ConfigScreen = () => {
   const [apiKeyObfuscatedDisplay, setApiKeyObfuscatedDisplay] = useState<string>('');
   const [apiKeyIsValid, setApiKeyIsValid] = useState<boolean>(true);
   const [isValidatingApiKey, setIsValidatingApiKey] = useState<boolean>(false);
+  const [isReadOnly, setIsReadOnly] = useState(false);
+  const [isOAuthLoading, setIsOAuthLoading] = useState(false);
+  const [isOAuthConnected, setIsOAuthConnected] = useState(false);
+  const [isHoveringConnected, setIsHoveringConnected] = useState(false);
+  const [isCheckingStatus, setIsCheckingStatus] = useState(true);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const popupWindowRef = useRef<Window | null>(null);
+  const checkWindowIntervalRef = useRef<number | null>(null);
+
+  // Check Klaviyo connection status with polling to handle race conditions
+  const checkGoogleStatus = async (
+    expectedStatus?: boolean,
+    maxRetries: number = 10
+  ): Promise<void> => {
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Checking Google Docs connection status (attempt ${attempt}/${maxRetries})...`);
+        const appActions = await sdk.cma.appAction.getManyForEnvironment({
+          environmentId: sdk.ids.environment,
+          spaceId: sdk.ids.space,
+        });
+
+        const checkStatusAppAction = appActions.items.find(
+          (action) => action.name === 'Check Status'
+        );
+        if (!checkStatusAppAction) {
+          console.warn('Check Status app action not found');
+          setIsCheckingStatus(false);
+          return;
+        }
+
+        const response = await sdk.cma.appActionCall.createWithResponse(
+          {
+            appActionId: checkStatusAppAction.sys.id,
+            appDefinitionId: sdk.ids.app,
+          },
+          {
+            parameters: {},
+          }
+        );
+
+        const statusData = JSON.parse(response.response.body);
+        console.log(`Google Docs status response (attempt ${attempt}):`, statusData);
+
+        // Assuming the response contains a connected field
+        const isConnected = statusData.connected === true;
+        console.log(`Google Docs connection status (attempt ${attempt}):`, isConnected);
+
+        // If we have an expected status and it matches, or if we don't have an expected status, accept the result
+        if (expectedStatus === undefined || isConnected === expectedStatus) {
+          setIsOAuthConnected(isConnected);
+          console.log(`Status check resolved to expected value: ${isConnected}`);
+          break;
+        } else {
+          console.log(
+            `Status mismatch. Expected: ${expectedStatus}, Got: ${isConnected}. Retrying...`
+          );
+
+          // If this is the last attempt, accept the current result anyway
+          if (attempt === maxRetries) {
+            console.log(`Max retries reached. Accepting current status: ${isConnected}`);
+            setIsOAuthConnected(isConnected);
+            break;
+          }
+
+          // Wait before retrying (exponential backoff: 500ms, 1000ms, 1500ms, etc.)
+          const waitTime = 500 * attempt;
+          console.log(`Waiting ${waitTime}ms before retry...`);
+          await delay(waitTime);
+        }
+      } catch (error) {
+        console.error(`Failed to check Google Docs status (attempt ${attempt}):`, error);
+
+        // If this is the last attempt, set status to false and give up
+        if (attempt === maxRetries) {
+          console.log('Max retries reached. Setting status to false due to errors.');
+          setIsOAuthConnected(false);
+          break;
+        }
+
+        // Wait before retrying on error
+        const waitTime = 500 * attempt;
+        console.log(`Waiting ${waitTime}ms before retry after error...`);
+        await delay(waitTime);
+      }
+    }
+
+    setIsCheckingStatus(false);
+    console.log(`Status check polling completed. Final status: ${isOAuthConnected}`);
+  };
+
+  const messageHandler = async (event: MessageEvent) => {
+    if (event.data.type === 'oauth:complete') {
+      console.log('oauth:complete');
+      const appDefinitionId = sdk.ids.app;
+      // call app action to complete oauth
+      const appActions = await sdk.cma.appAction.getManyForEnvironment({
+        environmentId: sdk.ids.environment,
+        spaceId: sdk.ids.space,
+      });
+      console.log('appActions', appActions);
+      const completeOauthAppAction = appActions.items.find(
+        (action) => action.name === 'Complete Oauth'
+      );
+      await sdk.cma.appActionCall.create(
+        { appDefinitionId, appActionId: completeOauthAppAction?.sys.id || '' },
+        {
+          parameters: {
+            code: event.data.code,
+            state: event.data.state,
+          },
+        }
+      );
+      console.log('completeOauthAppAction', completeOauthAppAction);
+      // Check the updated status after OAuth completion - expect it to be connected
+      await checkGoogleStatus(true);
+
+      sdk.notifier.success('OAuth complete');
+      cleanup();
+      setIsOAuthLoading(false);
+    }
+  };
+
+  const cleanup = () => {
+    console.log('cleanup called');
+    // Clear the interval
+    if (checkWindowIntervalRef.current) {
+      window.clearInterval(checkWindowIntervalRef.current);
+      checkWindowIntervalRef.current = null;
+    }
+    // Remove the message event listener
+    console.log('Removing message event listener');
+    window.removeEventListener('message', messageHandler);
+    console.log('Message event listener removed');
+    // Close the popup if it's still open
+    if (popupWindowRef.current && !popupWindowRef.current.closed) {
+      popupWindowRef.current.close();
+    }
+    popupWindowRef.current = null;
+  };
+
+  const handleOAuth = async () => {
+    console.log('handleOAuth started');
+    setIsOAuthLoading(true);
+
+    window.removeEventListener('message', messageHandler);
+    window.addEventListener('message', messageHandler);
+
+    try {
+      const appActions = await sdk.cma.appAction.getManyForEnvironment({
+        environmentId: sdk.ids.environment,
+        spaceId: sdk.ids.space,
+      });
+
+      const initiateOauthAppAction = appActions.items.find(
+        (action) => action.name === 'Initiate Oauth'
+      );
+
+      const response = await sdk.cma.appActionCall.createWithResponse(
+        {
+          appActionId: initiateOauthAppAction?.sys.id || '',
+          appDefinitionId: sdk.ids.app,
+        },
+        {
+          parameters: {},
+        }
+      );
+
+      const authorizationUrl = JSON.parse(response.response.body).authorizationUrl;
+
+      popupWindowRef.current = window.open(authorizationUrl, '_blank', 'height=700,width=450');
+
+      // Check if the window was closed
+      // checkWindowIntervalRef.current = window.setInterval(() => {
+      //   if (popupWindowRef.current?.closed) {
+      //     cleanup();
+      //     setIsOAuthLoading(false);
+      //   }
+      // }, 1000);
+    } catch (error) {
+      console.error('Failed to initiate OAuth:', error);
+      cleanup();
+      setIsOAuthLoading(false);
+      sdk.notifier.error('Failed to initiate OAuth flow');
+    }
+  };
+
+  const handleDisconnect = async () => {
+    setIsDisconnecting(true);
+    try {
+      const appActions = await sdk.cma.appAction.getManyForEnvironment({
+        environmentId: sdk.ids.environment,
+        spaceId: sdk.ids.space,
+      });
+      const disconnectAppAction = appActions.items.find((action) => action.name === 'Disconnect');
+      await sdk.cma.appActionCall.create(
+        {
+          appActionId: disconnectAppAction?.sys.id || '',
+          appDefinitionId: sdk.ids.app,
+        },
+        { parameters: {} }
+      );
+
+      // Check the updated status after disconnection - expect it to be disconnected
+      await checkGoogleStatus(false);
+
+      setIsHoveringConnected(false);
+      sdk.notifier.success('Disconnected from Google Docs');
+    } catch (error) {
+      console.error('Failed to disconnect:', error);
+      sdk.notifier.error('Failed to disconnect from Google Docs');
+    } finally {
+      setIsDisconnecting(false);
+    }
+  };
+
+  const getButtonText = () => {
+    if (isDisconnecting) return 'Disconnecting...';
+    if (isCheckingStatus) return 'Checking...';
+    if (isOAuthLoading) return 'Connecting...';
+    if (isOAuthConnected && isHoveringConnected) return 'Disconnect';
+    if (isOAuthConnected) return 'Connected';
+    return 'Connect';
+  };
+
+  const getButtonVariant = () => {
+    if (isCheckingStatus) return 'secondary';
+    if (isOAuthConnected && !isHoveringConnected) return 'positive';
+    if (isOAuthConnected && isHoveringConnected) return 'negative';
+    return 'primary';
+  };
+
+  const handleButtonClick = () => {
+    if (isCheckingStatus) return; // Don't allow clicks while checking status
+    if (isOAuthConnected && isHoveringConnected) {
+      handleDisconnect();
+    } else if (!isOAuthConnected && !isOAuthLoading) {
+      handleOAuth();
+    }
+  };
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
@@ -71,6 +322,13 @@ const ConfigScreen = () => {
           setApiKeyInput(masked);
         }
       }
+      const isInstalled = await sdk.app.isInstalled();
+      setIsReadOnly(isInstalled);
+
+      // Check Google Docs connection status
+      if (isInstalled) {
+        await checkGoogleStatus();
+      }
       sdk.app.setReady();
     })();
   }, [sdk]);
@@ -110,6 +368,28 @@ const ConfigScreen = () => {
           reducing errors, and speeding up your publishing workflow.
         </Paragraph>
         <Form style={{ width: '100%' }}>
+          <Box style={{ marginBottom: '32px', width: '100%' }}>
+            <Tooltip
+              content="App must be installed to connect"
+              isDisabled={isReadOnly}
+              placement="top">
+              <Button
+                variant={getButtonVariant()}
+                onClick={handleButtonClick}
+                onMouseEnter={() => {
+                  if (isOAuthConnected) {
+                    setIsHoveringConnected(true);
+                  }
+                }}
+                onMouseLeave={() => {
+                  setIsHoveringConnected(false);
+                }}
+                isLoading={isOAuthLoading}
+                isDisabled={isOAuthLoading || isDisconnecting || isCheckingStatus || !isReadOnly}>
+                {getButtonText()}
+              </Button>
+            </Tooltip>
+          </Box>
           <FormControl style={{ width: '100%' }}>
             <FormControl.Label isRequired>OpenAPI key</FormControl.Label>
             <Box style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>

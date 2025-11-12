@@ -1,4 +1,15 @@
 {
+  "name": "Google Docs",
+  "description": "Sync your Contentful content with Google Docs",
+  "id": "google-docs",
+  "category": "Productivity",
+  "version": "0.1.0",
+  "locations": [
+    {
+      "location": "app-config",
+      "component": "ConfigScreen"
+    }
+  ],
   "parameters": {
     "installation": [
       {
@@ -40,6 +51,32 @@
       "description": "Completes the OAuth flow for Google Docs",
       "path": "functions/completeOauth.js",
       "entryFile": "functions/completeOauth.ts",
+      "allowNetworks": [
+        "a.google.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "disconnect",
+      "name": "Disconnect",
+      "description": "Disconnects the Google Docs app",
+      "path": "functions/disconnect.js",
+      "entryFile": "functions/disconnect.ts",
+      "allowNetworks": [
+        "a.google.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "checkStatus",
+      "name": "Check Status",
+      "description": "Checks the status of the Google Docs app",
+      "path": "functions/checkStatus.js",
+      "entryFile": "functions/checkStatus.ts",
       "allowNetworks": [
         "a.google.com"
       ],
