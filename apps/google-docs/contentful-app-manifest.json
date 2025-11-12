@@ -20,6 +20,32 @@
       "accepts": [
         "appaction.call"
       ]
+    },
+    {
+      "id": "initiateOauth",
+      "name": "Initiate OAuth",
+      "description": "Initiates the OAuth flow for Google Docs",
+      "path": "functions/initiateOauth.js",
+      "entryFile": "functions/initiateOauth.ts",
+      "allowNetworks": [
+        "www.google.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "completeOauth",
+      "name": "Complete OAuth",
+      "description": "Completes the OAuth flow for Google Docs",
+      "path": "functions/completeOauth.js",
+      "entryFile": "functions/completeOauth.ts",
+      "allowNetworks": [
+        "a.google.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
     }
   ],
   "actions": [
