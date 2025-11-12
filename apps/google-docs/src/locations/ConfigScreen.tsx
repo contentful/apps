@@ -10,9 +10,10 @@ export interface AppInstallationParameters {
   apiKeySuffix?: string;
 }
 
+const VISIBLE_SUFFIX_LENGTH = 4;
+
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
-  const VISIBLE_SUFFIX_LENGTH = 4;
   const [apiKeyInput, setApiKeyInput] = useState<string>('');
   const [apiKeyObfuscatedDisplay, setApiKeyObfuscatedDisplay] = useState<string>('');
   const [apiKeyIsValid, setApiKeyIsValid] = useState<boolean>(true);
@@ -21,7 +22,7 @@ const ConfigScreen = () => {
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
     const trimmed = apiKeyInput.trim();
-    const parametersToSave: Record<string, unknown> = {};
+    const parametersToSave: Record<string, string | number> = {};
     // Only persist apiKey if user actually typed a new one (not the obfuscated placeholder)
     if (trimmed && trimmed !== apiKeyObfuscatedDisplay) {
       parametersToSave.apiKey = trimmed;
