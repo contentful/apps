@@ -149,8 +149,6 @@ const ConfigScreen = () => {
     }));
   };
 
-  console.log('lala');
-
   return (
     <Form>
       <Flex

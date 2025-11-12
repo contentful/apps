@@ -17,6 +17,9 @@ const mockSdk: any = {
       getMany: vi.fn(),
     },
   },
+  notifier: {
+    error: vi.fn(),
+  },
 };
 
 export { mockSdk };
