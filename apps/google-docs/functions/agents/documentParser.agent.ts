@@ -13,7 +13,7 @@ import { generateText } from 'ai';
 /**
  * Configuration for the content type parser
  */
-interface ContentTypeParserConfig {
+interface DocumentParserConfig {
   openaiApiKey: string;
   modelVersion: string;
   jsonData: any;
@@ -25,7 +25,7 @@ interface ContentTypeParserConfig {
  * @param config - Parser configuration
  * @returns Promise resolving to LLM response
  */
-export async function createDocument(config: ContentTypeParserConfig) {
+export async function createDocument(config: DocumentParserConfig) {
   const { openaiApiKey, modelVersion, jsonData, document } = config;
   const prompt = buildPrompt(jsonData);
   return await callOpenAI(prompt, modelVersion, openaiApiKey);

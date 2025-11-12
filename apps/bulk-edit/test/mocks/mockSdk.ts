@@ -12,6 +12,9 @@ interface MockSDK extends Partial<AppExtensionSDK> {
       get: ReturnType<typeof vi.fn>;
       update: ReturnType<typeof vi.fn>;
     };
+    editorInterface: {
+      get: ReturnType<typeof vi.fn>;
+    };
   };
   ids: {
     app: string;
@@ -77,6 +80,9 @@ const mockSdk: MockSDK = {
       getMany: vi.fn(),
       get: vi.fn(),
       update: vi.fn(),
+    },
+    editorInterface: {
+      get: vi.fn(),
     },
   },
 };

@@ -12,7 +12,7 @@
   "functions": [
     {
       "id": "createEntriesFromDocumentFunction",
-      "name": "Create content blocks function",
+      "name": "Create content entries from document function",
       "description": "Function to create content blocks from App Action.",
       "path": "functions/createEntriesFromDocument.js",
       "entryFile": "functions/createEntriesFromDocument.ts",
@@ -31,15 +31,15 @@
       "category": "Custom",
       "parameters": [
         {
-          "id": "contentType",
-          "name": "Content Type",
+          "id": "contentTypeId",
+          "name": "Content Type ID",
           "type": "Symbol",
           "required": true
         },
         {
           "id": "prompt",
-          "name": "Prompt fromt he user",
-          "type": "String",
+          "name": "Prompt from the user",
+          "type": "Symbol",
           "required": true
         }
       ]

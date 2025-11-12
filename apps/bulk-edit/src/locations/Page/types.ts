@@ -1,4 +1,6 @@
-import { FieldType } from 'contentful-management';
+import { ContentTypeFieldValidation, Control } from 'contentful-management';
+
+export type Item = { type: string; linkType?: string; validations?: ContentTypeFieldValidation[] };
 
 export type FilterOption = {
   label: string;
@@ -6,11 +8,17 @@ export type FilterOption = {
 };
 
 export type ContentTypeField = {
+  contentTypeId: string;
   id: string;
   uniqueId: string;
   name: string;
   locale?: string;
-} & FieldType;
+  type: string;
+  required: boolean;
+  items?: Item;
+  fieldControl?: Control;
+  validations: ContentTypeFieldValidation[];
+};
 
 export interface Fields {
   [key: string]: {
