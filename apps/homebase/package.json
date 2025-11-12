@@ -31,7 +31,7 @@
     "lint:write": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
   },
   "devDependencies": {
-    "@contentful/app-scripts": "^2.5.5",
+    "@contentful/app-scripts": "^2.5.6",
     "@eslint/js": "^9.37.0",
     "@testing-library/react": "16.3.0",
     "@types/node": "24.7.0",
