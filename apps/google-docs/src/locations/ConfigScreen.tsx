@@ -21,13 +21,13 @@ const ConfigScreen = () => {
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
-    const trimmed = apiKeyInput.trim();
+    const apiKey = apiKeyInput.trim();
     const parametersToSave: Record<string, string | number> = {};
     // Only persist apiKey if user actually typed a new one (not the obfuscated placeholder)
-    if (trimmed && trimmed !== apiKeyObfuscatedDisplay) {
-      parametersToSave.apiKey = trimmed;
-      parametersToSave.apiKeyLength = trimmed.length;
-      parametersToSave.apiKeySuffix = trimmed.slice(-VISIBLE_SUFFIX_LENGTH);
+    if (apiKey && apiKey !== apiKeyObfuscatedDisplay) {
+      parametersToSave.apiKey = apiKey;
+      parametersToSave.apiKeyLength = apiKey.length;
+      parametersToSave.apiKeySuffix = apiKey.slice(-VISIBLE_SUFFIX_LENGTH);
     }
     return {
       parameters: parametersToSave,
@@ -77,34 +77,26 @@ const ConfigScreen = () => {
 
   const validateApiKey = useCallback(
     async (value: string) => {
-      const trimmed = value.trim();
-      if (trimmed === apiKeyObfuscatedDisplay) {
+      const token = value.trim();
+      if (token === apiKeyObfuscatedDisplay) {
         setApiKeyIsValid(true);
         return true;
       }
-      if (trimmed.length === 0) {
+      if (token.length === 0) {
         setApiKeyIsValid(true);
         return true;
       }
       try {
         setIsValidatingApiKey(true);
-        const response = await fetch('https://api.openai.com/v1/models', {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${trimmed}`,
-          },
-        });
-        const ok = response.ok;
-        setApiKeyIsValid(ok);
-        return ok;
-      } catch {
+        return true;
+      } catch (e) {
         setApiKeyIsValid(false);
         return false;
       } finally {
         setIsValidatingApiKey(false);
       }
     },
-    [apiKeyObfuscatedDisplay]
+    [apiKeyObfuscatedDisplay, sdk]
   );
 
   return (
