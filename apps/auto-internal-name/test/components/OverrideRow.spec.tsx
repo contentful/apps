@@ -29,7 +29,7 @@ describe('OverrideRow', () => {
   const mockOverride: Override = {
     id: 'override-1',
     contentTypeId: '',
-    fieldName: '',
+    fieldId: '',
   };
 
   const mockSetOverrides = vi.fn((updater) => {
@@ -107,7 +107,7 @@ describe('OverrideRow', () => {
       const overrideWithContentType: Override = {
         id: 'override-1',
         contentTypeId: 'ct-1',
-        fieldName: 'title',
+        fieldId: 'title',
       };
 
       const setOverridesSpy = vi.fn();
@@ -137,7 +137,7 @@ describe('OverrideRow', () => {
       expect(callArgs([overrideWithContentType])[0]).toEqual({
         id: 'override-1',
         contentTypeId: 'ct-2',
-        fieldName: '',
+        fieldId: '',
       });
     });
 
@@ -146,7 +146,7 @@ describe('OverrideRow', () => {
       const overrideWithContentType: Override = {
         id: 'override-1',
         contentTypeId: 'ct-1',
-        fieldName: 'title',
+        fieldId: 'title',
       };
 
       const setOverridesSpy = vi.fn();
@@ -183,7 +183,7 @@ describe('OverrideRow', () => {
       expect(callArgs([overrideWithContentType])[0]).toEqual({
         id: 'override-1',
         contentTypeId: '',
-        fieldName: '',
+        fieldId: '',
       });
     });
   });
@@ -193,7 +193,7 @@ describe('OverrideRow', () => {
       const overrideWithContentType: Override = {
         id: 'override-1',
         contentTypeId: 'ct-1',
-        fieldName: '',
+        fieldId: '',
       };
 
       render(
@@ -213,7 +213,7 @@ describe('OverrideRow', () => {
       const overrideWithContentType: Override = {
         id: 'override-1',
         contentTypeId: 'ct-2',
-        fieldName: '',
+        fieldId: '',
       };
 
       const setOverridesSpy = vi.fn((updater) => {
@@ -252,7 +252,7 @@ describe('OverrideRow', () => {
       expect(callArgs([overrideWithContentType])[0]).toEqual({
         id: 'override-1',
         contentTypeId: 'ct-2',
-        fieldName: 'Name',
+        fieldId: 'name',
       });
     });
   });
@@ -262,7 +262,7 @@ describe('OverrideRow', () => {
       const user = userEvent.setup();
       const overrides: Override[] = [
         mockOverride,
-        { id: 'override-2', contentTypeId: 'ct-1', fieldName: 'title' },
+        { id: 'override-2', contentTypeId: 'ct-1', fieldId: 'title' },
       ];
 
       const setOverridesSpy = vi.fn((updater) => {
@@ -298,9 +298,9 @@ describe('OverrideRow', () => {
     it('should remove only the specific override when delete is clicked', async () => {
       const user = userEvent.setup();
       const overrides: Override[] = [
-        { id: 'override-1', contentTypeId: 'ct-1', fieldName: 'title' },
-        { id: 'override-2', contentTypeId: 'ct-2', fieldName: 'name' },
-        { id: 'override-3', contentTypeId: 'ct-1', fieldName: 'slug' },
+        { id: 'override-1', contentTypeId: 'ct-1', fieldId: 'title' },
+        { id: 'override-2', contentTypeId: 'ct-2', fieldId: 'name' },
+        { id: 'override-3', contentTypeId: 'ct-1', fieldId: 'slug' },
       ];
 
       const setOverridesSpy = vi.fn((updater) => {
@@ -371,7 +371,7 @@ describe('OverrideRow', () => {
       const overrideWithEmptyContentType: Override = {
         id: 'override-1',
         contentTypeId: 'ct-empty',
-        fieldName: '',
+        fieldId: '',
       };
 
       render(

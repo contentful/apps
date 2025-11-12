@@ -95,7 +95,7 @@ const ConfigScreen = () => {
   const addOverride = () => {
     setOverrides((prev) => [
       ...prev,
-      { id: window.crypto.randomUUID(), contentTypeId: '', fieldName: '' },
+      { id: window.crypto.randomUUID(), contentTypeId: '', fieldId: '' },
     ]);
   };
 

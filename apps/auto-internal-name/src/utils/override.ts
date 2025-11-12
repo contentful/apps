@@ -39,9 +39,9 @@ export const getInitialFieldName = (
   contentTypes: ContentTypeProps[],
   overrideItem: Override
 ): AutocompleteItem => {
-  if (overrideItem.contentTypeId && overrideItem.fieldName) {
+  if (overrideItem.contentTypeId && overrideItem.fieldId) {
     const fields = getFieldsFrom(contentTypes, overrideItem.contentTypeId);
-    const field = fields.find((f) => f.name === overrideItem.fieldName);
+    const field = fields.find((f) => f.id === overrideItem.fieldId);
 
     if (field) {
       return { id: field.id, name: field.name };

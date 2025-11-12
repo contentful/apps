@@ -1,7 +1,7 @@
 export type Override = {
   id: string;
   contentTypeId: string;
-  fieldName: string;
+  fieldId: string;
 };
 
 export type AutocompleteItem = {

@@ -43,7 +43,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({ contentTypes, overrideItem, s
       }
       return prev;
     });
-  }, [contentTypes, overrideItem.contentTypeId, overrideItem.fieldName]);
+  }, [contentTypes, overrideItem.contentTypeId, overrideItem.fieldId]);
 
   useEffect(() => {
     setFilteredContentTypes(contentTypes);
@@ -56,7 +56,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({ contentTypes, overrideItem, s
     setOverrides((prev: Override[]) => prev.filter((o) => o.id !== overrideItem.id));
   };
 
-  const updateOverride = (contentTypeId?: string, fieldName?: string) => {
+  const updateOverride = (contentTypeId?: string, fieldId?: string) => {
     setOverrides((prev: Override[]) =>
       prev.map((override) => {
         if (override.id !== overrideItem.id) {
@@ -65,12 +65,12 @@ const OverrideRow: React.FC<OverrideRowProps> = ({ contentTypes, overrideItem, s
 
         const newContentTypeId =
           contentTypeId || contentTypeId === '' ? { contentTypeId } : undefined;
-        const newFieldName = fieldName || fieldName === '' ? { fieldName } : undefined;
+        const newFieldId = fieldId || fieldId === '' ? { fieldId } : undefined;
 
         return {
           ...override,
           ...newContentTypeId,
-          ...newFieldName,
+          ...newFieldId,
         };
       })
     );
@@ -117,7 +117,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({ contentTypes, overrideItem, s
       return;
     }
 
-    const fields = getFieldsFrom(contentTypes, overrideItem.fieldName);
+    const fields = getFieldsFrom(contentTypes, overrideItem.contentTypeId);
 
     const newFilteredItems = filterItemsByName(fields, name);
     setfilteredFields(newFilteredItems as AutocompleteItem[]);
@@ -129,7 +129,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({ contentTypes, overrideItem, s
     );
 
     if (selectedItem) {
-      updateOverride(undefined, selectedItem.name);
+      updateOverride(undefined, selectedItem.id);
 
       setSelectedField({ id: selectedItem.id, name: selectedItem.name });
     }
