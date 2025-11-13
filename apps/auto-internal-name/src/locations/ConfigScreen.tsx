@@ -29,9 +29,11 @@ type SimplifiedField = { id: string; name: string };
 
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
-  const [separator, setSeparator] = useState<string>('');
-  const [sourceFieldId, setSourceFieldId] = useState<string>('');
-  const [overrides, setOverrides] = useState<Override[]>([]);
+  const [parameters, setParameters] = useState<AppParameters>({
+    separator: '',
+    sourceFieldId: '',
+    overrides: [],
+  });
 
   const [filteredSourceFields, setFilteredSourceFields] = useState<SimplifiedField[]>([]);
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
@@ -41,10 +43,10 @@ const ConfigScreen = () => {
     const currentState = await sdk.app.getCurrentState();
 
     return {
-      parameters: { separator, sourceFieldId, overrides },
+      parameters,
       targetState: currentState,
     };
-  }, [separator, sourceFieldId, overrides, sdk]);
+  }, [parameters, sdk]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -55,9 +57,7 @@ const ConfigScreen = () => {
       const currentParameters: AppParameters | null = await sdk.app.getParameters();
 
       if (currentParameters) {
-        setSeparator(currentParameters.separator || '');
-        setSourceFieldId(currentParameters.sourceFieldId || '');
-        setOverrides(currentParameters.overrides || []);
+        setParameters(currentParameters);
       }
 
       sdk.app.setReady();
@@ -88,10 +88,13 @@ const ConfigScreen = () => {
   }, []);
 
   const addOverride = () => {
-    setOverrides((prev) => [
+    setParameters((prev) => ({
       ...prev,
-      { id: window.crypto.randomUUID(), contentTypeId: '', fieldId: '' },
-    ]);
+      overrides: [
+        ...prev.overrides,
+        { id: window.crypto.randomUUID(), contentTypeId: '', fieldId: '' },
+      ],
+    }));
   };
 
   const handleSourceFieldInputChange = (name: string) => {
@@ -106,8 +109,15 @@ const ConfigScreen = () => {
       (item) => normalizeString(item.name) === normalizeString(value)
     );
     if (selectedField) {
-      setSourceFieldId(selectedField.id);
+      setParameters((prev) => ({ ...prev, sourceFieldId: selectedField.id }));
     }
+  };
+
+  const setOverrides = (updater: (prev: Override[]) => Override[]) => {
+    setParameters((prev) => ({
+      ...prev,
+      overrides: updater(prev.overrides),
+    }));
   };
 
   return (
@@ -133,7 +143,10 @@ const ConfigScreen = () => {
           <Heading as="h3">Configure</Heading>
           <FormControl id="separator">
             <FormControl.Label marginBottom="spacingS">Separator</FormControl.Label>
-            <TextInput value={separator} onChange={(e) => setSeparator(e.target.value)}></TextInput>
+            <TextInput
+              value={parameters.separator}
+              onChange={(e) => setParameters((prev) => ({ ...prev, separator: e.target.value }))}
+            />
             <FormControl.HelpText marginTop="spacingS">
               The separator can be any character or symbol and will append to the entry name.
             </FormControl.HelpText>
@@ -143,7 +156,7 @@ const ConfigScreen = () => {
               Source field ID
             </FormControl.Label>
             <Autocomplete
-              selectedItem={sourceFieldId}
+              selectedItem={parameters.sourceFieldId}
               items={filteredSourceFields.map((field) => field.name)}
               onInputValueChange={handleSourceFieldInputChange}
               onSelectItem={handleSourceFieldIdSelection}
@@ -163,7 +176,7 @@ const ConfigScreen = () => {
             If an override is needed per content type, select the content type and the field name
             you wish to use for each entry.
           </Paragraph>
-          {overrides?.map((override) => (
+          {parameters.overrides?.map((override) => (
             <OverrideRow
               key={override.id}
               contentTypes={contentTypes}
