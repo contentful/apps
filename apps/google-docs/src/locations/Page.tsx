@@ -13,6 +13,7 @@ import {
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import mammoth from 'mammoth';
 
 declare global {
   interface Window {
@@ -194,24 +195,7 @@ const Page = () => {
     setWordFile(file);
   };
 
-  const loadMammoth = async () => {
-    if (window.mammoth) return window.mammoth;
-    await new Promise<void>((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = 'https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js';
-      script.async = true;
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error('Failed to load mammoth.js'));
-      document.body.appendChild(script);
-    });
-    if (!window.mammoth) {
-      throw new Error('mammoth.js failed to initialize');
-    }
-    return window.mammoth;
-  };
-
   const convertDocxToHtml = async (file: File) => {
-    const mammoth = await loadMammoth();
     const arrayBuffer = await file.arrayBuffer();
     const result = await mammoth.convertToHtml({ arrayBuffer });
     return result.value as string;
