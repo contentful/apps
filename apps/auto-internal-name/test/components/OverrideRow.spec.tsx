@@ -54,6 +54,7 @@ describe('OverrideRow', () => {
             contentTypeId: false,
             fieldId: false,
           }}
+          overrides={[mockOverride]}
         />
       );
 
@@ -74,6 +75,7 @@ describe('OverrideRow', () => {
             contentTypeId: false,
             fieldId: false,
           }}
+          overrides={[mockOverride]}
         />
       );
 
@@ -96,6 +98,7 @@ describe('OverrideRow', () => {
             contentTypeId: false,
             fieldId: false,
           }}
+          overrides={[mockOverride]}
         />
       );
 
@@ -133,6 +136,7 @@ describe('OverrideRow', () => {
             contentTypeId: false,
             fieldId: false,
           }}
+          overrides={[overrideWithContentType]}
         />
       );
 
@@ -176,6 +180,7 @@ describe('OverrideRow', () => {
             contentTypeId: false,
             fieldId: false,
           }}
+          overrides={[overrideWithContentType]}
         />
       );
 
@@ -183,7 +188,8 @@ describe('OverrideRow', () => {
 
       await user.clear(contentTypeInput);
       await user.click(contentTypeInput);
-      const option = screen.getAllByRole('option', { name: 'Blog Post' })[0] as HTMLElement;
+
+      const option = await screen.findByText('Blog Post');
       await user.click(option);
 
       await waitFor(() => {
@@ -225,6 +231,7 @@ describe('OverrideRow', () => {
             contentTypeId: false,
             fieldId: false,
           }}
+          overrides={[overrideWithContentType]}
         />
       );
 
@@ -256,6 +263,7 @@ describe('OverrideRow', () => {
             contentTypeId: false,
             fieldId: false,
           }}
+          overrides={[overrideWithContentType]}
         />
       );
 
@@ -309,6 +317,7 @@ describe('OverrideRow', () => {
             contentTypeId: false,
             fieldId: false,
           }}
+          overrides={overrides}
         />
       );
 
@@ -353,6 +362,7 @@ describe('OverrideRow', () => {
             contentTypeId: false,
             fieldId: false,
           }}
+          overrides={overrides}
         />
       );
 
@@ -384,6 +394,7 @@ describe('OverrideRow', () => {
             contentTypeId: false,
             fieldId: false,
           }}
+          overrides={[mockOverride]}
         />
       );
 
@@ -423,6 +434,7 @@ describe('OverrideRow', () => {
             contentTypeId: false,
             fieldId: false,
           }}
+          overrides={[overrideWithEmptyContentType]}
         />
       );
 

@@ -9,6 +9,7 @@ import {
   TextInput,
   Button,
   Autocomplete,
+  Tooltip,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
@@ -40,10 +41,9 @@ const ConfigScreen = () => {
   const [fields, setFields] = useState<SimplifiedField[]>([]);
 
   const [errors, setErrors] = useState<{
-    separator: boolean;
     sourceFieldId: boolean;
     overrides: Record<string, { contentTypeId: boolean; fieldId: boolean }>;
-  }>({ separator: false, sourceFieldId: false, overrides: {} });
+  }>({ sourceFieldId: false, overrides: {} });
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
@@ -55,12 +55,12 @@ const ConfigScreen = () => {
         fieldId: !override.fieldId,
       };
     });
-    setErrors({ separator: !separator, sourceFieldId: !sourceFieldId, overrides: overrideErrors });
+    setErrors({ sourceFieldId: !sourceFieldId, overrides: overrideErrors });
 
     const hasOverrideErrors = Object.values(overrideErrors).some(
       (error) => error.contentTypeId || error.fieldId
     );
-    if (!separator || !sourceFieldId || hasOverrideErrors) {
+    if (!sourceFieldId || hasOverrideErrors) {
       sdk.notifier.error('Some fields are missing or invalid');
       return false;
     }
@@ -109,6 +109,13 @@ const ConfigScreen = () => {
       }
     })();
   }, []);
+
+  const maxOverridesReached = () => {
+    return (
+      contentTypes.every((ct) => overrides.some((o) => o.contentTypeId === ct.sys.id)) ||
+      contentTypes.length <= overrides.length
+    );
+  };
 
   const addOverride = () => {
     setParameters((prev) => ({
@@ -170,7 +177,7 @@ const ConfigScreen = () => {
 
         <Box>
           <Heading as="h3">Configure</Heading>
-          <FormControl id="separator" isInvalid={errors.separator}>
+          <FormControl id="separator">
             <FormControl.Label marginBottom="spacingS">Separator</FormControl.Label>
             <TextInput
               value={parameters.separator}
@@ -216,15 +223,22 @@ const ConfigScreen = () => {
               contentTypes={contentTypes}
               overrideItem={override}
               overrideError={errors.overrides[override.id]}
+              overrides={overrides}
               setOverrides={setOverrides}></OverrideRow>
           ))}
           <Box marginBottom="spacingXl">
-            <Button
-              aria-label="Add override"
-              startIcon={<PlusIcon />}
-              onClick={() => addOverride()}>
-              Add override
-            </Button>
+            <Tooltip
+              placement="right"
+              id="tooltip-1"
+              content={maxOverridesReached() ? 'No more content types available.' : undefined}>
+              <Button
+                aria-label="Add override"
+                startIcon={<PlusIcon />}
+                isDisabled={maxOverridesReached()}
+                onClick={() => addOverride()}>
+                Add override
+              </Button>
+            </Tooltip>
           </Box>
         </Flex>
       </Flex>

@@ -17,6 +17,7 @@ type OverrideRowProps = {
   contentTypes: ContentTypeProps[];
   overrideItem: Override;
   overrideError: { contentTypeId: boolean; fieldId: boolean };
+  overrides: Override[];
   setOverrides: (items: (prev: Override[]) => Override[]) => void;
 };
 
@@ -24,6 +25,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
   contentTypes,
   overrideItem,
   overrideError,
+  overrides,
   setOverrides,
 }) => {
   const [filteredContentTypes, setFilteredContentTypes] = useState<ContentTypeProps[]>([]);
@@ -51,12 +53,21 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
     });
   }, [contentTypes, overrideItem.contentTypeId, overrideItem.fieldId]);
 
+  const overridesContainingContentType = (contentTypeId: string) =>
+    overrides.filter(
+      (override) => override.contentTypeId === contentTypeId && override.id !== overrideItem.id
+    );
+
   useEffect(() => {
-    setFilteredContentTypes(contentTypes);
+    const contentTypesWithoutDuplicates = contentTypes.filter(
+      (contentType) => overridesContainingContentType(contentType.sys.id).length === 0
+    );
+
+    setFilteredContentTypes(contentTypesWithoutDuplicates);
     if (selectedContentType?.id) {
       setfilteredFields(getFieldsFrom(contentTypes, selectedContentType.id));
     }
-  }, [contentTypes, selectedContentType]);
+  }, [contentTypes, selectedContentType, overrides]);
 
   const deleteOverride = (overrideItem: Override) => {
     setOverrides((prev: Override[]) => prev.filter((o) => o.id !== overrideItem.id));

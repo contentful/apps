@@ -177,10 +177,8 @@ describe('ConfigScreen', () => {
 
       const contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[1];
       await user.type(contentTypeAutocomplete, 'Author');
-      await waitFor(() => {
-        expect(screen.getByText('Author')).toBeInTheDocument();
-      });
-      await user.click(screen.getByText('Author'));
+      const authorOption = screen.getAllByRole('option', { name: 'Author' })[0];
+      await user.click(authorOption);
 
       await waitFor(() => {
         const fieldAutocomplete = screen.getAllByPlaceholderText(/field name/i)[1];
@@ -264,7 +262,7 @@ describe('ConfigScreen', () => {
         expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
       });
 
-      // Leave separator and sourceFieldId empty, and add an incomplete override
+      // Leave sourceFieldId empty, and add an incomplete override
       const user = userEvent.setup();
       const addButton = screen.getByRole('button', { name: /add override/i });
       await user.click(addButton);
@@ -280,7 +278,6 @@ describe('ConfigScreen', () => {
       // Should return false and show all error messages
       expect(result).toBe(false);
       expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
-      expect(await screen.findByText('Separator is required')).toBeInTheDocument();
       expect(await screen.findByText('Source field ID is required')).toBeInTheDocument();
       expect(await screen.findByText('Content type is required')).toBeInTheDocument();
     });
@@ -393,10 +390,8 @@ describe('ConfigScreen', () => {
 
       contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[1];
       await user.type(contentTypeAutocomplete, 'Author');
-      await waitFor(() => {
-        expect(screen.getByText('Author')).toBeInTheDocument();
-      });
-      await user.click(screen.getByText('Author'));
+      const authorOption = screen.getAllByRole('option', { name: 'Author' })[0];
+      await user.click(authorOption);
 
       // Don't select field for second override
 
