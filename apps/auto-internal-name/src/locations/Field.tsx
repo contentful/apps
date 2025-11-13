@@ -1,27 +1,24 @@
 import { FieldAppSDK } from '@contentful/app-sdk';
-import { Box, Button, ButtonGroup, Flex, IconButton, Skeleton } from '@contentful/f36-components';
+import { Box, Button, ButtonGroup, Flex, IconButton } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { ArrowCounterClockwiseIcon } from '@contentful/f36-icons';
 import { SingleLineEditor } from '@contentful/field-editor-single-line';
 import { useEffect, useState } from 'react';
 import { styles } from './Field.styles';
-import { determineField } from '../utils/determineField';
 import { AppInstallationParameters } from '../utils/types';
 import { EntryProps } from 'contentful-management';
-
-const MAX_RETRIES = 4;
-const INITIAL_DELAY_MS = 500;
-const MAX_DELAY_MS = 2000;
+import { determineField } from '../utils/determineField';
+import { delay, MAX_RETRIES } from '../utils/delay';
+import { isEntryRecentlyCreated } from '../utils/entryUtils';
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   const [isUpdating, setIsUpdating] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useAutoResizer();
   const locales = sdk.locales;
   const defaultLocale = locales.default || 'en-US';
   const installationParameters = sdk.parameters.installation as AppInstallationParameters;
+
+  useAutoResizer();
 
   const getInternalNameFromParentEntry = (parentEntry: EntryProps): string => {
     const contentTypeId = sdk.contentType.sys.id;
@@ -33,8 +30,6 @@ const Field = () => {
   };
 
   const findParentEntry = async (): Promise<EntryProps | null> => {
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
     const currentEntryId = sdk.ids.entry;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
@@ -53,8 +48,7 @@ const Field = () => {
         }
 
         if (attempt < MAX_RETRIES) {
-          const delayMs = Math.min(INITIAL_DELAY_MS * Math.pow(2, attempt), MAX_DELAY_MS);
-          await delay(delayMs);
+          await delay(attempt);
         }
       } catch (error) {
         if (attempt === MAX_RETRIES) {
@@ -68,7 +62,6 @@ const Field = () => {
 
   const handleRefetch = async () => {
     setIsUpdating(true);
-    setError(null);
 
     try {
       const parentEntry = await findParentEntry();
@@ -77,9 +70,8 @@ const Field = () => {
         const internalNameValue = getInternalNameFromParentEntry(parentEntry);
         await sdk.field.setValue(internalNameValue);
       }
-    } catch (err: any) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update internal name';
-      setError(errorMessage);
+    } catch (err: unknown) {
+      console.error('Error updating internal name:', err);
     } finally {
       setIsUpdating(false);
     }
@@ -87,24 +79,13 @@ const Field = () => {
 
   const handleClear = async () => {
     await sdk.field.setValue('');
-    setError(null);
-  };
-
-  const isEntryRecentlyCreated = () => {
-    const entry = sdk.entry.getSys();
-    const createdAt = new Date(entry.createdAt);
-    const now = new Date();
-    const timeDiff = now.getTime() - createdAt.getTime();
-    const secondsDiff = timeDiff / 1000;
-
-    // Consider entry "recent" if created within the last 30 seconds
-    return secondsDiff < 30;
   };
 
   useEffect(() => {
     const updateInternalName = async () => {
       const parentEntry = await findParentEntry();
-      const isRecent = isEntryRecentlyCreated();
+      const entry = sdk.entry.getSys();
+      const isRecent = isEntryRecentlyCreated(entry.createdAt);
 
       if (parentEntry && !sdk.field.getValue() && isRecent) {
         setIsUpdating(true);
@@ -112,10 +93,8 @@ const Field = () => {
         try {
           const internalNameValue = getInternalNameFromParentEntry(parentEntry);
           await sdk.field.setValue(internalNameValue);
-        } catch (err: any) {
-          const errorMessage =
-            err instanceof Error ? err.message : 'Failed to update internal name';
-          setError(errorMessage);
+        } catch (err: unknown) {
+          console.error('Error auto-updating internal name:', err);
         }
       }
     };
@@ -152,11 +131,6 @@ const Field = () => {
           </ButtonGroup>
         </Flex>
       </Flex>
-      {error && (
-        <Box marginTop="spacingXs" fontSize="fontSizeS" css={styles.error}>
-          {error}
-        </Box>
-      )}
     </Flex>
   );
 };
