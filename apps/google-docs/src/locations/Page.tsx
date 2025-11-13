@@ -15,12 +15,6 @@ import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import mammoth from 'mammoth';
 
-declare global {
-  interface Window {
-    mammoth?: any;
-  }
-}
-
 function isValidGoogleDocUrl(url: string): boolean {
   return /^https:\/\/docs\.google\.com\/document\/d\/[A-Za-z0-9_-]+\/edit(?:\?[^#]*)?$/.test(url);
 }
