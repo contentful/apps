@@ -2,10 +2,12 @@ import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import pluginReact from "eslint-plugin-react";
-import { defineConfig } from "eslint/config";
+import { defineConfig, globalIgnores } from "eslint/config";
 import unusedImports from "eslint-plugin-unused-imports";
 
+
 export default defineConfig([
+  globalIgnores(["**/build/"]),
   {settings: {
     react: {
       version: "detect",
