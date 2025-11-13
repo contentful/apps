@@ -52,7 +52,7 @@ const ConfigScreen = () => {
         });
 
         const checkStatusAppAction = appActions.items.find(
-          (action) => action.name === 'Check Status'
+          (action) => action.name === 'Check Gdoc OAuth Token Status'
         );
         if (!checkStatusAppAction) {
           console.warn('Check Status app action not found');
@@ -131,7 +131,7 @@ const ConfigScreen = () => {
       });
       console.log('appActions', appActions);
       const completeOauthAppAction = appActions.items.find(
-        (action) => action.name === 'Complete Oauth'
+        (action) => action.name === 'Complete Gdoc OAuth Flow'
       );
       await sdk.cma.appActionCall.create(
         { appDefinitionId, appActionId: completeOauthAppAction?.sys.id || '' },
@@ -184,7 +184,7 @@ const ConfigScreen = () => {
       });
 
       const initiateOauthAppAction = appActions.items.find(
-        (action) => action.name === 'Initiate Oauth'
+        (action) => action.name === 'Initiate Gdoc OAuth Flow'
       );
 
       const response = await sdk.cma.appActionCall.createWithResponse(
