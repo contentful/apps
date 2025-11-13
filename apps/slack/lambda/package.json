@@ -24,7 +24,7 @@
   "devDependencies": {
     "@contentful/eslint-config-extension": "^0.4.3",
     "@tsconfig/node14": "^1.0.3",
-    "@types/aws-lambda": "^8.10.157",
+    "@types/aws-lambda": "^8.10.158",
     "@types/aws-sdk": "^2.7.4",
     "@types/chai": "^4.3.11",
     "@types/cors": "^2.8.19",
