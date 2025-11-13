@@ -223,7 +223,9 @@ const ConfigScreen = () => {
         environmentId: sdk.ids.environment,
         spaceId: sdk.ids.space,
       });
-      const disconnectAppAction = appActions.items.find((action) => action.name === 'Disconnect');
+      const disconnectAppAction = appActions.items.find(
+        (action) => action.name === 'Revoke Gdoc OAuth Token'
+      );
       await sdk.cma.appActionCall.create(
         {
           appActionId: disconnectAppAction?.sys.id || '',
