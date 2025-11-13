@@ -24,6 +24,7 @@ const Field = () => {
     const contentTypeId = sdk.contentType.sys.id;
     const fieldId = determineField(contentTypeId, installationParameters);
     const separator = installationParameters.separator;
+
     const parentFieldValue = (parentEntry.fields[fieldId]?.[defaultLocale] as string) || '';
 
     return separator ? `${parentFieldValue} ${separator}` : parentFieldValue;
@@ -83,16 +84,18 @@ const Field = () => {
 
   useEffect(() => {
     const updateInternalName = async () => {
-      const parentEntry = await findParentEntry();
       const entry = sdk.entry.getSys();
       const isRecent = isEntryRecentlyCreated(entry.createdAt);
 
-      if (parentEntry && !sdk.field.getValue() && isRecent) {
-        setIsUpdating(true);
-
+      if (!sdk.field.getValue() && isRecent) {
         try {
-          const internalNameValue = getInternalNameFromParentEntry(parentEntry);
-          await sdk.field.setValue(internalNameValue);
+          setIsUpdating(true);
+          const parentEntry = await findParentEntry();
+
+          if (parentEntry) {
+            const internalNameValue = getInternalNameFromParentEntry(parentEntry);
+            await sdk.field.setValue(internalNameValue);
+          }
         } catch (err: unknown) {
           console.error('Error auto-updating internal name:', err);
         }
@@ -108,7 +111,12 @@ const Field = () => {
     <Flex marginBottom="none" fullWidth flexDirection="column">
       <Flex marginBottom="none" fullWidth>
         <Box marginRight="spacingS" className={styles.editor}>
-          <SingleLineEditor field={sdk.field} locales={locales} withCharValidation />
+          <SingleLineEditor
+            field={sdk.field}
+            locales={locales}
+            withCharValidation
+            isDisabled={isUpdating}
+          />
         </Box>
         <Flex alignItems="flex-start">
           <ButtonGroup variant="spaced" spacing="spacingS">
