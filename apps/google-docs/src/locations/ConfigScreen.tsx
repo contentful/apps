@@ -198,6 +198,8 @@ const ConfigScreen = () => {
       );
 
       const authorizationUrl = JSON.parse(response.response.body).authorizationUrl;
+      console.log('response', response);
+      console.log('authorizationUrl', authorizationUrl);
 
       popupWindowRef.current = window.open(authorizationUrl, '_blank', 'height=700,width=450');
 
