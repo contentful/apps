@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
@@ -133,6 +133,152 @@ describe('ConfigScreen', () => {
       // Should render OverrideItem component
       await waitFor(() => {
         expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should disable add override button when all content types are used', async () => {
+      const user = userEvent.setup();
+      render(<ConfigScreen />);
+
+      await waitFor(() => {
+        expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
+      });
+
+      // Add first override and select Blog Post
+      const addButton = screen.getByRole('button', { name: /add override/i });
+      await user.click(addButton);
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
+      });
+
+      const contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[0];
+      await user.type(contentTypeAutocomplete, 'Blog Post');
+      const blogPostOption = await screen.findByText('Blog Post');
+      await user.click(blogPostOption);
+
+      // Add second override and select Author
+      await user.click(addButton);
+
+      await waitFor(() => {
+        const contentTypeInputs = screen.getAllByPlaceholderText(/content type name/i);
+        expect(contentTypeInputs.length).toBe(2);
+      });
+
+      const secondContentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[1];
+      await user.type(secondContentTypeAutocomplete, 'Author');
+      const authorOption = screen.getAllByRole('option', { name: 'Author' })[0];
+      await user.click(authorOption);
+
+      // Verify button is disabled
+      await waitFor(() => {
+        const addButtonAfter = screen.getByRole('button', { name: /add override/i });
+        expect(addButtonAfter).toBeDisabled();
+      });
+    });
+
+    it('should disable add override button when overrides count >= content types count', async () => {
+      const user = userEvent.setup();
+      render(<ConfigScreen />);
+
+      await waitFor(() => {
+        expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
+      });
+
+      // Add first override
+      const addButton = screen.getByRole('button', { name: /add override/i });
+      await user.click(addButton);
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
+      });
+
+      // Add second override (even without selecting content types)
+      await user.click(addButton);
+
+      await waitFor(() => {
+        const contentTypeInputs = screen.getAllByPlaceholderText(/content type name/i);
+        expect(contentTypeInputs.length).toBe(2);
+      });
+
+      // Verify button is disabled (2 overrides >= 2 content types)
+      await waitFor(() => {
+        const addButtonAfter = screen.getByRole('button', { name: /add override/i });
+        expect(addButtonAfter).toBeDisabled();
+      });
+    });
+
+    it('should keep add override button enabled when content types are available', async () => {
+      const user = userEvent.setup();
+      render(<ConfigScreen />);
+
+      await waitFor(() => {
+        expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
+      });
+
+      // Add one override and select Blog Post
+      const addButton = screen.getByRole('button', { name: /add override/i });
+      await user.click(addButton);
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
+      });
+
+      const contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[0];
+      await user.type(contentTypeAutocomplete, 'Blog Post');
+      const blogPostOption = await screen.findByText('Blog Post');
+      await user.click(blogPostOption);
+
+      // Verify button is still enabled (Author is still available)
+      await waitFor(() => {
+        const addButtonAfter = screen.getByRole('button', { name: /add override/i });
+        expect(addButtonAfter).not.toBeDisabled();
+      });
+    });
+
+    it('should show tooltip when max overrides reached', async () => {
+      const user = userEvent.setup();
+      render(<ConfigScreen />);
+
+      await waitFor(() => {
+        expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
+      });
+
+      // Add first override and select Blog Post
+      const addButton = screen.getByRole('button', { name: /add override/i });
+      await user.click(addButton);
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
+      });
+
+      const contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[0];
+      await user.type(contentTypeAutocomplete, 'Blog Post');
+      const blogPostOption = await screen.findByText('Blog Post');
+      await user.click(blogPostOption);
+
+      // Add second override and select Author
+      await user.click(addButton);
+
+      await waitFor(() => {
+        const contentTypeInputs = screen.getAllByPlaceholderText(/content type name/i);
+        expect(contentTypeInputs.length).toBe(2);
+      });
+
+      const secondContentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[1];
+      await user.type(secondContentTypeAutocomplete, 'Author');
+      const authorOption = screen.getAllByRole('option', { name: 'Author' })[0];
+      await user.click(authorOption);
+
+      const disabledButton = screen.getByRole('button', { name: /add override/i });
+      const tooltipWrapper = disabledButton.parentElement;
+      if (tooltipWrapper) {
+        fireEvent.mouseEnter(tooltipWrapper);
+      }
+
+      await waitFor(() => {
+        const tooltip = screen.getByRole('tooltip');
+        expect(tooltip.textContent).toBe('No more content types available.');
       });
     });
   });
