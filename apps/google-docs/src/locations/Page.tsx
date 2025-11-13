@@ -23,6 +23,11 @@ declare global {
 /*
  * INTEG-3258: Page Component - Document Uploader
  */
+// Regular expression to match Google Docs document URLs
+function isValidGoogleDocUrl(url: string): boolean {
+  return /^https:\/\/docs\.google\.com\/document\/d\/[A-Za-z0-9_-]+\/edit(?:\?[^#]*)?$/.test(url);
+}
+
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
 
@@ -323,7 +328,11 @@ const Page = () => {
                 value={googleDocUrl}
                 isInvalid={!googleDocUrlValid}
                 placeholder="https://docs.google.com/document/d/..."
-                onChange={(e) => setGoogleDocUrl(e.target.value)}
+                onChange={(e) => {
+                  const url = e.target.value;
+                  setGoogleDocUrl(url);
+                  setGoogleDocUrlValid(isValidGoogleDocUrl(url));
+                }}
               />
               <FormControl.HelpText>
                 Must be a publicly accessible Google Docs URL (View access).
@@ -331,7 +340,7 @@ const Page = () => {
               {googleDocUrlValid && googleDocUrl && (
                 <Box marginTop="spacingS">
                   <a
-                    href={googleDocUrl.replace('/edit', '/preview')}
+                    href={encodeURI(googleDocUrl.replace('/edit', '/preview'))}
                     target="_blank"
                     rel="noopener noreferrer">
                     Open original (best formatting)
