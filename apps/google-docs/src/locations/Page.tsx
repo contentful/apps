@@ -290,7 +290,15 @@ const Page = () => {
 
   return (
     <Flex flexDirection="column" alignItems="stretch">
-      <Box padding="spacingXl" style={{ maxWidth: '1120px', margin: '0 auto' }}>
+      <Box
+        padding="spacingXl"
+        style={{
+          maxWidth: '1120px',
+          margin: '32px auto',
+          background: '#fff',
+          border: '1px solid #e5e5e5',
+          borderRadius: '8px',
+        }}>
         <Heading as="h2">Document Uploader</Heading>
         <Paragraph marginBottom="spacingL">
           Upload a public Google Doc link or a Word document to send for processing.
