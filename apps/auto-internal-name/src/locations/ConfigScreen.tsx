@@ -16,7 +16,7 @@ import { PlusIcon } from '@contentful/f36-icons';
 import { styles } from './ConfigScreen.styles';
 import { ContentTypeProps } from 'contentful-management';
 import OverrideRow from '../components/OverrideRow';
-import { Override } from '../utils/consts';
+import { Override } from '../utils/types';
 import { normalizeString } from '../utils/override';
 
 type AppParameters = {
@@ -134,12 +134,14 @@ const ConfigScreen = () => {
           <FormControl id="separator">
             <FormControl.Label marginBottom="spacingS">Separator</FormControl.Label>
             <TextInput value={separator} onChange={(e) => setSeparator(e.target.value)}></TextInput>
-            <Paragraph marginTop="spacingS" fontColor="gray500">
+            <FormControl.HelpText marginTop="spacingS">
               The separator can be any character or symbol and will append to the entry name.
-            </Paragraph>
+            </FormControl.HelpText>
           </FormControl>
           <FormControl id="sourceFieldId">
-            <FormControl.Label marginBottom="spacingS">Source field ID</FormControl.Label>
+            <FormControl.Label marginBottom="spacingS" isRequired>
+              Source field ID
+            </FormControl.Label>
             <Autocomplete
               selectedItem={sourceFieldId}
               items={filteredSourceFields.map((field) => field.name)}
@@ -147,11 +149,11 @@ const ConfigScreen = () => {
               onSelectItem={handleSourceFieldIdSelection}
               placeholder="Search field name"
             />
-            <Paragraph marginTop="spacingS" fontColor="gray500">
+            <FormControl.HelpText marginTop="spacingS">
               The source field ID should be the name of the field that you want to use from the
               parent entry. This will be applied to any content types that include the same field
               ID.
-            </Paragraph>
+            </FormControl.HelpText>
           </FormControl>
         </Box>
 

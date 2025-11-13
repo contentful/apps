@@ -3,10 +3,10 @@ import { Autocomplete, Flex, FormControl, IconButton } from '@contentful/f36-com
 import { styles } from '../locations/ConfigScreen.styles';
 import { TrashSimpleIcon } from '@contentful/f36-icons';
 import { ContentTypeProps } from 'contentful-management';
-import { AutocompleteItem, Override } from '../utils/consts';
+import { AutocompleteItem, Override } from '../utils/types';
 import {
+  EMPTY_AUTOCOMPLETE_ITEM,
   filterItemsByName,
-  getEmptyAutocompleteItem,
   getFieldsFrom,
   getInitialContentTypeName,
   getInitialFieldName,
@@ -16,15 +16,15 @@ import {
 type OverrideRowProps = {
   contentTypes: ContentTypeProps[];
   overrideItem: Override;
-  setOverrides: (item: any) => void;
+  setOverrides: (items: (prev: Override[]) => Override[]) => void;
 };
 
 const OverrideRow: React.FC<OverrideRowProps> = ({ contentTypes, overrideItem, setOverrides }) => {
   const [filteredContentTypes, setFilteredContentTypes] = useState<ContentTypeProps[]>([]);
   const [filteredFields, setfilteredFields] = useState<AutocompleteItem[]>([]);
   const [selectedContentType, setSelectedContentType] =
-    useState<AutocompleteItem>(getEmptyAutocompleteItem);
-  const [selectedField, setSelectedField] = useState<AutocompleteItem>(getEmptyAutocompleteItem);
+    useState<AutocompleteItem>(EMPTY_AUTOCOMPLETE_ITEM);
+  const [selectedField, setSelectedField] = useState<AutocompleteItem>(EMPTY_AUTOCOMPLETE_ITEM);
 
   useEffect(() => {
     const initialContentType = getInitialContentTypeName(contentTypes, overrideItem);
@@ -81,8 +81,8 @@ const OverrideRow: React.FC<OverrideRowProps> = ({ contentTypes, overrideItem, s
       updateOverride('', '');
 
       setFilteredContentTypes(contentTypes);
-      setSelectedContentType(getEmptyAutocompleteItem());
-      setSelectedField(getEmptyAutocompleteItem());
+      setSelectedContentType(EMPTY_AUTOCOMPLETE_ITEM);
+      setSelectedField(EMPTY_AUTOCOMPLETE_ITEM);
       return;
     }
 
@@ -99,7 +99,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({ contentTypes, overrideItem, s
       updateOverride(selectedItem.sys.id, '');
 
       if (selectedItem.name !== selectedContentType?.name) {
-        setSelectedField(getEmptyAutocompleteItem());
+        setSelectedField(EMPTY_AUTOCOMPLETE_ITEM);
       }
 
       setSelectedContentType({ id: selectedItem.sys.id, name: selectedItem.name });
@@ -112,7 +112,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({ contentTypes, overrideItem, s
 
       if (selectedContentType) {
         setfilteredFields(getFieldsFrom(contentTypes, selectedContentType.id));
-        setSelectedField(getEmptyAutocompleteItem());
+        setSelectedField(EMPTY_AUTOCOMPLETE_ITEM);
       }
       return;
     }

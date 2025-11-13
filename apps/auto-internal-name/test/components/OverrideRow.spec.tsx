@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import OverrideRow from '../../src/components/OverrideRow';
 import { ContentTypeProps } from 'contentful-management';
-import { Override } from '../../src/utils/consts';
+import { Override } from '../../src/utils/types';
 
 describe('OverrideRow', () => {
   const mockContentTypes: ContentTypeProps[] = [

@@ -1,5 +1,7 @@
 import { ContentTypeProps } from 'contentful-management';
-import { AutocompleteItem, Override } from './consts';
+import { AutocompleteItem, Override } from './types';
+
+export const EMPTY_AUTOCOMPLETE_ITEM = { id: '', name: '' };
 
 export const normalizeString = (str: string) => (str ? str.trim().toLowerCase() : '');
 
@@ -17,10 +19,6 @@ export const getFieldsFrom = (contentTypes: ContentTypeProps[], contentTypeId: s
   return mappedFields ? mappedFields : [];
 };
 
-export const getEmptyAutocompleteItem = () => {
-  return { id: '', name: '' };
-};
-
 export const getInitialContentTypeName = (
   contentTypes: ContentTypeProps[],
   overrideItem: Override
@@ -32,7 +30,7 @@ export const getInitialContentTypeName = (
     return { id: overrideItem.contentTypeId, name: contentTypeName };
   }
 
-  return getEmptyAutocompleteItem();
+  return EMPTY_AUTOCOMPLETE_ITEM;
 };
 
 export const getInitialFieldName = (
@@ -48,7 +46,7 @@ export const getInitialFieldName = (
     }
   }
 
-  return getEmptyAutocompleteItem();
+  return EMPTY_AUTOCOMPLETE_ITEM;
 };
 
 export const filterItemsByName = (items: Array<{ name: string }>, filterValue: string) => {
