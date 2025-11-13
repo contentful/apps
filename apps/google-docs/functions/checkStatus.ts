@@ -28,6 +28,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   event: AppActionRequest<'Custom', CompleteOAuthParams>,
   context: FunctionEventContext
 ): Promise<AppActionResponse> => {
+  console.log('context', context);
   const sdk = (context as any).oauthSdk;
 
   if (!sdk) {
