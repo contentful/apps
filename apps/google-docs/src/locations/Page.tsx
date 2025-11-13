@@ -20,10 +20,6 @@ declare global {
   }
 }
 
-/*
- * INTEG-3258: Page Component - Document Uploader
- */
-// Regular expression to match Google Docs document URLs
 function isValidGoogleDocUrl(url: string): boolean {
   return /^https:\/\/docs\.google\.com\/document\/d\/[A-Za-z0-9_-]+\/edit(?:\?[^#]*)?$/.test(url);
 }
