@@ -9,10 +9,11 @@ import type {
 // import { KeyValueMap } from 'contentful-management';
 import { parseContentType } from './agents/contentTypeParser.agent';
 import { createDocument } from './agents/documentParser.agent';
+import { getCMAClient, fetchContentTypes } from './utils/fetchContentType';
 // import { createEntries, createAssets } from './service/entryService';
 
 export type AppActionParameters = {
-  contentType: string;
+  contentTypeIds: Array<string>;
   prompt: string;
 };
 interface AppInstallationParameters {
@@ -30,16 +31,21 @@ export const handler: FunctionEventHandler<
   event: AppActionRequest<'Custom', AppActionParameters>,
   context: FunctionEventContext
 ) => {
-  const { contentType, prompt } = event.body;
+  const { contentTypeIds, prompt } = event.body;
   const { openAiApiKey } = context.appInstallationParameters as AppInstallationParameters;
 
   // INTEG-3262 and INTEG-3263: Take in Content Type, Prompt, and Upload File from user
 
-  // INTEG-3262: Implement the content type parser agent
+  // INTEG-3262: Parse the content type
+  // Step 1: Initialize CMA client and fetch the content types
+  const cmaClient = getCMAClient(context);
+  const contentTypes = await fetchContentTypes(cmaClient, contentTypeIds);
+
+  // Step 2: Pass the content types to the AI agent for parsing
   const aiContentTypeResponse = parseContentType({
     openaiApiKey: openAiApiKey,
     modelVersion: 'gpt-4o',
-    jsonData: contentType,
+    jsonData: contentTypes,
   });
 
   // INTEG-3261: Pass the ai content type response to the observer for analysis
