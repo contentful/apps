@@ -75,16 +75,6 @@ const Page = () => {
     }
   }, [googleDocUrl]);
 
-  useEffect(() => {
-    try {
-      const params = (sdk.parameters?.installation || {}) as Record<string, unknown>;
-      const key = params && typeof params.apiKey === 'string' ? (params.apiKey as string) : null;
-      setApiKey(key);
-    } catch {
-      setApiKey(null);
-    }
-  }, [sdk]);
-
   const simulateUpload = async (label: string) => {
     try {
       setIsUploading(true);
@@ -130,51 +120,43 @@ const Page = () => {
     return null;
   };
 
+  const extractPublishedDocId = (url: string): string | null => {
+    // Published Google Docs use /document/d/e/{publishedId}/...
+    const m = url.match(/\/document\/d\/e\/([a-zA-Z0-9_-]+)/);
+    return m && m[1] ? m[1] : null;
+  };
+
   const fetchGoogleDoc = async (url: string) => {
+    // If this is a "published to web" URL, fetch from the public export endpoint (no OAuth needed)
+    const publishedId = extractPublishedDocId(url);
+    if (publishedId) {
+      const publishedExportUrl = `https://docs.google.com/document/d/e/${publishedId}/export?format=html`;
+      const publishedResp = await fetch(publishedExportUrl, { method: 'GET' });
+      if (!publishedResp.ok) {
+        throw new Error(`Failed to fetch published document (status ${publishedResp.status}).`);
+      }
+      const publishedHtml = await publishedResp.text();
+      return { title: 'Google Document', html: publishedHtml };
+    }
+
     const docId = extractGoogleDocId(url);
     if (!docId) {
       throw new Error('Unable to extract Google Doc ID from URL.');
     }
-    const keyParam = apiKey ? `&key=${encodeURIComponent(apiKey)}` : '';
-    // Try to get metadata (name) first
-    let title: string | null = null;
+    // Try docs.google.com export first (no OAuth); if that fails, fall back to Drive API
     try {
-      const metaResp = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(
-          docId
-        )}?fields=name,mimeType&supportsAllDrives=true${keyParam}`,
-        { method: 'GET' }
-      );
-      if (metaResp.ok) {
-        const meta = (await metaResp.json()) as { name?: string; mimeType?: string };
-        title = meta.name || null;
+      const directExportUrl = `https://docs.google.com/document/d/${encodeURIComponent(
+        docId
+      )}/export?format=html`;
+      const directResp = await fetch(directExportUrl, { method: 'GET' });
+      if (directResp.ok) {
+        const directHtml = await directResp.text();
+        return { title: 'Google Document', html: directHtml };
       }
     } catch {
-      // ignore metadata failure, continue to export
+      // ignore and continue
     }
-    // Export as HTML
-    let html: string | null = null;
-    // First attempt: Drive API with key (and Shared Drives support)
-    const driveUrlWithKey = `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(
-      docId
-    )}/export?mimeType=text/html&supportsAllDrives=true${keyParam}`;
-    let exportResp = await fetch(driveUrlWithKey, { method: 'GET' });
-    if (!exportResp.ok) {
-      // Second attempt: Drive API without key (public file with anyone link)
-      const driveUrlNoKey = `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(
-        docId
-      )}/export?mimeType=text/html&supportsAllDrives=true`;
-      exportResp = await fetch(driveUrlNoKey, { method: 'GET' });
-    }
-    if (exportResp.ok) {
-      html = await exportResp.text();
-    }
-    if (!html) {
-      throw new Error(
-        'Unable to fetch the document. Ensure the Doc is shared as "Anyone with the link — Viewer", or provide an API key with access. Files in Shared Drives may also require this setting.'
-      );
-    }
-    return { title: title || 'Google Document', html };
+    return { title: 'Google Document', html: null };
   };
 
   const onSubmitGoogleDoc = async () => {
