@@ -25,26 +25,17 @@ const Page = () => {
   const [googleDocUrl, setGoogleDocUrl] = useState<string>('');
   const [googleDocUrlValid, setGoogleDocUrlValid] = useState<boolean>(true);
 
-  const [wordFile, setWordFile] = useState<File | null>(null);
-  const [wordFileError, setWordFileError] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState<string | null>(null);
   const [fetchedDocHtml, setFetchedDocHtml] = useState<string | null>(null);
   const [fetchedDocTitle, setFetchedDocTitle] = useState<string | null>(null);
   const [isDocxRendered, setIsDocxRendered] = useState<boolean>(false);
-  const wordPreviewRef = useRef<HTMLDivElement | null>(null);
-
-  const acceptedWordTypes = useMemo(
-    () => [
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    ],
-    []
-  );
+  const previewRef = useRef<HTMLDivElement | null>(null);
 
   const validateGoogleDocUrl = (value: string) => {
     const trimmed = value.trim();
@@ -173,20 +164,15 @@ const Page = () => {
     }
   };
 
-  const onSelectWordFile = (fileList: FileList | null) => {
-    setWordFile(null);
-    setWordFileError(null);
+  const onSelectFile = (fileList: FileList | null) => {
+    setFile(null);
+    setFileError(null);
     if (!fileList || fileList.length === 0) {
       return;
     }
     const file = fileList[0];
-    if (!acceptedWordTypes.includes(file.type)) {
-      setWordFileError('Please select a .doc or .docx file.');
-      return;
-    }
 
-    console.log('file', file);
-    setWordFile(file);
+    setFile(file);
   };
 
   const convertDocxToHtml = async (file: File) => {
@@ -212,55 +198,53 @@ const Page = () => {
     return docx;
   };
 
-  const onSubmitWordDoc = async () => {
+  const onSubmitDoc = async () => {
     setSuccessMessage(null);
     setErrorMessage(null);
-    if (!wordFile) {
-      setWordFileError('Please choose a Word document to upload.');
+    if (!file) {
+      setFileError('Please choose a document file to upload.');
       return;
     }
     try {
-      const lower = wordFile.name.toLowerCase();
-      const isDocx =
-        lower.endsWith('.docx') ||
-        wordFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      const lower = file.name.toLowerCase();
+      const isDocx = lower.endsWith('.docx');
       if (isDocx) {
         // Prefer higher-fidelity renderer
         try {
           const docx = await loadDocxPreview();
-          const buf = await wordFile.arrayBuffer();
-          if (wordPreviewRef.current) {
-            wordPreviewRef.current.innerHTML = '';
-            await docx.renderAsync(buf, wordPreviewRef.current, undefined, {
+          const buf = await file.arrayBuffer();
+          if (previewRef.current) {
+            previewRef.current.innerHTML = '';
+            await docx.renderAsync(buf, previewRef.current, undefined, {
               inWrapper: true,
               ignoreLastRenderedPageBreak: true,
               experimental: true,
             });
             setIsDocxRendered(true);
-            setFetchedDocTitle(wordFile.name);
+            setFetchedDocTitle(file.name);
             setFetchedDocHtml(null);
-            setSuccessMessage(`Rendered "${wordFile.name}" successfully.`);
+            setSuccessMessage(`Rendered "${file.name}" successfully.`);
             return;
           }
         } catch {
           // Fallback to mammoth if docx-preview fails
-          const html = await convertDocxToHtml(wordFile);
-          setFetchedDocTitle(wordFile.name);
+          const html = await convertDocxToHtml(file);
+          setFetchedDocTitle(file.name);
           setFetchedDocHtml(html);
           setIsDocxRendered(false);
-          setSuccessMessage(`Parsed "${wordFile.name}" successfully.`);
+          setSuccessMessage(`Parsed "${file.name}" successfully.`);
           return;
         }
       }
       // Non-docx or unable to render with docx-preview; try mammoth fallback for best effort
-      const html = await convertDocxToHtml(wordFile);
-      await simulateUpload(`"${wordFile.name}"`);
-      setFetchedDocTitle(wordFile.name);
+      const html = await convertDocxToHtml(file);
+      await simulateUpload(`"${file.name}"`);
+      setFetchedDocTitle(file.name);
       setFetchedDocHtml(html);
       setIsDocxRendered(false);
-      setSuccessMessage(`Parsed "${wordFile.name}" successfully.`);
+      setSuccessMessage(`Parsed "${file.name}" successfully.`);
     } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : 'Failed to parse Word document.';
+      const message = e instanceof Error ? e.message : 'Failed to parse document file.';
       setErrorMessage(message);
       sdk.notifier.error(message);
     }
@@ -279,7 +263,7 @@ const Page = () => {
         }}>
         <Heading as="h2">Document Uploader</Heading>
         <Paragraph marginBottom="spacingL">
-          Upload a public Google Doc link or a Word document to send for processing.
+          Upload a public Google Doc link or a document file to send for processing.
         </Paragraph>
 
         <Stack spacing="spacingXl" flexDirection="column" alignItems="stretch">
@@ -328,23 +312,23 @@ const Page = () => {
 
           <Form>
             <FormControl>
-              <FormControl.Label>Word document (.doc, .docx)</FormControl.Label>
+              <FormControl.Label>Document file (.doc, .docx)</FormControl.Label>
               <Box marginTop="spacingS">
                 <input
                   type="file"
-                  accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                  onChange={(e) => onSelectWordFile(e.target.files)}
+                  accept=".doc,.docx"
+                  onChange={(e) => onSelectFile(e.target.files)}
                 />
               </Box>
               <FormControl.HelpText>
-                Choose a Word document from your computer.
+                Choose a document file from your computer.
               </FormControl.HelpText>
-              {wordFileError && (
-                <FormControl.ValidationMessage>{wordFileError}</FormControl.ValidationMessage>
+              {fileError && (
+                <FormControl.ValidationMessage>{fileError}</FormControl.ValidationMessage>
               )}
               <Box marginTop="spacingS">
-                <Button isDisabled={isUploading || !wordFile} onClick={onSubmitWordDoc}>
-                  Upload Word Document
+                <Button isDisabled={isUploading || !file} onClick={onSubmitDoc}>
+                  Upload Document File
                 </Button>
               </Box>
             </FormControl>
@@ -378,7 +362,7 @@ const Page = () => {
               </Heading>
               <Paragraph marginBottom="spacingS">Preview (DOCX high-fidelity render):</Paragraph>
               <Box
-                ref={wordPreviewRef}
+                ref={previewRef}
                 style={{ maxHeight: '400px', overflow: 'auto', background: '#fff' }}
               />
             </Box>
