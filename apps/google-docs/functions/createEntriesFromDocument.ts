@@ -7,7 +7,7 @@ import type {
 // INTEG-3262 and INTEG-3263: Likely imports to be used are commented out for now
 // import { ContentTypeProps, EntryProps, ContentFields } from 'contentful-management';
 // import { KeyValueMap } from 'contentful-management';
-import { parseContentType } from './agents/contentTypeParser.agent';
+import { parseContentTypes } from './agents/contentTypeParser.agent';
 import { createDocument } from './agents/documentParser.agent';
 import { getCMAClient, fetchContentTypes } from './utils/fetchContentType';
 // import { createEntries, createAssets } from './service/entryService';
@@ -42,22 +42,23 @@ export const handler: FunctionEventHandler<
   const contentTypes = await fetchContentTypes(cmaClient, contentTypeIds);
 
   // Step 2: Pass the content types to the AI agent for parsing
-  const aiContentTypeResponse = parseContentType({
-    openaiApiKey: openAiApiKey,
+  const contentTypeParseResult = await parseContentTypes(contentTypes, {
     modelVersion: 'gpt-4o',
-    jsonData: contentTypes,
+    temperature: 0.3,
   });
+
+  console.log(contentTypeParseResult);
 
   // INTEG-3261: Pass the ai content type response to the observer for analysis
   // createContentTypeObservationsFromLLMResponse()
 
   // INTEG-3263: Implement the document parser agent
-  const aiDocumentResponse = createDocument({
-    openaiApiKey: openAiApiKey,
-    modelVersion: 'gpt-4o',
-    jsonData: aiContentTypeResponse,
-    document: document,
-  });
+  // const aiDocumentResponse = createDocument({
+  //   openaiApiKey: openAiApiKey,
+  //   modelVersion: 'gpt-4o',
+  //   jsonData: aiContentTypeResponse,
+  //   document: document,
+  // });
 
   // INTEG-3261: Pass the ai document response to the observer for analysis
   // createDocumentObservationsFromLLMResponse()
