@@ -1,25 +1,59 @@
 import { vi } from 'vitest';
+import { AppInstallationParameters } from '../../src/utils/types';
+import { mockCma } from './mockCma';
 
-const mockSdk: any = {
-  app: {
-    onConfigure: vi.fn(),
-    getParameters: vi.fn().mockReturnValueOnce({}),
-    setReady: vi.fn(),
-    getCurrentState: vi.fn(),
-  },
-  ids: {
-    app: 'test-app',
-  },
-  field: {
-    getValue: vi.fn().mockReturnValue(''),
-    setValue: vi.fn().mockResolvedValue(undefined),
-    onValueChanged: vi.fn(),
-    removeValue: vi.fn(),
-  },
-  locales: {
-    default: 'en-US',
-    available: ['en-US', 'es-ES'],
-  },
+export const createMockSdk = (overrides?: any) => {
+  const baseMockSdk: any = {
+    app: {
+      onConfigure: vi.fn(),
+      getParameters: vi.fn().mockReturnValueOnce({}),
+      setReady: vi.fn(),
+      getCurrentState: vi.fn(),
+    },
+    ids: {
+      app: 'test-app',
+      entry: 'current-entry-id',
+      space: 'test-space-id',
+      environment: 'test-environment-id',
+      contentType: 'test-content-type-id',
+    },
+    field: {
+      getValue: vi.fn().mockReturnValue(''),
+      setValue: vi.fn().mockResolvedValue(undefined),
+      onValueChanged: vi.fn(),
+      removeValue: vi.fn(),
+    },
+    entry: {
+      getSys: vi.fn().mockReturnValue({
+        id: 'current-entry-id',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }),
+    },
+    contentType: {
+      sys: {
+        id: 'test-content-type-id',
+      },
+    },
+    locales: {
+      default: 'en-US',
+      available: ['en-US', 'es-ES'],
+      names: {
+        'en-US': 'English',
+        'es-ES': 'Spanish',
+      },
+    },
+    parameters: {
+      installation: {
+        sourceFieldId: 'title',
+        separator: '-',
+        overrides: [],
+      } as AppInstallationParameters,
+    },
+    cma: mockCma,
+  };
+
+  return overrides ? { ...baseMockSdk, ...overrides } : baseMockSdk;
 };
 
-export { mockSdk };
+export const mockSdk = createMockSdk();

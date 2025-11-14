@@ -7,6 +7,7 @@
     "@contentful/f36-components": "5.6.0",
     "@contentful/f36-tokens": "5.1.0",
     "@contentful/field-editor-single-line": "^1.9.0",
+    "@contentful/node-apps-toolkit": "^3.15.0",
     "@contentful/react-apps-toolkit": "1.2.16",
     "@testing-library/jest-dom": "^6.9.1",
     "contentful-management": "11.62.0",
@@ -18,6 +19,7 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
+    "build:functions": "contentful-app-scripts build-functions --ci",
     "test": "vitest",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "add-locations": "contentful-app-scripts add-locations",
