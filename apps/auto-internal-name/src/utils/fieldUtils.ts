@@ -1,6 +1,6 @@
 import { AppInstallationParameters } from './types';
 
-export const determineField = (
+export const getFieldIdForContentType = (
   contentTypeId: string,
   config: AppInstallationParameters
 ): string => {
