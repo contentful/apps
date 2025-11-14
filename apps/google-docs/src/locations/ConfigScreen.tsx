@@ -52,7 +52,7 @@ const ConfigScreen = () => {
         });
 
         const checkStatusAppAction = appActions.items.find(
-          (action) => action.name === 'Check Status'
+          (action) => action.name === 'checkGdocOauthTokenStatus'
         );
         if (!checkStatusAppAction) {
           console.warn('Check Status app action not found');
@@ -122,16 +122,14 @@ const ConfigScreen = () => {
 
   const messageHandler = async (event: MessageEvent) => {
     if (event.data.type === 'oauth:complete') {
-      console.log('oauth:complete');
       const appDefinitionId = sdk.ids.app;
       // call app action to complete oauth
       const appActions = await sdk.cma.appAction.getManyForEnvironment({
         environmentId: sdk.ids.environment,
         spaceId: sdk.ids.space,
       });
-      console.log('appActions', appActions);
       const completeOauthAppAction = appActions.items.find(
-        (action) => action.name === 'Complete Oauth'
+        (action) => action.name === 'completeGdocOauth'
       );
       await sdk.cma.appActionCall.create(
         { appDefinitionId, appActionId: completeOauthAppAction?.sys.id || '' },
@@ -142,7 +140,6 @@ const ConfigScreen = () => {
           },
         }
       );
-      console.log('completeOauthAppAction', completeOauthAppAction);
       // Check the updated status after OAuth completion - expect it to be connected
       await checkGoogleStatus(true);
 
@@ -153,8 +150,6 @@ const ConfigScreen = () => {
   };
 
   const cleanup = () => {
-    console.log('cleanup called');
-    // Clear the interval
     if (checkWindowIntervalRef.current) {
       window.clearInterval(checkWindowIntervalRef.current);
       checkWindowIntervalRef.current = null;
@@ -184,7 +179,7 @@ const ConfigScreen = () => {
       });
 
       const initiateOauthAppAction = appActions.items.find(
-        (action) => action.name === 'Initiate Oauth'
+        (action) => action.name === 'initiateGdocOauth'
       );
 
       const response = await sdk.cma.appActionCall.createWithResponse(
@@ -223,7 +218,9 @@ const ConfigScreen = () => {
         environmentId: sdk.ids.environment,
         spaceId: sdk.ids.space,
       });
-      const disconnectAppAction = appActions.items.find((action) => action.name === 'Disconnect');
+      const disconnectAppAction = appActions.items.find(
+        (action) => action.name === 'revokeGdocOauthToken'
+      );
       await sdk.cma.appActionCall.create(
         {
           appActionId: disconnectAppAction?.sys.id || '',
@@ -422,8 +419,6 @@ const ConfigScreen = () => {
                     parameters: {},
                   }
                 );
-
-                console.log(JSON.parse(response.response.body));
               }}>
               Create entries from document
             </Button>
