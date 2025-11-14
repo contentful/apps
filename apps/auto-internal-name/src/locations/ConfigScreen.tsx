@@ -49,18 +49,18 @@ const ConfigScreen = () => {
     const currentState = await sdk.app.getCurrentState();
 
     const overrideErrors: Record<string, { contentTypeId: boolean; fieldId: boolean }> = {};
-    overrides.forEach((override) => {
+    parameters.overrides.forEach((override) => {
       overrideErrors[override.id] = {
         contentTypeId: !override.contentTypeId,
         fieldId: !override.fieldId,
       };
     });
-    setErrors({ sourceFieldId: !sourceFieldId, overrides: overrideErrors });
+    setErrors({ sourceFieldId: !parameters.sourceFieldId, overrides: overrideErrors });
 
     const hasOverrideErrors = Object.values(overrideErrors).some(
       (error) => error.contentTypeId || error.fieldId
     );
-    if (!sourceFieldId || hasOverrideErrors) {
+    if (!parameters.sourceFieldId || hasOverrideErrors) {
       sdk.notifier.error('Some fields are missing or invalid');
       return false;
     }
@@ -112,8 +112,8 @@ const ConfigScreen = () => {
 
   const maxOverridesReached = () => {
     return (
-      contentTypes.every((ct) => overrides.some((o) => o.contentTypeId === ct.sys.id)) ||
-      contentTypes.length <= overrides.length
+      contentTypes.every((ct) => parameters.overrides.some((o) => o.contentTypeId === ct.sys.id)) ||
+      contentTypes.length <= parameters.overrides.length
     );
   };
 
@@ -129,7 +129,7 @@ const ConfigScreen = () => {
 
   const handleSourceFieldInputChange = (name: string) => {
     if (!name) {
-      setSourceFieldId('');
+      setParameters((prev) => ({ ...prev, sourceFieldId: '' }));
       setFilteredSourceFields(fields);
       return;
     }
@@ -223,7 +223,7 @@ const ConfigScreen = () => {
               contentTypes={contentTypes}
               overrideItem={override}
               overrideError={errors.overrides[override.id]}
-              overrides={overrides}
+              overrides={parameters.overrides}
               setOverrides={setOverrides}></OverrideRow>
           ))}
           <Box marginBottom="spacingXl">
