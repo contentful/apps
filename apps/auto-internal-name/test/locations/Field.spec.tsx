@@ -1,12 +1,10 @@
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, cleanup, act } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { createMockCma, createMockSdk } from '../../test/mocks';
 import Field from '../../src/locations/Field';
 import { EntryProps } from 'contentful-management';
-import * as delayUtils from '../../src/utils/delay';
-import * as entryUtils from '../../src/utils/entryUtils';
 import { FieldAppSDK } from '@contentful/app-sdk';
-import { MAX_RETRIES } from '../../src/utils/delay';
+import { MAX_RETRIES, INITIAL_DELAY_MS } from '../../src/utils/delay';
 
 const createMockEntry = (fields: Record<string, Record<string, string>>): EntryProps => ({
   sys: {
@@ -54,16 +52,10 @@ vi.mock('@contentful/field-editor-single-line', () => ({
   SingleLineEditor: (props: any) => mockSingleLineEditor(props),
 }));
 
-vi.mock('../../src/utils/delay', () => ({
-  delay: vi.fn().mockResolvedValue(undefined),
-  MAX_RETRIES: 4,
-}));
-
-vi.mock('../../src/utils/entryUtils', () => ({
-  isEntryRecentlyCreated: vi.fn().mockReturnValue(true),
-}));
-
 describe('Field component', () => {
+  // Fixed time used consistently across all tests
+  const FIXED_DATE = new Date('2024-01-01T12:00:00Z');
+
   const setupParentEntryMock = (parentEntry: EntryProps) => {
     mockCma.entry.getMany.mockResolvedValue({
       items: [parentEntry],
@@ -71,62 +63,77 @@ describe('Field component', () => {
     });
   };
 
+  // Helper to render component and flush timers
+  const renderAndFlushTimers = async () => {
+    await act(async () => {
+      render(<Field />);
+      await vi.runAllTimersAsync();
+    });
+  };
+
   beforeEach(() => {
+    vi.useFakeTimers();
     vi.clearAllMocks();
     mockCma = createMockCma();
     mockSdk = createMockSdk({
       cma: mockCma,
     });
 
+    vi.setSystemTime(FIXED_DATE);
+
     mockSdk.field.getValue.mockReturnValue('');
     mockSdk.field.setValue.mockResolvedValue(undefined);
+
+    // Set entry createdAt to 10 seconds ago (recently created)
     mockSdk.entry.getSys.mockReturnValue({
       id: 'current-entry-id',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date(FIXED_DATE.getTime() - 10 * 1000).toISOString(),
+      updatedAt: FIXED_DATE.toISOString(),
     });
     mockCma.entry.getMany.mockResolvedValue({
       items: [],
       total: 0,
     });
-    vi.mocked(entryUtils.isEntryRecentlyCreated).mockReturnValue(true);
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     cleanup();
   });
 
   describe('Rendering', () => {
     it('should render the component with all required elements', async () => {
-      render(<Field />);
+      await renderAndFlushTimers();
 
-      await waitFor(() => {
-        expect(screen.getByTestId('single-line-editor')).toBeInTheDocument();
-        const clearButton = screen.getByLabelText('Clear value');
-        expect(clearButton).toBeInTheDocument();
-        expect(clearButton).toHaveAttribute('title', 'Clear value');
-        const refetchButton = screen.getByLabelText('Refetch value from parent');
-        expect(refetchButton).toBeInTheDocument();
-      });
+      expect(screen.getByTestId('single-line-editor')).toBeInTheDocument();
+      const clearButton = screen.getByLabelText('Clear value');
+      expect(clearButton).toBeInTheDocument();
+      expect(clearButton).toHaveAttribute('title', 'Clear value');
+      const refetchButton = screen.getByLabelText('Refetch value from parent');
+      expect(refetchButton).toBeInTheDocument();
     });
   });
 
   describe('Clear button functionality', () => {
     it('should clear the field value when Clear button is clicked', async () => {
       mockSdk.field.getValue.mockReturnValue('existing value');
+      await renderAndFlushTimers();
 
-      render(<Field />);
-
-      await waitFor(() => {
-        const clearButton = screen.getByLabelText('Clear value');
+      const clearButton = screen.getByLabelText('Clear value');
+      await act(async () => {
         fireEvent.click(clearButton);
-        expect(mockSdk.field.setValue).toHaveBeenCalledTimes(1);
-        expect(mockSdk.field.setValue).toHaveBeenCalledWith('');
+        await vi.runAllTimersAsync();
       });
+
+      expect(mockSdk.field.setValue).toHaveBeenCalledTimes(1);
+      expect(mockSdk.field.setValue).toHaveBeenCalledWith('');
     });
 
-    it('should be disabled when updating', () => {
-      render(<Field />);
+    it('should be disabled when updating', async () => {
+      await act(async () => {
+        render(<Field />);
+        await vi.runAllTimersAsync();
+      });
       const clearButton = screen.getByLabelText('Clear value');
       expect(clearButton).toBeDisabled();
     });
@@ -134,10 +141,15 @@ describe('Field component', () => {
 
   describe('Refetch button functionality', () => {
     beforeEach(() => {
-      // to avoid auto-update on mount
-      vi.mocked(entryUtils.isEntryRecentlyCreated).mockReturnValue(false);
+      // Set entry createdAt to 31 seconds ago (not recently created) to avoid auto-update on mount
+      mockSdk.entry.getSys.mockReturnValue({
+        id: 'current-entry-id',
+        createdAt: new Date(FIXED_DATE.getTime() - 31 * 1000).toISOString(),
+        updatedAt: FIXED_DATE.toISOString(),
+      });
     });
-    it('should find parent entry and update field when parent is found', async () => {
+
+    it('should refetch value from parent when parent is found', async () => {
       const parentEntry = createMockEntry({
         title: {
           'en-US': 'Parent Title',
@@ -146,26 +158,15 @@ describe('Field component', () => {
       // Mock parent entry for refetch button click
       mockCma.entry.getMany.mockResolvedValueOnce({ items: [parentEntry], total: 1 });
 
-      render(<Field />);
+      await renderAndFlushTimers();
 
       const refetchButton = screen.getByLabelText('Refetch value from parent');
-      fireEvent.click(refetchButton);
-
-      await waitFor(() => {
-        expect(mockSdk.field.setValue).toHaveBeenCalledWith('Parent Title -');
+      await act(async () => {
+        fireEvent.click(refetchButton);
+        await vi.runAllTimersAsync();
       });
-    });
 
-    it('should handle case when no parent entry is found', async () => {
-      render(<Field />);
-
-      const refetchButton = screen.getByLabelText('Refetch value from parent');
-      fireEvent.click(refetchButton);
-
-      await waitFor(() => {
-        expect(mockCma.entry.getMany).toHaveBeenCalledTimes(MAX_RETRIES + 1);
-        expect(mockSdk.field.setValue).not.toHaveBeenCalled();
-      });
+      expect(mockSdk.field.setValue).toHaveBeenCalledWith('Parent Title -');
     });
 
     it('should log error to console when refetch fails', async () => {
@@ -173,14 +174,15 @@ describe('Field component', () => {
       const error = new Error('Network error');
       mockCma.entry.getMany.mockRejectedValue(error);
 
-      render(<Field />);
+      await renderAndFlushTimers();
 
       const refetchButton = screen.getByLabelText('Refetch value from parent');
-      fireEvent.click(refetchButton);
-
-      await waitFor(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith('Error updating internal name:', error);
+      await act(async () => {
+        fireEvent.click(refetchButton);
+        await vi.runAllTimersAsync();
       });
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error updating internal name:', error);
     });
   });
 
@@ -194,26 +196,29 @@ describe('Field component', () => {
 
       setupParentEntryMock(parentEntry);
 
-      render(<Field />);
+      await renderAndFlushTimers();
 
-      await waitFor(() => {
-        expect(mockCma.entry.getMany).toHaveBeenCalled();
-        expect(mockSdk.field.setValue).toHaveBeenCalledWith('Parent Title -');
-      });
+      expect(mockCma.entry.getMany).toHaveBeenCalled();
+      expect(mockSdk.field.setValue).toHaveBeenCalledWith('Parent Title -');
     });
 
     it('should not auto-update when field already has a value', async () => {
       mockSdk.field.getValue.mockReturnValue('Existing value');
 
-      render(<Field />);
+      await renderAndFlushTimers();
 
       expect(mockSdk.field.setValue).not.toHaveBeenCalled();
     });
 
     it('should not auto-update when entry is not recently created', async () => {
-      vi.mocked(entryUtils.isEntryRecentlyCreated).mockReturnValue(false);
+      // Set entry createdAt to 31 seconds ago (not recently created)
+      mockSdk.entry.getSys.mockReturnValue({
+        id: 'current-entry-id',
+        createdAt: new Date(FIXED_DATE.getTime() - 31 * 1000).toISOString(),
+        updatedAt: FIXED_DATE.toISOString(),
+      });
 
-      render(<Field />);
+      await renderAndFlushTimers();
 
       expect(mockSdk.field.setValue).not.toHaveBeenCalled();
     });
@@ -223,11 +228,9 @@ describe('Field component', () => {
       const error = new Error('Auto-update error');
       mockCma.entry.getMany.mockRejectedValue(error);
 
-      render(<Field />);
+      await renderAndFlushTimers();
 
-      await waitFor(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith('Error auto-updating internal name:', error);
-      });
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error auto-updating internal name:', error);
     });
   });
 
@@ -242,11 +245,9 @@ describe('Field component', () => {
 
       setupParentEntryMock(parentEntry);
 
-      render(<Field />);
+      await renderAndFlushTimers();
 
-      await waitFor(() => {
-        expect(mockSdk.field.setValue).toHaveBeenCalledWith('Parent Title');
-      });
+      expect(mockSdk.field.setValue).toHaveBeenCalledWith('Parent Title');
     });
 
     it('should use override field when content type has override', async () => {
@@ -266,18 +267,14 @@ describe('Field component', () => {
 
       setupParentEntryMock(parentEntry);
 
-      render(<Field />);
+      await renderAndFlushTimers();
 
-      await waitFor(() => {
-        expect(mockSdk.field.setValue).toHaveBeenCalledWith('Parent Name -');
-      });
+      expect(mockSdk.field.setValue).toHaveBeenCalledWith('Parent Name -');
     });
   });
 
   describe('Retry logic', () => {
     it('should retry finding parent entry when not found initially', async () => {
-      const delay = delayUtils.delay as ReturnType<typeof vi.fn>;
-
       mockCma.entry.getMany
         .mockResolvedValueOnce({ items: [], total: 0 })
         .mockResolvedValueOnce({ items: [], total: 0 })
@@ -292,25 +289,27 @@ describe('Field component', () => {
 
       render(<Field />);
 
-      await waitFor(
-        () => {
-          expect(mockCma.entry.getMany).toHaveBeenCalledTimes(3);
-        },
-        { timeout: 3000 }
-      );
+      // Advance through 3 retry delays (attempt 0: 500ms, attempt 1: 1000ms)
+      const totalDelay = INITIAL_DELAY_MS * 3;
+      vi.advanceTimersByTime(totalDelay);
+      await vi.runAllTimersAsync();
 
-      expect(delay).toHaveBeenCalledTimes(2);
+      expect(mockCma.entry.getMany).toHaveBeenCalledTimes(3);
+      expect(mockSdk.field.setValue).toHaveBeenCalledWith('Parent Title -');
     });
 
-    it('should stop retrying after max retries', async () => {
-      render(<Field />);
+    it('should handle the case when the parent entry is not found after all retries', async () => {
+      await renderAndFlushTimers();
 
-      await waitFor(
-        () => {
-          expect(mockCma.entry.getMany).toHaveBeenCalledTimes(MAX_RETRIES + 1);
-        },
-        { timeout: 5000 }
-      );
+      await act(async () => {
+        // Advance timers through all retry delays
+        const totalDelay = INITIAL_DELAY_MS * MAX_RETRIES + 1;
+        vi.advanceTimersByTime(totalDelay);
+        await vi.runAllTimersAsync();
+      });
+
+      expect(mockCma.entry.getMany).toHaveBeenCalledTimes(MAX_RETRIES + 1);
+      expect(mockSdk.field.setValue).not.toHaveBeenCalled();
     });
   });
 });
