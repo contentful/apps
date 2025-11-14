@@ -9,6 +9,7 @@ import {
   TextInput,
   Button,
   Autocomplete,
+  Tooltip,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
@@ -39,8 +40,30 @@ const ConfigScreen = () => {
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [fields, setFields] = useState<SimplifiedField[]>([]);
 
+  const [errors, setErrors] = useState<{
+    sourceFieldId: boolean;
+    overrides: Record<string, { contentTypeId: boolean; fieldId: boolean }>;
+  }>({ sourceFieldId: false, overrides: {} });
+
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
+
+    const overrideErrors: Record<string, { contentTypeId: boolean; fieldId: boolean }> = {};
+    parameters.overrides.forEach((override) => {
+      overrideErrors[override.id] = {
+        contentTypeId: !override.contentTypeId,
+        fieldId: !override.fieldId,
+      };
+    });
+    setErrors({ sourceFieldId: !parameters.sourceFieldId, overrides: overrideErrors });
+
+    const hasOverrideErrors = Object.values(overrideErrors).some(
+      (error) => error.contentTypeId || error.fieldId
+    );
+    if (!parameters.sourceFieldId || hasOverrideErrors) {
+      sdk.notifier.error('Some fields are missing or invalid');
+      return false;
+    }
 
     return {
       parameters,
@@ -87,6 +110,13 @@ const ConfigScreen = () => {
     })();
   }, []);
 
+  const maxOverridesReached = () => {
+    return (
+      contentTypes.every((ct) => parameters.overrides.some((o) => o.contentTypeId === ct.sys.id)) ||
+      contentTypes.length <= parameters.overrides.length
+    );
+  };
+
   const addOverride = () => {
     setParameters((prev) => ({
       ...prev,
@@ -98,6 +128,12 @@ const ConfigScreen = () => {
   };
 
   const handleSourceFieldInputChange = (name: string) => {
+    if (!name) {
+      setParameters((prev) => ({ ...prev, sourceFieldId: '' }));
+      setFilteredSourceFields(fields);
+      return;
+    }
+
     const newFilteredItems = fields.filter((item) =>
       normalizeString(item.name).includes(normalizeString(name))
     );
@@ -135,7 +171,7 @@ const ConfigScreen = () => {
           <Paragraph>
             This app allows you to automatically set the name of an entry based on a field from its
             parent entry. Provide the ID of the field you wish to use as the source field on the
-            parent, and a preview token to access the parent entry.
+            parent.
           </Paragraph>
         </Box>
 
@@ -151,7 +187,7 @@ const ConfigScreen = () => {
               The separator can be any character or symbol and will append to the entry name.
             </FormControl.HelpText>
           </FormControl>
-          <FormControl id="sourceFieldId">
+          <FormControl id="sourceFieldId" isInvalid={errors.sourceFieldId}>
             <FormControl.Label marginBottom="spacingS" isRequired>
               Source field ID
             </FormControl.Label>
@@ -162,6 +198,11 @@ const ConfigScreen = () => {
               onSelectItem={handleSourceFieldIdSelection}
               placeholder="Search field name"
             />
+            {errors.sourceFieldId && (
+              <FormControl.ValidationMessage>
+                Source field ID is required
+              </FormControl.ValidationMessage>
+            )}
             <FormControl.HelpText marginTop="spacingS">
               The source field ID should be the name of the field that you want to use from the
               parent entry. This will be applied to any content types that include the same field
@@ -181,15 +222,23 @@ const ConfigScreen = () => {
               key={override.id}
               contentTypes={contentTypes}
               overrideItem={override}
+              overrideError={errors.overrides[override.id]}
+              overrides={parameters.overrides}
               setOverrides={setOverrides}></OverrideRow>
           ))}
           <Box marginBottom="spacingXl">
-            <Button
-              aria-label="Add override"
-              startIcon={<PlusIcon />}
-              onClick={() => addOverride()}>
-              Add override
-            </Button>
+            <Tooltip
+              placement="right"
+              id="tooltip-1"
+              content={maxOverridesReached() ? 'No more content types available.' : undefined}>
+              <Button
+                aria-label="Add override"
+                startIcon={<PlusIcon />}
+                isDisabled={maxOverridesReached()}
+                onClick={() => addOverride()}>
+                Add override
+              </Button>
+            </Tooltip>
           </Box>
         </Flex>
       </Flex>
