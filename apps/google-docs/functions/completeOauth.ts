@@ -11,13 +11,8 @@ interface CompleteOAuthParams {
   state: string;
 }
 
-/*
- * INTEG-3271: Double check the imported types and make sure they work for Google Docs (use Klaviyo as a reference)
- * Additionally, understand the implementation detail for the Google Docs OAuth flow (copied from Klaviyo)
- */
 export async function completeOauth(sdk: OAuthSDK, params: CompleteOAuthParams): Promise<void> {
   try {
-    // Complete the OAuth flow using the SDK
     await sdk.exchange({ code: params.code, state: params.state });
   } catch (error) {
     console.error('Failed to complete OAuth flow:', error);
@@ -29,8 +24,6 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   event: AppActionRequest<'Custom', CompleteOAuthParams>,
   context: FunctionEventContext
 ): Promise<AppActionResponse> => {
-  console.log('in completeOauth handler');
-  console.log('context', context);
   const sdk = (context as any).oauthSdk;
 
   if (!sdk) {

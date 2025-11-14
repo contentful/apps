@@ -122,14 +122,12 @@ const ConfigScreen = () => {
 
   const messageHandler = async (event: MessageEvent) => {
     if (event.data.type === 'oauth:complete') {
-      console.log('oauth:complete');
       const appDefinitionId = sdk.ids.app;
       // call app action to complete oauth
       const appActions = await sdk.cma.appAction.getManyForEnvironment({
         environmentId: sdk.ids.environment,
         spaceId: sdk.ids.space,
       });
-      console.log('appActions', appActions);
       const completeOauthAppAction = appActions.items.find(
         (action) => action.name === 'completeGdocOauth'
       );
@@ -142,7 +140,6 @@ const ConfigScreen = () => {
           },
         }
       );
-      console.log('completeOauthAppAction', completeOauthAppAction);
       // Check the updated status after OAuth completion - expect it to be connected
       await checkGoogleStatus(true);
 
@@ -153,8 +150,6 @@ const ConfigScreen = () => {
   };
 
   const cleanup = () => {
-    console.log('cleanup called');
-    // Clear the interval
     if (checkWindowIntervalRef.current) {
       window.clearInterval(checkWindowIntervalRef.current);
       checkWindowIntervalRef.current = null;
@@ -198,8 +193,6 @@ const ConfigScreen = () => {
       );
 
       const authorizationUrl = JSON.parse(response.response.body).authorizationUrl;
-      console.log('response', response);
-      console.log('authorizationUrl', authorizationUrl);
 
       popupWindowRef.current = window.open(authorizationUrl, '_blank', 'height=700,width=450');
 
@@ -426,8 +419,6 @@ const ConfigScreen = () => {
                     parameters: {},
                   }
                 );
-
-                console.log(JSON.parse(response.response.body));
               }}>
               Create entries from document
             </Button>
