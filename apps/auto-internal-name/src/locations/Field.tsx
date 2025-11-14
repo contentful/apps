@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { styles } from './Field.styles';
 import { AppInstallationParameters } from '../utils/types';
 import { EntryProps } from 'contentful-management';
-import { determineField } from '../utils/determineField';
+import { getFieldIdForContentType } from '../utils/fieldUtils';
 import { delay, MAX_RETRIES } from '../utils/delay';
 import { isEntryRecentlyCreated } from '../utils/entryUtils';
 
@@ -22,7 +22,7 @@ const Field = () => {
 
   const getInternalNameFromParentEntry = (parentEntry: EntryProps): string => {
     const contentTypeId = sdk.contentType.sys.id;
-    const fieldId = determineField(contentTypeId, installationParameters);
+    const fieldId = getFieldIdForContentType(contentTypeId, installationParameters);
     const separator = installationParameters.separator;
 
     const parentFieldValue = (parentEntry.fields[fieldId]?.[defaultLocale] as string) || '';

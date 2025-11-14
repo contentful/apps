@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor, cleanup, act } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, act } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { createMockCma, createMockSdk } from '../../test/mocks';
 import Field from '../../src/locations/Field';
