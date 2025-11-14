@@ -171,7 +171,7 @@ const ConfigScreen = () => {
           <Paragraph>
             This app allows you to automatically set the name of an entry based on a field from its
             parent entry. Provide the ID of the field you wish to use as the source field on the
-            parent, and a preview token to access the parent entry.
+            parent.
           </Paragraph>
         </Box>
 

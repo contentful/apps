@@ -158,7 +158,8 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
         <FormControl
           id="contentTypeId"
           className={styles.formControl}
-          isInvalid={overrideError?.contentTypeId}>
+          isInvalid={overrideError?.contentTypeId}
+          isRequired>
           <FormControl.Label marginBottom="spacingS">Content type</FormControl.Label>
           <Autocomplete
             key={`${overrideItem.id}-content-type`}
@@ -177,7 +178,8 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
         <FormControl
           id="fieldName"
           className={styles.formControl}
-          isInvalid={overrideError?.fieldId}>
+          isInvalid={overrideError?.fieldId}
+          isRequired>
           <FormControl.Label marginBottom="spacingS">Field name</FormControl.Label>
           <Autocomplete
             key={`${overrideItem.id}-field`}
