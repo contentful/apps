@@ -21,8 +21,6 @@ export type OAuthSDK = {
 
 export async function initiateOauth(sdk: OAuthSDK): Promise<OAuthResponseUrl> {
   try {
-    console.log('initiateOauth called');
-    // Initialize OAuth flow using the SDK
     const oauthResponse = await sdk.init();
 
     return {
@@ -38,9 +36,6 @@ export const handler = async (
   event: AppEventHandlerRequest,
   context: AppEventContext
 ): Promise<AppEventHandlerResponse> => {
-  // Use the oauth sdk to initiate the oauth flow, use initiateOauth.ts from Klaviyo as a reference
-  console.log('in handler');
-  console.log('context', context);
   const sdk = (context as any).oauthSdk;
   if (!sdk) {
     console.error('No SDK available in context');
