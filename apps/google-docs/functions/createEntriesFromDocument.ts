@@ -13,7 +13,7 @@ import { fetchContentTypes } from './service/contentTypeService';
 import { initContentfulManagementClient } from './service/initCMAClient';
 
 export type AppActionParameters = {
-  contentTypeIds: Array<string>;
+  contentTypeIds: string;
   prompt: string;
 };
 interface AppInstallationParameters {
@@ -34,14 +34,18 @@ export const handler: FunctionEventHandler<
   const { contentTypeIds, prompt } = event.body;
   const { openAiApiKey } = context.appInstallationParameters as AppInstallationParameters;
 
-  console.log('contentTypeIds', contentTypeIds);
-  console.log('event.body', event.body);
   // INTEG-3262 and INTEG-3263: Take in Content Type, Prompt, and Upload File from user
 
   // INTEG-3262: Parse the content type
   // Step 1: Initialize CMA client and fetch the content types
   const cma = initContentfulManagementClient(context);
-  const contentTypes = await fetchContentTypes(cma, contentTypeIds);
+  console.log('fetching content types', contentTypeIds, typeof contentTypeIds);
+  const contentTypeIdsSet = new Set<string>();
+  contentTypeIdsSet.add(contentTypeIds);
+  const contentTypes = await fetchContentTypes(cma, contentTypeIdsSet);
+  console.log('content types', contentTypes);
+
+  return { success: true, response: contentTypes };
 
   // Step 2: Pass the content types to the AI agent for parsing
   const contentTypeParseResult = await parseContentTypes(contentTypes, {

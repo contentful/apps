@@ -8,11 +8,19 @@ import { PlainClientAPI } from 'contentful-management';
  */
 export const fetchContentTypes = async (
   cma: PlainClientAPI,
-  contentTypeIds: Array<string>
+  contentTypeIds: Set<string>
 ): Promise<any> => {
   try {
-    const response = await cma.contentType.getMany({ query: { ids: contentTypeIds as string[] } });
-    return response;
+    console.log('content type ids', [...contentTypeIds]);
+    // 70pkp58oElHwzUNTSlriuG
+    const response = await cma.contentType.getMany({});
+    // console.log('response', response);
+    const filteredContentTypes = response.items.filter((item) => {
+      console.log('item in content types', item.sys.id);
+      if (contentTypeIds.has(item.sys.id)) return item;
+    });
+    console.log('filtered content types', filteredContentTypes);
+    return filteredContentTypes;
   } catch (error) {
     throw new Error(`Failed to fetch content types ${contentTypeIds}: ${error}`);
   }

@@ -241,10 +241,6 @@ const Page = () => {
         (action) => action.name === 'createEntriesFromDocumentAction'
       );
 
-      console.log('createEntriesFromDocumentAction', createEntriesFromDocumentAction);
-
-      console.log('app definition id', appDefinitionId);
-
       // Call the app action
       const result = await sdk.cma.appActionCall.createWithResult(
         {
@@ -258,7 +254,7 @@ const Page = () => {
         }
       );
 
-      console.log('result', result);
+      console.log('ct agent parse result', result);
 
       // Check if the result has the expected structure
       if ('errors' in result && result.errors) {
