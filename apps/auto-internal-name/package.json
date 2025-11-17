@@ -29,7 +29,7 @@
     "lint:write": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "prettier:write": "prettier --write .",
     "prettier:check": "prettier --check .",
-    "prettier:list": "prettier --l ."
+    "prettier:list": "prettier -l ."
   },
   "devDependencies": {
     "@contentful/app-scripts": "^2.5.6",
