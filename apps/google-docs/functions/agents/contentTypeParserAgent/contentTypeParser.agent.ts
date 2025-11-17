@@ -6,6 +6,8 @@
  */
 
 import { openai } from '@ai-sdk/openai';
+import { createOpenAI } from '@ai-sdk/openai';
+
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { ContentTypeProps } from 'contentful-management';
@@ -62,8 +64,7 @@ export type FieldAnalysis = z.infer<typeof FieldAnalysisSchema>;
  * Configuration for the content type parser
  */
 export interface ContentTypeParserConfig {
-  modelVersion?: string;
-  temperature?: number;
+  openAiApiKey: string;
 }
 
 /**
@@ -76,9 +77,14 @@ export interface ContentTypeParserConfig {
  */
 export async function parseContentTypes(
   contentTypes: ContentTypeProps[],
-  config: ContentTypeParserConfig = {}
+  openAiApiKey: string
 ): Promise<ParseResult> {
-  const { modelVersion = 'gpt-4o', temperature = 0.3 } = config;
+  const modelVersion = 'gpt-4o';
+  const temperature = 0.3;
+
+  const openaiClient = createOpenAI({
+    apiKey: openAiApiKey,
+  });
 
   console.log(`🔍 Parsing ${contentTypes.length} content type(s)...`);
 
@@ -87,7 +93,7 @@ export async function parseContentTypes(
 
   // Generate structured output using AI SDK
   const result = await generateObject({
-    model: openai(modelVersion),
+    model: openaiClient(modelVersion),
     schema: ParseResultSchema,
     temperature,
     system: buildSystemPrompt(),

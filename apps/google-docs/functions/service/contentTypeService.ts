@@ -12,14 +12,8 @@ export const fetchContentTypes = async (
 ): Promise<any> => {
   try {
     console.log('content type ids', [...contentTypeIds]);
-    // 70pkp58oElHwzUNTSlriuG
     const response = await cma.contentType.getMany({});
-    // console.log('response', response);
-    const filteredContentTypes = response.items.filter((item) => {
-      console.log('item in content types', item.sys.id);
-      if (contentTypeIds.has(item.sys.id)) return item;
-    });
-    console.log('filtered content types', filteredContentTypes);
+    const filteredContentTypes = response.items.filter((item) => contentTypeIds.has(item.sys.id));
     return filteredContentTypes;
   } catch (error) {
     throw new Error(`Failed to fetch content types ${contentTypeIds}: ${error}`);

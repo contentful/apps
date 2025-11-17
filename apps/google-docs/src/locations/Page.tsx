@@ -211,7 +211,6 @@ const Page = () => {
     );
     setIsContentTypePickerOpen(false);
 
-    // Call the content type parser agent
     await analyzeContentTypes(contentTypes.map((ct) => ct.id));
   };
 

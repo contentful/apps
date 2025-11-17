@@ -27,7 +27,9 @@
       "description": "Function to create content blocks from App Action.",
       "path": "functions/createEntriesFromDocument.js",
       "entryFile": "functions/createEntriesFromDocument.ts",
-      "allowNetworks": [],
+      "allowNetworks": [
+        "https://api.openai.com"
+      ],
       "accepts": [
         "appaction.call"
       ]

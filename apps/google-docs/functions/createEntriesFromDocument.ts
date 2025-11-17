@@ -35,25 +35,21 @@ export const handler: FunctionEventHandler<
   const { contentTypeIds, prompt } = event.body;
   console.log('contentTypeIds', contentTypeIds, typeof contentTypeIds);
   const { openAiApiKey } = context.appInstallationParameters as AppInstallationParameters;
+  console.log('context', context, context.appInstallationParameters);
 
+  console.log('openAiApiKey', openAiApiKey);
   // INTEG-3262 and INTEG-3263: Take in Content Type, Prompt, and Upload File from user
 
   // INTEG-3262: Parse the content type
   // Step 1: Initialize CMA client and fetch the content types
   const cma = initContentfulManagementClient(context);
-  console.log('fetching content types', contentTypeIds, typeof contentTypeIds);
   const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
   console.log('content types', contentTypes);
 
-  return { success: true, response: contentTypes };
-
   // Step 2: Pass the content types to the AI agent for parsing
-  const contentTypeParseResult = await parseContentTypes(contentTypes, {
-    modelVersion: 'gpt-4o',
-    temperature: 0.3,
-  });
+  const contentTypeParseResult = await parseContentTypes(contentTypes, openAiApiKey);
 
-  console.log(contentTypeParseResult);
+  console.log('parser agent result', contentTypeParseResult);
 
   // INTEG-3261: Pass the ai content type response to the observer for analysis
   // createContentTypeObservationsFromLLMResponse()
