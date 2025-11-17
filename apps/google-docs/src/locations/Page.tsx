@@ -28,7 +28,6 @@ const Page = () => {
 
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
-
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -39,6 +38,10 @@ const Page = () => {
   const previewRef = useRef<HTMLDivElement | null>(null);
 
   const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
+
+  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   const validateGoogleDocUrl = (value: string) => {
     const trimmed = value.trim();
@@ -201,13 +204,78 @@ const Page = () => {
     return docx;
   };
 
-  const handleContentTypeSelected = (contentTypes: SelectedContentType[]) => {
+  const handleContentTypeSelected = async (contentTypes: SelectedContentType[]) => {
     const names = contentTypes.map((ct) => ct.name).join(', ');
     sdk.notifier.success(
       `Selected ${contentTypes.length} content type${contentTypes.length > 1 ? 's' : ''}: ${names}`
     );
-    // TODO: Add logic to create entries from the document here
     setIsContentTypePickerOpen(false);
+
+    // Call the content type parser agent
+    await analyzeContentTypes(contentTypes.map((ct) => ct.id));
+  };
+
+  const analyzeContentTypes = async (contentTypeIds: string[]) => {
+    try {
+      setIsAnalyzing(true);
+      setAnalysisError(null);
+      setAnalysisResult(null);
+
+      // Get the app definition ID
+      const appDefinitionId = sdk.ids.app;
+
+      if (!appDefinitionId) {
+        throw new Error('App definition ID not found');
+      }
+
+      console.log('sdk.ids.environment', sdk.ids.environment);
+      console.log('sdk.ids.space', sdk.ids.space);
+
+      const appActions = await sdk.cma.appAction.getManyForEnvironment({
+        environmentId: sdk.ids.environment,
+        spaceId: sdk.ids.space,
+      });
+      console.log('app actions', appActions);
+
+      const createEntriesFromDocumentAction = appActions.items.find(
+        (action) => action.name === 'createEntriesFromDocumentAction'
+      );
+
+      console.log('createEntriesFromDocumentAction', createEntriesFromDocumentAction);
+
+      console.log('app definition id', appDefinitionId);
+
+      // Call the app action
+      const result = await sdk.cma.appActionCall.createWithResult(
+        {
+          appDefinitionId,
+          appActionId: '3nLAuoEuepbJMvdgp1qX6g',
+        },
+        {
+          parameters: {
+            contentTypeIds: contentTypeIds[0],
+          },
+        }
+      );
+
+      console.log('result', result);
+
+      // Check if the result has the expected structure
+      if ('errors' in result && result.errors) {
+        throw new Error(JSON.stringify(result.errors));
+      }
+
+      setAnalysisResult(result);
+      sdk.notifier.success('Content types analyzed successfully!');
+    } catch (error) {
+      console.error('Failed to analyze content types:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to analyze content types';
+      setAnalysisError(errorMessage);
+      sdk.notifier.error(errorMessage);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const onSubmitDoc = async () => {
@@ -356,15 +424,53 @@ const Page = () => {
           {successMessage && <Note variant="positive">{successMessage}</Note>}
           {errorMessage && <Note variant="negative">{errorMessage}</Note>}
 
-          {(fetchedDocHtml || isDocxRendered) && (
+          {/* {(fetchedDocHtml || isDocxRendered) && ( */}
+          <Box marginTop="spacingM">
+            <Button
+              variant="primary"
+              onClick={() => {
+                setIsContentTypePickerOpen(true);
+              }}
+              isDisabled={isAnalyzing}>
+              Select Content Type
+            </Button>
+          </Box>
+          {/* )} */}
+
+          {isAnalyzing && (
             <Box marginTop="spacingM">
-              <Button
-                variant="primary"
-                onClick={() => {
-                  setIsContentTypePickerOpen(true);
+              <Note variant="primary">Analyzing content types...</Note>
+            </Box>
+          )}
+
+          {analysisError && (
+            <Box marginTop="spacingM">
+              <Note variant="negative">Error: {analysisError}</Note>
+            </Box>
+          )}
+
+          {analysisResult && (
+            <Box marginTop="spacingL" style={{ border: '1px solid #e5e5e5', padding: '16px' }}>
+              <Heading as="h3" marginBottom="spacingS">
+                Analysis Result
+              </Heading>
+              <Paragraph marginBottom="spacingS">
+                Raw output from the content type parser:
+              </Paragraph>
+              <Box
+                style={{
+                  maxHeight: '400px',
+                  overflow: 'auto',
+                  background: '#f7f9fa',
+                  padding: '16px',
+                  borderRadius: '4px',
+                  fontFamily: 'monospace',
+                  fontSize: '12px',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
                 }}>
-                Select Content Type
-              </Button>
+                {JSON.stringify(analysisResult, null, 2)}
+              </Box>
             </Box>
           )}
 

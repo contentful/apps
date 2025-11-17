@@ -34,6 +34,8 @@ export const handler: FunctionEventHandler<
   const { contentTypeIds, prompt } = event.body;
   const { openAiApiKey } = context.appInstallationParameters as AppInstallationParameters;
 
+  console.log('contentTypeIds', contentTypeIds);
+  console.log('event.body', event.body);
   // INTEG-3262 and INTEG-3263: Take in Content Type, Prompt, and Upload File from user
 
   // INTEG-3262: Parse the content type

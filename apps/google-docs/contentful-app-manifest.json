@@ -94,8 +94,8 @@
       "category": "Custom",
       "parameters": [
         {
-          "id": "contentTypeId",
-          "name": "Content Type ID",
+          "id": "contentTypeIds",
+          "name": "Content Type IDs",
           "type": "Symbol",
           "required": true
         },
