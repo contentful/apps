@@ -14,6 +14,7 @@ describe('OverrideRow', () => {
         { id: 'title', name: 'Title', type: 'Symbol', required: false },
         { id: 'slug', name: 'Slug', type: 'Symbol', required: false },
         { id: 'author', name: 'Author', type: 'Link', required: false },
+        { id: 'body', name: 'Body', type: 'Text', required: false },
       ],
     } as ContentTypeProps,
     {
@@ -22,6 +23,7 @@ describe('OverrideRow', () => {
       fields: [
         { id: 'name', name: 'Name', type: 'Symbol', required: false },
         { id: 'email', name: 'Email', type: 'Symbol', required: false },
+        { id: 'bio', name: 'Bio', type: 'Text', required: false },
       ],
     } as ContentTypeProps,
   ];
@@ -494,6 +496,42 @@ describe('OverrideRow', () => {
 
       const fieldInput = screen.getByPlaceholderText('Field name');
       expect(fieldInput).not.toBeDisabled();
+    });
+  });
+
+  describe('Field name filtering', () => {
+    it('should only show Symbol fields in field name autocomplete', async () => {
+      const user = userEvent.setup();
+      const overrideWithContentType: Override = {
+        id: 'override-1',
+        contentTypeId: 'ct-1',
+        fieldId: '',
+      };
+
+      render(
+        <OverrideRow
+          contentTypes={mockContentTypes}
+          overrideItem={overrideWithContentType}
+          setOverrides={mockSetOverrides}
+          overrideError={mockOverrideError}
+          overrides={[overrideWithContentType]}
+        />
+      );
+
+      const fieldInput = screen.getByPlaceholderText('Field name');
+      expect(fieldInput).not.toBeDisabled();
+
+      await user.click(fieldInput);
+
+      await waitFor(() => {
+        // Symbol fields should be available
+        expect(screen.getByText('Title')).toBeInTheDocument();
+        expect(screen.getByText('Slug')).toBeInTheDocument();
+      });
+
+      // Non-Symbol fields (Text and Link types) should NOT be available
+      expect(screen.queryByText('Body')).not.toBeInTheDocument();
+      expect(screen.queryByText('Author')).not.toBeInTheDocument();
     });
   });
 });

@@ -27,6 +27,7 @@ describe('ConfigScreen', () => {
       fields: [
         { id: 'title', name: 'Title', type: 'Symbol', required: false },
         { id: 'slug', name: 'Slug', type: 'Symbol', required: false },
+        { id: 'body', name: 'Body', type: 'Text', required: false },
       ],
     } as ContentTypeProps,
     {
@@ -35,6 +36,7 @@ describe('ConfigScreen', () => {
       fields: [
         { id: 'name', name: 'Name', type: 'Symbol', required: false },
         { id: 'title', name: 'Title', type: 'Symbol', required: false },
+        { id: 'bio', name: 'Bio', type: 'Text', required: false },
       ],
     } as ContentTypeProps,
   ];
@@ -455,6 +457,31 @@ describe('ConfigScreen', () => {
       expect(result).toBe(false);
       expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
       expect((await screen.findAllByText('Field name is required')).length).toBe(2);
+    });
+  });
+
+  describe('Source field filtering', () => {
+    it('should only show Symbol fields in sourceFieldId autocomplete', async () => {
+      const user = userEvent.setup();
+      render(<ConfigScreen />);
+
+      await waitFor(() => {
+        expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
+      });
+
+      const sourceFieldAutocomplete = screen.getByPlaceholderText(/search field name/i);
+      await user.click(sourceFieldAutocomplete);
+
+      await waitFor(() => {
+        // Symbol fields should be available
+        expect(screen.getByText('Title')).toBeInTheDocument();
+        expect(screen.getByText('Slug')).toBeInTheDocument();
+        expect(screen.getByText('Name')).toBeInTheDocument();
+      });
+
+      // Non-Symbol fields (Text type) should NOT be available
+      expect(screen.queryByText('Body')).not.toBeInTheDocument();
+      expect(screen.queryByText('Bio')).not.toBeInTheDocument();
     });
   });
 });

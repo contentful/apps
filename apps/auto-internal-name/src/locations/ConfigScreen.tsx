@@ -18,7 +18,7 @@ import { styles } from './ConfigScreen.styles';
 import { ContentTypeProps } from 'contentful-management';
 import OverrideRow from '../components/OverrideRow';
 import { Override, OverrideError } from '../utils/types';
-import { normalizeString } from '../utils/override';
+import { getUniqueShortTextFields, normalizeString } from '../utils/override';
 
 type AppParameters = {
   separator: string;
@@ -96,11 +96,7 @@ const ConfigScreen = () => {
           environmentId: sdk.ids.environment,
         });
 
-        const fields = contentTypes.items.flatMap((contentType) =>
-          contentType.fields.map((field) => ({ id: field.id, name: field.name }))
-        );
-
-        const uniqueFields = Array.from(new Map(fields.map((field) => [field.id, field])).values());
+        const uniqueFields = getUniqueShortTextFields(contentTypes);
 
         setContentTypes(contentTypes.items);
         setFields(uniqueFields);

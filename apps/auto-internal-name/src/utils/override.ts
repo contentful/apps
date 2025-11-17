@@ -1,22 +1,28 @@
-import { ContentTypeProps } from 'contentful-management';
+import { CollectionProp, ContentTypeProps } from 'contentful-management';
 import { AutocompleteItem, Override } from './types';
 
 export const EMPTY_AUTOCOMPLETE_ITEM = { id: '', name: '' };
 
 export const normalizeString = (str: string) => (str ? str.trim().toLowerCase() : '');
 
+export const getUniqueShortTextFields = (
+  contentTypes?: CollectionProp<ContentTypeProps> | ContentTypeProps[]
+) => {
+  if (!contentTypes) return [];
+
+  const fields = Array.isArray(contentTypes) ? contentTypes : contentTypes.items;
+  const allFields = fields.flatMap((ct) => ct.fields);
+  const filteredFields = allFields.filter((field) => field.type === 'Symbol');
+  const mappedFields = filteredFields.map((field) => ({ id: field.id, name: field.name }));
+
+  return Array.from(new Map(mappedFields.map((field) => [field.id, field])).values());
+};
+
 export const getFieldsFrom = (contentTypes: ContentTypeProps[], contentTypeId: string) => {
-  if (!contentTypeId) {
-    return [];
-  }
+  if (!contentTypeId) return [];
 
   const contentType = contentTypes.find((ct) => ct.sys.id === contentTypeId);
-  const mappedFields = contentType?.fields.map((field) => ({
-    id: field.id,
-    name: field.name,
-  }));
-
-  return mappedFields ? mappedFields : [];
+  return getUniqueShortTextFields(contentType ? [contentType] : undefined);
 };
 
 export const getInitialContentTypeName = (
