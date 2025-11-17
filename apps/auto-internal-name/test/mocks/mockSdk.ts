@@ -17,6 +17,16 @@ const mockSdk: any = {
       getMany: vi.fn(),
     },
   },
+  field: {
+    getValue: vi.fn().mockReturnValue(''),
+    setValue: vi.fn().mockResolvedValue(undefined),
+    onValueChanged: vi.fn(),
+    removeValue: vi.fn(),
+  },
+  locales: {
+    default: 'en-US',
+    available: ['en-US', 'es-ES'],
+  },
   notifier: {
     error: vi.fn(),
   },
