@@ -1,13 +1,26 @@
 import { useEffect, useState } from 'react';
-import { Button, FormControl, Modal, Paragraph, Select } from '@contentful/f36-components';
+import {
+  Button,
+  Flex,
+  FormControl,
+  Modal,
+  Paragraph,
+  Pill,
+  Select,
+} from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
+
+export interface SelectedContentType {
+  id: string;
+  name: string;
+}
 
 interface ContentTypePickerModalProps {
   sdk: PageAppSDK;
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (contentTypeId: string, contentTypeName: string) => void;
+  onSelect: (contentTypes: SelectedContentType[]) => void;
 }
 
 export const ContentTypePickerModal = ({
@@ -17,7 +30,7 @@ export const ContentTypePickerModal = ({
   onSelect,
 }: ContentTypePickerModalProps) => {
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
-  const [selectedContentType, setSelectedContentType] = useState<string>('');
+  const [selectedContentTypes, setSelectedContentTypes] = useState<SelectedContentType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -46,21 +59,38 @@ export const ContentTypePickerModal = ({
   useEffect(() => {
     // Reset selection when modal opens
     if (isOpen) {
-      setSelectedContentType('');
+      setSelectedContentTypes([]);
     }
   }, [isOpen]);
 
+  const handleAddContentType = (contentTypeId: string) => {
+    if (!contentTypeId) return;
+
+    const contentType = contentTypes.find((ct) => ct.sys.id === contentTypeId);
+    if (contentType && !selectedContentTypes.some((ct) => ct.id === contentTypeId)) {
+      setSelectedContentTypes([
+        ...selectedContentTypes,
+        { id: contentType.sys.id, name: contentType.name },
+      ]);
+    }
+  };
+
+  const handleRemoveContentType = (contentTypeId: string) => {
+    setSelectedContentTypes(selectedContentTypes.filter((ct) => ct.id !== contentTypeId));
+  };
+
   const handleContinue = () => {
-    if (!selectedContentType) {
-      sdk.notifier.error('Please select a content type');
+    if (selectedContentTypes.length === 0) {
+      sdk.notifier.error('Please select at least one content type');
       return;
     }
 
-    const contentType = contentTypes.find((ct) => ct.sys.id === selectedContentType);
-    if (contentType) {
-      onSelect(contentType.sys.id, contentType.name);
-    }
+    onSelect(selectedContentTypes);
   };
+
+  const availableContentTypes = contentTypes.filter(
+    (ct) => !selectedContentTypes.some((selected) => selected.id === ct.sys.id)
+  );
 
   return (
     <Modal title="Select content type(s)" isShown={isOpen} onClose={onClose} size="medium">
@@ -72,23 +102,46 @@ export const ContentTypePickerModal = ({
               Select the content type(s) you would like to use with this sync.
             </Paragraph>
             <FormControl isRequired>
-              <FormControl.Label>Content Type</FormControl.Label>
+              <FormControl.Label>
+                Content type{' '}
+                {selectedContentTypes.length > 0 && (
+                  <span style={{ fontWeight: 'normal', color: '#536171' }}>(required)</span>
+                )}
+              </FormControl.Label>
               <Select
                 id="content-type-select"
                 name="content-type-select"
-                value={selectedContentType}
-                onChange={(e) => setSelectedContentType(e.target.value)}
-                isDisabled={isLoading}>
+                value=""
+                onChange={(e) => {
+                  handleAddContentType(e.target.value);
+                }}
+                isDisabled={isLoading || availableContentTypes.length === 0}>
                 <Select.Option value="" isDisabled>
                   {isLoading ? 'Loading content types...' : 'Select one or more'}
                 </Select.Option>
-                {contentTypes.map((ct) => (
+                {availableContentTypes.map((ct) => (
                   <Select.Option key={ct.sys.id} value={ct.sys.id}>
                     {ct.name}
                   </Select.Option>
                 ))}
               </Select>
             </FormControl>
+
+            {selectedContentTypes.length > 0 && (
+              <Flex
+                flexWrap="wrap"
+                gap="spacingXs"
+                marginTop="spacingS"
+                style={{ marginTop: '12px' }}>
+                {selectedContentTypes.map((ct) => (
+                  <Pill
+                    key={ct.id}
+                    label={ct.name}
+                    onClose={() => handleRemoveContentType(ct.id)}
+                  />
+                ))}
+              </Flex>
+            )}
           </Modal.Content>
           <Modal.Controls>
             <Button onClick={onClose} variant="secondary">
@@ -97,7 +150,7 @@ export const ContentTypePickerModal = ({
             <Button
               onClick={handleContinue}
               variant="positive"
-              isDisabled={!selectedContentType || isLoading}>
+              isDisabled={selectedContentTypes.length === 0 || isLoading}>
               Continue
             </Button>
           </Modal.Controls>

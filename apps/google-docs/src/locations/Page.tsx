@@ -14,7 +14,7 @@ import {
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import mammoth from 'mammoth';
-import { ContentTypePickerModal } from '../components/ContentTypePickerModal';
+import { ContentTypePickerModal, SelectedContentType } from '../components/ContentTypePickerModal';
 
 function isValidGoogleDocUrl(url: string): boolean {
   return /^https:\/\/docs\.google\.com\/document\/d\/[A-Za-z0-9_-]+\/edit(?:\?[^#]*)?$/.test(url);
@@ -201,8 +201,11 @@ const Page = () => {
     return docx;
   };
 
-  const handleContentTypeSelected = (contentTypeId: string, contentTypeName: string) => {
-    sdk.notifier.success(`Selected content type: ${contentTypeName}`);
+  const handleContentTypeSelected = (contentTypes: SelectedContentType[]) => {
+    const names = contentTypes.map((ct) => ct.name).join(', ');
+    sdk.notifier.success(
+      `Selected ${contentTypes.length} content type${contentTypes.length > 1 ? 's' : ''}: ${names}`
+    );
     // TODO: Add logic to create entries from the document here
     setIsContentTypePickerOpen(false);
   };
