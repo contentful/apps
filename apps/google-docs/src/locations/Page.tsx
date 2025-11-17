@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -14,6 +14,7 @@ import {
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import mammoth from 'mammoth';
+import { ContentTypePickerModal } from '../components/ContentTypePickerModal';
 
 function isValidGoogleDocUrl(url: string): boolean {
   return /^https:\/\/docs\.google\.com\/document\/d\/[A-Za-z0-9_-]+\/edit(?:\?[^#]*)?$/.test(url);
@@ -36,6 +37,8 @@ const Page = () => {
   const [fetchedDocTitle, setFetchedDocTitle] = useState<string | null>(null);
   const [isDocxRendered, setIsDocxRendered] = useState<boolean>(false);
   const previewRef = useRef<HTMLDivElement | null>(null);
+
+  const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
 
   const validateGoogleDocUrl = (value: string) => {
     const trimmed = value.trim();
@@ -198,6 +201,12 @@ const Page = () => {
     return docx;
   };
 
+  const handleContentTypeSelected = (contentTypeId: string, contentTypeName: string) => {
+    sdk.notifier.success(`Selected content type: ${contentTypeName}`);
+    // TODO: Add logic to create entries from the document here
+    setIsContentTypePickerOpen(false);
+  };
+
   const onSubmitDoc = async () => {
     setSuccessMessage(null);
     setErrorMessage(null);
@@ -343,6 +352,19 @@ const Page = () => {
 
           {successMessage && <Note variant="positive">{successMessage}</Note>}
           {errorMessage && <Note variant="negative">{errorMessage}</Note>}
+
+          {(fetchedDocHtml || isDocxRendered) && (
+            <Box marginTop="spacingM">
+              <Button
+                variant="primary"
+                onClick={() => {
+                  setIsContentTypePickerOpen(true);
+                }}>
+                Select Content Type
+              </Button>
+            </Box>
+          )}
+
           {fetchedDocHtml && !isDocxRendered && (
             <Box marginTop="spacingL" style={{ border: '1px solid #e5e5e5', padding: '16px' }}>
               <Heading as="h3" marginBottom="spacingS">
@@ -369,6 +391,15 @@ const Page = () => {
           )}
         </Stack>
       </Box>
+
+      <ContentTypePickerModal
+        sdk={sdk}
+        isOpen={isContentTypePickerOpen}
+        onClose={() => {
+          setIsContentTypePickerOpen(false);
+        }}
+        onSelect={handleContentTypeSelected}
+      />
     </Flex>
   );
 };
