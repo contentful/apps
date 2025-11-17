@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { parseContentTypes } from './contentTypeParser.agent';
+import { analyzeContentTypes } from './contentTypeParser.agent';
 import type { ContentTypeProps } from 'contentful-management';
 
 const contentTypes: ContentTypeProps[] = [
@@ -225,9 +225,9 @@ describe('Content Type Parser Agent', () => {
       }
 
       // Calling the Content Type Parser Agent
-      const result = await parseContentTypes(contentTypes, {
-        modelVersion: 'gpt-4o-mini',
-        temperature: 0.3,
+      const result = await analyzeContentTypes({
+        contentTypes,
+        openAiApiKey: process.env.OPENAI_API_KEY,
       });
 
       // Verify the structure of the result

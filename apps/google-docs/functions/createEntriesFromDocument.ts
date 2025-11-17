@@ -4,12 +4,9 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-// INTEG-3262 and INTEG-3263: Likely imports to be used are commented out for now
-// import { ContentTypeProps, EntryProps, ContentFields } from 'contentful-management';
-// import { KeyValueMap } from 'contentful-management';
-import { parseContentTypes } from './agents/contentTypeParserAgent/contentTypeParser.agent';
+import { analyzeContentTypes } from './agents/contentTypeParserAgent/contentTypeParser.agent';
 import { createDocument } from './agents/documentParser.agent';
-import { fetchContentTypes } from './service/contentTypeService';
+import { fetchContentTypes as fetchContentTypes } from './service/contentTypeService';
 import { initContentfulManagementClient } from './service/initCMAClient';
 
 export type AppActionParameters = {
@@ -31,17 +28,15 @@ export const handler: FunctionEventHandler<
   event: AppActionRequest<'Custom', AppActionParameters>,
   context: FunctionEventContext
 ) => {
-  const { contentTypeIds, prompt } = event.body;
+  const { contentTypeIds } = event.body;
   const { openAiApiKey } = context.appInstallationParameters as AppInstallationParameters;
 
   // INTEG-3262 and INTEG-3263: Take in Content Type, Prompt, and Upload File from user
 
   const cma = initContentfulManagementClient(context);
+
   const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
-
-  const contentTypeParserAgentResult = await parseContentTypes(contentTypes, openAiApiKey);
-
-  console.log('contentTypeParserAgentResult', contentTypeParserAgentResult);
+  const contentTypeParserAgentResult = await analyzeContentTypes({ contentTypes, openAiApiKey });
 
   // INTEG-3261: Pass the ai content type response to the observer for analysis
   // createContentTypeObservationsFromLLMResponse()

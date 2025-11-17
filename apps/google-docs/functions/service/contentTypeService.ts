@@ -1,7 +1,7 @@
 import { PlainClientAPI } from 'contentful-management';
 
 /*
- * Fetch a content type by ID
+ * Fetches the user selected content types that the user wants the AI to create entries for
  * @param cma Content Management API client
  * @param contentTypeIds Array of content type IDs
  * @returns array of Content type json objects
@@ -11,10 +11,9 @@ export const fetchContentTypes = async (
   contentTypeIds: Set<string>
 ): Promise<any> => {
   try {
-    console.log('content type ids', [...contentTypeIds]);
     const response = await cma.contentType.getMany({});
-    const filteredContentTypes = response.items.filter((item) => contentTypeIds.has(item.sys.id));
-    return filteredContentTypes;
+    const selectedContentTypes = response.items.filter((item) => contentTypeIds.has(item.sys.id));
+    return selectedContentTypes;
   } catch (error) {
     throw new Error(`Failed to fetch content types ${contentTypeIds}: ${error}`);
   }

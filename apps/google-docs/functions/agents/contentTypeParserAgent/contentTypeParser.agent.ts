@@ -13,72 +13,49 @@ import { z } from 'zod';
 import { ContentTypeProps } from 'contentful-management';
 
 // ────────────────────────────────────────────────
-// Schema Definitions
+// Schema Definitions Move these to a different file
 // ────────────────────────────────────────────────
 
-/**
- * schema for field analysis
- */
-const FieldAnalysisSchema = z.object({
-  name: z.string(),
-  type: z.string(),
-  purpose: z.string(),
-  required: z.boolean(),
-});
-
-/**
- * schema for content type summary
- */
-const ContentTypeSummarySchema = z.object({
+// Each invidual CT analysis by the AI Agent output schema
+const ContentTypeAnalysisSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string(),
   purpose: z.string(),
   fieldCount: z.number(),
-  keyFields: z.array(z.string()).describe('Names of the most important fields'),
+  keyFields: z.array(z.string()),
   recommendations: z.array(z.string()),
 });
 
-/**
- * schema for the complete parse result
- */
-const ParseResultSchema = z.object({
-  contentTypes: z.array(ContentTypeSummarySchema),
+// The entire set of CT analyses by the AI Agent output schema
+const FinalContentTypesAnalysisSchema = z.object({
+  contentTypes: z.array(ContentTypeAnalysisSchema),
   summary: z.string(),
   complexity: z.string(),
 });
 
-// ────────────────────────────────────────────────
-// Type Exports
-// ────────────────────────────────────────────────
+export type ContentTypeSummary = z.infer<typeof ContentTypeAnalysisSchema>;
+export type FinalContentTypesResultSummary = z.infer<typeof FinalContentTypesAnalysisSchema>;
 
-export type ContentTypeSummary = z.infer<typeof ContentTypeSummarySchema>;
-export type ParseResult = z.infer<typeof ParseResultSchema>;
-export type FieldAnalysis = z.infer<typeof FieldAnalysisSchema>;
-
-// ────────────────────────────────────────────────
-// Main Parser Function
-// ────────────────────────────────────────────────
-
-/**
- * Configuration for the content type parser
- */
 export interface ContentTypeParserConfig {
+  contentTypes: ContentTypeProps[];
   openAiApiKey: string;
 }
 
 /**
- * Parses an array of Contentful content types and generates structured summaries
+ * AI Agent that parses an array of Contentful content types and generates structured summaries
  *
  * @param contentTypes - Array of Contentful content type objects
  * @param config - Optional configuration for the AI model
  * @returns Promise resolving to structured parse result with summaries
  *
  */
-export async function parseContentTypes(
-  contentTypes: ContentTypeProps[],
-  openAiApiKey: string
-): Promise<ParseResult> {
+export async function analyzeContentTypes({
+  contentTypes,
+  openAiApiKey,
+}: ContentTypeParserConfig): Promise<FinalContentTypesResultSummary> {
+  // TODO: Double check these values and make sure they are compatible because not every user will have a key
+  // to access all models
   const modelVersion = 'gpt-4o';
   const temperature = 0.3;
 
@@ -86,25 +63,18 @@ export async function parseContentTypes(
     apiKey: openAiApiKey,
   });
 
-  console.log(`🔍 Parsing ${contentTypes.length} content type(s)...`);
-
-  // Build the analysis prompt
   const prompt = buildAnalysisPrompt(contentTypes);
 
-  // Generate structured output using AI SDK
   const result = await generateObject({
     model: openaiClient(modelVersion),
-    schema: ParseResultSchema,
+    schema: FinalContentTypesAnalysisSchema,
     temperature,
     system: buildSystemPrompt(),
     prompt,
   });
 
-  const parseResult = result.object as ParseResult;
-
-  console.log(`✅ Successfully parsed ${parseResult.contentTypes.length} content type(s)`);
-
-  return parseResult;
+  const finalAnalysis = result.object as FinalContentTypesResultSummary;
+  return finalAnalysis;
 }
 
 // ────────────────────────────────────────────────
