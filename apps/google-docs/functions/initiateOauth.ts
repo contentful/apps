@@ -1,5 +1,3 @@
-import { AppEventHandlerResponse } from '@contentful/node-apps-toolkit';
-
 /*
  * INTEG-3271: Double check the imported types and make sure they work for Google Docs (use Klaviyo as a reference)
  */
@@ -11,6 +9,7 @@ import {
   AppEventHandlerRequest,
   OAuthResponseUrl,
   AppEventContext,
+  AppEventHandlerResponse,
 } from './types/oauth.types';
 
 export type OAuthSDK = {
@@ -22,7 +21,6 @@ export type OAuthSDK = {
 
 export async function initiateOauth(sdk: OAuthSDK): Promise<OAuthResponseUrl> {
   try {
-    // Initialize OAuth flow using the SDK
     const oauthResponse = await sdk.init();
 
     return {
@@ -38,6 +36,15 @@ export const handler = async (
   event: AppEventHandlerRequest,
   context: AppEventContext
 ): Promise<AppEventHandlerResponse> => {
-  // Use the oauth sdk to initiate the oauth flow, use initiateOauth.ts from Klaviyo as a reference
   const sdk = (context as any).oauthSdk;
+  if (!sdk) {
+    console.error('No SDK available in context');
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'No SDK available in context' }),
+    };
+  }
+
+  const oauthResponse = await initiateOauth(sdk);
+  return oauthResponse;
 };

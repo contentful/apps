@@ -1,12 +1,85 @@
 {
+  "name": "Google Docs",
+  "description": "Sync your Contentful content with Google Docs",
+  "id": "google-docs",
+  "category": "Productivity",
+  "version": "0.1.0",
+  "locations": [
+    {
+      "location": "app-config",
+      "component": "ConfigScreen"
+    }
+  ],
+  "parameters": {
+    "installation": [
+      {
+        "id": "apiKey",
+        "type": "Secret",
+        "name": "API Key",
+        "description": "API Key for the app to use the OpenAI API."
+      }
+    ]
+  },
   "functions": [
     {
       "id": "createEntriesFromDocumentFunction",
-      "name": "Create content blocks function",
+      "name": "Create content entries from document function",
       "description": "Function to create content blocks from App Action.",
       "path": "functions/createEntriesFromDocument.js",
       "entryFile": "functions/createEntriesFromDocument.ts",
       "allowNetworks": [],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "initiateGdocOauth",
+      "name": "Initiate Gdoc OAuth Flow",
+      "description": "Initiates the OAuth flow for Google Docs",
+      "path": "functions/initiateOauth.js",
+      "entryFile": "functions/initiateOauth.ts",
+      "allowNetworks": [
+        "www.google.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "completeGdocOauth",
+      "name": "Complete Gdoc OAuth Flow",
+      "description": "Completes the OAuth flow for Google Docs",
+      "path": "functions/completeOauth.js",
+      "entryFile": "functions/completeOauth.ts",
+      "allowNetworks": [
+        "a.google.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "revokeGdocOauthToken",
+      "name": "Revoke Gdoc OAuth Token",
+      "description": "Revoke token for the Google Docs app to disconnect from the app",
+      "path": "functions/disconnect.js",
+      "entryFile": "functions/disconnect.ts",
+      "allowNetworks": [
+        "a.google.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "checkGdocOauthTokenStatus",
+      "name": "Check Gdoc OAuth Token Status",
+      "description": "Checks the status of the Google Docs OAuth token to see if it is valid",
+      "path": "functions/checkStatus.js",
+      "entryFile": "functions/checkStatus.ts",
+      "allowNetworks": [
+        "a.google.com"
+      ],
       "accepts": [
         "appaction.call"
       ]
@@ -21,8 +94,8 @@
       "category": "Custom",
       "parameters": [
         {
-          "id": "contentType",
-          "name": "Content Type",
+          "id": "contentTypeId",
+          "name": "Content Type ID",
           "type": "Symbol",
           "required": true
         },

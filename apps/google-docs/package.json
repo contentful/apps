@@ -8,10 +8,12 @@
     "@contentful/f36-components": "^5.6.0",
     "@contentful/f36-tokens": "^5.1.0",
     "@contentful/field-editor-json": "^3.3.38",
+    "@contentful/node-apps-toolkit": "^3.13.0",
     "@contentful/react-apps-toolkit": "^1.2.16",
     "@emotion/css": "^11.13.4",
     "ai": "^5.0.81",
     "contentful-management": "^11.61.0",
+    "mammoth": "^1.11.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "zod": "^4.1.12"
@@ -28,7 +30,8 @@
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3EaGZUMKRKVZUyrcoNJ4o4 --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:dev": "source .env && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id \"$DEFINITIONS_ORG_ID\" --definition-id 653vTnuQw3j5onU1tUoH6t --token \"$CONTENTFUL_CMA_TOKEN\""
+    "deploy:dev": "npm run build && source .env && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id 653vTnuQw3j5onU1tUoH6t --token \"$CONTENTFUL_CMA_TOKEN\"",
+    "deploy:staging": "npm run build && source .env && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id 4i0mp5lQtgNsHYVrD5jIkj --token \"$CONTENTFUL_CMA_TOKEN\""
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -11,12 +11,16 @@ interface CompleteOAuthParams {
   state: string;
 }
 
-export async function completeOauth(sdk: OAuthSDK, params: CompleteOAuthParams): Promise<void> {
+export async function checkStatus(sdk: OAuthSDK): Promise<boolean> {
   try {
-    await sdk.exchange({ code: params.code, state: params.state });
+    const token = await sdk.token();
+    if (!token) {
+      return false;
+    }
+    return true;
   } catch (error) {
     console.error('Failed to complete OAuth flow:', error);
-    throw new Error('Failed to complete OAuth flow. Please try again: ' + error);
+    return false;
   }
 }
 
@@ -34,12 +38,10 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     };
   }
 
-  await completeOauth(sdk, {
-    code: event.body.code || '',
-    state: event.body.state || '',
-  });
+  const connected = await checkStatus(sdk);
 
   return {
     statusCode: 200,
+    connected,
   };
 };
