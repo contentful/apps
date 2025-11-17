@@ -13,9 +13,9 @@
   "parameters": {
     "installation": [
       {
-        "id": "apiKey",
+        "id": "openAiApiKey",
         "type": "Secret",
-        "name": "API Key",
+        "name": "OpenAI API Key",
         "description": "API Key for the app to use the OpenAI API."
       }
     ]

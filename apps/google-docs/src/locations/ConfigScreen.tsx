@@ -14,7 +14,7 @@ import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
 export interface AppInstallationParameters {
-  apiKey?: string;
+  openAiApiKey?: string;
   apiKeyLength?: number;
   apiKeySuffix?: string;
 }
@@ -273,7 +273,7 @@ const ConfigScreen = () => {
     const parametersToSave: Record<string, string | number> = {};
     // Only persist apiKey if user actually typed a new one (not the obfuscated placeholder)
     if (apiKey && apiKey !== apiKeyObfuscatedDisplay) {
-      parametersToSave.apiKey = apiKey;
+      parametersToSave.openAiApiKey = apiKey;
       parametersToSave.apiKeyLength = apiKey.length;
       parametersToSave.apiKeySuffix = apiKey.slice(-VISIBLE_SUFFIX_LENGTH);
     }
@@ -300,7 +300,7 @@ const ConfigScreen = () => {
         | (AppInstallationParameters & { apiKey?: string })
         | null;
       if (currentParameters) {
-        const { apiKey, apiKeyLength, apiKeySuffix } = currentParameters;
+        const { openAiApiKey: apiKey, apiKeyLength, apiKeySuffix } = currentParameters;
         const hasMeta =
           typeof apiKeyLength === 'number' &&
           typeof apiKeySuffix === 'string' &&
