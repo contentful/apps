@@ -1,8 +1,8 @@
 import { vi } from 'vitest';
-import { AppInstallationParameters, Override } from '../../src/utils/types';
+import { AppInstallationParameters } from '../../src/utils/types';
 import { mockCma } from './mockCma';
 
-const createMockSdk = (overrides?: Override[]) => {
+const createMockSdk = (overrides?: any) => {
   const baseMockSdk: any = {
     app: {
       onConfigure: vi.fn(),
