@@ -13,20 +13,23 @@
     "contentful-management": "11.62.0",
     "emotion": "10.0.17",
     "happy-dom": "^20.0.10",
+    "prettier": "^3.6.2",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
-    "build:functions": "contentful-app-scripts build-functions --ci",
     "test": "vitest",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "add-locations": "contentful-app-scripts add-locations",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:write": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
+    "lint:write": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "prettier:write": "prettier --write .",
+    "prettier:check": "prettier --check .",
+    "prettier:list": "prettier --l ."
   },
   "devDependencies": {
     "@contentful/app-scripts": "^2.5.6",
