@@ -38,6 +38,8 @@ export const handler: FunctionEventHandler<
   const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
   const contentTypeParserAgentResult = await analyzeContentTypes({ contentTypes, openAiApiKey });
 
+  console.log('contentTypeParserAgentResult', contentTypeParserAgentResult);
+
   // INTEG-3261: Pass the ai content type response to the observer for analysis
   // createContentTypeObservationsFromLLMResponse()
 
@@ -58,5 +60,5 @@ export const handler: FunctionEventHandler<
   // INTEG-3265: Create the assets in Contentful using the asset service
   // await createAssets()
 
-  return { success: true, response: {} };
+  return { success: true, response: contentTypeParserAgentResult };
 };

@@ -220,41 +220,28 @@ const Page = () => {
       setAnalysisError(null);
       setAnalysisResult(null);
 
-      // Get the app definition ID
       const appDefinitionId = sdk.ids.app;
 
       if (!appDefinitionId) {
         throw new Error('App definition ID not found');
       }
-
-      // Call the app action
       const result = await sdk.cma.appActionCall.createWithResult(
         {
           appDefinitionId,
           appActionId: '3nLAuoEuepbJMvdgp1qX6g',
         },
         {
-          parameters: {
-            contentTypeIds,
-          },
+          parameters: { contentTypeIds },
         }
       );
 
-      console.log('ct agent parse result', result);
-
-      // Check if the result has the expected structure
       if ('errors' in result && result.errors) {
         throw new Error(JSON.stringify(result.errors));
       }
 
-      setAnalysisResult(result);
-      sdk.notifier.success('Content types analyzed successfully!');
+      setAnalysisResult(result.sys);
     } catch (error) {
-      console.error('Failed to analyze content types:', error);
-      const errorMessage =
-        error instanceof Error ? error.message : 'Failed to analyze content types';
-      setAnalysisError(errorMessage);
-      sdk.notifier.error(errorMessage);
+      setAnalysisError(error instanceof Error ? error.message : 'Failed to analyze content types');
     } finally {
       setIsAnalyzing(false);
     }
@@ -406,18 +393,18 @@ const Page = () => {
           {successMessage && <Note variant="positive">{successMessage}</Note>}
           {errorMessage && <Note variant="negative">{errorMessage}</Note>}
 
-          {/* {(fetchedDocHtml || isDocxRendered) && ( */}
-          <Box marginTop="spacingM">
-            <Button
-              variant="primary"
-              onClick={() => {
-                setIsContentTypePickerOpen(true);
-              }}
-              isDisabled={isAnalyzing}>
-              Select Content Type
-            </Button>
-          </Box>
-          {/* )} */}
+          {(fetchedDocHtml || isDocxRendered) && (
+            <Box marginTop="spacingM">
+              <Button
+                variant="primary"
+                onClick={() => {
+                  setIsContentTypePickerOpen(true);
+                }}
+                isDisabled={isAnalyzing}>
+                Select Content Type
+              </Button>
+            </Box>
+          )}
 
           {isAnalyzing && (
             <Box marginTop="spacingM">
@@ -437,7 +424,7 @@ const Page = () => {
                 Analysis Result
               </Heading>
               <Paragraph marginBottom="spacingS">
-                Raw output from the content type parser:
+                Raw output from the content type analysis agent:
               </Paragraph>
               <Box
                 style={{
@@ -451,7 +438,7 @@ const Page = () => {
                   whiteSpace: 'pre-wrap',
                   wordBreak: 'break-word',
                 }}>
-                {JSON.stringify(analysisResult, null, 2)}
+                {JSON.stringify(analysisResult.result.response, null, 2)}
               </Box>
             </Box>
           )}

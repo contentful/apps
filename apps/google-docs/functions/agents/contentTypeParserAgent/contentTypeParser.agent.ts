@@ -1,41 +1,7 @@
-/**
- * Content Type Parser Agent
- *
- * Agent that analyzes Contentful content type JSONs and generates
- * structured summaries for each content type.
- */
-
-import { openai } from '@ai-sdk/openai';
 import { createOpenAI } from '@ai-sdk/openai';
-
+import { FinalContentTypesResultSummary, FinalContentTypesAnalysisSchema } from './schema';
 import { generateObject } from 'ai';
-import { z } from 'zod';
 import { ContentTypeProps } from 'contentful-management';
-
-// ────────────────────────────────────────────────
-// Schema Definitions Move these to a different file
-// ────────────────────────────────────────────────
-
-// Each invidual CT analysis by the AI Agent output schema
-const ContentTypeAnalysisSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
-  purpose: z.string(),
-  fieldCount: z.number(),
-  keyFields: z.array(z.string()),
-  recommendations: z.array(z.string()),
-});
-
-// The entire set of CT analyses by the AI Agent output schema
-const FinalContentTypesAnalysisSchema = z.object({
-  contentTypes: z.array(ContentTypeAnalysisSchema),
-  summary: z.string(),
-  complexity: z.string(),
-});
-
-export type ContentTypeSummary = z.infer<typeof ContentTypeAnalysisSchema>;
-export type FinalContentTypesResultSummary = z.infer<typeof FinalContentTypesAnalysisSchema>;
 
 export interface ContentTypeParserConfig {
   contentTypes: ContentTypeProps[];
@@ -76,10 +42,6 @@ export async function analyzeContentTypes({
   const finalAnalysis = result.object as FinalContentTypesResultSummary;
   return finalAnalysis;
 }
-
-// ────────────────────────────────────────────────
-// Prompt Building
-// ────────────────────────────────────────────────
 
 /**
  * Builds the system prompt for the AI
