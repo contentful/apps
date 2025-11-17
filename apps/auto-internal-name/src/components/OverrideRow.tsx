@@ -18,7 +18,8 @@ type OverrideRowProps = {
   overrideItem: Override;
   overrideError?: OverrideError;
   overrides: Override[];
-  setOverrides: (items: (prev: Override[]) => Override[]) => void;
+  onOverrideChange: (override: Override) => void;
+  onOverrideDelete: (overrideId: string) => void;
 };
 
 const OverrideRow: React.FC<OverrideRowProps> = ({
@@ -26,7 +27,8 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
   overrideItem,
   overrideError,
   overrides,
-  setOverrides,
+  onOverrideChange,
+  onOverrideDelete,
 }) => {
   const [filteredContentTypes, setFilteredContentTypes] = useState<ContentTypeProps[]>([]);
   const [filteredFields, setfilteredFields] = useState<AutocompleteItem[]>([]);
@@ -69,28 +71,15 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
     }
   }, [contentTypes, selectedContentType, overrides]);
 
-  const deleteOverride = (overrideItem: Override) => {
-    setOverrides((prev: Override[]) => prev.filter((o) => o.id !== overrideItem.id));
-  };
-
   const updateOverride = (contentTypeId?: string, fieldId?: string) => {
-    setOverrides((prev: Override[]) =>
-      prev.map((override) => {
-        if (override.id !== overrideItem.id) {
-          return override;
-        }
+    const newContentTypeId = contentTypeId || contentTypeId === '' ? { contentTypeId } : undefined;
+    const newFieldId = fieldId || fieldId === '' ? { fieldId } : undefined;
 
-        const newContentTypeId =
-          contentTypeId || contentTypeId === '' ? { contentTypeId } : undefined;
-        const newFieldId = fieldId || fieldId === '' ? { fieldId } : undefined;
-
-        return {
-          ...override,
-          ...newContentTypeId,
-          ...newFieldId,
-        };
-      })
-    );
+    onOverrideChange({
+      ...overrideItem,
+      ...newContentTypeId,
+      ...newFieldId,
+    });
   };
 
   const handleCTInputChange = (name: string) => {
@@ -201,7 +190,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
             aria-label="Delete override"
             icon={<TrashSimpleIcon />}
             variant="secondary"
-            onClick={() => deleteOverride(overrideItem)}
+            onClick={() => onOverrideDelete(overrideItem.id)}
           />
         </Box>
       </Flex>

@@ -7,16 +7,12 @@ import {
   Box,
   FormControl,
   TextInput,
-  Button,
   Autocomplete,
-  Tooltip,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
-import { PlusIcon } from '@contentful/f36-icons';
 import { styles } from './ConfigScreen.styles';
-import { ContentTypeProps } from 'contentful-management';
-import OverrideRow from '../components/OverrideRow';
+import ContentTypeOverrides from '../components/ContentTypeOverrides';
 import { Override, OverrideError } from '../utils/types';
 import { getUniqueShortTextFields, normalizeString } from '../utils/override';
 
@@ -37,7 +33,6 @@ const ConfigScreen = () => {
   });
 
   const [filteredSourceFields, setFilteredSourceFields] = useState<SimplifiedField[]>([]);
-  const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [fields, setFields] = useState<SimplifiedField[]>([]);
 
   const [sourceFieldError, setSourceFieldError] = useState<boolean>(false);
@@ -98,31 +93,13 @@ const ConfigScreen = () => {
 
         const uniqueFields = getUniqueShortTextFields(contentTypes);
 
-        setContentTypes(contentTypes.items);
         setFields(uniqueFields);
         setFilteredSourceFields(uniqueFields);
       } catch (error) {
         console.warn('[Error] Failed to load source fields:', error);
       }
     })();
-  }, []);
-
-  const maxOverridesReached = () => {
-    return (
-      contentTypes.every((ct) => parameters.overrides.some((o) => o.contentTypeId === ct.sys.id)) ||
-      contentTypes.length <= parameters.overrides.length
-    );
-  };
-
-  const addOverride = () => {
-    setParameters((prev) => ({
-      ...prev,
-      overrides: [
-        ...prev.overrides,
-        { id: window.crypto.randomUUID(), contentTypeId: '', fieldId: '' },
-      ],
-    }));
-  };
+  }, [sdk]);
 
   const handleSourceFieldInputChange = (name: string) => {
     if (!name) {
@@ -146,7 +123,7 @@ const ConfigScreen = () => {
     }
   };
 
-  const setOverrides = (updater: (prev: Override[]) => Override[]) => {
+  const handleOverridesChange = (updater: (prev: Override[]) => Override[]) => {
     setParameters((prev) => ({
       ...prev,
       overrides: updater(prev.overrides),
@@ -208,36 +185,11 @@ const ConfigScreen = () => {
           </FormControl>
         </Box>
 
-        <Flex flexDirection="column" fullWidth>
-          <Heading as="h3">Overrides</Heading>
-          <Paragraph>
-            If an override is needed per content type, select the content type and the field name
-            you wish to use for each entry.
-          </Paragraph>
-          {parameters.overrides?.map((override) => (
-            <OverrideRow
-              key={override.id}
-              contentTypes={contentTypes}
-              overrideItem={override}
-              overrideError={overrideErrors[override.id]}
-              overrides={parameters.overrides}
-              setOverrides={setOverrides}></OverrideRow>
-          ))}
-          <Box marginBottom="spacingXl">
-            <Tooltip
-              placement="right"
-              id="tooltip-1"
-              content={maxOverridesReached() ? 'No more content types available.' : undefined}>
-              <Button
-                aria-label="Add override"
-                startIcon={<PlusIcon />}
-                isDisabled={maxOverridesReached()}
-                onClick={() => addOverride()}>
-                Add override
-              </Button>
-            </Tooltip>
-          </Box>
-        </Flex>
+        <ContentTypeOverrides
+          overrides={parameters.overrides}
+          overrideErrors={overrideErrors}
+          onOverridesChange={handleOverridesChange}
+        />
       </Flex>
     </Form>
   );
