@@ -9,8 +9,8 @@ import type {
 // import { KeyValueMap } from 'contentful-management';
 import { parseContentTypes } from './agents/contentTypeParserAgent/contentTypeParser.agent';
 import { createDocument } from './agents/documentParser.agent';
-import { getCMAClient, fetchContentTypes } from './utils/fetchContentType';
-// import { createEntries, createAssets } from './service/entryService';
+import { fetchContentTypes } from './service/contentTypeService';
+import { initContentfulManagementClient } from './service/initCMAClient';
 
 export type AppActionParameters = {
   contentTypeIds: Array<string>;
@@ -38,8 +38,8 @@ export const handler: FunctionEventHandler<
 
   // INTEG-3262: Parse the content type
   // Step 1: Initialize CMA client and fetch the content types
-  const cmaClient = getCMAClient(context);
-  const contentTypes = await fetchContentTypes(cmaClient, contentTypeIds);
+  const cma = initContentfulManagementClient(context);
+  const contentTypes = await fetchContentTypes(cma, contentTypeIds);
 
   // Step 2: Pass the content types to the AI agent for parsing
   const contentTypeParseResult = await parseContentTypes(contentTypes, {
