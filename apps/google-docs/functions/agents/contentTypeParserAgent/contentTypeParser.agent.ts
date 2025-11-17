@@ -1,10 +1,8 @@
 /**
- * INTEG-3262: Content Type Parser Agent
+ * Content Type Parser Agent
  *
  * Agent that analyzes Contentful content type JSONs and generates
  * structured summaries for each content type.
- * See https://contentful.atlassian.net/wiki/spaces/ECO/pages/5850955777/RFC+Google+Docs+V1+AI-Gen
- * for more details.
  */
 
 import { openai } from '@ai-sdk/openai';
@@ -17,7 +15,7 @@ import { ContentTypeProps } from 'contentful-management';
 // ────────────────────────────────────────────────
 
 /**
- * Simplified schema for field analysis
+ * schema for field analysis
  */
 const FieldAnalysisSchema = z.object({
   name: z.string(),
@@ -27,7 +25,7 @@ const FieldAnalysisSchema = z.object({
 });
 
 /**
- * Simplified schema for content type summary
+ * schema for content type summary
  */
 const ContentTypeSummarySchema = z.object({
   id: z.string(),
@@ -40,7 +38,7 @@ const ContentTypeSummarySchema = z.object({
 });
 
 /**
- * Simplified schema for the complete parse result
+ * schema for the complete parse result
  */
 const ParseResultSchema = z.object({
   contentTypes: z.array(ContentTypeSummarySchema),
@@ -75,12 +73,6 @@ export interface ContentTypeParserConfig {
  * @param config - Optional configuration for the AI model
  * @returns Promise resolving to structured parse result with summaries
  *
- * @example
- * ```typescript
- * const contentTypes = await cma.contentType.getMany({ contentTypeIds: ['blogPost', 'author'] });
- * const result = await parseContentTypes(contentTypes.items);
- * console.log(result.contentTypes[0].purpose);
- * ```
  */
 export async function parseContentTypes(
   contentTypes: ContentTypeProps[],
@@ -159,39 +151,4 @@ Also provide:
 - Complexity assessment (simple/moderate/complex as a string)
 
 Keep responses concise and actionable.`;
-}
-
-// ────────────────────────────────────────────────
-// Utility Functions
-// ────────────────────────────────────────────────
-
-/**
- * Generates a plain text summary from a parse result
- * Useful for displaying summaries in UIs or logs
- */
-export function generateTextSummary(parseResult: ParseResult): string {
-  let output = `Content Model Summary\n`;
-  output += `${'='.repeat(50)}\n\n`;
-  output += `${parseResult.summary}\n\n`;
-  output += `Complexity: ${parseResult.complexity}\n`;
-  output += `Total Content Types: ${parseResult.contentTypes.length}\n\n`;
-
-  parseResult.contentTypes.forEach((ct, index) => {
-    output += `${index + 1}. ${ct.name} (${ct.id})\n`;
-    output += `   ${ct.description}\n`;
-    output += `   Purpose: ${ct.purpose}\n`;
-    output += `   Fields: ${ct.fieldCount}\n`;
-    if (ct.keyFields.length > 0) {
-      output += `   Key Fields: ${ct.keyFields.join(', ')}\n`;
-    }
-    if (ct.recommendations.length > 0) {
-      output += `   Recommendations:\n`;
-      ct.recommendations.forEach((rec) => {
-        output += `     - ${rec}\n`;
-      });
-    }
-    output += `\n`;
-  });
-
-  return output;
 }

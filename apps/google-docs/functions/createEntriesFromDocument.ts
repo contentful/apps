@@ -7,7 +7,7 @@ import type {
 // INTEG-3262 and INTEG-3263: Likely imports to be used are commented out for now
 // import { ContentTypeProps, EntryProps, ContentFields } from 'contentful-management';
 // import { KeyValueMap } from 'contentful-management';
-import { parseContentTypes } from './agents/contentTypeParser.agent';
+import { parseContentTypes } from './agents/contentTypeParserAgent/contentTypeParser.agent';
 import { createDocument } from './agents/documentParser.agent';
 import { getCMAClient, fetchContentTypes } from './utils/fetchContentType';
 // import { createEntries, createAssets } from './service/entryService';
