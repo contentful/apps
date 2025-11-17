@@ -1,8 +1,8 @@
 import { vi } from 'vitest';
-import { AppInstallationParameters } from '../../src/utils/types';
+import { AppInstallationParameters, Override } from '../../src/utils/types';
 import { mockCma } from './mockCma';
 
-export const createMockSdk = (overrides?: any) => {
+const createMockSdk = (overrides?: Override[]) => {
   const baseMockSdk: any = {
     app: {
       onConfigure: vi.fn(),
@@ -12,11 +12,11 @@ export const createMockSdk = (overrides?: any) => {
     },
     ids: {
       app: 'test-app',
-    space: 'test-space',
-    environment: 'test-environment',
-    entry: 'current-entry-id',
-    contentType: 'test-content-type-id',
-  },
+      space: 'test-space',
+      environment: 'test-environment',
+      entry: 'current-entry-id',
+      contentType: 'test-content-type-id',
+    },
     field: {
       getValue: vi.fn().mockReturnValue(''),
       setValue: vi.fn().mockResolvedValue(undefined),
@@ -56,4 +56,6 @@ export const createMockSdk = (overrides?: any) => {
   return overrides ? { ...baseMockSdk, ...overrides } : baseMockSdk;
 };
 
-export const mockSdk = createMockSdk();
+const mockSdk = createMockSdk();
+
+export { mockSdk, createMockSdk };
