@@ -15,18 +15,18 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 
 export interface AppInstallationParameters {
   openAiApiKey?: string;
-  apiKeyLength?: number;
-  apiKeySuffix?: string;
+  openAiApiKeyLength?: number;
+  openAiApiKeySuffix?: string;
 }
 
 const VISIBLE_SUFFIX_LENGTH = 4;
 
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
-  const [apiKeyInput, setApiKeyInput] = useState<string>('');
-  const [apiKeyObfuscatedDisplay, setApiKeyObfuscatedDisplay] = useState<string>('');
-  const [apiKeyIsValid, setApiKeyIsValid] = useState<boolean>(true);
-  const [isValidatingApiKey, setIsValidatingApiKey] = useState<boolean>(false);
+  const [openAiApiKeyInput, setOpenAiApiKeyInput] = useState<string>('');
+  const [openAiApiKeyObfuscatedDisplay, setOpenAiApiKeyObfuscatedDisplay] = useState<string>('');
+  const [openAiApiKeyIsValid, setOpenAiApiKeyIsValid] = useState<boolean>(true);
+  const [isValidatingOpenAiApiKey, setIsValidatingOpenAiApiKey] = useState<boolean>(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState(false);
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
@@ -269,19 +269,19 @@ const ConfigScreen = () => {
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
-    const apiKey = apiKeyInput.trim();
+    const openAiApiKey = openAiApiKeyInput.trim();
     const parametersToSave: Record<string, string | number> = {};
     // Only persist apiKey if user actually typed a new one (not the obfuscated placeholder)
-    if (apiKey && apiKey !== apiKeyObfuscatedDisplay) {
-      parametersToSave.openAiApiKey = apiKey;
-      parametersToSave.apiKeyLength = apiKey.length;
-      parametersToSave.apiKeySuffix = apiKey.slice(-VISIBLE_SUFFIX_LENGTH);
+    if (openAiApiKey && openAiApiKey !== openAiApiKeyObfuscatedDisplay) {
+      parametersToSave.openAiApiKey = openAiApiKey;
+      parametersToSave.openAiApiKeyLength = openAiApiKey.length;
+      parametersToSave.openAiApiKeySuffix = openAiApiKey.slice(-VISIBLE_SUFFIX_LENGTH);
     }
     return {
       parameters: parametersToSave,
       targetState: currentState,
     };
-  }, [sdk, apiKeyInput, apiKeyObfuscatedDisplay]);
+  }, [sdk, openAiApiKeyInput, openAiApiKeyObfuscatedDisplay]);
 
   const onConfigurationCompleted = useCallback((error?: unknown) => {
     if (!error) {
@@ -300,7 +300,11 @@ const ConfigScreen = () => {
         | (AppInstallationParameters & { apiKey?: string })
         | null;
       if (currentParameters) {
-        const { openAiApiKey: apiKey, apiKeyLength, apiKeySuffix } = currentParameters;
+        const {
+          openAiApiKey: apiKey,
+          openAiApiKeyLength: apiKeyLength,
+          openAiApiKeySuffix: apiKeySuffix,
+        } = currentParameters;
         const hasMeta =
           typeof apiKeyLength === 'number' &&
           typeof apiKeySuffix === 'string' &&
@@ -315,8 +319,8 @@ const ConfigScreen = () => {
           const visibleSuffix = suffix.slice(-VISIBLE_SUFFIX_LENGTH);
           const maskedLength = Math.max(0, totalLength - visibleSuffix.length);
           const masked = '•'.repeat(maskedLength) + visibleSuffix;
-          setApiKeyObfuscatedDisplay(masked);
-          setApiKeyInput(masked);
+          setOpenAiApiKeyObfuscatedDisplay(masked);
+          setOpenAiApiKeyInput(masked);
         }
       }
       const isInstalled = await sdk.app.isInstalled();
@@ -333,25 +337,25 @@ const ConfigScreen = () => {
   const validateApiKey = useCallback(
     async (value: string) => {
       const token = value.trim();
-      if (token === apiKeyObfuscatedDisplay) {
-        setApiKeyIsValid(true);
+      if (token === openAiApiKeyObfuscatedDisplay) {
+        setOpenAiApiKeyIsValid(true);
         return true;
       }
       if (token.length === 0) {
-        setApiKeyIsValid(true);
+        setOpenAiApiKeyIsValid(true);
         return true;
       }
       try {
-        setIsValidatingApiKey(true);
+        setIsValidatingOpenAiApiKey(true);
         return true;
       } catch (e) {
-        setApiKeyIsValid(false);
+        setOpenAiApiKeyIsValid(false);
         return false;
       } finally {
-        setIsValidatingApiKey(false);
+        setIsValidatingOpenAiApiKey(false);
       }
     },
-    [apiKeyObfuscatedDisplay, sdk]
+    [openAiApiKeyObfuscatedDisplay, sdk]
   );
 
   return (
@@ -393,11 +397,11 @@ const ConfigScreen = () => {
               <TextInput
                 id="apiKey"
                 name="apiKey"
-                value={apiKeyInput}
+                value={openAiApiKeyInput}
                 placeholder="sk-xxxx"
-                onChange={(e) => setApiKeyInput(e.target.value)}
-                onBlur={() => void validateApiKey(apiKeyInput)}
-                isInvalid={!apiKeyIsValid}
+                onChange={(e) => setOpenAiApiKeyInput(e.target.value)}
+                onBlur={() => void validateApiKey(openAiApiKeyInput)}
+                isInvalid={!openAiApiKeyIsValid}
                 style={{ flex: 1 }}
               />
             </Box>
@@ -432,12 +436,14 @@ const ConfigScreen = () => {
               </a>
               .
             </Paragraph>
-            {!apiKeyIsValid && (
+            {!openAiApiKeyIsValid && (
               <Paragraph marginTop="spacingS" style={{ color: '#cc2e2e' }}>
                 Unable to validate the API key. Please check and try again.
               </Paragraph>
             )}
-            {isValidatingApiKey && <Paragraph marginTop="spacingS">Validating key…</Paragraph>}
+            {isValidatingOpenAiApiKey && (
+              <Paragraph marginTop="spacingS">Validating key…</Paragraph>
+            )}
           </FormControl>
         </Form>
       </Box>
