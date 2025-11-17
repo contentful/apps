@@ -228,19 +228,6 @@ const Page = () => {
         throw new Error('App definition ID not found');
       }
 
-      console.log('sdk.ids.environment', sdk.ids.environment);
-      console.log('sdk.ids.space', sdk.ids.space);
-
-      const appActions = await sdk.cma.appAction.getManyForEnvironment({
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      });
-      console.log('app actions', appActions);
-
-      const createEntriesFromDocumentAction = appActions.items.find(
-        (action) => action.name === 'createEntriesFromDocumentAction'
-      );
-
       // Call the app action
       const result = await sdk.cma.appActionCall.createWithResult(
         {
@@ -249,7 +236,7 @@ const Page = () => {
         },
         {
           parameters: {
-            contentTypeIds: contentTypeIds[0],
+            contentTypeIds,
           },
         }
       );

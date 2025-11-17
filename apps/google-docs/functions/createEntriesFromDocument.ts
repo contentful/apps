@@ -13,7 +13,7 @@ import { fetchContentTypes } from './service/contentTypeService';
 import { initContentfulManagementClient } from './service/initCMAClient';
 
 export type AppActionParameters = {
-  contentTypeIds: string;
+  contentTypeIds: string[];
   prompt: string;
 };
 interface AppInstallationParameters {
@@ -31,7 +31,9 @@ export const handler: FunctionEventHandler<
   event: AppActionRequest<'Custom', AppActionParameters>,
   context: FunctionEventContext
 ) => {
+  console.log('event.body', event.body);
   const { contentTypeIds, prompt } = event.body;
+  console.log('contentTypeIds', contentTypeIds, typeof contentTypeIds);
   const { openAiApiKey } = context.appInstallationParameters as AppInstallationParameters;
 
   // INTEG-3262 and INTEG-3263: Take in Content Type, Prompt, and Upload File from user
@@ -40,9 +42,7 @@ export const handler: FunctionEventHandler<
   // Step 1: Initialize CMA client and fetch the content types
   const cma = initContentfulManagementClient(context);
   console.log('fetching content types', contentTypeIds, typeof contentTypeIds);
-  const contentTypeIdsSet = new Set<string>();
-  contentTypeIdsSet.add(contentTypeIds);
-  const contentTypes = await fetchContentTypes(cma, contentTypeIdsSet);
+  const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
   console.log('content types', contentTypes);
 
   return { success: true, response: contentTypes };

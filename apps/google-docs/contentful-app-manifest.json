@@ -85,27 +85,5 @@
       ]
     }
   ],
-  "actions": [
-    {
-      "id": "createEntriesFromDocumentAction",
-      "name": "Create entries from an uploaded document",
-      "type": "function-invocation",
-      "functionId": "createEntriesFromDocumentFunction",
-      "category": "Custom",
-      "parameters": [
-        {
-          "id": "contentTypeIds",
-          "name": "Content Type IDs",
-          "type": "Symbol",
-          "required": true
-        },
-        {
-          "id": "prompt",
-          "name": "Prompt from the user",
-          "type": "Symbol",
-          "required": true
-        }
-      ]
-    }
-  ]
+  "actions": []
 }
