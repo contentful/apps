@@ -3,7 +3,7 @@ import { Autocomplete, Flex, FormControl, IconButton, Box } from '@contentful/f3
 import { styles } from '../locations/ConfigScreen.styles';
 import { TrashSimpleIcon } from '@contentful/f36-icons';
 import { ContentTypeProps } from 'contentful-management';
-import { AutocompleteItem, Override } from '../utils/types';
+import { AutocompleteItem, Override, OverrideError } from '../utils/types';
 import {
   EMPTY_AUTOCOMPLETE_ITEM,
   filterItemsByName,
@@ -16,7 +16,7 @@ import {
 type OverrideRowProps = {
   contentTypes: ContentTypeProps[];
   overrideItem: Override;
-  overrideError: { contentTypeId: boolean; fieldId: boolean };
+  overrideError?: OverrideError;
   overrides: Override[];
   setOverrides: (items: (prev: Override[]) => Override[]) => void;
 };
@@ -158,7 +158,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
         <FormControl
           id="contentTypeId"
           className={styles.formControl}
-          isInvalid={overrideError?.contentTypeId}
+          isInvalid={overrideError?.isContentTypeMissing}
           isRequired>
           <FormControl.Label marginBottom="spacingS">Content type</FormControl.Label>
           <Autocomplete
@@ -171,14 +171,14 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
             onSelectItem={(item: AutocompleteItem) => handleCTItemSelection(item)}
             placeholder="Content type name"
           />
-          {overrideError?.contentTypeId && (
+          {overrideError?.isContentTypeMissing && (
             <FormControl.ValidationMessage>Content type is required</FormControl.ValidationMessage>
           )}
         </FormControl>
         <FormControl
           id="fieldName"
           className={styles.formControl}
-          isInvalid={overrideError?.fieldId}
+          isInvalid={overrideError?.isFieldMissing}
           isRequired>
           <FormControl.Label marginBottom="spacingS">Field name</FormControl.Label>
           <Autocomplete
@@ -192,7 +192,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
             onSelectItem={(item: AutocompleteItem) => handleFieldItemSelection(item)}
             placeholder="Field name"
           />
-          {overrideError?.fieldId && (
+          {overrideError?.isFieldMissing && (
             <FormControl.ValidationMessage>Field name is required</FormControl.ValidationMessage>
           )}
         </FormControl>

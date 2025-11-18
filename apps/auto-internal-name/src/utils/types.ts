@@ -8,3 +8,8 @@ export type AutocompleteItem = {
   id: string;
   name: string;
 };
+
+export type OverrideError = {
+  isContentTypeMissing: boolean;
+  isFieldMissing: boolean;
+};

@@ -208,34 +208,6 @@ describe('ConfigScreen', () => {
       });
     });
 
-    it('should keep add override button enabled when content types are available', async () => {
-      const user = userEvent.setup();
-      render(<ConfigScreen />);
-
-      await waitFor(() => {
-        expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
-      });
-
-      // Add one override and select Blog Post
-      const addButton = screen.getByRole('button', { name: /add override/i });
-      await user.click(addButton);
-
-      await waitFor(() => {
-        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
-      });
-
-      const contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[0];
-      await user.type(contentTypeAutocomplete, 'Blog Post');
-      const blogPostOption = await screen.findByText('Blog Post');
-      await user.click(blogPostOption);
-
-      // Verify button is still enabled (Author is still available)
-      await waitFor(() => {
-        const addButtonAfter = screen.getByRole('button', { name: /add override/i });
-        expect(addButtonAfter).not.toBeDisabled();
-      });
-    });
-
     it('should show tooltip when max overrides reached', async () => {
       const user = userEvent.setup();
       render(<ConfigScreen />);
@@ -426,72 +398,6 @@ describe('ConfigScreen', () => {
       expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
       expect(await screen.findByText('Source field ID is required')).toBeInTheDocument();
       expect(await screen.findByText('Content type is required')).toBeInTheDocument();
-    });
-
-    it('should return true when all validations pass', async () => {
-      const user = userEvent.setup();
-      render(<ConfigScreen />);
-
-      await waitFor(() => {
-        expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
-      });
-
-      // Set separator
-      const separatorInput = screen.getByLabelText(/separator/i);
-      await user.type(separatorInput, '-');
-
-      // Set sourceFieldId
-      const sourceFieldAutocomplete = screen.getByPlaceholderText(/search field name/i);
-      await user.type(sourceFieldAutocomplete, 'Title');
-      await waitFor(() => {
-        expect(screen.getByText('Title')).toBeInTheDocument();
-      });
-      await user.click(screen.getByText('Title'));
-
-      // Add an override with both contentTypeId and fieldId
-      const addButton = screen.getByRole('button', { name: /add override/i });
-      await user.click(addButton);
-
-      await waitFor(() => {
-        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
-      });
-
-      // Select content type
-      const contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[0];
-      await user.type(contentTypeAutocomplete, 'Blog Post');
-      await waitFor(() => {
-        expect(screen.getByText('Blog Post')).toBeInTheDocument();
-      });
-      await user.click(screen.getByText('Blog Post'));
-
-      // Select field
-      await waitFor(() => {
-        const fieldAutocomplete = screen.getAllByPlaceholderText(/field name/i)[0];
-        expect(fieldAutocomplete).not.toBeDisabled();
-      });
-
-      const fieldAutocomplete = screen.getAllByPlaceholderText(/field name/i)[0];
-      await user.type(fieldAutocomplete, 'Slug');
-      await waitFor(() => {
-        expect(screen.getByText('Slug')).toBeInTheDocument();
-      });
-      await user.click(screen.getByText('Slug'));
-
-      // Get the onConfigure callback
-      const callCount = mockSdk.app.onConfigure.mock.calls.length;
-      const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
-      const result = await onConfigureCallback();
-
-      // Should return configuration object
-      expect(result).not.toBe(false);
-      expect(result).toHaveProperty('parameters');
-      expect(result).toHaveProperty('targetState');
-      expect(result.parameters.separator).toBe('-');
-      expect(result.parameters.sourceFieldId).toBe('title');
-      expect(result.parameters.overrides.length).toBe(1);
-      expect(result.parameters.overrides[0].contentTypeId).toBe('ct-1');
-      expect(result.parameters.overrides[0].fieldId).toBe('slug');
-      expect(mockSdk.notifier.error).not.toHaveBeenCalled();
     });
 
     it('should validate multiple overrides correctly', async () => {

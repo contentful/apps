@@ -17,7 +17,7 @@ import { PlusIcon } from '@contentful/f36-icons';
 import { styles } from './ConfigScreen.styles';
 import { ContentTypeProps } from 'contentful-management';
 import OverrideRow from '../components/OverrideRow';
-import { Override } from '../utils/types';
+import { Override, OverrideError } from '../utils/types';
 import { normalizeString } from '../utils/override';
 
 type AppParameters = {
@@ -40,27 +40,28 @@ const ConfigScreen = () => {
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [fields, setFields] = useState<SimplifiedField[]>([]);
 
-  const [errors, setErrors] = useState<{
-    sourceFieldId: boolean;
-    overrides: Record<string, { contentTypeId: boolean; fieldId: boolean }>;
-  }>({ sourceFieldId: false, overrides: {} });
+  const [sourceFieldError, setSourceFieldError] = useState<boolean>(false);
+  const [overrideErrors, setOverrideErrors] = useState<Record<string, OverrideError>>({});
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
-    const overrideErrors: Record<string, { contentTypeId: boolean; fieldId: boolean }> = {};
+    const newSourceFieldError = !parameters.sourceFieldId;
+    setSourceFieldError(newSourceFieldError);
+
+    const newOverrideErrors: Record<string, OverrideError> = {};
     parameters.overrides.forEach((override) => {
-      overrideErrors[override.id] = {
-        contentTypeId: !override.contentTypeId,
-        fieldId: !override.fieldId,
+      newOverrideErrors[override.id] = {
+        isContentTypeMissing: !override.contentTypeId,
+        isFieldMissing: !override.fieldId,
       };
     });
-    setErrors({ sourceFieldId: !parameters.sourceFieldId, overrides: overrideErrors });
+    setOverrideErrors(newOverrideErrors);
 
-    const hasOverrideErrors = Object.values(overrideErrors).some(
-      (error) => error.contentTypeId || error.fieldId
+    const hasOverrideErrors = Object.values(newOverrideErrors).some(
+      (error) => error.isContentTypeMissing || error.isFieldMissing
     );
-    if (!parameters.sourceFieldId || hasOverrideErrors) {
+    if (newSourceFieldError || hasOverrideErrors) {
       sdk.notifier.error('Some fields are missing or invalid');
       return false;
     }
@@ -187,7 +188,7 @@ const ConfigScreen = () => {
               The separator can be any character or symbol and will append to the entry name.
             </FormControl.HelpText>
           </FormControl>
-          <FormControl id="sourceFieldId" isInvalid={errors.sourceFieldId}>
+          <FormControl id="sourceFieldId" isInvalid={sourceFieldError}>
             <FormControl.Label marginBottom="spacingS" isRequired>
               Source field ID
             </FormControl.Label>
@@ -198,7 +199,7 @@ const ConfigScreen = () => {
               onSelectItem={handleSourceFieldIdSelection}
               placeholder="Search field name"
             />
-            {errors.sourceFieldId && (
+            {sourceFieldError && (
               <FormControl.ValidationMessage>
                 Source field ID is required
               </FormControl.ValidationMessage>
@@ -222,7 +223,7 @@ const ConfigScreen = () => {
               key={override.id}
               contentTypes={contentTypes}
               overrideItem={override}
-              overrideError={errors.overrides[override.id]}
+              overrideError={overrideErrors[override.id]}
               overrides={parameters.overrides}
               setOverrides={setOverrides}></OverrideRow>
           ))}
