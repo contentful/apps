@@ -9,6 +9,12 @@ export type AutocompleteItem = {
   name: string;
 };
 
+export type AppInstallationParameters = {
+  overrides: Override[];
+  separator: string;
+  sourceFieldId: string;
+};
+
 export type OverrideIsInvalid = {
   isContentTypeMissing: boolean;
   isFieldMissing: boolean;

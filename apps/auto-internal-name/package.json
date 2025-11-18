@@ -7,11 +7,13 @@
     "@contentful/f36-components": "5.6.0",
     "@contentful/f36-tokens": "5.1.0",
     "@contentful/field-editor-single-line": "^1.9.0",
+    "@contentful/node-apps-toolkit": "^3.15.0",
     "@contentful/react-apps-toolkit": "1.2.16",
     "@testing-library/jest-dom": "^6.9.1",
     "contentful-management": "11.62.0",
     "emotion": "10.0.17",
     "happy-dom": "^20.0.10",
+    "prettier": "^3.6.2",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
@@ -24,7 +26,10 @@
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:write": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
+    "lint:write": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "prettier:write": "prettier --write .",
+    "prettier:check": "prettier --check .",
+    "prettier:list": "prettier -l ."
   },
   "devDependencies": {
     "@contentful/app-scripts": "^2.5.6",
