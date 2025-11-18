@@ -12,6 +12,7 @@ import {
 } from '@contentful/f36-components';
 import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import { getAppActionId } from '../utils/getAppActionId';
 
 export interface AppInstallationParameters {
   openAiApiKey?: string;
@@ -46,15 +47,9 @@ const ConfigScreen = () => {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`Checking Google Docs connection status (attempt ${attempt}/${maxRetries})...`);
-        const appActions = await sdk.cma.appAction.getManyForEnvironment({
-          environmentId: sdk.ids.environment,
-          spaceId: sdk.ids.space,
-        });
 
-        const checkStatusAppAction = appActions.items.find(
-          (action) => action.name === 'checkGdocOauthTokenStatus'
-        );
-        if (!checkStatusAppAction) {
+        const checkStatusAppActionId = await getAppActionId(sdk, 'checkGdocOauthTokenStatus');
+        if (!checkStatusAppActionId) {
           console.warn('Check Status app action not found');
           setIsCheckingStatus(false);
           return;
@@ -62,7 +57,7 @@ const ConfigScreen = () => {
 
         const response = await sdk.cma.appActionCall.createWithResponse(
           {
-            appActionId: checkStatusAppAction.sys.id,
+            appActionId: checkStatusAppActionId,
             appDefinitionId: sdk.ids.app,
           },
           {
@@ -124,15 +119,10 @@ const ConfigScreen = () => {
     if (event.data.type === 'oauth:complete') {
       const appDefinitionId = sdk.ids.app;
       // call app action to complete oauth
-      const appActions = await sdk.cma.appAction.getManyForEnvironment({
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      });
-      const completeOauthAppAction = appActions.items.find(
-        (action) => action.name === 'completeGdocOauth'
-      );
+      const completeOauthAppActionId = await getAppActionId(sdk, 'completeGdocOauth');
+
       await sdk.cma.appActionCall.create(
-        { appDefinitionId, appActionId: completeOauthAppAction?.sys.id || '' },
+        { appDefinitionId, appActionId: completeOauthAppActionId },
         {
           parameters: {
             code: event.data.code,
@@ -173,18 +163,11 @@ const ConfigScreen = () => {
     window.addEventListener('message', messageHandler);
 
     try {
-      const appActions = await sdk.cma.appAction.getManyForEnvironment({
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      });
-
-      const initiateOauthAppAction = appActions.items.find(
-        (action) => action.name === 'initiateGdocOauth'
-      );
+      const initiateOauthAppActionId = await getAppActionId(sdk, 'initiateGdocOauth');
 
       const response = await sdk.cma.appActionCall.createWithResponse(
         {
-          appActionId: initiateOauthAppAction?.sys.id || '',
+          appActionId: initiateOauthAppActionId,
           appDefinitionId: sdk.ids.app,
         },
         {
@@ -214,16 +197,11 @@ const ConfigScreen = () => {
   const handleDisconnect = async () => {
     setIsDisconnecting(true);
     try {
-      const appActions = await sdk.cma.appAction.getManyForEnvironment({
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      });
-      const disconnectAppAction = appActions.items.find(
-        (action) => action.name === 'revokeGdocOauthToken'
-      );
+      const disconnectAppActionId = await getAppActionId(sdk, 'revokeGdocOauthToken');
+
       await sdk.cma.appActionCall.create(
         {
-          appActionId: disconnectAppAction?.sys.id || '',
+          appActionId: disconnectAppActionId,
           appDefinitionId: sdk.ids.app,
         },
         { parameters: {} }
@@ -405,27 +383,7 @@ const ConfigScreen = () => {
                 style={{ flex: 1 }}
               />
             </Box>
-            <Button
-              onClick={async () => {
-                const appActions = await sdk.cma.appAction.getManyForEnvironment({
-                  environmentId: sdk.ids.environment,
-                  spaceId: sdk.ids.space,
-                });
-                const initiateOauthAppAction = appActions.items.find(
-                  (action) => action.name === 'createEntriesFromDocumentAction'
-                );
-                const response = await sdk.cma.appActionCall.createWithResponse(
-                  {
-                    appActionId: initiateOauthAppAction?.sys.id || '',
-                    appDefinitionId: sdk.ids.app,
-                  },
-                  {
-                    parameters: {},
-                  }
-                );
-              }}>
-              Create entries from document
-            </Button>
+
             <Paragraph marginTop="spacingS">
               Find your OpenAPI key{' '}
               <a

@@ -17,6 +17,7 @@ import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import mammoth from 'mammoth';
 import { ContentTypePickerModal, SelectedContentType } from '../components/ContentTypePickerModal';
+import { getAppActionId } from '../utils/getAppActionId';
 
 function isValidGoogleDocUrl(url: string): boolean {
   return /^https:\/\/docs\.google\.com\/document\/d\/[A-Za-z0-9_-]+\/edit(?:\?[^#]*)?$/.test(url);
@@ -227,10 +228,13 @@ const Page = () => {
       if (!appDefinitionId) {
         throw new Error('App definition ID not found');
       }
+
+      const appActionId = await getAppActionId(sdk, 'createEntriesFromDocumentAction');
+
       const result = await sdk.cma.appActionCall.createWithResult(
         {
           appDefinitionId,
-          appActionId: '3nLAuoEuepbJMvdgp1qX6g',
+          appActionId,
         },
         {
           parameters: { contentTypeIds },
