@@ -9,7 +9,7 @@ export type AutocompleteItem = {
   name: string;
 };
 
-export type OverrideError = {
+export type OverrideIsInvalid = {
   isContentTypeMissing: boolean;
   isFieldMissing: boolean;
 };

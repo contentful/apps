@@ -3,7 +3,7 @@ import { Autocomplete, Flex, FormControl, IconButton, Box } from '@contentful/f3
 import { styles } from '../locations/ConfigScreen.styles';
 import { TrashSimpleIcon } from '@contentful/f36-icons';
 import { ContentTypeProps } from 'contentful-management';
-import { AutocompleteItem, Override, OverrideError } from '../utils/types';
+import { AutocompleteItem, Override, OverrideIsInvalid } from '../utils/types';
 import {
   EMPTY_AUTOCOMPLETE_ITEM,
   filterItemsByName,
@@ -16,7 +16,7 @@ import {
 type OverrideRowProps = {
   contentTypes: ContentTypeProps[];
   overrideItem: Override;
-  overrideError?: OverrideError;
+  overrideIsInvalid?: OverrideIsInvalid;
   overrides: Override[];
   setOverrides: (items: (prev: Override[]) => Override[]) => void;
 };
@@ -24,7 +24,7 @@ type OverrideRowProps = {
 const OverrideRow: React.FC<OverrideRowProps> = ({
   contentTypes,
   overrideItem,
-  overrideError,
+  overrideIsInvalid,
   overrides,
   setOverrides,
 }) => {
@@ -158,7 +158,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
         <FormControl
           id="contentTypeId"
           className={styles.formControl}
-          isInvalid={overrideError?.isContentTypeMissing}
+          isInvalid={overrideIsInvalid?.isContentTypeMissing}
           isRequired>
           <FormControl.Label marginBottom="spacingS">Content type</FormControl.Label>
           <Autocomplete
@@ -171,14 +171,14 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
             onSelectItem={(item: AutocompleteItem) => handleCTItemSelection(item)}
             placeholder="Content type name"
           />
-          {overrideError?.isContentTypeMissing && (
+          {overrideIsInvalid?.isContentTypeMissing && (
             <FormControl.ValidationMessage>Content type is required</FormControl.ValidationMessage>
           )}
         </FormControl>
         <FormControl
           id="fieldName"
           className={styles.formControl}
-          isInvalid={overrideError?.isFieldMissing}
+          isInvalid={overrideIsInvalid?.isFieldMissing}
           isRequired>
           <FormControl.Label marginBottom="spacingS">Field name</FormControl.Label>
           <Autocomplete
@@ -192,7 +192,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
             onSelectItem={(item: AutocompleteItem) => handleFieldItemSelection(item)}
             placeholder="Field name"
           />
-          {overrideError?.isFieldMissing && (
+          {overrideIsInvalid?.isFieldMissing && (
             <FormControl.ValidationMessage>Field name is required</FormControl.ValidationMessage>
           )}
         </FormControl>

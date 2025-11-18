@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import OverrideRow from '../../src/components/OverrideRow';
 import { ContentTypeProps } from 'contentful-management';
-import { Override, OverrideError } from '../../src/utils/types';
+import { Override, OverrideIsInvalid } from '../../src/utils/types';
 
 describe('OverrideRow', () => {
   const mockContentTypes: ContentTypeProps[] = [
@@ -39,7 +39,7 @@ describe('OverrideRow', () => {
     return updater;
   });
 
-  const mockOverrideError: OverrideError = {
+  const mockOverrideError: OverrideIsInvalid = {
     isContentTypeMissing: false,
     isFieldMissing: false,
   };
@@ -55,7 +55,7 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={mockOverride}
           setOverrides={mockSetOverrides}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[mockOverride]}
         />
       );
@@ -73,7 +73,7 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={mockOverride}
           setOverrides={mockSetOverrides}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[mockOverride]}
         />
       );
@@ -93,7 +93,7 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={mockOverride}
           setOverrides={setOverridesSpy}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[mockOverride]}
         />
       );
@@ -128,7 +128,7 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={overrideWithContentType}
           setOverrides={setOverridesSpy}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[overrideWithContentType]}
         />
       );
@@ -169,7 +169,7 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={overrideWithContentType}
           setOverrides={setOverridesSpy}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[overrideWithContentType]}
         />
       );
@@ -217,7 +217,7 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={overrideWithContentType}
           setOverrides={mockSetOverrides}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[overrideWithContentType]}
         />
       );
@@ -246,7 +246,7 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={overrideWithContentType}
           setOverrides={setOverridesSpy}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[overrideWithContentType]}
         />
       );
@@ -297,7 +297,7 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={mockOverride}
           setOverrides={setOverridesSpy}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={overrides}
         />
       );
@@ -339,7 +339,7 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={overrideToDelete}
           setOverrides={setOverridesSpy}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={overrides}
         />
       );
@@ -383,7 +383,7 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={overrideWithoutContentType}
           setOverrides={mockSetOverrides}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={overrides}
         />
       );
@@ -419,7 +419,7 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={overrideWithBlogPost}
           setOverrides={mockSetOverrides}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={overrides}
         />
       );
@@ -450,7 +450,7 @@ describe('OverrideRow', () => {
           contentTypes={[]}
           overrideItem={mockOverride}
           setOverrides={mockSetOverrides}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[mockOverride]}
         />
       );
@@ -487,7 +487,7 @@ describe('OverrideRow', () => {
           contentTypes={[contentTypeWithoutFields]}
           overrideItem={overrideWithEmptyContentType}
           setOverrides={mockSetOverrides}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[overrideWithEmptyContentType]}
         />
       );
