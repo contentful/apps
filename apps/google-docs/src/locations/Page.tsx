@@ -8,8 +8,10 @@ import {
   Heading,
   Note,
   Paragraph,
+  Text,
   Stack,
   TextInput,
+  Spinner,
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -281,7 +283,7 @@ const Page = () => {
           setFetchedDocTitle(file.name);
           setFetchedDocHtml(html);
           setIsDocxRendered(false);
-          setSuccessMessage(`Parsed "${file.name}" successfully.`);
+          setSuccessMessage(`Uploaded "${file.name}" successfully.`);
           return;
         }
       }
@@ -291,7 +293,7 @@ const Page = () => {
       setFetchedDocTitle(file.name);
       setFetchedDocHtml(html);
       setIsDocxRendered(false);
-      setSuccessMessage(`Parsed "${file.name}" successfully.`);
+      setSuccessMessage(`Uploaded "${file.name}" successfully.`);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Failed to parse document file.';
       setErrorMessage(message);
@@ -304,6 +306,7 @@ const Page = () => {
       <Box
         padding="spacingXl"
         style={{
+          width: '100%',
           maxWidth: '1120px',
           margin: '32px auto',
           background: '#fff',
@@ -332,7 +335,7 @@ const Page = () => {
                 }}
               />
               <FormControl.HelpText>
-                Must be a publicly accessible Google Docs URL (View access).
+                Must be a publicly accessible Google Docs URL (View access)
               </FormControl.HelpText>
               {googleDocUrlValid && googleDocUrl && (
                 <Box marginTop="spacingS">
@@ -369,9 +372,7 @@ const Page = () => {
                   onChange={(e) => onSelectFile(e.target.files)}
                 />
               </Box>
-              <FormControl.HelpText>
-                Choose a document file from your computer.
-              </FormControl.HelpText>
+              <FormControl.HelpText>Choose a document file from your computer</FormControl.HelpText>
               {fileError && (
                 <FormControl.ValidationMessage>{fileError}</FormControl.ValidationMessage>
               )}
@@ -390,11 +391,8 @@ const Page = () => {
             </Box>
           )}
 
-          {successMessage && <Note variant="positive">{successMessage}</Note>}
-          {errorMessage && <Note variant="negative">{errorMessage}</Note>}
-
           {(fetchedDocHtml || isDocxRendered) && (
-            <Box marginTop="spacingM">
+            <Flex marginTop="spacingM">
               <Button
                 variant="primary"
                 onClick={() => {
@@ -403,12 +401,20 @@ const Page = () => {
                 isDisabled={isAnalyzing}>
                 Select Content Type
               </Button>
-            </Box>
+            </Flex>
           )}
+
+          {successMessage && <Note variant="positive">{successMessage}</Note>}
+          {errorMessage && <Note variant="negative">{errorMessage}</Note>}
 
           {isAnalyzing && (
             <Box marginTop="spacingM">
-              <Note variant="primary">Analyzing content types...</Note>
+              <Flex alignItems="center" gap="spacingS">
+                <Text fontWeight="fontWeightMedium" fontSize="fontSizeM">
+                  Analyzing content types
+                </Text>
+                <Spinner />
+              </Flex>
             </Box>
           )}
 
