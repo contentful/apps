@@ -5,11 +5,11 @@ import { ContentTypeProps } from 'contentful-management';
 import { Flex, Heading, Paragraph, Box, Button, Tooltip } from '@contentful/f36-components';
 import { PlusIcon } from '@contentful/f36-icons';
 import OverrideRow from './OverrideRow';
-import { Override } from '../utils/types';
+import { Override, OverrideError } from '../utils/types';
 
 type ContentTypeOverridesProps = {
   overrides: Override[];
-  overrideErrors: Record<string, { contentTypeId: boolean; fieldId: boolean }>;
+  overrideErrors: Record<string, OverrideError>;
   onOverridesChange: (updater: (prev: Override[]) => Override[]) => void;
 };
 
