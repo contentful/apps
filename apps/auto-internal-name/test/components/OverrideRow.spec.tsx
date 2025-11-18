@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import OverrideRow from '../../src/components/OverrideRow';
 import { ContentTypeProps } from 'contentful-management';
-import { Override } from '../../src/utils/types';
+import { Override, OverrideError } from '../../src/utils/types';
 
 describe('OverrideRow', () => {
   const mockContentTypes: ContentTypeProps[] = [
@@ -39,9 +39,9 @@ describe('OverrideRow', () => {
     return updater;
   });
 
-  const mockOverrideError = {
-    contentTypeId: false,
-    fieldId: false,
+  const mockOverrideError: OverrideError = {
+    isContentTypeMissing: false,
+    isFieldMissing: false,
   };
 
   beforeEach(() => {
