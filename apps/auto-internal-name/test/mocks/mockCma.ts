@@ -1,9 +1,20 @@
 import { vi } from 'vitest';
 
-const mockCma: any = {
-  contentType: {
-    getMany: vi.fn(),
-  },
+const createMockCma = () => {
+  return {
+    entry: {
+      getMany: vi.fn().mockResolvedValue({
+        items: [],
+        total: 0,
+      }),
+      get: vi.fn(),
+    },
+    contentType: {
+      getMany: vi.fn(),
+    },
+  };
 };
 
-export { mockCma };
+const mockCma = createMockCma();
+
+export { mockCma, createMockCma };

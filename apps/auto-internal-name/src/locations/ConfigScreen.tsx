@@ -16,20 +16,14 @@ import { PlusIcon } from '@contentful/f36-icons';
 import { styles } from './ConfigScreen.styles';
 import { ContentTypeProps } from 'contentful-management';
 import OverrideRow from '../components/OverrideRow';
-import { Override } from '../utils/types';
+import { AppInstallationParameters, Override } from '../utils/types';
 import { normalizeString } from '../utils/override';
-
-type AppParameters = {
-  separator: string;
-  sourceFieldId: string;
-  overrides: Override[];
-};
 
 type SimplifiedField = { id: string; name: string };
 
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
-  const [parameters, setParameters] = useState<AppParameters>({
+  const [parameters, setParameters] = useState<AppInstallationParameters>({
     separator: '',
     sourceFieldId: '',
     overrides: [],
@@ -54,7 +48,7 @@ const ConfigScreen = () => {
 
   useEffect(() => {
     (async () => {
-      const currentParameters: AppParameters | null = await sdk.app.getParameters();
+      const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
 
       if (currentParameters) {
         setParameters(currentParameters);
