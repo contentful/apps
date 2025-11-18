@@ -13,9 +13,9 @@
   "parameters": {
     "installation": [
       {
-        "id": "apiKey",
+        "id": "openAiApiKey",
         "type": "Secret",
-        "name": "API Key",
+        "name": "OpenAI API Key",
         "description": "API Key for the app to use the OpenAI API."
       }
     ]
@@ -27,7 +27,9 @@
       "description": "Function to create content blocks from App Action.",
       "path": "functions/createEntriesFromDocument.js",
       "entryFile": "functions/createEntriesFromDocument.ts",
-      "allowNetworks": [],
+      "allowNetworks": [
+        "https://api.openai.com"
+      ],
       "accepts": [
         "appaction.call"
       ]
@@ -85,27 +87,5 @@
       ]
     }
   ],
-  "actions": [
-    {
-      "id": "createEntriesFromDocumentAction",
-      "name": "Create entries from an uploaded document",
-      "type": "function-invocation",
-      "functionId": "createEntriesFromDocumentFunction",
-      "category": "Custom",
-      "parameters": [
-        {
-          "id": "contentTypeId",
-          "name": "Content Type ID",
-          "type": "Symbol",
-          "required": true
-        },
-        {
-          "id": "prompt",
-          "name": "Prompt from the user",
-          "type": "Symbol",
-          "required": true
-        }
-      ]
-    }
-  ]
+  "actions": []
 }

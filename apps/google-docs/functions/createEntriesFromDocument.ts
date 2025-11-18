@@ -4,15 +4,13 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-// INTEG-3262 and INTEG-3263: Likely imports to be used are commented out for now
-// import { ContentTypeProps, EntryProps, ContentFields } from 'contentful-management';
-// import { KeyValueMap } from 'contentful-management';
-import { parseContentType } from './agents/contentTypeParser.agent';
+import { analyzeContentTypes } from './agents/contentTypeParserAgent/contentTypeParser.agent';
 import { createDocument } from './agents/documentParser.agent';
-// import { createEntries, createAssets } from './service/entryService';
+import { fetchContentTypes } from './service/contentTypeService';
+import { initContentfulManagementClient } from './service/initCMAClient';
 
 export type AppActionParameters = {
-  contentTypeId: string;
+  contentTypeIds: string[];
   prompt: string;
 };
 interface AppInstallationParameters {
@@ -30,28 +28,28 @@ export const handler: FunctionEventHandler<
   event: AppActionRequest<'Custom', AppActionParameters>,
   context: FunctionEventContext
 ) => {
-  const { contentTypeId, prompt } = event.body;
+  const { contentTypeIds } = event.body;
   const { openAiApiKey } = context.appInstallationParameters as AppInstallationParameters;
 
   // INTEG-3262 and INTEG-3263: Take in Content Type, Prompt, and Upload File from user
 
-  // INTEG-3262: Implement the content type parser agent
-  const aiContentTypeResponse = parseContentType({
-    openaiApiKey: openAiApiKey,
-    modelVersion: 'gpt-4o',
-    jsonData: contentType,
-  });
+  const cma = initContentfulManagementClient(context);
+
+  const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
+  const contentTypeParserAgentResult = await analyzeContentTypes({ contentTypes, openAiApiKey });
+
+  console.log('contentTypeParserAgentResult', contentTypeParserAgentResult);
 
   // INTEG-3261: Pass the ai content type response to the observer for analysis
   // createContentTypeObservationsFromLLMResponse()
 
   // INTEG-3263: Implement the document parser agent
-  const aiDocumentResponse = createDocument({
-    openaiApiKey: openAiApiKey,
-    modelVersion: 'gpt-4o',
-    jsonData: aiContentTypeResponse,
-    document: document,
-  });
+  // const aiDocumentResponse = createDocument({
+  //   openaiApiKey: openAiApiKey,
+  //   modelVersion: 'gpt-4o',
+  //   jsonData: aiContentTypeResponse,
+  //   document: document,
+  // });
 
   // INTEG-3261: Pass the ai document response to the observer for analysis
   // createDocumentObservationsFromLLMResponse()
@@ -62,5 +60,5 @@ export const handler: FunctionEventHandler<
   // INTEG-3265: Create the assets in Contentful using the asset service
   // await createAssets()
 
-  return { success: true, response: {} };
+  return { success: true, response: contentTypeParserAgentResult };
 };

@@ -12,21 +12,22 @@ import {
 } from '@contentful/f36-components';
 import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import { getAppActionId } from '../utils/getAppActionId';
 
 export interface AppInstallationParameters {
-  apiKey?: string;
-  apiKeyLength?: number;
-  apiKeySuffix?: string;
+  openAiApiKey?: string;
+  openAiApiKeyLength?: number;
+  openAiApiKeySuffix?: string;
 }
 
 const VISIBLE_SUFFIX_LENGTH = 4;
 
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
-  const [apiKeyInput, setApiKeyInput] = useState<string>('');
-  const [apiKeyObfuscatedDisplay, setApiKeyObfuscatedDisplay] = useState<string>('');
-  const [apiKeyIsValid, setApiKeyIsValid] = useState<boolean>(true);
-  const [isValidatingApiKey, setIsValidatingApiKey] = useState<boolean>(false);
+  const [openAiApiKeyInput, setOpenAiApiKeyInput] = useState<string>('');
+  const [openAiApiKeyObfuscatedDisplay, setOpenAiApiKeyObfuscatedDisplay] = useState<string>('');
+  const [openAiApiKeyIsValid, setOpenAiApiKeyIsValid] = useState<boolean>(true);
+  const [isValidatingOpenAiApiKey, setIsValidatingOpenAiApiKey] = useState<boolean>(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState(false);
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
@@ -46,15 +47,9 @@ const ConfigScreen = () => {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`Checking Google Docs connection status (attempt ${attempt}/${maxRetries})...`);
-        const appActions = await sdk.cma.appAction.getManyForEnvironment({
-          environmentId: sdk.ids.environment,
-          spaceId: sdk.ids.space,
-        });
 
-        const checkStatusAppAction = appActions.items.find(
-          (action) => action.name === 'checkGdocOauthTokenStatus'
-        );
-        if (!checkStatusAppAction) {
+        const checkStatusAppActionId = await getAppActionId(sdk, 'checkGdocOauthTokenStatus');
+        if (!checkStatusAppActionId) {
           console.warn('Check Status app action not found');
           setIsCheckingStatus(false);
           return;
@@ -62,7 +57,7 @@ const ConfigScreen = () => {
 
         const response = await sdk.cma.appActionCall.createWithResponse(
           {
-            appActionId: checkStatusAppAction.sys.id,
+            appActionId: checkStatusAppActionId,
             appDefinitionId: sdk.ids.app,
           },
           {
@@ -124,15 +119,10 @@ const ConfigScreen = () => {
     if (event.data.type === 'oauth:complete') {
       const appDefinitionId = sdk.ids.app;
       // call app action to complete oauth
-      const appActions = await sdk.cma.appAction.getManyForEnvironment({
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      });
-      const completeOauthAppAction = appActions.items.find(
-        (action) => action.name === 'completeGdocOauth'
-      );
+      const completeOauthAppActionId = await getAppActionId(sdk, 'completeGdocOauth');
+
       await sdk.cma.appActionCall.create(
-        { appDefinitionId, appActionId: completeOauthAppAction?.sys.id || '' },
+        { appDefinitionId, appActionId: completeOauthAppActionId },
         {
           parameters: {
             code: event.data.code,
@@ -173,18 +163,11 @@ const ConfigScreen = () => {
     window.addEventListener('message', messageHandler);
 
     try {
-      const appActions = await sdk.cma.appAction.getManyForEnvironment({
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      });
-
-      const initiateOauthAppAction = appActions.items.find(
-        (action) => action.name === 'initiateGdocOauth'
-      );
+      const initiateOauthAppActionId = await getAppActionId(sdk, 'initiateGdocOauth');
 
       const response = await sdk.cma.appActionCall.createWithResponse(
         {
-          appActionId: initiateOauthAppAction?.sys.id || '',
+          appActionId: initiateOauthAppActionId,
           appDefinitionId: sdk.ids.app,
         },
         {
@@ -214,16 +197,11 @@ const ConfigScreen = () => {
   const handleDisconnect = async () => {
     setIsDisconnecting(true);
     try {
-      const appActions = await sdk.cma.appAction.getManyForEnvironment({
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      });
-      const disconnectAppAction = appActions.items.find(
-        (action) => action.name === 'revokeGdocOauthToken'
-      );
+      const disconnectAppActionId = await getAppActionId(sdk, 'revokeGdocOauthToken');
+
       await sdk.cma.appActionCall.create(
         {
-          appActionId: disconnectAppAction?.sys.id || '',
+          appActionId: disconnectAppActionId,
           appDefinitionId: sdk.ids.app,
         },
         { parameters: {} }
@@ -269,19 +247,19 @@ const ConfigScreen = () => {
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
-    const apiKey = apiKeyInput.trim();
+    const openAiApiKey = openAiApiKeyInput.trim();
     const parametersToSave: Record<string, string | number> = {};
     // Only persist apiKey if user actually typed a new one (not the obfuscated placeholder)
-    if (apiKey && apiKey !== apiKeyObfuscatedDisplay) {
-      parametersToSave.apiKey = apiKey;
-      parametersToSave.apiKeyLength = apiKey.length;
-      parametersToSave.apiKeySuffix = apiKey.slice(-VISIBLE_SUFFIX_LENGTH);
+    if (openAiApiKey && openAiApiKey !== openAiApiKeyObfuscatedDisplay) {
+      parametersToSave.openAiApiKey = openAiApiKey;
+      parametersToSave.openAiApiKeyLength = openAiApiKey.length;
+      parametersToSave.openAiApiKeySuffix = openAiApiKey.slice(-VISIBLE_SUFFIX_LENGTH);
     }
     return {
       parameters: parametersToSave,
       targetState: currentState,
     };
-  }, [sdk, apiKeyInput, apiKeyObfuscatedDisplay]);
+  }, [sdk, openAiApiKeyInput, openAiApiKeyObfuscatedDisplay]);
 
   const onConfigurationCompleted = useCallback((error?: unknown) => {
     if (!error) {
@@ -300,7 +278,11 @@ const ConfigScreen = () => {
         | (AppInstallationParameters & { apiKey?: string })
         | null;
       if (currentParameters) {
-        const { apiKey, apiKeyLength, apiKeySuffix } = currentParameters;
+        const {
+          openAiApiKey: apiKey,
+          openAiApiKeyLength: apiKeyLength,
+          openAiApiKeySuffix: apiKeySuffix,
+        } = currentParameters;
         const hasMeta =
           typeof apiKeyLength === 'number' &&
           typeof apiKeySuffix === 'string' &&
@@ -315,8 +297,8 @@ const ConfigScreen = () => {
           const visibleSuffix = suffix.slice(-VISIBLE_SUFFIX_LENGTH);
           const maskedLength = Math.max(0, totalLength - visibleSuffix.length);
           const masked = '•'.repeat(maskedLength) + visibleSuffix;
-          setApiKeyObfuscatedDisplay(masked);
-          setApiKeyInput(masked);
+          setOpenAiApiKeyObfuscatedDisplay(masked);
+          setOpenAiApiKeyInput(masked);
         }
       }
       const isInstalled = await sdk.app.isInstalled();
@@ -333,25 +315,25 @@ const ConfigScreen = () => {
   const validateApiKey = useCallback(
     async (value: string) => {
       const token = value.trim();
-      if (token === apiKeyObfuscatedDisplay) {
-        setApiKeyIsValid(true);
+      if (token === openAiApiKeyObfuscatedDisplay) {
+        setOpenAiApiKeyIsValid(true);
         return true;
       }
       if (token.length === 0) {
-        setApiKeyIsValid(true);
+        setOpenAiApiKeyIsValid(true);
         return true;
       }
       try {
-        setIsValidatingApiKey(true);
+        setIsValidatingOpenAiApiKey(true);
         return true;
       } catch (e) {
-        setApiKeyIsValid(false);
+        setOpenAiApiKeyIsValid(false);
         return false;
       } finally {
-        setIsValidatingApiKey(false);
+        setIsValidatingOpenAiApiKey(false);
       }
     },
-    [apiKeyObfuscatedDisplay, sdk]
+    [openAiApiKeyObfuscatedDisplay, sdk]
   );
 
   return (
@@ -393,35 +375,15 @@ const ConfigScreen = () => {
               <TextInput
                 id="apiKey"
                 name="apiKey"
-                value={apiKeyInput}
+                value={openAiApiKeyInput}
                 placeholder="sk-xxxx"
-                onChange={(e) => setApiKeyInput(e.target.value)}
-                onBlur={() => void validateApiKey(apiKeyInput)}
-                isInvalid={!apiKeyIsValid}
+                onChange={(e) => setOpenAiApiKeyInput(e.target.value)}
+                onBlur={() => void validateApiKey(openAiApiKeyInput)}
+                isInvalid={!openAiApiKeyIsValid}
                 style={{ flex: 1 }}
               />
             </Box>
-            <Button
-              onClick={async () => {
-                const appActions = await sdk.cma.appAction.getManyForEnvironment({
-                  environmentId: sdk.ids.environment,
-                  spaceId: sdk.ids.space,
-                });
-                const initiateOauthAppAction = appActions.items.find(
-                  (action) => action.name === 'createEntriesFromDocumentAction'
-                );
-                const response = await sdk.cma.appActionCall.createWithResponse(
-                  {
-                    appActionId: initiateOauthAppAction?.sys.id || '',
-                    appDefinitionId: sdk.ids.app,
-                  },
-                  {
-                    parameters: {},
-                  }
-                );
-              }}>
-              Create entries from document
-            </Button>
+
             <Paragraph marginTop="spacingS">
               Find your OpenAPI key{' '}
               <a
@@ -432,12 +394,14 @@ const ConfigScreen = () => {
               </a>
               .
             </Paragraph>
-            {!apiKeyIsValid && (
+            {!openAiApiKeyIsValid && (
               <Paragraph marginTop="spacingS" style={{ color: '#cc2e2e' }}>
                 Unable to validate the API key. Please check and try again.
               </Paragraph>
             )}
-            {isValidatingApiKey && <Paragraph marginTop="spacingS">Validating key…</Paragraph>}
+            {isValidatingOpenAiApiKey && (
+              <Paragraph marginTop="spacingS">Validating key…</Paragraph>
+            )}
           </FormControl>
         </Form>
       </Box>
