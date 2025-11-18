@@ -7,6 +7,7 @@ import {
   Paragraph,
   Pill,
   Select,
+  Text,
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
@@ -102,12 +103,7 @@ export const ContentTypePickerModal = ({
               Select the content type(s) you would like to use with this sync.
             </Paragraph>
             <FormControl isRequired>
-              <FormControl.Label>
-                Content type{' '}
-                {selectedContentTypes.length > 0 && (
-                  <span style={{ fontWeight: 'normal', color: '#536171' }}>(required)</span>
-                )}
-              </FormControl.Label>
+              <FormControl.Label>Content type</FormControl.Label>
               <Select
                 id="content-type-select"
                 name="content-type-select"
@@ -128,11 +124,7 @@ export const ContentTypePickerModal = ({
             </FormControl>
 
             {selectedContentTypes.length > 0 && (
-              <Flex
-                flexWrap="wrap"
-                gap="spacingXs"
-                marginTop="spacingS"
-                style={{ marginTop: '12px' }}>
+              <Flex flexWrap="wrap" gap="spacingXs" marginTop="spacingS">
                 {selectedContentTypes.map((ct) => (
                   <Pill
                     key={ct.id}

@@ -6,7 +6,7 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import { analyzeContentTypes } from './agents/contentTypeParserAgent/contentTypeParser.agent';
 import { createDocument } from './agents/documentParser.agent';
-import { fetchContentTypes as fetchContentTypes } from './service/contentTypeService';
+import { fetchContentTypes } from './service/contentTypeService';
 import { initContentfulManagementClient } from './service/initCMAClient';
 
 export type AppActionParameters = {
