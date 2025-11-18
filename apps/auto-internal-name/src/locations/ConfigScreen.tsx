@@ -1,14 +1,15 @@
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
+  Autocomplete,
+  Box,
+  Button,
   Flex,
   Form,
+  FormControl,
   Heading,
   Paragraph,
-  Box,
-  FormControl,
   TextInput,
-  Button,
-  Autocomplete,
+  Tooltip,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
@@ -16,10 +17,11 @@ import { PlusIcon } from '@contentful/f36-icons';
 import { styles } from './ConfigScreen.styles';
 import { ContentTypeProps } from 'contentful-management';
 import OverrideRow from '../components/OverrideRow';
-import { AppInstallationParameters, Override } from '../utils/types';
+import { AppInstallationParameters, Override, OverrideIsInvalid } from '../utils/types';
 import { normalizeString } from '../utils/override';
 
 type SimplifiedField = { id: string; name: string };
+type OverrideState = Record<string, OverrideIsInvalid>;
 
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
@@ -33,8 +35,30 @@ const ConfigScreen = () => {
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [fields, setFields] = useState<SimplifiedField[]>([]);
 
+  const [isSourceFieldMissing, setIsSourceFieldMissing] = useState<boolean>(false);
+  const [overridesAreInvalid, setOverridesAreInvalid] = useState<OverrideState>({});
+
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
+    setIsSourceFieldMissing(!parameters.sourceFieldId);
+
+    const overridesAreInvalid: Record<string, OverrideIsInvalid> = {};
+    parameters.overrides.forEach((override) => {
+      overridesAreInvalid[override.id] = {
+        isContentTypeMissing: !override.contentTypeId,
+        isFieldMissing: !override.fieldId,
+      };
+    });
+    setOverridesAreInvalid(overridesAreInvalid);
+
+    const invalidOverrides = parameters.overrides.some(
+      (override) => !override.contentTypeId || !override.fieldId
+    );
+
+    if (!parameters.sourceFieldId || invalidOverrides) {
+      sdk.notifier.error('Some fields are missing or invalid');
+      return false;
+    }
 
     return {
       parameters,
@@ -81,6 +105,13 @@ const ConfigScreen = () => {
     })();
   }, []);
 
+  const maxOverridesReached = () => {
+    return (
+      contentTypes.every((ct) => parameters.overrides.some((o) => o.contentTypeId === ct.sys.id)) ||
+      contentTypes.length <= parameters.overrides.length
+    );
+  };
+
   const addOverride = () => {
     setParameters((prev) => ({
       ...prev,
@@ -92,6 +123,12 @@ const ConfigScreen = () => {
   };
 
   const handleSourceFieldInputChange = (name: string) => {
+    if (!name) {
+      setParameters((prev) => ({ ...prev, sourceFieldId: '' }));
+      setFilteredSourceFields(fields);
+      return;
+    }
+
     const newFilteredItems = fields.filter((item) =>
       normalizeString(item.name).includes(normalizeString(name))
     );
@@ -129,7 +166,7 @@ const ConfigScreen = () => {
           <Paragraph>
             This app allows you to automatically set the name of an entry based on a field from its
             parent entry. Provide the ID of the field you wish to use as the source field on the
-            parent, and a preview token to access the parent entry.
+            parent.
           </Paragraph>
         </Box>
 
@@ -145,7 +182,7 @@ const ConfigScreen = () => {
               The separator can be any character or symbol and will append to the entry name.
             </FormControl.HelpText>
           </FormControl>
-          <FormControl id="sourceFieldId">
+          <FormControl id="sourceFieldId" isInvalid={isSourceFieldMissing}>
             <FormControl.Label marginBottom="spacingS" isRequired>
               Source field ID
             </FormControl.Label>
@@ -156,6 +193,11 @@ const ConfigScreen = () => {
               onSelectItem={handleSourceFieldIdSelection}
               placeholder="Search field name"
             />
+            {isSourceFieldMissing && (
+              <FormControl.ValidationMessage>
+                Source field ID is required
+              </FormControl.ValidationMessage>
+            )}
             <FormControl.HelpText marginTop="spacingS">
               The source field ID should be the name of the field that you want to use from the
               parent entry. This will be applied to any content types that include the same field
@@ -175,15 +217,23 @@ const ConfigScreen = () => {
               key={override.id}
               contentTypes={contentTypes}
               overrideItem={override}
+              overrideIsInvalid={overridesAreInvalid[override.id]}
+              overrides={parameters.overrides}
               setOverrides={setOverrides}></OverrideRow>
           ))}
           <Box marginBottom="spacingXl">
-            <Button
-              aria-label="Add override"
-              startIcon={<PlusIcon />}
-              onClick={() => addOverride()}>
-              Add override
-            </Button>
+            <Tooltip
+              placement="right"
+              id="tooltip-1"
+              content={maxOverridesReached() ? 'No more content types available.' : undefined}>
+              <Button
+                aria-label="Add override"
+                startIcon={<PlusIcon />}
+                isDisabled={maxOverridesReached()}
+                onClick={() => addOverride()}>
+                Add override
+              </Button>
+            </Tooltip>
           </Box>
         </Flex>
       </Flex>

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
@@ -46,6 +46,7 @@ describe('ConfigScreen', () => {
     mockSdk.cma.contentType.getMany.mockResolvedValue({
       items: mockContentTypes,
     });
+    mockSdk.notifier.error.mockClear();
   });
 
   describe('Initialization', () => {
@@ -134,6 +135,124 @@ describe('ConfigScreen', () => {
         expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
       });
     });
+
+    it('should disable add override button when all content types are used', async () => {
+      const user = userEvent.setup();
+      render(<ConfigScreen />);
+
+      await waitFor(() => {
+        expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
+      });
+
+      // Add first override and select Blog Post
+      const addButton = screen.getByRole('button', { name: /add override/i });
+      await user.click(addButton);
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
+      });
+
+      const contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[0];
+      await user.type(contentTypeAutocomplete, 'Blog Post');
+      const blogPostOption = await screen.findByText('Blog Post');
+      await user.click(blogPostOption);
+
+      // Add second override and select Author
+      await user.click(addButton);
+
+      await waitFor(() => {
+        const contentTypeInputs = screen.getAllByPlaceholderText(/content type name/i);
+        expect(contentTypeInputs.length).toBe(2);
+      });
+
+      const secondContentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[1];
+      await user.type(secondContentTypeAutocomplete, 'Author');
+      const authorOption = screen.getAllByRole('option', { name: 'Author' })[0];
+      await user.click(authorOption);
+
+      // Verify button is disabled
+      await waitFor(() => {
+        const addButtonAfter = screen.getByRole('button', { name: /add override/i });
+        expect(addButtonAfter).toBeDisabled();
+      });
+    });
+
+    it('should disable add override button when overrides count >= content types count', async () => {
+      const user = userEvent.setup();
+      render(<ConfigScreen />);
+
+      await waitFor(() => {
+        expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
+      });
+
+      // Add first override
+      const addButton = screen.getByRole('button', { name: /add override/i });
+      await user.click(addButton);
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
+      });
+
+      // Add second override (even without selecting content types)
+      await user.click(addButton);
+
+      await waitFor(() => {
+        const contentTypeInputs = screen.getAllByPlaceholderText(/content type name/i);
+        expect(contentTypeInputs.length).toBe(2);
+      });
+
+      // Verify button is disabled (2 overrides >= 2 content types)
+      await waitFor(() => {
+        const addButtonAfter = screen.getByRole('button', { name: /add override/i });
+        expect(addButtonAfter).toBeDisabled();
+      });
+    });
+
+    it('should show tooltip when max overrides reached', async () => {
+      const user = userEvent.setup();
+      render(<ConfigScreen />);
+
+      await waitFor(() => {
+        expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
+      });
+
+      // Add first override and select Blog Post
+      const addButton = screen.getByRole('button', { name: /add override/i });
+      await user.click(addButton);
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
+      });
+
+      const contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[0];
+      await user.type(contentTypeAutocomplete, 'Blog Post');
+      const blogPostOption = await screen.findByText('Blog Post');
+      await user.click(blogPostOption);
+
+      // Add second override and select Author
+      await user.click(addButton);
+
+      await waitFor(() => {
+        const contentTypeInputs = screen.getAllByPlaceholderText(/content type name/i);
+        expect(contentTypeInputs.length).toBe(2);
+      });
+
+      const secondContentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[1];
+      await user.type(secondContentTypeAutocomplete, 'Author');
+      const authorOption = screen.getAllByRole('option', { name: 'Author' })[0];
+      await user.click(authorOption);
+
+      const disabledButton = screen.getByRole('button', { name: /add override/i });
+      const tooltipWrapper = disabledButton.parentElement;
+      if (tooltipWrapper) {
+        fireEvent.mouseEnter(tooltipWrapper);
+      }
+
+      await waitFor(() => {
+        const tooltip = screen.getByRole('tooltip');
+        expect(tooltip.textContent).toBe('No more content types available.');
+      });
+    });
   });
 
   describe('clicking install button', () => {
@@ -143,42 +262,53 @@ describe('ConfigScreen', () => {
       const initialParameters = {
         separator: '-',
         sourceFieldId: 'title',
-        overrides: [{ id: 'override-1', contentTypeId: 'ct-1', fieldName: 'slug' }],
+        overrides: [{ id: 'override-1', contentTypeId: 'ct-1', fieldId: 'slug' }],
       };
 
       mockSdk.app.getParameters.mockResolvedValue(initialParameters);
 
       render(<ConfigScreen />);
 
-      // Wait for component to initialize with initial parameters
       await waitFor(() => {
         expect(screen.getByLabelText(/separator/i)).toBeInTheDocument();
       });
 
-      // Verify separator is loaded from parameters
       const separatorInput = screen.getByLabelText(/separator/i);
       await waitFor(() => {
         expect(separatorInput).toHaveValue('-');
       });
 
-      // Modify separator value
       await user.clear(separatorInput);
       await user.type(separatorInput, ' | ');
 
-      // Wait for state update
       await waitFor(() => {
         expect(separatorInput).toHaveValue(' | ');
       });
 
-      // Add another override
       const addButton = screen.getByRole('button', { name: /add override/i });
       await user.click(addButton);
 
-      // Wait for the new override to be added
       await waitFor(() => {
         const overrideItems = screen.getAllByLabelText(/content type/i);
         expect(overrideItems.length).toBeGreaterThan(1);
       });
+
+      const contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[1];
+      await user.type(contentTypeAutocomplete, 'Author');
+      const authorOption = screen.getAllByRole('option', { name: 'Author' })[0];
+      await user.click(authorOption);
+
+      await waitFor(() => {
+        const fieldAutocomplete = screen.getAllByPlaceholderText(/field name/i)[1];
+        expect(fieldAutocomplete).not.toBeDisabled();
+      });
+
+      const fieldAutocomplete = screen.getAllByPlaceholderText(/field name/i)[1];
+      await user.type(fieldAutocomplete, 'Name');
+      await waitFor(() => {
+        expect(screen.getByText('Name')).toBeInTheDocument();
+      });
+      await user.click(screen.getByText('Name'));
 
       // Get the latest callback (last one registered) - this simulates clicking install
       const callCount = mockSdk.app.onConfigure.mock.calls.length;
@@ -199,12 +329,132 @@ describe('ConfigScreen', () => {
       const firstOverride = result.parameters.overrides[0];
       expect(firstOverride).toHaveProperty('id');
       expect(firstOverride).toHaveProperty('contentTypeId');
-      expect(firstOverride).toHaveProperty('fieldName');
+      expect(firstOverride).toHaveProperty('fieldId');
       expect(firstOverride.contentTypeId).toBe('ct-1');
-      expect(firstOverride.fieldName).toBe('slug');
+      expect(firstOverride.fieldId).toBe('slug');
 
       expect(result).toHaveProperty('targetState');
       expect(result.targetState).toBeDefined();
+    });
+  });
+
+  describe('Validation', () => {
+    it('should return false and show error when override fieldId is missing', async () => {
+      const user = userEvent.setup();
+      render(<ConfigScreen />);
+
+      await waitFor(() => {
+        expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
+      });
+
+      const separatorInput = screen.getByLabelText(/separator/i);
+      await user.type(separatorInput, '-');
+
+      const sourceFieldAutocomplete = screen.getByPlaceholderText(/search field name/i);
+      await user.type(sourceFieldAutocomplete, 'Title');
+
+      const addButton = screen.getByRole('button', { name: /add override/i });
+      await user.click(addButton);
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
+      });
+
+      const contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[0];
+      await user.type(contentTypeAutocomplete, 'Blog Post');
+
+      const callCount = mockSdk.app.onConfigure.mock.calls.length;
+      const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
+      const result = await onConfigureCallback();
+
+      // Should return false and show error
+      expect(result).toBe(false);
+      expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
+      expect(await screen.findByText('Field name is required')).toBeInTheDocument();
+    });
+
+    it('should return false when multiple validation errors exist', async () => {
+      render(<ConfigScreen />);
+
+      await waitFor(() => {
+        expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
+      });
+
+      // Leave sourceFieldId empty, and add an incomplete override
+      const user = userEvent.setup();
+      const addButton = screen.getByRole('button', { name: /add override/i });
+      await user.click(addButton);
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
+      });
+
+      const callCount = mockSdk.app.onConfigure.mock.calls.length;
+      const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
+      const result = await onConfigureCallback();
+
+      // Should return false and show all error messages
+      expect(result).toBe(false);
+      expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
+      expect(await screen.findByText('Source field ID is required')).toBeInTheDocument();
+      expect(await screen.findByText('Content type is required')).toBeInTheDocument();
+    });
+
+    it('should validate multiple overrides correctly', async () => {
+      const user = userEvent.setup();
+      render(<ConfigScreen />);
+
+      await waitFor(() => {
+        expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
+      });
+
+      const separatorInput = screen.getByLabelText(/separator/i);
+      await user.type(separatorInput, '-');
+
+      const sourceFieldAutocomplete = screen.getByPlaceholderText(/search field name/i);
+      await user.type(sourceFieldAutocomplete, 'Title');
+
+      // Add first override - complete
+      const addButton = screen.getByRole('button', { name: /add override/i });
+      await user.click(addButton);
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
+      });
+
+      let contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[0];
+      await user.type(contentTypeAutocomplete, 'Blog Post');
+
+      await waitFor(() => {
+        const fieldAutocomplete = screen.getAllByPlaceholderText(/field name/i)[0];
+        expect(fieldAutocomplete).not.toBeDisabled();
+      });
+
+      await user.type(screen.getAllByPlaceholderText(/field name/i)[0], 'Slug');
+
+      // Add second override - incomplete (missing fieldId)
+      await user.click(addButton);
+
+      await waitFor(() => {
+        const contentTypeInputs = screen.getAllByPlaceholderText(/content type name/i);
+        expect(contentTypeInputs.length).toBe(2);
+      });
+
+      contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[1];
+      await user.type(contentTypeAutocomplete, 'Author');
+      const authorOption = screen.getAllByRole('option', { name: 'Author' })[0];
+      await user.click(authorOption);
+
+      // Don't select field for second override
+
+      const callCount = mockSdk.app.onConfigure.mock.calls.length;
+      const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
+      const result = await onConfigureCallback();
+
+      // Should return false because second override is incomplete
+      expect(result).toBe(false);
+      expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
+      expect((await screen.findAllByText('Field name is required')).length).toBe(2);
     });
   });
 });

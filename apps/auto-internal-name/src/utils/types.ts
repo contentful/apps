@@ -14,3 +14,8 @@ export type AppInstallationParameters = {
   separator: string;
   sourceFieldId: string;
 };
+
+export type OverrideIsInvalid = {
+  isContentTypeMissing: boolean;
+  isFieldMissing: boolean;
+};

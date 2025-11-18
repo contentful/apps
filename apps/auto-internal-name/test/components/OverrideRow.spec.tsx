@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import OverrideRow from '../../src/components/OverrideRow';
 import { ContentTypeProps } from 'contentful-management';
-import { Override } from '../../src/utils/types';
+import { Override, OverrideIsInvalid } from '../../src/utils/types';
 
 describe('OverrideRow', () => {
   const mockContentTypes: ContentTypeProps[] = [
@@ -39,6 +39,11 @@ describe('OverrideRow', () => {
     return updater;
   });
 
+  const mockOverrideError: OverrideIsInvalid = {
+    isContentTypeMissing: false,
+    isFieldMissing: false,
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -50,6 +55,8 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={mockOverride}
           setOverrides={mockSetOverrides}
+          overrideIsInvalid={mockOverrideError}
+          overrides={[mockOverride]}
         />
       );
 
@@ -66,6 +73,8 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={mockOverride}
           setOverrides={mockSetOverrides}
+          overrideIsInvalid={mockOverrideError}
+          overrides={[mockOverride]}
         />
       );
 
@@ -84,6 +93,8 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={mockOverride}
           setOverrides={setOverridesSpy}
+          overrideIsInvalid={mockOverrideError}
+          overrides={[mockOverride]}
         />
       );
 
@@ -117,6 +128,8 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={overrideWithContentType}
           setOverrides={setOverridesSpy}
+          overrideIsInvalid={mockOverrideError}
+          overrides={[overrideWithContentType]}
         />
       );
 
@@ -156,6 +169,8 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={overrideWithContentType}
           setOverrides={setOverridesSpy}
+          overrideIsInvalid={mockOverrideError}
+          overrides={[overrideWithContentType]}
         />
       );
 
@@ -163,7 +178,8 @@ describe('OverrideRow', () => {
 
       await user.clear(contentTypeInput);
       await user.click(contentTypeInput);
-      const option = screen.getAllByRole('option', { name: 'Blog Post' })[0] as HTMLElement;
+
+      const option = await screen.findByText('Blog Post');
       await user.click(option);
 
       await waitFor(() => {
@@ -201,6 +217,8 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={overrideWithContentType}
           setOverrides={mockSetOverrides}
+          overrideIsInvalid={mockOverrideError}
+          overrides={[overrideWithContentType]}
         />
       );
 
@@ -228,6 +246,8 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={overrideWithContentType}
           setOverrides={setOverridesSpy}
+          overrideIsInvalid={mockOverrideError}
+          overrides={[overrideWithContentType]}
         />
       );
 
@@ -277,6 +297,8 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={mockOverride}
           setOverrides={setOverridesSpy}
+          overrideIsInvalid={mockOverrideError}
+          overrides={overrides}
         />
       );
 
@@ -317,6 +339,8 @@ describe('OverrideRow', () => {
           contentTypes={mockContentTypes}
           overrideItem={overrideToDelete}
           setOverrides={setOverridesSpy}
+          overrideIsInvalid={mockOverrideError}
+          overrides={overrides}
         />
       );
 
@@ -337,6 +361,88 @@ describe('OverrideRow', () => {
     });
   });
 
+  describe('Content type filtering', () => {
+    it('should filter out content types used in other overrides', async () => {
+      const user = userEvent.setup();
+      const overrideWithBlogPost: Override = {
+        id: 'override-1',
+        contentTypeId: 'ct-1',
+        fieldId: 'title',
+      };
+
+      const overrideWithoutContentType: Override = {
+        id: 'override-2',
+        contentTypeId: '',
+        fieldId: '',
+      };
+
+      const overrides: Override[] = [overrideWithBlogPost, overrideWithoutContentType];
+
+      render(
+        <OverrideRow
+          contentTypes={mockContentTypes}
+          overrideItem={overrideWithoutContentType}
+          setOverrides={mockSetOverrides}
+          overrideIsInvalid={mockOverrideError}
+          overrides={overrides}
+        />
+      );
+
+      const contentTypeInput = screen.getByPlaceholderText('Content type name');
+      await user.click(contentTypeInput);
+
+      // Verify Blog Post is NOT in the dropdown (filtered out because override-1 uses it)
+      await waitFor(() => {
+        const blogPostOptions = screen.queryAllByRole('option', { name: 'Blog Post' });
+        expect(blogPostOptions.length).toBe(0);
+      });
+
+      // Verify Author is still available
+      await waitFor(() => {
+        const authorOptions = screen.getAllByRole('option', { name: 'Author' });
+        expect(authorOptions.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('should not filter out current override own content type', async () => {
+      const user = userEvent.setup();
+      const overrideWithBlogPost: Override = {
+        id: 'override-1',
+        contentTypeId: 'ct-1',
+        fieldId: 'title',
+      };
+
+      const overrides: Override[] = [overrideWithBlogPost];
+
+      render(
+        <OverrideRow
+          contentTypes={mockContentTypes}
+          overrideItem={overrideWithBlogPost}
+          setOverrides={mockSetOverrides}
+          overrideIsInvalid={mockOverrideError}
+          overrides={overrides}
+        />
+      );
+
+      // Clear and click on content type input to open dropdown
+      const contentTypeInput = screen.getByPlaceholderText('Content type name');
+      await user.clear(contentTypeInput);
+      await user.click(contentTypeInput);
+
+      // Verify Blog Post IS in the dropdown (not filtered out because it's the current override)
+      await waitFor(() => {
+        const blogPostOptions = screen.getAllByRole('option', { name: 'Blog Post' });
+        expect(blogPostOptions.length).toBeGreaterThan(0);
+      });
+
+      // Verify Author is also available
+      await waitFor(() => {
+        const authorOptions = screen.getAllByRole('option', { name: 'Author' });
+        expect(authorOptions.length).toBeGreaterThan(0);
+      });
+    });
+  });
+
   describe('Edge cases', () => {
     it('should handle empty content types array', () => {
       render(
@@ -344,6 +450,8 @@ describe('OverrideRow', () => {
           contentTypes={[]}
           overrideItem={mockOverride}
           setOverrides={mockSetOverrides}
+          overrideIsInvalid={mockOverrideError}
+          overrides={[mockOverride]}
         />
       );
 
@@ -379,6 +487,8 @@ describe('OverrideRow', () => {
           contentTypes={[contentTypeWithoutFields]}
           overrideItem={overrideWithEmptyContentType}
           setOverrides={mockSetOverrides}
+          overrideIsInvalid={mockOverrideError}
+          overrides={[overrideWithEmptyContentType]}
         />
       );
 

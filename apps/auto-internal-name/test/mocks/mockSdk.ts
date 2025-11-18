@@ -51,6 +51,9 @@ const createMockSdk = (overrides?: any) => {
       } as AppInstallationParameters,
     },
     cma: mockCma,
+    notifier: {
+      error: vi.fn(),
+    },
   };
 
   return overrides ? { ...baseMockSdk, ...overrides } : baseMockSdk;
