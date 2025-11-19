@@ -5,17 +5,17 @@ import { ContentTypeProps } from 'contentful-management';
 import { Flex, Heading, Paragraph, Box, Button, Tooltip } from '@contentful/f36-components';
 import { PlusIcon } from '@contentful/f36-icons';
 import OverrideRow from './OverrideRow';
-import { Override, OverrideError } from '../utils/types';
+import { Override, OverrideState } from '../utils/types';
 
 type ContentTypeOverridesProps = {
   overrides: Override[];
-  overrideErrors: Record<string, OverrideError>;
+  overridesAreInvalid?: OverrideState;
   onOverridesChange: (updater: (prev: Override[]) => Override[]) => void;
 };
 
 const ContentTypeOverrides: React.FC<ContentTypeOverridesProps> = ({
   overrides,
-  overrideErrors,
+  overridesAreInvalid,
   onOverridesChange,
 }) => {
   const sdk = useSDK<ConfigAppSDK>();
@@ -72,7 +72,7 @@ const ContentTypeOverrides: React.FC<ContentTypeOverridesProps> = ({
           key={override.id}
           contentTypes={contentTypes}
           overrideItem={override}
-          overrideError={overrideErrors[override.id]}
+          overrideIsInvalid={overridesAreInvalid?.[override.id]}
           overrides={overrides}
           onOverrideChange={handleOverrideChange}
           onOverrideDelete={handleOverrideDelete}

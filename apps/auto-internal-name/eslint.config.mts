@@ -13,15 +13,20 @@ export default defineConfig([
         version: 'detect',
       },
     },
-  }},
+  },
   {
     plugins: {
-      "unused-imports": unusedImports,
+      'unused-imports': unusedImports,
       react: pluginReact,
       tseslint: tseslint,
     },
   },
-  { files: ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"], plugins: { js }, extends: ["js/recommended"], languageOptions: { globals: globals.browser } },
+  {
+    files: ['**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    plugins: { js },
+    extends: ['js/recommended'],
+    languageOptions: { globals: globals.browser },
+  },
   tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
   {
@@ -35,12 +40,12 @@ export default defineConfig([
       'unused-imports/no-unused-vars': [
         'warn',
         {
-          "vars": "all",
-          "varsIgnorePattern": "^_",
-          "args": "after-used",
-          "argsIgnorePattern": "^_"
-        }
-      ]
-    }
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+        },
+      ],
+    },
   },
 ]);

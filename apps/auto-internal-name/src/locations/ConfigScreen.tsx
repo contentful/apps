@@ -2,25 +2,21 @@ import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Autocomplete,
   Box,
-  Button,
   Flex,
   Form,
   FormControl,
   Heading,
   Paragraph,
   TextInput,
-  Tooltip,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
 import { styles } from './ConfigScreen.styles';
-import { ContentTypeProps } from 'contentful-management';
 import ContentTypeOverrides from '../components/ContentTypeOverrides';
-import { AppInstallationParameters, Override, OverrideIsInvalid } from '../utils/types';
+import { AppInstallationParameters, OverrideState, Override } from '../utils/types';
 import { getUniqueShortTextFields, normalizeString } from '../utils/override';
 
 type SimplifiedField = { id: string; name: string };
-type OverrideState = Record<string, OverrideIsInvalid>;
 
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
@@ -40,7 +36,7 @@ const ConfigScreen = () => {
     const currentState = await sdk.app.getCurrentState();
     setIsSourceFieldMissing(!parameters.sourceFieldId);
 
-    const overridesAreInvalid: Record<string, OverrideIsInvalid> = {};
+    const overridesAreInvalid: OverrideState = {};
     parameters.overrides.forEach((override) => {
       overridesAreInvalid[override.id] = {
         isContentTypeMissing: !override.contentTypeId,
@@ -54,26 +50,6 @@ const ConfigScreen = () => {
     );
 
     if (!parameters.sourceFieldId || invalidOverrides) {
-      sdk.notifier.error('Some fields are missing or invalid');
-      return false;
-    }
-
-    const newSourceFieldError = !parameters.sourceFieldId;
-    setSourceFieldError(newSourceFieldError);
-
-    const newOverrideErrors: Record<string, OverrideError> = {};
-    parameters.overrides.forEach((override) => {
-      newOverrideErrors[override.id] = {
-        isContentTypeMissing: !override.contentTypeId,
-        isFieldMissing: !override.fieldId,
-      };
-    });
-    setOverrideErrors(newOverrideErrors);
-
-    const hasOverrideErrors = Object.values(newOverrideErrors).some(
-      (error) => error.isContentTypeMissing || error.isFieldMissing
-    );
-    if (newSourceFieldError || hasOverrideErrors) {
       sdk.notifier.error('Some fields are missing or invalid');
       return false;
     }

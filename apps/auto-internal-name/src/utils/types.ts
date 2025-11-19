@@ -19,3 +19,5 @@ export type OverrideIsInvalid = {
   isContentTypeMissing: boolean;
   isFieldMissing: boolean;
 };
+
+export type OverrideState = Record<string, OverrideIsInvalid>;

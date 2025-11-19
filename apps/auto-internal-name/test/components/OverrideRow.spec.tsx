@@ -360,7 +360,7 @@ describe('OverrideRow', () => {
           overrideItem={overrideWithoutContentType}
           onOverrideChange={mockOnOverrideChange}
           onOverrideDelete={mockOnOverrideDelete}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={overrides}
         />
       );
@@ -397,7 +397,7 @@ describe('OverrideRow', () => {
           overrideItem={overrideWithBlogPost}
           onOverrideChange={mockOnOverrideChange}
           onOverrideDelete={mockOnOverrideDelete}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={overrides}
         />
       );
@@ -492,7 +492,7 @@ describe('OverrideRow', () => {
           overrideItem={overrideWithContentType}
           onOverrideChange={mockOnOverrideChange}
           onOverrideDelete={mockOnOverrideDelete}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[overrideWithContentType]}
         />
       );
