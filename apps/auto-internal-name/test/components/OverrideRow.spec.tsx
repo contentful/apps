@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import OverrideRow from '../../src/components/OverrideRow';
 import { ContentTypeProps } from 'contentful-management';
-import { Override, OverrideError } from '../../src/utils/types';
+import { Override, OverrideIsInvalid } from '../../src/utils/types';
 
 describe('OverrideRow', () => {
   const mockContentTypes: ContentTypeProps[] = [
@@ -37,7 +37,7 @@ describe('OverrideRow', () => {
   const mockOnOverrideChange = vi.fn();
   const mockOnOverrideDelete = vi.fn();
 
-  const mockOverrideError: OverrideError = {
+  const mockOverrideError: OverrideIsInvalid = {
     isContentTypeMissing: false,
     isFieldMissing: false,
   };
@@ -54,7 +54,7 @@ describe('OverrideRow', () => {
           overrideItem={mockOverride}
           onOverrideChange={mockOnOverrideChange}
           onOverrideDelete={mockOnOverrideDelete}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[mockOverride]}
         />
       );
@@ -73,7 +73,7 @@ describe('OverrideRow', () => {
           overrideItem={mockOverride}
           onOverrideChange={mockOnOverrideChange}
           onOverrideDelete={mockOnOverrideDelete}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[mockOverride]}
         />
       );
@@ -94,7 +94,7 @@ describe('OverrideRow', () => {
           overrideItem={mockOverride}
           onOverrideChange={onOverrideChangeSpy}
           onOverrideDelete={mockOnOverrideDelete}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[mockOverride]}
         />
       );
@@ -134,7 +134,7 @@ describe('OverrideRow', () => {
           overrideItem={overrideWithContentType}
           onOverrideChange={onOverrideChangeSpy}
           onOverrideDelete={mockOnOverrideDelete}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[overrideWithContentType]}
         />
       );
@@ -174,7 +174,7 @@ describe('OverrideRow', () => {
           overrideItem={overrideWithContentType}
           onOverrideChange={onOverrideChangeSpy}
           onOverrideDelete={mockOnOverrideDelete}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[overrideWithContentType]}
         />
       );
@@ -221,7 +221,7 @@ describe('OverrideRow', () => {
           overrideItem={overrideWithContentType}
           onOverrideChange={mockOnOverrideChange}
           onOverrideDelete={mockOnOverrideDelete}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[overrideWithContentType]}
         />
       );
@@ -246,7 +246,7 @@ describe('OverrideRow', () => {
           overrideItem={overrideWithContentType}
           onOverrideChange={onOverrideChangeSpy}
           onOverrideDelete={mockOnOverrideDelete}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[overrideWithContentType]}
         />
       );
@@ -291,7 +291,7 @@ describe('OverrideRow', () => {
           overrideItem={mockOverride}
           onOverrideChange={mockOnOverrideChange}
           onOverrideDelete={onOverrideDeleteSpy}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={overrides}
         />
       );
@@ -323,7 +323,7 @@ describe('OverrideRow', () => {
           overrideItem={overrideToDelete}
           onOverrideChange={mockOnOverrideChange}
           onOverrideDelete={onOverrideDeleteSpy}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={overrides}
         />
       );
@@ -429,7 +429,7 @@ describe('OverrideRow', () => {
           overrideItem={mockOverride}
           onOverrideChange={mockOnOverrideChange}
           onOverrideDelete={mockOnOverrideDelete}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[mockOverride]}
         />
       );
@@ -467,7 +467,7 @@ describe('OverrideRow', () => {
           overrideItem={overrideWithEmptyContentType}
           onOverrideChange={mockOnOverrideChange}
           onOverrideDelete={mockOnOverrideDelete}
-          overrideError={mockOverrideError}
+          overrideIsInvalid={mockOverrideError}
           overrides={[overrideWithEmptyContentType]}
         />
       );
