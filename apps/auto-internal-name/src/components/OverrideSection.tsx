@@ -13,7 +13,7 @@ type ContentTypeOverridesProps = {
   onOverridesChange: (updater: (prev: Override[]) => Override[]) => void;
 };
 
-const ContentTypeOverrides: React.FC<ContentTypeOverridesProps> = ({
+const OverrideSection: React.FC<ContentTypeOverridesProps> = ({
   overrides,
   overridesAreInvalid,
   onOverridesChange,
@@ -96,4 +96,4 @@ const ContentTypeOverrides: React.FC<ContentTypeOverridesProps> = ({
   );
 };
 
-export default ContentTypeOverrides;
+export default OverrideSection;
