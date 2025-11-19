@@ -4,11 +4,6 @@ import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
 
   return <Paragraph>Hello Sidebar Component (AppId: {sdk.ids.app})</Paragraph>;
 };
