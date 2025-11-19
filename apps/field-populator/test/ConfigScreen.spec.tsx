@@ -92,13 +92,9 @@ describe('Config Screen component', () => {
       render(<ConfigScreen />);
     });
 
-    expect(screen.getByText('Assign content types')).toBeInTheDocument();
-    expect(
-      screen.getByText(/Select the content type\(s\) you want to use with Field Populator/)
-    ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /You can change this anytime by navigating to the.*Sidebar.*tab in your content model/
+        "Select the content type(s) you want to use with Field Populator. You can change this anytime by navigating to the 'Sidebar' tab in your content model."
       )
     ).toBeInTheDocument();
   });

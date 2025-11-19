@@ -127,8 +127,8 @@ const ConfigScreen = () => {
             Assign content types
           </Heading>
           <Paragraph marginBottom="spacingL">
-            Select the content type(s) you want to use with Field Populator. You can change this
-            anytime by navigating to the {'Sidebar'} tab in your content model.
+            {`Select the content type(s) you want to use with Field Populator. You can change this
+            anytime by navigating to the 'Sidebar' tab in your content model.`}
           </Paragraph>
           <FormControl id="contentTypes" style={{ width: '100%' }}>
             <FormControl.Label>Content types</FormControl.Label>
