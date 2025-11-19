@@ -1,23 +1,91 @@
-import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Flex, Form, Heading, Paragraph } from '@contentful/f36-components';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-import { css } from 'emotion';
+import { ConfigAppSDK, AppState } from '@contentful/app-sdk';
+import { Flex, Heading, Paragraph, FormControl } from '@contentful/f36-components';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
+import { ContentTypeProps } from 'contentful-management';
+import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
+import { styles } from './ConfigScreen.styles';
 
 export type AppInstallationParameters = Record<string, unknown>;
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
+  const [allContentTypes, setAllContentTypes] = useState<ContentTypeProps[]>([]);
+  const [selectedContentTypes, setSelectedContentTypes] = useState<ContentTypeProps[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const sdk = useSDK<ConfigAppSDK>();
+
+  const fetchAllContentTypes = async (): Promise<ContentTypeProps[]> => {
+    const contentTypes: ContentTypeProps[] = [];
+    let skip = 0;
+    const limit = 1000;
+    let fetched: number;
+
+    do {
+      const response = await sdk.cma.contentType.getMany({
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
+        query: { skip, limit },
+      });
+      const items = response.items as ContentTypeProps[];
+      contentTypes.push(...items);
+      fetched = items.length;
+      skip += limit;
+    } while (fetched === limit);
+
+    return contentTypes.sort((a, b) => a.name.localeCompare(b.name));
+  };
+
+  const loadContentTypesAndRestoreState = async () => {
+    try {
+      setIsLoading(true);
+      const contentTypes = await fetchAllContentTypes();
+      setAllContentTypes(contentTypes);
+
+      // Restore selected content types from saved state
+      const currentState: AppState | null = await sdk.app.getCurrentState();
+      if (currentState?.EditorInterface) {
+        const selectedIds = Object.keys(currentState.EditorInterface);
+        const restored = contentTypes.filter((ct) => selectedIds.includes(ct.sys.id));
+        setSelectedContentTypes(restored);
+      }
+    } catch (error) {
+      console.error('Error loading content types:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
+    const currentEditorInterface = currentState?.EditorInterface || {};
+
+    // Build new EditorInterface with selected content types assigned to sidebar
+    const newEditorInterface: AppState['EditorInterface'] = {};
+
+    // Remove content types that are no longer selected
+    Object.keys(currentEditorInterface).forEach((contentTypeId) => {
+      if (selectedContentTypes.some((ct) => ct.sys.id === contentTypeId)) {
+        newEditorInterface[contentTypeId] = currentEditorInterface[contentTypeId];
+      }
+    });
+
+    // Add newly selected content types to sidebar
+    selectedContentTypes.forEach((contentType) => {
+      if (!newEditorInterface[contentType.sys.id]) {
+        newEditorInterface[contentType.sys.id] = {
+          sidebar: { position: 1 },
+        };
+      }
+    });
 
     return {
       parameters,
-      targetState: currentState,
+      targetState: {
+        EditorInterface: newEditorInterface,
+      },
     };
-  }, [parameters, sdk]);
+  }, [parameters, selectedContentTypes, sdk]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -31,16 +99,48 @@ const ConfigScreen = () => {
         setParameters(currentParameters);
       }
 
+      await loadContentTypesAndRestoreState();
       sdk.app.setReady();
     })();
   }, [sdk]);
 
+  if (isLoading) {
+    return (
+      <Flex justifyContent="center" alignItems="center">
+        <Paragraph>Loading content types...</Paragraph>
+      </Flex>
+    );
+  }
+
   return (
-    <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
-      <Form>
-        <Heading>App Config</Heading>
-        <Paragraph>Welcome to your contentful app. This is your config page.</Paragraph>
-      </Form>
+    <Flex justifyContent="center" marginTop="spacingL" marginLeft="spacingL" marginRight="spacingL">
+      <Flex className={styles.container} flexDirection="column" alignItems="flex-start">
+        <Flex flexDirection="column" alignItems="flex-start">
+          <Heading marginBottom="spacingS">Set up Field Populator</Heading>
+          <Paragraph marginBottom="spacing2Xl">
+            Save time localizing content by instantly copying field values across locales with the
+            Field Populator app.
+          </Paragraph>
+        </Flex>
+        <Flex flexDirection="column" alignItems="flex-start">
+          <Heading as="h3" marginBottom="spacingXs">
+            Assign content types
+          </Heading>
+          <Paragraph marginBottom="spacingL">
+            Select the content type(s) you want to use with Field Populator. You can change this
+            anytime by navigating to the {'Sidebar'} tab in your content model.
+          </Paragraph>
+          <FormControl id="contentTypes" style={{ width: '100%' }}>
+            <FormControl.Label>Content types</FormControl.Label>
+            <ContentTypeMultiSelect
+              availableContentTypes={allContentTypes}
+              selectedContentTypes={selectedContentTypes}
+              onSelectionChange={setSelectedContentTypes}
+              isDisabled={allContentTypes.length === 0}
+            />
+          </FormControl>
+        </Flex>
+      </Flex>
     </Flex>
   );
 };
