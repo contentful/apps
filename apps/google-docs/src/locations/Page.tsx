@@ -69,7 +69,7 @@ const Page = () => {
           border: '1px solid #e5e5e5',
           borderRadius: '8px',
         }}>
-        <Heading as="h2">Document Uploader</Heading>
+        <Heading as="h2">Upload Document</Heading>
         <Paragraph marginBottom="spacingL">
           Upload a public Google Doc link or a document file to send for processing.
         </Paragraph>
