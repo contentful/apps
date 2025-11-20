@@ -5,24 +5,36 @@ export const EMPTY_AUTOCOMPLETE_ITEM = { id: '', name: '' };
 
 export const normalizeString = (str: string) => (str ? str.trim().toLowerCase() : '');
 
+const extractUniqueShortTextFields = (fields: ContentTypeProps['fields']): AutocompleteItem[] => {
+  const filteredFields = fields.filter((field) => field.type === 'Symbol');
+  const mappedFields = filteredFields.map((field) => ({ id: field.id, name: field.name }));
+
+  return Array.from(new Map(mappedFields.map((field) => [field.id, field])).values());
+};
+
+const getUniqueShortTextFieldsFromContentType = (contentType: ContentTypeProps) => {
+  return extractUniqueShortTextFields(contentType.fields);
+};
+
+const getUniqueShortTextFieldsFromArray = (contentTypes: ContentTypeProps[]) => {
+  const allFields = contentTypes.flatMap((ct) => ct.fields);
+  return extractUniqueShortTextFields(allFields);
+};
+
 export const getUniqueShortTextFields = (
   contentTypes?: CollectionProp<ContentTypeProps> | ContentTypeProps[]
 ) => {
   if (!contentTypes) return [];
 
   const fields = Array.isArray(contentTypes) ? contentTypes : contentTypes.items;
-  const allFields = fields.flatMap((ct) => ct.fields);
-  const filteredFields = allFields.filter((field) => field.type === 'Symbol');
-  const mappedFields = filteredFields.map((field) => ({ id: field.id, name: field.name }));
-
-  return Array.from(new Map(mappedFields.map((field) => [field.id, field])).values());
+  return getUniqueShortTextFieldsFromArray(fields);
 };
 
 export const getFieldsFrom = (contentTypes: ContentTypeProps[], contentTypeId: string) => {
   if (!contentTypeId) return [];
 
   const contentType = contentTypes.find((ct) => ct.sys.id === contentTypeId);
-  return getUniqueShortTextFields(contentType ? [contentType] : undefined);
+  return contentType ? getUniqueShortTextFieldsFromContentType(contentType) : [];
 };
 
 export const getInitialContentTypeName = (
