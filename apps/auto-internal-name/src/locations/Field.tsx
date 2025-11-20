@@ -15,7 +15,8 @@ const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   const [isUpdating, setIsUpdating] = useState(true);
   const locales = sdk.locales;
-  const defaultLocale = locales.default || 'en-US';
+  const defaultLocale = locales.default;
+  const currentLocale = sdk.field.locale || defaultLocale;
   const installationParameters = sdk.parameters.installation as AppInstallationParameters;
 
   useAutoResizer();
@@ -25,7 +26,9 @@ const Field = () => {
     const fieldId = getFieldIdForContentType(contentTypeId, installationParameters);
     const separator = installationParameters.separator;
 
-    const parentFieldValue = (parentEntry.fields[fieldId]?.[defaultLocale] as string) || '';
+    const localizedFieldValue = parentEntry.fields[fieldId] as Record<string, string> | undefined;
+    const parentFieldValue =
+      localizedFieldValue?.[currentLocale] || localizedFieldValue?.[defaultLocale] || '';
 
     return separator ? `${parentFieldValue} ${separator}` : parentFieldValue;
   };
