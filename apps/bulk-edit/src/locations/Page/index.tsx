@@ -79,6 +79,7 @@ const Page = () => {
   const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [initialTotal, setInitialTotal] = useState(0);
+  const [tableKey, setTableKey] = useState(0);
 
   const hasActiveFilters = () => {
     const hasSearchQuery = searchQuery.trim() !== '';
@@ -228,6 +229,12 @@ const Page = () => {
     setFields([]);
     setTotalEntries(0);
     setInitialTotal(0);
+  };
+
+  const clearSelectionState = () => {
+    setSelectedField(null);
+    setSelectedEntryIds([]);
+    setTableKey((tableKey) => tableKey + 1);
   };
 
   // Fetch content type and fields when selectedContentTypeId changes
@@ -525,6 +532,7 @@ const Page = () => {
                 setActivePage(0);
                 setSearchQuery('');
                 setInitialTotal(0);
+                clearSelectionState();
               }}
               disabled={entriesLoading}
             />
@@ -542,6 +550,7 @@ const Page = () => {
                   onSearchChange={(query) => {
                     setSearchQuery(query);
                     setActivePage(0);
+                    clearSelectionState();
                   }}
                   isDisabled={shouldDisableFilters(false)}
                   debounceDelay={300}
@@ -564,6 +573,7 @@ const Page = () => {
                     setSelectedItems={(statuses) => {
                       setSelectedStatuses(statuses);
                       setActivePage(0);
+                      clearSelectionState();
                     }}
                     disabled={shouldDisableFilters()}
                     placeholderConfig={{
@@ -603,18 +613,26 @@ const Page = () => {
                   )}
                 </Flex>
                 {!entriesLoading && (
-                  <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
-                    <Button
-                      variant="primary"
-                      onClick={() => setIsModalOpen(true)}
-                      isDisabled={!selectedField || selectedEntryIds.length === 0}>
-                      {selectedEntryIds.length > 1 ? 'Bulk edit' : 'Edit'}
-                    </Button>
+                  <>
+                    <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
+                      <Button
+                        variant="primary"
+                        onClick={() => setIsModalOpen(true)}
+                        isDisabled={!selectedField || selectedEntryIds.length === 0}>
+                        {selectedEntryIds.length > 1 ? 'Bulk edit' : 'Edit'}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => clearSelectionState()}
+                        isDisabled={!selectedField || selectedEntryIds.length === 0}>
+                        Clear selection
+                      </Button>
+                    </Flex>
                     <Text fontColor="gray600">
                       {selectedEntryIds.length || 'No'} entry field
                       {selectedEntryIds.length === 1 ? '' : 's'} selected
                     </Text>
-                  </Flex>
+                  </>
                 )}
                 {entriesLoading ? (
                   <Table style={styles.loadingTableBorder}>
@@ -640,6 +658,7 @@ const Page = () => {
                           />
                         )}
                         <EntryTable
+                          key={tableKey}
                           entries={entries}
                           fields={selectedColumns.flatMap(
                             (field) => fields.find((f) => f.uniqueId === field.value) || []
