@@ -17,7 +17,7 @@ const OverrideSection: React.FC<ContentTypeOverridesProps> = ({
   overrides,
   overridesAreInvalid,
   onOverridesChange,
-}) => {
+}: ContentTypeOverridesProps) => {
   const sdk = useSDK<ConfigAppSDK>();
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
 

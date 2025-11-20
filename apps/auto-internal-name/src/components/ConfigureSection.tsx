@@ -19,7 +19,7 @@ const ConfigureSection: React.FC<ConfigureSectionProps> = ({
   isSourceFieldMissing,
   onSeparatorChange,
   onSourceFieldIdChange,
-}) => {
+}: ConfigureSectionProps) => {
   const sdk = useSDK<ConfigAppSDK>();
   const [fields, setFields] = useState<AutocompleteItem[]>([]);
   const [filteredSourceFields, setFilteredSourceFields] = useState<AutocompleteItem[]>([]);

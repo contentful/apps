@@ -34,7 +34,6 @@ export default defineConfig([
       'react/jsx-uses-react': 'off',
       'react/react-in-jsx-scope': 'off',
       'no-unused-vars': 'off',
-      'react/prop-types': 'off',
       'unused-imports/no-unused-imports': 'error',
       '@typescript-eslint/no-explicit-any': 'off',
       'unused-imports/no-unused-vars': [

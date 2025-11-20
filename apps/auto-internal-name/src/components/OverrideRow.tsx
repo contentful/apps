@@ -29,7 +29,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
   overrides,
   onOverrideChange,
   onOverrideDelete,
-}) => {
+}: OverrideRowProps) => {
   const [filteredContentTypes, setFilteredContentTypes] = useState<ContentTypeProps[]>([]);
   const [filteredFields, setfilteredFields] = useState<AutocompleteItem[]>([]);
   const [selectedContentType, setSelectedContentType] =
