@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockCma, mockSdk } from './mocks';
 import Sidebar from '../src/locations/Sidebar';
 import userEvent from '@testing-library/user-event';
+import { APP_NAME } from '../src/utils/consts';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -18,14 +19,14 @@ describe('Sidebar component', () => {
     render(<Sidebar />);
 
     expect(screen.getByText('Populate content across similar locales')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Field Populator' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: APP_NAME })).toBeInTheDocument();
   });
 
   it('should open dialog when button is clicked', async () => {
     const user = userEvent.setup();
     render(<Sidebar />);
 
-    const button = screen.getByRole('button', { name: 'Field Populator' });
+    const button = screen.getByRole('button', { name: APP_NAME });
 
     await user.click(button);
 

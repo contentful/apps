@@ -1,8 +1,7 @@
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { Button, Flex, Text } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-
-const APP_NAME = 'Field Populator';
+import { APP_NAME } from '../utils/consts';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
