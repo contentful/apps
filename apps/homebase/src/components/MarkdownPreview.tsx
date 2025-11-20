@@ -6,6 +6,7 @@ import { css, cx } from 'emotion';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import remarkGfm from 'remark-gfm';
+import Mermaid from './Mermaid';
 
 const styles = {
   root: css`
@@ -138,9 +139,77 @@ const styles = {
       font-family: ${tokens.fontStackMonospace};
     }
 
+    pre {
+      background-color: ${tokens.gray100};
+      border: 1px solid ${tokens.gray300};
+      border-radius: ${tokens.borderRadiusMedium};
+      padding: ${tokens.spacingM};
+      margin: ${tokens.spacingM} 0;
+      overflow-x: auto;
+    }
+
+    code {
+      font-family: ${tokens.fontStackMonospace};
+      font-size: ${tokens.fontSizeS};
+      background-color: ${tokens.gray100};
+      padding: 2px 4px;
+      border-radius: ${tokens.borderRadiusSmall};
+    }
+
+    pre code {
+      background-color: transparent;
+      padding: 0;
+      border-radius: 0;
+    }
+
     .embedly-card {
       margin: ${tokens.spacingM} auto;
       display: block;
+    }
+
+    .mermaid {
+      margin: ${tokens.spacingM} auto;
+      text-align: center;
+      overflow-x: auto;
+      max-width: 100%;
+    }
+
+    .mermaid svg {
+      max-width: 100%;
+      height: auto;
+      min-width: 600px;
+    }
+
+    .mermaid .nodeLabel {
+      font-size: 13px;
+      font-weight: 500;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      max-width: none !important;
+    }
+
+    .mermaid .edgeLabel {
+      font-size: 11px;
+      background-color: white;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+
+    .mermaid .node rect {
+      min-width: 160px;
+    }
+
+    .mermaid .node foreignObject {
+      overflow: visible;
+      width: auto !important;
+      min-width: 160px !important;
+    }
+
+    .mermaid .node div {
+      max-width: none !important;
+      min-width: 160px !important;
+      padding: 8px 12px !important;
     }
   `,
   framed: css({
@@ -220,13 +289,32 @@ const MarkdownPreview = React.memo((props: MarkdownPreviewProps) => {
         rehypePlugins={[rehypeRaw, rehypeSanitize]}
         remarkPlugins={[remarkGfm]}
         remarkRehypeOptions={{
-          // The HTML is already sanitized by rehype
+          //The HTML is already sanitized by rehype
           allowDangerousHtml: true,
         }}
         components={{
           a: (markdownProps: MarkdownLinkProps) => (
             <MarkdownLink {...markdownProps} Embedly={props.previewComponents?.embedly} />
           ),
+          code({ node, inline, className, children, ...props }) {
+            // Extract language identifier from CSS class (e.g., "language-mermaid" → "mermaid")
+            const match = /language-(\w+)/.exec(className || '');
+
+            // convert React children to string and remove trailing newline that markdown adds
+            const code = String(children).replace(/\n$/, '');
+
+            //check if this is a block-level mermaid code block (not inline `code`)
+            if (!inline && match?.[1] === 'mermaid') {
+              return <Mermaid code={code} />;
+            }
+
+            //for all other code blocks, render normal <code> element
+            return (
+              <code className={className} {...props}>
+                {children}
+              </code>
+            );
+          },
         }}>
         {replaceMailtoAmp(props.value)}
       </ReactMarkdown>
