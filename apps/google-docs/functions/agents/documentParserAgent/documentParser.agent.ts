@@ -9,15 +9,15 @@
 
 import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
+import { ContentTypeProps } from 'contentful-management';
+import { fetchGoogleDoc } from '../../service/googleDriveService';
 
 /**
  * Configuration for the content type parser
  */
 interface DocumentParserConfig {
-  openaiApiKey: string;
-  modelVersion: string;
-  jsonData: any;
-  document: any;
+  // contentTypes: ContentTypeProps[];
+  googleDocUrl: string;
 }
 
 /**
@@ -26,9 +26,11 @@ interface DocumentParserConfig {
  * @returns Promise resolving to LLM response
  */
 export async function createDocument(config: DocumentParserConfig) {
-  const { openaiApiKey, modelVersion, jsonData, document } = config;
-  const prompt = buildPrompt(jsonData);
-  return await callOpenAI(prompt, modelVersion, openaiApiKey);
+  const { googleDocUrl } = config;
+  const googleDocContent = await fetchGoogleDoc(googleDocUrl);
+  // const prompt = buildPrompt(jsonData);
+  // return await callOpenAI(prompt, modelVersion, openaiApiKey);
+  return googleDocContent as string;
 }
 
 function buildPrompt(jsonData: any): string {

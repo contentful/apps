@@ -8,11 +8,13 @@ import { analyzeContentTypes } from './agents/contentTypeParserAgent/contentType
 import { createDocument } from './agents/documentParserAgent/documentParser.agent';
 import { fetchContentTypes } from './service/contentTypeService';
 import { initContentfulManagementClient } from './service/initCMAClient';
+import { fetchGoogleDoc } from './service/googleDriveService';
 
 export type AppActionParameters = {
   contentTypeIds: string[];
-  prompt: string;
+  googleDocUrl: string;
 };
+
 interface AppInstallationParameters {
   openAiApiKey: string;
 }
@@ -28,28 +30,21 @@ export const handler: FunctionEventHandler<
   event: AppActionRequest<'Custom', AppActionParameters>,
   context: FunctionEventContext
 ) => {
-  const { contentTypeIds } = event.body;
+  const { contentTypeIds, googleDocUrl } = event.body;
   const { openAiApiKey } = context.appInstallationParameters as AppInstallationParameters;
-
   // INTEG-3262 and INTEG-3263: Take in Content Type, Prompt, and Upload File from user
 
   const cma = initContentfulManagementClient(context);
-
   const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
-  const contentTypeParserAgentResult = await analyzeContentTypes({ contentTypes, openAiApiKey });
 
-  console.log('contentTypeParserAgentResult', contentTypeParserAgentResult);
+  const contentTypeParserAgentResult = await analyzeContentTypes({ contentTypes, openAiApiKey });
+  // console.log('contentTypeParserAgentResult', contentTypeParserAgentResult);
 
   // INTEG-3261: Pass the ai content type response to the observer for analysis
   // createContentTypeObservationsFromLLMResponse()
 
   // INTEG-3263: Implement the document parser agent
-  // const aiDocumentResponse = createDocument({
-  //   openaiApiKey: openAiApiKey,
-  //   modelVersion: 'gpt-4o',
-  //   jsonData: aiContentTypeResponse,
-  //   document: document,
-  // });
+  const aiDocumentResponse = await createDocument({ googleDocUrl });
 
   // INTEG-3261: Pass the ai document response to the observer for analysis
   // createDocumentObservationsFromLLMResponse()
@@ -60,5 +55,5 @@ export const handler: FunctionEventHandler<
   // INTEG-3265: Create the assets in Contentful using the asset service
   // await createAssets()
 
-  return { success: true, response: contentTypeParserAgentResult };
+  return { success: true, response: { contentTypeParserAgentResult, aiDocumentResponse } };
 };
