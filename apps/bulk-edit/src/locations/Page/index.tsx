@@ -79,6 +79,7 @@ const Page = () => {
   const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [initialTotal, setInitialTotal] = useState(0);
+  // Used to force a re-render of the table when the selection changes
   const [tableKey, setTableKey] = useState(0);
 
   const hasActiveFilters = () => {
@@ -231,6 +232,7 @@ const Page = () => {
     setInitialTotal(0);
   };
 
+  // Used to clear the selection states and force a re-render of the table
   const clearSelectionState = () => {
     setSelectedField(null);
     setSelectedEntryIds([]);
