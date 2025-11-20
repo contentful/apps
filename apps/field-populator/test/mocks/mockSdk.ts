@@ -29,6 +29,9 @@ const mockSdk: any = {
   dialogs: {
     openCurrentApp: vi.fn(),
   },
+  dialogs: {
+    openCurrentApp: vi.fn(),
+  },
 };
 
 export { mockSdk };
