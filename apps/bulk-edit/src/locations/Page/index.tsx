@@ -94,8 +94,12 @@ const Page = () => {
     setActivePage(0);
   };
 
-  const shouldDisableFilters = () => {
-    return (entries.length === 0 && initialTotal === 0) || !selectedContentType || entriesLoading;
+  const shouldDisableFilters = (disableIfLoading: boolean = true) => {
+    return (
+      (entries.length === 0 && initialTotal === 0) ||
+      !selectedContentType ||
+      (disableIfLoading ? entriesLoading : false)
+    );
   };
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
@@ -539,7 +543,7 @@ const Page = () => {
                     setSearchQuery(query);
                     setActivePage(0);
                   }}
-                  isDisabled={shouldDisableFilters()}
+                  isDisabled={shouldDisableFilters(false)}
                   debounceDelay={300}
                 />
 
@@ -579,7 +583,6 @@ const Page = () => {
                         return aIndex - bIndex;
                       });
                       setSelectedColumns(sortedSelectedColumns);
-                      setActivePage(0);
                     }}
                     disabled={shouldDisableFilters()}
                     placeholderConfig={{
