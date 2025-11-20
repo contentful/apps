@@ -27,7 +27,7 @@ interface FieldEditorProps {
 }
 
 const ERROR_MESSAGE = 'Failed to initialize field editor. Please try again.';
-const SUPPORTED_WIDGET_IDS = [
+const SUPPORTED_WIDGET_IDS = new Set([
   'singleLine',
   'dropdown',
   'radio',
@@ -39,7 +39,17 @@ const SUPPORTED_WIDGET_IDS = [
   'tagEditor',
   'boolean',
   'objectEditor',
-];
+]);
+const FIELD_TYPE_TO_DEFAULT_WIDGET: Record<string, string> = {
+  Symbol: 'singleLine',
+  Text: 'multipleLine',
+  Number: 'numberEditor',
+  Integer: 'numberEditor',
+  Date: 'datePicker',
+  Array: 'tagEditor',
+  Boolean: 'boolean',
+  Object: 'objectEditor',
+};
 
 export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange, locales }) => {
   const [error, setError] = useState('');
@@ -50,23 +60,10 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
   }, [field, value, onChange, locale]);
 
   const getWidgetId = (field: ContentTypeField) => {
-    const fieldTypeToDefaultWidget: Record<string, string> = {
-      Symbol: 'singleLine',
-      Text: 'multipleLine',
-      Number: 'numberEditor',
-      Integer: 'numberEditor',
-      Date: 'datePicker',
-      Array: 'tagEditor',
-      Boolean: 'boolean',
-      Object: 'objectEditor',
-    };
-    if (
-      field.fieldControl?.widgetId &&
-      SUPPORTED_WIDGET_IDS.includes(field.fieldControl.widgetId)
-    ) {
+    if (field.fieldControl?.widgetId && SUPPORTED_WIDGET_IDS.has(field.fieldControl.widgetId)) {
       return field.fieldControl.widgetId;
     }
-    return fieldTypeToDefaultWidget[field.type] || 'unknown';
+    return FIELD_TYPE_TO_DEFAULT_WIDGET[field.type] || 'unknown';
   };
 
   const renderEditor = () => {
@@ -144,7 +141,7 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
 
   return (
     <>
-      {SUPPORTED_WIDGET_IDS.includes(getWidgetId(field)) && (
+      {SUPPORTED_WIDGET_IDS.has(getWidgetId(field)) && (
         <Note>
           This field uses an unsupported custom appereance, the default editor for the field will be
           used instead.
