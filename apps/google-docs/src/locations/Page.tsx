@@ -75,13 +75,6 @@ const Page = () => {
 
           {successMessage && <Note variant="positive">{successMessage}</Note>}
           {errorMessage && <Note variant="negative">{errorMessage}</Note>}
-
-          <DocumentPreview
-            title={fetchedDocTitle}
-            html={fetchedDocHtml}
-            isDocxRendered={isDocxRendered}
-            previewRef={previewRef}
-          />
         </Stack>
       </Box>
     </Flex>
