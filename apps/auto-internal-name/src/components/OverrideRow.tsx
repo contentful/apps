@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Autocomplete, Flex, FormControl, IconButton, Box } from '@contentful/f36-components';
+import { Autocomplete, Box, Flex, FormControl, IconButton } from '@contentful/f36-components';
 import { styles } from '../locations/ConfigScreen.styles';
 import { TrashSimpleIcon } from '@contentful/f36-icons';
 import { ContentTypeProps } from 'contentful-management';
@@ -18,7 +18,7 @@ type OverrideRowProps = {
   overrideItem: Override;
   overrideIsInvalid?: OverrideIsInvalid;
   overrides: Override[];
-  onOverrideChange: (override: Override) => void;
+  onOverrideChange: (override: Override, contentTypeId?: string, fieldId?: string) => void;
   onOverrideDelete: (overrideId: string) => void;
 };
 
@@ -71,20 +71,9 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
     }
   }, [contentTypes, selectedContentType, overrides]);
 
-  const updateOverride = (contentTypeId?: string, fieldId?: string) => {
-    const newContentTypeId = contentTypeId || contentTypeId === '' ? { contentTypeId } : undefined;
-    const newFieldId = fieldId || fieldId === '' ? { fieldId } : undefined;
-
-    onOverrideChange({
-      ...overrideItem,
-      ...newContentTypeId,
-      ...newFieldId,
-    });
-  };
-
   const handleCTInputChange = (name: string) => {
     if (!name) {
-      updateOverride('', '');
+      onOverrideChange(overrideItem, '', '');
 
       setFilteredContentTypes(contentTypes);
       setSelectedContentType(EMPTY_AUTOCOMPLETE_ITEM);
@@ -102,7 +91,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
     );
 
     if (selectedItem) {
-      updateOverride(selectedItem.sys.id, '');
+      onOverrideChange(overrideItem, selectedItem.sys.id, '');
 
       if (selectedItem.name !== selectedContentType?.name) {
         setSelectedField(EMPTY_AUTOCOMPLETE_ITEM);
@@ -114,7 +103,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
 
   const handleFieldInputChange = (name: string) => {
     if (!name) {
-      updateOverride(undefined, '');
+      onOverrideChange(overrideItem, undefined, '');
 
       if (selectedContentType) {
         setfilteredFields(getFieldsFrom(contentTypes, selectedContentType.id));
@@ -135,7 +124,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
     );
 
     if (selectedItem) {
-      updateOverride(undefined, selectedItem.id);
+      onOverrideChange(overrideItem, undefined, selectedItem.id);
 
       setSelectedField({ id: selectedItem.id, name: selectedItem.name });
     }

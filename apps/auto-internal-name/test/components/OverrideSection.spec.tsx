@@ -110,11 +110,15 @@ describe('OverrideRow', () => {
       await user.click(option);
 
       await waitFor(() => {
-        expect(onOverrideChangeSpy).toHaveBeenCalledWith({
-          id: 'override-1',
-          contentTypeId: 'ct-1',
-          fieldId: '',
-        });
+        expect(onOverrideChangeSpy).toHaveBeenCalledWith(
+          {
+            id: 'override-1',
+            contentTypeId: '',
+            fieldId: '',
+          },
+          'ct-1',
+          ''
+        );
       });
     });
 
@@ -151,11 +155,15 @@ describe('OverrideRow', () => {
       });
 
       // Verify that the function was called with the updated override
-      expect(onOverrideChangeSpy).toHaveBeenCalledWith({
-        id: 'override-1',
-        contentTypeId: 'ct-2',
-        fieldId: '',
-      });
+      expect(onOverrideChangeSpy).toHaveBeenCalledWith(
+        {
+          id: 'override-1',
+          contentTypeId: 'ct-1',
+          fieldId: 'title',
+        },
+        '',
+        ''
+      );
     });
 
     it('should reset fields when content type input is cleared', async () => {
@@ -199,11 +207,15 @@ describe('OverrideRow', () => {
       });
 
       // Verify that the function was called with cleared values
-      expect(onOverrideChangeSpy).toHaveBeenCalledWith({
-        id: 'override-1',
-        contentTypeId: '',
-        fieldId: '',
-      });
+      expect(onOverrideChangeSpy).toHaveBeenCalledWith(
+        {
+          id: 'override-1',
+          contentTypeId: 'ct-1',
+          fieldId: 'title',
+        },
+        '',
+        ''
+      );
     });
   });
 
@@ -267,11 +279,15 @@ describe('OverrideRow', () => {
       });
 
       // Verify that the function was called with the updated override
-      expect(onOverrideChangeSpy).toHaveBeenCalledWith({
-        id: 'override-1',
-        contentTypeId: 'ct-2',
-        fieldId: 'name',
-      });
+      expect(onOverrideChangeSpy).toHaveBeenCalledWith(
+        {
+          id: 'override-1',
+          contentTypeId: 'ct-2',
+          fieldId: '',
+        },
+        undefined,
+        'name'
+      );
     });
   });
 

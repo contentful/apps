@@ -50,10 +50,13 @@ const OverrideSection: React.FC<ContentTypeOverridesProps> = ({
     ]);
   };
 
-  const handleOverrideChange = (updatedOverride: Override) => {
-    onOverridesChange((prev) =>
-      prev.map((override) => (override.id === updatedOverride.id ? updatedOverride : override))
-    );
+  const handleOverrideChange = (override: Override, contentTypeId?: string, fieldId?: string) => {
+    const newContentTypeId = contentTypeId || contentTypeId === '' ? { contentTypeId } : undefined;
+    const newFieldId = fieldId || fieldId === '' ? { fieldId } : undefined;
+
+    const newOverride = { ...override, ...newContentTypeId, ...newFieldId };
+
+    onOverridesChange((prev) => prev.map((o) => (o.id === newOverride.id ? newOverride : o)));
   };
 
   const handleOverrideDelete = (overrideId: string) => {
@@ -74,7 +77,9 @@ const OverrideSection: React.FC<ContentTypeOverridesProps> = ({
           overrideItem={override}
           overrideIsInvalid={overridesAreInvalid?.[override.id]}
           overrides={overrides}
-          onOverrideChange={handleOverrideChange}
+          onOverrideChange={(override, contentTypeId, fieldId) =>
+            handleOverrideChange(override, contentTypeId, fieldId)
+          }
           onOverrideDelete={handleOverrideDelete}
         />
       ))}
