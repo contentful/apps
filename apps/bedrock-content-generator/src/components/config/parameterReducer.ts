@@ -1,4 +1,5 @@
 import AppInstallationParameters from './appInstallationParameters';
+import featureConfig, { AIFeature } from '@configs/features/featureConfig';
 
 export enum ParameterAction {
   UPDATE_CREDENTIALS = 'updateCredentials',
@@ -6,6 +7,7 @@ export enum ParameterAction {
   UPDATE_MODEL = 'updateModel',
   UPDATE_PROFILE = 'updateProfile',
   UPDATE_BRAND_PROFILE = 'updateBrandProfile',
+  UPDATE_ENABLED_FEATURES = 'updateEnabledFeatures',
   APPLY_CONTENTFUL_PARAMETERS = 'applyContentfulParameters',
 }
 
@@ -47,13 +49,19 @@ type ParameterBrandProfileActions = {
   textLimit: number;
 };
 
+type ParameterUpdateEnabledFeaturesAction = {
+  type: ParameterAction.UPDATE_ENABLED_FEATURES;
+  value: AIFeature[];
+};
+
 export type ParameterReducer =
   | ParameterObjectActions
   | ParameterStringActions
   | ParameterProfileAction
   | ParameterBrandProfileActions
   | ParameterUpdateCredentialsAction
-  | ParameterUpdateRegionAction;
+  | ParameterUpdateRegionAction
+  | ParameterUpdateEnabledFeaturesAction;
 
 /**
  * This is a recursive type that will validate the parameter
@@ -129,6 +137,15 @@ const parameterReducer = (
         },
       };
     }
+    case ParameterAction.UPDATE_ENABLED_FEATURES: {
+      return {
+        ...state,
+        enabledFeatures: {
+          value: action.value,
+          isValid: action.value.length > 0,
+        },
+      };
+    }
     case ParameterAction.APPLY_CONTENTFUL_PARAMETERS: {
       const parameter = action.value as AppInstallationParameters;
       return {
@@ -174,6 +191,14 @@ const parameterReducer = (
             value: parameter.brandProfile?.additional || '',
             isValid: true,
           },
+        },
+        enabledFeatures: {
+          value: parameter.enabledFeatures || (Object.keys(featureConfig) as AIFeature[]),
+          isValid: true,
+        },
+        region: {
+          value: parameter.region,
+          isValid: parameter.region?.length > 0,
         },
       };
     }
