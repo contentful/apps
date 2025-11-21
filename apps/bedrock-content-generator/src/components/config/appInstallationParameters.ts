@@ -1,3 +1,5 @@
+import { AIFeature } from '@configs/features/featureConfig';
+
 interface AppInstallationParameters {
   accessKeyId: string;
   secretAccessKey: string;
@@ -5,6 +7,7 @@ interface AppInstallationParameters {
   model: string;
   profile: string;
   brandProfile: ProfileType;
+  enabledFeatures?: AIFeature[];
 }
 
 export enum ProfileFields {
