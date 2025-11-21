@@ -19,6 +19,3 @@ export const TEST_DOCUMENTS = [
   { id: 'doc7', title: 'Doc 7: Edge Cases Test', data: Doc7 },
   { id: 'doc8', title: 'Doc 8: DXP Benefits Sample', data: Doc8 },
 ];
-
-// Export individual documents
-export { Doc1, Doc2, Doc3, Doc4, Doc5, Doc6, Doc7, Doc8 };
