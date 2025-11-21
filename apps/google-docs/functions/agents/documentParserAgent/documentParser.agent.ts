@@ -1,5 +1,5 @@
 /**
- * INTEG-3263: Document Parser Agent
+ * Document Parser Agent
  *
  * Agent that takes a Google Doc URL and content type definitions,
  * then uses OpenAI to extract structured entries from the document
