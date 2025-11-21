@@ -13,6 +13,7 @@ import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentTypeSelector } from '../components';
 import { createEntriesFromDocumentAction } from '../utils/appFunctionUtils';
+import { GoogleDocUploader } from '../components/page/GoogleDocUploader';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -57,6 +58,14 @@ const Page = () => {
     }
   };
 
+  const handleSuccess = (title: string, html: string | null) => {
+    setGoogleDocUrl(html || '');
+  };
+
+  const handleError = (message: string) => {
+    setErrorMessage(message);
+  };
+
   return (
     <Flex flexDirection="column" alignItems="stretch">
       <Box
@@ -69,12 +78,13 @@ const Page = () => {
           border: '1px solid #e5e5e5',
           borderRadius: '8px',
         }}>
-        <Heading as="h2">Document Uploader</Heading>
+        <Heading as="h2">Upload Document</Heading>
         <Paragraph marginBottom="spacingL">
           Upload a public Google Doc link or a document file to send for processing.
         </Paragraph>
 
         <Stack spacing="spacingXl" flexDirection="column" alignItems="stretch">
+          <GoogleDocUploader sdk={sdk} onSuccess={handleSuccess} onError={handleError} />
           <Box>
             <TextInput
               value={googleDocUrl}
