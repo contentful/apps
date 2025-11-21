@@ -1,47 +1,60 @@
-import { useRef, useState } from 'react';
-import { Box, Flex, Heading, Note, Paragraph, Stack } from '@contentful/f36-components';
+import { useState } from 'react';
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Note,
+  Paragraph,
+  Stack,
+  TextInput,
+} from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import {
-  GoogleDocUploader,
-  DocumentFileUploader,
-  ContentTypeSelector,
-  DocumentPreview,
-} from '../components';
+import { ContentTypeSelector } from '../components';
+import { createEntriesFromDocumentAction } from '../utils/appFunctionUtils';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
 
+  const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
+  const [googleDocUrl, setGoogleDocUrl] = useState<string>(
+    'https://docs.google.com/document/d/1uTBhG6ojUU_epNPFV1qKGIb506YAf3ii/edit?usp=drive_link&ouid=100613518827458188455&rtpof=true&sd=true'
+  );
+  const [contentTypeIds, setContentTypeIds] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [fetchedDocHtml, setFetchedDocHtml] = useState<string | null>(null);
-  const [fetchedDocTitle, setFetchedDocTitle] = useState<string | null>(null);
-  const [isDocxRendered, setIsDocxRendered] = useState<boolean>(false);
-  const previewRef = useRef<HTMLDivElement | null>(null);
+  const [result, setResult] = useState<any>(null);
 
-  const handleGoogleDocSuccess = (title: string, html: string | null) => {
-    setFetchedDocTitle(title);
-    setFetchedDocHtml(html);
-    setIsDocxRendered(false);
-    setSuccessMessage(`Fetched "${title}" successfully.`);
+  const handleSubmit = async () => {
+    // Validation
+    if (!googleDocUrl.trim()) {
+      setErrorMessage('Please enter a Google Doc URL');
+      setSuccessMessage(null);
+      return;
+    }
+
+    if (contentTypeIds.length === 0) {
+      setErrorMessage('Please select at least one content type');
+      setSuccessMessage(null);
+      return;
+    }
+
+    setIsSubmitting(true);
     setErrorMessage(null);
-  };
-
-  const handleDocumentFileSuccess = (
-    title: string,
-    html: string | null,
-    isDocxRendered: boolean
-  ) => {
-    setFetchedDocTitle(title);
-    setFetchedDocHtml(html);
-    setIsDocxRendered(isDocxRendered);
-    setSuccessMessage(`${isDocxRendered ? 'Rendered' : 'Uploaded'} "${title}" successfully.`);
-    setErrorMessage(null);
-  };
-
-  const handleError = (message: string) => {
-    setErrorMessage(message);
     setSuccessMessage(null);
+    setResult(null);
+
+    try {
+      const response = await createEntriesFromDocumentAction(sdk, contentTypeIds, googleDocUrl);
+      setResult(response);
+      setSuccessMessage('Successfully created entries from document!');
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to create entries');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -62,26 +75,61 @@ const Page = () => {
         </Paragraph>
 
         <Stack spacing="spacingXl" flexDirection="column" alignItems="stretch">
-          <GoogleDocUploader sdk={sdk} onSuccess={handleGoogleDocSuccess} onError={handleError} />
+          <Box>
+            <TextInput
+              value={googleDocUrl}
+              onChange={(e) => setGoogleDocUrl(e.target.value)}
+              placeholder="Enter Google Doc URL (e.g., https://docs.google.com/document/d/...)"
+              name="googleDocUrl"
+            />
+          </Box>
 
-          <DocumentFileUploader
+          <ContentTypeSelector
             sdk={sdk}
-            onSuccess={handleDocumentFileSuccess}
-            onError={handleError}
-            previewRef={previewRef}
+            isContentTypePickerOpen={isContentTypePickerOpen}
+            setIsContentTypePickerOpen={setIsContentTypePickerOpen}
+            onContentTypesSelected={setContentTypeIds}
           />
 
-          <ContentTypeSelector sdk={sdk} />
+          <Box>
+            <Button
+              variant="primary"
+              onClick={handleSubmit}
+              isLoading={isSubmitting}
+              isDisabled={isSubmitting}>
+              Create Entries from Document
+            </Button>
+          </Box>
 
           {successMessage && <Note variant="positive">{successMessage}</Note>}
           {errorMessage && <Note variant="negative">{errorMessage}</Note>}
 
-          <DocumentPreview
-            title={fetchedDocTitle}
-            html={fetchedDocHtml}
-            isDocxRendered={isDocxRendered}
-            previewRef={previewRef}
-          />
+          {result && (
+            <Box
+              style={{
+                background: '#f7f9fa',
+                padding: '16px',
+                borderRadius: '4px',
+                border: '1px solid #e5e5e5',
+              }}>
+              <Heading as="h3" marginBottom="spacingS">
+                Response
+              </Heading>
+              <Box
+                as="pre"
+                style={{
+                  maxHeight: '400px',
+                  overflow: 'auto',
+                  fontFamily: 'monospace',
+                  fontSize: '12px',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  margin: 0,
+                }}>
+                {JSON.stringify(result, null, 2)}
+              </Box>
+            </Box>
+          )}
         </Stack>
       </Box>
     </Flex>

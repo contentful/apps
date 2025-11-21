@@ -28,7 +28,10 @@
       "path": "functions/createEntriesFromDocument.js",
       "entryFile": "functions/createEntriesFromDocument.ts",
       "allowNetworks": [
-        "https://api.openai.com"
+        "https://api.openai.com",
+        "https://docs.googleapis.com",
+        "https://docs.google.com",
+        "https://jsonplaceholder.typicode.com"
       ],
       "accepts": [
         "appaction.call"

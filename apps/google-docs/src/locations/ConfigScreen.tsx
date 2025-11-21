@@ -12,7 +12,7 @@ import {
 } from '@contentful/f36-components';
 import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { getAppActionId } from '../utils/getAppActionId';
+import { getAppActionId } from '../utils/appFunctionUtils';
 
 export interface AppInstallationParameters {
   openAiApiKey?: string;
