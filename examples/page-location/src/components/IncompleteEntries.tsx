@@ -4,7 +4,8 @@ import { ContentType, PageAppSDK } from '@contentful/app-sdk';
 import { Box, Paragraph } from '@contentful/f36-components';
 
 import CollectionList from '../components/CollectionList';
-import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import type { CollectionProp, EntryProps } from 'contentful-management';
 
 // Define rules for incomplete entries.
 const INCOMPLETE_CHECK_CONTENT_TYPE = 'album';
@@ -17,8 +18,8 @@ interface IncompleteEntriesProps {
 export default function IncompleteEntries({ contentTypes }: IncompleteEntriesProps) {
   const [incompleteEntries, setIncompleteEntries] = useState<any[] | null>(null);
 
-  const cma = useCMA();
-  const sdk = useSDK();
+  const sdk = useSDK<PageAppSDK>();
+  const cma = sdk.cma;
 
   useEffect(() => {
     async function fetchIncompleteEntries() {
@@ -31,7 +32,7 @@ export default function IncompleteEntries({ contentTypes }: IncompleteEntriesPro
             limit: 3,
           },
         })
-        .then((entries) => entries.items)
+        .then((entries: CollectionProp<EntryProps>) => entries.items)
         .catch(() => []);
 
       setIncompleteEntries(entries);

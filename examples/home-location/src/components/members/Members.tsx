@@ -1,12 +1,14 @@
 import React, { useCallback } from 'react';
 import { Flex, Grid, Text } from '@contentful/f36-components';
 import { useAsync } from 'react-async-hook';
-import { useCMA } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import { Member } from './Member';
 import { LoadingMembers } from './LoadingMembers';
+import type { HomeAppSDK } from '@contentful/app-sdk';
 
 const Members = () => {
-  const cma = useCMA();
+  const sdk = useSDK<HomeAppSDK>();
+  const cma = sdk.cma;
   const getSpaceMembers = useCallback(async () => {
     return await cma.user.getManyForSpace({});
   }, [cma]);
