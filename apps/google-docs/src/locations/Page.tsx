@@ -30,6 +30,14 @@ const Page = () => {
 
   const handleSubmit = async () => {
     // Validation
+    const openAiApiKey = sdk.parameters.installation?.openAiApiKey as string | undefined;
+
+    if (!openAiApiKey || !openAiApiKey.trim()) {
+      setErrorMessage('OpenAI API key is not configured. Please configure it in the app settings.');
+      setSuccessMessage(null);
+      return;
+    }
+
     if (!googleDocUrl.trim()) {
       setErrorMessage('Please enter a Google Doc URL');
       setSuccessMessage(null);
