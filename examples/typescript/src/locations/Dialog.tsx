@@ -1,14 +1,14 @@
 import { Paragraph } from '@contentful/f36-components';
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
   /*
-     To use the cma, inject it as follows.
+     To use the cma, access it as follows.
      If it is not needed, you can remove the next line.
   */
-  // const cma = useCMA();
+  // const cma = sdk.cma;
 
   return <Paragraph>Hello Dialog Component (AppId: {sdk.ids.app})</Paragraph>;
 };

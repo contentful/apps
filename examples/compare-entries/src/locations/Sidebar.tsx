@@ -1,12 +1,12 @@
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { Button, Select, Stack } from '@contentful/f36-components';
-import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import { EnvironmentProps, SpaceProps } from 'contentful-management';
 import React, { useEffect, useState } from 'react';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
-  const cma = useCMA();
+  const cma = sdk.cma;
 
   const [environments, setEnvironments] = useState<EnvironmentProps[] | undefined>(undefined);
   const [spaces, setSpaces] = useState<SpaceProps[] | undefined>(undefined);
