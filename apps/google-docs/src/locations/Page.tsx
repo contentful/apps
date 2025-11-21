@@ -13,6 +13,7 @@ import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentTypeSelector } from '../components';
 import { createEntriesFromDocumentAction } from '../utils/appFunctionUtils';
+import { GoogleDocUploader } from '../components/page/GoogleDocUploader';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -57,6 +58,14 @@ const Page = () => {
     }
   };
 
+  const handleSuccess = (title: string, html: string | null) => {
+    setGoogleDocUrl(html || '');
+  };
+
+  const handleError = (message: string) => {
+    setErrorMessage(message);
+  };
+
   return (
     <Flex flexDirection="column" alignItems="stretch">
       <Box
@@ -75,6 +84,7 @@ const Page = () => {
         </Paragraph>
 
         <Stack spacing="spacingXl" flexDirection="column" alignItems="stretch">
+          <GoogleDocUploader sdk={sdk} onSuccess={handleSuccess} onError={handleError} />
           <Box>
             <TextInput
               value={googleDocUrl}
