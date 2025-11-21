@@ -33,7 +33,6 @@ export const handler: FunctionEventHandler<
   const { contentTypeIds, googleDocUrl } = event.body;
   const { openAiApiKey } = context.appInstallationParameters as AppInstallationParameters;
   // INTEG-3262 and INTEG-3263: Take in Content Type, Prompt, and Upload File from user
-
   const cma = initContentfulManagementClient(context);
   const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
 
@@ -44,16 +43,28 @@ export const handler: FunctionEventHandler<
   // createContentTypeObservationsFromLLMResponse()
 
   // INTEG-3263: Implement the document parser agent
-  const aiDocumentResponse = await createDocument({ googleDocUrl });
+  // Pass the content types to the document parser so it can extract entries based on the structure
+  const aiDocumentResponse = await createDocument({
+    googleDocUrl,
+    openAiApiKey,
+    contentTypes,
+  });
 
   // INTEG-3261: Pass the ai document response to the observer for analysis
   // createDocumentObservationsFromLLMResponse()
 
   // INTEG-3264: Create the entries in Contentful using the entry service
-  // await createEntries();
+  // The aiDocumentResponse.entries is now ready to be passed to the CMA client
+  // await createEntries(aiDocumentResponse.entries, { spaceId, environmentId, accessToken });
 
   // INTEG-3265: Create the assets in Contentful using the asset service
   // await createAssets()
 
-  return { success: true, response: { contentTypeParserAgentResult, aiDocumentResponse } };
+  return {
+    success: true,
+    response: {
+      contentTypeParserAgentResult,
+      entriesReadyForCreation: aiDocumentResponse.entries,
+    },
+  };
 };

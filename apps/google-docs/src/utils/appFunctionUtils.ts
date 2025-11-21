@@ -15,9 +15,7 @@ export async function getAppActionId(
     environmentId: sdk.ids.environment,
     spaceId: sdk.ids.space,
   });
-
   const appAction = appActions.items.find((action) => action.name === actionName);
-
   if (!appAction) {
     throw new Error(`App action "${actionName}" not found`);
   }
@@ -38,7 +36,6 @@ export const createEntriesFromDocumentAction = async (
     }
 
     const appActionId = await getAppActionId(sdk, 'createEntriesFromDocumentAction');
-
     const result = await sdk.cma.appActionCall.createWithResult(
       {
         appDefinitionId,
@@ -55,6 +52,7 @@ export const createEntriesFromDocumentAction = async (
 
     return result;
   } catch (error) {
+    console.error('Error creating entries from document', error);
     throw new Error(error instanceof Error ? error.message : 'Failed to analyze content types');
   }
 };

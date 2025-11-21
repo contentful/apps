@@ -43,9 +43,6 @@ export async function analyzeContentTypes({
   return finalAnalysis;
 }
 
-/**
- * Builds the system prompt for the AI
- */
 function buildSystemPrompt(): string {
   return `You are an expert Contentful content modeling analyst. Your role is to analyze Contentful content type definitions and provide clear, actionable summaries.
 
@@ -61,9 +58,6 @@ Focus on clarity and actionability. Your summaries will be used by:
 - Content strategists planning content architecture`;
 }
 
-/**
- * Builds the analysis prompt from content type data
- */
 function buildAnalysisPrompt(contentTypes: ContentTypeProps[]): string {
   const contentTypeList = contentTypes.map((ct) => ct.name).join(', ');
   const totalFields = contentTypes.reduce((sum, ct) => sum + (ct.fields?.length || 0), 0);
