@@ -9,6 +9,7 @@ import { createDocument } from './agents/documentParserAgent/documentParser.agen
 import { fetchContentTypes } from './service/contentTypeService';
 import { initContentfulManagementClient } from './service/initCMAClient';
 import { fetchGoogleDoc } from './service/googleDriveService';
+import { createEntries } from './service/entryService';
 
 export type AppActionParameters = {
   contentTypeIds: string[];
@@ -35,6 +36,7 @@ export const handler: FunctionEventHandler<
   const cma = initContentfulManagementClient(context);
   const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
 
+  // Commented out to preserver as much time as possible due to the 30 second limit for App functions
   // const contentTypeParserAgentResult = await analyzeContentTypes({ contentTypes, openAiApiKey });
 
   // INTEG-3261: Pass the ai content type response to the observer for analysis
@@ -51,7 +53,10 @@ export const handler: FunctionEventHandler<
 
   // INTEG-3264: Create the entries in Contentful using the entry service
   // The aiDocumentResponse.entries is now ready to be passed to the CMA client
-  // await createEntries(aiDocumentResponse.entries, { spaceId, environmentId, accessToken });
+  const creationResult = await createEntries(cma, aiDocumentResponse.entries, {
+    spaceId: context.spaceId,
+    environmentId: context.environmentId,
+  });
 
   // INTEG-3265: Create the assets in Contentful using the asset service
   // await createAssets()
@@ -60,7 +65,14 @@ export const handler: FunctionEventHandler<
     success: true,
     response: {
       // contentTypeParserAgentResult,
-      entriesReadyForCreation: aiDocumentResponse.entries,
+      summary: aiDocumentResponse.summary,
+      totalEntriesExtracted: aiDocumentResponse.totalEntries,
+      createdEntries: creationResult.createdEntries.map((entry) => ({
+        id: entry.sys.id,
+        contentType: entry.sys.contentType.sys.id,
+      })),
+      errors: creationResult.errors,
+      successRate: `${creationResult.createdEntries.length}/${aiDocumentResponse.totalEntries}`,
     },
   };
 };
