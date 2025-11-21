@@ -29,11 +29,14 @@ const FeatureSelectionSection = ({ enabledFeatures, dispatch }: Props) => {
 
   const handleFeatureToggle = (feature: AIFeature, isChecked: boolean) => {
     if (isChecked) {
-      // Remove feature
+      // Remove feature - but prevent if it's the last one
+      if (enabledFeatures.length === 1) {
+        return; // Prevent removing the last feature
+      }
       const updatedFeatures = enabledFeatures.filter((f) => f !== feature);
       dispatch({
         type: ParameterAction.UPDATE_ENABLED_FEATURES,
-        value: updatedFeatures.length > 0 ? updatedFeatures : allFeatures, // Ensure at least one feature is enabled
+        value: updatedFeatures,
       });
     } else {
       // Add feature
