@@ -11,7 +11,6 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import { ContentTypeProps } from 'contentful-management';
-import { fetchGoogleDoc } from '../../service/googleDriveService';
 import { FinalEntriesResultSchema, FinalEntriesResult } from './schema';
 
 /**
@@ -19,16 +18,16 @@ import { FinalEntriesResultSchema, FinalEntriesResult } from './schema';
  */
 export interface DocumentParserConfig {
   openAiApiKey: string;
-  googleDocUrl: string;
+  document: unknown; // JSON document from Google Docs API or test data
   contentTypes: ContentTypeProps[];
   locale?: string;
 }
 
 /**
- * AI Agent that parses a Google Doc and extracts structured entries
+ * AI Agent that parses a Google Doc JSON and extracts structured entries
  * based on provided Contentful content type definitions.
  *
- * @param config - Parser configuration including API key, document URL, and content types
+ * @param config - Parser configuration including API key, document JSON, and content types
  * @returns Promise resolving to entries ready for CMA client
  */
 export async function createDocument(config: DocumentParserConfig): Promise<FinalEntriesResult> {
@@ -37,15 +36,16 @@ export async function createDocument(config: DocumentParserConfig): Promise<Fina
   const modelVersion = 'gpt-4o';
   const temperature = 0.3;
 
-  const { googleDocUrl, openAiApiKey, contentTypes, locale = 'en-US' } = config;
-  const googleDocContent = await fetchGoogleDoc(googleDocUrl);
+  const { document, openAiApiKey, contentTypes, locale = 'en-US' } = config;
+
+  // Extract text content from Google Docs JSON structure
+  const documentContent = extractTextFromGoogleDocsJson(document);
 
   const openaiClient = createOpenAI({
     apiKey: openAiApiKey,
   });
 
-  const prompt = buildExtractionPrompt({ contentTypes, googleDocContent, locale });
-
+  const prompt = buildExtractionPrompt({ contentTypes, documentContent, locale });
   const result = await generateObject({
     model: openaiClient(modelVersion),
     schema: FinalEntriesResultSchema,
@@ -80,7 +80,10 @@ CRITICAL FIELD TYPE RULES - READ CAREFULLY:
 - Array (of Link): ❌ NEVER USE - these reference other entries, skip entirely
   Example: DO NOT create [{ title: "x", content: "y" }] - this will FAIL
 - Link/Reference: ❌ NEVER USE - skip these fields (they reference other entries)
-- RichText: ❌ NEVER USE - complex format not supported
+- RichText: Provide a Markdown string preserving inline styles:
+  - Bold: **bold**
+  - Italic: *italic*
+  - Underline: _underline_ (or <u>underline</u>)
 
 FIELD FORMAT RULES:
 - Each entry must have a contentTypeId that matches one of the provided content types
@@ -103,13 +106,71 @@ EXTRACTION GUIDELINES:
 - Focus on simple fields: Symbol, Text, Number, Boolean, Date`;
 }
 
+/**
+ * Extracts plain text content from Google Docs JSON structure
+ */
+function extractTextFromGoogleDocsJson(document: unknown): string {
+  if (!document || typeof document !== 'object') {
+    return '';
+  }
+
+  const doc = document as Record<string, unknown>;
+  const textParts: string[] = [];
+
+  // Extract title if available
+  if (typeof doc.title === 'string') {
+    textParts.push(doc.title);
+  }
+
+  // Navigate through tabs -> documentTab -> body -> content
+  if (Array.isArray(doc.tabs)) {
+    for (const tab of doc.tabs) {
+      if (typeof tab === 'object' && tab !== null) {
+        const tabObj = tab as Record<string, unknown>;
+        if (tabObj.documentTab && typeof tabObj.documentTab === 'object') {
+          const docTab = tabObj.documentTab as Record<string, unknown>;
+          if (docTab.body && typeof docTab.body === 'object') {
+            const body = docTab.body as Record<string, unknown>;
+            if (Array.isArray(body.content)) {
+              for (const item of body.content) {
+                if (typeof item === 'object' && item !== null) {
+                  const itemObj = item as Record<string, unknown>;
+                  // Extract text from paragraphs
+                  if (itemObj.paragraph && typeof itemObj.paragraph === 'object') {
+                    const para = itemObj.paragraph as Record<string, unknown>;
+                    if (Array.isArray(para.elements)) {
+                      for (const elem of para.elements) {
+                        if (typeof elem === 'object' && elem !== null) {
+                          const elemObj = elem as Record<string, unknown>;
+                          if (elemObj.textRun && typeof elemObj.textRun === 'object') {
+                            const textRun = elemObj.textRun as Record<string, unknown>;
+                            if (typeof textRun.content === 'string') {
+                              textParts.push(textRun.content);
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return textParts.join(' ').trim();
+}
+
 function buildExtractionPrompt({
   contentTypes,
-  googleDocContent,
+  documentContent,
   locale,
 }: {
   contentTypes: ContentTypeProps[];
-  googleDocContent: string;
+  documentContent: string;
   locale: string;
 }): string {
   const contentTypeList = contentTypes.map((ct) => `${ct.name} (ID: ${ct.sys.id})`).join(', ');
@@ -121,8 +182,7 @@ function buildExtractionPrompt({
       ct.fields?.map((field) => {
         const isLinkType = field.type === 'Link';
         const isArrayOfLinks = field.type === 'Array' && (field.items as any)?.type === 'Link';
-        const isRichText = field.type === 'RichText';
-        const shouldSkip = isLinkType || isArrayOfLinks || isRichText;
+        const shouldSkip = isLinkType || isArrayOfLinks;
 
         return {
           id: field.id,
@@ -137,9 +197,7 @@ function buildExtractionPrompt({
           SKIP_REASON: shouldSkip
             ? isLinkType
               ? 'Link/Reference field - cannot be populated without entry IDs'
-              : isArrayOfLinks
-              ? 'Array of Links - cannot be populated without entry IDs'
-              : 'RichText field - complex format not supported'
+              : 'Array of Links - cannot be populated without entry IDs'
             : undefined,
         };
       }) || [];
@@ -163,7 +221,7 @@ CONTENT TYPE DEFINITIONS:
 ${JSON.stringify(contentTypeDefinitions, null, 2)}
 
 DOCUMENT CONTENT:
-${googleDocContent}
+${documentContent}
 
 CRITICAL INSTRUCTIONS:
 1. **SKIP ALL FIELDS WHERE "SKIP": true** - Do NOT include these fields in your output
@@ -176,6 +234,7 @@ CRITICAL INSTRUCTIONS:
 8. Match field types exactly:
    - Symbol: string (max 256 chars)
    - Text: string (any length)
+   - RichText: string in Markdown (preserve bold **, italics *, underline _)
    - Number: number
    - Boolean: boolean
    - Date: ISO 8601 string
