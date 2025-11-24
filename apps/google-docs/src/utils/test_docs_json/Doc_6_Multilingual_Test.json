@@ -1,0 +1,1875 @@
+{
+    "documentId": "1a4tbal0Xva7ezmEslgQCZGUMC15OFRqh-XQEBbyWGlU",
+    "suggestionsViewMode": "PREVIEW_WITHOUT_SUGGESTIONS",
+    "tabs": [
+        {
+            "documentTab": {
+                "body": {
+                    "content": [
+                        {
+                            "endIndex": 1,
+                            "sectionBreak": {
+                                "sectionStyle": {
+                                    "columnSeparatorStyle": "NONE",
+                                    "contentDirection": "LEFT_TO_RIGHT",
+                                    "sectionType": "CONTINUOUS"
+                                }
+                            }
+                        },
+                        {
+                            "endIndex": 37,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 37,
+                                        "startIndex": 1,
+                                        "textRun": {
+                                            "content": "Document Import \u2014 Multilingual Test\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "HEADING_1"
+                                }
+                            },
+                            "startIndex": 1
+                        },
+                        {
+                            "endIndex": 46,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 46,
+                                        "startIndex": 37,
+                                        "textRun": {
+                                            "content": "Overview\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "HEADING_2"
+                                }
+                            },
+                            "startIndex": 37
+                        },
+                        {
+                            "endIndex": 327,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 327,
+                                        "startIndex": 46,
+                                        "textRun": {
+                                            "content": "This document tests the importer's ability to handle multiple languages and encodings within a single document. It includes content in English, French, Spanish, Japanese, and Arabic. The importer must preserve text direction, special characters, and Unicode formatting accurately.\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 46
+                        },
+                        {
+                            "endIndex": 343,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 343,
+                                        "startIndex": 327,
+                                        "textRun": {
+                                            "content": "English Section\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "HEADING_2"
+                                }
+                            },
+                            "startIndex": 327
+                        },
+                        {
+                            "endIndex": 427,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 427,
+                                        "startIndex": 343,
+                                        "textRun": {
+                                            "content": "Hello! This is an English paragraph meant to validate basic Latin character import.\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 343
+                        },
+                        {
+                            "endIndex": 445,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 445,
+                                        "startIndex": 427,
+                                        "textRun": {
+                                            "content": "Section Fran\u00e7aise\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "HEADING_2"
+                                }
+                            },
+                            "startIndex": 427
+                        },
+                        {
+                            "endIndex": 555,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 555,
+                                        "startIndex": 445,
+                                        "textRun": {
+                                            "content": "Bonjour ! Ceci est un paragraphe en fran\u00e7ais pour valider l'importation des caract\u00e8res accentu\u00e9s et sp\u00e9ciaux.\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 445
+                        },
+                        {
+                            "endIndex": 574,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 574,
+                                        "startIndex": 555,
+                                        "textRun": {
+                                            "content": "Secci\u00f3n en Espa\u00f1ol\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "HEADING_2"
+                                }
+                            },
+                            "startIndex": 555
+                        },
+                        {
+                            "endIndex": 673,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 673,
+                                        "startIndex": 574,
+                                        "textRun": {
+                                            "content": "\u00a1Hola! Este es un p\u00e1rrafo en espa\u00f1ol con signos de exclamaci\u00f3n invertidos y caracteres como \u00f1 y \u00e1.\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 574
+                        },
+                        {
+                            "endIndex": 683,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 683,
+                                        "startIndex": 673,
+                                        "textRun": {
+                                            "content": "\u65e5\u672c\u8a9e\u306e\u30bb\u30af\u30b7\u30e7\u30f3\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "HEADING_2"
+                                }
+                            },
+                            "startIndex": 673
+                        },
+                        {
+                            "endIndex": 733,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 733,
+                                        "startIndex": 683,
+                                        "textRun": {
+                                            "content": "\u3053\u3093\u306b\u3061\u306f\uff01\u3053\u308c\u306f\u65e5\u672c\u8a9e\u306e\u6bb5\u843d\u3067\u3001\u30a4\u30f3\u30dd\u30fc\u30c8\u6642\u306bUnicode\u306e\u6b63\u78ba\u6027\u3092\u78ba\u8a8d\u3059\u308b\u305f\u3081\u306e\u30c6\u30b9\u30c8\u3067\u3059\u3002\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 683
+                        },
+                        {
+                            "endIndex": 746,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 746,
+                                        "startIndex": 733,
+                                        "textRun": {
+                                            "content": "\u0627\u0644\u0642\u0633\u0645 \u0627\u0644\u0639\u0631\u0628\u064a\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "HEADING_2"
+                                }
+                            },
+                            "startIndex": 733
+                        },
+                        {
+                            "endIndex": 835,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 835,
+                                        "startIndex": 746,
+                                        "textRun": {
+                                            "content": "\u0645\u0631\u062d\u0628\u064b\u0627! \u0647\u0630\u0647 \u0641\u0642\u0631\u0629 \u0628\u0627\u0644\u0644\u063a\u0629 \u0627\u0644\u0639\u0631\u0628\u064a\u0629 \u0644\u0644\u062a\u062d\u0642\u0642 \u0645\u0646 \u062f\u0639\u0645 \u0627\u0644\u0646\u0635 \u0645\u0646 \u0627\u0644\u064a\u0645\u064a\u0646 \u0625\u0644\u0649 \u0627\u0644\u064a\u0633\u0627\u0631 \u0623\u062b\u0646\u0627\u0621 \u0627\u0644\u0627\u0633\u062a\u064a\u0631\u0627\u062f.\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 746
+                        },
+                        {
+                            "endIndex": 858,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 858,
+                                        "startIndex": 835,
+                                        "textRun": {
+                                            "content": "Mixed Language Example\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "HEADING_2"
+                                }
+                            },
+                            "startIndex": 835
+                        },
+                        {
+                            "endIndex": 1021,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 1021,
+                                        "startIndex": 858,
+                                        "textRun": {
+                                            "content": "This paragraph mixes languages: Bonjour, this is an English-French hybrid. \u00a1Hola! \u3053\u3093\u306b\u3061\u306f! \u0645\u0631\u062d\u0628\u064b\u0627! Each script should maintain its formatting and display correctly.\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 858
+                        },
+                        {
+                            "endIndex": 1038,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 1038,
+                                        "startIndex": 1021,
+                                        "textRun": {
+                                            "content": "Expected Outcome\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "HEADING_2"
+                                }
+                            },
+                            "startIndex": 1021
+                        },
+                        {
+                            "endIndex": 1266,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 1266,
+                                        "startIndex": 1038,
+                                        "textRun": {
+                                            "content": "All multilingual content should appear correctly encoded and displayed. The importer must support both left-to-right and right-to-left scripts without data loss, ensuring that accented characters and Unicode text are preserved.\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 1038
+                        }
+                    ]
+                },
+                "documentStyle": {
+                    "background": {
+                        "color": {}
+                    },
+                    "documentFormat": {
+                        "documentMode": "PAGES"
+                    },
+                    "marginBottom": {
+                        "magnitude": 72,
+                        "unit": "PT"
+                    },
+                    "marginFooter": {
+                        "magnitude": 36,
+                        "unit": "PT"
+                    },
+                    "marginHeader": {
+                        "magnitude": 36,
+                        "unit": "PT"
+                    },
+                    "marginLeft": {
+                        "magnitude": 90,
+                        "unit": "PT"
+                    },
+                    "marginRight": {
+                        "magnitude": 90,
+                        "unit": "PT"
+                    },
+                    "marginTop": {
+                        "magnitude": 72,
+                        "unit": "PT"
+                    },
+                    "pageNumberStart": 1,
+                    "pageSize": {
+                        "height": {
+                            "magnitude": 792,
+                            "unit": "PT"
+                        },
+                        "width": {
+                            "magnitude": 612,
+                            "unit": "PT"
+                        }
+                    },
+                    "useCustomHeaderFooterMargins": true
+                },
+                "lists": {
+                    "kix.list.1": {
+                        "listProperties": {
+                            "nestingLevels": [
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%0",
+                                    "glyphSymbol": "\u25cf",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 18,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {
+                                        "weightedFontFamily": {
+                                            "fontFamily": "Noto Sans Symbols",
+                                            "weight": 400
+                                        }
+                                    }
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                }
+                            ]
+                        }
+                    },
+                    "kix.list.2": {
+                        "listProperties": {
+                            "nestingLevels": [
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%0",
+                                    "glyphSymbol": "\u25cf",
+                                    "indentFirstLine": {
+                                        "magnitude": 18,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 36,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {
+                                        "weightedFontFamily": {
+                                            "fontFamily": "Noto Sans Symbols",
+                                            "weight": 400
+                                        }
+                                    }
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                }
+                            ]
+                        }
+                    },
+                    "kix.list.3": {
+                        "listProperties": {
+                            "nestingLevels": [
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%0",
+                                    "glyphSymbol": "\u25cf",
+                                    "indentFirstLine": {
+                                        "magnitude": 36,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 54,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {
+                                        "weightedFontFamily": {
+                                            "fontFamily": "Noto Sans Symbols",
+                                            "weight": 400
+                                        }
+                                    }
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                }
+                            ]
+                        }
+                    },
+                    "kix.list.4": {
+                        "listProperties": {
+                            "nestingLevels": [
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%0",
+                                    "glyphSymbol": "\u25cf",
+                                    "indentFirstLine": {
+                                        "magnitude": 54,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 72,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {
+                                        "weightedFontFamily": {
+                                            "fontFamily": "Noto Sans Symbols",
+                                            "weight": 400
+                                        }
+                                    }
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                }
+                            ]
+                        }
+                    },
+                    "kix.list.5": {
+                        "listProperties": {
+                            "nestingLevels": [
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%0.",
+                                    "glyphType": "DECIMAL",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 18,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                }
+                            ]
+                        }
+                    },
+                    "kix.list.6": {
+                        "listProperties": {
+                            "nestingLevels": [
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%0.",
+                                    "glyphType": "DECIMAL",
+                                    "indentFirstLine": {
+                                        "magnitude": 18,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 36,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                }
+                            ]
+                        }
+                    },
+                    "kix.list.7": {
+                        "listProperties": {
+                            "nestingLevels": [
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%0.",
+                                    "glyphType": "DECIMAL",
+                                    "indentFirstLine": {
+                                        "magnitude": 36,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 54,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                }
+                            ]
+                        }
+                    },
+                    "kix.list.8": {
+                        "listProperties": {
+                            "nestingLevels": [
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%0.",
+                                    "glyphType": "DECIMAL",
+                                    "indentFirstLine": {
+                                        "magnitude": 54,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 72,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                }
+                            ]
+                        }
+                    },
+                    "kix.list.9": {
+                        "listProperties": {
+                            "nestingLevels": [
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%0.",
+                                    "glyphType": "DECIMAL",
+                                    "indentFirstLine": {
+                                        "magnitude": 72,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 90,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphType": "NONE",
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {}
+                                }
+                            ]
+                        }
+                    }
+                },
+                "namedStyles": {
+                    "styles": [
+                        {
+                            "namedStyleType": "NORMAL_TEXT",
+                            "paragraphStyle": {
+                                "alignment": "START",
+                                "avoidWidowAndOrphan": true,
+                                "borderBetween": {
+                                    "color": {},
+                                    "dashStyle": "SOLID",
+                                    "padding": {
+                                        "unit": "PT"
+                                    },
+                                    "width": {
+                                        "unit": "PT"
+                                    }
+                                },
+                                "borderBottom": {
+                                    "color": {},
+                                    "dashStyle": "SOLID",
+                                    "padding": {
+                                        "unit": "PT"
+                                    },
+                                    "width": {
+                                        "unit": "PT"
+                                    }
+                                },
+                                "borderLeft": {
+                                    "color": {},
+                                    "dashStyle": "SOLID",
+                                    "padding": {
+                                        "unit": "PT"
+                                    },
+                                    "width": {
+                                        "unit": "PT"
+                                    }
+                                },
+                                "borderRight": {
+                                    "color": {},
+                                    "dashStyle": "SOLID",
+                                    "padding": {
+                                        "unit": "PT"
+                                    },
+                                    "width": {
+                                        "unit": "PT"
+                                    }
+                                },
+                                "borderTop": {
+                                    "color": {},
+                                    "dashStyle": "SOLID",
+                                    "padding": {
+                                        "unit": "PT"
+                                    },
+                                    "width": {
+                                        "unit": "PT"
+                                    }
+                                },
+                                "direction": "LEFT_TO_RIGHT",
+                                "indentEnd": {
+                                    "unit": "PT"
+                                },
+                                "indentFirstLine": {
+                                    "unit": "PT"
+                                },
+                                "indentStart": {
+                                    "unit": "PT"
+                                },
+                                "keepLinesTogether": false,
+                                "keepWithNext": false,
+                                "lineSpacing": 115,
+                                "namedStyleType": "NORMAL_TEXT",
+                                "pageBreakBefore": false,
+                                "shading": {
+                                    "backgroundColor": {}
+                                },
+                                "spaceAbove": {
+                                    "unit": "PT"
+                                },
+                                "spaceBelow": {
+                                    "magnitude": 10,
+                                    "unit": "PT"
+                                },
+                                "spacingMode": "NEVER_COLLAPSE"
+                            },
+                            "textStyle": {
+                                "backgroundColor": {},
+                                "baselineOffset": "NONE",
+                                "bold": false,
+                                "fontSize": {
+                                    "magnitude": 11,
+                                    "unit": "PT"
+                                },
+                                "foregroundColor": {
+                                    "color": {
+                                        "rgbColor": {}
+                                    }
+                                },
+                                "italic": false,
+                                "smallCaps": false,
+                                "strikethrough": false,
+                                "underline": false,
+                                "weightedFontFamily": {
+                                    "fontFamily": "Cambria",
+                                    "weight": 400
+                                }
+                            }
+                        },
+                        {
+                            "namedStyleType": "HEADING_1",
+                            "paragraphStyle": {
+                                "direction": "LEFT_TO_RIGHT",
+                                "keepLinesTogether": true,
+                                "keepWithNext": true,
+                                "namedStyleType": "NORMAL_TEXT",
+                                "spaceAbove": {
+                                    "magnitude": 24,
+                                    "unit": "PT"
+                                },
+                                "spaceBelow": {
+                                    "unit": "PT"
+                                }
+                            },
+                            "textStyle": {
+                                "bold": true,
+                                "fontSize": {
+                                    "magnitude": 14,
+                                    "unit": "PT"
+                                },
+                                "foregroundColor": {
+                                    "color": {
+                                        "rgbColor": {
+                                            "blue": 0.5686275,
+                                            "green": 0.3764706,
+                                            "red": 0.21176471
+                                        }
+                                    }
+                                },
+                                "weightedFontFamily": {
+                                    "fontFamily": "Calibri",
+                                    "weight": 400
+                                }
+                            }
+                        },
+                        {
+                            "namedStyleType": "HEADING_2",
+                            "paragraphStyle": {
+                                "direction": "LEFT_TO_RIGHT",
+                                "keepLinesTogether": true,
+                                "keepWithNext": true,
+                                "namedStyleType": "NORMAL_TEXT",
+                                "spaceAbove": {
+                                    "magnitude": 10,
+                                    "unit": "PT"
+                                },
+                                "spaceBelow": {
+                                    "unit": "PT"
+                                }
+                            },
+                            "textStyle": {
+                                "bold": true,
+                                "fontSize": {
+                                    "magnitude": 13,
+                                    "unit": "PT"
+                                },
+                                "foregroundColor": {
+                                    "color": {
+                                        "rgbColor": {
+                                            "blue": 0.7411765,
+                                            "green": 0.5058824,
+                                            "red": 0.30980393
+                                        }
+                                    }
+                                },
+                                "weightedFontFamily": {
+                                    "fontFamily": "Calibri",
+                                    "weight": 400
+                                }
+                            }
+                        },
+                        {
+                            "namedStyleType": "HEADING_3",
+                            "paragraphStyle": {
+                                "direction": "LEFT_TO_RIGHT",
+                                "keepLinesTogether": true,
+                                "keepWithNext": true,
+                                "namedStyleType": "NORMAL_TEXT",
+                                "spaceAbove": {
+                                    "magnitude": 10,
+                                    "unit": "PT"
+                                },
+                                "spaceBelow": {
+                                    "unit": "PT"
+                                }
+                            },
+                            "textStyle": {
+                                "bold": true,
+                                "foregroundColor": {
+                                    "color": {
+                                        "rgbColor": {
+                                            "blue": 0.7411765,
+                                            "green": 0.5058824,
+                                            "red": 0.30980393
+                                        }
+                                    }
+                                },
+                                "weightedFontFamily": {
+                                    "fontFamily": "Calibri",
+                                    "weight": 400
+                                }
+                            }
+                        },
+                        {
+                            "namedStyleType": "HEADING_4",
+                            "paragraphStyle": {
+                                "direction": "LEFT_TO_RIGHT",
+                                "keepLinesTogether": true,
+                                "keepWithNext": true,
+                                "namedStyleType": "NORMAL_TEXT",
+                                "spaceAbove": {
+                                    "magnitude": 10,
+                                    "unit": "PT"
+                                },
+                                "spaceBelow": {
+                                    "unit": "PT"
+                                }
+                            },
+                            "textStyle": {
+                                "bold": true,
+                                "foregroundColor": {
+                                    "color": {
+                                        "rgbColor": {
+                                            "blue": 0.7411765,
+                                            "green": 0.5058824,
+                                            "red": 0.30980393
+                                        }
+                                    }
+                                },
+                                "italic": true,
+                                "weightedFontFamily": {
+                                    "fontFamily": "Calibri",
+                                    "weight": 400
+                                }
+                            }
+                        },
+                        {
+                            "namedStyleType": "HEADING_5",
+                            "paragraphStyle": {
+                                "direction": "LEFT_TO_RIGHT",
+                                "keepLinesTogether": true,
+                                "keepWithNext": true,
+                                "namedStyleType": "NORMAL_TEXT",
+                                "spaceAbove": {
+                                    "magnitude": 10,
+                                    "unit": "PT"
+                                },
+                                "spaceBelow": {
+                                    "unit": "PT"
+                                }
+                            },
+                            "textStyle": {
+                                "foregroundColor": {
+                                    "color": {
+                                        "rgbColor": {
+                                            "blue": 0.38039216,
+                                            "green": 0.24705882,
+                                            "red": 0.14117648
+                                        }
+                                    }
+                                },
+                                "weightedFontFamily": {
+                                    "fontFamily": "Calibri",
+                                    "weight": 400
+                                }
+                            }
+                        },
+                        {
+                            "namedStyleType": "HEADING_6",
+                            "paragraphStyle": {
+                                "direction": "LEFT_TO_RIGHT",
+                                "keepLinesTogether": true,
+                                "keepWithNext": true,
+                                "namedStyleType": "NORMAL_TEXT",
+                                "spaceAbove": {
+                                    "magnitude": 10,
+                                    "unit": "PT"
+                                },
+                                "spaceBelow": {
+                                    "unit": "PT"
+                                }
+                            },
+                            "textStyle": {
+                                "foregroundColor": {
+                                    "color": {
+                                        "rgbColor": {
+                                            "blue": 0.38039216,
+                                            "green": 0.24705882,
+                                            "red": 0.14117648
+                                        }
+                                    }
+                                },
+                                "italic": true,
+                                "weightedFontFamily": {
+                                    "fontFamily": "Calibri",
+                                    "weight": 400
+                                }
+                            }
+                        },
+                        {
+                            "namedStyleType": "TITLE",
+                            "paragraphStyle": {
+                                "borderBottom": {
+                                    "color": {
+                                        "color": {
+                                            "rgbColor": {
+                                                "blue": 0.7411765,
+                                                "green": 0.5058824,
+                                                "red": 0.30980393
+                                            }
+                                        }
+                                    },
+                                    "dashStyle": "SOLID",
+                                    "padding": {
+                                        "magnitude": 4,
+                                        "unit": "PT"
+                                    },
+                                    "width": {
+                                        "magnitude": 1,
+                                        "unit": "PT"
+                                    }
+                                },
+                                "direction": "LEFT_TO_RIGHT",
+                                "lineSpacing": 100,
+                                "namedStyleType": "NORMAL_TEXT",
+                                "spaceBelow": {
+                                    "magnitude": 15,
+                                    "unit": "PT"
+                                },
+                                "spacingMode": "NEVER_COLLAPSE"
+                            },
+                            "textStyle": {
+                                "fontSize": {
+                                    "magnitude": 26,
+                                    "unit": "PT"
+                                },
+                                "foregroundColor": {
+                                    "color": {
+                                        "rgbColor": {
+                                            "blue": 0.3647059,
+                                            "green": 0.21176471,
+                                            "red": 0.09019608
+                                        }
+                                    }
+                                },
+                                "weightedFontFamily": {
+                                    "fontFamily": "Calibri",
+                                    "weight": 400
+                                }
+                            }
+                        },
+                        {
+                            "namedStyleType": "SUBTITLE",
+                            "paragraphStyle": {
+                                "direction": "LEFT_TO_RIGHT",
+                                "namedStyleType": "NORMAL_TEXT"
+                            },
+                            "textStyle": {
+                                "fontSize": {
+                                    "magnitude": 12,
+                                    "unit": "PT"
+                                },
+                                "foregroundColor": {
+                                    "color": {
+                                        "rgbColor": {
+                                            "blue": 0.7411765,
+                                            "green": 0.5058824,
+                                            "red": 0.30980393
+                                        }
+                                    }
+                                },
+                                "italic": true,
+                                "weightedFontFamily": {
+                                    "fontFamily": "Calibri",
+                                    "weight": 400
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "tabProperties": {
+                "index": 0,
+                "tabId": "t.0",
+                "title": "Tab 1"
+            }
+        }
+    ],
+    "title": "Doc_6_Multilingual_Test"
+}

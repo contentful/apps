@@ -1,15 +1,21 @@
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { Document } from '@contentful/rich-text-types';
-import { Entry, ContentTypeField, Fields } from '../types';
-import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
+import { ContentTypeField, Entry, Fields } from '../types';
+import {
+  ContentTypeProps,
+  EditorInterfaceProps,
+  EntryProps,
+  QueryOptions,
+} from 'contentful-management';
 import {
   BATCH_FETCHING,
-  DRAFT_STATUS,
   CHANGED_STATUS,
+  DRAFT_STATUS,
   PUBLISHED_STATUS,
   UNKNOWN_STATUS,
 } from './constants';
 import { BadgeVariant } from '@contentful/f36-components';
+import { getCustomBooleanLabels } from './fieldEditorUtils';
 
 export const STATUSES = [DRAFT_STATUS, CHANGED_STATUS, PUBLISHED_STATUS];
 
@@ -71,44 +77,65 @@ export const isLinkValue = (value: unknown): value is { sys: { linkType: string 
 export const truncate = (str: string, max: number = 20) =>
   str.length > max ? str.slice(0, max) + ' ...' : str;
 
-export const renderFieldValue = (field: ContentTypeField, value: unknown): string => {
+function isBasicField(field: ContentTypeField) {
+  return (
+    field.type === 'Symbol' ||
+    field.type === 'Text' ||
+    field.type === 'Integer' ||
+    field.type === 'Number' ||
+    field.type === 'Date'
+  );
+}
+
+export const getFieldDisplayValue = (
+  field: ContentTypeField | null,
+  value: unknown,
+  maxLength: number = 30
+): string => {
+  if (!field) return '-';
+  if (value === undefined || value === null || value === '') return '-';
+
+  let displayValue = '-';
+
+  if (isBasicField(field)) {
+    displayValue = String(value);
+  }
+
+  if (field.type === 'Boolean') {
+    const { trueLabel, falseLabel } = getCustomBooleanLabels(field.fieldControl);
+    displayValue = value ? trueLabel : falseLabel;
+  }
+
   if (field.type === 'Array' && Array.isArray(value)) {
     const count = value.length;
     if (value[0]?.sys?.linkType === 'Entry') {
-      return count === 1 ? '1 reference field' : `${count} reference fields`;
+      displayValue = count === 1 ? '1 reference field' : `${count} reference fields`;
     } else if (value[0]?.sys?.linkType === 'Asset') {
-      return count === 1 ? '1 asset' : `${count} assets`;
+      displayValue = count === 1 ? '1 asset' : `${count} assets`;
     } else {
-      return truncate(value.join(', '));
+      displayValue = value.join(', ');
     }
   }
 
   if (field.type === 'Location' && isLocationValue(value)) {
-    return truncate(`Lat: ${value.lat}, Lon: ${value.lon}`);
+    displayValue = `Lat: ${value.lat}, Lon: ${value.lon}`;
   }
-  if (field.type === 'Boolean' && typeof value === 'boolean') {
-    return value ? 'true' : 'false';
-  }
-  if (field.type === 'Object' && typeof value === 'object' && value !== null) {
-    return truncate(JSON.stringify(value));
+  if (field.type === 'Object' && typeof value === 'object') {
+    displayValue = JSON.stringify(value);
   }
 
   if (field.type === 'Link' && isLinkValue(value) && value.sys.linkType === 'Asset') {
-    return `1 asset`;
+    displayValue = `1 asset`;
   }
   if (field.type === 'Link' && isLinkValue(value) && value.sys.linkType === 'Entry') {
-    return `1 reference field`;
+    displayValue = `1 reference field`;
   }
 
-  if (field.type === 'RichText' && typeof value === 'object' && value !== null) {
-    return truncate(documentToHtmlString(value as Document));
+  if (field.type === 'RichText' && typeof value === 'object') {
+    displayValue = documentToHtmlString(value as Document);
   }
 
-  if (typeof value === 'object' && value !== null) {
-    return '';
-  }
-
-  return value !== undefined && value !== null ? truncate(String(value)) : '-';
+  return maxLength ? truncate(displayValue, maxLength) : displayValue;
 };
 
 export const getEntryTitle = (
@@ -131,22 +158,15 @@ export const getEntryUrl = (entry: Entry, spaceId: string, environmentId: string
 };
 
 export const isCheckboxAllowed = (field: ContentTypeField): boolean => {
-  const restrictedTypes = [
-    'Location',
-    'Date',
-    'Asset',
-    'Array',
-    'Link',
-    'ResourceLink',
-    'Boolean',
-    'Object',
-    'RichText',
-  ];
+  if (!field || !field.type) return false;
 
-  if (!field.type) return false;
+  const restrictedTypes = ['Location', 'Asset', 'Link', 'ResourceLink', 'RichText'];
 
-  if (restrictedTypes.includes(field.type)) return false;
-  return true;
+  if (field.type === 'Array') {
+    return field.items?.type === 'Symbol';
+  }
+
+  return !restrictedTypes.includes(field.type);
 };
 
 /**
@@ -159,13 +179,17 @@ export function updateEntryFieldLocalized(
   value: any,
   locale: string
 ) {
-  return {
+  const newFields = {
     ...fields,
     [fieldId]: {
       ...(fields[fieldId] || {}),
       [locale]: value,
     },
   };
+  if (value === null) {
+    delete newFields[fieldId][locale];
+  }
+  return newFields;
 }
 
 export function getEntryFieldValue(
@@ -173,11 +197,16 @@ export function getEntryFieldValue(
   field: { id: string; locale?: string } | null | undefined,
   defaultLocale: string
 ): string {
-  if (!entry || !field || !field.id) return 'empty field';
+  if (!entry || !field || !field.id) {
+    return 'empty field';
+  }
   const fieldValue = entry.fields[field.id]?.[field.locale || defaultLocale];
-  if (fieldValue === undefined || fieldValue === null) return 'empty field';
 
-  return String(fieldValue) || 'empty field';
+  if (fieldValue === undefined || fieldValue === null) {
+    return 'empty field';
+  }
+
+  return fieldValue;
 }
 
 /**
@@ -310,4 +339,46 @@ export const filterEntriesByNumericSearch = (
       return String(fieldValue).includes(query);
     });
   });
+};
+
+export const mapContentTypePropsToFields = (
+  contentTypeProps: ContentTypeProps,
+  editorInterface: EditorInterfaceProps,
+  locales: string[]
+): ContentTypeField[] => {
+  const newFields: ContentTypeField[] = [];
+
+  contentTypeProps.fields.forEach((f) => {
+    const fieldControl = editorInterface?.controls?.find((c) => c.fieldId === f.id);
+    if (f.localized) {
+      locales.forEach((locale) => {
+        newFields.push({
+          contentTypeId: contentTypeProps.sys.id,
+          id: f.id,
+          uniqueId: `${f.id}-${locale}`,
+          name: f.name,
+          locale: locale,
+          type: f.type,
+          required: f.required,
+          items: f?.items,
+          validations: f.validations || [],
+          fieldControl: fieldControl,
+        });
+      });
+    } else {
+      newFields.push({
+        contentTypeId: contentTypeProps.sys.id,
+        id: f.id,
+        uniqueId: f.id,
+        name: f.name,
+        type: f.type,
+        required: f.required,
+        items: f?.items,
+        validations: f.validations || [],
+        fieldControl: fieldControl,
+      });
+    }
+  });
+
+  return newFields;
 };
