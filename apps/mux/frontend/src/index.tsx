@@ -248,7 +248,7 @@ export class App extends React.Component<AppProps, AppState> {
       if (this.state.value.ready) {
         await this.checkForValidAsset();
         if (this.isUsingSigned() && this.state.value.signedPlaybackId) {
-          this.setSignedPlayback(this.state.value.signedPlaybackId);
+          await this.setSignedPlayback(this.state.value.signedPlaybackId);
           this.setState({ playerPlaybackId: this.state.value.signedPlaybackId });
         }
         return;
