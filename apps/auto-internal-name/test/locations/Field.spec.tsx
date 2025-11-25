@@ -291,7 +291,7 @@ describe('Field component', () => {
       expect(mockSdk.field.setValue).toHaveBeenCalledWith('Título Padre ES -');
     });
 
-    it('should fall back to default locale when current locale is not available in parent entry', async () => {
+    it('should leave field empty when current locale is not available in parent entry', async () => {
       // Set field locale to Spanish, but parent entry only has English
       mockSdk.field.locale = 'es-ES';
       const parentEntry = createMockEntry({
@@ -304,7 +304,7 @@ describe('Field component', () => {
 
       await renderAndFlushTimers();
 
-      expect(mockSdk.field.setValue).toHaveBeenCalledWith('Parent Title EN -');
+      expect(mockSdk.field.setValue).toHaveBeenCalledWith('');
     });
   });
 

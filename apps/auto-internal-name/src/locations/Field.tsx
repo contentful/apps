@@ -27,8 +27,11 @@ const Field = () => {
     const separator = installationParameters.separator;
 
     const localizedFieldValue = parentEntry.fields[fieldId] as Record<string, string> | undefined;
-    const parentFieldValue =
-      localizedFieldValue?.[currentLocale] || localizedFieldValue?.[defaultLocale] || '';
+    const parentFieldValue = localizedFieldValue?.[currentLocale] || '';
+
+    if (!parentFieldValue) {
+      return '';
+    }
 
     return separator ? `${parentFieldValue} ${separator}` : parentFieldValue;
   };
