@@ -1,11 +1,27 @@
 import { SidebarAppSDK } from '@contentful/app-sdk';
-import { Paragraph } from '@contentful/f36-components';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { Button, Flex, Text } from '@contentful/f36-components';
+import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
+import { APP_NAME } from '../utils/consts';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
 
-  return <Paragraph>Hello Sidebar Component (AppId: {sdk.ids.app})</Paragraph>;
+  useAutoResizer();
+
+  const openDialog = async () => {
+    return sdk.dialogs.openCurrentApp({
+      title: APP_NAME,
+    });
+  };
+
+  return (
+    <Flex flexDirection="column" gap="spacingM">
+      <Text fontColor="gray500">Populate content across similar locales</Text>
+      <Button isFullWidth onClick={() => openDialog()}>
+        {APP_NAME}
+      </Button>
+    </Flex>
+  );
 };
 
 export default Sidebar;
