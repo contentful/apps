@@ -8,6 +8,7 @@ import { APP_NAME } from '../src/utils/consts';
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
+  useAutoResizer: () => {},
 }));
 
 describe('Sidebar component', () => {
