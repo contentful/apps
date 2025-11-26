@@ -12,7 +12,6 @@ lerna-debug.log
 .tool-versions
 .nx
 examples/**/package-lock.json
-examples/**/.npmrc
 .env
 .cursorindexingignore
 .specstory
