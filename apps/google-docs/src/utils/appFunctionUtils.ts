@@ -26,7 +26,7 @@ export async function getAppActionId(
 export const createEntriesFromDocumentAction = async (
   sdk: PageAppSDK | ConfigAppSDK,
   contentTypeIds: string[],
-  googleDocUrl: string
+  document: unknown
 ) => {
   try {
     const appDefinitionId = sdk.ids.app;
@@ -42,7 +42,7 @@ export const createEntriesFromDocumentAction = async (
         appActionId,
       },
       {
-        parameters: { contentTypeIds, googleDocUrl },
+        parameters: { contentTypeIds, document },
       }
     );
 
@@ -53,6 +53,8 @@ export const createEntriesFromDocumentAction = async (
     return result;
   } catch (error) {
     console.error('Error creating entries from document', error);
-    throw new Error(error instanceof Error ? error.message : 'Failed to analyze content types');
+    throw new Error(
+      error instanceof Error ? error.message : 'Failed to create entries from document'
+    );
   }
 };

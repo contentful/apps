@@ -1,14 +1,5 @@
 import { useState } from 'react';
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  Note,
-  Paragraph,
-  Stack,
-  TextInput,
-} from '@contentful/f36-components';
+import { Box, Button, Flex, Heading, Note, Paragraph, Stack } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentTypeSelector } from '../components';
@@ -19,9 +10,7 @@ const Page = () => {
   const sdk = useSDK<PageAppSDK>();
 
   const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
-  const [googleDocUrl, setGoogleDocUrl] = useState<string>(
-    'https://docs.google.com/document/d/1uTBhG6ojUU_epNPFV1qKGIb506YAf3ii/edit?usp=drive_link&ouid=100613518827458188455&rtpof=true&sd=true'
-  );
+  const [document, setDocument] = useState<{ title: string; data: unknown } | null>(null);
   const [contentTypeIds, setContentTypeIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -38,8 +27,8 @@ const Page = () => {
       return;
     }
 
-    if (!googleDocUrl.trim()) {
-      setErrorMessage('Please enter a Google Doc URL');
+    if (!document || !document.data) {
+      setErrorMessage('Please select a document');
       setSuccessMessage(null);
       return;
     }
@@ -56,7 +45,7 @@ const Page = () => {
     setResult(null);
 
     try {
-      const response = await createEntriesFromDocumentAction(sdk, contentTypeIds, googleDocUrl);
+      const response = await createEntriesFromDocumentAction(sdk, contentTypeIds, document.data);
       setResult(response);
       setSuccessMessage('Successfully created entries from document!');
     } catch (error) {
@@ -66,8 +55,18 @@ const Page = () => {
     }
   };
 
-  const handleSuccess = (title: string, html: string | null) => {
-    setGoogleDocUrl(html || '');
+  const handleSuccess = (title: string, documentJson: string | null) => {
+    if (!documentJson) {
+      setErrorMessage('Failed to load document data');
+      return;
+    }
+    try {
+      const parsed = JSON.parse(documentJson);
+      setDocument({ title, data: parsed });
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage('Failed to parse document JSON');
+    }
   };
 
   const handleError = (message: string) => {
@@ -93,14 +92,14 @@ const Page = () => {
 
         <Stack spacing="spacingXl" flexDirection="column" alignItems="stretch">
           <GoogleDocUploader sdk={sdk} onSuccess={handleSuccess} onError={handleError} />
-          <Box>
-            <TextInput
-              value={googleDocUrl}
-              onChange={(e) => setGoogleDocUrl(e.target.value)}
-              placeholder="Enter Google Doc URL (e.g., https://docs.google.com/document/d/...)"
-              name="googleDocUrl"
-            />
-          </Box>
+
+          {document && (
+            <Box>
+              <Paragraph>
+                <strong>Selected Document:</strong> {document.title}
+              </Paragraph>
+            </Box>
+          )}
 
           <ContentTypeSelector
             sdk={sdk}
