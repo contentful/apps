@@ -18,6 +18,7 @@ import { FinalEntriesResultSchema, FinalEntriesResult } from './schema';
  */
 export interface DocumentParserConfig {
   openAiApiKey: string;
+  // TODO: Update this when we have oauth working
   document: unknown; // JSON document from Google Docs API or test data
   contentTypes: ContentTypeProps[];
   locale?: string;
@@ -109,6 +110,7 @@ EXTRACTION GUIDELINES:
 /**
  * Extracts plain text content from Google Docs JSON structure
  */
+// TODO: Update this to be more robust and bulletproof
 function extractTextFromGoogleDocsJson(document: unknown): string {
   if (!document || typeof document !== 'object') {
     return '';
