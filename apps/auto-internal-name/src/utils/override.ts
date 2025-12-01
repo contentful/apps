@@ -7,13 +7,8 @@ export const normalizeString = (str: string) => (str ? str.trim().toLowerCase() 
 
 const extractUniqueShortTextFields = (fields: ContentTypeProps['fields']): AutocompleteItem[] => {
   const filteredFields = fields.filter((field) => field.type === 'Symbol');
-  const mappedFields = filteredFields.map((field) => ({ id: field.id, name: field.name }));
 
-  return Array.from(new Map(mappedFields.map((field) => [field.id, field])).values());
-};
-
-const getUniqueShortTextFieldsFromContentType = (contentType: ContentTypeProps) => {
-  return extractUniqueShortTextFields(contentType.fields);
+  return Array.from(new Map(filteredFields.map((field) => [field.id, field])).values());
 };
 
 const getUniqueShortTextFieldsFromArray = (contentTypes: ContentTypeProps[]) => {
@@ -34,7 +29,7 @@ export const getFieldsFrom = (contentTypes: ContentTypeProps[], contentTypeId: s
   if (!contentTypeId) return [];
 
   const contentType = contentTypes.find((ct) => ct.sys.id === contentTypeId);
-  return contentType ? getUniqueShortTextFieldsFromContentType(contentType) : [];
+  return contentType ? extractUniqueShortTextFields(contentType.fields) : [];
 };
 
 export const getInitialContentTypeName = (
