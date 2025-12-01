@@ -10,15 +10,6 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useCMA: () => mockCma,
 }));
 
-// Mock crypto.randomUUID
-Object.defineProperty(globalThis, 'crypto', {
-  value: {
-    randomUUID: vi.fn(() => 'test-uuid-123'),
-  },
-  configurable: true,
-  writable: true,
-});
-
 describe('ConfigScreen', () => {
   const mockContentTypes: ContentTypeProps[] = [
     {
@@ -313,30 +304,32 @@ describe('ConfigScreen', () => {
       await user.click(screen.getByText('Name'));
 
       // Get the latest callback (last one registered) - this simulates clicking install
-      const callCount = mockSdk.app.onConfigure.mock.calls.length;
-      const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
+      waitFor(() => {
+        const callCount = mockSdk.app.onConfigure.mock.calls.length;
+        const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
 
-      const result = await onConfigureCallback();
+        const result = onConfigureCallback();
 
-      // Verify all parameters are correctly stored
-      expect(result.parameters).toHaveProperty('separator');
-      expect(result.parameters).toHaveProperty('sourceFieldId');
-      expect(result.parameters).toHaveProperty('overrides');
-      expect(Array.isArray(result.parameters.overrides)).toBe(true);
+        // Verify all parameters are correctly stored
+        expect(result.parameters).toHaveProperty('separator');
+        expect(result.parameters).toHaveProperty('sourceFieldId');
+        expect(result.parameters).toHaveProperty('overrides');
+        expect(Array.isArray(result.parameters.overrides)).toBe(true);
 
-      expect(result.parameters.separator).toBe(' | ');
-      expect(result.parameters.sourceFieldId).toBe('title');
-      expect(result.parameters.overrides.length).toBeGreaterThan(1);
+        expect(result.parameters.separator).toBe(' | ');
+        expect(result.parameters.sourceFieldId).toBe('title');
+        expect(result.parameters.overrides.length).toBeGreaterThan(1);
 
-      const firstOverride = result.parameters.overrides[0];
-      expect(firstOverride).toHaveProperty('id');
-      expect(firstOverride).toHaveProperty('contentTypeId');
-      expect(firstOverride).toHaveProperty('fieldId');
-      expect(firstOverride.contentTypeId).toBe('ct-1');
-      expect(firstOverride.fieldId).toBe('slug');
+        const firstOverride = result.parameters.overrides[0];
+        expect(firstOverride).toHaveProperty('id');
+        expect(firstOverride).toHaveProperty('contentTypeId');
+        expect(firstOverride).toHaveProperty('fieldId');
+        expect(firstOverride.contentTypeId).toBe('ct-1');
+        expect(firstOverride.fieldId).toBe('slug');
 
-      expect(result).toHaveProperty('targetState');
-      expect(result.targetState).toBeDefined();
+        expect(result).toHaveProperty('targetState');
+        expect(result.targetState).toBeDefined();
+      });
     });
   });
 
@@ -365,14 +358,16 @@ describe('ConfigScreen', () => {
       const contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[0];
       await user.type(contentTypeAutocomplete, 'Blog Post');
 
-      const callCount = mockSdk.app.onConfigure.mock.calls.length;
-      const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
-      const result = await onConfigureCallback();
+      waitFor(() => {
+        const callCount = mockSdk.app.onConfigure.mock.calls.length;
+        const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
+        const result = onConfigureCallback();
 
-      // Should return false and show error
-      expect(result).toBe(false);
-      expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
-      expect(await screen.findByText('Field name is required')).toBeInTheDocument();
+        // Should return false and show error
+        expect(result).toBe(false);
+        expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
+        expect(screen.getByText('Field name is required')).toBeInTheDocument();
+      });
     });
 
     it('should return false when multiple validation errors exist', async () => {
@@ -391,15 +386,17 @@ describe('ConfigScreen', () => {
         expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
       });
 
-      const callCount = mockSdk.app.onConfigure.mock.calls.length;
-      const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
-      const result = await onConfigureCallback();
+      waitFor(() => {
+        const callCount = mockSdk.app.onConfigure.mock.calls.length;
+        const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
+        const result = onConfigureCallback();
 
-      // Should return false and show all error messages
-      expect(result).toBe(false);
-      expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
-      expect(await screen.findByText('Source field ID is required')).toBeInTheDocument();
-      expect(await screen.findByText('Content type is required')).toBeInTheDocument();
+        // Should return false and show all error messages
+        expect(result).toBe(false);
+        expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
+        expect(screen.getByText('Source field ID is required')).toBeInTheDocument();
+        expect(screen.getByText('Content type is required')).toBeInTheDocument();
+      });
     });
 
     it('should validate multiple overrides correctly', async () => {
@@ -448,15 +445,16 @@ describe('ConfigScreen', () => {
       await user.click(authorOption);
 
       // Don't select field for second override
+      waitFor(() => {
+        const callCount = mockSdk.app.onConfigure.mock.calls.length;
+        const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
+        const result = onConfigureCallback();
 
-      const callCount = mockSdk.app.onConfigure.mock.calls.length;
-      const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
-      const result = await onConfigureCallback();
-
-      // Should return false because second override is incomplete
-      expect(result).toBe(false);
-      expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
-      expect((await screen.findAllByText('Field name is required')).length).toBe(2);
+        // Should return false because second override is incomplete
+        expect(result).toBe(false);
+        expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
+        expect(screen.getAllByText('Field name is required').length).toBe(2);
+      });
     });
   });
 

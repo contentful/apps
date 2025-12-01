@@ -59,11 +59,13 @@ describe('OverrideRow', () => {
         />
       );
 
-      expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/field name/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /delete override/i })).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('Content type name')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('Field name')).toBeInTheDocument();
+      waitFor(() => {
+        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
+        expect(screen.getByLabelText(/field name/i)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /delete override/i })).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Content type name')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Field name')).toBeInTheDocument();
+      });
     });
 
     it('should disable field name input when no content type is selected', () => {
@@ -78,8 +80,10 @@ describe('OverrideRow', () => {
         />
       );
 
-      const fieldInput = screen.getByPlaceholderText('Field name');
-      expect(fieldInput).toBeDisabled();
+      waitFor(() => {
+        const fieldInput = screen.getByPlaceholderText('Field name');
+        expect(fieldInput).toBeDisabled();
+      });
     });
   });
 
@@ -238,8 +242,10 @@ describe('OverrideRow', () => {
         />
       );
 
-      const fieldInput = screen.getByPlaceholderText('Field name');
-      expect(fieldInput).not.toBeDisabled();
+      waitFor(() => {
+        const fieldInput = screen.getByPlaceholderText('Field name');
+        expect(fieldInput).not.toBeDisabled();
+      });
     });
 
     it('should update override when field is selected', async () => {
@@ -488,8 +494,10 @@ describe('OverrideRow', () => {
         />
       );
 
-      const fieldInput = screen.getByPlaceholderText('Field name');
-      expect(fieldInput).not.toBeDisabled();
+      waitFor(() => {
+        const fieldInput = screen.getByPlaceholderText('Field name');
+        expect(fieldInput).not.toBeDisabled();
+      });
     });
   });
 

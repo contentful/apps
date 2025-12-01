@@ -7,8 +7,9 @@ export const normalizeString = (str: string) => (str ? str.trim().toLowerCase() 
 
 const extractUniqueShortTextFields = (fields: ContentTypeProps['fields']): AutocompleteItem[] => {
   const filteredFields = fields.filter((field) => field.type === 'Symbol');
+  const mappedFields = filteredFields.map((field) => ({ id: field.id, name: field.name }));
 
-  return Array.from(new Map(filteredFields.map((field) => [field.id, field])).values());
+  return Array.from(new Map(mappedFields.map((field) => [field.id, field])).values());
 };
 
 const getUniqueShortTextFieldsFromArray = (contentTypes: ContentTypeProps[]) => {
