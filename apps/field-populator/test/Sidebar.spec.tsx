@@ -1,17 +1,36 @@
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockCma, mockSdk } from './mocks';
 import Sidebar from '../src/locations/Sidebar';
+import userEvent from '@testing-library/user-event';
+import { APP_NAME } from '../src/utils/consts';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
+  useAutoResizer: () => {},
 }));
 
 describe('Sidebar component', () => {
-  it('Component text exists', () => {
-    const { getByText } = render(<Sidebar />);
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
-    expect(getByText('Hello Sidebar Component (AppId: test-app)')).toBeTruthy();
+  it('should display text and button', () => {
+    render(<Sidebar />);
+
+    expect(screen.getByText('Populate content across similar locales')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: APP_NAME })).toBeInTheDocument();
+  });
+
+  it('should open dialog when button is clicked', async () => {
+    const user = userEvent.setup();
+    render(<Sidebar />);
+
+    const button = screen.getByRole('button', { name: APP_NAME });
+
+    await user.click(button);
+
+    expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledOnce();
   });
 });
