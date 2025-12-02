@@ -1,27 +1,25 @@
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
-  Autocomplete,
   Box,
-  Button,
   Flex,
   Form,
-  FormControl,
   Heading,
   Paragraph,
+  FormControl,
   TextInput,
-  Tooltip,
+  Autocomplete,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
-import { PlusIcon } from '@contentful/f36-icons';
 import { styles } from './ConfigScreen.styles';
-import { ContentTypeProps } from 'contentful-management';
-import OverrideRow from '../components/OverrideRow';
-import { AppInstallationParameters, Override, OverrideIsInvalid } from '../utils/types';
-import { normalizeString } from '../utils/override';
-
-type SimplifiedField = { id: string; name: string };
-type OverrideState = Record<string, OverrideIsInvalid>;
+import OverrideSection from '../components/OverrideSection';
+import {
+  AppInstallationParameters,
+  OverrideState,
+  Override,
+  AutocompleteItem,
+} from '../utils/types';
+import { getUniqueShortTextFields, normalizeString } from '../utils/override';
 
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
@@ -31,18 +29,16 @@ const ConfigScreen = () => {
     overrides: [],
   });
 
-  const [filteredSourceFields, setFilteredSourceFields] = useState<SimplifiedField[]>([]);
-  const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
-  const [fields, setFields] = useState<SimplifiedField[]>([]);
-
   const [isSourceFieldMissing, setIsSourceFieldMissing] = useState<boolean>(false);
   const [overridesAreInvalid, setOverridesAreInvalid] = useState<OverrideState>({});
+  const [fields, setFields] = useState<AutocompleteItem[]>([]);
+  const [filteredSourceFields, setFilteredSourceFields] = useState<AutocompleteItem[]>([]);
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
     setIsSourceFieldMissing(!parameters.sourceFieldId);
 
-    const overridesAreInvalid: Record<string, OverrideIsInvalid> = {};
+    const overridesAreInvalid: OverrideState = {};
     parameters.overrides.forEach((override) => {
       overridesAreInvalid[override.id] = {
         isContentTypeMissing: !override.contentTypeId,
@@ -90,35 +86,20 @@ const ConfigScreen = () => {
           environmentId: sdk.ids.environment,
         });
 
-        const fields = contentTypes.items.flatMap((contentType) =>
-          contentType.fields.map((field) => ({ id: field.id, name: field.name }))
-        );
+        const uniqueFields = getUniqueShortTextFields(contentTypes);
 
-        const uniqueFields = Array.from(new Map(fields.map((field) => [field.id, field])).values());
-
-        setContentTypes(contentTypes.items);
         setFields(uniqueFields);
         setFilteredSourceFields(uniqueFields);
       } catch (error) {
         console.warn('[Error] Failed to load source fields:', error);
       }
     })();
-  }, []);
+  }, [sdk]);
 
-  const maxOverridesReached = () => {
-    return (
-      contentTypes.every((ct) => parameters.overrides.some((o) => o.contentTypeId === ct.sys.id)) ||
-      contentTypes.length <= parameters.overrides.length
-    );
-  };
-
-  const addOverride = () => {
+  const handleOverridesChange = (updater: (prev: Override[]) => Override[]) => {
     setParameters((prev) => ({
       ...prev,
-      overrides: [
-        ...prev.overrides,
-        { id: window.crypto.randomUUID(), contentTypeId: '', fieldId: '' },
-      ],
+      overrides: updater(prev.overrides),
     }));
   };
 
@@ -142,13 +123,6 @@ const ConfigScreen = () => {
     if (selectedField) {
       setParameters((prev) => ({ ...prev, sourceFieldId: selectedField.id }));
     }
-  };
-
-  const setOverrides = (updater: (prev: Override[]) => Override[]) => {
-    setParameters((prev) => ({
-      ...prev,
-      overrides: updater(prev.overrides),
-    }));
   };
 
   return (
@@ -187,7 +161,9 @@ const ConfigScreen = () => {
               Source field ID
             </FormControl.Label>
             <Autocomplete
-              selectedItem={parameters.sourceFieldId}
+              selectedItem={
+                fields.find((field) => field.id === parameters.sourceFieldId)?.name || ''
+              }
               items={filteredSourceFields.map((field) => field.name)}
               onInputValueChange={handleSourceFieldInputChange}
               onSelectItem={handleSourceFieldIdSelection}
@@ -206,36 +182,11 @@ const ConfigScreen = () => {
           </FormControl>
         </Box>
 
-        <Flex flexDirection="column" fullWidth>
-          <Heading as="h3">Overrides</Heading>
-          <Paragraph>
-            If an override is needed per content type, select the content type and the field name
-            you wish to use for each entry.
-          </Paragraph>
-          {parameters.overrides?.map((override) => (
-            <OverrideRow
-              key={override.id}
-              contentTypes={contentTypes}
-              overrideItem={override}
-              overrideIsInvalid={overridesAreInvalid[override.id]}
-              overrides={parameters.overrides}
-              setOverrides={setOverrides}></OverrideRow>
-          ))}
-          <Box marginBottom="spacingXl">
-            <Tooltip
-              placement="right"
-              id="tooltip-1"
-              content={maxOverridesReached() ? 'No more content types available.' : undefined}>
-              <Button
-                aria-label="Add override"
-                startIcon={<PlusIcon />}
-                isDisabled={maxOverridesReached()}
-                onClick={() => addOverride()}>
-                Add override
-              </Button>
-            </Tooltip>
-          </Box>
-        </Flex>
+        <OverrideSection
+          overrides={parameters.overrides}
+          overridesAreInvalid={overridesAreInvalid}
+          onOverridesChange={handleOverridesChange}
+        />
       </Flex>
     </Form>
   );

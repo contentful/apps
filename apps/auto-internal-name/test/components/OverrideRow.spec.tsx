@@ -14,6 +14,7 @@ describe('OverrideRow', () => {
         { id: 'title', name: 'Title', type: 'Symbol', required: false },
         { id: 'slug', name: 'Slug', type: 'Symbol', required: false },
         { id: 'author', name: 'Author', type: 'Link', required: false },
+        { id: 'body', name: 'Body', type: 'Text', required: false },
       ],
     } as ContentTypeProps,
     {
@@ -22,6 +23,7 @@ describe('OverrideRow', () => {
       fields: [
         { id: 'name', name: 'Name', type: 'Symbol', required: false },
         { id: 'email', name: 'Email', type: 'Symbol', required: false },
+        { id: 'bio', name: 'Bio', type: 'Text', required: false },
       ],
     } as ContentTypeProps,
   ];
@@ -32,12 +34,8 @@ describe('OverrideRow', () => {
     fieldId: '',
   };
 
-  const mockSetOverrides = vi.fn((updater) => {
-    if (typeof updater === 'function') {
-      return updater([mockOverride]);
-    }
-    return updater;
-  });
+  const mockOnOverrideChange = vi.fn();
+  const mockOnOverrideDelete = vi.fn();
 
   const mockOverrideError: OverrideIsInvalid = {
     isContentTypeMissing: false,
@@ -54,17 +52,20 @@ describe('OverrideRow', () => {
         <OverrideRow
           contentTypes={mockContentTypes}
           overrideItem={mockOverride}
-          setOverrides={mockSetOverrides}
+          onOverrideChange={mockOnOverrideChange}
+          onOverrideDelete={mockOnOverrideDelete}
           overrideIsInvalid={mockOverrideError}
           overrides={[mockOverride]}
         />
       );
 
-      expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/field name/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /delete override/i })).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('Content type name')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('Field name')).toBeInTheDocument();
+      waitFor(() => {
+        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
+        expect(screen.getByLabelText(/field name/i)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /delete override/i })).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Content type name')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Field name')).toBeInTheDocument();
+      });
     });
 
     it('should disable field name input when no content type is selected', () => {
@@ -72,27 +73,31 @@ describe('OverrideRow', () => {
         <OverrideRow
           contentTypes={mockContentTypes}
           overrideItem={mockOverride}
-          setOverrides={mockSetOverrides}
+          onOverrideChange={mockOnOverrideChange}
+          onOverrideDelete={mockOnOverrideDelete}
           overrideIsInvalid={mockOverrideError}
           overrides={[mockOverride]}
         />
       );
 
-      const fieldInput = screen.getByPlaceholderText('Field name');
-      expect(fieldInput).toBeDisabled();
+      waitFor(() => {
+        const fieldInput = screen.getByPlaceholderText('Field name');
+        expect(fieldInput).toBeDisabled();
+      });
     });
   });
 
   describe('Content type selection', () => {
     it('should update override when content type is selected', async () => {
       const user = userEvent.setup();
-      const setOverridesSpy = vi.fn();
+      const onOverrideChangeSpy = vi.fn();
 
       render(
         <OverrideRow
           contentTypes={mockContentTypes}
           overrideItem={mockOverride}
-          setOverrides={setOverridesSpy}
+          onOverrideChange={onOverrideChangeSpy}
+          onOverrideDelete={mockOnOverrideDelete}
           overrideIsInvalid={mockOverrideError}
           overrides={[mockOverride]}
         />
@@ -109,7 +114,15 @@ describe('OverrideRow', () => {
       await user.click(option);
 
       await waitFor(() => {
-        expect(setOverridesSpy).toHaveBeenCalled();
+        expect(onOverrideChangeSpy).toHaveBeenCalledWith(
+          {
+            id: 'override-1',
+            contentTypeId: '',
+            fieldId: '',
+          },
+          'ct-1',
+          ''
+        );
       });
     });
 
@@ -121,13 +134,14 @@ describe('OverrideRow', () => {
         fieldId: 'title',
       };
 
-      const setOverridesSpy = vi.fn();
+      const onOverrideChangeSpy = vi.fn();
 
       render(
         <OverrideRow
           contentTypes={mockContentTypes}
           overrideItem={overrideWithContentType}
-          setOverrides={setOverridesSpy}
+          onOverrideChange={onOverrideChangeSpy}
+          onOverrideDelete={mockOnOverrideDelete}
           overrideIsInvalid={mockOverrideError}
           overrides={[overrideWithContentType]}
         />
@@ -144,14 +158,16 @@ describe('OverrideRow', () => {
         expect(contentTypeInput).toHaveValue('Author');
       });
 
-      // Verify that the function was called and check the result from the selection call (last call)
-      const lastCallIndex = setOverridesSpy.mock.calls.length - 1;
-      const callArgs = setOverridesSpy.mock.calls[lastCallIndex][0];
-      expect(callArgs([overrideWithContentType])[0]).toEqual({
-        id: 'override-1',
-        contentTypeId: 'ct-2',
-        fieldId: '',
-      });
+      // Verify that the function was called with the updated override
+      expect(onOverrideChangeSpy).toHaveBeenCalledWith(
+        {
+          id: 'override-1',
+          contentTypeId: 'ct-1',
+          fieldId: 'title',
+        },
+        '',
+        ''
+      );
     });
 
     it('should reset fields when content type input is cleared', async () => {
@@ -162,13 +178,14 @@ describe('OverrideRow', () => {
         fieldId: 'title',
       };
 
-      const setOverridesSpy = vi.fn();
+      const onOverrideChangeSpy = vi.fn();
 
       render(
         <OverrideRow
           contentTypes={mockContentTypes}
           overrideItem={overrideWithContentType}
-          setOverrides={setOverridesSpy}
+          onOverrideChange={onOverrideChangeSpy}
+          onOverrideDelete={mockOnOverrideDelete}
           overrideIsInvalid={mockOverrideError}
           overrides={[overrideWithContentType]}
         />
@@ -190,17 +207,19 @@ describe('OverrideRow', () => {
 
       await waitFor(() => {
         expect(contentTypeInput).toHaveValue('');
-        expect(setOverridesSpy).toHaveBeenCalled();
+        expect(onOverrideChangeSpy).toHaveBeenCalled();
       });
 
-      // Verify that the function was called and check the result from the selection call (last call)
-      const lastCallIndex = setOverridesSpy.mock.calls.length - 1;
-      const callArgs = setOverridesSpy.mock.calls[lastCallIndex][0];
-      expect(callArgs([overrideWithContentType])[0]).toEqual({
-        id: 'override-1',
-        contentTypeId: '',
-        fieldId: '',
-      });
+      // Verify that the function was called with cleared values
+      expect(onOverrideChangeSpy).toHaveBeenCalledWith(
+        {
+          id: 'override-1',
+          contentTypeId: 'ct-1',
+          fieldId: 'title',
+        },
+        '',
+        ''
+      );
     });
   });
 
@@ -216,14 +235,17 @@ describe('OverrideRow', () => {
         <OverrideRow
           contentTypes={mockContentTypes}
           overrideItem={overrideWithContentType}
-          setOverrides={mockSetOverrides}
+          onOverrideChange={mockOnOverrideChange}
+          onOverrideDelete={mockOnOverrideDelete}
           overrideIsInvalid={mockOverrideError}
           overrides={[overrideWithContentType]}
         />
       );
 
-      const fieldInput = screen.getByPlaceholderText('Field name');
-      expect(fieldInput).not.toBeDisabled();
+      waitFor(() => {
+        const fieldInput = screen.getByPlaceholderText('Field name');
+        expect(fieldInput).not.toBeDisabled();
+      });
     });
 
     it('should update override when field is selected', async () => {
@@ -234,18 +256,14 @@ describe('OverrideRow', () => {
         fieldId: '',
       };
 
-      const setOverridesSpy = vi.fn((updater) => {
-        if (typeof updater === 'function') {
-          return updater([overrideWithContentType]);
-        }
-        return updater;
-      });
+      const onOverrideChangeSpy = vi.fn();
 
       render(
         <OverrideRow
           contentTypes={mockContentTypes}
           overrideItem={overrideWithContentType}
-          setOverrides={setOverridesSpy}
+          onOverrideChange={onOverrideChangeSpy}
+          onOverrideDelete={mockOnOverrideDelete}
           overrideIsInvalid={mockOverrideError}
           overrides={[overrideWithContentType]}
         />
@@ -263,40 +281,38 @@ describe('OverrideRow', () => {
 
       await waitFor(() => {
         expect(fieldInput).toHaveValue('Name');
-        expect(setOverridesSpy).toHaveBeenCalled();
+        expect(onOverrideChangeSpy).toHaveBeenCalled();
       });
 
-      // Verify that the function was called and check the result
-      const lastCallIndex = setOverridesSpy.mock.calls.length - 1;
-      const callArgs = setOverridesSpy.mock.calls[lastCallIndex][0];
-      expect(callArgs([overrideWithContentType])[0]).toEqual({
-        id: 'override-1',
-        contentTypeId: 'ct-2',
-        fieldId: 'name',
-      });
+      // Verify that the function was called with the updated override
+      expect(onOverrideChangeSpy).toHaveBeenCalledWith(
+        {
+          id: 'override-1',
+          contentTypeId: 'ct-2',
+          fieldId: '',
+        },
+        undefined,
+        'name'
+      );
     });
   });
 
   describe('Delete functionality', () => {
-    it('should call setOverrides with filtered array when delete is clicked', async () => {
+    it('should call onOverrideDelete with override id when delete is clicked', async () => {
       const user = userEvent.setup();
       const overrides: Override[] = [
         mockOverride,
         { id: 'override-2', contentTypeId: 'ct-1', fieldId: 'title' },
       ];
 
-      const setOverridesSpy = vi.fn((updater) => {
-        if (typeof updater === 'function') {
-          return updater(overrides);
-        }
-        return updater;
-      });
+      const onOverrideDeleteSpy = vi.fn();
 
       render(
         <OverrideRow
           contentTypes={mockContentTypes}
           overrideItem={mockOverride}
-          setOverrides={setOverridesSpy}
+          onOverrideChange={mockOnOverrideChange}
+          onOverrideDelete={onOverrideDeleteSpy}
           overrideIsInvalid={mockOverrideError}
           overrides={overrides}
         />
@@ -305,15 +321,9 @@ describe('OverrideRow', () => {
       const deleteButton = screen.getByRole('button', { name: /delete override/i });
       await user.click(deleteButton);
 
-      // Should filter out the current override
+      // Should call onOverrideDelete with the override id
       await waitFor(() => {
-        expect(setOverridesSpy).toHaveBeenCalled();
-        const callArgs = setOverridesSpy.mock.calls[0][0];
-        if (typeof callArgs === 'function') {
-          const result = callArgs(overrides);
-          expect(result).toHaveLength(1);
-          expect(result[0].id).toBe('override-2');
-        }
+        expect(onOverrideDeleteSpy).toHaveBeenCalledWith('override-1');
       });
     });
 
@@ -325,12 +335,7 @@ describe('OverrideRow', () => {
         { id: 'override-3', contentTypeId: 'ct-1', fieldId: 'slug' },
       ];
 
-      const setOverridesSpy = vi.fn((updater) => {
-        if (typeof updater === 'function') {
-          return updater(overrides);
-        }
-        return updater;
-      });
+      const onOverrideDeleteSpy = vi.fn();
 
       const overrideToDelete = overrides[1];
 
@@ -338,7 +343,8 @@ describe('OverrideRow', () => {
         <OverrideRow
           contentTypes={mockContentTypes}
           overrideItem={overrideToDelete}
-          setOverrides={setOverridesSpy}
+          onOverrideChange={mockOnOverrideChange}
+          onOverrideDelete={onOverrideDeleteSpy}
           overrideIsInvalid={mockOverrideError}
           overrides={overrides}
         />
@@ -348,15 +354,7 @@ describe('OverrideRow', () => {
       await user.click(deleteButton);
 
       await waitFor(() => {
-        expect(setOverridesSpy).toHaveBeenCalled();
-        const callArgs = setOverridesSpy.mock.calls[0][0];
-        if (typeof callArgs === 'function') {
-          const result = callArgs(overrides);
-          expect(result).toHaveLength(2);
-          expect(result.find((o: Override) => o.id === 'override-2')).toBeUndefined();
-          expect(result.find((o: Override) => o.id === 'override-1')).toBeDefined();
-          expect(result.find((o: Override) => o.id === 'override-3')).toBeDefined();
-        }
+        expect(onOverrideDeleteSpy).toHaveBeenCalledWith('override-2');
       });
     });
   });
@@ -382,7 +380,8 @@ describe('OverrideRow', () => {
         <OverrideRow
           contentTypes={mockContentTypes}
           overrideItem={overrideWithoutContentType}
-          setOverrides={mockSetOverrides}
+          onOverrideChange={mockOnOverrideChange}
+          onOverrideDelete={mockOnOverrideDelete}
           overrideIsInvalid={mockOverrideError}
           overrides={overrides}
         />
@@ -418,7 +417,8 @@ describe('OverrideRow', () => {
         <OverrideRow
           contentTypes={mockContentTypes}
           overrideItem={overrideWithBlogPost}
-          setOverrides={mockSetOverrides}
+          onOverrideChange={mockOnOverrideChange}
+          onOverrideDelete={mockOnOverrideDelete}
           overrideIsInvalid={mockOverrideError}
           overrides={overrides}
         />
@@ -449,7 +449,8 @@ describe('OverrideRow', () => {
         <OverrideRow
           contentTypes={[]}
           overrideItem={mockOverride}
-          setOverrides={mockSetOverrides}
+          onOverrideChange={mockOnOverrideChange}
+          onOverrideDelete={mockOnOverrideDelete}
           overrideIsInvalid={mockOverrideError}
           overrides={[mockOverride]}
         />
@@ -486,14 +487,54 @@ describe('OverrideRow', () => {
         <OverrideRow
           contentTypes={[contentTypeWithoutFields]}
           overrideItem={overrideWithEmptyContentType}
-          setOverrides={mockSetOverrides}
+          onOverrideChange={mockOnOverrideChange}
+          onOverrideDelete={mockOnOverrideDelete}
           overrideIsInvalid={mockOverrideError}
           overrides={[overrideWithEmptyContentType]}
         />
       );
 
+      waitFor(() => {
+        const fieldInput = screen.getByPlaceholderText('Field name');
+        expect(fieldInput).not.toBeDisabled();
+      });
+    });
+  });
+
+  describe('Field name filtering', () => {
+    it('should only show Symbol fields in field name autocomplete', async () => {
+      const user = userEvent.setup();
+      const overrideWithContentType: Override = {
+        id: 'override-1',
+        contentTypeId: 'ct-1',
+        fieldId: '',
+      };
+
+      render(
+        <OverrideRow
+          contentTypes={mockContentTypes}
+          overrideItem={overrideWithContentType}
+          onOverrideChange={mockOnOverrideChange}
+          onOverrideDelete={mockOnOverrideDelete}
+          overrideIsInvalid={mockOverrideError}
+          overrides={[overrideWithContentType]}
+        />
+      );
+
       const fieldInput = screen.getByPlaceholderText('Field name');
       expect(fieldInput).not.toBeDisabled();
+
+      await user.click(fieldInput);
+
+      await waitFor(() => {
+        // Symbol fields should be available
+        expect(screen.getByText('Title')).toBeInTheDocument();
+        expect(screen.getByText('Slug')).toBeInTheDocument();
+      });
+
+      // Non-Symbol fields (Text and Link types) should NOT be available
+      expect(screen.queryByText('Body')).not.toBeInTheDocument();
+      expect(screen.queryByText('Author')).not.toBeInTheDocument();
     });
   });
 });
