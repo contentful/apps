@@ -3,32 +3,28 @@ import { Button, Flex, Form, FormControl, Select } from '@contentful/f36-compone
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useState } from 'react';
 import LocaleMultiSelect from '../components/LocaleMultiSelect';
-import { SimplifiedLocale, mapLocaleNamesToSimplifiedLocales } from '../utils/locales';
+import {
+  SimplifiedLocale,
+  mapLocaleNamesToSimplifiedLocales,
+  normalizeLocaleCode,
+} from '../utils/locales';
 import { styles } from './Dialog.styles';
 
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
   const [selectedSourceLocale, setSelectedSourceLocale] = useState<string | null>(null);
   const [selectedTargetLocales, setSelectedTargetLocales] = useState<SimplifiedLocale[]>([]);
-  const [missingInputs, setMissingInputs] = useState<{
-    missingSourceLocale: boolean;
-    missingTargetLocales: boolean;
-  }>({ missingSourceLocale: false, missingTargetLocales: false });
+  const [missingSourceLocale, setMissingSourceLocale] = useState(false);
+  const [missingTargetLocales, setMissingTargetLocales] = useState(false);
 
   const mappedLocales = mapLocaleNamesToSimplifiedLocales(sdk.locales.names);
 
   useAutoResizer();
 
-  const normalizeCode = (code: string) => {
-    return code.toLowerCase().replace(/\s/g, '-');
-  };
-
   const handlePopulateFields = () => {
     if (!selectedSourceLocale || selectedTargetLocales.length === 0) {
-      setMissingInputs({
-        missingSourceLocale: !selectedSourceLocale,
-        missingTargetLocales: selectedTargetLocales.length === 0,
-      });
+      setMissingSourceLocale(!selectedSourceLocale);
+      setMissingTargetLocales(selectedTargetLocales.length === 0);
       return;
     }
 
@@ -48,7 +44,7 @@ const Dialog = () => {
         marginBottom="spacingM"
         className={styles.container}>
         <Flex flexDirection="column">
-          <FormControl isRequired isInvalid={missingInputs.missingSourceLocale}>
+          <FormControl isRequired isInvalid={missingSourceLocale}>
             <FormControl.Label>Select source locale</FormControl.Label>
             <Select
               id="source-locale"
@@ -62,26 +58,26 @@ const Dialog = () => {
               )}
               {mappedLocales.map((locale) => (
                 <Select.Option
-                  key={`select-locale-${normalizeCode(locale.code)}`}
-                  data-test-id={`select-locale-${normalizeCode(locale.code)}`}
+                  key={`select-locale-${normalizeLocaleCode(locale.code)}`}
+                  data-test-id={`select-locale-${normalizeLocaleCode(locale.code)}`}
                   value={locale.code}>
                   {locale.name}
                 </Select.Option>
               ))}
             </Select>
-            {missingInputs.missingSourceLocale && (
+            {missingSourceLocale && (
               <FormControl.ValidationMessage>Select source locale</FormControl.ValidationMessage>
             )}
           </FormControl>
-          <FormControl isRequired isInvalid={missingInputs.missingTargetLocales}>
+          <FormControl isRequired isInvalid={missingTargetLocales}>
             <FormControl.Label>Select target locales to populate</FormControl.Label>
             <LocaleMultiSelect
               availableLocales={mappedLocales}
               selectedLocales={selectedTargetLocales}
               onSelectionChange={setSelectedTargetLocales}
-              isInvalid={missingInputs.missingTargetLocales}
+              isInvalid={missingTargetLocales}
             />
-            {missingInputs.missingTargetLocales && (
+            {missingTargetLocales && (
               <FormControl.ValidationMessage>Select target locales</FormControl.ValidationMessage>
             )}
           </FormControl>

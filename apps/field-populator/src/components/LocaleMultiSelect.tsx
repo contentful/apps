@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Stack, Pill } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
-import { SimplifiedLocale } from '../utils/locales';
+import { normalizeLocaleCode, SimplifiedLocale } from '../utils/locales';
 import { styles } from './LocaleMultiSelect.styles';
 
 interface LocaleMultiSelectProps {
@@ -41,10 +41,6 @@ const LocaleMultiSelect: React.FC<LocaleMultiSelectProps> = ({
     onSelectionChange(selectedLocales.filter((l) => l.code !== localeCode));
   };
 
-  const normalizeCode = (code: string) => {
-    return code.toLowerCase().replace(/\s/g, '-');
-  };
-
   return (
     <Stack marginTop="spacingXs" flexDirection="column" alignItems="start">
       <Multiselect
@@ -59,8 +55,8 @@ const LocaleMultiSelect: React.FC<LocaleMultiSelectProps> = ({
         triggerButtonProps={{ isDisabled }}>
         {filteredLocales.map((locale) => (
           <Multiselect.Option
-            key={`multiselect-locale-${normalizeCode(locale.code)}`}
-            itemId={`multiselect-locale-${normalizeCode(locale.code)}`}
+            key={`multiselect-locale-${normalizeLocaleCode(locale.code)}`}
+            itemId={`multiselect-locale-${normalizeLocaleCode(locale.code)}`}
             value={locale.code}
             isChecked={selectedLocales.some((l) => l.code === locale.code)}
             onSelectItem={(e) => handleLocaleToggle(locale, e.target.checked)}>
@@ -75,7 +71,7 @@ const LocaleMultiSelect: React.FC<LocaleMultiSelectProps> = ({
             {selectedLocales.map((locale) => (
               <Pill
                 key={locale.code}
-                testId={`pill-locale-${normalizeCode(locale.code)}`}
+                testId={`pill-locale-${normalizeLocaleCode(locale.code)}`}
                 label={locale.name}
                 isDraggable={false}
                 onClose={() => handleLocaleRemove(locale.code)}

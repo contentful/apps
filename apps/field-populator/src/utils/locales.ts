@@ -8,3 +8,7 @@ export const mapLocaleNamesToSimplifiedLocales = (
     name: localeNames[key],
   }));
 };
+
+export const normalizeLocaleCode = (code: string) => {
+  return code.toLowerCase().replace(/\s/g, '-');
+};
