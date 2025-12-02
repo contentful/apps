@@ -32,6 +32,16 @@ const mockSdk: any = {
   dialogs: {
     openCurrentApp: vi.fn(),
   },
+  locales: {
+    available: vi.fn(),
+    names: {
+      'en-US': 'English (United States)',
+      de: 'German',
+      fr: 'French',
+      'es-ES': 'Spanish (Spain)',
+    },
+  },
+  close: vi.fn(),
 };
 
 export { mockSdk };

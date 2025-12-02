@@ -11,6 +11,8 @@ const Sidebar = () => {
   const openDialog = async () => {
     return sdk.dialogs.openCurrentApp({
       title: APP_NAME,
+      width: 'large',
+      minHeight: '340px',
     });
   };
 
