@@ -23,12 +23,20 @@ const mockSdk: any = {
   parameters: {
     invocation: {},
   },
-  locales: {
-    default: 'en-US',
-  },
   dialogs: {
     openCurrentApp: vi.fn(),
   },
+  locales: {
+    default: 'en-US',
+    available: vi.fn(),
+    names: {
+      'en-US': 'English (United States)',
+      de: 'German',
+      fr: 'French',
+      'es-ES': 'Spanish (Spain)',
+    },
+  },
+  close: vi.fn(),
 };
 
 export { mockSdk };
