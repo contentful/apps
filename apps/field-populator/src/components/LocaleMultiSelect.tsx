@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Box, Stack, Pill } from '@contentful/f36-components';
+import { Box, Stack, Pill, FormControl } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { SimplifiedLocale } from '../utils/locales';
+import { styles } from './LocaleMultiSelect.styles';
 
 interface LocaleMultiSelectProps {
   availableLocales: SimplifiedLocale[];
   selectedLocales: SimplifiedLocale[];
   onSelectionChange: (locales: SimplifiedLocale[]) => void;
   isDisabled?: boolean;
+  isInvalid?: boolean;
 }
 
 const LocaleMultiSelect: React.FC<LocaleMultiSelectProps> = ({
@@ -15,6 +17,7 @@ const LocaleMultiSelect: React.FC<LocaleMultiSelectProps> = ({
   selectedLocales,
   onSelectionChange,
   isDisabled = false,
+  isInvalid = false,
 }) => {
   const [filteredLocales, setFilteredLocales] = useState<SimplifiedLocale[]>(availableLocales);
 
@@ -45,6 +48,7 @@ const LocaleMultiSelect: React.FC<LocaleMultiSelectProps> = ({
   return (
     <Stack marginTop="spacingXs" flexDirection="column" alignItems="start">
       <Multiselect
+        className={isInvalid ? styles.invalid : undefined}
         searchProps={{
           searchPlaceholder: 'Search locales',
           onSearchValueChange: handleSearchValueChange,

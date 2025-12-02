@@ -1,5 +1,5 @@
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { Button, Flex, Form, FormControl, Note, Select } from '@contentful/f36-components';
+import { Button, Flex, Form, FormControl, Select, Skeleton } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useState } from 'react';
 import LocaleMultiSelect from '../components/LocaleMultiSelect';
@@ -10,6 +10,10 @@ const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
   const [selectedSourceLocale, setSelectedSourceLocale] = useState<string | null>(null);
   const [selectedTargetLocales, setSelectedTargetLocales] = useState<SimplifiedLocale[]>([]);
+  const [missingInputs, setMissingInputs] = useState<{
+    missingSourceLocale: boolean;
+    missingTargetLocales: boolean;
+  }>({ missingSourceLocale: false, missingTargetLocales: false });
 
   const mappedLocales = mapLocaleNamesToSimplifiedLocales(sdk.locales.names);
 
@@ -19,9 +23,19 @@ const Dialog = () => {
     return code.toLowerCase().replace(/\s/g, '-');
   };
 
-  if (mappedLocales.length < 0) {
-    return <Note variant="negative">No locales found</Note>;
-  }
+  const handlePopulateFields = () => {
+    if (!selectedSourceLocale || selectedTargetLocales.length === 0) {
+      setMissingInputs({
+        missingSourceLocale: !selectedSourceLocale,
+        missingTargetLocales: selectedTargetLocales.length === 0,
+      });
+      return;
+    }
+
+    // todo : copy and paste logic to populate fields
+
+    sdk.close();
+  };
 
   return (
     <Form>
@@ -34,7 +48,7 @@ const Dialog = () => {
         marginBottom="spacingM"
         className={styles.container}>
         <Flex flexDirection="column">
-          <FormControl isRequired>
+          <FormControl isRequired isInvalid={missingInputs.missingSourceLocale}>
             <FormControl.Label>Select source locale</FormControl.Label>
             <Select
               id="source-locale"
@@ -55,14 +69,21 @@ const Dialog = () => {
                 </Select.Option>
               ))}
             </Select>
+            {missingInputs.missingSourceLocale && (
+              <FormControl.ValidationMessage>Select source locale</FormControl.ValidationMessage>
+            )}
           </FormControl>
-          <FormControl isRequired>
+          <FormControl isRequired isInvalid={missingInputs.missingTargetLocales}>
             <FormControl.Label>Select target locales to populate</FormControl.Label>
             <LocaleMultiSelect
               availableLocales={mappedLocales}
               selectedLocales={selectedTargetLocales}
               onSelectionChange={setSelectedTargetLocales}
+              isInvalid={missingInputs.missingTargetLocales}
             />
+            {missingInputs.missingTargetLocales && (
+              <FormControl.ValidationMessage>Select target locales</FormControl.ValidationMessage>
+            )}
           </FormControl>
         </Flex>
         <Flex justifyContent="flex-end" gap="spacingM">
@@ -72,7 +93,7 @@ const Dialog = () => {
             }}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={() => {}}>
+          <Button variant="primary" onClick={() => handlePopulateFields()}>
             Populate fields
           </Button>
         </Flex>

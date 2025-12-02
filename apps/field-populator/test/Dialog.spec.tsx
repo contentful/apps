@@ -106,13 +106,61 @@ describe('Dialog component', () => {
     });
   });
 
-  it('does not show error message when locales are available', async () => {
+  it('shows validation error when trying to populate without selecting source locale', async () => {
+    const user = userEvent.setup();
+
     await act(async () => {
       render(<Dialog />);
     });
 
     await waitFor(() => {
-      expect(screen.queryByText('No locales found')).not.toBeInTheDocument();
+      expect(screen.getByText('Populate fields')).toBeInTheDocument();
+    });
+
+    // Initially, "Select source locale" appears only once as a label
+    expect(screen.getAllByText('Select source locale')).toHaveLength(1);
+
+    const populateButton = screen.getByText('Populate fields');
+    await user.click(populateButton);
+
+    // After clicking, validation message appears - now there should be 2 instances (label + validation message)
+    await waitFor(() => {
+      expect(screen.getAllByText('Select source locale')).toHaveLength(2);
+    });
+  });
+
+  it('shows validation error when trying to populate without selecting target locales', async () => {
+    const user = userEvent.setup();
+
+    await act(async () => {
+      render(<Dialog />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Populate fields')).toBeInTheDocument();
+    });
+
+    // Select a source locale first
+    const selectButton = screen.getByTestId('source-locale-select');
+    await user.click(selectButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('select-locale-en-us')).toBeInTheDocument();
+    });
+
+    const sourceLocaleOption = screen.getByTestId('select-locale-en-us');
+    await user.click(sourceLocaleOption);
+
+    // Initially, "Select target locales" should not appear as a validation message
+    expect(screen.queryByText('Select target locales')).not.toBeInTheDocument();
+
+    // Try to populate without selecting target locales
+    const populateButton = screen.getByText('Populate fields');
+    await user.click(populateButton);
+
+    // After clicking, validation message should appear
+    await waitFor(() => {
+      expect(screen.getByText('Select target locales')).toBeInTheDocument();
     });
   });
 });
