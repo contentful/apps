@@ -273,6 +273,41 @@ describe('Field component', () => {
     });
   });
 
+  describe('Localization', () => {
+    it('should use current locale when field has a specific locale', async () => {
+      // Set field locale to Spanish
+      mockSdk.field.locale = 'es-ES';
+      const parentEntry = createMockEntry({
+        title: {
+          'en-US': 'Parent Title EN',
+          'es-ES': 'Título Padre ES',
+        },
+      });
+
+      setupParentEntryMock(parentEntry);
+
+      await renderAndFlushTimers();
+
+      expect(mockSdk.field.setValue).toHaveBeenCalledWith('Título Padre ES -');
+    });
+
+    it('should leave field empty when current locale is not available in parent entry', async () => {
+      // Set field locale to Spanish, but parent entry only has English
+      mockSdk.field.locale = 'es-ES';
+      const parentEntry = createMockEntry({
+        title: {
+          'en-US': 'Parent Title EN',
+        },
+      });
+
+      mockCma.entry.getMany.mockResolvedValueOnce({ items: [parentEntry], total: 1 });
+
+      await renderAndFlushTimers();
+
+      expect(mockSdk.field.setValue).toHaveBeenCalledWith('');
+    });
+  });
+
   describe('Retry logic', () => {
     it('should retry finding parent entry when not found initially', async () => {
       mockCma.entry.getMany
