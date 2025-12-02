@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Stack, Pill, FormControl } from '@contentful/f36-components';
+import { Box, Stack, Pill } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { SimplifiedLocale } from '../utils/locales';
 import { styles } from './LocaleMultiSelect.styles';

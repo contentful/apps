@@ -1,5 +1,5 @@
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { Button, Flex, Form, FormControl, Select, Skeleton } from '@contentful/f36-components';
+import { Button, Flex, Form, FormControl, Select } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useState } from 'react';
 import LocaleMultiSelect from '../components/LocaleMultiSelect';
