@@ -40,6 +40,8 @@ export async function analyzeContentTypes({
   });
 
   const finalAnalysis = result.object as FinalContentTypesResultSummary;
+  console.log('Content Type Parser Agent Result:', finalAnalysis);
+
   return finalAnalysis;
 }
 
