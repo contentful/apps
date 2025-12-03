@@ -54,7 +54,10 @@ export async function createDocument(config: DocumentParserConfig): Promise<Fina
     prompt,
   });
 
-  return result.object as FinalEntriesResult;
+  const finalResult = result.object as FinalEntriesResult;
+  console.log('Document Parser Agent Result:', result);
+
+  return finalResult;
 }
 
 // These should be improved by having an example prompt on top of this zero shot prompt
