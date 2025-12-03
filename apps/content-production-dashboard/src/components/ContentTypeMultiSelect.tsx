@@ -89,7 +89,6 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
         }
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialSelectedIds]);
 
   return (
