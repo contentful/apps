@@ -10,6 +10,7 @@ import { EntryProps } from 'contentful-management';
 import { getFieldIdForContentType } from '../utils/fieldUtils';
 import { delay, MAX_RETRIES } from '../utils/delay';
 import { isEntryRecentlyCreated } from '../utils/entryUtils';
+import { useInstallationParameters } from '../hooks/useInstallationParameters';
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
@@ -17,8 +18,7 @@ const Field = () => {
   const locales = sdk.locales;
   const defaultLocale = locales.default;
   const currentLocale = sdk.field.locale || defaultLocale;
-  const installationParameters = sdk.parameters.installation as AppInstallationParameters;
-  useAutoResizer();
+  const installationParameters = useInstallationParameters(sdk) as AppInstallationParameters;
 
   const getInternalNameFromParentEntry = (parentEntry: EntryProps): string => {
     const contentTypeId = sdk.contentType.sys.id;
