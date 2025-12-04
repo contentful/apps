@@ -18,9 +18,73 @@ export interface EntryCreationResult {
   }>;
 }
 
+async function createAndPublishDevAssetFromUrl(
+  cma: PlainClientAPI,
+  spaceId: string,
+  environmentId: string,
+  url: string
+) {
+  const fileName = 'dev-image.jpg';
+  const contentType = 'image/jpeg';
+  console.log('Creating dev asset from URL:', url);
+  const asset = await cma.asset.create(
+    { spaceId, environmentId },
+    {
+      fields: {
+        title: { 'en-US': 'Dev Image' },
+        file: {
+          'en-US': {
+            contentType,
+            fileName,
+            upload: url,
+          },
+        },
+      },
+    }
+  );
+  // Best-effort process + publish; if it fails, return draft asset
+  try {
+    const processed = await cma.asset.processForAllLocales({ spaceId, environmentId }, asset);
+    // Poll briefly until the file URL exists or timeout (~2s)
+    const start = Date.now();
+    let current = processed;
+    while (Date.now() - start < 2000) {
+      try {
+        const fetched = await cma.asset.get({
+          spaceId,
+          environmentId,
+          assetId: current.sys.id,
+        });
+        const file = (fetched.fields?.file as any)?.['en-US'];
+        if (file && (file.url || file.uploadFrom || file.upload)) {
+          current = fetched;
+          break;
+        }
+      } catch {
+        // ignore and retry
+      }
+      await new Promise((r) => setTimeout(r, 200));
+    }
+    try {
+      const published = await cma.asset.publish(
+        { spaceId, environmentId, assetId: current.sys.id },
+        current
+      );
+      return published;
+    } catch {
+      return current;
+    }
+  } catch {
+    return asset;
+  }
+}
+
+// (No block-embed fallback; images are inserted inline where tokens occur)
+
 function transformFieldsForContentType(
   fields: Record<string, Record<string, unknown>>,
-  contentType: ContentTypeProps | undefined
+  contentType: ContentTypeProps | undefined,
+  urlToAssetId?: Record<string, string>
 ) {
   if (!contentType) return fields;
 
@@ -38,7 +102,7 @@ function transformFieldsForContentType(
     for (const [locale, value] of Object.entries(localizedValue)) {
       if (def.type === 'RichText') {
         if (typeof value === 'string') {
-          perLocale[locale] = markdownToRichText(value);
+          perLocale[locale] = markdownToRichText(value, urlToAssetId);
         } else {
           // Pass through if already Rich Text-shaped or unknown type
           perLocale[locale] = value;
@@ -78,7 +142,46 @@ export async function createEntries(
 
     try {
       const contentType = contentTypes.find((ct) => ct.sys.id === entry.contentTypeId);
-      const transformedFields = transformFieldsForContentType(entry.fields, contentType);
+      // Build URL->assetId map: normalize URLs and only take the first image token per RichText field
+      let urlToAssetId: Record<string, string> | undefined;
+      if (contentType) {
+        const urls: string[] = [];
+        for (const field of contentType.fields) {
+          if (field.type !== 'RichText') continue;
+          const originalLocalized = entry.fields[field.id];
+          if (!originalLocalized) continue;
+          for (const originalVal of Object.values(originalLocalized)) {
+            if (typeof originalVal !== 'string') continue;
+            const regex = /!\[[^\]]*?\]\(([\s\S]*?)\)/g;
+            let m: RegExpExecArray | null;
+            while ((m = regex.exec(originalVal)) !== null) {
+              const rawUrl = m[1];
+              const normalizedUrl = String(rawUrl).replace(/\s+/g, '');
+              urls.push(normalizedUrl);
+            }
+          }
+        }
+        const uniqueUrls = Array.from(new Set(urls));
+        if (uniqueUrls.length) {
+          const firstUrl = uniqueUrls[0];
+          // TODO: Remove this once we have a real image with OAuth
+          const devUrl = firstUrl.includes('googleusercontent.com')
+            ? 'https://placehold.co/800x400?text=Dev+Image'
+            : firstUrl;
+          const asset = await createAndPublishDevAssetFromUrl(cma, spaceId, environmentId, devUrl);
+          urlToAssetId = {};
+          for (const u of uniqueUrls) {
+            urlToAssetId[u] = asset.sys.id;
+          }
+        }
+      }
+      const transformedFields = transformFieldsForContentType(
+        entry.fields,
+        contentType,
+        urlToAssetId
+      );
+
+      // No block-embed fallback; images are inserted inline via markdown tokens.
 
       const createdEntry = await cma.entry.create(
         { spaceId, environmentId, contentTypeId: entry.contentTypeId },

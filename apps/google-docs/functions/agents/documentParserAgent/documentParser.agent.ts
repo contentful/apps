@@ -85,6 +85,7 @@ CRITICAL FIELD TYPE RULES - READ CAREFULLY:
   - Bold: **bold**
   - Italic: *italic*
   - Underline: _underline_ (or <u>underline</u>)
+  - Images: include literal markdown tokens ![alt](url) when present in the document
 
 FIELD FORMAT RULES:
 - Each entry must have a contentTypeId that matches one of the provided content types
@@ -104,13 +105,13 @@ EXTRACTION GUIDELINES:
 - Extract all relevant content from the document - don't skip entries
 - If a required field cannot be populated from the document, use a sensible default or placeholder
 - Be thorough and extract as many valid entries as you can find
-- Focus on simple fields: Symbol, Text, Number, Boolean, Date`;
+- Focus on simple fields: Symbol, Text, Number, Boolean, Date
+- IMPORTANT FOR IMAGES: If the document content contains markdown image tokens like ![image](URL), include them verbatim in the most relevant RichText field so downstream processing can embed assets. Do NOT rewrite or drop these tokens.`;
 }
 
 /**
  * Extracts plain text content from Google Docs JSON structure
  */
-// TODO: Update this to be more robust and bulletproof
 function extractTextFromGoogleDocsJson(document: unknown): string {
   if (!document || typeof document !== 'object') {
     return '';
@@ -131,6 +132,23 @@ function extractTextFromGoogleDocsJson(document: unknown): string {
         const tabObj = tab as Record<string, unknown>;
         if (tabObj.documentTab && typeof tabObj.documentTab === 'object') {
           const docTab = tabObj.documentTab as Record<string, unknown>;
+          // Build inline image map for this tab
+          const inlineImageUrlById: Record<string, string> = {};
+          try {
+            const inlineObjects = (docTab as any).inlineObjects;
+            if (inlineObjects && typeof inlineObjects === 'object') {
+              for (const [objId, objVal] of Object.entries<any>(inlineObjects)) {
+                const url =
+                  objVal?.inlineObjectProperties?.embeddedObject?.imageProperties?.contentUri ||
+                  objVal?.inlineObjectProperties?.embeddedObject?.imageProperties?.sourceUri;
+                if (typeof url === 'string' && url) {
+                  inlineImageUrlById[objId] = url;
+                }
+              }
+            }
+          } catch {
+            // ignore
+          }
           if (docTab.body && typeof docTab.body === 'object') {
             const body = docTab.body as Record<string, unknown>;
             if (Array.isArray(body.content)) {
@@ -141,17 +159,38 @@ function extractTextFromGoogleDocsJson(document: unknown): string {
                   if (itemObj.paragraph && typeof itemObj.paragraph === 'object') {
                     const para = itemObj.paragraph as Record<string, unknown>;
                     if (Array.isArray(para.elements)) {
+                      let paragraphText = '';
                       for (const elem of para.elements) {
                         if (typeof elem === 'object' && elem !== null) {
                           const elemObj = elem as Record<string, unknown>;
                           if (elemObj.textRun && typeof elemObj.textRun === 'object') {
                             const textRun = elemObj.textRun as Record<string, unknown>;
                             if (typeof textRun.content === 'string') {
-                              textParts.push(textRun.content);
+                              paragraphText += textRun.content;
+                            }
+                          } else if (
+                            elemObj.inlineObjectElement &&
+                            typeof elemObj.inlineObjectElement === 'object'
+                          ) {
+                            const inlineObj = elemObj.inlineObjectElement as any;
+                            const id = inlineObj.inlineObjectId as string | undefined;
+                            const url = id ? inlineImageUrlById[id] : undefined;
+                            if (url) {
+                              paragraphText += `![image](${url})`;
+                            }
+                          } else if (elemObj.richLink && typeof elemObj.richLink === 'object') {
+                            const rich = elemObj.richLink as any;
+                            const uri = rich?.richLinkProperties?.uri as string | undefined;
+                            if (uri) {
+                              paragraphText += `[Video](${uri})`;
                             }
                           }
                         }
                       }
+                      if (!paragraphText.endsWith('\n')) {
+                        paragraphText += '\n';
+                      }
+                      textParts.push(paragraphText);
                     }
                   }
                 }
@@ -163,7 +202,7 @@ function extractTextFromGoogleDocsJson(document: unknown): string {
     }
   }
 
-  return textParts.join(' ').trim();
+  return textParts.join('').trim();
 }
 
 function buildExtractionPrompt({
@@ -236,7 +275,7 @@ CRITICAL INSTRUCTIONS:
 8. Match field types exactly:
    - Symbol: string (max 256 chars)
    - Text: string (any length)
-   - RichText: string in Markdown (preserve bold **, italics *, underline _)
+   - RichText: string in Markdown (preserve bold **, italics *, underline _, and include literal image tokens ![alt](url) when present)
    - Number: number
    - Boolean: boolean
    - Date: ISO 8601 string
@@ -245,6 +284,7 @@ CRITICAL INSTRUCTIONS:
 9. For required fields (required: true) that are NOT marked SKIP: true, ensure they are populated
 10. If you cannot populate a required field from the document, use a sensible default or placeholder
 11. Be thorough - extract all valid content from the document
+12. Do NOT remove or rewrite image tokens like ![image](URL) if they appear in the content; include them in the relevant RichText field.
 
 Return the extracted entries in the specified JSON schema format.`;
 }
