@@ -46,6 +46,7 @@ export async function createDocument(config: DocumentParserConfig): Promise<Fina
     apiKey: openAiApiKey,
   });
 
+  console.log('Document Parser Agent document content Input:', documentContent);
   const prompt = buildExtractionPrompt({ contentTypes, documentContent, locale });
   const result = await generateObject({
     model: openaiClient(modelVersion),

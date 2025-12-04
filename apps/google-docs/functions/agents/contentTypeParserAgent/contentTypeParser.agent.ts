@@ -29,6 +29,7 @@ export async function analyzeContentTypes({
     apiKey: openAiApiKey,
   });
 
+  console.log('Content Type Parser Agent content types Input:', contentTypes);
   const prompt = buildAnalysisPrompt(contentTypes);
 
   const result = await generateObject({
