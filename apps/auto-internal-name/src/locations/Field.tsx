@@ -11,17 +11,13 @@ import { getFieldIdForContentType } from '../utils/fieldUtils';
 import { delay, MAX_RETRIES } from '../utils/delay';
 import { isEntryRecentlyCreated } from '../utils/entryUtils';
 
-type FieldProps = {
-  installationParameters: AppInstallationParameters;
-};
-
-const Field = ({ installationParameters }: FieldProps) => {
+const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   const [isUpdating, setIsUpdating] = useState(true);
   const locales = sdk.locales;
   const defaultLocale = locales.default;
   const currentLocale = sdk.field.locale || defaultLocale;
-
+  const installationParameters = sdk.parameters.installation as AppInstallationParameters;
   useAutoResizer();
 
   const getInternalNameFromParentEntry = (parentEntry: EntryProps): string => {
