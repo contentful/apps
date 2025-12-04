@@ -19,6 +19,7 @@ const Field = () => {
   const defaultLocale = locales.default;
   const currentLocale = sdk.field.locale || defaultLocale;
   const installationParameters = useInstallationParameters(sdk) as AppInstallationParameters;
+  useAutoResizer();
 
   const getInternalNameFromParentEntry = (parentEntry: EntryProps): string => {
     const contentTypeId = sdk.contentType.sys.id;
