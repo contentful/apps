@@ -12,6 +12,9 @@ const createMockCma = () => {
     contentType: {
       getMany: vi.fn(),
     },
+    appInstallation: {
+      getForOrganization: vi.fn(),
+    },
   };
 };
 
