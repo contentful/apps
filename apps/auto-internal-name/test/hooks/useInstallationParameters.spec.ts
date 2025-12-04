@@ -62,7 +62,7 @@ describe('useInstallationParameters', () => {
         ],
       };
 
-      const mockInstallation: AppInstallationProps = {
+      const mockInstallation = {
         sys: {
           id: 'installation-1',
           space: {
@@ -74,7 +74,7 @@ describe('useInstallationParameters', () => {
           },
         },
         parameters: freshParameters,
-      };
+      } as unknown as AppInstallationProps;
 
       mockCma.appInstallation.getForOrganization = vi.fn().mockResolvedValue({
         items: [mockInstallation],
@@ -93,7 +93,7 @@ describe('useInstallationParameters', () => {
     });
 
     it('should return sdk parameters when no installation matches the space', async () => {
-      const mockInstallation: AppInstallationProps = {
+      const mockInstallation = {
         sys: {
           id: 'installation-1',
           space: {
@@ -109,7 +109,7 @@ describe('useInstallationParameters', () => {
           separator: '_',
           overrides: [],
         },
-      };
+      } as unknown as AppInstallationProps;
 
       mockCma.appInstallation.getForOrganization = vi.fn().mockResolvedValue({
         items: [mockInstallation],
