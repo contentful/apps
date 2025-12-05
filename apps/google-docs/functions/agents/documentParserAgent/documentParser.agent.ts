@@ -62,7 +62,6 @@ export async function createDocument(config: DocumentParserConfig): Promise<Fina
   return finalResult;
 }
 
-// These should be improved by having an example prompt on top of this zero shot prompt
 function buildSystemPrompt(): string {
   return `You are an expert content extraction AI that analyzes documents and extracts structured content based on Contentful content type definitions.
 
@@ -85,10 +84,27 @@ CRITICAL FIELD TYPE RULES - READ CAREFULLY:
 - Array (of Link): ❌ NEVER USE - these reference other entries, skip entirely
   Example: DO NOT create [{ title: "x", content: "y" }] - this will FAIL
 - Link/Reference: ❌ NEVER USE - skip these fields (they reference other entries)
-- RichText: Provide a Markdown string preserving inline styles:
-  - Bold: **bold**
-  - Italic: *italic*
-  - Underline: _underline_ (or <u>underline</u>)
+- RichText: Use ONLY the annotation tokens present in the provided document text. The extractor has already encoded Google Docs styles as simple tags:
+  - <B>...</B> = bold, <I>...</I> = italic, <U>...</U> = underline (these may be nested for combinations)
+  - <A href="URL">text</A> = hyperlink to URL
+  - <CODE>...</CODE> = inline code (monospace)
+  - <HR/> on its own line = horizontal rule
+  - ![alt](URL) = image reference (do not modify)
+  Do NOT introduce additional Markdown emphasis (** * _). If the source text contains the words "bold", "italic", "underline" as plain words, leave them unstyled.
+
+STRICT TOKEN POLICY (MANDATORY):
+- Treat <B>, <I>, <U>, <A>, <CODE>, <HR/>, and ![...](...) tokens as immutable markers of styles/assets that already exist in the source.
+- NEVER add new style tokens that are not already present in the provided document text.
+- NEVER remove, move, or re-wrap existing tokens around different text.
+- If a sentence has no tokens, output it as plain text (no emphasis, no markdown, no HTML).
+- The literal words "bold", "italic", and "underline" MUST remain plain unless they are already wrapped by tokens in the provided text.
+- If you are unsure about styling, prefer plain text.
+
+COPY-PASTE EXTRACTION METHOD (NON-NEGOTIABLE):
+- When setting Text or RichText fields, copy exact substrings from the provided document content.
+- Allowed transformations ONLY: trim leading/trailing whitespace; collapse sequences of more than one space into a single space; normalize Windows/Mac newlines to "\n".
+- Disallowed: paraphrasing, reordering, inventing tokens, adding emphasis, or inserting example markup.
+- Before returning, for every RichText string you produced, VERIFY that each occurrence of <B>, <I>, <U>, <A>, <CODE>, <HR/>, and ![...](...) also appears in the same order in the provided document content. If any token you added does not exist in the source, REMOVE it and return the plain text instead.
 
 FIELD FORMAT RULES:
 - Each entry must have a contentTypeId that matches one of the provided content types
@@ -105,16 +121,18 @@ COMMON MISTAKES TO AVOID:
 ✓ CORRECT: { "tags": { "en-US": ["tag1", "tag2", "tag3"] } } (if tags is Array of Symbol)
 
 EXTRACTION GUIDELINES:
+*** BE VERY CAREFUL TO NOT INVENT TEXT OR STRUCTURE THAT IS NOT PRESENT IN THE DOCUMENT ***
+EXAMPLE: If the document has the word "bold" in it, do not invent bold text in your output
 - Extract all relevant content from the document - don't skip entries
 - If a required field cannot be populated from the document, use a sensible default or placeholder
 - Be thorough and extract as many valid entries as you can find
-- Focus on simple fields: Symbol, Text, Number, Boolean, Date`;
+- Focus on simple fields: Symbol, Text, Number, Boolean, Date
+- IMPORTANT FOR IMAGES: If the document content contains markdown image tokens like ![image](URL), include them verbatim in the most relevant RichText field so downstream processing can embed assets. Do NOT rewrite or drop these tokens.`;
 }
 
 /**
  * Extracts plain text content from Google Docs JSON structure
  */
-// TODO: Update this to be more robust and bulletproof
 function extractTextFromGoogleDocsJson(document: unknown): string {
   if (!document || typeof document !== 'object') {
     return '';
@@ -135,6 +153,23 @@ function extractTextFromGoogleDocsJson(document: unknown): string {
         const tabObj = tab as Record<string, unknown>;
         if (tabObj.documentTab && typeof tabObj.documentTab === 'object') {
           const docTab = tabObj.documentTab as Record<string, unknown>;
+          // Build inline image map for this tab
+          const inlineImageUrlById: Record<string, string> = {};
+          try {
+            const inlineObjects = (docTab as any).inlineObjects;
+            if (inlineObjects && typeof inlineObjects === 'object') {
+              for (const [objId, objVal] of Object.entries<any>(inlineObjects)) {
+                const url =
+                  objVal?.inlineObjectProperties?.embeddedObject?.imageProperties?.contentUri ||
+                  objVal?.inlineObjectProperties?.embeddedObject?.imageProperties?.sourceUri;
+                if (typeof url === 'string' && url) {
+                  inlineImageUrlById[objId] = url;
+                }
+              }
+            }
+          } catch {
+            // ignore
+          }
           if (docTab.body && typeof docTab.body === 'object') {
             const body = docTab.body as Record<string, unknown>;
             if (Array.isArray(body.content)) {
@@ -145,17 +180,64 @@ function extractTextFromGoogleDocsJson(document: unknown): string {
                   if (itemObj.paragraph && typeof itemObj.paragraph === 'object') {
                     const para = itemObj.paragraph as Record<string, unknown>;
                     if (Array.isArray(para.elements)) {
+                      let paragraphText = '';
                       for (const elem of para.elements) {
                         if (typeof elem === 'object' && elem !== null) {
                           const elemObj = elem as Record<string, unknown>;
                           if (elemObj.textRun && typeof elemObj.textRun === 'object') {
                             const textRun = elemObj.textRun as Record<string, unknown>;
                             if (typeof textRun.content === 'string') {
-                              textParts.push(textRun.content);
+                              const content = textRun.content as string;
+                              const style = (textRun.textStyle || {}) as any;
+                              const isBold = !!style.bold;
+                              const isItalic = !!style.italic;
+                              const isUnderline = !!style.underline;
+                              let wrapped = content;
+                              // Hyperlink
+                              const href = style?.link?.url as string | undefined;
+                              if (href) {
+                                const safe = String(href).replace(/"/g, '&quot;');
+                                wrapped = `<A href="${safe}">${wrapped}</A>`;
+                              }
+                              // Monospace / code (heuristic: font family contains 'Mono')
+                              const fam = style?.weightedFontFamily?.fontFamily as
+                                | string
+                                | undefined;
+                              if (fam && /mono/i.test(fam)) {
+                                wrapped = `<CODE>${wrapped}</CODE>`;
+                              }
+                              // Wrap with style tokens so downstream converter can deterministically render
+                              if (isBold) wrapped = `<B>${wrapped}</B>`;
+                              if (isItalic) wrapped = `<I>${wrapped}</I>`;
+                              if (isUnderline) wrapped = `<U>${wrapped}</U>`;
+                              paragraphText += wrapped;
+                            }
+                          } else if (
+                            elemObj.inlineObjectElement &&
+                            typeof elemObj.inlineObjectElement === 'object'
+                          ) {
+                            const inlineObj = elemObj.inlineObjectElement as any;
+                            const id = inlineObj.inlineObjectId as string | undefined;
+                            const url = id ? inlineImageUrlById[id] : undefined;
+                            if (url) {
+                              paragraphText += `![image](${url})`;
+                            }
+                          } else if ((elemObj as any).horizontalRule) {
+                            // Horizontal rule
+                            paragraphText += `<HR/>`;
+                          } else if (elemObj.richLink && typeof elemObj.richLink === 'object') {
+                            const rich = elemObj.richLink as any;
+                            const uri = rich?.richLinkProperties?.uri as string | undefined;
+                            if (uri) {
+                              paragraphText += `[Video](${uri})`;
                             }
                           }
                         }
                       }
+                      if (!paragraphText.endsWith('\n')) {
+                        paragraphText += '\n';
+                      }
+                      textParts.push(paragraphText);
                     }
                   }
                 }
@@ -167,7 +249,7 @@ function extractTextFromGoogleDocsJson(document: unknown): string {
     }
   }
 
-  return textParts.join(' ').trim();
+  return textParts.join('').trim();
 }
 
 function buildExtractionPrompt({
@@ -230,6 +312,8 @@ DOCUMENT CONTENT:
 ${documentContent}
 
 CRITICAL INSTRUCTIONS:
+*** BE VERY CAREFUL TO NOT INVENT TEXT OR STRUCTURE THAT IS NOT PRESENT IN THE DOCUMENT ***
+EXAMPLE: If the document has the word "bold" in it, do not invent bold text in your output
 1. **SKIP ALL FIELDS WHERE "SKIP": true** - Do NOT include these fields in your output
 2. Look at each field definition - if it has "SKIP": true, completely ignore that field
 3. Only include fields where "SKIP" is false or not present
@@ -240,7 +324,14 @@ CRITICAL INSTRUCTIONS:
 8. Match field types exactly:
    - Symbol: string (max 256 chars)
    - Text: string (any length)
-   - RichText: string in Markdown (preserve bold **, italics *, underline _)
+   - RichText: string using ONLY the provided annotation tokens (<B>, <I>, <U>, <A href="...">text</A>, <CODE>, <HR/>, and ![alt](URL)). Do not invent Markdown emphasis.
+
+VALIDATION CHECKLIST BEFORE YOU RETURN:
+- [ ] I did not add any <B>/<I>/<U>/<A>/<CODE>/<HR/>/![...](...) tokens that were not present in the provided document content.
+- [ ] I did not wrap the literal words "bold", "italic", or "underline" with any style unless they were already wrapped in the provided text.
+- [ ] Paragraphs without tokens are left as plain text.
+- [ ] I preserved tokens exactly as given (content and order). 
+ - [ ] Every RichText value is an exact substring (after trivial whitespace normalization) of the provided document content.
    - Number: number
    - Boolean: boolean
    - Date: ISO 8601 string
@@ -249,6 +340,7 @@ CRITICAL INSTRUCTIONS:
 9. For required fields (required: true) that are NOT marked SKIP: true, ensure they are populated
 10. If you cannot populate a required field from the document, use a sensible default or placeholder
 11. Be thorough - extract all valid content from the document
+12. Do NOT remove or rewrite image tokens like ![image](URL) if they appear in the content; include them in the relevant RichText field.
 
 Return the extracted entries in the specified JSON schema format.`;
 }

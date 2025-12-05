@@ -1,6 +1,7 @@
 {
     "documentId": "1Ufzr1TNu5SPEbrKHqPW_GA7iTH0A6jqB2FH5vaIHfcg",
-    "suggestionsViewMode": "PREVIEW_WITHOUT_SUGGESTIONS",
+    "revisionId": "AOuX7-bW88EH4C0h-4f72CtHsTHW3qibgy7XhqIc72dtpwcXOu4OML5YwdE6x1QPwqy90OMMtCceqJE0i4IPSw",
+    "suggestionsViewMode": "SUGGESTIONS_INLINE",
     "tabs": [
         {
             "documentTab": {
@@ -315,23 +316,13 @@
                                         }
                                     },
                                     {
-                                        "endIndex": 758,
+                                        "endIndex": 759,
                                         "startIndex": 738,
                                         "textRun": {
-                                            "content": "underlined sections.",
+                                            "content": "underlined sections.\n",
                                             "textStyle": {
                                                 "bold": false,
                                                 "italic": false,
-                                                "underline": true
-                                            }
-                                        }
-                                    },
-                                    {
-                                        "endIndex": 759,
-                                        "startIndex": 758,
-                                        "textRun": {
-                                            "content": "\n",
-                                            "textStyle": {
                                                 "underline": true
                                             }
                                         }
@@ -345,12 +336,1433 @@
                             "startIndex": 655
                         },
                         {
-                            "endIndex": 776,
+                            "endIndex": 787,
                             "paragraph": {
                                 "elements": [
                                     {
-                                        "endIndex": 776,
+                                        "endIndex": 787,
                                         "startIndex": 759,
+                                        "textRun": {
+                                            "content": "Further Formatting Examples\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "headingId": "h.8j7x8f9gg5xs",
+                                    "namedStyleType": "HEADING_2"
+                                }
+                            },
+                            "startIndex": 759
+                        },
+                        {
+                            "endIndex": 827,
+                            "paragraph": {
+                                "bullet": {
+                                    "listId": "kix.fwj8bl2edzyz",
+                                    "textStyle": {
+                                        "backgroundColor": {},
+                                        "baselineOffset": "NONE",
+                                        "bold": false,
+                                        "fontSize": {
+                                            "magnitude": 11,
+                                            "unit": "PT"
+                                        },
+                                        "foregroundColor": {
+                                            "color": {
+                                                "rgbColor": {}
+                                            }
+                                        },
+                                        "italic": false,
+                                        "smallCaps": false,
+                                        "strikethrough": false,
+                                        "underline": true,
+                                        "weightedFontFamily": {
+                                            "fontFamily": "Cambria",
+                                            "weight": 400
+                                        }
+                                    }
+                                },
+                                "elements": [
+                                    {
+                                        "endIndex": 808,
+                                        "startIndex": 787,
+                                        "textRun": {
+                                            "content": "This text includes a ",
+                                            "textStyle": {}
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 825,
+                                        "startIndex": 808,
+                                        "textRun": {
+                                            "content": "hyperlink example",
+                                            "textStyle": {
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.8,
+                                                            "green": 0.33333334,
+                                                            "red": 0.06666667
+                                                        }
+                                                    }
+                                                },
+                                                "link": {
+                                                    "url": "https://www.google.com/search?q=https://www.example.com"
+                                                },
+                                                "underline": true
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 827,
+                                        "startIndex": 825,
+                                        "textRun": {
+                                            "content": ".\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "indentFirstLine": {
+                                        "magnitude": 18,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 36,
+                                        "unit": "PT"
+                                    },
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 787
+                        },
+                        {
+                            "endIndex": 862,
+                            "paragraph": {
+                                "bullet": {
+                                    "listId": "kix.fwj8bl2edzyz",
+                                    "textStyle": {
+                                        "backgroundColor": {},
+                                        "baselineOffset": "NONE",
+                                        "bold": false,
+                                        "fontSize": {
+                                            "magnitude": 11,
+                                            "unit": "PT"
+                                        },
+                                        "foregroundColor": {
+                                            "color": {
+                                                "rgbColor": {}
+                                            }
+                                        },
+                                        "italic": false,
+                                        "smallCaps": false,
+                                        "strikethrough": false,
+                                        "underline": true,
+                                        "weightedFontFamily": {
+                                            "fontFamily": "Cambria",
+                                            "weight": 400
+                                        }
+                                    }
+                                },
+                                "elements": [
+                                    {
+                                        "endIndex": 849,
+                                        "startIndex": 827,
+                                        "textRun": {
+                                            "content": "This is an example of ",
+                                            "textStyle": {}
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 860,
+                                        "startIndex": 849,
+                                        "textRun": {
+                                            "content": "inline code",
+                                            "textStyle": {
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.21960784,
+                                                            "green": 0.5019608,
+                                                            "red": 0.09411765
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 862,
+                                        "startIndex": 860,
+                                        "textRun": {
+                                            "content": ".\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "indentFirstLine": {
+                                        "magnitude": 18,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 36,
+                                        "unit": "PT"
+                                    },
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 827
+                        },
+                        {
+                            "endIndex": 863,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 863,
+                                        "startIndex": 862,
+                                        "textRun": {
+                                            "content": "\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "alignment": "START",
+                                    "avoidWidowAndOrphan": true,
+                                    "borderBetween": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "borderBottom": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "borderLeft": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "borderRight": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "borderTop": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "indentEnd": {
+                                        "unit": "PT"
+                                    },
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "keepLinesTogether": false,
+                                    "keepWithNext": false,
+                                    "lineSpacing": 115,
+                                    "namedStyleType": "NORMAL_TEXT",
+                                    "pageBreakBefore": false,
+                                    "shading": {
+                                        "backgroundColor": {}
+                                    },
+                                    "spaceAbove": {
+                                        "unit": "PT"
+                                    },
+                                    "spaceBelow": {
+                                        "magnitude": 10,
+                                        "unit": "PT"
+                                    },
+                                    "spacingMode": "NEVER_COLLAPSE"
+                                }
+                            },
+                            "startIndex": 862
+                        },
+                        {
+                            "endIndex": 896,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 864,
+                                        "startIndex": 863,
+                                        "textRun": {
+                                            "content": "\ue907",
+                                            "textStyle": {}
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 866,
+                                        "startIndex": 864,
+                                        "textRun": {
+                                            "content": "//",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.21960784,
+                                                            "green": 0.5019608,
+                                                            "red": 0.09411765
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 867,
+                                        "startIndex": 866,
+                                        "textRun": {
+                                            "content": " ",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.44705883,
+                                                            "green": 0.023529412,
+                                                            "red": 0.72156864
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 871,
+                                        "startIndex": 867,
+                                        "textRun": {
+                                            "content": "This",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.21960784,
+                                                            "green": 0.5019608,
+                                                            "red": 0.09411765
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 872,
+                                        "startIndex": 871,
+                                        "textRun": {
+                                            "content": " ",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.44705883,
+                                                            "green": 0.023529412,
+                                                            "red": 0.72156864
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 874,
+                                        "startIndex": 872,
+                                        "textRun": {
+                                            "content": "is",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.21960784,
+                                                            "green": 0.5019608,
+                                                            "red": 0.09411765
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 875,
+                                        "startIndex": 874,
+                                        "textRun": {
+                                            "content": " ",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.44705883,
+                                                            "green": 0.023529412,
+                                                            "red": 0.72156864
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 876,
+                                        "startIndex": 875,
+                                        "textRun": {
+                                            "content": "a",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.21960784,
+                                                            "green": 0.5019608,
+                                                            "red": 0.09411765
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 877,
+                                        "startIndex": 876,
+                                        "textRun": {
+                                            "content": " ",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.44705883,
+                                                            "green": 0.023529412,
+                                                            "red": 0.72156864
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 881,
+                                        "startIndex": 877,
+                                        "textRun": {
+                                            "content": "code",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.21960784,
+                                                            "green": 0.5019608,
+                                                            "red": 0.09411765
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 882,
+                                        "startIndex": 881,
+                                        "textRun": {
+                                            "content": " ",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.44705883,
+                                                            "green": 0.023529412,
+                                                            "red": 0.72156864
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 887,
+                                        "startIndex": 882,
+                                        "textRun": {
+                                            "content": "block",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.21960784,
+                                                            "green": 0.5019608,
+                                                            "red": 0.09411765
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 888,
+                                        "startIndex": 887,
+                                        "textRun": {
+                                            "content": " ",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.44705883,
+                                                            "green": 0.023529412,
+                                                            "red": 0.72156864
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 895,
+                                        "startIndex": 888,
+                                        "textRun": {
+                                            "content": "example",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.21960784,
+                                                            "green": 0.5019608,
+                                                            "red": 0.09411765
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 896,
+                                        "startIndex": 895,
+                                        "textRun": {
+                                            "content": "\n",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.44705883,
+                                                            "green": 0.023529412,
+                                                            "red": 0.72156864
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 863
+                        },
+                        {
+                            "endIndex": 920,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 904,
+                                        "startIndex": 896,
+                                        "textRun": {
+                                            "content": "function",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.21960784,
+                                                            "green": 0.5019608,
+                                                            "red": 0.09411765
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 905,
+                                        "startIndex": 904,
+                                        "textRun": {
+                                            "content": " ",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 917,
+                                        "startIndex": 905,
+                                        "textRun": {
+                                            "content": "helloWorld()",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.21960784,
+                                                            "green": 0.5019608,
+                                                            "red": 0.09411765
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 918,
+                                        "startIndex": 917,
+                                        "textRun": {
+                                            "content": " ",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 919,
+                                        "startIndex": 918,
+                                        "textRun": {
+                                            "content": "{",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.21960784,
+                                                            "green": 0.5019608,
+                                                            "red": 0.09411765
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 920,
+                                        "startIndex": 919,
+                                        "textRun": {
+                                            "content": "\n",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 896
+                        },
+                        {
+                            "endIndex": 952,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 922,
+                                        "startIndex": 920,
+                                        "textRun": {
+                                            "content": "  ",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 951,
+                                        "startIndex": 922,
+                                        "textRun": {
+                                            "content": "console.log(\"Hello, World!\");",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.21960784,
+                                                            "green": 0.5019608,
+                                                            "red": 0.09411765
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 952,
+                                        "startIndex": 951,
+                                        "textRun": {
+                                            "content": "\n",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 920
+                        },
+                        {
+                            "endIndex": 954,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 953,
+                                        "startIndex": 952,
+                                        "textRun": {
+                                            "content": "}",
+                                            "textStyle": {
+                                                "fontSize": {
+                                                    "magnitude": 9,
+                                                    "unit": "PT"
+                                                },
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.21960784,
+                                                            "green": 0.5019608,
+                                                            "red": 0.09411765
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 954,
+                                        "startIndex": 953,
+                                        "textRun": {
+                                            "content": "\n",
+                                            "textStyle": {
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 952
+                        },
+                        {
+                            "endIndex": 956,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 956,
+                                        "startIndex": 954,
+                                        "textRun": {
+                                            "content": "\ue907\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "alignment": "START",
+                                    "avoidWidowAndOrphan": true,
+                                    "borderBetween": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "borderBottom": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "borderLeft": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "borderRight": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "borderTop": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "indentEnd": {
+                                        "unit": "PT"
+                                    },
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "keepLinesTogether": false,
+                                    "keepWithNext": false,
+                                    "lineSpacing": 115,
+                                    "namedStyleType": "NORMAL_TEXT",
+                                    "pageBreakBefore": false,
+                                    "shading": {
+                                        "backgroundColor": {}
+                                    },
+                                    "spaceAbove": {
+                                        "unit": "PT"
+                                    },
+                                    "spaceBelow": {
+                                        "magnitude": 10,
+                                        "unit": "PT"
+                                    },
+                                    "spacingMode": "NEVER_COLLAPSE"
+                                }
+                            },
+                            "startIndex": 954
+                        },
+                        {
+                            "endIndex": 969,
+                            "paragraph": {
+                                "bullet": {
+                                    "listId": "kix.fwj8bl2edzyz",
+                                    "textStyle": {
+                                        "backgroundColor": {},
+                                        "baselineOffset": "NONE",
+                                        "bold": false,
+                                        "fontSize": {
+                                            "magnitude": 11,
+                                            "unit": "PT"
+                                        },
+                                        "foregroundColor": {
+                                            "color": {
+                                                "rgbColor": {}
+                                            }
+                                        },
+                                        "italic": false,
+                                        "smallCaps": false,
+                                        "strikethrough": false,
+                                        "underline": true,
+                                        "weightedFontFamily": {
+                                            "fontFamily": "Cambria",
+                                            "weight": 400
+                                        }
+                                    }
+                                },
+                                "elements": [
+                                    {
+                                        "endIndex": 968,
+                                        "startIndex": 956,
+                                        "textRun": {
+                                            "content": "Blockquotes:",
+                                            "textStyle": {
+                                                "bold": true
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 969,
+                                        "startIndex": 968,
+                                        "textRun": {
+                                            "content": "\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "indentFirstLine": {
+                                        "magnitude": 18,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 36,
+                                        "unit": "PT"
+                                    },
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 956
+                        },
+                        {
+                            "endIndex": 970,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 970,
+                                        "startIndex": 969,
+                                        "textRun": {
+                                            "content": "\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "alignment": "START",
+                                    "avoidWidowAndOrphan": true,
+                                    "borderBetween": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "borderBottom": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "borderLeft": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "borderRight": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "borderTop": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "indentEnd": {
+                                        "unit": "PT"
+                                    },
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "keepLinesTogether": false,
+                                    "keepWithNext": false,
+                                    "lineSpacing": 115,
+                                    "namedStyleType": "NORMAL_TEXT",
+                                    "pageBreakBefore": false,
+                                    "shading": {
+                                        "backgroundColor": {}
+                                    },
+                                    "spaceAbove": {
+                                        "unit": "PT"
+                                    },
+                                    "spaceBelow": {
+                                        "magnitude": 10,
+                                        "unit": "PT"
+                                    },
+                                    "spacingMode": "NEVER_COLLAPSE"
+                                }
+                            },
+                            "startIndex": 969
+                        },
+                        {
+                            "endIndex": 1093,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 1092,
+                                        "startIndex": 970,
+                                        "textRun": {
+                                            "content": "This is an example of a blockquote, often used for citations or emphasized text that stands apart from the main narrative.",
+                                            "textStyle": {
+                                                "foregroundColor": {
+                                                    "color": {
+                                                        "rgbColor": {
+                                                            "blue": 0.21960784,
+                                                            "green": 0.5019608,
+                                                            "red": 0.09411765
+                                                        }
+                                                    }
+                                                },
+                                                "weightedFontFamily": {
+                                                    "fontFamily": "Roboto Mono",
+                                                    "weight": 400
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "endIndex": 1093,
+                                        "startIndex": 1092,
+                                        "textRun": {
+                                            "content": "\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 970
+                        },
+                        {
+                            "endIndex": 1094,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 1094,
+                                        "startIndex": 1093,
+                                        "textRun": {
+                                            "content": "\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 1093
+                        },
+                        {
+                            "endIndex": 1096,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 1095,
+                                        "horizontalRule": {
+                                            "textStyle": {}
+                                        },
+                                        "startIndex": 1094
+                                    },
+                                    {
+                                        "endIndex": 1096,
+                                        "startIndex": 1095,
+                                        "textRun": {
+                                            "content": "\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 1094
+                        },
+                        {
+                            "endIndex": 1097,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 1097,
+                                        "startIndex": 1096,
+                                        "textRun": {
+                                            "content": "\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "alignment": "START",
+                                    "avoidWidowAndOrphan": true,
+                                    "borderBetween": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "borderBottom": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "borderLeft": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "borderRight": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "borderTop": {
+                                        "color": {},
+                                        "dashStyle": "SOLID",
+                                        "padding": {
+                                            "unit": "PT"
+                                        },
+                                        "width": {
+                                            "unit": "PT"
+                                        }
+                                    },
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "indentEnd": {
+                                        "unit": "PT"
+                                    },
+                                    "indentFirstLine": {
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "unit": "PT"
+                                    },
+                                    "keepLinesTogether": false,
+                                    "keepWithNext": false,
+                                    "lineSpacing": 115,
+                                    "namedStyleType": "NORMAL_TEXT",
+                                    "pageBreakBefore": false,
+                                    "shading": {
+                                        "backgroundColor": {}
+                                    },
+                                    "spaceAbove": {
+                                        "unit": "PT"
+                                    },
+                                    "spaceBelow": {
+                                        "magnitude": 10,
+                                        "unit": "PT"
+                                    },
+                                    "spacingMode": "NEVER_COLLAPSE"
+                                }
+                            },
+                            "startIndex": 1096
+                        },
+                        {
+                            "endIndex": 1142,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 1142,
+                                        "startIndex": 1097,
+                                        "textRun": {
+                                            "content": "This is a horizontal rule (HR) placed above.\n",
+                                            "textStyle": {}
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "indentFirstLine": {
+                                        "magnitude": 36,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 36,
+                                        "unit": "PT"
+                                    },
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 1097
+                        },
+                        {
+                            "endIndex": 1143,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 1143,
+                                        "startIndex": 1142,
+                                        "textRun": {
+                                            "content": "\n",
+                                            "textStyle": {
+                                                "underline": true
+                                            }
+                                        }
+                                    }
+                                ],
+                                "paragraphStyle": {
+                                    "direction": "LEFT_TO_RIGHT",
+                                    "namedStyleType": "NORMAL_TEXT"
+                                }
+                            },
+                            "startIndex": 1142
+                        },
+                        {
+                            "endIndex": 1160,
+                            "paragraph": {
+                                "elements": [
+                                    {
+                                        "endIndex": 1160,
+                                        "startIndex": 1143,
                                         "textRun": {
                                             "content": "Expected Outcome\n",
                                             "textStyle": {}
@@ -362,15 +1774,15 @@
                                     "namedStyleType": "HEADING_2"
                                 }
                             },
-                            "startIndex": 759
+                            "startIndex": 1143
                         },
                         {
-                            "endIndex": 999,
+                            "endIndex": 1383,
                             "paragraph": {
                                 "elements": [
                                     {
-                                        "endIndex": 999,
-                                        "startIndex": 776,
+                                        "endIndex": 1383,
+                                        "startIndex": 1160,
                                         "textRun": {
                                             "content": "All inline text styles (bold, italic, underline, and their combinations) should be represented in the structured content output with correct style attributes preserved. No formatting loss or incorrect nesting should occur.\n",
                                             "textStyle": {}
@@ -382,7 +1794,7 @@
                                     "namedStyleType": "NORMAL_TEXT"
                                 }
                             },
-                            "startIndex": 776
+                            "startIndex": 1160
                         }
                     ]
                 },
@@ -431,6 +1843,165 @@
                     "useCustomHeaderFooterMargins": true
                 },
                 "lists": {
+                    "kix.fwj8bl2edzyz": {
+                        "listProperties": {
+                            "nestingLevels": [
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%0",
+                                    "glyphSymbol": "\u25cf",
+                                    "indentFirstLine": {
+                                        "magnitude": 18,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 36,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {
+                                        "underline": false
+                                    }
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%1",
+                                    "glyphSymbol": "\u25cb",
+                                    "indentFirstLine": {
+                                        "magnitude": 54,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 72,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {
+                                        "underline": false
+                                    }
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%2",
+                                    "glyphSymbol": "\u25a0",
+                                    "indentFirstLine": {
+                                        "magnitude": 90,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 108,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {
+                                        "underline": false
+                                    }
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%3",
+                                    "glyphSymbol": "\u25cf",
+                                    "indentFirstLine": {
+                                        "magnitude": 126,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 144,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {
+                                        "underline": false
+                                    }
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%4",
+                                    "glyphSymbol": "\u25cb",
+                                    "indentFirstLine": {
+                                        "magnitude": 162,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 180,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {
+                                        "underline": false
+                                    }
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%5",
+                                    "glyphSymbol": "\u25a0",
+                                    "indentFirstLine": {
+                                        "magnitude": 198,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 216,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {
+                                        "underline": false
+                                    }
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%6",
+                                    "glyphSymbol": "\u25cf",
+                                    "indentFirstLine": {
+                                        "magnitude": 234,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 252,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {
+                                        "underline": false
+                                    }
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%7",
+                                    "glyphSymbol": "\u25cb",
+                                    "indentFirstLine": {
+                                        "magnitude": 270,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 288,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {
+                                        "underline": false
+                                    }
+                                },
+                                {
+                                    "bulletAlignment": "START",
+                                    "glyphFormat": "%8",
+                                    "glyphSymbol": "\u25a0",
+                                    "indentFirstLine": {
+                                        "magnitude": 306,
+                                        "unit": "PT"
+                                    },
+                                    "indentStart": {
+                                        "magnitude": 324,
+                                        "unit": "PT"
+                                    },
+                                    "startNumber": 1,
+                                    "textStyle": {
+                                        "underline": false
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "kix.list.1": {
                         "listProperties": {
                             "nestingLevels": [
