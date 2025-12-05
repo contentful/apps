@@ -311,7 +311,14 @@ EXAMPLE: If the document has the word "bold" in it, do not invent bold text in y
 9. Match field types exactly:
    - Symbol: string (max 256 chars)
    - Text: string (any length)
-   - RichText: string in Markdown (convert Google Docs formatting using the guide above)
+   - RichText: string using ONLY the provided annotation tokens (<B>, <I>, <U>, <A href="...">text</A>, <CODE>, <HR/>, and ![alt](URL)). Do not invent Markdown emphasis.
+
+VALIDATION CHECKLIST BEFORE YOU RETURN:
+- [ ] I did not add any <B>/<I>/<U>/<A>/<CODE>/<HR/>/![...](...) tokens that were not present in the provided document content.
+- [ ] I did not wrap the literal words "bold", "italic", or "underline" with any style unless they were already wrapped in the provided text.
+- [ ] Paragraphs without tokens are left as plain text.
+- [ ] I preserved tokens exactly as given (content and order). 
+ - [ ] Every RichText value is an exact substring (after trivial whitespace normalization) of the provided document content.
    - Number: number
    - Boolean: boolean
    - Date: ISO 8601 string
