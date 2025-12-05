@@ -1,6 +1,6 @@
-import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMockCma, createMockSdk } from '../mocks';
 import ConfigScreen from '../../src/locations/ConfigScreen';
 import { ContentTypeProps } from 'contentful-management';
@@ -271,16 +271,7 @@ describe('ConfigScreen', () => {
       });
       await user.click(screen.getByText('Name'));
 
-      // Get the latest callback (last one registered) - this simulates clicking install
-      await waitFor(() => {
-        const callCount = mockSdk.app.onConfigure.mock.calls.length;
-        expect(callCount).toBeGreaterThan(0);
-      });
-
-      const callCount = mockSdk.app.onConfigure.mock.calls.length;
-      const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
-
-      const result = await onConfigureCallback();
+      const result = await simulateSave();
 
       // Verify all parameters are correctly stored
       expect(result.parameters).toHaveProperty('separator');
@@ -331,14 +322,7 @@ describe('ConfigScreen', () => {
       const contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[0];
       await user.type(contentTypeAutocomplete, 'Blog Post');
 
-      await waitFor(() => {
-        const callCount = mockSdk.app.onConfigure.mock.calls.length;
-        expect(callCount).toBeGreaterThan(0);
-      });
-
-      const callCount = mockSdk.app.onConfigure.mock.calls.length;
-      const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
-      const result = await onConfigureCallback();
+      const result = await simulateSave();
 
       // Should return false and show error
       expect(result).toBe(false);
@@ -366,14 +350,7 @@ describe('ConfigScreen', () => {
         expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
       });
 
-      await waitFor(() => {
-        const callCount = mockSdk.app.onConfigure.mock.calls.length;
-        expect(callCount).toBeGreaterThan(0);
-      });
-
-      const callCount = mockSdk.app.onConfigure.mock.calls.length;
-      const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
-      const result = await onConfigureCallback();
+      const result = await simulateSave();
 
       // Should return false and show all error messages
       expect(result).toBe(false);
@@ -429,15 +406,7 @@ describe('ConfigScreen', () => {
       const authorOption = screen.getAllByRole('option', { name: 'Author' })[0];
       await user.click(authorOption);
 
-      // Don't select field for second override
-      await waitFor(() => {
-        const callCount = mockSdk.app.onConfigure.mock.calls.length;
-        expect(callCount).toBeGreaterThan(0);
-      });
-
-      const callCount = mockSdk.app.onConfigure.mock.calls.length;
-      const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
-      const result = await onConfigureCallback();
+      const result = await simulateSave();
 
       // Should return false because second override is incomplete
       expect(result).toBe(false);
@@ -473,3 +442,12 @@ describe('ConfigScreen', () => {
     });
   });
 });
+
+const simulateSave = async () => {
+  const callCount = mockSdk.app.onConfigure.mock.calls.length;
+  const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
+
+  return await act(async () => {
+    return await onConfigureCallback();
+  });
+};

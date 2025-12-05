@@ -161,6 +161,7 @@ const ConfigScreen = () => {
               Source field ID
             </FormControl.Label>
             <Autocomplete
+              className={styles.autocomplete}
               selectedItem={
                 fields.find((field) => field.id === parameters.sourceFieldId)?.name || ''
               }
