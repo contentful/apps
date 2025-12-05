@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Box, Stack, Pill } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { ContentTypeProps } from 'contentful-management';
@@ -38,7 +38,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
     setFilteredItems(newFilteredItems);
   };
 
-  const fetchAllContentTypes = async (): Promise<ContentTypeProps[]> => {
+  const fetchAllContentTypes = useCallback(async (): Promise<ContentTypeProps[]> => {
     let allContentTypes: ContentTypeProps[] = [];
     let skip = 0;
     const limit = 1000;
@@ -60,7 +60,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
     }
 
     return allContentTypes;
-  };
+  }, [cma, sdk.ids.space, sdk.ids.environment]);
 
   useEffect(() => {
     (async () => {
@@ -87,7 +87,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
         setSelectedContentTypes(currentContentTypes);
       }
     })();
-  }, []);
+  }, [fetchAllContentTypes, sdk.app, setSelectedContentTypes]);
 
   return (
     <>

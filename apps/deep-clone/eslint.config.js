@@ -20,6 +20,8 @@ export default [
         process: 'readonly',
         HTMLInputElement: 'readonly',
         setTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
       },
     },
     plugins: {
@@ -28,14 +30,12 @@ export default [
       'react-hooks': reactHooks,
     },
     rules: {
+      ...typescript.configs['flat/recommended'].rules,
       ...react.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
       'react/react-in-jsx-scope': 'off',
       'react/no-unescaped-entities': 'off',
-      'no-unused-vars': [
-        'warn',
-        { varsIgnorePattern: '^_', argsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
-      ],
+      'no-unused-vars': 'off',
     },
     settings: {
       react: { version: 'detect' },
@@ -49,12 +49,6 @@ export default [
         it: 'readonly',
         expect: 'readonly',
       },
-    },
-  },
-  {
-    files: ['src/**/*.d.ts'],
-    rules: {
-      'no-unused-vars': 'off',
     },
   },
 ];
