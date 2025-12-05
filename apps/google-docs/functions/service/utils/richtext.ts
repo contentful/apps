@@ -44,7 +44,6 @@ export function markdownToRichText(markdown: string, urlToAssetId?: Record<strin
       .replace(/<\s*\/\s*i\s*>/gi, '</I>')
       .replace(/<\s*u\s*>/gi, '<U>')
       .replace(/<\s*\/\s*u\s*>/gi, '</U>');
-
     // Collapse newlines and spaces inside markdown image/link tokens so parsing works line-by-line
     normalized = normalized.replace(/!\[([^\]]*?)\]\(([\s\S]*?)\)/g, (_m, alt, url) => {
       const cleanUrl = String(url).replace(/\s+/g, '');
@@ -434,6 +433,14 @@ export function markdownToRichText(markdown: string, urlToAssetId?: Record<strin
         flushBuffer();
         underline = false;
         i += 4;
+        continue;
+      }
+
+      // Toggle underline on '_' (single only, not '__') - markdown fallback
+      if (line[i] === '_' && !(i + 1 < line.length && line[i + 1] === '_')) {
+        flushBuffer();
+        underline = !underline;
+        i += 1;
         continue;
       }
       buffer += line[i];

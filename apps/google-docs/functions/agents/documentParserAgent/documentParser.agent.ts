@@ -102,6 +102,11 @@ COPY-PASTE EXTRACTION METHOD (NON-NEGOTIABLE):
 - Allowed transformations ONLY: trim leading/trailing whitespace; collapse sequences of more than one space into a single space; normalize Windows/Mac newlines to "\n".
 - Disallowed: paraphrasing, reordering, inventing tokens, adding emphasis, or inserting example markup.
 - Before returning, for every RichText string you produced, VERIFY that each occurrence of <B>, <I>, <U>, <A>, <CODE>, <HR/>, and ![...](...) also appears in the same order in the provided document content. If any token you added does not exist in the source, REMOVE it and return the plain text instead.
+- RichText: Provide a Markdown string preserving inline styles:
+  - Bold: **bold**
+  - Italic: *italic*
+  - Underline: _underline_ (or <u>underline</u>)
+  - Images: include literal markdown tokens ![alt](url) when present in the document
 
 FIELD FORMAT RULES:
 - Each entry must have a contentTypeId that matches one of the provided content types
