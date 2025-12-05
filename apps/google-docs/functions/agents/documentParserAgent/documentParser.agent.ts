@@ -88,6 +88,20 @@ CRITICAL FIELD TYPE RULES - READ CAREFULLY:
   - ![alt](URL) = image reference (do not modify)
   Do NOT introduce additional Markdown emphasis (** * _). If the source text contains the words "bold", "italic", "underline" as plain words, leave them unstyled.
 
+STRICT TOKEN POLICY (MANDATORY):
+- Treat <B>, <I>, <U>, <A>, <CODE>, <HR/>, and ![...](...) tokens as immutable markers of styles/assets that already exist in the source.
+- NEVER add new style tokens that are not already present in the provided document text.
+- NEVER remove, move, or re-wrap existing tokens around different text.
+- If a sentence has no tokens, output it as plain text (no emphasis, no markdown, no HTML).
+- The literal words "bold", "italic", and "underline" MUST remain plain unless they are already wrapped by tokens in the provided text.
+- If you are unsure about styling, prefer plain text.
+
+COPY-PASTE EXTRACTION METHOD (NON-NEGOTIABLE):
+- When setting Text or RichText fields, copy exact substrings from the provided document content.
+- Allowed transformations ONLY: trim leading/trailing whitespace; collapse sequences of more than one space into a single space; normalize Windows/Mac newlines to "\n".
+- Disallowed: paraphrasing, reordering, inventing tokens, adding emphasis, or inserting example markup.
+- Before returning, for every RichText string you produced, VERIFY that each occurrence of <B>, <I>, <U>, <A>, <CODE>, <HR/>, and ![...](...) also appears in the same order in the provided document content. If any token you added does not exist in the source, REMOVE it and return the plain text instead.
+
 FIELD FORMAT RULES:
 - Each entry must have a contentTypeId that matches one of the provided content types
 - Fields must be in the format: { "fieldId": { "locale": value } }
@@ -307,6 +321,13 @@ EXAMPLE: If the document has the word "bold" in it, do not invent bold text in y
    - Symbol: string (max 256 chars)
    - Text: string (any length)
    - RichText: string using ONLY the provided annotation tokens (<B>, <I>, <U>, <A href="...">text</A>, <CODE>, <HR/>, and ![alt](URL)). Do not invent Markdown emphasis.
+
+VALIDATION CHECKLIST BEFORE YOU RETURN:
+- [ ] I did not add any <B>/<I>/<U>/<A>/<CODE>/<HR/>/![...](...) tokens that were not present in the provided document content.
+- [ ] I did not wrap the literal words "bold", "italic", or "underline" with any style unless they were already wrapped in the provided text.
+- [ ] Paragraphs without tokens are left as plain text.
+- [ ] I preserved tokens exactly as given (content and order). 
+ - [ ] Every RichText value is an exact substring (after trivial whitespace normalization) of the provided document content.
    - Number: number
    - Boolean: boolean
    - Date: ISO 8601 string

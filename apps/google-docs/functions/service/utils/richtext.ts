@@ -54,24 +54,6 @@ export function markdownToRichText(markdown: string, urlToAssetId?: Record<strin
       const cleanUrl = String(url).replace(/\s+/g, '');
       return `[${text}](${cleanUrl})`;
     });
-
-    // Contextual guardrail: in explanatory lines (contain "such as"), prevent styling of the literal words
-    // "bold", "italic", "underline" if they were accidentally wrapped by the model.
-    if (/such as/i.test(normalized)) {
-      const guarded = normalized
-        .split(/\r?\n/)
-        .map((ln) => {
-          if (/such as/i.test(ln)) {
-            return ln
-              .replace(/<B>\s*bold\s*<\/B>/gi, 'bold')
-              .replace(/<I>\s*italic\s*<\/I>/gi, 'italic')
-              .replace(/<U>\s*underline\s*<\/U>/gi, 'underline');
-          }
-          return ln;
-        })
-        .join('\n');
-      normalized = guarded;
-    }
   } catch {
     // If any regex fails, fall back to original string
     normalized = markdown;
@@ -468,6 +450,7 @@ export function markdownToRichText(markdown: string, urlToAssetId?: Record<strin
     }
   }
 
+  console.log('documentChildren', documentChildren);
   return {
     nodeType: 'document',
     data: {},
