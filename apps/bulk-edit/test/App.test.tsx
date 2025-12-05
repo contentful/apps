@@ -37,4 +37,8 @@ describe('App', () => {
     const { container } = render(<App />);
     expect(container.firstChild).toBeNull();
   });
+
+  it('fails', () => {
+    expect(true).toBe(false);
+  });
 });
