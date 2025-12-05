@@ -9,7 +9,6 @@ export const styles = {
     flex: 1,
   }),
   autocomplete: css({
-    // Make the autocomplete button take full height and center vertically
     '& button': {
       height: '100%',
       display: 'flex',

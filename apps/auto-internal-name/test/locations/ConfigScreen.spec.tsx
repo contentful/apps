@@ -35,6 +35,15 @@ describe('ConfigScreen', () => {
     } as ContentTypeProps,
   ];
 
+  const simulateSave = async () => {
+    const callCount = mockSdk.app.onConfigure.mock.calls.length;
+    const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
+
+    return await act(async () => {
+      return await onConfigureCallback();
+    });
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockCma = createMockCma();
@@ -442,12 +451,3 @@ describe('ConfigScreen', () => {
     });
   });
 });
-
-const simulateSave = async () => {
-  const callCount = mockSdk.app.onConfigure.mock.calls.length;
-  const onConfigureCallback = mockSdk.app.onConfigure.mock.calls[callCount - 1][0];
-
-  return await act(async () => {
-    return await onConfigureCallback();
-  });
-};
