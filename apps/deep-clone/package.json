@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@contentful/app-components": "file:../../packages/contentful-app-components",
     "@contentful/app-sdk": "^4.29.7",
     "@contentful/f36-components": "4.80.5",
     "@contentful/f36-multiselect": "^4.81.0",
@@ -17,19 +16,16 @@
   },
   "scripts": {
     "start": "vite",
-    "build": "tsc && vite build",
-    "preinstall": "cd ../../packages/contentful-app-components && npm install && npm run build",
+    "build": "tsc && vite build --outDir build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
-    "install-ci": "npm install",
     "create-app-definition": "contentful-app-scripts create-app-definition",
-    "upload": "contentful-app-scripts upload --bundle-dir ./dist",
-    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id 41ggGmfuNUErRXQhTdGlpu --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:staging": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${TEST_ORG_ID} --definition-id 1wVW4ZwkUP7kYaf8Q49jUH --token ${TEST_CMA_TOKEN}"
+    "upload": "contentful-app-scripts upload --bundle-dir ./build",
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 41ggGmfuNUErRXQhTdGlpu --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:staging": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id 1wVW4ZwkUP7kYaf8Q49jUH --token ${TEST_CMA_TOKEN}"
   },
   "browserslist": {
     "production": [
