@@ -3,8 +3,8 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { createMockCma, createMockSdk } from '../../test/mocks';
 import Field from '../../src/locations/Field';
 import { EntryProps } from 'contentful-management';
-import { FieldAppSDK } from '@contentful/app-sdk';
 import { MAX_RETRIES, INITIAL_DELAY_MS } from '../../src/utils/delay';
+import { AppInstallationParameters } from '../../src/utils/types';
 
 const createMockEntry = (fields: Record<string, Record<string, string>>): EntryProps => ({
   sys: {
@@ -28,7 +28,7 @@ const createMockEntry = (fields: Record<string, Record<string, string>>): EntryP
 });
 
 const mockSingleLineEditor = vi.fn(
-  ({ field, locales }: { field: FieldAppSDK['field']; locales: Record<string, string> }) => (
+  ({ field, locales }: { field: any; locales: Record<string, string> }) => (
     <div data-test-id="single-line-editor">
       <input
         value={field.getValue() || ''}
@@ -42,10 +42,15 @@ const mockSingleLineEditor = vi.fn(
 
 let mockSdk: ReturnType<typeof createMockSdk>;
 let mockCma: ReturnType<typeof createMockCma>;
+let mockInstallationParameters: AppInstallationParameters;
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useAutoResizer: () => vi.fn()(),
+}));
+
+vi.mock('../../src/hooks/useInstallationParameters', () => ({
+  useInstallationParameters: () => mockInstallationParameters,
 }));
 
 vi.mock('@contentful/field-editor-single-line', () => ({
@@ -78,6 +83,13 @@ describe('Field component', () => {
     mockSdk = createMockSdk({
       cma: mockCma,
     });
+
+    // Set default installation parameters
+    mockInstallationParameters = {
+      sourceFieldId: 'title',
+      separator: '-',
+      overrides: [],
+    };
 
     vi.setSystemTime(FIXED_DATE);
 
@@ -236,7 +248,7 @@ describe('Field component', () => {
 
   describe('Field value construction', () => {
     it('should allow no separator', async () => {
-      mockSdk.parameters.installation.separator = undefined;
+      mockInstallationParameters.separator = '';
       const parentEntry = createMockEntry({
         title: {
           'en-US': 'Parent Title',
@@ -251,7 +263,7 @@ describe('Field component', () => {
     });
 
     it('should use override field when content type has override', async () => {
-      mockSdk.parameters.installation.overrides = [
+      mockInstallationParameters.overrides = [
         {
           id: 'override-1',
           fieldId: 'name',
