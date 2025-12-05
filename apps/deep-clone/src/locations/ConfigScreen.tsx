@@ -34,7 +34,7 @@ function ConfigScreen() {
       }
       sdk.app.setReady();
     })();
-  }, [sdk, parameters]);
+  }, [sdk]);
 
   const onConfigure = useCallback(async () => {
     if (!parameters.cloneText?.trim()) {
@@ -54,7 +54,7 @@ function ConfigScreen() {
       parameters,
       targetState: { EditorInterface: { ...editorInterface } },
     };
-  }, [parameters, selectedContentTypes, sdk.notifier]);
+  }, [parameters, selectedContentTypes]);
 
   useEffect(() => {
     sdk.app.onConfigure(onConfigure);

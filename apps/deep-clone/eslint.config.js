@@ -36,6 +36,7 @@ export default [
       'react/react-in-jsx-scope': 'off',
       'react/no-unescaped-entities': 'off',
       'no-unused-vars': 'off',
+      'react-hooks/exhaustive-deps': 'off',
     },
     settings: {
       react: { version: 'detect' },
