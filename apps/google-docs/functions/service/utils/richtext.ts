@@ -31,17 +31,20 @@ export function markdownToRichText(markdown: string, urlToAssetId?: Record<strin
   // Underline: <u> -> _
   let normalized = markdown;
   try {
-    // Normalize nested combinations first so we get contiguous markers
+    // Canonicalize HTML tags to simple tokens understood by the parser.
+    // Do NOT convert to Markdown markers to avoid LLM-added emphasis.
     normalized = normalized
-      // <strong><em>text</em></strong> or <b><i>...</i></b> -> ***text***
-      .replace(/<(strong|b)>\s*<(em|i)>([\s\S]*?)<\/\2>\s*<\/\1>/gi, '***$3***')
-      // <em><strong>text</strong></em> or <i><b>...</b></i> -> ***text***
-      .replace(/<(em|i)>\s*<(strong|b)>([\s\S]*?)<\/\2>\s*<\/\1>/gi, '***$3***')
-      // Now handle single tags
-      .replace(/<strong>([\s\S]*?)<\/strong>/gi, '**$1**')
-      .replace(/<b>([\s\S]*?)<\/b>/gi, '**$1**')
-      .replace(/<em>([\s\S]*?)<\/em>/gi, '*$1*')
-      .replace(/<i>([\s\S]*?)<\/i>/gi, '*$1*');
+      .replace(/<\s*strong\s*>/gi, '<B>')
+      .replace(/<\s*\/\s*strong\s*>/gi, '</B>')
+      .replace(/<\s*b\s*>/gi, '<B>')
+      .replace(/<\s*\/\s*b\s*>/gi, '</B>')
+      .replace(/<\s*em\s*>/gi, '<I>')
+      .replace(/<\s*\/\s*em\s*>/gi, '</I>')
+      .replace(/<\s*i\s*>/gi, '<I>')
+      .replace(/<\s*\/\s*i\s*>/gi, '</I>')
+      .replace(/<\s*u\s*>/gi, '<U>')
+      .replace(/<\s*\/\s*u\s*>/gi, '</U>');
+
     // Collapse newlines and spaces inside markdown image/link tokens so parsing works line-by-line
     normalized = normalized.replace(/!\[([^\]]*?)\]\(([\s\S]*?)\)/g, (_m, alt, url) => {
       const cleanUrl = String(url).replace(/\s+/g, '');
@@ -51,6 +54,24 @@ export function markdownToRichText(markdown: string, urlToAssetId?: Record<strin
       const cleanUrl = String(url).replace(/\s+/g, '');
       return `[${text}](${cleanUrl})`;
     });
+
+    // Contextual guardrail: in explanatory lines (contain "such as"), prevent styling of the literal words
+    // "bold", "italic", "underline" if they were accidentally wrapped by the model.
+    if (/such as/i.test(normalized)) {
+      const guarded = normalized
+        .split(/\r?\n/)
+        .map((ln) => {
+          if (/such as/i.test(ln)) {
+            return ln
+              .replace(/<B>\s*bold\s*<\/B>/gi, 'bold')
+              .replace(/<I>\s*italic\s*<\/I>/gi, 'italic')
+              .replace(/<U>\s*underline\s*<\/U>/gi, 'underline');
+          }
+          return ln;
+        })
+        .join('\n');
+      normalized = guarded;
+    }
   } catch {
     // If any regex fails, fall back to original string
     normalized = markdown;
@@ -100,8 +121,61 @@ export function markdownToRichText(markdown: string, urlToAssetId?: Record<strin
       continue;
     }
 
+    // Detect <CODE> blocks. Handle both single-line and multi-line forms deterministically.
+    if (rawLine.trim().startsWith('<CODE>')) {
+      const trimmed = rawLine.trim();
+      const sameLineCloseIdx = trimmed.indexOf('</CODE>');
+      if (sameLineCloseIdx !== -1) {
+        // Single-line code: <CODE>... </CODE>
+        const inner = trimmed.slice(6, sameLineCloseIdx);
+        documentChildren.push({
+          nodeType: 'paragraph',
+          data: {},
+          content: [
+            {
+              nodeType: 'text',
+              value: inner,
+              marks: [{ type: 'code' }],
+              data: {},
+            },
+          ],
+        });
+        continue;
+      }
+      // Multi-line code: collect subsequent lines until we see a line that contains </CODE>
+      const codeLines: string[] = [rawLine.replace(/^\s*<CODE>/, '')];
+      let closed = false;
+      while (li + 1 < lines.length) {
+        if (lines[li + 1].includes('</CODE>')) {
+          li += 1;
+          codeLines.push(lines[li].replace('</CODE>', ''));
+          closed = true;
+          break;
+        }
+        li += 1;
+        codeLines.push(lines[li]);
+      }
+      const codeText = codeLines.join('\n');
+      documentChildren.push({
+        nodeType: 'paragraph',
+        data: {},
+        content: [
+          {
+            nodeType: 'text',
+            value: codeText,
+            marks: [{ type: 'code' }],
+            data: {},
+          },
+        ],
+      });
+      continue;
+    }
+
     // Detect horizontal rule
-    if (/^(\*\s*\*\s*\*\s*|-{3,}\s*|_{3,}\s*)$/.test(rawLine.trim())) {
+    if (
+      rawLine.trim() === '<HR/>' ||
+      /^(\*\s*\*\s*\*\s*|-{3,}\s*|_{3,}\s*)$/.test(rawLine.trim())
+    ) {
       documentChildren.push({ nodeType: 'hr', data: {}, content: [] });
       continue;
     }
@@ -190,6 +264,66 @@ export function markdownToRichText(markdown: string, urlToAssetId?: Record<strin
     };
 
     while (i < line.length) {
+      // Parse HTML-like hyperlink: <A href="...">text</A>
+      if (line.startsWith('<A', i)) {
+        const m = line.slice(i).match(/^<A\s+href="([^"]*)">/i);
+        if (m) {
+          const href = m[1];
+          const after = i + m[0].length;
+          const closeIdx = line.indexOf('</A>', after);
+          if (closeIdx !== -1) {
+            flushBuffer();
+            const linkText = line.slice(after, closeIdx);
+            const marks: Array<{ type: 'bold' | 'italic' | 'underline' }> = [];
+            if (bold) {
+              marks.push({ type: 'bold' });
+            }
+            if (italic) {
+              marks.push({ type: 'italic' });
+            }
+            if (underline) {
+              marks.push({ type: 'underline' });
+            }
+            nodes.push({
+              nodeType: 'hyperlink',
+              data: { uri: href },
+              content: [createTextNode(linkText, marks)],
+            });
+            i = closeIdx + 4; // skip </A>
+            continue;
+          }
+        }
+      }
+
+      // Parse inline code token: <CODE>...</CODE>
+      if (line.startsWith('<CODE>', i)) {
+        const after = i + 6;
+        const closeIdx = line.indexOf('</CODE>', after);
+        if (closeIdx !== -1) {
+          flushBuffer();
+          const codeText = line.slice(after, closeIdx);
+          const marks: Array<{ type: 'bold' | 'italic' | 'underline' | 'code' }> = [];
+          if (bold) {
+            marks.push({ type: 'bold' } as any);
+          }
+          if (italic) {
+            marks.push({ type: 'italic' } as any);
+          }
+          if (underline) {
+            marks.push({ type: 'underline' } as any);
+          }
+          marks.push({ type: 'code' } as any);
+          nodes.push({
+            nodeType: 'text',
+            value: codeText,
+            marks,
+            data: {},
+          });
+          i = closeIdx + 7; // skip </CODE>
+          continue;
+        }
+      }
+
       // Parse hyperlink: [text](url)
       if (line[i] === '[') {
         const textStart = i + 1;
@@ -279,38 +413,45 @@ export function markdownToRichText(markdown: string, urlToAssetId?: Record<strin
         continue;
       }
 
-      // Toggle bold+italic when encountering triple asterisks '***'
-      if (line.startsWith('***', i)) {
+      // Toggle bold using canonical tags <B>...</B>
+      if (line.startsWith('<B>', i)) {
         flushBuffer();
-        // flip both together
-        bold = !bold;
-        italic = !italic;
+        bold = true;
         i += 3;
         continue;
       }
-
-      // Toggle bold on '**'
-      if (line.startsWith('**', i)) {
+      if (line.startsWith('</B>', i)) {
         flushBuffer();
-        bold = !bold;
-        i += 2;
+        bold = false;
+        i += 4;
         continue;
       }
-      // Toggle italic on '*' (single only, not '**')
-      if (line[i] === '*') {
-        // Avoid treating '**' case here
-        if (!(i + 1 < line.length && line[i + 1] === '*')) {
-          flushBuffer();
-          italic = !italic;
-          i += 1;
-          continue;
-        }
-      }
-      // Toggle underline on '_' (single only, not '__')
-      if (line[i] === '_' && !(i + 1 < line.length && line[i + 1] === '_')) {
+
+      // Toggle italic using canonical tags <I>...</I>
+      if (line.startsWith('<I>', i)) {
         flushBuffer();
-        underline = !underline;
-        i += 1;
+        italic = true;
+        i += 3;
+        continue;
+      }
+      if (line.startsWith('</I>', i)) {
+        flushBuffer();
+        italic = false;
+        i += 4;
+        continue;
+      }
+
+      // Toggle underline using canonical tags <U>...</U>
+      if (line.startsWith('<U>', i)) {
+        flushBuffer();
+        underline = true;
+        i += 3;
+        continue;
+      }
+      if (line.startsWith('</U>', i)) {
+        flushBuffer();
+        underline = false;
+        i += 4;
         continue;
       }
       buffer += line[i];

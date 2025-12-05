@@ -58,7 +58,6 @@ export async function createDocument(config: DocumentParserConfig): Promise<Fina
   return result.object as FinalEntriesResult;
 }
 
-// These should be improved by having an example prompt on top of this zero shot prompt
 function buildSystemPrompt(): string {
   return `You are an expert content extraction AI that analyzes documents and extracts structured content based on Contentful content type definitions.
 
@@ -81,11 +80,13 @@ CRITICAL FIELD TYPE RULES - READ CAREFULLY:
 - Array (of Link): ❌ NEVER USE - these reference other entries, skip entirely
   Example: DO NOT create [{ title: "x", content: "y" }] - this will FAIL
 - Link/Reference: ❌ NEVER USE - skip these fields (they reference other entries)
-- RichText: Provide a Markdown string preserving inline styles:
-  - Bold: **bold**
-  - Italic: *italic*
-  - Underline: _underline_ (or <u>underline</u>)
-  - Images: include literal markdown tokens ![alt](url) when present in the document
+- RichText: Use ONLY the annotation tokens present in the provided document text. The extractor has already encoded Google Docs styles as simple tags:
+  - <B>...</B> = bold, <I>...</I> = italic, <U>...</U> = underline (these may be nested for combinations)
+  - <A href="URL">text</A> = hyperlink to URL
+  - <CODE>...</CODE> = inline code (monospace)
+  - <HR/> on its own line = horizontal rule
+  - ![alt](URL) = image reference (do not modify)
+  Do NOT introduce additional Markdown emphasis (** * _). If the source text contains the words "bold", "italic", "underline" as plain words, leave them unstyled.
 
 FIELD FORMAT RULES:
 - Each entry must have a contentTypeId that matches one of the provided content types
@@ -102,6 +103,8 @@ COMMON MISTAKES TO AVOID:
 ✓ CORRECT: { "tags": { "en-US": ["tag1", "tag2", "tag3"] } } (if tags is Array of Symbol)
 
 EXTRACTION GUIDELINES:
+*** BE VERY CAREFUL TO NOT INVENT TEXT OR STRUCTURE THAT IS NOT PRESENT IN THE DOCUMENT ***
+EXAMPLE: If the document has the word "bold" in it, do not invent bold text in your output
 - Extract all relevant content from the document - don't skip entries
 - If a required field cannot be populated from the document, use a sensible default or placeholder
 - Be thorough and extract as many valid entries as you can find
@@ -166,7 +169,30 @@ function extractTextFromGoogleDocsJson(document: unknown): string {
                           if (elemObj.textRun && typeof elemObj.textRun === 'object') {
                             const textRun = elemObj.textRun as Record<string, unknown>;
                             if (typeof textRun.content === 'string') {
-                              paragraphText += textRun.content;
+                              const content = textRun.content as string;
+                              const style = (textRun.textStyle || {}) as any;
+                              const isBold = !!style.bold;
+                              const isItalic = !!style.italic;
+                              const isUnderline = !!style.underline;
+                              let wrapped = content;
+                              // Hyperlink
+                              const href = style?.link?.url as string | undefined;
+                              if (href) {
+                                const safe = String(href).replace(/"/g, '&quot;');
+                                wrapped = `<A href="${safe}">${wrapped}</A>`;
+                              }
+                              // Monospace / code (heuristic: font family contains 'Mono')
+                              const fam = style?.weightedFontFamily?.fontFamily as
+                                | string
+                                | undefined;
+                              if (fam && /mono/i.test(fam)) {
+                                wrapped = `<CODE>${wrapped}</CODE>`;
+                              }
+                              // Wrap with style tokens so downstream converter can deterministically render
+                              if (isBold) wrapped = `<B>${wrapped}</B>`;
+                              if (isItalic) wrapped = `<I>${wrapped}</I>`;
+                              if (isUnderline) wrapped = `<U>${wrapped}</U>`;
+                              paragraphText += wrapped;
                             }
                           } else if (
                             elemObj.inlineObjectElement &&
@@ -178,6 +204,9 @@ function extractTextFromGoogleDocsJson(document: unknown): string {
                             if (url) {
                               paragraphText += `![image](${url})`;
                             }
+                          } else if ((elemObj as any).horizontalRule) {
+                            // Horizontal rule
+                            paragraphText += `<HR/>`;
                           } else if (elemObj.richLink && typeof elemObj.richLink === 'object') {
                             const rich = elemObj.richLink as any;
                             const uri = rich?.richLinkProperties?.uri as string | undefined;
@@ -265,6 +294,8 @@ DOCUMENT CONTENT:
 ${documentContent}
 
 CRITICAL INSTRUCTIONS:
+*** BE VERY CAREFUL TO NOT INVENT TEXT OR STRUCTURE THAT IS NOT PRESENT IN THE DOCUMENT ***
+EXAMPLE: If the document has the word "bold" in it, do not invent bold text in your output
 1. **SKIP ALL FIELDS WHERE "SKIP": true** - Do NOT include these fields in your output
 2. Look at each field definition - if it has "SKIP": true, completely ignore that field
 3. Only include fields where "SKIP" is false or not present
@@ -275,7 +306,7 @@ CRITICAL INSTRUCTIONS:
 8. Match field types exactly:
    - Symbol: string (max 256 chars)
    - Text: string (any length)
-   - RichText: string in Markdown (preserve bold **, italics *, underline _, and include literal image tokens ![alt](url) when present)
+   - RichText: string using ONLY the provided annotation tokens (<B>, <I>, <U>, <A href="...">text</A>, <CODE>, <HR/>, and ![alt](URL)). Do not invent Markdown emphasis.
    - Number: number
    - Boolean: boolean
    - Date: ISO 8601 string
