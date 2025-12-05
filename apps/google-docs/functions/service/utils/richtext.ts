@@ -44,6 +44,10 @@ export function markdownToRichText(markdown: string, urlToAssetId?: Record<strin
       .replace(/<\s*\/\s*i\s*>/gi, '</I>')
       .replace(/<\s*u\s*>/gi, '<U>')
       .replace(/<\s*\/\s*u\s*>/gi, '</U>');
+<<<<<<< HEAD
+=======
+
+>>>>>>> 725bd3703 (feat: rich text formatting improvement)
     // Collapse newlines and spaces inside markdown image/link tokens so parsing works line-by-line
     normalized = normalized.replace(/!\[([^\]]*?)\]\(([\s\S]*?)\)/g, (_m, alt, url) => {
       const cleanUrl = String(url).replace(/\s+/g, '');
@@ -53,6 +57,24 @@ export function markdownToRichText(markdown: string, urlToAssetId?: Record<strin
       const cleanUrl = String(url).replace(/\s+/g, '');
       return `[${text}](${cleanUrl})`;
     });
+
+    // Contextual guardrail: in explanatory lines (contain "such as"), prevent styling of the literal words
+    // "bold", "italic", "underline" if they were accidentally wrapped by the model.
+    if (/such as/i.test(normalized)) {
+      const guarded = normalized
+        .split(/\r?\n/)
+        .map((ln) => {
+          if (/such as/i.test(ln)) {
+            return ln
+              .replace(/<B>\s*bold\s*<\/B>/gi, 'bold')
+              .replace(/<I>\s*italic\s*<\/I>/gi, 'italic')
+              .replace(/<U>\s*underline\s*<\/U>/gi, 'underline');
+          }
+          return ln;
+        })
+        .join('\n');
+      normalized = guarded;
+    }
   } catch {
     // If any regex fails, fall back to original string
     normalized = markdown;
@@ -439,8 +461,28 @@ export function markdownToRichText(markdown: string, urlToAssetId?: Record<strin
       // Toggle underline on '_' (single only, not '__') - markdown fallback
       if (line[i] === '_' && !(i + 1 < line.length && line[i + 1] === '_')) {
         flushBuffer();
-        underline = !underline;
-        i += 1;
+        italic = true;
+        i += 3;
+        continue;
+      }
+      if (line.startsWith('</I>', i)) {
+        flushBuffer();
+        italic = false;
+        i += 4;
+        continue;
+      }
+
+      // Toggle underline using canonical tags <U>...</U>
+      if (line.startsWith('<U>', i)) {
+        flushBuffer();
+        underline = true;
+        i += 3;
+        continue;
+      }
+      if (line.startsWith('</U>', i)) {
+        flushBuffer();
+        underline = false;
+        i += 4;
         continue;
       }
       buffer += line[i];
