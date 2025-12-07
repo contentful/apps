@@ -1,0 +1,377 @@
+/******************************************************************************
+
+Welcome to GDB Online.
+  GDB online is an online compiler and debugger tool for C, C++, Python, PHP, Ruby, 
+  C#, OCaml, VB, Perl, Swift, Prolog, Javascript, Pascal, COBOL, HTML, CSS, JS
+  Code, Compile, Run and Debug online from anywhere in world.
+
+*******************************************************************************/
+#include <stdio.h>
+
+int main()
+{
+    printf("Hello World");
+
+    return 0;
+}
+
+Original file line number	Diff line number	Diff line change
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="preload" as="audio" href="assets/audio/2p_see_u_again.mp3">
+<link rel="preload" as="audio" href="assets/audio/2p_argument.mp3">
+<link rel="preload" as="audio" href="assets/audio/3p_gpt5.mp3">
+<link rel="preload" as="audio" href="assets/audio/2p_goat.mp3">
+<link rel="preload" as="audio" href="assets/audio/1p_EN2CH.mp3">
+<link rel="preload" as="audio" href="assets/audio/1p_CH2EN.mp3">
+<link rel="preload" as="audio" href="assets/audio/4p_climate_100min.mp3">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<title>VibeVoice</title>
+<style>
+  :root {
+    --bg:#ffffff;
+    --card:#ffffff;
+    --muted:#555555;
+    --text:#000000;
+    --border:#dddddd;
+    --accent:#0066cc;
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; }
+  body {
+    color:var(--text);
+    background: var(--bg);
+    font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+    /* 去掉分页吸附与固定高度，整体自然流式 */
+  }
+  /* 容器：流式堆叠，不限制高度 */
+  .wrap {
+    max-width:1100px;
+    width:min(92vw,1100px);
+    margin:0 auto;
+    padding:24px 0;
+  }
+  /* 小号全局间距：让内容紧凑连续 */
+  section.page { padding: 16px 16px; }
+  h1 { margin:0 0 12px; font-size:clamp(28px,4vw,40px); text-align:center; }
+  h2 { margin:16px 0 10px; font-size:22px; }
+  h3 { margin:8px 0 6px; font-size:16px; font-weight:600; color:#222; }
+  .muted { color:var(--muted); }
+  .links a { text-decoration: none; color: var(--accent); font-weight: 500; }
+  .links a:hover { text-decoration: underline; }
+  .links .sep { margin: 0 6px; color: var(--muted); }
+  .case {
+    margin: 32px 0 24px;   /* 上方 32px 留白，下方 24px */
+  }
+  /* 音频+转写纵向排布（无需拉伸） */
+  .sync-block { display:block; }
+  audio { width:100%; display:block; margin:6px 0 8px; }
+  /* 只保留文本框；限制自身高度并滚动，避免溢出叠到下一个 case */
+  .transcript {
+    max-height: 20vh;          /* 需要更紧凑可调成 30vh / 28vh */
+    overflow:auto;
+    padding:8px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:#fff;
+    scroll-behavior:smooth;
+  }
+  /* 行内文本：长词/URL 自动换行，绝不撑破容器 */
+  .line {
+    display:grid;
+    grid-template-columns:84px 75px 1fr;
+    gap:10px;
+    padding:8px 10px;
+    border-radius:10px;
+    border:1px solid transparent;
+    cursor:pointer;
+  }
+  .line:hover { background:#f7f7f7; border-color:#eee; }
+  .line.active { background:rgba(0,102,204,0.08); border-color:#0066cc; }
+  .ts, .spk {
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+    color:#333; font-size:14px; align-self:center; opacity:.9;
+    white-space:nowrap;
+  }
+  .ts { text-align:right; }
+  .spk { text-align:left; }
+  .txt {
+    white-space:pre-wrap;
+    word-break:break-word;      /* 关键：长词断行 */
+    overflow-wrap:anywhere;     /* 关键：避免撑破容器 */
+  }
+  /* 移除所有固定高度链条，避免内容被强制压缩 */
+  .card, .scroll, .sync-grid { height:auto; min-height:0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- 首页：和后面 demo 自然续上 -->
+  <section class="page" id="overview">
+    <header>
+      <h1 style="font-size: 2.3em;">VibeVoice: A Frontier Open-Source Text-to-Speech Model</h1>
+      <!-- <p class="links" style="text-align:center; margin:0 0 4px;">
+        <a href="https://aka.ms/GeneralAI" target="_blank">MSRA GeneralAI Group</a>
+      </p> -->
+      <p class="links" style="text-align:center; margin:0 0 14px;">
+        <a href="https://arxiv.org/pdf/2508.19205" target="_blank">📄 Report</a>
+        <span class="sep">·</span>
+        <a href="https://github.com/microsoft/VibeVoice" target="_blank"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-bottom;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg> Code</a>
+        <span class="sep">·</span>
+        <a href="https://huggingface.co/collections/microsoft/vibevoice-68a2ef24a875c44be47b034f" target="_blank">🤗 Hugging Face</a>
+        <span class="sep">·</span>
+        <a href="https://aka.ms/VibeVoice-Demo" target="_blank">
+        <!-- <span class="sep">·</span> -->
+        <!-- <a href="https://aka.ms/VibeVoice-Demo" target="_blank">
+          <img src="assets/image/microphone.svg" alt="Demo" width="16" height="16" style="vertical-align:text-bottom;"> Demo
+        </a>
+        </a> -->
+      </p>
+
+      <p class="muted" style="margin:0;">
+        VibeVoice is a novel framework designed for generating <b>expressive, long-form, multi-speaker </b>conversational audio, such as podcasts, from text. It addresses significant challenges in traditional Text-to-Speech (TTS) systems, particularly in scalability, speaker consistency, and natural turn-taking.
+A core innovation of VibeVoice is its use of continuous speech tokenizers (Acoustic and Semantic) operating at an ultra-low frame rate of 7.5 Hz. These tokenizers efficiently preserve audio fidelity while significantly boosting computational efficiency for processing long sequences. VibeVoice employs a next-token diffusion framework, leveraging a Large Language Model (LLM) to understand textual context and dialogue flow, and a diffusion head to generate high-fidelity acoustic details.
+The model can synthesize speech up to 90 minutes long with up to 4 distinct speakers, surpassing the typical 1-2 speaker limits of many prior models.
+      </p>
+      
+      <div style="display:flex; justify-content:center; align-items:flex-start; gap:60px; margin:20px 0; width:100%;">
+        <div style="flex:1; text-align:center;">
+          <img src="assets/image/VibeVoice.jpg" alt="VibeVoice Framework" style="width:120%; height:400px; object-fit:contain;">
+        </div>
+        <div style="flex:1; text-align:center;">
+          <img src="assets/image/MOS-preference.png" alt="MOS Preference Results" style="width:75%; height:400px; object-fit:contain;">
+        </div>
+      </div>
+      <p class="muted" style="margin:0; font-family: 'Cambria', 'Garamond', 'Times New Roman', serif; font-size: 20px; line-height: 1.6; color: #111;">
+        <b >2025-09-05: VibeVoice is an open-source research framework intended to advance collaboration in the speech synthesis community. After release, we discovered instances where the tool was used in ways inconsistent with the stated intent. Since responsible use of AI is one of Microsoft’s guiding principles, we have disabled the repo until we are confident that out-of-scope use is no longer possible.</b>
+      </p>
+    </header>
+  </section>
+
+  <section class="page" id="demo4">
+    <h2>Context-Aware Expression</h2>
+    <div class="case" data-key="demo4-a" data-json="assets/text/2p_argument_gt_timestamp.json">
+      <h3>Spontaneous Emotion</h3>
+      <div class="sync-block">
+        <audio id="audio-demo4-a" controls preload="metadata">
+          <source src="assets/audio/2p_argument.mp3" type="audio/mpeg">
+        </audio>
+        <div class="transcript" id="trans-demo4-a"></div>
+      </div>
+    </div>
+    <div class="case" data-key="demo4-b" data-json="assets/text/2p_see_u_again_gt_timestamp.json">
+      <h3>Spontaneous Singing</h3>
+      <div class="sync-block">
+        <audio id="audio-demo4-b" controls preload="metadata">
+          <source src="assets/audio/2p_see_u_again.mp3" type="audio/mpeg">
+        </audio>
+        <div class="transcript" id="trans-demo4-b"></div>
+      </div>
+    </div>
+  </section>
+  <section class="page" id="demo1">
+    <h2>Podcast with Background Music</h2>
+    <div class="case" data-key="demo1-a" data-json="assets/text/3p_gpt5_gt_timestamp.json">
+      <!-- <h3>Example 1</h3> -->
+      <div class="sync-block">
+        <audio id="audio-demo1-a" controls preload="metadata">
+          <source src="assets/audio/3p_gpt5.mp3" type="audio/mpeg">
+        </audio>
+        <div class="transcript" id="trans-demo1-a"></div>
+      </div>
+    </div>
+    <div class="case" data-key="demo1-b" data-json="assets/text/2p_goat_gt_timestamp.json">
+      <!-- <h3>Example 2</h3> -->
+      <div class="sync-block">
+        <audio id="audio-demo1-b" controls preload="metadata">
+          <source src="assets/audio/2p_goat.mp3" type="audio/mpeg">
+        </audio>
+        <div class="transcript" id="trans-demo1-b"></div>
+      </div>
+    </div>
+  </section>
+  <section class="page" id="demo3">
+    <h2>Cross-Lingual</h2>
+    <div class="case" data-key="demo3-a" data-json="assets/text/1p_CH2EN_gt_timestamp.json">
+      <h3>Mandarin to English</h3>
+      <div class="sync-block">
+        <audio id="audio-demo3-a" controls preload="metadata">
+          <source src="assets/audio/1p_CH2EN.mp3" type="audio/mpeg">
+        </audio>
+        <div class="transcript" id="trans-demo3-a"></div>
+      </div>
+    </div>
+    <div class="case" data-key="demo3-b" data-json="assets/text/1p_EN2CH_gt_timestamp.json">
+      <h3>English to Mandarin</h3>
+      <div class="sync-block">
+        <audio id="audio-demo3-b" controls preload="metadata">
+          <source src="assets/audio/1p_EN2CH.mp3" type="audio/mpeg">
+        </audio>
+        <div class="transcript" id="trans-demo3-b"></div>
+      </div>
+    </div>
+  </section>
+  <section class="page" id="demo2">
+    <h2>Long Conversational Speech</h2>
+    <div class="case" data-key="demo2-a" data-json="assets/text/4p_climate_45min_gt_timestamp.json">
+      <!-- <h3>Case A</h3> -->
+      <div class="sync-block">
+        <audio id="audio-demo2-a" controls preload="metadata">
+          <source src="assets/audio/4p_climate_45min.mp3" type="audio/mpeg">
+        </audio>
+        <div class="transcript" id="trans-demo2-a"></div>
+      </div>
+    </div>
+    <div class="case" data-key="demo2-b" data-json="assets/text/4p_climate_100min_gt_timestamp.json">
+      <!-- <h3>Case A</h3> -->
+      <div class="sync-block">
+        <audio id="audio-demo2-b" controls preload="metadata">
+          <source src="assets/audio/4p_climate_100min.mp3" type="audio/mpeg">
+        </audio>
+        <div class="transcript" id="trans-demo2-b"></div>
+      </div>
+      <p style="font-size:0.85em; color:#888; margin:6px 0 0;">* Timestamps are derived from the generated audio and may contain errors.</p>
+    </div>
+  </section>
+  <!-- <section class="page" id="evaluation">
+    <h2>Subjective Evaluation Results</h2>
+    
+    <div style="text-align:center; margin:20px 0;">
+      <img src="assets/MOS-all.svg" alt="MOS Evaluation Results" style="max-width:90%; height:auto;">
+    </div>
+  </section> -->
+<!-- <footer style="margin:32px 0 16px; font-size:0.85em; color:#888; text-align:center;">
+  * Timestamps are derived from generated audio and may contain errors.
+</footer> -->
+</div>
+<script>
+/* ---- 全局互斥播放：一个播放，其他暂停 ---- */
+const allAudios = Array.from(document.querySelectorAll('audio'));
+allAudios.forEach(p => p.addEventListener('play', () => {
+  allAudios.forEach(o => { if (o !== p) o.pause(); });
+}));
+/* ---- 对齐播放器 ---- */
+function mmssms(t){
+  const m = Math.floor(t/60), s = Math.floor(t%60), ms = Math.floor((t-Math.floor(t))*1000);
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(ms).padStart(3,'0')}`;
+}
+class SyncPlayer{
+  constructor(key, segs){
+    this.audio   = document.getElementById(`audio-${key}`);
+    this.transEl = document.getElementById(`trans-${key}`);
+    this.idx = -1;
+    this.segments = segs.slice().sort((a,b)=>a.start-b.start);
+    for(let i=0;i<this.segments.length;i++){
+      const cur=this.segments[i], nxt=this.segments[i+1];
+      if (cur.end == null) cur.end = nxt ? nxt.start : Infinity;
+    }
+    this.shouldScroll = false; // 仅在用户主动跳转时滚动
+    this.render(); this.bind();
+  }
+  esc(s){
+    return String(s||'').replace(/[&<>"']/g, ch => (
+      {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]
+    ));
+  }
+  render(){
+    this.transEl.innerHTML = '';
+    this.segments.forEach((seg,i)=>{
+      const d = document.createElement('div');
+      d.className = 'line';
+      d.dataset.idx = i;
+      d.innerHTML = `
+        <div class="ts">${mmssms(seg.start)}</div>
+        <div class="spk">${this.esc(seg.speaker || '')}</div>
+        <div class="txt">${this.esc(seg.text)}</div>
+      `;
+      d.onclick = () => this.seek(seg.start, true, true);
+      this.transEl.appendChild(d);
+    });
+  }
+  seek(t, autoplay=false, scroll=false){
+    this.shouldScroll = !!scroll;
+    this.audio.currentTime = Math.max(0, t);
+    if (autoplay) this.audio.play().catch(()=>{});
+  }
+  findIdx(t){
+    let lo=0, hi=this.segments.length-1, ans=-1;
+    while (lo<=hi){
+      const mid=(lo+hi)>>1, seg=this.segments[mid];
+      if (t < seg.start) hi=mid-1;
+      else if (t >= seg.end) lo=mid+1;
+      else { ans=mid; break; }
+    }
+    return ans;
+  }
+  setActive(i, scroll=true){
+    const prev = this.idx >= 0 ? this.transEl.querySelector(`.line[data-idx="${this.idx}"]`) : null;
+    const next = i >= 0 ? this.transEl.querySelector(`.line[data-idx="${i}"]`) : null;
+    if (i === this.idx){
+      if (scroll && next){
+        const c=this.transEl;
+        // 滚动到顶部，而不是中心
+        const targetTop = next.offsetTop - c.offsetTop;
+        const maxTop = c.scrollHeight - c.clientHeight;
+        c.scrollTo({ top: Math.max(0, Math.min(targetTop, maxTop)), behavior: 'smooth' });
+      }
+      return;
+    }
+    if (prev) prev.classList.remove('active');
+    if (next){
+      next.classList.add('active');
+      if (scroll){
+        const c=this.transEl;
+        // 滚动到顶部，而不是中心
+        const targetTop = next.offsetTop - c.offsetTop;
+        const maxTop = c.scrollHeight - c.clientHeight;
+        c.scrollTo({ top: Math.max(0, Math.min(targetTop, maxTop)), behavior: 'smooth' });
+      }
+    }
+    this.idx = i;
+  }
+  onTime(){
+    const i = this.findIdx(this.audio.currentTime);
+    // 播放时始终启用滚动，除非音频已暂停
+    const doScroll = !this.audio.paused;
+    this.setActive(i, doScroll);
+  }
+  bind(){
+    const t = () => this.onTime();
+    this.audio.addEventListener('timeupdate', t);
+    this.audio.addEventListener('seeked',  () => { this.shouldScroll = true; this.onTime(); });
+    this.audio.addEventListener('seeking', () => { this.shouldScroll = true; });
+    this.audio.addEventListener('play', t);
+    this.audio.addEventListener('loadedmetadata', ()=>{
+      const dur = isFinite(this.audio.duration) ? this.audio.duration : Infinity;
+      for (let i=0;i<this.segments.length;i++){
+        if (this.segments[i].end === Infinity) this.segments[i].end = dur;
+      }
+    });
+  }
+}
+/* ---- 初始化所有 case ---- */
+function initCases(){
+  document.querySelectorAll('.case').forEach(section => {
+    const key  = section.dataset.key;
+    const json = section.dataset.json;
+    if (!key || !json) return;
+    // 让 audio 与 key 对应
+    const audioEl = section.querySelector('audio');
+    const transEl = section.querySelector('.transcript');
+    if (audioEl && transEl){
+      audioEl.id  = `audio-${key}`;
+      transEl.id  = `trans-${key}`;
+    }
+    fetch(json)
+      .then(r => r.json())
+      .then(data => { new SyncPlayer(key, data); })
+      .catch(err => console.error(`init ${key} failed:`, err));
+  });
+}
+window.addEventListener('DOMContentLoaded', initCases);
+</script>
+</body>
+</html>
