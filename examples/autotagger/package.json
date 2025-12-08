@@ -9,8 +9,8 @@
     "@contentful/react-apps-toolkit": "1.2.16",
     "@emotion/css": "^11.13.5",
     "contentful-management": "11.50.0",
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react": "19.0.1",
+    "react-dom": "19.0.1"
   },
   "scripts": {
     "start": "vite",
