@@ -248,6 +248,13 @@ type MarkdownLinkProps = React.PropsWithChildren<{
   Embedly?: React.ComponentType<{ url: string }>;
 }>;
 
+type MarkdownCodeProps = React.PropsWithChildren<{
+  node?: any;
+  inline?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+}>;
+
 type EditorDirection = 'ltr' | 'rtl';
 
 type PreviewComponents = {
@@ -296,7 +303,8 @@ const MarkdownPreview = React.memo((props: MarkdownPreviewProps) => {
           a: (markdownProps: MarkdownLinkProps) => (
             <MarkdownLink {...markdownProps} Embedly={props.previewComponents?.embedly} />
           ),
-          code({ node, inline, className, children, ...props }) {
+          code(codeProps: MarkdownCodeProps) {
+            const { node, inline, className, children, ...props } = codeProps;
             // Extract language identifier from CSS class (e.g., "language-mermaid" → "mermaid")
             const match = /language-(\w+)/.exec(className || '');
 
