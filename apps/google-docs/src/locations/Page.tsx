@@ -11,13 +11,14 @@ import {
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { ContentTypeSelector } from '../components';
+import { ContentTypeSelector, GettingStartedPage } from '../components';
 import { createEntriesFromDocumentAction } from '../utils/appFunctionUtils';
 import { GoogleDocUploader } from '../components/page/GoogleDocUploader';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
 
+  const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
   const [googleDocUrl, setGoogleDocUrl] = useState<string>(
     'https://docs.google.com/document/d/1uTBhG6ojUU_epNPFV1qKGIb506YAf3ii/edit?usp=drive_link&ouid=100613518827458188455&rtpof=true&sd=true'
@@ -73,6 +74,15 @@ const Page = () => {
   const handleError = (message: string) => {
     setErrorMessage(message);
   };
+
+  const handleGetStarted = () => {
+    setHasStarted(true);
+  };
+
+  // Show getting started page if not started yet
+  if (!hasStarted) {
+    return <GettingStartedPage onSelectFile={handleGetStarted} />;
+  }
 
   return (
     <Flex flexDirection="column" alignItems="stretch">
