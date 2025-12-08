@@ -67,7 +67,6 @@ export const handler: FunctionEventHandler<
     environmentId: context.environmentId,
     contentTypes,
   });
-  console.log('Created Entries Result:', creationResult);
 
   // INTEG-3265: Create the assets in Contentful using the asset service
   // await createAssets()
