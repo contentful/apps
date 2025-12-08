@@ -2,6 +2,7 @@ import { PlainClientAPI, EntryProps, ContentTypeProps } from 'contentful-managem
 import { EntryToCreate } from '../agents/documentParserAgent/schema';
 import { MarkdownParser } from './utils/richtext';
 
+import { URL } from 'url'; // Node.js URL parser
 /**
  * INTEG-3264: Service for creating entries in Contentful using the Contentful Management API
  *
@@ -203,9 +204,21 @@ export async function createEntries(
         if (uniqueUrls.length) {
           const firstUrl = uniqueUrls[0];
           // TODO: Remove this once we have a real image with OAuth
-          const devUrl = firstUrl.includes('googleusercontent.com')
-            ? 'https://placehold.co/800x400?text=Dev+Image'
-            : firstUrl;
+          let devUrl: string;
+          try {
+            const parsed = new URL(firstUrl);
+            // Only allow googleusercontent.com and its direct subdomains
+            const allowedHost = 'googleusercontent.com';
+            const host = parsed.hostname;
+            if (host === allowedHost || host.endsWith('.' + allowedHost)) {
+              devUrl = 'https://placehold.co/800x400?text=Dev+Image';
+            } else {
+              devUrl = firstUrl;
+            }
+          } catch (e) {
+            // If URL parsing fails, don't trust the URL, use the dev image
+            devUrl = 'https://placehold.co/800x400?text=Dev+Image';
+          }
           const asset = await createAndPublishDevAssetFromUrl(cma, spaceId, environmentId, devUrl);
           urlToAssetId = {};
           for (const u of uniqueUrls) {
