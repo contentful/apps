@@ -3,8 +3,7 @@
  *
  * Modal for selecting entries to use in reference field conditions
  */
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Modal,
   Button,
@@ -14,37 +13,22 @@ import {
   Spinner,
   TextInput,
   FormControl,
-  Checkbox,
+  EntryCard,
+  EntityStatus,
 } from '@contentful/f36-components';
 import { SearchIcon } from '@contentful/f36-icons';
 import { useCMA } from '@contentful/react-apps-toolkit';
 
 interface EntrySelectorProps {
-  /** Whether the modal is open */
   isOpen: boolean;
-  /** Callback when modal is closed */
   onClose: () => void;
-  /** Callback when entry is selected (single selection) */
   onSelect: (entryId: string, entryTitle: string) => void;
-  /** Callback when multiple entries are selected (multiple selection) */
   onSelectMultiple?: (entries: Array<{ id: string; title: string }>) => void;
-  /** Current space ID */
   spaceId: string;
-  /** Current environment ID */
   environmentId: string;
-  /** Optional content type ID to filter entries */
   contentTypeId?: string;
-  /** Whether to allow multiple selection */
   allowMultiple?: boolean;
-  /** Currently selected entry IDs to pre-select in the modal */
   initialSelectedIds?: string[];
-}
-
-interface EntryItem {
-  id: string;
-  title: string;
-  contentType: string;
-  updatedAt: string;
 }
 
 export const EntrySelector: React.FC<EntrySelectorProps> = ({
@@ -59,12 +43,48 @@ export const EntrySelector: React.FC<EntrySelectorProps> = ({
   initialSelectedIds = [],
 }) => {
   const cma = useCMA();
-  const [entries, setEntries] = useState<EntryItem[]>([]);
-  const [filteredEntries, setFilteredEntries] = useState<EntryItem[]>([]);
+  const [entries, setEntries] = useState<any[]>([]);
+  const [filteredEntries, setFilteredEntries] = useState<any[]>([]);
+  const [contentTypeMap, setContentTypeMap] = useState<Map<string, any>>(new Map());
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [selectedEntryIds, setSelectedEntryIds] = useState<Set<string>>(new Set());
+
+  // Helper function to get title from entry using displayField
+  const getEntryTitle = (entry: any): string => {
+    const contentType = contentTypeMap.get(entry.sys.contentType.sys.id);
+    if (!contentType || !entry.fields) {
+      return 'Untitled Entry';
+    }
+
+    const displayFieldId = contentType.displayField;
+    if (displayFieldId && entry.fields[displayFieldId]) {
+      const fieldValue = entry.fields[displayFieldId];
+      // Get the first available locale value
+      const localeValue = Object.values(fieldValue)[0];
+      if (localeValue && typeof localeValue === 'string') {
+        return localeValue;
+      }
+    }
+    return 'Untitled Entry';
+  };
+
+  // Helper function to get entry status from metadata
+  const getEntryStatus = (entry: any): EntityStatus => {
+    if (entry.sys.archivedVersion) {
+      return 'archived';
+    }
+
+    if (entry.sys.publishedVersion) {
+      if (entry.sys.version > entry.sys.publishedVersion + 1) {
+        return 'changed';
+      }
+      return 'published';
+    }
+
+    return 'draft';
+  };
 
   // Initialize selected entry IDs when modal opens
   useEffect(() => {
@@ -94,37 +114,22 @@ export const EntrySelector: React.FC<EntrySelectorProps> = ({
           },
         });
 
-        const entryItems: EntryItem[] = response.items
-          .filter((entry: any) => {
-            // Filter out Conditionful Settings content type
-            return entry.sys.contentType.sys.id !== 'conditionfulSettings';
-          })
-          .map((entry: any) => {
-            // Try to get a meaningful title from the entry
-            let title = 'Untitled Entry';
-            if (entry.fields) {
-              // Common title fields to check
-              const titleFields = ['title', 'name', 'label', 'heading'];
-              for (const fieldName of titleFields) {
-                if (entry.fields[fieldName]) {
-                  const fieldValue = entry.fields[fieldName];
-                  // Get the first available locale value
-                  const localeValue = Object.values(fieldValue)[0];
-                  if (localeValue && typeof localeValue === 'string') {
-                    title = localeValue;
-                    break;
-                  }
-                }
-              }
-            }
+        // Fetch content types to get display field information
+        const contentTypeIds = [
+          ...new Set(response.items.map((entry: any) => entry.sys.contentType.sys.id)),
+        ];
+        const contentTypes = await Promise.all(
+          contentTypeIds.map((id) =>
+            cma.contentType.get({ spaceId, environmentId, contentTypeId: id })
+          )
+        );
+        const ctMap = new Map(contentTypes.map((ct) => [ct.sys.id, ct]));
+        setContentTypeMap(ctMap);
 
-            return {
-              id: entry.sys.id,
-              title,
-              contentType: entry.sys.contentType.sys.id,
-              updatedAt: entry.sys.updatedAt,
-            };
-          });
+        const entryItems = response.items.filter((entry: any) => {
+          // Filter out Conditionful Settings content type
+          return entry.sys.contentType.sys.id !== 'conditionfulSettings';
+        });
 
         setEntries(entryItems);
         setFilteredEntries(entryItems);
@@ -147,28 +152,28 @@ export const EntrySelector: React.FC<EntrySelectorProps> = ({
     }
 
     const query = searchQuery.toLowerCase();
-    const filtered = entries.filter(
-      (entry) =>
-        entry.title.toLowerCase().includes(query) ||
-        entry.id.toLowerCase().includes(query) ||
-        entry.contentType.toLowerCase().includes(query)
-    );
+    const filtered = entries.filter((entry) => {
+      const title = getEntryTitle(entry).toLowerCase();
+      const id = entry.sys.id.toLowerCase();
+      const contentType = entry.sys.contentType.sys.id.toLowerCase();
+      return title.includes(query) || id.includes(query) || contentType.includes(query);
+    });
     setFilteredEntries(filtered);
-  }, [searchQuery, entries]);
+  }, [searchQuery, entries, contentTypeMap]);
 
-  const handleSelect = (entry: EntryItem) => {
+  const handleSelect = (entry: any) => {
     if (allowMultiple) {
       // Toggle selection for multiple mode
       const newSelection = new Set(selectedEntryIds);
-      if (newSelection.has(entry.id)) {
-        newSelection.delete(entry.id);
+      if (newSelection.has(entry.sys.id)) {
+        newSelection.delete(entry.sys.id);
       } else {
-        newSelection.add(entry.id);
+        newSelection.add(entry.sys.id);
       }
       setSelectedEntryIds(newSelection);
     } else {
       // Single selection mode - select and close
-      onSelect(entry.id, entry.title);
+      onSelect(entry.sys.id, getEntryTitle(entry));
       setSearchQuery('');
       setSelectedEntryIds(new Set());
       onClose();
@@ -177,14 +182,9 @@ export const EntrySelector: React.FC<EntrySelectorProps> = ({
 
   const handleSaveMultiple = () => {
     if (onSelectMultiple && allowMultiple) {
-      const selectedEntries = filteredEntries
-        .filter((entry) => selectedEntryIds.has(entry.id))
-        .map((entry) => ({ id: entry.id, title: entry.title }));
-
-      // Also include entries from the full list if they're not in filtered
       const allSelectedEntries = entries
-        .filter((entry) => selectedEntryIds.has(entry.id))
-        .map((entry) => ({ id: entry.id, title: entry.title }));
+        .filter((entry) => selectedEntryIds.has(entry.sys.id))
+        .map((entry) => ({ id: entry.sys.id, title: getEntryTitle(entry) }));
 
       onSelectMultiple(allSelectedEntries);
       setSearchQuery('');
@@ -208,87 +208,45 @@ export const EntrySelector: React.FC<EntrySelectorProps> = ({
             onClose={handleClose}
           />
           <Modal.Content>
-            <Stack flexDirection="column" spacing="spacingM">
-              <FormControl>
-                <FormControl.Label>Search entries</FormControl.Label>
-                <TextInput
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search by title, ID, or content type..."
-                  icon={<SearchIcon />}
-                />
-              </FormControl>
+            <FormControl>
+              <FormControl.Label>Search entries</FormControl.Label>
+              <TextInput
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by title, ID, or content type..."
+                icon={<SearchIcon />}
+              />
+            </FormControl>
 
-              {isLoading ? (
-                <Box padding="spacingL">
-                  <Spinner size="large" />
-                </Box>
-              ) : error ? (
-                <Text fontColor="red500">{error}</Text>
-              ) : filteredEntries.length === 0 ? (
-                <Text fontColor="gray500">
-                  {searchQuery ? 'No entries match your search.' : 'No entries found.'}
-                </Text>
-              ) : (
-                <Box
-                  style={{
-                    maxHeight: '400px',
-                    overflowY: 'auto',
-                    border: '1px solid #d3dce0',
-                    borderRadius: '6px',
-                  }}>
-                  <Stack flexDirection="column" spacing="none">
-                    {filteredEntries.map((entry) => {
-                      const isSelected = selectedEntryIds.has(entry.id);
-                      return (
-                        <Box
-                          key={entry.id}
-                          padding="spacingS"
-                          style={{
-                            borderBottom: '1px solid #e5ebed',
-                            cursor: 'pointer',
-                            transition: 'background-color 0.15s ease',
-                            backgroundColor:
-                              isSelected && allowMultiple ? '#e8f5fa' : 'transparent',
-                          }}
-                          onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
-                            if (!isSelected || !allowMultiple) {
-                              e.currentTarget.style.backgroundColor = '#f7f9fa';
-                            }
-                          }}
-                          onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => {
-                            e.currentTarget.style.backgroundColor =
-                              isSelected && allowMultiple ? '#e8f5fa' : 'transparent';
-                          }}
-                          onClick={() => handleSelect(entry)}>
-                          <Stack
-                            flexDirection="row"
-                            spacing="spacingS"
-                            alignItems="center"
-                            style={{ width: '100%' }}>
-                            {allowMultiple && (
-                              <Checkbox
-                                id={`entry-${entry.id}`}
-                                isChecked={isSelected}
-                                onChange={() => handleSelect(entry)}
-                              />
-                            )}
-                            <Stack flexDirection="column" spacing="spacing2Xs" style={{ flex: 1 }}>
-                              <Text fontWeight="fontWeightDemiBold" fontSize="fontSizeM">
-                                {entry.title}
-                              </Text>
-                              <Text fontSize="fontSizeS" fontColor="gray600">
-                                ID: {entry.id} • Type: {entry.contentType}
-                              </Text>
-                            </Stack>
-                          </Stack>
-                        </Box>
-                      );
-                    })}
-                  </Stack>
-                </Box>
-              )}
-            </Stack>
+            {isLoading ? (
+              <Box padding="spacingL">
+                <Spinner size="large" />
+              </Box>
+            ) : error ? (
+              <Text fontColor="red500">{error}</Text>
+            ) : filteredEntries.length === 0 ? (
+              <Text fontColor="gray500">
+                {searchQuery ? 'No entries match your search.' : 'No entries found.'}
+              </Text>
+            ) : (
+              <Stack flexDirection="column" spacing="spacingS">
+                {filteredEntries.map((entry) => {
+                  const isSelected = selectedEntryIds.has(entry.sys.id);
+                  console.log(entry);
+                  return (
+                    <EntryCard
+                      key={entry.sys.id}
+                      title={getEntryTitle(entry)}
+                      size="small"
+                      status={getEntryStatus(entry)}
+                      contentType={entry.sys.contentType.sys.id}
+                      isSelected={allowMultiple ? isSelected : undefined}
+                      onClick={() => handleSelect(entry)}
+                    />
+                  );
+                })}
+              </Stack>
+            )}
           </Modal.Content>
           <Modal.Controls>
             <>

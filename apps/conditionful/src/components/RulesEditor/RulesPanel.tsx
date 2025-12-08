@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react';
 import {
+  Header,
   Stack,
   Button,
   Card,
@@ -18,6 +19,7 @@ import {
   Note,
   Box,
 } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 import { PlusIcon, DeleteIcon, ChevronDownIcon, ChevronUpIcon } from '@contentful/f36-icons';
 import { Rule, MatchMode, FieldType } from '../../types/rules';
 import { RuleEditor } from './RuleEditor';
@@ -190,7 +192,7 @@ export const RulesPanel: React.FC<RulesPanelProps> = ({
               No rules configured yet
             </Text>
             <Text fontSize="fontSizeM" fontColor="gray500">
-              Create your first rule to control field visibility
+              Create your first field visibility rule
             </Text>
           </Flex>
         )}

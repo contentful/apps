@@ -13,7 +13,6 @@ import {
   Flex,
   Button,
   Pill,
-  Text,
 } from '@contentful/f36-components';
 import { DeleteIcon, PlusIcon } from '@contentful/f36-icons';
 import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
