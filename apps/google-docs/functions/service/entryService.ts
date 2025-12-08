@@ -1,8 +1,6 @@
 import { PlainClientAPI, EntryProps, ContentTypeProps } from 'contentful-management';
 import { EntryToCreate } from '../agents/documentParserAgent/schema';
 import { MarkdownParser } from './utils/richtext';
-
-import { URL } from 'url'; // Node.js URL parser
 /**
  * INTEG-3264: Service for creating entries in Contentful using the Contentful Management API
  *
