@@ -143,7 +143,7 @@ export const ContentTypePickerModal = ({
               onClick={handleContinue}
               variant="positive"
               isDisabled={selectedContentTypes.length === 0 || isLoading}>
-              Continue
+              Create
             </Button>
           </Modal.Controls>
         </>
