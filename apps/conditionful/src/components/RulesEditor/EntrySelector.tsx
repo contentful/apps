@@ -232,7 +232,6 @@ export const EntrySelector: React.FC<EntrySelectorProps> = ({
               <Stack flexDirection="column" spacing="spacingS">
                 {filteredEntries.map((entry) => {
                   const isSelected = selectedEntryIds.has(entry.sys.id);
-                  console.log(entry);
                   return (
                     <EntryCard
                       key={entry.sys.id}

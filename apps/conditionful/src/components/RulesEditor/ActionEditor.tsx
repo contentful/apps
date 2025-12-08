@@ -265,33 +265,51 @@ export const ActionEditor: React.FC<ActionEditorProps> = ({
 
         <FormControl isRequired style={{ flex: 1 }} marginBottom="none">
           <FormControl.Label>{isSetOptionsAction ? 'Reference Field' : 'Fields'}</FormControl.Label>
-          <Flex flexDirection="column" gap="spacingXs" style={{ width: '100%' }}>
-            {action.fieldIds.length > 0 && (
-              <Flex flexWrap="wrap" gap="spacingXs">
-                {action.fieldIds.map((fieldId) => (
-                  <Pill
-                    key={fieldId}
-                    label={getFieldName(fieldId)}
-                    onClose={() => handleRemoveField(fieldId)}
-                    onDrag={undefined}
-                  />
-                ))}
-              </Flex>
-            )}
-            <Button
-              variant="secondary"
-              startIcon={<PlusIcon />}
-              onClick={handleOpenFieldModal}
+          {isSetOptionsAction ? (
+            // For SET_OPTIONS, use a dropdown for single-select
+            <Select
+              value={action.fieldIds[0] || ''}
+              onChange={(e) => {
+                const fieldId = e.target.value;
+                onChange({
+                  ...action,
+                  fieldIds: fieldId ? [fieldId] : [],
+                  // Clear allowed entries if field changed
+                  allowedEntries: fieldId !== action.fieldIds[0] ? [] : action.allowedEntries,
+                });
+              }}
               isDisabled={disabled}>
-              {action.fieldIds.length === 0
-                ? isSetOptionsAction
-                  ? 'Select Reference Field'
-                  : 'Select Fields'
-                : isSetOptionsAction
-                ? 'Change Field'
-                : 'Edit Fields'}
-            </Button>
-          </Flex>
+              <Select.Option value="">Select a reference field</Select.Option>
+              {referenceFields.map((field) => (
+                <Select.Option key={field.id} value={field.id}>
+                  {field.name} ({field.type})
+                </Select.Option>
+              ))}
+            </Select>
+          ) : (
+            // For SHOW/HIDE, keep the existing multi-select UI
+            <Flex flexDirection="column" gap="spacingXs" style={{ width: '100%' }}>
+              {action.fieldIds.length > 0 && (
+                <Flex flexWrap="wrap" gap="spacingXs">
+                  {action.fieldIds.map((fieldId) => (
+                    <Pill
+                      key={fieldId}
+                      label={getFieldName(fieldId)}
+                      onClose={() => handleRemoveField(fieldId)}
+                      onDrag={undefined}
+                    />
+                  ))}
+                </Flex>
+              )}
+              <Button
+                variant="secondary"
+                startIcon={<PlusIcon />}
+                onClick={handleOpenFieldModal}
+                isDisabled={disabled}>
+                {action.fieldIds.length === 0 ? 'Select Fields' : 'Edit Fields'}
+              </Button>
+            </Flex>
+          )}
         </FormControl>
 
         {isSetOptionsAction && action.fieldIds.length > 0 && (
@@ -333,66 +351,44 @@ export const ActionEditor: React.FC<ActionEditorProps> = ({
         />
       </Flex>
 
-      {/* Field Selection Modal */}
-      <Modal onClose={() => setIsFieldModalOpen(false)} isShown={isFieldModalOpen}>
-        {() => (
-          <>
-            <Modal.Header
-              title={isSetOptionsAction ? 'Select Reference Field' : 'Select Fields'}
-              onClose={() => setIsFieldModalOpen(false)}
-            />
-            <Modal.Content>
-              <Stack flexDirection="column" spacing="spacingS">
-                {isSetOptionsAction ? (
-                  <>
-                    <Text>Select a reference field to set allowed entry options for:</Text>
-                    {referenceFields.length === 0 ? (
-                      <Note variant="warning">No reference fields found in this content type.</Note>
-                    ) : (
-                      referenceFields.map((field) => (
-                        <Checkbox
-                          key={field.id}
-                          id={`field-${field.id}`}
-                          isChecked={selectedFieldIds.has(field.id)}
-                          onChange={() => handleToggleField(field.id)}>
-                          {field.name} ({field.type})
-                        </Checkbox>
-                      ))
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <Text>
-                      Select the fields that should be{' '}
-                      {action.type === ActionType.SHOW ? 'shown' : 'hidden'}:
-                    </Text>
-                    {availableFields.map((field) => (
-                      <Checkbox
-                        key={field.id}
-                        id={`field-${field.id}`}
-                        isChecked={selectedFieldIds.has(field.id)}
-                        onChange={() => handleToggleField(field.id)}>
-                        {field.name} ({field.type})
-                      </Checkbox>
-                    ))}
-                  </>
-                )}
-              </Stack>
-            </Modal.Content>
-            <Modal.Controls>
-              <Button variant="transparent" onClick={() => setIsFieldModalOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                variant="positive"
-                onClick={handleSaveFieldSelection}
-                isDisabled={selectedFieldIds.size === 0}>
-                Save Selection
-              </Button>
-            </Modal.Controls>
-          </>
-        )}
-      </Modal>
+      {/* Field Selection Modal (only for SHOW/HIDE actions) */}
+      {!isSetOptionsAction && (
+        <Modal onClose={() => setIsFieldModalOpen(false)} isShown={isFieldModalOpen}>
+          {() => (
+            <>
+              <Modal.Header title="Select Fields" onClose={() => setIsFieldModalOpen(false)} />
+              <Modal.Content>
+                <Stack flexDirection="column" spacing="spacingS">
+                  <Text>
+                    Select the fields that should be{' '}
+                    {action.type === ActionType.SHOW ? 'shown' : 'hidden'}:
+                  </Text>
+                  {availableFields.map((field) => (
+                    <Checkbox
+                      key={field.id}
+                      id={`field-${field.id}`}
+                      isChecked={selectedFieldIds.has(field.id)}
+                      onChange={() => handleToggleField(field.id)}>
+                      {field.name} ({field.type})
+                    </Checkbox>
+                  ))}
+                </Stack>
+              </Modal.Content>
+              <Modal.Controls>
+                <Button variant="transparent" onClick={() => setIsFieldModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="positive"
+                  onClick={handleSaveFieldSelection}
+                  isDisabled={selectedFieldIds.size === 0}>
+                  Save Selection
+                </Button>
+              </Modal.Controls>
+            </>
+          )}
+        </Modal>
+      )}
 
       {/* Entry Selection Modal (for SET_OPTIONS action) */}
       <Modal onClose={() => setIsEntryModalOpen(false)} isShown={isEntryModalOpen} size="large">
