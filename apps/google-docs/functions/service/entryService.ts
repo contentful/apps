@@ -1,6 +1,6 @@
 import { PlainClientAPI, EntryProps, ContentTypeProps } from 'contentful-management';
 import { EntryToCreate } from '../agents/documentParserAgent/schema';
-import { markdownToRichText } from './utils/richtext';
+import { MarkdownParser } from './utils/richtext';
 
 /**
  * INTEG-3264: Service for creating entries in Contentful using the Contentful Management API
@@ -17,6 +17,9 @@ export interface EntryCreationResult {
     details?: any;
   }>;
 }
+
+// Precompiled regex for markdown image tokens: ![alt](url)
+const IMAGE_TOKEN_REGEX = /!\[[^\]]*?\]\(([\s\S]*?)\)/g;
 
 async function createAndPublishDevAssetFromUrl(
   cma: PlainClientAPI,
@@ -48,6 +51,7 @@ async function createAndPublishDevAssetFromUrl(
     // Poll briefly until the file URL exists or timeout (~2s)
     const start = Date.now();
     let current = processed;
+    let attempt = 0;
     while (Date.now() - start < 2000) {
       try {
         const fetched = await cma.asset.get({
@@ -60,9 +64,20 @@ async function createAndPublishDevAssetFromUrl(
           current = fetched;
           break;
         }
-      } catch {
-        // ignore and retry
+      } catch (err) {
+        // Best-effort: log and retry
+        console.warn('Polling asset for file URL failed; will retry', {
+          assetId: current.sys.id,
+          attempt,
+          error:
+            err instanceof Error
+              ? err.message
+              : typeof err === 'string'
+              ? err
+              : JSON.stringify(err),
+        });
       }
+      attempt += 1;
       await new Promise((r) => setTimeout(r, 200));
     }
     try {
@@ -71,10 +86,19 @@ async function createAndPublishDevAssetFromUrl(
         current
       );
       return published;
-    } catch {
+    } catch (err) {
+      console.error('Asset publish failed; returning processed (unpublished) asset', {
+        assetId: current.sys.id,
+        error:
+          err instanceof Error ? err.message : typeof err === 'string' ? err : JSON.stringify(err),
+      });
       return current;
     }
-  } catch {
+  } catch (err) {
+    console.error('Asset processing failed; returning original draft asset', {
+      error:
+        err instanceof Error ? err.message : typeof err === 'string' ? err : JSON.stringify(err),
+    });
     return asset;
   }
 }
@@ -102,7 +126,22 @@ function transformFieldsForContentType(
     for (const [locale, value] of Object.entries(localizedValue)) {
       if (def.type === 'RichText') {
         if (typeof value === 'string') {
-          perLocale[locale] = markdownToRichText(value, urlToAssetId);
+          const parser = new MarkdownParser(urlToAssetId);
+          const contentNodes = parser.parse(value);
+          perLocale[locale] = {
+            nodeType: 'document',
+            data: {},
+            content:
+              contentNodes && contentNodes.length
+                ? contentNodes
+                : [
+                    {
+                      nodeType: 'paragraph',
+                      data: {},
+                      content: [{ nodeType: 'text', value: '', marks: [], data: {} }],
+                    },
+                  ],
+          };
         } else {
           // Pass through if already Rich Text-shaped or unknown type
           perLocale[locale] = value;
@@ -152,11 +191,10 @@ export async function createEntries(
           if (!originalLocalized) continue;
           for (const originalVal of Object.values(originalLocalized)) {
             if (typeof originalVal !== 'string') continue;
-            const regex = /!\[[^\]]*?\]\(([\s\S]*?)\)/g;
-            let m: RegExpExecArray | null;
-            while ((m = regex.exec(originalVal)) !== null) {
-              const rawUrl = m[1];
-              const normalizedUrl = String(rawUrl).replace(/\s+/g, '');
+            // Reset regex state before each new string scan
+            IMAGE_TOKEN_REGEX.lastIndex = 0;
+            for (const match of (originalVal as string).matchAll(IMAGE_TOKEN_REGEX)) {
+              const normalizedUrl = String(match[1]).replace(/\s+/g, '');
               urls.push(normalizedUrl);
             }
           }

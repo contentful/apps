@@ -121,6 +121,9 @@ COMMON MISTAKES TO AVOID:
 ❌ WRONG: { "sections": { "en-US": [{ "title": "...", "content": "..." }] } }
 ✓ CORRECT: Skip "sections" field entirely if it's an Array of Links
 ✓ CORRECT: { "tags": { "en-US": ["tag1", "tag2", "tag3"] } } (if tags is Array of Symbol)
+Making up text or structure that is not present in the document, which is forbidden.
+Do not add styling or formatting that is not present in the document.
+Example: If the document has the word "bold" in it, do not invent bold text in your output.
 
 EXTRACTION GUIDELINES:
 *** BE VERY CAREFUL TO NOT INVENT TEXT OR STRUCTURE THAT IS NOT PRESENT IN THE DOCUMENT ***
