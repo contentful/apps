@@ -59,7 +59,6 @@ export async function createDocument(config: DocumentParserConfig): Promise<Fina
   return finalResult;
 }
 
-// These should be improved by having an example prompt on top of this zero shot prompt
 function buildSystemPrompt(): string {
   return `You are an expert content extraction AI that analyzes documents and extracts structured content based on Contentful content type definitions.
 
@@ -82,10 +81,32 @@ CRITICAL FIELD TYPE RULES - READ CAREFULLY:
 - Array (of Link): ❌ NEVER USE - these reference other entries, skip entirely
   Example: DO NOT create [{ title: "x", content: "y" }] - this will FAIL
 - Link/Reference: ❌ NEVER USE - skip these fields (they reference other entries)
+- RichText: Use ONLY the annotation tokens present in the provided document text. The extractor has already encoded Google Docs styles as simple tags:
+  - <B>...</B> = bold, <I>...</I> = italic, <U>...</U> = underline (these may be nested for combinations)
+  - <A href="URL">text</A> = hyperlink to URL
+  - <CODE>...</CODE> = inline code (monospace)
+  - <HR/> on its own line = horizontal rule
+  - ![alt](URL) = image reference (do not modify)
+  Do NOT introduce additional Markdown emphasis (** * _). If the source text contains the words "bold", "italic", "underline" as plain words, leave them unstyled.
+
+STRICT TOKEN POLICY (MANDATORY):
+- Treat <B>, <I>, <U>, <A>, <CODE>, <HR/>, and ![...](...) tokens as immutable markers of styles/assets that already exist in the source.
+- NEVER add new style tokens that are not already present in the provided document text.
+- NEVER remove, move, or re-wrap existing tokens around different text.
+- If a sentence has no tokens, output it as plain text (no emphasis, no markdown, no HTML).
+- The literal words "bold", "italic", and "underline" MUST remain plain unless they are already wrapped by tokens in the provided text.
+- If you are unsure about styling, prefer plain text.
+
+COPY-PASTE EXTRACTION METHOD (NON-NEGOTIABLE):
+- When setting Text or RichText fields, copy exact substrings from the provided document content.
+- Allowed transformations ONLY: trim leading/trailing whitespace; collapse sequences of more than one space into a single space; normalize Windows/Mac newlines to "\n".
+- Disallowed: paraphrasing, reordering, inventing tokens, adding emphasis, or inserting example markup.
+- Before returning, for every RichText string you produced, VERIFY that each occurrence of <B>, <I>, <U>, <A>, <CODE>, <HR/>, and ![...](...) also appears in the same order in the provided document content. If any token you added does not exist in the source, REMOVE it and return the plain text instead.
 - RichText: Provide a Markdown string preserving inline styles:
   - Bold: **bold**
   - Italic: *italic*
   - Underline: _underline_ (or <u>underline</u>)
+  - Images: include literal markdown tokens ![alt](url) when present in the document
 
 FIELD FORMAT RULES:
 - Each entry must have a contentTypeId that matches one of the provided content types
@@ -100,12 +121,18 @@ COMMON MISTAKES TO AVOID:
 ❌ WRONG: { "sections": { "en-US": [{ "title": "...", "content": "..." }] } }
 ✓ CORRECT: Skip "sections" field entirely if it's an Array of Links
 ✓ CORRECT: { "tags": { "en-US": ["tag1", "tag2", "tag3"] } } (if tags is Array of Symbol)
+Making up text or structure that is not present in the document, which is forbidden.
+Do not add styling or formatting that is not present in the document.
+Example: If the document has the word "bold" in it, do not invent bold text in your output.
 
 EXTRACTION GUIDELINES:
+*** BE VERY CAREFUL TO NOT INVENT TEXT OR STRUCTURE THAT IS NOT PRESENT IN THE DOCUMENT ***
+EXAMPLE: If the document has the word "bold" in it, do not invent bold text in your output
 - Extract all relevant content from the document - don't skip entries
 - If a required field cannot be populated from the document, use a sensible default or placeholder
 - Be thorough and extract as many valid entries as you can find
-- Focus on simple fields: Symbol, Text, Number, Boolean, Date`;
+- Focus on simple fields: Symbol, Text, Number, Boolean, Date
+- IMPORTANT FOR IMAGES: If the document content contains markdown image tokens like ![image](URL), include them verbatim in the most relevant RichText field so downstream processing can embed assets. Do NOT rewrite or drop these tokens.`;
 }
 
 function buildExtractionPrompt({
@@ -274,6 +301,8 @@ GOOGLE DOCS JSON DOCUMENT:
 ${JSON.stringify(document, null, 2)}
 
 CRITICAL INSTRUCTIONS:
+*** BE VERY CAREFUL TO NOT INVENT TEXT OR STRUCTURE THAT IS NOT PRESENT IN THE DOCUMENT ***
+EXAMPLE: If the document has the word "bold" in it, do not invent bold text in your output
 1. **PARSE THE GOOGLE DOCS JSON** - Use the parsing guide above to extract text and structure
 2. **SKIP ALL FIELDS WHERE "SKIP": true** - Do NOT include these fields in your output
 3. Look at each field definition - if it has "SKIP": true, completely ignore that field
@@ -285,7 +314,14 @@ CRITICAL INSTRUCTIONS:
 9. Match field types exactly:
    - Symbol: string (max 256 chars)
    - Text: string (any length)
-   - RichText: string in Markdown (convert Google Docs formatting using the guide above)
+   - RichText: string using ONLY the provided annotation tokens (<B>, <I>, <U>, <A href="...">text</A>, <CODE>, <HR/>, and ![alt](URL)). Do not invent Markdown emphasis.
+
+VALIDATION CHECKLIST BEFORE YOU RETURN:
+- [ ] I did not add any <B>/<I>/<U>/<A>/<CODE>/<HR/>/![...](...) tokens that were not present in the provided document content.
+- [ ] I did not wrap the literal words "bold", "italic", or "underline" with any style unless they were already wrapped in the provided text.
+- [ ] Paragraphs without tokens are left as plain text.
+- [ ] I preserved tokens exactly as given (content and order). 
+ - [ ] Every RichText value is an exact substring (after trivial whitespace normalization) of the provided document content.
    - Number: number
    - Boolean: boolean
    - Date: ISO 8601 string
