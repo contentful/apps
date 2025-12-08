@@ -29,6 +29,7 @@ export async function analyzeContentTypes({
     apiKey: openAiApiKey,
   });
 
+  console.log('Content Type Parser Agent content types Input:', contentTypes);
   const prompt = buildAnalysisPrompt(contentTypes);
 
   const result = await generateObject({
@@ -40,6 +41,8 @@ export async function analyzeContentTypes({
   });
 
   const finalAnalysis = result.object as FinalContentTypesResultSummary;
+  console.log('Content Type Parser Agent Result:', finalAnalysis);
+
   return finalAnalysis;
 }
 
