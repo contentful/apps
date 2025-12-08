@@ -11,7 +11,6 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import { ContentTypeProps } from 'contentful-management';
-import { fetchGoogleDoc } from '../../service/googleDriveService';
 import { FinalEntriesResultSchema, FinalEntriesResult } from './schema';
 
 /**
@@ -19,16 +18,17 @@ import { FinalEntriesResultSchema, FinalEntriesResult } from './schema';
  */
 export interface DocumentParserConfig {
   openAiApiKey: string;
-  googleDocUrl: string;
+  // TODO: Update this when we have oauth working
+  document: unknown; // JSON document from Google Docs API or test data
   contentTypes: ContentTypeProps[];
   locale?: string;
 }
 
 /**
- * AI Agent that parses a Google Doc and extracts structured entries
+ * AI Agent that parses a Google Doc JSON and extracts structured entries
  * based on provided Contentful content type definitions.
  *
- * @param config - Parser configuration including API key, document URL, and content types
+ * @param config - Parser configuration including API key, document JSON, and content types
  * @returns Promise resolving to entries ready for CMA client
  */
 export async function createDocument(config: DocumentParserConfig): Promise<FinalEntriesResult> {
@@ -37,15 +37,14 @@ export async function createDocument(config: DocumentParserConfig): Promise<Fina
   const modelVersion = 'gpt-4o';
   const temperature = 0.3;
 
-  const { googleDocUrl, openAiApiKey, contentTypes, locale = 'en-US' } = config;
-  const googleDocContent = await fetchGoogleDoc(googleDocUrl);
+  const { document, openAiApiKey, contentTypes, locale = 'en-US' } = config;
 
   const openaiClient = createOpenAI({
     apiKey: openAiApiKey,
   });
 
-  const prompt = buildExtractionPrompt({ contentTypes, googleDocContent, locale });
-
+  console.log('Document Parser Agent document content Input:', document);
+  const prompt = buildExtractionPrompt({ contentTypes, document, locale });
   const result = await generateObject({
     model: openaiClient(modelVersion),
     schema: FinalEntriesResultSchema,
@@ -54,7 +53,10 @@ export async function createDocument(config: DocumentParserConfig): Promise<Fina
     prompt,
   });
 
-  return result.object as FinalEntriesResult;
+  const finalResult = result.object as FinalEntriesResult;
+  console.log('Document Parser Agent Result:', JSON.stringify(result, null, 2));
+
+  return finalResult;
 }
 
 // These should be improved by having an example prompt on top of this zero shot prompt
@@ -80,7 +82,10 @@ CRITICAL FIELD TYPE RULES - READ CAREFULLY:
 - Array (of Link): ❌ NEVER USE - these reference other entries, skip entirely
   Example: DO NOT create [{ title: "x", content: "y" }] - this will FAIL
 - Link/Reference: ❌ NEVER USE - skip these fields (they reference other entries)
-- RichText: ❌ NEVER USE - complex format not supported
+- RichText: Provide a Markdown string preserving inline styles:
+  - Bold: **bold**
+  - Italic: *italic*
+  - Underline: _underline_ (or <u>underline</u>)
 
 FIELD FORMAT RULES:
 - Each entry must have a contentTypeId that matches one of the provided content types
@@ -105,11 +110,11 @@ EXTRACTION GUIDELINES:
 
 function buildExtractionPrompt({
   contentTypes,
-  googleDocContent,
+  document,
   locale,
 }: {
   contentTypes: ContentTypeProps[];
-  googleDocContent: string;
+  document: unknown;
   locale: string;
 }): string {
   const contentTypeList = contentTypes.map((ct) => `${ct.name} (ID: ${ct.sys.id})`).join(', ');
@@ -121,8 +126,7 @@ function buildExtractionPrompt({
       ct.fields?.map((field) => {
         const isLinkType = field.type === 'Link';
         const isArrayOfLinks = field.type === 'Array' && (field.items as any)?.type === 'Link';
-        const isRichText = field.type === 'RichText';
-        const shouldSkip = isLinkType || isArrayOfLinks || isRichText;
+        const shouldSkip = isLinkType || isArrayOfLinks;
 
         return {
           id: field.id,
@@ -137,9 +141,7 @@ function buildExtractionPrompt({
           SKIP_REASON: shouldSkip
             ? isLinkType
               ? 'Link/Reference field - cannot be populated without entry IDs'
-              : isArrayOfLinks
-              ? 'Array of Links - cannot be populated without entry IDs'
-              : 'RichText field - complex format not supported'
+              : 'Array of Links - cannot be populated without entry IDs'
             : undefined,
         };
       }) || [];
@@ -152,7 +154,7 @@ function buildExtractionPrompt({
     };
   });
 
-  return `Extract structured entries from the following document based on the provided Contentful content type definitions.
+  return `Extract structured entries from the following Google Docs JSON document based on the provided Contentful content type definitions.
 
 AVAILABLE CONTENT TYPES: ${contentTypeList}
 TOTAL CONTENT TYPES: ${contentTypes.length}
@@ -162,28 +164,143 @@ LOCALE TO USE: ${locale}
 CONTENT TYPE DEFINITIONS:
 ${JSON.stringify(contentTypeDefinitions, null, 2)}
 
-DOCUMENT CONTENT:
-${googleDocContent}
+=== GOOGLE DOCS JSON PARSING GUIDE ===
+
+The document is in Google Docs API JSON format. Here's how to interpret the structure:
+
+**DOCUMENT STRUCTURE:**
+- \`documentId\`: Unique identifier for the document
+- \`tabs[].documentTab.body.content[]\`: Array of content elements (paragraphs, tables, sections)
+- \`tabs[].documentTab.inlineObjects\`: Object mapping inlineObjectId → image/embedded object data
+- \`tabs[].documentTab.lists\`: Object mapping listId → list configuration (bullet/numbered)
+
+**CONTENT ELEMENT TYPES:**
+
+1. **Paragraphs** - Main text content:
+   \`\`\`
+   {
+     "paragraph": {
+       "elements": [{ "textRun": { "content": "text\\n", "textStyle": {...} } }],
+       "paragraphStyle": { "namedStyleType": "HEADING_1" | "HEADING_2" | "NORMAL_TEXT" | ... },
+       "bullet": { "listId": "kix.xxx", "nestingLevel": 0 }  // if it's a list item
+     }
+   }
+   \`\`\`
+   - \`namedStyleType\`: HEADING_1, HEADING_2, HEADING_3, HEADING_4, HEADING_5, HEADING_6, NORMAL_TEXT, TITLE, SUBTITLE
+   - \`bullet.listId\`: References list definition in \`lists\` object (indicates bullet/numbered list)
+   - \`bullet.nestingLevel\`: Indentation level (0 = top level)
+
+2. **Text Runs** - Inline text with formatting:
+   \`\`\`
+   {
+     "textRun": {
+       "content": "the actual text content",
+       "textStyle": {
+         "bold": true/false,
+         "italic": true/false,
+         "underline": true/false,
+         "strikethrough": true/false,
+         "link": { "url": "https://..." },
+         "foregroundColor": { "color": { "rgbColor": { "red": 0-1, "green": 0-1, "blue": 0-1 } } },
+         "fontSize": { "magnitude": 11, "unit": "PT" }
+       }
+     }
+   }
+   \`\`\`
+
+3. **Inline Object Elements** - References to images:
+   \`\`\`
+   { "inlineObjectElement": { "inlineObjectId": "kix.xxx" } }
+   \`\`\`
+   - Look up the actual image in \`inlineObjects["kix.xxx"]\`
+   - Image URL is at: \`inlineObjects[id].inlineObjectProperties.embeddedObject.imageProperties.contentUri\`
+
+4. **Rich Links** - Embedded links with previews (YouTube, etc.):
+   \`\`\`
+   { "richLink": { "richLinkId": "kix.xxx", "richLinkProperties": { "title": "...", "uri": "..." } } }
+   \`\`\`
+
+5. **Tables** - Structured tabular data:
+   \`\`\`
+   {
+     "table": {
+       "rows": number,
+       "columns": number,
+       "tableRows": [{
+         "tableCells": [{
+           "content": [/* paragraphs */]
+         }]
+       }]
+     }
+   }
+   \`\`\`
+   - Each cell contains an array of paragraph elements
+   - First row is typically headers
+
+6. **Lists** - Bullet and numbered lists:
+   - Paragraphs with \`bullet\` property are list items
+   - \`bullet.listId\` references the list definition in \`lists\`
+   - Check \`lists[listId].listProperties.nestingLevels[0].glyphSymbol\` for bullet character
+   - Check \`lists[listId].listProperties.nestingLevels[0].glyphType\` for numbered list type (DECIMAL, ALPHA, ROMAN)
+
+**EXTRACTING TEXT CONTENT:**
+1. Navigate to \`tabs[0].documentTab.body.content\`
+2. For each element, check if it has \`paragraph\`, \`table\`, or \`sectionBreak\`
+3. For paragraphs:
+   - Get heading level from \`paragraphStyle.namedStyleType\`
+   - Concatenate all \`elements[].textRun.content\` values
+   - Apply formatting based on \`textStyle\` (bold → **, italic → *, underline → _)
+   - Check for \`bullet\` to identify list items
+4. For tables:
+   - Iterate through \`tableRows[].tableCells[].content\` to get cell text
+   - Use first row as headers if appropriate
+
+**FORMATTING CONVERSION:**
+When extracting RichText fields, convert Google Docs formatting to Markdown:
+- textStyle.bold: true → **text**
+- textStyle.italic: true → *text*
+- textStyle.underline: true → _text_ or <u>text</u>
+- textStyle.strikethrough: true → ~~text~~
+- textStyle.link.url → [text](url)
+- HEADING_1 → # heading
+- HEADING_2 → ## heading
+- HEADING_3 → ### heading
+- Bullet lists → - item
+- Numbered lists → 1. item
+
+=== END PARSING GUIDE ===
+
+GOOGLE DOCS JSON DOCUMENT:
+${JSON.stringify(document, null, 2)}
 
 CRITICAL INSTRUCTIONS:
-1. **SKIP ALL FIELDS WHERE "SKIP": true** - Do NOT include these fields in your output
-2. Look at each field definition - if it has "SKIP": true, completely ignore that field
-3. Only include fields where "SKIP" is false or not present
-4. Analyze the document and identify content that matches the provided content type structures
-5. Extract all relevant entries from the document
-6. For each entry, use the contentTypeId that best matches the content
-7. Format fields correctly: { "fieldId": { "${locale}": value } }
-8. Match field types exactly:
+1. **PARSE THE GOOGLE DOCS JSON** - Use the parsing guide above to extract text and structure
+2. **SKIP ALL FIELDS WHERE "SKIP": true** - Do NOT include these fields in your output
+3. Look at each field definition - if it has "SKIP": true, completely ignore that field
+4. Only include fields where "SKIP" is false or not present
+5. Analyze the document and identify content that matches the provided content type structures
+6. Extract all relevant entries from the document
+7. For each entry, use the contentTypeId that best matches the content
+8. Format fields correctly: { "fieldId": { "${locale}": value } }
+9. Match field types exactly:
    - Symbol: string (max 256 chars)
    - Text: string (any length)
+   - RichText: string in Markdown (convert Google Docs formatting using the guide above)
    - Number: number
    - Boolean: boolean
    - Date: ISO 8601 string
    - Array: array of primitives (strings or numbers ONLY)
    - Object: JSON object
-9. For required fields (required: true) that are NOT marked SKIP: true, ensure they are populated
-10. If you cannot populate a required field from the document, use a sensible default or placeholder
-11. Be thorough - extract all valid content from the document
+10. For required fields (required: true) that are NOT marked SKIP: true, ensure they are populated
+11. If you cannot populate a required field from the document, use a sensible default or placeholder
+12. Be thorough - extract all valid content from the document
+
+**CONTENT EXTRACTION TIPS:**
+- Look for HEADING_1 or HEADING_2 paragraphs as entry titles
+- Normal paragraphs following headings are typically body content
+- Tables may contain structured data that maps to entry fields
+- Lists can be extracted as array fields (if type is Array of Symbol/Text)
+- Image URLs from inlineObjects can populate URL/Symbol fields
 
 Return the extracted entries in the specified JSON schema format.`;
 }

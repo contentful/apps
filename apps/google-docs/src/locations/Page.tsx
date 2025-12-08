@@ -14,21 +14,17 @@ const Page = () => {
 
   const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
   const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
-  const [googleDocUrl, setGoogleDocUrl] = useState<string>('');
+  const [document, setDocument] = useState<{ title: string; data: unknown } | null>(null);
   const [contentTypeIds, setContentTypeIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
 
-  const handleGetStarted = () => {
-    setIsUploadModalOpen(true);
-  };
-
   const handleUploadModalClose = (docUrl?: string) => {
     setIsUploadModalOpen(false);
     if (docUrl) {
-      setGoogleDocUrl(docUrl);
+      setDocument({ title: 'Document', data: docUrl });
       // Automatically open content type picker after document is selected
       setIsContentTypePickerOpen(true);
     }
@@ -59,8 +55,8 @@ const Page = () => {
       return;
     }
 
-    if (!googleDocUrl.trim()) {
-      setErrorMessage('Please enter a Google Doc URL');
+    if (!document || !document.data) {
+      setErrorMessage('Please select a document');
       setSuccessMessage(null);
       return;
     }
@@ -77,11 +73,7 @@ const Page = () => {
     setResult(null);
 
     try {
-      const response = await createEntriesFromDocumentAction(
-        sdk,
-        selectedContentTypeIds,
-        googleDocUrl
-      );
+      const response = await createEntriesFromDocumentAction(sdk, contentTypeIds, document.data);
       setResult(response);
       setSuccessMessage('Successfully created entries from document!');
     } catch (error) {
@@ -89,6 +81,28 @@ const Page = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSuccess = (title: string, documentJson: string | null) => {
+    if (!documentJson) {
+      setErrorMessage('Failed to load document data');
+      return;
+    }
+    try {
+      const parsed = JSON.parse(documentJson);
+      setDocument({ title, data: parsed });
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage('Failed to parse document JSON');
+    }
+  };
+
+  const handleError = (message: string) => {
+    setErrorMessage(message);
+  };
+
+  const handleGetStarted = () => {
+    setIsUploadModalOpen(true);
   };
 
   return (
