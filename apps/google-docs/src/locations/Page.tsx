@@ -15,17 +15,22 @@ const Page = () => {
   const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
   const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
-  const [document, setDocument] = useState<{ title: string; data: unknown } | null>(null);
+  const [googleDocUrl, setGoogleDocUrl] = useState<string>('');
   const [contentTypeIds, setContentTypeIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
 
+  const handleGetStarted = () => {
+    setHasStarted(true);
+    setIsUploadModalOpen(true);
+  };
+
   const handleUploadModalClose = (docUrl?: string) => {
     setIsUploadModalOpen(false);
     if (docUrl) {
-      setDocument({ title: 'Document', data: docUrl });
+      setGoogleDocUrl(docUrl);
       // Automatically open content type picker after document is selected
       setIsContentTypePickerOpen(true);
     }
@@ -56,7 +61,7 @@ const Page = () => {
       return;
     }
 
-    if (!document || !document.data) {
+    if (!googleDocUrl || !googleDocUrl.trim()) {
       setErrorMessage('Please select a document');
       setSuccessMessage(null);
       return;
@@ -74,7 +79,11 @@ const Page = () => {
     setResult(null);
 
     try {
-      const response = await createEntriesFromDocumentAction(sdk, contentTypeIds, document.data);
+      const response = await createEntriesFromDocumentAction(
+        sdk,
+        selectedContentTypeIds,
+        googleDocUrl
+      );
       setResult(response);
       setSuccessMessage('Successfully created entries from document!');
     } catch (error) {
@@ -82,11 +91,6 @@ const Page = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleGetStarted = () => {
-    setHasStarted(true);
-    setIsUploadModalOpen(true);
   };
 
   // Show getting started page if not started yet
