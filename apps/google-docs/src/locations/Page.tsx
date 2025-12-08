@@ -12,6 +12,7 @@ import { createEntriesFromDocumentAction } from '../utils/appFunctionUtils';
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
 
+  const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
   const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
   const [document, setDocument] = useState<{ title: string; data: unknown } | null>(null);
@@ -83,32 +84,18 @@ const Page = () => {
     }
   };
 
-  const handleSuccess = (title: string, documentJson: string | null) => {
-    if (!documentJson) {
-      setErrorMessage('Failed to load document data');
-      return;
-    }
-    try {
-      const parsed = JSON.parse(documentJson);
-      setDocument({ title, data: parsed });
-      setErrorMessage(null);
-    } catch (error) {
-      setErrorMessage('Failed to parse document JSON');
-    }
-  };
-
-  const handleError = (message: string) => {
-    setErrorMessage(message);
-  };
-
   const handleGetStarted = () => {
+    setHasStarted(true);
     setIsUploadModalOpen(true);
   };
 
+  // Show getting started page if not started yet
+  if (!hasStarted) {
+    return <GettingStartedPage onSelectFile={handleGetStarted} />;
+  }
+
   return (
     <>
-      <GettingStartedPage onSelectFile={handleGetStarted} />
-
       <UploadDocumentModal sdk={sdk} isOpen={isUploadModalOpen} onClose={handleUploadModalClose} />
 
       <ContentTypePickerModal
