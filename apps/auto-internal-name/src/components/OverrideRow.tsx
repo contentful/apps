@@ -31,7 +31,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
   onOverrideDelete,
 }: OverrideRowProps) => {
   const [filteredContentTypes, setFilteredContentTypes] = useState<ContentTypeProps[]>([]);
-  const [filteredFields, setfilteredFields] = useState<AutocompleteItem[]>([]);
+  const [filteredFields, setFilteredFields] = useState<AutocompleteItem[]>([]);
   const [selectedContentType, setSelectedContentType] =
     useState<AutocompleteItem>(EMPTY_AUTOCOMPLETE_ITEM);
   const [selectedField, setSelectedField] = useState<AutocompleteItem>(EMPTY_AUTOCOMPLETE_ITEM);
@@ -67,7 +67,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
 
     setFilteredContentTypes(contentTypesWithoutDuplicates);
     if (selectedContentType?.id) {
-      setfilteredFields(getFieldsFrom(contentTypes, selectedContentType.id));
+      setFilteredFields(getFieldsFrom(contentTypes, selectedContentType.id));
     }
   }, [contentTypes, selectedContentType, overrides]);
 
@@ -106,7 +106,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
       onOverrideChange(overrideItem, undefined, '');
 
       if (selectedContentType) {
-        setfilteredFields(getFieldsFrom(contentTypes, selectedContentType.id));
+        setFilteredFields(getFieldsFrom(contentTypes, selectedContentType.id));
         setSelectedField(EMPTY_AUTOCOMPLETE_ITEM);
       }
       return;
@@ -115,7 +115,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
     const fields = getFieldsFrom(contentTypes, overrideItem.contentTypeId);
 
     const newFilteredItems = filterItemsByName(fields, name);
-    setfilteredFields(newFilteredItems as AutocompleteItem[]);
+    setFilteredFields(newFilteredItems as AutocompleteItem[]);
   };
 
   const handleFieldItemSelection = (value: AutocompleteItem) => {
@@ -134,7 +134,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
     <>
       <Flex flexDirection="row" alignItems="space-evenly" gap="spacingS" key={overrideItem.id}>
         <FormControl
-          id="contentTypeId"
+          id={`${overrideItem.id}-content-type`}
           className={styles.formControl}
           isInvalid={overrideIsInvalid?.isContentTypeMissing}
           isRequired>
@@ -149,13 +149,14 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
             selectedItem={selectedContentType}
             onSelectItem={(item: AutocompleteItem) => handleCTItemSelection(item)}
             placeholder="Content type name"
+            listWidth="full"
           />
           {overrideIsInvalid?.isContentTypeMissing && (
             <FormControl.ValidationMessage>Content type is required</FormControl.ValidationMessage>
           )}
         </FormControl>
         <FormControl
-          id="fieldName"
+          id={`${overrideItem.id}-field-name`}
           className={styles.formControl}
           isInvalid={overrideIsInvalid?.isFieldMissing}
           isRequired>
@@ -171,6 +172,7 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
             onInputValueChange={(name: string) => handleFieldInputChange(name)}
             onSelectItem={(item: AutocompleteItem) => handleFieldItemSelection(item)}
             placeholder="Field name"
+            listWidth="full"
           />
           {overrideIsInvalid?.isFieldMissing && (
             <FormControl.ValidationMessage>Field name is required</FormControl.ValidationMessage>

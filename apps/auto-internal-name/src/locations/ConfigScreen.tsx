@@ -20,6 +20,7 @@ import {
   AutocompleteItem,
 } from '../utils/types';
 import { getUniqueShortTextFields, normalizeString } from '../utils/override';
+import { ContentTypeProps } from 'contentful-management';
 
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
@@ -28,9 +29,9 @@ const ConfigScreen = () => {
     sourceFieldId: '',
     overrides: [],
   });
-
   const [isSourceFieldMissing, setIsSourceFieldMissing] = useState<boolean>(false);
   const [overridesAreInvalid, setOverridesAreInvalid] = useState<OverrideState>({});
+  const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [fields, setFields] = useState<AutocompleteItem[]>([]);
   const [filteredSourceFields, setFilteredSourceFields] = useState<AutocompleteItem[]>([]);
 
@@ -38,14 +39,14 @@ const ConfigScreen = () => {
     const currentState = await sdk.app.getCurrentState();
     setIsSourceFieldMissing(!parameters.sourceFieldId);
 
-    const overridesAreInvalid: OverrideState = {};
+    const newOverridesAreInvalid: OverrideState = {};
     parameters.overrides.forEach((override) => {
-      overridesAreInvalid[override.id] = {
+      newOverridesAreInvalid[override.id] = {
         isContentTypeMissing: !override.contentTypeId,
         isFieldMissing: !override.fieldId,
       };
     });
-    setOverridesAreInvalid(overridesAreInvalid);
+    setOverridesAreInvalid(newOverridesAreInvalid);
 
     const invalidOverrides = parameters.overrides.some(
       (override) => !override.contentTypeId || !override.fieldId
@@ -63,7 +64,7 @@ const ConfigScreen = () => {
   }, [parameters, sdk]);
 
   useEffect(() => {
-    sdk.app.onConfigure(() => onConfigure());
+    sdk.app.onConfigure(onConfigure);
   }, [sdk, onConfigure]);
 
   useEffect(() => {
@@ -74,12 +75,6 @@ const ConfigScreen = () => {
         setParameters(currentParameters);
       }
 
-      sdk.app.setReady();
-    })();
-  }, [sdk]);
-
-  useEffect(() => {
-    (async () => {
       try {
         const contentTypes = await sdk.cma.contentType.getMany({
           spaceId: sdk.ids.space,
@@ -88,18 +83,21 @@ const ConfigScreen = () => {
 
         const uniqueFields = getUniqueShortTextFields(contentTypes);
 
+        setContentTypes(contentTypes.items || []);
         setFields(uniqueFields);
         setFilteredSourceFields(uniqueFields);
-      } catch (error) {
-        console.warn('[Error] Failed to load source fields:', error);
+      } catch {
+        sdk.notifier.error('Failed to load source fields');
       }
+
+      sdk.app.setReady();
     })();
   }, [sdk]);
 
-  const handleOverridesChange = (updater: (prev: Override[]) => Override[]) => {
+  const handleOverridesChange = (newOverrides: Override[]) => {
     setParameters((prev) => ({
       ...prev,
-      overrides: updater(prev.overrides),
+      overrides: newOverrides,
     }));
   };
 
@@ -162,6 +160,7 @@ const ConfigScreen = () => {
             </FormControl.Label>
             <Autocomplete
               className={styles.autocomplete}
+              listWidth="full"
               selectedItem={
                 fields.find((field) => field.id === parameters.sourceFieldId)?.name || ''
               }
@@ -184,6 +183,7 @@ const ConfigScreen = () => {
         </Box>
 
         <OverrideSection
+          contentTypes={contentTypes}
           overrides={parameters.overrides}
           overridesAreInvalid={overridesAreInvalid}
           onOverridesChange={handleOverridesChange}

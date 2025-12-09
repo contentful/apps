@@ -1,6 +1,4 @@
-import { ConfigAppSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { ContentTypeProps } from 'contentful-management';
 import { Flex, Heading, Paragraph, Box, Button, Tooltip } from '@contentful/f36-components';
 import { PlusIcon } from '@contentful/f36-icons';
@@ -8,44 +6,28 @@ import OverrideRow from './OverrideRow';
 import { Override, OverrideState } from '../utils/types';
 
 type ContentTypeOverridesProps = {
+  contentTypes: ContentTypeProps[];
   overrides: Override[];
   overridesAreInvalid?: OverrideState;
-  onOverridesChange: (updater: (prev: Override[]) => Override[]) => void;
+  onOverridesChange: (newOverrides: Override[]) => void;
 };
 
 const OverrideSection: React.FC<ContentTypeOverridesProps> = ({
+  contentTypes,
   overrides,
   overridesAreInvalid,
   onOverridesChange,
 }: ContentTypeOverridesProps) => {
-  const sdk = useSDK<ConfigAppSDK>();
-  const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const contentTypesResponse = await sdk.cma.contentType.getMany({
-          spaceId: sdk.ids.space,
-          environmentId: sdk.ids.environment,
-        });
-
-        setContentTypes(contentTypesResponse.items);
-      } catch (error) {
-        console.warn('[Error] Failed to load content types:', error);
-      }
-    })();
-  }, [sdk]);
-
-  const maxOverridesReached = () => {
+  const maxOverridesReached = useMemo(() => {
     return (
       contentTypes.every((ct) => overrides.some((o) => o.contentTypeId === ct.sys.id)) ||
       contentTypes.length <= overrides.length
     );
-  };
+  }, [contentTypes, overrides]);
 
   const addOverride = () => {
-    onOverridesChange((prev) => [
-      ...prev,
+    onOverridesChange([
+      ...overrides,
       { id: window.crypto.randomUUID(), contentTypeId: '', fieldId: '' },
     ]);
   };
@@ -56,11 +38,11 @@ const OverrideSection: React.FC<ContentTypeOverridesProps> = ({
 
     const newOverride = { ...override, ...newContentTypeId, ...newFieldId };
 
-    onOverridesChange((prev) => prev.map((o) => (o.id === newOverride.id ? newOverride : o)));
+    onOverridesChange(overrides.map((o) => (o.id === newOverride.id ? newOverride : o)));
   };
 
   const handleOverrideDelete = (overrideId: string) => {
-    onOverridesChange((prev) => prev.filter((o) => o.id !== overrideId));
+    onOverridesChange(overrides.filter((o) => o.id !== overrideId));
   };
 
   return (
@@ -87,11 +69,11 @@ const OverrideSection: React.FC<ContentTypeOverridesProps> = ({
         <Tooltip
           placement="right"
           id="tooltip-1"
-          content={maxOverridesReached() ? 'No more content types available.' : undefined}>
+          content={maxOverridesReached ? 'No more content types available.' : undefined}>
           <Button
             aria-label="Add override"
             startIcon={<PlusIcon />}
-            isDisabled={maxOverridesReached()}
+            isDisabled={maxOverridesReached}
             onClick={addOverride}>
             Add override
           </Button>

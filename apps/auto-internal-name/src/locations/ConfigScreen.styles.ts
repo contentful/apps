@@ -14,5 +14,8 @@ export const styles = {
       display: 'flex',
       alignItems: 'center',
     },
+    '& [role="option"]': {
+      padding: '5px 8px',
+    },
   }),
 };
