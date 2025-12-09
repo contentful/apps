@@ -5,6 +5,7 @@ import { css } from 'emotion';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 import { PermissionsSection } from '../components/access-config';
 import { usePermissions } from '../hooks/usePermissions';
+import { ConfigHeader } from '../components/form-header';
 
 const ConfigScreen = () => {
   const [expandedAccordions, setExpandedAccordions] = useState({
@@ -104,8 +105,7 @@ const ConfigScreen = () => {
       alignItems="flex-start"
       spacing="spacingXl"
       style={{ maxWidth: '720px', margin: '0 auto', padding: '24px' }}>
-      <Heading>App Config</Heading>
-      <Paragraph>Contentful Remote MCP (Public Alpha)</Paragraph>
+      <ConfigHeader />
       <PermissionsSection
         contentLifecyclePermissions={contentLifecyclePermissions}
         otherFeaturesPermissions={otherFeaturesPermissions}
