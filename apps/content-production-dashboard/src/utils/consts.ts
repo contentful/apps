@@ -3,9 +3,3 @@ export const VALIDATION_RANGES = {
   recentlyPublishedDays: { min: 1, max: 30 },
   timeToPublishDays: { min: 7, max: 90 },
 };
-
-export const DEFAULT_TIME_RANGE = {
-  all: 'All time',
-  year: 'Past year',
-  sixMonths: 'Last 6 months',
-};
