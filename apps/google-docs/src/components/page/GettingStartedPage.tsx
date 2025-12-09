@@ -1,4 +1,12 @@
-import { Box, Button, Heading, Paragraph, Card, Layout, Flex } from '@contentful/f36-components';
+import {
+  Box,
+  Button,
+  Heading,
+  Paragraph,
+  Card,
+  Layout,
+  Flex,
+} from '@contentful/f36-components';
 import { ArrowRightIcon } from '@contentful/f36-icons';
 
 interface GettingStartedPageProps {
@@ -21,7 +29,10 @@ export const GettingStartedPage = ({ onSelectFile }: GettingStartedPageProps) =>
                 </Paragraph>
               </Flex>
 
-              <Button variant="primary" onClick={onSelectFile} endIcon={<ArrowRightIcon />}>
+              <Button
+                variant="primary"
+                onClick={onSelectFile}
+                endIcon={<ArrowRightIcon />}>
                 Select your file
               </Button>
             </Flex>

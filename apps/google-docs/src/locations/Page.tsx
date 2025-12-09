@@ -16,7 +16,6 @@ const Page = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
   const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
   const [googleDocUrl, setGoogleDocUrl] = useState<string>('');
-  const [contentTypeIds, setContentTypeIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -40,7 +39,6 @@ const Page = () => {
     const names = contentTypes.map((ct) => ct.name).join(', ');
     const ids = contentTypes.map((ct) => ct.id);
 
-    setContentTypeIds(ids);
     setIsContentTypePickerOpen(false);
 
     sdk.notifier.success(

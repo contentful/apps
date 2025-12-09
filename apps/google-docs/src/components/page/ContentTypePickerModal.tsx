@@ -33,6 +33,10 @@ export const ContentTypePickerModal = ({
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [selectedContentTypes, setSelectedContentTypes] = useState<SelectedContentType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
+
+  const isInvalidSelection = selectedContentTypes.length === 0;
+  const isInvalidSelectionError = isInvalidSelection && hasAttemptedSubmit;
 
   useEffect(() => {
     // Fetch content types when component mounts
@@ -58,9 +62,10 @@ export const ContentTypePickerModal = ({
   }, [sdk]);
 
   useEffect(() => {
-    // Reset selection when modal opens
+    // Reset selection and attempt flag when modal opens
     if (isOpen) {
       setSelectedContentTypes([]);
+      setHasAttemptedSubmit(false);
     }
   }, [isOpen]);
 
@@ -81,8 +86,8 @@ export const ContentTypePickerModal = ({
   };
 
   const handleContinue = () => {
-    if (selectedContentTypes.length === 0) {
-      sdk.notifier.error('Please select at least one content type');
+    if (isInvalidSelection) {
+      setHasAttemptedSubmit(true);
       return;
     }
 
@@ -99,10 +104,10 @@ export const ContentTypePickerModal = ({
         <>
           <Modal.Header title="Select content type(s)" onClose={onClose} />
           <Modal.Content>
-            <Paragraph marginBottom="spacingM">
+            <Paragraph marginBottom="spacingM" color="gray700">
               Select the content type(s) you would like to use with this sync.
             </Paragraph>
-            <FormControl isRequired>
+            <FormControl isRequired isInvalid={isInvalidSelectionError}>
               <FormControl.Label>Content type</FormControl.Label>
               <Select
                 id="content-type-select"
@@ -121,6 +126,11 @@ export const ContentTypePickerModal = ({
                   </Select.Option>
                 ))}
               </Select>
+              {isInvalidSelectionError && (
+                <FormControl.ValidationMessage>
+                  You must select at least one content type.
+                </FormControl.ValidationMessage>
+              )}
             </FormControl>
 
             {selectedContentTypes.length > 0 && (
@@ -139,10 +149,7 @@ export const ContentTypePickerModal = ({
             <Button onClick={onClose} variant="secondary">
               Cancel
             </Button>
-            <Button
-              onClick={handleContinue}
-              variant="positive"
-              isDisabled={selectedContentTypes.length === 0 || isLoading}>
+            <Button onClick={handleContinue} variant="positive" isDisabled={isLoading}>
               Create
             </Button>
           </Modal.Controls>
