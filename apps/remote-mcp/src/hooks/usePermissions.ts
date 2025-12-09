@@ -5,10 +5,7 @@ import type {
   MigrationPermissions,
   EntityPermissions,
 } from '../components/types/config';
-import {
-  createEmptyEntityPermissions,
-  createAllPermissions,
-} from '../utils/permissions';
+import { createEmptyEntityPermissions, createAllPermissions } from '../utils/permissions';
 
 export const usePermissions = () => {
   const [contentLifecyclePermissions, setContentLifecyclePermissions] =
@@ -28,11 +25,10 @@ export const usePermissions = () => {
       invokeAgents: false,
     });
 
-  const [migrationPermissions, setMigrationPermissions] =
-    useState<MigrationPermissions>({
-      migrateWithinSpace: false,
-      migrateBetweenSpaces: false,
-    });
+  const [migrationPermissions, setMigrationPermissions] = useState<MigrationPermissions>({
+    migrateWithinSpace: false,
+    migrateBetweenSpaces: false,
+  });
 
   const handleSelectAllToggle = () => {
     const newValue = !contentLifecyclePermissions.selectAll;
@@ -47,7 +43,7 @@ export const usePermissions = () => {
 
   const handleEntityActionToggle = (
     entity: 'entries' | 'assets' | 'contentTypes',
-    action: string,
+    action: string
   ) => {
     setContentLifecyclePermissions((prev) => ({
       ...prev,
@@ -60,8 +56,7 @@ export const usePermissions = () => {
   };
 
   const handleColumnToggle = (action: string) => {
-    const currentValue =
-      contentLifecyclePermissions.entries[action as keyof EntityPermissions];
+    const currentValue = contentLifecyclePermissions.entries[action as keyof EntityPermissions];
     const newValue = !currentValue;
     setContentLifecyclePermissions((prev) => ({
       ...prev,
@@ -73,9 +68,7 @@ export const usePermissions = () => {
   };
 
   const handleRowToggle = (entity: 'entries' | 'assets' | 'contentTypes') => {
-    const allChecked = Object.values(contentLifecyclePermissions[entity]).every(
-      (v) => v,
-    );
+    const allChecked = Object.values(contentLifecyclePermissions[entity]).every((v) => v);
     const newValue = !allChecked;
     const allPermissions = createAllPermissions(newValue);
     setContentLifecyclePermissions((prev) => ({
@@ -85,9 +78,7 @@ export const usePermissions = () => {
     }));
   };
 
-  const handleOtherFeatureToggle = (
-    permission: keyof OtherFeaturesPermissions,
-  ) => {
+  const handleOtherFeatureToggle = (permission: keyof OtherFeaturesPermissions) => {
     setOtherFeaturesPermissions((prev) => ({
       ...prev,
       [permission]: !prev[permission],
@@ -105,6 +96,9 @@ export const usePermissions = () => {
     contentLifecyclePermissions,
     otherFeaturesPermissions,
     migrationPermissions,
+    setContentLifecyclePermissions,
+    setOtherFeaturesPermissions,
+    setMigrationPermissions,
     handleSelectAllToggle,
     handleEntityActionToggle,
     handleColumnToggle,

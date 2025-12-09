@@ -17,6 +17,9 @@ const ConfigScreen = () => {
     contentLifecyclePermissions,
     otherFeaturesPermissions,
     migrationPermissions,
+    setContentLifecyclePermissions,
+    setOtherFeaturesPermissions,
+    setMigrationPermissions,
     handleSelectAllToggle,
     handleEntityActionToggle,
     handleColumnToggle,
@@ -29,8 +32,7 @@ const ConfigScreen = () => {
     contentLifecyclePermissions,
     otherFeaturesPermissions,
     migrationPermissions,
-  }
-
+  };
 
   const sdk = useSDK<ConfigAppSDK>();
   /*
@@ -70,6 +72,19 @@ const ConfigScreen = () => {
       // If the app is not installed yet, `parameters` will be `null`.
       const currentParameters: typeof parameters | null = await sdk.app.getParameters();
 
+      // Restore saved permissions if they exist
+      if (currentParameters) {
+        if (currentParameters.contentLifecyclePermissions) {
+          setContentLifecyclePermissions(currentParameters.contentLifecyclePermissions);
+        }
+        if (currentParameters.otherFeaturesPermissions) {
+          setOtherFeaturesPermissions(currentParameters.otherFeaturesPermissions);
+        }
+        if (currentParameters.migrationPermissions) {
+          setMigrationPermissions(currentParameters.migrationPermissions);
+        }
+      }
+
       // Once preparation has finished, call `setReady` to hide
       // the loading screen and present the app to a user.
       sdk.app.setReady();
@@ -88,8 +103,7 @@ const ConfigScreen = () => {
       flexDirection="column"
       alignItems="flex-start"
       spacing="spacingXl"
-      style={{ maxWidth: '720px', margin: '0 auto', padding: '24px' }}
-    >
+      style={{ maxWidth: '720px', margin: '0 auto', padding: '24px' }}>
       <Heading>App Config</Heading>
       <Paragraph>Contentful Remote MCP (Public Alpha)</Paragraph>
       <PermissionsSection
