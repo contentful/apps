@@ -5,7 +5,6 @@ import {
   Form,
   Flex,
   FormControl,
-  Select,
   Switch,
   Text,
   Paragraph,
@@ -15,7 +14,7 @@ import {
 import { useSDK } from '@contentful/react-apps-toolkit';
 import ContentTypeMultiSelect, { ContentType } from '../components/ContentTypeMultiSelect';
 import tokens from '@contentful/f36-tokens';
-import { DEFAULT_PARAMS, VALIDATION_RANGES, DEFAULT_TIME_RANGE } from '../utils/consts';
+import { VALIDATION_RANGES } from '../utils/consts';
 import { ValidationErrors } from '../utils/types';
 import gearImage from '../assets/gear.png';
 import appearanceImage from '../assets/appearance.png';
@@ -23,20 +22,27 @@ import appearanceImage from '../assets/appearance.png';
 export interface AppInstallationParameters {
   trackedContentTypes?: string[];
   needsUpdateMonths?: number;
-  defaultTimeRange?: 'all' | 'year' | 'sixMonths';
   recentlyPublishedDays?: number;
   showUpcomingReleases?: boolean;
   timeToPublishDays?: number;
 }
 
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>(DEFAULT_PARAMS);
+  const [parameters, setParameters] = useState<AppInstallationParameters>({});
   const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const sdk = useSDK<ConfigAppSDK>();
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
+
+    const errors = getErrors(parameters);
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      sdk.notifier.error('Please fill in all required fields with valid values before saving.');
+      return false;
+    }
 
     return {
       parameters,
@@ -60,33 +66,34 @@ const ConfigScreen = () => {
     })();
   }, [sdk]);
 
-  const validateRange = (
-    value: number,
-    field: 'needsUpdateMonths' | 'recentlyPublishedDays' | 'timeToPublishDays'
-  ): void => {
-    const range = VALIDATION_RANGES[field];
+  const getErrors = (params: AppInstallationParameters): ValidationErrors => {
+    const errors: ValidationErrors = {};
 
-    if (value < range.min || value > range.max) {
-      setValidationErrors((prev) => ({
-        ...prev,
-        [field]: `Value must be between ${range.min} and ${range.max}`,
-      }));
-      return;
+    if (params.needsUpdateMonths === undefined || params.needsUpdateMonths === null) {
+      errors.needsUpdateMonths = 'Needs update months is required';
+    } else if (isValueOutOfRange(params.needsUpdateMonths, VALIDATION_RANGES.needsUpdateMonths)) {
+      errors.needsUpdateMonths = `Needs update months must be between ${VALIDATION_RANGES.needsUpdateMonths.min} and ${VALIDATION_RANGES.needsUpdateMonths.max}`;
     }
 
-    // Clear error if valid
-    setValidationErrors((prev) => {
-      const newErrors = { ...prev };
-      delete newErrors[field];
-      return newErrors;
-    });
+    if (params.recentlyPublishedDays === undefined || params.recentlyPublishedDays === null) {
+      errors.recentlyPublishedDays = 'Recently published days is required';
+    } else if (
+      isValueOutOfRange(params.recentlyPublishedDays, VALIDATION_RANGES.recentlyPublishedDays)
+    ) {
+      errors.recentlyPublishedDays = `Recently published days must be between ${VALIDATION_RANGES.recentlyPublishedDays.min} and ${VALIDATION_RANGES.recentlyPublishedDays.max}`;
+    }
+
+    if (params.timeToPublishDays === undefined || params.timeToPublishDays === null) {
+      errors.timeToPublishDays = 'Time to publish days is required';
+    } else if (isValueOutOfRange(params.timeToPublishDays, VALIDATION_RANGES.timeToPublishDays)) {
+      errors.timeToPublishDays = `Time to publish days must be between ${VALIDATION_RANGES.timeToPublishDays.min} and ${VALIDATION_RANGES.timeToPublishDays.max}`;
+    }
+
+    return errors;
   };
 
-  const handleDefaultTimeRangeChange = (value: string) => {
-    setParameters((prev) => ({
-      ...prev,
-      defaultTimeRange: value as 'all' | 'year' | 'sixMonths',
-    }));
+  const isValueOutOfRange = (value: number, range: { min: number; max: number }): boolean => {
+    return value < range.min || value > range.max;
   };
 
   const handleInputWithRangeValidation = (
@@ -95,7 +102,6 @@ const ConfigScreen = () => {
   ) => {
     const value = e.target.value;
     const numValue = parseInt(value, 10);
-    validateRange(numValue, field);
 
     if (numValue !== null) {
       setParameters((prev) => ({
@@ -120,15 +126,16 @@ const ConfigScreen = () => {
         <Form>
           <Heading marginBottom="spacingM">Set up Content Production Dashboard</Heading>
           <Paragraph marginBottom="spacingL">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
-            incididunt ut labore et dolore magna aliqua.
+            Get insight into your content lifecycle by tracking production volume, creation time,
+            and when content needs updates with the Content Production Dashboard.
           </Paragraph>
 
           <Heading as="h3" marginBottom="spacingM" marginTop="spacingL">
             Configure app
           </Heading>
           <Text as="p" marginBottom="spacingL" fontSize="fontSizeM" fontColor="gray600">
-            Section subtitle with basic instructions
+            Configure the time periods and display options the dashboard uses to calculate and
+            present your content metrics.
           </Text>
 
           <>
@@ -152,24 +159,6 @@ const ConfigScreen = () => {
                 Content will be marked as &quot;Needs update&quot; when it hasn&apos;t been updated
                 for this amount of time. Range: {VALIDATION_RANGES.needsUpdateMonths.min}-
                 {VALIDATION_RANGES.needsUpdateMonths.max} months.
-              </FormControl.HelpText>
-            </FormControl>
-
-            <FormControl marginBottom="spacingL">
-              <FormControl.Label>Default time range for content trends</FormControl.Label>
-              <Select
-                id="default-time-range"
-                name="default-time-range"
-                value={parameters.defaultTimeRange}
-                onChange={(e) => handleDefaultTimeRangeChange(e.target.value)}>
-                {Object.entries(DEFAULT_TIME_RANGE).map(([rangeKey, label]) => (
-                  <Select.Option key={rangeKey} value={rangeKey}>
-                    {label}
-                  </Select.Option>
-                ))}
-              </Select>
-              <FormControl.HelpText>
-                The default time period to display in content trend charts.
               </FormControl.HelpText>
             </FormControl>
 
@@ -225,7 +214,7 @@ const ConfigScreen = () => {
                 name="show-upcoming-releases"
                 isChecked={parameters.showUpcomingReleases}
                 onChange={handleShowUpcomingReleasesChange}>
-                Show &apos;Upcoming release&apos; section
+                Show &quot;Upcoming release&quot; section
               </Switch>
               <FormControl.HelpText>
                 Toggle visibility of the upcoming releases section on the dashboard.
@@ -280,7 +269,7 @@ const ConfigScreen = () => {
               flexDirection="column"
               style={{ maxWidth: '400px' }}
               justifyContent="space-between">
-              <Paragraph>Select "Content Production Dashboard" and click save.</Paragraph>
+              <Paragraph>Select &quot;Content Production Dashboard&quot; and click save.</Paragraph>
               <Image
                 alt="An image showing Contentful Home location appearance settings"
                 height="257px"

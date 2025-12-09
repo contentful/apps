@@ -1,14 +1,3 @@
-import { AppInstallationParameters } from '../locations/ConfigScreen';
-
-export const DEFAULT_PARAMS = {
-  trackedContentTypes: [],
-  needsUpdateMonths: 6,
-  defaultTimeRange: 'year',
-  recentlyPublishedDays: 7,
-  showUpcomingReleases: true,
-  timeToPublishDays: 30,
-} as AppInstallationParameters;
-
 export const VALIDATION_RANGES = {
   needsUpdateMonths: { min: 1, max: 60 },
   recentlyPublishedDays: { min: 1, max: 365 },
