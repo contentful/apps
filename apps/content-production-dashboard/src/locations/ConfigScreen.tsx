@@ -13,11 +13,11 @@ import {
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import ContentTypeMultiSelect, { ContentType } from '../components/ContentTypeMultiSelect';
-import tokens from '@contentful/f36-tokens';
 import { VALIDATION_RANGES } from '../utils/consts';
 import { ValidationErrors } from '../utils/types';
 import gearImage from '../assets/gear.png';
 import appearanceImage from '../assets/appearance.png';
+import { styles } from './ConfigScreen.styles';
 
 export interface AppInstallationParameters {
   trackedContentTypes?: string[];
@@ -60,6 +60,12 @@ const ConfigScreen = () => {
 
       if (currentParameters) {
         setParameters(currentParameters);
+      } else {
+        setParameters({
+          needsUpdateMonths: VALIDATION_RANGES.needsUpdateMonths.min,
+          recentlyPublishedDays: VALIDATION_RANGES.recentlyPublishedDays.min,
+          timeToPublishDays: VALIDATION_RANGES.timeToPublishDays.min,
+        });
       }
 
       sdk.app.setReady();
@@ -122,7 +128,7 @@ const ConfigScreen = () => {
 
   return (
     <Flex flexDirection="column" fullWidth>
-      <Flex flexDirection="column" style={{ margin: 'auto', padding: tokens.spacingL }}>
+      <Flex flexDirection="column" style={styles.container}>
         <Form>
           <Heading marginBottom="spacingM">Set up Content Production Dashboard</Heading>
           <Paragraph marginBottom="spacingL">
@@ -245,10 +251,7 @@ const ConfigScreen = () => {
             gap="spacingM"
             marginBottom="spacing2Xl"
             justifyContent="space-between">
-            <Flex
-              flexDirection="column"
-              style={{ maxWidth: '400px' }}
-              justifyContent="space-between">
+            <Flex flexDirection="column" style={styles.setupColumn} justifyContent="space-between">
               <Paragraph>
                 To make this dashboard your default home page, select the gear icon in the top right
                 corner of your Contentful navigation.
@@ -257,28 +260,17 @@ const ConfigScreen = () => {
                 alt="An image showing Contentful settings dropdown"
                 height="257px"
                 width="390px"
-                style={{
-                  border: `1px solid ${tokens.gray300}`,
-                  borderRadius: tokens.borderRadiusMedium,
-                  boxShadow: '0 3px 6px ${tokens.gray400}',
-                }}
+                style={styles.image}
                 src={gearImage}
               />
             </Flex>
-            <Flex
-              flexDirection="column"
-              style={{ maxWidth: '400px' }}
-              justifyContent="space-between">
+            <Flex flexDirection="column" style={styles.setupColumn} justifyContent="space-between">
               <Paragraph>Select &quot;Content Production Dashboard&quot; and click save.</Paragraph>
               <Image
                 alt="An image showing Contentful Home location appearance settings"
                 height="257px"
                 width="400px"
-                style={{
-                  border: `1px solid ${tokens.gray300}`,
-                  borderRadius: tokens.borderRadiusMedium,
-                  boxShadow: '0 3px 6px ${tokens.gray400}',
-                }}
+                style={styles.image}
                 src={appearanceImage}
               />
             </Flex>

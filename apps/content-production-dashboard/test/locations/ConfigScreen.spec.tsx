@@ -96,7 +96,7 @@ describe('Config Screen component', () => {
 
     // Test value above maximum
     await user.clear(needsUpdateInput);
-    await user.type(needsUpdateInput, '61');
+    await user.type(needsUpdateInput, '25');
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
     });
@@ -138,7 +138,7 @@ describe('Config Screen component', () => {
 
     // Test value above maximum
     await user.clear(recentlyPublishedInput);
-    await user.type(recentlyPublishedInput, '366');
+    await user.type(recentlyPublishedInput, '31');
 
     await simulateSave();
 
@@ -163,7 +163,7 @@ describe('Config Screen component', () => {
 
     // Test value below minimum
     await user.clear(timeToPublishInput);
-    await user.type(timeToPublishInput, '0');
+    await user.type(timeToPublishInput, '6');
     await simulateSave();
 
     await waitFor(() => {
@@ -176,7 +176,7 @@ describe('Config Screen component', () => {
 
     // Test value above maximum
     await user.clear(timeToPublishInput);
-    await user.type(timeToPublishInput, '366');
+    await user.type(timeToPublishInput, '91');
 
     await simulateSave();
 
@@ -201,19 +201,19 @@ describe('Config Screen component', () => {
     const switchInput = screen.getByRole('switch');
     await user.click(switchInput);
 
-    // Fill all required fields
+    // Fill all required fields with minimum values
     const needsUpdateInput = screen.getAllByTestId('cf-ui-text-input')[0];
     const recentlyPublishedInput = screen.getAllByTestId('cf-ui-text-input')[1];
     const timeToPublishInput = screen.getAllByTestId('cf-ui-text-input')[2];
 
     await user.clear(needsUpdateInput);
-    await user.type(needsUpdateInput, '12');
+    await user.type(needsUpdateInput, VALIDATION_RANGES.needsUpdateMonths.min.toString());
 
     await user.clear(recentlyPublishedInput);
-    await user.type(recentlyPublishedInput, '30');
+    await user.type(recentlyPublishedInput, VALIDATION_RANGES.recentlyPublishedDays.min.toString());
 
     await user.clear(timeToPublishInput);
-    await user.type(timeToPublishInput, '7');
+    await user.type(timeToPublishInput, VALIDATION_RANGES.timeToPublishDays.min.toString());
 
     // Verify all parameters are persisted correctly
     const result = await simulateSave();
@@ -221,9 +221,9 @@ describe('Config Screen component', () => {
     expect(result).not.toBe(false);
     expect(result).toEqual({
       parameters: {
-        needsUpdateMonths: 12,
-        recentlyPublishedDays: 30,
-        timeToPublishDays: 7,
+        needsUpdateMonths: VALIDATION_RANGES.needsUpdateMonths.min,
+        recentlyPublishedDays: VALIDATION_RANGES.recentlyPublishedDays.min,
+        timeToPublishDays: VALIDATION_RANGES.timeToPublishDays.min,
         showUpcomingReleases: true,
       },
       targetState: {},
