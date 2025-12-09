@@ -257,11 +257,7 @@ const ConfigScreen = () => {
           <Heading as="h3" marginBottom="spacingM" marginTop="spacingL">
             Set up
           </Heading>
-          <Flex
-            flexDirection="row"
-            gap="spacingM"
-            marginBottom="spacing2Xl"
-            justifyContent="space-between">
+          <Flex flexDirection="row" gap="spacing2Xl" marginBottom="spacing2Xl">
             <Flex flexDirection="column" style={styles.setupColumn} justifyContent="space-between">
               <Paragraph>
                 To make this dashboard your default home page, select the gear icon in the top right
