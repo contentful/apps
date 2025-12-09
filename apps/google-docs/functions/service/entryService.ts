@@ -1,7 +1,6 @@
 import { PlainClientAPI, EntryProps, ContentTypeProps } from 'contentful-management';
 import { EntryToCreate } from '../agents/documentParserAgent/schema';
-import { markdownToRichText } from './utils/richtext';
-
+import { MarkdownParser } from './utils/richtext';
 /**
  * INTEG-3264: Service for creating entries in Contentful using the Contentful Management API
  *
@@ -18,9 +17,97 @@ export interface EntryCreationResult {
   }>;
 }
 
+// Precompiled regex for markdown image tokens: ![alt](url)
+const IMAGE_TOKEN_REGEX = /!\[[^\]]*?\]\(([\s\S]*?)\)/g;
+
+async function createAndPublishDevAssetFromUrl(
+  cma: PlainClientAPI,
+  spaceId: string,
+  environmentId: string,
+  url: string
+) {
+  const fileName = 'dev-image.jpg';
+  const contentType = 'image/jpeg';
+  console.log('Creating dev asset from URL:', url);
+  const asset = await cma.asset.create(
+    { spaceId, environmentId },
+    {
+      fields: {
+        title: { 'en-US': 'Dev Image' },
+        file: {
+          'en-US': {
+            contentType,
+            fileName,
+            upload: url,
+          },
+        },
+      },
+    }
+  );
+  // Best-effort process + publish; if it fails, return draft asset
+  try {
+    const processed = await cma.asset.processForAllLocales({ spaceId, environmentId }, asset);
+    // Poll briefly until the file URL exists or timeout (~2s)
+    const start = Date.now();
+    let current = processed;
+    let attempt = 0;
+    while (Date.now() - start < 2000) {
+      try {
+        const fetched = await cma.asset.get({
+          spaceId,
+          environmentId,
+          assetId: current.sys.id,
+        });
+        const file = (fetched.fields?.file as any)?.['en-US'];
+        if (file && (file.url || file.uploadFrom || file.upload)) {
+          current = fetched;
+          break;
+        }
+      } catch (err) {
+        // Best-effort: log and retry
+        console.warn('Polling asset for file URL failed; will retry', {
+          assetId: current.sys.id,
+          attempt,
+          error:
+            err instanceof Error
+              ? err.message
+              : typeof err === 'string'
+              ? err
+              : JSON.stringify(err),
+        });
+      }
+      attempt += 1;
+      await new Promise((r) => setTimeout(r, 200));
+    }
+    try {
+      const published = await cma.asset.publish(
+        { spaceId, environmentId, assetId: current.sys.id },
+        current
+      );
+      return published;
+    } catch (err) {
+      console.error('Asset publish failed; returning processed (unpublished) asset', {
+        assetId: current.sys.id,
+        error:
+          err instanceof Error ? err.message : typeof err === 'string' ? err : JSON.stringify(err),
+      });
+      return current;
+    }
+  } catch (err) {
+    console.error('Asset processing failed; returning original draft asset', {
+      error:
+        err instanceof Error ? err.message : typeof err === 'string' ? err : JSON.stringify(err),
+    });
+    return asset;
+  }
+}
+
+// (No block-embed fallback; images are inserted inline where tokens occur)
+
 function transformFieldsForContentType(
   fields: Record<string, Record<string, unknown>>,
-  contentType: ContentTypeProps | undefined
+  contentType: ContentTypeProps | undefined,
+  urlToAssetId?: Record<string, string>
 ) {
   if (!contentType) return fields;
 
@@ -38,7 +125,22 @@ function transformFieldsForContentType(
     for (const [locale, value] of Object.entries(localizedValue)) {
       if (def.type === 'RichText') {
         if (typeof value === 'string') {
-          perLocale[locale] = markdownToRichText(value);
+          const parser = new MarkdownParser(urlToAssetId);
+          const contentNodes = parser.parse(value);
+          perLocale[locale] = {
+            nodeType: 'document',
+            data: {},
+            content:
+              contentNodes && contentNodes.length
+                ? contentNodes
+                : [
+                    {
+                      nodeType: 'paragraph',
+                      data: {},
+                      content: [{ nodeType: 'text', value: '', marks: [], data: {} }],
+                    },
+                  ],
+          };
         } else {
           // Pass through if already Rich Text-shaped or unknown type
           perLocale[locale] = value;
@@ -78,7 +180,57 @@ export async function createEntries(
 
     try {
       const contentType = contentTypes.find((ct) => ct.sys.id === entry.contentTypeId);
-      const transformedFields = transformFieldsForContentType(entry.fields, contentType);
+      // Build URL->assetId map: normalize URLs and only take the first image token per RichText field
+      let urlToAssetId: Record<string, string> | undefined;
+      if (contentType) {
+        const urls: string[] = [];
+        for (const field of contentType.fields) {
+          if (field.type !== 'RichText') continue;
+          const originalLocalized = entry.fields[field.id];
+          if (!originalLocalized) continue;
+          for (const originalVal of Object.values(originalLocalized)) {
+            if (typeof originalVal !== 'string') continue;
+            // Reset regex state before each new string scan
+            IMAGE_TOKEN_REGEX.lastIndex = 0;
+            for (const match of (originalVal as string).matchAll(IMAGE_TOKEN_REGEX)) {
+              const normalizedUrl = String(match[1]).replace(/\s+/g, '');
+              urls.push(normalizedUrl);
+            }
+          }
+        }
+        const uniqueUrls = Array.from(new Set(urls));
+        if (uniqueUrls.length) {
+          const firstUrl = uniqueUrls[0];
+          // TODO: Remove this once we have a real image with OAuth
+          let devUrl: string;
+          try {
+            const parsed = new URL(firstUrl);
+            // Only allow googleusercontent.com and its direct subdomains
+            const allowedHost = 'googleusercontent.com';
+            const host = parsed.hostname;
+            if (host === allowedHost || host.endsWith('.' + allowedHost)) {
+              devUrl = 'https://placehold.co/800x400?text=Dev+Image';
+            } else {
+              devUrl = firstUrl;
+            }
+          } catch (e) {
+            // If URL parsing fails, don't trust the URL, use the dev image
+            devUrl = 'https://placehold.co/800x400?text=Dev+Image';
+          }
+          const asset = await createAndPublishDevAssetFromUrl(cma, spaceId, environmentId, devUrl);
+          urlToAssetId = {};
+          for (const u of uniqueUrls) {
+            urlToAssetId[u] = asset.sys.id;
+          }
+        }
+      }
+      const transformedFields = transformFieldsForContentType(
+        entry.fields,
+        contentType,
+        urlToAssetId
+      );
+
+      // No block-embed fallback; images are inserted inline via markdown tokens.
 
       const createdEntry = await cma.entry.create(
         { spaceId, environmentId, contentTypeId: entry.contentTypeId },
