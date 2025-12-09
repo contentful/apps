@@ -13,7 +13,7 @@ import { createEntries } from './service/entryService';
 
 export type AppActionParameters = {
   contentTypeIds: string[];
-  googleDocUrl: string;
+  document: unknown; // JSON document from Google Docs API or test data
 };
 
 interface AppInstallationParameters {
@@ -31,8 +31,17 @@ export const handler: FunctionEventHandler<
   event: AppActionRequest<'Custom', AppActionParameters>,
   context: FunctionEventContext
 ) => {
-  const { contentTypeIds, googleDocUrl } = event.body;
+  const { contentTypeIds, document } = event.body;
   const { openAiApiKey } = context.appInstallationParameters as AppInstallationParameters;
+
+  if (!document) {
+    throw new Error('Document is required');
+  }
+
+  if (!contentTypeIds || contentTypeIds.length === 0) {
+    throw new Error('At least one content type ID is required');
+  }
+
   const cma = initContentfulManagementClient(context);
   const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
 
@@ -43,7 +52,7 @@ export const handler: FunctionEventHandler<
   // createContentTypeObservationsFromLLMResponse()
 
   const aiDocumentResponse = await createDocument({
-    googleDocUrl,
+    document,
     openAiApiKey,
     contentTypes,
   });
@@ -56,7 +65,9 @@ export const handler: FunctionEventHandler<
   const creationResult = await createEntries(cma, aiDocumentResponse.entries, {
     spaceId: context.spaceId,
     environmentId: context.environmentId,
+    contentTypes,
   });
+  console.log('Created Entries Result:', creationResult);
 
   // INTEG-3265: Create the assets in Contentful using the asset service
   // await createAssets()
