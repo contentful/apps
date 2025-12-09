@@ -36,6 +36,8 @@ const ConfigScreen = () => {
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
+    setValidationErrors({});
+
     const errors = getErrors(parameters);
 
     if (Object.keys(errors).length > 0) {
@@ -75,13 +77,13 @@ const ConfigScreen = () => {
   const getErrors = (params: AppInstallationParameters): ValidationErrors => {
     const errors: ValidationErrors = {};
 
-    if (params.needsUpdateMonths === undefined || params.needsUpdateMonths === null) {
+    if (params.needsUpdateMonths === undefined) {
       errors.needsUpdateMonths = 'Needs update months is required';
     } else if (isValueOutOfRange(params.needsUpdateMonths, VALIDATION_RANGES.needsUpdateMonths)) {
       errors.needsUpdateMonths = `Needs update months must be between ${VALIDATION_RANGES.needsUpdateMonths.min} and ${VALIDATION_RANGES.needsUpdateMonths.max}`;
     }
 
-    if (params.recentlyPublishedDays === undefined || params.recentlyPublishedDays === null) {
+    if (params.recentlyPublishedDays === undefined) {
       errors.recentlyPublishedDays = 'Recently published days is required';
     } else if (
       isValueOutOfRange(params.recentlyPublishedDays, VALIDATION_RANGES.recentlyPublishedDays)
@@ -89,7 +91,7 @@ const ConfigScreen = () => {
       errors.recentlyPublishedDays = `Recently published days must be between ${VALIDATION_RANGES.recentlyPublishedDays.min} and ${VALIDATION_RANGES.recentlyPublishedDays.max}`;
     }
 
-    if (params.timeToPublishDays === undefined || params.timeToPublishDays === null) {
+    if (params.timeToPublishDays === undefined) {
       errors.timeToPublishDays = 'Time to publish days is required';
     } else if (isValueOutOfRange(params.timeToPublishDays, VALIDATION_RANGES.timeToPublishDays)) {
       errors.timeToPublishDays = `Time to publish days must be between ${VALIDATION_RANGES.timeToPublishDays.min} and ${VALIDATION_RANGES.timeToPublishDays.max}`;
@@ -107,14 +109,16 @@ const ConfigScreen = () => {
     field: 'needsUpdateMonths' | 'recentlyPublishedDays' | 'timeToPublishDays'
   ) => {
     const value = e.target.value;
-    const numValue = parseInt(value, 10);
+    let numValue: number | undefined = parseInt(value, 10);
 
-    if (numValue !== null) {
-      setParameters((prev) => ({
-        ...prev,
-        [field]: numValue,
-      }));
+    if (isNaN(numValue)) {
+      numValue = undefined;
     }
+
+    setParameters((prev) => ({
+      ...prev,
+      [field]: numValue,
+    }));
   };
 
   const handleShowUpcomingReleasesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,7 +149,10 @@ const ConfigScreen = () => {
           </Text>
 
           <>
-            <FormControl marginBottom="spacingL" isInvalid={!!validationErrors.needsUpdateMonths}>
+            <FormControl
+              marginBottom="spacingL"
+              isRequired
+              isInvalid={!!validationErrors.needsUpdateMonths}>
               <FormControl.Label>
                 Content &quot;Needs update&quot; time threshold (months)
               </FormControl.Label>
@@ -153,7 +160,7 @@ const ConfigScreen = () => {
                 id="needs-update-months"
                 name="needs-update-months"
                 type="number"
-                value={parameters.needsUpdateMonths?.toString()}
+                value={parameters.needsUpdateMonths?.toString() || ''}
                 onChange={(event) => handleInputWithRangeValidation(event, 'needsUpdateMonths')}
               />
               {validationErrors.needsUpdateMonths && (
@@ -170,6 +177,7 @@ const ConfigScreen = () => {
 
             <FormControl
               marginBottom="spacingL"
+              isRequired
               isInvalid={!!validationErrors.recentlyPublishedDays}>
               <FormControl.Label>
                 &quot;Recently published&quot; time period (days)
@@ -178,7 +186,7 @@ const ConfigScreen = () => {
                 id="recently-published-days"
                 name="recently-published-days"
                 type="number"
-                value={parameters.recentlyPublishedDays?.toString()}
+                value={parameters.recentlyPublishedDays?.toString() || ''}
                 onChange={(event) => handleInputWithRangeValidation(event, 'recentlyPublishedDays')}
               />
               {validationErrors.recentlyPublishedDays && (
@@ -193,13 +201,16 @@ const ConfigScreen = () => {
               </FormControl.HelpText>
             </FormControl>
 
-            <FormControl marginBottom="spacingL" isInvalid={!!validationErrors.timeToPublishDays}>
+            <FormControl
+              marginBottom="spacingL"
+              isRequired
+              isInvalid={!!validationErrors.timeToPublishDays}>
               <FormControl.Label>Time to publish threshold (days)</FormControl.Label>
               <TextInput
                 id="time-to-publish-days"
                 name="time-to-publish-days"
                 type="number"
-                value={parameters.timeToPublishDays?.toString()}
+                value={parameters.timeToPublishDays?.toString() || ''}
                 onChange={(event) => handleInputWithRangeValidation(event, 'timeToPublishDays')}
               />
               {validationErrors.timeToPublishDays && (
