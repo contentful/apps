@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   Button,
   Flex,
@@ -11,6 +11,7 @@ import {
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
+import { OverlayProps } from '../../utils/modalOverlayUtils';
 
 export interface SelectedContentType {
   id: string;
@@ -22,6 +23,7 @@ interface ContentTypePickerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (contentTypes: SelectedContentType[]) => void;
+  overlayProps?: OverlayProps;
 }
 
 export const ContentTypePickerModal = ({
@@ -29,14 +31,22 @@ export const ContentTypePickerModal = ({
   isOpen,
   onClose,
   onSelect,
+  overlayProps,
 }: ContentTypePickerModalProps) => {
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [selectedContentTypes, setSelectedContentTypes] = useState<SelectedContentType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
 
-  const isInvalidSelection = selectedContentTypes.length === 0;
-  const isInvalidSelectionError = isInvalidSelection && hasAttemptedSubmit;
+  const isInvalidSelection = useMemo(
+    () => selectedContentTypes.length === 0,
+    [selectedContentTypes]
+  );
+
+  const isInvalidSelectionError = useMemo(
+    () => isInvalidSelection && hasAttemptedSubmit,
+    [isInvalidSelection, hasAttemptedSubmit]
+  );
 
   useEffect(() => {
     // Fetch content types when component mounts
@@ -94,12 +104,21 @@ export const ContentTypePickerModal = ({
     onSelect(selectedContentTypes);
   };
 
-  const availableContentTypes = contentTypes.filter(
-    (ct) => !selectedContentTypes.some((selected) => selected.id === ct.sys.id)
+  const availableContentTypes = useMemo(
+    () =>
+      contentTypes.filter(
+        (ct) => !selectedContentTypes.some((selected) => selected.id === ct.sys.id)
+      ),
+    [contentTypes, selectedContentTypes]
   );
 
   return (
-    <Modal title="Select content type(s)" isShown={isOpen} onClose={onClose} size="medium">
+    <Modal
+      title="Select content type(s)"
+      isShown={isOpen}
+      onClose={onClose}
+      size="medium"
+      overlayProps={overlayProps}>
       {() => (
         <>
           <Modal.Header title="Select content type(s)" onClose={onClose} />
@@ -149,7 +168,7 @@ export const ContentTypePickerModal = ({
             <Button onClick={onClose} variant="secondary">
               Cancel
             </Button>
-            <Button onClick={handleContinue} variant="positive" isDisabled={isLoading}>
+            <Button onClick={handleContinue} variant="primary" isDisabled={isLoading}>
               Create
             </Button>
           </Modal.Controls>

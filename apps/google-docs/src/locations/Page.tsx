@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Box, Button, Heading, Note } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -7,7 +7,9 @@ import {
   ContentTypePickerModal,
   SelectedContentType,
 } from '../components/page/ContentTypePickerModal';
+import { ConfirmCancelModal } from '../components/page/ConfirmCancelModal';
 import { createEntriesFromDocumentAction } from '../utils/appFunctionUtils';
+import { getOverlayProps, ModalType } from '../utils/modalOverlayUtils';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -15,6 +17,8 @@ const Page = () => {
   const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
   const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
+  const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState<boolean>(false);
+  const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
   const [googleDocUrl, setGoogleDocUrl] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -26,14 +30,79 @@ const Page = () => {
     setIsUploadModalOpen(true);
   };
 
-  const handleUploadModalClose = (docUrl?: string) => {
-    setIsUploadModalOpen(false);
+  const hasProgress = () => {
+    // User has progress if they've selected a document (googleDocUrl is set)
+    return hasStarted && googleDocUrl.trim().length > 0;
+  };
+
+  const handleUploadModalCloseRequest = (docUrl?: string) => {
+    // If user is submitting a document (docUrl provided), proceed normally
     if (docUrl) {
+      setIsUploadModalOpen(false);
       setGoogleDocUrl(docUrl);
-      // Automatically open content type picker after document is selected
       setIsContentTypePickerOpen(true);
+      return;
+    }
+
+    // If there's progress and user is trying to cancel, show confirmation
+    if (hasProgress()) {
+      setPendingCloseAction(() => () => {
+        setIsUploadModalOpen(false);
+        resetProgress();
+      });
+      setIsConfirmCancelModalOpen(true);
+    } else {
+      // No progress, reset to getting started page
+      setIsUploadModalOpen(false);
+      setHasStarted(false);
     }
   };
+
+  const handleContentTypePickerCloseRequest = () => {
+    // If there's progress, show confirmation
+    if (hasProgress()) {
+      setPendingCloseAction(() => () => {
+        setIsContentTypePickerOpen(false);
+        resetProgress();
+      });
+      setIsConfirmCancelModalOpen(true);
+    } else {
+      // No progress, close directly
+      setIsContentTypePickerOpen(false);
+    }
+  };
+
+  const resetProgress = () => {
+    setHasStarted(false);
+    setGoogleDocUrl('');
+    setIsUploadModalOpen(false);
+    setIsContentTypePickerOpen(false);
+    setSuccessMessage(null);
+    setErrorMessage(null);
+    setResult(null);
+  };
+
+  const handleConfirmCancel = () => {
+    setIsConfirmCancelModalOpen(false);
+    if (pendingCloseAction) {
+      pendingCloseAction();
+      setPendingCloseAction(null);
+    }
+  };
+
+  const handleKeepCreating = () => {
+    setIsConfirmCancelModalOpen(false);
+    setPendingCloseAction(null);
+  };
+
+  // Determine which modal is topmost (should show overlay)
+  // Priority: ConfirmCancelModal > ContentTypePickerModal > UploadDocumentModal
+  const topmostModal = useMemo(() => {
+    if (isConfirmCancelModalOpen) return ModalType.CONFIRM_CANCEL;
+    if (isContentTypePickerOpen) return ModalType.CONTENT_TYPE_PICKER;
+    if (isUploadModalOpen) return ModalType.UPLOAD;
+    return null;
+  }, [isUploadModalOpen, isContentTypePickerOpen, isConfirmCancelModalOpen]);
 
   const handleContentTypeSelected = async (contentTypes: SelectedContentType[]) => {
     const names = contentTypes.map((ct) => ct.name).join(', ');
@@ -98,13 +167,26 @@ const Page = () => {
 
   return (
     <>
-      <UploadDocumentModal sdk={sdk} isOpen={isUploadModalOpen} onClose={handleUploadModalClose} />
+      <UploadDocumentModal
+        sdk={sdk}
+        isOpen={isUploadModalOpen}
+        onClose={handleUploadModalCloseRequest}
+        overlayProps={getOverlayProps(topmostModal === ModalType.UPLOAD)}
+      />
 
       <ContentTypePickerModal
         sdk={sdk}
         isOpen={isContentTypePickerOpen}
-        onClose={() => setIsContentTypePickerOpen(false)}
+        onClose={handleContentTypePickerCloseRequest}
         onSelect={handleContentTypeSelected}
+        overlayProps={getOverlayProps(topmostModal === ModalType.CONTENT_TYPE_PICKER)}
+      />
+
+      <ConfirmCancelModal
+        isOpen={isConfirmCancelModalOpen}
+        onConfirm={handleConfirmCancel}
+        onCancel={handleKeepCreating}
+        overlayProps={getOverlayProps(topmostModal === ModalType.CONFIRM_CANCEL)}
       />
 
       {(result || successMessage || errorMessage) && (
