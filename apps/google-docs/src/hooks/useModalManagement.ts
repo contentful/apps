@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ModalType } from '../utils/modalOverlayUtils';
 
 interface ModalStates {
   isUploadModalOpen: boolean;
@@ -11,6 +10,12 @@ interface ModalSetters {
   setIsUploadModalOpen: (value: boolean) => void;
   setIsContentTypePickerOpen: (value: boolean) => void;
   setIsConfirmCancelModalOpen: (value: boolean) => void;
+}
+
+export enum ModalType {
+  UPLOAD = 'upload',
+  CONTENT_TYPE_PICKER = 'contentTypePicker',
+  CONFIRM_CANCEL = 'confirmCancel',
 }
 
 export const useModalManagement = () => {

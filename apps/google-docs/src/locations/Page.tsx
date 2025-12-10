@@ -8,8 +8,7 @@ import {
   SelectedContentType,
 } from '../components/page/ContentTypePickerModal';
 import { ConfirmCancelModal } from '../components/page/ConfirmCancelModal';
-import { ModalType } from '../utils/modalOverlayUtils';
-import { useModalManagement } from '../hooks/useModalManagement';
+import { useModalManagement, ModalType } from '../hooks/useModalManagement';
 import { useProgressTracking } from '../hooks/useProgressTracking';
 import { useDocumentSubmission } from '../hooks/useDocumentSubmission';
 
