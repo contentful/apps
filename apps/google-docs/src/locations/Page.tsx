@@ -15,12 +15,14 @@ import { useDocumentSubmission } from '../hooks/useDocumentSubmission';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
-  const { modalStates, getOverlayPropsForModal, openModal, closeModal } = useModalManagement();
+  const { modalStates, openModal, closeModal } = useModalManagement();
   const {
     hasStarted,
     setHasStarted,
     googleDocUrl,
     setGoogleDocUrl,
+    selectedContentTypes,
+    setSelectedContentTypes,
     hasProgress,
     resetProgress: resetProgressTracking,
     pendingCloseAction,
@@ -55,8 +57,8 @@ const Page = () => {
 
     // If there's progress and user is trying to cancel, show confirmation
     if (hasProgress) {
+      closeModal(ModalType.UPLOAD);
       setPendingCloseAction(() => () => {
-        closeModal(ModalType.UPLOAD);
         resetProgress();
       });
       openModal(ModalType.CONFIRM_CANCEL);
@@ -70,8 +72,8 @@ const Page = () => {
   const handleContentTypePickerCloseRequest = () => {
     // If there's progress, show confirmation
     if (hasProgress) {
+      closeModal(ModalType.CONTENT_TYPE_PICKER);
       setPendingCloseAction(() => () => {
-        closeModal(ModalType.CONTENT_TYPE_PICKER);
         resetProgress();
       });
       openModal(ModalType.CONFIRM_CANCEL);
@@ -92,6 +94,7 @@ const Page = () => {
   const handleKeepCreating = () => {
     closeModal(ModalType.CONFIRM_CANCEL);
     setPendingCloseAction(null);
+    openModal(ModalType.CONTENT_TYPE_PICKER);
   };
 
   const handleContentTypeSelected = async (contentTypes: SelectedContentType[]) => {
@@ -128,7 +131,6 @@ const Page = () => {
         sdk={sdk}
         isOpen={modalStates.isUploadModalOpen}
         onClose={handleUploadModalCloseRequest}
-        overlayProps={getOverlayPropsForModal(ModalType.UPLOAD)}
       />
 
       <ContentTypePickerModal
@@ -136,15 +138,15 @@ const Page = () => {
         isOpen={modalStates.isContentTypePickerOpen}
         onClose={handleContentTypePickerCloseRequest}
         onSelect={handleContentTypeSelected}
-        overlayProps={getOverlayPropsForModal(ModalType.CONTENT_TYPE_PICKER)}
         isSubmitting={isSubmitting}
+        selectedContentTypes={selectedContentTypes}
+        setSelectedContentTypes={setSelectedContentTypes}
       />
 
       <ConfirmCancelModal
         isOpen={modalStates.isConfirmCancelModalOpen}
         onConfirm={handleConfirmCancel}
         onCancel={handleKeepCreating}
-        overlayProps={getOverlayPropsForModal(ModalType.CONFIRM_CANCEL)}
       />
 
       {(result || successMessage || errorMessage) && (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -11,21 +11,14 @@ import {
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { GoogleDocUploader } from './GoogleDocUploader';
-import { getOverlayProps, OverlayProps } from '../../utils/modalOverlayUtils';
 
 interface UploadDocumentModalProps {
   sdk: PageAppSDK;
   isOpen: boolean;
   onClose: (googleDocUrl?: string) => void;
-  overlayProps?: OverlayProps;
 }
 
-export const UploadDocumentModal = ({
-  sdk,
-  isOpen,
-  onClose,
-  overlayProps,
-}: UploadDocumentModalProps) => {
+export const UploadDocumentModal = ({ sdk, isOpen, onClose }: UploadDocumentModalProps) => {
   const [googleDocUrl, setGoogleDocUrl] = useState<string>(
     'https://docs.google.com/document/d/1uTBhG6ojUU_epNPFV1qKGIb506YAf3ii/edit?usp=drive_link&ouid=100613518827458188455&rtpof=true&sd=true'
   );
@@ -61,32 +54,8 @@ export const UploadDocumentModal = ({
     onClose();
   };
 
-  // Determine which modal is topmost within UploadDocumentModal
-  const isUploadModalTopmost = useMemo(() => {
-    return isOpen && !isGoogleDocUploaderModalOpen;
-  }, [isOpen, isGoogleDocUploaderModalOpen]);
-
-  const isGoogleDocUploaderModalTopmost = useMemo(() => {
-    return isGoogleDocUploaderModalOpen;
-  }, [isGoogleDocUploaderModalOpen]);
-
-  // Get overlay props for each modal, respecting parent overlayProps
-  const uploadModalOverlayProps = useMemo(
-    () => getOverlayProps(isUploadModalTopmost, overlayProps),
-    [isUploadModalTopmost, overlayProps]
-  );
-
-  const googleDocUploaderOverlayProps = useMemo(
-    () => getOverlayProps(isGoogleDocUploaderModalTopmost, overlayProps),
-    [isGoogleDocUploaderModalTopmost, overlayProps]
-  );
-
   return (
-    <Modal
-      onClose={handleCancel}
-      isShown={isOpen}
-      size="large"
-      overlayProps={uploadModalOverlayProps}>
+    <Modal onClose={handleCancel} isShown={isOpen} size="large">
       {() => (
         <>
           <Modal.Header title="Upload Document" onClose={handleCancel} />
@@ -100,7 +69,6 @@ export const UploadDocumentModal = ({
                 sdk={sdk}
                 onSuccess={handleSuccess}
                 onError={handleError}
-                overlayProps={googleDocUploaderOverlayProps}
                 onModalStateChange={setIsGoogleDocUploaderModalOpen}
               />
 

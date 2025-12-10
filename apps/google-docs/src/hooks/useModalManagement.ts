@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { getOverlayProps, ModalType, OverlayProps } from '../utils/modalOverlayUtils';
+import { useState } from 'react';
+import { ModalType } from '../utils/modalOverlayUtils';
 
 interface ModalStates {
   isUploadModalOpen: boolean;
@@ -17,18 +17,6 @@ export const useModalManagement = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
   const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState<boolean>(false);
-
-  // Determine which modal is topmost (used to only show overlay on top modal)
-  const topmostModal = useMemo(() => {
-    if (isConfirmCancelModalOpen) return ModalType.CONFIRM_CANCEL;
-    if (isContentTypePickerOpen) return ModalType.CONTENT_TYPE_PICKER;
-    if (isUploadModalOpen) return ModalType.UPLOAD;
-    return null;
-  }, [isUploadModalOpen, isContentTypePickerOpen, isConfirmCancelModalOpen]);
-
-  const getOverlayPropsForModal = (modalType: ModalType): OverlayProps | undefined => {
-    return getOverlayProps(topmostModal === modalType);
-  };
 
   const openModal = (modalType: ModalType) => {
     switch (modalType) {
@@ -69,8 +57,6 @@ export const useModalManagement = () => {
       setIsContentTypePickerOpen,
       setIsConfirmCancelModalOpen,
     } as ModalSetters,
-    topmostModal,
-    getOverlayPropsForModal,
     openModal,
     closeModal,
   };

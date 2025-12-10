@@ -1,27 +1,15 @@
 import React from 'react';
 import { Button, Modal, Paragraph } from '@contentful/f36-components';
-import { OverlayProps } from '../../utils/modalOverlayUtils';
 
 interface ConfirmCancelModalProps {
   isOpen: boolean;
   onConfirm: () => void;
   onCancel: () => void;
-  overlayProps?: OverlayProps;
 }
 
-export const ConfirmCancelModal = ({
-  isOpen,
-  onConfirm,
-  onCancel,
-  overlayProps,
-}: ConfirmCancelModalProps) => {
+export const ConfirmCancelModal = ({ isOpen, onConfirm, onCancel }: ConfirmCancelModalProps) => {
   return (
-    <Modal
-      isShown={isOpen}
-      onClose={onCancel}
-      size="medium"
-      overlayProps={overlayProps}
-      shouldCloseOnOverlayClick={false}>
+    <Modal isShown={isOpen} onClose={onCancel} size="medium" shouldCloseOnOverlayClick={false}>
       {() => (
         <>
           <Modal.Header title="You're about to lose your progress" onClose={onCancel} />

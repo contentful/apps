@@ -12,7 +12,6 @@ import {
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
-import { OverlayProps } from '../../utils/modalOverlayUtils';
 
 export interface SelectedContentType {
   id: string;
@@ -24,8 +23,11 @@ interface ContentTypePickerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (contentTypes: SelectedContentType[]) => void;
-  overlayProps?: OverlayProps;
   isSubmitting: boolean;
+  selectedContentTypes: SelectedContentType[];
+  setSelectedContentTypes: (
+    contentTypes: SelectedContentType[] | ((prev: SelectedContentType[]) => SelectedContentType[])
+  ) => void;
 }
 
 export const ContentTypePickerModal = ({
@@ -33,11 +35,11 @@ export const ContentTypePickerModal = ({
   isOpen,
   onClose,
   onSelect,
-  overlayProps,
   isSubmitting,
+  selectedContentTypes,
+  setSelectedContentTypes,
 }: ContentTypePickerModalProps) => {
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
-  const [selectedContentTypes, setSelectedContentTypes] = useState<SelectedContentType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
 
@@ -75,9 +77,8 @@ export const ContentTypePickerModal = ({
   }, [sdk]);
 
   useEffect(() => {
-    // Reset selection and attempt flag when modal opens
+    // Reset attempt flag when modal opens (but preserve selectedContentTypes from parent)
     if (isOpen) {
-      setSelectedContentTypes([]);
       setHasAttemptedSubmit(false);
     }
   }, [isOpen]);
@@ -122,12 +123,7 @@ export const ContentTypePickerModal = ({
   );
 
   return (
-    <Modal
-      title="Select content type(s)"
-      isShown={isOpen}
-      onClose={handleClose}
-      size="medium"
-      overlayProps={overlayProps}>
+    <Modal title="Select content type(s)" isShown={isOpen} onClose={handleClose} size="medium">
       {() => (
         <>
           <Modal.Header title="Select content type(s)" onClose={handleClose} />

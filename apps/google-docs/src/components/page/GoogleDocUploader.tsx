@@ -11,14 +11,12 @@ import {
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { TEST_DOCUMENTS } from '../../utils/test_docs_json';
-import { OverlayProps } from '../../utils/modalOverlayUtils';
 
 interface GoogleDocUploaderProps {
   sdk: PageAppSDK;
   onSuccess: (title: string, html: string | null) => void;
   onError: (message: string) => void;
   isDisabled?: boolean;
-  overlayProps?: OverlayProps;
   onModalStateChange?: (isOpen: boolean) => void;
 }
 
@@ -27,7 +25,6 @@ export const GoogleDocUploader = ({
   onSuccess,
   onError,
   isDisabled,
-  overlayProps,
   onModalStateChange,
 }: GoogleDocUploaderProps) => {
   const [selectedDocument, setSelectedDocument] = useState<string>('');
@@ -73,6 +70,12 @@ export const GoogleDocUploader = ({
           {selectedDocument ? 'Change Document' : 'Select Document'}
         </Button>
 
+        {selectedDocument && (
+          <Box marginTop="spacingS">
+            <Text fontWeight="fontWeightDemiBold">Selected: {selectedDocument}</Text>
+          </Box>
+        )}
+
         {isUploading && (
           <Box marginTop="spacingS">
             <Text fontColor="gray500" fontSize="fontSizeS">
@@ -86,11 +89,7 @@ export const GoogleDocUploader = ({
         </FormControl.HelpText>
       </FormControl>
 
-      <Modal
-        onClose={() => setIsModalOpen(false)}
-        isShown={isModalOpen}
-        size="large"
-        overlayProps={overlayProps}>
+      <Modal onClose={() => setIsModalOpen(false)} isShown={isModalOpen} size="large">
         {() => (
           <>
             <Modal.Header title="Select a Test Document" onClose={() => setIsModalOpen(false)} />

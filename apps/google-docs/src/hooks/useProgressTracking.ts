@@ -1,8 +1,10 @@
 import { useState, useMemo, useCallback } from 'react';
+import { SelectedContentType } from '../components/page/ContentTypePickerModal';
 
 export const useProgressTracking = () => {
   const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [googleDocUrl, setGoogleDocUrl] = useState<string>('');
+  const [selectedContentTypes, setSelectedContentTypes] = useState<SelectedContentType[]>([]);
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
 
   const hasProgress = useMemo(
@@ -13,6 +15,7 @@ export const useProgressTracking = () => {
   const resetProgress = useCallback(() => {
     setHasStarted(false);
     setGoogleDocUrl('');
+    setSelectedContentTypes([]);
   }, []);
 
   return {
@@ -20,6 +23,8 @@ export const useProgressTracking = () => {
     setHasStarted,
     googleDocUrl,
     setGoogleDocUrl,
+    selectedContentTypes,
+    setSelectedContentTypes,
     hasProgress,
     resetProgress,
     pendingCloseAction,
