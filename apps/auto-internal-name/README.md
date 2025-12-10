@@ -1,19 +1,61 @@
-This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
+# Auto Internal Name
 
-## How to use
+A Contentful app that generates entry internal names from parent relationships and configured naming conventions, speeding up content creation and ensuring consistent naming across your content model.
 
-Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
+## Overview
+
+The Auto Internal Name app automatically fills entry internal name fields based on a configurable source field from parent entries, which is useful for nested content models.
+
+## Key Features
+
+### Installation & Configuration
+
+1. **Field Configuration**: Install and configure the app with:
+
+   - **Source field ID** — Identifies the field that contains the value used for internal names.
+   - **Separator** — Defines the string that separates parent values.
+   - **Overrides** — Specifies content types that use a different source field ID.
+   
+2. **Field Appearance Location**: Use the field appearance location on target fields that should be auto-populated using this logic
+
+### Entry Creation
+
+- Leverages the app config field source name to retrieve the correct value
+- Inserts the value into the target field automatically
+
+### Entry Editing
+
+- **No automatic changes** - Nothing happens unless there is user intervention
+- **Refetch button** - Users can use a "refetch" button to rerun the logic and override any existing value
+- **Clear value** - Users can clear the value if they want to provide their own custom name
+
+## How to Run
+
+### Prerequisites
+
+- Node.js (version specified in package.json)
+- npm
+- A Contentful space with appropriate permissions
+
+### Development
+
+1. Install dependencies:
 
 ```bash
-# npx
-npx create-contentful-app --example vite-react
-
-# npm
-npm init contentful-app --example vite-react
-
-# Yarn
-yarn create contentful-app --example vite-react
+npm install
 ```
+
+2. Start the development server:
+
+```bash
+npm run start
+```
+
+This command:
+
+- Runs the app in development mode
+- Display your app in the Contentful UI locations
+- Automatically reloads when you make edits
 
 ## Available Scripts
 
@@ -29,21 +71,25 @@ You will also see any lint errors in the console.
 
 #### `npm run build`
 
-Builds the app for production to the `dist` folder.
+Builds the app for production to the `build` folder.
 It correctly bundles React in production mode and optimizes the build for the best performance.
 
 The build is minified and the filenames include the hashes.
 Your app is ready to be deployed!
 
+#### `npm run test`
+
+Runs the test suite using Vitest.
+
 #### `npm run upload`
 
-Uploads the `dist` folder to Contentful and creates a bundle that is automatically activated.
+Uploads the `build` folder to Contentful and creates a bundle that is automatically activated.
 The command guides you through the deployment process and asks for all required arguments.
 Read [here](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/#deploy-with-contentful) for more information about the deployment process.
 
 #### `npm run upload-ci`
 
-Similar to `npm run upload` it will upload your app to contentful and activate it. The only difference is  
+Similar to `npm run upload` it will upload your app to Contentful and activate it. The only difference is  
 that with this command all required arguments are read from the environment variables, for example when you add
 the upload command to your CI pipeline.
 
