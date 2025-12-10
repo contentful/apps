@@ -143,7 +143,7 @@ const ConfigScreen = () => {
           <Heading as="h3" marginBottom="spacingM" marginTop="spacingL">
             Configure app
           </Heading>
-          <Text as="p" marginBottom="spacingL" fontSize="fontSizeM" fontColor="gray600">
+          <Text as="p" marginBottom="spacingL" fontSize="fontSizeM">
             Configure the time periods and display options the dashboard uses to calculate and
             present your content metrics.
           </Text>
