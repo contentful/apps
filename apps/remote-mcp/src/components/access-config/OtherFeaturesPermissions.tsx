@@ -23,35 +23,7 @@ export const OtherFeaturesPermissions: FC<OtherFeaturesPermissionsProps> = ({
       isChecked={permissions.runAIActions}
       onChange={() => onPermissionToggle('runAIActions')}
     >
-      Run AI actions
-    </Checkbox>
-
-    <Checkbox
-      isChecked={permissions.triggerAutomations}
-      onChange={() => onPermissionToggle('triggerAutomations')}
-    >
-      Trigger automations
-    </Checkbox>
-
-    <Checkbox
-      isChecked={permissions.installApps}
-      onChange={() => onPermissionToggle('installApps')}
-    >
-      Install and configure apps from the marketplace
-    </Checkbox>
-
-    <Checkbox
-      isChecked={permissions.callAppActions}
-      onChange={() => onPermissionToggle('callAppActions')}
-    >
-      Call app actions
-    </Checkbox>
-
-    <Checkbox
-      isChecked={permissions.invokeAgents}
-      onChange={() => onPermissionToggle('invokeAgents')}
-    >
-      Invoke and set up other Contentful agents
+      Run AI actions (available for premium customers)
     </Checkbox>
   </Stack>
 );

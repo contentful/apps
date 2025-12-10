@@ -1,5 +1,5 @@
 import { type FC } from 'react';
-import { Stack, Text, Checkbox } from '@contentful/f36-components';
+import { Stack, Text, Checkbox, Note } from '@contentful/f36-components';
 import type {
   MigrationPermissions as MigrationPermissionsType,
   MigrationPermissionKey,
@@ -20,6 +20,10 @@ export const MigrationPermissions: FC<MigrationPermissionsProps> = ({
       To migrate content between environments or spaces, make sure the Remote
       MCP app is installed in the source space.
     </Text>
+
+    <Note variant="warning" title="Access required for migration">
+      To enable migrating content, grant <b>read</b>, <b>edit</b>, and <b>create</b> access for <b>entries</b>, <b>assets</b>, and <b>content types</b>.
+    </Note>
 
     <Checkbox
       isChecked={permissions.migrateWithinSpace}

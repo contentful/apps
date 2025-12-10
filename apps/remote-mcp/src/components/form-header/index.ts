@@ -1,1 +1,1 @@
-export { ConfigHeader } from './FormHeader';
+export { FormHeader } from './FormHeader';

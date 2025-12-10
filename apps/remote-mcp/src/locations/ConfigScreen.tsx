@@ -1,11 +1,12 @@
 import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Heading, Form, Paragraph, Flex, Checkbox, Stack } from '@contentful/f36-components';
-import { css } from 'emotion';
+import { Stack } from '@contentful/f36-components';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 import { PermissionsSection } from '../components/access-config';
 import { usePermissions } from '../hooks/usePermissions';
-import { ConfigHeader } from '../components/form-header';
+import { FormHeader } from '../components/form-header/FormHeader';
+import { Setup } from '../components/set-up/Setup';
+import { RolesPermissionsFooter } from '../components/roles-permissions-footer';
 
 const ConfigScreen = () => {
   const [expandedAccordions, setExpandedAccordions] = useState({
@@ -104,8 +105,9 @@ const ConfigScreen = () => {
       flexDirection="column"
       alignItems="flex-start"
       spacing="spacingXl"
-      style={{ maxWidth: '720px', margin: '0 auto', padding: '24px' }}>
-      <ConfigHeader />
+      style={{ maxWidth: '852px', margin: '0 auto', backgroundColor: 'white' }}
+      padding="spacingL">
+      <FormHeader />
       <PermissionsSection
         contentLifecyclePermissions={contentLifecyclePermissions}
         otherFeaturesPermissions={otherFeaturesPermissions}
@@ -119,6 +121,8 @@ const ConfigScreen = () => {
         onOtherFeatureToggle={handleOtherFeatureToggle}
         onMigrationToggle={handleMigrationToggle}
       />
+      <Setup />
+      <RolesPermissionsFooter />
     </Stack>
   );
 };
