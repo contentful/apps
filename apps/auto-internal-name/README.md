@@ -12,14 +12,14 @@ The Auto Internal Name app automatically fills entry internal name fields based 
 
 1. **Field Configuration**: Install and configure the app with:
 
-   - Field name to source the name from (the field that contains the value to use for internal names)
-   - CPA API key to assist with querying in the function
-
+   - **Source field ID** — Identifies the field that contains the value used for internal names.
+   - **Separator** — Defines the string that separates parent values.
+   - **Overrides** — Specifies content types that use a different source field ID.
+   
 2. **Field Appearance Location**: Use the field appearance location on target fields that should be auto-populated using this logic
 
 ### Entry Creation
 
-- Automatically uses a function behind the scenes to lookup the "parent" entry
 - Leverages the app config field source name to retrieve the correct value
 - Inserts the value into the target field automatically
 
