@@ -19,6 +19,7 @@
     "build": "tsc && vite build --outDir build",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:ci": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
