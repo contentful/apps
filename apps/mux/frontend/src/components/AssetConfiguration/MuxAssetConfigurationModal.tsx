@@ -38,7 +38,7 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
   sdk,
 }) => {
   const { muxEnableSignedUrls } = installationParams;
-  
+
   const [modalData, setModalData] = useState<ModalData>({
     videoQuality: 'plus',
     playbackPolicies: muxEnableSignedUrls ? ['signed'] : ['public'],
