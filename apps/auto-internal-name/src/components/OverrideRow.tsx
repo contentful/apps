@@ -141,7 +141,6 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
           <FormControl.Label marginBottom="spacingS">Content type</FormControl.Label>
           <Autocomplete
             key={`${overrideItem.id}-content-type`}
-            className={styles.autocomplete}
             items={filteredContentTypes.map((ct) => ({ id: ct.sys.id, name: ct.name }))}
             onInputValueChange={(name: string) => handleCTInputChange(name)}
             itemToString={(item: AutocompleteItem) => item.name}
@@ -163,7 +162,6 @@ const OverrideRow: React.FC<OverrideRowProps> = ({
           <FormControl.Label marginBottom="spacingS">Field name</FormControl.Label>
           <Autocomplete
             key={`${overrideItem.id}-field`}
-            className={styles.autocomplete}
             items={filteredFields}
             isDisabled={!overrideItem.contentTypeId}
             selectedItem={selectedField}

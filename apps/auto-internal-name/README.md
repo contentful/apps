@@ -1,21 +1,10 @@
 # Auto Internal Name
 
-A Contentful app that automatically generates internal names for entries based on parent entry relationships and configured naming conventions. This app accelerates content creation workflows by eliminating manual naming tasks and ensuring consistent naming standards across your content model.
+A Contentful app that generates entry internal names from parent relationships and configured naming conventions, speeding up content creation and ensuring consistent naming across your content model.
 
 ## Overview
 
-The Auto Internal Name app automatically populates internal name fields for entries when they are created, using a configurable source field from parent entries. This is particularly useful for content models with nested relationships.
-
-### Primary Function
-
-- **Accelerate** the time needed to provide an internal name for an entry
-- **Make it easy** to follow a standard naming convention
-- **Assist** in understanding the relationship between entries
-- **Really good** when lots of nested content is expected
-
-### Target Audience
-
-This app is designed for **Content Authors** who work with hierarchical content structures and need to maintain consistent internal naming conventions across their entries.
+The Auto Internal Name app automatically fills entry internal name fields based on a configurable source field from parent entries, which is useful for nested content models.
 
 ## Key Features
 
@@ -45,7 +34,7 @@ This app is designed for **Content Authors** who work with hierarchical content 
 ### Prerequisites
 
 - Node.js (version specified in package.json)
-- npm or yarn
+- npm
 - A Contentful space with appropriate permissions
 
 ### Development
@@ -109,15 +98,6 @@ For this command to work, the following environment variables must be set:
 - `CONTENTFUL_ORG_ID` - The ID of your organization
 - `CONTENTFUL_APP_DEF_ID` - The ID of the app to which to add the bundle
 - `CONTENTFUL_ACCESS_TOKEN` - A personal [access token](https://www.contentful.com/developers/docs/references/content-management-api/#/reference/personal-access-tokens)
-
-## Intended Use Case
-
-This app is ideal for content models where:
-
-- **Hierarchical relationships** exist between entries (e.g., categories with subcategories, pages with sections)
-- **Consistent naming conventions** are required across related entries
-- **High volume of nested content** is expected, making manual naming time-consuming
-- **Internal names** need to reflect relationships to parent entries for better organization and understanding
 
 ## Libraries to use
 

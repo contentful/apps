@@ -8,14 +8,4 @@ export const styles = {
   formControl: css({
     flex: 1,
   }),
-  autocomplete: css({
-    '& button': {
-      height: '100%',
-      display: 'flex',
-      alignItems: 'center',
-    },
-    '& [role="option"]': {
-      padding: '5px 8px',
-    },
-  }),
 };
