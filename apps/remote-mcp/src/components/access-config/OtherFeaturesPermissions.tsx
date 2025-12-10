@@ -1,5 +1,5 @@
 import { type FC } from 'react';
-import { Stack, Text, Checkbox } from '@contentful/f36-components';
+import { Stack, Text, Checkbox, Box } from '@contentful/f36-components';
 import type {
   OtherFeaturesPermissions as OtherFeaturesPermissionsType,
   OtherFeaturesPermissionKey,
@@ -18,12 +18,13 @@ export const OtherFeaturesPermissions: FC<OtherFeaturesPermissionsProps> = ({
     <Text>
       Allow the MCP server to take other actions within your Contentful space.
     </Text>
-
+  <Box marginTop="spacingS">
     <Checkbox
       isChecked={permissions.runAIActions}
       onChange={() => onPermissionToggle('runAIActions')}
     >
       Run AI actions (available for premium customers)
     </Checkbox>
+  </Box>
   </Stack>
 );

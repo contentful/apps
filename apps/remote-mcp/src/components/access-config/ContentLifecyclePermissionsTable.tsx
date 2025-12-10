@@ -1,5 +1,5 @@
 import { type FC } from 'react';
-import { Stack, Text, Checkbox, Table, Flex } from '@contentful/f36-components';
+import { Stack, Text, Checkbox, Table, Flex, Box } from '@contentful/f36-components';
 import type { ContentLifecyclePermissions } from '../types/config';
 
 interface ContentLifecyclePermissionsTableProps {
@@ -27,10 +27,11 @@ export const ContentLifecyclePermissionsTable: FC<
       Allow the MCP server to read, edit, create, delete, publish, un-publish,
       archive or unarchive entities within Contentful.
     </Text>
-
-    <Checkbox isChecked={permissions.selectAll} onChange={onSelectAllToggle}>
-      Select all entities and actions in the table below
-    </Checkbox>
+    <Box marginTop="spacingS">
+      <Checkbox isChecked={permissions.selectAll} onChange={onSelectAllToggle}>
+        Select all entities and actions in the table below
+      </Checkbox>
+    </Box>
 
     <div style={{ width: '100%', overflowX: 'auto' }}>
       <Table style={{ minWidth: '800px' }}>
