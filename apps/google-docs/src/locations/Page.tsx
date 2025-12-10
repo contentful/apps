@@ -15,8 +15,6 @@ import { useDocumentSubmission } from '../hooks/useDocumentSubmission';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
-
-  // Custom hooks
   const { modalStates, getOverlayPropsForModal, openModal, closeModal } = useModalManagement();
   const {
     hasStarted,
