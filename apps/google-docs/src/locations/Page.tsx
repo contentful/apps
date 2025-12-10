@@ -1,5 +1,15 @@
 import { useState } from 'react';
-import { Box, Button, Flex, Heading, Note, Paragraph, Stack } from '@contentful/f36-components';
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Note,
+  Paragraph,
+  Stack,
+  Textarea,
+  Text,
+} from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentTypeSelector } from '../components';
@@ -16,6 +26,8 @@ const Page = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
+  const [pastedJson, setPastedJson] = useState<string>('');
+  const [showPasteJson, setShowPasteJson] = useState<boolean>(false);
 
   const handleSubmit = async () => {
     // Validation
@@ -73,6 +85,25 @@ const Page = () => {
     setErrorMessage(message);
   };
 
+  const handlePasteJson = () => {
+    if (!pastedJson || !pastedJson.trim()) {
+      setErrorMessage('Please paste JSON content');
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(pastedJson);
+      setDocument({ title: 'Pasted JSON Document', data: parsed });
+      setErrorMessage(null);
+      setSuccessMessage('JSON document loaded successfully');
+      setPastedJson('');
+      setShowPasteJson(false);
+    } catch (error) {
+      setErrorMessage('Invalid JSON format. Please check your JSON and try again.');
+      console.error('JSON parse error:', error);
+    }
+  };
+
   return (
     <Flex flexDirection="column" alignItems="stretch">
       <Box
@@ -92,6 +123,42 @@ const Page = () => {
 
         <Stack spacing="spacingXl" flexDirection="column" alignItems="stretch">
           <GoogleDocUploader sdk={sdk} onSuccess={handleSuccess} onError={handleError} />
+
+          {/* Temporary: Paste JSON feature */}
+          <Box>
+            <Button
+              variant="secondary"
+              onClick={() => setShowPasteJson(!showPasteJson)}
+              size="small">
+              {showPasteJson ? 'Hide' : 'Paste JSON (Temporary)'}
+            </Button>
+            {showPasteJson && (
+              <Box marginTop="spacingM">
+                <Text fontSize="fontSizeS" fontColor="gray600" marginBottom="spacingS">
+                  Paste your Google Docs JSON here (temporary feature)
+                </Text>
+                <Textarea
+                  value={pastedJson}
+                  onChange={(e) => setPastedJson(e.target.value)}
+                  placeholder="Paste Google Docs JSON here..."
+                  rows={10}
+                  style={{
+                    fontFamily: 'monospace',
+                    fontSize: '12px',
+                  }}
+                />
+                <Box marginTop="spacingS">
+                  <Button
+                    variant="secondary"
+                    onClick={handlePasteJson}
+                    size="small"
+                    isDisabled={!pastedJson || !pastedJson.trim()}>
+                    Load Pasted JSON
+                  </Button>
+                </Box>
+              </Box>
+            )}
+          </Box>
 
           {document && (
             <Box>

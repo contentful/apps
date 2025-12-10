@@ -198,26 +198,57 @@ export class MarkdownParser {
           if (urlEnd !== -1) {
             const altText = line.slice(altStart, altEnd);
             const url = line.slice(urlStart, urlEnd).trim();
+            // Normalize URL the same way as in entryService.ts (remove all whitespace)
+            // This ensures we can find the asset ID even if the URL has whitespace differences
+            const normalizedUrl = url.replace(/\s+/g, '');
             flush();
-            const assetId = this.urlToAssetId?.[url];
+
+            // Try to find asset ID using composite key (URL + alt) first, then fall back to URL only
+            // This handles cases where same URL appears with different alt text (e.g., drawing vs image)
+            const compositeKey = `${normalizedUrl}::${altText || 'image'}`;
+            const drawingKey = altText.toLowerCase().includes('drawing')
+              ? `${normalizedUrl}::drawing`
+              : null;
+            let assetId =
+              this.urlToAssetId?.[compositeKey] ||
+              (drawingKey ? this.urlToAssetId?.[drawingKey] : null) ||
+              this.urlToAssetId?.[normalizedUrl];
+
             if (assetId) {
-              const tokenText = line.slice(i, urlEnd + 1);
-              const isStandaloneToken = nodes.length === 0 && tokenText.trim() === line.trim();
-              if (isStandaloneToken) {
-                nodes.push({
-                  nodeType: 'embedded-asset-block',
-                  content: [],
-                  data: { target: { sys: { type: 'Link', linkType: 'Asset', id: assetId } } },
-                });
-              } else {
-                const LINK_TEXT = altText || 'image';
-                nodes.push({
-                  nodeType: 'asset-hyperlink',
-                  data: { target: { sys: { type: 'Link', linkType: 'Asset', id: assetId } } },
-                  content: [createTextNode(LINK_TEXT, [])],
-                });
-              }
+              // Always use asset-hyperlink for inline images (never embedded-asset-block in inline context)
+              // Standalone images are handled at the parseDocument level
+              const LINK_TEXT = altText || 'image';
+              console.log(
+                `✓ Mapped image URL to asset: ${normalizedUrl.substring(
+                  0,
+                  100
+                )}... -> ${assetId} (alt: "${altText}")`
+              );
+              nodes.push({
+                nodeType: 'asset-hyperlink',
+                data: { target: { sys: { type: 'Link', linkType: 'Asset', id: assetId } } },
+                content: [createTextNode(LINK_TEXT, [])],
+              });
             } else {
+              // Log when we can't find an asset ID for a URL (helps debug mapping issues)
+              console.warn(
+                `✗ No asset ID found for image URL: ${normalizedUrl.substring(
+                  0,
+                  100
+                )}... (alt: "${altText}")`
+              );
+              console.warn(
+                `  Tried keys: "${compositeKey.substring(0, 80)}...", "${normalizedUrl.substring(
+                  0,
+                  80
+                )}..."`
+              );
+              console.warn(
+                `  Available URL keys in map: ${Object.keys(this.urlToAssetId || {})
+                  .slice(0, 5)
+                  .map((k) => k.substring(0, 50))
+                  .join(', ')}${Object.keys(this.urlToAssetId || {}).length > 5 ? '...' : ''}`
+              );
               nodes.push(createTextNode(line.slice(i, urlEnd + 1), []));
             }
             i = urlEnd + 1;
@@ -357,6 +388,65 @@ export class MarkdownParser {
         });
         continue;
       }
+
+      // Check for standalone image token BEFORE parsing inline
+      // A standalone image is a line that contains ONLY an image token (with optional whitespace)
+      const imageMatch = rawLine.match(/^\s*!\[([^\]]*?)\]\(([\s\S]*?)\)\s*$/);
+      if (imageMatch) {
+        const url = imageMatch[2].trim();
+        const altText = imageMatch[1] || '';
+        // Normalize URL the same way as in entryService.ts (remove all whitespace)
+        // This ensures we can find the asset ID even if the URL has whitespace differences
+        const normalizedUrl = url.replace(/\s+/g, '');
+
+        // Try to find asset ID using composite key (URL + alt) first, then fall back to URL only
+        // This handles cases where same URL appears with different alt text (e.g., drawing vs image)
+        const compositeKey = `${normalizedUrl}::${altText || 'image'}`;
+        const drawingKey = altText.toLowerCase().includes('drawing')
+          ? `${normalizedUrl}::drawing`
+          : null;
+        let assetId =
+          this.urlToAssetId?.[compositeKey] ||
+          (drawingKey ? this.urlToAssetId?.[drawingKey] : null) ||
+          this.urlToAssetId?.[normalizedUrl];
+
+        if (assetId) {
+          // Standalone image -> add as block-level embedded asset (direct child of document)
+          console.log(
+            `✓ Mapped standalone image URL to asset: ${normalizedUrl.substring(
+              0,
+              100
+            )}... -> ${assetId} (alt: "${altText}")`
+          );
+          documentChildren.push({
+            nodeType: 'embedded-asset-block',
+            content: [],
+            data: { target: { sys: { type: 'Link', linkType: 'Asset', id: assetId } } },
+          });
+          continue;
+        } else {
+          // Log when we can't find an asset ID for a standalone image URL (helps debug mapping issues)
+          console.warn(
+            `✗ No asset ID found for standalone image URL: ${normalizedUrl.substring(
+              0,
+              100
+            )}... (alt: "${altText}")`
+          );
+          console.warn(
+            `  Tried keys: "${compositeKey.substring(0, 80)}...", "${normalizedUrl.substring(
+              0,
+              80
+            )}..."`
+          );
+          console.warn(
+            `  Available URL keys in map: ${Object.keys(this.urlToAssetId || {})
+              .slice(0, 5)
+              .map((k) => k.substring(0, 50))
+              .join(', ')}${Object.keys(this.urlToAssetId || {}).length > 5 ? '...' : ''}`
+          );
+        }
+      }
+
       const headingMatch = rawLine.match(/^\s*(#{1,6})\s+(.*)$/);
       const boldOnlyMatch = headingMatch
         ? null
@@ -369,12 +459,22 @@ export class MarkdownParser {
         : 0;
       const line = headingMatch ? headingMatch[2] : boldOnlyMatch ? boldOnlyMatch[2] : rawLine;
       const nodes = this.parseInline(line);
-      if (nodes.length) {
+
+      // Ensure no embedded-asset-block nodes end up in paragraphs (defensive check)
+      const inlineNodes = nodes.filter((node) => node.nodeType !== 'embedded-asset-block');
+      const blockNodes = nodes.filter((node) => node.nodeType === 'embedded-asset-block');
+
+      if (inlineNodes.length) {
         if (isHeading) {
-          documentChildren.push(createHeading(headingLevel, nodes));
+          documentChildren.push(createHeading(headingLevel, inlineNodes));
         } else {
-          documentChildren.push(createParagraph(nodes));
+          documentChildren.push(createParagraph(inlineNodes));
         }
+      }
+
+      // If any embedded-asset-block nodes were created (shouldn't happen, but handle gracefully)
+      for (const blockNode of blockNodes) {
+        documentChildren.push(blockNode);
       }
     }
     return documentChildren;

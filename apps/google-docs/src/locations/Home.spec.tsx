@@ -12,6 +12,6 @@ describe('Home component', () => {
   it('Component text exists', () => {
     const { getByText } = render(<Home />);
 
-    expect(getByText('Hello Home Component (AppId: test-app)')).toBeInTheDocument();
+    expect(getByText('Hello Home Component (AppId: test-app)')).toBeTruthy();
   });
 });

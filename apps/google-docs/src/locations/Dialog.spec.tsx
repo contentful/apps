@@ -12,6 +12,6 @@ describe('Dialog component', () => {
   it('Component text exists', () => {
     const { getByText } = render(<Dialog />);
 
-    expect(getByText('Hello Dialog Component (AppId: test-app)')).toBeInTheDocument();
+    expect(getByText('Hello Dialog Component (AppId: test-app)')).toBeTruthy();
   });
 });
