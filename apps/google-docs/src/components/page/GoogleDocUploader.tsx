@@ -73,12 +73,6 @@ export const GoogleDocUploader = ({
           {selectedDocument ? 'Change Document' : 'Select Document'}
         </Button>
 
-        {selectedDocument && (
-          <Box marginTop="spacingS">
-            <Text fontWeight="fontWeightDemiBold">Selected: {selectedDocument}</Text>
-          </Box>
-        )}
-
         {isUploading && (
           <Box marginTop="spacingS">
             <Text fontColor="gray500" fontSize="fontSizeS">
