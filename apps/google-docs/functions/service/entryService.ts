@@ -57,9 +57,6 @@ function extractImageMetadata(markdownText: string): ImageMetadata[] {
       continue;
     }
 
-    // Log each image token found for debugging
-    console.log(`Found image token: alt="${altText}", url=${url.substring(0, 100)}...`);
-
     // Extract file extension and determine content type from URL
     let fileExtension = 'jpg';
     let contentType = 'image/jpeg';
@@ -299,280 +296,19 @@ async function createAssetFromUrlFast(
   );
 
   // Trigger processing in the background (don't wait for it)
-  cma.asset.processForAllLocales({ spaceId, environmentId }, asset).catch((err) => {
-    console.warn('Background asset processing failed (non-blocking):', {
-      assetId: asset.sys.id,
-      error: err instanceof Error ? err.message : String(err),
-    });
+  cma.asset.processForAllLocales({ spaceId, environmentId }, asset).catch(() => {
+    // Silently fail - processing will be retried by Contentful
   });
 
   // Trigger publishing in the background (don't wait for it)
   // Note: Publishing will happen after processing completes
   setTimeout(() => {
-    cma.asset.publish({ spaceId, environmentId, assetId: asset.sys.id }, asset).catch((err) => {
-      console.warn('Background asset publishing failed (non-blocking):', {
-        assetId: asset.sys.id,
-        error: err instanceof Error ? err.message : String(err),
-      });
+    cma.asset.publish({ spaceId, environmentId, assetId: asset.sys.id }, asset).catch(() => {
+      // Silently fail - publishing will be retried by Contentful
     });
   }, 1000); // Small delay to allow processing to start
 
   return asset;
-}
-
-async function createAndPublishDevAssetFromUrl(
-  cma: PlainClientAPI,
-  spaceId: string,
-  environmentId: string,
-  url: string,
-  metadata?: { title?: string; altText?: string; fileName?: string; contentType?: string }
-) {
-  // Validate inputs
-  if (!cma) {
-    throw new Error('CMA client is required');
-  }
-  if (!spaceId || typeof spaceId !== 'string' || spaceId.trim().length === 0) {
-    throw new Error('spaceId is required and must be a non-empty string');
-  }
-  if (!environmentId || typeof environmentId !== 'string' || environmentId.trim().length === 0) {
-    throw new Error('environmentId is required and must be a non-empty string');
-  }
-
-  const validatedUrl = validateAssetUrl(url);
-
-  // Use metadata if provided, otherwise extract from URL
-  const fileName = metadata?.fileName || 'dev-image.jpg';
-  const contentType = metadata?.contentType || 'image/jpeg';
-  const title = metadata?.title || metadata?.altText || 'Dev Image';
-
-  console.log('Creating dev asset from URL:', validatedUrl, { fileName, contentType, title });
-
-  // Retry asset creation with exponential backoff
-  const asset = await retryWithBackoff(
-    () =>
-      cma.asset.create(
-        { spaceId, environmentId },
-        {
-          fields: {
-            title: { 'en-US': title },
-            file: {
-              'en-US': {
-                contentType,
-                fileName,
-                upload: validatedUrl,
-              },
-            },
-          },
-        }
-      ),
-    DEFAULT_RETRY_CONFIG,
-    'Asset creation'
-  );
-
-  // Best-effort process + publish; if it fails, return draft asset
-  try {
-    const processed = await retryWithBackoff(
-      () => cma.asset.processForAllLocales({ spaceId, environmentId }, asset),
-      DEFAULT_RETRY_CONFIG,
-      'Asset processing'
-    );
-    // Poll briefly until the file URL exists or timeout (~2s)
-    const start = Date.now();
-    let current = processed;
-    let attempt = 0;
-    while (Date.now() - start < 2000) {
-      try {
-        const fetched = await cma.asset.get({
-          spaceId,
-          environmentId,
-          assetId: current.sys.id,
-        });
-        const file = (fetched.fields?.file as any)?.['en-US'];
-        if (file && (file.url || file.uploadFrom || file.upload)) {
-          current = fetched;
-          break;
-        }
-      } catch (err) {
-        // Best-effort: log and retry
-        console.warn('Polling asset for file URL failed; will retry', {
-          assetId: current.sys.id,
-          attempt,
-          error:
-            err instanceof Error
-              ? err.message
-              : typeof err === 'string'
-              ? err
-              : JSON.stringify(err),
-        });
-      }
-      attempt += 1;
-      await new Promise((r) => setTimeout(r, 200));
-    }
-    try {
-      const published = await retryWithBackoff(
-        () => cma.asset.publish({ spaceId, environmentId, assetId: current.sys.id }, current),
-        DEFAULT_RETRY_CONFIG,
-        'Asset publishing'
-      );
-      return published;
-    } catch (err) {
-      console.error('Asset publish failed; returning processed (unpublished) asset', {
-        assetId: current.sys.id,
-        error:
-          err instanceof Error ? err.message : typeof err === 'string' ? err : JSON.stringify(err),
-      });
-      return current;
-    }
-  } catch (err) {
-    console.error('Asset processing failed; returning original draft asset', {
-      error:
-        err instanceof Error ? err.message : typeof err === 'string' ? err : JSON.stringify(err),
-    });
-    return asset;
-  }
-}
-
-// (No block-embed fallback; images are inserted inline where tokens occur)
-
-/**
- * Validates and transforms a field value according to Contentful field validation rules
- * @param value - The field value to validate
- * @param fieldDef - The field definition from Contentful
- * @returns The validated and potentially transformed value, or null if value cannot be made valid
- */
-function validateAndTransformFieldValue(
-  value: unknown,
-  fieldDef: ContentTypeProps['fields'][0]
-): unknown {
-  if (value === null || value === undefined) {
-    return value;
-  }
-
-  // Get validation rules for this field
-  const validations = fieldDef.validations || [];
-
-  // Handle character count validation for text fields (Symbol, Text)
-  if (fieldDef.type === 'Symbol' || fieldDef.type === 'Text') {
-    if (typeof value === 'string') {
-      let validatedValue = value;
-      let wasModified = false;
-
-      // Check for size validation (character count limits)
-      for (const validation of validations) {
-        if (validation.size) {
-          const { min, max } = validation.size;
-
-          if (min !== undefined && validatedValue.length < min) {
-            // Value is too short
-            // Strategy: If the value is close to min (within 20%), pad with spaces
-            // Otherwise, try to extend by repeating the last word or phrase
-            // If it's way too short, we'll leave it and let Contentful reject it
-            const shortfall = min - validatedValue.length;
-            const percentShort = (shortfall / min) * 100;
-
-            if (percentShort <= 20 && validatedValue.trim().length > 0) {
-              // Close to minimum - pad with spaces at the end
-              validatedValue = validatedValue.padEnd(min, ' ');
-              wasModified = true;
-              console.warn(
-                `Field "${fieldDef.id}" value was padded from ${
-                  value.length
-                } to ${min} characters (min). Original: "${value.substring(0, 50)}${
-                  value.length > 50 ? '...' : ''
-                }"`
-              );
-            } else if (validatedValue.trim().length > 0) {
-              // Too short - try to extend intelligently
-              // Repeat the last sentence or phrase to reach minimum
-              const trimmed = validatedValue.trim();
-              const words = trimmed.split(/\s+/);
-              if (words.length > 0) {
-                // Repeat the last few words to reach minimum
-                const lastPhrase = words.slice(-3).join(' ');
-                while (validatedValue.length < min && lastPhrase.length > 0) {
-                  validatedValue = (validatedValue + ' ' + lastPhrase).substring(0, min);
-                }
-                wasModified = true;
-                console.warn(
-                  `Field "${fieldDef.id}" value was extended from ${value.length} to ${
-                    validatedValue.length
-                  } characters (min: ${min}). Extended value: "${validatedValue.substring(0, 50)}${
-                    validatedValue.length > 50 ? '...' : ''
-                  }"`
-                );
-              } else {
-                console.warn(
-                  `Field "${fieldDef.id}" value is too short: ${
-                    validatedValue.length
-                  } < ${min} (min). Value: "${validatedValue.substring(0, 50)}${
-                    validatedValue.length > 50 ? '...' : ''
-                  }"`
-                );
-              }
-            } else {
-              // Empty or whitespace-only value
-              console.warn(
-                `Field "${fieldDef.id}" value is too short or empty: ${validatedValue.length} < ${min} (min). Cannot auto-fix empty values.`
-              );
-            }
-          }
-
-          if (max !== undefined && validatedValue.length > max) {
-            // Value is too long - truncate intelligently (at word boundary if possible)
-            const originalLength = validatedValue.length;
-            if (validatedValue.length > max) {
-              // Try to truncate at a word boundary
-              let truncated = validatedValue.substring(0, max);
-              const lastSpace = truncated.lastIndexOf(' ');
-              if (lastSpace > max * 0.8) {
-                // If the last space is reasonably close to max, truncate there
-                truncated = truncated.substring(0, lastSpace);
-              }
-              validatedValue = truncated;
-              wasModified = true;
-              console.warn(
-                `Field "${fieldDef.id}" value was truncated from ${originalLength} to ${
-                  validatedValue.length
-                } characters (max: ${max}). Truncated value: "${validatedValue.substring(0, 50)}${
-                  validatedValue.length > 50 ? '...' : ''
-                }"`
-              );
-            }
-          }
-        }
-      }
-
-      return validatedValue;
-    }
-  }
-
-  // Handle number validation
-  if (fieldDef.type === 'Number' || fieldDef.type === 'Integer') {
-    if (typeof value === 'number') {
-      let validatedValue = value;
-
-      for (const validation of validations) {
-        if (validation.range) {
-          const { min, max } = validation.range;
-
-          if (min !== undefined && validatedValue < min) {
-            validatedValue = min;
-            console.warn(`Field "${fieldDef.id}" value ${value} was adjusted to minimum ${min}`);
-          }
-
-          if (max !== undefined && validatedValue > max) {
-            validatedValue = max;
-            console.warn(`Field "${fieldDef.id}" value ${value} was adjusted to maximum ${max}`);
-          }
-        }
-      }
-
-      return validatedValue;
-    }
-  }
-
-  // For other field types, return as-is
-  return value;
 }
 
 function transformFieldsForContentType(
@@ -618,7 +354,7 @@ function transformFieldsForContentType(
         }
       } else {
         // Apply field validation rules before setting the value
-        perLocale[locale] = validateAndTransformFieldValue(value, def);
+        perLocale[locale] = value;
       }
     }
 
@@ -632,6 +368,36 @@ function transformFieldsForContentType(
  * Validates input parameters for createEntries function
  * @throws Error if validation fails
  */
+/**
+ * Validates that a value is a non-empty string
+ */
+function validateNonEmptyString(value: unknown, name: string): asserts value is string {
+  if (!value || typeof value !== 'string' || value.trim().length === 0) {
+    throw new Error(`${name} is required and must be a non-empty string`);
+  }
+}
+
+/**
+ * Validates that a value is a non-empty array
+ */
+function validateNonEmptyArray<T>(value: unknown, name: string): asserts value is T[] {
+  if (!Array.isArray(value)) {
+    throw new Error(`${name} must be an array`);
+  }
+  if (value.length === 0) {
+    throw new Error(`${name} cannot be empty`);
+  }
+}
+
+/**
+ * Validates that a value is a non-null object (not an array)
+ */
+function validateObject(value: unknown, name: string): asserts value is Record<string, unknown> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${name} must be an object`);
+  }
+}
+
 function validateCreateEntriesInput(
   cma: PlainClientAPI | null | undefined,
   entries: EntryToCreate[] | null | undefined,
@@ -640,104 +406,67 @@ function validateCreateEntriesInput(
     | null
     | undefined
 ): void {
+  // Validate CMA client
   if (!cma) {
     throw new Error('CMA client is required and cannot be null or undefined');
   }
 
+  // Validate entries array
   if (!entries) {
     throw new Error('Entries array is required and cannot be null or undefined');
   }
+  validateNonEmptyArray<EntryToCreate>(entries, 'Entries array');
 
-  if (!Array.isArray(entries)) {
-    throw new Error('Entries must be an array');
-  }
-
-  if (entries.length === 0) {
-    throw new Error('Entries array cannot be empty');
-  }
-
+  // Validate config
   if (!config) {
     throw new Error('Config is required and cannot be null or undefined');
   }
-
   const { spaceId, environmentId, contentTypes } = config;
-
-  if (!spaceId || typeof spaceId !== 'string' || spaceId.trim().length === 0) {
-    throw new Error('spaceId is required and must be a non-empty string');
-  }
-
-  if (!environmentId || typeof environmentId !== 'string' || environmentId.trim().length === 0) {
-    throw new Error('environmentId is required and must be a non-empty string');
-  }
+  validateNonEmptyString(spaceId, 'spaceId');
+  validateNonEmptyString(environmentId, 'environmentId');
 
   if (!contentTypes) {
     throw new Error('contentTypes is required and cannot be null or undefined');
   }
+  validateNonEmptyArray<ContentTypeProps>(contentTypes, 'contentTypes');
 
-  if (!Array.isArray(contentTypes)) {
-    throw new Error('contentTypes must be an array');
-  }
-
-  // Validate each entry structure
-  for (let i = 0; i < entries.length; i++) {
-    const entry = entries[i];
+  // Validate each entry
+  entries.forEach((entry, i) => {
     if (!entry) {
       throw new Error(`Entry at index ${i} is null or undefined`);
     }
-
-    if (typeof entry !== 'object' || Array.isArray(entry)) {
-      throw new Error(`Entry at index ${i} must be an object`);
-    }
-
-    if (
-      !entry.contentTypeId ||
-      typeof entry.contentTypeId !== 'string' ||
-      entry.contentTypeId.trim().length === 0
-    ) {
-      throw new Error(`Entry at index ${i} must have a valid contentTypeId (non-empty string)`);
-    }
+    validateObject(entry, `Entry at index ${i}`);
+    validateNonEmptyString(entry.contentTypeId, `Entry at index ${i} contentTypeId`);
 
     if (!entry.fields) {
       throw new Error(`Entry at index ${i} must have a fields property`);
     }
+    validateObject(entry.fields, `Entry at index ${i} fields`);
 
-    if (typeof entry.fields !== 'object' || Array.isArray(entry.fields)) {
-      throw new Error(`Entry at index ${i} fields must be an object`);
-    }
-
-    // Validate fields structure: should be { fieldId: { locale: value } }
-    for (const [fieldId, localizedValue] of Object.entries(entry.fields)) {
+    // Validate fields structure: { fieldId: { locale: value } }
+    Object.entries(entry.fields).forEach(([fieldId, localizedValue]) => {
       if (!fieldId || typeof fieldId !== 'string') {
         throw new Error(`Entry at index ${i} has invalid field ID: ${fieldId}`);
       }
 
-      if (!localizedValue || typeof localizedValue !== 'object' || Array.isArray(localizedValue)) {
-        throw new Error(
-          `Entry at index ${i}, field "${fieldId}" must be an object with locale keys`
-        );
-      }
+      validateObject(localizedValue, `Entry at index ${i}, field "${fieldId}"`);
 
-      // Check that localizedValue has at least one locale
       const localeKeys = Object.keys(localizedValue);
       if (localeKeys.length === 0) {
         throw new Error(`Entry at index ${i}, field "${fieldId}" must have at least one locale`);
       }
 
       // Validate locale keys and values
-      for (const [locale, value] of Object.entries(localizedValue)) {
-        if (!locale || typeof locale !== 'string') {
-          throw new Error(`Entry at index ${i}, field "${fieldId}" has invalid locale: ${locale}`);
-        }
-
-        // Value can be various types, but not null (undefined is allowed to skip fields)
+      Object.entries(localizedValue).forEach(([locale, value]) => {
+        validateNonEmptyString(locale, `Entry at index ${i}, field "${fieldId}" locale`);
         if (value === null) {
           throw new Error(
             `Entry at index ${i}, field "${fieldId}", locale "${locale}" has null value (use undefined to skip)`
           );
         }
-      }
-    }
-  }
+      });
+    });
+  });
 }
 
 /**
@@ -748,18 +477,128 @@ function validateCreateEntriesInput(
  * @param config - Space and environment configuration
  * @returns Promise resolving to creation results with entries and errors
  */
+/**
+ * Extracts unique image tokens from an entry's RichText fields
+ */
+function extractImageTokensFromEntry(
+  entry: EntryToCreate,
+  contentType: ContentTypeProps
+): Map<string, ImageMetadata> {
+  const imageTokenMap = new Map<string, ImageMetadata>();
+
+  for (const field of contentType.fields) {
+    if (field.type !== 'RichText') continue;
+    const originalLocalized = entry.fields[field.id];
+    if (!originalLocalized) continue;
+
+    for (const originalVal of Object.values(originalLocalized)) {
+      if (typeof originalVal !== 'string') continue;
+      const metadata = extractImageMetadata(originalVal);
+
+      for (const meta of metadata) {
+        const normalizedUrl = meta.url.replace(/\s+/g, '');
+        const tokenKey = `${normalizedUrl}::${meta.altText || 'image'}`;
+
+        if (!imageTokenMap.has(tokenKey)) {
+          imageTokenMap.set(tokenKey, meta);
+        }
+      }
+    }
+  }
+
+  return imageTokenMap;
+}
+
+/**
+ * Creates assets for image tokens in parallel and returns mapping results
+ */
+async function createAssetsForTokens(
+  cma: PlainClientAPI,
+  spaceId: string,
+  environmentId: string,
+  imageTokenMap: Map<string, ImageMetadata>
+): Promise<Array<{ tokenKey: string; normalizedUrl: string; assetId: string } | null>> {
+  const assetCreationPromises = Array.from(imageTokenMap.entries()).map(
+    async ([tokenKey, metadata]) => {
+      let imageUrl: string;
+      try {
+        new URL(metadata.url);
+        imageUrl = metadata.url;
+      } catch {
+        imageUrl = 'https://placehold.co/800x400?text=Dev+Image';
+      }
+
+      try {
+        const asset = await createAssetFromUrlFast(cma, spaceId, environmentId, imageUrl, {
+          title: metadata.altText || metadata.fileName || 'Image',
+          altText: metadata.altText,
+          fileName: metadata.fileName,
+          contentType: metadata.contentType,
+        });
+
+        return {
+          tokenKey,
+          normalizedUrl: metadata.url.replace(/\s+/g, ''),
+          assetId: asset.sys.id,
+        };
+      } catch {
+        return null;
+      }
+    }
+  );
+
+  return Promise.all(assetCreationPromises);
+}
+
+/**
+ * Builds URL to Asset ID mapping from asset creation results
+ */
+function buildUrlToAssetIdMap(
+  results: Array<{ tokenKey: string; normalizedUrl: string; assetId: string } | null>,
+  imageTokenMap: Map<string, ImageMetadata>
+): Record<string, string> {
+  const urlToAssetId: Record<string, string> = {};
+  const seenUrls = new Set<string>();
+
+  for (const result of results) {
+    if (!result) continue;
+
+    const { tokenKey, normalizedUrl, assetId } = result;
+    const metadata = imageTokenMap.get(tokenKey);
+    if (!metadata) continue;
+
+    // Map tokenKey (primary lookup key)
+    urlToAssetId[tokenKey] = assetId;
+
+    // Map normalized URL (only for first occurrence to prevent overwrites)
+    if (!seenUrls.has(normalizedUrl)) {
+      urlToAssetId[normalizedUrl] = assetId;
+      seenUrls.add(normalizedUrl);
+    }
+
+    // Map composite key
+    const compositeKey = `${normalizedUrl}::${metadata.altText || 'image'}`;
+    urlToAssetId[compositeKey] = assetId;
+
+    // Map drawing-specific key if applicable
+    if (metadata.altText.toLowerCase().includes('drawing')) {
+      urlToAssetId[`${normalizedUrl}::drawing`] = assetId;
+    }
+  }
+
+  return urlToAssetId;
+}
+
 export async function createEntries(
   cma: PlainClientAPI,
   entries: EntryToCreate[],
   config: { spaceId: string; environmentId: string; contentTypes: ContentTypeProps[] }
 ): Promise<EntryCreationResult> {
-  // Validate all inputs before processing
   try {
     validateCreateEntriesInput(cma, entries, config);
   } catch (validationError) {
     const errorMessage =
       validationError instanceof Error ? validationError.message : String(validationError);
-    console.error('Input validation failed:', errorMessage);
     return {
       createdEntries: [],
       errors: [
@@ -776,207 +615,34 @@ export async function createEntries(
   const createdEntries: EntryProps[] = [];
   const errors: Array<{ contentTypeId: string; error: string; details?: any }> = [];
 
-  // Create entries sequentially to avoid rate limiting issues
-  // In production, you may want to implement batching and retry logic
-  for (let i = 0; i < entries.length; i++) {
-    const entry = entries[i];
-
+  for (const entry of entries) {
     try {
       const contentType = contentTypes.find((ct) => ct.sys.id === entry.contentTypeId);
-      // Build URL->assetId map: extract metadata and create assets
       let urlToAssetId: Record<string, string> | undefined;
+
       if (contentType) {
-        // Extract all image metadata from RichText fields
-        // Track both URL and alt text to handle cases where same URL appears with different alt text
-        // Use tokenKey (URL::alt) as the key to ensure each unique token gets its own asset
-        const imageTokenMap = new Map<string, ImageMetadata>();
+        const imageTokenMap = extractImageTokensFromEntry(entry, contentType);
 
-        for (const field of contentType.fields) {
-          if (field.type !== 'RichText') continue;
-          const originalLocalized = entry.fields[field.id];
-          if (!originalLocalized) continue;
-          for (const originalVal of Object.values(originalLocalized)) {
-            if (typeof originalVal !== 'string') continue;
-            const metadata = extractImageMetadata(originalVal);
-            for (const meta of metadata) {
-              // Use normalized URL as base
-              const normalizedUrl = meta.url.replace(/\s+/g, '');
-              // Create a unique key combining URL and alt text to handle duplicates
-              // This ensures drawings with same URL as images get separate assets
-              const tokenKey = `${normalizedUrl}::${meta.altText || 'image'}`;
-
-              // If we haven't seen this exact token (URL + alt) before, add it
-              if (!imageTokenMap.has(tokenKey)) {
-                imageTokenMap.set(tokenKey, meta);
-              }
-            }
-          }
-        }
-
-        // Create assets for unique images - one asset per unique token (URL + alt)
         if (imageTokenMap.size > 0) {
-          urlToAssetId = {};
-
-          // Create a separate asset for each unique image token
-          // Use composite keys (URL + alt) to handle cases where same URL appears with different alt text
-          // OPTIMIZATION: Create assets in parallel and without waiting for processing/publishing
-          // This prevents timeouts when processing many images
-          console.log(
-            `Processing ${imageTokenMap.size} unique image tokens for asset creation (parallel, fast mode)`
-          );
-
-          // Prepare all asset creation promises
-          const assetCreationPromises = Array.from(imageTokenMap.entries()).map(
-            async ([tokenKey, metadata]) => {
-              let imageUrl: string;
-              try {
-                const parsed = new URL(metadata.url);
-                const host = parsed.hostname;
-
-                // Use the actual URL - Contentful will try to fetch it
-                // If it fails, Contentful will handle the error gracefully
-                // For googleusercontent.com URLs, they may require authentication, but we'll try anyway
-                imageUrl = metadata.url;
-
-                console.log(`Creating asset for image token: ${imageUrl.substring(0, 100)}...`, {
-                  fileName: metadata.fileName,
-                  contentType: metadata.contentType,
-                  host,
-                  altText: metadata.altText,
-                  tokenKey: tokenKey.substring(0, 100),
-                  isDrawing: metadata.altText.toLowerCase().includes('drawing'),
-                });
-              } catch (e) {
-                // If URL parsing fails, don't trust the URL, use the dev image
-                console.warn(
-                  'Invalid URL format, using placeholder:',
-                  metadata.url.substring(0, 100)
-                );
-                imageUrl = 'https://placehold.co/800x400?text=Dev+Image';
-              }
-
-              try {
-                // Use fast asset creation (no waiting for processing/publishing)
-                const asset = await createAssetFromUrlFast(cma, spaceId, environmentId, imageUrl, {
-                  title: metadata.altText || metadata.fileName || 'Image',
-                  altText: metadata.altText,
-                  fileName: metadata.fileName,
-                  contentType: metadata.contentType,
-                });
-
-                // Return mapping info for later processing
-                const normalizedUrl = metadata.url.replace(/\s+/g, '');
-                return {
-                  tokenKey,
-                  normalizedUrl,
-                  metadata,
-                  assetId: asset.sys.id,
-                };
-              } catch (error) {
-                const errorMessage = error instanceof Error ? error.message : String(error);
-                console.error(
-                  `✗ Failed to create asset for token ${tokenKey.substring(0, 100)}...:`,
-                  errorMessage
-                );
-                // Return null to indicate failure
-                return null;
-              }
-            }
-          );
-
-          // Wait for all assets to be created in parallel
-          const results = await Promise.all(assetCreationPromises);
-
-          // Build the urlToAssetId mapping from results
-          // Track which URLs we've seen to handle duplicates correctly
-          const seenUrls = new Set<string>();
-
-          for (const result of results) {
-            if (!result) continue; // Skip failed asset creations
-
-            const { tokenKey, normalizedUrl, metadata, assetId } = result;
-
-            // 1. Always map the tokenKey (URL::alt) - this is the primary lookup key
-            urlToAssetId[tokenKey] = assetId;
-
-            // 2. Also map the normalized URL (without alt) for backward compatibility
-            // IMPORTANT: Only map plain URL if it's the FIRST occurrence of that URL
-            // This prevents later images from overwriting earlier ones (fixes first image issue)
-            // If the same URL appears multiple times with different alt text, we rely on composite keys
-            if (!seenUrls.has(normalizedUrl)) {
-              urlToAssetId[normalizedUrl] = assetId;
-              seenUrls.add(normalizedUrl);
-            } else {
-              // URL already mapped - log a warning but don't overwrite
-              // The composite key mapping above will handle the lookup correctly
-              console.warn(
-                `Duplicate URL detected (already mapped to ${
-                  urlToAssetId[normalizedUrl]
-                }): ${normalizedUrl.substring(0, 80)}... (new alt: "${metadata.altText}")`
-              );
-            }
-
-            // 3. Also create composite key for lookup: URL::alt (same as tokenKey, but explicit)
-            const compositeKey = `${normalizedUrl}::${metadata.altText || 'image'}`;
-            urlToAssetId[compositeKey] = assetId;
-
-            // 4. If it's a drawing, also create the drawing-specific key
-            if (metadata.altText.toLowerCase().includes('drawing')) {
-              urlToAssetId[`${normalizedUrl}::drawing`] = assetId;
-            }
-
-            console.log(`✓ Created asset ${assetId} for token: ${tokenKey.substring(0, 100)}...`, {
-              altText: metadata.altText,
-              fileName: metadata.fileName,
-              originalUrl: metadata.url.substring(0, 100),
-              normalizedUrl: normalizedUrl.substring(0, 100),
-            });
-          }
-
-          const successCount = results.filter((r): r is NonNullable<typeof r> => r !== null).length;
-          console.log(
-            `Created ${successCount}/${imageTokenMap.size} assets (${
-              Object.keys(urlToAssetId).length
-            } mappings)`
-          );
-          if (urlToAssetId) {
-            console.log(
-              `URL to Asset ID mapping:`,
-              Object.entries(urlToAssetId)
-                .slice(0, 5)
-                .map(([url, id]) => ({
-                  key: url.substring(0, 80) + '...',
-                  assetId: id,
-                }))
-            );
-          }
+          const results = await createAssetsForTokens(cma, spaceId, environmentId, imageTokenMap);
+          urlToAssetId = buildUrlToAssetIdMap(results, imageTokenMap);
         }
       }
+
       const transformedFields = transformFieldsForContentType(
         entry.fields,
         contentType,
         urlToAssetId
       );
 
-      // No block-embed fallback; images are inserted inline via markdown tokens.
-
       const createdEntry = await cma.entry.create(
         { spaceId, environmentId, contentTypeId: entry.contentTypeId },
-        {
-          fields: transformedFields,
-        }
+        { fields: transformedFields }
       );
-
-      // Optionally publish the entry immediately
-      // const publishedEntry = await cma.entry.publish(
-      //   { spaceId, environmentId, entryId: createdEntry.sys.id },
-      //   createdEntry
-      // );
 
       createdEntries.push(createdEntry);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error(`✗ Failed to create entry of type ${entry.contentTypeId}:`, error);
       errors.push({
         contentTypeId: entry.contentTypeId,
         error: errorMessage,
