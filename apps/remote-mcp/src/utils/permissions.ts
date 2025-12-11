@@ -31,8 +31,6 @@ export const createAllPermissions = (value: boolean): EntityPermissions => ({
 /**
  * Checks if all permissions in an entity permissions object are checked
  */
-export const areAllPermissionsChecked = (
-  permissions: EntityPermissions,
-): boolean => {
+export const areAllPermissionsChecked = (permissions: EntityPermissions): boolean => {
   return Object.values(permissions).every((v) => v);
 };

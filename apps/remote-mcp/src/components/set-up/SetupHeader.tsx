@@ -11,7 +11,10 @@ export const SetupHeader: FC = () => (
       <Text fontSize="fontSizeM" marginBottom="none">
         Contentful hosts an MCP server that&apos;s available at
       </Text>
-      <Badge variant="secondary" textTransform="none"> https://mcp.contentful.com</Badge>
+      <Badge variant="secondary" textTransform="none">
+        {' '}
+        https://mcp.contentful.com
+      </Badge>
       <Text fontSize="fontSizeM" marginBottom="none">
         Here are instructions for specific tools.
       </Text>

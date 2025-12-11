@@ -15,16 +15,13 @@ export const OtherFeaturesPermissions: FC<OtherFeaturesPermissionsProps> = ({
   onPermissionToggle,
 }) => (
   <Stack flexDirection="column" spacing="spacing2Xs" alignItems="flex-start">
-    <Text>
-      Allow the MCP server to take other actions within your Contentful space.
-    </Text>
-  <Box marginTop="spacingS">
-    <Checkbox
-      isChecked={permissions.runAIActions}
-      onChange={() => onPermissionToggle('runAIActions')}
-    >
-      Run AI actions (available for premium customers)
-    </Checkbox>
-  </Box>
+    <Text>Allow the MCP server to take other actions within your Contentful space.</Text>
+    <Box marginTop="spacingS">
+      <Checkbox
+        isChecked={permissions.runAIActions}
+        onChange={() => onPermissionToggle('runAIActions')}>
+        Run AI actions (available for premium customers)
+      </Checkbox>
+    </Box>
   </Stack>
 );

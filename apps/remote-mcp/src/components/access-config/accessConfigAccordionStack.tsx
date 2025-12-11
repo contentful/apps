@@ -22,10 +22,7 @@ interface PermissionsSectionProps {
   };
   onAccordionToggle: (section: string, expanded: boolean) => void;
   onSelectAllToggle: () => void;
-  onEntityActionToggle: (
-    entity: 'entries' | 'assets' | 'contentTypes',
-    action: string,
-  ) => void;
+  onEntityActionToggle: (entity: 'entries' | 'assets' | 'contentTypes', action: string) => void;
   onColumnToggle: (action: string) => void;
   onRowToggle: (entity: 'entries' | 'assets' | 'contentTypes') => void;
   onOtherFeatureToggle: (permission: OtherFeaturesPermissionKey) => void;
@@ -49,14 +46,12 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
     flexDirection="column"
     spacing="spacing2Xs"
     alignItems="flex-start"
-    style={{ width: '100%' }}
-  >
+    style={{ width: '100%' }}>
     <Heading as="h2" marginBottom="spacing2Xs">
       Configure Contentful access
     </Heading>
     <Text marginBottom="spacingM">
-      Allow the MCP server to access entities and features within your
-      Contentful space.
+      Allow the MCP server to access entities and features within your Contentful space.
     </Text>
 
     <Accordion style={{ width: '100%', maxWidth: '100%' }}>
@@ -64,15 +59,13 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
         title="Content lifecycle actions"
         isExpanded={expandedAccordions.contentLifecycle}
         onExpand={() => onAccordionToggle('contentLifecycle', true)}
-        onCollapse={() => onAccordionToggle('contentLifecycle', false)}
-      >
+        onCollapse={() => onAccordionToggle('contentLifecycle', false)}>
         <div
           style={{
             marginTop: '-12px',
             boxSizing: 'border-box',
             paddingRight: '16px',
-          }}
-        >
+          }}>
           <ContentLifecyclePermissionsTable
             permissions={contentLifecyclePermissions}
             onSelectAllToggle={onSelectAllToggle}
@@ -87,15 +80,13 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
         title="Actions on other features"
         isExpanded={expandedAccordions.otherFeatures}
         onExpand={() => onAccordionToggle('otherFeatures', true)}
-        onCollapse={() => onAccordionToggle('otherFeatures', false)}
-      >
+        onCollapse={() => onAccordionToggle('otherFeatures', false)}>
         <div
           style={{
             marginTop: '-12px',
             boxSizing: 'border-box',
             paddingRight: '16px',
-          }}
-        >
+          }}>
           <OtherFeaturesPermissions
             permissions={otherFeaturesPermissions}
             onPermissionToggle={onOtherFeatureToggle}
@@ -107,15 +98,13 @@ export const PermissionsSection: FC<PermissionsSectionProps> = ({
         title="Migration permissions"
         isExpanded={expandedAccordions.migration}
         onExpand={() => onAccordionToggle('migration', true)}
-        onCollapse={() => onAccordionToggle('migration', false)}
-      >
+        onCollapse={() => onAccordionToggle('migration', false)}>
         <div
           style={{
             marginTop: '-12px',
             boxSizing: 'border-box',
             paddingRight: '16px',
-          }}
-        >
+          }}>
           <MigrationPermissions
             permissions={migrationPermissions}
             onPermissionToggle={onMigrationToggle}

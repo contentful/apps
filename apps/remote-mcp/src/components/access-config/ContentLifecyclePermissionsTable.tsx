@@ -5,17 +5,12 @@ import type { ContentLifecyclePermissions } from '../types/config';
 interface ContentLifecyclePermissionsTableProps {
   permissions: ContentLifecyclePermissions;
   onSelectAllToggle: () => void;
-  onEntityActionToggle: (
-    entity: 'entries' | 'assets' | 'contentTypes',
-    action: string,
-  ) => void;
+  onEntityActionToggle: (entity: 'entries' | 'assets' | 'contentTypes', action: string) => void;
   onColumnToggle: (action: string) => void;
   onRowToggle: (entity: 'entries' | 'assets' | 'contentTypes') => void;
 }
 
-export const ContentLifecyclePermissionsTable: FC<
-  ContentLifecyclePermissionsTableProps
-> = ({
+export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTableProps> = ({
   permissions,
   onSelectAllToggle,
   onEntityActionToggle,
@@ -24,8 +19,8 @@ export const ContentLifecyclePermissionsTable: FC<
 }) => (
   <Stack flexDirection="column" spacing="spacing2Xs" alignItems="flex-start">
     <Text>
-      Allow the MCP server to read, edit, create, delete, publish, un-publish,
-      archive or unarchive entities within Contentful.
+      Allow the MCP server to read, edit, create, delete, publish, un-publish, archive or unarchive
+      entities within Contentful.
     </Text>
     <Box marginTop="spacingS">
       <Checkbox isChecked={permissions.selectAll} onChange={onSelectAllToggle}>
@@ -48,15 +43,8 @@ export const ContentLifecyclePermissionsTable: FC<
               'archive',
               'unarchive',
             ].map((action) => (
-              <Table.Cell
-                key={action}
-                style={{ textAlign: 'center', verticalAlign: 'bottom' }}
-              >
-                <Flex
-                  flexDirection="column"
-                  alignItems="center"
-                  gap="spacingXs"
-                >
+              <Table.Cell key={action} style={{ textAlign: 'center', verticalAlign: 'bottom' }}>
+                <Flex flexDirection="column" alignItems="center" gap="spacingXs">
                   <Text fontWeight="fontWeightMedium" fontSize="fontSizeS">
                     {action.charAt(0).toUpperCase() +
                       action
@@ -66,15 +54,9 @@ export const ContentLifecyclePermissionsTable: FC<
                   </Text>
                   <Checkbox
                     isChecked={
-                      permissions.entries[
-                        action as keyof typeof permissions.entries
-                      ] &&
-                      permissions.assets[
-                        action as keyof typeof permissions.assets
-                      ] &&
-                      permissions.contentTypes[
-                        action as keyof typeof permissions.contentTypes
-                      ]
+                      permissions.entries[action as keyof typeof permissions.entries] &&
+                      permissions.assets[action as keyof typeof permissions.assets] &&
+                      permissions.contentTypes[action as keyof typeof permissions.contentTypes]
                     }
                     onChange={() => onColumnToggle(action)}
                   />
@@ -89,8 +71,7 @@ export const ContentLifecyclePermissionsTable: FC<
               <Table.Cell>
                 <Checkbox
                   isChecked={Object.values(permissions[entity]).every((v) => v)}
-                  onChange={() => onRowToggle(entity)}
-                >
+                  onChange={() => onRowToggle(entity)}>
                   {entity === 'contentTypes'
                     ? 'Content types'
                     : entity.charAt(0).toUpperCase() + entity.slice(1)}
@@ -109,11 +90,7 @@ export const ContentLifecyclePermissionsTable: FC<
                 <Table.Cell key={action}>
                   <Flex justifyContent="center">
                     <Checkbox
-                      isChecked={
-                        permissions[entity][
-                          action as keyof typeof permissions.entries
-                        ]
-                      }
+                      isChecked={permissions[entity][action as keyof typeof permissions.entries]}
                       onChange={() => onEntityActionToggle(entity, action)}
                     />
                   </Flex>
