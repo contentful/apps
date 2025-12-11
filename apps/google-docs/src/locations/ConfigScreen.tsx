@@ -1,16 +1,18 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Box,
-  Form,
   FormControl,
   Heading,
   Paragraph,
   TextInput,
   Spinner,
+  TextLink,
+  Subheading,
 } from '@contentful/f36-components';
 import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import tokens from '@contentful/f36-tokens';
 
 export interface AppInstallationParameters {
   openAiApiKey?: string;
@@ -112,55 +114,56 @@ const ConfigScreen = () => {
   );
 
   return (
-    <Box style={{ maxWidth: '800px', margin: '64px auto' }}>
+    <Box padding="spacingM" style={{ maxWidth: '900px', margin: '0 auto' }}>
       <Box padding="spacingXl">
         <Heading as="h2" marginBottom="spacingM">
           Set up Google Drive app
         </Heading>
-        <Paragraph marginBottom="spacingL">
+        <Paragraph marginBottom="spacingXl">
           Connect Google Drive to Contentful to seamlessly connect content, eliminating copy-paste,
           reducing errors, and speeding up your publishing workflow.
         </Paragraph>
-        <Form style={{ width: '100%' }}>
-          <FormControl style={{ width: '100%' }}>
-            <FormControl.Label isRequired>OpenAI API key</FormControl.Label>
-            <Box style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
-              <TextInput
-                id="apiKey"
-                name="apiKey"
-                value={openAiApiKeyInput}
-                placeholder="sk-..."
-                onChange={(e) => setOpenAiApiKeyInput(e.target.value)}
-                onBlur={() => void validateApiKey(openAiApiKeyInput)}
-                isInvalid={!openAiApiKeyIsValid}
-                style={{ flex: 1 }}
-              />
-            </Box>
-
-            <Paragraph marginTop="spacingS">
-              Find your OpenAI API key{' '}
-              <a
-                href="https://platform.openai.com/api-keys"
-                target="_blank"
-                rel="noopener noreferrer">
+        <Subheading marginBottom="spacing2Xs">Configure access</Subheading>
+        <Paragraph marginBottom="spacingXl">To use this app you need an OpenAPI account.</Paragraph>
+        <FormControl>
+          <FormControl.Label isRequired>OpenAI API key</FormControl.Label>
+          <TextInput
+            id="apiKey"
+            name="apiKey"
+            value={openAiApiKeyInput}
+            placeholder="sk-xxxx"
+            onChange={(e) => setOpenAiApiKeyInput(e.target.value)}
+            onBlur={() => void validateApiKey(openAiApiKeyInput)}
+            isInvalid={!openAiApiKeyIsValid}
+            style={{ flex: 1, color: tokens.gray700 }}
+          />
+          <FormControl.HelpText>
+            Find your OpenAI API key{' '}
+            <TextLink
+              href="https://platform.openai.com/api-keys"
+              target="_blank"
+              rel="noopener noreferrer">
+              <Box
+                as="span"
+                display="inline-flex"
+                style={{ fontWeight: 'normal', alignItems: 'center', gap: 4 }}>
                 here
-                <ArrowSquareOutIcon size="tiny" aria-hidden="true" style={{ marginLeft: 4 }} />
-              </a>
-              .
+                <ArrowSquareOutIcon size="small" aria-hidden="true" />
+              </Box>
+            </TextLink>
+          </FormControl.HelpText>
+          {!openAiApiKeyIsValid && (
+            <FormControl.ValidationMessage>
+              Unable to validate the OpenAI API key. Please check and try again.
+            </FormControl.ValidationMessage>
+          )}
+          {isValidatingOpenAiApiKey && (
+            <Paragraph marginTop="spacingS">
+              Validating key
+              <Spinner size="small" />
             </Paragraph>
-            {!openAiApiKeyIsValid && (
-              <Paragraph marginTop="spacingS" style={{ color: '#cc2e2e' }}>
-                Unable to validate the OpenAI API key. Please check and try again.
-              </Paragraph>
-            )}
-            {isValidatingOpenAiApiKey && (
-              <Paragraph marginTop="spacingS">
-                Validating key
-                <Spinner size="small" />
-              </Paragraph>
-            )}
-          </FormControl>
-        </Form>
+          )}
+        </FormControl>
       </Box>
     </Box>
   );
