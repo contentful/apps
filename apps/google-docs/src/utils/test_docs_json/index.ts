@@ -7,7 +7,10 @@ import Doc5 from './Doc_5_Bulk_Entry_Stress_Test.json';
 import Doc6 from './Doc_6_Multilingual_Test.json';
 import Doc7 from './Doc_7_Edge_Cases_Test.json';
 import Doc8 from './Doc_8_DXP_benefits - Sample.json';
-import Doc9 from './Doc_9_Customer_Example_Doc.json';
+let Doc9Data: any = null;
+if (require('./Doc_9_Customer_Example_Doc.json')) {
+  Doc9Data = require('./Doc_9_Customer_Example_Doc.json');
+}
 
 // Export test documents array
 export const TEST_DOCUMENTS = [
@@ -19,5 +22,5 @@ export const TEST_DOCUMENTS = [
   { id: 'doc6', title: 'Doc 6: Multilingual Test', data: Doc6 },
   { id: 'doc7', title: 'Doc 7: Edge Cases Test', data: Doc7 },
   { id: 'doc8', title: 'Doc 8: DXP Benefits Sample', data: Doc8 },
-  { id: 'doc9', title: 'Doc 9: Customer Example Doc', data: Doc9 },
+  { id: 'doc9', title: 'Doc 9: Customer Example Doc', data: Doc9Data },
 ];
