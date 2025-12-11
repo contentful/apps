@@ -192,64 +192,7 @@ function buildExtractionPrompt({
         const isLinkType = field.type === 'Link';
         const isArrayOfLinks = field.type === 'Array' && (field.items as any)?.type === 'Link';
         const shouldSkip = isLinkType || isArrayOfLinks;
-
-        // Format validations in a human-readable way
-        const formattedValidations = field.validations?.map((validation) => {
-          const formatted: any = {};
-          if (validation.size) {
-            formatted.size = {
-              min: validation.size.min,
-              max: validation.size.max,
-              description:
-                validation.size.min && validation.size.max
-                  ? `Character count must be between ${validation.size.min} and ${validation.size.max} (inclusive)`
-                  : validation.size.min
-                  ? `Character count must be at least ${validation.size.min}`
-                  : validation.size.max
-                  ? `Character count must be at most ${validation.size.max}`
-                  : 'Character count validation',
-            };
-          }
-          if (validation.range) {
-            formatted.range = {
-              min: validation.range.min,
-              max: validation.range.max,
-              description:
-                validation.range.min !== undefined && validation.range.max !== undefined
-                  ? `Value must be between ${validation.range.min} and ${validation.range.max} (inclusive)`
-                  : validation.range.min !== undefined
-                  ? `Value must be at least ${validation.range.min}`
-                  : validation.range.max !== undefined
-                  ? `Value must be at most ${validation.range.max}`
-                  : 'Range validation',
-            };
-          }
-          if (validation.in) {
-            formatted.enum = {
-              values: validation.in,
-              description: `Value must be one of: ${validation.in.join(', ')}`,
-            };
-          }
-          if (validation.regexp) {
-            formatted.regexp = {
-              pattern: validation.regexp.pattern,
-              flags: validation.regexp.flags,
-              description: `Value must match pattern: ${validation.regexp.pattern}`,
-            };
-          }
-          if (validation.unique) {
-            formatted.unique = {
-              description: 'Value must be unique across all entries',
-            };
-          }
-          // Include any other validation properties
-          Object.keys(validation).forEach((key) => {
-            if (!['size', 'range', 'in', 'regexp', 'unique'].includes(key)) {
-              formatted[key] = (validation as any)[key];
-            }
-          });
-          return formatted;
-        });
+        const validations = field.validations || [];
 
         return {
           id: field.id,
@@ -259,9 +202,9 @@ function buildExtractionPrompt({
           items: field.type === 'Array' ? (field.items as any) : undefined,
           required: field.required,
           localized: field.localized,
-          validations: formattedValidations || [],
-          validationSummary: formattedValidations?.length
-            ? formattedValidations
+          validations,
+          validationSummary: validations?.length
+            ? validations
                 .map((v: any) => {
                   if (v.size) return v.size.description;
                   if (v.range) return v.range.description;
