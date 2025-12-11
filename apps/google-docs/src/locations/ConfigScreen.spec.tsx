@@ -15,8 +15,6 @@ describe('Config Screen component', () => {
     // simulate the user clicking the install button
     await mockSdk.app.onConfigure.mock.calls[0][0]();
 
-    expect(
-      getByText('Welcome to your contentful app. This is your config page.')
-    ).toBeInTheDocument();
+    expect(getByText('Welcome to your contentful app. This is your config page.')).toBeTruthy();
   });
 });

@@ -42,6 +42,30 @@ export const handler: FunctionEventHandler<
     throw new Error('At least one content type ID is required');
   }
 
+  // Parse document if it's a string (may be JSON stringified during transmission)
+  let parsedDocument: unknown = document;
+  if (typeof document === 'string') {
+    // Check if it's a URL (starts with http:// or https://)
+    if (document.startsWith('http://') || document.startsWith('https://')) {
+      throw new Error(
+        'Document URL provided but fetching from Google Docs API is not yet implemented. Please provide the document JSON object directly.'
+      );
+    }
+
+    // Try to parse as JSON
+    try {
+      parsedDocument = JSON.parse(document);
+    } catch (e) {
+      // Provide more helpful error message
+      const preview = document.substring(0, 100);
+      throw new Error(
+        `Failed to parse document as JSON. Document appears to be a string but is not valid JSON. ` +
+          `Preview: ${preview}${document.length > 100 ? '...' : ''}. ` +
+          `Error: ${e instanceof Error ? e.message : String(e)}`
+      );
+    }
+  }
+
   const cma = initContentfulManagementClient(context);
   const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
 
@@ -52,7 +76,7 @@ export const handler: FunctionEventHandler<
   // createContentTypeObservationsFromLLMResponse()
 
   const aiDocumentResponse = await createDocument({
-    document,
+    document: parsedDocument,
     openAiApiKey,
     contentTypes,
   });

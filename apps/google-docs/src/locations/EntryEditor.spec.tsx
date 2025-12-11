@@ -12,6 +12,6 @@ describe('Entry component', () => {
   it('Component text exists', () => {
     const { getByText } = render(<EntryEditor />);
 
-    expect(getByText('Hello Entry Editor Component (AppId: test-app)')).toBeInTheDocument();
+    expect(getByText('Hello Entry Editor Component (AppId: test-app)')).toBeTruthy();
   });
 });
