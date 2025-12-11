@@ -2,7 +2,8 @@ import { useEffect, useRef } from 'react';
 import { Box, Button, Card, Heading, Layout, Note } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { GettingStartedPage, UploadDocumentModal } from '../components';
+import { GettingStartedPage } from '../components/page/GettingStartedPage';
+import { UploadDocumentModal } from '../components/page/UploadDocumentModal';
 import {
   ContentTypePickerModal,
   SelectedContentType,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Button,
@@ -17,7 +17,6 @@ interface GoogleDocUploaderProps {
   onSuccess: (title: string, html: string | null) => void;
   onError: (message: string) => void;
   isDisabled?: boolean;
-  onModalStateChange?: (isOpen: boolean) => void;
 }
 
 export const GoogleDocUploader = ({
@@ -25,16 +24,10 @@ export const GoogleDocUploader = ({
   onSuccess,
   onError,
   isDisabled,
-  onModalStateChange,
 }: GoogleDocUploaderProps) => {
   const [selectedDocument, setSelectedDocument] = useState<string>('');
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
-  // Notify parent when modal state changes
-  useEffect(() => {
-    onModalStateChange?.(isModalOpen);
-  }, [isModalOpen, onModalStateChange]);
 
   const handleSelectDocument = async (docId: string, title: string, documentData: any) => {
     setSelectedDocument(title);
