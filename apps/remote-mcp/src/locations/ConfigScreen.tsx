@@ -7,6 +7,11 @@ import { usePermissions } from '../hooks/usePermissions';
 import { FormHeader } from '../components/form-header/FormHeader';
 import { Setup } from '../components/set-up/Setup';
 import { RolesPermissionsFooter } from '../components/roles-permissions-footer';
+import {
+  createAppInstallationParameters,
+  parseAppInstallationParameters,
+} from '../utils/parameters';
+import { AppInstallationParameters } from '../components/types/config';
 
 const ConfigScreen = () => {
   const [expandedAccordions, setExpandedAccordions] = useState({
@@ -30,12 +35,6 @@ const ConfigScreen = () => {
     handleMigrationToggle,
   } = usePermissions();
 
-  const parameters = {
-    contentLifecyclePermissions,
-    otherFeaturesPermissions,
-    migrationPermissions,
-  };
-
   const sdk = useSDK<ConfigAppSDK>();
   /*
      To use the cma, inject it as follows.
@@ -52,6 +51,11 @@ const ConfigScreen = () => {
     // related to this app installation
     const currentState = await sdk.app.getCurrentState();
 
+    const parameters = createAppInstallationParameters({
+      contentLifecyclePermissions,
+      otherFeaturesPermissions,
+      migrationPermissions,
+    });
     return {
       // Parameters to be persisted as the app configuration.
       parameters,
@@ -72,26 +76,22 @@ const ConfigScreen = () => {
     (async () => {
       // Get current parameters of the app.
       // If the app is not installed yet, `parameters` will be `null`.
-      const currentParameters: typeof parameters | null = await sdk.app.getParameters();
+      const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
 
       // Restore saved permissions if they exist
       if (currentParameters) {
-        if (currentParameters.contentLifecyclePermissions) {
-          setContentLifecyclePermissions(currentParameters.contentLifecyclePermissions);
-        }
-        if (currentParameters.otherFeaturesPermissions) {
-          setOtherFeaturesPermissions(currentParameters.otherFeaturesPermissions);
-        }
-        if (currentParameters.migrationPermissions) {
-          setMigrationPermissions(currentParameters.migrationPermissions);
-        }
+        const parsedParameters = parseAppInstallationParameters(currentParameters);
+
+        setContentLifecyclePermissions(parsedParameters.contentLifecyclePermissions);
+        setOtherFeaturesPermissions(parsedParameters.otherFeaturesPermissions);
+        setMigrationPermissions(parsedParameters.migrationPermissions);
       }
 
       // Once preparation has finished, call `setReady` to hide
       // the loading screen and present the app to a user.
       sdk.app.setReady();
     })();
-  }, [sdk]);
+  }, [sdk, setContentLifecyclePermissions, setOtherFeaturesPermissions, setMigrationPermissions]);
 
   const handleAccordionToggle = (section: string, expanded: boolean) => {
     setExpandedAccordions((prev) => ({

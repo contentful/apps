@@ -29,5 +29,25 @@ export interface MigrationPermissions {
   migrateBetweenSpaces: boolean;
 }
 
+export interface InstallParameters {
+  contentLifecyclePermissions: ContentLifecyclePermissions;
+  otherFeaturesPermissions: OtherFeaturesPermissions;
+  migrationPermissions: MigrationPermissions;
+}
+
+export interface AppInstallationParameters {
+  selectAll: boolean;
+  entries: string;
+  assets: string;
+  contentTypes: string;
+  runAIActions: boolean;
+  triggerAutomations: boolean;
+  installApps: boolean;
+  callAppActions: boolean;
+  invokeAgents: boolean;
+  migrateWithinSpace: boolean;
+  migrateBetweenSpaces: boolean;
+}
+
 export type OtherFeaturesPermissionKey = keyof OtherFeaturesPermissions;
 export type MigrationPermissionKey = keyof MigrationPermissions;
