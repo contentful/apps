@@ -1,15 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  Note,
-  Paragraph,
-  Stack,
-  Textarea,
-  Text,
-} from '@contentful/f36-components';
+import { useEffect, useRef } from 'react';
+import { Box, Button, Card, Heading, Layout, Note } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { GettingStartedPage, UploadDocumentModal } from '../components';
@@ -48,25 +38,6 @@ const Page = () => {
     openModal(ModalType.UPLOAD);
   };
 
-  const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
-  const [document, setDocument] = useState<{ title: string; data: unknown } | null>(null);
-  const [contentTypeIds, setContentTypeIds] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [result, setResult] = useState<any>(null);
-  const [pastedJson, setPastedJson] = useState<string>('');
-  const [showPasteJson, setShowPasteJson] = useState<boolean>(false);
-
-  const handleSubmit = async () => {
-    // Validation
-    const openAiApiKey = sdk.parameters.installation?.openAiApiKey as string | undefined;
-
-    if (!openAiApiKey || !openAiApiKey.trim()) {
-      setErrorMessage('OpenAI API key is not configured. Please configure it in the app settings.');
-      setSuccessMessage(null);
-      return;
-    }
   const resetProgress = () => {
     resetProgressTracking();
     closeModal(ModalType.UPLOAD);
@@ -137,133 +108,86 @@ const Page = () => {
     await submit(ids);
   };
 
-  const handlePasteJson = () => {
-    if (!pastedJson || !pastedJson.trim()) {
-      setErrorMessage('Please paste JSON content');
-      return;
+  // Close the ContentTypePickerModal when submission completes
+  useEffect(() => {
+    const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
+
+    if (submissionJustCompleted && modalStates.isContentTypePickerOpen) {
+      closeModal(ModalType.CONTENT_TYPE_PICKER);
     }
 
-    try {
-      const parsed = JSON.parse(pastedJson);
-      setDocument({ title: 'Pasted JSON Document', data: parsed });
-      setErrorMessage(null);
-      setSuccessMessage('JSON document loaded successfully');
-      setPastedJson('');
-      setShowPasteJson(false);
-    } catch (error) {
-      setErrorMessage('Invalid JSON format. Please check your JSON and try again.');
-      console.error('JSON parse error:', error);
-    }
-  };
+    prevIsSubmittingRef.current = isSubmitting;
+  }, [isSubmitting, modalStates.isContentTypePickerOpen, closeModal]);
+
+  // Show getting started page if not started yet
+  if (!hasStarted) {
+    return <GettingStartedPage onSelectFile={handleGetStarted} />;
+  }
 
   return (
-    <Flex flexDirection="column" alignItems="stretch">
-      <Box
-        padding="spacingXl"
-        style={{
-          width: '100%',
-          maxWidth: '1120px',
-          margin: '32px auto',
-          background: '#fff',
-          border: '1px solid #e5e5e5',
-          borderRadius: '8px',
-        }}>
-        <Heading as="h2">Upload Document</Heading>
-        <Paragraph marginBottom="spacingL">
-          Upload a public Google Doc link or a document file to send for processing.
-        </Paragraph>
+    <>
+      <UploadDocumentModal
+        sdk={sdk}
+        isOpen={modalStates.isUploadModalOpen}
+        onClose={handleUploadModalCloseRequest}
+      />
 
-        <Stack spacing="spacingXl" flexDirection="column" alignItems="stretch">
-          <GoogleDocUploader sdk={sdk} onSuccess={handleSuccess} onError={handleError} />
+      <ContentTypePickerModal
+        sdk={sdk}
+        isOpen={modalStates.isContentTypePickerOpen}
+        onClose={handleContentTypePickerCloseRequest}
+        onSelect={handleContentTypeSelected}
+        isSubmitting={isSubmitting}
+        selectedContentTypes={selectedContentTypes}
+        setSelectedContentTypes={setSelectedContentTypes}
+      />
 
-          {/* Temporary: Paste JSON feature */}
-          <Box>
-            <Button
-              variant="secondary"
-              onClick={() => setShowPasteJson(!showPasteJson)}
-              size="small">
-              {showPasteJson ? 'Hide' : 'Paste JSON (Temporary)'}
-            </Button>
-            {showPasteJson && (
-              <Box marginTop="spacingM">
-                <Text fontSize="fontSizeS" fontColor="gray600" marginBottom="spacingS">
-                  Paste your Google Docs JSON here (temporary feature)
-                </Text>
-                <Textarea
-                  value={pastedJson}
-                  onChange={(e) => setPastedJson(e.target.value)}
-                  placeholder="Paste Google Docs JSON here..."
-                  rows={10}
-                  style={{
-                    fontFamily: 'monospace',
-                    fontSize: '12px',
-                  }}
-                />
-                <Box marginTop="spacingS">
-                  <Button
-                    variant="secondary"
-                    onClick={handlePasteJson}
-                    size="small"
-                    isDisabled={!pastedJson || !pastedJson.trim()}>
-                    Load Pasted JSON
-                  </Button>
-                </Box>
-              </Box>
-            )}
-          </Box>
+      <ConfirmCancelModal
+        isOpen={modalStates.isConfirmCancelModalOpen}
+        onConfirm={handleConfirmCancel}
+        onCancel={handleKeepCreating}
+      />
 
-          {document && (
-            <Box>
-              <Paragraph>
-                <strong>Selected Document:</strong> {document.title}
-              </Paragraph>
-            </Box>
-          )}
+      {(result || successMessage || errorMessage) && (
+        <Layout variant="fullscreen" withBoxShadow={true} offsetTop={10}>
+          <Layout.Body>
+            <Box padding="spacing2Xl">
+              <Card padding="large" style={{ maxWidth: '900px', margin: '0 auto' }}>
+                {successMessage && <Note variant="positive">{successMessage}</Note>}
+                {errorMessage && <Note variant="negative">{errorMessage}</Note>}
 
-          <ContentTypeSelector
-            sdk={sdk}
-            isContentTypePickerOpen={isContentTypePickerOpen}
-            setIsContentTypePickerOpen={setIsContentTypePickerOpen}
-            onContentTypesSelected={setContentTypeIds}
-          />
+                {result && (
+                  <Box marginTop="spacingM">
+                    <Heading as="h3" marginBottom="spacingS">
+                      Response
+                    </Heading>
+                    <Box
+                      as="pre"
+                      style={{
+                        maxHeight: '300px',
+                        overflow: 'auto',
+                        fontFamily: 'monospace',
+                        fontSize: '12px',
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                        margin: 0,
+                        background: '#f7f9fa',
+                        padding: '12px',
+                        borderRadius: '4px',
+                      }}>
+                      {JSON.stringify(result, null, 2)}
+                    </Box>
+                  </Box>
+                )}
 
-          <Box>
-            <Button
-              variant="primary"
-              onClick={handleSubmit}
-              isLoading={isSubmitting}
-              isDisabled={isSubmitting}>
-              Create Entries from Document
-            </Button>
-          </Box>
-
-          {successMessage && <Note variant="positive">{successMessage}</Note>}
-          {errorMessage && <Note variant="negative">{errorMessage}</Note>}
-
-          {result && (
-            <Box
-              style={{
-                background: '#f7f9fa',
-                padding: '16px',
-                borderRadius: '4px',
-                border: '1px solid #e5e5e5',
-              }}>
-              <Heading as="h3" marginBottom="spacingS">
-                Response
-              </Heading>
-              <Box
-                as="pre"
-                style={{
-                  maxHeight: '400px',
-                  overflow: 'auto',
-                  fontFamily: 'monospace',
-                  fontSize: '12px',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                  margin: 0,
-                }}>
-                {JSON.stringify(result, null, 2)}
-              </Box>
+                <Button
+                  variant="secondary"
+                  size="small"
+                  onClick={resetProgress}
+                  style={{ marginTop: '12px' }}>
+                  Start over
+                </Button>
+              </Card>
             </Box>
           </Layout.Body>
         </Layout>
