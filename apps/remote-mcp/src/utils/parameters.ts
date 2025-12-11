@@ -1,7 +1,4 @@
-import type {
-  InstallParameters,
-  AppInstallationParameters,
-} from '../components/types/config';
+import type { InstallParameters, AppInstallationParameters } from '../components/types/config';
 
 export const createAppInstallationParameters = (
   parameters: InstallParameters
