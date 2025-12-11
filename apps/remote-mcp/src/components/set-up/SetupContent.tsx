@@ -1,6 +1,6 @@
 import { type FC, useState } from 'react';
 import { Stack, Tabs, Text, Button } from '@contentful/f36-components';
-import { DownloadIcon } from '@contentful/f36-icons';
+import { DownloadSimpleIcon } from '@contentful/f36-icons';
 
 export const SetupContent: FC = () => {
   const [currentTab, setCurrentTab] = useState('cursor');
@@ -22,7 +22,14 @@ export const SetupContent: FC = () => {
             <strong>tools and integrations</strong> within Cursor to add a new MCP server.
           </Text>
 
-          <Button variant="secondary" startIcon={<DownloadIcon />} size="small">
+          <Button
+            variant="secondary"
+            startIcon={<DownloadSimpleIcon />}
+            size="small"
+            as="a"
+            href="https://cursor.com/en/install-mcp?name=contentful-mcp&config=eyJ1cmwiOiJodHRwczovL2NvbnRlbnRmdWwtcmVtb3RlLW1jcC1wcm9kdWN0aW9uLmNvbnRlbnRmdWwtZ21iaC53b3JrZXJzLmRldi9tY3AifQo="
+            target="_blank"
+            rel="noopener noreferrer">
             Install in Cursor
           </Button>
         </Stack>
