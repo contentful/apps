@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   Button,
   Flex,
@@ -7,6 +7,7 @@ import {
   Paragraph,
   Pill,
   Select,
+  Spinner,
   Text,
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
@@ -22,6 +23,11 @@ interface ContentTypePickerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (contentTypes: SelectedContentType[]) => void;
+  isSubmitting: boolean;
+  selectedContentTypes: SelectedContentType[];
+  setSelectedContentTypes: (
+    contentTypes: SelectedContentType[] | ((prev: SelectedContentType[]) => SelectedContentType[])
+  ) => void;
 }
 
 export const ContentTypePickerModal = ({
@@ -29,10 +35,23 @@ export const ContentTypePickerModal = ({
   isOpen,
   onClose,
   onSelect,
+  isSubmitting,
+  selectedContentTypes,
+  setSelectedContentTypes,
 }: ContentTypePickerModalProps) => {
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
-  const [selectedContentTypes, setSelectedContentTypes] = useState<SelectedContentType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
+
+  const isInvalidSelection = useMemo(
+    () => selectedContentTypes.length === 0,
+    [selectedContentTypes]
+  );
+
+  const isInvalidSelectionError = useMemo(
+    () => isInvalidSelection && hasAttemptedSubmit,
+    [isInvalidSelection, hasAttemptedSubmit]
+  );
 
   useEffect(() => {
     // Fetch content types when component mounts
@@ -58,14 +77,14 @@ export const ContentTypePickerModal = ({
   }, [sdk]);
 
   useEffect(() => {
-    // Reset selection when modal opens
+    // Reset attempt flag when modal opens (but preserve selectedContentTypes from parent)
     if (isOpen) {
-      setSelectedContentTypes([]);
+      setHasAttemptedSubmit(false);
     }
   }, [isOpen]);
 
   const handleAddContentType = (contentTypeId: string) => {
-    if (!contentTypeId) return;
+    if (!contentTypeId || isSubmitting) return;
 
     const contentType = contentTypes.find((ct) => ct.sys.id === contentTypeId);
     if (contentType && !selectedContentTypes.some((ct) => ct.id === contentTypeId)) {
@@ -77,32 +96,42 @@ export const ContentTypePickerModal = ({
   };
 
   const handleRemoveContentType = (contentTypeId: string) => {
+    if (isSubmitting) return;
     setSelectedContentTypes(selectedContentTypes.filter((ct) => ct.id !== contentTypeId));
   };
 
+  const handleClose = () => {
+    if (isSubmitting) return; // Prevent closing during submission
+    onClose();
+  };
+
   const handleContinue = () => {
-    if (selectedContentTypes.length === 0) {
-      sdk.notifier.error('Please select at least one content type');
+    if (isInvalidSelection) {
+      setHasAttemptedSubmit(true);
       return;
     }
 
     onSelect(selectedContentTypes);
   };
 
-  const availableContentTypes = contentTypes.filter(
-    (ct) => !selectedContentTypes.some((selected) => selected.id === ct.sys.id)
+  const availableContentTypes = useMemo(
+    () =>
+      contentTypes.filter(
+        (ct) => !selectedContentTypes.some((selected) => selected.id === ct.sys.id)
+      ),
+    [contentTypes, selectedContentTypes]
   );
 
   return (
-    <Modal title="Select content type(s)" isShown={isOpen} onClose={onClose} size="medium">
+    <Modal title="Select content type(s)" isShown={isOpen} onClose={handleClose} size="medium">
       {() => (
         <>
-          <Modal.Header title="Select content type(s)" onClose={onClose} />
+          <Modal.Header title="Select content type(s)" onClose={handleClose} />
           <Modal.Content>
-            <Paragraph marginBottom="spacingM">
+            <Paragraph marginBottom="spacingM" color="gray700">
               Select the content type(s) you would like to use with this sync.
             </Paragraph>
-            <FormControl isRequired>
+            <FormControl isRequired isInvalid={isInvalidSelectionError}>
               <FormControl.Label>Content type</FormControl.Label>
               <Select
                 id="content-type-select"
@@ -111,7 +140,7 @@ export const ContentTypePickerModal = ({
                 onChange={(e) => {
                   handleAddContentType(e.target.value);
                 }}
-                isDisabled={isLoading || availableContentTypes.length === 0}>
+                isDisabled={isLoading || availableContentTypes.length === 0 || isSubmitting}>
                 <Select.Option value="" isDisabled>
                   {isLoading ? 'Loading content types...' : 'Select one or more'}
                 </Select.Option>
@@ -121,6 +150,11 @@ export const ContentTypePickerModal = ({
                   </Select.Option>
                 ))}
               </Select>
+              {isInvalidSelectionError && (
+                <FormControl.ValidationMessage>
+                  You must select at least one content type.
+                </FormControl.ValidationMessage>
+              )}
             </FormControl>
 
             {selectedContentTypes.length > 0 && (
@@ -129,21 +163,22 @@ export const ContentTypePickerModal = ({
                   <Pill
                     key={ct.id}
                     label={ct.name}
-                    onClose={() => handleRemoveContentType(ct.id)}
+                    onClose={isSubmitting ? undefined : () => handleRemoveContentType(ct.id)}
                   />
                 ))}
               </Flex>
             )}
           </Modal.Content>
           <Modal.Controls>
-            <Button onClick={onClose} variant="secondary">
+            <Button onClick={handleClose} variant="secondary" isDisabled={isSubmitting}>
               Cancel
             </Button>
             <Button
               onClick={handleContinue}
-              variant="positive"
-              isDisabled={selectedContentTypes.length === 0 || isLoading}>
-              Continue
+              variant="primary"
+              isDisabled={isLoading || isSubmitting}
+              endIcon={isSubmitting ? <Spinner /> : undefined}>
+              Create
             </Button>
           </Modal.Controls>
         </>

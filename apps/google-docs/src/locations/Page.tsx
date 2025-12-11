@@ -1,155 +1,198 @@
-import { useState } from 'react';
-import { Box, Button, Flex, Heading, Note, Paragraph, Stack } from '@contentful/f36-components';
+import { useEffect, useRef } from 'react';
+import { Box, Button, Card, Heading, Layout, Note } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { ContentTypeSelector } from '../components';
-import { createEntriesFromDocumentAction } from '../utils/appFunctionUtils';
-import { GoogleDocUploader } from '../components/page/GoogleDocUploader';
+import { GettingStartedPage, UploadDocumentModal } from '../components';
+import {
+  ContentTypePickerModal,
+  SelectedContentType,
+} from '../components/page/ContentTypePickerModal';
+import { ConfirmCancelModal } from '../components/page/ConfirmCancelModal';
+import { useModalManagement, ModalType } from '../hooks/useModalManagement';
+import { useProgressTracking } from '../hooks/useProgressTracking';
+import { useDocumentSubmission } from '../hooks/useDocumentSubmission';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
+  const { modalStates, openModal, closeModal } = useModalManagement();
+  const {
+    hasStarted,
+    setHasStarted,
+    googleDocUrl,
+    setGoogleDocUrl,
+    selectedContentTypes,
+    setSelectedContentTypes,
+    hasProgress,
+    resetProgress: resetProgressTracking,
+    pendingCloseAction,
+    setPendingCloseAction,
+  } = useProgressTracking();
+  const { result, successMessage, errorMessage, submit, clearMessages, isSubmitting } =
+    useDocumentSubmission(sdk, googleDocUrl);
 
-  const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
-  const [document, setDocument] = useState<{ title: string; data: unknown } | null>(null);
-  const [contentTypeIds, setContentTypeIds] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [result, setResult] = useState<any>(null);
+  // Track previous submission state to detect completion
+  const prevIsSubmittingRef = useRef<boolean>(false);
 
-  const handleSubmit = async () => {
-    // Validation
-    const openAiApiKey = sdk.parameters.installation?.openAiApiKey as string | undefined;
+  const handleGetStarted = () => {
+    setHasStarted(true);
+    openModal(ModalType.UPLOAD);
+  };
 
-    if (!openAiApiKey || !openAiApiKey.trim()) {
-      setErrorMessage('OpenAI API key is not configured. Please configure it in the app settings.');
-      setSuccessMessage(null);
+  const resetProgress = () => {
+    resetProgressTracking();
+    closeModal(ModalType.UPLOAD);
+    closeModal(ModalType.CONTENT_TYPE_PICKER);
+    clearMessages();
+  };
+
+  const handleUploadModalCloseRequest = (docUrl?: string) => {
+    // If user is submitting a document (docUrl provided), proceed normally
+    if (docUrl) {
+      closeModal(ModalType.UPLOAD);
+      setGoogleDocUrl(docUrl);
+      openModal(ModalType.CONTENT_TYPE_PICKER);
       return;
     }
 
-    if (!document || !document.data) {
-      setErrorMessage('Please select a document');
-      setSuccessMessage(null);
-      return;
-    }
-
-    if (contentTypeIds.length === 0) {
-      setErrorMessage('Please select at least one content type');
-      setSuccessMessage(null);
-      return;
-    }
-
-    setIsSubmitting(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
-    setResult(null);
-
-    try {
-      const response = await createEntriesFromDocumentAction(sdk, contentTypeIds, document.data);
-      setResult(response);
-      setSuccessMessage('Successfully created entries from document!');
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to create entries');
-    } finally {
-      setIsSubmitting(false);
+    // If there's progress and user is trying to cancel, show confirmation
+    if (hasProgress) {
+      closeModal(ModalType.UPLOAD);
+      setPendingCloseAction(() => () => {
+        resetProgress();
+      });
+      openModal(ModalType.CONFIRM_CANCEL);
+    } else {
+      // No progress, reset to getting started page
+      closeModal(ModalType.UPLOAD);
+      setHasStarted(false);
     }
   };
 
-  const handleSuccess = (title: string, documentJson: string | null) => {
-    if (!documentJson) {
-      setErrorMessage('Failed to load document data');
-      return;
-    }
-    try {
-      const parsed = JSON.parse(documentJson);
-      setDocument({ title, data: parsed });
-      setErrorMessage(null);
-    } catch (error) {
-      setErrorMessage('Failed to parse document JSON');
+  const handleContentTypePickerCloseRequest = () => {
+    // If there's progress, show confirmation
+    if (hasProgress) {
+      closeModal(ModalType.CONTENT_TYPE_PICKER);
+      setPendingCloseAction(() => () => {
+        resetProgress();
+      });
+      openModal(ModalType.CONFIRM_CANCEL);
+    } else {
+      // No progress, close directly
+      closeModal(ModalType.CONTENT_TYPE_PICKER);
     }
   };
 
-  const handleError = (message: string) => {
-    setErrorMessage(message);
+  const handleConfirmCancel = () => {
+    closeModal(ModalType.CONFIRM_CANCEL);
+    if (pendingCloseAction) {
+      pendingCloseAction();
+      setPendingCloseAction(null);
+    }
   };
+
+  const handleKeepCreating = () => {
+    closeModal(ModalType.CONFIRM_CANCEL);
+    setPendingCloseAction(null);
+    openModal(ModalType.CONTENT_TYPE_PICKER);
+  };
+
+  const handleContentTypeSelected = async (contentTypes: SelectedContentType[]) => {
+    const names = contentTypes.map((ct) => ct.name).join(', ');
+    const ids = contentTypes.map((ct) => ct.id);
+
+    sdk.notifier.success(
+      `Selected ${contentTypes.length} content type${contentTypes.length > 1 ? 's' : ''}: ${names}`
+    );
+
+    // Call create entries function after content types are selected
+    await submit(ids);
+  };
+
+  // Close the ContentTypePickerModal when submission completes
+  useEffect(() => {
+    const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
+
+    if (submissionJustCompleted && modalStates.isContentTypePickerOpen) {
+      closeModal(ModalType.CONTENT_TYPE_PICKER);
+    }
+
+    prevIsSubmittingRef.current = isSubmitting;
+  }, [isSubmitting, modalStates.isContentTypePickerOpen, closeModal]);
+
+  // Show getting started page if not started yet
+  if (!hasStarted) {
+    return <GettingStartedPage onSelectFile={handleGetStarted} />;
+  }
 
   return (
-    <Flex flexDirection="column" alignItems="stretch">
-      <Box
-        padding="spacingXl"
-        style={{
-          width: '100%',
-          maxWidth: '1120px',
-          margin: '32px auto',
-          background: '#fff',
-          border: '1px solid #e5e5e5',
-          borderRadius: '8px',
-        }}>
-        <Heading as="h2">Upload Document</Heading>
-        <Paragraph marginBottom="spacingL">
-          Upload a public Google Doc link or a document file to send for processing.
-        </Paragraph>
+    <>
+      <UploadDocumentModal
+        sdk={sdk}
+        isOpen={modalStates.isUploadModalOpen}
+        onClose={handleUploadModalCloseRequest}
+      />
 
-        <Stack spacing="spacingXl" flexDirection="column" alignItems="stretch">
-          <GoogleDocUploader sdk={sdk} onSuccess={handleSuccess} onError={handleError} />
+      <ContentTypePickerModal
+        sdk={sdk}
+        isOpen={modalStates.isContentTypePickerOpen}
+        onClose={handleContentTypePickerCloseRequest}
+        onSelect={handleContentTypeSelected}
+        isSubmitting={isSubmitting}
+        selectedContentTypes={selectedContentTypes}
+        setSelectedContentTypes={setSelectedContentTypes}
+      />
 
-          {document && (
-            <Box>
-              <Paragraph>
-                <strong>Selected Document:</strong> {document.title}
-              </Paragraph>
+      <ConfirmCancelModal
+        isOpen={modalStates.isConfirmCancelModalOpen}
+        onConfirm={handleConfirmCancel}
+        onCancel={handleKeepCreating}
+      />
+
+      {(result || successMessage || errorMessage) && (
+        <Layout variant="fullscreen" withBoxShadow={true} offsetTop={10}>
+          <Layout.Body>
+            <Box padding="spacing2Xl">
+              <Card padding="large" style={{ maxWidth: '900px', margin: '0 auto' }}>
+                {successMessage && <Note variant="positive">{successMessage}</Note>}
+                {errorMessage && <Note variant="negative">{errorMessage}</Note>}
+
+                {result && (
+                  <Box marginTop="spacingM">
+                    <Heading as="h3" marginBottom="spacingS">
+                      Response
+                    </Heading>
+                    <Box
+                      as="pre"
+                      style={{
+                        maxHeight: '300px',
+                        overflow: 'auto',
+                        fontFamily: 'monospace',
+                        fontSize: '12px',
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                        margin: 0,
+                        background: '#f7f9fa',
+                        padding: '12px',
+                        borderRadius: '4px',
+                      }}>
+                      {JSON.stringify(result, null, 2)}
+                    </Box>
+                  </Box>
+                )}
+
+                <Button
+                  variant="secondary"
+                  size="small"
+                  onClick={resetProgress}
+                  style={{ marginTop: '12px' }}>
+                  Start over
+                </Button>
+              </Card>
             </Box>
-          )}
-
-          <ContentTypeSelector
-            sdk={sdk}
-            isContentTypePickerOpen={isContentTypePickerOpen}
-            setIsContentTypePickerOpen={setIsContentTypePickerOpen}
-            onContentTypesSelected={setContentTypeIds}
-          />
-
-          <Box>
-            <Button
-              variant="primary"
-              onClick={handleSubmit}
-              isLoading={isSubmitting}
-              isDisabled={isSubmitting}>
-              Create Entries from Document
-            </Button>
-          </Box>
-
-          {successMessage && <Note variant="positive">{successMessage}</Note>}
-          {errorMessage && <Note variant="negative">{errorMessage}</Note>}
-
-          {result && (
-            <Box
-              style={{
-                background: '#f7f9fa',
-                padding: '16px',
-                borderRadius: '4px',
-                border: '1px solid #e5e5e5',
-              }}>
-              <Heading as="h3" marginBottom="spacingS">
-                Response
-              </Heading>
-              <Box
-                as="pre"
-                style={{
-                  maxHeight: '400px',
-                  overflow: 'auto',
-                  fontFamily: 'monospace',
-                  fontSize: '12px',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                  margin: 0,
-                }}>
-                {JSON.stringify(result, null, 2)}
-              </Box>
-            </Box>
-          )}
-        </Stack>
-      </Box>
-    </Flex>
+          </Layout.Body>
+        </Layout>
+      )}
+    </>
   );
 };
 
