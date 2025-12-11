@@ -1,6 +1,17 @@
+export enum NODE_TYPES {
+  TEXT = 'text',
+  PARAGRAPH = 'paragraph',
+  HEADING = 'heading',
+  HYPERLINK = 'hyperlink',
+  HR = 'hr',
+  BLOCKQUOTE = 'blockquote',
+  ASSET_HYPERLINK = 'asset-hyperlink',
+  EMBEDDED_ASSET_BLOCK = 'embedded-asset-block',
+}
+
 function createTextNode(value: string, marks: Array<{ type: 'bold' | 'italic' | 'underline' }>) {
   return {
-    nodeType: 'text',
+    nodeType: NODE_TYPES.TEXT,
     value,
     marks,
     data: {},
@@ -9,7 +20,7 @@ function createTextNode(value: string, marks: Array<{ type: 'bold' | 'italic' | 
 
 function createParagraph(children: any[]) {
   return {
-    nodeType: 'paragraph',
+    nodeType: NODE_TYPES.PARAGRAPH,
     data: {},
     content: children,
   };
@@ -18,7 +29,7 @@ function createParagraph(children: any[]) {
 function createHeading(level: number, children: any[]) {
   const clamped = Math.min(6, Math.max(1, level));
   return {
-    nodeType: `heading-${clamped}`,
+    nodeType: `${NODE_TYPES.HEADING}-${clamped}`,
     data: {},
     content: children,
   };
@@ -140,7 +151,7 @@ export class MarkdownParser {
             if (italic) marks.push({ type: 'italic' });
             if (underline) marks.push({ type: 'underline' });
             nodes.push({
-              nodeType: 'hyperlink',
+              nodeType: NODE_TYPES.HYPERLINK,
               data: { uri: href },
               content: [createTextNode(linkText, marks)],
             });
@@ -160,7 +171,7 @@ export class MarkdownParser {
           if (italic) marks.push({ type: 'italic' });
           if (underline) marks.push({ type: 'underline' });
           marks.push({ type: 'code' });
-          nodes.push({ nodeType: 'text', value: codeText, marks, data: {} });
+          nodes.push({ nodeType: NODE_TYPES.TEXT, value: codeText, marks, data: {} });
           i = closeIdx + 7;
           continue;
         }
@@ -180,7 +191,7 @@ export class MarkdownParser {
             if (italic) marks.push({ type: 'italic' });
             if (underline) marks.push({ type: 'underline' });
             nodes.push({
-              nodeType: 'hyperlink',
+              nodeType: NODE_TYPES.HYPERLINK,
               data: { uri: url },
               content: [createTextNode(linkText, marks)],
             });
@@ -198,25 +209,31 @@ export class MarkdownParser {
           if (urlEnd !== -1) {
             const altText = line.slice(altStart, altEnd);
             const url = line.slice(urlStart, urlEnd).trim();
+            // Normalize URL the same way as in entryService.ts (remove all whitespace)
+            // This ensures we can find the asset ID even if the URL has whitespace differences
+            const normalizedUrl = url.replace(/\s+/g, '');
             flush();
-            const assetId = this.urlToAssetId?.[url];
+
+            // Try to find asset ID using composite key (URL + alt) first, then fall back to URL only
+            // This handles cases where same URL appears with different alt text (e.g., drawing vs image)
+            const compositeKey = `${normalizedUrl}::${altText || 'image'}`;
+            const drawingKey = altText.toLowerCase().includes('drawing')
+              ? `${normalizedUrl}::drawing`
+              : null;
+            let assetId =
+              this.urlToAssetId?.[compositeKey] ||
+              (drawingKey ? this.urlToAssetId?.[drawingKey] : null) ||
+              this.urlToAssetId?.[normalizedUrl];
+
             if (assetId) {
-              const tokenText = line.slice(i, urlEnd + 1);
-              const isStandaloneToken = nodes.length === 0 && tokenText.trim() === line.trim();
-              if (isStandaloneToken) {
-                nodes.push({
-                  nodeType: 'embedded-asset-block',
-                  content: [],
-                  data: { target: { sys: { type: 'Link', linkType: 'Asset', id: assetId } } },
-                });
-              } else {
-                const LINK_TEXT = altText || 'image';
-                nodes.push({
-                  nodeType: 'asset-hyperlink',
-                  data: { target: { sys: { type: 'Link', linkType: 'Asset', id: assetId } } },
-                  content: [createTextNode(LINK_TEXT, [])],
-                });
-              }
+              // Always use asset-hyperlink for inline images (never embedded-asset-block in inline context)
+              // Standalone images are handled at the parseDocument level
+              const LINK_TEXT = altText || 'image';
+              nodes.push({
+                nodeType: NODE_TYPES.ASSET_HYPERLINK,
+                data: { target: { sys: { type: 'Link', linkType: 'Asset', id: assetId } } },
+                content: [createTextNode(LINK_TEXT, [])],
+              });
             } else {
               nodes.push(createTextNode(line.slice(i, urlEnd + 1), []));
             }
@@ -304,9 +321,11 @@ export class MarkdownParser {
         }
         const codeText = codeLines.join('\n');
         documentChildren.push({
-          nodeType: 'paragraph',
+          nodeType: NODE_TYPES.PARAGRAPH,
           data: {},
-          content: [{ nodeType: 'text', value: codeText, marks: [{ type: 'code' }], data: {} }],
+          content: [
+            { nodeType: NODE_TYPES.TEXT, value: codeText, marks: [{ type: 'code' }], data: {} },
+          ],
         });
         continue;
       }
@@ -316,9 +335,11 @@ export class MarkdownParser {
         if (sameLineCloseIdx !== -1) {
           const inner = trimmed.slice(6, sameLineCloseIdx);
           documentChildren.push({
-            nodeType: 'paragraph',
+            nodeType: NODE_TYPES.PARAGRAPH,
             data: {},
-            content: [{ nodeType: 'text', value: inner, marks: [{ type: 'code' }], data: {} }],
+            content: [
+              { nodeType: NODE_TYPES.TEXT, value: inner, marks: [{ type: 'code' }], data: {} },
+            ],
           });
           continue;
         }
@@ -334,9 +355,11 @@ export class MarkdownParser {
         }
         const codeText = codeLines.join('\n');
         documentChildren.push({
-          nodeType: 'paragraph',
+          nodeType: NODE_TYPES.PARAGRAPH,
           data: {},
-          content: [{ nodeType: 'text', value: codeText, marks: [{ type: 'code' }], data: {} }],
+          content: [
+            { nodeType: NODE_TYPES.TEXT, value: codeText, marks: [{ type: 'code' }], data: {} },
+          ],
         });
         continue;
       }
@@ -344,19 +367,52 @@ export class MarkdownParser {
         rawLine.trim() === '<HR/>' ||
         /^(\*\s*\*\s*\*\s*|-{3,}\s*|_{3,}\s*)$/.test(rawLine.trim())
       ) {
-        documentChildren.push({ nodeType: 'hr', data: {}, content: [] });
+        documentChildren.push({ nodeType: NODE_TYPES.HR, data: {}, content: [] });
         continue;
       }
       if (rawLine.trim().startsWith('>')) {
         const quoteText = rawLine.replace(/^>\s?/, '');
         const nodes = this.parseSimpleInline(quoteText);
         documentChildren.push({
-          nodeType: 'blockquote',
+          nodeType: NODE_TYPES.BLOCKQUOTE,
           data: {},
           content: [createParagraph(nodes.length ? nodes : [createTextNode('', [])])],
         });
         continue;
       }
+
+      // Check for standalone image token BEFORE parsing inline
+      // A standalone image is a line that contains ONLY an image token (with optional whitespace)
+      const imageMatch = rawLine.match(/^\s*!\[([^\]]*?)\]\(([\s\S]*?)\)\s*$/);
+      if (imageMatch) {
+        const url = imageMatch[2].trim();
+        const altText = imageMatch[1] || '';
+        // Normalize URL the same way as in entryService.ts (remove all whitespace)
+        // This ensures we can find the asset ID even if the URL has whitespace differences
+        const normalizedUrl = url.replace(/\s+/g, '');
+
+        // Try to find asset ID using composite key (URL + alt) first, then fall back to URL only
+        // This handles cases where same URL appears with different alt text (e.g., drawing vs image)
+        const compositeKey = `${normalizedUrl}::${altText || 'image'}`;
+        const drawingKey = altText.toLowerCase().includes('drawing')
+          ? `${normalizedUrl}::drawing`
+          : null;
+        let assetId =
+          this.urlToAssetId?.[compositeKey] ||
+          (drawingKey ? this.urlToAssetId?.[drawingKey] : null) ||
+          this.urlToAssetId?.[normalizedUrl];
+
+        if (assetId) {
+          // Standalone image -> add as block-level embedded asset (direct child of document)
+          documentChildren.push({
+            nodeType: NODE_TYPES.EMBEDDED_ASSET_BLOCK,
+            content: [],
+            data: { target: { sys: { type: 'Link', linkType: 'Asset', id: assetId } } },
+          });
+          continue;
+        }
+      }
+
       const headingMatch = rawLine.match(/^\s*(#{1,6})\s+(.*)$/);
       const boldOnlyMatch = headingMatch
         ? null
@@ -369,12 +425,30 @@ export class MarkdownParser {
         : 0;
       const line = headingMatch ? headingMatch[2] : boldOnlyMatch ? boldOnlyMatch[2] : rawLine;
       const nodes = this.parseInline(line);
-      if (nodes.length) {
-        if (isHeading) {
-          documentChildren.push(createHeading(headingLevel, nodes));
+
+      // Ensure no embedded-asset-block nodes end up in paragraphs (defensive check)
+      const inlineNodes: any[] = [];
+      const blockNodes: any[] = [];
+
+      for (const node of nodes) {
+        if (node.nodeType === NODE_TYPES.EMBEDDED_ASSET_BLOCK) {
+          blockNodes.push(node);
         } else {
-          documentChildren.push(createParagraph(nodes));
+          inlineNodes.push(node);
         }
+      }
+
+      if (inlineNodes.length) {
+        if (isHeading) {
+          documentChildren.push(createHeading(headingLevel, inlineNodes));
+        } else {
+          documentChildren.push(createParagraph(inlineNodes));
+        }
+      }
+
+      // If any embedded-asset-block nodes were created (shouldn't happen, but handle gracefully)
+      for (const blockNode of blockNodes) {
+        documentChildren.push(blockNode);
       }
     }
     return documentChildren;

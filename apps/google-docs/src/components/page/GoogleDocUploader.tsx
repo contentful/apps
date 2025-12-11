@@ -95,7 +95,7 @@ export const GoogleDocUploader = ({
             <Modal.Header title="Select a Test Document" onClose={() => setIsModalOpen(false)} />
             <Modal.Content>
               <Stack flexDirection="column" spacing="spacingS">
-                {TEST_DOCUMENTS.map((doc, index) => (
+                {TEST_DOCUMENTS.filter((doc) => doc.data).map((doc, index) => (
                   <Card
                     key={index}
                     as="button"
