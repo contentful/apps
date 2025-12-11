@@ -1,6 +1,17 @@
+export enum NODE_TYPES {
+  TEXT = 'text',
+  PARAGRAPH = 'paragraph',
+  HEADING = 'heading',
+  HYPERLINK = 'hyperlink',
+  HR = 'hr',
+  BLOCKQUOTE = 'blockquote',
+  ASSET_HYPERLINK = 'asset-hyperlink',
+  EMBEDDED_ASSET_BLOCK = 'embedded-asset-block',
+}
+
 function createTextNode(value: string, marks: Array<{ type: 'bold' | 'italic' | 'underline' }>) {
   return {
-    nodeType: 'text',
+    nodeType: NODE_TYPES.TEXT,
     value,
     marks,
     data: {},
@@ -9,7 +20,7 @@ function createTextNode(value: string, marks: Array<{ type: 'bold' | 'italic' | 
 
 function createParagraph(children: any[]) {
   return {
-    nodeType: 'paragraph',
+    nodeType: NODE_TYPES.PARAGRAPH,
     data: {},
     content: children,
   };
@@ -18,7 +29,7 @@ function createParagraph(children: any[]) {
 function createHeading(level: number, children: any[]) {
   const clamped = Math.min(6, Math.max(1, level));
   return {
-    nodeType: `heading-${clamped}`,
+    nodeType: `${NODE_TYPES.HEADING}-${clamped}`,
     data: {},
     content: children,
   };
@@ -140,7 +151,7 @@ export class MarkdownParser {
             if (italic) marks.push({ type: 'italic' });
             if (underline) marks.push({ type: 'underline' });
             nodes.push({
-              nodeType: 'hyperlink',
+              nodeType: NODE_TYPES.HYPERLINK,
               data: { uri: href },
               content: [createTextNode(linkText, marks)],
             });
@@ -160,7 +171,7 @@ export class MarkdownParser {
           if (italic) marks.push({ type: 'italic' });
           if (underline) marks.push({ type: 'underline' });
           marks.push({ type: 'code' });
-          nodes.push({ nodeType: 'text', value: codeText, marks, data: {} });
+          nodes.push({ nodeType: NODE_TYPES.TEXT, value: codeText, marks, data: {} });
           i = closeIdx + 7;
           continue;
         }
@@ -180,7 +191,7 @@ export class MarkdownParser {
             if (italic) marks.push({ type: 'italic' });
             if (underline) marks.push({ type: 'underline' });
             nodes.push({
-              nodeType: 'hyperlink',
+              nodeType: NODE_TYPES.HYPERLINK,
               data: { uri: url },
               content: [createTextNode(linkText, marks)],
             });
@@ -225,7 +236,7 @@ export class MarkdownParser {
                 )}... -> ${assetId} (alt: "${altText}")`
               );
               nodes.push({
-                nodeType: 'asset-hyperlink',
+                nodeType: NODE_TYPES.ASSET_HYPERLINK,
                 data: { target: { sys: { type: 'Link', linkType: 'Asset', id: assetId } } },
                 content: [createTextNode(LINK_TEXT, [])],
               });
@@ -335,9 +346,11 @@ export class MarkdownParser {
         }
         const codeText = codeLines.join('\n');
         documentChildren.push({
-          nodeType: 'paragraph',
+          nodeType: NODE_TYPES.PARAGRAPH,
           data: {},
-          content: [{ nodeType: 'text', value: codeText, marks: [{ type: 'code' }], data: {} }],
+          content: [
+            { nodeType: NODE_TYPES.TEXT, value: codeText, marks: [{ type: 'code' }], data: {} },
+          ],
         });
         continue;
       }
@@ -347,9 +360,11 @@ export class MarkdownParser {
         if (sameLineCloseIdx !== -1) {
           const inner = trimmed.slice(6, sameLineCloseIdx);
           documentChildren.push({
-            nodeType: 'paragraph',
+            nodeType: NODE_TYPES.PARAGRAPH,
             data: {},
-            content: [{ nodeType: 'text', value: inner, marks: [{ type: 'code' }], data: {} }],
+            content: [
+              { nodeType: NODE_TYPES.TEXT, value: inner, marks: [{ type: 'code' }], data: {} },
+            ],
           });
           continue;
         }
@@ -365,9 +380,11 @@ export class MarkdownParser {
         }
         const codeText = codeLines.join('\n');
         documentChildren.push({
-          nodeType: 'paragraph',
+          nodeType: NODE_TYPES.PARAGRAPH,
           data: {},
-          content: [{ nodeType: 'text', value: codeText, marks: [{ type: 'code' }], data: {} }],
+          content: [
+            { nodeType: NODE_TYPES.TEXT, value: codeText, marks: [{ type: 'code' }], data: {} },
+          ],
         });
         continue;
       }
@@ -375,14 +392,14 @@ export class MarkdownParser {
         rawLine.trim() === '<HR/>' ||
         /^(\*\s*\*\s*\*\s*|-{3,}\s*|_{3,}\s*)$/.test(rawLine.trim())
       ) {
-        documentChildren.push({ nodeType: 'hr', data: {}, content: [] });
+        documentChildren.push({ nodeType: NODE_TYPES.HR, data: {}, content: [] });
         continue;
       }
       if (rawLine.trim().startsWith('>')) {
         const quoteText = rawLine.replace(/^>\s?/, '');
         const nodes = this.parseSimpleInline(quoteText);
         documentChildren.push({
-          nodeType: 'blockquote',
+          nodeType: NODE_TYPES.BLOCKQUOTE,
           data: {},
           content: [createParagraph(nodes.length ? nodes : [createTextNode('', [])])],
         });
@@ -419,7 +436,7 @@ export class MarkdownParser {
             )}... -> ${assetId} (alt: "${altText}")`
           );
           documentChildren.push({
-            nodeType: 'embedded-asset-block',
+            nodeType: NODE_TYPES.EMBEDDED_ASSET_BLOCK,
             content: [],
             data: { target: { sys: { type: 'Link', linkType: 'Asset', id: assetId } } },
           });
@@ -461,8 +478,16 @@ export class MarkdownParser {
       const nodes = this.parseInline(line);
 
       // Ensure no embedded-asset-block nodes end up in paragraphs (defensive check)
-      const inlineNodes = nodes.filter((node) => node.nodeType !== 'embedded-asset-block');
-      const blockNodes = nodes.filter((node) => node.nodeType === 'embedded-asset-block');
+      const inlineNodes: any[] = [];
+      const blockNodes: any[] = [];
+
+      for (const node of nodes) {
+        if (node.nodeType === NODE_TYPES.EMBEDDED_ASSET_BLOCK) {
+          blockNodes.push(node);
+        } else {
+          inlineNodes.push(node);
+        }
+      }
 
       if (inlineNodes.length) {
         if (isHeading) {

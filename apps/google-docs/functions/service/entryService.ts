@@ -1,4 +1,5 @@
 import { PlainClientAPI, EntryProps, ContentTypeProps } from 'contentful-management';
+import { extname } from 'path';
 import { EntryToCreate } from '../agents/documentParserAgent/schema';
 import { MarkdownParser } from './utils/richtext';
 /**
@@ -24,6 +25,31 @@ const IMAGE_TOKEN_REGEX = /!\[([^\]]*?)\]\(([\s\S]*?)\)/g;
 const IMAGE_URL_REGEX = /!\[[^\]]*?\]\(([\s\S]*?)\)/g;
 
 /**
+ * MIME type mapping for common file extensions
+ */
+const MIME_TYPES: Record<string, string> = {
+  png: 'image/png',
+  gif: 'image/gif',
+  webp: 'image/webp',
+  svg: 'image/svg+xml',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  bmp: 'image/bmp',
+  tiff: 'image/tiff',
+  tif: 'image/tiff',
+  mp4: 'video/mp4',
+  webm: 'video/webm',
+  mov: 'video/quicktime',
+  avi: 'video/x-msvideo',
+  mkv: 'video/x-matroska',
+  mp3: 'audio/mpeg',
+  wav: 'audio/wav',
+  ogg: 'audio/ogg',
+  m4a: 'audio/mp4',
+  pdf: 'application/pdf',
+};
+
+/**
  * Extracted metadata from an image token
  */
 interface ImageMetadata {
@@ -32,6 +58,18 @@ interface ImageMetadata {
   fileName: string;
   contentType: string;
   fileExtension: string;
+}
+
+/**
+ * Validates if a string is a valid URL
+ */
+function isValidUrl(url: string): boolean {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -61,69 +99,14 @@ function extractImageMetadata(markdownText: string): ImageMetadata[] {
     let fileExtension = 'jpg';
     let contentType = 'image/jpeg';
 
-    try {
+    if (isValidUrl(url)) {
       const urlObj = new URL(url);
       const pathname = urlObj.pathname.toLowerCase();
 
-      // Check for common image extensions
-      if (pathname.endsWith('.png')) {
-        fileExtension = 'png';
-        contentType = 'image/png';
-      } else if (pathname.endsWith('.gif')) {
-        fileExtension = 'gif';
-        contentType = 'image/gif';
-      } else if (pathname.endsWith('.webp')) {
-        fileExtension = 'webp';
-        contentType = 'image/webp';
-      } else if (pathname.endsWith('.svg')) {
-        fileExtension = 'svg';
-        contentType = 'image/svg+xml';
-      } else if (pathname.endsWith('.jpg') || pathname.endsWith('.jpeg')) {
-        fileExtension = 'jpg';
-        contentType = 'image/jpeg';
-      } else if (pathname.endsWith('.bmp')) {
-        fileExtension = 'bmp';
-        contentType = 'image/bmp';
-      } else if (pathname.endsWith('.tiff') || pathname.endsWith('.tif')) {
-        fileExtension = 'tiff';
-        contentType = 'image/tiff';
-      }
-      // Video formats
-      else if (pathname.endsWith('.mp4')) {
-        fileExtension = 'mp4';
-        contentType = 'video/mp4';
-      } else if (pathname.endsWith('.webm')) {
-        fileExtension = 'webm';
-        contentType = 'video/webm';
-      } else if (pathname.endsWith('.mov')) {
-        fileExtension = 'mov';
-        contentType = 'video/quicktime';
-      } else if (pathname.endsWith('.avi')) {
-        fileExtension = 'avi';
-        contentType = 'video/x-msvideo';
-      } else if (pathname.endsWith('.mkv')) {
-        fileExtension = 'mkv';
-        contentType = 'video/x-matroska';
-      }
-      // Audio formats
-      else if (pathname.endsWith('.mp3')) {
-        fileExtension = 'mp3';
-        contentType = 'audio/mpeg';
-      } else if (pathname.endsWith('.wav')) {
-        fileExtension = 'wav';
-        contentType = 'audio/wav';
-      } else if (pathname.endsWith('.ogg')) {
-        fileExtension = 'ogg';
-        contentType = 'audio/ogg';
-      } else if (pathname.endsWith('.m4a')) {
-        fileExtension = 'm4a';
-        contentType = 'audio/mp4';
-      }
-      // Document formats
-      else if (pathname.endsWith('.pdf')) {
-        fileExtension = 'pdf';
-        contentType = 'application/pdf';
-      }
+      // Extract extension using Node's path module
+      const extension = extname(pathname).slice(1).toLowerCase();
+      fileExtension = extension || 'jpg';
+      contentType = MIME_TYPES[fileExtension] || 'image/jpeg';
 
       // Extract filename from pathname
       const pathParts = pathname.split('/').filter(Boolean);
@@ -136,7 +119,7 @@ function extractImageMetadata(markdownText: string): ImageMetadata[] {
         contentType,
         fileExtension,
       });
-    } catch (e) {
+    } else {
       // If URL parsing fails, use defaults
       metadata.push({
         url,
@@ -169,9 +152,7 @@ function validateAssetUrl(url: string | null | undefined): string {
   }
 
   // Basic URL validation
-  try {
-    new URL(trimmedUrl);
-  } catch (e) {
+  if (!isValidUrl(trimmedUrl)) {
     throw new Error(`Invalid URL format: ${trimmedUrl.substring(0, 100)}`);
   }
 
@@ -258,10 +239,10 @@ async function createAssetFromUrlFast(
   if (!cma) {
     throw new Error('CMA client is required');
   }
-  if (!spaceId || typeof spaceId !== 'string' || spaceId.trim().length === 0) {
+  if (!spaceId || spaceId.trim().length === 0) {
     throw new Error('spaceId is required and must be a non-empty string');
   }
-  if (!environmentId || typeof environmentId !== 'string' || environmentId.trim().length === 0) {
+  if (!environmentId || environmentId.trim().length === 0) {
     throw new Error('environmentId is required and must be a non-empty string');
   }
 
@@ -300,13 +281,9 @@ async function createAssetFromUrlFast(
     // Silently fail - processing will be retried by Contentful
   });
 
-  // Trigger publishing in the background (don't wait for it)
-  // Note: Publishing will happen after processing completes
-  setTimeout(() => {
-    cma.asset.publish({ spaceId, environmentId, assetId: asset.sys.id }, asset).catch(() => {
-      // Silently fail - publishing will be retried by Contentful
-    });
-  }, 1000); // Small delay to allow processing to start
+  // Note: Assets are created as drafts. They can be published later if needed.
+  // Entries can reference draft assets without issues. Publishing is only required
+  // if assets need to be accessible via the Delivery API (public access).
 
   return asset;
 }
@@ -520,13 +497,9 @@ async function createAssetsForTokens(
 ): Promise<Array<{ tokenKey: string; normalizedUrl: string; assetId: string } | null>> {
   const assetCreationPromises = Array.from(imageTokenMap.entries()).map(
     async ([tokenKey, metadata]) => {
-      let imageUrl: string;
-      try {
-        new URL(metadata.url);
-        imageUrl = metadata.url;
-      } catch {
-        imageUrl = 'https://placehold.co/800x400?text=Dev+Image';
-      }
+      const imageUrl = isValidUrl(metadata.url)
+        ? metadata.url
+        : 'https://placehold.co/800x400?text=Dev+Image';
 
       try {
         const asset = await createAssetFromUrlFast(cma, spaceId, environmentId, imageUrl, {
