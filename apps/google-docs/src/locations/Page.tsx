@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Button,
@@ -12,12 +12,41 @@ import {
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { ContentTypeSelector } from '../components';
-import { createEntriesFromDocumentAction } from '../utils/appFunctionUtils';
-import { GoogleDocUploader } from '../components/page/GoogleDocUploader';
+import { GettingStartedPage, UploadDocumentModal } from '../components';
+import {
+  ContentTypePickerModal,
+  SelectedContentType,
+} from '../components/page/ContentTypePickerModal';
+import { ConfirmCancelModal } from '../components/page/ConfirmCancelModal';
+import { useModalManagement, ModalType } from '../hooks/useModalManagement';
+import { useProgressTracking } from '../hooks/useProgressTracking';
+import { useDocumentSubmission } from '../hooks/useDocumentSubmission';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
+  const { modalStates, openModal, closeModal } = useModalManagement();
+  const {
+    hasStarted,
+    setHasStarted,
+    googleDocUrl,
+    setGoogleDocUrl,
+    selectedContentTypes,
+    setSelectedContentTypes,
+    hasProgress,
+    resetProgress: resetProgressTracking,
+    pendingCloseAction,
+    setPendingCloseAction,
+  } = useProgressTracking();
+  const { result, successMessage, errorMessage, submit, clearMessages, isSubmitting } =
+    useDocumentSubmission(sdk, googleDocUrl);
+
+  // Track previous submission state to detect completion
+  const prevIsSubmittingRef = useRef<boolean>(false);
+
+  const handleGetStarted = () => {
+    setHasStarted(true);
+    openModal(ModalType.UPLOAD);
+  };
 
   const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
   const [document, setDocument] = useState<{ title: string; data: unknown } | null>(null);
@@ -38,51 +67,74 @@ const Page = () => {
       setSuccessMessage(null);
       return;
     }
+  const resetProgress = () => {
+    resetProgressTracking();
+    closeModal(ModalType.UPLOAD);
+    closeModal(ModalType.CONTENT_TYPE_PICKER);
+    clearMessages();
+  };
 
-    if (!document || !document.data) {
-      setErrorMessage('Please select a document');
-      setSuccessMessage(null);
+  const handleUploadModalCloseRequest = (docUrl?: string) => {
+    // If user is submitting a document (docUrl provided), proceed normally
+    if (docUrl) {
+      closeModal(ModalType.UPLOAD);
+      setGoogleDocUrl(docUrl);
+      openModal(ModalType.CONTENT_TYPE_PICKER);
       return;
     }
 
-    if (contentTypeIds.length === 0) {
-      setErrorMessage('Please select at least one content type');
-      setSuccessMessage(null);
-      return;
-    }
-
-    setIsSubmitting(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
-    setResult(null);
-
-    try {
-      const response = await createEntriesFromDocumentAction(sdk, contentTypeIds, document.data);
-      setResult(response);
-      setSuccessMessage('Successfully created entries from document!');
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to create entries');
-    } finally {
-      setIsSubmitting(false);
+    // If there's progress and user is trying to cancel, show confirmation
+    if (hasProgress) {
+      closeModal(ModalType.UPLOAD);
+      setPendingCloseAction(() => () => {
+        resetProgress();
+      });
+      openModal(ModalType.CONFIRM_CANCEL);
+    } else {
+      // No progress, reset to getting started page
+      closeModal(ModalType.UPLOAD);
+      setHasStarted(false);
     }
   };
 
-  const handleSuccess = (title: string, documentJson: string | null) => {
-    if (!documentJson) {
-      setErrorMessage('Failed to load document data');
-      return;
-    }
-    try {
-      const parsed = JSON.parse(documentJson);
-      setDocument({ title, data: parsed });
-      setErrorMessage(null);
-    } catch (error) {
-      setErrorMessage('Failed to parse document JSON');
+  const handleContentTypePickerCloseRequest = () => {
+    // If there's progress, show confirmation
+    if (hasProgress) {
+      closeModal(ModalType.CONTENT_TYPE_PICKER);
+      setPendingCloseAction(() => () => {
+        resetProgress();
+      });
+      openModal(ModalType.CONFIRM_CANCEL);
+    } else {
+      // No progress, close directly
+      closeModal(ModalType.CONTENT_TYPE_PICKER);
     }
   };
 
-  const handleError = (message: string) => {
-    setErrorMessage(message);
+  const handleConfirmCancel = () => {
+    closeModal(ModalType.CONFIRM_CANCEL);
+    if (pendingCloseAction) {
+      pendingCloseAction();
+      setPendingCloseAction(null);
+    }
+  };
+
+  const handleKeepCreating = () => {
+    closeModal(ModalType.CONFIRM_CANCEL);
+    setPendingCloseAction(null);
+    openModal(ModalType.CONTENT_TYPE_PICKER);
+  };
+
+  const handleContentTypeSelected = async (contentTypes: SelectedContentType[]) => {
+    const names = contentTypes.map((ct) => ct.name).join(', ');
+    const ids = contentTypes.map((ct) => ct.id);
+
+    sdk.notifier.success(
+      `Selected ${contentTypes.length} content type${contentTypes.length > 1 ? 's' : ''}: ${names}`
+    );
+
+    // Call create entries function after content types are selected
+    await submit(ids);
   };
 
   const handlePasteJson = () => {
@@ -213,10 +265,10 @@ const Page = () => {
                 {JSON.stringify(result, null, 2)}
               </Box>
             </Box>
-          )}
-        </Stack>
-      </Box>
-    </Flex>
+          </Layout.Body>
+        </Layout>
+      )}
+    </>
   );
 };
 

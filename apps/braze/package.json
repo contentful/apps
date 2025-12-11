@@ -23,6 +23,7 @@
     "start": "vite",
     "build": "tsc && vite build --outDir build && npm run build:functions",
     "test": "vitest",
+    "test:ci": "vitest run",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id gWLhC7MnK2rgcvifgE4do --token ${CONTENTFUL_CMA_TOKEN}",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",

@@ -25,6 +25,7 @@
     "start": "vite",
     "build": "tsc && vite build",
     "test": "vitest",
+    "test:ci": "vitest run",
     "preview": "vite preview",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "add-locations": "contentful-app-scripts add-locations",
