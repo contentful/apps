@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button, Modal, Paragraph } from '@contentful/f36-components';
 
 interface ConfirmCancelModalProps {

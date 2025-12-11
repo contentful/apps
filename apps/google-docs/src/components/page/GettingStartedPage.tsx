@@ -1,4 +1,13 @@
-import { Box, Button, Heading, Paragraph, Card, Layout, Flex } from '@contentful/f36-components';
+import {
+  Box,
+  Button,
+  Heading,
+  Paragraph,
+  Card,
+  Layout,
+  Flex,
+  Spinner,
+} from '@contentful/f36-components';
 import { ArrowRightIcon } from '@contentful/f36-icons';
 
 interface GettingStartedPageProps {

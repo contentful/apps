@@ -69,8 +69,8 @@ Your role is to:
 4. Create properly formatted entries that are ready to be created in Contentful via the CMA API
 
 CRITICAL FIELD TYPE RULES - READ CAREFULLY:
-- Symbol: Short text (max 256 characters) - use for titles, names, IDs ✓
-- Text: Long text (any length) - use for descriptions, content ✓
+- Symbol: Short text (default max 256 characters) - use for titles, names, IDs ✓
+- Text: Long text (default max 50,000 characters) - use for descriptions, content ✓
 - Number: Integer or decimal values only ✓
 - Boolean: true or false only ✓
 - Date: ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss.sssZ) ✓
@@ -81,6 +81,39 @@ CRITICAL FIELD TYPE RULES - READ CAREFULLY:
 - Array (of Link): ❌ NEVER USE - these reference other entries, skip entirely
   Example: DO NOT create [{ title: "x", content: "y" }] - this will FAIL
 - Link/Reference: ❌ NEVER USE - skip these fields (they reference other entries)
+
+FIELD VALIDATION RULES - MANDATORY TO RESPECT:
+Each field definition includes a "validations" array. You MUST respect ALL validation rules:
+1. Character Count Limits (size validation):
+   - If a field has validations with size: { min: X, max: Y }:
+     * The value MUST be between X and Y characters (inclusive)
+     * For Symbol/Text fields: Ensure your extracted text meets these limits
+     * If the document text is too short: Extend it intelligently (repeat key phrases, add context)
+     * If the document text is too long: Truncate at word boundaries to stay within max
+     * Example: If size: { min: 40, max: 60 }, a title must be 40-60 characters
+   
+2. Number Range Limits (range validation):
+   - If a field has validations with range: { min: X, max: Y }:
+     * The number MUST be between X and Y (inclusive)
+     * If the document value is outside this range, adjust it to the nearest valid value
+     * Example: If range: { min: 0, max: 10 }, a value of 15 becomes 10, -5 becomes 0
+   
+3. Required Fields:
+   - If required: true, the field MUST be populated
+   - If you cannot extract a value from the document, use a sensible default based on the field name/type
+   - Never leave required fields empty or undefined
+   
+4. Other Validations:
+   - Check for any other validation rules in the validations array
+   - Respect regex patterns, enum values, unique constraints, etc.
+   - If a validation cannot be satisfied, adjust the value to meet the constraint
+
+VALIDATION CHECKLIST FOR EACH FIELD:
+- Checked the validations array for this field
+- If size validation exists: Value length is between min and max (adjusted if needed)
+- If range validation exists: Number is within min and max (clamped if needed)
+- If required: Field is populated (not empty, null, or undefined)
+- All other validation rules are satisfied
 - RichText: Use ONLY the annotation tokens present in the provided document text. The extractor has already encoded Google Docs styles as simple tags:
   - <B>...</B> = bold, <I>...</I> = italic, <U>...</U> = underline (these may be nested for combinations)
   - <A href="URL">text</A> = hyperlink to URL
@@ -132,7 +165,12 @@ EXAMPLE: If the document has the word "bold" in it, do not invent bold text in y
 - If a required field cannot be populated from the document, use a sensible default or placeholder
 - Be thorough and extract as many valid entries as you can find
 - Focus on simple fields: Symbol, Text, Number, Boolean, Date
-- IMPORTANT FOR IMAGES: If the document content contains markdown image tokens like ![image](URL), include them verbatim in the most relevant RichText field so downstream processing can embed assets. Do NOT rewrite or drop these tokens.`;
+- IMPORTANT FOR IMAGES AND DRAWINGS: 
+  * If the document contains inlineObjectElement references, extract the image URL from inlineObjects[id].inlineObjectProperties.embeddedObject.imageProperties.contentUri
+  * If embeddedDrawingProperties exists, it's a Google Drawing (but still use the imageProperties.contentUri)
+  * Include them as markdown image tokens like ![alt](URL) in the most relevant RichText field
+  * Use alt text like "Drawing" or "Image" or descriptive text if available
+  * Do NOT rewrite or drop these tokens - they will be processed as assets downstream`;
 }
 
 function buildExtractionPrompt({
@@ -154,6 +192,7 @@ function buildExtractionPrompt({
         const isLinkType = field.type === 'Link';
         const isArrayOfLinks = field.type === 'Array' && (field.items as any)?.type === 'Link';
         const shouldSkip = isLinkType || isArrayOfLinks;
+        const validations = field.validations || [];
 
         return {
           id: field.id,
@@ -163,7 +202,19 @@ function buildExtractionPrompt({
           items: field.type === 'Array' ? (field.items as any) : undefined,
           required: field.required,
           localized: field.localized,
-          validations: field.validations,
+          validations,
+          validationSummary: validations?.length
+            ? validations
+                .map((v: any) => {
+                  if (v.size) return v.size.description;
+                  if (v.range) return v.range.description;
+                  if (v.enum) return v.enum.description;
+                  if (v.regexp) return v.regexp.description;
+                  if (v.unique) return v.unique.description;
+                  return 'Has validation rules';
+                })
+                .join('; ')
+            : 'No validation rules',
           SKIP: shouldSkip,
           SKIP_REASON: shouldSkip
             ? isLinkType
@@ -235,12 +286,19 @@ The document is in Google Docs API JSON format. Here's how to interpret the stru
    }
    \`\`\`
 
-3. **Inline Object Elements** - References to images:
+3. **Inline Object Elements** - References to images and drawings:
    \`\`\`
    { "inlineObjectElement": { "inlineObjectId": "kix.xxx" } }
    \`\`\`
-   - Look up the actual image in \`inlineObjects["kix.xxx"]\`
-   - Image URL is at: \`inlineObjects[id].inlineObjectProperties.embeddedObject.imageProperties.contentUri\`
+   - **CRITICAL**: Each inlineObjectElement has a unique inlineObjectId - you MUST look up the correct one
+   - Look up the actual object in \`inlineObjects["kix.xxx"]\` using the EXACT inlineObjectId from the element
+   - For IMAGES: Image URL is at: \`inlineObjects[id].inlineObjectProperties.embeddedObject.imageProperties.contentUri\`
+   - For GOOGLE DRAWINGS: Check for \`inlineObjects[id].inlineObjectProperties.embeddedObject.embeddedDrawingProperties\`
+     * If present, the drawing can be accessed via: \`inlineObjects[id].inlineObjectProperties.embeddedObject.imageProperties.contentUri\`
+     * Google Drawings are rendered as images, so they use the same contentUri structure as regular images
+     * The presence of \`embeddedDrawingProperties\` (even if empty) indicates it's a drawing, not a regular image
+   - **IMPORTANT**: When you see an inlineObjectElement with inlineObjectId "kix.ABC", you MUST look up inlineObjects["kix.ABC"] - do NOT use a different ID or the first image you find
+   - Each inlineObjectElement in the document corresponds to a DIFFERENT image/drawing - extract the URL for EACH one separately
 
 4. **Rich Links** - Embedded links with previews (YouTube, etc.):
    \`\`\`
@@ -278,9 +336,18 @@ The document is in Google Docs API JSON format. Here's how to interpret the stru
    - Concatenate all \`elements[].textRun.content\` values
    - Apply formatting based on \`textStyle\` (bold → **, italic → *, underline → _)
    - Check for \`bullet\` to identify list items
+   - Check for \`inlineObjectElement\` to identify embedded images/drawings:
+     * **CRITICAL**: For each inlineObjectElement, use its EXACT inlineObjectId to look up the object
+     * Look up \`inlineObjects[inlineObjectId]\` where inlineObjectId comes from the element (e.g., "kix.ABC")
+     * Extract image URL from \`inlineObjectProperties.embeddedObject.imageProperties.contentUri\`
+     * Check if \`embeddedDrawingProperties\` exists to identify Google Drawings
+     * Convert to markdown image token: \`![alt](url)\` where alt can be "Drawing" or "Image"
+     * **DO NOT** reuse the same URL for multiple inlineObjectElements - each one has its own unique URL
 4. For tables:
    - Iterate through \`tableRows[].tableCells[].content\` to get cell text
    - Use first row as headers if appropriate
+   - Also check for \`inlineObjectElement\` within table cells
+   - **CRITICAL**: Each inlineObjectElement in a table cell also has its own unique inlineObjectId - look it up separately
 
 **FORMATTING CONVERSION:**
 When extracting RichText fields, convert Google Docs formatting to Markdown:
@@ -312,31 +379,53 @@ EXAMPLE: If the document has the word "bold" in it, do not invent bold text in y
 7. For each entry, use the contentTypeId that best matches the content
 8. Format fields correctly: { "fieldId": { "${locale}": value } }
 9. Match field types exactly:
-   - Symbol: string (max 256 chars)
-   - Text: string (any length)
+   - Symbol: string (check validations for character limits)
+   - Text: string (check validations for character limits)
    - RichText: string using ONLY the provided annotation tokens (<B>, <I>, <U>, <A href="...">text</A>, <CODE>, <HR/>, and ![alt](URL)). Do not invent Markdown emphasis.
-
-VALIDATION CHECKLIST BEFORE YOU RETURN:
-- [ ] I did not add any <B>/<I>/<U>/<A>/<CODE>/<HR/>/![...](...) tokens that were not present in the provided document content.
-- [ ] I did not wrap the literal words "bold", "italic", or "underline" with any style unless they were already wrapped in the provided text.
-- [ ] Paragraphs without tokens are left as plain text.
-- [ ] I preserved tokens exactly as given (content and order). 
- - [ ] Every RichText value is an exact substring (after trivial whitespace normalization) of the provided document content.
-   - Number: number
+   - Number: number (check validations for range limits)
    - Boolean: boolean
    - Date: ISO 8601 string
    - Array: array of primitives (strings or numbers ONLY)
    - Object: JSON object
-10. For required fields (required: true) that are NOT marked SKIP: true, ensure they are populated
-11. If you cannot populate a required field from the document, use a sensible default or placeholder
-12. Be thorough - extract all valid content from the document
+
+10. **CRITICAL: RESPECT ALL FIELD VALIDATIONS**
+    - Each field has a "validations" array and "validationSummary" in the content type definitions
+    - You MUST check and respect ALL validation rules for each field
+    - For character count limits (size validation):
+      * If min is specified: Ensure value is at least that many characters (extend if needed)
+      * If max is specified: Ensure value is at most that many characters (truncate at word boundaries if needed)
+      * If both min and max: Value must be between them (adjust as needed)
+    - For number ranges (range validation):
+      * Clamp values to the min/max range
+    - For required fields: Always populate them (use defaults if document doesn't provide)
+    - BEFORE setting any field value, check its validations and ensure compliance
+
+11. For required fields (required: true) that are NOT marked SKIP: true, ensure they are populated
+12. If you cannot populate a required field from the document, use a sensible default or placeholder that meets validation rules
+13. Be thorough - extract all valid content from the document
+
+VALIDATION CHECKLIST BEFORE YOU RETURN:
+- [ ] I checked the "validations" array for EVERY field I populated
+- [ ] All character count limits (size.min, size.max) are respected
+- [ ] All number ranges (range.min, range.max) are respected
+- [ ] All required fields are populated
+- [ ] I did not add any <B>/<I>/<U>/<A>/<CODE>/<HR/>/![...](...) tokens that were not present in the provided document content.
+- [ ] I did not wrap the literal words "bold", "italic", or "underline" with any style unless they were already wrapped in the provided text.
+- [ ] Paragraphs without tokens are left as plain text.
+- [ ] I preserved tokens exactly as given (content and order). 
+- [ ] Every RichText value is an exact substring (after trivial whitespace normalization) of the provided document content.
 
 **CONTENT EXTRACTION TIPS:**
 - Look for HEADING_1 or HEADING_2 paragraphs as entry titles
 - Normal paragraphs following headings are typically body content
 - Tables may contain structured data that maps to entry fields
 - Lists can be extracted as array fields (if type is Array of Symbol/Text)
-- Image URLs from inlineObjects can populate URL/Symbol fields
+- Image URLs from inlineObjects can populate URL/Symbol fields or be included in RichText as markdown tokens
+- **GOOGLE DRAWINGS**: When you encounter \`inlineObjectElement\` with \`embeddedDrawingProperties\`:
+  * Extract the image URL from \`inlineObjectProperties.embeddedObject.imageProperties.contentUri\`
+  * Include it in RichText fields as a markdown image token: \`![Drawing](url)\` or \`![alt text](url)\`
+  * Google Drawings are rendered as images, so treat them the same as regular images for extraction purposes
+  * The drawing will be processed as an image asset in Contentful
 
 Return the extracted entries in the specified JSON schema format.`;
 }

@@ -36,7 +36,6 @@ export const createEntriesFromDocumentAction = async (
     }
 
     // Parse document if it's a JSON string (Contentful API expects an object, not a string)
-    // The document may be stringified by GoogleDocUploader or other components
     let parsedDocument: unknown = document;
     if (typeof document === 'string') {
       // Check if it's a URL (starts with http:// or https://)

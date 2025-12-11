@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -23,7 +23,6 @@ export const UploadDocumentModal = ({ sdk, isOpen, onClose }: UploadDocumentModa
     'https://docs.google.com/document/d/1uTBhG6ojUU_epNPFV1qKGIb506YAf3ii/edit?usp=drive_link&ouid=100613518827458188455&rtpof=true&sd=true'
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isGoogleDocUploaderModalOpen, setIsGoogleDocUploaderModalOpen] = useState<boolean>(false);
 
   // Reset state when modal opens
   useEffect(() => {
@@ -65,12 +64,7 @@ export const UploadDocumentModal = ({ sdk, isOpen, onClose }: UploadDocumentModa
             </Paragraph>
 
             <Stack spacing="spacingL" flexDirection="column" alignItems="stretch">
-              <GoogleDocUploader
-                sdk={sdk}
-                onSuccess={handleSuccess}
-                onError={handleError}
-                onModalStateChange={setIsGoogleDocUploaderModalOpen}
-              />
+              <GoogleDocUploader sdk={sdk} onSuccess={handleSuccess} onError={handleError} />
 
               <Box>
                 <TextInput

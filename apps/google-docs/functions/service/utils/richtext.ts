@@ -235,6 +235,25 @@ export class MarkdownParser {
                 content: [createTextNode(LINK_TEXT, [])],
               });
             } else {
+              // Log when we can't find an asset ID for a URL (helps debug mapping issues)
+              console.warn(
+                `✗ No asset ID found for image URL: ${normalizedUrl.substring(
+                  0,
+                  100
+                )}... (alt: "${altText}")`
+              );
+              console.warn(
+                `  Tried keys: "${compositeKey.substring(0, 80)}...", "${normalizedUrl.substring(
+                  0,
+                  80
+                )}..."`
+              );
+              console.warn(
+                `  Available URL keys in map: ${Object.keys(this.urlToAssetId || {})
+                  .slice(0, 5)
+                  .map((k) => k.substring(0, 50))
+                  .join(', ')}${Object.keys(this.urlToAssetId || {}).length > 5 ? '...' : ''}`
+              );
               nodes.push(createTextNode(line.slice(i, urlEnd + 1), []));
             }
             i = urlEnd + 1;

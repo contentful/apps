@@ -12,6 +12,6 @@ describe('Page component', () => {
   it('Component text exists', () => {
     const { getByText } = render(<Page />);
 
-    expect(getByText('Document Uploader')).toBeInTheDocument();
+    expect(getByText('Document Uploader')).toBeTruthy();
   });
 });

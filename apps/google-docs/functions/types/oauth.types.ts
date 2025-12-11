@@ -5,7 +5,7 @@ import * as contentful from 'contentful-management';
  */
 export interface AppEventHandlerRequest {
   headers: {
-    'X-Contentful-Topic': string;
+    'x-contentful-topic': string;
     'x-contentful-space-id': string;
     'x-contentful-environment-id': string;
     [key: string]: string;
@@ -49,46 +49,11 @@ export type OAuthTokenResponse = {
   expiry: number;
 };
 
-// Define types for field mappings
-interface AppFieldMapping {
-  contentfulFieldId: string;
-  klaviyoBlockName: string;
-  fieldType?: string;
-  contentTypeId?: string;
-  name?: string;
-  type?: string;
-  severity?: string;
-  value?: any;
-  isAssetField?: boolean;
-  locale?: string;
-}
-
-interface SyncStatus {
-  entryId: string;
-  contentTypeId: string;
-  contentTypeName?: string;
-  lastSynced: number;
-  fieldsUpdatedAt?: Record<string, number>;
-  needsSync: boolean;
-  syncCompleted: boolean;
-  lastSyncedVersion?: number;
-}
-
-interface SyncParameters {
-  syncStatuses: SyncStatus[];
-  lastUpdated: number;
-}
-
-// Interface for app installation parameters
 interface AppInstallationParameters {
   privateKey?: string;
   publicKey?: string;
   redirectUri?: string;
-  fieldMappings?: AppFieldMapping[];
-  syncData?: SyncParameters;
   appDefinitionId?: string;
-  selectedContentTypes?: Record<string, boolean>;
-  contentTypeMappings?: Record<string, AppFieldMapping[]>;
   installation?: any;
   selectedLocales?: string[];
   [key: string]: any;
