@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
   Button,
   Flex,
@@ -8,7 +8,6 @@ import {
   Pill,
   Select,
   Spinner,
-  Text,
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
