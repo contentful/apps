@@ -32,9 +32,11 @@ const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
   const invocationParams = sdk.parameters.invocation as unknown as InvocationParameters;
   const [changeCount, setChangeCount] = useState(0);
-  const [entries, setEntries] = useState<EntryProps[]>([]);
-  const [entryContentTypes, setEntryContentTypes] = useState<Record<string, ContentTypeProps>>({});
-  const [assets, setAssets] = useState<AssetProps[]>([]);
+  const [entriesFromPublished, setEntriesFromPublished] = useState<EntryProps[]>([]);
+  const [entriesFromCurrent, setEntriesFromCurrent] = useState<EntryProps[]>([]);
+  const [entryContentTypes, setEntryContentTypes] = useState<ContentTypeProps[]>([]);
+  const [assetsFromPublished, setAssetsFromPublished] = useState<AssetProps[]>([]);
+  const [assetsFromCurrent, setAssetsFromCurrent] = useState<AssetProps[]>([]);
   const [loading, setLoading] = useState(true);
 
   useAutoResizer();
@@ -43,11 +45,11 @@ const Dialog = () => {
   const publishedField = invocationParams?.publishedField || { content: [] };
   const locale = invocationParams?.locale;
 
-  const getReferenceIdsFromDocument = (doc: Document, types: string[]): string[] => {
-    const ids: string[] = [];
+  const getReferenceIdsFromDocument = (doc: Document, types: string[]): Set<string> => {
+    const ids: Set<string> = new Set();
     const getEntryIdsFromNode = (node: any) => {
       if (types.includes(node.nodeType)) {
-        ids.push(node.data.target.sys.id);
+        ids.add(node.data.target.sys.id);
       }
       if ('content' in node) {
         node.content.forEach(getEntryIdsFromNode);
@@ -57,10 +59,42 @@ const Dialog = () => {
     return ids;
   };
 
+  const getAssets = async (assetIds: string[]): Promise<AssetProps[]> => {
+    if (assetIds.length === 0) return [];
+
+    try {
+      const fetchedAssets = await sdk.cma.asset.getMany({
+        query: {
+          select: 'sys.id,fields.title',
+          'sys.id[in]': assetIds.join(','),
+        },
+      });
+      return fetchedAssets.items;
+    } catch (error) {
+      console.error('Error fetching assets:', error);
+      return [];
+    }
+  };
+
+  const getEntries = async (entryIds: string[]): Promise<EntryProps[]> => {
+    if (entryIds.length === 0) return [];
+
+    try {
+      const fetchedEntries = await sdk.cma.entry.getMany({
+        query: {
+          'sys.id[in]': entryIds.join(','),
+        },
+      });
+      return fetchedEntries.items;
+    } catch (error) {
+      console.error('Error fetching entries:', error);
+      return [];
+    }
+  };
+
   useEffect(() => {
     const fetchReferences = async () => {
       setLoading(true);
-      const contentTypes: Record<string, ContentTypeProps> = {};
 
       const currentEntryIds = getReferenceIdsFromDocument(currentField, [
         BLOCKS.EMBEDDED_ENTRY,
@@ -74,53 +108,31 @@ const Dialog = () => {
       const publishedAssetIds = getReferenceIdsFromDocument(publishedField, [
         BLOCKS.EMBEDDED_ASSET,
       ]);
-      const allEntryIds = [...new Set([...currentEntryIds, ...publishedEntryIds])];
-      const allAssetIds = [...new Set([...currentAssetIds, ...publishedAssetIds])];
 
-      if (allEntryIds.length > 0) {
-        let entries: EntryProps[] = [];
+      if (currentEntryIds.size > 0 || publishedEntryIds.size > 0) {
+        const fetchedEntriesFromCurrent = await getEntries(Array.from(currentEntryIds));
+        const fetchedEntriesFromPublished = await getEntries(Array.from(publishedEntryIds));
+        setEntriesFromCurrent(fetchedEntriesFromCurrent);
+        setEntriesFromPublished(fetchedEntriesFromPublished);
+
         try {
-          const fetchedEntries = await sdk.cma.entry.getMany({
+          const allEntries = [...entriesFromCurrent, ...entriesFromPublished];
+          const fetchedContentTypes = await sdk.cma.contentType.getMany({
             query: {
-              'sys.id[in]': allEntryIds.join(','),
+              'sys.id[in]': allEntries.map((entry) => entry.sys.contentType.sys.id),
             },
           });
-          entries = fetchedEntries.items;
-          setEntries(entries);
+          setEntryContentTypes(fetchedContentTypes.items);
         } catch (error) {
-          entries = [];
-          console.error('Error fetching entries:', error);
+          console.error('Error fetching content types:', error);
         }
-        if (entries.length > 0) {
-          await Promise.all(
-            entries.map(async (entry) => {
-              const entryId = entry.sys.id;
-              try {
-                const contentType = await sdk.cma.contentType.get({
-                  contentTypeId: entry.sys.contentType.sys.id,
-                });
-
-                contentTypes[entryId] = contentType;
-              } catch (error) {
-                console.error(`Error fetching content type for entry ${entryId}:`, error);
-                contentTypes[entryId] = { name: 'Reference is missing' } as ContentTypeProps;
-              }
-            })
-          );
-        }
-        setEntryContentTypes(contentTypes);
       }
-      if (allAssetIds.length > 0) {
-        try {
-          const fetchedAssets = await sdk.cma.asset.getMany({
-            query: {
-              'sys.id[in]': allAssetIds.join(','),
-            },
-          });
-          setAssets(fetchedAssets.items);
-        } catch (error) {
-          console.error('Error fetching assets:', error);
-        }
+      if (publishedAssetIds.size > 0 || currentAssetIds.size > 0) {
+        const fetchedAssetsFromPublished = await getAssets(Array.from(publishedAssetIds));
+        const fetchedAssetsFromCurrent = await getAssets(Array.from(currentAssetIds));
+
+        setAssetsFromPublished(fetchedAssetsFromPublished);
+        setAssetsFromCurrent(fetchedAssetsFromCurrent);
       }
       setLoading(false);
     };
@@ -188,10 +200,12 @@ const Dialog = () => {
               currentField={currentField}
               publishedField={publishedField}
               onChangeCount={setChangeCount}
-              entries={entries}
+              entriesFromPublished={entriesFromPublished}
+              entriesFromCurrent={entriesFromCurrent}
               entryContentTypes={entryContentTypes}
               locale={sdk.locales.default}
-              assets={assets}
+              assetsFromPublished={assetsFromPublished}
+              assetsFromCurrent={assetsFromCurrent}
             />
           )}
         </GridItem>
@@ -200,7 +214,7 @@ const Dialog = () => {
           <Box className={styles.diff}>
             {documentToReactComponents(
               publishedField,
-              createOptions(entries, entryContentTypes, assets, locale)
+              createOptions(entriesFromPublished, entryContentTypes, assetsFromPublished, locale)
             )}
           </Box>
         </GridItem>
