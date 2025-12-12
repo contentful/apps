@@ -229,12 +229,6 @@ export class MarkdownParser {
               // Always use asset-hyperlink for inline images (never embedded-asset-block in inline context)
               // Standalone images are handled at the parseDocument level
               const LINK_TEXT = altText || 'image';
-              console.log(
-                `✓ Mapped image URL to asset: ${normalizedUrl.substring(
-                  0,
-                  100
-                )}... -> ${assetId} (alt: "${altText}")`
-              );
               nodes.push({
                 nodeType: NODE_TYPES.ASSET_HYPERLINK,
                 data: { target: { sys: { type: 'Link', linkType: 'Asset', id: assetId } } },
@@ -429,38 +423,12 @@ export class MarkdownParser {
 
         if (assetId) {
           // Standalone image -> add as block-level embedded asset (direct child of document)
-          console.log(
-            `✓ Mapped standalone image URL to asset: ${normalizedUrl.substring(
-              0,
-              100
-            )}... -> ${assetId} (alt: "${altText}")`
-          );
           documentChildren.push({
             nodeType: NODE_TYPES.EMBEDDED_ASSET_BLOCK,
             content: [],
             data: { target: { sys: { type: 'Link', linkType: 'Asset', id: assetId } } },
           });
           continue;
-        } else {
-          // Log when we can't find an asset ID for a standalone image URL (helps debug mapping issues)
-          console.warn(
-            `✗ No asset ID found for standalone image URL: ${normalizedUrl.substring(
-              0,
-              100
-            )}... (alt: "${altText}")`
-          );
-          console.warn(
-            `  Tried keys: "${compositeKey.substring(0, 80)}...", "${normalizedUrl.substring(
-              0,
-              80
-            )}..."`
-          );
-          console.warn(
-            `  Available URL keys in map: ${Object.keys(this.urlToAssetId || {})
-              .slice(0, 5)
-              .map((k) => k.substring(0, 50))
-              .join(', ')}${Object.keys(this.urlToAssetId || {}).length > 5 ? '...' : ''}`
-          );
         }
       }
 
