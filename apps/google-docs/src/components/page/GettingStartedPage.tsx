@@ -9,6 +9,7 @@ import {
   Spinner,
 } from '@contentful/f36-components';
 import { ArrowRightIcon } from '@contentful/f36-icons';
+import { OAuthConnector } from './OAuthConnector';
 
 interface GettingStartedPageProps {
   onSelectFile: () => void;
@@ -34,6 +35,7 @@ export const GettingStartedPage = ({ onSelectFile }: GettingStartedPageProps) =>
                 Select your file
               </Button>
             </Flex>
+            <OAuthConnector />
           </Card>
         </Box>
       </Layout.Body>

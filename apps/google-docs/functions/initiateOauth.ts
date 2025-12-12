@@ -1,13 +1,9 @@
-/*
- * INTEG-3271: Double check the imported types and make sure they work for Google Docs (use Klaviyo as a reference)
- */
 import {
   OAuthInitResponse,
   OAuthExchangePayload,
   OAuthExchangeResponse,
   OAuthTokenResponse,
   AppEventHandlerRequest,
-  OAuthResponseUrl,
   AppEventContext,
   AppEventHandlerResponse,
 } from './types/oauth.types';
@@ -19,13 +15,10 @@ export type OAuthSDK = {
   revoke: () => Promise<void>;
 };
 
-export async function initiateOauth(sdk: OAuthSDK): Promise<OAuthResponseUrl> {
+export async function initiateOauth(sdk: OAuthSDK): Promise<OAuthInitResponse> {
   try {
     const oauthResponse = await sdk.init();
-
-    return {
-      authorizationUrl: oauthResponse.authorizeUrl,
-    };
+    return oauthResponse;
   } catch (error) {
     console.error('Failed to initialize OAuth flow:', error);
     throw new Error('Failed to initialize OAuth flow. Please try again.');
