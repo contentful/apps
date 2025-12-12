@@ -10,7 +10,7 @@ const ASSET_NOT_FOUND = 'Asset missing or inaccessible';
 
 export const createOptions = (
   entries: EntryProps[],
-  entryContentTypes: Record<string, ContentTypeProps>,
+  entryContentTypes: ContentTypeProps[],
   assets: AssetProps[],
   locale: string
 ): Options => ({
@@ -24,7 +24,9 @@ export const createOptions = (
           </Box>
         );
       }
-      const contentType = entryContentTypes[entry.sys.id];
+      const contentType = entryContentTypes.find(
+        (ct) => ct.sys.id === entry.sys.contentType.sys.id
+      );
       const contentTypeName = contentType?.name || UNKNOWN;
       const title = getEntryTitle(entry, contentType, locale);
 
@@ -41,7 +43,9 @@ export const createOptions = (
         return <InlineEntryCard contentType={UNKNOWN}>{ENTRY_NOT_FOUND}</InlineEntryCard>;
       }
 
-      const contentType = entryContentTypes[entry.sys.id];
+      const contentType = entryContentTypes.find(
+        (ct) => ct.sys.id === entry.sys.contentType.sys.id
+      );
       const contentTypeName = contentType?.name || UNKNOWN;
       const title = getEntryTitle(entry, contentType, locale);
 
