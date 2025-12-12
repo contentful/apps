@@ -16,7 +16,7 @@ import { useApiKeyState, AppInstallationParameters } from '../hooks/useApiKeySta
 import { useApiKeyValidation } from '../hooks/useApiKeyValidation';
 import { useAppConfiguration } from '../hooks/useAppConfiguration';
 import { ValidationFeedback } from '../components/config/ValidationFeedback';
-import { OPENAI_API_KEY_PREFIX } from '../utils/openaiValidation';
+import { validateApiKeyFormat, OPENAI_API_KEY_PREFIX } from '../utils/openaiValidation';
 
 export type { AppInstallationParameters };
 
@@ -53,7 +53,8 @@ const ConfigScreen = () => {
       newValue !== obfuscatedDisplay
     ) {
       const trimmed = newValue.trim();
-      if (trimmed.startsWith(OPENAI_API_KEY_PREFIX) && trimmed.length >= 10) {
+      const formatResult = validateApiKeyFormat(trimmed);
+      if (formatResult.isValid) {
         setApiKeyInput(newValue);
         handleInputChange(newValue);
         return;

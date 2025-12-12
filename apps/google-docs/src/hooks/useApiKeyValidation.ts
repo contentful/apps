@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { validateOpenAiApiKey, OPENAI_API_KEY_PREFIX } from '../utils/openaiValidation';
+import { validateOpenAiApiKey, validateApiKeyFormat } from '../utils/openaiValidation';
 
 interface UseApiKeyValidationReturn {
   isValid: boolean;
@@ -98,17 +98,10 @@ export const useApiKeyValidation = (obfuscatedDisplay: string): UseApiKeyValidat
       return;
     }
 
-    if (trimmed.length === 0 || !trimmed.startsWith(OPENAI_API_KEY_PREFIX) || trimmed.length < 10) {
+    const formatResult = validateApiKeyFormat(trimmed);
+    if (!formatResult.isValid) {
       setIsValid(false);
-      if (trimmed.length === 0) {
-        setValidationError('API key is required');
-      } else if (!trimmed.startsWith(OPENAI_API_KEY_PREFIX)) {
-        setValidationError(
-          `Invalid API key format. Keys must start with "${OPENAI_API_KEY_PREFIX}"`
-        );
-      } else {
-        setValidationError('API key is too short');
-      }
+      setValidationError(formatResult.error || '');
       setApiUnavailable(false);
     } else {
       setIsValid(true);
@@ -138,7 +131,8 @@ export const useApiKeyValidation = (obfuscatedDisplay: string): UseApiKeyValidat
       return;
     }
 
-    if (trimmed.length === 0 || !trimmed.startsWith(OPENAI_API_KEY_PREFIX) || trimmed.length < 10) {
+    const formatResult = validateApiKeyFormat(trimmed);
+    if (!formatResult.isValid) {
       return;
     }
 

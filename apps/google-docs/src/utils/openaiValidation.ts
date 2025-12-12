@@ -11,13 +11,10 @@ export interface ValidationResult {
 }
 
 /**
- * Validates an OpenAI API key by calling the OpenAI models endpoint.
- * Falls back to format-only validation if API is unavailable.
+ * Validates API key format only (no API call).
+ * Returns validation result with appropriate error messages.
  */
-export async function validateOpenAiApiKey(
-  apiKey: string,
-  timeout: number = VALIDATION_TIMEOUT
-): Promise<ValidationResult> {
+export function validateApiKeyFormat(apiKey: string): ValidationResult {
   const token = apiKey.trim();
 
   if (token.length === 0) {
@@ -40,6 +37,26 @@ export async function validateOpenAiApiKey(
       error: 'API key is too short',
     };
   }
+
+  return {
+    isValid: true,
+  };
+}
+
+/**
+ * Validates an OpenAI API key by calling the OpenAI models endpoint.
+ * Falls back to format-only validation if API is unavailable.
+ */
+export async function validateOpenAiApiKey(
+  apiKey: string,
+  timeout: number = VALIDATION_TIMEOUT
+): Promise<ValidationResult> {
+  const formatResult = validateApiKeyFormat(apiKey);
+  if (!formatResult.isValid) {
+    return formatResult;
+  }
+
+  const token = apiKey.trim();
 
   try {
     const controller = new AbortController();
