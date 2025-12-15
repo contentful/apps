@@ -9,9 +9,8 @@ import Doc7 from './Doc_7_Edge_Cases_Test.json';
 import Doc8 from './Doc_8_DXP_benefits - Sample.json';
 
 // Optional import: Doc9 may not exist in all environments (e.g., S3 hosted app)
-const doc9Filename = './Doc_9_Customer_Example_Doc.json';
-const doc9Modules = (import.meta as any).glob(doc9Filename, { eager: true });
-const Doc9 = doc9Modules?.[doc9Filename]?.default || null;
+const doc9Modules = (import.meta as any).glob('./Doc_9_Customer_Example_Doc.json', { eager: true });
+const Doc9 = doc9Modules?.['./Doc_9_Customer_Example_Doc.json']?.default || null;
 
 // Export test documents array
 export const TEST_DOCUMENTS = [
