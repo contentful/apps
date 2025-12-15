@@ -10,6 +10,9 @@ interface GettingStartedPageProps {
 
 export const GettingStartedPage = ({ onSelectFile }: GettingStartedPageProps) => {
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
+  const handleOAuthConnectedChange = (isOAuthConnectedValue: boolean) => {
+    setIsOAuthConnected(isOAuthConnectedValue);
+  };
   return (
     <Layout variant="fullscreen" withBoxShadow={true} offsetTop={10}>
       <Layout.Body>
@@ -18,7 +21,10 @@ export const GettingStartedPage = ({ onSelectFile }: GettingStartedPageProps) =>
           gap="spacingXl"
           style={{ maxWidth: '900px', margin: `${tokens.spacingL} auto` }}>
           <Heading marginBottom="none">Google Drive</Heading>
-          <OAuthConnector getIsOAuthConnected={setIsOAuthConnected} />
+          <OAuthConnector
+            onOAuthConnectedChange={handleOAuthConnectedChange}
+            isOAuthConnected={isOAuthConnected}
+          />
           <Card padding="large">
             {!isOAuthConnected && (
               <Note variant="warning" style={{ marginBottom: tokens.spacingM }}>

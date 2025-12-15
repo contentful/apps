@@ -7,13 +7,14 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import googleDriveLogo from '../../assets/google-drive.png';
 
 export const OAuthConnector = ({
-  getIsOAuthConnected,
+  onOAuthConnectedChange,
+  isOAuthConnected,
 }: {
-  getIsOAuthConnected: (isOAuthConnected: boolean) => void;
+  onOAuthConnectedChange: (oauthConnectionStatus: boolean) => void;
+  isOAuthConnected: boolean;
 }) => {
   const sdk = useSDK<ConfigAppSDK>();
   const [isOAuthLoading, setIsOAuthLoading] = useState(false);
-  const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const [isHoveringConnected, setIsHoveringConnected] = useState(false);
   const [isCheckingStatus, setIsCheckingStatus] = useState(true);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
@@ -65,8 +66,7 @@ export const OAuthConnector = ({
 
         // If we have an expected status and it matches, or if we don't have an expected status, accept the result
         if (expectedStatus === undefined || isConnected === expectedStatus) {
-          setIsOAuthConnected(isConnected);
-          getIsOAuthConnected(isConnected);
+          onOAuthConnectedChange(isConnected);
           console.log(`Status check resolved to expected value: ${isConnected}`);
           break;
         } else {
@@ -77,8 +77,7 @@ export const OAuthConnector = ({
           // If this is the last attempt, accept the current result anyway
           if (attempt === maxRetries) {
             console.log(`Max retries reached. Accepting current status: ${isConnected}`);
-            setIsOAuthConnected(isConnected);
-            getIsOAuthConnected(isConnected);
+            onOAuthConnectedChange(isConnected);
             break;
           }
 
@@ -93,8 +92,7 @@ export const OAuthConnector = ({
         // If this is the last attempt, set status to false and give up
         if (attempt === maxRetries) {
           console.log('Max retries reached. Setting status to false due to errors.');
-          setIsOAuthConnected(false);
-          getIsOAuthConnected(false);
+          onOAuthConnectedChange(false);
           break;
         }
 
