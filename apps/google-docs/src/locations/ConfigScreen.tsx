@@ -16,18 +16,18 @@ import { useApiKeyState, AppInstallationParameters } from '../hooks/useApiKeySta
 import { useApiKeyValidation } from '../hooks/useApiKeyValidation';
 import { useAppConfiguration } from '../hooks/useAppConfiguration';
 import { ValidationFeedback } from '../components/config/ValidationFeedback';
-import { validateApiKeyFormat, OPENAI_API_KEY_PREFIX } from '../utils/openaiValidation';
+import { OPENAI_API_KEY_PREFIX } from '../utils/openaiValidation';
 
 export type { AppInstallationParameters };
 
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
-  const { apiKeyInput, obfuscatedDisplay, setApiKeyInput, initializeFromParameters } =
+  const { apiKeyInput, obfuscatedDisplay, onApiKeyInputChange, initializeFromParameters } =
     useApiKeyState(sdk);
   const {
     isValid,
     isValidating,
-    validationError,
+    validationMessage,
     apiUnavailable,
     validateApiKey,
     handleInputChange,
@@ -37,7 +37,12 @@ const ConfigScreen = () => {
   const { handleConfigure } = useAppConfiguration(sdk);
 
   const onConfigure = useCallback(async () => {
-    return handleConfigure(apiKeyInput, obfuscatedDisplay, isValidating, validateApiKey);
+    return handleConfigure({
+      apiKeyInput,
+      obfuscatedDisplay,
+      isValidating,
+      validateApiKey,
+    });
   }, [apiKeyInput, obfuscatedDisplay, isValidating, validateApiKey, handleConfigure]);
 
   const onConfigurationCompleted = useCallback((error?: unknown) => {
@@ -47,29 +52,7 @@ const ConfigScreen = () => {
   }, []);
 
   const handleApiKeyChange = (newValue: string) => {
-    if (
-      apiKeyInput === obfuscatedDisplay &&
-      obfuscatedDisplay.length > 0 &&
-      newValue !== obfuscatedDisplay
-    ) {
-      const trimmed = newValue.trim();
-      const formatResult = validateApiKeyFormat(trimmed);
-      if (formatResult.isValid) {
-        setApiKeyInput(newValue);
-        handleInputChange(newValue);
-        return;
-      }
-      setApiKeyInput('');
-      return;
-    }
-
-    if (newValue.includes('•') && newValue !== obfuscatedDisplay) {
-      setApiKeyInput('');
-      return;
-    }
-
-    setApiKeyInput(newValue);
-    handleInputChange(newValue);
+    onApiKeyInputChange(newValue, handleInputChange);
   };
 
   useEffect(() => {
@@ -137,7 +120,7 @@ const ConfigScreen = () => {
           <ValidationFeedback
             isValidating={isValidating}
             isValid={isValid}
-            validationError={validationError}
+            validationMessage={validationMessage}
             apiUnavailable={apiUnavailable}
           />
         </FormControl>

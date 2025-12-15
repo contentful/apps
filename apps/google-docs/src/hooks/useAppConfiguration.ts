@@ -1,23 +1,29 @@
 import { useCallback } from 'react';
 import { ConfigAppSDK, AppState } from '@contentful/app-sdk';
-import { AppInstallationParameters } from './useApiKeyState';
+import { AppInstallationParameters, VISIBLE_SUFFIX_LENGTH } from './useApiKeyState';
 
-const VISIBLE_SUFFIX_LENGTH = 4;
+interface HandleConfigureParams {
+  apiKeyInput: string;
+  obfuscatedDisplay: string;
+  isValidating: boolean;
+  validateApiKey: (value: string, skipApiValidation?: boolean) => Promise<boolean>;
+}
 
 interface UseAppConfigurationReturn {
-  handleConfigure: (
-    apiKeyInput: string,
-    obfuscatedDisplay: string,
-    isValidating: boolean,
-    validateApiKey: (value: string, skipApiValidation?: boolean) => Promise<boolean>
-  ) => Promise<
+  handleConfigure: (params: HandleConfigureParams) => Promise<
     | false
     | {
-        parameters: Record<string, string | number>;
+        parameters: AppInstallationParameters;
         targetState: AppState | null | undefined;
       }
   >;
 }
+
+const createApiKeyParameters = (apiKey: string): AppInstallationParameters => ({
+  openAiApiKey: apiKey,
+  openAiApiKeyLength: apiKey.length,
+  openAiApiKeySuffix: apiKey.slice(-VISIBLE_SUFFIX_LENGTH),
+});
 
 /**
  * Hook to handle app configuration and parameter saving.
@@ -25,12 +31,12 @@ interface UseAppConfigurationReturn {
  */
 export const useAppConfiguration = (sdk: ConfigAppSDK): UseAppConfigurationReturn => {
   const handleConfigure = useCallback(
-    async (
-      apiKeyInput: string,
-      obfuscatedDisplay: string,
-      isValidating: boolean,
-      validateApiKey: (value: string, skipApiValidation?: boolean) => Promise<boolean>
-    ) => {
+    async ({
+      apiKeyInput,
+      obfuscatedDisplay,
+      isValidating,
+      validateApiKey,
+    }: HandleConfigureParams) => {
       if (isValidating) {
         return false;
       }
@@ -43,20 +49,15 @@ export const useAppConfiguration = (sdk: ConfigAppSDK): UseAppConfigurationRetur
         return false;
       }
 
-      const parametersToSave: Record<string, string | number> = {};
+      let parametersToSave: AppInstallationParameters = {};
+
       if (openAiApiKey && openAiApiKey !== obfuscatedDisplay) {
-        parametersToSave.openAiApiKey = openAiApiKey;
-        parametersToSave.openAiApiKeyLength = openAiApiKey.length;
-        parametersToSave.openAiApiKeySuffix = openAiApiKey.slice(-VISIBLE_SUFFIX_LENGTH);
+        parametersToSave = createApiKeyParameters(openAiApiKey);
       } else if (openAiApiKey === obfuscatedDisplay && openAiApiKey.length > 0) {
         const currentParameters =
           (await sdk.app.getParameters()) as AppInstallationParameters | null;
         if (currentParameters?.openAiApiKey) {
-          parametersToSave.openAiApiKey = currentParameters.openAiApiKey;
-          parametersToSave.openAiApiKeyLength = currentParameters.openAiApiKey.length;
-          parametersToSave.openAiApiKeySuffix = currentParameters.openAiApiKey.slice(
-            -VISIBLE_SUFFIX_LENGTH
-          );
+          parametersToSave = createApiKeyParameters(currentParameters.openAiApiKey);
         }
       }
 

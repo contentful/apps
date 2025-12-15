@@ -1,5 +1,6 @@
 const OPENAI_MODELS_URL = 'https://api.openai.com/v1/models';
 const VALIDATION_TIMEOUT = 10000;
+const MIN_API_KEY_LENGTH = 10;
 
 export const OPENAI_API_KEY_PREFIX = 'sk-';
 
@@ -31,7 +32,7 @@ export function validateApiKeyFormat(apiKey: string): ValidationResult {
     };
   }
 
-  if (token.length < 10) {
+  if (token.length < MIN_API_KEY_LENGTH) {
     return {
       isValid: false,
       error: 'API key is too short',
@@ -66,14 +67,13 @@ export async function validateOpenAiApiKey(
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
       },
       signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
 
-    if (response.status < 400) {
+    if (response.ok) {
       return {
         isValid: true,
       };

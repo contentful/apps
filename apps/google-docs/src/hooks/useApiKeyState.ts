@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
+import { validateApiKeyFormat } from '../utils/openaiValidation';
 
 export interface AppInstallationParameters {
   openAiApiKey?: string;
@@ -7,12 +8,12 @@ export interface AppInstallationParameters {
   openAiApiKeySuffix?: string;
 }
 
-const VISIBLE_SUFFIX_LENGTH = 4;
+export const VISIBLE_SUFFIX_LENGTH = 4;
 
 interface UseApiKeyStateReturn {
   apiKeyInput: string;
   obfuscatedDisplay: string;
-  setApiKeyInput: (value: string) => void;
+  onApiKeyInputChange: (value: string, onValidationChange?: (value: string) => void) => void;
   initializeFromParameters: () => Promise<void>;
 }
 
@@ -46,20 +47,51 @@ export const useApiKeyState = (sdk: ConfigAppSDK): UseApiKeyStateReturn => {
       return;
     }
 
-    const totalLength = hasMeta ? openAiApiKeyLength : openAiApiKey?.length || 8;
-    const suffix = hasMeta ? openAiApiKeySuffix : openAiApiKey?.slice(-VISIBLE_SUFFIX_LENGTH) || '';
-    const visibleSuffix = suffix.slice(-VISIBLE_SUFFIX_LENGTH);
-    const maskedLength = Math.max(0, totalLength - visibleSuffix.length);
+    const totalLength = hasMeta ? openAiApiKeyLength : openAiApiKey!.length;
+    const visibleSuffix = (hasMeta ? openAiApiKeySuffix : openAiApiKey!).slice(
+      -VISIBLE_SUFFIX_LENGTH
+    );
+
+    const maskedLength = Math.max(0, totalLength - VISIBLE_SUFFIX_LENGTH);
     const masked = '•'.repeat(maskedLength) + visibleSuffix;
 
     setObfuscatedDisplay(masked);
     setApiKeyInput(masked);
   }, [sdk]);
 
+  const onApiKeyInputChange = useCallback(
+    (newValue: string, onValidationChange?: (value: string) => void) => {
+      if (
+        apiKeyInput === obfuscatedDisplay &&
+        obfuscatedDisplay.length > 0 &&
+        newValue !== obfuscatedDisplay
+      ) {
+        const trimmed = newValue.trim();
+        const formatResult = validateApiKeyFormat(trimmed);
+        if (formatResult.isValid) {
+          setApiKeyInput(newValue);
+          onValidationChange?.(newValue);
+          return;
+        }
+        setApiKeyInput('');
+        return;
+      }
+
+      if (newValue.includes('•') && newValue !== obfuscatedDisplay) {
+        setApiKeyInput('');
+        return;
+      }
+
+      setApiKeyInput(newValue);
+      onValidationChange?.(newValue);
+    },
+    [apiKeyInput, obfuscatedDisplay]
+  );
+
   return {
     apiKeyInput,
     obfuscatedDisplay,
-    setApiKeyInput,
+    onApiKeyInputChange,
     initializeFromParameters,
   };
 };

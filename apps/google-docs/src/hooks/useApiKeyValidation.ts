@@ -4,7 +4,7 @@ import { validateOpenAiApiKey, validateApiKeyFormat } from '../utils/openaiValid
 interface UseApiKeyValidationReturn {
   isValid: boolean;
   isValidating: boolean;
-  validationError: string;
+  validationMessage: string;
   apiUnavailable: boolean;
   validateApiKey: (value: string, skipApiValidation?: boolean) => Promise<boolean>;
   handleInputChange: (value: string) => void;
@@ -12,7 +12,7 @@ interface UseApiKeyValidationReturn {
   handleBlur: (value: string) => void;
 }
 
-const API_VALIDATION_DEBOUNCE = 500;
+const API_VALIDATION_DEBOUNCE = 500; // milliseconds
 
 /**
  * Hook to manage API key validation with debouncing.
@@ -21,7 +21,7 @@ const API_VALIDATION_DEBOUNCE = 500;
 export const useApiKeyValidation = (obfuscatedDisplay: string): UseApiKeyValidationReturn => {
   const [isValid, setIsValid] = useState<boolean>(true);
   const [isValidating, setIsValidating] = useState<boolean>(false);
-  const [validationError, setValidationError] = useState<string>('');
+  const [validationMessage, setValidationMessage] = useState<string>('');
   const [apiUnavailable, setApiUnavailable] = useState<boolean>(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastValidatedValueRef = useRef<string>('');
@@ -34,11 +34,9 @@ export const useApiKeyValidation = (obfuscatedDisplay: string): UseApiKeyValidat
     isValidating?: boolean;
   }) => {
     setIsValid(state.isValid);
-    setValidationError(state.error || '');
+    setValidationMessage(state.error || '');
     setApiUnavailable(state.apiUnavailable || false);
-    if (state.isValidating !== undefined) {
-      setIsValidating(state.isValidating);
-    }
+    setIsValidating(state.isValidating ?? isValidating);
   };
 
   const validateApiKey = async (value: string, skipApiValidation = false): Promise<boolean> => {
@@ -99,15 +97,13 @@ export const useApiKeyValidation = (obfuscatedDisplay: string): UseApiKeyValidat
     }
 
     const formatResult = validateApiKeyFormat(trimmed);
-    if (!formatResult.isValid) {
-      setIsValid(false);
-      setValidationError(formatResult.error || '');
-      setApiUnavailable(false);
-    } else {
-      setIsValid(true);
-      setValidationError('');
-      setApiUnavailable(false);
+    updateValidationState({
+      isValid: formatResult.isValid,
+      error: formatResult.error || '',
+      apiUnavailable: false,
+    });
 
+    if (formatResult.isValid) {
       debounceTimerRef.current = setTimeout(() => {
         lastValidatedValueRef.current = trimmed;
         void validateApiKey(trimmed, false);
@@ -145,7 +141,7 @@ export const useApiKeyValidation = (obfuscatedDisplay: string): UseApiKeyValidat
     }
 
     lastValidatedValueRef.current = trimmed;
-    void validateApiKey(value, false);
+    void validateApiKey(trimmed, false);
   };
 
   useEffect(() => {
@@ -159,7 +155,7 @@ export const useApiKeyValidation = (obfuscatedDisplay: string): UseApiKeyValidat
   return {
     isValid,
     isValidating,
-    validationError,
+    validationMessage,
     apiUnavailable,
     validateApiKey,
     handleInputChange,

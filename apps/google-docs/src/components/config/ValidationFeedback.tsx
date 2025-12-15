@@ -4,14 +4,14 @@ import tokens from '@contentful/f36-tokens';
 interface ValidationFeedbackProps {
   isValidating: boolean;
   isValid: boolean;
-  validationError: string;
+  validationMessage: string;
   apiUnavailable: boolean;
 }
 
 export const ValidationFeedback = ({
   isValidating,
   isValid,
-  validationError,
+  validationMessage,
   apiUnavailable,
 }: ValidationFeedbackProps) => {
   if (isValidating) {
@@ -26,15 +26,15 @@ export const ValidationFeedback = ({
   if (!isValid) {
     return (
       <FormControl.ValidationMessage>
-        {validationError || 'Please enter a valid OpenAI API key'}
+        {validationMessage || 'Please enter a valid OpenAI API key'}
       </FormControl.ValidationMessage>
     );
   }
 
-  if (apiUnavailable && validationError) {
+  if (apiUnavailable && validationMessage) {
     return (
       <FormControl.HelpText marginTop="spacing2Xs" style={{ color: tokens.orange600 }}>
-        {validationError}
+        {validationMessage}
       </FormControl.HelpText>
     );
   }
