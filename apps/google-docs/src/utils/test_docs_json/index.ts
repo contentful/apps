@@ -7,10 +7,8 @@ import Doc5 from './Doc_5_Bulk_Entry_Stress_Test.json';
 import Doc6 from './Doc_6_Multilingual_Test.json';
 import Doc7 from './Doc_7_Edge_Cases_Test.json';
 import Doc8 from './Doc_8_DXP_benefits - Sample.json';
-let Doc9Data: any = null;
-if (require('./Doc_9_Customer_Example_Doc.json')) {
-  Doc9Data = require('./Doc_9_Customer_Example_Doc.json');
-}
+const doc9Modules = (import.meta as any).glob('./Doc_9_Customer_Example_Doc.json', { eager: true });
+const Doc9Data = doc9Modules?.['./Doc_9_Customer_Example_Doc.json']?.default || null;
 
 // Export test documents array
 export const TEST_DOCUMENTS = [

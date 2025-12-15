@@ -4,8 +4,13 @@ import tokens from '@contentful/f36-tokens';
 import { CheckCircleIcon } from '@contentful/f36-icons';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import googleDriveLogo from '../../assets/google-drive.png';
 
-export const OAuthConnector = () => {
+export const OAuthConnector = ({
+  getIsOAuthConnected,
+}: {
+  getIsOAuthConnected: (isOAuthConnected: boolean) => void;
+}) => {
   const sdk = useSDK<ConfigAppSDK>();
   const [isOAuthLoading, setIsOAuthLoading] = useState(false);
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
@@ -61,6 +66,7 @@ export const OAuthConnector = () => {
         // If we have an expected status and it matches, or if we don't have an expected status, accept the result
         if (expectedStatus === undefined || isConnected === expectedStatus) {
           setIsOAuthConnected(isConnected);
+          getIsOAuthConnected(isConnected);
           console.log(`Status check resolved to expected value: ${isConnected}`);
           break;
         } else {
@@ -72,6 +78,7 @@ export const OAuthConnector = () => {
           if (attempt === maxRetries) {
             console.log(`Max retries reached. Accepting current status: ${isConnected}`);
             setIsOAuthConnected(isConnected);
+            getIsOAuthConnected(isConnected);
             break;
           }
 
@@ -87,6 +94,7 @@ export const OAuthConnector = () => {
         if (attempt === maxRetries) {
           console.log('Max retries reached. Setting status to false due to errors.');
           setIsOAuthConnected(false);
+          getIsOAuthConnected(false);
           break;
         }
 
@@ -248,18 +256,24 @@ export const OAuthConnector = () => {
         border: `1px solid ${tokens.gray300}`,
         borderRadius: tokens.borderRadiusMedium,
       }}>
-      <Flex gap="spacingS">
-        <Image
-          src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"
-          alt="Google Drive"
-          height="40px"
-          width="40px"
-        />
+      <Flex gap="spacingS" alignItems="center" justifyContent="center">
+        <Flex
+          alignItems="center"
+          justifyContent="center"
+          style={{
+            height: '40px',
+            width: '40px',
+            border: `1px solid ${tokens.gray300}`,
+            borderRadius: tokens.borderRadiusMedium,
+            backgroundColor: tokens.gray100,
+          }}>
+          <Image src={googleDriveLogo} alt="Google Drive" height="28px" width="32px" />
+        </Flex>
         <Text fontSize="fontSizeL" fontWeight="fontWeightMedium" lineHeight="lineHeightL">
           Google Drive
         </Text>
       </Flex>
-      <Flex gap="spacingXs">
+      <Flex gap="spacingXs" alignItems="center">
         {isOAuthConnected && isHoveringConnected && (
           <Text
             fontSize="fontSizeS"
