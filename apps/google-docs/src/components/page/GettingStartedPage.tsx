@@ -1,13 +1,4 @@
-import {
-  Box,
-  Button,
-  Heading,
-  Paragraph,
-  Card,
-  Layout,
-  Flex,
-  Spinner,
-} from '@contentful/f36-components';
+import { Button, Heading, Paragraph, Card, Layout, Flex } from '@contentful/f36-components';
 import { ArrowRightIcon } from '@contentful/f36-icons';
 import { OAuthConnector } from './OAuthConnector';
 
@@ -19,8 +10,13 @@ export const GettingStartedPage = ({ onSelectFile }: GettingStartedPageProps) =>
   return (
     <Layout variant="fullscreen" withBoxShadow={true} offsetTop={10}>
       <Layout.Body>
-        <Box padding="spacing2Xl">
-          <Card padding="large" style={{ maxWidth: '900px', margin: '0 auto' }}>
+        <Flex
+          flexDirection="column"
+          gap="spacingXl"
+          style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <Heading>Google Drive</Heading>
+          <OAuthConnector />
+          <Card padding="large">
             <Flex flexDirection="row" alignItems="center" justifyContent="space-between">
               <Flex flexDirection="column" alignItems="flex-start">
                 <Heading marginBottom="spacingS">Google Drive Integration</Heading>
@@ -35,9 +31,8 @@ export const GettingStartedPage = ({ onSelectFile }: GettingStartedPageProps) =>
                 Select your file
               </Button>
             </Flex>
-            <OAuthConnector />
           </Card>
-        </Box>
+        </Flex>
       </Layout.Body>
     </Layout>
   );

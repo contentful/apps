@@ -1,5 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
-import { Box, Button, Stack, Text } from '@contentful/f36-components';
+import { Button, Flex, Text, Image } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
+import { CheckCircleIcon } from '@contentful/f36-icons';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
@@ -221,13 +223,6 @@ export const OAuthConnector = () => {
     return 'Connect';
   };
 
-  const getButtonVariant = () => {
-    if (isCheckingStatus) return 'secondary';
-    if (isOAuthConnected && !isHoveringConnected) return 'positive';
-    if (isOAuthConnected && isHoveringConnected) return 'negative';
-    return 'primary';
-  };
-
   const handleButtonClick = () => {
     if (isCheckingStatus) return; // Don't allow clicks while checking status
     if (isOAuthConnected && isHoveringConnected) {
@@ -245,36 +240,53 @@ export const OAuthConnector = () => {
   }, []);
 
   return (
-    <Box style={{ maxWidth: '800px', margin: '64px auto' }}>
-      <Box padding="spacingXl" style={{ border: '1px solid #E5EBED', borderRadius: '4px' }}>
-        <Stack
-          spacing="spacingS"
-          flexDirection="column"
-          alignItems="flex-start"
-          style={{ marginBottom: '32px' }}>
-          <Text fontSize="fontSizeXl" fontWeight="fontWeightMedium">
-            Set up Google OAuth
+    <Flex
+      alignItems="center"
+      justifyContent="space-between"
+      style={{
+        padding: `${tokens.spacingS} ${tokens.spacingL}`,
+        border: `1px solid ${tokens.gray300}`,
+        borderRadius: tokens.borderRadiusMedium,
+      }}>
+      <Flex gap="spacingS">
+        <Image
+          src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"
+          alt="Google Drive"
+          height="40px"
+          width="40px"
+        />
+        <Text fontSize="fontSizeL" fontWeight="fontWeightMedium" lineHeight="lineHeightL">
+          Google Drive
+        </Text>
+      </Flex>
+      <Flex gap="spacingXs">
+        {isOAuthConnected && isHoveringConnected && (
+          <Text
+            fontSize="fontSizeS"
+            fontWeight="fontWeightMedium"
+            lineHeight="lineHeightS"
+            fontColor="gray500">
+            Status: connected
           </Text>
-          <Text fontColor="gray500">Seamlessly sync content from Contentful to Google Docs</Text>
-        </Stack>
-        <Box style={{ marginBottom: '32px', width: '100%' }}>
-          <Button
-            variant={getButtonVariant()}
-            onClick={handleButtonClick}
-            onMouseEnter={() => {
-              if (isOAuthConnected) {
-                setIsHoveringConnected(true);
-              }
-            }}
-            onMouseLeave={() => {
-              setIsHoveringConnected(false);
-            }}
-            isLoading={isOAuthLoading}
-            isDisabled={isOAuthLoading || isDisconnecting || isCheckingStatus}>
-            {getButtonText()}
-          </Button>
-        </Box>
-      </Box>
-    </Box>
+        )}
+        <Button
+          variant={isOAuthConnected && isHoveringConnected ? 'negative' : 'secondary'}
+          size="small"
+          endIcon={isOAuthConnected && !isHoveringConnected ? <CheckCircleIcon /> : undefined}
+          onClick={handleButtonClick}
+          onMouseEnter={() => {
+            if (isOAuthConnected) {
+              setIsHoveringConnected(true);
+            }
+          }}
+          onMouseLeave={() => {
+            setIsHoveringConnected(false);
+          }}
+          isLoading={isOAuthLoading || isDisconnecting || isCheckingStatus}
+          isDisabled={isOAuthLoading || isDisconnecting || isCheckingStatus}>
+          {getButtonText()}
+        </Button>
+      </Flex>
+    </Flex>
   );
 };
