@@ -1,15 +1,8 @@
-import {
-  Box,
-  Button,
-  Card,
-  Flex,
-  Heading,
-  Paragraph,
-  Spinner,
-  Text,
-  Note,
-} from '@contentful/f36-components';
+import { Box, Button, Card, Flex, Heading, Paragraph, Text } from '@contentful/f36-components';
 import { useAllEntries } from '../hooks/useAllEntries';
+import { LoadingSkeleton } from '../components/LoadingSkeleton';
+import { ErrorDisplay } from '../components/ErrorDisplay';
+import { styles } from './Page.styles';
 
 const Page = () => {
   const { entries, total, isLoading, isFetching, error, refetch, fetchedAt } = useAllEntries();
@@ -22,64 +15,43 @@ const Page = () => {
     }).format(date);
   };
 
-  if (error) {
-    return (
-      <Box padding="spacingXl">
-        <Card>
-          <Note variant="negative" title="Error loading entries">
-            <Paragraph>{error.message}</Paragraph>
-            <Button onClick={() => refetch()} variant="primary" size="small">
-              Retry
-            </Button>
-          </Note>
-        </Card>
-      </Box>
-    );
-  }
-
   return (
-    <Box padding="spacingXl">
+    <Box padding="spacingXl" className={styles.pageContainer}>
       <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingL">
-        <div>
-          <Heading>All Entries</Heading>
-          <Text as="p" fontColor="gray600" fontSize="fontSizeM">
-            {isLoading ? 'Loading entries...' : `Total: ${total} entries`}
-            {fetchedAt && !isLoading && <> • Last fetched: {formatDate(fetchedAt)}</>}
-          </Text>
-        </div>
+        <Heading>Content Dashboard</Heading>
         <Button onClick={() => refetch()} variant="secondary" size="small" isDisabled={isFetching}>
           {isFetching ? 'Refreshing...' : 'Refresh'}
         </Button>
       </Flex>
 
-      {isLoading ? (
-        <Card>
-          <Flex justifyContent="center" alignItems="center" padding="spacingXl">
-            <Spinner size="large" />
-            <Paragraph marginLeft="spacingM">Fetching all entries from the space...</Paragraph>
-          </Flex>
-        </Card>
+      {error ? (
+        <ErrorDisplay error={error} onRetry={() => refetch()} />
+      ) : isLoading ? (
+        <LoadingSkeleton />
       ) : (
-        <Card>
-          {entries.length === 0 ? (
-            <Box padding="spacingXl">
-              <Paragraph>No entries found in this space.</Paragraph>
-            </Box>
-          ) : (
+        <>
+          {/* TODO: remove this section from below when implementing the UI tickets */}
+          <Card>
             <Box padding="spacingM">
-              <Paragraph>
-                Successfully loaded <strong>{entries.length}</strong> entries.
-                {isFetching && (
-                  <Text as="span" fontColor="gray600" marginLeft="spacingS">
-                    (Refreshing...)
-                  </Text>
-                )}
-              </Paragraph>
-              {/* TODO: Add virtual scrolling or pagination for large entry lists */}
-              {/* TODO: Add entry list display with filtering/search capabilities */}
+              <Text as="p" fontColor="gray600" fontSize="fontSizeM" marginBottom="spacingS">
+                {isLoading ? 'Loading entries...' : `Total: ${total} entries`}
+                {fetchedAt && !isLoading && <> • Last fetched: {formatDate(fetchedAt)}</>}
+              </Text>
+              {entries.length === 0 ? (
+                <Paragraph>No entries found in this space.</Paragraph>
+              ) : (
+                <Paragraph>
+                  Successfully loaded <strong>{entries.length}</strong> entries.
+                  {isFetching && (
+                    <Text as="span" fontColor="gray600" marginLeft="spacingS">
+                      (Refreshing...)
+                    </Text>
+                  )}
+                </Paragraph>
+              )}
             </Box>
-          )}
-        </Card>
+          </Card>
+        </>
       )}
     </Box>
   );
