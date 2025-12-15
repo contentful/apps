@@ -6,9 +6,15 @@ import { useState } from 'react';
 
 interface GettingStartedPageProps {
   onSelectFile: () => void;
+  onOauthTokenChange: (token: string) => void;
+  oauthToken: string;
 }
 
-export const GettingStartedPage = ({ onSelectFile }: GettingStartedPageProps) => {
+export const GettingStartedPage = ({
+  onSelectFile,
+  oauthToken,
+  onOauthTokenChange,
+}: GettingStartedPageProps) => {
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
   const handleOAuthConnectedChange = (isOAuthConnectedValue: boolean) => {
     setIsOAuthConnected(isOAuthConnectedValue);
@@ -24,6 +30,7 @@ export const GettingStartedPage = ({ onSelectFile }: GettingStartedPageProps) =>
           <OAuthConnector
             onOAuthConnectedChange={handleOAuthConnectedChange}
             isOAuthConnected={isOAuthConnected}
+            onOauthTokenChange={onOauthTokenChange}
           />
           <Card padding="large">
             {!isOAuthConnected && (
@@ -41,7 +48,11 @@ export const GettingStartedPage = ({ onSelectFile }: GettingStartedPageProps) =>
                 </Paragraph>
               </Flex>
 
-              <Button variant="primary" onClick={onSelectFile} endIcon={<ArrowRightIcon />}>
+              <Button
+                variant="primary"
+                isDisabled={!oauthToken}
+                onClick={onSelectFile}
+                endIcon={<ArrowRightIcon />}>
                 Select your file
               </Button>
             </Flex>

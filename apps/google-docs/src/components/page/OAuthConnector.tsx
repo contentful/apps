@@ -6,13 +6,17 @@ import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import googleDriveLogo from '../../assets/google-drive.png';
 
+type OAuthConnectorProps = {
+  onOAuthConnectedChange: (oauthConnectionStatus: boolean) => void;
+  isOAuthConnected: boolean;
+  onOauthTokenChange: (token: string) => void;
+};
+
 export const OAuthConnector = ({
   onOAuthConnectedChange,
   isOAuthConnected,
-}: {
-  onOAuthConnectedChange: (oauthConnectionStatus: boolean) => void;
-  isOAuthConnected: boolean;
-}) => {
+  onOauthTokenChange,
+}: OAuthConnectorProps) => {
   const sdk = useSDK<ConfigAppSDK>();
   const [isOAuthLoading, setIsOAuthLoading] = useState(false);
   const [isHoveringConnected, setIsHoveringConnected] = useState(false);
@@ -41,6 +45,7 @@ export const OAuthConnector = ({
         const checkStatusAppAction = appActions.items.find(
           (action) => action.name === 'checkGdocOauthTokenStatus'
         );
+        console.log('checkStatusAppAction', checkStatusAppAction);
         if (!checkStatusAppAction) {
           console.warn('checkGdocOauthTokenStatus app action not found');
           setIsCheckingStatus(false);
@@ -86,6 +91,8 @@ export const OAuthConnector = ({
           console.log(`Waiting ${waitTime}ms before retry...`);
           await delay(waitTime);
         }
+
+        onOauthTokenChange(statusData.token);
       } catch (error) {
         console.error(`Failed to check Google OAuth status (attempt ${attempt}):`, error);
 

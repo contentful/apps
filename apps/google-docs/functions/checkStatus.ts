@@ -11,16 +11,23 @@ interface CompleteOAuthParams {
   state: string;
 }
 
-export async function checkStatus(sdk: OAuthSDK): Promise<boolean> {
+interface CheckStatusResponse {
+  token: string;
+  status: boolean;
+}
+
+export async function checkStatus(sdk: OAuthSDK): Promise<CheckStatusResponse> {
   try {
     const token = await sdk.token();
-    if (!token) {
-      return false;
-    }
-    return true;
+    if (!token) return { token: '', status: false };
+
+    return {
+      token: token.accessToken,
+      status: true,
+    };
   } catch (error) {
     console.error('Failed to complete OAuth flow:', error);
-    return false;
+    return { token: '', status: false };
   }
 }
 
