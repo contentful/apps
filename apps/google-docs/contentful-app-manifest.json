@@ -44,7 +44,7 @@
       "path": "functions/initiateOauth.js",
       "entryFile": "functions/initiateOauth.ts",
       "allowNetworks": [
-        "www.google.com"
+        "oauth2.googleapis.com"
       ],
       "accepts": [
         "appaction.call"
@@ -57,7 +57,7 @@
       "path": "functions/completeOauth.js",
       "entryFile": "functions/completeOauth.ts",
       "allowNetworks": [
-        "a.google.com"
+        "oauth2.googleapis.com"
       ],
       "accepts": [
         "appaction.call"
@@ -70,7 +70,7 @@
       "path": "functions/disconnect.js",
       "entryFile": "functions/disconnect.ts",
       "allowNetworks": [
-        "a.google.com"
+        "oauth2.googleapis.com"
       ],
       "accepts": [
         "appaction.call"
@@ -83,7 +83,7 @@
       "path": "functions/checkStatus.js",
       "entryFile": "functions/checkStatus.ts",
       "allowNetworks": [
-        "a.google.com"
+        "oauth2.googleapis.com"
       ],
       "accepts": [
         "appaction.call"
