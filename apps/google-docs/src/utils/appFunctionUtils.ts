@@ -26,33 +26,14 @@ export async function getAppActionId(
 export const createEntriesFromDocumentAction = async (
   sdk: PageAppSDK | ConfigAppSDK,
   contentTypeIds: string[],
-  document: unknown
+  documentId: string,
+  oauthToken: string
 ) => {
   try {
     const appDefinitionId = sdk.ids.app;
 
     if (!appDefinitionId) {
       throw new Error('App definition ID not found');
-    }
-
-    // Parse document if it's a JSON string (Contentful API expects an object, not a string)
-    let parsedDocument: unknown = document;
-    if (typeof document === 'string') {
-      // Check if it's a URL (starts with http:// or https://)
-      if (document.startsWith('http://') || document.startsWith('https://')) {
-        throw new Error(
-          'Document URL provided but fetching from Google Docs API is not yet implemented. Please provide the document JSON object directly.'
-        );
-      }
-
-      // Try to parse as JSON
-      try {
-        parsedDocument = JSON.parse(document);
-      } catch (e) {
-        throw new Error(
-          `Failed to parse document as JSON: ${e instanceof Error ? e.message : String(e)}`
-        );
-      }
     }
 
     const appActionId = await getAppActionId(sdk, 'createEntriesFromDocumentAction');
@@ -62,7 +43,7 @@ export const createEntriesFromDocumentAction = async (
         appActionId,
       },
       {
-        parameters: { contentTypeIds, document: parsedDocument },
+        parameters: { contentTypeIds, documentId, oauthToken },
       }
     );
 
