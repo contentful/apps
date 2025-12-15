@@ -7,8 +7,10 @@ import Doc5 from './Doc_5_Bulk_Entry_Stress_Test.json';
 import Doc6 from './Doc_6_Multilingual_Test.json';
 import Doc7 from './Doc_7_Edge_Cases_Test.json';
 import Doc8 from './Doc_8_DXP_benefits - Sample.json';
+
+// Optional import: Doc9 may not exist in all environments (e.g., S3 hosted app)
 const doc9Modules = (import.meta as any).glob('./Doc_9_Customer_Example_Doc.json', { eager: true });
-const Doc9Data = doc9Modules?.['./Doc_9_Customer_Example_Doc.json']?.default || null;
+const Doc9 = doc9Modules?.['./Doc_9_Customer_Example_Doc.json']?.default || null;
 
 // Export test documents array
 export const TEST_DOCUMENTS = [
@@ -20,5 +22,5 @@ export const TEST_DOCUMENTS = [
   { id: 'doc6', title: 'Doc 6: Multilingual Test', data: Doc6 },
   { id: 'doc7', title: 'Doc 7: Edge Cases Test', data: Doc7 },
   { id: 'doc8', title: 'Doc 8: DXP Benefits Sample', data: Doc8 },
-  { id: 'doc9', title: 'Doc 9: Customer Example Doc', data: Doc9Data },
+  { id: 'doc9', title: 'Doc 9: Customer Example Doc', data: Doc9 },
 ];
