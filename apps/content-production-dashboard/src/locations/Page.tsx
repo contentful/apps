@@ -26,7 +26,7 @@ const Page = () => {
 
       {error ? (
         <ErrorDisplay error={error} onRetry={() => refetch()} />
-      ) : isLoading ? (
+      ) : isLoading || isFetching ? (
         <LoadingSkeleton />
       ) : (
         <>

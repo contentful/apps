@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import { mockCma } from './mockCma';
 
 const mockSdk: any = {
   app: {
@@ -9,7 +10,10 @@ const mockSdk: any = {
   },
   ids: {
     app: 'test-app',
+    space: 'test-space',
+    environment: 'test-environment',
   },
+  cma: mockCma,
 };
 
 export { mockSdk };

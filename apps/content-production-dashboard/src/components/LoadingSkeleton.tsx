@@ -1,20 +1,11 @@
-import { Flex, SkeletonContainer, SkeletonImage } from '@contentful/f36-components';
+import { Flex, Skeleton } from '@contentful/f36-components';
 
 export const LoadingSkeleton = () => {
   return (
-    <Flex flexDirection="column" gap="spacingXl" margin="spacingXl">
-      <SkeletonContainer>
-        <SkeletonImage width="100%" height={300} />
-      </SkeletonContainer>
-      <SkeletonContainer>
-        <SkeletonImage width="100%" height={300} />
-      </SkeletonContainer>
-      <SkeletonContainer>
-        <SkeletonImage width="100%" height={300} />
-      </SkeletonContainer>
-      <SkeletonContainer>
-        <SkeletonImage width="100%" height={300} />
-      </SkeletonContainer>
+    <Flex flexDirection="column" margin="spacingXl">
+      <Skeleton.Container svgHeight={500}>
+        <Skeleton.Text numberOfLines={4} lineHeight={100} />
+      </Skeleton.Container>
     </Flex>
   );
 };
