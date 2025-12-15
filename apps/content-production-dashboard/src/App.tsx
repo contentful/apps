@@ -1,6 +1,7 @@
 import { locations } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useMemo } from 'react';
+import { QueryProvider } from './providers/QueryProvider';
 import ConfigScreen from './locations/ConfigScreen';
 import Page from './locations/Page';
 import Home from './locations/Home';
@@ -22,7 +23,7 @@ const App = () => {
     }
   }, [sdk.location]);
 
-  return Component ? <Component /> : null;
+  return <QueryProvider>{Component ? <Component /> : null}</QueryProvider>;
 };
 
 export default App;
