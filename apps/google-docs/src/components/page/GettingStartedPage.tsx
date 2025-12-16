@@ -19,6 +19,7 @@ export const GettingStartedPage = ({
   const handleOAuthConnectedChange = (isOAuthConnectedValue: boolean) => {
     setIsOAuthConnected(isOAuthConnectedValue);
   };
+
   return (
     <Layout variant="fullscreen" withBoxShadow={true} offsetTop={10}>
       <Layout.Body>

@@ -45,7 +45,6 @@ export const OAuthConnector = ({
         const checkStatusAppAction = appActions.items.find(
           (action) => action.name === 'checkGdocOauthTokenStatus'
         );
-        console.log('checkStatusAppAction', checkStatusAppAction);
         if (!checkStatusAppAction) {
           console.warn('checkGdocOauthTokenStatus app action not found');
           setIsCheckingStatus(false);
@@ -62,12 +61,13 @@ export const OAuthConnector = ({
           }
         );
 
-        const statusData = JSON.parse(response.response.body);
-        console.log(`Google OAuth status response (attempt ${attempt}):`, statusData);
+        const statusResponse = JSON.parse(response.response.body);
+        console.log(`Google OAuth status response (attempt ${attempt}):`, statusResponse);
 
         // Assuming the response contains a connected field
-        const isConnected = statusData.connected === true;
+        const isConnected = statusResponse.connected === true;
         console.log(`Google OAuth connection status (attempt ${attempt}):`, isConnected);
+        onOauthTokenChange(statusResponse.token);
 
         // If we have an expected status and it matches, or if we don't have an expected status, accept the result
         if (expectedStatus === undefined || isConnected === expectedStatus) {
@@ -91,8 +91,6 @@ export const OAuthConnector = ({
           console.log(`Waiting ${waitTime}ms before retry...`);
           await delay(waitTime);
         }
-
-        onOauthTokenChange(statusData.token);
       } catch (error) {
         console.error(`Failed to check Google OAuth status (attempt ${attempt}):`, error);
 

@@ -136,7 +136,6 @@ const Page = () => {
     );
   }
 
-  console.log('OAUTH TOKENNN', oauthToken);
   return (
     <>
       <UploadDocumentModal
@@ -144,7 +143,6 @@ const Page = () => {
         isOpen={modalStates.isUploadModalOpen}
         onClose={handleUploadModalCloseRequest}
       />
-
       <ContentTypePickerModal
         sdk={sdk}
         isOpen={modalStates.isContentTypePickerOpen}
@@ -160,7 +158,6 @@ const Page = () => {
         onConfirm={handleConfirmCancel}
         onCancel={handleKeepCreating}
       />
-
       {(result || successMessage || errorMessage) && (
         <Layout variant="fullscreen" withBoxShadow={true} offsetTop={10}>
           <Layout.Body>
