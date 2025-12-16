@@ -34,18 +34,44 @@ export interface AppInstallationParameters {
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
   const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
-  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const sdk = useSDK<ConfigAppSDK>();
+
+  const [needsUpdateMonthsError, setNeedsUpdateMonthsError] = useState<string | undefined>();
+  const [recentlyPublishedDaysError, setRecentlyPublishedDaysError] = useState<
+    string | undefined
+  >();
+  const [timeToPublishDaysError, setTimeToPublishDaysError] = useState<string | undefined>();
+
+  const validationErrors = () => {
+    const needsUpdateMonthsError = validateField(
+      parameters.needsUpdateMonths,
+      'Needs update months',
+      NEEDS_UPDATE_MONTHS_RANGE
+    );
+    const recentlyPublishedDaysError = validateField(
+      parameters.recentlyPublishedDays,
+      'Recently published days',
+      RECENTLY_PUBLISHED_DAYS_RANGE
+    );
+    const timeToPublishDaysError = validateField(
+      parameters.timeToPublishDays,
+      'Time to publish days',
+      TIME_TO_PUBLISH_DAYS_RANGE
+    );
+
+    setNeedsUpdateMonthsError(needsUpdateMonthsError);
+    setRecentlyPublishedDaysError(recentlyPublishedDaysError);
+    setTimeToPublishDaysError(timeToPublishDaysError);
+
+    return needsUpdateMonthsError || recentlyPublishedDaysError || timeToPublishDaysError;
+  };
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
-    setValidationErrors({});
+    const hasErrors = validationErrors();
 
-    const errors = getErrors(parameters);
-
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
+    if (hasErrors) {
       sdk.notifier.error('Please fill in all required fields with valid values before saving.');
       return false;
     }
@@ -71,34 +97,6 @@ const ConfigScreen = () => {
       sdk.app.setReady();
     })();
   }, [sdk]);
-
-  const getErrors = (params: AppInstallationParameters): ValidationErrors => {
-    const errors: ValidationErrors = {};
-
-    if (params.needsUpdateMonths === undefined) {
-      errors.needsUpdateMonths = 'Needs update months is required';
-    } else if (isValueOutOfRange(params.needsUpdateMonths, NEEDS_UPDATE_MONTHS_RANGE)) {
-      errors.needsUpdateMonths = `Needs update months must be between ${NEEDS_UPDATE_MONTHS_RANGE.min} and ${NEEDS_UPDATE_MONTHS_RANGE.max}`;
-    }
-
-    if (params.recentlyPublishedDays === undefined) {
-      errors.recentlyPublishedDays = 'Recently published days is required';
-    } else if (isValueOutOfRange(params.recentlyPublishedDays, RECENTLY_PUBLISHED_DAYS_RANGE)) {
-      errors.recentlyPublishedDays = `Recently published days must be between ${RECENTLY_PUBLISHED_DAYS_RANGE.min} and ${RECENTLY_PUBLISHED_DAYS_RANGE.max}`;
-    }
-
-    if (params.timeToPublishDays === undefined) {
-      errors.timeToPublishDays = 'Time to publish days is required';
-    } else if (isValueOutOfRange(params.timeToPublishDays, TIME_TO_PUBLISH_DAYS_RANGE)) {
-      errors.timeToPublishDays = `Time to publish days must be between ${TIME_TO_PUBLISH_DAYS_RANGE.min} and ${TIME_TO_PUBLISH_DAYS_RANGE.max}`;
-    }
-
-    return errors;
-  };
-
-  const isValueOutOfRange = (value: number, range: { min: number; max: number }): boolean => {
-    return value < range.min || value > range.max;
-  };
 
   const handleOnChangeInput = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -126,6 +124,24 @@ const ConfigScreen = () => {
     }));
   };
 
+  const isValueOutOfRange = (value: number, range: { min: number; max: number }): boolean => {
+    return value < range.min || value > range.max;
+  };
+
+  const validateField = (
+    value: number | undefined,
+    label: string,
+    range: { min: number; max: number }
+  ): string | undefined => {
+    if (value === undefined) {
+      return `${label} is required`;
+    }
+    if (isValueOutOfRange(value, range)) {
+      return `${label} must be between ${range.min} and ${range.max}`;
+    }
+    return undefined;
+  };
+
   return (
     <Flex flexDirection="column" fullWidth>
       <Flex flexDirection="column" style={styles.container}>
@@ -145,10 +161,7 @@ const ConfigScreen = () => {
           </Text>
 
           <>
-            <FormControl
-              marginBottom="spacingL"
-              isRequired
-              isInvalid={!!validationErrors.needsUpdateMonths}>
+            <FormControl marginBottom="spacingL" isRequired isInvalid={!!needsUpdateMonthsError}>
               <FormControl.Label>
                 Content &quot;Needs update&quot; time threshold (months)
               </FormControl.Label>
@@ -159,9 +172,9 @@ const ConfigScreen = () => {
                 value={parameters.needsUpdateMonths?.toString() || ''}
                 onChange={(event) => handleOnChangeInput(event, 'needsUpdateMonths')}
               />
-              {validationErrors.needsUpdateMonths && (
+              {needsUpdateMonthsError && (
                 <FormControl.ValidationMessage>
-                  {validationErrors.needsUpdateMonths}
+                  {needsUpdateMonthsError}
                 </FormControl.ValidationMessage>
               )}
               <FormControl.HelpText>
@@ -174,7 +187,7 @@ const ConfigScreen = () => {
             <FormControl
               marginBottom="spacingL"
               isRequired
-              isInvalid={!!validationErrors.recentlyPublishedDays}>
+              isInvalid={!!recentlyPublishedDaysError}>
               <FormControl.Label>
                 &quot;Recently published&quot; time period (days)
               </FormControl.Label>
@@ -185,9 +198,9 @@ const ConfigScreen = () => {
                 value={parameters.recentlyPublishedDays?.toString() || ''}
                 onChange={(event) => handleOnChangeInput(event, 'recentlyPublishedDays')}
               />
-              {validationErrors.recentlyPublishedDays && (
+              {recentlyPublishedDaysError && (
                 <FormControl.ValidationMessage>
-                  {validationErrors.recentlyPublishedDays}
+                  {recentlyPublishedDaysError}
                 </FormControl.ValidationMessage>
               )}
               <FormControl.HelpText>
@@ -197,10 +210,7 @@ const ConfigScreen = () => {
               </FormControl.HelpText>
             </FormControl>
 
-            <FormControl
-              marginBottom="spacingL"
-              isRequired
-              isInvalid={!!validationErrors.timeToPublishDays}>
+            <FormControl marginBottom="spacingL" isRequired isInvalid={!!timeToPublishDaysError}>
               <FormControl.Label>Time to publish threshold (days)</FormControl.Label>
               <TextInput
                 id="time-to-publish-days"
@@ -209,9 +219,9 @@ const ConfigScreen = () => {
                 value={parameters.timeToPublishDays?.toString() || ''}
                 onChange={(event) => handleOnChangeInput(event, 'timeToPublishDays')}
               />
-              {validationErrors.timeToPublishDays && (
+              {timeToPublishDaysError && (
                 <FormControl.ValidationMessage>
-                  {validationErrors.timeToPublishDays}
+                  {timeToPublishDaysError}
                 </FormControl.ValidationMessage>
               )}
               <FormControl.HelpText>
