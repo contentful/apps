@@ -3,7 +3,11 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
 import ConfigScreen from '../../src/locations/ConfigScreen';
-import { VALIDATION_RANGES } from '../../src/utils/consts';
+import {
+  NEEDS_UPDATE_MONTHS_RANGE,
+  RECENTLY_PUBLISHED_DAYS_RANGE,
+  TIME_TO_PUBLISH_DAYS_RANGE,
+} from '../../src/utils/consts';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -89,7 +93,7 @@ describe('Config Screen component', () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          `Needs update months must be between ${VALIDATION_RANGES.needsUpdateMonths.min} and ${VALIDATION_RANGES.needsUpdateMonths.max}`
+          `Needs update months must be between ${NEEDS_UPDATE_MONTHS_RANGE.min} and ${NEEDS_UPDATE_MONTHS_RANGE.max}`
         )
       ).toBeInTheDocument();
     });
@@ -106,7 +110,7 @@ describe('Config Screen component', () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          `Needs update months must be between ${VALIDATION_RANGES.needsUpdateMonths.min} and ${VALIDATION_RANGES.needsUpdateMonths.max}`
+          `Needs update months must be between ${NEEDS_UPDATE_MONTHS_RANGE.min} and ${NEEDS_UPDATE_MONTHS_RANGE.max}`
         )
       ).toBeInTheDocument();
     });
@@ -131,7 +135,7 @@ describe('Config Screen component', () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          `Recently published days must be between ${VALIDATION_RANGES.recentlyPublishedDays.min} and ${VALIDATION_RANGES.recentlyPublishedDays.max}`
+          `Recently published days must be between ${RECENTLY_PUBLISHED_DAYS_RANGE.min} and ${RECENTLY_PUBLISHED_DAYS_RANGE.max}`
         )
       ).toBeInTheDocument();
     });
@@ -145,7 +149,7 @@ describe('Config Screen component', () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          `Recently published days must be between ${VALIDATION_RANGES.recentlyPublishedDays.min} and ${VALIDATION_RANGES.recentlyPublishedDays.max}`
+          `Recently published days must be between ${RECENTLY_PUBLISHED_DAYS_RANGE.min} and ${RECENTLY_PUBLISHED_DAYS_RANGE.max}`
         )
       ).toBeInTheDocument();
     });
@@ -169,7 +173,7 @@ describe('Config Screen component', () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          `Time to publish days must be between ${VALIDATION_RANGES.timeToPublishDays.min} and ${VALIDATION_RANGES.timeToPublishDays.max}`
+          `Time to publish days must be between ${TIME_TO_PUBLISH_DAYS_RANGE.min} and ${TIME_TO_PUBLISH_DAYS_RANGE.max}`
         )
       ).toBeInTheDocument();
     });
@@ -183,7 +187,7 @@ describe('Config Screen component', () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          `Time to publish days must be between ${VALIDATION_RANGES.timeToPublishDays.min} and ${VALIDATION_RANGES.timeToPublishDays.max}`
+          `Time to publish days must be between ${TIME_TO_PUBLISH_DAYS_RANGE.min} and ${TIME_TO_PUBLISH_DAYS_RANGE.max}`
         )
       ).toBeInTheDocument();
     });
@@ -207,13 +211,13 @@ describe('Config Screen component', () => {
     const timeToPublishInput = screen.getAllByTestId('cf-ui-text-input')[2];
 
     await user.clear(needsUpdateInput);
-    await user.type(needsUpdateInput, VALIDATION_RANGES.needsUpdateMonths.min.toString());
+    await user.type(needsUpdateInput, NEEDS_UPDATE_MONTHS_RANGE.min.toString());
 
     await user.clear(recentlyPublishedInput);
-    await user.type(recentlyPublishedInput, VALIDATION_RANGES.recentlyPublishedDays.min.toString());
+    await user.type(recentlyPublishedInput, RECENTLY_PUBLISHED_DAYS_RANGE.min.toString());
 
     await user.clear(timeToPublishInput);
-    await user.type(timeToPublishInput, VALIDATION_RANGES.timeToPublishDays.min.toString());
+    await user.type(timeToPublishInput, TIME_TO_PUBLISH_DAYS_RANGE.min.toString());
 
     // Verify all parameters are persisted correctly
     const result = await simulateSave();
@@ -221,9 +225,9 @@ describe('Config Screen component', () => {
     expect(result).not.toBe(false);
     expect(result).toEqual({
       parameters: {
-        needsUpdateMonths: VALIDATION_RANGES.needsUpdateMonths.min,
-        recentlyPublishedDays: VALIDATION_RANGES.recentlyPublishedDays.min,
-        timeToPublishDays: VALIDATION_RANGES.timeToPublishDays.min,
+        needsUpdateMonths: NEEDS_UPDATE_MONTHS_RANGE.min,
+        recentlyPublishedDays: RECENTLY_PUBLISHED_DAYS_RANGE.min,
+        timeToPublishDays: TIME_TO_PUBLISH_DAYS_RANGE.min,
         showUpcomingReleases: true,
       },
       targetState: {},

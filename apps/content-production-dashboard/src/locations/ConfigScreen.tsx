@@ -13,7 +13,11 @@ import {
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import ContentTypeMultiSelect, { ContentType } from '../components/ContentTypeMultiSelect';
-import { VALIDATION_RANGES } from '../utils/consts';
+import {
+  NEEDS_UPDATE_MONTHS_RANGE,
+  RECENTLY_PUBLISHED_DAYS_RANGE,
+  TIME_TO_PUBLISH_DAYS_RANGE,
+} from '../utils/consts';
 import { ValidationErrors } from '../utils/types';
 import gearImage from '../assets/gear.png';
 import appearanceImage from '../assets/appearance.png';
@@ -62,12 +66,6 @@ const ConfigScreen = () => {
 
       if (currentParameters) {
         setParameters(currentParameters);
-      } else {
-        setParameters({
-          needsUpdateMonths: VALIDATION_RANGES.needsUpdateMonths.min,
-          recentlyPublishedDays: VALIDATION_RANGES.recentlyPublishedDays.min,
-          timeToPublishDays: VALIDATION_RANGES.timeToPublishDays.min,
-        });
       }
 
       sdk.app.setReady();
@@ -79,22 +77,20 @@ const ConfigScreen = () => {
 
     if (params.needsUpdateMonths === undefined) {
       errors.needsUpdateMonths = 'Needs update months is required';
-    } else if (isValueOutOfRange(params.needsUpdateMonths, VALIDATION_RANGES.needsUpdateMonths)) {
-      errors.needsUpdateMonths = `Needs update months must be between ${VALIDATION_RANGES.needsUpdateMonths.min} and ${VALIDATION_RANGES.needsUpdateMonths.max}`;
+    } else if (isValueOutOfRange(params.needsUpdateMonths, NEEDS_UPDATE_MONTHS_RANGE)) {
+      errors.needsUpdateMonths = `Needs update months must be between ${NEEDS_UPDATE_MONTHS_RANGE.min} and ${NEEDS_UPDATE_MONTHS_RANGE.max}`;
     }
 
     if (params.recentlyPublishedDays === undefined) {
       errors.recentlyPublishedDays = 'Recently published days is required';
-    } else if (
-      isValueOutOfRange(params.recentlyPublishedDays, VALIDATION_RANGES.recentlyPublishedDays)
-    ) {
-      errors.recentlyPublishedDays = `Recently published days must be between ${VALIDATION_RANGES.recentlyPublishedDays.min} and ${VALIDATION_RANGES.recentlyPublishedDays.max}`;
+    } else if (isValueOutOfRange(params.recentlyPublishedDays, RECENTLY_PUBLISHED_DAYS_RANGE)) {
+      errors.recentlyPublishedDays = `Recently published days must be between ${RECENTLY_PUBLISHED_DAYS_RANGE.min} and ${RECENTLY_PUBLISHED_DAYS_RANGE.max}`;
     }
 
     if (params.timeToPublishDays === undefined) {
       errors.timeToPublishDays = 'Time to publish days is required';
-    } else if (isValueOutOfRange(params.timeToPublishDays, VALIDATION_RANGES.timeToPublishDays)) {
-      errors.timeToPublishDays = `Time to publish days must be between ${VALIDATION_RANGES.timeToPublishDays.min} and ${VALIDATION_RANGES.timeToPublishDays.max}`;
+    } else if (isValueOutOfRange(params.timeToPublishDays, TIME_TO_PUBLISH_DAYS_RANGE)) {
+      errors.timeToPublishDays = `Time to publish days must be between ${TIME_TO_PUBLISH_DAYS_RANGE.min} and ${TIME_TO_PUBLISH_DAYS_RANGE.max}`;
     }
 
     return errors;
@@ -104,7 +100,7 @@ const ConfigScreen = () => {
     return value < range.min || value > range.max;
   };
 
-  const handleInputWithRangeValidation = (
+  const handleOnChangeInput = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     field: 'needsUpdateMonths' | 'recentlyPublishedDays' | 'timeToPublishDays'
   ) => {
@@ -161,7 +157,7 @@ const ConfigScreen = () => {
                 name="needs-update-months"
                 type="number"
                 value={parameters.needsUpdateMonths?.toString() || ''}
-                onChange={(event) => handleInputWithRangeValidation(event, 'needsUpdateMonths')}
+                onChange={(event) => handleOnChangeInput(event, 'needsUpdateMonths')}
               />
               {validationErrors.needsUpdateMonths && (
                 <FormControl.ValidationMessage>
@@ -170,8 +166,8 @@ const ConfigScreen = () => {
               )}
               <FormControl.HelpText>
                 Content will be marked as &quot;Needs update&quot; when it hasn&apos;t been updated
-                for this amount of time. Range: {VALIDATION_RANGES.needsUpdateMonths.min}-
-                {VALIDATION_RANGES.needsUpdateMonths.max} months.
+                for this amount of time. Range: {NEEDS_UPDATE_MONTHS_RANGE.min}-
+                {NEEDS_UPDATE_MONTHS_RANGE.max} months.
               </FormControl.HelpText>
             </FormControl>
 
@@ -187,7 +183,7 @@ const ConfigScreen = () => {
                 name="recently-published-days"
                 type="number"
                 value={parameters.recentlyPublishedDays?.toString() || ''}
-                onChange={(event) => handleInputWithRangeValidation(event, 'recentlyPublishedDays')}
+                onChange={(event) => handleOnChangeInput(event, 'recentlyPublishedDays')}
               />
               {validationErrors.recentlyPublishedDays && (
                 <FormControl.ValidationMessage>
@@ -196,8 +192,8 @@ const ConfigScreen = () => {
               )}
               <FormControl.HelpText>
                 Content will be considered &quot;Recently published&quot; if it was published within
-                this time period. Range: {VALIDATION_RANGES.recentlyPublishedDays.min}-
-                {VALIDATION_RANGES.recentlyPublishedDays.max} days.
+                this time period. Range: {RECENTLY_PUBLISHED_DAYS_RANGE.min}-
+                {RECENTLY_PUBLISHED_DAYS_RANGE.max} days.
               </FormControl.HelpText>
             </FormControl>
 
@@ -211,7 +207,7 @@ const ConfigScreen = () => {
                 name="time-to-publish-days"
                 type="number"
                 value={parameters.timeToPublishDays?.toString() || ''}
-                onChange={(event) => handleInputWithRangeValidation(event, 'timeToPublishDays')}
+                onChange={(event) => handleOnChangeInput(event, 'timeToPublishDays')}
               />
               {validationErrors.timeToPublishDays && (
                 <FormControl.ValidationMessage>
@@ -220,8 +216,7 @@ const ConfigScreen = () => {
               )}
               <FormControl.HelpText>
                 The time period to calculate average time to publish metrics. Range:{' '}
-                {VALIDATION_RANGES.timeToPublishDays.min}-{VALIDATION_RANGES.timeToPublishDays.max}{' '}
-                days.
+                {TIME_TO_PUBLISH_DAYS_RANGE.min}-{TIME_TO_PUBLISH_DAYS_RANGE.max} days.
               </FormControl.HelpText>
             </FormControl>
 
