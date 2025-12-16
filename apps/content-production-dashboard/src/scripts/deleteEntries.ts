@@ -26,7 +26,9 @@ export async function deleteEntry(entryId: string, client: PlainClientAPI): Prom
         await client.entry.unpublish({ entryId });
         console.log(`   📤 Unpublished entry: ${entryId}`);
       }
-    } catch (error) {}
+    } catch {
+      console.log(`   📤 Entry ${entryId} is not published`);
+    }
 
     await client.entry.delete({ entryId });
     console.log(`   ✅ Deleted entry: ${entryId}`);

@@ -106,11 +106,6 @@ describe('fetchAllEntries', () => {
   });
 
   it('reduces batch size and retries when hitting response size limit', async () => {
-    const largeBatch: EntryProps[] = Array.from({ length: 1000 }, (_, i) => ({
-      sys: { id: `entry-${i}`, type: 'Entry' } as any,
-      fields: { title: { 'en-US': `Entry ${i}` } },
-    }));
-
     const smallerBatch: EntryProps[] = Array.from({ length: 500 }, (_, i) => ({
       sys: { id: `entry-${i}`, type: 'Entry' } as any,
       fields: { title: { 'en-US': `Entry ${i}` } },
@@ -119,7 +114,7 @@ describe('fetchAllEntries', () => {
     // First call fails with size limit error
     const sizeLimitError = new Error('Response size too big');
     mockCma.entry.getMany
-      .mockRejectedValueOnce(sizeLimitError)
+      .mockRejectedValueOnce(sizeLimitError) // default batch size is 1000
       .mockResolvedValueOnce(getManyEntries(smallerBatch, 500));
 
     const result = await fetchAllEntries(mockSdk);
