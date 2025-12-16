@@ -7,14 +7,14 @@
 examples @contentful/team-extensibility @contentful/team-marketplace
 function-examples @contentful/team-extensibility
 
-# team fusion co-owns delivery function examples
+# team entity-architecture co-owns delivery function examples
 
-examples/function-mock-shop @contentful/team-fusion
-examples/function-potterdb @contentful/team-fusion
-examples/function-potterdb-rest-api @contentful/team-fusion
-examples/native-external-references-mockshop @contentful/team-fusion
-examples/native-external-references-tmdb @contentful/team-fusion
-function-examples/external-references @contentful/team-fusion
+examples/function-mock-shop @contentful/team-entity-architecture
+examples/function-potterdb @contentful/team-entity-architecture
+examples/function-potterdb-rest-api @contentful/team-entity-architecture
+examples/native-external-references-mockshop @contentful/team-entity-architecture
+examples/native-external-references-tmdb @contentful/team-entity-architecture
+function-examples/external-references @contentful/team-entity-architecture
 
 # package.json and package-lock.json should be unowned so that dependabot can automatically update dependencies
 
