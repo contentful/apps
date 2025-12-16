@@ -18,7 +18,6 @@ import {
   RECENTLY_PUBLISHED_DAYS_RANGE,
   TIME_TO_PUBLISH_DAYS_RANGE,
 } from '../utils/consts';
-import { ValidationErrors } from '../utils/types';
 import gearImage from '../assets/gear.png';
 import appearanceImage from '../assets/appearance.png';
 import { styles } from './ConfigScreen.styles';
