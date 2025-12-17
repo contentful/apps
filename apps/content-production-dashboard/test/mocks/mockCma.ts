@@ -2,6 +2,16 @@ import { vi } from 'vitest';
 import { EntryProps } from 'contentful-management';
 
 const mockCma: any = {
+  contentType: {
+    get: vi.fn(),
+    getMany: vi.fn().mockResolvedValue({
+      items: [
+        { sys: { id: 'blogPost' }, name: 'Blog Post' },
+        { sys: { id: 'article' }, name: 'Article' },
+        { sys: { id: 'page' }, name: 'Page' },
+      ],
+    }),
+  },
   entry: {
     getMany: vi.fn(),
   },
