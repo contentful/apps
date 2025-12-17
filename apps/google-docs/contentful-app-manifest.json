@@ -23,8 +23,8 @@
   "functions": [
     {
       "id": "createPlanFunction",
-      "name": "Create plan from document function",
-      "description": "Function to create an entry creation plan from a document (step 1 of 2-step flow).",
+      "name": "Create plan ",
+      "description": "Function to create an entry creation plan",
       "path": "functions/createPlan.js",
       "entryFile": "functions/createPlan.ts",
       "allowNetworks": [

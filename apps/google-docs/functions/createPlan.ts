@@ -4,9 +4,10 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { analyzeContentTypeRelationships } from './agents/planAgent/plan.agent';
+import { buildContentTypeGraph } from './agents/planAgent/plan.agent';
 import { fetchContentTypes } from './service/contentTypeService';
 import { initContentfulManagementClient } from './service/initCMAClient';
+import { ContentTypeProps } from 'contentful-management';
 
 export type CreatePlanParameters = {
   contentTypeIds: string[];
@@ -19,16 +20,10 @@ interface AppInstallationParameters {
 /**
  * App Action: Create Plan
  *
- * This is the first step in the two-step flow for creating entries from a Google Doc.
- * It analyzes the selected content types to understand their relationships.
+ * Analyzes selected content types and builds a nested relationship graph
+ * showing which content types reference which others.
  *
- * The relationship analysis is returned to the UI for visualization, showing:
- * - What content types have been selected
- * - How they relate to each other (which fields reference which content types)
- * - A visual map of the content model
- *
- * After the user reviews the plan and uploads a document, the createEntries action
- * will use this structure to create the actual entries.
+ * Returns a simple JSON structure for UI visualization.
  */
 export const handler: FunctionEventHandler<
   FunctionTypeEnum.AppActionCall,
@@ -48,27 +43,21 @@ export const handler: FunctionEventHandler<
   const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
 
   console.log(
-    'Analyzing relationships for content types:',
-    contentTypes.map((ct) => ct.name).join(', ')
+    'Building relationship graph for content types:',
+    contentTypes.map((ct: ContentTypeProps) => ct.name).join(', ')
   );
 
-  // Analyze the content type relationships
-  const analysis = await analyzeContentTypeRelationships({
+  // Build the content type relationship graph
+  const graph = await buildContentTypeGraph({
     openAiApiKey,
     contentTypes,
   });
 
-  console.log('Content type relationship analysis completed:', analysis.summary);
+  console.log('Content type relationship graph completed:', graph.summary);
 
   return {
     success: true,
-    analysis,
-    response: {
-      summary: analysis.summary,
-      totalContentTypes: analysis.totalContentTypes,
-      totalRelationships: analysis.totalRelationships,
-      contentTypes: analysis.contentTypes,
-      relationships: analysis.relationships,
-    },
+    graph: graph.graph,
+    summary: graph.summary,
   };
 };

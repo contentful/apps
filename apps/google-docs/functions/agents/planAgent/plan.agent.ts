@@ -1,14 +1,14 @@
 /**
  * Plan Agent
  *
- * Agent that analyzes an array of content types to understand their relationships.
- * This is used to visualize the content model in the UI before creating entries.
+ * Agent that analyzes an array of content types to build a simple relationship graph.
+ * Returns a nested JSON structure showing which content types reference which others.
  */
 
 import { createOpenAI } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import { ContentTypeProps } from 'contentful-management';
-import { ContentTypeRelationshipAnalysisSchema, ContentTypeRelationshipAnalysis } from './schema';
+import { ContentTypeRelationshipGraphSchema, ContentTypeRelationshipGraph } from './schema';
 
 /**
  * Configuration for the plan agent
@@ -19,15 +19,15 @@ export interface PlanAgentConfig {
 }
 
 /**
- * AI Agent that analyzes content types to understand their relationships.
- * Returns a structured analysis for UI visualization.
+ * AI Agent that analyzes content types and builds a nested relationship graph.
+ * Returns a simple tree structure for UI visualization.
  *
  * @param config - Plan agent configuration including API key and content types
- * @returns Promise resolving to a relationship analysis
+ * @returns Promise resolving to a nested relationship graph
  */
-export async function analyzeContentTypeRelationships(
+export async function buildContentTypeGraph(
   config: PlanAgentConfig
-): Promise<ContentTypeRelationshipAnalysis> {
+): Promise<ContentTypeRelationshipGraph> {
   const modelVersion = 'gpt-4o';
   const temperature = 0.3;
 
@@ -38,61 +38,73 @@ export async function analyzeContentTypeRelationships(
   });
 
   console.log(
-    'Plan Agent - Analyzing content types:',
+    'Plan Agent - Building graph for content types:',
     contentTypes.map((ct) => ct.name).join(', ')
   );
 
-  const prompt = buildAnalysisPrompt(contentTypes);
+  const prompt = buildGraphPrompt(contentTypes);
 
   const result = await generateObject({
     model: openaiClient(modelVersion),
-    schema: ContentTypeRelationshipAnalysisSchema,
+    schema: ContentTypeRelationshipGraphSchema,
     temperature,
     system: buildSystemPrompt(),
     prompt,
   });
 
-  const analysis = result.object as ContentTypeRelationshipAnalysis;
-  console.log('Plan Agent - Relationship Analysis:', JSON.stringify(analysis, null, 2));
+  const graph = result.object as ContentTypeRelationshipGraph;
+  console.log('Plan Agent - Relationship Graph:', JSON.stringify(graph, null, 2));
 
-  return analysis;
+  return graph;
 }
 
 function buildSystemPrompt(): string {
-  return `You are an expert at analyzing Contentful content models and understanding relationships between content types.
+  return `You are an expert at analyzing Contentful content models and creating visual relationship graphs.
 
 Your role is to:
-1. Analyze the structure of each content type
-2. Identify reference fields (fields that link to other entries)
-3. Determine relationships between content types
-4. Provide a clear summary for UI visualization
+1. Identify reference fields in content types (type "Link" or Array of "Link")
+2. Build a nested JSON structure showing the relationship hierarchy
+3. Create a simple tree that shows which content types reference which others
 
-REFERENCE FIELD IDENTIFICATION:
-- Type "Link" with linkType "Entry" = reference to another entry
-- Type "Array" with items.type "Link" and items.linkType "Entry" = array of references
-- Check validations for "linkContentType" to see which content types can be referenced
+OUTPUT FORMAT:
+Create a nested JSON graph where:
+- Each node has: { id: "contentTypeId", name: "Content Type Name", references: [...nested nodes...] }
+- "references" array contains content types that this one references
+- Nest the structure to show the hierarchy clearly
+- Content types with no outgoing references have no "references" field or an empty array
+- Content types with no incoming references should be at the root level
 
-RELATIONSHIP ANALYSIS:
-For each reference field:
-- Source: The content type that HAS the reference field
-- Target: The content type(s) that can be referenced
-- relationType: "single" for Link, "many" for Array
-- Check if the target is in the selected content types set
+EXAMPLE OUTPUT:
+\`\`\`json
+{
+  "graph": [
+    {
+      "id": "blogPost",
+      "name": "Blog Post",
+      "references": [
+        {
+          "id": "author",
+          "name": "Author"
+        },
+        {
+          "id": "category",
+          "name": "Category"
+        }
+      ]
+    }
+  ],
+  "summary": "Blog Post references Author and Category"
+}
+\`\`\`
 
-OUTPUT REQUIREMENTS:
-- For each content type: summary with counts and reference fields
-- For each relationship: clear source → target mapping with field info
-- Overall summary: describe the content model structure
-- Be concise and clear for UI display
-
-Example: "3 content types selected: Blog Post references Author and Category"`;
+Keep it simple and focused on the visual hierarchy for UI purposes.`;
 }
 
-function buildAnalysisPrompt(contentTypes: ContentTypeProps[]): string {
+function buildGraphPrompt(contentTypes: ContentTypeProps[]): string {
   const contentTypeIds = contentTypes.map((ct) => ct.sys.id);
   const contentTypeNames = contentTypes.map((ct) => ct.name).join(', ');
 
-  // Create detailed content type information focusing on reference fields
+  // Extract reference information
   const contentTypeDetails = contentTypes.map((ct) => {
     const referenceFields =
       ct.fields
@@ -107,61 +119,57 @@ function buildAnalysisPrompt(contentTypes: ContentTypeProps[]): string {
         .map((field) => {
           const linkContentType = field.validations?.find((v: any) => v.linkContentType);
           return {
-            id: field.id,
-            name: field.name,
-            type: field.type,
-            linkType: (field as any).linkType,
-            items: field.type === 'Array' ? (field.items as any) : undefined,
-            validations: linkContentType,
+            fieldId: field.id,
+            fieldName: field.name,
+            canReference: linkContentType?.linkContentType || ['any'],
           };
         }) || [];
 
     return {
       id: ct.sys.id,
       name: ct.name,
-      description: ct.description,
-      totalFields: ct.fields?.length || 0,
       referenceFields,
     };
   });
 
-  return `Analyze the following Contentful content types and their relationships.
+  return `Build a nested relationship graph for the following Contentful content types.
 
 SELECTED CONTENT TYPES: ${contentTypeNames}
 CONTENT TYPE IDS: ${contentTypeIds.join(', ')}
-TOTAL: ${contentTypes.length}
 
 CONTENT TYPE DETAILS:
 ${JSON.stringify(contentTypeDetails, null, 2)}
 
 YOUR TASK:
 
-1. **Analyze Each Content Type**:
-   - Summarize each content type
-   - List its reference fields (if any)
-   - Determine if it has incoming or outgoing references
+1. **Identify Root Content Types**: Content types that are NOT referenced by others should be at the root level
+2. **Build Nested Structure**: For each content type that has reference fields, nest the referenced content types
+3. **Keep It Simple**: Only include id and name for each node, plus nested references
+4. **Avoid Duplicates**: If a content type appears in multiple places, that's okay (show the relationship)
 
-2. **Identify Relationships**:
-   - For each reference field, create a ContentTypeRelationship
-   - Source = content type that HAS the reference field
-   - Target = content type(s) that can be referenced (from linkContentType validation)
-   - If linkContentType validation is missing, the field can reference ANY content type
-   - relationType = "single" for Link, "many" for Array
-   - isInSelectedSet = true if target content type is in the selected set
+STRUCTURE RULES:
+- Start with content types that reference others (usually the "parent" content types)
+- Nest their referenced content types in the "references" array
+- Each node: { id: "contentTypeId", name: "Content Type Name", references?: [...] }
+- If a content type doesn't reference anything, omit "references" or use empty array
 
-3. **Generate Summary**:
-   - Describe the content model in 1-2 sentences
-   - Example: "3 content types selected: Blog Post references Author (single) and Category (many)"
-   - Example: "2 content types with no relationships between them"
+EXAMPLE:
+If Blog Post references Author and Category:
+\`\`\`json
+{
+  "graph": [
+    {
+      "id": "blogPost",
+      "name": "Blog Post",
+      "references": [
+        { "id": "author", "name": "Author" },
+        { "id": "category", "name": "Category" }
+      ]
+    }
+  ],
+  "summary": "Blog Post references Author and Category"
+}
+\`\`\`
 
-4. **Count Relationships**:
-   - Total number of reference relationships identified
-
-IMPORTANT NOTES:
-- A reference field may reference multiple content types (check linkContentType array)
-- Create a separate relationship entry for EACH referenced content type
-- If a field can reference ANY content type (no linkContentType validation), still include it
-- Only analyze the provided content types - don't invent relationships
-
-Provide a structured analysis that can be used to visualize the content model in a UI.`;
+Now create the graph for the provided content types.`;
 }
