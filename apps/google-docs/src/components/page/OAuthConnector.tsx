@@ -16,9 +16,7 @@ export const OAuthConnector = ({
   onOAuthConnectedChange,
   isOAuthConnected,
   onOauthTokenChange,
-}: {
-  OAuthConnectorProps
-}) => {
+}: OAuthConnectorProps) => {
   const sdk = useSDK<ConfigAppSDK | PageAppSDK>();
   const [isOAuthLoading, setIsOAuthLoading] = useState(false);
   const [isHoveringConnected, setIsHoveringConnected] = useState(false);
