@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Box, Button, Card, Heading, Layout, Note } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -16,6 +16,7 @@ import { useDocumentSubmission } from '../hooks/useDocumentSubmission';
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
   const { modalStates, openModal, closeModal } = useModalManagement();
+  const [oauthToken, setOauthToken] = useState<string>('');
   const {
     hasStarted,
     setHasStarted,
@@ -33,6 +34,10 @@ const Page = () => {
 
   // Track previous submission state to detect completion
   const prevIsSubmittingRef = useRef<boolean>(false);
+
+  const handleOauthTokenChange = (token: string) => {
+    setOauthToken(token);
+  };
 
   const handleGetStarted = () => {
     setHasStarted(true);
@@ -122,7 +127,13 @@ const Page = () => {
 
   // Show getting started page if not started yet
   if (!hasStarted) {
-    return <GettingStartedPage onSelectFile={handleGetStarted} />;
+    return (
+      <GettingStartedPage
+        oauthToken={oauthToken}
+        onOauthTokenChange={handleOauthTokenChange}
+        onSelectFile={handleGetStarted}
+      />
+    );
   }
 
   return (
@@ -132,7 +143,6 @@ const Page = () => {
         isOpen={modalStates.isUploadModalOpen}
         onClose={handleUploadModalCloseRequest}
       />
-
       <ContentTypePickerModal
         sdk={sdk}
         isOpen={modalStates.isContentTypePickerOpen}
@@ -148,7 +158,6 @@ const Page = () => {
         onConfirm={handleConfirmCancel}
         onCancel={handleKeepCreating}
       />
-
       {(result || successMessage || errorMessage) && (
         <Layout variant="fullscreen" withBoxShadow={true} offsetTop={10}>
           <Layout.Body>

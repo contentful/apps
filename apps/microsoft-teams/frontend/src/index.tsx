@@ -14,7 +14,16 @@ import AuthProvider from '@context/AuthProvider';
 const { client: SentryClient, init: SentryInit } = sentryMarketplaceAppsSDK;
 const environment = import.meta.env.PROD ? 'production' : 'development';
 
-SentryInit({ environment });
+SentryInit({
+  environment,
+  ignoreErrors: [
+    // Ignore 429 rate limit errors
+    '429',
+    'Too Many Requests',
+    'RateLimitExceeded',
+    'exceeded the rate limit',
+  ],
+});
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
