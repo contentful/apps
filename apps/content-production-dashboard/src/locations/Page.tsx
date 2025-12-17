@@ -4,8 +4,14 @@ import { styles } from './Page.styles';
 import { MetricCard } from '../components/MetricCard';
 import { MetricsCalculator } from '../metrics/MetricsCalculator';
 import { ScheduledActionStatus, EntryProps, ScheduledActionProps } from 'contentful-management';
+import { PageAppSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import type { AppInstallationParameters } from './ConfigScreen';
 
 const Page = () => {
+  const sdk = useSDK<PageAppSDK>();
+  const installation = (sdk.parameters.installation ?? {}) as AppInstallationParameters;
+
   // TODO (fetching ticket): replace this with the real fetched entries.
   // Mocked entries for UI testing (created/published dates are relative to "now").
   const now = new Date();
@@ -110,7 +116,11 @@ const Page = () => {
     },
   ];
 
-  const metrics = new MetricsCalculator(entries, scheduledActions).metrics;
+  const metrics = new MetricsCalculator(entries, scheduledActions, {
+    needsUpdateMonths: installation.needsUpdateMonths,
+    recentlyPublishedDays: installation.recentlyPublishedDays,
+    timeToPublishDays: installation.timeToPublishDays,
+  }).metrics;
 
   return (
     <Flex flexDirection="column" style={styles.container}>

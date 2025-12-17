@@ -4,6 +4,11 @@ import { ClockIcon } from '@contentful/f36-icons';
 import type { MetricCardProps } from '../components/MetricCard';
 import { CalendarDotsIcon } from '@contentful/f36-icons';
 import { PenNibIcon } from '@contentful/f36-icons';
+import {
+  NEEDS_UPDATE_MONTHS_RANGE,
+  RECENTLY_PUBLISHED_DAYS_RANGE,
+  TIME_TO_PUBLISH_DAYS_RANGE,
+} from '../utils/consts';
 
 const msPerDay = 24 * 60 * 60 * 1000;
 
@@ -48,16 +53,28 @@ export class MetricsCalculator {
   private readonly entries: ReadonlyArray<EntryProps>;
   private readonly scheduledActions: ReadonlyArray<ScheduledActionProps>;
   private readonly now: Date; // to maintain all the metrics consistent at the same current time
+  private readonly needsUpdateMonths: number;
+  private readonly recentlyPublishedDays: number;
+  private readonly timeToPublishDays: number;
 
   public readonly metrics: ReadonlyArray<MetricCardProps>;
 
   constructor(
     entries: ReadonlyArray<EntryProps>,
-    scheduledActions: ReadonlyArray<ScheduledActionProps>
+    scheduledActions: ReadonlyArray<ScheduledActionProps>,
+    options?: {
+      needsUpdateMonths?: number;
+      recentlyPublishedDays?: number;
+      timeToPublishDays?: number;
+    }
   ) {
     this.entries = entries;
     this.scheduledActions = scheduledActions;
     this.now = new Date();
+    this.needsUpdateMonths = options?.needsUpdateMonths ?? NEEDS_UPDATE_MONTHS_RANGE.min;
+    this.recentlyPublishedDays =
+      options?.recentlyPublishedDays ?? RECENTLY_PUBLISHED_DAYS_RANGE.min;
+    this.timeToPublishDays = options?.timeToPublishDays ?? TIME_TO_PUBLISH_DAYS_RANGE.min;
 
     // Calculate once at construction time (per your request).
     this.metrics = [
@@ -101,7 +118,7 @@ export class MetricsCalculator {
   }
 
   private calculateAverageTimeToPublish(): MetricCardProps {
-    const startThisPeriod = subDays(this.now, 30);
+    const startThisPeriod = subDays(this.now, this.timeToPublishDays);
 
     let sumDays = 0;
     let count = 0;
@@ -125,7 +142,10 @@ export class MetricsCalculator {
     return {
       title: 'Average Time to Publish',
       value: avg === undefined ? '—' : `${avg.toFixed(1)} days`,
-      subtitle: count === 0 ? 'No entries published in the last 30 days' : 'For the last 30 days',
+      subtitle:
+        count === 0
+          ? `No entries published in the last ${this.timeToPublishDays} days`
+          : `For the last ${this.timeToPublishDays} days`,
       icon: ClockIcon,
       isNegative: false,
     };
@@ -154,7 +174,7 @@ export class MetricsCalculator {
   }
 
   private calculateRecentlyPublished(): MetricCardProps {
-    const start = subDays(this.now, 7);
+    const start = subDays(this.now, this.recentlyPublishedDays);
 
     let count = 0;
     for (const entry of this.entries) {
@@ -168,14 +188,14 @@ export class MetricsCalculator {
     return {
       title: 'Recently Published',
       value: String(count),
-      subtitle: 'In the last 7 days',
+      subtitle: `In the last ${this.recentlyPublishedDays} days`,
       icon: ClockIcon,
       isNegative: false,
     };
   }
 
   private calculateNeedsUpdate(): MetricCardProps {
-    const cutoff = subMonths(this.now, 6);
+    const cutoff = subMonths(this.now, this.needsUpdateMonths);
 
     let count = 0;
     for (const entry of this.entries) {
@@ -189,7 +209,7 @@ export class MetricsCalculator {
     return {
       title: 'Needs Update',
       value: String(count),
-      subtitle: 'Content older than 6 months',
+      subtitle: `Content older than ${this.needsUpdateMonths} months`,
       icon: PenNibIcon,
       isNegative: false,
     };
