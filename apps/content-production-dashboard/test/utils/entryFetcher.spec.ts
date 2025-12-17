@@ -150,9 +150,9 @@ describe('fetchAllEntries', () => {
       .mockRejectedValueOnce(sizeLimitError) // 500 fails
       .mockRejectedValueOnce(sizeLimitError) // 250 fails
       .mockRejectedValueOnce(sizeLimitError) // 125 fails
-      .mockRejectedValueOnce(sizeLimitError) // 100 (minimum) fails, throws error
-      .mockRejectedValueOnce(sizeLimitError) // 50 (minimum) fails, throws error
-      .mockRejectedValueOnce(sizeLimitError); // 25 (minimum) fails, throws error
+      .mockRejectedValueOnce(sizeLimitError) // 62 fails
+      .mockRejectedValueOnce(sizeLimitError) // 31 fails
+      .mockRejectedValueOnce(sizeLimitError); // 15 (minimum) fails, throws error
 
     await expect(fetchAllEntries(mockSdk)).rejects.toThrow(
       'Unable to fetch entries: response size too large even with minimal batch size'
