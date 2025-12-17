@@ -22,24 +22,9 @@
   },
   "functions": [
     {
-      "id": "createPlanFunction",
-      "name": "Create plan ",
-      "description": "Function to create an entry creation plan",
-      "path": "functions/handlers/createPlan.js",
-      "entryFile": "functions/handlers/createPlan.ts",
-      "allowNetworks": [
-        "https://api.openai.com",
-        "https://docs.googleapis.com",
-        "https://docs.google.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
-    },
-    {
       "id": "processDocumentFunction",
       "name": "Process Document",
-      "description": "Processes a Google Doc and creates Contentful entries based on document structure.",
+      "description": "Processes a Google Doc and returns entry drafts",
       "path": "functions/handlers/processDocument.js",
       "entryFile": "functions/handlers/processDocument.ts",
       "allowNetworks": [
