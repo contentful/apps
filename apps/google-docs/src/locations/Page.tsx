@@ -110,7 +110,37 @@ const Page = () => {
       `Selected ${contentTypes.length} content type${contentTypes.length > 1 ? 's' : ''}: ${names}`
     );
 
-    // Call create entries function after content types are selected
+    // Step 1: Call createPlan to analyze content type relationships
+    try {
+      console.log('🎯 Step 1: Creating relationship graph for selected content types...');
+      console.log('📋 Selected Content Types:', names);
+      console.log('📋 Content Type IDs:', ids);
+
+      const { createPlanAction } = await import('../utils/appFunctionUtils');
+      const planResult = await createPlanAction(sdk, ids);
+
+      console.log('✅ Plan created successfully!');
+      console.log('📊 Full Result:', JSON.stringify(planResult, null, 2));
+
+      // Access the response data
+      const graph = (planResult as any).graph;
+      const summary = (planResult as any).summary;
+
+      if (graph) {
+        console.log('📊 Graph Structure:', JSON.stringify(graph, null, 2));
+      }
+      if (summary) {
+        console.log('📊 Summary:', summary);
+        sdk.notifier.success(`Plan: ${summary}`);
+      }
+    } catch (error) {
+      console.error('❌ Error creating plan:', error);
+      sdk.notifier.error(
+        `Failed to create plan: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+
+    // Step 2: Call create entries function after content types are selected
     await submit(ids);
   };
 

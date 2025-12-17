@@ -23,6 +23,39 @@ export async function getAppActionId(
   return appAction.sys.id;
 }
 
+export const createPlanAction = async (
+  sdk: PageAppSDK | ConfigAppSDK,
+  contentTypeIds: string[]
+) => {
+  try {
+    const appDefinitionId = sdk.ids.app;
+
+    if (!appDefinitionId) {
+      throw new Error('App definition ID not found');
+    }
+
+    const appActionId = await getAppActionId(sdk, 'createPlanFunction');
+    const result = await sdk.cma.appActionCall.createWithResult(
+      {
+        appDefinitionId,
+        appActionId,
+      },
+      {
+        parameters: { contentTypeIds },
+      }
+    );
+
+    if ('errors' in result && result.errors) {
+      throw new Error(JSON.stringify(result.errors));
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Error creating plan', error);
+    throw new Error(error instanceof Error ? error.message : 'Failed to create plan');
+  }
+};
+
 export const createEntriesFromDocumentAction = async (
   sdk: PageAppSDK | ConfigAppSDK,
   contentTypeIds: string[],
@@ -55,7 +88,7 @@ export const createEntriesFromDocumentAction = async (
       }
     }
 
-    const appActionId = await getAppActionId(sdk, 'createEntriesFromDocumentAction');
+    const appActionId = await getAppActionId(sdk, 'createEntriesFromDocumentFunction');
     const result = await sdk.cma.appActionCall.createWithResult(
       {
         appDefinitionId,

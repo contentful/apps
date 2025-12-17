@@ -70,7 +70,7 @@ export const handler: FunctionEventHandler<
   const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
 
   // Commented out to preserver as much time as possible due to the 30 second limit for App functions
-  // const contentTypeParserAgentResult = await analyzeContentTypes({ contentTypes, openAiApiKey });
+  const contentTypeParserAgentResult = await analyzeContentTypes({ contentTypes, openAiApiKey });
 
   // INTEG-3261: Pass the ai content type response to the observer for analysis
   // createContentTypeObservationsFromLLMResponse()
@@ -81,33 +81,14 @@ export const handler: FunctionEventHandler<
     contentTypes,
   });
 
-  // INTEG-3261: Pass the ai document response to the observer for analysis
-  // createDocumentObservationsFromLLMResponse()
-
-  // INTEG-3264: Create the entries in Contentful using the entry service
-  // The aiDocumentResponse.entries is now ready to be passed to the CMA client
-  const creationResult = await createEntries(cma, aiDocumentResponse.entries, {
-    spaceId: context.spaceId,
-    environmentId: context.environmentId,
-    contentTypes,
-  });
-  console.log('Created Entries Result:', creationResult);
-
-  // INTEG-3265: Create the assets in Contentful using the asset service
-  // await createAssets()
+  console.log('AI Document Response:', aiDocumentResponse);
 
   return {
     success: true,
     response: {
-      // contentTypeParserAgentResult,
+      contentTypeParserAgentResult,
       summary: aiDocumentResponse.summary,
       totalEntriesExtracted: aiDocumentResponse.totalEntries,
-      createdEntries: creationResult.createdEntries.map((entry) => ({
-        id: entry.sys.id,
-        contentType: entry.sys.contentType.sys.id,
-      })),
-      errors: creationResult.errors,
-      successRate: `${creationResult.createdEntries.length}/${aiDocumentResponse.totalEntries}`,
     },
   };
 };
