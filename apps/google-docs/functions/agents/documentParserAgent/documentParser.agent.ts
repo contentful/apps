@@ -12,15 +12,16 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import { ContentTypeProps } from 'contentful-management';
 import { FinalEntriesResultSchema, FinalEntriesResult } from './schema';
+import { fetchGoogleDocAsJson } from '../../service/googleDriveService';
 
 /**
  * Configuration for the document parser
  */
 export interface DocumentParserConfig {
-  openAiApiKey: string;
-  // TODO: Update this when we have oauth working
-  document: unknown; // JSON document from Google Docs API or test data
+  documentId: string;
+  oauthToken: string;
   contentTypes: ContentTypeProps[];
+  openAiApiKey: string;
   locale?: string;
 }
 
@@ -31,20 +32,23 @@ export interface DocumentParserConfig {
  * @param config - Parser configuration including API key, document JSON, and content types
  * @returns Promise resolving to entries ready for CMA client
  */
-export async function createDocument(config: DocumentParserConfig): Promise<FinalEntriesResult> {
+export async function analyzeDocumentWithAgent(
+  config: DocumentParserConfig
+): Promise<FinalEntriesResult> {
   // TODO: Double check these values and make sure they are compatible because not every user will have a key
   // to access all models
   const modelVersion = 'gpt-4o';
   const temperature = 0.3;
 
-  const { document, openAiApiKey, contentTypes, locale = 'en-US' } = config;
+  const { documentId, oauthToken, openAiApiKey, contentTypes, locale = 'en-US' } = config;
 
   const openaiClient = createOpenAI({
     apiKey: openAiApiKey,
   });
 
-  console.log('Document Parser Agent document content Input:', document);
-  const prompt = buildExtractionPrompt({ contentTypes, document, locale });
+  console.log('Document Parser Agent document content Input:', documentId);
+  const documentJson = await fetchGoogleDocAsJson({ documentId, oauthToken });
+  const prompt = buildExtractionPrompt({ contentTypes, documentJson, locale });
   const result = await generateObject({
     model: openaiClient(modelVersion),
     schema: FinalEntriesResultSchema,
@@ -175,11 +179,11 @@ EXAMPLE: If the document has the word "bold" in it, do not invent bold text in y
 
 function buildExtractionPrompt({
   contentTypes,
-  document,
+  documentJson,
   locale,
 }: {
   contentTypes: ContentTypeProps[];
-  document: unknown;
+  documentJson: unknown;
   locale: string;
 }): string {
   const contentTypeList = contentTypes.map((ct) => `${ct.name} (ID: ${ct.sys.id})`).join(', ');
@@ -365,7 +369,7 @@ When extracting RichText fields, convert Google Docs formatting to Markdown:
 === END PARSING GUIDE ===
 
 GOOGLE DOCS JSON DOCUMENT:
-${JSON.stringify(document, null, 2)}
+${JSON.stringify(documentJson, null, 2)}
 
 CRITICAL INSTRUCTIONS:
 *** BE VERY CAREFUL TO NOT INVENT TEXT OR STRUCTURE THAT IS NOT PRESENT IN THE DOCUMENT ***
