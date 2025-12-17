@@ -3,6 +3,7 @@ import type { EntryProps, ScheduledActionProps } from 'contentful-management';
 import { ClockIcon } from '@contentful/f36-icons';
 import type { MetricCardProps } from '../components/MetricCard';
 import { CalendarDotsIcon } from '@contentful/f36-icons';
+import { PenNibIcon } from '@contentful/f36-icons';
 
 const msPerDay = 24 * 60 * 60 * 1000;
 
@@ -20,6 +21,12 @@ function addDays(base: Date, days: number): Date {
 
 function subDays(base: Date, days: number): Date {
   return new Date(base.getTime() - days * msPerDay);
+}
+
+function subMonths(base: Date, months: number): Date {
+  const date = new Date(base);
+  date.setMonth(date.getMonth() - months);
+  return date;
 }
 
 function isWithin(d: Date, startInclusive: Date, endExclusive: Date): boolean {
@@ -57,6 +64,8 @@ export class MetricsCalculator {
       this.calculateTotalPublished(),
       this.calculateAverageTimeToPublish(),
       this.calculateScheduled(),
+      this.calculateRecentlyPublished(),
+      this.calculateNeedsUpdate(),
     ];
   }
 
@@ -140,6 +149,48 @@ export class MetricsCalculator {
       value: String(count),
       subtitle: 'For the next 30 days',
       icon: CalendarDotsIcon,
+      isNegative: false,
+    };
+  }
+
+  private calculateRecentlyPublished(): MetricCardProps {
+    const start = subDays(this.now, 7);
+
+    let count = 0;
+    for (const entry of this.entries) {
+      const publishedAt = parseDate(entry?.sys?.publishedAt);
+      if (!publishedAt) continue;
+      if (isWithin(publishedAt, start, this.now)) {
+        count += 1;
+      }
+    }
+
+    return {
+      title: 'Recently Published',
+      value: String(count),
+      subtitle: 'In the last 7 days',
+      icon: ClockIcon,
+      isNegative: false,
+    };
+  }
+
+  private calculateNeedsUpdate(): MetricCardProps {
+    const cutoff = subMonths(this.now, 6);
+
+    let count = 0;
+    for (const entry of this.entries) {
+      const updatedAt = parseDate(entry?.sys?.updatedAt);
+      if (!updatedAt) continue;
+      if (updatedAt.getTime() < cutoff.getTime()) {
+        count += 1;
+      }
+    }
+
+    return {
+      title: 'Needs Update',
+      value: String(count),
+      subtitle: 'Content older than 6 months',
+      icon: PenNibIcon,
       isNegative: false,
     };
   }

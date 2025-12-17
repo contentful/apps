@@ -20,6 +20,7 @@ const Page = () => {
       sys: {
         createdAt: daysAgo(10),
         publishedAt: daysAgo(5),
+        updatedAt: daysAgo(5),
       },
     } as unknown as EntryProps,
     // Published in last 30 days, 2 days to publish
@@ -34,6 +35,8 @@ const Page = () => {
       sys: {
         createdAt: daysAgo(50),
         publishedAt: daysAgo(40),
+        // Older than 6 months → should count in "Needs Update"
+        updatedAt: daysAgo(220),
       },
     } as unknown as EntryProps,
   ];
