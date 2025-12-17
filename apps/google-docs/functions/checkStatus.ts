@@ -11,16 +11,23 @@ interface CompleteOAuthParams {
   state: string;
 }
 
-export async function checkStatus(sdk: OAuthSDK): Promise<boolean> {
+interface CheckStatusResponse {
+  token: string;
+  connected: boolean;
+}
+
+export async function checkStatus(sdk: OAuthSDK): Promise<CheckStatusResponse> {
   try {
     const token = await sdk.token();
-    if (!token) {
-      return false;
-    }
-    return true;
+    if (!token) return { token: '', connected: false };
+
+    return {
+      token: token.accessToken,
+      connected: true,
+    };
   } catch (error) {
     console.error('Failed to complete OAuth flow:', error);
-    return false;
+    return { token: '', connected: false };
   }
 }
 
@@ -38,10 +45,10 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     };
   }
 
-  const connected = await checkStatus(sdk);
+  const result = await checkStatus(sdk);
 
   return {
     statusCode: 200,
-    connected,
+    ...result,
   };
 };
