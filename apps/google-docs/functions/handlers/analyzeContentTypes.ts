@@ -4,12 +4,11 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { buildContentTypeGraph } from '../agents/planAgent/plan.agent';
+import { analyzeContentTypes as analyzeContentTypesAgent } from '../agents/contentTypeParserAgent/contentTypeParser.agent';
 import { fetchContentTypes } from '../service/contentTypeService';
 import { initContentfulManagementClient } from '../service/initCMAClient';
-import { ContentTypeProps } from 'contentful-management';
 
-export type CreatePlanParameters = {
+export type AnalyzeContentTypesParameters = {
   contentTypeIds: string[];
 };
 
@@ -18,18 +17,17 @@ interface AppInstallationParameters {
 }
 
 /**
- * App Action: Create Plan
+ * App Action: Analyze Content Types
  *
- * Analyzes selected content types and builds a nested relationship graph
- * showing which content types reference which others.
+ * Analyzes the structure and relationships of selected content types
+ * using AI to understand their fields, validations, and relationships.
  *
- * Returns a simple JSON structure for UI visualization.
  */
 export const handler: FunctionEventHandler<
   FunctionTypeEnum.AppActionCall,
-  CreatePlanParameters
+  AnalyzeContentTypesParameters
 > = async (
-  event: AppActionRequest<'Custom', CreatePlanParameters>,
+  event: AppActionRequest<'Custom', AnalyzeContentTypesParameters>,
   context: FunctionEventContext
 ) => {
   const { contentTypeIds } = event.body;
@@ -42,22 +40,14 @@ export const handler: FunctionEventHandler<
   const cma = initContentfulManagementClient(context);
   const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
 
-  console.log(
-    'Building relationship graph for content types:',
-    contentTypes.map((ct: ContentTypeProps) => ct.name).join(', ')
-  );
-
-  // Build the content type relationship graph
-  const graph = await buildContentTypeGraph({
-    openAiApiKey,
+  const contentTypeParserAgentResult = await analyzeContentTypesAgent({
     contentTypes,
+    openAiApiKey,
   });
 
-  console.log('Content type relationship graph completed:', graph.summary);
-
+  console.log('Content type analysis completed', contentTypeParserAgentResult);
   return {
     success: true,
-    graph: graph.graph,
-    summary: graph.summary,
+    analysis: contentTypeParserAgentResult,
   };
 };

@@ -68,21 +68,39 @@ async function callAppAction<T = unknown>(
   }
 }
 
-export const createPlanAction = async (
+/**
+ * Analyzes content type structure and relationships using AI
+ * @param sdk - The Contentful SDK instance
+ * @param contentTypeIds - Array of content type IDs to analyze
+ * @returns Analysis result from the app action
+ */
+export const analyzeContentTypesAction = async (
   sdk: PageAppSDK | ConfigAppSDK,
   contentTypeIds: string[]
 ) => {
-  return callAppAction(sdk, 'createPlanFunction', { contentTypeIds });
+  return callAppAction(sdk, 'analyzeContentTypesFunction', { contentTypeIds });
 };
 
-export const createEntriesFromDocumentAction = async (
+/**
+ * Processes a document and creates Contentful entries
+ * @param sdk - The Contentful SDK instance
+ * @param contentTypeIds - Array of content type IDs to use for entry creation
+ * @param document - The document to process (JSON object or string)
+ * @returns Processing result from the app action
+ */
+export const processDocumentAction = async (
   sdk: PageAppSDK | ConfigAppSDK,
   contentTypeIds: string[],
   document: unknown
 ) => {
   const parsedDocument = parseDocument(document);
-  return callAppAction(sdk, 'createEntriesFromDocumentFunction', {
+  return callAppAction(sdk, 'processDocumentFunction', {
     contentTypeIds,
     document: parsedDocument,
   });
 };
+
+/**
+ * @deprecated Use processDocumentAction instead
+ */
+export const createEntriesFromDocumentAction = processDocumentAction;

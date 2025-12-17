@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { createEntriesFromDocumentAction } from '../utils/appFunctionUtils';
+import { createEntriesFromDocumentAction } from '../utils/appActionUtils';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages';
 
 interface UseDocumentSubmissionReturn {

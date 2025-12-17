@@ -1,9 +1,4 @@
 /**
- * Shared utility for parsing and validating Google Docs documents
- * Used by both client-side and server-side code
- */
-
-/**
  * Parses a document parameter that may be a JSON string, URL, or object
  * @param document - The document to parse (string URL, JSON string, or object)
  * @returns The parsed document object

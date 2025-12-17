@@ -37,16 +37,29 @@
       ]
     },
     {
-      "id": "createEntriesFromDocumentFunction",
-      "name": "Create content entries from document function",
-      "description": "Function to create content blocks from App Action.",
-      "path": "functions/handlers/createEntriesFromDocument.js",
-      "entryFile": "functions/handlers/createEntriesFromDocument.ts",
+      "id": "processDocumentFunction",
+      "name": "Process Document",
+      "description": "Processes a Google Doc and creates Contentful entries based on document structure.",
+      "path": "functions/handlers/processDocument.js",
+      "entryFile": "functions/handlers/processDocument.ts",
       "allowNetworks": [
         "https://api.openai.com",
         "https://docs.googleapis.com",
         "https://docs.google.com",
         "https://jsonplaceholder.typicode.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "analyzeContentTypesFunction",
+      "name": "Analyze Content Types",
+      "description": "Analyzes content type structure and relationships using AI.",
+      "path": "functions/handlers/analyzeContentTypes.js",
+      "entryFile": "functions/handlers/analyzeContentTypes.ts",
+      "allowNetworks": [
+        "https://api.openai.com"
       ],
       "accepts": [
         "appaction.call"

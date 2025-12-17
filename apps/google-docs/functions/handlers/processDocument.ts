@@ -4,7 +4,7 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { analyzeContentTypes } from '../agents/contentTypeParserAgent/contentTypeParser.agent';
+import { ContentTypeProps } from 'contentful-management';
 import { createDocument } from '../agents/documentParserAgent/documentParser.agent';
 import { fetchContentTypes } from '../service/contentTypeService';
 import { initContentfulManagementClient } from '../service/initCMAClient';
@@ -12,7 +12,7 @@ import { fetchGoogleDoc } from '../service/googleDriveService';
 import { createEntries } from '../service/entryService';
 import { parseDocument, validateDocument } from '../utils/documentValidationUtils';
 
-export type AppActionParameters = {
+export type ProcessDocumentParameters = {
   contentTypeIds: string[];
   document: unknown; // JSON document from Google Docs API or test data
 };
@@ -21,15 +21,21 @@ interface AppInstallationParameters {
   openAiApiKey: string;
 }
 
-/*
- * Important Caveat: App Functions have a 30 second limit on execution time.
- * There is a likely future where we will need to break down the function into smaller functions.
+/**
+ * App Action: Process Document
+ *
+ * Processes a Google Doc and creates Contentful entries based on the document structure
+ * and the provided content types. This function focuses solely on document processing
+ * and entry creation.
+ *
+ * Note: Content type analysis should be done separately using the analyzeContentTypes
+ * function to avoid timeout issues.
  */
 export const handler: FunctionEventHandler<
   FunctionTypeEnum.AppActionCall,
-  AppActionParameters
+  ProcessDocumentParameters
 > = async (
-  event: AppActionRequest<'Custom', AppActionParameters>,
+  event: AppActionRequest<'Custom', ProcessDocumentParameters>,
   context: FunctionEventContext
 ) => {
   const { contentTypeIds, document } = event.body;
@@ -48,26 +54,26 @@ export const handler: FunctionEventHandler<
   const cma = initContentfulManagementClient(context);
   const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
 
-  // Commented out to preserver as much time as possible due to the 30 second limit for App functions
-  const contentTypeParserAgentResult = await analyzeContentTypes({ contentTypes, openAiApiKey });
+  console.log(
+    'Processing document with content types:',
+    contentTypes.map((ct: ContentTypeProps) => ct.name).join(', ')
+  );
 
-  // INTEG-3261: Pass the ai content type response to the observer for analysis
-  // createContentTypeObservationsFromLLMResponse()
-
+  // Process the document and create entries
   const aiDocumentResponse = await createDocument({
     document: parsedDocument,
     openAiApiKey,
     contentTypes,
   });
 
-  console.log('AI Document Response:', aiDocumentResponse);
+  console.log('Document processing completed:', {
+    summary: aiDocumentResponse.summary,
+    totalEntries: aiDocumentResponse.totalEntries,
+  });
 
   return {
     success: true,
-    response: {
-      contentTypeParserAgentResult,
-      summary: aiDocumentResponse.summary,
-      totalEntriesExtracted: aiDocumentResponse.totalEntries,
-    },
+    summary: aiDocumentResponse.summary,
+    totalEntriesExtracted: aiDocumentResponse.totalEntries,
   };
 };
