@@ -88,6 +88,32 @@
       "accepts": [
         "appaction.call"
       ]
+    },
+    {
+      "id": "listGoogleDocs",
+      "name": "List Google Docs",
+      "description": "Lists Google Docs from the user's Drive",
+      "path": "functions/listGoogleDocs.js",
+      "entryFile": "functions/listGoogleDocs.ts",
+      "allowNetworks": [
+        "https://www.googleapis.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "fetchGoogleDoc",
+      "name": "Fetch Google Doc",
+      "description": "Fetches a specific Google Doc JSON using the Docs API",
+      "path": "functions/fetchGoogleDoc.js",
+      "entryFile": "functions/fetchGoogleDoc.ts",
+      "allowNetworks": [
+        "https://docs.googleapis.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
     }
   ],
   "actions": []

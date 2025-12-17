@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Button, Flex, Text, Image } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { CheckCircleIcon } from '@contentful/f36-icons';
-import { ConfigAppSDK } from '@contentful/app-sdk';
+import { ConfigAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import googleDriveLogo from '../../assets/google-drive.png';
 
@@ -13,7 +13,7 @@ export const OAuthConnector = ({
   onOAuthConnectedChange: (oauthConnectionStatus: boolean) => void;
   isOAuthConnected: boolean;
 }) => {
-  const sdk = useSDK<ConfigAppSDK>();
+  const sdk = useSDK<ConfigAppSDK | PageAppSDK>();
   const [isOAuthLoading, setIsOAuthLoading] = useState(false);
   const [isHoveringConnected, setIsHoveringConnected] = useState(false);
   const [isCheckingStatus, setIsCheckingStatus] = useState(true);
@@ -50,7 +50,7 @@ export const OAuthConnector = ({
         const response = await sdk.cma.appActionCall.createWithResponse(
           {
             appActionId: checkStatusAppAction.sys.id,
-            appDefinitionId: sdk.ids.app,
+            appDefinitionId: sdk.ids.app || '',
           },
           {
             parameters: {},
@@ -119,7 +119,10 @@ export const OAuthConnector = ({
         (action) => action.name === 'completeGdocOauth'
       );
       await sdk.cma.appActionCall.create(
-        { appDefinitionId, appActionId: completeOauthAppAction?.sys.id || '' },
+        {
+          appDefinitionId: appDefinitionId || '',
+          appActionId: completeOauthAppAction?.sys.id || '',
+        },
         {
           parameters: {
             code: event.data.code,
@@ -170,7 +173,7 @@ export const OAuthConnector = ({
       const response = await sdk.cma.appActionCall.createWithResponse(
         {
           appActionId: initiateOauthAppAction?.sys.id || '',
-          appDefinitionId: sdk.ids.app,
+          appDefinitionId: sdk.ids.app || '',
         },
         {
           parameters: {},
@@ -203,7 +206,7 @@ export const OAuthConnector = ({
       await sdk.cma.appActionCall.create(
         {
           appActionId: disconnectAppAction?.sys.id || '',
-          appDefinitionId: sdk.ids.app,
+          appDefinitionId: sdk.ids.app || '',
         },
         { parameters: {} }
       );

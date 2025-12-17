@@ -7,6 +7,9 @@ export enum NODE_TYPES {
   BLOCKQUOTE = 'blockquote',
   ASSET_HYPERLINK = 'asset-hyperlink',
   EMBEDDED_ASSET_BLOCK = 'embedded-asset-block',
+  UNORDERED_LIST = 'unordered-list',
+  ORDERED_LIST = 'ordered-list',
+  LIST_ITEM = 'list-item',
 }
 
 function createTextNode(value: string, marks: Array<{ type: 'bold' | 'italic' | 'underline' }>) {
@@ -310,6 +313,51 @@ export class MarkdownParser {
         continue;
       }
 
+      // Handle markdown bold (**text**) - but check if italic needs closing first
+      // When we see **, if italic is ON, we might have *italic** pattern
+      // In that case, close italic first, then handle ** for bold
+      if (line.startsWith('**', i)) {
+        // If italic is ON and we're seeing **, this is *italic** pattern
+        // Close italic first, then handle ** for bold
+        if (italic) {
+          // Close italic first (this handles the *italic** case)
+          flush();
+          italic = false;
+          // Now handle ** for bold - advance past both * characters
+          bold = !bold;
+          i += 2;
+          continue;
+        }
+        // Normal ** handling (italic is OFF)
+        flush();
+        bold = !bold;
+        i += 2;
+        continue;
+      }
+      // Handle markdown italic (*text*) - but not if it's part of **
+      // This handles single * for italic
+      if (line[i] === '*') {
+        // If this * is followed by *, it's part of **
+        // Skip it and let ** check handle it (unless italic is ON, which is handled above)
+        if (i + 1 < line.length && line[i + 1] === '*') {
+          // This shouldn't happen if italic is OFF (would be caught by ** check above)
+          // But if it does, skip this * and let ** handle it
+          i += 1;
+          continue;
+        }
+        // Single * for italic
+        flush();
+        italic = !italic;
+        i += 1;
+        continue;
+      }
+      // Handle markdown underline (__text__) - check before single _
+      if (line.startsWith('__', i)) {
+        flush();
+        underline = !underline;
+        i += 2;
+        continue;
+      }
       // Toggle underline on '_' (single only, not '__') - markdown fallback
       if (line[i] === '_' && !(i + 1 < line.length && line[i + 1] === '_')) {
         flush();
@@ -326,9 +374,124 @@ export class MarkdownParser {
   parseDocument(normalized: string) {
     const lines = normalized.split(/\r?\n/);
     const documentChildren: any[] = [];
+
+    // Helper function to create a list item
+    // List items in Contentful Rich Text must contain block-level nodes (paragraphs)
+    const createListItem = (inlineNodes: any[]) => {
+      // Ensure no embedded-asset-block nodes end up in list items (defensive check)
+      const inlineOnlyNodes: any[] = [];
+      const blockNodes: any[] = [];
+
+      for (const node of inlineNodes) {
+        if (node.nodeType === NODE_TYPES.EMBEDDED_ASSET_BLOCK) {
+          blockNodes.push(node);
+        } else {
+          inlineOnlyNodes.push(node);
+        }
+      }
+
+      const listItemContent: any[] = [];
+
+      // Add paragraph with inline nodes
+      if (inlineOnlyNodes.length > 0) {
+        listItemContent.push(createParagraph(inlineOnlyNodes));
+      } else {
+        listItemContent.push(createParagraph([createTextNode('', [])]));
+      }
+
+      // Add any block nodes (shouldn't happen, but handle gracefully)
+      for (const blockNode of blockNodes) {
+        listItemContent.push(blockNode);
+      }
+
+      return {
+        nodeType: NODE_TYPES.LIST_ITEM,
+        data: {},
+        content: listItemContent,
+      };
+    };
+
     for (let li = 0; li < lines.length; li++) {
       const rawLine = lines[li];
       if (!rawLine.trim()) {
+        continue;
+      }
+
+      // Check for unordered list item (- or * at start of line, optionally indented)
+      const unorderedListMatch = rawLine.match(/^(\s*)([-*])\s+(.+)$/);
+      if (unorderedListMatch) {
+        const indent = unorderedListMatch[1].length;
+        const itemText = unorderedListMatch[3];
+        const nodes = this.parseInline(itemText);
+
+        // Group consecutive list items at the same indent level
+        const listItems: any[] = [createListItem(nodes.length ? nodes : [createTextNode('', [])])];
+
+        // Collect consecutive list items at the same indent level
+        let nextLi = li + 1;
+        while (nextLi < lines.length) {
+          const nextLine = lines[nextLi];
+          if (!nextLine.trim()) {
+            nextLi++;
+            continue;
+          }
+          const nextMatch = nextLine.match(/^(\s*)([-*])\s+(.+)$/);
+          if (nextMatch && nextMatch[1].length === indent) {
+            const nextItemText = nextMatch[3];
+            const nextNodes = this.parseInline(nextItemText);
+            listItems.push(createListItem(nextNodes.length ? nextNodes : [createTextNode('', [])]));
+            nextLi++;
+          } else {
+            break;
+          }
+        }
+
+        documentChildren.push({
+          nodeType: NODE_TYPES.UNORDERED_LIST,
+          data: {},
+          content: listItems,
+        });
+
+        li = nextLi - 1; // Skip processed lines
+        continue;
+      }
+
+      // Check for ordered list item (number. at start of line, optionally indented)
+      const orderedListMatch = rawLine.match(/^(\s*)(\d+)\.\s+(.+)$/);
+      if (orderedListMatch) {
+        const indent = orderedListMatch[1].length;
+        const itemText = orderedListMatch[3];
+        const nodes = this.parseInline(itemText);
+
+        // Group consecutive list items at the same indent level
+        const listItems: any[] = [createListItem(nodes.length ? nodes : [createTextNode('', [])])];
+
+        // Collect consecutive list items at the same indent level
+        let nextLi = li + 1;
+        while (nextLi < lines.length) {
+          const nextLine = lines[nextLi];
+          if (!nextLine.trim()) {
+            nextLi++;
+            continue;
+          }
+          const nextMatch = nextLine.match(/^(\s*)(\d+)\.\s+(.+)$/);
+          if (nextMatch && nextMatch[1].length === indent) {
+            const nextItemText = nextMatch[3];
+            const nextNodes = this.parseInline(nextItemText);
+            listItems.push(createListItem(nextNodes.length ? nextNodes : [createTextNode('', [])]));
+            nextLi++;
+          } else {
+            break;
+          }
+        }
+
+        documentChildren.push({
+          nodeType: NODE_TYPES.ORDERED_LIST,
+          data: {},
+          content: listItems,
+        });
+
+        li = nextLi - 1; // Skip processed lines
         continue;
       }
       if (rawLine.trim().startsWith('```')) {
