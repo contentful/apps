@@ -11,7 +11,7 @@ const queryClient = new QueryClient({
       gcTime: CACHE_CONFIG.CACHE_TIME_MS, // gcTime replaces cacheTime in v5
       refetchOnWindowFocus: CACHE_CONFIG.REFETCH_ON_WINDOW_FOCUS,
       retry: 2, // Retry failed requests 2 times
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+      retryDelay: 3000,
     },
   },
 });

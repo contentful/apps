@@ -29,38 +29,6 @@ describe('Page component', () => {
     });
   });
 
-  it('shows loading skeleton when isLoading is true', () => {
-    mockUseQuery.mockReturnValue({
-      data: undefined,
-      isLoading: true,
-      isFetching: false,
-      error: null,
-      refetch: mockRefetch,
-    });
-
-    render(<Page />);
-
-    expect(screen.getByText('Loading component...')).toBeInTheDocument();
-  });
-
-  it('shows "No entries found" message when entries array is empty', () => {
-    mockUseQuery.mockReturnValue({
-      data: {
-        entries: [],
-        total: 0,
-        fetchedAt: new Date(),
-      },
-      isLoading: false,
-      isFetching: false,
-      error: null,
-      refetch: mockRefetch,
-    });
-
-    render(<Page />);
-
-    expect(screen.getByText('No entries found in this space.')).toBeInTheDocument();
-  });
-
   it('shows error display when error exists', () => {
     const testError = new Error('Failed to fetch entries');
     mockUseQuery.mockReturnValue({
@@ -75,25 +43,6 @@ describe('Page component', () => {
 
     expect(screen.getByText('Error loading entries')).toBeInTheDocument();
     expect(screen.getByText('Failed to fetch entries')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
-  });
-
-  it('calls refetch when retry button is clicked', async () => {
-    const testError = new Error('Failed to fetch entries');
-    mockUseQuery.mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      isFetching: false,
-      error: testError,
-      refetch: mockRefetch,
-    });
-
-    render(<Page />);
-
-    const retryButton = screen.getByRole('button', { name: 'Retry' });
-    retryButton.click();
-
-    expect(mockRefetch).toHaveBeenCalledTimes(1);
   });
 
   it('shows loading state when isFetching is true', () => {

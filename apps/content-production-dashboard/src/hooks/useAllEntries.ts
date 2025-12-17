@@ -11,15 +11,9 @@ export interface UseAllEntriesResult {
   isFetching: boolean;
   error: Error | null;
   refetch: () => void;
-  fetchedAt: Date | null;
+  fetchedAt: Date | undefined;
 }
 
-/**
- * Custom hook to fetch all entries from the space using TanStack Query.
- * Provides caching, loading states, and automatic refetching capabilities.
- *
- * @returns Object with entries, loading states, error, and refetch function
- */
 export function useAllEntries(): UseAllEntriesResult {
   const sdk = useSDK<PageAppSDK>();
 
@@ -33,10 +27,8 @@ export function useAllEntries(): UseAllEntriesResult {
     total: data?.total || 0,
     isLoading,
     isFetching,
-    error: error || null,
-    refetch: () => {
-      refetch();
-    },
-    fetchedAt: data?.fetchedAt || null,
+    error,
+    refetch,
+    fetchedAt: data?.fetchedAt,
   };
 }

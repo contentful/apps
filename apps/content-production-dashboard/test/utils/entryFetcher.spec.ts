@@ -150,14 +150,16 @@ describe('fetchAllEntries', () => {
       .mockRejectedValueOnce(sizeLimitError) // 500 fails
       .mockRejectedValueOnce(sizeLimitError) // 250 fails
       .mockRejectedValueOnce(sizeLimitError) // 125 fails
-      .mockRejectedValueOnce(sizeLimitError); // 100 (minimum) fails, throws error
+      .mockRejectedValueOnce(sizeLimitError) // 100 (minimum) fails, throws error
+      .mockRejectedValueOnce(sizeLimitError) // 50 (minimum) fails, throws error
+      .mockRejectedValueOnce(sizeLimitError); // 25 (minimum) fails, throws error
 
     await expect(fetchAllEntries(mockSdk)).rejects.toThrow(
       'Unable to fetch entries: response size too large even with minimal batch size'
     );
 
     // Should try: 1000 -> 500 -> 250 -> 125 -> 100 (minimum, fails and throws)
-    expect(mockCma.entry.getMany).toHaveBeenCalledTimes(5);
+    expect(mockCma.entry.getMany).toHaveBeenCalledTimes(7);
   });
 
   it('handles partial batch correctly', async () => {

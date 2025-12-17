@@ -8,13 +8,6 @@ export interface FetchAllEntriesResult {
   fetchedAt: Date;
 }
 
-/**
- * Fetches all entries from the space with pagination and batching.
- * Handles response size limits by automatically reducing batch size if needed.
- *
- * @param sdk - Contentful PageAppSDK instance
- * @returns Promise with all entries, total count, and fetch timestamp
- */
 export async function fetchAllEntries(sdk: PageAppSDK): Promise<FetchAllEntriesResult> {
   const allEntries: EntryProps[] = [];
   let batchSkip = 0;

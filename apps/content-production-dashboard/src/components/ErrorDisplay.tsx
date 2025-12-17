@@ -1,17 +1,13 @@
-import { Button, Note, Paragraph } from '@contentful/f36-components';
+import { Note, Paragraph } from '@contentful/f36-components';
 
 interface ErrorDisplayProps {
-  error: Error;
-  onRetry: () => void;
+  error: Error | null;
 }
 
-export const ErrorDisplay = ({ error, onRetry }: ErrorDisplayProps) => {
+export const ErrorDisplay = ({ error }: ErrorDisplayProps) => {
   return (
     <Note variant="negative" title="Error loading entries">
-      <Paragraph>{error.message}</Paragraph>
-      <Button onClick={onRetry} variant="primary" size="small">
-        Retry
-      </Button>
+      <Paragraph>{error?.message}</Paragraph>
     </Note>
   );
 };

@@ -5,15 +5,7 @@ import { ErrorDisplay } from '../components/ErrorDisplay';
 import { styles } from './Page.styles';
 
 const Page = () => {
-  const { entries, total, isLoading, isFetching, error, refetch, fetchedAt } = useAllEntries();
-
-  const formatDate = (date: Date | null) => {
-    if (!date) return 'Never';
-    return new Intl.DateTimeFormat('en-US', {
-      dateStyle: 'short',
-      timeStyle: 'medium',
-    }).format(date);
-  };
+  const { isFetching, error, refetch } = useAllEntries();
 
   return (
     <Box padding="spacingXl" className={styles.pageContainer}>
@@ -25,33 +17,11 @@ const Page = () => {
       </Flex>
 
       {error ? (
-        <ErrorDisplay error={error} onRetry={() => refetch()} />
-      ) : isLoading || isFetching ? (
+        <ErrorDisplay error={error} />
+      ) : isFetching ? (
         <LoadingSkeleton />
       ) : (
-        <>
-          {/* TODO: remove this section from below when implementing the UI tickets */}
-          <Card>
-            <Box padding="spacingM">
-              <Text as="p" fontColor="gray600" fontSize="fontSizeM" marginBottom="spacingS">
-                {isLoading ? 'Loading entries...' : `Total: ${total} entries`}
-                {fetchedAt && !isLoading && <> • Last fetched: {formatDate(fetchedAt)}</>}
-              </Text>
-              {entries.length === 0 ? (
-                <Paragraph>No entries found in this space.</Paragraph>
-              ) : (
-                <Paragraph>
-                  Successfully loaded <strong>{entries.length}</strong> entries.
-                  {isFetching && (
-                    <Text as="span" fontColor="gray600" marginLeft="spacingS">
-                      (Refreshing...)
-                    </Text>
-                  )}
-                </Paragraph>
-              )}
-            </Box>
-          </Card>
-        </>
+        <>{/* TODO: implement the rest of the sections */}</>
       )}
     </Box>
   );
