@@ -22,7 +22,7 @@
   },
   "functions": [
     {
-      "id": "processDocumentFunction",
+      "id": "processDocument",
       "name": "Process Document",
       "description": "Processes a Google Doc and returns entry drafts",
       "path": "functions/handlers/processDocument.js",
@@ -38,7 +38,7 @@
       ]
     },
     {
-      "id": "analyzeContentTypesFunction",
+      "id": "analyzeContentTypes",
       "name": "Analyze Content Types",
       "description": "Analyzes content type structure and relationships using AI.",
       "path": "functions/handlers/analyzeContentTypes.js",
