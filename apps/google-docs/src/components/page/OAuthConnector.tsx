@@ -6,12 +6,18 @@ import { ConfigAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import googleDriveLogo from '../../assets/google-drive.png';
 
+type OAuthConnectorProps = {
+  onOAuthConnectedChange: (oauthConnectionStatus: boolean) => void;
+  isOAuthConnected: boolean;
+  onOauthTokenChange: (token: string) => void;
+};
+
 export const OAuthConnector = ({
   onOAuthConnectedChange,
   isOAuthConnected,
+  onOauthTokenChange,
 }: {
-  onOAuthConnectedChange: (oauthConnectionStatus: boolean) => void;
-  isOAuthConnected: boolean;
+  OAuthConnectorProps
 }) => {
   const sdk = useSDK<ConfigAppSDK | PageAppSDK>();
   const [isOAuthLoading, setIsOAuthLoading] = useState(false);
@@ -57,12 +63,13 @@ export const OAuthConnector = ({
           }
         );
 
-        const statusData = JSON.parse(response.response.body);
-        console.log(`Google OAuth status response (attempt ${attempt}):`, statusData);
+        const statusResponse = JSON.parse(response.response.body);
+        console.log(`Google OAuth status response (attempt ${attempt}):`, statusResponse);
 
         // Assuming the response contains a connected field
-        const isConnected = statusData.connected === true;
+        const isConnected = statusResponse.connected === true;
         console.log(`Google OAuth connection status (attempt ${attempt}):`, isConnected);
+        onOauthTokenChange(statusResponse.token);
 
         // If we have an expected status and it matches, or if we don't have an expected status, accept the result
         if (expectedStatus === undefined || isConnected === expectedStatus) {
