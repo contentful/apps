@@ -22,6 +22,21 @@
   },
   "functions": [
     {
+      "id": "createPlanFunction",
+      "name": "Create plan from document function",
+      "description": "Function to create an entry creation plan from a document (step 1 of 2-step flow).",
+      "path": "functions/createPlan.js",
+      "entryFile": "functions/createPlan.ts",
+      "allowNetworks": [
+        "https://api.openai.com",
+        "https://docs.googleapis.com",
+        "https://docs.google.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
       "id": "createEntriesFromDocumentFunction",
       "name": "Create content entries from document function",
       "description": "Function to create content blocks from App Action.",
