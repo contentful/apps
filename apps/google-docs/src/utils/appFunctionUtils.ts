@@ -1,4 +1,5 @@
 import { PageAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
+import { parseDocument } from '../../functions/utils/documentValidationUtils';
 
 /**
  * Fetches the app action ID by name from the current environment
@@ -23,10 +24,19 @@ export async function getAppActionId(
   return appAction.sys.id;
 }
 
-export const createPlanAction = async (
+/**
+ * Generic helper to call an app action with parameters
+ * @param sdk - The Contentful SDK instance
+ * @param actionName - The name of the app action to call
+ * @param parameters - The parameters to pass to the app action
+ * @returns The result from the app action
+ * @throws Error if the app action fails
+ */
+async function callAppAction<T = unknown>(
   sdk: PageAppSDK | ConfigAppSDK,
-  contentTypeIds: string[]
-) => {
+  actionName: string,
+  parameters: Record<string, unknown>
+): Promise<T> {
   try {
     const appDefinitionId = sdk.ids.app;
 
@@ -34,14 +44,14 @@ export const createPlanAction = async (
       throw new Error('App definition ID not found');
     }
 
-    const appActionId = await getAppActionId(sdk, 'createPlanFunction');
+    const appActionId = await getAppActionId(sdk, actionName);
     const result = await sdk.cma.appActionCall.createWithResult(
       {
         appDefinitionId,
         appActionId,
       },
       {
-        parameters: { contentTypeIds },
+        parameters,
       }
     );
 
@@ -49,11 +59,20 @@ export const createPlanAction = async (
       throw new Error(JSON.stringify(result.errors));
     }
 
-    return result;
+    return result as T;
   } catch (error) {
-    console.error('Error creating plan', error);
-    throw new Error(error instanceof Error ? error.message : 'Failed to create plan');
+    console.error(`Error calling app action "${actionName}"`, error);
+    throw new Error(
+      error instanceof Error ? error.message : `Failed to call app action "${actionName}"`
+    );
   }
+}
+
+export const createPlanAction = async (
+  sdk: PageAppSDK | ConfigAppSDK,
+  contentTypeIds: string[]
+) => {
+  return callAppAction(sdk, 'createPlanFunction', { contentTypeIds });
 };
 
 export const createEntriesFromDocumentAction = async (
@@ -61,53 +80,9 @@ export const createEntriesFromDocumentAction = async (
   contentTypeIds: string[],
   document: unknown
 ) => {
-  try {
-    const appDefinitionId = sdk.ids.app;
-
-    if (!appDefinitionId) {
-      throw new Error('App definition ID not found');
-    }
-
-    // Parse document if it's a JSON string (Contentful API expects an object, not a string)
-    let parsedDocument: unknown = document;
-    if (typeof document === 'string') {
-      // Check if it's a URL (starts with http:// or https://)
-      if (document.startsWith('http://') || document.startsWith('https://')) {
-        throw new Error(
-          'Document URL provided but fetching from Google Docs API is not yet implemented. Please provide the document JSON object directly.'
-        );
-      }
-
-      // Try to parse as JSON
-      try {
-        parsedDocument = JSON.parse(document);
-      } catch (e) {
-        throw new Error(
-          `Failed to parse document as JSON: ${e instanceof Error ? e.message : String(e)}`
-        );
-      }
-    }
-
-    const appActionId = await getAppActionId(sdk, 'createEntriesFromDocumentFunction');
-    const result = await sdk.cma.appActionCall.createWithResult(
-      {
-        appDefinitionId,
-        appActionId,
-      },
-      {
-        parameters: { contentTypeIds, document: parsedDocument },
-      }
-    );
-
-    if ('errors' in result && result.errors) {
-      throw new Error(JSON.stringify(result.errors));
-    }
-
-    return result;
-  } catch (error) {
-    console.error('Error creating entries from document', error);
-    throw new Error(
-      error instanceof Error ? error.message : 'Failed to create entries from document'
-    );
-  }
+  const parsedDocument = parseDocument(document);
+  return callAppAction(sdk, 'createEntriesFromDocumentFunction', {
+    contentTypeIds,
+    document: parsedDocument,
+  });
 };

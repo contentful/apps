@@ -4,9 +4,9 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { buildContentTypeGraph } from './agents/planAgent/plan.agent';
-import { fetchContentTypes } from './service/contentTypeService';
-import { initContentfulManagementClient } from './service/initCMAClient';
+import { buildContentTypeGraph } from '../agents/planAgent/plan.agent';
+import { fetchContentTypes } from '../service/contentTypeService';
+import { initContentfulManagementClient } from '../service/initCMAClient';
 import { ContentTypeProps } from 'contentful-management';
 
 export type CreatePlanParameters = {
