@@ -14,7 +14,8 @@ interface UseDocumentSubmissionReturn {
 
 export const useDocumentSubmission = (
   sdk: PageAppSDK,
-  googleDocUrl: string
+  documentId: string,
+  oauthToken: string
 ): UseDocumentSubmissionReturn => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [result, setResult] = useState<any>(null);
@@ -29,7 +30,7 @@ export const useDocumentSubmission = (
         return ERROR_MESSAGES.NO_API_KEY;
       }
 
-      if (!googleDocUrl || !googleDocUrl.trim()) {
+      if (!documentId || !documentId.trim()) {
         return ERROR_MESSAGES.NO_DOCUMENT;
       }
 
@@ -39,7 +40,7 @@ export const useDocumentSubmission = (
 
       return null;
     },
-    [sdk, googleDocUrl]
+    [sdk, documentId]
   );
 
   const submit = useCallback(
@@ -57,7 +58,12 @@ export const useDocumentSubmission = (
       setResult(null);
 
       try {
-        const response = await createEntriesFromDocumentAction(sdk, contentTypeIds, googleDocUrl);
+        const response = await createEntriesFromDocumentAction(
+          sdk,
+          contentTypeIds,
+          documentId,
+          oauthToken
+        );
         setResult(response);
         setSuccessMessage(SUCCESS_MESSAGES.ENTRIES_CREATED);
       } catch (error) {
@@ -66,7 +72,7 @@ export const useDocumentSubmission = (
         setIsSubmitting(false);
       }
     },
-    [sdk, googleDocUrl, validateSubmission]
+    [sdk, documentId, oauthToken, validateSubmission]
   );
 
   const clearMessages = useCallback(() => {

@@ -12,6 +12,7 @@ import { ConfirmCancelModal } from '../components/page/ConfirmCancelModal';
 import { useModalManagement, ModalType } from '../hooks/useModalManagement';
 import { useProgressTracking } from '../hooks/useProgressTracking';
 import { useDocumentSubmission } from '../hooks/useDocumentSubmission';
+import SelectDocumentModal from '../components/page/SelectDocumentModal';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -20,8 +21,8 @@ const Page = () => {
   const {
     hasStarted,
     setHasStarted,
-    googleDocUrl,
-    setGoogleDocUrl,
+    documentId,
+    setDocumentId,
     selectedContentTypes,
     setSelectedContentTypes,
     hasProgress,
@@ -30,7 +31,7 @@ const Page = () => {
     setPendingCloseAction,
   } = useProgressTracking();
   const { result, successMessage, errorMessage, submit, clearMessages, isSubmitting } =
-    useDocumentSubmission(sdk, googleDocUrl);
+    useDocumentSubmission(sdk, documentId, oauthToken);
 
   // Track previous submission state to detect completion
   const prevIsSubmittingRef = useRef<boolean>(false);
@@ -51,16 +52,16 @@ const Page = () => {
     clearMessages();
   };
 
-  const handleUploadModalCloseRequest = (docUrl?: string) => {
-    // If user is submitting a document (docUrl provided), proceed normally
-    if (docUrl) {
+  const handleUploadModalCloseRequest = (docId?: string) => {
+    // If docId is provided, user clicked "Next" - save document ID and proceed to content type picker
+    if (docId) {
+      setDocumentId(docId);
       closeModal(ModalType.UPLOAD);
-      setGoogleDocUrl(docUrl);
       openModal(ModalType.CONTENT_TYPE_PICKER);
       return;
     }
 
-    // If there's progress and user is trying to cancel, show confirmation
+    // User clicked "Cancel" - If there's progress and user is trying to cancel, show confirmation
     if (hasProgress) {
       closeModal(ModalType.UPLOAD);
       setPendingCloseAction(() => () => {
@@ -137,8 +138,8 @@ const Page = () => {
 
   return (
     <>
-      <UploadDocumentModal
-        sdk={sdk}
+      <SelectDocumentModal
+        oauthToken={oauthToken}
         isOpen={modalStates.isUploadModalOpen}
         onClose={handleUploadModalCloseRequest}
       />

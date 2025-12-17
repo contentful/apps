@@ -2,7 +2,7 @@ import {
   AppEventHandlerRequest,
   AppEventHandlerResponse,
   AppEventContext,
-} from './types/oauth.types';
+} from '../types/oauth.types';
 
 export const handler = async (
   event: AppEventHandlerRequest,

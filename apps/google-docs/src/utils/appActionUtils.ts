@@ -91,12 +91,13 @@ export const analyzeContentTypesAction = async (
 export const processDocumentAction = async (
   sdk: PageAppSDK | ConfigAppSDK,
   contentTypeIds: string[],
-  document: unknown
+  documentId: string,
+  oauthToken: string
 ) => {
-  const parsedDocument = parseDocument(document);
-  return callAppAction(sdk, 'processDocumentFunction', {
+  return callAppAction(sdk, 'processDocument', {
     contentTypeIds,
-    document: parsedDocument,
+    documentId,
+    oauthToken,
   });
 };
 

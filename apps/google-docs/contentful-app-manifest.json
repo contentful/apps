@@ -29,7 +29,7 @@
       "entryFile": "functions/handlers/processDocument.ts",
       "allowNetworks": [
         "https://api.openai.com",
-        "https://docs.googleapis.com",
+        "*.googleapis.com",
         "https://docs.google.com",
         "https://jsonplaceholder.typicode.com"
       ],
