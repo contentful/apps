@@ -1,15 +1,16 @@
 import { FileIcon } from '@contentful/f36-icons';
 import type { EntryProps } from 'contentful-management';
-import { MetricCardProps } from '../components/MetricCard';
+import { ClockIcon } from '@contentful/f36-icons';
+import type { MetricCardProps } from '../components/MetricCard';
 
 const msPerDay = 24 * 60 * 60 * 1000;
 
-function toDate(value: unknown) {
+type MaybeDate = Date | undefined;
+
+function parseDate(value: string | undefined): MaybeDate {
   if (!value) return undefined;
-  if (value instanceof Date) return Number.isNaN(value.getTime()) ? undefined : value;
-  if (typeof value !== 'string') return undefined;
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? undefined : d;
+  const ms = Date.parse(value);
+  return Number.isNaN(ms) ? undefined : new Date(ms);
 }
 
 function subDays(base: Date, days: number): Date {
@@ -31,10 +32,6 @@ function percentChange(current: number, previous: number): { text: string; isNeg
   return { text: `${abs}% publishing ${direction} MoM`, isNegative: pct < 0 };
 }
 
-const getPublishedAt = (entry: EntryProps): Date | undefined => {
-  return toDate(entry?.sys?.publishedAt ?? entry?.sys?.firstPublishedAt);
-};
-
 export class MetricsCalculator {
   private readonly entries: ReadonlyArray<EntryProps>;
   private readonly now: Date; // to maintain all the metrics consistent at the same current time
@@ -46,7 +43,15 @@ export class MetricsCalculator {
     this.now = new Date();
 
     // Calculate once at construction time (per your request).
-    this.metrics = [this.calculateTotalPublished()];
+    this.metrics = [this.calculateTotalPublished(), this.calculateAverageTimeToPublish()];
+  }
+
+  private getPublishedAt(entry: EntryProps): MaybeDate {
+    return parseDate(entry?.sys?.publishedAt);
+  }
+
+  private getCreatedAt(entry: EntryProps): MaybeDate {
+    return parseDate(entry?.sys?.createdAt);
   }
 
   private calculateTotalPublished(): MetricCardProps {
@@ -54,14 +59,20 @@ export class MetricsCalculator {
     const startPrevPeriod = subDays(this.now, 60);
     const endPrevPeriod = startThisPeriod;
 
-    const publishedDates = this.entries
-      .map((e) => getPublishedAt(e))
-      .filter((d): d is Date => Boolean(d));
+    let current = 0;
+    let previous = 0;
+    for (const entry of this.entries) {
+      const publishedAt = this.getPublishedAt(entry);
+      if (!publishedAt) continue;
 
-    const current = publishedDates.filter((d) => isWithin(d, startThisPeriod, this.now)).length;
-    const previous = publishedDates.filter((d) =>
-      isWithin(d, startPrevPeriod, endPrevPeriod)
-    ).length;
+      if (isWithin(publishedAt, startThisPeriod, this.now)) {
+        current += 1;
+        continue;
+      }
+      if (isWithin(publishedAt, startPrevPeriod, endPrevPeriod)) {
+        previous += 1;
+      }
+    }
 
     const { text, isNegative } = percentChange(current, previous);
 
@@ -71,6 +82,37 @@ export class MetricsCalculator {
       subtitle: text,
       icon: FileIcon,
       isNegative,
+    };
+  }
+
+  private calculateAverageTimeToPublish(): MetricCardProps {
+    const startThisPeriod = subDays(this.now, 30);
+
+    let sumDays = 0;
+    let count = 0;
+    for (const entry of this.entries) {
+      const publishedAt = this.getPublishedAt(entry);
+      if (!publishedAt) continue;
+      if (!isWithin(publishedAt, startThisPeriod, this.now)) continue;
+
+      const createdAt = this.getCreatedAt(entry);
+      if (!createdAt) continue;
+
+      const deltaDays = (publishedAt.getTime() - createdAt.getTime()) / msPerDay;
+      if (deltaDays < 0) continue;
+
+      sumDays += deltaDays;
+      count += 1;
+    }
+
+    const avg = count === 0 ? undefined : sumDays / count;
+
+    return {
+      title: 'Average Time to Publish',
+      value: avg === undefined ? '—' : `${avg.toFixed(1)} days`,
+      subtitle: count === 0 ? 'No entries published in the last 30 days' : 'For the last 30 days',
+      icon: ClockIcon,
+      isNegative: false,
     };
   }
 }
