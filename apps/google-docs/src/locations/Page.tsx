@@ -3,7 +3,6 @@ import { Box, Button, Card, Heading, Layout, Note } from '@contentful/f36-compon
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { GettingStartedPage } from '../components/page/GettingStartedPage';
-import { UploadDocumentModal } from '../components/page/UploadDocumentModal';
 import {
   ContentTypePickerModal,
   SelectedContentType,
