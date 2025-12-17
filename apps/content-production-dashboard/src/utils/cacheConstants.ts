@@ -13,5 +13,5 @@ export const FETCH_CONFIG = {
   // Default batch size for pagination (1000 is Contentful's max per request)
   DEFAULT_BATCH_SIZE: 1000,
   // Minimum batch size when reducing due to response size limits
-  MIN_BATCH_SIZE: 25,
+  MIN_BATCH_SIZE: 15,
 } as const;
