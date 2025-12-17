@@ -1,4 +1,4 @@
-import { Box, Button, Card, Flex, Heading, Paragraph, Text } from '@contentful/f36-components';
+import { Box, Button, Flex, Heading } from '@contentful/f36-components';
 import { useAllEntries } from '../hooks/useAllEntries';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { ErrorDisplay } from '../components/ErrorDisplay';
