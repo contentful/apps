@@ -4,9 +4,9 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { analyzeContentTypes as analyzeContentTypesAgent } from '../agents/contentTypeParserAgent/contentTypeParser.agent';
-import { fetchContentTypes } from '../service/contentTypeService';
-import { initContentfulManagementClient } from '../service/initCMAClient';
+import { createContentTypeAnalysisWithAgent as analyzeContentTypesAgent } from '../../agents/contentTypeParserAgent/contentTypeParser.agent';
+import { fetchContentTypes } from '../../service/contentTypeService';
+import { initContentfulManagementClient } from '../../service/initCMAClient';
 
 export type AnalyzeContentTypesParameters = {
   contentTypeIds: string[];

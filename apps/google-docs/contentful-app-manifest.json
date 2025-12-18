@@ -25,8 +25,8 @@
       "id": "createPreview",
       "name": "Create Preview",
       "description": "Parses the Google Doc and creates preview entries",
-      "path": "functions/handlers/createPreviewHandler.js",
-      "entryFile": "functions/handlers/createPreviewHandler.ts",
+      "path": "functions/handlers/createPreview/createPreviewHandler.js",
+      "entryFile": "functions/handlers/createPreview/createPreviewHandler.ts",
       "allowNetworks": [
         "https://api.openai.com",
         "*.googleapis.com",
@@ -41,8 +41,8 @@
       "id": "analyzeContentTypes",
       "name": "Analyze Content Types",
       "description": "Analyzes content type structure and relationships using AI.",
-      "path": "functions/handlers/analyzeContentTypesHandler.js",
-      "entryFile": "functions/handlers/analyzeContentTypesHandler.ts",
+      "path": "functions/handlers/createPreview/createContentTypesAnalysisHandler.js",
+      "entryFile": "functions/handlers/createPreview/createContentTypesAnalysisHandler.ts",
       "allowNetworks": [
         "https://api.openai.com"
       ],
@@ -54,8 +54,8 @@
       "id": "createEntries",
       "name": "Create Entries",
       "description": "Creates entries in Contentful",
-      "path": "functions/handlers/createEntriesHandler.js",
-      "entryFile": "functions/handlers/createEntriesHandler.ts",
+      "path": "functions/handlers/createEntries/createEntriesHandler.js",
+      "entryFile": "functions/handlers/createEntries/createEntriesHandler.ts",
       "allowNetworks": [],
       "accepts": [
         "appaction.call"

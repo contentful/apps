@@ -1,8 +1,8 @@
 import { AppActionRequest, FunctionEventHandler } from '@contentful/node-apps-toolkit';
-import { createEntries } from '../service/entryService';
-import { initContentfulManagementClient } from '../service/initCMAClient';
-import { EntryToCreate } from '../agents/documentParserAgent/schema';
 import { FunctionTypeEnum, FunctionEventContext } from '@contentful/node-apps-toolkit';
+import { EntryToCreate } from '../../agents/documentParserAgent/schema';
+import { createEntriesFromPreview } from '../../service/entryService';
+import { initContentfulManagementClient } from '../../service/initCMAClient';
 
 interface CreateEntriesParameters {
   entries: EntryToCreate[];
@@ -38,7 +38,7 @@ export const handler: FunctionEventHandler<
     throw new Error('No matching content types found');
   }
 
-  const result = await createEntries(cma, entries, {
+  const result = await createEntriesFromPreview(cma, entries, {
     spaceId: context.spaceId,
     environmentId: context.environmentId,
     contentTypes: contentTypes,
