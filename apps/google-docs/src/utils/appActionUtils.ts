@@ -76,9 +76,10 @@ async function callAppAction<T = unknown>(
  */
 export const analyzeContentTypesAction = async (
   sdk: PageAppSDK | ConfigAppSDK,
-  contentTypeIds: string[]
+  contentTypeIds: string[],
+  oauthToken: string
 ) => {
-  return callAppAction(sdk, 'analyzeContentTypes', { contentTypeIds });
+  return callAppAction(sdk, 'analyzeContentTypes', { contentTypeIds, oauthToken });
 };
 
 /**

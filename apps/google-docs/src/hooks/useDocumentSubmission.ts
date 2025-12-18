@@ -62,8 +62,13 @@ export const useDocumentSubmission = (
       setResult(null);
 
       try {
-        const response = await analyzeContentTypesAction(sdk, contentTypeIds);
-        console.log('response', response);
+        const analyzeContentTypesResponse = await analyzeContentTypesAction(
+          sdk,
+          contentTypeIds,
+          oauthToken
+        );
+        console.log('analyzeContentTypesResponse', analyzeContentTypesResponse);
+
         const processDocumentResponse = await processDocumentAction(
           sdk,
           contentTypeIds,
@@ -72,7 +77,7 @@ export const useDocumentSubmission = (
         );
         console.log('processDocumentResponse', processDocumentResponse);
 
-        setResult([response, processDocumentResponse]);
+        setResult([analyzeContentTypesResponse, processDocumentResponse]);
         setSuccessMessage(SUCCESS_MESSAGES.ENTRIES_CREATED);
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : ERROR_MESSAGES.SUBMISSION_FAILED);
