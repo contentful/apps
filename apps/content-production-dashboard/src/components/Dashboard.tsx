@@ -23,7 +23,6 @@ const Dashboard = () => {
 
   return (
     <Flex flexDirection="column" style={styles.container}>
-      {/* Header */}
       <Flex flexDirection="row" justifyContent="space-between" marginBottom="spacingL">
         <Heading>Content Dashboard</Heading>
         <Button
@@ -36,7 +35,6 @@ const Dashboard = () => {
         </Button>
       </Flex>
 
-      {/* Metrics Cards */}
       <Flex flexDirection="row" gap="spacingM">
         {metrics.map((metric) => {
           return (

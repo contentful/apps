@@ -9,45 +9,8 @@ import {
   RECENTLY_PUBLISHED_DAYS_RANGE,
   TIME_TO_PUBLISH_DAYS_RANGE,
 } from '../utils/consts';
-
-const msPerDay = 24 * 60 * 60 * 1000;
-
-type MaybeDate = Date | undefined;
-
-function parseDate(value: string | undefined): MaybeDate {
-  if (!value) return undefined;
-  const ms = Date.parse(value);
-  return Number.isNaN(ms) ? undefined : new Date(ms);
-}
-
-function addDays(base: Date, days: number): Date {
-  return new Date(base.getTime() + days * msPerDay);
-}
-
-function subDays(base: Date, days: number): Date {
-  return new Date(base.getTime() - days * msPerDay);
-}
-
-function subMonths(base: Date, months: number): Date {
-  const date = new Date(base);
-  date.setMonth(date.getMonth() - months);
-  return date;
-}
-
-function isWithin(d: Date, startInclusive: Date, endExclusive: Date): boolean {
-  return d.getTime() >= startInclusive.getTime() && d.getTime() < endExclusive.getTime();
-}
-
-function percentChange(current: number, previous: number): { text: string; isNegative: boolean } {
-  if (previous === 0) {
-    if (current === 0) return { text: '0.0% publishing change MoM', isNegative: false };
-    return { text: 'New publishing this month', isNegative: false };
-  }
-  const pct = ((current - previous) / previous) * 100;
-  const abs = Math.abs(pct).toFixed(1);
-  const direction = pct < 0 ? 'decrease' : 'increase';
-  return { text: `${abs}% publishing ${direction} MoM`, isNegative: pct < 0 };
-}
+import { msPerDay, parseDate, addDays, subDays, subMonths, isWithin } from '../utils/dates';
+import { percentChange } from '../utils/metrics';
 
 export class MetricsCalculator {
   private readonly entries: ReadonlyArray<EntryProps>;
@@ -76,7 +39,6 @@ export class MetricsCalculator {
       options?.recentlyPublishedDays ?? RECENTLY_PUBLISHED_DAYS_RANGE.min;
     this.timeToPublishDays = options?.timeToPublishDays ?? TIME_TO_PUBLISH_DAYS_RANGE.min;
 
-    // Calculate once at construction time (per your request).
     this.metrics = [
       this.calculateTotalPublished(),
       this.calculateAverageTimeToPublish(),

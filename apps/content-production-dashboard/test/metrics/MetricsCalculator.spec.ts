@@ -9,7 +9,6 @@ import {
 } from '../../src/utils/consts';
 
 describe('MetricsCalculator', () => {
-  // Use actual current time to match MetricsCalculator's internal new Date()
   const now = new Date();
   const daysAgo = (days: number) =>
     new Date(now.getTime() - days * 24 * 60 * 60 * 1000).toISOString();
