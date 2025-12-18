@@ -70,7 +70,7 @@
     "jsdom": "^25.0.1",
     "prop-types": "^15.8.1",
     "rimraf": "^5.0.1",
-    "storybook": "^7.3.0",
+    "storybook": "^7.6.21",
     "typescript": "4.9.5",
     "vite-plugin-dts": "^4.2.2",
     "vite-plugin-eslint": "^1.8.1",
