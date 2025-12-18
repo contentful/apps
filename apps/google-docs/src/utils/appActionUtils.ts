@@ -116,8 +116,3 @@ export const createEntriesAction = async (
 ) => {
   return callAppAction(sdk, 'createEntries', { entries, contentTypeIds });
 };
-
-/**
- * @deprecated Use processDocumentAction instead
- */
-export const createEntriesFromDocumentAction = createPreviewAction;
