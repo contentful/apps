@@ -63,11 +63,13 @@ export const handler: FunctionEventHandler<
   console.log('Document processing completed:', {
     summary: aiDocumentResponse.summary,
     totalEntries: aiDocumentResponse.totalEntries,
+    entries: aiDocumentResponse.entries,
   });
 
   return {
     success: true,
     summary: aiDocumentResponse.summary,
     totalEntriesExtracted: aiDocumentResponse.totalEntries,
+    entries: aiDocumentResponse.entries,
   };
 };
