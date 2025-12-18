@@ -14,6 +14,9 @@ const mockSdk: any = {
     space: 'test-space',
     environment: 'test-environment',
   },
+  parameters: {
+    installation: {},
+  },
   notifier: {
     error: vi.fn(),
     success: vi.fn(),
