@@ -7,7 +7,7 @@ interface ErrorDisplayProps {
 export const ErrorDisplay = ({ error }: ErrorDisplayProps) => {
   return (
     <Note variant="negative" title="Error loading entries">
-      <Paragraph>{error?.message}</Paragraph>
+      <Paragraph>{error instanceof Error ? error.message : 'Unknown error'}</Paragraph>
     </Note>
   );
 };
