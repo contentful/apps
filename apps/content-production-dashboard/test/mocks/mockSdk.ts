@@ -8,7 +8,6 @@ const mockSdk: any = {
     setReady: vi.fn(),
     getCurrentState: vi.fn().mockResolvedValue({}),
   },
-  cma: mockCma,
   ids: {
     app: 'test-app',
     space: 'test-space',
@@ -22,6 +21,7 @@ const mockSdk: any = {
     success: vi.fn(),
     warning: vi.fn(),
   },
+  cma: mockCma,
 };
 
 export { mockSdk };
