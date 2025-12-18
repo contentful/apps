@@ -249,9 +249,9 @@ async function createAssetFromUrlFast(
   const validatedUrl = validateAssetUrl(url);
 
   // Use metadata if provided, otherwise extract from URL
-  const fileName = metadata?.fileName || 'dev-image.jpg';
+  const fileName = metadata?.fileName || 'image.jpg';
   const contentType = metadata?.contentType || 'image/jpeg';
-  const title = metadata?.title || metadata?.altText || 'Dev Image';
+  const title = metadata?.title || metadata?.altText || 'Image';
 
   // Create asset without waiting for processing/publishing
   // Contentful will process and publish it in the background
@@ -497,12 +497,14 @@ async function createAssetsForTokens(
 ): Promise<Array<{ tokenKey: string; normalizedUrl: string; assetId: string } | null>> {
   const assetCreationPromises = Array.from(imageTokenMap.entries()).map(
     async ([tokenKey, metadata]) => {
-      const imageUrl = isValidUrl(metadata.url)
-        ? metadata.url
-        : 'https://placehold.co/800x400?text=Dev+Image';
+      // Skip invalid URLs - with OAuth working, we should only have valid URLs
+      if (!isValidUrl(metadata.url)) {
+        console.warn(`Skipping invalid image URL: ${metadata.url.substring(0, 100)}...`);
+        return null;
+      }
 
       try {
-        const asset = await createAssetFromUrlFast(cma, spaceId, environmentId, imageUrl, {
+        const asset = await createAssetFromUrlFast(cma, spaceId, environmentId, metadata.url, {
           title: metadata.altText || metadata.fileName || 'Image',
           altText: metadata.altText,
           fileName: metadata.fileName,
@@ -514,7 +516,11 @@ async function createAssetsForTokens(
           normalizedUrl: metadata.url.replace(/\s+/g, ''),
           assetId: asset.sys.id,
         };
-      } catch {
+      } catch (error) {
+        console.error(
+          `Failed to create asset for URL: ${metadata.url.substring(0, 100)}...`,
+          error
+        );
         return null;
       }
     }
