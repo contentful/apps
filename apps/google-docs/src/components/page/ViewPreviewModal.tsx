@@ -87,15 +87,6 @@ export const ViewPreviewModal: React.FC<ViewPreviewModalProps> = ({
                   <Paragraph>
                     Based off the document, the following entries are being suggested:
                   </Paragraph>
-                  <Flex gap="spacingS" alignItems="center">
-                    <Badge variant="primary">
-                      {totalEntries} {totalEntries === 1 ? 'entry' : 'entries'}
-                    </Badge>
-                    <Badge variant="secondary">
-                      {Object.keys(entriesByContentType).length} content{' '}
-                      {Object.keys(entriesByContentType).length === 1 ? 'type' : 'types'}
-                    </Badge>
-                  </Flex>
                 </Flex>
               </Card>
 

@@ -32,8 +32,11 @@ const Page = () => {
     pendingCloseAction,
     setPendingCloseAction,
   } = useProgressTracking();
-  const { result, successMessage, errorMessage, submit, clearMessages, isSubmitting } =
-    useDocumentSubmission(sdk, documentId, oauthToken);
+  const { previewEntries, submit, clearMessages, isSubmitting } = useDocumentSubmission(
+    sdk,
+    documentId,
+    oauthToken
+  );
 
   // Track previous submission state to detect completion
   const prevIsSubmittingRef = useRef<boolean>(false);
@@ -117,9 +120,7 @@ const Page = () => {
   };
 
   const handlePreviewModalConfirm = async (contentTypes: SelectedContentType[]) => {
-    const entries = result?.sys?.result?.entries;
-
-    if (!entries || entries.length === 0) {
+    if (!previewEntries || previewEntries.length === 0) {
       sdk.notifier.error('No entries to create');
       return;
     }
@@ -127,7 +128,7 @@ const Page = () => {
     setIsCreatingEntries(true);
     try {
       const ids = contentTypes.map((ct) => ct.id);
-      const entryResult: any = await createEntriesAction(sdk, entries, ids);
+      const entryResult: any = await createEntriesAction(sdk, previewEntries, ids);
 
       if (entryResult.errorCount > 0) {
         sdk.notifier.warning(
@@ -155,21 +156,18 @@ const Page = () => {
     const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
 
     if (submissionJustCompleted && modalStates.isContentTypePickerOpen) {
-      console.log('Document processing completed, result:', result);
+      console.log('Document processing completed, previewEntries:', previewEntries);
       closeModal(ModalType.CONTENT_TYPE_PICKER);
 
       // Open preview modal if we have entries
-      const entries = result?.sys?.result?.entries;
-      if (entries && entries.length > 0) {
-        console.log('Opening preview modal with', entries.length, 'entries');
+      if (previewEntries && previewEntries.length > 0) {
+        console.log('Opening preview modal with', previewEntries.length, 'entries');
         openModal(ModalType.PREVIEW);
-      } else {
-        console.log('No entries to preview. Full result:', result);
       }
     }
 
     prevIsSubmittingRef.current = isSubmitting;
-  }, [isSubmitting, modalStates.isContentTypePickerOpen, closeModal, openModal, result]);
+  }, [isSubmitting, modalStates.isContentTypePickerOpen, closeModal, openModal, previewEntries]);
 
   // Show getting started page if not started yet
   if (!hasStarted) {
@@ -208,7 +206,7 @@ const Page = () => {
       <ViewPreviewModal
         isOpen={modalStates.isPreviewModalOpen}
         onClose={() => closeModal(ModalType.PREVIEW)}
-        entries={result?.sys?.result?.entries || null}
+        entries={previewEntries}
         onConfirm={() => handlePreviewModalConfirm(selectedContentTypes)}
         isSubmitting={isCreatingEntries}
       />
