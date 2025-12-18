@@ -12,7 +12,7 @@ import { useAllEntries } from '../hooks/useAllEntries';
 const Dashboard = () => {
   const sdk = useSDK();
   const installation = (sdk.parameters.installation ?? {}) as AppInstallationParameters;
-  const { entries, isFetching, error, refetch } = useAllEntries();
+  const { entries, isFetching, error } = useAllEntries();
 
   // TODO : replace this with the real scheduled actions.
   const scheduledActions: ScheduledActionProps[] = [];

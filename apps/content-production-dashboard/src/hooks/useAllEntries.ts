@@ -9,14 +9,13 @@ export interface UseAllEntriesResult {
   total: number;
   isFetching: boolean;
   error: Error | null;
-  refetch: () => void;
   fetchedAt: Date | undefined;
 }
 
 export function useAllEntries(): UseAllEntriesResult {
   const sdk = useSDK<PageAppSDK>();
 
-  const { data, isFetching, error, refetch } = useQuery<FetchAllEntriesResult, Error>({
+  const { data, isFetching, error } = useQuery<FetchAllEntriesResult, Error>({
     queryKey: ['entries', sdk.ids.space, sdk.ids.environment],
     queryFn: () => fetchAllEntries(sdk),
   });
@@ -26,7 +25,6 @@ export function useAllEntries(): UseAllEntriesResult {
     total: data?.total || 0,
     isFetching,
     error,
-    refetch,
     fetchedAt: data?.fetchedAt,
   };
 }
