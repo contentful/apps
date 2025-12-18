@@ -38,7 +38,6 @@ export const handler: FunctionEventHandler<
     throw new Error('No matching content types found');
   }
 
-  // Create entries
   const result = await createEntries(cma, entries, {
     spaceId: context.spaceId,
     environmentId: context.environmentId,

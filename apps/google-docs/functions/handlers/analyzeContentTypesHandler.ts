@@ -16,13 +16,6 @@ interface AppInstallationParameters {
   openAiApiKey: string;
 }
 
-/**
- * App Action: Analyze Content Types
- *
- * Analyzes the structure and relationships of selected content types
- * using AI to understand their fields, validations, and relationships.
- *
- */
 export const handler: FunctionEventHandler<
   FunctionTypeEnum.AppActionCall,
   AnalyzeContentTypesParameters
@@ -37,8 +30,6 @@ export const handler: FunctionEventHandler<
     throw new Error('At least one content type ID is required');
   }
 
-  console.log('contentTypeIds', contentTypeIds);
-  console.log('In analyzeContentTypes handler');
   const cma = initContentfulManagementClient(context);
   const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
 
