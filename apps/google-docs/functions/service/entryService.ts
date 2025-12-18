@@ -568,7 +568,7 @@ function buildUrlToAssetIdMap(
   return urlToAssetId;
 }
 
-export async function createEntries(
+export async function createEntriesFromPreview(
   cma: PlainClientAPI,
   entries: EntryToCreate[],
   config: { spaceId: string; environmentId: string; contentTypes: ContentTypeProps[] }

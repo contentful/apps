@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { PlainClientAPI, EntryProps, ContentTypeProps } from 'contentful-management';
-import { createEntries, EntryCreationResult } from './entryService';
+import { createEntriesFromPreview, EntryCreationResult } from './entryService';
 import { EntryToCreate } from '../agents/documentParserAgent/schema';
 
 // Mock CMA client
@@ -40,7 +40,7 @@ describe('createEntries', () => {
 
   describe('Input Validation', () => {
     it('should reject null CMA client', async () => {
-      const result = await createEntries(null as any, [], {
+      const result = await createEntriesFromPreview(null as any, [], {
         spaceId: mockSpaceId,
         environmentId: mockEnvironmentId,
         contentTypes: mockContentTypes,
@@ -52,7 +52,7 @@ describe('createEntries', () => {
     });
 
     it('should reject undefined CMA client', async () => {
-      const result = await createEntries(undefined as any, [], {
+      const result = await createEntriesFromPreview(undefined as any, [], {
         spaceId: mockSpaceId,
         environmentId: mockEnvironmentId,
         contentTypes: mockContentTypes,
@@ -64,7 +64,7 @@ describe('createEntries', () => {
     });
 
     it('should reject null entries array', async () => {
-      const result = await createEntries(mockCMA, null as any, {
+      const result = await createEntriesFromPreview(mockCMA, null as any, {
         spaceId: mockSpaceId,
         environmentId: mockEnvironmentId,
         contentTypes: mockContentTypes,
@@ -76,7 +76,7 @@ describe('createEntries', () => {
     });
 
     it('should reject undefined entries array', async () => {
-      const result = await createEntries(mockCMA, undefined as any, {
+      const result = await createEntriesFromPreview(mockCMA, undefined as any, {
         spaceId: mockSpaceId,
         environmentId: mockEnvironmentId,
         contentTypes: mockContentTypes,
@@ -88,7 +88,7 @@ describe('createEntries', () => {
     });
 
     it('should reject empty entries array', async () => {
-      const result = await createEntries(mockCMA, [], {
+      const result = await createEntriesFromPreview(mockCMA, [], {
         spaceId: mockSpaceId,
         environmentId: mockEnvironmentId,
         contentTypes: mockContentTypes,
@@ -100,7 +100,7 @@ describe('createEntries', () => {
     });
 
     it('should reject non-array entries', async () => {
-      const result = await createEntries(mockCMA, {} as any, {
+      const result = await createEntriesFromPreview(mockCMA, {} as any, {
         spaceId: mockSpaceId,
         environmentId: mockEnvironmentId,
         contentTypes: mockContentTypes,
@@ -119,7 +119,7 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntries(mockCMA, entries, null as any);
+      const result = await createEntriesFromPreview(mockCMA, entries, null as any);
 
       expect(result.createdEntries).toHaveLength(0);
       expect(result.errors).toHaveLength(1);
@@ -134,7 +134,7 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntries(mockCMA, entries, {
+      const result = await createEntriesFromPreview(mockCMA, entries, {
         spaceId: '',
         environmentId: mockEnvironmentId,
         contentTypes: mockContentTypes,
@@ -153,7 +153,7 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntries(mockCMA, entries, {
+      const result = await createEntriesFromPreview(mockCMA, entries, {
         spaceId: mockSpaceId,
         environmentId: '',
         contentTypes: mockContentTypes,
@@ -172,7 +172,7 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntries(mockCMA, entries, {
+      const result = await createEntriesFromPreview(mockCMA, entries, {
         spaceId: mockSpaceId,
         environmentId: mockEnvironmentId,
         contentTypes: null as any,
@@ -191,7 +191,7 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntries(mockCMA, entries, {
+      const result = await createEntriesFromPreview(mockCMA, entries, {
         spaceId: mockSpaceId,
         environmentId: mockEnvironmentId,
         contentTypes: mockContentTypes,
@@ -210,7 +210,7 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntries(mockCMA, entries, {
+      const result = await createEntriesFromPreview(mockCMA, entries, {
         spaceId: mockSpaceId,
         environmentId: mockEnvironmentId,
         contentTypes: mockContentTypes,
@@ -229,7 +229,7 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntries(mockCMA, entries, {
+      const result = await createEntriesFromPreview(mockCMA, entries, {
         spaceId: mockSpaceId,
         environmentId: mockEnvironmentId,
         contentTypes: mockContentTypes,
@@ -261,7 +261,7 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntries(mockCMA, entries, {
+      const result = await createEntriesFromPreview(mockCMA, entries, {
         spaceId: mockSpaceId,
         environmentId: mockEnvironmentId,
         contentTypes: mockContentTypes,
@@ -297,7 +297,7 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntries(mockCMA, entries, {
+      const result = await createEntriesFromPreview(mockCMA, entries, {
         spaceId: mockSpaceId,
         environmentId: mockEnvironmentId,
         contentTypes: mockContentTypes,
@@ -321,7 +321,7 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntries(mockCMA, entries, {
+      const result = await createEntriesFromPreview(mockCMA, entries, {
         spaceId: mockSpaceId,
         environmentId: mockEnvironmentId,
         contentTypes: mockContentTypes,
@@ -358,7 +358,7 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntries(mockCMA, entries, {
+      const result = await createEntriesFromPreview(mockCMA, entries, {
         spaceId: mockSpaceId,
         environmentId: mockEnvironmentId,
         contentTypes: mockContentTypes,
@@ -403,7 +403,7 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntries(mockCMA, entries, {
+      const result = await createEntriesFromPreview(mockCMA, entries, {
         spaceId: mockSpaceId,
         environmentId: mockEnvironmentId,
         contentTypes: mockContentTypes,

@@ -32,7 +32,7 @@ export interface DocumentParserConfig {
  * @param config - Parser configuration including API key, document JSON, and content types
  * @returns Promise resolving to entries ready for CMA client
  */
-export async function analyzeDocumentWithAgent(
+export async function createPreviewWithAgent(
   config: DocumentParserConfig
 ): Promise<FinalEntriesResult> {
   // TODO: Double check these values and make sure they are compatible because not every user will have a key

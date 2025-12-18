@@ -16,7 +16,7 @@ export interface ContentTypeParserConfig {
  * @returns Promise resolving to structured parse result with summaries
  *
  */
-export async function analyzeContentTypes({
+export async function createContentTypeAnalysisWithAgent({
   contentTypes,
   openAiApiKey,
 }: ContentTypeParserConfig): Promise<FinalContentTypesResultSummary> {

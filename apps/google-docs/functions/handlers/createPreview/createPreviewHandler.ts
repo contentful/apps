@@ -4,9 +4,9 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { analyzeDocumentWithAgent } from '../agents/documentParserAgent/documentParser.agent';
-import { fetchContentTypes } from '../service/contentTypeService';
-import { initContentfulManagementClient } from '../service/initCMAClient';
+import { createPreviewWithAgent } from '../../agents/documentParserAgent/documentParser.agent';
+import { fetchContentTypes } from '../../service/contentTypeService';
+import { initContentfulManagementClient } from '../../service/initCMAClient';
 
 export type CreatePreviewParameters = {
   contentTypeIds: string[];
@@ -44,7 +44,7 @@ export const handler: FunctionEventHandler<
   const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
 
   // Process the document and create preview entries
-  const aiDocumentResponse = await analyzeDocumentWithAgent({
+  const aiDocumentResponse = await createPreviewWithAgent({
     documentId,
     oauthToken,
     openAiApiKey,
