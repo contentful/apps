@@ -12,11 +12,14 @@ import { useModalManagement, ModalType } from '../hooks/useModalManagement';
 import { useProgressTracking } from '../hooks/useProgressTracking';
 import { useDocumentSubmission } from '../hooks/useDocumentSubmission';
 import SelectDocumentModal from '../components/page/SelectDocumentModal';
+import { ViewPreviewModal } from '../components/page/ViewPreviewModal';
+import { createEntriesAction } from '../utils/appActionUtils';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
   const { modalStates, openModal, closeModal } = useModalManagement();
   const [oauthToken, setOauthToken] = useState<string>('');
+  const [isCreatingEntries, setIsCreatingEntries] = useState<boolean>(false);
   const {
     hasStarted,
     setHasStarted,
@@ -29,8 +32,11 @@ const Page = () => {
     pendingCloseAction,
     setPendingCloseAction,
   } = useProgressTracking();
-  const { result, successMessage, errorMessage, submit, clearMessages, isSubmitting } =
-    useDocumentSubmission(sdk, documentId, oauthToken);
+  const { previewEntries, submit, clearMessages, isSubmitting } = useDocumentSubmission(
+    sdk,
+    documentId,
+    oauthToken
+  );
 
   // Track previous submission state to detect completion
   const prevIsSubmittingRef = useRef<boolean>(false);
@@ -110,20 +116,58 @@ const Page = () => {
       `Selected ${contentTypes.length} content type${contentTypes.length > 1 ? 's' : ''}: ${names}`
     );
 
-    // Call create entries function after content types are selected
     await submit(ids);
   };
 
-  // Close the ContentTypePickerModal when submission completes
+  const handlePreviewModalConfirm = async (contentTypes: SelectedContentType[]) => {
+    if (!previewEntries || previewEntries.length === 0) {
+      sdk.notifier.error('No entries to create');
+      return;
+    }
+
+    setIsCreatingEntries(true);
+    try {
+      const ids = contentTypes.map((ct) => ct.id);
+      const entryResult: any = await createEntriesAction(sdk, previewEntries, ids);
+
+      if (entryResult.errorCount > 0) {
+        sdk.notifier.warning(
+          `Created ${entryResult.createdCount} entries with ${entryResult.errorCount} errors`
+        );
+        console.error('Entry creation errors:', entryResult.errors);
+      } else {
+        sdk.notifier.success(`Successfully created ${entryResult.createdCount} entries`);
+      }
+
+      // Close the preview modal and reset progress after creating entries
+      closeModal(ModalType.PREVIEW);
+      resetProgress();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      sdk.notifier.error(`Failed to create entries: ${errorMessage}`);
+      console.error('Entry creation failed:', error);
+    } finally {
+      setIsCreatingEntries(false);
+    }
+  };
+
+  // Close the ContentTypePickerModal when submission completes and open preview modal
   useEffect(() => {
     const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
 
     if (submissionJustCompleted && modalStates.isContentTypePickerOpen) {
+      console.log('Document processing completed, previewEntries:', previewEntries);
       closeModal(ModalType.CONTENT_TYPE_PICKER);
+
+      // Open preview modal if we have entries
+      if (previewEntries && previewEntries.length > 0) {
+        console.log('Opening preview modal with', previewEntries.length, 'entries');
+        openModal(ModalType.PREVIEW);
+      }
     }
 
     prevIsSubmittingRef.current = isSubmitting;
-  }, [isSubmitting, modalStates.isContentTypePickerOpen, closeModal]);
+  }, [isSubmitting, modalStates.isContentTypePickerOpen, closeModal, openModal, previewEntries]);
 
   // Show getting started page if not started yet
   if (!hasStarted) {
@@ -158,50 +202,14 @@ const Page = () => {
         onConfirm={handleConfirmCancel}
         onCancel={handleKeepCreating}
       />
-      {(result || successMessage || errorMessage) && (
-        <Layout variant="fullscreen" withBoxShadow={true} offsetTop={10}>
-          <Layout.Body>
-            <Box padding="spacing2Xl">
-              <Card padding="large" style={{ maxWidth: '900px', margin: '0 auto' }}>
-                {successMessage && <Note variant="positive">{successMessage}</Note>}
-                {errorMessage && <Note variant="negative">{errorMessage}</Note>}
 
-                {result && (
-                  <Box marginTop="spacingM">
-                    <Heading as="h3" marginBottom="spacingS">
-                      Response
-                    </Heading>
-                    <Box
-                      as="pre"
-                      style={{
-                        maxHeight: '300px',
-                        overflow: 'auto',
-                        fontFamily: 'monospace',
-                        fontSize: '12px',
-                        whiteSpace: 'pre-wrap',
-                        wordBreak: 'break-word',
-                        margin: 0,
-                        background: '#f7f9fa',
-                        padding: '12px',
-                        borderRadius: '4px',
-                      }}>
-                      {JSON.stringify(result, null, 2)}
-                    </Box>
-                  </Box>
-                )}
-
-                <Button
-                  variant="secondary"
-                  size="small"
-                  onClick={resetProgress}
-                  style={{ marginTop: '12px' }}>
-                  Start over
-                </Button>
-              </Card>
-            </Box>
-          </Layout.Body>
-        </Layout>
-      )}
+      <ViewPreviewModal
+        isOpen={modalStates.isPreviewModalOpen}
+        onClose={() => closeModal(ModalType.PREVIEW)}
+        entries={previewEntries}
+        onConfirm={() => handlePreviewModalConfirm(selectedContentTypes)}
+        isSubmitting={isCreatingEntries}
+      />
     </>
   );
 };

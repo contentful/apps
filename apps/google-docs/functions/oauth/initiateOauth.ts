@@ -6,7 +6,7 @@ import {
   AppEventHandlerRequest,
   AppEventContext,
   AppEventHandlerResponse,
-} from './types/oauth.types';
+} from './oauth.types';
 
 export type OAuthSDK = {
   init: () => Promise<OAuthInitResponse>;
