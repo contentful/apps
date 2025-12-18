@@ -1,6 +1,6 @@
 // hooks/useGoogleDocsPicker.ts
 import { useCallback, useState } from 'react';
-import { loadGapi, loadPickerApi } from './googleapis';
+import { loadGapi, loadPickerApi } from '../utils/googleapis';
 
 type PickerCallbackData = {
   id: string;
@@ -13,15 +13,24 @@ type UseGoogleDocsPickerOptions = {
   onPicked?: (files: PickerCallbackData[]) => void;
 };
 
-const GOOGLE_PICKER_API_KEY = 'AIzaSyB3IOHMnQrwBlgxX6U0lCDdGgLyv64cE_Q';
-const GOOGLE_APP_ID = 899819136146;
+// These are already exposed by google in the network even if they were hidden as environment variables
+// and google acknowledges that these are okay to be public and that restrictions come from defining the
+// origin web url that is allowed to use these keys which is defined in a private google docs oauth app.
+// Additionally the api key requires a valid OAuth token for operations on private user data.
+// That means even if someone sees your key, they cannot:
+// 1. access user files without an OAuth token,
+// 2. use other APIs you haven’t enabled,
+
+// Summary: The API keys are defined to only only accept requests from app.contentful.com and ctfapps.net domains.
+// See https://developers.google.com/workspace/drive/picker/guides/overview?utm_source=chatgpt.com#create-api-key for more details
+const GOOGLE_PICKER_API_KEY = '';
+const GOOGLE_APP_ID = 1;
 
 export function useGoogleDocsPicker(
   accessToken: string | null,
   options: UseGoogleDocsPickerOptions = {}
 ) {
   const [isOpening, setIsOpening] = useState(false);
-
   const openPicker = useCallback(async () => {
     if (!accessToken) {
       console.warn('No Google access token available');
@@ -36,16 +45,15 @@ export function useGoogleDocsPicker(
       const google = (window as any).google;
       const gapi = (window as any).gapi;
 
+      // Only show Google Docs
       const view = new google.picker.View(google.picker.ViewId.DOCS);
-      view.setMimeTypes('application/vnd.google-apps.document'); // only Google Docs
+      view.setMimeTypes('application/vnd.google-apps.document');
 
       const picker = new google.picker.PickerBuilder()
         .setOAuthToken(accessToken)
         .setDeveloperKey(GOOGLE_PICKER_API_KEY)
         .addView(view)
-        .enableFeature(google.picker.Feature.NAV_HIDDEN)
-        .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
-        .setOrigin('https://app.contentful.com') // ✅ ALWAYS THIS VALUE
+        .setOrigin('https://app.contentful.com')
         .setCallback((data: any) => {
           if (data.action === google.picker.Action.PICKED) {
             const docs: PickerCallbackData[] = data.docs.map((doc: any) => ({

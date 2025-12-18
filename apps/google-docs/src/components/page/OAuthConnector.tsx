@@ -5,7 +5,7 @@ import { CheckCircleIcon } from '@contentful/f36-icons';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import googleDriveLogo from '../../assets/google-drive.png';
-import { GoogleDocsPickerButton } from './GoogleDocsPicker';
+import { useGoogleDocsPicker } from '../../hooks/useGoogleDocPicker';
 
 type OAuthConnectorProps = {
   onOAuthConnectedChange: (oauthConnectionStatus: boolean) => void;
@@ -27,6 +27,14 @@ export const OAuthConnector = ({
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const popupWindowRef = useRef<Window | null>(null);
   const checkWindowIntervalRef = useRef<number | null>(null);
+
+  const { openPicker, isOpening } = useGoogleDocsPicker(oauthToken, {
+    onPicked: (files) => {
+      if (files.length > 0) {
+        console.log('Picked doc:', files[0]);
+      }
+    },
+  });
 
   // Check Google OAuth connection status with polling to handle race conditions
   const checkGoogleOAuthStatus = async (
@@ -262,16 +270,6 @@ export const OAuthConnector = ({
         border: `1px solid ${tokens.gray300}`,
         borderRadius: tokens.borderRadiusMedium,
       }}>
-      <GoogleDocsPickerButton
-        accessToken={oauthToken}
-        onDocSelected={(doc) => {
-          console.log('Picked doc:', doc);
-          // From here you can:
-          // - Save doc.id in your Contentful entry
-          // - Call your backend to fetch contents via Drive API
-        }}
-      />
-
       <Flex gap="spacingS" alignItems="center" justifyContent="center">
         <Flex
           alignItems="center"
