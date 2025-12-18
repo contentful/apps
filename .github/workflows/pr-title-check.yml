@@ -7,6 +7,9 @@ jobs:
   check-title:
     if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: deepakputhraya/action-pr-title@master
         with:
