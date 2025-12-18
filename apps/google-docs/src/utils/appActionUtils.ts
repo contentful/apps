@@ -1,5 +1,4 @@
 import { PageAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
-import { parseDocument } from '../../functions/utils/documentValidationUtils';
 import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 
 /**
@@ -90,13 +89,13 @@ export const analyzeContentTypesAction = async (
  * @param document - The document to process (JSON object or string)
  * @returns Processing result from the app action
  */
-export const processDocumentAction = async (
+export const createPreviewAction = async (
   sdk: PageAppSDK | ConfigAppSDK,
   contentTypeIds: string[],
   documentId: string,
   oauthToken: string
 ) => {
-  return callAppAction(sdk, 'processDocument', {
+  return callAppAction(sdk, 'createPreview', {
     contentTypeIds,
     documentId,
     oauthToken,
@@ -121,4 +120,4 @@ export const createEntriesAction = async (
 /**
  * @deprecated Use processDocumentAction instead
  */
-export const createEntriesFromDocumentAction = processDocumentAction;
+export const createEntriesFromDocumentAction = createPreviewAction;

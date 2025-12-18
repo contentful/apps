@@ -1,8 +1,4 @@
-import {
-  AppEventHandlerRequest,
-  AppEventHandlerResponse,
-  AppEventContext,
-} from '../types/oauth.types';
+import { AppEventHandlerRequest, AppEventHandlerResponse, AppEventContext } from './oauth.types';
 
 export const handler = async (
   event: AppEventHandlerRequest,

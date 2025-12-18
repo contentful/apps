@@ -22,11 +22,11 @@
   },
   "functions": [
     {
-      "id": "processDocument",
-      "name": "Process Document",
-      "description": "Processes a Google Doc and returns entry drafts",
-      "path": "functions/handlers/processDocument.js",
-      "entryFile": "functions/handlers/processDocument.ts",
+      "id": "createPreview",
+      "name": "Create Preview",
+      "description": "Parses the Google Doc and creates preview entries",
+      "path": "functions/handlers/createPreviewHandler.js",
+      "entryFile": "functions/handlers/createPreviewHandler.ts",
       "allowNetworks": [
         "https://api.openai.com",
         "*.googleapis.com",

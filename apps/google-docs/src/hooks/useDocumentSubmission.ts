@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { analyzeContentTypesAction, processDocumentAction } from '../utils/appActionUtils';
+import { analyzeContentTypesAction, createPreviewAction } from '../utils/appActionUtils';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages';
 
 interface UseDocumentSubmissionReturn {
@@ -65,7 +65,7 @@ export const useDocumentSubmission = (
         );
         console.log('analyzeContentTypesResponse', analyzeContentTypesResponse);
 
-        const processDocumentResponse = await processDocumentAction(
+        const processDocumentResponse = await createPreviewAction(
           sdk,
           contentTypeIds,
           documentId,

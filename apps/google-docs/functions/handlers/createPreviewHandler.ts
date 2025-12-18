@@ -4,16 +4,13 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { ContentTypeProps } from 'contentful-management';
 import { analyzeDocumentWithAgent } from '../agents/documentParserAgent/documentParser.agent';
 import { fetchContentTypes } from '../service/contentTypeService';
 import { initContentfulManagementClient } from '../service/initCMAClient';
 
-import { parseDocument, validateDocument } from '../utils/documentValidationUtils';
-
-export type ProcessDocumentParameters = {
+export type CreatePreviewParameters = {
   contentTypeIds: string[];
-  documentId: string; // JSON document from Google Docs API or test data
+  documentId: string;
   oauthToken: string;
 };
 
@@ -22,27 +19,21 @@ interface AppInstallationParameters {
 }
 
 /**
- * App Action: Process Document
+ * Create Preview
  *
- * Processes a Google Doc and creates Contentful entries based on the document structure
- * and the provided content types. This function focuses solely on document processing
- * and entry creation.
+ * Processes a Google Doc and creates preview entries based on the document structure
+ * and the provided content types.
  *
- * Note: Content type analysis should be done separately using the analyzeContentTypes
- * function to avoid timeout issues.
  */
 export const handler: FunctionEventHandler<
   FunctionTypeEnum.AppActionCall,
-  ProcessDocumentParameters
+  CreatePreviewParameters
 > = async (
-  event: AppActionRequest<'Custom', ProcessDocumentParameters>,
+  event: AppActionRequest<'Custom', CreatePreviewParameters>,
   context: FunctionEventContext
 ) => {
   const { contentTypeIds, documentId, oauthToken } = event.body;
   const { openAiApiKey } = context.appInstallationParameters as AppInstallationParameters;
-
-  // Validate inputs
-  validateDocument(documentId);
 
   if (!contentTypeIds || contentTypeIds.length === 0) {
     throw new Error('At least one content type ID is required');
@@ -52,18 +43,12 @@ export const handler: FunctionEventHandler<
 
   const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
 
-  // Process the document and create entries
+  // Process the document and create preview entries
   const aiDocumentResponse = await analyzeDocumentWithAgent({
     documentId,
     oauthToken,
     openAiApiKey,
     contentTypes,
-  });
-
-  console.log('Document processing completed:', {
-    summary: aiDocumentResponse.summary,
-    totalEntries: aiDocumentResponse.totalEntries,
-    entries: aiDocumentResponse.entries,
   });
 
   return {

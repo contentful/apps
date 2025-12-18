@@ -3,7 +3,6 @@ import { createEntries } from '../service/entryService';
 import { initContentfulManagementClient } from '../service/initCMAClient';
 import { EntryToCreate } from '../agents/documentParserAgent/schema';
 import { FunctionTypeEnum, FunctionEventContext } from '@contentful/node-apps-toolkit';
-import { ProcessDocumentParameters } from './processDocument';
 
 interface CreateEntriesParameters {
   entries: EntryToCreate[];
