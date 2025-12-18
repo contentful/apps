@@ -137,7 +137,7 @@ const Dashboard = () => {
       </Flex>
 
       {/* Metrics Cards */}
-      <Flex flexDirection="row" gap="spacing2Xs">
+      <Flex flexDirection="row" gap="spacingM">
         {metrics.map((metric) => {
           return (
             <MetricCard

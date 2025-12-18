@@ -1,6 +1,8 @@
 import { Card, Flex, Text } from '@contentful/f36-components';
 import type { IconProps } from '@contentful/f36-icons';
 import type { ComponentType } from 'react';
+import tokens from '@contentful/f36-tokens';
+import { styles } from './MetricCard.styles';
 
 export type MetricCardProps = {
   title: string;
@@ -12,7 +14,7 @@ export type MetricCardProps = {
 
 export const MetricCard = ({ title, value, subtitle, icon: Icon, isNegative }: MetricCardProps) => {
   return (
-    <Card padding="default">
+    <Card padding="default" style={styles.card}>
       <Flex justifyContent="space-between" alignItems="center">
         <Flex flexDirection="column" gap="spacing2Xs">
           <Text fontSize="fontSizeS" fontColor="gray600" fontWeight="fontWeightDemiBold">
@@ -25,7 +27,7 @@ export const MetricCard = ({ title, value, subtitle, icon: Icon, isNegative }: M
             {subtitle}
           </Text>
         </Flex>
-        <Icon />
+        <Icon color={tokens.gray900} />
       </Flex>
     </Card>
   );
