@@ -21,8 +21,6 @@ const Page = () => {
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isCreatingEntries, setIsCreatingEntries] = useState<boolean>(false);
   const {
-    hasStarted,
-    setHasStarted,
     documentId,
     setDocumentId,
     selectedContentTypes,
@@ -46,7 +44,6 @@ const Page = () => {
   };
 
   const handleGetStarted = () => {
-    setHasStarted(true);
     openModal(ModalType.UPLOAD);
   };
 
@@ -76,7 +73,6 @@ const Page = () => {
     } else {
       // No progress, reset to getting started page
       closeModal(ModalType.UPLOAD);
-      setHasStarted(false);
     }
   };
 
@@ -109,13 +105,9 @@ const Page = () => {
   };
 
   const handleContentTypeSelected = async (contentTypes: SelectedContentType[]) => {
-    const names = contentTypes.map((ct) => ct.name).join(', ');
     const ids = contentTypes.map((ct) => ct.id);
 
-    sdk.notifier.success(
-      `Selected ${contentTypes.length} content type${contentTypes.length > 1 ? 's' : ''}: ${names}`
-    );
-
+    // Call create entries function after content types are selected
     await submit(ids);
   };
 
@@ -169,19 +161,13 @@ const Page = () => {
     prevIsSubmittingRef.current = isSubmitting;
   }, [isSubmitting, modalStates.isContentTypePickerOpen, closeModal, openModal, previewEntries]);
 
-  // Show getting started page if not started yet
-  if (!hasStarted) {
-    return (
+  return (
+    <>
       <GettingStartedPage
         oauthToken={oauthToken}
         onOauthTokenChange={handleOauthTokenChange}
         onSelectFile={handleGetStarted}
       />
-    );
-  }
-
-  return (
-    <>
       <SelectDocumentModal
         oauthToken={oauthToken}
         isOpen={modalStates.isUploadModalOpen}
