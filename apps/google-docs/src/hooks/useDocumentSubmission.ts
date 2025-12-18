@@ -1,11 +1,12 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { createEntriesFromDocumentAction } from '../utils/appFunctionUtils';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages';
+import { analyzeContentTypesAction, createPreviewAction } from '../utils/appActionUtils';
+import { ERROR_MESSAGES } from '../constants/messages';
+import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 
 interface UseDocumentSubmissionReturn {
   isSubmitting: boolean;
-  result: any;
+  previewEntries: EntryToCreate[];
   errorMessage: string | null;
   successMessage: string | null;
   submit: (contentTypeIds: string[]) => Promise<void>;
@@ -18,7 +19,7 @@ export const useDocumentSubmission = (
   oauthToken: string
 ): UseDocumentSubmissionReturn => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [result, setResult] = useState<any>(null);
+  const [previewEntries, setPreviewEntries] = useState<EntryToCreate[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -55,17 +56,25 @@ export const useDocumentSubmission = (
       setIsSubmitting(true);
       setErrorMessage(null);
       setSuccessMessage(null);
-      setResult(null);
+      setPreviewEntries([]);
 
       try {
-        const response = await createEntriesFromDocumentAction(
+        const analyzeContentTypesResponse = await analyzeContentTypesAction(
+          sdk,
+          contentTypeIds,
+          oauthToken
+        );
+        console.log('analyzeContentTypesResponse', analyzeContentTypesResponse);
+
+        const processDocumentResponse = await createPreviewAction(
           sdk,
           contentTypeIds,
           documentId,
           oauthToken
         );
-        setResult(response);
-        setSuccessMessage(SUCCESS_MESSAGES.ENTRIES_CREATED);
+        console.log('processDocumentResponse', processDocumentResponse);
+
+        setPreviewEntries((processDocumentResponse as any).sys.result.entries);
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : ERROR_MESSAGES.SUBMISSION_FAILED);
       } finally {
@@ -76,14 +85,14 @@ export const useDocumentSubmission = (
   );
 
   const clearMessages = useCallback(() => {
-    setResult(null);
+    setPreviewEntries([]);
     setSuccessMessage(null);
     setErrorMessage(null);
   }, []);
 
   return {
     isSubmitting,
-    result,
+    previewEntries,
     errorMessage,
     successMessage,
     submit,

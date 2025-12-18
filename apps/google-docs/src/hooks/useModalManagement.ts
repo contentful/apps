@@ -4,24 +4,28 @@ interface ModalStates {
   isUploadModalOpen: boolean;
   isContentTypePickerOpen: boolean;
   isConfirmCancelModalOpen: boolean;
+  isPreviewModalOpen: boolean;
 }
 
 interface ModalSetters {
   setIsUploadModalOpen: (value: boolean) => void;
   setIsContentTypePickerOpen: (value: boolean) => void;
   setIsConfirmCancelModalOpen: (value: boolean) => void;
+  setIsPreviewModalOpen: (value: boolean) => void;
 }
 
 export enum ModalType {
   UPLOAD = 'upload',
   CONTENT_TYPE_PICKER = 'contentTypePicker',
   CONFIRM_CANCEL = 'confirmCancel',
+  PREVIEW = 'preview',
 }
 
 export const useModalManagement = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
   const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState<boolean>(false);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState<boolean>(false);
 
   const openModal = (modalType: ModalType) => {
     switch (modalType) {
@@ -33,6 +37,9 @@ export const useModalManagement = () => {
         break;
       case ModalType.CONFIRM_CANCEL:
         setIsConfirmCancelModalOpen(true);
+        break;
+      case ModalType.PREVIEW:
+        setIsPreviewModalOpen(true);
         break;
     }
   };
@@ -48,6 +55,9 @@ export const useModalManagement = () => {
       case ModalType.CONFIRM_CANCEL:
         setIsConfirmCancelModalOpen(false);
         break;
+      case ModalType.PREVIEW:
+        setIsPreviewModalOpen(false);
+        break;
     }
   };
 
@@ -56,11 +66,13 @@ export const useModalManagement = () => {
       isUploadModalOpen,
       isContentTypePickerOpen,
       isConfirmCancelModalOpen,
+      isPreviewModalOpen,
     } as ModalStates,
     setModalStates: {
       setIsUploadModalOpen,
       setIsContentTypePickerOpen,
       setIsConfirmCancelModalOpen,
+      setIsPreviewModalOpen,
     } as ModalSetters,
     openModal,
     closeModal,
