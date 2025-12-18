@@ -177,7 +177,7 @@ export const ContentTypePickerModal = ({
               variant="primary"
               isDisabled={isLoading || isSubmitting}
               endIcon={isSubmitting ? <Spinner /> : undefined}>
-              Create
+              Next
             </Button>
           </Modal.Controls>
         </>

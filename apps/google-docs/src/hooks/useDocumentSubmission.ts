@@ -1,6 +1,10 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { createEntriesFromDocumentAction } from '../utils/appActionUtils';
+import {
+  analyzeContentTypesAction,
+  createEntriesFromDocumentAction,
+  processDocumentAction,
+} from '../utils/appActionUtils';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages';
 
 interface UseDocumentSubmissionReturn {
@@ -58,13 +62,17 @@ export const useDocumentSubmission = (
       setResult(null);
 
       try {
-        const response = await createEntriesFromDocumentAction(
+        const response = await analyzeContentTypesAction(sdk, contentTypeIds);
+        console.log('response', response);
+        const processDocumentResponse = await processDocumentAction(
           sdk,
           contentTypeIds,
           documentId,
           oauthToken
         );
-        setResult(response);
+        console.log('processDocumentResponse', processDocumentResponse);
+
+        setResult([response, processDocumentResponse]);
         setSuccessMessage(SUCCESS_MESSAGES.ENTRIES_CREATED);
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : ERROR_MESSAGES.SUBMISSION_FAILED);

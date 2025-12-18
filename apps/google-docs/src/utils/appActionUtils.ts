@@ -78,7 +78,7 @@ export const analyzeContentTypesAction = async (
   sdk: PageAppSDK | ConfigAppSDK,
   contentTypeIds: string[]
 ) => {
-  return callAppAction(sdk, 'analyzeContentTypesFunction', { contentTypeIds });
+  return callAppAction(sdk, 'analyzeContentTypes', { contentTypeIds });
 };
 
 /**

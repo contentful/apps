@@ -37,6 +37,8 @@ export const handler: FunctionEventHandler<
     throw new Error('At least one content type ID is required');
   }
 
+  console.log('contentTypeIds', contentTypeIds);
+  console.log('In analyzeContentTypes handler');
   const cma = initContentfulManagementClient(context);
   const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
 
