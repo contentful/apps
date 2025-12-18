@@ -1,4 +1,4 @@
-import { Button, Flex, Heading } from '@contentful/f36-components';
+import { Flex, Box, Heading } from '@contentful/f36-components';
 import { MetricCard } from './MetricCard';
 import { MetricsCalculator } from '../metrics/MetricsCalculator';
 import { ScheduledActionProps } from 'contentful-management';
@@ -25,12 +25,9 @@ const Dashboard = () => {
 
   return (
     <Flex flexDirection="column" style={styles.container}>
-      <Flex flexDirection="row" justifyContent="space-between" marginBottom="spacingL">
+      <Box marginBottom="spacingXs">
         <Heading>Content Dashboard</Heading>
-        <Button onClick={() => refetch()} variant="secondary" size="small" isDisabled={isFetching}>
-          {isFetching ? 'Refreshing...' : 'Refresh'}
-        </Button>
-      </Flex>
+      </Box>
 
       {error ? (
         <ErrorDisplay error={error} />

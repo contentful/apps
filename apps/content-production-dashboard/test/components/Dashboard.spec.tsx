@@ -40,12 +40,6 @@ describe('Dashboard component', () => {
     expect(screen.getByText('Content Dashboard')).toBeInTheDocument();
   });
 
-  it('renders the refresh button', () => {
-    render(<Dashboard />, { wrapper: createWrapper() });
-
-    expect(screen.getByRole('button', { name: /refresh/i })).toBeInTheDocument();
-  });
-
   it('renders all metric cards', () => {
     render(<Dashboard />, { wrapper: createWrapper() });
 

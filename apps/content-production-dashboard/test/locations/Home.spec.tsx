@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { mockSdk } from '../mocks';
-import Page from '../../src/locations/Page';
+import Home from '../../src/locations/Home';
 import { EntryProps } from 'contentful-management';
 
 // Mock TanStack Query
@@ -15,7 +15,7 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
-describe('Page component', () => {
+describe('Home component', () => {
   const mockRefetch = vi.fn();
 
   beforeEach(() => {
@@ -39,7 +39,7 @@ describe('Page component', () => {
       refetch: mockRefetch,
     });
 
-    render(<Page />);
+    render(<Home />);
 
     expect(screen.getByText('Error loading entries')).toBeInTheDocument();
     expect(screen.getByText('Failed to fetch entries')).toBeInTheDocument();
@@ -65,7 +65,7 @@ describe('Page component', () => {
       refetch: mockRefetch,
     });
 
-    render(<Page />);
+    render(<Home />);
 
     expect(screen.getByText('Loading component...')).toBeInTheDocument();
   });
