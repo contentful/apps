@@ -29,6 +29,7 @@ export const GettingStartedPage = ({
           style={{ maxWidth: '900px', margin: `${tokens.spacingL} auto` }}>
           <Heading marginBottom="none">Google Drive</Heading>
           <OAuthConnector
+            oauthToken={oauthToken}
             onOAuthConnectedChange={handleOAuthConnectedChange}
             isOAuthConnected={isOAuthConnected}
             onOauthTokenChange={onOauthTokenChange}

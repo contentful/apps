@@ -5,16 +5,19 @@ import { CheckCircleIcon } from '@contentful/f36-icons';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import googleDriveLogo from '../../assets/google-drive.png';
+import { useGoogleDocsPicker } from '../../hooks/useGoogleDocPicker';
 
 type OAuthConnectorProps = {
   onOAuthConnectedChange: (oauthConnectionStatus: boolean) => void;
   isOAuthConnected: boolean;
   onOauthTokenChange: (token: string) => void;
+  oauthToken: string;
 };
 
 export const OAuthConnector = ({
   onOAuthConnectedChange,
   isOAuthConnected,
+  oauthToken,
   onOauthTokenChange,
 }: OAuthConnectorProps) => {
   const sdk = useSDK<ConfigAppSDK>();
@@ -24,6 +27,14 @@ export const OAuthConnector = ({
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const popupWindowRef = useRef<Window | null>(null);
   const checkWindowIntervalRef = useRef<number | null>(null);
+
+  const { openPicker, isOpening } = useGoogleDocsPicker(oauthToken, {
+    onPicked: (files) => {
+      if (files.length > 0) {
+        console.log('Picked doc:', files[0]);
+      }
+    },
+  });
 
   // Check Google OAuth connection status with polling to handle race conditions
   const checkGoogleOAuthStatus = async (
