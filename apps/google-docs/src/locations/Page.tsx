@@ -28,7 +28,9 @@ const Page = () => {
   const { modalStates, openModal, closeModal } = useModalManagement();
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isCreatingEntries, setIsCreatingEntries] = useState<boolean>(false);
+
   const [createdEntries, setCreatedEntries] = useState<EntryCreationResult['createdEntries']>([]);
+
   const {
     documentId,
     setDocumentId,
@@ -45,7 +47,7 @@ const Page = () => {
     preview,
     isLoading: isGeneratingPlan,
     error: planError,
-    generatePreview: generatePlan,
+    generatePreview,
   } = usePreviewGeneration(sdk, documentId, oauthToken);
 
   // Track previous submission state to detect completion
@@ -120,11 +122,30 @@ const Page = () => {
 
   const handleContentTypeSelected = async (contentTypes: SelectedContentType[]) => {
     const ids = contentTypes.map((ct) => ct.id);
-    await submit(ids);
+    // Close content type picker and open loading modal
+    closeModal(ModalType.CONTENT_TYPE_PICKER);
+    openModal(ModalType.LOADING);
+    await generatePreview(ids);
+  };
+
+  const handleErrorModalTryAgain = () => {
+    closeModal(ModalType.ERROR_ENTRIES);
+    // Reopen the preview modal so user can try again
+    openModal(ModalType.PREVIEW);
+  };
+
+  const handleErrorModalCancel = () => {
+    closeModal(ModalType.ERROR_ENTRIES);
+    resetProgress();
+  };
+
+  const handlePlanReviewCancel = () => {
+    closeModal(ModalType.PREVIEW);
+    openModal(ModalType.CONTENT_TYPE_PICKER);
   };
 
   const handlePreviewModalConfirm = async (contentTypes: SelectedContentType[]) => {
-    if (!previewEntries || previewEntries.length === 0) {
+    if (!preview || !preview.entries || preview.entries.length === 0) {
       sdk.notifier.error('No entries to create');
       return;
     }
@@ -134,12 +155,11 @@ const Page = () => {
       const ids = contentTypes.map((ct) => ct.id);
       const entryResult: EntryCreationResult = await createEntriesFromPreview(
         sdk,
-        previewEntries,
+        preview.entries,
         ids
       );
 
       const createdCount = entryResult.createdEntries.length;
-      const errorCount = entryResult.errors.length;
 
       closeModal(ModalType.PREVIEW);
 
@@ -162,37 +182,6 @@ const Page = () => {
     }
   };
 
-  const handleErrorModalTryAgain = () => {
-    closeModal(ModalType.ERROR_ENTRIES);
-    // Reopen the preview modal so user can try again
-    openModal(ModalType.PREVIEW);
-  };
-
-  const handleErrorModalCancel = () => {
-    closeModal(ModalType.ERROR_ENTRIES);
-    resetProgress();
-  };
-
-  const handlePlanReviewCancel = () => {
-    closeModal(ModalType.PREVIEW);
-    openModal(ModalType.CONTENT_TYPE_PICKER);
-  };
-
-  const handlePreviewModal = async () => {
-    if (!preview) return;
-
-    const contentTypeIds: string[] = preview.entries.map(
-      (entry: EntryToCreate) => entry.contentTypeId
-    );
-    const uniqueContentTypeIds = Array.from(new Set(contentTypeIds));
-
-    closeModal(ModalType.PREVIEW);
-    openModal(ModalType.LOADING);
-
-    // Create entries using the plan data - pass entries to avoid re-analysis
-    await submit(uniqueContentTypeIds, preview.entries);
-  };
-
   // Track previous plan generation state to detect completion
   const prevIsGeneratingPlanRef = useRef<boolean>(false);
 
@@ -200,9 +189,11 @@ const Page = () => {
   useEffect(() => {
     const planGenerationJustCompleted = prevIsGeneratingPlanRef.current && !isGeneratingPlan;
 
-    if (planGenerationJustCompleted && modalStates.isLoadingModalOpen) {
-      // Close loading modal first
-      closeModal(ModalType.LOADING);
+    if (planGenerationJustCompleted) {
+      // Close loading modal if it's open
+      if (modalStates.isLoadingModalOpen) {
+        closeModal(ModalType.LOADING);
+      }
 
       if (preview && !planError) {
         // Plan generation completed successfully, open preview modal
@@ -267,8 +258,9 @@ const Page = () => {
       <PreviewModal
         isOpen={modalStates.isPreviewModalOpen}
         onClose={handlePlanReviewCancel}
-        onCreateEntries={handlePreviewModal}
+        onCreateEntries={handlePreviewModalConfirm}
         preview={preview}
+        isCreatingEntries={isCreatingEntries}
         isLoading={isGeneratingPlan}
       />
 

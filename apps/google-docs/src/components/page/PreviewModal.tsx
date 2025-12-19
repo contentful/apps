@@ -1,5 +1,6 @@
 import { Button, Modal, Paragraph, Box, Flex } from '@contentful/f36-components';
 import { EntryToCreate } from '../../../functions/agents/documentParserAgent/schema';
+import { SelectedContentType } from './ContentTypePickerModal';
 
 interface PreviewData {
   summary: string;
@@ -10,24 +11,22 @@ interface PreviewData {
 interface PreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreateEntries: () => void;
+  onCreateEntries: (contentTypes: SelectedContentType[]) => void;
   preview: PreviewData | null;
+  isCreatingEntries: boolean;
   isLoading: boolean;
 }
 
 export const PreviewModal = ({
   isOpen,
+  isCreatingEntries,
   onClose,
   onCreateEntries,
   preview,
   isLoading,
 }: PreviewModalProps) => {
-  const handleCreateEntries = () => {
-    onCreateEntries();
-  };
-
   const handleClose = () => {
-    if (!isLoading) {
+    if (!isLoading && !isCreatingEntries) {
       onClose();
     }
   };
@@ -45,8 +44,8 @@ export const PreviewModal = ({
       isShown={isOpen}
       onClose={handleClose}
       size="large"
-      shouldCloseOnOverlayClick={!isLoading}
-      shouldCloseOnEscapePress={!isLoading}>
+      shouldCloseOnOverlayClick={!isLoading && !isCreatingEntries}
+      shouldCloseOnEscapePress={!isLoading && !isCreatingEntries}>
       {() => (
         <>
           <Modal.Header title="Create entries" onClose={handleClose} />
@@ -104,11 +103,18 @@ export const PreviewModal = ({
             </Box>
           </Modal.Content>
           <Modal.Controls>
-            <Button onClick={handleClose} variant="secondary" isDisabled={isLoading}>
+            <Button
+              onClick={handleClose}
+              variant="secondary"
+              isDisabled={isLoading || isCreatingEntries}>
               Cancel
             </Button>
             <Button
-              onClick={handleCreateEntries}
+              onClick={() =>
+                onCreateEntries(
+                  entries.map((entry) => ({ id: entry.contentTypeId } as SelectedContentType))
+                )
+              }
               variant="primary"
               isDisabled={isLoading || entries.length === 0}>
               Create entries

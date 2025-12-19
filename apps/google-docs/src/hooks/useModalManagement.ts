@@ -58,6 +58,7 @@ export const useModalManagement = () => {
         break;
       case ModalType.ERROR_ENTRIES:
         setIsErrorEntriesModalOpen(true);
+        break;
       case ModalType.LOADING:
         setIsLoadingModalOpen(true);
         break;
@@ -83,6 +84,7 @@ export const useModalManagement = () => {
         break;
       case ModalType.ERROR_ENTRIES:
         setIsErrorEntriesModalOpen(false);
+        break;
       case ModalType.LOADING:
         setIsLoadingModalOpen(false);
         break;
