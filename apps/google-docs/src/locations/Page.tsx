@@ -7,9 +7,12 @@ import {
   SelectedContentType,
 } from '../components/page/ContentTypePickerModal';
 import { ConfirmCancelModal } from '../components/page/ConfirmCancelModal';
+import { PreviewModal } from '../components/page/PreviewModal';
+import { LoadingModal } from '../components/page/LoadingModal';
 import { useModalManagement, ModalType } from '../hooks/useModalManagement';
 import { useProgressTracking } from '../hooks/useProgressTracking';
 import { useDocumentSubmission } from '../hooks/useDocumentSubmission';
+import { usePlanGeneration } from '../hooks/usePlanGeneration';
 import SelectDocumentModal from '../components/page/SelectDocumentModal';
 import { ViewPreviewModal } from '../components/page/ViewPreviewModal';
 import { ReviewEntriesModal } from '../components/page/ReviewEntriesModal';
@@ -32,11 +35,15 @@ const Page = () => {
     pendingCloseAction,
     setPendingCloseAction,
   } = useProgressTracking();
-  const { previewEntries, submit, clearMessages, isSubmitting } = useDocumentSubmission(
-    sdk,
-    documentId,
-    oauthToken
-  );
+  const { previewEntries, successMessage, errorMessage, submit, clearMessages, isSubmitting } =
+    useDocumentSubmission(sdk, documentId, oauthToken);
+  const {
+    plan,
+    isLoading: isGeneratingPlan,
+    error: planError,
+    generatePlan,
+    clearPlan,
+  } = usePlanGeneration(sdk, documentId, oauthToken);
 
   // Track previous submission state to detect completion
   const prevIsSubmittingRef = useRef<boolean>(false);
@@ -53,7 +60,10 @@ const Page = () => {
     resetProgressTracking();
     closeModal(ModalType.UPLOAD);
     closeModal(ModalType.CONTENT_TYPE_PICKER);
+    closeModal(ModalType.PREVIEW);
+    closeModal(ModalType.LOADING);
     clearMessages();
+    clearPlan();
   };
 
   const handleUploadModalCloseRequest = (docId?: string) => {
@@ -161,23 +171,84 @@ const Page = () => {
     resetProgress();
   };
 
-  // Close the ContentTypePickerModal when submission completes and open preview modal
+
+  const handlePlanReviewCancel = () => {
+    closeModal(ModalType.PREVIEW);
+    openModal(ModalType.CONTENT_TYPE_PICKER);
+    clearPlan();
+  };
+
+  const handlePlanReviewCreateEntries = async () => {
+    if (!plan) return;
+
+    const contentTypeIds = plan.entries.map((entry) => entry.contentTypeId);
+    const uniqueContentTypeIds = Array.from(new Set(contentTypeIds));
+
+    closeModal(ModalType.PREVIEW);
+    openModal(ModalType.LOADING);
+
+    // Create entries using the plan data - pass entries to avoid re-analysis
+    await submit(uniqueContentTypeIds, plan.entries);
+  };
+
+  // Close the Loading modal when submission completes
   useEffect(() => {
     const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
 
-    if (submissionJustCompleted && modalStates.isContentTypePickerOpen) {
-      console.log('Document processing completed, previewEntries:', previewEntries);
-      closeModal(ModalType.CONTENT_TYPE_PICKER);
-
-      // Open preview modal if we have entries
-      if (previewEntries && previewEntries.length > 0) {
-        console.log('Opening preview modal with', previewEntries.length, 'entries');
-        openModal(ModalType.PREVIEW);
-      }
+    if (submissionJustCompleted && modalStates.isLoadingModalOpen) {
+      closeModal(ModalType.LOADING);
+      clearPlan();
     }
 
     prevIsSubmittingRef.current = isSubmitting;
-  }, [isSubmitting, modalStates.isContentTypePickerOpen, closeModal, openModal, previewEntries]);
+  }, [isSubmitting, modalStates.isLoadingModalOpen, closeModal, clearPlan]);
+
+  // Handle plan generation completion
+  useEffect(() => {
+    if (!isGeneratingPlan && plan && !planError) {
+      // Close loading modal first
+      if (modalStates.isLoadingModalOpen) {
+        closeModal(ModalType.LOADING);
+      }
+
+      // Validate plan has required data before opening modal
+      if (plan.entries && Array.isArray(plan.entries) && plan.summary) {
+        // Plan generation completed successfully, open plan review modal
+        if (!modalStates.isPreviewModalOpen && !modalStates.isContentTypePickerOpen) {
+          openModal(ModalType.PREVIEW);
+        }
+      } else {
+        // Invalid plan data
+        sdk.notifier.error('Invalid plan data received');
+        if (modalStates.isPreviewModalOpen) {
+          closeModal(ModalType.PREVIEW);
+        }
+        openModal(ModalType.CONTENT_TYPE_PICKER);
+      }
+    } else if (!isGeneratingPlan && planError) {
+      // Plan generation failed, close loading modal and return to content type picker
+      if (modalStates.isLoadingModalOpen) {
+        closeModal(ModalType.LOADING);
+      }
+      sdk.notifier.error(`Failed to generate plan: ${planError}`);
+      if (modalStates.isPreviewModalOpen) {
+        closeModal(ModalType.PREVIEW);
+      }
+      if (!modalStates.isContentTypePickerOpen) {
+        openModal(ModalType.CONTENT_TYPE_PICKER);
+      }
+    }
+  }, [
+    isGeneratingPlan,
+    plan,
+    planError,
+    modalStates.isLoadingModalOpen,
+    modalStates.isPreviewModalOpen,
+    modalStates.isContentTypePickerOpen,
+    openModal,
+    closeModal,
+    sdk,
+  ]);
 
   return (
     <>
@@ -196,9 +267,22 @@ const Page = () => {
         isOpen={modalStates.isContentTypePickerOpen}
         onClose={handleContentTypePickerCloseRequest}
         onSelect={handleContentTypeSelected}
-        isSubmitting={isSubmitting}
+        isGeneratingPlan={isGeneratingPlan}
         selectedContentTypes={selectedContentTypes}
         setSelectedContentTypes={setSelectedContentTypes}
+      />
+
+      <PreviewModal
+        isOpen={modalStates.isPreviewModalOpen}
+        onClose={handlePlanReviewCancel}
+        onCreateEntries={handlePlanReviewCreateEntries}
+        plan={plan}
+        isLoading={isGeneratingPlan}
+      />
+
+      <LoadingModal
+        isOpen={modalStates.isLoadingModalOpen}
+        message={isGeneratingPlan ? 'Generating plan...' : 'Creating entries...'}
       />
 
       <ConfirmCancelModal

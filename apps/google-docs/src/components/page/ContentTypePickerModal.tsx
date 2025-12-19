@@ -22,7 +22,7 @@ interface ContentTypePickerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (contentTypes: SelectedContentType[]) => void;
-  isSubmitting: boolean;
+  isGeneratingPlan: boolean;
   selectedContentTypes: SelectedContentType[];
   setSelectedContentTypes: (
     contentTypes: SelectedContentType[] | ((prev: SelectedContentType[]) => SelectedContentType[])
@@ -34,7 +34,7 @@ export const ContentTypePickerModal = ({
   isOpen,
   onClose,
   onSelect,
-  isSubmitting,
+  isGeneratingPlan,
   selectedContentTypes,
   setSelectedContentTypes,
 }: ContentTypePickerModalProps) => {
@@ -88,7 +88,7 @@ export const ContentTypePickerModal = ({
   }, [isOpen]);
 
   const handleAddContentType = (contentTypeId: string) => {
-    if (!contentTypeId || isSubmitting) return;
+    if (!contentTypeId || isGeneratingPlan) return;
 
     const contentType = contentTypes.find((ct) => ct.sys.id === contentTypeId);
     if (contentType && !selectedContentTypes.some((ct) => ct.id === contentTypeId)) {
@@ -100,12 +100,12 @@ export const ContentTypePickerModal = ({
   };
 
   const handleRemoveContentType = (contentTypeId: string) => {
-    if (isSubmitting) return;
+    if (isGeneratingPlan) return;
     setSelectedContentTypes(selectedContentTypes.filter((ct) => ct.id !== contentTypeId));
   };
 
   const handleClose = () => {
-    if (isSubmitting) return; // Prevent closing during submission
+    if (isGeneratingPlan) return; // Prevent closing during plan generation
     onClose();
   };
 
@@ -144,7 +144,7 @@ export const ContentTypePickerModal = ({
                 onChange={(e) => {
                   handleAddContentType(e.target.value);
                 }}
-                isDisabled={isLoading || availableContentTypes.length === 0 || isSubmitting}>
+                isDisabled={isLoading || availableContentTypes.length === 0 || isGeneratingPlan}>
                 <Select.Option value="" isDisabled>
                   {isLoading ? 'Loading content types...' : 'Select one or more'}
                 </Select.Option>
@@ -172,22 +172,22 @@ export const ContentTypePickerModal = ({
                   <Pill
                     key={ct.id}
                     label={ct.name}
-                    onClose={isSubmitting ? undefined : () => handleRemoveContentType(ct.id)}
+                    onClose={isGeneratingPlan ? undefined : () => handleRemoveContentType(ct.id)}
                   />
                 ))}
               </Flex>
             )}
           </Modal.Content>
           <Modal.Controls>
-            <Button onClick={handleClose} variant="secondary" isDisabled={isSubmitting}>
+            <Button onClick={handleClose} variant="secondary" isDisabled={isGeneratingPlan}>
               Cancel
             </Button>
             <Button
               onClick={handleContinue}
               variant="primary"
-              isDisabled={isLoading || isSubmitting}
-              endIcon={isSubmitting ? <Spinner /> : undefined}>
-              Next
+              isDisabled={isLoading || isGeneratingPlan}
+              endIcon={isGeneratingPlan ? <Spinner /> : undefined}>
+              Continue
             </Button>
           </Modal.Controls>
         </>

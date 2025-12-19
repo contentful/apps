@@ -7,6 +7,7 @@ interface ModalStates {
   isPreviewModalOpen: boolean;
   isReviewModalOpen: boolean;
   isErrorEntriesModalOpen: boolean;
+  isLoadingModalOpen: boolean;
 }
 
 interface ModalSetters {
@@ -16,6 +17,7 @@ interface ModalSetters {
   setIsPreviewModalOpen: (value: boolean) => void;
   setIsReviewModalOpen: (value: boolean) => void;
   setIsErrorEntriesModalOpen: (value: boolean) => void;
+  setIsLoadingModalOpen: (value: boolean) => void;
 }
 
 export enum ModalType {
@@ -25,6 +27,7 @@ export enum ModalType {
   PREVIEW = 'preview',
   REVIEW = 'review',
   ERROR_ENTRIES = 'errorEntries',
+  LOADING = 'loading',
 }
 
 export const useModalManagement = () => {
@@ -34,6 +37,7 @@ export const useModalManagement = () => {
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState<boolean>(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState<boolean>(false);
   const [isErrorEntriesModalOpen, setIsErrorEntriesModalOpen] = useState<boolean>(false);
+  const [isLoadingModalOpen, setIsLoadingModalOpen] = useState<boolean>(false);
 
   const openModal = (modalType: ModalType) => {
     switch (modalType) {
@@ -54,6 +58,8 @@ export const useModalManagement = () => {
         break;
       case ModalType.ERROR_ENTRIES:
         setIsErrorEntriesModalOpen(true);
+      case ModalType.LOADING:
+        setIsLoadingModalOpen(true);
         break;
     }
   };
@@ -77,6 +83,8 @@ export const useModalManagement = () => {
         break;
       case ModalType.ERROR_ENTRIES:
         setIsErrorEntriesModalOpen(false);
+      case ModalType.LOADING:
+        setIsLoadingModalOpen(false);
         break;
     }
   };
@@ -89,6 +97,7 @@ export const useModalManagement = () => {
       isPreviewModalOpen,
       isReviewModalOpen,
       isErrorEntriesModalOpen,
+      isLoadingModalOpen,
     } as ModalStates,
     setModalStates: {
       setIsUploadModalOpen,
@@ -97,6 +106,7 @@ export const useModalManagement = () => {
       setIsPreviewModalOpen,
       setIsReviewModalOpen,
       setIsErrorEntriesModalOpen,
+      setIsLoadingModalOpen,
     } as ModalSetters,
     openModal,
     closeModal,
