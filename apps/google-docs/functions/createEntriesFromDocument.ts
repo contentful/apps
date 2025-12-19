@@ -4,11 +4,11 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { analyzeDocumentWithAgent } from './agents/documentParserAgent/documentParser.agent';
 import { fetchContentTypes } from './service/contentTypeService';
 import { initContentfulManagementClient } from './service/initCMAClient';
-import { createEntries } from './service/entryService';
 import { EntryToCreate } from './agents/documentParserAgent/schema';
+import { createPreviewWithAgent } from './agents/documentParserAgent/documentParser.agent';
+import { createEntriesFromPreview } from './service/entryService';
 
 export type AppActionParameters = {
   contentTypeIds: string[];
@@ -53,7 +53,7 @@ export const handler: FunctionEventHandler<
     totalEntries = entriesToCreate.length;
   } else if (documentJson) {
     // Fallback: analyze document if entries not provided but documentJson is available
-    const aiDocumentResponse = await analyzeDocumentWithAgent({
+    const aiDocumentResponse = await createPreviewWithAgent({
       documentJson,
       openAiApiKey,
       contentTypes,
@@ -66,7 +66,7 @@ export const handler: FunctionEventHandler<
   }
 
   // INTEG-3264: Create the entries in Contentful using the entry service
-  const creationResult = await createEntries(cma, entriesToCreate, {
+  const creationResult = await createEntriesFromPreview(cma, entriesToCreate, {
     spaceId: context.spaceId,
     environmentId: context.environmentId,
     contentTypes,

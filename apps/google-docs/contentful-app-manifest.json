@@ -38,14 +38,12 @@
       ]
     },
     {
-      "id": "analyzeContentTypes",
-      "name": "Analyze Content Types",
-      "description": "Analyzes content type structure and relationships using AI.",
-      "path": "functions/handlers/createPreview/createContentTypesAnalysisHandler.js",
-      "entryFile": "functions/handlers/createPreview/createContentTypesAnalysisHandler.ts",
-      "allowNetworks": [
-        "https://api.openai.com"
-      ],
+      "id": "createEntries",
+      "name": "Create Entries",
+      "description": "Creates entries in Contentful",
+      "path": "functions/handlers/createEntries/createEntriesHandler.js",
+      "entryFile": "functions/handlers/createEntries/createEntriesHandler.ts",
+      "allowNetworks": [],
       "accepts": [
         "appaction.call"
       ]

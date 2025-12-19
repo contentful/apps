@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { createPlanFromDocumentAction } from '../utils/appFunctionUtils';
+import { createPreviewFromDocumentAction } from '../utils/appFunctionUtils';
 import { fetchGoogleDocAsJson } from '../utils/googleDriveUtils';
 import { ERROR_MESSAGES } from '../constants/messages';
 import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
@@ -74,7 +74,8 @@ export const usePlanGeneration = (
         // Fetch document JSON from frontend
         const documentJson = await fetchGoogleDocAsJson(documentId, oauthToken);
 
-        const response = await createPlanFromDocumentAction(sdk, contentTypeIds, documentJson);
+        console.log('Creating preview from document', documentJson, contentTypeIds);
+        const response = await createPreviewFromDocumentAction(sdk, contentTypeIds, documentJson);
         console.log('Plan generation response:', response);
 
         if (response.sys?.status === 'succeeded' && response.sys?.result) {

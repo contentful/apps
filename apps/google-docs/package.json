@@ -27,14 +27,12 @@
     "build:frontend": "rm -rf build && tsc && vite build",
     "build:functions": "contentful-app-scripts build-functions --ci",
     "build": "rimraf build && npm run build:frontend && npm run build:functions",
-    "upload:app-dev": "contentful-app-scripts upload --bundle-dir ./build --organization-id 6xdLsz6lCsk0yPOccSsDK7 --definition-id 653vTnuQw3j5onU1tUoH6t --token $CONTENTFUL_ACCESS_TOKEN",
-    "deploy:sync-dev": "aws s3 sync ./build ${STATIC_S3_BASE}/google-docs-dev && aws cloudfront create-invalidation --distribution-id $GOOGLE_DOCS_TEST_CLOUDFRONT_DIST_ID --paths \"/*\" > /dev/null 2>&1",
-    "deploy:dev": "npm run build && npm run upload:app-dev && npm run deploy:sync-dev",
+    "upload:app-dev": "contentful-app-scripts upload --bundle-dir ./build --organization-id 6xdLsz6lCsk0yPOccSsDK7 --definition-id 7GZyBCU0FGVnR1mpRYJQ5L --token $CONTENTFUL_ACCESS_TOKEN" ,
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id 6B7UvF9RgdtICSBSvSIUMY --definition-id 1g8kRAvM4pb7Wb6pNPR87J --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:oauth-dev": "aws s3 sync ./build s3://cf-apps-static-dev/apps/google-docs-dev && aws cloudfront create-invalidation --distribution-id E1V99AG4M4Z8HJ --paths \"/*\" > /dev/null 2>&1",
+    "deploy:dev": "npm run build && npm run upload:app-dev && npm run deploy:oauth-dev",
     "upload:app-staging": "contentful-app-scripts upload --bundle-dir ./build --organization-id 6xdLsz6lCsk0yPOccSsDK7 --definition-id 4i0mp5lQtgNsHYVrD5jIkj --token $CONTENTFUL_ACCESS_TOKEN",
-    "deploy:staging": "npm run build && npm run upload:app-staging && npm run deploy:sync-dev",
-    "deploy:sync-prod": "aws s3 sync ./build ${STATIC_S3_BASE}/google-docs && aws cloudfront create-invalidation --distribution-id $GOOGLE_DOCS_PROD_CLOUDFRONT_DIST_ID --paths \"/*\" > /dev/null 2>&1",
-    "upload": "contentful-app-scripts upload --bundle-dir ./build --organization-id 5EJGHo8tYJcjnEhYWDxivp --definition-id 3EaGZUMKRKVZUyrcoNJ4o4 --token $CONTENTFUL_ACCESS_TOKEN",
-    "deploy": "npm run build && npm run upload && npm run deploy:sync-prod"
+    "deploy:staging": "npm run build && npm run upload:app-staging && npm run deploy:oauth-dev"
   },
   "eslintConfig": {
     "extends": "react-app"

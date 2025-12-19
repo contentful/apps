@@ -64,7 +64,7 @@ export const createEntriesFromDocumentAction = async (
   }
 };
 
-export const createPlanFromDocumentAction = async (
+export const createPreviewFromDocumentAction = async (
   sdk: PageAppSDK | ConfigAppSDK,
   contentTypeIds: string[],
   documentJson: unknown
@@ -76,7 +76,9 @@ export const createPlanFromDocumentAction = async (
       throw new Error('App definition ID not found');
     }
 
-    const appActionId = await getAppActionId(sdk, 'createPlanFromDocumentAction');
+    console.log('Creating preview from document', documentJson, contentTypeIds);
+
+    const appActionId = await getAppActionId(sdk, 'createPreview');
     const result = await sdk.cma.appActionCall.createWithResult(
       {
         appDefinitionId,
