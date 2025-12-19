@@ -1,5 +1,5 @@
 import Page from './Page';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { mockCma, mockSdk } from '../../test/mocks';
 import { vi } from 'vitest';
 
@@ -9,9 +9,11 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 describe('Page component', () => {
-  it('Component text exists', () => {
-    const { getByText } = render(<Page />);
+  it('renders the Google Drive heading', async () => {
+    const { getByRole } = render(<Page />);
 
-    expect(getByText('Document Uploader')).toBeTruthy();
+    await waitFor(() => {
+      expect(getByRole('heading', { name: 'Google Drive' })).toBeTruthy();
+    });
   });
 });

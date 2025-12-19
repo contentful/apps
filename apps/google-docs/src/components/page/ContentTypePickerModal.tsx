@@ -41,6 +41,7 @@ export const ContentTypePickerModal = ({
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
+  const [hasFetchError, setHasFetchError] = useState<boolean>(false);
 
   const isInvalidSelection = useMemo(
     () => selectedContentTypes.length === 0,
@@ -52,11 +53,14 @@ export const ContentTypePickerModal = ({
     [isInvalidSelection, hasAttemptedSubmit]
   );
 
+  const showFetchError = hasFetchError && !isLoading;
+
   useEffect(() => {
     // Fetch content types when component mounts
     const fetchContentTypes = async () => {
       try {
         setIsLoading(true);
+        setHasFetchError(false);
         const space = await sdk.cma.space.get({});
         const environment = await sdk.cma.environment.get({ spaceId: space.sys.id });
         const contentTypesResponse = await sdk.cma.contentType.getMany({
@@ -66,7 +70,8 @@ export const ContentTypePickerModal = ({
         setContentTypes(contentTypesResponse.items || []);
       } catch (error) {
         console.error('Failed to fetch content types:', error);
-        sdk.notifier.error('Failed to load content types');
+        setHasFetchError(true);
+        setContentTypes([]);
       } finally {
         setIsLoading(false);
       }
@@ -130,7 +135,7 @@ export const ContentTypePickerModal = ({
             <Paragraph marginBottom="spacingM" color="gray700">
               Select the content type(s) you would like to use with this sync.
             </Paragraph>
-            <FormControl isRequired isInvalid={isInvalidSelectionError}>
+            <FormControl isRequired isInvalid={isInvalidSelectionError || showFetchError}>
               <FormControl.Label>Content type</FormControl.Label>
               <Select
                 id="content-type-select"
@@ -149,6 +154,11 @@ export const ContentTypePickerModal = ({
                   </Select.Option>
                 ))}
               </Select>
+              {showFetchError && (
+                <FormControl.ValidationMessage>
+                  Unable to load content types.
+                </FormControl.ValidationMessage>
+              )}
               {isInvalidSelectionError && (
                 <FormControl.ValidationMessage>
                   You must select at least one content type.

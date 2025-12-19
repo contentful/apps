@@ -1,27 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { PlainClientAPI, EntryProps, ContentTypeProps } from 'contentful-management';
-import { createEntriesFromPreview, EntryCreationResult } from './entryService';
-import { EntryToCreate } from '../agents/documentParserAgent/schema';
+import type { PageAppSDK } from '@contentful/app-sdk';
+import type { EntryProps, ContentTypeProps } from 'contentful-management';
+import { createEntriesFromPreview } from './entryService';
+import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
+import { createMockSDK } from '../../test/mocks';
 
-// Mock CMA client
-const createMockCMA = (): PlainClientAPI => {
-  return {
-    asset: {
-      create: vi.fn(),
-      processForAllLocales: vi.fn(),
-      get: vi.fn(),
-      publish: vi.fn(),
-    },
-    entry: {
-      create: vi.fn(),
-    },
-  } as unknown as PlainClientAPI;
-};
-
-describe('createEntries', () => {
-  let mockCMA: PlainClientAPI;
-  const mockSpaceId = 'test-space-id';
-  const mockEnvironmentId = 'test-environment-id';
+describe('createEntriesFromPreview', () => {
+  let mockSDK: PageAppSDK;
   const mockContentTypes: ContentTypeProps[] = [
     {
       sys: { id: 'blogPost', type: 'ContentType' },
@@ -34,41 +19,34 @@ describe('createEntries', () => {
   ];
 
   beforeEach(() => {
-    mockCMA = createMockCMA();
+    mockSDK = createMockSDK();
     vi.clearAllMocks();
+    // Mock contentType.getMany to return our mock content types
+    vi.mocked(mockSDK.cma.contentType.getMany).mockResolvedValue({
+      items: mockContentTypes,
+      total: mockContentTypes.length,
+    } as any);
   });
 
   describe('Input Validation', () => {
-    it('should reject null CMA client', async () => {
-      const result = await createEntriesFromPreview(null as any, [], {
-        spaceId: mockSpaceId,
-        environmentId: mockEnvironmentId,
-        contentTypes: mockContentTypes,
-      });
+    it('should reject null SDK', async () => {
+      const result = await createEntriesFromPreview(null as any, [], ['blogPost']);
 
       expect(result.createdEntries).toHaveLength(0);
       expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].error).toContain('CMA client is required');
+      expect(result.errors[0].error).toContain('SDK is required');
     });
 
-    it('should reject undefined CMA client', async () => {
-      const result = await createEntriesFromPreview(undefined as any, [], {
-        spaceId: mockSpaceId,
-        environmentId: mockEnvironmentId,
-        contentTypes: mockContentTypes,
-      });
+    it('should reject undefined SDK', async () => {
+      const result = await createEntriesFromPreview(undefined as any, [], ['blogPost']);
 
       expect(result.createdEntries).toHaveLength(0);
       expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].error).toContain('CMA client is required');
+      expect(result.errors[0].error).toContain('SDK is required');
     });
 
     it('should reject null entries array', async () => {
-      const result = await createEntriesFromPreview(mockCMA, null as any, {
-        spaceId: mockSpaceId,
-        environmentId: mockEnvironmentId,
-        contentTypes: mockContentTypes,
-      });
+      const result = await createEntriesFromPreview(mockSDK, null as any, ['blogPost']);
 
       expect(result.createdEntries).toHaveLength(0);
       expect(result.errors).toHaveLength(1);
@@ -76,11 +54,7 @@ describe('createEntries', () => {
     });
 
     it('should reject undefined entries array', async () => {
-      const result = await createEntriesFromPreview(mockCMA, undefined as any, {
-        spaceId: mockSpaceId,
-        environmentId: mockEnvironmentId,
-        contentTypes: mockContentTypes,
-      });
+      const result = await createEntriesFromPreview(mockSDK, undefined as any, ['blogPost']);
 
       expect(result.createdEntries).toHaveLength(0);
       expect(result.errors).toHaveLength(1);
@@ -88,30 +62,22 @@ describe('createEntries', () => {
     });
 
     it('should reject empty entries array', async () => {
-      const result = await createEntriesFromPreview(mockCMA, [], {
-        spaceId: mockSpaceId,
-        environmentId: mockEnvironmentId,
-        contentTypes: mockContentTypes,
-      });
+      const result = await createEntriesFromPreview(mockSDK, [], ['blogPost']);
 
       expect(result.createdEntries).toHaveLength(0);
       expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].error).toContain('Entries array cannot be empty');
+      expect(result.errors[0].error).toContain('Entries cannot be empty');
     });
 
     it('should reject non-array entries', async () => {
-      const result = await createEntriesFromPreview(mockCMA, {} as any, {
-        spaceId: mockSpaceId,
-        environmentId: mockEnvironmentId,
-        contentTypes: mockContentTypes,
-      });
+      const result = await createEntriesFromPreview(mockSDK, {} as any, ['blogPost']);
 
       expect(result.createdEntries).toHaveLength(0);
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0].error).toContain('Entries must be an array');
     });
 
-    it('should reject null config', async () => {
+    it('should reject null contentTypeIds', async () => {
       const entries: EntryToCreate[] = [
         {
           contentTypeId: 'blogPost',
@@ -119,14 +85,14 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntriesFromPreview(mockCMA, entries, null as any);
+      const result = await createEntriesFromPreview(mockSDK, entries, null as any);
 
       expect(result.createdEntries).toHaveLength(0);
       expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].error).toContain('Config is required');
+      expect(result.errors[0].error).toContain('contentTypeIds');
     });
 
-    it('should reject empty spaceId', async () => {
+    it('should reject empty contentTypeIds array', async () => {
       const entries: EntryToCreate[] = [
         {
           contentTypeId: 'blogPost',
@@ -134,53 +100,11 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntriesFromPreview(mockCMA, entries, {
-        spaceId: '',
-        environmentId: mockEnvironmentId,
-        contentTypes: mockContentTypes,
-      });
+      const result = await createEntriesFromPreview(mockSDK, entries, []);
 
       expect(result.createdEntries).toHaveLength(0);
       expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].error).toContain('spaceId');
-    });
-
-    it('should reject empty environmentId', async () => {
-      const entries: EntryToCreate[] = [
-        {
-          contentTypeId: 'blogPost',
-          fields: { title: { 'en-US': 'Test' } },
-        },
-      ];
-
-      const result = await createEntriesFromPreview(mockCMA, entries, {
-        spaceId: mockSpaceId,
-        environmentId: '',
-        contentTypes: mockContentTypes,
-      });
-
-      expect(result.createdEntries).toHaveLength(0);
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].error).toContain('environmentId');
-    });
-
-    it('should reject null contentTypes', async () => {
-      const entries: EntryToCreate[] = [
-        {
-          contentTypeId: 'blogPost',
-          fields: { title: { 'en-US': 'Test' } },
-        },
-      ];
-
-      const result = await createEntriesFromPreview(mockCMA, entries, {
-        spaceId: mockSpaceId,
-        environmentId: mockEnvironmentId,
-        contentTypes: null as any,
-      });
-
-      expect(result.createdEntries).toHaveLength(0);
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].error).toContain('contentTypes');
+      expect(result.errors[0].error).toContain('contentTypeIds cannot be empty');
     });
 
     it('should reject entry with null contentTypeId', async () => {
@@ -191,11 +115,7 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntriesFromPreview(mockCMA, entries, {
-        spaceId: mockSpaceId,
-        environmentId: mockEnvironmentId,
-        contentTypes: mockContentTypes,
-      });
+      const result = await createEntriesFromPreview(mockSDK, entries, ['blogPost']);
 
       expect(result.createdEntries).toHaveLength(0);
       expect(result.errors).toHaveLength(1);
@@ -210,11 +130,7 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntriesFromPreview(mockCMA, entries, {
-        spaceId: mockSpaceId,
-        environmentId: mockEnvironmentId,
-        contentTypes: mockContentTypes,
-      });
+      const result = await createEntriesFromPreview(mockSDK, entries, ['blogPost']);
 
       expect(result.createdEntries).toHaveLength(0);
       expect(result.errors).toHaveLength(1);
@@ -229,15 +145,31 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntriesFromPreview(mockCMA, entries, {
-        spaceId: mockSpaceId,
-        environmentId: mockEnvironmentId,
-        contentTypes: mockContentTypes,
-      });
+      const result = await createEntriesFromPreview(mockSDK, entries, ['blogPost']);
 
       expect(result.createdEntries).toHaveLength(0);
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0].error).toContain('null value');
+    });
+
+    it('should handle no matching content types', async () => {
+      vi.mocked(mockSDK.cma.contentType.getMany).mockResolvedValue({
+        items: [],
+        total: 0,
+      } as any);
+
+      const entries: EntryToCreate[] = [
+        {
+          contentTypeId: 'blogPost',
+          fields: { title: { 'en-US': 'Test' } },
+        },
+      ];
+
+      const result = await createEntriesFromPreview(mockSDK, entries, ['blogPost']);
+
+      expect(result.createdEntries).toHaveLength(0);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0].error).toContain('No matching content types found');
     });
   });
 
@@ -252,7 +184,7 @@ describe('createEntries', () => {
         fields: { title: { 'en-US': 'Test Title' } },
       } as unknown as EntryProps;
 
-      vi.mocked(mockCMA.entry.create).mockResolvedValue(mockEntry);
+      vi.mocked(mockSDK.cma.entry.create).mockResolvedValue(mockEntry);
 
       const entries: EntryToCreate[] = [
         {
@@ -261,16 +193,16 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntriesFromPreview(mockCMA, entries, {
-        spaceId: mockSpaceId,
-        environmentId: mockEnvironmentId,
-        contentTypes: mockContentTypes,
-      });
+      const result = await createEntriesFromPreview(mockSDK, entries, ['blogPost']);
 
       expect(result.createdEntries).toHaveLength(1);
       expect(result.errors).toHaveLength(0);
-      expect(mockCMA.entry.create).toHaveBeenCalledWith(
-        { spaceId: mockSpaceId, environmentId: mockEnvironmentId, contentTypeId: 'blogPost' },
+      expect(mockSDK.cma.entry.create).toHaveBeenCalledWith(
+        {
+          spaceId: mockSDK.ids.space,
+          environmentId: mockSDK.ids.environment,
+          contentTypeId: 'blogPost',
+        },
         { fields: { title: { 'en-US': 'Test Title' } } }
       );
     });
@@ -285,7 +217,7 @@ describe('createEntries', () => {
         fields: { content: { 'en-US': { nodeType: 'document', content: [] } } },
       } as unknown as EntryProps;
 
-      vi.mocked(mockCMA.entry.create).mockResolvedValue(mockEntry);
+      vi.mocked(mockSDK.cma.entry.create).mockResolvedValue(mockEntry);
 
       const entries: EntryToCreate[] = [
         {
@@ -297,22 +229,18 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntriesFromPreview(mockCMA, entries, {
-        spaceId: mockSpaceId,
-        environmentId: mockEnvironmentId,
-        contentTypes: mockContentTypes,
-      });
+      const result = await createEntriesFromPreview(mockSDK, entries, ['blogPost']);
 
       expect(result.createdEntries).toHaveLength(1);
       expect(result.errors).toHaveLength(0);
-      expect(mockCMA.entry.create).toHaveBeenCalled();
+      expect(mockSDK.cma.entry.create).toHaveBeenCalled();
     });
   });
 
   describe('Error Handling', () => {
     it('should handle CMA API errors gracefully', async () => {
       const error = new Error('CMA API Error');
-      vi.mocked(mockCMA.entry.create).mockRejectedValue(error);
+      vi.mocked(mockSDK.cma.entry.create).mockRejectedValue(error);
 
       const entries: EntryToCreate[] = [
         {
@@ -321,11 +249,7 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntriesFromPreview(mockCMA, entries, {
-        spaceId: mockSpaceId,
-        environmentId: mockEnvironmentId,
-        contentTypes: mockContentTypes,
-      });
+      const result = await createEntriesFromPreview(mockSDK, entries, ['blogPost']);
 
       expect(result.createdEntries).toHaveLength(0);
       expect(result.errors).toHaveLength(1);
@@ -340,10 +264,10 @@ describe('createEntries', () => {
           type: 'Entry',
           contentType: { sys: { id: 'blogPost', type: 'Link', linkType: 'ContentType' } },
         },
-        fields: { title: { 'en-US': 'Test Title 1' } },
+        fields: { title: { 'en-US': 'Test Title 2' } },
       } as unknown as EntryProps;
 
-      vi.mocked(mockCMA.entry.create)
+      vi.mocked(mockSDK.cma.entry.create)
         .mockRejectedValueOnce(new Error('First entry failed'))
         .mockResolvedValueOnce(mockEntry1);
 
@@ -358,11 +282,7 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntriesFromPreview(mockCMA, entries, {
-        spaceId: mockSpaceId,
-        environmentId: mockEnvironmentId,
-        contentTypes: mockContentTypes,
-      });
+      const result = await createEntriesFromPreview(mockSDK, entries, ['blogPost']);
 
       expect(result.createdEntries).toHaveLength(1);
       expect(result.errors).toHaveLength(1);
@@ -386,11 +306,9 @@ describe('createEntries', () => {
         fields: {},
       } as EntryProps;
 
-      vi.mocked(mockCMA.asset.create).mockResolvedValue(mockAsset);
-      vi.mocked(mockCMA.asset.processForAllLocales).mockResolvedValue(mockAsset);
-      vi.mocked(mockCMA.asset.get).mockResolvedValue(mockAsset);
-      vi.mocked(mockCMA.asset.publish).mockResolvedValue(mockAsset);
-      vi.mocked(mockCMA.entry.create).mockResolvedValue(mockEntry);
+      vi.mocked(mockSDK.cma.asset.create).mockResolvedValue(mockAsset);
+      vi.mocked(mockSDK.cma.asset.processForAllLocales).mockResolvedValue(mockAsset);
+      vi.mocked(mockSDK.cma.entry.create).mockResolvedValue(mockEntry);
 
       const entries: EntryToCreate[] = [
         {
@@ -403,17 +321,15 @@ describe('createEntries', () => {
         },
       ];
 
-      const result = await createEntriesFromPreview(mockCMA, entries, {
-        spaceId: mockSpaceId,
-        environmentId: mockEnvironmentId,
-        contentTypes: mockContentTypes,
-      });
+      const result = await createEntriesFromPreview(mockSDK, entries, ['blogPost']);
 
-      expect(mockCMA.asset.create).toHaveBeenCalled();
-      const assetCreateCall = vi.mocked(mockCMA.asset.create).mock.calls[0];
+      expect(mockSDK.cma.asset.create).toHaveBeenCalled();
+      const assetCreateCall = vi.mocked(mockSDK.cma.asset.create).mock.calls[0];
       expect(assetCreateCall[1].fields.title['en-US']).toBe('Alt text');
       expect(assetCreateCall[1].fields.file['en-US'].contentType).toBe('image/png');
       expect(assetCreateCall[1].fields.file['en-US'].fileName).toContain('.png');
+      expect(result.createdEntries).toHaveLength(1);
+      expect(result.errors).toHaveLength(0);
     });
   });
 });

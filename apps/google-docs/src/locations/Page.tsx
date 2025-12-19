@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { Box, Button, Card, Heading, Layout, Note } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { GettingStartedPage } from '../components/page/GettingStartedPage';
@@ -13,16 +12,17 @@ import { useProgressTracking } from '../hooks/useProgressTracking';
 import { useDocumentSubmission } from '../hooks/useDocumentSubmission';
 import SelectDocumentModal from '../components/page/SelectDocumentModal';
 import { ViewPreviewModal } from '../components/page/ViewPreviewModal';
-import { createEntriesAction } from '../utils/appActionUtils';
+import { ReviewEntriesModal } from '../components/page/ReviewEntriesModal';
+import { ErrorEntriesModal } from '../components/page/ErrorEntriesModal';
+import { createEntriesFromPreview, EntryCreationResult } from '../services/entryService';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
   const { modalStates, openModal, closeModal } = useModalManagement();
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isCreatingEntries, setIsCreatingEntries] = useState<boolean>(false);
+  const [createdEntries, setCreatedEntries] = useState<EntryCreationResult['createdEntries']>([]);
   const {
-    hasStarted,
-    setHasStarted,
     documentId,
     setDocumentId,
     selectedContentTypes,
@@ -46,7 +46,6 @@ const Page = () => {
   };
 
   const handleGetStarted = () => {
-    setHasStarted(true);
     openModal(ModalType.UPLOAD);
   };
 
@@ -76,7 +75,6 @@ const Page = () => {
     } else {
       // No progress, reset to getting started page
       closeModal(ModalType.UPLOAD);
-      setHasStarted(false);
     }
   };
 
@@ -109,13 +107,7 @@ const Page = () => {
   };
 
   const handleContentTypeSelected = async (contentTypes: SelectedContentType[]) => {
-    const names = contentTypes.map((ct) => ct.name).join(', ');
     const ids = contentTypes.map((ct) => ct.id);
-
-    sdk.notifier.success(
-      `Selected ${contentTypes.length} content type${contentTypes.length > 1 ? 's' : ''}: ${names}`
-    );
-
     await submit(ids);
   };
 
@@ -128,27 +120,45 @@ const Page = () => {
     setIsCreatingEntries(true);
     try {
       const ids = contentTypes.map((ct) => ct.id);
-      const entryResult: any = await createEntriesAction(sdk, previewEntries, ids);
+      const entryResult: EntryCreationResult = await createEntriesFromPreview(
+        sdk,
+        previewEntries,
+        ids
+      );
 
-      if (entryResult.errorCount > 0) {
-        sdk.notifier.warning(
-          `Created ${entryResult.createdCount} entries with ${entryResult.errorCount} errors`
-        );
+      const createdCount = entryResult.createdEntries.length;
+      const errorCount = entryResult.errors.length;
+
+      closeModal(ModalType.PREVIEW);
+
+      if (createdCount === 0) {
         console.error('Entry creation errors:', entryResult.errors);
-      } else {
-        sdk.notifier.success(`Successfully created ${entryResult.createdCount} entries`);
+        openModal(ModalType.ERROR_ENTRIES);
+        return;
       }
 
-      // Close the preview modal and reset progress after creating entries
-      closeModal(ModalType.PREVIEW);
+      setCreatedEntries(entryResult.createdEntries);
       resetProgress();
+      openModal(ModalType.REVIEW);
     } catch (error) {
+      closeModal(ModalType.PREVIEW);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      sdk.notifier.error(`Failed to create entries: ${errorMessage}`);
       console.error('Entry creation failed:', error);
+      openModal(ModalType.ERROR_ENTRIES);
     } finally {
       setIsCreatingEntries(false);
     }
+  };
+
+  const handleErrorModalTryAgain = () => {
+    closeModal(ModalType.ERROR_ENTRIES);
+    // Reopen the preview modal so user can try again
+    openModal(ModalType.PREVIEW);
+  };
+
+  const handleErrorModalCancel = () => {
+    closeModal(ModalType.ERROR_ENTRIES);
+    resetProgress();
   };
 
   // Close the ContentTypePickerModal when submission completes and open preview modal
@@ -169,19 +179,13 @@ const Page = () => {
     prevIsSubmittingRef.current = isSubmitting;
   }, [isSubmitting, modalStates.isContentTypePickerOpen, closeModal, openModal, previewEntries]);
 
-  // Show getting started page if not started yet
-  if (!hasStarted) {
-    return (
+  return (
+    <>
       <GettingStartedPage
         oauthToken={oauthToken}
         onOauthTokenChange={handleOauthTokenChange}
         onSelectFile={handleGetStarted}
       />
-    );
-  }
-
-  return (
-    <>
       <SelectDocumentModal
         oauthToken={oauthToken}
         isOpen={modalStates.isUploadModalOpen}
@@ -209,6 +213,20 @@ const Page = () => {
         entries={previewEntries}
         onConfirm={() => handlePreviewModalConfirm(selectedContentTypes)}
         isSubmitting={isCreatingEntries}
+      />
+
+      <ReviewEntriesModal
+        isOpen={modalStates.isReviewModalOpen}
+        onClose={() => closeModal(ModalType.REVIEW)}
+        createdEntries={createdEntries}
+        spaceId={sdk.ids.space}
+        defaultLocale={sdk.locales.default}
+      />
+
+      <ErrorEntriesModal
+        isOpen={modalStates.isErrorEntriesModalOpen}
+        onClose={handleErrorModalCancel}
+        onTryAgain={handleErrorModalTryAgain}
       />
     </>
   );

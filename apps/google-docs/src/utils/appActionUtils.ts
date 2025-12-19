@@ -1,5 +1,4 @@
 import { PageAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
-import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 
 /**
  * Fetches the app action ID by name from the current environment
@@ -100,19 +99,4 @@ export const createPreviewAction = async (
     documentId,
     oauthToken,
   });
-};
-
-/**
- * Creates entries in Contentful from parsed document data
- * @param sdk - The Contentful SDK instance
- * @param entries - Array of entries to create
- * @param contentTypeIds - Array of content type IDs used in the entries
- * @returns Creation result with created entries and errors
- */
-export const createEntriesAction = async (
-  sdk: PageAppSDK | ConfigAppSDK,
-  entries: EntryToCreate[],
-  contentTypeIds: string[]
-) => {
-  return callAppAction(sdk, 'createEntries', { entries, contentTypeIds });
 };

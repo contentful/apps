@@ -145,8 +145,6 @@ export const OAuthConnector = ({
       );
       // Check the updated status after OAuth completion - expect it to be connected
       await checkGoogleOAuthStatus(true);
-
-      sdk.notifier.success('OAuth complete');
       cleanup();
       setIsOAuthLoading(false);
     }
@@ -202,7 +200,7 @@ export const OAuthConnector = ({
     } catch (error) {
       cleanup();
       setIsOAuthLoading(false);
-      sdk.notifier.error('Failed to initiate OAuth flow');
+      sdk.notifier.error('Unable to connect to Google Drive. Please try again.');
     }
   };
 
@@ -228,9 +226,8 @@ export const OAuthConnector = ({
       await checkGoogleOAuthStatus(false);
 
       setIsHoveringConnected(false);
-      sdk.notifier.success('Disconnected from Google OAuth');
     } catch (error) {
-      sdk.notifier.error('Failed to disconnect from Google OAuth');
+      sdk.notifier.error('Unable to disconnect from Google Drive. Please try again.');
     } finally {
       setIsDisconnecting(false);
     }
