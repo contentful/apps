@@ -14,7 +14,6 @@ import { useProgressTracking } from '../hooks/useProgressTracking';
 import { useDocumentSubmission } from '../hooks/useDocumentSubmission';
 import { usePreviewGeneration } from '../hooks/usePreviewGeneration';
 import SelectDocumentModal from '../components/page/SelectDocumentModal';
-import { ViewPreviewModal } from '../components/page/ViewPreviewModal';
 import { ReviewEntriesModal } from '../components/page/ReviewEntriesModal';
 import { ErrorEntriesModal } from '../components/page/ErrorEntriesModal';
 import { createEntriesFromPreview, EntryCreationResult } from '../services/entryService';
@@ -174,7 +173,6 @@ const Page = () => {
     resetProgress();
   };
 
-
   const handlePlanReviewCancel = () => {
     closeModal(ModalType.PREVIEW);
     openModal(ModalType.CONTENT_TYPE_PICKER);
@@ -283,14 +281,6 @@ const Page = () => {
         isOpen={modalStates.isConfirmCancelModalOpen}
         onConfirm={handleConfirmCancel}
         onCancel={handleKeepCreating}
-      />
-
-      <ViewPreviewModal
-        isOpen={modalStates.isPreviewModalOpen}
-        onClose={() => closeModal(ModalType.PREVIEW)}
-        entries={previewEntries}
-        onConfirm={() => handlePreviewModalConfirm(selectedContentTypes)}
-        isSubmitting={isCreatingEntries}
       />
 
       <ReviewEntriesModal
