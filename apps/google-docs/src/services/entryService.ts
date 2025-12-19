@@ -1,12 +1,14 @@
-import { PlainClientAPI, EntryProps, ContentTypeProps } from 'contentful-management';
+import { PageAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
+import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { extname } from 'path';
-import { EntryToCreate } from '../agents/documentParserAgent/schema';
-import { MarkdownParser } from './utils/richtext';
+import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
+import { MarkdownParser } from '../utils/richtext';
+
 /**
- * INTEG-3264: Service for creating entries in Contentful using the Contentful Management API
+ * Service for creating entries in Contentful using the Contentful Management API
  *
  * This service takes the output from the Document Parser Agent (which extracts entries from documents)
- * and creates them in Contentful using the CMA client.
+ * and creates them in Contentful using the CMA client from the SDK.
  */
 
 export interface EntryCreationResult {
@@ -21,8 +23,6 @@ export interface EntryCreationResult {
 // Precompiled regex for markdown image tokens: ![alt](url)
 // Note: This regex captures both alt text and URL for metadata extraction
 const IMAGE_TOKEN_REGEX = /!\[([^\]]*?)\]\(([\s\S]*?)\)/g;
-// Regex for extracting just URLs (for backward compatibility)
-const IMAGE_URL_REGEX = /!\[[^\]]*?\]\(([\s\S]*?)\)/g;
 
 /**
  * MIME type mapping for common file extensions
@@ -103,7 +103,7 @@ function extractImageMetadata(markdownText: string): ImageMetadata[] {
       const urlObj = new URL(url);
       const pathname = urlObj.pathname.toLowerCase();
 
-      // Extract extension using Node's path module
+      // Extract extension using path.extname
       const extension = extname(pathname).slice(1).toLowerCase();
       fileExtension = extension || 'jpg';
       contentType = MIME_TYPES[fileExtension] || 'image/jpeg';
@@ -229,7 +229,7 @@ async function retryWithBackoff<T>(
  * The asset will be processed and published by Contentful in the background.
  */
 async function createAssetFromUrlFast(
-  cma: PlainClientAPI,
+  cma: PageAppSDK['cma'] | ConfigAppSDK['cma'],
   spaceId: string,
   environmentId: string,
   url: string,
@@ -342,10 +342,6 @@ function transformFieldsForContentType(
 }
 
 /**
- * Validates input parameters for createEntries function
- * @throws Error if validation fails
- */
-/**
  * Validates that a value is a non-empty string
  */
 function validateNonEmptyString(value: unknown, name: string): asserts value is string {
@@ -376,15 +372,15 @@ function validateObject(value: unknown, name: string): asserts value is Record<s
 }
 
 function validateCreateEntriesInput(
-  cma: PlainClientAPI | null | undefined,
+  sdk: PageAppSDK | ConfigAppSDK | null | undefined,
   entries: EntryToCreate[] | null | undefined,
-  config:
-    | { spaceId: string; environmentId: string; contentTypes: ContentTypeProps[] }
-    | null
-    | undefined
+  contentTypeIds: string[] | null | undefined
 ): void {
-  // Validate CMA client
-  if (!cma) {
+  // Validate SDK
+  if (!sdk) {
+    throw new Error('SDK is required and cannot be null or undefined');
+  }
+  if (!sdk.cma) {
     throw new Error('CMA client is required and cannot be null or undefined');
   }
 
@@ -392,20 +388,13 @@ function validateCreateEntriesInput(
   if (!entries) {
     throw new Error('Entries array is required and cannot be null or undefined');
   }
-  validateNonEmptyArray<EntryToCreate>(entries, 'Entries array');
+  validateNonEmptyArray<EntryToCreate>(entries, 'Entries');
 
-  // Validate config
-  if (!config) {
-    throw new Error('Config is required and cannot be null or undefined');
+  // Validate contentTypeIds
+  if (!contentTypeIds) {
+    throw new Error('contentTypeIds is required and cannot be null or undefined');
   }
-  const { spaceId, environmentId, contentTypes } = config;
-  validateNonEmptyString(spaceId, 'spaceId');
-  validateNonEmptyString(environmentId, 'environmentId');
-
-  if (!contentTypes) {
-    throw new Error('contentTypes is required and cannot be null or undefined');
-  }
-  validateNonEmptyArray<ContentTypeProps>(contentTypes, 'contentTypes');
+  validateNonEmptyArray<string>(contentTypeIds, 'contentTypeIds');
 
   // Validate each entry
   entries.forEach((entry, i) => {
@@ -447,14 +436,6 @@ function validateCreateEntriesInput(
 }
 
 /**
- * Creates multiple entries in Contentful
- *
- * @param cma - Contentful Management API client
- * @param entries - Array of entries from Document Parser Agent output
- * @param config - Space and environment configuration
- * @returns Promise resolving to creation results with entries and errors
- */
-/**
  * Extracts unique image tokens from an entry's RichText fields
  */
 function extractImageTokensFromEntry(
@@ -490,7 +471,7 @@ function extractImageTokensFromEntry(
  * Creates assets for image tokens in parallel and returns mapping results
  */
 async function createAssetsForTokens(
-  cma: PlainClientAPI,
+  cma: PageAppSDK['cma'] | ConfigAppSDK['cma'],
   spaceId: string,
   environmentId: string,
   imageTokenMap: Map<string, ImageMetadata>
@@ -568,13 +549,21 @@ function buildUrlToAssetIdMap(
   return urlToAssetId;
 }
 
+/**
+ * Creates multiple entries in Contentful
+ *
+ * @param sdk - Contentful SDK instance (PageAppSDK or ConfigAppSDK)
+ * @param entries - Array of entries from Document Parser Agent output
+ * @param contentTypeIds - Array of content type IDs to fetch and use
+ * @returns Promise resolving to creation results with entries and errors
+ */
 export async function createEntriesFromPreview(
-  cma: PlainClientAPI,
+  sdk: PageAppSDK | ConfigAppSDK,
   entries: EntryToCreate[],
-  config: { spaceId: string; environmentId: string; contentTypes: ContentTypeProps[] }
+  contentTypeIds: string[]
 ): Promise<EntryCreationResult> {
   try {
-    validateCreateEntriesInput(cma, entries, config);
+    validateCreateEntriesInput(sdk, entries, contentTypeIds);
   } catch (validationError) {
     const errorMessage =
       validationError instanceof Error ? validationError.message : String(validationError);
@@ -583,14 +572,38 @@ export async function createEntriesFromPreview(
       errors: [
         {
           contentTypeId: 'validation',
-          error: `Input validation failed: ${errorMessage}`,
+          error: errorMessage,
           details: validationError,
         },
       ],
     };
   }
 
-  const { spaceId, environmentId, contentTypes } = config;
+  const spaceId = sdk.ids.space;
+  const environmentId = sdk.ids.environment;
+  const cma = sdk.cma;
+
+  // Fetch content types
+  const contentTypesResponse = await cma.contentType.getMany({
+    spaceId,
+    environmentId,
+  });
+  const contentTypes = contentTypesResponse.items.filter((ct) =>
+    contentTypeIds.includes(ct.sys.id)
+  );
+
+  if (contentTypes.length === 0) {
+    return {
+      createdEntries: [],
+      errors: [
+        {
+          contentTypeId: 'validation',
+          error: 'No matching content types found',
+        },
+      ],
+    };
+  }
+
   const createdEntries: EntryProps[] = [];
   const errors: Array<{ contentTypeId: string; error: string; details?: any }> = [];
 

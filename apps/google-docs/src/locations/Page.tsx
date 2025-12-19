@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { Box, Button, Card, Heading, Layout, Note } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { GettingStartedPage } from '../components/page/GettingStartedPage';
@@ -13,7 +12,7 @@ import { useProgressTracking } from '../hooks/useProgressTracking';
 import { useDocumentSubmission } from '../hooks/useDocumentSubmission';
 import SelectDocumentModal from '../components/page/SelectDocumentModal';
 import { ViewPreviewModal } from '../components/page/ViewPreviewModal';
-import { createEntriesAction } from '../utils/appActionUtils';
+import { createEntriesFromPreview, EntryCreationResult } from '../services/entryService';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -120,15 +119,20 @@ const Page = () => {
     setIsCreatingEntries(true);
     try {
       const ids = contentTypes.map((ct) => ct.id);
-      const entryResult: any = await createEntriesAction(sdk, previewEntries, ids);
+      const entryResult: EntryCreationResult = await createEntriesFromPreview(
+        sdk,
+        previewEntries,
+        ids
+      );
 
-      if (entryResult.errorCount > 0) {
-        sdk.notifier.warning(
-          `Created ${entryResult.createdCount} entries with ${entryResult.errorCount} errors`
-        );
+      const createdCount = entryResult.createdEntries.length;
+      const errorCount = entryResult.errors.length;
+
+      if (errorCount > 0) {
+        sdk.notifier.warning(`Created ${createdCount} entries with ${errorCount} errors`);
         console.error('Entry creation errors:', entryResult.errors);
       } else {
-        sdk.notifier.success(`Successfully created ${entryResult.createdCount} entries`);
+        sdk.notifier.success(`Successfully created ${createdCount} entries`);
       }
 
       // Close the preview modal and reset progress after creating entries
