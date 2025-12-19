@@ -4,17 +4,17 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { fetchContentTypes } from './service/contentTypeService';
-import { initContentfulManagementClient } from './service/initCMAClient';
-import { EntryToCreate } from './agents/documentParserAgent/schema';
-import { createPreviewWithAgent } from './agents/documentParserAgent/documentParser.agent';
-import { createEntriesFromPreview } from './service/entryService';
+import { EntryToCreate } from '../../agents/documentParserAgent/schema';
+import { createEntriesFromPreview } from '../../service/entryService';
+import { initContentfulManagementClient } from '../../service/initCMAClient';
+import { fetchContentTypes } from '../../service/contentTypeService';
+import { createPreviewWithAgent } from '../../agents/documentParserAgent/documentParser.agent';
 
-export type AppActionParameters = {
+interface CreateEntriesParameters {
   contentTypeIds: string[];
   documentJson?: unknown; // Optional: Google Doc JSON (if entries not provided, will analyze document)
   entries?: EntryToCreate[]; // Optional: if provided, skip document analysis and use these entries
-};
+}
 
 interface AppInstallationParameters {
   openAiApiKey: string;
@@ -26,9 +26,9 @@ interface AppInstallationParameters {
  */
 export const handler: FunctionEventHandler<
   FunctionTypeEnum.AppActionCall,
-  AppActionParameters
+  CreateEntriesParameters
 > = async (
-  event: AppActionRequest<'Custom', AppActionParameters>,
+  event: AppActionRequest<'Custom', CreateEntriesParameters>,
   context: FunctionEventContext
 ) => {
   const { contentTypeIds, documentJson, entries: providedEntries } = event.body;
