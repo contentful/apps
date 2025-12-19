@@ -6,6 +6,7 @@ interface ModalStates {
   isConfirmCancelModalOpen: boolean;
   isPreviewModalOpen: boolean;
   isReviewModalOpen: boolean;
+  isErrorEntriesModalOpen: boolean;
 }
 
 interface ModalSetters {
@@ -14,6 +15,7 @@ interface ModalSetters {
   setIsConfirmCancelModalOpen: (value: boolean) => void;
   setIsPreviewModalOpen: (value: boolean) => void;
   setIsReviewModalOpen: (value: boolean) => void;
+  setIsErrorEntriesModalOpen: (value: boolean) => void;
 }
 
 export enum ModalType {
@@ -22,6 +24,7 @@ export enum ModalType {
   CONFIRM_CANCEL = 'confirmCancel',
   PREVIEW = 'preview',
   REVIEW = 'review',
+  ERROR_ENTRIES = 'errorEntries',
 }
 
 export const useModalManagement = () => {
@@ -30,6 +33,7 @@ export const useModalManagement = () => {
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState<boolean>(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState<boolean>(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState<boolean>(false);
+  const [isErrorEntriesModalOpen, setIsErrorEntriesModalOpen] = useState<boolean>(false);
 
   const openModal = (modalType: ModalType) => {
     switch (modalType) {
@@ -47,6 +51,9 @@ export const useModalManagement = () => {
         break;
       case ModalType.REVIEW:
         setIsReviewModalOpen(true);
+        break;
+      case ModalType.ERROR_ENTRIES:
+        setIsErrorEntriesModalOpen(true);
         break;
     }
   };
@@ -68,6 +75,9 @@ export const useModalManagement = () => {
       case ModalType.REVIEW:
         setIsReviewModalOpen(false);
         break;
+      case ModalType.ERROR_ENTRIES:
+        setIsErrorEntriesModalOpen(false);
+        break;
     }
   };
 
@@ -78,6 +88,7 @@ export const useModalManagement = () => {
       isConfirmCancelModalOpen,
       isPreviewModalOpen,
       isReviewModalOpen,
+      isErrorEntriesModalOpen,
     } as ModalStates,
     setModalStates: {
       setIsUploadModalOpen,
@@ -85,6 +96,7 @@ export const useModalManagement = () => {
       setIsConfirmCancelModalOpen,
       setIsPreviewModalOpen,
       setIsReviewModalOpen,
+      setIsErrorEntriesModalOpen,
     } as ModalSetters,
     openModal,
     closeModal,

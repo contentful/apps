@@ -13,6 +13,7 @@ import { useDocumentSubmission } from '../hooks/useDocumentSubmission';
 import SelectDocumentModal from '../components/page/SelectDocumentModal';
 import { ViewPreviewModal } from '../components/page/ViewPreviewModal';
 import { ReviewEntriesModal } from '../components/page/ReviewEntriesModal';
+import { ErrorEntriesModal } from '../components/page/ErrorEntriesModal';
 import { createEntriesFromPreview, EntryCreationResult } from '../services/entryService';
 
 const Page = () => {
@@ -128,27 +129,36 @@ const Page = () => {
       const createdCount = entryResult.createdEntries.length;
       const errorCount = entryResult.errors.length;
 
-      if (errorCount > 0) {
-        sdk.notifier.warning(`Created ${createdCount} entries with ${errorCount} errors`);
+      closeModal(ModalType.PREVIEW);
+
+      if (createdCount === 0) {
         console.error('Entry creation errors:', entryResult.errors);
+        openModal(ModalType.ERROR_ENTRIES);
+        return;
       }
 
       setCreatedEntries(entryResult.createdEntries);
-
-      // Close the preview modal and reset progress after creating entries
-      closeModal(ModalType.PREVIEW);
       resetProgress();
-
-      if (createdCount > 0) {
-        openModal(ModalType.REVIEW);
-      }
+      openModal(ModalType.REVIEW);
     } catch (error) {
+      closeModal(ModalType.PREVIEW);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      sdk.notifier.error(`Failed to create entries: ${errorMessage}`);
       console.error('Entry creation failed:', error);
+      openModal(ModalType.ERROR_ENTRIES);
     } finally {
       setIsCreatingEntries(false);
     }
+  };
+
+  const handleErrorModalTryAgain = () => {
+    closeModal(ModalType.ERROR_ENTRIES);
+    // Reopen the preview modal so user can try again
+    openModal(ModalType.PREVIEW);
+  };
+
+  const handleErrorModalCancel = () => {
+    closeModal(ModalType.ERROR_ENTRIES);
+    resetProgress();
   };
 
   // Close the ContentTypePickerModal when submission completes and open preview modal
@@ -211,6 +221,12 @@ const Page = () => {
         createdEntries={createdEntries}
         spaceId={sdk.ids.space}
         defaultLocale={sdk.locales.default}
+      />
+
+      <ErrorEntriesModal
+        isOpen={modalStates.isErrorEntriesModalOpen}
+        onClose={handleErrorModalCancel}
+        onTryAgain={handleErrorModalTryAgain}
       />
     </>
   );
