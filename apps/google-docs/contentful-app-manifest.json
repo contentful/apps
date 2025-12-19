@@ -38,19 +38,6 @@
       ]
     },
     {
-      "id": "analyzeContentTypes",
-      "name": "Analyze Content Types",
-      "description": "Analyzes content type structure and relationships using AI.",
-      "path": "functions/handlers/createPreview/createContentTypesAnalysisHandler.js",
-      "entryFile": "functions/handlers/createPreview/createContentTypesAnalysisHandler.ts",
-      "allowNetworks": [
-        "https://api.openai.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
-    },
-    {
       "id": "initiateGdocOauth",
       "name": "Initiate Gdoc OAuth Flow",
       "description": "Initiates the OAuth flow for Google Docs",

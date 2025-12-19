@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { analyzeContentTypesAction, createPreviewAction } from '../utils/appActionUtils';
-import { ERROR_MESSAGES } from '../constants/messages';
+import { createEntries } from '../utils/appFunctionUtils';
+import { fetchGoogleDocAsJson } from '../utils/googleDriveUtils';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages';
 import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 
 interface UseDocumentSubmissionReturn {
@@ -9,8 +10,14 @@ interface UseDocumentSubmissionReturn {
   previewEntries: EntryToCreate[];
   errorMessage: string | null;
   successMessage: string | null;
-  submit: (contentTypeIds: string[]) => Promise<void>;
+  submit: (contentTypeIds: string[], entries?: any[]) => Promise<void>;
   clearMessages: () => void;
+}
+
+interface FinalEntriesResult {
+  entries: EntryToCreate[];
+  summary: string;
+  totalEntries: number;
 }
 
 export const useDocumentSubmission = (
@@ -45,7 +52,7 @@ export const useDocumentSubmission = (
   );
 
   const submit = useCallback(
-    async (contentTypeIds: string[]) => {
+    async (contentTypeIds: string[], entries?: any[]) => {
       const validationError = validateSubmission(contentTypeIds);
       if (validationError) {
         setErrorMessage(validationError);
@@ -59,22 +66,16 @@ export const useDocumentSubmission = (
       setPreviewEntries([]);
 
       try {
-        const analyzeContentTypesResponse = await analyzeContentTypesAction(
-          sdk,
-          contentTypeIds,
-          oauthToken
-        );
-        console.log('analyzeContentTypesResponse', analyzeContentTypesResponse);
+        // If entries provided, use them directly. Otherwise fetch document JSON as fallback
+        let documentJson: unknown | undefined;
+        if (!entries || entries.length === 0) {
+          documentJson = await fetchGoogleDocAsJson(documentId, oauthToken);
+        }
 
-        const processDocumentResponse = await createPreviewAction(
-          sdk,
-          contentTypeIds,
-          documentId,
-          oauthToken
-        );
-        console.log('processDocumentResponse', processDocumentResponse);
+        const response = (await createEntries(sdk, contentTypeIds, entries, documentJson)) as any;
+        const result: FinalEntriesResult = response.sys.result;
 
-        setPreviewEntries((processDocumentResponse as any).sys.result.entries);
+        setPreviewEntries(result.entries);
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : ERROR_MESSAGES.SUBMISSION_FAILED);
       } finally {

@@ -8,10 +8,9 @@ import { createPreviewWithAgent } from '../../agents/documentParserAgent/documen
 import { fetchContentTypes } from '../../service/contentTypeService';
 import { initContentfulManagementClient } from '../../service/initCMAClient';
 
-export type CreatePreviewParameters = {
+export type AppActionParameters = {
   contentTypeIds: string[];
-  documentId: string;
-  oauthToken: string;
+  documentJson: unknown; // Google Doc JSON (fetched from frontend)
 };
 
 interface AppInstallationParameters {
@@ -27,34 +26,37 @@ interface AppInstallationParameters {
  */
 export const handler: FunctionEventHandler<
   FunctionTypeEnum.AppActionCall,
-  CreatePreviewParameters
+  AppActionParameters
 > = async (
-  event: AppActionRequest<'Custom', CreatePreviewParameters>,
+  event: AppActionRequest<'Custom', AppActionParameters>,
   context: FunctionEventContext
 ) => {
-  const { contentTypeIds, documentId, oauthToken } = event.body;
+  const { contentTypeIds, documentJson } = event.body;
   const { openAiApiKey } = context.appInstallationParameters as AppInstallationParameters;
+  if (!documentJson) {
+    throw new Error('Document JSON is required');
+  }
 
   if (!contentTypeIds || contentTypeIds.length === 0) {
     throw new Error('At least one content type ID is required');
   }
 
   const cma = initContentfulManagementClient(context);
-
   const contentTypes = await fetchContentTypes(cma, new Set<string>(contentTypeIds));
 
-  // Process the document and create preview entries
+  // Use the same AI agent to analyze the document and generate proposed entries
   const aiDocumentResponse = await createPreviewWithAgent({
-    documentId,
-    oauthToken,
+    documentJson,
     openAiApiKey,
     contentTypes,
   });
 
   return {
     success: true,
-    summary: aiDocumentResponse.summary,
-    totalEntriesExtracted: aiDocumentResponse.totalEntries,
-    entries: aiDocumentResponse.entries,
+    response: {
+      entries: aiDocumentResponse.entries,
+      summary: aiDocumentResponse.summary,
+      totalEntries: aiDocumentResponse.totalEntries,
+    },
   };
 };

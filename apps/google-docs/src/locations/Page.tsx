@@ -7,21 +7,30 @@ import {
   SelectedContentType,
 } from '../components/page/ContentTypePickerModal';
 import { ConfirmCancelModal } from '../components/page/ConfirmCancelModal';
+import { PreviewModal } from '../components/page/PreviewModal';
+import { LoadingModal } from '../components/page/LoadingModal';
 import { useModalManagement, ModalType } from '../hooks/useModalManagement';
 import { useProgressTracking } from '../hooks/useProgressTracking';
 import { useDocumentSubmission } from '../hooks/useDocumentSubmission';
+import { usePreviewGeneration } from '../hooks/usePreviewGeneration';
 import SelectDocumentModal from '../components/page/SelectDocumentModal';
-import { ViewPreviewModal } from '../components/page/ViewPreviewModal';
 import { ReviewEntriesModal } from '../components/page/ReviewEntriesModal';
 import { ErrorEntriesModal } from '../components/page/ErrorEntriesModal';
 import { createEntriesFromPreview, EntryCreationResult } from '../services/entryService';
+
+interface EntryToCreate {
+  contentTypeId: string;
+  fields: Record<string, Record<string, any>>;
+}
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();
   const { modalStates, openModal, closeModal } = useModalManagement();
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isCreatingEntries, setIsCreatingEntries] = useState<boolean>(false);
+
   const [createdEntries, setCreatedEntries] = useState<EntryCreationResult['createdEntries']>([]);
+
   const {
     documentId,
     setDocumentId,
@@ -32,11 +41,14 @@ const Page = () => {
     pendingCloseAction,
     setPendingCloseAction,
   } = useProgressTracking();
-  const { previewEntries, submit, clearMessages, isSubmitting } = useDocumentSubmission(
-    sdk,
-    documentId,
-    oauthToken
-  );
+  const { previewEntries, successMessage, errorMessage, submit, clearMessages, isSubmitting } =
+    useDocumentSubmission(sdk, documentId, oauthToken);
+  const {
+    preview,
+    isLoading: isGeneratingPlan,
+    error: planError,
+    generatePreview,
+  } = usePreviewGeneration(sdk, documentId, oauthToken);
 
   // Track previous submission state to detect completion
   const prevIsSubmittingRef = useRef<boolean>(false);
@@ -53,6 +65,8 @@ const Page = () => {
     resetProgressTracking();
     closeModal(ModalType.UPLOAD);
     closeModal(ModalType.CONTENT_TYPE_PICKER);
+    closeModal(ModalType.PREVIEW);
+    closeModal(ModalType.LOADING);
     clearMessages();
   };
 
@@ -108,11 +122,30 @@ const Page = () => {
 
   const handleContentTypeSelected = async (contentTypes: SelectedContentType[]) => {
     const ids = contentTypes.map((ct) => ct.id);
-    await submit(ids);
+    // Close content type picker and open loading modal
+    closeModal(ModalType.CONTENT_TYPE_PICKER);
+    openModal(ModalType.LOADING);
+    await generatePreview(ids);
+  };
+
+  const handleErrorModalTryAgain = () => {
+    closeModal(ModalType.ERROR_ENTRIES);
+    // Reopen the preview modal so user can try again
+    openModal(ModalType.PREVIEW);
+  };
+
+  const handleErrorModalCancel = () => {
+    closeModal(ModalType.ERROR_ENTRIES);
+    resetProgress();
+  };
+
+  const handlePlanReviewCancel = () => {
+    closeModal(ModalType.PREVIEW);
+    openModal(ModalType.CONTENT_TYPE_PICKER);
   };
 
   const handlePreviewModalConfirm = async (contentTypes: SelectedContentType[]) => {
-    if (!previewEntries || previewEntries.length === 0) {
+    if (!preview || !preview.entries || preview.entries.length === 0) {
       sdk.notifier.error('No entries to create');
       return;
     }
@@ -122,12 +155,11 @@ const Page = () => {
       const ids = contentTypes.map((ct) => ct.id);
       const entryResult: EntryCreationResult = await createEntriesFromPreview(
         sdk,
-        previewEntries,
+        preview.entries,
         ids
       );
 
       const createdCount = entryResult.createdEntries.length;
-      const errorCount = entryResult.errors.length;
 
       closeModal(ModalType.PREVIEW);
 
@@ -150,34 +182,56 @@ const Page = () => {
     }
   };
 
-  const handleErrorModalTryAgain = () => {
-    closeModal(ModalType.ERROR_ENTRIES);
-    // Reopen the preview modal so user can try again
-    openModal(ModalType.PREVIEW);
-  };
+  // Track previous plan generation state to detect completion
+  const prevIsGeneratingPlanRef = useRef<boolean>(false);
 
-  const handleErrorModalCancel = () => {
-    closeModal(ModalType.ERROR_ENTRIES);
-    resetProgress();
-  };
-
-  // Close the ContentTypePickerModal when submission completes and open preview modal
+  // Handle plan generation completion
   useEffect(() => {
-    const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
+    const planGenerationJustCompleted = prevIsGeneratingPlanRef.current && !isGeneratingPlan;
 
-    if (submissionJustCompleted && modalStates.isContentTypePickerOpen) {
-      console.log('Document processing completed, previewEntries:', previewEntries);
-      closeModal(ModalType.CONTENT_TYPE_PICKER);
+    if (planGenerationJustCompleted) {
+      // Close loading modal if it's open
+      if (modalStates.isLoadingModalOpen) {
+        closeModal(ModalType.LOADING);
+      }
 
-      // Open preview modal if we have entries
-      if (previewEntries && previewEntries.length > 0) {
-        console.log('Opening preview modal with', previewEntries.length, 'entries');
-        openModal(ModalType.PREVIEW);
+      if (preview && !planError) {
+        // Plan generation completed successfully, open preview modal
+        if (preview.entries && Array.isArray(preview.entries) && preview.summary) {
+          openModal(ModalType.PREVIEW);
+        } else {
+          // Invalid preview data
+          sdk.notifier.error('Invalid preview data received');
+          openModal(ModalType.CONTENT_TYPE_PICKER);
+        }
+      } else if (planError) {
+        // Plan generation failed, show error and return to content type picker
+        sdk.notifier.error(`Failed to generate preview: ${planError}`);
+        openModal(ModalType.CONTENT_TYPE_PICKER);
       }
     }
 
+    prevIsGeneratingPlanRef.current = isGeneratingPlan;
+  }, [
+    isGeneratingPlan,
+    preview,
+    planError,
+    modalStates.isLoadingModalOpen,
+    closeModal,
+    openModal,
+    sdk,
+  ]);
+
+  // Close the Loading modal when submission completes
+  useEffect(() => {
+    const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
+
+    if (submissionJustCompleted && modalStates.isLoadingModalOpen) {
+      closeModal(ModalType.LOADING);
+    }
+
     prevIsSubmittingRef.current = isSubmitting;
-  }, [isSubmitting, modalStates.isContentTypePickerOpen, closeModal, openModal, previewEntries]);
+  }, [isSubmitting, modalStates.isLoadingModalOpen, closeModal]);
 
   return (
     <>
@@ -196,23 +250,29 @@ const Page = () => {
         isOpen={modalStates.isContentTypePickerOpen}
         onClose={handleContentTypePickerCloseRequest}
         onSelect={handleContentTypeSelected}
-        isSubmitting={isSubmitting}
+        isGeneratingPlan={isGeneratingPlan}
         selectedContentTypes={selectedContentTypes}
         setSelectedContentTypes={setSelectedContentTypes}
+      />
+
+      <PreviewModal
+        isOpen={modalStates.isPreviewModalOpen}
+        onClose={handlePlanReviewCancel}
+        onCreateEntries={handlePreviewModalConfirm}
+        preview={preview}
+        isCreatingEntries={isCreatingEntries}
+        isLoading={isGeneratingPlan}
+      />
+
+      <LoadingModal
+        isOpen={modalStates.isLoadingModalOpen}
+        message={isGeneratingPlan ? 'Generating plan...' : 'Creating entries...'}
       />
 
       <ConfirmCancelModal
         isOpen={modalStates.isConfirmCancelModalOpen}
         onConfirm={handleConfirmCancel}
         onCancel={handleKeepCreating}
-      />
-
-      <ViewPreviewModal
-        isOpen={modalStates.isPreviewModalOpen}
-        onClose={() => closeModal(ModalType.PREVIEW)}
-        entries={previewEntries}
-        onConfirm={() => handlePreviewModalConfirm(selectedContentTypes)}
-        isSubmitting={isCreatingEntries}
       />
 
       <ReviewEntriesModal

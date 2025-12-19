@@ -12,14 +12,12 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import { ContentTypeProps } from 'contentful-management';
 import { FinalEntriesResultSchema, FinalEntriesResult } from './schema';
-import { fetchGoogleDocAsJson } from '../../service/googleDriveService';
 
 /**
  * Configuration for the document parser
  */
 export interface DocumentParserConfig {
-  documentId: string;
-  oauthToken: string;
+  documentJson: unknown; // Google Doc JSON (fetched from frontend)
   contentTypes: ContentTypeProps[];
   openAiApiKey: string;
   locale?: string;
@@ -40,15 +38,15 @@ export async function createPreviewWithAgent(
   const modelVersion = 'gpt-4o';
   const temperature = 0.3;
 
-  const { documentId, oauthToken, openAiApiKey, contentTypes, locale = 'en-US' } = config;
+  const { documentJson, openAiApiKey, contentTypes, locale = 'en-US' } = config;
 
   const openaiClient = createOpenAI({
     apiKey: openAiApiKey,
   });
 
-  console.log('Document Parser Agent document content Input:', documentId);
-  const documentJson = await fetchGoogleDocAsJson({ documentId, oauthToken });
   const prompt = buildExtractionPrompt({ contentTypes, documentJson, locale });
+
+  const aiStartTime = Date.now();
   const result = await generateObject({
     model: openaiClient(modelVersion),
     schema: FinalEntriesResultSchema,
@@ -56,9 +54,10 @@ export async function createPreviewWithAgent(
     system: buildSystemPrompt(),
     prompt,
   });
+  const aiDuration = Date.now() - aiStartTime;
+  console.log(`[Timing] AI generateObject: ${aiDuration}ms`);
 
   const finalResult = result.object as FinalEntriesResult;
-  console.log('Document Parser Agent Result:', JSON.stringify(result, null, 2));
 
   return finalResult;
 }
