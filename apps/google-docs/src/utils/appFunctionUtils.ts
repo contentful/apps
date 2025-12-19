@@ -23,7 +23,7 @@ export async function getAppActionId(
   return appAction.sys.id;
 }
 
-export const createEntriesFromDocumentAction = async (
+export const createEntries = async (
   sdk: PageAppSDK | ConfigAppSDK,
   contentTypeIds: string[],
   entries?: any[], // Optional: entries from plan to avoid re-analysis
@@ -36,7 +36,7 @@ export const createEntriesFromDocumentAction = async (
       throw new Error('App definition ID not found');
     }
 
-    const appActionId = await getAppActionId(sdk, 'createEntriesFromDocumentAction');
+    const appActionId = await getAppActionId(sdk, 'createEntries');
     const result = await sdk.cma.appActionCall.createWithResult(
       {
         appDefinitionId,
@@ -64,7 +64,7 @@ export const createEntriesFromDocumentAction = async (
   }
 };
 
-export const createPreviewFromDocumentAction = async (
+export const createPreview = async (
   sdk: PageAppSDK | ConfigAppSDK,
   contentTypeIds: string[],
   documentJson: unknown

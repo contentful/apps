@@ -31,8 +31,7 @@ export const handler: FunctionEventHandler<
   event: AppActionRequest<'Custom', CreateEntriesParameters>,
   context: FunctionEventContext
 ) => {
-  const { contentTypeIds, documentJson, entries: providedEntries } = event.body;
-  const { openAiApiKey } = context.appInstallationParameters as AppInstallationParameters;
+  const { contentTypeIds, entries: providedEntries } = event.body;
 
   if (!contentTypeIds || contentTypeIds.length === 0) {
     throw new Error('At least one content type ID is required');
@@ -51,16 +50,6 @@ export const handler: FunctionEventHandler<
     entriesToCreate = providedEntries;
     summary = `Creating ${entriesToCreate.length} entries from plan`;
     totalEntries = entriesToCreate.length;
-  } else if (documentJson) {
-    // Fallback: analyze document if entries not provided but documentJson is available
-    const aiDocumentResponse = await createPreviewWithAgent({
-      documentJson,
-      openAiApiKey,
-      contentTypes,
-    });
-    entriesToCreate = aiDocumentResponse.entries;
-    summary = aiDocumentResponse.summary;
-    totalEntries = aiDocumentResponse.totalEntries;
   } else {
     throw new Error('Either entries or documentJson must be provided');
   }

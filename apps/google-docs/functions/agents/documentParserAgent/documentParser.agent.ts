@@ -44,15 +44,8 @@ export async function createPreviewWithAgent(
     apiKey: openAiApiKey,
   });
 
-  console.log('Document Parser Agent document JSON received (fetched from frontend)');
-
-  // Step 1: Build extraction prompt
-  const promptStartTime = Date.now();
   const prompt = buildExtractionPrompt({ contentTypes, documentJson, locale });
-  const promptDuration = Date.now() - promptStartTime;
-  console.log(`[Timing] Build extraction prompt: ${promptDuration}ms`);
 
-  // Step 3: Generate object with AI
   const aiStartTime = Date.now();
   const result = await generateObject({
     model: openaiClient(modelVersion),
@@ -64,14 +57,7 @@ export async function createPreviewWithAgent(
   const aiDuration = Date.now() - aiStartTime;
   console.log(`[Timing] AI generateObject: ${aiDuration}ms`);
 
-  // Step 4: Process result
-  const processStartTime = Date.now();
   const finalResult = result.object as FinalEntriesResult;
-  const processDuration = Date.now() - processStartTime;
-  console.log(`[Timing] Process result: ${processDuration}ms`);
-
-  const totalDuration = Date.now() - promptStartTime;
-  console.log(`[Timing] Total Document Parser Agent execution: ${totalDuration}ms`);
 
   return finalResult;
 }

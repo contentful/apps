@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { createEntriesFromDocumentAction } from '../utils/appFunctionUtils';
+import { createEntries } from '../utils/appFunctionUtils';
 import { fetchGoogleDocAsJson } from '../utils/googleDriveUtils';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/messages';
 import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
@@ -72,12 +72,7 @@ export const useDocumentSubmission = (
           documentJson = await fetchGoogleDocAsJson(documentId, oauthToken);
         }
 
-        const response = await createEntriesFromDocumentAction(
-          sdk,
-          contentTypeIds,
-          entries,
-          documentJson
-        ) as any;
+        const response = (await createEntries(sdk, contentTypeIds, entries, documentJson)) as any;
         const result: FinalEntriesResult = response.sys.result;
 
         setPreviewEntries(result.entries);
