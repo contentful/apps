@@ -12,6 +12,7 @@ import { useProgressTracking } from '../hooks/useProgressTracking';
 import { useDocumentSubmission } from '../hooks/useDocumentSubmission';
 import SelectDocumentModal from '../components/page/SelectDocumentModal';
 import { ViewPreviewModal } from '../components/page/ViewPreviewModal';
+import { ReviewEntriesModal } from '../components/page/ReviewEntriesModal';
 import { createEntriesFromPreview, EntryCreationResult } from '../services/entryService';
 
 const Page = () => {
@@ -19,6 +20,7 @@ const Page = () => {
   const { modalStates, openModal, closeModal } = useModalManagement();
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isCreatingEntries, setIsCreatingEntries] = useState<boolean>(false);
+  const [createdEntries, setCreatedEntries] = useState<EntryCreationResult['createdEntries']>([]);
   const {
     documentId,
     setDocumentId,
@@ -105,8 +107,6 @@ const Page = () => {
 
   const handleContentTypeSelected = async (contentTypes: SelectedContentType[]) => {
     const ids = contentTypes.map((ct) => ct.id);
-
-    // Call create entries function after content types are selected
     await submit(ids);
   };
 
@@ -131,13 +131,17 @@ const Page = () => {
       if (errorCount > 0) {
         sdk.notifier.warning(`Created ${createdCount} entries with ${errorCount} errors`);
         console.error('Entry creation errors:', entryResult.errors);
-      } else {
-        sdk.notifier.success(`Successfully created ${createdCount} entries`);
       }
+
+      setCreatedEntries(entryResult.createdEntries);
 
       // Close the preview modal and reset progress after creating entries
       closeModal(ModalType.PREVIEW);
       resetProgress();
+
+      if (createdCount > 0) {
+        openModal(ModalType.REVIEW);
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       sdk.notifier.error(`Failed to create entries: ${errorMessage}`);
@@ -199,6 +203,14 @@ const Page = () => {
         entries={previewEntries}
         onConfirm={() => handlePreviewModalConfirm(selectedContentTypes)}
         isSubmitting={isCreatingEntries}
+      />
+
+      <ReviewEntriesModal
+        isOpen={modalStates.isReviewModalOpen}
+        onClose={() => closeModal(ModalType.REVIEW)}
+        createdEntries={createdEntries}
+        spaceId={sdk.ids.space}
+        defaultLocale={sdk.locales.default}
       />
     </>
   );

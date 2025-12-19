@@ -1,6 +1,5 @@
 import { PageAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
-import { extname } from 'path';
 import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 import { MarkdownParser } from '../utils/richtext';
 
@@ -72,6 +71,14 @@ function isValidUrl(url: string): boolean {
   }
 }
 
+function getFileExtension(pathname: string): string {
+  const lastDot = pathname.lastIndexOf('.');
+  if (lastDot === -1 || lastDot === pathname.length - 1) {
+    return '';
+  }
+  return pathname.slice(lastDot + 1).toLowerCase();
+}
+
 /**
  * Extracts image metadata from markdown image tokens
  * Returns array of ImageMetadata objects
@@ -103,8 +110,7 @@ function extractImageMetadata(markdownText: string): ImageMetadata[] {
       const urlObj = new URL(url);
       const pathname = urlObj.pathname.toLowerCase();
 
-      // Extract extension using path.extname
-      const extension = extname(pathname).slice(1).toLowerCase();
+      const extension = getFileExtension(pathname);
       fileExtension = extension || 'jpg';
       contentType = MIME_TYPES[fileExtension] || 'image/jpeg';
 
@@ -233,6 +239,7 @@ async function createAssetFromUrlFast(
   spaceId: string,
   environmentId: string,
   url: string,
+  defaultLocale: string,
   metadata?: { title?: string; altText?: string; fileName?: string; contentType?: string }
 ) {
   // Validate inputs
@@ -261,9 +268,9 @@ async function createAssetFromUrlFast(
         { spaceId, environmentId },
         {
           fields: {
-            title: { 'en-US': title },
+            title: { [defaultLocale]: title },
             file: {
-              'en-US': {
+              [defaultLocale]: {
                 contentType,
                 fileName,
                 upload: validatedUrl,
@@ -474,6 +481,7 @@ async function createAssetsForTokens(
   cma: PageAppSDK['cma'] | ConfigAppSDK['cma'],
   spaceId: string,
   environmentId: string,
+  defaultLocale: string,
   imageTokenMap: Map<string, ImageMetadata>
 ): Promise<Array<{ tokenKey: string; normalizedUrl: string; assetId: string } | null>> {
   const assetCreationPromises = Array.from(imageTokenMap.entries()).map(
@@ -485,12 +493,19 @@ async function createAssetsForTokens(
       }
 
       try {
-        const asset = await createAssetFromUrlFast(cma, spaceId, environmentId, metadata.url, {
-          title: metadata.altText || metadata.fileName || 'Image',
-          altText: metadata.altText,
-          fileName: metadata.fileName,
-          contentType: metadata.contentType,
-        });
+        const asset = await createAssetFromUrlFast(
+          cma,
+          spaceId,
+          environmentId,
+          metadata.url,
+          defaultLocale,
+          {
+            title: metadata.altText || metadata.fileName || 'Image',
+            altText: metadata.altText,
+            fileName: metadata.fileName,
+            contentType: metadata.contentType,
+          }
+        );
 
         return {
           tokenKey,
@@ -582,6 +597,7 @@ export async function createEntriesFromPreview(
   const spaceId = sdk.ids.space;
   const environmentId = sdk.ids.environment;
   const cma = sdk.cma;
+  const defaultLocale = sdk.locales.default;
 
   // Fetch content types
   const contentTypesResponse = await cma.contentType.getMany({
@@ -616,7 +632,13 @@ export async function createEntriesFromPreview(
         const imageTokenMap = extractImageTokensFromEntry(entry, contentType);
 
         if (imageTokenMap.size > 0) {
-          const results = await createAssetsForTokens(cma, spaceId, environmentId, imageTokenMap);
+          const results = await createAssetsForTokens(
+            cma,
+            spaceId,
+            environmentId,
+            defaultLocale,
+            imageTokenMap
+          );
           urlToAssetId = buildUrlToAssetIdMap(results, imageTokenMap);
         }
       }
