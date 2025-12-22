@@ -32,7 +32,7 @@ const Page = () => {
     pendingCloseAction,
     setPendingCloseAction,
   } = useProgressTracking();
-  const { previewEntries, submit, clearMessages, isSubmitting } = useDocumentSubmission(
+  const { previewData, submit, clearMessages, isSubmitting } = useDocumentSubmission(
     sdk,
     documentId,
     oauthToken
@@ -112,7 +112,7 @@ const Page = () => {
   };
 
   const handlePreviewModalConfirm = async (contentTypes: SelectedContentType[]) => {
-    if (!previewEntries || previewEntries.length === 0) {
+    if (!previewData || previewData.entries.length === 0) {
       sdk.notifier.error('No entries to create');
       return;
     }
@@ -122,7 +122,7 @@ const Page = () => {
       const ids = contentTypes.map((ct) => ct.id);
       const entryResult: EntryCreationResult = await createEntriesFromPreview(
         sdk,
-        previewEntries,
+        previewData.entries,
         ids
       );
 
@@ -166,18 +166,18 @@ const Page = () => {
     const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
 
     if (submissionJustCompleted && modalStates.isContentTypePickerOpen) {
-      console.log('Document processing completed, previewEntries:', previewEntries);
+      console.log('Document processing completed, previewData:', previewData);
       closeModal(ModalType.CONTENT_TYPE_PICKER);
 
       // Open preview modal if we have entries
-      if (previewEntries && previewEntries.length > 0) {
-        console.log('Opening preview modal with', previewEntries.length, 'entries');
+      if (previewData && previewData.entries.length > 0) {
+        console.log('Opening preview modal with', previewData.entries.length, 'entries');
         openModal(ModalType.PREVIEW);
       }
     }
 
     prevIsSubmittingRef.current = isSubmitting;
-  }, [isSubmitting, modalStates.isContentTypePickerOpen, closeModal, openModal, previewEntries]);
+  }, [isSubmitting, modalStates.isContentTypePickerOpen, closeModal, openModal, previewData]);
 
   return (
     <>
@@ -210,9 +210,10 @@ const Page = () => {
       <ViewPreviewModal
         isOpen={modalStates.isPreviewModalOpen}
         onClose={() => closeModal(ModalType.PREVIEW)}
-        entries={previewEntries}
-        onConfirm={() => handlePreviewModalConfirm(selectedContentTypes)}
-        isSubmitting={isCreatingEntries}
+        preview={previewData}
+        onCreateEntries={handlePreviewModalConfirm}
+        isCreatingEntries={isCreatingEntries}
+        isLoading={isSubmitting}
       />
 
       <ReviewEntriesModal

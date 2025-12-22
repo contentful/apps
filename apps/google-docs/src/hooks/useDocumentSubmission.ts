@@ -2,11 +2,11 @@ import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { analyzeContentTypesAction, createPreviewAction } from '../utils/appActionUtils';
 import { ERROR_MESSAGES } from '../constants/messages';
-import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
+import { PreviewData } from '../components/page/ViewPreviewModal';
 
 interface UseDocumentSubmissionReturn {
   isSubmitting: boolean;
-  previewEntries: EntryToCreate[];
+  previewData: PreviewData | null;
   errorMessage: string | null;
   successMessage: string | null;
   submit: (contentTypeIds: string[]) => Promise<void>;
@@ -19,7 +19,7 @@ export const useDocumentSubmission = (
   oauthToken: string
 ): UseDocumentSubmissionReturn => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [previewEntries, setPreviewEntries] = useState<EntryToCreate[]>([]);
+  const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -56,7 +56,7 @@ export const useDocumentSubmission = (
       setIsSubmitting(true);
       setErrorMessage(null);
       setSuccessMessage(null);
-      setPreviewEntries([]);
+      setPreviewData(null);
 
       try {
         const analyzeContentTypesResponse = await analyzeContentTypesAction(
@@ -74,7 +74,7 @@ export const useDocumentSubmission = (
         );
         console.log('processDocumentResponse', processDocumentResponse);
 
-        setPreviewEntries((processDocumentResponse as any).sys.result.entries);
+        setPreviewData((processDocumentResponse as any).sys.result);
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : ERROR_MESSAGES.SUBMISSION_FAILED);
       } finally {
@@ -85,14 +85,14 @@ export const useDocumentSubmission = (
   );
 
   const clearMessages = useCallback(() => {
-    setPreviewEntries([]);
+    setPreviewData(null);
     setSuccessMessage(null);
     setErrorMessage(null);
   }, []);
 
   return {
     isSubmitting,
-    previewEntries,
+    previewData,
     errorMessage,
     successMessage,
     submit,
