@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { analyzeContentTypesAction, createPreviewAction } from '../utils/appAction';
+import { createContentTypesAnalysisAction, createPreviewAction } from '../utils/appAction';
 import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 import { ERROR_MESSAGES } from '../utils/constants/messages';
 
@@ -65,7 +65,7 @@ export const useGeneratePreview = ({
       setPreviewEntries([]);
 
       try {
-        const analyzeContentTypesResponse = await analyzeContentTypesAction(
+        const analyzeContentTypesResponse = await createContentTypesAnalysisAction(
           sdk,
           contentTypeIds,
           oauthToken

@@ -8,7 +8,7 @@ import { createContentTypeAnalysisWithAgent as analyzeContentTypesAgent } from '
 import { fetchContentTypes } from '../../service/contentTypeService';
 import { initContentfulManagementClient } from '../../service/initCMAClient';
 
-export type AnalyzeContentTypesParameters = {
+export type CreateContentTypesAnalysisParameters = {
   contentTypeIds: string[];
 };
 
@@ -18,9 +18,9 @@ interface AppInstallationParameters {
 
 export const handler: FunctionEventHandler<
   FunctionTypeEnum.AppActionCall,
-  AnalyzeContentTypesParameters
+  CreateContentTypesAnalysisParameters
 > = async (
-  event: AppActionRequest<'Custom', AnalyzeContentTypesParameters>,
+  event: AppActionRequest<'Custom', CreateContentTypesAnalysisParameters>,
   context: FunctionEventContext
 ) => {
   const { contentTypeIds } = event.body;
