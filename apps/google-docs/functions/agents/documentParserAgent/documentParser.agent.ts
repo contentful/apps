@@ -71,6 +71,7 @@ Your role is to:
 2. Analyze the provided Contentful content type definitions (their fields, types, and validations)
 3. Extract relevant information from the document that matches the content type structure
 4. Create properly formatted entries that are ready to be created in Contentful via the CMA API
+5. Identify and establish references between entries extracted from the same document
 
 CRITICAL FIELD TYPE RULES - READ CAREFULLY:
 - Symbol: Short text (default max 256 characters) - use for titles, names, IDs ✓
@@ -82,9 +83,76 @@ CRITICAL FIELD TYPE RULES - READ CAREFULLY:
 - Object: JSON object (use sparingly, check validations) ✓
 - Array (of Symbol/Text/Number): Array of PRIMITIVE values ONLY ✓
   Example: ["value1", "value2"] or [1, 2, 3]
-- Array (of Link): ❌ NEVER USE - these reference other entries, skip entirely
-  Example: DO NOT create [{ title: "x", content: "y" }] - this will FAIL
-- Link/Reference: ❌ NEVER USE - skip these fields (they reference other entries)
+- Link/Reference: Use reference placeholders ✓ (see REFERENCE HANDLING below)
+- Array (of Link): Use array of reference placeholders ✓ (see REFERENCE HANDLING below)
+
+=== REFERENCE HANDLING (CRITICAL) ===
+
+When content in the document should reference another entry (from the SAME document), use the reference placeholder system:
+
+**Step 1: Assign tempId to referenced entries**
+Any entry that will be referenced by another entry MUST have a "tempId" field.
+Format: contentTypeId_n (e.g., "author_1", "tag_1", "tag_2", "category_1")
+
+**Step 2: Use { "__ref": "tempId" } for single references**
+For Link fields (single reference), set the value to: { "__ref": "tempId_of_target" }
+
+**Step 3: Use [{ "__ref": "tempId1" }, { "__ref": "tempId2" }] for array references**
+For Array of Link fields, set the value to an array of reference placeholders.
+
+**Example:**
+Document contains:
+- A blog post titled "My Journey" by author "John Doe"
+- Tags: "Technology", "AI"
+- Author section about "John Doe"
+
+Output:
+{
+  "entries": [
+    {
+      "tempId": "author_1",
+      "contentTypeId": "author",
+      "fields": { "name": { "en-US": "John Doe" }, "bio": { "en-US": "..." } }
+    },
+    {
+      "tempId": "tag_1",
+      "contentTypeId": "tag",
+      "fields": { "name": { "en-US": "Technology" } }
+    },
+    {
+      "tempId": "tag_2",
+      "contentTypeId": "tag",
+      "fields": { "name": { "en-US": "AI" } }
+    },
+    {
+      "contentTypeId": "blogPost",
+      "fields": {
+        "title": { "en-US": "My Journey" },
+        "author": { "en-US": { "__ref": "author_1" } },
+        "tags": { "en-US": [{ "__ref": "tag_1" }, { "__ref": "tag_2" }] }
+      }
+    }
+  ]
+}
+
+**Reference Detection Rules:**
+1. Look at the content type definitions to identify which fields are Link or Array of Link types
+2. When you see content that matches a Link field (e.g., "Author: John Doe" for a blogPost.author field):
+   - Check if there's a corresponding entry being created for that referenced content
+   - If yes, create the referenced entry with a tempId and use { "__ref": "tempId" }
+   - If the referenced content type is in the available content types but no explicit content exists, create a minimal entry for it
+3. For Array of Link fields (e.g., tags, categories, related posts):
+   - Create separate entries for each item with tempIds
+   - Use an array of { "__ref": "tempId" } placeholders
+4. Only create references to entries from the SAME document - do NOT reference external entries
+5. Entries with tempId (referenced entries) should appear BEFORE the entries that reference them
+
+**IMPORTANT: Check linkContentType validation**
+- Link fields may have a "linkContentType" validation specifying which content types can be linked
+- Only create references to entries whose contentTypeId matches the allowed linkContentType
+- Example: If author field has linkContentType: ["author"], only reference entries with contentTypeId "author"
+
+=== END REFERENCE HANDLING ===
 
 FIELD VALIDATION RULES - MANDATORY TO RESPECT:
 Each field definition includes a "validations" array. You MUST respect ALL validation rules:
@@ -107,7 +175,11 @@ Each field definition includes a "validations" array. You MUST respect ALL valid
    - If you cannot extract a value from the document, use a sensible default based on the field name/type
    - Never leave required fields empty or undefined
    
-4. Other Validations:
+4. Link Content Type Validation:
+   - If a Link field has linkContentType validation, only reference entries of those content types
+   - Check the validations array for linkContentType: ["allowedType1", "allowedType2"]
+   
+5. Other Validations:
    - Check for any other validation rules in the validations array
    - Respect regex patterns, enum values, unique constraints, etc.
    - If a validation cannot be satisfied, adjust the value to meet the constraint
@@ -117,6 +189,7 @@ VALIDATION CHECKLIST FOR EACH FIELD:
 - If size validation exists: Value length is between min and max (adjusted if needed)
 - If range validation exists: Number is within min and max (clamped if needed)
 - If required: Field is populated (not empty, null, or undefined)
+- If Link/Array of Link: Used { "__ref": "tempId" } format with valid tempId
 - All other validation rules are satisfied
 - RichText: Use ONLY the annotation tokens present in the provided document text. The extractor has already encoded Google Docs styles as simple tags:
   - <B>...</B> = bold, <I>...</I> = italic, <U>...</U> = underline (these may be nested for combinations)
@@ -136,7 +209,7 @@ STRICT TOKEN POLICY (MANDATORY):
 
 COPY-PASTE EXTRACTION METHOD (NON-NEGOTIABLE):
 - When setting Text or RichText fields, copy exact substrings from the provided document content.
-- Allowed transformations ONLY: trim leading/trailing whitespace; collapse sequences of more than one space into a single space; normalize Windows/Mac newlines to "\n".
+- Allowed transformations ONLY: trim leading/trailing whitespace; collapse sequences of more than one space into a single space; normalize Windows/Mac newlines to "\\n".
 - Disallowed: paraphrasing, reordering, inventing tokens, adding emphasis, or inserting example markup.
 - Before returning, for every RichText string you produced, VERIFY that each occurrence of <B>, <I>, <U>, <A>, <CODE>, <HR/>, and ![...](...) also appears in the same order in the provided document content. If any token you added does not exist in the source, REMOVE it and return the plain text instead.
 - RichText: Provide a Markdown string preserving inline styles:
@@ -147,17 +220,22 @@ COPY-PASTE EXTRACTION METHOD (NON-NEGOTIABLE):
 
 FIELD FORMAT RULES:
 - Each entry must have a contentTypeId that matches one of the provided content types
+- Entries that are referenced should have a tempId (format: contentTypeId_n)
 - Fields must be in the format: { "fieldId": { "locale": value } }
 - Only include fields that exist in the content type definition
-- NEVER include Reference/Link fields (type: "Link")
-- NEVER include fields with type "Array" if items.type is "Link"
-- NEVER create arrays of objects like [{ title: "x", content: "y" }] - this will FAIL
-- If a field type is unclear or complex, SKIP it rather than guess
+- For Link fields: use { "__ref": "tempId" } to reference another entry
+- For Array of Link fields: use [{ "__ref": "tempId1" }, { "__ref": "tempId2" }]
 
 COMMON MISTAKES TO AVOID:
-❌ WRONG: { "sections": { "en-US": [{ "title": "...", "content": "..." }] } }
-✓ CORRECT: Skip "sections" field entirely if it's an Array of Links
-✓ CORRECT: { "tags": { "en-US": ["tag1", "tag2", "tag3"] } } (if tags is Array of Symbol)
+❌ WRONG: { "author": { "en-US": "John Doe" } } (for a Link field - this is a string, not a reference)
+✓ CORRECT: { "author": { "en-US": { "__ref": "author_1" } } } (proper reference placeholder)
+
+❌ WRONG: { "tags": { "en-US": ["Technology", "AI"] } } (for Array of Link field - these are strings)
+✓ CORRECT: { "tags": { "en-US": [{ "__ref": "tag_1" }, { "__ref": "tag_2" }] } } (proper reference array)
+
+❌ WRONG: Creating a reference without a corresponding entry with that tempId
+✓ CORRECT: Every { "__ref": "X" } has a matching entry with tempId: "X"
+
 Making up text or structure that is not present in the document, which is forbidden.
 Do not add styling or formatting that is not present in the document.
 Example: If the document has the word "bold" in it, do not invent bold text in your output.
@@ -168,7 +246,7 @@ EXAMPLE: If the document has the word "bold" in it, do not invent bold text in y
 - Extract all relevant content from the document - don't skip entries
 - If a required field cannot be populated from the document, use a sensible default or placeholder
 - Be thorough and extract as many valid entries as you can find
-- Focus on simple fields: Symbol, Text, Number, Boolean, Date
+- For Link fields, identify relationships between content and create proper references
 - IMPORTANT FOR IMAGES AND DRAWINGS: 
   * If the document contains inlineObjectElement references, extract the image URL from inlineObjects[id].inlineObjectProperties.embeddedObject.imageProperties.contentUri
   * If embeddedDrawingProperties exists, it's a Google Drawing (but still use the imageProperties.contentUri)
@@ -189,14 +267,27 @@ function buildExtractionPrompt({
   const contentTypeList = contentTypes.map((ct) => `${ct.name} (ID: ${ct.sys.id})`).join(', ');
   const totalFields = contentTypes.reduce((sum, ct) => sum + (ct.fields?.length || 0), 0);
 
-  // Create a detailed view of content types, filtering out unsupported field types
+  // Create a detailed view of content types with reference field information
   const contentTypeDefinitions = contentTypes.map((ct) => {
     const fields =
       ct.fields?.map((field) => {
         const isLinkType = field.type === 'Link';
         const isArrayOfLinks = field.type === 'Array' && (field.items as any)?.type === 'Link';
-        const shouldSkip = isLinkType || isArrayOfLinks;
+        const isReferenceField = isLinkType || isArrayOfLinks;
         const validations = field.validations || [];
+
+        // Extract linkContentType from validations if present
+        const linkContentTypeValidation = validations.find((v: any) => v.linkContentType);
+        const allowedContentTypes = linkContentTypeValidation
+          ? (linkContentTypeValidation as any).linkContentType
+          : null;
+
+        // For array of links, also check items validations
+        const itemsValidations = (field.items as any)?.validations || [];
+        const itemsLinkContentType = itemsValidations.find((v: any) => v.linkContentType);
+        const allowedItemContentTypes = itemsLinkContentType
+          ? (itemsLinkContentType as any).linkContentType
+          : null;
 
         return {
           id: field.id,
@@ -215,15 +306,18 @@ function buildExtractionPrompt({
                   if (v.enum) return v.enum.description;
                   if (v.regexp) return v.regexp.description;
                   if (v.unique) return v.unique.description;
+                  if (v.linkContentType) return `Can link to: ${v.linkContentType.join(', ')}`;
                   return 'Has validation rules';
                 })
                 .join('; ')
             : 'No validation rules',
-          SKIP: shouldSkip,
-          SKIP_REASON: shouldSkip
+          IS_REFERENCE_FIELD: isReferenceField,
+          REFERENCE_TYPE: isLinkType ? 'single' : isArrayOfLinks ? 'array' : null,
+          ALLOWED_CONTENT_TYPES: allowedContentTypes || allowedItemContentTypes || 'any',
+          USAGE: isReferenceField
             ? isLinkType
-              ? 'Link/Reference field - cannot be populated without entry IDs'
-              : 'Array of Links - cannot be populated without entry IDs'
+              ? 'Use { "__ref": "tempId" } to reference another entry'
+              : 'Use [{ "__ref": "tempId1" }, ...] to reference multiple entries'
             : undefined,
         };
       }) || [];
@@ -374,10 +468,22 @@ ${JSON.stringify(documentJson, null, 2)}
 CRITICAL INSTRUCTIONS:
 *** BE VERY CAREFUL TO NOT INVENT TEXT OR STRUCTURE THAT IS NOT PRESENT IN THE DOCUMENT ***
 EXAMPLE: If the document has the word "bold" in it, do not invent bold text in your output
+
 1. **PARSE THE GOOGLE DOCS JSON** - Use the parsing guide above to extract text and structure
-2. **SKIP ALL FIELDS WHERE "SKIP": true** - Do NOT include these fields in your output
-3. Look at each field definition - if it has "SKIP": true, completely ignore that field
-4. Only include fields where "SKIP" is false or not present
+
+2. **IDENTIFY REFERENCE RELATIONSHIPS** - Look at fields marked IS_REFERENCE_FIELD: true
+   - These fields should reference other entries using { "__ref": "tempId" }
+   - Check ALLOWED_CONTENT_TYPES to know which content types can be referenced
+   - Check REFERENCE_TYPE to know if it's a single reference or array of references
+
+3. **CREATE REFERENCED ENTRIES FIRST** - Entries that will be referenced must:
+   - Have a tempId (format: contentTypeId_n, e.g., "author_1", "tag_1")
+   - Appear BEFORE the entries that reference them in the entries array
+
+4. **USE REFERENCE PLACEHOLDERS** - For reference fields:
+   - Single: { "fieldId": { "${locale}": { "__ref": "tempId" } } }
+   - Array: { "fieldId": { "${locale}": [{ "__ref": "tempId1" }, { "__ref": "tempId2" }] } }
+
 5. Analyze the document and identify content that matches the provided content type structures
 6. Extract all relevant entries from the document
 7. For each entry, use the contentTypeId that best matches the content
@@ -385,26 +491,20 @@ EXAMPLE: If the document has the word "bold" in it, do not invent bold text in y
 9. Match field types exactly:
    - Symbol: string (check validations for character limits)
    - Text: string (check validations for character limits)
-   - RichText: string using ONLY the provided annotation tokens (<B>, <I>, <U>, <A href="...">text</A>, <CODE>, <HR/>, and ![alt](URL)). Do not invent Markdown emphasis.
+   - RichText: string using ONLY the provided annotation tokens
    - Number: number (check validations for range limits)
    - Boolean: boolean
    - Date: ISO 8601 string
-   - Array: array of primitives (strings or numbers ONLY)
-   - Object: JSON object
+   - Array (of primitives): array of strings or numbers
+   - Link: { "__ref": "tempId" }
+   - Array (of Link): [{ "__ref": "tempId1" }, { "__ref": "tempId2" }]
 
 10. **CRITICAL: RESPECT ALL FIELD VALIDATIONS**
     - Each field has a "validations" array and "validationSummary" in the content type definitions
     - You MUST check and respect ALL validation rules for each field
-    - For character count limits (size validation):
-      * If min is specified: Ensure value is at least that many characters (extend if needed)
-      * If max is specified: Ensure value is at most that many characters (truncate at word boundaries if needed)
-      * If both min and max: Value must be between them (adjust as needed)
-    - For number ranges (range validation):
-      * Clamp values to the min/max range
-    - For required fields: Always populate them (use defaults if document doesn't provide)
-    - BEFORE setting any field value, check its validations and ensure compliance
+    - For reference fields, check ALLOWED_CONTENT_TYPES
 
-11. For required fields (required: true) that are NOT marked SKIP: true, ensure they are populated
+11. For required fields: Always populate them (use defaults if document doesn't provide)
 12. If you cannot populate a required field from the document, use a sensible default or placeholder that meets validation rules
 13. Be thorough - extract all valid content from the document
 
@@ -413,23 +513,20 @@ VALIDATION CHECKLIST BEFORE YOU RETURN:
 - [ ] All character count limits (size.min, size.max) are respected
 - [ ] All number ranges (range.min, range.max) are respected
 - [ ] All required fields are populated
-- [ ] I did not add any <B>/<I>/<U>/<A>/<CODE>/<HR/>/![...](...) tokens that were not present in the provided document content.
-- [ ] I did not wrap the literal words "bold", "italic", or "underline" with any style unless they were already wrapped in the provided text.
-- [ ] Paragraphs without tokens are left as plain text.
-- [ ] I preserved tokens exactly as given (content and order). 
-- [ ] Every RichText value is an exact substring (after trivial whitespace normalization) of the provided document content.
+- [ ] Every { "__ref": "X" } has a corresponding entry with tempId: "X"
+- [ ] Referenced entries appear BEFORE the entries that reference them
+- [ ] Reference fields use the correct format ({ "__ref": "..." } or [{ "__ref": "..." }])
+- [ ] I did not add any tokens that were not present in the provided document content
+- [ ] Every RichText value is an exact substring of the provided document content
 
 **CONTENT EXTRACTION TIPS:**
 - Look for HEADING_1 or HEADING_2 paragraphs as entry titles
 - Normal paragraphs following headings are typically body content
 - Tables may contain structured data that maps to entry fields
-- Lists can be extracted as array fields (if type is Array of Symbol/Text)
-- Image URLs from inlineObjects can populate URL/Symbol fields or be included in RichText as markdown tokens
-- **GOOGLE DRAWINGS**: When you encounter \`inlineObjectElement\` with \`embeddedDrawingProperties\`:
-  * Extract the image URL from \`inlineObjectProperties.embeddedObject.imageProperties.contentUri\`
-  * Include it in RichText fields as a markdown image token: \`![Drawing](url)\` or \`![alt text](url)\`
-  * Google Drawings are rendered as images, so treat them the same as regular images for extraction purposes
-  * The drawing will be processed as an image asset in Contentful
+- Lists can be extracted as array fields or as multiple related entries
+- When you see patterns like "Author: Name" or "Tags: X, Y, Z", these often indicate references
+- Create separate entries for referenced content (authors, tags, categories) with tempIds
+- Image URLs from inlineObjects can populate URL/Symbol fields or be included in RichText
 
 Return the extracted entries in the specified JSON schema format.`;
 }
