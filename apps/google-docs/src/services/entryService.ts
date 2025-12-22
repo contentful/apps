@@ -1,6 +1,10 @@
 import { PageAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
-import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
+import {
+  EntryToCreate,
+  isReference,
+  isReferenceArray,
+} from '../../functions/agents/documentParserAgent/schema';
 import { MarkdownParser } from './richtext';
 
 /**
@@ -565,7 +569,162 @@ function buildUrlToAssetIdMap(
 }
 
 /**
- * Creates multiple entries in Contentful
+ * Creates a Contentful Link object for an entry reference
+ */
+function createEntryLink(entryId: string): {
+  sys: { type: 'Link'; linkType: 'Entry'; id: string };
+} {
+  return {
+    sys: {
+      type: 'Link',
+      linkType: 'Entry',
+      id: entryId,
+    },
+  };
+}
+
+/**
+ * Checks if a field value contains reference placeholders
+ */
+function valueHasReferences(value: unknown): boolean {
+  if (isReference(value)) return true;
+  if (isReferenceArray(value)) return true;
+  return false;
+}
+
+/**
+ * Checks if an entry has any reference fields
+ */
+function entryHasReferences(entry: EntryToCreate): boolean {
+  for (const localizedValue of Object.values(entry.fields)) {
+    for (const value of Object.values(localizedValue)) {
+      if (valueHasReferences(value)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * Separates entry fields into non-reference fields and reference-only fields.
+ * Used in the two-pass approach: first create with non-ref fields, then update with refs.
+ */
+function separateReferenceFields(fields: Record<string, Record<string, unknown>>): {
+  nonRefFields: Record<string, Record<string, unknown>>;
+  refFields: Record<string, Record<string, unknown>>;
+} {
+  const nonRefFields: Record<string, Record<string, unknown>> = {};
+  const refFields: Record<string, Record<string, unknown>> = {};
+
+  for (const [fieldId, localizedValue] of Object.entries(fields)) {
+    const nonRefLocalized: Record<string, unknown> = {};
+    const refLocalized: Record<string, unknown> = {};
+
+    for (const [locale, value] of Object.entries(localizedValue)) {
+      if (valueHasReferences(value)) {
+        refLocalized[locale] = value;
+      } else {
+        nonRefLocalized[locale] = value;
+      }
+    }
+
+    if (Object.keys(nonRefLocalized).length > 0) {
+      nonRefFields[fieldId] = nonRefLocalized;
+    }
+    if (Object.keys(refLocalized).length > 0) {
+      refFields[fieldId] = refLocalized;
+    }
+  }
+
+  return { nonRefFields, refFields };
+}
+
+/**
+ * Looks up a tempId in the map, with case-insensitive fallback.
+ * AI can be inconsistent with casing (e.g., "author_1" vs "Author_1").
+ */
+function lookupTempId(tempId: string, tempIdToEntryId: Map<string, string>): string | undefined {
+  // First try exact match
+  const exactMatch = tempIdToEntryId.get(tempId);
+  if (exactMatch) return exactMatch;
+
+  // Fallback: case-insensitive match
+  const lowerTempId = tempId.toLowerCase();
+  for (const [key, value] of tempIdToEntryId.entries()) {
+    if (key.toLowerCase() === lowerTempId) {
+      return value;
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Resolves reference placeholders in entry fields, replacing { __ref: "tempId" }
+ * with actual Contentful Link objects { sys: { type: "Link", linkType: "Entry", id: "..." } }
+ */
+function resolveReferences(
+  fields: Record<string, Record<string, unknown>>,
+  tempIdToEntryId: Map<string, string>
+): Record<string, Record<string, unknown>> {
+  const resolved: Record<string, Record<string, unknown>> = {};
+
+  for (const [fieldId, localizedValue] of Object.entries(fields)) {
+    const resolvedLocalized: Record<string, unknown> = {};
+
+    for (const [locale, value] of Object.entries(localizedValue)) {
+      if (isReference(value)) {
+        // Single reference
+        const entryId = lookupTempId(value.__ref, tempIdToEntryId);
+        if (entryId) {
+          resolvedLocalized[locale] = createEntryLink(entryId);
+        }
+        // Skip this field value if reference cannot be resolved
+      } else if (isReferenceArray(value)) {
+        // Array of references
+        const resolvedRefs = value
+          .map((ref) => {
+            const entryId = lookupTempId(ref.__ref, tempIdToEntryId);
+            if (entryId) {
+              return createEntryLink(entryId);
+            }
+            return null;
+          })
+          .filter((link) => link !== null);
+
+        if (resolvedRefs.length > 0) {
+          resolvedLocalized[locale] = resolvedRefs;
+        }
+      } else {
+        // Non-reference value, pass through
+        resolvedLocalized[locale] = value;
+      }
+    }
+
+    // Only include field if it has at least one locale value
+    if (Object.keys(resolvedLocalized).length > 0) {
+      resolved[fieldId] = resolvedLocalized;
+    }
+  }
+
+  return resolved;
+}
+
+/**
+ * Creates multiple entries in Contentful using a two-pass approach
+ *
+ * This function handles:
+ * 1. PASS 1: Create all entries WITHOUT reference fields (Contentful generates IDs)
+ * 2. Build tempId -> realId mapping from created entries
+ * 3. PASS 2: Update entries that have references with resolved reference fields
+ * 4. Image asset creation from markdown tokens in RichText fields
+ * 5. Field transformation based on content type definitions
+ *
+ * The two-pass approach allows:
+ * - Contentful to generate all entry IDs (no pre-generated UUIDs)
+ * - Support for circular references (A -> B -> C -> A)
+ * - tempIds remain ephemeral (only used during creation process)
  *
  * @param sdk - Contentful SDK instance (PageAppSDK or ConfigAppSDK)
  * @param entries - Array of entries from Document Parser Agent output
@@ -620,16 +779,33 @@ export async function createEntriesFromPreview(
     };
   }
 
+  // Map to track tempId -> actual Contentful entry ID (built during Pass 1)
+  const tempIdToEntryId = new Map<string, string>();
+
+  // Track created entries and their original entry data (for Pass 2)
+  const createdEntriesMap = new Map<string, { created: EntryProps; original: EntryToCreate }>();
+
   const createdEntries: EntryProps[] = [];
   const errors: Array<{ contentTypeId: string; error: string; details?: any }> = [];
+
+  // PASS 1: Create all entries WITHOUT reference fields
 
   for (const entry of entries) {
     try {
       const contentType = contentTypes.find((ct) => ct.sys.id === entry.contentTypeId);
+
+      // Separate reference fields from non-reference fields
+      const { nonRefFields } = separateReferenceFields(entry.fields);
+
+      // Handle image assets in RichText fields (using non-ref fields only)
       let urlToAssetId: Record<string, string> | undefined;
 
       if (contentType) {
-        const imageTokenMap = extractImageTokensFromEntry(entry, contentType);
+        const entryWithNonRefFields: EntryToCreate = {
+          ...entry,
+          fields: nonRefFields,
+        };
+        const imageTokenMap = extractImageTokensFromEntry(entryWithNonRefFields, contentType);
 
         if (imageTokenMap.size > 0) {
           const results = await createAssetsForTokens(
@@ -643,23 +819,84 @@ export async function createEntriesFromPreview(
         }
       }
 
+      // Transform fields for content type (handles RichText conversion)
       const transformedFields = transformFieldsForContentType(
-        entry.fields,
+        nonRefFields,
         contentType,
         urlToAssetId
       );
 
+      // Create the entry in Contentful (let Contentful generate the ID)
       const createdEntry = await cma.entry.create(
         { spaceId, environmentId, contentTypeId: entry.contentTypeId },
         { fields: transformedFields }
       );
 
+      // Map tempId to the real Contentful entry ID (used in Pass 2 to resolve references)
+      if (entry.tempId) {
+        tempIdToEntryId.set(entry.tempId, createdEntry.sys.id);
+      }
+
+      // Store for Pass 2
+      createdEntriesMap.set(createdEntry.sys.id, { created: createdEntry, original: entry });
       createdEntries.push(createdEntry);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       errors.push({
         contentTypeId: entry.contentTypeId,
         error: errorMessage,
+        details: error,
+      });
+    }
+  }
+
+  // PASS 2: Update entries that have reference fields
+  for (const [entryId, { created, original }] of createdEntriesMap) {
+    // Skip entries without references
+    if (!entryHasReferences(original)) {
+      continue;
+    }
+
+    try {
+      const contentType = contentTypes.find((ct) => ct.sys.id === original.contentTypeId);
+
+      // Extract only the reference fields
+      const { refFields } = separateReferenceFields(original.fields);
+
+      // Resolve references (now all IDs are known)
+      const resolvedRefFields = resolveReferences(refFields, tempIdToEntryId);
+
+      // Transform fields for content type
+      const transformedRefFields = transformFieldsForContentType(
+        resolvedRefFields,
+        contentType,
+        undefined // No assets in reference fields
+      );
+
+      // Merge with existing fields and update the entry
+      // Need to fetch the latest version to avoid version conflicts
+      const latestEntry = await cma.entry.get({ spaceId, environmentId, entryId });
+
+      const updatedFields = {
+        ...latestEntry.fields,
+        ...transformedRefFields,
+      };
+
+      const updatedEntry = await cma.entry.update(
+        { spaceId, environmentId, entryId },
+        { ...latestEntry, fields: updatedFields }
+      );
+
+      // Update the entry in our results
+      const index = createdEntries.findIndex((e) => e.sys.id === entryId);
+      if (index !== -1) {
+        createdEntries[index] = updatedEntry;
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      errors.push({
+        contentTypeId: original.contentTypeId,
+        error: `Failed to add references: ${errorMessage}`,
         details: error,
       });
     }
