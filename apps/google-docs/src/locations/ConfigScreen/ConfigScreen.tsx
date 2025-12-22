@@ -12,11 +12,11 @@ import {
 import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import tokens from '@contentful/f36-tokens';
-import { useApiKeyState, AppInstallationParameters } from '../hooks/useApiKeyState';
-import { useApiKeyValidation } from '../hooks/useApiKeyValidation';
-import { useAppConfiguration } from '../hooks/useAppConfiguration';
-import { ValidationFeedback } from '../components/config/ValidationFeedback';
-import { OPENAI_API_KEY_PREFIX } from '../utils/openaiValidation';
+import { AppInstallationParameters, useApiKeyState } from '../../hooks/useApiKeyState';
+import { useApiKeyValidation } from '../../hooks/useApiKeyValidation';
+import { useAppConfiguration } from '../../hooks/useAppConfiguration';
+import { OPENAI_API_KEY_PREFIX } from '../../utils/openaiValidation';
+import { ValidationFeedback } from './ValidationFeedback';
 
 export type { AppInstallationParameters };
 

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { SelectedContentType } from '../components/page/ContentTypePickerModal';
+import { SelectedContentType } from '../locations/Page/components/modals/step_2/SelectContentTypeModal';
 
 export const useProgressTracking = () => {
   const [documentId, setDocumentId] = useState<string>('');

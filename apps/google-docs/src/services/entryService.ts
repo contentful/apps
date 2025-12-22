@@ -1,7 +1,7 @@
 import { PageAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
-import { MarkdownParser } from '../utils/richtext';
+import { MarkdownParser } from './richtext';
 
 /**
  * Service for creating entries in Contentful using the Contentful Management API

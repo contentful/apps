@@ -1,20 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { GettingStartedPage } from '../components/page/GettingStartedPage';
+import { GettingStartedPage } from './components/mainpage/GettingStartedPage';
+import { ConfirmCancelModal } from './components/modals/ConfirmCancelModal';
+import { useModalManagement, ModalType } from '../../hooks/useModalManagement';
+import { useProgressTracking } from '../../hooks/useProgressTracking';
+import { useDocumentSubmission } from '../../hooks/useGeneratePreview';
+import { ReviewEntriesModal } from './components/modals/step_4/ReviewEntriesModal';
+import { ErrorEntriesModal } from './components/modals/step_4/ErrorEntriesModal';
+import { createEntriesFromPreview, EntryCreationResult } from '../../services/entryService';
+import SelectDocumentModal from './components/modals/step_1/SelectDocumentModal';
 import {
-  ContentTypePickerModal,
   SelectedContentType,
-} from '../components/page/ContentTypePickerModal';
-import { ConfirmCancelModal } from '../components/page/ConfirmCancelModal';
-import { useModalManagement, ModalType } from '../hooks/useModalManagement';
-import { useProgressTracking } from '../hooks/useProgressTracking';
-import { useDocumentSubmission } from '../hooks/useDocumentSubmission';
-import SelectDocumentModal from '../components/page/SelectDocumentModal';
-import { ViewPreviewModal } from '../components/page/ViewPreviewModal';
-import { ReviewEntriesModal } from '../components/page/ReviewEntriesModal';
-import { ErrorEntriesModal } from '../components/page/ErrorEntriesModal';
-import { createEntriesFromPreview, EntryCreationResult } from '../services/entryService';
+  ContentTypePickerModal,
+} from './components/modals/step_2/SelectContentTypeModal';
+import { ViewPreviewModal } from './components/modals/step_3/PreviewModal';
 
 const Page = () => {
   const sdk = useSDK<PageAppSDK>();

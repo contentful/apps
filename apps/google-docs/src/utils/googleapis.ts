@@ -1,4 +1,3 @@
-// utils/loadGoogleApis.ts
 let gapiLoaded: Promise<void> | null = null;
 let pickerLoaded: Promise<void> | null = null;
 

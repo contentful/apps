@@ -4,8 +4,8 @@ import tokens from '@contentful/f36-tokens';
 import { CheckCircleIcon } from '@contentful/f36-icons';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import googleDriveLogo from '../../assets/google-drive.png';
-import { useGoogleDocsPicker } from '../../hooks/useGoogleDocPicker';
+import googleDriveLogo from '../../../../assets/google-drive.png';
+import { useGoogleDocsPicker } from '../../../../hooks/useGoogleDocPicker';
 
 type OAuthConnectorProps = {
   onOAuthConnectedChange: (oauthConnectionStatus: boolean) => void;
