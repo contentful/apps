@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { loadGapi, loadPickerApi } from '../utils/googleApis';
+import { loadGapi, loadPickerApi } from '../utils/googleapis';
 
 type PickerCallbackData = {
   id: string;
