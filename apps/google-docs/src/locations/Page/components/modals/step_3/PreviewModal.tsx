@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Button, Flex, Modal, Paragraph } from '@contentful/f36-components';
 import { EntryToCreate } from '../../../../../../functions/agents/documentParserAgent/schema';
 import { SelectedContentType } from '../step_2/SelectContentTypeModal';
+import { PageAppSDK } from '@contentful/app-sdk';
 
 export interface PreviewData {
   summary: string;
@@ -9,6 +10,7 @@ export interface PreviewData {
   entries: EntryToCreate[];
 }
 interface PreviewModalProps {
+  sdk: PageAppSDK;
   isOpen: boolean;
   onClose: () => void;
   preview: PreviewData | null;
@@ -18,6 +20,7 @@ interface PreviewModalProps {
 }
 
 export const PreviewModal: React.FC<PreviewModalProps> = ({
+  sdk,
   isOpen,
   onClose,
   preview,
@@ -60,7 +63,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
               {entries.length > 0 ? (
                 <Box>
                   {entries.map((entry, index) => {
-                    const title = entry.fields.title?.['en-US'] || '';
+                    const title = entry.fields.displayField?.[sdk.locales.default] || '';
                     return (
                       <Box
                         key={index}
