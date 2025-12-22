@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { analyzeContentTypesAction, createPreviewAction } from '../utils/appActionUtils';
 import { ERROR_MESSAGES } from '../constants/messages';
-import { PreviewData } from '../components/page/ViewPreviewModal';
+import { PreviewData } from '../components/page/PreviewModal';
 
 interface UseDocumentSubmissionReturn {
   isSubmitting: boolean;

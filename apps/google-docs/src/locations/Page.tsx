@@ -11,7 +11,7 @@ import { useModalManagement, ModalType } from '../hooks/useModalManagement';
 import { useProgressTracking } from '../hooks/useProgressTracking';
 import { useDocumentSubmission } from '../hooks/useDocumentSubmission';
 import SelectDocumentModal from '../components/page/SelectDocumentModal';
-import { ViewPreviewModal } from '../components/page/ViewPreviewModal';
+import { ViewPreviewModal } from '../components/page/PreviewModal';
 import { ReviewEntriesModal } from '../components/page/ReviewEntriesModal';
 import { ErrorEntriesModal } from '../components/page/ErrorEntriesModal';
 import { createEntriesFromPreview, EntryCreationResult } from '../services/entryService';

@@ -8,7 +8,7 @@ export interface PreviewData {
   totalEntries: number;
   entries: EntryToCreate[];
 }
-interface ViewPreviewModalProps {
+interface PreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   preview: PreviewData | null;
@@ -17,7 +17,7 @@ interface ViewPreviewModalProps {
   isLoading: boolean;
 }
 
-export const ViewPreviewModal: React.FC<ViewPreviewModalProps> = ({
+export const PreviewModal: React.FC<PreviewModalProps> = ({
   isOpen,
   onClose,
   preview,
