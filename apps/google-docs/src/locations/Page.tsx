@@ -256,6 +256,7 @@ const Page = () => {
       />
 
       <PreviewModal
+        sdk={sdk}
         isOpen={modalStates.isPreviewModalOpen}
         onClose={handlePlanReviewCancel}
         onCreateEntries={handlePreviewModalConfirm}

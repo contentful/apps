@@ -1,6 +1,8 @@
-import { Button, Modal, Paragraph, Box, Flex } from '@contentful/f36-components';
+import { Button, Modal, Paragraph, Box, Flex, Text, Card } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 import { EntryToCreate } from '../../../functions/agents/documentParserAgent/schema';
 import { SelectedContentType } from './ContentTypePickerModal';
+import { PageAppSDK } from '@contentful/app-sdk';
 
 interface PreviewData {
   summary: string;
@@ -9,6 +11,7 @@ interface PreviewData {
 }
 
 interface PreviewModalProps {
+  sdk: PageAppSDK;
   isOpen: boolean;
   onClose: () => void;
   onCreateEntries: (contentTypes: SelectedContentType[]) => void;
@@ -18,6 +21,7 @@ interface PreviewModalProps {
 }
 
 export const PreviewModal = ({
+  sdk,
   isOpen,
   isCreatingEntries,
   onClose,
@@ -61,39 +65,32 @@ export const PreviewModal = ({
               {entries.length > 0 ? (
                 <Box>
                   {entries.map((entry, index) => {
-                    const title = entry.fields.title?.['en-US'] || '';
+                    const title = entry.fields.displayField?.[sdk.locales.default] || '';
                     return (
-                      <Box
+                      <Card
                         key={index}
-                        style={{
-                          padding: '10px 14px',
-                          backgroundColor: '#f9fafb',
-                          border: '1px solid #e5e7eb',
-                          borderRadius: '8px',
-                          marginBottom: '8px',
-                        }}>
+                        padding="default"
+                        marginBottom="spacingS"
+                        style={{ padding: `${tokens.spacingS} ${tokens.spacingM}` }}>
                         <Flex alignItems="center">
                           <Box style={{ flex: 1, minWidth: 0 }}>
-                            <span
-                              style={{
-                                fontWeight: 500,
-                                fontSize: '14px',
-                                color: '#111827',
-                              }}>
+                            <Text
+                              as="span"
+                              fontWeight="fontWeightMedium"
+                              fontSize="fontSizeM"
+                              style={{ color: tokens.gray900 }}>
                               {title.length > 60 ? title.substring(0, 60) + '...' : title}
-                            </span>
-                            <span
-                              style={{
-                                color: '#6b7280',
-                                fontSize: '14px',
-                                marginLeft: '8px',
-                                fontWeight: 400,
-                              }}>
+                            </Text>
+                            <Text
+                              as="span"
+                              fontWeight="fontWeightNormal"
+                              fontSize="fontSizeM"
+                              style={{ color: tokens.gray500, marginLeft: tokens.spacingXs }}>
                               ({entry.contentTypeId || 'unknown'})
-                            </span>
+                            </Text>
                           </Box>
                         </Flex>
-                      </Box>
+                      </Card>
                     );
                   })}
                 </Box>
