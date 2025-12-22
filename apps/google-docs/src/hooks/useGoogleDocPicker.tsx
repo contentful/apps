@@ -1,4 +1,3 @@
-// hooks/useGoogleDocsPicker.ts
 import { useCallback, useState } from 'react';
 import { loadGapi, loadPickerApi } from '../utils/googleApis';
 
