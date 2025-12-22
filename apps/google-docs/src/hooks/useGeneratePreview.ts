@@ -1,12 +1,12 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { createContentTypesAnalysisAction, createPreviewAction } from '../utils/appAction';
-import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 import { ERROR_MESSAGES } from '../utils/constants/messages';
+import { PreviewData } from '../locations/Page/components/modals/step_3/PreviewModal';
 
 interface UseGeneratePreviewResult {
   isSubmitting: boolean;
-  previewEntries: EntryToCreate[];
+  previewData: PreviewData | null;
   errorMessage: string | null;
   successMessage: string | null;
   submit: (contentTypeIds: string[]) => Promise<void>;
@@ -25,7 +25,7 @@ export const useGeneratePreview = ({
   oauthToken,
 }: UseGeneratePreviewProps): UseGeneratePreviewResult => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [previewEntries, setPreviewEntries] = useState<EntryToCreate[]>([]);
+  const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -62,7 +62,7 @@ export const useGeneratePreview = ({
       setIsSubmitting(true);
       setErrorMessage(null);
       setSuccessMessage(null);
-      setPreviewEntries([]);
+      setPreviewData(null);
 
       try {
         const analyzeContentTypesResponse = await createContentTypesAnalysisAction(
@@ -80,7 +80,7 @@ export const useGeneratePreview = ({
         );
         console.log('processDocumentResponse', processDocumentResponse);
 
-        setPreviewEntries((processDocumentResponse as any).sys.result.entries);
+        setPreviewData((processDocumentResponse as any).sys.result);
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : ERROR_MESSAGES.SUBMISSION_FAILED);
       } finally {
@@ -91,14 +91,14 @@ export const useGeneratePreview = ({
   );
 
   const clearMessages = useCallback(() => {
-    setPreviewEntries([]);
+    setPreviewData(null);
     setSuccessMessage(null);
     setErrorMessage(null);
   }, []);
 
   return {
     isSubmitting,
-    previewEntries,
+    previewData,
     errorMessage,
     successMessage,
     submit,
