@@ -73,12 +73,12 @@ async function callAppAction<T = unknown>(
  * @param contentTypeIds - Array of content type IDs to analyze
  * @returns Analysis result from the app action
  */
-export const analyzeContentTypesAction = async (
+export const createContentTypesAnalysisAction = async (
   sdk: PageAppSDK | ConfigAppSDK,
   contentTypeIds: string[],
   oauthToken: string
 ) => {
-  return callAppAction(sdk, 'analyzeContentTypes', { contentTypeIds, oauthToken });
+  return callAppAction(sdk, 'createContentTypesAnalysis', { contentTypeIds, oauthToken });
 };
 
 /**
