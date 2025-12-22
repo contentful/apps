@@ -14,7 +14,7 @@ import {
 import tokens from '@contentful/f36-tokens';
 import { EntryToCreate } from '../../../../../../functions/agents/documentParserAgent/schema';
 
-interface ViewPreviewModalProps {
+interface PreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   entries: EntryToCreate[] | null;
@@ -22,7 +22,7 @@ interface ViewPreviewModalProps {
   isSubmitting: boolean;
 }
 
-export const ViewPreviewModal: React.FC<ViewPreviewModalProps> = ({
+export const PreviewModal: React.FC<PreviewModalProps> = ({
   isOpen,
   onClose,
   entries,

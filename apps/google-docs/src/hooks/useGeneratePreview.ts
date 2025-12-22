@@ -4,7 +4,7 @@ import { analyzeContentTypesAction, createPreviewAction } from '../utils/appActi
 import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 import { ERROR_MESSAGES } from '../utils/constants/messages';
 
-interface UseDocumentSubmissionReturn {
+interface UseGeneratePreviewResult {
   isSubmitting: boolean;
   previewEntries: EntryToCreate[];
   errorMessage: string | null;
@@ -13,11 +13,17 @@ interface UseDocumentSubmissionReturn {
   clearMessages: () => void;
 }
 
-export const useDocumentSubmission = (
-  sdk: PageAppSDK,
-  documentId: string,
-  oauthToken: string
-): UseDocumentSubmissionReturn => {
+interface UseGeneratePreviewProps {
+  sdk: PageAppSDK;
+  documentId: string;
+  oauthToken: string;
+}
+
+export const useGeneratePreview = ({
+  sdk,
+  documentId,
+  oauthToken,
+}: UseGeneratePreviewProps): UseGeneratePreviewResult => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [previewEntries, setPreviewEntries] = useState<EntryToCreate[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
