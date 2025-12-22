@@ -39,7 +39,7 @@ export const OAuthConnector = ({
   // Check Google OAuth connection status with polling to handle race conditions
   const checkGoogleOAuthStatus = async (
     expectedStatus?: boolean,
-    maxRetries: number = 10
+    maxRetries: number = 5
   ): Promise<void> => {
     const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
