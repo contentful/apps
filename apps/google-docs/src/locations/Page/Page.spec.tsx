@@ -1,6 +1,6 @@
 import Page from './Page';
 import { render, waitFor } from '@testing-library/react';
-import { mockCma, mockSdk } from '../../test/mocks';
+import { mockCma, mockSdk } from '../../../test/mocks';
 import { vi } from 'vitest';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({

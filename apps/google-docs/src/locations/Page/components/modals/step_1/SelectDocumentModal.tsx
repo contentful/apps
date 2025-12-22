@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useGoogleDocsPicker } from '../../hooks/useGoogleDocPicker';
+import { useGoogleDocsPicker } from '../../../../../hooks/useGoogleDocPicker';
 
 interface SelectDocumentModalProps {
   oauthToken: string;

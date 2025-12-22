@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { analyzeContentTypesAction, createPreviewAction } from '../utils/appActionUtils';
-import { ERROR_MESSAGES } from '../constants/messages';
+import { analyzeContentTypesAction, createPreviewAction } from '../utils/appAction';
 import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
+import { ERROR_MESSAGES } from '../utils/constants/messages';
 
 interface UseDocumentSubmissionReturn {
   isSubmitting: boolean;

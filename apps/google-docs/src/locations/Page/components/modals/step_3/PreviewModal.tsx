@@ -12,7 +12,7 @@ import {
   Badge,
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import { EntryToCreate } from '../../../functions/agents/documentParserAgent/schema';
+import { EntryToCreate } from '../../../../../../functions/agents/documentParserAgent/schema';
 
 interface ViewPreviewModalProps {
   isOpen: boolean;
