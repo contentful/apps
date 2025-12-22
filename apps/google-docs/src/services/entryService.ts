@@ -641,6 +641,26 @@ function separateReferenceFields(fields: Record<string, Record<string, unknown>>
 }
 
 /**
+ * Looks up a tempId in the map, with case-insensitive fallback.
+ * AI can be inconsistent with casing (e.g., "author_1" vs "Author_1").
+ */
+function lookupTempId(tempId: string, tempIdToEntryId: Map<string, string>): string | undefined {
+  // First try exact match
+  const exactMatch = tempIdToEntryId.get(tempId);
+  if (exactMatch) return exactMatch;
+
+  // Fallback: case-insensitive match
+  const lowerTempId = tempId.toLowerCase();
+  for (const [key, value] of tempIdToEntryId.entries()) {
+    if (key.toLowerCase() === lowerTempId) {
+      return value;
+    }
+  }
+
+  return undefined;
+}
+
+/**
  * Resolves reference placeholders in entry fields, replacing { __ref: "tempId" }
  * with actual Contentful Link objects { sys: { type: "Link", linkType: "Entry", id: "..." } }
  */
@@ -656,24 +676,20 @@ function resolveReferences(
     for (const [locale, value] of Object.entries(localizedValue)) {
       if (isReference(value)) {
         // Single reference
-        const entryId = tempIdToEntryId.get(value.__ref);
+        const entryId = lookupTempId(value.__ref, tempIdToEntryId);
         if (entryId) {
           resolvedLocalized[locale] = createEntryLink(entryId);
-        } else {
-          console.warn(`Reference to unknown tempId: ${value.__ref}`);
-          // Skip this field value if reference cannot be resolved
         }
+        // Skip this field value if reference cannot be resolved
       } else if (isReferenceArray(value)) {
         // Array of references
         const resolvedRefs = value
           .map((ref) => {
-            const entryId = tempIdToEntryId.get(ref.__ref);
+            const entryId = lookupTempId(ref.__ref, tempIdToEntryId);
             if (entryId) {
               return createEntryLink(entryId);
-            } else {
-              console.warn(`Reference to unknown tempId: ${ref.__ref}`);
-              return null;
             }
+            return null;
           })
           .filter((link) => link !== null);
 
@@ -772,9 +788,8 @@ export async function createEntriesFromPreview(
   const createdEntries: EntryProps[] = [];
   const errors: Array<{ contentTypeId: string; error: string; details?: any }> = [];
 
-  // ============================================================
   // PASS 1: Create all entries WITHOUT reference fields
-  // ============================================================
+
   for (const entry of entries) {
     try {
       const contentType = contentTypes.find((ct) => ct.sys.id === entry.contentTypeId);
@@ -817,12 +832,16 @@ export async function createEntriesFromPreview(
         { fields: transformedFields }
       );
 
+      // Map tempId to the real Contentful entry ID (used in Pass 2 to resolve references)
+      if (entry.tempId) {
+        tempIdToEntryId.set(entry.tempId, createdEntry.sys.id);
+      }
+
       // Store for Pass 2
       createdEntriesMap.set(createdEntry.sys.id, { created: createdEntry, original: entry });
       createdEntries.push(createdEntry);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error(`  Failed to create entry (${entry.contentTypeId}):`, errorMessage);
       errors.push({
         contentTypeId: entry.contentTypeId,
         error: errorMessage,
@@ -831,9 +850,7 @@ export async function createEntriesFromPreview(
     }
   }
 
-  // ============================================================
   // PASS 2: Update entries that have reference fields
-  // ============================================================
   for (const [entryId, { created, original }] of createdEntriesMap) {
     // Skip entries without references
     if (!entryHasReferences(original)) {
@@ -877,7 +894,6 @@ export async function createEntriesFromPreview(
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error(`  Failed to update entry (${original.contentTypeId}):`, errorMessage);
       errors.push({
         contentTypeId: original.contentTypeId,
         error: `Failed to add references: ${errorMessage}`,
