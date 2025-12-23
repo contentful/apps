@@ -1,12 +1,13 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { createContentTypesAnalysisAction, createPreviewAction } from '../utils/appAction';
-import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 import { ERROR_MESSAGES } from '../utils/constants/messages';
-
+import { PreviewResponseType } from '../locations/Page/components/modals/step_3/PreviewModal';
+import { getEntryTitle } from '../utils/getEntryTitle';
+import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 interface UseGeneratePreviewResult {
   isSubmitting: boolean;
-  previewEntries: EntryToCreate[];
+  previewEntries: PreviewResponseType;
   errorMessage: string | null;
   successMessage: string | null;
   submit: (contentTypeIds: string[]) => Promise<void>;
@@ -25,7 +26,10 @@ export const useGeneratePreview = ({
   oauthToken,
 }: UseGeneratePreviewProps): UseGeneratePreviewResult => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [previewEntries, setPreviewEntries] = useState<EntryToCreate[]>([]);
+  const [previewEntries, setPreviewEntries] = useState<PreviewResponseType>({
+    entries: [],
+    entryTitles: [],
+  });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -62,7 +66,6 @@ export const useGeneratePreview = ({
       setIsSubmitting(true);
       setErrorMessage(null);
       setSuccessMessage(null);
-      setPreviewEntries([]);
 
       try {
         const analyzeContentTypesResponse = await createContentTypesAnalysisAction(
@@ -72,15 +75,25 @@ export const useGeneratePreview = ({
         );
         console.log('analyzeContentTypesResponse', analyzeContentTypesResponse);
 
-        const processDocumentResponse = await createPreviewAction(
+        const previewResponse = await createPreviewAction(
           sdk,
           contentTypeIds,
           documentId,
           oauthToken
         );
-        console.log('processDocumentResponse', processDocumentResponse);
+        console.log('previewResponse', previewResponse);
 
-        setPreviewEntries((processDocumentResponse as any).sys.result.entries);
+        const previewEntries = (previewResponse as any).sys.result.entries;
+
+        // for v0, we are only displaying the titles and content type names in the preview modal
+        const entryTitles = await Promise.all(
+          previewEntries.map((entry: EntryToCreate) => getEntryTitle({ sdk, entry }))
+        );
+
+        setPreviewEntries({
+          entries: previewEntries,
+          entryTitles,
+        });
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : ERROR_MESSAGES.SUBMISSION_FAILED);
       } finally {
@@ -91,7 +104,6 @@ export const useGeneratePreview = ({
   );
 
   const clearMessages = useCallback(() => {
-    setPreviewEntries([]);
     setSuccessMessage(null);
     setErrorMessage(null);
   }, []);

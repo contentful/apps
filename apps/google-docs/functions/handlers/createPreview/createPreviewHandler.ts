@@ -53,8 +53,6 @@ export const handler: FunctionEventHandler<
 
   return {
     success: true,
-    summary: aiDocumentResponse.summary,
-    totalEntriesExtracted: aiDocumentResponse.totalEntries,
     entries: aiDocumentResponse.entries,
   };
 };

@@ -115,7 +115,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     };
 
     const handlePreviewModalConfirm = async (contentTypes: SelectedContentType[]) => {
-      if (!previewEntries || previewEntries.length === 0) {
+      if (!previewEntries || previewEntries.entries.length === 0) {
         sdk.notifier.error('No entries to create');
         return;
       }
@@ -125,7 +125,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         const ids = contentTypes.map((ct) => ct.id);
         const entryResult: EntryCreationResult = await createEntriesFromPreview(
           sdk,
-          previewEntries,
+          previewEntries.entries,
           ids
         );
 
@@ -166,13 +166,12 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     useEffect(() => {
       const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
 
-      if (submissionJustCompleted && modalStates.isContentTypePickerOpen) {
-        console.log('Document processing completed, previewEntries:', previewEntries);
+      if (submissionJustCompleted && modalStates.isContentTypePickerOpen && previewEntries) {
+        console.log('Document processing completed, previewEntries:', previewEntries.entries);
         closeModal(ModalType.CONTENT_TYPE_PICKER);
 
         // Open preview modal if we have entries
-        if (previewEntries && previewEntries.length > 0) {
-          console.log('Opening preview modal with', previewEntries.length, 'entries');
+        if (previewEntries.entries && previewEntries.entries.length > 0) {
           openModal(ModalType.PREVIEW);
         }
       }
@@ -206,9 +205,10 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         <PreviewModal
           isOpen={modalStates.isPreviewModalOpen}
           onClose={() => closeModal(ModalType.PREVIEW)}
-          entries={previewEntries}
-          onConfirm={() => handlePreviewModalConfirm(selectedContentTypes)}
-          isSubmitting={isCreatingEntries}
+          previewEntries={previewEntries}
+          onCreateEntries={() => handlePreviewModalConfirm(selectedContentTypes)}
+          isLoading={isSubmitting}
+          isCreatingEntries={isCreatingEntries}
         />
 
         <ReviewEntriesModal
