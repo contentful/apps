@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Flex, Modal, Paragraph } from '@contentful/f36-components';
+import { Box, Button, Flex, Modal, Paragraph, Text } from '@contentful/f36-components';
 import { EntryToCreate } from '../../../../../../functions/agents/documentParserAgent/schema';
 import { SelectedContentType } from '../step_2/SelectContentTypeModal';
 import { PageAppSDK } from '@contentful/app-sdk';
@@ -80,32 +80,28 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
                     return (
                       <Box
                         key={index}
+                        padding="spacingM"
                         style={{
-                          padding: '10px 14px',
-                          backgroundColor: '#f9fafb',
-                          border: '1px solid #e5e7eb',
-                          borderRadius: '8px',
-                          marginBottom: '8px',
-                        }}>
+                          backgroundColor: 'var(--gray-100)',
+                          border: '1px solid var(--gray-300)',
+                          borderRadius: 'var(--border-radius-medium)',
+                        }}
+                        marginBottom="spacingS">
                         <Flex alignItems="center">
                           <Box style={{ flex: 1, minWidth: 0 }}>
-                            <span
-                              style={{
-                                fontWeight: 500,
-                                fontSize: '14px',
-                                color: '#111827',
-                              }}>
+                            <Text
+                              fontWeight="fontWeightDemiBold"
+                              fontSize="fontSizeM"
+                              fontColor="gray900">
                               {title.length > 60 ? title.substring(0, 60) + '...' : title}
-                            </span>
-                            <span
-                              style={{
-                                color: '#6b7280',
-                                fontSize: '14px',
-                                marginLeft: '8px',
-                                fontWeight: 400,
-                              }}>
+                            </Text>
+                            <Text
+                              fontColor="gray600"
+                              fontSize="fontSizeM"
+                              marginLeft="spacingXs"
+                              as="span">
                               ({entry.contentTypeId || 'unknown'})
-                            </span>
+                            </Text>
                           </Box>
                         </Flex>
                       </Box>
