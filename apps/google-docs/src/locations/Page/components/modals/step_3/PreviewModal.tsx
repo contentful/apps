@@ -69,8 +69,8 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
           <Modal.Header title="Preview entries" onClose={handleClose} />
           <Modal.Content>
             <Paragraph marginBottom="spacingM" color="gray700">
-              Based off the document, {totalEntries}{' '}
-              {totalEntries === 1 ? 'entry is' : 'entries are'} being suggested:
+              Based off the document, {entries.length}{' '}
+              {entries.length === 1 ? 'entry is' : 'entries are'} being suggested:
             </Paragraph>
 
             <Box marginBottom="spacingM">
@@ -123,7 +123,11 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
               }
               variant="primary"
               isDisabled={isLoading || entries.length === 0}>
-              {isCreatingEntries ? 'Creating entries...' : 'Create entries'}
+              {isCreatingEntries
+                ? 'Creating entries...'
+                : entries.length === 1
+                ? 'Create entry'
+                : 'Create entries'}
             </Button>
           </Modal.Controls>
         </>
