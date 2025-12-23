@@ -10,6 +10,7 @@ type PickerCallbackData = {
 
 type UseGoogleDocsPickerOptions = {
   onPicked?: (files: PickerCallbackData[]) => void;
+  onCancel?: () => void;
 };
 
 // These are already exposed by google in the network even if they were hidden as environment variables
@@ -62,6 +63,8 @@ export function useGoogleDocsPicker(
               url: doc.url,
             }));
             options.onPicked?.(docs);
+          } else if (data.action === google.picker.Action.CANCEL) {
+            options.onCancel?.();
           }
         });
 
@@ -75,7 +78,7 @@ export function useGoogleDocsPicker(
     } finally {
       setIsOpening(false);
     }
-  }, [accessToken, options.onPicked]);
+  }, [accessToken, options.onPicked, options.onCancel]);
 
   return { openPicker, isOpening };
 }
