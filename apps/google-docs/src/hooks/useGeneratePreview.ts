@@ -4,7 +4,7 @@ import { createContentTypesAnalysisAction, createPreviewAction } from '../utils/
 import { ERROR_MESSAGES } from '../utils/constants/messages';
 import { PreviewData } from '../locations/Page/components/modals/step_3/PreviewModal';
 import { fetchEntryTitle } from '../services/fetchEntryTitle';
-
+import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 interface UseGeneratePreviewResult {
   isSubmitting: boolean;
   previewData: PreviewData | null;
@@ -63,7 +63,6 @@ export const useGeneratePreview = ({
       setIsSubmitting(true);
       setErrorMessage(null);
       setSuccessMessage(null);
-      setPreviewData(null);
 
       try {
         const analyzeContentTypesResponse = await createContentTypesAnalysisAction(
@@ -85,7 +84,9 @@ export const useGeneratePreview = ({
 
         // for v0, we are only displaying the titles and content type names in the preview modal
         const entryPreviewData = await Promise.all(
-          previewData.entries.map((entry: any) => fetchEntryTitle(sdk, entry, sdk.locales.default))
+          previewData.entries.map((entry: EntryToCreate) =>
+            fetchEntryTitle(sdk, entry, sdk.locales.default)
+          )
         );
 
         setPreviewData({
