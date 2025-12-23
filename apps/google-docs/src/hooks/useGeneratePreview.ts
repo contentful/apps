@@ -3,6 +3,7 @@ import { PageAppSDK } from '@contentful/app-sdk';
 import { createContentTypesAnalysisAction, createPreviewAction } from '../utils/appAction';
 import { ERROR_MESSAGES } from '../utils/constants/messages';
 import { PreviewData } from '../locations/Page/components/modals/step_3/PreviewModal';
+import { fetchEntryTitle } from '../services/fetchEntryTitle';
 
 interface UseGeneratePreviewResult {
   isSubmitting: boolean;
@@ -80,7 +81,19 @@ export const useGeneratePreview = ({
         );
         console.log('processDocumentResponse', processDocumentResponse);
 
-        setPreviewData((processDocumentResponse as any).sys.result);
+        const resultData = (processDocumentResponse as any).sys.result;
+
+        // for v0, we are only displaying the titles and content type names in the preview modal
+        const entryPreviewData = await Promise.all(
+          resultData.entries.map((entry: any) => fetchEntryTitle(sdk, entry, sdk.locales.default))
+        );
+
+        console.log('entryPreviewData', entryPreviewData);
+
+        setPreviewData({
+          ...resultData,
+          entryPreviewData,
+        });
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : ERROR_MESSAGES.SUBMISSION_FAILED);
       } finally {

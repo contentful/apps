@@ -1,18 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Box, Button, Flex, Modal, Paragraph, Text } from '@contentful/f36-components';
 import { EntryToCreate } from '../../../../../../functions/agents/documentParserAgent/schema';
 import { SelectedContentType } from '../step_2/SelectContentTypeModal';
-import { PageAppSDK } from '@contentful/app-sdk';
-import { fetchEntryTitle } from '../../../../../services/fetchEntryTitle';
 import tokens from '@contentful/f36-tokens';
 
 export interface PreviewData {
   summary: string;
   totalEntries: number;
   entries: EntryToCreate[];
+  entryPreviewData: Array<{ title: string; contentTypeName: string }>;
 }
 interface PreviewModalProps {
-  sdk: PageAppSDK;
   isOpen: boolean;
   onClose: () => void;
   preview: PreviewData | null;
@@ -22,7 +20,6 @@ interface PreviewModalProps {
 }
 
 export const PreviewModal: React.FC<PreviewModalProps> = ({
-  sdk,
   isOpen,
   onClose,
   preview,
@@ -30,25 +27,12 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
   isCreatingEntries,
   isLoading,
 }) => {
-  const [entryTitles, setEntryTitles] = useState<
-    Record<number, { title: string; contentTypeName: string }>
-  >({});
-
-  useEffect(() => {
-    if (!preview) return;
-
-    // Fetch titles for all entries
-    preview.entries.forEach(async (entry, index) => {
-      const { title, contentTypeName } = await fetchEntryTitle(sdk, entry, sdk.locales.default);
-      setEntryTitles((prev) => ({ ...prev, [index]: { title, contentTypeName } }));
-    });
-  }, [preview, sdk]);
-
   if (!preview) {
     return null;
   }
 
-  const { summary, totalEntries, entries } = preview;
+  // for v0, we are only displaying the titles and content type names (in entryPreviewData)
+  const { summary, totalEntries, entries, entryPreviewData } = preview;
 
   const handleClose = () => {
     if (!isLoading && !isCreatingEntries) {
@@ -76,7 +60,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
             <Box marginBottom="spacingM">
               {entries.length > 0 ? (
                 <Box>
-                  {Object.values(entryTitles).map((entryTitle, index) => {
+                  {entryPreviewData.map((entry, index) => {
                     return (
                       <Box
                         key={index}
@@ -85,18 +69,18 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
                           border: `1px solid ${tokens.gray300}`,
                           borderRadius: tokens.borderRadiusMedium,
                         }}
-                        marginBottom="spacingXs">
+                        marginBottom="spacingS">
                         <Flex alignItems="center" gap="spacingXs">
                           <Text
                             fontWeight="fontWeightMedium"
                             fontSize="fontSizeM"
                             fontColor="gray900">
-                            {entryTitle.title.length > 60
-                              ? entryTitle.title.substring(0, 60) + '...'
-                              : entryTitle.title}
+                            {entry.title.length > 60
+                              ? entry.title.substring(0, 60) + '...'
+                              : entry.title}
                           </Text>
                           <Text fontColor="gray500" fontSize="fontSizeM" as="span">
-                            ({entryTitles[index].contentTypeName})
+                            ({entry.contentTypeName})
                           </Text>
                         </Flex>
                       </Box>

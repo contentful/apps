@@ -204,7 +204,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         />
 
         <PreviewModal
-          sdk={sdk}
           isOpen={modalStates.isPreviewModalOpen}
           onClose={() => closeModal(ModalType.PREVIEW)}
           preview={previewData}
