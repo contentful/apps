@@ -29,15 +29,17 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
   isCreatingEntries,
   isLoading,
 }) => {
-  const [entryTitles, setEntryTitles] = useState<Record<number, string>>({});
+  const [entryTitles, setEntryTitles] = useState<
+    Record<number, { title: string; contentTypeName: string }>
+  >({});
 
   useEffect(() => {
     if (!preview) return;
 
     // Fetch titles for all entries
     preview.entries.forEach(async (entry, index) => {
-      const title = await fetchEntryTitle(sdk, entry, sdk.locales.default);
-      setEntryTitles((prev) => ({ ...prev, [index]: title }));
+      const { title, contentTypeName } = await fetchEntryTitle(sdk, entry, sdk.locales.default);
+      setEntryTitles((prev) => ({ ...prev, [index]: { title, contentTypeName } }));
     });
   }, [preview, sdk]);
 
@@ -75,8 +77,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
             <Box marginBottom="spacingM">
               {entries.length > 0 ? (
                 <Box>
-                  {entries.map((entry, index) => {
-                    const title = entryTitles[index] || '';
+                  {Object.values(entryTitles).map((entryTitle, index) => {
                     return (
                       <Box
                         key={index}
@@ -93,14 +94,16 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
                               fontWeight="fontWeightDemiBold"
                               fontSize="fontSizeM"
                               fontColor="gray900">
-                              {title.length > 60 ? title.substring(0, 60) + '...' : title}
+                              {entryTitle.title.length > 60
+                                ? entryTitle.title.substring(0, 60) + '...'
+                                : entryTitle.title}
                             </Text>
                             <Text
                               fontColor="gray600"
                               fontSize="fontSizeM"
                               marginLeft="spacingXs"
                               as="span">
-                              ({entry.contentTypeId || 'unknown'})
+                              ({entryTitles[index].contentTypeName})
                             </Text>
                           </Box>
                         </Flex>
