@@ -66,7 +66,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
       shouldCloseOnEscapePress={!isLoading && !isCreatingEntries}>
       {() => (
         <>
-          <Modal.Header title="Create entries" onClose={handleClose} />
+          <Modal.Header title="Preview entries" onClose={handleClose} />
           <Modal.Content>
             <Paragraph marginBottom="spacingM" color="gray700">
               Based off the document, {totalEntries}{' '}
@@ -80,10 +80,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
                     return (
                       <Box
                         key={index}
-                        paddingTop="spacingS"
-                        paddingBottom="spacingS"
-                        paddingLeft="spacingM"
-                        paddingRight="spacingM"
+                        padding="spacingS"
                         style={{
                           border: `1px solid ${tokens.gray300}`,
                           borderRadius: tokens.borderRadiusMedium,
