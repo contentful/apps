@@ -38,7 +38,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       pendingCloseAction,
       setPendingCloseAction,
     } = useProgressTracking();
-    const { previewData, submit, clearMessages, isSubmitting } = useGeneratePreview({
+    const { previewEntries, submit, clearMessages, isSubmitting } = useGeneratePreview({
       sdk,
       documentId,
       oauthToken,
@@ -115,7 +115,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     };
 
     const handlePreviewModalConfirm = async (contentTypes: SelectedContentType[]) => {
-      if (!previewData || previewData.entries.length === 0) {
+      if (!previewEntries || previewEntries.entries.length === 0) {
         sdk.notifier.error('No entries to create');
         return;
       }
@@ -125,7 +125,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         const ids = contentTypes.map((ct) => ct.id);
         const entryResult: EntryCreationResult = await createEntriesFromPreview(
           sdk,
-          previewData.entries,
+          previewEntries.entries,
           ids
         );
 
@@ -166,19 +166,18 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     useEffect(() => {
       const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
 
-      if (submissionJustCompleted && modalStates.isContentTypePickerOpen && previewData) {
-        console.log('Document processing completed, previewEntries:', previewData.entries);
+      if (submissionJustCompleted && modalStates.isContentTypePickerOpen && previewEntries) {
+        console.log('Document processing completed, previewEntries:', previewEntries.entries);
         closeModal(ModalType.CONTENT_TYPE_PICKER);
 
         // Open preview modal if we have entries
-        if (previewData.entries && previewData.entries.length > 0) {
-          console.log('Opening preview modal with', previewData.entries.length, 'entries');
+        if (previewEntries.entries && previewEntries.entries.length > 0) {
           openModal(ModalType.PREVIEW);
         }
       }
 
       prevIsSubmittingRef.current = isSubmitting;
-    }, [isSubmitting, modalStates.isContentTypePickerOpen, closeModal, openModal, previewData]);
+    }, [isSubmitting, modalStates.isContentTypePickerOpen, closeModal, openModal, previewEntries]);
 
     return (
       <>
@@ -206,7 +205,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         <PreviewModal
           isOpen={modalStates.isPreviewModalOpen}
           onClose={() => closeModal(ModalType.PREVIEW)}
-          preview={previewData}
+          previewEntries={previewEntries}
           onCreateEntries={() => handlePreviewModalConfirm(selectedContentTypes)}
           isLoading={isSubmitting}
           isCreatingEntries={isCreatingEntries}

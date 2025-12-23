@@ -11,7 +11,7 @@ export interface PreviewResponseType {
 interface PreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  preview: PreviewResponseType;
+  previewEntries: PreviewResponseType;
   onCreateEntries: (contentTypes: SelectedContentType[]) => void;
   isCreatingEntries: boolean;
   isLoading: boolean;
@@ -20,16 +20,16 @@ interface PreviewModalProps {
 export const PreviewModal: React.FC<PreviewModalProps> = ({
   isOpen,
   onClose,
-  preview,
+  previewEntries,
   onCreateEntries,
   isCreatingEntries,
   isLoading,
 }) => {
-  if (!preview) {
+  if (!previewEntries) {
     return null;
   }
   // for v0, we are only displaying the titles and content type names (in entryPreviewData)
-  const { entries, entryTitles } = preview;
+  const { entries, entryTitles } = previewEntries;
 
   const MAX_TITLE_LENGTH = 60;
 

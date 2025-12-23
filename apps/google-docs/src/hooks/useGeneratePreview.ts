@@ -7,7 +7,7 @@ import { getEntryTitle } from '../utils/getEntryTitle';
 import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 interface UseGeneratePreviewResult {
   isSubmitting: boolean;
-  previewData: PreviewResponseType;
+  previewEntries: PreviewResponseType;
   errorMessage: string | null;
   successMessage: string | null;
   submit: (contentTypeIds: string[]) => Promise<void>;
@@ -26,7 +26,7 @@ export const useGeneratePreview = ({
   oauthToken,
 }: UseGeneratePreviewProps): UseGeneratePreviewResult => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [previewData, setPreviewData] = useState<PreviewResponseType>({
+  const [previewEntries, setPreviewEntries] = useState<PreviewResponseType>({
     entries: [],
     entryTitles: [],
   });
@@ -92,7 +92,7 @@ export const useGeneratePreview = ({
           previewData.entries.map((entry: EntryToCreate) => getEntryTitle({ sdk, entry }))
         );
 
-        setPreviewData({
+        setPreviewEntries({
           ...previewData,
           entryTitles,
         });
@@ -112,7 +112,7 @@ export const useGeneratePreview = ({
 
   return {
     isSubmitting,
-    previewData,
+    previewEntries,
     errorMessage,
     successMessage,
     submit,
