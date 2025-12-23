@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Button, Flex, Modal, Paragraph } from '@contentful/f36-components';
 import { EntryToCreate } from '../../../../../../functions/agents/documentParserAgent/schema';
 import { SelectedContentType } from '../step_2/SelectContentTypeModal';
 import { PageAppSDK } from '@contentful/app-sdk';
+import { fetchEntryTitle } from '../../../../../services/fetchEntryTitle';
 
 export interface PreviewData {
   summary: string;
@@ -28,6 +29,18 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
   isCreatingEntries,
   isLoading,
 }) => {
+  const [entryTitles, setEntryTitles] = useState<Record<number, string>>({});
+
+  useEffect(() => {
+    if (!preview) return;
+
+    // Fetch titles for all entries
+    preview.entries.forEach(async (entry, index) => {
+      const title = await fetchEntryTitle(sdk, entry, sdk.locales.default);
+      setEntryTitles((prev) => ({ ...prev, [index]: title }));
+    });
+  }, [preview, sdk]);
+
   if (!preview) {
     return null;
   }
@@ -63,7 +76,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
               {entries.length > 0 ? (
                 <Box>
                   {entries.map((entry, index) => {
-                    const title = entry.fields.displayField?.[sdk.locales.default] || '';
+                    const title = entryTitles[index] || '';
                     return (
                       <Box
                         key={index}
