@@ -7,7 +7,7 @@ import { getEntryTitle } from '../utils/getEntryTitle';
 import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 interface UseGeneratePreviewResult {
   isSubmitting: boolean;
-  previewData: PreviewResponseType | null;
+  previewData: PreviewResponseType;
   errorMessage: string | null;
   successMessage: string | null;
   submit: (contentTypeIds: string[]) => Promise<void>;
@@ -26,7 +26,10 @@ export const useGeneratePreview = ({
   oauthToken,
 }: UseGeneratePreviewProps): UseGeneratePreviewResult => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [previewData, setPreviewData] = useState<PreviewResponseType | null>(null);
+  const [previewData, setPreviewData] = useState<PreviewResponseType>({
+    entries: [],
+    entryTitles: [],
+  });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -82,14 +85,16 @@ export const useGeneratePreview = ({
 
         const previewData = (previewResponse as any).sys.result;
 
+        console.log('previewData', previewData);
+
         // for v0, we are only displaying the titles and content type names in the preview modal
-        const entryPreviewData = await Promise.all(
+        const entryTitles = await Promise.all(
           previewData.entries.map((entry: EntryToCreate) => getEntryTitle({ sdk, entry }))
         );
 
         setPreviewData({
           ...previewData,
-          entryPreviewData,
+          entryTitles,
         });
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : ERROR_MESSAGES.SUBMISSION_FAILED);
@@ -101,7 +106,6 @@ export const useGeneratePreview = ({
   );
 
   const clearMessages = useCallback(() => {
-    setPreviewData(null);
     setSuccessMessage(null);
     setErrorMessage(null);
   }, []);

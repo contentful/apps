@@ -5,15 +5,13 @@ import { SelectedContentType } from '../step_2/SelectContentTypeModal';
 import tokens from '@contentful/f36-tokens';
 
 export interface PreviewResponseType {
-  summary: string;
-  totalEntries: number;
   entries: EntryToCreate[];
-  entryPreviewData: Array<{ title: string; contentTypeName: string }>;
+  entryTitles: Array<{ title: string; contentTypeName: string }>;
 }
 interface PreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  preview: PreviewResponseType | null;
+  preview: PreviewResponseType;
   onCreateEntries: (contentTypes: SelectedContentType[]) => void;
   isCreatingEntries: boolean;
   isLoading: boolean;
@@ -31,7 +29,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
     return null;
   }
   // for v0, we are only displaying the titles and content type names (in entryPreviewData)
-  const { summary, totalEntries, entries, entryPreviewData } = preview;
+  const { entries, entryTitles } = preview;
 
   const MAX_TITLE_LENGTH = 60;
 
@@ -64,7 +62,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
             )}
 
             <Box marginBottom="spacingM">
-              {entryPreviewData.map((entry, index) => {
+              {entryTitles.map((entry, index) => {
                 return (
                   <Box
                     key={index}
