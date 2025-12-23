@@ -42,7 +42,6 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
 
   return (
     <Modal
-      title="Create entries"
       isShown={isOpen}
       onClose={handleClose}
       size="large"
