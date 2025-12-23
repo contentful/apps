@@ -4,14 +4,15 @@ import { EntryToCreate } from '../../../../../../functions/agents/documentParser
 import { SelectedContentType } from '../step_2/SelectContentTypeModal';
 import tokens from '@contentful/f36-tokens';
 
-export interface PreviewResponseType {
-  entries: EntryToCreate[];
-  entryTitles: Array<{ title: string; contentTypeName: string }>;
+export interface PreviewEntry {
+  entry: EntryToCreate;
+  title: string;
+  contentTypeName: string;
 }
 interface PreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  previewEntries: PreviewResponseType;
+  previewEntries: PreviewEntry[];
   onCreateEntries: (contentTypes: SelectedContentType[]) => void;
   isCreatingEntries: boolean;
   isLoading: boolean;
@@ -25,11 +26,9 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
   isCreatingEntries,
   isLoading,
 }) => {
-  if (!previewEntries) {
+  if (!previewEntries || previewEntries.length === 0) {
     return null;
   }
-  // for v0, we are only displaying the titles and content type names (in entryPreviewData)
-  const { entries, entryTitles } = previewEntries;
 
   const MAX_TITLE_LENGTH = 60;
 
@@ -50,41 +49,33 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
         <>
           <Modal.Header title="Preview entries" onClose={handleClose} />
           <Modal.Content>
-            {entries.length == 0 ? (
-              <Paragraph marginBottom="spacingM" color="gray700">
-                No entries found
-              </Paragraph>
-            ) : (
-              <Paragraph marginBottom="spacingM" color="gray700">
-                Based off the document, {entries.length}{' '}
-                {entries.length === 1 ? 'entry is' : 'entries are'} being suggested:
-              </Paragraph>
-            )}
+            <Paragraph marginBottom="spacingM" color="gray700">
+              Based off the document, {previewEntries.length}{' '}
+              {previewEntries.length === 1 ? 'entry is' : 'entries are'} being suggested:
+            </Paragraph>
 
             <Box marginBottom="spacingM">
-              {entryTitles.map((entry, index) => {
-                return (
-                  <Box
-                    key={index}
-                    padding="spacingS"
-                    style={{
-                      border: `1px solid ${tokens.gray300}`,
-                      borderRadius: tokens.borderRadiusMedium,
-                    }}
-                    marginBottom="spacingS">
-                    <Flex alignItems="center" gap="spacingXs">
-                      <Text fontWeight="fontWeightMedium" fontSize="fontSizeM" fontColor="gray900">
-                        {entry.title.length > MAX_TITLE_LENGTH
-                          ? entry.title.substring(0, 60) + '...'
-                          : entry.title}
-                      </Text>
-                      <Text fontColor="gray500" fontSize="fontSizeM" as="span">
-                        ({entry.contentTypeName})
-                      </Text>
-                    </Flex>
-                  </Box>
-                );
-              })}
+              {previewEntries.map((item, index) => (
+                <Box
+                  key={index}
+                  padding="spacingS"
+                  style={{
+                    border: `1px solid ${tokens.gray300}`,
+                    borderRadius: tokens.borderRadiusMedium,
+                  }}
+                  marginBottom="spacingS">
+                  <Flex alignItems="center" gap="spacingXs">
+                    <Text fontWeight="fontWeightMedium" fontSize="fontSizeM" fontColor="gray900">
+                      {item.title.length > MAX_TITLE_LENGTH
+                        ? item.title.substring(0, MAX_TITLE_LENGTH) + '...'
+                        : item.title}
+                    </Text>
+                    <Text fontColor="gray500" fontSize="fontSizeM" as="span">
+                      ({item.contentTypeName})
+                    </Text>
+                  </Flex>
+                </Box>
+              ))}
             </Box>
           </Modal.Content>
           <Modal.Controls>
@@ -97,14 +88,16 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
             <Button
               onClick={() =>
                 onCreateEntries(
-                  entries.map((entry) => ({ id: entry.contentTypeId } as SelectedContentType))
+                  previewEntries.map((item) => ({
+                    id: item.entry.contentTypeId,
+                  })) as SelectedContentType[]
                 )
               }
               variant="primary"
-              isDisabled={isLoading || entries.length === 0}>
+              isDisabled={isLoading || previewEntries.length === 0}>
               {isCreatingEntries
                 ? 'Creating entries...'
-                : entries.length === 1
+                : previewEntries.length === 1
                 ? 'Create entry'
                 : 'Create entries'}
             </Button>

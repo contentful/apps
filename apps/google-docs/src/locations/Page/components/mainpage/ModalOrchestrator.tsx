@@ -115,7 +115,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     };
 
     const handlePreviewModalConfirm = async (contentTypes: SelectedContentType[]) => {
-      if (!previewEntries || previewEntries.entries.length === 0) {
+      if (!previewEntries || previewEntries.length === 0) {
         sdk.notifier.error('No entries to create');
         return;
       }
@@ -123,11 +123,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       setIsCreatingEntries(true);
       try {
         const ids = contentTypes.map((ct) => ct.id);
-        const entryResult: EntryCreationResult = await createEntriesFromPreview(
-          sdk,
-          previewEntries.entries,
-          ids
-        );
+        const entries = previewEntries.map((p) => p.entry);
+        const entryResult: EntryCreationResult = await createEntriesFromPreview(sdk, entries, ids);
 
         const createdCount = entryResult.createdEntries.length;
 
@@ -167,11 +164,11 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
 
       if (submissionJustCompleted && modalStates.isContentTypePickerOpen && previewEntries) {
-        console.log('Document processing completed, previewEntries:', previewEntries.entries);
+        console.log('Document processing completed, previewEntries:', previewEntries);
         closeModal(ModalType.CONTENT_TYPE_PICKER);
 
         // Open preview modal if we have entries
-        if (previewEntries.entries && previewEntries.entries.length > 0) {
+        if (previewEntries.length > 0) {
           openModal(ModalType.PREVIEW);
         }
       }
