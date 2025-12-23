@@ -4,6 +4,7 @@ import { EntryToCreate } from '../../../../../../functions/agents/documentParser
 import { SelectedContentType } from '../step_2/SelectContentTypeModal';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { fetchEntryTitle } from '../../../../../services/fetchEntryTitle';
+import tokens from '@contentful/f36-tokens';
 
 export interface PreviewData {
   summary: string;
@@ -68,10 +69,8 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
           <Modal.Header title="Create entries" onClose={handleClose} />
           <Modal.Content>
             <Paragraph marginBottom="spacingM" color="gray700">
-              {preview.summary ||
-                `Based off the document, ${totalEntries} ${
-                  totalEntries === 1 ? 'entry is' : 'entries are'
-                } being suggested:`}
+              Based off the document, {totalEntries}{' '}
+              {totalEntries === 1 ? 'entry is' : 'entries are'} being suggested:
             </Paragraph>
 
             <Box marginBottom="spacingM">
@@ -81,31 +80,27 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
                     return (
                       <Box
                         key={index}
-                        padding="spacingM"
+                        paddingTop="spacingS"
+                        paddingBottom="spacingS"
+                        paddingLeft="spacingM"
+                        paddingRight="spacingM"
                         style={{
-                          backgroundColor: 'var(--gray-100)',
-                          border: '1px solid var(--gray-300)',
-                          borderRadius: 'var(--border-radius-medium)',
+                          border: `1px solid ${tokens.gray300}`,
+                          borderRadius: tokens.borderRadiusMedium,
                         }}
-                        marginBottom="spacingS">
-                        <Flex alignItems="center">
-                          <Box style={{ flex: 1, minWidth: 0 }}>
-                            <Text
-                              fontWeight="fontWeightDemiBold"
-                              fontSize="fontSizeM"
-                              fontColor="gray900">
-                              {entryTitle.title.length > 60
-                                ? entryTitle.title.substring(0, 60) + '...'
-                                : entryTitle.title}
-                            </Text>
-                            <Text
-                              fontColor="gray600"
-                              fontSize="fontSizeM"
-                              marginLeft="spacingXs"
-                              as="span">
-                              ({entryTitles[index].contentTypeName})
-                            </Text>
-                          </Box>
+                        marginBottom="spacingXs">
+                        <Flex alignItems="center" gap="spacingXs">
+                          <Text
+                            fontWeight="fontWeightMedium"
+                            fontSize="fontSizeM"
+                            fontColor="gray900">
+                            {entryTitle.title.length > 60
+                              ? entryTitle.title.substring(0, 60) + '...'
+                              : entryTitle.title}
+                          </Text>
+                          <Text fontColor="gray500" fontSize="fontSizeM" as="span">
+                            ({entryTitles[index].contentTypeName})
+                          </Text>
                         </Flex>
                       </Box>
                     );
