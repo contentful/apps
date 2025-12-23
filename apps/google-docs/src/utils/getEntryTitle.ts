@@ -1,4 +1,4 @@
-import { PageAppSDK } from '@contentful/app-sdk';
+import { ContentType, PageAppSDK } from '@contentful/app-sdk';
 import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 
 /**
@@ -15,9 +15,7 @@ export const getEntryTitle = async ({
   entry,
 }: GetEntryTitleProps): Promise<{ title: string; contentTypeName: string }> => {
   try {
-    const contentType = await sdk.cma.contentType.get({
-      contentTypeId: entry.contentTypeId,
-    });
+    const contentType = await getContentType({ sdk, contentTypeId: entry.contentTypeId });
 
     const contentTypeName = contentType.name;
 
@@ -33,4 +31,18 @@ export const getEntryTitle = async ({
     console.error(`Failed to get entry title for ${entry.contentTypeId}:`, error);
     return { title: '', contentTypeName: entry.contentTypeId };
   }
+};
+
+export interface GetContentTypeProps {
+  sdk: PageAppSDK;
+  contentTypeId: string;
+}
+
+export const getContentType = async ({
+  sdk,
+  contentTypeId,
+}: GetContentTypeProps): Promise<ContentType> => {
+  return await sdk.cma.contentType.get({
+    contentTypeId,
+  });
 };
