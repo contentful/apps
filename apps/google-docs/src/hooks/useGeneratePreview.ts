@@ -73,25 +73,23 @@ export const useGeneratePreview = ({
         );
         console.log('analyzeContentTypesResponse', analyzeContentTypesResponse);
 
-        const processDocumentResponse = await createPreviewAction(
+        const previewResponse = await createPreviewAction(
           sdk,
           contentTypeIds,
           documentId,
           oauthToken
         );
-        console.log('processDocumentResponse', processDocumentResponse);
+        console.log('previewResponse', previewResponse);
 
-        const resultData = (processDocumentResponse as any).sys.result;
+        const previewData = (previewResponse as any).sys.result;
 
         // for v0, we are only displaying the titles and content type names in the preview modal
         const entryPreviewData = await Promise.all(
-          resultData.entries.map((entry: any) => fetchEntryTitle(sdk, entry, sdk.locales.default))
+          previewData.entries.map((entry: any) => fetchEntryTitle(sdk, entry, sdk.locales.default))
         );
 
-        console.log('entryPreviewData', entryPreviewData);
-
         setPreviewData({
-          ...resultData,
+          ...previewData,
           entryPreviewData,
         });
       } catch (error) {
