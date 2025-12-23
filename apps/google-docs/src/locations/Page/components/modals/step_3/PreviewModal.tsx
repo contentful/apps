@@ -30,7 +30,6 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
   if (!preview) {
     return null;
   }
-
   // for v0, we are only displaying the titles and content type names (in entryPreviewData)
   const { summary, totalEntries, entries, entryPreviewData } = preview;
 
@@ -53,44 +52,41 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
         <>
           <Modal.Header title="Preview entries" onClose={handleClose} />
           <Modal.Content>
-            <Paragraph marginBottom="spacingM" color="gray700">
-              Based off the document, {entries.length}{' '}
-              {entries.length === 1 ? 'entry is' : 'entries are'} being suggested:
-            </Paragraph>
+            {entries.length == 0 ? (
+              <Paragraph marginBottom="spacingM" color="gray700">
+                No entries found
+              </Paragraph>
+            ) : (
+              <Paragraph marginBottom="spacingM" color="gray700">
+                Based off the document, {entries.length}{' '}
+                {entries.length === 1 ? 'entry is' : 'entries are'} being suggested:
+              </Paragraph>
+            )}
 
             <Box marginBottom="spacingM">
-              {entries.length > 0 ? (
-                <Box>
-                  {entryPreviewData.map((entry, index) => {
-                    return (
-                      <Box
-                        key={index}
-                        padding="spacingS"
-                        style={{
-                          border: `1px solid ${tokens.gray300}`,
-                          borderRadius: tokens.borderRadiusMedium,
-                        }}
-                        marginBottom="spacingS">
-                        <Flex alignItems="center" gap="spacingXs">
-                          <Text
-                            fontWeight="fontWeightMedium"
-                            fontSize="fontSizeM"
-                            fontColor="gray900">
-                            {entry.title.length > MAX_TITLE_LENGTH
-                              ? entry.title.substring(0, 60) + '...'
-                              : entry.title}
-                          </Text>
-                          <Text fontColor="gray500" fontSize="fontSizeM" as="span">
-                            ({entry.contentTypeName})
-                          </Text>
-                        </Flex>
-                      </Box>
-                    );
-                  })}
-                </Box>
-              ) : (
-                <Paragraph color="gray600">No entries found</Paragraph>
-              )}
+              {entryPreviewData.map((entry, index) => {
+                return (
+                  <Box
+                    key={index}
+                    padding="spacingS"
+                    style={{
+                      border: `1px solid ${tokens.gray300}`,
+                      borderRadius: tokens.borderRadiusMedium,
+                    }}
+                    marginBottom="spacingS">
+                    <Flex alignItems="center" gap="spacingXs">
+                      <Text fontWeight="fontWeightMedium" fontSize="fontSizeM" fontColor="gray900">
+                        {entry.title.length > MAX_TITLE_LENGTH
+                          ? entry.title.substring(0, 60) + '...'
+                          : entry.title}
+                      </Text>
+                      <Text fontColor="gray500" fontSize="fontSizeM" as="span">
+                        ({entry.contentTypeName})
+                      </Text>
+                    </Flex>
+                  </Box>
+                );
+              })}
             </Box>
           </Modal.Content>
           <Modal.Controls>
