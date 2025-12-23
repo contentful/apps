@@ -34,6 +34,8 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
   // for v0, we are only displaying the titles and content type names (in entryPreviewData)
   const { summary, totalEntries, entries, entryPreviewData } = preview;
 
+  const MAX_TITLE_LENGTH = 60;
+
   const handleClose = () => {
     if (!isLoading && !isCreatingEntries) {
       onClose();
@@ -74,7 +76,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
                             fontWeight="fontWeightMedium"
                             fontSize="fontSizeM"
                             fontColor="gray900">
-                            {entry.title.length > 60
+                            {entry.title.length > MAX_TITLE_LENGTH
                               ? entry.title.substring(0, 60) + '...'
                               : entry.title}
                           </Text>
