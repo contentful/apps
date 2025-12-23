@@ -2,12 +2,12 @@ import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { createContentTypesAnalysisAction, createPreviewAction } from '../utils/appAction';
 import { ERROR_MESSAGES } from '../utils/constants/messages';
-import { PreviewData } from '../locations/Page/components/modals/step_3/PreviewModal';
-import { fetchEntryTitle } from '../services/fetchEntryTitle';
+import { PreviewResponseType } from '../locations/Page/components/modals/step_3/PreviewModal';
+import { getEntryTitle } from '../utils/getEntryTitle';
 import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 interface UseGeneratePreviewResult {
   isSubmitting: boolean;
-  previewData: PreviewData | null;
+  previewData: PreviewResponseType | null;
   errorMessage: string | null;
   successMessage: string | null;
   submit: (contentTypeIds: string[]) => Promise<void>;
@@ -26,7 +26,7 @@ export const useGeneratePreview = ({
   oauthToken,
 }: UseGeneratePreviewProps): UseGeneratePreviewResult => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [previewData, setPreviewData] = useState<PreviewData | null>(null);
+  const [previewData, setPreviewData] = useState<PreviewResponseType | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -84,9 +84,7 @@ export const useGeneratePreview = ({
 
         // for v0, we are only displaying the titles and content type names in the preview modal
         const entryPreviewData = await Promise.all(
-          previewData.entries.map((entry: EntryToCreate) =>
-            fetchEntryTitle(sdk, entry, sdk.locales.default)
-          )
+          previewData.entries.map((entry: EntryToCreate) => getEntryTitle({ sdk, entry }))
         );
 
         setPreviewData({

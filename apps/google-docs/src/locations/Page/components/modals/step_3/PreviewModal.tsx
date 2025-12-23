@@ -4,7 +4,7 @@ import { EntryToCreate } from '../../../../../../functions/agents/documentParser
 import { SelectedContentType } from '../step_2/SelectContentTypeModal';
 import tokens from '@contentful/f36-tokens';
 
-export interface PreviewData {
+export interface PreviewResponseType {
   summary: string;
   totalEntries: number;
   entries: EntryToCreate[];
@@ -13,7 +13,7 @@ export interface PreviewData {
 interface PreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  preview: PreviewData | null;
+  preview: PreviewResponseType | null;
   onCreateEntries: (contentTypes: SelectedContentType[]) => void;
   isCreatingEntries: boolean;
   isLoading: boolean;

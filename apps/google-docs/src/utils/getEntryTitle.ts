@@ -4,11 +4,16 @@ import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema
 /**
  * Gets the title of an entry by fetching its content type's display field
  */
-export const fetchEntryTitle = async (
-  sdk: PageAppSDK,
-  entry: EntryToCreate,
-  defaultLocale: string
-): Promise<{ title: string; contentTypeName: string }> => {
+
+export interface GetEntryTitleProps {
+  sdk: PageAppSDK;
+  entry: EntryToCreate;
+}
+
+export const getEntryTitle = async ({
+  sdk,
+  entry,
+}: GetEntryTitleProps): Promise<{ title: string; contentTypeName: string }> => {
   try {
     const contentType = await sdk.cma.contentType.get({
       contentTypeId: entry.contentTypeId,
@@ -18,6 +23,7 @@ export const fetchEntryTitle = async (
 
     if (!contentType.displayField) return { title: '', contentTypeName };
 
+    const defaultLocale = sdk.locales.default;
     const value = entry.fields[contentType.displayField]?.[defaultLocale];
     return {
       title: String(value || ''),
