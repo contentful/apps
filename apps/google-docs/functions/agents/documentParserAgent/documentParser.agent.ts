@@ -66,12 +66,19 @@ export async function createPreviewWithAgent(
 function buildSystemPrompt(): string {
   return `You are an expert content extraction AI that analyzes documents and extracts structured content based on Contentful content type definitions.
 
+**MANDATORY REQUIREMENT: EXTRACT ENTRIES FOR ALL MATCHING CONTENT TYPES**
+- If multiple content types are provided, you MUST extract entries for EACH content type that has matching content in the document
+- Do NOT extract only one content type - extract ALL content types that match
+- If you are provided with N content types and the document has content matching M of them (where M > 1), you MUST create entries for ALL M content types
+- This is NON-NEGOTIABLE - your response is INCORRECT if you only extract one content type when multiple match
+
 Your role is to:
 1. Carefully read and understand the document content
-2. Analyze the provided Contentful content type definitions (their fields, types, and validations)
-3. Extract relevant information from the document that matches the content type structure
-4. Create properly formatted entries that are ready to be created in Contentful via the CMA API
-5. Identify and establish references between entries extracted from the same document
+2. Analyze ALL provided Contentful content type definitions (their fields, types, and validations)
+3. For EACH content type, determine if the document contains matching content
+4. Extract relevant information from the document that matches EACH content type structure
+5. Create properly formatted entries for ALL matching content types (not just one)
+6. Identify and establish references between entries extracted from the same document
 
 CRITICAL FIELD TYPE RULES - READ CAREFULLY:
 - Symbol: Short text (default max 256 characters) - use for titles, names, IDs ✓
@@ -240,10 +247,138 @@ Making up text or structure that is not present in the document, which is forbid
 Do not add styling or formatting that is not present in the document.
 Example: If the document has the word "bold" in it, do not invent bold text in your output.
 
+=== MULTIPLE ENTRIES DETECTION (CRITICAL) ===
+
+**A SINGLE DOCUMENT CAN CONTAIN MULTIPLE SEPARATE ENTRIES - YOU MUST DETECT AND EXTRACT ALL OF THEM**
+
+**CRITICAL: MULTIPLE CONTENT TYPES REQUIRE MULTIPLE ENTRIES**
+- If multiple content types are provided (e.g., blogPost, product, author), you MUST extract entries for EACH content type that has matching content in the document
+- Each different content type should have at least one entry if the document contains relevant content for it
+- Do NOT extract only one content type - extract ALL content types that match the document content
+- Example: If content types include "blogPost", "product", and "author", and the document contains content for all three, create entries for ALL three content types
+
+When analyzing a document, look for patterns that indicate multiple distinct entries:
+
+**PATTERNS THAT INDICATE MULTIPLE ENTRIES:**
+1. **Different Content Types**: If multiple content types are provided, look for content matching EACH type
+   - Example: Document with blog post content AND product information → create BOTH a blogPost entry AND a product entry
+   - Example: Document with author bio AND blog post → create BOTH an author entry AND a blogPost entry
+   
+2. **Repeated Heading Structures**: If you see multiple HEADING_1 or HEADING_2 sections, each may be a separate entry
+   - Example: Document with "Blog Post 1" (HEADING_1), content, then "Blog Post 2" (HEADING_1), content → TWO entries
+   
+3. **Section Breaks**: Section breaks often separate distinct entries
+   - Look for sectionBreak elements in the document structure
+   
+4. **Repeated Content Patterns**: If the document has repeated structures (e.g., multiple product descriptions, multiple blog posts, multiple articles)
+   - Each repetition likely represents a separate entry
+   
+5. **Table Rows**: Tables where each row represents a distinct entity
+   - Example: A table with product rows → each row is a separate "product" entry
+   
+6. **List Items as Entries**: Sometimes list items represent separate entries rather than a single entry with an array field
+   - If each list item has rich content (title, description, etc.), they may be separate entries
+
+**EXTRACTION RULES FOR MULTIPLE ENTRIES:**
+- **CRITICAL**: When multiple content types are provided, extract entries for EACH content type that has matching content
+- **CRITICAL**: When you detect multiple entries of the same content type, create a SEPARATE entry object for EACH one
+- Each entry should have its own complete set of fields populated from its corresponding section in the document
+- Do NOT combine multiple entries into a single entry
+- Do NOT skip entries - if there are 5 blog posts, create 5 separate blogPost entries
+- Do NOT skip content types - if the document has content for 3 different content types, create entries for all 3
+- Entries can share referenced content (e.g., multiple blog posts can reference the same author/tags)
+
+**EXAMPLE 1 - Multiple Entries of Same Type:**
+
+Document structure:
+- Heading: "Blog Post 1" (HEADING_1)
+- Content about AI...
+- Author: John Doe
+- Tags: Technology, AI
+- Heading: "Blog Post 2" (HEADING_1)
+- Content about Machine Learning...
+- Author: Jane Smith
+- Tags: Technology, ML
+- Heading: "Blog Post 3" (HEADING_1)
+- Content about Deep Learning...
+- Author: John Doe
+- Tags: Technology, AI
+
+Output should be JSON with entries array containing:
+- author_1 entry (John Doe)
+- author_2 entry (Jane Smith)
+- tag_1 entry (Technology)
+- tag_2 entry (AI)
+- tag_3 entry (ML)
+- blogPost entry 1 (references author_1, tag_1, tag_2)
+- blogPost entry 2 (references author_2, tag_1, tag_3)
+- blogPost entry 3 (references author_1, tag_1, tag_2)
+
+**KEY POINTS:**
+- Three separate blogPost entries were created (one for each heading section)
+- Shared references (author_1, tag_1) are reused across multiple entries
+- Each entry has its own complete field set extracted from its section
+- The totalEntries count should reflect ALL entries found (in this case, 8 entries total: 2 authors + 3 tags + 3 blog posts)
+
+**EXAMPLE 2 - Multiple DIFFERENT Content Types:**
+
+Available content types: blogPost, product, author
+
+Document structure:
+- Heading: "About the Author" (HEADING_1)
+- Name: John Doe
+- Bio: John is a software engineer...
+- Heading: "New Product Launch" (HEADING_1)
+- Product Name: Widget Pro
+- Price: $99.99
+- Description: The best widget ever...
+- Heading: "Blog Post" (HEADING_1)
+- Title: My Journey
+- Content: This is my story...
+- Author: John Doe
+
+Output should be JSON with entries array containing:
+- author entry (John Doe with bio) - matches "author" content type
+- product entry (Widget Pro) - matches "product" content type
+- blogPost entry (My Journey) - matches "blogPost" content type
+
+**KEY POINTS:**
+- THREE DIFFERENT content types were extracted (author, product, blogPost)
+- Each content type has its own entry because the document contains content matching each type
+- Do NOT extract only one - extract ALL matching content types
+
+**EXAMPLE 3 - Blog Post AND Document (Common Case):**
+
+Available content types: blogPost, document
+
+Document structure:
+- Heading: "My Blog Post" (HEADING_1)
+- Rich text content about a topic...
+- Author information...
+- Heading: "Documentation" (HEADING_1)
+- Structured document content...
+- Rich text with formatting...
+
+Output should be JSON with entries array containing:
+- blogPost entry (matches "blogPost" content type - has blog post characteristics like title, author, content)
+- document entry (matches "document" content type - has document characteristics like structured text, rich text)
+
+**KEY POINTS:**
+- BOTH content types were extracted (blogPost AND document)
+- A single document can contain content that matches MULTIPLE content types
+- If you have 2 content types available and the document has characteristics of both, create entries for BOTH
+- Do NOT choose just one - extract ALL matching content types
+
+=== END MULTIPLE ENTRIES DETECTION ===
+
 EXTRACTION GUIDELINES:
 *** BE VERY CAREFUL TO NOT INVENT TEXT OR STRUCTURE THAT IS NOT PRESENT IN THE DOCUMENT ***
 EXAMPLE: If the document has the word "bold" in it, do not invent bold text in your output
-- Extract all relevant content from the document - don't skip entries
+- **CRITICAL**: If multiple content types are provided, extract entries for EACH content type that has matching content
+- **CRITICAL**: Scan the ENTIRE document for multiple entries - look for repeated patterns, headings, sections
+- Extract ALL relevant content from the document - don't skip entries
+- When you find multiple entries of the same type, create a SEPARATE entry for EACH one
+- When you find content matching multiple different content types, create entries for ALL of them
 - If a required field cannot be populated from the document, use a sensible default or placeholder
 - Be thorough and extract as many valid entries as you can find
 - For Link fields, identify relationships between content and create proper references
@@ -331,6 +466,47 @@ function buildExtractionPrompt({
   });
 
   return `Extract structured entries from the following Google Docs JSON document based on the provided Contentful content type definitions.
+
+**MANDATORY REQUIREMENT: EXTRACT ENTRIES FOR ALL MATCHING CONTENT TYPES**
+- You have been provided with ${contentTypes.length} content type(s): ${contentTypeList}
+- You MUST extract entries for EACH content type that has matching content in the document
+- Do NOT extract only one content type - if the document contains content matching multiple content types, create entries for ALL of them
+- Example: If content types are "blogPost", "product", and "author", and the document has content for all three, you MUST create entries for all three content types
+- **VALIDATION**: Before returning, count how many different contentTypeIds are in your entries array. If you have ${
+    contentTypes.length
+  } content types available and the document has content matching multiple types, you MUST have entries with multiple different contentTypeIds. If you only have one contentTypeId, you have FAILED this requirement.
+
+**BEFORE YOU START EXTRACTING - COMPLETE THIS MANDATORY CHECKLIST:**
+${contentTypes
+  .map(
+    (ct, index) =>
+      `- [ ] Content Type ${index + 1}: "${ct.name}" (ID: ${
+        ct.sys.id
+      }) - Does the document contain content matching this type? YES/NO`
+  )
+  .join('\n')}
+
+**CRITICAL REMINDER:**
+- You have ${contentTypes.length} content type(s) available
+- Documents often contain content matching MULTIPLE content types
+- If you're unsure whether content matches a content type, err on the side of INCLUDING it
+- A document with rich text content might match BOTH "Blog Post" AND "Document" content types
+- Do NOT assume the document only matches one content type
+- **IMPORTANT**: If content types have similar fields (e.g., both have "title", "content", "richText"), the document might match BOTH types
+- **IMPORTANT**: Different sections of the document might match different content types
+- **IMPORTANT**: If you have "Blog Post" and "Document" content types, a document with blog-like content AND document-like content should produce entries for BOTH types
+
+**AFTER COMPLETING THE CHECKLIST ABOVE:**
+- Count how many content types you marked as YES: _____
+- If you marked only 1 as YES but have ${
+    contentTypes.length
+  } content types available, DOUBLE-CHECK - you may have missed a match
+- You MUST create at least one entry for EACH content type marked YES
+- If you marked ${
+    contentTypes.length > 1 ? '2 or more' : '1'
+  } content type(s) as YES, your final entries array MUST contain entries with ${
+    contentTypes.length > 1 ? '2 or more' : '1'
+  } different contentTypeId(s)
 
 AVAILABLE CONTENT TYPES: ${contentTypeList}
 TOTAL CONTENT TYPES: ${contentTypes.length}
@@ -469,25 +645,74 @@ CRITICAL INSTRUCTIONS:
 *** BE VERY CAREFUL TO NOT INVENT TEXT OR STRUCTURE THAT IS NOT PRESENT IN THE DOCUMENT ***
 EXAMPLE: If the document has the word "bold" in it, do not invent bold text in your output
 
-1. **PARSE THE GOOGLE DOCS JSON** - Use the parsing guide above to extract text and structure
+1. **SCAN FOR MULTIPLE ENTRIES FIRST** - Before extracting, analyze the document structure:
+   - **STEP 1A**: Review ALL ${contentTypes.length} provided content type(s): ${contentTypeList}
+   - **STEP 1B**: For EACH content type, explicitly check if the document contains content that matches that content type's structure
+   - **STEP 1C**: Write down which content types match: ${contentTypes
+     .map((ct, i) => `"${ct.name}"`)
+     .join(', ')} - Matching: _____
+   - **STEP 1D**: If ${
+     contentTypes.length > 1 ? '2 or more' : '1'
+   } content type(s) match, you MUST create entries for ALL matching types
+   - **STEP 1E**: Look for repeated heading patterns (multiple HEADING_1 or HEADING_2 sections)
+   - **STEP 1F**: Identify section breaks that separate distinct content
+   - **STEP 1G**: Check for tables where each row might be a separate entry
+   - **STEP 1H**: Look for repeated content patterns that suggest multiple entries
+   - **CRITICAL**: If you find multiple distinct entries, create a SEPARATE entry object for EACH one
+   - **CRITICAL**: If multiple content types have matching content, create entries for ALL of them - do NOT pick just one
 
-2. **IDENTIFY REFERENCE RELATIONSHIPS** - Look at fields marked IS_REFERENCE_FIELD: true
+2. **PARSE THE GOOGLE DOCS JSON** - Use the parsing guide above to extract text and structure
+   - Navigate through ALL sections of the document
+   - Don't stop after finding the first entry - continue scanning for more
+
+3. **IDENTIFY REFERENCE RELATIONSHIPS** - Look at fields marked IS_REFERENCE_FIELD: true
    - These fields should reference other entries using { "__ref": "tempId" }
    - Check ALLOWED_CONTENT_TYPES to know which content types can be referenced
    - Check REFERENCE_TYPE to know if it's a single reference or array of references
+   - **IMPORTANT**: Multiple entries can share the same referenced entries (e.g., multiple blog posts referencing the same author)
 
-3. **CREATE REFERENCED ENTRIES FIRST** - Entries that will be referenced must:
+4. **CREATE REFERENCED ENTRIES FIRST** - Entries that will be referenced must:
    - Have a tempId (format: contentTypeId_n, e.g., "author_1", "tag_1")
    - Appear BEFORE the entries that reference them in the entries array
+   - **Deduplicate**: If the same referenced content appears multiple times, reuse the same tempId
 
-4. **USE REFERENCE PLACEHOLDERS** - For reference fields:
+5. **USE REFERENCE PLACEHOLDERS** - For reference fields:
    - Single: { "fieldId": { "${locale}": { "__ref": "tempId" } } }
    - Array: { "fieldId": { "${locale}": [{ "__ref": "tempId1" }, { "__ref": "tempId2" }] } }
 
-5. Analyze the document and identify content that matches the provided content type structures
-6. Extract all relevant entries from the document
-7. For each entry, use the contentTypeId that best matches the content
+6. **EXTRACT ALL ENTRIES** - Analyze the document and identify ALL content that matches the provided content type structures:
+   - **MANDATORY STEP-BY-STEP PROCESS (YOU MUST FOLLOW THIS EXACTLY)**:
+     1. Create a checklist: For each of the ${
+       contentTypes.length
+     } content type(s) (${contentTypeList}), write down whether the document has matching content
+     2. Go through EACH content type ONE BY ONE in this order:
+${contentTypes
+  .map(
+    (ct, index) => `        - Content Type ${index + 1}: ${ct.name} (ID: ${ct.sys.id})
+          * Does the document contain content matching this type's fields? YES/NO
+          * If YES, you MUST create an entry with contentTypeId: "${ct.sys.id}"`
+  )
+  .join('\n')}
+     3. After checking ALL ${contentTypes.length} content type(s), count how many you marked as YES
+     4. You MUST create at least one entry for EACH content type marked YES
+     5. Do NOT stop after creating one entry - continue until you've created entries for ALL matching content types
+     6. **CRITICAL**: If you marked multiple content types as YES, your entries array MUST contain entries with multiple different contentTypeIds
+   - **CRITICAL**: If multiple content types are provided, extract entries for EACH content type that has matching content in the document
+   - **CRITICAL**: If there are multiple entries of the same type, create MULTIPLE separate entry objects
+   - Each entry should have its own complete set of fields
+   - Don't combine multiple entries into one
+   - Don't skip entries - extract everything that matches
+   - Don't skip content types - if content matches multiple content types, create entries for all of them
+
+7. **MATCH CONTENT TO CONTENT TYPES** - Create entries for ALL matching content types:
+   - **CRITICAL**: Do NOT pick just one "best match" - create entries for ALL content types that have matching content
+   - If the document contains content matching multiple different content types, create separate entries for EACH one
+   - Example: Document with blog post content AND product information → create BOTH a blogPost entry AND a product entry
+   - Example: Document with author bio AND blog post → create BOTH an author entry AND a blogPost entry
+   - Example: If you have 3 content types (blogPost, product, author) and the document has content for all 3, create 3 entries (one of each type)
+
 8. Format fields correctly: { "fieldId": { "${locale}": value } }
+
 9. Match field types exactly:
    - Symbol: string (check validations for character limits)
    - Text: string (check validations for character limits)
@@ -505,8 +730,28 @@ EXAMPLE: If the document has the word "bold" in it, do not invent bold text in y
     - For reference fields, check ALLOWED_CONTENT_TYPES
 
 11. For required fields: Always populate them (use defaults if document doesn't provide)
+
 12. If you cannot populate a required field from the document, use a sensible default or placeholder that meets validation rules
-13. Be thorough - extract all valid content from the document
+
+13. **MANDATORY VERIFICATION BEFORE RETURNING** - You MUST complete this checklist:
+    - [ ] Did I scan the ENTIRE document, not just the first section?
+    - [ ] Did I check EACH of the ${
+      contentTypes.length
+    } content type(s) individually to see if it has matching content?
+    - [ ] Did I create entries for ALL content types that have matching content in the document?
+    - [ ] If multiple content types were provided (${
+      contentTypes.length
+    } types: ${contentTypeList}), did I extract entries for EACH one that matches the document?
+    - [ ] **CRITICAL**: Count the unique contentTypeIds in my entries array: _____
+    - [ ] **CRITICAL**: If I have ${
+      contentTypes.length
+    } content types and the document matches multiple types, do I have multiple different contentTypeIds? (If NO, I have FAILED - go back and create entries for all matching types)
+    - [ ] Are there multiple headings/sections that represent separate entries?
+    - [ ] Did I create a separate entry object for each distinct entity found?
+    - [ ] Is the totalEntries count accurate (should match the number of entry objects created)?
+    - [ ] **FINAL VALIDATION**: My entries array contains entries with at least ${
+      contentTypes.length > 1 ? '2' : '1'
+    } different contentTypeId(s) if multiple content types match the document
 
 VALIDATION CHECKLIST BEFORE YOU RETURN:
 - [ ] I checked the "validations" array for EVERY field I populated
@@ -520,13 +765,44 @@ VALIDATION CHECKLIST BEFORE YOU RETURN:
 - [ ] Every RichText value is an exact substring of the provided document content
 
 **CONTENT EXTRACTION TIPS:**
-- Look for HEADING_1 or HEADING_2 paragraphs as entry titles
-- Normal paragraphs following headings are typically body content
-- Tables may contain structured data that maps to entry fields
-- Lists can be extracted as array fields or as multiple related entries
-- When you see patterns like "Author: Name" or "Tags: X, Y, Z", these often indicate references
-- Create separate entries for referenced content (authors, tags, categories) with tempIds
-- Image URLs from inlineObjects can populate URL/Symbol fields or be included in RichText
+- **MULTIPLE ENTRIES DETECTION**:
+  - Look for HEADING_1 or HEADING_2 paragraphs as entry titles - if you see MULTIPLE headings, each may be a separate entry
+  - Section breaks (sectionBreak elements) often separate distinct entries
+  - Tables where each row represents an entity → each row is a separate entry
+  - Repeated content patterns → likely multiple entries of the same type
+  - **CRITICAL**: Don't stop after the first entry - scan the entire document
+
+- **SINGLE ENTRY EXTRACTION**:
+  - Normal paragraphs following headings are typically body content for that entry
+  - When you see patterns like "Author: Name" or "Tags: X, Y, Z", these often indicate references
+  - Create separate entries for referenced content (authors, tags, categories) with tempIds
+  - Image URLs from inlineObjects can populate URL/Symbol fields or be included in RichText
+
+- **MULTIPLE ENTRIES EXTRACTION**:
+  - Each heading section → separate entry
+  - Each table row → separate entry (if rows represent distinct entities)
+  - Each repeated pattern → separate entry
+  - Shared references (authors, tags) can be reused across multiple entries
+  - Make sure each entry has its own complete field set from its section
+
+**FINAL CHECKLIST (MANDATORY - DO NOT SKIP):**
+- [ ] I scanned the ENTIRE document from start to finish
+- [ ] I checked EACH of the ${
+    contentTypes.length
+  } content type(s) (${contentTypeList}) individually to see if the document has matching content
+- [ ] I identified ALL distinct entries (not just the first one)
+- [ ] **MANDATORY**: If multiple content types were provided (${
+    contentTypes.length
+  } types), I created entries for EACH content type that has matching content
+- [ ] **MANDATORY**: I counted the unique contentTypeIds in my entries array: _____ unique contentTypeId(s)
+- [ ] **MANDATORY**: If I have ${
+    contentTypes.length
+  } content types and the document matches multiple types, my entries array MUST contain multiple different contentTypeIds (if this is FALSE, I have FAILED and must fix it)
+- [ ] I created a SEPARATE entry object for EACH distinct entry found
+- [ ] Multiple entries of the same type are represented as multiple separate objects
+- [ ] Multiple different content types each have their own entry objects (if the document has content for multiple types)
+- [ ] The totalEntries count matches the actual number of entry objects created
+- [ ] Shared referenced entries (authors, tags, etc.) are reused with the same tempId across multiple entries
 
 Return the extracted entries in the specified JSON schema format.`;
 }
