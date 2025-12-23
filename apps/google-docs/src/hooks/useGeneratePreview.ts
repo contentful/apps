@@ -4,10 +4,7 @@ import { createContentTypesAnalysisAction, createPreviewAction } from '../utils/
 import { ERROR_MESSAGES } from '../utils/constants/messages';
 import { PreviewEntry } from '../locations/Page/components/modals/step_3/PreviewModal';
 import { getEntryTitle } from '../utils/getEntryTitle';
-import {
-  EntryToCreate,
-  FinalEntriesResult,
-} from '../../functions/agents/documentParserAgent/schema';
+import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
 
 interface UseGeneratePreviewResult {
   isSubmitting: boolean;
@@ -76,17 +73,11 @@ export const useGeneratePreview = ({
         );
         console.log('analyzeContentTypesResponse', analyzeContentTypesResponse);
 
-        const previewResponse = (await createPreviewAction(
-          sdk,
-          contentTypeIds,
-          documentId,
-          oauthToken
-        )) as FinalEntriesResult;
-        console.log('previewResponse', previewResponse);
+        const { entries } = await createPreviewAction(sdk, contentTypeIds, documentId, oauthToken);
 
         // Build preview entries with title info
         const previewEntriesWithTitles: PreviewEntry[] = await Promise.all(
-          previewResponse.entries.map(async (entry) => {
+          entries.map(async (entry: EntryToCreate) => {
             const { title, contentTypeName } = await getEntryTitle({ sdk, entry });
             return { entry, title, contentTypeName };
           })
