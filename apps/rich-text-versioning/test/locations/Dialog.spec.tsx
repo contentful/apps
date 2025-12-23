@@ -241,11 +241,15 @@ describe('Dialog component', () => {
         ],
       });
 
-      mockSdk.cma.contentType.get = vi.fn().mockResolvedValue({
-        displayField: 'title',
-        name: 'Fruits',
-        sys: { id: 'fruits' },
-        fields: [{ id: 'title', name: 'Title', type: 'Symbol' }],
+      mockSdk.cma.contentType.getMany = vi.fn().mockResolvedValue({
+        items: [
+          {
+            displayField: 'title',
+            name: 'Fruits',
+            sys: { id: 'fruits' },
+            fields: [{ id: 'title', name: 'Title', type: 'Symbol' }],
+          },
+        ],
       });
 
       render(<Dialog />);
@@ -264,11 +268,15 @@ describe('Dialog component', () => {
         items: [], // No entries found
       });
 
-      mockSdk.cma.contentType.get = vi.fn().mockResolvedValue({
-        displayField: 'title',
-        name: 'Fruits',
-        sys: { id: 'fruits' },
-        fields: [{ id: 'title', name: 'Title', type: 'Symbol' }],
+      mockSdk.cma.contentType.getMany = vi.fn().mockResolvedValue({
+        items: [
+          {
+            displayField: 'title',
+            name: 'Fruits',
+            sys: { id: 'fruits' },
+            fields: [{ id: 'title', name: 'Title', type: 'Symbol' }],
+          },
+        ],
       });
 
       render(<Dialog />);
@@ -344,11 +352,15 @@ describe('Dialog component', () => {
         ],
       });
 
-      mockSdk.cma.contentType.get = vi.fn().mockResolvedValue({
-        displayField: 'title',
-        name: 'Fruits',
-        sys: { id: 'fruits' },
-        fields: [{ id: 'title', name: 'Title', type: 'Symbol' }],
+      mockSdk.cma.contentType.getMany = vi.fn().mockResolvedValue({
+        items: [
+          {
+            displayField: 'title',
+            name: 'Fruits',
+            sys: { id: 'fruits' },
+            fields: [{ id: 'title', name: 'Title', type: 'Symbol' }],
+          },
+        ],
       });
 
       render(<Dialog />);
@@ -366,11 +378,15 @@ describe('Dialog component', () => {
         items: [], // No entries found
       });
 
-      mockSdk.cma.contentType.get = vi.fn().mockResolvedValue({
-        displayField: 'title',
-        name: 'Fruits',
-        sys: { id: 'fruits' },
-        fields: [{ id: 'title', name: 'Title', type: 'Symbol' }],
+      mockSdk.cma.contentType.getMany = vi.fn().mockResolvedValue({
+        items: [
+          {
+            displayField: 'title',
+            name: 'Fruits',
+            sys: { id: 'fruits' },
+            fields: [{ id: 'title', name: 'Title', type: 'Symbol' }],
+          },
+        ],
       });
 
       render(<Dialog />);

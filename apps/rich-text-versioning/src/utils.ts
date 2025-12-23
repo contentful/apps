@@ -1,6 +1,5 @@
 import { AppState, ContentTypeField } from '@contentful/app-sdk';
-import { EntityStatus } from '@contentful/f36-components';
-import { ContentTypeProps, Entry, EntryProps } from 'contentful-management';
+import { ContentTypeProps, EntryProps } from 'contentful-management';
 
 import { Document } from '@contentful/rich-text-types';
 
@@ -60,10 +59,10 @@ export const restoreSelectedFields = (
 
 export const getEntryTitle = (
   entry: EntryProps,
-  contentType: ContentTypeProps,
+  contentType: ContentTypeProps | undefined,
   locale: string
 ): string => {
-  let displayFieldId = contentType.displayField;
+  const displayFieldId = contentType?.displayField;
   if (!displayFieldId) return 'Untitled';
 
   const value = entry.fields[displayFieldId]?.[locale];
