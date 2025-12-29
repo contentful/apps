@@ -38,7 +38,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       pendingCloseAction,
       setPendingCloseAction,
     } = useProgressTracking();
-    const { previewEntries, submit, clearMessages, isSubmitting } = useGeneratePreview({
+    const { previewEntries, assets, submit, clearMessages, isSubmitting } = useGeneratePreview({
       sdk,
       documentId,
       oauthToken,
@@ -124,7 +124,12 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       try {
         const ids = contentTypes.map((ct) => ct.id);
         const entries = previewEntries.map((p) => p.entry);
-        const entryResult: EntryCreationResult = await createEntriesFromPreview(sdk, entries, ids);
+        const entryResult: EntryCreationResult = await createEntriesFromPreview(
+          sdk,
+          entries,
+          ids,
+          assets
+        );
 
         const createdCount = entryResult.createdEntries.length;
 

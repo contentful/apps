@@ -2,6 +2,7 @@ import { PageAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
 import {
   EntryToCreate,
+  AssetToCreate,
   isReference,
   isReferenceArray,
 } from '../../functions/agents/documentParserAgent/schema';
@@ -446,127 +447,8 @@ function validateCreateEntriesInput(
   });
 }
 
-/**
- * Extracts unique image tokens from an entry's RichText fields
- */
-function extractImageTokensFromEntry(
-  entry: EntryToCreate,
-  contentType: ContentTypeProps
-): Map<string, ImageMetadata> {
-  const imageTokenMap = new Map<string, ImageMetadata>();
-
-  for (const field of contentType.fields) {
-    if (field.type !== 'RichText') continue;
-    const originalLocalized = entry.fields[field.id];
-    if (!originalLocalized) continue;
-
-    for (const originalVal of Object.values(originalLocalized)) {
-      if (typeof originalVal !== 'string') continue;
-      const metadata = extractImageMetadata(originalVal);
-
-      for (const meta of metadata) {
-        const normalizedUrl = meta.url.replace(/\s+/g, '');
-        const tokenKey = `${normalizedUrl}::${meta.altText || 'image'}`;
-
-        if (!imageTokenMap.has(tokenKey)) {
-          imageTokenMap.set(tokenKey, meta);
-        }
-      }
-    }
-  }
-
-  return imageTokenMap;
-}
-
-/**
- * Creates assets for image tokens in parallel and returns mapping results
- */
-async function createAssetsForTokens(
-  cma: PageAppSDK['cma'] | ConfigAppSDK['cma'],
-  spaceId: string,
-  environmentId: string,
-  defaultLocale: string,
-  imageTokenMap: Map<string, ImageMetadata>
-): Promise<Array<{ tokenKey: string; normalizedUrl: string; assetId: string } | null>> {
-  const assetCreationPromises = Array.from(imageTokenMap.entries()).map(
-    async ([tokenKey, metadata]) => {
-      // Skip invalid URLs - with OAuth working, we should only have valid URLs
-      if (!isValidUrl(metadata.url)) {
-        console.warn(`Skipping invalid image URL: ${metadata.url.substring(0, 100)}...`);
-        return null;
-      }
-
-      try {
-        const asset = await createAssetFromUrlFast(
-          cma,
-          spaceId,
-          environmentId,
-          metadata.url,
-          defaultLocale,
-          {
-            title: metadata.altText || metadata.fileName || 'Image',
-            altText: metadata.altText,
-            fileName: metadata.fileName,
-            contentType: metadata.contentType,
-          }
-        );
-
-        return {
-          tokenKey,
-          normalizedUrl: metadata.url.replace(/\s+/g, ''),
-          assetId: asset.sys.id,
-        };
-      } catch (error) {
-        console.error(
-          `Failed to create asset for URL: ${metadata.url.substring(0, 100)}...`,
-          error
-        );
-        return null;
-      }
-    }
-  );
-
-  return Promise.all(assetCreationPromises);
-}
-
-/**
- * Builds URL to Asset ID mapping from asset creation results
- */
-function buildUrlToAssetIdMap(
-  results: Array<{ tokenKey: string; normalizedUrl: string; assetId: string } | null>,
-  imageTokenMap: Map<string, ImageMetadata>
-): Record<string, string> {
-  const urlToAssetId: Record<string, string> = {};
-  const seenUrls = new Set<string>();
-
-  for (const result of results) {
-    if (!result) continue;
-
-    const { tokenKey, normalizedUrl, assetId } = result;
-    const metadata = imageTokenMap.get(tokenKey);
-    if (!metadata) continue;
-
-    // Map tokenKey (primary lookup key)
-    urlToAssetId[tokenKey] = assetId;
-
-    // Map normalized URL (only for first occurrence to prevent overwrites)
-    if (!seenUrls.has(normalizedUrl)) {
-      urlToAssetId[normalizedUrl] = assetId;
-      seenUrls.add(normalizedUrl);
-    }
-
-    // Map composite key
-    const compositeKey = `${normalizedUrl}::${metadata.altText || 'image'}`;
-    urlToAssetId[compositeKey] = assetId;
-
-    // Map drawing-specific key if applicable
-    if (metadata.altText.toLowerCase().includes('drawing')) {
-      urlToAssetId[`${normalizedUrl}::drawing`] = assetId;
-    }
-  }
-
-  return urlToAssetId;
-}
+// NOTE: Algorithm-based asset extraction functions have been removed.
+// Assets are now identified and returned by the AI agent, then created via createAssetsFromAgentOutput.
 
 /**
  * Creates a Contentful Link object for an entry reference
@@ -712,13 +594,93 @@ function resolveReferences(
 }
 
 /**
+ * Creates assets from the agent output and builds URL mapping for RichText conversion
+ *
+ * The mapping supports multiple lookup keys to match how MarkdownParser searches for assets:
+ * - normalizedUrl: Direct URL lookup
+ * - compositeKey: `${normalizedUrl}::${altText || 'image'}` for matching with alt text
+ * - drawingKey: `${normalizedUrl}::drawing` if alt text includes "drawing"
+ */
+async function createAssetsFromAgentOutput(
+  cma: PageAppSDK['cma'] | ConfigAppSDK['cma'],
+  spaceId: string,
+  environmentId: string,
+  defaultLocale: string,
+  assets: AssetToCreate[]
+): Promise<Record<string, string>> {
+  const urlToAssetId: Record<string, string> = {};
+
+  if (!assets || assets.length === 0) {
+    return urlToAssetId;
+  }
+
+  const assetCreationPromises = assets.map(async (asset) => {
+    if (!isValidUrl(asset.url)) {
+      console.warn(`Skipping invalid asset URL: ${asset.url.substring(0, 100)}...`);
+      return null;
+    }
+
+    try {
+      const createdAsset = await createAssetFromUrlFast(
+        cma,
+        spaceId,
+        environmentId,
+        asset.url,
+        defaultLocale,
+        {
+          title: asset.title || asset.altText || 'Image',
+          altText: asset.altText,
+          fileName: asset.fileName,
+          contentType: asset.contentType,
+        }
+      );
+
+      const normalizedUrl = asset.url.replace(/\s+/g, '');
+      const altText = asset.altText || '';
+
+      return {
+        normalizedUrl,
+        altText,
+        assetId: createdAsset.sys.id,
+      };
+    } catch (error) {
+      console.error(`Failed to create asset for URL: ${asset.url.substring(0, 100)}...`, error);
+      return null;
+    }
+  });
+
+  const results = await Promise.all(assetCreationPromises);
+
+  // Build mapping with multiple keys for MarkdownParser lookup
+  for (const result of results) {
+    if (!result) continue;
+
+    const { normalizedUrl, altText, assetId } = result;
+
+    // Map normalized URL (primary lookup)
+    urlToAssetId[normalizedUrl] = assetId;
+
+    // Map composite key: `${normalizedUrl}::${altText || 'image'}`
+    const compositeKey = `${normalizedUrl}::${altText || 'image'}`;
+    urlToAssetId[compositeKey] = assetId;
+
+    // Map drawing-specific key if applicable
+    if (altText.toLowerCase().includes('drawing')) {
+      urlToAssetId[`${normalizedUrl}::drawing`] = assetId;
+    }
+  }
+
+  return urlToAssetId;
+}
+
+/**
  * Creates multiple entries in Contentful using a two-pass approach
  *
  * This function handles:
- * 1. PASS 1: Create all entries WITHOUT reference fields (Contentful generates IDs)
- * 2. Build tempId -> realId mapping from created entries
- * 3. PASS 2: Update entries that have references with resolved reference fields
- * 4. Image asset creation from markdown tokens in RichText fields
+ * 1. ASSET CREATION: Create all assets from agent output first (assets are identified by the AI agent, not parsed from RichText)
+ * 2. PASS 1: Create all entries WITHOUT reference fields (Contentful generates IDs)
+ * 3. Build tempId -> realId mapping from created entries
+ * 4. PASS 2: Update entries that have references with resolved reference fields
  * 5. Field transformation based on content type definitions
  *
  * The two-pass approach allows:
@@ -726,15 +688,20 @@ function resolveReferences(
  * - Support for circular references (A -> B -> C -> A)
  * - tempIds remain ephemeral (only used during creation process)
  *
+ * Assets are created from the agent's output array, not parsed algorithmically from RichText fields.
+ * The AI agent identifies all images/drawings in the document and returns them in the assets array.
+ *
  * @param sdk - Contentful SDK instance (PageAppSDK or ConfigAppSDK)
  * @param entries - Array of entries from Document Parser Agent output
  * @param contentTypeIds - Array of content type IDs to fetch and use
+ * @param assets - Array of assets from Document Parser Agent output (optional, defaults to empty array)
  * @returns Promise resolving to creation results with entries and errors
  */
 export async function createEntriesFromPreview(
   sdk: PageAppSDK | ConfigAppSDK,
   entries: EntryToCreate[],
-  contentTypeIds: string[]
+  contentTypeIds: string[],
+  assets: AssetToCreate[] = []
 ): Promise<EntryCreationResult> {
   try {
     validateCreateEntriesInput(sdk, entries, contentTypeIds);
@@ -788,6 +755,15 @@ export async function createEntriesFromPreview(
   const createdEntries: EntryProps[] = [];
   const errors: Array<{ contentTypeId: string; error: string; details?: any }> = [];
 
+  // ASSET CREATION: Create all assets from agent output first
+  const urlToAssetId = await createAssetsFromAgentOutput(
+    cma,
+    spaceId,
+    environmentId,
+    defaultLocale,
+    assets
+  );
+
   // PASS 1: Create all entries WITHOUT reference fields
 
   for (const entry of entries) {
@@ -797,33 +773,12 @@ export async function createEntriesFromPreview(
       // Separate reference fields from non-reference fields
       const { nonRefFields } = separateReferenceFields(entry.fields);
 
-      // Handle image assets in RichText fields (using non-ref fields only)
-      let urlToAssetId: Record<string, string> | undefined;
-
-      if (contentType) {
-        const entryWithNonRefFields: EntryToCreate = {
-          ...entry,
-          fields: nonRefFields,
-        };
-        const imageTokenMap = extractImageTokensFromEntry(entryWithNonRefFields, contentType);
-
-        if (imageTokenMap.size > 0) {
-          const results = await createAssetsForTokens(
-            cma,
-            spaceId,
-            environmentId,
-            defaultLocale,
-            imageTokenMap
-          );
-          urlToAssetId = buildUrlToAssetIdMap(results, imageTokenMap);
-        }
-      }
-
       // Transform fields for content type (handles RichText conversion)
+      // Assets are already created and mapped in urlToAssetId
       const transformedFields = transformFieldsForContentType(
         nonRefFields,
         contentType,
-        urlToAssetId
+        Object.keys(urlToAssetId).length > 0 ? urlToAssetId : undefined
       );
 
       // Create the entry in Contentful (let Contentful generate the ID)

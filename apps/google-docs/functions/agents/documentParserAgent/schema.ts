@@ -29,6 +29,18 @@ export const EntryToCreateSchema = z.object({
     ),
 });
 
+// Schema for an asset to be created in Contentful
+export const AssetToCreateSchema = z.object({
+  url: z.string().describe('The URL of the asset (image, video, etc.)'),
+  title: z.string().optional().describe('Title for the asset'),
+  altText: z.string().optional().describe('Alt text for the asset'),
+  fileName: z.string().optional().describe('File name for the asset'),
+  contentType: z
+    .string()
+    .optional()
+    .describe('MIME type of the asset (e.g., image/jpeg, image/png)'),
+});
+
 // The final output schema - array of entries ready for CMA client
 export const FinalEntriesResultSchema = z.object({
   entries: z
@@ -36,12 +48,18 @@ export const FinalEntriesResultSchema = z.object({
     .describe(
       'Array of entries extracted from the document. Entries that are referenced by others should come first and have tempId set.'
     ),
+  assets: z
+    .array(AssetToCreateSchema)
+    .describe(
+      'Array of assets (images, videos, etc.) found in the document that should be created in Contentful. These will be created as assets and can be referenced in entries.'
+    ),
   summary: z.string().describe('Brief summary of what was extracted from the document'),
   totalEntries: z.number().describe('Total number of entries extracted'),
 });
 
 export type Reference = z.infer<typeof ReferenceSchema>;
 export type EntryToCreate = z.infer<typeof EntryToCreateSchema>;
+export type AssetToCreate = z.infer<typeof AssetToCreateSchema>;
 export type FinalEntriesResult = z.infer<typeof FinalEntriesResultSchema>;
 
 // Type guard to check if a value is a reference placeholder

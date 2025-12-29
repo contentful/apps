@@ -54,5 +54,6 @@ export const handler: FunctionEventHandler<
   return {
     success: true,
     entries: aiDocumentResponse.entries,
+    assets: aiDocumentResponse.assets || [],
   };
 };

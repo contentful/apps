@@ -385,9 +385,18 @@ EXAMPLE: If the document has the word "bold" in it, do not invent bold text in y
 - IMPORTANT FOR IMAGES AND DRAWINGS: 
   * If the document contains inlineObjectElement references, extract the image URL from inlineObjects[id].inlineObjectProperties.embeddedObject.imageProperties.contentUri
   * If embeddedDrawingProperties exists, it's a Google Drawing (but still use the imageProperties.contentUri)
-  * Include them as markdown image tokens like ![alt](URL) in the most relevant RichText field
-  * Use alt text like "Drawing" or "Image" or descriptive text if available
-  * Do NOT rewrite or drop these tokens - they will be processed as assets downstream`;
+  * **CRITICAL DUAL PROCESS**:
+    1. **ADD TO ASSETS ARRAY**: For each image/drawing found, add it to the "assets" array with:
+       - url: The image URL from imageProperties.contentUri
+       - title: Descriptive title (e.g., "Image", "Drawing", or text from nearby content)
+       - altText: Alt text if available, or use title
+       - fileName: Extract from URL if possible, or use default like "image.jpg"
+       - contentType: MIME type (e.g., "image/jpeg", "image/png") - infer from URL extension
+    2. **INCLUDE IN RICHTEXT**: Also include markdown image tokens like ![alt](URL) in RichText fields where the image appears
+       - This allows the system to know where to place the asset in the RichText content
+       - Use the same URL and alt text in both the assets array and the RichText token
+       - Example: If an image appears in a paragraph, include ![alt](url) in that paragraph's RichText field
+  * **BOTH ARE REQUIRED**: Add to assets array AND include token in RichText - the token will be replaced with an asset reference during processing`;
 }
 
 function buildExtractionPrompt({
@@ -615,13 +624,16 @@ The document is in Google Docs API JSON format. Here's how to interpret the stru
      * Look up \`inlineObjects[inlineObjectId]\` where inlineObjectId comes from the element (e.g., "kix.ABC")
      * Extract image URL from \`inlineObjectProperties.embeddedObject.imageProperties.contentUri\`
      * Check if \`embeddedDrawingProperties\` exists to identify Google Drawings
-     * Convert to markdown image token: \`![alt](url)\` where alt can be "Drawing" or "Image"
+     * **DUAL PROCESS REQUIRED**:
+       - **ADD TO ASSETS ARRAY**: For each image/drawing found, add an object to the "assets" array with url, title, altText, fileName, and contentType
+       - **INCLUDE IN RICHTEXT**: Also include markdown image token ![alt](url) in the RichText field where the image appears
      * **DO NOT** reuse the same URL for multiple inlineObjectElements - each one has its own unique URL
 4. For tables:
    - Iterate through \`tableRows[].tableCells[].content\` to get cell text
    - Use first row as headers if appropriate
-   - Also check for \`inlineObjectElement\` within table cells
-   - **CRITICAL**: Each inlineObjectElement in a table cell also has its own unique inlineObjectId - look it up separately
+     - Also check for \`inlineObjectElement\` within table cells
+     - **CRITICAL**: Each inlineObjectElement in a table cell also has its own unique inlineObjectId - look it up separately
+     - **CRITICAL**: For each image found in table cells, add it to the "assets" array AND include ![alt](url) token in the RichText field
 
 **FORMATTING CONVERSION:**
 When extracting RichText fields, convert Google Docs formatting to Markdown:
@@ -635,6 +647,7 @@ When extracting RichText fields, convert Google Docs formatting to Markdown:
 - HEADING_3 → ### heading
 - Bullet lists → - item
 - Numbered lists → 1. item
+- **IMPORTANT**: Include image tokens (![alt](url)) in RichText fields where images appear, AND also add them to the "assets" array
 
 === END PARSING GUIDE ===
 
@@ -733,7 +746,15 @@ ${contentTypes
 
 12. If you cannot populate a required field from the document, use a sensible default or placeholder that meets validation rules
 
-13. **MANDATORY VERIFICATION BEFORE RETURNING** - You MUST complete this checklist:
+13. **ASSET EXTRACTION** - You MUST identify and extract all assets (images, drawings, videos, etc.):
+    - [ ] Did I scan the document for ALL inlineObjectElement references?
+    - [ ] Did I extract the URL from each inlineObject's imageProperties.contentUri?
+    - [ ] Did I add each image/drawing to the "assets" array with url, title, altText, fileName, and contentType?
+    - [ ] Did I ALSO include markdown image tokens (![alt](url)) in RichText fields where images appear?
+    - [ ] Are all assets properly formatted in the assets array?
+    - [ ] Do the image tokens in RichText match the URLs in the assets array?
+
+14. **MANDATORY VERIFICATION BEFORE RETURNING** - You MUST complete this checklist:
     - [ ] Did I scan the ENTIRE document, not just the first section?
     - [ ] Did I check EACH of the ${
       contentTypes.length
@@ -752,6 +773,8 @@ ${contentTypes
     - [ ] **FINAL VALIDATION**: My entries array contains entries with at least ${
       contentTypes.length > 1 ? '2' : '1'
     } different contentTypeId(s) if multiple content types match the document
+    - [ ] Did I extract all images/drawings and add them to the assets array?
+    - [ ] Did I avoid including image tokens in RichText fields?
 
 VALIDATION CHECKLIST BEFORE YOU RETURN:
 - [ ] I checked the "validations" array for EVERY field I populated
@@ -776,7 +799,7 @@ VALIDATION CHECKLIST BEFORE YOU RETURN:
   - Normal paragraphs following headings are typically body content for that entry
   - When you see patterns like "Author: Name" or "Tags: X, Y, Z", these often indicate references
   - Create separate entries for referenced content (authors, tags, categories) with tempIds
-  - Image URLs from inlineObjects can populate URL/Symbol fields or be included in RichText
+  - Image URLs from inlineObjects should be added to the assets array, not embedded in RichText fields
 
 - **MULTIPLE ENTRIES EXTRACTION**:
   - Each heading section → separate entry
@@ -803,6 +826,9 @@ VALIDATION CHECKLIST BEFORE YOU RETURN:
 - [ ] Multiple different content types each have their own entry objects (if the document has content for multiple types)
 - [ ] The totalEntries count matches the actual number of entry objects created
 - [ ] Shared referenced entries (authors, tags, etc.) are reused with the same tempId across multiple entries
+- [ ] **ASSETS**: I extracted ALL images/drawings from inlineObjectElements and added them to the assets array
+- [ ] **ASSETS**: Each asset in the assets array has url, title, altText, fileName, and contentType fields
+- [ ] **ASSETS**: I ALSO included markdown image tokens (![alt](url)) in RichText fields where images appear (both are required)
 
-Return the extracted entries in the specified JSON schema format.`;
+Return the extracted entries and assets in the specified JSON schema format.`;
 }
