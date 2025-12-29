@@ -22,6 +22,7 @@ interface MuxAssetConfigurationModalProps {
   onConfirm: (data: ModalData) => void;
   installationParams: {
     muxEnableSignedUrls: boolean;
+    muxEnableDRM?: boolean;
   };
   isEditMode?: boolean;
   asset?: MuxContentfulObject;
@@ -37,11 +38,11 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
   asset,
   sdk,
 }) => {
-  const { muxEnableSignedUrls } = installationParams;
+  const { muxEnableSignedUrls, muxEnableDRM } = installationParams;
 
   const [modalData, setModalData] = useState<ModalData>({
     videoQuality: 'plus',
-    playbackPolicies: muxEnableSignedUrls ? ['signed'] : ['public'],
+    playbackPolicies: muxEnableDRM ? ['drm'] : muxEnableSignedUrls ? ['signed'] : ['public'],
     captionsConfig: {
       captionsType: 'off',
       languageCode: null,
@@ -65,7 +66,11 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
     if (isEditMode && asset) {
       setModalData({
         videoQuality: 'plus',
-        playbackPolicies: asset.signedPlaybackId ? ['signed'] : ['public'],
+        playbackPolicies: asset.drmPlaybackId
+          ? ['drm']
+          : asset.signedPlaybackId
+            ? ['signed']
+            : ['public'],
         captionsConfig: {
           captionsType: 'off',
           languageCode: null,
@@ -136,6 +141,7 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
                   setModalData((prev) => ({ ...prev, playbackPolicies: policies }))
                 }
                 enableSignedUrls={muxEnableSignedUrls}
+                enableDRM={muxEnableDRM}
                 onValidationChange={(isValid) =>
                   handleValidationChange('playbackPolicies', isValid)
                 }

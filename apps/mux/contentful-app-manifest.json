@@ -17,6 +17,15 @@
       "entryFile": "functions/src/getSignedUrlTokens.ts",
       "allowNetworks": ["api.contentful.com", "https://api.mux.com"],
       "accepts": ["appaction.call"]
+    },
+    {
+      "id": "getDRMLicenseTokens",
+      "name": "Get DRM license tokens",
+      "description": "This action returns DRM license tokens for securing Mux video playback with DRM protection.",
+      "path": "functions/src/getDRMLicenseTokens.js",
+      "entryFile": "functions/src/getDRMLicenseTokens.ts",
+      "allowNetworks": ["api.contentful.com", "https://api.mux.com"],
+      "accepts": ["appaction.call"]
     }
   ]
 }

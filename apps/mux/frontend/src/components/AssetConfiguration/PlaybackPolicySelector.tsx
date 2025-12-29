@@ -7,6 +7,7 @@ interface PlaybackPolicySelectorProps {
   selectedPolicies: PolicyType[];
   onPoliciesChange: (policies: PolicyType[]) => void;
   enableSignedUrls: boolean;
+  enableDRM?: boolean;
   onValidationChange?: (isValid: boolean) => void;
 }
 
@@ -17,6 +18,7 @@ export const PlaybackPolicySelector: FC<PlaybackPolicySelectorProps> = ({
   selectedPolicies,
   onPoliciesChange,
   enableSignedUrls,
+  enableDRM = false,
   onValidationChange,
 }) => {
   const handlePolicyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,6 +62,22 @@ export const PlaybackPolicySelector: FC<PlaybackPolicySelectorProps> = ({
               icon={<ExternalLinkIcon />}
               variant="secondary"
               href={playbackPolicyLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            />
+          </FormControl.HelpText>
+        </FormControl>
+
+        <FormControl marginBottom="none">
+          <Radio value="drm" isDisabled={!enableDRM}>
+            DRM Protected
+          </Radio>
+          <FormControl.HelpText>
+            Highest level of content protection using industry-standard encryption. Requires DRM to be enabled in app configuration.
+            <TextLink
+              icon={<ExternalLinkIcon />}
+              variant="secondary"
+              href="https://www.mux.com/blog/protect-your-video-content-with-drm-now-ga"
               target="_blank"
               rel="noopener noreferrer"
             />
