@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { EntryProps } from 'contentful-management';
-import { fetchAllEntries } from '../../src/utils/entryFetcher';
+import { fetchAllEntries } from '../../src/utils/fetchAllEntries';
 import { mockCma, getManyEntries } from '../mocks/mockCma';
 
 describe('fetchAllEntries', () => {
