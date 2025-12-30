@@ -1,12 +1,13 @@
 export interface EntityPermissions {
   read: boolean;
-  edit: boolean;
-  create: boolean;
-  delete: boolean;
-  publish: boolean;
-  unpublish: boolean;
-  archive: boolean;
-  unarchive: boolean;
+  edit?: boolean;
+  create?: boolean;
+  delete?: boolean;
+  publish?: boolean;
+  unpublish?: boolean;
+  archive?: boolean;
+  unarchive?: boolean;
+  invoke?: boolean;
 }
 
 export interface ContentLifecyclePermissions {
@@ -14,14 +15,19 @@ export interface ContentLifecyclePermissions {
   entries: EntityPermissions;
   assets: EntityPermissions;
   contentTypes: EntityPermissions;
+  aiActions: EntityPermissions;
+  editorInterfaces: EntityPermissions;
+  environments: EntityPermissions;
+  locales: EntityPermissions;
+  orgs: EntityPermissions;
+  spaces: EntityPermissions;
+  tags: EntityPermissions;
+  concepts: EntityPermissions;
+  conceptSchemes: EntityPermissions;
 }
 
 export interface OtherFeaturesPermissions {
   runAIActions: boolean;
-  triggerAutomations: boolean;
-  installApps: boolean;
-  callAppActions: boolean;
-  invokeAgents: boolean;
 }
 
 export interface MigrationPermissions {
@@ -40,14 +46,21 @@ export interface AppInstallationParameters {
   entries: string;
   assets: string;
   contentTypes: string;
+  aiActions: string;
+  editorInterfaces: string;
+  environments: string;
+  locales: string;
+  orgs: string;
+  spaces: string;
+  tags: string;
+  concepts: string;
+  conceptSchemes: string;
   runAIActions: boolean;
-  triggerAutomations: boolean;
-  installApps: boolean;
-  callAppActions: boolean;
-  invokeAgents: boolean;
   migrateWithinSpace: boolean;
   migrateBetweenSpaces: boolean;
 }
 
 export type OtherFeaturesPermissionKey = keyof OtherFeaturesPermissions;
 export type MigrationPermissionKey = keyof MigrationPermissions;
+export type ContentLifecycleEntityKey = Exclude<keyof ContentLifecyclePermissions, 'selectAll'>;
+export type EntityActionKey = keyof EntityPermissions;
