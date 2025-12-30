@@ -11,16 +11,6 @@ type PickerCallbackData = {
 type UseGoogleDocsPickerOptions = {
   onPicked?: (files: PickerCallbackData[]) => void;
   onCancel?: () => void;
-  /**
-   * Array of folder IDs to suggest as starting points in the picker.
-   * Users can navigate to these folders to find documents.
-   */
-  suggestedFolderIds?: string[];
-  /**
-   * Whether to include folders in the document view.
-   * When true, folders will be shown alongside documents.
-   */
-  includeFolders?: boolean;
 };
 
 const GOOGLE_PICKER_API_KEY = '';
@@ -61,21 +51,6 @@ export function useGoogleDocsPicker(
       const docsView = new google.picker.DocsView(google.picker.ViewId.DOCS);
       docsView.setMimeTypes('application/vnd.google-apps.document');
 
-      // Include folders in the document view if requested
-      // This allows users to see and navigate folders alongside documents
-      // When folders are included, users can browse into folders to find documents
-      if (options.includeFolders !== false) {
-        // Default to true if not specified, but allow explicit false
-        docsView.setIncludeFolders(true);
-      }
-
-      // Set parent folder if suggested folder IDs are provided
-      // This will start the picker in the first suggested folder
-      // Users can navigate to other folders from there
-      if (options.suggestedFolderIds && options.suggestedFolderIds.length > 0) {
-        docsView.setParent(options.suggestedFolderIds[0]);
-      }
-
       const pickerBuilder = new google.picker.PickerBuilder()
         .setOAuthToken(accessToken)
         .setDeveloperKey(GOOGLE_PICKER_API_KEY)
@@ -112,13 +87,7 @@ export function useGoogleDocsPicker(
     } finally {
       setIsOpening(false);
     }
-  }, [
-    accessToken,
-    options.onPicked,
-    options.onCancel,
-    options.suggestedFolderIds,
-    options.includeFolders,
-  ]);
+  }, [accessToken, options.onPicked, options.onCancel]);
 
   return { openPicker, isOpening };
 }
