@@ -1,4 +1,10 @@
 import { PageAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
+import { FinalEntriesResult } from '../../functions/agents/documentParserAgent/schema';
+
+/** Contentful app action responses wrap the result in sys.result */
+interface AppActionResponse<T> {
+  sys: { result: T };
+}
 
 /**
  * Fetches the app action ID by name from the current environment
@@ -82,21 +88,23 @@ export const createContentTypesAnalysisAction = async (
 };
 
 /**
- * Processes a document and creates Contentful entries
+ * Processes a document and extracts entries for preview
  * @param sdk - The Contentful SDK instance
  * @param contentTypeIds - Array of content type IDs to use for entry creation
- * @param document - The document to process (JSON object or string)
- * @returns Processing result from the app action
+ * @param documentId - The Google Doc ID to process
+ * @param oauthToken - OAuth token for Google API access
+ * @returns The extracted entries result
  */
 export const createPreviewAction = async (
   sdk: PageAppSDK | ConfigAppSDK,
   contentTypeIds: string[],
   documentId: string,
   oauthToken: string
-) => {
-  return callAppAction(sdk, 'createPreview', {
-    contentTypeIds,
-    documentId,
-    oauthToken,
-  });
+): Promise<FinalEntriesResult> => {
+  const response = await callAppAction<AppActionResponse<FinalEntriesResult>>(
+    sdk,
+    'createPreview',
+    { contentTypeIds, documentId, oauthToken }
+  );
+  return response.sys.result;
 };
