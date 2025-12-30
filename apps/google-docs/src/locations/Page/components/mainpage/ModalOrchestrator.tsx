@@ -8,11 +8,9 @@ import { ReviewEntriesModal } from '../modals/step_4/ReviewEntriesModal';
 import { ErrorEntriesModal } from '../modals/step_4/ErrorEntriesModal';
 import { createEntriesFromPreview, EntryCreationResult } from '../../../../services/entryService';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
-import {
-  SelectedContentType,
-  ContentTypePickerModal,
-} from '../modals/step_2/SelectContentTypeModal';
+import { ContentTypePickerModal } from '../modals/step_2/SelectContentTypeModal';
 import { PreviewModal } from '../modals/step_3/PreviewModal';
+import { ContentTypeProps } from 'contentful-management';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
@@ -109,22 +107,24 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       openModal(ModalType.CONTENT_TYPE_PICKER);
     };
 
-    const handleContentTypeSelected = async (contentTypes: SelectedContentType[]) => {
-      const ids = contentTypes.map((ct) => ct.id);
+    const handleContentTypeSelected = async (contentTypes: ContentTypeProps[]) => {
+      const ids = contentTypes.map((ct) => ct.sys.id);
       await submit(ids);
     };
 
-    const handlePreviewModalConfirm = async (contentTypes: SelectedContentType[]) => {
+    const handlePreviewModalConfirm = async (contentTypeIds: string[]) => {
       if (!previewEntries || previewEntries.length === 0) {
         sdk.notifier.error('No entries to create');
         return;
       }
-
       setIsCreatingEntries(true);
       try {
-        const ids = contentTypes.map((ct) => ct.id);
         const entries = previewEntries.map((p) => p.entry);
-        const entryResult: EntryCreationResult = await createEntriesFromPreview(sdk, entries, ids);
+        const entryResult: EntryCreationResult = await createEntriesFromPreview(
+          sdk,
+          entries,
+          contentTypeIds
+        );
 
         const createdCount = entryResult.createdEntries.length;
 
@@ -203,7 +203,9 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           isOpen={modalStates.isPreviewModalOpen}
           onClose={() => closeModal(ModalType.PREVIEW)}
           previewEntries={previewEntries}
-          onCreateEntries={() => handlePreviewModalConfirm(selectedContentTypes)}
+          onCreateEntries={() =>
+            handlePreviewModalConfirm(selectedContentTypes.map((ct) => ct.sys.id))
+          }
           isLoading={isSubmitting}
           isCreatingEntries={isCreatingEntries}
         />

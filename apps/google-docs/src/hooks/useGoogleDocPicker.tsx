@@ -43,7 +43,6 @@ export function useGoogleDocsPicker(
       await loadPickerApi();
 
       const google = (window as any).google;
-      const gapi = (window as any).gapi;
 
       // Only show Google Docs
       const view = new google.picker.View(google.picker.ViewId.DOCS);
