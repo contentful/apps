@@ -85,7 +85,7 @@ export const ContentTypePickerModal = ({
     }
   }, [isOpen]);
 
-  const handleSearchValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onSearchValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value.toLowerCase().trim();
     if (!searchTerm) {
       setFilteredContentTypes(contentTypes);
@@ -93,6 +93,13 @@ export const ContentTypePickerModal = ({
     }
     const filtered = contentTypes.filter((ct) => ct.name.toLowerCase().includes(searchTerm));
     setFilteredContentTypes(filtered);
+  };
+
+  const getPlaceholderText = () => {
+    if (isLoading) return 'Loading content types...';
+    if (contentTypes.length === 0) return 'No content types in space';
+    if (selectedContentTypes.length === 0) return 'Select one or more';
+    return `${selectedContentTypes.length} selected`;
   };
 
   const handleSelectContentType = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,18 +142,10 @@ export const ContentTypePickerModal = ({
               <Multiselect
                 searchProps={{
                   searchPlaceholder: 'Search content types',
-                  onSearchValueChange: handleSearchValueChange,
+                  onSearchValueChange,
                 }}
                 currentSelection={selectedContentTypes.map((ct) => ct.sys.id)}
-                placeholder={
-                  isLoading
-                    ? 'Loading content types...'
-                    : contentTypes.length === 0
-                    ? 'No content types in space'
-                    : selectedContentTypes.length === 0
-                    ? 'Select one or more'
-                    : `${selectedContentTypes.length} selected`
-                }>
+                placeholder={getPlaceholderText()}>
                 {filteredContentTypes.map((ct) => (
                   <Multiselect.Option
                     className={css({ padding: `0.25rem` })}
