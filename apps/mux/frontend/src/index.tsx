@@ -429,6 +429,13 @@ export class App extends React.Component<AppProps, AppState> {
         options,
         async (res) => await this.responseCheck(res)
       );
+      
+      if (!muxUploadUrl) {
+        // Adding this fallback so the upload won't fail when the DRM Configuration ID is invalid
+        this.setState({ modalAssetConfigurationVisible: false });
+        return;
+      }
+      
       const uploader = this.muxUploaderRef.current!;
       uploader.endpoint = muxUploadUrl;
 
@@ -650,9 +657,20 @@ export class App extends React.Component<AppProps, AppState> {
         );
         return false;
 
-      case !res.ok:
-        this.props.sdk.notifier.error(`API Error. ${res.status} ${res.statusText}`);
+      case !res.ok: {
+        // Try to get the specific error message from the response
+        try {
+          const errorData = await res.clone().json();
+          if (errorData?.error?.messages?.[0]) {
+            this.props.sdk.notifier.error(errorData.error.messages[0]);
+          } else {
+            this.props.sdk.notifier.error(`API Error. ${res.status} ${res.statusText}`);
+          }
+        } catch {
+          this.props.sdk.notifier.error(`API Error. ${res.status} ${res.statusText}`);
+        }
         return false;
+      }
 
       default:
         return true;
@@ -1011,7 +1029,7 @@ export class App extends React.Component<AppProps, AppState> {
       update: currentValue.pendingActions?.update ?? [],
     };
 
-    // Determine current policy considering pending actions (same logic as getCurrentPolicy in PlaybackSwitcher)
+    // Determine current policy considering pending actions
     let currentPolicy: PolicyType;
     if (currentValue.pendingActions?.create) {
       const playbackCreateAction = currentValue.pendingActions.create.find(
