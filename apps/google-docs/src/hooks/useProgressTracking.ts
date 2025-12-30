@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
-import { SelectedContentType } from '../locations/Page/components/modals/step_2/SelectContentTypeModal';
+import { ContentTypeProps } from 'contentful-management';
 
 export const useProgressTracking = () => {
   const [documentId, setDocumentId] = useState<string>('');
-  const [selectedContentTypes, setSelectedContentTypes] = useState<SelectedContentType[]>([]);
+  const [selectedContentTypes, setSelectedContentTypes] = useState<ContentTypeProps[]>([]);
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
 
   const hasProgress = documentId.trim().length > 0;

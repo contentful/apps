@@ -1,7 +1,6 @@
 import React from 'react';
 import { Box, Button, Flex, Modal, Paragraph, Text } from '@contentful/f36-components';
 import { EntryToCreate } from '../../../../../../functions/agents/documentParserAgent/schema';
-import { SelectedContentType } from '../step_2/SelectContentTypeModal';
 import tokens from '@contentful/f36-tokens';
 
 export interface PreviewResponseType {
@@ -12,7 +11,7 @@ interface PreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   previewEntries: PreviewResponseType;
-  onCreateEntries: (contentTypes: SelectedContentType[]) => void;
+  onCreateEntries: (contentTypeIds: string[]) => void;
   isCreatingEntries: boolean;
   isLoading: boolean;
 }
@@ -95,11 +94,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
               Cancel
             </Button>
             <Button
-              onClick={() =>
-                onCreateEntries(
-                  entries.map((entry) => ({ id: entry.contentTypeId } as SelectedContentType))
-                )
-              }
+              onClick={() => onCreateEntries(entries.map((entry) => entry.contentTypeId))}
               variant="primary"
               isDisabled={isLoading || entries.length === 0}>
               {isCreatingEntries
