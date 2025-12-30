@@ -6,26 +6,22 @@ import {
   Modal,
   Paragraph,
   Pill,
-  Select,
+  Multiselect,
   Spinner,
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
-
-export interface SelectedContentType {
-  id: string;
-  name: string;
-}
+import { css } from '@emotion/css';
 
 interface ContentTypePickerModalProps {
   sdk: PageAppSDK;
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (contentTypes: SelectedContentType[]) => void;
+  onSelect: (contentTypes: ContentTypeProps[]) => void;
   isSubmitting: boolean;
-  selectedContentTypes: SelectedContentType[];
+  selectedContentTypes: ContentTypeProps[];
   setSelectedContentTypes: (
-    contentTypes: SelectedContentType[] | ((prev: SelectedContentType[]) => SelectedContentType[])
+    contentTypes: ContentTypeProps[] | ((prev: ContentTypeProps[]) => ContentTypeProps[])
   ) => void;
 }
 
@@ -39,6 +35,7 @@ export const ContentTypePickerModal = ({
   setSelectedContentTypes,
 }: ContentTypePickerModalProps) => {
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
+  const [filteredContentTypes, setFilteredContentTypes] = useState<ContentTypeProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
   const [hasFetchError, setHasFetchError] = useState<boolean>(false);
@@ -68,6 +65,7 @@ export const ContentTypePickerModal = ({
           environmentId: environment.sys.id,
         });
         setContentTypes(contentTypesResponse.items || []);
+        setFilteredContentTypes(contentTypesResponse.items || []);
       } catch (error) {
         console.error('Failed to fetch content types:', error);
         setHasFetchError(true);
@@ -87,21 +85,33 @@ export const ContentTypePickerModal = ({
     }
   }, [isOpen]);
 
-  const handleAddContentType = (contentTypeId: string) => {
-    if (!contentTypeId || isSubmitting) return;
-
-    const contentType = contentTypes.find((ct) => ct.sys.id === contentTypeId);
-    if (contentType && !selectedContentTypes.some((ct) => ct.id === contentTypeId)) {
-      setSelectedContentTypes([
-        ...selectedContentTypes,
-        { id: contentType.sys.id, name: contentType.name },
-      ]);
+  const onSearchValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const searchTerm = e.target.value.toLowerCase().trim();
+    if (!searchTerm) {
+      setFilteredContentTypes(contentTypes);
+      return;
     }
+    const filtered = contentTypes.filter((ct) => ct.name.toLowerCase().includes(searchTerm));
+    setFilteredContentTypes(filtered);
   };
 
-  const handleRemoveContentType = (contentTypeId: string) => {
-    if (isSubmitting) return;
-    setSelectedContentTypes(selectedContentTypes.filter((ct) => ct.id !== contentTypeId));
+  const getPlaceholderText = () => {
+    if (isLoading) return 'Loading content types...';
+    if (contentTypes.length === 0) return 'No content types in space';
+    if (selectedContentTypes.length === 0) return 'Select one or more';
+    return `${selectedContentTypes.length} selected`;
+  };
+
+  const handleSelectContentType = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { checked, value } = e.target;
+    if (checked) {
+      setSelectedContentTypes([
+        ...selectedContentTypes,
+        contentTypes.find((ct) => ct.sys.id === value) as ContentTypeProps,
+      ]);
+    } else {
+      setSelectedContentTypes(selectedContentTypes.filter((selected) => selected.sys.id !== value));
+    }
   };
 
   const handleClose = () => {
@@ -118,14 +128,6 @@ export const ContentTypePickerModal = ({
     onSelect(selectedContentTypes);
   };
 
-  const availableContentTypes = useMemo(
-    () =>
-      contentTypes.filter(
-        (ct) => !selectedContentTypes.some((selected) => selected.id === ct.sys.id)
-      ),
-    [contentTypes, selectedContentTypes]
-  );
-
   return (
     <Modal title="Select content type(s)" isShown={isOpen} onClose={handleClose} size="medium">
       {() => (
@@ -137,23 +139,28 @@ export const ContentTypePickerModal = ({
             </Paragraph>
             <FormControl isRequired isInvalid={isInvalidSelectionError || showFetchError}>
               <FormControl.Label>Content type</FormControl.Label>
-              <Select
-                id="content-type-select"
-                name="content-type-select"
-                value=""
-                onChange={(e) => {
-                  handleAddContentType(e.target.value);
+              <Multiselect
+                searchProps={{
+                  searchPlaceholder: 'Search content types',
+                  onSearchValueChange,
                 }}
-                isDisabled={isLoading || availableContentTypes.length === 0 || isSubmitting}>
-                <Select.Option value="" isDisabled>
-                  {isLoading ? 'Loading content types...' : 'Select one or more'}
-                </Select.Option>
-                {availableContentTypes.map((ct) => (
-                  <Select.Option key={ct.sys.id} value={ct.sys.id}>
+                currentSelection={selectedContentTypes.map((ct) => ct.sys.id)}
+                placeholder={getPlaceholderText()}>
+                {filteredContentTypes.map((ct) => (
+                  <Multiselect.Option
+                    className={css({ padding: `0.25rem` })}
+                    key={ct.sys.id}
+                    value={ct.sys.id}
+                    itemId={ct.sys.id}
+                    isChecked={selectedContentTypes.some(
+                      (selected) => selected.sys.id === ct.sys.id
+                    )}
+                    isDisabled={isLoading || isSubmitting}
+                    onSelectItem={handleSelectContentType}>
                     {ct.name}
-                  </Select.Option>
+                  </Multiselect.Option>
                 ))}
-              </Select>
+              </Multiselect>
               {showFetchError && (
                 <FormControl.ValidationMessage>
                   Unable to load content types.
@@ -170,9 +177,18 @@ export const ContentTypePickerModal = ({
               <Flex flexWrap="wrap" gap="spacingXs" marginTop="spacingS">
                 {selectedContentTypes.map((ct) => (
                   <Pill
-                    key={ct.id}
+                    key={ct.sys.id}
                     label={ct.name}
-                    onClose={isSubmitting ? undefined : () => handleRemoveContentType(ct.id)}
+                    onClose={
+                      isSubmitting
+                        ? undefined
+                        : () =>
+                            setSelectedContentTypes(
+                              selectedContentTypes.filter(
+                                (selected) => selected.sys.id !== ct.sys.id
+                              )
+                            )
+                    }
                   />
                 ))}
               </Flex>
