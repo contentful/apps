@@ -4,11 +4,12 @@ import { createContentTypesAnalysisAction, createPreviewAction } from '../utils/
 import { ERROR_MESSAGES } from '../utils/constants/messages';
 import { PreviewEntry } from '../locations/Page/components/modals/step_3/PreviewModal';
 import { getEntryTitle } from '../utils/getEntryTitle';
-import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
+import { EntryToCreate, AssetToCreate } from '../../functions/agents/documentParserAgent/schema';
 
 interface UseGeneratePreviewResult {
   isSubmitting: boolean;
   previewEntries: PreviewEntry[];
+  assets: AssetToCreate[];
   errorMessage: string | null;
   successMessage: string | null;
   submit: (contentTypeIds: string[]) => Promise<void>;
@@ -28,6 +29,7 @@ export const useGeneratePreview = ({
 }: UseGeneratePreviewProps): UseGeneratePreviewResult => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [previewEntries, setPreviewEntries] = useState<PreviewEntry[]>([]);
+  const [assets, setAssets] = useState<AssetToCreate[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -73,7 +75,12 @@ export const useGeneratePreview = ({
         );
         console.log('analyzeContentTypesResponse', analyzeContentTypesResponse);
 
-        const { entries } = await createPreviewAction(sdk, contentTypeIds, documentId, oauthToken);
+        const { entries, assets: agentAssets = [] } = await createPreviewAction(
+          sdk,
+          contentTypeIds,
+          documentId,
+          oauthToken
+        );
 
         // Build preview entries with title info
         const previewEntriesWithTitles: PreviewEntry[] = await Promise.all(
@@ -84,6 +91,7 @@ export const useGeneratePreview = ({
         );
 
         setPreviewEntries(previewEntriesWithTitles);
+        setAssets(agentAssets);
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : ERROR_MESSAGES.SUBMISSION_FAILED);
       } finally {
@@ -101,6 +109,7 @@ export const useGeneratePreview = ({
   return {
     isSubmitting,
     previewEntries,
+    assets,
     errorMessage,
     successMessage,
     submit,
