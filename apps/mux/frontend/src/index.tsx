@@ -1011,44 +1011,32 @@ export class App extends React.Component<AppProps, AppState> {
       update: currentValue.pendingActions?.update ?? [],
     };
 
-    const hasPending =
-      updatedPendingActions.create.length + updatedPendingActions.delete.length <
-      totalPendingActions;
-
-    if (hasPending) {
-      await this.props.sdk.field.setValue(
-        updatePendingActions(currentValue, updatedPendingActions)
+    // Determine current policy considering pending actions (same logic as getCurrentPolicy in PlaybackSwitcher)
+    let currentPolicy: PolicyType;
+    if (currentValue.pendingActions?.create) {
+      const playbackCreateAction = currentValue.pendingActions.create.find(
+        (action) => action.type === 'playback'
       );
-      return;
-    }
-
-    const isCurrentlyDRM = this.isUsingDRM();
-    const isCurrentlySigned = this.isUsingSigned();
-    const currentPolicy = isCurrentlyDRM
-      ? 'drm'
-      : isCurrentlySigned
-        ? 'signed'
-        : 'public';
-    let targetPolicy: PolicyType;
-
-    if (policy) {
-      if (policy === currentPolicy) return;
-      targetPolicy = policy;
-    } else {
-      if (isCurrentlyDRM) {
-        targetPolicy = 'public';
-      } else if (isCurrentlySigned) {
-        targetPolicy = 'drm';
+      if (playbackCreateAction) {
+        currentPolicy = playbackCreateAction.data?.policy as PolicyType;
       } else {
-        targetPolicy = 'signed';
+        const isCurrentlyDRM = this.isUsingDRM();
+        const isCurrentlySigned = this.isUsingSigned();
+        currentPolicy = isCurrentlyDRM ? 'drm' : isCurrentlySigned ? 'signed' : 'public';
       }
+    } else {
+      const isCurrentlyDRM = this.isUsingDRM();
+      const isCurrentlySigned = this.isUsingSigned();
+      currentPolicy = isCurrentlyDRM ? 'drm' : isCurrentlySigned ? 'signed' : 'public';
     }
+
+    if (policy === currentPolicy) return;
 
     updatedPendingActions.delete.push({ type: 'playback', id: currentPlaybackId, retry: 0 });
     updatedPendingActions.create.push({
       type: 'playback',
       data: {
-        policy: targetPolicy,
+        policy: policy,
         assetId: currentValue.assetId,
       },
       retry: 0,
@@ -1308,15 +1296,8 @@ export class App extends React.Component<AppProps, AppState> {
           <div>
             {this.isUsingDRM() && (
               <Box marginBottom="spacingM">
-                <Note variant="neutral">
-                  This Mux asset is using{' '}
-                  <TextLink
-                    href="https://www.mux.com/blog/protect-your-video-content-with-drm-now-ga"
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    DRM protection
-                  </TextLink>
-                  {' '}for maximum content security.
+                <Note variant="warning">
+                  DRM-protected videos cannot be displayed in the Contentful preview due to security restrictions. However, the generated playback code is fully functional and will work correctly in your production environment.
                 </Note>
               </Box>
             )}

@@ -42,7 +42,7 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
 
   const [modalData, setModalData] = useState<ModalData>({
     videoQuality: 'plus',
-    playbackPolicies: muxEnableDRM ? ['drm'] : muxEnableSignedUrls ? ['signed'] : ['public'],
+    playbackPolicies: muxEnableSignedUrls ? ['signed'] : ['public'],
     captionsConfig: {
       captionsType: 'off',
       languageCode: null,
