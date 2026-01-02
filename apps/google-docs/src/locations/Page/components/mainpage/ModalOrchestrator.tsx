@@ -10,6 +10,7 @@ import { createEntriesFromPreview, EntryCreationResult } from '../../../../servi
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { ContentTypePickerModal } from '../modals/step_2/SelectContentTypeModal';
 import { PreviewModal } from '../modals/step_3/PreviewModal';
+import { LoadingModal } from '../modals/LoadingModal';
 import { ContentTypeProps } from 'contentful-management';
 
 export interface ModalOrchestratorHandle {
@@ -108,6 +109,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     };
 
     const handleContentTypeSelected = async (contentTypes: ContentTypeProps[]) => {
+      closeModal(ModalType.CONTENT_TYPE_PICKER);
       const ids = contentTypes.map((ct) => ct.sys.id);
       await submit(ids);
     };
@@ -163,9 +165,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     useEffect(() => {
       const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
 
-      if (submissionJustCompleted && modalStates.isContentTypePickerOpen && previewEntries) {
+      if (submissionJustCompleted && previewEntries) {
         console.log('Document processing completed, previewEntries:', previewEntries);
-        closeModal(ModalType.CONTENT_TYPE_PICKER);
 
         // Open preview modal if we have entries
         if (previewEntries.length > 0) {
@@ -174,7 +175,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
 
       prevIsSubmittingRef.current = isSubmitting;
-    }, [isSubmitting, modalStates.isContentTypePickerOpen, closeModal, openModal, previewEntries]);
+    }, [isSubmitting, closeModal, openModal, previewEntries]);
 
     return (
       <>
@@ -198,6 +199,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           onConfirm={handleConfirmCancel}
           onCancel={handleKeepCreating}
         />
+
+        <LoadingModal isOpen={isSubmitting} />
 
         <PreviewModal
           isOpen={modalStates.isPreviewModalOpen}
