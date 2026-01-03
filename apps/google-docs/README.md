@@ -74,6 +74,30 @@ cma.locale.getMany({}).then((locales) => console.log(locales));
 Visit the [`contentful-management` documentation](https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/#using-the-contentful-management-library)
 to find out more.
 
+## Schema Convention
+
+This app supports an optional schema convention that allows you to explicitly mark entry boundaries, content types, and references in your Google Docs. Using schema markers significantly improves AI accuracy.
+
+**Learn more:**
+- [Schema Convention Guide](./SCHEMA_CONVENTION.md) - Complete guide to using schema markers
+- [Schema Examples](./SCHEMA_EXAMPLES.md) - Practical examples for different use cases
+
+**Quick Start:**
+- Use `**!CT:contentTypeId!**` to mark the start of an entry
+- Use `**!REF:tempId!**` to mark references between entries
+- Use `**!END!**` to mark the end of an entry (optional)
+
+Example:
+```
+**!CT:blogPost!**
+My Blog Post Title
+Content goes here...
+
+**!CT:author!**
+John Doe
+Bio: Author information...
+```
+
 ## Learn More
 
 [Read more](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/) and check out the video on how to use the CLI.

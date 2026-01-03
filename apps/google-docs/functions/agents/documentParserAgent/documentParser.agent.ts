@@ -13,6 +13,7 @@ import { generateObject } from 'ai';
 import { ContentTypeProps } from 'contentful-management';
 import { FinalEntriesResultSchema, FinalEntriesResult } from './schema';
 import { fetchGoogleDocAsJson } from '../../service/googleDriveService';
+import { extractTextWithSchema, generateSchemaGuidance, ParsedSchema } from './schemaConvention';
 
 /**
  * Configuration for the document parser
@@ -48,12 +49,26 @@ export async function createPreviewWithAgent(
 
   console.log('Document Parser Agent document content Input:', documentId);
   const documentJson = await fetchGoogleDocAsJson({ documentId, oauthToken });
-  const prompt = buildExtractionPrompt({ contentTypes, documentJson, locale });
+
+  // Extract schema markers from document
+  const { text: documentText, schema } = extractTextWithSchema(documentJson);
+  console.log(
+    'Schema markers detected:',
+    schema.hasSchema ? `${schema.markers.length} markers found` : 'none'
+  );
+
+  const prompt = buildExtractionPrompt({
+    contentTypes,
+    documentJson,
+    locale,
+    schema,
+    availableContentTypeIds: contentTypes.map((ct) => ct.sys.id),
+  });
   const result = await generateObject({
     model: openaiClient(modelVersion),
     schema: FinalEntriesResultSchema,
     temperature,
-    system: buildSystemPrompt(),
+    system: buildSystemPrompt(schema),
     prompt,
   });
 
@@ -63,8 +78,31 @@ export async function createPreviewWithAgent(
   return finalResult;
 }
 
-function buildSystemPrompt(): string {
+function buildSystemPrompt(schema?: ParsedSchema): string {
+  let schemaSection = '';
+  if (schema?.hasSchema) {
+    schemaSection = `
+=== SCHEMA CONVENTION DETECTED ===
+The document contains explicit schema markers that you MUST respect and follow exactly.
+
+**SCHEMA MARKERS FOUND:**
+${schema.markers.length} marker(s) detected in the document.
+
+**CRITICAL: SCHEMA MARKERS TAKE PRECEDENCE**
+- If schema markers are present, you MUST follow them exactly
+- Schema markers override inference-based detection
+- Each **!CT:contentTypeId!** marker indicates the start of a new entry
+- Use **!REF:tempId!** markers to create references between entries
+- Extract content between markers for each entry
+- Do NOT ignore or skip schema markers
+
+=== END SCHEMA CONVENTION ===
+
+`;
+  }
+
   return `You are an expert content extraction AI that analyzes documents and extracts structured content based on Contentful content type definitions.
+${schemaSection}
 
 **MANDATORY REQUIREMENT: EXTRACT ENTRIES FOR ALL MATCHING CONTENT TYPES**
 - If multiple content types are provided, you MUST extract entries for EACH content type that has matching content in the document
@@ -403,10 +441,14 @@ function buildExtractionPrompt({
   contentTypes,
   documentJson,
   locale,
+  schema,
+  availableContentTypeIds,
 }: {
   contentTypes: ContentTypeProps[];
   documentJson: unknown;
   locale: string;
+  schema?: ParsedSchema;
+  availableContentTypeIds: string[];
 }): string {
   const contentTypeList = contentTypes.map((ct) => `${ct.name} (ID: ${ct.sys.id})`).join(', ');
   const totalFields = contentTypes.reduce((sum, ct) => sum + (ct.fields?.length || 0), 0);
@@ -474,7 +516,14 @@ function buildExtractionPrompt({
     };
   });
 
+  // Generate schema guidance if schema markers are present
+  const schemaGuidance = schema?.hasSchema
+    ? generateSchemaGuidance(schema, availableContentTypeIds)
+    : '';
+
   return `Extract structured entries from the following Google Docs JSON document based on the provided Contentful content type definitions.
+
+${schemaGuidance}
 
 **MANDATORY REQUIREMENT: EXTRACT ENTRIES FOR ALL MATCHING CONTENT TYPES**
 - You have been provided with ${contentTypes.length} content type(s): ${contentTypeList}
