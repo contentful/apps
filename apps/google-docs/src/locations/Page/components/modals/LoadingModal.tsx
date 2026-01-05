@@ -27,19 +27,17 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
           <Modal.Header title={title} />
           <Modal.Content>
             {step === 'reviewingContentTypes' ? (
-              <>
-                <Flex
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  gap="spacingM"
-                  padding="spacingXl">
-                  <Spinner size="large" variant="primary" />
-                  <Paragraph color="gray700" style={{ textAlign: 'center' }}>
-                    Reviewing content types and your document
-                  </Paragraph>
-                </Flex>
-              </>
+              <Flex
+                flexDirection="column"
+                alignItems="center"
+                justifyContent="center"
+                gap="spacingM"
+                padding="spacingXl">
+                <Spinner size="large" variant="primary" />
+                <Paragraph color="gray700" style={{ textAlign: 'center' }}>
+                  Reviewing content types and your document
+                </Paragraph>
+              </Flex>
             ) : (
               <>
                 <Paragraph marginBottom="spacingM" color="gray700">
