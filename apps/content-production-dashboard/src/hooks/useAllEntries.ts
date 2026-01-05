@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { EntryProps } from 'contentful-management';
-import { fetchAllEntries, FetchAllEntriesResult } from '../utils/entryFetcher';
+import { fetchAllEntries, FetchAllEntriesResult } from '../utils/fetchAllEntries';
 
 export interface UseAllEntriesResult {
   entries: EntryProps[];
