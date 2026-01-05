@@ -65,14 +65,6 @@ describe('Content Security Validation', () => {
       expect(result.isValid).toBe(true);
       expect(result.errors.length).toBe(0);
     });
-
-    it('should detect SQL injection patterns', () => {
-      const maliciousContent = "SELECT * FROM users WHERE id = '1' OR '1'='1'";
-      const result = validateCodeInjection(maliciousContent);
-      // SQL injection is a warning, not an error
-      expect(result.warnings.length).toBeGreaterThan(0);
-      expect(result.warnings.some((w) => w.includes('SQL injection'))).toBe(true);
-    });
   });
 
   describe('Prompt Injection Detection', () => {

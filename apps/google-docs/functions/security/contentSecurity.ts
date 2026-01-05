@@ -55,13 +55,6 @@ const CODE_INJECTION_PATTERNS: CodeInjectionPattern[] = [
     description: 'Detected javascript: protocol',
   },
   {
-    name: 'SQL Injection Pattern',
-    pattern:
-      /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE|UNION|SCRIPT)\b[\s\S]*?['";])/gi,
-    severity: 'warning',
-    description: 'Detected potential SQL injection pattern',
-  },
-  {
     name: 'HTML Injection',
     pattern: /<iframe[\s\S]*?>[\s\S]*?<\/iframe>/gi,
     severity: 'error',

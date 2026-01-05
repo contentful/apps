@@ -18,7 +18,6 @@ Detects and prevents various code injection attacks:
 
 - **JavaScript Injection**: Script tags, event handlers, `javascript:` protocol, `eval()`, `Function()` constructor, `innerHTML` assignments
 - **HTML Injection**: iframe tags, object/embed tags
-- **SQL Injection**: SQL command patterns (warnings)
 - **Data URI Attacks**: Malicious data URIs containing scripts
 
 ### Prompt Injection Prevention
@@ -109,7 +108,7 @@ npm test -- contentSecurity.test.ts
 ```
 
 Test cases cover:
-- Code injection detection (JavaScript, HTML, SQL)
+- Code injection detection (JavaScript, HTML)
 - Prompt injection detection (instruction override, role manipulation, etc.)
 - Object and array validation
 - Google Docs JSON structure validation
