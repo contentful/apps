@@ -2,11 +2,11 @@
  * Content Security Module
  *
  * Provides validation and sanitization functions to prevent:
- * 1. Code injection attacks (JavaScript, SQL, HTML, etc.)
- * 2. Prompt injection attacks (attempts to manipulate AI behavior)
+ * 1. Prompt injection attacks (attempts to manipulate AI behavior)
+ * 2. Data corruption (null bytes, control characters)
  *
  * This module validates content at multiple stages:
- * - Before sending to AI (document content sanitization)
+ * - Before sending to AI (document content sanitization and prompt injection detection)
  * - After AI parsing (parsed entry validation)
  * - Before Contentful creation (final validation)
  */
@@ -18,13 +18,6 @@ export interface SecurityValidationResult {
   sanitizedContent?: string;
 }
 
-export interface CodeInjectionPattern {
-  name: string;
-  pattern: RegExp;
-  severity: 'error' | 'warning';
-  description: string;
-}
-
 export interface PromptInjectionPattern {
   name: string;
   patterns: RegExp[];
@@ -33,75 +26,19 @@ export interface PromptInjectionPattern {
 }
 
 /**
- * Common code injection patterns to detect
+ * Prompt injection patterns to detect and prevent AI manipulation
  */
-const CODE_INJECTION_PATTERNS: CodeInjectionPattern[] = [
-  {
-    name: 'JavaScript Script Tag',
-    pattern: /<script[\s\S]*?>[\s\S]*?<\/script>/gi,
-    severity: 'error',
-    description: 'Detected JavaScript script tag',
-  },
-  {
-    name: 'JavaScript Event Handler',
-    pattern: /on\w+\s*=\s*["'][^"']*["']/gi,
-    severity: 'error',
-    description: 'Detected JavaScript event handler (onclick, onerror, etc.)',
-  },
-  {
-    name: 'JavaScript Function Call',
-    pattern: /javascript\s*:/gi,
-    severity: 'error',
-    description: 'Detected javascript: protocol',
-  },
-  {
-    name: 'HTML Injection',
-    pattern: /<iframe[\s\S]*?>[\s\S]*?<\/iframe>/gi,
-    severity: 'error',
-    description: 'Detected iframe tag',
-  },
-  {
-    name: 'Object/Embed Tag',
-    pattern: /<(object|embed)[\s\S]*?>/gi,
-    severity: 'error',
-    description: 'Detected object or embed tag',
-  },
-  {
-    name: 'Data URI with Script',
-    pattern: /data:\s*text\/html[\s\S]*?base64[\s\S]*?script/gi,
-    severity: 'error',
-    description: 'Detected data URI containing script',
-  },
-  {
-    name: 'Eval Function',
-    pattern: /\beval\s*\(/gi,
-    severity: 'error',
-    description: 'Detected eval() function call',
-  },
-  {
-    name: 'Function Constructor',
-    pattern: /\bnew\s+Function\s*\(/gi,
-    severity: 'error',
-    description: 'Detected Function constructor',
-  },
-  {
-    name: 'InnerHTML Assignment',
-    pattern: /\.innerHTML\s*=\s*["']/gi,
-    severity: 'error',
-    description: 'Detected innerHTML assignment',
-  },
-];
 
-/**
- * Common prompt injection patterns to detect
- */
+// Common sub-patterns for maintainability
+const INSTRUCTION_TERMS = '(instructions?|directions?|rules?|prompts?)';
+
 const PROMPT_INJECTION_PATTERNS: PromptInjectionPattern[] = [
   {
     name: 'Ignore Instructions',
     patterns: [
-      /ignore\s+(all\s+)?(previous\s+)?(instructions?|directions?|rules?)/gi,
-      /forget\s+(all\s+)?(previous\s+)?(instructions?|directions?|rules?)/gi,
-      /disregard\s+(all\s+)?(previous\s+)?(instructions?|directions?|rules?)/gi,
+      new RegExp(`ignore\\s+(all\\s+)?(previous\\s+)?${INSTRUCTION_TERMS}`, 'gi'),
+      new RegExp(`forget\\s+(all\\s+)?(previous\\s+)?${INSTRUCTION_TERMS}`, 'gi'),
+      new RegExp(`disregard\\s+(all\\s+)?(previous\\s+)?${INSTRUCTION_TERMS}`, 'gi'),
     ],
     severity: 'error',
     description: 'Attempt to ignore previous instructions',
@@ -109,7 +46,10 @@ const PROMPT_INJECTION_PATTERNS: PromptInjectionPattern[] = [
   {
     name: 'Override Instructions',
     patterns: [
-      /(new|override|replace)\s+(instructions?|directions?|rules?|prompt)/gi,
+      new RegExp(
+        `(new|override|replace)\\s+(all\\s+)?(the\\s+)?((previous|prior)\\s+)?${INSTRUCTION_TERMS}`,
+        'gi'
+      ),
       /instead\s+(of|do|use|follow)/gi,
     ],
     severity: 'error',
@@ -138,8 +78,11 @@ const PROMPT_INJECTION_PATTERNS: PromptInjectionPattern[] = [
   {
     name: 'Confidentiality Bypass',
     patterns: [
-      /(reveal|show|display|output|print|return)\s+(all\s+)?(system|prompt|instructions?|rules?)/gi,
-      /(what\s+are\s+)?(your\s+)?(instructions?|prompts?|rules?|directions?)/gi,
+      new RegExp(
+        `(reveal|show|display|output|print|return)\\s+(all\\s+)?(system|prompt|instructions?|rules?)`,
+        'gi'
+      ),
+      new RegExp(`(what\\s+are\\s+)?(your\\s+)?${INSTRUCTION_TERMS}`, 'gi'),
     ],
     severity: 'warning',
     description: 'Attempt to extract system instructions',
@@ -147,7 +90,8 @@ const PROMPT_INJECTION_PATTERNS: PromptInjectionPattern[] = [
   {
     name: 'Jailbreak Attempt',
     patterns: [
-      /(jailbreak|bypass|hack|exploit)/gi,
+      // Word boundaries prevent false positives like "bypass valve" or "hack together"
+      /\b(jailbreak|bypass|hack|exploit)\b/gi,
       /(developer\s+mode|debug\s+mode|admin\s+mode)/gi,
     ],
     severity: 'error',
@@ -156,57 +100,20 @@ const PROMPT_INJECTION_PATTERNS: PromptInjectionPattern[] = [
 ];
 
 /**
- * Sanitizes a string by removing or escaping dangerous characters
- * This is a conservative approach - removes potentially dangerous content
+ * Sanitizes a string by removing dangerous characters that could cause data corruption
  */
 function sanitizeString(content: string): string {
   if (typeof content !== 'string') {
     return String(content);
   }
 
-  let sanitized = content;
+  // Remove null bytes (can break JSON parsing and database storage)
+  let sanitized = content.replace(/\0/g, '');
 
-  // Remove null bytes
-  sanitized = sanitized.replace(/\0/g, '');
-
-  // Remove control characters except newlines and tabs
+  // Remove control characters except newlines and tabs (can break API calls and storage)
   sanitized = sanitized.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
 
   return sanitized;
-}
-
-/**
- * Validates content for code injection patterns
- */
-export function validateCodeInjection(content: string): SecurityValidationResult {
-  const errors: string[] = [];
-  const warnings: string[] = [];
-
-  if (typeof content !== 'string') {
-    return {
-      isValid: true,
-      errors: [],
-      warnings: [],
-    };
-  }
-
-  for (const pattern of CODE_INJECTION_PATTERNS) {
-    const matches = content.match(pattern.pattern);
-    if (matches) {
-      const message = `${pattern.description}: ${pattern.name}`;
-      if (pattern.severity === 'error') {
-        errors.push(message);
-      } else {
-        warnings.push(message);
-      }
-    }
-  }
-
-  return {
-    isValid: errors.length === 0,
-    errors,
-    warnings,
-  };
 }
 
 /**
@@ -248,16 +155,17 @@ export function validatePromptInjection(content: string): SecurityValidationResu
 }
 
 /**
- * Comprehensive validation combining code injection and prompt injection checks
+ * Comprehensive validation for prompt injection and data sanitization
+ * This is the main validation function that combines prompt injection detection
+ * with content sanitization to ensure safe AI processing.
  */
 export function validateContentSecurity(content: string): SecurityValidationResult {
-  const codeInjectionResult = validateCodeInjection(content);
-  const promptInjectionResult = validatePromptInjection(content);
+  const { isValid, errors, warnings } = validatePromptInjection(content);
 
   return {
-    isValid: codeInjectionResult.isValid && promptInjectionResult.isValid,
-    errors: [...codeInjectionResult.errors, ...promptInjectionResult.errors],
-    warnings: [...codeInjectionResult.warnings, ...promptInjectionResult.warnings],
+    isValid,
+    errors,
+    warnings,
     sanitizedContent: sanitizeString(content),
   };
 }

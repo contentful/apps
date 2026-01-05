@@ -1,6 +1,6 @@
 # Content Security Module
 
-This module provides comprehensive security validation to prevent code injection and prompt injection attacks when processing Google Docs content.
+This module provides security validation focused on preventing prompt injection attacks and ensuring data integrity when processing Google Docs content for AI integration.
 
 ## Overview
 
@@ -12,14 +12,6 @@ The security module validates content at multiple stages of the document process
 
 ## Security Features
 
-### Code Injection Prevention
-
-Detects and prevents various code injection attacks:
-
-- **JavaScript Injection**: Script tags, event handlers, `javascript:` protocol, `eval()`, `Function()` constructor, `innerHTML` assignments
-- **HTML Injection**: iframe tags, object/embed tags
-- **Data URI Attacks**: Malicious data URIs containing scripts
-
 ### Prompt Injection Prevention
 
 Detects and prevents prompt injection attacks:
@@ -29,6 +21,13 @@ Detects and prevents prompt injection attacks:
 - **Output Format Manipulation**: Attempts to change output format or structure
 - **Confidentiality Bypass**: Attempts to extract system instructions or prompts
 - **Jailbreak Attempts**: Developer mode, bypass, hack, exploit attempts
+
+### Content Sanitization
+
+Ensures data integrity by removing dangerous characters:
+
+- **Null Bytes**: Removed to prevent JSON parsing errors and database issues
+- **Control Characters**: Removed (except newlines and tabs) to prevent API call failures
 
 ## Usage
 
@@ -61,7 +60,6 @@ if (!result.isValid) {
 ```typescript
 import { validateParsedEntries } from './contentSecurity';
 
-const entries = await parseDocumentWithAI(documentJson);
 const result = validateParsedEntries(entries);
 if (!result.isValid) {
   throw new Error(`Security validation failed: ${result.errors.join('; ')}`);
@@ -108,32 +106,8 @@ npm test -- contentSecurity.test.ts
 ```
 
 Test cases cover:
-- Code injection detection (JavaScript, HTML)
-- Prompt injection detection (instruction override, role manipulation, etc.)
+- Prompt injection detection (instruction override, role manipulation, jailbreak attempts, etc.)
+- Content sanitization (null bytes, control characters)
 - Object and array validation
 - Google Docs JSON structure validation
 - Parsed entries validation
-
-## Security Best Practices
-
-1. **Defense in Depth**: Validation occurs at multiple stages
-2. **Fail Secure**: Errors block processing, warnings are logged
-3. **Content Sanitization**: Dangerous characters are removed
-4. **Pattern Detection**: Multiple patterns detect various attack vectors
-5. **AI Prompt Hardening**: System prompts include instructions to resist prompt injection
-
-## Limitations
-
-- Pattern-based detection may have false positives/negatives
-- New attack vectors may not be detected
-- Content sanitization is conservative (may remove some legitimate content)
-- Regular updates to patterns are recommended
-
-## Future Enhancements
-
-- Machine learning-based detection
-- Custom pattern configuration
-- Rate limiting for repeated violations
-- Security audit logging
-- Integration with security monitoring systems
-
