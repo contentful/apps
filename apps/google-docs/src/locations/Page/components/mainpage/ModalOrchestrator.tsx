@@ -127,8 +127,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         const entryResult: EntryCreationResult = await createEntriesFromPreview(
           sdk,
           entries,
+          contentTypeIds,
           assets
-          contentTypeIds
         );
 
         const createdCount = entryResult.createdEntries.length;
