@@ -1,16 +1,18 @@
 import React from 'react';
-import { Modal, Paragraph, Flex, Spinner } from '@contentful/f36-components';
+import { Modal, Paragraph, Flex, Spinner, Skeleton } from '@contentful/f36-components';
 
 interface LoadingModalProps {
   isOpen: boolean;
-  title?: string;
-  message?: string;
+  step?: 'reviewingContentTypes' | 'creatingEntries';
+  title: string;
+  entriesCount?: number;
 }
 
 export const LoadingModal: React.FC<LoadingModalProps> = ({
   isOpen,
-  title = 'Preparing your preview',
-  message = 'Reviewing content types and your document',
+  step,
+  title,
+  entriesCount,
 }) => {
   return (
     <Modal
@@ -23,17 +25,29 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
         <>
           <Modal.Header title={title} />
           <Modal.Content>
-            <Flex
-              flexDirection="column"
-              alignItems="center"
-              justifyContent="center"
-              gap="spacingM"
-              padding="spacingXl">
-              <Spinner size="large" variant="primary" />
-              <Paragraph color="gray700" style={{ textAlign: 'center' }}>
-                {message}
-              </Paragraph>
-            </Flex>
+            {step === 'reviewingContentTypes' ? (
+              <Flex
+                flexDirection="column"
+                alignItems="center"
+                justifyContent="center"
+                padding="spacingXl">
+                <Spinner size="large" variant="primary" />
+                <Paragraph color="gray700" style={{ textAlign: 'center' }}>
+                  Reviewing content types and your document
+                </Paragraph>
+              </Flex>
+            ) : (
+              <>
+                <Paragraph marginBottom="spacingM" color="gray700">
+                  {entriesCount
+                    ? `Creating ${entriesCount} ${entriesCount === 1 ? 'entry' : 'entries'}...`
+                    : 'Creating entries...'}
+                </Paragraph>
+                <Skeleton.Container>
+                  <Skeleton.BodyText numberOfLines={4} />
+                </Skeleton.Container>
+              </>
+            )}
           </Modal.Content>
         </>
       )}

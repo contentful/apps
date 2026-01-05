@@ -119,6 +119,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         sdk.notifier.error('No entries to create');
         return;
       }
+
+      closeModal(ModalType.PREVIEW);
       setIsCreatingEntries(true);
       try {
         const entries = previewEntries.map((p) => p.entry);
@@ -129,8 +131,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         );
 
         const createdCount = entryResult.createdEntries.length;
-
-        closeModal(ModalType.PREVIEW);
 
         if (createdCount === 0) {
           console.error('Entry creation errors:', entryResult.errors);
@@ -200,7 +200,18 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           onCancel={handleKeepCreating}
         />
 
-        <LoadingModal isOpen={isSubmitting} />
+        <LoadingModal
+          isOpen={isSubmitting}
+          step="reviewingContentTypes"
+          title="Preparing your preview"
+        />
+
+        <LoadingModal
+          isOpen={isCreatingEntries}
+          step="creatingEntries"
+          title="Create entries"
+          entriesCount={previewEntries?.length}
+        />
 
         <PreviewModal
           isOpen={modalStates.isPreviewModalOpen}
