@@ -11,7 +11,6 @@ type OAuthConnectorProps = {
   onOAuthConnectedChange: (oauthConnectionStatus: boolean) => void;
   isOAuthConnected: boolean;
   onOauthTokenChange: (token: string) => void;
-  oauthToken: string;
 };
 
 enum OAuthLoadingState {
@@ -24,7 +23,6 @@ enum OAuthLoadingState {
 export const OAuthConnector = ({
   onOAuthConnectedChange,
   isOAuthConnected,
-  oauthToken,
   onOauthTokenChange,
 }: OAuthConnectorProps) => {
   const sdk = useSDK<ConfigAppSDK>();
