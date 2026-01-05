@@ -329,70 +329,10 @@ export function validateObjectSecurity(
 
 /**
  * Validates Google Docs JSON structure for security issues
- * Extracts text content from the document structure and validates it
+ * Recursively validates all string fields in the document structure
  */
 export function validateGoogleDocJson(documentJson: unknown): SecurityValidationResult {
-  // First validate the entire JSON structure
-  const structureResult = validateObjectSecurity(documentJson, 'document');
-
-  // Extract and validate text content specifically
-  const textContent = extractTextFromGoogleDoc(documentJson);
-  const textResult = validateContentSecurity(textContent);
-
-  return {
-    isValid: structureResult.isValid && textResult.isValid,
-    errors: [...structureResult.errors, ...textResult.errors],
-    warnings: [...structureResult.warnings, ...textResult.warnings],
-  };
-}
-
-/**
- * Extracts all text content from a Google Docs JSON structure
- */
-function extractTextFromGoogleDoc(docJson: unknown): string {
-  if (!docJson || typeof docJson !== 'object') {
-    return '';
-  }
-
-  const textParts: string[] = [];
-
-  function extractTextRecursive(obj: unknown): void {
-    if (typeof obj === 'string') {
-      textParts.push(obj);
-      return;
-    }
-
-    if (Array.isArray(obj)) {
-      for (const item of obj) {
-        extractTextRecursive(item);
-      }
-      return;
-    }
-
-    if (obj && typeof obj === 'object') {
-      // Look for common text fields in Google Docs JSON
-      if ('content' in obj && typeof obj.content === 'string') {
-        textParts.push(obj.content);
-      }
-      if ('text' in obj && typeof obj.text === 'string') {
-        textParts.push(obj.text);
-      }
-      if ('name' in obj && typeof obj.name === 'string') {
-        textParts.push(obj.name);
-      }
-      if ('title' in obj && typeof obj.title === 'string') {
-        textParts.push(obj.title);
-      }
-
-      // Recursively process all values
-      for (const value of Object.values(obj)) {
-        extractTextRecursive(value);
-      }
-    }
-  }
-
-  extractTextRecursive(docJson);
-  return textParts.join(' ');
+  return validateObjectSecurity(documentJson, 'document');
 }
 
 /**
