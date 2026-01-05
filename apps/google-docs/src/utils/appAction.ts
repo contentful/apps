@@ -37,7 +37,7 @@ export async function getAppActionId(
  * @returns The result from the app action
  * @throws Error if the app action fails
  */
-async function callAppAction<T = unknown>(
+export async function callAppAction<T = unknown>(
   sdk: PageAppSDK | ConfigAppSDK,
   actionName: string,
   parameters: Record<string, unknown>
@@ -50,6 +50,9 @@ async function callAppAction<T = unknown>(
     }
 
     const appActionId = await getAppActionId(sdk, actionName);
+    if (!appActionId) {
+      throw new Error(`App action "${actionName}" not found`);
+    }
     const result = await sdk.cma.appActionCall.createWithResult(
       {
         appDefinitionId,
@@ -65,6 +68,49 @@ async function callAppAction<T = unknown>(
     }
 
     return result as T;
+  } catch (error) {
+    console.error(`Error calling app action "${actionName}"`, error);
+    throw new Error(
+      error instanceof Error ? error.message : `Failed to call app action "${actionName}"`
+    );
+  }
+}
+
+/**
+ * Call an app action and get the raw response (for OAuth and other special cases)
+ * @param sdk - The Contentful SDK instance
+ * @param actionName - The name of the app action to call
+ * @param parameters - The parameters to pass to the app action
+ * @returns The raw response with response.body
+ */
+export async function callAppActionWithResponse(
+  sdk: PageAppSDK | ConfigAppSDK,
+  actionName: string,
+  parameters: Record<string, unknown>
+): Promise<{ response: { body: string } }> {
+  try {
+    const appDefinitionId = sdk.ids.app;
+
+    if (!appDefinitionId) {
+      throw new Error('App definition ID not found');
+    }
+
+    const appActionId = await getAppActionId(sdk, actionName);
+    if (!appActionId) {
+      throw new Error(`App action "${actionName}" not found`);
+    }
+
+    const result = await sdk.cma.appActionCall.createWithResponse(
+      {
+        appDefinitionId,
+        appActionId,
+      },
+      {
+        parameters,
+      }
+    );
+
+    return result;
   } catch (error) {
     console.error(`Error calling app action "${actionName}"`, error);
     throw new Error(
