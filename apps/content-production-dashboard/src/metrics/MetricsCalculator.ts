@@ -118,7 +118,6 @@ export class MetricsCalculator {
 
     let count = 0;
     for (const action of this.scheduledActions) {
-      if (action?.sys?.status && action.sys.status !== 'scheduled') continue;
       const scheduledFor = parseDate(action?.scheduledFor?.datetime);
       if (!scheduledFor) continue;
       if (isWithin(scheduledFor, this.now, end)) {
