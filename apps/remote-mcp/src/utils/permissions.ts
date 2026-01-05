@@ -12,6 +12,7 @@ export const createEmptyEntityPermissions = (): EntityPermissions => ({
   unpublish: false,
   archive: false,
   unarchive: false,
+  invoke: false,
 });
 
 /**
@@ -26,6 +27,7 @@ export const createAllPermissions = (value: boolean): EntityPermissions => ({
   unpublish: value,
   archive: value,
   unarchive: value,
+  invoke: value,
 });
 
 /**

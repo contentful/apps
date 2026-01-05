@@ -9,6 +9,8 @@ import type {
   MigrationPermissions as MigrationPermissionsType,
   OtherFeaturesPermissionKey,
   MigrationPermissionKey,
+  ContentLifecycleEntityKey,
+  EntityActionKey,
 } from '../types/config';
 
 interface PermissionsSectionProps {
@@ -22,9 +24,9 @@ interface PermissionsSectionProps {
   };
   onAccordionToggle: (section: string, expanded: boolean) => void;
   onSelectAllToggle: () => void;
-  onEntityActionToggle: (entity: 'entries' | 'assets' | 'contentTypes', action: string) => void;
-  onColumnToggle: (action: string) => void;
-  onRowToggle: (entity: 'entries' | 'assets' | 'contentTypes') => void;
+  onEntityActionToggle: (entity: ContentLifecycleEntityKey, action: EntityActionKey) => void;
+  onColumnToggle: (action: EntityActionKey) => void;
+  onRowToggle: (entity: ContentLifecycleEntityKey) => void;
   onOtherFeatureToggle: (permission: OtherFeaturesPermissionKey) => void;
   onMigrationToggle: (permission: MigrationPermissionKey) => void;
 }

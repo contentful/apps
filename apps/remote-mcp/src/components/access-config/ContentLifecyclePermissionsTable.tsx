@@ -57,7 +57,18 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
                     isChecked={
                       permissions.entries[action as keyof typeof permissions.entries] &&
                       permissions.assets[action as keyof typeof permissions.assets] &&
-                      permissions.contentTypes[action as keyof typeof permissions.contentTypes]
+                      permissions.contentTypes[action as keyof typeof permissions.contentTypes] &&
+                      permissions.aiActions[action as keyof typeof permissions.aiActions] &&
+                      permissions.editorInterfaces[
+                        action as keyof typeof permissions.editorInterfaces
+                      ] &&
+                      permissions.environments[action as keyof typeof permissions.environments] &&
+                      permissions.locales[action as keyof typeof permissions.locales] &&
+                      permissions.orgs[action as keyof typeof permissions.orgs] &&
+                      permissions.spaces[action as keyof typeof permissions.spaces] &&
+                      permissions.tags[action as keyof typeof permissions.tags] &&
+                      permissions.concepts[action as keyof typeof permissions.concepts] &&
+                      permissions.conceptSchemes[action as keyof typeof permissions.conceptSchemes]
                     }
                     onChange={() => onColumnToggle(action as EntityActionKey)}
                   />
@@ -67,38 +78,68 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
           </Table.Row>
         </Table.Head>
         <Table.Body>
-          {(['entries', 'assets', 'contentTypes'] as const).map((entity) => (
-            <Table.Row key={entity}>
-              <Table.Cell>
-                <Checkbox
-                  isChecked={Object.values(permissions[entity]).every((v) => v)}
-                  onChange={() => onRowToggle(entity)}>
-                  {entity === 'contentTypes'
-                    ? 'Content types'
-                    : entity.charAt(0).toUpperCase() + entity.slice(1)}
-                </Checkbox>
-              </Table.Cell>
-              {[
-                'read',
-                'edit',
-                'create',
-                'delete',
-                'publish',
-                'unpublish',
-                'archive',
-                'unarchive',
-              ].map((action) => (
-                <Table.Cell key={action}>
-                  <Flex justifyContent="center">
-                    <Checkbox
-                      isChecked={permissions[entity][action as keyof typeof permissions.entries]}
-                      onChange={() => onEntityActionToggle(entity, action as EntityActionKey)}
-                    />
-                  </Flex>
+          {(
+            [
+              'entries',
+              'assets',
+              'contentTypes',
+              'aiActions',
+              'editorInterfaces',
+              'environments',
+              'locales',
+              'orgs',
+              'spaces',
+              'tags',
+              'concepts',
+              'conceptSchemes',
+            ] as const
+          ).map((entity) => {
+            const displayNames: Record<string, string> = {
+              entries: 'Entries',
+              assets: 'Assets',
+              contentTypes: 'Content types',
+              aiActions: 'AI actions',
+              editorInterfaces: 'Editor interfaces',
+              environments: 'Environments',
+              locales: 'Locales',
+              orgs: 'Organizations',
+              spaces: 'Spaces',
+              tags: 'Tags',
+              concepts: 'Concepts',
+              conceptSchemes: 'Concept schemes',
+            };
+
+            return (
+              <Table.Row key={entity}>
+                <Table.Cell>
+                  <Checkbox
+                    isChecked={Object.values(permissions[entity]).every((v) => v)}
+                    onChange={() => onRowToggle(entity)}>
+                    {displayNames[entity]}
+                  </Checkbox>
                 </Table.Cell>
-              ))}
-            </Table.Row>
-          ))}
+                {[
+                  'read',
+                  'edit',
+                  'create',
+                  'delete',
+                  'publish',
+                  'unpublish',
+                  'archive',
+                  'unarchive',
+                ].map((action) => (
+                  <Table.Cell key={action}>
+                    <Flex justifyContent="center">
+                      <Checkbox
+                        isChecked={permissions[entity][action as keyof typeof permissions.entries]}
+                        onChange={() => onEntityActionToggle(entity, action as EntityActionKey)}
+                      />
+                    </Flex>
+                  </Table.Cell>
+                ))}
+              </Table.Row>
+            );
+          })}
         </Table.Body>
       </Table>
     </div>
