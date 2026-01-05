@@ -16,11 +16,12 @@ const Dashboard = () => {
   const { scheduledActions, isFetchingScheduledActions, fetchingScheduledActionsError } =
     useScheduledActions();
 
-  const metrics = new MetricsCalculator(entries, scheduledActions, {
+  const metricsCalculator = new MetricsCalculator(entries, scheduledActions, {
     needsUpdateMonths: installation.needsUpdateMonths,
     recentlyPublishedDays: installation.recentlyPublishedDays,
     timeToPublishDays: installation.timeToPublishDays,
-  }).metrics;
+  });
+  const metrics = metricsCalculator.getAllMetrics();
 
   return (
     <Flex flexDirection="column" style={styles.container}>

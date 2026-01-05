@@ -9,7 +9,7 @@ import {
   RECENTLY_PUBLISHED_DAYS_RANGE,
   TIME_TO_PUBLISH_DAYS_RANGE,
 } from '../utils/consts';
-import { msPerDay, parseDate, addDays, subDays, subMonths, isWithin } from '../utils/dates';
+import { DateCalculator, msPerDay } from '../utils/DateCalculator';
 
 function percentChange(current: number, previous: number): { text: string; isNegative: boolean } {
   if (previous === 0) {
@@ -29,8 +29,7 @@ export class MetricsCalculator {
   private readonly needsUpdateMonths: number;
   private readonly recentlyPublishedDays: number;
   private readonly timeToPublishDays: number;
-
-  public readonly metrics: ReadonlyArray<MetricCardProps>;
+  private readonly dateCalculator: DateCalculator;
 
   constructor(
     entries: ReadonlyArray<EntryProps>,
@@ -48,8 +47,11 @@ export class MetricsCalculator {
     this.recentlyPublishedDays =
       options?.recentlyPublishedDays ?? RECENTLY_PUBLISHED_DAYS_RANGE.min;
     this.timeToPublishDays = options?.timeToPublishDays ?? TIME_TO_PUBLISH_DAYS_RANGE.min;
+    this.dateCalculator = new DateCalculator();
+  }
 
-    this.metrics = [
+  public getAllMetrics(): ReadonlyArray<MetricCardProps> {
+    return [
       this.calculateTotalPublished(),
       this.calculateAverageTimeToPublish(),
       this.calculateScheduled(),
@@ -59,21 +61,21 @@ export class MetricsCalculator {
   }
 
   private calculateTotalPublished(): MetricCardProps {
-    const startThisPeriod = subDays(this.now, 30);
-    const startPrevPeriod = subDays(this.now, 60);
+    const startThisPeriod = this.dateCalculator.subDays(this.now, 30);
+    const startPrevPeriod = this.dateCalculator.subDays(this.now, 60);
     const endPrevPeriod = startThisPeriod;
 
     let current = 0;
     let previous = 0;
     for (const entry of this.entries) {
-      const publishedAt = parseDate(entry?.sys?.publishedAt);
+      const publishedAt = this.dateCalculator.parseDate(entry?.sys?.publishedAt);
       if (!publishedAt) continue;
 
-      if (isWithin(publishedAt, startThisPeriod, this.now)) {
+      if (this.dateCalculator.isWithin(publishedAt, startThisPeriod, this.now)) {
         current += 1;
         continue;
       }
-      if (isWithin(publishedAt, startPrevPeriod, endPrevPeriod)) {
+      if (this.dateCalculator.isWithin(publishedAt, startPrevPeriod, endPrevPeriod)) {
         previous += 1;
       }
     }
@@ -90,16 +92,16 @@ export class MetricsCalculator {
   }
 
   private calculateAverageTimeToPublish(): MetricCardProps {
-    const startThisPeriod = subDays(this.now, this.timeToPublishDays);
+    const startThisPeriod = this.dateCalculator.subDays(this.now, this.timeToPublishDays);
 
     let sumDays = 0;
     let count = 0;
     for (const entry of this.entries) {
-      const publishedAt = parseDate(entry?.sys?.publishedAt);
+      const publishedAt = this.dateCalculator.parseDate(entry?.sys?.publishedAt);
       if (!publishedAt) continue;
-      if (!isWithin(publishedAt, startThisPeriod, this.now)) continue;
+      if (!this.dateCalculator.isWithin(publishedAt, startThisPeriod, this.now)) continue;
 
-      const createdAt = parseDate(entry?.sys?.createdAt);
+      const createdAt = this.dateCalculator.parseDate(entry?.sys?.createdAt);
       if (!createdAt) continue;
 
       const deltaDays = (publishedAt.getTime() - createdAt.getTime()) / msPerDay;
@@ -124,13 +126,13 @@ export class MetricsCalculator {
   }
 
   private calculateScheduled(): MetricCardProps {
-    const end = addDays(this.now, 30);
+    const end = this.dateCalculator.addDays(this.now, 30);
 
     let count = 0;
     for (const action of this.scheduledActions) {
-      const scheduledFor = parseDate(action?.scheduledFor?.datetime);
+      const scheduledFor = this.dateCalculator.parseDate(action?.scheduledFor?.datetime);
       if (!scheduledFor) continue;
-      if (isWithin(scheduledFor, this.now, end)) {
+      if (this.dateCalculator.isWithin(scheduledFor, this.now, end)) {
         count += 1;
       }
     }
@@ -145,13 +147,13 @@ export class MetricsCalculator {
   }
 
   private calculateRecentlyPublished(): MetricCardProps {
-    const start = subDays(this.now, this.recentlyPublishedDays);
+    const start = this.dateCalculator.subDays(this.now, this.recentlyPublishedDays);
 
     let count = 0;
     for (const entry of this.entries) {
-      const publishedAt = parseDate(entry?.sys?.publishedAt);
+      const publishedAt = this.dateCalculator.parseDate(entry?.sys?.publishedAt);
       if (!publishedAt) continue;
-      if (isWithin(publishedAt, start, this.now)) {
+      if (this.dateCalculator.isWithin(publishedAt, start, this.now)) {
         count += 1;
       }
     }
@@ -166,11 +168,11 @@ export class MetricsCalculator {
   }
 
   private calculateNeedsUpdate(): MetricCardProps {
-    const cutoff = subMonths(this.now, this.needsUpdateMonths);
+    const cutoff = this.dateCalculator.subMonths(this.now, this.needsUpdateMonths);
 
     let count = 0;
     for (const entry of this.entries) {
-      const updatedAt = parseDate(entry?.sys?.updatedAt);
+      const updatedAt = this.dateCalculator.parseDate(entry?.sys?.updatedAt);
       if (!updatedAt) continue;
       if (updatedAt.getTime() < cutoff.getTime()) {
         count += 1;
