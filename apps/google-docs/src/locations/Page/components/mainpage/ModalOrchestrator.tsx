@@ -10,6 +10,7 @@ import { createEntriesFromPreview, EntryCreationResult } from '../../../../servi
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { ContentTypePickerModal } from '../modals/step_2/SelectContentTypeModal';
 import { PreviewModal } from '../modals/step_3/PreviewModal';
+import { LoadingModal } from '../modals/LoadingModal';
 import { ContentTypeProps } from 'contentful-management';
 
 export interface ModalOrchestratorHandle {
@@ -108,6 +109,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     };
 
     const handleContentTypeSelected = async (contentTypes: ContentTypeProps[]) => {
+      closeModal(ModalType.CONTENT_TYPE_PICKER);
       const ids = contentTypes.map((ct) => ct.sys.id);
       await submit(ids);
     };
@@ -117,6 +119,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         sdk.notifier.error('No entries to create');
         return;
       }
+
+      closeModal(ModalType.PREVIEW);
       setIsCreatingEntries(true);
       try {
         const entries = previewEntries.map((p) => p.entry);
@@ -128,8 +132,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         );
 
         const createdCount = entryResult.createdEntries.length;
-
-        closeModal(ModalType.PREVIEW);
 
         if (createdCount === 0) {
           console.error('Entry creation errors:', entryResult.errors);
@@ -164,9 +166,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     useEffect(() => {
       const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
 
-      if (submissionJustCompleted && modalStates.isContentTypePickerOpen && previewEntries) {
+      if (submissionJustCompleted && previewEntries) {
         console.log('Document processing completed, previewEntries:', previewEntries);
-        closeModal(ModalType.CONTENT_TYPE_PICKER);
 
         // Open preview modal if we have entries
         if (previewEntries.length > 0) {
@@ -175,7 +176,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
 
       prevIsSubmittingRef.current = isSubmitting;
-    }, [isSubmitting, modalStates.isContentTypePickerOpen, closeModal, openModal, previewEntries]);
+    }, [isSubmitting, closeModal, openModal, previewEntries]);
 
     return (
       <>
@@ -200,6 +201,12 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           onCancel={handleKeepCreating}
         />
 
+        <LoadingModal
+          isOpen={isSubmitting}
+          step="reviewingContentTypes"
+          title="Preparing your preview"
+        />
+
         <PreviewModal
           isOpen={modalStates.isPreviewModalOpen}
           onClose={() => closeModal(ModalType.PREVIEW)}
@@ -209,6 +216,13 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           }
           isLoading={isSubmitting}
           isCreatingEntries={isCreatingEntries}
+        />
+
+        <LoadingModal
+          isOpen={isCreatingEntries}
+          step="creatingEntries"
+          title="Create entries"
+          entriesCount={previewEntries?.length}
         />
 
         <ReviewEntriesModal
