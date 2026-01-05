@@ -1,1 +1,1 @@
-# Contentful Remote MCP (Public Alpha)
+# Contentful Remote MCP (Public Beta)
