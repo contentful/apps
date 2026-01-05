@@ -5,6 +5,7 @@ import { CheckCircleIcon } from '@contentful/f36-icons';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import googleDriveLogo from '../../../../assets/google-drive.png';
+import { callAppAction, callAppActionWithResponse } from '../../../../utils/appAction';
 
 type OAuthConnectorProps = {
   onOAuthConnectedChange: (oauthConnectionStatus: boolean) => void;
@@ -39,30 +40,8 @@ export const OAuthConnector = ({
         console.log(
           `Checking Google OAuth connection status (attempt ${attempt}/${maxRetries})...`
         );
-        const appActions = await sdk.cma.appAction.getManyForEnvironment({
-          environmentId: sdk.ids.environment,
-          spaceId: sdk.ids.space,
-        });
 
-        const checkStatusAppAction = appActions.items.find(
-          (action) => action.name === 'checkGdocOauthTokenStatus'
-        );
-        if (!checkStatusAppAction) {
-          console.warn('checkGdocOauthTokenStatus app action not found');
-          setIsCheckingStatus(false);
-          return;
-        }
-
-        const response = await sdk.cma.appActionCall.createWithResponse(
-          {
-            appActionId: checkStatusAppAction.sys.id,
-            appDefinitionId: sdk.ids.app,
-          },
-          {
-            parameters: {},
-          }
-        );
-
+        const response = await callAppActionWithResponse(sdk, 'checkGdocOauthTokenStatus', {});
         const statusResponse = JSON.parse(response.response.body);
         console.log(`Google OAuth status response (attempt ${attempt}):`, statusResponse);
 
@@ -116,24 +95,10 @@ export const OAuthConnector = ({
 
   const messageHandler = async (event: MessageEvent) => {
     if (event.data.type === 'oauth:complete') {
-      const appDefinitionId = sdk.ids.app;
-      // call app action to complete oauth
-      const appActions = await sdk.cma.appAction.getManyForEnvironment({
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
+      await callAppAction(sdk, 'completeGdocOauth', {
+        code: event.data.code,
+        state: event.data.state,
       });
-      const completeOauthAppAction = appActions.items.find(
-        (action) => action.name === 'completeGdocOauth'
-      );
-      await sdk.cma.appActionCall.create(
-        { appDefinitionId, appActionId: completeOauthAppAction?.sys.id || '' },
-        {
-          parameters: {
-            code: event.data.code,
-            state: event.data.state,
-          },
-        }
-      );
       // Check the updated status after OAuth completion - expect it to be connected
       await checkGoogleOAuthStatus(true);
       cleanup();
@@ -163,24 +128,7 @@ export const OAuthConnector = ({
     window.addEventListener('message', messageHandler);
 
     try {
-      const appActions = await sdk.cma.appAction.getManyForEnvironment({
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      });
-
-      const initiateOauthAppAction = appActions.items.find(
-        (action) => action.name === 'initiateGdocOauth'
-      );
-
-      const response = await sdk.cma.appActionCall.createWithResponse(
-        {
-          appActionId: initiateOauthAppAction?.sys.id || '',
-          appDefinitionId: sdk.ids.app,
-        },
-        {
-          parameters: {},
-        }
-      );
+      const response = await callAppActionWithResponse(sdk, 'initiateGdocOauth', {});
       const { authorizeUrl } = JSON.parse(response.response.body);
 
       popupWindowRef.current = window.open(
@@ -198,20 +146,7 @@ export const OAuthConnector = ({
   const handleDisconnect = async () => {
     setIsDisconnecting(true);
     try {
-      const appActions = await sdk.cma.appAction.getManyForEnvironment({
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      });
-      const disconnectAppAction = appActions.items.find(
-        (action) => action.name === 'revokeGdocOauthToken'
-      );
-      await sdk.cma.appActionCall.create(
-        {
-          appActionId: disconnectAppAction?.sys.id || '',
-          appDefinitionId: sdk.ids.app,
-        },
-        { parameters: {} }
-      );
+      await callAppAction(sdk, 'revokeGdocOauthToken', {});
 
       // Check the updated status after disconnection - expect it to be disconnected
       await checkGoogleOAuthStatus(false);
