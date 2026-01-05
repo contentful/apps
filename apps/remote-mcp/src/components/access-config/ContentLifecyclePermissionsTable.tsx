@@ -1,13 +1,14 @@
 import { type FC } from 'react';
 import { Stack, Text, Checkbox, Table, Flex, Box } from '@contentful/f36-components';
 import type { ContentLifecyclePermissions } from '../types/config';
+import type { ContentLifecycleEntityKey, EntityActionKey } from '../types/config';
 
 interface ContentLifecyclePermissionsTableProps {
   permissions: ContentLifecyclePermissions;
   onSelectAllToggle: () => void;
-  onEntityActionToggle: (entity: 'entries' | 'assets' | 'contentTypes', action: string) => void;
-  onColumnToggle: (action: string) => void;
-  onRowToggle: (entity: 'entries' | 'assets' | 'contentTypes') => void;
+  onEntityActionToggle: (entity: ContentLifecycleEntityKey, action: EntityActionKey) => void;
+  onColumnToggle: (action: EntityActionKey) => void;
+  onRowToggle: (entity: ContentLifecycleEntityKey) => void;
 }
 
 export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTableProps> = ({
@@ -58,7 +59,7 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
                       permissions.assets[action as keyof typeof permissions.assets] &&
                       permissions.contentTypes[action as keyof typeof permissions.contentTypes]
                     }
-                    onChange={() => onColumnToggle(action)}
+                    onChange={() => onColumnToggle(action as EntityActionKey)}
                   />
                 </Flex>
               </Table.Cell>
@@ -91,7 +92,7 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
                   <Flex justifyContent="center">
                     <Checkbox
                       isChecked={permissions[entity][action as keyof typeof permissions.entries]}
-                      onChange={() => onEntityActionToggle(entity, action)}
+                      onChange={() => onEntityActionToggle(entity, action as EntityActionKey)}
                     />
                   </Flex>
                 </Table.Cell>
