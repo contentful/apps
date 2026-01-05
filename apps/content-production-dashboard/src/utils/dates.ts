@@ -8,12 +8,14 @@ export function parseDate(value: string | undefined): MaybeDate {
   return Number.isNaN(ms) ? undefined : new Date(ms);
 }
 
-export function addDays(base: Date, days: number): Date {
-  return new Date(base.getTime() + days * msPerDay);
+export function addDays(date: Date, days: number): Date {
+  date.setDate(date.getDate() + days);
+  return date;
 }
 
-export function subDays(base: Date, days: number): Date {
-  return new Date(base.getTime() - days * msPerDay);
+export function subDays(date: Date, days: number): Date {
+  date.setDate(date.getDate() - days);
+  return date;
 }
 
 export function subMonths(base: Date, months: number): Date {
