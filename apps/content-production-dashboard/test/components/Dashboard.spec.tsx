@@ -10,12 +10,24 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 const mockRefetch = vi.fn();
+
 vi.mock('../../src/hooks/useAllEntries', () => ({
   useAllEntries: () => ({
     entries: [],
     total: 0,
-    isFetching: false,
-    error: null,
+    isFetchingEntries: false,
+    fetchingEntriesError: null,
+    refetch: mockRefetch,
+    fetchedAt: new Date(),
+  }),
+}));
+
+vi.mock('../../src/hooks/useScheduledActions', () => ({
+  useScheduledActions: () => ({
+    scheduledActions: [],
+    total: 0,
+    isFetchingScheduledActions: false,
+    fetchingScheduledActionsError: null,
     refetch: mockRefetch,
     fetchedAt: new Date(),
   }),

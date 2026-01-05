@@ -7,8 +7,8 @@ import { fetchAllEntries, FetchAllEntriesResult } from '../utils/fetchAllEntries
 export interface UseAllEntriesResult {
   entries: EntryProps[];
   total: number;
-  isFetching: boolean;
-  error: Error | null;
+  isFetchingEntries: boolean;
+  fetchingEntriesError: Error | null;
   fetchedAt: Date | undefined;
 }
 
@@ -23,8 +23,8 @@ export function useAllEntries(): UseAllEntriesResult {
   return {
     entries: data?.entries || [],
     total: data?.total || 0,
-    isFetching,
-    error,
+    isFetchingEntries: isFetching,
+    fetchingEntriesError: error,
     fetchedAt: data?.fetchedAt,
   };
 }
