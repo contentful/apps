@@ -206,13 +206,6 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           title="Preparing your preview"
         />
 
-        <LoadingModal
-          isOpen={isCreatingEntries}
-          step="creatingEntries"
-          title="Create entries"
-          entriesCount={previewEntries?.length}
-        />
-
         <PreviewModal
           isOpen={modalStates.isPreviewModalOpen}
           onClose={() => closeModal(ModalType.PREVIEW)}
@@ -222,6 +215,13 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           }
           isLoading={isSubmitting}
           isCreatingEntries={isCreatingEntries}
+        />
+
+        <LoadingModal
+          isOpen={isCreatingEntries}
+          step="creatingEntries"
+          title="Create entries"
+          entriesCount={previewEntries?.length}
         />
 
         <ReviewEntriesModal

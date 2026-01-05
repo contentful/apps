@@ -1,5 +1,6 @@
 import React from 'react';
-import { Modal, Paragraph, Flex, Spinner, Skeleton } from '@contentful/f36-components';
+import { Modal, Paragraph, Spinner, Skeleton, Flex } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 
 interface LoadingModalProps {
   isOpen: boolean;
@@ -26,16 +27,19 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
           <Modal.Header title={title} />
           <Modal.Content>
             {step === 'reviewingContentTypes' ? (
-              <Flex
-                flexDirection="column"
-                alignItems="center"
-                justifyContent="center"
-                padding="spacingXl">
-                <Spinner size="large" variant="primary" />
-                <Paragraph color="gray700" style={{ textAlign: 'center' }}>
-                  Reviewing content types and your document
-                </Paragraph>
-              </Flex>
+              <>
+                <Flex
+                  flexDirection="column"
+                  alignItems="center"
+                  justifyContent="center"
+                  gap="spacingM"
+                  padding="spacingXl">
+                  <Spinner size="large" variant="primary" />
+                  <Paragraph color="gray700" style={{ textAlign: 'center' }}>
+                    Reviewing content types and your document
+                  </Paragraph>
+                </Flex>
+              </>
             ) : (
               <>
                 <Paragraph marginBottom="spacingM" color="gray700">
