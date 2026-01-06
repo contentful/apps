@@ -4,11 +4,9 @@ This module provides security validation focused on preventing prompt injection 
 
 ## Overview
 
-The security module validates content at multiple stages of the document processing pipeline:
+The security module validates content before sending it to the AI to prevent prompt injection attacks:
 
-1. **Before AI Processing**: Validates Google Docs JSON structure and content
-2. **After AI Processing**: Validates parsed entries returned from the AI agent
-3. **Before Contentful Creation**: Final validation before creating entries in Contentful
+1. **Before AI Processing**: Validates Google Docs JSON structure and content for prompt injection patterns and data corruption issues
 
 ## Security Features
 
@@ -16,10 +14,7 @@ The security module validates content at multiple stages of the document process
 
 Detects and prevents prompt injection attacks:
 
-- **Instruction Override**: Attempts to ignore, forget, or override system instructions
-- **Role Manipulation**: Attempts to change AI role or persona
-- **Output Format Manipulation**: Attempts to change output format or structure
-- **Confidentiality Bypass**: Attempts to extract system instructions or prompts
+- **Instruction Override**: Attempts to ignore, forget, disregard, override, or replace system instructions
 - **Jailbreak Attempts**: Developer mode, bypass, hack, exploit attempts
 
 ### Content Sanitization
@@ -55,17 +50,6 @@ if (!result.isValid) {
 }
 ```
 
-### Entry Validation
-
-```typescript
-import { validateParsedEntries } from './contentSecurity';
-
-const result = validateParsedEntries(entries);
-if (!result.isValid) {
-  throw new Error(`Security validation failed: ${result.errors.join('; ')}`);
-}
-```
-
 ## Validation Results
 
 All validation functions return a `SecurityValidationResult`:
@@ -89,13 +73,8 @@ interface SecurityValidationResult {
 Security validation is integrated into `documentParser.agent.ts`:
 
 1. Validates document JSON before sending to OpenAI
-2. Validates parsed entries after receiving from OpenAI
-
-### Entry Service
-
-Security validation is integrated into `entryService.ts`:
-
-1. Final validation before creating entries in Contentful
+2. Blocks processing if malicious prompt injection patterns are detected
+3. Logs warnings for suspicious but non-critical patterns
 
 ## Testing
 
@@ -110,4 +89,3 @@ Test cases cover:
 - Content sanitization (null bytes, control characters)
 - Object and array validation
 - Google Docs JSON structure validation
-- Parsed entries validation

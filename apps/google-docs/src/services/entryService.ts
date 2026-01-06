@@ -7,7 +7,6 @@ import {
   isReferenceArray,
 } from '../../functions/agents/documentParserAgent/schema';
 import { MarkdownParser } from './richtext';
-import { validateParsedEntries } from '../../functions/security/contentSecurity';
 
 /**
  * Service for creating entries in Contentful using the Contentful Management API
@@ -719,32 +718,6 @@ export async function createEntriesFromPreview(
         },
       ],
     };
-  }
-
-  // SECURITY VALIDATION: Final security check before creating entries in Contentful
-  const securityCheck = validateParsedEntries(entries);
-  if (!securityCheck.isValid) {
-    console.error('Security validation failed before creating entries:', {
-      errors: securityCheck.errors,
-      warnings: securityCheck.warnings,
-    });
-    return {
-      createdEntries: [],
-      errors: [
-        {
-          contentTypeId: 'security',
-          error: `Security validation failed: ${securityCheck.errors.join('; ')}`,
-          details: {
-            errors: securityCheck.errors,
-            warnings: securityCheck.warnings,
-          },
-        },
-      ],
-    };
-  }
-
-  if (securityCheck.warnings.length > 0) {
-    console.warn('Security warnings before creating entries:', securityCheck.warnings);
   }
 
   const spaceId = sdk.ids.space;

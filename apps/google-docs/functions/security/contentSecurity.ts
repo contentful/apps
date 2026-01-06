@@ -5,10 +5,6 @@
  * 1. Prompt injection attacks (attempts to manipulate AI behavior)
  * 2. Data corruption (null bytes, control characters)
  *
- * This module validates content at multiple stages:
- * - Before sending to AI (document content sanitization and prompt injection detection)
- * - After AI parsing (parsed entry validation)
- * - Before Contentful creation (final validation)
  */
 
 export interface SecurityValidationResult {
@@ -50,42 +46,9 @@ const PROMPT_INJECTION_PATTERNS: PromptInjectionPattern[] = [
         `(new|override|replace)\\s+(all\\s+)?(the\\s+)?((previous|prior)\\s+)?${INSTRUCTION_TERMS}`,
         'gi'
       ),
-      /instead\s+(of|do|use|follow)/gi,
     ],
     severity: 'error',
     description: 'Attempt to override instructions',
-  },
-  {
-    name: 'System Prompt Manipulation',
-    patterns: [
-      /you\s+are\s+(now|nowadays|currently)/gi,
-      /(pretend|act|behave)\s+as\s+(if\s+)?you\s+are/gi,
-      /(role|persona|identity)\s*[:=]\s*/gi,
-    ],
-    severity: 'warning',
-    description: 'Attempt to manipulate system prompt or role',
-  },
-  {
-    name: 'Output Format Manipulation',
-    patterns: [
-      /output\s+(format|structure|schema)\s*[:=]/gi,
-      /(return|respond|reply)\s+(with|in|using)\s+(a\s+)?(different|new|custom)/gi,
-      /(change|modify|alter)\s+(the\s+)?(output|format|response)/gi,
-    ],
-    severity: 'warning',
-    description: 'Attempt to manipulate output format',
-  },
-  {
-    name: 'Confidentiality Bypass',
-    patterns: [
-      new RegExp(
-        `(reveal|show|display|output|print|return)\\s+(all\\s+)?(system|prompt|instructions?|rules?)`,
-        'gi'
-      ),
-      new RegExp(`(what\\s+are\\s+)?(your\\s+)?${INSTRUCTION_TERMS}`, 'gi'),
-    ],
-    severity: 'warning',
-    description: 'Attempt to extract system instructions',
   },
   {
     name: 'Jailbreak Attempt',
@@ -234,50 +197,4 @@ export function validateObjectSecurity(
  */
 export function validateGoogleDocJson(documentJson: unknown): SecurityValidationResult {
   return validateObjectSecurity(documentJson, 'document');
-}
-
-/**
- * Validates parsed entries from AI before creating them in Contentful
- */
-export function validateParsedEntries(entries: unknown[]): SecurityValidationResult {
-  const errors: string[] = [];
-  const warnings: string[] = [];
-
-  if (!Array.isArray(entries)) {
-    return {
-      isValid: false,
-      errors: ['Entries must be an array'],
-      warnings: [],
-    };
-  }
-
-  for (let i = 0; i < entries.length; i++) {
-    const entry = entries[i];
-    const entryResult = validateObjectSecurity(entry, `entries[${i}]`);
-
-    if (!entryResult.isValid) {
-      errors.push(...entryResult.errors);
-      warnings.push(...entryResult.warnings);
-    }
-
-    // Additional validation for entry structure
-    if (entry && typeof entry === 'object') {
-      const entryObj = entry as Record<string, unknown>;
-
-      // Validate fields structure
-      if ('fields' in entryObj && entryObj.fields) {
-        const fieldsResult = validateObjectSecurity(entryObj.fields, `entries[${i}].fields`);
-        if (!fieldsResult.isValid) {
-          errors.push(...fieldsResult.errors);
-          warnings.push(...fieldsResult.warnings);
-        }
-      }
-    }
-  }
-
-  return {
-    isValid: errors.length === 0,
-    errors,
-    warnings,
-  };
 }

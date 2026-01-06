@@ -13,7 +13,7 @@ import { generateObject } from 'ai';
 import { ContentTypeProps } from 'contentful-management';
 import { FinalEntriesResultSchema, FinalEntriesResult } from './schema';
 import { fetchGoogleDocAsJson } from '../../service/googleDriveService';
-import { validateGoogleDocJson, validateParsedEntries } from '../../security/contentSecurity';
+import { validateGoogleDocJson } from '../../security/contentSecurity';
 
 /**
  * Configuration for the document parser
@@ -52,6 +52,7 @@ export async function createPreviewWithAgent(
 
   // SECURITY VALIDATION: Validate document content before sending to AI
   const documentSecurityCheck = validateGoogleDocJson(documentJson);
+
   if (!documentSecurityCheck.isValid) {
     const errorMessage = `Security validation failed for document: ${documentSecurityCheck.errors.join(
       '; '
@@ -78,23 +79,6 @@ export async function createPreviewWithAgent(
 
   const finalResult = result.object as FinalEntriesResult;
   console.log('Document Parser Agent Result:', JSON.stringify(result, null, 2));
-
-  // SECURITY VALIDATION: Validate parsed entries before returning
-  const entriesSecurityCheck = validateParsedEntries(finalResult.entries);
-  if (!entriesSecurityCheck.isValid) {
-    const errorMessage = `Security validation failed for parsed entries: ${entriesSecurityCheck.errors.join(
-      '; '
-    )}`;
-    console.error('Parsed entries security validation failed:', {
-      errors: entriesSecurityCheck.errors,
-      warnings: entriesSecurityCheck.warnings,
-    });
-    throw new Error(errorMessage);
-  }
-
-  if (entriesSecurityCheck.warnings.length > 0) {
-    console.warn('Parsed entries security warnings:', entriesSecurityCheck.warnings);
-  }
 
   return finalResult;
 }
