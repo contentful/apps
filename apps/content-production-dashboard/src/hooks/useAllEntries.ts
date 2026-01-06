@@ -7,16 +7,15 @@ import { fetchAllEntries, FetchAllEntriesResult } from '../utils/fetchAllEntries
 export interface UseAllEntriesResult {
   entries: EntryProps[];
   total: number;
-  isFetching: boolean;
-  error: Error | null;
-  refetch: () => void;
+  isFetchingEntries: boolean;
+  fetchingEntriesError: Error | null;
   fetchedAt: Date | undefined;
 }
 
 export function useAllEntries(): UseAllEntriesResult {
   const sdk = useSDK<PageAppSDK>();
 
-  const { data, isFetching, error, refetch } = useQuery<FetchAllEntriesResult, Error>({
+  const { data, isFetching, error } = useQuery<FetchAllEntriesResult, Error>({
     queryKey: ['entries', sdk.ids.space, sdk.ids.environment],
     queryFn: () => fetchAllEntries(sdk),
   });
@@ -24,9 +23,8 @@ export function useAllEntries(): UseAllEntriesResult {
   return {
     entries: data?.entries || [],
     total: data?.total || 0,
-    isFetching,
-    error,
-    refetch,
+    isFetchingEntries: isFetching,
+    fetchingEntriesError: error,
     fetchedAt: data?.fetchedAt,
   };
 }

@@ -1,17 +1,72 @@
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { mockCma, mockSdk } from '../mocks';
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { mockSdk } from '../mocks';
 import Home from '../../src/locations/Home';
+import { EntryProps } from 'contentful-management';
 
+// Mock TanStack Query
+const mockUseQuery = vi.fn();
+vi.mock('@tanstack/react-query', () => ({
+  useQuery: (options: any) => mockUseQuery(options),
+}));
+
+// Mock Contentful SDK
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
-  useCMA: () => mockCma,
 }));
 
 describe('Home component', () => {
-  it('Component text exists', () => {
-    const { getByText } = render(<Home />);
+  const mockRefetch = vi.fn();
 
-    expect(getByText('Hello Home Component (AppId: test-app)')).toBeTruthy();
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseQuery.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      error: null,
+      refetch: mockRefetch,
+    });
+  });
+
+  it('shows error display when error exists', () => {
+    const testError = new Error('Failed to fetch entries');
+    mockUseQuery.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      error: testError,
+      refetch: mockRefetch,
+    });
+
+    render(<Home />);
+
+    expect(screen.getByText('Error loading entries')).toBeInTheDocument();
+    expect(screen.getByText('Failed to fetch entries')).toBeInTheDocument();
+  });
+
+  it('shows loading state when isFetching is true', () => {
+    const mockEntries: EntryProps[] = [
+      {
+        sys: { id: 'entry-1', type: 'Entry' } as any,
+        fields: {},
+      },
+    ];
+
+    mockUseQuery.mockReturnValue({
+      data: {
+        entries: mockEntries,
+        total: 1,
+        fetchedAt: new Date(),
+      },
+      isLoading: false,
+      isFetching: true,
+      error: null,
+      refetch: mockRefetch,
+    });
+
+    render(<Home />);
+
+    expect(screen.getByText('Loading component...')).toBeInTheDocument();
   });
 });
