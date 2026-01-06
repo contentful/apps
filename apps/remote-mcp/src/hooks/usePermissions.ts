@@ -4,6 +4,7 @@ import type {
   OtherFeaturesPermissions,
   MigrationPermissions,
   EntityPermissions,
+  ContentLifecycleEntityKey,
 } from '../components/types/config';
 import { createEmptyEntityPermissions, createAllPermissions } from '../utils/permissions';
 
@@ -14,15 +15,20 @@ export const usePermissions = () => {
       entries: createEmptyEntityPermissions(),
       assets: createEmptyEntityPermissions(),
       contentTypes: createEmptyEntityPermissions(),
+      aiActions: createEmptyEntityPermissions(),
+      editorInterfaces: createEmptyEntityPermissions(),
+      environments: createEmptyEntityPermissions(),
+      locales: createEmptyEntityPermissions(),
+      orgs: createEmptyEntityPermissions(),
+      spaces: createEmptyEntityPermissions(),
+      tags: createEmptyEntityPermissions(),
+      concepts: createEmptyEntityPermissions(),
+      conceptSchemes: createEmptyEntityPermissions(),
     });
 
   const [otherFeaturesPermissions, setOtherFeaturesPermissions] =
     useState<OtherFeaturesPermissions>({
       runAIActions: false,
-      triggerAutomations: false,
-      installApps: false,
-      callAppActions: false,
-      invokeAgents: false,
     });
 
   const [migrationPermissions, setMigrationPermissions] = useState<MigrationPermissions>({
@@ -38,13 +44,19 @@ export const usePermissions = () => {
       entries: allPermissions,
       assets: allPermissions,
       contentTypes: allPermissions,
+      aiActions: allPermissions,
+      editorInterfaces: allPermissions,
+      environments: allPermissions,
+      locales: allPermissions,
+      orgs: allPermissions,
+      spaces: allPermissions,
+      tags: allPermissions,
+      concepts: allPermissions,
+      conceptSchemes: allPermissions,
     });
   };
 
-  const handleEntityActionToggle = (
-    entity: 'entries' | 'assets' | 'contentTypes',
-    action: string
-  ) => {
+  const handleEntityActionToggle = (entity: ContentLifecycleEntityKey, action: string) => {
     setContentLifecyclePermissions((prev) => ({
       ...prev,
       [entity]: {
@@ -63,11 +75,20 @@ export const usePermissions = () => {
       entries: { ...prev.entries, [action]: newValue },
       assets: { ...prev.assets, [action]: newValue },
       contentTypes: { ...prev.contentTypes, [action]: newValue },
+      aiActions: { ...prev.aiActions, [action]: newValue },
+      editorInterfaces: { ...prev.editorInterfaces, [action]: newValue },
+      environments: { ...prev.environments, [action]: newValue },
+      locales: { ...prev.locales, [action]: newValue },
+      orgs: { ...prev.orgs, [action]: newValue },
+      spaces: { ...prev.spaces, [action]: newValue },
+      tags: { ...prev.tags, [action]: newValue },
+      concepts: { ...prev.concepts, [action]: newValue },
+      conceptSchemes: { ...prev.conceptSchemes, [action]: newValue },
       selectAll: false,
     }));
   };
 
-  const handleRowToggle = (entity: 'entries' | 'assets' | 'contentTypes') => {
+  const handleRowToggle = (entity: ContentLifecycleEntityKey) => {
     const allChecked = Object.values(contentLifecyclePermissions[entity]).every((v) => v);
     const newValue = !allChecked;
     const allPermissions = createAllPermissions(newValue);
