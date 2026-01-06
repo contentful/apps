@@ -20,8 +20,8 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
 }) => (
   <Stack flexDirection="column" spacing="spacing2Xs" alignItems="flex-start">
     <Text>
-      Allow the MCP server to read, edit, create, delete, publish, un-publish, archive or unarchive
-      entities within Contentful.
+      Allow the MCP server to read, edit, create, delete, publish, un-publish, archive, unarchive,
+      or invoke entities within Contentful.
     </Text>
     <Box marginTop="spacingS">
       <Checkbox isChecked={permissions.selectAll} onChange={onSelectAllToggle}>
@@ -75,6 +75,14 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
                 </Flex>
               </Table.Cell>
             ))}
+            <Table.Cell style={{ textAlign: 'center', verticalAlign: 'bottom' }}>
+              <Flex flexDirection="column" alignItems="center" gap="spacingXs">
+                <Text fontWeight="fontWeightMedium" fontSize="fontSizeS">
+                  Invoke
+                </Text>
+                <Box style={{ height: '16px' }} />
+              </Flex>
+            </Table.Cell>
           </Table.Row>
         </Table.Head>
         <Table.Body>
@@ -137,6 +145,16 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
                     </Flex>
                   </Table.Cell>
                 ))}
+                <Table.Cell>
+                  {entity === 'aiActions' && (
+                    <Flex justifyContent="center">
+                      <Checkbox
+                        isChecked={permissions.aiActions.invoke}
+                        onChange={() => onEntityActionToggle('aiActions', 'invoke')}
+                      />
+                    </Flex>
+                  )}
+                </Table.Cell>
               </Table.Row>
             );
           })}
