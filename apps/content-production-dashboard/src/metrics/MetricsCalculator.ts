@@ -11,17 +11,6 @@ import {
 } from '../utils/consts';
 import { DateCalculator, msPerDay } from '../utils/DateCalculator';
 
-function percentChange(current: number, previous: number): { text: string; isNegative: boolean } {
-  if (previous === 0) {
-    if (current === 0) return { text: '0.0% publishing change MoM', isNegative: false };
-    return { text: 'New publishing this month', isNegative: false };
-  }
-  const pct = ((current - previous) / previous) * 100;
-  const abs = Math.abs(pct).toFixed(1);
-  const direction = pct < 0 ? 'decrease' : 'increase';
-  return { text: `${abs}% publishing ${direction} MoM`, isNegative: pct < 0 };
-}
-
 export class MetricsCalculator {
   private readonly entries: ReadonlyArray<EntryProps>;
   private readonly scheduledActions: ReadonlyArray<ScheduledActionProps>;
@@ -29,7 +18,6 @@ export class MetricsCalculator {
   private readonly needsUpdateMonths: number;
   private readonly recentlyPublishedDays: number;
   private readonly timeToPublishDays: number;
-  private readonly dateCalculator: DateCalculator;
 
   constructor(
     entries: ReadonlyArray<EntryProps>,
@@ -47,7 +35,6 @@ export class MetricsCalculator {
     this.recentlyPublishedDays =
       options?.recentlyPublishedDays ?? RECENTLY_PUBLISHED_DAYS_RANGE.min;
     this.timeToPublishDays = options?.timeToPublishDays ?? TIME_TO_PUBLISH_DAYS_RANGE.min;
-    this.dateCalculator = new DateCalculator();
   }
 
   public getAllMetrics(): ReadonlyArray<MetricCardProps> {
@@ -60,27 +47,38 @@ export class MetricsCalculator {
     ];
   }
 
+  private percentChange(current: number, previous: number): { text: string; isNegative: boolean } {
+    if (previous === 0) {
+      if (current === 0) return { text: '0.0% publishing change MoM', isNegative: false };
+      return { text: 'New publishing this month', isNegative: false };
+    }
+    const pct = ((current - previous) / previous) * 100;
+    const abs = Math.abs(pct).toFixed(1);
+    const direction = pct < 0 ? 'decrease' : 'increase';
+    return { text: `${abs}% publishing ${direction} MoM`, isNegative: pct < 0 };
+  }
+
   private calculateTotalPublished(): MetricCardProps {
-    const startThisPeriod = this.dateCalculator.subDays(this.now, 30);
-    const startPrevPeriod = this.dateCalculator.subDays(this.now, 60);
+    const startThisPeriod = DateCalculator.subDays(this.now, 30);
+    const startPrevPeriod = DateCalculator.subDays(this.now, 60);
     const endPrevPeriod = startThisPeriod;
 
     let current = 0;
     let previous = 0;
     for (const entry of this.entries) {
-      const publishedAt = this.dateCalculator.parseDate(entry?.sys?.publishedAt);
+      const publishedAt = DateCalculator.parseDate(entry?.sys?.publishedAt);
       if (!publishedAt) continue;
 
-      if (this.dateCalculator.isWithin(publishedAt, startThisPeriod, this.now)) {
+      if (DateCalculator.isWithin(publishedAt, startThisPeriod, this.now)) {
         current += 1;
         continue;
       }
-      if (this.dateCalculator.isWithin(publishedAt, startPrevPeriod, endPrevPeriod)) {
+      if (DateCalculator.isWithin(publishedAt, startPrevPeriod, endPrevPeriod)) {
         previous += 1;
       }
     }
 
-    const { text, isNegative } = percentChange(current, previous);
+    const { text, isNegative } = this.percentChange(current, previous);
 
     return {
       title: 'Total Published',
@@ -92,16 +90,16 @@ export class MetricsCalculator {
   }
 
   private calculateAverageTimeToPublish(): MetricCardProps {
-    const startThisPeriod = this.dateCalculator.subDays(this.now, this.timeToPublishDays);
+    const startThisPeriod = DateCalculator.subDays(this.now, this.timeToPublishDays);
 
     let sumDays = 0;
     let count = 0;
     for (const entry of this.entries) {
-      const publishedAt = this.dateCalculator.parseDate(entry?.sys?.publishedAt);
+      const publishedAt = DateCalculator.parseDate(entry?.sys?.publishedAt);
       if (!publishedAt) continue;
-      if (!this.dateCalculator.isWithin(publishedAt, startThisPeriod, this.now)) continue;
+      if (!DateCalculator.isWithin(publishedAt, startThisPeriod, this.now)) continue;
 
-      const createdAt = this.dateCalculator.parseDate(entry?.sys?.createdAt);
+      const createdAt = DateCalculator.parseDate(entry?.sys?.createdAt);
       if (!createdAt) continue;
 
       const deltaDays = (publishedAt.getTime() - createdAt.getTime()) / msPerDay;
@@ -126,13 +124,13 @@ export class MetricsCalculator {
   }
 
   private calculateScheduled(): MetricCardProps {
-    const end = this.dateCalculator.addDays(this.now, 30);
+    const end = DateCalculator.addDays(this.now, 30);
 
     let count = 0;
     for (const action of this.scheduledActions) {
-      const scheduledFor = this.dateCalculator.parseDate(action?.scheduledFor?.datetime);
+      const scheduledFor = DateCalculator.parseDate(action?.scheduledFor?.datetime);
       if (!scheduledFor) continue;
-      if (this.dateCalculator.isWithin(scheduledFor, this.now, end)) {
+      if (DateCalculator.isWithin(scheduledFor, this.now, end)) {
         count += 1;
       }
     }
@@ -147,13 +145,13 @@ export class MetricsCalculator {
   }
 
   private calculateRecentlyPublished(): MetricCardProps {
-    const start = this.dateCalculator.subDays(this.now, this.recentlyPublishedDays);
+    const start = DateCalculator.subDays(this.now, this.recentlyPublishedDays);
 
     let count = 0;
     for (const entry of this.entries) {
-      const publishedAt = this.dateCalculator.parseDate(entry?.sys?.publishedAt);
+      const publishedAt = DateCalculator.parseDate(entry?.sys?.publishedAt);
       if (!publishedAt) continue;
-      if (this.dateCalculator.isWithin(publishedAt, start, this.now)) {
+      if (DateCalculator.isWithin(publishedAt, start, this.now)) {
         count += 1;
       }
     }
@@ -168,11 +166,11 @@ export class MetricsCalculator {
   }
 
   private calculateNeedsUpdate(): MetricCardProps {
-    const cutoff = this.dateCalculator.subMonths(this.now, this.needsUpdateMonths);
+    const cutoff = DateCalculator.subMonths(this.now, this.needsUpdateMonths);
 
     let count = 0;
     for (const entry of this.entries) {
-      const updatedAt = this.dateCalculator.parseDate(entry?.sys?.updatedAt);
+      const updatedAt = DateCalculator.parseDate(entry?.sys?.updatedAt);
       if (!updatedAt) continue;
       if (updatedAt.getTime() < cutoff.getTime()) {
         count += 1;
