@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import {
   Button,
   Flex,
@@ -39,6 +39,7 @@ export const ContentTypePickerModal = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
   const [hasFetchError, setHasFetchError] = useState<boolean>(false);
+  const multiselectListRef = useRef<HTMLUListElement>(null);
 
   const isInvalidSelection = useMemo(
     () => selectedContentTypes.length === 0,
@@ -84,6 +85,23 @@ export const ContentTypePickerModal = ({
       setHasAttemptedSubmit(false);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    // Recalculate the Multiselect dropdown position when selection changes
+    if (multiselectListRef.current) {
+      const element = multiselectListRef.current;
+      const currentScroll = element.scrollTop;
+      const maxScroll = element.scrollHeight - element.clientHeight;
+
+      if (currentScroll >= maxScroll) {
+        element.scrollTop = currentScroll - 1;
+      } else {
+        element.scrollTop = currentScroll + 1;
+      }
+
+      element.scrollTop = currentScroll;
+    }
+  }, [selectedContentTypes]);
 
   const onSearchValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value.toLowerCase().trim();
@@ -144,8 +162,11 @@ export const ContentTypePickerModal = ({
                   searchPlaceholder: 'Search content types',
                   onSearchValueChange,
                 }}
-                currentSelection={selectedContentTypes.map((ct) => ct.sys.id)}
-                placeholder={getPlaceholderText()}>
+                currentSelection={selectedContentTypes.map((ct) => ct.name)}
+                placeholder={getPlaceholderText()}
+                popoverProps={{
+                  listRef: multiselectListRef,
+                }}>
                 {filteredContentTypes.map((ct) => (
                   <Multiselect.Option
                     className={css({ padding: `0.25rem` })}
