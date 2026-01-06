@@ -6,6 +6,7 @@ import { useProgressTracking } from '../../../../hooks/useProgressTracking';
 import { useGeneratePreview } from '../../../../hooks/useGeneratePreview';
 import { ReviewEntriesModal } from '../modals/step_4/ReviewEntriesModal';
 import { ErrorEntriesModal } from '../modals/step_4/ErrorEntriesModal';
+import { ErrorModal } from '../modals/ErrorModal';
 import { createEntriesFromPreview, EntryCreationResult } from '../../../../services/entryService';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
 import { ContentTypePickerModal } from '../modals/step_2/SelectContentTypeModal';
@@ -37,11 +38,12 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       pendingCloseAction,
       setPendingCloseAction,
     } = useProgressTracking();
-    const { previewEntries, assets, submit, clearMessages, isSubmitting } = useGeneratePreview({
-      sdk,
-      documentId,
-      oauthToken,
-    });
+    const { previewEntries, assets, submit, clearMessages, isSubmitting, errorMessage } =
+      useGeneratePreview({
+        sdk,
+        documentId,
+        oauthToken,
+      });
 
     // Track previous submission state to detect completion
     const prevIsSubmittingRef = useRef<boolean>(false);
@@ -162,21 +164,33 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       resetProgress();
     };
 
+    const handleErrorPreviewModalClose = () => {
+      closeModal(ModalType.ERROR_PREVIEW);
+      clearMessages();
+      resetProgress();
+    };
+
     // Close the ContentTypePickerModal when submission completes and open preview modal
     useEffect(() => {
       const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
 
-      if (submissionJustCompleted && previewEntries) {
-        console.log('Document processing completed, previewEntries:', previewEntries);
+      if (submissionJustCompleted) {
+        // Check if there was an error during submission
+        if (errorMessage) {
+          console.error('Preview generation failed:', errorMessage);
+          openModal(ModalType.ERROR_PREVIEW);
+        } else if (previewEntries) {
+          console.log('Document processing completed, previewEntries:', previewEntries);
 
-        // Open preview modal if we have entries
-        if (previewEntries.length > 0) {
-          openModal(ModalType.PREVIEW);
+          // Open preview modal if we have entries
+          if (previewEntries.length > 0) {
+            openModal(ModalType.PREVIEW);
+          }
         }
       }
 
       prevIsSubmittingRef.current = isSubmitting;
-    }, [isSubmitting, closeModal, openModal, previewEntries]);
+    }, [isSubmitting, closeModal, openModal, previewEntries, errorMessage]);
 
     return (
       <>
@@ -223,6 +237,13 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           step="creatingEntries"
           title="Create entries"
           entriesCount={previewEntries?.length}
+        />
+
+        <ErrorModal
+          isOpen={modalStates.isErrorPreviewModalOpen}
+          onClose={handleErrorPreviewModalClose}
+          title="Unable to generate preview"
+          message="An error occurred while processing your document."
         />
 
         <ReviewEntriesModal
