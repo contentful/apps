@@ -12,6 +12,7 @@ type OAuthConnectorProps = {
   isOAuthConnected: boolean;
   onOauthTokenChange: (token: string) => void;
   oauthToken: string;
+  onLoadingStateChange?: (isLoading: boolean) => void;
 };
 
 enum OAuthLoadingState {
@@ -26,12 +27,17 @@ export const OAuthConnector = ({
   isOAuthConnected,
   oauthToken,
   onOauthTokenChange,
+  onLoadingStateChange,
 }: OAuthConnectorProps) => {
   const sdk = useSDK<ConfigAppSDK>();
   const [loadingState, setLoadingState] = useState<OAuthLoadingState>(OAuthLoadingState.CHECKING);
   const [isHoveringConnected, setIsHoveringConnected] = useState(false);
   const popupWindowRef = useRef<Window | null>(null);
   const checkWindowIntervalRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    onLoadingStateChange?.(loadingState === OAuthLoadingState.CHECKING);
+  }, [loadingState, onLoadingStateChange]);
 
   // Check Google OAuth connection status with polling to handle race conditions
   const checkGoogleOAuthStatus = async (

@@ -15,6 +15,7 @@ const Page = () => {
   const modalOrchestratorRef = useRef<ModalOrchestratorHandle>(null);
   const [oauthToken, setOauthToken] = useState<string>('');
   const [isOAuthConnected, setIsOAuthConnected] = useState(false);
+  const [isOAuthLoading, setIsOAuthLoading] = useState(true);
 
   const handleOauthTokenChange = (token: string) => {
     setOauthToken(token);
@@ -22,6 +23,10 @@ const Page = () => {
 
   const handleOAuthConnectedChange = (isConnected: boolean) => {
     setIsOAuthConnected(isConnected);
+  };
+
+  const handleOAuthLoadingStateChange = (isLoading: boolean) => {
+    setIsOAuthLoading(isLoading);
   };
 
   const handleSelectFile = () => {
@@ -42,9 +47,10 @@ const Page = () => {
               onOAuthConnectedChange={handleOAuthConnectedChange}
               isOAuthConnected={isOAuthConnected}
               onOauthTokenChange={handleOauthTokenChange}
+              onLoadingStateChange={handleOAuthLoadingStateChange}
             />
             <Card padding="large">
-              {!isOAuthConnected && (
+              {!isOAuthLoading && !isOAuthConnected && (
                 <Note variant="warning" style={{ marginBottom: tokens.spacingM }}>
                   Please connect to Google Drive before selecting your file.
                 </Note>
