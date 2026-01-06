@@ -34,7 +34,7 @@
     "deploy:staging": "npm run build && npm run upload:app-staging && npm run deploy:sync-dev",
     "deploy:sync-prod": "aws s3 sync ./build ${PROD_STATIC_S3_BASE}/google-docs && aws cloudfront create-invalidation --distribution-id $GOOGLE_DOCS_PROD_CLOUDFRONT_DIST_ID --paths \"/*\" > /dev/null 2>&1",
     "upload": "contentful-app-scripts upload --bundle-dir ./build --organization-id 5EJGHo8tYJcjnEhYWDxivp --definition-id 3EaGZUMKRKVZUyrcoNJ4o4 --token $CONTENTFUL_ACCESS_TOKEN",
-    "deploy": "npm run build && npm run upload && npm run deploy:sync-prod"
+    "deploy:prod": "npm run build && npm run upload && npm run deploy:sync-prod"
   },
   "eslintConfig": {
     "extends": "react-app"
