@@ -9,14 +9,13 @@ export interface UseScheduledActionsResult {
   total: number;
   isFetchingScheduledActions: boolean;
   fetchingScheduledActionsError: Error | null;
-  refetch: () => void;
   fetchedAt: Date | undefined;
 }
 
 export function useScheduledActions(): UseScheduledActionsResult {
   const sdk = useSDK<PageAppSDK>();
 
-  const { data, isFetching, error, refetch } = useQuery<FetchScheduledActionsResult, Error>({
+  const { data, isFetching, error } = useQuery<FetchScheduledActionsResult, Error>({
     queryKey: ['scheduledActions', sdk.ids.space, sdk.ids.environment],
     queryFn: () => fetchScheduledActions(sdk),
   });
@@ -26,7 +25,6 @@ export function useScheduledActions(): UseScheduledActionsResult {
     total: data?.total || 0,
     isFetchingScheduledActions: isFetching,
     fetchingScheduledActionsError: error,
-    refetch,
     fetchedAt: data?.fetchedAt,
   };
 }

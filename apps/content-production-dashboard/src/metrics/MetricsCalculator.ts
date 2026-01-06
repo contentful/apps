@@ -47,7 +47,10 @@ export class MetricsCalculator {
     ];
   }
 
-  private percentChange(current: number, previous: number): { text: string; isNegative: boolean } {
+  private calculatePublishingChangeText(
+    current: number,
+    previous: number
+  ): { text: string; isNegative: boolean } {
     if (previous === 0) {
       if (current === 0) return { text: '0.0% publishing change MoM', isNegative: false };
       return { text: 'New publishing this month', isNegative: false };
@@ -78,7 +81,7 @@ export class MetricsCalculator {
       }
     }
 
-    const { text, isNegative } = this.percentChange(current, previous);
+    const { text, isNegative } = this.calculatePublishingChangeText(current, previous);
 
     return {
       title: 'Total Published',
