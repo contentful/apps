@@ -13,7 +13,7 @@ import { generateObject } from 'ai';
 import { ContentTypeProps } from 'contentful-management';
 import { FinalEntriesResultSchema, FinalEntriesResult } from './schema';
 import { fetchGoogleDocAsJson } from '../../service/googleDriveService';
-import { validateGoogleDocJson } from '../../security/contentSecurity';
+import { validateGoogleDocJson } from '../../security/googleDocsValidator';
 
 /**
  * Configuration for the document parser
@@ -57,15 +57,8 @@ export async function createPreviewWithAgent(
     const errorMessage = `Security validation failed for document: ${documentSecurityCheck.errors.join(
       '; '
     )}`;
-    console.error('Document security validation failed:', {
-      errors: documentSecurityCheck.errors,
-      warnings: documentSecurityCheck.warnings,
-    });
+    console.error('Document security validation failed:', documentSecurityCheck.errors);
     throw new Error(errorMessage);
-  }
-
-  if (documentSecurityCheck.warnings.length > 0) {
-    console.warn('Document security warnings:', documentSecurityCheck.warnings);
   }
 
   const prompt = buildExtractionPrompt({ contentTypes, documentJson, locale });
