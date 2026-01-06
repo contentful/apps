@@ -1,5 +1,6 @@
 import { PageAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
 import { FinalEntriesResult } from '../../functions/agents/documentParserAgent/schema';
+import { AppActionCallResponse } from 'contentful-management/dist/typings/entities/app-action-call';
 
 /** Contentful app action responses wrap the result in sys.result */
 interface AppActionResponse<T> {
@@ -87,7 +88,7 @@ export async function callAppActionWithResponse(
   sdk: PageAppSDK | ConfigAppSDK,
   actionName: string,
   parameters: Record<string, unknown>
-): Promise<{ response: { body: string } }> {
+): Promise<AppActionCallResponse> {
   try {
     const appDefinitionId = sdk.ids.app;
 
