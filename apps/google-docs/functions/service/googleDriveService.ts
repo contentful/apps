@@ -1,12 +1,23 @@
-export async function fetchGoogleDoc(googleDocUrl: string): Promise<string> {
-  // Extract /d/{id}
-  const m = googleDocUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
-  if (!m) throw new Error('Invalid Google Doc URL format');
-  const documentId = m[1];
+type FetchGoogleDocAsJsonParams = {
+  documentId: string;
+  oauthToken: string;
+};
 
-  const exportUrl = `https://docs.google.com/document/d/${documentId}/export?format=html`;
-
-  const res = await fetch(exportUrl);
-  const html = await res.text();
-  return html;
+export async function fetchGoogleDocAsJson({
+  documentId,
+  oauthToken,
+}: FetchGoogleDocAsJsonParams): Promise<unknown> {
+  const res = await fetch(
+    `https://docs.googleapis.com/v1/documents/${documentId}?includeTabsContent=true`,
+    {
+      headers: {
+        Authorization: `Bearer ${oauthToken}`,
+      },
+    }
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to fetch document JSON: ${res.status} ${res.statusText}`);
+  }
+  const json = await res.json();
+  return json;
 }

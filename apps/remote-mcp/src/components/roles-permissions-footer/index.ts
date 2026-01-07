@@ -1,0 +1,1 @@
+export { RolesPermissionsFooter } from './RolesPermissionsFooter';
