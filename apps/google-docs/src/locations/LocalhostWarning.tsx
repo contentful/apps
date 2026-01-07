@@ -1,6 +1,10 @@
+import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Paragraph, TextLink, Note, Flex } from '@contentful/f36-components';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 const LocalhostWarning = () => {
+  const sdk = useSDK<ConfigAppSDK>();
+
   return (
     <Flex marginTop="spacingXl" justifyContent="center">
       <Note title="App running outside of Contentful" style={{ maxWidth: '800px' }}>
@@ -20,7 +24,9 @@ const LocalhostWarning = () => {
             our guide
           </TextLink>{' '}
           to get started or{' '}
-          <TextLink href="https://app.contentful.com/deeplink?link=apps">open Contentful</TextLink>{' '}
+          <TextLink href={`https://${sdk.hostnames.webapp}/deeplink?link=apps`}>
+            open Contentful
+          </TextLink>{' '}
           to manage your app.
         </Paragraph>
       </Note>

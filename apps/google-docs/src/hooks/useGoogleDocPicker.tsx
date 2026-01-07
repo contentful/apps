@@ -1,5 +1,7 @@
 import { useCallback, useState } from 'react';
 import { loadGapi, loadPickerApi } from '../utils/googleapis';
+import { PageAppSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 type PickerCallbackData = {
   id: string;
@@ -33,6 +35,7 @@ export function useGoogleDocsPicker(
   options: UseGoogleDocsPickerOptions = {}
 ) {
   const [isOpening, setIsOpening] = useState(false);
+  const sdk = useSDK<PageAppSDK>();
   const openPicker = useCallback(async () => {
     if (!accessToken) {
       console.warn('No Google access token available');
@@ -49,12 +52,11 @@ export function useGoogleDocsPicker(
       // Create the document view - only show Google Docs
       const docsView = new google.picker.DocsView(google.picker.ViewId.DOCS);
       docsView.setMimeTypes('application/vnd.google-apps.document');
-
       const pickerBuilder = new google.picker.PickerBuilder()
         .setOAuthToken(accessToken)
         .setDeveloperKey(GOOGLE_PICKER_API_KEY)
         .addView(docsView)
-        .setOrigin('https://app.contentful.com');
+        .setOrigin(`https://${sdk.hostnames.webapp}` || 'https://app.contentful.com');
 
       const picker = pickerBuilder.setCallback((data: any) => {
         if (data.action === google.picker.Action.PICKED) {
