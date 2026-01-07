@@ -5,7 +5,7 @@ import { CheckCircleIcon } from '@contentful/f36-icons';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import googleDriveLogo from '../../../../assets/google-drive.png';
-import { callAppAction, callAppActionWithResponse } from '../../../../utils/appAction';
+import { callAppActionWithResult } from '../../../../utils/appAction';
 
 type OAuthConnectorProps = {
   onOAuthConnectedChange: (oauthConnectionStatus: boolean) => void;
@@ -21,6 +21,11 @@ enum OAuthLoadingState {
   CONNECTING = 'connecting',
   DISCONNECTING = 'disconnecting',
 }
+
+type CheckStatusResponse = {
+  token: string;
+  connected: boolean;
+};
 
 export const OAuthConnector = ({
   onOAuthConnectedChange,
@@ -52,14 +57,16 @@ export const OAuthConnector = ({
           `Checking Google OAuth connection status (attempt ${attempt}/${maxRetries})...`
         );
 
-        const response = await callAppActionWithResponse(sdk, 'checkGdocOauthTokenStatus', {});
-        const statusResponse = JSON.parse(response.response.body);
-        console.log(`Google OAuth status response (attempt ${attempt}):`, statusResponse);
+        const { connected, token } = await callAppActionWithResult<CheckStatusResponse>(
+          sdk,
+          'checkGdocOauthTokenStatus',
+          {}
+        );
 
         // Assuming the response contains a connected field
-        const isConnected = statusResponse.connected === true;
+        const isConnected = connected === true;
         console.log(`Google OAuth connection status (attempt ${attempt}):`, isConnected);
-        onOauthTokenChange(statusResponse.token);
+        onOauthTokenChange(token);
 
         // If we have an expected status and it matches, or if we don't have an expected status, accept the result
         if (expectedStatus === undefined || isConnected === expectedStatus) {
@@ -106,10 +113,11 @@ export const OAuthConnector = ({
 
   const messageHandler = async (event: MessageEvent) => {
     if (event.data.type === 'oauth:complete') {
-      await callAppAction(sdk, 'completeGdocOauth', {
+      await callAppActionWithResult<void>(sdk, 'completeGdocOauth', {
         code: event.data.code,
         state: event.data.state,
       });
+
       // Check the updated status after OAuth completion - expect it to be connected
       await checkGoogleOAuthStatus(true);
       cleanup();
@@ -139,8 +147,11 @@ export const OAuthConnector = ({
     window.addEventListener('message', messageHandler);
 
     try {
-      const response = await callAppActionWithResponse(sdk, 'initiateGdocOauth', {});
-      const { authorizeUrl } = JSON.parse(response.response.body);
+      const { authorizeUrl } = await callAppActionWithResult<{ authorizeUrl: string }>(
+        sdk,
+        'initiateGdocOauth',
+        {}
+      );
 
       popupWindowRef.current = window.open(
         `${authorizeUrl}&access_type=offline&prompt=consent`,
@@ -157,7 +168,7 @@ export const OAuthConnector = ({
   const handleDisconnect = async () => {
     setLoadingState(OAuthLoadingState.DISCONNECTING);
     try {
-      await callAppAction(sdk, 'revokeGdocOauthToken', {});
+      await callAppActionWithResult<void>(sdk, 'revokeGdocOauthToken', {});
 
       // Check the updated status after disconnection - expect it to be disconnected
       await checkGoogleOAuthStatus(false);
