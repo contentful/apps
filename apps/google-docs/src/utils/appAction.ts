@@ -88,7 +88,7 @@ export async function callAppActionWithResponse(
   sdk: PageAppSDK | ConfigAppSDK,
   actionName: string,
   parameters: Record<string, unknown>
-): Promise<AppActionCallResponse> {
+): Promise<any> {
   try {
     const appDefinitionId = sdk.ids.app;
 
@@ -101,7 +101,7 @@ export async function callAppActionWithResponse(
       throw new Error(`App action "${actionName}" not found`);
     }
 
-    const result = await sdk.cma.appActionCall.createWithResponse(
+    const response = (await sdk.cma.appActionCall.createWithResult(
       {
         appDefinitionId,
         appActionId,
@@ -109,9 +109,8 @@ export async function callAppActionWithResponse(
       {
         parameters,
       }
-    );
-
-    return result;
+    )) as any;
+    return response.sys.result as any;
   } catch (error) {
     console.error(`Error calling app action "${actionName}"`, error);
     throw new Error(

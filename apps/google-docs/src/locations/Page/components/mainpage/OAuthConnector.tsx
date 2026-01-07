@@ -5,7 +5,10 @@ import { CheckCircleIcon } from '@contentful/f36-icons';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import googleDriveLogo from '../../../../assets/google-drive.png';
-import { callAppAction, callAppActionWithResponse } from '../../../../utils/appAction';
+import {
+  callAppAction,
+  callAppActionWithResponse as callAppActionWithResult,
+} from '../../../../utils/appAction';
 
 type OAuthConnectorProps = {
   onOAuthConnectedChange: (oauthConnectionStatus: boolean) => void;
@@ -52,8 +55,7 @@ export const OAuthConnector = ({
           `Checking Google OAuth connection status (attempt ${attempt}/${maxRetries})...`
         );
 
-        const response = await callAppActionWithResponse(sdk, 'checkGdocOauthTokenStatus', {});
-        const statusResponse = JSON.parse(response.response.body);
+        const statusResponse = await callAppActionWithResult(sdk, 'checkGdocOauthTokenStatus', {});
         console.log(`Google OAuth status response (attempt ${attempt}):`, statusResponse);
 
         // Assuming the response contains a connected field
@@ -139,8 +141,7 @@ export const OAuthConnector = ({
     window.addEventListener('message', messageHandler);
 
     try {
-      const response = await callAppActionWithResponse(sdk, 'initiateGdocOauth', {});
-      const { authorizeUrl } = JSON.parse(response.response.body);
+      const { authorizeUrl } = await callAppActionWithResult(sdk, 'initiateGdocOauth', {});
 
       popupWindowRef.current = window.open(
         `${authorizeUrl}&access_type=offline&prompt=consent`,
