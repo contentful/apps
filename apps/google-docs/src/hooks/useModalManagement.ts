@@ -5,6 +5,7 @@ interface ModalStates {
   isContentTypePickerOpen: boolean;
   isConfirmCancelModalOpen: boolean;
   isPreviewModalOpen: boolean;
+  isErrorPreviewModalOpen: boolean;
   isReviewModalOpen: boolean;
   isErrorEntriesModalOpen: boolean;
 }
@@ -14,6 +15,7 @@ interface ModalSetters {
   setIsContentTypePickerOpen: (value: boolean) => void;
   setIsConfirmCancelModalOpen: (value: boolean) => void;
   setIsPreviewModalOpen: (value: boolean) => void;
+  setIsErrorPreviewModalOpen: (value: boolean) => void;
   setIsReviewModalOpen: (value: boolean) => void;
   setIsErrorEntriesModalOpen: (value: boolean) => void;
 }
@@ -23,6 +25,7 @@ export enum ModalType {
   CONTENT_TYPE_PICKER = 'contentTypePicker',
   CONFIRM_CANCEL = 'confirmCancel',
   PREVIEW = 'preview',
+  ERROR_PREVIEW = 'errorPreview',
   REVIEW = 'review',
   ERROR_ENTRIES = 'errorEntries',
 }
@@ -32,6 +35,7 @@ export const useModalManagement = () => {
   const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState<boolean>(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState<boolean>(false);
+  const [isErrorPreviewModalOpen, setIsErrorPreviewModalOpen] = useState<boolean>(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState<boolean>(false);
   const [isErrorEntriesModalOpen, setIsErrorEntriesModalOpen] = useState<boolean>(false);
 
@@ -48,6 +52,9 @@ export const useModalManagement = () => {
         break;
       case ModalType.PREVIEW:
         setIsPreviewModalOpen(true);
+        break;
+      case ModalType.ERROR_PREVIEW:
+        setIsErrorPreviewModalOpen(true);
         break;
       case ModalType.REVIEW:
         setIsReviewModalOpen(true);
@@ -72,6 +79,9 @@ export const useModalManagement = () => {
       case ModalType.PREVIEW:
         setIsPreviewModalOpen(false);
         break;
+      case ModalType.ERROR_PREVIEW:
+        setIsErrorPreviewModalOpen(false);
+        break;
       case ModalType.REVIEW:
         setIsReviewModalOpen(false);
         break;
@@ -87,6 +97,7 @@ export const useModalManagement = () => {
       isContentTypePickerOpen,
       isConfirmCancelModalOpen,
       isPreviewModalOpen,
+      isErrorPreviewModalOpen,
       isReviewModalOpen,
       isErrorEntriesModalOpen,
     } as ModalStates,
@@ -95,6 +106,7 @@ export const useModalManagement = () => {
       setIsContentTypePickerOpen,
       setIsConfirmCancelModalOpen,
       setIsPreviewModalOpen,
+      setIsErrorPreviewModalOpen,
       setIsReviewModalOpen,
       setIsErrorEntriesModalOpen,
     } as ModalSetters,
