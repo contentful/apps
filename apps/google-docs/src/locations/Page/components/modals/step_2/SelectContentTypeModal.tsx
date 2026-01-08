@@ -80,11 +80,11 @@ export const ContentTypePickerModal = ({
   }, [sdk]);
 
   useEffect(() => {
-    // Reset attempt flag when modal opens (but preserve selectedContentTypes from parent)
     if (isOpen) {
       setHasAttemptedSubmit(false);
+      setSelectedContentTypes([]);
     }
-  }, [isOpen]);
+  }, [isOpen, setSelectedContentTypes]);
 
   useEffect(() => {
     // Recalculate the Multiselect dropdown position when selection changes
