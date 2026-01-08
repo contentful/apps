@@ -19,6 +19,7 @@ interface RescheduleModalProps {
   release: ReleaseWithScheduledAction | null;
   sdk: HomeAppSDK | PageAppSDK;
   onSuccess: () => void;
+  testId: string;
 }
 
 const formatDateForInput = (dateString: string): string => {
@@ -67,7 +68,7 @@ const generateTimeOptions = (): string[] => {
   return options;
 };
 
-export const RescheduleModal = ({ isShown, onClose, release, sdk, onSuccess }: RescheduleModalProps) => {
+export const RescheduleModal = ({ isShown, onClose, release, sdk, onSuccess, testId }: RescheduleModalProps) => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState('');
   const [timezone, setTimezone] = useState('UTC');
@@ -156,7 +157,7 @@ export const RescheduleModal = ({ isShown, onClose, release, sdk, onSuccess }: R
   if (!release) return null;
 
   return (
-    <Modal isShown={isShown} onClose={onClose} size="medium">
+    <Modal isShown={isShown} onClose={onClose} size="medium" testId={testId}>
       {() => (
         <>
           <Modal.Header title="Edit Schedule" onClose={onClose} />

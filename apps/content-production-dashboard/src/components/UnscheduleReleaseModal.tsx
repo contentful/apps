@@ -9,6 +9,7 @@ interface CancelReleaseModalProps {
   release: ReleaseWithScheduledAction | null;
   sdk: HomeAppSDK | PageAppSDK;
   onSuccess: () => void;
+  testId: string;
 }
 
 export const UnscheduleReleaseModal = ({
@@ -17,6 +18,7 @@ export const UnscheduleReleaseModal = ({
   release,
   sdk,
   onSuccess,
+  testId,
 }: CancelReleaseModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,7 +45,7 @@ export const UnscheduleReleaseModal = ({
   if (!release) return null;
 
   return (
-    <Modal isShown={isShown} onClose={onClose} size="medium">
+    <Modal isShown={isShown} onClose={onClose} size="medium" testId={testId}>
       {() => (
         <>
           <Modal.Header title="Cancel Release" onClose={onClose} />
