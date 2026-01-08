@@ -14,7 +14,6 @@ import { ContentTypeProps } from 'contentful-management';
 import { FinalEntriesResultSchema, FinalEntriesResult } from './schema';
 import { fetchGoogleDocAsJson } from '../../service/googleDriveService';
 import { validateGoogleDocJson } from '../../security/googleDocsValidator';
-import { text } from 'stream/consumers';
 
 /**
  * Configuration for the document parser
