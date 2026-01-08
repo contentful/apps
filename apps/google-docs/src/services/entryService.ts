@@ -300,7 +300,7 @@ async function createAssetFromUrlFast(
   return asset;
 }
 
-function transformFieldsForContentType(
+async function transformFieldsForContentType(
   fields: Record<string, Record<string, unknown>>,
   contentType: ContentTypeProps | undefined,
   urlToAssetId?: Record<string, string>
@@ -322,7 +322,7 @@ function transformFieldsForContentType(
       if (def.type === 'RichText') {
         if (typeof value === 'string') {
           const parser = new MarkdownParser(urlToAssetId);
-          const contentNodes = parser.parse(value);
+          const contentNodes = await parser.parseDocument(value);
           perLocale[locale] = {
             nodeType: 'document',
             data: {},
@@ -769,13 +769,11 @@ export async function createEntriesFromPreview(
   for (const entry of entries) {
     try {
       const contentType = contentTypes.find((ct) => ct.sys.id === entry.contentTypeId);
-
       // Separate reference fields from non-reference fields
       const { nonRefFields } = separateReferenceFields(entry.fields);
-
       // Transform fields for content type (handles RichText conversion)
       // Assets are already created and mapped in urlToAssetId
-      const transformedFields = transformFieldsForContentType(
+      const transformedFields = await transformFieldsForContentType(
         nonRefFields,
         contentType,
         Object.keys(urlToAssetId).length > 0 ? urlToAssetId : undefined
@@ -822,7 +820,7 @@ export async function createEntriesFromPreview(
       const resolvedRefFields = resolveReferences(refFields, tempIdToEntryId);
 
       // Transform fields for content type
-      const transformedRefFields = transformFieldsForContentType(
+      const transformedRefFields = await transformFieldsForContentType(
         resolvedRefFields,
         contentType,
         undefined // No assets in reference fields

@@ -10,6 +10,7 @@
     "@contentful/field-editor-json": "^3.3.38",
     "@contentful/node-apps-toolkit": "^3.13.0",
     "@contentful/react-apps-toolkit": "^1.2.16",
+    "@contentful/rich-text-from-markdown": "^16.1.8",
     "@emotion/css": "^11.13.4",
     "ai": "^5.0.81",
     "contentful-management": "^11.61.0",
