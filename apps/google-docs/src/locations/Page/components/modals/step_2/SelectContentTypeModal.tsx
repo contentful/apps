@@ -80,7 +80,6 @@ export const ContentTypePickerModal = ({
   }, [sdk]);
 
   useEffect(() => {
-    // Reset attempt flag and selected content types when modal opens
     if (isOpen) {
       setHasAttemptedSubmit(false);
       setSelectedContentTypes([]);
