@@ -112,12 +112,13 @@ jobs:
       - run:
           name: Deploy apps to staging
           command: |
-            STATIC_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1" \
-                STATIC_JIRA_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1/jira" \
-                STATIC_KLAVIYO_S3_BASE="s3://cf-apps-klaviyo/apps" \
-                REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
-                REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
-                STAGE='test' npm run deploy:test
+            STATIC_S3_BASE="s3://cf-apps-static-dev/apps" \
+            STATIC_TEST_S3_BASE="s3://cf-apps-static-dev/apps/apps-test-$CIRCLE_SHA1" \
+            STATIC_KLAVIYO_S3_BASE="s3://cf-apps-klaviyo/apps" \
+            REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
+            REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
+            GOOGLE_DOCS_TEST_CLOUDFRONT_DIST_ID=$GOOGLE_DOCS_TEST_CLOUDFRONT_DIST_ID \
+            STAGE='test' npm run deploy:test
       - run:
           name: Invalidate Slack staging cloudfront distribution
           command: aws cloudfront create-invalidation --distribution-id $SLACK_TEST_CLOUDFRONT_DIST_ID --paths "/*"
@@ -154,11 +155,12 @@ jobs:
           name: Deploy apps to prod
           command: |
             STATIC_S3_BASE="s3://cf-apps-static/apps" \
-                STATIC_JIRA_S3_BASE="s3://cf-apps-jira" \
-                STATIC_KLAVIYO_S3_BASE="s3://cf-apps-klaviyo/apps" \
-                REACT_APP_BACKEND_BASE_URL=$APP_SLACK_BACKEND_BASE_URL_PROD \
-                REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_PROD \
-                STAGE='prd' npm run deploy
+            STATIC_JIRA_S3_BASE="s3://cf-apps-jira" \
+            STATIC_KLAVIYO_S3_BASE="s3://cf-apps-klaviyo/apps" \
+            REACT_APP_BACKEND_BASE_URL=$APP_SLACK_BACKEND_BASE_URL_PROD \
+            REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_PROD \
+            GOOGLE_DOCS_PROD_CLOUDFRONT_DIST_ID=$GOOGLE_DOCS_PROD_CLOUDFRONT_DIST_ID \
+            STAGE='prd' npm run deploy
       - run:
           name: Post Deploy
           command: npm run post-deploy

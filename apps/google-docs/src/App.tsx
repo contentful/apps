@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { locations } from '@contentful/app-sdk';
-import ConfigScreen from './locations/ConfigScreen';
-import Page from './locations/Page';
-import Sidebar from './locations/Sidebar';
+import Page from './locations/Page/Page';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import ConfigScreen from './locations/ConfigScreen/ConfigScreen';
+import Sidebar from './locations/Sidebar/Sidebar';
 
 const ComponentLocationSettings = {
   [locations.LOCATION_APP_CONFIG]: ConfigScreen,

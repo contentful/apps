@@ -24,8 +24,8 @@
     "eject": "vite eject",
     "lint": "eslint --ext .ts,.tsx,.js,.jsx,.svg ./",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
-    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/slack --acl public-read",
-    "deploy:test": "aws s3 sync ./build ${STATIC_S3_BASE}/slack-test --acl public-read"
+    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/slack",
+    "deploy:test": "aws s3 sync ./build ${STATIC_TEST_S3_BASE}/slack-test"
   },
   "browserslist": {
     "production": [
