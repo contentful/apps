@@ -9,5 +9,6 @@ export const styles = {
   container: {
     padding: tokens.spacingL,
     backgroundColor: tokens.colorWhite,
-  } as CSSProperties,
+  }
 };
+
