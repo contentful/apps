@@ -2,6 +2,8 @@ import { type FC } from 'react';
 import { Stack, Text, Checkbox, Table, Flex, Box } from '@contentful/f36-components';
 import type { ContentLifecyclePermissions } from '../types/config';
 import type { ContentLifecycleEntityKey, EntityActionKey } from '../types/config';
+import { ENTITY_AVAILABLE_ACTIONS, STANDARD_ACTIONS, ALL_ENTITIES } from '../types/config';
+import { isActionAvailable } from '../../utils/permissions';
 
 interface ContentLifecyclePermissionsTableProps {
   permissions: ContentLifecyclePermissions;
@@ -11,7 +13,9 @@ interface ContentLifecyclePermissionsTableProps {
   onRowToggle: (entity: ContentLifecycleEntityKey) => void;
 }
 
-export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTableProps> = ({
+export const ContentLifecyclePermissionsTable: FC<
+  ContentLifecyclePermissionsTableProps
+> = ({
   permissions,
   onSelectAllToggle,
   onEntityActionToggle,
@@ -20,8 +24,8 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
 }) => (
   <Stack flexDirection="column" spacing="spacing2Xs" alignItems="flex-start">
     <Text>
-      Allow the MCP server to read, edit, create, delete, publish, un-publish, archive, unarchive,
-      or invoke entities within Contentful.
+      Allow the MCP server to read, edit, create, delete, publish, un-publish,
+      archive, unarchive, or invoke entities within Contentful.
     </Text>
     <Box marginTop="spacingS">
       <Checkbox isChecked={permissions.selectAll} onChange={onSelectAllToggle}>
@@ -34,75 +38,45 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
         <Table.Head>
           <Table.Row>
             <Table.Cell></Table.Cell>
-            {[
-              'read',
-              'edit',
-              'create',
-              'delete',
-              'publish',
-              'unpublish',
-              'archive',
-              'unarchive',
-            ].map((action) => (
-              <Table.Cell key={action} style={{ textAlign: 'center', verticalAlign: 'bottom' }}>
-                <Flex flexDirection="column" alignItems="center" gap="spacingXs">
-                  <Text fontWeight="fontWeightMedium" fontSize="fontSizeS">
-                    {action.charAt(0).toUpperCase() +
-                      action
-                        .slice(1)
-                        .replace('unpublish', 'Un-publish')
-                        .replace('unarchive', 'Un-archive')}
-                  </Text>
-                  <Checkbox
-                    isChecked={
-                      permissions.entries[action as keyof typeof permissions.entries] &&
-                      permissions.assets[action as keyof typeof permissions.assets] &&
-                      permissions.contentTypes[action as keyof typeof permissions.contentTypes] &&
-                      permissions.aiActions[action as keyof typeof permissions.aiActions] &&
-                      permissions.editorInterfaces[
-                        action as keyof typeof permissions.editorInterfaces
-                      ] &&
-                      permissions.environments[action as keyof typeof permissions.environments] &&
-                      permissions.locales[action as keyof typeof permissions.locales] &&
-                      permissions.orgs[action as keyof typeof permissions.orgs] &&
-                      permissions.spaces[action as keyof typeof permissions.spaces] &&
-                      permissions.tags[action as keyof typeof permissions.tags] &&
-                      permissions.concepts[action as keyof typeof permissions.concepts] &&
-                      permissions.conceptSchemes[action as keyof typeof permissions.conceptSchemes]
-                    }
-                    onChange={() => onColumnToggle(action as EntityActionKey)}
-                  />
-                </Flex>
-              </Table.Cell>
-            ))}
-            <Table.Cell style={{ textAlign: 'center', verticalAlign: 'bottom' }}>
-              <Flex flexDirection="column" alignItems="center" gap="spacingXs">
-                <Text fontWeight="fontWeightMedium" fontSize="fontSizeS">
-                  Invoke
-                </Text>
-                <Box style={{ height: '16px' }} />
-              </Flex>
-            </Table.Cell>
+            {STANDARD_ACTIONS.map((action) => {
+              // Get all entities that support this action
+              const entitiesWithAction = ALL_ENTITIES.filter((entity) =>
+                isActionAvailable(entity, action),
+              );
+              // Column is checked if all entities that support this action have it enabled
+              const isColumnChecked = entitiesWithAction.every(
+                (entity) =>
+                  permissions[entity][
+                    action as keyof typeof permissions.entries
+                  ],
+              );
+
+              return (
+                <Table.Cell
+                  key={action}
+                  style={{ textAlign: 'center', verticalAlign: 'bottom' }}
+                >
+                  <Flex
+                    flexDirection="column"
+                    alignItems="center"
+                    gap="spacingXs"
+                  >
+                    <Text fontWeight="fontWeightMedium" fontSize="fontSizeS">
+                      {action.charAt(0).toUpperCase() + action.slice(1)}
+                    </Text>
+                    <Checkbox
+                      isChecked={isColumnChecked}
+                      onChange={() => onColumnToggle(action as EntityActionKey)}
+                    />
+                  </Flex>
+                </Table.Cell>
+              );
+            })}
           </Table.Row>
         </Table.Head>
         <Table.Body>
-          {(
-            [
-              'entries',
-              'assets',
-              'contentTypes',
-              'aiActions',
-              'editorInterfaces',
-              'environments',
-              'locales',
-              'orgs',
-              'spaces',
-              'tags',
-              'concepts',
-              'conceptSchemes',
-            ] as const
-          ).map((entity) => {
-            const displayNames: Record<string, string> = {
+          {ALL_ENTITIES.map((entity) => {
+            const displayNames: Record<ContentLifecycleEntityKey, string> = {
               entries: 'Entries',
               assets: 'Assets',
               contentTypes: 'Content types',
@@ -117,44 +91,47 @@ export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTab
               conceptSchemes: 'Concept schemes',
             };
 
+            // Get available actions for this entity
+            const availableActions = ENTITY_AVAILABLE_ACTIONS[entity];
+            // Row is checked if all available actions for this entity are enabled
+            const isRowChecked = availableActions.every(
+              (action) =>
+                permissions[entity][action as keyof typeof permissions.entries],
+            );
+
             return (
               <Table.Row key={entity}>
                 <Table.Cell>
                   <Checkbox
-                    isChecked={Object.values(permissions[entity]).every((v) => v)}
-                    onChange={() => onRowToggle(entity)}>
+                    isChecked={isRowChecked}
+                    onChange={() => onRowToggle(entity)}
+                  >
                     {displayNames[entity]}
                   </Checkbox>
                 </Table.Cell>
-                {[
-                  'read',
-                  'edit',
-                  'create',
-                  'delete',
-                  'publish',
-                  'unpublish',
-                  'archive',
-                  'unarchive',
-                ].map((action) => (
-                  <Table.Cell key={action}>
-                    <Flex justifyContent="center">
-                      <Checkbox
-                        isChecked={permissions[entity][action as keyof typeof permissions.entries]}
-                        onChange={() => onEntityActionToggle(entity, action as EntityActionKey)}
-                      />
-                    </Flex>
-                  </Table.Cell>
-                ))}
-                <Table.Cell>
-                  {entity === 'aiActions' && (
-                    <Flex justifyContent="center">
-                      <Checkbox
-                        isChecked={permissions.aiActions.invoke}
-                        onChange={() => onEntityActionToggle('aiActions', 'invoke')}
-                      />
-                    </Flex>
-                  )}
-                </Table.Cell>
+                {STANDARD_ACTIONS.map((action) => {
+                  const isAvailable = isActionAvailable(entity, action);
+                  return (
+                    <Table.Cell key={action}>
+                      <Flex justifyContent="center">
+                        <Checkbox
+                          isDisabled={!isAvailable}
+                          isChecked={
+                            permissions[entity][
+                              action as keyof typeof permissions.entries
+                            ]
+                          }
+                          onChange={() =>
+                            onEntityActionToggle(
+                              entity,
+                              action as EntityActionKey,
+                            )
+                          }
+                        />
+                      </Flex>
+                    </Table.Cell>
+                  );
+                })}
               </Table.Row>
             );
           })}
