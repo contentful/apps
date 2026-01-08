@@ -1,4 +1,9 @@
-import type { EntityPermissions } from '../components/types/config';
+import type {
+  EntityPermissions,
+  ContentLifecycleEntityKey,
+  EntityActionKey,
+} from '../components/types/config';
+import { ENTITY_AVAILABLE_ACTIONS } from '../components/types/config';
 
 /**
  * Creates an empty entity permissions object with all permissions set to false
@@ -16,23 +21,40 @@ export const createEmptyEntityPermissions = (): EntityPermissions => ({
 });
 
 /**
- * Creates an entity permissions object with all permissions set to the given value
+ * Creates an entity permissions object with only available actions set to the given value,
+ * while keeping unavailable actions as false.
  */
-export const createAllPermissions = (value: boolean): EntityPermissions => ({
-  read: value,
-  edit: value,
-  create: value,
-  delete: value,
-  publish: value,
-  unpublish: value,
-  archive: value,
-  unarchive: value,
-  invoke: value,
-});
+export const createEntityPermissions = (
+  entity: ContentLifecycleEntityKey,
+  value: boolean
+): EntityPermissions => {
+  const availableActions = ENTITY_AVAILABLE_ACTIONS[entity];
+  const permissions = createEmptyEntityPermissions();
+
+  for (const action of availableActions) {
+    permissions[action] = value;
+  }
+
+  return permissions;
+};
 
 /**
- * Checks if all permissions in an entity permissions object are checked
+ * Checks if an action is available for a given entity
  */
-export const areAllPermissionsChecked = (permissions: EntityPermissions): boolean => {
-  return Object.values(permissions).every((v) => v);
+export const isActionAvailable = (
+  entity: ContentLifecycleEntityKey,
+  action: EntityActionKey
+): boolean => {
+  return ENTITY_AVAILABLE_ACTIONS[entity].includes(action);
+};
+
+/**
+ * Checks if all available permissions for an entity are checked
+ */
+export const areAllAvailablePermissionsChecked = (
+  entity: ContentLifecycleEntityKey,
+  permissions: EntityPermissions
+): boolean => {
+  const availableActions = ENTITY_AVAILABLE_ACTIONS[entity];
+  return availableActions.every((action) => permissions[action]);
 };
