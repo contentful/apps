@@ -5,12 +5,26 @@ import { CheckCircleIcon } from '@contentful/f36-icons';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import googleDriveLogo from '../../../../assets/google-drive.png';
+import { callAppActionWithResult } from '../../../../utils/appAction';
 
 type OAuthConnectorProps = {
   onOAuthConnectedChange: (oauthConnectionStatus: boolean) => void;
   isOAuthConnected: boolean;
   onOauthTokenChange: (token: string) => void;
   oauthToken: string;
+  onLoadingStateChange?: (isLoading: boolean) => void;
+};
+
+enum OAuthLoadingState {
+  IDLE = 'idle',
+  CHECKING = 'checking',
+  CONNECTING = 'connecting',
+  DISCONNECTING = 'disconnecting',
+}
+
+type CheckStatusResponse = {
+  token: string;
+  connected: boolean;
 };
 
 export const OAuthConnector = ({
@@ -18,14 +32,17 @@ export const OAuthConnector = ({
   isOAuthConnected,
   oauthToken,
   onOauthTokenChange,
+  onLoadingStateChange,
 }: OAuthConnectorProps) => {
   const sdk = useSDK<ConfigAppSDK>();
-  const [isOAuthLoading, setIsOAuthLoading] = useState(false);
+  const [loadingState, setLoadingState] = useState<OAuthLoadingState>(OAuthLoadingState.CHECKING);
   const [isHoveringConnected, setIsHoveringConnected] = useState(false);
-  const [isCheckingStatus, setIsCheckingStatus] = useState(true);
-  const [isDisconnecting, setIsDisconnecting] = useState(false);
   const popupWindowRef = useRef<Window | null>(null);
   const checkWindowIntervalRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    onLoadingStateChange?.(loadingState === OAuthLoadingState.CHECKING);
+  }, [loadingState, onLoadingStateChange]);
 
   // Check Google OAuth connection status with polling to handle race conditions
   const checkGoogleOAuthStatus = async (
@@ -39,37 +56,17 @@ export const OAuthConnector = ({
         console.log(
           `Checking Google OAuth connection status (attempt ${attempt}/${maxRetries})...`
         );
-        const appActions = await sdk.cma.appAction.getManyForEnvironment({
-          environmentId: sdk.ids.environment,
-          spaceId: sdk.ids.space,
-        });
 
-        const checkStatusAppAction = appActions.items.find(
-          (action) => action.name === 'checkGdocOauthTokenStatus'
+        const { connected, token } = await callAppActionWithResult<CheckStatusResponse>(
+          sdk,
+          'checkGdocOauthTokenStatus',
+          {}
         );
-        if (!checkStatusAppAction) {
-          console.warn('checkGdocOauthTokenStatus app action not found');
-          setIsCheckingStatus(false);
-          return;
-        }
-
-        const response = await sdk.cma.appActionCall.createWithResponse(
-          {
-            appActionId: checkStatusAppAction.sys.id,
-            appDefinitionId: sdk.ids.app,
-          },
-          {
-            parameters: {},
-          }
-        );
-
-        const statusResponse = JSON.parse(response.response.body);
-        console.log(`Google OAuth status response (attempt ${attempt}):`, statusResponse);
 
         // Assuming the response contains a connected field
-        const isConnected = statusResponse.connected === true;
+        const isConnected = connected === true;
         console.log(`Google OAuth connection status (attempt ${attempt}):`, isConnected);
-        onOauthTokenChange(statusResponse.token);
+        onOauthTokenChange(token);
 
         // If we have an expected status and it matches, or if we don't have an expected status, accept the result
         if (expectedStatus === undefined || isConnected === expectedStatus) {
@@ -110,34 +107,21 @@ export const OAuthConnector = ({
       }
     }
 
-    setIsCheckingStatus(false);
+    setLoadingState(OAuthLoadingState.IDLE);
     console.log(`Status check polling completed. Final status: ${isOAuthConnected}`);
   };
 
   const messageHandler = async (event: MessageEvent) => {
     if (event.data.type === 'oauth:complete') {
-      const appDefinitionId = sdk.ids.app;
-      // call app action to complete oauth
-      const appActions = await sdk.cma.appAction.getManyForEnvironment({
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
+      await callAppActionWithResult<void>(sdk, 'completeGdocOauth', {
+        code: event.data.code,
+        state: event.data.state,
       });
-      const completeOauthAppAction = appActions.items.find(
-        (action) => action.name === 'completeGdocOauth'
-      );
-      await sdk.cma.appActionCall.create(
-        { appDefinitionId, appActionId: completeOauthAppAction?.sys.id || '' },
-        {
-          parameters: {
-            code: event.data.code,
-            state: event.data.state,
-          },
-        }
-      );
+
       // Check the updated status after OAuth completion - expect it to be connected
       await checkGoogleOAuthStatus(true);
       cleanup();
-      setIsOAuthLoading(false);
+      setLoadingState(OAuthLoadingState.IDLE);
     }
   };
 
@@ -157,31 +141,17 @@ export const OAuthConnector = ({
   };
 
   const handleOAuth = async () => {
-    setIsOAuthLoading(true);
+    setLoadingState(OAuthLoadingState.CONNECTING);
 
     window.removeEventListener('message', messageHandler);
     window.addEventListener('message', messageHandler);
 
     try {
-      const appActions = await sdk.cma.appAction.getManyForEnvironment({
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      });
-
-      const initiateOauthAppAction = appActions.items.find(
-        (action) => action.name === 'initiateGdocOauth'
+      const { authorizeUrl } = await callAppActionWithResult<{ authorizeUrl: string }>(
+        sdk,
+        'initiateGdocOauth',
+        {}
       );
-
-      const response = await sdk.cma.appActionCall.createWithResponse(
-        {
-          appActionId: initiateOauthAppAction?.sys.id || '',
-          appDefinitionId: sdk.ids.app,
-        },
-        {
-          parameters: {},
-        }
-      );
-      const { authorizeUrl } = JSON.parse(response.response.body);
 
       popupWindowRef.current = window.open(
         `${authorizeUrl}&access_type=offline&prompt=consent`,
@@ -190,28 +160,15 @@ export const OAuthConnector = ({
       );
     } catch (error) {
       cleanup();
-      setIsOAuthLoading(false);
+      setLoadingState(OAuthLoadingState.IDLE);
       sdk.notifier.error('Unable to connect to Google Drive. Please try again.');
     }
   };
 
   const handleDisconnect = async () => {
-    setIsDisconnecting(true);
+    setLoadingState(OAuthLoadingState.DISCONNECTING);
     try {
-      const appActions = await sdk.cma.appAction.getManyForEnvironment({
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      });
-      const disconnectAppAction = appActions.items.find(
-        (action) => action.name === 'revokeGdocOauthToken'
-      );
-      await sdk.cma.appActionCall.create(
-        {
-          appActionId: disconnectAppAction?.sys.id || '',
-          appDefinitionId: sdk.ids.app,
-        },
-        { parameters: {} }
-      );
+      await callAppActionWithResult<void>(sdk, 'revokeGdocOauthToken', {});
 
       // Check the updated status after disconnection - expect it to be disconnected
       await checkGoogleOAuthStatus(false);
@@ -220,24 +177,31 @@ export const OAuthConnector = ({
     } catch (error) {
       sdk.notifier.error('Unable to disconnect from Google Drive. Please try again.');
     } finally {
-      setIsDisconnecting(false);
+      setLoadingState(OAuthLoadingState.IDLE);
     }
   };
 
   const getButtonText = () => {
-    if (isDisconnecting) return 'Disconnecting';
-    if (isCheckingStatus) return 'Checking';
-    if (isOAuthLoading) return 'Connecting';
-    if (isOAuthConnected && isHoveringConnected) return 'Disconnect';
-    if (isOAuthConnected) return 'Connected';
-    return 'Connect';
+    switch (loadingState) {
+      case OAuthLoadingState.DISCONNECTING:
+        return 'Disconnecting';
+      case OAuthLoadingState.CHECKING:
+        return 'Checking';
+      case OAuthLoadingState.CONNECTING:
+        return 'Connecting';
+      case OAuthLoadingState.IDLE:
+        if (isOAuthConnected && isHoveringConnected) return 'Disconnect';
+        if (isOAuthConnected) return 'Connected';
+        return 'Connect';
+    }
   };
 
   const handleButtonClick = () => {
-    if (isCheckingStatus) return; // Don't allow clicks while checking status
+    if (loadingState !== OAuthLoadingState.IDLE) return; // Don't allow clicks while in any loading state
+
     if (isOAuthConnected && isHoveringConnected) {
       handleDisconnect();
-    } else if (!isOAuthConnected && !isOAuthLoading) {
+    } else if (!isOAuthConnected) {
       handleOAuth();
     }
   };
@@ -298,8 +262,8 @@ export const OAuthConnector = ({
           onMouseLeave={() => {
             setIsHoveringConnected(false);
           }}
-          isLoading={isOAuthLoading || isDisconnecting || isCheckingStatus}
-          isDisabled={isOAuthLoading || isDisconnecting || isCheckingStatus}>
+          isLoading={loadingState !== OAuthLoadingState.IDLE}
+          isDisabled={loadingState !== OAuthLoadingState.IDLE}>
           {getButtonText()}
         </Button>
       </Flex>

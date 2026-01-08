@@ -1,10 +1,14 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { createContentTypesAnalysisAction, createPreviewAction } from '../utils/appAction';
+import { callAppActionWithResult } from '../utils/appAction';
 import { ERROR_MESSAGES } from '../utils/constants/messages';
 import { PreviewEntry } from '../locations/Page/components/modals/step_3/PreviewModal';
 import { getEntryTitle } from '../utils/getEntryTitle';
-import { EntryToCreate, AssetToCreate } from '../../functions/agents/documentParserAgent/schema';
+import {
+  EntryToCreate,
+  AssetToCreate,
+  FinalEntriesResult,
+} from '../../functions/agents/documentParserAgent/schema';
 
 interface UseGeneratePreviewResult {
   isSubmitting: boolean;
@@ -68,19 +72,12 @@ export const useGeneratePreview = ({
       setSuccessMessage(null);
 
       try {
-        const analyzeContentTypesResponse = await createContentTypesAnalysisAction(
-          sdk,
-          contentTypeIds,
-          oauthToken
-        );
-        console.log('analyzeContentTypesResponse', analyzeContentTypesResponse);
-
-        const { entries, assets: agentAssets = [] } = await createPreviewAction(
-          sdk,
-          contentTypeIds,
-          documentId,
-          oauthToken
-        );
+        const { entries, assets: agentAssets = [] } =
+          await callAppActionWithResult<FinalEntriesResult>(sdk, 'createPreview', {
+            contentTypeIds,
+            documentId,
+            oauthToken,
+          });
 
         // Build preview entries with title info
         const previewEntriesWithTitles: PreviewEntry[] = await Promise.all(

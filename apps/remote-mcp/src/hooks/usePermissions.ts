@@ -4,8 +4,16 @@ import type {
   OtherFeaturesPermissions,
   MigrationPermissions,
   EntityPermissions,
+  ContentLifecycleEntityKey,
+  EntityActionKey,
 } from '../components/types/config';
-import { createEmptyEntityPermissions, createAllPermissions } from '../utils/permissions';
+import { ALL_ENTITIES } from '../components/types/config';
+import {
+  createEmptyEntityPermissions,
+  createEntityPermissions,
+  areAllAvailablePermissionsChecked,
+  isActionAvailable,
+} from '../utils/permissions';
 
 export const usePermissions = () => {
   const [contentLifecyclePermissions, setContentLifecyclePermissions] =
@@ -14,15 +22,20 @@ export const usePermissions = () => {
       entries: createEmptyEntityPermissions(),
       assets: createEmptyEntityPermissions(),
       contentTypes: createEmptyEntityPermissions(),
+      aiActions: createEmptyEntityPermissions(),
+      editorInterfaces: createEmptyEntityPermissions(),
+      environments: createEmptyEntityPermissions(),
+      locales: createEmptyEntityPermissions(),
+      orgs: createEmptyEntityPermissions(),
+      spaces: createEmptyEntityPermissions(),
+      tags: createEmptyEntityPermissions(),
+      concepts: createEmptyEntityPermissions(),
+      conceptSchemes: createEmptyEntityPermissions(),
     });
 
   const [otherFeaturesPermissions, setOtherFeaturesPermissions] =
     useState<OtherFeaturesPermissions>({
       runAIActions: false,
-      triggerAutomations: false,
-      installApps: false,
-      callAppActions: false,
-      invokeAgents: false,
     });
 
   const [migrationPermissions, setMigrationPermissions] = useState<MigrationPermissions>({
@@ -32,19 +45,24 @@ export const usePermissions = () => {
 
   const handleSelectAllToggle = () => {
     const newValue = !contentLifecyclePermissions.selectAll;
-    const allPermissions = createAllPermissions(newValue);
     setContentLifecyclePermissions({
       selectAll: newValue,
-      entries: allPermissions,
-      assets: allPermissions,
-      contentTypes: allPermissions,
+      entries: createEntityPermissions('entries', newValue),
+      assets: createEntityPermissions('assets', newValue),
+      contentTypes: createEntityPermissions('contentTypes', newValue),
+      aiActions: createEntityPermissions('aiActions', newValue),
+      editorInterfaces: createEntityPermissions('editorInterfaces', newValue),
+      environments: createEntityPermissions('environments', newValue),
+      locales: createEntityPermissions('locales', newValue),
+      orgs: createEntityPermissions('orgs', newValue),
+      spaces: createEntityPermissions('spaces', newValue),
+      tags: createEntityPermissions('tags', newValue),
+      concepts: createEntityPermissions('concepts', newValue),
+      conceptSchemes: createEntityPermissions('conceptSchemes', newValue),
     });
   };
 
-  const handleEntityActionToggle = (
-    entity: 'entries' | 'assets' | 'contentTypes',
-    action: string
-  ) => {
+  const handleEntityActionToggle = (entity: ContentLifecycleEntityKey, action: EntityActionKey) => {
     setContentLifecyclePermissions((prev) => ({
       ...prev,
       [entity]: {
@@ -55,25 +73,44 @@ export const usePermissions = () => {
     }));
   };
 
-  const handleColumnToggle = (action: string) => {
-    const currentValue = contentLifecyclePermissions.entries[action as keyof EntityPermissions];
-    const newValue = !currentValue;
-    setContentLifecyclePermissions((prev) => ({
-      ...prev,
-      entries: { ...prev.entries, [action]: newValue },
-      assets: { ...prev.assets, [action]: newValue },
-      contentTypes: { ...prev.contentTypes, [action]: newValue },
-      selectAll: false,
-    }));
+  const handleColumnToggle = (action: EntityActionKey) => {
+    // Find all entities that support this action
+    const entitiesWithAction = ALL_ENTITIES.filter((entity) => isActionAvailable(entity, action));
+
+    // Check if all entities that support this action currently have it enabled
+    const allChecked = entitiesWithAction.every(
+      (entity) => contentLifecyclePermissions[entity][action]
+    );
+    const newValue = !allChecked;
+
+    setContentLifecyclePermissions((prev) => {
+      const updates: Partial<ContentLifecyclePermissions> = {};
+      for (const entity of ALL_ENTITIES) {
+        // Only update entities that support this action
+        if (isActionAvailable(entity, action)) {
+          updates[entity] = { ...prev[entity], [action]: newValue };
+        }
+      }
+      return {
+        ...prev,
+        ...updates,
+        selectAll: false,
+      };
+    });
   };
 
-  const handleRowToggle = (entity: 'entries' | 'assets' | 'contentTypes') => {
-    const allChecked = Object.values(contentLifecyclePermissions[entity]).every((v) => v);
+  const handleRowToggle = (entity: ContentLifecycleEntityKey) => {
+    // Check if all available actions for this entity are currently enabled
+    const allChecked = areAllAvailablePermissionsChecked(
+      entity,
+      contentLifecyclePermissions[entity]
+    );
     const newValue = !allChecked;
-    const allPermissions = createAllPermissions(newValue);
+    // Only set available actions for this entity
+    const entityPermissions = createEntityPermissions(entity, newValue);
     setContentLifecyclePermissions((prev) => ({
       ...prev,
-      [entity]: allPermissions,
+      [entity]: entityPermissions,
       selectAll: false,
     }));
   };

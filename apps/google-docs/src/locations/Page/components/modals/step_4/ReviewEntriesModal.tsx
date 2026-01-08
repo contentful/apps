@@ -3,6 +3,8 @@ import { Button, Modal, Paragraph, TextLink, Flex, Box } from '@contentful/f36-c
 import { EntryProps } from 'contentful-management';
 import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
+import { PageAppSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 interface ReviewEntriesModalProps {
   isOpen: boolean;
@@ -42,10 +44,12 @@ export const ReviewEntriesModal: React.FC<ReviewEntriesModalProps> = ({
   spaceId,
   defaultLocale,
 }) => {
+  const sdk = useSDK<PageAppSDK>();
+
   const entryLinks = useMemo(() => {
     return createdEntries.map((entry) => {
       const displayName = getEntryDisplayName(entry, defaultLocale);
-      const url = `https://app.contentful.com/spaces/${spaceId}/entries/${entry.sys.id}`;
+      const url = `https://${sdk.hostnames.webapp}/spaces/${spaceId}/entries/${entry.sys.id}`;
 
       return {
         entry,
