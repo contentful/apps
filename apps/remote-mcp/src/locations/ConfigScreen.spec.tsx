@@ -22,7 +22,7 @@ describe('Config Screen component', () => {
       expect(mockSdk.app.setReady).toHaveBeenCalled();
     });
 
-    expect(getByText('Set up the Contentful remote MCP Server (Alpha)')).toBeInTheDocument();
+    expect(getByText('Set up the Contentful remote MCP Server (Beta)')).toBeInTheDocument();
   });
 
   it('renders all main sections', async () => {
@@ -33,7 +33,7 @@ describe('Config Screen component', () => {
     });
 
     // Check for FormHeader content
-    expect(getByText('Set up the Contentful remote MCP Server (Alpha)')).toBeInTheDocument();
+    expect(getByText('Set up the Contentful remote MCP Server (Beta)')).toBeInTheDocument();
 
     // Check for Setup section
     expect(getByText('Set up instructions')).toBeInTheDocument();

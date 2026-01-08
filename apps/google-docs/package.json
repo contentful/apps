@@ -35,6 +35,8 @@
     "deploy:dev": "npm run build && npm run upload:app-dev && npm run deploy:sync-dev",
     "upload:app-staging": "contentful-app-scripts upload --bundle-dir ./build --organization-id 6xdLsz6lCsk0yPOccSsDK7 --definition-id 4i0mp5lQtgNsHYVrD5jIkj --token $CONTENTFUL_ACCESS_TOKEN",
     "deploy:staging": "npm run build && npm run upload:app-staging && npm run deploy:sync-dev",
+    "upload:app-flinkly": "contentful-app-scripts upload --bundle-dir ./build --organization-id 3m1Cqy5lzALpWNY9GjP2Zm --definition-id 7r10omUtVNoq8X3Yy4YfBL --token $FLINKLY_CONTENTFUL_ACCESS_TOKEN",
+    "deploy:flinkly": "npm run build && npm run upload:app-flinkly && npm run deploy:sync-dev",
     "deploy:sync-prod": "aws s3 sync ./build ${PROD_STATIC_S3_BASE}/google-docs && aws cloudfront create-invalidation --distribution-id $GOOGLE_DOCS_PROD_CLOUDFRONT_DIST_ID --paths \"/*\" > /dev/null 2>&1",
     "upload": "contentful-app-scripts upload --bundle-dir ./build --organization-id 5EJGHo8tYJcjnEhYWDxivp --definition-id 3EaGZUMKRKVZUyrcoNJ4o4 --token $CONTENTFUL_ACCESS_TOKEN",
     "deploy:prod": "npm run build && npm run upload && npm run deploy:sync-prod"
