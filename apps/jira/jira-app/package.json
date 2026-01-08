@@ -33,8 +33,8 @@
   "scripts": {
     "start": "VITE_NGROK_URL=${NGROK_URL} VITE_ATLASSIAN_APP_CLIENT_ID=${ATLASSIAN_APP_CLIENT_ID} vite",
     "build": "vite build",
-    "deploy": "aws s3 sync ./build ${STATIC_JIRA_S3_BASE} --acl public-read",
-    "deploy:test": "aws s3 sync ./build ${STATIC_TEST_S3_BASE}/jira --acl public-read",
+    "deploy": "aws s3 sync ./build ${STATIC_JIRA_S3_BASE}",
+    "deploy:test": "aws s3 sync ./build ${STATIC_TEST_S3_BASE}/jira",
     "test": "vitest",
     "test:ci": "CI=true vitest"
   },
