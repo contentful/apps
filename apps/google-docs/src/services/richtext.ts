@@ -164,10 +164,48 @@ export class MarkdownParser {
 
         // Check for underline markers
         if (value.includes(UNDERLINE_START) || value.includes(UNDERLINE_END)) {
-          // Escape special regex characters in markers
-          const escapedStart = UNDERLINE_START.replace(/[\[\]]/g, '\\$&');
-          const escapedEnd = UNDERLINE_END.replace(/[\[\]]/g, '\\$&');
-          const parts = value.split(new RegExp(`(${escapedStart}|${escapedEnd})`));
+          // Split by markers - use simple string split instead of regex to avoid escaping issues
+          const parts: string[] = [];
+          let remaining = value;
+          let lastIndex = 0;
+
+          while (remaining.length > 0) {
+            const startIndex = remaining.indexOf(UNDERLINE_START);
+            const endIndex = remaining.indexOf(UNDERLINE_END);
+
+            if (startIndex === -1 && endIndex === -1) {
+              // No more markers, add remaining text
+              if (remaining.length > 0) {
+                parts.push(remaining);
+              }
+              break;
+            }
+
+            // Find which marker comes first
+            let nextMarker: 'start' | 'end' | null = null;
+            let nextIndex = -1;
+
+            if (startIndex !== -1 && (endIndex === -1 || startIndex < endIndex)) {
+              nextMarker = 'start';
+              nextIndex = startIndex;
+            } else if (endIndex !== -1) {
+              nextMarker = 'end';
+              nextIndex = endIndex;
+            }
+
+            if (nextIndex > 0) {
+              // Add text before marker
+              parts.push(remaining.substring(0, nextIndex));
+            }
+
+            // Add marker itself
+            parts.push(nextMarker === 'start' ? UNDERLINE_START : UNDERLINE_END);
+
+            // Update remaining
+            const markerLength =
+              nextMarker === 'start' ? UNDERLINE_START.length : UNDERLINE_END.length;
+            remaining = remaining.substring(nextIndex + markerLength);
+          }
           let underlineActive = false;
           let currentText = '';
 
