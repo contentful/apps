@@ -73,36 +73,10 @@ export const ENTITY_AVAILABLE_ACTIONS: Record<
   ContentLifecycleEntityKey,
   readonly EntityActionKey[]
 > = {
-  entries: [
-    'read',
-    'edit',
-    'create',
-    'delete',
-    'publish',
-    'unpublish',
-    'archive',
-    'unarchive',
-  ],
-  assets: [
-    'read',
-    'edit',
-    'create',
-    'delete',
-    'publish',
-    'unpublish',
-    'archive',
-    'unarchive',
-  ],
+  entries: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish', 'archive', 'unarchive'],
+  assets: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish', 'archive', 'unarchive'],
   contentTypes: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish'],
-  aiActions: [
-    'read',
-    'edit',
-    'create',
-    'delete',
-    'publish',
-    'unpublish',
-    'invoke',
-  ],
+  aiActions: ['read', 'edit', 'create', 'delete', 'publish', 'unpublish', 'invoke'],
   locales: ['read', 'edit', 'create', 'delete'],
   concepts: ['read', 'edit', 'create', 'delete'],
   conceptSchemes: ['read', 'edit', 'create', 'delete'],
@@ -114,9 +88,7 @@ export const ENTITY_AVAILABLE_ACTIONS: Record<
 } as const;
 
 /** All entity keys derived from ENTITY_AVAILABLE_ACTIONS */
-export const ALL_ENTITIES = Object.keys(
-  ENTITY_AVAILABLE_ACTIONS,
-) as ContentLifecycleEntityKey[];
+export const ALL_ENTITIES = Object.keys(ENTITY_AVAILABLE_ACTIONS) as ContentLifecycleEntityKey[];
 
 /** All actions shown in table columns */
 export const STANDARD_ACTIONS: EntityActionKey[] = [

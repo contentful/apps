@@ -13,9 +13,7 @@ interface ContentLifecyclePermissionsTableProps {
   onRowToggle: (entity: ContentLifecycleEntityKey) => void;
 }
 
-export const ContentLifecyclePermissionsTable: FC<
-  ContentLifecyclePermissionsTableProps
-> = ({
+export const ContentLifecyclePermissionsTable: FC<ContentLifecyclePermissionsTableProps> = ({
   permissions,
   onSelectAllToggle,
   onEntityActionToggle,
@@ -24,8 +22,8 @@ export const ContentLifecyclePermissionsTable: FC<
 }) => (
   <Stack flexDirection="column" spacing="spacing2Xs" alignItems="flex-start">
     <Text>
-      Allow the MCP server to read, edit, create, delete, publish, un-publish,
-      archive, unarchive, or invoke entities within Contentful.
+      Allow the MCP server to read, edit, create, delete, publish, un-publish, archive, unarchive,
+      or invoke entities within Contentful.
     </Text>
     <Box marginTop="spacingS">
       <Checkbox isChecked={permissions.selectAll} onChange={onSelectAllToggle}>
@@ -41,26 +39,16 @@ export const ContentLifecyclePermissionsTable: FC<
             {STANDARD_ACTIONS.map((action) => {
               // Get all entities that support this action
               const entitiesWithAction = ALL_ENTITIES.filter((entity) =>
-                isActionAvailable(entity, action),
+                isActionAvailable(entity, action)
               );
               // Column is checked if all entities that support this action have it enabled
               const isColumnChecked = entitiesWithAction.every(
-                (entity) =>
-                  permissions[entity][
-                    action as keyof typeof permissions.entries
-                  ],
+                (entity) => permissions[entity][action as keyof typeof permissions.entries]
               );
 
               return (
-                <Table.Cell
-                  key={action}
-                  style={{ textAlign: 'center', verticalAlign: 'bottom' }}
-                >
-                  <Flex
-                    flexDirection="column"
-                    alignItems="center"
-                    gap="spacingXs"
-                  >
+                <Table.Cell key={action} style={{ textAlign: 'center', verticalAlign: 'bottom' }}>
+                  <Flex flexDirection="column" alignItems="center" gap="spacingXs">
                     <Text fontWeight="fontWeightMedium" fontSize="fontSizeS">
                       {action.charAt(0).toUpperCase() + action.slice(1)}
                     </Text>
@@ -95,17 +83,13 @@ export const ContentLifecyclePermissionsTable: FC<
             const availableActions = ENTITY_AVAILABLE_ACTIONS[entity];
             // Row is checked if all available actions for this entity are enabled
             const isRowChecked = availableActions.every(
-              (action) =>
-                permissions[entity][action as keyof typeof permissions.entries],
+              (action) => permissions[entity][action as keyof typeof permissions.entries]
             );
 
             return (
               <Table.Row key={entity}>
                 <Table.Cell>
-                  <Checkbox
-                    isChecked={isRowChecked}
-                    onChange={() => onRowToggle(entity)}
-                  >
+                  <Checkbox isChecked={isRowChecked} onChange={() => onRowToggle(entity)}>
                     {displayNames[entity]}
                   </Checkbox>
                 </Table.Cell>
@@ -117,16 +101,9 @@ export const ContentLifecyclePermissionsTable: FC<
                         <Checkbox
                           isDisabled={!isAvailable}
                           isChecked={
-                            permissions[entity][
-                              action as keyof typeof permissions.entries
-                            ]
+                            permissions[entity][action as keyof typeof permissions.entries]
                           }
-                          onChange={() =>
-                            onEntityActionToggle(
-                              entity,
-                              action as EntityActionKey,
-                            )
-                          }
+                          onChange={() => onEntityActionToggle(entity, action as EntityActionKey)}
                         />
                       </Flex>
                     </Table.Cell>

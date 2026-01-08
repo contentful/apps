@@ -1,4 +1,8 @@
-import type { EntityPermissions, ContentLifecycleEntityKey, EntityActionKey } from '../components/types/config';
+import type {
+  EntityPermissions,
+  ContentLifecycleEntityKey,
+  EntityActionKey,
+} from '../components/types/config';
 import { ENTITY_AVAILABLE_ACTIONS } from '../components/types/config';
 
 /**
@@ -22,7 +26,7 @@ export const createEmptyEntityPermissions = (): EntityPermissions => ({
  */
 export const createEntityPermissions = (
   entity: ContentLifecycleEntityKey,
-  value: boolean,
+  value: boolean
 ): EntityPermissions => {
   const availableActions = ENTITY_AVAILABLE_ACTIONS[entity];
   const permissions = createEmptyEntityPermissions();
@@ -39,7 +43,7 @@ export const createEntityPermissions = (
  */
 export const isActionAvailable = (
   entity: ContentLifecycleEntityKey,
-  action: EntityActionKey,
+  action: EntityActionKey
 ): boolean => {
   return ENTITY_AVAILABLE_ACTIONS[entity].includes(action);
 };
@@ -49,7 +53,7 @@ export const isActionAvailable = (
  */
 export const areAllAvailablePermissionsChecked = (
   entity: ContentLifecycleEntityKey,
-  permissions: EntityPermissions,
+  permissions: EntityPermissions
 ): boolean => {
   const availableActions = ENTITY_AVAILABLE_ACTIONS[entity];
   return availableActions.every((action) => permissions[action]);

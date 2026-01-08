@@ -8,7 +8,12 @@ import type {
   EntityActionKey,
 } from '../components/types/config';
 import { ALL_ENTITIES } from '../components/types/config';
-import { createEmptyEntityPermissions, createEntityPermissions, areAllAvailablePermissionsChecked, isActionAvailable } from '../utils/permissions';
+import {
+  createEmptyEntityPermissions,
+  createEntityPermissions,
+  areAllAvailablePermissionsChecked,
+  isActionAvailable,
+} from '../utils/permissions';
 
 export const usePermissions = () => {
   const [contentLifecyclePermissions, setContentLifecyclePermissions] =
@@ -70,13 +75,11 @@ export const usePermissions = () => {
 
   const handleColumnToggle = (action: EntityActionKey) => {
     // Find all entities that support this action
-    const entitiesWithAction = ALL_ENTITIES.filter((entity) =>
-      isActionAvailable(entity, action),
-    );
+    const entitiesWithAction = ALL_ENTITIES.filter((entity) => isActionAvailable(entity, action));
 
     // Check if all entities that support this action currently have it enabled
     const allChecked = entitiesWithAction.every(
-      (entity) => contentLifecyclePermissions[entity][action],
+      (entity) => contentLifecyclePermissions[entity][action]
     );
     const newValue = !allChecked;
 
@@ -100,7 +103,7 @@ export const usePermissions = () => {
     // Check if all available actions for this entity are currently enabled
     const allChecked = areAllAvailablePermissionsChecked(
       entity,
-      contentLifecyclePermissions[entity],
+      contentLifecyclePermissions[entity]
     );
     const newValue = !allChecked;
     // Only set available actions for this entity
