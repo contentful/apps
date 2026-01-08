@@ -19,7 +19,7 @@
     "@contentful/f36-tokens": "^4.0.5",
     "@remix-run/dev": "^2.14.0",
     "@remix-run/node": "^2.14.0",
-    "@remix-run/react": "^2.14.0",
+    "@remix-run/react": "^2.17.3",
     "@remix-run/serve": "^2.16.4",
     "@tanstack/react-query": "^5.52.2",
     "@tanstack/react-table": "^8.20.5",
