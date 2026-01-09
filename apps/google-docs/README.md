@@ -78,10 +78,6 @@ to find out more.
 
 This app supports an optional schema convention that allows you to explicitly mark entry boundaries, content types, and references in your Google Docs. Using schema markers significantly improves AI accuracy.
 
-**Learn more:**
-- [Schema Convention Guide](./SCHEMA_CONVENTION.md) - Complete guide to using schema markers
-- [Schema Examples](./SCHEMA_EXAMPLES.md) - Practical examples for different use cases
-
 **Quick Start:**
 - Use `**!CT:contentTypeId!**` to mark the start of an entry
 - Use `**!REF:tempId!**` to mark references between entries

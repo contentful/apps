@@ -50,11 +50,10 @@ export async function createPreviewWithAgent(
 
   console.log('Document Parser Agent document content Input:', documentId);
   const documentJson = await fetchGoogleDocAsJson({ documentId, oauthToken });
-  // Extract schema markers from document
-  const { text: documentText, schema } = extractTextWithSchema(documentJson);
-
   // SECURITY VALIDATION: Validate document content before sending to AI
-  const documentSecurityCheck = validateGoogleDocJson(documentText);
+  const documentSecurityCheck = validateGoogleDocJson(documentJson);
+  // Extract schema markers from document
+  const { schema } = extractTextWithSchema(documentJson);
 
   if (!documentSecurityCheck.isValid) {
     const errorMessage = `Security validation failed for document: ${documentSecurityCheck.errors.join(
