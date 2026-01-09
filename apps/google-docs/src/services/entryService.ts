@@ -24,216 +24,6 @@ export interface EntryCreationResult {
   }>;
 }
 
-// Precompiled regex for markdown image tokens: ![alt](url)
-// Note: This regex captures both alt text and URL for metadata extraction
-const IMAGE_TOKEN_REGEX = /!\[([^\]]*?)\]\(([\s\S]*?)\)/g;
-
-/**
- * MIME type mapping for common file extensions
- */
-const MIME_TYPES: Record<string, string> = {
-  png: 'image/png',
-  gif: 'image/gif',
-  webp: 'image/webp',
-  svg: 'image/svg+xml',
-  jpg: 'image/jpeg',
-  jpeg: 'image/jpeg',
-  bmp: 'image/bmp',
-  tiff: 'image/tiff',
-  tif: 'image/tiff',
-  mp4: 'video/mp4',
-  webm: 'video/webm',
-  mov: 'video/quicktime',
-  avi: 'video/x-msvideo',
-  mkv: 'video/x-matroska',
-  mp3: 'audio/mpeg',
-  wav: 'audio/wav',
-  ogg: 'audio/ogg',
-  m4a: 'audio/mp4',
-  pdf: 'application/pdf',
-};
-
-/**
- * Extracted metadata from an image token
- */
-interface ImageMetadata {
-  url: string;
-  altText: string;
-  fileName: string;
-  contentType: string;
-  fileExtension: string;
-}
-
-/**
- * Validates if a string is a valid URL
- */
-function isValidUrl(url: string): boolean {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function getFileExtension(pathname: string): string {
-  const lastDot = pathname.lastIndexOf('.');
-  if (lastDot === -1 || lastDot === pathname.length - 1) {
-    return '';
-  }
-  return pathname.slice(lastDot + 1).toLowerCase();
-}
-
-/**
- * Extracts image metadata from markdown image tokens
- * Returns array of ImageMetadata objects
- */
-function extractImageMetadata(markdownText: string): ImageMetadata[] {
-  const metadata: ImageMetadata[] = [];
-
-  if (!markdownText || typeof markdownText !== 'string') {
-    return metadata;
-  }
-
-  // Reset regex state
-  IMAGE_TOKEN_REGEX.lastIndex = 0;
-
-  for (const match of markdownText.matchAll(IMAGE_TOKEN_REGEX)) {
-    const altText = match[1] || '';
-    // Extract URL and normalize (remove all whitespace) - this matches how we store it in the map
-    const url = String(match[2]).replace(/\s+/g, '').trim();
-
-    if (!url) {
-      continue;
-    }
-
-    // Extract file extension and determine content type from URL
-    let fileExtension = 'jpg';
-    let contentType = 'image/jpeg';
-
-    if (isValidUrl(url)) {
-      const urlObj = new URL(url);
-      const pathname = urlObj.pathname.toLowerCase();
-
-      const extension = getFileExtension(pathname);
-      fileExtension = extension || 'jpg';
-      contentType = MIME_TYPES[fileExtension] || 'image/jpeg';
-
-      // Extract filename from pathname
-      const pathParts = pathname.split('/').filter(Boolean);
-      const fileName = pathParts[pathParts.length - 1] || `image.${fileExtension}`;
-
-      metadata.push({
-        url,
-        altText: altText.trim(),
-        fileName: fileName.includes('.') ? fileName : `${fileName}.${fileExtension}`,
-        contentType,
-        fileExtension,
-      });
-    } else {
-      // If URL parsing fails, use defaults
-      metadata.push({
-        url,
-        altText: altText.trim(),
-        fileName: `image.${fileExtension}`,
-        contentType,
-        fileExtension,
-      });
-    }
-  }
-
-  return metadata;
-}
-
-/**
- * Validates URL input for asset creation
- */
-function validateAssetUrl(url: string | null | undefined): string {
-  if (!url) {
-    throw new Error('URL is required and cannot be null or undefined');
-  }
-
-  if (typeof url !== 'string') {
-    throw new Error('URL must be a string');
-  }
-
-  const trimmedUrl = url.trim();
-  if (trimmedUrl.length === 0) {
-    throw new Error('URL cannot be an empty string');
-  }
-
-  // Basic URL validation
-  if (!isValidUrl(trimmedUrl)) {
-    throw new Error(`Invalid URL format: ${trimmedUrl.substring(0, 100)}`);
-  }
-
-  return trimmedUrl;
-}
-
-/**
- * Retry configuration for asset operations
- */
-interface RetryConfig {
-  maxRetries: number;
-  initialDelayMs: number;
-  maxDelayMs: number;
-  backoffMultiplier: number;
-}
-
-const DEFAULT_RETRY_CONFIG: RetryConfig = {
-  maxRetries: 3,
-  initialDelayMs: 500,
-  maxDelayMs: 5000,
-  backoffMultiplier: 2,
-};
-
-/**
- * Retries a function with exponential backoff
- */
-async function retryWithBackoff<T>(
-  fn: () => Promise<T>,
-  config: RetryConfig = DEFAULT_RETRY_CONFIG,
-  operationName: string = 'operation'
-): Promise<T> {
-  let lastError: Error | unknown;
-  let delay = config.initialDelayMs;
-
-  for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
-    try {
-      return await fn();
-    } catch (error) {
-      lastError = error;
-
-      if (attempt === config.maxRetries) {
-        // Last attempt failed
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error(
-          `${operationName} failed after ${config.maxRetries + 1} attempts:`,
-          errorMessage
-        );
-        throw error;
-      }
-
-      // Wait before retrying with exponential backoff
-      const currentDelay = Math.min(delay, config.maxDelayMs);
-      console.warn(
-        `${operationName} failed (attempt ${attempt + 1}/${
-          config.maxRetries + 1
-        }), retrying in ${currentDelay}ms...`,
-        {
-          error: error instanceof Error ? error.message : String(error),
-        }
-      );
-
-      await new Promise((resolve) => setTimeout(resolve, currentDelay));
-      delay *= config.backoffMultiplier;
-    }
-  }
-
-  // This should never be reached, but TypeScript needs it
-  throw lastError;
-}
-
 /**
  * Creates an asset quickly without waiting for processing/publishing.
  * This is optimized for speed to avoid timeouts when processing many images.
@@ -258,8 +48,6 @@ async function createAssetFromUrlFast(
     throw new Error('environmentId is required and must be a non-empty string');
   }
 
-  const validatedUrl = validateAssetUrl(url);
-
   // Use metadata if provided, otherwise extract from URL
   const fileName = metadata?.fileName || 'image.jpg';
   const contentType = metadata?.contentType || 'image/jpeg';
@@ -267,25 +55,20 @@ async function createAssetFromUrlFast(
 
   // Create asset without waiting for processing/publishing
   // Contentful will process and publish it in the background
-  const asset = await retryWithBackoff(
-    () =>
-      cma.asset.create(
-        { spaceId, environmentId },
-        {
-          fields: {
-            title: { [defaultLocale]: title },
-            file: {
-              [defaultLocale]: {
-                contentType,
-                fileName,
-                upload: validatedUrl,
-              },
-            },
+  const asset = await cma.asset.create(
+    { spaceId, environmentId },
+    {
+      fields: {
+        title: { [defaultLocale]: title },
+        file: {
+          [defaultLocale]: {
+            contentType,
+            fileName,
+            upload: url,
           },
-        }
-      ),
-    DEFAULT_RETRY_CONFIG,
-    'Asset creation'
+        },
+      },
+    }
   );
 
   // Trigger processing in the background (don't wait for it)
@@ -352,103 +135,6 @@ async function transformFieldsForContentType(
 
   return transformed;
 }
-
-/**
- * Validates that a value is a non-empty string
- */
-function validateNonEmptyString(value: unknown, name: string): asserts value is string {
-  if (!value || typeof value !== 'string' || value.trim().length === 0) {
-    throw new Error(`${name} is required and must be a non-empty string`);
-  }
-}
-
-/**
- * Validates that a value is a non-empty array
- */
-function validateNonEmptyArray<T>(value: unknown, name: string): asserts value is T[] {
-  if (!Array.isArray(value)) {
-    throw new Error(`${name} must be an array`);
-  }
-  if (value.length === 0) {
-    throw new Error(`${name} cannot be empty`);
-  }
-}
-
-/**
- * Validates that a value is a non-null object (not an array)
- */
-function validateObject(value: unknown, name: string): asserts value is Record<string, unknown> {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    throw new Error(`${name} must be an object`);
-  }
-}
-
-function validateCreateEntriesInput(
-  sdk: PageAppSDK | ConfigAppSDK | null | undefined,
-  entries: EntryToCreate[] | null | undefined,
-  contentTypeIds: string[] | null | undefined
-): void {
-  // Validate SDK
-  if (!sdk) {
-    throw new Error('SDK is required and cannot be null or undefined');
-  }
-  if (!sdk.cma) {
-    throw new Error('CMA client is required and cannot be null or undefined');
-  }
-
-  // Validate entries array
-  if (!entries) {
-    throw new Error('Entries array is required and cannot be null or undefined');
-  }
-  validateNonEmptyArray<EntryToCreate>(entries, 'Entries');
-
-  // Validate contentTypeIds
-  if (!contentTypeIds) {
-    throw new Error('contentTypeIds is required and cannot be null or undefined');
-  }
-  validateNonEmptyArray<string>(contentTypeIds, 'contentTypeIds');
-
-  // Validate each entry
-  entries.forEach((entry, i) => {
-    if (!entry) {
-      throw new Error(`Entry at index ${i} is null or undefined`);
-    }
-    validateObject(entry, `Entry at index ${i}`);
-    validateNonEmptyString(entry.contentTypeId, `Entry at index ${i} contentTypeId`);
-
-    if (!entry.fields) {
-      throw new Error(`Entry at index ${i} must have a fields property`);
-    }
-    validateObject(entry.fields, `Entry at index ${i} fields`);
-
-    // Validate fields structure: { fieldId: { locale: value } }
-    Object.entries(entry.fields).forEach(([fieldId, localizedValue]) => {
-      if (!fieldId || typeof fieldId !== 'string') {
-        throw new Error(`Entry at index ${i} has invalid field ID: ${fieldId}`);
-      }
-
-      validateObject(localizedValue, `Entry at index ${i}, field "${fieldId}"`);
-
-      const localeKeys = Object.keys(localizedValue);
-      if (localeKeys.length === 0) {
-        throw new Error(`Entry at index ${i}, field "${fieldId}" must have at least one locale`);
-      }
-
-      // Validate locale keys and values
-      Object.entries(localizedValue).forEach(([locale, value]) => {
-        validateNonEmptyString(locale, `Entry at index ${i}, field "${fieldId}" locale`);
-        if (value === null) {
-          throw new Error(
-            `Entry at index ${i}, field "${fieldId}", locale "${locale}" has null value (use undefined to skip)`
-          );
-        }
-      });
-    });
-  });
-}
-
-// NOTE: Algorithm-based asset extraction functions have been removed.
-// Assets are now identified and returned by the AI agent, then created via createAssetsFromAgentOutput.
 
 /**
  * Creates a Contentful Link object for an entry reference
@@ -615,11 +301,6 @@ async function createAssetsFromAgentOutput(
   }
 
   const assetCreationPromises = assets.map(async (asset) => {
-    if (!isValidUrl(asset.url)) {
-      console.warn(`Skipping invalid asset URL: ${asset.url.substring(0, 100)}...`);
-      return null;
-    }
-
     try {
       const createdAsset = await createAssetFromUrlFast(
         cma,
@@ -703,23 +384,6 @@ export async function createEntriesFromPreview(
   contentTypeIds: string[],
   assets: AssetToCreate[] = []
 ): Promise<EntryCreationResult> {
-  try {
-    validateCreateEntriesInput(sdk, entries, contentTypeIds);
-  } catch (validationError) {
-    const errorMessage =
-      validationError instanceof Error ? validationError.message : String(validationError);
-    return {
-      createdEntries: [],
-      errors: [
-        {
-          contentTypeId: 'validation',
-          error: errorMessage,
-          details: validationError,
-        },
-      ],
-    };
-  }
-
   const spaceId = sdk.ids.space;
   const environmentId = sdk.ids.environment;
   const cma = sdk.cma;
