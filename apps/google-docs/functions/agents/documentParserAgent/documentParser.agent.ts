@@ -33,7 +33,7 @@ export interface DocumentParserConfig {
 function stripUnusedDocumentMetadata(doc: any): any {
   if (!doc || typeof doc !== 'object') return doc;
 
-  const { documentStyle, headers, footers, footnotes, revisionId, suggestedChanges, ...rest } = doc;
+  const { documentStyle, revisionId, suggestedChanges, ...rest } = doc;
 
   return rest;
 }
