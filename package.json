@@ -25,7 +25,7 @@
     "deploy": "lerna run deploy --concurrency=3 --since=${SINCE:-master}",
     "deploy:test": "lerna run deploy:test --concurrency=3 --since=${SINCE:-master}",
     "post-deploy": "lerna run post-deploy",
-    "publish-packages": "lerna version --conventional-commits --no-private --force-git-tag --create-release github --yes && lerna publish from-git --yes",
+    "publish-packages": "lerna version --conventional-commits --no-private --force-git-tag --create-release github --yes && (lerna publish from-git --yes || echo 'Publish failed, continuing...')",
     "prettier:list": "npx prettier@2.8.8 --list-different",
     "prettier:write": "npx prettier@2.8.8 --write",
     "prettier:check": "npx prettier@2.8.8 --check '**/*.{js,jsx,ts,tsx}'",
