@@ -8,8 +8,6 @@ import {
   Text,
   Icon,
 } from '@contentful/f36-components';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { GearSixIcon } from '@contentful/f36-icons';
 import { RELEASES_PER_PAGE } from '../utils/consts';
 import tokens from '@contentful/f36-tokens';
@@ -33,7 +31,6 @@ const ReleasesTableHeader = () => {
 };
 
 export const ReleasesTable = () => {
-  const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const [currentPage, setCurrentPage] = useState(0);
   const { releases, total, isFetchingReleases, fetchingReleasesError } = useReleases(currentPage);
 
