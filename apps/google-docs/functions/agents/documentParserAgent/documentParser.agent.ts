@@ -117,8 +117,10 @@ Your role is to:
 6. Identify and establish references between entries extracted from the same document
 
 CRITICAL FIELD TYPE RULES - READ CAREFULLY:
-- Symbol: Short text (default max 256 characters) - use for titles, names, IDs ✓
-- Text: Long text (default max 50,000 characters) - use for descriptions, content ✓
+- Symbol: Short text (MANDATORY MAX 256 CHARACTERS - Contentful will reject values longer than this) - use for titles, names, IDs ✓
+  **CRITICAL**: Even if no size validation is specified, Symbol fields CANNOT exceed 256 characters. You MUST truncate at word boundaries if the extracted text is longer.
+- Text: Long text (MANDATORY MAX 50,000 CHARACTERS - Contentful will reject values longer than this) - use for descriptions, content ✓
+  **CRITICAL**: Even if no size validation is specified, Text fields CANNOT exceed 50,000 characters. You MUST truncate at word boundaries if the extracted text is longer.
 - Number: Integer or decimal values only ✓
 - Boolean: true or false only ✓
 - Date: ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss.sssZ) ✓
@@ -126,6 +128,7 @@ CRITICAL FIELD TYPE RULES - READ CAREFULLY:
 - Object: JSON object (use sparingly, check validations) ✓
 - Array (of Symbol/Text/Number): Array of PRIMITIVE values ONLY ✓
   Example: ["value1", "value2"] or [1, 2, 3]
+  **CRITICAL**: For arrays of Symbol items, each item must also respect the 256 character limit
 - Link/Reference: Use reference placeholders ✓ (see REFERENCE HANDLING below)
 - Array (of Link): Use array of reference placeholders ✓ (see REFERENCE HANDLING below)
 
@@ -198,14 +201,23 @@ Output:
 === END REFERENCE HANDLING ===
 
 FIELD VALIDATION RULES - MANDATORY TO RESPECT:
+**CRITICAL**: Contentful will REJECT entries with field values that violate constraints. Your response will FAIL if you generate invalid values.
+
 Each field definition includes a "validations" array. You MUST respect ALL validation rules:
 1. Character Count Limits (size validation):
+   - **MANDATORY DEFAULT LIMITS** (even if no validation specified):
+     * Symbol fields: MAX 256 characters (Contentful hard limit - cannot be exceeded)
+     * Text fields: MAX 50,000 characters (Contentful hard limit - cannot be exceeded)
    - If a field has validations with size: { min: X, max: Y }:
      * The value MUST be between X and Y characters (inclusive)
-     * For Symbol/Text fields: Ensure your extracted text meets these limits
-     * If the document text is too short: Extend it intelligently (repeat key phrases, add context)
-     * If the document text is too long: Truncate at word boundaries to stay within max
+     * These limits OVERRIDE the defaults above (e.g., if max: 100 is specified, use 100, not 256)
+   - For Symbol/Text fields: 
+     * BEFORE setting any value, check its length
+     * If the extracted text exceeds the max (validation max OR default max), you MUST truncate at word boundaries
+     * If the document text is too short and min is specified: Extend it intelligently (repeat key phrases, add context)
+     * If the document text is too long: Truncate at word boundaries to stay within max - DO NOT return values that exceed limits
      * Example: If size: { min: 40, max: 60 }, a title must be 40-60 characters
+     * Example: If no size validation but field type is Symbol, max is 256 characters
    
 2. Number Range Limits (range validation):
    - If a field has validations with range: { min: X, max: Y }:
@@ -227,13 +239,16 @@ Each field definition includes a "validations" array. You MUST respect ALL valid
    - Respect regex patterns, enum values, unique constraints, etc.
    - If a validation cannot be satisfied, adjust the value to meet the constraint
 
-VALIDATION CHECKLIST FOR EACH FIELD:
-- Checked the validations array for this field
-- If size validation exists: Value length is between min and max (adjusted if needed)
-- If range validation exists: Number is within min and max (clamped if needed)
-- If required: Field is populated (not empty, null, or undefined)
-- If Link/Array of Link: Used { "__ref": "tempId" } format with valid tempId
-- All other validation rules are satisfied
+VALIDATION CHECKLIST FOR EACH FIELD (MANDATORY - CHECK EVERY FIELD):
+- [ ] Checked the validations array for this field
+- [ ] **CRITICAL FOR SYMBOL FIELDS**: Value length is ≤ 256 characters (default Contentful limit)
+- [ ] **CRITICAL FOR TEXT FIELDS**: Value length is ≤ 50,000 characters (default Contentful limit)
+- [ ] If size validation exists: Value length is between min and max (validation limits override defaults)
+- [ ] If range validation exists: Number is within min and max (clamped if needed)
+- [ ] If required: Field is populated (not empty, null, or undefined)
+- [ ] If Link/Array of Link: Used { "__ref": "tempId" } format with valid tempId
+- [ ] All other validation rules are satisfied
+- [ ] **FINAL CHECK**: Before returning, verify NO Symbol field value exceeds 256 chars and NO Text field value exceeds 50,000 chars
 - RichText: Convert HTML-style tags from the document to proper Markdown format:
   - <B>text</B> → **text** (bold)
   - <I>text</I> → *text* (italic)
@@ -485,6 +500,17 @@ function buildExtractionPrompt({
           ? (itemsLinkContentType as any).linkContentType
           : null;
 
+        // Determine effective max length for Symbol/Text fields
+        let effectiveMaxLength: string | undefined;
+        const sizeValidation = validations.find((v: any) => v.size);
+        if (sizeValidation?.size?.max !== undefined) {
+          effectiveMaxLength = `${sizeValidation.size.max} (from validation)`;
+        } else if (field.type === 'Symbol') {
+          effectiveMaxLength = '256 (Contentful default - MANDATORY)';
+        } else if (field.type === 'Text') {
+          effectiveMaxLength = '50000 (Contentful default - MANDATORY)';
+        }
+
         return {
           id: field.id,
           name: field.name,
@@ -494,6 +520,7 @@ function buildExtractionPrompt({
           required: field.required,
           localized: field.localized,
           validations,
+          MAX_LENGTH: effectiveMaxLength,
           validationSummary: validations?.length
             ? validations
                 .map((v: any) => {
@@ -506,6 +533,8 @@ function buildExtractionPrompt({
                   return 'Has validation rules';
                 })
                 .join('; ')
+            : effectiveMaxLength
+            ? `No explicit validation rules, but MAX_LENGTH applies: ${effectiveMaxLength}`
             : 'No validation rules',
           IS_REFERENCE_FIELD: isReferenceField,
           REFERENCE_TYPE: isLinkType ? 'single' : isArrayOfLinks ? 'array' : null,
@@ -576,6 +605,15 @@ LOCALE TO USE: ${locale}
 
 CONTENT TYPE DEFINITIONS:
 ${JSON.stringify(contentTypeDefinitions)}
+
+**CRITICAL FIELD LENGTH REMINDER:**
+- Each field definition includes a "MAX_LENGTH" property showing the effective maximum character limit
+- For Symbol fields: If MAX_LENGTH shows "256 (Contentful default - MANDATORY)", you MUST ensure the value is ≤ 256 characters
+- For Text fields: If MAX_LENGTH shows "50000 (Contentful default - MANDATORY)", you MUST ensure the value is ≤ 50,000 characters
+- If MAX_LENGTH shows a validation-based limit (e.g., "100 (from validation)"), use that limit instead
+- **BEFORE SETTING ANY FIELD VALUE**: Check the MAX_LENGTH for that field and verify your value does not exceed it
+- If a value would exceed MAX_LENGTH, truncate it at word boundaries BEFORE including it in your response
+- **Contentful will REJECT entries with values exceeding these limits - your response will FAIL if you violate them**
 
 === GOOGLE DOCS JSON PARSING GUIDE ===
 
@@ -788,20 +826,26 @@ ${contentTypes
 8. Format fields correctly: { "fieldId": { "${locale}": value } }
 
 9. Match field types exactly:
-   - Symbol: string (check validations for character limits)
-   - Text: string (check validations for character limits)
+   - Symbol: string (MANDATORY: max 256 characters - check validations for custom limits, but NEVER exceed 256)
+   - Text: string (MANDATORY: max 50,000 characters - check validations for custom limits, but NEVER exceed 50,000)
    - RichText: string using ONLY the provided annotation tokens
    - Number: number (check validations for range limits)
    - Boolean: boolean
    - Date: ISO 8601 string
    - Array (of primitives): array of strings or numbers
+     * For arrays of Symbol items: each item must be ≤ 256 characters
    - Link: { "__ref": "tempId" }
    - Array (of Link): [{ "__ref": "tempId1" }, { "__ref": "tempId2" }]
 
-10. **CRITICAL: RESPECT ALL FIELD VALIDATIONS**
+10. **CRITICAL: RESPECT ALL FIELD VALIDATIONS - YOUR RESPONSE WILL FAIL IF YOU VIOLATE THESE**
     - Each field has a "validations" array and "validationSummary" in the content type definitions
     - You MUST check and respect ALL validation rules for each field
+    - **MANDATORY DEFAULT LIMITS** (apply even if no validation specified):
+      * Symbol fields: MAX 256 characters - Contentful will reject longer values
+      * Text fields: MAX 50,000 characters - Contentful will reject longer values
+    - If a validation specifies a different limit, use that limit instead (it overrides the default)
     - For reference fields, check ALLOWED_CONTENT_TYPES
+    - **BEFORE RETURNING**: Count characters in every Symbol and Text field value - if any exceed limits, truncate them
 
 11. For required fields: Always populate them (use defaults if document doesn't provide)
 
@@ -837,9 +881,12 @@ ${contentTypes
     - [ ] Did I extract all images/drawings and add them to the assets array?
     - [ ] Did I avoid including image tokens in RichText fields?
 
-VALIDATION CHECKLIST BEFORE YOU RETURN:
+VALIDATION CHECKLIST BEFORE YOU RETURN (MANDATORY - DO NOT SKIP):
 - [ ] I checked the "validations" array for EVERY field I populated
-- [ ] All character count limits (size.min, size.max) are respected
+- [ ] **CRITICAL**: I verified EVERY Symbol field value is ≤ 256 characters (counted each one)
+- [ ] **CRITICAL**: I verified EVERY Text field value is ≤ 50,000 characters (counted each one)
+- [ ] **CRITICAL**: If any Symbol/Text value exceeded limits, I truncated it at word boundaries
+- [ ] All character count limits (size.min, size.max) are respected (validation limits override defaults)
 - [ ] All number ranges (range.min, range.max) are respected
 - [ ] All required fields are populated
 - [ ] Every { "__ref": "X" } has a corresponding entry with tempId: "X"
@@ -847,6 +894,7 @@ VALIDATION CHECKLIST BEFORE YOU RETURN:
 - [ ] Reference fields use the correct format ({ "__ref": "..." } or [{ "__ref": "..." }])
 - [ ] I did not add any tokens that were not present in the provided document content
 - [ ] Every RichText value is an exact substring of the provided document content
+- [ ] **FINAL VERIFICATION**: I counted characters in all Symbol and Text fields - NONE exceed their limits
 
 **CONTENT EXTRACTION TIPS:**
 - **MULTIPLE ENTRIES DETECTION**:
