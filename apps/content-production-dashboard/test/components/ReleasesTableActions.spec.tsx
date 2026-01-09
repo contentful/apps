@@ -19,7 +19,9 @@ vi.mock('../../src/hooks/useReleases', () => ({
   useReleases: (page: number) => mockUseReleases(page),
 }));
 
-const createMockRelease = (overrides?: Partial<ReleaseWithScheduledAction>): ReleaseWithScheduledAction => {
+const createMockRelease = (
+  overrides?: Partial<ReleaseWithScheduledAction>
+): ReleaseWithScheduledAction => {
   const now = new Date();
   const futureDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
 
