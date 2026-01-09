@@ -103,6 +103,18 @@ export async function askForEntryCount(rl: Interface): Promise<number> {
   return numberOfEntries;
 }
 
+export async function askForContentTypeCount(rl: Interface): Promise<number> {
+  const contentTypesInput = await askQuestion(rl, 'Enter the number of content types to create: ');
+  const numberOfContentTypes = Number.parseInt(contentTypesInput);
+
+  if (isNaN(numberOfContentTypes) || numberOfContentTypes <= 0) {
+    console.log('❌ Please enter a valid positive number.');
+    throw new Error('Invalid content type count');
+  }
+
+  return numberOfContentTypes;
+}
+
 export async function askForContentTypeName(
   rl: Interface,
   deleteContentTypeName: string | undefined

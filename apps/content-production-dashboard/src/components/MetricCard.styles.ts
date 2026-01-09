@@ -6,5 +6,6 @@ export const styles = {
     border: `1px solid ${tokens.gray300}`,
     borderRadius: '4px',
     boxShadow: 'none',
+    backgroundColor: tokens.colorWhite,
   } as CSSProperties,
 };

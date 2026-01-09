@@ -10,4 +10,13 @@ export const styles = {
     padding: tokens.spacingL,
     backgroundColor: tokens.colorWhite,
   } as CSSProperties,
+  flexGrow: {
+    flex: 1,
+  } as CSSProperties,
+  sectionContainer: {
+    border: `1px solid ${tokens.gray300}`,
+    borderRadius: '4px',
+    padding: tokens.spacingL,
+    backgroundColor: tokens.colorWhite,
+  } as CSSProperties,
 };

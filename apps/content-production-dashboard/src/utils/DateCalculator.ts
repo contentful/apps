@@ -30,4 +30,35 @@ export class DateCalculator {
   static isWithin(d: Date, startInclusive: Date, endExclusive: Date): boolean {
     return d.getTime() >= startInclusive.getTime() && d.getTime() < endExclusive.getTime();
   }
+
+  static formatMonthYear(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  }
+
+  static formatMonthYearDisplay(monthYear: string): string {
+    const [year, month] = monthYear.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1);
+    // todo : check default locale from the sdk or somehow
+    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  }
+
+  static generateMonthRange(startDate: Date, endDate: Date): string[] {
+    const months: string[] = [];
+    const current = new Date(startDate);
+    current.setDate(1);
+    current.setHours(0, 0, 0, 0);
+
+    const end = new Date(endDate);
+    end.setDate(1);
+    end.setHours(0, 0, 0, 0);
+
+    while (current <= end) {
+      months.push(DateCalculator.formatMonthYear(current));
+      current.setMonth(current.getMonth() + 1);
+    }
+
+    return months;
+  }
 }
