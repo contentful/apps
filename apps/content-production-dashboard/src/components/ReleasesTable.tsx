@@ -1,10 +1,23 @@
 import { useState } from 'react';
-import { Table, Pagination, Note, Box, Skeleton, Text, Icon } from '@contentful/f36-components';
+import {
+  Table,
+  Pagination,
+  Note,
+  Box,
+  Skeleton,
+  Text,
+  Icon,
+} from '@contentful/f36-components';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
+import { useReleases } from '../hooks/useReleases';
 import { GearSixIcon } from '@contentful/f36-icons';
+import type { ReleaseWithScheduledAction } from '../utils/fetchReleases';
 import { RELEASES_PER_PAGE } from '../utils/consts';
 import tokens from '@contentful/f36-tokens';
 import { styles } from './ReleasesTable.styles';
-import { useReleases } from '../hooks/useReleases';
+import { ReleasesTableActions } from './ReleasesTableActions';
+
 
 const ReleasesTableHeader = () => {
   return (
@@ -27,7 +40,7 @@ const ReleasesTableHeader = () => {
 
 export const ReleasesTable = () => {
   const [currentPage, setCurrentPage] = useState(0);
-  const { releases, total, isFetchingReleases, fetchingReleasesError } = useReleases(currentPage);
+  const { releases, total, isFetchingReleases, fetchingReleasesError, refetch } = useReleases(currentPage);
 
   const formatDate = (dateString: string | undefined): string => {
     if (!dateString) return '—';
@@ -109,7 +122,11 @@ export const ReleasesTable = () => {
               <Table.Cell style={styles.updatedCell}>{formatDate(release.updatedAt)}</Table.Cell>
               <Table.Cell style={styles.userCell}>{formatUserName(release.updatedBy)}</Table.Cell>
               <Table.Cell style={styles.actionsCell}>
-                {/* TODO: Add actions menu here */}
+                <ReleasesTableActions
+                  release={release}
+                  sdk={sdk}
+                  onActionSuccess={refetch}
+                />
               </Table.Cell>
             </Table.Row>
           ))}
