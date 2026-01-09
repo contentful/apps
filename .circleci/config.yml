@@ -11,6 +11,12 @@ commands:
           template-preset: 'semantic-release-ecosystem'
       - vault/configure-lerna
       - run:
+          name: Setup GitHub authentication for bypass
+          command: |
+            git config --global user.email "circleci@contentful.com"
+            git config --global user.name "CircleCI"
+            git config --global url."https://${GITHUB_BYPASS_TOKEN:-$GITHUB_TOKEN}@github.com".insteadOf "https://github.com"
+      - run:
           name: Setup GitHub packages
           command: |
             echo "//npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_WRITE_TOKEN}" > ~/.npmrc
