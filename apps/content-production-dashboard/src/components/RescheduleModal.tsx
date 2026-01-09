@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Modal,
   FormControl,
-  TextInput,
-  Select,
+  Autocomplete,
   Button,
   Flex,
   Note,
@@ -22,19 +21,12 @@ interface RescheduleModalProps {
   testId: string;
 }
 
-const formatDateForInput = (dateString: string): string => {
-  try {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  } catch {
-    return '';
-  }
+type TimezoneOption = {
+  value: string;
+  display: string;
 };
 
-const formatTimeForInput = (dateString: string): string => {
+const formatToPMAM = (dateString: string): string => {
   try {
     const date = new Date(dateString);
     let hours = date.getHours();
@@ -54,6 +46,23 @@ const formatTimeForInput = (dateString: string): string => {
   }
 };
 
+const parseTimeToDate = (date: Date, timeString: string): Date => {
+  const [timePart, period] = timeString.split(' ');
+  const [hours, minutes] = timePart.split(':');
+  let hour24 = parseInt(hours, 10);
+  
+  // Convert to 24-hour format
+  if (period.toUpperCase() === 'PM' && hour24 !== 12) {
+    hour24 += 12;
+  } else if (period.toUpperCase() === 'AM' && hour24 === 12) {
+    hour24 = 0;
+  }
+  
+  const newDate = new Date(date);
+  newDate.setHours(hour24, parseInt(minutes, 10), 0, 0);
+  return newDate;
+};
+
 // Generate time options in 30-minute increments
 const generateTimeOptions = (): string[] => {
   const options: string[] = [];
@@ -68,26 +77,69 @@ const generateTimeOptions = (): string[] => {
   return options;
 };
 
+
+const generateTimezoneOptions = () => {
+  return Intl.supportedValuesOf('timeZone').map((tz) => {
+    const date = new Date();
+    const utcOffset = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      timeZoneName: 'longOffset'
+    }).format(date).split(' ').pop();
+    
+    return {
+      value: tz,
+      display: `${tz} (${utcOffset})`
+    };
+  });
+};
+
 export const RescheduleModal = ({ isShown, onClose, release, sdk, onSuccess, testId }: RescheduleModalProps) => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState('');
   const [timezone, setTimezone] = useState('UTC');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Memoize options to avoid recalculating on every render
+  const allTimeOptions = useMemo(() => generateTimeOptions(), []);
+  const allTimezoneOptions = useMemo(() => generateTimezoneOptions(), []);
+  
+  // State for filtered options
+  const [filteredTimeOptions, setFilteredTimeOptions] = useState<string[]>([]);
+  const [filteredTimezoneOptions, setFilteredTimezoneOptions] = useState<TimezoneOption[]>([]);
 
   useEffect(() => {
     if (release && isShown) {
       setDate(new Date(release.scheduledFor.datetime));
-      setTime(formatTimeForInput(release.scheduledFor.datetime));
+      setTime(formatToPMAM(release.scheduledFor.datetime));
       setTimezone(release.scheduledFor.timezone || 'UTC');
       setError(null);
+      setFilteredTimeOptions(allTimeOptions);
+      setFilteredTimezoneOptions(allTimezoneOptions);
     }
-  }, [release?.scheduledFor.datetime, release?.scheduledFor.timezone, isShown]);
+  }, [release?.scheduledFor.datetime, release?.scheduledFor.timezone, isShown, allTimeOptions, allTimezoneOptions]);
+
+  // Filter time options
+  const handleTimeInputChange = (value: string) => {
+    const filtered = allTimeOptions.filter((option) =>
+      option.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredTimeOptions(filtered);
+  };
+
+  // Filter timezone options
+  const handleTimezoneInputChange = (value: string) => {
+    const filtered = allTimezoneOptions.filter((option) =>
+      option.display.toLowerCase().includes(value.toLowerCase()) ||
+      option.value.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredTimezoneOptions(filtered);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!release || !date || !time) {
-      setError('Date and time are required');
+
+    if (!date || !time || !release || time.trim() === '' || !timezone) {
+      setError('Date, time, and release are required for rescheduling');
       return;
     }
 
@@ -102,29 +154,16 @@ export const RescheduleModal = ({ isShown, onClose, release, sdk, onSuccess, tes
         environmentId: sdk.ids.environment,
       });
 
-            // Parse the time in 12-hour format
-            const [timePart, period] = time.split(' ');
-            const [hours, minutes] = timePart.split(':');
-            let hour24 = parseInt(hours, 10);
-            
-            // Convert to 24-hour format
-            if (period.toUpperCase() === 'PM' && hour24 !== 12) {
-              hour24 += 12;
-            } else if (period.toUpperCase() === 'AM' && hour24 === 12) {
-              hour24 = 0;
-            }
+      // Parse the time and create a new Date object
+      const newDate = parseTimeToDate(date, time);
       
-            // Create a new Date object with the selected date and time
-            const newDate = new Date(date);
-            newDate.setHours(hour24, parseInt(minutes, 10), 0, 0);
+      // Validate that the new date is in the future
+      if (newDate <= new Date()) {
+        throw new Error('Scheduled date and time must be in the future');
+      }
       
-            // Validate that the new date is in the future
-            if (newDate <= new Date()) {
-              throw new Error('Scheduled date and time must be in the future');
-            }
-      
-            // Format the date in ISO 8601 format
-            const isoDate = newDate.toISOString();
+      // Format the date in ISO 8601 format
+      const isoDate = newDate.toISOString();
 
       // Update the scheduled action
       await sdk.cma.scheduledActions.update(
@@ -175,50 +214,41 @@ export const RescheduleModal = ({ isShown, onClose, release, sdk, onSuccess, tes
                   />
                     </FormControl>
                   </Box>
-                  <Box flex={1}>
-                    <FormControl>
+                  <Box>
+                    <FormControl isRequired isInvalid={!!error}>
                       <FormControl.Label>Time</FormControl.Label>
-                      <Select
-                        value={time}
-                        onChange={(e) => setTime(e.target.value)}
-                      >
-                        {generateTimeOptions().map((timeOption) => (
-                          <Select.Option key={timeOption} value={timeOption}>
-                            {timeOption}
-                          </Select.Option>
-                        ))}
-                      </Select>
+                      <Autocomplete
+                        items={filteredTimeOptions}
+                        onInputValueChange={handleTimeInputChange}
+                        onSelectItem={(item) => setTime(item)}
+                        selectedItem={time}
+                        listMaxHeight={100}
+                        listWidth="full"
+                        placeholder="Select time"
+                        usePortal={true}
+                      />
+                      {error && (
+                        <FormControl.ValidationMessage>
+                          {error}
+                        </FormControl.ValidationMessage>
+                      )}
                     </FormControl>
                   </Box>
                 </Flex>
-                <FormControl>
+                <FormControl isRequired isInvalid={!!error}>
                   <FormControl.Label>Time zone</FormControl.Label>
-                  <Select
-                    value={timezone}
-                    onChange={(e) => setTimezone(e.target.value)}
-                    
-                  >
-                    {Intl.supportedValuesOf('timeZone').map((tz) => {
-                      // Get UTC offset for the timezone
-                      const date = new Date();
-                      const utcOffset = new Intl.DateTimeFormat('en-US', {
-                        timeZone: tz,
-                        timeZoneName: 'longOffset'
-                      }).format(date).split(' ').pop();
-                      
-                      return (
-                        <Select.Option key={tz} value={tz}>
-                          {`${tz} (${utcOffset})`}
-                        </Select.Option>
-                      );
-                    })}
-                  </Select>
+                  <Autocomplete<TimezoneOption>
+                    items={filteredTimezoneOptions}
+                    onInputValueChange={handleTimezoneInputChange}
+                    onSelectItem={(item) => setTimezone(item.value)}
+                    selectedItem={allTimezoneOptions.find(tz => tz.value === timezone)}
+                    itemToString={(item) => item.display}
+                    renderItem={(item) => item.display}
+                    listMaxHeight={120}
+                    placeholder="Select timezone"
+                    usePortal={true}
+                  />
                 </FormControl>
-                {error && (
-                  <Note variant="negative" title="Error">
-                    {error}
-                  </Note>
-                )}
               </Flex>
             </form>
           </Modal.Content>
@@ -230,7 +260,7 @@ export const RescheduleModal = ({ isShown, onClose, release, sdk, onSuccess, tes
               <Button
                 variant="primary"
                 onClick={handleSubmit}
-                isDisabled={isSubmitting || !date || !time}
+                isDisabled={isSubmitting || !!error}
                 isLoading={isSubmitting}>
                 Set Schedule
               </Button>
@@ -241,4 +271,3 @@ export const RescheduleModal = ({ isShown, onClose, release, sdk, onSuccess, tes
     </Modal>
   );
 };
-
