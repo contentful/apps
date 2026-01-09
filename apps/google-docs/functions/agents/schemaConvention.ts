@@ -195,7 +195,6 @@ export function removeSchemaMarkers(text: string): string {
  * Extracts text content from Google Docs JSON and parses schema markers
  */
 export function extractTextWithSchema(documentJson: unknown): {
-  text: string;
   schema: ParsedSchema;
 } {
   // Extract plain text from Google Docs JSON
@@ -204,7 +203,7 @@ export function extractTextWithSchema(documentJson: unknown): {
   // Parse schema markers
   const schema = parseSchemaMarkers(text);
 
-  return { text, schema };
+  return { schema };
 }
 
 /**
