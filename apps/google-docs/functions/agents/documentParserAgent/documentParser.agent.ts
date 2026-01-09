@@ -28,6 +28,18 @@ export interface DocumentParserConfig {
 }
 
 /**
+ * Strips unnecessary metadata from Google Doc JSON to reduce payload size
+ * Removes only top-level metadata that's not used for content extraction
+ */
+function stripUnusedDocumentMetadata(doc: any): any {
+  if (!doc || typeof doc !== 'object') return doc;
+
+  const { documentStyle, revisionId, suggestedChanges, ...rest } = doc;
+
+  return rest;
+}
+
+/**
  * AI Agent that parses a Google Doc JSON and extracts structured entries
  * based on provided Contentful content type definitions.
  *
@@ -49,7 +61,8 @@ export async function createPreviewWithAgent(
   });
 
   console.log('Document Parser Agent document content Input:', documentId);
-  const documentJson = await fetchGoogleDocAsJson({ documentId, oauthToken });
+  let documentJson = await fetchGoogleDocAsJson({ documentId, oauthToken });
+
   // SECURITY VALIDATION: Validate document content before sending to AI
   const documentSecurityCheck = validateGoogleDocJson(documentJson);
   // Extract schema markers from document
@@ -62,6 +75,9 @@ export async function createPreviewWithAgent(
     console.error('Document security validation failed:', documentSecurityCheck.errors);
     throw new Error(errorMessage);
   }
+
+  documentJson = stripUnusedDocumentMetadata(documentJson);
+
   const prompt = buildExtractionPrompt({
     contentTypes,
     documentJson,
@@ -69,6 +85,7 @@ export async function createPreviewWithAgent(
     schema,
     availableContentTypeIds: contentTypes.map((ct) => ct.sys.id),
   });
+
   const result = await generateObject({
     model: openaiClient(modelVersion),
     schema: FinalEntriesResultSchema,
@@ -596,7 +613,7 @@ TOTAL FIELDS ACROSS ALL TYPES: ${totalFields}
 LOCALE TO USE: ${locale}
 
 CONTENT TYPE DEFINITIONS:
-${JSON.stringify(contentTypeDefinitions, null, 2)}
+${JSON.stringify(contentTypeDefinitions)}
 
 === GOOGLE DOCS JSON PARSING GUIDE ===
 
@@ -734,7 +751,7 @@ When extracting RichText fields, convert Google Docs formatting to Markdown:
 === END PARSING GUIDE ===
 
 GOOGLE DOCS JSON DOCUMENT:
-${JSON.stringify(documentJson, null, 2)}
+${JSON.stringify(documentJson)}
 
 CRITICAL INSTRUCTIONS:
 *** BE VERY CAREFUL TO NOT INVENT TEXT OR STRUCTURE THAT IS NOT PRESENT IN THE DOCUMENT ***
