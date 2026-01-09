@@ -1,5 +1,13 @@
 import { useState } from 'react';
-import { Table, Pagination, Note, Box, Skeleton, Text, Icon } from '@contentful/f36-components';
+import {
+  Table,
+  Pagination,
+  Note,
+  Box,
+  Skeleton,
+  Text,
+  Icon,
+} from '@contentful/f36-components';
 import { GearSixIcon } from '@contentful/f36-icons';
 import { RELEASES_PER_PAGE } from '../utils/consts';
 import tokens from '@contentful/f36-tokens';
@@ -45,6 +53,7 @@ export const ReleasesTable = () => {
       return '—';
     }
   };
+
 
   const formatUserName = (
     user: { id: string; firstName?: string; lastName?: string } | null
