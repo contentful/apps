@@ -39,7 +39,7 @@ const Dashboard = () => {
   const metrics = metricsCalculator.getAllMetrics();
 
   return (
-    <Flex flexDirection="column" style={styles.dashboardContainer}>
+    <Flex flexDirection="column" style={styles.container}>
       <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingXs">
         <Heading>Content Dashboard</Heading>
         <Button
