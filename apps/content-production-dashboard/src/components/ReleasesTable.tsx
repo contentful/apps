@@ -1,19 +1,10 @@
 import { useState } from 'react';
-import {
-  Table,
-  Pagination,
-  Note,
-  Box,
-  Skeleton,
-  Text,
-  Icon,
-} from '@contentful/f36-components';
+import { Table, Pagination, Note, Box, Skeleton, Text, Icon } from '@contentful/f36-components';
 import { GearSixIcon } from '@contentful/f36-icons';
 import { RELEASES_PER_PAGE } from '../utils/consts';
 import tokens from '@contentful/f36-tokens';
 import { styles } from './ReleasesTable.styles';
 import { useReleases } from '../hooks/useReleases';
-
 
 const ReleasesTableHeader = () => {
   return (
@@ -24,7 +15,11 @@ const ReleasesTableHeader = () => {
         <Table.Cell style={styles.itemsCell}>Items</Table.Cell>
         <Table.Cell style={styles.updatedCell}>Last Updated</Table.Cell>
         <Table.Cell style={styles.userCell}>Last Updated By</Table.Cell>
-        <Table.Cell style={styles.actionsCell}><Icon style={{ margin: tokens.spacing2Xs }}><GearSixIcon /></Icon></Table.Cell>
+        <Table.Cell style={styles.actionsCell}>
+          <Icon style={{ margin: tokens.spacing2Xs }}>
+            <GearSixIcon />
+          </Icon>
+        </Table.Cell>
       </Table.Row>
     </Table.Head>
   );
@@ -54,7 +49,9 @@ export const ReleasesTable = () => {
   const truncate = (str: string, max: number = 20) =>
     str.length > max ? str.slice(0, max) + ' ...' : str;
 
-  const formatUserName = (user: { id: string; firstName?: string; lastName?: string } | null): string => {
+  const formatUserName = (
+    user: { id: string; firstName?: string; lastName?: string } | null
+  ): string => {
     if (!user) return '—';
     const firstName = user.firstName || '';
     const lastName = user.lastName || '';
@@ -65,7 +62,7 @@ export const ReleasesTable = () => {
     return (
       <Box marginTop="spacingXl">
         <Note variant="negative" title="Error loading releases">
-           Failed to load releases
+          Failed to load releases
         </Note>
       </Box>
     );
@@ -103,11 +100,13 @@ export const ReleasesTable = () => {
         <ReleasesTableHeader />
         <Table.Body>
           {releases.map((release) => (
-            <Table.Row key={release.releaseId} >
+            <Table.Row key={release.releaseId}>
               <Table.Cell style={styles.titleCell}>
                 <Text fontWeight="fontWeightDemiBold">{truncate(release.title)}</Text>
               </Table.Cell>
-              <Table.Cell style={styles.dateCell}>{formatDate(release.scheduledFor.datetime)}</Table.Cell>
+              <Table.Cell style={styles.dateCell}>
+                {formatDate(release.scheduledFor.datetime)}
+              </Table.Cell>
               <Table.Cell style={styles.itemsCell}>{release.itemsCount} items</Table.Cell>
               <Table.Cell style={styles.updatedCell}>{formatDate(release.updatedAt)}</Table.Cell>
               <Table.Cell style={styles.userCell}>{formatUserName(release.updatedBy)}</Table.Cell>

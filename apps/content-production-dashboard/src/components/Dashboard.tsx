@@ -11,7 +11,6 @@ import { LoadingSkeleton } from './LoadingSkeleton';
 import { ReleasesTable } from './ReleasesTable';
 import { styles } from './Dashboard.styles';
 
-
 const Dashboard = () => {
   const sdk = useSDK();
   const installation = (sdk.parameters.installation ?? {}) as AppInstallationParameters;
