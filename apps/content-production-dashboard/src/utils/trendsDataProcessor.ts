@@ -77,21 +77,20 @@ export function processContentTypeTrends(
     const contentTypeId = entry.sys.contentType?.sys?.id;
     if (!contentTypeId) return;
 
-    const contentTypeName = contentTypeNames?.get(contentTypeId) || contentTypeId;
     const monthYear = DateCalculator.formatMonthYear(createdAt);
-    contentTypes.add(contentTypeName);
+    contentTypes.add(contentTypeId);
 
     if (!contentTypeMap.has(monthYear)) {
       contentTypeMap.set(monthYear, new Map());
     }
 
     const monthData = contentTypeMap.get(monthYear)!;
-    monthData.set(contentTypeName, (monthData.get(contentTypeName) || 0) + 1);
+    monthData.set(contentTypeId, (monthData.get(contentTypeId) || 0) + 1);
   });
 
   // Generate all months in range
   const allMonths = DateCalculator.generateMonthRange(startDate, now);
-  const contentTypeArray = Array.from(contentTypes).sort();
+  const contentTypeNamesArray = Array.from(contentTypeNames?.values() || []).sort();
 
   // Convert to chart data format
   const data = allMonths.map((monthYear) => {
@@ -100,14 +99,18 @@ export function processContentTypeTrends(
       date: DateCalculator.formatMonthYearDisplay(monthYear),
     };
 
-    contentTypeArray.forEach((contentTypeName) => {
-      dataPoint[contentTypeName] = monthData.get(contentTypeName) || 0;
+    contentTypeNamesArray.forEach((contentTypeName) => {
+      // Find the key (contentTypeId) that has this value (contentTypeName)
+      const contentTypeId = Array.from(contentTypeNames?.entries() || []).find(
+        ([, value]) => value === contentTypeName
+      )?.[0];
+      dataPoint[contentTypeName] = monthData.get(contentTypeId || '') || 0;
     });
 
     return dataPoint;
   });
 
-  return { data, contentTypes: contentTypeArray };
+  return { data, contentTypes: contentTypeNamesArray };
 }
 
 export function processCreatorTrends(
