@@ -1,14 +1,16 @@
-import { Flex, Heading, Button } from '@contentful/f36-components';
+import { Flex, Heading, Button, Box } from '@contentful/f36-components';
 import { ArrowClockwiseIcon } from '@contentful/f36-icons';
 import { MetricCard } from './MetricCard';
 import { MetricsCalculator } from '../metrics/MetricsCalculator';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import type { AppInstallationParameters } from '../locations/ConfigScreen';
-import { styles } from '../locations/Page.styles';
 import { ErrorDisplay } from './ErrorDisplay';
 import { useAllEntries } from '../hooks/useAllEntries';
 import { useScheduledActions } from '../hooks/useScheduledActions';
 import { LoadingSkeleton } from './LoadingSkeleton';
+import { ReleasesTable } from './ReleasesTable';
+import { styles } from './Dashboard.styles';
+
 
 const Dashboard = () => {
   const sdk = useSDK();
@@ -37,7 +39,7 @@ const Dashboard = () => {
   const metrics = metricsCalculator.getAllMetrics();
 
   return (
-    <Flex flexDirection="column" style={styles.container}>
+    <Flex flexDirection="column" style={styles.dashboardContainer}>
       <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingXs">
         <Heading>Content Dashboard</Heading>
         <Button
@@ -55,7 +57,8 @@ const Dashboard = () => {
       ) : isRefreshing ? (
         <LoadingSkeleton metricsCount={metricsCalculator.getAllMetrics().length} />
       ) : (
-        <Flex flexDirection="row" gap="spacingM">
+        <>
+        <Flex flexDirection="row" gap="spacingM" style={styles.metricsContainer}>
           {metrics.map((metric) => {
             return (
               <MetricCard
@@ -68,6 +71,15 @@ const Dashboard = () => {
             );
           })}
         </Flex>
+          <Box marginTop="spacingXl">
+            <Box padding="spacingL" style={styles.releasesTableContainer}>
+              <Heading as="h2" marginBottom="spacingM">
+                Upcoming Scheduled Releases
+              </Heading>
+              <ReleasesTable />
+            </Box>
+          </Box>
+        </>
       )}
     </Flex>
   );
