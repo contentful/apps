@@ -10,7 +10,7 @@ export const LoadingSkeleton = ({ metricsCount }: { metricsCount: number }) => {
           return (
             <Card key={index} style={styles.metricCard}>
               <Skeleton.Container>
-                <Skeleton.Image width="100%" height="120px" />
+                <Skeleton.Image width="100%" height="110px" />
               </Skeleton.Container>
             </Card>
           );

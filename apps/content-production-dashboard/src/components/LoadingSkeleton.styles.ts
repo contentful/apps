@@ -5,7 +5,7 @@ import { styles as metricCardStyles } from './MetricCard.styles';
 export const styles = {
   metricCard: {
     ...metricCardStyles.card,
-    height: '120px',
+    height: '110px',
     padding: tokens.spacingXs,
   } as CSSProperties,
 

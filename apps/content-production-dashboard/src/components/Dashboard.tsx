@@ -1,4 +1,4 @@
-import { Flex, Heading, Button, Spinner } from '@contentful/f36-components';
+import { Flex, Heading, Button } from '@contentful/f36-components';
 import { ArrowClockwiseIcon } from '@contentful/f36-icons';
 import { MetricCard } from './MetricCard';
 import { MetricsCalculator } from '../metrics/MetricsCalculator';
