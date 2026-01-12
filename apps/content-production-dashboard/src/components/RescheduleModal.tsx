@@ -174,7 +174,6 @@ export const RescheduleModal = ({
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-
     const hasErrors = validateFields();
     if (hasErrors) {
       return;
@@ -218,7 +217,7 @@ export const RescheduleModal = ({
       let errorMessage = 'Failed to reschedule release';
 
       if (err?.code === 'TooManyPendingJobs') {
-        errorMessage = errorMessage + '. ' + 'You\'ve exceeded the pending scheduled actions limit.';
+        errorMessage = errorMessage + '. ' + "You've exceeded the pending scheduled actions limit.";
       }
 
       sdk.notifier.error(errorMessage);

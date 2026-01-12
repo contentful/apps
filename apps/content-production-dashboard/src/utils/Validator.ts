@@ -3,11 +3,7 @@ type FieldId = string;
 export type ErrorField = Record<FieldId, ErrorMessage>;
 
 export class Validator {
-  static setError(
-    errors: ErrorField,
-    field: string,
-    message: string
-  ): void {
+  static setError(errors: ErrorField, field: string, message: string): void {
     errors[field] = message;
   }
 
@@ -36,7 +32,7 @@ export class Validator {
       this.setError(errors, field, errorMessage);
       return errorMessage;
     }
-    
+
     return;
   }
 
