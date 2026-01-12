@@ -10,12 +10,13 @@ export interface UseAllEntriesResult {
   isFetchingEntries: boolean;
   fetchingEntriesError: Error | null;
   fetchedAt: Date | undefined;
+  refetchEntries: () => void;
 }
 
 export function useAllEntries(): UseAllEntriesResult {
   const sdk = useSDK<PageAppSDK>();
 
-  const { data, isFetching, error } = useQuery<FetchAllEntriesResult, Error>({
+  const { data, isFetching, error, refetch } = useQuery<FetchAllEntriesResult, Error>({
     queryKey: ['entries', sdk.ids.space, sdk.ids.environment],
     queryFn: () => fetchAllEntries(sdk),
   });
@@ -26,5 +27,8 @@ export function useAllEntries(): UseAllEntriesResult {
     isFetchingEntries: isFetching,
     fetchingEntriesError: error,
     fetchedAt: data?.fetchedAt,
+    refetchEntries: () => {
+      refetch();
+    },
   };
 }

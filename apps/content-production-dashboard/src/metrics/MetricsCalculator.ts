@@ -1,9 +1,5 @@
-import { FileIcon } from '@contentful/f36-icons';
 import type { EntryProps, ScheduledActionProps } from 'contentful-management';
-import { ClockIcon } from '@contentful/f36-icons';
 import type { MetricCardProps } from '../components/MetricCard';
-import { CalendarDotsIcon } from '@contentful/f36-icons';
-import { PenNibIcon } from '@contentful/f36-icons';
 import {
   NEEDS_UPDATE_MONTHS_RANGE,
   RECENTLY_PUBLISHED_DAYS_RANGE,
@@ -87,7 +83,6 @@ export class MetricsCalculator {
       title: 'Total Published',
       value: String(current),
       subtitle: text,
-      icon: FileIcon,
       isNegative,
     };
   }
@@ -121,7 +116,6 @@ export class MetricsCalculator {
         count === 0
           ? `No entries published in the last ${this.timeToPublishDays} days`
           : `For the last ${this.timeToPublishDays} days`,
-      icon: ClockIcon,
       isNegative: false,
     };
   }
@@ -142,7 +136,6 @@ export class MetricsCalculator {
       title: 'Scheduled',
       value: String(count),
       subtitle: 'For the next 30 days',
-      icon: CalendarDotsIcon,
       isNegative: false,
     };
   }
@@ -163,7 +156,6 @@ export class MetricsCalculator {
       title: 'Recently Published',
       value: String(count),
       subtitle: `In the last ${this.recentlyPublishedDays} days`,
-      icon: ClockIcon,
       isNegative: false,
     };
   }
@@ -184,7 +176,6 @@ export class MetricsCalculator {
       title: 'Needs Update',
       value: String(count),
       subtitle: `Content older than ${this.needsUpdateMonths} months`,
-      icon: PenNibIcon,
       isNegative: false,
     };
   }

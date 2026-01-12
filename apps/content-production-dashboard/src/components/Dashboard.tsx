@@ -1,20 +1,33 @@
-import { Flex, Box, Heading } from '@contentful/f36-components';
+import { Flex, Heading, Button, Spinner } from '@contentful/f36-components';
+import { ArrowClockwiseIcon } from '@contentful/f36-icons';
 import { MetricCard } from './MetricCard';
 import { MetricsCalculator } from '../metrics/MetricsCalculator';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import type { AppInstallationParameters } from '../locations/ConfigScreen';
 import { styles } from '../locations/Page.styles';
 import { ErrorDisplay } from './ErrorDisplay';
-import { LoadingSkeleton } from './LoadingSkeleton';
 import { useAllEntries } from '../hooks/useAllEntries';
 import { useScheduledActions } from '../hooks/useScheduledActions';
+import { LoadingSkeleton } from './LoadingSkeleton';
 
 const Dashboard = () => {
   const sdk = useSDK();
   const installation = (sdk.parameters.installation ?? {}) as AppInstallationParameters;
-  const { entries, isFetchingEntries, fetchingEntriesError } = useAllEntries();
-  const { scheduledActions, isFetchingScheduledActions, fetchingScheduledActionsError } =
-    useScheduledActions();
+  const { entries, isFetchingEntries, fetchingEntriesError, refetchEntries } = useAllEntries();
+  const {
+    scheduledActions,
+    isFetchingScheduledActions,
+    fetchingScheduledActionsError,
+    refetchScheduledActions,
+  } = useScheduledActions();
+
+  const handleRefresh = () => {
+    refetchEntries();
+    refetchScheduledActions();
+  };
+
+  const isRefreshing = isFetchingEntries || isFetchingScheduledActions;
+  const hasError = fetchingEntriesError || fetchingScheduledActionsError;
 
   const metricsCalculator = new MetricsCalculator(entries, scheduledActions, {
     needsUpdateMonths: installation.needsUpdateMonths,
@@ -25,31 +38,36 @@ const Dashboard = () => {
 
   return (
     <Flex flexDirection="column" style={styles.container}>
-      <Box marginBottom="spacingXs">
+      <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingXs">
         <Heading>Content Dashboard</Heading>
-      </Box>
+        <Button
+          variant="secondary"
+          size="small"
+          startIcon={<ArrowClockwiseIcon />}
+          onClick={handleRefresh}
+          isDisabled={isRefreshing}>
+          Refresh
+        </Button>
+      </Flex>
 
-      {fetchingEntriesError || fetchingScheduledActionsError ? (
+      {hasError ? (
         <ErrorDisplay error={fetchingEntriesError} />
-      ) : isFetchingEntries || isFetchingScheduledActions ? (
-        <LoadingSkeleton />
+      ) : isRefreshing ? (
+        <LoadingSkeleton metricsCount={metricsCalculator.getAllMetrics().length} />
       ) : (
-        <>
-          <Flex flexDirection="row" gap="spacingM">
-            {metrics.map((metric) => {
-              return (
-                <MetricCard
-                  key={metric.title}
-                  title={metric.title}
-                  value={metric.value}
-                  subtitle={metric.subtitle}
-                  icon={metric.icon}
-                  isNegative={metric.isNegative}
-                />
-              );
-            })}
-          </Flex>
-        </>
+        <Flex flexDirection="row" gap="spacingM">
+          {metrics.map((metric) => {
+            return (
+              <MetricCard
+                key={metric.title}
+                title={metric.title}
+                value={metric.value}
+                subtitle={metric.subtitle}
+                isNegative={metric.isNegative}
+              />
+            );
+          })}
+        </Flex>
       )}
     </Flex>
   );
