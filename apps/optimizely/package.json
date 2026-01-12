@@ -33,7 +33,7 @@
     "build": "rm -rf build && vite build",
     "build:local": "npm run env:local && npm run build",
     "env:local": "echo REACT_APP_OPTIMIZELY_CLIENT_APP_ID=${REACT_APP_OPTIMIZELY_CLIENT_APP_ID} > .env.local",
-    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/optimizely --acl public-read",
+    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/optimizely",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "test": "vitest",
     "test:ci": "vitest"

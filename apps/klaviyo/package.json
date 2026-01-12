@@ -37,8 +37,8 @@
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id 2x4lsvuxPAGS2UUHwWVYee --token $CONTENTFUL_ACCESS_TOKEN",
     "proxy": "cd ../lambda && npm run dev",
-    "deploy": "aws s3 sync ./build ${STATIC_KLAVIYO_S3_BASE}/klaviyo --acl public-read",
-    "deploy:test": "aws s3 sync ./build ${STATIC_KLAVIYO_S3_BASE}/klaviyo-test --acl public-read",
+    "deploy": "aws s3 sync ./build ${STATIC_KLAVIYO_S3_BASE}/klaviyo",
+    "deploy:test": "aws s3 sync ./build ${STATIC_KLAVIYO_S3_BASE}/klaviyo-test",
     "deploy:staging": "npm run build && contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${TEST_ORG_ID} --definition-id TQDpclXMlILg5GAlaxU7y --token ${TEST_CMA_TOKEN}",
     "dev-with-proxy": "concurrently \"npm run dev\" \"npm run proxy\"",
     "upload-staging": "contentful-app-scripts upload --bundle-dir ./build --host api.flinkly.com --organization-id 7oPjKXwmGdQ9vnnjVe6MCy --definition-id TQDpclXMlILg5GAlaxU7y --token $CONTENTFUL_STAGING_ACCESS_TOKEN"
