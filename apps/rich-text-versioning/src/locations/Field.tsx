@@ -9,6 +9,7 @@ import { EntrySys } from '@contentful/app-sdk/dist/types/utils';
 import { convertToSerializableJson, ErrorInfo } from '../utils';
 import { ReleaseEntrySys } from '@contentful/app-sdk/dist/types/entry.types';
 import { styles } from './Field.styles';
+import { i18n } from '@lingui/core';
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
@@ -16,6 +17,12 @@ const Field = () => {
   const [entrySys, setEntrySys] = useState<EntrySys | ReleaseEntrySys | null>(null);
 
   useAutoResizer();
+
+  const locale = sdk.field.locale;
+  if (!i18n.locale) {
+    i18n.load(locale, {});
+    i18n.activate(locale);
+  }
 
   useEffect(() => {
     setFieldValue(sdk.field.getValue());
