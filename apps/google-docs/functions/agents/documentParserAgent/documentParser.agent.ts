@@ -121,6 +121,11 @@ CRITICAL FIELD TYPE RULES - READ CAREFULLY:
   **CRITICAL**: Even if no size validation is specified, Symbol fields CANNOT exceed 256 characters. You MUST truncate at word boundaries if the extracted text is longer.
 - Text: Long text (MANDATORY MAX 50,000 CHARACTERS - Contentful will reject values longer than this) - use for descriptions, content ✓
   **CRITICAL**: Even if no size validation is specified, Text fields CANNOT exceed 50,000 characters. You MUST truncate at word boundaries if the extracted text is longer.
+- RichText: Rich text content (MANDATORY MAX 200,000 CHARACTERS - Contentful will reject values longer than this) ✓
+  **CRITICAL**: RichText fields have TWO limits:
+    1. Character count: MAX 200,000 characters (hard limit)
+    2. Payload size: MAX 1 MB (field size cannot exceed 1MB payload)
+  If the RichText content exceeds either limit, you MUST truncate it appropriately.
 - Number: Integer or decimal values only ✓
 - Boolean: true or false only ✓
 - Date: ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss.sssZ) ✓
@@ -129,6 +134,7 @@ CRITICAL FIELD TYPE RULES - READ CAREFULLY:
 - Array (of Symbol/Text/Number): Array of PRIMITIVE values ONLY ✓
   Example: ["value1", "value2"] or [1, 2, 3]
   **CRITICAL**: For arrays of Symbol items, each item must also respect the 256 character limit
+  **CRITICAL**: Arrays of Symbol/Text fields have a MAX of 1,000 items per field
 - Link/Reference: Use reference placeholders ✓ (see REFERENCE HANDLING below)
 - Array (of Link): Use array of reference placeholders ✓ (see REFERENCE HANDLING below)
 
@@ -200,6 +206,26 @@ Output:
 
 === END REFERENCE HANDLING ===
 
+=== ENTRY-LEVEL LIMITS (CRITICAL) ===
+
+**CONTENTFUL ENTRY LIMITS - YOU MUST RESPECT THESE:**
+1. **Entry Size**: Each entry MUST NOT exceed 2 MB total size
+   - This includes all fields, metadata, and structure
+   - If an entry would exceed 2 MB, you MUST split it into multiple entries or reduce content
+   
+2. **Entry Links**: Each entry MUST NOT exceed 1,000 total links across ALL fields
+   - This includes all reference fields (Link and Array of Link fields)
+   - Count ALL references: single references count as 1, array references count by number of items
+   - Example: If an entry has 3 Link fields with 1 reference each, and 1 Array of Link field with 997 items, that's 1,000 total links (the maximum)
+   - If you exceed this limit, you MUST reduce the number of references
+
+**VALIDATION BEFORE RETURNING:**
+- [ ] For EACH entry, estimate the total size (should be well under 2 MB)
+- [ ] For EACH entry, count ALL links across ALL fields (should be ≤ 1,000)
+- [ ] If any entry exceeds these limits, adjust it BEFORE returning
+
+=== END ENTRY-LEVEL LIMITS ===
+
 FIELD VALIDATION RULES - MANDATORY TO RESPECT:
 **CRITICAL**: Contentful will REJECT entries with field values that violate constraints. Your response will FAIL if you generate invalid values.
 
@@ -208,16 +234,20 @@ Each field definition includes a "validations" array. You MUST respect ALL valid
    - **MANDATORY DEFAULT LIMITS** (even if no validation specified):
      * Symbol fields: MAX 256 characters (Contentful hard limit - cannot be exceeded)
      * Text fields: MAX 50,000 characters (Contentful hard limit - cannot be exceeded)
+     * RichText fields: MAX 200,000 characters AND MAX 1 MB payload size (Contentful hard limits - cannot be exceeded)
    - If a field has validations with size: { min: X, max: Y }:
      * The value MUST be between X and Y characters (inclusive)
      * These limits OVERRIDE the defaults above (e.g., if max: 100 is specified, use 100, not 256)
-   - For Symbol/Text fields: 
+   - For Symbol/Text/RichText fields: 
      * BEFORE setting any value, check its length
      * If the extracted text exceeds the max (validation max OR default max), you MUST truncate at word boundaries
      * If the document text is too short and min is specified: Extend it intelligently (repeat key phrases, add context)
      * If the document text is too long: Truncate at word boundaries to stay within max - DO NOT return values that exceed limits
      * Example: If size: { min: 40, max: 60 }, a title must be 40-60 characters
      * Example: If no size validation but field type is Symbol, max is 256 characters
+   - For Array fields (Symbol/Text arrays):
+     * MAX 1,000 items per array field (Contentful hard limit)
+     * Each Symbol item in the array must also respect the 256 character limit
    
 2. Number Range Limits (range validation):
    - If a field has validations with range: { min: X, max: Y }:
@@ -243,12 +273,14 @@ VALIDATION CHECKLIST FOR EACH FIELD (MANDATORY - CHECK EVERY FIELD):
 - [ ] Checked the validations array for this field
 - [ ] **CRITICAL FOR SYMBOL FIELDS**: Value length is ≤ 256 characters (default Contentful limit)
 - [ ] **CRITICAL FOR TEXT FIELDS**: Value length is ≤ 50,000 characters (default Contentful limit)
+- [ ] **CRITICAL FOR RICHTEXT FIELDS**: Value length is ≤ 200,000 characters AND payload size is ≤ 1 MB (default Contentful limits)
+- [ ] **CRITICAL FOR ARRAY FIELDS**: Array length is ≤ 1,000 items (default Contentful limit for Symbol/Text arrays)
 - [ ] If size validation exists: Value length is between min and max (validation limits override defaults)
 - [ ] If range validation exists: Number is within min and max (clamped if needed)
 - [ ] If required: Field is populated (not empty, null, or undefined)
 - [ ] If Link/Array of Link: Used { "__ref": "tempId" } format with valid tempId
 - [ ] All other validation rules are satisfied
-- [ ] **FINAL CHECK**: Before returning, verify NO Symbol field value exceeds 256 chars and NO Text field value exceeds 50,000 chars
+- [ ] **FINAL CHECK**: Before returning, verify NO Symbol field value exceeds 256 chars, NO Text field value exceeds 50,000 chars, NO RichText field exceeds 200,000 chars or 1 MB payload, and NO array field exceeds 1,000 items
 - RichText: Convert HTML-style tags from the document to proper Markdown format:
   - <B>text</B> → **text** (bold)
   - <I>text</I> → *text* (italic)
@@ -458,6 +490,8 @@ EXAMPLE: If the document has the word "bold" in it, do not invent bold text in y
        - title: Descriptive title (e.g., "Image", "Drawing", or text from nearby content)
        - altText: Alt text if available, or use title
        - fileName: Extract from URL if possible, or use default like "image.jpg"
+         **CRITICAL**: fileName MUST NOT exceed 256 characters (including extension) - Contentful will reject longer filenames
+         If the filename would exceed 256 characters, truncate it appropriately while preserving the file extension
        - contentType: MIME type (e.g., "image/jpeg", "image/png") - infer from URL extension
     2. **INCLUDE IN RICHTEXT**: Also include markdown image tokens like ![alt](URL) in RichText fields where the image appears
        - This allows the system to know where to place the asset in the RichText content
@@ -855,6 +889,7 @@ ${contentTypes
     - [ ] Did I scan the document for ALL inlineObjectElement references?
     - [ ] Did I extract the URL from each inlineObject's imageProperties.contentUri?
     - [ ] Did I add each image/drawing to the "assets" array with url, title, altText, fileName, and contentType?
+    - [ ] **CRITICAL**: Did I verify that ALL fileName values are ≤ 256 characters (including extension)?
     - [ ] Did I ALSO include markdown image tokens (![alt](url)) in RichText fields where images appear?
     - [ ] Are all assets properly formatted in the assets array?
     - [ ] Do the image tokens in RichText match the URLs in the assets array?
@@ -885,7 +920,11 @@ VALIDATION CHECKLIST BEFORE YOU RETURN (MANDATORY - DO NOT SKIP):
 - [ ] I checked the "validations" array for EVERY field I populated
 - [ ] **CRITICAL**: I verified EVERY Symbol field value is ≤ 256 characters (counted each one)
 - [ ] **CRITICAL**: I verified EVERY Text field value is ≤ 50,000 characters (counted each one)
-- [ ] **CRITICAL**: If any Symbol/Text value exceeded limits, I truncated it at word boundaries
+- [ ] **CRITICAL**: I verified EVERY RichText field value is ≤ 200,000 characters AND ≤ 1 MB payload size
+- [ ] **CRITICAL**: I verified EVERY Array field (Symbol/Text arrays) has ≤ 1,000 items
+- [ ] **CRITICAL**: For EACH entry, I verified the total entry size is ≤ 2 MB
+- [ ] **CRITICAL**: For EACH entry, I counted ALL links across ALL fields and verified ≤ 1,000 total links
+- [ ] **CRITICAL**: If any Symbol/Text/RichText value exceeded limits, I truncated it at word boundaries
 - [ ] All character count limits (size.min, size.max) are respected (validation limits override defaults)
 - [ ] All number ranges (range.min, range.max) are respected
 - [ ] All required fields are populated
@@ -894,7 +933,8 @@ VALIDATION CHECKLIST BEFORE YOU RETURN (MANDATORY - DO NOT SKIP):
 - [ ] Reference fields use the correct format ({ "__ref": "..." } or [{ "__ref": "..." }])
 - [ ] I did not add any tokens that were not present in the provided document content
 - [ ] Every RichText value is an exact substring of the provided document content
-- [ ] **FINAL VERIFICATION**: I counted characters in all Symbol and Text fields - NONE exceed their limits
+- [ ] **FINAL VERIFICATION**: I counted characters in all Symbol, Text, and RichText fields - NONE exceed their limits
+- [ ] **FINAL VERIFICATION**: I verified all entries are ≤ 2 MB and have ≤ 1,000 links each
 
 **CONTENT EXTRACTION TIPS:**
 - **MULTIPLE ENTRIES DETECTION**:
