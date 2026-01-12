@@ -17,14 +17,14 @@ interface PreviewModalProps {
   isLoading: boolean;
 }
 
-export const PreviewModal: React.FC<PreviewModalProps> = ({
+export const PreviewModal = ({
   isOpen,
   onClose,
   previewEntries,
   onCreateEntries,
   isCreatingEntries,
   isLoading,
-}) => {
+}: PreviewModalProps) => {
   if (!previewEntries || previewEntries.length === 0) {
     return null;
   }

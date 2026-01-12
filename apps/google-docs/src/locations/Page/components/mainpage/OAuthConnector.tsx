@@ -30,7 +30,6 @@ type CheckStatusResponse = {
 export const OAuthConnector = ({
   onOAuthConnectedChange,
   isOAuthConnected,
-  oauthToken,
   onOauthTokenChange,
   onLoadingStateChange,
 }: OAuthConnectorProps) => {
