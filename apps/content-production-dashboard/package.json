@@ -24,6 +24,8 @@
     "test:ci": "vitest",
     "lint": "eslint src test ",
     "lint:fix": "eslint src --fix",
+    "prettier": "prettier --write .",
+    "prettier:fix": "prettier --write --fix .",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "add-locations": "contentful-app-scripts add-locations",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",

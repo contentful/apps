@@ -47,9 +47,6 @@ export async function fetchAllEntries(sdk: PageAppSDK): Promise<FetchAllEntriesR
       if (error.message && error.message.includes('Response size too big')) {
         if (batchSize > FETCH_CONFIG.MIN_BATCH_SIZE) {
           const newBatchSize = Math.floor(batchSize / 2);
-          console.warn(
-            `Response size limit hit, reducing batch size from ${batchSize} to ${newBatchSize}`
-          );
           batchSize = newBatchSize;
           // Retry with smaller batch size (don't advance batchSkip)
           continue;
