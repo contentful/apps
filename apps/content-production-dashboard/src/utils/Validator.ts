@@ -1,26 +1,14 @@
+type ErrorMessage = string | undefined;
+type FieldId = string;
+export type ErrorField = Record<FieldId, ErrorMessage>;
+
 export class Validator {
   static setError(
-    errors: Record<string, string>,
+    errors: ErrorField,
     field: string,
-    message: string | undefined
+    message: string
   ): void {
-    if (message === undefined || message.trim() === '') {
-      delete errors[field];
-    } else {
-      errors[field] = message;
-    }
-  }
-
-  static getError(errors: Record<string, string>, field: string): string | undefined {
-    return errors[field];
-  }
-
-  static clearError(errors: Record<string, string>, field: string): void {
-    delete errors[field];
-  }
-
-  static clearAll(errors: Record<string, string>): void {
-    Object.keys(errors).forEach((key) => delete errors[key]);
+    errors[field] = message;
   }
 
   static hasErrors(errors: Record<string, string>): boolean {
@@ -48,9 +36,8 @@ export class Validator {
       this.setError(errors, field, errorMessage);
       return errorMessage;
     }
-
-    this.clearError(errors, field);
-    return undefined;
+    
+    return;
   }
 
   static isWithinRange(
@@ -72,8 +59,7 @@ export class Validator {
       return errorMessage;
     }
 
-    this.clearError(errors, field);
-    return undefined;
+    return;
   }
 
   static customValidation(
@@ -87,7 +73,6 @@ export class Validator {
       return errorMessage;
     }
 
-    this.clearError(errors, field);
-    return undefined;
+    return;
   }
 }

@@ -94,7 +94,7 @@ export const RescheduleModal = ({
 }: RescheduleModalProps) => {
   const [date, setDate] = useState<Date>(new Date());
   const [time, setTime] = useState('');
-  const [timezone, setTimezone] = useState<TimezoneOption>({ value: 'UTC', display: 'UTC' });
+  const [timezone, setTimezone] = useState<TimezoneOption>({ value: '', display: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [filteredTimeOptions, setFilteredTimeOptions] = useState<string[]>([]);
@@ -108,7 +108,7 @@ export const RescheduleModal = ({
       setDate(new Date(release.scheduledFor.datetime));
       setTime(formatToPMAM(release.scheduledFor.datetime));
       setTimezone({
-        value: release.scheduledFor.timezone || 'UTC',
+        value: release.scheduledFor.timezone || '',
         display:
           allTimezoneOptions.find((tz) => tz.value === release.scheduledFor.timezone)?.display ||
           '',
@@ -174,12 +174,13 @@ export const RescheduleModal = ({
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    if (!release || !date || !time || !timezone) {
-      return;
-    }
 
     const hasErrors = validateFields();
     if (hasErrors) {
+      return;
+    }
+
+    if (!release || !date || !time || !timezone) {
       return;
     }
 
@@ -217,7 +218,7 @@ export const RescheduleModal = ({
       let errorMessage = 'Failed to reschedule release';
 
       if (err?.code === 'TooManyPendingJobs') {
-        errorMessage = errorMessage + `You've exceeded the pending scheduled actions limit. `;
+        errorMessage = errorMessage + '. ' + 'You\'ve exceeded the pending scheduled actions limit.';
       }
 
       sdk.notifier.error(errorMessage);
@@ -246,13 +247,7 @@ export const RescheduleModal = ({
                         onSelect={(selectedDate: Date | undefined) => {
                           if (selectedDate) {
                             setDate(selectedDate);
-                          }
-                          if (errors.date) {
-                            setErrors((prev) => {
-                              const newErrors = { ...prev };
-                              delete newErrors.date;
-                              return newErrors;
-                            });
+                            clearError('date');
                           }
                         }}
                         fromDate={new Date()}
@@ -271,13 +266,7 @@ export const RescheduleModal = ({
                         onInputValueChange={handleTimeInputChange}
                         onSelectItem={(item) => {
                           setTime(item);
-                          if (errors.time) {
-                            setErrors((prev) => {
-                              const newErrors = { ...prev };
-                              delete newErrors.time;
-                              return newErrors;
-                            });
-                          }
+                          clearError('time');
                         }}
                         selectedItem={time}
                         listMaxHeight={100}
@@ -298,13 +287,7 @@ export const RescheduleModal = ({
                     onInputValueChange={handleTimezoneInputChange}
                     onSelectItem={(item) => {
                       setTimezone(item);
-                      if (errors.timezone) {
-                        setErrors((prev) => {
-                          const newErrors = { ...prev };
-                          delete newErrors.timezone;
-                          return newErrors;
-                        });
-                      }
+                      clearError('timezone');
                     }}
                     selectedItem={timezone}
                     itemToString={(item) => item.display}

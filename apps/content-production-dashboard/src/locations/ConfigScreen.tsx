@@ -36,7 +36,6 @@ const ConfigScreen = () => {
   const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
   const sdk = useSDK<ConfigAppSDK>();
 
-  // Use FormErrorHandler for validation
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validationErrors = (): boolean => {
@@ -115,7 +114,6 @@ const ConfigScreen = () => {
       [field]: numValue,
     }));
 
-    // Clear error for this field when user types
     if (errors[field]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
