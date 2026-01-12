@@ -201,9 +201,7 @@ export function extractTextWithSchema(documentJson: unknown): {
   const text = extractPlainText(documentJson);
 
   // Parse schema markers
-  const schema = parseSchemaMarkers(text);
-
-  return { schema };
+  return parseSchemaMarkers(text);
 }
 
 /**
