@@ -8,15 +8,14 @@ import {
   Text,
   Icon,
 } from '@contentful/f36-components';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { useReleases } from '../hooks/useReleases';
 import { GearSixIcon } from '@contentful/f36-icons';
-import type { ReleaseWithScheduledAction } from '../utils/fetchReleases';
 import { RELEASES_PER_PAGE } from '../utils/consts';
 import tokens from '@contentful/f36-tokens';
 import { styles } from './ReleasesTable.styles';
 import { ReleasesTableActions } from './ReleasesTableActions';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 
 
 const ReleasesTableHeader = () => {
@@ -39,6 +38,7 @@ const ReleasesTableHeader = () => {
 };
 
 export const ReleasesTable = () => {
+  const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const [currentPage, setCurrentPage] = useState(0);
   const { releases, total, isFetchingReleases, fetchingReleasesError, refetch } = useReleases(currentPage);
 

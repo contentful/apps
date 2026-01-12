@@ -5,12 +5,12 @@ import {
   Autocomplete,
   Button,
   Flex,
-  Note,
   Box,
 } from '@contentful/f36-components';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import type { ReleaseWithScheduledAction } from '../utils/fetchReleases';
 import { Datepicker } from '@contentful/f36-datepicker';
+import { Validator } from '../utils/Validator';
 
 interface RescheduleModalProps {
   isShown: boolean;
@@ -94,30 +94,28 @@ const generateTimezoneOptions = () => {
 };
 
 export const RescheduleModal = ({ isShown, onClose, release, sdk, onSuccess, testId }: RescheduleModalProps) => {
-  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [date, setDate] = useState<Date>(new Date());
   const [time, setTime] = useState('');
-  const [timezone, setTimezone] = useState('UTC');
+  const [timezone, setTimezone] = useState<TimezoneOption>({ value: 'UTC', display: 'UTC' });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Memoize options to avoid recalculating on every render
-  const allTimeOptions = useMemo(() => generateTimeOptions(), []);
-  const allTimezoneOptions = useMemo(() => generateTimezoneOptions(), []);
-  
-  // State for filtered options
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [filteredTimeOptions, setFilteredTimeOptions] = useState<string[]>([]);
   const [filteredTimezoneOptions, setFilteredTimezoneOptions] = useState<TimezoneOption[]>([]);
+  
+  const allTimeOptions = useMemo(() => generateTimeOptions(), []);
+  const allTimezoneOptions = useMemo(() => generateTimezoneOptions(), []);
+
 
   useEffect(() => {
     if (release && isShown) {
       setDate(new Date(release.scheduledFor.datetime));
       setTime(formatToPMAM(release.scheduledFor.datetime));
-      setTimezone(release.scheduledFor.timezone || 'UTC');
-      setError(null);
+      setTimezone({ value: release.scheduledFor.timezone || 'UTC', display: allTimezoneOptions.find(tz => tz.value === release.scheduledFor.timezone)?.display || '' });
+      setErrors({});
       setFilteredTimeOptions(allTimeOptions);
       setFilteredTimezoneOptions(allTimezoneOptions);
     }
-  }, [release?.scheduledFor.datetime, release?.scheduledFor.timezone, isShown, allTimeOptions, allTimezoneOptions]);
+  }, [release, isShown]);
 
   // Filter time options
   const handleTimeInputChange = (value: string) => {
@@ -125,6 +123,20 @@ export const RescheduleModal = ({ isShown, onClose, release, sdk, onSuccess, tes
       option.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredTimeOptions(filtered);
+    
+    // Clear the selected time if the input is cleared
+    if (!value || value.trim() === '') {
+      setTime('');
+    }
+    
+    // Clear error if field has value
+    if (value && value.trim() !== '' && errors.time) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.time;
+        return newErrors;
+      });
+    }
   };
 
   // Filter timezone options
@@ -134,17 +146,41 @@ export const RescheduleModal = ({ isShown, onClose, release, sdk, onSuccess, tes
       option.value.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredTimezoneOptions(filtered);
+    
+    if (!value || value.trim() === '') {
+      setTimezone({ value: '', display: '' });
+    }
+    
+    if (value && value.trim() !== '' && errors.timezone) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.timezone;
+        return newErrors;
+      });
+    }
+  };
+
+  const validateFields = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    Validator.isRequired(newErrors, date, 'date', 'Date');
+    Validator.isRequired(newErrors, time, 'time', 'Time');
+    Validator.isRequired(newErrors, timezone.value, 'timezone', 'Timezone');
+    
+    setErrors(newErrors);
+    return Validator.hasErrors(newErrors);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    if (!release) {
+      return;
+    }
 
-    if (!date || !time || !release || time.trim() === '' || !timezone) {
-      setError('Date, time, and release are required for rescheduling');
+    const hasErrors = validateFields();
+    if (hasErrors) {
       return;
     }
 
     setIsSubmitting(true);
-    setError(null);
 
     try {
       // Get the scheduled action to retrieve its version
@@ -154,18 +190,10 @@ export const RescheduleModal = ({ isShown, onClose, release, sdk, onSuccess, tes
         environmentId: sdk.ids.environment,
       });
 
-      // Parse the time and create a new Date object
-      const newDate = parseTimeToDate(date, time);
+      const newDate = parseTimeToDate(date!, time);
       
-      // Validate that the new date is in the future
-      if (newDate <= new Date()) {
-        throw new Error('Scheduled date and time must be in the future');
-      }
-      
-      // Format the date in ISO 8601 format
       const isoDate = newDate.toISOString();
 
-      // Update the scheduled action
       await sdk.cma.scheduledActions.update(
         {
           scheduledActionId: release.scheduledActionId,
@@ -178,18 +206,25 @@ export const RescheduleModal = ({ isShown, onClose, release, sdk, onSuccess, tes
           environment: scheduledAction.environment,
           scheduledFor: {
             datetime: isoDate,
-            timezone,
+            timezone: timezone.value,
           },
         }
       );
 
       onSuccess();
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to reschedule release:', err);
-      setError(err instanceof Error ? err.message : 'Failed to reschedule release');
+      let errorMessage = 'Failed to reschedule release';
+      
+      if (err?.code=== 'TooManyPendingJobs') {
+        errorMessage = errorMessage + `You've exceeded the pending scheduled actions limit. `
+      }
+      
+      sdk.notifier.error(errorMessage);
     } finally {
       setIsSubmitting(false);
+      onClose();
     }
   };
 
@@ -205,49 +240,89 @@ export const RescheduleModal = ({ isShown, onClose, release, sdk, onSuccess, tes
               <Flex flexDirection="column" gap="spacingM">
                 <Flex gap="spacingM" alignItems="flex-start">
                   <Box flex={1}>
-                    <FormControl isRequired>
+                    <FormControl isRequired isInvalid={!!errors.date}>
                       <FormControl.Label>Publish on</FormControl.Label>
                       <Datepicker
-                    selected={date || undefined}
-                    onSelect={(date: Date | undefined) => setDate(date || undefined)}
-                    dateFormat="dd MMM yyyy"
-                  />
+                        selected={date}
+                        onSelect={(selectedDate: Date | undefined) => {
+                          if (selectedDate) {
+                            setDate(selectedDate);
+                          }
+                          if (errors.date) {
+                            setErrors((prev) => {
+                              const newErrors = { ...prev };
+                              delete newErrors.date;
+                              return newErrors;
+                            });
+                          }
+                        }}
+                        fromDate={new Date()}
+                        dateFormat="dd MMM yyyy"
+                      />
+                      {errors.date && (
+                        <FormControl.ValidationMessage>
+                          {errors.date}
+                        </FormControl.ValidationMessage>
+                      )}
                     </FormControl>
                   </Box>
                   <Box>
-                    <FormControl isRequired isInvalid={!!error}>
+                    <FormControl isRequired isInvalid={!!errors.time}>
                       <FormControl.Label>Time</FormControl.Label>
                       <Autocomplete
                         items={filteredTimeOptions}
                         onInputValueChange={handleTimeInputChange}
-                        onSelectItem={(item) => setTime(item)}
+                        onSelectItem={(item) => {
+                          setTime(item);
+                          if (errors.time) {
+                            setErrors((prev) => {
+                              const newErrors = { ...prev };
+                              delete newErrors.time;
+                              return newErrors;
+                            });
+                          }
+                        }}
                         selectedItem={time}
                         listMaxHeight={100}
                         listWidth="full"
                         placeholder="Select time"
                         usePortal={true}
                       />
-                      {error && (
+                      {errors.time && (
                         <FormControl.ValidationMessage>
-                          {error}
+                          {errors.time}
                         </FormControl.ValidationMessage>
                       )}
                     </FormControl>
                   </Box>
                 </Flex>
-                <FormControl isRequired isInvalid={!!error}>
+                <FormControl isRequired isInvalid={!!errors.timezone}>
                   <FormControl.Label>Time zone</FormControl.Label>
                   <Autocomplete<TimezoneOption>
                     items={filteredTimezoneOptions}
                     onInputValueChange={handleTimezoneInputChange}
-                    onSelectItem={(item) => setTimezone(item.value)}
-                    selectedItem={allTimezoneOptions.find(tz => tz.value === timezone)}
+                    onSelectItem={(item) => {
+                      setTimezone(item);
+                      if (errors.timezone) {
+                        setErrors((prev) => {
+                          const newErrors = { ...prev };
+                          delete newErrors.timezone;
+                          return newErrors;
+                        });
+                      }
+                    }}
+                  selectedItem={timezone}
                     itemToString={(item) => item.display}
                     renderItem={(item) => item.display}
                     listMaxHeight={120}
                     placeholder="Select timezone"
                     usePortal={true}
                   />
+                  {errors.timezone && (
+                    <FormControl.ValidationMessage>
+                      {errors.timezone}
+                    </FormControl.ValidationMessage>
+                  )}
                 </FormControl>
               </Flex>
             </form>
@@ -260,7 +335,7 @@ export const RescheduleModal = ({ isShown, onClose, release, sdk, onSuccess, tes
               <Button
                 variant="primary"
                 onClick={handleSubmit}
-                isDisabled={isSubmitting || !!error}
+                isDisabled={isSubmitting}
                 isLoading={isSubmitting}>
                 Set Schedule
               </Button>
