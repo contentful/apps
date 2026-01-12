@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
 import Dashboard from '../../src/components/Dashboard';
@@ -9,7 +10,8 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useCMA: () => mockCma,
 }));
 
-const mockRefetch = vi.fn();
+const mockRefetchEntries = vi.fn();
+const mockRefetchScheduledActions = vi.fn();
 
 vi.mock('../../src/hooks/useAllEntries', () => ({
   useAllEntries: () => ({
@@ -17,7 +19,7 @@ vi.mock('../../src/hooks/useAllEntries', () => ({
     total: 0,
     isFetchingEntries: false,
     fetchingEntriesError: null,
-    refetch: mockRefetch,
+    refetchEntries: mockRefetchEntries,
     fetchedAt: new Date(),
   }),
 }));
@@ -28,7 +30,7 @@ vi.mock('../../src/hooks/useScheduledActions', () => ({
     total: 0,
     isFetchingScheduledActions: false,
     fetchingScheduledActionsError: null,
-    refetch: mockRefetch,
+    refetchScheduledActions: mockRefetchScheduledActions,
     fetchedAt: new Date(),
   }),
 }));
@@ -60,5 +62,16 @@ describe('Dashboard component', () => {
     expect(screen.getByText('Scheduled')).toBeInTheDocument();
     expect(screen.getByText('Recently Published')).toBeInTheDocument();
     expect(screen.getByText('Needs Update')).toBeInTheDocument();
+  });
+
+  it('calls refetchEntries and refetchScheduledActions when refresh button is clicked', async () => {
+    const user = userEvent.setup();
+    render(<Dashboard />, { wrapper: createWrapper() });
+
+    const refreshButton = screen.getByRole('button', { name: /refresh/i });
+    await user.click(refreshButton);
+
+    expect(mockRefetchEntries).toHaveBeenCalledTimes(1);
+    expect(mockRefetchScheduledActions).toHaveBeenCalledTimes(1);
   });
 });
