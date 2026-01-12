@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, Button, Flex, Text, Note } from '@contentful/f36-components';
+import { Modal, Button, Flex, Text } from '@contentful/f36-components';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import type { ReleaseWithScheduledAction } from '../utils/fetchReleases';
 
@@ -35,6 +35,7 @@ export const UnscheduleReleaseModal = ({
 
       onSuccess();
     } catch (err) {
+      console.error('Failed to unschedule release:', err);
       sdk.notifier.error('Unable to cancel release');
     } finally {
       setIsSubmitting(false);

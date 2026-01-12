@@ -173,7 +173,7 @@ export const RescheduleModal = ({
     return Validator.hasErrors(newErrors);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async () => {
     const hasErrors = validateFields();
     if (hasErrors) {
       return;
