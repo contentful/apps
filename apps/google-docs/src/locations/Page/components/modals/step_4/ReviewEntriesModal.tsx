@@ -49,7 +49,7 @@ export const ReviewEntriesModal: React.FC<ReviewEntriesModalProps> = ({
   const entryLinks = useMemo(() => {
     return createdEntries.map((entry) => {
       const displayName = getEntryDisplayName(entry, defaultLocale);
-      const url = `https://${sdk.hostnames.webapp}/spaces/${spaceId}/entries/${entry.sys.id}`;
+      const url = `https://${sdk.hostnames.webapp}/spaces/${spaceId}/environments/${sdk.ids.environment}/entries/${entry.sys.id}`;
 
       return {
         entry,
