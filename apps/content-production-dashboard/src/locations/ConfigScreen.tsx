@@ -62,7 +62,7 @@ const ConfigScreen = () => {
       'Time to publish days',
       TIME_TO_PUBLISH_DAYS_RANGE
     );
-    
+
     setErrors(newErrors);
     return Validator.hasErrors(newErrors);
   };
@@ -114,7 +114,7 @@ const ConfigScreen = () => {
       ...prev,
       [field]: numValue,
     }));
-    
+
     // Clear error for this field when user types
     if (errors[field]) {
       setErrors((prev) => {
@@ -133,7 +133,6 @@ const ConfigScreen = () => {
       showUpcomingReleases: checked,
     }));
   };
-
 
   return (
     <Flex flexDirection="column" fullWidth>

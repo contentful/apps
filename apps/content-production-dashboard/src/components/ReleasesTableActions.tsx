@@ -13,9 +13,17 @@ interface ReleasesTableActionsProps {
   onActionSuccess: () => void;
 }
 
-export const ReleasesTableActions = ({ release, sdk, onActionSuccess }: ReleasesTableActionsProps) => {
-  const [rescheduleRelease, setRescheduleRelease] = useState<ReleaseWithScheduledAction | null>(null);
-  const [unscheduleRelease, setUnscheduleRelease] = useState<ReleaseWithScheduledAction | null>(null);
+export const ReleasesTableActions = ({
+  release,
+  sdk,
+  onActionSuccess,
+}: ReleasesTableActionsProps) => {
+  const [rescheduleRelease, setRescheduleRelease] = useState<ReleaseWithScheduledAction | null>(
+    null
+  );
+  const [unscheduleRelease, setUnscheduleRelease] = useState<ReleaseWithScheduledAction | null>(
+    null
+  );
 
   const handleViewRelease = (release: ReleaseWithScheduledAction) => {
     window.open(release.viewUrl, '_blank', 'noopener,noreferrer');
@@ -35,18 +43,16 @@ export const ReleasesTableActions = ({ release, sdk, onActionSuccess }: Releases
     <>
       <Menu>
         <Menu.Trigger>
-          <IconButton icon={<DotsThreeIcon color={tokens.gray500} />} aria-label="toggle menu" size="small" />
+          <IconButton
+            icon={<DotsThreeIcon color={tokens.gray500} />}
+            aria-label="toggle menu"
+            size="small"
+          />
         </Menu.Trigger>
         <Menu.List>
-          <Menu.Item onClick={() => handleViewRelease(release)}>
-            View release
-          </Menu.Item>
-          <Menu.Item onClick={() => setRescheduleRelease(release)}>
-            Reschedule release
-          </Menu.Item>
-          <Menu.Item onClick={() => setUnscheduleRelease(release)}>
-            Unschedule release
-          </Menu.Item>
+          <Menu.Item onClick={() => handleViewRelease(release)}>View release</Menu.Item>
+          <Menu.Item onClick={() => setRescheduleRelease(release)}>Reschedule release</Menu.Item>
+          <Menu.Item onClick={() => setUnscheduleRelease(release)}>Unschedule release</Menu.Item>
         </Menu.List>
       </Menu>
       <RescheduleModal
@@ -68,4 +74,3 @@ export const ReleasesTableActions = ({ release, sdk, onActionSuccess }: Releases
     </>
   );
 };
-

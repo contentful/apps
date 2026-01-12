@@ -1,5 +1,9 @@
 export class Validator {
-  static setError(errors: Record<string, string>, field: string, message: string | undefined): void {
+  static setError(
+    errors: Record<string, string>,
+    field: string,
+    message: string | undefined
+  ): void {
     if (message === undefined || message.trim() === '') {
       delete errors[field];
     } else {
@@ -87,4 +91,3 @@ export class Validator {
     return undefined;
   }
 }
-

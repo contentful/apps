@@ -30,7 +30,7 @@ export const UnscheduleReleaseModal = ({
     try {
       await sdk.cma.scheduledActions.delete({
         spaceId: sdk.ids.space,
-        scheduledActionId: release.scheduledActionId
+        scheduledActionId: release.scheduledActionId,
       });
 
       onSuccess();
@@ -58,19 +58,14 @@ export const UnscheduleReleaseModal = ({
           </Modal.Content>
           <Modal.Controls>
             <Flex justifyContent="flex-end" gap="spacingS">
-              <Button
-                variant="secondary"
-                onClick={onClose}
-                isDisabled={isSubmitting}
-              >
+              <Button variant="secondary" onClick={onClose} isDisabled={isSubmitting}>
                 No, keep scheduled
               </Button>
               <Button
                 variant="negative"
                 onClick={handleUnschedule}
                 isDisabled={isSubmitting}
-                isLoading={isSubmitting}
-              >
+                isLoading={isSubmitting}>
                 Yes, unschedule release
               </Button>
             </Flex>
@@ -80,4 +75,3 @@ export const UnscheduleReleaseModal = ({
     </Modal>
   );
 };
-

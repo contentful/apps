@@ -1,13 +1,5 @@
 import { useState } from 'react';
-import {
-  Table,
-  Pagination,
-  Note,
-  Box,
-  Skeleton,
-  Text,
-  Icon,
-} from '@contentful/f36-components';
+import { Table, Pagination, Note, Box, Skeleton, Text, Icon } from '@contentful/f36-components';
 import { useReleases } from '../hooks/useReleases';
 import { GearSixIcon } from '@contentful/f36-icons';
 import { RELEASES_PER_PAGE } from '../utils/consts';
@@ -16,7 +8,6 @@ import { styles } from './ReleasesTable.styles';
 import { ReleasesTableActions } from './ReleasesTableActions';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
-
 
 const ReleasesTableHeader = () => {
   return (
@@ -40,7 +31,8 @@ const ReleasesTableHeader = () => {
 export const ReleasesTable = () => {
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const [currentPage, setCurrentPage] = useState(0);
-  const { releases, total, isFetchingReleases, fetchingReleasesError, refetch } = useReleases(currentPage);
+  const { releases, total, isFetchingReleases, fetchingReleasesError, refetch } =
+    useReleases(currentPage);
 
   const formatDate = (dateString: string | undefined): string => {
     if (!dateString) return '—';
@@ -122,11 +114,7 @@ export const ReleasesTable = () => {
               <Table.Cell style={styles.updatedCell}>{formatDate(release.updatedAt)}</Table.Cell>
               <Table.Cell style={styles.userCell}>{formatUserName(release.updatedBy)}</Table.Cell>
               <Table.Cell style={styles.actionsCell}>
-                <ReleasesTableActions
-                  release={release}
-                  sdk={sdk}
-                  onActionSuccess={refetch}
-                />
+                <ReleasesTableActions release={release} sdk={sdk} onActionSuccess={refetch} />
               </Table.Cell>
             </Table.Row>
           ))}
