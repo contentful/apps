@@ -129,6 +129,9 @@ CRITICAL FIELD TYPE RULES - READ CAREFULLY:
 - Number: Integer or decimal values only ✓
 - Boolean: true or false only ✓
 - Date: ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss.sssZ) ✓
+  CRITICAL: If the document contains non-date text like "ASAP", "TBD", "soon", "N/A", etc.,
+  DO NOT output that text. Instead, OMIT the field entirely from the output.
+  Only include Date fields when you can extract or infer an actual date.
 - Location: { lat: number, lon: number } ✓
 - Object: JSON object (use sparingly, check validations) ✓
 - Array (of Symbol/Text/Number): Array of PRIMITIVE values ONLY ✓
