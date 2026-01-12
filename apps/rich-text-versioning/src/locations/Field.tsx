@@ -58,15 +58,16 @@ const Field = () => {
 
     try {
       const publishedEntries = await sdk.cma.entry.getPublished({
-        query: { 'sys.id': sdk.ids.entry },
+        query: {
+          'sys.id': sdk.ids.entry,
+          include: 0,
+        },
       });
       const publishedEntry = publishedEntries.items[0];
 
-      if (publishedEntry?.fields?.[sdk.field.id]) {
-        const fieldData = publishedEntry.fields[sdk.field.id];
-        publishedField = fieldData as Document;
-      }
+      publishedField = publishedEntry?.fields?.[sdk.field.id]?.[sdk.field.locale];
     } catch (error) {
+      console.error('Error loading content:', error);
       currentErrorInfo = {
         hasError: true,
         errorCode: '500',
@@ -81,9 +82,7 @@ const Field = () => {
       shouldCloseOnEscapePress: true,
       parameters: {
         currentField: convertToSerializableJson(value),
-        publishedField: publishedField
-          ? convertToSerializableJson(publishedField)[sdk.field.locale]
-          : undefined,
+        publishedField: publishedField ? convertToSerializableJson(publishedField) : undefined,
         errorInfo: convertToSerializableJson(currentErrorInfo),
         locale: sdk.field.locale,
       },
