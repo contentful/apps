@@ -24,10 +24,6 @@ describe('Page Location', () => {
     } as typeof actual;
   });
 
-  vi.mock('contentful-management', () => ({
-    createClient: vi.fn(() => ({})),
-  }));
-
   const mockConfigEntry = createConfigEntry(mockConfigEntryWithLocalizedFields);
 
   beforeEach(() => {

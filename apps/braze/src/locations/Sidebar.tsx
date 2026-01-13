@@ -18,7 +18,6 @@ import { InvocationParams } from './Dialog';
 import { styles } from './Sidebar.styles';
 import InformationWithLink from '../components/InformationWithLink';
 import Splitter from '../components/Splitter';
-import { createClient } from 'contentful-management';
 import { useEffect, useState } from 'react';
 import React from 'react';
 
@@ -27,20 +26,9 @@ const Sidebar = () => {
   useAutoResizer();
   const [entryConnectedFields, setEntryConnectedFields] = useState<SidebarContentBlockInfo[]>([]);
 
-  const cma = createClient(
-    { apiAdapter: sdk.cmaAdapter },
-    {
-      type: 'plain',
-      defaults: {
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      },
-    }
-  );
-
   useEffect(() => {
     const getContentBlocksData = async () => {
-      const response = await cma.appActionCall.createWithResponse(
+      const response = await sdk.cma.appActionCall.createWithResponse(
         {
           spaceId: sdk.ids.space,
           environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,

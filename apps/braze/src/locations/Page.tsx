@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Table,
@@ -19,7 +19,7 @@ import { fetchBrazeConnectedEntries } from '../utils/fetchBrazeConnectedEntries'
 import InformationWithLink from '../components/InformationWithLink';
 import { styles } from './Page.styles';
 import Splitter from '../components/Splitter';
-import { createClient, EntryProps } from 'contentful-management';
+import { EntryProps } from 'contentful-management';
 import { Entry } from '../fields/Entry';
 import {
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
@@ -342,24 +342,13 @@ const Page = () => {
   const [configEntry, setConfigEntry] = useState<EntryProps | null>(null);
   const [entryConnectedFields, setEntryConnectedFields] = useState<EntryConnectedFields>([]);
 
-  const cma = createClient(
-    { apiAdapter: sdk.cmaAdapter },
-    {
-      type: 'plain',
-      defaults: {
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      },
-    }
-  );
-
   const loadEntries = async () => {
     setLoading(true);
     try {
-      const config = await getConfigEntry(cma);
+      const config = await getConfigEntry(sdk.cma);
       setConfigEntry(config);
       const entries = await fetchBrazeConnectedEntries(
-        cma,
+        sdk.cma,
         sdk.parameters?.installation?.contentfulApiKey,
         sdk.ids.space,
         sdk.ids.environment,
@@ -423,7 +412,7 @@ const Page = () => {
       connectedFields[entry.id] = entryConnectedFields.filter(isNotSelectedField);
     }
 
-    await updateConfig(configEntry, connectedFields, cma);
+    await updateConfig(configEntry, connectedFields, sdk.cma);
     setModalOpen(false);
     setShowSuccess(true);
   };

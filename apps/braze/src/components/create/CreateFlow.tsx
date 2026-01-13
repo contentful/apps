@@ -15,7 +15,6 @@ import {
   updateConfig,
   localizeFieldId,
 } from '../../utils';
-import { createClient } from 'contentful-management';
 import DraftStep from './DraftStep';
 import ErrorStep from './ErrorStep';
 import LocalesSelectionStep from '../generate/LocalesSelectionStep';
@@ -70,17 +69,6 @@ const CreateFlow = (props: CreateFlowProps) => {
     );
   };
 
-  const cma = createClient(
-    { apiAdapter: sdk.cmaAdapter },
-    {
-      type: 'plain',
-      defaults: {
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      },
-    }
-  );
-
   const getFieldsToCreate = (data: ContentBlockData) => {
     const fieldsToCreate = [];
     const contentBlockAlreadyCreated = (fieldId: string, locale?: string) => {
@@ -130,11 +118,11 @@ const CreateFlow = (props: CreateFlowProps) => {
           contentBlockId: result.contentBlockId,
         };
       });
-    const configEntry = await getConfigEntry(cma);
+    const configEntry = await getConfigEntry(sdk.cma);
     const connectedFields = configEntry.fields[CONFIG_FIELD_ID]?.[sdk.locales.default] || {};
     const entryConnectedFields: EntryConnectedFields = connectedFields[entry.id] || [];
     connectedFields[entry.id] = [...entryConnectedFields, ...newFields];
-    await updateConfig(configEntry, connectedFields, cma, sdk.locales.default);
+    await updateConfig(configEntry, connectedFields, sdk.cma, sdk.locales.default);
   };
 
   const handleCreate = async (data: ContentBlockData) => {
@@ -151,7 +139,7 @@ const CreateFlow = (props: CreateFlowProps) => {
     const fieldsToCreate = getFieldsToCreate(data);
 
     try {
-      const response = await cma.appActionCall.createWithResponse(
+      const response = await sdk.cma.appActionCall.createWithResponse(
         {
           spaceId: sdk.ids.space,
           environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,

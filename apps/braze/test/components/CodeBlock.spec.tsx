@@ -1,12 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { mockCma, mockSdk } from '../mocks';
+import { mockSdk } from '../mocks';
 import CodeBlock from '../../src/components/CodeBlock';
 import { screen, render, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
-  useCMA: () => mockCma,
   useAutoResizer: () => {},
 }));
 
