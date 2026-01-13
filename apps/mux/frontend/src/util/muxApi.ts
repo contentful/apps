@@ -48,7 +48,8 @@ function buildAssetSettings(
   options: ModalData,
   drmConfigurationId?: string
 ): AssetSettings {
-  const hasDRM = options.playbackPolicies.includes('drm');
+  const selectedPolicy = options.playbackPolicies[0]; 
+  const hasDRM = selectedPolicy === 'drm';
   const settings: AssetSettings = {
     video_quality: options.videoQuality,
     inputs: [],
@@ -62,7 +63,7 @@ function buildAssetSettings(
       },
     ];
   } else if (!hasDRM) {
-    settings.playback_policies = options.playbackPolicies;
+    settings.playback_policies = [selectedPolicy];
   }
 
   // Metadata case

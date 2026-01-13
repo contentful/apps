@@ -30,6 +30,7 @@ export const PlaybackPolicySelector: FC<PlaybackPolicySelectorProps> = ({
     if (onValidationChange) {
       onValidationChange(selectedPolicies.length > 0);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPolicies]);
 
   return (

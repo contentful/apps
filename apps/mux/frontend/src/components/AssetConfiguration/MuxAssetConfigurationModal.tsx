@@ -64,13 +64,16 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
 
   useEffect(() => {
     if (isEditMode && asset) {
+      // Determine the current playback policy 
+      const currentPolicy: PolicyType = asset.drmPlaybackId
+        ? 'drm'
+        : asset.signedPlaybackId
+          ? 'signed'
+          : 'public';
+
       setModalData({
         videoQuality: 'plus',
-        playbackPolicies: asset.drmPlaybackId
-          ? ['drm']
-          : asset.signedPlaybackId
-            ? ['signed']
-            : ['public'],
+        playbackPolicies: [currentPolicy],
         captionsConfig: {
           captionsType: 'off',
           languageCode: null,

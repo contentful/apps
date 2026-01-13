@@ -256,12 +256,16 @@ export class App extends React.Component<AppProps, AppState> {
 
       if (this.state.value.ready) {
         await this.checkForValidAsset();
+        
         if (this.isUsingDRM() && this.state.value.drmPlaybackId) {
+          // Load DRM tokens for external player link
           await this.setDRMPlayback(this.state.value.drmPlaybackId);
           this.setState({ playerPlaybackId: this.state.value.drmPlaybackId });
         } else if (this.isUsingSigned() && this.state.value.signedPlaybackId) {
           await this.setSignedPlayback(this.state.value.signedPlaybackId);
           this.setState({ playerPlaybackId: this.state.value.signedPlaybackId });
+        } else if (this.state.value.playbackId) {
+          this.setState({ playerPlaybackId: this.state.value.playbackId });
         }
         return;
       }
@@ -310,6 +314,7 @@ export class App extends React.Component<AppProps, AppState> {
     // Check if DRM playback ID is set
     return this.state.value && this.state.value.drmPlaybackId ? true : false;
   };
+
 
   getSwitchCheckedState = (): boolean => {
     // If there are pending actions of playback, use the state of the pending action
@@ -938,6 +943,84 @@ export class App extends React.Component<AppProps, AppState> {
     this.muxPlayerRef.current?.load();
   };
 
+  generateExternalPlayerURL = (): string | null => {
+    if (!this.isUsingDRM() || !this.state.value || !this.state.playbackToken || !this.state.drmLicenseToken) {
+      return null;
+    }
+
+    const playbackId = this.state.value.drmPlaybackId;
+    const streamType = this.getPlayerType();
+    const customDomain = this.props.sdk.parameters.installation.muxDomain;
+    const videoTitle = this.state.value.meta?.title || 'DRM Protected Video';
+
+    // Use JSON.stringify for safe string escaping
+    const tokens = {
+      playback: this.state.playbackToken,
+      ...(this.state.posterToken && { thumbnail: this.state.posterToken }),
+      ...(this.state.storyboardToken && { storyboard: this.state.storyboardToken }),
+      drm: this.state.drmLicenseToken,
+    };
+
+    // Build player attributes
+    const attrs: string[] = [
+      `playback-id="${playbackId}"`,
+      streamType ? `stream-type="${streamType}"` : '',
+      customDomain && customDomain !== 'mux.com' ? `custom-domain="${customDomain}"` : '',
+      this.state.value.audioOnly ? 'audio="true"' : '',
+    ].filter(Boolean);
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mux DRM Player - ${videoTitle.replace(/"/g, '&quot;')}</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif;
+      background: white;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+    mux-player {
+      width: 100%;
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>${videoTitle.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h1>
+    <script src="https://unpkg.com/@mux/mux-player"></script>
+    <mux-player ${attrs.join(' ')} style="width:100%"></mux-player>
+    <script>
+      const player = document.querySelector('mux-player');
+      if (player) {
+        player.tokens = ${JSON.stringify(tokens)};
+      }
+    </script>
+  </div>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html' });
+    return URL.createObjectURL(blob);
+  };
+
   playerParams = () => {
     if (!this.state.value) return;
 
@@ -1303,22 +1386,41 @@ export class App extends React.Component<AppProps, AppState> {
       (this.state.value.playbackId || this.state.value.signedPlaybackId || this.state.value.drmPlaybackId)
     ) {
       const { muxDomain } = this.props.sdk.parameters.installation as InstallationParams;
+      
       const showPlayer =
         (this.state.value.ready && this.state.value.playbackId) ||
-        (this.isUsingSigned() && !this.state.isTokenLoading) ||
-        (this.isUsingDRM() && this.state.value.ready);
+        (this.isUsingSigned() && !this.state.isTokenLoading);
 
       return (
         <>
           {modal}
           <div>
-            {this.isUsingDRM() && (
-              <Box marginBottom="spacingM">
-                <Note variant="warning">
-                  DRM-protected videos cannot be displayed in the Contentful preview due to security restrictions. However, the generated playback code is fully functional and will work correctly in your production environment.
-                </Note>
-              </Box>
-            )}
+            {this.isUsingDRM() && (() => {
+              const externalPlayerURL = this.state.playbackToken && this.state.drmLicenseToken 
+                ? this.generateExternalPlayerURL() 
+                : null;
+              
+              return (
+                <Box marginBottom="spacingM">
+                  <Note variant="warning">
+                    DRM-protected videos cannot be displayed in Contentful's preview due to platform-level security restrictions. {' '}
+                    {externalPlayerURL ? (
+                      <>
+                        <TextLink
+                          href={externalPlayerURL}
+                          target="_blank"
+                          rel="noopener noreferrer">
+                          Open in external player
+                        </TextLink>
+                        {' '}to view the DRM-protected video (note: DRM playback has an associated cost), or use the generated playback code in your production environment.
+                      </>
+                    ) : (
+                      'The generated playback code is fully functional and will work correctly in your production environment outside of Contentful.'
+                    )}
+                  </Note>
+                </Box>
+              );
+            })()}
 
             {this.isUsingDRM() &&
               !this.state.drmLicenseToken &&
@@ -1391,20 +1493,13 @@ export class App extends React.Component<AppProps, AppState> {
                     page_type: 'Preview Player',
                   }}
                   tokens={
-                    this.isUsingSigned()
+                    this.isUsingSigned() && this.state.playbackToken
                       ? {
                           playback: this.state.playbackToken,
                           thumbnail: this.state.posterToken,
                           storyboard: this.state.storyboardToken,
                         }
-                      : this.isUsingDRM() && this.state.drmLicenseToken && this.state.playbackToken
-                        ? {
-                            playback: this.state.playbackToken,
-                            thumbnail: this.state.posterToken,
-                            storyboard: this.state.storyboardToken,
-                            drm: this.state.drmLicenseToken,
-                          }
-                        : undefined
+                      : undefined
                   }
                 />
               )}
@@ -1416,7 +1511,7 @@ export class App extends React.Component<AppProps, AppState> {
               </Box>
             )}
 
-            {showPlayer && (
+            {this.state.value && this.state.value.assetId && (
               <Box marginTop="spacingM">
                 <Menu
                   requestRemoveAsset={this.requestRemoveAsset}
@@ -1429,7 +1524,7 @@ export class App extends React.Component<AppProps, AppState> {
               </Box>
             )}
 
-            {!showPlayer && (
+            {!showPlayer && !this.isUsingDRM() && (
               <section className="uploader_area center aspectratio" data-testid="waitingtoplay">
                 <span>
                   <Spinner size="small" /> Waiting for asset to be playable
