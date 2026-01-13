@@ -39,8 +39,6 @@ describe('fetchAllEntries', () => {
     expect(result.fetchedAt).toBeInstanceOf(Date);
     expect(mockCma.entry.getMany).toHaveBeenCalledTimes(1);
     expect(mockCma.entry.getMany).toHaveBeenCalledWith({
-      spaceId: 'test-space',
-      environmentId: 'test-environment',
       query: {
         skip: 0,
         limit: 1000,
@@ -69,16 +67,12 @@ describe('fetchAllEntries', () => {
     expect(result.total).toBe(1500);
     expect(mockCma.entry.getMany).toHaveBeenCalledTimes(2);
     expect(mockCma.entry.getMany).toHaveBeenNthCalledWith(1, {
-      spaceId: 'test-space',
-      environmentId: 'test-environment',
       query: {
         skip: 0,
         limit: 1000,
       },
     });
     expect(mockCma.entry.getMany).toHaveBeenNthCalledWith(2, {
-      spaceId: 'test-space',
-      environmentId: 'test-environment',
       query: {
         skip: 1000,
         limit: 1000,
@@ -124,16 +118,12 @@ describe('fetchAllEntries', () => {
     // Should be called twice: once with 1000 (fails), once with 500 (succeeds)
     expect(mockCma.entry.getMany).toHaveBeenCalledTimes(2);
     expect(mockCma.entry.getMany).toHaveBeenNthCalledWith(1, {
-      spaceId: 'test-space',
-      environmentId: 'test-environment',
       query: {
         skip: 0,
         limit: 1000,
       },
     });
     expect(mockCma.entry.getMany).toHaveBeenNthCalledWith(2, {
-      spaceId: 'test-space',
-      environmentId: 'test-environment',
       query: {
         skip: 0,
         limit: 500, // Reduced batch size
