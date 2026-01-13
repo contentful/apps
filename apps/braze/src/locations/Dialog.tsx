@@ -56,7 +56,7 @@ const Dialog = () => {
         invocationParams.title,
         fieldsRef.current,
         sdk.ids.space,
-        sdk.ids.environment,
+        sdk.ids.environmentAlias ?? sdk.ids.environment,
         sdk.parameters.installation.contentfulApiKey,
         cmaEntry.sys.publishedAt,
         cmaEntry.sys.updatedAt

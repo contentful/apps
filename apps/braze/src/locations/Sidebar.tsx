@@ -30,8 +30,6 @@ const Sidebar = () => {
     const getContentBlocksData = async () => {
       const response = await sdk.cma.appActionCall.createWithResponse(
         {
-          spaceId: sdk.ids.space,
-          environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
           appDefinitionId: sdk.ids.app!,
           appActionId: 'getContentBlocksAction',
         },

@@ -27,8 +27,6 @@ const ConfigScreen = () => {
 
     do {
       const response = await sdk.cma.contentType.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
         query: { skip, limit },
       });
       const items = response.items as ContentTypeProps[];

@@ -1,10 +1,9 @@
-import { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
-import { CMAClient, ConfigAppSDK, SidebarAppSDK } from '@contentful/app-sdk';
+import { EntryProps, KeyValueMap } from 'contentful-management';
+import { CMAClient, SidebarAppSDK } from '@contentful/app-sdk';
 import { getEntry } from './entryUtils';
 
 export const getContentTypesWithoutLivePreview = async (
-  cma: PlainClientAPI | CMAClient,
-  sdk: ConfigAppSDK,
+  cma: CMAClient,
   excludedContentTypesIds: string[] = []
 ): Promise<any[]> => {
   try {
@@ -15,8 +14,6 @@ export const getContentTypesWithoutLivePreview = async (
 
     while (areMoreContentTypes) {
       const response = await cma.contentType.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
         query: { skip, limit },
       });
       if (response.items) {
@@ -48,8 +45,6 @@ export const getRelatedEntries = async (sdk: SidebarAppSDK, id: string): Promise
       query: {
         links_to_entry: id,
       },
-      spaceId: sdk.ids.space,
-      environmentId: sdk.ids.environment,
     });
 
     return response.items;

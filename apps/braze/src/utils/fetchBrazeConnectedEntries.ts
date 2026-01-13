@@ -21,8 +21,6 @@ export async function fetchBrazeConnectedEntries(
   if (!entryIds.length) return [];
 
   const response = await cma.entry.getMany({
-    spaceId: spaceId,
-    environmentId: environmentId,
     query: {
       'sys.id[in]': entryIds.join(','),
       limit: 25,

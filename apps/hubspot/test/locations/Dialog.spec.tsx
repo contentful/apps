@@ -204,8 +204,6 @@ describe('Dialog component', () => {
 
     expect(mockCreateWithResponse).toHaveBeenCalledWith(
       {
-        spaceId: 'test-space',
-        environmentId: 'test-environment-alias',
         appDefinitionId: 'test-app',
         appActionId: 'createModulesAction',
       },

@@ -351,7 +351,7 @@ const Page = () => {
         sdk.cma,
         sdk.parameters?.installation?.contentfulApiKey,
         sdk.ids.space,
-        sdk.ids.environment,
+        sdk.ids.environmentAlias ?? sdk.ids.environment,
         sdk.locales.default,
         config
       );
