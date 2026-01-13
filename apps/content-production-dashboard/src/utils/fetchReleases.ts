@@ -1,4 +1,4 @@
-import { BaseAppSDK, HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
+import { BaseAppSDK } from '@contentful/app-sdk';
 import { UserProps } from 'contentful-management';
 import { fetchScheduledActions } from './fetchScheduledActions';
 
@@ -55,7 +55,7 @@ const fetchLaunchReleases = async (sdk: BaseAppSDK): Promise<Map<string, Release
 };
 
 const fetchTimelineReleases = async (
-  sdk: HomeAppSDK | PageAppSDK
+  sdk: BaseAppSDK
 ): Promise<Map<string, ReleaseInfo>> => {
   const releasesMap = new Map<string, { title: string; itemsCount: number; viewUrl: string }>();
   const timelineReleasesResponse = await sdk.cma.release.query({
