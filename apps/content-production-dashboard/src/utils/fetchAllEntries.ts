@@ -1,4 +1,4 @@
-import { PageAppSDK } from '@contentful/app-sdk';
+import { BaseAppSDK } from '@contentful/app-sdk';
 import { EntryProps } from 'contentful-management';
 import { FETCH_CONFIG } from './cacheConstants';
 
@@ -8,7 +8,7 @@ export interface FetchAllEntriesResult {
   fetchedAt: Date;
 }
 
-export async function fetchAllEntries(sdk: PageAppSDK): Promise<FetchAllEntriesResult> {
+export async function fetchAllEntries(sdk: BaseAppSDK): Promise<FetchAllEntriesResult> {
   const allEntries: EntryProps[] = [];
   let batchSkip = 0;
   let total = 0;
@@ -18,8 +18,6 @@ export async function fetchAllEntries(sdk: PageAppSDK): Promise<FetchAllEntriesR
   while (hasMore) {
     try {
       const response = await sdk.cma.entry.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
         query: {
           skip: batchSkip,
           limit: batchSize,
@@ -47,9 +45,6 @@ export async function fetchAllEntries(sdk: PageAppSDK): Promise<FetchAllEntriesR
       if (error.message && error.message.includes('Response size too big')) {
         if (batchSize > FETCH_CONFIG.MIN_BATCH_SIZE) {
           const newBatchSize = Math.floor(batchSize / 2);
-          console.warn(
-            `Response size limit hit, reducing batch size from ${batchSize} to ${newBatchSize}`
-          );
           batchSize = newBatchSize;
           // Retry with smaller batch size (don't advance batchSkip)
           continue;

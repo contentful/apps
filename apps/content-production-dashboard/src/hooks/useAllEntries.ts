@@ -3,6 +3,7 @@ import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { EntryProps } from 'contentful-management';
 import { fetchAllEntries, FetchAllEntriesResult } from '../utils/fetchAllEntries';
+import { getEnvironmentId } from '../utils/sdkUtils';
 
 export interface UseAllEntriesResult {
   entries: EntryProps[];
@@ -17,7 +18,7 @@ export function useAllEntries(): UseAllEntriesResult {
   const sdk = useSDK<PageAppSDK>();
 
   const { data, isFetching, error, refetch } = useQuery<FetchAllEntriesResult, Error>({
-    queryKey: ['entries', sdk.ids.space, sdk.ids.environment],
+    queryKey: ['entries', sdk.ids.space, getEnvironmentId(sdk)],
     queryFn: () => fetchAllEntries(sdk),
   });
 
