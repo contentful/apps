@@ -37,7 +37,7 @@ const Sidebar = () => {
   const { pageUrl, error: slugError, isConfigured } = useSidebarSlug();
 
   // PostHog API hook
-  const { queryAnalytics } = usePostHogApi();
+  const { queryAnalytics, listRecordings } = usePostHogApi();
 
   // Tab state - only analytics for now, recordings and flags will be added later
   const [activeTab, setActiveTab] = useState<SidebarTab>('analytics');
@@ -134,6 +134,39 @@ const Sidebar = () => {
     };
   }, []);
 
+  // Fetch recordings
+  const fetchRecordings = useCallback(async () => {
+    if (!pageUrl) return;
+
+    setRecordingsLoading(true);
+    try {
+      const response = await listRecordings(pageUrl);
+
+      if (!isMountedRef.current) return;
+
+      if (response.success && response.data) {
+        setRecordings(response.data.recordings);
+        setRecordingsError(null);
+      } else {
+        setRecordingsError(response.error?.message || 'Failed to fetch recordings');
+      }
+    } catch (err) {
+      if (!isMountedRef.current) return;
+      setRecordingsError(err instanceof Error ? err.message : 'An unexpected error occurred');
+    } finally {
+      if (isMountedRef.current) {
+        setRecordingsLoading(false);
+      }
+    }
+  }, [pageUrl, listRecordings]);
+
+  // Fetch recordings when switching to recordings tab
+  useEffect(() => {
+    if (activeTab === 'recordings' && isAppConfigured && isConfigured && pageUrl) {
+      fetchRecordings();
+    }
+  }, [activeTab, isAppConfigured, isConfigured, pageUrl, fetchRecordings]);
+
   // Handle date range change
   const handleDateRangeChange = useCallback((newRange: DateRange) => {
     setDateRange(newRange);
@@ -200,10 +233,8 @@ const Sidebar = () => {
       <Tabs currentTab={activeTab} onTabChange={(tab) => setActiveTab(tab as SidebarTab)}>
         <Tabs.List className={styles.tabList}>
           <Tabs.Tab panelId="analytics">Analytics</Tabs.Tab>
-          {/* Future tabs will be added here:
           <Tabs.Tab panelId="recordings">Recordings</Tabs.Tab>
-          <Tabs.Tab panelId="flags">Feature Flags</Tabs.Tab>
-          */}
+          {/* Feature Flags tab will be added in US3 */}
         </Tabs.List>
 
         {/* Analytics Tab Panel */}
@@ -226,14 +257,18 @@ const Sidebar = () => {
           )}
         </Tabs.Panel>
 
-        {/* Future tab panels will be added here:
+        {/* Recordings Tab Panel */}
         <Tabs.Panel id="recordings">
-          <RecordingsList />
+          <RecordingsList
+            recordings={recordings}
+            isLoading={recordingsLoading}
+            error={recordingsError}
+            posthogHost={installationParams?.posthogHost}
+            projectId={installationParams?.posthogProjectId}
+          />
         </Tabs.Panel>
-        <Tabs.Panel id="flags">
-          <FeatureFlagsList />
-        </Tabs.Panel>
-        */}
+
+        {/* Feature Flags tab panel will be added in US3 */}
       </Tabs>
     </Box>
   );
