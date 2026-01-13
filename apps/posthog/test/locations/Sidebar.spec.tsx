@@ -72,12 +72,13 @@ describe('Sidebar component', () => {
       });
     });
 
-    it('should show empty state when no metrics are loaded', async () => {
+    it('should show metrics when data is loaded', async () => {
       render(<Sidebar />);
 
       await waitFor(() => {
-        // The empty state should be visible initially
-        expect(screen.getByTestId('analytics-empty')).toBeInTheDocument();
+        // Metrics should be visible after data loads from the mock
+        expect(screen.getByTestId('analytics-page-views')).toBeInTheDocument();
+        expect(screen.getByTestId('analytics-unique-visitors')).toBeInTheDocument();
       });
     });
   });

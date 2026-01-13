@@ -3,9 +3,13 @@
  *
  * Provides methods to invoke PostHog App Actions and handle responses.
  * Used by Sidebar components to fetch analytics, recordings, and feature flags.
+ *
+ * Features:
+ * - Rate limit handling with exponential backoff
+ * - Response caching with TTL
  */
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import type {
@@ -17,8 +21,26 @@ import type {
 } from '../types';
 
 // ============================================================================
+// Constants
+// ============================================================================
+
+/** Cache TTL in milliseconds (5 minutes) */
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
+/** Maximum retry attempts for rate-limited requests */
+const MAX_RETRIES = 3;
+
+/** Base delay for exponential backoff (1 second) */
+const BASE_RETRY_DELAY_MS = 1000;
+
+// ============================================================================
 // Types
 // ============================================================================
+
+interface CacheEntry<T> {
+  data: ApiResponse<T>;
+  timestamp: number;
+}
 
 interface UsePostHogApiResult {
   /**
@@ -46,6 +68,37 @@ interface UsePostHogApiResult {
     flagId: number,
     active: boolean
   ) => Promise<ApiResponse<{ flag: FeatureFlag }>>;
+
+  /**
+   * Clear the response cache
+   */
+  clearCache: () => void;
+}
+
+// ============================================================================
+// Utilities
+// ============================================================================
+
+/**
+ * Sleep for a specified duration
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Generate a cache key from action ID and parameters
+ */
+function getCacheKey(actionId: string, parameters: Record<string, unknown>): string {
+  return `${actionId}:${JSON.stringify(parameters)}`;
+}
+
+/**
+ * Check if a cache entry is still valid
+ */
+function isCacheValid<T>(entry: CacheEntry<T> | undefined): boolean {
+  if (!entry) return false;
+  return Date.now() - entry.timestamp < CACHE_TTL_MS;
 }
 
 // ============================================================================
@@ -56,36 +109,99 @@ export function usePostHogApi(): UsePostHogApiResult {
   const sdk = useSDK<SidebarAppSDK>();
   const cma = useCMA();
 
+  // Response cache (persists across renders but not component remounts)
+  const cacheRef = useRef<Map<string, CacheEntry<unknown>>>(new Map());
+
   /**
-   * Generic helper to invoke an App Action and parse the response
+   * Clear all cached responses
+   */
+  const clearCache = useCallback(() => {
+    cacheRef.current.clear();
+  }, []);
+
+  /**
+   * Generic helper to invoke an App Action with retry logic and caching
    */
   const invokeAction = useCallback(
-    async <T>(actionId: string, parameters: Record<string, unknown>): Promise<ApiResponse<T>> => {
-      try {
-        const response = await cma.appActionCall.createWithResponse(
-          {
-            spaceId: sdk.ids.space,
-            environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
-            appDefinitionId: sdk.ids.app!,
-            appActionId: actionId,
-          },
-          { parameters }
-        );
+    async <T>(
+      actionId: string,
+      parameters: Record<string, unknown>,
+      options: { useCache?: boolean; invalidateCache?: boolean } = {}
+    ): Promise<ApiResponse<T>> => {
+      const { useCache = true, invalidateCache = false } = options;
+      const cacheKey = getCacheKey(actionId, parameters);
 
-        // Parse the response body
-        const result = JSON.parse(response.response.body);
-        return result as ApiResponse<T>;
-      } catch (error) {
-        // Handle network or parsing errors
-        const message = error instanceof Error ? error.message : 'Failed to invoke App Action';
-        return {
-          success: false,
-          error: {
-            code: 'NETWORK_ERROR',
-            message,
-          },
-        };
+      // Check cache first (unless invalidating)
+      if (useCache && !invalidateCache) {
+        const cached = cacheRef.current.get(cacheKey) as CacheEntry<T> | undefined;
+        if (cached && isCacheValid(cached)) {
+          return cached.data as ApiResponse<T>;
+        }
       }
+
+      // Retry logic with exponential backoff
+      let lastError: Error | null = null;
+      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          const response = await cma.appActionCall.createWithResponse(
+            {
+              spaceId: sdk.ids.space,
+              environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
+              appDefinitionId: sdk.ids.app!,
+              appActionId: actionId,
+            },
+            { parameters }
+          );
+
+          // Parse the response body
+          const result = JSON.parse(response.response.body) as ApiResponse<T>;
+
+          // Check for rate limit error in response
+          if (!result.success && result.error?.code === 'RATE_LIMIT_EXCEEDED') {
+            if (attempt < MAX_RETRIES) {
+              const delay = BASE_RETRY_DELAY_MS * Math.pow(2, attempt);
+              await sleep(delay);
+              continue;
+            }
+          }
+
+          // Cache successful responses
+          if (result.success && useCache) {
+            cacheRef.current.set(cacheKey, {
+              data: result,
+              timestamp: Date.now(),
+            });
+          }
+
+          return result;
+        } catch (error) {
+          lastError = error instanceof Error ? error : new Error('Unknown error');
+
+          // Check if it's a rate limit error (429 status)
+          const isRateLimited =
+            lastError.message.includes('429') || lastError.message.includes('rate limit');
+
+          if (isRateLimited && attempt < MAX_RETRIES) {
+            const delay = BASE_RETRY_DELAY_MS * Math.pow(2, attempt);
+            await sleep(delay);
+            continue;
+          }
+
+          // Don't retry non-rate-limit errors
+          if (!isRateLimited) {
+            break;
+          }
+        }
+      }
+
+      // All retries failed
+      return {
+        success: false,
+        error: {
+          code: 'NETWORK_ERROR',
+          message: lastError?.message || 'Failed to invoke App Action after retries',
+        },
+      };
     },
     [cma, sdk.ids]
   );
@@ -128,13 +244,23 @@ export function usePostHogApi(): UsePostHogApiResult {
 
   /**
    * Toggle a feature flag's active status
+   * Note: This invalidates the cache to ensure fresh data on next fetch
    */
   const toggleFeatureFlag = useCallback(
     async (flagId: number, active: boolean): Promise<ApiResponse<{ flag: FeatureFlag }>> => {
-      return invokeAction<{ flag: FeatureFlag }>('toggleFeatureFlag', {
-        flagId,
-        active,
-      });
+      const result = await invokeAction<{ flag: FeatureFlag }>(
+        'toggleFeatureFlag',
+        { flagId, active },
+        { useCache: false }
+      );
+
+      // Invalidate the flags list cache after toggling
+      if (result.success) {
+        const flagsListCacheKey = 'listFeatureFlags:{}';
+        cacheRef.current.delete(flagsListCacheKey);
+      }
+
+      return result;
     },
     [invokeAction]
   );
@@ -144,5 +270,6 @@ export function usePostHogApi(): UsePostHogApiResult {
     listRecordings,
     listFeatureFlags,
     toggleFeatureFlag,
+    clearCache,
   };
 }

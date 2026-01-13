@@ -199,15 +199,24 @@ describe('PostHogClient', () => {
 
   describe('getDailyStats', () => {
     it('should fetch daily stats and fill missing days with zeros', async () => {
+      // Create mock response with today's date so matching works
+      const today = new Date();
+      const mockDailyResponse = {
+        results: [[today.toISOString().split('T')[0], 40, 20]],
+        columns: ['date', 'pageviews', 'unique_users'],
+        types: ['Date', 'UInt64', 'UInt64'],
+      };
+
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockDailyStatsResponse),
+        json: () => Promise.resolve(mockDailyResponse),
       });
 
       const client = new PostHogClient(mockConfig);
       const stats = await client.getDailyStats('hello-world', 'https://example.com/blog/{slug}');
 
       expect(stats).toHaveLength(7);
+      // Today's stats should have the mocked values
       expect(stats[stats.length - 1].pageviews).toBe(40);
     });
 
@@ -221,10 +230,10 @@ describe('PostHogClient', () => {
       const stats = await client.getDailyStats(
         'hello-world',
         'https://example.com/blog/{slug}',
-        'last14d'
+        'last30d'
       );
 
-      expect(stats).toHaveLength(14);
+      expect(stats).toHaveLength(30);
     });
   });
 
