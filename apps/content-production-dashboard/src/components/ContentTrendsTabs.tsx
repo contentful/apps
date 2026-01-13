@@ -16,15 +16,32 @@ import { useContentTypes } from '../hooks/useContentTypes';
 export interface ContentTrendsTabsProps {
   entries: EntryProps[];
   timeRange: TimeRange;
+  trackedContentTypes?: string[];
 }
 
-export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({ entries, timeRange }) => {
+export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
+  entries,
+  trackedContentTypes,
+  timeRange,
+}) => {
   const sdk = useSDK<HomeAppSDK>();
   const [selectedTab, setSelectedTab] = useState('overall');
 
   const [creatorsNames, setCreatorsNames] = useState<Map<string, string>>(new Map());
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-  const { contentTypeNames, isFetchingContentTypes } = useContentTypes();
+  const { contentTypeNames, isFetchingContentTypes } = useContentTypes(trackedContentTypes);
+
+  const filteredEntries = useMemo(() => {
+    console.log('trackedContentTypes', trackedContentTypes);
+    if (!trackedContentTypes || trackedContentTypes.length === 0) {
+      console.log('no tracked content types', entries);
+      return entries;
+    }
+    return entries.filter((entry) => {
+      const contentTypeId = entry.sys.contentType.sys.id;
+      return trackedContentTypes.includes(contentTypeId);
+    });
+  }, [entries, trackedContentTypes]);
 
   useEffect(() => {
     const fetchCreators = async () => {
@@ -57,16 +74,16 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({ entries, t
   }, [selectedTab, sdk]);
 
   const overallData = useMemo(() => {
-    return processOverallTrends(entries, { timeRange });
-  }, [entries, timeRange]);
+    return processOverallTrends(filteredEntries, { timeRange });
+  }, [filteredEntries, timeRange]);
 
   const contentTypeData = useMemo(() => {
-    return processContentTypeTrends(entries, { timeRange }, contentTypeNames);
-  }, [entries, timeRange, contentTypeNames]);
+    return processContentTypeTrends(filteredEntries, { timeRange }, contentTypeNames);
+  }, [filteredEntries, timeRange, contentTypeNames]);
 
   const creatorData = useMemo(() => {
-    return processCreatorTrends(entries, { timeRange }, creatorsNames);
-  }, [entries, timeRange, creatorsNames]);
+    return processCreatorTrends(filteredEntries, { timeRange }, creatorsNames);
+  }, [filteredEntries, timeRange, creatorsNames]);
 
   const handleTabChange = (id: string) => {
     setSelectedTab(id);

@@ -1,4 +1,4 @@
-import { Card, Flex, Heading, Skeleton } from '@contentful/f36-components';
+import { Card, Flex, Heading, Skeleton, Subheading } from '@contentful/f36-components';
 import { styles } from './LoadingSkeleton.styles';
 
 export const LoadingSkeleton = ({ metricsCount }: { metricsCount: number }) => {
@@ -19,7 +19,7 @@ export const LoadingSkeleton = ({ metricsCount }: { metricsCount: number }) => {
 
       {/* Content Publishing Trends Section */}
       <Card padding="default" style={styles.sectionCard}>
-        <Heading marginBottom="spacing2Xl">Content Publishing Trends</Heading>
+        <Subheading marginBottom="spacing2Xl">Content Publishing Trends</Subheading>
         <Skeleton.Container>
           <Skeleton.Image width="100%" height="100px" />
         </Skeleton.Container>
@@ -27,7 +27,7 @@ export const LoadingSkeleton = ({ metricsCount }: { metricsCount: number }) => {
 
       {/* Upcoming Scheduled Releases Section */}
       <Card padding="default" style={styles.sectionCard}>
-        <Heading marginBottom="spacing2Xl">Upcoming Scheduled Releases</Heading>
+        <Subheading marginBottom="spacing2Xl">Upcoming Scheduled Releases</Subheading>
         <Skeleton.Container>
           <Skeleton.Image width="100%" height="100px" />
         </Skeleton.Container>

@@ -15,11 +15,11 @@ import { ReleasesTable } from './ReleasesTable';
 import { styles } from './Dashboard.styles';
 
 const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
-    { value: 'month', label: 'Past Month' },
-    { value: '3months', label: 'Past 3 Months' },
-    { value: '6months', label: 'Past 6 Months' },
-    { value: 'year', label: 'Past Year' },
-    { value: 'yearToDate', label: 'Year to Date' },
+  { value: 'month', label: 'Past Month' },
+  { value: '3months', label: 'Past 3 Months' },
+  { value: '6months', label: 'Past 6 Months' },
+  { value: 'year', label: 'Past Year' },
+  { value: 'yearToDate', label: 'Year to Date' },
 ];
 
 const Dashboard = () => {
@@ -73,35 +73,39 @@ const Dashboard = () => {
         <LoadingSkeleton metricsCount={metricsCalculator.getAllMetrics().length} />
       ) : (
         <>
-        <Box>
-          <Flex flexDirection="row" gap="spacingM">
-            {metrics.map((metric) => {
-              return (
-                <MetricCard
-                  key={metric.title}
-                  title={metric.title}
-                  value={metric.value}
-                  subtitle={metric.subtitle}
-                  isNegative={metric.isNegative}
-                />
-              );
-            })}
-          </Flex>
-        </Box>
-
-        <Box marginTop="spacingL" style={styles.sectionContainer}>
-            <Flex flexDirection="row" justifyContent="space-between" alignItems="center">
-                <Subheading>Content Publishing Trends</Subheading>
-                <Select value={timeRange} size="medium" onChange={handleTimeRangeChange}>
-                    {TIME_RANGE_OPTIONS.map((option) => (
-                        <Select.Option key={option.value} value={option.value}>
-                            {option.label}
-                        </Select.Option>
-                    ))}
-                </Select>
+          <Box>
+            <Flex flexDirection="row" gap="spacingM">
+              {metrics.map((metric) => {
+                return (
+                  <MetricCard
+                    key={metric.title}
+                    title={metric.title}
+                    value={metric.value}
+                    subtitle={metric.subtitle}
+                    isNegative={metric.isNegative}
+                  />
+                );
+              })}
             </Flex>
-            <ContentTrendsTabs entries={entries} timeRange={timeRange} />
-        </Box>
+          </Box>
+
+          <Box marginTop="spacingL" style={styles.sectionContainer}>
+            <Flex flexDirection="row" justifyContent="space-between" alignItems="center">
+              <Subheading>Content Publishing Trends</Subheading>
+              <Select value={timeRange} size="medium" onChange={handleTimeRangeChange}>
+                {TIME_RANGE_OPTIONS.map((option) => (
+                  <Select.Option key={option.value} value={option.value}>
+                    {option.label}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Flex>
+            <ContentTrendsTabs
+              entries={entries}
+              trackedContentTypes={installation.trackedContentTypes ?? []}
+              timeRange={timeRange}
+            />
+          </Box>
 
         <Box marginTop="spacingXl">
             <Box padding="spacingL" style={styles.releasesTableContainer}>

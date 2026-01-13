@@ -81,7 +81,7 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
             <Tooltip content={tooltipContent} />
             {linesLegends.map((key, index) => (
               <Line
-                key={key}
+                key={`${key}-${index}`}
                 type="monotone"
                 dataKey={key}
                 stroke={colors[index]}

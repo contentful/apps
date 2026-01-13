@@ -98,6 +98,13 @@ const ConfigScreen = () => {
     })();
   }, [sdk]);
 
+  useEffect(() => {
+    setParameters((prev) => ({
+      ...prev,
+      trackedContentTypes: selectedContentTypes.map((ct) => ct.id),
+    }));
+  }, [selectedContentTypes]);
+
   const handleOnChangeInput = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     field: 'needsUpdateMonths' | 'recentlyPublishedDays' | 'timeToPublishDays'
