@@ -174,31 +174,6 @@ describe('fetchReleases', () => {
       expect(result.releases[1].viewUrl).toContain('app.contentful.com');
     });
   });
-
-  describe('Pagination', () => {
-    it('applies skip and limit correctly', async () => {
-      const actions = Array.from({ length: 5 }, (_, i) =>
-        createActionWithRelease(`action-${i + 1}`, `release-${i + 1}`)
-      );
-      const releases = Array.from({ length: 5 }, (_, i) =>
-        createMockRelease('launch', { id: `release-${i + 1}`, title: `Release ${i + 1}` })
-      );
-      const user = createMockUser();
-
-      setupMocks({
-        scheduledActions: actions,
-        launchReleases: releases,
-        users: [user],
-      });
-
-      const result = await fetchReleases(mockSdk, 1, 2);
-
-      expect(result.releases).toHaveLength(2);
-      expect(result.total).toBe(5);
-      expect(result.releases[0].releaseId).toBe('release-2');
-      expect(result.releases[1].releaseId).toBe('release-3');
-    });
-  });
 });
 
 const createMockScheduledAction = (

@@ -14,17 +14,25 @@ export interface UseReleasesResult {
   total: number;
   isFetchingReleases: boolean;
   fetchingReleasesError: Error | null;
-  refetch: () => void;
+  refetchReleases: () => void;
   fetchedAt: Date | undefined;
 }
 
-export function useReleases(page: number = 1): UseReleasesResult {
+export function useReleases(page: number = 0): UseReleasesResult {
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const skip = page * RELEASES_PER_PAGE;
 
   const { data, isFetching, error, refetch } = useQuery<FetchReleasesResult, Error>({
-    queryKey: ['releases', sdk.ids.space, sdk.ids.environment, page],
-    queryFn: () => fetchReleases(sdk, skip, RELEASES_PER_PAGE),
+    queryKey: ['releases', sdk.ids.space, sdk.ids.environment],
+    queryFn: () => fetchReleases(sdk),
+    select: (data) => {
+      const paginatedReleases = data.releases.slice(skip, skip + RELEASES_PER_PAGE);
+      return {
+        releases: paginatedReleases,
+        total: data.total,
+        fetchedAt: data.fetchedAt,
+      };
+    },
   });
 
   return {
@@ -32,7 +40,7 @@ export function useReleases(page: number = 1): UseReleasesResult {
     total: data?.total || 0,
     isFetchingReleases: isFetching,
     fetchingReleasesError: error,
-    refetch,
+    refetchReleases: refetch,
     fetchedAt: data?.fetchedAt,
   };
 }

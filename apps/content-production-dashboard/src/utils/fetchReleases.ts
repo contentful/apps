@@ -83,11 +83,7 @@ const fetchTimelineReleases = async (
   return releasesMap;
 };
 
-export const fetchReleases = async (
-  sdk: HomeAppSDK | PageAppSDK,
-  skip: number = 0,
-  limit: number = 10
-): Promise<FetchReleasesResult> => {
+export const fetchReleases = async (sdk: HomeAppSDK | PageAppSDK): Promise<FetchReleasesResult> => {
   const scheduledActions = await sdk.cma.scheduledActions.getMany({
     spaceId: sdk.ids.space,
     query: {
@@ -164,7 +160,7 @@ export const fetchReleases = async (
     });
 
   return {
-    releases: releasesWithActions.slice(skip, skip + limit),
+    releases: releasesWithActions,
     total: releasesWithActions.length,
     fetchedAt: new Date(),
   };
