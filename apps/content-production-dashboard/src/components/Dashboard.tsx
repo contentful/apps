@@ -1,14 +1,15 @@
-import { Flex, Heading, Button } from '@contentful/f36-components';
+import { Flex, Heading, Button, Box } from '@contentful/f36-components';
 import { ArrowClockwiseIcon } from '@contentful/f36-icons';
 import { MetricCard } from './MetricCard';
 import { MetricsCalculator } from '../metrics/MetricsCalculator';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import type { AppInstallationParameters } from '../locations/ConfigScreen';
-import { styles } from '../locations/Page.styles';
 import { ErrorDisplay } from './ErrorDisplay';
 import { useAllEntries } from '../hooks/useAllEntries';
 import { useScheduledActions } from '../hooks/useScheduledActions';
 import { LoadingSkeleton } from './LoadingSkeleton';
+import { ReleasesTable } from './ReleasesTable';
+import { styles } from './Dashboard.styles';
 
 const Dashboard = () => {
   const sdk = useSDK();
@@ -55,19 +56,29 @@ const Dashboard = () => {
       ) : isRefreshing ? (
         <LoadingSkeleton metricsCount={metricsCalculator.getAllMetrics().length} />
       ) : (
-        <Flex flexDirection="row" gap="spacingM">
-          {metrics.map((metric) => {
-            return (
-              <MetricCard
-                key={metric.title}
-                title={metric.title}
-                value={metric.value}
-                subtitle={metric.subtitle}
-                isNegative={metric.isNegative}
-              />
-            );
-          })}
-        </Flex>
+        <>
+          <Flex flexDirection="row" gap="spacingM">
+            {metrics.map((metric) => {
+              return (
+                <MetricCard
+                  key={metric.title}
+                  title={metric.title}
+                  value={metric.value}
+                  subtitle={metric.subtitle}
+                  isNegative={metric.isNegative}
+                />
+              );
+            })}
+          </Flex>
+          <Box marginTop="spacingXl">
+            <Box padding="spacingL" style={styles.releasesTableContainer}>
+              <Heading as="h2" marginBottom="spacingM">
+                Upcoming Scheduled Releases
+              </Heading>
+              <ReleasesTable />
+            </Box>
+          </Box>
+        </>
       )}
     </Flex>
   );
