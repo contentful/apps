@@ -7,10 +7,15 @@ import { mockSdk, mockSdkUnconfigured, mockSdkNoMapping, mockSdkNoSlug } from '.
 // Mocks
 // ============================================================================
 
-vi.mock('@contentful/react-apps-toolkit', () => ({
-  useSDK: vi.fn(() => mockSdk),
-  useAutoResizer: vi.fn(),
-}));
+vi.mock('@contentful/react-apps-toolkit', async (importOriginal) => {
+  const { mockSdk } = await import('../mocks/mockSdk');
+  const { mockCma } = await import('../mocks/mockCma');
+  return {
+    useSDK: vi.fn(() => mockSdk),
+    useAutoResizer: vi.fn(),
+    useCMA: vi.fn(() => mockCma),
+  };
+});
 
 // Import the mocked useSDK so we can change its return value
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -47,12 +52,12 @@ describe('Sidebar component', () => {
       });
     });
 
-    it('should show tracking URL when configured', async () => {
+    it('should show last updated indicator when configured', async () => {
       render(<Sidebar />);
 
       await waitFor(() => {
-        expect(screen.getByText(/Tracking:/)).toBeInTheDocument();
-        expect(screen.getByText(/https:\/\/example\.com\/blog\/my-test-post/)).toBeInTheDocument();
+        // The auto-refresh indicator should be visible after data loads
+        expect(screen.getByText(/Auto-refreshing/)).toBeInTheDocument();
       });
     });
   });

@@ -4,6 +4,7 @@ import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { Box, Tabs, Text, TextLink, Note } from '@contentful/f36-components';
 import { AnalyticsDisplay } from '../components/AnalyticsDisplay';
 import { RecordingsList } from '../components/RecordingsList';
+import { FeatureFlagsList } from '../components/FeatureFlagsList';
 import { useSidebarSlug } from '../hooks/useSidebarSlug';
 import { usePostHogApi } from '../hooks/usePostHogApi';
 import { styles } from './Sidebar.styles';
@@ -13,6 +14,7 @@ import type {
   SidebarTab,
   PostHogConfiguration,
   SessionRecording,
+  FeatureFlag,
 } from '../types';
 
 /** Auto-refresh interval in milliseconds (10 seconds per spec) */
@@ -37,7 +39,7 @@ const Sidebar = () => {
   const { pageUrl, error: slugError, isConfigured } = useSidebarSlug();
 
   // PostHog API hook
-  const { queryAnalytics, listRecordings } = usePostHogApi();
+  const { queryAnalytics, listRecordings, listFeatureFlags, toggleFeatureFlag } = usePostHogApi();
 
   // Tab state - only analytics for now, recordings and flags will be added later
   const [activeTab, setActiveTab] = useState<SidebarTab>('analytics');
@@ -53,6 +55,12 @@ const Sidebar = () => {
   const [recordings, setRecordings] = useState<SessionRecording[]>([]);
   const [recordingsLoading, setRecordingsLoading] = useState(false);
   const [recordingsError, setRecordingsError] = useState<string | null>(null);
+
+  // Feature flags state
+  const [featureFlags, setFeatureFlags] = useState<FeatureFlag[]>([]);
+  const [flagsLoading, setFlagsLoading] = useState(false);
+  const [flagsError, setFlagsError] = useState<string | null>(null);
+  const [togglingFlagId, setTogglingFlagId] = useState<number | null>(null);
 
   // Ref to track if component is mounted (for async cleanup)
   const isMountedRef = useRef(true);
@@ -167,6 +175,67 @@ const Sidebar = () => {
     }
   }, [activeTab, isAppConfigured, isConfigured, pageUrl, fetchRecordings]);
 
+  // Fetch feature flags
+  const fetchFlags = useCallback(async () => {
+    setFlagsLoading(true);
+    try {
+      const response = await listFeatureFlags();
+
+      if (!isMountedRef.current) return;
+
+      if (response.success && response.data) {
+        setFeatureFlags(response.data.flags);
+        setFlagsError(null);
+      } else {
+        setFlagsError(response.error?.message || 'Failed to fetch feature flags');
+      }
+    } catch (err) {
+      if (!isMountedRef.current) return;
+      setFlagsError(err instanceof Error ? err.message : 'An unexpected error occurred');
+    } finally {
+      if (isMountedRef.current) {
+        setFlagsLoading(false);
+      }
+    }
+  }, [listFeatureFlags]);
+
+  // Fetch feature flags when switching to flags tab
+  useEffect(() => {
+    if (activeTab === 'flags' && isAppConfigured) {
+      fetchFlags();
+    }
+  }, [activeTab, isAppConfigured, fetchFlags]);
+
+  // Handle feature flag toggle
+  const handleFlagToggle = useCallback(
+    async (flagId: number, active: boolean) => {
+      setTogglingFlagId(flagId);
+      try {
+        const response = await toggleFeatureFlag(flagId, active);
+
+        if (!isMountedRef.current) return;
+
+        if (response.success && response.data) {
+          // Update the flag in the local state
+          setFeatureFlags((prev) =>
+            prev.map((flag) => (flag.id === flagId ? response.data!.flag : flag))
+          );
+          sdk.notifier.success(`Feature flag ${active ? 'enabled' : 'disabled'}`);
+        } else {
+          sdk.notifier.error(response.error?.message || 'Failed to toggle feature flag');
+        }
+      } catch (err) {
+        if (!isMountedRef.current) return;
+        sdk.notifier.error(err instanceof Error ? err.message : 'Failed to toggle feature flag');
+      } finally {
+        if (isMountedRef.current) {
+          setTogglingFlagId(null);
+        }
+      }
+    },
+    [toggleFeatureFlag, sdk.notifier]
+  );
+
   // Handle date range change
   const handleDateRangeChange = useCallback((newRange: DateRange) => {
     setDateRange(newRange);
@@ -234,7 +303,7 @@ const Sidebar = () => {
         <Tabs.List className={styles.tabList}>
           <Tabs.Tab panelId="analytics">Analytics</Tabs.Tab>
           <Tabs.Tab panelId="recordings">Recordings</Tabs.Tab>
-          {/* Feature Flags tab will be added in US3 */}
+          <Tabs.Tab panelId="flags">Flags</Tabs.Tab>
         </Tabs.List>
 
         {/* Analytics Tab Panel */}
@@ -268,7 +337,17 @@ const Sidebar = () => {
           />
         </Tabs.Panel>
 
-        {/* Feature Flags tab panel will be added in US3 */}
+        {/* Feature Flags Tab Panel */}
+        <Tabs.Panel id="flags">
+          <FeatureFlagsList
+            flags={featureFlags}
+            isLoading={flagsLoading}
+            error={flagsError}
+            onToggle={handleFlagToggle}
+            isToggling={togglingFlagId}
+            isReadOnly={false}
+          />
+        </Tabs.Panel>
       </Tabs>
     </Box>
   );
