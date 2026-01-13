@@ -1,7 +1,6 @@
-import { BaseAppSDK, PageAppSDK } from '@contentful/app-sdk';
+import { BaseAppSDK } from '@contentful/app-sdk';
 import { EntryProps } from 'contentful-management';
 import { FETCH_CONFIG } from './cacheConstants';
-import { getEnvironmentId } from './sdkUtils';
 
 export interface FetchAllEntriesResult {
   entries: EntryProps[];

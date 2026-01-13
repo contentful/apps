@@ -1,4 +1,4 @@
-import { PageAppSDK } from '@contentful/app-sdk';
+import { BaseAppSDK } from '@contentful/app-sdk';
 import { QueryOptions, ScheduledActionProps } from 'contentful-management';
 import { getEnvironmentId } from './sdkUtils';
 
@@ -11,7 +11,7 @@ export interface FetchScheduledActionsResult {
 // The current limit of scheduled actions in scheduled status is 500. Once it's reached, no additional scheduled actions can be created.
 
 export const fetchScheduledActions = async (
-  sdk: PageAppSDK,
+  sdk: BaseAppSDK,
   query: QueryOptions = {}
 ): Promise<FetchScheduledActionsResult> => {
   const scheduledActions = await sdk.cma.scheduledActions.getMany({

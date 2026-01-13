@@ -1,7 +1,6 @@
-import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
+import { BaseAppSDK, HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { UserProps } from 'contentful-management';
 import { fetchScheduledActions } from './fetchScheduledActions';
-import { getEnvironmentId } from './sdkUtils';
 
 export interface ReleaseWithScheduledAction {
   releaseId: string;
@@ -34,9 +33,7 @@ interface ReleaseInfo {
   viewUrl: string;
 }
 
-const fetchLaunchReleases = async (
-  sdk: HomeAppSDK | PageAppSDK
-): Promise<Map<string, ReleaseInfo>> => {
+const fetchLaunchReleases = async (sdk: BaseAppSDK): Promise<Map<string, ReleaseInfo>> => {
   const releasesMap = new Map<string, { title: string; itemsCount: number; viewUrl: string }>();
   const launchReleasesResponse = await sdk.cma.release.query({
     query: {
@@ -81,7 +78,7 @@ const fetchTimelineReleases = async (
   return releasesMap;
 };
 
-export const fetchReleases = async (sdk: HomeAppSDK | PageAppSDK): Promise<FetchReleasesResult> => {
+export const fetchReleases = async (sdk: BaseAppSDK): Promise<FetchReleasesResult> => {
   const scheduledActions = await fetchScheduledActions(sdk, {
     'sys.status[in]': 'scheduled',
     'entity.sys.linkType': 'Release',
