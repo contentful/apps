@@ -54,9 +54,7 @@ const fetchLaunchReleases = async (sdk: BaseAppSDK): Promise<Map<string, Release
   return releasesMap;
 };
 
-const fetchTimelineReleases = async (
-  sdk: BaseAppSDK
-): Promise<Map<string, ReleaseInfo>> => {
+const fetchTimelineReleases = async (sdk: BaseAppSDK): Promise<Map<string, ReleaseInfo>> => {
   const releasesMap = new Map<string, { title: string; itemsCount: number; viewUrl: string }>();
   const timelineReleasesResponse = await sdk.cma.release.query({
     query: {
