@@ -46,9 +46,6 @@ export const ReleasesTable = () => {
     }
   };
 
-  const truncate = (str: string, max: number = 50) =>
-    str.length > max ? str.slice(0, max) + ' ...' : str;
-
   const formatUserName = (
     user: { id: string; firstName?: string; lastName?: string } | null
   ): string => {
@@ -102,7 +99,7 @@ export const ReleasesTable = () => {
           {releases.map((release) => (
             <Table.Row key={release.releaseId}>
               <Table.Cell style={styles.titleCell}>
-                <Text fontWeight="fontWeightDemiBold">{truncate(release.title)}</Text>
+                <Text fontWeight="fontWeightDemiBold">{release.title}</Text>
               </Table.Cell>
               <Table.Cell style={styles.dateCell}>
                 {formatDate(release.scheduledFor.datetime)}
