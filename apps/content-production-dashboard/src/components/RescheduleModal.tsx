@@ -33,7 +33,7 @@ const generate12HourTimeOptions = (): string[] => {
   return options;
 };
 
-const generateTimezoneOptions = () => {
+const generateTimeZoneOptions = () => {
   return Intl.supportedValuesOf('timeZone').map((tz) => {
     const date = new Date();
     const utcOffset = new Intl.DateTimeFormat('en-US', {
