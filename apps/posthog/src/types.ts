@@ -225,6 +225,11 @@ export interface ApiResponse<T = unknown> {
 // =============================================================================
 
 /**
+ * Available tabs in the sidebar.
+ */
+export type SidebarTab = 'analytics' | 'recordings' | 'flags';
+
+/**
  * React state for the sidebar component
  */
 export interface SidebarState {
