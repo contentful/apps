@@ -1,65 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import type { AnalyticsMetrics, DateRange } from '../../src/types';
-
-// Mock the AnalyticsDisplay component - will be implemented in T032
-// This test defines the expected behavior
-
-// Component props interface (for documentation)
-interface AnalyticsDisplayProps {
-  metrics: AnalyticsMetrics | null;
-  isLoading: boolean;
-  error: string | null;
-  dateRange: DateRange;
-  onDateRangeChange: (dateRange: DateRange) => void;
-}
-
-// Placeholder component for testing - replace with actual import when T032 is complete
-const AnalyticsDisplay = ({
-  metrics,
-  isLoading,
-  error,
-  dateRange,
-  onDateRangeChange,
-}: AnalyticsDisplayProps) => {
-  if (isLoading) {
-    return <div data-testid="analytics-loading">Loading analytics...</div>;
-  }
-
-  if (error) {
-    return <div data-testid="analytics-error">{error}</div>;
-  }
-
-  if (!metrics) {
-    return <div data-testid="analytics-empty">No analytics data available</div>;
-  }
-
-  return (
-    <div data-testid="analytics-display">
-      <div data-testid="analytics-page-views">{metrics.pageViews}</div>
-      <div data-testid="analytics-unique-visitors">{metrics.uniqueVisitors}</div>
-      <div data-testid="analytics-avg-duration">{formatDuration(metrics.avgSessionDuration)}</div>
-      <select
-        data-testid="date-range-selector"
-        value={dateRange}
-        onChange={(e) => onDateRangeChange(e.target.value as DateRange)}>
-        <option value="today">Today</option>
-        <option value="last7days">Last 7 days</option>
-        <option value="last30days">Last 30 days</option>
-      </select>
-    </div>
-  );
-};
-
-// Helper function to format duration in seconds to human readable format
-const formatDuration = (seconds: number): string => {
-  if (seconds < 60) {
-    return `${Math.round(seconds)}s`;
-  }
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.round(seconds % 60);
-  return `${minutes}m ${remainingSeconds}s`;
-};
+import { AnalyticsDisplay, formatDuration } from '../../src/components/AnalyticsDisplay';
 
 describe('AnalyticsDisplay component', () => {
   const mockMetrics: AnalyticsMetrics = {
@@ -225,7 +167,8 @@ describe('AnalyticsDisplay component', () => {
         />
       );
 
-      const selector = screen.getByTestId('date-range-selector') as HTMLSelectElement;
+      // Forma 36 Select uses id attribute, not data-testid
+      const selector = document.getElementById('date-range-selector') as HTMLSelectElement;
       expect(selector).toBeTruthy();
       expect(selector.value).toBe('last7days');
     });
@@ -242,11 +185,14 @@ describe('AnalyticsDisplay component', () => {
         />
       );
 
-      const selector = screen.getByTestId('date-range-selector');
+      // Forma 36 Select uses id attribute
+      const selector = document.getElementById('date-range-selector') as HTMLSelectElement;
+      expect(selector).toBeTruthy();
+      // Trigger change with a new value
+      selector.value = 'last30days';
       selector.dispatchEvent(new Event('change', { bubbles: true }));
 
-      // Note: In a real test with userEvent, we'd simulate the actual selection
-      // This is a simplified version to demonstrate the expected behavior
+      expect(onDateRangeChange).toHaveBeenCalledWith('last30days');
     });
 
     it('displays all date range options', () => {
