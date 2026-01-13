@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Modal, FormControl, Autocomplete, Button, Flex, Box } from '@contentful/f36-components';
+import { Modal, Autocomplete, Button, Flex, Box, FormControl } from '@contentful/f36-components';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import type { ReleaseWithScheduledAction } from '../utils/fetchReleases';
 import { Datepicker } from '@contentful/f36-datepicker';
@@ -235,72 +235,70 @@ export const RescheduleModal = ({
         <>
           <Modal.Header title="Edit Schedule" onClose={onClose} />
           <Modal.Content>
-            <form onSubmit={handleSubmit}>
-              <Flex flexDirection="column" gap="spacingM">
-                <Flex gap="spacingM" alignItems="flex-start">
-                  <Box flex={1}>
-                    <FormControl isRequired isInvalid={!!errors.date}>
-                      <FormControl.Label>Publish on</FormControl.Label>
-                      <Datepicker
-                        selected={date}
-                        onSelect={(selectedDate: Date | undefined) => {
-                          if (selectedDate) {
-                            setDate(selectedDate);
-                            clearError('date');
-                          }
-                        }}
-                        fromDate={new Date()}
-                        dateFormat="dd MMM yyyy"
-                      />
-                      {errors.date && (
-                        <FormControl.ValidationMessage>{errors.date}</FormControl.ValidationMessage>
-                      )}
-                    </FormControl>
-                  </Box>
-                  <Box>
-                    <FormControl isRequired isInvalid={!!errors.time}>
-                      <FormControl.Label>Time</FormControl.Label>
-                      <Autocomplete
-                        items={filteredTimeOptions}
-                        onInputValueChange={handleTimeInputChange}
-                        onSelectItem={(item) => {
-                          setTime(item);
-                          clearError('time');
-                        }}
-                        selectedItem={time}
-                        listMaxHeight={100}
-                        listWidth="full"
-                        placeholder="Select time"
-                        usePortal={true}
-                      />
-                      {errors.time && (
-                        <FormControl.ValidationMessage>{errors.time}</FormControl.ValidationMessage>
-                      )}
-                    </FormControl>
-                  </Box>
-                </Flex>
-                <FormControl isRequired isInvalid={!!errors.timezone}>
-                  <FormControl.Label>Time zone</FormControl.Label>
-                  <Autocomplete<TimezoneOption>
-                    items={filteredTimezoneOptions}
-                    onInputValueChange={handleTimezoneInputChange}
-                    onSelectItem={(item) => {
-                      setTimezone(item);
-                      clearError('timezone');
-                    }}
-                    selectedItem={timezone}
-                    itemToString={(item) => item.display}
-                    renderItem={(item) => item.display}
-                    listMaxHeight={120}
-                    placeholder="Select timezone"
-                    usePortal={true}
-                  />
-                  {errors.timezone && (
-                    <FormControl.ValidationMessage>{errors.timezone}</FormControl.ValidationMessage>
-                  )}
-                </FormControl>
+            <Flex flexDirection="column" gap="spacingM">
+              <Flex gap="spacingM" alignItems="flex-start">
+                <Box flex={1}>
+                  <FormControl isRequired isInvalid={!!errors.date}>
+                    <FormControl.Label>Publish on</FormControl.Label>
+                    <Datepicker
+                      selected={date}
+                      onSelect={(selectedDate: Date | undefined) => {
+                        if (selectedDate) {
+                          setDate(selectedDate);
+                          clearError('date');
+                        }
+                      }}
+                      fromDate={new Date()}
+                      dateFormat="dd MMM yyyy"
+                    />
+                    {errors.date && (
+                      <FormControl.ValidationMessage>{errors.date}</FormControl.ValidationMessage>
+                    )}
+                  </FormControl>
+                </Box>
+                <Box>
+                  <FormControl isRequired isInvalid={!!errors.time}>
+                    <FormControl.Label>Time</FormControl.Label>
+                    <Autocomplete
+                      items={filteredTimeOptions}
+                      onInputValueChange={handleTimeInputChange}
+                      onSelectItem={(item) => {
+                        setTime(item);
+                        clearError('time');
+                      }}
+                      selectedItem={time}
+                      listMaxHeight={100}
+                      listWidth="full"
+                      placeholder="Select time"
+                      usePortal={true}
+                    />
+                    {errors.time && (
+                      <FormControl.ValidationMessage>{errors.time}</FormControl.ValidationMessage>
+                    )}
+                  </FormControl>
+                </Box>
               </Flex>
-            </form>
+              <FormControl isRequired isInvalid={!!errors.timezone}>
+                <FormControl.Label>Time zone</FormControl.Label>
+                <Autocomplete<TimezoneOption>
+                  items={filteredTimezoneOptions}
+                  onInputValueChange={handleTimezoneInputChange}
+                  onSelectItem={(item) => {
+                    setTimezone(item);
+                    clearError('timezone');
+                  }}
+                  selectedItem={timezone}
+                  itemToString={(item) => item.display}
+                  renderItem={(item) => item.display}
+                  listMaxHeight={120}
+                  placeholder="Select timezone"
+                  usePortal={true}
+                />
+                {errors.timezone && (
+                  <FormControl.ValidationMessage>{errors.timezone}</FormControl.ValidationMessage>
+                )}
+              </FormControl>
+            </Flex>
           </Modal.Content>
           <Modal.Controls>
             <Flex justifyContent="flex-end" gap="spacingS">

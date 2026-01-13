@@ -51,7 +51,6 @@ export const ReleasesTable = () => {
     }
   };
 
-
   const formatUserName = (
     user: { id: string; firstName?: string; lastName?: string } | null
   ): string => {
@@ -114,7 +113,11 @@ export const ReleasesTable = () => {
               <Table.Cell style={styles.updatedCell}>{formatDate(release.updatedAt)}</Table.Cell>
               <Table.Cell style={styles.userCell}>{formatUserName(release.updatedBy)}</Table.Cell>
               <Table.Cell style={styles.actionsCell}>
-                <ReleasesTableActions release={release} sdk={sdk} onActionSuccess={refetchReleases} />
+                <ReleasesTableActions
+                  release={release}
+                  sdk={sdk}
+                  onActionSuccess={refetchReleases}
+                />
               </Table.Cell>
             </Table.Row>
           ))}
