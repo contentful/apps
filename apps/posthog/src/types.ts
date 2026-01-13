@@ -205,6 +205,22 @@ export interface AppError {
 }
 
 // =============================================================================
+// API Response Types
+// =============================================================================
+
+/**
+ * Generic API response wrapper for App Action calls.
+ */
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+  };
+}
+
+// =============================================================================
 // UI State Entities
 // =============================================================================
 
