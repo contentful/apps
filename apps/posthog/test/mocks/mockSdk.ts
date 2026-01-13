@@ -48,7 +48,15 @@ export const mockSdk: any = {
   location: {
     is: vi.fn().mockReturnValue(true),
   },
+  locales: {
+    default: 'en-US',
+    available: ['en-US'],
+  },
   window: {
     startAutoResizer: vi.fn(),
+  },
+  notifier: {
+    success: vi.fn(),
+    error: vi.fn(),
   },
 };
