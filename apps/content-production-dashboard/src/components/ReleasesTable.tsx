@@ -31,7 +31,7 @@ const ReleasesTableHeader = () => {
 export const ReleasesTable = () => {
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const [currentPage, setCurrentPage] = useState(0);
-  const { releases, total, isFetchingReleases, fetchingReleasesError, refetch } =
+  const { releases, total, isFetchingReleases, fetchingReleasesError, refetchReleases } =
     useReleases(currentPage);
 
   const formatDate = (dateString: string | undefined): string => {
@@ -114,7 +114,7 @@ export const ReleasesTable = () => {
               <Table.Cell style={styles.updatedCell}>{formatDate(release.updatedAt)}</Table.Cell>
               <Table.Cell style={styles.userCell}>{formatUserName(release.updatedBy)}</Table.Cell>
               <Table.Cell style={styles.actionsCell}>
-                <ReleasesTableActions release={release} sdk={sdk} onActionSuccess={refetch} />
+                <ReleasesTableActions release={release} sdk={sdk} onActionSuccess={refetchReleases} />
               </Table.Cell>
             </Table.Row>
           ))}
