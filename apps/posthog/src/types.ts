@@ -1,103 +1,238 @@
 /**
- * PostHog Analytics App - Shared Types
+ * PostHog Analytics App - Shared Type Definitions
+ * Based on data-model.md specification
  */
 
-// ============================================================================
-// Date Range Types
-// ============================================================================
-
-/**
- * Available date range options for analytics
- */
-export type DateRangeType = 'last24h' | 'last7d' | 'last14d' | 'last30d';
+// =============================================================================
+// Installation Parameters
+// =============================================================================
 
 /**
- * Date range configuration
+ * Configuration for a content type's URL/slug mapping
  */
-export interface DateRangeConfig {
-  label: string;
-  days: number;
-  interval: string; // HogQL interval string
+export interface ContentTypeSlugConfig {
+  /** Field ID containing the slug */
+  slugField: string;
+  /** Base URL prefix (e.g., "https://example.com/blog/") */
+  urlPrefix: string;
 }
 
 /**
- * Available date range options
+ * Maps Contentful content type IDs to their URL/slug configuration
  */
-export const DATE_RANGE_OPTIONS: Record<DateRangeType, DateRangeConfig> = {
-  last24h: { label: 'Last 24 hours', days: 1, interval: '1 DAY' },
-  last7d: { label: 'Last 7 days', days: 7, interval: '7 DAY' },
-  last14d: { label: 'Last 14 days', days: 14, interval: '14 DAY' },
-  last30d: { label: 'Last 30 days', days: 30, interval: '30 DAY' },
-};
-
-// ============================================================================
-// App Configuration Types
-// ============================================================================
-
-/**
- * URL mapping configuration for a content type
- */
-export interface UrlMapping {
-  /** The Contentful content type ID (e.g., "blogPost") */
-  contentTypeId: string;
-  /** The URL pattern with {slug} placeholder (e.g., "https://example.com/blog/{slug}") */
-  urlPattern: string;
+export interface ContentTypeMapping {
+  [contentTypeId: string]: ContentTypeSlugConfig;
 }
 
 /**
  * App installation parameters stored in Contentful
  */
-export interface AppInstallationParameters {
-  /** Project API Key (public key) for frontend event tracking */
-  projectApiKey?: string;
-  /** Personal API Key for API access (private) */
-  personalApiKey?: string;
-  /** PostHog Project ID (numeric) */
-  projectId?: string;
-  /** PostHog host URL (e.g., "https://us.posthog.com") */
-  posthogHost?: string;
-  /** URL mappings for content types */
-  urlMappings?: UrlMapping[];
+export interface PostHogConfiguration {
+  /** Personal API key for PostHog authentication */
+  posthogApiKey: string;
+  /** PostHog project ID */
+  posthogProjectId: string;
+  /** PostHog instance URL (us/eu cloud or custom) */
+  posthogHost: 'us' | 'eu' | string;
+  /** Mapping of content types to URL fields */
+  contentTypes: ContentTypeMapping;
 }
 
-// ============================================================================
-// Analytics Data Types
-// ============================================================================
+// =============================================================================
+// Analytics Entities
+// =============================================================================
 
 /**
- * Entry statistics from PostHog
+ * Date range options for analytics queries
  */
-export interface EntryStats {
-  /** Total page views in the period */
-  pageviews: number;
-  /** Unique users/visitors */
-  uniqueUsers: number;
+export type DateRange = 'today' | 'last7days' | 'last30days';
+
+/**
+ * Aggregated analytics data for a specific page
+ */
+export interface AnalyticsMetrics {
+  /** Total page view events */
+  pageViews: number;
+  /** Count of distinct persons */
+  uniqueVisitors: number;
+  /** Average session duration in seconds */
+  avgSessionDuration: number;
+  /** Time period for metrics */
+  dateRange: DateRange;
+  /** URL being analyzed */
+  pageUrl: string;
 }
 
 /**
- * Daily statistics for charts
+ * Time-series data point for charts
  */
-export interface DailyStats {
-  /** Date in YYYY-MM-DD format */
+export interface AnalyticsDataPoint {
+  /** ISO date string */
   date: string;
-  /** Page views for the day */
-  pageviews: number;
-  /** Unique users for the day */
-  uniqueUsers: number;
+  /** Page views for this date */
+  pageViews: number;
+  /** Unique visitors for this date */
+  uniqueVisitors: number;
 }
 
+// =============================================================================
+// Session Recording Entities
+// =============================================================================
+
 /**
- * Session recording metadata
+ * Represents a recorded user session from PostHog
  */
 export interface SessionRecording {
-  /** Recording ID */
+  /** PostHog recording ID */
   id: string;
-  /** Truncated distinct ID for display */
+  /** User identifier */
   distinctId: string;
+  /** ISO timestamp of session start */
+  startTime: string;
+  /** ISO timestamp of session end */
+  endTime: string;
   /** Recording duration in seconds */
   duration: number;
-  /** Recording start timestamp (ISO string) */
-  startTime: string;
-  /** Full URL to watch the recording in PostHog */
-  recordingUrl: string;
+  /** Active time (excluding idle) */
+  activeSeconds: number;
+  /** Link to view in PostHog dashboard */
+  viewUrl: string;
+}
+
+/**
+ * API response for listing recordings
+ */
+export interface SessionRecordingListResponse {
+  recordings: SessionRecording[];
+  hasMore: boolean;
+  totalCount: number;
+}
+
+// =============================================================================
+// Feature Flag Entities
+// =============================================================================
+
+/**
+ * Represents a PostHog feature flag
+ */
+export interface FeatureFlag {
+  /** PostHog flag ID */
+  id: number;
+  /** Unique flag key */
+  key: string;
+  /** Human-readable name */
+  name: string;
+  /** Whether flag is enabled */
+  active: boolean;
+  /** Percentage rollout (0-100) */
+  rolloutPercentage: number | null;
+  /** ISO timestamp */
+  createdAt: string;
+  /** Creator email */
+  createdBy: string;
+}
+
+/**
+ * API response for listing flags
+ */
+export interface FeatureFlagListResponse {
+  flags: FeatureFlag[];
+  totalCount: number;
+}
+
+/**
+ * Request to toggle a feature flag
+ */
+export interface FeatureFlagToggleRequest {
+  flagId: number;
+  active: boolean;
+}
+
+// =============================================================================
+// Error Entities
+// =============================================================================
+
+/**
+ * Error codes for the app
+ */
+export type ErrorCode =
+  | 'INVALID_API_KEY'
+  | 'PROJECT_NOT_FOUND'
+  | 'RATE_LIMIT_EXCEEDED'
+  | 'NETWORK_ERROR'
+  | 'PERMISSION_DENIED'
+  | 'NOT_CONFIGURED'
+  | 'SLUG_NOT_FOUND'
+  | 'UNKNOWN_ERROR';
+
+/**
+ * Standardized error format for the app
+ */
+export interface AppError {
+  code: ErrorCode;
+  message: string;
+  details?: string;
+  recoverable: boolean;
+}
+
+// =============================================================================
+// UI State Entities
+// =============================================================================
+
+/**
+ * React state for the sidebar component
+ */
+export interface SidebarState {
+  // View state
+  activeTab: 'analytics' | 'recordings' | 'flags';
+  isLoading: boolean;
+  error: string | null;
+
+  // Analytics state
+  analytics: AnalyticsMetrics | null;
+  selectedDateRange: DateRange;
+
+  // Recordings state
+  recordings: SessionRecording[];
+  recordingsLoading: boolean;
+
+  // Feature flags state
+  featureFlags: FeatureFlag[];
+  flagsLoading: boolean;
+  togglingFlagId: number | null;
+}
+
+/**
+ * Content type info from Contentful
+ */
+export interface ContentTypeInfo {
+  id: string;
+  name: string;
+  fields: Array<{
+    id: string;
+    name: string;
+    type: string;
+  }>;
+}
+
+/**
+ * React state for the configuration screen
+ */
+export interface ConfigScreenState {
+  // Connection settings
+  apiKey: string;
+  projectId: string;
+  host: 'us' | 'eu' | string;
+
+  // Validation state
+  isTestingConnection: boolean;
+  connectionStatus: 'untested' | 'success' | 'error';
+  connectionError: string | null;
+
+  // Content type mappings
+  contentTypes: ContentTypeMapping;
+  availableContentTypes: ContentTypeInfo[];
+
+  // Save state
+  isSaving: boolean;
 }
