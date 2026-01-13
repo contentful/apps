@@ -8,6 +8,7 @@ import {
   FetchReleasesResult,
   fetchReleases,
 } from '../utils/fetchReleases';
+import { getEnvironmentId } from '../utils/sdkUtils';
 
 export interface UseReleasesResult {
   releases: ReleaseWithScheduledAction[];
@@ -23,7 +24,7 @@ export function useReleases(page: number = 0): UseReleasesResult {
   const skip = page * RELEASES_PER_PAGE;
 
   const { data, isFetching, error, refetch } = useQuery<FetchReleasesResult, Error>({
-    queryKey: ['releases', sdk.ids.space, sdk.ids.environment],
+    queryKey: ['releases', sdk.ids.space, getEnvironmentId(sdk)],
     queryFn: () => fetchReleases(sdk),
     select: (data) => {
       const paginatedReleases = data.releases.slice(skip, skip + RELEASES_PER_PAGE);

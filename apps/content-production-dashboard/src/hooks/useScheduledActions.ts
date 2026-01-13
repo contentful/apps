@@ -3,6 +3,7 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { useQuery } from '@tanstack/react-query';
 import { ScheduledActionProps } from 'contentful-management';
 import { fetchScheduledActions, FetchScheduledActionsResult } from '../utils/fetchScheduledActions';
+import { getEnvironmentId } from '../utils/sdkUtils';
 
 export interface UseScheduledActionsResult {
   scheduledActions: ScheduledActionProps[];
@@ -17,12 +18,12 @@ export function useScheduledActions(): UseScheduledActionsResult {
   const sdk = useSDK<PageAppSDK>();
 
   const { data, isFetching, error, refetch } = useQuery<FetchScheduledActionsResult, Error>({
-    queryKey: ['scheduledActions', sdk.ids.space, sdk.ids.environment],
+    queryKey: ['scheduledActions', sdk.ids.space, getEnvironmentId(sdk)],
     queryFn: () => fetchScheduledActions(sdk),
   });
 
   return {
-    scheduledActions: data?.scheduledActions || [],
+    scheduledActions: data?.items || [],
     total: data?.total || 0,
     isFetchingScheduledActions: isFetching,
     fetchingScheduledActionsError: error,

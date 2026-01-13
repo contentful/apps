@@ -1,5 +1,7 @@
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { UserProps } from 'contentful-management';
+import { fetchScheduledActions } from './fetchScheduledActions';
+import { getEnvironmentId } from './sdkUtils';
 
 export interface ReleaseWithScheduledAction {
   releaseId: string;
@@ -38,7 +40,7 @@ const fetchLaunchReleases = async (
   const releasesMap = new Map<string, { title: string; itemsCount: number; viewUrl: string }>();
   const launchReleasesResponse = await sdk.cma.release.query({
     spaceId: sdk.ids.space,
-    environmentId: sdk.ids.environment,
+    environmentId: getEnvironmentId(sdk),
     query: {
       'sys.status[in]': 'active',
       limit: 500,
@@ -63,7 +65,7 @@ const fetchTimelineReleases = async (
   const releasesMap = new Map<string, { title: string; itemsCount: number; viewUrl: string }>();
   const timelineReleasesResponse = await sdk.cma.release.query({
     spaceId: sdk.ids.space,
-    environmentId: sdk.ids.environment,
+    environmentId: getEnvironmentId(sdk),
     query: {
       'sys.schemaVersion': 'Release.v2',
       'sys.status[in]': 'active',
@@ -84,18 +86,12 @@ const fetchTimelineReleases = async (
 };
 
 export const fetchReleases = async (sdk: HomeAppSDK | PageAppSDK): Promise<FetchReleasesResult> => {
-  const scheduledActions = await sdk.cma.scheduledActions.getMany({
-    spaceId: sdk.ids.space,
-    query: {
-      'environment.sys.id': sdk.ids.environment,
-      'sys.status[in]': 'scheduled',
-      'entity.sys.linkType': 'Release',
-      order: 'scheduledFor.datetime',
-      limit: 500,
-    },
+  const scheduledActions = await fetchScheduledActions(sdk, {
+    'sys.status[in]': 'scheduled',
+    'entity.sys.linkType': 'Release',
   });
 
-  if (scheduledActions.items.length === 0) {
+  if (scheduledActions.total === 0) {
     return {
       releases: [],
       total: 0,
