@@ -15,7 +15,6 @@ export const fetchScheduledActions = async (
   query: QueryOptions = {}
 ): Promise<FetchScheduledActionsResult> => {
   const scheduledActions = await sdk.cma.scheduledActions.getMany({
-    spaceId: sdk.ids.space,
     query: {
       'environment.sys.id': getEnvironmentId(sdk),
       'sys.status[in]': 'scheduled',

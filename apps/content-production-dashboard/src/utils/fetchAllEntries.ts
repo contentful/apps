@@ -1,4 +1,4 @@
-import { PageAppSDK } from '@contentful/app-sdk';
+import { BaseAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { EntryProps } from 'contentful-management';
 import { FETCH_CONFIG } from './cacheConstants';
 import { getEnvironmentId } from './sdkUtils';
@@ -9,7 +9,7 @@ export interface FetchAllEntriesResult {
   fetchedAt: Date;
 }
 
-export async function fetchAllEntries(sdk: PageAppSDK): Promise<FetchAllEntriesResult> {
+export async function fetchAllEntries(sdk: BaseAppSDK): Promise<FetchAllEntriesResult> {
   const allEntries: EntryProps[] = [];
   let batchSkip = 0;
   let total = 0;
@@ -19,8 +19,6 @@ export async function fetchAllEntries(sdk: PageAppSDK): Promise<FetchAllEntriesR
   while (hasMore) {
     try {
       const response = await sdk.cma.entry.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: getEnvironmentId(sdk),
         query: {
           skip: batchSkip,
           limit: batchSize,

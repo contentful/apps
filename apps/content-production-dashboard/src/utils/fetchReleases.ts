@@ -39,8 +39,6 @@ const fetchLaunchReleases = async (
 ): Promise<Map<string, ReleaseInfo>> => {
   const releasesMap = new Map<string, { title: string; itemsCount: number; viewUrl: string }>();
   const launchReleasesResponse = await sdk.cma.release.query({
-    spaceId: sdk.ids.space,
-    environmentId: getEnvironmentId(sdk),
     query: {
       'sys.status[in]': 'active',
       limit: 500,
@@ -64,8 +62,6 @@ const fetchTimelineReleases = async (
 ): Promise<Map<string, ReleaseInfo>> => {
   const releasesMap = new Map<string, { title: string; itemsCount: number; viewUrl: string }>();
   const timelineReleasesResponse = await sdk.cma.release.query({
-    spaceId: sdk.ids.space,
-    environmentId: getEnvironmentId(sdk),
     query: {
       'sys.schemaVersion': 'Release.v2',
       'sys.status[in]': 'active',
