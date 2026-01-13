@@ -83,36 +83,51 @@ export function AnalyticsDisplay({
 
   // Success state - display metrics
   return (
-    <div data-testid="analytics-display">
+    <div data-testid="analytics-display" role="region" aria-label="Analytics metrics for this page">
       {/* Date Range Selector */}
       <div className={styles.dateRangeContainer}>
         <DateRangeSelector value={dateRange} onChange={onDateRangeChange} hideLabel />
       </div>
 
       {/* Metrics Grid */}
-      <div className={styles.metricsGrid}>
+      <div className={styles.metricsGrid} role="list" aria-label="Analytics metrics">
         {/* Page Views */}
-        <div className={styles.metricCard}>
-          <div className={styles.metricValue} data-testid="analytics-page-views">
+        <div className={styles.metricCard} role="listitem">
+          <div
+            className={styles.metricValue}
+            data-testid="analytics-page-views"
+            aria-label={`${metrics.pageViews} page views`}>
             {metrics.pageViews}
           </div>
-          <p className={styles.metricLabel}>Page Views</p>
+          <p className={styles.metricLabel} id="page-views-label">
+            Page Views
+          </p>
         </div>
 
         {/* Unique Visitors */}
-        <div className={styles.metricCard}>
-          <div className={styles.metricValue} data-testid="analytics-unique-visitors">
+        <div className={styles.metricCard} role="listitem">
+          <div
+            className={styles.metricValue}
+            data-testid="analytics-unique-visitors"
+            aria-label={`${metrics.uniqueVisitors} unique visitors`}>
             {metrics.uniqueVisitors}
           </div>
-          <p className={styles.metricLabel}>Unique Visitors</p>
+          <p className={styles.metricLabel} id="unique-visitors-label">
+            Unique Visitors
+          </p>
         </div>
 
         {/* Average Session Duration - Full width */}
-        <div className={styles.metricCardFull}>
-          <div className={styles.metricValue} data-testid="analytics-avg-duration">
+        <div className={styles.metricCardFull} role="listitem">
+          <div
+            className={styles.metricValue}
+            data-testid="analytics-avg-duration"
+            aria-label={`Average session duration: ${formatDuration(metrics.avgSessionDuration)}`}>
             {formatDuration(metrics.avgSessionDuration)}
           </div>
-          <p className={styles.metricLabel}>Avg. Session Duration</p>
+          <p className={styles.metricLabel} id="avg-duration-label">
+            Avg. Session Duration
+          </p>
         </div>
       </div>
     </div>

@@ -137,22 +137,30 @@ export function RecordingsList({
 
   // Success state - display recordings list
   return (
-    <div className={styles.listContainer} data-testid="recordings-list">
-      {recordings.map((recording) => {
+    <div
+      className={styles.listContainer}
+      data-testid="recordings-list"
+      role="list"
+      aria-label={`${recordings.length} session recordings`}>
+      {recordings.map((recording, index) => {
         const recordingUrl = getRecordingUrl(recording, posthogHost, projectId);
+        const sessionLabel = `Session ${recording.id.slice(0, 8)}`;
+        const timeLabel = formatRelativeTime(recording.startTime);
+        const durationLabel = formatDuration(recording.duration);
 
         return (
-          <div key={recording.id} className={styles.listItem}>
+          <div key={recording.id} className={styles.listItem} role="listitem">
             <TextLink
               href={recordingUrl}
               target="_blank"
               rel="noopener noreferrer"
               icon={<ExternalLinkIcon />}
-              alignIcon="end">
+              alignIcon="end"
+              aria-label={`View ${sessionLabel} recording from ${timeLabel}, duration ${durationLabel}. Opens in new tab.`}>
               <div>
-                <div className={styles.listItemTitle}>Session {recording.id.slice(0, 8)}...</div>
+                <div className={styles.listItemTitle}>{sessionLabel}...</div>
                 <div className={styles.listItemMeta}>
-                  {formatRelativeTime(recording.startTime)} · {formatDuration(recording.duration)}
+                  {timeLabel} · {durationLabel}
                 </div>
               </div>
             </TextLink>

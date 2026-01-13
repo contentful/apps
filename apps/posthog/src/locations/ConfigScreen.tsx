@@ -518,14 +518,16 @@ const ConfigScreen = () => {
           <code>{'{slug}'}</code> as a placeholder for the entry's slug field.
         </Paragraph>
 
-        <Note variant="neutral" title="How URL Mapping Works" marginBottom="spacingL">
-          <Paragraph marginBottom="none">
-            For example, if your blog posts are published at{' '}
-            <code>https://example.com/blog/my-post-title</code>, set the URL pattern to{' '}
-            <code>https://example.com/blog/{'{slug}'}</code>. The app will replace{' '}
-            <code>{'{slug}'}</code> with the entry's slug field value.
-          </Paragraph>
-        </Note>
+        <Box marginBottom="spacingL">
+          <Note variant="neutral" title="How URL Mapping Works">
+            <Paragraph marginBottom="none">
+              For example, if your blog posts are published at{' '}
+              <code>https://example.com/blog/my-post-title</code>, set the URL pattern to{' '}
+              <code>https://example.com/blog/{'{slug}'}</code>. The app will replace{' '}
+              <code>{'{slug}'}</code> with the entry's slug field value.
+            </Paragraph>
+          </Note>
+        </Box>
 
         {/* URL Mappings Table */}
         {(parameters.urlMappings || []).length > 0 && (
