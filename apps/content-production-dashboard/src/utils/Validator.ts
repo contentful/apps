@@ -17,23 +17,16 @@ export class Validator {
     field: string,
     label: string
   ): string | undefined {
-    let isEmpty = false;
+    const isEmpty =
+        value == null ||
+        (typeof value === 'string' && value.trim() === '') ||
+        (value instanceof Date && Number.isNaN(value.getTime()));
 
-    if (value === undefined || value === null) {
-      isEmpty = true;
-    } else if (typeof value === 'string' && value.trim() === '') {
-      isEmpty = true;
-    } else if (value instanceof Date && isNaN(value.getTime())) {
-      isEmpty = true;
-    }
+    if (!isEmpty) return;
 
-    if (isEmpty) {
-      const errorMessage = `${label} is required`;
-      this.setError(errors, field, errorMessage);
-      return errorMessage;
-    }
-
-    return;
+    const errorMessage = `${label} is required`;
+    this.setError(errors, field, errorMessage);
+    return errorMessage;
   }
 
   static isWithinRange(
