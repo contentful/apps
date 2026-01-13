@@ -67,6 +67,7 @@ describe('Home component', () => {
 
     render(<Home />);
 
-    expect(screen.getByText('Loading component...')).toBeInTheDocument();
+    expect(screen.getByText('Content Publishing Trends')).toBeInTheDocument();
+    expect(screen.getByText('Upcoming Scheduled Releases')).toBeInTheDocument();
   });
 });
