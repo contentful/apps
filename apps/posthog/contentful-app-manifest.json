@@ -1,0 +1,130 @@
+{
+  "$schema": "https://unpkg.com/@contentful/app-manifest@1.0.0/app-manifest.schema.json",
+  "functions": [
+    {
+      "id": "validateConnectionFunction",
+      "name": "Validate PostHog Connection",
+      "description": "Test PostHog API credentials",
+      "path": "functions/validateConnection.js",
+      "entryFile": "functions/validateConnection.ts",
+      "allowNetworks": [
+        "https://us.posthog.com",
+        "https://eu.posthog.com",
+        "https://app.posthog.com",
+        "https://*.posthog.com"
+      ],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "queryAnalyticsFunction",
+      "name": "Query PostHog Analytics",
+      "description": "Query page view metrics from PostHog using HogQL",
+      "path": "functions/queryAnalytics.js",
+      "entryFile": "functions/queryAnalytics.ts",
+      "allowNetworks": [
+        "https://us.posthog.com",
+        "https://eu.posthog.com",
+        "https://app.posthog.com",
+        "https://*.posthog.com"
+      ],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "listRecordingsFunction",
+      "name": "List Session Recordings",
+      "description": "List session recordings filtered by URL",
+      "path": "functions/listRecordings.js",
+      "entryFile": "functions/listRecordings.ts",
+      "allowNetworks": [
+        "https://us.posthog.com",
+        "https://eu.posthog.com",
+        "https://app.posthog.com",
+        "https://*.posthog.com"
+      ],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "listFeatureFlagsFunction",
+      "name": "List Feature Flags",
+      "description": "List all feature flags in the project",
+      "path": "functions/listFeatureFlags.js",
+      "entryFile": "functions/listFeatureFlags.ts",
+      "allowNetworks": [
+        "https://us.posthog.com",
+        "https://eu.posthog.com",
+        "https://app.posthog.com",
+        "https://*.posthog.com"
+      ],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "toggleFeatureFlagFunction",
+      "name": "Toggle Feature Flag",
+      "description": "Enable or disable a feature flag",
+      "path": "functions/toggleFeatureFlag.js",
+      "entryFile": "functions/toggleFeatureFlag.ts",
+      "allowNetworks": [
+        "https://us.posthog.com",
+        "https://eu.posthog.com",
+        "https://app.posthog.com",
+        "https://*.posthog.com"
+      ],
+      "accepts": ["appaction.call"]
+    }
+  ],
+  "actions": [
+    {
+      "id": "validateConnection",
+      "name": "Validate Connection",
+      "type": "function-invocation",
+      "functionId": "validateConnectionFunction",
+      "category": "Custom",
+      "parameters": [
+        { "id": "apiKey", "name": "API Key", "type": "Symbol", "required": true },
+        { "id": "projectId", "name": "Project ID", "type": "Symbol", "required": true },
+        { "id": "host", "name": "Host", "type": "Symbol", "required": true }
+      ]
+    },
+    {
+      "id": "queryAnalytics",
+      "name": "Query Analytics",
+      "type": "function-invocation",
+      "functionId": "queryAnalyticsFunction",
+      "category": "Custom",
+      "parameters": [
+        { "id": "pageUrl", "name": "Page URL", "type": "Symbol", "required": true },
+        { "id": "dateRange", "name": "Date Range", "type": "Symbol", "required": true }
+      ]
+    },
+    {
+      "id": "listRecordings",
+      "name": "List Recordings",
+      "type": "function-invocation",
+      "functionId": "listRecordingsFunction",
+      "category": "Custom",
+      "parameters": [
+        { "id": "pageUrl", "name": "Page URL", "type": "Symbol", "required": true },
+        { "id": "limit", "name": "Limit", "type": "Number", "required": false }
+      ]
+    },
+    {
+      "id": "listFeatureFlags",
+      "name": "List Feature Flags",
+      "type": "function-invocation",
+      "functionId": "listFeatureFlagsFunction",
+      "category": "Custom",
+      "parameters": []
+    },
+    {
+      "id": "toggleFeatureFlag",
+      "name": "Toggle Feature Flag",
+      "type": "function-invocation",
+      "functionId": "toggleFeatureFlagFunction",
+      "category": "Custom",
+      "parameters": [
+        { "id": "flagId", "name": "Flag ID", "type": "Number", "required": true },
+        { "id": "active", "name": "Active", "type": "Boolean", "required": true }
+      ]
+    }
+  ]
+}

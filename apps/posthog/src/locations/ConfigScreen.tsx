@@ -16,10 +16,18 @@ import {
   TextLink,
   Subheading,
   Stack,
+  Spinner,
+  Badge,
 } from '@contentful/f36-components';
-import { PlusIcon, DeleteIcon, ExternalLinkIcon } from '@contentful/f36-icons';
+import {
+  PlusIcon,
+  DeleteIcon,
+  ExternalLinkIcon,
+  CheckCircleIcon,
+  ErrorCircleIcon,
+} from '@contentful/f36-icons';
 import { css } from 'emotion';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
 import { AppInstallationParameters, UrlMapping } from '../types';
 import { styles as sharedStyles } from './ConfigScreen.styles';
 
@@ -75,8 +83,18 @@ const censorApiKey = (key: string): string => {
 // Component
 // ============================================================================
 
+// Connection status type
+type ConnectionStatus = 'untested' | 'testing' | 'success' | 'error';
+
+interface ConnectionResult {
+  projectName?: string;
+  organizationName?: string;
+  errorMessage?: string;
+}
+
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
+  const cma = useCMA();
 
   // State
   const [parameters, setParameters] = useState<AppInstallationParameters>({
@@ -86,6 +104,10 @@ const ConfigScreen = () => {
   const [isProjectKeyEditing, setIsProjectKeyEditing] = useState(false);
   const [showCustomHost, setShowCustomHost] = useState(false);
   const [customHostValue, setCustomHostValue] = useState('');
+
+  // Connection test state
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('untested');
+  const [connectionResult, setConnectionResult] = useState<ConnectionResult | null>(null);
 
   // ========================================================================
   // Configuration Save Handler
@@ -216,6 +238,78 @@ const ConfigScreen = () => {
       urlMappings: (prev.urlMappings || []).filter((_, i) => i !== index),
     }));
   };
+
+  // ========================================================================
+  // Connection Test Handler
+  // ========================================================================
+
+  const testConnection = async () => {
+    // Validate required fields before testing
+    if (!parameters.personalApiKey?.trim()) {
+      sdk.notifier.error('Please enter a Personal API Key first');
+      return;
+    }
+    if (!parameters.projectId?.trim()) {
+      sdk.notifier.error('Please enter a Project ID first');
+      return;
+    }
+    if (!parameters.posthogHost?.trim()) {
+      sdk.notifier.error('Please select a PostHog Host first');
+      return;
+    }
+
+    setConnectionStatus('testing');
+    setConnectionResult(null);
+
+    try {
+      const response = await cma.appActionCall.createWithResponse(
+        {
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
+          appDefinitionId: sdk.ids.app!,
+          appActionId: 'validateConnection',
+        },
+        {
+          parameters: {
+            apiKey: parameters.personalApiKey,
+            projectId: parameters.projectId,
+            host: parameters.posthogHost,
+          },
+        }
+      );
+
+      const result = JSON.parse(response.response.body);
+
+      if (result.success) {
+        setConnectionStatus('success');
+        setConnectionResult({
+          projectName: result.data.projectName,
+          organizationName: result.data.organizationName,
+        });
+        sdk.notifier.success(`Connected to project: ${result.data.projectName}`);
+      } else {
+        setConnectionStatus('error');
+        setConnectionResult({
+          errorMessage: result.error?.message || 'Connection failed',
+        });
+        sdk.notifier.error(result.error?.message || 'Connection failed');
+      }
+    } catch (error) {
+      setConnectionStatus('error');
+      const errorMessage = error instanceof Error ? error.message : 'Connection test failed';
+      setConnectionResult({ errorMessage });
+      sdk.notifier.error(errorMessage);
+    }
+  };
+
+  // Reset connection status when credentials change
+  useEffect(() => {
+    if (connectionStatus !== 'untested') {
+      setConnectionStatus('untested');
+      setConnectionResult(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parameters.personalApiKey, parameters.projectId, parameters.posthogHost]);
 
   // ========================================================================
   // Render
@@ -378,6 +472,39 @@ const ConfigScreen = () => {
               Select your PostHog deployment region or enter a custom URL for self-hosted instances.
             </FormControl.HelpText>
           </FormControl>
+
+          {/* Test Connection Button */}
+          <Box marginBottom="spacingL">
+            <Flex alignItems="center" gap="spacingM">
+              <Button
+                variant="secondary"
+                onClick={testConnection}
+                isDisabled={connectionStatus === 'testing'}
+                isLoading={connectionStatus === 'testing'}>
+                {connectionStatus === 'testing' ? 'Testing...' : 'Test Connection'}
+              </Button>
+
+              {/* Connection Status Display */}
+              {connectionStatus === 'success' && connectionResult && (
+                <Flex
+                  alignItems="center"
+                  gap="spacingXs"
+                  className={sharedStyles.connectionSuccess}>
+                  <CheckCircleIcon variant="positive" />
+                  <span>
+                    Connected to <strong>{connectionResult.projectName}</strong>
+                  </span>
+                </Flex>
+              )}
+
+              {connectionStatus === 'error' && connectionResult && (
+                <Flex alignItems="center" gap="spacingXs" className={sharedStyles.connectionError}>
+                  <ErrorCircleIcon variant="negative" />
+                  <span>{connectionResult.errorMessage}</span>
+                </Flex>
+              )}
+            </Flex>
+          </Box>
         </Form>
       </Box>
 
