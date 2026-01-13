@@ -38,6 +38,33 @@ export interface PostHogConfiguration {
   contentTypes: ContentTypeMapping;
 }
 
+/**
+ * URL mapping for a content type to its frontend URL pattern.
+ */
+export interface UrlMapping {
+  /** The Contentful content type ID */
+  contentTypeId: string;
+  /** URL pattern with {slug} placeholder (e.g., "https://example.com/blog/{slug}") */
+  urlPattern: string;
+}
+
+/**
+ * App installation parameters stored in Contentful.
+ * This is the root configuration object saved when the app is installed.
+ */
+export interface AppInstallationParameters {
+  /** Personal API key for PostHog API authentication (phx_...) */
+  personalApiKey?: string;
+  /** Project API key for client-side tracking (phc_...) - optional */
+  projectApiKey?: string;
+  /** PostHog project ID */
+  projectId?: string;
+  /** PostHog host URL (us.posthog.com, eu.posthog.com, or custom) */
+  posthogHost?: string;
+  /** URL mappings for content types */
+  urlMappings: UrlMapping[];
+}
+
 // =============================================================================
 // Analytics Entities
 // =============================================================================
@@ -89,14 +116,16 @@ export interface SessionRecording {
   distinctId: string;
   /** ISO timestamp of session start */
   startTime: string;
-  /** ISO timestamp of session end */
-  endTime: string;
+  /** ISO timestamp of session end (optional for simple queries) */
+  endTime?: string;
   /** Recording duration in seconds */
   duration: number;
   /** Active time (excluding idle) */
-  activeSeconds: number;
+  activeSeconds?: number;
   /** Link to view in PostHog dashboard */
-  viewUrl: string;
+  viewUrl?: string;
+  /** Alternative: URL to recording (used by posthog.ts) */
+  recordingUrl?: string;
 }
 
 /**
@@ -236,3 +265,41 @@ export interface ConfigScreenState {
   // Save state
   isSaving: boolean;
 }
+
+// =============================================================================
+// Legacy Type Aliases (for compatibility with existing components)
+// =============================================================================
+
+/**
+ * Alternative date range type used by posthog.ts
+ */
+export type DateRangeType = 'today' | 'last7d' | 'last30d';
+
+/**
+ * Entry statistics from PostHog (legacy naming)
+ */
+export interface EntryStats {
+  pageviews: number;
+  uniqueUsers: number;
+}
+
+/**
+ * Daily statistics (legacy naming)
+ */
+export interface DailyStats {
+  date: string;
+  pageviews: number;
+  uniqueUsers: number;
+}
+
+/**
+ * Date range options configuration
+ */
+export const DATE_RANGE_OPTIONS: Record<
+  DateRangeType,
+  { label: string; days: number; interval: string }
+> = {
+  today: { label: 'Today', days: 1, interval: '1 DAY' },
+  last7d: { label: 'Last 7 days', days: 7, interval: '7 DAY' },
+  last30d: { label: 'Last 30 days', days: 30, interval: '30 DAY' },
+};

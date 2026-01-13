@@ -21,6 +21,7 @@ import { PlusIcon, DeleteIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import { css } from 'emotion';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { AppInstallationParameters, UrlMapping } from '../types';
+import { styles as sharedStyles } from './ConfigScreen.styles';
 
 // Re-export types for backwards compatibility
 export type { AppInstallationParameters, UrlMapping } from '../types';
@@ -35,15 +36,11 @@ const POSTHOG_HOSTS = [
   { value: 'custom', label: 'Custom (Self-hosted)' },
 ] as const;
 
+// Local styles specific to this component
 const styles = {
-  container: css({
-    margin: '80px auto',
-    maxWidth: '800px',
-    padding: '0 20px',
-  }),
-  section: css({
-    marginBottom: '32px',
-  }),
+  // Use shared body style for main container
+  container: sharedStyles.body,
+  section: sharedStyles.section,
   splitter: css({
     border: 'none',
     borderTop: '1px solid #e5e5e5',
