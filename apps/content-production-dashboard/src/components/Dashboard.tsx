@@ -57,19 +57,19 @@ const Dashboard = () => {
         <LoadingSkeleton metricsCount={metricsCalculator.getAllMetrics().length} />
       ) : (
         <>
-        <Flex flexDirection="row" gap="spacingM" style={styles.metricsContainer}>
-          {metrics.map((metric) => {
-            return (
-              <MetricCard
-                key={metric.title}
-                title={metric.title}
-                value={metric.value}
-                subtitle={metric.subtitle}
-                isNegative={metric.isNegative}
-              />
-            );
-          })}
-        </Flex>
+          <Flex flexDirection="row" gap="spacingM">
+            {metrics.map((metric) => {
+              return (
+                <MetricCard
+                  key={metric.title}
+                  title={metric.title}
+                  value={metric.value}
+                  subtitle={metric.subtitle}
+                  isNegative={metric.isNegative}
+                />
+              );
+            })}
+          </Flex>
           <Box marginTop="spacingXl">
             <Box padding="spacingL" style={styles.releasesTableContainer}>
               <Heading as="h2" marginBottom="spacingM">

@@ -46,7 +46,7 @@ export const ReleasesTable = () => {
     }
   };
 
-  const truncate = (str: string, max: number = 20) =>
+  const truncate = (str: string, max: number = 50) =>
     str.length > max ? str.slice(0, max) + ' ...' : str;
 
   const formatUserName = (
