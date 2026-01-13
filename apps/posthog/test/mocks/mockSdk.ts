@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
 
+// Base mock SDK with all fields configured correctly
 export const mockSdk: any = {
   app: {
     onConfigure: vi.fn(),
@@ -58,5 +59,49 @@ export const mockSdk: any = {
   notifier: {
     success: vi.fn(),
     error: vi.fn(),
+  },
+  navigator: {
+    openAppConfig: vi.fn().mockResolvedValue(undefined),
+    openEntry: vi.fn().mockResolvedValue(undefined),
+  },
+};
+
+// Mock SDK with no installation parameters (app not configured)
+export const mockSdkUnconfigured: any = {
+  ...mockSdk,
+  parameters: {
+    installation: {},
+  },
+};
+
+// Mock SDK with no URL mapping for the current content type
+export const mockSdkNoMapping: any = {
+  ...mockSdk,
+  parameters: {
+    installation: {
+      posthogApiKey: 'phx_test_api_key',
+      posthogProjectId: '12345',
+      posthogHost: 'us',
+      contentTypes: {
+        // Different content type, not matching blogPost
+        landingPage: {
+          slugField: 'pageUrl',
+          urlPrefix: 'https://example.com/',
+        },
+      },
+    },
+  },
+};
+
+// Mock SDK with empty slug field
+export const mockSdkNoSlug: any = {
+  ...mockSdk,
+  entry: {
+    ...mockSdk.entry,
+    fields: {
+      slug: {
+        getValue: vi.fn().mockReturnValue(''),
+      },
+    },
   },
 };
