@@ -1,4 +1,5 @@
 import { PageAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
+import { ERROR_MESSAGES } from './constants/messages';
 
 /**
  * Call a specified app action and return the result if there are no errors or processing states. The function is written such that processing and failure states are considered
@@ -23,7 +24,7 @@ export async function callAppActionWithResult<T>(
 
     const appActionId = await getAppActionId(sdk, actionName);
     if (!appActionId) {
-      throw new Error(`App action "${actionName}" not found`);
+      throw new Error('App action not found');
     }
 
     const response = await sdk.cma.appActionCall.createWithResult(
@@ -37,7 +38,8 @@ export async function callAppActionWithResult<T>(
     );
 
     if (response.sys.status === 'failed') {
-      throw new Error(`Failed to call app action: ${actionName}: ${response.sys.error.message}`);
+      console.error(`App action "${actionName}" failed`, response.sys.error);
+      throw new Error('App action failed');
     } else if (response.sys.status === 'processing') {
       throw new Error(
         `Incomplete request, app action: ${actionName} is in the state of "Processing"`
@@ -47,9 +49,7 @@ export async function callAppActionWithResult<T>(
     return response.sys.result as unknown as T;
   } catch (error) {
     console.error(`Error calling app action "${actionName}"`, error);
-    throw new Error(
-      error instanceof Error ? error.message : `Failed to call app action "${actionName}"`
-    );
+    throw new Error(ERROR_MESSAGES.GENERIC_ERROR);
   }
 }
 
