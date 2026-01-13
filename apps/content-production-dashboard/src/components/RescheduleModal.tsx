@@ -4,6 +4,7 @@ import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import type { ReleaseWithScheduledAction } from '../utils/fetchReleases';
 import { Datepicker } from '@contentful/f36-datepicker';
 import { Validator } from '../utils/Validator';
+import { formatTimeTo12Hour, parse12HourTimeToDate } from '../utils/DateFormatUtils';
 
 interface RescheduleModalProps {
   isShown: boolean;
@@ -19,41 +20,7 @@ type TimezoneOption = {
   display: string;
 };
 
-const formatToPMAM = (dateString: string): string => {
-  try {
-    const date = new Date(dateString);
-    let hours = date.getHours();
-    const minutes = date.getMinutes();
-    const period = hours >= 12 ? 'PM' : 'AM';
-
-    hours = hours % 12;
-    if (hours === 0) hours = 12;
-
-    const roundedMinutes = minutes < 30 ? 0 : 30;
-
-    return `${hours}:${String(roundedMinutes).padStart(2, '0')} ${period}`;
-  } catch {
-    return '';
-  }
-};
-
-const parseTimeToDate = (date: Date, timeString: string): Date => {
-  const [timePart, period] = timeString.split(' ');
-  const [hours, minutes] = timePart.split(':');
-  let hour24 = parseInt(hours, 10);
-
-  if (period.toUpperCase() === 'PM' && hour24 !== 12) {
-    hour24 += 12;
-  } else if (period.toUpperCase() === 'AM' && hour24 === 12) {
-    hour24 = 0;
-  }
-
-  const newDate = new Date(date);
-  newDate.setHours(hour24, parseInt(minutes, 10), 0, 0);
-  return newDate;
-};
-
-const generateTimeOptions = (): string[] => {
+const generate12HourTimeOptions = (): string[] => {
   const options: string[] = [];
   for (let hour = 0; hour < 24; hour++) {
     for (let minute = 0; minute < 60; minute += 30) {
@@ -100,13 +67,13 @@ export const RescheduleModal = ({
   const [filteredTimeOptions, setFilteredTimeOptions] = useState<string[]>([]);
   const [filteredTimezoneOptions, setFilteredTimezoneOptions] = useState<TimezoneOption[]>([]);
 
-  const allTimeOptions = useMemo(() => generateTimeOptions(), []);
+  const allTimeOptions = useMemo(() => generate12HourTimeOptions(), []);
   const allTimezoneOptions = useMemo(() => generateTimezoneOptions(), []);
 
   useEffect(() => {
     if (release && isShown) {
       setDate(new Date(release.scheduledFor.datetime));
-      setTime(formatToPMAM(release.scheduledFor.datetime));
+      setTime(formatTimeTo12Hour(release.scheduledFor.datetime));
       setTimezone({
         value: release.scheduledFor.timezone || '',
         display:
@@ -192,7 +159,7 @@ export const RescheduleModal = ({
         environmentId: sdk.ids.environment,
       });
 
-      const isoDate = parseTimeToDate(date, time).toISOString();
+      const isoDate = parse12HourTimeToDate(date, time).toISOString();
 
       await sdk.cma.scheduledActions.update(
         {

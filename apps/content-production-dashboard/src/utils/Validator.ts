@@ -18,9 +18,9 @@ export class Validator {
     label: string
   ): string | undefined {
     const isEmpty =
-        value == null ||
-        (typeof value === 'string' && value.trim() === '') ||
-        (value instanceof Date && Number.isNaN(value.getTime()));
+      value == null ||
+      (typeof value === 'string' && value.trim() === '') ||
+      (value instanceof Date && Number.isNaN(value.getTime()));
 
     if (!isEmpty) return;
 

@@ -8,6 +8,7 @@ import { styles } from './ReleasesTable.styles';
 import { ReleasesTableActions } from './ReleasesTableActions';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
+import { formatDateTimeWithTimezone } from '../utils/DateFormatUtils';
 
 const ReleasesTableHeader = () => {
   return (
@@ -33,23 +34,6 @@ export const ReleasesTable = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const { releases, total, isFetchingReleases, fetchingReleasesError, refetchReleases } =
     useReleases(currentPage);
-
-  const formatDate = (dateString: string | undefined): string => {
-    if (!dateString) return '—';
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZoneName: 'short',
-      });
-    } catch {
-      return '—';
-    }
-  };
 
   const formatUserName = (
     user: { id: string; firstName?: string; lastName?: string } | null
@@ -107,10 +91,12 @@ export const ReleasesTable = () => {
                 <Text fontWeight="fontWeightDemiBold">{release.title}</Text>
               </Table.Cell>
               <Table.Cell style={styles.dateCell}>
-                {formatDate(release.scheduledFor.datetime)}
+                {formatDateTimeWithTimezone(release.scheduledFor.datetime)}
               </Table.Cell>
               <Table.Cell style={styles.itemsCell}>{release.itemsCount} items</Table.Cell>
-              <Table.Cell style={styles.updatedCell}>{formatDate(release.updatedAt)}</Table.Cell>
+              <Table.Cell style={styles.updatedCell}>
+                {formatDateTimeWithTimezone(release.updatedAt)}
+              </Table.Cell>
               <Table.Cell style={styles.userCell}>{formatUserName(release.updatedBy)}</Table.Cell>
               <Table.Cell style={styles.actionsCell}>
                 <ReleasesTableActions
