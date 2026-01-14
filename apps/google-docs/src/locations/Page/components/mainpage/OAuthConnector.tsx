@@ -158,11 +158,10 @@ export const OAuthConnector = ({
         {}
       );
 
-      popupWindowRef.current = window.open(
-        `${authorizeUrl}&access_type=offline&prompt=consent`,
-        '_blank',
-        'height=700,width=450'
-      );
+      const separator = authorizeUrl.includes('?') ? '&' : '?';
+      const urlWithParams = `${authorizeUrl}${separator}access_type=offline&prompt=consent`;
+
+      popupWindowRef.current = window.open(urlWithParams, '_blank', 'height=700,width=450');
     } catch (error) {
       cleanup();
       setLoadingState(OAuthLoadingState.IDLE);
@@ -244,7 +243,17 @@ export const OAuthConnector = ({
           Google Drive
         </Text>
       </Flex>
-      <Flex gap="spacingXs" alignItems="center">
+      <Flex
+        gap="spacingXs"
+        alignItems="center"
+        onMouseEnter={() => {
+          if (isOAuthConnected) {
+            setIsHoveringConnected(true);
+          }
+        }}
+        onMouseLeave={() => {
+          setIsHoveringConnected(false);
+        }}>
         {isOAuthConnected && isHoveringConnected && (
           <Text
             fontSize="fontSizeS"
@@ -259,14 +268,6 @@ export const OAuthConnector = ({
           size="small"
           endIcon={isOAuthConnected && !isHoveringConnected ? <CheckCircleIcon /> : undefined}
           onClick={handleButtonClick}
-          onMouseEnter={() => {
-            if (isOAuthConnected) {
-              setIsHoveringConnected(true);
-            }
-          }}
-          onMouseLeave={() => {
-            setIsHoveringConnected(false);
-          }}
           isLoading={loadingState !== OAuthLoadingState.IDLE}
           isDisabled={loadingState !== OAuthLoadingState.IDLE}>
           {getButtonText()}
