@@ -1,4 +1,4 @@
-import { Card, Flex, Heading, Skeleton, Subheading } from '@contentful/f36-components';
+import { Card, Flex, Skeleton, Subheading } from '@contentful/f36-components';
 import { styles } from './LoadingSkeleton.styles';
 
 export const LoadingSkeleton = ({ metricsCount }: { metricsCount: number }) => {

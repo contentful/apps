@@ -12,11 +12,22 @@ import {
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { HomeAppSDK } from '@contentful/app-sdk';
 import { useContentTypes } from '../hooks/useContentTypes';
+import { MAX_CONTENT_TYPES_IN_LEGEND } from '../utils/consts';
+
+const filterEntriesByContentTypeIds = (
+  entries: EntryProps[],
+  contentTypeIds: string[]
+): EntryProps[] => {
+  return entries.filter((entry) => {
+    const contentTypeId = entry.sys.contentType.sys.id;
+    return contentTypeIds.includes(contentTypeId);
+  });
+};
 
 export interface ContentTrendsTabsProps {
   entries: EntryProps[];
   timeRange: TimeRange;
-  trackedContentTypes?: string[];
+  trackedContentTypes: string[];
 }
 
 export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
@@ -32,16 +43,28 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
   const { contentTypeNames, isFetchingContentTypes } = useContentTypes(trackedContentTypes);
 
   const filteredEntries = useMemo(() => {
-    console.log('trackedContentTypes', trackedContentTypes);
-    if (!trackedContentTypes || trackedContentTypes.length === 0) {
-      console.log('no tracked content types', entries);
+    const hasTrackedTypes = trackedContentTypes.length > 0;
+    const exceedsLimit = contentTypeNames.size > MAX_CONTENT_TYPES_IN_LEGEND;
+
+    if (!hasTrackedTypes && !exceedsLimit) {
       return entries;
     }
-    return entries.filter((entry) => {
-      const contentTypeId = entry.sys.contentType.sys.id;
-      return trackedContentTypes.includes(contentTypeId);
-    });
-  }, [entries, trackedContentTypes]);
+
+    let contentTypeIdsToFilter: string[];
+
+    if (hasTrackedTypes) {
+      contentTypeIdsToFilter = exceedsLimit
+        ? trackedContentTypes.slice(0, MAX_CONTENT_TYPES_IN_LEGEND)
+        : trackedContentTypes;
+    } else {
+      contentTypeIdsToFilter = Array.from(contentTypeNames.keys()).slice(
+        0,
+        MAX_CONTENT_TYPES_IN_LEGEND
+      );
+    }
+
+    return filterEntriesByContentTypeIds(entries, contentTypeIdsToFilter);
+  }, [entries, trackedContentTypes, contentTypeNames]);
 
   useEffect(() => {
     const fetchCreators = async () => {
@@ -90,7 +113,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
   };
 
   return (
-    <Box>
+    <Box data-testid="content-trends-tabs">
       <Tabs defaultTab={selectedTab} onTabChange={handleTabChange}>
         <Tabs.List variant="horizontal-divider">
           <Tabs.Tab panelId="overall">New Entries</Tabs.Tab>
@@ -116,7 +139,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
                 <Spinner size="medium" />
               </Flex>
             ) : contentTypeData.contentTypes.length === 0 ? (
-              <Box padding="spacingL" textAlign="center">
+              <Box padding="spacingL">
                 No content type data available for the selected time range.
               </Box>
             ) : (
@@ -137,9 +160,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
                 <Spinner size="medium" />
               </Flex>
             ) : creatorData.creators.length === 0 ? (
-              <Box padding="spacingL" textAlign="center">
-                No creator data available for the selected time range.
-              </Box>
+              <Box padding="spacingL">No creator data available for the selected time range.</Box>
             ) : (
               <ChartWrapper
                 data={creatorData.data}

@@ -153,10 +153,6 @@ function generateSampleFieldValue(
   fieldType: (typeof FIELD_TYPES)[number],
   entryIndex: number
 ): any {
-  const baseValue = {
-    'en-US': null as any,
-  };
-
   switch (fieldType.type) {
     case 'Symbol':
       return { 'en-US': `Sample Text ${entryIndex + 1}` };

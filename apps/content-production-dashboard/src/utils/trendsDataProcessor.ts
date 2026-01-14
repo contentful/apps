@@ -1,6 +1,7 @@
 import { EntryProps } from 'contentful-management';
 import { DateCalculator } from './DateCalculator';
 import type { ChartDataPoint } from '../components/ChartWrapper';
+import { MAX_CONTENT_TYPES_IN_LEGEND } from './consts';
 
 export type TimeRange = 'year' | '6months' | '3months' | 'month' | 'yearToDate';
 
@@ -90,7 +91,9 @@ export function processContentTypeTrends(
 
   // Generate all months in range
   const allMonths = DateCalculator.generateMonthRange(startDate, now);
-  const contentTypeNamesArray = Array.from(contentTypeNames?.values() || []).sort();
+  const contentTypeNamesArray = Array.from(contentTypeNames?.values() || [])
+    .slice(0, MAX_CONTENT_TYPES_IN_LEGEND)
+    .sort();
 
   // Convert to chart data format
   const data = allMonths.map((monthYear) => {
