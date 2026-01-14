@@ -10,6 +10,116 @@ import {
   FinalEntriesResult,
 } from '../../functions/agents/documentParserAgent/schema';
 
+interface AgentCallParams {
+  spaceId: string;
+  environmentId: string;
+  documentId: string;
+  contentTypeIds: string[];
+  oauthToken: string;
+}
+
+interface AgentResponse {
+  entries: EntryToCreate[];
+  assets: AssetToCreate[];
+}
+
+/**
+ * Parse agent response to extract entries and assets to feed the cma create entries step
+ */
+const parseAgentResponse = (data: any): AgentResponse => {
+  // The assistant message contains the ai agent's response for the document and content types analysis
+  const assistantMessage = data.messages?.find((m: any) => m.role === 'assistant');
+  if (!assistantMessage) {
+    throw new Error('No assistant message found in agent response');
+  }
+
+  // Iterate through all parts to find one with entries JSON
+  const parts = assistantMessage.content?.parts;
+  if (!Array.isArray(parts) || parts.length === 0) {
+    throw new Error('Parts of the ai agent document analysis NOT found');
+  }
+
+  // Collect entries and assets from all parts
+  const allEntries: EntryToCreate[] = [];
+  const allAssets: AssetToCreate[] = [];
+  for (const part of parts) {
+    if (!part.text) continue;
+
+    try {
+      const parsed = JSON.parse(part.text);
+
+      if (Array.isArray(parsed.entries)) {
+        allEntries.push(...parsed.entries);
+      }
+      if (Array.isArray(parsed.assets)) {
+        allAssets.push(...parsed.assets);
+      }
+    } catch {
+      // We do not throw an error here because we want to continue parsing the other parts
+      // and other parts may already be valid and correctly parsed
+      console.warn('[parseAgentResponse] Failed to parse part:', { part, text: part.text });
+    }
+  }
+
+  // If this condition triggers that means all parts were invalid and we did not find any entries or assets so throw the error
+  if (allEntries.length === 0 && allAssets.length === 0) {
+    throw new Error('No entries or assets found in the ai agent document analysis');
+  }
+
+  return { entries: allEntries, assets: allAssets };
+};
+
+/**
+ * Call the agent - uses localhost fetch for dev, CMA SDK for production.
+ * We will want to figure out a proper localhost development mechanism but for now we are limited to a direct fetch to the agent.
+ */
+const callGoogleDocsAgent = async (
+  sdk: PageAppSDK,
+  params: AgentCallParams
+): Promise<AgentResponse> => {
+  const { spaceId, environmentId, documentId, contentTypeIds, oauthToken } = params;
+  const AGENT_ID = 'google-docs-agent';
+  const useLocalDevAgent = true; // Turn to false to use production agents-api
+  let response: any;
+  if (useLocalDevAgent) {
+    response = await fetch(
+      `http://localhost:4111/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${AGENT_ID}/generate`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-contentful-enable-alpha-feature': 'agents-api',
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'user',
+              content: `The documentId is: ${documentId}, the contentTypeIds are: ${contentTypeIds}, and the oauth token is: ${oauthToken}. Here's a JSON stringified version of the params if it helps
+                ${JSON.stringify({ documentId, contentTypeIds, oauthToken })}`,
+            },
+          ],
+        }),
+      }
+    );
+  } else {
+    response = await sdk.cma.agent.generate(
+      { agentId: AGENT_ID, spaceId, environmentId },
+      // @ts-expect-error - custom parameters for our agent
+      { documentId, oauthToken, contentTypeIds }
+    );
+  }
+
+  const data = await response.text();
+  try {
+    const parsedData = JSON.parse(data);
+    return parseAgentResponse(parsedData);
+  } catch (error) {
+    console.error('[callGoogleDocsAgent] Failed to parse response:', error);
+    // Graceful fall back state so app doesn't crash but we still know there was an error
+    return { entries: [], assets: [] };
+  }
+};
+
 interface UseGeneratePreviewResult {
   isSubmitting: boolean;
   previewEntries: PreviewEntry[];
@@ -72,12 +182,13 @@ export const useGeneratePreview = ({
       setSuccessMessage(null);
 
       try {
-        const { entries, assets: agentAssets = [] } =
-          await callAppActionWithResult<FinalEntriesResult>(sdk, 'createPreview', {
-            contentTypeIds,
-            documentId,
-            oauthToken,
-          });
+        const { entries, assets: agentAssets } = await callGoogleDocsAgent(sdk, {
+          spaceId: sdk.ids.space,
+          environmentId: sdk.ids.environment,
+          documentId,
+          contentTypeIds,
+          oauthToken,
+        });
 
         // Build preview entries with title info
         const previewEntriesWithTitles: PreviewEntry[] = await Promise.all(
