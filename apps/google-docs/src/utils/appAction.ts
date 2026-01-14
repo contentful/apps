@@ -15,42 +15,37 @@ export async function callAppActionWithResult<T>(
   actionName: string,
   parameters: Record<string, unknown>
 ): Promise<T> {
-  try {
-    const appDefinitionId = sdk.ids.app;
+  const appDefinitionId = sdk.ids.app;
 
-    if (!appDefinitionId) {
-      throw new Error('App definition ID not found');
-    }
-
-    const appActionId = await getAppActionId(sdk, actionName);
-    if (!appActionId) {
-      throw new Error('App action not found');
-    }
-
-    const response = await sdk.cma.appActionCall.createWithResult(
-      {
-        appDefinitionId,
-        appActionId,
-      },
-      {
-        parameters,
-      }
-    );
-
-    if (response.sys.status === 'failed') {
-      console.error(`App action "${actionName}" failed`, response.sys.error);
-      throw new Error('App action failed');
-    } else if (response.sys.status === 'processing') {
-      throw new Error(
-        `Incomplete request, app action: ${actionName} is in the state of "Processing"`
-      );
-    }
-
-    return response.sys.result as unknown as T;
-  } catch (error) {
-    console.error(`Error calling app action "${actionName}"`, error);
-    throw new Error(ERROR_MESSAGES.GENERIC_ERROR);
+  if (!appDefinitionId) {
+    throw new Error('App definition ID not found');
   }
+
+  const appActionId = await getAppActionId(sdk, actionName);
+  if (!appActionId) {
+    throw new Error('App action not found');
+  }
+
+  const response = await sdk.cma.appActionCall.createWithResult(
+    {
+      appDefinitionId,
+      appActionId,
+    },
+    {
+      parameters,
+    }
+  );
+
+  if (response.sys.status === 'failed') {
+    console.error(`App action "${actionName}" failed`, response.sys.error);
+    throw new Error('App action failed');
+  } else if (response.sys.status === 'processing') {
+    throw new Error(
+      `Incomplete request, app action: ${actionName} is in the state of "Processing"`
+    );
+  }
+
+  return response.sys.result as unknown as T;
 }
 
 /**

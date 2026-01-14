@@ -14,7 +14,7 @@ interface UseGeneratePreviewResult {
   isSubmitting: boolean;
   previewEntries: PreviewEntry[];
   assets: AssetToCreate[];
-  error: unknown | null;
+  error: Error | null;
   successMessage: string | null;
   submit: (contentTypeIds: string[]) => Promise<void>;
   clearMessages: () => void;
@@ -34,7 +34,7 @@ export const useGeneratePreview = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [previewEntries, setPreviewEntries] = useState<PreviewEntry[]>([]);
   const [assets, setAssets] = useState<AssetToCreate[]>([]);
-  const [error, setError] = useState<unknown | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const validateSubmission = useCallback(
@@ -90,7 +90,7 @@ export const useGeneratePreview = ({
         setPreviewEntries(previewEntriesWithTitles);
         setAssets(agentAssets);
       } catch (err) {
-        setError(err);
+        setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsSubmitting(false);
       }
