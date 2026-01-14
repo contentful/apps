@@ -68,7 +68,7 @@ export const RescheduleModal = ({
   const [filteredTimezoneOptions, setFilteredTimezoneOptions] = useState<TimezoneOption[]>([]);
 
   const allTimeOptions = useMemo(() => generate12HourTimeOptions(), []);
-  const allTimezoneOptions = useMemo(() => generateTimezoneOptions(), []);
+  const allTimezoneOptions = useMemo(() => generateTimeZoneOptions(), []);
 
   useEffect(() => {
     if (release && isShown) {
