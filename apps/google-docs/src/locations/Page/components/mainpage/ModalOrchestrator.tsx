@@ -5,7 +5,6 @@ import { useModalManagement, ModalType } from '../../../../hooks/useModalManagem
 import { useProgressTracking } from '../../../../hooks/useProgressTracking';
 import { useGeneratePreview } from '../../../../hooks/useGeneratePreview';
 import { ReviewEntriesModal } from '../modals/step_4/ReviewEntriesModal';
-import { ErrorEntriesModal } from '../modals/step_4/ErrorEntriesModal';
 import { ErrorModal } from '../modals/ErrorModal';
 import { createEntriesFromPreview, EntryCreationResult } from '../../../../services/entryService';
 import SelectDocumentModal from '../modals/step_1/SelectDocumentModal';
@@ -13,6 +12,7 @@ import { ContentTypePickerModal } from '../modals/step_2/SelectContentTypeModal'
 import { PreviewModal } from '../modals/step_3/PreviewModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ContentTypeProps } from 'contentful-management';
+import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
@@ -38,7 +38,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       pendingCloseAction,
       setPendingCloseAction,
     } = useProgressTracking();
-    const { previewEntries, assets, submit, clearMessages, isSubmitting, errorMessage } =
+    const { previewEntries, assets, submit, clearMessages, isSubmitting, error } =
       useGeneratePreview({
         sdk,
         documentId,
@@ -47,6 +47,9 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
 
     // Track previous submission state to detect completion
     const prevIsSubmittingRef = useRef<boolean>(false);
+
+    // Track last submitted content type IDs for retry functionality
+    const lastSubmittedContentTypeIdsRef = useRef<string[]>([]);
 
     // Expose startFlow method to parent
     useImperativeHandle(ref, () => ({
@@ -113,6 +116,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const handleContentTypeSelected = async (contentTypes: ContentTypeProps[]) => {
       closeModal(ModalType.CONTENT_TYPE_PICKER);
       const ids = contentTypes.map((ct) => ct.sys.id);
+      lastSubmittedContentTypeIdsRef.current = ids;
       await submit(ids);
     };
 
@@ -170,14 +174,22 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       resetProgress();
     };
 
+    const handleErrorPreviewModalRetry = async () => {
+      closeModal(ModalType.ERROR_PREVIEW);
+      clearMessages();
+
+      if (lastSubmittedContentTypeIdsRef.current.length > 0) {
+        await submit(lastSubmittedContentTypeIdsRef.current);
+      }
+    };
+
     // Close the ContentTypePickerModal when submission completes and open preview modal
     useEffect(() => {
       const submissionJustCompleted = prevIsSubmittingRef.current && !isSubmitting;
 
       if (submissionJustCompleted) {
         // Check if there was an error during submission
-        if (errorMessage) {
-          console.error('Preview generation failed:', errorMessage);
+        if (error) {
           openModal(ModalType.ERROR_PREVIEW);
         } else if (previewEntries) {
           console.log('Document processing completed, previewEntries:', previewEntries);
@@ -190,7 +202,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
 
       prevIsSubmittingRef.current = isSubmitting;
-    }, [isSubmitting, closeModal, openModal, previewEntries, errorMessage]);
+    }, [isSubmitting, closeModal, openModal, previewEntries, error]);
 
     return (
       <>
@@ -243,7 +255,8 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           isOpen={modalStates.isErrorPreviewModalOpen}
           onClose={handleErrorPreviewModalClose}
           title="Unable to generate preview"
-          message="An error occurred while processing your document."
+          message={ERROR_MESSAGES.GENERIC_ERROR}
+          onTryAgain={handleErrorPreviewModalRetry}
         />
 
         <ReviewEntriesModal
@@ -254,9 +267,11 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           defaultLocale={sdk.locales.default}
         />
 
-        <ErrorEntriesModal
+        <ErrorModal
           isOpen={modalStates.isErrorEntriesModalOpen}
           onClose={handleErrorModalCancel}
+          title="Unable to create entries"
+          message={ERROR_MESSAGES.CREATE_ENTRIES_ERROR}
           onTryAgain={handleErrorModalTryAgain}
         />
       </>

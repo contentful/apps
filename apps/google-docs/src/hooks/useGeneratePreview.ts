@@ -14,7 +14,7 @@ interface UseGeneratePreviewResult {
   isSubmitting: boolean;
   previewEntries: PreviewEntry[];
   assets: AssetToCreate[];
-  errorMessage: string | null;
+  error: Error | null;
   successMessage: string | null;
   submit: (contentTypeIds: string[]) => Promise<void>;
   clearMessages: () => void;
@@ -34,7 +34,7 @@ export const useGeneratePreview = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [previewEntries, setPreviewEntries] = useState<PreviewEntry[]>([]);
   const [assets, setAssets] = useState<AssetToCreate[]>([]);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const validateSubmission = useCallback(
@@ -62,13 +62,13 @@ export const useGeneratePreview = ({
     async (contentTypeIds: string[]) => {
       const validationError = validateSubmission(contentTypeIds);
       if (validationError) {
-        setErrorMessage(validationError);
+        setError(new Error(validationError));
         setSuccessMessage(null);
         return;
       }
 
       setIsSubmitting(true);
-      setErrorMessage(null);
+      setError(null);
       setSuccessMessage(null);
 
       try {
@@ -89,8 +89,8 @@ export const useGeneratePreview = ({
 
         setPreviewEntries(previewEntriesWithTitles);
         setAssets(agentAssets);
-      } catch (error) {
-        setErrorMessage(error instanceof Error ? error.message : ERROR_MESSAGES.SUBMISSION_FAILED);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsSubmitting(false);
       }
@@ -100,14 +100,14 @@ export const useGeneratePreview = ({
 
   const clearMessages = useCallback(() => {
     setSuccessMessage(null);
-    setErrorMessage(null);
+    setError(null);
   }, []);
 
   return {
     isSubmitting,
     previewEntries,
     assets,
-    errorMessage,
+    error,
     successMessage,
     submit,
     clearMessages,

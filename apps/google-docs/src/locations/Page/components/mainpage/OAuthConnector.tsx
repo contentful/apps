@@ -113,15 +113,20 @@ export const OAuthConnector = ({
 
   const messageHandler = async (event: MessageEvent) => {
     if (event.data.type === 'oauth:complete') {
-      await callAppActionWithResult<void>(sdk, 'completeGdocOauth', {
-        code: event.data.code,
-        state: event.data.state,
-      });
+      try {
+        await callAppActionWithResult<void>(sdk, 'completeGdocOauth', {
+          code: event.data.code,
+          state: event.data.state,
+        });
 
-      // Check the updated status after OAuth completion - expect it to be connected
-      await checkGoogleOAuthStatus(true);
-      cleanup();
-      setLoadingState(OAuthLoadingState.IDLE);
+        // Check the updated status after OAuth completion - expect it to be connected
+        await checkGoogleOAuthStatus(true);
+      } catch (error) {
+        console.error('Unable to complete Google OAuth connection:', error);
+      } finally {
+        cleanup();
+        setLoadingState(OAuthLoadingState.IDLE);
+      }
     }
   };
 
