@@ -50,6 +50,7 @@ export const OAuthConnector = ({
     maxRetries: number = 5
   ): Promise<void> => {
     const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    let finalStatus: boolean | null = null;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -65,13 +66,24 @@ export const OAuthConnector = ({
 
         // Assuming the response contains a connected field
         const isConnected = connected === true;
-        console.log(`Google OAuth connection status (attempt ${attempt}):`, isConnected);
+        console.log(`Connection status check:`, {
+          connected: isConnected,
+          hasToken: !!token,
+          tokenLength: token?.length || 0,
+        });
         onOauthTokenChange(token);
 
         // If we have an expected status and it matches, or if we don't have an expected status, accept the result
         if (expectedStatus === undefined || isConnected === expectedStatus) {
+          const previousStatus = isOAuthConnected;
+          finalStatus = isConnected;
           onOAuthConnectedChange(isConnected);
-          console.log(`Status check resolved to expected value: ${isConnected}`);
+          console.log(`Status check resolved:`, {
+            previousStatus,
+            newStatus: isConnected,
+            expectedStatus,
+            statusChanged: previousStatus !== isConnected,
+          });
           break;
         } else {
           console.log(
@@ -81,6 +93,7 @@ export const OAuthConnector = ({
           // If this is the last attempt, accept the current result anyway
           if (attempt === maxRetries) {
             console.log(`Max retries reached. Accepting current status: ${isConnected}`);
+            finalStatus = isConnected;
             onOAuthConnectedChange(isConnected);
             break;
           }
@@ -91,11 +104,14 @@ export const OAuthConnector = ({
           await delay(waitTime);
         }
       } catch (error) {
-        console.error(`Failed to check Google OAuth status (attempt ${attempt}):`, error);
+        console.error(`Failed to check Google OAuth status:`, { error });
 
         // If this is the last attempt, set status to false and give up
         if (attempt === maxRetries) {
-          console.log('Max retries reached. Setting status to false due to errors.');
+          console.warn('Max retries reached. Setting status to false due to errors.', {
+            attempts: maxRetries,
+          });
+          finalStatus = false;
           onOAuthConnectedChange(false);
           break;
         }
@@ -108,21 +124,26 @@ export const OAuthConnector = ({
     }
 
     setLoadingState(OAuthLoadingState.IDLE);
-    console.log(`Status check polling completed. Final status: ${isOAuthConnected}`);
+    console.log(`Status check polling completed. Final status: ${finalStatus ?? 'unknown'}`);
   };
 
   const messageHandler = async (event: MessageEvent) => {
     if (event.data.type === 'oauth:complete') {
+      console.log('Received OAuth completion message from popup', {
+        hasCode: !!event.data.code,
+        hasState: !!event.data.state,
+      });
       try {
         await callAppActionWithResult<void>(sdk, 'completeGdocOauth', {
           code: event.data.code,
           state: event.data.state,
         });
 
+        console.log('OAuth exchange completed, checking status...');
         // Check the updated status after OAuth completion - expect it to be connected
         await checkGoogleOAuthStatus(true);
       } catch (error) {
-        console.error('Unable to complete Google OAuth connection:', error);
+        console.error('Unable to complete Google OAuth connection:', { error });
       } finally {
         cleanup();
         setLoadingState(OAuthLoadingState.IDLE);
@@ -146,6 +167,7 @@ export const OAuthConnector = ({
   };
 
   const handleOAuth = async () => {
+    console.log('Initiating OAuth connection flow...');
     setLoadingState(OAuthLoadingState.CONNECTING);
 
     window.removeEventListener('message', messageHandler);
@@ -161,8 +183,15 @@ export const OAuthConnector = ({
       const separator = authorizeUrl.includes('?') ? '&' : '?';
       const urlWithParams = `${authorizeUrl}${separator}access_type=offline&prompt=consent`;
 
+      console.log('Opening OAuth popup with URL:', {
+        hasQueryParams: authorizeUrl.includes('?'),
+        includesOffline: urlWithParams.includes('access_type=offline'),
+        includesConsent: urlWithParams.includes('prompt=consent'),
+      });
+
       popupWindowRef.current = window.open(urlWithParams, '_blank', 'height=700,width=450');
     } catch (error) {
+      console.error('Failed to initiate OAuth:', { error });
       cleanup();
       setLoadingState(OAuthLoadingState.IDLE);
       sdk.notifier.error('Unable to connect to Google Drive. Please try again.');
