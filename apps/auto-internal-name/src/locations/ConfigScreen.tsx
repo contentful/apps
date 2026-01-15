@@ -151,10 +151,10 @@ const ConfigScreen = () => {
             Set up Auto-prefix
           </Heading>
           <Paragraph>
-            This app automatically adds the parent entry's name as a prefix to your reference
+            This app automatically adds the parent entry&apos;s name as a prefix to your reference
             titles, helping maintain a clear naming taxonomy and improving discoverability. Select
-            the parent field and a separator -the parent's name will be applied as a prefix to the
-            reference name.
+            the parent field and a separator -the parent&apos;s name will be applied as a prefix to
+            the reference name.
           </Paragraph>
         </Box>
 

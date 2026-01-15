@@ -262,12 +262,14 @@ describe.skip('Field component', () => {
     });
 
     it('should use override field when content type has override', async () => {
-      mockInstallationParameters.overrides = [
+      mockInstallationParameters.rules = [
+        /*
         {
           id: 'override-1',
           fieldId: 'name',
           contentTypeId: 'test-content-type-id',
         },
+        */
       ];
 
       const parentEntry = createMockEntry({

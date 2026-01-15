@@ -21,7 +21,6 @@ const Field = () => {
   useAutoResizer();
 
   const getInternalNameFromParentEntry = (parentEntry: EntryProps): string => {
-    const contentTypeId = sdk.contentType.sys.id;
     const fieldId = 'todo';
     const separator = installationParameters.separator;
 
