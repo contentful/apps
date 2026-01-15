@@ -7,6 +7,7 @@ import type { AppInstallationParameters } from '../locations/ConfigScreen';
 import { ErrorDisplay } from './ErrorDisplay';
 import { useAllEntries } from '../hooks/useAllEntries';
 import { useScheduledActions } from '../hooks/useScheduledActions';
+import { useInstallationParameters } from '../hooks/useInstallationParameters';
 import { ContentTrendsTabs } from './ContentTrendsTabs';
 import type { TimeRange } from '../utils/trendsDataProcessor';
 import React, { useState } from 'react';
@@ -24,7 +25,8 @@ const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
 
 const Dashboard = () => {
   const sdk = useSDK();
-  const installation = (sdk.parameters.installation ?? {}) as AppInstallationParameters;
+  const { parameters, refetchInstallationParameters } = useInstallationParameters(sdk);
+  const installation = (parameters ?? {}) as AppInstallationParameters;
   const { entries, isFetchingEntries, fetchingEntriesError, refetchEntries } = useAllEntries();
   const {
     scheduledActions,
@@ -34,7 +36,8 @@ const Dashboard = () => {
   } = useScheduledActions();
   const [timeRange, setTimeRange] = useState<TimeRange>('year');
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
+    await refetchInstallationParameters();
     refetchEntries();
     refetchScheduledActions();
   };
