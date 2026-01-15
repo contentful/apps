@@ -66,9 +66,9 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
 
   return (
     <Flex flexDirection="row" alignItems="flex-start">
-      <Box style={{ flex: 1 }}>
+      <Box style={styles.chartContainer}>
         <ResponsiveContainer width="100%" height={height}>
-          <LineChart data={data} margin={{ top: 35, right: 30, left: 20 }}>
+          <LineChart data={data} margin={{ top: 35, right: 35 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={tokens.gray200} />
             <XAxis
               dataKey={xAxisDataKey}
@@ -82,7 +82,7 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
             {linesLegends.map((key, index) => (
               <Line
                 key={`${key}-${index}`}
-                type="monotone"
+                type="linear"
                 dataKey={key}
                 data-testid={`line-${key}`}
                 stroke={colors[index]}
@@ -102,7 +102,7 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
       </Box>
 
       {legendTitle && (
-        <Flex flexDirection="column" style={{ width: '18%' }}>
+        <Flex flexDirection="column" style={styles.legendContainer}>
           <Text
             fontSize="fontSizeM"
             fontColor="gray600"

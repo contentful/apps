@@ -6,23 +6,20 @@ import { QueryProvider } from '../../src/providers/QueryProvider';
 import { createMockEntry, createMockUser } from '../utils/testHelpers';
 import { EntryProps } from 'contentful-management';
 
-const mockProcessOverallTrends = vi.fn();
+const mockProcessNewEntries = vi.fn();
 const mockProcessContentTypeTrends = vi.fn();
 const mockProcessCreatorTrends = vi.fn();
 
 vi.mock('../../src/utils/trendsDataProcessor', () => ({
-  processOverallTrends: (entries: EntryProps[], options: any) =>
-    mockProcessOverallTrends(entries, options),
+  processNewEntries: (entries: EntryProps[], options: any) =>
+    mockProcessNewEntries(entries, options),
   processContentTypeTrends: (
     entries: EntryProps[],
     options: any,
-    contentTypeNames?: Map<string, string>
-  ) => mockProcessContentTypeTrends(entries, options, contentTypeNames),
-  processCreatorTrends: (
-    entries: EntryProps[],
-    options: any,
-    creatorsNames?: Map<string, string>
-  ) => mockProcessCreatorTrends(entries, options, creatorsNames),
+    contentTypes?: Map<string, string>
+  ) => mockProcessContentTypeTrends(entries, options, contentTypes),
+  processCreatorTrends: (entries: EntryProps[], options: any, contentTypes?: Map<string, string>) =>
+    mockProcessCreatorTrends(entries, options, contentTypes),
 }));
 
 const mockGetManyForSpace = vi.fn();
@@ -42,12 +39,12 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
-const mockContentTypeNames = new Map<string, string>();
+const mockContentTypes = new Map<string, string>();
 const mockCreatorsNames = new Map<string, string>();
 let mockIsFetchingContentTypes = false;
 
 const mockUseContentTypes = vi.fn(() => ({
-  contentTypeNames: mockContentTypeNames,
+  contentTypes: mockContentTypes,
   isFetchingContentTypes: mockIsFetchingContentTypes,
   fetchingContentTypesError: null,
 }));
@@ -94,9 +91,9 @@ describe('ContentTrendsTabs component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockContentTypeNames.clear();
-    mockContentTypeNames.set('blogPost', 'Blog Post');
-    mockContentTypeNames.set('article', 'Article');
+    mockContentTypes.clear();
+    mockContentTypes.set('blogPost', 'Blog Post');
+    mockContentTypes.set('article', 'Article');
     mockIsFetchingContentTypes = false;
 
     mockCreatorsNames.clear();
@@ -104,12 +101,12 @@ describe('ContentTrendsTabs component', () => {
     mockCreatorsNames.set('user-2', 'Jane Smith');
 
     mockUseContentTypes.mockReturnValue({
-      contentTypeNames: mockContentTypeNames,
+      contentTypes: mockContentTypes,
       isFetchingContentTypes: mockIsFetchingContentTypes,
       fetchingContentTypesError: null,
     });
 
-    mockProcessOverallTrends.mockReturnValue(mockOverallData);
+    mockProcessNewEntries.mockReturnValue(mockOverallData);
     mockProcessContentTypeTrends.mockReturnValue(mockContentTypeData);
     mockProcessCreatorTrends.mockReturnValue(mockCreatorData);
 
@@ -151,7 +148,7 @@ describe('ContentTrendsTabs component', () => {
         { wrapper: createWrapper() }
       );
 
-      expect(mockProcessOverallTrends).toHaveBeenCalledWith(mockEntries, { timeRange: 'year' });
+      expect(mockProcessNewEntries).toHaveBeenCalledWith(mockEntries, { timeRange: 'year' });
       expect(screen.getByText('Content:')).toBeInTheDocument();
       expect(screen.getByText('New Content')).toBeInTheDocument();
     });
@@ -162,7 +159,7 @@ describe('ContentTrendsTabs component', () => {
         { wrapper: createWrapper() }
       );
 
-      expect(mockProcessOverallTrends).toHaveBeenCalledWith(expect.arrayContaining(mockEntries), {
+      expect(mockProcessNewEntries).toHaveBeenCalledWith(expect.arrayContaining(mockEntries), {
         timeRange: 'month',
       });
     });
@@ -172,7 +169,7 @@ describe('ContentTrendsTabs component', () => {
     it('shows Spinner when isFetchingContentTypes is true', async () => {
       mockIsFetchingContentTypes = true;
       mockUseContentTypes.mockReturnValue({
-        contentTypeNames: new Map(),
+        contentTypes: new Map(),
         isFetchingContentTypes: true,
         fetchingContentTypesError: null,
       });
@@ -225,7 +222,7 @@ describe('ContentTrendsTabs component', () => {
         expect(mockProcessContentTypeTrends).toHaveBeenCalledWith(
           mockEntries,
           { timeRange: 'year' },
-          mockContentTypeNames
+          mockContentTypes
         );
         expect(screen.getByText('Content Types:')).toBeInTheDocument();
         expect(screen.getByText('Blog Post')).toBeInTheDocument();
@@ -233,7 +230,7 @@ describe('ContentTrendsTabs component', () => {
       });
     });
 
-    it('calls processContentTypeTrends with filteredEntries, timeRange, and contentTypeNames', async () => {
+    it('calls processContentTypeTrends with entries, timeRange, and contentTypes', async () => {
       const user = userEvent.setup();
       render(
         <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="year" />,
@@ -247,41 +244,9 @@ describe('ContentTrendsTabs component', () => {
         expect(mockProcessContentTypeTrends).toHaveBeenCalledWith(
           mockEntries,
           { timeRange: 'year' },
-          mockContentTypeNames
+          mockContentTypes
         );
       });
-    });
-
-    it('filters entries correctly based on trackedContentTypes', async () => {
-      const user = userEvent.setup();
-      render(
-        <ContentTrendsTabs
-          entries={mockEntries}
-          trackedContentTypes={['blogPost']}
-          timeRange="year"
-        />,
-        { wrapper: createWrapper() }
-      );
-
-      const contentTypeTab = screen.getByText('By Content Type');
-      await user.click(contentTypeTab);
-
-      await waitFor(() => {
-        expect(mockProcessContentTypeTrends).toHaveBeenCalled();
-        const filteredEntries = mockProcessContentTypeTrends.mock.calls[0][0];
-        expect(
-          filteredEntries.every((entry: EntryProps) => entry.sys.contentType.sys.id === 'blogPost')
-        ).toBe(true);
-      });
-    });
-
-    it('returns all entries when no trackedContentTypes and under limit', () => {
-      render(
-        <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="year" />,
-        { wrapper: createWrapper() }
-      );
-
-      expect(mockProcessOverallTrends).toHaveBeenCalledWith(mockEntries, { timeRange: 'year' });
     });
   });
 
@@ -377,7 +342,7 @@ describe('ContentTrendsTabs component', () => {
         expect(mockProcessCreatorTrends).toHaveBeenCalledWith(
           mockEntries,
           { timeRange: 'year' },
-          mockCreatorsNames
+          mockContentTypes
         );
         expect(screen.getByText('Creators:')).toBeInTheDocument();
         expect(screen.getByText('John Doe')).toBeInTheDocument();

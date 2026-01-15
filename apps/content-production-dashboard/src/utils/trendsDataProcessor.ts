@@ -1,7 +1,6 @@
 import { EntryProps } from 'contentful-management';
 import { DateCalculator } from './DateCalculator';
 import type { ChartDataPoint } from '../components/ChartWrapper';
-import { MAX_CONTENT_TYPES_IN_LEGEND } from './consts';
 
 export type TimeRange = 'year' | '6months' | '3months' | 'month' | 'yearToDate';
 
@@ -35,15 +34,31 @@ export function getStartDateForTimeRange(timeRange: TimeRange): Date {
   return startDate;
 }
 
-export function processOverallTrends(
+function filterEntriesByContentTypes(
   entries: EntryProps[],
-  options: TrendsDataProcessorOptions
+  contentTypes?: Map<string, string>
+): EntryProps[] {
+  if (!contentTypes || contentTypes.size === 0) {
+    return entries;
+  }
+  return entries.filter((entry) => {
+    const contentTypeId = entry.sys.contentType?.sys?.id;
+    return contentTypeId && contentTypes.has(contentTypeId);
+  });
+}
+
+export function processNewEntries(
+  entries: EntryProps[],
+  options: TrendsDataProcessorOptions,
+  contentTypes?: Map<string, string>
 ): ChartDataPoint[] {
   const startDate = getStartDateForTimeRange(options.timeRange);
   const now = new Date();
   const monthMap = new Map<string, number>();
 
-  entries.forEach((entry) => {
+  const filteredEntries = filterEntriesByContentTypes(entries, contentTypes);
+
+  filteredEntries.forEach((entry) => {
     const createdAt = DateCalculator.parseDate(entry?.sys?.createdAt);
     if (!createdAt || createdAt < startDate) return;
 
@@ -64,14 +79,16 @@ export function processOverallTrends(
 export function processContentTypeTrends(
   entries: EntryProps[],
   options: TrendsDataProcessorOptions,
-  contentTypeNames?: Map<string, string>
+  contentTypes?: Map<string, string>
 ): { data: ChartDataPoint[]; contentTypes: string[] } {
   const startDate = getStartDateForTimeRange(options.timeRange);
   const now = new Date();
   const contentTypeMap = new Map<string, Map<string, number>>();
-  const contentTypes = new Set<string>();
+  const foundContentTypeIds = new Set<string>();
 
-  entries.forEach((entry) => {
+  const filteredEntries = filterEntriesByContentTypes(entries, contentTypes);
+
+  filteredEntries.forEach((entry) => {
     const createdAt = DateCalculator.parseDate(entry?.sys?.createdAt);
     if (!createdAt || createdAt < startDate) return;
 
@@ -79,7 +96,7 @@ export function processContentTypeTrends(
     if (!contentTypeId) return;
 
     const monthYear = DateCalculator.formatMonthYear(createdAt);
-    contentTypes.add(contentTypeId);
+    foundContentTypeIds.add(contentTypeId);
 
     if (!contentTypeMap.has(monthYear)) {
       contentTypeMap.set(monthYear, new Map());
@@ -91,9 +108,7 @@ export function processContentTypeTrends(
 
   // Generate all months in range
   const allMonths = DateCalculator.generateMonthRange(startDate, now);
-  const contentTypeNamesArray = Array.from(contentTypeNames?.values() || [])
-    .slice(0, MAX_CONTENT_TYPES_IN_LEGEND)
-    .sort();
+  const contentTypeNamesArray = Array.from(contentTypes?.values() || []).sort();
 
   // Convert to chart data format
   const data = allMonths.map((monthYear) => {
@@ -104,7 +119,7 @@ export function processContentTypeTrends(
 
     contentTypeNamesArray.forEach((contentTypeName) => {
       // Find the key (contentTypeId) that has this value (contentTypeName)
-      const contentTypeId = Array.from(contentTypeNames?.entries() || []).find(
+      const contentTypeId = Array.from(contentTypes?.entries() || []).find(
         ([, value]) => value === contentTypeName
       )?.[0];
       dataPoint[contentTypeName] = monthData.get(contentTypeId || '') || 0;
@@ -119,21 +134,23 @@ export function processContentTypeTrends(
 export function processCreatorTrends(
   entries: EntryProps[],
   options: TrendsDataProcessorOptions,
-  creatorsNames?: Map<string, string>
+  contentTypes?: Map<string, string>
 ): { data: ChartDataPoint[]; creators: string[] } {
   const startDate = getStartDateForTimeRange(options.timeRange);
   const now = new Date();
   const creatorMap = new Map<string, Map<string, number>>();
   const creators = new Set<string>();
 
-  entries.forEach((entry) => {
+  const filteredEntries = filterEntriesByContentTypes(entries, contentTypes);
+
+  filteredEntries.forEach((entry) => {
     const createdAt = DateCalculator.parseDate(entry?.sys?.createdAt);
     if (!createdAt || createdAt < startDate) return;
 
     const creatorId = entry.sys.createdBy?.sys?.id;
     if (!creatorId) return;
 
-    const creatorName = creatorsNames?.get(creatorId) || creatorId;
+    const creatorName = contentTypes?.get(creatorId) || creatorId;
     const monthYear = DateCalculator.formatMonthYear(createdAt);
     creators.add(creatorName);
 

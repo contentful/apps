@@ -9,4 +9,10 @@ export const styles = {
     borderRadius: '50%',
     flexShrink: 0,
   } as CSSProperties,
+  chartContainer: {
+    flex: 1,
+  } as CSSProperties,
+  legendContainer: {
+    width: '20%',
+  } as CSSProperties,
 };

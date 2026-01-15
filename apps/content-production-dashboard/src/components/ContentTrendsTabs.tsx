@@ -3,7 +3,7 @@ import { Tabs, Box, Flex, Spinner } from '@contentful/f36-components';
 import { EntryProps } from 'contentful-management';
 import { ChartWrapper } from './ChartWrapper';
 import {
-  processOverallTrends,
+  processNewEntries,
   processContentTypeTrends,
   processCreatorTrends,
   type TimeRange,
@@ -12,17 +12,6 @@ import {
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { HomeAppSDK } from '@contentful/app-sdk';
 import { useContentTypes } from '../hooks/useContentTypes';
-import { MAX_CONTENT_TYPES_IN_LEGEND } from '../utils/consts';
-
-const filterEntriesByContentTypeIds = (
-  entries: EntryProps[],
-  contentTypeIds: string[]
-): EntryProps[] => {
-  return entries.filter((entry) => {
-    const contentTypeId = entry.sys.contentType.sys.id;
-    return contentTypeIds.includes(contentTypeId);
-  });
-};
 
 export interface ContentTrendsTabsProps {
   entries: EntryProps[];
@@ -40,31 +29,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
 
   const [creatorsNames, setCreatorsNames] = useState<Map<string, string>>(new Map());
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-  const { contentTypeNames, isFetchingContentTypes } = useContentTypes(trackedContentTypes);
-
-  const filteredEntries = useMemo(() => {
-    const hasTrackedTypes = trackedContentTypes.length > 0;
-    const exceedsLimit = contentTypeNames.size > MAX_CONTENT_TYPES_IN_LEGEND;
-
-    if (!hasTrackedTypes && !exceedsLimit) {
-      return entries;
-    }
-
-    let contentTypeIdsToFilter: string[];
-
-    if (hasTrackedTypes) {
-      contentTypeIdsToFilter = exceedsLimit
-        ? trackedContentTypes.slice(0, MAX_CONTENT_TYPES_IN_LEGEND)
-        : trackedContentTypes;
-    } else {
-      contentTypeIdsToFilter = Array.from(contentTypeNames.keys()).slice(
-        0,
-        MAX_CONTENT_TYPES_IN_LEGEND
-      );
-    }
-
-    return filterEntriesByContentTypeIds(entries, contentTypeIdsToFilter);
-  }, [entries, trackedContentTypes, contentTypeNames]);
+  const { contentTypes, isFetchingContentTypes } = useContentTypes(trackedContentTypes);
 
   useEffect(() => {
     const fetchCreators = async () => {
@@ -96,17 +61,17 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
     fetchCreators();
   }, [selectedTab, sdk]);
 
-  const overallData = useMemo(() => {
-    return processOverallTrends(filteredEntries, { timeRange });
-  }, [filteredEntries, timeRange]);
+  const newEntries = useMemo(() => {
+    return processNewEntries(entries, { timeRange }, contentTypes);
+  }, [entries, timeRange]);
 
   const contentTypeData = useMemo(() => {
-    return processContentTypeTrends(filteredEntries, { timeRange }, contentTypeNames);
-  }, [filteredEntries, timeRange, contentTypeNames]);
+    return processContentTypeTrends(entries, { timeRange }, contentTypes);
+  }, [entries, timeRange, contentTypes]);
 
   const creatorData = useMemo(() => {
-    return processCreatorTrends(filteredEntries, { timeRange }, creatorsNames);
-  }, [filteredEntries, timeRange, creatorsNames]);
+    return processCreatorTrends(entries, { timeRange }, contentTypes);
+  }, [entries, timeRange, creatorsNames, contentTypes]);
 
   const handleTabChange = (id: string) => {
     setSelectedTab(id);
@@ -124,7 +89,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
         <Tabs.Panel id="overall">
           <Box marginTop="spacingM">
             <ChartWrapper
-              data={overallData}
+              data={newEntries}
               xAxisDataKey="date"
               linesLegends={['New Content']}
               legendTitle="Content:"
