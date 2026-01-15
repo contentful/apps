@@ -18,8 +18,12 @@ vi.mock('../../src/utils/trendsDataProcessor', () => ({
     options: any,
     contentTypes?: Map<string, string>
   ) => mockProcessContentTypeTrends(entries, options, contentTypes),
-  processCreatorTrends: (entries: EntryProps[], options: any, contentTypes?: Map<string, string>) =>
-    mockProcessCreatorTrends(entries, options, contentTypes),
+  processCreatorTrends: (
+    entries: EntryProps[],
+    options: any,
+    creatorsNames?: Map<string, string>,
+    contentTypes?: Map<string, string>
+  ) => mockProcessCreatorTrends(entries, options, creatorsNames, contentTypes),
 }));
 
 const mockGetManyForSpace = vi.fn();
@@ -342,6 +346,7 @@ describe('ContentTrendsTabs component', () => {
         expect(mockProcessCreatorTrends).toHaveBeenCalledWith(
           mockEntries,
           { timeRange: 'year' },
+          mockCreatorsNames,
           mockContentTypes
         );
         expect(screen.getByText('Creators:')).toBeInTheDocument();
