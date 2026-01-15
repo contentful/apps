@@ -57,7 +57,7 @@ const parseAgentResponse = (data: any): AgentResponse => {
     } catch {
       // We do not throw an error here because we want to continue parsing the other parts
       // and other parts may already be valid and correctly parsed
-      console.warn('[parseAgentResponse] Failed to parse part:', { part, text: part.text });
+      console.warn('Failed to parse part:', { part, text: part.text });
     }
   }
 
@@ -110,14 +110,15 @@ const callGoogleDocsAgent = async (
   }
 
   const data = await response.text();
+
+  let parsedData: any;
   try {
-    const parsedData = JSON.parse(data);
-    return parseAgentResponse(parsedData);
-  } catch (error) {
-    console.error('[callGoogleDocsAgent] Failed to parse response:', error);
-    // Graceful fall back state so app doesn't crash but we still know there was an error
-    return { entries: [], assets: [] };
+    parsedData = JSON.parse(data);
+  } catch {
+    throw new Error('Failed to parse google docs agent response as JSON');
   }
+
+  return parseAgentResponse(parsedData);
 };
 
 interface UseGeneratePreviewResult {
@@ -201,6 +202,10 @@ export const useGeneratePreview = ({
         setPreviewEntries(previewEntriesWithTitles);
         setAssets(agentAssets);
       } catch (err) {
+        console.error(
+          'Error generating preview:',
+          err instanceof Error ? err.message : String(err)
+        );
         setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsSubmitting(false);
