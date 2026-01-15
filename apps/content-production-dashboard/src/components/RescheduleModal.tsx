@@ -180,7 +180,6 @@ export const RescheduleModal = ({
 
       onSuccess();
     } catch (err: any) {
-      console.error('Failed to reschedule release:', err);
       let errorMessage = 'Failed to reschedule release';
 
       if (err?.code === 'TooManyPendingJobs') {

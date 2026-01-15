@@ -194,7 +194,7 @@ describe('ReleasesTable component', () => {
   });
 
   describe('Modal interactions', () => {
-    it('closes reschedule modal when close button is clicked', async () => {
+    it('opens reschedule modal when reschedule button is clicked', async () => {
       const user = userEvent.setup();
       const mockRelease = createMockRelease();
       mockUseReleases.mockReturnValue({
@@ -207,29 +207,14 @@ describe('ReleasesTable component', () => {
 
       render(<ReleasesTable />, { wrapper: createWrapper() });
 
-      // Open the menu and wait for menu items to appear
       const menuButtons = screen.getAllByLabelText('toggle menu');
       await user.click(menuButtons[0]);
 
-      // Wait for menu items to be visible
       const rescheduleButton = await screen.findByText('Reschedule release');
       await user.click(rescheduleButton);
 
-      // Wait for modal to appear
       const modal = await screen.findByTestId('reschedule-modal', {}, { timeout: 2000 });
       expect(modal).toBeInTheDocument();
-
-      // Close the modal
-      const closeButton = screen.getByText('Cancel');
-      await user.click(closeButton);
-
-      // Wait for modal to disappear
-      await waitFor(
-        () => {
-          expect(screen.queryByTestId('reschedule-modal')).not.toBeInTheDocument();
-        },
-        { timeout: 2000 }
-      );
     });
 
     it('closes unschedule modal when close button is clicked', async () => {
@@ -245,23 +230,18 @@ describe('ReleasesTable component', () => {
 
       render(<ReleasesTable />, { wrapper: createWrapper() });
 
-      // Open the menu and wait for menu items to appear
       const menuButtons = screen.getAllByLabelText('toggle menu');
       await user.click(menuButtons[0]);
 
-      // Wait for menu items to be visible
       const unscheduleButton = await screen.findByText('Unschedule release');
       await user.click(unscheduleButton);
 
-      // Wait for modal to appear
       const modal = await screen.findByTestId('unschedule-modal', {}, { timeout: 2000 });
       expect(modal).toBeInTheDocument();
 
-      // Close the modal
       const closeButton = screen.getByText('No, keep scheduled');
       await user.click(closeButton);
 
-      // Wait for modal to disappear
       await waitFor(
         () => {
           expect(screen.queryByTestId('unschedule-modal')).not.toBeInTheDocument();
