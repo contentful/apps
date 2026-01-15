@@ -37,9 +37,9 @@ const Dashboard = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>('year');
 
   const handleRefresh = async () => {
-    await refetchInstallationParameters();
     refetchEntries();
     refetchScheduledActions();
+    await refetchInstallationParameters();
   };
 
   const isRefreshing = isFetchingEntries || isFetchingScheduledActions;
@@ -110,14 +110,14 @@ const Dashboard = () => {
             />
           </Box>
 
-        <Box marginTop="spacingXl">
+          <Box marginTop="spacingXl">
             <Box padding="spacingL" style={styles.releasesTableContainer}>
-                <Heading as="h2" marginBottom="spacingM">
-                    Upcoming Scheduled Releases
-                </Heading>
-                <ReleasesTable />
+              <Heading as="h2" marginBottom="spacingM">
+                Upcoming Scheduled Releases
+              </Heading>
+              <ReleasesTable />
             </Box>
-        </Box>
+          </Box>
         </>
       )}
     </Flex>
