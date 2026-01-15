@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMockCma, createMockSdk } from '../mocks';
@@ -72,14 +72,6 @@ describe('ConfigScreen', () => {
       });
     });
 
-    it('should load content types on mount', async () => {
-      render(<ConfigScreen />);
-
-      await waitFor(() => {
-        expect(mockCma.contentType.getMany).toHaveBeenCalledWith({});
-      });
-    });
-
     it('should load existing parameters on mount', async () => {
       const existingParameters = {
         separator: '-',
@@ -113,6 +105,8 @@ describe('ConfigScreen', () => {
       await waitFor(() => {
         expect(mockSdk.app.getParameters).toHaveBeenCalled();
         expect(mockSdk.app.setReady).toHaveBeenCalled();
+        expect(screen.getByDisplayValue('Title | Blog Post')).toBeInTheDocument();
+        expect(screen.getByDisplayValue('Slug | Blog Post')).toBeInTheDocument();
       });
     });
   });
@@ -275,39 +269,25 @@ describe('ConfigScreen', () => {
       expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
       await waitFor(() => {
         expect(screen.getByText('Parent field is required')).toBeInTheDocument();
-        expect(screen.getByText('Reference entries is required')).toBeInTheDocument();
+        expect(screen.getByText('Reference field is required')).toBeInTheDocument();
       });
     });
 
-    it('should return false when multiple validation errors exist', async () => {
-      await act(async () => {
-        render(<ConfigScreen />);
-      });
+    it('should return false when no rules are configured', async () => {
+      const user = userEvent.setup();
+      render(<ConfigScreen />);
 
       await waitFor(() => {
         expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
       });
 
-      // Add a new rule but don't fill in the fields
-      const user = userEvent.setup();
-      const addButton = screen.getByRole('button', { name: /add auto-prefix/i });
-      await user.click(addButton);
-
-      await waitFor(() => {
-        expect(screen.getAllByLabelText(/parent field/i).length).toBeGreaterThan(1);
-      });
+      const deleteButton = screen.getByRole('button', { name: /delete configuration/i });
+      await user.click(deleteButton);
 
       const result = await simulateSave();
 
-      // Should return false and show all error messages
       expect(result).toBe(false);
       expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
-      await waitFor(() => {
-        const parentFieldErrors = screen.getAllByText('Parent field is required');
-        const referenceFieldErrors = screen.getAllByText('Reference entries is required');
-        expect(parentFieldErrors.length).toBeGreaterThan(0);
-        expect(referenceFieldErrors.length).toBeGreaterThan(0);
-      });
     });
 
     it('should validate multiple rules correctly', async () => {
@@ -371,7 +351,7 @@ describe('ConfigScreen', () => {
       expect(result).toBe(false);
       expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
       await waitFor(() => {
-        expect(screen.getByText('Reference entries is required')).toBeInTheDocument();
+        expect(screen.getByText('Reference field is required')).toBeInTheDocument();
       });
     });
   });

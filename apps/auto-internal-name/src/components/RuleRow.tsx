@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Autocomplete, Box, Flex, FormControl, IconButton } from '@contentful/f36-components';
 import { TrashSimpleIcon } from '@contentful/f36-icons';
-import { FieldSelection, Rule, ConfigurationValidation } from '../utils/types';
+import { FieldSelection, Rule, RuleValidation } from '../utils/types';
 import { styles } from './RuleRow.styles';
 
 type RuleRowProps = {
   rule: Rule;
   availableFields: FieldSelection[];
-  validation?: ConfigurationValidation;
+  validation?: RuleValidation;
   onRuleChange: (rule: Rule) => void;
   onRuleDelete: (ruleId: string) => void;
 };
@@ -51,7 +51,7 @@ const RuleRow: React.FC<RuleRowProps> = ({
       <Flex flexDirection="row" alignItems="flex-start" gap="spacingXl" fullWidth>
         <FormControl
           id={`parent-field-${rule.id}`}
-          isInvalid={validation?.isParentFieldMissing}
+          isInvalid={validation?.parentFieldError}
           isRequired
           style={{ flex: 1 }}>
           <FormControl.Label marginBottom="spacingS">Parent field</FormControl.Label>
@@ -68,14 +68,16 @@ const RuleRow: React.FC<RuleRowProps> = ({
             itemToString={(item: FieldSelection | null) => (item ? item.displayName : '')}
             renderItem={(item: FieldSelection | null) => (item ? item.displayName : '')}
           />
-          {validation?.isParentFieldMissing && (
-            <FormControl.ValidationMessage>Parent field is required</FormControl.ValidationMessage>
+          {validation?.parentFieldError && (
+            <FormControl.ValidationMessage>
+              {validation.parentFieldErrorMessage}
+            </FormControl.ValidationMessage>
           )}
         </FormControl>
 
         <FormControl
           id={`reference-field-${rule.id}`}
-          isInvalid={validation?.isReferenceFieldMissing}
+          isInvalid={validation?.referenceFieldError}
           isRequired
           style={{ flex: 1 }}>
           <FormControl.Label marginBottom="spacingS">Reference entries</FormControl.Label>
@@ -92,9 +94,9 @@ const RuleRow: React.FC<RuleRowProps> = ({
             itemToString={(item: FieldSelection | null) => (item ? item.displayName : '')}
             renderItem={(item: FieldSelection | null) => (item ? item.displayName : '')}
           />
-          {validation?.isReferenceFieldMissing && (
+          {validation?.referenceFieldError && (
             <FormControl.ValidationMessage>
-              Reference entries is required
+              {validation.referenceFieldErrorMessage}
             </FormControl.ValidationMessage>
           )}
         </FormControl>

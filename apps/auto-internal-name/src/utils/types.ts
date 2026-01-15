@@ -18,9 +18,11 @@ export type AppInstallationParameters = {
   separator: string;
 };
 
-export type ConfigurationValidation = {
-  isParentFieldMissing: boolean;
-  isReferenceFieldMissing: boolean;
+export type RuleValidation = {
+  parentFieldError: boolean;
+  referenceFieldError: boolean;
+  parentFieldErrorMessage: string;
+  referenceFieldErrorMessage: string;
 };
 
-export type ConfigurationValidationState = Record<string, ConfigurationValidation>;
+export type RuleValidationState = Record<string, RuleValidation>;

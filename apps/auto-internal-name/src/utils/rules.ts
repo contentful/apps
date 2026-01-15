@@ -1,5 +1,5 @@
 import { ContentTypeProps } from 'contentful-management';
-import { FieldSelection } from './types';
+import { FieldSelection, Rule } from './types';
 
 const getFieldUniqueId = (contentTypeId: string, fieldId: string) => `${contentTypeId}.${fieldId}`;
 
@@ -20,4 +20,11 @@ export const getFieldSelectionsFromContentTypes = (
       }));
     })
     .sort((a, b) => a.displayName.localeCompare(b.displayName));
+};
+
+export const getRuleKey = (rule: Rule) => {
+  if (!rule.parentField || !rule.referenceField) {
+    return null;
+  }
+  return `${rule.parentField.fieldUniqueId}::${rule.referenceField.fieldUniqueId}`;
 };

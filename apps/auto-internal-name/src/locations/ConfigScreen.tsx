@@ -18,10 +18,11 @@ import RuleRow from '../components/RuleRow';
 import {
   AppInstallationParameters,
   Rule,
-  ConfigurationValidationState,
+  RuleValidationState,
   FieldSelection,
+  RuleValidation,
 } from '../utils/types';
-import { getFieldSelectionsFromContentTypes } from '../utils/rules';
+import { getFieldSelectionsFromContentTypes, getRuleKey } from '../utils/rules';
 
 const ConfigScreen = () => {
   const createEmptyRule = () => {
@@ -37,26 +38,46 @@ const ConfigScreen = () => {
     separator: '',
     rules: [createEmptyRule()],
   });
-  const [configurationsAreInvalid, setConfigurationsAreInvalid] =
-    useState<ConfigurationValidationState>({});
+  const [rulesValidations, setRulesValidations] = useState<RuleValidationState>({});
   const [availableFields, setAvailableFields] = useState<FieldSelection[]>([]);
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
-    const newConfigurationsAreInvalid: ConfigurationValidationState = {};
+    const newRulesValidations: RuleValidationState = {};
     parameters.rules.forEach((rule) => {
-      newConfigurationsAreInvalid[rule.id] = {
-        isParentFieldMissing: !rule.parentField,
-        isReferenceFieldMissing: !rule.referenceField,
+      const ruleValidation: RuleValidation = {
+        parentFieldError: false,
+        referenceFieldError: false,
+        parentFieldErrorMessage: '',
+        referenceFieldErrorMessage: '',
       };
+      if (!rule.parentField) {
+        ruleValidation.parentFieldError = true;
+        ruleValidation.parentFieldErrorMessage = 'Parent field is required';
+      }
+      if (!rule.referenceField) {
+        ruleValidation.referenceFieldError = true;
+        ruleValidation.referenceFieldErrorMessage = 'Reference field is required';
+      }
+      const ruleKey = getRuleKey(rule);
+      if (ruleKey && parameters.rules.filter((r) => getRuleKey(r) === ruleKey).length > 1) {
+        ruleValidation.parentFieldError = true;
+        ruleValidation.parentFieldErrorMessage = 'Duplicated rule';
+        ruleValidation.referenceFieldError = true;
+        ruleValidation.referenceFieldErrorMessage = 'Duplicated rule';
+      }
+      newRulesValidations[rule.id] = ruleValidation;
     });
 
-    setConfigurationsAreInvalid(newConfigurationsAreInvalid);
+    setRulesValidations(newRulesValidations);
 
-    const invalidConfigurations = parameters.rules.some(
-      (rule) => !rule.parentField || !rule.referenceField
-    );
+    const invalidConfigurations =
+      !parameters.rules.length ||
+      Object.values(newRulesValidations).some(
+        (ruleValidation: RuleValidation) =>
+          ruleValidation.parentFieldError || ruleValidation.referenceFieldError
+      );
 
     if (invalidConfigurations) {
       sdk.notifier.error('Some fields are missing or invalid');
@@ -167,7 +188,7 @@ const ConfigScreen = () => {
                   key={rule.id}
                   rule={rule}
                   availableFields={availableFields}
-                  validation={configurationsAreInvalid[rule.id]}
+                  validation={rulesValidations[rule.id]}
                   onRuleChange={handleRuleChange}
                   onRuleDelete={handleRuleDelete}
                 />

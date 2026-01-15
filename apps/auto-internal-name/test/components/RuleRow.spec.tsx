@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import type { ComponentProps } from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import RuleRow from '../../src/components/RuleRow';
-import { Rule, FieldSelection, ConfigurationValidation } from '../../src/utils/types';
+import { Rule, FieldSelection, RuleValidation } from '../../src/utils/types';
 
 describe('RuleRow', () => {
   const mockAvailableFields: FieldSelection[] = [
@@ -50,9 +50,11 @@ describe('RuleRow', () => {
   const mockOnRuleChange = vi.fn();
   const mockOnRuleDelete = vi.fn();
 
-  const mockValidation: ConfigurationValidation = {
-    isParentFieldMissing: false,
-    isReferenceFieldMissing: false,
+  const mockValidation: RuleValidation = {
+    parentFieldError: false,
+    referenceFieldError: false,
+    parentFieldErrorMessage: '',
+    referenceFieldErrorMessage: '',
   };
 
   type RuleRowProps = ComponentProps<typeof RuleRow>;
@@ -90,15 +92,17 @@ describe('RuleRow', () => {
     });
 
     it('should show validation errors when fields are missing', async () => {
-      const validationWithErrors: ConfigurationValidation = {
-        isParentFieldMissing: true,
-        isReferenceFieldMissing: true,
+      const validationWithErrors: RuleValidation = {
+        parentFieldError: true,
+        referenceFieldError: true,
+        parentFieldErrorMessage: 'Parent field is required',
+        referenceFieldErrorMessage: 'Reference field is required',
       };
 
       await renderRuleRow({ validation: validationWithErrors });
 
       expect(screen.getByText('Parent field is required')).toBeInTheDocument();
-      expect(screen.getByText('Reference entries is required')).toBeInTheDocument();
+      expect(screen.getByText('Reference field is required')).toBeInTheDocument();
     });
   });
 
