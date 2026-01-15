@@ -1,0 +1,69 @@
+import { useState } from 'react';
+import { Box, Flex, Heading, Tabs, Text } from '@contentful/f36-components';
+import { ScheduledContentTable } from './ScheduledContentTable';
+import { RecentlyPublishedTable } from './RecentlyPublishedTable';
+import { NeedsUpdateTable } from './NeedsUpdateTable';
+import { styles } from './Dashboard.styles';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
+import { ReactNode } from 'react';
+
+interface TabPanelContentProps {
+  description: string;
+  children: ReactNode;
+}
+
+const TabPanelContent = ({ description, children }: TabPanelContentProps) => {
+  return (
+    <Flex flexDirection="column" marginLeft="spacingM" marginRight="spacingM" marginTop="spacingL">
+      <Text fontSize="fontSizeM" fontColor="gray600" marginBottom="spacingM">
+        {description}
+      </Text>
+      {children}
+    </Flex>
+  );
+};
+
+export const ScheduledContentTabs = () => {
+  const { parameters } = useSDK<HomeAppSDK | PageAppSDK>();
+  const recentlyPublishedDays = parameters?.installation?.recentlyPublishedDays;
+  const needsUpdateMonths = parameters?.installation?.needsUpdateMonths;
+  const [currentTab, setCurrentTab] = useState('scheduled');
+
+  return (
+    <Box marginTop="spacingXl">
+      <Box padding="spacingL" style={styles.releasesTableContainer}>
+        <Heading as="h2" marginBottom="spacingM">
+          Upcoming Scheduled Content
+        </Heading>
+        <Tabs currentTab={currentTab} onTabChange={setCurrentTab}>
+          <Tabs.List>
+            <Tabs.Tab panelId="scheduled">Scheduled Content</Tabs.Tab>
+            <Tabs.Tab panelId="recentlyPublished">Recently Published</Tabs.Tab>
+            <Tabs.Tab panelId="needsUpdate">Needs Update</Tabs.Tab>
+          </Tabs.List>
+          <Tabs.Panel id="scheduled">
+            <TabPanelContent description="Entries and Assets scheduled will appear here.">
+              <ScheduledContentTable />
+            </TabPanelContent>
+          </Tabs.Panel>
+          <Tabs.Panel id="recentlyPublished">
+            <TabPanelContent
+              description={`Content published in the last ${recentlyPublishedDays} days will appear here.`}>
+              <RecentlyPublishedTable />
+            </TabPanelContent>
+          </Tabs.Panel>
+          <Tabs.Panel id="needsUpdate">
+            <TabPanelContent
+              description={`Content older than ${needsUpdateMonths} months will appear here.`}>
+              <NeedsUpdateTable />
+            </TabPanelContent>
+          </Tabs.Panel>
+        </Tabs>
+      </Box>
+    </Box>
+  );
+};
+
+
+
