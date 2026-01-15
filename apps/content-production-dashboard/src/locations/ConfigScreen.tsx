@@ -21,6 +21,7 @@ import {
 import gearImage from '../assets/gear.png';
 import appearanceImage from '../assets/appearance.png';
 import { styles } from './ConfigScreen.styles';
+import { Validator } from '../utils/Validator';
 
 export interface AppInstallationParameters {
   trackedContentTypes?: string[];
@@ -35,34 +36,34 @@ const ConfigScreen = () => {
   const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
   const sdk = useSDK<ConfigAppSDK>();
 
-  const [needsUpdateMonthsError, setNeedsUpdateMonthsError] = useState<string | undefined>();
-  const [recentlyPublishedDaysError, setRecentlyPublishedDaysError] = useState<
-    string | undefined
-  >();
-  const [timeToPublishDaysError, setTimeToPublishDaysError] = useState<string | undefined>();
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const validationErrors = () => {
-    const needsUpdateMonthsError = validateField(
+  const validationErrors = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    Validator.isWithinRange(
+      newErrors,
       parameters.needsUpdateMonths,
+      'needsUpdateMonths',
       'Needs update months',
       NEEDS_UPDATE_MONTHS_RANGE
     );
-    const recentlyPublishedDaysError = validateField(
+    Validator.isWithinRange(
+      newErrors,
       parameters.recentlyPublishedDays,
+      'recentlyPublishedDays',
       'Recently published days',
       RECENTLY_PUBLISHED_DAYS_RANGE
     );
-    const timeToPublishDaysError = validateField(
+    Validator.isWithinRange(
+      newErrors,
       parameters.timeToPublishDays,
+      'timeToPublishDays',
       'Time to publish days',
       TIME_TO_PUBLISH_DAYS_RANGE
     );
 
-    setNeedsUpdateMonthsError(needsUpdateMonthsError);
-    setRecentlyPublishedDaysError(recentlyPublishedDaysError);
-    setTimeToPublishDaysError(timeToPublishDaysError);
-
-    return needsUpdateMonthsError || recentlyPublishedDaysError || timeToPublishDaysError;
+    setErrors(newErrors);
+    return Validator.hasErrors(newErrors);
   };
 
   const onConfigure = useCallback(async () => {
@@ -112,6 +113,14 @@ const ConfigScreen = () => {
       ...prev,
       [field]: numValue,
     }));
+
+    if (errors[field]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
   };
 
   const handleShowUpcomingReleasesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,24 +130,6 @@ const ConfigScreen = () => {
       ...prev,
       showUpcomingReleases: checked,
     }));
-  };
-
-  const isValueOutOfRange = (value: number, range: { min: number; max: number }): boolean => {
-    return value < range.min || value > range.max;
-  };
-
-  const validateField = (
-    value: number | undefined,
-    label: string,
-    range: { min: number; max: number }
-  ): string | undefined => {
-    if (value === undefined) {
-      return `${label} is required`;
-    }
-    if (isValueOutOfRange(value, range)) {
-      return `${label} must be between ${range.min} and ${range.max}`;
-    }
-    return undefined;
   };
 
   return (
@@ -160,7 +151,7 @@ const ConfigScreen = () => {
           </Text>
 
           <>
-            <FormControl marginBottom="spacingL" isRequired isInvalid={!!needsUpdateMonthsError}>
+            <FormControl marginBottom="spacingL" isRequired isInvalid={!!errors.needsUpdateMonths}>
               <FormControl.Label>
                 Content &quot;Needs update&quot; time threshold (months)
               </FormControl.Label>
@@ -171,9 +162,9 @@ const ConfigScreen = () => {
                 value={parameters.needsUpdateMonths?.toString() || ''}
                 onChange={(event) => handleOnChangeInput(event, 'needsUpdateMonths')}
               />
-              {needsUpdateMonthsError && (
+              {errors.needsUpdateMonths && (
                 <FormControl.ValidationMessage>
-                  {needsUpdateMonthsError}
+                  {errors.needsUpdateMonths}
                 </FormControl.ValidationMessage>
               )}
               <FormControl.HelpText>
@@ -186,7 +177,7 @@ const ConfigScreen = () => {
             <FormControl
               marginBottom="spacingL"
               isRequired
-              isInvalid={!!recentlyPublishedDaysError}>
+              isInvalid={!!errors.recentlyPublishedDays}>
               <FormControl.Label>
                 &quot;Recently published&quot; time period (days)
               </FormControl.Label>
@@ -197,9 +188,9 @@ const ConfigScreen = () => {
                 value={parameters.recentlyPublishedDays?.toString() || ''}
                 onChange={(event) => handleOnChangeInput(event, 'recentlyPublishedDays')}
               />
-              {recentlyPublishedDaysError && (
+              {errors.recentlyPublishedDays && (
                 <FormControl.ValidationMessage>
-                  {recentlyPublishedDaysError}
+                  {errors.recentlyPublishedDays}
                 </FormControl.ValidationMessage>
               )}
               <FormControl.HelpText>
@@ -209,7 +200,7 @@ const ConfigScreen = () => {
               </FormControl.HelpText>
             </FormControl>
 
-            <FormControl marginBottom="spacingL" isRequired isInvalid={!!timeToPublishDaysError}>
+            <FormControl marginBottom="spacingL" isRequired isInvalid={!!errors.timeToPublishDays}>
               <FormControl.Label>Time to publish threshold (days)</FormControl.Label>
               <TextInput
                 id="time-to-publish-days"
@@ -218,9 +209,9 @@ const ConfigScreen = () => {
                 value={parameters.timeToPublishDays?.toString() || ''}
                 onChange={(event) => handleOnChangeInput(event, 'timeToPublishDays')}
               />
-              {timeToPublishDaysError && (
+              {errors.timeToPublishDays && (
                 <FormControl.ValidationMessage>
-                  {timeToPublishDaysError}
+                  {errors.timeToPublishDays}
                 </FormControl.ValidationMessage>
               )}
               <FormControl.HelpText>

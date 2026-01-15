@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { Table, Pagination, Note, Box, Skeleton, Text, Icon } from '@contentful/f36-components';
+import { useReleases } from '../hooks/useReleases';
 import { GearSixIcon } from '@contentful/f36-icons';
 import { RELEASES_PER_PAGE } from '../utils/consts';
 import tokens from '@contentful/f36-tokens';
 import { styles } from './ReleasesTable.styles';
-import { useReleases } from '../hooks/useReleases';
+import { ReleasesTableActions } from './ReleasesTableActions';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
+import { formatDateTimeWithTimezone } from '../utils/DateFormatUtils';
 
 const ReleasesTableHeader = () => {
   return (
@@ -26,25 +30,10 @@ const ReleasesTableHeader = () => {
 };
 
 export const ReleasesTable = () => {
+  const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const [currentPage, setCurrentPage] = useState(0);
-  const { releases, total, isFetchingReleases, fetchingReleasesError } = useReleases(currentPage);
-
-  const formatDate = (dateString: string | undefined): string => {
-    if (!dateString) return '—';
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZoneName: 'short',
-      });
-    } catch {
-      return '—';
-    }
-  };
+  const { releases, total, isFetchingReleases, fetchingReleasesError, refetchReleases } =
+    useReleases(currentPage);
 
   const formatUserName = (
     user: { id: string; firstName?: string; lastName?: string } | null
@@ -102,13 +91,19 @@ export const ReleasesTable = () => {
                 <Text fontWeight="fontWeightDemiBold">{release.title}</Text>
               </Table.Cell>
               <Table.Cell style={styles.dateCell}>
-                {formatDate(release.scheduledFor.datetime)}
+                {formatDateTimeWithTimezone(release.scheduledFor.datetime)}
               </Table.Cell>
               <Table.Cell style={styles.itemsCell}>{release.itemsCount} items</Table.Cell>
-              <Table.Cell style={styles.updatedCell}>{formatDate(release.updatedAt)}</Table.Cell>
+              <Table.Cell style={styles.updatedCell}>
+                {formatDateTimeWithTimezone(release.updatedAt)}
+              </Table.Cell>
               <Table.Cell style={styles.userCell}>{formatUserName(release.updatedBy)}</Table.Cell>
               <Table.Cell style={styles.actionsCell}>
-                {/* TODO: Add actions menu here */}
+                <ReleasesTableActions
+                  release={release}
+                  sdk={sdk}
+                  onActionSuccess={refetchReleases}
+                />
               </Table.Cell>
             </Table.Row>
           ))}

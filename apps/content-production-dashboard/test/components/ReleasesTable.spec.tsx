@@ -1,9 +1,10 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
 import { ReleasesTable } from '../../src/components/ReleasesTable';
 import { QueryProvider } from '../../src/providers/QueryProvider';
 import type { ReleaseWithScheduledAction } from '../../src/utils/fetchReleases';
+import userEvent from '@testing-library/user-event';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -157,6 +158,96 @@ describe('ReleasesTable component', () => {
       expect(screen.getByText('Release 1')).toBeInTheDocument();
       expect(screen.getByText('Release 2')).toBeInTheDocument();
       expect(screen.getByText('Release 3')).toBeInTheDocument();
+    });
+  });
+
+  describe('Menu actions', () => {
+    it('opens view release in new window when clicking view release', async () => {
+      const user = userEvent.setup();
+      const mockRelease = createMockRelease({
+        viewUrl: 'https://app.contentful.com/releases/123',
+      });
+      mockUseReleases.mockReturnValue({
+        releases: [mockRelease],
+        total: 1,
+        isFetchingReleases: false,
+        fetchingReleasesError: null,
+        refetch: mockRefetch,
+      });
+
+      render(<ReleasesTable />, { wrapper: createWrapper() });
+
+      // Find and click the menu trigger
+      const menuButtons = screen.getAllByLabelText('toggle menu');
+      await user.click(menuButtons[0]);
+
+      // Click "View release"
+      const viewReleaseButton = screen.getByText('View release');
+      await user.click(viewReleaseButton);
+
+      expect(window.open).toHaveBeenCalledWith(
+        'https://app.contentful.com/releases/123',
+        '_blank',
+        'noopener,noreferrer'
+      );
+    });
+  });
+
+  describe('Modal interactions', () => {
+    it('opens reschedule modal when reschedule button is clicked', async () => {
+      const user = userEvent.setup();
+      const mockRelease = createMockRelease();
+      mockUseReleases.mockReturnValue({
+        releases: [mockRelease],
+        total: 1,
+        isFetchingReleases: false,
+        fetchingReleasesError: null,
+        refetch: mockRefetch,
+      });
+
+      render(<ReleasesTable />, { wrapper: createWrapper() });
+
+      const menuButtons = screen.getAllByLabelText('toggle menu');
+      await user.click(menuButtons[0]);
+
+      const rescheduleButton = await screen.findByText('Reschedule release');
+      await user.click(rescheduleButton);
+
+      const modal = await screen.findByTestId('reschedule-modal', {}, { timeout: 2000 });
+      expect(modal).toBeInTheDocument();
+    });
+
+    it('closes unschedule modal when close button is clicked', async () => {
+      const user = userEvent.setup();
+      const mockRelease = createMockRelease();
+      mockUseReleases.mockReturnValue({
+        releases: [mockRelease],
+        total: 1,
+        isFetchingReleases: false,
+        fetchingReleasesError: null,
+        refetch: mockRefetch,
+      });
+
+      render(<ReleasesTable />, { wrapper: createWrapper() });
+
+      const menuButtons = screen.getAllByLabelText('toggle menu');
+      await user.click(menuButtons[0]);
+
+      const unscheduleButton = await screen.findByText('Unschedule release');
+      await user.click(unscheduleButton);
+
+      const modal = await screen.findByTestId('unschedule-modal', {}, { timeout: 2000 });
+      expect(modal).toBeInTheDocument();
+
+      const closeButton = screen.getByText('No, keep scheduled');
+      await user.click(closeButton);
+
+      await waitFor(
+        () => {
+          expect(screen.queryByTestId('unschedule-modal')).not.toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
     });
   });
 });
