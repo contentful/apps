@@ -45,9 +45,8 @@ const createMockSdk = (overrides?: any) => {
     },
     parameters: {
       installation: {
-        sourceFieldId: 'title',
         separator: '-',
-        overrides: [],
+        rules: [],
       } as AppInstallationParameters,
     },
     cma: mockCma,
