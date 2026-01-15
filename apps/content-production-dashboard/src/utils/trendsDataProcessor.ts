@@ -134,6 +134,7 @@ export function processContentTypeTrends(
 export function processCreatorTrends(
   entries: EntryProps[],
   options: TrendsDataProcessorOptions,
+  creatorsNames?: Map<string, string>,
   contentTypes?: Map<string, string>
 ): { data: ChartDataPoint[]; creators: string[] } {
   const startDate = getStartDateForTimeRange(options.timeRange);
@@ -150,7 +151,7 @@ export function processCreatorTrends(
     const creatorId = entry.sys.createdBy?.sys?.id;
     if (!creatorId) return;
 
-    const creatorName = contentTypes?.get(creatorId) || creatorId;
+    const creatorName = creatorsNames?.get(creatorId) || creatorId;
     const monthYear = DateCalculator.formatMonthYear(createdAt);
     creators.add(creatorName);
 

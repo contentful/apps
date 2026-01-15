@@ -63,14 +63,14 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
 
   const newEntries = useMemo(() => {
     return processNewEntries(entries, { timeRange }, contentTypes);
-  }, [entries, timeRange]);
+  }, [entries, timeRange, contentTypes]);
 
   const contentTypeData = useMemo(() => {
     return processContentTypeTrends(entries, { timeRange }, contentTypes);
   }, [entries, timeRange, contentTypes]);
 
   const creatorData = useMemo(() => {
-    return processCreatorTrends(entries, { timeRange }, contentTypes);
+    return processCreatorTrends(entries, { timeRange }, creatorsNames, contentTypes);
   }, [entries, timeRange, creatorsNames, contentTypes]);
 
   const handleTabChange = (id: string) => {
