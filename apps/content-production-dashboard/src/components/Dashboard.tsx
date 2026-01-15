@@ -9,6 +9,7 @@ import { useAllEntries } from '../hooks/useAllEntries';
 import { useScheduledActions } from '../hooks/useScheduledActions';
 import { LoadingSkeleton } from './LoadingSkeleton';
 import { ReleasesTable } from './ReleasesTable';
+import { ScheduledContentTabs } from './ScheduledContentTabs';
 import { styles } from './Dashboard.styles';
 
 const Dashboard = () => {
@@ -78,6 +79,7 @@ const Dashboard = () => {
               <ReleasesTable />
             </Box>
           </Box>
+          <ScheduledContentTabs />
         </>
       )}
     </Flex>
