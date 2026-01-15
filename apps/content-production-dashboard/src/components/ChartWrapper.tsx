@@ -50,17 +50,17 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
     return linesLegends.map((_, index) => CHART_COLORS[index % CHART_COLORS.length]);
   }, [linesLegends.length]);
 
-  const isOverallTrends = linesLegends.length === 1 && linesLegends[0] === 'New Content';
+  const isNewEntriesTab = linesLegends.length === 1 && linesLegends[0] === 'New Content';
   const tooltipContent = ({ active, payload, label }: any) => (
     <ChartTooltip
       active={active}
       payload={payload}
       label={label}
       data={data}
-      valueKey={isOverallTrends ? linesLegends[0] : undefined}
+      valueKey={isNewEntriesTab ? linesLegends[0] : undefined}
       linesLegends={linesLegends}
       colors={colors}
-      isOverallTrends={isOverallTrends}
+      inNewEntriesTab={isNewEntriesTab}
     />
   );
 

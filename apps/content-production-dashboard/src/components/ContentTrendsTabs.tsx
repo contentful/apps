@@ -25,7 +25,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
   timeRange,
 }) => {
   const sdk = useSDK<HomeAppSDK>();
-  const [selectedTab, setSelectedTab] = useState('overall');
+  const [selectedTab, setSelectedTab] = useState('newEntries');
 
   const [creatorsNames, setCreatorsNames] = useState<Map<string, string>>(new Map());
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
@@ -81,12 +81,12 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
     <Box data-testid="content-trends-tabs">
       <Tabs defaultTab={selectedTab} onTabChange={handleTabChange}>
         <Tabs.List variant="horizontal-divider">
-          <Tabs.Tab panelId="overall">New Entries</Tabs.Tab>
+          <Tabs.Tab panelId="newEntries">New Entries</Tabs.Tab>
           <Tabs.Tab panelId="byContentType">By Content Type</Tabs.Tab>
           <Tabs.Tab panelId="byCreator">By Creator</Tabs.Tab>
         </Tabs.List>
 
-        <Tabs.Panel id="overall">
+        <Tabs.Panel id="newEntries">
           <Box marginTop="spacingM">
             <ChartWrapper
               data={newEntries}

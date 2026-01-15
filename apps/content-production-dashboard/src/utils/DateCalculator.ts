@@ -40,7 +40,6 @@ export class DateCalculator {
   static formatMonthYearDisplay(monthYear: string): string {
     const [year, month] = monthYear.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1);
-    // todo : check default locale from the sdk or somehow
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   }
 

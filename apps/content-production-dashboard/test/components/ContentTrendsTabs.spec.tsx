@@ -72,7 +72,7 @@ describe('ContentTrendsTabs component', () => {
     createMockEntry({ id: 'entry-3', contentTypeId: 'blogPost', createdById: 'user-1' }),
   ];
 
-  const mockOverallData = [
+  const mockNewEntriesData = [
     { date: 'Jan 2024', 'New Content': 5 },
     { date: 'Feb 2024', 'New Content': 8 },
   ];
@@ -110,7 +110,7 @@ describe('ContentTrendsTabs component', () => {
       fetchingContentTypesError: null,
     });
 
-    mockProcessNewEntries.mockReturnValue(mockOverallData);
+    mockProcessNewEntries.mockReturnValue(mockNewEntriesData);
     mockProcessContentTypeTrends.mockReturnValue(mockContentTypeData);
     mockProcessCreatorTrends.mockReturnValue(mockCreatorData);
 
@@ -134,7 +134,7 @@ describe('ContentTrendsTabs component', () => {
       expect(screen.getByText('By Creator')).toBeInTheDocument();
     });
 
-    it('default tab is "overall"', () => {
+    it('default tab is "newEntries"', () => {
       render(
         <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="year" />,
         { wrapper: createWrapper() }
@@ -145,8 +145,8 @@ describe('ContentTrendsTabs component', () => {
     });
   });
 
-  describe('Overall Trends Tab', () => {
-    it('renders ChartWrapper with overallData', () => {
+  describe('New Entries Tab', () => {
+    it('renders ChartWrapper with newEntriesData', () => {
       render(
         <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="year" />,
         { wrapper: createWrapper() }
@@ -157,7 +157,7 @@ describe('ContentTrendsTabs component', () => {
       expect(screen.getByText('New Content')).toBeInTheDocument();
     });
 
-    it('calls processOverallTrends with filteredEntries and timeRange', () => {
+    it('calls processNewEntries with filteredEntries and timeRange', () => {
       render(
         <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="month" />,
         { wrapper: createWrapper() }

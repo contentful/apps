@@ -10,7 +10,7 @@ interface ChartTooltipProps {
   valueKey?: string;
   linesLegends?: string[];
   colors?: string[];
-  isOverallTrends?: boolean;
+  inNewEntriesTab?: boolean;
 }
 
 export const ChartTooltip: React.FC<ChartTooltipProps> = ({
@@ -21,11 +21,11 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
   valueKey,
   linesLegends,
   colors,
-  isOverallTrends,
+  inNewEntriesTab,
 }) => {
-  if (isOverallTrends && data && valueKey) {
+  if (inNewEntriesTab && data && valueKey) {
     return (
-      <OverallTrendsTooltip
+      <NewEntriesTooltip
         active={active}
         payload={payload}
         label={label}
@@ -75,7 +75,7 @@ const DefaultTooltip: React.FC<{
   );
 };
 
-const OverallTrendsTooltip: React.FC<{
+const NewEntriesTooltip: React.FC<{
   active?: boolean;
   payload?: Array<{ value: number; name: string }>;
   label?: string;
