@@ -35,6 +35,7 @@ import {
   type AppState,
   AppProps,
   ResolutionType,
+  PolicyType,
   Track,
   ResyncParams,
   PendingActions,
@@ -103,6 +104,7 @@ export class App extends React.Component<AppProps, AppState> {
   fileInputRef = React.createRef<HTMLInputElement>();
   muxPlayerRef = React.createRef<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
   getSignedTokenActionId: string;
+  getDRMLicenseTokenActionId: string;
   private pollPending = false;
 
   constructor(props: AppProps) {
@@ -124,6 +126,7 @@ export class App extends React.Component<AppProps, AppState> {
     );
 
     this.getSignedTokenActionId = '';
+    this.getDRMLicenseTokenActionId = '';
     const field = props.sdk.field.getValue();
 
     this.state = {
@@ -135,8 +138,9 @@ export class App extends React.Component<AppProps, AppState> {
         "It doesn't look like you've specified your Mux Access Token ID or Secret in the extension configuration.",
       errorShowResetAction: false,
       playerPlaybackId:
-        field && ('playbackId' in field || 'signedPlaybackId' in field)
-          ? field.playbackId || field.signedPlaybackId
+        field &&
+        ('playbackId' in field || 'signedPlaybackId' in field || 'drmPlaybackId' in field)
+          ? field.playbackId || field.signedPlaybackId || field.drmPlaybackId
           : undefined,
       modalAssetConfigurationVisible: false,
       file: null,
@@ -149,6 +153,7 @@ export class App extends React.Component<AppProps, AppState> {
       playbackToken: undefined,
       posterToken: undefined,
       storyboardToken: undefined,
+      drmLicenseToken: undefined,
       raw: undefined,
     };
   }
@@ -210,8 +215,12 @@ export class App extends React.Component<AppProps, AppState> {
       environmentId: this.props.sdk.ids.environment,
       spaceId: this.props.sdk.ids.space,
     });
+    
     this.getSignedTokenActionId =
       appActionsResponse.items.find((x) => x.name === 'getSignedUrlTokens')?.sys.id ?? '';
+    
+    this.getDRMLicenseTokenActionId =
+      appActionsResponse.items.find((x) => x.name === 'getDRMLicenseTokens')?.sys.id ?? '';
 
     this.props.sdk.window.startAutoResizer();
 
@@ -247,9 +256,16 @@ export class App extends React.Component<AppProps, AppState> {
 
       if (this.state.value.ready) {
         await this.checkForValidAsset();
-        if (this.isUsingSigned() && this.state.value.signedPlaybackId) {
+        
+        if (this.isUsingDRM() && this.state.value.drmPlaybackId) {
+          // Load DRM tokens for external player link
+          await this.setDRMPlayback(this.state.value.drmPlaybackId);
+          this.setState({ playerPlaybackId: this.state.value.drmPlaybackId });
+        } else if (this.isUsingSigned() && this.state.value.signedPlaybackId) {
           await this.setSignedPlayback(this.state.value.signedPlaybackId);
           this.setState({ playerPlaybackId: this.state.value.signedPlaybackId });
+        } else if (this.state.value.playbackId) {
+          this.setState({ playerPlaybackId: this.state.value.playbackId });
         }
         return;
       }
@@ -293,6 +309,12 @@ export class App extends React.Component<AppProps, AppState> {
       ? true
       : false;
   };
+
+  isUsingDRM = (): boolean => {
+    // Check if DRM playback ID is set
+    return this.state.value && this.state.value.drmPlaybackId ? true : false;
+  };
+
 
   getSwitchCheckedState = (): boolean => {
     // If there are pending actions of playback, use the state of the pending action
@@ -412,6 +434,13 @@ export class App extends React.Component<AppProps, AppState> {
         options,
         async (res) => await this.responseCheck(res)
       );
+      
+      if (!muxUploadUrl) {
+        // Adding this fallback so the upload won't fail when the DRM Configuration ID is invalid
+        this.setState({ modalAssetConfigurationVisible: false });
+        return;
+      }
+      
       const uploader = this.muxUploaderRef.current!;
       uploader.endpoint = muxUploadUrl;
 
@@ -543,6 +572,67 @@ export class App extends React.Component<AppProps, AppState> {
     this.setState({ playbackToken, posterToken, storyboardToken });
   };
 
+  private fetchDRMLicenseToken = async (playbackId: string): Promise<{ licenseToken: string; playbackToken: string; posterToken: string; storyboardToken: string }> => {
+    this.setState({ isTokenLoading: true });
+
+    try {
+      if (!this.getDRMLicenseTokenActionId) {
+        throw new Error('App Action for Get DRM License Token not found.');
+      }
+
+      const {
+        response: { body },
+      } = await this.cmaClient.appActionCall.createWithResponse(
+        {
+          organizationId: this.props.sdk.ids.organization,
+          appDefinitionId: this.props.sdk.ids.app!,
+          appActionId: this.getDRMLicenseTokenActionId,
+        },
+        { parameters: { playbackId } }
+      );
+      const parsedBody = JSON.parse(body);
+      if (!parsedBody.ok) {
+        const errorMessage = parsedBody.error || parsedBody.message || 'Unknown error';
+        throw new Error(errorMessage);
+      }
+
+      const licenseToken = parsedBody.data.licenseToken as string;
+      const playbackToken = parsedBody.data.playbackToken as string;
+      const posterToken = parsedBody.data.posterToken as string;
+      const storyboardToken = parsedBody.data.storyboardToken as string;
+      this.setState({ 
+        isTokenLoading: false, 
+        drmLicenseToken: licenseToken,
+        playbackToken: playbackToken,
+        posterToken: posterToken,
+        storyboardToken: storyboardToken,
+      });
+      return { licenseToken, playbackToken, posterToken, storyboardToken };
+    } catch (e) {
+      console.error('Error fetching DRM license token:', e);
+      const errorMessage = e instanceof Error ? e.message : 'Failed to fetch DRM license token';
+      this.setState({ 
+        isTokenLoading: false,
+        error: `Error: ${errorMessage}. Please verify that the App Action is correctly linked to the getDRMLicenseTokens function.`
+      });
+      return { licenseToken: '', playbackToken: '', posterToken: '', storyboardToken: '' };
+    }
+  };
+
+  setDRMPlayback = async (drmPlaybackId: string) => {
+    const { muxSigningKeyId, muxSigningKeyPrivate } = this.props.sdk.parameters
+      .installation as InstallationParams;
+    if (!(muxSigningKeyId && muxSigningKeyPrivate)) {
+      this.setState({
+        error:
+          'Error: this asset was created with DRM protection, but signing keys do not exist for your account',
+        errorShowResetAction: true,
+      });
+      return;
+    }
+    await this.fetchDRMLicenseToken(drmPlaybackId);
+  };
+
   getAsset = async (assetId: string) => {
     if (!assetId) {
       throw Error('Something went wrong, we cannot getAsset without an assetId.');
@@ -572,9 +662,20 @@ export class App extends React.Component<AppProps, AppState> {
         );
         return false;
 
-      case !res.ok:
-        this.props.sdk.notifier.error(`API Error. ${res.status} ${res.statusText}`);
+      case !res.ok: {
+        // Try to get the specific error message from the response
+        try {
+          const errorData = await res.clone().json();
+          if (errorData?.error?.messages?.[0]) {
+            this.props.sdk.notifier.error(errorData.error.messages[0]);
+          } else {
+            this.props.sdk.notifier.error(`API Error. ${res.status} ${res.statusText}`);
+          }
+        } catch {
+          this.props.sdk.notifier.error(`API Error. ${res.status} ${res.statusText}`);
+        }
         return false;
+      }
 
       default:
         return true;
@@ -647,6 +748,9 @@ export class App extends React.Component<AppProps, AppState> {
       const signedPlayback = asset.playback_ids?.find(
         ({ policy }: { policy: string }) => policy === 'signed'
       );
+      const drmPlayback = asset.playback_ids?.find(
+        ({ policy }: { policy: string }) => policy === 'drm'
+      );
 
       const audioOnly =
         'max_stored_resolution' in asset && asset.max_stored_resolution === 'Audio only';
@@ -694,6 +798,7 @@ export class App extends React.Component<AppProps, AppState> {
         assetId: this.state.value.assetId,
         playbackId: (publicPlayback && publicPlayback.id) || undefined,
         signedPlaybackId: (signedPlayback && signedPlayback.id) || undefined,
+        drmPlaybackId: (drmPlayback && drmPlayback.id) || undefined,
         ready: asset.status === 'ready',
         ratio: asset.aspect_ratio || undefined,
         max_stored_resolution: asset.max_stored_resolution || undefined,
@@ -717,7 +822,9 @@ export class App extends React.Component<AppProps, AppState> {
         await this.props.sdk.field.setValue(newValue);
       }
 
-      if (publicPlayback && publicPlayback.id) {
+      if (drmPlayback && drmPlayback.id) {
+        this.setState({ playerPlaybackId: drmPlayback.id });
+      } else if (publicPlayback && publicPlayback.id) {
         this.setState({ playerPlaybackId: publicPlayback.id });
       } else if (signedPlayback && signedPlayback.id) {
         this.setState({ playerPlaybackId: signedPlayback.id });
@@ -725,6 +832,8 @@ export class App extends React.Component<AppProps, AppState> {
 
       if (signedPlayback) {
         await this.setSignedPlayback(signedPlayback.id);
+      } else if (drmPlayback) {
+        await this.setDRMPlayback(drmPlayback.id);
       }
 
       const renditionPreparing = asset.static_renditions?.files
@@ -834,13 +943,94 @@ export class App extends React.Component<AppProps, AppState> {
     this.muxPlayerRef.current?.load();
   };
 
+  generateExternalPlayerURL = (): string | null => {
+    if (!this.isUsingDRM() || !this.state.value || !this.state.playbackToken || !this.state.drmLicenseToken) {
+      return null;
+    }
+
+    const playbackId = this.state.value.drmPlaybackId;
+    const streamType = this.getPlayerType();
+    const customDomain = this.props.sdk.parameters.installation.muxDomain;
+    const videoTitle = this.state.value.meta?.title || 'DRM Protected Video';
+
+    // Use JSON.stringify for safe string escaping
+    const tokens = {
+      playback: this.state.playbackToken,
+      ...(this.state.posterToken && { thumbnail: this.state.posterToken }),
+      ...(this.state.storyboardToken && { storyboard: this.state.storyboardToken }),
+      drm: this.state.drmLicenseToken,
+    };
+
+    // Build player attributes
+    const attrs: string[] = [
+      `playback-id="${playbackId}"`,
+      streamType ? `stream-type="${streamType}"` : '',
+      customDomain && customDomain !== 'mux.com' ? `custom-domain="${customDomain}"` : '',
+      this.state.value.audioOnly ? 'audio="true"' : '',
+    ].filter(Boolean);
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mux DRM Player - ${videoTitle.replace(/"/g, '&quot;')}</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif;
+      background: white;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+    mux-player {
+      width: 100%;
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>${videoTitle.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h1>
+    <script src="https://unpkg.com/@mux/mux-player"></script>
+    <mux-player ${attrs.join(' ')} style="width:100%"></mux-player>
+    <script>
+      const player = document.querySelector('mux-player');
+      if (player) {
+        player.tokens = ${JSON.stringify(tokens)};
+      }
+    </script>
+  </div>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html' });
+    return URL.createObjectURL(blob);
+  };
+
   playerParams = () => {
     if (!this.state.value) return;
 
     const params = [
       {
         name: 'playback-id',
-        value: this.state.value.playbackId || this.state.value.signedPlaybackId,
+        value:
+          this.state.value.playbackId ||
+          this.state.value.signedPlaybackId ||
+          this.state.value.drmPlaybackId,
       },
       {
         name: 'stream-type',
@@ -867,6 +1057,26 @@ export class App extends React.Component<AppProps, AppState> {
         }
       );
     }
+    if (this.isUsingDRM() && this.state.playbackToken) {
+      params.push(
+        {
+          name: 'playback-token',
+          value: this.state.playbackToken,
+        },
+        {
+          name: 'thumbnail-token',
+          value: this.state.posterToken,
+        },
+        {
+          name: 'storyboard-token',
+          value: this.state.storyboardToken,
+        },
+        {
+          name: 'drm-token',
+          value: this.state.drmLicenseToken,
+        }
+      );
+    }
     if (this.state.value.audioOnly) {
       params.push({
         name: 'audio',
@@ -882,11 +1092,12 @@ export class App extends React.Component<AppProps, AppState> {
     return params;
   };
 
-  swapPlaybackIDs = async (policy: 'public' | 'signed') => {
+  swapPlaybackIDs = async (policy: PolicyType) => {
     if (!this.state.value) return;
 
     const currentValue = this.state.value;
-    const currentPlaybackId = currentValue.playbackId || currentValue.signedPlaybackId;
+    const currentPlaybackId =
+      currentValue.playbackId || currentValue.signedPlaybackId || currentValue.drmPlaybackId;
     const totalPendingActions =
       (currentValue.pendingActions?.create?.length || 0) +
       (currentValue.pendingActions?.delete?.length || 0);
@@ -901,33 +1112,32 @@ export class App extends React.Component<AppProps, AppState> {
       update: currentValue.pendingActions?.update ?? [],
     };
 
-    const hasPending =
-      updatedPendingActions.create.length + updatedPendingActions.delete.length <
-      totalPendingActions;
-
-    if (hasPending) {
-      await this.props.sdk.field.setValue(
-        updatePendingActions(currentValue, updatedPendingActions)
+    // Determine current policy considering pending actions
+    let currentPolicy: PolicyType;
+    if (currentValue.pendingActions?.create) {
+      const playbackCreateAction = currentValue.pendingActions.create.find(
+        (action) => action.type === 'playback'
       );
-      return;
-    }
-
-    const isCurrentlySigned = this.isUsingSigned();
-    const currentPolicy = isCurrentlySigned ? 'signed' : 'public';
-    let targetPolicy: 'public' | 'signed';
-
-    if (policy) {
-      if (policy === currentPolicy) return;
-      targetPolicy = policy;
+      if (playbackCreateAction) {
+        currentPolicy = playbackCreateAction.data?.policy as PolicyType;
+      } else {
+        const isCurrentlyDRM = this.isUsingDRM();
+        const isCurrentlySigned = this.isUsingSigned();
+        currentPolicy = isCurrentlyDRM ? 'drm' : isCurrentlySigned ? 'signed' : 'public';
+      }
     } else {
-      targetPolicy = isCurrentlySigned ? 'public' : 'signed';
+      const isCurrentlyDRM = this.isUsingDRM();
+      const isCurrentlySigned = this.isUsingSigned();
+      currentPolicy = isCurrentlyDRM ? 'drm' : isCurrentlySigned ? 'signed' : 'public';
     }
+
+    if (policy === currentPolicy) return;
 
     updatedPendingActions.delete.push({ type: 'playback', id: currentPlaybackId, retry: 0 });
     updatedPendingActions.create.push({
       type: 'playback',
       data: {
-        policy: targetPolicy,
+        policy: policy,
         assetId: currentValue.assetId,
       },
       retry: 0,
@@ -1171,8 +1381,12 @@ export class App extends React.Component<AppProps, AppState> {
       );
     }
 
-    if (this.state.value && (this.state.value.playbackId || this.state.value.signedPlaybackId)) {
+    if (
+      this.state.value &&
+      (this.state.value.playbackId || this.state.value.signedPlaybackId || this.state.value.drmPlaybackId)
+    ) {
       const { muxDomain } = this.props.sdk.parameters.installation as InstallationParams;
+      
       const showPlayer =
         (this.state.value.ready && this.state.value.playbackId) ||
         (this.isUsingSigned() && !this.state.isTokenLoading);
@@ -1181,6 +1395,50 @@ export class App extends React.Component<AppProps, AppState> {
         <>
           {modal}
           <div>
+            {this.isUsingDRM() && (() => {
+              const externalPlayerURL = this.state.playbackToken && this.state.drmLicenseToken 
+                ? this.generateExternalPlayerURL() 
+                : null;
+              
+              return (
+                <Box marginBottom="spacingM">
+                  <Note variant="warning">
+                    DRM-protected videos cannot be displayed in Contentful's preview due to platform-level security restrictions. {' '}
+                    {externalPlayerURL ? (
+                      <>
+                        <TextLink
+                          href={externalPlayerURL}
+                          target="_blank"
+                          rel="noopener noreferrer">
+                          Open in external player
+                        </TextLink>
+                        {' '}to view the DRM-protected video (note: DRM playback has an associated cost), or use the generated playback code in your production environment.
+                      </>
+                    ) : (
+                      'The generated playback code is fully functional and will work correctly in your production environment outside of Contentful.'
+                    )}
+                  </Note>
+                </Box>
+              );
+            })()}
+
+            {this.isUsingDRM() &&
+              !this.state.drmLicenseToken &&
+              !this.state.isTokenLoading && (
+                <Box marginBottom="spacingM">
+                  <Note variant="negative" data-testid="nodrmtoken">
+                    {(() => {
+                      const { muxSigningKeyId, muxSigningKeyPrivate } = this.props.sdk.parameters
+                        .installation as InstallationParams;
+                      if (!muxSigningKeyId || !muxSigningKeyPrivate) {
+                        return 'No signing key to create a DRM license token. Please configure signing keys in the app settings.';
+                      }
+                      return 'DRM license token could not be generated. The video may not play in preview. Make sure the getDRMLicenseTokens function is deployed.';
+                    })()}
+                  </Note>
+                </Box>
+              )}
+
             {this.isUsingSigned() && (
               <Box marginBottom="spacingM">
                 <Note variant="neutral">
@@ -1234,11 +1492,15 @@ export class App extends React.Component<AppProps, AppState> {
                       'user' in this.props.sdk ? this.props.sdk.user.sys.id : undefined,
                     page_type: 'Preview Player',
                   }}
-                  tokens={{
-                    playback: this.isUsingSigned() ? this.state.playbackToken : undefined,
-                    thumbnail: this.isUsingSigned() ? this.state.posterToken : undefined,
-                    storyboard: this.isUsingSigned() ? this.state.storyboardToken : undefined,
-                  }}
+                  tokens={
+                    this.isUsingSigned() && this.state.playbackToken
+                      ? {
+                          playback: this.state.playbackToken,
+                          thumbnail: this.state.posterToken,
+                          storyboard: this.state.storyboardToken,
+                        }
+                      : undefined
+                  }
                 />
               )}
             </section>
@@ -1249,7 +1511,7 @@ export class App extends React.Component<AppProps, AppState> {
               </Box>
             )}
 
-            {showPlayer && (
+            {this.state.value && this.state.value.assetId && (
               <Box marginTop="spacingM">
                 <Menu
                   requestRemoveAsset={this.requestRemoveAsset}
@@ -1262,7 +1524,7 @@ export class App extends React.Component<AppProps, AppState> {
               </Box>
             )}
 
-            {!showPlayer && (
+            {!showPlayer && !this.isUsingDRM() && (
               <section className="uploader_area center aspectratio" data-testid="waitingtoplay">
                 <span>
                   <Spinner size="small" /> Waiting for asset to be playable
@@ -1303,7 +1565,11 @@ export class App extends React.Component<AppProps, AppState> {
                     tracks={(this.state.value?.captions || []) as Track[]}
                     type="caption"
                     title="Add Caption"
-                    playbackId={this.state.value?.playbackId || this.state.value?.signedPlaybackId}
+                    playbackId={
+                      this.state.value?.playbackId ||
+                      this.state.value?.signedPlaybackId ||
+                      this.state.value?.drmPlaybackId
+                    }
                     domain={this.props.sdk.parameters.installation.domain}
                     token={this.state.playbackToken}
                     isSigned={this.isUsingSigned()}
@@ -1322,7 +1588,11 @@ export class App extends React.Component<AppProps, AppState> {
                     tracks={(this.state.value?.audioTracks || []) as Track[]}
                     type="audio"
                     title="Add Audio Track"
-                    playbackId={this.state.value?.playbackId || this.state.value?.signedPlaybackId}
+                    playbackId={
+                      this.state.value?.playbackId ||
+                      this.state.value?.signedPlaybackId ||
+                      this.state.value?.drmPlaybackId
+                    }
                     domain={this.props.sdk.parameters.installation.domain}
                     token={this.state.playbackToken}
                     isSigned={this.isUsingSigned()}
@@ -1337,11 +1607,12 @@ export class App extends React.Component<AppProps, AppState> {
                 </Tabs.Panel>
 
                 <Tabs.Panel id="playercode">
-                  {this.isUsingSigned() && (
+                  {(this.isUsingSigned() || this.isUsingDRM()) && (
                     <Box marginBottom="spacingM" marginTop="spacingM">
                       <Note variant="warning">
-                        This code snippet is for limited testing and expires after about 12 hours.
-                        Tokens should be generated seperately.
+                        {this.isUsingDRM()
+                          ? 'DRM-protected content requires license tokens to be generated on your server. This code snippet is for reference only.'
+                          : 'This code snippet is for limited testing and expires after about 12 hours. Tokens should be generated seperately.'}
                       </Note>
                     </Box>
                   )}
@@ -1355,6 +1626,9 @@ export class App extends React.Component<AppProps, AppState> {
                     enableSignedUrls={
                       (this.props.sdk.parameters.installation as InstallationParams)
                         .muxEnableSignedUrls
+                    }
+                    enableDRM={
+                      (this.props.sdk.parameters.installation as InstallationParams).muxEnableDRM
                     }
                   />
                 </Tabs.Panel>
@@ -1444,6 +1718,6 @@ init((sdk) => {
 });
 
 // Enabling hot reload
-if (module.hot) {
+if (typeof module !== 'undefined' && module.hot) {
   module.hot.accept();
 }

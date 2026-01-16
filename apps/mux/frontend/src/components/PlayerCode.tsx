@@ -27,6 +27,7 @@ const PlayerCode: React.FC<PlayerCodeProps> = ({ params }) => {
   const playbackToken = getParam('playback-token');
   const thumbnailToken = getParam('thumbnail-token');
   const storyboardToken = getParam('storyboard-token');
+  const drmToken = getParam('drm-token');
   const audio = getParam('audio');
   const customDomain = getParam('custom-domain');
   const streamType = getParam('stream-type');
@@ -38,6 +39,7 @@ const PlayerCode: React.FC<PlayerCodeProps> = ({ params }) => {
     playbackToken ? `playback-token="${playbackToken}"` : '',
     thumbnailToken ? `thumbnail-token="${thumbnailToken}"` : '',
     storyboardToken ? `storyboard-token="${storyboardToken}"` : '',
+    drmToken ? `drm-token="${drmToken}"` : '',
     audio ? `audio="${audio}"` : '',
     customDomain ? `custom-domain="${customDomain}"` : '',
     autoplay ? 'autoplay' : '',
@@ -47,6 +49,8 @@ const PlayerCode: React.FC<PlayerCodeProps> = ({ params }) => {
   ]
     .filter(Boolean)
     .join(' ');
+
+  const muxPlayerCode = `<script src="https://unpkg.com/@mux/mux-player"></script>\n\n<mux-player ${muxPlayerAttrs} style="width:100%" />`;
 
   let iframeSrcBase =
     customDomain && customDomain !== 'mux.com'
@@ -80,7 +84,6 @@ const PlayerCode: React.FC<PlayerCodeProps> = ({ params }) => {
     .filter(Boolean)
     .join(' ');
 
-  const muxPlayerCode = `<script src="https://unpkg.com/@mux/mux-player"></script>\n\n<mux-player ${muxPlayerAttrs} style="width:100%" />`;
   const iframeCode = `<iframe ${iframeAttrs} style="aspect-ratio: 16/9; width: 100%; border: 0;"></iframe>`;
 
   const codeSnippet = codeType === 'mux-player' ? muxPlayerCode : iframeCode;

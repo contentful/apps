@@ -14,6 +14,8 @@ export interface InstallationParams {
   muxSigningKeyPrivate?: string;
   muxEnableAudioNormalize: boolean;
   muxDomain?: string;
+  muxEnableDRM?: boolean;
+  muxDRMConfigurationId?: string;
 }
 
 export interface AppState {
@@ -25,6 +27,7 @@ export interface AppState {
   playbackToken?: string;
   posterToken?: string;
   storyboardToken?: string;
+  drmLicenseToken?: string;
   captionname?: string;
   audioName?: string;
   playerPlaybackId?: string;
@@ -40,7 +43,7 @@ export interface AppState {
 
 export type ResolutionType = 'highest' | 'audio-only';
 
-export type PolicyType = 'signed' | 'public';
+export type PolicyType = 'signed' | 'public' | 'drm';
 
 export interface PendingAction {
   type: 'playback' | 'asset' | 'caption' | 'staticRendition' | 'audio' | 'metadata';
@@ -65,6 +68,7 @@ export interface MuxContentfulObject {
   assetId: string;
   playbackId?: string;
   signedPlaybackId?: string;
+  drmPlaybackId?: string;
   ready: boolean;
   ratio?: string;
   error?: string;

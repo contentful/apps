@@ -8,10 +8,15 @@ interface PlaybackSwitcherProps {
   value: MuxContentfulObject;
   onSwapPlaybackIDs: (policy: PolicyType) => void;
   enableSignedUrls: boolean;
+  enableDRM?: boolean;
 }
 
 function isUsingSigned(value: MuxContentfulObject): boolean {
   return !!(value && value.signedPlaybackId && !value.playbackId);
+}
+
+function isUsingDRM(value: MuxContentfulObject): boolean {
+  return !!(value && value.drmPlaybackId);
 }
 
 function getCurrentPolicy(value: MuxContentfulObject): PolicyType {
@@ -23,13 +28,18 @@ function getCurrentPolicy(value: MuxContentfulObject): PolicyType {
       return playbackCreateAction.data?.policy as PolicyType;
     }
   }
-  return isUsingSigned(value) ? 'signed' : 'public';
+  // Priority: public > signed > drm 
+  if (value?.playbackId) return 'public';
+  if (isUsingSigned(value)) return 'signed';
+  if (isUsingDRM(value)) return 'drm';
+  return 'public';
 }
 
 export const PlaybackSwitcher: React.FC<PlaybackSwitcherProps> = ({
   value,
   onSwapPlaybackIDs,
   enableSignedUrls,
+  enableDRM = false,
 }) => {
   const selectedPolicy = getCurrentPolicy(value);
 
@@ -44,6 +54,7 @@ export const PlaybackSwitcher: React.FC<PlaybackSwitcherProps> = ({
           }
         }}
         enableSignedUrls={enableSignedUrls}
+        enableDRM={enableDRM}
       />
     </Flex>
   );
