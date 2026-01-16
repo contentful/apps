@@ -14,4 +14,13 @@ export const styles = {
     borderRadius: '10px',
     boxShadow: `0 6px 16px -2px ${tokens.gray200}, 0 3px 6px -3px ${tokens.gray400}`,
   } as CSSProperties,
+  flexGrow: {
+    flex: 1,
+  } as CSSProperties,
+  sectionContainer: {
+    border: `1px solid ${tokens.gray300}`,
+    borderRadius: '4px',
+    padding: tokens.spacingL,
+    backgroundColor: tokens.colorWhite,
+  } as CSSProperties,
 };
