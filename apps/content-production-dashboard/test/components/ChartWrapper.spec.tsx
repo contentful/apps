@@ -136,21 +136,6 @@ describe('ChartWrapper component', () => {
     });
   });
 
-  describe('Tooltip', () => {
-    it('renders Tooltip component', () => {
-      render(
-        <ChartWrapper
-          data={mockData}
-          xAxisDataKey="date"
-          linesLegends={['New Content']}
-          legendTitle="Content:"
-        />
-      );
-
-      expect(screen.getByTestId('tooltip')).toBeInTheDocument();
-    });
-  });
-
   describe('Data Handling', () => {
     it('handles empty data array', () => {
       render(

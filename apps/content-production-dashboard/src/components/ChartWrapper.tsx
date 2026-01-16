@@ -9,10 +9,9 @@ import {
   ResponsiveContainer,
   LabelList,
 } from 'recharts';
-import { ChartTooltip } from './ChartTooltip';
 import { Box, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import { styles } from './ChartWrapper.styles';
+import { styles, CHART_COLORS } from './ChartWrapper.styles';
 
 export interface ChartDataPoint {
   [key: string]: string | number;
@@ -26,19 +25,6 @@ export interface ChartWrapperProps {
   legendTitle?: string;
 }
 
-const CHART_COLORS = [
-  '#4A90E2', // Blue
-  '#50C878', // Green
-  '#FF6B6B', // Red
-  '#FFA500', // Orange
-  '#9B59B6', // Purple
-  '#1ABC9C', // Teal
-  '#E74C3C', // Dark Red
-  '#3498DB', // Light Blue
-  '#F39C12', // Dark Orange
-  '#16A085', // Dark Teal
-];
-
 export const ChartWrapper: React.FC<ChartWrapperProps> = ({
   data,
   xAxisDataKey,
@@ -49,20 +35,6 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
   const colors = useMemo(() => {
     return linesLegends.map((_, index) => CHART_COLORS[index % CHART_COLORS.length]);
   }, [linesLegends.length]);
-
-  const isNewEntriesTab = linesLegends.length === 1 && linesLegends[0] === 'New Content';
-  const tooltipContent = ({ active, payload, label }: any) => (
-    <ChartTooltip
-      active={active}
-      payload={payload}
-      label={label}
-      data={data}
-      valueKey={isNewEntriesTab ? linesLegends[0] : undefined}
-      linesLegends={linesLegends}
-      colors={colors}
-      inNewEntriesTab={isNewEntriesTab}
-    />
-  );
 
   return (
     <Flex flexDirection="row" alignItems="flex-start">
@@ -78,7 +50,7 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
               height={80}
             />
             <YAxis tick={{ fontSize: 12 }} />
-            <Tooltip content={tooltipContent} />
+            <Tooltip />
             {linesLegends.map((key, index) => (
               <Line
                 key={`${key}-${index}`}
