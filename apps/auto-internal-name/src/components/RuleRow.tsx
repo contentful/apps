@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Autocomplete, Box, Flex, FormControl, IconButton } from '@contentful/f36-components';
+import { Autocomplete, Box, FormControl, GridItem, IconButton } from '@contentful/f36-components';
 import { TrashSimpleIcon } from '@contentful/f36-icons';
 import { FieldSelection, Rule, RuleValidation } from '../utils/types';
 
@@ -52,67 +52,70 @@ const RuleRow: React.FC<RuleRowProps> = ({
   };
 
   return (
-    <Flex flexDirection="row" alignItems="flex-start" gap="spacingM" fullWidth>
-      <FormControl
-        id={`parent-field-${rule.id}`}
-        isInvalid={validation?.parentFieldError}
-        isRequired
-        style={{ flex: 1 }}>
-        <FormControl.Label marginBottom="spacingS">Parent field</FormControl.Label>
-        <Autocomplete
-          testId="parent-field-autocomplete"
-          listWidth="full"
-          items={filteredParentFields}
-          selectedItem={rule.parentField}
-          onInputValueChange={handleParentFieldInputChange}
-          onSelectItem={(field: FieldSelection | null) => {
-            onRuleChange({ ...rule, parentField: field || null });
-          }}
-          placeholder="Field name | Content type name"
-          itemToString={(item: FieldSelection | null) => (item ? item.displayName : '')}
-          renderItem={(item: FieldSelection | null) => (item ? item.displayName : '')}
-        />
-        {validation?.parentFieldError && (
-          <FormControl.ValidationMessage>
-            {validation.parentFieldErrorMessage}
-          </FormControl.ValidationMessage>
-        )}
-      </FormControl>
-
-      <FormControl
-        id={`reference-field-${rule.id}`}
-        isInvalid={validation?.referenceFieldError}
-        isRequired
-        style={{ flex: 1 }}>
-        <FormControl.Label marginBottom="spacingS">Reference entries</FormControl.Label>
-        <Autocomplete
-          testId="reference-field-autocomplete"
-          listWidth="full"
-          items={filteredReferenceFields}
-          selectedItem={rule.referenceField}
-          onInputValueChange={handleReferenceFieldInputChange}
-          onSelectItem={(field: FieldSelection | null) => {
-            onRuleChange({ ...rule, referenceField: field || null });
-          }}
-          placeholder="Field name | Content type name"
-          itemToString={(item: FieldSelection | null) => (item ? item.displayName : '')}
-          renderItem={(item: FieldSelection | null) => (item ? item.displayName : '')}
-        />
-        {validation?.referenceFieldError && (
-          <FormControl.ValidationMessage>
-            {validation.referenceFieldErrorMessage}
-          </FormControl.ValidationMessage>
-        )}
-      </FormControl>
-      <Box marginTop="spacingXl">
-        <IconButton
-          aria-label="Delete rule"
-          icon={<TrashSimpleIcon />}
-          variant="secondary"
-          onClick={() => onRuleDelete(rule.id)}
-        />
-      </Box>
-    </Flex>
+    <>
+      <GridItem>
+        <FormControl
+          id={`parent-field-${rule.id}`}
+          isInvalid={validation?.parentFieldError}
+          isRequired>
+          <FormControl.Label marginBottom="spacingS">Parent field</FormControl.Label>
+          <Autocomplete
+            testId="parent-field-autocomplete"
+            listWidth="full"
+            items={filteredParentFields}
+            selectedItem={rule.parentField}
+            onInputValueChange={handleParentFieldInputChange}
+            onSelectItem={(field: FieldSelection | null) => {
+              onRuleChange({ ...rule, parentField: field || null });
+            }}
+            placeholder="Field name | Content type name"
+            itemToString={(item: FieldSelection | null) => (item ? item.displayName : '')}
+            renderItem={(item: FieldSelection | null) => (item ? item.displayName : '')}
+          />
+          {validation?.parentFieldError && (
+            <FormControl.ValidationMessage>
+              {validation.parentFieldErrorMessage}
+            </FormControl.ValidationMessage>
+          )}
+        </FormControl>
+      </GridItem>
+      <GridItem>
+        <FormControl
+          id={`reference-field-${rule.id}`}
+          isInvalid={validation?.referenceFieldError}
+          isRequired>
+          <FormControl.Label marginBottom="spacingS">Reference entries</FormControl.Label>
+          <Autocomplete
+            testId="reference-field-autocomplete"
+            listWidth="full"
+            items={filteredReferenceFields}
+            selectedItem={rule.referenceField}
+            onInputValueChange={handleReferenceFieldInputChange}
+            onSelectItem={(field: FieldSelection | null) => {
+              onRuleChange({ ...rule, referenceField: field || null });
+            }}
+            placeholder="Field name | Content type name"
+            itemToString={(item: FieldSelection | null) => (item ? item.displayName : '')}
+            renderItem={(item: FieldSelection | null) => (item ? item.displayName : '')}
+          />
+          {validation?.referenceFieldError && (
+            <FormControl.ValidationMessage>
+              {validation.referenceFieldErrorMessage}
+            </FormControl.ValidationMessage>
+          )}
+        </FormControl>
+      </GridItem>
+      <GridItem>
+        <Box marginTop="spacingXl">
+          <IconButton
+            aria-label="Delete rule"
+            icon={<TrashSimpleIcon />}
+            variant="secondary"
+            onClick={() => onRuleDelete(rule.id)}
+          />
+        </Box>
+      </GridItem>
+    </>
   );
 };
 

@@ -9,9 +9,10 @@ import {
   TextInput,
   Button,
   Subheading,
-  IconButton,
+  Grid,
+  GridItem,
 } from '@contentful/f36-components';
-import { PlusIcon, TrashSimpleIcon } from '@contentful/f36-icons';
+import { PlusIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
 import { styles } from './ConfigScreen.styles';
@@ -182,16 +183,20 @@ const ConfigScreen = () => {
           <Subheading marginBottom="none">Configure</Subheading>
 
           <Flex flexDirection="column" gap="spacingXs">
-            <Flex flexDirection="row" gap="spacingXl" alignItems="flex-start" fullWidth>
-              <Box style={{ flex: 1 }}>
+            <Grid
+              className={styles.rulesGrid}
+              columns="minmax(0, 1fr) minmax(0, 1fr) auto"
+              columnGap="spacingL"
+              rowGap="spacingXs">
+              <GridItem>
                 <Paragraph fontWeight="fontWeightDemiBold" marginBottom="spacing2Xs">
                   Select the parent field
                 </Paragraph>
                 <Paragraph>
                   The parent field name will be used as the prefix on the reference name.
                 </Paragraph>
-              </Box>
-              <Box style={{ flex: 1 }}>
+              </GridItem>
+              <GridItem>
                 <Paragraph fontWeight="fontWeightDemiBold" marginBottom="spacing2Xs">
                   Select reference entries
                 </Paragraph>
@@ -199,19 +204,8 @@ const ConfigScreen = () => {
                   Select the references of your parent content type that you wish to prefix with the
                   parent field name.
                 </Paragraph>
-              </Box>
-              <Box marginTop="spacingXl">
-                <IconButton
-                  aria-label="Delete rule"
-                  aria-hidden="true"
-                  className={styles.iconSpacer}
-                  icon={<TrashSimpleIcon />}
-                  tabIndex={-1}
-                />
-              </Box>
-            </Flex>
-
-            <Flex flexDirection="column" gap="spacingXs">
+              </GridItem>
+              <GridItem />
               {parameters.rules.map((rule) => (
                 <RuleRow
                   key={rule.id}
@@ -222,17 +216,17 @@ const ConfigScreen = () => {
                   onRuleDelete={handleRuleDelete}
                 />
               ))}
+            </Grid>
 
-              <Box>
-                <Button
-                  startIcon={<PlusIcon />}
-                  variant="secondary"
-                  size="small"
-                  onClick={handleAddRule}>
-                  Add auto-prefix
-                </Button>
-              </Box>
-            </Flex>
+            <Box>
+              <Button
+                startIcon={<PlusIcon />}
+                variant="secondary"
+                size="small"
+                onClick={handleAddRule}>
+                Add auto-prefix
+              </Button>
+            </Box>
           </Flex>
 
           <FormControl id="separator">
