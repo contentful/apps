@@ -7,10 +7,6 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
-vi.mock('contentful-management', () => ({
-  createClient: () => mockCma,
-}));
-
 describe('Config Screen component', () => {
   beforeEach(() => {
     vi.clearAllMocks();

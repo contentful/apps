@@ -46,7 +46,9 @@ const Sidebar = () => {
   return entries.length > 0 ? (
     <List>
       {entries.map((entry: EntryProps) => {
-        const entryLink = `https://${sdk.hostnames.webapp}/spaces/${sdk.ids.space}/environments/${sdk.ids.environment}/entries/${entry.sys.id}`;
+        const entryLink = `https://${sdk.hostnames.webapp}/spaces/${sdk.ids.space}/environments/${
+          sdk.ids.environmentAlias ?? sdk.ids.environment
+        }/entries/${entry.sys.id}`;
         return (
           <Box key={entry.sys.id} marginBottom="spacingS">
             <List.Item key={entry.sys.id}>

@@ -2,7 +2,6 @@ import { DialogAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { Skeleton } from '@contentful/f36-components';
 import { useEffect, useRef, useState } from 'react';
-import { createClient } from 'contentful-management';
 import { FieldsFactory } from '../fields/FieldsFactory';
 import { Entry } from '../fields/Entry';
 import { Field } from '../fields/Field';
@@ -41,22 +40,12 @@ const Dialog = () => {
     if (entry) {
       return;
     }
-    const cma = createClient(
-      { apiAdapter: sdk.cmaAdapter },
-      {
-        type: 'plain',
-        defaults: {
-          environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
-          spaceId: sdk.ids.space,
-        },
-      }
-    );
 
     const fetchEntry = async () => {
       const fieldsFactory = new FieldsFactory(
         invocationParams.entryId!,
         invocationParams.contentTypeId!,
-        cma,
+        sdk.cma,
         sdk.locales.default
       );
       const cmaEntry = await fieldsFactory.getEntry();
@@ -67,7 +56,7 @@ const Dialog = () => {
         invocationParams.title,
         fieldsRef.current,
         sdk.ids.space,
-        sdk.ids.environment,
+        sdk.ids.environmentAlias ?? sdk.ids.environment,
         sdk.parameters.installation.contentfulApiKey,
         cmaEntry.sys.publishedAt,
         cmaEntry.sys.updatedAt

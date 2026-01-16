@@ -1,9 +1,4 @@
-import {
-  ContentFields,
-  ContentTypeProps,
-  KeyValueMap,
-  PlainClientAPI,
-} from 'contentful-management';
+import { ContentFields, ContentTypeProps, KeyValueMap } from 'contentful-management';
 import { Field } from './Field';
 import { AssetArrayField } from './AssetArrayField';
 import { AssetField } from './AssetField';
@@ -16,19 +11,20 @@ import { RichTextField } from './RichTextField';
 import { TextArrayField } from './TextArrayField';
 import resolveResponse from 'contentful-resolve-response';
 import { ExternalResourceField } from './ExternalResourceField';
+import { CMAClient } from '@contentful/app-sdk';
 
 export class FieldsFactory {
   private contentTypes: { [key: string]: ContentTypeProps };
   private entryId: string;
   private entryContentTypeId: string;
-  private cma: PlainClientAPI;
+  private cma: CMAClient;
   private defaultLocale: string;
   NESTED_DEPTH = 5;
 
   public constructor(
     entryId: string,
     entryContentTypeId: string,
-    cma: PlainClientAPI,
+    cma: CMAClient,
     defaultLocale: string
   ) {
     this.entryId = entryId;

@@ -1,4 +1,5 @@
-import { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
+import { CMAClient } from '@contentful/app-sdk';
+import { EntryProps, KeyValueMap } from 'contentful-management';
 
 export const SAVED_RESPONSE = 'response';
 export const ASSET_FIELDS_QUERY = [
@@ -147,7 +148,7 @@ export function removeHypens(str: string) {
   return str.replace('-', '');
 }
 
-async function getDefaultLocale(cma: PlainClientAPI): Promise<string> {
+async function getDefaultLocale(cma: CMAClient): Promise<string> {
   const fallbackLocale = 'en-US';
   try {
     const locales = await cma.locale.getMany({ query: { limit: 1000 } });
@@ -162,7 +163,7 @@ async function getDefaultLocale(cma: PlainClientAPI): Promise<string> {
 export async function updateConfig(
   configEntry: EntryProps<KeyValueMap>,
   connectedFields: ConnectedFields,
-  cma: PlainClientAPI,
+  cma: CMAClient,
   defaultLocale?: string
 ) {
   if (!configEntry.fields[CONFIG_FIELD_ID]) {
@@ -173,7 +174,7 @@ export async function updateConfig(
   return await cma.entry.update({ entryId: CONFIG_ENTRY_ID }, configEntry);
 }
 
-export async function getConfigEntry(cma: PlainClientAPI): Promise<EntryProps<KeyValueMap>> {
+export async function getConfigEntry(cma: CMAClient): Promise<EntryProps<KeyValueMap>> {
   return await cma.entry.get({ entryId: CONFIG_ENTRY_ID });
 }
 

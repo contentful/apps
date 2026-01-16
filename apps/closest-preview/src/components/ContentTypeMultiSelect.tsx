@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Box, Paragraph, Pill, Skeleton, Stack } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { ContentType } from '../types';
-import { PlainClientAPI } from 'contentful-management';
 import { CMAClient, ConfigAppSDK } from '@contentful/app-sdk';
 import { getContentTypesWithoutLivePreview } from '../utils/livePreviewUtils';
 
@@ -10,7 +9,7 @@ type ContentTypeMultiSelectProps = {
   selectedContentTypes: ContentType[];
   setSelectedContentTypes: (contentTypes: ContentType[]) => void;
   sdk: ConfigAppSDK;
-  cma: PlainClientAPI | CMAClient;
+  cma: CMAClient;
   excludedContentTypesIds?: string[];
 };
 
@@ -51,7 +50,6 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
 
         const contentTypesWithoutLivePreview = await getContentTypesWithoutLivePreview(
           cma,
-          sdk,
           excludedContentTypesIds
         );
 

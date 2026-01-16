@@ -5,8 +5,6 @@ export const getEntry = async (sdk: SidebarAppSDK): Promise<EntryProps | null> =
   try {
     return await sdk.cma.entry.get({
       entryId: sdk.ids.entry,
-      spaceId: sdk.ids.space,
-      environmentId: sdk.ids.environment,
     });
   } catch (error) {
     console.error('Failed to fetch entry:', error);
@@ -25,8 +23,6 @@ export const getContentTypesForEntries = async (
     try {
       contentTypeMap[id] = await sdk.cma.contentType.get({
         contentTypeId: id,
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
       });
     } catch (error) {
       console.error('Error fetching content type:', error);

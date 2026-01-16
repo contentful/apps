@@ -1,15 +1,11 @@
 import Sidebar from '../../src/locations/Sidebar';
 import { cleanup, fireEvent, render, waitFor, screen } from '@testing-library/react';
-import { mockCma, mockSdk } from '../mocks';
+import { mockSdk } from '../mocks';
 import { expectedFields } from '../mocks';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useAutoResizer: () => {},
-}));
-
-vi.mock('contentful-management', () => ({
-  createClient: () => mockCma,
 }));
 
 const mockGetEntryConnectedFields = vi.fn();
@@ -27,7 +23,7 @@ describe('Sidebar component', () => {
   afterEach(cleanup);
 
   it('Sync button opens dialog', async () => {
-    mockCma.asset.get.mockResolvedValue({
+    mockSdk.cma.asset.get.mockResolvedValue({
       fields: {
         file: {
           'en-US': {
@@ -104,7 +100,7 @@ describe('Sidebar component', () => {
   });
 
   it('displays error when dialog returns true', async () => {
-    mockCma.asset.get.mockResolvedValue({
+    mockSdk.cma.asset.get.mockResolvedValue({
       fields: {
         file: {
           'en-US': {

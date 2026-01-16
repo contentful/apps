@@ -21,7 +21,6 @@ import { styles } from './ConfigScreen.styles';
 import Splitter from '../components/Splitter';
 import {
   AppInstallationParameters,
-  BRAZE_API_KEY_DOCUMENTATION,
   BRAZE_APP_DOCUMENTATION,
   BRAZE_CONTENT_BLOCK_DOCUMENTATION,
   BRAZE_ENDPOINTS,
@@ -32,7 +31,7 @@ import {
   CONTENT_TYPE_DOCUMENTATION,
 } from '../utils';
 import InformationWithLink from '../components/InformationWithLink';
-import { ContentTypeProps, createClient, PlainClientAPI } from 'contentful-management';
+import { ContentTypeProps, PlainClientAPI } from 'contentful-management';
 
 export async function callTo(url: string, newApiKey: string) {
   return await fetch(url, {
@@ -58,17 +57,6 @@ const ConfigScreen = () => {
   );
   const sdk = useSDK<ConfigAppSDK>();
   const spaceId = sdk.ids.space;
-
-  const cma = createClient(
-    { apiAdapter: sdk.cmaAdapter },
-    {
-      type: 'plain',
-      defaults: {
-        environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      },
-    }
-  );
 
   async function checkContentfulApiKey(apiKey: string) {
     if (!apiKey) {
@@ -105,7 +93,7 @@ const ConfigScreen = () => {
     }
 
     try {
-      await createContentType(sdk, cma);
+      await createContentType(sdk);
     } catch (e) {
       console.error(e);
       sdk.notifier.error('Error creating content type for configuration');
@@ -113,7 +101,6 @@ const ConfigScreen = () => {
     }
     await addAppToSidebar(
       sdk,
-      cma,
       selectedContentTypes.map((contentType) => contentType.id)
     );
 
@@ -130,7 +117,7 @@ const ConfigScreen = () => {
       parameters,
       targetState: { EditorInterface: { ...currentState?.EditorInterface, ...editorInterface } },
     };
-  }, [parameters, sdk, cma, selectedContentTypes]);
+  }, [parameters, sdk, selectedContentTypes]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -170,7 +157,6 @@ const ConfigScreen = () => {
         <ContentTypeSection
           selectedContentTypes={selectedContentTypes}
           setSelectedContentTypes={setSelectedContentTypes}
-          cma={cma}
           sdk={sdk}
         />
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
@@ -192,9 +178,9 @@ const ConfigScreen = () => {
   );
 };
 
-async function createContentType(sdk: ConfigAppSDK, cma: PlainClientAPI) {
+async function createContentType(sdk: ConfigAppSDK) {
   try {
-    await cma.contentType.get({
+    await sdk.cma.contentType.get({
       contentTypeId: CONFIG_CONTENT_TYPE_ID,
     });
     return;
@@ -213,21 +199,21 @@ async function createContentType(sdk: ConfigAppSDK, cma: PlainClientAPI) {
       },
     ],
   };
-  const contentTypeProps = await cma.contentType.createWithId(
+  const contentTypeProps = await sdk.cma.contentType.createWithId(
     { contentTypeId: CONFIG_CONTENT_TYPE_ID },
     contentTypeBody
   );
-  await cma.contentType.publish({ contentTypeId: CONFIG_CONTENT_TYPE_ID }, contentTypeProps);
-  await cma.entry.createWithId(
+  await sdk.cma.contentType.publish({ contentTypeId: CONFIG_CONTENT_TYPE_ID }, contentTypeProps);
+  await sdk.cma.entry.createWithId(
     { contentTypeId: CONFIG_CONTENT_TYPE_ID, entryId: CONFIG_ENTRY_ID },
     { fields: {} }
   );
 }
 
-async function addAppToSidebar(sdk: ConfigAppSDK, cma: PlainClientAPI, contentTypesId: string[]) {
+async function addAppToSidebar(sdk: ConfigAppSDK, contentTypesId: string[]) {
   for (const contentTypeId of contentTypesId) {
     try {
-      const editorInterface = await cma.editorInterface.get({ contentTypeId });
+      const editorInterface = await sdk.cma.editorInterface.get({ contentTypeId });
       const updatedSidebar = [
         ...(editorInterface.sidebar || []),
         {
@@ -237,7 +223,7 @@ async function addAppToSidebar(sdk: ConfigAppSDK, cma: PlainClientAPI, contentTy
         },
       ];
 
-      await cma.editorInterface.update(
+      await sdk.cma.editorInterface.update(
         { contentTypeId },
         {
           ...editorInterface,
@@ -290,10 +276,9 @@ function ConnectedContentSection(props: {
 function ContentTypeSection(props: {
   selectedContentTypes: { id: string; name: string }[];
   setSelectedContentTypes: (contentTypes: { id: string; name: string }[]) => void;
-  cma: PlainClientAPI;
   sdk: ConfigAppSDK;
 }) {
-  const { selectedContentTypes, setSelectedContentTypes, cma, sdk } = props;
+  const { selectedContentTypes, setSelectedContentTypes, sdk } = props;
   const [availableContentTypes, setAvailableContentTypes] = useState<
     { id: string; name: string }[]
   >([]);
@@ -306,9 +291,7 @@ function ContentTypeSection(props: {
     let areMoreContentTypes = true;
 
     while (areMoreContentTypes) {
-      const response = await cma.contentType.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
+      const response = await sdk.cma.contentType.getMany({
         query: { skip, limit },
       });
       if (response.items) {

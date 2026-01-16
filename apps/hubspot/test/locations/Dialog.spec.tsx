@@ -3,11 +3,6 @@ import Dialog from '../../src/locations/Dialog';
 import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { mockSdk, expectedFields } from '../mocks';
-import { mockCma } from '../mocks';
-
-vi.mock('contentful-management', () => ({
-  createClient: () => mockCma,
-}));
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => ({
@@ -181,7 +176,7 @@ describe('Dialog component', () => {
       },
     });
 
-    mockCma.appActionCall.createWithResponse = mockCreateWithResponse;
+    mockSdk.cma.appActionCall.createWithResponse = mockCreateWithResponse;
 
     render(<Dialog />);
 
@@ -209,8 +204,6 @@ describe('Dialog component', () => {
 
     expect(mockCreateWithResponse).toHaveBeenCalledWith(
       {
-        spaceId: 'test-space',
-        environmentId: 'test-environment-alias',
         appDefinitionId: 'test-app',
         appActionId: 'createModulesAction',
       },

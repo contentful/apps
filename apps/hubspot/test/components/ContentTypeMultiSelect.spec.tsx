@@ -3,23 +3,18 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ContentTypeMultiSelect from '../../src/components/ContentTypeMultiSelect';
 import { ContentType } from '../../src/utils/utils';
-import { mockCma, mockSdk } from '../mocks';
+import { mockSdk } from '../mocks';
 import type { ConfigAppSDK } from '@contentful/app-sdk';
-import { createClient } from 'contentful-management';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
-vi.mock('contentful-management', () => ({
-  createClient: () => mockCma,
-}));
-
 describe('ContentTypeMultiSelect', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCma.contentType.getMany.mockResolvedValue({
+    mockSdk.cma.contentType.getMany.mockResolvedValue({
       items: [
         { sys: { id: 'blogPost' }, name: 'Blog Post' },
         { sys: { id: 'article' }, name: 'Article' },
@@ -38,23 +33,12 @@ describe('ContentTypeMultiSelect', () => {
 
   const TestWrapper = ({ initialSelected = [] }: { initialSelected?: ContentType[] }) => {
     const sdk = useSDK<ConfigAppSDK>();
-    const cma = createClient(
-      { apiAdapter: sdk.cmaAdapter },
-      {
-        type: 'plain',
-        defaults: {
-          environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
-          spaceId: sdk.ids.space,
-        },
-      }
-    );
     const [selected, setSelected] = React.useState<ContentType[]>(initialSelected);
     return (
       <ContentTypeMultiSelect
         selectedContentTypes={selected}
         setSelectedContentTypes={setSelected}
         sdk={sdk}
-        cma={cma}
       />
     );
   };

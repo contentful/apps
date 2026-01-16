@@ -13,28 +13,8 @@ import {
   CONTENT_TYPE_DOCUMENTATION,
 } from '../../src/utils';
 
-const mockCma = {
-  contentType: {
-    get: vi.fn(),
-    createWithId: vi.fn(),
-    publish: vi.fn(),
-    getMany: vi.fn(),
-  },
-  entry: {
-    createWithId: vi.fn(),
-  },
-  editorInterface: {
-    get: vi.fn(),
-    update: vi.fn(),
-  },
-};
-
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
-}));
-
-vi.mock('contentful-management', () => ({
-  createClient: () => mockCma,
 }));
 
 vi.mock('./ConfigScreen', async () => {
@@ -69,7 +49,7 @@ describe('Config Screen component', () => {
   let configScreen: RenderResult<typeof queries, HTMLElement, HTMLElement>;
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCma.contentType.getMany.mockResolvedValue({
+    mockSdk.cma.contentType.getMany.mockResolvedValue({
       items: [
         { sys: { id: 'blogPost' }, name: 'Blog Post' },
         { sys: { id: 'article' }, name: 'Article' },
@@ -233,24 +213,24 @@ describe('Config Screen component', () => {
   describe('createContentType', () => {
     it('creates content type and entry if they do not exist', async () => {
       await fillScreen();
-      mockCma.contentType.get.mockRejectedValueOnce(new Error('Content type not found'));
+      mockSdk.cma.contentType.get.mockRejectedValueOnce(new Error('Content type not found'));
 
       await saveAppInstallation();
 
-      expect(mockCma.contentType.createWithId).toHaveBeenCalled();
-      expect(mockCma.contentType.publish).toHaveBeenCalled();
-      expect(mockCma.entry.createWithId).toHaveBeenCalled();
+      expect(mockSdk.cma.contentType.createWithId).toHaveBeenCalled();
+      expect(mockSdk.cma.contentType.publish).toHaveBeenCalled();
+      expect(mockSdk.cma.entry.createWithId).toHaveBeenCalled();
     });
 
     it('does not create content type if it already exists', async () => {
       await fillScreen();
-      mockCma.contentType.get.mockResolvedValueOnce({});
+      mockSdk.cma.contentType.get.mockResolvedValueOnce({});
 
       await saveAppInstallation();
 
-      expect(mockCma.contentType.createWithId).not.toHaveBeenCalled();
-      expect(mockCma.contentType.publish).not.toHaveBeenCalled();
-      expect(mockCma.entry.createWithId).not.toHaveBeenCalled();
+      expect(mockSdk.cma.contentType.createWithId).not.toHaveBeenCalled();
+      expect(mockSdk.cma.contentType.publish).not.toHaveBeenCalled();
+      expect(mockSdk.cma.entry.createWithId).not.toHaveBeenCalled();
     });
   });
 
@@ -274,18 +254,18 @@ describe('Config Screen component', () => {
       const article = await screen.findByText('Article');
       const news = await screen.findByText('News');
 
-      expect(mockCma.contentType.getMany).toHaveBeenCalled();
+      expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
       expect(blogPost).toBeTruthy();
       expect(article).toBeTruthy();
       expect(news).toBeTruthy();
     });
 
     it('adds app to sidebar for each content type', async () => {
-      mockCma.editorInterface.get.mockResolvedValueOnce({
+      mockSdk.cma.editorInterface.get.mockResolvedValueOnce({
         sidebar: [],
         sys: { contentType: { sys: { id: 'blogPost' } } },
       });
-      mockCma.editorInterface.update.mockResolvedValueOnce({});
+      mockSdk.cma.editorInterface.update.mockResolvedValueOnce({});
 
       await fillScreen();
       const user = userEvent.setup();
@@ -295,8 +275,8 @@ describe('Config Screen component', () => {
 
       const result = await saveAppInstallation();
 
-      expect(mockCma.editorInterface.get).toHaveBeenCalledWith({ contentTypeId: 'blogPost' });
-      expect(mockCma.editorInterface.update).toHaveBeenCalledWith(
+      expect(mockSdk.cma.editorInterface.get).toHaveBeenCalledWith({ contentTypeId: 'blogPost' });
+      expect(mockSdk.cma.editorInterface.update).toHaveBeenCalledWith(
         { contentTypeId: 'blogPost' },
         expect.objectContaining({
           sidebar: expect.arrayContaining([
@@ -322,7 +302,7 @@ describe('Config Screen component', () => {
       await selectContentTypes(user);
       await waitFor(() => expect(screen.getByTestId('pill-blogPost')).toBeTruthy());
 
-      mockCma.editorInterface.get.mockRejectedValueOnce(
+      mockSdk.cma.editorInterface.get.mockRejectedValueOnce(
         new Error('Failed to get editor interface')
       );
 
