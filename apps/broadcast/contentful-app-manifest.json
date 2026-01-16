@@ -1,0 +1,18 @@
+{
+  "functions": [
+    {
+      "id": "generateAudio",
+      "name": "Generate audio",
+      "description": "Generate an MP3 voiceover from entry text and upload it as a Contentful Asset.",
+      "path": "functions/generate-audio.js",
+      "entryFile": "functions/generate-audio.ts",
+      "allowNetworks": [
+        "https://api.contentful.com",
+        "https://api.elevenlabs.io",
+        "https://github.com",
+        "https://raw.githubusercontent.com"
+      ],
+      "accepts": ["appaction.call"]
+    }
+  ]
+}

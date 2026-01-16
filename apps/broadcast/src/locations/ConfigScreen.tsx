@@ -1,13 +1,34 @@
 import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Heading, Form, Paragraph, Flex } from '@contentful/f36-components';
+import {
+  Box,
+  Checkbox,
+  Flex,
+  Form,
+  FormControl,
+  Heading,
+  Paragraph,
+  TextInput,
+  TextLink,
+} from '@contentful/f36-components';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { css } from 'emotion';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
-export interface AppInstallationParameters {}
+export interface AppInstallationParameters {
+  elevenLabsApiKey?: string;
+  voiceId?: string;
+  generateAudioActionId?: string;
+  useMockAi?: boolean;
+}
 
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>({});
+  const [parameters, setParameters] = useState<AppInstallationParameters>({
+    elevenLabsApiKey: '',
+    voiceId: '',
+    generateAudioActionId: '',
+    useMockAi: false,
+  });
   const sdk = useSDK<ConfigAppSDK>();
   /*
      To use the cma, access it as follows.
@@ -23,6 +44,16 @@ const ConfigScreen = () => {
     // Get current the state of EditorInterface and other entities
     // related to this app installation
     const currentState = await sdk.app.getCurrentState();
+
+    if (!parameters.useMockAi && !parameters.elevenLabsApiKey) {
+      sdk.notifier.error('Please provide an ElevenLabs API key or enable mock mode.');
+      return false;
+    }
+
+    if (!parameters.voiceId) {
+      sdk.notifier.error('Please provide a voice ID.');
+      return false;
+    }
 
     return {
       // Parameters to be persisted as the app configuration.
@@ -47,7 +78,12 @@ const ConfigScreen = () => {
       const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
 
       if (currentParameters) {
-        setParameters(currentParameters);
+        setParameters({
+          elevenLabsApiKey: currentParameters.elevenLabsApiKey || '',
+          voiceId: currentParameters.voiceId || '',
+          generateAudioActionId: currentParameters.generateAudioActionId || '',
+          useMockAi: Boolean(currentParameters.useMockAi),
+        });
       }
 
       // Once preparation has finished, call `setReady` to hide
@@ -59,8 +95,103 @@ const ConfigScreen = () => {
   return (
     <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
       <Form>
-        <Heading>App Config</Heading>
-        <Paragraph>Welcome to your contentful app. This is your config page.</Paragraph>
+        <Heading marginBottom="spacingS">Voice &amp; Video Studio</Heading>
+        <Paragraph marginBottom="spacingXl">
+          Configure your ElevenLabs credentials and audio generation settings.
+        </Paragraph>
+
+        <Box marginBottom="spacingXl">
+          <FormControl isRequired isInvalid={!parameters.useMockAi && !parameters.elevenLabsApiKey}>
+            <FormControl.Label>ElevenLabs API key</FormControl.Label>
+            <TextInput
+              id="elevenLabsApiKey"
+              name="elevenLabsApiKey"
+              type="password"
+              value={parameters.elevenLabsApiKey}
+              onChange={(event) =>
+                setParameters({
+                  ...parameters,
+                  elevenLabsApiKey: event.target.value,
+                })
+              }
+              isDisabled={parameters.useMockAi}
+            />
+            <FormControl.HelpText>
+              Store this as a secret app installation parameter. Create or manage keys in
+              ElevenLabs.
+            </FormControl.HelpText>
+            {!parameters.useMockAi && !parameters.elevenLabsApiKey && (
+              <FormControl.ValidationMessage>
+                Provide an API key or enable mock mode.
+              </FormControl.ValidationMessage>
+            )}
+          </FormControl>
+          <Box marginTop="spacingS">
+            <TextLink
+              href="https://elevenlabs.io/app/speech-synthesis"
+              target="_blank"
+              rel="noopener noreferrer"
+              alignIcon="end"
+              icon={<ExternalLinkIcon />}>
+              Manage ElevenLabs keys
+            </TextLink>
+          </Box>
+        </Box>
+
+        <Box marginBottom="spacingXl">
+          <FormControl isRequired isInvalid={!parameters.voiceId}>
+            <FormControl.Label>Voice ID</FormControl.Label>
+            <TextInput
+              id="voiceId"
+              name="voiceId"
+              value={parameters.voiceId}
+              onChange={(event) =>
+                setParameters({
+                  ...parameters,
+                  voiceId: event.target.value,
+                })
+              }
+            />
+            {!parameters.voiceId && (
+              <FormControl.ValidationMessage>Voice ID is required.</FormControl.ValidationMessage>
+            )}
+          </FormControl>
+        </Box>
+
+        <Box marginBottom="spacingXl">
+          <FormControl>
+            <FormControl.Label>Generate Audio action ID (optional)</FormControl.Label>
+            <TextInput
+              id="generateAudioActionId"
+              name="generateAudioActionId"
+              value={parameters.generateAudioActionId}
+              onChange={(event) =>
+                setParameters({
+                  ...parameters,
+                  generateAudioActionId: event.target.value,
+                })
+              }
+              placeholder="Auto-resolve by action name if left empty"
+            />
+            <FormControl.HelpText>
+              If set, the Sidebar will call this App Action directly. Otherwise it will look for an
+              action named &quot;Generate Audio&quot;.
+            </FormControl.HelpText>
+          </FormControl>
+        </Box>
+
+        <Box marginBottom="spacingXl">
+          <Checkbox
+            isChecked={parameters.useMockAi}
+            onChange={(event) =>
+              setParameters({
+                ...parameters,
+                useMockAi: event.target.checked,
+              })
+            }>
+            Use mock audio generator
+          </Checkbox>
+        </Box>
       </Form>
     </Flex>
   );
