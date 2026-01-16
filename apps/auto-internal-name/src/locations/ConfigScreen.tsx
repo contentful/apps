@@ -41,9 +41,7 @@ const ConfigScreen = () => {
   const [rulesValidations, setRulesValidations] = useState<RuleValidationState>({});
   const [availableFields, setAvailableFields] = useState<FieldSelection[]>([]);
 
-  const onConfigure = useCallback(async () => {
-    const currentState = await sdk.app.getCurrentState();
-
+  const validateOnConfigure = () => {
     const newRulesValidations: RuleValidationState = {};
     parameters.rules.forEach((rule) => {
       const ruleValidation: RuleValidation = {
@@ -79,16 +77,36 @@ const ConfigScreen = () => {
         (ruleValidation: RuleValidation) =>
           ruleValidation.parentFieldError || ruleValidation.referenceFieldError
       );
+    return !invalidConfigurations;
+  };
 
-    if (invalidConfigurations) {
+  const addApptoFields = async () => {
+    const state = (await sdk.app.getCurrentState()) || { EditorInterface: {} };
+
+    for (const rule of parameters.rules) {
+      const fieldId = rule.referenceField?.fieldId;
+      const contentTypeId = rule.referenceField?.contentTypeId;
+      if (fieldId && contentTypeId) {
+        state.EditorInterface[contentTypeId] = {
+          controls: [...(state.EditorInterface[contentTypeId]?.controls || []), { fieldId }],
+        };
+      }
+    }
+
+    return state;
+  };
+
+  const onConfigure = useCallback(async () => {
+    if (!validateOnConfigure()) {
       sdk.notifier.error('Some fields are missing or invalid');
       return false;
     }
 
-    // TODO: change appereance of fields
+    const targetState = await addApptoFields();
+
     return {
       parameters,
-      targetState: currentState,
+      targetState,
     };
   }, [parameters, sdk]);
 
