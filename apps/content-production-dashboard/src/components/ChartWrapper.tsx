@@ -18,7 +18,7 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
   data,
   xAxisDataKey,
   processedContentTypes,
-  height = 400,
+  height = 300,
   legendTitle,
 }) => {
   const contentTypesIds = useMemo<string[]>(() => {
@@ -45,7 +45,7 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
   return (
     <Flex flexDirection="row" alignItems="flex-start">
       <ResponsiveContainer width="100%" height={height}>
-        <LineChart data={data} margin={{ top: 35, right: 35 }}>
+        <LineChart data={data} margin={{ top: 20, right: 35 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={tokens.gray200} />
           <XAxis
             dataKey={xAxisDataKey}
