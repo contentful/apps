@@ -23,9 +23,8 @@ describe('useInstallationParameters', () => {
       },
       parameters: {
         installation: {
-          sourceFieldId: 'title',
+          rules: [],
           separator: '',
-          overrides: [],
         } as AppInstallationParameters,
       },
       cma: mockCma,
@@ -41,9 +40,8 @@ describe('useInstallationParameters', () => {
       const { result } = renderHook(() => useInstallationParameters(mockSdk));
 
       expect(result.current).toEqual({
-        sourceFieldId: 'title',
+        rules: [],
         separator: '',
-        overrides: [],
       });
     });
   });
@@ -51,15 +49,28 @@ describe('useInstallationParameters', () => {
   describe('Successful parameter fetch', () => {
     it('should fetch and return fresh parameters from CMA when installation matches space', async () => {
       const freshParameters: AppInstallationParameters = {
-        sourceFieldId: 'name',
-        separator: '_',
-        overrides: [
+        rules: [
           {
-            id: 'override-1',
-            contentTypeId: 'blog-post',
-            fieldId: 'slug',
+            id: 'rule-1',
+            parentField: {
+              fieldUniqueId: 'blog-post.slug',
+              fieldId: 'slug',
+              fieldName: 'Slug',
+              contentTypeId: 'blog-post',
+              contentTypeName: 'Blog Post',
+              displayName: 'Slug | Blog Post',
+            },
+            referenceField: {
+              fieldUniqueId: 'blog-post.slug',
+              fieldId: 'slug',
+              fieldName: 'Slug',
+              contentTypeId: 'blog-post',
+              contentTypeName: 'Blog Post',
+              displayName: 'Slug | Blog Post',
+            },
           },
         ],
+        separator: '_',
       };
 
       const mockInstallation = {
@@ -105,9 +116,8 @@ describe('useInstallationParameters', () => {
           },
         },
         parameters: {
-          sourceFieldId: 'other-field',
+          rules: [],
           separator: '_',
-          overrides: [],
         },
       } as unknown as AppInstallationProps;
 
@@ -119,9 +129,8 @@ describe('useInstallationParameters', () => {
 
       await waitFor(() => {
         expect(result.current).toEqual({
-          sourceFieldId: 'title',
+          rules: [],
           separator: '',
-          overrides: [],
         });
       });
     });
@@ -137,9 +146,8 @@ describe('useInstallationParameters', () => {
 
       await waitFor(() => {
         expect(result.current).toEqual({
-          sourceFieldId: 'title',
+          rules: [],
           separator: '',
-          overrides: [],
         });
       });
 
