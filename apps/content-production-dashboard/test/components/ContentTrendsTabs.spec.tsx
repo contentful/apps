@@ -131,7 +131,7 @@ describe('ContentTrendsTabs component', () => {
       render(
         <ContentTrendsTabs
           entries={mockEntries}
-          trackedContentTypes={[]}
+          defaultContentTypes={[]}
           timeRange={TimeRange.Year}
         />,
         { wrapper: createWrapper() }
@@ -146,7 +146,7 @@ describe('ContentTrendsTabs component', () => {
       render(
         <ContentTrendsTabs
           entries={mockEntries}
-          trackedContentTypes={[]}
+          defaultContentTypes={[]}
           timeRange={TimeRange.Year}
         />,
         { wrapper: createWrapper() }
@@ -162,7 +162,7 @@ describe('ContentTrendsTabs component', () => {
       render(
         <ContentTrendsTabs
           entries={mockEntries}
-          trackedContentTypes={[]}
+          defaultContentTypes={[]}
           timeRange={TimeRange.Year}
         />,
         { wrapper: createWrapper() }
@@ -179,7 +179,7 @@ describe('ContentTrendsTabs component', () => {
       render(
         <ContentTrendsTabs
           entries={mockEntries}
-          trackedContentTypes={[]}
+          defaultContentTypes={[]}
           timeRange={TimeRange.Month}
         />,
         { wrapper: createWrapper() }
@@ -207,7 +207,7 @@ describe('ContentTrendsTabs component', () => {
       render(
         <ContentTrendsTabs
           entries={mockEntries}
-          trackedContentTypes={[]}
+          defaultContentTypes={[]}
           timeRange={TimeRange.Year}
         />,
         { wrapper: createWrapper() }
@@ -229,7 +229,7 @@ describe('ContentTrendsTabs component', () => {
       render(
         <ContentTrendsTabs
           entries={mockEntries}
-          trackedContentTypes={[]}
+          defaultContentTypes={[]}
           timeRange={TimeRange.Year}
         />,
         { wrapper: createWrapper() }
@@ -250,7 +250,7 @@ describe('ContentTrendsTabs component', () => {
       render(
         <ContentTrendsTabs
           entries={mockEntries}
-          trackedContentTypes={[]}
+          defaultContentTypes={[]}
           timeRange={TimeRange.Year}
         />,
         { wrapper: createWrapper() }
@@ -276,7 +276,7 @@ describe('ContentTrendsTabs component', () => {
       render(
         <ContentTrendsTabs
           entries={mockEntries}
-          trackedContentTypes={[]}
+          defaultContentTypes={[]}
           timeRange={TimeRange.Year}
         />,
         { wrapper: createWrapper() }
@@ -301,7 +301,7 @@ describe('ContentTrendsTabs component', () => {
       render(
         <ContentTrendsTabs
           entries={mockEntries}
-          trackedContentTypes={[]}
+          defaultContentTypes={[]}
           timeRange={TimeRange.Year}
         />,
         { wrapper: createWrapper() }
@@ -326,7 +326,7 @@ describe('ContentTrendsTabs component', () => {
       render(
         <ContentTrendsTabs
           entries={mockEntries}
-          trackedContentTypes={[]}
+          defaultContentTypes={[]}
           timeRange={TimeRange.Year}
         />,
         { wrapper: createWrapper() }
@@ -347,7 +347,7 @@ describe('ContentTrendsTabs component', () => {
       render(
         <ContentTrendsTabs
           entries={mockEntries}
-          trackedContentTypes={[]}
+          defaultContentTypes={[]}
           timeRange={TimeRange.Year}
         />,
         { wrapper: createWrapper() }
@@ -369,7 +369,7 @@ describe('ContentTrendsTabs component', () => {
       render(
         <ContentTrendsTabs
           entries={mockEntries}
-          trackedContentTypes={[]}
+          defaultContentTypes={[]}
           timeRange={TimeRange.Year}
         />,
         { wrapper: createWrapper() }
@@ -394,7 +394,7 @@ describe('ContentTrendsTabs component', () => {
       render(
         <ContentTrendsTabs
           entries={mockEntries}
-          trackedContentTypes={[]}
+          defaultContentTypes={[]}
           timeRange={TimeRange.Year}
         />,
         { wrapper: createWrapper() }

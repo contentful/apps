@@ -22,10 +22,8 @@ export const styles = {
     borderRadius: '50%',
     flexShrink: 0,
   } as CSSProperties,
-  chartContainer: {
-    flex: 1,
-  } as CSSProperties,
   legendContainer: {
-    width: '20%',
+    marginTop: tokens.spacingS,
+    width: '19%',
   } as CSSProperties,
 };
