@@ -22,7 +22,7 @@ import {
   FieldSelection,
   RuleValidation,
 } from '../utils/types';
-import { getFieldSelectionsFromContentTypes, getRuleKey } from '../utils/rules';
+import { getFieldSelectionsFromContentTypes } from '../utils/rules';
 
 const ConfigScreen = () => {
   const createEmptyRule = () => {
@@ -60,12 +60,13 @@ const ConfigScreen = () => {
         ruleValidation.referenceFieldError = true;
         ruleValidation.referenceFieldErrorMessage = 'Reference field is required';
       }
-      const ruleKey = getRuleKey(rule);
-      if (ruleKey && parameters.rules.filter((r) => getRuleKey(r) === ruleKey).length > 1) {
-        ruleValidation.parentFieldError = true;
-        ruleValidation.parentFieldErrorMessage = 'Duplicated rule';
+      const referenceKey = rule.referenceField?.fieldUniqueId;
+      if (
+        referenceKey &&
+        parameters.rules.filter((r) => r.referenceField?.fieldUniqueId === referenceKey).length > 1
+      ) {
         ruleValidation.referenceFieldError = true;
-        ruleValidation.referenceFieldErrorMessage = 'Duplicated rule';
+        ruleValidation.referenceFieldErrorMessage = 'Each field can only be in one reference entry';
       }
       newRulesValidations[rule.id] = ruleValidation;
     });

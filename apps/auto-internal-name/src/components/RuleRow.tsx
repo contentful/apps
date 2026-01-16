@@ -39,11 +39,17 @@ const RuleRow: React.FC<RuleRowProps> = ({
   const handleParentFieldInputChange = (value: string) => {
     const filtered = filterFieldsByDisplayName(availableFields, value);
     setFilteredParentFields(filtered);
+    if (value === '') {
+      onRuleChange({ ...rule, parentField: null });
+    }
   };
 
   const handleReferenceFieldInputChange = (value: string) => {
     const filtered = filterFieldsByDisplayName(availableFields, value);
     setFilteredReferenceFields(filtered);
+    if (value === '') {
+      onRuleChange({ ...rule, referenceField: null });
+    }
   };
 
   return (
