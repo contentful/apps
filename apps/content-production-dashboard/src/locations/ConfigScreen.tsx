@@ -24,7 +24,7 @@ import { styles } from './ConfigScreen.styles';
 import { Validator } from '../utils/Validator';
 
 export interface AppInstallationParameters {
-  trackedContentTypes?: string[];
+  defaultContentTypes?: string[];
   needsUpdateMonths?: number;
   recentlyPublishedDays?: number;
   showUpcomingReleases?: boolean;
@@ -101,7 +101,7 @@ const ConfigScreen = () => {
   useEffect(() => {
     setParameters((prev) => ({
       ...prev,
-      trackedContentTypes: selectedContentTypes.map((ct) => ct.id),
+      defaultContentTypes: selectedContentTypes.map((ct) => ct.id),
     }));
   }, [selectedContentTypes]);
 
@@ -246,7 +246,7 @@ const ConfigScreen = () => {
                 selectedContentTypes={selectedContentTypes}
                 setSelectedContentTypes={setSelectedContentTypes}
                 sdk={sdk}
-                initialSelectedIds={parameters.trackedContentTypes}
+                initialSelectedIds={parameters.defaultContentTypes}
               />
               <FormControl.HelpText>
                 Select content types to display in the publication trends chart. If none are

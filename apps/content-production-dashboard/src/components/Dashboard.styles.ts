@@ -16,7 +16,9 @@ export const styles = {
   sectionContainer: {
     border: `1px solid ${tokens.gray300}`,
     borderRadius: '4px',
-    padding: tokens.spacingL,
+    paddingTop: tokens.spacingL,
+    paddingRight: tokens.spacingL,
+    paddingLeft: tokens.spacingL,
     backgroundColor: tokens.colorWhite,
   } as CSSProperties,
 };

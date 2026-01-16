@@ -105,7 +105,7 @@ const Dashboard = () => {
             </Flex>
             <ContentTrendsTabs
               entries={entries}
-              trackedContentTypes={installation.trackedContentTypes ?? []}
+              defaultContentTypes={installation.defaultContentTypes ?? []}
               timeRange={timeRange}
             />
           </Box>

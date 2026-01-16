@@ -125,7 +125,7 @@ describe('ContentTrendsTabs component', () => {
   describe('Rendering', () => {
     it('renders all three tabs', () => {
       render(
-        <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="year" />,
+        <ContentTrendsTabs entries={mockEntries} defaultContentTypes={[]} timeRange="year" />,
         { wrapper: createWrapper() }
       );
 
@@ -136,7 +136,7 @@ describe('ContentTrendsTabs component', () => {
 
     it('default tab is "newEntries"', () => {
       render(
-        <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="year" />,
+        <ContentTrendsTabs entries={mockEntries} defaultContentTypes={[]} timeRange="year" />,
         { wrapper: createWrapper() }
       );
 
@@ -148,7 +148,7 @@ describe('ContentTrendsTabs component', () => {
   describe('New Entries Tab', () => {
     it('renders ChartWrapper with newEntriesData', () => {
       render(
-        <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="year" />,
+        <ContentTrendsTabs entries={mockEntries} defaultContentTypes={[]} timeRange="year" />,
         { wrapper: createWrapper() }
       );
 
@@ -159,7 +159,7 @@ describe('ContentTrendsTabs component', () => {
 
     it('calls processNewEntries with filteredEntries and timeRange', () => {
       render(
-        <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="month" />,
+        <ContentTrendsTabs entries={mockEntries} defaultContentTypes={[]} timeRange="month" />,
         { wrapper: createWrapper() }
       );
 
@@ -180,7 +180,7 @@ describe('ContentTrendsTabs component', () => {
 
       const user = userEvent.setup();
       render(
-        <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="year" />,
+        <ContentTrendsTabs entries={mockEntries} defaultContentTypes={[]} timeRange="year" />,
         { wrapper: createWrapper() }
       );
 
@@ -198,7 +198,7 @@ describe('ContentTrendsTabs component', () => {
 
       const user = userEvent.setup();
       render(
-        <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="year" />,
+        <ContentTrendsTabs entries={mockEntries} defaultContentTypes={[]} timeRange="year" />,
         { wrapper: createWrapper() }
       );
 
@@ -215,7 +215,7 @@ describe('ContentTrendsTabs component', () => {
     it('renders ChartWrapper when data is available', async () => {
       const user = userEvent.setup();
       render(
-        <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="year" />,
+        <ContentTrendsTabs entries={mockEntries} defaultContentTypes={[]} timeRange="year" />,
         { wrapper: createWrapper() }
       );
 
@@ -237,7 +237,7 @@ describe('ContentTrendsTabs component', () => {
     it('calls processContentTypeTrends with entries, timeRange, and contentTypes', async () => {
       const user = userEvent.setup();
       render(
-        <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="year" />,
+        <ContentTrendsTabs entries={mockEntries} defaultContentTypes={[]} timeRange="year" />,
         { wrapper: createWrapper() }
       );
 
@@ -258,7 +258,7 @@ describe('ContentTrendsTabs component', () => {
     it('fetches users from SDK when "byCreator" tab is selected', async () => {
       const user = userEvent.setup();
       render(
-        <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="year" />,
+        <ContentTrendsTabs entries={mockEntries} defaultContentTypes={[]} timeRange="year" />,
         { wrapper: createWrapper() }
       );
 
@@ -279,7 +279,7 @@ describe('ContentTrendsTabs component', () => {
       });
 
       render(
-        <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="year" />,
+        <ContentTrendsTabs entries={mockEntries} defaultContentTypes={[]} timeRange="year" />,
         { wrapper: createWrapper() }
       );
 
@@ -296,7 +296,7 @@ describe('ContentTrendsTabs component', () => {
       mockGetManyForSpace.mockImplementation(() => new Promise(() => {})); // Never resolves
 
       render(
-        <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="year" />,
+        <ContentTrendsTabs entries={mockEntries} defaultContentTypes={[]} timeRange="year" />,
         { wrapper: createWrapper() }
       );
 
@@ -314,7 +314,7 @@ describe('ContentTrendsTabs component', () => {
 
       const user = userEvent.setup();
       render(
-        <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="year" />,
+        <ContentTrendsTabs entries={mockEntries} defaultContentTypes={[]} timeRange="year" />,
         { wrapper: createWrapper() }
       );
 
@@ -335,7 +335,7 @@ describe('ContentTrendsTabs component', () => {
     it('renders ChartWrapper when creator data is available', async () => {
       const user = userEvent.setup();
       render(
-        <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="year" />,
+        <ContentTrendsTabs entries={mockEntries} defaultContentTypes={[]} timeRange="year" />,
         { wrapper: createWrapper() }
       );
 
