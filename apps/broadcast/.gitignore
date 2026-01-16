@@ -1,0 +1,23 @@
+# Node
+node_modules/
+dist/
+build/
+*.log
+.env*
+
+# Vercel/Next.js
+.next/
+
+# Mac
+.DS_Store
+
+# VSCode
+.vscode/
+
+# Test/coverage
+coverage/
+
+# Misc
+*.tmp
+*.swp
+.idea/
