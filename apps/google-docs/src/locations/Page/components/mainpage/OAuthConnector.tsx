@@ -52,10 +52,6 @@ export const OAuthConnector = ({
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(
-          `Checking Google OAuth connection status (attempt ${attempt}/${maxRetries})...`
-        );
-
         const { connected, token } = await callAppActionWithResult<CheckStatusResponse>(
           sdk,
           'checkGdocOauthTokenStatus',
@@ -64,19 +60,13 @@ export const OAuthConnector = ({
 
         // Assuming the response contains a connected field
         const isConnected = connected === true;
-        console.log(`Google OAuth connection status (attempt ${attempt}):`, isConnected);
         onOauthTokenChange(token);
 
         // If we have an expected status and it matches, or if we don't have an expected status, accept the result
         if (expectedStatus === undefined || isConnected === expectedStatus) {
           onOAuthConnectedChange(isConnected);
-          console.log(`Status check resolved to expected value: ${isConnected}`);
           break;
         } else {
-          console.log(
-            `Status mismatch. Expected: ${expectedStatus}, Got: ${isConnected}. Retrying...`
-          );
-
           // If this is the last attempt, accept the current result anyway
           if (attempt === maxRetries) {
             console.log(`Max retries reached. Accepting current status: ${isConnected}`);
@@ -86,7 +76,6 @@ export const OAuthConnector = ({
 
           // Wait before retrying (exponential backoff: 500ms, 1000ms, 1500ms, etc.)
           const waitTime = 500 * attempt;
-          console.log(`Waiting ${waitTime}ms before retry...`);
           await delay(waitTime);
         }
       } catch (error) {
@@ -101,13 +90,11 @@ export const OAuthConnector = ({
 
         // Wait before retrying on error
         const waitTime = 500 * attempt;
-        console.log(`Waiting ${waitTime}ms before retry after error...`);
         await delay(waitTime);
       }
     }
 
     setLoadingState(OAuthLoadingState.IDLE);
-    console.log(`Status check polling completed. Final status: ${isOAuthConnected}`);
   };
 
   const messageHandler = async (event: MessageEvent) => {
