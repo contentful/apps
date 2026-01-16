@@ -9,8 +9,9 @@ import {
   TextInput,
   Button,
   Subheading,
+  IconButton,
 } from '@contentful/f36-components';
-import { PlusIcon } from '@contentful/f36-icons';
+import { PlusIcon, TrashSimpleIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
 import { styles } from './ConfigScreen.styles';
@@ -198,6 +199,15 @@ const ConfigScreen = () => {
                   Select the references of your parent content type that you wish to prefix with the
                   parent field name.
                 </Paragraph>
+              </Box>
+              <Box marginTop="spacingXl">
+                <IconButton
+                  aria-label="Delete rule"
+                  aria-hidden="true"
+                  className={styles.iconSpacer}
+                  icon={<TrashSimpleIcon />}
+                  tabIndex={-1}
+                />
               </Box>
             </Flex>
 

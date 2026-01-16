@@ -8,4 +8,7 @@ export const styles = {
   formControl: css({
     flex: 1,
   }),
+  iconSpacer: css({
+    visibility: 'hidden',
+  }),
 };
