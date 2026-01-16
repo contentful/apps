@@ -7,7 +7,11 @@ export const styles = {
     borderRadius: tokens.borderRadiusMedium,
   } as CSSProperties,
   container: {
+    marginLeft: tokens.spacingM,
+    marginRight: tokens.spacingM,
     padding: tokens.spacingL,
     backgroundColor: tokens.colorWhite,
+    borderRadius: '10px',
+    boxShadow: `0 6px 16px -2px ${tokens.gray200}, 0 3px 6px -3px ${tokens.gray400}`,
   } as CSSProperties,
 };
