@@ -1,4 +1,13 @@
-import { Button, Flex, FormControl, Note, Select, Spinner, Text } from '@contentful/f36-components';
+import {
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  Note,
+  Select,
+  Spinner,
+  Text,
+} from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useMemo, useState } from 'react';
@@ -139,20 +148,27 @@ const Sidebar = () => {
 
   return (
     <Flex flexDirection="column" gap="spacingM">
-      <FormControl>
+      <FormControl marginBottom="spacingXs">
         <FormControl.Label>Target locale</FormControl.Label>
-        <Select
-          id="audioLocale"
-          name="audioLocale"
-          value={selectedLocale}
-          onChange={(event) => setSelectedLocale(event.target.value)}
-          isDisabled={isLoading}>
-          {localeOptions.map((locale) => (
-            <Select.Option key={locale.value} value={locale.value}>
-              {locale.label}
-            </Select.Option>
-          ))}
-        </Select>
+        <Box
+          maxWidth="95%"
+          paddingLeft="spacingXs"
+          paddingRight="spacingXs"
+          paddingBottom="spacingXs"
+          css={{ overflow: 'visible' }}>
+          <Select
+            id="audioLocale"
+            name="audioLocale"
+            value={selectedLocale}
+            onChange={(event) => setSelectedLocale(event.target.value)}
+            isDisabled={isLoading}>
+            {localeOptions.map((locale) => (
+              <Select.Option key={locale.value} value={locale.value}>
+                {locale.label}
+              </Select.Option>
+            ))}
+          </Select>
+        </Box>
       </FormControl>
       {isLoading ? (
         <Flex alignItems="center" gap="spacingS">
@@ -160,7 +176,7 @@ const Sidebar = () => {
           <Text>Generating audio...</Text>
         </Flex>
       ) : (
-        <Button variant="primary" onClick={handleGenerateAudio} isDisabled={isLoading}>
+        <Button variant="primary" onClick={handleGenerateAudio} isDisabled={isLoading} isFullWidth>
           Generate Audio
         </Button>
       )}
