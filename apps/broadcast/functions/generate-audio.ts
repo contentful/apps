@@ -127,20 +127,25 @@ export const handler: FunctionEventHandler<
       ? await getMockAudioBuffer()
       : await fetchElevenLabsAudio(voiceId, text, elevenLabsApiKey as string);
 
+    console.log('generate-audio:buffer-size', { size: audioBuffer.byteLength });
+
     const cma = initContentfulManagementClient(context);
 
-    // Convert ArrayBuffer to Uint8Array for upload
-    const fileData = new Uint8Array(audioBuffer);
-
+    // Contentful upload.create accepts ArrayBuffer, Buffer, or Stream
+    // Pass ArrayBuffer directly - it's explicitly supported and may work better in Functions environment
     const upload = await cma.upload.create(
       {
         spaceId: effectiveSpaceId,
         environmentId: effectiveEnvironmentId,
       },
-      { file: fileData }
+      { file: audioBuffer }
     );
 
-    console.log('generate-audio:upload', { uploadId: upload.sys.id });
+    console.log('generate-audio:upload', {
+      uploadId: upload.sys.id,
+      uploadSize: (upload as any).file?.size || (upload as any).size || 'unknown',
+      uploadKeys: Object.keys(upload),
+    });
 
     const asset = await cma.asset.create(
       {
