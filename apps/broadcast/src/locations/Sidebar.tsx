@@ -1,12 +1,13 @@
-import { Button, Flex, Note, Spinner, Text } from '@contentful/f36-components';
+import { Button, Flex, FormControl, Note, Select, Spinner, Text } from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 type GenerateAudioResult = {
   status: 'success';
   assetId: string;
   url: string;
+  locale: string;
 };
 
 type AppActionResult =
@@ -28,8 +29,18 @@ const Sidebar = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [selectedLocale, setSelectedLocale] = useState<string>(() => sdk.locales.default);
 
   const installParams = sdk.parameters.installation as InstallationParameters | undefined;
+
+  const localeOptions = useMemo(
+    () =>
+      sdk.locales.available.map((locale) => ({
+        value: locale,
+        label: locale,
+      })),
+    [sdk.locales.available]
+  );
 
   const resolveActionId = async (): Promise<string | null> => {
     if (installParams?.generateAudioActionId) {
@@ -59,16 +70,19 @@ const Sidebar = () => {
       return;
     }
 
-    const bodyValue = bodyField.getValue();
-    const text = typeof bodyValue === 'string' ? bodyValue.trim() : '';
-    if (!text) {
-      sdk.notifier.error('Body field is empty.');
-      return;
-    }
-
     const voiceId = installParams?.voiceId;
     if (!voiceId) {
       sdk.notifier.error('Missing voiceId in app configuration.');
+      return;
+    }
+
+    if (!sdk.ids.app) {
+      sdk.notifier.error('App definition ID is unavailable. Please reload the entry.');
+      return;
+    }
+
+    if (!sdk.ids.entry) {
+      sdk.notifier.error('Entry ID is unavailable. Please reload the entry.');
       return;
     }
 
@@ -82,16 +96,15 @@ const Sidebar = () => {
 
       const appActionCall = await sdk.cma.appActionCall.createWithResult(
         {
-          appDefinitionId: sdk.ids.app || '',
+          appDefinitionId: sdk.ids.app,
           appActionId,
         },
         {
           parameters: {
-            text,
             entryId: sdk.ids.entry,
-            spaceId: sdk.ids.space,
-            envId: sdk.ids.environment,
-            voiceId,
+            fieldId: AUDIO_ASSET_FIELD_ID,
+            targetLocale: selectedLocale,
+            ...(voiceId ? { voiceId } : {}),
           },
         }
       );
@@ -107,15 +120,11 @@ const Sidebar = () => {
         return;
       }
 
-      await audioField.setValue({
-        sys: {
-          type: 'Link',
-          linkType: 'Asset',
-          id: result.data.assetId,
-        },
-      });
       setAudioUrl(result.data.url);
+      await sdk.navigator.openEntry(sdk.ids.entry);
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error('generate-audio:sidebar-error', message, error);
       sdk.notifier.error('Audio generation failed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -130,6 +139,21 @@ const Sidebar = () => {
 
   return (
     <Flex flexDirection="column" gap="spacingM">
+      <FormControl>
+        <FormControl.Label>Target locale</FormControl.Label>
+        <Select
+          id="audioLocale"
+          name="audioLocale"
+          value={selectedLocale}
+          onChange={(event) => setSelectedLocale(event.target.value)}
+          isDisabled={isLoading}>
+          {localeOptions.map((locale) => (
+            <Select.Option key={locale.value} value={locale.value}>
+              {locale.label}
+            </Select.Option>
+          ))}
+        </Select>
+      </FormControl>
       {isLoading ? (
         <Flex alignItems="center" gap="spacingS">
           <Spinner size="small" />

@@ -9,9 +9,9 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 describe('Page component', () => {
-  it('Component text exists', () => {
-    const { getByText } = render(<Page />);
+  it('renders usage dashboard', async () => {
+    const { findByText } = render(<Page />);
 
-    expect(getByText('Hello Page Component (AppId: test-app)')).toBeInTheDocument();
+    expect(await findByText('Broadcast Usage Dashboard')).toBeInTheDocument();
   });
 });

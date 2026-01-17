@@ -1,27 +1,50 @@
-import {
+import type {
   AppActionRequest,
   AppActionResponse,
   FunctionEventContext,
   FunctionEventHandler,
   FunctionTypeEnum,
 } from '@contentful/node-apps-toolkit';
-import { createClient, PlainClientAPI } from 'contentful-management';
+import {
+  AssetProps,
+  ContentTypeProps,
+  createClient,
+  EntryProps,
+  KeyValueMap,
+  LocaleProps,
+  PlainClientAPI,
+} from 'contentful-management';
 import { getMockAudioBuffer } from '../lib/mock-audio';
 
 type GenerateAudioRequest = {
-  text: string;
   entryId: string;
-  spaceId: string;
-  envId: string;
-  voiceId: string;
+  fieldId: string;
+  targetLocale: string;
+  voiceId?: string;
+};
+
+type GenerateAudioResult = {
+  status: 'success';
+  assetId: string;
+  url: string;
+  locale: string;
 };
 
 type AppInstallationParameters = {
   elevenLabsApiKey?: string;
   useMockAi?: boolean | string;
+  voiceId?: string;
 };
 
-const DEFAULT_LOCALE = 'en-US';
+type AssetLink = {
+  sys: {
+    type: 'Link';
+    linkType: 'Asset';
+    id: string;
+  };
+};
+
+const BODY_FIELD_ID = 'body';
 
 const fetchElevenLabsAudio = async (
   voiceId: string,
@@ -48,9 +71,9 @@ const fetchElevenLabsAudio = async (
   return response.arrayBuffer();
 };
 
-function initContentfulManagementClient(
+const initContentfulManagementClient = (
   context: FunctionEventContext<AppInstallationParameters>
-): PlainClientAPI {
+): PlainClientAPI => {
   if (context.cma) {
     return context.cma;
   }
@@ -68,7 +91,129 @@ function initContentfulManagementClient(
       environmentId: context.environmentId,
     },
   });
-}
+};
+
+const getDefaultLocale = (locales: LocaleProps[]): string => {
+  const defaultLocale = locales.find((locale) => locale.default);
+  return defaultLocale?.code ?? locales[0]?.code ?? 'en-US';
+};
+
+const buildFallbackChain = (
+  locales: LocaleProps[],
+  targetLocale: string,
+  defaultLocale: string
+): string[] => {
+  const localeMap = new Map(locales.map((locale) => [locale.code, locale]));
+  const chain: string[] = [];
+  const visited = new Set<string>();
+
+  let current: string | undefined = targetLocale;
+  while (current && !visited.has(current)) {
+    chain.push(current);
+    visited.add(current);
+    current = localeMap.get(current)?.fallbackCode ?? undefined;
+  }
+
+  if (!chain.includes(defaultLocale)) {
+    chain.push(defaultLocale);
+  }
+
+  return chain;
+};
+
+const resolveLocalizedText = (
+  entry: EntryProps<KeyValueMap>,
+  fieldId: string,
+  locales: LocaleProps[],
+  targetLocale: string,
+  defaultLocale: string,
+  isLocalized: boolean
+): string | null => {
+  const fieldValue = entry.fields[fieldId] as Record<string, unknown> | undefined;
+  if (!fieldValue) {
+    return null;
+  }
+
+  const localeChain = isLocalized
+    ? buildFallbackChain(locales, targetLocale, defaultLocale)
+    : [defaultLocale];
+
+  for (const locale of localeChain) {
+    const value = fieldValue[locale];
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+  }
+
+  return null;
+};
+
+const resolveFieldLocalization = (
+  contentType: ContentTypeProps,
+  fieldId: string
+): { isLocalized: boolean; fieldName: string } | null => {
+  const field = contentType.fields.find((contentField) => contentField.id === fieldId);
+  if (!field) {
+    return null;
+  }
+
+  return {
+    isLocalized: Boolean(field.localized),
+    fieldName: field.name ?? fieldId,
+  };
+};
+
+const isAssetLink = (value: unknown): value is AssetLink => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const maybeLink = value as AssetLink;
+  return (
+    maybeLink.sys?.type === 'Link' &&
+    maybeLink.sys?.linkType === 'Asset' &&
+    typeof maybeLink.sys?.id === 'string'
+  );
+};
+
+const buildAssetFields = (
+  asset: AssetProps | null,
+  title: string,
+  fileName: string,
+  uploadId: string,
+  targetLocale: string,
+  defaultLocale: string,
+  includeDefaultLocale: boolean
+): AssetProps['fields'] => {
+  const filePayload = {
+    contentType: 'audio/mpeg',
+    fileName,
+    uploadFrom: {
+      sys: {
+        type: 'Link',
+        linkType: 'Upload',
+        id: uploadId,
+      },
+    },
+  };
+
+  const existingTitle = asset?.fields?.title ?? {};
+  const existingFile = asset?.fields?.file ?? {};
+
+  return {
+    ...asset?.fields,
+    title: {
+      ...existingTitle,
+      [targetLocale]: title,
+      ...(includeDefaultLocale ? { [defaultLocale]: title } : {}),
+    },
+    file: {
+      ...existingFile,
+      [targetLocale]: filePayload,
+      ...(includeDefaultLocale ? { [defaultLocale]: filePayload } : {}),
+    },
+  };
+};
 
 export const handler: FunctionEventHandler<
   FunctionTypeEnum.AppActionCall,
@@ -78,17 +223,14 @@ export const handler: FunctionEventHandler<
   context: FunctionEventContext<AppInstallationParameters>
 ): Promise<AppActionResponse> => {
   try {
-    const { text, entryId, spaceId, envId, voiceId } = event.body;
+    const { entryId, fieldId, targetLocale, voiceId: requestVoiceId } = event.body;
 
-    const effectiveSpaceId = spaceId || context.spaceId;
-    const effectiveEnvironmentId = envId || context.environmentId;
-
-    if (!text || !entryId || !effectiveSpaceId || !effectiveEnvironmentId || !voiceId) {
+    if (!entryId || !fieldId || !targetLocale) {
       return {
         ok: false,
         errors: [
           {
-            message: 'Missing required parameters for audio generation',
+            message: 'Missing required parameters for audio generation.',
             type: 'ValidationError',
           },
         ],
@@ -97,116 +239,251 @@ export const handler: FunctionEventHandler<
 
     const appInstallationParameters = context.appInstallationParameters ?? {};
 
-    // Handle both boolean and string values for useMockAi
     const useMockAi =
       appInstallationParameters.useMockAi === true ||
       String(appInstallationParameters.useMockAi ?? '').toLowerCase() === 'true';
     const elevenLabsApiKey = appInstallationParameters.elevenLabsApiKey;
+    const effectiveVoiceId = requestVoiceId ?? appInstallationParameters.voiceId;
 
     if (!useMockAi && !elevenLabsApiKey) {
       return {
         ok: false,
         errors: [
           {
-            message: 'Missing ElevenLabs API key in app installation parameters',
+            message: 'Missing ElevenLabs API key in app installation parameters.',
             type: 'ConfigurationError',
           },
         ],
       };
     }
 
-    console.log('generate-audio:start', {
-      spaceId: effectiveSpaceId,
-      environmentId: effectiveEnvironmentId,
-      hasCma: Boolean(context.cma),
-      hasCmaClientOptions: Boolean(context.cmaClientOptions),
-      useMockAi,
+    if (!effectiveVoiceId) {
+      return {
+        ok: false,
+        errors: [
+          {
+            message: 'Missing voiceId for audio generation.',
+            type: 'ConfigurationError',
+          },
+        ],
+      };
+    }
+
+    const cma = initContentfulManagementClient(context);
+    const [localeResponse, entry] = await Promise.all([
+      cma.locale.getMany({
+        spaceId: context.spaceId,
+        environmentId: context.environmentId,
+      }),
+      cma.entry.get({
+        spaceId: context.spaceId,
+        environmentId: context.environmentId,
+        entryId,
+      }),
+    ]);
+
+    const locales = localeResponse.items;
+    const localeCodes = new Set(locales.map((locale) => locale.code));
+    if (!localeCodes.has(targetLocale)) {
+      return {
+        ok: false,
+        errors: [
+          {
+            message: `Target locale ${targetLocale} is not available in this environment.`,
+            type: 'ValidationError',
+          },
+        ],
+      };
+    }
+
+    const defaultLocale = getDefaultLocale(locales);
+
+    const contentType = await cma.contentType.get({
+      spaceId: context.spaceId,
+      environmentId: context.environmentId,
+      contentTypeId: entry.sys.contentType.sys.id,
     });
+
+    const bodyFieldInfo = resolveFieldLocalization(contentType, BODY_FIELD_ID);
+    if (!bodyFieldInfo) {
+      return {
+        ok: false,
+        errors: [
+          {
+            message: `Missing text field: ${BODY_FIELD_ID}.`,
+            type: 'ValidationError',
+          },
+        ],
+      };
+    }
+
+    const assetFieldInfo = resolveFieldLocalization(contentType, fieldId);
+    if (!assetFieldInfo) {
+      return {
+        ok: false,
+        errors: [
+          {
+            message: `Missing asset field: ${fieldId}.`,
+            type: 'ValidationError',
+          },
+        ],
+      };
+    }
+
+    const text = resolveLocalizedText(
+      entry,
+      BODY_FIELD_ID,
+      locales,
+      targetLocale,
+      defaultLocale,
+      bodyFieldInfo.isLocalized
+    );
+
+    if (!text) {
+      return {
+        ok: false,
+        errors: [
+          {
+            message: `No text found for ${bodyFieldInfo.fieldName} in ${targetLocale} or its fallbacks.`,
+            type: 'ValidationError',
+          },
+        ],
+      };
+    }
 
     const audioBuffer = useMockAi
       ? await getMockAudioBuffer()
-      : await fetchElevenLabsAudio(voiceId, text, elevenLabsApiKey as string);
+      : await fetchElevenLabsAudio(effectiveVoiceId, text, elevenLabsApiKey as string);
 
-    console.log('generate-audio:buffer-size', { size: audioBuffer.byteLength });
-
-    const cma = initContentfulManagementClient(context);
-
-    // Contentful upload.create accepts ArrayBuffer, Buffer, or Stream
-    // Pass ArrayBuffer directly - it's explicitly supported and may work better in Functions environment
     const upload = await cma.upload.create(
       {
-        spaceId: effectiveSpaceId,
-        environmentId: effectiveEnvironmentId,
+        spaceId: context.spaceId,
+        environmentId: context.environmentId,
       },
       { file: audioBuffer }
     );
 
-    console.log('generate-audio:upload', {
-      uploadId: upload.sys.id,
-      uploadSize: (upload as any).file?.size || (upload as any).size || 'unknown',
-      uploadKeys: Object.keys(upload),
-    });
+    const assetLocale = assetFieldInfo.isLocalized ? targetLocale : defaultLocale;
+    const currentFieldValue = entry.fields[fieldId] as Record<string, unknown> | undefined;
+    const currentAssetLink = currentFieldValue ? currentFieldValue[assetLocale] : undefined;
+    const existingAssetId = isAssetLink(currentAssetLink) ? currentAssetLink.sys.id : null;
 
-    const asset = await cma.asset.create(
-      {
-        spaceId: effectiveSpaceId,
-        environmentId: effectiveEnvironmentId,
-      },
-      {
-        fields: {
-          title: {
-            [DEFAULT_LOCALE]: `Voice for entry ${entryId}`,
-          },
-          file: {
-            [DEFAULT_LOCALE]: {
-              contentType: 'audio/mpeg',
-              fileName: `voice-${entryId}.mp3`,
-              uploadFrom: {
-                sys: {
-                  type: 'Link',
-                  linkType: 'Upload',
-                  id: upload.sys.id,
-                },
-              },
-            },
-          },
+    const assetTitle = `Broadcast Audio - ${entryId} - ${targetLocale}`;
+    const fileName = `broadcast-${entryId}-${targetLocale}.mp3`;
+    const includeDefaultLocale =
+      assetFieldInfo.isLocalized && !existingAssetId && targetLocale !== defaultLocale;
+
+    let updatedAsset: AssetProps;
+
+    if (!existingAssetId) {
+      const newAssetFields = buildAssetFields(
+        null,
+        assetTitle,
+        fileName,
+        upload.sys.id,
+        assetLocale,
+        defaultLocale,
+        includeDefaultLocale
+      );
+
+      const createdAsset = await cma.asset.create(
+        {
+          spaceId: context.spaceId,
+          environmentId: context.environmentId,
         },
-      }
-    );
+        {
+          fields: newAssetFields,
+        }
+      );
+
+      updatedAsset = createdAsset;
+    } else {
+      const existingAsset = await cma.asset.get({
+        spaceId: context.spaceId,
+        environmentId: context.environmentId,
+        assetId: existingAssetId,
+      });
+
+      const mergedFields = buildAssetFields(
+        existingAsset,
+        assetTitle,
+        fileName,
+        upload.sys.id,
+        assetLocale,
+        defaultLocale,
+        false
+      );
+
+      updatedAsset = await cma.asset.update(
+        {
+          spaceId: context.spaceId,
+          environmentId: context.environmentId,
+          assetId: existingAssetId,
+        },
+        {
+          sys: existingAsset.sys,
+          fields: mergedFields,
+        }
+      );
+    }
 
     const processedAsset = await cma.asset.processForAllLocales(
       {
-        spaceId: effectiveSpaceId,
-        environmentId: effectiveEnvironmentId,
+        spaceId: context.spaceId,
+        environmentId: context.environmentId,
       },
-      asset
+      updatedAsset
     );
-
-    console.log('generate-audio:processed', { assetId: processedAsset.sys.id });
 
     const publishedAsset = await cma.asset.publish(
       {
-        spaceId: effectiveSpaceId,
-        environmentId: effectiveEnvironmentId,
+        spaceId: context.spaceId,
+        environmentId: context.environmentId,
         assetId: processedAsset.sys.id,
       },
       processedAsset
     );
 
-    console.log('generate-audio:published', { assetId: publishedAsset.sys.id });
-
-    const assetUrl = publishedAsset.fields.file?.[DEFAULT_LOCALE]?.url;
+    const assetUrl =
+      publishedAsset.fields.file?.[assetLocale]?.url ??
+      publishedAsset.fields.file?.[defaultLocale]?.url;
     if (!assetUrl) {
       return {
         ok: false,
         errors: [
           {
-            message: 'Missing asset URL after publishing',
+            message: 'Missing asset URL after publishing.',
             type: 'AssetError',
           },
         ],
       };
     }
+
+    const updatedEntryFields = {
+      ...entry.fields,
+      [fieldId]: {
+        ...(entry.fields[fieldId] as Record<string, unknown> | undefined),
+        [assetLocale]: {
+          sys: {
+            type: 'Link',
+            linkType: 'Asset',
+            id: publishedAsset.sys.id,
+          },
+        },
+      },
+    };
+
+    await cma.entry.update(
+      {
+        spaceId: context.spaceId,
+        environmentId: context.environmentId,
+        entryId: entry.sys.id,
+      },
+      {
+        sys: entry.sys,
+        fields: updatedEntryFields,
+      }
+    );
 
     return {
       ok: true,
@@ -214,7 +491,8 @@ export const handler: FunctionEventHandler<
         status: 'success',
         assetId: publishedAsset.sys.id,
         url: assetUrl.startsWith('//') ? `https:${assetUrl}` : assetUrl,
-      },
+        locale: targetLocale,
+      } satisfies GenerateAudioResult,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error occurred';

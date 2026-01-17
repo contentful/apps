@@ -1,14 +1,16 @@
 # Broadcast - Voice & Video Studio
 
-A Contentful App that generates audio voiceovers from entry text using ElevenLabs text-to-speech API. The app converts text content into MP3 audio files and automatically uploads them as Contentful Assets.
+A Contentful App that generates audio voiceovers from entry text using ElevenLabs text-to-speech API. The app converts text content into MP3 audio files and automatically uploads them as Contentful Assets. It also provides a usage metrics dashboard to monitor your ElevenLabs subscription usage.
 
 ## Features
 
 - **Text-to-Speech Generation**: Converts text from Contentful entries into high-quality MP3 audio files using ElevenLabs API
+- **Usage Metrics Dashboard**: Monitor your ElevenLabs subscription usage, character limits, and billing cycle information
 - **Mock Mode**: Test audio generation without an API key using mock audio samples
 - **Automatic Asset Management**: Creates, processes, and publishes audio assets directly in Contentful
 - **Sidebar Integration**: Easy-to-use sidebar interface for generating audio from entry content
 - **Configurable Voice**: Configure custom ElevenLabs voice IDs per installation
+- **Multi-locale Support**: Generate audio for specific locales with locale selection
 
 ## Architecture
 
@@ -21,7 +23,7 @@ A Contentful App that generates audio voiceovers from entry text using ElevenLab
 ### Backend
 - **Runtime**: Contentful Functions (Node.js)
 - **SDK**: `@contentful/node-apps-toolkit` for App Actions
-- **API Integration**: ElevenLabs Text-to-Speech API
+- **API Integration**: ElevenLabs Text-to-Speech API and Subscription API
 - **Asset Management**: Contentful Management API (CMA)
 
 ## Prerequisites
@@ -55,14 +57,27 @@ The app expects entries with the following fields:
 
 ## Usage
 
+### Generating Audio
+
 1. **Open an entry** in Contentful that has the required fields (`body` and `audioAsset`)
 2. **Open the Sidebar** location where the Broadcast app is installed
-3. **Click "Generate Audio"** to convert the `body` field text into an audio file
-4. The generated MP3 will be:
+3. **Select the target locale** from the dropdown (defaults to the space's default locale)
+4. **Click "Generate Audio"** to convert the `body` field text into an audio file
+5. The generated MP3 will be:
    - Uploaded to Contentful
    - Processed and published as an Asset
-   - Automatically linked to the `audioAsset` field
+   - Automatically linked to the `audioAsset` field for the selected locale
    - Playable directly in the sidebar
+
+### Viewing Usage Metrics
+
+1. **Navigate to the Page location** where the Broadcast app is installed
+2. View your ElevenLabs subscription metrics including:
+   - Current character usage vs. limit
+   - Usage percentage with visual progress bar
+   - Subscription tier
+   - Next billing cycle reset date
+   - Detailed metrics table
 
 ## Development
 
@@ -89,36 +104,58 @@ For CI/CD pipelines, set these environment variables:
 ```
 apps/broadcast/
 ├── functions/
-│   └── generate-audio.ts      # App Action handler for audio generation
+│   ├── generate-audio.ts      # App Action handler for audio generation
+│   └── get-usage-metrics.ts   # App Action handler for usage metrics
 ├── lib/
 │   └── mock-audio.ts          # Mock audio generator for testing
 ├── src/
+│   ├── components/
+│   │   ├── ProgressBar.tsx    # Usage progress bar component
+│   │   └── LocalhostWarning.tsx
 │   ├── locations/
 │   │   ├── ConfigScreen.tsx   # App configuration UI
 │   │   ├── Sidebar.tsx        # Main audio generation interface
-│   │   └── ...                # Other location components
+│   │   ├── Page.tsx           # Usage metrics dashboard
+│   │   ├── EntryEditor.tsx    # Entry editor location (placeholder)
+│   │   ├── Home.tsx           # Home location (placeholder)
+│   │   └── ...                # Test files and other components
 │   └── App.tsx                # Main app component
-├── contentful-app-manifest.json  # Function definitions
+├── contentful-app-manifest.json  # App manifest with functions and actions
 └── package.json
 ```
 
 ## How It Works
 
+### Audio Generation Flow
+
 1. **User triggers generation** from the Sidebar location
-2. **Sidebar component** extracts text from the entry's `body` field
+2. **Sidebar component** extracts text from the entry's `body` field for the selected locale
 3. **App Action call** invokes the `generateAudio` function with:
-   - Text content
    - Entry ID
-   - Space/Environment IDs
-   - Voice ID from configuration
+   - Target field ID (`audioAsset`)
+   - Target locale
+   - Voice ID from configuration (optional override)
 4. **Function handler** (`generate-audio.ts`):
-   - Calls ElevenLabs API (or uses mock audio)
+   - Retrieves the entry and extracts text from the `body` field
+   - Calls ElevenLabs API (or uses mock audio if enabled)
    - Receives MP3 audio buffer
    - Uploads to Contentful via CMA
    - Creates an Asset with proper metadata
    - Processes and publishes the asset
+   - Links the asset to the entry's `audioAsset` field for the target locale
    - Returns asset ID and URL
-5. **Sidebar updates** the `audioAsset` field with the new asset
+5. **Sidebar displays** the generated audio player and opens the entry
+
+### Usage Metrics Flow
+
+1. **User navigates** to the Page location
+2. **Page component** automatically fetches usage metrics on load
+3. **App Action call** invokes the `getUsageMetrics` function
+4. **Function handler** (`get-usage-metrics.ts`):
+   - Calls ElevenLabs Subscription API
+   - Retrieves character usage, limits, tier, and reset date
+   - Returns formatted metrics data
+5. **Page displays** metrics with visual progress indicators and detailed tables
 
 ## Configuration
 
@@ -131,9 +168,17 @@ apps/broadcast/
 
 ### Function Configuration
 
-The `generateAudio` function is configured in `contentful-app-manifest.json`:
-- **Network Access**: Allows connections to Contentful and ElevenLabs APIs
+Both functions are configured in `contentful-app-manifest.json`:
+
+**`generateAudio` function:**
+- **Network Access**: Allows connections to Contentful, ElevenLabs, and GitHub APIs
 - **Accepts**: `appaction.call` events
+- **Parameters**: `entryId`, `fieldId`, `targetLocale`, `voiceId` (optional)
+
+**`getUsageMetricsFn` function:**
+- **Network Access**: Allows connections to ElevenLabs API
+- **Accepts**: `appaction.call` events
+- **Parameters**: None (uses installation parameters)
 
 ## Testing
 
@@ -143,14 +188,15 @@ The app includes test files for all location components. Run tests with:
 npm test
 ```
 
-Mock mode can be enabled in the configuration screen to test without an ElevenLabs API key.
+Mock mode can be enabled in the configuration screen to test audio generation without an ElevenLabs API key. Note that usage metrics require a valid API key with appropriate permissions (Administration > User > Read for restricted keys).
 
 ## Libraries & Dependencies
 
 - **[Forma 36](https://f36.contentful.com/)**: Contentful's design system and React components
 - **[Contentful App SDK](https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/)**: SDK for building Contentful apps
 - **[Contentful Management API](https://www.contentful.com/developers/docs/references/content-management-api/)**: For creating and managing assets
-- **[ElevenLabs API](https://elevenlabs.io/docs)**: Text-to-speech service
+- **[Contentful Node Apps Toolkit](https://www.npmjs.com/package/@contentful/node-apps-toolkit)**: For building Contentful Functions
+- **[ElevenLabs API](https://elevenlabs.io/docs)**: Text-to-speech service and subscription management
 
 ## Learn More
 

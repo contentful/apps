@@ -1,4 +1,46 @@
 {
+  "locations": [
+    {
+      "location": "app-config",
+      "component": "ConfigScreen"
+    },
+    {
+      "location": "entry-sidebar",
+      "component": "Sidebar"
+    },
+    {
+      "location": "page",
+      "component": "Page"
+    }
+  ],
+  "parameters": {
+    "installation": [
+      {
+        "id": "elevenLabsApiKey",
+        "type": "Secret",
+        "name": "ElevenLabs API key",
+        "description": "API key for the app to use the ElevenLabs API."
+      },
+      {
+        "id": "voiceId",
+        "type": "Symbol",
+        "name": "Voice ID",
+        "description": "Default ElevenLabs voice ID used when generating audio."
+      },
+      {
+        "id": "generateAudioActionId",
+        "type": "Symbol",
+        "name": "Generate Audio action ID",
+        "description": "Optional app action ID to override the auto-resolved Generate Audio action."
+      },
+      {
+        "id": "useMockAi",
+        "type": "Boolean",
+        "name": "Use mock audio generator",
+        "description": "Enable mock audio generation for local testing."
+      }
+    ]
+  },
   "functions": [
     {
       "id": "generateAudio",
@@ -13,6 +55,152 @@
         "https://raw.githubusercontent.com"
       ],
       "accepts": ["appaction.call"]
+    },
+    {
+      "id": "getUsageMetricsFn",
+      "name": "Get usage metrics",
+      "description": "Fetch ElevenLabs subscription usage metrics for the dashboard.",
+      "path": "functions/get-usage-metrics.js",
+      "entryFile": "functions/get-usage-metrics.ts",
+      "allowNetworks": ["https://api.elevenlabs.io"],
+      "accepts": ["appaction.call"]
+    }
+  ],
+  "actions": [
+    {
+      "id": "generateAudio",
+      "name": "Generate Audio",
+      "type": "function-invocation",
+      "functionId": "generateAudio",
+      "category": "Custom",
+      "parametersSchema": {
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string"
+          },
+          "fieldId": {
+            "type": "string"
+          },
+          "targetLocale": {
+            "type": "string",
+            "pattern": "^[a-z]{2}-[A-Z]{2}$"
+          },
+          "voiceId": {
+            "type": "string"
+          }
+        },
+        "required": ["entryId", "fieldId", "targetLocale"],
+        "additionalProperties": false
+      },
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string"
+              },
+              "assetId": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "locale": {
+                "type": "string"
+              }
+            },
+            "required": ["status", "assetId", "url", "locale"],
+            "additionalProperties": false
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              },
+              "required": ["message", "type"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["ok"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "getUsageMetrics",
+      "name": "Get Usage Metrics",
+      "type": "function-invocation",
+      "functionId": "getUsageMetricsFn",
+      "category": "Custom",
+      "parametersSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string"
+              },
+              "code": {
+                "type": "string"
+              },
+              "character_count": {
+                "type": "number"
+              },
+              "character_limit": {
+                "type": "number"
+              },
+              "tier": {
+                "type": "string"
+              },
+              "next_character_count_reset_unix": {
+                "type": "number"
+              }
+            },
+            "required": ["status"],
+            "additionalProperties": false
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              },
+              "required": ["message", "type"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["ok"],
+        "additionalProperties": false
+      }
     }
   ]
 }

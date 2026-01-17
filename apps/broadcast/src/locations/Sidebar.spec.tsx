@@ -6,12 +6,14 @@ import { vi } from 'vitest';
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
+  useAutoResizer: vi.fn(),
 }));
 
 describe('Sidebar component', () => {
-  it('Component text exists', () => {
+  it('renders generation controls', () => {
     const { getByText } = render(<Sidebar />);
 
-    expect(getByText('Hello Sidebar Component (AppId: test-app)')).toBeInTheDocument();
+    expect(getByText('Target locale')).toBeInTheDocument();
+    expect(getByText('Generate Audio')).toBeInTheDocument();
   });
 });
