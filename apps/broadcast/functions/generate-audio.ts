@@ -376,7 +376,7 @@ export const handler: FunctionEventHandler<
       fields: EntryProps<KeyValueMap>['fields'],
       sys: EntryProps<KeyValueMap>['sys']
     ) =>
-      cma.entry.update(
+      cma!.entry.update(
         {
           spaceId: context.spaceId,
           environmentId: context.environmentId,
@@ -421,7 +421,7 @@ export const handler: FunctionEventHandler<
           }
 
           attempt += 1;
-          const latestEntry = await cma.entry.get({
+          const latestEntry = await cma!.entry.get({
             spaceId: context.spaceId,
             environmentId: context.environmentId,
             entryId: entry.sys.id,

@@ -6,12 +6,14 @@ A Contentful App that generates audio voiceovers from entry text using ElevenLab
 
 - **Text-to-Speech Generation**: Converts text from Contentful entries into high-quality MP3 audio files using ElevenLabs API
 - **Usage Metrics Dashboard**: Monitor your ElevenLabs subscription usage, character limits, and billing cycle information
+- **Generation Activity Logging**: Automatic logging of all generation attempts with detailed analytics including success rates, latency distribution, and usage by content type and author (supports paginated log retrieval)
 - **Mock Mode**: Test audio generation without an API key using mock audio samples
 - **Automatic Asset Management**: Creates, processes, and publishes audio assets directly in Contentful
 - **Sidebar Integration**: Easy-to-use sidebar interface for generating audio from entry content
 - **Configurable Voice**: Configure default ElevenLabs voice IDs per installation
 - **Author-Based Voice Resolution**: Automatically resolve voice IDs from linked author profiles when available
 - **Multi-locale Support**: Generate audio for specific locales with locale selection
+- **Retry Logic**: Automatic retry handling for concurrent entry updates
 
 ## Architecture
 
@@ -26,6 +28,7 @@ A Contentful App that generates audio voiceovers from entry text using ElevenLab
 - **SDK**: `@contentful/node-apps-toolkit` for App Actions
 - **API Integration**: ElevenLabs Text-to-Speech API and Subscription API
 - **Asset Management**: Contentful Management API (CMA)
+- **Architecture**: Modular function structure with separated concerns (constants, Contentful operations, ElevenLabs integration, logging)
 
 ## Prerequisites
 
@@ -64,6 +67,18 @@ and use its voice configuration before falling back to the installation default.
 
 - **`voiceId`** (Text field): Optional ElevenLabs voice ID to override the default
 
+### Generation Logging Content Type
+
+The app automatically creates a content type (`broadcastAudioGenerationLog`) to track generation attempts. This content type includes:
+
+- Entry ID and locale
+- Character count and voice ID used
+- Success/failure status
+- Content type ID and author entry ID (for analytics)
+- Latency measurements
+
+This content type is created automatically on first use and is used by the usage dashboard to display generation activity analytics.
+
 ## Usage
 
 ### Generating Audio
@@ -87,6 +102,13 @@ and use its voice configuration before falling back to the installation default.
    - Subscription tier
    - Next billing cycle reset date
    - Detailed metrics table
+3. **View generation activity** with analytics including:
+- Total attempts, success/failure counts, and success rate
+- Average latency and latency distribution buckets
+- Top content types by character usage
+- Top authors by character usage
+- Filter by time period: Current billing cycle, Last 30 days, or All time
+- Log pagination beyond the first 1,000 entries (up to 5,000 per view)
 
 ## Development
 
@@ -113,7 +135,13 @@ For CI/CD pipelines, set these environment variables:
 ```
 apps/broadcast/
 ├── functions/
-│   ├── generate-audio.ts      # App Action handler for audio generation
+│   ├── generate-audio.ts      # Main App Action handler for audio generation
+│   ├── generate-audio/        # Modular helper modules
+│   │   ├── constants.ts       # Field IDs and content type constants
+│   │   ├── contentful.ts      # Contentful CMA operations and field resolution
+│   │   ├── elevenlabs.ts      # ElevenLabs API integration
+│   │   ├── logging.ts         # Generation attempt logging to Contentful
+│   │   └── types.ts           # TypeScript type definitions
 │   └── get-usage-metrics.ts   # App Action handler for usage metrics
 ├── lib/
 │   └── mock-audio.ts          # Mock audio generator for testing
@@ -124,11 +152,13 @@ apps/broadcast/
 │   ├── locations/
 │   │   ├── ConfigScreen.tsx   # App configuration UI
 │   │   ├── Sidebar.tsx        # Main audio generation interface
-│   │   ├── Page.tsx           # Usage metrics dashboard
+│   │   ├── Page.tsx           # Usage metrics dashboard with activity logs
 │   │   ├── EntryEditor.tsx    # Entry editor location (placeholder)
 │   │   ├── Home.tsx           # Home location (placeholder)
 │   │   └── ...                # Test files and other components
 │   └── App.tsx                # Main app component
+├── test/
+│   └── mocks/                 # Test mocks for SDK and CMA
 ├── contentful-app-manifest.json  # App manifest with functions and actions
 └── package.json
 ```
@@ -145,14 +175,19 @@ apps/broadcast/
    - Target locale
    - Voice ID from configuration (optional override)
 4. **Function handler** (`generate-audio.ts`):
-   - Retrieves the entry and extracts text from the `body` field
-   - Resolves the linked author entry (if present) and reads its `voiceId`
+   - Validates required parameters and locale availability
+   - Retrieves the entry and content type metadata
+   - Resolves field localization settings for `body` and `audioAsset` fields
+   - Resolves the linked author entry (if present) and reads its `voiceId` field
+   - Determines effective voice ID (author override > request > installation default)
+   - Extracts localized text from the `body` field with fallback logic
    - Calls ElevenLabs API (or uses mock audio if enabled)
    - Receives MP3 audio buffer
    - Uploads to Contentful via CMA
-   - Creates an Asset with proper metadata
+   - Creates or updates an Asset with proper metadata (handles existing assets)
    - Processes and publishes the asset
-   - Links the asset to the entry's `audioAsset` field for the target locale
+   - Links the asset to the entry's `audioAsset` field for the target locale with retry logic for concurrent updates
+   - Logs the generation attempt (success or failure) to Contentful
    - Returns asset ID and URL
 5. **Sidebar displays** the generated audio player and opens the entry
 
@@ -165,7 +200,12 @@ apps/broadcast/
    - Calls ElevenLabs Subscription API
    - Retrieves character usage, limits, tier, and reset date
    - Returns formatted metrics data
-5. **Page displays** metrics with visual progress indicators and detailed tables
+5. **Page component** also fetches generation logs:
+   - Queries the `broadcastAudioGenerationLog` content type
+   - Filters by selected time period (current cycle, last 30 days, or all time)
+   - Resolves content type and author names for display
+   - Calculates statistics: success rate, latency distribution, top content types, top authors
+6. **Page displays** metrics with visual progress indicators, detailed tables, and generation activity analytics
 
 ## Configuration
 
@@ -184,19 +224,30 @@ Both functions are configured in `contentful-app-manifest.json`:
 - **Network Access**: Allows connections to Contentful, ElevenLabs, and GitHub APIs
 - **Accepts**: `appaction.call` events
 - **Parameters**: `entryId`, `fieldId`, `targetLocale`, `voiceId` (optional)
+- **Features**: 
+  - Automatic content type creation for generation logs
+  - Retry logic for concurrent entry updates
+  - Comprehensive error handling and logging
+  - Author-based voice resolution with fallback chain
 
 **`getUsageMetricsFn` function:**
 - **Network Access**: Allows connections to ElevenLabs API
 - **Accepts**: `appaction.call` events
 - **Parameters**: None (uses installation parameters)
+- **Error Handling**: Gracefully handles missing API keys and provider errors
 
 ## Testing
 
-The app includes test files for all location components. Run tests with:
+The app includes comprehensive test files for all location components using Vitest and React Testing Library. Run tests with:
 
 ```bash
-npm test
+npm test          # Run tests in watch mode
+npm run test:ci   # Run tests once (for CI)
 ```
+
+Test files are located alongside their components:
+- `src/locations/*.spec.tsx` - Component tests
+- `test/mocks/` - Mock implementations for SDK and CMA
 
 Mock mode can be enabled in the configuration screen to test audio generation without an ElevenLabs API key. Note that usage metrics require a valid API key with appropriate permissions (Administration > User > Read for restricted keys).
 
