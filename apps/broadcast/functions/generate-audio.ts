@@ -1,330 +1,65 @@
 import type {
-  AppActionRequest,
   AppActionResponse,
   FunctionEventContext,
   FunctionEventHandler,
   FunctionTypeEnum,
 } from '@contentful/node-apps-toolkit';
-import {
-  AssetProps,
-  ContentTypeProps,
-  createClient,
-  EntryProps,
-  KeyValueMap,
-  LocaleProps,
-  PlainClientAPI,
-} from 'contentful-management';
+import type { AssetProps, EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
 import { getMockAudioBuffer } from '../lib/mock-audio';
+import { AUTHOR_FIELD_ID, AUTHOR_VOICE_FIELD_ID, BODY_FIELD_ID } from './generate-audio/constants';
+import {
+  buildAssetFields,
+  findAuthorReferenceField,
+  getDefaultLocale,
+  initContentfulManagementClient,
+  isArchivedEntry,
+  isAssetLink,
+  resolveFieldLocalization,
+  resolveLocalizedEntryLink,
+  resolveLocalizedText,
+} from './generate-audio/contentful';
+import { fetchElevenLabsAudio } from './generate-audio/elevenlabs';
+import { logGenerationAttempt } from './generate-audio/logging';
+import type {
+  AppInstallationParameters,
+  GenerateAudioActionRequest,
+  GenerateAudioResult,
+} from './generate-audio/types';
 
-type GenerateAudioRequest = {
-  entryId: string;
-  fieldId: string;
-  targetLocale: string;
-  voiceId?: string;
-};
-
-type GenerateAudioResult = {
-  status: 'success';
-  assetId: string;
-  url: string;
-  locale: string;
-};
-
-type AppInstallationParameters = {
-  elevenLabsApiKey?: string;
-  useMockAi?: boolean | string;
-  voiceId?: string;
-};
-
-type AssetLink = {
-  sys: {
-    type: 'Link';
-    linkType: 'Asset';
-    id: string;
-  };
-};
-
-type EntryLink = {
-  sys: {
-    type: 'Link';
-    linkType: 'Entry';
-    id: string;
-  };
-};
-
-const BODY_FIELD_ID = 'body';
-const AUTHOR_FIELD_ID = 'author';
-const AUTHOR_VOICE_FIELD_ID = 'voiceId';
-
-const fetchElevenLabsAudio = async (
-  voiceId: string,
-  text: string,
-  apiKey: string
-): Promise<ArrayBuffer> => {
-  const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-    method: 'POST',
-    headers: {
-      'xi-api-key': apiKey,
-      Accept: 'audio/mpeg',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ text }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `ElevenLabs request failed: ${response.status} ${response.statusText} - ${errorText}`
-    );
-  }
-
-  return response.arrayBuffer();
-};
-
-const initContentfulManagementClient = (
-  context: FunctionEventContext<AppInstallationParameters>
-): PlainClientAPI => {
-  if (context.cma) {
-    return context.cma;
-  }
-
-  if (!context.cmaClientOptions) {
-    throw new Error(
-      'Contentful Management API client options are only provided for certain function types. To learn more about using the CMA within functions, see https://www.contentful.com/developers/docs/extensibility/app-framework/functions/#using-the-cma.'
-    );
-  }
-
-  return createClient(context.cmaClientOptions, {
-    type: 'plain',
-    defaults: {
-      spaceId: context.spaceId,
-      environmentId: context.environmentId,
-    },
-  });
-};
-
-const getDefaultLocale = (locales: LocaleProps[]): string => {
-  const defaultLocale = locales.find((locale) => locale.default);
-  return defaultLocale?.code ?? locales[0]?.code ?? 'en-US';
-};
-
-const buildFallbackChain = (
-  locales: LocaleProps[],
-  targetLocale: string,
-  defaultLocale: string
-): string[] => {
-  const localeMap = new Map(locales.map((locale) => [locale.code, locale]));
-  const chain: string[] = [];
-  const visited = new Set<string>();
-
-  let current: string | undefined = targetLocale;
-  while (current && !visited.has(current)) {
-    chain.push(current);
-    visited.add(current);
-    current = localeMap.get(current)?.fallbackCode ?? undefined;
-  }
-
-  if (!chain.includes(defaultLocale)) {
-    chain.push(defaultLocale);
-  }
-
-  return chain;
-};
-
-const resolveLocalizedText = (
-  entry: EntryProps<KeyValueMap>,
-  fieldId: string,
-  locales: LocaleProps[],
-  targetLocale: string,
-  defaultLocale: string,
-  isLocalized: boolean
-): string | null => {
-  const fieldValue = entry.fields[fieldId] as Record<string, unknown> | undefined;
-  if (!fieldValue) {
+const getErrorStatusCode = (error: unknown): number | null => {
+  if (!error || typeof error !== 'object') {
     return null;
   }
 
-  const localeChain = isLocalized
-    ? buildFallbackChain(locales, targetLocale, defaultLocale)
-    : [defaultLocale];
-
-  for (const locale of localeChain) {
-    const value = fieldValue[locale];
-    if (typeof value === 'string' && value.trim()) {
-      return value.trim();
-    }
+  const maybeError = error as { status?: number; statusCode?: number };
+  if (typeof maybeError.statusCode === 'number') {
+    return maybeError.statusCode;
   }
-
-  return null;
-};
-
-const resolveFieldLocalization = (
-  contentType: ContentTypeProps,
-  fieldId: string
-): { isLocalized: boolean; fieldName: string } | null => {
-  const field = contentType.fields.find((contentField) => contentField.id === fieldId);
-  if (!field) {
-    return null;
-  }
-
-  return {
-    isLocalized: Boolean(field.localized),
-    fieldName: field.name ?? fieldId,
-  };
-};
-
-const isAssetLink = (value: unknown): value is AssetLink => {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
-
-  const maybeLink = value as AssetLink;
-  return (
-    maybeLink.sys?.type === 'Link' &&
-    maybeLink.sys?.linkType === 'Asset' &&
-    typeof maybeLink.sys?.id === 'string'
-  );
-};
-
-const isEntryLink = (value: unknown): value is EntryLink => {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
-
-  const maybeLink = value as EntryLink;
-  return (
-    maybeLink.sys?.type === 'Link' &&
-    maybeLink.sys?.linkType === 'Entry' &&
-    typeof maybeLink.sys?.id === 'string'
-  );
-};
-
-const getEntryLinkFromValue = (value: unknown): EntryLink | null => {
-  if (isEntryLink(value)) {
-    return value;
-  }
-
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      if (isEntryLink(item)) {
-        return item;
-      }
-    }
-  }
-
-  return null;
-};
-
-const resolveLocalizedEntryLink = (
-  entry: EntryProps<KeyValueMap>,
-  fieldId: string,
-  locales: LocaleProps[],
-  targetLocale: string,
-  defaultLocale: string,
-  isLocalized: boolean
-): EntryLink | null => {
-  const fieldValue = entry.fields[fieldId] as Record<string, unknown> | undefined;
-  if (!fieldValue) {
-    return null;
-  }
-
-  const localeChain = isLocalized
-    ? buildFallbackChain(locales, targetLocale, defaultLocale)
-    : [defaultLocale];
-
-  for (const locale of localeChain) {
-    const value = fieldValue[locale];
-    const link = getEntryLinkFromValue(value);
-    if (link) {
-      return link;
-    }
-  }
-
-  return null;
-};
-
-const findAuthorReferenceField = (
-  contentType: ContentTypeProps
-): { fieldId: string; fieldName: string; isLocalized: boolean } | null => {
-  for (const field of contentType.fields) {
-    const normalizedId = field.id.toLowerCase();
-    const normalizedName = field.name?.toLowerCase() ?? '';
-    const looksLikeAuthor =
-      normalizedId === AUTHOR_FIELD_ID ||
-      normalizedId.includes(AUTHOR_FIELD_ID) ||
-      normalizedName.includes(AUTHOR_FIELD_ID);
-    const isEntryLinkField =
-      (field.type === 'Link' && field.linkType === 'Entry') ||
-      (field.type === 'Array' && field.items?.type === 'Link' && field.items?.linkType === 'Entry');
-
-    if (looksLikeAuthor && isEntryLinkField) {
-      return {
-        fieldId: field.id,
-        fieldName: field.name ?? field.id,
-        isLocalized: Boolean(field.localized),
-      };
-    }
-  }
-
-  return null;
-};
-
-const isArchivedEntry = (entry: EntryProps<KeyValueMap>): boolean => {
-  const sys = entry.sys as EntryProps<KeyValueMap>['sys'] & {
-    archivedVersion?: number;
-    archivedAt?: string;
-  };
-  return Boolean(sys.archivedVersion || sys.archivedAt);
-};
-
-const buildAssetFields = (
-  asset: AssetProps | null,
-  title: string,
-  fileName: string,
-  uploadId: string,
-  targetLocale: string,
-  defaultLocale: string,
-  includeDefaultLocale: boolean
-): AssetProps['fields'] => {
-  const filePayload = {
-    contentType: 'audio/mpeg',
-    fileName,
-    uploadFrom: {
-      sys: {
-        type: 'Link',
-        linkType: 'Upload',
-        id: uploadId,
-      },
-    },
-  };
-
-  const existingTitle = asset?.fields?.title ?? {};
-  const existingFile = asset?.fields?.file ?? {};
-
-  return {
-    ...asset?.fields,
-    title: {
-      ...existingTitle,
-      [targetLocale]: title,
-      ...(includeDefaultLocale ? { [defaultLocale]: title } : {}),
-    },
-    file: {
-      ...existingFile,
-      [targetLocale]: filePayload,
-      ...(includeDefaultLocale ? { [defaultLocale]: filePayload } : {}),
-    },
-  };
+  return typeof maybeError.status === 'number' ? maybeError.status : null;
 };
 
 export const handler: FunctionEventHandler<
   FunctionTypeEnum.AppActionCall,
   AppInstallationParameters
 > = async (
-  event: AppActionRequest<'Custom', GenerateAudioRequest>,
+  event: GenerateAudioActionRequest,
   context: FunctionEventContext<AppInstallationParameters>
 ): Promise<AppActionResponse> => {
+  const startedAt = Date.now();
+  let cma: PlainClientAPI | null = null;
+  let defaultLocale = 'en-US';
+  let resolvedVoiceIdForLog: string | undefined;
+  let logCharCount: number | undefined;
+  let logContentTypeId: string | undefined;
+  let logAuthorEntryId: string | undefined;
+  let logLocale: string | undefined;
+  let logEntryId: string | undefined;
+
   try {
     const { entryId, fieldId, targetLocale, voiceId: requestVoiceId } = event.body;
+    logEntryId = entryId;
+    logLocale = targetLocale;
+    resolvedVoiceIdForLog = requestVoiceId;
 
     if (!entryId || !fieldId || !targetLocale) {
       return {
@@ -370,7 +105,7 @@ export const handler: FunctionEventHandler<
       };
     }
 
-    const cma = initContentfulManagementClient(context);
+    cma = initContentfulManagementClient(context);
     const [localeResponse, entry] = await Promise.all([
       cma.locale.getMany({
         spaceId: context.spaceId,
@@ -397,7 +132,9 @@ export const handler: FunctionEventHandler<
       };
     }
 
-    const defaultLocale = getDefaultLocale(locales);
+    defaultLocale = getDefaultLocale(locales);
+    resolvedVoiceIdForLog = fallbackVoiceId;
+    logContentTypeId = entry.sys.contentType.sys.id;
 
     const contentType = await cma.contentType.get({
       spaceId: context.spaceId,
@@ -418,7 +155,7 @@ export const handler: FunctionEventHandler<
       };
     }
 
-    const authorFieldInfo = findAuthorReferenceField(contentType);
+    const authorFieldInfo = findAuthorReferenceField(contentType, AUTHOR_FIELD_ID);
     let resolvedVoiceId: string | null = null;
 
     if (authorFieldInfo) {
@@ -432,6 +169,7 @@ export const handler: FunctionEventHandler<
       );
 
       if (authorLink) {
+        logAuthorEntryId = authorLink.sys.id;
         try {
           const authorEntry = await cma.entry.get({
             spaceId: context.spaceId,
@@ -511,6 +249,7 @@ export const handler: FunctionEventHandler<
       };
     }
 
+    logCharCount = text.length;
     const audioBuffer = useMockAi
       ? await getMockAudioBuffer()
       : await fetchElevenLabsAudio(effectiveVoiceId, text, elevenLabsApiKey as string);
@@ -633,17 +372,85 @@ export const handler: FunctionEventHandler<
       },
     };
 
-    await cma.entry.update(
-      {
-        spaceId: context.spaceId,
-        environmentId: context.environmentId,
-        entryId: entry.sys.id,
+    const updateEntryWithFields = async (
+      fields: EntryProps<KeyValueMap>['fields'],
+      sys: EntryProps<KeyValueMap>['sys']
+    ) =>
+      cma.entry.update(
+        {
+          spaceId: context.spaceId,
+          environmentId: context.environmentId,
+          entryId: entry.sys.id,
+        },
+        {
+          sys,
+          fields,
+        }
+      );
+
+    const buildLatestFields = (latestEntry: EntryProps<KeyValueMap>) => ({
+      ...latestEntry.fields,
+      [fieldId]: {
+        ...(latestEntry.fields[fieldId] as Record<string, unknown> | undefined),
+        [assetLocale]: {
+          sys: {
+            type: 'Link',
+            linkType: 'Asset',
+            id: publishedAsset.sys.id,
+          },
+        },
       },
-      {
-        sys: entry.sys,
-        fields: updatedEntryFields,
+    });
+
+    const updateEntryWithRetry = async (
+      initialFields: EntryProps<KeyValueMap>['fields'],
+      initialSys: EntryProps<KeyValueMap>['sys']
+    ) => {
+      const maxRetries = 2;
+      let attempt = 0;
+      let currentFields = initialFields;
+      let currentSys = initialSys;
+
+      while (true) {
+        try {
+          await updateEntryWithFields(currentFields, currentSys);
+          return;
+        } catch (error) {
+          if (getErrorStatusCode(error) !== 409 || attempt >= maxRetries) {
+            throw error;
+          }
+
+          attempt += 1;
+          const latestEntry = await cma.entry.get({
+            spaceId: context.spaceId,
+            environmentId: context.environmentId,
+            entryId: entry.sys.id,
+          });
+          currentFields = buildLatestFields(latestEntry);
+          currentSys = latestEntry.sys;
+        }
       }
-    );
+    };
+
+    await updateEntryWithRetry(updatedEntryFields, entry.sys);
+
+    if (cma && logEntryId && logLocale) {
+      await logGenerationAttempt(
+        cma,
+        context,
+        {
+          entryId: logEntryId,
+          locale: logLocale,
+          charCount: logCharCount,
+          voiceId: effectiveVoiceId,
+          success: true,
+          contentTypeId: logContentTypeId,
+          authorEntryId: logAuthorEntryId,
+          latencyMs: Date.now() - startedAt,
+        },
+        defaultLocale
+      );
+    }
 
     return {
       ok: true,
@@ -658,6 +465,25 @@ export const handler: FunctionEventHandler<
     const message = error instanceof Error ? error.message : 'Unknown error occurred';
     const errorDetails = error instanceof Error ? { message, stack: error.stack } : { message };
     console.error('generate-audio:error', errorDetails);
+
+    if (cma && logEntryId && logLocale) {
+      await logGenerationAttempt(
+        cma,
+        context,
+        {
+          entryId: logEntryId,
+          locale: logLocale,
+          charCount: logCharCount,
+          voiceId: resolvedVoiceIdForLog,
+          success: false,
+          contentTypeId: logContentTypeId,
+          authorEntryId: logAuthorEntryId,
+          latencyMs: Date.now() - startedAt,
+        },
+        defaultLocale
+      );
+    }
+
     return {
       ok: false,
       errors: [
