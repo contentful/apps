@@ -9,7 +9,8 @@ A Contentful App that generates audio voiceovers from entry text using ElevenLab
 - **Mock Mode**: Test audio generation without an API key using mock audio samples
 - **Automatic Asset Management**: Creates, processes, and publishes audio assets directly in Contentful
 - **Sidebar Integration**: Easy-to-use sidebar interface for generating audio from entry content
-- **Configurable Voice**: Configure custom ElevenLabs voice IDs per installation
+- **Configurable Voice**: Configure default ElevenLabs voice IDs per installation
+- **Author-Based Voice Resolution**: Automatically resolve voice IDs from linked author profiles when available
 - **Multi-locale Support**: Generate audio for specific locales with locale selection
 
 ## Architecture
@@ -54,6 +55,14 @@ The app expects entries with the following fields:
 
 - **`body`** (Text/Long text field): The text content to convert to audio
 - **`audioAsset`** (Media/Asset field): Where the generated audio asset will be stored
+- **`author`** (Reference/Entry field): Optional reference to an author entry that can supply a voice override
+
+### Author Profiles
+
+If your content model includes an author reference, the app will attempt to resolve the linked author entry
+and use its voice configuration before falling back to the installation default.
+
+- **`voiceId`** (Text field): Optional ElevenLabs voice ID to override the default
 
 ## Usage
 
@@ -137,6 +146,7 @@ apps/broadcast/
    - Voice ID from configuration (optional override)
 4. **Function handler** (`generate-audio.ts`):
    - Retrieves the entry and extracts text from the `body` field
+   - Resolves the linked author entry (if present) and reads its `voiceId`
    - Calls ElevenLabs API (or uses mock audio if enabled)
    - Receives MP3 audio buffer
    - Uploads to Contentful via CMA

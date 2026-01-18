@@ -44,7 +44,17 @@ type AssetLink = {
   };
 };
 
+type EntryLink = {
+  sys: {
+    type: 'Link';
+    linkType: 'Entry';
+    id: string;
+  };
+};
+
 const BODY_FIELD_ID = 'body';
+const AUTHOR_FIELD_ID = 'author';
+const AUTHOR_VOICE_FIELD_ID = 'voiceId';
 
 const fetchElevenLabsAudio = async (
   voiceId: string,
@@ -176,6 +186,97 @@ const isAssetLink = (value: unknown): value is AssetLink => {
   );
 };
 
+const isEntryLink = (value: unknown): value is EntryLink => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const maybeLink = value as EntryLink;
+  return (
+    maybeLink.sys?.type === 'Link' &&
+    maybeLink.sys?.linkType === 'Entry' &&
+    typeof maybeLink.sys?.id === 'string'
+  );
+};
+
+const getEntryLinkFromValue = (value: unknown): EntryLink | null => {
+  if (isEntryLink(value)) {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      if (isEntryLink(item)) {
+        return item;
+      }
+    }
+  }
+
+  return null;
+};
+
+const resolveLocalizedEntryLink = (
+  entry: EntryProps<KeyValueMap>,
+  fieldId: string,
+  locales: LocaleProps[],
+  targetLocale: string,
+  defaultLocale: string,
+  isLocalized: boolean
+): EntryLink | null => {
+  const fieldValue = entry.fields[fieldId] as Record<string, unknown> | undefined;
+  if (!fieldValue) {
+    return null;
+  }
+
+  const localeChain = isLocalized
+    ? buildFallbackChain(locales, targetLocale, defaultLocale)
+    : [defaultLocale];
+
+  for (const locale of localeChain) {
+    const value = fieldValue[locale];
+    const link = getEntryLinkFromValue(value);
+    if (link) {
+      return link;
+    }
+  }
+
+  return null;
+};
+
+const findAuthorReferenceField = (
+  contentType: ContentTypeProps
+): { fieldId: string; fieldName: string; isLocalized: boolean } | null => {
+  for (const field of contentType.fields) {
+    const normalizedId = field.id.toLowerCase();
+    const normalizedName = field.name?.toLowerCase() ?? '';
+    const looksLikeAuthor =
+      normalizedId === AUTHOR_FIELD_ID ||
+      normalizedId.includes(AUTHOR_FIELD_ID) ||
+      normalizedName.includes(AUTHOR_FIELD_ID);
+    const isEntryLinkField =
+      (field.type === 'Link' && field.linkType === 'Entry') ||
+      (field.type === 'Array' && field.items?.type === 'Link' && field.items?.linkType === 'Entry');
+
+    if (looksLikeAuthor && isEntryLinkField) {
+      return {
+        fieldId: field.id,
+        fieldName: field.name ?? field.id,
+        isLocalized: Boolean(field.localized),
+      };
+    }
+  }
+
+  return null;
+};
+
+const isArchivedEntry = (entry: EntryProps<KeyValueMap>): boolean => {
+  const sys = entry.sys as EntryProps<KeyValueMap>['sys'] & {
+    archivedVersion?: number;
+    archivedAt?: string;
+  };
+  return Boolean(sys.archivedVersion || sys.archivedAt);
+};
+
 const buildAssetFields = (
   asset: AssetProps | null,
   title: string,
@@ -243,7 +344,7 @@ export const handler: FunctionEventHandler<
       appInstallationParameters.useMockAi === true ||
       String(appInstallationParameters.useMockAi ?? '').toLowerCase() === 'true';
     const elevenLabsApiKey = appInstallationParameters.elevenLabsApiKey;
-    const effectiveVoiceId = requestVoiceId ?? appInstallationParameters.voiceId;
+    const fallbackVoiceId = appInstallationParameters.voiceId ?? requestVoiceId;
 
     if (!useMockAi && !elevenLabsApiKey) {
       return {
@@ -257,7 +358,7 @@ export const handler: FunctionEventHandler<
       };
     }
 
-    if (!effectiveVoiceId) {
+    if (!fallbackVoiceId) {
       return {
         ok: false,
         errors: [
@@ -316,6 +417,65 @@ export const handler: FunctionEventHandler<
         ],
       };
     }
+
+    const authorFieldInfo = findAuthorReferenceField(contentType);
+    let resolvedVoiceId: string | null = null;
+
+    if (authorFieldInfo) {
+      const authorLink = resolveLocalizedEntryLink(
+        entry,
+        authorFieldInfo.fieldId,
+        locales,
+        targetLocale,
+        defaultLocale,
+        authorFieldInfo.isLocalized
+      );
+
+      if (authorLink) {
+        try {
+          const authorEntry = await cma.entry.get({
+            spaceId: context.spaceId,
+            environmentId: context.environmentId,
+            entryId: authorLink.sys.id,
+          });
+
+          if (!isArchivedEntry(authorEntry)) {
+            const authorContentType = await cma.contentType.get({
+              spaceId: context.spaceId,
+              environmentId: context.environmentId,
+              contentTypeId: authorEntry.sys.contentType.sys.id,
+            });
+
+            const authorVoiceField = resolveFieldLocalization(
+              authorContentType,
+              AUTHOR_VOICE_FIELD_ID
+            );
+
+            if (authorVoiceField) {
+              const authorVoiceId = resolveLocalizedText(
+                authorEntry,
+                AUTHOR_VOICE_FIELD_ID,
+                locales,
+                targetLocale,
+                defaultLocale,
+                authorVoiceField.isLocalized
+              );
+
+              if (authorVoiceId?.trim()) {
+                resolvedVoiceId = authorVoiceId.trim();
+              }
+            }
+          }
+        } catch (error) {
+          console.warn('generate-audio:author-lookup-failed', {
+            authorEntryId: authorLink.sys.id,
+            message: error instanceof Error ? error.message : 'Unknown error',
+          });
+        }
+      }
+    }
+
+    const effectiveVoiceId = resolvedVoiceId ?? fallbackVoiceId;
 
     const assetFieldInfo = resolveFieldLocalization(contentType, fieldId);
     if (!assetFieldInfo) {
