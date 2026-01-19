@@ -8,9 +8,11 @@ import {
   Spinner,
   Text,
 } from '@contentful/f36-components';
-import { SidebarAppSDK } from '@contentful/app-sdk';
+import { EntryFieldAPI, SidebarAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useMemo, useState } from 'react';
+import { useVideoGenerator } from '../hooks/useVideoGenerator';
+import { uploadVideoAsset } from '../lib/contentful-upload';
 
 type GenerateAudioResult = {
   status: 'success';
@@ -28,19 +30,76 @@ type InstallationParameters = {
   voiceId?: string;
 };
 
+type AssetLink = {
+  sys: {
+    type: 'Link';
+    linkType: 'Asset';
+    id: string;
+  };
+};
+
 const BODY_FIELD_ID = 'body';
 const AUDIO_ASSET_FIELD_ID = 'audioAsset';
+const VIDEO_ASSET_FIELD_ID = 'videoAsset';
+const IMAGE_FIELD_CANDIDATES = ['featuredImage', 'image'];
 const ACTION_NAME = 'Generate Audio';
+
+const normalizeAssetUrl = (url: string) => (url.startsWith('//') ? `https:${url}` : url);
+
+const isAssetLink = (value: unknown): value is AssetLink => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const sys = (value as AssetLink).sys;
+  return sys?.type === 'Link' && sys?.linkType === 'Asset' && typeof sys?.id === 'string';
+};
+
+const getAssetLinkFromValue = (value: unknown): AssetLink | null => {
+  if (isAssetLink(value)) {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    const match = value.find(isAssetLink);
+    return match ?? null;
+  }
+
+  return null;
+};
+
+const getFieldValueWithFallback = (
+  field: EntryFieldAPI,
+  locale: string,
+  fallbackLocale: string
+) => {
+  const localizedValue = field.getValue(locale);
+  if (localizedValue !== undefined && localizedValue !== null) {
+    return localizedValue;
+  }
+
+  if (locale !== fallbackLocale) {
+    return field.getValue(fallbackLocale);
+  }
+
+  return localizedValue;
+};
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
   useAutoResizer();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioLocale, setAudioLocale] = useState<string | null>(null);
   const [selectedLocale, setSelectedLocale] = useState<string>(() => sdk.locales.default);
 
+  const { generateVideo } = useVideoGenerator();
+
   const installParams = sdk.parameters.installation as InstallationParameters | undefined;
+  const audioField = sdk.entry.fields[AUDIO_ASSET_FIELD_ID];
+  const videoField = sdk.entry.fields[VIDEO_ASSET_FIELD_ID];
 
   const localeOptions = useMemo(
     () =>
@@ -66,8 +125,39 @@ const Sidebar = () => {
     return matchedAction?.sys.id ?? null;
   };
 
+  const imageFieldId = IMAGE_FIELD_CANDIDATES.find((fieldId) => sdk.entry.fields[fieldId]);
+
+  const resolveAssetUrl = async (fieldId: string): Promise<string | null> => {
+    const field = sdk.entry.fields[fieldId];
+    if (!field) {
+      return null;
+    }
+
+    const spaceId = sdk.ids.space;
+    const environmentId = sdk.ids.environment;
+    if (!spaceId || !environmentId) {
+      throw new Error('Space or environment ID is unavailable.');
+    }
+
+    const fieldValue = getFieldValueWithFallback(field, selectedLocale, sdk.locales.default);
+    const assetLink = getAssetLinkFromValue(fieldValue);
+    if (!assetLink) {
+      return null;
+    }
+
+    const asset = await sdk.cma.asset.get({
+      spaceId,
+      environmentId,
+      assetId: assetLink.sys.id,
+    });
+
+    const fileField =
+      asset.fields.file?.[selectedLocale] ?? asset.fields.file?.[sdk.locales.default];
+    const assetUrl = fileField?.url;
+    return assetUrl ? normalizeAssetUrl(assetUrl) : null;
+  };
+
   const handleGenerateAudio = async () => {
-    const audioField = sdk.entry.fields[AUDIO_ASSET_FIELD_ID];
     if (!audioField) {
       sdk.notifier.error(`Missing field: ${AUDIO_ASSET_FIELD_ID}`);
       return;
@@ -129,7 +219,8 @@ const Sidebar = () => {
         return;
       }
 
-      setAudioUrl(result.data.url);
+      setAudioUrl(normalizeAssetUrl(result.data.url));
+      setAudioLocale(result.data.locale ?? selectedLocale);
       await sdk.navigator.openEntry(sdk.ids.entry);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -140,7 +231,88 @@ const Sidebar = () => {
     }
   };
 
-  if (!sdk.entry.fields[AUDIO_ASSET_FIELD_ID]) {
+  const handleGenerateVideo = async () => {
+    if (!imageFieldId) {
+      sdk.notifier.error('Missing field: please add a Media field with ID featuredImage or image.');
+      return;
+    }
+
+    if (!sdk.ids.entry) {
+      sdk.notifier.error('Entry ID is unavailable. Please reload the entry.');
+      return;
+    }
+
+    if (!sdk.ids.space || !sdk.ids.environment) {
+      sdk.notifier.error('Space or environment ID is unavailable. Please reload the entry.');
+      return;
+    }
+
+    setIsVideoLoading(true);
+    try {
+      const resolvedAudioUrl =
+        audioUrl && audioLocale === selectedLocale
+          ? audioUrl
+          : await resolveAssetUrl(AUDIO_ASSET_FIELD_ID);
+      if (!resolvedAudioUrl) {
+        sdk.notifier.error('Missing audio asset. Generate audio first.');
+        return;
+      }
+
+      const resolvedImageUrl = await resolveAssetUrl(imageFieldId);
+      if (!resolvedImageUrl) {
+        sdk.notifier.error(`Missing image asset for field: ${imageFieldId}.`);
+        return;
+      }
+
+      const videoBlob = await generateVideo({
+        imageUrl: resolvedImageUrl,
+        audioUrl: resolvedAudioUrl,
+      });
+
+      const assetId = await uploadVideoAsset(sdk, videoBlob, {
+        title: `Broadcast Video - ${sdk.ids.entry} - ${selectedLocale}`,
+        fileName: `broadcast-${sdk.ids.entry}-${selectedLocale}.mp4`,
+      });
+
+      if (videoField) {
+        await videoField.setValue(
+          {
+            sys: {
+              type: 'Link',
+              linkType: 'Asset',
+              id: assetId,
+            },
+          },
+          selectedLocale
+        );
+      } else {
+        sdk.notifier.warning(
+          `Video generated but missing field: ${VIDEO_ASSET_FIELD_ID}. Unable to link.`
+        );
+      }
+
+      sdk.notifier.success('Video generated and uploaded.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error('generate-video:sidebar-error', message, error);
+      sdk.notifier.error(
+        message.includes('download failed') ? message : 'Video generation failed. Please try again.'
+      );
+    } finally {
+      setIsVideoLoading(false);
+    }
+  };
+
+  const hasAudioAsset =
+    Boolean(audioUrl && audioLocale === selectedLocale) ||
+    Boolean(
+      audioField &&
+        getAssetLinkFromValue(
+          getFieldValueWithFallback(audioField, selectedLocale, sdk.locales.default)
+        )
+    );
+
+  if (!audioField) {
     return (
       <Note variant="negative">Missing field: please add a Media field with ID 'audioAsset'.</Note>
     );
@@ -180,7 +352,37 @@ const Sidebar = () => {
           Generate Audio
         </Button>
       )}
-      {audioUrl ? <audio controls src={audioUrl} /> : null}
+      {audioUrl && audioLocale === selectedLocale ? <audio controls src={audioUrl} /> : null}
+      <Flex flexDirection="column" gap="spacingS">
+        <Text fontWeight="fontWeightDemiBold">Social Video</Text>
+        {!imageFieldId ? (
+          <Note variant="negative">
+            Missing field: please add a Media field with ID 'featuredImage' or 'image'.
+          </Note>
+        ) : null}
+        {!hasAudioAsset ? (
+          <Note variant="warning">Generate audio first to enable video rendering.</Note>
+        ) : null}
+        {!videoField ? (
+          <Note variant="warning">
+            Missing field: videoAsset. The video will be uploaded but not linked.
+          </Note>
+        ) : null}
+        {isVideoLoading ? (
+          <Flex alignItems="center" gap="spacingS">
+            <Spinner size="small" />
+            <Text>Rendering video...</Text>
+          </Flex>
+        ) : (
+          <Button
+            variant="secondary"
+            onClick={handleGenerateVideo}
+            isDisabled={isVideoLoading || isLoading || !imageFieldId || !hasAudioAsset}
+            isFullWidth>
+            Generate Social Video
+          </Button>
+        )}
+      </Flex>
     </Flex>
   );
 };
