@@ -123,6 +123,16 @@ export const useVideoGenerator = () => {
 
         await ffmpeg.writeFile('input.jpg', imageData);
         await ffmpeg.writeFile('audio.mp3', audioData);
+        const fps = 30;
+        const zoomPanFrames = Math.max(1, Math.ceil(audioDuration * fps));
+        const filterComplex = [
+          "[0:v]scale=1280:720,format=yuv420p,zoompan=z='min(zoom+0.0005,1.5)':d=" +
+            zoomPanFrames +
+            ':s=1280x720[v0]',
+          '[1:a]showwaves=s=1280x200:mode=cline:colors=white@0.9:scale=sqrt,format=yuva420p,colorchannelmixer=aa=0.8[wave]',
+          '[v0][wave]overlay=x=0:y=H-h-24:shortest=1[outv]',
+        ].join(';');
+
         const exitCode = await ffmpeg.exec([
           '-loop',
           '1',
@@ -130,10 +140,12 @@ export const useVideoGenerator = () => {
           'input.jpg',
           '-i',
           'audio.mp3',
-          '-vf',
-          'scale=trunc(iw/2)*2:trunc(ih/2)*2',
-          '-r',
-          '30',
+          '-filter_complex',
+          filterComplex,
+          '-map',
+          '[outv]',
+          '-map',
+          '1:a',
           '-t',
           audioDuration.toFixed(3),
           '-c:v',
