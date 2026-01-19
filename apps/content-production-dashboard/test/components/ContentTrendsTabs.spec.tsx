@@ -28,6 +28,12 @@ vi.mock('../../src/utils/trendsDataProcessor', () => ({
 }));
 
 const mockGetManyForSpace = vi.fn();
+const mockGetManyContentTypes = vi.fn().mockResolvedValue({
+  items: [
+    { sys: { id: 'blogPost' }, name: 'Blog Post' },
+    { sys: { id: 'article' }, name: 'Article' },
+  ],
+});
 const mockSdk: any = {
   ids: {
     space: 'test-space',
@@ -36,6 +42,9 @@ const mockSdk: any = {
   cma: {
     user: {
       getManyForSpace: mockGetManyForSpace,
+    },
+    contentType: {
+      getMany: mockGetManyContentTypes,
     },
   },
 };
@@ -239,8 +248,9 @@ describe('ContentTrendsTabs component', () => {
       await user.click(contentTypeTab);
 
       await waitFor(() => {
+        expect(screen.getByText('No data to display')).toBeInTheDocument();
         expect(
-          screen.getByText('No content type data available for the selected time range.')
+          screen.getByText('Data will display once you select content types')
         ).toBeInTheDocument();
       });
     });
@@ -266,8 +276,8 @@ describe('ContentTrendsTabs component', () => {
           mockContentTypes
         );
         expect(screen.getByText('Content Types:')).toBeInTheDocument();
-        expect(screen.getByText('Blog Post')).toBeInTheDocument();
-        expect(screen.getByText('Article')).toBeInTheDocument();
+        expect(screen.getAllByText('Blog Post')[0]).toBeInTheDocument();
+        expect(screen.getAllByText('Article')[0]).toBeInTheDocument();
       });
     });
 
@@ -383,8 +393,9 @@ describe('ContentTrendsTabs component', () => {
       });
 
       await waitFor(() => {
+        expect(screen.getByText('No data to display')).toBeInTheDocument();
         expect(
-          screen.getByText('No creator data available for the selected time range.')
+          screen.getByText('Data will display once you select content types')
         ).toBeInTheDocument();
       });
     });
