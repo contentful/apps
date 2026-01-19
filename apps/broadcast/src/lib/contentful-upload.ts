@@ -25,12 +25,14 @@ export const uploadVideoAsset = async (
   const fileName = options.fileName ?? `broadcast-${entryId}.mp4`;
   const contentType = options.contentType ?? (videoBlob.type || 'video/mp4');
 
+  const uploadPayload = await videoBlob.arrayBuffer();
+
   const upload = await sdk.cma.upload.create(
     {
       spaceId,
       environmentId,
     },
-    { file: videoBlob }
+    { file: uploadPayload }
   );
 
   const asset = await sdk.cma.asset.create(

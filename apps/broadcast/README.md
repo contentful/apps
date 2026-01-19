@@ -1,6 +1,6 @@
 # Broadcast - Voice & Video Studio
 
-A Contentful App that generates audio voiceovers from entry text using ElevenLabs text-to-speech API. The app converts text content into MP3 audio files and automatically uploads them as Contentful Assets. It also provides a usage metrics dashboard to monitor your ElevenLabs subscription usage.
+A Contentful App that generates audio voiceovers from entry text using ElevenLabs text-to-speech API. The app converts text content into MP3 audio files and automatically uploads them as Contentful Assets. It also renders social-ready MP4 videos on the client and provides a usage metrics dashboard to monitor your ElevenLabs subscription usage.
 
 ## Features
 
@@ -10,6 +10,7 @@ A Contentful App that generates audio voiceovers from entry text using ElevenLab
 - **Mock Mode**: Test audio generation without an API key using mock audio samples
 - **Automatic Asset Management**: Creates, processes, and publishes audio assets directly in Contentful
 - **Sidebar Integration**: Easy-to-use sidebar interface for generating audio from entry content
+- **Text-to-Video Rendering**: Combines generated audio with a featured image to create an MP4 audiogram on the frontend (ffmpeg.wasm)
 - **Configurable Voice**: Configure default ElevenLabs voice IDs per installation
 - **Author-Based Voice Resolution**: Automatically resolve voice IDs from linked author profiles when available
 - **Multi-locale Support**: Generate audio for specific locales with locale selection
@@ -22,6 +23,7 @@ A Contentful App that generates audio voiceovers from entry text using ElevenLab
 - **Build Tool**: Vite
 - **UI Components**: Forma 36 (Contentful's design system)
 - **Testing**: Vitest with React Testing Library
+- **Video Rendering**: ffmpeg.wasm runs in the browser to avoid serverless timeouts
 
 ### Backend
 - **Runtime**: Contentful Functions (Node.js)
@@ -58,6 +60,8 @@ The app expects entries with the following fields:
 
 - **`body`** (Text/Long text field): The text content to convert to audio
 - **`audioAsset`** (Media/Asset field): Where the generated audio asset will be stored
+- **`featuredImage`** or **`image`** (Media/Asset field): The still image used to render social videos
+- **`videoAsset`** (Media/Asset field): Where the generated video asset will be stored (optional but recommended)
 - **`author`** (Reference/Entry field): Optional reference to an author entry that can supply a voice override
 
 ### Author Profiles
@@ -92,6 +96,19 @@ This content type is created automatically on first use and is used by the usage
    - Processed and published as an Asset
    - Automatically linked to the `audioAsset` field for the selected locale
    - Playable directly in the sidebar
+
+### Generating Social Video
+
+1. **Ensure fields exist**: `audioAsset` (generated), `featuredImage` or `image`, and `videoAsset`
+2. **Open the Sidebar** and scroll to the Social Video section
+3. **Click "Generate Social Video"**
+4. The app will:
+   - Download the published audio asset and image
+   - Render an MP4 in the browser with ffmpeg.wasm
+   - Upload, process, and publish the video asset
+   - Link the result to `videoAsset` (if the field exists)
+
+Note: The audio and image assets must be published and accessible by the browser (CORS). If assets are unpublished or private, rendering will fail.
 
 ### Viewing Usage Metrics
 
@@ -146,6 +163,10 @@ apps/broadcast/
 ├── lib/
 │   └── mock-audio.ts          # Mock audio generator for testing
 ├── src/
+│   ├── hooks/
+│   │   └── useVideoGenerator.ts # ffmpeg.wasm video renderer
+│   ├── lib/
+│   │   └── contentful-upload.ts # CMA upload helper for video assets
 │   ├── components/
 │   │   ├── ProgressBar.tsx    # Usage progress bar component
 │   │   └── LocalhostWarning.tsx
@@ -159,6 +180,8 @@ apps/broadcast/
 │   └── App.tsx                # Main app component
 ├── test/
 │   └── mocks/                 # Test mocks for SDK and CMA
+├── public/
+│   └── ffmpeg-core.worker.js   # Stub worker (single-threaded ffmpeg-core)
 ├── contentful-app-manifest.json  # App manifest with functions and actions
 └── package.json
 ```
@@ -206,6 +229,16 @@ apps/broadcast/
    - Resolves content type and author names for display
    - Calculates statistics: success rate, latency distribution, top content types, top authors
 6. **Page displays** metrics with visual progress indicators, detailed tables, and generation activity analytics
+
+### Video Generation Flow
+
+1. **User triggers video render** from the Sidebar
+2. **Sidebar resolves assets** for the selected locale:
+   - Audio from `audioAsset`
+   - Image from `featuredImage` or `image`
+3. **Frontend renders MP4** with ffmpeg.wasm (single-threaded core for iframe compatibility)
+4. **Upload helper** creates, processes, and publishes a new video Asset via CMA
+5. **Entry update** links the Asset to `videoAsset` when present
 
 ## Configuration
 

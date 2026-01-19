@@ -24,12 +24,32 @@ const fetchBinary = async (url: string, label: string) => {
     }
 
     const buffer = await response.arrayBuffer();
+    if (!buffer.byteLength) {
+      throw new Error(`${label} download returned an empty file.`);
+    }
+
     return new Uint8Array(buffer);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     throw new Error(
       `${label} download failed. Ensure the asset is published and CORS-accessible. (${message})`
     );
+  }
+};
+
+const getAudioDuration = async (audioBuffer: ArrayBuffer): Promise<number> => {
+  const AudioContextCtor =
+    window.AudioContext || (window as Window & { webkitAudioContext?: any }).webkitAudioContext;
+  if (!AudioContextCtor) {
+    return 0;
+  }
+
+  const context = new AudioContextCtor();
+  try {
+    const decoded = await context.decodeAudioData(audioBuffer.slice(0));
+    return decoded.duration;
+  } finally {
+    await context.close();
   }
 };
 
@@ -78,20 +98,44 @@ export const useVideoGenerator = () => {
         await loadFFmpeg();
 
         const ffmpeg = ffmpegRef.current!;
-        const [imageData, audioData] = await Promise.all([
+        const [imageData, audioBuffer] = await Promise.all([
           fetchBinary(imageUrl, 'Image'),
-          fetchBinary(audioUrl, 'Audio'),
+          (async () => {
+            const normalizedUrl = normalizeAssetUrl(audioUrl);
+            const response = await fetch(normalizedUrl, { mode: 'cors' });
+            if (!response.ok) {
+              throw new Error(`Audio download failed (HTTP ${response.status}).`);
+            }
+            const buffer = await response.arrayBuffer();
+            if (!buffer.byteLength) {
+              throw new Error('Audio download returned an empty file.');
+            }
+            return buffer;
+          })(),
         ]);
+
+        const audioDuration = await getAudioDuration(audioBuffer);
+        if (!Number.isFinite(audioDuration) || audioDuration <= 0) {
+          throw new Error('Audio duration could not be determined.');
+        }
+
+        const audioData = new Uint8Array(audioBuffer);
 
         await ffmpeg.writeFile('input.jpg', imageData);
         await ffmpeg.writeFile('audio.mp3', audioData);
-        await ffmpeg.exec([
+        const exitCode = await ffmpeg.exec([
           '-loop',
           '1',
           '-i',
           'input.jpg',
           '-i',
           'audio.mp3',
+          '-vf',
+          'scale=trunc(iw/2)*2:trunc(ih/2)*2',
+          '-r',
+          '30',
+          '-t',
+          audioDuration.toFixed(3),
           '-c:v',
           'libx264',
           '-tune',
@@ -103,10 +147,20 @@ export const useVideoGenerator = () => {
           '-pix_fmt',
           'yuv420p',
           '-shortest',
+          '-movflags',
+          '+faststart',
           'output.mp4',
         ]);
 
+        if (exitCode !== 0) {
+          throw new Error(`FFmpeg exited with code ${exitCode}.`);
+        }
+
         const outputData = await ffmpeg.readFile('output.mp4');
+        if (!(outputData instanceof Uint8Array) || outputData.byteLength === 0) {
+          throw new Error('FFmpeg produced an empty video file.');
+        }
+
         return new Blob([outputData], { type: 'video/mp4' });
       } finally {
         const ffmpeg = ffmpegRef.current;
