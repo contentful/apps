@@ -8,7 +8,7 @@ import { styles } from './ReleasesTable.styles';
 import { ReleasesTableActions } from './ReleasesTableActions';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
-import { formatDateTimeWithTimezone } from '../utils/DateFormatUtils';
+import { formatDateTimeWithTimezone } from '../utils/dateFormat';
 
 const ReleasesTableHeader = () => {
   return (

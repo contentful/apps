@@ -7,7 +7,7 @@ import {
   generateContentTypeChartData,
   generateCreatorChartData,
 } from '../utils/trendsDataProcessor';
-import type { TimeRange } from '../utils/types';
+import { TimeRange } from '../utils/types';
 
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { HomeAppSDK } from '@contentful/app-sdk';

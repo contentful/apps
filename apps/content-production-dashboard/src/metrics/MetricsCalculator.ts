@@ -5,7 +5,14 @@ import {
   RECENTLY_PUBLISHED_DAYS_RANGE,
   TIME_TO_PUBLISH_DAYS_RANGE,
 } from '../utils/consts';
-import { DateCalculator, msPerDay } from '../utils/DateCalculator';
+import {
+  parseDate,
+  addDays,
+  subDays,
+  subMonths,
+  isWithin,
+  msPerDay,
+} from '../utils/dateCalculator';
 
 export class MetricsCalculator {
   private readonly entries: ReadonlyArray<EntryProps>;
@@ -58,21 +65,21 @@ export class MetricsCalculator {
   }
 
   private calculateTotalPublished(): MetricCardProps {
-    const startThisPeriod = DateCalculator.subDays(this.now, 30);
-    const startPrevPeriod = DateCalculator.subDays(this.now, 60);
+    const startThisPeriod = subDays(this.now, 30);
+    const startPrevPeriod = subDays(this.now, 60);
     const endPrevPeriod = startThisPeriod;
 
     let current = 0;
     let previous = 0;
     for (const entry of this.entries) {
-      const publishedAt = DateCalculator.parseDate(entry?.sys?.publishedAt);
+      const publishedAt = parseDate(entry?.sys?.publishedAt);
       if (!publishedAt) continue;
 
-      if (DateCalculator.isWithin(publishedAt, startThisPeriod, this.now)) {
+      if (isWithin(publishedAt, startThisPeriod, this.now)) {
         current += 1;
         continue;
       }
-      if (DateCalculator.isWithin(publishedAt, startPrevPeriod, endPrevPeriod)) {
+      if (isWithin(publishedAt, startPrevPeriod, endPrevPeriod)) {
         previous += 1;
       }
     }
@@ -88,16 +95,16 @@ export class MetricsCalculator {
   }
 
   private calculateAverageTimeToPublish(): MetricCardProps {
-    const startThisPeriod = DateCalculator.subDays(this.now, this.timeToPublishDays);
+    const startThisPeriod = subDays(this.now, this.timeToPublishDays);
 
     let sumDays = 0;
     let count = 0;
     for (const entry of this.entries) {
-      const publishedAt = DateCalculator.parseDate(entry?.sys?.publishedAt);
+      const publishedAt = parseDate(entry?.sys?.publishedAt);
       if (!publishedAt) continue;
-      if (!DateCalculator.isWithin(publishedAt, startThisPeriod, this.now)) continue;
+      if (!isWithin(publishedAt, startThisPeriod, this.now)) continue;
 
-      const createdAt = DateCalculator.parseDate(entry?.sys?.createdAt);
+      const createdAt = parseDate(entry?.sys?.createdAt);
       if (!createdAt) continue;
 
       const deltaDays = (publishedAt.getTime() - createdAt.getTime()) / msPerDay;
@@ -121,13 +128,13 @@ export class MetricsCalculator {
   }
 
   private calculateScheduled(): MetricCardProps {
-    const end = DateCalculator.addDays(this.now, 30);
+    const end = addDays(this.now, 30);
 
     let count = 0;
     for (const action of this.scheduledActions) {
-      const scheduledFor = DateCalculator.parseDate(action?.scheduledFor?.datetime);
+      const scheduledFor = parseDate(action?.scheduledFor?.datetime);
       if (!scheduledFor) continue;
-      if (DateCalculator.isWithin(scheduledFor, this.now, end)) {
+      if (isWithin(scheduledFor, this.now, end)) {
         count += 1;
       }
     }
@@ -141,13 +148,13 @@ export class MetricsCalculator {
   }
 
   private calculateRecentlyPublished(): MetricCardProps {
-    const start = DateCalculator.subDays(this.now, this.recentlyPublishedDays);
+    const start = subDays(this.now, this.recentlyPublishedDays);
 
     let count = 0;
     for (const entry of this.entries) {
-      const publishedAt = DateCalculator.parseDate(entry?.sys?.publishedAt);
+      const publishedAt = parseDate(entry?.sys?.publishedAt);
       if (!publishedAt) continue;
-      if (DateCalculator.isWithin(publishedAt, start, this.now)) {
+      if (isWithin(publishedAt, start, this.now)) {
         count += 1;
       }
     }
@@ -161,11 +168,11 @@ export class MetricsCalculator {
   }
 
   private calculateNeedsUpdate(): MetricCardProps {
-    const cutoff = DateCalculator.subMonths(this.now, this.needsUpdateMonths);
+    const cutoff = subMonths(this.now, this.needsUpdateMonths);
 
     let count = 0;
     for (const entry of this.entries) {
-      const updatedAt = DateCalculator.parseDate(entry?.sys?.updatedAt);
+      const updatedAt = parseDate(entry?.sys?.updatedAt);
       if (!updatedAt) continue;
       if (updatedAt.getTime() < cutoff.getTime()) {
         count += 1;

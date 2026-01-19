@@ -1,26 +1,27 @@
 import { EntryProps } from 'contentful-management';
-import { DateCalculator } from './DateCalculator';
-import { formatMonthYear, formatMonthYearDisplay } from './DateFormatUtils';
-import type { ChartDataPoint, TimeRange, TrendsDataProcessorOptions } from './types';
+import { parseDate } from './dateCalculator';
+import { formatMonthYear, formatMonthYearDisplay } from './dateFormat';
+import type { ChartDataPoint, TrendsDataProcessorOptions } from './types';
+import { TimeRange } from './types';
 
 export function getStartDateForTimeRange(timeRange: TimeRange): Date {
   const now = new Date();
   const startDate = new Date(now);
 
   switch (timeRange) {
-    case 'month':
+    case TimeRange.Month:
       startDate.setMonth(now.getMonth() - 1);
       break;
-    case '3months':
+    case TimeRange.ThreeMonths:
       startDate.setMonth(now.getMonth() - 3);
       break;
-    case '6months':
+    case TimeRange.SixMonths:
       startDate.setMonth(now.getMonth() - 6);
       break;
-    case 'year':
+    case TimeRange.Year:
       startDate.setFullYear(now.getFullYear() - 1);
       break;
-    case 'yearToDate':
+    case TimeRange.YearToDate:
       startDate.setMonth(0, 1); // January 1st
       startDate.setFullYear(now.getFullYear());
       break;
@@ -72,7 +73,7 @@ export function generateNewEntriesChartData(
   const filteredEntries = filterEntriesByContentTypes(entries, contentTypes);
 
   filteredEntries.forEach((entry) => {
-    const createdAt = DateCalculator.parseDate(entry?.sys?.createdAt);
+    const createdAt = parseDate(entry?.sys?.createdAt);
     if (!createdAt || createdAt < startDate) return;
 
     const monthYear = formatMonthYear(createdAt);
@@ -102,7 +103,7 @@ export function generateContentTypeChartData(
   const filteredEntries = filterEntriesByContentTypes(entries, contentTypes);
 
   filteredEntries.forEach((entry) => {
-    const createdAt = DateCalculator.parseDate(entry?.sys?.createdAt);
+    const createdAt = parseDate(entry?.sys?.createdAt);
     if (!createdAt || createdAt < startDate) return;
 
     const contentTypeId = entry.sys.contentType?.sys?.id;
@@ -158,7 +159,7 @@ export function generateCreatorChartData(
   const filteredEntries = filterEntriesByContentTypes(entries, contentTypes);
 
   filteredEntries.forEach((entry) => {
-    const createdAt = DateCalculator.parseDate(entry?.sys?.createdAt);
+    const createdAt = parseDate(entry?.sys?.createdAt);
     if (!createdAt || createdAt < startDate) return;
 
     const creatorId = entry.sys.createdBy?.sys?.id;

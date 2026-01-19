@@ -3,30 +3,28 @@ import { ArrowClockwiseIcon } from '@contentful/f36-icons';
 import { MetricCard } from './MetricCard';
 import { MetricsCalculator } from '../metrics/MetricsCalculator';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import type { AppInstallationParameters } from '../locations/ConfigScreen';
 import { ErrorDisplay } from './ErrorDisplay';
 import { useAllEntries } from '../hooks/useAllEntries';
 import { useScheduledActions } from '../hooks/useScheduledActions';
 import { useInstallationParameters } from '../hooks/useInstallationParameters';
 import { ContentTrendsTabs } from './ContentTrendsTabs';
-import type { TimeRange } from '../utils/types';
+import { TimeRange } from '../utils/types';
 import React, { useState } from 'react';
 import { LoadingSkeleton } from './LoadingSkeleton';
 import { ReleasesTable } from './ReleasesTable';
 import { styles } from './Dashboard.styles';
 
 const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
-  { value: 'month', label: 'Past Month' },
-  { value: '3months', label: 'Past 3 Months' },
-  { value: '6months', label: 'Past 6 Months' },
-  { value: 'year', label: 'Past Year' },
-  { value: 'yearToDate', label: 'Year to Date' },
+  { value: TimeRange.Month, label: 'Past Month' },
+  { value: TimeRange.ThreeMonths, label: 'Past 3 Months' },
+  { value: TimeRange.SixMonths, label: 'Past 6 Months' },
+  { value: TimeRange.Year, label: 'Past Year' },
+  { value: TimeRange.YearToDate, label: 'Year to Date' },
 ];
 
 const Dashboard = () => {
   const sdk = useSDK();
-  const { parameters, refetchInstallationParameters } = useInstallationParameters(sdk);
-  const installation = (parameters ?? {}) as AppInstallationParameters;
+  const { installation, refetchInstallationParameters } = useInstallationParameters(sdk);
   const { entries, isFetchingEntries, fetchingEntriesError, refetchEntries } = useAllEntries();
   const {
     scheduledActions,
@@ -34,7 +32,7 @@ const Dashboard = () => {
     fetchingScheduledActionsError,
     refetchScheduledActions,
   } = useScheduledActions();
-  const [timeRange, setTimeRange] = useState<TimeRange>('year');
+  const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.Year);
 
   const handleRefresh = async () => {
     refetchEntries();

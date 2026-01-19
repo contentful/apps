@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BaseAppSDK } from '@contentful/app-sdk';
 import { AppInstallationProps, KeyValueMap } from 'contentful-management';
+import { AppInstallationParameters } from '../locations/ConfigScreen';
 
 export const useInstallationParameters = (sdk: BaseAppSDK) => {
   const [parameters, setParameters] = useState<KeyValueMap>(sdk.parameters.installation);
@@ -18,7 +19,9 @@ export const useInstallationParameters = (sdk: BaseAppSDK) => {
     setParameters(newParameters);
   };
 
-  return { parameters, refetchInstallationParameters };
+  const installation = (parameters ?? {}) as AppInstallationParameters;
+
+  return { installation, refetchInstallationParameters };
 };
 
 const fetchParameters = async (sdk: BaseAppSDK): Promise<KeyValueMap> => {

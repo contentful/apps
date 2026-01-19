@@ -8,7 +8,13 @@ export interface ChartWrapperProps {
   legendTitle?: string;
 }
 
-export type TimeRange = 'year' | '6months' | '3months' | 'month' | 'yearToDate';
+export enum TimeRange {
+  Month = 'month',
+  ThreeMonths = '3months',
+  SixMonths = '6months',
+  Year = 'year',
+  YearToDate = 'yearToDate',
+}
 
 export interface TrendsDataProcessorOptions {
   timeRange: TimeRange;
