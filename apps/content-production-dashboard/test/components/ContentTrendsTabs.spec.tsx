@@ -6,24 +6,24 @@ import { QueryProvider } from '../../src/providers/QueryProvider';
 import { createMockEntry, createMockUser } from '../utils/testHelpers';
 import { EntryProps } from 'contentful-management';
 
-const mockProcessNewEntries = vi.fn();
-const mockProcessContentTypeTrends = vi.fn();
-const mockProcessCreatorTrends = vi.fn();
+const mockGenerateNewEntriesChartData = vi.fn();
+const mockGenerateContentTypeChartData = vi.fn();
+const mockGenerateCreatorChartData = vi.fn();
 
 vi.mock('../../src/utils/trendsDataProcessor', () => ({
-  processNewEntries: (entries: EntryProps[], options: any) =>
-    mockProcessNewEntries(entries, options),
-  processContentTypeTrends: (
+  generateNewEntriesChartData: (entries: EntryProps[], options: any) =>
+    mockGenerateNewEntriesChartData(entries, options),
+  generateContentTypeChartData: (
     entries: EntryProps[],
     options: any,
     contentTypes?: Map<string, string>
-  ) => mockProcessContentTypeTrends(entries, options, contentTypes),
-  processCreatorTrends: (
+  ) => mockGenerateContentTypeChartData(entries, options, contentTypes),
+  generateCreatorChartData: (
     entries: EntryProps[],
     options: any,
     creatorsNames?: Map<string, string>,
     contentTypes?: Map<string, string>
-  ) => mockProcessCreatorTrends(entries, options, creatorsNames, contentTypes),
+  ) => mockGenerateCreatorChartData(entries, options, creatorsNames, contentTypes),
 }));
 
 const mockGetManyForSpace = vi.fn();
@@ -110,9 +110,9 @@ describe('ContentTrendsTabs component', () => {
       fetchingContentTypesError: null,
     });
 
-    mockProcessNewEntries.mockReturnValue(mockNewEntriesData);
-    mockProcessContentTypeTrends.mockReturnValue(mockContentTypeData);
-    mockProcessCreatorTrends.mockReturnValue(mockCreatorData);
+    mockGenerateNewEntriesChartData.mockReturnValue(mockNewEntriesData);
+    mockGenerateContentTypeChartData.mockReturnValue(mockContentTypeData);
+    mockGenerateCreatorChartData.mockReturnValue(mockCreatorData);
 
     mockGetManyForSpace.mockResolvedValue({
       items: [
@@ -152,20 +152,25 @@ describe('ContentTrendsTabs component', () => {
         { wrapper: createWrapper() }
       );
 
-      expect(mockProcessNewEntries).toHaveBeenCalledWith(mockEntries, { timeRange: 'year' });
+      expect(mockGenerateNewEntriesChartData).toHaveBeenCalledWith(mockEntries, {
+        timeRange: 'year',
+      });
       expect(screen.getByText('Content:')).toBeInTheDocument();
       expect(screen.getByText('New Content')).toBeInTheDocument();
     });
 
-    it('calls processNewEntries with filteredEntries and timeRange', () => {
+    it('calls generateNewEntriesChartData with filteredEntries and timeRange', () => {
       render(
         <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="month" />,
         { wrapper: createWrapper() }
       );
 
-      expect(mockProcessNewEntries).toHaveBeenCalledWith(expect.arrayContaining(mockEntries), {
-        timeRange: 'month',
-      });
+      expect(mockGenerateNewEntriesChartData).toHaveBeenCalledWith(
+        expect.arrayContaining(mockEntries),
+        {
+          timeRange: 'month',
+        }
+      );
     });
   });
 
@@ -191,7 +196,7 @@ describe('ContentTrendsTabs component', () => {
     });
 
     it('shows "No content type data available" message when no content types are available', async () => {
-      mockProcessContentTypeTrends.mockReturnValue({
+      mockGenerateContentTypeChartData.mockReturnValue({
         data: [],
         contentTypes: [],
       });
@@ -223,7 +228,7 @@ describe('ContentTrendsTabs component', () => {
       await user.click(contentTypeTab);
 
       await waitFor(() => {
-        expect(mockProcessContentTypeTrends).toHaveBeenCalledWith(
+        expect(mockGenerateContentTypeChartData).toHaveBeenCalledWith(
           mockEntries,
           { timeRange: 'year' },
           mockContentTypes
@@ -234,7 +239,7 @@ describe('ContentTrendsTabs component', () => {
       });
     });
 
-    it('calls processContentTypeTrends with entries, timeRange, and contentTypes', async () => {
+    it('calls generateContentTypeChartData with entries, timeRange, and contentTypes', async () => {
       const user = userEvent.setup();
       render(
         <ContentTrendsTabs entries={mockEntries} trackedContentTypes={[]} timeRange="year" />,
@@ -245,7 +250,7 @@ describe('ContentTrendsTabs component', () => {
       await user.click(contentTypeTab);
 
       await waitFor(() => {
-        expect(mockProcessContentTypeTrends).toHaveBeenCalledWith(
+        expect(mockGenerateContentTypeChartData).toHaveBeenCalledWith(
           mockEntries,
           { timeRange: 'year' },
           mockContentTypes
@@ -287,7 +292,7 @@ describe('ContentTrendsTabs component', () => {
       await user.click(creatorTab);
 
       await waitFor(() => {
-        expect(mockProcessCreatorTrends).toHaveBeenCalled();
+        expect(mockGenerateCreatorChartData).toHaveBeenCalled();
       });
     });
 
@@ -307,7 +312,7 @@ describe('ContentTrendsTabs component', () => {
     });
 
     it('shows "No creator data available" message when no creators are available', async () => {
-      mockProcessCreatorTrends.mockReturnValue({
+      mockGenerateCreatorChartData.mockReturnValue({
         data: [],
         creators: [],
       });
@@ -343,7 +348,7 @@ describe('ContentTrendsTabs component', () => {
       await user.click(creatorTab);
 
       await waitFor(() => {
-        expect(mockProcessCreatorTrends).toHaveBeenCalledWith(
+        expect(mockGenerateCreatorChartData).toHaveBeenCalledWith(
           mockEntries,
           { timeRange: 'year' },
           mockCreatorsNames,

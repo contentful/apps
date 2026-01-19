@@ -12,18 +12,7 @@ import {
 import { Box, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { styles, CHART_COLORS } from './ChartWrapper.styles';
-
-export interface ChartDataPoint {
-  [key: string]: string | number;
-}
-
-export interface ChartWrapperProps {
-  data: ChartDataPoint[];
-  xAxisDataKey: string;
-  linesLegends: string[];
-  height?: number;
-  legendTitle?: string;
-}
+import type { ChartWrapperProps } from '../utils/types';
 
 export const ChartWrapper: React.FC<ChartWrapperProps> = ({
   data,

@@ -9,7 +9,7 @@ import { useAllEntries } from '../hooks/useAllEntries';
 import { useScheduledActions } from '../hooks/useScheduledActions';
 import { useInstallationParameters } from '../hooks/useInstallationParameters';
 import { ContentTrendsTabs } from './ContentTrendsTabs';
-import type { TimeRange } from '../utils/trendsDataProcessor';
+import type { TimeRange } from '../utils/types';
 import React, { useState } from 'react';
 import { LoadingSkeleton } from './LoadingSkeleton';
 import { ReleasesTable } from './ReleasesTable';

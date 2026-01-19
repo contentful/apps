@@ -3,11 +3,11 @@ import { Tabs, Box, Flex, Spinner } from '@contentful/f36-components';
 import { EntryProps } from 'contentful-management';
 import { ChartWrapper } from './ChartWrapper';
 import {
-  processNewEntries,
-  processContentTypeTrends,
-  processCreatorTrends,
-  type TimeRange,
+  generateNewEntriesChartData,
+  generateContentTypeChartData,
+  generateCreatorChartData,
 } from '../utils/trendsDataProcessor';
+import type { TimeRange } from '../utils/types';
 
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { HomeAppSDK } from '@contentful/app-sdk';
@@ -33,8 +33,6 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
 
   useEffect(() => {
     const fetchCreators = async () => {
-      if (selectedTab !== 'byCreator') return;
-
       setIsLoadingUsers(true);
       try {
         const usersResponse = await sdk.cma.user.getManyForSpace({
@@ -59,18 +57,18 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
     };
 
     fetchCreators();
-  }, [selectedTab, sdk]);
+  }, [sdk]);
 
   const newEntries = useMemo(() => {
-    return processNewEntries(entries, { timeRange }, contentTypes);
+    return generateNewEntriesChartData(entries, { timeRange }, contentTypes);
   }, [entries, timeRange, contentTypes]);
 
   const contentTypeData = useMemo(() => {
-    return processContentTypeTrends(entries, { timeRange }, contentTypes);
+    return generateContentTypeChartData(entries, { timeRange }, contentTypes);
   }, [entries, timeRange, contentTypes]);
 
   const creatorData = useMemo(() => {
-    return processCreatorTrends(entries, { timeRange }, creatorsNames, contentTypes);
+    return generateCreatorChartData(entries, { timeRange }, creatorsNames, contentTypes);
   }, [entries, timeRange, creatorsNames, contentTypes]);
 
   const handleTabChange = (id: string) => {

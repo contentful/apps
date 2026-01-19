@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { ChartWrapper } from '../../src/components/ChartWrapper';
 import { createMockChartData } from '../utils/testHelpers';
-import type { ChartDataPoint } from '../../src/components/ChartWrapper';
+import type { ChartDataPoint } from '../../src/utils/types';
 
 // Mock recharts components - use real implementation but capture props and data for testing
 vi.mock('recharts', async () => {

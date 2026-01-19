@@ -77,10 +77,13 @@ const ConfigScreen = () => {
     }
 
     return {
-      parameters,
+      parameters: {
+        ...parameters,
+        trackedContentTypes: selectedContentTypes.map((ct) => ct.id),
+      },
       targetState: currentState,
     };
-  }, [parameters, sdk]);
+  }, [parameters, selectedContentTypes, sdk]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -97,13 +100,6 @@ const ConfigScreen = () => {
       sdk.app.setReady();
     })();
   }, [sdk]);
-
-  useEffect(() => {
-    setParameters((prev) => ({
-      ...prev,
-      trackedContentTypes: selectedContentTypes.map((ct) => ct.id),
-    }));
-  }, [selectedContentTypes]);
 
   const handleOnChangeInput = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,

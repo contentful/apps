@@ -1,12 +1,7 @@
 import { EntryProps } from 'contentful-management';
 import { DateCalculator } from './DateCalculator';
-import type { ChartDataPoint } from '../components/ChartWrapper';
-
-export type TimeRange = 'year' | '6months' | '3months' | 'month' | 'yearToDate';
-
-export interface TrendsDataProcessorOptions {
-  timeRange: TimeRange;
-}
+import { formatMonthYear, formatMonthYearDisplay } from './DateFormatUtils';
+import type { ChartDataPoint, TimeRange, TrendsDataProcessorOptions } from './types';
 
 export function getStartDateForTimeRange(timeRange: TimeRange): Date {
   const now = new Date();
@@ -34,6 +29,24 @@ export function getStartDateForTimeRange(timeRange: TimeRange): Date {
   return startDate;
 }
 
+export function generateMonthRange(startDate: Date, endDate: Date): string[] {
+  const months: string[] = [];
+  const current = new Date(startDate);
+  current.setDate(1);
+  current.setHours(0, 0, 0, 0);
+
+  const end = new Date(endDate);
+  end.setDate(1);
+  end.setHours(0, 0, 0, 0);
+
+  while (current <= end) {
+    months.push(formatMonthYear(current));
+    current.setMonth(current.getMonth() + 1);
+  }
+
+  return months;
+}
+
 function filterEntriesByContentTypes(
   entries: EntryProps[],
   contentTypes?: Map<string, string>
@@ -47,7 +60,7 @@ function filterEntriesByContentTypes(
   });
 }
 
-export function processNewEntries(
+export function generateNewEntriesChartData(
   entries: EntryProps[],
   options: TrendsDataProcessorOptions,
   contentTypes?: Map<string, string>
@@ -62,21 +75,21 @@ export function processNewEntries(
     const createdAt = DateCalculator.parseDate(entry?.sys?.createdAt);
     if (!createdAt || createdAt < startDate) return;
 
-    const monthYear = DateCalculator.formatMonthYear(createdAt);
+    const monthYear = formatMonthYear(createdAt);
     monthMap.set(monthYear, (monthMap.get(monthYear) || 0) + 1);
   });
 
   // Generate all months in range
-  const allMonths = DateCalculator.generateMonthRange(startDate, now);
+  const allMonths = generateMonthRange(startDate, now);
 
   // Convert to chart data format
   return allMonths.map((monthYear) => ({
-    date: DateCalculator.formatMonthYearDisplay(monthYear),
+    date: formatMonthYearDisplay(monthYear),
     'New Content': monthMap.get(monthYear) || 0,
   }));
 }
 
-export function processContentTypeTrends(
+export function generateContentTypeChartData(
   entries: EntryProps[],
   options: TrendsDataProcessorOptions,
   contentTypes?: Map<string, string>
@@ -95,7 +108,7 @@ export function processContentTypeTrends(
     const contentTypeId = entry.sys.contentType?.sys?.id;
     if (!contentTypeId) return;
 
-    const monthYear = DateCalculator.formatMonthYear(createdAt);
+    const monthYear = formatMonthYear(createdAt);
     foundContentTypeIds.add(contentTypeId);
 
     if (!contentTypeMap.has(monthYear)) {
@@ -107,14 +120,14 @@ export function processContentTypeTrends(
   });
 
   // Generate all months in range
-  const allMonths = DateCalculator.generateMonthRange(startDate, now);
+  const allMonths = generateMonthRange(startDate, now);
   const contentTypeNamesArray = Array.from(contentTypes?.values() || []).sort();
 
   // Convert to chart data format
   const data = allMonths.map((monthYear) => {
     const monthData = contentTypeMap.get(monthYear) || new Map();
     const dataPoint: ChartDataPoint = {
-      date: DateCalculator.formatMonthYearDisplay(monthYear),
+      date: formatMonthYearDisplay(monthYear),
     };
 
     contentTypeNamesArray.forEach((contentTypeName) => {
@@ -131,7 +144,7 @@ export function processContentTypeTrends(
   return { data, contentTypes: contentTypeNamesArray };
 }
 
-export function processCreatorTrends(
+export function generateCreatorChartData(
   entries: EntryProps[],
   options: TrendsDataProcessorOptions,
   creatorsNames?: Map<string, string>,
@@ -152,7 +165,7 @@ export function processCreatorTrends(
     if (!creatorId) return;
 
     const creatorName = creatorsNames?.get(creatorId) || creatorId;
-    const monthYear = DateCalculator.formatMonthYear(createdAt);
+    const monthYear = formatMonthYear(createdAt);
     creators.add(creatorName);
 
     if (!creatorMap.has(monthYear)) {
@@ -164,14 +177,14 @@ export function processCreatorTrends(
   });
 
   // Generate all months in range
-  const allMonths = DateCalculator.generateMonthRange(startDate, now);
+  const allMonths = generateMonthRange(startDate, now);
   const creatorArray = Array.from(creators).sort();
 
   // Convert to chart data format
   const data = allMonths.map((monthYear) => {
     const monthData = creatorMap.get(monthYear) || new Map();
     const dataPoint: ChartDataPoint = {
-      date: DateCalculator.formatMonthYearDisplay(monthYear),
+      date: formatMonthYearDisplay(monthYear),
     };
 
     creatorArray.forEach((creatorName) => {

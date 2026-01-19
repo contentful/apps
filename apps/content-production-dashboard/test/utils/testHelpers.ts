@@ -1,5 +1,5 @@
 import { EntryProps } from 'contentful-management';
-import type { ChartDataPoint } from '../../src/components/ChartWrapper';
+import type { ChartDataPoint } from '../../src/utils/types';
 
 export interface MockEntryOverrides {
   id?: string;
