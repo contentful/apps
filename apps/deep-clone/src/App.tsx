@@ -2,12 +2,14 @@ import { useMemo } from 'react';
 import { locations } from '@contentful/app-sdk';
 import ConfigScreen from './locations/ConfigScreen';
 import Sidebar from './locations/Sidebar';
+import Dialog from './locations/Dialog';
 
 import { useSDK } from '@contentful/react-apps-toolkit';
 
 const ComponentLocationSettings = {
   [locations.LOCATION_APP_CONFIG]: ConfigScreen,
   [locations.LOCATION_ENTRY_SIDEBAR]: Sidebar,
+  [locations.LOCATION_DIALOG]: Dialog,
 } as const;
 
 const App = () => {

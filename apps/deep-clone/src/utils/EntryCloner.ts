@@ -6,36 +6,30 @@ type ReferenceMap = Record<string, EntryProps>;
 
 class EntryCloner {
   private references: ReferenceMap = {};
+  private referencesTree: ReferenceMap = {};
   private clones: ReferenceMap = {};
   private contentTypes: { [id: string]: ContentTypeProps } = {};
   private updates: number = 0;
-  private parameters: AppParameters;
-  private cma: CMAClient;
-  private entryId: string;
-  private setReferencesCount: (count: number) => void;
-  private setClonesCount: (count: number) => void;
-  private setUpdatesCount: (count: number) => void;
 
-  constructor(
-    cma: CMAClient,
-    parameters: AppParameters,
-    entryId: string,
-    setReferencesCount: (count: number) => void,
-    setClonesCount: (count: number) => void,
-    setUpdatesCount: (count: number) => void
-  ) {
-    this.cma = cma;
-    this.parameters = parameters;
-    this.entryId = entryId;
-    this.setReferencesCount = setReferencesCount;
-    this.setClonesCount = setClonesCount;
-    this.setUpdatesCount = setUpdatesCount;
+  private _shouldCloneComponents: string[] = [];
+  set shouldCloneComponents(components: string[]) {
+    this._shouldCloneComponents = components;
   }
 
+  get shouldCloneComponents(): string[] {
+    return this._shouldCloneComponents;
+  }
+
+  constructor(
+    private cma: CMAClient,
+    private parameters: AppParameters,
+    private entryId: string,
+    private setReferencesCount: (_count: number) => void,
+    private setClonesCount: (_count: number) => void,
+    private setUpdatesCount: (_count: number) => void
+  ) {}
+
   async cloneEntry(): Promise<EntryProps> {
-    if (Object.keys(this.references).length === 0) {
-      await this.findReferences(this.entryId);
-    }
     await this.createClones();
     await this.updateReferenceTree();
     return this.clones[this.entryId] as EntryProps;
@@ -44,6 +38,12 @@ class EntryCloner {
   async getReferencesQty(): Promise<number> {
     await this.findReferences(this.entryId);
     return Object.keys(this.references).length;
+  }
+
+  async getReferencesTree(): Promise<Record<string, EntryProps>> {
+    await this.findReferences(this.entryId);
+    this.referencesTree = this.references;
+    return this.referencesTree;
   }
 
   private async findReferences(entryId: string): Promise<void> {
@@ -74,7 +74,16 @@ class EntryCloner {
   }
 
   private async createClones(): Promise<void> {
-    const clonePromises = Object.entries(this.references).map(async ([entryId, entry]) => {
+    Object.entries(this.references)
+      .filter(([entryId, _]) => !this.shouldCloneComponents.includes(entryId))
+      .forEach(([entryId, entry]) => {
+        this.clones[entryId] = entry;
+      });
+
+    const cloneComponents = Object.entries(this.references).filter(
+      ([entryId, _]) => entryId === this.entryId || this.shouldCloneComponents.includes(entryId)
+    );
+    const clonePromises = cloneComponents.map(async ([entryId, entry]) => {
       try {
         const entryFields = await this.getFieldsForClone(entry);
         const createProps: CreateEntryProps = {
