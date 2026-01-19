@@ -1,10 +1,10 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
 import Dashboard from '../../src/components/Dashboard';
 import { QueryProvider } from '../../src/providers/QueryProvider';
-import { createMockEntry } from '../utils/testHelpers';
+import { createMockEntry, renderWithAct } from '../utils/testHelpers';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -64,14 +64,14 @@ describe('Dashboard component', () => {
     });
   });
 
-  it('renders the dashboard heading', () => {
-    render(<Dashboard />, { wrapper: createWrapper() });
+  it('renders the dashboard heading', async () => {
+    await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
     expect(screen.getByText('Content Dashboard')).toBeInTheDocument();
   });
 
-  it('renders all metric cards', () => {
-    render(<Dashboard />, { wrapper: createWrapper() });
+  it('renders all metric cards', async () => {
+    await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
     expect(screen.getByText('Total Published')).toBeInTheDocument();
     expect(screen.getByText('Average Time to Publish')).toBeInTheDocument();
@@ -82,7 +82,7 @@ describe('Dashboard component', () => {
 
   it('calls refetchEntries and refetchScheduledActions when refresh button is clicked', async () => {
     const user = userEvent.setup();
-    render(<Dashboard />, { wrapper: createWrapper() });
+    await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
     const refreshButton = screen.getByRole('button', { name: /refresh/i });
     await user.click(refreshButton);
@@ -96,8 +96,8 @@ describe('Dashboard component', () => {
       mockSdk.parameters.installation = {};
     });
 
-    it('renders components correctly', () => {
-      render(<Dashboard />, { wrapper: createWrapper() });
+    it('renders components correctly', async () => {
+      await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
       expect(screen.getByText('Content Publishing Trends')).toBeInTheDocument();
       const select = screen.getByRole('combobox');
@@ -105,15 +105,16 @@ describe('Dashboard component', () => {
       expect(screen.getByText('New Entries')).toBeInTheDocument();
     });
 
-    it('default time range is "year"', () => {
-      render(<Dashboard />, { wrapper: createWrapper() });
+    it('default time range is "year"', async () => {
+      await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
       expect(screen.getByText('Past Year')).toBeInTheDocument();
     });
 
     it('renders all TIME_RANGE_OPTIONS in dropdown', async () => {
       const user = userEvent.setup();
-      render(<Dashboard />, { wrapper: createWrapper() });
+
+      await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
       const select = screen.getByRole('combobox');
       await user.click(select);

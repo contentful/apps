@@ -1,9 +1,9 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { ContentTrendsTabs } from '../../src/components/ContentTrendsTabs';
 import { QueryProvider } from '../../src/providers/QueryProvider';
-import { createMockEntry, createMockUser } from '../utils/testHelpers';
+import { createMockEntry, createMockUser, renderWithAct } from '../utils/testHelpers';
 import { EntryProps } from 'contentful-management';
 import { TimeRange } from '../../src/utils/types';
 
@@ -30,8 +30,11 @@ vi.mock('../../src/utils/trendsDataProcessor', () => ({
 const mockGetManyForSpace = vi.fn();
 const mockGetManyContentTypes = vi.fn().mockResolvedValue({
   items: [
-    { sys: { id: 'blogPost' }, name: 'Blog Post' },
     { sys: { id: 'article' }, name: 'Article' },
+    { sys: { id: 'blogPost' }, name: 'Blog Post' },
+    { sys: { id: 'page' }, name: 'Page' },
+    { sys: { id: 'product' }, name: 'Product' },
+    { sys: { id: 'video' }, name: 'Video' },
   ],
 });
 const mockSdk: any = {
@@ -109,8 +112,11 @@ describe('ContentTrendsTabs component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockContentTypes.clear();
-    mockContentTypes.set('blogPost', 'Blog Post');
     mockContentTypes.set('article', 'Article');
+    mockContentTypes.set('blogPost', 'Blog Post');
+    mockContentTypes.set('page', 'Page');
+    mockContentTypes.set('product', 'Product');
+    mockContentTypes.set('video', 'Video');
     mockIsFetchingContentTypes = false;
 
     mockCreatorsNames.clear();
@@ -136,8 +142,8 @@ describe('ContentTrendsTabs component', () => {
   });
 
   describe('Rendering', () => {
-    it('renders all three tabs', () => {
-      render(
+    it('renders all three tabs', async () => {
+      await renderWithAct(
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
@@ -151,8 +157,8 @@ describe('ContentTrendsTabs component', () => {
       expect(screen.getByText('By Creator')).toBeInTheDocument();
     });
 
-    it('default tab is "newEntries"', () => {
-      render(
+    it('default tab is "newEntries"', async () => {
+      await renderWithAct(
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
@@ -167,8 +173,8 @@ describe('ContentTrendsTabs component', () => {
   });
 
   describe('New Entries Tab', () => {
-    it('renders ChartWrapper with newEntriesData', () => {
-      render(
+    it('renders ChartWrapper with newEntriesData', async () => {
+      await renderWithAct(
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
@@ -184,8 +190,8 @@ describe('ContentTrendsTabs component', () => {
       expect(screen.getByText('New Content')).toBeInTheDocument();
     });
 
-    it('calls generateNewEntriesChartData with filteredEntries and timeRange', () => {
-      render(
+    it('calls generateNewEntriesChartData with filteredEntries and timeRange', async () => {
+      await renderWithAct(
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
@@ -213,7 +219,7 @@ describe('ContentTrendsTabs component', () => {
       });
 
       const user = userEvent.setup();
-      render(
+      await renderWithAct(
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
@@ -235,7 +241,7 @@ describe('ContentTrendsTabs component', () => {
       });
 
       const user = userEvent.setup();
-      render(
+      await renderWithAct(
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
@@ -257,7 +263,7 @@ describe('ContentTrendsTabs component', () => {
 
     it('renders ChartWrapper when data is available', async () => {
       const user = userEvent.setup();
-      render(
+      await renderWithAct(
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
@@ -283,7 +289,7 @@ describe('ContentTrendsTabs component', () => {
 
     it('calls generateContentTypeChartData with entries, timeRange, and contentTypes', async () => {
       const user = userEvent.setup();
-      render(
+      await renderWithAct(
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
@@ -308,7 +314,7 @@ describe('ContentTrendsTabs component', () => {
   describe('By Creator Tab', () => {
     it('fetches users from SDK when "byCreator" tab is selected', async () => {
       const user = userEvent.setup();
-      render(
+      await renderWithAct(
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
@@ -333,7 +339,7 @@ describe('ContentTrendsTabs component', () => {
         items: [createMockUser({ id: 'user-1', firstName: 'John', lastName: 'Doe' })],
       });
 
-      render(
+      await renderWithAct(
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
@@ -354,7 +360,7 @@ describe('ContentTrendsTabs component', () => {
       const user = userEvent.setup();
       mockGetManyForSpace.mockImplementation(() => new Promise(() => {})); // Never resolves
 
-      render(
+      await renderWithAct(
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
@@ -376,7 +382,7 @@ describe('ContentTrendsTabs component', () => {
       });
 
       const user = userEvent.setup();
-      render(
+      await renderWithAct(
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
@@ -402,7 +408,7 @@ describe('ContentTrendsTabs component', () => {
 
     it('renders ChartWrapper when creator data is available', async () => {
       const user = userEvent.setup();
-      render(
+      await renderWithAct(
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
@@ -425,6 +431,74 @@ describe('ContentTrendsTabs component', () => {
         expect(screen.getByText('John Doe')).toBeInTheDocument();
         expect(screen.getByText('Jane Smith')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Default Content Types Functionality', () => {
+    it('ContentTypeSelector renders in correct tabs', async () => {
+      await renderWithAct(
+        <ContentTrendsTabs entries={mockEntries} defaultContentTypes={[]} timeRange="year" />,
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Content types')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText('Content types')).toBeInTheDocument();
+      expect(screen.getByText('You can select up to five at a time.')).toBeInTheDocument();
+
+      const user = userEvent.setup();
+      const contentTypeTab = screen.getByText('By Content Type');
+      await user.click(contentTypeTab);
+
+      await waitFor(() => {
+        expect(screen.getByText('Content types')).toBeInTheDocument();
+        expect(screen.getByText('You can select up to five at a time.')).toBeInTheDocument();
+      });
+
+      const creatorTab = screen.getByText('By Creator');
+      await user.click(creatorTab);
+
+      await waitFor(() => {
+        expect(screen.queryByText('Content types')).not.toBeInTheDocument();
+        expect(screen.queryByText('You can select up to five at a time.')).not.toBeInTheDocument();
+      });
+    });
+
+    it('initializes with defaultContentTypes provided', async () => {
+      const defaultTypes = ['blogPost', 'article'];
+
+      await renderWithAct(
+        <ContentTrendsTabs
+          entries={mockEntries}
+          defaultContentTypes={defaultTypes}
+          timeRange="year"
+        />,
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => {
+        expect(screen.getAllByText('Article')[0]).toBeInTheDocument();
+        expect(screen.getAllByText('Blog Post')[0]).toBeInTheDocument();
+      });
+      expect(mockProcessNewEntries).toHaveBeenCalled();
+    });
+
+    it('initializes without defaultContentTypes (first 5 sorted)', async () => {
+      await renderWithAct(
+        <ContentTrendsTabs entries={mockEntries} defaultContentTypes={[]} timeRange="year" />,
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => {
+        expect(screen.getAllByText('Article')[0]).toBeInTheDocument();
+        expect(screen.getAllByText('Blog Post')[0]).toBeInTheDocument();
+        expect(screen.getAllByText('Page')[0]).toBeInTheDocument();
+        expect(screen.getAllByText('Product')[0]).toBeInTheDocument();
+        expect(screen.getAllByText('Video')[0]).toBeInTheDocument();
+      });
+      expect(mockProcessNewEntries).toHaveBeenCalled();
     });
   });
 });

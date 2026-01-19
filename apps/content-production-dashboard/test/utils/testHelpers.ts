@@ -1,4 +1,6 @@
+import { act, render, RenderOptions } from '@testing-library/react';
 import { EntryProps } from 'contentful-management';
+import { ReactElement } from 'react';
 import type { ChartDataPoint } from '../../src/utils/types';
 
 export interface MockEntryOverrides {
@@ -116,4 +118,15 @@ export function createMockContentTypeNames(
     map.set(id, name);
   });
   return map;
+}
+
+export async function renderWithAct(
+  ui: ReactElement,
+  options?: RenderOptions
+): Promise<ReturnType<typeof render>> {
+  let result: ReturnType<typeof render>;
+  await act(async () => {
+    result = render(ui, options);
+  });
+  return result!;
 }
