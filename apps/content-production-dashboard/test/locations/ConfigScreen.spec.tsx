@@ -229,6 +229,7 @@ describe('Config Screen component', () => {
         recentlyPublishedDays: RECENTLY_PUBLISHED_DAYS_RANGE.min,
         timeToPublishDays: TIME_TO_PUBLISH_DAYS_RANGE.min,
         showUpcomingReleases: true,
+        trackedContentTypes: [],
       },
       targetState: {},
     });

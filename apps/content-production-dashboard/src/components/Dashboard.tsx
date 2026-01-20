@@ -1,19 +1,30 @@
-import { Flex, Heading, Button, Box } from '@contentful/f36-components';
+import { Flex, Heading, Button, Box, Select, Subheading } from '@contentful/f36-components';
 import { ArrowClockwiseIcon } from '@contentful/f36-icons';
 import { MetricCard } from './MetricCard';
 import { MetricsCalculator } from '../metrics/MetricsCalculator';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import type { AppInstallationParameters } from '../locations/ConfigScreen';
 import { ErrorDisplay } from './ErrorDisplay';
 import { useAllEntries } from '../hooks/useAllEntries';
 import { useScheduledActions } from '../hooks/useScheduledActions';
+import { useInstallationParameters } from '../hooks/useInstallationParameters';
+import { ContentTrendsTabs } from './ContentTrendsTabs';
+import { TimeRange } from '../utils/types';
+import React, { useState } from 'react';
 import { LoadingSkeleton } from './LoadingSkeleton';
 import { ReleasesTable } from './ReleasesTable';
 import { styles } from './Dashboard.styles';
 
+const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
+  { value: TimeRange.Month, label: 'Past Month' },
+  { value: TimeRange.ThreeMonths, label: 'Past 3 Months' },
+  { value: TimeRange.SixMonths, label: 'Past 6 Months' },
+  { value: TimeRange.Year, label: 'Past Year' },
+  { value: TimeRange.YearToDate, label: 'Year to Date' },
+];
+
 const Dashboard = () => {
   const sdk = useSDK();
-  const installation = (sdk.parameters.installation ?? {}) as AppInstallationParameters;
+  const { installation, refetchInstallationParameters } = useInstallationParameters(sdk);
   const { entries, isFetchingEntries, fetchingEntriesError, refetchEntries } = useAllEntries();
   const {
     scheduledActions,
@@ -21,10 +32,12 @@ const Dashboard = () => {
     fetchingScheduledActionsError,
     refetchScheduledActions,
   } = useScheduledActions();
+  const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.Year);
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     refetchEntries();
     refetchScheduledActions();
+    await refetchInstallationParameters();
   };
 
   const isRefreshing = isFetchingEntries || isFetchingScheduledActions;
@@ -36,6 +49,10 @@ const Dashboard = () => {
     timeToPublishDays: installation.timeToPublishDays,
   });
   const metrics = metricsCalculator.getAllMetrics();
+
+  const handleTimeRangeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setTimeRange(e.target.value as TimeRange);
+  };
 
   return (
     <Flex flexDirection="column" style={styles.container}>
@@ -57,19 +74,40 @@ const Dashboard = () => {
         <LoadingSkeleton metricsCount={metricsCalculator.getAllMetrics().length} />
       ) : (
         <>
-          <Flex flexDirection="row" gap="spacingM">
-            {metrics.map((metric) => {
-              return (
-                <MetricCard
-                  key={metric.title}
-                  title={metric.title}
-                  value={metric.value}
-                  subtitle={metric.subtitle}
-                  isNegative={metric.isNegative}
-                />
-              );
-            })}
-          </Flex>
+          <Box>
+            <Flex flexDirection="row" gap="spacingM">
+              {metrics.map((metric) => {
+                return (
+                  <MetricCard
+                    key={metric.title}
+                    title={metric.title}
+                    value={metric.value}
+                    subtitle={metric.subtitle}
+                    isNegative={metric.isNegative}
+                  />
+                );
+              })}
+            </Flex>
+          </Box>
+
+          <Box marginTop="spacingL" style={styles.sectionContainer}>
+            <Flex flexDirection="row" justifyContent="space-between" alignItems="center">
+              <Subheading>Content Publishing Trends</Subheading>
+              <Select value={timeRange} size="medium" onChange={handleTimeRangeChange}>
+                {TIME_RANGE_OPTIONS.map((option) => (
+                  <Select.Option key={option.value} value={option.value}>
+                    {option.label}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Flex>
+            <ContentTrendsTabs
+              entries={entries}
+              trackedContentTypes={installation.trackedContentTypes ?? []}
+              timeRange={timeRange}
+            />
+          </Box>
+
           <Box marginTop="spacingXl">
             <Box padding="spacingL" style={styles.releasesTableContainer}>
               <Heading as="h2" marginBottom="spacingM">

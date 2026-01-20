@@ -48,3 +48,15 @@ export const formatDateTimeWithTimezone = (dateString: string | undefined): stri
     return '—';
   }
 };
+
+export const formatMonthYear = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+};
+
+export const formatMonthYearDisplay = (monthYear: string): string => {
+  const [year, month] = monthYear.split('-');
+  const date = new Date(parseInt(year), parseInt(month) - 1);
+  return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+};

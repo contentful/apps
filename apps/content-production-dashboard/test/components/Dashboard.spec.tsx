@@ -4,6 +4,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
 import Dashboard from '../../src/components/Dashboard';
 import { QueryProvider } from '../../src/providers/QueryProvider';
+import { createMockEntry } from '../utils/testHelpers';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -13,15 +14,22 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 const mockRefetchEntries = vi.fn();
 const mockRefetchScheduledActions = vi.fn();
 
+const mockEntries = [
+  createMockEntry({ id: 'entry-1', contentTypeId: 'blogPost' }),
+  createMockEntry({ id: 'entry-2', contentTypeId: 'article' }),
+];
+
+const mockUseAllEntries = vi.fn(() => ({
+  entries: mockEntries,
+  total: mockEntries.length,
+  isFetchingEntries: false,
+  fetchingEntriesError: null,
+  refetchEntries: mockRefetchEntries,
+  fetchedAt: new Date(),
+}));
+
 vi.mock('../../src/hooks/useAllEntries', () => ({
-  useAllEntries: () => ({
-    entries: [],
-    total: 0,
-    isFetchingEntries: false,
-    fetchingEntriesError: null,
-    refetchEntries: mockRefetchEntries,
-    fetchedAt: new Date(),
-  }),
+  useAllEntries: () => mockUseAllEntries(),
 }));
 
 vi.mock('../../src/hooks/useScheduledActions', () => ({
@@ -46,6 +54,14 @@ const createWrapper = () => {
 describe('Dashboard component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseAllEntries.mockReturnValue({
+      entries: mockEntries,
+      total: mockEntries.length,
+      isFetchingEntries: false,
+      fetchingEntriesError: null,
+      refetchEntries: mockRefetchEntries,
+      fetchedAt: new Date(),
+    });
   });
 
   it('renders the dashboard heading', () => {
@@ -73,5 +89,40 @@ describe('Dashboard component', () => {
 
     expect(mockRefetchEntries).toHaveBeenCalledTimes(1);
     expect(mockRefetchScheduledActions).toHaveBeenCalledTimes(1);
+  });
+
+  describe('Content Publishing Trends Section', () => {
+    beforeEach(() => {
+      mockSdk.parameters.installation = {};
+    });
+
+    it('renders components correctly', () => {
+      render(<Dashboard />, { wrapper: createWrapper() });
+
+      expect(screen.getByText('Content Publishing Trends')).toBeInTheDocument();
+      const select = screen.getByRole('combobox');
+      expect(select).toBeInTheDocument();
+      expect(screen.getByText('New Entries')).toBeInTheDocument();
+    });
+
+    it('default time range is "year"', () => {
+      render(<Dashboard />, { wrapper: createWrapper() });
+
+      expect(screen.getByText('Past Year')).toBeInTheDocument();
+    });
+
+    it('renders all TIME_RANGE_OPTIONS in dropdown', async () => {
+      const user = userEvent.setup();
+      render(<Dashboard />, { wrapper: createWrapper() });
+
+      const select = screen.getByRole('combobox');
+      await user.click(select);
+
+      expect(screen.getByText('Past Month')).toBeInTheDocument();
+      expect(screen.getByText('Past 3 Months')).toBeInTheDocument();
+      expect(screen.getByText('Past 6 Months')).toBeInTheDocument();
+      expect(screen.getByText('Past Year')).toBeInTheDocument();
+      expect(screen.getByText('Year to Date')).toBeInTheDocument();
+    });
   });
 });
