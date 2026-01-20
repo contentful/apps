@@ -18,7 +18,7 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
   data,
   xAxisDataKey,
   processedContentTypes,
-  height = 300,
+  height = 400,
   legendTitle,
 }) => {
   const contentTypesIds = useMemo<string[]>(() => {
