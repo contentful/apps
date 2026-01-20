@@ -7,6 +7,7 @@ import Dialog from './locations/Dialog';
 import Sidebar from './locations/Sidebar';
 import Page from './locations/Page';
 import Home from './locations/Home';
+import Agent from './locations/Agent';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
 const ComponentLocationSettings = {
@@ -17,6 +18,7 @@ const ComponentLocationSettings = {
   [locations.LOCATION_ENTRY_SIDEBAR]: Sidebar,
   [locations.LOCATION_PAGE]: Page,
   [locations.LOCATION_HOME]: Home,
+  [locations.LOCATION_AGENT]: Agent,
 };
 
 const App = () => {
