@@ -9,6 +9,7 @@ import { ReleasesTableActions } from './ReleasesTableActions';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { formatDateTimeWithTimezone } from '../utils/dateFormat';
+import { formatUserName } from '../utils/UserUtils';
 
 const ReleasesTableHeader = () => {
   return (
@@ -34,15 +35,6 @@ export const ReleasesTable = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const { releases, total, isFetchingReleases, fetchingReleasesError, refetchReleases } =
     useReleases(currentPage);
-
-  const formatUserName = (
-    user: { id: string; firstName?: string; lastName?: string } | null
-  ): string => {
-    if (!user) return '—';
-    const firstName = user.firstName || '';
-    const lastName = user.lastName || '';
-    return `${firstName} ${lastName}`.trim() || '—';
-  };
 
   if (fetchingReleasesError) {
     return (
