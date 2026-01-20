@@ -218,20 +218,44 @@ const ConfigScreen = () => {
           <Flex flexDirection="column" gap="spacingM">
             <FormControl>
               <FormControl.Label>Waveform color</FormControl.Label>
-              <TextInput
-                id="waveformColor"
-                name="waveformColor"
-                value={parameters.waveformColor || ''}
-                onChange={(event) =>
-                  setParameters({
-                    ...parameters,
-                    waveformColor: event.target.value,
-                  })
-                }
-                placeholder="white"
-              />
+              <Flex alignItems="center" gap="spacingS">
+                <Box>
+                  <input
+                    id="waveformColor"
+                    name="waveformColor"
+                    type="color"
+                    value={parameters.waveformColor || '#ffffff'}
+                    onChange={(event) =>
+                      setParameters({
+                        ...parameters,
+                        waveformColor: event.target.value,
+                      })
+                    }
+                    aria-label="Waveform color picker"
+                    className={css({
+                      width: '44px',
+                      height: '44px',
+                      padding: 0,
+                      border: '1px solid #CBD5E0',
+                      borderRadius: '6px',
+                      background: 'transparent',
+                    })}
+                  />
+                </Box>
+                <TextInput
+                  value={parameters.waveformColor || ''}
+                  onChange={(event) =>
+                    setParameters({
+                      ...parameters,
+                      waveformColor: event.target.value,
+                    })
+                  }
+                  placeholder="#FFFFFF"
+                  aria-label="Waveform color hex value"
+                />
+              </Flex>
               <FormControl.HelpText>
-                Accepts FFmpeg color values (for example: white, black, #FFFFFF).
+                Uses hex colors from the native picker (for example: #FFFFFF).
               </FormControl.HelpText>
             </FormControl>
 

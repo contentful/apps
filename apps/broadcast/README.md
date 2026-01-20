@@ -248,6 +248,11 @@ apps/broadcast/
 - **`voiceId`**: The ElevenLabs voice ID to use
 - **`generateAudioActionId`**: (Optional) Specific App Action ID
 - **`useMockAi`**: Boolean flag to enable mock mode
+- **`waveformColor`**: Hex color for the waveform overlay (for example: `#FFFFFF`)
+- **`waveformOpacity`**: Opacity for the waveform overlay (0-1)
+- **`kenBurnsEnabled`**: Toggle the Ken Burns zoom effect for video rendering
+- **`kenBurnsZoomIncrement`**: Per-frame zoom increment (for example: `0.0005`)
+- **`kenBurnsMaxZoom`**: Maximum zoom level (for example: `1.5`)
 
 ### Function Configuration
 
