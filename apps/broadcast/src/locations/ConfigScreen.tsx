@@ -20,6 +20,10 @@ export interface AppInstallationParameters {
   voiceId?: string;
   generateAudioActionId?: string;
   useMockAi?: boolean;
+  waveformColor?: string;
+  waveformOpacity?: string;
+  kenBurnsZoomIncrement?: string;
+  kenBurnsMaxZoom?: string;
 }
 
 const ConfigScreen = () => {
@@ -28,6 +32,10 @@ const ConfigScreen = () => {
     voiceId: '',
     generateAudioActionId: '',
     useMockAi: false,
+    waveformColor: 'white',
+    waveformOpacity: '0.9',
+    kenBurnsZoomIncrement: '0.0005',
+    kenBurnsMaxZoom: '1.5',
   });
   const sdk = useSDK<ConfigAppSDK>();
   /*
@@ -83,6 +91,10 @@ const ConfigScreen = () => {
           voiceId: currentParameters.voiceId || '',
           generateAudioActionId: currentParameters.generateAudioActionId || '',
           useMockAi: Boolean(currentParameters.useMockAi),
+          waveformColor: currentParameters.waveformColor || 'white',
+          waveformOpacity: currentParameters.waveformOpacity || '0.9',
+          kenBurnsZoomIncrement: currentParameters.kenBurnsZoomIncrement || '0.0005',
+          kenBurnsMaxZoom: currentParameters.kenBurnsMaxZoom || '1.5',
         });
       }
 
@@ -191,6 +203,89 @@ const ConfigScreen = () => {
             }>
             Use mock audio generator
           </Checkbox>
+        </Box>
+
+        <Box marginBottom="spacingXl">
+          <Heading as="h2" marginBottom="spacingS">
+            Video rendering
+          </Heading>
+          <Paragraph marginBottom="spacingL">
+            Customize the waveform overlay and Ken Burns zoom effect for generated social videos.
+          </Paragraph>
+          <Flex flexDirection="column" gap="spacingM">
+            <FormControl>
+              <FormControl.Label>Waveform color</FormControl.Label>
+              <TextInput
+                id="waveformColor"
+                name="waveformColor"
+                value={parameters.waveformColor}
+                onChange={(event) =>
+                  setParameters({
+                    ...parameters,
+                    waveformColor: event.target.value,
+                  })
+                }
+                placeholder="white"
+              />
+              <FormControl.HelpText>
+                Accepts FFmpeg color values (for example: white, black, #FFFFFF).
+              </FormControl.HelpText>
+            </FormControl>
+
+            <FormControl>
+              <FormControl.Label>Waveform opacity (0-1)</FormControl.Label>
+              <TextInput
+                id="waveformOpacity"
+                name="waveformOpacity"
+                type="number"
+                step="0.05"
+                min="0"
+                max="1"
+                value={parameters.waveformOpacity}
+                onChange={(event) =>
+                  setParameters({
+                    ...parameters,
+                    waveformOpacity: event.target.value,
+                  })
+                }
+              />
+            </FormControl>
+
+            <FormControl>
+              <FormControl.Label>Ken Burns zoom increment</FormControl.Label>
+              <TextInput
+                id="kenBurnsZoomIncrement"
+                name="kenBurnsZoomIncrement"
+                type="number"
+                step="0.0001"
+                value={parameters.kenBurnsZoomIncrement}
+                onChange={(event) =>
+                  setParameters({
+                    ...parameters,
+                    kenBurnsZoomIncrement: event.target.value,
+                  })
+                }
+              />
+              <FormControl.HelpText>Per-frame zoom increase (default 0.0005).</FormControl.HelpText>
+            </FormControl>
+
+            <FormControl>
+              <FormControl.Label>Ken Burns max zoom</FormControl.Label>
+              <TextInput
+                id="kenBurnsMaxZoom"
+                name="kenBurnsMaxZoom"
+                type="number"
+                step="0.1"
+                value={parameters.kenBurnsMaxZoom}
+                onChange={(event) =>
+                  setParameters({
+                    ...parameters,
+                    kenBurnsMaxZoom: event.target.value,
+                  })
+                }
+              />
+            </FormControl>
+          </Flex>
         </Box>
       </Form>
     </Flex>

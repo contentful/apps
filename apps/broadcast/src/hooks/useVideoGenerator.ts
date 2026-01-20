@@ -10,6 +10,10 @@ const LOCAL_WORKER_URL = '/ffmpeg-core.worker.js';
 type GenerateVideoInput = {
   imageUrl: string;
   audioUrl: string;
+  waveformColor?: string;
+  waveformOpacity?: number;
+  kenBurnsZoomIncrement?: number;
+  kenBurnsMaxZoom?: number;
 };
 
 const normalizeAssetUrl = (url: string) => (url.startsWith('//') ? `https:${url}` : url);
@@ -92,7 +96,14 @@ export const useVideoGenerator = () => {
   }, [isReady]);
 
   const generateVideo = useCallback(
-    async ({ imageUrl, audioUrl }: GenerateVideoInput): Promise<Blob> => {
+    async ({
+      imageUrl,
+      audioUrl,
+      waveformColor,
+      waveformOpacity,
+      kenBurnsZoomIncrement,
+      kenBurnsMaxZoom,
+    }: GenerateVideoInput): Promise<Blob> => {
       setIsLoading(true);
       try {
         await loadFFmpeg();
@@ -125,11 +136,18 @@ export const useVideoGenerator = () => {
         await ffmpeg.writeFile('audio.mp3', audioData);
         const fps = 30;
         const zoomPanFrames = Math.max(1, Math.ceil(audioDuration * fps));
+        const zoomIncrement = kenBurnsZoomIncrement ?? 0.0005;
+        const maxZoom = kenBurnsMaxZoom ?? 1.5;
+        const baseColor = waveformColor?.trim() || 'white';
+        const opacity = Math.min(1, Math.max(0, waveformOpacity ?? 0.9));
+        const waveformColorWithOpacity = baseColor.includes('@')
+          ? baseColor
+          : `${baseColor}@${opacity.toFixed(2)}`;
         const filterComplex = [
-          "[0:v]scale=1280:720,format=yuv420p,zoompan=z='min(zoom+0.0005,1.5)':d=" +
+          `[0:v]scale=1280:720,format=yuv420p,zoompan=z='min(zoom+${zoomIncrement},${maxZoom})':d=` +
             zoomPanFrames +
             ':s=1280x720[v0]',
-          '[1:a]showwaves=s=1280x200:mode=cline:colors=white@0.9:scale=sqrt,format=yuva420p,colorchannelmixer=aa=0.8[wave]',
+          `[1:a]showwaves=s=1280x200:mode=cline:colors=${waveformColorWithOpacity}:scale=sqrt,format=yuva420p,colorchannelmixer=aa=0.8[wave]`,
           '[v0][wave]overlay=x=0:y=H-h-24:shortest=1[outv]',
         ].join(';');
 
