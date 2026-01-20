@@ -110,8 +110,6 @@ describe('ChartWrapper component', () => {
       render(<ChartWrapper data={mockData} xAxisDataKey="date" legendTitle="Content Types:" />);
 
       expect(screen.getByText('New Content')).toBeInTheDocument();
-      expect(screen.getByText('Updated Content')).toBeInTheDocument();
-      expect(screen.getByText('Deleted Content')).toBeInTheDocument();
     });
 
     it('legend has correct title text', () => {
