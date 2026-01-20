@@ -24,12 +24,12 @@ const TabPanelContent = ({ description, children }: TabPanelContentProps) => {
   );
 };
 
+
 export const ScheduledContentTabs = () => {
   const { parameters } = useSDK<HomeAppSDK | PageAppSDK>();
   const recentlyPublishedDays = parameters?.installation?.recentlyPublishedDays;
   const needsUpdateMonths = parameters?.installation?.needsUpdateMonths;
   const [currentTab, setCurrentTab] = useState('scheduled');
-
   return (
     <Box marginTop="spacingXl">
       <Box padding="spacingL" style={styles.releasesTableContainer}>
@@ -43,19 +43,19 @@ export const ScheduledContentTabs = () => {
             <Tabs.Tab panelId="needsUpdate">Needs Update</Tabs.Tab>
           </Tabs.List>
           <Tabs.Panel id="scheduled">
-            <TabPanelContent description="Entries and Assets scheduled will appear here.">
+            <TabPanelContent description="Content scheduled will appear here.">
               <ScheduledContentTable />
             </TabPanelContent>
           </Tabs.Panel>
           <Tabs.Panel id="recentlyPublished">
             <TabPanelContent
-              description={`Content published in the last ${recentlyPublishedDays} days will appear here.`}>
+              description={`Content published in the last ${recentlyPublishedDays} ${recentlyPublishedDays === 1 ? 'day' : 'days'} will appear here.`}>
               <RecentlyPublishedTable />
             </TabPanelContent>
           </Tabs.Panel>
           <Tabs.Panel id="needsUpdate">
             <TabPanelContent
-              description={`Content older than ${needsUpdateMonths} months will appear here.`}>
+              description={`Content older than ${needsUpdateMonths} ${needsUpdateMonths === 1 ? 'month' : 'months'} will appear here.`}>
               <NeedsUpdateTable />
             </TabPanelContent>
           </Tabs.Panel>
