@@ -134,10 +134,13 @@ Note: The audio and image assets must be published and accessible by the browser
 - **`npm start`** or **`npm run dev`**: Start the development server with hot reload
 - **`npm run build`**: Build the app for production (includes function build)
 - **`npm run build:functions`**: Build only the Contentful Functions
+- **`npm run preview`**: Preview the production build locally
 - **`npm test`**: Run tests in watch mode
 - **`npm run test:ci`**: Run tests once (for CI)
 - **`npm run upload`**: Upload the built app to Contentful
 - **`npm run upload-ci`**: Upload using environment variables (for CI/CD)
+- **`npm run create-app-definition`**: Create a new app definition in Contentful
+- **`npm run add-locations`**: Add new locations to the app
 
 ### CI/CD Deployment
 
@@ -159,7 +162,8 @@ apps/broadcast/
 │   │   ├── elevenlabs.ts      # ElevenLabs API integration
 │   │   ├── logging.ts         # Generation attempt logging to Contentful
 │   │   └── types.ts           # TypeScript type definitions
-│   └── get-usage-metrics.ts   # App Action handler for usage metrics
+│   ├── get-usage-metrics.ts   # App Action handler for usage metrics
+│   └── tsconfig.json          # TypeScript config for functions
 ├── lib/
 │   └── mock-audio.ts          # Mock audio generator for testing
 ├── src/
@@ -174,17 +178,25 @@ apps/broadcast/
 │   │   ├── ConfigScreen.tsx   # App configuration UI
 │   │   ├── Sidebar.tsx        # Main audio generation interface
 │   │   ├── Page.tsx           # Usage metrics dashboard with activity logs
-│   │   ├── EntryEditor.tsx    # Entry editor location (placeholder)
-│   │   ├── Home.tsx           # Home location (placeholder)
-│   │   └── ...                # Test files and other components
-│   └── App.tsx                # Main app component
+│   │   ├── EntryEditor.tsx    # Entry editor location (placeholder, not registered)
+│   │   ├── Home.tsx           # Home location (placeholder, not registered)
+│   │   ├── Field.tsx          # Field location (placeholder, not registered)
+│   │   ├── Dialog.tsx         # Dialog location (placeholder, not registered)
+│   │   └── *.spec.tsx         # Test files for components
+│   ├── App.tsx                # Main app component with location routing
+│   ├── index.tsx              # App entry point
+│   └── setupTests.ts          # Test setup configuration
 ├── test/
 │   └── mocks/                 # Test mocks for SDK and CMA
 ├── public/
-│   └── ffmpeg-core.worker.js   # Stub worker (single-threaded ffmpeg-core)
+│   └── ffmpeg-core.worker.js  # Stub worker (single-threaded ffmpeg-core)
 ├── contentful-app-manifest.json  # App manifest with functions and actions
+├── vite.config.mts            # Vite configuration
+├── tsconfig.json              # TypeScript configuration
 └── package.json
 ```
+
+**Note**: Only `ConfigScreen`, `Sidebar`, and `Page` locations are registered in the manifest and actively used. Other location components (`EntryEditor`, `Home`, `Field`, `Dialog`) exist in the codebase but are not registered in the manifest.
 
 ## How It Works
 
@@ -234,11 +246,16 @@ apps/broadcast/
 
 1. **User triggers video render** from the Sidebar
 2. **Sidebar resolves assets** for the selected locale:
-   - Audio from `audioAsset`
-   - Image from `featuredImage` or `image`
-3. **Frontend renders MP4** with ffmpeg.wasm (single-threaded core for iframe compatibility)
-4. **Upload helper** creates, processes, and publishes a new video Asset via CMA
-5. **Entry update** links the Asset to `videoAsset` when present
+   - Audio from `audioAsset` (must be published and CORS-accessible)
+   - Image from `featuredImage` or `image` (must be published and CORS-accessible)
+3. **Frontend downloads assets** via fetch with CORS mode
+4. **Frontend renders MP4** with ffmpeg.wasm:
+   - Uses single-threaded core (`ffmpeg-core.wasm`) for iframe compatibility (avoids SharedArrayBuffer requirements)
+   - Generates audio waveform visualization overlay
+   - Applies Ken Burns zoom effect (if enabled) to the still image
+   - Combines audio and image into MP4 video
+5. **Upload helper** (`contentful-upload.ts`) creates, processes, and publishes a new video Asset via CMA
+6. **Entry update** links the Asset to `videoAsset` field when present (shows warning if field is missing)
 
 ## Configuration
 
@@ -248,11 +265,11 @@ apps/broadcast/
 - **`voiceId`**: The ElevenLabs voice ID to use
 - **`generateAudioActionId`**: (Optional) Specific App Action ID
 - **`useMockAi`**: Boolean flag to enable mock mode
-- **`waveformColor`**: Hex color for the waveform overlay (for example: `#FFFFFF`)
-- **`waveformOpacity`**: Opacity for the waveform overlay (0-1)
-- **`kenBurnsEnabled`**: Toggle the Ken Burns zoom effect for video rendering
-- **`kenBurnsZoomIncrement`**: Per-frame zoom increment (for example: `0.0005`)
-- **`kenBurnsMaxZoom`**: Maximum zoom level (for example: `1.5`)
+- **`waveformColor`**: Hex color for the waveform overlay (default: `white`, example: `#FFFFFF`)
+- **`waveformOpacity`**: Opacity for the waveform overlay (default: `0.9`, range: 0-1)
+- **`kenBurnsEnabled`**: Toggle the Ken Burns zoom effect for video rendering (default: `false`)
+- **`kenBurnsZoomIncrement`**: Per-frame zoom increment (default: `0.0005`)
+- **`kenBurnsMaxZoom`**: Maximum zoom level (default: `1.5`)
 
 ### Function Configuration
 
@@ -289,13 +306,19 @@ Test files are located alongside their components:
 
 Mock mode can be enabled in the configuration screen to test audio generation without an ElevenLabs API key. Note that usage metrics require a valid API key with appropriate permissions (Administration > User > Read for restricted keys).
 
+The app includes comprehensive test coverage for all active location components (`ConfigScreen`, `Sidebar`, `Page`) using Vitest and React Testing Library. Test files are co-located with their components (`.spec.tsx` files).
+
 ## Libraries & Dependencies
 
-- **[Forma 36](https://f36.contentful.com/)**: Contentful's design system and React components
-- **[Contentful App SDK](https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/)**: SDK for building Contentful apps
-- **[Contentful Management API](https://www.contentful.com/developers/docs/references/content-management-api/)**: For creating and managing assets
+- **[Forma 36](https://f36.contentful.com/)**: Contentful's design system and React components (`@contentful/f36-components`, `@contentful/f36-tokens`, `@contentful/f36-icons`)
+- **[Contentful App SDK](https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/)**: SDK for building Contentful apps (`@contentful/app-sdk`)
+- **[Contentful React Apps Toolkit](https://www.npmjs.com/package/@contentful/react-apps-toolkit)**: React hooks and utilities for Contentful apps
+- **[Contentful Management API](https://www.contentful.com/developers/docs/references/content-management-api/)**: For creating and managing assets (`contentful-management`)
 - **[Contentful Node Apps Toolkit](https://www.npmjs.com/package/@contentful/node-apps-toolkit)**: For building Contentful Functions
 - **[ElevenLabs API](https://elevenlabs.io/docs)**: Text-to-speech service and subscription management
+- **[ffmpeg.wasm](https://ffmpegwasm.netlify.app/)**: WebAssembly-based video processing (`@ffmpeg/ffmpeg`, `@ffmpeg/core`)
+- **[Vite](https://vitejs.dev/)**: Build tool and development server
+- **[Vitest](https://vitest.dev/)**: Testing framework with React Testing Library
 
 ## Learn More
 
