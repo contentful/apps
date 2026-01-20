@@ -86,12 +86,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
 
         <Tabs.Panel id="newEntries">
           <Box marginTop="spacingM">
-            <ChartWrapper
-              data={newEntries}
-              xAxisDataKey="date"
-              linesLegends={['New Content']}
-              legendTitle="Content:"
-            />
+            <ChartWrapper data={newEntries} xAxisDataKey="date" legendTitle="Content:" />
           </Box>
         </Tabs.Panel>
 
@@ -110,7 +105,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
               <ChartWrapper
                 data={contentTypeData.data}
                 xAxisDataKey="date"
-                linesLegends={Array.from(contentTypeData.processedContentTypes.values())}
+                processedContentTypes={contentTypeData.processedContentTypes}
                 legendTitle="Content Types:"
               />
             )}
@@ -126,12 +121,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
             ) : creatorData.creators.length === 0 ? (
               <Box padding="spacingL">No creator data available for the selected time range.</Box>
             ) : (
-              <ChartWrapper
-                data={creatorData.data}
-                xAxisDataKey="date"
-                linesLegends={creatorData.creators}
-                legendTitle="Creators:"
-              />
+              <ChartWrapper data={creatorData.data} xAxisDataKey="date" legendTitle="Creators:" />
             )}
           </Box>
         </Tabs.Panel>

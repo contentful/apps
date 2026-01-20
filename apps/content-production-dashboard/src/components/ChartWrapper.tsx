@@ -17,13 +17,30 @@ import type { ChartWrapperProps } from '../utils/types';
 export const ChartWrapper: React.FC<ChartWrapperProps> = ({
   data,
   xAxisDataKey,
-  linesLegends,
+  processedContentTypes,
   height = 400,
   legendTitle,
 }) => {
+  const contentTypesIds = useMemo<string[]>(() => {
+    if (processedContentTypes) {
+      return Array.from(processedContentTypes.keys());
+    }
+
+    if (data.length === 0) {
+      return [];
+    }
+
+    const firstPointKeys = Object.keys(data[0]);
+    return firstPointKeys.filter((key) => key !== xAxisDataKey).sort();
+  }, [data, xAxisDataKey, processedContentTypes]);
+
+  const contentTypesNames = useMemo<string[]>(() => {
+    return processedContentTypes ? Array.from(processedContentTypes.values()) : contentTypesIds;
+  }, [processedContentTypes, contentTypesIds]);
+
   const colors = useMemo(() => {
-    return linesLegends.map((_, index) => CHART_COLORS[index % CHART_COLORS.length]);
-  }, [linesLegends.length]);
+    return contentTypesIds.map((_, index) => CHART_COLORS[index % CHART_COLORS.length]);
+  }, [contentTypesIds.length]);
 
   return (
     <Flex flexDirection="row" alignItems="flex-start">
@@ -40,7 +57,7 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
             />
             <YAxis tick={{ fontSize: 12 }} />
             <Tooltip />
-            {linesLegends.map((key, index) => (
+            {contentTypesIds.map((key, index) => (
               <Line
                 key={`${key}-${index}`}
                 type="linear"
@@ -71,9 +88,9 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
             marginBottom="spacingXs">
             {legendTitle}
           </Text>
-          {linesLegends.map((key, index) => (
+          {contentTypesNames.map((name: string, index: number) => (
             <Flex
-              key={`${key}-${index}`}
+              key={`${name}-${index}`}
               alignItems="center"
               gap="spacing2Xs"
               marginBottom="spacingXs">
@@ -84,7 +101,7 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
                 }}
               />
               <Text fontSize="fontSizeM" fontColor="gray700">
-                {key}
+                {name}
               </Text>
             </Flex>
           ))}
