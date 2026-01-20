@@ -114,6 +114,7 @@ export function generateNewEntriesChartData(
 ): ChartDataPoint[] {
   const startDate = getStartDateForTimeRange(options.timeRange);
   const now = new Date();
+
   const filteredEntries = filterEntriesByContentTypes(entries, contentTypes);
   const allMonths = generateMonthRange(startDate, now);
 
@@ -140,7 +141,30 @@ export function generateContentTypeChartData(
 ): { data: ChartDataPoint[]; processedContentTypes: Map<string, string> } {
   const startDate = getStartDateForTimeRange(options.timeRange);
   const now = new Date();
+  const contentTypeMap = new Map<string, Map<string, number>>();
+  const foundContentTypeIds = new Set<string>();
+
   const filteredEntries = filterEntriesByContentTypes(entries, contentTypes);
+
+  filteredEntries.forEach((entry) => {
+    const createdAt = parseDate(entry?.sys?.createdAt);
+    if (!createdAt || createdAt < startDate) return;
+
+    const contentTypeId = entry.sys.contentType?.sys?.id;
+    if (!contentTypeId) return;
+
+    const monthYear = formatMonthYear(createdAt);
+    foundContentTypeIds.add(contentTypeId);
+
+    if (!contentTypeMap.has(monthYear)) {
+      contentTypeMap.set(monthYear, new Map());
+    }
+
+    const monthData = contentTypeMap.get(monthYear)!;
+    monthData.set(contentTypeId, (monthData.get(contentTypeId) || 0) + 1);
+  });
+
+  // Generate all months in range
   const allMonths = generateMonthRange(startDate, now);
 
   // Group entries by month and contentTypeId
@@ -171,6 +195,7 @@ export function generateCreatorChartData(
 ): { data: ChartDataPoint[]; creators: string[] } {
   const startDate = getStartDateForTimeRange(options.timeRange);
   const now = new Date();
+
   const filteredEntries = filterEntriesByContentTypes(entries, contentTypes);
   const allMonths = generateMonthRange(startDate, now);
 
