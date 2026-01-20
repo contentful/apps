@@ -11,7 +11,12 @@ const emptyStateStyle: CSSProperties = {
 
 export const EmptyStateTable = () => {
   return (
-    <Flex padding="spacing3Xl" style={emptyStateStyle} flexDirection="column" alignItems="center" justifyContent="center">
+    <Flex
+      padding="spacing3Xl"
+      style={emptyStateStyle}
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center">
       <Text fontSize="fontSizeL" fontColor="gray600" fontWeight="fontWeightDemiBold">
         No entries found
       </Text>

@@ -6,4 +6,3 @@ export const styles = {
   contentTypeCell: cellWithWidth('25%'),
   publishedDateCell: cellWithWidth('15%'),
 };
-

@@ -24,7 +24,6 @@ const TabPanelContent = ({ description, children }: TabPanelContentProps) => {
   );
 };
 
-
 export const ScheduledContentTabs = () => {
   const { parameters } = useSDK<HomeAppSDK | PageAppSDK>();
   const recentlyPublishedDays = parameters?.installation?.recentlyPublishedDays;
@@ -64,6 +63,3 @@ export const ScheduledContentTabs = () => {
     </Box>
   );
 };
-
-
-

@@ -8,4 +8,3 @@ export const styles = {
   scheduledDateCell: cellWithWidth('15%'),
   statusCell: cellWithWidth('15%'),
 };
-

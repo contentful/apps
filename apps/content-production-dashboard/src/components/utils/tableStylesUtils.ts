@@ -5,4 +5,3 @@ export const cellWithWidth = (width: string): CSSProperties => ({
   width,
   minWidth: '50px',
 });
-

@@ -7,4 +7,3 @@ export const styles = {
   publishedDateCell: cellWithWidth('15%'),
   ageCell: cellWithWidth('15%'),
 };
-

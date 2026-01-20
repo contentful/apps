@@ -17,7 +17,7 @@ const NeedsUpdateTableHeader = () => {
 };
 
 export const NeedsUpdateTable = () => {
-  const ITEMS = [] // TODO: Add actual items here 
+  const ITEMS = []; // TODO: Add actual items here
 
   if (ITEMS.length === 0) {
     return <EmptyStateTable />;
@@ -29,4 +29,3 @@ export const NeedsUpdateTable = () => {
     </Table>
   );
 };
-

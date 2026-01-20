@@ -16,7 +16,7 @@ const RecentlyPublishedTableHeader = () => {
 };
 
 export const RecentlyPublishedTable = () => {
-  const ITEMS = [] // TODO: Add actual items here 
+  const ITEMS = []; // TODO: Add actual items here
 
   if (ITEMS.length === 0) {
     return <EmptyStateTable />;
@@ -28,4 +28,3 @@ export const RecentlyPublishedTable = () => {
     </Table>
   );
 };
-
