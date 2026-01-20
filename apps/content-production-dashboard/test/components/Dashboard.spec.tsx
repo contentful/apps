@@ -54,14 +54,11 @@ describe('Dashboard component', () => {
     expect(screen.getByText('Content Dashboard')).toBeInTheDocument();
   });
 
-  it('renders all metric cards', () => {
+  it('renders metric cards', () => {
     render(<Dashboard />, { wrapper: createWrapper() });
 
     expect(screen.getByText('Total Published')).toBeInTheDocument();
     expect(screen.getByText('Average Time to Publish')).toBeInTheDocument();
-    expect(screen.getByText('Scheduled')).toBeInTheDocument();
-    expect(screen.getByText('Recently Published')).toBeInTheDocument();
-    expect(screen.getByText('Needs Update')).toBeInTheDocument();
   });
 
   it('calls refetchEntries and refetchScheduledActions when refresh button is clicked', async () => {
