@@ -18,6 +18,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import type { Editor } from '@tiptap/react';
 import { styles } from '../components/Agent.styles';
 import { AIChatEmptyState } from '../components/AgentEmptyChat';
+import { AGENT_API_BASE_URL } from '../constants';
 
 const Agent = () => {
   const sdk = useSDK<AgentAppSDK>();
@@ -29,8 +30,7 @@ const Agent = () => {
   const pendingLayoutChangeRef = useRef<'expanded' | 'normal' | null>(null);
   const editorRef = useRef<Editor | null>(null);
 
-  const apiBase = 'https://d66179c76ce9.ngrok-free.app';
-  const apiUrl = apiBase ? `${apiBase.replace(/\/$/, '')}/api/agent/stream` : '/api/agent/stream';
+  const apiUrl = `${AGENT_API_BASE_URL.replace(/\/$/, '')}/api/agent/stream`;
 
   const { messages, append, status, stop } = useChat({
     api: apiUrl,

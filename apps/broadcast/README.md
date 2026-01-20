@@ -24,6 +24,7 @@ A Contentful App that generates audio voiceovers from entry text using ElevenLab
 - **UI Components**: Forma 36 (Contentful's design system)
 - **Testing**: Vitest with React Testing Library
 - **Video Rendering**: ffmpeg.wasm runs in the browser to avoid serverless timeouts
+- **Agent UI**: Forma 36 AI components + Vercel AI SDK `useChat`
 
 ### Backend
 - **Runtime**: Contentful Functions (Node.js)
@@ -31,6 +32,7 @@ A Contentful App that generates audio voiceovers from entry text using ElevenLab
 - **API Integration**: ElevenLabs Text-to-Speech API and Subscription API
 - **Asset Management**: Contentful Management API (CMA)
 - **Architecture**: Modular function structure with separated concerns (constants, Contentful operations, ElevenLabs integration, logging)
+- **Agent Server**: Minimal Node + TypeScript server for Bedrock LLM chat streaming
 
 ## Prerequisites
 
@@ -85,6 +87,42 @@ This content type is created automatically on first use and is used by the usage
 
 ## Usage
 
+### Agent Chat (MVP)
+
+The Agent location uses a lightweight local server that streams responses from Amazon Bedrock using the Vercel AI SDK.
+
+#### Environment variables
+
+Server (local):
+- `AWS_BEARER_TOKEN_BEDROCK`: Bedrock long-lived bearer token (required)
+- `BEDROCK_MODEL_ID`: Bedrock model ID or inference profile ARN (required for Claude 4.5)
+- `AGENT_ALLOWED_ORIGINS`: Comma-separated CORS allowlist (optional)
+- `PORT`: Server port (default `8787`)
+
+Frontend (Contentful-hosted):
+- `AGENT_API_BASE_URL` in `src/constants.ts`: Public URL where the agent server is reachable (e.g. ngrok URL)
+
+#### Local dev workflow (with ngrok)
+
+1. Start the server:
+   ```bash
+   npm run dev:server
+   ```
+2. Start a tunnel:
+   ```bash
+   ngrok http 8787
+   ```
+3. Update the frontend constant:
+   ```ts
+   export const AGENT_API_BASE_URL = 'https://<your-ngrok-domain>';
+   ```
+4. (Optional) Restrict CORS:
+   ```bash
+   AGENT_ALLOWED_ORIGINS=https://<your-ctfcloud-domain>
+   ```
+
+The server streams text and the UI is configured with `streamProtocol: 'text'`.
+
 ### Generating Audio
 
 1. **Open an entry** in Contentful that has the required fields (`body` and `audioAsset`)
@@ -132,8 +170,10 @@ Note: The audio and image assets must be published and accessible by the browser
 ### Available Scripts
 
 - **`npm start`** or **`npm run dev`**: Start the development server with hot reload
+- **`npm run dev:server`**: Start the local Agent server (Bedrock streaming)
 - **`npm run build`**: Build the app for production (includes function build)
 - **`npm run build:functions`**: Build only the Contentful Functions
+- **`npm run build:server`**: Type-check/build the Agent server
 - **`npm run preview`**: Preview the production build locally
 - **`npm test`**: Run tests in watch mode
 - **`npm run test:ci`**: Run tests once (for CI)
@@ -166,6 +206,10 @@ apps/broadcast/
 │   └── tsconfig.json          # TypeScript config for functions
 ├── lib/
 │   └── mock-audio.ts          # Mock audio generator for testing
+├── server/
+│   ├── src/
+│   │   └── server.ts           # Bedrock chat streaming endpoint
+│   └── tsconfig.json           # TypeScript config for server
 ├── src/
 │   ├── hooks/
 │   │   └── useVideoGenerator.ts # ffmpeg.wasm video renderer
@@ -178,6 +222,7 @@ apps/broadcast/
 │   │   ├── ConfigScreen.tsx   # App configuration UI
 │   │   ├── Sidebar.tsx        # Main audio generation interface
 │   │   ├── Page.tsx           # Usage metrics dashboard with activity logs
+│   │   ├── Agent.tsx          # Agent chat UI (Bedrock-backed)
 │   │   ├── EntryEditor.tsx    # Entry editor location (placeholder, not registered)
 │   │   ├── Home.tsx           # Home location (placeholder, not registered)
 │   │   ├── Field.tsx          # Field location (placeholder, not registered)
@@ -196,7 +241,15 @@ apps/broadcast/
 └── package.json
 ```
 
-**Note**: Only `ConfigScreen`, `Sidebar`, and `Page` locations are registered in the manifest and actively used. Other location components (`EntryEditor`, `Home`, `Field`, `Dialog`) exist in the codebase but are not registered in the manifest.
+**Note**: `ConfigScreen`, `Sidebar`, `Page`, and `Agent` locations are registered in the manifest and actively used. Other location components (`EntryEditor`, `Home`, `Field`, `Dialog`) exist in the codebase but are not registered in the manifest.
+
+## Agent Roadmap (implementation hints)
+
+- Add server-side prompts for Contentful context (space/environment IDs are already passed from the client).
+- Enrich messages with entry metadata or search results before calling Bedrock.
+- Add tool calls for asset generation, usage metrics, and content suggestions.
+- Persist chat history in Contentful or an external store.
+- Add rate limits and per-space auth for production.
 
 ## How It Works
 
