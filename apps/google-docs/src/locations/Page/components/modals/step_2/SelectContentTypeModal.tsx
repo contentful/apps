@@ -7,7 +7,6 @@ import {
   Paragraph,
   Pill,
   Multiselect,
-  Spinner,
 } from '@contentful/f36-components';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
@@ -133,7 +132,7 @@ export const ContentTypePickerModal = ({
   };
 
   const handleClose = () => {
-    if (isSubmitting) return; // Prevent closing during submission
+    if (isSubmitting && !isInvalidSelection) return;
     onClose();
   };
 
@@ -147,13 +146,13 @@ export const ContentTypePickerModal = ({
   };
 
   return (
-    <Modal title="Select content type(s)" isShown={isOpen} onClose={handleClose} size="medium">
+    <Modal title="Select content type(s)" isShown={isOpen} onClose={() => {}} size="medium">
       {() => (
         <>
-          <Modal.Header title="Select content type(s)" onClose={handleClose} />
-          <Modal.Content>
+          <Modal.Header title="Select content type(s)" />
+          <Modal.Content className={css({ paddingBottom: '160px' })}>
             <Paragraph marginBottom="spacingM" color="gray700">
-              Select the content type(s) you would like to use with this sync.
+              Select the content type(s) you would like to use with this document.
             </Paragraph>
             <FormControl isRequired isInvalid={isInvalidSelectionError || showFetchError}>
               <FormControl.Label>Content type</FormControl.Label>
@@ -195,7 +194,7 @@ export const ContentTypePickerModal = ({
             </FormControl>
 
             {selectedContentTypes.length > 0 && (
-              <Flex flexWrap="wrap" gap="spacingXs" marginTop="spacingS">
+              <Flex flexWrap="wrap" gap="spacingXs" marginTop="spacingS" marginBottom="spacingXl">
                 {selectedContentTypes.map((ct) => (
                   <Pill
                     key={ct.sys.id}
