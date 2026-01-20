@@ -10,6 +10,7 @@ const ScheduledContentTableHeader = () => {
         <Table.Cell style={styles.creatorCell}>Creator</Table.Cell>
         <Table.Cell style={styles.contentTypeCell}>Content Type</Table.Cell>
         <Table.Cell style={styles.publishedDateCell}>Published Date</Table.Cell>
+        <Table.Cell style={styles.scheduledDateCell}>Scheduled Date</Table.Cell>
         <Table.Cell style={styles.statusCell}>Status</Table.Cell>
       </Table.Row>
     </Table.Head>
@@ -21,7 +22,7 @@ export const ScheduledContentTable = () => {
     <Table>
       <ScheduledContentTableHeader />
       <Table.Body>
-        <EmptyStateTable colSpan={5} />
+        <EmptyStateTable />
       </Table.Body>
     </Table>
   );

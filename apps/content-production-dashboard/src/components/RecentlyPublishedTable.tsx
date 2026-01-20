@@ -20,7 +20,7 @@ export const RecentlyPublishedTable = () => {
     <Table>
       <RecentlyPublishedTableHeader />
       <Table.Body>
-        <EmptyStateTable colSpan={4} />
+        <EmptyStateTable />
       </Table.Body>
     </Table>
   );

@@ -21,7 +21,7 @@ export const NeedsUpdateTable = () => {
     <Table>
       <NeedsUpdateTableHeader />
       <Table.Body>
-        <EmptyStateTable colSpan={5} />
+        <EmptyStateTable />
       </Table.Body>
     </Table>
   );
