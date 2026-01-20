@@ -101,7 +101,8 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
               <Flex padding="spacingL" justifyContent="center">
                 <Spinner size="medium" />
               </Flex>
-            ) : contentTypeData.contentTypes.length === 0 ? (
+            ) : !contentTypeData?.processedContentTypes ||
+              contentTypeData.processedContentTypes.size === 0 ? (
               <Box padding="spacingL">
                 No content type data available for the selected time range.
               </Box>
@@ -109,7 +110,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
               <ChartWrapper
                 data={contentTypeData.data}
                 xAxisDataKey="date"
-                linesLegends={contentTypeData.contentTypes}
+                linesLegends={Array.from(contentTypeData.processedContentTypes.values())}
                 legendTitle="Content Types:"
               />
             )}

@@ -61,6 +61,52 @@ function filterEntriesByContentTypes(
   });
 }
 
+function groupEntriesByMonthAndKey(
+  entries: EntryProps[],
+  startDate: Date,
+  getKey: (entry: EntryProps) => string | null
+): Map<string, Map<string, number>> {
+  const monthMap = new Map<string, Map<string, number>>();
+
+  for (const entry of entries) {
+    const createdAt = parseDate(entry?.sys?.createdAt);
+    if (!createdAt || createdAt < startDate) continue;
+
+    const key = getKey(entry);
+    if (!key) continue;
+
+    const monthYear = formatMonthYear(createdAt);
+
+    if (!monthMap.has(monthYear)) {
+      monthMap.set(monthYear, new Map());
+    }
+
+    const monthData = monthMap.get(monthYear)!;
+    monthData.set(key, (monthData.get(key) || 0) + 1);
+  }
+
+  return monthMap;
+}
+
+function buildChartDataFromMonthMap(
+  monthMap: Map<string, Map<string, number>>,
+  allMonths: string[],
+  keys: string[]
+): ChartDataPoint[] {
+  return allMonths.map((monthYear) => {
+    const monthData = monthMap.get(monthYear) || new Map();
+    const dataPoint: ChartDataPoint = {
+      date: formatMonthYearDisplay(monthYear),
+    };
+
+    for (const key of keys) {
+      dataPoint[key] = monthData.get(key) || 0;
+    }
+
+    return dataPoint;
+  });
+}
+
 export function generateNewEntriesChartData(
   entries: EntryProps[],
   options: TrendsDataProcessorOptions,
@@ -68,25 +114,22 @@ export function generateNewEntriesChartData(
 ): ChartDataPoint[] {
   const startDate = getStartDateForTimeRange(options.timeRange);
   const now = new Date();
-  const monthMap = new Map<string, number>();
-
   const filteredEntries = filterEntriesByContentTypes(entries, contentTypes);
-
-  filteredEntries.forEach((entry) => {
-    const createdAt = parseDate(entry?.sys?.createdAt);
-    if (!createdAt || createdAt < startDate) return;
-
-    const monthYear = formatMonthYear(createdAt);
-    monthMap.set(monthYear, (monthMap.get(monthYear) || 0) + 1);
-  });
-
-  // Generate all months in range
   const allMonths = generateMonthRange(startDate, now);
 
-  // Convert to chart data format
+  const monthCounts = new Map<string, number>();
+  for (const entry of filteredEntries) {
+    const createdAt = parseDate(entry?.sys?.createdAt);
+    if (!createdAt || createdAt < startDate) continue;
+
+    const monthYear = formatMonthYear(createdAt);
+    monthCounts.set(monthYear, (monthCounts.get(monthYear) || 0) + 1);
+  }
+
+  // Build chart data
   return allMonths.map((monthYear) => ({
     date: formatMonthYearDisplay(monthYear),
-    'New Content': monthMap.get(monthYear) || 0,
+    'New Content': monthCounts.get(monthYear) || 0,
   }));
 }
 
@@ -94,55 +137,30 @@ export function generateContentTypeChartData(
   entries: EntryProps[],
   options: TrendsDataProcessorOptions,
   contentTypes?: Map<string, string>
-): { data: ChartDataPoint[]; contentTypes: string[] } {
+): { data: ChartDataPoint[]; processedContentTypes: Map<string, string> } {
   const startDate = getStartDateForTimeRange(options.timeRange);
   const now = new Date();
-  const contentTypeMap = new Map<string, Map<string, number>>();
-  const foundContentTypeIds = new Set<string>();
-
   const filteredEntries = filterEntriesByContentTypes(entries, contentTypes);
-
-  filteredEntries.forEach((entry) => {
-    const createdAt = parseDate(entry?.sys?.createdAt);
-    if (!createdAt || createdAt < startDate) return;
-
-    const contentTypeId = entry.sys.contentType?.sys?.id;
-    if (!contentTypeId) return;
-
-    const monthYear = formatMonthYear(createdAt);
-    foundContentTypeIds.add(contentTypeId);
-
-    if (!contentTypeMap.has(monthYear)) {
-      contentTypeMap.set(monthYear, new Map());
-    }
-
-    const monthData = contentTypeMap.get(monthYear)!;
-    monthData.set(contentTypeId, (monthData.get(contentTypeId) || 0) + 1);
-  });
-
-  // Generate all months in range
   const allMonths = generateMonthRange(startDate, now);
-  const contentTypeNamesArray = Array.from(contentTypes?.values() || []).sort();
 
-  // Convert to chart data format
-  const data = allMonths.map((monthYear) => {
-    const monthData = contentTypeMap.get(monthYear) || new Map();
-    const dataPoint: ChartDataPoint = {
-      date: formatMonthYearDisplay(monthYear),
-    };
-
-    contentTypeNamesArray.forEach((contentTypeName) => {
-      // Find the key (contentTypeId) that has this value (contentTypeName)
-      const contentTypeId = Array.from(contentTypes?.entries() || []).find(
-        ([, value]) => value === contentTypeName
-      )?.[0];
-      dataPoint[contentTypeName] = monthData.get(contentTypeId || '') || 0;
-    });
-
-    return dataPoint;
+  // Group entries by month and contentTypeId
+  const monthMap = groupEntriesByMonthAndKey(filteredEntries, startDate, (entry) => {
+    return entry.sys.contentType?.sys?.id || null;
   });
 
-  return { data, contentTypes: contentTypeNamesArray };
+  const contentTypeIds = Array.from(contentTypes?.keys() || []).sort();
+
+  const data = buildChartDataFromMonthMap(monthMap, allMonths, contentTypeIds);
+
+  const processedContentTypes = new Map<string, string>();
+  contentTypeIds.forEach((contentTypeId) => {
+    const contentTypeName = contentTypes?.get(contentTypeId);
+    if (contentTypeName) {
+      processedContentTypes.set(contentTypeId, contentTypeName);
+    }
+  });
+
+  return { data, processedContentTypes };
 }
 
 export function generateCreatorChartData(
@@ -153,47 +171,23 @@ export function generateCreatorChartData(
 ): { data: ChartDataPoint[]; creators: string[] } {
   const startDate = getStartDateForTimeRange(options.timeRange);
   const now = new Date();
-  const creatorMap = new Map<string, Map<string, number>>();
-  const creators = new Set<string>();
-
   const filteredEntries = filterEntriesByContentTypes(entries, contentTypes);
+  const allMonths = generateMonthRange(startDate, now);
 
-  filteredEntries.forEach((entry) => {
-    const createdAt = parseDate(entry?.sys?.createdAt);
-    if (!createdAt || createdAt < startDate) return;
-
+  // Group entries by month and creator name
+  const creatorsSet = new Set<string>();
+  const monthMap = groupEntriesByMonthAndKey(filteredEntries, startDate, (entry) => {
     const creatorId = entry.sys.createdBy?.sys?.id;
-    if (!creatorId) return;
+    if (!creatorId) return null;
 
     const creatorName = creatorsNames?.get(creatorId) || creatorId;
-    const monthYear = formatMonthYear(createdAt);
-    creators.add(creatorName);
-
-    if (!creatorMap.has(monthYear)) {
-      creatorMap.set(monthYear, new Map());
-    }
-
-    const monthData = creatorMap.get(monthYear)!;
-    monthData.set(creatorName, (monthData.get(creatorName) || 0) + 1);
+    creatorsSet.add(creatorName);
+    return creatorName;
   });
 
-  // Generate all months in range
-  const allMonths = generateMonthRange(startDate, now);
-  const creatorArray = Array.from(creators).sort();
+  const creators = Array.from(creatorsSet).sort();
 
-  // Convert to chart data format
-  const data = allMonths.map((monthYear) => {
-    const monthData = creatorMap.get(monthYear) || new Map();
-    const dataPoint: ChartDataPoint = {
-      date: formatMonthYearDisplay(monthYear),
-    };
+  const data = buildChartDataFromMonthMap(monthMap, allMonths, creators);
 
-    creatorArray.forEach((creatorName) => {
-      dataPoint[creatorName] = monthData.get(creatorName) || 0;
-    });
-
-    return dataPoint;
-  });
-
-  return { data, creators: creatorArray };
+  return { data, creators };
 }
