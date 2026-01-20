@@ -17,12 +17,15 @@ const NeedsUpdateTableHeader = () => {
 };
 
 export const NeedsUpdateTable = () => {
+  const ITEMS = [] // TODO: Add actual items here 
+
+  if (ITEMS.length === 0) {
+    return <EmptyStateTable />;
+  }
+
   return (
     <Table>
       <NeedsUpdateTableHeader />
-      <Table.Body>
-        <EmptyStateTable />
-      </Table.Body>
     </Table>
   );
 };

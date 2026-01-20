@@ -16,12 +16,15 @@ const RecentlyPublishedTableHeader = () => {
 };
 
 export const RecentlyPublishedTable = () => {
+  const ITEMS = [] // TODO: Add actual items here 
+
+  if (ITEMS.length === 0) {
+    return <EmptyStateTable />;
+  }
+
   return (
     <Table>
       <RecentlyPublishedTableHeader />
-      <Table.Body>
-        <EmptyStateTable />
-      </Table.Body>
     </Table>
   );
 };

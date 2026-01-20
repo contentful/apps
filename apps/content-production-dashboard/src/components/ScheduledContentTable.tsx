@@ -18,6 +18,12 @@ const ScheduledContentTableHeader = () => {
 };
 
 export const ScheduledContentTable = () => {
+  const ITEMS = [] // TODO: Add actual items here 
+
+  if (ITEMS.length === 0) {
+    return <EmptyStateTable />;
+  }
+
   return (
     <Table>
       <ScheduledContentTableHeader />
