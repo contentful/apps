@@ -1,6 +1,6 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ContentTrendsTabs } from '../../src/components/ContentTrendsTabs';
 import { QueryProvider } from '../../src/providers/QueryProvider';
 import { createMockEntry, createMockUser, renderWithAct } from '../utils/testHelpers';
@@ -437,7 +437,11 @@ describe('ContentTrendsTabs component', () => {
   describe('Default Content Types Functionality', () => {
     it('ContentTypeSelector renders in correct tabs', async () => {
       await renderWithAct(
-        <ContentTrendsTabs entries={mockEntries} defaultContentTypes={[]} timeRange="year" />,
+        <ContentTrendsTabs
+          entries={mockEntries}
+          defaultContentTypes={[]}
+          timeRange={TimeRange.Year}
+        />,
         { wrapper: createWrapper() }
       );
 
@@ -473,7 +477,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={defaultTypes}
-          timeRange="year"
+          timeRange={TimeRange.Year}
         />,
         { wrapper: createWrapper() }
       );
@@ -482,12 +486,16 @@ describe('ContentTrendsTabs component', () => {
         expect(screen.getAllByText('Article')[0]).toBeInTheDocument();
         expect(screen.getAllByText('Blog Post')[0]).toBeInTheDocument();
       });
-      expect(mockProcessNewEntries).toHaveBeenCalled();
+      expect(mockGenerateNewEntriesChartData).toHaveBeenCalled();
     });
 
     it('initializes without defaultContentTypes (first 5 sorted)', async () => {
       await renderWithAct(
-        <ContentTrendsTabs entries={mockEntries} defaultContentTypes={[]} timeRange="year" />,
+        <ContentTrendsTabs
+          entries={mockEntries}
+          defaultContentTypes={[]}
+          timeRange={TimeRange.Year}
+        />,
         { wrapper: createWrapper() }
       );
 
@@ -498,7 +506,7 @@ describe('ContentTrendsTabs component', () => {
         expect(screen.getAllByText('Product')[0]).toBeInTheDocument();
         expect(screen.getAllByText('Video')[0]).toBeInTheDocument();
       });
-      expect(mockProcessNewEntries).toHaveBeenCalled();
+      expect(mockGenerateNewEntriesChartData).toHaveBeenCalled();
     });
   });
 });
