@@ -1,4 +1,4 @@
-import { EntryProps } from 'contentful-management';
+import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { parseDate, msPerDay } from './dateCalculator';
 import { formatMonthYear, formatMonthYearDisplay } from './dateFormat';
 import type {
@@ -147,7 +147,7 @@ export function generateMonthRange(startDate: Date, endDate: Date): string[] {
 
 function filterEntriesByContentTypes(
   entries: EntryProps[],
-  contentTypes?: Map<string, string>
+  contentTypes?: Map<string, ContentTypeProps>
 ): EntryProps[] {
   if (!contentTypes || contentTypes.size === 0) {
     return entries;
@@ -207,7 +207,7 @@ function buildChartDataFromMonthMap(
 function setupChartData(
   entries: EntryProps[],
   options: TrendsDataProcessorOptions,
-  contentTypes?: Map<string, string>
+  contentTypes?: Map<string, ContentTypeProps>
 ): ChartDataSetup {
   const startDate = getStartDateForTimeRange(options.timeRange);
   const now = new Date();

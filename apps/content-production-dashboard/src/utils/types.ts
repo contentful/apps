@@ -39,3 +39,8 @@ export type MonthMetrics = {
   newContent: number;
   avgTimeToPublish: number | undefined;
 };
+export enum EntryStatus {
+    Draft = 'Draft',
+    Published = 'Published',
+    Changed = 'Changed',
+  }
