@@ -48,13 +48,17 @@ export const ScheduledContentTabs = () => {
           </Tabs.Panel>
           <Tabs.Panel id="recentlyPublished">
             <TabPanelContent
-              description={`Content published in the last ${recentlyPublishedDays} ${recentlyPublishedDays === 1 ? 'day' : 'days'} will appear here.`}>
+              description={`Content published in the last ${recentlyPublishedDays} ${
+                recentlyPublishedDays === 1 ? 'day' : 'days'
+              } will appear here.`}>
               <RecentlyPublishedTable />
             </TabPanelContent>
           </Tabs.Panel>
           <Tabs.Panel id="needsUpdate">
             <TabPanelContent
-              description={`Content older than ${needsUpdateMonths} ${needsUpdateMonths === 1 ? 'month' : 'months'} will appear here.`}>
+              description={`Content older than ${needsUpdateMonths} ${
+                needsUpdateMonths === 1 ? 'month' : 'months'
+              } will appear here.`}>
               <NeedsUpdateTable />
             </TabPanelContent>
           </Tabs.Panel>
