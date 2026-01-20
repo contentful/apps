@@ -1,6 +1,8 @@
 import {
+  AIChatConversation,
   AIChatInput,
   AIChatMessage,
+  AIChatMessageList,
   AIChatReasoning,
   AIChatSidePanel,
   AIChatHistory,
@@ -8,31 +10,63 @@ import {
   MessageGroup,
   Slider,
 } from '@contentful/f36-ai-components';
-import { Flex } from '@contentful/f36-components';
 import { AgentAppSDK, ToolbarAction } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useChat } from '@ai-sdk/react';
+import type { UIMessage } from '@ai-sdk/ui-utils';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import type { Editor } from '@tiptap/react';
 import { styles } from '../components/Agent.styles';
 import { AIChatEmptyState } from '../components/AgentEmptyChat';
-
-interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-}
 
 const Agent = () => {
   const sdk = useSDK<AgentAppSDK>();
   useAutoResizer();
   const [currentPanel, setCurrentPanel] = useState<'chat' | 'history'>('chat');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isStreaming, setIsStreaming] = useState(false);
   const [layoutVariant, setLayoutVariant] = useState<'expanded' | 'normal'>('normal');
   const [isChangingLayout, setIsChangingLayout] = useState(false);
   const [layoutError, setLayoutError] = useState<string | null>(null);
   const pendingLayoutChangeRef = useRef<'expanded' | 'normal' | null>(null);
   const editorRef = useRef<Editor | null>(null);
+
+  const apiBase = 'https://d66179c76ce9.ngrok-free.app';
+  const apiUrl = apiBase ? `${apiBase.replace(/\/$/, '')}/api/agent/stream` : '/api/agent/stream';
+
+  const { messages, append, status, stop } = useChat({
+    api: apiUrl,
+    body: {
+      spaceId: sdk.ids.space,
+      environmentId: sdk.ids.environment,
+    },
+    streamProtocol: 'text',
+    initialMessages: [
+      {
+        id: 'system',
+        role: 'system',
+        content: 'You are Broadcast, an AI audio & video producer agent for Contentful.',
+      },
+    ],
+  });
+
+  const isStreaming = status === 'streaming';
+
+  const getMessageText = useCallback((message: UIMessage) => {
+    if (typeof message.content === 'string') {
+      return message.content;
+    }
+
+    if ('parts' in message && Array.isArray(message.parts)) {
+      return message.parts
+        .map((part) =>
+          typeof part === 'object' && part && 'text' in part && typeof part.text === 'string'
+            ? part.text
+            : ''
+        )
+        .join('');
+    }
+
+    return '';
+  }, []);
 
   useEffect(() => {
     sdk.agent.onContextChange(() => {});
@@ -72,35 +106,16 @@ const Agent = () => {
     };
   }, [sdk.agent]);
 
-  const handleSubmit = useCallback((editor: Editor) => {
-    const content = editor.getText();
-    if (!content.trim()) return;
+  const handleSubmit = useCallback(
+    (editor: Editor) => {
+      const content = editor.getText();
+      if (!content.trim()) return;
 
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: content.trim(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    editor.commands.clearContent();
-    setIsStreaming(true);
-
-    // Simulate AI response
-    setTimeout(() => {
-      const assistantMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'This is a placeholder response from the AI agent.',
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-      setIsStreaming(false);
-    }, 1000);
-  }, []);
-
-  const handleStop = useCallback(() => {
-    setIsStreaming(false);
-  }, []);
+      void append({ role: 'user', content: content.trim() });
+      editor.commands.clearContent();
+    },
+    [append]
+  );
 
   const handleSuggestionClick = useCallback((suggestion: string) => {
     if (!editorRef.current) return;
@@ -134,10 +149,17 @@ const Agent = () => {
     }
   }, [layoutVariant, sdk.agent, isChangingLayout]);
 
+  const visibleMessages = useMemo(() => {
+    return messages.filter((message) => {
+      if (message.role === 'system') return false;
+      return getMessageText(message).trim().length > 0;
+    });
+  }, [messages, getMessageText]);
+
   const messageList = () => (
-    <Flex flexDirection="column" fullWidth fullHeight padding={'spacingXs'}>
-      <Flex flexDirection="column" flexGrow={1} fullWidth className={styles.messageList}>
-        {messages.length === 0 ? (
+    <AIChatConversation>
+      <AIChatMessageList className={styles.messageList}>
+        {visibleMessages.length === 0 ? (
           <AIChatEmptyState
             onSuggestionClick={handleSuggestionClick}
             onToggleLayout={toggleLayoutVariant}
@@ -147,25 +169,29 @@ const Agent = () => {
           />
         ) : (
           <>
-            {messages.map((message) => (
-              <AIChatMessage key={message.id} authorRole={message.role} content={message.content} />
+            {visibleMessages.map((message) => (
+              <AIChatMessage
+                key={message.id}
+                authorRole={message.role === 'user' ? 'user' : 'assistant'}
+                content={getMessageText(message)}
+              />
             ))}
             {isStreaming && (
               <AIChatReasoning testId="ai-chat-reasoning">
-                <div>Processing...</div>
+                <div>Thinking about your entries...</div>
               </AIChatReasoning>
             )}
           </>
         )}
-      </Flex>
+      </AIChatMessageList>
       <AIChatInput
-        placeholder="Ask me anything..."
+        placeholder="Ask Broadcast to generate or analyze audio & video..."
         isStreaming={isStreaming}
         onSubmit={handleSubmit}
-        onStop={handleStop}
+        onStop={stop}
         editorRef={editorRef as React.MutableRefObject<Editor>}
       />
-    </Flex>
+    </AIChatConversation>
   );
 
   const historyPanel = () => {

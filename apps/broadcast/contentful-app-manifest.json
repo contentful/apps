@@ -11,6 +11,10 @@
     {
       "location": "page",
       "component": "Page"
+    },
+    {
+      "location": "agent",
+      "component": "Agent"
     }
   ],
   "parameters": {
