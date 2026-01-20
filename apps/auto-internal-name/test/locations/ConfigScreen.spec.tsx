@@ -10,7 +10,6 @@ let mockSdk: ReturnType<typeof createMockSdk>;
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
-  useCMA: () => mockCma,
 }));
 
 describe('ConfigScreen', () => {
@@ -50,8 +49,6 @@ describe('ConfigScreen', () => {
     mockSdk = createMockSdk({
       cma: mockCma,
     });
-    mockSdk.app.getParameters.mockResolvedValue(null);
-    mockSdk.app.getCurrentState.mockResolvedValue({});
     mockCma.contentType.getMany.mockResolvedValue({
       items: mockContentTypes,
     });
@@ -281,7 +278,7 @@ describe('ConfigScreen', () => {
         expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
       });
 
-      const deleteButton = screen.getByRole('button', { name: /delete configuration/i });
+      const deleteButton = screen.getByRole('button', { name: /delete rule/i });
       await user.click(deleteButton);
 
       const result = await simulateSave();

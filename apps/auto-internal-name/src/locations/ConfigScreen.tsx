@@ -1,4 +1,4 @@
-import { ConfigAppSDK } from '@contentful/app-sdk';
+import { CMAClient, ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Box,
   Flex,
@@ -25,6 +25,7 @@ import {
   RuleValidation,
 } from '../utils/types';
 import { getFieldSelectionsFromContentTypes } from '../utils/rules';
+import { ContentTypeProps } from 'contentful-management';
 
 const ConfigScreen = () => {
   const createEmptyRule = () => {
@@ -33,6 +34,25 @@ const ConfigScreen = () => {
       parentField: null,
       referenceField: null,
     };
+  };
+
+  const getAllContentTypes = async (cma: CMAClient): Promise<ContentTypeProps[]> => {
+    const allContentTypes: ContentTypeProps[] = [];
+    let skip = 0;
+    const limit = 1000;
+    let fetched: number;
+
+    do {
+      const response = await cma.contentType.getMany({
+        query: { skip, limit },
+      });
+      const items = response.items as ContentTypeProps[];
+      allContentTypes.push(...items);
+      fetched = items.length;
+      skip += limit;
+    } while (fetched === limit);
+
+    return allContentTypes;
   };
 
   const sdk = useSDK<ConfigAppSDK>();
@@ -125,9 +145,7 @@ const ConfigScreen = () => {
       }
 
       try {
-        const contentTypesResponse = await sdk.cma.contentType.getMany({}); // TODO: get all
-
-        const contentTypesList = contentTypesResponse.items || [];
+        const contentTypesList = await getAllContentTypes(sdk.cma);
         const fields = getFieldSelectionsFromContentTypes(contentTypesList);
 
         setAvailableFields(fields);

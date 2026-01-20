@@ -86,7 +86,7 @@ describe('RuleRow', () => {
 
       expect(screen.getByLabelText(/parent field/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/reference entries/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /delete configuration/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /delete rule/i })).toBeInTheDocument();
       const inputs = screen.getAllByPlaceholderText('Field name | Content type name');
       expect(inputs.length).toBe(2);
     });
@@ -120,8 +120,7 @@ describe('RuleRow', () => {
       await user.type(parentFieldInput, 'Title');
 
       await waitFor(() => {
-        const options = screen.getAllByText('Title | Blog Post');
-        expect(options.length).toBeGreaterThan(0);
+        screen.getAllByText('Title | Blog Post');
       });
 
       const options = screen.getAllByText('Title | Blog Post');
@@ -148,8 +147,7 @@ describe('RuleRow', () => {
       await user.type(parentFieldInput, 'Slug');
 
       await waitFor(() => {
-        const options = screen.getAllByText('Slug | Blog Post');
-        expect(options.length).toBeGreaterThan(0);
+        screen.getAllByText('Slug | Blog Post');
       });
 
       // Fields that don't match should not be visible in the filtered list
@@ -179,20 +177,6 @@ describe('RuleRow', () => {
   });
 
   describe('Delete functionality', () => {
-    it('should call onRuleDelete with rule id when delete is clicked', async () => {
-      const user = userEvent.setup();
-      const onRuleDeleteSpy = vi.fn();
-
-      await renderRuleRow({ onRuleDelete: onRuleDeleteSpy });
-
-      const deleteButton = screen.getByRole('button', { name: /delete configuration/i });
-      await user.click(deleteButton);
-
-      await waitFor(() => {
-        expect(onRuleDeleteSpy).toHaveBeenCalledWith('rule-1');
-      });
-    });
-
     it('should remove only the specific rule when delete is clicked', async () => {
       const user = userEvent.setup();
       const ruleToDelete: Rule = {
@@ -208,7 +192,7 @@ describe('RuleRow', () => {
         onRuleDelete: onRuleDeleteSpy,
       });
 
-      const deleteButton = screen.getByRole('button', { name: /delete configuration/i });
+      const deleteButton = screen.getByRole('button', { name: /delete rule/i });
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -250,6 +234,10 @@ describe('RuleRow', () => {
 
       await waitFor(() => {
         expect(parentFieldInput).toHaveValue('');
+        expect(screen.getAllByText('Title | Blog Post').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Title | Author').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Slug | Blog Post').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Name | Author').length).toBeGreaterThan(0);
       });
     });
   });
@@ -337,8 +325,7 @@ describe('RuleRow', () => {
       await user.type(parentFieldInput, 'Slug');
 
       await waitFor(() => {
-        const options = screen.getAllByText('Slug | Blog Post');
-        expect(options.length).toBeGreaterThan(0);
+        screen.getAllByText('Slug | Blog Post');
       });
 
       const options = screen.getAllByText('Slug | Blog Post');

@@ -8,9 +8,9 @@ export const getFieldSelectionsFromContentTypes = (
 ): FieldSelection[] => {
   return contentTypes
     .flatMap((contentType) => {
-      const singlelineFields = contentType.fields.filter((field) => field.type === 'Symbol');
+      const singleLineFields = contentType.fields.filter((field) => field.type === 'Symbol');
 
-      return singlelineFields.map((field) => ({
+      return singleLineFields.map((field) => ({
         fieldUniqueId: getFieldUniqueId(contentType.sys.id, field.id),
         fieldId: field.id,
         fieldName: field.name,

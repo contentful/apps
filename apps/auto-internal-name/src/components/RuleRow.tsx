@@ -23,7 +23,7 @@ const RuleRow: React.FC<RuleRowProps> = ({
   const [filteredReferenceFields, setFilteredReferenceFields] =
     useState<FieldSelection[]>(availableFields);
 
-  const normalizeString = (str: string) => (str ? str.trim().toLowerCase() : '');
+  const normalizeString = (str: string) => str.trim().toLowerCase();
 
   const filterFieldsByDisplayName = (
     fields: FieldSelection[],
