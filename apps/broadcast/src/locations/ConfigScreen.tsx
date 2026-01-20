@@ -21,9 +21,10 @@ export interface AppInstallationParameters {
   generateAudioActionId?: string;
   useMockAi?: boolean;
   waveformColor?: string;
-  waveformOpacity?: string;
-  kenBurnsZoomIncrement?: string;
-  kenBurnsMaxZoom?: string;
+  waveformOpacity?: number;
+  kenBurnsZoomIncrement?: number;
+  kenBurnsMaxZoom?: number;
+  kenBurnsEnabled?: boolean;
 }
 
 const ConfigScreen = () => {
@@ -33,9 +34,10 @@ const ConfigScreen = () => {
     generateAudioActionId: '',
     useMockAi: false,
     waveformColor: 'white',
-    waveformOpacity: '0.9',
-    kenBurnsZoomIncrement: '0.0005',
-    kenBurnsMaxZoom: '1.5',
+    waveformOpacity: 0.9,
+    kenBurnsZoomIncrement: 0.0005,
+    kenBurnsMaxZoom: 1.5,
+    kenBurnsEnabled: false,
   });
   const sdk = useSDK<ConfigAppSDK>();
   /*
@@ -92,9 +94,10 @@ const ConfigScreen = () => {
           generateAudioActionId: currentParameters.generateAudioActionId || '',
           useMockAi: Boolean(currentParameters.useMockAi),
           waveformColor: currentParameters.waveformColor || 'white',
-          waveformOpacity: currentParameters.waveformOpacity || '0.9',
-          kenBurnsZoomIncrement: currentParameters.kenBurnsZoomIncrement || '0.0005',
-          kenBurnsMaxZoom: currentParameters.kenBurnsMaxZoom || '1.5',
+          waveformOpacity: currentParameters.waveformOpacity ?? 0.9,
+          kenBurnsZoomIncrement: currentParameters.kenBurnsZoomIncrement ?? 0.0005,
+          kenBurnsMaxZoom: currentParameters.kenBurnsMaxZoom ?? 1.5,
+          kenBurnsEnabled: currentParameters.kenBurnsEnabled ?? false,
         });
       }
 
@@ -218,7 +221,7 @@ const ConfigScreen = () => {
               <TextInput
                 id="waveformColor"
                 name="waveformColor"
-                value={parameters.waveformColor}
+                value={parameters.waveformColor || ''}
                 onChange={(event) =>
                   setParameters({
                     ...parameters,
@@ -241,50 +244,72 @@ const ConfigScreen = () => {
                 step="0.05"
                 min="0"
                 max="1"
-                value={parameters.waveformOpacity}
+                value={parameters.waveformOpacity ?? ''}
                 onChange={(event) =>
                   setParameters({
                     ...parameters,
-                    waveformOpacity: event.target.value,
+                    waveformOpacity: event.target.value
+                      ? Number.parseFloat(event.target.value)
+                      : undefined,
                   })
                 }
               />
             </FormControl>
 
-            <FormControl>
-              <FormControl.Label>Ken Burns zoom increment</FormControl.Label>
-              <TextInput
-                id="kenBurnsZoomIncrement"
-                name="kenBurnsZoomIncrement"
-                type="number"
-                step="0.0001"
-                value={parameters.kenBurnsZoomIncrement}
-                onChange={(event) =>
-                  setParameters({
-                    ...parameters,
-                    kenBurnsZoomIncrement: event.target.value,
-                  })
-                }
-              />
-              <FormControl.HelpText>Per-frame zoom increase (default 0.0005).</FormControl.HelpText>
-            </FormControl>
+            <Checkbox
+              isChecked={parameters.kenBurnsEnabled ?? true}
+              onChange={(event) =>
+                setParameters({
+                  ...parameters,
+                  kenBurnsEnabled: event.target.checked,
+                })
+              }>
+              Enable Ken Burns effect
+            </Checkbox>
+            {parameters.kenBurnsEnabled ? (
+              <>
+                <FormControl>
+                  <FormControl.Label>Ken Burns zoom increment</FormControl.Label>
+                  <TextInput
+                    id="kenBurnsZoomIncrement"
+                    name="kenBurnsZoomIncrement"
+                    type="number"
+                    step="0.0001"
+                    value={parameters.kenBurnsZoomIncrement ?? ''}
+                    onChange={(event) =>
+                      setParameters({
+                        ...parameters,
+                        kenBurnsZoomIncrement: event.target.value
+                          ? Number.parseFloat(event.target.value)
+                          : undefined,
+                      })
+                    }
+                  />
+                  <FormControl.HelpText>
+                    Per-frame zoom increase (default 0.0005).
+                  </FormControl.HelpText>
+                </FormControl>
 
-            <FormControl>
-              <FormControl.Label>Ken Burns max zoom</FormControl.Label>
-              <TextInput
-                id="kenBurnsMaxZoom"
-                name="kenBurnsMaxZoom"
-                type="number"
-                step="0.1"
-                value={parameters.kenBurnsMaxZoom}
-                onChange={(event) =>
-                  setParameters({
-                    ...parameters,
-                    kenBurnsMaxZoom: event.target.value,
-                  })
-                }
-              />
-            </FormControl>
+                <FormControl>
+                  <FormControl.Label>Ken Burns max zoom</FormControl.Label>
+                  <TextInput
+                    id="kenBurnsMaxZoom"
+                    name="kenBurnsMaxZoom"
+                    type="number"
+                    step="0.1"
+                    value={parameters.kenBurnsMaxZoom ?? ''}
+                    onChange={(event) =>
+                      setParameters({
+                        ...parameters,
+                        kenBurnsMaxZoom: event.target.value
+                          ? Number.parseFloat(event.target.value)
+                          : undefined,
+                      })
+                    }
+                  />
+                </FormControl>
+              </>
+            ) : null}
           </Flex>
         </Box>
       </Form>

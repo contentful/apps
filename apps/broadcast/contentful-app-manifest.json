@@ -38,6 +38,36 @@
         "type": "Boolean",
         "name": "Use mock audio generator",
         "description": "Enable mock audio generation for local testing."
+      },
+      {
+        "id": "waveformColor",
+        "type": "Symbol",
+        "name": "Waveform color",
+        "description": "Color used for the audio waveform overlay."
+      },
+      {
+        "id": "waveformOpacity",
+        "type": "Number",
+        "name": "Waveform opacity",
+        "description": "Opacity for the waveform overlay (0-1)."
+      },
+      {
+        "id": "kenBurnsZoomIncrement",
+        "type": "Number",
+        "name": "Ken Burns zoom increment",
+        "description": "Per-frame zoom increment for the Ken Burns effect."
+      },
+      {
+        "id": "kenBurnsMaxZoom",
+        "type": "Number",
+        "name": "Ken Burns max zoom",
+        "description": "Maximum zoom level for the Ken Burns effect."
+      },
+      {
+        "id": "kenBurnsEnabled",
+        "type": "Boolean",
+        "name": "Enable Ken Burns effect",
+        "description": "Toggle the Ken Burns zoom effect for video rendering."
       }
     ]
   },

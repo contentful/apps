@@ -29,9 +29,10 @@ type InstallationParameters = {
   generateAudioActionId?: string;
   voiceId?: string;
   waveformColor?: string;
-  waveformOpacity?: string;
-  kenBurnsZoomIncrement?: string;
-  kenBurnsMaxZoom?: string;
+  waveformOpacity?: number;
+  kenBurnsZoomIncrement?: number;
+  kenBurnsMaxZoom?: number;
+  kenBurnsEnabled?: boolean;
 };
 
 type AssetLink = {
@@ -268,21 +269,14 @@ const Sidebar = () => {
         return;
       }
 
-      const parseOptionalNumber = (value?: string) => {
-        if (!value) {
-          return undefined;
-        }
-        const parsed = Number.parseFloat(value);
-        return Number.isFinite(parsed) ? parsed : undefined;
-      };
-
       const videoBlob = await generateVideo({
         imageUrl: resolvedImageUrl,
         audioUrl: resolvedAudioUrl,
         waveformColor: installParams?.waveformColor,
-        waveformOpacity: parseOptionalNumber(installParams?.waveformOpacity),
-        kenBurnsZoomIncrement: parseOptionalNumber(installParams?.kenBurnsZoomIncrement),
-        kenBurnsMaxZoom: parseOptionalNumber(installParams?.kenBurnsMaxZoom),
+        waveformOpacity: installParams?.waveformOpacity,
+        kenBurnsZoomIncrement: installParams?.kenBurnsZoomIncrement,
+        kenBurnsMaxZoom: installParams?.kenBurnsMaxZoom,
+        kenBurnsEnabled: installParams?.kenBurnsEnabled,
       });
 
       const assetId = await uploadVideoAsset(sdk, videoBlob, {
