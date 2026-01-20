@@ -620,12 +620,11 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   setDRMPlayback = async (drmPlaybackId: string) => {
-    const { muxSigningKeyId, muxSigningKeyPrivate } = this.props.sdk.parameters
-      .installation as InstallationParams;
-    if (!(muxSigningKeyId && muxSigningKeyPrivate)) {
+    const { muxEnableDRM } = this.props.sdk.parameters.installation as InstallationParams;
+    if (!muxEnableDRM) {
       this.setState({
         error:
-          'Error: this asset was created with DRM protection, but signing keys do not exist for your account',
+          'Error: this asset was created with DRM protection, but DRM Configuration ID is not active for your account',
         errorShowResetAction: true,
       });
       return;

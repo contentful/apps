@@ -398,16 +398,20 @@ function findPendingActionsInMuxFields(fields: any): Record<string, any> {
 
 async function createMuxPlaybackId(assetId: string, policy: string, context: any) {
   console.log(`Creating playbackId for assetId ${assetId} with policy ${policy}`);
-  const { muxAccessTokenId, muxAccessTokenSecret } = context.appInstallationParameters;
+  const { muxAccessTokenId, muxAccessTokenSecret, muxDRMConfigurationId } = context.appInstallationParameters;
   const credentials = btoa(`${muxAccessTokenId}:${muxAccessTokenSecret}`);
 
+  const body: any = { policy };
+  if (policy === 'drm') {
+    body.drm_configuration_id = muxDRMConfigurationId;
+  }
   const createRes = await fetch(`https://api.mux.com/video/v1/assets/${assetId}/playback-ids`, {
     method: 'POST',
     headers: {
       Authorization: `Basic ${credentials}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ policy }),
+    body: JSON.stringify(body),
   });
   if (!createRes.ok) {
     const error = await createRes.json();
