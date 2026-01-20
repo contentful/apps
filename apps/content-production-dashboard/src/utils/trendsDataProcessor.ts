@@ -68,12 +68,12 @@ function groupEntriesByMonthAndKey(
 ): Map<string, Map<string, number>> {
   const monthMap = new Map<string, Map<string, number>>();
 
-  for (const entry of entries) {
+  entries.forEach((entry) => {
     const createdAt = parseDate(entry?.sys?.createdAt);
-    if (!createdAt || createdAt < startDate) continue;
+    if (!createdAt || createdAt < startDate) return;
 
     const key = getKey(entry);
-    if (!key) continue;
+    if (!key) return;
 
     const monthYear = formatMonthYear(createdAt);
 
@@ -83,7 +83,7 @@ function groupEntriesByMonthAndKey(
 
     const monthData = monthMap.get(monthYear)!;
     monthData.set(key, (monthData.get(key) || 0) + 1);
-  }
+  });
 
   return monthMap;
 }
@@ -99,9 +99,9 @@ function buildChartDataFromMonthMap(
       date: formatMonthYearDisplay(monthYear),
     };
 
-    for (const key of keys) {
+    keys.forEach((key) => {
       dataPoint[key] = monthData.get(key) || 0;
-    }
+    });
 
     return dataPoint;
   });
@@ -119,13 +119,13 @@ export function generateNewEntriesChartData(
   const allMonths = generateMonthRange(startDate, now);
 
   const monthCounts = new Map<string, number>();
-  for (const entry of filteredEntries) {
+  filteredEntries.forEach((entry) => {
     const createdAt = parseDate(entry?.sys?.createdAt);
-    if (!createdAt || createdAt < startDate) continue;
+    if (!createdAt || createdAt < startDate) return;
 
     const monthYear = formatMonthYear(createdAt);
     monthCounts.set(monthYear, (monthCounts.get(monthYear) || 0) + 1);
-  }
+  });
 
   // Build chart data
   return allMonths.map((monthYear) => ({
