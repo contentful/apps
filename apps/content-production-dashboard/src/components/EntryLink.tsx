@@ -7,11 +7,16 @@ interface EntryLinkProps {
   children: React.ReactNode;
 }
 
-export const EntryLink = ({ entryId, spaceId, children}: EntryLinkProps) => {
+export const EntryLink = ({ entryId, spaceId, children }: EntryLinkProps) => {
   const entryUrl = `https://app.contentful.com/spaces/${spaceId}/entries/${entryId}`;
 
   return (
-    <TextLink href={entryUrl} target="_blank" rel="noopener noreferrer" alignIcon="end" icon={<ArrowSquareOutIcon />}>
+    <TextLink
+      href={entryUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      alignIcon="end"
+      icon={<ArrowSquareOutIcon />}>
       {children}
     </TextLink>
   );
