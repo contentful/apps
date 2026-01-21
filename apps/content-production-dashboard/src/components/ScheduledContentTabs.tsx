@@ -32,9 +32,6 @@ export const ScheduledContentTabs = () => {
   return (
     <Box marginTop="spacingXl">
       <Box padding="spacingL" style={styles.releasesTableContainer}>
-        <Heading as="h2" marginBottom="spacingM">
-          Upcoming Scheduled Content
-        </Heading>
         <Tabs currentTab={currentTab} onTabChange={setCurrentTab}>
           <Tabs.List>
             <Tabs.Tab panelId="scheduled">Scheduled Content</Tabs.Tab>
