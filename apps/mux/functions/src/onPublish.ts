@@ -303,6 +303,9 @@ async function updateEntryFieldWithMuxAsset(
           const signedPlayback = Array.isArray(muxAsset.playback_ids)
             ? muxAsset.playback_ids.find((p: any) => p.policy === 'signed')
             : undefined;
+          const drmPlayback = Array.isArray(muxAsset.playback_ids)
+            ? muxAsset.playback_ids.find((p: any) => p.policy === 'drm')
+            : undefined;
 
           const audioTracks = muxAsset.tracks?.filter((t: any) => t.type === 'audio');
           const captions = muxAsset.tracks?.filter((t: any) => t.type === 'text');
@@ -313,6 +316,7 @@ async function updateEntryFieldWithMuxAsset(
             assetId: muxAsset.id,
             playbackId: publicPlayback?.id || undefined,
             signedPlaybackId: signedPlayback?.id || undefined,
+            drmPlaybackId: drmPlayback?.id || undefined,  
             ready: muxAsset.status === 'ready',
             ratio: muxAsset.aspect_ratio || undefined,
             max_stored_resolution: muxAsset.max_stored_resolution || undefined,
