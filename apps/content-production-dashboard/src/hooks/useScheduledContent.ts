@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { EntryProps } from 'contentful-management';
 
 import { ScheduledContentItem } from '../utils/types';
@@ -38,7 +39,10 @@ export function useScheduledContent(
   const { scheduledActions, isFetchingScheduledActions, refetchScheduledActions } =
     useScheduledActions({ query: { 'sys.entity.sys.linkType': 'Entry' } });
 
-  const entryIds = scheduledActions.map((action) => action.entity?.sys?.id || '').filter(Boolean);
+  const entryIds = useMemo(
+    () => scheduledActions.map((action) => action.entity?.sys?.id || '').filter(Boolean),
+    [scheduledActions]
+  );
 
   const {
     entries,
@@ -50,33 +54,38 @@ export function useScheduledContent(
     enabled: entryIds.length > 0,
   });
 
-  const entriesMap = generateEntriesMap(entries);
-  const userIds = getUserIdsFromEntries(entries);
+  
+  const entriesMap = useMemo(() => generateEntriesMap(entries), [entries]);
+  const userIds = useMemo(() => getUserIdsFromEntries(entries), [entries]);
 
   const { contentTypes, isFetchingContentTypes, refetchContentTypes } = useContentTypes();
   const { usersMap, isFetching: isFetchingUsers } = useUsers(userIds);
 
-  const scheduledItems: ScheduledContentItem[] = [];
+  const scheduledItems = useMemo(() => {
+    const items: ScheduledContentItem[] = [];
 
-  scheduledActions.forEach((action) => {
-    const entry = entriesMap.get(action.entity?.sys?.id || '');
-    if (!entry) return;
+    scheduledActions.forEach((action) => {
+      const entry = entriesMap.get(action.entity?.sys?.id || '');
+      if (!entry) return;
 
-    const contentType = contentTypes.get(entry.sys.contentType?.sys?.id || '');
+      const contentType = contentTypes.get(entry.sys.contentType?.sys?.id || '');
 
-    scheduledItems.push({
-      id: entry.sys.id,
-      title: getEntryTitle(entry, contentType, defaultLocale),
-      contentType: contentType?.name || '',
-      contentTypeId: entry.sys.contentType?.sys?.id || '',
-      creator: getCreatorFromEntry(entry, usersMap),
-      publishedDate: entry.sys.publishedAt || null,
-      updatedDate: entry.sys.updatedAt,
-      status: getEntryStatus(entry),
-      scheduledActionId: action.sys.id,
-      scheduledFor: action.scheduledFor?.datetime || '',
+      items.push({
+        id: entry.sys.id,
+        title: getEntryTitle(entry, contentType, defaultLocale),
+        contentType: contentType?.name || '',
+        contentTypeId: entry.sys.contentType?.sys?.id || '',
+        creator: getCreatorFromEntry(entry, usersMap),
+        publishedDate: entry.sys.publishedAt || null,
+        updatedDate: entry.sys.updatedAt,
+        status: getEntryStatus(entry),
+        scheduledActionId: action.sys.id,
+        scheduledFor: action.scheduledFor?.datetime || '',
+      });
     });
-  });
+
+    return items;
+  }, [scheduledActions, entriesMap, contentTypes, usersMap, defaultLocale]);
 
   const isFetching =
     isFetchingScheduledActions || isFetchingEntries || isFetchingContentTypes || isFetchingUsers;
