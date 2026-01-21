@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { isEntryRecentlyCreated } from '../../src/utils/entryUtils';
+import { isEntryRecentlyCreated } from '../../src/utils/utils';
 
 describe('entryUtils', () => {
   describe('isEntryRecentlyCreated', () => {

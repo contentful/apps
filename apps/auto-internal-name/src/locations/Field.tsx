@@ -5,46 +5,50 @@ import { ArrowCounterClockwiseIcon } from '@contentful/f36-icons';
 import { SingleLineEditor } from '@contentful/field-editor-single-line';
 import { useEffect, useState } from 'react';
 import { styles } from './Field.styles';
-import { AppInstallationParameters } from '../utils/types';
 import { EntryProps } from 'contentful-management';
+import { AppInstallationParameters, Rule } from '../utils/types';
+import { getMatchingRule } from '../utils/utils';
 import { delay, MAX_RETRIES } from '../utils/delay';
-import { isEntryRecentlyCreated } from '../utils/entryUtils';
+import { isEntryRecentlyCreated } from '../utils/utils';
 import { useInstallationParameters } from '../hooks/useInstallationParameters';
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   const [isUpdating, setIsUpdating] = useState(true);
+  const installationParameters = useInstallationParameters(sdk) as AppInstallationParameters;
+  const matchingRule = getMatchingRule(
+    sdk.contentType.sys.id,
+    sdk.ids.field,
+    installationParameters
+  );
   const locales = sdk.locales;
   const defaultLocale = locales.default;
   const currentLocale = sdk.field.locale || defaultLocale;
-  const installationParameters = useInstallationParameters(sdk) as AppInstallationParameters;
   useAutoResizer();
 
-  const getInternalNameFromParentEntry = (parentEntry: EntryProps): string => {
-    const fieldId = 'todo';
-    const separator = installationParameters.separator;
-
-    const localizedFieldValue = parentEntry.fields[fieldId] as Record<string, string> | undefined;
-    const parentFieldValue = localizedFieldValue?.[currentLocale] || '';
+  const getInternalNameFromParentEntry = (parentEntry: EntryProps, fieldId: string): string => {
+    const localizedFieldValue = parentEntry.fields[fieldId];
+    const parentFieldValue = localizedFieldValue?.[currentLocale];
 
     if (!parentFieldValue) {
       return '';
     }
 
+    const separator = installationParameters.separator;
     return separator ? `${parentFieldValue} ${separator}` : parentFieldValue;
   };
 
-  const findParentEntry = async (): Promise<EntryProps | null> => {
+  const findParentEntry = async (matchingRule: Rule): Promise<EntryProps | null> => {
     const currentEntryId = sdk.ids.entry;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
         const entries = await sdk.cma.entry.getMany({
-          spaceId: sdk.ids.space,
-          environmentId: sdk.ids.environment,
           query: {
             links_to_entry: currentEntryId,
-            include: 1,
+            content_type: matchingRule.parentField!.contentTypeId,
+            select: `fields.${matchingRule.parentField!.fieldId}`,
+            order: '-sys.updatedAt',
           },
         });
 
@@ -66,13 +70,19 @@ const Field = () => {
   };
 
   const handleRefetch = async () => {
+    if (!matchingRule) {
+      return;
+    }
     setIsUpdating(true);
 
     try {
-      const parentEntry = await findParentEntry();
+      const parentEntry = await findParentEntry(matchingRule);
 
       if (parentEntry) {
-        const internalNameValue = getInternalNameFromParentEntry(parentEntry);
+        const internalNameValue = getInternalNameFromParentEntry(
+          parentEntry,
+          matchingRule.parentField!.fieldId
+        );
         await sdk.field.setValue(internalNameValue);
       }
     } catch (err: unknown) {
@@ -91,13 +101,16 @@ const Field = () => {
       const entry = sdk.entry.getSys();
       const isRecent = isEntryRecentlyCreated(entry.createdAt);
 
-      if (!sdk.field.getValue() && isRecent) {
+      if (!sdk.field.getValue() && !!matchingRule && isRecent) {
         try {
           setIsUpdating(true);
-          const parentEntry = await findParentEntry();
+          const parentEntry = await findParentEntry(matchingRule);
 
           if (parentEntry) {
-            const internalNameValue = getInternalNameFromParentEntry(parentEntry);
+            const internalNameValue = getInternalNameFromParentEntry(
+              parentEntry,
+              matchingRule.parentField!.fieldId
+            );
             await sdk.field.setValue(internalNameValue);
           }
         } catch (err: unknown) {

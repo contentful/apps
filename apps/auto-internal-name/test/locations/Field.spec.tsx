@@ -57,7 +57,7 @@ vi.mock('@contentful/field-editor-single-line', () => ({
   SingleLineEditor: (props: any) => mockSingleLineEditor(props),
 }));
 
-describe.skip('Field component', () => {
+describe('Field component', () => {
   // Fixed time used consistently across all tests
   const FIXED_DATE = new Date('2024-01-01T12:00:00Z');
 
@@ -82,12 +82,37 @@ describe.skip('Field component', () => {
     mockCma = createMockCma();
     mockSdk = createMockSdk({
       cma: mockCma,
+      contentType: {
+        sys: {
+          id: 'reference-content-type-id',
+        },
+      },
     });
 
     // Set default installation parameters
     mockInstallationParameters = {
-      rules: [],
       separator: '-',
+      rules: [
+        {
+          id: 'rule-1',
+          parentField: {
+            fieldUniqueId: 'parent-content-type.title',
+            fieldId: 'title',
+            fieldName: 'Title',
+            contentTypeId: 'parent-content-type',
+            contentTypeName: 'Parent',
+            displayName: 'Title | Parent',
+          },
+          referenceField: {
+            fieldUniqueId: 'reference-content-type-id.name',
+            fieldId: 'name',
+            fieldName: 'Name',
+            contentTypeId: 'reference-content-type-id',
+            contentTypeName: 'Reference',
+            displayName: 'Name | Reference',
+          },
+        },
+      ],
     };
 
     vi.setSystemTime(FIXED_DATE);
@@ -259,30 +284,6 @@ describe.skip('Field component', () => {
       await renderAndFlushTimers();
 
       expect(mockSdk.field.setValue).toHaveBeenCalledWith('Parent Title');
-    });
-
-    it('should use override field when content type has override', async () => {
-      mockInstallationParameters.rules = [
-        /*
-        {
-          id: 'override-1',
-          fieldId: 'name',
-          contentTypeId: 'test-content-type-id',
-        },
-        */
-      ];
-
-      const parentEntry = createMockEntry({
-        name: {
-          'en-US': 'Parent Name',
-        },
-      });
-
-      setupParentEntryMock(parentEntry);
-
-      await renderAndFlushTimers();
-
-      expect(mockSdk.field.setValue).toHaveBeenCalledWith('Parent Name -');
     });
   });
 
