@@ -61,13 +61,14 @@ export function useScheduledContent(
   const { contentTypes, isFetchingContentTypes, refetchContentTypes, fetchingContentTypesError } =
     useContentTypes(contentTypeIds);
 
-  const scheduledItems: ScheduledContentItem[] = [];
+  const scheduledItems = useMemo(() => {
+    const items: ScheduledContentItem[] = [];
 
     scheduledActions.forEach((action) => {
       const entry = scheduledEntries.find((e) => e.sys.id === action.entity?.sys?.id);
       if (!entry) return;
 
-    const contentType = contentTypes.get(entry.sys.contentType?.sys?.id || '');
+      const contentType = contentTypes.get(entry.sys.contentType?.sys?.id || '');
 
       items.push({
         id: entry.sys.id,
