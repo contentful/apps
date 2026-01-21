@@ -1,5 +1,8 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
 
+// Must be imported before MuxPlayer to prevent Chromecast errors in Contentful's sandboxed iframe
+import './util/disableChromecast';
+
 import React, { ChangeEvent, createRef } from 'react';
 import { render } from 'react-dom';
 
@@ -58,6 +61,7 @@ import Sidebar from './locations/Sidebar';
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 interface SignedTokens {
+  licenseToken?: string;
   playbackToken: string;
   posterToken: string;
   storyboardToken: string;
@@ -104,7 +108,6 @@ export class App extends React.Component<AppProps, AppState> {
   fileInputRef = React.createRef<HTMLInputElement>();
   muxPlayerRef = React.createRef<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
   getSignedTokenActionId: string;
-  getDRMLicenseTokenActionId: string;
   private pollPending = false;
 
   constructor(props: AppProps) {
@@ -126,7 +129,6 @@ export class App extends React.Component<AppProps, AppState> {
     );
 
     this.getSignedTokenActionId = '';
-    this.getDRMLicenseTokenActionId = '';
     const field = props.sdk.field.getValue();
 
     this.state = {
@@ -218,9 +220,6 @@ export class App extends React.Component<AppProps, AppState> {
     
     this.getSignedTokenActionId =
       appActionsResponse.items.find((x) => x.name === 'getSignedUrlTokens')?.sys.id ?? '';
-    
-    this.getDRMLicenseTokenActionId =
-      appActionsResponse.items.find((x) => x.name === 'getDRMLicenseTokens')?.sys.id ?? '';
 
     this.props.sdk.window.startAutoResizer();
 
@@ -259,7 +258,7 @@ export class App extends React.Component<AppProps, AppState> {
         
         if (this.isUsingDRM() && this.state.value.drmPlaybackId) {
           // Load DRM tokens for external player link
-          await this.setDRMPlayback(this.state.value.drmPlaybackId);
+          await this.setSignedPlayback(this.state.value.drmPlaybackId, true);
           this.setState({ playerPlaybackId: this.state.value.drmPlaybackId });
         } else if (this.isUsingSigned() && this.state.value.signedPlaybackId) {
           await this.setSignedPlayback(this.state.value.signedPlaybackId);
@@ -520,7 +519,7 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
-  private fetchSignedTokens = async (playbackId: string): Promise<SignedTokens> => {
+  private fetchSignedTokens = async (playbackId: string, isDRM = false): Promise<SignedTokens> => {
     this.setState({ isTokenLoading: true });
 
     try {
@@ -536,7 +535,7 @@ export class App extends React.Component<AppProps, AppState> {
           appDefinitionId: this.props.sdk.ids.app!,
           appActionId: this.getSignedTokenActionId,
         },
-        { parameters: { playbackId } }
+        { parameters: { playbackId, isDRM } }
       );
       const parsedBody = JSON.parse(body);
       if (!parsedBody.ok) throw new Error(parsedBody.error);
@@ -548,6 +547,7 @@ export class App extends React.Component<AppProps, AppState> {
       console.error(e);
       this.setState({ isTokenLoading: false });
       return {
+        licenseToken: 'license-token-not-found',
         playbackToken: 'playback-token-not-found',
         posterToken: 'poster-token-not-found',
         storyboardToken: 'storyboard-token-not-found',
@@ -555,81 +555,23 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
-  setSignedPlayback = async (signedPlaybackId: string) => {
+  setSignedPlayback = async (signedPlaybackId: string, isDRM = false) => {
     const { muxSigningKeyId, muxSigningKeyPrivate } = this.props.sdk.parameters
       .installation as InstallationParams;
     if (!(muxSigningKeyId && muxSigningKeyPrivate)) {
       this.setState({
         error:
-          'Error: this asset was created with a signed playback ID, but signing keys do not exist for your account',
+          `Error: this asset was created with ${isDRM ? 'DRM protection' : 'signed playback'}, but signing keys do not exist for your account. Make sure to enable "Signed URLs" in the app settings.`,
         errorShowResetAction: true,
       });
       return;
     }
-    const { playbackToken, posterToken, storyboardToken } = await this.fetchSignedTokens(
-      signedPlaybackId
+    const { playbackToken, posterToken, storyboardToken, licenseToken } = await this.fetchSignedTokens(
+      signedPlaybackId,
+      isDRM
     );
-    this.setState({ playbackToken, posterToken, storyboardToken });
-  };
 
-  private fetchDRMLicenseToken = async (playbackId: string): Promise<{ licenseToken: string; playbackToken: string; posterToken: string; storyboardToken: string }> => {
-    this.setState({ isTokenLoading: true });
-
-    try {
-      if (!this.getDRMLicenseTokenActionId) {
-        throw new Error('App Action for Get DRM License Token not found.');
-      }
-
-      const {
-        response: { body },
-      } = await this.cmaClient.appActionCall.createWithResponse(
-        {
-          organizationId: this.props.sdk.ids.organization,
-          appDefinitionId: this.props.sdk.ids.app!,
-          appActionId: this.getDRMLicenseTokenActionId,
-        },
-        { parameters: { playbackId } }
-      );
-      const parsedBody = JSON.parse(body);
-      if (!parsedBody.ok) {
-        const errorMessage = parsedBody.error || parsedBody.message || 'Unknown error';
-        throw new Error(errorMessage);
-      }
-
-      const licenseToken = parsedBody.data.licenseToken as string;
-      const playbackToken = parsedBody.data.playbackToken as string;
-      const posterToken = parsedBody.data.posterToken as string;
-      const storyboardToken = parsedBody.data.storyboardToken as string;
-      this.setState({ 
-        isTokenLoading: false, 
-        drmLicenseToken: licenseToken,
-        playbackToken: playbackToken,
-        posterToken: posterToken,
-        storyboardToken: storyboardToken,
-      });
-      return { licenseToken, playbackToken, posterToken, storyboardToken };
-    } catch (e) {
-      console.error('Error fetching DRM license token:', e);
-      const errorMessage = e instanceof Error ? e.message : 'Failed to fetch DRM license token';
-      this.setState({ 
-        isTokenLoading: false,
-        error: `Error: ${errorMessage}. Please verify that the App Action is correctly linked to the getDRMLicenseTokens function.`
-      });
-      return { licenseToken: '', playbackToken: '', posterToken: '', storyboardToken: '' };
-    }
-  };
-
-  setDRMPlayback = async (drmPlaybackId: string) => {
-    const { muxEnableDRM } = this.props.sdk.parameters.installation as InstallationParams;
-    if (!muxEnableDRM) {
-      this.setState({
-        error:
-          'Error: this asset was created with DRM protection, but DRM Configuration ID is not active for your account',
-        errorShowResetAction: true,
-      });
-      return;
-    }
-    await this.fetchDRMLicenseToken(drmPlaybackId);
+    this.setState({ playbackToken, posterToken, storyboardToken, drmLicenseToken: licenseToken });
   };
 
   getAsset = async (assetId: string) => {
@@ -832,7 +774,7 @@ export class App extends React.Component<AppProps, AppState> {
       if (signedPlayback) {
         await this.setSignedPlayback(signedPlayback.id);
       } else if (drmPlayback) {
-        await this.setDRMPlayback(drmPlayback.id);
+        await this.setSignedPlayback(drmPlayback.id, true);
       }
 
       const renditionPreparing = asset.static_renditions?.files
@@ -1097,9 +1039,6 @@ export class App extends React.Component<AppProps, AppState> {
     const currentValue = this.state.value;
     const currentPlaybackId =
       currentValue.playbackId || currentValue.signedPlaybackId || currentValue.drmPlaybackId;
-    const totalPendingActions =
-      (currentValue.pendingActions?.create?.length || 0) +
-      (currentValue.pendingActions?.delete?.length || 0);
 
     const updatedPendingActions: PendingActions = {
       delete: currentValue.pendingActions?.delete
