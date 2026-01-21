@@ -1,13 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockCma, mockSdk } from './mocks';
+import { mockSdk } from './mocks';
 import Sidebar from '../src/locations/Sidebar';
 import userEvent from '@testing-library/user-event';
 import { APP_NAME } from '../src/utils/consts';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
-  useCMA: () => mockCma,
   useAutoResizer: () => {},
 }));
 
@@ -32,5 +31,40 @@ describe('Sidebar component', () => {
     await user.click(button);
 
     expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledOnce();
+  });
+
+  it('should copy field values from source locale to target locales', async () => {
+    const user = userEvent.setup();
+    const titleGetValue = vi.fn().mockReturnValue('Hello');
+    const titleSetValue = vi.fn();
+    const bodyGetValue = vi.fn().mockReturnValue('World');
+    const bodySetValue = vi.fn();
+
+    mockSdk.entry = {
+      fields: {
+        title: {
+          getValue: titleGetValue,
+          setValue: titleSetValue,
+        },
+        body: {
+          getValue: bodyGetValue,
+          setValue: bodySetValue,
+        },
+      },
+    };
+
+    mockSdk.dialogs.openCurrentApp.mockResolvedValue({
+      sourceLocale: 'en-US',
+      targetLocales: ['de', 'fr'],
+    });
+
+    render(<Sidebar />);
+
+    await user.click(screen.getByRole('button', { name: APP_NAME }));
+
+    expect(titleSetValue).toHaveBeenCalledWith('Hello', 'de');
+    expect(titleSetValue).toHaveBeenCalledWith('Hello', 'fr');
+    expect(bodySetValue).toHaveBeenCalledWith('World', 'de');
+    expect(bodySetValue).toHaveBeenCalledWith('World', 'fr');
   });
 });

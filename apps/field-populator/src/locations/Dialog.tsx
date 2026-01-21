@@ -28,9 +28,10 @@ const Dialog = () => {
       return;
     }
 
-    // todo : copy and paste logic to populate fields
-
-    sdk.close();
+    sdk.close({
+      sourceLocale: selectedSourceLocale,
+      targetLocales: selectedTargetLocales.map((locale) => locale.code),
+    });
   };
 
   return (
