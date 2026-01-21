@@ -2,7 +2,7 @@ import { PageAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
 
 export interface FetchContentTypesResult {
-  contentTypes: Map<string, string>;
+  contentTypes: Map<string, ContentTypeProps>;
   fetchedAt: Date;
 }
 
@@ -51,9 +51,9 @@ export async function fetchContentTypes(
     }
   }
 
-  const contentTypes = new Map<string, string>();
+  const contentTypes = new Map<string, ContentTypeProps>();
   allContentTypes.forEach((contentType) => {
-    contentTypes.set(contentType.sys.id, contentType.name);
+    contentTypes.set(contentType.sys.id, contentType);
   });
 
   return {

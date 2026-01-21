@@ -13,7 +13,7 @@ import { TimeRange } from './types';
 export function generateNewEntriesChartData(
   entries: EntryProps[],
   options: TrendsDataProcessorOptions,
-  contentTypes?: Map<string, string>
+  contentTypes?: Map<string, ContentTypeProps>
 ): ChartDataPoint[] {
   const { startDate, filteredEntries, allMonths } = setupChartData(entries, options, contentTypes);
 
@@ -34,7 +34,7 @@ export function generateNewEntriesChartData(
 export function generateContentTypeChartData(
   entries: EntryProps[],
   options: TrendsDataProcessorOptions,
-  contentTypes?: Map<string, string>
+  contentTypes?: Map<string, ContentTypeProps>
 ): { data: ChartDataPoint[]; processedContentTypes: Map<string, string> } {
   const { startDate, filteredEntries, allMonths } = setupChartData(entries, options, contentTypes);
 

@@ -1,16 +1,17 @@
 import { useState } from 'react';
-import { Table, Note, Box, Skeleton, Pagination, Badge } from '@contentful/f36-components';
+import { Table, Box, Skeleton, Pagination, Badge } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { styles } from './ScheduledContentTable.styles';
 import { EmptyStateTable } from './EmptyStateTable';
 
-import { formatDateTimeWithTimezone } from '../utils/DateFormatUtils';
+import { formatDateTimeWithTimezone } from '../utils/dateFormat';
 import { formatUserName } from '../utils/UserUtils';
 import { RELEASES_PER_PAGE } from '../utils/consts';
 
 import { EntryLink } from './EntryLink';
-import { EntryStatus } from '../utils/types';
+import { EntryStatus, ScheduledContentItem } from '../utils/types';
+import { useScheduledContent } from '../hooks/useScheduledContent';
 
 enum BadgeVariant {
   Primary = 'primary',
@@ -23,11 +24,11 @@ const ScheduledContentTableHeader = () => {
     <Table.Head>
       <Table.Row>
         <Table.Cell style={styles.titleCell}>Title</Table.Cell>
-        <Table.Cell style={styles.creatorCell}>Creator</Table.Cell>
-        <Table.Cell style={styles.contentTypeCell}>Content Type</Table.Cell>
-        <Table.Cell style={styles.publishedDateCell}>Published Date</Table.Cell>
         <Table.Cell style={styles.scheduledDateCell}>Scheduled Date</Table.Cell>
+        <Table.Cell style={styles.publishedDateCell}>Published Date</Table.Cell>
         <Table.Cell style={styles.statusCell}>Status</Table.Cell>
+        <Table.Cell style={styles.contentTypeCell}>Content Type</Table.Cell>
+        <Table.Cell style={styles.creatorCell}>Creator</Table.Cell>
       </Table.Row>
     </Table.Head>
   );
@@ -43,23 +44,23 @@ const getStatusBadgeVariant = (status: EntryStatus | undefined): BadgeVariant =>
   return BadgeVariant.Warning;
 };
 
-
-interface ScheduledEntry {
-  id: string;
-  title: string;
-  creator: string;
-  contentType: string;
-  publishedDate: string;
-  scheduledFor: string;
-  status: EntryStatus;
-}
-
 export const ScheduledContentTable = () => {
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const [currentPage, setCurrentPage] = useState(0);
-  
-  const items: ScheduledEntry[] = []
-  const total = items.length;
+  const { items, total, isFetching } = useScheduledContent(sdk.locales.default, currentPage);
+
+  if (isFetching) {
+    return (
+      <>
+        <Table>
+          <ScheduledContentTableHeader />
+          <Table.Body>
+            <Skeleton.Row rowCount={5} columnCount={6} />
+          </Table.Body>
+        </Table>
+      </>
+    );
+  }
 
   if (items.length === 0) {
     return <EmptyStateTable />;
@@ -70,26 +71,24 @@ export const ScheduledContentTable = () => {
       <Table>
         <ScheduledContentTableHeader />
         <Table.Body>
-          {items.map((item: any) => (
+          {items.map((item: ScheduledContentItem) => (
             <Table.Row key={item.id}>
               <Table.Cell style={styles.titleCell}>
                 <EntryLink entryId={item.id} spaceId={sdk.ids.space}>
                   {item.title}
                 </EntryLink>
               </Table.Cell>
-              <Table.Cell style={styles.creatorCell}>{formatUserName(item.creator)}</Table.Cell>
-              <Table.Cell style={styles.contentTypeCell}>{item.contentType}</Table.Cell>
-              <Table.Cell style={styles.publishedDateCell}>
-                {formatDateTimeWithTimezone(item.publishedDate)}
-              </Table.Cell>
               <Table.Cell style={styles.scheduledDateCell}>
                 {formatDateTimeWithTimezone(item.scheduledFor)}
               </Table.Cell>
-              <Table.Cell style={styles.statusCell}>
-                <Badge variant={getStatusBadgeVariant(item.status)}>
-                  {item.status}
-                </Badge>
+              <Table.Cell style={styles.publishedDateCell}>
+                {formatDateTimeWithTimezone(item.publishedDate || '')}
               </Table.Cell>
+              <Table.Cell style={styles.statusCell}>
+                <Badge variant={getStatusBadgeVariant(item.status)}>{item.status}</Badge>
+              </Table.Cell>
+              <Table.Cell style={styles.contentTypeCell}>{item.contentType}</Table.Cell>
+              <Table.Cell style={styles.creatorCell}>{formatUserName(item.creator)}</Table.Cell>
             </Table.Row>
           ))}
         </Table.Body>
