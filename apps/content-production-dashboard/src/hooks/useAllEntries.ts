@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { EntryProps } from 'contentful-management';
+import { EntryProps, QueryOptions } from 'contentful-management';
 import { fetchAllEntries, FetchAllEntriesResult } from '../utils/fetchAllEntries';
 import { getEnvironmentId } from '../utils/sdkUtils';
 
@@ -14,12 +14,19 @@ export interface UseAllEntriesResult {
   refetchEntries: () => void;
 }
 
-export function useAllEntries(): UseAllEntriesResult {
+export interface UseEntriesOptions {
+  query?: QueryOptions;
+  enabled?: boolean;
+}
+
+export function useEntries(options: UseEntriesOptions = {}): UseAllEntriesResult {
+  const { query, enabled } = options;
   const sdk = useSDK<PageAppSDK>();
 
   const { data, isFetching, error, refetch } = useQuery<FetchAllEntriesResult, Error>({
-    queryKey: ['entries', sdk.ids.space, getEnvironmentId(sdk)],
-    queryFn: () => fetchAllEntries(sdk),
+    queryKey: ['entries', sdk.ids.space, getEnvironmentId(sdk), query ?? {}],
+    queryFn: () => fetchAllEntries(sdk, query),
+    enabled,
   });
 
   return {
@@ -32,4 +39,8 @@ export function useAllEntries(): UseAllEntriesResult {
       refetch();
     },
   };
+}
+
+export function useAllEntries(): UseAllEntriesResult {
+  return useEntries();
 }

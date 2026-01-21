@@ -46,27 +46,6 @@ const getStatusBadgeVariant = (status: EntryStatus | undefined): BadgeVariant =>
   return BadgeVariant.Warning;
 };
 
-
-interface ScheduledEntry {
-  id: string;
-  title: string;
-  creator: string;
-  contentType: string;
-  publishedDate: string;
-  scheduledFor: string;
-  status: EntryStatus;
-}
-
-const getStatusBadgeVariant = (status: EntryStatus | undefined): BadgeVariant => {
-  if (status === EntryStatus.Published) {
-    return BadgeVariant.Positive;
-  }
-  if (status === EntryStatus.Changed) {
-    return BadgeVariant.Primary;
-  }
-  return BadgeVariant.Warning;
-};
-
 export const ScheduledContentTable = ({
   scheduledActions,
   entries,
@@ -118,6 +97,9 @@ export const ScheduledContentTable = ({
               </Table.Cell>
               <Table.Cell style={styles.scheduledDateCell}>
                 {formatDateTimeWithTimezone(item.scheduledFor.datetime, item.scheduledFor.timezone)}
+              </Table.Cell>
+              <Table.Cell style={styles.publishedDateCell}>
+                {formatDateTimeWithTimezone(item.publishedDate || '')}
               </Table.Cell>
               <Table.Cell style={styles.publishedDateCell}>
                 {formatDateTimeWithTimezone(item.publishedDate || '')}

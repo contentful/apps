@@ -1,7 +1,7 @@
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useQuery } from '@tanstack/react-query';
-import { ScheduledActionProps } from 'contentful-management';
+import { QueryOptions, ScheduledActionProps } from 'contentful-management';
 import { fetchScheduledActions, FetchScheduledActionsResult } from '../utils/fetchScheduledActions';
 import { getEnvironmentId } from '../utils/sdkUtils';
 
@@ -14,12 +14,12 @@ export interface UseScheduledActionsResult {
   refetchScheduledActions: () => void;
 }
 
-export function useScheduledActions(): UseScheduledActionsResult {
+export function useScheduledActions(query: QueryOptions = {}): UseScheduledActionsResult {
   const sdk = useSDK<PageAppSDK>();
 
   const { data, isFetching, error, refetch } = useQuery<FetchScheduledActionsResult, Error>({
-    queryKey: ['scheduledActions', sdk.ids.space, getEnvironmentId(sdk)],
-    queryFn: () => fetchScheduledActions(sdk),
+    queryKey: ['scheduledActions', sdk.ids.space, getEnvironmentId(sdk), query],
+    queryFn: () => fetchScheduledActions(sdk, query),
   });
 
   return {
