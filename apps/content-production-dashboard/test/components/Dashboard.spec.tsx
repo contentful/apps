@@ -44,6 +44,16 @@ vi.mock('../../src/hooks/useScheduledActions', () => ({
   }),
 }));
 
+vi.mock('../../src/hooks/useScheduledContent', () => ({
+  useScheduledContent: () => ({
+    items: [],
+    total: 0,
+    isFetching: false,
+    error: null,
+    refetch: vi.fn(),
+  }),
+}));
+
 vi.mock('../../src/hooks/useContentTypes', () => ({
   useContentTypes: () => ({
     contentTypes: new Map<string, string>([

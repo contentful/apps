@@ -1,7 +1,9 @@
 import { act, render, RenderOptions } from '@testing-library/react';
-import { EntryProps } from 'contentful-management';
+import React from 'react';
+import { EntryProps, ScheduledActionProps, ContentTypeProps } from 'contentful-management';
 import { ReactElement } from 'react';
 import type { ChartDataPoint } from '../../src/utils/types';
+import { QueryProvider } from '../../src/providers/QueryProvider';
 
 export interface MockEntryOverrides {
   id?: string;
@@ -129,4 +131,103 @@ export async function renderWithAct(
     result = render(ui, options);
   });
   return result!;
+}
+
+export interface MockScheduledActionOverrides {
+  id?: string;
+  entityId?: string;
+  entityLinkType?: 'Entry' | 'Release';
+  scheduledFor?: string;
+  action?: 'publish' | 'unpublish';
+  createdById?: string;
+}
+
+export function createMockScheduledAction(
+  overrides: MockScheduledActionOverrides = {}
+): ScheduledActionProps {
+  const now = new Date();
+  const futureDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const {
+    id = `action-${Math.random().toString(36).slice(2, 11)}`,
+    entityId = `entity-${Math.random().toString(36).slice(2, 11)}`,
+    entityLinkType = 'Entry',
+    scheduledFor = futureDate.toISOString(),
+    action = 'publish',
+    createdById = `user-${Math.random().toString(36).slice(2, 11)}`,
+  } = overrides;
+
+  return {
+    sys: {
+      id,
+      type: 'ScheduledAction',
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+      version: 1,
+      space: { sys: { id: 'test-space', type: 'Link', linkType: 'Space' } },
+      status: 'scheduled',
+      createdBy: {
+        sys: {
+          id: createdById,
+          type: 'Link',
+          linkType: 'User',
+        },
+      },
+      updatedBy: {
+        sys: {
+          id: createdById,
+          type: 'Link',
+          linkType: 'User',
+        },
+      },
+    },
+    entity: {
+      sys: {
+        id: entityId,
+        type: 'Link',
+        linkType: entityLinkType,
+      },
+    },
+    scheduledFor: {
+      datetime: scheduledFor,
+      timezone: 'UTC',
+    },
+    action,
+  } as ScheduledActionProps;
+}
+
+export interface MockContentTypeOverrides {
+  id?: string;
+  name?: string;
+  displayField?: string;
+}
+
+export function createMockContentType(overrides: MockContentTypeOverrides = {}): ContentTypeProps {
+  const {
+    id = `contentType-${Math.random().toString(36).slice(2, 11)}`,
+    name = 'Blog Post',
+    displayField = 'title',
+  } = overrides;
+
+  return {
+    sys: {
+      id,
+      type: 'ContentType',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      version: 1,
+      space: { sys: { id: 'test-space', type: 'Link', linkType: 'Space' } },
+      environment: { sys: { id: 'test-environment', type: 'Link', linkType: 'Environment' } },
+    },
+    name,
+    displayField,
+    fields: [],
+  } as unknown as ContentTypeProps;
+}
+
+export function createQueryProviderWrapper(): React.ComponentType<{ children: React.ReactNode }> {
+  const TestWrapper = ({ children }: { children: React.ReactNode }) => {
+    return React.createElement(QueryProvider, { children });
+  };
+  TestWrapper.displayName = 'TestWrapper';
+  return TestWrapper;
 }

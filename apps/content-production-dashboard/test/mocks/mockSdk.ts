@@ -14,6 +14,9 @@ const mockSdk: any = {
     environment: 'test-environment',
     organization: 'test-organization',
   },
+  locales: {
+    default: 'en-US',
+  },
   parameters: {
     installation: {},
   },

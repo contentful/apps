@@ -54,7 +54,6 @@ export function useScheduledContent(
     enabled: entryIds.length > 0,
   });
 
-  
   const entriesMap = useMemo(() => generateEntriesMap(entries), [entries]);
   const userIds = useMemo(() => getUserIdsFromEntries(entries), [entries]);
 
