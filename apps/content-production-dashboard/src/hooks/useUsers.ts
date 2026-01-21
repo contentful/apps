@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -31,13 +30,10 @@ export function useUsers(userIds: string[]): UseUsersResult {
     },
   });
 
-  const usersMap = useMemo(() => {
-    const map = new Map<string, UserProps>();
-    (data ?? []).forEach((user) => {
-      map.set(user.sys.id, user);
-    });
-    return map;
-  }, [data]);
+  const usersMap = new Map<string, UserProps>();
+  (data ?? []).forEach((user) => {
+    usersMap.set(user.sys.id, user);
+  });
 
   return {
     usersMap,

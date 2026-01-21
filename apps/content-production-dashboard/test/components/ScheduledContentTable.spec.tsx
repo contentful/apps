@@ -3,8 +3,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { ScheduledContentTable } from '../../src/components/ScheduledContentTable';
 import { EntryStatus, ScheduledContentItem } from '../../src/utils/types';
 import { mockSdk } from '../mocks';
-import { createQueryProviderWrapper } from '../utils/testHelpers';
-import userEvent from '@testing-library/user-event';
+import { createQueryProviderWrapper } from '../utils/createQueryProviderWrapper';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -44,8 +43,6 @@ const createMockScheduledContentItem = (
   };
 };
 
-const createWrapper = createQueryProviderWrapper;
-
 describe('ScheduledContentTable component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -64,7 +61,7 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable />, { wrapper: createWrapper() });
+      render(<ScheduledContentTable />, { wrapper: createQueryProviderWrapper() });
 
       expect(screen.getByRole('table')).toBeInTheDocument();
       expect(screen.getByText('Title')).toBeInTheDocument();
@@ -86,7 +83,7 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable />, { wrapper: createWrapper() });
+      render(<ScheduledContentTable />, { wrapper: createQueryProviderWrapper() });
 
       expect(screen.getByText('No entries found')).toBeInTheDocument();
     });
@@ -103,7 +100,7 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable />, { wrapper: createWrapper() });
+      render(<ScheduledContentTable />, { wrapper: createQueryProviderWrapper() });
 
       expect(screen.getByText('Title')).toBeInTheDocument();
       expect(screen.getByText('Scheduled Date')).toBeInTheDocument();
@@ -130,7 +127,7 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable />, { wrapper: createWrapper() });
+      render(<ScheduledContentTable />, { wrapper: createQueryProviderWrapper() });
 
       expect(screen.getByText('My Blog Post')).toBeInTheDocument();
       expect(screen.getByText('Blog Post')).toBeInTheDocument();
@@ -155,7 +152,7 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable />, { wrapper: createWrapper() });
+      render(<ScheduledContentTable />, { wrapper: createQueryProviderWrapper() });
 
       expect(screen.getByText('Entry 1')).toBeInTheDocument();
       expect(screen.getByText('Entry 2')).toBeInTheDocument();
@@ -179,7 +176,7 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable />, { wrapper: createWrapper() });
+      render(<ScheduledContentTable />, { wrapper: createQueryProviderWrapper() });
 
       expect(screen.getByText(EntryStatus.Published)).toBeInTheDocument();
       expect(screen.getByText(EntryStatus.Changed)).toBeInTheDocument();
@@ -202,7 +199,7 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable />, { wrapper: createWrapper() });
+      render(<ScheduledContentTable />, { wrapper: createQueryProviderWrapper() });
 
       const link = screen.getByText('My Entry').closest('a');
       expect(link).toHaveAttribute(

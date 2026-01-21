@@ -1,9 +1,7 @@
 import { act, render, RenderOptions } from '@testing-library/react';
-import React from 'react';
 import { EntryProps, ScheduledActionProps, ContentTypeProps } from 'contentful-management';
 import { ReactElement } from 'react';
 import type { ChartDataPoint } from '../../src/utils/types';
-import { QueryProvider } from '../../src/providers/QueryProvider';
 
 export interface MockEntryOverrides {
   id?: string;
@@ -222,12 +220,4 @@ export function createMockContentType(overrides: MockContentTypeOverrides = {}):
     displayField,
     fields: [],
   } as unknown as ContentTypeProps;
-}
-
-export function createQueryProviderWrapper(): React.ComponentType<{ children: React.ReactNode }> {
-  const TestWrapper = ({ children }: { children: React.ReactNode }) => {
-    return React.createElement(QueryProvider, { children });
-  };
-  TestWrapper.displayName = 'TestWrapper';
-  return TestWrapper;
 }
