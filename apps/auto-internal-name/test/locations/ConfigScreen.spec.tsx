@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMockCma, createMockSdk } from '../mocks';
@@ -10,7 +10,6 @@ let mockSdk: ReturnType<typeof createMockSdk>;
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
-  useCMA: () => mockCma,
 }));
 
 describe('ConfigScreen', () => {
@@ -50,8 +49,6 @@ describe('ConfigScreen', () => {
     mockSdk = createMockSdk({
       cma: mockCma,
     });
-    mockSdk.app.getParameters.mockResolvedValue(null);
-    mockSdk.app.getCurrentState.mockResolvedValue({});
     mockCma.contentType.getMany.mockResolvedValue({
       items: mockContentTypes,
     });
@@ -63,31 +60,39 @@ describe('ConfigScreen', () => {
       render(<ConfigScreen />);
 
       await waitFor(() => {
-        expect(screen.getByText('Set up Auto Internal Name')).toBeInTheDocument();
+        expect(screen.getByText('Set up Auto-prefix')).toBeInTheDocument();
         expect(
           screen.getByText(
-            /This app allows you to automatically set the name of an entry based on a field from its parent entry/
+            /This app automatically adds the parent entry's name as a prefix to your reference/
           )
         ).toBeInTheDocument();
-      });
-    });
-
-    it('should load content types on mount', async () => {
-      render(<ConfigScreen />);
-
-      await waitFor(() => {
-        expect(mockCma.contentType.getMany).toHaveBeenCalledWith({
-          spaceId: 'test-space',
-          environmentId: 'test-environment',
-        });
       });
     });
 
     it('should load existing parameters on mount', async () => {
       const existingParameters = {
         separator: '-',
-        sourceFieldId: 'title',
-        overrides: [{ id: 'override-1', contentTypeId: 'ct-1', fieldId: 'slug' }],
+        rules: [
+          {
+            id: 'rule-1',
+            parentField: {
+              fieldUniqueId: 'ct-1.title',
+              fieldId: 'title',
+              fieldName: 'Title',
+              contentTypeId: 'ct-1',
+              contentTypeName: 'Blog Post',
+              displayName: 'Title | Blog Post',
+            },
+            referenceField: {
+              fieldUniqueId: 'ct-1.slug',
+              fieldId: 'slug',
+              fieldName: 'Slug',
+              contentTypeId: 'ct-1',
+              contentTypeName: 'Blog Post',
+              displayName: 'Slug | Blog Post',
+            },
+          },
+        ],
       };
 
       mockSdk.app.getParameters.mockResolvedValue(existingParameters);
@@ -97,6 +102,8 @@ describe('ConfigScreen', () => {
       await waitFor(() => {
         expect(mockSdk.app.getParameters).toHaveBeenCalled();
         expect(mockSdk.app.setReady).toHaveBeenCalled();
+        expect(screen.getByDisplayValue('Title | Blog Post')).toBeInTheDocument();
+        expect(screen.getByDisplayValue('Slug | Blog Post')).toBeInTheDocument();
       });
     });
   });
@@ -119,108 +126,20 @@ describe('ConfigScreen', () => {
     });
   });
 
-  describe('Overrides management', () => {
-    it('should add a new override when add button is clicked', async () => {
+  describe('Rules management', () => {
+    it('should add a new rule when add button is clicked', async () => {
       const user = userEvent.setup();
       render(<ConfigScreen />);
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /add override/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /add auto-prefix/i })).toBeInTheDocument();
       });
 
-      const addButton = screen.getByRole('button', { name: /add override/i });
-      await user.click(addButton);
-
-      // Should render OverrideItem component
-      await waitFor(() => {
-        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
-      });
-    });
-
-    it('should disable add override button when all content types are used', async () => {
-      const user = userEvent.setup();
-      render(<ConfigScreen />);
-
-      await waitFor(() => {
-        expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
-      });
-
-      // Add first override and select Blog Post
-      const addButton = screen.getByRole('button', { name: /add override/i });
+      const addButton = screen.getByRole('button', { name: /add auto-prefix/i });
       await user.click(addButton);
 
       await waitFor(() => {
-        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
-      });
-
-      const contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[0];
-      await user.type(contentTypeAutocomplete, 'Blog Post');
-      const blogPostOption = await screen.findByText('Blog Post');
-      await user.click(blogPostOption);
-
-      // Add second override and select Author
-      await user.click(addButton);
-
-      await waitFor(() => {
-        const contentTypeInputs = screen.getAllByPlaceholderText(/content type name/i);
-        expect(contentTypeInputs.length).toBe(2);
-      });
-
-      const secondContentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[1];
-      await user.type(secondContentTypeAutocomplete, 'Author');
-      const authorOption = screen.getAllByRole('option', { name: 'Author' })[0];
-      await user.click(authorOption);
-
-      // Verify button is disabled
-      await waitFor(() => {
-        const addButtonAfter = screen.getByRole('button', { name: /add override/i });
-        expect(addButtonAfter).toBeDisabled();
-      });
-    });
-
-    it('should show tooltip when max overrides reached', async () => {
-      const user = userEvent.setup();
-      render(<ConfigScreen />);
-
-      await waitFor(() => {
-        expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
-      });
-
-      // Add first override and select Blog Post
-      const addButton = screen.getByRole('button', { name: /add override/i });
-      await user.click(addButton);
-
-      await waitFor(() => {
-        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
-      });
-
-      const contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[0];
-      await user.type(contentTypeAutocomplete, 'Blog Post');
-      const blogPostOption = await screen.findByText('Blog Post');
-      await user.click(blogPostOption);
-
-      // Add second override and select Author
-      await user.click(addButton);
-
-      await waitFor(() => {
-        const contentTypeInputs = screen.getAllByPlaceholderText(/content type name/i);
-        expect(contentTypeInputs.length).toBe(2);
-      });
-
-      const secondContentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[1];
-      await user.type(secondContentTypeAutocomplete, 'Author');
-      const authorOption = screen.getAllByRole('option', { name: 'Author' })[0];
-      await user.click(authorOption);
-
-      const disabledButton = screen.getByRole('button', { name: /add override/i });
-      const tooltipWrapper = disabledButton.parentElement;
-      if (tooltipWrapper) {
-        fireEvent.mouseEnter(tooltipWrapper);
-      }
-
-      await waitFor(() => {
-        const tooltip = screen.getByRole('tooltip');
-        expect(tooltip.textContent).toBe('No more content types available.');
+        expect(screen.getAllByLabelText(/parent field/i).length).toBeGreaterThan(1);
       });
     });
   });
@@ -231,8 +150,27 @@ describe('ConfigScreen', () => {
 
       const initialParameters = {
         separator: '-',
-        sourceFieldId: 'title',
-        overrides: [{ id: 'override-1', contentTypeId: 'ct-1', fieldId: 'slug' }],
+        rules: [
+          {
+            id: 'rule-1',
+            parentField: {
+              fieldUniqueId: 'ct-1.title',
+              fieldId: 'title',
+              fieldName: 'Title',
+              contentTypeId: 'ct-1',
+              contentTypeName: 'Blog Post',
+              displayName: 'Title | Blog Post',
+            },
+            referenceField: {
+              fieldUniqueId: 'ct-1.slug',
+              fieldId: 'slug',
+              fieldName: 'Slug',
+              contentTypeId: 'ct-1',
+              contentTypeName: 'Blog Post',
+              displayName: 'Slug | Blog Post',
+            },
+          },
+        ],
       };
 
       mockSdk.app.getParameters.mockResolvedValue(initialParameters);
@@ -255,49 +193,52 @@ describe('ConfigScreen', () => {
         expect(separatorInput).toHaveValue(' | ');
       });
 
-      const addButton = screen.getByRole('button', { name: /add override/i });
+      const addButton = screen.getByRole('button', { name: /add auto-prefix/i });
       await user.click(addButton);
 
       await waitFor(() => {
-        const overrideItems = screen.getAllByLabelText(/content type/i);
-        expect(overrideItems.length).toBeGreaterThan(1);
+        const parentFieldInputs = screen.getAllByLabelText(/parent field/i);
+        expect(parentFieldInputs.length).toBeGreaterThan(1);
       });
 
-      const contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[1];
-      await user.type(contentTypeAutocomplete, 'Author');
-      const authorOption = screen.getAllByRole('option', { name: 'Author' })[0];
-      await user.click(authorOption);
-
+      // Select parent field for the new rule
+      const parentFieldInput = screen.getAllByPlaceholderText(
+        /field name \| content type name/i
+      )[2];
+      await user.click(parentFieldInput);
+      await user.type(parentFieldInput, 'Name');
       await waitFor(() => {
-        const fieldAutocomplete = screen.getAllByPlaceholderText(/field name/i)[1];
-        expect(fieldAutocomplete).not.toBeDisabled();
+        const options = screen.getAllByText('Name | Author');
+        expect(options.length).toBeGreaterThan(0);
       });
+      await user.click(screen.getAllByText('Name | Author')[0]);
 
-      const fieldAutocomplete = screen.getAllByPlaceholderText(/field name/i)[1];
-      await user.type(fieldAutocomplete, 'Name');
+      // Select reference field for the new rule
+      const referenceFieldInput = screen.getAllByPlaceholderText(
+        /field name \| content type name/i
+      )[3];
+      await user.click(referenceFieldInput);
+      await user.type(referenceFieldInput, 'Title');
       await waitFor(() => {
-        expect(screen.getByText('Name')).toBeInTheDocument();
+        const options = screen.getAllByText('Title | Author');
+        expect(options.length).toBeGreaterThan(0);
       });
-      await user.click(screen.getByText('Name'));
+      await user.click(screen.getAllByText('Title | Author')[0]);
 
       const result = await simulateSave();
 
       // Verify all parameters are correctly stored
       expect(result.parameters).toHaveProperty('separator');
-      expect(result.parameters).toHaveProperty('sourceFieldId');
-      expect(result.parameters).toHaveProperty('overrides');
-      expect(Array.isArray(result.parameters.overrides)).toBe(true);
+      expect(result.parameters).toHaveProperty('rules');
+      expect(Array.isArray(result.parameters.rules)).toBe(true);
 
       expect(result.parameters.separator).toBe(' | ');
-      expect(result.parameters.sourceFieldId).toBe('title');
-      expect(result.parameters.overrides.length).toBeGreaterThan(1);
+      expect(result.parameters.rules.length).toBeGreaterThan(1);
 
-      const firstOverride = result.parameters.overrides[0];
-      expect(firstOverride).toHaveProperty('id');
-      expect(firstOverride).toHaveProperty('contentTypeId');
-      expect(firstOverride).toHaveProperty('fieldId');
-      expect(firstOverride.contentTypeId).toBe('ct-1');
-      expect(firstOverride.fieldId).toBe('slug');
+      const firstRule = result.parameters.rules[0];
+      expect(firstRule).toHaveProperty('id');
+      expect(firstRule).toHaveProperty('parentField');
+      expect(firstRule).toHaveProperty('referenceField');
 
       expect(result).toHaveProperty('targetState');
       expect(result.targetState).toBeDefined();
@@ -305,7 +246,7 @@ describe('ConfigScreen', () => {
   });
 
   describe('Validation', () => {
-    it('should return false and show error when override fieldId is missing', async () => {
+    it('should return false and show error when rule fields are missing', async () => {
       const user = userEvent.setup();
       await act(async () => {
         render(<ConfigScreen />);
@@ -318,59 +259,35 @@ describe('ConfigScreen', () => {
       const separatorInput = screen.getByLabelText(/separator/i);
       await user.type(separatorInput, '-');
 
-      const sourceFieldAutocomplete = screen.getByPlaceholderText(/search field name/i);
-      await user.type(sourceFieldAutocomplete, 'Title');
-
-      const addButton = screen.getByRole('button', { name: /add override/i });
-      await user.click(addButton);
-
-      await waitFor(() => {
-        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
-      });
-
-      const contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[0];
-      await user.type(contentTypeAutocomplete, 'Blog Post');
-
       const result = await simulateSave();
 
       // Should return false and show error
       expect(result).toBe(false);
       expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
       await waitFor(() => {
-        expect(screen.getByText('Field name is required')).toBeInTheDocument();
+        expect(screen.getByText('Parent field is required')).toBeInTheDocument();
+        expect(screen.getByText('Reference field is required')).toBeInTheDocument();
       });
     });
 
-    it('should return false when multiple validation errors exist', async () => {
-      await act(async () => {
-        render(<ConfigScreen />);
-      });
+    it('should return false when no rules are configured', async () => {
+      const user = userEvent.setup();
+      render(<ConfigScreen />);
 
       await waitFor(() => {
         expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
       });
 
-      // Leave sourceFieldId empty, and add an incomplete override
-      const user = userEvent.setup();
-      const addButton = screen.getByRole('button', { name: /add override/i });
-      await user.click(addButton);
-
-      await waitFor(() => {
-        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
-      });
+      const deleteButton = screen.getByRole('button', { name: /delete rule/i });
+      await user.click(deleteButton);
 
       const result = await simulateSave();
 
-      // Should return false and show all error messages
       expect(result).toBe(false);
       expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
-      await waitFor(() => {
-        expect(screen.getByText('Source field ID is required')).toBeInTheDocument();
-        expect(screen.getByText('Content type is required')).toBeInTheDocument();
-      });
     });
 
-    it('should validate multiple overrides correctly', async () => {
+    it('should validate multiple rules correctly', async () => {
       const user = userEvent.setup();
       render(<ConfigScreen />);
 
@@ -381,53 +298,63 @@ describe('ConfigScreen', () => {
       const separatorInput = screen.getByLabelText(/separator/i);
       await user.type(separatorInput, '-');
 
-      const sourceFieldAutocomplete = screen.getByPlaceholderText(/search field name/i);
-      await user.type(sourceFieldAutocomplete, 'Title');
+      // Fill in first rule
+      const parentFieldInput1 = screen.getAllByPlaceholderText(
+        /field name \| content type name/i
+      )[0];
+      await user.click(parentFieldInput1);
+      await user.type(parentFieldInput1, 'Title');
+      await waitFor(() => {
+        const options = screen.getAllByText('Title | Blog Post');
+        expect(options.length).toBeGreaterThan(0);
+      });
+      await user.click(screen.getAllByText('Title | Blog Post')[0]);
 
-      // Add first override - complete
-      const addButton = screen.getByRole('button', { name: /add override/i });
+      const referenceFieldInput1 = screen.getAllByPlaceholderText(
+        /field name \| content type name/i
+      )[1];
+      await user.click(referenceFieldInput1);
+      await user.type(referenceFieldInput1, 'Slug');
+      await waitFor(() => {
+        const options = screen.getAllByText('Slug | Blog Post');
+        expect(options.length).toBeGreaterThan(0);
+      });
+      await user.click(screen.getAllByText('Slug | Blog Post')[0]);
+
+      // Add second rule - incomplete (missing reference field)
+      const addButton = screen.getByRole('button', { name: /add auto-prefix/i });
       await user.click(addButton);
 
       await waitFor(() => {
-        expect(screen.getByLabelText(/content type/i)).toBeInTheDocument();
+        const parentFieldInputs = screen.getAllByLabelText(/parent field/i);
+        expect(parentFieldInputs.length).toEqual(2);
       });
 
-      let contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[0];
-      await user.type(contentTypeAutocomplete, 'Blog Post');
-
+      // Fill in only parent field for second rule
+      const parentFieldInput2 = screen.getAllByPlaceholderText(
+        /field name \| content type name/i
+      )[2];
+      await user.click(parentFieldInput2);
+      await user.type(parentFieldInput2, 'Name');
       await waitFor(() => {
-        const fieldAutocomplete = screen.getAllByPlaceholderText(/field name/i)[0];
-        expect(fieldAutocomplete).not.toBeDisabled();
+        const options = screen.getAllByText('Name | Author');
+        expect(options.length).toBeGreaterThan(0);
       });
-
-      await user.type(screen.getAllByPlaceholderText(/field name/i)[0], 'Slug');
-
-      // Add second override - incomplete (missing fieldId)
-      await user.click(addButton);
-
-      await waitFor(() => {
-        const contentTypeInputs = screen.getAllByPlaceholderText(/content type name/i);
-        expect(contentTypeInputs.length).toBe(2);
-      });
-
-      contentTypeAutocomplete = screen.getAllByPlaceholderText(/content type name/i)[1];
-      await user.type(contentTypeAutocomplete, 'Author');
-      const authorOption = screen.getAllByRole('option', { name: 'Author' })[0];
-      await user.click(authorOption);
+      await user.click(screen.getAllByText('Name | Author')[0]);
 
       const result = await simulateSave();
 
-      // Should return false because second override is incomplete
+      // Should return false because second rule is incomplete
       expect(result).toBe(false);
       expect(mockSdk.notifier.error).toHaveBeenCalledWith('Some fields are missing or invalid');
       await waitFor(() => {
-        expect(screen.getAllByText('Field name is required').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByText('Reference field is required')).toBeInTheDocument();
       });
     });
   });
 
-  describe('Source field filtering', () => {
-    it('should only show Symbol fields in sourceFieldId autocomplete', async () => {
+  describe('Field filtering', () => {
+    it('should only show Symbol fields in autocomplete', async () => {
       const user = userEvent.setup();
       render(<ConfigScreen />);
 
@@ -435,19 +362,22 @@ describe('ConfigScreen', () => {
         expect(mockSdk.cma.contentType.getMany).toHaveBeenCalled();
       });
 
-      const sourceFieldAutocomplete = screen.getByPlaceholderText(/search field name/i);
-      await user.click(sourceFieldAutocomplete);
+      const parentFieldInput = screen.getAllByPlaceholderText(
+        /field name \| content type name/i
+      )[0];
+      await user.click(parentFieldInput);
+      await user.type(parentFieldInput, 'T');
 
       await waitFor(() => {
         // Symbol fields should be available
-        expect(screen.getByText('Title')).toBeInTheDocument();
-        expect(screen.getByText('Slug')).toBeInTheDocument();
-        expect(screen.getByText('Name')).toBeInTheDocument();
+        expect(screen.getAllByText('Title | Blog Post').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Slug | Blog Post').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Name | Author').length).toBeGreaterThan(0);
       });
 
       // Non-Symbol fields (Text type) should NOT be available
-      expect(screen.queryByText('Body')).not.toBeInTheDocument();
-      expect(screen.queryByText('Bio')).not.toBeInTheDocument();
+      expect(screen.queryByText('Body | Blog Post')).not.toBeInTheDocument();
+      expect(screen.queryByText('Bio | Author')).not.toBeInTheDocument();
     });
   });
 });

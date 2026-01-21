@@ -1,23 +1,28 @@
-export type Override = {
-  id: string;
-  contentTypeId: string;
+export type FieldSelection = {
+  fieldUniqueId: string;
   fieldId: string;
+  fieldName: string;
+  contentTypeId: string;
+  contentTypeName: string;
+  displayName: string;
 };
 
-export type AutocompleteItem = {
+export type Rule = {
   id: string;
-  name: string;
+  parentField: FieldSelection | null;
+  referenceField: FieldSelection | null;
 };
 
 export type AppInstallationParameters = {
-  overrides: Override[];
+  rules: Rule[];
   separator: string;
-  sourceFieldId: string;
 };
 
-export type OverrideIsInvalid = {
-  isContentTypeMissing: boolean;
-  isFieldMissing: boolean;
+export type RuleValidation = {
+  parentFieldError: boolean;
+  referenceFieldError: boolean;
+  parentFieldErrorMessage: string;
+  referenceFieldErrorMessage: string;
 };
 
-export type OverrideState = Record<string, OverrideIsInvalid>;
+export type RuleValidationState = Record<string, RuleValidation>;

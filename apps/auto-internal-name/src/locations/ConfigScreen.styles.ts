@@ -8,4 +8,7 @@ export const styles = {
   formControl: css({
     flex: 1,
   }),
+  rulesGrid: css({
+    width: '100%',
+  }),
 };

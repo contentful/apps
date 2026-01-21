@@ -8,7 +8,7 @@ const createMockSdk = (overrides?: any) => {
       onConfigure: vi.fn(),
       getParameters: vi.fn().mockResolvedValue(null),
       setReady: vi.fn(),
-      getCurrentState: vi.fn().mockResolvedValue({}),
+      getCurrentState: vi.fn().mockResolvedValue({ EditorInterface: {} }),
     },
     ids: {
       app: 'test-app',
@@ -16,6 +16,7 @@ const createMockSdk = (overrides?: any) => {
       environment: 'test-environment',
       entry: 'current-entry-id',
       contentType: 'test-content-type-id',
+      field: 'name',
     },
     field: {
       getValue: vi.fn().mockReturnValue(''),
@@ -45,9 +46,8 @@ const createMockSdk = (overrides?: any) => {
     },
     parameters: {
       installation: {
-        sourceFieldId: 'title',
         separator: '-',
-        overrides: [],
+        rules: [],
       } as AppInstallationParameters,
     },
     cma: mockCma,

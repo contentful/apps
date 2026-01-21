@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react';
 import { styles } from './Field.styles';
 import { AppInstallationParameters } from '../utils/types';
 import { EntryProps } from 'contentful-management';
-import { getFieldIdForContentType } from '../utils/fieldUtils';
 import { delay, MAX_RETRIES } from '../utils/delay';
 import { isEntryRecentlyCreated } from '../utils/entryUtils';
 import { useInstallationParameters } from '../hooks/useInstallationParameters';
@@ -22,8 +21,7 @@ const Field = () => {
   useAutoResizer();
 
   const getInternalNameFromParentEntry = (parentEntry: EntryProps): string => {
-    const contentTypeId = sdk.contentType.sys.id;
-    const fieldId = getFieldIdForContentType(contentTypeId, installationParameters);
+    const fieldId = 'todo';
     const separator = installationParameters.separator;
 
     const localizedFieldValue = parentEntry.fields[fieldId] as Record<string, string> | undefined;

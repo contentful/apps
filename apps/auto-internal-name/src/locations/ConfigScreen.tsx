@@ -1,4 +1,4 @@
-import { ConfigAppSDK } from '@contentful/app-sdk';
+import { CMAClient, ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Box,
   Flex,
@@ -7,59 +7,128 @@ import {
   Paragraph,
   FormControl,
   TextInput,
-  Autocomplete,
+  Button,
+  Subheading,
+  Grid,
+  GridItem,
 } from '@contentful/f36-components';
+import { PlusIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
 import { styles } from './ConfigScreen.styles';
-import OverrideSection from '../components/OverrideSection';
+import RuleRow from '../components/RuleRow';
 import {
   AppInstallationParameters,
-  OverrideState,
-  Override,
-  AutocompleteItem,
+  Rule,
+  RuleValidationState,
+  FieldSelection,
+  RuleValidation,
 } from '../utils/types';
-import { getUniqueShortTextFields, normalizeString } from '../utils/override';
+import { getFieldSelectionsFromContentTypes } from '../utils/rules';
 import { ContentTypeProps } from 'contentful-management';
 
 const ConfigScreen = () => {
+  const createEmptyRule = () => {
+    return {
+      id: window.crypto.randomUUID(),
+      parentField: null,
+      referenceField: null,
+    };
+  };
+
+  const getAllContentTypes = async (cma: CMAClient): Promise<ContentTypeProps[]> => {
+    const allContentTypes: ContentTypeProps[] = [];
+    let skip = 0;
+    const limit = 1000;
+    let fetched: number;
+
+    do {
+      const response = await cma.contentType.getMany({
+        query: { skip, limit },
+      });
+      const items = response.items as ContentTypeProps[];
+      allContentTypes.push(...items);
+      fetched = items.length;
+      skip += limit;
+    } while (fetched === limit);
+
+    return allContentTypes;
+  };
+
   const sdk = useSDK<ConfigAppSDK>();
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     separator: '',
-    sourceFieldId: '',
-    overrides: [],
+    rules: [createEmptyRule()],
   });
-  const [isSourceFieldMissing, setIsSourceFieldMissing] = useState<boolean>(false);
-  const [overridesAreInvalid, setOverridesAreInvalid] = useState<OverrideState>({});
-  const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
-  const [fields, setFields] = useState<AutocompleteItem[]>([]);
-  const [filteredSourceFields, setFilteredSourceFields] = useState<AutocompleteItem[]>([]);
+  const [rulesValidations, setRulesValidations] = useState<RuleValidationState>({});
+  const [availableFields, setAvailableFields] = useState<FieldSelection[]>([]);
+
+  const validateOnConfigure = () => {
+    const newRulesValidations: RuleValidationState = {};
+    parameters.rules.forEach((rule) => {
+      const ruleValidation: RuleValidation = {
+        parentFieldError: false,
+        referenceFieldError: false,
+        parentFieldErrorMessage: '',
+        referenceFieldErrorMessage: '',
+      };
+      if (!rule.parentField) {
+        ruleValidation.parentFieldError = true;
+        ruleValidation.parentFieldErrorMessage = 'Parent field is required';
+      }
+      if (!rule.referenceField) {
+        ruleValidation.referenceFieldError = true;
+        ruleValidation.referenceFieldErrorMessage = 'Reference field is required';
+      }
+      const referenceKey = rule.referenceField?.fieldUniqueId;
+      if (
+        referenceKey &&
+        parameters.rules.filter((r) => r.referenceField?.fieldUniqueId === referenceKey).length > 1
+      ) {
+        ruleValidation.referenceFieldError = true;
+        ruleValidation.referenceFieldErrorMessage = 'Each field can only be in one reference entry';
+      }
+      newRulesValidations[rule.id] = ruleValidation;
+    });
+
+    setRulesValidations(newRulesValidations);
+
+    const invalidConfigurations =
+      !parameters.rules.length ||
+      Object.values(newRulesValidations).some(
+        (ruleValidation: RuleValidation) =>
+          ruleValidation.parentFieldError || ruleValidation.referenceFieldError
+      );
+    return !invalidConfigurations;
+  };
+
+  const addApptoFields = async () => {
+    const state = (await sdk.app.getCurrentState()) || { EditorInterface: {} };
+
+    for (const rule of parameters.rules) {
+      const fieldId = rule.referenceField?.fieldId;
+      const contentTypeId = rule.referenceField?.contentTypeId;
+      if (fieldId && contentTypeId) {
+        state.EditorInterface[contentTypeId] = {
+          controls: [...(state.EditorInterface[contentTypeId]?.controls || []), { fieldId }],
+        };
+      }
+    }
+
+    return state;
+  };
 
   const onConfigure = useCallback(async () => {
-    const currentState = await sdk.app.getCurrentState();
-    setIsSourceFieldMissing(!parameters.sourceFieldId);
-
-    const newOverridesAreInvalid: OverrideState = {};
-    parameters.overrides.forEach((override) => {
-      newOverridesAreInvalid[override.id] = {
-        isContentTypeMissing: !override.contentTypeId,
-        isFieldMissing: !override.fieldId,
-      };
-    });
-    setOverridesAreInvalid(newOverridesAreInvalid);
-
-    const invalidOverrides = parameters.overrides.some(
-      (override) => !override.contentTypeId || !override.fieldId
-    );
-
-    if (!parameters.sourceFieldId || invalidOverrides) {
+    if (!validateOnConfigure()) {
       sdk.notifier.error('Some fields are missing or invalid');
       return false;
     }
 
+    const targetState = await addApptoFields();
+
     return {
       parameters,
-      targetState: currentState,
+      targetState,
     };
   }, [parameters, sdk]);
 
@@ -76,51 +145,37 @@ const ConfigScreen = () => {
       }
 
       try {
-        const contentTypes = await sdk.cma.contentType.getMany({
-          spaceId: sdk.ids.space,
-          environmentId: sdk.ids.environment,
-        });
+        const contentTypesList = await getAllContentTypes(sdk.cma);
+        const fields = getFieldSelectionsFromContentTypes(contentTypesList);
 
-        const uniqueFields = getUniqueShortTextFields(contentTypes);
-
-        setContentTypes(contentTypes.items || []);
-        setFields(uniqueFields);
-        setFilteredSourceFields(uniqueFields);
+        setAvailableFields(fields);
       } catch {
-        sdk.notifier.error('Failed to load source fields');
+        sdk.notifier.error('Failed to load fields');
       }
 
       sdk.app.setReady();
     })();
   }, [sdk]);
 
-  const handleOverridesChange = (newOverrides: Override[]) => {
+  const handleRuleChange = (rule: Rule) => {
     setParameters((prev) => ({
       ...prev,
-      overrides: newOverrides,
+      rules: prev.rules.map((r) => (r.id === rule.id ? rule : r)),
     }));
   };
 
-  const handleSourceFieldInputChange = (name: string) => {
-    if (!name) {
-      setParameters((prev) => ({ ...prev, sourceFieldId: '' }));
-      setFilteredSourceFields(fields);
-      return;
-    }
-
-    const newFilteredItems = fields.filter((item) =>
-      normalizeString(item.name).includes(normalizeString(name))
-    );
-    setFilteredSourceFields(newFilteredItems);
+  const handleAddRule = () => {
+    setParameters((prev) => ({
+      ...prev,
+      rules: [...prev.rules, createEmptyRule()],
+    }));
   };
 
-  const handleSourceFieldIdSelection = (value: string) => {
-    const selectedField = fields.find(
-      (item) => normalizeString(item.name) === normalizeString(value)
-    );
-    if (selectedField) {
-      setParameters((prev) => ({ ...prev, sourceFieldId: selectedField.id }));
-    }
+  const handleRuleDelete = (ruleId: string) => {
+    setParameters((prev) => ({
+      ...prev,
+      rules: prev.rules.filter((rule) => rule.id !== ruleId),
+    }));
   };
 
   return (
@@ -129,21 +184,69 @@ const ConfigScreen = () => {
         className={styles.container}
         flexDirection="column"
         alignItems="flex-start"
-        gap="spacingXl"
-        marginTop="spacing2Xl">
+        gap="spacingXl">
         <Box>
           <Heading as="h2" marginBottom="spacingS">
-            Set up Auto Internal Name
+            Set up Auto-prefix
           </Heading>
           <Paragraph>
-            This app allows you to automatically set the name of an entry based on a field from its
-            parent entry. Provide the ID of the field you wish to use as the source field on the
-            parent.
+            This app automatically adds the parent entry&apos;s name as a prefix to your reference
+            titles, helping maintain a clear naming taxonomy and improving discoverability. Select
+            the parent field and a separator -the parent&apos;s name will be applied as a prefix to
+            the reference name.
           </Paragraph>
         </Box>
 
-        <Box>
-          <Heading as="h3">Configure</Heading>
+        <Flex flexDirection="column" gap="spacingL" fullWidth>
+          <Subheading marginBottom="none">Configure</Subheading>
+
+          <Flex flexDirection="column" gap="spacingXs">
+            <Grid
+              className={styles.rulesGrid}
+              columns="minmax(0, 1fr) minmax(0, 1fr) auto"
+              columnGap="spacingL"
+              rowGap="spacingXs">
+              <GridItem>
+                <Paragraph fontWeight="fontWeightDemiBold" marginBottom="spacing2Xs">
+                  Select the parent field
+                </Paragraph>
+                <Paragraph>
+                  The parent field name will be used as the prefix on the reference name.
+                </Paragraph>
+              </GridItem>
+              <GridItem>
+                <Paragraph fontWeight="fontWeightDemiBold" marginBottom="spacing2Xs">
+                  Select reference entries
+                </Paragraph>
+                <Paragraph>
+                  Select the references of your parent content type that you wish to prefix with the
+                  parent field name.
+                </Paragraph>
+              </GridItem>
+              <GridItem />
+              {parameters.rules.map((rule) => (
+                <RuleRow
+                  key={rule.id}
+                  rule={rule}
+                  availableFields={availableFields}
+                  validation={rulesValidations[rule.id]}
+                  onRuleChange={handleRuleChange}
+                  onRuleDelete={handleRuleDelete}
+                />
+              ))}
+            </Grid>
+
+            <Box>
+              <Button
+                startIcon={<PlusIcon />}
+                variant="secondary"
+                size="small"
+                onClick={handleAddRule}>
+                Add auto-prefix
+              </Button>
+            </Box>
+          </Flex>
+
           <FormControl id="separator">
             <FormControl.Label marginBottom="spacingS">Separator</FormControl.Label>
             <TextInput
@@ -154,39 +257,7 @@ const ConfigScreen = () => {
               The separator can be any character or symbol and will append to the entry name.
             </FormControl.HelpText>
           </FormControl>
-          <FormControl id="sourceFieldId" isInvalid={isSourceFieldMissing}>
-            <FormControl.Label marginBottom="spacingS" isRequired>
-              Source field ID
-            </FormControl.Label>
-            <Autocomplete
-              listWidth="full"
-              selectedItem={
-                fields.find((field) => field.id === parameters.sourceFieldId)?.name || ''
-              }
-              items={filteredSourceFields.map((field) => field.name)}
-              onInputValueChange={handleSourceFieldInputChange}
-              onSelectItem={handleSourceFieldIdSelection}
-              placeholder="Search field name"
-            />
-            {isSourceFieldMissing && (
-              <FormControl.ValidationMessage>
-                Source field ID is required
-              </FormControl.ValidationMessage>
-            )}
-            <FormControl.HelpText marginTop="spacingS">
-              The source field ID should be the name of the field that you want to use from the
-              parent entry. This will be applied to any content types that include the same field
-              ID.
-            </FormControl.HelpText>
-          </FormControl>
-        </Box>
-
-        <OverrideSection
-          contentTypes={contentTypes}
-          overrides={parameters.overrides}
-          overridesAreInvalid={overridesAreInvalid}
-          onOverridesChange={handleOverridesChange}
-        />
+        </Flex>
       </Flex>
     </Form>
   );
