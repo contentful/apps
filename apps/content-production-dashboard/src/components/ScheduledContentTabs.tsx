@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Flex, Heading, Tabs, Text } from '@contentful/f36-components';
+import { Box, Flex, Tabs, Text } from '@contentful/f36-components';
 import { ScheduledContentTable } from './ScheduledContentTable';
 import { RecentlyPublishedTable } from './RecentlyPublishedTable';
 import { NeedsUpdateTable } from './NeedsUpdateTable';
