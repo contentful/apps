@@ -1,28 +1,18 @@
 import { useMemo } from 'react';
-import { EntryProps } from 'contentful-management';
+import { EntryProps, ScheduledActionProps } from 'contentful-management';
 
 import { ScheduledContentItem } from '../utils/types';
 import { getCreatorFromEntry } from '../utils/UserUtils';
 import { getEntryStatus, getEntryTitle } from '../utils/EntryUtils';
-import { useEntries } from './useAllEntries';
 import { useContentTypes } from './useContentTypes';
 import { useUsers } from './useUsers';
-import { useScheduledActions } from './useScheduledActions';
 import { RELEASES_PER_PAGE } from '../utils/consts';
 
 interface UseScheduledContentResult {
   items: ScheduledContentItem[];
   total: number;
   isFetching: boolean;
-  error: Error | null;
   refetch: () => void;
-}
-
-function generateEntriesMap(entries: EntryProps[]): Map<string, EntryProps> {
-  return entries.reduce((map, entry) => {
-    map.set(entry.sys.id, entry);
-    return map;
-  }, new Map<string, EntryProps>());
 }
 
 function getUserIdsFromEntries(entries: EntryProps[]): string[] {
@@ -31,40 +21,45 @@ function getUserIdsFromEntries(entries: EntryProps[]): string[] {
   return [...new Set(userIds)];
 }
 
+function getContentTypeIdsFromEntries(entries: EntryProps[]): string[] {
+  const contentTypeIds = entries
+    .map((entry) => entry.sys.contentType?.sys?.id)
+    .filter(Boolean) as string[];
+
+  return [...new Set(contentTypeIds)];
+}
+
 export function useScheduledContent(
+  scheduledActions: ScheduledActionProps[],
+  entries: EntryProps[],
   defaultLocale: string,
   page: number = 0
 ): UseScheduledContentResult {
   const skip = page * RELEASES_PER_PAGE;
-  const { scheduledActions, isFetchingScheduledActions, refetchScheduledActions } =
-    useScheduledActions({ query: { 'sys.entity.sys.linkType': 'Entry' } });
 
-  const entryIds = useMemo(
-    () => scheduledActions.map((action) => action.entity?.sys?.id || '').filter(Boolean),
-    [scheduledActions]
+  const scheduledEntries = useMemo(
+    () =>
+      entries.filter((entry) =>
+        scheduledActions.some((action) => action.entity?.sys?.id == entry.sys.id)
+      ),
+    [entries, scheduledActions]
   );
 
-  const {
-    entries,
-    isFetchingEntries,
-    fetchingEntriesError: entriesError,
-    refetchEntries,
-  } = useEntries({
-    query: { 'sys.id[in]': entryIds.join(',') },
-    enabled: entryIds.length > 0,
-  });
+  const userIds = useMemo(() => getUserIdsFromEntries(scheduledEntries), [scheduledEntries]);
+  const contentTypeIds = useMemo(
+    () => getContentTypeIdsFromEntries(scheduledEntries),
+    [scheduledEntries]
+  );
 
-  const entriesMap = useMemo(() => generateEntriesMap(entries), [entries]);
-  const userIds = useMemo(() => getUserIdsFromEntries(entries), [entries]);
-
-  const { contentTypes, isFetchingContentTypes, refetchContentTypes } = useContentTypes();
-  const { usersMap, isFetching: isFetchingUsers } = useUsers(userIds);
+  const { usersMap, isFetching: isFetchingUsers, refetch: refetchUsers } = useUsers(userIds);
+  const { contentTypes, isFetchingContentTypes, refetchContentTypes } =
+    useContentTypes(contentTypeIds);
 
   const scheduledItems = useMemo(() => {
     const items: ScheduledContentItem[] = [];
 
     scheduledActions.forEach((action) => {
-      const entry = entriesMap.get(action.entity?.sys?.id || '');
+      const entry = scheduledEntries.find((e) => e.sys.id === action.entity?.sys?.id);
       if (!entry) return;
 
       const contentType = contentTypes.get(entry.sys.contentType?.sys?.id || '');
@@ -87,21 +82,17 @@ export function useScheduledContent(
     });
 
     return items;
-  }, [scheduledActions, entriesMap, contentTypes, usersMap, defaultLocale]);
+  }, [scheduledActions, scheduledEntries, contentTypes, usersMap, defaultLocale]);
 
-  const isFetching =
-    isFetchingScheduledActions || isFetchingEntries || isFetchingContentTypes || isFetchingUsers;
-  const error = entriesError;
+  const isFetching = isFetchingUsers || isFetchingContentTypes;
 
   if (!scheduledActions.length) {
     return {
       items: [],
       total: 0,
       isFetching,
-      error,
       refetch: () => {
-        refetchScheduledActions();
-        refetchEntries();
+        refetchUsers();
         refetchContentTypes();
       },
     };
@@ -111,10 +102,8 @@ export function useScheduledContent(
     items: scheduledItems.slice(skip, skip + RELEASES_PER_PAGE),
     total: scheduledItems.length,
     isFetching,
-    error,
     refetch: () => {
-      refetchScheduledActions();
-      refetchEntries();
+      refetchUsers();
       refetchContentTypes();
     },
   };

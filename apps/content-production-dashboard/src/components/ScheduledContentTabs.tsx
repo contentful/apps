@@ -7,6 +7,7 @@ import { styles } from './Dashboard.styles';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { ReactNode } from 'react';
+import { EntryProps, ScheduledActionProps } from 'contentful-management';
 
 interface TabPanelContentProps {
   description: string;
@@ -24,11 +25,18 @@ const TabPanelContent = ({ description, children }: TabPanelContentProps) => {
   );
 };
 
-export const ScheduledContentTabs = () => {
+export const ScheduledContentTabs = ({
+  scheduledActions,
+  entries,
+}: {
+  scheduledActions: ScheduledActionProps[];
+  entries: EntryProps[];
+}) => {
   const { parameters } = useSDK<HomeAppSDK | PageAppSDK>();
   const recentlyPublishedDays = parameters?.installation?.recentlyPublishedDays;
   const needsUpdateMonths = parameters?.installation?.needsUpdateMonths;
   const [currentTab, setCurrentTab] = useState('scheduled');
+
   return (
     <Box marginTop="spacingXl">
       <Box padding="spacingL" style={styles.releasesTableContainer}>
@@ -40,7 +48,7 @@ export const ScheduledContentTabs = () => {
           </Tabs.List>
           <Tabs.Panel id="scheduled">
             <TabPanelContent description="Content scheduled will appear here.">
-              <ScheduledContentTable />
+              <ScheduledContentTable scheduledActions={scheduledActions} entries={entries} />
             </TabPanelContent>
           </Tabs.Panel>
           <Tabs.Panel id="recentlyPublished">

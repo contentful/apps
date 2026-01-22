@@ -19,25 +19,13 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   }),
 }));
 
-const mockRefetchScheduledActions = vi.fn();
-const mockRefetchEntries = vi.fn();
 const mockRefetchContentTypes = vi.fn();
 
-const mockUseScheduledActions = vi.fn();
-const mockUseEntries = vi.fn();
 const mockUseContentTypes = vi.fn();
 const mockUseUsers = vi.fn();
 
-vi.mock('../../src/hooks/useScheduledActions', () => ({
-  useScheduledActions: () => mockUseScheduledActions(),
-}));
-
-vi.mock('../../src/hooks/useAllEntries', () => ({
-  useEntries: (options: any) => mockUseEntries(options),
-}));
-
 vi.mock('../../src/hooks/useContentTypes', () => ({
-  useContentTypes: () => mockUseContentTypes(),
+  useContentTypes: (contentTypeIds?: string[]) => mockUseContentTypes(contentTypeIds),
 }));
 
 vi.mock('../../src/hooks/useUsers', () => ({
@@ -47,26 +35,11 @@ vi.mock('../../src/hooks/useUsers', () => ({
 describe('useScheduledContent', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockRefetchScheduledActions.mockClear();
-    mockRefetchEntries.mockClear();
     mockRefetchContentTypes.mockClear();
   });
 
   describe('Empty state', () => {
     it('returns empty items when no scheduled actions exist', () => {
-      mockUseScheduledActions.mockReturnValue({
-        scheduledActions: [],
-        isFetchingScheduledActions: false,
-        refetchScheduledActions: mockRefetchScheduledActions,
-      });
-
-      mockUseEntries.mockReturnValue({
-        entries: [],
-        isFetchingEntries: false,
-        fetchingEntriesError: null,
-        refetchEntries: mockRefetchEntries,
-      });
-
       mockUseContentTypes.mockReturnValue({
         contentTypes: new Map(),
         isFetchingContentTypes: false,
@@ -76,18 +49,16 @@ describe('useScheduledContent', () => {
       mockUseUsers.mockReturnValue({
         usersMap: new Map(),
         isFetching: false,
-        error: null,
         refetch: vi.fn(),
       });
 
-      const { result } = renderHook(() => useScheduledContent('en-US', 0), {
+      const { result } = renderHook(() => useScheduledContent([], [], 'en-US', 0), {
         wrapper: createQueryProviderWrapper(),
       });
 
       expect(result.current.items).toEqual([]);
       expect(result.current.total).toBe(0);
       expect(result.current.isFetching).toBe(false);
-      expect(result.current.error).toBeNull();
     });
   });
 
@@ -121,19 +92,6 @@ describe('useScheduledContent', () => {
       const user1 = createMockUser({ id: 'user-1', firstName: 'John', lastName: 'Doe' });
       const user2 = createMockUser({ id: 'user-2', firstName: 'Jane', lastName: 'Smith' });
 
-      mockUseScheduledActions.mockReturnValue({
-        scheduledActions: [scheduledAction1, scheduledAction2],
-        isFetchingScheduledActions: false,
-        refetchScheduledActions: mockRefetchScheduledActions,
-      });
-
-      mockUseEntries.mockReturnValue({
-        entries: [entry1, entry2],
-        isFetchingEntries: false,
-        fetchingEntriesError: null,
-        refetchEntries: mockRefetchEntries,
-      });
-
       const contentTypesMap = new Map([
         ['blogPost', contentType1],
         ['article', contentType2],
@@ -151,13 +109,16 @@ describe('useScheduledContent', () => {
       mockUseUsers.mockReturnValue({
         usersMap,
         isFetching: false,
-        error: null,
         refetch: vi.fn(),
       });
 
-      const { result } = renderHook(() => useScheduledContent('en-US', 0), {
-        wrapper: createQueryProviderWrapper(),
-      });
+      const { result } = renderHook(
+        () =>
+          useScheduledContent([scheduledAction1, scheduledAction2], [entry1, entry2], 'en-US', 0),
+        {
+          wrapper: createQueryProviderWrapper(),
+        }
+      );
 
       await waitFor(() => {
         expect(result.current.items).toHaveLength(2);
@@ -197,19 +158,6 @@ describe('useScheduledContent', () => {
       const contentType = createMockContentType({ id: 'blogPost', name: 'Blog Post' });
       const user = createMockUser({ id: 'user-1', firstName: 'John', lastName: 'Doe' });
 
-      mockUseScheduledActions.mockReturnValue({
-        scheduledActions: [scheduledAction],
-        isFetchingScheduledActions: false,
-        refetchScheduledActions: mockRefetchScheduledActions,
-      });
-
-      mockUseEntries.mockReturnValue({
-        entries: [entry],
-        isFetchingEntries: false,
-        fetchingEntriesError: null,
-        refetchEntries: mockRefetchEntries,
-      });
-
       mockUseContentTypes.mockReturnValue({
         contentTypes: new Map([['blogPost', contentType]]),
         isFetchingContentTypes: false,
@@ -219,13 +167,15 @@ describe('useScheduledContent', () => {
       mockUseUsers.mockReturnValue({
         usersMap: new Map([['user-1', user]]),
         isFetching: false,
-        error: null,
         refetch: vi.fn(),
       });
 
-      const { result } = renderHook(() => useScheduledContent('en-US', 0), {
-        wrapper: createQueryProviderWrapper(),
-      });
+      const { result } = renderHook(
+        () => useScheduledContent([scheduledAction], [entry], 'en-US', 0),
+        {
+          wrapper: createQueryProviderWrapper(),
+        }
+      );
 
       await waitFor(() => {
         expect(result.current.items).toHaveLength(1);

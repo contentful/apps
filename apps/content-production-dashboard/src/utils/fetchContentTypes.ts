@@ -18,7 +18,6 @@ export async function fetchContentTypes(
         .get({
           contentTypeId: id,
           spaceId: sdk.ids.space,
-          environmentId: sdk.ids.environment,
         })
         .catch((error) => {
           console.error(`Error fetching content type ${id}:`, error);
