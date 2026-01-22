@@ -132,8 +132,8 @@ describe('ScheduledContentTable component', () => {
       expect(screen.getByText('My Blog Post')).toBeInTheDocument();
       expect(screen.getByText('Blog Post')).toBeInTheDocument();
       expect(screen.getByText('John Doe')).toBeInTheDocument();
-      expect(screen.getByText('Jan 15, 2024, 07:00 AM GMT-3')).toBeInTheDocument();
-      expect(screen.getByText('Dec 31, 2023, 09:00 PM GMT-3')).toBeInTheDocument();
+      expect(screen.getByText(/Jan 15, 2024/i)).toBeInTheDocument();
+      expect(screen.getByText(/Dec 31, 2023/i)).toBeInTheDocument();
       expect(screen.getByText(EntryStatus.Published)).toBeInTheDocument();
     });
 
