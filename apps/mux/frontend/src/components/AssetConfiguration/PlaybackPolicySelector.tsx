@@ -33,7 +33,6 @@ export const PlaybackPolicySelector: FC<PlaybackPolicySelectorProps> = ({
     if (onValidationChange) {
       onValidationChange(selectedPolicies.length > 0);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPolicies]);
 
   return (
@@ -77,9 +76,7 @@ export const PlaybackPolicySelector: FC<PlaybackPolicySelectorProps> = ({
             DRM Protected
           </Radio>
           <FormControl.HelpText>
-            {isAudioOnly
-              ? 'DRM is not available for audio files. Use the Protected option for secure playback.'
-              : 'Highest level of content protection using industry-standard encryption. Requires DRM to be enabled in app configuration.'}
+            Highest level of content protection using industry-standard encryption. Requires DRM to be enabled in app configuration.
             <TextLink
               icon={<ExternalLinkIcon />}
               variant="secondary"
