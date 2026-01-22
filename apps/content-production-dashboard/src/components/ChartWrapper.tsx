@@ -13,6 +13,7 @@ import { Box, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { styles, CHART_COLORS } from './ChartWrapper.styles';
 import type { ChartWrapperProps } from '../utils/types';
+import { ChartTooltip } from './ChartTooltip';
 
 export const ChartWrapper: React.FC<ChartWrapperProps> = ({
   data,
@@ -20,6 +21,7 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
   processedContentTypes,
   height = 400,
   legendTitle,
+  inNewEntriesTab,
 }) => {
   const contentTypesIds = useMemo<string[]>(() => {
     if (processedContentTypes) {
@@ -55,7 +57,16 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
             height={80}
           />
           <YAxis tick={{ fontSize: 12 }} />
-          <Tooltip />
+          <Tooltip
+            content={
+              <ChartTooltip
+                data={data}
+                valueKey={contentTypesIds[0]}
+                inNewEntriesTab={inNewEntriesTab}
+                processedContentTypes={processedContentTypes}
+              />
+            }
+          />
           {contentTypesIds.map((key, index) => (
             <Line
               key={`${key}-${index}`}

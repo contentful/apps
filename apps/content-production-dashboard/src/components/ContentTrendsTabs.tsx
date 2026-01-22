@@ -148,6 +148,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
                     data={newEntries}
                     xAxisDataKey="date"
                     legendTitle="Content:"
+                    inNewEntriesTab
                   />
                 )}
               </>
