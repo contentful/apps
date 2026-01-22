@@ -56,7 +56,7 @@ export const ScheduledContentTabs = ({
               description={`Content published in the last ${recentlyPublishedDays} ${
                 recentlyPublishedDays === 1 ? 'day' : 'days'
               } will appear here.`}>
-              <RecentlyPublishedTable />
+              <RecentlyPublishedTable entries={entries} />
             </TabPanelContent>
           </Tabs.Panel>
           <Tabs.Panel id="needsUpdate">

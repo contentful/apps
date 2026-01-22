@@ -1,6 +1,16 @@
-import { Table } from '@contentful/f36-components';
+import { Box, Pagination, Skeleton, Table } from '@contentful/f36-components';
 import { styles } from './RecentlyPublishedTable.styles';
 import { EmptyStateTable } from './EmptyStateTable';
+import { EntryProps, ScheduledActionProps } from 'contentful-management';
+import { items } from 'happy-dom/lib/PropertySymbol';
+import { RELEASES_PER_PAGE } from '../utils/consts';
+import { formatDateTimeWithTimezone } from '../utils/dateFormat';
+import { formatUserName } from '../utils/UserUtils';
+import { EntryLink } from './EntryLink';
+import { useState } from 'react';
+import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { useRecentlyPublishedContent } from '../hooks/useRecentlyPublishedContent';
 
 const RecentlyPublishedTableHeader = () => {
   return (
@@ -15,16 +25,62 @@ const RecentlyPublishedTableHeader = () => {
   );
 };
 
-export const RecentlyPublishedTable = () => {
-  const ITEMS = []; // TODO: Add actual items here
+export const RecentlyPublishedTable = ({ entries }: { entries: EntryProps[] }) => {
+  const sdk = useSDK<HomeAppSDK | PageAppSDK>();
+  const [currentPage, setCurrentPage] = useState(0);
+  const { items, total, isFetching } = useRecentlyPublishedContent(
+    currentPage,
+    entries,
+  );
 
-  if (ITEMS.length === 0) {
+  if (isFetching) {
+    return (
+      <>
+        <Table>
+          <RecentlyPublishedTableHeader />
+          <Table.Body>
+            <Skeleton.Row rowCount={5} columnCount={6} />
+          </Table.Body>
+        </Table>
+      </>
+    );
+  }
+
+  if (items.length === 0) {
     return <EmptyStateTable />;
   }
 
   return (
+    <>
     <Table>
       <RecentlyPublishedTableHeader />
+      <Table.Body>
+        {items.map((item) => (
+          <Table.Row key={item.id}>
+            <Table.Cell style={styles.titleCell}>
+              <EntryLink entryId={item.id} spaceId={sdk.ids.space}>
+                {item.title}
+              </EntryLink>
+            </Table.Cell>
+            <Table.Cell style={styles.creatorCell}>{formatUserName(item.creator)}</Table.Cell>
+            <Table.Cell style={styles.contentTypeCell}>{item.contentType}</Table.Cell>
+            <Table.Cell style={styles.publishedDateCell}>
+              {formatDateTimeWithTimezone(item.publishedDate || undefined)}
+            </Table.Cell>
+          </Table.Row>
+        ))}
+      </Table.Body>
     </Table>
-  );
+    {total > RELEASES_PER_PAGE && (
+      <Box marginTop="spacingL">
+        <Pagination
+          activePage={currentPage}
+          onPageChange={setCurrentPage}
+          totalItems={total}
+          itemsPerPage={RELEASES_PER_PAGE}
+        />
+      </Box>
+    )}
+  </>
+);
 };
