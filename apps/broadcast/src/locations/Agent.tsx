@@ -32,6 +32,33 @@ import { AGENT_API_BASE_URL } from '../constants';
 type FindEntryArgs = { query: string };
 type GenerateVideoArgs = { entryId: string };
 
+const getLocalizedFieldValue = (field: unknown, locale: string) => {
+  if (!field) return null;
+  if (typeof field === 'object' && !Array.isArray(field)) {
+    const localized = field as Record<string, unknown>;
+    if (locale in localized) {
+      return localized[locale];
+    }
+  }
+  return field;
+};
+
+const getAssetIdFromField = (fieldValue: unknown): string | null => {
+  if (!fieldValue) return null;
+  if (Array.isArray(fieldValue)) {
+    for (const item of fieldValue) {
+      const id = getAssetIdFromField(item);
+      if (id) return id;
+    }
+    return null;
+  }
+  if (typeof fieldValue === 'object' && fieldValue !== null && 'sys' in fieldValue) {
+    const sys = (fieldValue as { sys?: { id?: string } }).sys;
+    if (sys?.id) return sys.id;
+  }
+  return null;
+};
+
 const Agent = () => {
   const sdk = useSDK<AgentAppSDK>();
   useAutoResizer();
@@ -93,26 +120,23 @@ const Agent = () => {
           const entry = await sdk.cma.entry.get({ entryId });
 
           // Extract audio and image asset links from entry fields
-          const audioField = entry.fields.audio;
-          const imageField = entry.fields.image;
+          const audioField = entry.fields.audioAsset ?? entry.fields.audio;
+          const imageField = entry.fields.featuredImage ?? entry.fields.image;
 
-          const audioLink =
-            audioField && typeof audioField === 'object'
-              ? (audioField[sdk.locales.default] as { sys: { id: string } })
-              : null;
-          const imageLink =
-            imageField && typeof imageField === 'object'
-              ? (imageField[sdk.locales.default] as { sys: { id: string } })
-              : null;
+          const localizedAudio = getLocalizedFieldValue(audioField, sdk.locales.default);
+          const localizedImage = getLocalizedFieldValue(imageField, sdk.locales.default);
 
-          if (!audioLink?.sys?.id || !imageLink?.sys?.id) {
-            return 'Entry is missing required audio or image assets.';
+          const audioAssetId = getAssetIdFromField(localizedAudio);
+          const imageAssetId = getAssetIdFromField(localizedImage);
+
+          if (!audioAssetId || !imageAssetId) {
+            return 'Entry is missing required audio or image assets. Expected audioAsset and featuredImage (or image).';
           }
 
           // Fetch the actual assets to get URLs
           const [audioAsset, imageAsset] = await Promise.all([
-            sdk.cma.asset.get({ assetId: audioLink.sys.id }),
-            sdk.cma.asset.get({ assetId: imageLink.sys.id }),
+            sdk.cma.asset.get({ assetId: audioAssetId }),
+            sdk.cma.asset.get({ assetId: imageAssetId }),
           ]);
 
           const audioUrl = audioAsset.fields.file?.[sdk.locales.default]?.url;

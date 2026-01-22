@@ -91,6 +91,12 @@ This content type is created automatically on first use and is used by the usage
 
 The Agent location uses a lightweight local server that streams responses from Amazon Bedrock using the Vercel AI SDK.
 
+#### Client-side tool execution
+
+The server defines tool schemas (no execution) and streams tool calls via the data stream protocol. The client
+handles `onToolCall` to run CMA operations (entry search and video generation) and returns tool results so the
+assistant can continue.
+
 #### Environment variables
 
 Server (local):
@@ -121,7 +127,9 @@ Frontend (Contentful-hosted):
    AGENT_ALLOWED_ORIGINS=https://<your-ctfcloud-domain>
    ```
 
-The server streams text and the UI is configured with `streamProtocol: 'text'`.
+The server streams the data protocol (`useChat` default) to support tool calls, and the client
+executes tools locally with the CMA SDK (entry search + video generation).
+Set `AGENT_DEBUG=true` when starting the server to log the serialized model messages for debugging.
 
 ### Generating Audio
 
