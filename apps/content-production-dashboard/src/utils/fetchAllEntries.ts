@@ -1,5 +1,5 @@
 import { BaseAppSDK } from '@contentful/app-sdk';
-import { EntryProps, QueryOptions } from 'contentful-management';
+import { EntryProps } from 'contentful-management';
 import { FETCH_CONFIG } from './cacheConstants';
 
 export interface FetchAllEntriesResult {
@@ -8,10 +8,7 @@ export interface FetchAllEntriesResult {
   fetchedAt: Date;
 }
 
-export async function fetchAllEntries(
-  sdk: BaseAppSDK,
-  query: QueryOptions = {}
-): Promise<FetchAllEntriesResult> {
+export async function fetchAllEntries(sdk: BaseAppSDK): Promise<FetchAllEntriesResult> {
   const allEntries: EntryProps[] = [];
   let batchSkip = 0;
   let total = 0;
@@ -24,7 +21,6 @@ export async function fetchAllEntries(
         query: {
           skip: batchSkip,
           limit: batchSize,
-          ...query,
         },
       });
 
