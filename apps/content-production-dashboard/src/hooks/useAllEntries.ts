@@ -14,18 +14,12 @@ export interface UseAllEntriesResult {
   refetchEntries: () => void;
 }
 
-export interface UseEntriesOptions {
-  enabled?: boolean;
-}
-
-export function useEntries(options: UseEntriesOptions = {}): UseAllEntriesResult {
-  const { enabled } = options;
+export function useAllEntries(): UseAllEntriesResult {
   const sdk = useSDK<PageAppSDK>();
 
   const { data, isFetching, error, refetch } = useQuery<FetchAllEntriesResult, Error>({
     queryKey: ['entries', sdk.ids.space, getEnvironmentId(sdk)],
     queryFn: () => fetchAllEntries(sdk),
-    enabled,
   });
 
   return {
@@ -38,8 +32,4 @@ export function useEntries(options: UseEntriesOptions = {}): UseAllEntriesResult
       refetch();
     },
   };
-}
-
-export function useAllEntries(): UseAllEntriesResult {
-  return useEntries();
 }
