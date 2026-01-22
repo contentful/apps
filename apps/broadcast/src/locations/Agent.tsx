@@ -206,19 +206,35 @@ const Agent = () => {
 
   const isStreaming = status === 'streaming';
 
+  const insertSentenceSpacing = (text: string) => text.replace(/([.!?])(?=[A-Z0-9])/g, '$1 ');
+
+  const joinPartsWithSpacing = (parts: string[]) =>
+    parts.reduce((result, part) => {
+      if (!result) return part;
+      if (!part) return result;
+      const lastChar = result[result.length - 1];
+      const nextChar = part[0];
+      const needsSpace =
+        /[A-Za-z0-9]$/.test(result) && /[A-Za-z0-9]/.test(nextChar) && lastChar !== '\n';
+      return needsSpace ? `${result} ${part}` : `${result}${part}`;
+    }, '');
+
   const getMessageText = useCallback((message: UIMessage) => {
     if (typeof message.content === 'string') {
-      return message.content;
+      return insertSentenceSpacing(message.content);
     }
 
     if ('parts' in message && Array.isArray(message.parts)) {
-      return message.parts
-        .map((part) =>
-          typeof part === 'object' && part && 'text' in part && typeof part.text === 'string'
-            ? part.text
-            : ''
-        )
-        .join('');
+      const joined = joinPartsWithSpacing(
+        message.parts
+          .map((part) =>
+            typeof part === 'object' && part && 'text' in part && typeof part.text === 'string'
+              ? part.text
+              : ''
+          )
+          .filter(Boolean)
+      );
+      return insertSentenceSpacing(joined);
     }
 
     return '';
