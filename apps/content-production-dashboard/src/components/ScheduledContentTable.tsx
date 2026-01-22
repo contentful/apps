@@ -79,7 +79,7 @@ export const ScheduledContentTable = () => {
                 </EntryLink>
               </Table.Cell>
               <Table.Cell style={styles.scheduledDateCell}>
-                {formatDateTimeWithTimezone(item.scheduledFor)}
+                {formatDateTimeWithTimezone(item.scheduledFor.datetime, item.scheduledFor.timezone)}
               </Table.Cell>
               <Table.Cell style={styles.publishedDateCell}>
                 {formatDateTimeWithTimezone(item.publishedDate || '')}

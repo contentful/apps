@@ -64,5 +64,8 @@ export interface ScheduledEntry {
 
 export interface ScheduledContentItem extends ScheduledEntry {
   scheduledActionId: string;
-  scheduledFor: string;
+  scheduledFor: {
+    datetime: string;
+    timezone?: string;
+  };
 }

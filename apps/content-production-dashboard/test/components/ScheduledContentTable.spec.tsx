@@ -38,7 +38,10 @@ const createMockScheduledContentItem = (
     updatedDate: now.toISOString(),
     status: EntryStatus.Published,
     scheduledActionId: 'action-1',
-    scheduledFor: futureDate.toISOString(),
+    scheduledFor: {
+      datetime: futureDate.toISOString(),
+      timezone: 'UTC',
+    },
     ...overrides,
   };
 };
@@ -115,7 +118,10 @@ describe('ScheduledContentTable component', () => {
         id: 'entry-1',
         title: 'My Blog Post',
         contentType: 'Blog Post',
-        scheduledFor: '2024-01-15T10:00:00Z',
+        scheduledFor: {
+          datetime: '2024-01-15T10:00:00Z',
+          timezone: 'UTC',
+        },
         publishedDate: '2024-01-01T00:00:00Z',
       });
 

@@ -79,7 +79,10 @@ export function useScheduledContent(
         updatedDate: entry.sys.updatedAt,
         status: getEntryStatus(entry),
         scheduledActionId: action.sys.id,
-        scheduledFor: action.scheduledFor?.datetime || '',
+        scheduledFor: {
+          datetime: action.scheduledFor?.datetime || '',
+          timezone: action.scheduledFor?.timezone,
+        },
       });
     });
 

@@ -83,7 +83,10 @@ export const ReleasesTable = () => {
                 <Text fontWeight="fontWeightDemiBold">{release.title}</Text>
               </Table.Cell>
               <Table.Cell style={styles.dateCell}>
-                {formatDateTimeWithTimezone(release.scheduledFor.datetime)}
+                {formatDateTimeWithTimezone(
+                  release.scheduledFor.datetime,
+                  release.scheduledFor.timezone
+                )}
               </Table.Cell>
               <Table.Cell style={styles.itemsCell}>{release.itemsCount} items</Table.Cell>
               <Table.Cell style={styles.updatedCell}>

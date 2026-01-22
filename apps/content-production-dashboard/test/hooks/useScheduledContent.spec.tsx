@@ -234,7 +234,8 @@ describe('useScheduledContent', () => {
       const item = result.current.items[0];
       expect(item.id).toBe('entry-1');
       expect(item.scheduledActionId).toBe('action-1');
-      expect(item.scheduledFor).toBe('2024-01-15T10:00:00Z');
+      expect(item.scheduledFor.datetime).toBe('2024-01-15T10:00:00Z');
+      expect(item.scheduledFor.timezone).toBe('UTC');
       expect(item.publishedDate).toBe('2024-01-01T00:00:00Z');
       expect(item.status).toBe(EntryStatus.Changed);
       expect(item.creator).toEqual({
