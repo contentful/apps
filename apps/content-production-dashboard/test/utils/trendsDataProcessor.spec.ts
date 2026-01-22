@@ -75,6 +75,73 @@ describe('trendsDataProcessor', () => {
       );
       expect(totalCount).toBe(1);
     });
+
+    it('calculates average time to publish correctly for entries in a specific month', () => {
+      const targetMonth = new Date(now);
+      targetMonth.setMonth(now.getMonth() - 1);
+      targetMonth.setDate(15); // Middle of the month
+
+      const entry1Created = new Date(targetMonth);
+      entry1Created.setDate(10);
+      const entry1Published = new Date(targetMonth);
+      entry1Published.setDate(12); // 2 days later
+
+      const entry2Created = new Date(targetMonth);
+      entry2Created.setDate(10);
+      const entry2Published = new Date(targetMonth);
+      entry2Published.setDate(14); // 4 days later
+
+      const entry3Created = new Date(targetMonth);
+      entry3Created.setDate(10);
+      const entry3Published = new Date(targetMonth);
+      entry3Published.setDate(16); // 6 days later
+
+      const entries: EntryProps[] = [
+        createMockEntry({
+          createdAt: entry1Created.toISOString(),
+          publishedAt: entry1Published.toISOString(),
+        }),
+        createMockEntry({
+          createdAt: entry2Created.toISOString(),
+          publishedAt: entry2Published.toISOString(),
+        }),
+        createMockEntry({
+          createdAt: entry3Created.toISOString(),
+          publishedAt: entry3Published.toISOString(),
+        }),
+      ];
+
+      const result = generateNewEntriesChartData(entries, { timeRange: TimeRange.ThreeMonths });
+
+      // Target month (1 month ago) is at index 2
+      expect(result.length).toBeGreaterThanOrEqual(4);
+      expect(result[2]['New Content']).toBe(3);
+      expect(result[2]['avgTimeToPublish']).toBeCloseTo(4, 1);
+    });
+
+    it('returns undefined for avgTimeToPublish when entries are not published', () => {
+      const targetMonth = new Date(now);
+      targetMonth.setMonth(now.getMonth() - 1);
+      targetMonth.setDate(15);
+
+      const entry1 = createMockEntry({
+        createdAt: targetMonth.toISOString(),
+      });
+      entry1.sys.publishedAt = undefined;
+
+      const entry2 = createMockEntry({
+        createdAt: targetMonth.toISOString(),
+      });
+      entry2.sys.publishedAt = undefined;
+
+      const entries: EntryProps[] = [entry1, entry2];
+
+      const result = generateNewEntriesChartData(entries, { timeRange: TimeRange.ThreeMonths });
+
+      // Target month (1 month ago) is at index 2
+      expect(result[2]['New Content']).toBe(2);
+      expect(result[2]['avgTimeToPublish']).toBeUndefined();
+    });
   });
 
   describe('generateContentTypeChartData', () => {

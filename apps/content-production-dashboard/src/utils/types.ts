@@ -1,3 +1,5 @@
+import { EntryProps } from 'contentful-management';
+
 export type ChartDataPoint = Record<string, string | number>;
 
 export interface ChartWrapperProps {
@@ -19,3 +21,20 @@ export enum TimeRange {
 export interface TrendsDataProcessorOptions {
   timeRange: TimeRange;
 }
+
+export type ChartDataSetup = {
+  startDate: Date;
+  now: Date;
+  filteredEntries: EntryProps[];
+  allMonths: string[];
+};
+
+export type NewEntriesMonth = {
+  count: number;
+  publishTimes: number[];
+};
+
+export type MonthMetrics = {
+  newContent: number;
+  avgTimeToPublish: number | undefined;
+};
