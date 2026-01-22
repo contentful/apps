@@ -1,8 +1,7 @@
 import { Box, Pagination, Skeleton, Table } from '@contentful/f36-components';
 import { styles } from './RecentlyPublishedTable.styles';
 import { EmptyStateTable } from './EmptyStateTable';
-import { EntryProps, ScheduledActionProps } from 'contentful-management';
-import { items } from 'happy-dom/lib/PropertySymbol';
+import { EntryProps } from 'contentful-management';
 import { RELEASES_PER_PAGE } from '../utils/consts';
 import { formatDateTimeWithTimezone } from '../utils/dateFormat';
 import { formatUserName } from '../utils/UserUtils';
@@ -11,15 +10,16 @@ import { useState } from 'react';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useRecentlyPublishedContent } from '../hooks/useRecentlyPublishedContent';
+import { ErrorDisplay } from './ErrorDisplay';
 
 const RecentlyPublishedTableHeader = () => {
   return (
     <Table.Head>
       <Table.Row>
         <Table.Cell style={styles.titleCell}>Title</Table.Cell>
-        <Table.Cell style={styles.creatorCell}>Creator</Table.Cell>
-        <Table.Cell style={styles.contentTypeCell}>Content Type</Table.Cell>
         <Table.Cell style={styles.publishedDateCell}>Published Date</Table.Cell>
+        <Table.Cell style={styles.contentTypeCell}>Content Type</Table.Cell>
+        <Table.Cell style={styles.creatorCell}>Creator</Table.Cell>
       </Table.Row>
     </Table.Head>
   );
@@ -28,10 +28,14 @@ const RecentlyPublishedTableHeader = () => {
 export const RecentlyPublishedTable = ({ entries }: { entries: EntryProps[] }) => {
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const [currentPage, setCurrentPage] = useState(0);
-  const { items, total, isFetching } = useRecentlyPublishedContent(
+  const { items, total, isFetching, error } = useRecentlyPublishedContent(
     currentPage,
     entries,
   );
+
+  if (error) {
+    return <ErrorDisplay error={error} />;
+  }
 
   if (isFetching) {
     return (
@@ -62,11 +66,11 @@ export const RecentlyPublishedTable = ({ entries }: { entries: EntryProps[] }) =
                 {item.title}
               </EntryLink>
             </Table.Cell>
-            <Table.Cell style={styles.creatorCell}>{formatUserName(item.creator)}</Table.Cell>
-            <Table.Cell style={styles.contentTypeCell}>{item.contentType}</Table.Cell>
             <Table.Cell style={styles.publishedDateCell}>
               {formatDateTimeWithTimezone(item.publishedDate || undefined)}
             </Table.Cell>
+            <Table.Cell style={styles.contentTypeCell}>{item.contentType}</Table.Cell>
+            <Table.Cell style={styles.creatorCell}>{formatUserName(item.creator)}</Table.Cell>
           </Table.Row>
         ))}
       </Table.Body>

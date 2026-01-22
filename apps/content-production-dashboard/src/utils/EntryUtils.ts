@@ -35,3 +35,20 @@ export function getEntryTitle(
 
   return 'Untitled';
 }
+
+export function getUniqueIdsFromEntries<T>(
+    entries: T[],
+    selector: (entry: T) => string | undefined | null
+  ): string[] {
+    const ids = entries.map(selector).filter(Boolean) as string[];
+    return [...new Set(ids)];
+  }
+
+  
+  export function getUniqueUserIdsFromEntries(entries: EntryProps[]): string[] {
+    return getUniqueIdsFromEntries(entries, (entry) => entry.sys.createdBy?.sys?.id);
+  }
+  
+  export function getUniqueContentTypeIdsFromEntries(entries: EntryProps[]): string[] {
+    return getUniqueIdsFromEntries(entries, (entry) => entry.sys.contentType?.sys?.id);
+  }

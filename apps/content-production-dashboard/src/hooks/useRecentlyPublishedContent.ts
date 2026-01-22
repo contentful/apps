@@ -8,7 +8,7 @@ import { RELEASES_PER_PAGE } from '../utils/consts';
 import { EntryProps } from 'contentful-management';
 import { isWithin, parseDate, subDays } from '../utils/dateCalculator';
 import { getCreatorFromEntry } from '../utils/UserUtils';
-import { getEntryStatus, getEntryTitle } from '../utils/EntryUtils';
+import { getEntryTitle, getUniqueContentTypeIdsFromEntries, getUniqueUserIdsFromEntries } from '../utils/EntryUtils';
 import { useMemo } from 'react';
 import { Creator, EntryStatus } from '../utils/types';
 
@@ -25,6 +25,7 @@ export interface UseRecentlyPublishedResult {
   total: number;
   isFetching: boolean;
   refetch: () => void;
+  error: Error | null;
 }
 
 export function useRecentlyPublishedContent( page: number, entries: EntryProps[]): UseRecentlyPublishedResult {
@@ -32,24 +33,22 @@ export function useRecentlyPublishedContent( page: number, entries: EntryProps[]
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const installation = (sdk.parameters.installation ?? {}) as AppInstallationParameters;
   const recentlyPublishedDays = installation.recentlyPublishedDays ?? 7;
+  const recentlyPublishedDate = subDays(new Date(), recentlyPublishedDays);
+  const now = new Date();
   const defaultLocale = sdk.locales.default;
 
   const recentlyPublishedEntries = entries.filter((entry) => {
     const publishedAt = parseDate(entry?.sys?.publishedAt);
     if (!publishedAt) return false;
-    return isWithin(publishedAt, subDays(new Date(), recentlyPublishedDays), new Date());
+    return isWithin(publishedAt, recentlyPublishedDate, now);
   });
 
-  const userIds = Array.from(
-    new Set(recentlyPublishedEntries.map((entry) => entry.sys.createdBy?.sys?.id).filter(Boolean) as string[])
-  );
+  const userIds = getUniqueUserIdsFromEntries(recentlyPublishedEntries);
 
-  const contentTypeIds = Array.from(
-    new Set(recentlyPublishedEntries.map((entry) => entry.sys.contentType?.sys?.id).filter(Boolean) as string[])
-  );
+  const contentTypeIds = getUniqueContentTypeIdsFromEntries(recentlyPublishedEntries);
 
-  const { contentTypes, isFetchingContentTypes, refetchContentTypes } = useContentTypes(contentTypeIds);
-  const { usersMap, isFetching: isFetchingUsers, refetch: refetchUsers } = useUsers(userIds);
+  const { contentTypes, isFetchingContentTypes, refetchContentTypes, fetchingContentTypesError } = useContentTypes(contentTypeIds);
+  const { usersMap, isFetching: isFetchingUsers, refetch: refetchUsers, error: usersError } = useUsers(userIds);
 
 
   const recentlyPublishedItems = useMemo(() => {
@@ -80,5 +79,6 @@ export function useRecentlyPublishedContent( page: number, entries: EntryProps[]
       refetchContentTypes();
       refetchUsers();
     },
+    error: usersError ?? fetchingContentTypesError ?? null,
   };
 }

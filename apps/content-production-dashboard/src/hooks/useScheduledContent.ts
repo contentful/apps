@@ -15,20 +15,6 @@ interface UseScheduledContentResult {
   refetch: () => void;
 }
 
-function getUserIdsFromEntries(entries: EntryProps[]): string[] {
-  const userIds = entries.map((entry) => entry.sys.createdBy?.sys?.id).filter(Boolean) as string[];
-
-  return [...new Set(userIds)];
-}
-
-function getContentTypeIdsFromEntries(entries: EntryProps[]): string[] {
-  const contentTypeIds = entries
-    .map((entry) => entry.sys.contentType?.sys?.id)
-    .filter(Boolean) as string[];
-
-  return [...new Set(contentTypeIds)];
-}
-
 export function useScheduledContent(
   scheduledActions: ScheduledActionProps[],
   entries: EntryProps[],
@@ -112,3 +98,11 @@ export function useScheduledContent(
     },
   };
 }
+function getUserIdsFromEntries(scheduledEntries: EntryProps[]): any {
+    throw new Error('Function not implemented.');
+}
+
+function getContentTypeIdsFromEntries(scheduledEntries: EntryProps[]): any {
+    throw new Error('Function not implemented.');
+}
+
