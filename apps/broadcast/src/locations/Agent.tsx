@@ -14,11 +14,23 @@ import { AgentAppSDK, ToolbarAction } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useChat } from '@ai-sdk/react';
 import type { UIMessage } from '@ai-sdk/ui-utils';
+// Tool call type for client-side execution
+type AgentToolCall = {
+  toolCallId: string;
+  toolName: string;
+  args: unknown;
+};
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import type { Editor } from '@tiptap/react';
 import { styles } from '../components/Agent.styles';
 import { AIChatEmptyState } from '../components/AgentEmptyChat';
+import { useVideoGenerator } from '../hooks/useVideoGenerator';
+import { uploadVideoAsset } from '../lib/contentful-upload';
 import { AGENT_API_BASE_URL } from '../constants';
+
+// Type for tool call arguments
+type FindEntryArgs = { query: string };
+type GenerateVideoArgs = { entryId: string };
 
 const Agent = () => {
   const sdk = useSDK<AgentAppSDK>();
@@ -30,7 +42,122 @@ const Agent = () => {
   const pendingLayoutChangeRef = useRef<'expanded' | 'normal' | null>(null);
   const editorRef = useRef<Editor | null>(null);
 
+  // Client-side tool execution state
+  const [isClientWorking, setIsClientWorking] = useState(false);
+  const [isRendering, setIsRendering] = useState(false);
+  const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string | null>(null);
+
+  // Video generator hook
+  const { generateVideo } = useVideoGenerator();
+
   const apiUrl = `${AGENT_API_BASE_URL.replace(/\/$/, '')}/api/agent/stream`;
+
+  // Handle tool calls from the agent (client-side execution)
+  const handleToolCall = useCallback(
+    async (toolInvocation: AgentToolCall): Promise<string> => {
+      const { toolName, args } = toolInvocation;
+
+      if (toolName === 'find_entry') {
+        setIsClientWorking(true);
+        try {
+          const { query } = args as FindEntryArgs;
+          const entries = await sdk.cma.entry.getMany({
+            query: { query, limit: 1 },
+          });
+
+          if (entries.items.length > 0) {
+            const entry = entries.items[0];
+            const titleField = entry.fields.title;
+            const title =
+              titleField && typeof titleField === 'object'
+                ? (titleField[sdk.locales.default] as string) ?? 'Untitled'
+                : 'Untitled';
+            return `Found entry "${title}" with ID: ${entry.sys.id}. Please proceed with generating the video.`;
+          }
+          return `No entries found matching "${query}".`;
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Unknown error';
+          return `Error searching entries: ${message}`;
+        } finally {
+          setIsClientWorking(false);
+        }
+      }
+
+      if (toolName === 'generate_video') {
+        setIsClientWorking(true);
+        setIsRendering(true);
+        try {
+          const { entryId } = args as GenerateVideoArgs;
+
+          // Fetch the entry to get audio and image assets
+          const entry = await sdk.cma.entry.get({ entryId });
+
+          // Extract audio and image asset links from entry fields
+          const audioField = entry.fields.audio;
+          const imageField = entry.fields.image;
+
+          const audioLink =
+            audioField && typeof audioField === 'object'
+              ? (audioField[sdk.locales.default] as { sys: { id: string } })
+              : null;
+          const imageLink =
+            imageField && typeof imageField === 'object'
+              ? (imageField[sdk.locales.default] as { sys: { id: string } })
+              : null;
+
+          if (!audioLink?.sys?.id || !imageLink?.sys?.id) {
+            return 'Entry is missing required audio or image assets.';
+          }
+
+          // Fetch the actual assets to get URLs
+          const [audioAsset, imageAsset] = await Promise.all([
+            sdk.cma.asset.get({ assetId: audioLink.sys.id }),
+            sdk.cma.asset.get({ assetId: imageLink.sys.id }),
+          ]);
+
+          const audioUrl = audioAsset.fields.file?.[sdk.locales.default]?.url;
+          const imageUrl = imageAsset.fields.file?.[sdk.locales.default]?.url;
+
+          if (!audioUrl || !imageUrl) {
+            return 'Could not retrieve audio or image URLs from assets.';
+          }
+
+          // Generate the video
+          const videoBlob = await generateVideo({
+            imageUrl: imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl,
+            audioUrl: audioUrl.startsWith('//') ? `https:${audioUrl}` : audioUrl,
+          });
+
+          // Upload the video to Contentful
+          const assetId = await uploadVideoAsset(
+            sdk as unknown as Parameters<typeof uploadVideoAsset>[0],
+            videoBlob,
+            {
+              title: `Broadcast Video - ${entryId}`,
+            }
+          );
+
+          // Get the uploaded asset URL for preview
+          const uploadedAsset = await sdk.cma.asset.get({ assetId });
+          const videoUrl = uploadedAsset.fields.file?.[sdk.locales.default]?.url;
+          if (videoUrl) {
+            setGeneratedVideoUrl(videoUrl.startsWith('//') ? `https:${videoUrl}` : videoUrl);
+          }
+
+          return `Video generated successfully! Asset ID: ${assetId}`;
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Unknown error';
+          return `Error generating video: ${message}`;
+        } finally {
+          setIsClientWorking(false);
+          setIsRendering(false);
+        }
+      }
+
+      return `Unknown tool: ${toolName}`;
+    },
+    [sdk, generateVideo]
+  );
 
   const { messages, append, status, stop } = useChat({
     api: apiUrl,
@@ -38,7 +165,12 @@ const Agent = () => {
       spaceId: sdk.ids.space,
       environmentId: sdk.ids.environment,
     },
-    streamProtocol: 'text',
+    maxSteps: 5, // Allow multiple tool calls in a conversation
+    async onToolCall({ toolCall }) {
+      // Execute tool on client side and return result
+      const result = await handleToolCall(toolCall);
+      return result;
+    },
     initialMessages: [
       {
         id: 'system',
@@ -176,9 +308,30 @@ const Agent = () => {
                 content={getMessageText(message)}
               />
             ))}
+            {/* Show generated video player if available */}
+            {generatedVideoUrl && (
+              <div style={{ padding: '8px 16px' }}>
+                <video
+                  src={generatedVideoUrl}
+                  controls
+                  style={{ maxWidth: '100%', borderRadius: '8px' }}
+                />
+              </div>
+            )}
+            {/* Show streaming indicator */}
             {isStreaming && (
               <AIChatReasoning testId="ai-chat-reasoning">
                 <div>Thinking about your entries...</div>
+              </AIChatReasoning>
+            )}
+            {/* Show client-side tool execution indicator */}
+            {(isClientWorking || isRendering) && !isStreaming && (
+              <AIChatReasoning testId="ai-chat-client-working">
+                <div>
+                  {isRendering
+                    ? 'Rendering video... This may take a moment.'
+                    : 'Searching entries...'}
+                </div>
               </AIChatReasoning>
             )}
           </>
