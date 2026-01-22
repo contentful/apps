@@ -33,6 +33,7 @@ export const RecentlyPublishedTable = ({ entries }: { entries: EntryProps[] }) =
   const installation = (sdk.parameters.installation ?? {}) as AppInstallationParameters;
   const recentlyPublishedDays = installation.recentlyPublishedDays ?? 7;
   const recentlyPublishedDate = subDays(new Date(), recentlyPublishedDays);
+
   const { items, total, isFetching, error } = useRecentlyPublishedContent(
     currentPage,
     entries,
