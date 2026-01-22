@@ -9,6 +9,8 @@ interface PlaybackPolicySelectorProps {
   enableSignedUrls: boolean;
   enableDRM?: boolean;
   onValidationChange?: (isValid: boolean) => void;
+  /** When true, DRM option is disabled because audio files don't support DRM */
+  isAudioOnly?: boolean;
 }
 
 const playbackPolicyLink =
@@ -20,6 +22,7 @@ export const PlaybackPolicySelector: FC<PlaybackPolicySelectorProps> = ({
   enableSignedUrls,
   enableDRM = false,
   onValidationChange,
+  isAudioOnly = false,
 }) => {
   const handlePolicyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value as PolicyType;
@@ -70,11 +73,13 @@ export const PlaybackPolicySelector: FC<PlaybackPolicySelectorProps> = ({
         </FormControl>
 
         <FormControl marginBottom="none">
-          <Radio value="drm" isDisabled={!enableDRM}>
+          <Radio value="drm" isDisabled={!enableDRM || isAudioOnly}>
             DRM Protected
           </Radio>
           <FormControl.HelpText>
-            Highest level of content protection using industry-standard encryption. Requires DRM to be enabled in app configuration.
+            {isAudioOnly
+              ? 'DRM is not available for audio files. Use the Protected option for secure playback.'
+              : 'Highest level of content protection using industry-standard encryption. Requires DRM to be enabled in app configuration.'}
             <TextLink
               icon={<ExternalLinkIcon />}
               variant="secondary"
