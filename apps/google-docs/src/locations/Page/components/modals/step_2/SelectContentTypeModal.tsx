@@ -194,7 +194,7 @@ export const ContentTypePickerModal = ({
             </FormControl>
 
             {selectedContentTypes.length > 0 && (
-              <Flex flexWrap="wrap" gap="spacingXs" marginTop="spacingS" marginBottom="spacingXl">
+              <Flex flexWrap="wrap" gap="spacingXs" marginTop="spacingS">
                 {selectedContentTypes.map((ct) => (
                   <Pill
                     key={ct.sys.id}
