@@ -12,7 +12,6 @@ interface UseScheduledContentResult {
   items: ScheduledContentItem[];
   total: number;
   isFetching: boolean;
-  error: Error | null;
   refetch: () => void;
 }
 
