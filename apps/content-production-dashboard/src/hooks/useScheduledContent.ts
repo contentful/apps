@@ -3,7 +3,12 @@ import { EntryProps, ScheduledActionProps } from 'contentful-management';
 
 import { ScheduledContentItem } from '../utils/types';
 import { getCreatorFromEntry } from '../utils/UserUtils';
-import { getEntryStatus, getEntryTitle, getUniqueContentTypeIdsFromEntries, getUniqueUserIdsFromEntries } from '../utils/EntryUtils';
+import {
+  getEntryStatus,
+  getEntryTitle,
+  getUniqueContentTypeIdsFromEntries,
+  getUniqueUserIdsFromEntries,
+} from '../utils/EntryUtils';
 import { useContentTypes } from './useContentTypes';
 import { useUsers } from './useUsers';
 import { ITEMS_PER_PAGE } from '../utils/consts';
@@ -98,4 +103,3 @@ export function useScheduledContent(
     },
   };
 }
-

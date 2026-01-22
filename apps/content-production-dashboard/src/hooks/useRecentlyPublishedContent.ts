@@ -4,7 +4,11 @@ import { RELEASES_PER_PAGE } from '../utils/consts';
 import { EntryProps } from 'contentful-management';
 import { isWithin, parseDate } from '../utils/dateCalculator';
 import { getCreatorFromEntry } from '../utils/UserUtils';
-import { getEntryTitle, getUniqueContentTypeIdsFromEntries, getUniqueUserIdsFromEntries } from '../utils/EntryUtils';
+import {
+  getEntryTitle,
+  getUniqueContentTypeIdsFromEntries,
+  getUniqueUserIdsFromEntries,
+} from '../utils/EntryUtils';
 import { useMemo } from 'react';
 import { Creator } from '../utils/types';
 
@@ -43,9 +47,14 @@ export function useRecentlyPublishedContent(
 
   const contentTypeIds = getUniqueContentTypeIdsFromEntries(recentlyPublishedEntries);
 
-  const { contentTypes, isFetchingContentTypes, refetchContentTypes, fetchingContentTypesError } = useContentTypes(contentTypeIds);
-  const { usersMap, isFetching: isFetchingUsers, refetch: refetchUsers, error: usersError } = useUsers(userIds);
-
+  const { contentTypes, isFetchingContentTypes, refetchContentTypes, fetchingContentTypesError } =
+    useContentTypes(contentTypeIds);
+  const {
+    usersMap,
+    isFetching: isFetchingUsers,
+    refetch: refetchUsers,
+    error: usersError,
+  } = useUsers(userIds);
 
   const recentlyPublishedItems = useMemo(() => {
     const items: RecentlyPublishedItem[] = [];
@@ -63,7 +72,6 @@ export function useRecentlyPublishedContent(
 
     return items;
   }, [recentlyPublishedEntries, contentTypes, usersMap, defaultLocale]);
-
 
   const isFetching = isFetchingContentTypes || isFetchingUsers;
 

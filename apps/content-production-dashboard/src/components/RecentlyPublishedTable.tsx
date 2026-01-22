@@ -37,7 +37,7 @@ export const RecentlyPublishedTable = ({ entries }: { entries: EntryProps[] }) =
     currentPage,
     entries,
     recentlyPublishedDate,
-    sdk.locales.default,
+    sdk.locales.default
   );
 
   if (error) {
@@ -63,35 +63,35 @@ export const RecentlyPublishedTable = ({ entries }: { entries: EntryProps[] }) =
 
   return (
     <>
-    <Table>
-      <RecentlyPublishedTableHeader />
-      <Table.Body>
-        {items.map((item) => (
-          <Table.Row key={item.id}>
-            <Table.Cell style={styles.titleCell}>
-              <EntryLink entryId={item.id} spaceId={sdk.ids.space}>
-                {item.title}
-              </EntryLink>
-            </Table.Cell>
-            <Table.Cell style={styles.publishedDateCell}>
-              {formatDateTimeWithTimezone(item.publishedDate || undefined)}
-            </Table.Cell>
-            <Table.Cell style={styles.contentTypeCell}>{item.contentType}</Table.Cell>
-            <Table.Cell style={styles.creatorCell}>{formatUserName(item.creator)}</Table.Cell>
-          </Table.Row>
-        ))}
-      </Table.Body>
-    </Table>
-    {total > RELEASES_PER_PAGE && (
-      <Box marginTop="spacingL">
-        <Pagination
-          activePage={currentPage}
-          onPageChange={setCurrentPage}
-          totalItems={total}
-          itemsPerPage={RELEASES_PER_PAGE}
-        />
-      </Box>
-    )}
-  </>
-);
+      <Table>
+        <RecentlyPublishedTableHeader />
+        <Table.Body>
+          {items.map((item) => (
+            <Table.Row key={item.id}>
+              <Table.Cell style={styles.titleCell}>
+                <EntryLink entryId={item.id} spaceId={sdk.ids.space}>
+                  {item.title}
+                </EntryLink>
+              </Table.Cell>
+              <Table.Cell style={styles.publishedDateCell}>
+                {formatDateTimeWithTimezone(item.publishedDate || undefined)}
+              </Table.Cell>
+              <Table.Cell style={styles.contentTypeCell}>{item.contentType}</Table.Cell>
+              <Table.Cell style={styles.creatorCell}>{formatUserName(item.creator)}</Table.Cell>
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table>
+      {total > RELEASES_PER_PAGE && (
+        <Box marginTop="spacingL">
+          <Pagination
+            activePage={currentPage}
+            onPageChange={setCurrentPage}
+            totalItems={total}
+            itemsPerPage={RELEASES_PER_PAGE}
+          />
+        </Box>
+      )}
+    </>
+  );
 };
