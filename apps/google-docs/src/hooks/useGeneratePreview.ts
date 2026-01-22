@@ -94,10 +94,14 @@ const callGoogleDocsAgent = async (
           messages: [
             {
               role: 'user',
-              content: `The documentId is: ${documentId}, the contentTypeIds are: ${contentTypeIds}, and the oauth token is: ${oauthToken}. Here's a JSON stringified version of the params if it helps
-                ${JSON.stringify({ documentId, contentTypeIds, oauthToken })}`,
+              content: `Analyze the following google docs document ${documentId} and extract the Contentful entries and assets for the following content types: ${contentTypeIds}`,
             },
           ],
+          metadata: {
+            documentId,
+            contentTypeIds,
+            oauthToken,
+          },
         }),
       }
     );
