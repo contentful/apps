@@ -4,6 +4,7 @@ import { ScheduledContentTable } from '../../src/components/ScheduledContentTabl
 import { EntryStatus, ScheduledContentItem } from '../../src/utils/types';
 import { mockSdk } from '../mocks';
 import { createQueryProviderWrapper } from '../utils/createQueryProviderWrapper';
+import { createMockEntry, createMockScheduledAction } from '../utils/testHelpers';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -14,8 +15,12 @@ const mockRefetch = vi.fn();
 const mockUseScheduledContent = vi.fn();
 
 vi.mock('../../src/hooks/useScheduledContent', () => ({
-  useScheduledContent: (defaultLocale: string, page: number) =>
-    mockUseScheduledContent(defaultLocale, page),
+  useScheduledContent: (
+    scheduledActions: unknown[],
+    entries: unknown[],
+    defaultLocale: string,
+    page: number
+  ) => mockUseScheduledContent(scheduledActions, entries, defaultLocale, page),
 }));
 
 const createMockScheduledContentItem = (
@@ -28,16 +33,13 @@ const createMockScheduledContentItem = (
     id: 'entry-1',
     title: 'Test Entry',
     contentType: 'Blog Post',
-    contentTypeId: 'blogPost',
     creator: {
       id: 'user-1',
       firstName: 'John',
       lastName: 'Doe',
     },
     publishedDate: now.toISOString(),
-    updatedDate: now.toISOString(),
     status: EntryStatus.Published,
-    scheduledActionId: 'action-1',
     scheduledFor: {
       datetime: futureDate.toISOString(),
       timezone: 'UTC',
@@ -64,7 +66,9 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable />, { wrapper: createQueryProviderWrapper() });
+      render(<ScheduledContentTable scheduledActions={[]} entries={[]} />, {
+        wrapper: createQueryProviderWrapper(),
+      });
 
       expect(screen.getByRole('table')).toBeInTheDocument();
       expect(screen.getByText('Title')).toBeInTheDocument();
@@ -86,7 +90,9 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable />, { wrapper: createQueryProviderWrapper() });
+      render(<ScheduledContentTable scheduledActions={[]} entries={[]} />, {
+        wrapper: createQueryProviderWrapper(),
+      });
 
       expect(screen.getByText('No entries found')).toBeInTheDocument();
     });
@@ -94,6 +100,12 @@ describe('ScheduledContentTable component', () => {
 
   describe('Table rendering', () => {
     it('renders table with correct columns', () => {
+      const entry = createMockEntry({ id: 'entry-1', contentTypeId: 'blogPost' });
+      const scheduledAction = createMockScheduledAction({
+        id: 'action-1',
+        entityId: 'entry-1',
+        entityLinkType: 'Entry',
+      });
       const mockItem = createMockScheduledContentItem();
       mockUseScheduledContent.mockReturnValue({
         items: [mockItem],
@@ -103,7 +115,9 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable />, { wrapper: createQueryProviderWrapper() });
+      render(<ScheduledContentTable scheduledActions={[scheduledAction]} entries={[entry]} />, {
+        wrapper: createQueryProviderWrapper(),
+      });
 
       expect(screen.getByText('Title')).toBeInTheDocument();
       expect(screen.getByText('Scheduled Date')).toBeInTheDocument();
@@ -114,6 +128,17 @@ describe('ScheduledContentTable component', () => {
     });
 
     it('renders scheduled content items with correct data', () => {
+      const entry = createMockEntry({
+        id: 'entry-1',
+        contentTypeId: 'blogPost',
+        publishedAt: '2024-01-01T00:00:00Z',
+      });
+      const scheduledAction = createMockScheduledAction({
+        id: 'action-1',
+        entityId: 'entry-1',
+        entityLinkType: 'Entry',
+        scheduledFor: '2024-01-15T10:00:00Z',
+      });
       const mockItem = createMockScheduledContentItem({
         id: 'entry-1',
         title: 'My Blog Post',
@@ -133,7 +158,9 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable />, { wrapper: createQueryProviderWrapper() });
+      render(<ScheduledContentTable scheduledActions={[scheduledAction]} entries={[entry]} />, {
+        wrapper: createQueryProviderWrapper(),
+      });
 
       expect(screen.getByText('My Blog Post')).toBeInTheDocument();
       expect(screen.getByText('Blog Post')).toBeInTheDocument();
@@ -144,6 +171,24 @@ describe('ScheduledContentTable component', () => {
     });
 
     it('renders multiple scheduled content items', () => {
+      const entry1 = createMockEntry({ id: 'entry-1', contentTypeId: 'blogPost' });
+      const entry2 = createMockEntry({ id: 'entry-2', contentTypeId: 'article' });
+      const entry3 = createMockEntry({ id: 'entry-3', contentTypeId: 'blogPost' });
+      const scheduledAction1 = createMockScheduledAction({
+        id: 'action-1',
+        entityId: 'entry-1',
+        entityLinkType: 'Entry',
+      });
+      const scheduledAction2 = createMockScheduledAction({
+        id: 'action-2',
+        entityId: 'entry-2',
+        entityLinkType: 'Entry',
+      });
+      const scheduledAction3 = createMockScheduledAction({
+        id: 'action-3',
+        entityId: 'entry-3',
+        entityLinkType: 'Entry',
+      });
       const mockItems = [
         createMockScheduledContentItem({ id: 'entry-1', title: 'Entry 1' }),
         createMockScheduledContentItem({ id: 'entry-2', title: 'Entry 2' }),
@@ -158,7 +203,13 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable />, { wrapper: createQueryProviderWrapper() });
+      render(
+        <ScheduledContentTable
+          scheduledActions={[scheduledAction1, scheduledAction2, scheduledAction3]}
+          entries={[entry1, entry2, entry3]}
+        />,
+        { wrapper: createQueryProviderWrapper() }
+      );
 
       expect(screen.getByText('Entry 1')).toBeInTheDocument();
       expect(screen.getByText('Entry 2')).toBeInTheDocument();
@@ -168,6 +219,24 @@ describe('ScheduledContentTable component', () => {
 
   describe('Status badges', () => {
     it('displays correct status badges for all status types', () => {
+      const entry1 = createMockEntry({ id: 'entry-1', contentTypeId: 'blogPost' });
+      const entry2 = createMockEntry({ id: 'entry-2', contentTypeId: 'article' });
+      const entry3 = createMockEntry({ id: 'entry-3', contentTypeId: 'blogPost' });
+      const scheduledAction1 = createMockScheduledAction({
+        id: 'action-1',
+        entityId: 'entry-1',
+        entityLinkType: 'Entry',
+      });
+      const scheduledAction2 = createMockScheduledAction({
+        id: 'action-2',
+        entityId: 'entry-2',
+        entityLinkType: 'Entry',
+      });
+      const scheduledAction3 = createMockScheduledAction({
+        id: 'action-3',
+        entityId: 'entry-3',
+        entityLinkType: 'Entry',
+      });
       const mockItems = [
         createMockScheduledContentItem({ id: 'entry-1', status: EntryStatus.Published }),
         createMockScheduledContentItem({ id: 'entry-2', status: EntryStatus.Changed }),
@@ -182,7 +251,13 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable />, { wrapper: createQueryProviderWrapper() });
+      render(
+        <ScheduledContentTable
+          scheduledActions={[scheduledAction1, scheduledAction2, scheduledAction3]}
+          entries={[entry1, entry2, entry3]}
+        />,
+        { wrapper: createQueryProviderWrapper() }
+      );
 
       expect(screen.getByText(EntryStatus.Published)).toBeInTheDocument();
       expect(screen.getByText(EntryStatus.Changed)).toBeInTheDocument();
@@ -192,6 +267,12 @@ describe('ScheduledContentTable component', () => {
 
   describe('EntryLink rendering', () => {
     it('renders EntryLink with correct URL', () => {
+      const entry = createMockEntry({ id: 'entry-123', contentTypeId: 'blogPost' });
+      const scheduledAction = createMockScheduledAction({
+        id: 'action-1',
+        entityId: 'entry-123',
+        entityLinkType: 'Entry',
+      });
       const mockItem = createMockScheduledContentItem({
         id: 'entry-123',
         title: 'My Entry',
@@ -205,7 +286,9 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable />, { wrapper: createQueryProviderWrapper() });
+      render(<ScheduledContentTable scheduledActions={[scheduledAction]} entries={[entry]} />, {
+        wrapper: createQueryProviderWrapper(),
+      });
 
       const link = screen.getByText('My Entry').closest('a');
       expect(link).toHaveAttribute(
