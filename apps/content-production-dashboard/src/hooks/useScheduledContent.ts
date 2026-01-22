@@ -68,12 +68,9 @@ export function useScheduledContent(
         id: entry.sys.id,
         title: getEntryTitle(entry, contentType, defaultLocale),
         contentType: contentType?.name || '',
-        contentTypeId: entry.sys.contentType?.sys?.id || '',
         creator: getCreatorFromEntry(entry, usersMap),
         publishedDate: entry.sys.publishedAt || null,
-        updatedDate: entry.sys.updatedAt,
         status: getEntryStatus(entry),
-        scheduledActionId: action.sys.id,
         scheduledFor: {
           datetime: action.scheduledFor?.datetime || '',
           timezone: action.scheduledFor?.timezone,

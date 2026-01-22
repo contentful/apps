@@ -51,19 +51,13 @@ export enum EntryStatus {
   Changed = 'Changed',
 }
 
-export interface ScheduledEntry {
+export interface ScheduledContentItem {
   id: string;
   title: string;
   contentType: string;
-  contentTypeId: string;
   creator: Creator | null;
   publishedDate: string | null;
-  updatedDate: string;
   status: EntryStatus;
-}
-
-export interface ScheduledContentItem extends ScheduledEntry {
-  scheduledActionId: string;
   scheduledFor: {
     datetime: string;
     timezone?: string;

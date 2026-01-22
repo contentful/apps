@@ -127,14 +127,10 @@ describe('useScheduledContent', () => {
       expect(result.current.items[0]).toMatchObject({
         id: 'entry-1',
         contentType: 'Blog Post',
-        contentTypeId: 'blogPost',
-        scheduledActionId: 'action-1',
       });
       expect(result.current.items[1]).toMatchObject({
         id: 'entry-2',
         contentType: 'Article',
-        contentTypeId: 'article',
-        scheduledActionId: 'action-2',
       });
     });
 
@@ -183,7 +179,6 @@ describe('useScheduledContent', () => {
 
       const item = result.current.items[0];
       expect(item.id).toBe('entry-1');
-      expect(item.scheduledActionId).toBe('action-1');
       expect(item.scheduledFor.datetime).toBe('2024-01-15T10:00:00Z');
       expect(item.scheduledFor.timezone).toBe('UTC');
       expect(item.publishedDate).toBe('2024-01-01T00:00:00Z');
