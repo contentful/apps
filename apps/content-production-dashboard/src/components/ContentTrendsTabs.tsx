@@ -106,7 +106,12 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
   }, [entries, timeRange, filteredContentTypesForChart]);
 
   const creatorData = useMemo(() => {
-    return generateCreatorChartData(entries, { timeRange }, creatorsNames, filteredContentTypesForChart);
+    return generateCreatorChartData(
+      entries,
+      { timeRange },
+      creatorsNames,
+      filteredContentTypesForChart
+    );
   }, [entries, timeRange, creatorsNames, filteredContentTypesForChart]);
 
   const handleContentTypeSelection = (newSelected: ContentType[]) => {
@@ -144,11 +149,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
                 {newEntries.length === 0 ? (
                   <EmptyState />
                 ) : (
-                  <ChartWrapper
-                    data={newEntries}
-                    xAxisDataKey="date"
-                    legendTitle="Content:"
-                  />
+                  <ChartWrapper data={newEntries} xAxisDataKey="date" legendTitle="Content:" />
                 )}
               </>
             )}
