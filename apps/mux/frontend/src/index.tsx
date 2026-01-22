@@ -547,7 +547,7 @@ export class App extends React.Component<AppProps, AppState> {
       console.error(e);
       this.setState({ isTokenLoading: false });
       return {
-        licenseToken: 'license-token-not-found',
+        licenseToken: undefined,
         playbackToken: 'playback-token-not-found',
         posterToken: 'poster-token-not-found',
         storyboardToken: 'storyboard-token-not-found',
@@ -1373,7 +1373,7 @@ export class App extends React.Component<AppProps, AppState> {
                       if (!muxSigningKeyId || !muxSigningKeyPrivate) {
                         return 'No signing key to create a DRM license token. Please configure signing keys in the app settings.';
                       }
-                      return 'DRM license token could not be generated. The video may not play in preview. Make sure the getDRMLicenseTokens function is deployed.';
+                      return 'You must enable the "Signed URLs" in the app settings to preview this video with DRM protection.';
                     })()}
                   </Note>
                 </Box>

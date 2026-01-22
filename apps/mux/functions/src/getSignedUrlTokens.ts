@@ -60,18 +60,21 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   const { playbackId, isDRM = false } = event.body;
   const {
     appInstallationParameters: {
+      muxEnableSignedUrls,
       muxSigningKeyId,
       muxSigningKeyPrivate,
       muxAccessTokenId,
       muxAccessTokenSecret,
     },
   } = context;
-  if (typeof muxSigningKeyId !== 'string' || typeof muxSigningKeyPrivate !== 'string') {
-    console.error('muxSigningKeyId and muxSigningKeyPrivate are not set');
+
+  // Check if signed URLs are enabled and signing keys exist
+  if (!muxEnableSignedUrls || typeof muxSigningKeyId !== 'string' || typeof muxSigningKeyPrivate !== 'string') {
+    console.error('Signed URLs checkbox is not enabled or signing keys are not set');
     return {
       ok: false,
       error: 'You must enable the "Signed URLs" in the app settings to play this video',
-    }
+    };
   }
   const mux = new Mux({ tokenId: muxAccessTokenId, tokenSecret: muxAccessTokenSecret, jwtSigningKey: muxSigningKeyId, jwtPrivateKey: muxSigningKeyPrivate });
 
