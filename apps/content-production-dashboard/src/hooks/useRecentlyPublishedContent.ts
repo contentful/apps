@@ -1,16 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
-import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
 import { useContentTypes } from './useContentTypes';
 import { useUsers } from './useUsers';
-import type { AppInstallationParameters } from '../locations/ConfigScreen';
 import { RELEASES_PER_PAGE } from '../utils/consts';
 import { EntryProps } from 'contentful-management';
-import { isWithin, parseDate, subDays } from '../utils/dateCalculator';
+import { isWithin, parseDate } from '../utils/dateCalculator';
 import { getCreatorFromEntry } from '../utils/UserUtils';
 import { getEntryTitle, getUniqueContentTypeIdsFromEntries, getUniqueUserIdsFromEntries } from '../utils/EntryUtils';
 import { useMemo } from 'react';
-import { Creator, EntryStatus } from '../utils/types';
+import { Creator } from '../utils/types';
 
 export interface RecentlyPublishedItem {
   id: string;
@@ -28,14 +24,14 @@ export interface UseRecentlyPublishedResult {
   error: Error | null;
 }
 
-export function useRecentlyPublishedContent( page: number, entries: EntryProps[]): UseRecentlyPublishedResult {
+export function useRecentlyPublishedContent(
+  page: number,
+  entries: EntryProps[],
+  recentlyPublishedDate: Date,
+  defaultLocale: string
+): UseRecentlyPublishedResult {
   const skip = page * RELEASES_PER_PAGE;
-  const sdk = useSDK<HomeAppSDK | PageAppSDK>();
-  const installation = (sdk.parameters.installation ?? {}) as AppInstallationParameters;
-  const recentlyPublishedDays = installation.recentlyPublishedDays ?? 7;
-  const recentlyPublishedDate = subDays(new Date(), recentlyPublishedDays);
   const now = new Date();
-  const defaultLocale = sdk.locales.default;
 
   const recentlyPublishedEntries = entries.filter((entry) => {
     const publishedAt = parseDate(entry?.sys?.publishedAt);

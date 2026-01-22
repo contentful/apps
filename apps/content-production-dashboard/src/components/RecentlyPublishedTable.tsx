@@ -11,6 +11,8 @@ import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useRecentlyPublishedContent } from '../hooks/useRecentlyPublishedContent';
 import { ErrorDisplay } from './ErrorDisplay';
+import { subDays } from '../utils/dateCalculator';
+import type { AppInstallationParameters } from '../locations/ConfigScreen';
 
 const RecentlyPublishedTableHeader = () => {
   return (
@@ -28,9 +30,14 @@ const RecentlyPublishedTableHeader = () => {
 export const RecentlyPublishedTable = ({ entries }: { entries: EntryProps[] }) => {
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const [currentPage, setCurrentPage] = useState(0);
+  const installation = (sdk.parameters.installation ?? {}) as AppInstallationParameters;
+  const recentlyPublishedDays = installation.recentlyPublishedDays ?? 7;
+  const recentlyPublishedDate = subDays(new Date(), recentlyPublishedDays);
   const { items, total, isFetching, error } = useRecentlyPublishedContent(
     currentPage,
     entries,
+    recentlyPublishedDate,
+    sdk.locales.default,
   );
 
   if (error) {

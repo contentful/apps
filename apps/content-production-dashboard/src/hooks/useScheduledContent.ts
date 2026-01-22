@@ -3,7 +3,7 @@ import { EntryProps, ScheduledActionProps } from 'contentful-management';
 
 import { ScheduledContentItem } from '../utils/types';
 import { getCreatorFromEntry } from '../utils/UserUtils';
-import { getEntryStatus, getEntryTitle } from '../utils/EntryUtils';
+import { getEntryStatus, getEntryTitle, getUniqueContentTypeIdsFromEntries, getUniqueUserIdsFromEntries } from '../utils/EntryUtils';
 import { useContentTypes } from './useContentTypes';
 import { useUsers } from './useUsers';
 import { ITEMS_PER_PAGE } from '../utils/consts';
@@ -31,9 +31,9 @@ export function useScheduledContent(
     [entries, scheduledActions]
   );
 
-  const userIds = useMemo(() => getUserIdsFromEntries(scheduledEntries), [scheduledEntries]);
+  const userIds = useMemo(() => getUniqueUserIdsFromEntries(scheduledEntries), [scheduledEntries]);
   const contentTypeIds = useMemo(
-    () => getContentTypeIdsFromEntries(scheduledEntries),
+    () => getUniqueContentTypeIdsFromEntries(scheduledEntries),
     [scheduledEntries]
   );
 
@@ -97,12 +97,5 @@ export function useScheduledContent(
       refetchContentTypes();
     },
   };
-}
-function getUserIdsFromEntries(scheduledEntries: EntryProps[]): any {
-    throw new Error('Function not implemented.');
-}
-
-function getContentTypeIdsFromEntries(scheduledEntries: EntryProps[]): any {
-    throw new Error('Function not implemented.');
 }
 
