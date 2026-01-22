@@ -128,10 +128,11 @@ describe('ScheduledContentTable component', () => {
     });
 
     it('renders scheduled content items with correct data', () => {
+      const publishedDate = '2024-01-01T12:00:00Z';
       const entry = createMockEntry({
         id: 'entry-1',
         contentTypeId: 'blogPost',
-        publishedAt: '2024-01-01T00:00:00Z',
+        publishedAt: publishedDate,
       });
       const scheduledAction = createMockScheduledAction({
         id: 'action-1',
@@ -147,7 +148,7 @@ describe('ScheduledContentTable component', () => {
           datetime: '2024-01-15T10:00:00Z',
           timezone: 'UTC',
         },
-        publishedDate: '2024-01-01T00:00:00Z',
+        publishedDate,
       });
 
       mockUseScheduledContent.mockReturnValue({
@@ -166,7 +167,7 @@ describe('ScheduledContentTable component', () => {
       expect(screen.getByText('Blog Post')).toBeInTheDocument();
       expect(screen.getByText('John Doe')).toBeInTheDocument();
       expect(screen.getByText(/Jan 15, 2024/i)).toBeInTheDocument();
-      expect(screen.getByText(/Dec 31, 2023/i)).toBeInTheDocument();
+      expect(screen.getByText(/Jan 1, 2024/i)).toBeInTheDocument();
       expect(screen.getByText(EntryStatus.Published)).toBeInTheDocument();
     });
 
