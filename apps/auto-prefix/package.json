@@ -1,5 +1,5 @@
 {
-  "name": "auto-internal-name",
+  "name": "auto-prefix",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
