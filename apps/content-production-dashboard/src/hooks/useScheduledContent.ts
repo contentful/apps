@@ -6,12 +6,13 @@ import { getCreatorFromEntry } from '../utils/UserUtils';
 import { getEntryStatus, getEntryTitle } from '../utils/EntryUtils';
 import { useContentTypes } from './useContentTypes';
 import { useUsers } from './useUsers';
-import { RELEASES_PER_PAGE } from '../utils/consts';
+import { ITEMS_PER_PAGE } from '../utils/consts';
 
 interface UseScheduledContentResult {
   items: ScheduledContentItem[];
   total: number;
   isFetching: boolean;
+  error: Error | null;
   refetch: () => void;
 }
 
@@ -35,7 +36,7 @@ export function useScheduledContent(
   defaultLocale: string,
   page: number = 0
 ): UseScheduledContentResult {
-  const skip = page * RELEASES_PER_PAGE;
+  const skip = page * ITEMS_PER_PAGE;
 
   const scheduledEntries = useMemo(
     () =>
@@ -51,8 +52,13 @@ export function useScheduledContent(
     [scheduledEntries]
   );
 
-  const { usersMap, isFetching: isFetchingUsers, refetch: refetchUsers } = useUsers(userIds);
-  const { contentTypes, isFetchingContentTypes, refetchContentTypes } =
+  const {
+    usersMap,
+    isFetching: isFetchingUsers,
+    refetch: refetchUsers,
+    error: fetchingUsersError,
+  } = useUsers(userIds);
+  const { contentTypes, isFetchingContentTypes, refetchContentTypes, fetchingContentTypesError } =
     useContentTypes(contentTypeIds);
 
   const scheduledItems = useMemo(() => {
@@ -88,6 +94,7 @@ export function useScheduledContent(
       items: [],
       total: 0,
       isFetching,
+      error: null,
       refetch: () => {
         refetchUsers();
         refetchContentTypes();
@@ -96,9 +103,10 @@ export function useScheduledContent(
   }
 
   return {
-    items: scheduledItems.slice(skip, skip + RELEASES_PER_PAGE),
+    items: scheduledItems.slice(skip, skip + ITEMS_PER_PAGE),
     total: scheduledItems.length,
     isFetching,
+    error: fetchingUsersError ?? fetchingContentTypesError ?? null,
     refetch: () => {
       refetchUsers();
       refetchContentTypes();

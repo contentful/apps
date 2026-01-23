@@ -1,10 +1,14 @@
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { ScheduledContentTable } from '../../src/components/ScheduledContentTable';
-import { EntryStatus, ScheduledContentItem } from '../../src/utils/types';
+import { EntryStatus } from '../../src/utils/types';
 import { mockSdk } from '../mocks';
 import { createQueryProviderWrapper } from '../utils/createQueryProviderWrapper';
-import { createMockEntry, createMockScheduledAction } from '../utils/testHelpers';
+import {
+  createMockEntry,
+  createMockScheduledAction,
+  createMockScheduledContentItem,
+} from '../utils/testHelpers';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -23,31 +27,6 @@ vi.mock('../../src/hooks/useScheduledContent', () => ({
   ) => mockUseScheduledContent(scheduledActions, entries, defaultLocale, page),
 }));
 
-const createMockScheduledContentItem = (
-  overrides?: Partial<ScheduledContentItem>
-): ScheduledContentItem => {
-  const now = new Date();
-  const futureDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-
-  return {
-    id: 'entry-1',
-    title: 'Test Entry',
-    contentType: 'Blog Post',
-    creator: {
-      id: 'user-1',
-      firstName: 'John',
-      lastName: 'Doe',
-    },
-    publishedDate: now.toISOString(),
-    status: EntryStatus.Published,
-    scheduledFor: {
-      datetime: futureDate.toISOString(),
-      timezone: 'UTC',
-    },
-    ...overrides,
-  };
-};
-
 describe('ScheduledContentTable component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -56,8 +35,12 @@ describe('ScheduledContentTable component', () => {
     mockSdk.ids.space = 'test-space';
   });
 
+  afterEach(() => {
+    cleanup();
+  });
+
   describe('Loading state', () => {
-    it('renders skeleton loader when fetching', () => {
+    it('renders headers and skeleton loader when fetching', () => {
       mockUseScheduledContent.mockReturnValue({
         items: [],
         total: 0,
@@ -77,6 +60,7 @@ describe('ScheduledContentTable component', () => {
       expect(screen.getByText('Status')).toBeInTheDocument();
       expect(screen.getByText('Content Type')).toBeInTheDocument();
       expect(screen.getByText('Creator')).toBeInTheDocument();
+      expect(screen.getByTestId('scheduled-content-table-skeleton')).toBeInTheDocument();
     });
   });
 
@@ -263,6 +247,24 @@ describe('ScheduledContentTable component', () => {
       expect(screen.getByText(EntryStatus.Published)).toBeInTheDocument();
       expect(screen.getByText(EntryStatus.Changed)).toBeInTheDocument();
       expect(screen.getByText(EntryStatus.Draft)).toBeInTheDocument();
+    });
+  });
+
+  describe('Error state', () => {
+    it('renders error message when there is an error', () => {
+      mockUseScheduledContent.mockReturnValue({
+        items: [],
+        total: 0,
+        isFetching: false,
+        error: new Error('Test error'),
+        refetch: mockRefetch,
+      });
+
+      render(<ScheduledContentTable scheduledActions={[]} entries={[]} />, {
+        wrapper: createQueryProviderWrapper(),
+      });
+
+      expect(screen.getByText('Test error')).toBeInTheDocument();
     });
   });
 

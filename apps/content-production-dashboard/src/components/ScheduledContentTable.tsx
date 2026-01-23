@@ -7,12 +7,13 @@ import { EmptyStateTable } from './EmptyStateTable';
 
 import { formatDateTimeWithTimezone } from '../utils/dateFormat';
 import { formatUserName } from '../utils/UserUtils';
-import { RELEASES_PER_PAGE } from '../utils/consts';
+import { ITEMS_PER_PAGE } from '../utils/consts';
 
 import { EntryLink } from './EntryLink';
 import { EntryStatus, ScheduledContentItem } from '../utils/types';
 import { useScheduledContent } from '../hooks/useScheduledContent';
 import { EntryProps, ScheduledActionProps } from 'contentful-management';
+import { ErrorDisplay } from './ErrorDisplay';
 
 enum BadgeVariant {
   Primary = 'primary',
@@ -54,19 +55,23 @@ export const ScheduledContentTable = ({
 }) => {
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const [currentPage, setCurrentPage] = useState(0);
-  const { items, total, isFetching } = useScheduledContent(
+  const { items, total, isFetching, error } = useScheduledContent(
     scheduledActions,
     entries,
     sdk.locales.default,
     currentPage
   );
 
+  if (error) {
+    return <ErrorDisplay error={error} />;
+  }
+
   if (isFetching) {
     return (
       <>
         <Table>
           <ScheduledContentTableHeader />
-          <Table.Body>
+          <Table.Body testId="scheduled-content-table-skeleton">
             <Skeleton.Row rowCount={5} columnCount={6} />
           </Table.Body>
         </Table>
@@ -105,13 +110,13 @@ export const ScheduledContentTable = ({
           ))}
         </Table.Body>
       </Table>
-      {total > RELEASES_PER_PAGE && (
+      {total > ITEMS_PER_PAGE && (
         <Box marginTop="spacingL">
           <Pagination
             activePage={currentPage}
             onPageChange={setCurrentPage}
             totalItems={total}
-            itemsPerPage={RELEASES_PER_PAGE}
+            itemsPerPage={ITEMS_PER_PAGE}
           />
         </Box>
       )}

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Table, Pagination, Note, Box, Skeleton, Text, Icon } from '@contentful/f36-components';
 import { useReleases } from '../hooks/useReleases';
 import { GearSixIcon } from '@contentful/f36-icons';
-import { RELEASES_PER_PAGE } from '../utils/consts';
+import { ITEMS_PER_PAGE } from '../utils/consts';
 import tokens from '@contentful/f36-tokens';
 import { styles } from './ReleasesTable.styles';
 import { ReleasesTableActions } from './ReleasesTableActions';
@@ -109,7 +109,7 @@ export const ReleasesTable = () => {
           activePage={currentPage}
           onPageChange={setCurrentPage}
           totalItems={total}
-          itemsPerPage={RELEASES_PER_PAGE}
+          itemsPerPage={ITEMS_PER_PAGE}
         />
       </Box>
     </>

@@ -1,7 +1,8 @@
 import { act, render, RenderOptions } from '@testing-library/react';
 import { EntryProps, ScheduledActionProps, ContentTypeProps } from 'contentful-management';
 import { ReactElement } from 'react';
-import type { ChartDataPoint } from '../../src/utils/types';
+import type { ChartDataPoint, ScheduledContentItem } from '../../src/utils/types';
+import { EntryStatus } from '../../src/utils/types';
 
 export interface MockEntryOverrides {
   id?: string;
@@ -220,4 +221,29 @@ export function createMockContentType(overrides: MockContentTypeOverrides = {}):
     displayField,
     fields: [],
   } as unknown as ContentTypeProps;
+}
+
+export function createMockScheduledContentItem(
+  overrides?: Partial<ScheduledContentItem>
+): ScheduledContentItem {
+  const now = new Date();
+  const futureDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+  return {
+    id: 'entry-1',
+    title: 'Test Entry',
+    contentType: 'Blog Post',
+    creator: {
+      id: 'user-1',
+      firstName: 'John',
+      lastName: 'Doe',
+    },
+    publishedDate: now.toISOString(),
+    status: EntryStatus.Published,
+    scheduledFor: {
+      datetime: futureDate.toISOString(),
+      timezone: 'UTC',
+    },
+    ...overrides,
+  };
 }

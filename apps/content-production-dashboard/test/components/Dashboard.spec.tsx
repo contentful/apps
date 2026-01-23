@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { cleanup, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
@@ -86,6 +86,14 @@ describe('Dashboard component', () => {
       refetchEntries: mockRefetchEntries,
       fetchedAt: new Date(),
     });
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   it('renders the dashboard heading', async () => {
