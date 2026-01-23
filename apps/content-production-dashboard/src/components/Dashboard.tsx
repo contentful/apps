@@ -7,11 +7,13 @@ import { ErrorDisplay } from './ErrorDisplay';
 import { useAllEntries } from '../hooks/useAllEntries';
 import { useScheduledActions } from '../hooks/useScheduledActions';
 import { useInstallationParameters } from '../hooks/useInstallationParameters';
+import { useContentTypes } from '../hooks/useContentTypes';
 import { ContentTrendsTabs } from './ContentTrendsTabs';
 import { TimeRange } from '../utils/types';
 import React, { useState } from 'react';
 import { LoadingSkeleton } from './LoadingSkeleton';
 import { ReleasesTable } from './ReleasesTable';
+import { ScheduledContentTabs } from './ScheduledContentTabs';
 import { styles } from './Dashboard.styles';
 
 const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
@@ -32,11 +34,13 @@ const Dashboard = () => {
     fetchingScheduledActionsError,
     refetchScheduledActions,
   } = useScheduledActions();
+  const { contentTypes, isFetchingContentTypes, refetchContentTypes } = useContentTypes();
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.Year);
 
   const handleRefresh = async () => {
     refetchEntries();
     refetchScheduledActions();
+    refetchContentTypes();
     await refetchInstallationParameters();
   };
 
@@ -105,6 +109,8 @@ const Dashboard = () => {
               entries={entries}
               defaultContentTypes={installation.defaultContentTypes ?? []}
               timeRange={timeRange}
+              contentTypes={contentTypes}
+              isFetchingContentTypes={isFetchingContentTypes}
             />
           </Box>
 
@@ -116,6 +122,7 @@ const Dashboard = () => {
               <ReleasesTable />
             </Box>
           </Box>
+          <ScheduledContentTabs />
         </>
       )}
     </Flex>
