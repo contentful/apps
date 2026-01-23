@@ -11,7 +11,6 @@ import { TimeRange } from '../utils/types';
 
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK, HomeAppSDK } from '@contentful/app-sdk';
-import { useContentTypes } from '../hooks/useContentTypes';
 import ContentTypeMultiSelect, { ContentType } from './ContentTypeMultiSelect';
 import { styles } from './ContentTrendsTabs.styles';
 
@@ -19,19 +18,22 @@ export interface ContentTrendsTabsProps {
   entries: EntryProps[];
   timeRange: TimeRange;
   defaultContentTypes: string[];
+  contentTypes: Map<string, string>;
+  isFetchingContentTypes: boolean;
 }
 
 export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
   entries,
   defaultContentTypes,
   timeRange,
+  contentTypes,
+  isFetchingContentTypes,
 }) => {
   const sdk = useSDK<HomeAppSDK>();
   const [selectedTab, setSelectedTab] = useState('newEntries');
 
   const [creatorsNames, setCreatorsNames] = useState<Map<string, string>>(new Map());
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-  const { contentTypes, isFetchingContentTypes } = useContentTypes();
   const [selectedChartContentTypes, setSelectedChartContentTypes] = useState<ContentType[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
 

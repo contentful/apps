@@ -13,6 +13,7 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 
 const mockRefetchEntries = vi.fn();
 const mockRefetchScheduledActions = vi.fn();
+const mockRefetchContentTypes = vi.fn();
 
 const mockEntries = [
   createMockEntry({ id: 'entry-1', contentTypeId: 'blogPost' }),
@@ -40,6 +41,19 @@ vi.mock('../../src/hooks/useScheduledActions', () => ({
     fetchingScheduledActionsError: null,
     refetchScheduledActions: mockRefetchScheduledActions,
     fetchedAt: new Date(),
+  }),
+}));
+
+vi.mock('../../src/hooks/useContentTypes', () => ({
+  useContentTypes: () => ({
+    contentTypes: new Map<string, string>([
+      ['blogPost', 'Blog Post'],
+      ['article', 'Article'],
+    ]),
+    isFetchingContentTypes: false,
+    fetchingContentTypesError: null,
+    fetchedAt: new Date(),
+    refetchContentTypes: mockRefetchContentTypes,
   }),
 }));
 
@@ -80,7 +94,7 @@ describe('Dashboard component', () => {
     expect(screen.getByText('Needs Update')).toBeInTheDocument();
   });
 
-  it('calls refetchEntries and refetchScheduledActions when refresh button is clicked', async () => {
+  it('calls refetchEntries, refetchScheduledActions, and refetchContentTypes when refresh button is clicked', async () => {
     const user = userEvent.setup();
     await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
@@ -89,6 +103,7 @@ describe('Dashboard component', () => {
 
     expect(mockRefetchEntries).toHaveBeenCalledTimes(1);
     expect(mockRefetchScheduledActions).toHaveBeenCalledTimes(1);
+    expect(mockRefetchContentTypes).toHaveBeenCalledTimes(1);
   });
 
   describe('Content Publishing Trends Section', () => {

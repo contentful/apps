@@ -7,6 +7,7 @@ import { ErrorDisplay } from './ErrorDisplay';
 import { useAllEntries } from '../hooks/useAllEntries';
 import { useScheduledActions } from '../hooks/useScheduledActions';
 import { useInstallationParameters } from '../hooks/useInstallationParameters';
+import { useContentTypes } from '../hooks/useContentTypes';
 import { ContentTrendsTabs } from './ContentTrendsTabs';
 import { TimeRange } from '../utils/types';
 import React, { useState } from 'react';
@@ -32,11 +33,13 @@ const Dashboard = () => {
     fetchingScheduledActionsError,
     refetchScheduledActions,
   } = useScheduledActions();
+  const { contentTypes, isFetchingContentTypes, refetchContentTypes } = useContentTypes();
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.Year);
 
   const handleRefresh = async () => {
     refetchEntries();
     refetchScheduledActions();
+    refetchContentTypes();
     await refetchInstallationParameters();
   };
 
@@ -105,6 +108,8 @@ const Dashboard = () => {
               entries={entries}
               defaultContentTypes={installation.defaultContentTypes ?? []}
               timeRange={timeRange}
+              contentTypes={contentTypes}
+              isFetchingContentTypes={isFetchingContentTypes}
             />
           </Box>
 

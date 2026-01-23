@@ -60,16 +60,6 @@ const mockContentTypes = new Map<string, string>();
 const mockCreatorsNames = new Map<string, string>();
 let mockIsFetchingContentTypes = false;
 
-const mockUseContentTypes = vi.fn(() => ({
-  contentTypes: mockContentTypes,
-  isFetchingContentTypes: mockIsFetchingContentTypes,
-  fetchingContentTypesError: null,
-}));
-
-vi.mock('../../src/hooks/useContentTypes', () => ({
-  useContentTypes: () => mockUseContentTypes(),
-}));
-
 const createWrapper = () => {
   const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryProvider>{children}</QueryProvider>
@@ -123,12 +113,6 @@ describe('ContentTrendsTabs component', () => {
     mockCreatorsNames.set('user-1', 'John Doe');
     mockCreatorsNames.set('user-2', 'Jane Smith');
 
-    mockUseContentTypes.mockReturnValue({
-      contentTypes: mockContentTypes,
-      isFetchingContentTypes: mockIsFetchingContentTypes,
-      fetchingContentTypesError: null,
-    });
-
     mockGenerateNewEntriesChartData.mockReturnValue(mockNewEntriesData);
     mockGenerateContentTypeChartData.mockReturnValue(mockContentTypeData);
     mockGenerateCreatorChartData.mockReturnValue(mockCreatorData);
@@ -148,6 +132,8 @@ describe('ContentTrendsTabs component', () => {
           entries={mockEntries}
           defaultContentTypes={[]}
           timeRange={TimeRange.Year}
+          contentTypes={mockContentTypes}
+          isFetchingContentTypes={mockIsFetchingContentTypes}
         />,
         { wrapper: createWrapper() }
       );
@@ -163,6 +149,8 @@ describe('ContentTrendsTabs component', () => {
           entries={mockEntries}
           defaultContentTypes={[]}
           timeRange={TimeRange.Year}
+          contentTypes={mockContentTypes}
+          isFetchingContentTypes={mockIsFetchingContentTypes}
         />,
         { wrapper: createWrapper() }
       );
@@ -179,6 +167,8 @@ describe('ContentTrendsTabs component', () => {
           entries={mockEntries}
           defaultContentTypes={[]}
           timeRange={TimeRange.Year}
+          contentTypes={mockContentTypes}
+          isFetchingContentTypes={mockIsFetchingContentTypes}
         />,
         { wrapper: createWrapper() }
       );
@@ -196,6 +186,8 @@ describe('ContentTrendsTabs component', () => {
           entries={mockEntries}
           defaultContentTypes={[]}
           timeRange={TimeRange.Month}
+          contentTypes={mockContentTypes}
+          isFetchingContentTypes={mockIsFetchingContentTypes}
         />,
         { wrapper: createWrapper() }
       );
@@ -212,11 +204,6 @@ describe('ContentTrendsTabs component', () => {
   describe('By Content Type Tab', () => {
     it('shows Spinner when isFetchingContentTypes is true', async () => {
       mockIsFetchingContentTypes = true;
-      mockUseContentTypes.mockReturnValue({
-        contentTypes: new Map(),
-        isFetchingContentTypes: true,
-        fetchingContentTypesError: null,
-      });
 
       const user = userEvent.setup();
       await renderWithAct(
@@ -224,6 +211,8 @@ describe('ContentTrendsTabs component', () => {
           entries={mockEntries}
           defaultContentTypes={[]}
           timeRange={TimeRange.Year}
+          contentTypes={new Map()}
+          isFetchingContentTypes={true}
         />,
         { wrapper: createWrapper() }
       );
@@ -246,6 +235,8 @@ describe('ContentTrendsTabs component', () => {
           entries={mockEntries}
           defaultContentTypes={[]}
           timeRange={TimeRange.Year}
+          contentTypes={mockContentTypes}
+          isFetchingContentTypes={mockIsFetchingContentTypes}
         />,
         { wrapper: createWrapper() }
       );
@@ -268,6 +259,8 @@ describe('ContentTrendsTabs component', () => {
           entries={mockEntries}
           defaultContentTypes={[]}
           timeRange={TimeRange.Year}
+          contentTypes={mockContentTypes}
+          isFetchingContentTypes={mockIsFetchingContentTypes}
         />,
         { wrapper: createWrapper() }
       );
@@ -294,6 +287,8 @@ describe('ContentTrendsTabs component', () => {
           entries={mockEntries}
           defaultContentTypes={[]}
           timeRange={TimeRange.Year}
+          contentTypes={mockContentTypes}
+          isFetchingContentTypes={mockIsFetchingContentTypes}
         />,
         { wrapper: createWrapper() }
       );
@@ -319,6 +314,8 @@ describe('ContentTrendsTabs component', () => {
           entries={mockEntries}
           defaultContentTypes={[]}
           timeRange={TimeRange.Year}
+          contentTypes={mockContentTypes}
+          isFetchingContentTypes={mockIsFetchingContentTypes}
         />,
         { wrapper: createWrapper() }
       );
@@ -344,6 +341,8 @@ describe('ContentTrendsTabs component', () => {
           entries={mockEntries}
           defaultContentTypes={[]}
           timeRange={TimeRange.Year}
+          contentTypes={mockContentTypes}
+          isFetchingContentTypes={mockIsFetchingContentTypes}
         />,
         { wrapper: createWrapper() }
       );
@@ -365,6 +364,8 @@ describe('ContentTrendsTabs component', () => {
           entries={mockEntries}
           defaultContentTypes={[]}
           timeRange={TimeRange.Year}
+          contentTypes={mockContentTypes}
+          isFetchingContentTypes={mockIsFetchingContentTypes}
         />,
         { wrapper: createWrapper() }
       );
@@ -387,6 +388,8 @@ describe('ContentTrendsTabs component', () => {
           entries={mockEntries}
           defaultContentTypes={[]}
           timeRange={TimeRange.Year}
+          contentTypes={mockContentTypes}
+          isFetchingContentTypes={mockIsFetchingContentTypes}
         />,
         { wrapper: createWrapper() }
       );
@@ -413,6 +416,8 @@ describe('ContentTrendsTabs component', () => {
           entries={mockEntries}
           defaultContentTypes={[]}
           timeRange={TimeRange.Year}
+          contentTypes={mockContentTypes}
+          isFetchingContentTypes={mockIsFetchingContentTypes}
         />,
         { wrapper: createWrapper() }
       );
@@ -441,6 +446,8 @@ describe('ContentTrendsTabs component', () => {
           entries={mockEntries}
           defaultContentTypes={[]}
           timeRange={TimeRange.Year}
+          contentTypes={mockContentTypes}
+          isFetchingContentTypes={mockIsFetchingContentTypes}
         />,
         { wrapper: createWrapper() }
       );
@@ -478,6 +485,8 @@ describe('ContentTrendsTabs component', () => {
           entries={mockEntries}
           defaultContentTypes={defaultTypes}
           timeRange={TimeRange.Year}
+          contentTypes={mockContentTypes}
+          isFetchingContentTypes={mockIsFetchingContentTypes}
         />,
         { wrapper: createWrapper() }
       );
@@ -495,6 +504,8 @@ describe('ContentTrendsTabs component', () => {
           entries={mockEntries}
           defaultContentTypes={[]}
           timeRange={TimeRange.Year}
+          contentTypes={mockContentTypes}
+          isFetchingContentTypes={mockIsFetchingContentTypes}
         />,
         { wrapper: createWrapper() }
       );

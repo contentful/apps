@@ -8,12 +8,13 @@ export interface UseContentTypesResult {
   isFetchingContentTypes: boolean;
   fetchingContentTypesError: Error | null;
   fetchedAt: Date | undefined;
+  refetchContentTypes: () => void;
 }
 
 export function useContentTypes(contentTypeIds?: string[]): UseContentTypesResult {
   const sdk = useSDK<PageAppSDK>();
 
-  const { data, isFetching, error } = useQuery<FetchContentTypesResult, Error>({
+  const { data, isFetching, error, refetch } = useQuery<FetchContentTypesResult, Error>({
     queryKey: ['contentTypes', sdk.ids.space, sdk.ids.environment, contentTypeIds],
     queryFn: () => fetchContentTypes(sdk, contentTypeIds),
   });
@@ -23,5 +24,8 @@ export function useContentTypes(contentTypeIds?: string[]): UseContentTypesResul
     isFetchingContentTypes: isFetching,
     fetchingContentTypesError: error,
     fetchedAt: data?.fetchedAt,
+    refetchContentTypes: () => {
+      refetch();
+    },
   };
 }
