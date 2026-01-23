@@ -1,0 +1,107 @@
+{
+  "name": "Google Docs",
+  "description": "Sync your Contentful content with Google Docs",
+  "id": "google-docs",
+  "category": "Productivity",
+  "version": "0.1.0",
+  "locations": [
+    {
+      "location": "app-config",
+      "component": "ConfigScreen"
+    }
+  ],
+  "parameters": {
+    "installation": [
+      {
+        "id": "openAiApiKey",
+        "type": "Secret",
+        "name": "OpenAI API Key",
+        "description": "API Key for the app to use the OpenAI API."
+      }
+    ]
+  },
+  "functions": [
+    {
+      "id": "createPreview",
+      "name": "Create Preview",
+      "description": "Parses the Google Doc and creates preview entries",
+      "path": "functions/handlers/createPreview/createPreviewHandler.js",
+      "entryFile": "functions/handlers/createPreview/createPreviewHandler.ts",
+      "allowNetworks": [
+        "https://api.openai.com",
+        "*.googleapis.com",
+        "https://docs.google.com",
+        "https://jsonplaceholder.typicode.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "createContentTypesAnalysis",
+      "name": "Create Content Types Analysis",
+      "description": "Analyzes content type structure and relationships using AI.",
+      "path": "functions/handlers/createPreview/createContentTypesAnalysisHandler.js",
+      "entryFile": "functions/handlers/createPreview/createContentTypesAnalysisHandler.ts",
+      "allowNetworks": [
+        "https://api.openai.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "initiateGdocOauth",
+      "name": "Initiate Gdoc OAuth Flow",
+      "description": "Initiates the OAuth flow for Google Docs",
+      "path": "functions/oauth/initiateOauth.js",
+      "entryFile": "functions/oauth/initiateOauth.ts",
+      "allowNetworks": [
+        "oauth2.googleapis.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "completeGdocOauth",
+      "name": "Complete Gdoc OAuth Flow",
+      "description": "Completes the OAuth flow for Google Docs",
+      "path": "functions/oauth/completeOauth.js",
+      "entryFile": "functions/oauth/completeOauth.ts",
+      "allowNetworks": [
+        "oauth2.googleapis.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "revokeGdocOauthToken",
+      "name": "Revoke Gdoc OAuth Token",
+      "description": "Revoke token for the Google Docs app to disconnect from the app",
+      "path": "functions/oauth/disconnect.js",
+      "entryFile": "functions/oauth/disconnect.ts",
+      "allowNetworks": [
+        "oauth2.googleapis.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "checkGdocOauthTokenStatus",
+      "name": "Check Gdoc OAuth Token Status",
+      "description": "Checks the status of the Google Docs OAuth token to see if it is valid",
+      "path": "functions/oauth/checkStatus.js",
+      "entryFile": "functions/oauth/checkStatus.ts",
+      "allowNetworks": [
+        "oauth2.googleapis.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    }
+  ],
+  "actions": []
+}

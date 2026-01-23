@@ -5,7 +5,7 @@ import { Heading, Paragraph, Grid, Box } from '@contentful/f36-components';
 
 import Collection from './Collection';
 import CollectionList from './CollectionList';
-import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 interface DashboardProps {
   contentTypes: ContentType[];
@@ -20,7 +20,7 @@ interface CollectionsState {
 
 export default function Dashboard({ contentTypes }: DashboardProps) {
   const sdk = useSDK<PageAppSDK>();
-  const cma = useCMA();
+  const cma = sdk.cma;
   const [data, setData] = useState<CollectionsState>({
     total: null,
     published: null,

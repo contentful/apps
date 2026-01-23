@@ -1,17 +1,40 @@
 import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Heading, Form, Paragraph, Flex, Checkbox } from '@contentful/f36-components';
-import { css } from 'emotion';
+import { Stack } from '@contentful/f36-components';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-
-export interface AppInstallationParameters {
-  enableAllTools?: boolean;
-}
+import { PermissionsSection } from '../components/access-config';
+import { usePermissions } from '../hooks/usePermissions';
+import { FormHeader } from '../components/form-header/FormHeader';
+import { Setup } from '../components/set-up/Setup';
+import { RolesPermissionsFooter } from '../components/roles-permissions-footer';
+import {
+  createAppInstallationParameters,
+  parseAppInstallationParameters,
+} from '../utils/parameters';
+import { AppInstallationParameters } from '../components/types/config';
 
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>({
-    enableAllTools: false,
+  const [expandedAccordions, setExpandedAccordions] = useState({
+    contentLifecycle: true,
+    otherFeatures: false,
+    migration: false,
   });
+
+  const {
+    contentLifecyclePermissions,
+    otherFeaturesPermissions,
+    migrationPermissions,
+    setContentLifecyclePermissions,
+    setOtherFeaturesPermissions,
+    setMigrationPermissions,
+    handleSelectAllToggle,
+    handleEntityActionToggle,
+    handleColumnToggle,
+    handleRowToggle,
+    handleOtherFeatureToggle,
+    handleMigrationToggle,
+  } = usePermissions();
+
   const sdk = useSDK<ConfigAppSDK>();
   /*
      To use the cma, inject it as follows.
@@ -28,6 +51,11 @@ const ConfigScreen = () => {
     // related to this app installation
     const currentState = await sdk.app.getCurrentState();
 
+    const parameters = createAppInstallationParameters({
+      contentLifecyclePermissions,
+      otherFeaturesPermissions,
+      migrationPermissions,
+    });
     return {
       // Parameters to be persisted as the app configuration.
       parameters,
@@ -35,7 +63,7 @@ const ConfigScreen = () => {
       // locations, you can just pass the currentState as is
       targetState: currentState,
     };
-  }, [parameters, sdk]);
+  }, [contentLifecyclePermissions, otherFeaturesPermissions, migrationPermissions, sdk]);
 
   useEffect(() => {
     // `onConfigure` allows to configure a callback to be
@@ -50,30 +78,52 @@ const ConfigScreen = () => {
       // If the app is not installed yet, `parameters` will be `null`.
       const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
 
+      // Restore saved permissions if they exist
       if (currentParameters) {
-        setParameters(currentParameters);
+        const parsedParameters = parseAppInstallationParameters(currentParameters);
+
+        setContentLifecyclePermissions(parsedParameters.contentLifecyclePermissions);
+        setOtherFeaturesPermissions(parsedParameters.otherFeaturesPermissions);
+        setMigrationPermissions(parsedParameters.migrationPermissions);
       }
 
       // Once preparation has finished, call `setReady` to hide
       // the loading screen and present the app to a user.
       sdk.app.setReady();
     })();
-  }, [sdk]);
+  }, [sdk, setContentLifecyclePermissions, setOtherFeaturesPermissions, setMigrationPermissions]);
+
+  const handleAccordionToggle = (section: string, expanded: boolean) => {
+    setExpandedAccordions((prev) => ({
+      ...prev,
+      [section]: expanded,
+    }));
+  };
 
   return (
-    <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
-      <Form>
-        <Heading>App Config</Heading>
-        <Paragraph>Contentful Remote MCP (Public Alpha)</Paragraph>
-        <Checkbox
-          isChecked={parameters.enableAllTools}
-          onChange={() =>
-            setParameters({ ...parameters, enableAllTools: !parameters.enableAllTools })
-          }>
-          Enable All Tools
-        </Checkbox>
-      </Form>
-    </Flex>
+    <Stack
+      flexDirection="column"
+      alignItems="flex-start"
+      spacing="spacingXl"
+      style={{ maxWidth: '852px', margin: '0 auto', backgroundColor: 'white' }}
+      padding="spacingL">
+      <FormHeader />
+      <PermissionsSection
+        contentLifecyclePermissions={contentLifecyclePermissions}
+        otherFeaturesPermissions={otherFeaturesPermissions}
+        migrationPermissions={migrationPermissions}
+        expandedAccordions={expandedAccordions}
+        onAccordionToggle={handleAccordionToggle}
+        onSelectAllToggle={handleSelectAllToggle}
+        onEntityActionToggle={handleEntityActionToggle}
+        onColumnToggle={handleColumnToggle}
+        onRowToggle={handleRowToggle}
+        onOtherFeatureToggle={handleOtherFeatureToggle}
+        onMigrationToggle={handleMigrationToggle}
+      />
+      <Setup />
+      <RolesPermissionsFooter />
+    </Stack>
   );
 };
 

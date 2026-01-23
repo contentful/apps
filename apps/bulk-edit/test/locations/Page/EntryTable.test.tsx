@@ -1,8 +1,8 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { EntryTable } from '../../../src/locations/Page/components/EntryTable';
-import { Entry, ContentTypeField } from '../../../src/locations/Page/types';
+import { ContentTypeField, Entry } from '../../../src/locations/Page/types';
 import { ContentTypeProps } from 'contentful-management';
 import { isCheckboxAllowed } from '../../../src/locations/Page/utils/entryUtils';
 

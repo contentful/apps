@@ -5,12 +5,12 @@ import { PlaybackPolicySelector } from './PlaybackPolicySelector';
 import { CaptionsConfiguration, CaptionsConfig } from './CaptionsConfiguration';
 import Mp4RenditionsConfiguration, { Mp4RenditionsConfig } from './Mp4RenditionsConfiguration';
 import MetadataConfiguration, { MetadataConfig } from './MetadataConfiguration';
-import { MuxContentfulObject } from '../../util/types';
+import { MuxContentfulObject, PolicyType } from '../../util/types';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
 
 export interface ModalData {
   videoQuality: string;
-  playbackPolicies: string[];
+  playbackPolicies: PolicyType[];
   captionsConfig: CaptionsConfig;
   mp4Config: Mp4RenditionsConfig;
   metadataConfig: MetadataConfig;
@@ -37,9 +37,11 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
   asset,
   sdk,
 }) => {
+  const { muxEnableSignedUrls } = installationParams;
+
   const [modalData, setModalData] = useState<ModalData>({
     videoQuality: 'plus',
-    playbackPolicies: ['public'],
+    playbackPolicies: muxEnableSignedUrls ? ['signed'] : ['public'],
     captionsConfig: {
       captionsType: 'off',
       languageCode: null,
@@ -54,10 +56,8 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
     metadataConfig: {
       standardMetadata: {
         title: undefined,
-        creatorId: undefined,
         externalId: undefined,
       },
-      customMetadata: undefined,
     },
   });
 
@@ -80,16 +80,13 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
         metadataConfig: {
           standardMetadata: {
             title: asset.meta?.title,
-            creatorId: asset.meta?.creator_id,
             externalId: asset.meta?.external_id,
           },
-          customMetadata: asset.passthrough,
         },
       });
     }
   }, [isEditMode, asset]);
 
-  const { muxEnableSignedUrls } = installationParams;
   const [mainCategoryExpanded, setMainCategoryExpanded] = useState<boolean>(true);
 
   const [validationState, setValidationState] = useState<Record<string, boolean>>({

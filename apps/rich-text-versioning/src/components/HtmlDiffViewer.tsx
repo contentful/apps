@@ -13,20 +13,24 @@ interface HtmlDiffViewerProps {
   currentField: Document;
   publishedField: Document;
   onChangeCount: (count: number) => void;
-  entries: EntryProps[];
-  entryContentTypes: Record<string, ContentTypeProps>;
+  entriesFromPublished: EntryProps[];
+  entriesFromCurrent: EntryProps[];
+  entryContentTypes: ContentTypeProps[];
   locale: string;
-  assets: AssetProps[];
+  assetsFromPublished: AssetProps[];
+  assetsFromCurrent: AssetProps[];
 }
 
 const HtmlDiffViewer = ({
   currentField,
   publishedField,
   onChangeCount,
-  entries,
+  entriesFromPublished,
+  entriesFromCurrent,
   entryContentTypes,
   locale,
-  assets,
+  assetsFromPublished,
+  assetsFromCurrent,
 }: HtmlDiffViewerProps) => {
   const [diffHtml, setDiffHtml] = useState<string>('');
 
@@ -35,11 +39,11 @@ const HtmlDiffViewer = ({
       // Convert current field to React components with embedded entry renderers
       const currentComponents = documentToReactComponents(
         currentField,
-        createOptions(entries, entryContentTypes, assets, locale)
+        createOptions(entriesFromCurrent, entryContentTypes, assetsFromCurrent, locale)
       );
       const publishedComponents = documentToReactComponents(
         publishedField,
-        createOptions(entries, entryContentTypes, assets, locale)
+        createOptions(entriesFromPublished, entryContentTypes, assetsFromPublished, locale)
       );
 
       // Convert React components to HTML strings
@@ -66,7 +70,17 @@ const HtmlDiffViewer = ({
     };
 
     processDiff();
-  }, [currentField, publishedField, onChangeCount, entries, entryContentTypes, locale, assets]);
+  }, [
+    currentField,
+    publishedField,
+    onChangeCount,
+    entriesFromCurrent,
+    entriesFromPublished,
+    entryContentTypes,
+    locale,
+    assetsFromCurrent,
+    assetsFromPublished,
+  ]);
 
   if (!diffHtml) {
     return (

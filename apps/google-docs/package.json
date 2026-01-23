@@ -1,0 +1,78 @@
+{
+  "name": "google-docs",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@ai-sdk/openai": "^2.0.56",
+    "@contentful/app-sdk": "^4.51.0",
+    "@contentful/f36-components": "^5.6.0",
+    "@contentful/f36-tokens": "^5.1.0",
+    "@contentful/field-editor-json": "^3.3.38",
+    "@contentful/node-apps-toolkit": "^3.13.0",
+    "@contentful/react-apps-toolkit": "^1.2.16",
+    "@contentful/rich-text-from-markdown": "^16.1.8",
+    "@emotion/css": "^11.13.4",
+    "ai": "^5.0.81",
+    "contentful-management": "^11.61.0",
+    "googleapis": "^166.0.0",
+    "mammoth": "^1.11.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^4.1.12"
+  },
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "preview": "vite preview",
+    "test": "vitest",
+    "build:frontend": "rm -rf build && tsc && vite build",
+    "build:functions": "contentful-app-scripts build-functions --ci",
+    "build": "rimraf build && npm run build:frontend && npm run build:functions",
+    "upload:app-dev": "contentful-app-scripts upload --bundle-dir ./build --organization-id 6xdLsz6lCsk0yPOccSsDK7 --definition-id 653vTnuQw3j5onU1tUoH6t --token $CONTENTFUL_ACCESS_TOKEN",
+    "deploy:sync-dev": "aws s3 sync ./build ${STATIC_S3_BASE}/google-docs-dev/dev && aws cloudfront create-invalidation --distribution-id $GOOGLE_DOCS_TEST_CLOUDFRONT_DIST_ID --paths \"/*\" > /dev/null 2>&1",
+    "deploy:dev": "npm run build && npm run upload:app-dev && npm run deploy:sync-dev",
+    "upload:app-dev2": "contentful-app-scripts upload --bundle-dir ./build --organization-id 6xdLsz6lCsk0yPOccSsDK7 --definition-id 7GZyBCU0FGVnR1mpRYJQ5L --token $CONTENTFUL_ACCESS_TOKEN",
+    "deploy:sync-dev2": "aws s3 sync ./build ${STATIC_S3_BASE}/google-docs-dev/dev2 && aws cloudfront create-invalidation --distribution-id $GOOGLE_DOCS_TEST_CLOUDFRONT_DIST_ID --paths \"/*\" > /dev/null 2>&1",
+    "deploy:dev2": "npm run build && npm run upload:app-dev2 && npm run deploy:sync-dev2",
+    "upload:app-staging": "contentful-app-scripts upload --bundle-dir ./build --organization-id 6xdLsz6lCsk0yPOccSsDK7 --definition-id 4i0mp5lQtgNsHYVrD5jIkj --token $CONTENTFUL_ACCESS_TOKEN",
+    "deploy:sync-staging": "aws s3 sync ./build ${STATIC_S3_BASE}/google-docs-dev/staging && aws cloudfront create-invalidation --distribution-id $GOOGLE_DOCS_TEST_CLOUDFRONT_DIST_ID --paths \"/*\" > /dev/null 2>&1",
+    "deploy:staging": "npm run build && npm run upload:app-staging && npm run deploy:sync-staging",
+    "upload:app-flinkly": "contentful-app-scripts upload --bundle-dir ./build --organization-id 3m1Cqy5lzALpWNY9GjP2Zm --definition-id 7r10omUtVNoq8X3Yy4YfBL --token $FLINKLY_CONTENTFUL_ACCESS_TOKEN",
+    "deploy:sync-flinkly": "aws s3 sync ./build ${STATIC_S3_BASE}/google-docs-dev/flinkly && aws cloudfront create-invalidation --distribution-id $GOOGLE_DOCS_TEST_CLOUDFRONT_DIST_ID --paths \"/*\" > /dev/null 2>&1",
+    "deploy:flinkly": "npm run build && npm run upload:app-flinkly && npm run deploy:sync-flinkly",
+    "deploy:sync-prod": "aws s3 sync ./build ${PROD_STATIC_S3_BASE}/google-docs && aws cloudfront create-invalidation --distribution-id $GOOGLE_DOCS_PROD_CLOUDFRONT_DIST_ID --paths \"/*\" > /dev/null 2>&1",
+    "upload": "contentful-app-scripts upload --bundle-dir ./build --organization-id 5EJGHo8tYJcjnEhYWDxivp --definition-id 3EaGZUMKRKVZUyrcoNJ4o4 --token $CONTENTFUL_ACCESS_TOKEN",
+    "deploy:prod": "npm run build && npm run upload && npm run deploy:sync-prod"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "^2.3.0",
+    "@contentful/node-apps-toolkit": "^3.11.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/node": "^22.13.5",
+    "@types/react": "^18.3.13",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "cross-env": "^7.0.3",
+    "jsdom": "^26.0.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.2.2",
+    "vitest": "^3.0.9"
+  },
+  "homepage": "."
+}

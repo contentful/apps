@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, vi, expect } from 'vitest';
 import App from '../src/App';
 import { locations } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
 
 // Mock the Page component
 vi.mock('../src/locations/Page', () => ({
@@ -22,6 +21,7 @@ describe('App', () => {
       location: {
         is: (location: string) => location === locations.LOCATION_PAGE,
       },
+      locales: { default: 'en-US' },
     });
     render(<App />);
     expect(screen.getByTestId('mock-page')).toBeTruthy();
@@ -32,6 +32,7 @@ describe('App', () => {
       location: {
         is: () => false,
       },
+      locales: { default: 'en-US' },
     });
     const { container } = render(<App />);
     expect(container.firstChild).toBeNull();

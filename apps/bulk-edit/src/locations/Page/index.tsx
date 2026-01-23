@@ -11,13 +11,7 @@ import {
   Text,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import {
-  ContentFields,
-  ContentTypeProps,
-  EntryProps,
-  KeyValueMap,
-  QueryOptions,
-} from 'contentful-management';
+import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
 import { ContentTypeField, FilterOption } from './types';
 import { styles } from './styles';
 import { ContentTypeSidebar } from './components/ContentTypeSidebar';
@@ -28,16 +22,17 @@ import { UndoBulkEditModal } from './components/UndoBulkEditModal';
 import { SearchBar } from './components/SearchBar';
 import {
   fetchEntriesWithBatching,
-  getEntryFieldValue,
-  getStatusFromEntry,
-  getStatusFlags,
-  processEntriesInBatches,
-  truncate,
-  updateEntryFieldLocalized,
   filterEntriesByNumericSearch,
+  getEntryFieldValue,
+  getStatusFlags,
+  getStatusFromEntry,
   isNumericSearch,
+  mapContentTypePropsToFields,
+  processEntriesInBatches,
   STATUSES,
+  updateEntryFieldLocalized,
 } from './utils/entryUtils';
+import { successNotification } from './utils/successNotification';
 import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
 import FilterMultiselect from './components/FilterMultiselect';
@@ -84,6 +79,8 @@ const Page = () => {
   const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [initialTotal, setInitialTotal] = useState(0);
+  // Used to force a re-render of the table when the selection changes
+  const [tableKey, setTableKey] = useState(0);
 
   const hasActiveFilters = () => {
     const hasSearchQuery = searchQuery.trim() !== '';
@@ -99,8 +96,12 @@ const Page = () => {
     setActivePage(0);
   };
 
-  const shouldDisableFilters = () => {
-    return (entries.length === 0 && initialTotal === 0) || !selectedContentType || entriesLoading;
+  const shouldDisableFilters = (disableIfLoading: boolean = true) => {
+    return (
+      (entries.length === 0 && initialTotal === 0) ||
+      !selectedContentType ||
+      (disableIfLoading ? entriesLoading : false)
+    );
   };
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
@@ -231,6 +232,13 @@ const Page = () => {
     setInitialTotal(0);
   };
 
+  // Used to clear the selection states and force a re-render of the table
+  const clearSelectionState = () => {
+    setSelectedField(null);
+    setSelectedEntryIds([]);
+    setTableKey((tableKey) => tableKey + 1);
+  };
+
   // Fetch content type and fields when selectedContentTypeId changes
   useEffect(() => {
     const fetchContentTypeAndFields = async (): Promise<void> => {
@@ -241,27 +249,10 @@ const Page = () => {
 
       try {
         const ct = await sdk.cma.contentType.get({ contentTypeId: selectedContentTypeId });
-        const newFields: ContentTypeField[] = [];
-        ct.fields.forEach((f: ContentFields<KeyValueMap>) => {
-          if (f.localized) {
-            locales.forEach((locale) => {
-              newFields.push({
-                id: f.id,
-                uniqueId: `${f.id}-${locale}`,
-                name: f.name,
-                type: f.type as any,
-                locale: locale,
-              });
-            });
-          } else {
-            newFields.push({
-              id: f.id,
-              uniqueId: f.id,
-              name: f.name,
-              type: f.type as any,
-            });
-          }
+        const editorInterface = await sdk.cma.editorInterface.get({
+          contentTypeId: ct.sys.id,
         });
+        const newFields = mapContentTypePropsToFields(ct, editorInterface, locales);
         setFields(newFields);
         setSelectedColumns(getFieldsMapped(newFields));
         setCurrentContentType(ct);
@@ -346,39 +337,6 @@ const Page = () => {
   const selectedContentType = contentTypes.find((ct) => ct.sys.id === selectedContentTypeId);
   const selectedEntries = entries.filter((entry) => selectedEntryIds.includes(entry.sys.id));
 
-  function successNotification({
-    firstUpdatedValue,
-    value,
-    count,
-  }: {
-    firstUpdatedValue: string;
-    value: string;
-    count: number;
-  }) {
-    const message =
-      count === 1
-        ? `${truncate(firstUpdatedValue, 30)} was updated to ${truncate(value, 30)}`
-        : `${truncate(firstUpdatedValue, 30)} and ${
-            count - 1
-          } more entry fields were updated to ${truncate(value, 30)}`;
-    const notification = Notification.success(message, {
-      title: 'Success!',
-      cta: {
-        label: 'Undo',
-        textLinkProps: {
-          variant: 'primary',
-          onClick: () => {
-            notification.then((item) => {
-              Notification.close(item.id);
-              setUndoFirstEntryFieldValue(firstUpdatedValue);
-              setIsUndoModalOpen(true);
-            });
-          },
-        },
-      },
-    });
-  }
-
   const processBatchResults = (results: Array<{ success: boolean; entry: EntryProps }>) => {
     const successful = results.filter((r) => r.success).map((r) => r.entry);
     const failed = results.filter((r) => !r.success).map((r) => r.entry);
@@ -391,11 +349,12 @@ const Page = () => {
     );
   };
 
-  const onSave = async (val: string | number) => {
+  const onSave = async (val: any) => {
     setTotalUpdateCount(0);
     setEditionCount(0);
     setIsSaving(true);
     setFailedUpdates([]);
+    val = val === '' ? null : val;
 
     try {
       if (!selectedField) return;
@@ -457,8 +416,13 @@ const Page = () => {
         );
         successNotification({
           firstUpdatedValue: firstUpdatedValue,
-          value: `${val}`,
+          value: val,
           count: successful.length,
+          field: selectedField,
+          onUndo: (formattedFirstValue) => {
+            setUndoFirstEntryFieldValue(formattedFirstValue);
+            setIsUndoModalOpen(true);
+          },
         });
       }
 
@@ -570,6 +534,7 @@ const Page = () => {
                 setActivePage(0);
                 setSearchQuery('');
                 setInitialTotal(0);
+                clearSelectionState();
               }}
               disabled={entriesLoading}
             />
@@ -587,8 +552,9 @@ const Page = () => {
                   onSearchChange={(query) => {
                     setSearchQuery(query);
                     setActivePage(0);
+                    clearSelectionState();
                   }}
-                  isDisabled={shouldDisableFilters()}
+                  isDisabled={shouldDisableFilters(false)}
                   debounceDelay={300}
                 />
 
@@ -609,6 +575,7 @@ const Page = () => {
                     setSelectedItems={(statuses) => {
                       setSelectedStatuses(statuses);
                       setActivePage(0);
+                      clearSelectionState();
                     }}
                     disabled={shouldDisableFilters()}
                     placeholderConfig={{
@@ -622,13 +589,12 @@ const Page = () => {
                     options={getFieldsMapped(fields)}
                     selectedItems={selectedColumns}
                     setSelectedItems={(selectedColumns) => {
-                      const sortedSelectedColumns = selectedColumns.toSorted((a, b) => {
+                      const sortedSelectedColumns = [...selectedColumns].sort((a, b) => {
                         const aIndex = fields.findIndex((f) => f.uniqueId === a.value);
                         const bIndex = fields.findIndex((f) => f.uniqueId === b.value);
                         return aIndex - bIndex;
                       });
                       setSelectedColumns(sortedSelectedColumns);
-                      setActivePage(0);
                     }}
                     disabled={shouldDisableFilters()}
                     placeholderConfig={{
@@ -649,18 +615,26 @@ const Page = () => {
                   )}
                 </Flex>
                 {!entriesLoading && (
-                  <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
-                    <Button
-                      variant="primary"
-                      onClick={() => setIsModalOpen(true)}
-                      isDisabled={!selectedField || selectedEntryIds.length === 0}>
-                      {selectedEntryIds.length > 1 ? 'Bulk edit' : 'Edit'}
-                    </Button>
+                  <>
+                    <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
+                      <Button
+                        variant="primary"
+                        onClick={() => setIsModalOpen(true)}
+                        isDisabled={!selectedField || selectedEntryIds.length === 0}>
+                        {selectedEntryIds.length > 1 ? 'Bulk edit' : 'Edit'}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => clearSelectionState()}
+                        isDisabled={!selectedField || selectedEntryIds.length === 0}>
+                        Clear selection
+                      </Button>
+                    </Flex>
                     <Text fontColor="gray600">
                       {selectedEntryIds.length || 'No'} entry field
                       {selectedEntryIds.length === 1 ? '' : 's'} selected
                     </Text>
-                  </Flex>
+                  </>
                 )}
                 {entriesLoading ? (
                   <Table style={styles.loadingTableBorder}>
@@ -686,6 +660,7 @@ const Page = () => {
                           />
                         )}
                         <EntryTable
+                          key={tableKey}
                           entries={entries}
                           fields={selectedColumns.flatMap(
                             (field) => fields.find((f) => f.uniqueId === field.value) || []
@@ -725,7 +700,7 @@ const Page = () => {
         onSave={onSave}
         selectedEntries={selectedEntries}
         selectedField={selectedField}
-        defaultLocale={defaultLocale}
+        locales={sdk.locales}
         isSaving={isSaving}
         totalUpdateCount={totalUpdateCount}
         editionCount={editionCount}

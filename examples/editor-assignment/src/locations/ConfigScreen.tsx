@@ -2,7 +2,7 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Heading, Form, Accordion, Flex, Checkbox } from '@contentful/f36-components';
 import { css } from 'emotion';
-import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentTypeProps } from 'contentful-management';
 import tokens from '@contentful/f36-tokens';
 import { getInitialSidebarContentTypes } from '../utils/sidebar';
@@ -64,7 +64,7 @@ const ConfigScreen = () => {
   const [supportedFieldCTs, setSupportedFieldCTs] = useState<ContentTypeProps[]>([]);
   const [selectedFieldCTs, setSelectedFieldCTs] = useState<string[]>([]);
   const sdk = useSDK<ConfigAppSDK>();
-  const cma = useCMA();
+  const cma = sdk.cma;
 
   const onConfigure = useCallback(async () => {
     // This method will be called when a user clicks on "Install"

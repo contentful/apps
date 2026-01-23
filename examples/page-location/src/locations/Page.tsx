@@ -6,7 +6,7 @@ import { PageAppSDK } from '@contentful/app-sdk';
 
 import Dashboard from '../components/Dashboard';
 
-import { useCMA } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentTypeProps } from 'contentful-management';
 import { PageLayout } from '../components/PageLayout';
 import IncompleteEntries from '../components/IncompleteEntries';
@@ -24,7 +24,8 @@ export const PageRouter = () => {
 };
 
 const Page = () => {
-  const cma = useCMA();
+  const sdk = useSDK<PageAppSDK>();
+  const cma = sdk.cma;
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
 
   useEffect(() => {

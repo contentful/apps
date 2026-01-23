@@ -5,8 +5,10 @@ import { ConfigErrors, Sections } from '@components/config/configText';
 import contentTypeReducer from '@components/config/contentTypeReducer';
 import CostSection from '@components/config/cost-section/CostSection';
 import DisclaimerSection from '@components/config/disclaimer-section/DisclaimerSection';
+import FeatureSelectionSection from '@components/config/feature-selection-section/FeatureSelectionSection';
 import parameterReducer, { Validator } from '@components/config/parameterReducer';
 import { defaultRegionId } from '@configs/aws/bedrockRegions';
+import featureConfig, { AIFeature } from '@configs/features/featureConfig';
 import { Box, Heading } from '@contentful/f36-components';
 import useGetContentTypes from '@hooks/config/useGetContentTypes';
 import useInitializeParameters from '@hooks/config/useInitializeParameters';
@@ -37,6 +39,10 @@ const initialParameters: Validator<AppInstallationParameters> = {
     isValid: true,
   },
   brandProfile: {},
+  enabledFeatures: {
+    value: Object.keys(featureConfig) as AIFeature[],
+    isValid: true,
+  },
 };
 
 const initialContentTypes: Set<string> = new Set();
@@ -61,6 +67,7 @@ const ConfigPage = () => {
         tone: parameters.brandProfile.tone?.value,
         values: parameters.brandProfile.values?.value,
       },
+      enabledFeatures: parameters.enabledFeatures?.value,
     };
   }, [
     parameters.brandProfile,
@@ -69,6 +76,7 @@ const ConfigPage = () => {
     parameters.region.value,
     parameters.model.value,
     parameters.profile.value,
+    parameters.enabledFeatures?.value,
   ]);
 
   const validateParams = (): string[] => {
@@ -118,6 +126,13 @@ const ConfigPage = () => {
       <hr css={styles.splitter} />
       <BrandSection
         profile={{ ...parameters.brandProfile, profile: parameters.profile }}
+        dispatch={dispatchParameters}
+      />
+      <hr css={styles.splitter} />
+      <FeatureSelectionSection
+        enabledFeatures={
+          parameters.enabledFeatures?.value || (Object.keys(featureConfig) as AIFeature[])
+        }
         dispatch={dispatchParameters}
       />
       <hr css={styles.splitter} />

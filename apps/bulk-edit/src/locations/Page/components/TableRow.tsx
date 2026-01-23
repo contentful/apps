@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Table, TextLink, Badge, Checkbox, Flex, Text } from '@contentful/f36-components';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { ArrowSquareOutIcon } from '@contentful/f36-icons';
 import { Entry, ContentTypeField } from '../types';
 import { ContentTypeProps } from 'contentful-management';
 import { rowStyles } from './TableRow.styles';
 import {
   getStatusFromEntry,
-  renderFieldValue,
+  getFieldDisplayValue,
   getEntryTitle,
   getEntryUrl,
   isCheckboxAllowed,
@@ -88,7 +88,7 @@ export const TableRow: React.FC<TableRowProps> = ({
           target="_blank"
           rel="noopener noreferrer"
           testId="entry-link"
-          icon={<ExternalLinkIcon />}
+          icon={<ArrowSquareOutIcon />}
           alignIcon="end"
           tabIndex={-1}>
           {getEntryTitle(entry, contentType, defaultLocale)}
@@ -135,10 +135,10 @@ export const TableRow: React.FC<TableRowProps> = ({
                   aria-label={`Select ${truncate(field.name)} for ${displayValue}`}
                   tabIndex={-1}
                 />
-                {renderFieldValue(field, fieldValue)}
+                {getFieldDisplayValue(field, fieldValue, 30)}
               </Flex>
             ) : (
-              <Text fontColor="gray500">{renderFieldValue(field, fieldValue)}</Text>
+              <Text fontColor="gray500">{getFieldDisplayValue(field, fieldValue, 30)}</Text>
             )}
           </Table.Cell>
         );
