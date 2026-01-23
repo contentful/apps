@@ -102,7 +102,7 @@ const NewEntriesTooltip: React.FC<{
   const currentDataPoint = data.find((d) => d.date === label);
   if (!currentDataPoint) return null;
 
-  const currentValue = (currentDataPoint[valueKey] as number) || 0;
+  const currentValue = currentDataPoint[valueKey] as number;
   const avgTimeToPublish = currentDataPoint['avgTimeToPublish'] as number | undefined;
   const newContentChange = currentDataPoint['newContentChange'] as number | undefined;
   const avgTimeToPublishChange = currentDataPoint['avgTimeToPublishChange'] as number | undefined;
