@@ -20,6 +20,7 @@
     "start": "vite",
     "build": "tsc && vite build",
     "test": "vitest",
+    "test:ci": "vitest run",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "add-locations": "contentful-app-scripts add-locations",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",

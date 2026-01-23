@@ -9,11 +9,28 @@ const Sidebar = () => {
   useAutoResizer();
 
   const openDialog = async () => {
-    return sdk.dialogs.openCurrentApp({
+    const result = await sdk.dialogs.openCurrentApp({
       title: APP_NAME,
       width: 'large',
       minHeight: '340px',
     });
+    if (!result) {
+      return;
+    }
+    const { sourceLocale, targetLocales } = result as {
+      sourceLocale: string;
+      targetLocales: string[];
+    };
+    updateFields(sourceLocale, targetLocales);
+  };
+
+  const updateFields = (sourceLocale: string, targetLocales: string[]) => {
+    for (const fieldId of Object.keys(sdk.entry.fields)) {
+      const newValue = sdk.entry.fields[fieldId].getValue(sourceLocale);
+      for (const targetLocale of targetLocales) {
+        sdk.entry.fields[fieldId].setValue(newValue, targetLocale);
+      }
+    }
   };
 
   return (

@@ -1,12 +1,11 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { mockCma, mockSdk } from './mocks';
+import { mockSdk } from './mocks';
 import Dialog from '../src/locations/Dialog';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
-  useCMA: () => mockCma,
   useAutoResizer: () => {},
 }));
 
