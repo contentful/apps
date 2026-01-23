@@ -13,6 +13,7 @@ import { TimeRange } from '../utils/types';
 import React, { useState } from 'react';
 import { LoadingSkeleton } from './LoadingSkeleton';
 import { ReleasesTable } from './ReleasesTable';
+import { ScheduledContentTabs } from './ScheduledContentTabs';
 import { styles } from './Dashboard.styles';
 
 const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
@@ -121,6 +122,7 @@ const Dashboard = () => {
               <ReleasesTable />
             </Box>
           </Box>
+          <ScheduledContentTabs />
         </>
       )}
     </Flex>

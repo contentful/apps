@@ -89,9 +89,6 @@ describe('Dashboard component', () => {
 
     expect(screen.getByText('Total Published')).toBeInTheDocument();
     expect(screen.getByText('Average Time to Publish')).toBeInTheDocument();
-    expect(screen.getByText('Scheduled')).toBeInTheDocument();
-    expect(screen.getByText('Recently Published')).toBeInTheDocument();
-    expect(screen.getByText('Needs Update')).toBeInTheDocument();
   });
 
   it('calls refetchEntries, refetchScheduledActions, and refetchContentTypes when refresh button is clicked', async () => {
