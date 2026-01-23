@@ -24,8 +24,8 @@ import {
   FieldSelection,
   RuleValidation,
 } from '../utils/types';
-import { getFieldSelectionsFromContentTypes } from '../utils/rules';
 import { ContentTypeProps } from 'contentful-management';
+import { getFieldSelectionsFromContentTypes } from '../utils/utils';
 
 const ConfigScreen = () => {
   const createEmptyRule = () => {
