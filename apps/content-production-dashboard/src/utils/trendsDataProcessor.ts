@@ -19,7 +19,7 @@ export function generateNewEntriesChartData(
 
   const monthData = countNewEntriesByMonth(filteredEntries, startDate);
 
-  return allMonths.map((monthYear, index) => {
+  return allMonths.map((monthYear: string, index: number) => {
     const currentData = monthData.get(monthYear) || { count: 0, publishTimes: [] };
     const currentMetrics = getMonthMetrics(currentData);
 

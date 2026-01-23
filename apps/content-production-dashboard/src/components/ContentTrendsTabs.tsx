@@ -151,7 +151,12 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
                 {newEntries.length === 0 ? (
                   <EmptyState />
                 ) : (
-                  <ChartWrapper data={newEntries} xAxisDataKey="date" legendTitle="Content:" />
+                  <ChartWrapper
+                    data={newEntries}
+                    xAxisDataKey="date"
+                    legendTitle="Content:"
+                    inNewEntriesTab
+                  />
                 )}
               </>
             )}

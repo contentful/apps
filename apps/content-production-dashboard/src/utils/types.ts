@@ -8,6 +8,7 @@ export interface ChartWrapperProps {
   height?: number;
   legendTitle?: string;
   processedContentTypes?: Map<string, string>;
+  inNewEntriesTab?: boolean;
 }
 
 export enum TimeRange {
