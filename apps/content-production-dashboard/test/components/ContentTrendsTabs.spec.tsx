@@ -80,10 +80,13 @@ describe('ContentTrendsTabs component', () => {
 
   const mockContentTypeData = {
     data: [
-      { date: 'Jan 2024', 'Blog Post': 3, Article: 2 },
-      { date: 'Feb 2024', 'Blog Post': 5, Article: 3 },
+      { date: 'Jan 2024', blogPost: 3, article: 2 },
+      { date: 'Feb 2024', blogPost: 5, article: 3 },
     ],
-    contentTypes: ['Blog Post', 'Article'],
+    processedContentTypes: new Map<string, string>([
+      ['blogPost', 'Blog Post'],
+      ['article', 'Article'],
+    ]),
   };
 
   const mockCreatorData = {
@@ -219,7 +222,7 @@ describe('ContentTrendsTabs component', () => {
     it('shows "No content type data available" message when no content types are available', async () => {
       mockGenerateContentTypeChartData.mockReturnValue({
         data: [],
-        contentTypes: [],
+        processedContentTypes: new Map<string, string>(),
       });
 
       const user = userEvent.setup();

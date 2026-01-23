@@ -86,12 +86,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
 
         <Tabs.Panel id="newEntries">
           <Box marginTop="spacingM">
-            <ChartWrapper
-              data={newEntries}
-              xAxisDataKey="date"
-              linesLegends={['New Content']}
-              legendTitle="Content:"
-            />
+            <ChartWrapper data={newEntries} xAxisDataKey="date" legendTitle="Content:" />
           </Box>
         </Tabs.Panel>
 
@@ -101,7 +96,8 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
               <Flex padding="spacingL" justifyContent="center">
                 <Spinner size="medium" />
               </Flex>
-            ) : contentTypeData.contentTypes.length === 0 ? (
+            ) : !contentTypeData?.processedContentTypes ||
+              contentTypeData.processedContentTypes.size === 0 ? (
               <Box padding="spacingL">
                 No content type data available for the selected time range.
               </Box>
@@ -109,7 +105,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
               <ChartWrapper
                 data={contentTypeData.data}
                 xAxisDataKey="date"
-                linesLegends={contentTypeData.contentTypes}
+                processedContentTypes={contentTypeData.processedContentTypes}
                 legendTitle="Content Types:"
               />
             )}
@@ -125,12 +121,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
             ) : creatorData.creators.length === 0 ? (
               <Box padding="spacingL">No creator data available for the selected time range.</Box>
             ) : (
-              <ChartWrapper
-                data={creatorData.data}
-                xAxisDataKey="date"
-                linesLegends={creatorData.creators}
-                legendTitle="Creators:"
-              />
+              <ChartWrapper data={creatorData.data} xAxisDataKey="date" legendTitle="Creators:" />
             )}
           </Box>
         </Tabs.Panel>
