@@ -44,40 +44,38 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
 
   return (
     <Flex flexDirection="row" alignItems="flex-start">
-      <Box style={styles.chartContainer}>
-        <ResponsiveContainer width="100%" height={height}>
-          <LineChart data={data} margin={{ top: 35, right: 35 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={tokens.gray200} />
-            <XAxis
-              dataKey={xAxisDataKey}
-              tick={{ fontSize: 12 }}
-              angle={-45}
-              textAnchor="end"
-              height={80}
-            />
-            <YAxis tick={{ fontSize: 12 }} />
-            <Tooltip />
-            {contentTypesIds.map((key, index) => (
-              <Line
-                key={`${key}-${index}`}
-                type="linear"
-                dataKey={key}
-                data-testid={`line-${key}`}
-                stroke={colors[index]}
-                strokeWidth={2}
-                dot={{ r: 4 }}
-                activeDot={{ r: 6 }}>
-                <LabelList
-                  position="top"
-                  offset={10}
-                  fontSize={12}
-                  formatter={(value) => (value != null && value !== 0 ? String(value) : '')}
-                />
-              </Line>
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
-      </Box>
+      <ResponsiveContainer width="100%" height={height}>
+        <LineChart data={data} margin={{ top: 35, right: 35 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={tokens.gray200} />
+          <XAxis
+            dataKey={xAxisDataKey}
+            tick={{ fontSize: 12 }}
+            angle={-45}
+            textAnchor="end"
+            height={80}
+          />
+          <YAxis tick={{ fontSize: 12 }} />
+          <Tooltip />
+          {contentTypesIds.map((key, index) => (
+            <Line
+              key={`${key}-${index}`}
+              type="linear"
+              dataKey={key}
+              data-testid={`line-${key}`}
+              stroke={colors[index]}
+              strokeWidth={2}
+              dot={{ r: 4 }}
+              activeDot={{ r: 6 }}>
+              <LabelList
+                position="top"
+                offset={10}
+                fontSize={12}
+                formatter={(value) => (value != null && value !== 0 ? String(value) : '')}
+              />
+            </Line>
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
 
       {legendTitle && (
         <Flex flexDirection="column" style={styles.legendContainer}>

@@ -24,7 +24,7 @@ import { styles } from './ConfigScreen.styles';
 import { Validator } from '../utils/Validator';
 
 export interface AppInstallationParameters {
-  trackedContentTypes?: string[];
+  defaultContentTypes?: string[];
   needsUpdateMonths?: number;
   recentlyPublishedDays?: number;
   showUpcomingReleases?: boolean;
@@ -79,7 +79,7 @@ const ConfigScreen = () => {
     return {
       parameters: {
         ...parameters,
-        trackedContentTypes: selectedContentTypes.map((ct) => ct.id),
+        defaultContentTypes: selectedContentTypes.map((ct) => ct.id),
       },
       targetState: currentState,
     };
@@ -162,7 +162,7 @@ const ConfigScreen = () => {
                 id="needs-update-months"
                 name="needs-update-months"
                 type="number"
-                value={parameters.needsUpdateMonths?.toString() || ''}
+                value={parameters.needsUpdateMonths ? String(parameters.needsUpdateMonths) : ''}
                 onChange={(event) => handleOnChangeInput(event, 'needsUpdateMonths')}
               />
               {errors.needsUpdateMonths && (
@@ -188,7 +188,9 @@ const ConfigScreen = () => {
                 id="recently-published-days"
                 name="recently-published-days"
                 type="number"
-                value={parameters.recentlyPublishedDays?.toString() || ''}
+                value={
+                  parameters.recentlyPublishedDays ? String(parameters.recentlyPublishedDays) : ''
+                }
                 onChange={(event) => handleOnChangeInput(event, 'recentlyPublishedDays')}
               />
               {errors.recentlyPublishedDays && (
@@ -209,7 +211,7 @@ const ConfigScreen = () => {
                 id="time-to-publish-days"
                 name="time-to-publish-days"
                 type="number"
-                value={parameters.timeToPublishDays?.toString() || ''}
+                value={parameters.timeToPublishDays ? String(parameters.timeToPublishDays) : ''}
                 onChange={(event) => handleOnChangeInput(event, 'timeToPublishDays')}
               />
               {errors.timeToPublishDays && (
@@ -227,7 +229,7 @@ const ConfigScreen = () => {
               <Switch
                 id="show-upcoming-releases"
                 name="show-upcoming-releases"
-                isChecked={parameters.showUpcomingReleases}
+                isChecked={parameters.showUpcomingReleases ?? false}
                 onChange={handleShowUpcomingReleasesChange}>
                 Show &quot;Upcoming release&quot; section
               </Switch>
@@ -242,7 +244,7 @@ const ConfigScreen = () => {
                 selectedContentTypes={selectedContentTypes}
                 setSelectedContentTypes={setSelectedContentTypes}
                 sdk={sdk}
-                initialSelectedIds={parameters.trackedContentTypes}
+                initialSelectedIds={parameters.defaultContentTypes}
               />
               <FormControl.HelpText>
                 Select content types to display in the publication trends chart. If none are

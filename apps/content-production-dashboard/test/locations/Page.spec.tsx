@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { mockSdk } from '../mocks';
 import Page from '../../src/locations/Page';
@@ -29,7 +29,7 @@ describe('Page component', () => {
     });
   });
 
-  it('shows error display when error exists', () => {
+  it('shows error display when error exists', async () => {
     const testError = new Error('Failed to fetch entries');
     mockUseQuery.mockReturnValue({
       data: undefined,
@@ -41,11 +41,13 @@ describe('Page component', () => {
 
     render(<Page />);
 
-    expect(screen.getByText('Error loading entries')).toBeInTheDocument();
-    expect(screen.getByText('Failed to fetch entries')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Error loading entries')).toBeInTheDocument();
+      expect(screen.getByText('Failed to fetch entries')).toBeInTheDocument();
+    });
   });
 
-  it('shows loading state when isFetching is true', () => {
+  it('shows loading state when isFetching is true', async () => {
     const mockEntries: EntryProps[] = [
       {
         sys: { id: 'entry-1', type: 'Entry' } as any,
@@ -67,7 +69,9 @@ describe('Page component', () => {
 
     render(<Page />);
 
-    expect(screen.getByText('Content Publishing Trends')).toBeInTheDocument();
-    expect(screen.getByText('Upcoming Scheduled Releases')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Content Publishing Trends')).toBeInTheDocument();
+      expect(screen.getByText('Upcoming Scheduled Releases')).toBeInTheDocument();
+    });
   });
 });

@@ -1,10 +1,10 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { mockCma, mockSdk } from '../mocks';
 import Dashboard from '../../src/components/Dashboard';
 import { QueryProvider } from '../../src/providers/QueryProvider';
-import { createMockEntry } from '../utils/testHelpers';
+import { createMockEntry, renderWithAct } from '../utils/testHelpers';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -13,6 +13,7 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 
 const mockRefetchEntries = vi.fn();
 const mockRefetchScheduledActions = vi.fn();
+const mockRefetchContentTypes = vi.fn();
 
 const mockEntries = [
   createMockEntry({ id: 'entry-1', contentTypeId: 'blogPost' }),
@@ -43,6 +44,19 @@ vi.mock('../../src/hooks/useScheduledActions', () => ({
   }),
 }));
 
+vi.mock('../../src/hooks/useContentTypes', () => ({
+  useContentTypes: () => ({
+    contentTypes: new Map<string, string>([
+      ['blogPost', 'Blog Post'],
+      ['article', 'Article'],
+    ]),
+    isFetchingContentTypes: false,
+    fetchingContentTypesError: null,
+    fetchedAt: new Date(),
+    refetchContentTypes: mockRefetchContentTypes,
+  }),
+}));
+
 const createWrapper = () => {
   const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryProvider>{children}</QueryProvider>
@@ -64,28 +78,29 @@ describe('Dashboard component', () => {
     });
   });
 
-  it('renders the dashboard heading', () => {
-    render(<Dashboard />, { wrapper: createWrapper() });
+  it('renders the dashboard heading', async () => {
+    await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
     expect(screen.getByText('Content Dashboard')).toBeInTheDocument();
   });
 
-  it('renders metric cards', () => {
-    render(<Dashboard />, { wrapper: createWrapper() });
+  it('renders all metric cards', async () => {
+    await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
     expect(screen.getByText('Total Published')).toBeInTheDocument();
     expect(screen.getByText('Average Time to Publish')).toBeInTheDocument();
   });
 
-  it('calls refetchEntries and refetchScheduledActions when refresh button is clicked', async () => {
+  it('calls refetchEntries, refetchScheduledActions, and refetchContentTypes when refresh button is clicked', async () => {
     const user = userEvent.setup();
-    render(<Dashboard />, { wrapper: createWrapper() });
+    await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
     const refreshButton = screen.getByRole('button', { name: /refresh/i });
     await user.click(refreshButton);
 
     expect(mockRefetchEntries).toHaveBeenCalledTimes(1);
     expect(mockRefetchScheduledActions).toHaveBeenCalledTimes(1);
+    expect(mockRefetchContentTypes).toHaveBeenCalledTimes(1);
   });
 
   describe('Content Publishing Trends Section', () => {
@@ -93,8 +108,8 @@ describe('Dashboard component', () => {
       mockSdk.parameters.installation = {};
     });
 
-    it('renders components correctly', () => {
-      render(<Dashboard />, { wrapper: createWrapper() });
+    it('renders components correctly', async () => {
+      await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
       expect(screen.getByText('Content Publishing Trends')).toBeInTheDocument();
       const select = screen.getByRole('combobox');
@@ -102,15 +117,16 @@ describe('Dashboard component', () => {
       expect(screen.getByText('New Entries')).toBeInTheDocument();
     });
 
-    it('default time range is "year"', () => {
-      render(<Dashboard />, { wrapper: createWrapper() });
+    it('default time range is "year"', async () => {
+      await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
       expect(screen.getByText('Past Year')).toBeInTheDocument();
     });
 
     it('renders all TIME_RANGE_OPTIONS in dropdown', async () => {
       const user = userEvent.setup();
-      render(<Dashboard />, { wrapper: createWrapper() });
+
+      await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
       const select = screen.getByRole('combobox');
       await user.click(select);

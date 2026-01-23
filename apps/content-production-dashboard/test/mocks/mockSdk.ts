@@ -12,6 +12,7 @@ const mockSdk: any = {
     app: 'test-app',
     space: 'test-space',
     environment: 'test-environment',
+    organization: 'test-organization',
   },
   parameters: {
     installation: {},

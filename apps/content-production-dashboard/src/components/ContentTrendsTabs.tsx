@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Tabs, Box, Flex, Spinner } from '@contentful/f36-components';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Box, Flex, FormControl, Paragraph, Spinner, Tabs, Text } from '@contentful/f36-components';
 import { EntryProps } from 'contentful-management';
 import { ChartWrapper } from './ChartWrapper';
 import {
@@ -10,26 +10,32 @@ import {
 import { TimeRange } from '../utils/types';
 
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { HomeAppSDK } from '@contentful/app-sdk';
-import { useContentTypes } from '../hooks/useContentTypes';
+import { ConfigAppSDK, HomeAppSDK } from '@contentful/app-sdk';
+import ContentTypeMultiSelect, { ContentType } from './ContentTypeMultiSelect';
+import { styles } from './ContentTrendsTabs.styles';
 
 export interface ContentTrendsTabsProps {
   entries: EntryProps[];
   timeRange: TimeRange;
-  trackedContentTypes: string[];
+  defaultContentTypes: string[];
+  contentTypes: Map<string, string>;
+  isFetchingContentTypes: boolean;
 }
 
 export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
   entries,
-  trackedContentTypes,
+  defaultContentTypes,
   timeRange,
+  contentTypes,
+  isFetchingContentTypes,
 }) => {
   const sdk = useSDK<HomeAppSDK>();
   const [selectedTab, setSelectedTab] = useState('newEntries');
 
   const [creatorsNames, setCreatorsNames] = useState<Map<string, string>>(new Map());
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-  const { contentTypes, isFetchingContentTypes } = useContentTypes(trackedContentTypes);
+  const [selectedChartContentTypes, setSelectedChartContentTypes] = useState<ContentType[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const fetchCreators = async () => {
@@ -59,17 +65,64 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
     fetchCreators();
   }, [sdk]);
 
+  useEffect(() => {
+    if (contentTypes.size > 0 && !isInitialized) {
+      let initialSelected: ContentType[] = Array.from(contentTypes.entries())
+        .map(([id, name]) => ({ id, name }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .slice(0, 5);
+
+      if (defaultContentTypes && defaultContentTypes.length > 0) {
+        initialSelected = defaultContentTypes
+          .map((id) => {
+            const name = contentTypes.get(id);
+            return name ? { id, name } : null;
+          })
+          .filter((ct): ct is ContentType => ct !== null);
+      }
+
+      if (initialSelected.length > 0) {
+        setSelectedChartContentTypes(initialSelected);
+        setIsInitialized(true);
+      }
+    }
+  }, [contentTypes, defaultContentTypes, isInitialized]);
+
+  const filteredContentTypesForChart = useMemo(() => {
+    const filtered = new Map<string, string>();
+    selectedChartContentTypes.forEach((ct) => {
+      const name = contentTypes.get(ct.id);
+      if (name) {
+        filtered.set(ct.id, name);
+      }
+    });
+    return filtered;
+  }, [selectedChartContentTypes, contentTypes]);
+
   const newEntries = useMemo(() => {
-    return generateNewEntriesChartData(entries, { timeRange }, contentTypes);
-  }, [entries, timeRange, contentTypes]);
+    return generateNewEntriesChartData(entries, { timeRange }, filteredContentTypesForChart);
+  }, [entries, timeRange, filteredContentTypesForChart]);
 
   const contentTypeData = useMemo(() => {
-    return generateContentTypeChartData(entries, { timeRange }, contentTypes);
-  }, [entries, timeRange, contentTypes]);
+    return generateContentTypeChartData(entries, { timeRange }, filteredContentTypesForChart);
+  }, [entries, timeRange, filteredContentTypesForChart]);
 
   const creatorData = useMemo(() => {
-    return generateCreatorChartData(entries, { timeRange }, creatorsNames, contentTypes);
-  }, [entries, timeRange, creatorsNames, contentTypes]);
+    return generateCreatorChartData(
+      entries,
+      { timeRange },
+      creatorsNames,
+      filteredContentTypesForChart
+    );
+  }, [entries, timeRange, creatorsNames, filteredContentTypesForChart]);
+
+  const handleContentTypeSelection = (newSelected: ContentType[]) => {
+    if (newSelected.length <= 5) {
+      setSelectedChartContentTypes(newSelected);
+    } else {
+      setSelectedChartContentTypes(newSelected.slice(0, 5));
+    }
+  };
 
   const handleTabChange = (id: string) => {
     setSelectedTab(id);
@@ -86,28 +139,48 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
 
         <Tabs.Panel id="newEntries">
           <Box marginTop="spacingM">
-            <ChartWrapper data={newEntries} xAxisDataKey="date" legendTitle="Content:" />
+            {isFetchingContentTypes ? (
+              <LoadingSpinner />
+            ) : (
+              <>
+                <ContentTypeSelector
+                  selectedContentTypes={selectedChartContentTypes}
+                  onSelectionChange={handleContentTypeSelection}
+                  sdk={sdk as unknown as ConfigAppSDK}
+                />
+                {newEntries.length === 0 ? (
+                  <EmptyState />
+                ) : (
+                  <ChartWrapper data={newEntries} xAxisDataKey="date" legendTitle="Content:" />
+                )}
+              </>
+            )}
           </Box>
         </Tabs.Panel>
 
         <Tabs.Panel id="byContentType">
           <Box marginTop="spacingM">
             {isFetchingContentTypes ? (
-              <Flex padding="spacingL" justifyContent="center">
-                <Spinner size="medium" />
-              </Flex>
-            ) : !contentTypeData?.processedContentTypes ||
-              contentTypeData.processedContentTypes.size === 0 ? (
-              <Box padding="spacingL">
-                No content type data available for the selected time range.
-              </Box>
+              <LoadingSpinner />
             ) : (
-              <ChartWrapper
-                data={contentTypeData.data}
-                xAxisDataKey="date"
-                processedContentTypes={contentTypeData.processedContentTypes}
-                legendTitle="Content Types:"
-              />
+              <>
+                <ContentTypeSelector
+                  selectedContentTypes={selectedChartContentTypes}
+                  onSelectionChange={handleContentTypeSelection}
+                  sdk={sdk as unknown as ConfigAppSDK}
+                />
+                {!contentTypeData?.processedContentTypes ||
+                contentTypeData.processedContentTypes.size === 0 ? (
+                  <EmptyState />
+                ) : (
+                  <ChartWrapper
+                    data={contentTypeData.data}
+                    xAxisDataKey="date"
+                    processedContentTypes={contentTypeData.processedContentTypes}
+                    legendTitle="Content Types:"
+                  />
+                )}
+              </>
             )}
           </Box>
         </Tabs.Panel>
@@ -115,11 +188,9 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
         <Tabs.Panel id="byCreator">
           <Box marginTop="spacingM">
             {isLoadingUsers ? (
-              <Flex padding="spacingL" justifyContent="center">
-                <Spinner size="medium" />
-              </Flex>
+              <LoadingSpinner />
             ) : creatorData.creators.length === 0 ? (
-              <Box padding="spacingL">No creator data available for the selected time range.</Box>
+              <EmptyState />
             ) : (
               <ChartWrapper data={creatorData.data} xAxisDataKey="date" legendTitle="Creators:" />
             )}
@@ -127,5 +198,49 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
         </Tabs.Panel>
       </Tabs>
     </Box>
+  );
+};
+
+const EmptyState: React.FC = () => {
+  return (
+    <Flex style={styles.emptyStateContainer}>
+      <Text fontSize="fontSizeM" fontWeight="fontWeightDemiBold">
+        No data to display
+      </Text>
+      <Paragraph>Data will display once you select content types</Paragraph>
+    </Flex>
+  );
+};
+
+const LoadingSpinner: React.FC = () => {
+  return (
+    <Flex padding="spacingL" justifyContent="center">
+      <Spinner size="medium" />
+    </Flex>
+  );
+};
+
+interface ContentTypeSelectorProps {
+  selectedContentTypes: ContentType[];
+  onSelectionChange: (contentTypes: ContentType[]) => void;
+  sdk: ConfigAppSDK;
+}
+
+const ContentTypeSelector: React.FC<ContentTypeSelectorProps> = ({
+  selectedContentTypes,
+  onSelectionChange,
+  sdk,
+}) => {
+  return (
+    <FormControl marginBottom="spacingM" style={styles.formControlPadding}>
+      <FormControl.Label>Content types</FormControl.Label>
+      <ContentTypeMultiSelect
+        selectedContentTypes={selectedContentTypes}
+        setSelectedContentTypes={onSelectionChange}
+        sdk={sdk}
+        initialSelectedIds={selectedContentTypes.map((ct) => ct.id)}
+      />
+      <FormControl.HelpText>You can select up to five at a time.</FormControl.HelpText>
+    </FormControl>
   );
 };
