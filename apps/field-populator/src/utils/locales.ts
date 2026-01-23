@@ -12,3 +12,7 @@ export const mapLocaleNamesToSimplifiedLocales = (
 export const normalizeLocaleCode = (code: string) => {
   return code.toLowerCase().replace(/\s/g, '-');
 };
+
+export const isSameLocaleFamily = (code1: string, code2: string) => {
+  return code1.split('-')[0] === code2.split('-')[0];
+};

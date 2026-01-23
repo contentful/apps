@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { Box, Stack, Pill } from '@contentful/f36-components';
+import React, { useMemo, useState } from 'react';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { normalizeLocaleCode, SimplifiedLocale } from '../utils/locales';
 import { styles } from './LocaleMultiSelect.styles';
@@ -19,15 +18,16 @@ const LocaleMultiSelect: React.FC<LocaleMultiSelectProps> = ({
   isDisabled = false,
   isInvalid = false,
 }) => {
-  const [filteredLocales, setFilteredLocales] = useState<SimplifiedLocale[]>(availableLocales);
+  const [searchValue, setSearchValue] = useState('');
 
-  const handleSearchValueChange = (event: { target: { value: string } }) => {
-    const value = event.target.value;
-    const newFilteredLocales = availableLocales.filter((locale) =>
-      locale.name.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredLocales(newFilteredLocales);
-  };
+  const filteredLocales = useMemo(() => {
+    if (!searchValue) {
+      return availableLocales;
+    }
+
+    const query = searchValue.toLowerCase();
+    return availableLocales.filter((locale) => locale.name.toLowerCase().includes(query));
+  }, [availableLocales, searchValue]);
 
   const handleLocaleToggle = (locale: SimplifiedLocale, checked: boolean) => {
     if (checked) {
@@ -37,50 +37,28 @@ const LocaleMultiSelect: React.FC<LocaleMultiSelectProps> = ({
     }
   };
 
-  const handleLocaleRemove = (localeCode: string) => {
-    onSelectionChange(selectedLocales.filter((l) => l.code !== localeCode));
-  };
-
   return (
-    <Stack marginTop="spacingXs" flexDirection="column" alignItems="start">
-      <Multiselect
-        className={isInvalid ? styles.invalid : undefined}
-        searchProps={{
-          searchPlaceholder: 'Search locales',
-          onSearchValueChange: handleSearchValueChange,
-        }}
-        placeholder="Select one or more"
-        popoverProps={{ isFullWidth: true, listMaxHeight: 110 }}
-        currentSelection={selectedLocales.map((l) => l.name)}
-        triggerButtonProps={{ isDisabled }}>
-        {filteredLocales.map((locale) => (
-          <Multiselect.Option
-            key={`multiselect-locale-${normalizeLocaleCode(locale.code)}`}
-            itemId={`multiselect-locale-${normalizeLocaleCode(locale.code)}`}
-            value={locale.code}
-            isChecked={selectedLocales.some((l) => l.code === locale.code)}
-            onSelectItem={(e) => handleLocaleToggle(locale, e.target.checked)}>
-            {locale.name}
-          </Multiselect.Option>
-        ))}
-      </Multiselect>
-
-      {selectedLocales.length > 0 && (
-        <Box width="full" overflow="auto">
-          <Stack flexDirection="row" spacing="spacing2Xs" flexWrap="wrap">
-            {selectedLocales.map((locale) => (
-              <Pill
-                key={locale.code}
-                testId={`pill-locale-${normalizeLocaleCode(locale.code)}`}
-                label={locale.name}
-                isDraggable={false}
-                onClose={() => handleLocaleRemove(locale.code)}
-              />
-            ))}
-          </Stack>
-        </Box>
-      )}
-    </Stack>
+    <Multiselect
+      className={isInvalid ? styles.invalid : undefined}
+      searchProps={{
+        searchPlaceholder: 'Search locales',
+        onSearchValueChange: (event) => setSearchValue(event.target.value),
+      }}
+      placeholder="Select one or more"
+      popoverProps={{ isFullWidth: true, listMaxHeight: 110 }}
+      currentSelection={selectedLocales.map((l) => l.name)}
+      triggerButtonProps={{ isDisabled }}>
+      {filteredLocales.map((locale) => (
+        <Multiselect.Option
+          key={`multiselect-locale-${normalizeLocaleCode(locale.code)}`}
+          itemId={`multiselect-locale-${normalizeLocaleCode(locale.code)}`}
+          value={locale.code}
+          isChecked={selectedLocales.some((l) => l.code === locale.code)}
+          onSelectItem={(e) => handleLocaleToggle(locale, e.target.checked)}>
+          {locale.name}
+        </Multiselect.Option>
+      ))}
+    </Multiselect>
   );
 };
 
