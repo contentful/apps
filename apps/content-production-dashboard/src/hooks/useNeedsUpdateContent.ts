@@ -5,7 +5,7 @@ import { useUsers } from './useUsers';
 import type { AppInstallationParameters } from '../locations/ConfigScreen';
 import { ITEMS_PER_PAGE } from '../utils/consts';
 import { getEntryTitle, getUniqueUserIdsFromEntries } from '../utils/EntryUtils';
-import { parseDate, subMonths } from '../utils/dateCalculator';
+import { parseDate, subMonths, msPerDay } from '../utils/dateCalculator';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { getCreatorFromEntry } from '../utils/UserUtils';
 import { Creator } from '../utils/types';
@@ -30,7 +30,7 @@ export interface UseNeedsUpdateResult {
 function calculateAgeInDays(date: Date): number {
   const now = new Date();
   const diffTime = now.getTime() - date.getTime();
-  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  return Math.floor(diffTime / msPerDay);
 }
 
 export function useNeedsUpdate(
