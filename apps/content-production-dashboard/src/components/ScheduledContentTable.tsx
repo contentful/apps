@@ -12,7 +12,7 @@ import { ITEMS_PER_PAGE } from '../utils/consts';
 import { EntryLink } from './EntryLink';
 import { EntryStatus, ScheduledContentItem } from '../utils/types';
 import { useScheduledContent } from '../hooks/useScheduledContent';
-import { EntryProps, ScheduledActionProps } from 'contentful-management';
+import { EntryProps, ScheduledActionProps, ContentTypeProps } from 'contentful-management';
 import { ErrorDisplay } from './ErrorDisplay';
 
 enum BadgeVariant {
@@ -49,9 +49,11 @@ const getStatusBadgeVariant = (status: EntryStatus | undefined): BadgeVariant =>
 export const ScheduledContentTable = ({
   scheduledActions,
   entries,
+  contentTypes,
 }: {
   scheduledActions: ScheduledActionProps[];
   entries: EntryProps[];
+  contentTypes: Map<string, ContentTypeProps>;
 }) => {
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const [currentPage, setCurrentPage] = useState(0);
@@ -59,7 +61,8 @@ export const ScheduledContentTable = ({
     scheduledActions,
     entries,
     sdk.locales.default,
-    currentPage
+    currentPage,
+    contentTypes
   );
 
   if (error) {

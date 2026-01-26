@@ -1,14 +1,9 @@
-import { useContentTypes } from './useContentTypes';
 import { useUsers } from './useUsers';
 import { ITEMS_PER_PAGE } from '../utils/consts';
-import { EntryProps } from 'contentful-management';
+import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { isWithin, parseDate } from '../utils/dateCalculator';
 import { getCreatorFromEntry } from '../utils/UserUtils';
-import {
-  getEntryTitle,
-  getUniqueContentTypeIdsFromEntries,
-  getUniqueUserIdsFromEntries,
-} from '../utils/EntryUtils';
+import { getEntryTitle, getUniqueUserIdsFromEntries } from '../utils/EntryUtils';
 import { useMemo } from 'react';
 import { Creator } from '../utils/types';
 
@@ -32,7 +27,8 @@ export function useRecentlyPublishedContent(
   page: number,
   entries: EntryProps[],
   recentlyPublishedDate: Date,
-  defaultLocale: string
+  defaultLocale: string,
+  contentTypes: Map<string, ContentTypeProps>
 ): UseRecentlyPublishedResult {
   const skip = page * ITEMS_PER_PAGE;
   const now = new Date();
@@ -45,10 +41,6 @@ export function useRecentlyPublishedContent(
 
   const userIds = getUniqueUserIdsFromEntries(recentlyPublishedEntries);
 
-  const contentTypeIds = getUniqueContentTypeIdsFromEntries(recentlyPublishedEntries);
-
-  const { contentTypes, isFetchingContentTypes, refetchContentTypes, fetchingContentTypesError } =
-    useContentTypes(contentTypeIds);
   const {
     usersMap,
     isFetching: isFetchingUsers,
@@ -73,16 +65,15 @@ export function useRecentlyPublishedContent(
     return items;
   }, [recentlyPublishedEntries, contentTypes, usersMap, defaultLocale]);
 
-  const isFetching = isFetchingContentTypes || isFetchingUsers;
+  const isFetching = isFetchingUsers;
 
   return {
     items: recentlyPublishedItems.slice(skip, skip + ITEMS_PER_PAGE),
     total: recentlyPublishedItems.length,
     isFetching,
     refetch: () => {
-      refetchContentTypes();
       refetchUsers();
     },
-    error: usersError ?? fetchingContentTypesError ?? null,
+    error: usersError ?? null,
   };
 }

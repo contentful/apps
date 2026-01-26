@@ -9,7 +9,7 @@ import { useNeedsUpdate } from '../hooks/useNeedsUpdateContent';
 import { formatDateTimeWithTimezone } from '../utils/dateFormat';
 import { formatUserName } from '../utils/UserUtils';
 import { ITEMS_PER_PAGE } from '../utils/consts';
-import { EntryProps } from 'contentful-management';
+import { EntryProps, ContentTypeProps } from 'contentful-management';
 
 const NeedsUpdateTableHeader = () => {
   return (
@@ -25,10 +25,16 @@ const NeedsUpdateTableHeader = () => {
   );
 };
 
-export const NeedsUpdateTable = ({ entries }: { entries: EntryProps[] }) => {
+export const NeedsUpdateTable = ({
+  entries,
+  contentTypes,
+}: {
+  entries: EntryProps[];
+  contentTypes: Map<string, ContentTypeProps>;
+}) => {
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const [currentPage, setCurrentPage] = useState(0);
-  const { items, total, isFetching, error } = useNeedsUpdate(entries, currentPage);
+  const { items, total, isFetching, error } = useNeedsUpdate(entries, currentPage, contentTypes);
 
   if (error) {
     return (

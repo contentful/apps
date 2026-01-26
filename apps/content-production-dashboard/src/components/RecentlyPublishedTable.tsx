@@ -1,7 +1,7 @@
 import { Box, Pagination, Skeleton, Table } from '@contentful/f36-components';
 import { styles } from './RecentlyPublishedTable.styles';
 import { EmptyStateTable } from './EmptyStateTable';
-import { EntryProps } from 'contentful-management';
+import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { ITEMS_PER_PAGE } from '../utils/consts';
 import { formatDateTimeWithTimezone } from '../utils/dateFormat';
 import { formatUserName } from '../utils/UserUtils';
@@ -27,7 +27,13 @@ const RecentlyPublishedTableHeader = () => {
   );
 };
 
-export const RecentlyPublishedTable = ({ entries }: { entries: EntryProps[] }) => {
+export const RecentlyPublishedTable = ({
+  entries,
+  contentTypes,
+}: {
+  entries: EntryProps[];
+  contentTypes: Map<string, ContentTypeProps>;
+}) => {
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const [currentPage, setCurrentPage] = useState(0);
   const installation = (sdk.parameters.installation ?? {}) as AppInstallationParameters;
@@ -38,7 +44,8 @@ export const RecentlyPublishedTable = ({ entries }: { entries: EntryProps[] }) =
     currentPage,
     entries,
     recentlyPublishedDate,
-    sdk.locales.default
+    sdk.locales.default,
+    contentTypes
   );
 
   if (error) {
