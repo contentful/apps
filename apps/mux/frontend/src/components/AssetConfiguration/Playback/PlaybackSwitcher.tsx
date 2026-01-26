@@ -42,6 +42,7 @@ export const PlaybackSwitcher: React.FC<PlaybackSwitcherProps> = ({
   enableDRM = false,
 }) => {
   const selectedPolicy = getCurrentPolicy(value);
+  const isAudioOnly = value?.audioOnly ?? false;
 
   return (
     <Flex>
@@ -55,6 +56,7 @@ export const PlaybackSwitcher: React.FC<PlaybackSwitcherProps> = ({
         }}
         enableSignedUrls={enableSignedUrls}
         enableDRM={enableDRM}
+        isAudioOnly={isAudioOnly}
       />
     </Flex>
   );

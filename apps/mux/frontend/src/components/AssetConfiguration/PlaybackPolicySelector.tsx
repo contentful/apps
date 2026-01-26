@@ -6,7 +6,7 @@ import { PolicyType } from '../../util/types';
 interface PlaybackPolicySelectorProps {
   selectedPolicies: PolicyType[];
   onPoliciesChange: (policies: PolicyType[]) => void;
-  enableSignedUrls: boolean;
+  enableSignedUrls?: boolean;
   enableDRM?: boolean;
   onValidationChange?: (isValid: boolean) => void;
   /** When true, DRM option is disabled because audio files don't support DRM */
@@ -19,7 +19,7 @@ const playbackPolicyLink =
 export const PlaybackPolicySelector: FC<PlaybackPolicySelectorProps> = ({
   selectedPolicies,
   onPoliciesChange,
-  enableSignedUrls,
+  enableSignedUrls = false,
   enableDRM = false,
   onValidationChange,
   isAudioOnly = false,

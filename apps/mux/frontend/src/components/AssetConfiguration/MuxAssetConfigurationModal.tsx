@@ -69,7 +69,9 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
   file = null,
   pendingUploadURL = null,
 }) => {
-  const { muxEnableSignedUrls, muxEnableDRM } = installationParams;
+  // Use explicit defaults to handle undefined values from SDK
+  const muxEnableSignedUrls = installationParams.muxEnableSignedUrls ?? false;
+  const muxEnableDRM = installationParams.muxEnableDRM ?? false;
 
   // Detect if the input is an audio-only file
   const isAudioOnly = useMemo(
