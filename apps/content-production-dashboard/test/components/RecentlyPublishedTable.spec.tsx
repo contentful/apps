@@ -5,6 +5,7 @@ import { RecentlyPublishedItem } from '../../src/hooks/useRecentlyPublishedConte
 import { mockSdk } from '../mocks';
 import { createQueryProviderWrapper } from '../utils/createQueryProviderWrapper';
 import { EntryProps } from 'contentful-management';
+import { createMockContentType } from '../utils/testHelpers';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -18,8 +19,16 @@ vi.mock('../../src/hooks/useRecentlyPublishedContent', () => ({
     page: number,
     entries: EntryProps[],
     recentlyPublishedDate: Date,
-    defaultLocale: string
-  ) => mockUseRecentlyPublishedContent(page, entries, recentlyPublishedDate, defaultLocale),
+    defaultLocale: string,
+    contentTypes: unknown
+  ) =>
+    mockUseRecentlyPublishedContent(
+      page,
+      entries,
+      recentlyPublishedDate,
+      defaultLocale,
+      contentTypes
+    ),
 }));
 
 const createMockRecentlyPublishedItem = (
@@ -63,6 +72,10 @@ const createMockEntry = (overrides?: Partial<EntryProps>): EntryProps => {
 };
 
 describe('RecentlyPublishedTable component', () => {
+  const mockContentTypes = new Map([
+    ['blogPost', createMockContentType({ id: 'blogPost', name: 'Blog Post' })],
+  ]);
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockSdk.locales = { default: 'en-US' };
@@ -80,7 +93,7 @@ describe('RecentlyPublishedTable component', () => {
         error: null,
       });
 
-      render(<RecentlyPublishedTable entries={mockEntries} />, {
+      render(<RecentlyPublishedTable entries={mockEntries} contentTypes={mockContentTypes} />, {
         wrapper: createQueryProviderWrapper(),
       });
 
@@ -104,7 +117,7 @@ describe('RecentlyPublishedTable component', () => {
         error: mockError,
       });
 
-      render(<RecentlyPublishedTable entries={mockEntries} />, {
+      render(<RecentlyPublishedTable entries={mockEntries} contentTypes={mockContentTypes} />, {
         wrapper: createQueryProviderWrapper(),
       });
 
@@ -123,7 +136,7 @@ describe('RecentlyPublishedTable component', () => {
         error: null,
       });
 
-      render(<RecentlyPublishedTable entries={mockEntries} />, {
+      render(<RecentlyPublishedTable entries={mockEntries} contentTypes={mockContentTypes} />, {
         wrapper: createQueryProviderWrapper(),
       });
 
@@ -142,7 +155,7 @@ describe('RecentlyPublishedTable component', () => {
         error: null,
       });
 
-      render(<RecentlyPublishedTable entries={mockEntries} />, {
+      render(<RecentlyPublishedTable entries={mockEntries} contentTypes={mockContentTypes} />, {
         wrapper: createQueryProviderWrapper(),
       });
 
@@ -168,7 +181,7 @@ describe('RecentlyPublishedTable component', () => {
         error: null,
       });
 
-      render(<RecentlyPublishedTable entries={mockEntries} />, {
+      render(<RecentlyPublishedTable entries={mockEntries} contentTypes={mockContentTypes} />, {
         wrapper: createQueryProviderWrapper(),
       });
 
@@ -193,7 +206,7 @@ describe('RecentlyPublishedTable component', () => {
         error: null,
       });
 
-      render(<RecentlyPublishedTable entries={mockEntries} />, {
+      render(<RecentlyPublishedTable entries={mockEntries} contentTypes={mockContentTypes} />, {
         wrapper: createQueryProviderWrapper(),
       });
 
@@ -218,7 +231,7 @@ describe('RecentlyPublishedTable component', () => {
         error: null,
       });
 
-      render(<RecentlyPublishedTable entries={mockEntries} />, {
+      render(<RecentlyPublishedTable entries={mockEntries} contentTypes={mockContentTypes} />, {
         wrapper: createQueryProviderWrapper(),
       });
 
@@ -244,7 +257,7 @@ describe('RecentlyPublishedTable component', () => {
         error: null,
       });
 
-      render(<RecentlyPublishedTable entries={mockEntries} />, {
+      render(<RecentlyPublishedTable entries={mockEntries} contentTypes={mockContentTypes} />, {
         wrapper: createQueryProviderWrapper(),
       });
 
@@ -262,7 +275,7 @@ describe('RecentlyPublishedTable component', () => {
         error: null,
       });
 
-      render(<RecentlyPublishedTable entries={mockEntries} />, {
+      render(<RecentlyPublishedTable entries={mockEntries} contentTypes={mockContentTypes} />, {
         wrapper: createQueryProviderWrapper(),
       });
 

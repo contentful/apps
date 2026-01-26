@@ -8,6 +8,7 @@ import {
   createMockEntry,
   createMockScheduledAction,
   createMockScheduledContentItem,
+  createMockContentType,
 } from '../utils/testHelpers';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
@@ -23,11 +24,17 @@ vi.mock('../../src/hooks/useScheduledContent', () => ({
     scheduledActions: unknown[],
     entries: unknown[],
     defaultLocale: string,
-    page: number
-  ) => mockUseScheduledContent(scheduledActions, entries, defaultLocale, page),
+    page: number,
+    contentTypes: unknown
+  ) => mockUseScheduledContent(scheduledActions, entries, defaultLocale, page, contentTypes),
 }));
 
 describe('ScheduledContentTable component', () => {
+  const mockContentTypes = new Map([
+    ['blogPost', createMockContentType({ id: 'blogPost', name: 'Blog Post' })],
+    ['article', createMockContentType({ id: 'article', name: 'Article' })],
+  ]);
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockRefetch.mockClear();
@@ -49,9 +56,16 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable scheduledActions={[]} entries={[]} />, {
-        wrapper: createQueryProviderWrapper(),
-      });
+      render(
+        <ScheduledContentTable
+          scheduledActions={[]}
+          entries={[]}
+          contentTypes={mockContentTypes}
+        />,
+        {
+          wrapper: createQueryProviderWrapper(),
+        }
+      );
 
       expect(screen.getByRole('table')).toBeInTheDocument();
       expect(screen.getByText('Title')).toBeInTheDocument();
@@ -74,9 +88,16 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable scheduledActions={[]} entries={[]} />, {
-        wrapper: createQueryProviderWrapper(),
-      });
+      render(
+        <ScheduledContentTable
+          scheduledActions={[]}
+          entries={[]}
+          contentTypes={mockContentTypes}
+        />,
+        {
+          wrapper: createQueryProviderWrapper(),
+        }
+      );
 
       expect(screen.getByText('No entries found')).toBeInTheDocument();
     });
@@ -99,9 +120,16 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable scheduledActions={[scheduledAction]} entries={[entry]} />, {
-        wrapper: createQueryProviderWrapper(),
-      });
+      render(
+        <ScheduledContentTable
+          scheduledActions={[scheduledAction]}
+          entries={[entry]}
+          contentTypes={mockContentTypes}
+        />,
+        {
+          wrapper: createQueryProviderWrapper(),
+        }
+      );
 
       expect(screen.getByText('Title')).toBeInTheDocument();
       expect(screen.getByText('Scheduled Date')).toBeInTheDocument();
@@ -143,9 +171,16 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable scheduledActions={[scheduledAction]} entries={[entry]} />, {
-        wrapper: createQueryProviderWrapper(),
-      });
+      render(
+        <ScheduledContentTable
+          scheduledActions={[scheduledAction]}
+          entries={[entry]}
+          contentTypes={mockContentTypes}
+        />,
+        {
+          wrapper: createQueryProviderWrapper(),
+        }
+      );
 
       expect(screen.getByText('My Blog Post')).toBeInTheDocument();
       expect(screen.getByText('Blog Post')).toBeInTheDocument();
@@ -192,6 +227,7 @@ describe('ScheduledContentTable component', () => {
         <ScheduledContentTable
           scheduledActions={[scheduledAction1, scheduledAction2, scheduledAction3]}
           entries={[entry1, entry2, entry3]}
+          contentTypes={mockContentTypes}
         />,
         { wrapper: createQueryProviderWrapper() }
       );
@@ -240,6 +276,7 @@ describe('ScheduledContentTable component', () => {
         <ScheduledContentTable
           scheduledActions={[scheduledAction1, scheduledAction2, scheduledAction3]}
           entries={[entry1, entry2, entry3]}
+          contentTypes={mockContentTypes}
         />,
         { wrapper: createQueryProviderWrapper() }
       );
@@ -260,9 +297,16 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable scheduledActions={[]} entries={[]} />, {
-        wrapper: createQueryProviderWrapper(),
-      });
+      render(
+        <ScheduledContentTable
+          scheduledActions={[]}
+          entries={[]}
+          contentTypes={mockContentTypes}
+        />,
+        {
+          wrapper: createQueryProviderWrapper(),
+        }
+      );
 
       expect(screen.getByText('Test error')).toBeInTheDocument();
     });
@@ -289,9 +333,16 @@ describe('ScheduledContentTable component', () => {
         refetch: mockRefetch,
       });
 
-      render(<ScheduledContentTable scheduledActions={[scheduledAction]} entries={[entry]} />, {
-        wrapper: createQueryProviderWrapper(),
-      });
+      render(
+        <ScheduledContentTable
+          scheduledActions={[scheduledAction]}
+          entries={[entry]}
+          contentTypes={mockContentTypes}
+        />,
+        {
+          wrapper: createQueryProviderWrapper(),
+        }
+      );
 
       const link = screen.getByText('My Entry').closest('a');
       expect(link).toHaveAttribute(
