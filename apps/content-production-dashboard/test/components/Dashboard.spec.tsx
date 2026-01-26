@@ -1,6 +1,7 @@
 import { cleanup, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { ContentTypeProps } from 'contentful-management';
 import { mockCma, mockSdk } from '../mocks';
 import Dashboard from '../../src/components/Dashboard';
 import { QueryProvider } from '../../src/providers/QueryProvider';
@@ -56,9 +57,22 @@ vi.mock('../../src/hooks/useScheduledContent', () => ({
 
 vi.mock('../../src/hooks/useContentTypes', () => ({
   useContentTypes: () => ({
-    contentTypes: new Map<string, string>([
-      ['blogPost', 'Blog Post'],
-      ['article', 'Article'],
+    contentTypes: new Map<string, ContentTypeProps>([
+      [
+        'blogPost',
+        {
+          sys: { id: 'blogPost', type: 'ContentType', version: 0 },
+          name: 'Blog Post',
+          displayField: 'title',
+        } as ContentTypeProps,
+      ],
+      [
+        'article',
+        {
+          sys: { id: 'article', type: 'ContentType', version: 0 },
+          name: 'Article',
+        } as ContentTypeProps,
+      ],
     ]),
     isFetchingContentTypes: false,
     fetchingContentTypesError: null,
@@ -86,10 +100,6 @@ describe('Dashboard component', () => {
       refetchEntries: mockRefetchEntries,
       fetchedAt: new Date(),
     });
-  });
-
-  afterEach(() => {
-    cleanup();
   });
 
   afterEach(() => {

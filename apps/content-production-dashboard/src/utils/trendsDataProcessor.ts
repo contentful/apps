@@ -53,9 +53,9 @@ export function generateContentTypeChartData(
 
   const processedContentTypes = new Map<string, string>();
   contentTypeIds.forEach((contentTypeId) => {
-    const contentTypeName = contentTypes?.get(contentTypeId);
-    if (contentTypeName) {
-      processedContentTypes.set(contentTypeId, contentTypeName);
+    const contentType = contentTypes?.get(contentTypeId);
+    if (contentType) {
+      processedContentTypes.set(contentTypeId, contentType.name);
     }
   });
 
@@ -66,7 +66,7 @@ export function generateCreatorChartData(
   entries: EntryProps[],
   options: TrendsDataProcessorOptions,
   creatorsNames?: Map<string, string>,
-  contentTypes?: Map<string, string>
+  contentTypes?: Map<string, ContentTypeProps>
 ): { data: ChartDataPoint[]; creators: string[] } {
   const { startDate, filteredEntries, allMonths } = setupChartData(entries, options, contentTypes);
 

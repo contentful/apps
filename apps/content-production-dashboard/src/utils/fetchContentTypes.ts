@@ -18,6 +18,9 @@ export async function fetchContentTypes(
         .get({
           contentTypeId: id,
           spaceId: sdk.ids.space,
+          query: {
+            fields: ['name', 'displayField'],
+          },
         })
         .catch((error) => {
           console.error(`Error fetching content type ${id}:`, error);

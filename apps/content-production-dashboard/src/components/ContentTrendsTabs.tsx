@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Box, Flex, FormControl, Paragraph, Spinner, Tabs, Text } from '@contentful/f36-components';
-import { EntryProps } from 'contentful-management';
+import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { ChartWrapper } from './ChartWrapper';
 import {
   generateNewEntriesChartData,
@@ -18,7 +18,7 @@ export interface ContentTrendsTabsProps {
   entries: EntryProps[];
   timeRange: TimeRange;
   defaultContentTypes: string[];
-  contentTypes: Map<string, string>;
+  contentTypes: Map<string, ContentTypeProps>;
   isFetchingContentTypes: boolean;
 }
 
@@ -68,15 +68,15 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
   useEffect(() => {
     if (contentTypes.size > 0 && !isInitialized) {
       let initialSelected: ContentType[] = Array.from(contentTypes.entries())
-        .map(([id, name]) => ({ id, name }))
+        .map(([id, contentType]) => ({ id, name: contentType.name }))
         .sort((a, b) => a.name.localeCompare(b.name))
         .slice(0, 5);
 
       if (defaultContentTypes && defaultContentTypes.length > 0) {
         initialSelected = defaultContentTypes
           .map((id) => {
-            const name = contentTypes.get(id);
-            return name ? { id, name } : null;
+            const contentType = contentTypes.get(id);
+            return contentType ? { id, name: contentType.name } : null;
           })
           .filter((ct): ct is ContentType => ct !== null);
       }
@@ -89,11 +89,11 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
   }, [contentTypes, defaultContentTypes, isInitialized]);
 
   const filteredContentTypesForChart = useMemo(() => {
-    const filtered = new Map<string, string>();
+    const filtered = new Map<string, ContentTypeProps>();
     selectedChartContentTypes.forEach((ct) => {
-      const name = contentTypes.get(ct.id);
-      if (name) {
-        filtered.set(ct.id, name);
+      const contentType = contentTypes.get(ct.id);
+      if (contentType) {
+        filtered.set(ct.id, contentType);
       }
     });
     return filtered;

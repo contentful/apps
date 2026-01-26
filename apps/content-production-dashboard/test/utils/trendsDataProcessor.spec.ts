@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
-import { EntryProps } from 'contentful-management';
+import { EntryProps, ContentTypeProps } from 'contentful-management';
 import {
   generateNewEntriesChartData,
   generateContentTypeChartData,
@@ -59,8 +59,11 @@ describe('trendsDataProcessor', () => {
         }),
       ];
 
-      const contentTypes = new Map<string, string>();
-      contentTypes.set('blogPost', 'Blog Post');
+      const contentTypes = new Map<string, ContentTypeProps>();
+      contentTypes.set('blogPost', {
+        sys: { id: 'blogPost', type: 'ContentType', version: 0 },
+        name: 'Blog Post',
+      } as ContentTypeProps);
 
       const result = generateNewEntriesChartData(
         entries,
@@ -161,9 +164,15 @@ describe('trendsDataProcessor', () => {
         }),
       ];
 
-      const contentTypes = new Map<string, string>();
-      contentTypes.set('blogPost', 'Blog Post');
-      contentTypes.set('article', 'Article');
+      const contentTypes = new Map<string, ContentTypeProps>();
+      contentTypes.set('blogPost', {
+        sys: { id: 'blogPost', type: 'ContentType', version: 0 },
+        name: 'Blog Post',
+      } as ContentTypeProps);
+      contentTypes.set('article', {
+        sys: { id: 'article', type: 'ContentType', version: 0 },
+        name: 'Article',
+      } as ContentTypeProps);
 
       const result = generateContentTypeChartData(
         entries,
