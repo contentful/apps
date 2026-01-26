@@ -65,20 +65,24 @@ export function useNeedsUpdate(
   } = useUsers(userIds);
 
   const needsUpdateItems = useMemo(() => {
-    return filteredEntries.map((entry) => {
-      return {
-        id: entry.sys.id,
-        title: getEntryTitle(
-          entry,
-          contentTypes.get(entry.sys.contentType?.sys?.id || ''),
-          defaultLocale
-        ),
-        age: calculateAgeInDays(parseDate(entry.sys.updatedAt) || new Date()),
-        publishedDate: entry.sys.publishedAt ?? null,
-        creator: getCreatorFromEntry(entry, usersMap),
-        contentType: contentTypes.get(entry.sys.contentType?.sys?.id || '')?.name || '',
-      };
-    });
+    return filteredEntries
+      .map((entry) => {
+        return {
+          id: entry.sys.id,
+          title: getEntryTitle(
+            entry,
+            contentTypes.get(entry.sys.contentType?.sys?.id || ''),
+            defaultLocale
+          ),
+          age: calculateAgeInDays(parseDate(entry.sys.updatedAt) || new Date()),
+          publishedDate: entry.sys.publishedAt ?? null,
+          creator: getCreatorFromEntry(entry, usersMap),
+          contentType: contentTypes.get(entry.sys.contentType?.sys?.id || '')?.name || '',
+        };
+      })
+      .sort((a, b) => {
+        return b.age - a.age;
+      });
   }, [filteredEntries, contentTypes, usersMap, defaultLocale]);
 
   const skip = page * ITEMS_PER_PAGE;
