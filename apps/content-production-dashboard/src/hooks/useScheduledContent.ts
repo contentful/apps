@@ -3,7 +3,12 @@ import { EntryProps, ScheduledActionProps } from 'contentful-management';
 
 import { ScheduledContentItem } from '../utils/types';
 import { getCreatorFromEntry } from '../utils/UserUtils';
-import { getEntryStatus, getEntryTitle } from '../utils/EntryUtils';
+import {
+  getEntryStatus,
+  getEntryTitle,
+  getUniqueContentTypeIdsFromEntries,
+  getUniqueUserIdsFromEntries,
+} from '../utils/EntryUtils';
 import { useContentTypes } from './useContentTypes';
 import { useUsers } from './useUsers';
 import { ITEMS_PER_PAGE } from '../utils/consts';
@@ -14,20 +19,6 @@ interface UseScheduledContentResult {
   isFetching: boolean;
   error: Error | null;
   refetch: () => void;
-}
-
-function getUserIdsFromEntries(entries: EntryProps[]): string[] {
-  const userIds = entries.map((entry) => entry.sys.createdBy?.sys?.id).filter(Boolean) as string[];
-
-  return [...new Set(userIds)];
-}
-
-function getContentTypeIdsFromEntries(entries: EntryProps[]): string[] {
-  const contentTypeIds = entries
-    .map((entry) => entry.sys.contentType?.sys?.id)
-    .filter(Boolean) as string[];
-
-  return [...new Set(contentTypeIds)];
 }
 
 export function useScheduledContent(
@@ -46,9 +37,9 @@ export function useScheduledContent(
     [entries, scheduledActions]
   );
 
-  const userIds = useMemo(() => getUserIdsFromEntries(scheduledEntries), [scheduledEntries]);
+  const userIds = useMemo(() => getUniqueUserIdsFromEntries(scheduledEntries), [scheduledEntries]);
   const contentTypeIds = useMemo(
-    () => getContentTypeIdsFromEntries(scheduledEntries),
+    () => getUniqueContentTypeIdsFromEntries(scheduledEntries),
     [scheduledEntries]
   );
 
