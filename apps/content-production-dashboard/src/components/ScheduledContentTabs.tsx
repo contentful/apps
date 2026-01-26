@@ -64,7 +64,7 @@ export const ScheduledContentTabs = ({
               description={`Content older than ${needsUpdateMonths} ${
                 needsUpdateMonths === 1 ? 'month' : 'months'
               } will appear here.`}>
-              <NeedsUpdateTable />
+              <NeedsUpdateTable entries={entries} />
             </TabPanelContent>
           </Tabs.Panel>
         </Tabs>
