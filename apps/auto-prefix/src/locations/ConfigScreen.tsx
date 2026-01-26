@@ -25,17 +25,9 @@ import {
   RuleValidation,
 } from '../utils/types';
 import { ContentTypeProps } from 'contentful-management';
-import { getFieldSelectionsFromContentTypes } from '../utils/utils';
+import { createEmptyRule, getFieldSelectionsFromContentTypes } from '../utils/utils';
 
 const ConfigScreen = () => {
-  const createEmptyRule = () => {
-    return {
-      id: window.crypto.randomUUID(),
-      parentField: null,
-      referenceField: null,
-    };
-  };
-
   const getAllContentTypes = async (cma: CMAClient): Promise<ContentTypeProps[]> => {
     const allContentTypes: ContentTypeProps[] = [];
     let skip = 0;
@@ -72,18 +64,18 @@ const ConfigScreen = () => {
         parentFieldErrorMessage: '',
         referenceFieldErrorMessage: '',
       };
-      if (!rule.parentField) {
+      if (!rule.parentField.fieldUniqueId) {
         ruleValidation.parentFieldError = true;
         ruleValidation.parentFieldErrorMessage = 'Parent field is required';
       }
-      if (!rule.referenceField) {
+      if (!rule.referenceField.fieldUniqueId) {
         ruleValidation.referenceFieldError = true;
         ruleValidation.referenceFieldErrorMessage = 'Reference field is required';
       }
-      const referenceKey = rule.referenceField?.fieldUniqueId;
+      const referenceKey = rule.referenceField.fieldUniqueId;
       if (
         referenceKey &&
-        parameters.rules.filter((r) => r.referenceField?.fieldUniqueId === referenceKey).length > 1
+        parameters.rules.filter((r) => r.referenceField.fieldUniqueId === referenceKey).length > 1
       ) {
         ruleValidation.referenceFieldError = true;
         ruleValidation.referenceFieldErrorMessage = 'Each field can only be in one reference entry';
@@ -102,12 +94,12 @@ const ConfigScreen = () => {
     return !invalidConfigurations;
   };
 
-  const addApptoFields = async () => {
+  const addAppToFields = async () => {
     const state = (await sdk.app.getCurrentState()) || { EditorInterface: {} };
 
     for (const rule of parameters.rules) {
-      const fieldId = rule.referenceField?.fieldId;
-      const contentTypeId = rule.referenceField?.contentTypeId;
+      const fieldId = rule.referenceField.fieldId;
+      const contentTypeId = rule.referenceField.contentTypeId;
       if (fieldId && contentTypeId) {
         state.EditorInterface[contentTypeId] = {
           controls: [...(state.EditorInterface[contentTypeId]?.controls || []), { fieldId }],
@@ -124,7 +116,7 @@ const ConfigScreen = () => {
       return false;
     }
 
-    const targetState = await addApptoFields();
+    const targetState = await addAppToFields();
 
     return {
       parameters,

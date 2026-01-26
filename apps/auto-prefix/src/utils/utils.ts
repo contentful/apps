@@ -44,3 +44,22 @@ export const getMatchingRule = (
     ) || null
   );
 };
+
+export const createEmptyRule = () => {
+  return {
+    id: window.crypto.randomUUID(),
+    parentField: createEmptyField(),
+    referenceField: createEmptyField(),
+  };
+};
+
+export const createEmptyField = (): FieldSelection => {
+  return {
+    fieldUniqueId: '',
+    fieldId: '',
+    fieldName: '',
+    contentTypeId: '',
+    contentTypeName: '',
+    displayName: '',
+  };
+};

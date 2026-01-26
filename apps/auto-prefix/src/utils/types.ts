@@ -9,8 +9,8 @@ export type FieldSelection = {
 
 export type Rule = {
   id: string;
-  parentField: FieldSelection | null;
-  referenceField: FieldSelection | null;
+  parentField: FieldSelection;
+  referenceField: FieldSelection;
 };
 
 export type AppInstallationParameters = {

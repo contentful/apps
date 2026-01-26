@@ -46,8 +46,8 @@ const Field = () => {
         const entries = await sdk.cma.entry.getMany({
           query: {
             links_to_entry: currentEntryId,
-            content_type: matchingRule.parentField!.contentTypeId,
-            select: `fields.${matchingRule.parentField!.fieldId}`,
+            content_type: matchingRule.parentField.contentTypeId,
+            select: `fields.${matchingRule.parentField.fieldId}`,
             order: '-sys.updatedAt',
           },
         });
@@ -81,7 +81,7 @@ const Field = () => {
       if (parentEntry) {
         const internalNameValue = getInternalNameFromParentEntry(
           parentEntry,
-          matchingRule.parentField!.fieldId
+          matchingRule.parentField.fieldId
         );
         await sdk.field.setValue(internalNameValue);
       }
@@ -109,7 +109,7 @@ const Field = () => {
           if (parentEntry) {
             const internalNameValue = getInternalNameFromParentEntry(
               parentEntry,
-              matchingRule.parentField!.fieldId
+              matchingRule.parentField.fieldId
             );
             await sdk.field.setValue(internalNameValue);
           }

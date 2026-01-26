@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Autocomplete, Box, FormControl, GridItem, IconButton } from '@contentful/f36-components';
 import { TrashSimpleIcon } from '@contentful/f36-icons';
 import { FieldSelection, Rule, RuleValidation } from '../utils/types';
+import { createEmptyField } from '../utils/utils';
 
 type RuleRowProps = {
   rule: Rule;
@@ -39,7 +40,7 @@ const RuleRow: React.FC<RuleRowProps> = ({
     const filtered = filterFieldsByDisplayName(availableFields, value);
     setFilteredParentFields(filtered);
     if (value === '') {
-      onRuleChange({ ...rule, parentField: null });
+      onRuleChange({ ...rule, parentField: createEmptyField() });
     }
   };
 
@@ -47,7 +48,7 @@ const RuleRow: React.FC<RuleRowProps> = ({
     const filtered = filterFieldsByDisplayName(availableFields, value);
     setFilteredReferenceFields(filtered);
     if (value === '') {
-      onRuleChange({ ...rule, referenceField: null });
+      onRuleChange({ ...rule, referenceField: createEmptyField() });
     }
   };
 
@@ -66,7 +67,8 @@ const RuleRow: React.FC<RuleRowProps> = ({
             selectedItem={rule.parentField}
             onInputValueChange={handleParentFieldInputChange}
             onSelectItem={(field: FieldSelection | null) => {
-              onRuleChange({ ...rule, parentField: field || null });
+              if (!field) return;
+              onRuleChange({ ...rule, parentField: field });
             }}
             placeholder="Field name | Content type name"
             itemToString={(item: FieldSelection | null) => (item ? item.displayName : '')}
@@ -92,7 +94,8 @@ const RuleRow: React.FC<RuleRowProps> = ({
             selectedItem={rule.referenceField}
             onInputValueChange={handleReferenceFieldInputChange}
             onSelectItem={(field: FieldSelection | null) => {
-              onRuleChange({ ...rule, referenceField: field || null });
+              if (!field) return;
+              onRuleChange({ ...rule, referenceField: field });
             }}
             placeholder="Field name | Content type name"
             itemToString={(item: FieldSelection | null) => (item ? item.displayName : '')}

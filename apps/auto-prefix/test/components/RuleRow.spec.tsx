@@ -4,6 +4,7 @@ import type { ComponentProps } from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import RuleRow from '../../src/components/RuleRow';
 import { Rule, FieldSelection, RuleValidation } from '../../src/utils/types';
+import { createEmptyField } from '../../src/utils/utils';
 
 describe('RuleRow', () => {
   const mockAvailableFields: FieldSelection[] = [
@@ -43,8 +44,8 @@ describe('RuleRow', () => {
 
   const mockRule: Rule = {
     id: 'rule-1',
-    parentField: null,
-    referenceField: null,
+    parentField: createEmptyField(),
+    referenceField: createEmptyField(),
   };
 
   const mockOnRuleChange = vi.fn();
@@ -130,7 +131,7 @@ describe('RuleRow', () => {
         expect(onRuleChangeSpy).toHaveBeenCalledWith({
           id: 'rule-1',
           parentField: mockAvailableFields[0],
-          referenceField: null,
+          referenceField: createEmptyField(),
         });
       });
     });
@@ -247,7 +248,7 @@ describe('RuleRow', () => {
       const ruleWithParentField: Rule = {
         id: 'rule-1',
         parentField: mockAvailableFields[0],
-        referenceField: null,
+        referenceField: createEmptyField(),
       };
 
       await renderRuleRow({ rule: ruleWithParentField });
@@ -261,7 +262,7 @@ describe('RuleRow', () => {
     it('should display pre-selected reference field', async () => {
       const ruleWithReferenceField: Rule = {
         id: 'rule-1',
-        parentField: null,
+        parentField: createEmptyField(),
         referenceField: mockAvailableFields[2],
       };
 
