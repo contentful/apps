@@ -140,7 +140,251 @@ After adding or changing code, post a short explanation. Explanation must includ
 - **Scope** (files/areas affected) and **dependencies** (reuse existing; propose new only if necessary).
 
 
-## 10) Before Responding - Verification Checklist
+## 10) Contentful Functions Organization
+
+When building App Actions with Contentful Functions, organize complex logic into modular helper files:
+
+**Recommended structure for complex functions:**
+
+```
+functions/
+├── my-action.ts              # Main handler (entry point)
+└── my-action/                # Helper modules
+    ├── constants.ts          # Field IDs, content type IDs, magic strings
+    ├── contentful.ts         # CMA operations and field resolution
+    ├── external-api.ts       # Third-party API integrations
+    ├── logging.ts            # Analytics, telemetry, audit logging
+    └── types.ts              # TypeScript interfaces and type guards
+```
+
+**Key patterns:**
+
+1. **CMA Client Initialization**: Use the context-provided client when available:
+
+```ts
+export const initContentfulManagementClient = (
+  context: FunctionEventContext<AppInstallationParameters>
+): PlainClientAPI => {
+  if (context.cma) return context.cma;
+  
+  if (!context.cmaClientOptions) {
+    throw new Error('CMA client options not available for this function type.');
+  }
+  
+  return createClient(context.cmaClientOptions, {
+    type: 'plain',
+    defaults: {
+      spaceId: context.spaceId,
+      environmentId: context.environmentId,
+    },
+  });
+};
+```
+
+2. **Type Guards**: Create reusable type guards for Contentful link types:
+
+```ts
+export const isAssetLink = (value: unknown): value is AssetLink => {
+  if (!value || typeof value !== 'object') return false;
+  const sys = (value as AssetLink).sys;
+  return sys?.type === 'Link' && sys?.linkType === 'Asset' && typeof sys?.id === 'string';
+};
+```
+
+3. **Error Handling with Status Codes**: Handle specific error codes for retry logic:
+
+```ts
+const getErrorStatusCode = (error: unknown): number | null => {
+  const maybeError = error as { status?: number; statusCode?: number };
+  return maybeError.statusCode ?? maybeError.status ?? null;
+};
+
+// Use in retry logic for 409 conflicts
+if (getErrorStatusCode(error) === 409 && attempt < maxRetries) {
+  // Fetch latest and retry
+}
+```
+
+---
+
+## 11) Multi-Locale Field Resolution
+
+Contentful fields can be localized or non-localized. When accessing field values:
+
+1. **Check field localization settings** via the content type:
+
+```ts
+export const resolveFieldLocalization = (
+  contentType: ContentTypeProps,
+  fieldId: string
+): { isLocalized: boolean; fieldName: string } | null => {
+  const field = contentType.fields.find((f) => f.id === fieldId);
+  if (!field) return null;
+  return { isLocalized: Boolean(field.localized), fieldName: field.name ?? fieldId };
+};
+```
+
+2. **Build fallback chains** for localized content:
+
+```ts
+export const buildFallbackChain = (
+  locales: LocaleProps[],
+  targetLocale: string,
+  defaultLocale: string
+): string[] => {
+  const localeMap = new Map(locales.map((l) => [l.code, l]));
+  const chain: string[] = [];
+  let current: string | undefined = targetLocale;
+  
+  while (current && !chain.includes(current)) {
+    chain.push(current);
+    current = localeMap.get(current)?.fallbackCode ?? undefined;
+  }
+  
+  if (!chain.includes(defaultLocale)) chain.push(defaultLocale);
+  return chain;
+};
+```
+
+3. **Resolve values with fallback**: For non-localized fields, use only the default locale:
+
+```ts
+const localeChain = isLocalized 
+  ? buildFallbackChain(locales, targetLocale, defaultLocale) 
+  : [defaultLocale];
+```
+
+---
+
+## 12) Browser-Side Heavy Computation
+
+For operations that may exceed serverless timeout limits (video processing, large file operations), prefer **client-side execution**:
+
+- **ffmpeg.wasm**: For video/audio processing in the browser
+- **Client-side tool execution**: In agent patterns, define tools on the server but execute them on the client using the CMA SDK
+
+**When to use client-side:**
+- Video encoding/transcoding
+- Large file manipulation
+- Operations requiring > 10 seconds execution time
+- Operations requiring browser APIs (Canvas, WebAudio, etc.)
+
+**Pattern for client-side tool execution (AI agents):**
+
+```ts
+// Server: Define tool schema (no execute function)
+const tools = {
+  generate_video: tool({
+    description: 'Generate a video from entry assets.',
+    inputSchema: z.object({ entryId: z.string() }),
+    // No execute - client handles this
+  }),
+};
+
+// Client: Handle tool calls
+const { messages } = useChat({
+  async onToolCall({ toolCall }) {
+    if (toolCall.toolName === 'generate_video') {
+      // Execute with SDK on client
+      const result = await generateVideoFromEntry(sdk.cma, toolCall.args.entryId);
+      return result;
+    }
+  },
+});
+```
+
+---
+
+## 13) SDK Notifier Pattern
+
+Use `sdk.notifier` for user-facing feedback:
+
+```ts
+// Error messages
+sdk.notifier.error('Audio generation failed. Please try again.');
+
+// Success messages
+sdk.notifier.success('Video generated and uploaded.');
+
+// Warnings
+sdk.notifier.warning('Video generated but no videoAsset field found to link.');
+```
+
+**Best practices:**
+- Keep messages user-friendly (avoid technical jargon)
+- Log technical details to console for debugging
+- Use appropriate severity (error vs warning vs success)
+
+---
+
+## 14) App Manifest Configuration
+
+The `contentful-app-manifest.json` defines app configuration:
+
+```json
+{
+  "id": "my-app",
+  "name": "My App",
+  "locations": [
+    { "location": "app-config" },
+    { "location": "entry-sidebar" },
+    { "location": "page" }
+  ],
+  "functions": [
+    {
+      "id": "myFunction",
+      "name": "My Function",
+      "path": "functions/my-function.ts",
+      "entryFile": "./functions/my-function.ts",
+      "accepts": ["appaction.call"],
+      "allowNetworks": [
+        "api.contentful.com",
+        "api.external-service.com"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "myAction",
+      "name": "My Action",
+      "type": "function-invocation",
+      "functionId": "myFunction",
+      "parameters": [
+        { "id": "entryId", "type": "Symbol", "name": "Entry ID", "required": true },
+        { "id": "targetLocale", "type": "Symbol", "name": "Target Locale", "required": true }
+      ]
+    }
+  ]
+}
+```
+
+**Key points:**
+- `allowNetworks`: Whitelist external domains the function can access
+- `accepts`: Event types the function responds to (`appaction.call`, `appevent.handler`, etc.)
+- Action `parameters`: Define the contract between frontend and function
+
+---
+
+## 15) README Documentation Standards
+
+Each app should have a comprehensive README including:
+
+1. **Features**: Bullet list of what the app does
+2. **Architecture**: Frontend stack, backend runtime, key libraries
+3. **Prerequisites**: Node version, API keys, permissions needed
+4. **Installation**: Step-by-step setup instructions
+5. **Content Model Setup**: Required fields, content types, relationships
+6. **Usage**: How to use each app location
+7. **Configuration**: App installation parameters explained
+8. **Project Structure**: Directory tree with descriptions
+9. **Development**: Available scripts, local dev workflow
+10. **How It Works**: Flow diagrams or step-by-step explanations
+
+**README length guideline**: Comprehensive apps may have 200-400 lines; simple apps can be shorter but should cover the essentials.
+
+---
+
+## 16) Before Responding - Verification Checklist
 
 After making code changes, verify:
 
@@ -154,7 +398,9 @@ After making code changes, verify:
 
 If any check fails, do not proceed.
 
-## 11) Required Response Structure
+---
+
+## 17) Required Response Structure
 
 Only after all checks pass, respond with:
 **Goal** — what is changing and why
