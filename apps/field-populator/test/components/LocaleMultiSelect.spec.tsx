@@ -1,15 +1,11 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import LocaleMultiSelect from '../../src/components/LocaleMultiSelect';
-import { SimplifiedLocale, mapLocaleNamesToSimplifiedLocales } from '../../src/utils/locales';
+import { mapLocaleNamesToSimplifiedLocales } from '../../src/utils/locales';
 import { mockSdk } from '../mocks';
 
 describe('LocaleMultiSelect component', () => {
   const mockAvailableLocales = mapLocaleNamesToSimplifiedLocales(mockSdk.locales.names);
-
-  const mockSelectedLocales: SimplifiedLocale[] = [
-    mockAvailableLocales[0], // English (United States)
-  ];
 
   beforeEach(() => {
     vi.clearAllMocks();

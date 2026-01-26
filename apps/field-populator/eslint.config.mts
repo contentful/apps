@@ -7,6 +7,16 @@ import unusedImports from 'eslint-plugin-unused-imports';
 
 export default defineConfig([
   {
+    ignores: [
+      'build/**',
+      'dist/**',
+      'node_modules/**',
+      'coverage/**',
+      '*.config.{js,ts,mjs,cjs}',
+      'vite.config.ts',
+    ],
+  },
+  {
     settings: {
       react: {
         version: 'detect',
