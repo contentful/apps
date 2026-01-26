@@ -1,4 +1,4 @@
-import { EntryProps } from 'contentful-management';
+import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { parseDate, msPerDay } from './dateCalculator';
 import { formatMonthYear, formatMonthYearDisplay } from './dateFormat';
 import type {
@@ -13,7 +13,7 @@ import { TimeRange } from './types';
 export function generateNewEntriesChartData(
   entries: EntryProps[],
   options: TrendsDataProcessorOptions,
-  contentTypes?: Map<string, string>
+  contentTypes?: Map<string, ContentTypeProps>
 ): ChartDataPoint[] {
   const { startDate, filteredEntries, allMonths } = setupChartData(entries, options, contentTypes);
 
@@ -34,7 +34,7 @@ export function generateNewEntriesChartData(
 export function generateContentTypeChartData(
   entries: EntryProps[],
   options: TrendsDataProcessorOptions,
-  contentTypes?: Map<string, string>
+  contentTypes?: Map<string, ContentTypeProps>
 ): { data: ChartDataPoint[]; processedContentTypes: Map<string, string> } {
   const { startDate, filteredEntries, allMonths } = setupChartData(entries, options, contentTypes);
 
@@ -53,9 +53,9 @@ export function generateContentTypeChartData(
 
   const processedContentTypes = new Map<string, string>();
   contentTypeIds.forEach((contentTypeId) => {
-    const contentTypeName = contentTypes?.get(contentTypeId);
-    if (contentTypeName) {
-      processedContentTypes.set(contentTypeId, contentTypeName);
+    const contentType = contentTypes?.get(contentTypeId);
+    if (contentType) {
+      processedContentTypes.set(contentTypeId, contentType.name);
     }
   });
 
@@ -66,7 +66,7 @@ export function generateCreatorChartData(
   entries: EntryProps[],
   options: TrendsDataProcessorOptions,
   creatorsNames?: Map<string, string>,
-  contentTypes?: Map<string, string>
+  contentTypes?: Map<string, ContentTypeProps>
 ): { data: ChartDataPoint[]; creators: string[] } {
   const { startDate, filteredEntries, allMonths } = setupChartData(entries, options, contentTypes);
 
@@ -147,7 +147,7 @@ export function generateMonthRange(startDate: Date, endDate: Date): string[] {
 
 function filterEntriesByContentTypes(
   entries: EntryProps[],
-  contentTypes?: Map<string, string>
+  contentTypes?: Map<string, ContentTypeProps>
 ): EntryProps[] {
   if (!contentTypes || contentTypes.size === 0) {
     return entries;
@@ -207,7 +207,7 @@ function buildChartDataFromMonthMap(
 function setupChartData(
   entries: EntryProps[],
   options: TrendsDataProcessorOptions,
-  contentTypes?: Map<string, string>
+  contentTypes?: Map<string, ContentTypeProps>
 ): ChartDataSetup {
   const startDate = getStartDateForTimeRange(options.timeRange);
   const now = new Date();

@@ -39,3 +39,27 @@ export type MonthMetrics = {
   newContent: number;
   avgTimeToPublish: number | undefined;
 };
+export interface Creator {
+  id: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+export enum EntryStatus {
+  Draft = 'Draft',
+  Published = 'Published',
+  Changed = 'Changed',
+}
+
+export interface ScheduledContentItem {
+  id: string;
+  title: string;
+  contentType: string;
+  creator: Creator | null;
+  publishedDate: string | null;
+  status: EntryStatus;
+  scheduledFor: {
+    datetime: string;
+    timezone?: string;
+  };
+}

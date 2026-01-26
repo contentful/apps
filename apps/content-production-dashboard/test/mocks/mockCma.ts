@@ -31,6 +31,12 @@ const mockCma: any = {
       ],
     }),
   },
+  user: {
+    getManyForSpace: vi.fn().mockResolvedValue({
+      items: [],
+      total: 0,
+    }),
+  },
 };
 
 export const getManyEntries = (entries: EntryProps[], total?: number) => {

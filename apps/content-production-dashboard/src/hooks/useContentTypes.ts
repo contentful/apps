@@ -1,10 +1,11 @@
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useQuery } from '@tanstack/react-query';
+import { ContentTypeProps } from 'contentful-management';
 import { fetchContentTypes, FetchContentTypesResult } from '../utils/fetchContentTypes';
 
 export interface UseContentTypesResult {
-  contentTypes: Map<string, string>;
+  contentTypes: Map<string, ContentTypeProps>;
   isFetchingContentTypes: boolean;
   fetchingContentTypesError: Error | null;
   fetchedAt: Date | undefined;

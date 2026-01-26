@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ContentTrendsTabs } from '../../src/components/ContentTrendsTabs';
 import { QueryProvider } from '../../src/providers/QueryProvider';
 import { createMockEntry, createMockUser, renderWithAct } from '../utils/testHelpers';
-import { EntryProps } from 'contentful-management';
+import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { TimeRange } from '../../src/utils/types';
 
 const mockGenerateNewEntriesChartData = vi.fn();
@@ -17,13 +17,13 @@ vi.mock('../../src/utils/trendsDataProcessor', () => ({
   generateContentTypeChartData: (
     entries: EntryProps[],
     options: any,
-    contentTypes?: Map<string, string>
+    contentTypes?: Map<string, ContentTypeProps>
   ) => mockGenerateContentTypeChartData(entries, options, contentTypes),
   generateCreatorChartData: (
     entries: EntryProps[],
     options: any,
     creatorsNames?: Map<string, string>,
-    contentTypes?: Map<string, string>
+    contentTypes?: Map<string, ContentTypeProps>
   ) => mockGenerateCreatorChartData(entries, options, creatorsNames, contentTypes),
 }));
 
@@ -56,7 +56,7 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
-const mockContentTypes = new Map<string, string>();
+const mockContentTypes = new Map<string, ContentTypeProps>();
 const mockCreatorsNames = new Map<string, string>();
 let mockIsFetchingContentTypes = false;
 
@@ -102,11 +102,26 @@ describe('ContentTrendsTabs component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockContentTypes.clear();
-    mockContentTypes.set('article', 'Article');
-    mockContentTypes.set('blogPost', 'Blog Post');
-    mockContentTypes.set('page', 'Page');
-    mockContentTypes.set('product', 'Product');
-    mockContentTypes.set('video', 'Video');
+    mockContentTypes.set('article', {
+      sys: { id: 'article', type: 'ContentType', version: 0 },
+      name: 'Article',
+    } as ContentTypeProps);
+    mockContentTypes.set('blogPost', {
+      sys: { id: 'blogPost', type: 'ContentType', version: 0 },
+      name: 'Blog Post',
+    } as ContentTypeProps);
+    mockContentTypes.set('page', {
+      sys: { id: 'page', type: 'ContentType', version: 0 },
+      name: 'Page',
+    } as ContentTypeProps);
+    mockContentTypes.set('product', {
+      sys: { id: 'product', type: 'ContentType', version: 0 },
+      name: 'Product',
+    } as ContentTypeProps);
+    mockContentTypes.set('video', {
+      sys: { id: 'video', type: 'ContentType', version: 0 },
+      name: 'Video',
+    } as ContentTypeProps);
     mockIsFetchingContentTypes = false;
 
     mockCreatorsNames.clear();

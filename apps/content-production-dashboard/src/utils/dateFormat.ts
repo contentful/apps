@@ -32,7 +32,10 @@ export const parse12HourTimeToDate = (date: Date, timeString: string): Date => {
   return newDate;
 };
 
-export const formatDateTimeWithTimezone = (dateString: string | undefined): string => {
+export const formatDateTimeWithTimezone = (
+  dateString: string | undefined,
+  timezone?: string
+): string => {
   if (!dateString) return '—';
   try {
     const date = new Date(dateString);
@@ -43,6 +46,7 @@ export const formatDateTimeWithTimezone = (dateString: string | undefined): stri
       hour: '2-digit',
       minute: '2-digit',
       timeZoneName: 'short',
+      ...(timezone && { timeZone: timezone }),
     });
   } catch {
     return '—';

@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Table, Pagination, Note, Box, Skeleton, Text, Icon } from '@contentful/f36-components';
 import { useReleases } from '../hooks/useReleases';
 import { GearSixIcon } from '@contentful/f36-icons';
-import { RELEASES_PER_PAGE } from '../utils/consts';
+import { ITEMS_PER_PAGE } from '../utils/consts';
 import tokens from '@contentful/f36-tokens';
 import { styles } from './ReleasesTable.styles';
 import { ReleasesTableActions } from './ReleasesTableActions';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { formatDateTimeWithTimezone } from '../utils/dateFormat';
+import { formatUserName } from '../utils/UserUtils';
 
 const ReleasesTableHeader = () => {
   return (
@@ -34,15 +35,6 @@ export const ReleasesTable = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const { releases, total, isFetchingReleases, fetchingReleasesError, refetchReleases } =
     useReleases(currentPage);
-
-  const formatUserName = (
-    user: { id: string; firstName?: string; lastName?: string } | null
-  ): string => {
-    if (!user) return '—';
-    const firstName = user.firstName || '';
-    const lastName = user.lastName || '';
-    return `${firstName} ${lastName}`.trim() || '—';
-  };
 
   if (fetchingReleasesError) {
     return (
@@ -91,7 +83,10 @@ export const ReleasesTable = () => {
                 <Text fontWeight="fontWeightDemiBold">{release.title}</Text>
               </Table.Cell>
               <Table.Cell style={styles.dateCell}>
-                {formatDateTimeWithTimezone(release.scheduledFor.datetime)}
+                {formatDateTimeWithTimezone(
+                  release.scheduledFor.datetime,
+                  release.scheduledFor.timezone
+                )}
               </Table.Cell>
               <Table.Cell style={styles.itemsCell}>{release.itemsCount} items</Table.Cell>
               <Table.Cell style={styles.updatedCell}>
@@ -114,7 +109,7 @@ export const ReleasesTable = () => {
           activePage={currentPage}
           onPageChange={setCurrentPage}
           totalItems={total}
-          itemsPerPage={RELEASES_PER_PAGE}
+          itemsPerPage={ITEMS_PER_PAGE}
         />
       </Box>
     </>

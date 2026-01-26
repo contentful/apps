@@ -3,6 +3,7 @@ import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { ScheduledActionProps, UserProps } from 'contentful-management';
 import { fetchReleases } from '../../src/utils/fetchReleases';
 import { mockCma } from '../mocks/mockCma';
+import { createMockScheduledAction, createMockUser } from './testHelpers';
 
 describe('fetchReleases', () => {
   let mockSdk: HomeAppSDK | PageAppSDK;
@@ -90,12 +91,12 @@ describe('fetchReleases', () => {
         title: 'My Launch Release',
         itemsCount: 10,
       });
-      const user = createMockUser({ sys: { id: 'user-1' } as any });
+      const user = createMockUser({ id: 'user-1', firstName: 'John', lastName: 'Doe' });
 
       setupMocks({
         scheduledActions: [action],
         launchReleases: [release],
-        users: [user],
+        users: [user as UserProps],
       });
 
       const result = await fetchReleases(mockSdk);
@@ -130,7 +131,7 @@ describe('fetchReleases', () => {
       setupMocks({
         scheduledActions: [action],
         timelineReleases: [release],
-        users: [user],
+        users: [user as UserProps],
       });
 
       const result = await fetchReleases(mockSdk);
@@ -163,7 +164,7 @@ describe('fetchReleases', () => {
         scheduledActions: [launchAction, timelineAction],
         launchReleases: [launchRelease],
         timelineReleases: [timelineRelease],
-        users: [user],
+        users: [user as UserProps],
       });
 
       const result = await fetchReleases(mockSdk);
@@ -175,60 +176,6 @@ describe('fetchReleases', () => {
     });
   });
 });
-
-const createMockScheduledAction = (
-  overrides?: Partial<ScheduledActionProps>
-): ScheduledActionProps => {
-  const now = new Date();
-  const futureDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-
-  const defaultAction: ScheduledActionProps = {
-    sys: {
-      id: 'action-1',
-      type: 'ScheduledAction',
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
-      version: 1,
-      space: { sys: { id: 'space-1', type: 'Link', linkType: 'Space' } },
-      status: 'scheduled',
-      createdBy: {
-        sys: {
-          id: 'user-1',
-          type: 'Link',
-          linkType: 'User',
-        },
-      },
-      updatedBy: {
-        sys: {
-          id: 'user-1',
-          type: 'Link',
-          linkType: 'User',
-        },
-      },
-    },
-    entity: {
-      sys: {
-        id: 'release-1',
-        type: 'Link',
-        linkType: 'Release',
-      },
-    },
-    scheduledFor: {
-      datetime: futureDate.toISOString(),
-      timezone: 'UTC',
-    },
-    action: 'publish',
-  } as ScheduledActionProps;
-
-  if (overrides?.sys) {
-    defaultAction.sys = { ...defaultAction.sys, ...(overrides.sys as any) };
-    if ((overrides.sys as any).createdBy) {
-      defaultAction.sys.createdBy = (overrides.sys as any).createdBy;
-    }
-  }
-
-  return { ...defaultAction, ...overrides, sys: defaultAction.sys } as ScheduledActionProps;
-};
 
 const createMockRelease = (
   type: 'launch' | 'timeline',
@@ -252,38 +199,10 @@ const createMockRelease = (
   return baseRelease;
 };
 
-const createMockUser = (overrides?: Partial<UserProps>): UserProps => {
-  return {
-    sys: {
-      id: 'user-1',
-      type: 'User',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    ...overrides,
-  } as UserProps;
-};
-
 const createActionWithRelease = (actionId: string, releaseId: string, userId = 'user-1') =>
   createMockScheduledAction({
-    sys: {
-      id: actionId,
-      createdBy: {
-        sys: {
-          id: userId,
-          type: 'Link',
-          linkType: 'User',
-        },
-      },
-    } as any,
-    entity: {
-      sys: {
-        id: releaseId,
-        type: 'Link',
-        linkType: 'Release',
-      },
-    },
+    id: actionId,
+    entityId: releaseId,
+    entityLinkType: 'Release',
+    createdById: userId,
   });
