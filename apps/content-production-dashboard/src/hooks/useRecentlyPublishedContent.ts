@@ -1,6 +1,6 @@
 import { useContentTypes } from './useContentTypes';
 import { useUsers } from './useUsers';
-import { RELEASES_PER_PAGE } from '../utils/consts';
+import { ITEMS_PER_PAGE } from '../utils/consts';
 import { EntryProps } from 'contentful-management';
 import { isWithin, parseDate } from '../utils/dateCalculator';
 import { getCreatorFromEntry } from '../utils/UserUtils';
@@ -34,7 +34,7 @@ export function useRecentlyPublishedContent(
   recentlyPublishedDate: Date,
   defaultLocale: string
 ): UseRecentlyPublishedResult {
-  const skip = page * RELEASES_PER_PAGE;
+  const skip = page * ITEMS_PER_PAGE;
   const now = new Date();
 
   const recentlyPublishedEntries = entries.filter((entry) => {
@@ -76,7 +76,7 @@ export function useRecentlyPublishedContent(
   const isFetching = isFetchingContentTypes || isFetchingUsers;
 
   return {
-    items: recentlyPublishedItems.slice(skip, skip + RELEASES_PER_PAGE),
+    items: recentlyPublishedItems.slice(skip, skip + ITEMS_PER_PAGE),
     total: recentlyPublishedItems.length,
     isFetching,
     refetch: () => {

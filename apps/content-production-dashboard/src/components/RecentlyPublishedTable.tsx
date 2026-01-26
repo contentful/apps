@@ -2,7 +2,7 @@ import { Box, Pagination, Skeleton, Table } from '@contentful/f36-components';
 import { styles } from './RecentlyPublishedTable.styles';
 import { EmptyStateTable } from './EmptyStateTable';
 import { EntryProps } from 'contentful-management';
-import { RELEASES_PER_PAGE } from '../utils/consts';
+import { ITEMS_PER_PAGE } from '../utils/consts';
 import { formatDateTimeWithTimezone } from '../utils/dateFormat';
 import { formatUserName } from '../utils/UserUtils';
 import { EntryLink } from './EntryLink';
@@ -83,13 +83,13 @@ export const RecentlyPublishedTable = ({ entries }: { entries: EntryProps[] }) =
           ))}
         </Table.Body>
       </Table>
-      {total > RELEASES_PER_PAGE && (
+      {total > ITEMS_PER_PAGE && (
         <Box marginTop="spacingL">
           <Pagination
             activePage={currentPage}
             onPageChange={setCurrentPage}
             totalItems={total}
-            itemsPerPage={RELEASES_PER_PAGE}
+            itemsPerPage={ITEMS_PER_PAGE}
           />
         </Box>
       )}

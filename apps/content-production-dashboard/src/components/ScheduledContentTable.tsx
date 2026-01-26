@@ -101,9 +101,6 @@ export const ScheduledContentTable = ({
               <Table.Cell style={styles.publishedDateCell}>
                 {formatDateTimeWithTimezone(item.publishedDate || '')}
               </Table.Cell>
-              <Table.Cell style={styles.publishedDateCell}>
-                {formatDateTimeWithTimezone(item.publishedDate || '')}
-              </Table.Cell>
               <Table.Cell style={styles.statusCell}>
                 <Badge variant={getStatusBadgeVariant(item.status)}>{item.status}</Badge>
               </Table.Cell>
