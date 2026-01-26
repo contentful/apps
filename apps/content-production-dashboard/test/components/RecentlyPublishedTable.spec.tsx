@@ -89,6 +89,7 @@ describe('RecentlyPublishedTable component', () => {
       expect(screen.getByText('Published Date')).toBeInTheDocument();
       expect(screen.getByText('Content Type')).toBeInTheDocument();
       expect(screen.getByText('Creator')).toBeInTheDocument();
+      expect(screen.getByTestId('recently-published-table-skeleton')).toBeInTheDocument();
     });
   });
 

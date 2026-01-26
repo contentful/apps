@@ -3,6 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useRecentlyPublishedContent } from '../../src/hooks/useRecentlyPublishedContent';
 import { createMockEntry, createMockContentType, createMockUser } from '../utils/testHelpers';
 import { createQueryProviderWrapper } from '../utils/createQueryProviderWrapper';
+import { subDays } from '../../src/utils/dateCalculator';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => ({
@@ -50,8 +51,7 @@ describe('useRecentlyPublishedContent', () => {
         error: null,
       });
 
-      const now = new Date();
-      const recentlyPublishedDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const recentlyPublishedDate = subDays(new Date(), 7);
 
       const { result } = renderHook(
         () => useRecentlyPublishedContent(0, [], recentlyPublishedDate, 'en-US'),
@@ -69,9 +69,8 @@ describe('useRecentlyPublishedContent', () => {
 
   describe('Data fetching and mapping', () => {
     it('fetches and maps recently published entries', async () => {
-      const now = new Date();
-      const recentlyPublishedDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const publishedDate = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+      const recentlyPublishedDate = subDays(new Date(), 7);
+      const publishedDate = subDays(new Date(), 3);
 
       const entry1 = createMockEntry({
         id: 'entry-1',
@@ -149,21 +148,20 @@ describe('useRecentlyPublishedContent', () => {
     });
 
     it('filters entries by published date range and returns only entries in range', async () => {
-      const now = new Date();
-      const recentlyPublishedDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const recentlyPublishedDate = subDays(new Date(), 7);
 
       const entryInRange = createMockEntry({
         id: 'entry-1',
         contentTypeId: 'blogPost',
         createdById: 'user-1',
-        publishedAt: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        publishedAt: subDays(new Date(), 3).toISOString(),
       });
 
       const entryOutOfRange = createMockEntry({
         id: 'entry-2',
         contentTypeId: 'article',
         createdById: 'user-2',
-        publishedAt: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+        publishedAt: subDays(new Date(), 10).toISOString(),
       });
 
       const entryNoPublished = createMockEntry({

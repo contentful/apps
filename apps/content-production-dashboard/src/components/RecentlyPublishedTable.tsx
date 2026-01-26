@@ -50,7 +50,7 @@ export const RecentlyPublishedTable = ({ entries }: { entries: EntryProps[] }) =
       <>
         <Table>
           <RecentlyPublishedTableHeader />
-          <Table.Body>
+          <Table.Body testId="recently-published-table-skeleton">
             <Skeleton.Row rowCount={5} columnCount={6} />
           </Table.Body>
         </Table>
