@@ -1,31 +1,18 @@
-import { Box, Pagination, Skeleton, Table } from '@contentful/f36-components';
+import { useState, useMemo } from 'react';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { styles } from './RecentlyPublishedTable.styles';
-import { EmptyStateTable } from './EmptyStateTable';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
-import { ITEMS_PER_PAGE } from '../utils/consts';
 import { formatDateTimeWithTimezone } from '../utils/dateFormat';
 import { formatUserName } from '../utils/UserUtils';
 import { EntryLink } from './EntryLink';
-import { useState } from 'react';
-import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import { useRecentlyPublishedContent } from '../hooks/useRecentlyPublishedContent';
-import { ErrorDisplay } from './ErrorDisplay';
+import {
+  useRecentlyPublishedContent,
+  RecentlyPublishedItem,
+} from '../hooks/useRecentlyPublishedContent';
 import { subDays } from '../utils/dateCalculator';
 import type { AppInstallationParameters } from '../locations/ConfigScreen';
-
-const RecentlyPublishedTableHeader = () => {
-  return (
-    <Table.Head>
-      <Table.Row>
-        <Table.Cell style={styles.titleCell}>Title</Table.Cell>
-        <Table.Cell style={styles.publishedDateCell}>Published Date</Table.Cell>
-        <Table.Cell style={styles.contentTypeCell}>Content Type</Table.Cell>
-        <Table.Cell style={styles.creatorCell}>Creator</Table.Cell>
-      </Table.Row>
-    </Table.Head>
-  );
-};
+import { ContentTable, TableColumn } from './ContentTable';
 
 export const RecentlyPublishedTable = ({
   entries,
@@ -48,58 +35,51 @@ export const RecentlyPublishedTable = ({
     contentTypes
   );
 
-  if (error) {
-    return <ErrorDisplay error={error} />;
-  }
-
-  if (isFetching) {
-    return (
-      <>
-        <Table>
-          <RecentlyPublishedTableHeader />
-          <Table.Body testId="recently-published-table-skeleton">
-            <Skeleton.Row rowCount={5} columnCount={6} />
-          </Table.Body>
-        </Table>
-      </>
-    );
-  }
-
-  if (items.length === 0) {
-    return <EmptyStateTable />;
-  }
+  const columns = useMemo<TableColumn<RecentlyPublishedItem>[]>(
+    () => [
+      {
+        id: 'title',
+        label: 'Title',
+        style: styles.titleCell,
+        render: (item) => (
+          <EntryLink entryId={item.id} spaceId={sdk.ids.space}>
+            {item.title}
+          </EntryLink>
+        ),
+      },
+      {
+        id: 'publishedDate',
+        label: 'Published Date',
+        style: styles.publishedDateCell,
+        render: (item) => formatDateTimeWithTimezone(item.publishedDate || undefined),
+      },
+      {
+        id: 'contentType',
+        label: 'Content Type',
+        style: styles.contentTypeCell,
+        render: (item) => item.contentType,
+      },
+      {
+        id: 'creator',
+        label: 'Creator',
+        style: styles.creatorCell,
+        render: (item) => formatUserName(item.creator),
+      },
+    ],
+    [sdk.ids.space]
+  );
 
   return (
-    <>
-      <Table>
-        <RecentlyPublishedTableHeader />
-        <Table.Body>
-          {items.map((item) => (
-            <Table.Row key={item.id}>
-              <Table.Cell style={styles.titleCell}>
-                <EntryLink entryId={item.id} spaceId={sdk.ids.space}>
-                  {item.title}
-                </EntryLink>
-              </Table.Cell>
-              <Table.Cell style={styles.publishedDateCell}>
-                {formatDateTimeWithTimezone(item.publishedDate || undefined)}
-              </Table.Cell>
-              <Table.Cell style={styles.contentTypeCell}>{item.contentType}</Table.Cell>
-              <Table.Cell style={styles.creatorCell}>{formatUserName(item.creator)}</Table.Cell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table>
-      {total > ITEMS_PER_PAGE && (
-        <Box marginTop="spacingL">
-          <Pagination
-            activePage={currentPage}
-            onPageChange={setCurrentPage}
-            totalItems={total}
-            itemsPerPage={ITEMS_PER_PAGE}
-          />
-        </Box>
-      )}
-    </>
+    <ContentTable
+      items={items}
+      total={total}
+      isFetching={isFetching}
+      error={error}
+      columns={columns}
+      currentPage={currentPage}
+      onPageChange={setCurrentPage}
+      testId="recently-published-table"
+      skeletonColumnCount={5}
+    />
   );
 };
