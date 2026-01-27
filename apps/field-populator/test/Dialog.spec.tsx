@@ -4,6 +4,8 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { mockSdk } from './mocks';
 import Dialog from '../src/locations/Dialog';
 
+const defaultLocaleNames = { ...mockSdk.locales.names };
+
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useAutoResizer: () => {},
@@ -12,6 +14,7 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 describe('Dialog component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSdk.locales.names = { ...defaultLocaleNames };
   });
 
   it('renders the dialog with form controls', async () => {
@@ -20,8 +23,8 @@ describe('Dialog component', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Select source locale')).toBeInTheDocument();
-      expect(screen.getByText('Select target locales to populate')).toBeInTheDocument();
+      expect(screen.getByText('Source locale')).toBeInTheDocument();
+      expect(screen.getByText('Target locales')).toBeInTheDocument();
     });
   });
 
@@ -116,16 +119,47 @@ describe('Dialog component', () => {
       expect(screen.getByText('Populate fields')).toBeInTheDocument();
     });
 
-    // Initially, "Select source locale" appears only once as a label
-    expect(screen.getAllByText('Select source locale')).toHaveLength(1);
+    expect(screen.queryByText('Select source locale')).not.toBeInTheDocument();
 
     const populateButton = screen.getByText('Populate fields');
     await user.click(populateButton);
 
-    // After clicking, validation message appears - now there should be 2 instances (label + validation message)
     await waitFor(() => {
-      expect(screen.getAllByText('Select source locale')).toHaveLength(2);
+      expect(screen.getByText('Select source locale')).toBeInTheDocument();
     });
+  });
+
+  it('filters target locales to the same family and excludes the source locale', async () => {
+    const user = userEvent.setup();
+    mockSdk.locales.names = {
+      ...mockSdk.locales.names,
+      'en-GB': 'English (United Kingdom)',
+      'en-CA': 'English (Canada)',
+    };
+
+    await act(async () => {
+      render(<Dialog />);
+    });
+
+    const sourceSelect = screen.getByTestId('source-locale-select');
+    await user.selectOptions(sourceSelect, 'en-US');
+
+    const targetTrigger = await screen.findByText('Select one or more');
+    await user.click(targetTrigger);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('checkbox', { name: 'English (United Kingdom)' })
+      ).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'English (Canada)' })).toBeInTheDocument();
+    });
+
+    expect(
+      screen.queryByRole('checkbox', { name: 'English (United States)' })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: 'German' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: 'French' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: 'Spanish (Spain)' })).not.toBeInTheDocument();
   });
 
   it('shows validation error when trying to populate without selecting target locales', async () => {
