@@ -1,4 +1,4 @@
-import { CMAClient, ConfigAppSDK } from '@contentful/app-sdk';
+import { AppState, CMAClient, ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Box,
   Flex,
@@ -95,19 +95,19 @@ const ConfigScreen = () => {
   };
 
   const addAppToFields = async () => {
-    const state = (await sdk.app.getCurrentState()) || { EditorInterface: {} };
+    const targetState: { EditorInterface: AppState['EditorInterface'] } = { EditorInterface: {} };
 
     for (const rule of parameters.rules) {
       const fieldId = rule.referenceField.fieldId;
       const contentTypeId = rule.referenceField.contentTypeId;
       if (fieldId && contentTypeId) {
-        state.EditorInterface[contentTypeId] = {
-          controls: [...(state.EditorInterface[contentTypeId]?.controls || []), { fieldId }],
+        targetState.EditorInterface[contentTypeId] = {
+          controls: [{ fieldId }],
         };
       }
     }
 
-    return state;
+    return targetState;
   };
 
   const onConfigure = useCallback(async () => {
