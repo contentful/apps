@@ -14,6 +14,6 @@ describe('Sidebar component', () => {
     const { getByText } = render(<Sidebar />);
 
     expect(getByText('Target locale')).toBeInTheDocument();
-    expect(getByText('Generate Audio')).toBeInTheDocument();
+    expect(getByText('Generate audio')).toBeInTheDocument();
   });
 });

@@ -1,13 +1,4 @@
-import {
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  Note,
-  Select,
-  Spinner,
-  Text,
-} from '@contentful/f36-components';
+import { Box, Button, Flex, FormControl, Note, Select, Text } from '@contentful/f36-components';
 import { EntryFieldAPI, SidebarAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useMemo, useState } from 'react';
@@ -330,38 +321,33 @@ const Sidebar = () => {
 
   return (
     <Flex flexDirection="column" gap="spacingM">
-      <FormControl marginBottom="spacingXs">
-        <FormControl.Label>Target locale</FormControl.Label>
-        <Box
-          maxWidth="95%"
-          paddingLeft="spacingXs"
-          paddingRight="spacingXs"
-          paddingBottom="spacingXs"
-          css={{ overflow: 'visible' }}>
-          <Select
-            id="audioLocale"
-            name="audioLocale"
-            value={selectedLocale}
-            onChange={(event) => setSelectedLocale(event.target.value)}
-            isDisabled={isLoading}>
-            {localeOptions.map((locale) => (
-              <Select.Option key={locale.value} value={locale.value}>
-                {locale.label}
-              </Select.Option>
-            ))}
-          </Select>
-        </Box>
-      </FormControl>
-      {isLoading ? (
-        <Flex alignItems="center" gap="spacingS">
-          <Spinner size="small" />
-          <Text>Generating audio...</Text>
-        </Flex>
-      ) : (
-        <Button variant="primary" onClick={handleGenerateAudio} isDisabled={isLoading} isFullWidth>
-          Generate Audio
+      <Flex flexDirection="column" gap="spacingS">
+        <FormControl marginBottom="spacingXs">
+          <FormControl.Label>Target locale</FormControl.Label>
+          <Box width="100%" css={{ overflow: 'visible' }}>
+            <Select
+              id="audioLocale"
+              name="audioLocale"
+              value={selectedLocale}
+              onChange={(event) => setSelectedLocale(event.target.value)}
+              isDisabled={isLoading}>
+              {localeOptions.map((locale) => (
+                <Select.Option key={locale.value} value={locale.value}>
+                  {locale.label}
+                </Select.Option>
+              ))}
+            </Select>
+          </Box>
+        </FormControl>
+        <Button
+          variant="primary"
+          onClick={handleGenerateAudio}
+          isDisabled={isLoading}
+          isLoading={isLoading}
+          isFullWidth>
+          Generate audio
         </Button>
-      )}
+      </Flex>
       {audioUrl && audioLocale === selectedLocale ? <audio controls src={audioUrl} /> : null}
       <Flex flexDirection="column" gap="spacingS">
         <Text fontWeight="fontWeightDemiBold">Social Video</Text>
@@ -378,20 +364,14 @@ const Sidebar = () => {
             Missing field: videoAsset. The video will be uploaded but not linked.
           </Note>
         ) : null}
-        {isVideoLoading ? (
-          <Flex alignItems="center" gap="spacingS">
-            <Spinner size="small" />
-            <Text>Rendering video...</Text>
-          </Flex>
-        ) : (
-          <Button
-            variant="secondary"
-            onClick={handleGenerateVideo}
-            isDisabled={isVideoLoading || isLoading || !imageFieldId || !hasAudioAsset}
-            isFullWidth>
-            Generate Social Video
-          </Button>
-        )}
+        <Button
+          variant="secondary"
+          onClick={handleGenerateVideo}
+          isDisabled={isVideoLoading || isLoading || !imageFieldId || !hasAudioAsset}
+          isLoading={isVideoLoading}
+          isFullWidth>
+          Generate social video
+        </Button>
       </Flex>
     </Flex>
   );

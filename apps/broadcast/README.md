@@ -136,7 +136,7 @@ Set `AGENT_DEBUG=true` when starting the server to log the serialized model mess
 1. **Open an entry** in Contentful that has the required fields (`body` and `audioAsset`)
 2. **Open the Sidebar** location where the Broadcast app is installed
 3. **Select the target locale** from the dropdown (defaults to the space's default locale)
-4. **Click "Generate Audio"** to convert the `body` field text into an audio file
+4. **Click "Generate audio"** to convert the `body` field text into an audio file
 5. The generated MP3 will be:
    - Uploaded to Contentful
    - Processed and published as an Asset
@@ -147,7 +147,7 @@ Set `AGENT_DEBUG=true` when starting the server to log the serialized model mess
 
 1. **Ensure fields exist**: `audioAsset` (generated), `featuredImage` or `image`, and `videoAsset`
 2. **Open the Sidebar** and scroll to the Social Video section
-3. **Click "Generate Social Video"**
+3. **Click "Generate social video"**
 4. The app will:
    - Download the published audio asset and image
    - Render an MP4 in the browser with ffmpeg.wasm
