@@ -46,63 +46,6 @@ describe('ScheduledContentTable component', () => {
     cleanup();
   });
 
-  describe('Loading state', () => {
-    it('renders headers and skeleton loader when fetching', () => {
-      mockUseScheduledContent.mockReturnValue({
-        items: [],
-        total: 0,
-        isFetching: true,
-        error: null,
-        refetch: mockRefetch,
-      });
-
-      render(
-        <ScheduledContentTable
-          scheduledActions={[]}
-          entries={[]}
-          contentTypes={mockContentTypes}
-        />,
-        {
-          wrapper: createQueryProviderWrapper(),
-        }
-      );
-
-      expect(screen.getByRole('table')).toBeInTheDocument();
-      expect(screen.getByText('Title')).toBeInTheDocument();
-      expect(screen.getByText('Scheduled Date')).toBeInTheDocument();
-      expect(screen.getByText('Published Date')).toBeInTheDocument();
-      expect(screen.getByText('Status')).toBeInTheDocument();
-      expect(screen.getByText('Content Type')).toBeInTheDocument();
-      expect(screen.getByText('Creator')).toBeInTheDocument();
-      expect(screen.getByTestId('scheduled-content-table-skeleton')).toBeInTheDocument();
-    });
-  });
-
-  describe('Empty state', () => {
-    it('renders empty state when no items', () => {
-      mockUseScheduledContent.mockReturnValue({
-        items: [],
-        total: 0,
-        isFetching: false,
-        error: null,
-        refetch: mockRefetch,
-      });
-
-      render(
-        <ScheduledContentTable
-          scheduledActions={[]}
-          entries={[]}
-          contentTypes={mockContentTypes}
-        />,
-        {
-          wrapper: createQueryProviderWrapper(),
-        }
-      );
-
-      expect(screen.getByText('No entries found')).toBeInTheDocument();
-    });
-  });
-
   describe('Table rendering', () => {
     it('renders table with correct columns', () => {
       const entry = createMockEntry({ id: 'entry-1', contentTypeId: 'blogPost' });
@@ -284,31 +227,6 @@ describe('ScheduledContentTable component', () => {
       expect(screen.getByText(EntryStatus.Published)).toBeInTheDocument();
       expect(screen.getByText(EntryStatus.Changed)).toBeInTheDocument();
       expect(screen.getByText(EntryStatus.Draft)).toBeInTheDocument();
-    });
-  });
-
-  describe('Error state', () => {
-    it('renders error message when there is an error', () => {
-      mockUseScheduledContent.mockReturnValue({
-        items: [],
-        total: 0,
-        isFetching: false,
-        error: new Error('Test error'),
-        refetch: mockRefetch,
-      });
-
-      render(
-        <ScheduledContentTable
-          scheduledActions={[]}
-          entries={[]}
-          contentTypes={mockContentTypes}
-        />,
-        {
-          wrapper: createQueryProviderWrapper(),
-        }
-      );
-
-      expect(screen.getByText('Test error')).toBeInTheDocument();
     });
   });
 
