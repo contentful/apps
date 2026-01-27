@@ -67,13 +67,11 @@ export function useScheduledContent(
     return items;
   }, [scheduledActions, scheduledEntries, contentTypes, usersMap, defaultLocale]);
 
-  const isFetching = isFetchingUsers;
-
   if (!scheduledActions.length) {
     return {
       items: [],
       total: 0,
-      isFetching,
+      isFetching: isFetchingUsers,
       error: null,
       refetch: () => {
         refetchUsers();
@@ -84,7 +82,7 @@ export function useScheduledContent(
   return {
     items: scheduledItems.slice(skip, skip + ITEMS_PER_PAGE),
     total: scheduledItems.length,
-    isFetching,
+    isFetching: isFetchingUsers,
     error: fetchingUsersError ?? null,
     refetch: () => {
       refetchUsers();
