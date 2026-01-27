@@ -1,151 +1,128 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { RecentlyPublishedTable } from '../../src/components/RecentlyPublishedTable';
-import { RecentlyPublishedItem } from '../../src/hooks/useRecentlyPublishedContent';
+import { cleanup, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { NeedsUpdateTable } from '../../src/components/NeedsUpdateTable';
 import { mockSdk } from '../mocks';
 import { createQueryProviderWrapper } from '../utils/createQueryProviderWrapper';
+import { createMockEntry, createMockContentType } from '../utils/testHelpers';
 import { EntryProps } from 'contentful-management';
-import { createMockContentType } from '../utils/testHelpers';
+import { NeedsUpdateItem } from '../../src/hooks/useNeedsUpdateContent';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => ({}),
 }));
 
-const mockUseRecentlyPublishedContent = vi.fn();
+const mockRefetch = vi.fn();
+const mockUseNeedsUpdate = vi.fn();
 
-vi.mock('../../src/hooks/useRecentlyPublishedContent', () => ({
-  useRecentlyPublishedContent: (
-    page: number,
-    entries: EntryProps[],
-    recentlyPublishedDate: Date,
-    defaultLocale: string,
-    contentTypes: unknown
-  ) =>
-    mockUseRecentlyPublishedContent(
-      page,
-      entries,
-      recentlyPublishedDate,
-      defaultLocale,
-      contentTypes
-    ),
+vi.mock('../../src/hooks/useNeedsUpdateContent', () => ({
+  useNeedsUpdate: (entries: EntryProps[], page: number, contentTypes: unknown) =>
+    mockUseNeedsUpdate(entries, page, contentTypes),
 }));
 
-const createMockRecentlyPublishedItem = (
-  overrides?: Partial<RecentlyPublishedItem>
-): RecentlyPublishedItem => {
-  const now = new Date();
-
+const createMockNeedsUpdateItem = (overrides?: Partial<NeedsUpdateItem>): NeedsUpdateItem => {
   return {
     id: 'entry-1',
     title: 'Test Entry',
-    contentType: 'Blog Post',
+    age: 180,
+    publishedDate: '2024-01-01T00:00:00Z',
     creator: {
       id: 'user-1',
       firstName: 'John',
       lastName: 'Doe',
     },
-    publishedDate: now.toISOString(),
+    contentType: 'Blog Post',
     ...overrides,
   };
 };
 
-const createMockEntry = (overrides?: Partial<EntryProps>): EntryProps => {
-  return {
-    sys: {
-      id: 'entry-1',
-      type: 'Entry',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      publishedAt: new Date().toISOString(),
-      contentType: {
-        sys: {
-          id: 'blogPost',
-          type: 'Link',
-          linkType: 'ContentType',
-        },
-      },
-    },
-    fields: {},
-    ...overrides,
-  } as EntryProps;
-};
-
-describe('RecentlyPublishedTable component', () => {
+describe('NeedsUpdateTable component', () => {
   const mockContentTypes = new Map([
     ['blogPost', createMockContentType({ id: 'blogPost', name: 'Blog Post' })],
+    ['article', createMockContentType({ id: 'article', name: 'Article' })],
   ]);
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockRefetch.mockClear();
     mockSdk.locales = { default: 'en-US' };
     mockSdk.ids.space = 'test-space';
-    mockSdk.parameters.installation = { recentlyPublishedDays: 7 };
+    mockSdk.parameters.installation = { needsUpdateMonths: 6 };
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   describe('Table rendering', () => {
     it('renders table with correct columns', () => {
       const mockEntries = [createMockEntry()];
-      const mockItem = createMockRecentlyPublishedItem();
-      mockUseRecentlyPublishedContent.mockReturnValue({
+      const mockItem = createMockNeedsUpdateItem();
+      mockUseNeedsUpdate.mockReturnValue({
         items: [mockItem],
         total: 1,
         isFetching: false,
         error: null,
+        refetch: mockRefetch,
       });
 
-      render(<RecentlyPublishedTable entries={mockEntries} contentTypes={mockContentTypes} />, {
+      render(<NeedsUpdateTable entries={mockEntries} contentTypes={mockContentTypes} />, {
         wrapper: createQueryProviderWrapper(),
       });
 
       expect(screen.getByText('Title')).toBeInTheDocument();
+      expect(screen.getByText('Age')).toBeInTheDocument();
       expect(screen.getByText('Published Date')).toBeInTheDocument();
       expect(screen.getByText('Content Type')).toBeInTheDocument();
       expect(screen.getByText('Creator')).toBeInTheDocument();
     });
 
-    it('renders recently published items with correct data', () => {
+    it('renders needs update items with correct data', () => {
       const mockEntries = [createMockEntry()];
-      const mockItem = createMockRecentlyPublishedItem({
+      const mockItem = createMockNeedsUpdateItem({
         id: 'entry-1',
         title: 'My Blog Post',
         contentType: 'Blog Post',
+        age: 200,
         publishedDate: '2024-01-15T10:00:00Z',
       });
 
-      mockUseRecentlyPublishedContent.mockReturnValue({
+      mockUseNeedsUpdate.mockReturnValue({
         items: [mockItem],
         total: 1,
         isFetching: false,
         error: null,
+        refetch: mockRefetch,
       });
 
-      render(<RecentlyPublishedTable entries={mockEntries} contentTypes={mockContentTypes} />, {
+      render(<NeedsUpdateTable entries={mockEntries} contentTypes={mockContentTypes} />, {
         wrapper: createQueryProviderWrapper(),
       });
 
       expect(screen.getByText('My Blog Post')).toBeInTheDocument();
       expect(screen.getByText('Blog Post')).toBeInTheDocument();
       expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.getByText('200 days')).toBeInTheDocument();
       expect(screen.getByText(/Jan 15, 2024/i)).toBeInTheDocument();
     });
 
-    it('renders multiple recently published items', () => {
+    it('renders multiple needs update items', () => {
       const mockEntries = [createMockEntry()];
       const mockItems = [
-        createMockRecentlyPublishedItem({ id: 'entry-1', title: 'Entry 1' }),
-        createMockRecentlyPublishedItem({ id: 'entry-2', title: 'Entry 2' }),
-        createMockRecentlyPublishedItem({ id: 'entry-3', title: 'Entry 3' }),
+        createMockNeedsUpdateItem({ id: 'entry-1', title: 'Entry 1', age: 200 }),
+        createMockNeedsUpdateItem({ id: 'entry-2', title: 'Entry 2', age: 150 }),
+        createMockNeedsUpdateItem({ id: 'entry-3', title: 'Entry 3', age: 100 }),
       ];
 
-      mockUseRecentlyPublishedContent.mockReturnValue({
+      mockUseNeedsUpdate.mockReturnValue({
         items: mockItems,
         total: 3,
         isFetching: false,
         error: null,
+        refetch: mockRefetch,
       });
 
-      render(<RecentlyPublishedTable entries={mockEntries} contentTypes={mockContentTypes} />, {
+      render(<NeedsUpdateTable entries={mockEntries} contentTypes={mockContentTypes} />, {
         wrapper: createQueryProviderWrapper(),
       });
 
@@ -158,19 +135,20 @@ describe('RecentlyPublishedTable component', () => {
   describe('EntryLink rendering', () => {
     it('renders EntryLink with correct URL', () => {
       const mockEntries = [createMockEntry()];
-      const mockItem = createMockRecentlyPublishedItem({
+      const mockItem = createMockNeedsUpdateItem({
         id: 'entry-123',
         title: 'My Entry',
       });
 
-      mockUseRecentlyPublishedContent.mockReturnValue({
+      mockUseNeedsUpdate.mockReturnValue({
         items: [mockItem],
         total: 1,
         isFetching: false,
         error: null,
+        refetch: mockRefetch,
       });
 
-      render(<RecentlyPublishedTable entries={mockEntries} contentTypes={mockContentTypes} />, {
+      render(<NeedsUpdateTable entries={mockEntries} contentTypes={mockContentTypes} />, {
         wrapper: createQueryProviderWrapper(),
       });
 

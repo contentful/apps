@@ -7,7 +7,7 @@ import { styles } from './Dashboard.styles';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { ReactNode } from 'react';
-import { EntryProps, ScheduledActionProps } from 'contentful-management';
+import { EntryProps, ScheduledActionProps, ContentTypeProps } from 'contentful-management';
 
 interface TabPanelContentProps {
   description: string;
@@ -28,9 +28,11 @@ const TabPanelContent = ({ description, children }: TabPanelContentProps) => {
 export const ScheduledContentTabs = ({
   scheduledActions,
   entries,
+  contentTypes,
 }: {
   scheduledActions: ScheduledActionProps[];
   entries: EntryProps[];
+  contentTypes: Map<string, ContentTypeProps>;
 }) => {
   const { parameters } = useSDK<HomeAppSDK | PageAppSDK>();
   const recentlyPublishedDays = parameters?.installation?.recentlyPublishedDays;
@@ -48,7 +50,11 @@ export const ScheduledContentTabs = ({
           </Tabs.List>
           <Tabs.Panel id="scheduled">
             <TabPanelContent description="Content scheduled will appear here.">
-              <ScheduledContentTable scheduledActions={scheduledActions} entries={entries} />
+              <ScheduledContentTable
+                scheduledActions={scheduledActions}
+                entries={entries}
+                contentTypes={contentTypes}
+              />
             </TabPanelContent>
           </Tabs.Panel>
           <Tabs.Panel id="recentlyPublished">
@@ -56,7 +62,7 @@ export const ScheduledContentTabs = ({
               description={`Content published in the last ${recentlyPublishedDays} ${
                 recentlyPublishedDays === 1 ? 'day' : 'days'
               } will appear here.`}>
-              <RecentlyPublishedTable entries={entries} />
+              <RecentlyPublishedTable entries={entries} contentTypes={contentTypes} />
             </TabPanelContent>
           </Tabs.Panel>
           <Tabs.Panel id="needsUpdate">
@@ -64,7 +70,7 @@ export const ScheduledContentTabs = ({
               description={`Content older than ${needsUpdateMonths} ${
                 needsUpdateMonths === 1 ? 'month' : 'months'
               } will appear here.`}>
-              <NeedsUpdateTable />
+              <NeedsUpdateTable entries={entries} contentTypes={contentTypes} />
             </TabPanelContent>
           </Tabs.Panel>
         </Tabs>

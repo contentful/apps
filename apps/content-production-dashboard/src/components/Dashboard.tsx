@@ -122,7 +122,11 @@ const Dashboard = () => {
               <ReleasesTable />
             </Box>
           </Box>
-          <ScheduledContentTabs scheduledActions={scheduledActions} entries={entries} />
+          <ScheduledContentTabs
+            scheduledActions={scheduledActions}
+            entries={entries}
+            contentTypes={contentTypes}
+          />
         </>
       )}
     </Flex>

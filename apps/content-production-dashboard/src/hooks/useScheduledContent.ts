@@ -1,15 +1,9 @@
 import { useMemo } from 'react';
-import { EntryProps, ScheduledActionProps } from 'contentful-management';
+import { EntryProps, ScheduledActionProps, ContentTypeProps } from 'contentful-management';
 
 import { ScheduledContentItem } from '../utils/types';
 import { getCreatorFromEntry } from '../utils/UserUtils';
-import {
-  getEntryStatus,
-  getEntryTitle,
-  getUniqueContentTypeIdsFromEntries,
-  getUniqueUserIdsFromEntries,
-} from '../utils/EntryUtils';
-import { useContentTypes } from './useContentTypes';
+import { getEntryStatus, getEntryTitle, getUniqueUserIdsFromEntries } from '../utils/EntryUtils';
 import { useUsers } from './useUsers';
 import { ITEMS_PER_PAGE } from '../utils/consts';
 
@@ -25,7 +19,8 @@ export function useScheduledContent(
   scheduledActions: ScheduledActionProps[],
   entries: EntryProps[],
   defaultLocale: string,
-  page: number = 0
+  page: number = 0,
+  contentTypes: Map<string, ContentTypeProps>
 ): UseScheduledContentResult {
   const skip = page * ITEMS_PER_PAGE;
 
@@ -38,10 +33,6 @@ export function useScheduledContent(
   );
 
   const userIds = useMemo(() => getUniqueUserIdsFromEntries(scheduledEntries), [scheduledEntries]);
-  const contentTypeIds = useMemo(
-    () => getUniqueContentTypeIdsFromEntries(scheduledEntries),
-    [scheduledEntries]
-  );
 
   const {
     usersMap,
@@ -49,8 +40,6 @@ export function useScheduledContent(
     refetch: refetchUsers,
     error: fetchingUsersError,
   } = useUsers(userIds);
-  const { contentTypes, isFetchingContentTypes, refetchContentTypes, fetchingContentTypesError } =
-    useContentTypes(contentTypeIds);
 
   const scheduledItems = useMemo(() => {
     const items: ScheduledContentItem[] = [];
@@ -78,17 +67,14 @@ export function useScheduledContent(
     return items;
   }, [scheduledActions, scheduledEntries, contentTypes, usersMap, defaultLocale]);
 
-  const isFetching = isFetchingUsers || isFetchingContentTypes;
-
   if (!scheduledActions.length) {
     return {
       items: [],
       total: 0,
-      isFetching,
+      isFetching: isFetchingUsers,
       error: null,
       refetch: () => {
         refetchUsers();
-        refetchContentTypes();
       },
     };
   }
@@ -96,11 +82,10 @@ export function useScheduledContent(
   return {
     items: scheduledItems.slice(skip, skip + ITEMS_PER_PAGE),
     total: scheduledItems.length,
-    isFetching,
-    error: fetchingUsersError ?? fetchingContentTypesError ?? null,
+    isFetching: isFetchingUsers,
+    error: fetchingUsersError ?? null,
     refetch: () => {
       refetchUsers();
-      refetchContentTypes();
     },
   };
 }

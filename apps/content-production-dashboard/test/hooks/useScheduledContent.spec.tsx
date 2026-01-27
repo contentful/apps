@@ -52,7 +52,7 @@ describe('useScheduledContent', () => {
         refetch: vi.fn(),
       });
 
-      const { result } = renderHook(() => useScheduledContent([], [], 'en-US', 0), {
+      const { result } = renderHook(() => useScheduledContent([], [], 'en-US', 0, new Map()), {
         wrapper: createQueryProviderWrapper(),
       });
 
@@ -114,7 +114,13 @@ describe('useScheduledContent', () => {
 
       const { result } = renderHook(
         () =>
-          useScheduledContent([scheduledAction1, scheduledAction2], [entry1, entry2], 'en-US', 0),
+          useScheduledContent(
+            [scheduledAction1, scheduledAction2],
+            [entry1, entry2],
+            'en-US',
+            0,
+            contentTypesMap
+          ),
         {
           wrapper: createQueryProviderWrapper(),
         }
@@ -167,7 +173,14 @@ describe('useScheduledContent', () => {
       });
 
       const { result } = renderHook(
-        () => useScheduledContent([scheduledAction], [entry], 'en-US', 0),
+        () =>
+          useScheduledContent(
+            [scheduledAction],
+            [entry],
+            'en-US',
+            0,
+            new Map([['blogPost', contentType]])
+          ),
         {
           wrapper: createQueryProviderWrapper(),
         }

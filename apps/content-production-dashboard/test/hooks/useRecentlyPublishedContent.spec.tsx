@@ -54,7 +54,7 @@ describe('useRecentlyPublishedContent', () => {
       const recentlyPublishedDate = subDays(new Date(), 7);
 
       const { result } = renderHook(
-        () => useRecentlyPublishedContent(0, [], recentlyPublishedDate, 'en-US'),
+        () => useRecentlyPublishedContent(0, [], recentlyPublishedDate, 'en-US', new Map()),
         {
           wrapper: createQueryProviderWrapper(),
         }
@@ -114,7 +114,14 @@ describe('useRecentlyPublishedContent', () => {
       });
 
       const { result } = renderHook(
-        () => useRecentlyPublishedContent(0, [entry1, entry2], recentlyPublishedDate, 'en-US'),
+        () =>
+          useRecentlyPublishedContent(
+            0,
+            [entry1, entry2],
+            recentlyPublishedDate,
+            'en-US',
+            contentTypesMap
+          ),
         {
           wrapper: createQueryProviderWrapper(),
         }
@@ -194,7 +201,8 @@ describe('useRecentlyPublishedContent', () => {
             0,
             [entryInRange, entryOutOfRange, entryNoPublished],
             recentlyPublishedDate,
-            'en-US'
+            'en-US',
+            new Map([['blogPost', contentType]])
           ),
         {
           wrapper: createQueryProviderWrapper(),
