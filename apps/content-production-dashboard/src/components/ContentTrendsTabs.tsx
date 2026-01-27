@@ -244,6 +244,7 @@ const ContentTypeSelector: React.FC<ContentTypeSelectorProps> = ({
         setSelectedContentTypes={onSelectionChange}
         sdk={sdk}
         initialSelectedIds={selectedContentTypes.map((ct) => ct.id)}
+        maxSelected={5}
       />
       <FormControl.HelpText>You can select up to five at a time.</FormControl.HelpText>
     </FormControl>
