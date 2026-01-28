@@ -3,7 +3,7 @@ import { css } from 'emotion';
 
 export const styles = {
   container: css({
-    width: '97%',
+    width: '100%',
   }),
   fieldFilterListContainer: css({
     display: 'flex',

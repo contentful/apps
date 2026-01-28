@@ -34,6 +34,7 @@ import { ErrorNote } from './components/ErrorNote';
 import { EmptyEntryBanner } from './components/EmptyEntryBanner';
 import { buildQuery, fieldFilterValuesToQuery } from './utils/contentfulQueryUtils';
 import { FieldVisibiltyMenu } from './components/FieldVisibiltyMenu';
+import tokens from '@contentful/f36-tokens';
 
 const getFieldsMapped = (fields: ContentTypeField[]) => {
   return fields.map((field) => ({
@@ -443,8 +444,8 @@ const Page = () => {
 
   return (
     <Flex style={{ overflow: 'hidden' }}>
-      <Box style={styles.mainContent} paddingLeft="spacingL">
-        <Box style={{ ...styles.whiteBox, minWidth: 0 }} paddingTop="spacingL">
+      <Box style={styles.mainContent}>
+        <Box style={styles.mainContentBody}>
           <Flex style={{ minWidth: 0 }}>
             <ContentTypeSidebar
               contentTypes={contentTypes}
@@ -455,7 +456,7 @@ const Page = () => {
               disabled={entriesLoading}
             />
             <div style={styles.spacer} />
-            <Box style={styles.tableContainer}>
+            <Flex style={styles.tableContainer}>
               {contentTypeLoading && (
                 <Flex alignItems="center" justifyContent="center" style={styles.loadingContainer}>
                   <Spinner />
@@ -492,20 +493,9 @@ const Page = () => {
                 sortOption={sortOption}
                 setSortOption={setSortOption}
               />
-              {/* Multiselects Filters Section */}
-              {/* <Flex gap="spacingS" alignItems="center">
-                <SortMenu
-                  sortOption={sortOption}
-                  onSortChange={(newSort) => {
-                    setSortOption(newSort);
-                    setActivePage(0);
-                  }}
-                  disabled={shouldDisableFilters()}
-                />
-              </Flex> */}
               {!entriesLoading && (
                 <>
-                  <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
+                  <Flex style={styles.editButton}>
                     <Button
                       variant="primary"
                       onClick={() => setIsModalOpen(true)}
@@ -541,10 +531,7 @@ const Page = () => {
               ) : (
                 <>
                   {entries.length === 0 || !selectedContentType ? (
-                    <EmptyEntryBanner
-                      hasEntries={entries.length > 0}
-                      // hasInitialEntries={initialTotal > 0}
-                    />
+                    <EmptyEntryBanner hasEntries={entries.length > 0} />
                   ) : (
                     <>
                       {failedUpdates.length > 0 && (
@@ -585,7 +572,7 @@ const Page = () => {
                   )}
                 </>
               )}
-            </Box>
+            </Flex>
           </Flex>
         </Box>
       </Box>

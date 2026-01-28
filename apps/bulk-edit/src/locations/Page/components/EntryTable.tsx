@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Box, Pagination, Table } from '@contentful/f36-components';
+import { Box, Flex, Pagination, Table } from '@contentful/f36-components';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ContentTypeField, Entry } from '../types';
 import { ContentTypeProps } from 'contentful-management';
@@ -265,83 +265,184 @@ export const EntryTable: React.FC<EntryTableProps> = ({
   });
 
   return (
-    <>
-      <Box ref={scrollContainerRef} style={tableStyles.tableContainer}>
-        <Table
-          ref={tableRef}
-          testId="bulk-edit-table"
-          style={tableStyles.table}
-          tabIndex={0}
-          role="grid"
-          aria-label="Bulk edit table with keyboard navigation">
-          <TableHeader
-            fields={fields}
-            headerCheckboxes={headerCheckboxes}
-            onHeaderCheckboxChange={handleHeaderCheckboxChange}
-            checkboxesDisabled={Object.fromEntries(
-              columnIds.map((columnId) => [
-                columnId,
-                allowedColumns[columnId]
-                  ? selectedFieldId !== null && selectedFieldId !== columnId
-                  : true,
-              ])
-            )}
-            focusedCell={focusedCell}
-            focusRange={focusRange}
-            onCellFocus={(position) => focusCell(position)}
-          />
-          <Table.Body>
-            {/* Top spacer row */}
-            {rowVirtualizer.getVirtualItems().length > 0 && (
-              <tr>
-                <td colSpan={columnIds.length} style={tableStyles.topSpacer(rowVirtualizer)} />
-              </tr>
-            )}
+    <Flex style={tableStyles.entryTableContainer}>
+      <div style={tableStyles.tableContainerContent}>
+        <Box ref={scrollContainerRef} style={tableStyles.tableContainer}>
+          <Table
+            ref={tableRef}
+            testId="bulk-edit-table"
+            style={tableStyles.table}
+            tabIndex={0}
+            role="grid"
+            aria-label="Bulk edit table with keyboard navigation">
+            <TableHeader
+              fields={fields}
+              headerCheckboxes={headerCheckboxes}
+              onHeaderCheckboxChange={handleHeaderCheckboxChange}
+              checkboxesDisabled={Object.fromEntries(
+                columnIds.map((columnId) => [
+                  columnId,
+                  allowedColumns[columnId]
+                    ? selectedFieldId !== null && selectedFieldId !== columnId
+                    : true,
+                ])
+              )}
+              focusedCell={focusedCell}
+              focusRange={focusRange}
+              onCellFocus={(position) => focusCell(position)}
+            />
+            <Table.Body>
+              {/* Top spacer row */}
+              {rowVirtualizer.getVirtualItems().length > 0 && (
+                <tr>
+                  <td colSpan={columnIds.length} style={tableStyles.topSpacer(rowVirtualizer)} />
+                </tr>
+              )}
 
-            {/* Virtualized rows */}
-            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-              const entry = entries[virtualRow.index];
-              if (!entry) return null;
+              {/* Virtualized rows */}
+              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const entry = entries[virtualRow.index];
+                if (!entry) return null;
 
-              return (
-                <TableRow
-                  key={entry.sys.id}
-                  entry={entry}
-                  fields={fields}
-                  contentType={contentType}
-                  spaceId={spaceId}
-                  environmentId={environmentId}
-                  defaultLocale={defaultLocale}
-                  rowCheckboxes={rowCheckboxes[entry.sys.id]}
-                  onCellCheckboxChange={(columnId, checked) =>
-                    handleCellCheckboxChange(entry.sys.id, columnId, checked)
-                  }
-                  cellCheckboxesDisabled={Object.fromEntries(
-                    columnIds.map((columnId) => [
-                      columnId,
-                      allowedColumns[columnId]
-                        ? selectedFieldId !== null && selectedFieldId !== columnId
-                        : true,
-                    ])
-                  )}
-                  rowIndex={virtualRow.index}
-                  focusedCell={focusedCell}
-                  focusRange={focusRange}
-                  onCellFocus={(position) => focusCell(position)}
-                />
-              );
-            })}
+                return (
+                  <TableRow
+                    key={entry.sys.id}
+                    entry={entry}
+                    fields={fields}
+                    contentType={contentType}
+                    spaceId={spaceId}
+                    environmentId={environmentId}
+                    defaultLocale={defaultLocale}
+                    rowCheckboxes={rowCheckboxes[entry.sys.id]}
+                    onCellCheckboxChange={(columnId, checked) =>
+                      handleCellCheckboxChange(entry.sys.id, columnId, checked)
+                    }
+                    cellCheckboxesDisabled={Object.fromEntries(
+                      columnIds.map((columnId) => [
+                        columnId,
+                        allowedColumns[columnId]
+                          ? selectedFieldId !== null && selectedFieldId !== columnId
+                          : true,
+                      ])
+                    )}
+                    rowIndex={virtualRow.index}
+                    focusedCell={focusedCell}
+                    focusRange={focusRange}
+                    onCellFocus={(position) => focusCell(position)}
+                  />
+                );
+              })}
 
-            {/* Bottom spacer row */}
-            {rowVirtualizer.getVirtualItems().length > 0 && (
-              <tr>
-                <td colSpan={columnIds.length} style={tableStyles.bottomSpacer(rowVirtualizer)} />
-              </tr>
-            )}
-          </Table.Body>
-        </Table>
-      </Box>
-      <Box style={styles.paginationContainer}>
+              {/* {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const entry = entries[virtualRow.index];
+                if (!entry) return null;
+
+                return (
+                  <TableRow
+                    key={entry.sys.id}
+                    entry={entry}
+                    fields={fields}
+                    contentType={contentType}
+                    spaceId={spaceId}
+                    environmentId={environmentId}
+                    defaultLocale={defaultLocale}
+                    rowCheckboxes={rowCheckboxes[entry.sys.id]}
+                    onCellCheckboxChange={(columnId, checked) =>
+                      handleCellCheckboxChange(entry.sys.id, columnId, checked)
+                    }
+                    cellCheckboxesDisabled={Object.fromEntries(
+                      columnIds.map((columnId) => [
+                        columnId,
+                        allowedColumns[columnId]
+                          ? selectedFieldId !== null && selectedFieldId !== columnId
+                          : true,
+                      ])
+                    )}
+                    rowIndex={virtualRow.index}
+                    focusedCell={focusedCell}
+                    focusRange={focusRange}
+                    onCellFocus={(position) => focusCell(position)}
+                  />
+                );
+              })}
+
+              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const entry = entries[virtualRow.index];
+                if (!entry) return null;
+
+                return (
+                  <TableRow
+                    key={entry.sys.id}
+                    entry={entry}
+                    fields={fields}
+                    contentType={contentType}
+                    spaceId={spaceId}
+                    environmentId={environmentId}
+                    defaultLocale={defaultLocale}
+                    rowCheckboxes={rowCheckboxes[entry.sys.id]}
+                    onCellCheckboxChange={(columnId, checked) =>
+                      handleCellCheckboxChange(entry.sys.id, columnId, checked)
+                    }
+                    cellCheckboxesDisabled={Object.fromEntries(
+                      columnIds.map((columnId) => [
+                        columnId,
+                        allowedColumns[columnId]
+                          ? selectedFieldId !== null && selectedFieldId !== columnId
+                          : true,
+                      ])
+                    )}
+                    rowIndex={virtualRow.index}
+                    focusedCell={focusedCell}
+                    focusRange={focusRange}
+                    onCellFocus={(position) => focusCell(position)}
+                  />
+                );
+              })}
+
+              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const entry = entries[virtualRow.index];
+                if (!entry) return null;
+
+                return (
+                  <TableRow
+                    key={entry.sys.id}
+                    entry={entry}
+                    fields={fields}
+                    contentType={contentType}
+                    spaceId={spaceId}
+                    environmentId={environmentId}
+                    defaultLocale={defaultLocale}
+                    rowCheckboxes={rowCheckboxes[entry.sys.id]}
+                    onCellCheckboxChange={(columnId, checked) =>
+                      handleCellCheckboxChange(entry.sys.id, columnId, checked)
+                    }
+                    cellCheckboxesDisabled={Object.fromEntries(
+                      columnIds.map((columnId) => [
+                        columnId,
+                        allowedColumns[columnId]
+                          ? selectedFieldId !== null && selectedFieldId !== columnId
+                          : true,
+                      ])
+                    )}
+                    rowIndex={virtualRow.index}
+                    focusedCell={focusedCell}
+                    focusRange={focusRange}
+                    onCellFocus={(position) => focusCell(position)}
+                  />
+                );
+              })} */}
+
+              {/* Bottom spacer row */}
+              {rowVirtualizer.getVirtualItems().length > 0 && (
+                <tr>
+                  <td colSpan={columnIds.length} style={tableStyles.bottomSpacer(rowVirtualizer)} />
+                </tr>
+              )}
+            </Table.Body>
+          </Table>
+        </Box>
+      </div>
+      <Box style={tableStyles.paginationContainer}>
         <Pagination
           activePage={activePage}
           onPageChange={onPageChange}
@@ -353,6 +454,6 @@ export const EntryTable: React.FC<EntryTableProps> = ({
           aria-label="Pagination navigation"
         />
       </Box>
-    </>
+    </Flex>
   );
 };

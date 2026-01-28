@@ -5,5 +5,9 @@ export const emptyEntryBannerStyles = {
   container: css({
     background: tokens.gray100,
     borderRadius: tokens.borderRadiusMedium,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+    padding: tokens.spacing2Xl,
   }),
 };

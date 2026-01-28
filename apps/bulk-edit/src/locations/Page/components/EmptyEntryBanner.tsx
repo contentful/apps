@@ -31,12 +31,7 @@ export const EmptyEntryBanner: React.FC<EmptyStateProps> = ({
   // }
 
   return (
-    <Flex
-      alignItems="center"
-      justifyContent="center"
-      flexDirection="column"
-      padding="spacing2Xl"
-      className={emptyEntryBannerStyles.container}>
+    <Flex className={emptyEntryBannerStyles.container}>
       <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold">
         We couldn't find any matches.
       </Text>
