@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Flex, TextInput, Button, Menu } from '@contentful/f36-components';
+import { Flex, TextInput, Button, Menu, Text } from '@contentful/f36-components';
 import { FunnelSimpleIcon, MagnifyingGlassIcon, CheckIcon } from '@contentful/f36-icons';
 import { useDebounce } from 'use-debounce';
 import { styles } from './SearchBar.styles';

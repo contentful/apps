@@ -75,6 +75,8 @@ export const fieldFilterValuesToQuery = (
     let key, value;
     const operator = fieldFilterValue.operator;
 
+    console.log('fieldFilterValue', fieldFilterValue);
+
     if (
       fieldFilterValue.contentTypeField.type === 'Symbol' ||
       fieldFilterValue.contentTypeField.type === 'Integer' ||
