@@ -8,7 +8,7 @@ import type {
   NewEntriesMonth,
   TrendsDataProcessorOptions,
 } from './types';
-import { TimeRange } from './types';
+import { TimeRange, CreatorViewSetting } from './types';
 
 export function generateNewEntriesChartData(
   entries: EntryProps[],
@@ -67,10 +67,9 @@ export function generateCreatorChartData(
   options: TrendsDataProcessorOptions,
   creatorsNames?: Map<string, string>,
   contentTypes?: Map<string, ContentTypeProps>
-): { data: ChartDataPoint[]; creators: string[] } {
+): { data: ChartDataPoint[]; creators: string[]; totalsByCreator: Record<string, number> } {
   const { startDate, filteredEntries, allMonths } = setupChartData(entries, options, contentTypes);
 
-  // Group entries by month and creator name
   const creatorsSet = new Set<string>();
   const monthMap = groupEntriesByMonthAndKey(filteredEntries, startDate, (entry) => {
     const creatorId = entry.sys.createdBy?.sys?.id;
@@ -84,7 +83,72 @@ export function generateCreatorChartData(
   const creators = Array.from(creatorsSet).sort();
   const data = buildChartDataFromMonthMap(monthMap, allMonths, creators);
 
-  return { data, creators };
+  const totalsByCreator: Record<string, number> = {};
+  creators.forEach((creator) => {
+    totalsByCreator[creator] = 0;
+  });
+
+  data.forEach((point) => {
+    creators.forEach((creator) => {
+      const value = point[creator];
+      if (typeof value === 'number') {
+        totalsByCreator[creator] += value;
+      }
+    });
+  });
+
+  return { data, creators, totalsByCreator };
+}
+
+export function getVisibleCreatorsByView(
+  creatorData: { creators: string[]; totalsByCreator: Record<string, number> },
+  view: CreatorViewSetting,
+  selectedAlphabeticalCreators: string[]
+): string[] {
+  if (creatorData.creators.length === 0) {
+    return [];
+  }
+
+  if (view === CreatorViewSetting.Alphabetical) {
+    return selectedAlphabeticalCreators.length > 0
+      ? selectedAlphabeticalCreators
+      : creatorData.creators.slice(0, 5);
+  }
+
+  const creatorsByActivityDesc = [...creatorData.creators].sort(
+    (a, b) => (creatorData.totalsByCreator[b] ?? 0) - (creatorData.totalsByCreator[a] ?? 0)
+  );
+
+  if (view === CreatorViewSetting.BottomFiveCreators) {
+    return creatorsByActivityDesc.slice(-5).reverse();
+  }
+
+  return creatorsByActivityDesc.slice(0, 5);
+}
+
+export function getFilteredCreatorDataByView(
+  creatorData: {
+    data: ChartDataPoint[];
+    creators: string[];
+    totalsByCreator: Record<string, number>;
+  },
+  view: CreatorViewSetting,
+  selectedAlphabeticalCreators: string[]
+): { data: ChartDataPoint[]; creators: string[] } {
+  const visibleCreators = getVisibleCreatorsByView(creatorData, view, selectedAlphabeticalCreators);
+
+  if (visibleCreators.length === 0) return { data: [], creators: [] };
+
+  const data = creatorData.data.map((point) => {
+    const newPoint: ChartDataPoint = { date: point.date };
+    visibleCreators.forEach((creator) => {
+      const value = point[creator];
+      newPoint[creator] = typeof value === 'number' ? value : 0;
+    });
+    return newPoint;
+  });
+
+  return { data, creators: visibleCreators };
 }
 
 function calculateAverage(values: number[]): number | undefined {

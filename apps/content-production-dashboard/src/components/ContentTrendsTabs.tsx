@@ -18,6 +18,7 @@ import {
   generateNewEntriesChartData,
   generateContentTypeChartData,
   generateCreatorChartData,
+  getFilteredCreatorDataByView,
 } from '../utils/trendsDataProcessor';
 import { TimeRange, CreatorViewSetting } from '../utils/types';
 import { CREATOR_VIEW_OPTIONS } from '../utils/consts';
@@ -119,6 +120,10 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
     );
   }, [entries, timeRange, creatorsNames, filteredContentTypesForChart]);
 
+  const visibleCreatorData = useMemo(() => {
+    return getFilteredCreatorDataByView(creatorData, creatorView, selectedAlphabeticalCreators);
+  }, [creatorData, creatorView, selectedAlphabeticalCreators]);
+
   useEffect(() => {
     if (
       creatorView === CreatorViewSetting.Alphabetical &&
@@ -129,39 +134,6 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
       setHasInitializedAlphabetical(true);
     }
   }, [creatorView, creatorData.creators, hasInitializedAlphabetical]);
-
-  const visibleCreators = useMemo(() => {
-    if (creatorData.creators.length === 0) {
-      return [] as string[];
-    }
-
-    if (creatorView === CreatorViewSetting.Alphabetical) {
-      return selectedAlphabeticalCreators;
-    }
-
-    if (creatorView === CreatorViewSetting.BottomFiveCreators) {
-      return creatorData.creators.slice(-5);
-    }
-
-    // Default to top five creators
-    return creatorData.creators.slice(0, 5);
-  }, [creatorView, creatorData.creators, selectedAlphabeticalCreators]);
-
-  const filteredCreatorData = useMemo(() => {
-    if (visibleCreators.length === 0) {
-      return { data: [] as any[], creators: [] as string[] };
-    }
-
-    const filteredData = creatorData.data.map((point) => {
-      const newPoint: any = { date: point.date };
-      visibleCreators.forEach((creator) => {
-        newPoint[creator] = (point as any)[creator] ?? 0;
-      });
-      return newPoint;
-    });
-
-    return { data: filteredData, creators: visibleCreators };
-  }, [creatorData.data, visibleCreators]);
 
   const handleContentTypeSelection = (newSelected: ContentType[]) => {
     if (newSelected.length <= 5) {
@@ -277,13 +249,11 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
                   )}
                 </Flex>
 
-                {creatorData.creators.length === 0 ? (
-                  <EmptyState helperText="Data will display once creator activity is available." />
-                ) : visibleCreators.length === 0 ? (
+                {visibleCreatorData.creators.length === 0 ? (
                   <EmptyState helperText="Data will display once you select creators." />
                 ) : (
                   <ChartWrapper
-                    data={filteredCreatorData.data}
+                    data={visibleCreatorData.data}
                     xAxisDataKey="date"
                     legendTitle="Creators:"
                   />

@@ -97,6 +97,10 @@ describe('ContentTrendsTabs component', () => {
       { date: 'Feb 2024', 'John Doe': 5, 'Jane Smith': 3 },
     ],
     creators: ['John Doe', 'Jane Smith'],
+    totalsByCreator: {
+      'John Doe': 8,
+      'Jane Smith': 5,
+    },
   };
 
   beforeEach(() => {
@@ -406,6 +410,7 @@ describe('ContentTrendsTabs component', () => {
       mockGenerateCreatorChartData.mockReturnValue({
         data: [],
         creators: [],
+        totalsByCreator: {},
       });
 
       const user = userEvent.setup();
@@ -463,6 +468,53 @@ describe('ContentTrendsTabs component', () => {
         expect(screen.getByText('Creators:')).toBeInTheDocument();
         expect(screen.getByText('John Doe')).toBeInTheDocument();
         expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+      });
+    });
+
+    it('uses activity to determine top and bottom creators', async () => {
+      const user = userEvent.setup();
+
+      mockGenerateCreatorChartData.mockReturnValue({
+        data: [
+          { date: 'Jan 2024', Alice: 10, Bob: 2, Charlie: 5 },
+          { date: 'Feb 2024', Alice: 0, Bob: 8, Charlie: 1 },
+        ],
+        creators: ['Alice', 'Bob', 'Charlie'],
+        totalsByCreator: {
+          Alice: 10,
+          Bob: 10,
+          Charlie: 6,
+        },
+      });
+
+      await renderWithAct(
+        <ContentTrendsTabs
+          entries={mockEntries}
+          defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
+          timeRange={TimeRange.Year}
+          contentTypes={mockContentTypes}
+          isFetchingContentTypes={mockIsFetchingContentTypes}
+        />,
+        { wrapper: createWrapper() }
+      );
+
+      const creatorTab = screen.getByText('By Creator');
+      await user.click(creatorTab);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('line-Alice')).toBeInTheDocument();
+        expect(screen.getByTestId('line-Bob')).toBeInTheDocument();
+        expect(screen.getByTestId('line-Charlie')).toBeInTheDocument();
+      });
+
+      const viewSelect = screen.getByLabelText('View by');
+      await user.selectOptions(viewSelect, CreatorViewSetting.BottomFiveCreators);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('line-Alice')).toBeInTheDocument();
+        expect(screen.getByTestId('line-Bob')).toBeInTheDocument();
+        expect(screen.getByTestId('line-Charlie')).toBeInTheDocument();
       });
     });
   });

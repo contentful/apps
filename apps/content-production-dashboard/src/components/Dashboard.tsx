@@ -43,7 +43,6 @@ const Dashboard = () => {
     refetchContentTypes();
     await refetchInstallationParameters();
   };
-  console.log('installation');
 
   const isRefreshing = isFetchingEntries || isFetchingScheduledActions;
   const hasError = fetchingEntriesError || fetchingScheduledActionsError;
