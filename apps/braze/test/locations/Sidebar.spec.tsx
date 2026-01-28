@@ -17,24 +17,14 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useAutoResizer: () => {},
 }));
 
-const mockCma = {
-  appActionCall: {
-    createWithResponse: vi.fn(),
-  },
-};
-
 mockSdk.entry.fields['fieldA'] = {
   name: 'Field A',
 };
 
-vi.mock('contentful-management', () => ({
-  createClient: () => mockCma,
-}));
-
 describe('Sidebar component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCma.appActionCall.createWithResponse.mockResolvedValue({
+    mockSdk.cma.appActionCall.createWithResponse.mockResolvedValue({
       response: {
         body: JSON.stringify({
           contentBlocks: [

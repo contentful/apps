@@ -112,8 +112,6 @@ const Page = () => {
 
     do {
       const response = await sdk.cma.contentType.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
         query: { skip, limit },
       });
       const items = response.items as ContentTypeProps[];
@@ -380,8 +378,6 @@ const Page = () => {
           const updated = await sdk.cma.entry.update(
             {
               entryId: latestEntry.sys.id,
-              spaceId: sdk.ids.space,
-              environmentId: sdk.ids.environment,
             },
             { ...latestEntry, fields: updatedFields }
           );
@@ -467,8 +463,6 @@ const Page = () => {
         try {
           const restoredEntry = await sdk.cma.entry.update(
             {
-              spaceId: sdk.ids.space,
-              environmentId: sdk.ids.environment,
               entryId: currentEntry.sys.id,
             },
             {
@@ -667,7 +661,7 @@ const Page = () => {
                           )}
                           contentType={selectedContentType}
                           spaceId={sdk.ids.space}
-                          environmentId={sdk.ids.environment}
+                          environmentId={sdk.ids.environmentAlias ?? sdk.ids.environment}
                           defaultLocale={defaultLocale}
                           activePage={activePage}
                           totalEntries={totalEntries}

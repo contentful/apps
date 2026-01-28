@@ -12,6 +12,7 @@ const mockSdk: any = {
     app: 'test-app',
     space: 'test-space',
     environment: 'master',
+    environmentAlias: 'master-alias',
     entry: 'root-entry',
   },
   locales: { default: 'en-US' },

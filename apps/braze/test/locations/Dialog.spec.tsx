@@ -12,20 +12,6 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useAutoResizer: () => {},
 }));
 
-const mockCma = {
-  appActionCall: {
-    createWithResponse: vi.fn(),
-  },
-  entry: {
-    get: vi.fn(),
-    update: vi.fn(),
-  },
-};
-
-vi.mock('contentful-management', () => ({
-  createClient: () => mockCma,
-}));
-
 const mockGetEntry = vi.fn();
 const mockCreateFieldsForEntry = vi.fn();
 vi.mock('../../src/fields/FieldsFactory', () => ({
@@ -72,7 +58,7 @@ describe('Dialog component', () => {
     mockCreateFieldsForEntry.mockResolvedValue([mockField]);
     vi.spyOn(mockEntry, 'getGraphQLResponse').mockImplementation(async () => 'graphql response');
     vi.spyOn(Entry, 'fromSerialized').mockImplementation(() => mockEntry);
-    mockCma.entry.get.mockResolvedValue({
+    mockSdk.cma.entry.get.mockResolvedValue({
       fields: {
         connectedFields: {
           'en-US': {
@@ -154,7 +140,7 @@ describe('Dialog component', () => {
       contentTypeId: 'contentTypeId',
       title: 'title',
     };
-    mockCma.appActionCall.createWithResponse.mockResolvedValue({
+    mockSdk.cma.appActionCall.createWithResponse.mockResolvedValue({
       response: {
         body: JSON.stringify({
           results: [
@@ -186,7 +172,7 @@ describe('Dialog component', () => {
       title: 'title',
     };
 
-    mockCma.appActionCall.createWithResponse.mockResolvedValue({
+    mockSdk.cma.appActionCall.createWithResponse.mockResolvedValue({
       response: {
         body: JSON.stringify({
           results: [
@@ -233,7 +219,7 @@ describe('Dialog component', () => {
       title: 'title',
     };
 
-    mockCma.appActionCall.createWithResponse.mockResolvedValue({
+    mockSdk.cma.appActionCall.createWithResponse.mockResolvedValue({
       response: {
         body: JSON.stringify({
           results: [
@@ -280,7 +266,7 @@ describe('Dialog component', () => {
       title: 'title',
     };
 
-    mockCma.appActionCall.createWithResponse
+    mockSdk.cma.appActionCall.createWithResponse
       .mockResolvedValueOnce({
         response: {
           body: JSON.stringify({

@@ -269,8 +269,6 @@ export async function fetchEntriesWithBatching(
       };
 
       const response = await sdk.cma.entry.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
         query: batchQuery,
       });
 
