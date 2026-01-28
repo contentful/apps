@@ -5,7 +5,7 @@ import { ContentTrendsTabs } from '../../src/components/ContentTrendsTabs';
 import { QueryProvider } from '../../src/providers/QueryProvider';
 import { createMockEntry, createMockUser, renderWithAct } from '../utils/testHelpers';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
-import { TimeRange } from '../../src/utils/types';
+import { CreatorViewSetting, TimeRange } from '../../src/utils/types';
 
 const mockGenerateNewEntriesChartData = vi.fn();
 const mockGenerateContentTypeChartData = vi.fn();
@@ -146,6 +146,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -163,6 +164,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -181,6 +183,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -200,6 +203,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Month}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -225,6 +229,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={new Map()}
           isFetchingContentTypes={true}
@@ -249,6 +254,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -273,6 +279,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -301,6 +308,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -328,6 +336,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -355,6 +364,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -378,6 +388,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -402,6 +413,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -430,6 +442,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -463,6 +476,7 @@ describe('ContentTrendsTabs component', () => {
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
         />,
         { wrapper: createWrapper() }
       );
@@ -502,6 +516,7 @@ describe('ContentTrendsTabs component', () => {
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
         />,
         { wrapper: createWrapper() }
       );
@@ -521,6 +536,7 @@ describe('ContentTrendsTabs component', () => {
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
         />,
         { wrapper: createWrapper() }
       );

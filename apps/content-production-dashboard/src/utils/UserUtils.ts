@@ -1,7 +1,7 @@
 import { EntryProps, UserProps } from 'contentful-management';
 import { Creator } from './types';
 
-export const formatUserName = (user: Creator | null): string => {
+export const formatUserName = (user: UserProps | Creator | null): string => {
   if (!user) return '—';
   const firstName = user.firstName || '';
   const lastName = user.lastName || '';
