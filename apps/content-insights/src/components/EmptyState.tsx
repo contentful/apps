@@ -16,7 +16,11 @@ const emptyStateContainer: CSSProperties = {
   marginBottom: tokens.spacingL,
 };
 
-export const EmptyState: React.FC<{ helperText: string }> = ({ helperText }) => {
+type EmptyStateProps = {
+  helperText: string;
+};
+
+export const EmptyState = ({ helperText }: EmptyStateProps) => {
   return (
     <Flex style={emptyStateContainer}>
       <Text fontSize="fontSizeM" fontWeight="fontWeightDemiBold">
