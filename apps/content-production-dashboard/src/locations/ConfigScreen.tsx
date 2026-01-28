@@ -18,19 +18,13 @@ import {
   NEEDS_UPDATE_MONTHS_RANGE,
   RECENTLY_PUBLISHED_DAYS_RANGE,
   TIME_TO_PUBLISH_DAYS_RANGE,
+  CREATOR_VIEW_OPTIONS,
 } from '../utils/consts';
+import { CreatorViewSetting, ConfigField } from '../utils/types';
 import gearImage from '../assets/gear.png';
 import appearanceImage from '../assets/appearance.png';
 import { styles } from './ConfigScreen.styles';
 import { Validator } from '../utils/Validator';
-
-type CreatorViewSetting = 'topFiveCreators' | 'bottomFiveCreators' | 'alphabetical';
-
-const CREATOR_VIEW_OPTIONS: { value: CreatorViewSetting; label: string }[] = [
-  { value: 'topFiveCreators', label: 'Top five creators' },
-  { value: 'bottomFiveCreators', label: 'Bottom five creators' },
-  { value: 'alphabetical', label: 'Alphabetical' },
-];
 
 export interface AppInstallationParameters {
   defaultContentTypes?: string[];
@@ -53,21 +47,21 @@ const ConfigScreen = () => {
     Validator.isWithinRange(
       newErrors,
       parameters.needsUpdateMonths,
-      'needsUpdateMonths',
+      ConfigField.NeedsUpdateMonths,
       'Needs update months',
       NEEDS_UPDATE_MONTHS_RANGE
     );
     Validator.isWithinRange(
       newErrors,
       parameters.recentlyPublishedDays,
-      'recentlyPublishedDays',
+      ConfigField.RecentlyPublishedDays,
       'Recently published days',
       RECENTLY_PUBLISHED_DAYS_RANGE
     );
     Validator.isWithinRange(
       newErrors,
       parameters.timeToPublishDays,
-      'timeToPublishDays',
+      ConfigField.TimeToPublishDays,
       'Time to publish days',
       TIME_TO_PUBLISH_DAYS_RANGE
     );
@@ -113,7 +107,7 @@ const ConfigScreen = () => {
 
   const handleOnChangeInput = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    field: 'needsUpdateMonths' | 'recentlyPublishedDays' | 'timeToPublishDays'
+    field: ConfigField
   ) => {
     const value = e.target.value;
     let numValue: number | undefined = parseInt(value, 10);
@@ -182,7 +176,7 @@ const ConfigScreen = () => {
                 name="needs-update-months"
                 type="number"
                 value={parameters.needsUpdateMonths ? String(parameters.needsUpdateMonths) : ''}
-                onChange={(event) => handleOnChangeInput(event, 'needsUpdateMonths')}
+                onChange={(event) => handleOnChangeInput(event, ConfigField.NeedsUpdateMonths)}
               />
               {errors.needsUpdateMonths && (
                 <FormControl.ValidationMessage>
@@ -210,7 +204,7 @@ const ConfigScreen = () => {
                 value={
                   parameters.recentlyPublishedDays ? String(parameters.recentlyPublishedDays) : ''
                 }
-                onChange={(event) => handleOnChangeInput(event, 'recentlyPublishedDays')}
+                onChange={(event) => handleOnChangeInput(event, ConfigField.RecentlyPublishedDays)}
               />
               {errors.recentlyPublishedDays && (
                 <FormControl.ValidationMessage>
@@ -231,7 +225,7 @@ const ConfigScreen = () => {
                 name="time-to-publish-days"
                 type="number"
                 value={parameters.timeToPublishDays ? String(parameters.timeToPublishDays) : ''}
-                onChange={(event) => handleOnChangeInput(event, 'timeToPublishDays')}
+                onChange={(event) => handleOnChangeInput(event, ConfigField.TimeToPublishDays)}
               />
               {errors.timeToPublishDays && (
                 <FormControl.ValidationMessage>
