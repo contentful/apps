@@ -92,7 +92,10 @@ describe('ContentTable component', () => {
       />
     );
 
-    expect(screen.getByText('No entries found')).toBeInTheDocument();
+    expect(screen.getByText('No data to display')).toBeInTheDocument();
+    expect(
+      screen.getByText('Data will display once entry activity is available.')
+    ).toBeInTheDocument();
   });
 
   it('renders rows when items are provided', () => {

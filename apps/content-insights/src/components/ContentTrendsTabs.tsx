@@ -30,6 +30,7 @@ import ContentTypeMultiSelect, { ContentType } from './ContentTypeMultiSelect';
 import { styles } from './ContentTrendsTabs.styles';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { useUsers } from '../hooks/useUsers';
+import { EmptyState } from './EmptyState';
 
 export interface ContentTrendsTabsProps {
   entries: EntryProps[];
@@ -302,16 +303,6 @@ const CreatorMultiSelect: React.FC<CreatorMultiSelectProps> = ({
   );
 };
 
-const EmptyState: React.FC<{ helperText: string }> = ({ helperText }) => {
-  return (
-    <Flex style={styles.emptyStateContainer}>
-      <Text fontSize="fontSizeM" fontWeight="fontWeightDemiBold">
-        No data to display
-      </Text>
-      <Paragraph>{helperText}</Paragraph>
-    </Flex>
-  );
-};
 
 const LoadingSpinner: React.FC = () => {
   return (
