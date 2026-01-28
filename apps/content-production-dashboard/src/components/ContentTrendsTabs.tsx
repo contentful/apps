@@ -110,13 +110,8 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
   }, [entries, timeRange, filteredContentTypesForChart]);
 
   const creatorData = useMemo(() => {
-    return generateCreatorChartData(
-      entries,
-      { timeRange },
-      creatorsNames,
-      filteredContentTypesForChart
-    );
-  }, [entries, timeRange, creatorsNames, filteredContentTypesForChart]);
+    return generateCreatorChartData(entries, { timeRange }, creatorsNames);
+  }, [entries, timeRange, creatorsNames]);
 
   const visibleCreatorData = useMemo(() => {
     return getFilteredCreatorDataByView(creatorData, creatorView, selectedAlphabeticalCreators);

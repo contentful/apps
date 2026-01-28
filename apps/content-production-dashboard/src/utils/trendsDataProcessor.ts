@@ -65,10 +65,9 @@ export function generateContentTypeChartData(
 export function generateCreatorChartData(
   entries: EntryProps[],
   options: TrendsDataProcessorOptions,
-  creatorsNames?: Map<string, string>,
-  contentTypes?: Map<string, ContentTypeProps>
+  creatorsNames?: Map<string, string>
 ): { data: ChartDataPoint[]; creators: string[]; totalsByCreator: Record<string, number> } {
-  const { startDate, filteredEntries, allMonths } = setupChartData(entries, options, contentTypes);
+  const { startDate, filteredEntries, allMonths } = setupChartData(entries, options);
 
   const creatorsSet = new Set<string>();
   const monthMap = groupEntriesByMonthAndKey(filteredEntries, startDate, (entry) => {
