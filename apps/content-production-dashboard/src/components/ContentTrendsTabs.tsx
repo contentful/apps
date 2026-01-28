@@ -246,13 +246,11 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
           <Box marginTop="spacingM">
             {isLoadingUsers ? (
               <LoadingSpinner />
-            ) : creatorData.creators.length === 0 ? (
-              <EmptyState helperText="Data will display once creator activity is available." />
             ) : (
               <>
-                <Flex marginBottom="spacingM" gap="spacingL" alignItems="flex-start">
-                  <FormControl style={styles.creatorControlWidth}>
-                    <FormControl.Label>View by</FormControl.Label>
+                <Flex alignItems="flex-start" gap="spacingM">
+                  <FormControl marginBottom="spacingM" style={styles.formControlPadding}>
+                    <FormControl.Label marginBottom="spacingM">View by</FormControl.Label>
                     <Select value={creatorView} onChange={handleCreatorViewChange}>
                       {CREATOR_VIEW_OPTIONS.map((option) => (
                         <Select.Option key={option.value} value={option.value}>
@@ -263,8 +261,8 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
                   </FormControl>
 
                   {creatorView === CreatorViewSetting.Alphabetical && (
-                    <FormControl style={styles.creatorControlWidth}>
-                      <Flex alignItems="center" gap="spacing2Xs">
+                    <FormControl marginBottom="spacingM" style={styles.formControlPadding}>
+                      <Flex alignItems="center" gap="spacing2Xs" marginBottom="spacingXs">
                         <FormControl.Label>Select creators</FormControl.Label>
                         <Tooltip content="You can select up to five at a time.">
                           <InfoIcon size="tiny" />
@@ -279,7 +277,9 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
                   )}
                 </Flex>
 
-                {visibleCreators.length === 0 ? (
+                {creatorData.creators.length === 0 ? (
+                  <EmptyState helperText="Data will display once creator activity is available." />
+                ) : visibleCreators.length === 0 ? (
                   <EmptyState helperText="Data will display once you select creators." />
                 ) : (
                   <ChartWrapper

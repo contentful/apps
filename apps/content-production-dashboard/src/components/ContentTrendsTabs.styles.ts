@@ -17,10 +17,7 @@ export const styles = {
   } as CSSProperties,
   formControlPadding: {
     padding: tokens.spacingS,
-  } as CSSProperties,
-  creatorControlWidth: {
     minWidth: '280px',
     maxWidth: '360px',
-    flex: '1 1 0',
   } as CSSProperties,
 };
