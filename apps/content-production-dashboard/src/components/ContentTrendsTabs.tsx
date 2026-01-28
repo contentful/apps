@@ -9,7 +9,6 @@ import {
   Text,
   Select,
   Tooltip,
-  Icon,
 } from '@contentful/f36-components';
 import { InfoIcon } from '@contentful/f36-icons';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
