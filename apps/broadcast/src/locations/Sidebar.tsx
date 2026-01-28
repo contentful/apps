@@ -88,7 +88,6 @@ const Sidebar = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [audioLocale, setAudioLocale] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [selectedLocale, setSelectedLocale] = useState<string>(() => sdk.locales.default);
 
@@ -185,6 +184,34 @@ const Sidebar = () => {
     };
   }, [resolveAssetUrl, selectedLocale, videoField]);
 
+  useEffect(() => {
+    if (!audioField) {
+      setAudioUrl(null);
+      return;
+    }
+
+    let isActive = true;
+    const loadAudioUrl = async () => {
+      try {
+        const resolvedAudioUrl = await resolveAssetUrl(AUDIO_ASSET_FIELD_ID);
+        if (isActive) {
+          setAudioUrl(resolvedAudioUrl);
+        }
+      } catch (error) {
+        console.error('resolve-audio-url:sidebar-error', error);
+        if (isActive) {
+          setAudioUrl(null);
+        }
+      }
+    };
+
+    void loadAudioUrl();
+
+    return () => {
+      isActive = false;
+    };
+  }, [audioField, resolveAssetUrl, selectedLocale]);
+
   const handleGenerateAudio = async () => {
     if (!audioField) {
       sdk.notifier.error(`Missing field: ${AUDIO_ASSET_FIELD_ID}`);
@@ -248,7 +275,6 @@ const Sidebar = () => {
       }
 
       setAudioUrl(normalizeAssetUrl(result.data.url));
-      setAudioLocale(result.data.locale ?? selectedLocale);
       await sdk.navigator.openEntry(sdk.ids.entry);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -277,10 +303,7 @@ const Sidebar = () => {
 
     setIsVideoLoading(true);
     try {
-      const resolvedAudioUrl =
-        audioUrl && audioLocale === selectedLocale
-          ? audioUrl
-          : await resolveAssetUrl(AUDIO_ASSET_FIELD_ID);
+      const resolvedAudioUrl = audioUrl ?? (await resolveAssetUrl(AUDIO_ASSET_FIELD_ID));
       if (!resolvedAudioUrl) {
         sdk.notifier.error('Missing audio asset. Generate audio first.');
         return;
@@ -342,7 +365,7 @@ const Sidebar = () => {
   };
 
   const hasAudioAsset =
-    Boolean(audioUrl && audioLocale === selectedLocale) ||
+    Boolean(audioUrl) ||
     Boolean(
       audioField &&
         getAssetLinkFromValue(
@@ -387,7 +410,7 @@ const Sidebar = () => {
           Generate audio
         </Button>
       </Flex>
-      {audioUrl && audioLocale === selectedLocale ? <audio controls src={audioUrl} /> : null}
+      {audioUrl ? <audio controls src={audioUrl} /> : null}
       <Flex flexDirection="column" gap="spacingS">
         <Text fontWeight="fontWeightDemiBold">Social Video</Text>
         {!imageFieldId ? (
