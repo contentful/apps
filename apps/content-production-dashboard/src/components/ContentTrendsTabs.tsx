@@ -56,7 +56,6 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [creatorView, setCreatorView] = useState<CreatorViewSetting>(defaultCreatorViewSetting);
   const [selectedAlphabeticalCreators, setSelectedAlphabeticalCreators] = useState<string[]>([]);
-  const [hasInitializedAlphabetical, setHasInitializedAlphabetical] = useState(false);
 
   const userIds = useMemo(() => getUniqueUserIdsFromEntries(entries), [entries]);
   const { usersMap, isFetching: isLoadingUsers } = useUsers(userIds);
@@ -123,17 +122,6 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
   const visibleCreatorData = useMemo(() => {
     return getFilteredCreatorDataByView(creatorData, creatorView, selectedAlphabeticalCreators);
   }, [creatorData, creatorView, selectedAlphabeticalCreators]);
-
-  useEffect(() => {
-    if (
-      creatorView === CreatorViewSetting.Alphabetical &&
-      creatorData.creators.length > 0 &&
-      !hasInitializedAlphabetical
-    ) {
-      setSelectedAlphabeticalCreators(creatorData.creators.slice(0, 5));
-      setHasInitializedAlphabetical(true);
-    }
-  }, [creatorView, creatorData.creators, hasInitializedAlphabetical]);
 
   const handleContentTypeSelection = (newSelected: ContentType[]) => {
     if (newSelected.length <= 5) {

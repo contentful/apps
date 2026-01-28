@@ -110,9 +110,7 @@ export function getVisibleCreatorsByView(
   }
 
   if (view === CreatorViewSetting.Alphabetical) {
-    return selectedAlphabeticalCreators.length > 0
-      ? selectedAlphabeticalCreators
-      : creatorData.creators.slice(0, 5);
+    return selectedAlphabeticalCreators;
   }
 
   const creatorsByActivityDesc = [...creatorData.creators].sort(
