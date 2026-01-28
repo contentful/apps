@@ -11,4 +11,10 @@ export const styles = {
     gap: `${tokens.spacingXs}`,
     flexWrap: 'wrap',
   }),
+  fieldFilterListContainer: css({
+    display: 'flex',
+    flexDirection: 'row',
+    gap: `${tokens.spacingXs}`,
+    flexWrap: 'wrap',
+  }),
 };

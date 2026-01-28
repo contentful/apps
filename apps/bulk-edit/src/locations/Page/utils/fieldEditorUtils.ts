@@ -3,6 +3,8 @@ import type { ContentTypeField } from '../types';
 import { Control } from 'contentful-management';
 import { FieldValue } from '../components/FieldEditor';
 
+export type FieldValue = string | number | boolean | string[] | object | null | undefined;
+
 // API creation utilities
 export const createFieldAPI = (
   field: ContentTypeField,

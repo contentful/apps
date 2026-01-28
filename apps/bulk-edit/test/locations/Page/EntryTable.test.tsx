@@ -18,38 +18,66 @@ vi.mock('@tanstack/react-virtual', () => ({
 }));
 
 const mockFields: ContentTypeField[] = [
-  { id: 'displayName', uniqueId: 'displayName', name: 'Display Name', type: 'Symbol' },
-  { id: 'description', uniqueId: 'description', name: 'Description', type: 'Text' },
+  {
+    contentTypeId: 'testContentType',
+    id: 'displayName',
+    uniqueId: 'displayName',
+    name: 'Display Name',
+    type: 'Symbol',
+    required: true,
+    validations: [],
+  },
+  {
+    contentTypeId: 'testContentType',
+    id: 'description',
+    uniqueId: 'description',
+    name: 'Description',
+    type: 'Text',
+    required: true,
+    validations: [],
+  },
 ];
 
 const mockLocalizedFields: ContentTypeField[] = [
   {
     id: 'displayName',
+    contentTypeId: 'testContentType',
     uniqueId: 'displayName-en-US',
+    required: true,
+    validations: [],
     name: 'Display Name',
     type: 'Symbol',
     locale: 'en-US',
   },
   {
     id: 'description',
+    contentTypeId: 'testContentType',
     uniqueId: 'description-en-US',
     name: 'Description',
     type: 'Text',
     locale: 'en-US',
+    required: true,
+    validations: [],
   },
   {
     id: 'displayName',
+    contentTypeId: 'testContentType',
     uniqueId: 'displayName-es-AR',
     name: 'Display Name',
     type: 'Symbol',
     locale: 'es-AR',
+    required: true,
+    validations: [],
   },
   {
     id: 'description',
+    contentTypeId: 'testContentType',
     uniqueId: 'description-es-AR',
     name: 'Description',
     type: 'Text',
     locale: 'es-AR',
+    required: true,
+    validations: [],
   },
 ];
 
@@ -381,9 +409,33 @@ describe('EntryTable', () => {
 
   it('shows the Status column tooltip on hover with correct text', async () => {
     const fields: ContentTypeField[] = [
-      { id: 'name', uniqueId: 'name', name: 'Name', type: 'Symbol' },
-      { id: 'location', uniqueId: 'location', name: 'Location', type: 'Location' },
-      { id: 'cost', uniqueId: 'cost', name: 'Cost', type: 'Number' },
+      {
+        contentTypeId: 'testContentType',
+        id: 'name',
+        uniqueId: 'name',
+        name: 'Name',
+        type: 'Symbol',
+        required: true,
+        validations: [],
+      },
+      {
+        contentTypeId: 'testContentType',
+        id: 'location',
+        uniqueId: 'location',
+        name: 'Location',
+        type: 'Location',
+        required: true,
+        validations: [],
+      },
+      {
+        contentTypeId: 'testContentType',
+        id: 'cost',
+        uniqueId: 'cost',
+        name: 'Cost',
+        type: 'Number',
+        required: true,
+        validations: [],
+      },
     ];
     render(
       <EntryTable

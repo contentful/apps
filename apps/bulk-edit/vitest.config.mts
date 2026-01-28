@@ -9,5 +9,10 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/setupTests.ts'],
     env: loadEnv('test', process.cwd(), ''),
+    server: {
+      deps: {
+        inline: ['@phosphor-icons/react', '@contentful/f36-icons'],
+      },
+    },
   },
 });
