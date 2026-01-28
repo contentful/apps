@@ -1,6 +1,6 @@
 import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Page from '../../../src/locations/Page';
 import { mockSdk } from '../../mocks';
 import { getManyContentTypes, getManyEntries } from '../../mocks/mockCma';
@@ -247,32 +247,62 @@ describe('Table display', () => {
 });
 
 describe('Reset filters functionality', () => {
-  it('hides reset filters button when no filters are active', async () => {
-    render(<Page />);
+  beforeEach(() => {
+    // Mock content type fetch
+    mockSdk.cma.contentType.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyContentTypes([condoAContentType]));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
-    });
+    // Mock content type get for fields
+    mockSdk.cma.contentType.get = vi.fn().mockResolvedValue(condoAContentType);
 
-    expect(screen.queryByText('Reset filters')).not.toBeInTheDocument();
+    // Mock entries fetch
+    mockSdk.cma.entry.getMany = vi
+      .fn()
+      .mockResolvedValue(getManyEntries([condoAEntry1, condoAEntry2]));
   });
 
-  it('shows reset filters button when status filter is active', async () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('disables reset filters button when no filters are active', async () => {
     render(<Page />);
 
     await waitFor(() => {
       expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
-      expect(screen.queryByText('Reset filters')).not.toBeInTheDocument();
     });
 
-    const statusFilter = screen.getByText('Filter by status');
-    fireEvent.click(statusFilter);
+    const resetButton = screen.getByRole('button', { name: /reset filters/i });
+    expect(resetButton).toBeDisabled();
+  });
 
-    const draftOption = screen.getByRole('checkbox', { name: 'Draft' });
-    fireEvent.click(draftOption);
+  it('enables reset filters button when status filter is active', async () => {
+    render(<Page />);
 
     await waitFor(() => {
-      expect(screen.getByText('Reset filters')).toBeInTheDocument();
+      expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
+    });
+
+    // Reset button should be disabled initially
+    const resetButton = screen.getByRole('button', { name: /reset filters/i });
+    expect(resetButton).toBeDisabled();
+
+    // Find the Status filter button (it's a button element containing "Status" text)
+    const statusButtons = screen.getAllByText('Status');
+    const statusFilter = statusButtons.find((el) => el.closest('button'));
+    expect(statusFilter).toBeTruthy();
+    fireEvent.click(statusFilter!);
+
+    // Select "Draft" from the menu
+    await waitFor(() => {
+      expect(screen.getByRole('menuitem', { name: 'Draft' })).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Draft' }));
+
+    // Reset button should now be enabled
+    await waitFor(() => {
+      expect(resetButton).not.toBeDisabled();
     });
   });
 
@@ -283,19 +313,30 @@ describe('Reset filters functionality', () => {
       expect(screen.getByTestId('bulk-edit-table')).toBeInTheDocument();
     });
 
-    const statusFilter = screen.getByText('Filter by status');
-    fireEvent.click(statusFilter);
+    // Find the Status filter button
+    const statusButtons = screen.getAllByText('Status');
+    const statusFilter = statusButtons.find((el) => el.closest('button'));
+    expect(statusFilter).toBeTruthy();
+    fireEvent.click(statusFilter!);
 
-    const draftOption = screen.getByRole('checkbox', { name: 'Draft' });
-    fireEvent.click(draftOption);
+    // Select "Draft" from the menu
+    await waitFor(() => {
+      expect(screen.getByRole('menuitem', { name: 'Draft' })).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Draft' }));
 
-    expect(await screen.findByText('Reset filters')).toBeInTheDocument();
+    // Wait for reset button to be enabled
+    const resetButton = screen.getByRole('button', { name: /reset filters/i });
+    await waitFor(() => {
+      expect(resetButton).not.toBeDisabled();
+    });
 
-    const resetButton = await screen.findByText('Reset filters');
+    // Click reset
     fireEvent.click(resetButton);
 
+    // Reset button should be disabled again
     await waitFor(() => {
-      expect(screen.queryByText('Reset filters')).not.toBeInTheDocument();
+      expect(resetButton).toBeDisabled();
     });
   });
 });

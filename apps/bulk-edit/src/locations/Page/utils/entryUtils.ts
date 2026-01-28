@@ -12,12 +12,13 @@ import {
   CHANGED_STATUS,
   DRAFT_STATUS,
   PUBLISHED_STATUS,
+  ARCHIVED_STATUS,
   UNKNOWN_STATUS,
 } from './constants';
 import { BadgeVariant } from '@contentful/f36-components';
 import { getCustomBooleanLabels } from './fieldEditorUtils';
 
-export const STATUSES = [DRAFT_STATUS, CHANGED_STATUS, PUBLISHED_STATUS];
+export const STATUSES = [PUBLISHED_STATUS, CHANGED_STATUS, DRAFT_STATUS, ARCHIVED_STATUS];
 
 export const getStatusFromEntry = (entry: Entry): string => {
   const { sys } = entry;

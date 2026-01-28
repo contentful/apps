@@ -11,22 +11,18 @@ import {
   Text,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { ContentTypeProps, EntryProps, QueryOptions } from 'contentful-management';
-import { ContentTypeField, FilterOption } from './types';
+import { ContentTypeProps, EntryProps } from 'contentful-management';
+import { ContentTypeField, FieldFilterValue, FilterOption } from './types';
 import { styles } from './styles';
 import { ContentTypeSidebar } from './components/ContentTypeSidebar';
-import { SORT_OPTIONS, SortMenu } from './components/SortMenu';
+import { SORT_OPTIONS } from './components/SortMenu';
 import { EntryTable } from './components/EntryTable';
 import { BulkEditModal } from './components/BulkEditModal';
 import { UndoBulkEditModal } from './components/UndoBulkEditModal';
 import { SearchBar } from './components/SearchBar';
 import {
   fetchEntriesWithBatching,
-  filterEntriesByNumericSearch,
   getEntryFieldValue,
-  getStatusFlags,
-  getStatusFromEntry,
-  isNumericSearch,
   mapContentTypePropsToFields,
   processEntriesInBatches,
   STATUSES,
@@ -35,8 +31,9 @@ import {
 import { successNotification } from './utils/successNotification';
 import { API_LIMITS, BATCH_FETCHING, BATCH_PROCESSING, PAGE_SIZE_OPTIONS } from './utils/constants';
 import { ErrorNote } from './components/ErrorNote';
-import FilterMultiselect from './components/FilterMultiselect';
 import { EmptyEntryBanner } from './components/EmptyEntryBanner';
+import { buildQuery, fieldFilterValuesToQuery } from './utils/contentfulQueryUtils';
+import { FieldVisibiltyMenu } from './components/FieldVisibiltyMenu';
 
 const getFieldsMapped = (fields: ContentTypeField[]) => {
   return fields.map((field) => ({
@@ -56,6 +53,7 @@ const Page = () => {
   const defaultLocale = sdk.locales.default;
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [selectedContentTypeId, setSelectedContentTypeId] = useState<string | undefined>(undefined);
+  const [allContentTypesLoading, setAllContentTypesLoading] = useState(true);
   const [contentTypeLoading, setContentTypeLoading] = useState(true);
   const [entries, setEntries] = useState<EntryProps[]>([]);
   const [entriesLoading, setEntriesLoading] = useState(true);
@@ -75,33 +73,33 @@ const Page = () => {
   const [totalUpdateCount, setTotalUpdateCount] = useState<number>(0);
   const [editionCount, setEditionCount] = useState<number>(0);
   const [selectedColumns, setSelectedColumns] = useState<FilterOption[]>([]);
-  const [selectedStatuses, setSelectedStatuses] = useState<FilterOption[]>(statusOptions);
+  const [selectedStatuses, setSelectedStatuses] = useState<FilterOption[]>([]); //statusOptions);
   const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [initialTotal, setInitialTotal] = useState(0);
+  const [searchFieldFilterValues, setSearchFieldFilterValues] = useState<FieldFilterValue[]>([]);
+  const [searchFieldFilterArgs, setSearchFieldFilterArgs] = useState<string>('');
+  // const [initialTotal, setInitialTotal] = useState(0);
   // Used to force a re-render of the table when the selection changes
   const [tableKey, setTableKey] = useState(0);
 
   const hasActiveFilters = () => {
     const hasSearchQuery = searchQuery.trim() !== '';
-    const hasStatusFilter = selectedStatuses.length !== statusOptions.length;
+    const hasSearchFieldFilterValues = searchFieldFilterValues.length > 0;
+    const hasStatusFilter = selectedStatuses.length > 0;
     const hasColumnFilter = selectedColumns.length !== getFieldsMapped(fields).length;
-    return hasSearchQuery || hasStatusFilter || hasColumnFilter;
+    return hasSearchQuery || hasStatusFilter || hasColumnFilter || hasSearchFieldFilterValues;
   };
 
   const resetFilters = () => {
     setSearchQuery('');
-    setSelectedStatuses(statusOptions);
+    setSearchFieldFilterValues([]);
+    setSelectedStatuses([]);
     setSelectedColumns(getFieldsMapped(fields));
     setActivePage(0);
   };
 
   const shouldDisableFilters = (disableIfLoading: boolean = true) => {
-    return (
-      (entries.length === 0 && initialTotal === 0) ||
-      !selectedContentType ||
-      (disableIfLoading ? entriesLoading : false)
-    );
+    return !selectedContentType || (disableIfLoading ? entriesLoading : false);
   };
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
@@ -125,87 +123,30 @@ const Page = () => {
     return allContentTypes;
   };
 
-  const getOrder = (sortOption: string, displayField: string | null) => {
-    if (sortOption === 'updatedAt_desc') return '-sys.updatedAt';
-    else if (sortOption === 'updatedAt_asc') return 'sys.updatedAt';
-    else if (displayField === null) return undefined;
-    else if (sortOption === 'displayName_asc') return `fields.${displayField}`;
-    else if (sortOption === 'displayName_desc') return `-fields.${displayField}`;
+  const clearBasicState = () => {
+    setEntries([]);
+    setFields([]);
+    setTotalEntries(0);
   };
 
-  const getStatusFilter = (statusLabels: string[]) => {
-    // If no statuses selected, return a filter that matches nothing
-    if (statusLabels.length === 0) {
-      return { 'sys.id[in]': 'nonexistent-id' };
-    }
-
-    const { hasDraft, hasPublished, hasChanged } = getStatusFlags(statusLabels);
-
-    // Single status filtering
-    if (hasDraft && statusLabels.length === 1) {
-      return { 'sys.publishedAt[exists]': false };
-    }
-
-    if (!hasDraft && (hasPublished || hasChanged)) {
-      return { 'sys.publishedAt[exists]': true, 'sys.archivedAt[exists]': false };
-    }
-
-    // Other combinations does not filter anything
-    return {};
-  };
-
-  // We cannot differentiate throw the query changed and published
-  const filterEntriesByStatus = (entries: EntryProps[], statusLabels: string[]): EntryProps[] => {
-    // If no statuses selected, return empty array
-    if (statusLabels.length === 0) return [];
-
-    // If all statuses selected, return all entries
-    if (statusLabels.length === 3) return entries;
-
-    return entries.filter((entry) => {
-      const entryStatus = getStatusFromEntry(entry);
-      return statusLabels.includes(entryStatus);
-    });
-  };
-
-  function needsClientFiltering() {
-    const statusLabels = selectedStatuses.map((status) => status.label);
-    const { hasDraft, hasPublished, hasChanged } = getStatusFlags(statusLabels);
-
-    // If we need client-side filtering, fetch all entries
-    const allStatusesSelected = hasDraft && hasPublished && hasChanged;
-    const isPublishedOrChanged = hasPublished || hasChanged;
-
-    return (
-      (selectedStatuses.length > 0 && !allStatusesSelected && isPublishedOrChanged) ||
-      isNumericSearch(searchQuery)
-    );
-  }
-
-  const buildQuery = (
-    sortOption: string,
-    displayField: string | null,
-    statusLabels: string[]
-  ): QueryOptions => {
-    const query: QueryOptions = {
-      content_type: selectedContentTypeId,
-      order: getOrder(sortOption, displayField),
-      skip: needsClientFiltering() ? 0 : activePage * itemsPerPage,
-      limit: needsClientFiltering() ? 1000 : itemsPerPage,
-      ...getStatusFilter(statusLabels),
-    };
-
-    if (!isNumericSearch(searchQuery) && searchQuery.trim()) {
-      query.query = searchQuery.trim();
-    }
-
-    return query;
+  // Used to clear the selection states and force a re-render of the table
+  const clearSelectionState = () => {
+    setSelectedField(null);
+    setSelectedEntryIds([]);
+    setTableKey((tableKey) => tableKey + 1);
   };
 
   useEffect(() => {
+    setSearchFieldFilterArgs(fieldFilterValuesToQuery(searchFieldFilterValues).queryString);
+  }, [searchFieldFilterValues]);
+
+  // ------------------------------------------------------------
+  // ALL Content Types Fetch
+  // ------------------------------------------------------------
+  useEffect(() => {
     const fetchContentTypes = async (): Promise<void> => {
       try {
-        setContentTypeLoading(true);
+        setAllContentTypesLoading(true);
         const contentTypes = await getAllContentTypes();
         const sortedContentTypes = contentTypes
           .slice()
@@ -219,27 +160,16 @@ const Page = () => {
         setContentTypes([]);
         setSelectedContentTypeId(undefined);
       } finally {
-        setContentTypeLoading(false);
+        setAllContentTypesLoading(false);
       }
     };
     void fetchContentTypes();
   }, []);
 
-  const clearBasicState = () => {
-    setEntries([]);
-    setFields([]);
-    setTotalEntries(0);
-    setInitialTotal(0);
-  };
-
-  // Used to clear the selection states and force a re-render of the table
-  const clearSelectionState = () => {
-    setSelectedField(null);
-    setSelectedEntryIds([]);
-    setTableKey((tableKey) => tableKey + 1);
-  };
-
+  // ------------------------------------------------------------
+  // Content Type Fetch
   // Fetch content type and fields when selectedContentTypeId changes
+  // ------------------------------------------------------------
   useEffect(() => {
     const fetchContentTypeAndFields = async (): Promise<void> => {
       if (!selectedContentTypeId) {
@@ -247,25 +177,36 @@ const Page = () => {
         return;
       }
 
+      setContentTypeLoading(true);
       try {
         const ct = await sdk.cma.contentType.get({ contentTypeId: selectedContentTypeId });
         const editorInterface = await sdk.cma.editorInterface.get({
           contentTypeId: ct.sys.id,
         });
+        resetFilters();
+        clearSelectionState();
+
         const newFields = mapContentTypePropsToFields(ct, editorInterface, locales);
         setFields(newFields);
         setSelectedColumns(getFieldsMapped(newFields));
         setCurrentContentType(ct);
       } catch (e) {
+        resetFilters();
+        clearSelectionState();
         clearBasicState();
         setSelectedColumns([]);
         setCurrentContentType(null);
       }
+
+      setContentTypeLoading(false);
     };
     void fetchContentTypeAndFields();
   }, [sdk, selectedContentTypeId]);
 
+  // ------------------------------------------------------------
+  // Entries Fetch
   // Fetch entries when pagination, sorting, or content type changes
+  // ------------------------------------------------------------
   useEffect(() => {
     const fetchEntries = async (): Promise<void> => {
       if (fields.length === 0 || !currentContentType) {
@@ -276,49 +217,27 @@ const Page = () => {
         const displayField = currentContentType.displayField || null;
         const statusLabels = selectedStatuses.map((status) => status.label);
 
-        const baseQuery = buildQuery(sortOption, displayField, statusLabels);
+        const baseQuery = buildQuery(
+          sortOption,
+          displayField,
+          statusLabels,
+          currentContentType.sys.id,
+          activePage,
+          itemsPerPage,
+          searchFieldFilterValues,
+          searchQuery
+        );
 
         const { entries, total } = await fetchEntriesWithBatching(
           sdk,
           baseQuery,
           baseQuery.limit || BATCH_FETCHING.DEFAULT_BATCH_SIZE
         );
-
-        // Apply client-side status filtering
-        const statusFilteredEntries = filterEntriesByStatus(entries, statusLabels);
-
-        let searchFilteredEntries;
-        if (!searchQuery.trim() || !isNumericSearch(searchQuery)) {
-          searchFilteredEntries = statusFilteredEntries;
-        } else {
-          searchFilteredEntries = filterEntriesByNumericSearch(
-            statusFilteredEntries,
-            searchQuery,
-            fields,
-            defaultLocale
-          );
-        }
-
-        if (needsClientFiltering()) {
-          // Client-side pagination
-          const startIndex = activePage * itemsPerPage;
-          const endIndex = startIndex + itemsPerPage;
-          const paginatedEntries = searchFilteredEntries.slice(startIndex, endIndex);
-
-          setEntries(paginatedEntries);
-          setTotalEntries(searchFilteredEntries.length);
-        } else {
-          // Server-side pagination
-          setEntries(searchFilteredEntries);
-          setTotalEntries(total);
-        }
-
-        // Determine empty state type
-        if (initialTotal === 0 && total > 0) {
-          setInitialTotal(total);
-        }
+        setEntries(entries);
+        setTotalEntries(total);
       } catch (e) {
-        clearBasicState();
+        setEntries([]);
+        setTotalEntries(0);
       } finally {
         setEntriesLoading(false);
       }
@@ -332,6 +251,9 @@ const Page = () => {
     currentContentType,
     selectedStatuses,
     searchQuery,
+    // searchFieldFilterValues,
+    searchFieldFilterArgs,
+    fields,
   ]);
 
   const selectedContentType = contentTypes.find((ct) => ct.sys.id === selectedContentTypeId);
@@ -511,7 +433,7 @@ const Page = () => {
     }
   };
 
-  if (contentTypeLoading) {
+  if (allContentTypesLoading) {
     return (
       <Flex alignItems="center" justifyContent="center" style={{ minHeight: '60vh' }}>
         <Spinner />
@@ -521,7 +443,7 @@ const Page = () => {
 
   return (
     <Flex style={{ overflow: 'hidden' }}>
-      <Box style={styles.mainContent} paddingY="spacingL" paddingLeft="spacingL">
+      <Box style={styles.mainContent} paddingLeft="spacingL">
         <Box style={{ ...styles.whiteBox, minWidth: 0 }} paddingTop="spacingL">
           <Flex style={{ minWidth: 0 }}>
             <ContentTypeSidebar
@@ -529,171 +451,145 @@ const Page = () => {
               selectedContentTypeId={selectedContentTypeId}
               onContentTypeSelect={(newCT) => {
                 setSelectedContentTypeId(newCT);
-                setSortOption(SORT_OPTIONS[0].value);
-                setSelectedStatuses(statusOptions);
-                setActivePage(0);
-                setSearchQuery('');
-                setInitialTotal(0);
-                clearSelectionState();
               }}
               disabled={entriesLoading}
             />
             <div style={styles.spacer} />
             <Box style={styles.tableContainer}>
-              <>
-                {/* Heading */}
-                <Heading style={styles.pageHeader}>
-                  {selectedContentType ? `Bulk edit ${selectedContentType.name}` : 'Bulk Edit App'}
-                </Heading>
-
-                {/* Search Section */}
-                <SearchBar
-                  searchQuery={searchQuery}
-                  onSearchChange={(query) => {
-                    setSearchQuery(query);
+              {contentTypeLoading && (
+                <Flex alignItems="center" justifyContent="center" style={styles.loadingContainer}>
+                  <Spinner />
+                </Flex>
+              )}
+              {/* Heading */}
+              <Heading style={styles.pageHeader}>
+                {selectedContentType ? `Bulk edit ${selectedContentType.name}` : 'Bulk Edit App'}
+              </Heading>
+              {/* Search Section */}
+              <SearchBar
+                searchQuery={searchQuery}
+                onSearchChange={(query, fieldFilterValues) => {
+                  setSearchQuery(query);
+                  setSearchFieldFilterValues(fieldFilterValues);
+                  setSearchFieldFilterArgs(fieldFilterValuesToQuery(fieldFilterValues).queryString);
+                  setActivePage(0);
+                  clearSelectionState();
+                }}
+                isDisabled={shouldDisableFilters(false)}
+                debounceDelay={300}
+                fields={selectedColumns.flatMap(
+                  (field) => fields.find((f) => f.uniqueId === field.value) || []
+                )}
+                fieldFilterValues={searchFieldFilterValues}
+                setFieldFilterValues={setSearchFieldFilterValues}
+                statusOptions={statusOptions}
+                selectedStatuses={selectedStatuses}
+                setSelectedStatuses={setSelectedStatuses}
+                clearSelectionState={clearSelectionState}
+                setActivePage={setActivePage}
+                resetFilters={resetFilters}
+                hasActiveFilters={hasActiveFilters}
+                sortOption={sortOption}
+                setSortOption={setSortOption}
+              />
+              {/* Multiselects Filters Section */}
+              {/* <Flex gap="spacingS" alignItems="center">
+                <SortMenu
+                  sortOption={sortOption}
+                  onSortChange={(newSort) => {
+                    setSortOption(newSort);
                     setActivePage(0);
-                    clearSelectionState();
                   }}
-                  isDisabled={shouldDisableFilters(false)}
-                  debounceDelay={300}
+                  disabled={shouldDisableFilters()}
                 />
-
-                {/* Multiselects Filters Section */}
-                <Flex gap="spacingS" alignItems="center">
-                  <SortMenu
-                    sortOption={sortOption}
-                    onSortChange={(newSort) => {
-                      setSortOption(newSort);
-                      setActivePage(0);
-                    }}
-                    disabled={shouldDisableFilters()}
-                  />
-                  <FilterMultiselect
-                    id="status"
-                    options={statusOptions}
-                    selectedItems={selectedStatuses}
-                    setSelectedItems={(statuses) => {
-                      setSelectedStatuses(statuses);
-                      setActivePage(0);
-                      clearSelectionState();
-                    }}
-                    disabled={shouldDisableFilters()}
-                    placeholderConfig={{
-                      noneSelected: 'No statuses selected',
-                      allSelected: 'Filter by status',
-                    }}
-                    style={styles.columnMultiselectStatuses}
-                  />
-                  <FilterMultiselect
-                    id="column"
-                    options={getFieldsMapped(fields)}
-                    selectedItems={selectedColumns}
-                    setSelectedItems={(selectedColumns) => {
-                      const sortedSelectedColumns = [...selectedColumns].sort((a, b) => {
-                        const aIndex = fields.findIndex((f) => f.uniqueId === a.value);
-                        const bIndex = fields.findIndex((f) => f.uniqueId === b.value);
-                        return aIndex - bIndex;
-                      });
-                      setSelectedColumns(sortedSelectedColumns);
-                    }}
-                    disabled={shouldDisableFilters()}
-                    placeholderConfig={{
-                      noneSelected: 'No fields selected',
-                      allSelected: 'Filter fields',
-                    }}
-                    style={styles.columnMultiselectColumns}
-                  />
-                  {hasActiveFilters() && (
+              </Flex> */}
+              {!entriesLoading && (
+                <>
+                  <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
+                    <Button
+                      variant="primary"
+                      onClick={() => setIsModalOpen(true)}
+                      isDisabled={!selectedField || selectedEntryIds.length === 0}>
+                      {selectedEntryIds.length > 1 ? 'Bulk edit' : 'Edit'}
+                    </Button>
                     <Button
                       variant="secondary"
-                      size="small"
-                      onClick={resetFilters}
-                      isDisabled={shouldDisableFilters()}
-                      style={styles.resetFiltersButton}>
-                      Reset filters
+                      onClick={() => clearSelectionState()}
+                      isDisabled={!selectedField || selectedEntryIds.length === 0}>
+                      Clear selection
                     </Button>
-                  )}
-                </Flex>
-                {!entriesLoading && (
-                  <>
-                    <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
-                      <Button
-                        variant="primary"
-                        onClick={() => setIsModalOpen(true)}
-                        isDisabled={!selectedField || selectedEntryIds.length === 0}>
-                        {selectedEntryIds.length > 1 ? 'Bulk edit' : 'Edit'}
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        onClick={() => clearSelectionState()}
-                        isDisabled={!selectedField || selectedEntryIds.length === 0}>
-                        Clear selection
-                      </Button>
-                    </Flex>
                     <Text fontColor="gray600">
                       {selectedEntryIds.length || 'No'} entry field
                       {selectedEntryIds.length === 1 ? '' : 's'} selected
                     </Text>
-                  </>
-                )}
-                {entriesLoading ? (
-                  <Table style={styles.loadingTableBorder}>
-                    <Table.Body>
-                      <Skeleton.Row rowCount={5} columnCount={5} />
-                    </Table.Body>
-                  </Table>
-                ) : (
-                  <>
-                    {entries.length === 0 || !selectedContentType ? (
-                      <EmptyEntryBanner
-                        hasEntries={entries.length > 0}
-                        hasInitialEntries={initialTotal > 0}
-                      />
-                    ) : (
-                      <>
-                        {failedUpdates.length > 0 && (
-                          <ErrorNote
-                            failedUpdates={failedUpdates}
-                            selectedContentType={selectedContentType}
-                            defaultLocale={defaultLocale}
-                            onClose={() => setFailedUpdates([])}
-                          />
-                        )}
-                        <EntryTable
-                          key={tableKey}
-                          entries={entries}
-                          fields={selectedColumns.flatMap(
-                            (field) => fields.find((f) => f.uniqueId === field.value) || []
-                          )}
-                          contentType={selectedContentType}
-                          spaceId={sdk.ids.space}
-                          environmentId={sdk.ids.environment}
+                    <div style={{ flex: 1 }} />
+                    <FieldVisibiltyMenu
+                      selectedColumns={selectedColumns}
+                      setSelectedColumns={setSelectedColumns}
+                      fields={fields}
+                      getFieldsMapped={getFieldsMapped}
+                    />
+                  </Flex>
+                </>
+              )}
+              {entriesLoading ? (
+                <Table style={styles.loadingTableBorder}>
+                  <Table.Body>
+                    <Skeleton.Row rowCount={5} columnCount={5} />
+                  </Table.Body>
+                </Table>
+              ) : (
+                <>
+                  {entries.length === 0 || !selectedContentType ? (
+                    <EmptyEntryBanner
+                      hasEntries={entries.length > 0}
+                      // hasInitialEntries={initialTotal > 0}
+                    />
+                  ) : (
+                    <>
+                      {failedUpdates.length > 0 && (
+                        <ErrorNote
+                          failedUpdates={failedUpdates}
+                          selectedContentType={selectedContentType}
                           defaultLocale={defaultLocale}
-                          activePage={activePage}
-                          totalEntries={totalEntries}
-                          itemsPerPage={itemsPerPage}
-                          onPageChange={setActivePage}
-                          onItemsPerPageChange={(itemsPerPage) => {
-                            setItemsPerPage(itemsPerPage);
-                            setActivePage(0);
-                          }}
-                          pageSizeOptions={PAGE_SIZE_OPTIONS}
-                          onSelectionChange={({ selectedEntryIds, selectedFieldId }) => {
-                            setSelectedEntryIds(selectedEntryIds);
-                            setSelectedField(
-                              fields.find((f) => f.uniqueId === selectedFieldId) || null
-                            );
-                          }}
+                          onClose={() => setFailedUpdates([])}
                         />
-                      </>
-                    )}
-                  </>
-                )}
-              </>
+                      )}
+                      <EntryTable
+                        key={tableKey}
+                        entries={entries}
+                        fields={selectedColumns.flatMap(
+                          (field) => fields.find((f) => f.uniqueId === field.value) || []
+                        )}
+                        contentType={selectedContentType}
+                        spaceId={sdk.ids.space}
+                        environmentId={sdk.ids.environment}
+                        defaultLocale={defaultLocale}
+                        activePage={activePage}
+                        totalEntries={totalEntries}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={setActivePage}
+                        onItemsPerPageChange={(itemsPerPage) => {
+                          setItemsPerPage(itemsPerPage);
+                          setActivePage(0);
+                        }}
+                        pageSizeOptions={PAGE_SIZE_OPTIONS}
+                        onSelectionChange={({ selectedEntryIds, selectedFieldId }) => {
+                          setSelectedEntryIds(selectedEntryIds);
+                          setSelectedField(
+                            fields.find((f) => f.uniqueId === selectedFieldId) || null
+                          );
+                        }}
+                      />
+                    </>
+                  )}
+                </>
+              )}
             </Box>
           </Flex>
         </Box>
       </Box>
+
       <BulkEditModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

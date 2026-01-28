@@ -9,6 +9,7 @@ export const PAGE_DESCRIPTION = 'Bulk edit your content entries';
 export const DRAFT_STATUS = 'Draft';
 export const CHANGED_STATUS = 'Changed';
 export const PUBLISHED_STATUS = 'Published';
+export const ARCHIVED_STATUS = 'Archived';
 export const UNKNOWN_STATUS = 'Unknown';
 
 export const BATCH_FETCHING = {
