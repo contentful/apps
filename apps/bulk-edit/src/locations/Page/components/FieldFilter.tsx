@@ -124,7 +124,7 @@ export const FieldFilter = ({ field, setFieldFilterValues }: FieldFilterProps) =
   useEffect(() => {
     const newFilterValue: FieldFilterValue = {
       fieldUniqueId: field.uniqueId,
-      operator: selectedOperator,
+      operator: selectedOperator || 'in',
       value: debouncedInputValue,
       entryIds:
         selectedEntries.length > 0 ? selectedEntries : selectedEntry ? [selectedEntry] : undefined,
