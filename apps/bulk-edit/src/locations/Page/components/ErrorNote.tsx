@@ -1,6 +1,6 @@
 import React from 'react';
 import { Note } from '@contentful/f36-components';
-import { WarningOctagonIcon } from '@phosphor-icons/react';
+import { WarningOctagonIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { Entry } from '../types';
 import { getEntryTitle } from '../utils/entryUtils';

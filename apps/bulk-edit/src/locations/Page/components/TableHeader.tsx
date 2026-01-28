@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, Checkbox, Flex, Text } from '@contentful/f36-components';
 import { Tooltip } from '@contentful/f36-tooltip';
-import { QuestionIcon } from '@phosphor-icons/react';
+import { QuestionIcon } from '@contentful/f36-icons';
 import { ContentTypeField } from '../types';
 import { headerStyles } from './TableHeader.styles';
 import { truncate, isCheckboxAllowed } from '../utils/entryUtils';
@@ -100,7 +100,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
             <FocusedTooltip
               content="Bulk editing is not supported for Status"
               isFocused={isStatusFocused}>
-              <QuestionIcon size={16} aria-label="Bulk editing not supported for Status" />
+              <QuestionIcon aria-label="Bulk editing not supported for Status" size="small" />
             </FocusedTooltip>
           </Flex>
         </Table.Cell>
@@ -159,8 +159,8 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
                       content={`Bulk editing is not supported for the ${field.name} field type`}
                       isFocused={isFieldFocused}>
                       <QuestionIcon
-                        size={16}
                         aria-label={`Bulk editing not supported for ${field.name}`}
+                        size="small"
                       />
                     </FocusedTooltip>
                   </>

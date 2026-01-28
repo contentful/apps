@@ -1,6 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { BulkEditModal } from '../../../src/locations/Page/components/BulkEditModal';
 import { ContentTypeField, Entry } from '../../../src/locations/Page/types';
 import { mockSdk } from '../../mocks';
@@ -16,6 +16,7 @@ describe('BulkEditModal', () => {
     uniqueId: 'size',
     name: 'Size',
     type: 'Number',
+    required: true,
     fieldControl: { fieldId: 'size', widgetId: 'numberEditor' },
     validations: [],
   };
@@ -190,6 +191,7 @@ describe('BulkEditModal', () => {
       uniqueId: 'age',
       name: 'Age',
       type: 'Integer',
+      required: true,
       fieldControl: { fieldId: 'age', widgetId: 'numberEditor' },
       validations: [{ range: { min: 0, max: 120 } }],
     };

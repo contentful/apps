@@ -2,11 +2,13 @@ import type { FieldAPI } from '@contentful/field-editor-shared';
 import type { ContentTypeField } from '../types';
 import { Control } from 'contentful-management';
 
+export type FieldValue = string | number | boolean | string[] | object | null | undefined;
+
 // API creation utilities
 export const createFieldAPI = (
   field: ContentTypeField,
-  value: string,
-  onChange: (value: string) => void,
+  value: FieldValue,
+  onChange: (value: FieldValue) => void,
   defaultLocale: string
 ): FieldAPI => {
   const locale = field.locale || defaultLocale;

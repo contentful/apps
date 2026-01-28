@@ -19,10 +19,12 @@ import {
 } from '../utils/fieldEditorUtils';
 import type { LocalesAPI } from '@contentful/field-editor-shared';
 
+export type FieldValue = string | number | boolean | string[] | object | null | undefined;
+
 interface FieldEditorProps {
   field: ContentTypeField;
-  value: string;
-  onChange: (value: string) => void;
+  value: FieldValue;
+  onChange: (value: FieldValue) => void;
   locales: LocalesAPI;
 }
 
@@ -141,7 +143,7 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
 
   return (
     <>
-      {SUPPORTED_WIDGET_IDS.has(getWidgetId(field)) && (
+      {!SUPPORTED_WIDGET_IDS.has(getWidgetId(field)) && (
         <Note>
           This field uses an unsupported custom appereance, the default editor for the field will be
           used instead.

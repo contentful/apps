@@ -25,7 +25,7 @@ export const styles = {
   sidebar: {
     minWidth: `${SIDEBAR_WIDTH}px`,
     borderRight: `1px solid ${tokens.gray200}`,
-    height: '100vh',
+    // height: '100vh',
     background: tokens.colorWhite,
   },
   mainContent: {
@@ -36,6 +36,16 @@ export const styles = {
     flex: 1,
     minWidth: 0,
     overflow: 'hidden',
+    position: 'relative',
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(255, 255, 255, 0.3)',
+    zIndex: 1000,
   },
   whiteBox: {
     background: tokens.colorWhite,
@@ -43,16 +53,15 @@ export const styles = {
   },
   pageHeader: {
     background: tokens.colorWhite,
-    paddingBottom: tokens.spacingM,
     width: 'fit-content',
   },
   spacer: {
     background: tokens.colorWhite,
     width: SPACER_SPACING,
-    height: '100vh',
     display: 'block',
     marginRight: tokens.spacing2Xs,
     flexShrink: 0, // Spacer is inside a flex container and should not shrink
+    minHeight: `calc(100vh - ${tokens.spacingL})`,
   },
   sortMenu: {
     width: 'fit-content',
@@ -72,8 +81,8 @@ export const styles = {
     padding: `${tokens.spacingXs} 0`,
   },
   editButton: {
-    width: 'fit-content',
-    marginBottom: tokens.spacingS,
+    width: '97%',
+    marginTop: tokens.spacingXs,
   },
   errorNote: {
     maxWidth: `${TABLE_WIDTH}px`,

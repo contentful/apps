@@ -12,12 +12,19 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 describe('FieldEditor', () => {
   const mockOnChange = vi.fn();
 
+  const createFieldControl = (widgetId: string, fieldId: string = 'test-field') => ({
+    fieldId,
+    widgetId,
+  });
+
   const createField = (type: string, id: string = 'test-field', name: string = 'Test Field') => ({
+    contentTypeId: 'test-content-type',
     id,
     name,
     type,
     locale: mockSdk.locales.default,
     uniqueId: `${id}-${mockSdk.locales.default}`,
+    required: false,
     validations: [],
   });
 
@@ -37,7 +44,7 @@ describe('FieldEditor', () => {
     const field = createField('Symbol');
     const value = 'test value';
 
-    const fieldMockWithControl = { ...field, fieldControl: { widgetId: 'singleLine' } };
+    const fieldMockWithControl = { ...field, fieldControl: createFieldControl('singleLine') };
 
     render(
       <FieldEditor
@@ -58,7 +65,7 @@ describe('FieldEditor', () => {
 
     const fieldMockWithControl = {
       ...field,
-      fieldControl: { widgetId: 'dropdown' },
+      fieldControl: createFieldControl('dropdown'),
       validations: [
         {
           in: ['one', 'two', 'three'],
@@ -85,7 +92,7 @@ describe('FieldEditor', () => {
 
     const fieldMockWithControl = {
       ...field,
-      fieldControl: { widgetId: 'radio' },
+      fieldControl: createFieldControl('radio'),
       validations: [
         {
           in: ['one', 'two', 'three'],
@@ -110,7 +117,7 @@ describe('FieldEditor', () => {
     const field = createField('Text');
     const value = 'test value';
 
-    const fieldMockWithControl = { ...field, fieldControl: { widgetId: 'singleLine' } };
+    const fieldMockWithControl = { ...field, fieldControl: createFieldControl('singleLine') };
 
     render(
       <FieldEditor
@@ -129,7 +136,7 @@ describe('FieldEditor', () => {
     const field = createField('Text');
     const value = 'multiline text value';
 
-    const fieldMockWithControl = { ...field, fieldControl: { widgetId: 'multipleLine' } };
+    const fieldMockWithControl = { ...field, fieldControl: createFieldControl('multipleLine') };
 
     render(
       <FieldEditor
@@ -150,7 +157,7 @@ describe('FieldEditor', () => {
 
     const fieldMockWithControl = {
       ...field,
-      fieldControl: { widgetId: 'dropdown' },
+      fieldControl: createFieldControl('dropdown'),
       validations: [
         {
           in: ['one', 'two', 'three'],
@@ -177,7 +184,7 @@ describe('FieldEditor', () => {
 
     const fieldMockWithControl = {
       ...field,
-      fieldControl: { widgetId: 'radio' },
+      fieldControl: createFieldControl('radio'),
       validations: [
         {
           in: ['one', 'two', 'three'],
@@ -202,7 +209,7 @@ describe('FieldEditor', () => {
     const field = createField('Number');
     const value = 123.45;
 
-    const fieldMockWithControl = { ...field, fieldControl: { widgetId: 'numberEditor' } };
+    const fieldMockWithControl = { ...field, fieldControl: createFieldControl('numberEditor') };
 
     render(
       <FieldEditor
@@ -222,7 +229,7 @@ describe('FieldEditor', () => {
 
     const fieldMockWithControl = {
       ...field,
-      fieldControl: { widgetId: 'dropdown' },
+      fieldControl: createFieldControl('dropdown'),
       validations: [
         {
           in: [1, 2.56, 3.64],
@@ -249,7 +256,7 @@ describe('FieldEditor', () => {
 
     const fieldMockWithControl = {
       ...field,
-      fieldControl: { widgetId: 'radio' },
+      fieldControl: createFieldControl('radio'),
       validations: [
         {
           in: [1, 2.56, 3.64],
@@ -274,7 +281,7 @@ describe('FieldEditor', () => {
     const field = createField('Integer');
     const value = 42;
 
-    const fieldMockWithControl = { ...field, fieldControl: { widgetId: 'numberEditor' } };
+    const fieldMockWithControl = { ...field, fieldControl: createFieldControl('numberEditor') };
 
     render(
       <FieldEditor
@@ -294,7 +301,7 @@ describe('FieldEditor', () => {
 
     const fieldMockWithControl = {
       ...field,
-      fieldControl: { widgetId: 'dropdown' },
+      fieldControl: createFieldControl('dropdown'),
       validations: [
         {
           in: [1, 42, 364],
@@ -321,7 +328,7 @@ describe('FieldEditor', () => {
 
     const fieldMockWithControl = {
       ...field,
-      fieldControl: { widgetId: 'radio' },
+      fieldControl: createFieldControl('radio'),
       validations: [
         {
           in: [1, 42, 364],
@@ -346,7 +353,7 @@ describe('FieldEditor', () => {
     const field = createField('Date');
     const value = '2023-10-26T10:00:00Z';
 
-    const fieldMockWithControl = { ...field, fieldControl: { widgetId: 'datePicker' } };
+    const fieldMockWithControl = { ...field, fieldControl: createFieldControl('datePicker') };
 
     render(
       <FieldEditor
@@ -365,7 +372,7 @@ describe('FieldEditor', () => {
     const field = createField('Array');
     const value = ['tag1', 'tag2'];
 
-    const fieldMockWithControl = { ...field, fieldControl: { widgetId: 'tagEditor' } };
+    const fieldMockWithControl = { ...field, fieldControl: createFieldControl('tagEditor') };
 
     render(
       <FieldEditor
@@ -385,7 +392,7 @@ describe('FieldEditor', () => {
     const field = createField('Array');
     const value = ['item1', 'item2'];
 
-    const fieldMockWithControl = { ...field, fieldControl: { widgetId: 'listInput' } };
+    const fieldMockWithControl = { ...field, fieldControl: createFieldControl('listInput') };
 
     render(
       <FieldEditor
@@ -406,7 +413,7 @@ describe('FieldEditor', () => {
 
     const fieldMockWithControl = {
       ...field,
-      fieldControl: { widgetId: 'checkbox' },
+      fieldControl: createFieldControl('checkbox'),
       items: {
         type: 'Symbol',
         validations: [
@@ -435,7 +442,7 @@ describe('FieldEditor', () => {
     const field = createField('Object');
     const value = { key: 'value' };
 
-    const fieldMockWithControl = { ...field, fieldControl: { widgetId: 'objectEditor' } };
+    const fieldMockWithControl = { ...field, fieldControl: createFieldControl('objectEditor') };
 
     render(
       <FieldEditor
@@ -455,7 +462,7 @@ describe('FieldEditor', () => {
     const field = createField('Boolean');
     const value = true;
 
-    const fieldMockWithControl = { ...field, fieldControl: { widgetId: 'boolean' } };
+    const fieldMockWithControl = { ...field, fieldControl: createFieldControl('boolean') };
 
     render(
       <FieldEditor
@@ -475,7 +482,7 @@ describe('FieldEditor', () => {
   describe('Boolean field editor with custom labels', () => {
     it('renders BooleanEditor with default labels when editor interface is null', async () => {
       const field = createField('Boolean');
-      const fieldMockWithControl = { ...field, fieldControl: { widgetId: 'boolean' } };
+      const fieldMockWithControl = { ...field, fieldControl: createFieldControl('boolean') };
       const value = true;
 
       // Mock the SDK to return null for editor interface
@@ -500,7 +507,7 @@ describe('FieldEditor', () => {
 
     it('renders BooleanEditor with custom labels from editor interface', async () => {
       const field = createField('Boolean');
-      const fieldMockWithControl = { ...field, fieldControl: { widgetId: 'boolean' } };
+      const fieldMockWithControl = { ...field, fieldControl: createFieldControl('boolean') };
       const value = true;
 
       // Mock editor interface with custom labels
@@ -548,7 +555,7 @@ describe('FieldEditor', () => {
   describe('FieldAPI and LocalesAPI creation', () => {
     it('creates FieldAPI with correct properties', () => {
       const field = createField('Symbol', 'test-id', 'Test Name');
-      const fieldMockWithControl = { ...field, fieldControl: { widgetId: 'singleLine' } };
+      const fieldMockWithControl = { ...field, fieldControl: createFieldControl('singleLine') };
       const value = 'test value';
 
       render(
@@ -568,7 +575,7 @@ describe('FieldEditor', () => {
         ...createField('Symbol'),
         locale: 'es-ES',
       };
-      const fieldMockWithControl = { ...field, fieldControl: { widgetId: 'singleLine' } };
+      const fieldMockWithControl = { ...field, fieldControl: createFieldControl('singleLine') };
       const value = 'test value';
 
       render(
@@ -588,7 +595,7 @@ describe('FieldEditor', () => {
         ...createField('Symbol'),
         locale: undefined,
       };
-      const fieldMockWithControl = { ...field, fieldControl: { widgetId: 'singleLine' } };
+      const fieldMockWithControl = { ...field, fieldControl: createFieldControl('singleLine') };
       const value = 'test value';
 
       render(
@@ -605,7 +612,7 @@ describe('FieldEditor', () => {
 
     it('creates LocalesAPI with correct properties', () => {
       const field = createField('Text');
-      const fieldMockWithControl = { ...field, fieldControl: { widgetId: 'singleLine' } };
+      const fieldMockWithControl = { ...field, fieldControl: createFieldControl('singleLine') };
       const value = 'test value';
 
       render(
@@ -622,7 +629,7 @@ describe('FieldEditor', () => {
 
     it('handles different default locales', () => {
       const field = createField('Text');
-      const fieldMockWithControl = { ...field, fieldControl: { widgetId: 'singleLine' } };
+      const fieldMockWithControl = { ...field, fieldControl: createFieldControl('singleLine') };
       const value = 'test value';
       const customLocales = {
         ...mockSdk.locales,

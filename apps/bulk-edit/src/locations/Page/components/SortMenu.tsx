@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Menu, Button } from '@contentful/f36-components';
 
 import { styles } from '../styles';
-import { CaretDownIcon, CaretUpIcon, SortDescendingIcon } from '@phosphor-icons/react';
+import { CaretDownIcon, CaretUpIcon, SortDescendingIcon } from '@contentful/f36-icons';
 
 export const SORT_OPTIONS = [
   { value: 'displayName_asc', label: 'Display name: A-Z' },
@@ -21,14 +21,13 @@ export const SortMenu: React.FC<SortMenuProps> = ({ sortOption, onSortChange, di
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <Box marginBottom="spacingM" marginTop="spacingM" style={styles.sortMenu}>
+    <Box style={styles.sortMenu}>
       <Menu onOpen={() => setIsOpen(true)} onClose={() => setIsOpen(false)}>
         <Menu.Trigger>
           <Button
             variant="secondary"
-            size="small"
-            startIcon={<SortDescendingIcon size={16} />}
-            endIcon={isOpen ? <CaretUpIcon size={16} /> : <CaretDownIcon size={16} />}
+            startIcon={<SortDescendingIcon />}
+            endIcon={isOpen ? <CaretUpIcon /> : <CaretDownIcon />}
             aria-label="Sort by"
             isDisabled={disabled}>
             Sort by
