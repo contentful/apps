@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@ai-sdk/openai": "^2.0.56",
-    "@contentful/app-sdk": "^4.51.0",
+    "@contentful/app-sdk": "^4.51.3",
     "@contentful/f36-components": "^5.6.0",
     "@contentful/f36-tokens": "^5.1.0",
     "@contentful/field-editor-json": "^3.3.38",

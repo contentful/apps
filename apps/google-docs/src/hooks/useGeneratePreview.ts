@@ -81,6 +81,26 @@ const callGoogleDocsAgent = async (
   const AGENT_ID = 'google-docs-agent';
   const useLocalDevAgent = true; // Turn to false to use production agents-api
   let response: any;
+
+  const payload = {
+    messages: [
+      {
+        role: 'user' as const,
+        parts: [
+          {
+            type: 'text' as const,
+            text: `Analyze the following google docs document ${documentId} and extract the Contentful entries and assets for the following content types: ${contentTypeIds} with the following oauth token: ${oauthToken}`,
+          },
+        ],
+      },
+    ],
+    metadata: {
+      documentId,
+      contentTypeIds,
+      oauthToken,
+    },
+  };
+
   if (useLocalDevAgent) {
     response = await fetch(
       `http://localhost:4111/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${AGENT_ID}/generate`,
@@ -90,31 +110,14 @@ const callGoogleDocsAgent = async (
           'Content-Type': 'application/json',
           'x-contentful-enable-alpha-feature': 'agents-api',
         },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'user',
-              content: `Analyze the following google docs document ${documentId} and extract the Contentful entries and assets for the following content types: ${contentTypeIds}`,
-            },
-          ],
-          metadata: {
-            documentId,
-            contentTypeIds,
-            oauthToken,
-          },
-        }),
+        body: JSON.stringify(payload),
       }
     );
   } else {
-    response = await sdk.cma.agent.generate(
-      { agentId: AGENT_ID, spaceId, environmentId },
-      // @ts-expect-error - custom parameters for our agent
-      { documentId, oauthToken, contentTypeIds }
-    );
+    response = await sdk.cma.agent.generate({ agentId: AGENT_ID, spaceId, environmentId }, payload);
   }
 
   const data = await response.text();
-
   let parsedData: any;
   try {
     parsedData = JSON.parse(data);
