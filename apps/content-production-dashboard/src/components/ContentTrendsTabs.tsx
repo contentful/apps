@@ -364,6 +364,7 @@ const ContentTypeSelector: React.FC<ContentTypeSelectorProps> = ({
         sdk={sdk}
         initialSelectedIds={selectedContentTypes.map((ct) => ct.id)}
         maxSelected={5}
+        disablePills
       />
     </FormControl>
   );

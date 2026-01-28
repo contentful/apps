@@ -15,6 +15,7 @@ interface ContentTypeMultiSelectProps {
   sdk: ConfigAppSDK;
   initialSelectedIds?: string[];
   maxSelected?: number;
+  disablePills?: boolean;
 }
 
 const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
@@ -23,6 +24,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   sdk,
   initialSelectedIds,
   maxSelected,
+  disablePills = false,
 }) => {
   const [availableContentTypes, setAvailableContentTypes] = useState<ContentType[]>([]);
   const [filteredItems, setFilteredItems] = React.useState<ContentType[]>([]);
@@ -134,7 +136,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
         })}
       </Multiselect>
 
-      {selectedContentTypes.length > 0 && (
+      {!disablePills && selectedContentTypes.length > 0 && (
         <Box width="full" overflow="auto">
           <Stack flexDirection="row" spacing="spacing2Xs" flexWrap="wrap">
             {selectedContentTypes.map((contentType, index) => (
