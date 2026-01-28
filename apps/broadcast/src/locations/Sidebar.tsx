@@ -1,7 +1,7 @@
 import { Box, Button, Flex, FormControl, Note, Select, Text } from '@contentful/f36-components';
 import { EntryFieldAPI, SidebarAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useVideoGenerator } from '../hooks/useVideoGenerator';
 import { uploadVideoAsset } from '../lib/contentful-upload';
 
@@ -89,6 +89,7 @@ const Sidebar = () => {
   const [isVideoLoading, setIsVideoLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [audioLocale, setAudioLocale] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [selectedLocale, setSelectedLocale] = useState<string>(() => sdk.locales.default);
 
   const { generateVideo } = useVideoGenerator();
@@ -123,35 +124,66 @@ const Sidebar = () => {
 
   const imageFieldId = IMAGE_FIELD_CANDIDATES.find((fieldId) => sdk.entry.fields[fieldId]);
 
-  const resolveAssetUrl = async (fieldId: string): Promise<string | null> => {
-    const field = sdk.entry.fields[fieldId];
-    if (!field) {
-      return null;
+  const resolveAssetUrl = useCallback(
+    async (fieldId: string): Promise<string | null> => {
+      const field = sdk.entry.fields[fieldId];
+      if (!field) {
+        return null;
+      }
+
+      const spaceId = sdk.ids.space;
+      const environmentId = sdk.ids.environment;
+      if (!spaceId || !environmentId) {
+        throw new Error('Space or environment ID is unavailable.');
+      }
+
+      const fieldValue = getFieldValueWithFallback(field, selectedLocale, sdk.locales.default);
+      const assetLink = getAssetLinkFromValue(fieldValue);
+      if (!assetLink) {
+        return null;
+      }
+
+      const asset = await sdk.cma.asset.get({
+        spaceId,
+        environmentId,
+        assetId: assetLink.sys.id,
+      });
+
+      const fileField =
+        asset.fields.file?.[selectedLocale] ?? asset.fields.file?.[sdk.locales.default];
+      const assetUrl = fileField?.url;
+      return assetUrl ? normalizeAssetUrl(assetUrl) : null;
+    },
+    [sdk, selectedLocale]
+  );
+
+  useEffect(() => {
+    if (!videoField) {
+      setVideoUrl(null);
+      return;
     }
 
-    const spaceId = sdk.ids.space;
-    const environmentId = sdk.ids.environment;
-    if (!spaceId || !environmentId) {
-      throw new Error('Space or environment ID is unavailable.');
-    }
+    let isActive = true;
+    const loadVideoUrl = async () => {
+      try {
+        const resolvedVideoUrl = await resolveAssetUrl(VIDEO_ASSET_FIELD_ID);
+        if (isActive) {
+          setVideoUrl(resolvedVideoUrl);
+        }
+      } catch (error) {
+        console.error('resolve-video-url:sidebar-error', error);
+        if (isActive) {
+          setVideoUrl(null);
+        }
+      }
+    };
 
-    const fieldValue = getFieldValueWithFallback(field, selectedLocale, sdk.locales.default);
-    const assetLink = getAssetLinkFromValue(fieldValue);
-    if (!assetLink) {
-      return null;
-    }
+    void loadVideoUrl();
 
-    const asset = await sdk.cma.asset.get({
-      spaceId,
-      environmentId,
-      assetId: assetLink.sys.id,
-    });
-
-    const fileField =
-      asset.fields.file?.[selectedLocale] ?? asset.fields.file?.[sdk.locales.default];
-    const assetUrl = fileField?.url;
-    return assetUrl ? normalizeAssetUrl(assetUrl) : null;
-  };
+    return () => {
+      isActive = false;
+    };
+  }, [resolveAssetUrl, selectedLocale, videoField]);
 
   const handleGenerateAudio = async () => {
     if (!audioField) {
@@ -292,6 +324,11 @@ const Sidebar = () => {
         );
       }
 
+      const resolvedVideoUrl = await resolveAssetUrl(VIDEO_ASSET_FIELD_ID);
+      if (resolvedVideoUrl) {
+        setVideoUrl(resolvedVideoUrl);
+      }
+
       sdk.notifier.success('Video generated and uploaded.');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -312,6 +349,8 @@ const Sidebar = () => {
           getFieldValueWithFallback(audioField, selectedLocale, sdk.locales.default)
         )
     );
+
+  const resolvedVideoUrl = videoUrl;
 
   if (!audioField) {
     return (
@@ -372,6 +411,9 @@ const Sidebar = () => {
           isFullWidth>
           Generate social video
         </Button>
+        {resolvedVideoUrl ? (
+          <video src={resolvedVideoUrl} controls style={{ width: '100%', borderRadius: '8px' }} />
+        ) : null}
       </Flex>
     </Flex>
   );
