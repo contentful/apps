@@ -44,6 +44,12 @@ const NUMBER_FILTER_OPERATORS: Array<{ value: FieldFilterValue['operator']; labe
   { value: 'not exists', label: 'is empty' },
 ];
 
+const RICH_TEXT_FILTER_OPERATORS: Array<{ value: FieldFilterValue['operator']; label: string }> = [
+  { value: 'match', label: 'matches' },
+  { value: 'exists', label: 'is not empty' },
+  { value: 'not exists', label: 'is empty' },
+];
+
 const isObjectField = (field: ContentTypeField) => {
   return field.type === 'Link';
 };
@@ -53,6 +59,10 @@ const isArrayField = (field: ContentTypeField) => {
 const isNumberField = (field: ContentTypeField) => {
   return field.type === 'Integer' || field.type === 'Number';
 };
+const isRichTextField = (field: ContentTypeField) => {
+  return field.type === 'RichText';
+};
+
 const getFilterOperators = (field: ContentTypeField) => {
   if (isObjectField(field)) {
     return LINK_FILTER_OPERATORS;
@@ -62,6 +72,9 @@ const getFilterOperators = (field: ContentTypeField) => {
   }
   if (isNumberField(field)) {
     return NUMBER_FILTER_OPERATORS;
+  }
+  if (isRichTextField(field)) {
+    return RICH_TEXT_FILTER_OPERATORS;
   }
   return FILTER_OPERATORS;
 };
@@ -73,16 +86,26 @@ interface FieldFilterProps {
 
 export const FieldFilter = ({ field, setFieldFilterValues }: FieldFilterProps) => {
   const sdk = useSDK<PageAppSDK>();
-  const [selectedOperator, setSelectedOperator] = useState<FieldFilterValue['operator']>('in');
+  const [selectedOperator, setSelectedOperator] = useState<FieldFilterValue['operator']>();
   const [inputValue, setInputValue] = useState('');
   const [debouncedInputValue] = useDebounce(inputValue, 500);
   const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
   const [selectedEntries, setSelectedEntries] = useState<string[]>([]);
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
+  const [selectedOperatorLabel, setSelectedOperatorLabel] = useState<string>('is');
 
-  const selectedOperatorLabel =
-    getFilterOperators(field).find((op) => op.value === selectedOperator)?.label || 'is';
+  useEffect(() => {
+    const operators = getFilterOperators(field);
+    if (selectedOperator) {
+      setSelectedOperatorLabel(
+        operators.find((op) => op.value === selectedOperator)?.label || 'is'
+      );
+    } else {
+      const firstOperator = operators[0].value;
+      setSelectedOperator(firstOperator);
+    }
+  }, [selectedOperator, field]);
 
   const isEntrySelector =
     field.type === 'Link' && field.fieldControl?.widgetId === 'entryLinkEditor';

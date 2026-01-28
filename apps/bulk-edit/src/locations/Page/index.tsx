@@ -99,15 +99,7 @@ const Page = () => {
   };
 
   const shouldDisableFilters = (disableIfLoading: boolean = true) => {
-    // return (
-    //   (entries.length === 0 && initialTotal === 0) ||
-    //   !selectedContentType ||
-    //   (disableIfLoading ? entriesLoading : false)
-    // );
-    return (
-      // (entries.length === 0 && initialTotal === 0) ||
-      !selectedContentType || (disableIfLoading ? entriesLoading : false)
-    );
+    return !selectedContentType || (disableIfLoading ? entriesLoading : false);
   };
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
@@ -474,7 +466,6 @@ const Page = () => {
                 {selectedContentType ? `Bulk edit ${selectedContentType.name}` : 'Bulk Edit App'}
               </Heading>
               {/* Search Section */}
-              {searchFieldFilterArgs}
               <SearchBar
                 searchQuery={searchQuery}
                 onSearchChange={(query, fieldFilterValues) => {
