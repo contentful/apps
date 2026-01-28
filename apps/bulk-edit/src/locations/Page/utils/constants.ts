@@ -33,7 +33,7 @@ export const API_LIMITS = {
 
 export const PAGE_SIZE_OPTIONS = [25, 50, 100, 200, 500];
 
-export const SIDEBAR_WIDTH = 200;
+export const SIDEBAR_WIDTH = 260;
 export const SPACER_SPACING = 24;
 export const CELL_WIDTH = 200;
 export const TABLE_WIDTH = CELL_WIDTH * 4;

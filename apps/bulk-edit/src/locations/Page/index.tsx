@@ -34,6 +34,7 @@ import { ErrorNote } from './components/ErrorNote';
 import { EmptyEntryBanner } from './components/EmptyEntryBanner';
 import { buildQuery, fieldFilterValuesToQuery } from './utils/contentfulQueryUtils';
 import { FieldVisibiltyMenu } from './components/FieldVisibiltyMenu';
+import tokens from '@contentful/f36-tokens';
 
 const getFieldsMapped = (fields: ContentTypeField[]) => {
   return fields.map((field) => ({

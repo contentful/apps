@@ -21,22 +21,30 @@ export const focusedCell: CSSProperties = {
   outlineOffset: '-3px',
 };
 
+export const whiteBox: CSSProperties = {
+  background: tokens.colorWhite,
+  borderRadius: tokens.borderRadiusMedium,
+};
+
 export const styles = {
-  sidebar: {
-    minWidth: `${SIDEBAR_WIDTH}px`,
-    borderRight: `1px solid ${tokens.gray200}`,
-    // height: '100vh',
-    background: tokens.colorWhite,
-  },
   mainContent: {
     flexGrow: 1,
     minWidth: 0,
+    paddingLeft: tokens.spacingL,
+    paddingRight: tokens.spacingL,
+  },
+  mainContentBody: {
+    paddingTop: tokens.spacingL,
+    minWidth: 0,
+    ...whiteBox,
   },
   tableContainer: {
     flex: 1,
+    flexDirection: 'column',
     minWidth: 0,
     overflow: 'hidden',
     position: 'relative',
+    paddingRight: tokens.spacingM,
   },
   loadingContainer: {
     position: 'absolute',
@@ -47,10 +55,7 @@ export const styles = {
     background: 'rgba(255, 255, 255, 0.3)',
     zIndex: 1000,
   },
-  whiteBox: {
-    background: tokens.colorWhite,
-    borderRadius: tokens.borderRadiusMedium,
-  },
+  whiteBox,
   pageHeader: {
     background: tokens.colorWhite,
     width: 'fit-content',
@@ -69,26 +74,20 @@ export const styles = {
   sortMenuList: {
     width: 'fit-content',
   },
-  paginationContainer: {
-    background: tokens.colorWhite,
-    paddingBottom: tokens.spacingM,
-    maxWidth: `81vw`,
-    marginTop: tokens.spacingL,
-    marginRight: tokens.spacingXs,
-  },
-  noContentTypeText: {
-    fontWeight: 'bold',
-    padding: `${tokens.spacingXs} 0`,
-  },
+
   editButton: {
-    width: '97%',
+    width: '100%',
     marginTop: tokens.spacingXs,
+    marginBottom: tokens.spacingM,
+    alignItems: 'center',
+    gap: tokens.spacingS,
   },
   errorNote: {
     maxWidth: `${TABLE_WIDTH}px`,
     marginTop: tokens.spacingM,
   },
   loadingTableBorder: {
+    width: '100%',
     border: `1px solid ${tokens.gray200}`,
   },
   columnMultiselectStatuses: {
