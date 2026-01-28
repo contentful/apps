@@ -32,6 +32,14 @@ const mockCma: any = {
     }),
   },
   user: {
+    getForSpace: vi.fn().mockResolvedValue({
+      sys: {
+        id: 'user-1',
+      },
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john.doe@example.com',
+    }),
     getManyForSpace: vi.fn().mockResolvedValue({
       items: [],
       total: 0,
