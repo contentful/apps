@@ -52,7 +52,12 @@ describe('Config Screen component', () => {
     expect(screen.getByText('Time to publish threshold (days)')).toBeInTheDocument();
     expect(screen.getAllByTestId('cf-ui-text-input').length).toBe(3);
     expect(screen.getByRole('switch')).toBeInTheDocument();
-    expect(screen.getByText(/Default content types to track/i)).toBeInTheDocument();
+    expect(screen.getByText('Select content types')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Select the default content types to display in the “New entries” and “By content type” charts. You can select up to five./i
+      )
+    ).toBeInTheDocument();
   });
 
   it('validates required fields and shows error messages', async () => {

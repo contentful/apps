@@ -259,12 +259,12 @@ const ConfigScreen = () => {
               charts.
             </Text>
 
+            <Text as="p" marginBottom="spacingS" fontSize="fontSizeM">
+              Select the default content types to display in the “New entries” and “By content type”
+              charts. You can select up to five.
+            </Text>
             <FormControl marginBottom="spacingL">
-              <FormControl.Label>Default content types to track</FormControl.Label>
-              <FormControl.HelpText>
-                Select the default content types to display in the “New entries” and “By content
-                type” charts. You can select up to five.
-              </FormControl.HelpText>
+              <FormControl.Label>Select content types</FormControl.Label>
               <ContentTypeMultiSelect
                 selectedContentTypes={selectedContentTypes}
                 setSelectedContentTypes={setSelectedContentTypes}
@@ -274,11 +274,11 @@ const ConfigScreen = () => {
               />
             </FormControl>
 
+            <Text as="p" marginBottom="spacingS" fontSize="fontSizeM">
+              Select the default setting for the by creator view of the content publishing trends.
+            </Text>
             <FormControl marginBottom="spacingL">
-              <FormControl.Label>Default setting for by creator view</FormControl.Label>
-              <FormControl.HelpText>
-                Select the default setting for the by creator view of the content publishing trends.
-              </FormControl.HelpText>
+              <FormControl.Label>Select setting</FormControl.Label>
               <Select
                 id="default-creator-view-setting"
                 name="default-creator-view-setting"
