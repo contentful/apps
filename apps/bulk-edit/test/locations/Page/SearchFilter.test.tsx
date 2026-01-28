@@ -378,7 +378,11 @@ describe('SearchFilter', () => {
     it('calls resetFilters when clicked', () => {
       const mockResetFilters = vi.fn();
       render(
-        <SearchBar {...defaultProps} resetFilters={mockResetFilters} hasActiveFilters={() => true} />
+        <SearchBar
+          {...defaultProps}
+          resetFilters={mockResetFilters}
+          hasActiveFilters={() => true}
+        />
       );
 
       const resetButton = screen.getByRole('button', { name: /reset filters/i });

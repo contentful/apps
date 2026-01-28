@@ -175,7 +175,7 @@ describe('Bulk edit functionality', () => {
 
 describe('Bulk edit notification', () => {
   beforeEach(() => {
-    vi.spyOn(Notification, 'success').mockImplementation(() => ({}) as any);
+    vi.spyOn(Notification, 'success').mockImplementation(() => ({} as any));
   });
   afterEach(() => {
     cleanup();
