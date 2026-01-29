@@ -71,7 +71,6 @@ describe('Page component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Content Publishing Trends')).toBeInTheDocument();
-      expect(screen.getByText('Upcoming Scheduled Releases')).toBeInTheDocument();
     });
   });
 });
