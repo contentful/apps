@@ -11,6 +11,7 @@ import {
   TextInput,
   Image,
   Select,
+  Tooltip,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import ContentTypeMultiSelect, { ContentType } from '../components/ContentTypeMultiSelect';
@@ -25,6 +26,7 @@ import gearImage from '../assets/gear.png';
 import appearanceImage from '../assets/appearance.png';
 import { styles } from './ConfigScreen.styles';
 import { Validator } from '../utils/Validator';
+import { InfoIcon } from '@contentful/f36-icons';
 
 export interface AppInstallationParameters {
   defaultContentTypes?: string[];
@@ -261,10 +263,15 @@ const ConfigScreen = () => {
 
             <Text as="p" marginBottom="spacingS" fontSize="fontSizeM">
               Select the default content types to display in the “New entries” and “By content type”
-              charts. You can select up to five.
+              charts.
             </Text>
             <FormControl marginBottom="spacingL">
-              <FormControl.Label>Select content types</FormControl.Label>
+              <Flex alignItems="center" gap="spacing2Xs">
+                <FormControl.Label>Select content types</FormControl.Label>
+                <Tooltip content="You can select up to five at a time.">
+                  <InfoIcon size="tiny" />
+                </Tooltip>
+              </Flex>
               <ContentTypeMultiSelect
                 selectedContentTypes={selectedContentTypes}
                 setSelectedContentTypes={setSelectedContentTypes}

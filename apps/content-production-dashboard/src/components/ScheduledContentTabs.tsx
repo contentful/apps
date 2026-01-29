@@ -43,7 +43,7 @@ export const ScheduledContentTabs = ({
     <Box marginTop="spacingXl">
       <Box padding="spacingL" style={styles.releasesTableContainer}>
         <Tabs currentTab={currentTab} onTabChange={setCurrentTab}>
-          <Tabs.List>
+          <Tabs.List variant="horizontal-divider">
             <Tabs.Tab panelId="scheduled">Scheduled Content</Tabs.Tab>
             <Tabs.Tab panelId="recentlyPublished">Recently Published</Tabs.Tab>
             <Tabs.Tab panelId="needsUpdate">Needs Update</Tabs.Tab>

@@ -55,7 +55,7 @@ describe('Config Screen component', () => {
     expect(screen.getByText('Select content types')).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Select the default content types to display in the “New entries” and “By content type” charts. You can select up to five./i
+        /Select the default content types to display in the “New entries” and “By content type” charts./i
       )
     ).toBeInTheDocument();
   });
