@@ -108,7 +108,7 @@ describe('ReleasesTable component', () => {
 
       render(<ReleasesTable />, { wrapper: createWrapper() });
 
-      expect(screen.getByText('No scheduled releases')).toBeInTheDocument();
+      expect(screen.getByText('No data to display')).toBeInTheDocument();
       expect(
         screen.getByText('Releases will appear here when they are scheduled.')
       ).toBeInTheDocument();

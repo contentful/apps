@@ -10,6 +10,7 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { formatDateTimeWithTimezone } from '../utils/dateFormat';
 import { formatUserName } from '../utils/UserUtils';
+import { EmptyState } from './EmptyState';
 
 const ReleasesTableHeader = () => {
   return (
@@ -60,16 +61,7 @@ export const ReleasesTable = () => {
   }
 
   if (releases.length === 0) {
-    return (
-      <Box padding="spacing3Xl" style={styles.emptyState}>
-        <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold" marginBottom="spacingS">
-          No scheduled releases
-        </Text>
-        <Text fontSize="fontSizeM" fontColor="gray600">
-          Releases will appear here when they are scheduled.
-        </Text>
-      </Box>
-    );
+    return <EmptyState helperText="Releases will appear here when they are scheduled." />;
   }
 
   return (

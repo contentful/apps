@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Table, Box, Skeleton, Pagination } from '@contentful/f36-components';
 import { ITEMS_PER_PAGE } from '../utils/consts';
-import { EmptyStateTable } from './EmptyStateTable';
+import { EmptyState } from './EmptyState';
 import { ErrorDisplay } from './ErrorDisplay';
 
 export interface TableColumn<T> {
@@ -73,7 +73,7 @@ export function ContentTable<T extends { id: string }>({
   }
 
   if (items.length === 0) {
-    return <EmptyStateTable />;
+    return <EmptyState helperText="Data will display once entry activity is available." />;
   }
 
   return (

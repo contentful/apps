@@ -1,15 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  Box,
-  Flex,
-  FormControl,
-  Paragraph,
-  Spinner,
-  Tabs,
-  Text,
-  Select,
-  Tooltip,
-} from '@contentful/f36-components';
+import { Box, Flex, FormControl, Spinner, Tabs, Select, Tooltip } from '@contentful/f36-components';
 import { InfoIcon } from '@contentful/f36-icons';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { ChartWrapper } from './ChartWrapper';
@@ -30,6 +20,7 @@ import ContentTypeMultiSelect, { ContentType } from './ContentTypeMultiSelect';
 import { styles } from './ContentTrendsTabs.styles';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { useUsers } from '../hooks/useUsers';
+import { EmptyState } from './EmptyState';
 
 export interface ContentTrendsTabsProps {
   entries: EntryProps[];
@@ -299,17 +290,6 @@ const CreatorMultiSelect: React.FC<CreatorMultiSelectProps> = ({
         })}
       </Multiselect>
     </>
-  );
-};
-
-const EmptyState: React.FC<{ helperText: string }> = ({ helperText }) => {
-  return (
-    <Flex style={styles.emptyStateContainer}>
-      <Text fontSize="fontSizeM" fontWeight="fontWeightDemiBold">
-        No data to display
-      </Text>
-      <Paragraph>{helperText}</Paragraph>
-    </Flex>
   );
 };
 
