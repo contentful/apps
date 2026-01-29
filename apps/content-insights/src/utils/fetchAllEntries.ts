@@ -1,6 +1,6 @@
 import { BaseAppSDK } from '@contentful/app-sdk';
 import { EntryProps } from 'contentful-management';
-import { FETCH_CONFIG } from './cacheConstants';
+import { FETCH_CONFIG } from './consts';
 
 export interface FetchAllEntriesResult {
   entries: EntryProps[];
