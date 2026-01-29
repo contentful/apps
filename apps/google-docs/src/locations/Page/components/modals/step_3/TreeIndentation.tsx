@@ -9,9 +9,8 @@ interface TreeIndentationProps {
   allNodes: TreeNode[];
 }
 
-const INDENTATION_SIZE = 24.5;
-const OFFSET = 2.75;
-const BORDER_RADIUS = '4px';
+const INDENTATION_SIZE = 24;
+const OFFSET = 8;
 
 const styles = {
   indentation: css({
@@ -20,38 +19,47 @@ const styles = {
   }),
   vertical: css({
     borderLeft: `1px solid ${tokens.gray300}`,
-    marginLeft: `${INDENTATION_SIZE / OFFSET}px`,
+    paddingTop: tokens.spacingS,
+    marginTop: `-${tokens.spacingS}`,
   }),
   lShaped: css({
-    borderLeft: `1px solid ${tokens.gray300}`,
-    borderBottom: `1px solid ${tokens.gray300}`,
-    borderBottomLeftRadius: BORDER_RADIUS,
     position: 'relative',
-    marginLeft: `${INDENTATION_SIZE / OFFSET}px`,
+    transform: `translateX(${OFFSET}px)`,
+    zIndex: 0,
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: `-${tokens.spacingS}`,
+      bottom: '50%',
+      width: '1px',
+      backgroundColor: tokens.gray300,
+    },
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      top: '50%',
+      height: '1px',
+      width: `${INDENTATION_SIZE - OFFSET}px`,
+      backgroundColor: tokens.gray300,
+    },
   }),
   tShaped: css({
     borderLeft: `1px solid ${tokens.gray300}`,
     position: 'relative',
-    marginLeft: `${INDENTATION_SIZE / OFFSET}px`,
+    transform: `translateX(${OFFSET}px) `,
+    paddingTop: tokens.spacingS,
+    marginTop: `-${tokens.spacingS}`,
     '&::after': {
       content: '""',
       backgroundColor: tokens.gray300,
       position: 'absolute',
-      left: 0,
-      top: '50%',
-      transform: 'translateY(-50%)',
-      display: 'block',
+      top: '62%',
       height: '1px',
-      width: `${INDENTATION_SIZE}px`,
-      borderTopRightRadius: BORDER_RADIUS,
-      borderBottomRightRadius: BORDER_RADIUS,
+      width: `${INDENTATION_SIZE - OFFSET}px`,
     },
   }),
 };
 
-/**
- * Simple approach: build ancestor path representation
- */
 function getAncestorCount(node: TreeNode): number {
   // Level 0 = root, no indentation
   // Level 1 = 0 ancestors (direct children of root)

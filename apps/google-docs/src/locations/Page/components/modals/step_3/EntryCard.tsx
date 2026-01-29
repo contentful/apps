@@ -19,6 +19,7 @@ const styles = {
     transition: 'box-shadow 0.2s ease',
     flex: 1,
     alignSelf: 'center',
+    zIndex: 1,
   }),
   parentCard: css({
     borderWidth: '2px',
