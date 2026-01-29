@@ -14,10 +14,11 @@ const styles = {
   card: css({
     border: `1px solid ${tokens.gray300}`,
     borderRadius: tokens.borderRadiusMedium,
-    padding: tokens.spacingS,
+    padding: tokens.spacingXs,
     backgroundColor: tokens.colorWhite,
     transition: 'box-shadow 0.2s ease',
     flex: 1,
+    alignSelf: 'center',
   }),
   parentCard: css({
     borderWidth: '2px',

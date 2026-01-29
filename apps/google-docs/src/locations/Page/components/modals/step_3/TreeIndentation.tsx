@@ -9,32 +9,31 @@ interface TreeIndentationProps {
   allNodes: TreeNode[];
 }
 
-const INDENTATION_SIZE = 32;
+const INDENTATION_SIZE = 24.5;
 const OFFSET = 2.75;
 const BORDER_RADIUS = '4px';
 
 const styles = {
   indentation: css({
-    padding: `0 ${INDENTATION_SIZE / 2}px`,
-    height: '100%',
+    width: `${INDENTATION_SIZE}px`,
+    flexShrink: 0,
   }),
   vertical: css({
     borderLeft: `1px solid ${tokens.gray300}`,
-    transform: `translateX(${INDENTATION_SIZE / OFFSET}px)`,
+    marginLeft: `${INDENTATION_SIZE / OFFSET}px`,
   }),
   lShaped: css({
     borderLeft: `1px solid ${tokens.gray300}`,
     borderBottom: `1px solid ${tokens.gray300}`,
     borderBottomLeftRadius: BORDER_RADIUS,
     position: 'relative',
-    transform: `translateY(-50%) translateX(${INDENTATION_SIZE / OFFSET}px)`,
-    height: '50%',
+    marginLeft: `${INDENTATION_SIZE / OFFSET}px`,
   }),
   tShaped: css({
     borderLeft: `1px solid ${tokens.gray300}`,
     position: 'relative',
-    transform: `translateX(${INDENTATION_SIZE / OFFSET}px)`,
-    '::after': {
+    marginLeft: `${INDENTATION_SIZE / OFFSET}px`,
+    '&::after': {
       content: '""',
       backgroundColor: tokens.gray300,
       position: 'absolute',
@@ -43,7 +42,7 @@ const styles = {
       transform: 'translateY(-50%)',
       display: 'block',
       height: '1px',
-      width: '100%',
+      width: `${INDENTATION_SIZE}px`,
       borderTopRightRadius: BORDER_RADIUS,
       borderBottomRightRadius: BORDER_RADIUS,
     },
@@ -51,28 +50,28 @@ const styles = {
 };
 
 /**
- * Gets ancestors for a node to render vertical lines
+ * Simple approach: build ancestor path representation
  */
-function getAncestors(node: TreeNode, allNodes: TreeNode[]): TreeNode[] {
-  const ancestors: TreeNode[] = [];
-
-  for (let i = 1; i < node.path.length; i++) {
-    const ancestorPath = node.path.slice(0, i);
-    const ancestor = allNodes.find((n) => n.path.join('/') === ancestorPath.join('/'));
-    if (ancestor) {
-      ancestors.push(ancestor);
-    }
-  }
-
-  return ancestors;
+function getAncestorCount(node: TreeNode): number {
+  // Level 0 = root, no indentation
+  // Level 1 = 0 ancestors (direct children of root)
+  // Level 2 = 1 ancestor, etc.
+  return Math.max(0, node.level - 1);
 }
 
 /**
- * Check if an ancestor is the last child at its level
+ * Check if an ancestor at a given level is the last child
  */
-function isAncestorLastChild(ancestor: TreeNode, allNodes: TreeNode[]): boolean {
-  if (ancestor.level === 0) return true;
+function isAncestorLastChild(node: TreeNode, ancestorLevel: number, allNodes: TreeNode[]): boolean {
+  if (ancestorLevel === 0) return true;
 
+  // Find the ancestor at this level from node's path
+  const ancestorPath = node.path.slice(0, ancestorLevel + 1);
+  const ancestor = allNodes.find((n) => n.path.join('/') === ancestorPath.join('/'));
+
+  if (!ancestor) return true;
+
+  // Find its parent and siblings
   const parentPath = ancestor.path.slice(0, -1);
   const siblings = allNodes.filter(
     (n) => n.level === ancestor.level && n.path.slice(0, -1).join('/') === parentPath.join('/')
@@ -90,16 +89,18 @@ export const TreeIndentation: React.FC<TreeIndentationProps> = ({
     return null;
   }
 
-  const ancestors = getAncestors(node, allNodes);
+  const ancestorCount = getAncestorCount(node);
 
   return (
     <>
-      {ancestors.map((ancestor, index) => {
-        const shouldShowVerticalLine = !isAncestorLastChild(ancestor, allNodes);
+      {/* Render vertical lines for ancestors */}
+      {Array.from({ length: ancestorCount }).map((_, index) => {
+        const ancestorLevel = index + 1;
+        const shouldShowVerticalLine = !isAncestorLastChild(node, ancestorLevel, allNodes);
 
         return (
           <div
-            key={index}
+            key={`ancestor-${index}`}
             className={cx(styles.indentation, {
               [styles.vertical]: shouldShowVerticalLine,
             })}
@@ -107,6 +108,7 @@ export const TreeIndentation: React.FC<TreeIndentationProps> = ({
         );
       })}
 
+      {/* Render the connector for this node */}
       <div
         className={cx(styles.indentation, {
           [styles.lShaped]: isLastChild,
