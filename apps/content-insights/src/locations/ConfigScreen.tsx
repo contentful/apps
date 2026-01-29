@@ -154,18 +154,18 @@ const ConfigScreen = () => {
     <Flex flexDirection="column" fullWidth>
       <Flex flexDirection="column" style={styles.container}>
         <Form>
-          <Heading marginBottom="spacingM">Set up Content Production Dashboard</Heading>
+          <Heading marginBottom="spacingM">Set up Content Insights</Heading>
           <Paragraph marginBottom="spacingL">
             Get insight into your content lifecycle by tracking production volume, creation time,
-            and when content needs updates with the Content Production Dashboard.
+            and when content needs updates with Content Insights.
           </Paragraph>
 
           <Heading as="h3" marginBottom="spacingM" marginTop="spacingL">
             Configure app
           </Heading>
           <Text as="p" marginBottom="spacingL" fontSize="fontSizeM">
-            Configure the time periods and display options the dashboard uses to calculate and
-            present your content metrics.
+            Configure the time periods and display options the app uses to calculate and present
+            your content metrics.
           </Text>
 
           <>
@@ -322,7 +322,7 @@ const ConfigScreen = () => {
               />
             </Flex>
             <Flex flexDirection="column" style={styles.setupColumn} justifyContent="space-between">
-              <Paragraph>Select &quot;Content Production Dashboard&quot; and click save.</Paragraph>
+              <Paragraph>Select &quot;Content Insights&quot; and click save.</Paragraph>
               <Image
                 alt="An image showing Contentful Home location appearance settings"
                 height="257px"

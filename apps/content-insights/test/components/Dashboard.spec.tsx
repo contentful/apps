@@ -109,7 +109,7 @@ describe('Dashboard component', () => {
   it('renders the dashboard heading', async () => {
     await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
-    expect(screen.getByText('Content Dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Content Insights')).toBeInTheDocument();
   });
 
   it('renders all metric cards', async () => {
