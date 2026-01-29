@@ -40,9 +40,10 @@ describe('fetchReleases', () => {
       ),
     ];
     if (userIds.length > 0) {
-      mockCma.user.getManyForSpace.mockResolvedValueOnce({
-        items: users,
-        total: users.length,
+      // Mock getForSpace for each user ID (fetchUsersById calls it for each ID)
+      userIds.forEach((userId) => {
+        const user = users.find((u) => u.sys.id === userId) || createMockUser({ id: userId });
+        mockCma.user.getForSpace.mockResolvedValueOnce(user);
       });
     }
   };
@@ -65,6 +66,7 @@ describe('fetchReleases', () => {
     };
     mockCma.user = {
       getManyForSpace: vi.fn(),
+      getForSpace: vi.fn(),
     };
   });
 
@@ -79,7 +81,7 @@ describe('fetchReleases', () => {
       expect(result.fetchedAt).toBeInstanceOf(Date);
       expect(mockCma.scheduledActions.getMany).toHaveBeenCalledTimes(1);
       expect(mockCma.release.query).not.toHaveBeenCalled();
-      expect(mockCma.user.getManyForSpace).not.toHaveBeenCalled();
+      expect(mockCma.user.getForSpace).not.toHaveBeenCalled();
     });
   });
 

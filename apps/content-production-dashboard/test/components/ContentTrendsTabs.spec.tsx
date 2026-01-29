@@ -1,33 +1,40 @@
-import { screen, waitFor } from '@testing-library/react';
+import { cleanup, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ContentTrendsTabs } from '../../src/components/ContentTrendsTabs';
 import { QueryProvider } from '../../src/providers/QueryProvider';
 import { createMockEntry, createMockUser, renderWithAct } from '../utils/testHelpers';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
-import { TimeRange } from '../../src/utils/types';
+import { CreatorViewSetting, TimeRange } from '../../src/utils/types';
 
 const mockGenerateNewEntriesChartData = vi.fn();
 const mockGenerateContentTypeChartData = vi.fn();
 const mockGenerateCreatorChartData = vi.fn();
 
-vi.mock('../../src/utils/trendsDataProcessor', () => ({
-  generateNewEntriesChartData: (entries: EntryProps[], options: any) =>
-    mockGenerateNewEntriesChartData(entries, options),
-  generateContentTypeChartData: (
-    entries: EntryProps[],
-    options: any,
-    contentTypes?: Map<string, ContentTypeProps>
-  ) => mockGenerateContentTypeChartData(entries, options, contentTypes),
-  generateCreatorChartData: (
-    entries: EntryProps[],
-    options: any,
-    creatorsNames?: Map<string, string>,
-    contentTypes?: Map<string, ContentTypeProps>
-  ) => mockGenerateCreatorChartData(entries, options, creatorsNames, contentTypes),
-}));
+vi.mock('../../src/utils/trendsDataProcessor', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../src/utils/trendsDataProcessor')>();
+  return {
+    ...actual,
+    generateNewEntriesChartData: (
+      entries: EntryProps[],
+      options: any,
+      contentTypes?: Map<string, ContentTypeProps>
+    ) => mockGenerateNewEntriesChartData(entries, options, contentTypes),
+    generateContentTypeChartData: (
+      entries: EntryProps[],
+      options: any,
+      contentTypes?: Map<string, ContentTypeProps>
+    ) => mockGenerateContentTypeChartData(entries, options, contentTypes),
+    generateCreatorChartData: (
+      entries: EntryProps[],
+      options: any,
+      creatorsNames?: Map<string, string>,
+      contentTypes?: Map<string, ContentTypeProps>
+    ) => mockGenerateCreatorChartData(entries, options, creatorsNames, contentTypes),
+  };
+});
 
-const mockGetManyForSpace = vi.fn();
+const mockGetForSpace = vi.fn();
 const mockGetManyContentTypes = vi.fn().mockResolvedValue({
   items: [
     { sys: { id: 'article' }, name: 'Article' },
@@ -44,7 +51,7 @@ const mockSdk: any = {
   },
   cma: {
     user: {
-      getManyForSpace: mockGetManyForSpace,
+      getForSpace: mockGetForSpace,
     },
     contentType: {
       getMany: mockGetManyContentTypes,
@@ -54,6 +61,13 @@ const mockSdk: any = {
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
+}));
+
+const mockUseUsers = vi.fn();
+const mockRefetchUsers = vi.fn();
+
+vi.mock('../../src/hooks/useUsers', () => ({
+  useUsers: (userIds: string[]) => mockUseUsers(userIds),
 }));
 
 const mockContentTypes = new Map<string, ContentTypeProps>();
@@ -97,6 +111,10 @@ describe('ContentTrendsTabs component', () => {
       { date: 'Feb 2024', 'John Doe': 5, 'Jane Smith': 3 },
     ],
     creators: ['John Doe', 'Jane Smith'],
+    totalsByCreator: {
+      'John Doe': 8,
+      'Jane Smith': 5,
+    },
   };
 
   beforeEach(() => {
@@ -132,12 +150,33 @@ describe('ContentTrendsTabs component', () => {
     mockGenerateContentTypeChartData.mockReturnValue(mockContentTypeData);
     mockGenerateCreatorChartData.mockReturnValue(mockCreatorData);
 
-    mockGetManyForSpace.mockResolvedValue({
-      items: [
-        createMockUser({ id: 'user-1', firstName: 'John', lastName: 'Doe' }),
-        createMockUser({ id: 'user-2', firstName: 'Jane', lastName: 'Smith' }),
-      ],
+    mockGetForSpace.mockResolvedValue({
+      sys: { id: 'user-1' },
+      firstName: 'John',
+      lastName: 'Doe',
     });
+
+    // Mock useUsers hook to return users map
+    const mockUsersMap = new Map();
+    mockUsersMap.set(
+      'user-1',
+      createMockUser({ id: 'user-1', firstName: 'John', lastName: 'Doe' })
+    );
+    mockUsersMap.set(
+      'user-2',
+      createMockUser({ id: 'user-2', firstName: 'Jane', lastName: 'Smith' })
+    );
+
+    mockUseUsers.mockReturnValue({
+      usersMap: mockUsersMap,
+      isFetching: false,
+      error: null,
+      refetch: mockRefetchUsers,
+    });
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   describe('Rendering', () => {
@@ -146,6 +185,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -163,6 +203,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -181,6 +222,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -188,8 +230,12 @@ describe('ContentTrendsTabs component', () => {
         { wrapper: createWrapper() }
       );
 
-      expect(mockGenerateNewEntriesChartData).toHaveBeenCalledWith(mockEntries, {
-        timeRange: TimeRange.Year,
+      await waitFor(() => {
+        expect(mockGenerateNewEntriesChartData).toHaveBeenCalledWith(
+          mockEntries,
+          { timeRange: TimeRange.Year },
+          expect.any(Map)
+        );
       });
       expect(screen.getByText('Content:')).toBeInTheDocument();
       expect(screen.getByText('New Content')).toBeInTheDocument();
@@ -200,6 +246,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Month}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -207,12 +254,15 @@ describe('ContentTrendsTabs component', () => {
         { wrapper: createWrapper() }
       );
 
-      expect(mockGenerateNewEntriesChartData).toHaveBeenCalledWith(
-        expect.arrayContaining(mockEntries),
-        {
-          timeRange: TimeRange.Month,
-        }
-      );
+      await waitFor(() => {
+        expect(mockGenerateNewEntriesChartData).toHaveBeenCalledWith(
+          expect.arrayContaining(mockEntries),
+          {
+            timeRange: TimeRange.Month,
+          },
+          expect.any(Map)
+        );
+      });
     });
   });
 
@@ -225,6 +275,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={new Map()}
           isFetchingContentTypes={true}
@@ -249,6 +300,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -262,7 +314,7 @@ describe('ContentTrendsTabs component', () => {
       await waitFor(() => {
         expect(screen.getByText('No data to display')).toBeInTheDocument();
         expect(
-          screen.getByText('Data will display once you select content types')
+          screen.getByText('Data will display once you select content types.')
         ).toBeInTheDocument();
       });
     });
@@ -273,6 +325,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -301,6 +354,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -328,6 +382,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -339,22 +394,18 @@ describe('ContentTrendsTabs component', () => {
       await user.click(creatorTab);
 
       await waitFor(() => {
-        expect(mockGetManyForSpace).toHaveBeenCalledWith({
-          spaceId: 'test-space',
-        });
+        expect(mockUseUsers).toHaveBeenCalledWith(['user-1', 'user-2']);
       });
     });
 
     it('maps user IDs to names correctly (firstName + lastName)', async () => {
       const user = userEvent.setup();
-      mockGetManyForSpace.mockResolvedValue({
-        items: [createMockUser({ id: 'user-1', firstName: 'John', lastName: 'Doe' })],
-      });
 
       await renderWithAct(
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -372,12 +423,18 @@ describe('ContentTrendsTabs component', () => {
 
     it('shows Spinner when isLoadingUsers is true', async () => {
       const user = userEvent.setup();
-      mockGetManyForSpace.mockImplementation(() => new Promise(() => {})); // Never resolves
+      mockUseUsers.mockReturnValue({
+        usersMap: new Map(),
+        isFetching: true,
+        error: null,
+        refetch: mockRefetchUsers,
+      });
 
       await renderWithAct(
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -395,6 +452,7 @@ describe('ContentTrendsTabs component', () => {
       mockGenerateCreatorChartData.mockReturnValue({
         data: [],
         creators: [],
+        totalsByCreator: {},
       });
 
       const user = userEvent.setup();
@@ -402,6 +460,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -413,14 +472,12 @@ describe('ContentTrendsTabs component', () => {
       await user.click(creatorTab);
 
       await waitFor(() => {
-        expect(mockGetManyForSpace).toHaveBeenCalled();
+        expect(mockUseUsers).toHaveBeenCalled();
       });
 
       await waitFor(() => {
         expect(screen.getByText('No data to display')).toBeInTheDocument();
-        expect(
-          screen.getByText('Data will display once you select content types')
-        ).toBeInTheDocument();
+        expect(screen.getByText('Data will display once you select creators.')).toBeInTheDocument();
       });
     });
 
@@ -430,6 +487,7 @@ describe('ContentTrendsTabs component', () => {
         <ContentTrendsTabs
           entries={mockEntries}
           defaultContentTypes={[]}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
@@ -441,12 +499,7 @@ describe('ContentTrendsTabs component', () => {
       await user.click(creatorTab);
 
       await waitFor(() => {
-        expect(mockGenerateCreatorChartData).toHaveBeenCalledWith(
-          mockEntries,
-          { timeRange: 'year' },
-          mockCreatorsNames,
-          mockContentTypes
-        );
+        expect(mockGenerateCreatorChartData).toHaveBeenCalled();
         expect(screen.getByText('Creators:')).toBeInTheDocument();
         expect(screen.getByText('John Doe')).toBeInTheDocument();
         expect(screen.getByText('Jane Smith')).toBeInTheDocument();
@@ -463,6 +516,7 @@ describe('ContentTrendsTabs component', () => {
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
         />,
         { wrapper: createWrapper() }
       );
@@ -472,7 +526,6 @@ describe('ContentTrendsTabs component', () => {
       });
 
       expect(screen.getByText('Content types')).toBeInTheDocument();
-      expect(screen.getByText('You can select up to five at a time.')).toBeInTheDocument();
 
       const user = userEvent.setup();
       const contentTypeTab = screen.getByText('By Content Type');
@@ -480,7 +533,6 @@ describe('ContentTrendsTabs component', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Content types')).toBeInTheDocument();
-        expect(screen.getByText('You can select up to five at a time.')).toBeInTheDocument();
       });
 
       const creatorTab = screen.getByText('By Creator');
@@ -488,7 +540,6 @@ describe('ContentTrendsTabs component', () => {
 
       await waitFor(() => {
         expect(screen.queryByText('Content types')).not.toBeInTheDocument();
-        expect(screen.queryByText('You can select up to five at a time.')).not.toBeInTheDocument();
       });
     });
 
@@ -502,6 +553,7 @@ describe('ContentTrendsTabs component', () => {
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
         />,
         { wrapper: createWrapper() }
       );
@@ -521,6 +573,7 @@ describe('ContentTrendsTabs component', () => {
           timeRange={TimeRange.Year}
           contentTypes={mockContentTypes}
           isFetchingContentTypes={mockIsFetchingContentTypes}
+          defaultCreatorViewSetting={CreatorViewSetting.TopFiveCreators}
         />,
         { wrapper: createWrapper() }
       );

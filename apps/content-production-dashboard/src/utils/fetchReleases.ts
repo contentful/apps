@@ -1,6 +1,7 @@
 import { BaseAppSDK } from '@contentful/app-sdk';
 import { UserProps } from 'contentful-management';
 import { fetchScheduledActions } from './fetchScheduledActions';
+import { fetchUsersById } from './fetchUsersById';
 
 export interface ReleaseWithScheduledAction {
   releaseId: string;
@@ -94,20 +95,15 @@ export const fetchReleases = async (sdk: BaseAppSDK): Promise<FetchReleasesResul
     ...new Set(scheduledActions.items.map((a) => a.sys.createdBy.sys.id ?? null).filter(Boolean)),
   ];
 
-  const [launchReleasesResponse, timelineReleasesResponse, usersResponse] = await Promise.all([
+  const [launchReleasesResponse, timelineReleasesResponse, users] = await Promise.all([
     fetchLaunchReleases(sdk),
     fetchTimelineReleases(sdk),
-    userIds.length > 0
-      ? sdk.cma.user.getManyForSpace({
-          spaceId: sdk.ids.space,
-          query: { 'sys.id[in]': userIds.join(',') },
-        })
-      : Promise.resolve({ items: [] }),
+    userIds.length > 0 ? fetchUsersById(sdk, userIds) : Promise.resolve([]),
   ]);
 
   // Build maps for quick lookup
   const usersMap = new Map<string, UserProps>();
-  usersResponse.items.forEach((user) => {
+  users.forEach((user) => {
     usersMap.set(user.sys.id, user);
   });
 

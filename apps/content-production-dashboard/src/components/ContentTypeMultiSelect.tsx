@@ -14,6 +14,8 @@ interface ContentTypeMultiSelectProps {
   setSelectedContentTypes: (contentTypes: ContentType[]) => void;
   sdk: ConfigAppSDK;
   initialSelectedIds?: string[];
+  maxSelected?: number;
+  disablePills?: boolean;
 }
 
 const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
@@ -21,6 +23,8 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   setSelectedContentTypes,
   sdk,
   initialSelectedIds,
+  maxSelected,
+  disablePills = false,
 }) => {
   const [availableContentTypes, setAvailableContentTypes] = useState<ContentType[]>([]);
   const [filteredItems, setFilteredItems] = React.useState<ContentType[]>([]);
@@ -78,11 +82,15 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
       setAvailableContentTypes(newAvailableContentTypes);
       setFilteredItems(newAvailableContentTypes);
 
-      // Initialize selected content types from initialSelectedIds if provided
       if (initialSelectedIds && initialSelectedIds.length > 0 && !isInitialized) {
-        const initialSelected = newAvailableContentTypes.filter((ct) =>
+        let initialSelected = newAvailableContentTypes.filter((ct) =>
           initialSelectedIds.includes(ct.id)
         );
+
+        if (maxSelected && initialSelected.length > maxSelected) {
+          initialSelected = initialSelected.slice(0, maxSelected);
+        }
+
         if (initialSelected.length > 0) {
           setSelectedContentTypes(initialSelected);
           setIsInitialized(true);
@@ -90,6 +98,8 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
       }
     })();
   }, [initialSelectedIds]);
+
+  const isAtMax = !!maxSelected && selectedContentTypes.length >= maxSelected;
 
   return (
     <Stack marginTop="spacingXs" flexDirection="column" alignItems="start">
@@ -99,26 +109,32 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
           onSearchValueChange: handleSearchValueChange,
         }}
         placeholder={getPlaceholderText()}>
-        {filteredItems.map((item) => (
-          <Multiselect.Option
-            key={item.id}
-            value={item.id}
-            itemId={item.id}
-            isChecked={selectedContentTypes.some((ct) => ct.id === item.id)}
-            onSelectItem={(e) => {
-              const checked = e.target.checked;
-              if (checked) {
-                setSelectedContentTypes([...selectedContentTypes, item]);
-              } else {
-                setSelectedContentTypes(selectedContentTypes.filter((ct) => ct.id !== item.id));
-              }
-            }}>
-            {item.name}
-          </Multiselect.Option>
-        ))}
+        {filteredItems.map((item) => {
+          const isSelected = selectedContentTypes.some((ct) => ct.id === item.id);
+          const isDisabled = !isSelected && isAtMax;
+
+          return (
+            <Multiselect.Option
+              key={item.id}
+              value={item.id}
+              itemId={item.id}
+              isChecked={isSelected}
+              isDisabled={isDisabled}
+              onSelectItem={(e) => {
+                const checked = e.target.checked;
+                if (checked) {
+                  setSelectedContentTypes([...selectedContentTypes, item]);
+                } else {
+                  setSelectedContentTypes(selectedContentTypes.filter((ct) => ct.id !== item.id));
+                }
+              }}>
+              {item.name}
+            </Multiselect.Option>
+          );
+        })}
       </Multiselect>
 
-      {selectedContentTypes.length > 0 && (
+      {!disablePills && selectedContentTypes.length > 0 && (
         <Box width="full" overflow="auto">
           <Stack flexDirection="row" spacing="spacing2Xs" flexWrap="wrap">
             {selectedContentTypes.map((contentType, index) => (

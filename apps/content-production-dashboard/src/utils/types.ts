@@ -51,6 +51,18 @@ export enum EntryStatus {
   Changed = 'Changed',
 }
 
+export enum CreatorViewSetting {
+  TopFiveCreators = 'topFiveCreators',
+  BottomFiveCreators = 'bottomFiveCreators',
+  Alphabetical = 'alphabetical',
+}
+
+export enum ConfigField {
+  NeedsUpdateMonths = 'needsUpdateMonths',
+  RecentlyPublishedDays = 'recentlyPublishedDays',
+  TimeToPublishDays = 'timeToPublishDays',
+}
+
 export interface ScheduledContentItem {
   id: string;
   title: string;

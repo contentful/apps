@@ -9,7 +9,7 @@ import { useScheduledActions } from '../hooks/useScheduledActions';
 import { useInstallationParameters } from '../hooks/useInstallationParameters';
 import { useContentTypes } from '../hooks/useContentTypes';
 import { ContentTrendsTabs } from './ContentTrendsTabs';
-import { TimeRange } from '../utils/types';
+import { TimeRange, CreatorViewSetting } from '../utils/types';
 import React, { useState } from 'react';
 import { LoadingSkeleton } from './LoadingSkeleton';
 import { ReleasesTable } from './ReleasesTable';
@@ -108,6 +108,9 @@ const Dashboard = () => {
             <ContentTrendsTabs
               entries={entries}
               defaultContentTypes={installation.defaultContentTypes ?? []}
+              defaultCreatorViewSetting={
+                installation.defaultCreatorViewSetting ?? CreatorViewSetting.Alphabetical
+              }
               timeRange={timeRange}
               contentTypes={contentTypes}
               isFetchingContentTypes={isFetchingContentTypes}

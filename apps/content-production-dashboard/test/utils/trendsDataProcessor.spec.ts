@@ -221,6 +221,9 @@ describe('trendsDataProcessor', () => {
       expect(result.creators).toContain('Jane Smith');
       expect(result.data[0]).toHaveProperty('John Doe');
       expect(result.data[0]).toHaveProperty('Jane Smith');
+      expect(result.totalsByCreator).toBeDefined();
+      expect(result.totalsByCreator['John Doe']).toBeGreaterThan(0);
+      expect(result.totalsByCreator['Jane Smith']).toBeGreaterThan(0);
     });
   });
 

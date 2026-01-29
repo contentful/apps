@@ -1,18 +1,35 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Flex, FormControl, Paragraph, Spinner, Tabs, Text } from '@contentful/f36-components';
+import {
+  Box,
+  Flex,
+  FormControl,
+  Paragraph,
+  Spinner,
+  Tabs,
+  Text,
+  Select,
+  Tooltip,
+} from '@contentful/f36-components';
+import { InfoIcon } from '@contentful/f36-icons';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { ChartWrapper } from './ChartWrapper';
 import {
   generateNewEntriesChartData,
   generateContentTypeChartData,
   generateCreatorChartData,
+  getFilteredCreatorDataByView,
 } from '../utils/trendsDataProcessor';
-import { TimeRange } from '../utils/types';
+import { TimeRange, CreatorViewSetting } from '../utils/types';
+import { CREATOR_VIEW_OPTIONS } from '../utils/consts';
+import { getUniqueUserIdsFromEntries } from '../utils/EntryUtils';
+import { formatUserName } from '../utils/UserUtils';
 
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK, HomeAppSDK } from '@contentful/app-sdk';
 import ContentTypeMultiSelect, { ContentType } from './ContentTypeMultiSelect';
 import { styles } from './ContentTrendsTabs.styles';
+import { Multiselect } from '@contentful/f36-multiselect';
+import { useUsers } from '../hooks/useUsers';
 
 export interface ContentTrendsTabsProps {
   entries: EntryProps[];
@@ -20,6 +37,7 @@ export interface ContentTrendsTabsProps {
   defaultContentTypes: string[];
   contentTypes: Map<string, ContentTypeProps>;
   isFetchingContentTypes: boolean;
+  defaultCreatorViewSetting: CreatorViewSetting;
 }
 
 export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
@@ -28,42 +46,26 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
   timeRange,
   contentTypes,
   isFetchingContentTypes,
+  defaultCreatorViewSetting,
 }) => {
   const sdk = useSDK<HomeAppSDK>();
   const [selectedTab, setSelectedTab] = useState('newEntries');
 
-  const [creatorsNames, setCreatorsNames] = useState<Map<string, string>>(new Map());
-  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [selectedChartContentTypes, setSelectedChartContentTypes] = useState<ContentType[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [creatorView, setCreatorView] = useState<CreatorViewSetting>(defaultCreatorViewSetting);
+  const [selectedAlphabeticalCreators, setSelectedAlphabeticalCreators] = useState<string[]>([]);
 
-  useEffect(() => {
-    const fetchCreators = async () => {
-      setIsLoadingUsers(true);
-      try {
-        const usersResponse = await sdk.cma.user.getManyForSpace({
-          spaceId: sdk.ids.space,
-        });
+  const userIds = useMemo(() => getUniqueUserIdsFromEntries(entries), [entries]);
+  const { usersMap, isFetching: isLoadingUsers } = useUsers(userIds);
 
-        const newCreatorsNames = new Map<string, string>();
-        usersResponse.items.forEach((user) => {
-          const fullName =
-            user.firstName && user.lastName
-              ? `${user.firstName} ${user.lastName}`
-              : user.email || user.sys.id;
-          newCreatorsNames.set(user.sys.id, fullName);
-        });
-
-        setCreatorsNames(newCreatorsNames);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      } finally {
-        setIsLoadingUsers(false);
-      }
-    };
-
-    fetchCreators();
-  }, [sdk]);
+  const creatorsNames = useMemo(() => {
+    const newCreatorsNames = new Map<string, string>();
+    usersMap.forEach((user, id) => {
+      newCreatorsNames.set(id, formatUserName(user));
+    });
+    return newCreatorsNames;
+  }, [usersMap]);
 
   useEffect(() => {
     if (contentTypes.size > 0 && !isInitialized) {
@@ -108,13 +110,12 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
   }, [entries, timeRange, filteredContentTypesForChart]);
 
   const creatorData = useMemo(() => {
-    return generateCreatorChartData(
-      entries,
-      { timeRange },
-      creatorsNames,
-      filteredContentTypesForChart
-    );
-  }, [entries, timeRange, creatorsNames, filteredContentTypesForChart]);
+    return generateCreatorChartData(entries, { timeRange }, creatorsNames);
+  }, [entries, timeRange, creatorsNames]);
+
+  const visibleCreatorData = useMemo(() => {
+    return getFilteredCreatorDataByView(creatorData, creatorView, selectedAlphabeticalCreators);
+  }, [creatorData, creatorView, selectedAlphabeticalCreators]);
 
   const handleContentTypeSelection = (newSelected: ContentType[]) => {
     if (newSelected.length <= 5) {
@@ -126,6 +127,11 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
 
   const handleTabChange = (id: string) => {
     setSelectedTab(id);
+  };
+
+  const handleCreatorViewChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value as CreatorViewSetting;
+    setCreatorView(value);
   };
 
   return (
@@ -149,7 +155,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
                   sdk={sdk as unknown as ConfigAppSDK}
                 />
                 {newEntries.length === 0 ? (
-                  <EmptyState />
+                  <EmptyState helperText="Data will display once you select content types." />
                 ) : (
                   <ChartWrapper
                     data={newEntries}
@@ -176,7 +182,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
                 />
                 {!contentTypeData?.processedContentTypes ||
                 contentTypeData.processedContentTypes.size === 0 ? (
-                  <EmptyState />
+                  <EmptyState helperText="Data will display once you select content types." />
                 ) : (
                   <ChartWrapper
                     data={contentTypeData.data}
@@ -194,10 +200,47 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
           <Box marginTop="spacingM">
             {isLoadingUsers ? (
               <LoadingSpinner />
-            ) : creatorData.creators.length === 0 ? (
-              <EmptyState />
             ) : (
-              <ChartWrapper data={creatorData.data} xAxisDataKey="date" legendTitle="Creators:" />
+              <>
+                <Flex alignItems="flex-start" gap="spacingM">
+                  <FormControl marginBottom="spacingM" style={styles.formControlPadding}>
+                    <FormControl.Label marginBottom="spacingM">View by</FormControl.Label>
+                    <Select value={creatorView} onChange={handleCreatorViewChange}>
+                      {CREATOR_VIEW_OPTIONS.map((option) => (
+                        <Select.Option key={option.value} value={option.value}>
+                          {option.label}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  {creatorView === CreatorViewSetting.Alphabetical && (
+                    <FormControl marginBottom="spacingM" style={styles.formControlPadding}>
+                      <Flex alignItems="center" gap="spacing2Xs" marginBottom="spacingXs">
+                        <FormControl.Label>Select creators</FormControl.Label>
+                        <Tooltip content="You can select up to five at a time.">
+                          <InfoIcon size="tiny" />
+                        </Tooltip>
+                      </Flex>
+                      <CreatorMultiSelect
+                        allCreators={creatorData.creators}
+                        selectedCreators={selectedAlphabeticalCreators}
+                        onChange={setSelectedAlphabeticalCreators}
+                      />
+                    </FormControl>
+                  )}
+                </Flex>
+
+                {visibleCreatorData.creators.length === 0 ? (
+                  <EmptyState helperText="Data will display once you select creators." />
+                ) : (
+                  <ChartWrapper
+                    data={visibleCreatorData.data}
+                    xAxisDataKey="date"
+                    legendTitle="Creators:"
+                  />
+                )}
+              </>
             )}
           </Box>
         </Tabs.Panel>
@@ -206,13 +249,66 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
   );
 };
 
-const EmptyState: React.FC = () => {
+interface CreatorMultiSelectProps {
+  allCreators: string[];
+  selectedCreators: string[];
+  onChange: (creators: string[]) => void;
+}
+
+const CreatorMultiSelect: React.FC<CreatorMultiSelectProps> = ({
+  allCreators,
+  selectedCreators,
+  onChange,
+}) => {
+  const getPlaceholderText = () => {
+    if (selectedCreators.length === 0) return 'Select creators';
+    if (selectedCreators.length === 1) return selectedCreators[0];
+    return `${selectedCreators[0]} and ${selectedCreators.length - 1} more`;
+  };
+
+  const handleSelect = (creator: string, checked: boolean) => {
+    if (checked) {
+      if (selectedCreators.length < 5 && !selectedCreators.includes(creator)) {
+        onChange([...selectedCreators, creator]);
+      }
+    } else {
+      onChange(selectedCreators.filter((c) => c !== creator));
+    }
+  };
+
+  const isAtMax = selectedCreators.length >= 5;
+
+  return (
+    <>
+      <Multiselect placeholder={getPlaceholderText()}>
+        {allCreators.map((creator) => {
+          const isSelected = selectedCreators.includes(creator);
+          const isDisabled = !isSelected && isAtMax;
+
+          return (
+            <Multiselect.Option
+              key={creator}
+              value={creator}
+              itemId={creator}
+              isChecked={isSelected}
+              isDisabled={isDisabled}
+              onSelectItem={(e) => handleSelect(creator, e.target.checked)}>
+              {creator}
+            </Multiselect.Option>
+          );
+        })}
+      </Multiselect>
+    </>
+  );
+};
+
+const EmptyState: React.FC<{ helperText: string }> = ({ helperText }) => {
   return (
     <Flex style={styles.emptyStateContainer}>
       <Text fontSize="fontSizeM" fontWeight="fontWeightDemiBold">
         No data to display
       </Text>
-      <Paragraph>Data will display once you select content types</Paragraph>
+      <Paragraph>{helperText}</Paragraph>
     </Flex>
   );
 };
@@ -238,14 +334,20 @@ const ContentTypeSelector: React.FC<ContentTypeSelectorProps> = ({
 }) => {
   return (
     <FormControl marginBottom="spacingM" style={styles.formControlPadding}>
-      <FormControl.Label>Content types</FormControl.Label>
+      <Flex alignItems="center" gap="spacing2Xs">
+        <FormControl.Label>Content types</FormControl.Label>
+        <Tooltip content="You can select up to five at a time.">
+          <InfoIcon size="tiny" />
+        </Tooltip>
+      </Flex>
       <ContentTypeMultiSelect
         selectedContentTypes={selectedContentTypes}
         setSelectedContentTypes={onSelectionChange}
         sdk={sdk}
         initialSelectedIds={selectedContentTypes.map((ct) => ct.id)}
+        maxSelected={5}
+        disablePills
       />
-      <FormControl.HelpText>You can select up to five at a time.</FormControl.HelpText>
     </FormControl>
   );
 };

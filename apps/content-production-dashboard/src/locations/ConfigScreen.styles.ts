@@ -5,6 +5,7 @@ export const styles = {
   container: {
     margin: 'auto',
     padding: tokens.spacingL,
+    maxWidth: '900px',
   } as CSSProperties,
 
   setupColumn: {

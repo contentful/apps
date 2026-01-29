@@ -17,5 +17,7 @@ export const styles = {
   } as CSSProperties,
   formControlPadding: {
     padding: tokens.spacingS,
+    minWidth: '280px',
+    maxWidth: '360px',
   } as CSSProperties,
 };

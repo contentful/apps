@@ -32,6 +32,13 @@ export const LoadingSkeleton = ({ metricsCount }: { metricsCount: number }) => {
           <Skeleton.Image width="100%" height="100px" />
         </Skeleton.Container>
       </Card>
+
+      {/* Scheduled Content Section */}
+      <Card padding="default" style={styles.sectionCard}>
+        <Skeleton.Container>
+          <Skeleton.Image width="100%" height="100px" />
+        </Skeleton.Container>
+      </Card>
     </Flex>
   );
 };
