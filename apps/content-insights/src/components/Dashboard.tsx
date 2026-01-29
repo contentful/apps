@@ -61,7 +61,7 @@ const Dashboard = () => {
   return (
     <Flex flexDirection="column" style={styles.container}>
       <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingXs">
-        <Heading>Content Dashboard</Heading>
+        <Heading>Content Insights</Heading>
         <Button
           variant="secondary"
           size="small"
