@@ -121,6 +121,7 @@ const callGoogleDocsAgent = async (
   let parsedData: any;
   try {
     parsedData = JSON.parse(data);
+    console.log('parsedData', parsedData);
   } catch {
     throw new Error('Failed to parse google docs agent response as JSON');
   }
