@@ -82,7 +82,6 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
       setAvailableContentTypes(newAvailableContentTypes);
       setFilteredItems(newAvailableContentTypes);
 
-      // Initialize selected content types from initialSelectedIds if provided
       if (initialSelectedIds && initialSelectedIds.length > 0 && !isInitialized) {
         let initialSelected = newAvailableContentTypes.filter((ct) =>
           initialSelectedIds.includes(ct.id)
@@ -100,6 +99,8 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
     })();
   }, [initialSelectedIds]);
 
+  const isAtMax = !!maxSelected && selectedContentTypes.length >= maxSelected;
+
   return (
     <Stack marginTop="spacingXs" flexDirection="column" alignItems="start">
       <Multiselect
@@ -110,7 +111,6 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
         placeholder={getPlaceholderText()}>
         {filteredItems.map((item) => {
           const isSelected = selectedContentTypes.some((ct) => ct.id === item.id);
-          const isAtMax = !!maxSelected && selectedContentTypes.length >= maxSelected;
           const isDisabled = !isSelected && isAtMax;
 
           return (
@@ -123,9 +123,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
               onSelectItem={(e) => {
                 const checked = e.target.checked;
                 if (checked) {
-                  if (!maxSelected || selectedContentTypes.length < maxSelected) {
-                    setSelectedContentTypes([...selectedContentTypes, item]);
-                  }
+                  setSelectedContentTypes([...selectedContentTypes, item]);
                 } else {
                   setSelectedContentTypes(selectedContentTypes.filter((ct) => ct.id !== item.id));
                 }
