@@ -44,7 +44,7 @@ describe('Config Screen component', () => {
     render(<ConfigScreen />);
 
     await waitFor(() => {
-      expect(screen.getByText('Set up Content Production Dashboard')).toBeInTheDocument();
+      expect(screen.getByText('Set up Content Insights')).toBeInTheDocument();
     });
 
     expect(screen.getByText('Content "Needs update" time threshold (months)')).toBeInTheDocument();
@@ -64,7 +64,7 @@ describe('Config Screen component', () => {
     render(<ConfigScreen />);
 
     await waitFor(() => {
-      expect(screen.getByText('Set up Content Production Dashboard')).toBeInTheDocument();
+      expect(screen.getByText('Set up Content Insights')).toBeInTheDocument();
     });
 
     await simulateSave();
@@ -84,7 +84,7 @@ describe('Config Screen component', () => {
     render(<ConfigScreen />);
 
     await waitFor(() => {
-      expect(screen.getByText('Set up Content Production Dashboard')).toBeInTheDocument();
+      expect(screen.getByText('Set up Content Insights')).toBeInTheDocument();
     });
 
     const needsUpdateInput = screen.getAllByTestId('cf-ui-text-input')[0];
@@ -126,7 +126,7 @@ describe('Config Screen component', () => {
     render(<ConfigScreen />);
 
     await waitFor(() => {
-      expect(screen.getByText('Set up Content Production Dashboard')).toBeInTheDocument();
+      expect(screen.getByText('Set up Content Insights')).toBeInTheDocument();
     });
 
     const recentlyPublishedInput = screen.getAllByTestId('cf-ui-text-input')[1];
@@ -165,7 +165,7 @@ describe('Config Screen component', () => {
     render(<ConfigScreen />);
 
     await waitFor(() => {
-      expect(screen.getByText('Set up Content Production Dashboard')).toBeInTheDocument();
+      expect(screen.getByText('Set up Content Insights')).toBeInTheDocument();
     });
 
     const timeToPublishInput = screen.getAllByTestId('cf-ui-text-input')[2];
@@ -203,7 +203,7 @@ describe('Config Screen component', () => {
     render(<ConfigScreen />);
 
     await waitFor(() => {
-      expect(screen.getByText('Set up Content Production Dashboard')).toBeInTheDocument();
+      expect(screen.getByText('Set up Content Insights')).toBeInTheDocument();
     });
 
     // Toggle showUpcomingReleases switch
