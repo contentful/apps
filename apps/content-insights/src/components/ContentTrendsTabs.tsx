@@ -1,15 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  Box,
-  Flex,
-  FormControl,
-  Paragraph,
-  Spinner,
-  Tabs,
-  Text,
-  Select,
-  Tooltip,
-} from '@contentful/f36-components';
+import { Box, Flex, FormControl, Spinner, Tabs, Select, Tooltip } from '@contentful/f36-components';
 import { InfoIcon } from '@contentful/f36-icons';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { ChartWrapper } from './ChartWrapper';
@@ -302,7 +292,6 @@ const CreatorMultiSelect: React.FC<CreatorMultiSelectProps> = ({
     </>
   );
 };
-
 
 const LoadingSpinner: React.FC = () => {
   return (
