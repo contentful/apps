@@ -21,6 +21,7 @@ const styles = {
     borderLeft: `1px solid ${tokens.gray300}`,
     paddingTop: tokens.spacingS,
     marginTop: `-${tokens.spacingS}`,
+    transform: `translateX(${OFFSET}px)`,
   }),
   lShaped: css({
     position: 'relative',

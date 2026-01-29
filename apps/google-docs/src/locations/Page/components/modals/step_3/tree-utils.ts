@@ -15,6 +15,7 @@ export interface TreeNode {
   level: number;
   path: string[];
   hasChildren: boolean;
+  isCircular?: boolean;
 }
 
 export interface BuildTreeOptions {
@@ -50,6 +51,7 @@ export function buildEntryTree(options: BuildTreeOptions): TreeNode[] {
     const refs = extractReferences(item.entry);
     refs.forEach((ref) => referencedTempIds.add(ref));
   });
+  console.log('referencedTempIds:', referencedTempIds);
 
   // Build tree starting from root entries (those not referenced by others)
   const rootNodes: TreeNode[] = [];
@@ -64,6 +66,16 @@ export function buildEntryTree(options: BuildTreeOptions): TreeNode[] {
       }
     }
   });
+
+  // If no root nodes found (all entries are referenced - circular scenario),
+  // use the first entry as the root to ensure tree renders
+  if (rootNodes.length === 0 && entries.length > 0) {
+    const firstEntry = entries[0];
+    const node = buildNode(firstEntry, entryMap, 0, [], maxDepth, processedPaths);
+    if (node) {
+      rootNodes.push(node);
+    }
+  }
 
   return rootNodes;
 }
@@ -88,6 +100,15 @@ function extractReferences(entry: EntryToCreate): string[] {
 }
 
 /**
+ * Checks if a node creates a circular reference
+ * A circular reference occurs when an entry references itself through its ancestry
+ */
+function isCircular(nodeId: string, path: string[]): boolean {
+  console.log('nodeId', nodeId);
+  return path.includes(nodeId);
+}
+
+/**
  * Recursively builds a tree node with its children
  */
 function buildNode(
@@ -98,12 +119,40 @@ function buildNode(
   maxDepth: number,
   processedPaths: Set<string>
 ): TreeNode | null {
+  console.log('buildNode', item);
   const nodeId = item.entry.tempId || `entry_${Math.random()}`;
   const nodePath = [...path, nodeId];
   const pathKey = nodePath.join('/');
 
-  // Prevent circular references and exceeding max depth
-  if (processedPaths.has(pathKey) || level >= maxDepth) {
+  console.log('pathKey', pathKey);
+  // Check if we've exceeded max depth
+  if (level >= maxDepth) {
+    return null;
+  }
+
+  // Check for circular reference
+  const circular = isCircular(nodeId, path);
+
+  console.log('circular', circular);
+  // If circular, return the node but don't process children
+  if (circular) {
+    return {
+      id: nodeId,
+      tempId: item.entry.tempId,
+      contentTypeId: item.entry.contentTypeId,
+      title: item.title,
+      contentTypeName: item.contentTypeName,
+      entry: item.entry,
+      children: [],
+      level,
+      path: nodePath,
+      hasChildren: false,
+      isCircular: true,
+    };
+  }
+
+  // Prevent processing the same path multiple times (for performance)
+  if (processedPaths.has(pathKey)) {
     return null;
   }
 
