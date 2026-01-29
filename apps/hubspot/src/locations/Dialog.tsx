@@ -83,8 +83,6 @@ const Dialog = () => {
     try {
       const response = await sdk.cma.appActionCall.createWithResponse(
         {
-          spaceId: sdk.ids.space,
-          environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
           appDefinitionId: sdk.ids.app!,
           appActionId: 'createModulesAction',
         },
