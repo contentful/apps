@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useRecentlyPublishedContent } from '../../src/hooks/useRecentlyPublishedContent';
 import { createMockEntry, createMockContentType, createMockUser } from '../utils/testHelpers';
 import { createQueryProviderWrapper } from '../utils/createQueryProviderWrapper';
-import { subDays } from '../../src/utils/dateCalculator';
+import { subDays } from '../../src/utils/dateUtils';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => ({

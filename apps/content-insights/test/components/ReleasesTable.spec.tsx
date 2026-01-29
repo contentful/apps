@@ -26,7 +26,7 @@ const createMockRelease = (
   const futureDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
 
   return {
-    releaseId: 'release-1',
+    id: 'release-1',
     scheduledActionId: 'action-1',
     title: 'Test Release',
     scheduledFor: {
@@ -119,7 +119,7 @@ describe('ReleasesTable component', () => {
     it('renders release data in table rows', () => {
       const mockReleases = [
         createMockRelease({
-          releaseId: 'release-1',
+          id: 'release-1',
           title: 'My First Release',
           itemsCount: 10,
         }),
@@ -141,9 +141,9 @@ describe('ReleasesTable component', () => {
 
     it('renders multiple releases', () => {
       const mockReleases = [
-        createMockRelease({ releaseId: 'release-1', title: 'Release 1' }),
-        createMockRelease({ releaseId: 'release-2', title: 'Release 2' }),
-        createMockRelease({ releaseId: 'release-3', title: 'Release 3' }),
+        createMockRelease({ id: 'release-1', title: 'Release 1' }),
+        createMockRelease({ id: 'release-2', title: 'Release 2' }),
+        createMockRelease({ id: 'release-3', title: 'Release 3' }),
       ];
       mockUseReleases.mockReturnValue({
         releases: mockReleases,

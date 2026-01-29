@@ -4,7 +4,7 @@ import { fetchScheduledActions } from './fetchScheduledActions';
 import { fetchUsersById } from './fetchUsersById';
 
 export interface ReleaseWithScheduledAction {
-  releaseId: string;
+  id: string;
   scheduledActionId: string;
   title: string;
   scheduledFor: {
@@ -124,7 +124,7 @@ export const fetchReleases = async (sdk: BaseAppSDK): Promise<FetchReleasesResul
       const user = userId ? usersMap.get(userId) : undefined;
 
       return {
-        releaseId,
+        id: releaseId,
         scheduledActionId: action.sys.id,
         title: releaseInfo.title,
         scheduledFor: action.scheduledFor,

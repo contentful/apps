@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
-import { styles } from './NeedsUpdateTable.styles';
+import { needsUpdateTableStyles as styles } from './tableStyles';
 import { EntryLink } from './EntryLink';
 import { useNeedsUpdate, NeedsUpdateItem } from '../hooks/useNeedsUpdateContent';
-import { formatDateTimeWithTimezone } from '../utils/dateFormat';
+import { formatDateTimeWithTimezone } from '../utils/dateUtils';
 import { formatUserName } from '../utils/UserUtils';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { ContentTable, TableColumn } from './ContentTable';

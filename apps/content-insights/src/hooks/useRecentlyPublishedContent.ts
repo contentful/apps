@@ -1,7 +1,7 @@
 import { useUsers } from './useUsers';
 import { ITEMS_PER_PAGE } from '../utils/consts';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
-import { isWithin, parseDate } from '../utils/dateCalculator';
+import { isWithin, parseDate } from '../utils/dateUtils';
 import { getCreatorFromEntry } from '../utils/UserUtils';
 import { getEntryTitle, getUniqueUserIdsFromEntries } from '../utils/EntryUtils';
 import { useMemo } from 'react';

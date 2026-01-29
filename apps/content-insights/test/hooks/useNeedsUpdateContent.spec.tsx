@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useNeedsUpdate } from '../../src/hooks/useNeedsUpdateContent';
 import { createMockEntry, createMockContentType, createMockUser } from '../utils/testHelpers';
 import { createQueryProviderWrapper } from '../utils/createQueryProviderWrapper';
-import { subMonths } from '../../src/utils/dateCalculator';
+import { subMonths } from '../../src/utils/dateUtils';
 
 const mockUseSDK = vi.fn();
 

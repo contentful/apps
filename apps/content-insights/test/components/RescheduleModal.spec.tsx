@@ -18,7 +18,7 @@ const createMockRelease = (
   const futureDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
   return {
-    releaseId: 'release-1',
+    id: 'release-1',
     scheduledActionId: 'action-1',
     title: 'Test Release',
     scheduledFor: {
