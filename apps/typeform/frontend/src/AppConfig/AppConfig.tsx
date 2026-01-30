@@ -9,30 +9,16 @@ import {
   Option,
   FormLabel,
   Note,
+  Flex,
+  Box,
+  Subheading,
+  Stack,
 } from '@contentful/f36-components';
-import FieldSelector from './FieldSelector';
-import {
-  CompatibleFields,
-  ContentType,
-  Hash,
-  EditorInterface,
-  InstallationParameters,
-  SelectedFields,
-  WorkspaceOption,
-  WorkspacesResponse,
-} from '../typings';
-import {
-  getCompatibleFields,
-  editorInterfacesToSelectedFields,
-  selectedFieldsToTargetState,
-  validateParameters,
-  getToken,
-  resetLocalStorage,
-} from '../utils';
+import ContentTypeMultiSelect, { ContentType } from '../components/ContentTypeMultiSelect';
+import { OAuthConnector } from '../components/OAuthConnector';
+import { InstallationParameters, WorkspaceOption, WorkspacesResponse } from '../typings';
+import { validateParameters, getToken, resetLocalStorage } from '../utils';
 import { styles } from './styles';
-
-// @ts-ignore 2307
-import logo from './config-screen-logo.svg';
 
 const AUTH_ERROR_CODES = [401, 403];
 
@@ -43,22 +29,18 @@ interface Props {
 
 interface State {
   selectedWorkspaceId: string;
+  baseUrl: string;
   accessToken: string;
   workspaces: WorkspaceOption[];
-  contentTypes: ContentType[];
-  selectedContentTypes: string[];
-  selectedFields: SelectedFields;
-  compatibleFields: CompatibleFields;
+  selectedContentTypes: ContentType[];
 }
 
 export class AppConfig extends React.Component<Props, State> {
   state: State = {
-    contentTypes: [],
-    compatibleFields: {},
     workspaces: [],
     selectedContentTypes: [],
-    selectedFields: {},
     selectedWorkspaceId: '',
+    baseUrl: 'https://api.typeform.com',
     accessToken: getToken(),
   };
 
@@ -67,51 +49,71 @@ export class AppConfig extends React.Component<Props, State> {
 
     sdk.app.onConfigure(this.onAppConfigure);
 
-    const [contentTypesResponse, eisResponse, paramsResponse] = await Promise.all([
-      sdk.space.getContentTypes(),
-      sdk.space.getEditorInterfaces(),
-      sdk.app.getParameters(),
-      this.fetchWorkspaces(),
-    ]);
-
-    const contentTypes = (contentTypesResponse as Hash).items as ContentType[];
-    const editorInterfaces = (eisResponse as Hash).items as EditorInterface[];
-    const compatibleFields = getCompatibleFields(contentTypes);
-    const filteredContentTypes = contentTypes.filter((ct) => {
-      const fields = compatibleFields[ct.sys.id];
-      return fields && fields.length > 0;
-    });
-
+    const paramsResponse = await sdk.app.getParameters();
     const parameters: InstallationParameters = paramsResponse as InstallationParameters;
+    const effectiveBaseUrl = get(parameters, ['baseUrl'], 'https://api.typeform.com');
+    const effectiveAccessToken = getToken(effectiveBaseUrl);
 
     this.setState(
       {
         selectedWorkspaceId: get(parameters, ['selectedWorkspaceId'], ''),
-        compatibleFields,
-        contentTypes: filteredContentTypes,
-        selectedFields: editorInterfacesToSelectedFields(editorInterfaces, sdk.ids.app),
+        baseUrl: effectiveBaseUrl,
+        accessToken: effectiveAccessToken,
       },
-      () => sdk.app.setReady()
+      () => {
+        sdk.app.setReady();
+        // Fetch workspaces after state is set
+        if (effectiveAccessToken) {
+          this.fetchWorkspaces();
+        }
+      }
     );
   }
 
   fetchWorkspaces = async () => {
     try {
-      const response = await fetch(`/workspaces`, {
+      const { baseUrl, accessToken } = this.state;
+
+      if (!accessToken) {
+        return;
+      }
+
+      // Use window.location.origin to construct the correct URL
+      // This works for both local dev (localhost:3001) and production
+      const origin =
+        process.env.NODE_ENV === 'development' ? 'http://localhost:3001' : window.location.origin;
+      const apiUrl = `${origin}/workspaces?baseUrl=${encodeURIComponent(baseUrl)}`;
+      console.log('Fetching workspaces from:', apiUrl);
+      console.log('With token:', accessToken ? 'present' : 'missing');
+      const response = await fetch(apiUrl, {
         headers: {
-          Authorization: `Bearer ${this.state.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
       if (AUTH_ERROR_CODES.includes(response.status)) {
-        resetLocalStorage();
+        resetLocalStorage(baseUrl);
         this.setState({ accessToken: '' });
         return;
       }
 
-      const result: WorkspacesResponse = await response.json();
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to fetch workspaces:', response.status, errorText);
+        if (AUTH_ERROR_CODES.includes(response.status)) {
+          resetLocalStorage(baseUrl);
+          this.setState({ accessToken: '' });
+          return;
+        }
+        throw new Error(`Failed to fetch workspaces: ${response.status} ${errorText}`);
+      }
+
+      const result: WorkspacesResponse = (await response.json()) as WorkspacesResponse;
       this.setState({ workspaces: this.normalizeWorkspaceResponse(result) });
-    } catch (_error) {
+    } catch (error) {
+      console.error('Error fetching workspaces:', error);
       this.props.sdk.notifier.error(
         'There was a problem fetching your Typeform workspaces. Please try again.'
       );
@@ -126,7 +128,7 @@ export class AppConfig extends React.Component<Props, State> {
   };
 
   onAppConfigure = () => {
-    const { accessToken, selectedWorkspaceId, contentTypes, selectedFields } = this.state;
+    const { accessToken, selectedWorkspaceId, baseUrl, selectedContentTypes } = this.state;
     const parameters = { selectedWorkspaceId, accessToken };
     const error = validateParameters(parameters);
     const hasStaleWorkspaceIdSelected = !this.selectedWorkspaceIdIsValid();
@@ -141,9 +143,19 @@ export class AppConfig extends React.Component<Props, State> {
       return false;
     }
 
+    // Convert selectedContentTypes to targetState format
+    const editorInterface = selectedContentTypes.reduce((acc, contentType) => {
+      return {
+        ...acc,
+        [contentType.id]: {
+          sidebar: { position: 0 },
+        },
+      };
+    }, {});
+
     return {
-      parameters: { selectedWorkspaceId },
-      targetState: selectedFieldsToTargetState(contentTypes, selectedFields),
+      parameters: { selectedWorkspaceId, baseUrl },
+      targetState: { EditorInterface: editorInterface },
     };
   };
 
@@ -157,16 +169,26 @@ export class AppConfig extends React.Component<Props, State> {
     this.setState({ selectedWorkspaceId: id.trim() });
   };
 
-  setAccessToken = (token: string) => {
-    this.setState({ accessToken: token.trim() });
+  setBaseUrl = (baseUrl: string) => {
+    const trimmedBaseUrl = baseUrl.trim();
+    const tokenForNewBaseUrl = getToken(trimmedBaseUrl);
+    this.setState({ baseUrl: trimmedBaseUrl, accessToken: tokenForNewBaseUrl }, () => {
+      if (tokenForNewBaseUrl) {
+        this.fetchWorkspaces();
+      }
+    });
   };
 
-  onSelectedFieldsChange = (selectedFields: SelectedFields) => {
-    this.setState({ selectedFields });
+  setAccessToken = (token: string) => {
+    this.setState({ accessToken: token.trim() }, () => {
+      if (token) {
+        this.fetchWorkspaces();
+      }
+    });
   };
 
   render() {
-    const { contentTypes, compatibleFields, selectedFields, selectedWorkspaceId, workspaces } =
+    const { selectedWorkspaceId, baseUrl, workspaces, selectedContentTypes, accessToken } =
       this.state;
 
     const { sdk } = this.props;
@@ -175,29 +197,50 @@ export class AppConfig extends React.Component<Props, State> {
     } = sdk;
 
     return (
-      <div>
-        <div className={styles.background('#262627')} />
-        <div className={styles.body}>
-          <div>
-            <div>
-              <>
-                <Heading>About Typeform</Heading>
-                <Paragraph className={styles.aboutP}>
-                  The{' '}
-                  <TextLink
-                    href="https://www.typeform.com/"
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    Typeform
-                  </TextLink>{' '}
-                  app allows you to reference your forms from Typeform without leaving Contentful.
-                </Paragraph>
-              </>
-              <hr className={styles.splitter} />
-            </div>
-            <div>
-              <>
-                <Heading>Configuration</Heading>
+      <Flex justifyContent="center" alignItems="center">
+        <Box marginBottom="spacing2Xl" marginTop="spacing2Xl" className={styles.body}>
+          <Heading marginBottom="spacingS">Set up Typeform</Heading>
+          <Paragraph marginBottom="spacingXl">
+            The{' '}
+            <TextLink href="https://www.typeform.com/" target="_blank" rel="noopener noreferrer">
+              Typeform
+            </TextLink>{' '}
+            app allows you to reference your forms from Typeform without leaving Contentful.
+          </Paragraph>
+
+          <Subheading marginTop="spacingXl" marginBottom="spacing2Xs">
+            Configure access
+          </Subheading>
+          <Paragraph marginBottom="spacingM">Section subtitle with basic instructions</Paragraph>
+
+          <Box marginBottom="spacingL">
+            <OAuthConnector
+              sdk={sdk}
+              baseUrl={baseUrl}
+              onBaseUrlChange={this.setBaseUrl}
+              onTokenChange={this.setAccessToken}
+              expireSoon={this.props.expireSoon}
+            />
+          </Box>
+
+          <Box marginBottom="spacingL">
+            <FormLabel htmlFor="baseUrl" marginBottom="spacingXs">
+              Typeform region
+            </FormLabel>
+            <Select
+              id="baseUrl"
+              name="baseUrl"
+              onChange={(event: any) => this.setBaseUrl(event.currentTarget.value)}
+              value={baseUrl}
+              data-test-id="typeform-base-url-select">
+              <Option value="https://api.typeform.com">US (typeform.com)</Option>
+              <Option value="https://api.typeform.eu">EU (typeform.eu)</Option>
+            </Select>
+          </Box>
+
+          {accessToken && (
+            <>
+              <Box marginBottom="spacingL">
                 <FormLabel htmlFor="workspaceId" isRequired>
                   Typeform workspace
                 </FormLabel>
@@ -217,49 +260,32 @@ export class AppConfig extends React.Component<Props, State> {
                     </Option>
                   ))}
                 </Select>
-              </>
-              <hr className={styles.splitter} />
-              <>
-                <Heading>Assign to content types</Heading>
-                {contentTypes.length > 0 ? (
-                  <>
-                    <Paragraph>
-                      This app can only be used with <strong>Short text</strong> fields. Select
-                      which content types to use with the Typeform App.
-                    </Paragraph>
-                    <FieldSelector
-                      contentTypes={contentTypes}
-                      compatibleFields={compatibleFields}
-                      selectedFields={selectedFields}
-                      onSelectedFieldsChange={this.onSelectedFieldsChange}
-                    />
-                  </>
-                ) : (
-                  <Note variant="warning">
-                    There are <strong>no content types with fields of type Short Text</strong>{' '}
-                    fields in this environment. You can add one in your{' '}
-                    <TextLink
-                      variant="primary"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href={
-                        environment === 'master'
-                          ? `https://${sdk.hostnames.webapp}/spaces/${space}/content_types`
-                          : `https://${sdk.hostnames.webapp}/spaces/${space}/environments/${environment}/content_types`
-                      }>
-                      content model
-                    </TextLink>{' '}
-                    and assign it to the app from this screen.
-                  </Note>
-                )}
-              </>
-            </div>
-          </div>
-        </div>
-        <div className={styles.icon}>
-          <img src={logo} alt="typeform logo" />
-        </div>
-      </div>
+              </Box>
+            </>
+          )}
+
+          <hr className={styles.splitter} />
+
+          <Subheading marginTop="spacingXl" marginBottom="spacing2Xs">
+            Assign content types
+          </Subheading>
+          <Paragraph marginBottom="spacingM">
+            Select the content type(s) you want to use with Typeform. You can change this anytime by
+            navigating to the 'Sidebar' tab in your content model.
+          </Paragraph>
+          <Paragraph marginBottom="spacingXs" style={{ fontWeight: '600' }}>
+            Content types
+          </Paragraph>
+          <ContentTypeMultiSelect
+            selectedContentTypes={selectedContentTypes}
+            setSelectedContentTypes={(contentTypes) =>
+              this.setState({ selectedContentTypes: contentTypes })
+            }
+            sdk={sdk}
+            cma={sdk.cma}
+          />
+        </Box>
+      </Flex>
     );
   }
 }

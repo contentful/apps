@@ -58,8 +58,12 @@ const getSelectedForm = (value: string, forms: FormOption[]) => {
 };
 
 export function TypeFormField({ sdk }: Props) {
-  const { selectedWorkspaceId } = sdk.parameters.installation as InstallationParameters;
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const { selectedWorkspaceId, baseUrl } = sdk.parameters.installation as InstallationParameters;
+  const effectiveBaseUrl = baseUrl || 'https://api.typeform.com';
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    token: getToken(effectiveBaseUrl),
+  });
   const { loading, forms, value, hasStaleData, selectedForm, error, token } = state;
 
   function reducer(
@@ -123,15 +127,23 @@ export function TypeFormField({ sdk }: Props) {
   useEffect(() => {
     const fetchForms = async () => {
       try {
-        const response = await fetch(`/forms/${selectedWorkspaceId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const effectiveBaseUrl = baseUrl || 'https://api.typeform.com';
+        const response = await fetch(
+          `${window.location.origin}/forms/${selectedWorkspaceId}?baseUrl=${encodeURIComponent(
+            effectiveBaseUrl
+          )}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log('response', response);
 
         if (AUTH_ERROR_CODES.includes(response.status)) {
-          // clear everything in case token is expired
-          resetLocalStorage();
+          // clear everything in case token is expired or invalid for this region
+          resetLocalStorage(effectiveBaseUrl);
           dispatch({ type: ACTION_TYPES.RESET });
         } else {
           const result = (await response.json()) as TypeFormResponse;
@@ -145,7 +157,7 @@ export function TypeFormField({ sdk }: Props) {
         }
       } catch (error) {
         // only show error dialog is the user is logged in
-        if (isUserAuthenticated()) {
+        if (isUserAuthenticated(effectiveBaseUrl)) {
           dispatch({ type: ACTION_TYPES.ERROR });
         }
       }
@@ -153,7 +165,7 @@ export function TypeFormField({ sdk }: Props) {
     fetchForms();
     // Start auto resizer to adjust field height
     sdk.window.startAutoResizer();
-  }, [token, sdk.window, selectedWorkspaceId]);
+  }, [token, sdk.window, selectedWorkspaceId, effectiveBaseUrl]);
 
   const onChange = (event: any) => {
     const value = event.currentTarget.value;
@@ -181,11 +193,12 @@ export function TypeFormField({ sdk }: Props) {
     }));
   };
 
-  if (!isUserAuthenticated()) {
+  if (!isUserAuthenticated(effectiveBaseUrl)) {
     return (
       <TypeformOAuth
         aria-label="typeform-auth"
         isFullWidth={false}
+        baseUrl={effectiveBaseUrl}
         setToken={(token: string) =>
           dispatch({ type: ACTION_TYPES.UPDATE_TOKEN, payload: { token } })
         }
@@ -236,7 +249,11 @@ export function TypeFormField({ sdk }: Props) {
       {value && !hasStaleData && (
         <div className={styles.actionButtons}>
           <TextLink
-            href={`https://admin.typeform.com/form/${selectedForm.id}/create`}
+            href={`${
+              (baseUrl || 'https://api.typeform.com') === 'https://api.typeform.eu'
+                ? 'https://admin.typeform.eu'
+                : 'https://admin.typeform.com'
+            }/form/${selectedForm.id}/create`}
             target="_blank"
             icon={<EditIcon />}
             rel="noopener noreferrer"
@@ -255,7 +272,11 @@ export function TypeFormField({ sdk }: Props) {
             </Tooltip>
           )}
           <TextLink
-            href={`https://admin.typeform.com/form/${selectedForm.id}/results`}
+            href={`${
+              (baseUrl || 'https://api.typeform.com') === 'https://api.typeform.eu'
+                ? 'https://admin.typeform.eu'
+                : 'https://admin.typeform.com'
+            }/form/${selectedForm.id}/results`}
             target="_blank"
             icon={<EntryIcon />}
             rel="noopener noreferrer"
