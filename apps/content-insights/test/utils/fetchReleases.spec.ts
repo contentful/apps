@@ -106,7 +106,7 @@ describe('fetchReleases', () => {
       expect(result.releases).toHaveLength(1);
       expect(result.total).toBe(1);
       expect(result.releases[0]).toMatchObject({
-        releaseId: 'launch-release-1',
+        id: 'launch-release-1',
         scheduledActionId: 'action-1',
         title: 'My Launch Release',
         action: 'publish',
@@ -140,7 +140,7 @@ describe('fetchReleases', () => {
 
       expect(result.releases).toHaveLength(1);
       expect(result.releases[0]).toMatchObject({
-        releaseId: 'timeline-release-1',
+        id: 'timeline-release-1',
         title: 'My Timeline Release',
         itemsCount: 15,
         viewUrl: `https://app.contentful.com/spaces/${spaceId}/views/entries?release=timeline-release-1`,

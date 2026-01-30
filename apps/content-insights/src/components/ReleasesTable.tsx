@@ -1,35 +1,16 @@
-import { useState } from 'react';
-import { Table, Pagination, Note, Box, Skeleton, Text, Icon } from '@contentful/f36-components';
+import { useState, useMemo } from 'react';
+import { Text, Icon } from '@contentful/f36-components';
 import { useReleases } from '../hooks/useReleases';
+import type { ReleaseWithScheduledAction } from '../utils/fetchReleases';
 import { GearSixIcon } from '@contentful/f36-icons';
-import { ITEMS_PER_PAGE } from '../utils/consts';
 import tokens from '@contentful/f36-tokens';
-import { styles } from './ReleasesTable.styles';
+import { releasesTableStyles as styles } from './tableStyles';
 import { ReleasesTableActions } from './ReleasesTableActions';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
-import { formatDateTimeWithTimezone } from '../utils/dateFormat';
+import { formatDateTimeWithTimezone } from '../utils/dateUtils';
 import { formatUserName } from '../utils/UserUtils';
-import { EmptyState } from './EmptyState';
-
-const ReleasesTableHeader = () => {
-  return (
-    <Table.Head>
-      <Table.Row>
-        <Table.Cell style={styles.titleCell}>Title</Table.Cell>
-        <Table.Cell style={styles.dateCell}>Scheduled Date & Time</Table.Cell>
-        <Table.Cell style={styles.itemsCell}>Items</Table.Cell>
-        <Table.Cell style={styles.updatedCell}>Last Updated</Table.Cell>
-        <Table.Cell style={styles.userCell}>Last Updated By</Table.Cell>
-        <Table.Cell style={styles.actionsCell}>
-          <Icon style={{ margin: tokens.spacing2Xs }}>
-            <GearSixIcon />
-          </Icon>
-        </Table.Cell>
-      </Table.Row>
-    </Table.Head>
-  );
-};
+import { ContentTable, TableColumn } from './ContentTable';
 
 export const ReleasesTable = () => {
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
@@ -37,73 +18,68 @@ export const ReleasesTable = () => {
   const { releases, total, isFetchingReleases, fetchingReleasesError, refetchReleases } =
     useReleases(currentPage);
 
-  if (fetchingReleasesError) {
-    return (
-      <Box marginTop="spacingXl">
-        <Note variant="negative" title="Error loading releases">
-          Failed to load releases
-        </Note>
-      </Box>
-    );
-  }
-
-  if (isFetchingReleases && releases.length === 0) {
-    return (
-      <>
-        <Table>
-          <ReleasesTableHeader />
-          <Table.Body>
-            <Skeleton.Row rowCount={5} columnCount={6} />
-          </Table.Body>
-        </Table>
-      </>
-    );
-  }
-
-  if (releases.length === 0) {
-    return <EmptyState helperText="Releases will appear here when they are scheduled." />;
-  }
+  const columns = useMemo<TableColumn<ReleaseWithScheduledAction>[]>(
+    () => [
+      {
+        id: 'title',
+        label: 'Title',
+        style: styles.titleCell,
+        render: (item) => <Text fontWeight="fontWeightDemiBold">{item.title}</Text>,
+      },
+      {
+        id: 'scheduledDate',
+        label: 'Scheduled Date & Time',
+        style: styles.dateCell,
+        render: (item) =>
+          formatDateTimeWithTimezone(item.scheduledFor.datetime, item.scheduledFor.timezone),
+      },
+      {
+        id: 'items',
+        label: 'Items',
+        style: styles.itemsCell,
+        render: (item) => `${item.itemsCount} items`,
+      },
+      {
+        id: 'updatedAt',
+        label: 'Last Updated',
+        style: styles.updatedCell,
+        render: (item) => formatDateTimeWithTimezone(item.updatedAt),
+      },
+      {
+        id: 'updatedBy',
+        label: 'Last Updated By',
+        style: styles.userCell,
+        render: (item) => formatUserName(item.updatedBy),
+      },
+      {
+        id: 'actions',
+        label: (
+          <Icon style={{ margin: tokens.spacing2Xs }}>
+            <GearSixIcon />
+          </Icon>
+        ),
+        style: styles.actionsCell,
+        render: (item) => (
+          <ReleasesTableActions release={item} sdk={sdk} onActionSuccess={refetchReleases} />
+        ),
+      },
+    ],
+    [sdk, refetchReleases]
+  );
 
   return (
-    <>
-      <Table>
-        <ReleasesTableHeader />
-        <Table.Body>
-          {releases.map((release) => (
-            <Table.Row key={release.releaseId}>
-              <Table.Cell style={styles.titleCell}>
-                <Text fontWeight="fontWeightDemiBold">{release.title}</Text>
-              </Table.Cell>
-              <Table.Cell style={styles.dateCell}>
-                {formatDateTimeWithTimezone(
-                  release.scheduledFor.datetime,
-                  release.scheduledFor.timezone
-                )}
-              </Table.Cell>
-              <Table.Cell style={styles.itemsCell}>{release.itemsCount} items</Table.Cell>
-              <Table.Cell style={styles.updatedCell}>
-                {formatDateTimeWithTimezone(release.updatedAt)}
-              </Table.Cell>
-              <Table.Cell style={styles.userCell}>{formatUserName(release.updatedBy)}</Table.Cell>
-              <Table.Cell style={styles.actionsCell}>
-                <ReleasesTableActions
-                  release={release}
-                  sdk={sdk}
-                  onActionSuccess={refetchReleases}
-                />
-              </Table.Cell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table>
-      <Box marginTop="spacingL">
-        <Pagination
-          activePage={currentPage}
-          onPageChange={setCurrentPage}
-          totalItems={total}
-          itemsPerPage={ITEMS_PER_PAGE}
-        />
-      </Box>
-    </>
+    <ContentTable
+      items={releases}
+      total={total}
+      isFetching={isFetchingReleases}
+      error={fetchingReleasesError}
+      columns={columns}
+      currentPage={currentPage}
+      onPageChange={setCurrentPage}
+      testId="releases-table"
+      errorMessage="Failed to load releases"
+      emptyStateMessage="Releases will appear here when they are scheduled."
+      skeletonColumnCount={6}
+    />
   );
 };

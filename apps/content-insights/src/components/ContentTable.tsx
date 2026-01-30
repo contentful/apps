@@ -6,7 +6,7 @@ import { ErrorDisplay } from './ErrorDisplay';
 
 export interface TableColumn<T> {
   id: string;
-  label: string;
+  label: string | ReactNode;
   style?: React.CSSProperties;
   render: (item: T) => ReactNode;
 }
@@ -22,6 +22,7 @@ export interface ContentTableProps<T> {
   testId?: string;
   skeletonColumnCount?: number;
   errorMessage?: string;
+  emptyStateMessage?: string;
 }
 
 const TableHeader = <T,>({ columns }: { columns: TableColumn<T>[] }) => {
@@ -49,6 +50,7 @@ export function ContentTable<T extends { id: string }>({
   testId,
   skeletonColumnCount,
   errorMessage,
+  emptyStateMessage,
 }: ContentTableProps<T>) {
   if (error) {
     const displayError = errorMessage
@@ -73,7 +75,11 @@ export function ContentTable<T extends { id: string }>({
   }
 
   if (items.length === 0) {
-    return <EmptyState helperText="Data will display once entry activity is available." />;
+    return (
+      <EmptyState
+        helperText={emptyStateMessage || 'Data will display once entry activity is available.'}
+      />
+    );
   }
 
   return (

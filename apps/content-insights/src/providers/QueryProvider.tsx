@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ReactNode } from 'react';
-import { CACHE_CONFIG } from '../utils/cacheConstants';
+import { CACHE_CONFIG } from '../utils/consts';
 
 // Create a QueryClient instance with default options
 const queryClient = new QueryClient({

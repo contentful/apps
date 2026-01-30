@@ -5,14 +5,7 @@ import {
   RECENTLY_PUBLISHED_DAYS_RANGE,
   TIME_TO_PUBLISH_DAYS_RANGE,
 } from '../utils/consts';
-import {
-  parseDate,
-  addDays,
-  subDays,
-  subMonths,
-  isWithin,
-  msPerDay,
-} from '../utils/dateCalculator';
+import { parseDate, addDays, subDays, subMonths, isWithin, msPerDay } from '../utils/dateUtils';
 
 export class MetricsCalculator {
   private readonly entries: ReadonlyArray<EntryProps>;

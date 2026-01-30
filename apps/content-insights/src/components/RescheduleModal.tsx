@@ -4,7 +4,7 @@ import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import type { ReleaseWithScheduledAction } from '../utils/fetchReleases';
 import { Datepicker } from '@contentful/f36-datepicker';
 import { Validator } from '../utils/Validator';
-import { formatTimeTo12Hour, parse12HourTimeToDate } from '../utils/dateFormat';
+import { formatTimeTo12Hour, parse12HourTimeToDate } from '../utils/dateUtils';
 
 interface RescheduleModalProps {
   isShown: boolean;

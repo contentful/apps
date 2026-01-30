@@ -1,6 +1,5 @@
 import { EntryProps, ContentTypeProps } from 'contentful-management';
-import { parseDate, msPerDay } from './dateCalculator';
-import { formatMonthYear, formatMonthYearDisplay } from './dateFormat';
+import { parseDate, msPerDay, formatMonthYear, formatMonthYearDisplay } from './dateUtils';
 import type {
   ChartDataPoint,
   ChartDataSetup,

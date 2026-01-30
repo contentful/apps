@@ -5,7 +5,7 @@ import { useUsers } from './useUsers';
 import type { AppInstallationParameters } from '../locations/ConfigScreen';
 import { ITEMS_PER_PAGE } from '../utils/consts';
 import { getEntryTitle, getUniqueUserIdsFromEntries } from '../utils/EntryUtils';
-import { parseDate, subMonths, msPerDay } from '../utils/dateCalculator';
+import { parseDate, subMonths, msPerDay } from '../utils/dateUtils';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { getCreatorFromEntry } from '../utils/UserUtils';
 import { Creator } from '../utils/types';

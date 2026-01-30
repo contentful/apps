@@ -1,16 +1,15 @@
 import { useState, useMemo } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
-import { styles } from './RecentlyPublishedTable.styles';
+import { recentlyPublishedTableStyles as styles } from './tableStyles';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
-import { formatDateTimeWithTimezone } from '../utils/dateFormat';
+import { formatDateTimeWithTimezone, subDays } from '../utils/dateUtils';
 import { formatUserName } from '../utils/UserUtils';
 import { EntryLink } from './EntryLink';
 import {
   useRecentlyPublishedContent,
   RecentlyPublishedItem,
 } from '../hooks/useRecentlyPublishedContent';
-import { subDays } from '../utils/dateCalculator';
 import type { AppInstallationParameters } from '../locations/ConfigScreen';
 import { ContentTable, TableColumn } from './ContentTable';
 
