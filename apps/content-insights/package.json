@@ -33,8 +33,7 @@
     "add-locations": "contentful-app-scripts add-locations",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id $CONTENTFUL_APP_DEF_ID --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id ${STAGING_APP_ID} --token ${TEST_CMA_TOKEN}",
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5W2Kr6xIwM99vK6BMbKacv --token ${CONTENTFUL_CMA_TOKEN}",
     "generate-entries": "tsx src/scripts/generateEntries.ts",
     "delete-entries": "tsx src/scripts/deleteEntries.ts"
   },
