@@ -16,7 +16,7 @@
     "@dnd-kit/sortable": "^8.0.0",
     "@emotion/css": "^11.13.0",
     "cross-env": "^7.0.3",
-    "eslint": "^8.57.0",
+    "eslint": "^9.26.0",
     "lodash.get": "^4.4.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
