@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { Box, Button, Modal, Paragraph } from '@contentful/f36-components';
 import { EntryToCreate } from '../../../../../../functions/agents/documentParserAgent/schema';
-import { buildEntryTree, flattenTree } from './tree-utils';
-import { TreeRow } from './TreeRow';
+import { buildEntryTree, flattenTree } from './previewTree/tree-utils';
+import { TreeRow } from './previewTree/TreeRow/TreeRow';
 
 export interface PreviewEntry {
   entry: EntryToCreate;

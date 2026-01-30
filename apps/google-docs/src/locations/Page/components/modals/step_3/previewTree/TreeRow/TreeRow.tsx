@@ -1,9 +1,8 @@
 import React from 'react';
 import { Flex } from '@contentful/f36-components';
-import { css } from '@emotion/css';
-import { TreeNode, isLastChild } from './tree-utils';
-import { TreeIndentation } from './TreeIndentation';
-import { EntryCard } from './EntryCard';
+import { TreeNode, isLastChild } from '../tree-utils';
+import { Indentation } from '../Indentation/Indentation';
+import { EntryCard } from '../EntryCard/EntryCard';
 
 interface TreeRowProps {
   node: TreeNode;
@@ -15,7 +14,7 @@ export const TreeRow: React.FC<TreeRowProps> = ({ node, allNodes }) => {
 
   return (
     <Flex marginBottom="spacingS">
-      <TreeIndentation node={node} isLastChild={isLast} allNodes={allNodes} />
+      <Indentation node={node} isLastChild={isLast} allNodes={allNodes} />
       <EntryCard node={node} />
     </Flex>
   );

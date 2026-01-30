@@ -2,7 +2,7 @@ import {
   EntryToCreate,
   isReference,
   isReferenceArray,
-} from '../../../../../../functions/agents/documentParserAgent/schema';
+} from '../../../../../../../functions/agents/documentParserAgent/schema';
 
 export interface TreeNode {
   id: string;
