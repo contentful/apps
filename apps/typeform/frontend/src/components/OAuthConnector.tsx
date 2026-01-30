@@ -61,7 +61,6 @@ export const OAuthConnector: React.FC<Props> = ({
       const { token, expireTime, error } = data;
 
       if (error) {
-        console.error('There was an error authenticating. Please try again.');
         setLoadingState(OAuthLoadingState.IDLE);
       } else if (token) {
         setTokenWithBaseUrl(token, expireTime, baseUrl);

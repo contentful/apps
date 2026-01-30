@@ -56,18 +56,14 @@ app.use('/forms', async (req, res) => {
 });
 
 app.use('/workspaces', async (req, res) => {
-  console.log('Workspaces route hit:', req.method, req.path, req.url);
   const { authorization } = req.headers;
   if (!authorization) {
-    console.log('No authorization header');
     res.sendStatus(401);
     return;
   }
   const [, token] = authorization.split(' ');
   const baseUrl = req.query.baseUrl || 'https://api.typeform.com';
-  console.log('Calling handleWorkspaces with baseUrl:', baseUrl);
   const { status, body } = await handleWorkspaces(req.method, req.path, token, baseUrl, deps);
-  console.log('Workspaces response:', status);
   res.status(status).send(body);
 });
 
@@ -92,7 +88,6 @@ app.all('/callback', async (req, res) => {
       }
     } catch (e) {
       // If state parsing fails, use default
-      console.warn('Failed to parse OAuth state parameter:', e);
     }
   }
 

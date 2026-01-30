@@ -78,20 +78,12 @@ export class AppConfig extends React.Component<Props, State> {
         return;
       }
 
-      // Use window.location.origin to construct the correct URL
-      // This works for both local dev (localhost:3001) and production
-      const origin =
-        process.env.NODE_ENV === 'development' ? 'http://localhost:3001' : window.location.origin;
-      const apiUrl = `${origin}/workspaces?baseUrl=${encodeURIComponent(baseUrl)}`;
-      console.log('Fetching workspaces from:', apiUrl);
-      console.log('With token:', accessToken ? 'present' : 'missing');
+      const apiUrl = `${window.location.origin}/workspaces?baseUrl=${encodeURIComponent(baseUrl)}`;
       const response = await fetch(apiUrl, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
       if (AUTH_ERROR_CODES.includes(response.status)) {
         resetLocalStorage(baseUrl);
@@ -101,7 +93,6 @@ export class AppConfig extends React.Component<Props, State> {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Failed to fetch workspaces:', response.status, errorText);
         if (AUTH_ERROR_CODES.includes(response.status)) {
           resetLocalStorage(baseUrl);
           this.setState({ accessToken: '' });
@@ -113,7 +104,6 @@ export class AppConfig extends React.Component<Props, State> {
       const result: WorkspacesResponse = (await response.json()) as WorkspacesResponse;
       this.setState({ workspaces: this.normalizeWorkspaceResponse(result) });
     } catch (error) {
-      console.error('Error fetching workspaces:', error);
       this.props.sdk.notifier.error(
         'There was a problem fetching your Typeform workspaces. Please try again.'
       );
