@@ -53,8 +53,6 @@ function extractReferences(entry: EntryToCreate): string[] {
 export function buildEntryTree(options: BuildTreeOptions): TreeNode[] {
   const { entries, maxDepth = 4 } = options;
 
-  console.log('🌲 [buildEntryTree] Starting with', entries.length, 'entries, maxDepth:', maxDepth);
-
   // Create entry map for quick lookup
   const entryMap = new Map<
     string,
@@ -73,8 +71,6 @@ export function buildEntryTree(options: BuildTreeOptions): TreeNode[] {
     refs.forEach((ref) => referencedTempIds.add(ref));
   });
 
-  console.log('🎯 Referenced entries:', Array.from(referencedTempIds));
-
   // Build roots: entries not referenced by others OR entries without tempId
   const rootNodes: TreeNode[] = [];
   const processedPaths = new Set<string>();
@@ -83,10 +79,8 @@ export function buildEntryTree(options: BuildTreeOptions): TreeNode[] {
     const isRoot = !item.entry.tempId || !referencedTempIds.has(item.entry.tempId);
 
     if (isRoot) {
-      console.log('🌱 Building root:', item.entry.tempId || 'no-tempId', '-', item.title);
       const node = buildNode(item, entryMap, 0, [], maxDepth, processedPaths);
       if (node) {
-        console.log('  ✅ Root built with', node.children.length, 'children');
         rootNodes.push(node);
       }
     }
@@ -94,18 +88,10 @@ export function buildEntryTree(options: BuildTreeOptions): TreeNode[] {
 
   // Fallback: if all entries are in circular references, use the first one
   if (rootNodes.length === 0 && entries.length > 0) {
-    console.log('⚠️ No roots found (circular graph). Using first entry as root.');
     const node = buildNode(entries[0], entryMap, 0, [], maxDepth, processedPaths);
     if (node) rootNodes.push(node);
   }
 
-  console.log(
-    '🎉 Tree built:',
-    rootNodes.length,
-    'roots,',
-    flattenTree(rootNodes).length,
-    'total nodes'
-  );
   return rootNodes;
 }
 
@@ -124,17 +110,13 @@ function buildNode(
   const nodePath = [...path, nodeId];
   const pathKey = nodePath.join('/');
 
-  console.log(`${'  '.repeat(level)}🔨 [${nodeId}] "${item.title}" at level ${level}`);
-
   // Stop at max depth
   if (level >= maxDepth) {
-    console.log(`${'  '.repeat(level)}   ⛔ Max depth reached`);
     return null;
   }
 
   // Handle circular reference
   if (path.includes(nodeId)) {
-    console.log(`${'  '.repeat(level)}   🔄 Circular reference detected`);
     return {
       id: nodeId,
       tempId: item.entry.tempId,
@@ -152,14 +134,12 @@ function buildNode(
 
   // Avoid processing same path twice
   if (processedPaths.has(pathKey)) {
-    console.log(`${'  '.repeat(level)}   ⏭️ Already processed`);
     return null;
   }
   processedPaths.add(pathKey);
 
   // Build children
   const refs = extractReferences(item.entry);
-  console.log(`${'  '.repeat(level)}   📎 ${refs.length} references`);
 
   const children: TreeNode[] = [];
   refs.forEach((ref) => {
@@ -176,8 +156,6 @@ function buildNode(
       if (childNode) children.push(childNode);
     }
   });
-
-  console.log(`${'  '.repeat(level)}   ✅ Complete: ${children.length} children`);
 
   return {
     id: nodeId,
