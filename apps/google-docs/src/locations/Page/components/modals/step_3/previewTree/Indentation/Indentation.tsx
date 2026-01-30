@@ -5,7 +5,7 @@ import { indentationStyles as styles } from './Indentation.styles';
 
 interface IndentationProps {
   node: TreeNode;
-  isLastChild: boolean;
+  isLeafNode: boolean;
   allNodes: TreeNode[];
 }
 
@@ -37,7 +37,7 @@ function isAncestorLastChild(node: TreeNode, ancestorLevel: number, allNodes: Tr
   return siblings[siblings.length - 1]?.id === ancestor.id;
 }
 
-export const Indentation: React.FC<IndentationProps> = ({ node, isLastChild, allNodes }) => {
+export const Indentation: React.FC<IndentationProps> = ({ node, isLeafNode, allNodes }) => {
   if (node.level === 0) {
     return null;
   }
@@ -64,8 +64,8 @@ export const Indentation: React.FC<IndentationProps> = ({ node, isLastChild, all
       {/* Render the connector for this node */}
       <div
         className={cx(styles.indentation, {
-          [styles.lShaped]: isLastChild,
-          [styles.tShaped]: !isLastChild,
+          [styles.lShaped]: isLeafNode,
+          [styles.tShaped]: !isLeafNode,
         })}
       />
     </>

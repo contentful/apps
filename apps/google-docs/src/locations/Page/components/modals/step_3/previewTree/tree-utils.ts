@@ -18,13 +18,14 @@ export interface TreeNode {
   isCircular?: boolean;
 }
 
+const MAX_TREE_DEPTH = 4;
+
 export interface BuildTreeOptions {
   entries: Array<{
     entry: EntryToCreate;
     title: string;
     contentTypeName: string;
   }>;
-  maxDepth?: number;
 }
 
 /**
@@ -51,7 +52,7 @@ function extractReferences(entry: EntryToCreate): string[] {
  * Entries not referenced by others become roots. Circular references are handled gracefully.
  */
 export function buildEntryTree(options: BuildTreeOptions): TreeNode[] {
-  const { entries, maxDepth = 4 } = options;
+  const { entries } = options;
 
   // Create entry map for quick lookup
   const entryMap = new Map<
@@ -72,7 +73,7 @@ export function buildEntryTree(options: BuildTreeOptions): TreeNode[] {
     const isRoot = !item.entry.tempId;
 
     if (isRoot) {
-      const node = buildNode(item, entryMap, 0, [], maxDepth, processedPaths);
+      const node = buildNode(item, entryMap, 0, [], processedPaths);
       if (node) {
         rootNodes.push(node);
       }
@@ -81,7 +82,7 @@ export function buildEntryTree(options: BuildTreeOptions): TreeNode[] {
 
   // Fallback: if all entries are in circular references, use the first one
   if (rootNodes.length === 0 && entries.length > 0) {
-    const node = buildNode(entries[0], entryMap, 0, [], maxDepth, processedPaths);
+    const node = buildNode(entries[0], entryMap, 0, [], processedPaths);
     if (node) rootNodes.push(node);
   }
 
@@ -96,7 +97,6 @@ function buildNode(
   entryMap: Map<string, { entry: EntryToCreate; title: string; contentTypeName: string }>,
   level: number,
   path: string[],
-  maxDepth: number,
   processedPaths: Set<string>
 ): TreeNode | null {
   const nodeId = item.entry.tempId || `entry_${Math.random()}`;
@@ -104,7 +104,7 @@ function buildNode(
   const pathKey = nodePath.join('/');
 
   // Stop at max depth
-  if (level >= maxDepth) {
+  if (level >= MAX_TREE_DEPTH) {
     return null;
   }
 
@@ -138,14 +138,7 @@ function buildNode(
   refs.forEach((ref) => {
     const childItem = entryMap.get(ref);
     if (childItem) {
-      const childNode = buildNode(
-        childItem,
-        entryMap,
-        level + 1,
-        nodePath,
-        maxDepth,
-        processedPaths
-      );
+      const childNode = buildNode(childItem, entryMap, level + 1, nodePath, processedPaths);
       if (childNode) children.push(childNode);
     }
   });
@@ -182,7 +175,7 @@ export function flattenTree(nodes: TreeNode[]): TreeNode[] {
 /**
  * Check if a node is the last child of its parent
  */
-export function isLastChild(node: TreeNode, allNodes: TreeNode[]): boolean {
+export function isLeafNode(node: TreeNode, allNodes: TreeNode[]): boolean {
   if (node.level === 0) return true;
 
   const parentPath = node.path.slice(0, -1);

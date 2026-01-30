@@ -19,8 +19,6 @@ interface PreviewModalProps {
   isLoading: boolean;
 }
 
-const MAX_DEPTH = 4;
-
 export const PreviewModal = ({
   isOpen,
   onClose,
@@ -36,7 +34,6 @@ export const PreviewModal = ({
 
     const tree = buildEntryTree({
       entries: previewEntries,
-      maxDepth: MAX_DEPTH,
     });
 
     const flat = flattenTree(tree);
