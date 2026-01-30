@@ -22,10 +22,11 @@ const styles = {
     alignSelf: 'center',
     zIndex: 1,
   }),
-  parentCard: css({
+  rootCard: css({
     borderWidth: '2px',
     borderColor: tokens.gray400,
   }),
+
   circularCard: css({
     borderColor: tokens.orange400,
     backgroundColor: tokens.orange100,
@@ -41,7 +42,7 @@ const styles = {
 };
 
 export const EntryCard: React.FC<EntryCardProps> = ({ node }) => {
-  const isParent = node.hasChildren;
+  const isRoot = node.level === 0;
   const isCircular = node.isCircular;
   const truncatedTitle =
     node.title.length > MAX_TITLE_LENGTH
@@ -52,7 +53,7 @@ export const EntryCard: React.FC<EntryCardProps> = ({ node }) => {
     <Box
       className={css(
         styles.card,
-        isParent && !isCircular && styles.parentCard,
+        isRoot && !isCircular && styles.rootCard,
         isCircular && styles.circularCard
       )}>
       <Flex alignItems="center" gap="spacingXs" flexWrap="wrap">
@@ -64,7 +65,7 @@ export const EntryCard: React.FC<EntryCardProps> = ({ node }) => {
           </Tooltip>
         )}
         <Text
-          fontWeight={isParent && !isCircular ? 'fontWeightMedium' : 'fontWeightNormal'}
+          fontWeight={isRoot && !isCircular ? 'fontWeightMedium' : 'fontWeightNormal'}
           fontSize="fontSizeM"
           fontColor="gray900"
           className={styles.title}>
