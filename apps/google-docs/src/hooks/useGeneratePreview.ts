@@ -23,6 +23,12 @@ interface AgentResponse {
   assets: AssetToCreate[];
 }
 
+interface StreamEvent {
+  type: string;
+  delta?: string;
+  [key: string]: unknown;
+}
+
 /**
  * Parse agent response to extract entries and assets to feed the cma create entries step
  */
@@ -70,6 +76,98 @@ const parseAgentResponse = (data: any): AgentResponse => {
 };
 
 /**
+ * Parse a Server-Sent Events (SSE) stream from the Contentful agent.
+ *
+ * The agent stream sends events like:
+ * - { type: 'start' } - Stream starts
+ * - { type: 'text-delta', delta: '...' } - Incremental text content
+ * - { type: 'text-end' } - Text complete
+ * - { type: 'finish' } - Stream ends
+ *
+ * The text-delta events contain the actual JSON response being built incrementally.
+ * We accumulate all deltas to get the complete JSON which has { entries: [], assets: [] }.
+ */
+const parseStreamEvent = async (response: Response): Promise<AgentResponse> => {
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error('Response body is not readable');
+  }
+
+  const decoder = new TextDecoder();
+  let buffer = '';
+  const textDeltas: string[] = [];
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) {
+        break;
+      }
+
+      buffer += decoder.decode(value, { stream: true });
+
+      // Process complete SSE events (separated by double newlines)
+      const events = buffer.split('\n\n');
+      // Keep the last incomplete chunk in the buffer
+      buffer = events.pop() || '';
+
+      for (const event of events) {
+        if (!event.trim()) continue;
+
+        // Parse each line in the event
+        const lines = event.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataContent = line.slice(6); // Remove 'data: ' prefix
+
+            // Check for stream termination signal
+            if (dataContent === '[DONE]') {
+              continue;
+            }
+
+            try {
+              const parsed = JSON.parse(dataContent) as StreamEvent;
+              // Accumulate text-delta events - these contain the actual JSON content
+              if (parsed.type === 'text-delta' && typeof parsed.delta === 'string') {
+                textDeltas.push(parsed.delta);
+              }
+            } catch {
+              // Some data chunks might not be valid JSON, skip them
+              console.warn('Failed to parse SSE data chunk:', dataContent);
+            }
+          }
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  // Combine all text deltas to get the complete JSON response
+  const fullText = textDeltas.join('');
+
+  if (!fullText.trim()) {
+    throw new Error('No text content received from agent stream');
+  }
+
+  // Parse the accumulated JSON - should be { entries: [...], assets: [...] }
+  let parsedResponse: { entries?: EntryToCreate[]; assets?: AssetToCreate[] };
+  try {
+    parsedResponse = JSON.parse(fullText);
+  } catch (parseError) {
+    console.error('[SSE] Failed to parse accumulated text as JSON:', parseError);
+    console.error('[SSE] Raw text:', fullText);
+    throw new Error('Failed to parse agent response as JSON');
+  }
+
+  return {
+    entries: parsedResponse.entries ?? [],
+    assets: parsedResponse.assets ?? [],
+  };
+};
+
+/**
  * Call the agent - uses localhost fetch for dev, CMA SDK for production.
  * We will want to figure out a proper localhost development mechanism but for now we are limited to a direct fetch to the agent.
  */
@@ -80,7 +178,6 @@ const callGoogleDocsAgent = async (
   const { spaceId, environmentId, documentId, contentTypeIds, oauthToken } = params;
   const AGENT_ID = 'google-docs-agent';
   const useLocalDevAgent = true; // Turn to false to use production agents-api
-  let response: any;
 
   const payload = {
     messages: [
@@ -102,8 +199,8 @@ const callGoogleDocsAgent = async (
   };
 
   if (useLocalDevAgent) {
-    response = await fetch(
-      `http://localhost:4111/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${AGENT_ID}/generate`,
+    const response = await fetch(
+      `http://localhost:4111/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${AGENT_ID}/stream`,
       {
         method: 'POST',
         headers: {
@@ -113,20 +210,22 @@ const callGoogleDocsAgent = async (
         body: JSON.stringify(payload),
       }
     );
+
+    if (!response.ok) {
+      throw new Error(
+        `Agent request failed with status ${response.status}: ${response.statusText}`
+      );
+    }
+
+    // Handle SSE stream response - returns AgentResponse directly
+    return await parseStreamEvent(response);
   } else {
-    response = await sdk.cma.agent.generate({ agentId: AGENT_ID, spaceId, environmentId }, payload);
+    const response = await sdk.cma.agent.generate(
+      { agentId: AGENT_ID, spaceId, environmentId },
+      payload
+    );
+    return parseAgentResponse(response);
   }
-
-  const data = await response.text();
-  let parsedData: any;
-  try {
-    parsedData = JSON.parse(data);
-    console.log('parsedData', parsedData);
-  } catch {
-    throw new Error('Failed to parse google docs agent response as JSON');
-  }
-
-  return parseAgentResponse(parsedData);
 };
 
 interface UseGeneratePreviewResult {
