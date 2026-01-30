@@ -75,7 +75,10 @@ const Dashboard = () => {
       {hasError ? (
         <ErrorDisplay error={fetchingEntriesError} />
       ) : isRefreshing ? (
-        <LoadingSkeleton metricsCount={metricsCalculator.getAllMetrics().length} />
+        <LoadingSkeleton
+          metricsCount={metricsCalculator.getAllMetrics().length}
+          showReleasesSection={installation.showUpcomingReleases || false}
+        />
       ) : (
         <>
           <Box>
@@ -118,12 +121,14 @@ const Dashboard = () => {
           </Box>
 
           <Box marginTop="spacingXl">
-            <Box padding="spacingL" style={styles.releasesTableContainer}>
-              <Heading as="h2" marginBottom="spacingM">
-                Upcoming Scheduled Releases
-              </Heading>
-              <ReleasesTable />
-            </Box>
+            {installation.showUpcomingReleases && (
+              <Box padding="spacingL" style={styles.releasesTableContainer}>
+                <Heading as="h2" marginBottom="spacingM">
+                  Upcoming Scheduled Releases
+                </Heading>
+                <ReleasesTable />
+              </Box>
+            )}
           </Box>
           <ScheduledContentTabs
             scheduledActions={scheduledActions}

@@ -1,7 +1,13 @@
 import { Card, Flex, Skeleton, Subheading } from '@contentful/f36-components';
 import { styles } from './LoadingSkeleton.styles';
 
-export const LoadingSkeleton = ({ metricsCount }: { metricsCount: number }) => {
+export const LoadingSkeleton = ({
+  metricsCount,
+  showReleasesSection,
+}: {
+  metricsCount: number;
+  showReleasesSection: boolean;
+}) => {
   return (
     <Flex flexDirection="column" gap="spacingL">
       {/* Metric Cards Section */}
@@ -26,12 +32,14 @@ export const LoadingSkeleton = ({ metricsCount }: { metricsCount: number }) => {
       </Card>
 
       {/* Upcoming Scheduled Releases Section */}
-      <Card padding="default" style={styles.sectionCard}>
-        <Subheading marginBottom="spacing2Xl">Upcoming Scheduled Releases</Subheading>
-        <Skeleton.Container>
-          <Skeleton.Image width="100%" height="100px" />
-        </Skeleton.Container>
-      </Card>
+      {showReleasesSection && (
+        <Card padding="default" style={styles.sectionCard}>
+          <Subheading marginBottom="spacing2Xl">Upcoming Scheduled Releases</Subheading>
+          <Skeleton.Container>
+            <Skeleton.Image width="100%" height="100px" />
+          </Skeleton.Container>
+        </Card>
+      )}
 
       {/* Scheduled Content Section */}
       <Card padding="default" style={styles.sectionCard}>
