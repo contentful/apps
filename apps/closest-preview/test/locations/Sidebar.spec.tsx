@@ -52,7 +52,7 @@ describe('Sidebar component', () => {
 
     expect(link).toHaveAttribute(
       'href',
-      `https://${mockSdk.hostnames.webapp}/spaces/${mockSdk.ids.space}/environments/${mockSdk.ids.environment}/entries/Entry id 1`
+      `https://${mockSdk.hostnames.webapp}/spaces/${mockSdk.ids.space}/environments/${mockSdk.ids.environmentAlias}/entries/Entry id 1`
     );
   });
 });

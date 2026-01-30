@@ -1,13 +1,14 @@
-import { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
-import { EntryConnectedFields, getConfigEntry } from '../utils';
+import { EntryProps, KeyValueMap } from 'contentful-management';
+import { EntryConnectedFields } from '../utils';
 import { Entry } from '../fields/Entry';
 import { FieldsFactory } from '../fields/FieldsFactory';
+import { CMAClient } from '@contentful/app-sdk';
 
 /**
  * Fetches entries from Contentful that have connectedFields.
  */
 export async function fetchBrazeConnectedEntries(
-  cma: PlainClientAPI,
+  cma: CMAClient,
   contentfulApiKey: string,
   spaceId: string,
   environmentId: string,
@@ -20,8 +21,6 @@ export async function fetchBrazeConnectedEntries(
   if (!entryIds.length) return [];
 
   const response = await cma.entry.getMany({
-    spaceId: spaceId,
-    environmentId: environmentId,
     query: {
       'sys.id[in]': entryIds.join(','),
       limit: 25,

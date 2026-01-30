@@ -23,6 +23,12 @@ interface AgentResponse {
   assets: AssetToCreate[];
 }
 
+interface StreamEvent {
+  type: string;
+  delta?: string;
+  [key: string]: unknown;
+}
+
 /**
  * Parse agent response to extract entries and assets to feed the cma create entries step
  */
@@ -57,7 +63,7 @@ const parseAgentResponse = (data: any): AgentResponse => {
     } catch {
       // We do not throw an error here because we want to continue parsing the other parts
       // and other parts may already be valid and correctly parsed
-      console.warn('[parseAgentResponse] Failed to parse part:', { part, text: part.text });
+      console.warn('Failed to parse part:', { part, text: part.text });
     }
   }
 
@@ -67,6 +73,98 @@ const parseAgentResponse = (data: any): AgentResponse => {
   }
 
   return { entries: allEntries, assets: allAssets };
+};
+
+/**
+ * Parse a Server-Sent Events (SSE) stream from the Contentful agent.
+ *
+ * The agent stream sends events like:
+ * - { type: 'start' } - Stream starts
+ * - { type: 'text-delta', delta: '...' } - Incremental text content
+ * - { type: 'text-end' } - Text complete
+ * - { type: 'finish' } - Stream ends
+ *
+ * The text-delta events contain the actual JSON response being built incrementally.
+ * We accumulate all deltas to get the complete JSON which has { entries: [], assets: [] }.
+ */
+const parseStreamEvent = async (response: Response): Promise<AgentResponse> => {
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error('Response body is not readable');
+  }
+
+  const decoder = new TextDecoder();
+  let buffer = '';
+  const textDeltas: string[] = [];
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) {
+        break;
+      }
+
+      buffer += decoder.decode(value, { stream: true });
+
+      // Process complete SSE events (separated by double newlines)
+      const events = buffer.split('\n\n');
+      // Keep the last incomplete chunk in the buffer
+      buffer = events.pop() || '';
+
+      for (const event of events) {
+        if (!event.trim()) continue;
+
+        // Parse each line in the event
+        const lines = event.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataContent = line.slice(6); // Remove 'data: ' prefix
+
+            // Check for stream termination signal
+            if (dataContent === '[DONE]') {
+              continue;
+            }
+
+            try {
+              const parsed = JSON.parse(dataContent) as StreamEvent;
+              // Accumulate text-delta events - these contain the actual JSON content
+              if (parsed.type === 'text-delta' && typeof parsed.delta === 'string') {
+                textDeltas.push(parsed.delta);
+              }
+            } catch {
+              // Some data chunks might not be valid JSON, skip them
+              console.warn('Failed to parse SSE data chunk:', dataContent);
+            }
+          }
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  // Combine all text deltas to get the complete JSON response
+  const fullText = textDeltas.join('');
+
+  if (!fullText.trim()) {
+    throw new Error('No text content received from agent stream');
+  }
+
+  // Parse the accumulated JSON - should be { entries: [...], assets: [...] }
+  let parsedResponse: { entries?: EntryToCreate[]; assets?: AssetToCreate[] };
+  try {
+    parsedResponse = JSON.parse(fullText);
+  } catch (parseError) {
+    console.error('[SSE] Failed to parse accumulated text as JSON:', parseError);
+    console.error('[SSE] Raw text:', fullText);
+    throw new Error('Failed to parse agent response as JSON');
+  }
+
+  return {
+    entries: parsedResponse.entries ?? [],
+    assets: parsedResponse.assets ?? [],
+  };
 };
 
 /**
@@ -80,43 +178,53 @@ const callGoogleDocsAgent = async (
   const { spaceId, environmentId, documentId, contentTypeIds, oauthToken } = params;
   const AGENT_ID = 'google-docs-agent';
   const useLocalDevAgent = true; // Turn to false to use production agents-api
-  let response: any;
+
+  const payload = {
+    messages: [
+      {
+        role: 'user' as const,
+        parts: [
+          {
+            type: 'text' as const,
+            text: `Analyze the following google docs document ${documentId} and extract the Contentful entries and assets for the following content types: ${contentTypeIds} with the following oauth token: ${oauthToken}`,
+          },
+        ],
+      },
+    ],
+    metadata: {
+      documentId,
+      contentTypeIds,
+      oauthToken,
+    },
+  };
+
   if (useLocalDevAgent) {
-    response = await fetch(
-      `http://localhost:4111/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${AGENT_ID}/generate`,
+    const response = await fetch(
+      `http://localhost:4111/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${AGENT_ID}/stream`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-contentful-enable-alpha-feature': 'agents-api',
         },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'user',
-              content: `The documentId is: ${documentId}, the contentTypeIds are: ${contentTypeIds}, and the oauth token is: ${oauthToken}. Here's a JSON stringified version of the params if it helps
-                ${JSON.stringify({ documentId, contentTypeIds, oauthToken })}`,
-            },
-          ],
-        }),
+        body: JSON.stringify(payload),
       }
     );
-  } else {
-    response = await sdk.cma.agent.generate(
-      { agentId: AGENT_ID, spaceId, environmentId },
-      // @ts-expect-error - custom parameters for our agent
-      { documentId, oauthToken, contentTypeIds }
-    );
-  }
 
-  const data = await response.text();
-  try {
-    const parsedData = JSON.parse(data);
-    return parseAgentResponse(parsedData);
-  } catch (error) {
-    console.error('[callGoogleDocsAgent] Failed to parse response:', error);
-    // Graceful fall back state so app doesn't crash but we still know there was an error
-    return { entries: [], assets: [] };
+    if (!response.ok) {
+      throw new Error(
+        `Agent request failed with status ${response.status}: ${response.statusText}`
+      );
+    }
+
+    // Handle SSE stream response - returns AgentResponse directly
+    return await parseStreamEvent(response);
+  } else {
+    const response = await sdk.cma.agent.generate(
+      { agentId: AGENT_ID, spaceId, environmentId },
+      payload
+    );
+    return parseAgentResponse(response);
   }
 };
 
@@ -201,6 +309,10 @@ export const useGeneratePreview = ({
         setPreviewEntries(previewEntriesWithTitles);
         setAssets(agentAssets);
       } catch (err) {
+        console.error(
+          'Error generating preview:',
+          err instanceof Error ? err.message : String(err)
+        );
         setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsSubmitting(false);
