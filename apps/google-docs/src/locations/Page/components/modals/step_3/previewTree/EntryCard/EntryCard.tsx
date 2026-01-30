@@ -20,12 +20,7 @@ export const EntryCard: React.FC<EntryCardProps> = ({ node }) => {
       : node.title;
 
   return (
-    <Box
-      className={css(
-        styles.card,
-        isRoot && !isCircular && styles.rootCard,
-        isCircular && styles.circularCard
-      )}>
+    <Box className={css(styles.card, isRoot && !isCircular && styles.rootCard)}>
       <Flex alignItems="center" gap="spacingXs" flexWrap="wrap">
         {isCircular && (
           <Tooltip

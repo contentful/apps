@@ -17,10 +17,6 @@ export const entryCardStyles = {
     borderColor: tokens.gray400,
   }),
 
-  circularCard: css({
-    borderColor: tokens.orange400,
-    backgroundColor: tokens.orange100,
-  }),
   title: css({
     wordBreak: 'break-word',
     overflow: 'hidden',
