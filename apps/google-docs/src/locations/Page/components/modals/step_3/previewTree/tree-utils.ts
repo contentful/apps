@@ -64,19 +64,12 @@ export function buildEntryTree(options: BuildTreeOptions): TreeNode[] {
     }
   });
 
-  // Find all tempIds that are referenced by other entries
-  const referencedTempIds = new Set<string>();
-  entries.forEach((item) => {
-    const refs = extractReferences(item.entry);
-    refs.forEach((ref) => referencedTempIds.add(ref));
-  });
-
-  // Build roots: entries not referenced by others OR entries without tempId
+  // Build roots: entries without tempId are roots (not referenced by others)
   const rootNodes: TreeNode[] = [];
   const processedPaths = new Set<string>();
 
   entries.forEach((item) => {
-    const isRoot = !item.entry.tempId || !referencedTempIds.has(item.entry.tempId);
+    const isRoot = !item.entry.tempId;
 
     if (isRoot) {
       const node = buildNode(item, entryMap, 0, [], maxDepth, processedPaths);
