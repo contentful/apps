@@ -49,7 +49,7 @@ function extractReferences(entry: EntryToCreate): string[] {
 
 /**
  * Builds a tree structure from flat entry list, respecting references.
- * Entries not referenced by others become roots. Circular references are handled gracefully.
+ * Entries not referenced by others become roots. If circular references detected, shows flat list.
  */
 export function buildEntryTree(options: BuildTreeOptions): TreeNode[] {
   const { entries } = options;
@@ -80,10 +80,20 @@ export function buildEntryTree(options: BuildTreeOptions): TreeNode[] {
     }
   });
 
-  // Fallback: if all entries are in circular references, use the first one
+  // Fallback: if ALL entries contain circular references, show flat list without hierarchy
   if (rootNodes.length === 0 && entries.length > 0) {
-    const node = buildNode(entries[0], entryMap, 0, [], processedPaths);
-    if (node) rootNodes.push(node);
+    return entries.map((item) => ({
+      id: item.entry.tempId || `entry_${Math.random()}`,
+      tempId: item.entry.tempId,
+      contentTypeId: item.entry.contentTypeId,
+      title: item.title,
+      contentTypeName: item.contentTypeName,
+      entry: item.entry,
+      children: [],
+      level: 0,
+      path: [item.entry.tempId || `entry_${Math.random()}`],
+      hasChildren: false,
+    }));
   }
 
   return rootNodes;
