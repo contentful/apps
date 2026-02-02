@@ -4,6 +4,12 @@ import {
   isReferenceArray,
 } from '../../../../../../../functions/agents/documentParserAgent/schema';
 
+export interface PreviewEntry {
+  entry: EntryToCreate;
+  title: string;
+  contentTypeName: string;
+}
+
 export interface TreeNode {
   id: string;
   tempId?: string;
@@ -19,14 +25,6 @@ export interface TreeNode {
 }
 
 const MAX_TREE_DEPTH = 4;
-
-export interface BuildTreeOptions {
-  entries: Array<{
-    entry: EntryToCreate;
-    title: string;
-    contentTypeName: string;
-  }>;
-}
 
 /**
  * Extracts all reference tempIds from an entry's fields
@@ -51,14 +49,9 @@ function extractReferences(entry: EntryToCreate): string[] {
  * Builds a tree structure from flat entry list, respecting references.
  * Entries not referenced by others become roots. If circular references detected, shows flat list.
  */
-export function buildEntryTree(options: BuildTreeOptions): TreeNode[] {
-  const { entries } = options;
-
+export function buildEntryTree(entries: PreviewEntry[]): TreeNode[] {
   // Create entry map for quick lookup
-  const entryMap = new Map<
-    string,
-    { entry: EntryToCreate; title: string; contentTypeName: string }
-  >();
+  const entryMap = new Map<string, PreviewEntry>();
   entries.forEach((item) => {
     if (item.entry.tempId) {
       entryMap.set(item.entry.tempId, item);
@@ -103,8 +96,8 @@ export function buildEntryTree(options: BuildTreeOptions): TreeNode[] {
  * Recursively builds a tree node with its children
  */
 function buildNode(
-  item: { entry: EntryToCreate; title: string; contentTypeName: string },
-  entryMap: Map<string, { entry: EntryToCreate; title: string; contentTypeName: string }>,
+  item: PreviewEntry,
+  entryMap: Map<string, PreviewEntry>,
   level: number,
   path: string[],
   processedPaths: Set<string>

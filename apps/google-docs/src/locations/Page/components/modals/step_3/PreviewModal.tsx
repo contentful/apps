@@ -1,14 +1,7 @@
 import React, { useMemo } from 'react';
 import { Box, Button, Modal, Paragraph } from '@contentful/f36-components';
-import { EntryToCreate } from '../../../../../../functions/agents/documentParserAgent/schema';
-import { buildEntryTree, flattenTree } from './previewTree/tree-utils';
+import { buildEntryTree, flattenTree, PreviewEntry } from './previewTree/tree-utils';
 import { TreeRow } from './previewTree/TreeRow/TreeRow';
-
-export interface PreviewEntry {
-  entry: EntryToCreate;
-  title: string;
-  contentTypeName: string;
-}
 
 interface PreviewModalProps {
   isOpen: boolean;
@@ -32,9 +25,7 @@ export const PreviewModal = ({
       return { treeNodes: [], flatNodes: [] };
     }
 
-    const tree = buildEntryTree({
-      entries: previewEntries,
-    });
+    const tree = buildEntryTree(previewEntries);
 
     const flat = flattenTree(tree);
 
