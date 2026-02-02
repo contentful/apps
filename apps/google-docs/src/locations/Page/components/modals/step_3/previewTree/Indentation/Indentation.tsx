@@ -29,7 +29,9 @@ function isLastChild(node: TreeNode, allNodes: TreeNode[]): boolean {
   return siblings[siblings.length - 1]?.id === node.id;
 }
 
-//Check if an ancestor at a given level is the last child
+/**
+ * Check if an ancestor at a given level is the last child
+ */
 function isAncestorLastChild(node: TreeNode, ancestorLevel: number, allNodes: TreeNode[]): boolean {
   if (ancestorLevel === 0) return true;
 

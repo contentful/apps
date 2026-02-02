@@ -174,16 +174,3 @@ export function flattenTree(nodes: TreeNode[]): TreeNode[] {
   nodes.forEach((node) => traverse(node));
   return result;
 }
-/**
- * Check if a node is the last child of its parent
- */
-export function isLeafNode(node: TreeNode, allNodes: TreeNode[]): boolean {
-  if (node.level === 0) return true;
-
-  const parentPath = node.path.slice(0, -1);
-  const siblings = allNodes.filter(
-    (n) => n.level === node.level && n.path.slice(0, -1).join('/') === parentPath.join('/')
-  );
-
-  return siblings[siblings.length - 1]?.id === node.id;
-}
