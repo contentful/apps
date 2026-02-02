@@ -5,7 +5,6 @@ import { indentationStyles as styles } from './Indentation.styles';
 
 interface IndentationProps {
   node: TreeNode;
-  isLeafNode: boolean;
   allNodes: TreeNode[];
 }
 
@@ -17,8 +16,20 @@ function getAncestorCount(node: TreeNode): number {
 }
 
 /**
- * Check if an ancestor at a given level is the last child
+ * Check if a node is the last child among its siblings
  */
+function isLastChild(node: TreeNode, allNodes: TreeNode[]): boolean {
+  if (node.level === 0) return true;
+
+  const parentPath = node.path.slice(0, -1);
+  const siblings = allNodes.filter(
+    (n) => n.level === node.level && n.path.slice(0, -1).join('/') === parentPath.join('/')
+  );
+
+  return siblings[siblings.length - 1]?.id === node.id;
+}
+
+//Check if an ancestor at a given level is the last child
 function isAncestorLastChild(node: TreeNode, ancestorLevel: number, allNodes: TreeNode[]): boolean {
   if (ancestorLevel === 0) return true;
 
@@ -28,21 +39,16 @@ function isAncestorLastChild(node: TreeNode, ancestorLevel: number, allNodes: Tr
 
   if (!ancestor) return true;
 
-  // Find its parent and siblings
-  const parentPath = ancestor.path.slice(0, -1);
-  const siblings = allNodes.filter(
-    (n) => n.level === ancestor.level && n.path.slice(0, -1).join('/') === parentPath.join('/')
-  );
-
-  return siblings[siblings.length - 1]?.id === ancestor.id;
+  return isLastChild(ancestor, allNodes);
 }
 
-export const Indentation: React.FC<IndentationProps> = ({ node, isLeafNode, allNodes }) => {
+export const Indentation: React.FC<IndentationProps> = ({ node, allNodes }) => {
   if (node.level === 0) {
     return null;
   }
 
   const ancestorCount = getAncestorCount(node);
+  const isLeaf = isLastChild(node, allNodes);
 
   return (
     <>
@@ -64,8 +70,8 @@ export const Indentation: React.FC<IndentationProps> = ({ node, isLeafNode, allN
       {/* Render the connector for this node */}
       <div
         className={cx(styles.indentation, {
-          [styles.lShaped]: isLeafNode,
-          [styles.tShaped]: !isLeafNode,
+          [styles.lShaped]: isLeaf,
+          [styles.tShaped]: !isLeaf,
         })}
       />
     </>

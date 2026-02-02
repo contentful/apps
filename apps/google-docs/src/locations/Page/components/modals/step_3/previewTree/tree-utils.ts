@@ -135,10 +135,10 @@ function buildNode(
   processedPaths.add(pathKey);
 
   // Build children
-  const refs = extractReferences(item.entry);
+  const referenceTempIds = extractReferences(item.entry);
 
   const children: TreeNode[] = [];
-  refs.forEach((ref) => {
+  referenceTempIds.forEach((ref) => {
     const childItem = entryMap.get(ref);
     if (childItem) {
       const childNode = buildNode(childItem, entryMap, level + 1, nodePath, processedPaths);
@@ -174,7 +174,6 @@ export function flattenTree(nodes: TreeNode[]): TreeNode[] {
   nodes.forEach((node) => traverse(node));
   return result;
 }
-
 /**
  * Check if a node is the last child of its parent
  */
