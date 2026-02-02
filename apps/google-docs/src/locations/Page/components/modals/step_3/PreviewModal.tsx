@@ -1,7 +1,6 @@
-import { useMemo } from 'react';
-import { Box, Button, Modal, Paragraph } from '@contentful/f36-components';
-import { buildEntryTree, flattenTree, PreviewEntry } from './previewTree/tree-utils';
-import { TreeRow } from './previewTree/TreeRow/TreeRow';
+import { Button, Modal, Paragraph } from '@contentful/f36-components';
+import { PreviewEntry } from './previewTree/tree-utils';
+import { PreviewTree } from './previewTree/PreviewTree';
 
 interface PreviewModalProps {
   isOpen: boolean;
@@ -20,15 +19,6 @@ export const PreviewModal = ({
   isCreatingEntries,
   isLoading,
 }: PreviewModalProps) => {
-  const treeNodes = useMemo(() => {
-    if (!previewEntries || previewEntries.length === 0) {
-      return [];
-    }
-
-    const tree = buildEntryTree(previewEntries);
-    return flattenTree(tree);
-  }, [previewEntries]);
-
   if (!previewEntries || previewEntries.length === 0) {
     return null;
   }
@@ -55,11 +45,7 @@ export const PreviewModal = ({
               {previewEntries.length === 1 ? 'entry is' : 'entries are'} being suggested:
             </Paragraph>
 
-            <Box marginBottom="spacingM">
-              {treeNodes.map((node, index) => (
-                <TreeRow key={`${node.id}-${index}`} node={node} allNodes={treeNodes} />
-              ))}
-            </Box>
+            <PreviewTree previewEntries={previewEntries} />
           </Modal.Content>
           <Modal.Controls>
             <Button
