@@ -8,6 +8,8 @@
     "@contentful/f36-multiselect": "^5.6.0",
     "@contentful/f36-tokens": "5.1.0",
     "@contentful/react-apps-toolkit": "1.2.16",
+    "@contentful/rich-text-react-renderer": "^16.1.0",
+    "@contentful/rich-text-types": "^16.8.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/user-event": "^14.6.1",
     "contentful-management": "11.60.4",

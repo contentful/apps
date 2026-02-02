@@ -1,34 +1,139 @@
-import { DialogAppSDK } from '@contentful/app-sdk';
-import { Button, Flex, Form } from '@contentful/f36-components';
+import { ContentTypeField, DialogAppSDK } from '@contentful/app-sdk';
+import { Box, Button, Flex, Form, Skeleton } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { useState } from 'react';
+import { ContentTypeProps, EntryProps } from 'contentful-management';
+import { useEffect, useMemo, useState } from 'react';
+import LocaleSelection from '../components/LocaleSelection';
+import PreviewStepComponent from '../components/PreviewStepComponent';
 import { SimplifiedLocale, mapLocaleNamesToSimplifiedLocales } from '../utils/locales';
 import { styles } from './Dialog.styles';
-import LocaleSelection from '../components/LocaleSelection';
+
+type DialogStep = 'locale-selection' | 'preview';
+
+interface InvocationParameters {
+  entryId: string;
+  contentTypeId: string;
+}
 
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
+  const invocationParams = sdk.parameters.invocation as unknown as InvocationParameters;
+
+  const [currentStep, setCurrentStep] = useState<DialogStep>('locale-selection');
+
   const [selectedSourceLocale, setSelectedSourceLocale] = useState<string | null>(null);
   const [selectedTargetLocales, setSelectedTargetLocales] = useState<SimplifiedLocale[]>([]);
   const [missingSourceLocale, setMissingSourceLocale] = useState(false);
   const [missingTargetLocales, setMissingTargetLocales] = useState(false);
 
+  const [entry, setEntry] = useState<EntryProps | null>(null);
+  const [contentType, setContentType] = useState<ContentTypeProps | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [adoptedFields, setAdoptedFields] = useState<Record<string, boolean>>({});
+
   const mappedLocales = mapLocaleNamesToSimplifiedLocales(sdk.locales.names);
 
   useAutoResizer();
 
-  const handlePopulateFields = () => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [fetchedEntry, fetchedContentType] = await Promise.all([
+          sdk.cma.entry.get({ entryId: invocationParams.entryId }),
+          sdk.cma.contentType.get({ contentTypeId: invocationParams.contentTypeId }),
+        ]);
+        setEntry(fetchedEntry);
+        setContentType(fetchedContentType);
+
+        const initialAdoptedFields: Record<string, boolean> = {};
+        (fetchedContentType.fields as ContentTypeField[])
+          .filter((field) => field.localized)
+          .forEach((field) => {
+            initialAdoptedFields[field.id] = true;
+          });
+        setAdoptedFields(initialAdoptedFields);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to load entry data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [
+    invocationParams.entryId,
+    invocationParams.contentTypeId,
+    sdk.cma.entry,
+    sdk.cma.contentType,
+  ]);
+
+  const handleNext = () => {
     if (!selectedSourceLocale || selectedTargetLocales.length === 0) {
       setMissingSourceLocale(!selectedSourceLocale);
       setMissingTargetLocales(selectedTargetLocales.length === 0);
       return;
     }
+    setCurrentStep('preview');
+  };
 
+  const handleBack = () => {
+    setCurrentStep('locale-selection');
+  };
+
+  const handleConfirm = () => {
     sdk.close({
       sourceLocale: selectedSourceLocale,
       targetLocales: selectedTargetLocales.map((locale) => locale.code),
+      adoptedFields,
     });
   };
+
+  const hasAdoptedFields = useMemo(() => {
+    return Object.values(adoptedFields).some((adopted) => adopted);
+  }, [adoptedFields]);
+
+  if (loading) {
+    return (
+      <Form>
+        <Flex
+          flexDirection="column"
+          marginTop="spacingM"
+          marginRight="spacingL"
+          marginLeft="spacingL"
+          marginBottom="spacingM"
+          className={styles.container}>
+          <Skeleton.Container>
+            <Skeleton.BodyText numberOfLines={4} />
+          </Skeleton.Container>
+        </Flex>
+      </Form>
+    );
+  }
+
+  if (error || !entry || !contentType) {
+    return (
+      <Form>
+        <Flex
+          flexDirection="column"
+          marginTop="spacingM"
+          marginRight="spacingL"
+          marginLeft="spacingL"
+          marginBottom="spacingM"
+          className={styles.container}>
+          <Flex flexDirection="column" alignItems="center" gap="spacingM">
+            {error || 'Failed to load entry data'}
+          </Flex>
+          <Flex justifyContent="flex-end" gap="spacingM" marginTop="spacingL">
+            <Button onClick={() => sdk.close()}>Close</Button>
+          </Flex>
+        </Flex>
+      </Form>
+    );
+  }
 
   return (
     <Form>
@@ -40,32 +145,51 @@ const Dialog = () => {
         marginLeft="spacingL"
         marginBottom="spacingM"
         className={styles.container}>
-        <LocaleSelection
-          availableLocales={mappedLocales}
-          selectedSourceLocale={selectedSourceLocale}
-          selectedTargetLocales={selectedTargetLocales}
-          onSourceLocaleChange={(locale) => {
-            setSelectedSourceLocale(locale);
-            setMissingSourceLocale(false);
-          }}
-          onTargetLocalesChange={(locales) => {
-            setSelectedTargetLocales(locales);
-            setMissingTargetLocales(false);
-          }}
-          missingSourceLocale={missingSourceLocale}
-          missingTargetLocales={missingTargetLocales}
-        />
-        <Flex justifyContent="flex-end" gap="spacingM">
-          <Button
-            onClick={() => {
-              sdk.close();
-            }}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={() => handlePopulateFields()}>
-            Populate fields
-          </Button>
-        </Flex>
+        {currentStep === 'locale-selection' && (
+          <Box style={{ marginLeft: '300px', marginRight: '300px' }}>
+            <LocaleSelection
+              availableLocales={mappedLocales}
+              selectedSourceLocale={selectedSourceLocale}
+              selectedTargetLocales={selectedTargetLocales}
+              onSourceLocaleChange={(locale) => {
+                setSelectedSourceLocale(locale);
+                setMissingSourceLocale(false);
+              }}
+              onTargetLocalesChange={(locales) => {
+                setSelectedTargetLocales(locales);
+                setMissingTargetLocales(false);
+              }}
+              missingSourceLocale={missingSourceLocale}
+              missingTargetLocales={missingTargetLocales}
+            />
+            <Flex justifyContent="flex-end" gap="spacingM">
+              <Button onClick={() => sdk.close()}>Cancel</Button>
+              <Button variant="primary" onClick={handleNext}>
+                Next
+              </Button>
+            </Flex>
+          </Box>
+        )}
+
+        {currentStep === 'preview' && selectedSourceLocale && (
+          <>
+            <PreviewStepComponent
+              entry={entry}
+              contentType={contentType}
+              sourceLocale={selectedSourceLocale}
+              targetLocales={selectedTargetLocales}
+              adoptedFields={adoptedFields}
+              onAdoptedFieldsChange={setAdoptedFields}
+              availableLocales={mappedLocales}
+            />
+            <Flex justifyContent="flex-end" gap="spacingM">
+              <Button onClick={handleBack}>Back</Button>
+              <Button variant="primary" onClick={handleConfirm} isDisabled={!hasAdoptedFields}>
+                Confirm
+              </Button>
+            </Flex>
+          </>
+        )}
       </Flex>
     </Form>
   );
