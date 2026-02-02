@@ -1,6 +1,6 @@
 import { Checkbox, Form, Subheading } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import * as React from 'react';
 import { CompatibleFields, ContentType, SelectedFields } from './fields';
 

@@ -1,6 +1,5 @@
 import { ConfigAppSDK, DialogAppSDK, FieldAppSDK, init, locations } from '@contentful/app-sdk';
 import { GlobalStyles } from '@contentful/f36-components';
-import * as React from 'react';
 import { createRoot } from 'react-dom/client';
 
 import AppConfig from './AppConfig/AppConfig';
