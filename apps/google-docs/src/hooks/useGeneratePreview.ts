@@ -5,7 +5,7 @@ import {
   AGENT_ID,
   POLL_INTERVAL_MS,
   MAX_POLL_ATTEMPTS,
-  isLocalDevAgent,
+  USE_LOCAL_AGENTS_API,
 } from '../utils/constants/agent';
 import { PreviewEntry } from '../locations/Page/components/modals/step_3/PreviewModal';
 import { getEntryTitle } from '../utils/getEntryTitle';
@@ -153,7 +153,7 @@ const startAgentRun = (sdk: PageAppSDK, params: AgentCallParams): string => {
 
   const startTime = Date.now();
 
-  if (isLocalDevAgent()) {
+  if (USE_LOCAL_AGENTS_API) {
     fetch(
       `http://localhost:4111/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${AGENT_ID}/generate`,
       {
@@ -198,7 +198,7 @@ const pollAgentRun = async (
 
     let runData: AgentRunData;
 
-    if (isLocalDevAgent()) {
+    if (USE_LOCAL_AGENTS_API) {
       const response = await fetch(
         `http://localhost:4111/spaces/${spaceId}/environments/${environmentId}/ai_agents/runs/${runId}`,
         {
