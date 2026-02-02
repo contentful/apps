@@ -1,0 +1,52 @@
+{
+  "name": "redirect",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@contentful/app-sdk": "4.51.0",
+    "@contentful/f36-components": "5.6.0",
+    "@contentful/f36-tokens": "5.1.0",
+    "@contentful/react-apps-toolkit": "1.2.16",
+    "@testing-library/jest-dom": "^6.9.1",
+    "contentful-management": "11.62.0",
+    "emotion": "10.0.27",
+    "happy-dom": "^20.4.0",
+    "prettier": "^3.6.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build",
+    "test": "vitest",
+    "test:ci": "vitest run",
+    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "add-locations": "contentful-app-scripts add-locations",
+    "upload": "contentful-app-scripts upload --bundle-dir ./build",
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
+    "lint": "eslint . ",
+    "lint:write": "eslint .  --fix",
+    "prettier:write": "prettier --write .",
+    "prettier:check": "prettier --check .",
+    "prettier:list": "prettier -l ."
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "^2.3.0",
+    "@eslint/js": "^9.39.1",
+    "@eslint/json": "1.0.0",
+    "@testing-library/react": "16.3.0",
+    "@types/node": "25.1.0",
+    "@types/react": "18.3.1",
+    "@types/react-dom": "18.3.0",
+    "@vitejs/plugin-react": "5.1.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "globals": "^16.5.0",
+    "jiti": "^2.6.1",
+    "typescript": "5.9.2",
+    "typescript-eslint": "^8.46.3",
+    "vite": "7.2.0",
+    "vitest": "4.0.7"
+  }
+}
