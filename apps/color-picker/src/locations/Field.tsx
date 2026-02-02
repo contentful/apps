@@ -35,7 +35,7 @@ type FieldValue = Color | string | undefined;
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   const [isOpen, setIsOpen] = useState(false);
-  const [value, setValue] = useFieldValue<FieldValue>();
+  const [value, setValue] = useFieldValue<FieldValue>(sdk.field.id, sdk.field.locale);
   const customColorPicker = useRef<HTMLInputElement>(null);
 
   const storeHexValue = sdk.field.type === 'Symbol';
@@ -161,6 +161,7 @@ const Field = () => {
         id="customColor"
         className={styles.displayNone}
         ref={customColorPicker}
+        value={value && typeof value === 'string' ? value : (value as Color)?.value}
       />
     </Form>
   );
