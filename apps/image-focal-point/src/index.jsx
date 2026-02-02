@@ -8,9 +8,7 @@ import './index.css';
 import { AppView } from './components/AppView';
 import { FocalPointView } from './components/FocalPointView';
 import { FocalPointDialog } from './components/FocalPointDialog';
-import { getField, isCompatibleImageField } from './utils';
-
-const IMAGE_FIELD_ID = 'image';
+import { getField, isCompatibleImageField, deriveImageFieldId } from './utils';
 
 export class App extends React.Component {
   static propTypes = {
@@ -57,7 +55,9 @@ export class App extends React.Component {
   };
 
   findProperLocale() {
-    const imageField = this.props.sdk.entry.fields[IMAGE_FIELD_ID];
+    const currentFieldId = this.props.sdk.field.id;
+    const imageFieldId = deriveImageFieldId(currentFieldId);
+    const imageField = this.props.sdk.entry.fields[imageFieldId];
 
     return imageField.locales.includes(this.props.sdk.field.locale)
       ? this.props.sdk.field.locale
@@ -87,7 +87,9 @@ export class App extends React.Component {
     } = this.props;
 
     try {
-      const imageField = entry.fields[IMAGE_FIELD_ID];
+      const currentFieldId = this.props.sdk.field.id;
+      const imageFieldId = deriveImageFieldId(currentFieldId);
+      const imageField = entry.fields[imageFieldId];
       const asset = await space.getAsset(imageField.getValue(this.findProperLocale()).sys.id);
       const file =
         asset.fields.file[this.findProperLocale()] ??
@@ -124,7 +126,9 @@ export class App extends React.Component {
 
   render() {
     const { sdk } = this.props;
-    const imageField = getField(sdk.contentType, IMAGE_FIELD_ID);
+    const currentFieldId = sdk.field.id;
+    const imageFieldId = deriveImageFieldId(currentFieldId);
+    const imageField = getField(sdk.contentType, imageFieldId);
     const isImageField = isCompatibleImageField(imageField);
 
     if (isImageField) {
@@ -139,7 +143,7 @@ export class App extends React.Component {
 
     return (
       <Note variant="negative">
-        Could not find a field of type Asset with the ID &quot;{IMAGE_FIELD_ID}&quot;
+        Could not find a field of type Asset with the ID &quot;{imageFieldId}&quot;
       </Note>
     );
   }
