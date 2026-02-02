@@ -1,14 +1,9 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
-import { callAppActionWithResult } from '../utils/appAction';
 import { ERROR_MESSAGES } from '../utils/constants/messages';
-import { PreviewEntry } from '../locations/Page/components/modals/step_3/PreviewModal';
+import { PreviewEntry } from '../locations/Page/components/modals/step_3/previewTree/tree-utils';
 import { getEntryTitle } from '../utils/getEntryTitle';
-import {
-  EntryToCreate,
-  AssetToCreate,
-  FinalEntriesResult,
-} from '../../functions/agents/documentParserAgent/schema';
+import { EntryToCreate, AssetToCreate } from '../../functions/agents/documentParserAgent/schema';
 
 interface AgentCallParams {
   spaceId: string;
