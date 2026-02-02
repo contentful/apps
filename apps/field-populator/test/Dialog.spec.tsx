@@ -173,7 +173,6 @@ describe('Dialog component', () => {
       expect(screen.getByText('Populate fields')).toBeInTheDocument();
     });
 
-    // Select a source locale first
     const selectButton = screen.getByTestId('source-locale-select');
     await user.click(selectButton);
 
@@ -184,14 +183,11 @@ describe('Dialog component', () => {
     const sourceLocaleOption = screen.getByTestId('select-locale-en-us');
     await user.click(sourceLocaleOption);
 
-    // Initially, "Select target locales" should not appear as a validation message
     expect(screen.queryByText('Select target locales')).not.toBeInTheDocument();
 
-    // Try to populate without selecting target locales
     const populateButton = screen.getByText('Populate fields');
     await user.click(populateButton);
 
-    // After clicking, validation message should appear
     await waitFor(() => {
       expect(screen.getByText('Select target locales')).toBeInTheDocument();
     });

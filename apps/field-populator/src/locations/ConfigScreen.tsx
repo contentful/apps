@@ -42,7 +42,6 @@ const ConfigScreen = () => {
       const contentTypes = await fetchAllContentTypes();
       setAllContentTypes(contentTypes);
 
-      // Restore selected content types from saved state
       const currentState: AppState | null = await sdk.app.getCurrentState();
       if (currentState?.EditorInterface) {
         const selectedIds = Object.keys(currentState.EditorInterface);
@@ -60,17 +59,14 @@ const ConfigScreen = () => {
     const currentState = await sdk.app.getCurrentState();
     const currentEditorInterface = currentState?.EditorInterface || {};
 
-    // Build new EditorInterface with selected content types assigned to sidebar
     const newEditorInterface: AppState['EditorInterface'] = {};
 
-    // Remove content types that are no longer selected
     Object.keys(currentEditorInterface).forEach((contentTypeId) => {
       if (selectedContentTypes.some((ct) => ct.sys.id === contentTypeId)) {
         newEditorInterface[contentTypeId] = currentEditorInterface[contentTypeId];
       }
     });
 
-    // Add newly selected content types to sidebar
     selectedContentTypes.forEach((contentType) => {
       if (!newEditorInterface[contentType.sys.id]) {
         newEditorInterface[contentType.sys.id] = {

@@ -2,7 +2,6 @@ import { ContentTypeField } from '@contentful/app-sdk';
 import { Box, Flex, Text } from '@contentful/f36-components';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import { Document } from '@contentful/rich-text-types';
-import { css } from 'emotion';
 import {
   isAssetArrayField,
   isAssetField,
@@ -27,31 +26,6 @@ interface LinkValue {
   };
 }
 
-const styles = {
-  emptyValue: css({
-    color: '#8091a5',
-    fontStyle: 'italic',
-  }),
-  richTextContent: css({
-    '& p': {
-      marginBottom: '0.5em',
-    },
-    '& p:last-child': {
-      marginBottom: 0,
-    },
-  }),
-  assetGrid: css({
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '8px',
-  }),
-  entryStack: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  }),
-};
-
 const isLinkValue = (value: unknown): value is LinkValue => {
   return (
     typeof value === 'object' &&
@@ -67,26 +41,19 @@ const isLinkArray = (value: unknown): value is LinkValue[] => {
 };
 
 const PreviewField = ({ value, fieldDefinition, locale }: PreviewFieldProps) => {
-  // Handle empty/undefined values
   if (value === undefined || value === null || value === '') {
     return (
       <PreviewBox>
-        <Text className={styles.emptyValue}>(empty)</Text>
+        <Text>(empty)</Text>
       </PreviewBox>
     );
   }
 
-  // Handle Rich Text fields
   if (isRichTextField(fieldDefinition)) {
     const document = value as Document;
-    return (
-      <PreviewBox className={styles.richTextContent}>
-        {documentToReactComponents(document)}
-      </PreviewBox>
-    );
+    return <PreviewBox>{documentToReactComponents(document)}</PreviewBox>;
   }
 
-  // Handle single Asset link
   if (isAssetField(fieldDefinition) && isLinkValue(value)) {
     return (
       <PreviewBox>
@@ -95,23 +62,21 @@ const PreviewField = ({ value, fieldDefinition, locale }: PreviewFieldProps) => 
     );
   }
 
-  // Handle single Entry reference
   if (isEntryField(fieldDefinition) && isLinkValue(value)) {
     return <PreviewBox>Reference</PreviewBox>;
   }
 
-  // Handle Array of Assets
   if (isAssetArrayField(fieldDefinition) && isLinkArray(value)) {
     if (value.length === 0) {
       return (
         <PreviewBox>
-          <Text className={styles.emptyValue}>(empty)</Text>
+          <Text>(empty)</Text>
         </PreviewBox>
       );
     }
     return (
       <PreviewBox>
-        <Flex className={styles.assetGrid}>
+        <Flex gap="spacingXs" flexWrap="wrap">
           {value.map((link) => (
             <CustomAssetCard key={link.sys.id} assetId={link.sys.id} locale={locale} />
           ))}
@@ -120,28 +85,26 @@ const PreviewField = ({ value, fieldDefinition, locale }: PreviewFieldProps) => 
     );
   }
 
-  // Handle Array of Entry references
   if (isEntryArrayField(fieldDefinition) && isLinkArray(value)) {
     if (value.length === 0) {
       return (
         <PreviewBox>
-          <Text className={styles.emptyValue}>(empty)</Text>
+          <Text>(empty)</Text>
         </PreviewBox>
       );
     }
     return (
       <PreviewBox>
-        <Box className={styles.entryStack}>{value.map((link) => 'Reference')}</Box>
+        <Box>{value.map((link) => 'Reference')}</Box>
       </PreviewBox>
     );
   }
 
-  // Handle arrays of primitive values
   if (Array.isArray(value)) {
     if (value.length === 0) {
       return (
         <PreviewBox>
-          <Text className={styles.emptyValue}>(empty)</Text>
+          <Text>(empty)</Text>
         </PreviewBox>
       );
     }
@@ -152,7 +115,6 @@ const PreviewField = ({ value, fieldDefinition, locale }: PreviewFieldProps) => 
     );
   }
 
-  // Handle boolean values
   if (typeof value === 'boolean') {
     return (
       <PreviewBox>
@@ -161,7 +123,6 @@ const PreviewField = ({ value, fieldDefinition, locale }: PreviewFieldProps) => 
     );
   }
 
-  // Handle objects (JSON fields)
   if (typeof value === 'object') {
     return (
       <PreviewBox>
@@ -172,7 +133,6 @@ const PreviewField = ({ value, fieldDefinition, locale }: PreviewFieldProps) => 
     );
   }
 
-  // Handle all other primitive values (strings, numbers, dates)
   return (
     <PreviewBox>
       <Text>{String(value)}</Text>

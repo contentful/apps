@@ -1,26 +1,10 @@
 import { Box, Flex, Heading, Note, Paragraph } from '@contentful/f36-components';
-import { css } from 'emotion';
-import tokens from '@contentful/f36-tokens';
 import { UpdateResult } from '../utils/updateEntry';
+import { styles } from './ConfirmationStepComponent.styles';
 
 interface ConfirmationStepComponentProps {
   result: UpdateResult;
 }
-
-const styles = {
-  container: css({
-    textAlign: 'center',
-    padding: tokens.spacingXl,
-  }),
-  iconSuccess: css({
-    color: tokens.green500,
-    marginBottom: tokens.spacingM,
-  }),
-  iconError: css({
-    color: tokens.red500,
-    marginBottom: tokens.spacingM,
-  }),
-};
 
 const ConfirmationStepComponent = ({ result }: ConfirmationStepComponentProps) => {
   const { success, fieldsUpdated, entriesUpdated, error } = result;

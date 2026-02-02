@@ -10,14 +10,14 @@ import {
   Select,
   Subheading,
   Text,
+  TextInput,
 } from '@contentful/f36-components';
 import { ContentTypeProps, EntryProps } from 'contentful-management';
-import { css } from 'emotion';
 import { useMemo, useState } from 'react';
 import { SimplifiedLocale } from '../utils/locales';
 import PreviewBox from './PreviewBox';
 import PreviewFieldRow from './PreviewFieldRow';
-import tokens from '@contentful/f36-tokens';
+import { styles } from './PreviewStepComponent.styles';
 
 interface PreviewStepComponentProps {
   entry: EntryProps;
@@ -29,22 +29,6 @@ interface PreviewStepComponentProps {
   availableLocales: SimplifiedLocale[];
   isDisabled?: boolean;
 }
-
-const styles = {
-  previewSection: css({
-    border: '1px solid #e5ebed',
-    borderRadius: '6px',
-    padding: '16px',
-    marginBottom: '16px',
-  }),
-  localeList: css({
-    marginTop: '4px',
-    paddingLeft: '16px',
-  }),
-  localeSelectors: css({
-    marginTop: '16px',
-  }),
-};
 
 const PreviewStepComponent = ({
   entry,
@@ -60,23 +44,19 @@ const PreviewStepComponent = ({
     targetLocales[0]?.code || ''
   );
 
-  // Get the source locale name for display
   const sourceLocaleName = useMemo(() => {
     const locale = availableLocales.find((l) => l.code === sourceLocale);
     return locale?.name || sourceLocale;
   }, [availableLocales, sourceLocale]);
 
-  // Get localizable fields only (fields that have values per locale)
   const localizableFields = useMemo(() => {
     return (contentType.fields as ContentTypeField[]).filter((field) => field.localized);
   }, [contentType.fields]);
 
-  // Check if all fields are adopted
   const allFieldsAdopted = useMemo(() => {
     return localizableFields.every((field) => adoptedFields[field.id] === true);
   }, [localizableFields, adoptedFields]);
 
-  // Handle "Adopt all fields" checkbox change
   const handleAdoptAllChange = (checked: boolean) => {
     const newAdoptedFields: Record<string, boolean> = {};
     localizableFields.forEach((field) => {
@@ -85,7 +65,6 @@ const PreviewStepComponent = ({
     onAdoptedFieldsChange(newAdoptedFields);
   };
 
-  // Handle individual field checkbox change
   const handleFieldAdoptedChange = (fieldId: string, adopted: boolean) => {
     onAdoptedFieldsChange({
       ...adoptedFields,
@@ -93,7 +72,6 @@ const PreviewStepComponent = ({
     });
   };
 
-  // Get field value for a specific locale
   const getFieldValue = (fieldId: string, locale: string): unknown => {
     return entry.fields[fieldId]?.[locale];
   };
@@ -125,7 +103,11 @@ const PreviewStepComponent = ({
       </PreviewBox>
 
       {/* Preview Section */}
-      <Box marginTop="spacingXl" className={styles.previewSection}>
+      <Box
+        marginTop="spacingXl"
+        marginBottom="spacingM"
+        padding="spacingM"
+        className={styles.previewSection}>
         <Flex justifyContent="space-between" alignItems="flex-start">
           <Box>
             <Subheading marginBottom="spacing2Xs">Preview changes</Subheading>
@@ -143,17 +125,15 @@ const PreviewStepComponent = ({
         </Flex>
 
         {/* Locale Selectors */}
-        <Flex gap="spacingM" className={styles.localeSelectors}>
+        <Flex gap="spacingM" marginTop="spacingM">
           <Flex flexGrow={1} flexBasis="0">
             <FormControl style={{ width: '100%' }}>
               <FormControl.Label>Source locale</FormControl.Label>
-              <Select
+              <TextInput
                 id="preview-source-locale"
                 name="preview-source-locale"
-                value={sourceLocale}
-                isDisabled>
-                <Select.Option value={sourceLocale}>{sourceLocaleName}</Select.Option>
-              </Select>
+                value={sourceLocaleName}
+                isDisabled></TextInput>
             </FormControl>
           </Flex>
           <Flex flexGrow={1} flexBasis="0">
@@ -182,10 +162,7 @@ const PreviewStepComponent = ({
               marginBottom="spacingM"
               paddingLeft="spacingM"
               paddingRight="spacingM"
-              className={css({
-                border: `1px solid ${tokens.gray300}`,
-                borderRadius: tokens.borderRadiusSmall,
-              })}>
+              className={styles.fieldBox}>
               <PreviewFieldRow
                 field={field}
                 sourceValue={getFieldValue(field.id, sourceLocale)}

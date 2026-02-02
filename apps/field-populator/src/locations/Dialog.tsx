@@ -39,7 +39,6 @@ const Dialog = () => {
   const [updateResult, setUpdateResult] = useState<UpdateResult | null>(null);
 
   const mappedLocales = mapLocaleNamesToSimplifiedLocales(sdk.locales.names);
-  console.log('mappedLocales', mappedLocales);
 
   useAutoResizer();
 
@@ -201,7 +200,7 @@ const Dialog = () => {
               availableLocales={mappedLocales}
               isDisabled={isUpdating}
             />
-            <Flex justifyContent="flex-end" gap="spacingM">
+            <Flex justifyContent="flex-end" gap="spacingM" className={styles.stickyFooter}>
               <Button onClick={handleBack} isDisabled={isUpdating}>
                 Back
               </Button>

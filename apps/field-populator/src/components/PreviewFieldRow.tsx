@@ -1,19 +1,7 @@
-import { ContentTypeField, DialogAppSDK } from '@contentful/app-sdk';
-import {
-  Box,
-  Caption,
-  Checkbox,
-  Flex,
-  Grid,
-  Paragraph,
-  Text,
-  TextLink,
-} from '@contentful/f36-components';
+import { ContentTypeField } from '@contentful/app-sdk';
+import { Box, Checkbox, Flex, Grid, Paragraph, Text, TextLink } from '@contentful/f36-components';
 import { ArrowSquareOutIcon } from '@contentful/f36-icons';
-import { css } from 'emotion';
 import PreviewField from './PreviewField';
-import tokens from '@contentful/f36-tokens';
-import { useSDK } from '@contentful/react-apps-toolkit';
 
 interface PreviewFieldRowProps {
   field: ContentTypeField;
@@ -26,21 +14,6 @@ interface PreviewFieldRowProps {
   isDisabled?: boolean;
 }
 
-const styles = {
-  row: css({
-    paddingTop: '16px',
-    paddingBottom: '16px',
-  }),
-  header: css({
-    marginBottom: '12px',
-  }),
-  fieldName: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-  }),
-};
-
 const PreviewFieldRow = ({
   field,
   sourceValue,
@@ -52,9 +25,9 @@ const PreviewFieldRow = ({
   isDisabled = false,
 }: PreviewFieldRowProps) => {
   return (
-    <Box className={styles.row}>
-      <Flex justifyContent="space-between" alignItems="center" className={styles.header}>
-        <Box marginBottom="spacingM" className={styles.fieldName}>
+    <Box paddingTop="spacingM" paddingBottom="spacingM">
+      <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingS">
+        <Box marginBottom="spacingM">
           <TextLink
             href={''}
             target="_blank"

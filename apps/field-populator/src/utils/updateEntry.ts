@@ -53,7 +53,6 @@ export async function updateEntryFields(
 
       const sourceValue = entry.fields[fieldId]?.[sourceLocale];
 
-      // Set the source value for each target locale
       for (const targetLocale of targetLocales) {
         if (!entry.fields[fieldId]) {
           entry.fields[fieldId] = {};
