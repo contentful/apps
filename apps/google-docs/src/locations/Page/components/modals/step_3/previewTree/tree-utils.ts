@@ -30,19 +30,19 @@ const MAX_TREE_DEPTH = 4;
  * Extracts all reference tempIds from an entry's fields
  */
 function extractReferences(entry: EntryToCreate): string[] {
-  const refs: string[] = [];
+  const referenceTempIds: string[] = [];
 
-  Object.entries(entry.fields).forEach(([fieldName, localizedField]) => {
-    Object.values(localizedField).forEach((value) => {
-      if (isReference(value)) {
-        refs.push(value.__ref);
-      } else if (isReferenceArray(value)) {
-        value.forEach((ref) => refs.push(ref.__ref));
+  Object.values(entry.fields).forEach((localizedField) => {
+    Object.values(localizedField).forEach((fieldValue) => {
+      if (isReference(fieldValue)) {
+        referenceTempIds.push(fieldValue.__ref);
+      } else if (isReferenceArray(fieldValue)) {
+        fieldValue.forEach((ref) => referenceTempIds.push(ref.__ref));
       }
     });
   });
 
-  return refs;
+  return referenceTempIds;
 }
 
 /**

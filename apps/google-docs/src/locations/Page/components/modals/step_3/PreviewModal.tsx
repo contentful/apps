@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Box, Button, Modal, Paragraph } from '@contentful/f36-components';
 import { buildEntryTree, flattenTree, PreviewEntry } from './previewTree/tree-utils';
 import { TreeRow } from './previewTree/TreeRow/TreeRow';
@@ -20,16 +20,13 @@ export const PreviewModal = ({
   isCreatingEntries,
   isLoading,
 }: PreviewModalProps) => {
-  const { treeNodes, flatNodes } = useMemo(() => {
+  const treeNodes = useMemo(() => {
     if (!previewEntries || previewEntries.length === 0) {
-      return { treeNodes: [], flatNodes: [] };
+      return [];
     }
 
     const tree = buildEntryTree(previewEntries);
-
-    const flat = flattenTree(tree);
-
-    return { treeNodes: tree, flatNodes: flat };
+    return flattenTree(tree);
   }, [previewEntries]);
 
   if (!previewEntries || previewEntries.length === 0) {
@@ -59,8 +56,8 @@ export const PreviewModal = ({
             </Paragraph>
 
             <Box marginBottom="spacingM">
-              {flatNodes.map((node, index) => (
-                <TreeRow key={`${node.id}-${index}`} node={node} allNodes={flatNodes} />
+              {treeNodes.map((node, index) => (
+                <TreeRow key={`${node.id}-${index}`} node={node} allNodes={treeNodes} />
               ))}
             </Box>
           </Modal.Content>
