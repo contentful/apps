@@ -7,9 +7,9 @@ import {
   MAX_POLL_ATTEMPTS,
   USE_LOCAL_AGENTS_API,
 } from '../utils/constants/agent';
-import { PreviewEntry } from '../locations/Page/components/modals/step_3/PreviewModal';
 import { getEntryTitle } from '../utils/getEntryTitle';
 import { EntryToCreate, AssetToCreate } from '../../functions/agents/documentParserAgent/schema';
+import { PreviewEntry } from '../locations/Page/components/modals/step_3/previewTree/tree-utils';
 
 interface AgentCallParams {
   spaceId: string;
