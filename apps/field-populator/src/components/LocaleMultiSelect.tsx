@@ -29,6 +29,9 @@ const LocaleMultiSelect: React.FC<LocaleMultiSelectProps> = ({
     return availableLocales.filter((locale) => locale.name.toLowerCase().includes(query));
   }, [availableLocales, searchValue]);
 
+  console.log('availableLocales', availableLocales);
+  console.log('filteredLocales', filteredLocales);
+
   const handleLocaleToggle = (locale: SimplifiedLocale, checked: boolean) => {
     if (checked) {
       onSelectionChange([...selectedLocales, locale]);

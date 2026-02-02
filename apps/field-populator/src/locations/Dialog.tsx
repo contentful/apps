@@ -3,12 +3,14 @@ import { Box, Button, Flex, Form, Skeleton } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { ContentTypeProps, EntryProps } from 'contentful-management';
 import { useEffect, useMemo, useState } from 'react';
+import ConfirmationStepComponent from '../components/ConfirmationStepComponent';
 import LocaleSelection from '../components/LocaleSelection';
 import PreviewStepComponent from '../components/PreviewStepComponent';
 import { SimplifiedLocale, mapLocaleNamesToSimplifiedLocales } from '../utils/locales';
+import { updateEntryFields, UpdateResult } from '../utils/updateEntry';
 import { styles } from './Dialog.styles';
 
-type DialogStep = 'locale-selection' | 'preview';
+type DialogStep = 'locale-selection' | 'preview' | 'confirmation';
 
 interface InvocationParameters {
   entryId: string;
@@ -21,7 +23,7 @@ const Dialog = () => {
 
   const [currentStep, setCurrentStep] = useState<DialogStep>('locale-selection');
 
-  const [selectedSourceLocale, setSelectedSourceLocale] = useState<string | null>(null);
+  const [selectedSourceLocale, setSelectedSourceLocale] = useState<string | undefined>(undefined);
   const [selectedTargetLocales, setSelectedTargetLocales] = useState<SimplifiedLocale[]>([]);
   const [missingSourceLocale, setMissingSourceLocale] = useState(false);
   const [missingTargetLocales, setMissingTargetLocales] = useState(false);
@@ -33,7 +35,11 @@ const Dialog = () => {
 
   const [adoptedFields, setAdoptedFields] = useState<Record<string, boolean>>({});
 
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateResult, setUpdateResult] = useState<UpdateResult | null>(null);
+
   const mappedLocales = mapLocaleNamesToSimplifiedLocales(sdk.locales.names);
+  console.log('mappedLocales', mappedLocales);
 
   useAutoResizer();
 
@@ -84,12 +90,24 @@ const Dialog = () => {
     setCurrentStep('locale-selection');
   };
 
-  const handleConfirm = () => {
-    sdk.close({
-      sourceLocale: selectedSourceLocale,
-      targetLocales: selectedTargetLocales.map((locale) => locale.code),
-      adoptedFields,
-    });
+  const handleConfirm = async () => {
+    if (!selectedSourceLocale || !entry) {
+      return;
+    }
+
+    setIsUpdating(true);
+
+    const result = await updateEntryFields(
+      sdk.cma,
+      invocationParams.entryId,
+      selectedSourceLocale,
+      selectedTargetLocales.map((locale) => locale.code),
+      adoptedFields
+    );
+
+    setUpdateResult(result);
+    setIsUpdating(false);
+    setCurrentStep('confirmation');
   };
 
   const hasAdoptedFields = useMemo(() => {
@@ -181,11 +199,29 @@ const Dialog = () => {
               adoptedFields={adoptedFields}
               onAdoptedFieldsChange={setAdoptedFields}
               availableLocales={mappedLocales}
+              isDisabled={isUpdating}
             />
             <Flex justifyContent="flex-end" gap="spacingM">
-              <Button onClick={handleBack}>Back</Button>
-              <Button variant="primary" onClick={handleConfirm} isDisabled={!hasAdoptedFields}>
+              <Button onClick={handleBack} isDisabled={isUpdating}>
+                Back
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleConfirm}
+                isDisabled={!hasAdoptedFields || isUpdating}
+                isLoading={isUpdating}>
                 Confirm
+              </Button>
+            </Flex>
+          </>
+        )}
+
+        {currentStep === 'confirmation' && updateResult && (
+          <>
+            <ConfirmationStepComponent result={updateResult} />
+            <Flex justifyContent="flex-end" gap="spacingM">
+              <Button variant="primary" onClick={() => sdk.close()}>
+                Done
               </Button>
             </Flex>
           </>

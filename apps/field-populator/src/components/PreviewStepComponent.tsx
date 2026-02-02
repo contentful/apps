@@ -27,6 +27,7 @@ interface PreviewStepComponentProps {
   adoptedFields: Record<string, boolean>;
   onAdoptedFieldsChange: (adoptedFields: Record<string, boolean>) => void;
   availableLocales: SimplifiedLocale[];
+  isDisabled?: boolean;
 }
 
 const styles = {
@@ -53,6 +54,7 @@ const PreviewStepComponent = ({
   adoptedFields,
   onAdoptedFieldsChange,
   availableLocales,
+  isDisabled = false,
 }: PreviewStepComponentProps) => {
   const [selectedTargetLocale, setSelectedTargetLocale] = useState<string>(
     targetLocales[0]?.code || ''
@@ -134,7 +136,8 @@ const PreviewStepComponent = ({
           </Box>
           <Checkbox
             isChecked={allFieldsAdopted}
-            onChange={(e) => handleAdoptAllChange(e.target.checked)}>
+            onChange={(e) => handleAdoptAllChange(e.target.checked)}
+            isDisabled={isDisabled}>
             Adopt all fields
           </Checkbox>
         </Flex>
@@ -191,6 +194,7 @@ const PreviewStepComponent = ({
                 targetLocale={selectedTargetLocale}
                 isAdopted={adoptedFields[field.id] ?? true}
                 onAdoptedChange={(adopted) => handleFieldAdoptedChange(field.id, adopted)}
+                isDisabled={isDisabled}
               />
             </Box>
           ))}

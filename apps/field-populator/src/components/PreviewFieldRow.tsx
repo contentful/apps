@@ -23,6 +23,7 @@ interface PreviewFieldRowProps {
   targetLocale: string;
   isAdopted: boolean;
   onAdoptedChange: (adopted: boolean) => void;
+  isDisabled?: boolean;
 }
 
 const styles = {
@@ -48,6 +49,7 @@ const PreviewFieldRow = ({
   targetLocale,
   isAdopted,
   onAdoptedChange,
+  isDisabled = false,
 }: PreviewFieldRowProps) => {
   return (
     <Box className={styles.row}>
@@ -64,7 +66,10 @@ const PreviewFieldRow = ({
             </Text>
           </TextLink>
         </Box>
-        <Checkbox isChecked={isAdopted} onChange={(e) => onAdoptedChange(e.target.checked)}>
+        <Checkbox
+          isChecked={isAdopted}
+          onChange={(e) => onAdoptedChange(e.target.checked)}
+          isDisabled={isDisabled}>
           Adopt this field
         </Checkbox>
       </Flex>

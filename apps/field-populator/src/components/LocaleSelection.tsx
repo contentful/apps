@@ -1,11 +1,11 @@
 import { Flex, Subheading, FormControl, Select } from '@contentful/f36-components';
 import { isSameLocaleFamily, normalizeLocaleCode, SimplifiedLocale } from '../utils/locales';
 import LocaleMultiSelect from './LocaleMultiSelect';
-import { useState } from 'react';
+import { useMemo } from 'react';
 
 interface LocaleSelectionProps {
   availableLocales: SimplifiedLocale[];
-  selectedSourceLocale: string | null;
+  selectedSourceLocale: string | undefined;
   selectedTargetLocales: SimplifiedLocale[];
   onSourceLocaleChange: (locale: string) => void;
   onTargetLocalesChange: (locales: SimplifiedLocale[]) => void;
@@ -22,21 +22,24 @@ const LocaleSelection = ({
   missingSourceLocale,
   missingTargetLocales,
 }: LocaleSelectionProps) => {
-  const [availableTargetLocales, setAvailableTargetLocales] = useState<SimplifiedLocale[]>([]);
+  const availableTargetLocales: SimplifiedLocale[] = useMemo(() => {
+    if (!selectedSourceLocale) {
+      return availableLocales;
+    }
+    return availableLocales.filter(
+      (locale) =>
+        selectedSourceLocale !== locale.code &&
+        isSameLocaleFamily(selectedSourceLocale, locale.code)
+    );
+  }, [availableLocales, selectedSourceLocale]);
 
   const onSourceLocaleSelected = (newSourceLocale: string) => {
-    const newAvailableTargetLocales = availableLocales.filter(
-      (targetLocale) =>
-        newSourceLocale !== targetLocale.code &&
-        isSameLocaleFamily(newSourceLocale, targetLocale.code)
-    );
     const newSelectedTargetLocales = selectedTargetLocales.filter((locale) =>
       isSameLocaleFamily(newSourceLocale, locale.code)
     );
 
     onSourceLocaleChange(newSourceLocale);
     onTargetLocalesChange(newSelectedTargetLocales);
-    setAvailableTargetLocales(newAvailableTargetLocales);
   };
 
   return (
@@ -48,6 +51,7 @@ const LocaleSelection = ({
           id="source-locale"
           name="source-locale"
           testId="source-locale-select"
+          value={selectedSourceLocale}
           onChange={(event) => onSourceLocaleSelected(event.target.value)}>
           {!selectedSourceLocale && (
             <Select.Option key={`select-locale-empty`} value={undefined}>
