@@ -231,6 +231,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           isOpen={isSubmitting}
           step="reviewingContentTypes"
           title="Preparing your preview"
+          contentTypeCount={selectedContentTypes.length}
         />
 
         <PreviewModal
