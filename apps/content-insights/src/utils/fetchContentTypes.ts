@@ -1,4 +1,4 @@
-import { PageAppSDK } from '@contentful/app-sdk';
+import { BaseAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
 
 export interface FetchContentTypesResult {
@@ -7,7 +7,7 @@ export interface FetchContentTypesResult {
 }
 
 export async function fetchContentTypes(
-  sdk: PageAppSDK,
+  sdk: BaseAppSDK,
   contentTypeIds?: string[]
 ): Promise<FetchContentTypesResult> {
   const allContentTypes: ContentTypeProps[] = [];

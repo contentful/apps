@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Stack, Pill } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
-import { ContentTypeProps } from 'contentful-management';
 import { ConfigAppSDK } from '@contentful/app-sdk';
+import { fetchContentTypes } from '../utils/fetchContentTypes';
 
 export interface ContentType {
   id: string;
@@ -44,35 +44,11 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
     setFilteredItems(newFilteredItems);
   };
 
-  const fetchAllContentTypes = async (): Promise<ContentTypeProps[]> => {
-    let allContentTypes: ContentTypeProps[] = [];
-    let skip = 0;
-    const limit = 1000;
-    let areMoreContentTypes = true;
-
-    while (areMoreContentTypes) {
-      const response = await sdk.cma.contentType.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
-        query: { skip, limit },
-      });
-      if (response.items) {
-        allContentTypes = allContentTypes.concat(response.items as ContentTypeProps[]);
-        areMoreContentTypes = response.items.length === limit;
-      } else {
-        areMoreContentTypes = false;
-      }
-      skip += limit;
-    }
-
-    return allContentTypes;
-  };
-
   useEffect(() => {
     (async () => {
-      const allContentTypes = await fetchAllContentTypes();
+      const { contentTypes } = await fetchContentTypes(sdk);
 
-      const newAvailableContentTypes = allContentTypes
+      const newAvailableContentTypes = Array.from(contentTypes.values())
         .map((ct) => ({
           id: ct.sys.id,
           name: ct.name,
