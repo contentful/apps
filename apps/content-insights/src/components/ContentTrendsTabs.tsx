@@ -270,26 +270,24 @@ const CreatorMultiSelect: React.FC<CreatorMultiSelectProps> = ({
   const isAtMax = selectedCreators.length >= 5;
 
   return (
-    <>
-      <Multiselect placeholder={getPlaceholderText()}>
-        {allCreators.map((creator) => {
-          const isSelected = selectedCreators.includes(creator);
-          const isDisabled = !isSelected && isAtMax;
+    <Multiselect placeholder={getPlaceholderText()}>
+      {allCreators.map((creator) => {
+        const isSelected = selectedCreators.includes(creator);
+        const isDisabled = !isSelected && isAtMax;
 
-          return (
-            <Multiselect.Option
-              key={creator}
-              value={creator}
-              itemId={creator}
-              isChecked={isSelected}
-              isDisabled={isDisabled}
-              onSelectItem={(e) => handleSelect(creator, e.target.checked)}>
-              {creator}
-            </Multiselect.Option>
-          );
-        })}
-      </Multiselect>
-    </>
+        return (
+          <Multiselect.Option
+            key={creator}
+            value={creator}
+            itemId={creator}
+            isChecked={isSelected}
+            isDisabled={isDisabled}
+            onSelectItem={(e) => handleSelect(creator, e.target.checked)}>
+            {creator}
+          </Multiselect.Option>
+        );
+      })}
+    </Multiselect>
   );
 };
 
