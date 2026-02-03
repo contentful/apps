@@ -59,7 +59,7 @@ const valueToString = (value: unknown): string | null => {
 const PreviewField = ({ value, fieldDefinition, locale, compareValue }: PreviewFieldProps) => {
   const valueStr = valueToString(value);
   const compareValueStr = compareValue === undefined ? null : valueToString(compareValue);
-  const canShowDiff = valueStr !== null && compareValueStr !== null && valueStr !== compareValueStr;
+  const showDiff = valueStr !== null && compareValueStr !== null && valueStr !== compareValueStr;
 
   if (
     value === undefined ||
@@ -76,11 +76,11 @@ const PreviewField = ({ value, fieldDefinition, locale, compareValue }: PreviewF
 
   if (isRichTextField(fieldDefinition)) {
     const document = value as Document;
-    const compareDocument = compareValue as Document | null | undefined;
-    if (canShowDiff) {
+    if (showDiff) {
+      const compareDocument = compareValue as Document | null | undefined;
       return (
         <PreviewBox>
-          <RichTextDiff sourceDocument={document} targetDocument={compareDocument} />
+          <RichTextDiff document={document} compareDocument={compareDocument} />
         </PreviewBox>
       );
     }
@@ -120,7 +120,7 @@ const PreviewField = ({ value, fieldDefinition, locale, compareValue }: PreviewF
   }
 
   if (Array.isArray(value)) {
-    if (canShowDiff) {
+    if (showDiff) {
       return (
         <PreviewBox>
           <DiffText sourceText={valueStr} targetText={compareValueStr} />
@@ -135,7 +135,7 @@ const PreviewField = ({ value, fieldDefinition, locale, compareValue }: PreviewF
   }
 
   if (typeof value === 'boolean') {
-    if (canShowDiff) {
+    if (showDiff) {
       return (
         <PreviewBox>
           <DiffText sourceText={valueStr} targetText={compareValueStr} />
@@ -150,7 +150,7 @@ const PreviewField = ({ value, fieldDefinition, locale, compareValue }: PreviewF
   }
 
   if (typeof value === 'object') {
-    if (canShowDiff) {
+    if (showDiff) {
       return (
         <PreviewBox>
           <DiffText sourceText={valueStr} targetText={compareValueStr} preformatted />
@@ -166,7 +166,7 @@ const PreviewField = ({ value, fieldDefinition, locale, compareValue }: PreviewF
     );
   }
 
-  if (canShowDiff) {
+  if (showDiff) {
     return (
       <PreviewBox>
         <DiffText sourceText={valueStr} targetText={compareValueStr} />

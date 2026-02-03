@@ -14,7 +14,7 @@ export interface DiffSegment {
  * @returns Array of segments with type indicating the diff status
  */
 export function computeTextDiff(source: string, target: string): DiffSegment[] {
-  const changes: Change[] = diffWords(target, source);
+  const changes: Change[] = diffWords(source, target);
 
   return changes.map((change) => {
     let type: DiffSegment['type'];

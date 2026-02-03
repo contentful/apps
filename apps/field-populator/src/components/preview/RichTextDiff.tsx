@@ -7,12 +7,12 @@ import DOMPurify from 'dompurify';
 import { styles } from './RichTextDiff.styles';
 
 interface RichTextDiffProps {
-  sourceDocument: Document;
-  targetDocument: Document | null | undefined;
+  document: Document;
+  compareDocument: Document | null | undefined;
 }
 
 /**
- * Creates an empty rich text document for comparison when target is null/undefined
+ * Creates an empty rich text document for comparison when compareDocument is null/undefined
  */
 const createEmptyDocument = (): Document => ({
   nodeType: BLOCKS.DOCUMENT,
@@ -20,21 +20,21 @@ const createEmptyDocument = (): Document => ({
   content: [],
 });
 
-const RichTextDiff = ({ sourceDocument, targetDocument }: RichTextDiffProps) => {
+const RichTextDiff = ({ document, compareDocument }: RichTextDiffProps) => {
   const diffHtml = useMemo(() => {
-    const sourceComponents = documentToReactComponents(sourceDocument);
-    const targetComponents = documentToReactComponents(targetDocument ?? createEmptyDocument());
+    const currentComponents = documentToReactComponents(document);
+    const compareComponents = documentToReactComponents(compareDocument ?? createEmptyDocument());
 
-    const sourceHtml = renderToString(<>{sourceComponents}</>);
-    const targetHtml = renderToString(<>{targetComponents}</>);
+    const currentHtml = renderToString(<>{currentComponents}</>);
+    const compareHtml = renderToString(<>{compareComponents}</>);
 
-    const diff = Diff.execute(targetHtml, sourceHtml, {
+    const diff = Diff.execute(currentHtml, compareHtml, {
       combineWords: true,
       ignoreWhiteSpaceDifferences: false,
     });
 
     return DOMPurify.sanitize(diff);
-  }, [sourceDocument, targetDocument]);
+  }, [document, compareDocument]);
 
   return (
     <div
