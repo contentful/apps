@@ -8,7 +8,6 @@ import {
   Switch,
   Text,
   Paragraph,
-  TextInput,
   Image,
   Select,
   Tooltip,
@@ -27,6 +26,7 @@ import appearanceImage from '../assets/appearance.png';
 import { styles } from './ConfigScreen.styles';
 import { Validator } from '../utils/Validator';
 import { InfoIcon } from '@contentful/f36-icons';
+import TextInputInteger from '../components/TextInputInteger';
 
 export interface AppInstallationParameters {
   defaultContentTypes?: string[];
@@ -107,20 +107,10 @@ const ConfigScreen = () => {
     })();
   }, [sdk]);
 
-  const handleOnChangeInput = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    field: ConfigField
-  ) => {
-    const value = e.target.value;
-    let numValue: number | undefined = parseInt(value, 10);
-
-    if (isNaN(numValue)) {
-      numValue = undefined;
-    }
-
+  const handleIntegerChange = (field: ConfigField) => (value: number | undefined) => {
     setParameters((prev) => ({
       ...prev,
-      [field]: numValue,
+      [field]: value,
     }));
 
     if (errors[field]) {
@@ -173,12 +163,11 @@ const ConfigScreen = () => {
               <FormControl.Label>
                 Content &quot;Needs update&quot; time threshold (months)
               </FormControl.Label>
-              <TextInput
+              <TextInputInteger
                 id="needs-update-months"
                 name="needs-update-months"
-                type="number"
-                value={parameters.needsUpdateMonths ? String(parameters.needsUpdateMonths) : ''}
-                onChange={(event) => handleOnChangeInput(event, ConfigField.NeedsUpdateMonths)}
+                value={parameters.needsUpdateMonths}
+                onChange={handleIntegerChange(ConfigField.NeedsUpdateMonths)}
               />
               {errors.needsUpdateMonths && (
                 <FormControl.ValidationMessage>
@@ -199,14 +188,11 @@ const ConfigScreen = () => {
               <FormControl.Label>
                 &quot;Recently published&quot; time period (days)
               </FormControl.Label>
-              <TextInput
+              <TextInputInteger
                 id="recently-published-days"
                 name="recently-published-days"
-                type="number"
-                value={
-                  parameters.recentlyPublishedDays ? String(parameters.recentlyPublishedDays) : ''
-                }
-                onChange={(event) => handleOnChangeInput(event, ConfigField.RecentlyPublishedDays)}
+                value={parameters.recentlyPublishedDays}
+                onChange={handleIntegerChange(ConfigField.RecentlyPublishedDays)}
               />
               {errors.recentlyPublishedDays && (
                 <FormControl.ValidationMessage>
@@ -222,12 +208,11 @@ const ConfigScreen = () => {
 
             <FormControl marginBottom="spacingL" isRequired isInvalid={!!errors.timeToPublishDays}>
               <FormControl.Label>Time to publish threshold (days)</FormControl.Label>
-              <TextInput
+              <TextInputInteger
                 id="time-to-publish-days"
                 name="time-to-publish-days"
-                type="number"
-                value={parameters.timeToPublishDays ? String(parameters.timeToPublishDays) : ''}
-                onChange={(event) => handleOnChangeInput(event, ConfigField.TimeToPublishDays)}
+                value={parameters.timeToPublishDays}
+                onChange={handleIntegerChange(ConfigField.TimeToPublishDays)}
               />
               {errors.timeToPublishDays && (
                 <FormControl.ValidationMessage>
