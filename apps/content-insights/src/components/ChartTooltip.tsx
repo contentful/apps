@@ -159,7 +159,7 @@ const NewEntriesTooltip: React.FC<{
           {avgTimeToPublishChange !== undefined && (
             <Text
               fontSize="fontSizeM"
-              fontColor={avgTimeToPublishChange >= 0 ? 'green600' : 'red600'}>
+              fontColor={avgTimeToPublishChange >= 0 ? 'red600' : 'green600'}>
               {formatPercentage(avgTimeToPublishChange)} from previous month
             </Text>
           )}
