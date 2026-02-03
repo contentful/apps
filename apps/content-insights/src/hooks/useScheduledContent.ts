@@ -27,7 +27,7 @@ export function useScheduledContent(
   const scheduledEntries = useMemo(
     () =>
       entries.filter((entry) =>
-        scheduledActions.some((action) => action.entity?.sys?.id == entry.sys.id)
+        scheduledActions.some((action) => action.entity.sys.id == entry.sys.id)
       ),
     [entries, scheduledActions]
   );
@@ -45,7 +45,7 @@ export function useScheduledContent(
     const items: ScheduledContentItem[] = [];
 
     scheduledActions.forEach((action) => {
-      const entry = scheduledEntries.find((e) => e.sys.id === action.entity?.sys?.id);
+      const entry = scheduledEntries.find((e) => e.sys.id === action.entity.sys.id);
       if (!entry) return;
 
       const contentType = contentTypes.get(entry.sys.contentType?.sys?.id || '');
@@ -58,8 +58,8 @@ export function useScheduledContent(
         publishedDate: entry.sys.publishedAt || null,
         status: getEntryStatus(entry),
         scheduledFor: {
-          datetime: action.scheduledFor?.datetime || '',
-          timezone: action.scheduledFor?.timezone,
+          datetime: action.scheduledFor.datetime,
+          timezone: action.scheduledFor.timezone,
         },
       });
     });

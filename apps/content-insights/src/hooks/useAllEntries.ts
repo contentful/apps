@@ -28,8 +28,6 @@ export function useAllEntries(): UseAllEntriesResult {
     isFetchingEntries: isFetching,
     fetchingEntriesError: error,
     fetchedAt: data?.fetchedAt,
-    refetchEntries: () => {
-      refetch();
-    },
+    refetchEntries: refetch,
   };
 }
