@@ -21,28 +21,6 @@ vi.mock('@contentful/f36-components', () => ({
   ),
 }));
 
-vi.mock('@contentful/f36-tokens', () => ({
-  default: {
-    colorWhite: '#ffffff',
-    gray100: '#f5f5f5',
-    gray200: '#e0e0e0',
-    gray300: '#d0d0d0',
-    gray600: '#666666',
-    gray700: '#333333',
-    gray900: '#000000',
-    green600: '#00aa00',
-    red600: '#aa0000',
-    borderRadiusMedium: '4px',
-    spacingXs: '8px',
-    spacing2Xs: '4px',
-    spacingS: '12px',
-    spacingM: '16px',
-    fontSizeS: '14px',
-    fontSizeM: '16px',
-    fontWeightDemiBold: '600',
-  },
-}));
-
 describe('ChartTooltip', () => {
   const mockTooltipItems: TooltipPayloadItem[] = [
     { value: 10, name: 'Blog Post', dataKey: 'blogPost', color: '#4A90E2' },

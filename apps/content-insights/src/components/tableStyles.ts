@@ -1,9 +1,10 @@
 import { CSSProperties } from 'react';
+import tokens from '@contentful/f36-tokens';
 
 export const cellWithWidth = (width: string): CSSProperties => ({
   verticalAlign: 'middle',
   width,
-  minWidth: '50px',
+  minWidth: tokens.spacing2Xl,
 });
 
 export const needsUpdateTableStyles = {

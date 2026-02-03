@@ -11,7 +11,7 @@ export const styles = {
     marginRight: tokens.spacingM,
     padding: tokens.spacingL,
     backgroundColor: tokens.colorWhite,
-    borderRadius: '10px',
+    borderRadius: tokens.spacingS,
     boxShadow: `0 6px 16px -2px ${tokens.gray200}, 0 3px 6px -3px ${tokens.gray400}`,
   } as CSSProperties,
   flexGrow: {
@@ -19,7 +19,7 @@ export const styles = {
   } as CSSProperties,
   sectionContainer: {
     border: `1px solid ${tokens.gray300}`,
-    borderRadius: '4px',
+    borderRadius: tokens.spacing2Xs,
     paddingTop: tokens.spacingL,
     paddingRight: tokens.spacingL,
     paddingLeft: tokens.spacingL,
