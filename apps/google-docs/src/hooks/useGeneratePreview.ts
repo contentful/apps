@@ -274,12 +274,6 @@ export const useGeneratePreview = ({
 
   const validateSubmission = useCallback(
     (contentTypeIds: string[]): string | null => {
-      const openAiApiKey = sdk.parameters.installation?.openAiApiKey as string | undefined;
-
-      if (!openAiApiKey || !openAiApiKey.trim()) {
-        return ERROR_MESSAGES.NO_API_KEY;
-      }
-
       if (!documentId || !documentId.trim()) {
         return ERROR_MESSAGES.NO_DOCUMENT;
       }

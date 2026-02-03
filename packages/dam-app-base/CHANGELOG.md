@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0](https://github.com/contentful/apps/compare/@contentful/dam-app-base@3.0.17...@contentful/dam-app-base@4.0.0) (2026-02-02)
+
+- feat(dam-app-base)!: upgrade to React 19 and Forma 36 v5 (#10510) ([232eecf](https://github.com/contentful/apps/commit/232eecf345b0c63861422c55d19a2e0121652da4)), closes [#10510](https://github.com/contentful/apps/issues/10510)
+
+### BREAKING CHANGES
+
+- peer deps now require react/react-dom >=19; Forma 36 v5 and @emotion/css adopted.
+
 ## [3.0.17](https://github.com/contentful/apps/compare/@contentful/dam-app-base@3.0.16...@contentful/dam-app-base@3.0.17) (2025-12-02)
 
 **Note:** Version bump only for package @contentful/dam-app-base
