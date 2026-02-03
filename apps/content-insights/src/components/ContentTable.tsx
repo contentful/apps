@@ -3,6 +3,11 @@ import { Table, Box, Skeleton, Pagination } from '@contentful/f36-components';
 import { ITEMS_PER_PAGE } from '../utils/consts';
 import { EmptyState } from './EmptyState';
 import { ErrorDisplay } from './ErrorDisplay';
+import tokens from '@contentful/f36-tokens';
+
+// Fixed height for table container to prevent layout shift when paginating
+// Header row (~48px) + ITEMS_PER_PAGE rows (~48px each)
+const TABLE_CONTAINER_HEIGHT = `${64 + ITEMS_PER_PAGE * 48}px`;
 
 export interface TableColumn<T> {
   id: string;
@@ -65,12 +70,14 @@ export function ContentTable<T extends { id: string }>({
   if (isFetching) {
     const columnCount = skeletonColumnCount ?? columns.length;
     return (
-      <Table>
-        <TableHeader columns={columns} />
-        <Table.Body testId={testId ? `${testId}-skeleton` : undefined}>
-          <Skeleton.Row rowCount={ITEMS_PER_PAGE} columnCount={columnCount} />
-        </Table.Body>
-      </Table>
+      <Box style={{ minHeight: TABLE_CONTAINER_HEIGHT }}>
+        <Table>
+          <TableHeader columns={columns} />
+          <Table.Body testId={testId ? `${testId}-skeleton` : undefined}>
+            <Skeleton.Row rowCount={ITEMS_PER_PAGE} columnCount={columnCount} />
+          </Table.Body>
+        </Table>
+      </Box>
     );
   }
 
@@ -84,20 +91,22 @@ export function ContentTable<T extends { id: string }>({
 
   return (
     <>
-      <Table>
-        <TableHeader columns={columns} />
-        <Table.Body testId={testId}>
-          {items.map((item) => (
-            <Table.Row key={item.id}>
-              {columns.map((column) => (
-                <Table.Cell key={column.id} style={column.style}>
-                  {column.render(item)}
-                </Table.Cell>
-              ))}
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table>
+      <Box style={{ minHeight: TABLE_CONTAINER_HEIGHT }}>
+        <Table>
+          <TableHeader columns={columns} />
+          <Table.Body testId={testId}>
+            {items.map((item) => (
+              <Table.Row key={item.id}>
+                {columns.map((column) => (
+                  <Table.Cell key={column.id} style={column.style}>
+                    {column.render(item)}
+                  </Table.Cell>
+                ))}
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table>
+      </Box>
       {total > ITEMS_PER_PAGE && (
         <Box marginTop="spacingL">
           <Pagination

@@ -47,6 +47,10 @@ export const ReleasesTableActions = ({
             icon={<DotsThreeIcon color={tokens.gray500} />}
             aria-label="toggle menu"
             size="small"
+            style={{
+              padding: tokens.spacing2Xs,
+              margin: 0,
+            }}
           />
         </Menu.Trigger>
         <Menu.List>
