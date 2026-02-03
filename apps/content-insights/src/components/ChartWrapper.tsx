@@ -42,7 +42,7 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
 
   const colors = useMemo(() => {
     return contentTypesIds.map((_, index) => CHART_COLORS[index % CHART_COLORS.length]);
-  }, [contentTypesIds.length]);
+  }, [contentTypesIds]);
 
   return (
     <Flex flexDirection="row" alignItems="flex-start">
