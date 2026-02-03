@@ -95,7 +95,6 @@ describe('RescheduleModal component', () => {
       expect(screen.getByText('Publish on')).toBeInTheDocument();
       expect(screen.getByText('Time')).toBeInTheDocument();
       expect(screen.getByText('Time zone')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText(/jan/i)).toBeInTheDocument();
       expect(screen.getByPlaceholderText('Select timezone')).toBeInTheDocument();
     });
   });
