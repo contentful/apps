@@ -3,7 +3,7 @@ import { Box, Flex, Text, Tooltip } from '@contentful/f36-components';
 import { RepeatIcon } from '@contentful/f36-icons';
 import { css } from '@emotion/css';
 import { entryCardStyles as styles } from './EntryCard.styles';
-import { TreeNode } from '../tree-utils';
+import { TreeNode } from '../utils/tree-utils';
 
 interface EntryCardProps {
   node: TreeNode;

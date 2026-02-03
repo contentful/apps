@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Box } from '@contentful/f36-components';
-import { PreviewEntry, buildEntryTree, flattenTree } from './tree-utils';
+import { PreviewEntry, flattenTree } from './utils/tree-utils';
+import { buildEntryTree } from './utils/build-tree';
 import { TreeRow } from './TreeRow/TreeRow';
 
 interface PreviewTreeProps {

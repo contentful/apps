@@ -9,7 +9,7 @@ import {
 } from '../utils/constants/agent';
 import { getEntryTitle } from '../utils/getEntryTitle';
 import { EntryToCreate, AssetToCreate } from '../../functions/agents/documentParserAgent/schema';
-import { PreviewEntry } from '../locations/Page/components/modals/step_3/previewTree/tree-utils';
+import { PreviewEntry } from '../locations/Page/components/modals/step_3/previewTree/utils/tree-utils';
 
 interface AgentCallParams {
   spaceId: string;

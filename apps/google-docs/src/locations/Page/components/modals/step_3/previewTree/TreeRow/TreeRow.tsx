@@ -1,6 +1,6 @@
 import React from 'react';
 import { Flex } from '@contentful/f36-components';
-import { TreeNode } from '../tree-utils';
+import { TreeNode } from '../utils/tree-utils';
 import { Indentation } from '../Indentation/Indentation';
 import { EntryCard } from '../EntryCard/EntryCard';
 

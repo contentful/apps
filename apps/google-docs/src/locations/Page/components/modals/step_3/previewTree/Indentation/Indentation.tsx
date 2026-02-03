@@ -1,6 +1,6 @@
 import React from 'react';
 import { cx } from '@emotion/css';
-import { TreeNode } from '../tree-utils';
+import { TreeNode } from '../utils/tree-utils';
 import { indentationStyles as styles } from './Indentation.styles';
 
 interface IndentationProps {

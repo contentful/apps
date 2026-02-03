@@ -1,5 +1,5 @@
 import { Button, Modal, Paragraph } from '@contentful/f36-components';
-import { PreviewEntry } from './previewTree/tree-utils';
+import { PreviewEntry } from './previewTree/utils/tree-utils';
 import { PreviewTree } from './previewTree/PreviewTree';
 
 interface PreviewModalProps {
