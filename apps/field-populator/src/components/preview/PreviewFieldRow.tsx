@@ -52,7 +52,12 @@ const PreviewFieldRow = ({
           <Paragraph marginBottom="spacingXs" fontWeight="fontWeightMedium">
             Source
           </Paragraph>
-          <PreviewField value={sourceValue} fieldDefinition={field} locale={sourceLocale} />
+          <PreviewField
+            value={sourceValue}
+            fieldDefinition={field}
+            locale={sourceLocale}
+            compareValue={targetValue}
+          />
         </Box>
         <Box>
           <Paragraph marginBottom="spacingXs" fontWeight="fontWeightMedium">

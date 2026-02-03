@@ -3,9 +3,9 @@ import { Box, Button, Flex, Form, Skeleton } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { ContentTypeProps, EntryProps } from 'contentful-management';
 import { useEffect, useMemo, useState } from 'react';
-import ConfirmationStepComponent from '../components/ConfirmationStepComponent';
-import LocaleSelection from '../components/LocaleSelection';
-import PreviewStepComponent from '../components/PreviewStepComponent';
+import ConfirmationStep from '../components/steps/ConfirmationStep';
+import LocaleSelectionStep from '../components/steps/LocaleSelectionStep';
+import PreviewStep from '../components/steps/PreviewStep';
 import { SimplifiedLocale, mapLocaleNamesToSimplifiedLocales } from '../utils/locales';
 import { updateEntryFields, UpdateResult } from '../utils/updateEntry';
 import { styles } from './Dialog.styles';
@@ -164,7 +164,7 @@ const Dialog = () => {
         className={styles.container}>
         {currentStep === 'locale-selection' && (
           <Box style={{ marginLeft: '300px', marginRight: '300px' }}>
-            <LocaleSelection
+            <LocaleSelectionStep
               availableLocales={mappedLocales}
               selectedSourceLocale={selectedSourceLocale}
               selectedTargetLocales={selectedTargetLocales}
@@ -190,7 +190,7 @@ const Dialog = () => {
 
         {currentStep === 'preview' && selectedSourceLocale && (
           <>
-            <PreviewStepComponent
+            <PreviewStep
               entry={entry}
               contentType={contentType}
               sourceLocale={selectedSourceLocale}
@@ -217,7 +217,7 @@ const Dialog = () => {
 
         {currentStep === 'confirmation' && updateResult && (
           <>
-            <ConfirmationStepComponent result={updateResult} />
+            <ConfirmationStep result={updateResult} />
             <Flex justifyContent="flex-end" gap="spacingM">
               <Button variant="primary" onClick={() => sdk.close()}>
                 Done

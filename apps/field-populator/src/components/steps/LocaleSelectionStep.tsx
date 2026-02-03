@@ -1,9 +1,9 @@
 import { Flex, Subheading, FormControl, Select } from '@contentful/f36-components';
-import { isSameLocaleFamily, normalizeLocaleCode, SimplifiedLocale } from '../utils/locales';
-import LocaleMultiSelect from './LocaleMultiSelect';
+import { isSameLocaleFamily, normalizeLocaleCode, SimplifiedLocale } from '../../utils/locales';
+import LocaleMultiSelect from '../LocaleMultiSelect';
 import { useMemo } from 'react';
 
-interface LocaleSelectionProps {
+interface LocaleSelectionStepProps {
   availableLocales: SimplifiedLocale[];
   selectedSourceLocale: string | undefined;
   selectedTargetLocales: SimplifiedLocale[];
@@ -13,7 +13,7 @@ interface LocaleSelectionProps {
   missingTargetLocales: boolean;
 }
 
-const LocaleSelection = ({
+const LocaleSelectionStep = ({
   availableLocales,
   selectedSourceLocale,
   selectedTargetLocales,
@@ -21,7 +21,7 @@ const LocaleSelection = ({
   onTargetLocalesChange,
   missingSourceLocale,
   missingTargetLocales,
-}: LocaleSelectionProps) => {
+}: LocaleSelectionStepProps) => {
   const availableTargetLocales: SimplifiedLocale[] = useMemo(() => {
     if (!selectedSourceLocale) {
       return availableLocales;
@@ -94,4 +94,4 @@ const LocaleSelection = ({
   );
 };
 
-export default LocaleSelection;
+export default LocaleSelectionStep;

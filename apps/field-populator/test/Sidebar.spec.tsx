@@ -31,40 +31,15 @@ describe('Sidebar component', () => {
     await user.click(button);
 
     expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledOnce();
-  });
-
-  it('should copy field values from source locale to target locales', async () => {
-    const user = userEvent.setup();
-    const titleGetValue = vi.fn().mockReturnValue('Hello');
-    const titleSetValue = vi.fn();
-    const bodyGetValue = vi.fn().mockReturnValue('World');
-    const bodySetValue = vi.fn();
-
-    mockSdk.entry = {
-      fields: {
-        title: {
-          getValue: titleGetValue,
-          setValue: titleSetValue,
+    expect(mockSdk.dialogs.openCurrentApp).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: APP_NAME,
+        width: 'fullWidth',
+        parameters: {
+          entryId: mockSdk.entry.getSys().id,
+          contentTypeId: mockSdk.contentType.sys.id,
         },
-        body: {
-          getValue: bodyGetValue,
-          setValue: bodySetValue,
-        },
-      },
-    };
-
-    mockSdk.dialogs.openCurrentApp.mockResolvedValue({
-      sourceLocale: 'en-US',
-      targetLocales: ['de', 'fr'],
-    });
-
-    render(<Sidebar />);
-
-    await user.click(screen.getByRole('button', { name: APP_NAME }));
-
-    expect(titleSetValue).toHaveBeenCalledWith('Hello', 'de');
-    expect(titleSetValue).toHaveBeenCalledWith('Hello', 'fr');
-    expect(bodySetValue).toHaveBeenCalledWith('World', 'de');
-    expect(bodySetValue).toHaveBeenCalledWith('World', 'fr');
+      })
+    );
   });
 });

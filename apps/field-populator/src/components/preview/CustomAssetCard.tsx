@@ -1,5 +1,5 @@
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { AssetCard, Badge, Skeleton } from '@contentful/f36-components';
+import { AssetCard, Skeleton } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { AssetProps } from 'contentful-management';
 import { useEffect, useState } from 'react';

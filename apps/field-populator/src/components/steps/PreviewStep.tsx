@@ -14,12 +14,12 @@ import {
 } from '@contentful/f36-components';
 import { ContentTypeProps, EntryProps } from 'contentful-management';
 import { useMemo, useState } from 'react';
-import { SimplifiedLocale } from '../utils/locales';
-import PreviewBox from './PreviewBox';
-import PreviewFieldRow from './PreviewFieldRow';
-import { styles } from './PreviewStepComponent.styles';
+import { SimplifiedLocale } from '../../utils/locales';
+import PreviewBox from '../preview/PreviewBox';
+import PreviewFieldRow from '../preview/PreviewFieldRow';
+import { styles } from './PreviewStep.styles';
 
-interface PreviewStepComponentProps {
+interface PreviewStepProps {
   entry: EntryProps;
   contentType: ContentTypeProps;
   sourceLocale: string;
@@ -39,7 +39,7 @@ const PreviewStepComponent = ({
   onAdoptedFieldsChange,
   availableLocales,
   isDisabled = false,
-}: PreviewStepComponentProps) => {
+}: PreviewStepProps) => {
   const [selectedTargetLocale, setSelectedTargetLocale] = useState<string>(
     targetLocales[0]?.code || ''
   );

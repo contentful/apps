@@ -1,12 +1,12 @@
 import { Box, Flex, Heading, Note, Paragraph } from '@contentful/f36-components';
-import { UpdateResult } from '../utils/updateEntry';
-import { styles } from './ConfirmationStepComponent.styles';
+import { UpdateResult } from '../../utils/updateEntry';
+import { styles } from './ConfirmationStep.styles';
 
-interface ConfirmationStepComponentProps {
+interface ConfirmationStepProps {
   result: UpdateResult;
 }
 
-const ConfirmationStepComponent = ({ result }: ConfirmationStepComponentProps) => {
+const ConfirmationStep = ({ result }: ConfirmationStepProps) => {
   const { success, fieldsUpdated, entriesUpdated, error } = result;
 
   if (success) {
@@ -33,4 +33,4 @@ const ConfirmationStepComponent = ({ result }: ConfirmationStepComponentProps) =
   );
 };
 
-export default ConfirmationStepComponent;
+export default ConfirmationStep;
