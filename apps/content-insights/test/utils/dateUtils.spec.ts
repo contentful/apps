@@ -142,15 +142,14 @@ describe('dateUtils', () => {
   });
 
   describe('formatTimeTo12Hour', () => {
-    it('formats AM and PM times correctly'),
-      () => {
-        const date15min = new Date(2024, 0, 15, 10, 15, 0);
-        const date30min = new Date(2024, 0, 15, 10, 30, 0);
-        const date45min = new Date(2024, 0, 15, 10, 45, 0);
-        expect(formatTimeTo12Hour(date15min.toISOString())).toBe('10:00 AM');
-        expect(formatTimeTo12Hour(date30min.toISOString())).toBe('10:30 AM');
-        expect(formatTimeTo12Hour(date45min.toISOString())).toBe('10:30 AM');
-      };
+    it('formats AM and PM times correctly', () => {
+      const date15min = new Date(2024, 0, 15, 10, 15, 0);
+      const date30min = new Date(2024, 0, 15, 10, 30, 0);
+      const date45min = new Date(2024, 0, 15, 10, 45, 0);
+      expect(formatTimeTo12Hour(date15min.toISOString())).toBe('10:00 AM');
+      expect(formatTimeTo12Hour(date30min.toISOString())).toBe('10:30 AM');
+      expect(formatTimeTo12Hour(date45min.toISOString())).toBe('10:30 AM');
+    });
 
     it('formats noon and midnight correctly', () => {
       const noonDate = new Date(2024, 0, 15, 12, 0, 0);
