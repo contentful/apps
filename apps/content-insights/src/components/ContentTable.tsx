@@ -3,11 +3,7 @@ import { Table, Box, Skeleton, Pagination } from '@contentful/f36-components';
 import { ITEMS_PER_PAGE } from '../utils/consts';
 import { EmptyState } from './EmptyState';
 import { ErrorDisplay } from './ErrorDisplay';
-import tokens from '@contentful/f36-tokens';
-
-// Fixed height for table container to prevent layout shift when paginating
-// Header row (~48px) + ITEMS_PER_PAGE rows (~48px each)
-const TABLE_CONTAINER_HEIGHT = `${64 + ITEMS_PER_PAGE * 48}px`;
+import { tableContainerStyles } from './tableStyles';
 
 export interface TableColumn<T> {
   id: string;
@@ -70,7 +66,7 @@ export function ContentTable<T extends { id: string }>({
   if (isFetching) {
     const columnCount = skeletonColumnCount ?? columns.length;
     return (
-      <Box style={{ minHeight: TABLE_CONTAINER_HEIGHT }}>
+      <Box style={tableContainerStyles}>
         <Table>
           <TableHeader columns={columns} />
           <Table.Body testId={testId ? `${testId}-skeleton` : undefined}>
@@ -91,7 +87,7 @@ export function ContentTable<T extends { id: string }>({
 
   return (
     <>
-      <Box style={{ minHeight: TABLE_CONTAINER_HEIGHT }}>
+      <Box style={tableContainerStyles}>
         <Table>
           <TableHeader columns={columns} />
           <Table.Body testId={testId}>

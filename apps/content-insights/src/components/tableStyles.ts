@@ -1,5 +1,10 @@
 import { CSSProperties } from 'react';
 import tokens from '@contentful/f36-tokens';
+import { ITEMS_PER_PAGE } from '../utils/consts';
+
+export const tableContainerStyles = {
+  minHeight: `${64 + ITEMS_PER_PAGE * 48}px`,
+};
 
 export const cellWithWidth = (width: string, style?: CSSProperties): CSSProperties => ({
   verticalAlign: 'middle',
