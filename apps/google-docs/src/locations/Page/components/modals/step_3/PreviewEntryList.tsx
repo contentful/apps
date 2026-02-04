@@ -1,4 +1,4 @@
-import { Box, Flex, Text, Checkbox } from '@contentful/f36-components';
+import { Box, Flex, Text, Checkbox, Card } from '@contentful/f36-components';
 import { PreviewEntry } from './PreviewModal';
 import tokens from '@contentful/f36-tokens';
 
@@ -45,12 +45,10 @@ export const PreviewEntryList = ({
         const isChecked = selectedIndices.has(index);
 
         return (
-          <Box
+          <Card
             key={index}
+            onClick={() => onToggleEntry(index)}
             style={{
-              border: `1px solid ${tokens.gray300}`,
-              borderRadius: tokens.borderRadiusMedium,
-              padding: tokens.spacingS,
               marginBottom: tokens.spacingS,
             }}>
             <Flex alignItems="center" gap="spacingS">
@@ -58,6 +56,7 @@ export const PreviewEntryList = ({
                 isChecked={isChecked}
                 onChange={() => onToggleEntry(index)}
                 id={`entry-${index}`}
+                onClick={(e) => onToggleEntry(index)}
               />
               <Flex alignItems="center" gap="spacingXs" style={{ flex: 1 }}>
                 <Text fontWeight="fontWeightMedium" fontSize="fontSizeM" fontColor="gray900">
@@ -72,7 +71,7 @@ export const PreviewEntryList = ({
                 </Text>
               </Flex>
             </Flex>
-          </Box>
+          </Card>
         );
       })}
     </Box>
