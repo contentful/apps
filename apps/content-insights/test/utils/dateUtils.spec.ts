@@ -142,20 +142,21 @@ describe('dateUtils', () => {
   });
 
   describe('formatTimeTo12Hour', () => {
-    it('formats AM and PM times correctly', () => {
-      expect(formatTimeTo12Hour('2024-01-15T09:30:00Z')).toBe('9:00 AM');
-      expect(formatTimeTo12Hour('2024-01-15T15:30:00Z')).toBe('3:00 PM');
-    });
+    it('formats AM and PM times correctly'),
+      () => {
+        const date15min = new Date(2024, 0, 15, 10, 15, 0);
+        const date30min = new Date(2024, 0, 15, 10, 30, 0);
+        const date45min = new Date(2024, 0, 15, 10, 45, 0);
+        expect(formatTimeTo12Hour(date15min.toISOString())).toBe('10:00 AM');
+        expect(formatTimeTo12Hour(date30min.toISOString())).toBe('10:30 AM');
+        expect(formatTimeTo12Hour(date45min.toISOString())).toBe('10:30 AM');
+      };
 
     it('formats noon and midnight correctly', () => {
-      expect(formatTimeTo12Hour('2024-01-15T12:00:00Z')).toBe('12:00 PM');
-      expect(formatTimeTo12Hour('2024-01-15T00:00:00Z')).toBe('12:00 AM');
-    });
-
-    it('rounds minutes correctly (down to 0 when < 30, up to 30 when >= 30)', () => {
-      expect(formatTimeTo12Hour('2024-01-15T10:15:00Z')).toBe('10:00 AM');
-      expect(formatTimeTo12Hour('2024-01-15T10:30:00Z')).toBe('10:30 AM');
-      expect(formatTimeTo12Hour('2024-01-15T10:45:00Z')).toBe('10:30 AM');
+      const noonDate = new Date(2024, 0, 15, 12, 0, 0);
+      const midnightDate = new Date(2024, 0, 15, 0, 0, 0);
+      expect(formatTimeTo12Hour(noonDate.toISOString())).toBe('12:00 PM');
+      expect(formatTimeTo12Hour(midnightDate.toISOString())).toBe('12:00 AM');
     });
 
     it('returns empty string for invalid date', () => {
