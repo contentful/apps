@@ -1,5 +1,5 @@
 import { type FC } from 'react';
-import { Stack, Heading, Text, Badge, Flex } from '@contentful/f36-components';
+import { Stack, Heading, Text, Badge, Flex, TextLink } from '@contentful/f36-components';
 
 export const SetupHeader: FC = () => (
   <Stack flexDirection="column" spacing="spacingXs" alignItems="flex-start">
@@ -16,7 +16,16 @@ export const SetupHeader: FC = () => (
         https://mcp.contentful.com
       </Badge>
       <Text fontSize="fontSizeM" marginBottom="none">
-        Here are instructions for specific tools.
+        . Refer to our
+      </Text>
+      <TextLink
+        href="https://www.contentful.com/developers/docs/tools/mcp-server/"
+        target="_blank"
+        rel="noopener noreferrer">
+        MCP documentation
+      </TextLink>
+      <Text fontSize="fontSizeM" marginBottom="none">
+        for platform-specific setup instructions.
       </Text>
     </Flex>
   </Stack>
