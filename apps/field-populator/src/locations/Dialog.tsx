@@ -163,7 +163,7 @@ const Dialog = () => {
         marginBottom="spacingM"
         className={styles.container}>
         {currentStep === 'locale-selection' && (
-          <Box style={{ marginLeft: '300px', marginRight: '300px' }}>
+          <Box>
             <LocaleSelectionStep
               availableLocales={mappedLocales}
               selectedSourceLocale={selectedSourceLocale}

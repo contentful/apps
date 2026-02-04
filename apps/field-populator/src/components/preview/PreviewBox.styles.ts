@@ -6,7 +6,7 @@ export const styles = {
     borderRadius: tokens.borderRadiusMedium,
     border: `1px solid ${tokens.gray300}`,
     background: tokens.gray100,
-    padding: '12px',
+    padding: tokens.spacingS,
     wordBreak: 'break-word',
   }),
 };

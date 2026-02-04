@@ -1,5 +1,5 @@
 import { Text } from '@contentful/f36-components';
-import { computeTextDiff, DiffSegment } from '../../utils/textDiff';
+import { computeTextDiff, DiffSegment, DiffType } from '../../utils/textDiff';
 import { styles } from './DiffText.styles';
 
 interface DiffTextProps {
@@ -12,7 +12,7 @@ const DiffText = ({ sourceText, targetText, preformatted = false }: DiffTextProp
   const segments = computeTextDiff(sourceText, targetText);
 
   const content = segments.map((segment: DiffSegment, index: number) => {
-    if (segment.type === 'added') {
+    if (segment.type === DiffType.Added) {
       return (
         <span key={index} className={styles.added}>
           {segment.text}
@@ -20,7 +20,7 @@ const DiffText = ({ sourceText, targetText, preformatted = false }: DiffTextProp
       );
     }
 
-    if (segment.type === 'removed') {
+    if (segment.type === DiffType.Removed) {
       return (
         <span key={index} className={styles.removed}>
           {segment.text}

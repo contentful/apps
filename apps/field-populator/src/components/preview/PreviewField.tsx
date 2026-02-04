@@ -11,7 +11,7 @@ import {
   isLinkValue,
   isLinkArray,
 } from '../../utils/fieldTypes';
-import CustomAssetCard from './CustomAssetCard';
+import SingleAssetCard from './SingleAssetCard';
 import DiffText from './DiffText';
 import PreviewBox from './PreviewBox';
 import RichTextDiff from './RichTextDiff';
@@ -90,7 +90,7 @@ const PreviewField = ({ value, fieldDefinition, locale, compareValue }: PreviewF
   if (isAssetField(fieldDefinition) && isLinkValue(value)) {
     return (
       <PreviewBox>
-        <CustomAssetCard assetId={value.sys.id} locale={locale} />
+        <SingleAssetCard assetId={value.sys.id} locale={locale} />
       </PreviewBox>
     );
   }
@@ -104,7 +104,7 @@ const PreviewField = ({ value, fieldDefinition, locale, compareValue }: PreviewF
       <PreviewBox>
         <Flex gap="spacingXs" flexWrap="wrap">
           {value.map((link) => (
-            <CustomAssetCard key={link.sys.id} assetId={link.sys.id} locale={locale} />
+            <SingleAssetCard key={link.sys.id} assetId={link.sys.id} locale={locale} />
           ))}
         </Flex>
       </PreviewBox>

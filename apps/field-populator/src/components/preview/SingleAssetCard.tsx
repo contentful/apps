@@ -4,12 +4,12 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { AssetProps } from 'contentful-management';
 import { useEffect, useState } from 'react';
 
-interface CustomAssetCardProps {
+interface SingleAssetCardProps {
   assetId: string;
   locale: string;
 }
 
-const CustomAssetCard = ({ assetId, locale }: CustomAssetCardProps) => {
+const SingleAssetCard = ({ assetId, locale }: SingleAssetCardProps) => {
   const sdk = useSDK<DialogAppSDK>();
   const [asset, setAsset] = useState<AssetProps | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,4 +52,4 @@ const CustomAssetCard = ({ assetId, locale }: CustomAssetCardProps) => {
   return <AssetCard title={title} size="small" src={src} />;
 };
 
-export default CustomAssetCard;
+export default SingleAssetCard;

@@ -2,28 +2,26 @@ import { diffWords, Change } from 'diff';
 
 export interface DiffSegment {
   text: string;
-  type: 'added' | 'removed' | 'unchanged';
+  type: DiffType;
 }
 
-/**
- * Computes word-level diff between source and target strings.
- * Returns segments indicating what text was added, removed, or unchanged.
- *
- * @param source - The source text to compare
- * @param target - The target text to compare against
- * @returns Array of segments with type indicating the diff status
- */
+export enum DiffType {
+  Added = 'added',
+  Removed = 'removed',
+  Unchanged = 'unchanged',
+}
+
 export function computeTextDiff(source: string, target: string): DiffSegment[] {
   const changes: Change[] = diffWords(source, target);
 
   return changes.map((change) => {
     let type: DiffSegment['type'];
     if (change.added) {
-      type = 'added';
+      type = DiffType.Added;
     } else if (change.removed) {
-      type = 'removed';
+      type = DiffType.Removed;
     } else {
-      type = 'unchanged';
+      type = DiffType.Unchanged;
     }
 
     return {
