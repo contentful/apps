@@ -26,7 +26,7 @@ import { styles } from '../components/Agent.styles';
 import { AIChatEmptyState } from '../components/AgentEmptyChat';
 import { useVideoGenerator } from '../hooks/useVideoGenerator';
 import { uploadVideoAsset } from '../lib/contentful-upload';
-import { AGENT_API_BASE_URL } from '../constants';
+import { getAgentStreamUrl } from '../utils/constants/agent';
 
 // Type for tool call arguments
 type FindEntryArgs = { query: string };
@@ -82,14 +82,16 @@ const Agent = () => {
   // Video generator hook
   const { generateVideo } = useVideoGenerator();
 
-  const apiUrl = `${AGENT_API_BASE_URL.replace(/\/$/, '')}/api/agent/stream`;
+  // Build the agents-api streaming URL
+  const apiUrl = getAgentStreamUrl(sdk.ids.space, sdk.ids.environment);
 
   // Handle tool calls from the agent (client-side execution)
+  // Tool names match the IDs defined in agents-api elevenlabs-agent
   const handleToolCall = useCallback(
     async (toolInvocation: AgentToolCall): Promise<string> => {
       const { toolName, args } = toolInvocation;
 
-      if (toolName === 'find_entry') {
+      if (toolName === 'find-entry') {
         setIsClientWorking(true);
         try {
           const { query } = args as FindEntryArgs;
@@ -115,7 +117,7 @@ const Agent = () => {
         }
       }
 
-      if (toolName === 'generate_video') {
+      if (toolName === 'generate-video') {
         setIsClientWorking(true);
         setIsRendering(true);
         try {
@@ -190,23 +192,17 @@ const Agent = () => {
 
   const { messages, append, status, stop } = useChat({
     api: apiUrl,
-    body: {
-      spaceId: sdk.ids.space,
-      environmentId: sdk.ids.environment,
-    },
+    // agents-api stream endpoint uses URL path for spaceId/environmentId
+    // threadId can be passed for conversation continuity
+    body: {},
     maxSteps: 5, // Allow multiple tool calls in a conversation
     async onToolCall({ toolCall }) {
       // Execute tool on client side and return result
       const result = await handleToolCall(toolCall);
       return result;
     },
-    initialMessages: [
-      {
-        id: 'system',
-        role: 'system',
-        content: 'You are Broadcast, an AI audio & video producer agent for Contentful.',
-      },
-    ],
+    // Note: System prompt is defined in agents-api (elevenlabs-agent)
+    // No need for initialMessages here
   });
 
   const isStreaming = status === 'streaming';
