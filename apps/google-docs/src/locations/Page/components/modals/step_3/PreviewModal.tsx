@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Button, Modal, Paragraph } from '@contentful/f36-components';
 import { EntryToCreate } from '../../../../../../functions/agents/documentParserAgent/schema';
 import { PreviewEntryList } from './PreviewEntryList';
@@ -11,7 +12,7 @@ interface PreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   previewEntries: PreviewEntry[];
-  onCreateEntries: (contentTypeIds: string[]) => void;
+  onCreateEntries: (selectedEntries: PreviewEntry[]) => void;
   isCreatingEntries: boolean;
   isLoading: boolean;
 }
@@ -24,6 +25,15 @@ export const PreviewModal = ({
   isCreatingEntries,
   isLoading,
 }: PreviewModalProps) => {
+  const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
+
+  // Select all entries by default
+  useEffect(() => {
+    if (previewEntries.length > 0) {
+      setSelectedIndices(new Set(previewEntries.map((_, index) => index)));
+    }
+  }, [previewEntries]);
+
   if (!previewEntries || previewEntries.length === 0) {
     return null;
   }
@@ -33,6 +43,32 @@ export const PreviewModal = ({
       onClose();
     }
   };
+
+  const handleToggleEntry = (index: number) => {
+    setSelectedIndices((prev) => {
+      const selected = new Set(prev);
+      if (selected.has(index)) {
+        selected.delete(index);
+      } else {
+        selected.add(index);
+      }
+      return selected;
+    });
+  };
+
+  const handleToggleAll = () => {
+    // Deselect all
+    if (selectedIndices.size === previewEntries.length) setSelectedIndices(new Set());
+    // Select all
+    else setSelectedIndices(new Set(previewEntries.map((_, index) => index)));
+  };
+
+  const handleCreateEntries = () => {
+    const selectedEntries = Array.from(selectedIndices).map((index) => previewEntries[index]);
+    onCreateEntries(selectedEntries);
+  };
+
+  const selectedCount = selectedIndices.size;
 
   return (
     <Modal
@@ -51,7 +87,12 @@ export const PreviewModal = ({
               which entries you would like to create.
             </Paragraph>
 
-            <PreviewEntryList previewEntries={previewEntries} />
+            <PreviewEntryList
+              previewEntries={previewEntries}
+              selectedIndices={selectedIndices}
+              onToggleEntry={handleToggleEntry}
+              onToggleAll={handleToggleAll}
+            />
           </Modal.Content>
           <Modal.Controls>
             <Button
@@ -61,16 +102,14 @@ export const PreviewModal = ({
               Cancel
             </Button>
             <Button
-              onClick={() =>
-                onCreateEntries(previewEntries.map((preview) => preview.entry.contentTypeId))
-              }
+              onClick={handleCreateEntries}
               variant="primary"
-              isDisabled={isLoading || previewEntries.length === 0}>
+              isDisabled={isLoading || selectedCount === 0}>
               {isCreatingEntries
                 ? 'Creating entries...'
-                : previewEntries.length === 1
+                : selectedCount === 1
                 ? 'Create entry'
-                : 'Create entries'}
+                : `Create ${selectedCount} entries`}
             </Button>
           </Modal.Controls>
         </>
