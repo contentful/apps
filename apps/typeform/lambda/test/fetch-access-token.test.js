@@ -9,6 +9,7 @@ describe('auth handler', () => {
       fetchAccessToken(
         'code',
         'http://some-origin',
+        'https://api.typeform.com',
         Object.assign(mocks, {
           fetch: jest.fn().mockResolvedValue({
             status: 500,
