@@ -28,6 +28,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
   ({ sdk, oauthToken }, ref) => {
     const { modalStates, openModal, closeModal } = useModalManagement();
     const [isCreatingEntries, setIsCreatingEntries] = useState<boolean>(false);
+    const [selectedEntriesCount, setSelectedEntriesCount] = useState<number>(0);
     const [createdEntries, setCreatedEntries] = useState<EntryCreationResult['createdEntries']>([]);
     const {
       documentId,
@@ -127,6 +128,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         return;
       }
 
+      setSelectedEntriesCount(selectedEntries.length);
       closeModal(ModalType.PREVIEW);
       setIsCreatingEntries(true);
       try {
@@ -245,7 +247,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           isOpen={isCreatingEntries}
           step="creatingEntries"
           title="Create entries"
-          entriesCount={previewEntries?.length}
+          entriesCount={selectedEntriesCount}
         />
 
         <ErrorModal
