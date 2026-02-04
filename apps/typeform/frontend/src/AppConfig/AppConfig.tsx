@@ -19,6 +19,7 @@ import { OAuthConnector } from '../components/OAuthConnector';
 import { InstallationParameters, WorkspaceOption, WorkspacesResponse } from '../typings';
 import { validateParameters, getToken, resetLocalStorage } from '../utils';
 import { styles } from './styles';
+import { BASE_URL } from '../constants';
 
 const AUTH_ERROR_CODES = [401, 403];
 
@@ -40,7 +41,7 @@ export class AppConfig extends React.Component<Props, State> {
     workspaces: [],
     selectedContentTypes: [],
     selectedWorkspaceId: '',
-    baseUrl: 'https://api.typeform.com',
+    baseUrl: BASE_URL,
     accessToken: getToken(),
   };
 
@@ -51,7 +52,7 @@ export class AppConfig extends React.Component<Props, State> {
 
     const paramsResponse = await sdk.app.getParameters();
     const parameters: InstallationParameters = paramsResponse as InstallationParameters;
-    const effectiveBaseUrl = get(parameters, ['baseUrl'], 'https://api.typeform.com');
+    const effectiveBaseUrl = get(parameters, ['baseUrl'], BASE_URL);
     const effectiveAccessToken = getToken(effectiveBaseUrl);
 
     this.setState(

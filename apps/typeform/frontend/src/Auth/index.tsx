@@ -4,6 +4,7 @@ import { AppExtensionSDK } from '@contentful/app-sdk';
 import { AppConfig } from '../AppConfig';
 import { getToken, tokenIsExpired, tokenWillExpireSoon, resetLocalStorage } from '../utils';
 import { InstallationParameters } from '../typings';
+import { BASE_URL } from '../constants';
 
 interface Props {
   sdk: AppExtensionSDK;
@@ -11,13 +12,13 @@ interface Props {
 
 export default function AuthWrapper({ sdk }: Props) {
   let expirationWatchInterval = React.useRef<NodeJS.Timeout | undefined>(undefined);
-  const [baseUrl, setBaseUrl] = useState<string>('https://api.typeform.com');
+  const [baseUrl, setBaseUrl] = useState<string>(BASE_URL);
   const [expireSoon, setExpireSoon] = useState(false);
 
   useEffect(() => {
     sdk.app.getParameters().then((params) => {
       const installationParams = params as InstallationParameters | null;
-      const effectiveBaseUrl = installationParams?.baseUrl || 'https://api.typeform.com';
+      const effectiveBaseUrl = installationParams?.baseUrl || BASE_URL;
       setBaseUrl(effectiveBaseUrl);
     });
   }, [sdk]);

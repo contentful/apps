@@ -6,6 +6,7 @@ const fetch = require('node-fetch');
 const handleForms = require('./forms-handler');
 const handleWorkspaces = require('./workspaces-handler');
 const fetchAccessToken = require('./fetch-access-token');
+const { BASE_URL } = require('./constants');
 
 const deps = {
   fetch,
@@ -13,21 +14,22 @@ const deps = {
 
 const app = express();
 
-// CORS middleware for local development
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-  );
+if (process.env.LOCAL_DEV === 'true') {
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header(
+      'Access-Control-Allow-Headers',
+      'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+    );
 
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-    return;
-  }
-  next();
-});
+    if (req.method === 'OPTIONS') {
+      res.sendStatus(200);
+      return;
+    }
+    next();
+  });
+}
 
 const FRONTEND = path.dirname(require.resolve('@contentful/typeform-frontend'));
 
@@ -50,7 +52,7 @@ app.use('/forms', async (req, res) => {
     return;
   }
   const [, token] = authorization.split(' ');
-  const baseUrl = req.query.baseUrl || 'https://api.typeform.com';
+  const baseUrl = req.query.baseUrl || BASE_URL;
   const { status, body } = await handleForms(req.method, req.path, token, baseUrl, deps);
   res.status(status).send(body);
 });
@@ -62,7 +64,7 @@ app.use('/workspaces', async (req, res) => {
     return;
   }
   const [, token] = authorization.split(' ');
-  const baseUrl = req.query.baseUrl || 'https://api.typeform.com';
+  const baseUrl = req.query.baseUrl || BASE_URL;
   const { status, body } = await handleWorkspaces(req.method, req.path, token, baseUrl, deps);
   res.status(status).send(body);
 });
@@ -79,7 +81,7 @@ app.all('/callback', async (req, res) => {
   const origin = `${protocol}://${host}`;
 
   // Extract baseUrl from state parameter if present
-  let effectiveBaseUrl = 'https://api.typeform.com';
+  let effectiveBaseUrl = BASE_URL;
   if (state) {
     try {
       const stateData = JSON.parse(decodeURIComponent(state));

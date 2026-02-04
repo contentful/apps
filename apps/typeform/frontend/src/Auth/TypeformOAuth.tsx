@@ -57,7 +57,6 @@ export function TypeformOAuth({
       if (source !== oauthWindow) {
         return;
       }
-      console.log('data', data);
 
       const { token, expireTime, error } = data;
 

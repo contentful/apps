@@ -1,10 +1,9 @@
 'use strict';
 
-const dotenv = require('dotenv');
-dotenv.config();
+const { BASE_URL } = require('./constants');
 
 module.exports = async (code, origin, baseUrl, { fetch }) => {
-  const effectiveBaseUrl = baseUrl || 'https://api.typeform.com';
+  const effectiveBaseUrl = baseUrl || BASE_URL;
   const ENDPOINT = `${effectiveBaseUrl}/oauth/token`;
 
   const body =

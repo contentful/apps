@@ -1,5 +1,7 @@
 'use strict';
 
+const { BASE_URL } = require('./constants');
+
 const fetchForms = async (method, path, token, baseUrl, { fetch }) => {
   if (method !== 'GET') {
     return {
@@ -7,7 +9,7 @@ const fetchForms = async (method, path, token, baseUrl, { fetch }) => {
       body: { message: 'Method not allowed.' },
     };
   }
-  const effectiveBaseUrl = baseUrl || 'https://api.typeform.com';
+  const effectiveBaseUrl = baseUrl || BASE_URL;
   const [, workspaceId] = path.split('/');
   const response = await fetch(
     `${effectiveBaseUrl}/forms?page_size=200&workspace_id=${workspaceId}`,

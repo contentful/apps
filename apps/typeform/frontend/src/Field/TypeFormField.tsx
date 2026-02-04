@@ -8,6 +8,7 @@ import { styles } from './styles';
 import logo from './typeform-icon.svg';
 import { isUserAuthenticated, getToken, resetLocalStorage } from '../utils';
 import { EditIcon, EntryIcon } from '@contentful/f36-icons';
+import { BASE_URL } from '../constants';
 
 interface Props {
   sdk: FieldExtensionSDK & AppExtensionSDK;
@@ -59,7 +60,7 @@ const getSelectedForm = (value: string, forms: FormOption[]) => {
 
 export function TypeFormField({ sdk }: Props) {
   const { selectedWorkspaceId, baseUrl } = sdk.parameters.installation as InstallationParameters;
-  const effectiveBaseUrl = baseUrl || 'https://api.typeform.com';
+  const effectiveBaseUrl = baseUrl || BASE_URL;
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
     token: getToken(effectiveBaseUrl),
@@ -127,7 +128,7 @@ export function TypeFormField({ sdk }: Props) {
   useEffect(() => {
     const fetchForms = async () => {
       try {
-        const effectiveBaseUrl = baseUrl || 'https://api.typeform.com';
+        const effectiveBaseUrl = baseUrl || BASE_URL;
         const response = await fetch(
           `${window.location.origin}/forms/${selectedWorkspaceId}?baseUrl=${encodeURIComponent(
             effectiveBaseUrl
@@ -250,7 +251,7 @@ export function TypeFormField({ sdk }: Props) {
         <div className={styles.actionButtons}>
           <TextLink
             href={`${
-              (baseUrl || 'https://api.typeform.com') === 'https://api.typeform.eu'
+              (baseUrl || BASE_URL) === 'https://api.typeform.eu'
                 ? 'https://admin.typeform.eu'
                 : 'https://admin.typeform.com'
             }/form/${selectedForm.id}/create`}
@@ -273,7 +274,7 @@ export function TypeFormField({ sdk }: Props) {
           )}
           <TextLink
             href={`${
-              (baseUrl || 'https://api.typeform.com') === 'https://api.typeform.eu'
+              (baseUrl || BASE_URL) === 'https://api.typeform.eu'
                 ? 'https://admin.typeform.eu'
                 : 'https://admin.typeform.com'
             }/form/${selectedForm.id}/results`}
