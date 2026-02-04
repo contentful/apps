@@ -16,9 +16,12 @@ export const SetupHeader: FC = () => (
         https://mcp.contentful.com
       </Badge>
       <Text fontSize="fontSizeM" marginBottom="none">
-        . Refer to our 
+        . Refer to our
       </Text>
-      <TextLink href="https://www.contentful.com/developers/docs/tools/mcp-server/" target="_blank" rel="noopener noreferrer">
+      <TextLink
+        href="https://www.contentful.com/developers/docs/tools/mcp-server/"
+        target="_blank"
+        rel="noopener noreferrer">
         MCP documentation
       </TextLink>
       <Text fontSize="fontSizeM" marginBottom="none">
