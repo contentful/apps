@@ -77,7 +77,6 @@ export function TypeformOAuth({
   }, [oauthWindow, setToken]);
 
   const executeOauth = () => {
-    console.log('executeOauth', effectiveBaseUrl);
     const client_id = getClientId();
     // Encode baseUrl in the state parameter so callback can retrieve it
     const state = encodeURIComponent(JSON.stringify({ baseUrl: effectiveBaseUrl }));

@@ -28,13 +28,11 @@ const fetchWorkspaces = async (method, _path, token, baseUrl, { fetch }) => {
     },
   });
 
-  console.log('response', response);
   if (!response.ok) {
     const error = makeError(response);
     throw error;
   }
   const json = await response.json();
-  console.log('json', json);
   return await json;
 };
 

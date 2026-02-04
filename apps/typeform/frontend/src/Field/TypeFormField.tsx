@@ -140,8 +140,6 @@ export function TypeFormField({ sdk }: Props) {
           }
         );
 
-        console.log('response', response);
-
         if (AUTH_ERROR_CODES.includes(response.status)) {
           // clear everything in case token is expired or invalid for this region
           resetLocalStorage(effectiveBaseUrl);

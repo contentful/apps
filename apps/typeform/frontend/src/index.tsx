@@ -14,7 +14,6 @@ import './index.scss';
 import processTokenCallback from './processTokenCallback';
 
 if (window.location.search.includes('token')) {
-  console.log('window.location.search', window.location.search);
   processTokenCallback(window);
 } else {
   init((sdk) => {
