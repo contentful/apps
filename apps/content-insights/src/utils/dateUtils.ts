@@ -1,40 +1,41 @@
+import dayjs from 'dayjs';
+
 export const msPerDay = 24 * 60 * 60 * 1000;
 
 export type MaybeDate = Date | undefined;
 
 export function parseDate(value: string | undefined): MaybeDate {
   if (!value) return undefined;
-  const ms = Date.parse(value);
-  return Number.isNaN(ms) ? undefined : new Date(ms);
+  const parsed = dayjs(value);
+  return parsed.isValid() ? parsed.toDate() : undefined;
 }
 
 export function addDays(date: Date, days: number): Date {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
+  return dayjs(date).add(days, 'day').toDate();
 }
 
 export function subDays(date: Date, days: number): Date {
-  const result = new Date(date);
-  result.setDate(result.getDate() - days);
-  return result;
+  return dayjs(date).subtract(days, 'day').toDate();
 }
 
 export function subMonths(base: Date, months: number): Date {
-  const date = new Date(base);
-  date.setMonth(date.getMonth() - months);
-  return date;
+  return dayjs(base).subtract(months, 'month').toDate();
 }
 
 export function isWithin(d: Date, startInclusive: Date, endExclusive: Date): boolean {
-  return d.getTime() >= startInclusive.getTime() && d.getTime() < endExclusive.getTime();
+  const date = dayjs(d);
+  const start = dayjs(startInclusive);
+  const end = dayjs(endExclusive);
+  return (date.isAfter(start) || date.isSame(start)) && date.isBefore(end);
 }
 
 export const formatTimeTo12Hour = (dateString: string): string => {
   try {
-    const date = new Date(dateString);
-    let hours = date.getHours();
-    const minutes = date.getMinutes();
+    const date = dayjs(dateString);
+    if (!date.isValid()) return '';
+
+    let hours = date.hour();
+    const minutes = date.minute();
     const period = hours >= 12 ? 'PM' : 'AM';
 
     hours = hours % 12;
@@ -59,9 +60,7 @@ export const parse12HourTimeToDate = (date: Date, timeString: string): Date => {
     hour24 = 0;
   }
 
-  const newDate = new Date(date);
-  newDate.setHours(hour24, parseInt(minutes, 10), 0, 0);
-  return newDate;
+  return dayjs(date).hour(hour24).minute(parseInt(minutes, 10)).second(0).millisecond(0).toDate();
 };
 
 export const formatDateTimeWithTimezone = (
@@ -70,8 +69,10 @@ export const formatDateTimeWithTimezone = (
 ): string => {
   if (!dateString) return '—';
   try {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
+    const date = dayjs(dateString);
+    if (!date.isValid()) return '—';
+
+    return date.toDate().toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -86,13 +87,14 @@ export const formatDateTimeWithTimezone = (
 };
 
 export const formatMonthYear = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  return `${year}-${month}`;
+  return dayjs(date).format('YYYY-MM');
 };
 
 export const formatMonthYearDisplay = (monthYear: string): string => {
   const [year, month] = monthYear.split('-');
-  const date = new Date(parseInt(year), parseInt(month) - 1);
-  return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  const date = dayjs()
+    .year(parseInt(year, 10))
+    .month(parseInt(month, 10) - 1)
+    .date(1);
+  return date.format('MMM YYYY');
 };
