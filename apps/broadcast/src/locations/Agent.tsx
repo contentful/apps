@@ -64,9 +64,14 @@ const Agent = () => {
   useAutoResizer();
   const [currentPanel, setCurrentPanel] = useState<'chat' | 'history'>('chat');
   const [layoutVariant, setLayoutVariant] = useState<'expanded' | 'normal'>('normal');
+  const [initialLayoutVariant, setInitialLayoutVariant] = useState<'expanded' | 'normal' | null>(
+    null
+  );
   const [isChangingLayout, setIsChangingLayout] = useState(false);
-  const [layoutError, setLayoutError] = useState<string | null>(null);
   const pendingLayoutChangeRef = useRef<'expanded' | 'normal' | null>(null);
+  const autoExpandPendingRef = useRef(false);
+  const autoExpandLastAttemptRef = useRef(0);
+  const hasAutoCollapsedRef = useRef(false);
   const editorRef = useRef<Editor | null>(null);
 
   // Client-side tool execution state
@@ -240,6 +245,31 @@ const Agent = () => {
     return '';
   }, []);
 
+  const requestLayoutVariant = useCallback(
+    (variant: 'expanded' | 'normal') => {
+      if (pendingLayoutChangeRef.current === variant) {
+        return;
+      }
+
+      if (isChangingLayout) {
+        return;
+      }
+
+      pendingLayoutChangeRef.current = variant;
+      setIsChangingLayout(true);
+
+      try {
+        sdk.agent.setAgentLayoutVariant(variant);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to change layout';
+        console.error(errorMessage);
+        setIsChangingLayout(false);
+        pendingLayoutChangeRef.current = null;
+      }
+    },
+    [isChangingLayout, sdk.agent]
+  );
+
   useEffect(() => {
     sdk.agent.onContextChange(() => {});
     sdk.agent.onToolbarAction((action: ToolbarAction) => {
@@ -254,35 +284,69 @@ const Agent = () => {
 
     // Listen to layout variant changes from host UI
     const unsubscribeLayoutVariant = sdk.agent.onAgentLayoutVariantChange((variant) => {
+      if (initialLayoutVariant === null) {
+        setInitialLayoutVariant(variant);
+      }
+
       // If we have a pending change and it matches, clear the pending state
       if (pendingLayoutChangeRef.current === variant) {
         setLayoutVariant(variant);
         setIsChangingLayout(false);
-        setLayoutError(null);
         pendingLayoutChangeRef.current = null;
       } else if (pendingLayoutChangeRef.current !== null) {
         // Host responded with different variant than requested - this is an error
-        setLayoutError(`Expected ${pendingLayoutChangeRef.current} but received ${variant}`);
+        setLayoutVariant(variant);
         setIsChangingLayout(false);
         pendingLayoutChangeRef.current = null;
       } else {
         // Host UI changed variant independently (not in response to our request)
         setLayoutVariant(variant);
         setIsChangingLayout(false);
-        setLayoutError(null);
       }
     });
 
     return () => {
       unsubscribeLayoutVariant();
     };
-  }, [sdk.agent]);
+  }, [initialLayoutVariant, sdk.agent]);
+
+  useEffect(() => {
+    if (
+      initialLayoutVariant === 'expanded' &&
+      !hasAutoCollapsedRef.current &&
+      !autoExpandPendingRef.current
+    ) {
+      hasAutoCollapsedRef.current = true;
+      requestLayoutVariant('normal');
+    }
+  }, [initialLayoutVariant, requestLayoutVariant]);
+
+  useEffect(() => {
+    if (!autoExpandPendingRef.current) {
+      return;
+    }
+
+    if (layoutVariant === 'expanded') {
+      autoExpandPendingRef.current = false;
+      return;
+    }
+
+    if (status === 'streaming' && !isChangingLayout) {
+      const now = Date.now();
+      if (now - autoExpandLastAttemptRef.current > 500) {
+        autoExpandLastAttemptRef.current = now;
+        requestLayoutVariant('expanded');
+      }
+      return;
+    }
+  }, [isChangingLayout, layoutVariant, requestLayoutVariant, status]);
 
   const handleSubmit = useCallback(
     (editor: Editor) => {
       const content = editor.getText();
       if (!content.trim()) return;
 
+      autoExpandPendingRef.current = true;
       void append({ role: 'user', content: content.trim() });
       editor.commands.clearContent();
     },
@@ -292,34 +356,10 @@ const Agent = () => {
   const handleSuggestionClick = useCallback((suggestion: string) => {
     if (!editorRef.current) return;
 
+    autoExpandPendingRef.current = true;
     editorRef.current.commands.setContent(suggestion);
     editorRef.current.commands.focus();
   }, []);
-
-  const toggleLayoutVariant = useCallback(() => {
-    // Don't allow multiple simultaneous changes
-    if (isChangingLayout) {
-      return;
-    }
-
-    const newVariant = layoutVariant === 'expanded' ? 'normal' : 'expanded';
-
-    // Set pending state (but don't update actual state yet)
-    pendingLayoutChangeRef.current = newVariant;
-    setIsChangingLayout(true);
-    setLayoutError(null);
-
-    try {
-      // Request the change from host UI - validation happens synchronously in SDK
-      // Call-and-forget: errors will come back via onLayoutVariantChange callback
-      sdk.agent.setAgentLayoutVariant(newVariant);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to change layout';
-      setLayoutError(errorMessage);
-      setIsChangingLayout(false);
-      pendingLayoutChangeRef.current = null;
-    }
-  }, [layoutVariant, sdk.agent, isChangingLayout]);
 
   const visibleMessages = useMemo(() => {
     return messages.filter((message) => {
@@ -332,13 +372,7 @@ const Agent = () => {
     <AIChatConversation>
       <AIChatMessageList className={styles.messageList}>
         {visibleMessages.length === 0 ? (
-          <AIChatEmptyState
-            onSuggestionClick={handleSuggestionClick}
-            onToggleLayout={toggleLayoutVariant}
-            currentLayoutVariant={layoutVariant}
-            isChangingLayout={isChangingLayout}
-            layoutError={layoutError}
-          />
+          <AIChatEmptyState onSuggestionClick={handleSuggestionClick} />
         ) : (
           <>
             {visibleMessages.map((message) => (
@@ -378,7 +412,7 @@ const Agent = () => {
         )}
       </AIChatMessageList>
       <AIChatInput
-        placeholder="Ask Broadcast to generate or analyze audio & video..."
+        placeholder="Ask this agent to generate or analyze audio & video..."
         isStreaming={isStreaming}
         onSubmit={handleSubmit}
         onStop={stop}

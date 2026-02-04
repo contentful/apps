@@ -46,15 +46,15 @@ interface AIChatEmptyStateProps {
 const getDefaultSuggestions = (): ChatEmptyStateSuggestion[] => [
   {
     icon: ImageIcon,
-    text: 'How many mobile visitors do we have?',
+    text: 'Generate a video for the entry about app building guidelines.',
   },
   {
     icon: UsersIcon,
-    text: 'What is the count of users accessing our site?',
+    text: 'Find the entry titled "Product Update" and return its ID.',
   },
   {
     icon: ListBulletedIcon,
-    text: 'Can you provide statistics on visitor traffic?',
+    text: 'Search for the entry about "Q1 launch" and create a video.',
   },
 ];
 
