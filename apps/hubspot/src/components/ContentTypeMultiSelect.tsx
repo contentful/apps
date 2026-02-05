@@ -40,8 +40,6 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
 
     while (areMoreContentTypes) {
       const response = await sdk.cma.contentType.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
         query: { skip, limit },
       });
       if (response.items) {

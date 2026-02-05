@@ -1,14 +1,10 @@
 import { cleanup, render, screen, act } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
-import { mockCma, mockSdk } from '../mocks';
+import { mockSdk } from '../mocks';
 import ConfigScreen, { EMPTY_MESSAGE } from '../../src/locations/ConfigScreen';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
-}));
-
-vi.mock('contentful-management', () => ({
-  createClient: () => mockCma,
 }));
 
 async function saveAppInstallation() {
@@ -31,7 +27,7 @@ const fillInHubspotAccessToken = async (user: UserEvent, value: string) => {
 describe('Hubspot Config Screen ', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCma.contentType.getMany.mockResolvedValue({
+    mockSdk.cma.contentType.getMany.mockResolvedValue({
       items: [
         { sys: { id: 'blogPost' }, name: 'Blog Post' },
         { sys: { id: 'article' }, name: 'Article' },
@@ -214,9 +210,9 @@ describe('Hubspot Config Screen ', () => {
 
       await saveAppInstallation();
 
-      expect(mockCma.contentType.createWithId).toHaveBeenCalled();
-      expect(mockCma.contentType.publish).toHaveBeenCalled();
-      expect(mockCma.entry.createWithId).toHaveBeenCalled();
+      expect(mockSdk.cma.contentType.createWithId).toHaveBeenCalled();
+      expect(mockSdk.cma.contentType.publish).toHaveBeenCalled();
+      expect(mockSdk.cma.entry.createWithId).toHaveBeenCalled();
     });
 
     it('does not create content type if it already exists', async () => {
@@ -224,17 +220,17 @@ describe('Hubspot Config Screen ', () => {
       expect(await screen.findByPlaceholderText(/Enter your access token/i)).toBeTruthy();
       // Mock content type and entry creation to throw VersionMismatch error
       const versionMismatchError = { code: 'VersionMismatch' };
-      mockCma.contentType.createWithId.mockResolvedValue(versionMismatchError);
-      mockCma.contentType.publish.mockResolvedValue(versionMismatchError);
-      mockCma.entry.createWithId.mockResolvedValue(versionMismatchError);
+      mockSdk.cma.contentType.createWithId.mockResolvedValue(versionMismatchError);
+      mockSdk.cma.contentType.publish.mockResolvedValue(versionMismatchError);
+      mockSdk.cma.entry.createWithId.mockResolvedValue(versionMismatchError);
       const user = userEvent.setup();
       await fillInHubspotAccessToken(user, 'valid-token');
 
       await saveAppInstallation();
 
-      expect(mockCma.contentType.createWithId).toHaveBeenCalled();
-      expect(mockCma.contentType.publish).toHaveBeenCalled();
-      expect(mockCma.entry.createWithId).toHaveBeenCalled();
+      expect(mockSdk.cma.contentType.createWithId).toHaveBeenCalled();
+      expect(mockSdk.cma.contentType.publish).toHaveBeenCalled();
+      expect(mockSdk.cma.entry.createWithId).toHaveBeenCalled();
       expect(mockSdk.notifier.error).not.toHaveBeenCalled();
     });
   });

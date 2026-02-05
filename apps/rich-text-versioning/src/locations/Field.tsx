@@ -9,6 +9,7 @@ import { EntrySys } from '@contentful/app-sdk/dist/types/utils';
 import { convertToSerializableJson, ErrorInfo } from '../utils';
 import { ReleaseEntrySys } from '@contentful/app-sdk/dist/types/entry.types';
 import { styles } from './Field.styles';
+import { i18n } from '@lingui/core';
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
@@ -16,6 +17,12 @@ const Field = () => {
   const [entrySys, setEntrySys] = useState<EntrySys | ReleaseEntrySys | null>(null);
 
   useAutoResizer();
+
+  const locale = sdk.field.locale;
+  if (!i18n.locale) {
+    i18n.load(locale, {});
+    i18n.activate(locale);
+  }
 
   useEffect(() => {
     setFieldValue(sdk.field.getValue());
@@ -58,15 +65,16 @@ const Field = () => {
 
     try {
       const publishedEntries = await sdk.cma.entry.getPublished({
-        query: { 'sys.id': sdk.ids.entry },
+        query: {
+          'sys.id': sdk.ids.entry,
+          include: 0,
+        },
       });
       const publishedEntry = publishedEntries.items[0];
 
-      if (publishedEntry?.fields?.[sdk.field.id]) {
-        const fieldData = publishedEntry.fields[sdk.field.id];
-        publishedField = fieldData as Document;
-      }
+      publishedField = publishedEntry?.fields?.[sdk.field.id]?.[sdk.field.locale];
     } catch (error) {
+      console.error('Error loading content:', error);
       currentErrorInfo = {
         hasError: true,
         errorCode: '500',
@@ -81,9 +89,7 @@ const Field = () => {
       shouldCloseOnEscapePress: true,
       parameters: {
         currentField: convertToSerializableJson(value),
-        publishedField: publishedField
-          ? convertToSerializableJson(publishedField)[sdk.field.locale]
-          : undefined,
+        publishedField: publishedField ? convertToSerializableJson(publishedField) : undefined,
         errorInfo: convertToSerializableJson(currentErrorInfo),
         locale: sdk.field.locale,
       },
