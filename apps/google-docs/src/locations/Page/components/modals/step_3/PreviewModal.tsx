@@ -1,13 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Button, Modal, Paragraph } from '@contentful/f36-components';
-import { EntryToCreate } from '../../../../../../functions/agents/documentParserAgent/schema';
 import { PreviewEntryList } from './PreviewEntryList';
+import { PreviewEntry } from './types';
 
-export interface PreviewEntry {
-  entry: EntryToCreate;
-  title: string;
-  contentTypeName: string;
-}
 interface PreviewModalProps {
   isOpen: boolean;
   onClose: () => void;

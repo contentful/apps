@@ -13,7 +13,7 @@ import { PreviewModal } from '../modals/step_3/PreviewModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ContentTypeProps } from 'contentful-management';
 import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
-import { PreviewEntry } from '../modals/step_3/PreviewModal';
+import { PreviewEntry } from '../modals/step_3/types';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;

@@ -1,5 +1,5 @@
 import { Box, Flex, Text, Checkbox, Card } from '@contentful/f36-components';
-import { PreviewEntry } from './PreviewModal';
+import { PreviewEntry } from './types';
 import tokens from '@contentful/f36-tokens';
 
 const MAX_TITLE_LENGTH = 60;
