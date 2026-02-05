@@ -58,7 +58,7 @@ export const getEntryDisplayName = (entry: EntryProps, defaultLocale: string): s
   }
 
   // Fall back to the first text/Symbol field
-  for (const [_fieldId, localizedValue] of Object.entries(entry.fields)) {
+  for (const localizedValue of Object.values(entry.fields)) {
     if (localizedValue && typeof localizedValue === 'object') {
       const value = localizedValue[defaultLocale] || Object.values(localizedValue)[0];
       if (value && typeof value === 'string' && value.trim().length > 0) {
