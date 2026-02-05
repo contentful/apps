@@ -2,7 +2,7 @@
 
 const fetchWorkspaces = require('./fetch-workspaces');
 
-module.exports = async (method, path, token, { fetch }) => {
+module.exports = async (method, path, token, baseUrl, { fetch }) => {
   if (method !== 'GET') {
     return {
       status: 405,
@@ -13,7 +13,7 @@ module.exports = async (method, path, token, { fetch }) => {
   try {
     return {
       status: 200,
-      body: { workspaces: await fetchWorkspaces(method, path, token, { fetch }) },
+      body: { workspaces: await fetchWorkspaces(method, path, token, baseUrl, { fetch }) },
     };
   } catch (err) {
     const { message, code, details } = err;

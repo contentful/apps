@@ -1,9 +1,11 @@
 'use strict';
 
 const { BASE_URL } = require('./constants');
-const ENDPOINT = `${BASE_URL}/oauth/token`;
 
-module.exports = async (code, origin, { fetch }) => {
+module.exports = async (code, origin, baseUrl, { fetch }) => {
+  const effectiveBaseUrl = baseUrl || BASE_URL;
+  const ENDPOINT = `${effectiveBaseUrl}/oauth/token`;
+
   const body =
     `grant_type=authorization_code&code=${code}&client_id=${process.env.CLIENT_ID}&` +
     `client_secret=${process.env.CLIENT_SECRET}&redirect_uri=${encodeURIComponent(
