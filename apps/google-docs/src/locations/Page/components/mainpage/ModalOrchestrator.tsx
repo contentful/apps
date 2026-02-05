@@ -30,6 +30,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
     const [isCreatingEntries, setIsCreatingEntries] = useState<boolean>(false);
     const [selectedEntriesCount, setSelectedEntriesCount] = useState<number>(0);
     const [createdEntries, setCreatedEntries] = useState<EntryCreationResult['createdEntries']>([]);
+    const [contentTypeNamesMap, setContentTypeNamesMap] = useState<Record<string, string>>({});
     const {
       documentId,
       setDocumentId,
@@ -129,6 +130,14 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       }
 
       setSelectedEntriesCount(selectedEntries.length);
+
+      // Build a map of contentTypeId -> contentTypeName from selected entries to use in the review modal
+      const namesMap: Record<string, string> = {};
+      selectedEntries.forEach((previewEntry) => {
+        namesMap[previewEntry.entry.contentTypeId] = previewEntry.contentTypeName;
+      });
+      setContentTypeNamesMap(namesMap);
+
       closeModal(ModalType.PREVIEW);
       setIsCreatingEntries(true);
       try {
@@ -262,6 +271,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           isOpen={modalStates.isReviewModalOpen}
           onClose={() => closeModal(ModalType.REVIEW)}
           createdEntries={createdEntries}
+          contentTypeNamesMap={contentTypeNamesMap}
           spaceId={sdk.ids.space}
           defaultLocale={sdk.locales.default}
         />
