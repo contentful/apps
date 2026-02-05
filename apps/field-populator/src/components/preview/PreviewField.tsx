@@ -31,12 +31,6 @@ const valueToString = (value: unknown): string | null => {
   if (value === undefined || value === null || value === '') {
     return '';
   }
-  if (typeof value === 'string') {
-    return value;
-  }
-  if (typeof value === 'number') {
-    return String(value);
-  }
   if (typeof value === 'boolean') {
     return value ? 'Yes' : 'No';
   }
@@ -127,11 +121,6 @@ const PreviewField = ({ value, fieldDefinition, locale, compareValue }: PreviewF
         </PreviewBox>
       );
     }
-    return (
-      <PreviewBox>
-        <Text>{valueStr}</Text>
-      </PreviewBox>
-    );
   }
 
   if (typeof value === 'boolean') {
@@ -142,11 +131,6 @@ const PreviewField = ({ value, fieldDefinition, locale, compareValue }: PreviewF
         </PreviewBox>
       );
     }
-    return (
-      <PreviewBox>
-        <Text>{valueStr}</Text>
-      </PreviewBox>
-    );
   }
 
   if (typeof value === 'object') {
