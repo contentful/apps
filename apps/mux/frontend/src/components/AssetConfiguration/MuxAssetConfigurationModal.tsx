@@ -9,7 +9,17 @@ import { MuxContentfulObject, PolicyType } from '../../util/types';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
 
 // Audio file extensions for detection
-const AUDIO_EXTENSIONS = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac', '.wma', '.aiff', '.opus'];
+const AUDIO_EXTENSIONS = [
+  '.mp3',
+  '.wav',
+  '.m4a',
+  '.aac',
+  '.ogg',
+  '.flac',
+  '.wma',
+  '.aiff',
+  '.opus',
+];
 
 /**
  * Detects if the input is an audio-only file based on:
@@ -21,15 +31,15 @@ const isAudioFile = (file: File | null, url: string | null): boolean => {
   if (file) {
     return file.type.startsWith('audio/');
   }
-  
+
   // Check URL extension
   if (url) {
     const urlLower = url.toLowerCase();
     // Remove query params and hash for extension check
     const cleanUrl = urlLower.split('?')[0].split('#')[0];
-    return AUDIO_EXTENSIONS.some(ext => cleanUrl.endsWith(ext));
+    return AUDIO_EXTENSIONS.some((ext) => cleanUrl.endsWith(ext));
   }
-  
+
   return false;
 };
 
@@ -74,10 +84,7 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
   const muxEnableDRM = installationParams.muxEnableDRM ?? false;
 
   // Detect if the input is an audio-only file
-  const isAudioOnly = useMemo(
-    () => isAudioFile(file, pendingUploadURL),
-    [file, pendingUploadURL]
-  );
+  const isAudioOnly = useMemo(() => isAudioFile(file, pendingUploadURL), [file, pendingUploadURL]);
 
   // DRM is disabled for audio files
   const effectiveDRMEnabled = muxEnableDRM && !isAudioOnly;
@@ -125,7 +132,7 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
 
   useEffect(() => {
     if (isEditMode && asset) {
-      // Determine the current playback policy 
+      // Determine the current playback policy
       const currentPolicy: PolicyType = asset.drmPlaybackId
         ? 'drm'
         : asset.signedPlaybackId
@@ -201,7 +208,8 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
             <Accordion.Item title="Privacy Settings">
               {isAudioOnly && (
                 <Note variant="warning" style={{ marginBottom: '1rem' }}>
-                  Audio files do not support DRM protection. Please use the Protected option for secure playback.
+                  Audio files do not support DRM protection. Please use the Protected option for
+                  secure playback.
                 </Note>
               )}
               <PlaybackPolicySelector

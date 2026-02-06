@@ -28,7 +28,7 @@ function getCurrentPolicy(value: MuxContentfulObject): PolicyType {
       return playbackCreateAction.data?.policy as PolicyType;
     }
   }
-  // Priority: public > signed > drm 
+  // Priority: public > signed > drm
   if (value?.playbackId) return 'public';
   if (isUsingSigned(value)) return 'signed';
   if (isUsingDRM(value)) return 'drm';

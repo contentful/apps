@@ -371,9 +371,9 @@ class Config extends React.Component<ConfigProps, IState> {
             <Box marginTop="spacingM" paddingBottom="spacingM">
               <Note variant="warning" title="This is an advanced feature">
                 DRM provides the highest level of content protection using industry-standard
-                encryption. To use DRM, you must first request
-                access in your Mux dashboard under Settings → Digital Rights Management. Once
-                approved, you'll receive a DRM Configuration ID.{' '}
+                encryption. To use DRM, you must first request access in your Mux dashboard under
+                Settings → Digital Rights Management. Once approved, you'll receive a DRM
+                Configuration ID.{' '}
                 <TextLink
                   href="https://www.mux.com/blog/protect-your-video-content-with-drm-now-ga"
                   rel="noopener noreferrer"

@@ -44,11 +44,8 @@ interface AssetInput {
   name?: string;
 }
 
-function buildAssetSettings(
-  options: ModalData,
-  drmConfigurationId?: string
-): AssetSettings {
-  const selectedPolicy = options.playbackPolicies[0]; 
+function buildAssetSettings(options: ModalData, drmConfigurationId?: string): AssetSettings {
+  const selectedPolicy = options.playbackPolicies[0];
   const hasDRM = selectedPolicy === 'drm';
   const settings: AssetSettings = {
     video_quality: options.videoQuality,
@@ -127,13 +124,13 @@ export async function addByURL({
   pollForAssetDetails,
 }: AddByURLConfig) {
   const { muxDRMConfigurationId } = sdk.parameters.installation as InstallationParams;
-  
+
   // Validate DRM configuration if DRM is selected
   if (options.playbackPolicies.includes('drm') && !muxDRMConfigurationId) {
     setAssetError('DRM is selected but DRM Configuration ID is not set in app configuration.');
     return;
   }
-  
+
   const settings = buildAssetSettings(options, muxDRMConfigurationId);
 
   const requestBody = {
@@ -189,16 +186,16 @@ export async function getUploadUrl(
   options: ModalData,
   responseCheck: (res: Response) => boolean | Promise<boolean>
 ) {
-  const { muxEnableAudioNormalize, muxDRMConfigurationId } =
-    sdk.parameters.installation as InstallationParams;
-  
+  const { muxEnableAudioNormalize, muxDRMConfigurationId } = sdk.parameters
+    .installation as InstallationParams;
+
   // Validate DRM configuration if DRM is selected
   if (options.playbackPolicies.includes('drm') && !muxDRMConfigurationId) {
     const errorMsg = 'DRM is selected but DRM Configuration ID is not set in app configuration.';
     sdk.notifier.error(errorMsg);
     return;
   }
-  
+
   const settings = buildAssetSettings(options, muxDRMConfigurationId);
 
   const newAssetSettings = {

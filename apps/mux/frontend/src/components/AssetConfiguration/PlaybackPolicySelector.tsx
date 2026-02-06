@@ -76,7 +76,8 @@ export const PlaybackPolicySelector: FC<PlaybackPolicySelectorProps> = ({
             DRM Protected
           </Radio>
           <FormControl.HelpText>
-            Highest level of content protection using industry-standard encryption. Requires DRM to be enabled in app configuration.
+            Highest level of content protection using industry-standard encryption. Requires DRM to
+            be enabled in app configuration.
             <TextLink
               icon={<ExternalLinkIcon />}
               variant="secondary"

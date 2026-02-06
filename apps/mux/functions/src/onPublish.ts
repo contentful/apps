@@ -316,7 +316,7 @@ async function updateEntryFieldWithMuxAsset(
             assetId: muxAsset.id,
             playbackId: publicPlayback?.id || undefined,
             signedPlaybackId: signedPlayback?.id || undefined,
-            drmPlaybackId: drmPlayback?.id || undefined,  
+            drmPlaybackId: drmPlayback?.id || undefined,
             ready: muxAsset.status === 'ready',
             ratio: muxAsset.aspect_ratio || undefined,
             max_stored_resolution: muxAsset.max_stored_resolution || undefined,
@@ -402,7 +402,8 @@ function findPendingActionsInMuxFields(fields: any): Record<string, any> {
 
 async function createMuxPlaybackId(assetId: string, policy: string, context: any) {
   console.log(`Creating playbackId for assetId ${assetId} with policy ${policy}`);
-  const { muxAccessTokenId, muxAccessTokenSecret, muxDRMConfigurationId } = context.appInstallationParameters;
+  const { muxAccessTokenId, muxAccessTokenSecret, muxDRMConfigurationId } =
+    context.appInstallationParameters;
   const credentials = btoa(`${muxAccessTokenId}:${muxAccessTokenSecret}`);
 
   const body: any = { policy };

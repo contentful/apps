@@ -75,10 +75,15 @@ function normalizeForDiff<T>(obj: T): T {
     return Object.keys(obj)
       .filter((k) => (obj as Record<string, unknown>)[k] !== undefined)
       .sort()
-      .reduce((acc, k) => {
-        (acc as Record<string, unknown>)[k] = normalizeForDiff((obj as Record<string, unknown>)[k]);
-        return acc;
-      }, {} as Record<string, unknown>) as T;
+      .reduce(
+        (acc, k) => {
+          (acc as Record<string, unknown>)[k] = normalizeForDiff(
+            (obj as Record<string, unknown>)[k]
+          );
+          return acc;
+        },
+        {} as Record<string, unknown>
+      ) as T;
   }
   return obj;
 }
@@ -140,8 +145,7 @@ export class App extends React.Component<AppProps, AppState> {
         "It doesn't look like you've specified your Mux Access Token ID or Secret in the extension configuration.",
       errorShowResetAction: false,
       playerPlaybackId:
-        field &&
-        ('playbackId' in field || 'signedPlaybackId' in field || 'drmPlaybackId' in field)
+        field && ('playbackId' in field || 'signedPlaybackId' in field || 'drmPlaybackId' in field)
           ? field.playbackId || field.signedPlaybackId || field.drmPlaybackId
           : undefined,
       modalAssetConfigurationVisible: false,
@@ -217,7 +221,7 @@ export class App extends React.Component<AppProps, AppState> {
       environmentId: this.props.sdk.ids.environment,
       spaceId: this.props.sdk.ids.space,
     });
-    
+
     this.getSignedTokenActionId =
       appActionsResponse.items.find((x) => x.name === 'getSignedUrlTokens')?.sys.id ?? '';
 
@@ -255,7 +259,7 @@ export class App extends React.Component<AppProps, AppState> {
 
       if (this.state.value.ready) {
         await this.checkForValidAsset();
-        
+
         if (this.isUsingDRM() && this.state.value.drmPlaybackId) {
           // Load DRM tokens for external player link
           await this.setSignedPlayback(this.state.value.drmPlaybackId, true);
@@ -313,7 +317,6 @@ export class App extends React.Component<AppProps, AppState> {
     // Check if DRM playback ID is set
     return this.state.value && this.state.value.drmPlaybackId ? true : false;
   };
-
 
   getSwitchCheckedState = (): boolean => {
     // If there are pending actions of playback, use the state of the pending action
@@ -433,13 +436,13 @@ export class App extends React.Component<AppProps, AppState> {
         options,
         async (res) => await this.responseCheck(res)
       );
-      
+
       if (!muxUploadUrl) {
         // Adding this fallback so the upload won't fail when the DRM Configuration ID is invalid
         this.setState({ modalAssetConfigurationVisible: false });
         return;
       }
-      
+
       const uploader = this.muxUploaderRef.current!;
       uploader.endpoint = muxUploadUrl;
 
@@ -560,16 +563,13 @@ export class App extends React.Component<AppProps, AppState> {
       .installation as InstallationParams;
     if (!(muxSigningKeyId && muxSigningKeyPrivate)) {
       this.setState({
-        error:
-          `Error: this asset was created with ${isDRM ? 'DRM protection' : 'signed playback'}, but signing keys do not exist for your account. Make sure to enable "Signed URLs" in the app settings.`,
+        error: `Error: this asset was created with ${isDRM ? 'DRM protection' : 'signed playback'}, but signing keys do not exist for your account. Make sure to enable "Signed URLs" in the app settings.`,
         errorShowResetAction: true,
       });
       return;
     }
-    const { playbackToken, posterToken, storyboardToken, licenseToken } = await this.fetchSignedTokens(
-      signedPlaybackId,
-      isDRM
-    );
+    const { playbackToken, posterToken, storyboardToken, licenseToken } =
+      await this.fetchSignedTokens(signedPlaybackId, isDRM);
 
     this.setState({ playbackToken, posterToken, storyboardToken, drmLicenseToken: licenseToken });
   };
@@ -885,7 +885,12 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   generateExternalPlayerURL = (): string | null => {
-    if (!this.isUsingDRM() || !this.state.value || !this.state.playbackToken || !this.state.drmLicenseToken) {
+    if (
+      !this.isUsingDRM() ||
+      !this.state.value ||
+      !this.state.playbackToken ||
+      !this.state.drmLicenseToken
+    ) {
       return null;
     }
 
@@ -1323,10 +1328,12 @@ export class App extends React.Component<AppProps, AppState> {
 
     if (
       this.state.value &&
-      (this.state.value.playbackId || this.state.value.signedPlaybackId || this.state.value.drmPlaybackId)
+      (this.state.value.playbackId ||
+        this.state.value.signedPlaybackId ||
+        this.state.value.drmPlaybackId)
     ) {
       const { muxDomain } = this.props.sdk.parameters.installation as InstallationParams;
-      
+
       const showPlayer =
         (this.state.value.ready && this.state.value.playbackId) ||
         (this.isUsingSigned() && !this.state.isTokenLoading);
@@ -1335,49 +1342,51 @@ export class App extends React.Component<AppProps, AppState> {
         <>
           {modal}
           <div>
-            {this.isUsingDRM() && (() => {
-              const externalPlayerURL = this.state.playbackToken && this.state.drmLicenseToken 
-                ? this.generateExternalPlayerURL() 
-                : null;
-              
-              return (
-                <Box marginBottom="spacingM">
-                  <Note variant="warning">
-                    DRM-protected videos cannot be displayed in Contentful's preview due to platform-level security restrictions. {' '}
-                    {externalPlayerURL ? (
-                      <>
-                        <TextLink
-                          href={externalPlayerURL}
-                          target="_blank"
-                          rel="noopener noreferrer">
-                          Open in external player
-                        </TextLink>
-                        {' '}to view the DRM-protected video (note: DRM playback has an associated cost), or use the generated playback code in your production environment.
-                      </>
-                    ) : (
-                      'The generated playback code is fully functional and will work correctly in your production environment outside of Contentful.'
-                    )}
-                  </Note>
-                </Box>
-              );
-            })()}
-
             {this.isUsingDRM() &&
-              !this.state.drmLicenseToken &&
-              !this.state.isTokenLoading && (
-                <Box marginBottom="spacingM">
-                  <Note variant="negative" data-testid="nodrmtoken">
-                    {(() => {
-                      const { muxSigningKeyId, muxSigningKeyPrivate } = this.props.sdk.parameters
-                        .installation as InstallationParams;
-                      if (!muxSigningKeyId || !muxSigningKeyPrivate) {
-                        return 'No signing key to create a DRM license token. Please configure signing keys in the app settings.';
-                      }
-                      return 'You must enable the "Signed URLs" in the app settings to preview this video with DRM protection.';
-                    })()}
-                  </Note>
-                </Box>
-              )}
+              (() => {
+                const externalPlayerURL =
+                  this.state.playbackToken && this.state.drmLicenseToken
+                    ? this.generateExternalPlayerURL()
+                    : null;
+
+                return (
+                  <Box marginBottom="spacingM">
+                    <Note variant="warning">
+                      DRM-protected videos cannot be displayed in Contentful's preview due to
+                      platform-level security restrictions.{' '}
+                      {externalPlayerURL ? (
+                        <>
+                          <TextLink
+                            href={externalPlayerURL}
+                            target="_blank"
+                            rel="noopener noreferrer">
+                            Open in external player
+                          </TextLink>{' '}
+                          to view the DRM-protected video (note: DRM playback has an associated
+                          cost), or use the generated playback code in your production environment.
+                        </>
+                      ) : (
+                        'The generated playback code is fully functional and will work correctly in your production environment outside of Contentful.'
+                      )}
+                    </Note>
+                  </Box>
+                );
+              })()}
+
+            {this.isUsingDRM() && !this.state.drmLicenseToken && !this.state.isTokenLoading && (
+              <Box marginBottom="spacingM">
+                <Note variant="negative" data-testid="nodrmtoken">
+                  {(() => {
+                    const { muxSigningKeyId, muxSigningKeyPrivate } = this.props.sdk.parameters
+                      .installation as InstallationParams;
+                    if (!muxSigningKeyId || !muxSigningKeyPrivate) {
+                      return 'No signing key to create a DRM license token. Please configure signing keys in the app settings.';
+                    }
+                    return 'You must enable the "Signed URLs" in the app settings to preview this video with DRM protection.';
+                  })()}
+                </Note>
+              </Box>
+            )}
 
             {this.isUsingSigned() && (
               <Box marginBottom="spacingM">
