@@ -1,7 +1,7 @@
 import { ContentTypeField } from '@contentful/app-sdk';
-import { Box, Checkbox, Flex, Grid, Paragraph, Text, TextLink } from '@contentful/f36-components';
-import { ArrowSquareOutIcon } from '@contentful/f36-icons';
+import { Box, Checkbox, Flex, Grid, Paragraph, Text } from '@contentful/f36-components';
 import PreviewField from './PreviewField';
+import { styles } from './PreviewFieldRow.styles';
 
 interface PreviewFieldRowProps {
   field: ContentTypeField;
@@ -25,19 +25,12 @@ const PreviewFieldRow = ({
   isDisabled = false,
 }: PreviewFieldRowProps) => {
   return (
-    <Box paddingTop="spacingM" paddingBottom="spacingM">
+    <Box padding="spacingS" className={styles.fieldBox}>
       <Flex justifyContent="space-between" alignItems="center" marginBottom="spacingS">
         <Box marginBottom="spacingM">
-          <TextLink
-            href={''}
-            target="_blank"
-            rel="noopener noreferrer"
-            icon={<ArrowSquareOutIcon variant="muted" size="tiny" />}
-            alignIcon="end">
-            <Text fontColor="blue600" fontWeight="fontWeightDemiBold">
-              {field.name}
-            </Text>
-          </TextLink>
+          <Text fontSize="fontSizeM" fontWeight="fontWeightDemiBold" fontColor="gray900">
+            {field.name}
+          </Text>
         </Box>
         <Checkbox
           isChecked={isAdopted}
