@@ -303,6 +303,9 @@ async function updateEntryFieldWithMuxAsset(
           const signedPlayback = Array.isArray(muxAsset.playback_ids)
             ? muxAsset.playback_ids.find((p: any) => p.policy === 'signed')
             : undefined;
+          const drmPlayback = Array.isArray(muxAsset.playback_ids)
+            ? muxAsset.playback_ids.find((p: any) => p.policy === 'drm')
+            : undefined;
 
           const audioTracks = muxAsset.tracks?.filter((t: any) => t.type === 'audio');
           const captions = muxAsset.tracks?.filter((t: any) => t.type === 'text');
@@ -313,6 +316,7 @@ async function updateEntryFieldWithMuxAsset(
             assetId: muxAsset.id,
             playbackId: publicPlayback?.id || undefined,
             signedPlaybackId: signedPlayback?.id || undefined,
+            drmPlaybackId: drmPlayback?.id || undefined,
             ready: muxAsset.status === 'ready',
             ratio: muxAsset.aspect_ratio || undefined,
             max_stored_resolution: muxAsset.max_stored_resolution || undefined,
@@ -398,16 +402,21 @@ function findPendingActionsInMuxFields(fields: any): Record<string, any> {
 
 async function createMuxPlaybackId(assetId: string, policy: string, context: any) {
   console.log(`Creating playbackId for assetId ${assetId} with policy ${policy}`);
-  const { muxAccessTokenId, muxAccessTokenSecret } = context.appInstallationParameters;
+  const { muxAccessTokenId, muxAccessTokenSecret, muxDRMConfigurationId } =
+    context.appInstallationParameters;
   const credentials = btoa(`${muxAccessTokenId}:${muxAccessTokenSecret}`);
 
+  const body: any = { policy };
+  if (policy === 'drm') {
+    body.drm_configuration_id = muxDRMConfigurationId;
+  }
   const createRes = await fetch(`https://api.mux.com/video/v1/assets/${assetId}/playback-ids`, {
     method: 'POST',
     headers: {
       Authorization: `Basic ${credentials}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ policy }),
+    body: JSON.stringify(body),
   });
   if (!createRes.ok) {
     const error = await createRes.json();
