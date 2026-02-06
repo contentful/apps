@@ -12,5 +12,5 @@ class ResizeObserver {
   unobserve() {}
   disconnect() {}
 }
-// @ts-expect-error assign to global for tests
+
 global.ResizeObserver = ResizeObserver;
