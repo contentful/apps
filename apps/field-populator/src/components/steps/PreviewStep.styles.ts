@@ -10,8 +10,4 @@ export const styles = {
     marginTop: tokens.spacing2Xs,
     paddingLeft: tokens.spacingM,
   }),
-  fieldBox: css({
-    border: `1px solid ${tokens.gray300}`,
-    borderRadius: tokens.borderRadiusSmall,
-  }),
 };

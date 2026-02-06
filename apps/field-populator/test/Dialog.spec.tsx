@@ -244,4 +244,130 @@ describe('Dialog component', () => {
 
     expect(mockCma.entry.update).toHaveBeenCalled();
   });
+
+  it('completes the full flow with a reference field and updates both main and referenced entry', async () => {
+    const user = userEvent.setup();
+    const referencedEntryId = 'referenced-entry-id';
+    const referencedContentTypeId = 'referenced-content-type';
+
+    mockSdk.locales.names = {
+      ...mockSdk.locales.names,
+      'en-GB': 'English (United Kingdom)',
+    };
+
+    const mainEntryWithReference = {
+      sys: {
+        id: 'test-entry',
+        type: 'Entry',
+        contentType: { sys: { id: 'test-content-type' } },
+      },
+      fields: {
+        title: { 'en-US': 'Main Title' },
+        description: { 'en-US': 'Main Description' },
+        linkedEntry: {
+          'en-US': {
+            sys: { type: 'Link', linkType: 'Entry', id: referencedEntryId },
+          },
+        },
+      },
+    };
+
+    const mainContentTypeWithRefField = {
+      sys: { id: 'test-content-type', type: 'ContentType' },
+      name: 'Test Content Type',
+      displayField: 'title',
+      fields: [
+        { id: 'title', name: 'Title', type: 'Symbol', localized: true },
+        { id: 'description', name: 'Description', type: 'Text', localized: true },
+        {
+          id: 'linkedEntry',
+          name: 'Linked Entry',
+          type: 'Link',
+          linkType: 'Entry',
+          localized: true,
+        },
+      ],
+    };
+
+    const referencedEntry = {
+      sys: {
+        id: referencedEntryId,
+        type: 'Entry',
+        contentType: { sys: { id: referencedContentTypeId } },
+      },
+      fields: {
+        name: { 'en-US': 'Referenced Name' },
+      },
+    };
+
+    const referencedContentType = {
+      sys: { id: referencedContentTypeId, type: 'ContentType' },
+      name: 'Referenced Content Type',
+      displayField: 'name',
+      fields: [{ id: 'name', name: 'Name', type: 'Symbol', localized: true }],
+    };
+
+    mockCma.entry.get.mockImplementation((params: { entryId: string }) => {
+      if (params.entryId === 'test-entry') return Promise.resolve(mainEntryWithReference as any);
+      if (params.entryId === referencedEntryId) return Promise.resolve(referencedEntry as any);
+      return Promise.resolve(mainEntryWithReference as any);
+    });
+
+    mockCma.contentType.get.mockImplementation((params: { contentTypeId: string }) => {
+      if (params.contentTypeId === 'test-content-type')
+        return Promise.resolve(mainContentTypeWithRefField as any);
+      if (params.contentTypeId === referencedContentTypeId)
+        return Promise.resolve(referencedContentType as any);
+      return Promise.resolve(mainContentTypeWithRefField as any);
+    });
+
+    mockCma.entry.update.mockImplementation((_params: any, entry: any) => Promise.resolve(entry));
+
+    await act(async () => {
+      render(<Dialog />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Next')).toBeInTheDocument();
+    });
+
+    const sourceSelect = screen.getByTestId('source-locale-select');
+    await user.selectOptions(sourceSelect, 'en-US');
+
+    const targetTrigger = await screen.findByText('Select one or more');
+    await user.click(targetTrigger);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('checkbox', { name: 'English (United Kingdom)' })
+      ).toBeInTheDocument();
+    });
+
+    const targetCheckbox = screen.getByRole('checkbox', { name: 'English (United Kingdom)' });
+    await user.click(targetCheckbox);
+
+    const nextButton = screen.getByText('Next');
+    await user.click(nextButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Back')).toBeInTheDocument();
+      expect(screen.getByText('Confirm')).toBeInTheDocument();
+    });
+
+    expect(mockCma.entry.update).not.toHaveBeenCalled();
+
+    const confirmButton = screen.getByText('Confirm');
+    await user.click(confirmButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Done')).toBeInTheDocument();
+    });
+
+    expect(mockCma.entry.update).toHaveBeenCalledTimes(2);
+
+    const updateCalls = mockCma.entry.update.mock.calls as Array<[{ entryId: string }, unknown]>;
+    const updatedEntryIds = updateCalls.map(([params]) => params.entryId);
+    expect(updatedEntryIds).toContain('test-entry');
+    expect(updatedEntryIds).toContain(referencedEntryId);
+  });
 });

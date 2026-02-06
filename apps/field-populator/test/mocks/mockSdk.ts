@@ -49,6 +49,9 @@ const mockSdk: any = {
       id: 'test-content-type',
     },
   },
+  hostnames: {
+    webapp: 'app.contentful.com',
+  },
   close: vi.fn(),
 };
 

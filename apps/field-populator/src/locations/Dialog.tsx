@@ -1,4 +1,4 @@
-import { ContentTypeField, DialogAppSDK } from '@contentful/app-sdk';
+import { DialogAppSDK } from '@contentful/app-sdk';
 import { Box, Button, Flex, Form, Skeleton } from '@contentful/f36-components';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { ContentTypeProps, EntryProps } from 'contentful-management';
@@ -6,9 +6,11 @@ import { useEffect, useMemo, useState } from 'react';
 import ConfirmationStep from '../components/steps/ConfirmationStep';
 import LocaleSelectionStep from '../components/steps/LocaleSelectionStep';
 import PreviewStep from '../components/steps/PreviewStep';
+import { AdoptedFieldsMap, hasAnyAdoptedFields, ReferencedEntryData } from '../utils/adoptedFields';
 import { SimplifiedLocale, mapLocaleNamesToSimplifiedLocales } from '../utils/locales';
-import { updateEntryFields, UpdateResult } from '../utils/updateEntry';
+import { updateEntries, UpdateResult } from '../utils/entry';
 import { styles } from './Dialog.styles';
+import { fetchEntries } from '../utils/entry';
 
 type DialogStep = 'locale-selection' | 'preview' | 'confirmation';
 
@@ -30,10 +32,11 @@ const Dialog = () => {
 
   const [entry, setEntry] = useState<EntryProps | null>(null);
   const [contentType, setContentType] = useState<ContentTypeProps | null>(null);
+  const [referencedEntries, setReferencedEntries] = useState<ReferencedEntryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [adoptedFields, setAdoptedFields] = useState<Record<string, boolean>>({});
+  const [adoptedFields, setAdoptedFields] = useState<AdoptedFieldsMap>({});
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateResult, setUpdateResult] = useState<UpdateResult | null>(null);
@@ -44,37 +47,25 @@ const Dialog = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-        const [fetchedEntry, fetchedContentType] = await Promise.all([
-          sdk.cma.entry.get({ entryId: invocationParams.entryId }),
-          sdk.cma.contentType.get({ contentTypeId: invocationParams.contentTypeId }),
-        ]);
-        setEntry(fetchedEntry);
-        setContentType(fetchedContentType);
-
-        const initialAdoptedFields: Record<string, boolean> = {};
-        (fetchedContentType.fields as ContentTypeField[])
-          .filter((field) => field.localized)
-          .forEach((field) => {
-            initialAdoptedFields[field.id] = true;
-          });
-        setAdoptedFields(initialAdoptedFields);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load entry data');
+        const result = await fetchEntries(
+          sdk.cma,
+          invocationParams.entryId,
+          invocationParams.contentTypeId
+        );
+        setEntry(result.entry);
+        setContentType(result.contentType);
+        setReferencedEntries(result.referencedEntriesData);
+      } catch (error) {
+        console.error('Error fetching entry data:', error);
+        setError('Failed to fetch entry data');
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
-  }, [
-    invocationParams.entryId,
-    invocationParams.contentTypeId,
-    sdk.cma.entry,
-    sdk.cma.contentType,
-  ]);
+  }, [sdk.cma, invocationParams.entryId, invocationParams.contentTypeId]);
 
   const handleNext = () => {
     if (!selectedSourceLocale || selectedTargetLocales.length === 0) {
@@ -96,7 +87,7 @@ const Dialog = () => {
 
     setIsUpdating(true);
 
-    const result = await updateEntryFields(
+    const result = await updateEntries(
       sdk.cma,
       invocationParams.entryId,
       selectedSourceLocale,
@@ -110,7 +101,7 @@ const Dialog = () => {
   };
 
   const hasAdoptedFields = useMemo(() => {
-    return Object.values(adoptedFields).some((adopted) => adopted);
+    return hasAnyAdoptedFields(adoptedFields);
   }, [adoptedFields]);
 
   if (loading) {
@@ -193,12 +184,14 @@ const Dialog = () => {
             <PreviewStep
               entry={entry}
               contentType={contentType}
+              referencedEntries={referencedEntries}
               sourceLocale={selectedSourceLocale}
               targetLocales={selectedTargetLocales}
               adoptedFields={adoptedFields}
               onAdoptedFieldsChange={setAdoptedFields}
               availableLocales={mappedLocales}
               isDisabled={isUpdating}
+              baseUrl={`https://${sdk.hostnames.webapp}/spaces/${sdk.ids.space}/environments/${sdk.ids.environment}`}
             />
             <Flex justifyContent="flex-end" gap="spacingM" className={styles.stickyFooter}>
               <Button onClick={handleBack} isDisabled={isUpdating}>
