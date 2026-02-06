@@ -2,7 +2,7 @@
 
 const fetchForms = require('./fetch-forms');
 
-module.exports = async (method, path, token, baseUrl, { fetch }) => {
+module.exports = async (method, path, token, { fetch }) => {
   if (method !== 'GET') {
     return {
       status: 405,
@@ -13,7 +13,7 @@ module.exports = async (method, path, token, baseUrl, { fetch }) => {
   try {
     return {
       status: 200,
-      body: { forms: await fetchForms(method, path, token, baseUrl, { fetch }) },
+      body: { forms: await fetchForms(method, path, token, { fetch }) },
     };
   } catch (err) {
     const { message, code } = err;

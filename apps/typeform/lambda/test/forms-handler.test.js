@@ -5,13 +5,7 @@ const mocks = require('../mocks');
 
 describe('forms handler', () => {
   test('expects HTTP GET', async () => {
-    const { status, body } = await handle(
-      'PUT',
-      '/forms',
-      'randomToken',
-      'https://api.typeform.com',
-      mocks
-    );
+    const { status, body } = await handle('PUT', '/forms', 'randomToken', mocks);
 
     expect(status).toBe(405);
     expect(body).toEqual({ message: 'Method not allowed.' });
@@ -23,7 +17,6 @@ describe('forms handler', () => {
       'GET',
       '/forms',
       'some token',
-      'https://api.typeform.com',
       Object.assign({}, mocks, {
         fetch: () => {
           const error = new Error('Some error happened');

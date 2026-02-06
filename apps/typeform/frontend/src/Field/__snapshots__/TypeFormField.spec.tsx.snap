@@ -14,7 +14,7 @@ exports[`TypeFormField > should render successfully when the user is signed in 1
       class="css-1jmxdak"
     >
       <select
-        class="css-1g6ytnc"
+        class="css-hcyaiw"
         data-test-id="cf-ui-select"
       >
         <option
@@ -72,12 +72,12 @@ exports[`TypeFormField > should render successfully when the user is signed in 1
       class="css-j7qwjs"
     >
       <div
-        class="css-1lh0ubj"
+        class="css-n69953"
       >
         The typeform you have selected in Contentful no longer exists in your workspace.
          
         <a
-          class="css-1ulo0xy"
+          class="css-1wm2dh8"
           data-test-id="cf-ui-text-link"
         >
           <span
@@ -99,7 +99,7 @@ exports[`TypeFormField > should render the auth button when the user is not auth
 <div>
   <button
     aria-label="typeform-auth"
-    class="css-127ixdm"
+    class="css-ndrb9n"
     data-test-id="cf-ui-button"
     type="button"
   >
@@ -137,10 +137,10 @@ exports[`TypeFormField > should render the error screen if something goes wrong 
       class="css-j7qwjs"
     >
       <div
-        class="css-1lh0ubj"
+        class="css-n69953"
       >
         <p
-          class="css-13j6071"
+          class="css-18y4b1e"
           data-test-id="cf-ui-paragraph"
         >
           We could not fetch your typeforms. Please make sure you have selected a valid Typeform workspace and are logged in.

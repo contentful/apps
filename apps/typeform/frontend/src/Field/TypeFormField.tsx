@@ -8,7 +8,6 @@ import { styles } from './styles';
 import logo from './typeform-icon.svg';
 import { isUserAuthenticated, getToken, resetLocalStorage } from '../utils';
 import { EditIcon, EntryIcon } from '@contentful/f36-icons';
-import { BASE_URL } from '../constants';
 
 interface Props {
   sdk: FieldExtensionSDK & AppExtensionSDK;
@@ -59,12 +58,8 @@ const getSelectedForm = (value: string, forms: FormOption[]) => {
 };
 
 export function TypeFormField({ sdk }: Props) {
-  const { selectedWorkspaceId, baseUrl } = sdk.parameters.installation as InstallationParameters;
-  const effectiveBaseUrl = baseUrl || BASE_URL;
-  const [state, dispatch] = useReducer(reducer, {
-    ...initialState,
-    token: getToken(effectiveBaseUrl),
-  });
+  const { selectedWorkspaceId } = sdk.parameters.installation as InstallationParameters;
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { loading, forms, value, hasStaleData, selectedForm, error, token } = state;
 
   function reducer(
@@ -128,21 +123,15 @@ export function TypeFormField({ sdk }: Props) {
   useEffect(() => {
     const fetchForms = async () => {
       try {
-        const effectiveBaseUrl = baseUrl || BASE_URL;
-        const response = await fetch(
-          `${window.location.origin}/forms/${selectedWorkspaceId}?baseUrl=${encodeURIComponent(
-            effectiveBaseUrl
-          )}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch(`/forms/${selectedWorkspaceId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (AUTH_ERROR_CODES.includes(response.status)) {
-          // clear everything in case token is expired or invalid for this region
-          resetLocalStorage(effectiveBaseUrl);
+          // clear everything in case token is expired
+          resetLocalStorage();
           dispatch({ type: ACTION_TYPES.RESET });
         } else {
           const result = (await response.json()) as TypeFormResponse;
@@ -156,7 +145,7 @@ export function TypeFormField({ sdk }: Props) {
         }
       } catch (error) {
         // only show error dialog is the user is logged in
-        if (isUserAuthenticated(effectiveBaseUrl)) {
+        if (isUserAuthenticated()) {
           dispatch({ type: ACTION_TYPES.ERROR });
         }
       }
@@ -164,7 +153,7 @@ export function TypeFormField({ sdk }: Props) {
     fetchForms();
     // Start auto resizer to adjust field height
     sdk.window.startAutoResizer();
-  }, [token, sdk.window, selectedWorkspaceId, effectiveBaseUrl]);
+  }, [token, sdk.window, selectedWorkspaceId]);
 
   const onChange = (event: any) => {
     const value = event.currentTarget.value;
@@ -192,12 +181,11 @@ export function TypeFormField({ sdk }: Props) {
     }));
   };
 
-  if (!isUserAuthenticated(effectiveBaseUrl)) {
+  if (!isUserAuthenticated()) {
     return (
       <TypeformOAuth
         aria-label="typeform-auth"
         isFullWidth={false}
-        baseUrl={effectiveBaseUrl}
         setToken={(token: string) =>
           dispatch({ type: ACTION_TYPES.UPDATE_TOKEN, payload: { token } })
         }
@@ -248,11 +236,7 @@ export function TypeFormField({ sdk }: Props) {
       {value && !hasStaleData && (
         <div className={styles.actionButtons}>
           <TextLink
-            href={`${
-              (baseUrl || BASE_URL) === 'https://api.typeform.eu'
-                ? 'https://admin.typeform.eu'
-                : 'https://admin.typeform.com'
-            }/form/${selectedForm.id}/create`}
+            href={`https://admin.typeform.com/form/${selectedForm.id}/create`}
             target="_blank"
             icon={<EditIcon />}
             rel="noopener noreferrer"
@@ -271,11 +255,7 @@ export function TypeFormField({ sdk }: Props) {
             </Tooltip>
           )}
           <TextLink
-            href={`${
-              (baseUrl || BASE_URL) === 'https://api.typeform.eu'
-                ? 'https://admin.typeform.eu'
-                : 'https://admin.typeform.com'
-            }/form/${selectedForm.id}/results`}
+            href={`https://admin.typeform.com/form/${selectedForm.id}/results`}
             target="_blank"
             icon={<EntryIcon />}
             rel="noopener noreferrer"
