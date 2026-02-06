@@ -5,4 +5,6 @@ export interface ContentType {
 
 export interface AppInstallationParameters {
   enableVanityUrl: boolean;
+  redirectFromContentTypes: ContentType[];
+  redirectToContentTypes: ContentType[];
 }

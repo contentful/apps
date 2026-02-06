@@ -11,16 +11,19 @@ import {
 } from '@contentful/f36-components';
 import { ArrowRightIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { css } from 'emotion';
 import { useCallback, useEffect, useState } from 'react';
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 import { AppInstallationParameters, ContentType } from '../utils/types';
 import tokens from '@contentful/f36-tokens';
+import { createContentTypes as createConfigurationContentTypes } from '../utils/createContentType';
+import { styles } from './ConfigScreen.styles';
 
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
   const [parameters, setParameters] = useState<AppInstallationParameters>({
-    enableVanityUrl: true,
+    enableVanityUrl: false,
+    redirectFromContentTypes: [],
+    redirectToContentTypes: [],
   });
   const [redirectFromContentTypes, setRedirectFromContentTypes] = useState<ContentType[]>([]);
   const [redirectToContentTypes, setRedirectToContentTypes] = useState<ContentType[]>([]);
@@ -35,9 +38,33 @@ const ConfigScreen = () => {
       return false;
     }
 
+    await createConfigurationContentTypes(sdk, parameters.enableVanityUrl);
+
+    const allContentTypeIds = new Set([
+      ...redirectFromContentTypes.map((ct) => ct.id),
+      ...redirectToContentTypes.map((ct) => ct.id),
+    ]);
+
+    const editorInterface = Array.from(allContentTypeIds).reduce(
+      (acc, contentTypeId) => ({
+        ...acc,
+        [contentTypeId]: {
+          sidebar: { position: 0 },
+        },
+      }),
+      {}
+    );
+
     setShowValidationErrors(false);
     return {
-      parameters,
+      parameters: {
+        ...parameters,
+        redirectFromContentTypes,
+        redirectToContentTypes,
+      },
+      targetState: {
+        EditorInterface: editorInterface,
+      },
     };
   }, [parameters, redirectFromContentTypes, redirectToContentTypes, sdk]);
 
@@ -51,6 +78,13 @@ const ConfigScreen = () => {
 
       if (currentParameters) {
         setParameters(currentParameters);
+
+        if (currentParameters.redirectFromContentTypes) {
+          setRedirectFromContentTypes(currentParameters.redirectFromContentTypes);
+        }
+        if (currentParameters.redirectToContentTypes) {
+          setRedirectToContentTypes(currentParameters.redirectToContentTypes);
+        }
       }
 
       sdk.app.setReady();
@@ -59,7 +93,7 @@ const ConfigScreen = () => {
 
   return (
     <Flex justifyContent="center" margin="spacingXl">
-      <Flex flexDirection="column" className={css({ maxWidth: '800px', width: '100%' })}>
+      <Flex flexDirection="column" className={styles.body}>
         <Form>
           <Box marginBottom="spacing2Xl">
             <Heading as="h2" marginBottom="spacingS" fontWeight="fontWeightMedium">
@@ -71,8 +105,6 @@ const ConfigScreen = () => {
               required.
             </Paragraph>
           </Box>
-
-          {/* Configure Section */}
           <Box marginBottom="spacingXl">
             <Heading as="h3" marginBottom="spacingL">
               Configure
