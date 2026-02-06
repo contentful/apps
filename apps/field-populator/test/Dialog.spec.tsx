@@ -1,7 +1,7 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { mockSdk } from './mocks';
+import { mockCma, mockSdk } from './mocks';
 import Dialog from '../src/locations/Dialog';
 
 const defaultLocaleNames = { ...mockSdk.locales.names };
@@ -28,14 +28,14 @@ describe('Dialog component', () => {
     });
   });
 
-  it('renders Cancel and Populate fields buttons', async () => {
+  it('renders Cancel and Next buttons', async () => {
     await act(async () => {
       render(<Dialog />);
     });
 
     await waitFor(() => {
       expect(screen.getByText('Cancel')).toBeInTheDocument();
-      expect(screen.getByText('Populate fields')).toBeInTheDocument();
+      expect(screen.getByText('Next')).toBeInTheDocument();
     });
   });
 
@@ -108,7 +108,7 @@ describe('Dialog component', () => {
     });
   });
 
-  it('shows validation error when trying to populate without selecting source locale', async () => {
+  it('shows validation error when trying to proceed without selecting source locale', async () => {
     const user = userEvent.setup();
 
     await act(async () => {
@@ -116,13 +116,13 @@ describe('Dialog component', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Populate fields')).toBeInTheDocument();
+      expect(screen.getByText('Next')).toBeInTheDocument();
     });
 
     expect(screen.queryByText('Select source locale')).not.toBeInTheDocument();
 
-    const populateButton = screen.getByText('Populate fields');
-    await user.click(populateButton);
+    const nextButton = screen.getByText('Next');
+    await user.click(nextButton);
 
     await waitFor(() => {
       expect(screen.getByText('Select source locale')).toBeInTheDocument();
@@ -162,7 +162,7 @@ describe('Dialog component', () => {
     expect(screen.queryByRole('checkbox', { name: 'Spanish (Spain)' })).not.toBeInTheDocument();
   });
 
-  it('shows validation error when trying to populate without selecting target locales', async () => {
+  it('shows validation error when trying to proceed without selecting target locales', async () => {
     const user = userEvent.setup();
 
     await act(async () => {
@@ -170,10 +170,9 @@ describe('Dialog component', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Populate fields')).toBeInTheDocument();
+      expect(screen.getByText('Next')).toBeInTheDocument();
     });
 
-    // Select a source locale first
     const selectButton = screen.getByTestId('source-locale-select');
     await user.click(selectButton);
 
@@ -184,16 +183,65 @@ describe('Dialog component', () => {
     const sourceLocaleOption = screen.getByTestId('select-locale-en-us');
     await user.click(sourceLocaleOption);
 
-    // Initially, "Select target locales" should not appear as a validation message
     expect(screen.queryByText('Select target locales')).not.toBeInTheDocument();
 
-    // Try to populate without selecting target locales
-    const populateButton = screen.getByText('Populate fields');
-    await user.click(populateButton);
+    const nextButton = screen.getByText('Next');
+    await user.click(nextButton);
 
-    // After clicking, validation message should appear
     await waitFor(() => {
       expect(screen.getByText('Select target locales')).toBeInTheDocument();
     });
+  });
+
+  it('completes the full flow: locale selection, preview, and confirmation', async () => {
+    const user = userEvent.setup();
+    mockSdk.locales.names = {
+      ...mockSdk.locales.names,
+      'en-GB': 'English (United Kingdom)',
+    };
+
+    await act(async () => {
+      render(<Dialog />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Next')).toBeInTheDocument();
+    });
+
+    const sourceSelect = screen.getByTestId('source-locale-select');
+    await user.selectOptions(sourceSelect, 'en-US');
+
+    const targetTrigger = await screen.findByText('Select one or more');
+    await user.click(targetTrigger);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('checkbox', { name: 'English (United Kingdom)' })
+      ).toBeInTheDocument();
+    });
+
+    const targetCheckbox = screen.getByRole('checkbox', { name: 'English (United Kingdom)' });
+    await user.click(targetCheckbox);
+
+    const nextButton = screen.getByText('Next');
+    await user.click(nextButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Back')).toBeInTheDocument();
+      expect(screen.getByText('Confirm')).toBeInTheDocument();
+    });
+
+    expect(mockCma.entry.update).not.toHaveBeenCalled();
+
+    // Click Confirm to populate fields
+    const confirmButton = screen.getByText('Confirm');
+    await user.click(confirmButton);
+
+    // Should show confirmation step with Done button
+    await waitFor(() => {
+      expect(screen.getByText('Done')).toBeInTheDocument();
+    });
+
+    expect(mockCma.entry.update).toHaveBeenCalled();
   });
 });

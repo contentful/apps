@@ -14,7 +14,6 @@ async function saveAppInstallation() {
 
 describe('Config Screen component', () => {
   beforeAll(() => {
-    // Set up mock data
     mockSdk.cma.contentType.getMany.mockResolvedValue({
       items: [
         {
@@ -52,7 +51,6 @@ describe('Config Screen component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset mock implementations
     mockSdk.app.getParameters.mockResolvedValue({});
     mockSdk.app.getCurrentState.mockResolvedValue({});
     mockSdk.app.onConfigure.mockImplementation(
@@ -115,7 +113,6 @@ describe('Config Screen component', () => {
       render(<ConfigScreen />);
     });
 
-    // Wait for content types to load and state to restore
     await waitFor(() => {
       expect(screen.getByText('Content types')).toBeInTheDocument();
     });
@@ -125,7 +122,6 @@ describe('Config Screen component', () => {
   });
 
   it('should reset content types when none are selected', async () => {
-    // Mock current state with existing app configuration
     mockSdk.app.getCurrentState.mockResolvedValue({
       EditorInterface: {
         'existing-content-type': {
@@ -138,17 +134,13 @@ describe('Config Screen component', () => {
       render(<ConfigScreen />);
     });
 
-    // Wait for component to load
     await waitFor(() => {
       expect(screen.getByText('Content types')).toBeInTheDocument();
     });
 
-    // Simulate configuration with no content types selected
     await act(async () => {
       const result = await saveAppInstallation();
 
-      // Verify that the target state has an empty EditorInterface
-      // This means the app is removed from all content types
       expect(result?.targetState.EditorInterface).toEqual({});
     });
   });

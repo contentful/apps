@@ -21,7 +21,10 @@ const mockSdk: any = {
     error: vi.fn(),
   },
   parameters: {
-    invocation: {},
+    invocation: {
+      entryId: 'test-entry',
+      contentTypeId: 'test-content-type',
+    },
   },
   dialogs: {
     openCurrentApp: vi.fn(),
@@ -34,6 +37,16 @@ const mockSdk: any = {
       de: 'German',
       fr: 'French',
       'es-ES': 'Spanish (Spain)',
+    },
+  },
+  entry: {
+    getSys: vi.fn().mockReturnValue({
+      id: 'test-entry',
+    }),
+  },
+  contentType: {
+    sys: {
+      id: 'test-content-type',
     },
   },
   close: vi.fn(),

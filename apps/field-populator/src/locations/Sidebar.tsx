@@ -8,35 +8,22 @@ const Sidebar = () => {
 
   useAutoResizer();
 
-  const openDialog = async () => {
-    const result = await sdk.dialogs.openCurrentApp({
+  const openDialog = () => {
+    sdk.dialogs.openCurrentApp({
       title: APP_NAME,
-      width: 'large',
+      width: 'fullWidth',
       minHeight: '340px',
+      parameters: {
+        entryId: sdk.entry.getSys().id,
+        contentTypeId: sdk.contentType.sys.id,
+      },
     });
-    if (!result) {
-      return;
-    }
-    const { sourceLocale, targetLocales } = result as {
-      sourceLocale: string;
-      targetLocales: string[];
-    };
-    updateFields(sourceLocale, targetLocales);
-  };
-
-  const updateFields = (sourceLocale: string, targetLocales: string[]) => {
-    for (const fieldId of Object.keys(sdk.entry.fields)) {
-      const newValue = sdk.entry.fields[fieldId].getValue(sourceLocale);
-      for (const targetLocale of targetLocales) {
-        sdk.entry.fields[fieldId].setValue(newValue, targetLocale);
-      }
-    }
   };
 
   return (
     <Flex flexDirection="column" gap="spacingM">
       <Text fontColor="gray500">Populate content across similar locales</Text>
-      <Button isFullWidth onClick={() => openDialog()}>
+      <Button isFullWidth onClick={openDialog}>
         {APP_NAME}
       </Button>
     </Flex>
