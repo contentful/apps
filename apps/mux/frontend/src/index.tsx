@@ -75,15 +75,10 @@ function normalizeForDiff<T>(obj: T): T {
     return Object.keys(obj)
       .filter((k) => (obj as Record<string, unknown>)[k] !== undefined)
       .sort()
-      .reduce(
-        (acc, k) => {
-          (acc as Record<string, unknown>)[k] = normalizeForDiff(
-            (obj as Record<string, unknown>)[k]
-          );
-          return acc;
-        },
-        {} as Record<string, unknown>
-      ) as T;
+      .reduce((acc, k) => {
+        (acc as Record<string, unknown>)[k] = normalizeForDiff((obj as Record<string, unknown>)[k]);
+        return acc;
+      }, {} as Record<string, unknown>) as T;
   }
   return obj;
 }
@@ -563,7 +558,9 @@ export class App extends React.Component<AppProps, AppState> {
       .installation as InstallationParams;
     if (!(muxSigningKeyId && muxSigningKeyPrivate)) {
       this.setState({
-        error: `Error: this asset was created with ${isDRM ? 'DRM protection' : 'signed playback'}, but signing keys do not exist for your account. Make sure to enable "Signed URLs" in the app settings.`,
+        error: `Error: this asset was created with ${
+          isDRM ? 'DRM protection' : 'signed playback'
+        }, but signing keys do not exist for your account. Make sure to enable "Signed URLs" in the app settings.`,
         errorShowResetAction: true,
       });
       return;

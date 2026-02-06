@@ -136,8 +136,8 @@ const ModalContent: FC<MuxAssetConfigurationModalProps> = ({
       const currentPolicy: PolicyType = asset.drmPlaybackId
         ? 'drm'
         : asset.signedPlaybackId
-          ? 'signed'
-          : 'public';
+        ? 'signed'
+        : 'public';
 
       setModalData({
         videoQuality: 'plus',
