@@ -153,10 +153,10 @@ export class FocalPointDialog extends Component {
           </div>
         </Modal.Content>
         <Modal.Controls>
-          <Button onClick={() => this.props.onSave(this.state.focalPoint)} buttonType="positive">
+          <Button onClick={() => this.props.onSave(this.state.focalPoint)} variant="positive">
             Save
           </Button>
-          <Button onClick={this.props.onClose} buttonType="muted">
+          <Button onClick={this.props.onClose} variant="secondary">
             Close
           </Button>
         </Modal.Controls>

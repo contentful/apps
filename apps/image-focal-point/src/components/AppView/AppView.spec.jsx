@@ -39,7 +39,7 @@ describe('AppView', () => {
 
     it('should render inline validation if the content type id is taken', async () => {
       props.sdk.space.getContentTypes.mockImplementation(() => ({
-        items: [{ sys: { id: 'imageWithFocalPoint' } }],
+        items: [{ sys: { id: 'imageWithFocalPoint' }, name: 'Test', fields: [] }],
       }));
       const { getByTestId } = render(<AppView {...props} />);
       await wait();
@@ -60,6 +60,57 @@ describe('AppView', () => {
       fireEvent.change(getByTestId('content-type-id-input'), { target: { value: 'someTestId' } });
       fireEvent.change(getByTestId('content-type-name-input'), { target: { value: 'Test Name' } });
       expect(getByTestId('content-type-id-input').value).toEqual('someTestId');
+    });
+
+    it('should allow selecting an existing content type with Object and Asset fields', async () => {
+      props.sdk.space.getContentTypes.mockImplementation(() => ({
+        items: [
+          {
+            sys: { id: 'eligibleType' },
+            name: 'Eligible Type',
+            fields: [
+              { id: 'focalPoint', name: 'Focal Point', type: 'Object' },
+              { id: 'image', name: 'Image', type: 'Link', linkType: 'Asset' },
+            ],
+          },
+        ],
+      }));
+      const { getByLabelText, getByTestId } = render(<AppView {...props} />);
+      await wait();
+
+      // Switch to "Use existing" mode
+      fireEvent.click(getByLabelText('Use an existing content type'));
+
+      // Should show the existing content type dropdown
+      expect(getByTestId('existing-content-type')).toBeDefined();
+    });
+
+    it('should show field dropdowns when existing content type is selected', async () => {
+      props.sdk.space.getContentTypes.mockImplementation(() => ({
+        items: [
+          {
+            sys: { id: 'eligibleType' },
+            name: 'Eligible Type',
+            fields: [
+              { id: 'focalPoint', name: 'Focal Point', type: 'Object' },
+              { id: 'image', name: 'Image', type: 'Link', linkType: 'Asset' },
+            ],
+          },
+        ],
+      }));
+      const { getByLabelText, getByTestId, container } = render(<AppView {...props} />);
+      await wait();
+
+      // Switch to "Use existing" mode
+      fireEvent.click(getByLabelText('Use an existing content type'));
+
+      // Select the content type
+      const select = container.querySelector('select[name="existingContentType"]');
+      fireEvent.change(select, { target: { value: 'eligibleType' } });
+
+      // Should show field dropdowns
+      expect(getByTestId('focal-point-field')).toBeDefined();
+      expect(getByTestId('image-field')).toBeDefined();
     });
   });
 
