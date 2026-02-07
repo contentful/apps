@@ -24,6 +24,7 @@ export interface AppInstallationParameters {
   voiceId?: string;
   generateAudioActionId?: string;
   useMockAi?: boolean;
+  demoMode?: boolean;
   waveformColor?: string;
   waveformOpacity?: number;
   kenBurnsZoomIncrement?: number;
@@ -37,6 +38,7 @@ const ConfigScreen = () => {
     voiceId: '',
     generateAudioActionId: '',
     useMockAi: false,
+    demoMode: false,
     waveformColor: 'white',
     waveformOpacity: 0.9,
     kenBurnsZoomIncrement: 0.0005,
@@ -59,12 +61,12 @@ const ConfigScreen = () => {
     // related to this app installation
     const currentState = await sdk.app.getCurrentState();
 
-    if (!parameters.useMockAi && !parameters.elevenLabsApiKey) {
-      sdk.notifier.error('Please provide an ElevenLabs API key or enable mock mode.');
+    if (!parameters.useMockAi && !parameters.demoMode && !parameters.elevenLabsApiKey) {
+      sdk.notifier.error('Please provide an ElevenLabs API key or enable mock/demo mode.');
       return false;
     }
 
-    if (!parameters.voiceId) {
+    if (!parameters.demoMode && !parameters.voiceId) {
       sdk.notifier.error('Please provide a voice ID.');
       return false;
     }
@@ -97,6 +99,7 @@ const ConfigScreen = () => {
           voiceId: currentParameters.voiceId || '',
           generateAudioActionId: currentParameters.generateAudioActionId || '',
           useMockAi: Boolean(currentParameters.useMockAi),
+          demoMode: Boolean(currentParameters.demoMode),
           waveformColor: currentParameters.waveformColor || 'white',
           waveformOpacity: currentParameters.waveformOpacity ?? 0.9,
           kenBurnsZoomIncrement: currentParameters.kenBurnsZoomIncrement ?? 0.0005,
@@ -222,6 +225,24 @@ const ConfigScreen = () => {
                     />
                     <FormControl.HelpText>
                       Enable mock mode to test the app without an ElevenLabs API key.
+                    </FormControl.HelpText>
+                  </FormControl>
+
+                  <FormControl>
+                    <FormControl.Label>Demo mode (instant assets)</FormControl.Label>
+                    <Checkbox
+                      id="demoMode"
+                      isChecked={parameters.demoMode}
+                      onChange={(event) =>
+                        setParameters({
+                          ...parameters,
+                          demoMode: event.target.checked,
+                        })
+                      }
+                      aria-label="Enable demo mode"
+                    />
+                    <FormControl.HelpText>
+                      Uses pre-generated audio/video assets after a short delay for live demos.
                     </FormControl.HelpText>
                   </FormControl>
                 </Stack>

@@ -4,6 +4,8 @@ import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useVideoGenerator } from '../hooks/useVideoGenerator';
 import { uploadVideoAsset } from '../lib/contentful-upload';
+import { delay } from '../lib/delay';
+import { DEMO_AUDIO_ASSET_ID, DEMO_DELAY_MS, DEMO_VIDEO_ASSET_ID } from '../constants';
 
 type GenerateAudioResult = {
   status: 'success';
@@ -19,6 +21,7 @@ type AppActionResult =
 type InstallationParameters = {
   generateAudioActionId?: string;
   voiceId?: string;
+  demoMode?: boolean;
   waveformColor?: string;
   waveformOpacity?: number;
   kenBurnsZoomIncrement?: number;
@@ -64,6 +67,14 @@ const getAssetLinkFromValue = (value: unknown): AssetLink | null => {
   return null;
 };
 
+const createAssetLink = (assetId: string): AssetLink => ({
+  sys: {
+    type: 'Link',
+    linkType: 'Asset',
+    id: assetId,
+  },
+});
+
 const getFieldValueWithFallback = (
   field: EntryFieldAPI,
   locale: string,
@@ -94,6 +105,7 @@ const Sidebar = () => {
   const { generateVideo } = useVideoGenerator();
 
   const installParams = sdk.parameters.installation as InstallationParameters | undefined;
+  const isDemoMode = Boolean(installParams?.demoMode);
   const audioField = sdk.entry.fields[AUDIO_ASSET_FIELD_ID];
   const videoField = sdk.entry.fields[VIDEO_ASSET_FIELD_ID];
 
@@ -148,6 +160,27 @@ const Sidebar = () => {
         assetId: assetLink.sys.id,
       });
 
+      const fileField =
+        asset.fields.file?.[selectedLocale] ?? asset.fields.file?.[sdk.locales.default];
+      const assetUrl = fileField?.url;
+      return assetUrl ? normalizeAssetUrl(assetUrl) : null;
+    },
+    [sdk, selectedLocale]
+  );
+
+  const resolveAssetUrlById = useCallback(
+    async (assetId: string): Promise<string | null> => {
+      const spaceId = sdk.ids.space;
+      const environmentId = sdk.ids.environment;
+      if (!spaceId || !environmentId) {
+        throw new Error('Space or environment ID is unavailable.');
+      }
+
+      const asset = await sdk.cma.asset.get({
+        spaceId,
+        environmentId,
+        assetId,
+      });
       const fileField =
         asset.fields.file?.[selectedLocale] ?? asset.fields.file?.[sdk.locales.default];
       const assetUrl = fileField?.url;
@@ -225,7 +258,7 @@ const Sidebar = () => {
     }
 
     const voiceId = installParams?.voiceId;
-    if (!voiceId) {
+    if (!isDemoMode && !voiceId) {
       sdk.notifier.error('Missing voiceId in app configuration.');
       return;
     }
@@ -240,8 +273,24 @@ const Sidebar = () => {
       return;
     }
 
+    if (!sdk.ids.space || !sdk.ids.environment) {
+      sdk.notifier.error('Space or environment ID is unavailable. Please reload the entry.');
+      return;
+    }
+
     setIsLoading(true);
     try {
+      if (isDemoMode) {
+        await delay(DEMO_DELAY_MS);
+        await audioField.setValue(createAssetLink(DEMO_AUDIO_ASSET_ID), selectedLocale);
+        const resolvedAudioUrl =
+          (await resolveAssetUrl(AUDIO_ASSET_FIELD_ID)) ??
+          (await resolveAssetUrlById(DEMO_AUDIO_ASSET_ID));
+        setAudioUrl(resolvedAudioUrl);
+        sdk.notifier.success('Demo audio attached.');
+        return;
+      }
+
       const appActionId = await resolveActionId();
       if (!appActionId) {
         sdk.notifier.error('Generate Audio app action not found.');
@@ -286,6 +335,38 @@ const Sidebar = () => {
   };
 
   const handleGenerateVideo = async () => {
+    if (!sdk.ids.space || !sdk.ids.environment) {
+      sdk.notifier.error('Space or environment ID is unavailable. Please reload the entry.');
+      return;
+    }
+
+    if (isDemoMode) {
+      setIsVideoLoading(true);
+      try {
+        await delay(DEMO_DELAY_MS);
+        if (videoField) {
+          await videoField.setValue(createAssetLink(DEMO_VIDEO_ASSET_ID), selectedLocale);
+        } else {
+          sdk.notifier.warning(
+            `Demo video available but missing field: ${VIDEO_ASSET_FIELD_ID}. Unable to link.`
+          );
+        }
+
+        const resolvedVideoUrl =
+          (await resolveAssetUrl(VIDEO_ASSET_FIELD_ID)) ??
+          (await resolveAssetUrlById(DEMO_VIDEO_ASSET_ID));
+        setVideoUrl(resolvedVideoUrl);
+        sdk.notifier.success('Demo video attached.');
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        console.error('demo-video:sidebar-error', message, error);
+        sdk.notifier.error('Demo video attachment failed. Please try again.');
+      } finally {
+        setIsVideoLoading(false);
+      }
+      return;
+    }
+
     if (!imageFieldId) {
       sdk.notifier.error('Missing field: please add a Media field with ID featuredImage or image.');
       return;
@@ -293,11 +374,6 @@ const Sidebar = () => {
 
     if (!sdk.ids.entry) {
       sdk.notifier.error('Entry ID is unavailable. Please reload the entry.');
-      return;
-    }
-
-    if (!sdk.ids.space || !sdk.ids.environment) {
-      sdk.notifier.error('Space or environment ID is unavailable. Please reload the entry.');
       return;
     }
 

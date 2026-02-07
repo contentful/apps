@@ -26,7 +26,13 @@ import { styles } from '../components/Agent.styles';
 import { AIChatEmptyState } from '../components/AgentEmptyChat';
 import { useVideoGenerator } from '../hooks/useVideoGenerator';
 import { uploadVideoAsset } from '../lib/contentful-upload';
-import { AGENT_API_BASE_URL } from '../constants';
+import { delay } from '../lib/delay';
+import {
+  AGENT_API_BASE_URL,
+  DEMO_AUDIO_ASSET_ID,
+  DEMO_DELAY_MS,
+  DEMO_VIDEO_ASSET_ID,
+} from '../constants';
 
 // Type for tool call arguments
 type FindEntryArgs = { query: string };
@@ -59,6 +65,16 @@ const getAssetIdFromField = (fieldValue: unknown): string | null => {
   return null;
 };
 
+const normalizeAssetUrl = (url: string) => (url.startsWith('//') ? `https:${url}` : url);
+
+const createAssetLink = (assetId: string) => ({
+  sys: {
+    type: 'Link' as const,
+    linkType: 'Asset' as const,
+    id: assetId,
+  },
+});
+
 const Agent = () => {
   const sdk = useSDK<AgentAppSDK>();
   useAutoResizer();
@@ -81,6 +97,9 @@ const Agent = () => {
 
   // Video generator hook
   const { generateVideo } = useVideoGenerator();
+
+  const installParams = sdk.parameters.installation as { demoMode?: boolean } | undefined;
+  const isDemoMode = Boolean(installParams?.demoMode);
 
   const apiUrl = `${AGENT_API_BASE_URL.replace(/\/$/, '')}/api/agent/stream`;
 
@@ -124,6 +143,58 @@ const Agent = () => {
           // Fetch the entry to get audio and image assets
           const entry = await sdk.cma.entry.get({ entryId });
 
+          if (isDemoMode) {
+            await delay(DEMO_DELAY_MS);
+
+            const [audioAsset, videoAsset] = await Promise.all([
+              sdk.cma.asset.get({ assetId: DEMO_AUDIO_ASSET_ID }),
+              sdk.cma.asset.get({ assetId: DEMO_VIDEO_ASSET_ID }),
+            ]);
+
+            const audioUrl = audioAsset.fields.file?.[sdk.locales.default]?.url;
+            const videoUrl = videoAsset.fields.file?.[sdk.locales.default]?.url;
+            if (!audioUrl || !videoUrl) {
+              return 'Demo assets are missing file URLs.';
+            }
+            if (videoUrl) {
+              setGeneratedVideoUrl(normalizeAssetUrl(videoUrl));
+            }
+
+            let didUpdate = false;
+            const updatedFields = { ...entry.fields };
+            const locale = sdk.locales.default;
+
+            if ('audioAsset' in entry.fields) {
+              const existingField =
+                typeof entry.fields.audioAsset === 'object' && entry.fields.audioAsset
+                  ? (entry.fields.audioAsset as Record<string, unknown>)
+                  : {};
+              updatedFields.audioAsset = {
+                ...existingField,
+                [locale]: createAssetLink(DEMO_AUDIO_ASSET_ID),
+              };
+              didUpdate = true;
+            }
+
+            if ('videoAsset' in entry.fields) {
+              const existingField =
+                typeof entry.fields.videoAsset === 'object' && entry.fields.videoAsset
+                  ? (entry.fields.videoAsset as Record<string, unknown>)
+                  : {};
+              updatedFields.videoAsset = {
+                ...existingField,
+                [locale]: createAssetLink(DEMO_VIDEO_ASSET_ID),
+              };
+              didUpdate = true;
+            }
+
+            if (didUpdate) {
+              await sdk.cma.entry.update({ entryId }, { ...entry, fields: updatedFields });
+            }
+
+            return `Demo mode: attached audio/video assets. Video asset ID: ${DEMO_VIDEO_ASSET_ID}`;
+          }
+
           // Extract audio and image asset links from entry fields
           const audioField = entry.fields.audioAsset ?? entry.fields.audio;
           const imageField = entry.fields.featuredImage ?? entry.fields.image;
@@ -153,8 +224,8 @@ const Agent = () => {
 
           // Generate the video
           const videoBlob = await generateVideo({
-            imageUrl: imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl,
-            audioUrl: audioUrl.startsWith('//') ? `https:${audioUrl}` : audioUrl,
+            imageUrl: normalizeAssetUrl(imageUrl),
+            audioUrl: normalizeAssetUrl(audioUrl),
           });
 
           // Upload the video to Contentful
@@ -185,7 +256,7 @@ const Agent = () => {
 
       return `Unknown tool: ${toolName}`;
     },
-    [sdk, generateVideo]
+    [generateVideo, isDemoMode, sdk]
   );
 
   const { messages, append, status, stop } = useChat({
