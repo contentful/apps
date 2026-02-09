@@ -13,10 +13,16 @@ import { ArrowRightIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
-import { AppInstallationParameters, ContentType } from '../utils/types';
+import { AppInstallationParameters } from '../utils/types';
 import tokens from '@contentful/f36-tokens';
-import { createContentTypes as createConfigurationContentTypes } from '../utils/createContentType';
+import {
+  createContentTypes as createConfigurationContentTypes,
+  REDIRECT_CONTENT_TYPE_ID,
+  VANITY_URL_CONTENT_TYPE_ID,
+} from '../utils/createContentType';
 import { styles } from './ConfigScreen.styles';
+
+const EXCLUDED_CONTENT_TYPE_IDS: string[] = [REDIRECT_CONTENT_TYPE_ID, VANITY_URL_CONTENT_TYPE_ID];
 
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
@@ -25,24 +31,28 @@ const ConfigScreen = () => {
     redirectFromContentTypes: [],
     redirectToContentTypes: [],
   });
-  const [redirectFromContentTypes, setRedirectFromContentTypes] = useState<ContentType[]>([]);
-  const [redirectToContentTypes, setRedirectToContentTypes] = useState<ContentType[]>([]);
   const [showValidationErrors, setShowValidationErrors] = useState<boolean>(false);
 
   const onConfigure = useCallback(async () => {
-    const hasFromError = redirectFromContentTypes.length === 0;
-    const hasToError = redirectToContentTypes.length === 0;
+    const hasFromError = parameters.redirectFromContentTypes.length === 0;
+    const hasToError = parameters.redirectToContentTypes.length === 0;
 
     if (hasFromError || hasToError) {
       setShowValidationErrors(true);
       return false;
     }
 
-    await createConfigurationContentTypes(sdk, parameters.enableVanityUrl);
+    try {
+      await createConfigurationContentTypes(sdk, parameters.enableVanityUrl);
+    } catch (error) {
+      sdk.notifier.error('Failed to create required content types. Please try again.');
+
+      return false;
+    }
 
     const allContentTypeIds = new Set([
-      ...redirectFromContentTypes.map((ct) => ct.id),
-      ...redirectToContentTypes.map((ct) => ct.id),
+      ...parameters.redirectFromContentTypes.map((ct) => ct.id),
+      ...parameters.redirectToContentTypes.map((ct) => ct.id),
     ]);
 
     const editorInterface = Array.from(allContentTypeIds).reduce(
@@ -57,16 +67,12 @@ const ConfigScreen = () => {
 
     setShowValidationErrors(false);
     return {
-      parameters: {
-        ...parameters,
-        redirectFromContentTypes,
-        redirectToContentTypes,
-      },
+      parameters,
       targetState: {
         EditorInterface: editorInterface,
       },
     };
-  }, [parameters, redirectFromContentTypes, redirectToContentTypes, sdk]);
+  }, [parameters, sdk]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -78,13 +84,6 @@ const ConfigScreen = () => {
 
       if (currentParameters) {
         setParameters(currentParameters);
-
-        if (currentParameters.redirectFromContentTypes) {
-          setRedirectFromContentTypes(currentParameters.redirectFromContentTypes);
-        }
-        if (currentParameters.redirectToContentTypes) {
-          setRedirectToContentTypes(currentParameters.redirectToContentTypes);
-        }
       }
 
       sdk.app.setReady();
@@ -120,15 +119,19 @@ const ConfigScreen = () => {
                 </Paragraph>
                 <FormControl
                   isRequired
-                  isInvalid={showValidationErrors && redirectFromContentTypes.length === 0}>
+                  isInvalid={
+                    showValidationErrors && parameters.redirectFromContentTypes.length === 0
+                  }>
                   <FormControl.Label>Select redirect from content types</FormControl.Label>
                   <ContentTypeMultiSelect
-                    selectedContentTypes={redirectFromContentTypes}
-                    setSelectedContentTypes={setRedirectFromContentTypes}
-                    sdk={sdk}
+                    selectedContentTypes={parameters.redirectFromContentTypes}
+                    setSelectedContentTypes={(contentTypes) =>
+                      setParameters((prev) => ({ ...prev, redirectFromContentTypes: contentTypes }))
+                    }
                     cma={sdk.cma}
+                    excludedContentTypesIds={EXCLUDED_CONTENT_TYPE_IDS}
                   />
-                  {showValidationErrors && redirectFromContentTypes.length === 0 && (
+                  {showValidationErrors && parameters.redirectFromContentTypes.length === 0 && (
                     <FormControl.ValidationMessage>
                       Select at least one content type
                     </FormControl.ValidationMessage>
@@ -150,15 +153,19 @@ const ConfigScreen = () => {
                 </Paragraph>
                 <FormControl
                   isRequired
-                  isInvalid={showValidationErrors && redirectToContentTypes.length === 0}>
+                  isInvalid={
+                    showValidationErrors && parameters.redirectToContentTypes.length === 0
+                  }>
                   <FormControl.Label>Select redirect to content types</FormControl.Label>
                   <ContentTypeMultiSelect
-                    selectedContentTypes={redirectToContentTypes}
-                    setSelectedContentTypes={setRedirectToContentTypes}
-                    sdk={sdk}
+                    selectedContentTypes={parameters.redirectToContentTypes}
+                    setSelectedContentTypes={(contentTypes) =>
+                      setParameters((prev) => ({ ...prev, redirectToContentTypes: contentTypes }))
+                    }
                     cma={sdk.cma}
+                    excludedContentTypesIds={EXCLUDED_CONTENT_TYPE_IDS}
                   />
-                  {showValidationErrors && redirectToContentTypes.length === 0 && (
+                  {showValidationErrors && parameters.redirectToContentTypes.length === 0 && (
                     <FormControl.ValidationMessage>
                       Select at least one content type
                     </FormControl.ValidationMessage>

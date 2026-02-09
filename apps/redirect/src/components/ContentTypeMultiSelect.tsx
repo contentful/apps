@@ -3,12 +3,12 @@ import { Box, Stack, Pill } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { ContentType } from '../utils/types';
 import { ContentTypeProps } from 'contentful-management';
-import { ConfigAppSDK, CMAClient } from '@contentful/app-sdk';
+import { CMAClient } from '@contentful/app-sdk';
+import { REDIRECT_CONTENT_TYPE_ID, VANITY_URL_CONTENT_TYPE_ID } from '../utils/createContentType';
 
 interface ContentTypeMultiSelectProps {
   selectedContentTypes: ContentType[];
   setSelectedContentTypes: (contentTypes: ContentType[]) => void;
-  sdk: ConfigAppSDK;
   cma: CMAClient;
   excludedContentTypesIds?: string[];
 }
@@ -16,7 +16,6 @@ interface ContentTypeMultiSelectProps {
 const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   selectedContentTypes,
   setSelectedContentTypes,
-  sdk,
   cma,
   excludedContentTypesIds = [],
 }) => {

@@ -70,7 +70,7 @@ const redirectContentTypeBody: CreateContentTypeProps = {
 const vanityUrlContentTypeBody: CreateContentTypeProps = {
   name: 'Vanity URL',
   description:
-    'Vanity URL content type for marketing campaign URLs and branded shortcuts. Do not delete or modify manually.',
+    'Vanity URL content type for marketing campaign URLs and branded shortcuts for the Redirect app. Do not delete or modify manually.',
   displayField: 'title',
   fields: [
     {
@@ -131,23 +131,30 @@ const vanityUrlContentTypeBody: CreateContentTypeProps = {
   ],
 };
 
+async function contentTypeExists(sdk: ConfigAppSDK, contentTypeId: string): Promise<boolean> {
+  try {
+    await sdk.cma.contentType.get({ contentTypeId });
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 async function createAndPublishContentType(
   sdk: ConfigAppSDK,
   contentTypeId: string,
   contentTypeBody: CreateContentTypeProps
 ): Promise<void> {
-  try {
-    const contentTypeProps = await sdk.cma.contentType.createWithId(
-      { contentTypeId },
-      contentTypeBody
-    );
-    await sdk.cma.contentType.publish({ contentTypeId }, contentTypeProps);
-  } catch (e: unknown) {
-    // Only ignore error if content type already exists
-    if (e instanceof Error && 'code' in e && e.code !== 'VersionMismatch') {
-      throw e;
-    }
+  if (await contentTypeExists(sdk, contentTypeId)) {
+    return;
   }
+
+  const contentTypeProps = await sdk.cma.contentType.createWithId(
+    { contentTypeId },
+    contentTypeBody
+  );
+
+  await sdk.cma.contentType.publish({ contentTypeId }, contentTypeProps);
 }
 
 export async function createContentTypes(
