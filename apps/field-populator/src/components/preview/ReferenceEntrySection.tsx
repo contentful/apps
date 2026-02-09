@@ -63,7 +63,7 @@ const ReferenceEntrySection = ({
 
   const allFieldsAdopted = useMemo(() => {
     return localizedFields.every((field) => adoptedFields[field.id] === true);
-  }, [fieldCount, adoptedFields]);
+  }, [localizedFields, adoptedFields]);
 
   const getFieldValue = (fieldId: string, locale: string): unknown => {
     return entry.fields[fieldId]?.[locale];

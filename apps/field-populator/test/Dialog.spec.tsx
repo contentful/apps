@@ -313,15 +313,12 @@ describe('Dialog component', () => {
       return Promise.resolve(mainEntryWithReference as any);
     });
 
-    mockCma.contentType.get.mockImplementation((params: { contentTypeId: string }) => {
-      if (params.contentTypeId === 'test-content-type')
-        return Promise.resolve(mainContentTypeWithRefField as any);
-      if (params.contentTypeId === referencedContentTypeId)
-        return Promise.resolve(referencedContentType as any);
-      return Promise.resolve(mainContentTypeWithRefField as any);
-    });
+    mockCma.contentType.get.mockResolvedValue(mainContentTypeWithRefField);
 
     mockCma.entry.update.mockImplementation((_params: any, entry: any) => Promise.resolve(entry));
+
+    mockCma.entry.getMany.mockResolvedValue({ items: [referencedEntry] });
+    mockCma.contentType.getMany.mockResolvedValue({ items: [referencedContentType] });
 
     await act(async () => {
       render(<Dialog />);
