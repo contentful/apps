@@ -22,6 +22,7 @@
   },
   "scripts": {
     "start": "vite",
+    "preinstall": "cd ../../packages/shared-components && npm install && npm run build",
     "build": "tsc && vite build --outDir build && npm run build:functions",
     "test": "vitest",
     "test:ci": "vitest run",

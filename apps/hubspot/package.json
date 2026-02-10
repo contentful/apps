@@ -23,6 +23,7 @@
   "scripts": {
     "start": "vite",
     "dev": "vite",
+    "preinstall": "cd ../../packages/shared-components && npm install && npm run build",
     "build": "vite build --outDir build && npm run build:functions",
     "preview": "vite preview",
     "test": "vitest",
