@@ -7,28 +7,40 @@
   "type": "module",
   "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "dev": "vite",
+    "test": "vitest",
+    "test:ci": "vitest run",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prettier:write": "prettier --write .",
+    "prettier:check": "prettier --check .",
+    "prettier:list": "prettier -l .",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "@contentful/f36-components": "^5.9.0",
+    "@contentful/f36-tokens": "^5.1.0",
+    "@emotion/css": "10.0.27",
     "happy-dom": "^20.4.0",
     "prettier": "^3.6.2",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "@testing-library/react": "16.3.0",
     "@eslint/js": "^9.39.1",
     "@eslint/json": "1.0.0",
-    "eslint": "^9.39.1",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-unused-imports": "^4.1.4",
-    "vite": "^7.3.1",
-    "vitest": "^4.0.18",
-    "@vitejs/plugin-react": "5.1.0",
+    "@testing-library/react": "16.3.0",
     "@types/node": "25.1.0",
     "@types/react": "18.3.1",
     "@types/react-dom": "18.3.0",
+    "@vitejs/plugin-react": "5.1.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-unused-imports": "^4.1.4",
     "typescript": "5.9.2",
-    "typescript-eslint": "^8.46.3"
+    "typescript-eslint": "^8.46.3",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18"
   }
 }

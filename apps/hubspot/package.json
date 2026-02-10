@@ -15,6 +15,7 @@
     "contentful-management": "^11.52.0",
     "dotenv": "^17.2.1",
     "emotion": "10.0.27",
+    "shared-components": "file:../../packages/shared-components",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "tsx": "^4.20.3"

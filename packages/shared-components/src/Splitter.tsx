@@ -2,15 +2,15 @@ import { Box, CommonProps, MarginProps, PaddingProps } from '@contentful/f36-com
 import { cx, css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
 
-interface SplitterProps extends CommonProps, MarginProps, PaddingProps {}
+export interface SplitterProps extends CommonProps, MarginProps, PaddingProps {}
 
-const Splitter = (props: SplitterProps) => {
+export function Splitter(props: SplitterProps) {
   const { className, ...otherProps } = props;
 
   return (
     <Box
       {...otherProps}
-      as="hr"
+      as={'hr'}
       className={cx(
         css({
           border: 0,
@@ -21,6 +21,4 @@ const Splitter = (props: SplitterProps) => {
       )}
     />
   );
-};
-
-export default Splitter;
+}
