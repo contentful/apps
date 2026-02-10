@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "shared-components": "file:../../packages/shared-components",
     "@contentful/app-sdk": "4.25.0",
     "@contentful/f36-components": "4.65.4",
     "@contentful/f36-multiselect": "^4.26.0",

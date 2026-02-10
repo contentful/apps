@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import WizardFooter from '../WizardFooter';
 import { Box, Button, Paragraph, Skeleton, Subheading } from '@contentful/f36-components';
-import Splitter from '../Splitter';
+import { Splitter } from 'shared-components';
 import tokens from '@contentful/f36-tokens';
 import CodeBlock from '../CodeBlock';
 import { Entry } from '../../fields/Entry';

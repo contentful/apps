@@ -17,7 +17,7 @@ import {
 import { InvocationParams } from './Dialog';
 import { styles } from './Sidebar.styles';
 import InformationWithLink from '../components/InformationWithLink';
-import Splitter from '../components/Splitter';
+import { Splitter } from 'shared-components';
 import { useEffect, useState } from 'react';
 import React from 'react';
 
