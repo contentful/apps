@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "shared-components": "file:../../packages/shared-components",
     "@contentful/app-sdk": "4.25.0",
     "@contentful/f36-components": "4.65.4",
     "@contentful/f36-multiselect": "^4.26.0",
@@ -18,11 +17,13 @@
     "happy-dom": "^20.0.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-syntax-highlighter": "^15.6.1"
+    "react-syntax-highlighter": "^16.1.0",
+    "shared-components": "file:../../packages/shared-components"
   },
   "scripts": {
     "start": "vite",
     "preinstall": "cd ../../packages/shared-components && npm install && npm run build",
+    "prebuild": "cd ../../packages/shared-components && npm run build",
     "build": "tsc && vite build --outDir build && npm run build:functions",
     "test": "vitest",
     "test:ci": "vitest run",
@@ -38,7 +39,7 @@
     "create-app-event": "tsx -r dotenv/config src/scripts/createAppEvents.ts"
   },
   "devDependencies": {
-    "@contentful/app-scripts": "^2.3.0",
+    "@contentful/app-scripts": "^1.1.2",
     "@contentful/node-apps-toolkit": "^3.11.1",
     "@testing-library/react": "16.2.0",
     "@tsconfig/recommended": "^1.0.8",
