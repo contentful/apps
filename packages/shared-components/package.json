@@ -5,9 +5,13 @@
   "license": "ISC",
   "author": "",
   "type": "module",
-  "main": "index.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
   "scripts": {
-    "build": "tsc",
+    "build": "rimraf lib && tsc",
     "dev": "vite",
     "test": "vitest",
     "test:ci": "vitest run",
@@ -15,8 +19,7 @@
     "lint:fix": "eslint . --fix",
     "prettier:write": "prettier --write .",
     "prettier:check": "prettier --check .",
-    "prettier:list": "prettier -l .",
-    "prepublishOnly": "npm run build"
+    "prettier:list": "prettier -l ."
   },
   "dependencies": {
     "@testing-library/jest-dom": "^6.9.1"
@@ -48,6 +51,7 @@
     "prettier": "^3.6.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "rimraf": "^5.0.10",
     "typescript": "5.9.2",
     "typescript-eslint": "^8.46.3",
     "vite": "^7.3.1",

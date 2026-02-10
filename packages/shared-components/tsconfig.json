@@ -19,9 +19,11 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noEmit": true,
+    "outDir": "./lib",
+    "rootDir": "./",
+    "declaration": true,
     "jsx": "react-jsx",
     "types": ["vitest/globals"]
   },
-  "include": ["src", "test"]
+  "files": ["./index.ts"]
 }
