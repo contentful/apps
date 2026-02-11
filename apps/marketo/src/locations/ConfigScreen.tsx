@@ -4,10 +4,8 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { css } from 'emotion';
 import { useCallback, useEffect, useState } from 'react';
 
-export interface AppInstallationParameters {}
-
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>({});
+  const [parameters, setParameters] = useState({});
   const sdk = useSDK<ConfigAppSDK>();
 
   /*
