@@ -1,13 +1,14 @@
 import React, { useMemo } from 'react';
 import { Box, Stack, Pill } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
+import { useContentTypes } from './hooks/useContentTypes';
 
 export interface ContentType {
   id: string;
   name: string;
 }
 
-interface ContentTypeMultiSelectProps {
+export interface ContentTypeMultiSelectProps {
   availableContentTypesIds?: string[];
   selectedContentTypes: ContentType[];
   setSelectedContentTypes: (contentTypes: ContentType[]) => void;
@@ -22,15 +23,7 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   maxSelected,
   disablePills = false,
 }) => {
-  // Mock content types - TODO: Replace with useContentTypes hook
-  const availableContentTypes: ContentType[] = [
-    { id: 'article', name: 'Article' },
-    { id: 'blogPost', name: 'Blog Post' },
-    { id: 'product', name: 'Product' },
-    { id: 'category', name: 'Category' },
-    { id: 'author', name: 'Author' },
-    { id: 'page', name: 'Page' },
-  ];
+  const availableContentTypes = useContentTypes(availableContentTypesIds);
   const [filteredContentTypes, setFilteredContentTypes] =
     React.useState<ContentType[]>(availableContentTypes);
 
@@ -52,6 +45,8 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
     () => !!maxSelected && selectedContentTypes.length >= maxSelected,
     [selectedContentTypes]
   );
+
+  console.log('selectedContentTypes', selectedContentTypes);
 
   return (
     <Stack marginTop="spacingXs" flexDirection="column" alignItems="start">
