@@ -23,7 +23,6 @@
     "rootDir": "./",
     "declaration": true,
     "jsx": "react-jsx",
-    "types": ["vitest/globals"]
   },
   "files": ["./index.ts"]
 }
