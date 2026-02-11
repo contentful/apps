@@ -1,6 +1,6 @@
 import { ContentType } from '../ContentTypeMultiSelect';
 
-export function useContentTypes(contentTypeIds?: string[]): ContentType[] {
+export function useContentTypes(_contentTypeIds?: string[]): ContentType[] {
   // TODO: Replace with actual content types fetch
   return [
     { id: 'article', name: 'Article' },

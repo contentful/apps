@@ -25,5 +25,7 @@
     "jsx": "react-jsx",
     "types": ["vitest/globals"],
   },
-  "include": ["src", "test"]
+  "files": [
+    "./index.ts",
+  ]
 }

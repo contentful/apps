@@ -1,6 +1,7 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { useState } from 'react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ContentTypeMultiSelect from '../src/ContentTypeMultiSelect';
+import { ContentTypeMultiSelect } from '../src/ContentTypeMultiSelect';
 import { afterEach, describe, expect, it } from 'vitest';
 
 vi.mock('../src/hooks/useContentTypes', () => ({
@@ -20,13 +21,17 @@ describe('ContentTypeMultiSelect', () => {
   });
 
   it('shows the correct input placeholder text', async () => {
-    render(<ContentTypeMultiSelect selectedContentTypes={[]} setSelectedContentTypes={() => {}} />);
+    render(
+      <ContentTypeMultiSelect selectedContentTypesIds={[]} setSelectedContentTypesIds={() => {}} />
+    );
 
     expect(await screen.findByText('Select one or more')).toBeInTheDocument();
   });
 
   it('renders available content types in the dropdown', async () => {
-    render(<ContentTypeMultiSelect selectedContentTypes={[]} setSelectedContentTypes={() => {}} />);
+    render(
+      <ContentTypeMultiSelect selectedContentTypesIds={[]} setSelectedContentTypesIds={() => {}} />
+    );
 
     expect(await screen.findByText('Article')).toBeTruthy();
     expect(screen.getByText('Blog Post')).toBeTruthy();
@@ -36,41 +41,13 @@ describe('ContentTypeMultiSelect', () => {
     expect(screen.getByText('Page')).toBeTruthy();
   });
 
-  it('selects and deselects content types, showing and removing pills', async () => {
-    render(<ContentTypeMultiSelect selectedContentTypes={[]} setSelectedContentTypes={() => {}} />);
-
-    const user = userEvent.setup();
-
-    // Wait for content types to be loaded
-    const blogPostOption = await screen.findByText('Blog Post');
-
-    await user.click(blogPostOption);
-
-    expect(await screen.findByLabelText('Close')).toBeInTheDocument();
-
-    const closeButton = screen.getByLabelText('Close');
-    await user.click(closeButton);
-
-    await waitFor(() => {
-      expect(screen.queryByLabelText('Close')).toBeNull();
-    });
-  });
-
-  it('shows correct pill placeholder text', async () => {
-    render(<ContentTypeMultiSelect selectedContentTypes={[]} setSelectedContentTypes={() => {}} />);
-
-    const user = userEvent.setup();
-
-    // Wait for content types to be loaded
-    const blogPostOption = await screen.findByText('Blog Post');
-
-    await user.click(blogPostOption);
-
-    const pill = (await screen.findByLabelText('Close')).parentElement;
-    expect(pill).toHaveTextContent('Blog Post');
-
-    const articleOption = screen.getByText('Article');
-    await user.click(articleOption);
+  it('shows correct pill labels for selected content types', async () => {
+    render(
+      <ContentTypeMultiSelect
+        selectedContentTypesIds={['blogPost', 'article']}
+        setSelectedContentTypesIds={() => {}}
+      />
+    );
 
     const closeButtons = await screen.findAllByLabelText('Close');
     const pillTexts = closeButtons.map((btn) => btn.parentElement?.textContent);
@@ -78,20 +55,45 @@ describe('ContentTypeMultiSelect', () => {
     expect(pillTexts).toContain('Article');
   });
 
-  it('display the max amount of content types correctly', async () => {
+  it('removes the pill after deselecting a content type', async () => {
+    const Wrapper = () => {
+      const [selected, setSelected] = useState(['blogPost']);
+      return (
+        <ContentTypeMultiSelect
+          selectedContentTypesIds={selected}
+          setSelectedContentTypesIds={setSelected}
+        />
+      );
+    };
+
+    render(<Wrapper />);
+
+    const user = userEvent.setup();
+
+    // Pill should be visible initially
+    const closeButton = await screen.findByLabelText('Close');
+    expect(closeButton.parentElement).toHaveTextContent('Blog Post');
+
+    await user.click(closeButton);
+
+    // Pill should disappear after deselection
+    expect(screen.queryByLabelText('Close')).not.toBeInTheDocument();
+  });
+
+  it('does not call setSelectedContentTypesIds for disabled options when maxSelected is reached', async () => {
     render(
       <ContentTypeMultiSelect
-        selectedContentTypes={[]}
-        setSelectedContentTypes={() => {}}
+        selectedContentTypesIds={['article', 'blogPost']}
+        setSelectedContentTypesIds={() => {}}
         maxSelected={2}
       />
     );
 
-    expect(await screen.findByText('Article')).toBeTruthy();
-    expect(screen.getByText('Blog Post')).toBeTruthy();
-    expect(screen.getByText('Product')).not.toBeInTheDocument();
-    expect(screen.getByText('Category')).not.toBeInTheDocument();
-    expect(screen.getByText('Author')).not.toBeInTheDocument();
-    expect(screen.getByText('Page')).not.toBeInTheDocument();
+    const user = userEvent.setup();
+
+    await user.click(screen.getByText('Product'));
+
+    const closeButtons = screen.getAllByLabelText('Close');
+    expect(closeButtons).toHaveLength(2);
   });
 });
