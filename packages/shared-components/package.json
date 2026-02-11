@@ -34,10 +34,13 @@
   "devDependencies": {
     "@contentful/f36-components": "^5.9.0",
     "@contentful/f36-tokens": "^5.1.0",
+    "@contentful/react-apps-toolkit": "^1.2.16",
+    "@contentful/app-sdk": "^4.51.0",
     "@emotion/css": "10.0.27",
     "@eslint/js": "^9.39.1",
     "@eslint/json": "1.0.0",
     "@testing-library/react": "16.3.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/node": "25.1.0",
     "@types/react": "18.3.1",
     "@types/react-dom": "18.3.0",

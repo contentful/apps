@@ -22,8 +22,17 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   maxSelected,
   disablePills = false,
 }) => {
-  const availableContentTypes = useContentTypes(availableContentTypesIds);
-  const [filteredContentTypes, setFilteredContentTypes] = React.useState<ContentType[]>([]);
+  // Mock content types - TODO: Replace with useContentTypes hook
+  const availableContentTypes: ContentType[] = [
+    { id: 'article', name: 'Article' },
+    { id: 'blogPost', name: 'Blog Post' },
+    { id: 'product', name: 'Product' },
+    { id: 'category', name: 'Category' },
+    { id: 'author', name: 'Author' },
+    { id: 'page', name: 'Page' },
+  ];
+  const [filteredContentTypes, setFilteredContentTypes] =
+    React.useState<ContentType[]>(availableContentTypes);
 
   const getPlaceholderText = () => {
     if (selectedContentTypes.length === 0) return 'Select one or more';
