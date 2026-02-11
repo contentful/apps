@@ -4,7 +4,6 @@
   "description": "Shared components for Contentful apps",
   "license": "MIT",
   "author": "Contentful GmbH",
-  "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
