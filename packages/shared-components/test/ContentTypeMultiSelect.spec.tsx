@@ -80,7 +80,7 @@ describe('ContentTypeMultiSelect', () => {
     expect(screen.queryByLabelText('Close')).not.toBeInTheDocument();
   });
 
-  it('does not call setSelectedContentTypesIds for disabled options when maxSelected is reached', async () => {
+  it('does not display other content types pills when maxSelected is reached', async () => {
     render(
       <ContentTypeMultiSelect
         selectedContentTypesIds={['article', 'blogPost']}
