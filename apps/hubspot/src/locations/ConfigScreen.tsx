@@ -20,7 +20,7 @@ import demoVideo from '../assets/hubspot.mp4';
 import { ChevronDownIcon, ChevronUpIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Splitter } from 'shared-components';
+import { Splitter } from '@contentful/shared-components';
 import { IMAGE_HEIGHT, IMAGE_WIDTH, styles } from './ConfigScreen.styles';
 import {
   AppInstallationParameters,

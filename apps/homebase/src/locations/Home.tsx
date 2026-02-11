@@ -22,7 +22,7 @@ import { useEffect, useState } from 'react';
 import { EntryProps } from 'contentful-management';
 import MarkdownPreview from '../components/MarkdownPreview';
 import { styles } from './Home.styles';
-import { Splitter } from 'shared-components';
+import { Splitter } from '@contentful/shared-components';
 import ButtonMenu from '../components/ButonMenu';
 import { CaretDownIcon, EyeIcon } from '@contentful/f36-icons';
 

@@ -18,7 +18,7 @@ import {
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
 import { styles } from './ConfigScreen.styles';
-import { Splitter } from 'shared-components';
+import { Splitter } from '@contentful/shared-components';
 import {
   AppInstallationParameters,
   BRAZE_APP_DOCUMENTATION,

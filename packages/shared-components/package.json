@@ -1,9 +1,9 @@
 {
-  "name": "shared-components",
+  "name": "@contentful/shared-components",
   "version": "1.0.0",
-  "description": "lala",
-  "license": "ISC",
-  "author": "",
+  "description": "Shared components for Contentful apps",
+  "license": "MIT",
+  "author": "Contentful GmbH",
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
