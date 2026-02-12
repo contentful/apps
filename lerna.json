@@ -3,6 +3,7 @@
     "apps/**/*",
     "packages/*"
   ],
+  "useWorkspaces": true,
   "version": "independent",
   "command": {
     "publish": {

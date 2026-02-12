@@ -24,7 +24,7 @@ import MarkdownPreview from '../components/MarkdownPreview';
 import { styles } from './Home.styles';
 import { Splitter } from '@contentful/shared-components';
 import ButtonMenu from '../components/ButonMenu';
-import { CaretDownIcon, EyeIcon } from '@contentful/f36-icons';
+import { ChevronDownIcon, PreviewIcon } from '@contentful/f36-icons';
 
 const Home = () => {
   const sdk = useSDK<HomeAppSDK>();
@@ -114,7 +114,7 @@ const Home = () => {
         <ButtonMenu
           buttonLabel={selectedEntry ? displayName(selectedEntry) : DEFAULT_SELECT_LABEL}
           isDisabled={noEntries}
-          buttonProps={{ endIcon: <CaretDownIcon /> }}>
+          buttonProps={{ endIcon: <ChevronDownIcon /> }}>
           <Menu.List>
             {entries.map((entry) => (
               <Menu.Item key={entry.sys.id} onClick={() => setSelectedEntry(entry)}>
@@ -127,7 +127,7 @@ const Home = () => {
           variant="secondary"
           onClick={handleEditEntry}
           isDisabled={!selectedEntry}
-          startIcon={<EyeIcon />}
+          startIcon={<PreviewIcon />}
         />
       </Flex>
       <Box>

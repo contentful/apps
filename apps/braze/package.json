@@ -9,6 +9,7 @@
     "@contentful/f36-tokens": "4.0.2",
     "@contentful/react-apps-toolkit": "1.2.16",
     "@contentful/rich-text-html-renderer": "^17.0.0",
+    "@contentful/shared-components": "file:../../packages/shared-components",
     "@phosphor-icons/react": "^2.1.7",
     "@testing-library/user-event": "^14.6.1",
     "contentful-management": "11.48.3",
@@ -17,13 +18,11 @@
     "happy-dom": "^20.0.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-syntax-highlighter": "^16.1.0",
-    "@contentful/shared-components": "file:../../packages/shared-components"
+    "react-syntax-highlighter": "^16.1.0"
   },
   "scripts": {
     "start": "vite",
-    "preinstall": "cd ../../packages/shared-components && npm install --include=dev && npm run build",
-    "build": " npm run preinstall && tsc && vite build --outDir build && npm run build:functions",
+    "build": "tsc && vite build --outDir build && npm run build:functions",
     "test": "vitest",
     "test:ci": "vitest run",
     "create-app-definition": "contentful-app-scripts create-app-definition",

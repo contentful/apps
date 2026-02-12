@@ -1,4 +1,3 @@
-import { KnownAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
 import { useEffect, useState } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -7,7 +6,7 @@ export function useContentTypes(contentTypeIds?: string[]): {
   contentTypes: ContentTypeProps[];
   isLoading: boolean;
 } {
-  const sdk = useSDK<KnownAppSDK>();
+  const sdk = useSDK();
   const allContentTypes: ContentTypeProps[] = [];
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [isLoading, setIsLoading] = useState(false);

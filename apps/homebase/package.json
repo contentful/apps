@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@contentful/shared-components": "file:../../packages/shared-components",
     "@contentful/app-sdk": "4.45.0",
     "@contentful/f36-components": "5.6.0",
     "@contentful/f36-tokens": "5.1.0",
     "@contentful/field-editor-markdown": "^1.12.9",
     "@contentful/react-apps-toolkit": "1.2.16",
+    "@contentful/shared-components": "file:../../packages/shared-components",
     "@testing-library/jest-dom": "^6.9.1",
     "contentful-management": "11.60.4",
     "emotion": "10.0.27",
