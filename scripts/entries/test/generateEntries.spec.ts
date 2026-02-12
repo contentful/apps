@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import contentful from 'contentful-management';
 import type { PlainClientAPI } from 'contentful-management';
+import { generateEntries } from '../generateEntries.ts';
 import {
-  generateEntries,
   createContentTypeWithAllFields,
   createSampleEntry,
   batchEntries,
-} from '../bulk-edit-generateEntries.ts';
+} from '../generateEntries.ts';
 
 // Mock contentful-management
 vi.mock('contentful-management', () => ({
@@ -333,6 +333,9 @@ describe('generateEntries.ts', () => {
   describe('generateEntries (main function)', () => {
     it('should use AMOUNT_OF_ENTRIES environment variable when available', async () => {
       process.env.AMOUNT_OF_ENTRIES = '10';
+      process.env.CONTENTFUL_ACCESS_TOKEN = 'test-token';
+      process.env.SPACE_ID = 'test-space';
+      process.env.ENVIRONMENT_ID = 'test-env';
 
       const mockContentTypeProps = {
         sys: { id: 'test-content-type-id' },
@@ -359,6 +362,10 @@ describe('generateEntries.ts', () => {
     });
 
     it('should handle errors during execution', async () => {
+      process.env.CONTENTFUL_ACCESS_TOKEN = 'test-token';
+      process.env.SPACE_ID = 'test-space';
+      process.env.ENVIRONMENT_ID = 'test-env';
+
       const mockError = new Error('Script execution failed');
       mockContentType.create.mockRejectedValue(mockError);
 

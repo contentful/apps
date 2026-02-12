@@ -9,14 +9,9 @@ import {
   createReadlineInterface,
   askForEntryCount,
 } from './utils.ts';
-import type { KeyValueMap, PlainClientAPI } from 'contentful-management';
+import { KeyValueMap, PlainClientAPI } from 'contentful-management';
 
-// Load environment variables from .env file in scripts directory
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.join(__dirname, '..', '.env') });
-
-const FIELD_TYPES = [
+export const FIELD_TYPES = [
   {
     type: 'Symbol',
     name: 'Short Text',
@@ -95,7 +90,7 @@ const FIELD_TYPES = [
 
 export async function createContentTypeWithAllFields(
   client: PlainClientAPI,
-  contentTypeName: string
+  contentTypeName: string = 'All Field Types'
 ) {
   console.log(`Creating content type: ${contentTypeName}`);
 
@@ -152,10 +147,46 @@ export async function createContentTypeWithAllFields(
   }
 }
 
+export async function createScheduleAction(
+  client: PlainClientAPI,
+  entryId: string,
+  scheduledDate: string
+): Promise<void> {
+  const { SPACE_ID, ENVIRONMENT_ID } = process.env;
+
+  await client.scheduledActions.create(
+    {
+      spaceId: SPACE_ID ?? '',
+    },
+    {
+      entity: {
+        sys: {
+          type: 'Link',
+          linkType: 'Entry',
+          id: entryId,
+        },
+      },
+      environment: {
+        sys: {
+          type: 'Link',
+          linkType: 'Environment',
+          id: ENVIRONMENT_ID ?? '',
+        },
+      },
+      scheduledFor: {
+        datetime: scheduledDate,
+        timezone: 'UTC',
+      },
+      action: 'publish',
+    }
+  );
+}
+
 export async function createSampleEntry(
   contentTypeId: string,
   index: number,
-  client: PlainClientAPI
+  client: PlainClientAPI,
+  options?: { useScheduleAction?: boolean; scheduledDate?: string }
 ) {
   console.log(`Creating sample entry ${index + 1}...`);
 
@@ -199,44 +230,17 @@ export async function createSampleEntry(
     fields,
   };
 
-  const { SPACE_ID, SCHEDULED_DATE, ENVIRONMENT_ID } = process.env;
-
   try {
     const entryResult = await client.entry.create({ contentTypeId }, body);
     console.log(`✅ Created sample entry: ${entryResult.sys.id}`);
 
-    if (SCHEDULED_DATE) {
-      await client.scheduledActions.create(
-        {
-          spaceId: SPACE_ID ?? '',
-        },
-        {
-          entity: {
-            sys: {
-              type: 'Link',
-              linkType: 'Entry',
-              id: entryResult.sys.id,
-            },
-          },
-          environment: {
-            sys: {
-              type: 'Link',
-              linkType: 'Environment',
-              id: ENVIRONMENT_ID ?? '',
-            },
-          },
-          scheduledFor: {
-            datetime: SCHEDULED_DATE ?? '2026-12-12T12:00:00.000Z',
-            timezone: 'UTC',
-          },
-          action: 'publish',
-        }
-      );
+    if (options?.useScheduleAction && options?.scheduledDate) {
+      await createScheduleAction(client, entryResult.sys.id, options.scheduledDate);
+      console.log(`✅ Scheduled action created for entry ${index + 1}`);
     } else {
       await client.entry.publish({ entryId: entryResult.sys.id }, entryResult);
+      console.log(`✅ Published sample entry ${index + 1}`);
     }
-
-    console.log(`Sample entry ${index + 1}`);
 
     return entryResult.sys.id;
   } catch (err) {
@@ -250,7 +254,8 @@ export async function createSampleEntry(
 export async function batchEntries(
   numberOfEntries: number,
   contentTypeId: string,
-  client: PlainClientAPI
+  client: PlainClientAPI,
+  options?: { useScheduleAction?: boolean; scheduledDate?: string }
 ) {
   console.log(`Creating ${numberOfEntries} entries in batches...`);
 
@@ -261,7 +266,7 @@ export async function batchEntries(
   for (let i = 0; i < numberOfEntries; i += batchSize) {
     const batch = Array.from(
       { length: Math.min(batchSize, numberOfEntries - i) },
-      (_, batchIndex) => createSampleEntry(contentTypeId, i + batchIndex, client)
+      (_, batchIndex) => createSampleEntry(contentTypeId, i + batchIndex, client, options)
     );
 
     console.log(
@@ -299,15 +304,19 @@ export async function batchEntries(
   console.log(`   Visit your Contentful space to see the new content type and sample entry.`);
 }
 
-export async function generateEntries() {
+// Load environment variables from .env file in scripts directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
+
+export async function generateEntries(
+  contentTypeName?: string,
+  options?: { useScheduleAction?: boolean; scheduledDate?: string }
+) {
   validateEnvironment();
   const client = createContentfulClient();
   const rl = createReadlineInterface();
-  const { AMOUNT_OF_ENTRIES, SCHEDULED_DATE } = process.env;
-
-  const contentTypeName = SCHEDULED_DATE
-    ? 'Scheduled - All Field Types'
-    : 'Publish - All Field Types';
+  const { AMOUNT_OF_ENTRIES } = process.env;
 
   const contentTypeId = await createContentTypeWithAllFields(client, contentTypeName);
 
@@ -324,7 +333,7 @@ export async function generateEntries() {
   } else {
     const numberOfEntries = parseInt(AMOUNT_OF_ENTRIES);
 
-    await batchEntries(numberOfEntries, contentTypeId, client);
+    await batchEntries(numberOfEntries, contentTypeId, client, options);
   }
 }
 

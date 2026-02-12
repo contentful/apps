@@ -1,5 +1,5 @@
 import contentful from 'contentful-management';
-import type { EntryProps, PlainClientAPI } from 'contentful-management';
+import type { EntryProps, KeyValueMap, PlainClientAPI } from 'contentful-management';
 import { Interface, createInterface } from 'readline';
 
 export function validateEnvironment(): void {
