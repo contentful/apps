@@ -6,7 +6,7 @@ import {
   deleteContentType,
   deleteEntry,
   deleteEntries,
-} from '../deleteEntries.ts';
+} from '../deleteEntriesByContentTypeId.ts';
 
 // Mock contentful-management
 vi.mock('contentful-management', () => ({
