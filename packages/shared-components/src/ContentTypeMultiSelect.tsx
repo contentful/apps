@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Box, Stack, Pill } from '@contentful/f36-components';
+import { Box, Stack, Pill, Skeleton } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { useContentTypes } from './hooks/useContentTypes';
+import { ContentTypeProps } from 'contentful-management';
 
 export interface ContentType {
   id: string;
@@ -23,12 +24,15 @@ export function ContentTypeMultiSelect({
   maxSelected,
   disablePills = false,
 }: ContentTypeMultiSelectProps) {
-  const availableContentTypes = useContentTypes(availableContentTypesIds);
-  const [filteredContentTypes, setFilteredContentTypes] =
-    useState<ContentType[]>(availableContentTypes);
+  const { contentTypes, isLoading } = useContentTypes(availableContentTypesIds);
+  const [filteredContentTypes, setFilteredContentTypes] = useState<ContentTypeProps[]>([]);
+
+  useEffect(() => {
+    setFilteredContentTypes(contentTypes);
+  }, [contentTypes]);
 
   const getContentTypeName = (contentTypeId: string) => {
-    const contentType = availableContentTypes.find((ct) => ct.id === contentTypeId);
+    const contentType = contentTypes.find((ct) => ct.sys.id === contentTypeId);
     if (!contentType) return '';
 
     return contentType.name;
@@ -44,7 +48,7 @@ export function ContentTypeMultiSelect({
 
   const handleSearchValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    const newFilteredContentTypes = availableContentTypes.filter((contentType) =>
+    const newFilteredContentTypes = contentTypes.filter((contentType) =>
       contentType.name.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredContentTypes(newFilteredContentTypes);
@@ -55,6 +59,13 @@ export function ContentTypeMultiSelect({
     [selectedContentTypesIds, maxSelected]
   );
 
+  if (isLoading)
+    return (
+      <Skeleton.Container>
+        <Skeleton.BodyText numberOfLines={2} />
+      </Skeleton.Container>
+    );
+
   return (
     <Stack marginTop="spacingXs" flexDirection="column" alignItems="start">
       <Multiselect
@@ -64,23 +75,23 @@ export function ContentTypeMultiSelect({
         }}
         placeholder={getPlaceholderText()}>
         {filteredContentTypes.map((item) => {
-          const isSelected = selectedContentTypesIds.includes(item.id);
+          const isSelected = selectedContentTypesIds.includes(item.sys.id);
           const isDisabled = !isSelected && isAtMax;
 
           return (
             <Multiselect.Option
-              key={item.id}
-              value={item.id}
-              itemId={item.id}
+              key={item.sys.id}
+              value={item.sys.id}
+              itemId={item.sys.id}
               isChecked={isSelected}
               isDisabled={isDisabled}
               onSelectItem={(e) => {
                 const checked = e.target.checked;
                 if (checked) {
-                  setSelectedContentTypesIds([...selectedContentTypesIds, item.id]);
+                  setSelectedContentTypesIds([...selectedContentTypesIds, item.sys.id]);
                 } else {
                   setSelectedContentTypesIds(
-                    selectedContentTypesIds.filter((ct) => ct !== item.id)
+                    selectedContentTypesIds.filter((ct) => ct !== item.sys.id)
                   );
                 }
               }}>

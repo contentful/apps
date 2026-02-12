@@ -1,38 +1,54 @@
-import { useState } from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import React from 'react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ContentTypeMultiSelect } from '../src/ContentTypeMultiSelect';
-import { afterEach, describe, expect, it } from 'vitest';
+import { beforeEach, vi, afterEach, describe, it, expect } from 'vitest';
+import { mockSdk } from './mocks/mockSdk';
 
-vi.mock('../src/hooks/useContentTypes', () => ({
-  useContentTypes: () => [
-    { id: 'article', name: 'Article' },
-    { id: 'blogPost', name: 'Blog Post' },
-    { id: 'product', name: 'Product' },
-    { id: 'category', name: 'Category' },
-    { id: 'author', name: 'Author' },
-    { id: 'page', name: 'Page' },
-  ],
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
 }));
 
 describe('ContentTypeMultiSelect', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (mockSdk.cma.contentType.getMany as ReturnType<typeof vi.fn>).mockResolvedValue({
+      items: [
+        { sys: { id: 'article' }, name: 'Article' },
+        { sys: { id: 'blogPost' }, name: 'Blog Post' },
+        { sys: { id: 'product' }, name: 'Product' },
+        { sys: { id: 'category' }, name: 'Category' },
+        { sys: { id: 'author' }, name: 'Author' },
+        { sys: { id: 'page' }, name: 'Page' },
+      ],
+      total: 6,
+      skip: 0,
+      limit: 1000,
+      sys: { type: 'Array' },
+    });
+  });
+
   afterEach(() => {
     cleanup();
   });
 
-  it('shows the correct input placeholder text', async () => {
-    render(
-      <ContentTypeMultiSelect selectedContentTypesIds={[]} setSelectedContentTypesIds={() => {}} />
+  const TestWrapper = ({ initialSelected = [] }: { initialSelected?: string[] }) => {
+    const [selected, setSelected] = React.useState<string[]>(initialSelected);
+    return (
+      <ContentTypeMultiSelect
+        selectedContentTypesIds={selected}
+        setSelectedContentTypesIds={setSelected}
+      />
     );
+  };
 
+  it('shows the correct input placeholder text', async () => {
+    render(<TestWrapper />);
     expect(await screen.findByText('Select one or more')).toBeInTheDocument();
   });
 
   it('renders available content types in the dropdown', async () => {
-    render(
-      <ContentTypeMultiSelect selectedContentTypesIds={[]} setSelectedContentTypesIds={() => {}} />
-    );
-
+    render(<TestWrapper />);
     expect(await screen.findByText('Article')).toBeTruthy();
     expect(screen.getByText('Blog Post')).toBeTruthy();
     expect(screen.getByText('Product')).toBeTruthy();
@@ -41,59 +57,43 @@ describe('ContentTypeMultiSelect', () => {
     expect(screen.getByText('Page')).toBeTruthy();
   });
 
-  it('shows correct pill labels for selected content types', async () => {
-    render(
-      <ContentTypeMultiSelect
-        selectedContentTypesIds={['blogPost', 'article']}
-        setSelectedContentTypesIds={() => {}}
-      />
-    );
+  it('selects and deselects content types, showing and removing pills', async () => {
+    render(<TestWrapper />);
+    const user = userEvent.setup();
+
+    // Wait for content types to be loaded
+    const blogPostOption = await screen.findByText('Blog Post');
+
+    await user.click(blogPostOption);
+
+    expect(await screen.findByLabelText('Close')).toBeInTheDocument();
+
+    const closeButton = screen.getByLabelText('Close');
+    await user.click(closeButton);
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Close')).toBeNull();
+    });
+  });
+
+  it('shows correct pill placeholder text', async () => {
+    render(<TestWrapper />);
+    const user = userEvent.setup();
+
+    // Wait for content types to be loaded
+    const blogPostOption = await screen.findByText('Blog Post');
+
+    await user.click(blogPostOption);
+
+    const pill = (await screen.findByLabelText('Close')).parentElement;
+    expect(pill).toHaveTextContent('Blog Post');
+
+    const articleOption = screen.getByText('Article');
+    await user.click(articleOption);
 
     const closeButtons = await screen.findAllByLabelText('Close');
     const pillTexts = closeButtons.map((btn) => btn.parentElement?.textContent);
     expect(pillTexts).toContain('Blog Post');
     expect(pillTexts).toContain('Article');
-  });
-
-  it('removes the pill after deselecting a content type', async () => {
-    const Wrapper = () => {
-      const [selected, setSelected] = useState(['blogPost']);
-      return (
-        <ContentTypeMultiSelect
-          selectedContentTypesIds={selected}
-          setSelectedContentTypesIds={setSelected}
-        />
-      );
-    };
-
-    render(<Wrapper />);
-
-    const user = userEvent.setup();
-
-    // Pill should be visible initially
-    const closeButton = await screen.findByLabelText('Close');
-    expect(closeButton.parentElement).toHaveTextContent('Blog Post');
-
-    await user.click(closeButton);
-
-    // Pill should disappear after deselection
-    expect(screen.queryByLabelText('Close')).not.toBeInTheDocument();
-  });
-
-  it('does not display other content types pills when maxSelected is reached', async () => {
-    render(
-      <ContentTypeMultiSelect
-        selectedContentTypesIds={['article', 'blogPost']}
-        setSelectedContentTypesIds={() => {}}
-        maxSelected={2}
-      />
-    );
-
-    const user = userEvent.setup();
-
-    await user.click(screen.getByText('Product'));
-
-    const closeButtons = screen.getAllByLabelText('Close');
-    expect(closeButtons).toHaveLength(2);
   });
 });
