@@ -55,8 +55,6 @@ export async function deleteAllEntriesForContentType(
     return;
   }
 
-  console.log(`📊 Found ${entries.length} entries to delete.`);
-
   let confirmed: boolean;
   if (deleteContentTypeId) {
     confirmed = true;
