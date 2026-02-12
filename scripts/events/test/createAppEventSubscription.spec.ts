@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import contentful from 'contentful-management';
 import type { PlainClientAPI } from 'contentful-management';
 import { createAppEventSubscription } from '../createAppEventSubscription.ts';
+import * as utils from '../../entries/utils';
 
 // Mock contentful-management
 vi.mock('contentful-management', () => ({
@@ -42,6 +43,8 @@ describe('addEvents.ts', () => {
     process.env.CONTENTFUL_APP_DEF_ID = TEST_APP_DEF_ID;
     process.env.CONTENTFUL_ACCESS_TOKEN = TEST_ACCESS_TOKEN;
     process.env.CONTENTFUL_FUNCTION_ID = TEST_FUNCTION_ID;
+    process.env.CONTENTFUL_EVENT_TOPICS =
+      'Entry.save,Entry.auto_save,Entry.delete,AppInstallation.delete';
     process.env.SPACE_ID = 'test-space';
     process.env.ENVIRONMENT_ID = 'test-env';
 
@@ -147,6 +150,50 @@ describe('addEvents.ts', () => {
       ];
       const callArgs = (mockAppEventSubscription.upsert as any).mock.calls[0];
       expect(callArgs[1].topics).toEqual(expectedTopics);
+    });
+
+    it('should use custom topics from CONTENTFUL_EVENT_TOPICS', async () => {
+      process.env.CONTENTFUL_EVENT_TOPICS = 'Entry.save,Entry.delete';
+      const mockSubscription = { sys: { id: 'test-subscription-id' } };
+      mockAppEventSubscription.upsert = vi.fn().mockResolvedValue(mockSubscription);
+
+      await createAppEventSubscription();
+
+      expect(mockAppEventSubscription.upsert).toHaveBeenCalledWith(
+        {
+          organizationId: TEST_ORG_ID,
+          appDefinitionId: TEST_APP_DEF_ID,
+        },
+        expect.objectContaining({
+          topics: ['Entry.save', 'Entry.delete'],
+        })
+      );
+    });
+
+    it('should not execute subscription when CONTENTFUL_EVENT_TOPICS is empty', async () => {
+      process.env.CONTENTFUL_EVENT_TOPICS = '';
+      const mockRl = { question: vi.fn(), close: vi.fn() };
+      vi.spyOn(utils, 'createReadlineInterface').mockReturnValue(mockRl as any);
+      vi.spyOn(utils, 'askQuestion').mockResolvedValue('');
+
+      await createAppEventSubscription();
+
+      expect(consoleSpy.error).toHaveBeenCalledWith(
+        expect.stringContaining('At least one event topic is required')
+      );
+      expect(mockAppEventSubscription.upsert).not.toHaveBeenCalled();
+      expect(mockRl.close).toHaveBeenCalled();
+    });
+
+    it('should not execute subscription when CONTENTFUL_EVENT_TOPICS parses to no topics', async () => {
+      process.env.CONTENTFUL_EVENT_TOPICS = '  , , ,  ';
+
+      await createAppEventSubscription();
+
+      expect(consoleSpy.error).toHaveBeenCalledWith(
+        expect.stringContaining('CONTENTFUL_EVENT_TOPICS could not be parsed')
+      );
+      expect(mockAppEventSubscription.upsert).not.toHaveBeenCalled();
     });
   });
 });
