@@ -13,6 +13,8 @@
   "scripts": {
     "setup": "npx tsx setup.ts",
     "delete-entries": "npx tsx entries/deleteEntries.ts",
+    "generate-entries:content-insights": "npx tsx entries/content-insights-generateEntries.ts",
+    "generate-entries:bulk-edit": "npx tsx entries/bulk-edit-generateEntries.ts",
     "test": "vitest"
   },
   "dependencies": {
