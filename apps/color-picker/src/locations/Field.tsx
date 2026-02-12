@@ -34,8 +34,9 @@ type FieldValue = Color | string | undefined;
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
+  const locale = sdk.field.locale;
   const [isOpen, setIsOpen] = useState(false);
-  const [value, setValue] = useFieldValue<FieldValue>();
+  const [value, setValue] = useFieldValue<FieldValue>(undefined, locale);
   const customColorPicker = useRef<HTMLInputElement>(null);
 
   const storeHexValue = sdk.field.type === 'Symbol';
