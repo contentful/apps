@@ -10,7 +10,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import {
   askForContentTypeId,
-  confirmDeletion,
+  confirmAction,
   createContentfulClient,
   createReadlineInterface,
   getEntriesByContentType,
@@ -42,6 +42,22 @@ export async function deleteEntry(entryId: string, client: PlainClientAPI): Prom
   }
 }
 
+export async function deleteContentType(
+  contentTypeId: string,
+  client: PlainClientAPI
+): Promise<boolean> {
+  try {
+    console.log(`Deleting content type: ${contentTypeId}`);
+    await client.contentType.unpublish({ contentTypeId });
+    await client.contentType.delete({ contentTypeId });
+    console.log(`✅ Deleted content type: ${contentTypeId}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Failed to delete content type ${contentTypeId}:`, error);
+    return false;
+  }
+}
+
 export async function deleteAllEntriesForContentType(
   contentTypeId: string,
   client: PlainClientAPI,
@@ -59,7 +75,10 @@ export async function deleteAllEntriesForContentType(
   if (deleteContentTypeId) {
     confirmed = true;
   } else {
-    confirmed = await confirmDeletion(rl, entries.length);
+    confirmed = await confirmAction(
+      rl,
+      `\n⚠️  Are you sure you want to delete ALL ${entries.length} entries? (yes/no): `
+    );
   }
 
   if (!confirmed) {
@@ -106,7 +125,7 @@ export async function deleteEntries() {
   validateEnvironment();
   const client = createContentfulClient();
   const rl = createReadlineInterface();
-  const { DELETE_CONTENT_TYPE_ID } = process.env;
+  const { DELETE_CONTENT_TYPE_ID, DELETE_CONTENT_TYPE } = process.env;
 
   try {
     const contentTypeId = await askForContentTypeId(rl, DELETE_CONTENT_TYPE_ID);
@@ -120,7 +139,18 @@ export async function deleteEntries() {
 
     await deleteAllEntriesForContentType(contentTypeId, client, rl, DELETE_CONTENT_TYPE_ID);
 
-    console.log('\n🎉 Script completed successfully!');
+    if (DELETE_CONTENT_TYPE === 'true') {
+      await deleteContentType(contentTypeId, client);
+    } else {
+      const shouldDeleteContentTypeValue = await confirmAction(
+        rl,
+        '\nDo you also want to delete the content type? (yes/no): '
+      );
+
+      if (shouldDeleteContentTypeValue) {
+        await deleteContentType(contentTypeId, client);
+      }
+    }
   } catch (error) {
     console.error('\n❌ Script failed:', error);
     throw error;

@@ -144,11 +144,7 @@ export async function askForContentTypeId(
   return contentTypeId;
 }
 
-export async function confirmDeletion(rl: Interface, entryCount: number): Promise<boolean> {
-  const confirmation = await askQuestion(
-    rl,
-    `\n⚠️  Are you sure you want to delete ALL ${entryCount} entries? (yes/no): `
-  );
-
-  return confirmation.toLowerCase() === 'yes';
+export async function confirmAction(rl: Interface, prompt: string): Promise<boolean> {
+  const answer = await askQuestion(rl, prompt);
+  return answer.toLowerCase() === 'yes' || answer.toLowerCase() === 'y';
 }

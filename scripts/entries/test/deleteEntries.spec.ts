@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import contentful from 'contentful-management';
 import type { PlainClientAPI } from 'contentful-management';
-import { deleteAllEntriesForContentType, deleteEntry, deleteEntries } from '../deleteEntries.ts';
+import {
+  deleteAllEntriesForContentType,
+  deleteContentType,
+  deleteEntry,
+  deleteEntries,
+} from '../deleteEntries.ts';
 
 // Mock contentful-management
 vi.mock('contentful-management', () => ({
@@ -73,6 +78,8 @@ describe('deleteEntries.ts', () => {
     // Setup mock content type
     mockContentType = {
       getMany: vi.fn(),
+      unpublish: vi.fn(),
+      delete: vi.fn(),
     };
 
     // Setup mock client
@@ -244,6 +251,107 @@ describe('deleteEntries.ts', () => {
 
       expect(consoleSpy.log).toHaveBeenCalledWith('✅ No entries found for this content type.');
       expect(mockEntry.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteContentType', () => {
+    it('should unpublish and delete a content type successfully', async () => {
+      mockContentType.unpublish.mockResolvedValue({});
+      mockContentType.delete.mockResolvedValue({});
+
+      const result = await deleteContentType('test-content-type', mockClient as PlainClientAPI);
+
+      expect(mockContentType.unpublish).toHaveBeenCalledWith({
+        contentTypeId: 'test-content-type',
+      });
+      expect(mockContentType.delete).toHaveBeenCalledWith({
+        contentTypeId: 'test-content-type',
+      });
+      expect(result).toBe(true);
+      expect(consoleSpy.log).toHaveBeenCalledWith('✅ Deleted content type: test-content-type');
+    });
+
+    it('should handle errors gracefully', async () => {
+      mockContentType.unpublish.mockRejectedValue(new Error('Unpublish failed'));
+
+      const result = await deleteContentType('test-content-type', mockClient as PlainClientAPI);
+
+      expect(result).toBe(false);
+      expect(consoleSpy.error).toHaveBeenCalledWith(
+        '❌ Failed to delete content type test-content-type:',
+        expect.any(Error)
+      );
+    });
+  });
+
+  describe('deleteEntries', () => {
+    const originalEnv = process.env;
+
+    beforeEach(() => {
+      process.env = { ...originalEnv };
+      process.env.CONTENTFUL_ACCESS_TOKEN = 'test-token';
+      process.env.SPACE_ID = 'test-space';
+      process.env.ENVIRONMENT_ID = 'test-env';
+      process.env.DELETE_CONTENT_TYPE_ID = 'env-content-type-id';
+
+      mockEntry.getMany.mockResolvedValue({
+        items: [{ sys: { id: 'entry-1' } }],
+      });
+      mockEntry.get.mockResolvedValue({ sys: { publishedVersion: undefined } });
+      mockEntry.delete.mockResolvedValue({});
+      mockContentType.unpublish.mockResolvedValue({});
+      mockContentType.delete.mockResolvedValue({});
+    });
+
+    afterEach(() => {
+      process.env = originalEnv;
+    });
+
+    it('should delete content type when DELETE_CONTENT_TYPE=true', async () => {
+      process.env.DELETE_CONTENT_TYPE = 'true';
+
+      await deleteEntries();
+
+      expect(mockContentType.unpublish).toHaveBeenCalledWith({
+        contentTypeId: 'env-content-type-id',
+      });
+      expect(mockContentType.delete).toHaveBeenCalledWith({
+        contentTypeId: 'env-content-type-id',
+      });
+    });
+
+    it('should not delete content type when DELETE_CONTENT_TYPE is not set and user answers no', async () => {
+      delete process.env.DELETE_CONTENT_TYPE;
+
+      mockCreatedReadlineInterface.question.mockImplementation(
+        (_prompt: string, callback: (answer: string) => void) => {
+          callback('no');
+        }
+      );
+
+      await deleteEntries();
+
+      expect(mockContentType.unpublish).not.toHaveBeenCalled();
+      expect(mockContentType.delete).not.toHaveBeenCalled();
+    });
+
+    it('should delete content type when user answers yes interactively', async () => {
+      delete process.env.DELETE_CONTENT_TYPE;
+
+      mockCreatedReadlineInterface.question.mockImplementation(
+        (_prompt: string, callback: (answer: string) => void) => {
+          callback('yes');
+        }
+      );
+
+      await deleteEntries();
+
+      expect(mockContentType.unpublish).toHaveBeenCalledWith({
+        contentTypeId: 'env-content-type-id',
+      });
+      expect(mockContentType.delete).toHaveBeenCalledWith({
+        contentTypeId: 'env-content-type-id',
+      });
     });
   });
 });
