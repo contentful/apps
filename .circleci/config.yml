@@ -47,6 +47,9 @@ jobs:
             npm ci
             npm run bootstrap:ci
       - run:
+          name: Build shared-components
+          command: npx lerna run build --scope=@contentful/shared-components
+      - run:
           name: Check for prettier violations
           command: |
             git fetch origin master # circleci doesn't fetch master by default
@@ -77,6 +80,9 @@ jobs:
             npm ci
             npm run bootstrap:ci
       - run:
+          name: Build shared-components
+          command: npx lerna run build --scope=@contentful/shared-components
+      - run:
           name: Build
           command: |
             NODE_ENV='production' \
@@ -96,6 +102,9 @@ jobs:
           command: |
             npm ci
             npm run bootstrap:ci
+      - run:
+          name: Build shared-components
+          command: npx lerna run build --scope=@contentful/shared-components
       - run:
           name: Install awscli
           command: |
@@ -137,6 +146,9 @@ jobs:
           command: |
             npm ci
             npm run bootstrap:ci
+      - run:
+          name: Build shared-components
+          command: npx lerna run build --scope=@contentful/shared-components
       - run:
           name: Install awscli
           command: |
