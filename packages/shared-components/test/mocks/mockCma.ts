@@ -5,6 +5,9 @@ const mockCma = {
     get: vi.fn(),
     getMany: vi.fn(),
   },
+  appInstallation: {
+    getForOrganization: vi.fn(),
+  },
 };
 
 export { mockCma };
