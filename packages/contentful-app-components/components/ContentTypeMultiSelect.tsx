@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Box, Stack, Pill, Skeleton } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
-import { useContentTypes } from './hooks/useContentTypes';
+import { useContentTypes } from '../hooks/useContentTypes';
 import { ContentTypeProps } from 'contentful-management';
 
 export interface ContentType {

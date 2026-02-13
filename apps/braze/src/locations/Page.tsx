@@ -18,7 +18,7 @@ import { PageAppSDK } from '@contentful/app-sdk';
 import { fetchBrazeConnectedEntries } from '../utils/fetchBrazeConnectedEntries';
 import InformationWithLink from '../components/InformationWithLink';
 import { styles } from './Page.styles';
-import { Splitter } from '@contentful/shared-components';
+import { Splitter } from 'contentful-app-components';
 import { EntryProps } from 'contentful-management';
 import { Entry } from '../fields/Entry';
 import {

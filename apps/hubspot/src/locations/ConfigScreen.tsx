@@ -20,14 +20,13 @@ import demoVideo from '../assets/hubspot.mp4';
 import { ChevronDownIcon, ChevronUpIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Splitter } from '@contentful/shared-components';
+import { Splitter, ContentTypeMultiSelect } from 'contentful-app-components';
 import { IMAGE_HEIGHT, IMAGE_WIDTH, styles } from './ConfigScreen.styles';
 import {
   AppInstallationParameters,
   CONFIG_SCREEN_INSTRUCTIONS,
   HUBSPOT_PRIVATE_APPS_URL,
 } from '../utils/utils';
-import { ContentTypeMultiSelect } from '@contentful/shared-components';
 import ConfigEntryService from '../utils/ConfigEntryService';
 import sidebarExample from '../assets/sidebar-example.png';
 import pageTableExample from '../assets/page-table-example.png';

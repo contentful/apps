@@ -22,7 +22,7 @@ import { useEffect, useState } from 'react';
 import { EntryProps } from 'contentful-management';
 import MarkdownPreview from '../components/MarkdownPreview';
 import { styles } from './Home.styles';
-import { Splitter } from '@contentful/shared-components';
+import { Splitter } from 'contentful-app-components';
 import ButtonMenu from '../components/ButonMenu';
 import { ChevronDownIcon, PreviewIcon } from '@contentful/f36-icons';
 

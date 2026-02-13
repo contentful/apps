@@ -47,8 +47,8 @@ jobs:
             npm ci
             npm run bootstrap:ci
       - run:
-          name: Build shared-components
-          command: npx lerna run build --scope=@contentful/shared-components
+          name: Build contentful-app-components
+          command: npx lerna run build --scope=contentful-app-components
       - run:
           name: Check for prettier violations
           command: |
@@ -80,8 +80,8 @@ jobs:
             npm ci
             npm run bootstrap:ci
       - run:
-          name: Build shared-components
-          command: npx lerna run build --scope=@contentful/shared-components
+          name: Build contentful-app-components
+          command: npx lerna run build --scope=contentful-app-components
       - run:
           name: Build
           command: |
@@ -103,8 +103,8 @@ jobs:
             npm ci
             npm run bootstrap:ci
       - run:
-          name: Build shared-components
-          command: npx lerna run build --scope=@contentful/shared-components
+          name: Build contentful-app-components
+          command: npx lerna run build --scope=contentful-app-components
       - run:
           name: Install awscli
           command: |
@@ -147,8 +147,8 @@ jobs:
             npm ci
             npm run bootstrap:ci
       - run:
-          name: Build shared-components
-          command: npx lerna run build --scope=@contentful/shared-components
+          name: Build contentful-app-components
+          command: npx lerna run build --scope=contentful-app-components
       - run:
           name: Install awscli
           command: |

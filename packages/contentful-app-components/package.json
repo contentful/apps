@@ -1,5 +1,5 @@
 {
-  "name": "@contentful/shared-components",
+  "name": "contentful-app-components",
   "version": "1.0.0",
   "description": "Shared components for Contentful apps",
   "license": "MIT",

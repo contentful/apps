@@ -6,7 +6,7 @@
     "apps/braze",
     "apps/homebase",
     "apps/hubspot",
-    "packages/shared-components"
+    "packages/contentful-app-components"
   ],
   "engines": {
     "node": ">=16.0.0",
