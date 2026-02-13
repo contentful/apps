@@ -11,19 +11,14 @@
   "type": "module",
   "main": "setup.ts",
   "scripts": {
-    "setup": "npx tsx setup.ts",
-    "delete-entries": "npx tsx entries/deleteEntries.ts",
-    "generate-entries:content-insights": "npx tsx entries/content-insights-generateEntries.ts",
-    "generate-entries:bulk-edit": "npx tsx entries/bulk-edit-generateEntries.ts",
-    "test": "vitest"
+    "setup": "npx tsx setup.ts"
   },
   "dependencies": {
-    "contentful-management": "11.63.1",
+    "contentful-management": "^11.54.1",
     "dotenv": "^17.2.0"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
-    "@types/node": "^20.0.0",
-    "vitest": "^4.0.0"
+    "@types/node": "^20.0.0"
   }
 }
