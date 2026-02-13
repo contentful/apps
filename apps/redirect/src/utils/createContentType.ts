@@ -135,7 +135,7 @@ async function contentTypeExists(sdk: ConfigAppSDK, contentTypeId: string): Prom
   try {
     await sdk.cma.contentType.get({ contentTypeId });
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

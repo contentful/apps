@@ -44,7 +44,7 @@ const ConfigScreen = () => {
 
     try {
       await createConfigurationContentTypes(sdk, parameters.enableVanityUrl);
-    } catch (error) {
+    } catch {
       sdk.notifier.error('Failed to create required content types. Please try again.');
 
       return false;

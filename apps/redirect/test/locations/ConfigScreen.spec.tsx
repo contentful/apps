@@ -1,4 +1,4 @@
-import { render, screen, waitFor, cleanup, act, within } from '@testing-library/react';
+import { render, screen, waitFor, cleanup, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest';
 import ConfigScreen from '../../src/locations/ConfigScreen';
