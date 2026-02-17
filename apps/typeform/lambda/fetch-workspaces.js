@@ -14,15 +14,14 @@ const makeError = (response) => {
   return error;
 };
 
-const fetchWorkspaces = async (method, _path, token, baseUrl, { fetch }) => {
+const fetchWorkspaces = async (method, _path, token, { fetch }) => {
   if (method !== 'GET') {
     return {
       status: 405,
       body: { message: 'Method not allowed.' },
     };
   }
-  const effectiveBaseUrl = baseUrl || BASE_URL;
-  const response = await fetch(`${effectiveBaseUrl}/workspaces`, {
+  const response = await fetch(`${BASE_URL}/workspaces`, {
     headers: {
       Authorization: 'Bearer ' + token,
     },
@@ -33,6 +32,7 @@ const fetchWorkspaces = async (method, _path, token, baseUrl, { fetch }) => {
     throw error;
   }
   const json = await response.json();
+
   return await json;
 };
 
