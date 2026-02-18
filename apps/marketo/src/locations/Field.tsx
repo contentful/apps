@@ -1,17 +1,7 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
-import {
-  Button,
-  Select,
-  Option,
-  Flex,
-  Paragraph,
-  Spinner,
-} from '@contentful/forma-36-react-components';
-import { FieldExtensionSDK } from '@contentful/app-sdk';
-
-interface FieldProps {
-  sdk: FieldExtensionSDK;
-}
+import { useState, useEffect } from 'react';
+import { Paragraph, Flex, Button, Spinner, Autocomplete } from '@contentful/f36-components';
+import { FieldAppSDK } from '@contentful/app-sdk';
+import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 
 interface FormObject {
   id: string;
@@ -19,41 +9,61 @@ interface FormObject {
   name: string;
 }
 
-const Field = (props: FieldProps) => {
+const Field = () => {
+  const sdk = useSDK<FieldAppSDK>();
   const [forms, updateForms] = useState<FormObject[] | null>(null);
-  const [selectedForm, updateSelectedForm] = useState<FormObject | null>(null);
+  const [filteredForms, updateFilteredForms] = useState<FormObject[]>([]);
+  const [selectedForm, updateSelectedForm] = useState<FormObject | undefined>(undefined);
   const [loadingData, updateLoadingStatus] = useState(true);
   const [error, updateError] = useState({ error: false, message: '' });
 
-  props.sdk.window.startAutoResizer();
+  useAutoResizer();
 
-  const updateFieldValue = (event: ChangeEvent<HTMLSelectElement>) => {
-    const id = event.target.value;
-    const form = forms?.find((form) => form.id.toString() === id);
-    if (id === 'none') {
-      removeFieldValue();
+  const updateFieldValue = (form: FormObject | null) => {
+    if (!form) {
+      return;
     }
-    props.sdk.field.setValue({ id: form?.id, url: form?.url });
-    updateSelectedForm(form || null);
+    sdk.field.setValue({ id: form.id, url: form.url });
+    updateSelectedForm(form);
+    if (forms) {
+      updateFilteredForms(forms.filter((item) => item.id !== form.id));
+    }
+  };
+
+  const handleFormInputChange = (value: string) => {
+    const normalizedValue = value.trim().toLowerCase();
+    if (!forms) {
+      updateFilteredForms([]);
+      return;
+    }
+    updateFilteredForms(
+      forms.filter((form) => {
+        if (selectedForm && selectedForm.id === form.id) {
+          return false;
+        }
+        return form.name.toLowerCase().includes(normalizedValue);
+      })
+    );
   };
 
   const removeFieldValue = () => {
-    props.sdk.field.setValue(null);
-    updateSelectedForm(null);
+    sdk.field.setValue(null);
+    updateSelectedForm(undefined);
+    updateFilteredForms(forms || []);
     return;
   };
+
+  // TODO: Replace with actual endpoint
+  const ENDPOINT = 'dummy-endpoint';
 
   useEffect(() => {
     //Get list of available forms to from Marketo selection
     (async () => {
       try {
-        const endpoint = process.env.REACT_APP_ENDPOINT
-          ? `${process.env.REACT_APP_ENDPOINT}/api/getMarketoData`
-          : '/api/getMarketoData';
         const response = await (
-          await fetch(endpoint, {
+          await fetch(ENDPOINT, {
             method: 'POST',
-            body: JSON.stringify(props.sdk.parameters.installation),
+            body: JSON.stringify(sdk.parameters.installation),
             headers: {
               'Access-Control-Request-Method': 'POST',
               'Content-Type': 'application/json',
@@ -70,7 +80,16 @@ const Field = (props: FieldProps) => {
             };
           });
           updateForms(mappedResponse);
+          updateFilteredForms(mappedResponse);
           updateLoadingStatus(false);
+
+          const fieldValue = sdk.field.getValue();
+          if (fieldValue?.id) {
+            const preselectedForm = mappedResponse.find(
+              (item: FormObject) => item.id === fieldValue.id
+            );
+            updateSelectedForm(preselectedForm || undefined);
+          }
         } else {
           updateError({
             error: true,
@@ -84,11 +103,7 @@ const Field = (props: FieldProps) => {
     })();
 
     // Set field value in local state
-    const fieldValue = props.sdk.field.getValue();
-    if (fieldValue !== undefined) {
-      updateSelectedForm(fieldValue);
-    }
-  }, [props.sdk]); //Think about this
+  }, [sdk]); //Think about this
 
   return (
     <>
@@ -106,23 +121,16 @@ const Field = (props: FieldProps) => {
         <Flex flexDirection={'column'} fullHeight={true}>
           {forms && forms.length > 0 && (
             <>
-              <Select
-                name="forms"
-                id="forms"
-                onChange={(event) => updateFieldValue(event)}
-                value={selectedForm ? selectedForm.id : 'none'}>
-                <Option id={'none'} key={'No form'} value={'none'}>
-                  {selectedForm ? 'Remove form' : 'Select a form'}
-                </Option>
-                {forms.map((item) => (
-                  <Option
-                    disabled={selectedForm ? selectedForm.id === item.id : false}
-                    key={`key-${item.id}`}
-                    value={item.id}>
-                    {item.name}
-                  </Option>
-                ))}
-              </Select>
+              <Autocomplete<FormObject>
+                items={filteredForms.filter((item) => item.id !== selectedForm?.id)}
+                selectedItem={selectedForm}
+                onInputValueChange={handleFormInputChange}
+                onSelectItem={updateFieldValue}
+                placeholder="Select a form"
+                itemToString={(item) => (item ? item.name : '')}
+                renderItem={(item) => item.name}
+                listWidth="full"
+              />
               {selectedForm && (
                 <Flex marginTop={'spacingS'}>
                   <Button onClick={() => removeFieldValue()}>Remove Form</Button>

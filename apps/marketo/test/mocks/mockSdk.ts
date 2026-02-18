@@ -7,6 +7,13 @@ const mockSdk: any = {
     setReady: vi.fn(),
     getCurrentState: vi.fn(),
   },
+  field: {
+    getValue: vi.fn(),
+    setValue: vi.fn(),
+  },
+  parameters: {
+    installation: {},
+  },
   ids: {
     app: 'test-app',
   },
