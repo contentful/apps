@@ -18,6 +18,7 @@ const App = () => {
         return component;
       }
     }
+    return null;
   }, [sdk.location]);
 
   return Component ? <Component /> : null;

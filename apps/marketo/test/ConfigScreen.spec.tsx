@@ -1,7 +1,7 @@
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { mockCma, mockSdk } from '../../test/mocks';
-import ConfigScreen from './ConfigScreen';
+import { mockCma, mockSdk } from './mocks';
+import ConfigScreen from '../src/locations/ConfigScreen';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -11,6 +11,10 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 describe('Config Screen component', () => {
   it('Component text exists', async () => {
     const { getByText } = render(<ConfigScreen />);
+
+    await waitFor(() => {
+      expect(mockSdk.app.setReady).toHaveBeenCalled();
+    });
 
     // simulate the user clicking the install button
     await mockSdk.app.onConfigure.mock.calls[0][0]();
