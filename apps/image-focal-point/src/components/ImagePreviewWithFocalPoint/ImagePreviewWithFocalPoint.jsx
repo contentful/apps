@@ -15,15 +15,15 @@ function getTranslateValue(coord, wrapperSize, imgSize) {
 }
 
 export const ImagePreviewWithFocalPoint = ({
-  className,
+  className = '',
   file: {
     url,
     details: {
       image: { width: originalImgWidth, height: originalImgHeight },
     },
   },
-  subtitle,
-  wrapperWidth,
+  subtitle = '',
+  wrapperWidth = 150,
   ...otherProps
 }) => {
   const sizingRatio = originalImgWidth / wrapperWidth;
@@ -91,10 +91,4 @@ ImagePreviewWithFocalPoint.propTypes = {
   wrapperHeight: PropTypes.number,
   wrapperWidth: PropTypes.number,
   subtitle: PropTypes.string,
-};
-
-ImagePreviewWithFocalPoint.defaultProps = {
-  className: '',
-  wrapperWidth: 150,
-  subtitle: '',
 };
