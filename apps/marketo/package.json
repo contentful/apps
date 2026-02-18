@@ -17,18 +17,20 @@
   },
   "scripts": {
     "start": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && npm run build:functions",
     "test": "vitest",
     "test:ci": "vitest run",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "add-locations": "contentful-app-scripts add-locations",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
-    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "lint": "eslint . ",
     "lint:write": "eslint .  --fix",
     "prettier:write": "prettier --write .",
     "prettier:check": "prettier --check .",
-    "prettier:list": "prettier -l ."
+    "prettier:list": "prettier -l .",
+    "upsert-actions": "contentful-app-scripts upsert-actions --ci --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
+    "build:functions": "contentful-app-scripts build-functions --ci"
   },
   "devDependencies": {
     "@contentful/app-scripts": "^2.3.0",
@@ -47,6 +49,8 @@
     "typescript": "5.9.2",
     "typescript-eslint": "^8.46.3",
     "vite": "7.2.0",
-    "vitest": "4.0.7"
+    "vitest": "4.0.7",
+    "@contentful/node-apps-toolkit": "^3.11.1",
+    "@tsconfig/recommended": "1.0.8"
   }
 }
