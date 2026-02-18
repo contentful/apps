@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { ContentTypeProps } from 'contentful-management';
-import { useContentTypes } from '../src/hooks/useContentTypes';
+import { useContentTypes } from '../hooks/useContentTypes';
 import { mockSdk } from './mocks/mockSdk';
 import { mockCma } from './mocks/mockCma';
 

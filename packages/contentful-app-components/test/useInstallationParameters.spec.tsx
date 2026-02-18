@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useInstallationParameters } from '../src/hooks/useInstallationParameters';
+import { useInstallationParameters } from '../hooks/useInstallationParameters';
 import { mockSdk } from './mocks/mockSdk';
 import { mockCma } from './mocks/mockCma';
 import { AppInstallationProps } from 'contentful-management';

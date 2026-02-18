@@ -1,7 +1,7 @@
 import React from 'react';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ContentTypeMultiSelect } from '../src/ContentTypeMultiSelect';
+import { ContentTypeMultiSelect } from '../components/ContentTypeMultiSelect';
 import { beforeEach, vi, afterEach, describe, it, expect } from 'vitest';
 import { mockSdk } from './mocks/mockSdk';
 

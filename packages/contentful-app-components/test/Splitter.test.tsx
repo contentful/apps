@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { Splitter } from '../src/Splitter';
+import { Splitter } from '../components/Splitter';
 
 describe('Splitter', () => {
   it('renders an hr element', () => {
