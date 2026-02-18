@@ -43,13 +43,10 @@ function initializeAdoptedFields(
   initialAdoptedFields[entryId] = mainEntryFields;
 
   for (const referenceEntryData of referencedEntries) {
-    if (referenceEntryData.isSelfReference) {
-      continue;
-    }
-
     const referenceEntryId = referenceEntryData.entry.sys.id;
-    if (initialAdoptedFields[referenceEntryId]) {
-      // Same entry is referenced more than once, skip it from the second time
+
+    if (referenceEntryData.isSelfReference || initialAdoptedFields[referenceEntryId]) {
+      // Self reference or already adopted, skip it
       continue;
     }
 
@@ -98,7 +95,7 @@ const PreviewStepComponent = ({
     if (Object.keys(adoptedFields).length === 0) {
       onAdoptedFieldsChange(initializeAdoptedFields(entry.sys.id, contentType, referencedEntries));
     }
-  }, [entry.sys.id, contentType, referencedEntries, adoptedFields, onAdoptedFieldsChange]);
+  }, [adoptedFields]);
 
   const sourceLocaleName = useMemo(() => {
     const locale = availableLocales.find((l) => l.code === sourceLocale);
@@ -106,7 +103,7 @@ const PreviewStepComponent = ({
   }, [availableLocales, sourceLocale]);
 
   const localizedFields = useMemo(() => {
-    return (contentType.fields as ContentTypeField[]).filter(
+    return contentType.fields.filter(
       (field) => field.localized && !isEntryField(field) && !isEntryArrayField(field)
     );
   }, [contentType.fields]);
@@ -116,7 +113,7 @@ const PreviewStepComponent = ({
   }, [localizedFields, adoptedFields]);
 
   const handleAdoptAll = (entryId: string, contentType: ContentTypeProps, adopted: boolean) => {
-    const fieldIds = (contentType.fields as ContentTypeField[])
+    const fieldIds = contentType.fields
       .filter((f) => f.localized && !isEntryField(f) && !isEntryArrayField(f))
       .map((f) => f.id);
     onAdoptedFieldsChange(setAllEntryFieldsAdopted(adoptedFields, entryId, fieldIds, adopted));
@@ -210,7 +207,7 @@ const PreviewStepComponent = ({
 
         {/* Field rows */}
         <Flex flexDirection="column" gap="spacingS">
-          {(contentType.fields as ContentTypeField[]).map((field) => {
+          {contentType.fields.map((field) => {
             if (isEntryField(field) || isEntryArrayField(field)) {
               const fieldReferences = referencedEntries.filter(
                 (referenceData) => referenceData.fieldId === field.id

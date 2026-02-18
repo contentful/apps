@@ -1,6 +1,6 @@
 import { CMAClient, ContentTypeField } from '@contentful/app-sdk';
 import { AdoptedFieldsMap, ReferencedEntryData } from './adoptedFields';
-import { isEntryArrayField, isEntryField, isLinkArray, isLinkValue } from './fieldTypes';
+import { isEntryArrayField, isEntryField, isLinkArray, isLinkValue, LinkValue } from './fieldTypes';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
 
 export interface UpdateResult {
@@ -112,13 +112,65 @@ export const fetchEntries = async (
     cma.contentType.get({ contentTypeId }),
   ]);
 
-  const referenceFields = (mainEntryContentType.fields as ContentTypeField[]).filter(
+  const referencesToProcess: { referenceEntryId: string; field: ContentTypeField }[] =
+    collectReferences(mainEntry, mainEntryContentType);
+
+  const entryMap = await fetchReferenceEntries(cma, referencesToProcess, entryId);
+
+  const contentTypeMap = await fetchContentTypes(
+    cma,
+    entryMap,
+    contentTypeId,
+    mainEntryContentType
+  );
+
+  const referencedEntriesData: ReferencedEntryData[] = referencesToProcess.map(
+    ({ referenceEntryId, field }) => {
+      if (referenceEntryId === entryId) {
+        return {
+          entry: mainEntry,
+          contentType: mainEntryContentType,
+          fieldId: field.id,
+          fieldName: field.name,
+          isSelfReference: true,
+        };
+      }
+
+      const referenceEntry = entryMap[referenceEntryId];
+      const referenceContentType = contentTypeMap[referenceEntry.sys.contentType.sys.id];
+
+      return {
+        entry: referenceEntry,
+        contentType: referenceContentType,
+        fieldId: field.id,
+        fieldName: field.name,
+        isSelfReference: false,
+      };
+    }
+  );
+
+  return {
+    entry: mainEntry,
+    contentType: mainEntryContentType,
+    referencedEntriesData,
+  };
+};
+
+const collectReferences = (mainEntry: EntryProps, mainEntryContentType: ContentTypeProps) => {
+  const referenceFields = mainEntryContentType.fields.filter(
     (field) => isEntryField(field) || isEntryArrayField(field)
   );
 
-  // Phase 1: Collect all references synchronously
   const seenReferences = new Set<string>();
   const referencesToProcess: { referenceEntryId: string; field: ContentTypeField }[] = [];
+
+  const processReference = (link: LinkValue, field: ContentTypeField) => {
+    const referenceKey = `${link.sys.id}:${field.id}`;
+    if (!seenReferences.has(referenceKey)) {
+      seenReferences.add(referenceKey);
+      referencesToProcess.push({ referenceEntryId: link.sys.id, field });
+    }
+  };
 
   for (const field of referenceFields) {
     const fieldValues = mainEntry.fields[field.id];
@@ -127,25 +179,24 @@ export const fetchEntries = async (
     const value = Object.values(fieldValues)[0];
 
     if (isLinkValue(value) && value.sys.linkType === 'Entry') {
-      const referenceKey = `${value.sys.id}:${field.id}`;
-      if (!seenReferences.has(referenceKey)) {
-        seenReferences.add(referenceKey);
-        referencesToProcess.push({ referenceEntryId: value.sys.id, field });
-      }
+      processReference(value, field);
     } else if (isLinkArray(value)) {
       for (const link of value) {
         if (link.sys.linkType === 'Entry') {
-          const referenceKey = `${link.sys.id}:${field.id}`;
-          if (!seenReferences.has(referenceKey)) {
-            seenReferences.add(referenceKey);
-            referencesToProcess.push({ referenceEntryId: link.sys.id, field });
-          }
+          processReference(link, field);
         }
       }
     }
   }
 
-  // Phase 2: Fetch all non-self referenced entries
+  return referencesToProcess;
+};
+
+const fetchReferenceEntries = async (
+  cma: CMAClient,
+  referencesToProcess: { referenceEntryId: string; field: ContentTypeField }[],
+  entryId: string
+): Promise<Record<string, EntryProps>> => {
   const uniqueEntryIds = [
     ...new Set(
       referencesToProcess
@@ -165,53 +216,31 @@ export const fetchEntries = async (
     }
   }
 
-  // Phase 3: Fetch all missing content types
-  const contentTypeCache: Record<string, ContentTypeProps> = {
+  return entryMap;
+};
+
+const fetchContentTypes = async (
+  cma: CMAClient,
+  entryMap: Record<string, EntryProps>,
+  contentTypeId: string,
+  mainEntryContentType: ContentTypeProps
+): Promise<Record<string, ContentTypeProps>> => {
+  const contentTypeMap: Record<string, ContentTypeProps> = {
     [contentTypeId]: mainEntryContentType,
   };
 
   const uniqueContentTypeIds = [
     ...new Set(Object.values(entryMap).map((e) => e.sys.contentType.sys.id)),
-  ].filter((id) => !contentTypeCache[id]);
+  ].filter((id) => !contentTypeMap[id]);
 
   if (uniqueContentTypeIds.length > 0) {
     const contentTypesResponse = await cma.contentType.getMany({
       query: { 'sys.id[in]': uniqueContentTypeIds.join(',') },
     });
     for (const ct of contentTypesResponse.items) {
-      contentTypeCache[ct.sys.id] = ct;
+      contentTypeMap[ct.sys.id] = ct;
     }
   }
 
-  // Phase 4: Assemble results
-  const referencedEntriesData: ReferencedEntryData[] = referencesToProcess.map(
-    ({ referenceEntryId, field }) => {
-      if (referenceEntryId === entryId) {
-        return {
-          entry: mainEntry,
-          contentType: mainEntryContentType,
-          fieldId: field.id,
-          fieldName: field.name,
-          isSelfReference: true,
-        };
-      }
-
-      const referenceEntry = entryMap[referenceEntryId];
-      const referenceContentType = contentTypeCache[referenceEntry.sys.contentType.sys.id];
-
-      return {
-        entry: referenceEntry,
-        contentType: referenceContentType,
-        fieldId: field.id,
-        fieldName: field.name,
-        isSelfReference: false,
-      };
-    }
-  );
-
-  return {
-    entry: mainEntry,
-    contentType: mainEntryContentType,
-    referencedEntriesData,
-  };
+  return contentTypeMap;
 };

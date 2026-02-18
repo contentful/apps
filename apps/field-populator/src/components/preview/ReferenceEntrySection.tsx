@@ -26,12 +26,13 @@ const getEntryTitle = (
   contentType: ContentTypeProps,
   locale: string
 ): string => {
+  const untitled = 'Untitled';
   const displayFieldId = contentType.displayField;
-  if (!displayFieldId) return 'Untitled';
+  if (!displayFieldId) return untitled;
 
   const value = entry.fields[displayFieldId]?.[locale];
   if (value === undefined || value === null || value === '') {
-    return 'Untitled';
+    return untitled;
   }
   return String(value);
 };
