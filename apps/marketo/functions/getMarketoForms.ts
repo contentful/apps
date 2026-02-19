@@ -4,10 +4,7 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { type PlainClientAPI, createClient } from 'contentful-management';
 import { MarketoAuthenticationError, MarketoApiError } from './exceptions';
-
-type AppActionParameters = {};
 
 type AppInstallationParameters = {
   clientId: string;
@@ -15,23 +12,8 @@ type AppInstallationParameters = {
   munchkinId: string;
 };
 
-function initContentfulManagementClient(context: FunctionEventContext): PlainClientAPI {
-  if (!context.cmaClientOptions) {
-    throw new Error(
-      'Contentful Management API client options are only provided for certain function types. To learn more about using the CMA within functions, see https://www.contentful.com/developers/docs/extensibility/app-framework/functions/#using-the-cma.'
-    );
-  }
-  return createClient(context.cmaClientOptions, {
-    type: 'plain',
-    defaults: {
-      spaceId: context.spaceId,
-      environmentId: context.environmentId,
-    },
-  });
-}
-
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
-  event: AppActionRequest<'Custom', AppActionParameters>,
+  event: AppActionRequest<'Custom'>,
   context: FunctionEventContext
 ) => {
   const { clientId, clientSecret, munchkinId } =

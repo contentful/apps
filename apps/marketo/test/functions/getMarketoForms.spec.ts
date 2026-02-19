@@ -7,7 +7,6 @@ import {
 } from '@contentful/node-apps-toolkit';
 import { MarketoAuthenticationError, MarketoApiError } from '../../functions/exceptions';
 
-// Mock fetch globally
 global.fetch = vi.fn();
 
 describe('getMarketoForms handler', () => {
@@ -26,10 +25,10 @@ describe('getMarketoForms handler', () => {
     environmentId: 'test-env',
   } as FunctionEventContext;
 
-  const mockEvent: AppActionRequest<'Custom', {}> = {
+  const mockEvent: AppActionRequest<'Custom'> = {
     type: FunctionTypeEnum.AppActionCall,
     body: {},
-  } as AppActionRequest<'Custom', {}>;
+  } as AppActionRequest<'Custom'>;
 
   it('should successfully fetch and return Marketo forms', async () => {
     const mockAuthResponse = {
