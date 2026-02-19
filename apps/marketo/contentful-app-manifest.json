@@ -17,7 +17,32 @@
       "type": "function-invocation",
       "functionId": "getMarketoFormsFunction",
       "category": "Custom",
-      "parameters": []
+      "parametersSchema": {},
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "forms": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The ID of the form"
+                },
+                "url": {
+                  "type": "string",
+                  "description": "The URL of the form"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The name of the form"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   ]
 }
