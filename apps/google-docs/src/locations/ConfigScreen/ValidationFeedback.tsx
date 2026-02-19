@@ -1,0 +1,43 @@
+import { FormControl, Flex, Text, Spinner } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
+
+interface ValidationFeedbackProps {
+  isValidating: boolean;
+  isValid: boolean;
+  validationMessage: string;
+  apiUnavailable: boolean;
+}
+
+export const ValidationFeedback = ({
+  isValidating,
+  isValid,
+  validationMessage,
+  apiUnavailable,
+}: ValidationFeedbackProps) => {
+  if (isValidating) {
+    return (
+      <Flex marginTop="spacing2Xs">
+        <Text marginRight="spacingXs">Validating API key</Text>
+        <Spinner size="small" />
+      </Flex>
+    );
+  }
+
+  if (!isValid) {
+    return (
+      <FormControl.ValidationMessage>
+        {validationMessage || 'Please enter a valid OpenAI API key'}
+      </FormControl.ValidationMessage>
+    );
+  }
+
+  if (apiUnavailable && validationMessage) {
+    return (
+      <FormControl.HelpText marginTop="spacing2Xs" style={{ color: tokens.orange600 }}>
+        {validationMessage}
+      </FormControl.HelpText>
+    );
+  }
+
+  return null;
+};

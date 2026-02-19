@@ -22,11 +22,27 @@
   },
   "functions": [
     {
-      "id": "createEntriesFromDocumentFunction",
-      "name": "Create content entries from document function",
-      "description": "Function to create content blocks from App Action.",
-      "path": "functions/createEntriesFromDocument.js",
-      "entryFile": "functions/createEntriesFromDocument.ts",
+      "id": "createPreview",
+      "name": "Create Preview",
+      "description": "Parses the Google Doc and creates preview entries",
+      "path": "functions/handlers/createPreview/createPreviewHandler.js",
+      "entryFile": "functions/handlers/createPreview/createPreviewHandler.ts",
+      "allowNetworks": [
+        "https://api.openai.com",
+        "*.googleapis.com",
+        "https://docs.google.com",
+        "https://jsonplaceholder.typicode.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
+    },
+    {
+      "id": "createContentTypesAnalysis",
+      "name": "Create Content Types Analysis",
+      "description": "Analyzes content type structure and relationships using AI.",
+      "path": "functions/handlers/createPreview/createContentTypesAnalysisHandler.js",
+      "entryFile": "functions/handlers/createPreview/createContentTypesAnalysisHandler.ts",
       "allowNetworks": [
         "https://api.openai.com"
       ],
@@ -38,10 +54,10 @@
       "id": "initiateGdocOauth",
       "name": "Initiate Gdoc OAuth Flow",
       "description": "Initiates the OAuth flow for Google Docs",
-      "path": "functions/initiateOauth.js",
-      "entryFile": "functions/initiateOauth.ts",
+      "path": "functions/oauth/initiateOauth.js",
+      "entryFile": "functions/oauth/initiateOauth.ts",
       "allowNetworks": [
-        "www.google.com"
+        "oauth2.googleapis.com"
       ],
       "accepts": [
         "appaction.call"
@@ -51,10 +67,10 @@
       "id": "completeGdocOauth",
       "name": "Complete Gdoc OAuth Flow",
       "description": "Completes the OAuth flow for Google Docs",
-      "path": "functions/completeOauth.js",
-      "entryFile": "functions/completeOauth.ts",
+      "path": "functions/oauth/completeOauth.js",
+      "entryFile": "functions/oauth/completeOauth.ts",
       "allowNetworks": [
-        "a.google.com"
+        "oauth2.googleapis.com"
       ],
       "accepts": [
         "appaction.call"
@@ -64,10 +80,10 @@
       "id": "revokeGdocOauthToken",
       "name": "Revoke Gdoc OAuth Token",
       "description": "Revoke token for the Google Docs app to disconnect from the app",
-      "path": "functions/disconnect.js",
-      "entryFile": "functions/disconnect.ts",
+      "path": "functions/oauth/disconnect.js",
+      "entryFile": "functions/oauth/disconnect.ts",
       "allowNetworks": [
-        "a.google.com"
+        "oauth2.googleapis.com"
       ],
       "accepts": [
         "appaction.call"
@@ -77,10 +93,10 @@
       "id": "checkGdocOauthTokenStatus",
       "name": "Check Gdoc OAuth Token Status",
       "description": "Checks the status of the Google Docs OAuth token to see if it is valid",
-      "path": "functions/checkStatus.js",
-      "entryFile": "functions/checkStatus.ts",
+      "path": "functions/oauth/checkStatus.js",
+      "entryFile": "functions/oauth/checkStatus.ts",
       "allowNetworks": [
-        "a.google.com"
+        "oauth2.googleapis.com"
       ],
       "accepts": [
         "appaction.call"

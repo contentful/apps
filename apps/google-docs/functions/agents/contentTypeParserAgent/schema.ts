@@ -20,5 +20,4 @@ export const FinalContentTypesAnalysisSchema = z.object({
   complexity: z.string(),
 });
 
-export type ContentTypeSummary = z.infer<typeof ContentTypeAnalysisSchema>;
 export type FinalContentTypesResultSummary = z.infer<typeof FinalContentTypesAnalysisSchema>;

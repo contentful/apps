@@ -79,6 +79,8 @@ const Page = () => {
   const [currentContentType, setCurrentContentType] = useState<ContentTypeProps | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [initialTotal, setInitialTotal] = useState(0);
+  // Used to force a re-render of the table when the selection changes
+  const [tableKey, setTableKey] = useState(0);
 
   const hasActiveFilters = () => {
     const hasSearchQuery = searchQuery.trim() !== '';
@@ -94,8 +96,12 @@ const Page = () => {
     setActivePage(0);
   };
 
-  const shouldDisableFilters = () => {
-    return (entries.length === 0 && initialTotal === 0) || !selectedContentType || entriesLoading;
+  const shouldDisableFilters = (disableIfLoading: boolean = true) => {
+    return (
+      (entries.length === 0 && initialTotal === 0) ||
+      !selectedContentType ||
+      (disableIfLoading ? entriesLoading : false)
+    );
   };
 
   const getAllContentTypes = async (): Promise<ContentTypeProps[]> => {
@@ -106,8 +112,6 @@ const Page = () => {
 
     do {
       const response = await sdk.cma.contentType.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
         query: { skip, limit },
       });
       const items = response.items as ContentTypeProps[];
@@ -224,6 +228,13 @@ const Page = () => {
     setFields([]);
     setTotalEntries(0);
     setInitialTotal(0);
+  };
+
+  // Used to clear the selection states and force a re-render of the table
+  const clearSelectionState = () => {
+    setSelectedField(null);
+    setSelectedEntryIds([]);
+    setTableKey((tableKey) => tableKey + 1);
   };
 
   // Fetch content type and fields when selectedContentTypeId changes
@@ -367,8 +378,6 @@ const Page = () => {
           const updated = await sdk.cma.entry.update(
             {
               entryId: latestEntry.sys.id,
-              spaceId: sdk.ids.space,
-              environmentId: sdk.ids.environment,
             },
             { ...latestEntry, fields: updatedFields }
           );
@@ -454,8 +463,6 @@ const Page = () => {
         try {
           const restoredEntry = await sdk.cma.entry.update(
             {
-              spaceId: sdk.ids.space,
-              environmentId: sdk.ids.environment,
               entryId: currentEntry.sys.id,
             },
             {
@@ -521,6 +528,7 @@ const Page = () => {
                 setActivePage(0);
                 setSearchQuery('');
                 setInitialTotal(0);
+                clearSelectionState();
               }}
               disabled={entriesLoading}
             />
@@ -538,8 +546,9 @@ const Page = () => {
                   onSearchChange={(query) => {
                     setSearchQuery(query);
                     setActivePage(0);
+                    clearSelectionState();
                   }}
-                  isDisabled={shouldDisableFilters()}
+                  isDisabled={shouldDisableFilters(false)}
                   debounceDelay={300}
                 />
 
@@ -560,6 +569,7 @@ const Page = () => {
                     setSelectedItems={(statuses) => {
                       setSelectedStatuses(statuses);
                       setActivePage(0);
+                      clearSelectionState();
                     }}
                     disabled={shouldDisableFilters()}
                     placeholderConfig={{
@@ -579,7 +589,6 @@ const Page = () => {
                         return aIndex - bIndex;
                       });
                       setSelectedColumns(sortedSelectedColumns);
-                      setActivePage(0);
                     }}
                     disabled={shouldDisableFilters()}
                     placeholderConfig={{
@@ -600,18 +609,26 @@ const Page = () => {
                   )}
                 </Flex>
                 {!entriesLoading && (
-                  <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
-                    <Button
-                      variant="primary"
-                      onClick={() => setIsModalOpen(true)}
-                      isDisabled={!selectedField || selectedEntryIds.length === 0}>
-                      {selectedEntryIds.length > 1 ? 'Bulk edit' : 'Edit'}
-                    </Button>
+                  <>
+                    <Flex alignItems="center" gap="spacingS" style={styles.editButton}>
+                      <Button
+                        variant="primary"
+                        onClick={() => setIsModalOpen(true)}
+                        isDisabled={!selectedField || selectedEntryIds.length === 0}>
+                        {selectedEntryIds.length > 1 ? 'Bulk edit' : 'Edit'}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => clearSelectionState()}
+                        isDisabled={!selectedField || selectedEntryIds.length === 0}>
+                        Clear selection
+                      </Button>
+                    </Flex>
                     <Text fontColor="gray600">
                       {selectedEntryIds.length || 'No'} entry field
                       {selectedEntryIds.length === 1 ? '' : 's'} selected
                     </Text>
-                  </Flex>
+                  </>
                 )}
                 {entriesLoading ? (
                   <Table style={styles.loadingTableBorder}>
@@ -637,13 +654,14 @@ const Page = () => {
                           />
                         )}
                         <EntryTable
+                          key={tableKey}
                           entries={entries}
                           fields={selectedColumns.flatMap(
                             (field) => fields.find((f) => f.uniqueId === field.value) || []
                           )}
                           contentType={selectedContentType}
                           spaceId={sdk.ids.space}
-                          environmentId={sdk.ids.environment}
+                          environmentId={sdk.ids.environmentAlias ?? sdk.ids.environment}
                           defaultLocale={defaultLocale}
                           activePage={activePage}
                           totalEntries={totalEntries}

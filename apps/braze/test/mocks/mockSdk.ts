@@ -1,7 +1,9 @@
 import { vi } from 'vitest';
 import { BRAZE_ENDPOINTS } from '../../src/utils';
+import { mockCma } from './mockCma';
 
 const mockSdk: any = {
+  cma: mockCma,
   app: {
     onConfigure: vi.fn(),
     getParameters: vi.fn().mockReturnValueOnce({}),

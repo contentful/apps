@@ -1,14 +1,15 @@
 import React, { useCallback } from 'react';
-import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import { useAsync } from 'react-async-hook';
 import { Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import Stats from '../components/stats/Stats';
 import Members from '../components/members/Members';
+import type { HomeAppSDK } from '@contentful/app-sdk';
 
 export const Home = () => {
-  const sdk = useSDK();
-  const cma = useCMA();
+  const sdk = useSDK<HomeAppSDK>();
+  const cma = sdk.cma;
   const getSpace = useCallback(async () => {
     return await cma.space.get({});
   }, [cma]);

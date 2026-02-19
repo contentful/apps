@@ -91,6 +91,9 @@ const Sections = {
     'Add details about your brand to power accurate and on-brand content for all of your prompts.',
   addToSidebarHeading: 'Add to sidebar views',
   addToSidebarDescription: 'Assign Content Generator to content types.',
+  featureSelectionHeading: 'Feature selection',
+  featureSelectionDescription:
+    'Select which AI features should be available in the sidebar. At least one feature must be enabled.',
   costHeading: 'Cost',
   costSubheading:
     'Using this app incurs AWS costs, depending on the amount of tokens you generate.',

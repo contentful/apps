@@ -25,6 +25,7 @@
     "build": "vite build --outDir build && npm run build:functions",
     "preview": "vite preview",
     "test": "vitest",
+    "test:ci": "vitest run",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "add-locations": "contentful-app-scripts add-locations",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 4u975fs1eUfiPsdaxpbQFO --token ${CONTENTFUL_CMA_TOKEN}",

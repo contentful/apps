@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "^4.29.1",
-    "@contentful/f36-components": "4.80.5",
+    "@contentful/f36-components": "4.81.1",
     "@contentful/f36-tokens": "4.2.0",
     "@contentful/react-apps-toolkit": "1.2.16",
     "contentful-management": "10.46.4",
@@ -18,6 +18,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
+    "test:ci": "vitest run",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "add-locations": "contentful-app-scripts add-locations",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",

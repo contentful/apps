@@ -1,16 +1,18 @@
 import { Box } from '@contentful/f36-components';
-import featureConfig, { AIFeature } from '@configs/features/featureConfig';
+import { AIFeature } from '@configs/features/featureConfig';
 import FeatureButton from './feature-button/FeatureButton';
 import { useState } from 'react';
+import useSidebarParameters from '@hooks/sidebar/useSidebarParameters';
 
 const SidebarButtons = () => {
   const [isSaving, setIsSaving] = useState(false);
+  const { enabledFeatures } = useSidebarParameters();
 
   const handleSaving = (toggleTo: boolean) => {
     setIsSaving(toggleTo);
   };
 
-  const featureList = Object.keys(featureConfig).map((feature) => {
+  const featureList = enabledFeatures.map((feature) => {
     return (
       <FeatureButton
         key={feature}

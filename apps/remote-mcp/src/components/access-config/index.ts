@@ -1,0 +1,1 @@
+export { PermissionsSection } from './accessConfigAccordionStack';

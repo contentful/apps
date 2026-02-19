@@ -27,6 +27,30 @@ interface FieldEditorProps {
 }
 
 const ERROR_MESSAGE = 'Failed to initialize field editor. Please try again.';
+const SUPPORTED_WIDGET_IDS = new Set([
+  'singleLine',
+  'dropdown',
+  'radio',
+  'multipleLine',
+  'numberEditor',
+  'datePicker',
+  'listInput',
+  'checkbox',
+  'tagEditor',
+  'boolean',
+  'objectEditor',
+]);
+const FIELD_TYPE_TO_DEFAULT_WIDGET: Record<string, string> = {
+  Symbol: 'singleLine',
+  Text: 'multipleLine',
+  Number: 'numberEditor',
+  Integer: 'numberEditor',
+  Date: 'datePicker',
+  Array: 'tagEditor',
+  Boolean: 'boolean',
+  Object: 'objectEditor',
+};
+
 export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange, locales }) => {
   const [error, setError] = useState('');
   const locale = field.locale ? field.locale : locales.default;
@@ -35,9 +59,16 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
     return createFieldAPI(field, value, onChange, locale);
   }, [field, value, onChange, locale]);
 
+  const getWidgetId = (field: ContentTypeField) => {
+    if (field.fieldControl?.widgetId && SUPPORTED_WIDGET_IDS.has(field.fieldControl.widgetId)) {
+      return field.fieldControl.widgetId;
+    }
+    return FIELD_TYPE_TO_DEFAULT_WIDGET[field.type] || 'unknown';
+  };
+
   const renderEditor = () => {
     try {
-      switch (field.fieldControl?.widgetId) {
+      switch (getWidgetId(field)) {
         case 'singleLine':
           return (
             <SingleLineEditor
@@ -108,5 +139,15 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onChange
     return <Note variant="negative">{error}</Note>;
   }
 
-  return <>{renderEditor()}</>;
+  return (
+    <>
+      {SUPPORTED_WIDGET_IDS.has(getWidgetId(field)) && (
+        <Note>
+          This field uses an unsupported custom appereance, the default editor for the field will be
+          used instead.
+        </Note>
+      )}
+      {renderEditor()}
+    </>
+  );
 };
