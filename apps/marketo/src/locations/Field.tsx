@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import {
   Paragraph,
   Flex,
-  Button,
   Spinner,
   Autocomplete,
   FormControl,
@@ -85,7 +84,7 @@ const Field = () => {
   };
 
   const removeFieldValue = () => {
-    sdk.field.setValue(null);
+    sdk.field.setValue(EMPTY_FORM);
     setSelectedForm(EMPTY_FORM);
     setFilteredForms(forms || []);
   };
@@ -168,11 +167,6 @@ const Field = () => {
               listWidth="full"
             />
           </FormControl>
-          {selectedForm?.id && (
-            <Flex marginTop={'spacingS'}>
-              <Button onClick={removeFieldValue}>Remove Form</Button>
-            </Flex>
-          )}
         </>
       )}
     </Flex>

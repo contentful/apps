@@ -94,17 +94,7 @@ describe('Field component', () => {
       expect(screen.queryByPlaceholderText('Select a form')).not.toBeInTheDocument();
     });
 
-    it('should not show the Remove Form button when no form is selected', async () => {
-      mockFetchSuccess();
-
-      render(<Field />);
-
-      await waitForAutocomplete();
-
-      expect(screen.queryByText('Remove Form')).not.toBeInTheDocument();
-    });
-
-    it('should update the field value when a form is selected and show the Remove Form button', async () => {
+    it('should update the field value when a form is selected', async () => {
       const user = userEvent.setup();
       mockFetchSuccess();
 
@@ -116,13 +106,11 @@ describe('Field component', () => {
         id: 'form-1',
         url: 'https://marketo.example.com/form-1',
       });
-
-      expect(screen.getByText('Remove Form')).toBeInTheDocument();
     });
   });
 
   describe('Pre-selected form', () => {
-    it('should display the saved form and show Remove Form button on load', async () => {
+    it('should display the saved form on load', async () => {
       mockSdk.field.getValue.mockReturnValue({
         id: 'form-2',
         url: 'https://marketo.example.com/form-2',
@@ -133,7 +121,6 @@ describe('Field component', () => {
 
       const input = await waitForAutocomplete();
       expect(input).toHaveValue('Contact Us');
-      expect(screen.getByText('Remove Form')).toBeInTheDocument();
     });
   });
 
@@ -209,7 +196,7 @@ describe('Field component', () => {
   });
 
   describe('Remove form', () => {
-    it('should clear the field value, hide the button, and restore all forms in the dropdown', async () => {
+    it('should clear the field value and restore all forms in the dropdown when input is cleared', async () => {
       const user = userEvent.setup();
       mockFetchSuccess();
 
@@ -217,16 +204,9 @@ describe('Field component', () => {
 
       const input = await selectForm(user, 'Contact Us');
 
-      await waitFor(() => {
-        expect(screen.getByText('Remove Form')).toBeInTheDocument();
-      });
+      await user.clear(input);
 
-      await user.click(screen.getByText('Remove Form'));
-
-      expect(mockSdk.field.setValue).toHaveBeenCalledWith(null);
-      await waitFor(() => {
-        expect(screen.queryByText('Remove Form')).not.toBeInTheDocument();
-      });
+      expect(mockSdk.field.setValue).toHaveBeenCalledWith({ id: '', name: '', url: '' });
 
       await user.click(input);
 
