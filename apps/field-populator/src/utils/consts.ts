@@ -1,1 +1,1 @@
-export const APP_NAME = 'Field Populator';
+export const APP_NAME = 'Locale Field Populator';

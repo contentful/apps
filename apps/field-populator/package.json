@@ -30,7 +30,8 @@
     "add-locations": "contentful-app-scripts add-locations",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id ${PROD_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 2kYWs1ck9ygF8ei2B4cYL8 --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:staging": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id 5SjsH1qGRd1m5j27gRJN9s --token ${TEST_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id ${STAGING_APP_ID} --token ${TEST_CMA_TOKEN}",
     "lint": "eslint .",
     "lint:write": "eslint . --fix"

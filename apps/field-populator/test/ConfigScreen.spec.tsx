@@ -66,12 +66,12 @@ describe('Config Screen component', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Set up Field Populator')).toBeInTheDocument();
+      expect(screen.getByText('Set up Locale Field Populator')).toBeInTheDocument();
     });
 
     expect(
       screen.getByText(
-        /Save time localizing content by instantly copying field values across locales with the Field Populator app/
+        /Save time localizing content by instantly copying field values across locales with the Locale Field Populator app/
       )
     ).toBeInTheDocument();
   });
@@ -92,7 +92,7 @@ describe('Config Screen component', () => {
 
     expect(
       screen.getByText(
-        "Select the content type(s) you want to use with Field Populator. You can change this anytime by navigating to the 'Sidebar' tab in your content model."
+        "Select the content type(s) you want to use with Locale Field Populator. You can change this anytime by navigating to the 'Sidebar' tab in your content model."
       )
     ).toBeInTheDocument();
   });

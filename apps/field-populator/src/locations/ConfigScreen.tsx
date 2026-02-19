@@ -112,10 +112,10 @@ const ConfigScreen = () => {
     <Flex justifyContent="center" marginTop="spacingL" marginLeft="spacingL" marginRight="spacingL">
       <Flex className={styles.container} flexDirection="column" alignItems="flex-start">
         <Flex flexDirection="column" alignItems="flex-start">
-          <Heading marginBottom="spacingS">Set up Field Populator</Heading>
+          <Heading marginBottom="spacingS">Set up Locale Field Populator</Heading>
           <Paragraph marginBottom="spacing2Xl">
             Save time localizing content by instantly copying field values across locales with the
-            Field Populator app.
+            Locale Field Populator app.
           </Paragraph>
         </Flex>
         <Flex flexDirection="column" alignItems="flex-start">
@@ -123,7 +123,7 @@ const ConfigScreen = () => {
             Assign content types
           </Heading>
           <Paragraph marginBottom="spacingL">
-            {`Select the content type(s) you want to use with Field Populator. You can change this
+            {`Select the content type(s) you want to use with Locale Field Populator. You can change this
             anytime by navigating to the 'Sidebar' tab in your content model.`}
           </Paragraph>
           <FormControl id="contentTypes" style={{ width: '100%' }}>
