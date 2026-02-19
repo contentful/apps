@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Paragraph,
   Flex,
@@ -6,15 +6,16 @@ import {
   Spinner,
   Autocomplete,
   FormControl,
+  Note,
 } from '@contentful/f36-components';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
-interface FormObject {
+export type FormObject = {
   id: string;
   url: string;
   name: string;
-}
+};
 
 interface ErrorState {
   error: boolean;
@@ -27,30 +28,29 @@ interface MarketoFormsResponse {
 
 // TODO: Replace with actual endpoint
 const ENDPOINT = 'dummy-endpoint';
+const EMPTY_FORM: FormObject = { id: '', name: '', url: '' };
+const DROPDOWN_EXPANDED_HEIGHT = 240;
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
-  const [forms, updateForms] = useState<FormObject[] | null>(null);
+  const [forms, setForms] = useState<FormObject[] | null>(null);
   const [filteredForms, setFilteredForms] = useState<FormObject[]>([]);
-  const [selectedForm, setSelectedForm] = useState<FormObject | undefined>(undefined);
+  const [selectedForm, setSelectedForm] = useState<FormObject>(EMPTY_FORM);
   const [loadingData, setLoadingStatus] = useState(true);
   const [error, updateError] = useState<ErrorState>({ error: false, message: '' });
 
-  const DROPDOWN_EXPANDED_HEIGHT = 240;
-
   useEffect(() => {
     sdk.window.startAutoResizer();
-    return () => sdk.window.stopAutoResizer();
-  }, [sdk.window]);
+  }, []);
 
-  const handleDropdownOpen = useCallback(() => {
+  const handleDropdownOpen = () => {
     sdk.window.stopAutoResizer();
     sdk.window.updateHeight(DROPDOWN_EXPANDED_HEIGHT);
-  }, [sdk.window]);
+  };
 
-  const handleDropdownClose = useCallback(() => {
+  const handleDropdownClose = () => {
     sdk.window.startAutoResizer();
-  }, [sdk.window]);
+  };
 
   const updateFieldValue = (form: FormObject | null) => {
     if (!form) {
@@ -86,7 +86,7 @@ const Field = () => {
 
   const removeFieldValue = () => {
     sdk.field.setValue(null);
-    setSelectedForm({ id: '', name: '', url: '' });
+    setSelectedForm(EMPTY_FORM);
     setFilteredForms(forms || []);
   };
 
@@ -115,13 +115,13 @@ const Field = () => {
           return;
         }
 
-        updateForms(response.result);
+        setForms(response.result);
         setFilteredForms(response.result);
 
         const fieldValue = sdk.field.getValue();
         if (fieldValue?.id) {
           const preselectedForm = response.result.find((item) => item.id === fieldValue.id);
-          setSelectedForm(preselectedForm || undefined);
+          setSelectedForm(preselectedForm || EMPTY_FORM);
         }
 
         setLoadingStatus(false);
@@ -137,47 +137,45 @@ const Field = () => {
     loadForms();
   }, [sdk.field]);
 
+  if (loadingData) {
+    return (
+      <Flex alignItems="center" gap="spacingXs">
+        <Paragraph marginBottom="none">Loading Marketo data</Paragraph>
+        <Spinner color="primary" />
+      </Flex>
+    );
+  }
+
+  if (error.error) {
+    return <Note variant="negative">{error.message}</Note>;
+  }
+
   return (
-    <>
-      {loadingData ? (
+    <Flex flexDirection="column" fullHeight style={{ width: '99%' }}>
+      {forms && forms.length > 0 && (
         <>
-          {error.error ? (
-            <Paragraph>{error.message}</Paragraph>
-          ) : (
-            <Flex alignItems="center" gap="spacingXs">
-              <Paragraph marginBottom="none">Loading Marketo data</Paragraph>
-              <Spinner color="primary" />
+          <FormControl>
+            <Autocomplete<FormObject>
+              items={filteredForms.filter((item) => item.id !== selectedForm?.id)}
+              selectedItem={selectedForm}
+              onInputValueChange={handleFormInputChange}
+              onSelectItem={updateFieldValue}
+              onOpen={handleDropdownOpen}
+              onClose={handleDropdownClose}
+              placeholder="Select a form"
+              itemToString={(item) => (item ? item.name : '')}
+              renderItem={(item) => item.name}
+              listWidth="full"
+            />
+          </FormControl>
+          {selectedForm?.id && (
+            <Flex marginTop={'spacingS'}>
+              <Button onClick={removeFieldValue}>Remove Form</Button>
             </Flex>
           )}
         </>
-      ) : (
-        <Flex flexDirection={'column'} fullHeight={true} style={{ width: '99%' }}>
-          {forms && forms.length > 0 && (
-            <>
-              <FormControl>
-                <Autocomplete<FormObject>
-                  items={filteredForms.filter((item) => item.id !== selectedForm?.id)}
-                  selectedItem={selectedForm}
-                  onInputValueChange={handleFormInputChange}
-                  onSelectItem={updateFieldValue}
-                  onOpen={handleDropdownOpen}
-                  onClose={handleDropdownClose}
-                  placeholder="Select a form"
-                  itemToString={(item) => (item ? item.name : '')}
-                  renderItem={(item) => item.name}
-                  listWidth="full"
-                />
-              </FormControl>
-              {selectedForm?.id && (
-                <Flex marginTop={'spacingS'}>
-                  <Button onClick={removeFieldValue}>Remove Form</Button>
-                </Flex>
-              )}
-            </>
-          )}
-        </Flex>
       )}
-    </>
+    </Flex>
   );
 };
 
