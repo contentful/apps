@@ -1,7 +1,14 @@
-import { useState, useEffect } from 'react';
-import { Paragraph, Flex, Button, Spinner, Autocomplete } from '@contentful/f36-components';
+import { useState, useEffect, useCallback } from 'react';
+import {
+  Paragraph,
+  Flex,
+  Button,
+  Spinner,
+  Autocomplete,
+  FormControl,
+} from '@contentful/f36-components';
 import { FieldAppSDK } from '@contentful/app-sdk';
-import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 interface FormObject {
   id: string;
@@ -9,34 +16,65 @@ interface FormObject {
   name: string;
 }
 
+interface ErrorState {
+  error: boolean;
+  message: string;
+}
+
+interface MarketoFormsResponse {
+  result?: FormObject[];
+}
+
+// TODO: Replace with actual endpoint
+const ENDPOINT = 'dummy-endpoint';
+
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   const [forms, updateForms] = useState<FormObject[] | null>(null);
-  const [filteredForms, updateFilteredForms] = useState<FormObject[]>([]);
-  const [selectedForm, updateSelectedForm] = useState<FormObject | undefined>(undefined);
-  const [loadingData, updateLoadingStatus] = useState(true);
-  const [error, updateError] = useState({ error: false, message: '' });
+  const [filteredForms, setFilteredForms] = useState<FormObject[]>([]);
+  const [selectedForm, setSelectedForm] = useState<FormObject | undefined>(undefined);
+  const [loadingData, setLoadingStatus] = useState(true);
+  const [error, updateError] = useState<ErrorState>({ error: false, message: '' });
 
-  useAutoResizer();
+  const DROPDOWN_EXPANDED_HEIGHT = 240;
+
+  useEffect(() => {
+    sdk.window.startAutoResizer();
+    return () => sdk.window.stopAutoResizer();
+  }, [sdk.window]);
+
+  const handleDropdownOpen = useCallback(() => {
+    sdk.window.stopAutoResizer();
+    sdk.window.updateHeight(DROPDOWN_EXPANDED_HEIGHT);
+  }, [sdk.window]);
+
+  const handleDropdownClose = useCallback(() => {
+    sdk.window.startAutoResizer();
+  }, [sdk.window]);
 
   const updateFieldValue = (form: FormObject | null) => {
     if (!form) {
       return;
     }
     sdk.field.setValue({ id: form.id, url: form.url });
-    updateSelectedForm(form);
+    setSelectedForm(form);
     if (forms) {
-      updateFilteredForms(forms.filter((item) => item.id !== form.id));
+      setFilteredForms(forms.filter((item) => item.id !== form.id));
     }
   };
 
   const handleFormInputChange = (value: string) => {
-    const normalizedValue = value.trim().toLowerCase();
-    if (!forms) {
-      updateFilteredForms([]);
+    if (!value && selectedForm?.id) {
+      removeFieldValue();
       return;
     }
-    updateFilteredForms(
+
+    const normalizedValue = value.trim().toLowerCase();
+    if (!forms) {
+      setFilteredForms([]);
+      return;
+    }
+    setFilteredForms(
       forms.filter((form) => {
         if (selectedForm && selectedForm.id === form.id) {
           return false;
@@ -48,62 +86,56 @@ const Field = () => {
 
   const removeFieldValue = () => {
     sdk.field.setValue(null);
-    updateSelectedForm(undefined);
-    updateFilteredForms(forms || []);
-    return;
+    setSelectedForm({ id: '', name: '', url: '' });
+    setFilteredForms(forms || []);
   };
 
-  // TODO: Replace with actual endpoint
-  const ENDPOINT = 'dummy-endpoint';
-
   useEffect(() => {
-    //Get list of available forms to from Marketo selection
-    (async () => {
+    const loadForms = async () => {
       try {
-        const response = await (
-          await fetch(ENDPOINT, {
-            method: 'POST',
-            body: JSON.stringify(sdk.parameters.installation),
-            headers: {
-              'Access-Control-Request-Method': 'POST',
-              'Content-Type': 'application/json',
-            },
-          })
-        ).json();
+        const fetchResponse = await fetch(ENDPOINT, {
+          method: 'POST',
+          body: JSON.stringify(sdk.parameters.installation),
+          headers: {
+            'Access-Control-Request-Method': 'POST',
+            'Content-Type': 'application/json',
+          },
+        });
 
-        if (response.result) {
-          const mappedResponse = response.result.map((item: FormObject) => {
-            return {
-              id: item.id,
-              url: item.url,
-              name: item.name,
-            };
-          });
-          updateForms(mappedResponse);
-          updateFilteredForms(mappedResponse);
-          updateLoadingStatus(false);
+        //Check if needed to parse the response
+        const response = (await fetchResponse.json()) as MarketoFormsResponse;
 
-          const fieldValue = sdk.field.getValue();
-          if (fieldValue?.id) {
-            const preselectedForm = mappedResponse.find(
-              (item: FormObject) => item.id === fieldValue.id
-            );
-            updateSelectedForm(preselectedForm || undefined);
-          }
-        } else {
+        if (!response.result) {
           updateError({
             error: true,
             message:
               'Something is wrong with the Marketo App. Please ask a space admin to check the configuration.',
           });
+          setLoadingStatus(false);
+          return;
         }
-      } catch (error) {
-        console.log(error);
-      }
-    })();
 
-    // Set field value in local state
-  }, [sdk]); //Think about this
+        updateForms(response.result);
+        setFilteredForms(response.result);
+
+        const fieldValue = sdk.field.getValue();
+        if (fieldValue?.id) {
+          const preselectedForm = response.result.find((item) => item.id === fieldValue.id);
+          setSelectedForm(preselectedForm || undefined);
+        }
+
+        setLoadingStatus(false);
+      } catch {
+        updateError({
+          error: true,
+          message: 'Could not load Marketo forms. Please try again or contact a space admin.',
+        });
+        setLoadingStatus(false);
+      }
+    };
+
+    loadForms();
+  }, [sdk.field]);
 
   return (
     <>
@@ -112,28 +144,33 @@ const Field = () => {
           {error.error ? (
             <Paragraph>{error.message}</Paragraph>
           ) : (
-            <Paragraph>
-              Loading Marketo data <Spinner color={'primary'} />
-            </Paragraph>
+            <Flex alignItems="center" gap="spacingXs">
+              <Paragraph marginBottom="none">Loading Marketo data</Paragraph>
+              <Spinner color="primary" />
+            </Flex>
           )}
         </>
       ) : (
-        <Flex flexDirection={'column'} fullHeight={true}>
+        <Flex flexDirection={'column'} fullHeight={true} style={{ width: '99%' }}>
           {forms && forms.length > 0 && (
             <>
-              <Autocomplete<FormObject>
-                items={filteredForms.filter((item) => item.id !== selectedForm?.id)}
-                selectedItem={selectedForm}
-                onInputValueChange={handleFormInputChange}
-                onSelectItem={updateFieldValue}
-                placeholder="Select a form"
-                itemToString={(item) => (item ? item.name : '')}
-                renderItem={(item) => item.name}
-                listWidth="full"
-              />
-              {selectedForm && (
+              <FormControl>
+                <Autocomplete<FormObject>
+                  items={filteredForms.filter((item) => item.id !== selectedForm?.id)}
+                  selectedItem={selectedForm}
+                  onInputValueChange={handleFormInputChange}
+                  onSelectItem={updateFieldValue}
+                  onOpen={handleDropdownOpen}
+                  onClose={handleDropdownClose}
+                  placeholder="Select a form"
+                  itemToString={(item) => (item ? item.name : '')}
+                  renderItem={(item) => item.name}
+                  listWidth="full"
+                />
+              </FormControl>
+              {selectedForm?.id && (
                 <Flex marginTop={'spacingS'}>
-                  <Button onClick={() => removeFieldValue()}>Remove Form</Button>
+                  <Button onClick={removeFieldValue}>Remove Form</Button>
                 </Flex>
               )}
             </>
