@@ -1,46 +1,24 @@
 import React, { useMemo } from 'react';
-import { Button, Modal, Paragraph, TextLink, Flex, Box } from '@contentful/f36-components';
+import { Button, Modal, Paragraph, Flex, EntryCard } from '@contentful/f36-components';
 import { EntryProps } from 'contentful-management';
-import { ArrowSquareOutIcon } from '@contentful/f36-icons';
-import tokens from '@contentful/f36-tokens';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import { getEntryDisplayName } from '../../../../../utils/getEntryTitle';
 
 interface ReviewEntriesModalProps {
   isOpen: boolean;
   onClose: () => void;
   createdEntries: EntryProps[];
+  contentTypeNamesMap: Record<string, string>;
   spaceId: string;
   defaultLocale: string;
-}
-
-function getEntryDisplayName(entry: EntryProps, defaultLocale: string): string {
-  // Try to find a 'title' field first
-  if (entry.fields.title) {
-    const titleValue = entry.fields.title[defaultLocale] || Object.values(entry.fields.title)[0];
-    if (titleValue && typeof titleValue === 'string') {
-      return titleValue;
-    }
-  }
-
-  // Fall back to the first text/Symbol field
-  for (const [_fieldId, localizedValue] of Object.entries(entry.fields)) {
-    if (localizedValue && typeof localizedValue === 'object') {
-      const value = localizedValue[defaultLocale] || Object.values(localizedValue)[0];
-      if (value && typeof value === 'string' && value.trim().length > 0) {
-        return value;
-      }
-    }
-  }
-
-  // Last resort: use entry ID
-  return entry.sys.id;
 }
 
 export const ReviewEntriesModal: React.FC<ReviewEntriesModalProps> = ({
   isOpen,
   onClose,
   createdEntries,
+  contentTypeNamesMap,
   spaceId,
   defaultLocale,
 }) => {
@@ -48,22 +26,30 @@ export const ReviewEntriesModal: React.FC<ReviewEntriesModalProps> = ({
 
   const entryLinks = useMemo(() => {
     return createdEntries.map((entry) => {
-      const displayName = getEntryDisplayName(entry, defaultLocale);
-      const url = `https://${sdk.hostnames.webapp}/spaces/${spaceId}/environments/${sdk.ids.environment}/entries/${entry.sys.id}`;
+      const contentTypeId = entry.sys.contentType.sys.id;
+      const contentTypeName = contentTypeNamesMap[contentTypeId] || contentTypeId;
 
       return {
         entry,
-        displayName,
-        url,
+        displayName: getEntryDisplayName(entry, defaultLocale),
+        contentType: contentTypeName,
+        url: `https://${sdk.hostnames.webapp}/spaces/${spaceId}/environments/${sdk.ids.environment}/entries/${entry.sys.id}`,
       };
     });
-  }, [createdEntries, spaceId, defaultLocale]);
+  }, [
+    createdEntries,
+    contentTypeNamesMap,
+    spaceId,
+    defaultLocale,
+    sdk.hostnames.webapp,
+    sdk.ids.environment,
+  ]);
 
   const entryCount = createdEntries.length;
   const entryHasText = entryCount === 1 ? 'entry has' : 'entries have';
 
   return (
-    <Modal isShown={isOpen} onClose={onClose} size="medium">
+    <Modal isShown={isOpen} onClose={onClose} size="large">
       {() => (
         <>
           <Modal.Header title="Review entries" onClose={onClose} />
@@ -72,22 +58,16 @@ export const ReviewEntriesModal: React.FC<ReviewEntriesModalProps> = ({
               <Paragraph marginBottom="none">
                 Success! {entryCount} {entryHasText} been created:
               </Paragraph>
-              <Flex
-                as="ul"
-                flexDirection="column"
-                gap="spacingS"
-                style={{ padding: 0, paddingLeft: tokens.spacingM, margin: 0 }}>
-                {entryLinks.map(({ entry, displayName, url }) => (
-                  <Box as="li" key={entry.sys.id}>
-                    <TextLink
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      icon={<ArrowSquareOutIcon variant="muted" size="small" />}
-                      alignIcon="end">
-                      {displayName}
-                    </TextLink>
-                  </Box>
+              <Flex flexDirection="column" gap="spacingS">
+                {entryLinks.map(({ entry, displayName, url, contentType }) => (
+                  <EntryCard
+                    key={entry.sys.id}
+                    title={displayName}
+                    contentType={contentType}
+                    size="small"
+                    status="draft"
+                    onClick={() => window.open(url, '_blank')}
+                  />
                 ))}
               </Flex>
             </Flex>
