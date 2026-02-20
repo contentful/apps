@@ -25,8 +25,6 @@ interface MarketoFormsResponse {
   result?: FormObject[];
 }
 
-// TODO: Replace with actual endpoint
-const ENDPOINT = 'dummy-endpoint';
 const EMPTY_FORM: FormObject = { id: '', name: '', url: '' };
 const DROPDOWN_EXPANDED_HEIGHT = 240;
 
@@ -92,7 +90,8 @@ const Field = () => {
   useEffect(() => {
     const loadForms = async () => {
       try {
-        const fetchResponse = await fetch(ENDPOINT, {
+        // TODO: Replace fetch with Contentful Functions. This was added as part of the original implementation.
+        const fetchResponse = await fetch('dummy-endpoint', {
           method: 'POST',
           body: JSON.stringify(sdk.parameters.installation),
           headers: {
