@@ -8,6 +8,7 @@ import {
   FormControl,
   Switch,
   Box,
+  Note,
 } from '@contentful/f36-components';
 import { ArrowRightIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -191,12 +192,24 @@ const ConfigScreen = () => {
             </Switch>
           </Box>
 
-          <Box>
+          <Box marginBottom="spacing3Xl">
             <Subheading marginBottom="spacingXs">Disclaimer</Subheading>
-            <Paragraph>
-              The Redirects app will create a content type labeled &quot;Redirect&quot;. If deleted,
-              the app will not work.
-            </Paragraph>
+            <Note variant="warning" className={styles.noteIconTop}>
+              <Paragraph marginBottom={parameters.enableVanityUrl ? 'spacingM' : 'none'}>
+                The Redirects app creates a content type called &quot;Redirect.&quot; This content
+                type is required for the app to function, if it is deleted, redirects will no longer
+                work. Each redirect you create generates a new entry using this content type;
+                deleting an entry will disable the corresponding redirect.
+              </Paragraph>
+              {parameters.enableVanityUrl && (
+                <Paragraph marginBottom="none">
+                  If you use vanity URLs, the app also creates a content type called &quot;Vanity
+                  URL.&quot; This content type is required for vanity URLs to function. Each vanity
+                  URL you create generates a new entry using this content type; deleting an entry
+                  will disable the corresponding vanity URL.
+                </Paragraph>
+              )}
+            </Note>
           </Box>
         </Form>
       </Flex>

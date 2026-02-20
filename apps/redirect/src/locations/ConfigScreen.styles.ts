@@ -6,4 +6,7 @@ export const styles = {
     minHeight: '40vh',
     maxWidth: '800px',
   }),
+  noteIconTop: css({
+    alignItems: 'flex-start',
+  }),
 };

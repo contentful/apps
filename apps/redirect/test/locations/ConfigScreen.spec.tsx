@@ -65,7 +65,27 @@ describe('ConfigScreen', () => {
       expect(screen.getByText('Redirect TO')).toBeInTheDocument();
       expect(screen.getByText('Vanity URL')).toBeInTheDocument();
       expect(screen.getByText('Disclaimer')).toBeInTheDocument();
+      expect(
+        screen.getByText(/The Redirects app creates a content type called/)
+      ).toBeInTheDocument();
     });
+  });
+
+  it('shows vanity URL disclaimer only when vanity URL is enabled', async () => {
+    render(<ConfigScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Disclaimer')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByText(/If you use vanity URLs/)).not.toBeInTheDocument();
+
+    const vanitySwitch = screen.getByRole('switch', {
+      name: 'Enable Vanity URL content type',
+    });
+    await userEvent.click(vanitySwitch);
+
+    expect(screen.getByText(/If you use vanity URLs/)).toBeInTheDocument();
   });
 
   it('allows selecting content types for both FROM and TO', async () => {
