@@ -48,10 +48,6 @@ const ContentTypeFieldMultiSelect: React.FC<ContentTypeFieldMultiSelectProps> = 
     }
   }, [contentTypes, sdk, onSelectionChange]);
 
-  useEffect(() => {
-    setFilteredFields(availableFields);
-  }, [availableFields]);
-
   const getPlaceholderText = () => {
     if (selectedFields.length === 0) return 'Select one or more';
     if (selectedFields.length === 1) return selectedFields[0].displayName;

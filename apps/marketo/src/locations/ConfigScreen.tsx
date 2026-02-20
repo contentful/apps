@@ -21,7 +21,6 @@ export interface AppInstallationParameters {
   clientId?: string;
   clientSecret?: string;
   munchkinId?: string;
-  [key: string]: string | undefined;
 }
 
 const ConfigScreen = () => {
@@ -190,7 +189,7 @@ const ConfigScreen = () => {
                 .
               </FormControl.HelpText>
               <FormControl.HelpText marginTop="none">
-                For instance, for the url &quot;https://064-CCJ-768.mktorest.com/idenitity&quot;,
+                For instance, for the url &quot;https://123-ABC-456.mktorest.com/identitity&quot;,
                 &quot;064-CCJ-768&quot; would be the Munchkin ID.
               </FormControl.HelpText>
               <TextLink
