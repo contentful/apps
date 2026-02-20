@@ -4,9 +4,12 @@ const createMockSdk = (overrides?: Record<string, unknown>) => {
   const baseMockSdk = {
     app: {
       onConfigure: vi.fn(),
-      getParameters: vi.fn().mockReturnValueOnce({}),
+      getParameters: vi.fn().mockResolvedValue(null),
       setReady: vi.fn(),
-      getCurrentState: vi.fn(),
+      getCurrentState: vi.fn().mockResolvedValue(null),
+    },
+    notifier: {
+      error: vi.fn(),
     },
     field: {
       getValue: vi.fn(),
