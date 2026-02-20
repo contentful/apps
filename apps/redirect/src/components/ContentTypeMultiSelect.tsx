@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Box, Stack, Pill, Note } from '@contentful/f36-components';
+import { Box, Stack, Pill } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { ContentType } from '../utils/types';
 import { ContentTypeProps } from 'contentful-management';
