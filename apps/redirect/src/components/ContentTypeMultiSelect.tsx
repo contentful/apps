@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Box, Stack, Pill } from '@contentful/f36-components';
+import { Box, Stack, Pill, Note } from '@contentful/f36-components';
 import { Multiselect } from '@contentful/f36-multiselect';
 import { ContentType } from '../utils/types';
 import { ContentTypeProps } from 'contentful-management';
 import { CMAClient } from '@contentful/app-sdk';
+
+const DEFAULT_EXCLUDED_IDS: string[] = [];
 
 interface ContentTypeMultiSelectProps {
   selectedContentTypes: ContentType[];
@@ -16,10 +18,11 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
   selectedContentTypes,
   setSelectedContentTypes,
   cma,
-  excludedContentTypesIds = [],
+  excludedContentTypesIds = DEFAULT_EXCLUDED_IDS,
 }) => {
   const [availableContentTypes, setAvailableContentTypes] = useState<ContentType[]>([]);
   const [filteredItems, setFilteredItems] = useState<ContentType[]>([]);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const idPrefix = useMemo(() => `multiselect-${crypto.randomUUID()}-`, []);
 
@@ -58,20 +61,30 @@ const ContentTypeMultiSelect: React.FC<ContentTypeMultiSelectProps> = ({
 
   useEffect(() => {
     (async () => {
-      const allContentTypes = await fetchAllContentTypes();
+      try {
+        setFetchError(null);
+        const allContentTypes = await fetchAllContentTypes();
 
-      const newAvailableContentTypes = allContentTypes
-        .filter((ct) => !excludedContentTypesIds.includes(ct.sys.id))
-        .map((ct) => ({
-          id: ct.sys.id,
-          name: ct.name,
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name));
+        const newAvailableContentTypes = allContentTypes
+          .filter((ct) => !excludedContentTypesIds.includes(ct.sys.id))
+          .map((ct) => ({
+            id: ct.sys.id,
+            name: ct.name,
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name));
 
-      setAvailableContentTypes(newAvailableContentTypes);
-      setFilteredItems(newAvailableContentTypes);
+        setAvailableContentTypes(newAvailableContentTypes);
+        setFilteredItems(newAvailableContentTypes);
+      } catch {
+        setFetchError('Failed to load content types. Please try again later.');
+      }
     })();
   }, [cma, excludedContentTypesIds]);
+
+  if (fetchError) {
+    console.error(fetchError);
+    return;
+  }
 
   return (
     <>

@@ -93,7 +93,7 @@ const vanityUrlContentTypeBody: CreateContentTypeProps = {
         {
           regexp: {
             pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
-            flags: 'i',
+            flags: '',
           },
           message: 'Slug must be URL-friendly (lowercase letters, numbers, and hyphens only)',
         },
