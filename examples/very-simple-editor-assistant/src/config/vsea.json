@@ -1,0 +1,10 @@
+{
+  "aaaChild": {
+    "name": "Il mio Nome",
+    "markdownString": "Il mio Cognome"
+  },
+  "aaaParent": {
+    "name": "Nome del mio Papà",
+    "title": "Cognome del mio Papà"
+  }
+}
