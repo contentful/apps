@@ -11,7 +11,7 @@ export default defineConfig({
     env: loadEnv('test', process.cwd(), ''),
     server: {
       deps: {
-        inline: ['@phosphor-icons/react', '@contentful/f36-icons'],
+        inline: ['@contentful/f36-icons'],
       },
     },
   },
