@@ -10,6 +10,24 @@ import StatusFilter from './StatusFilter';
 import tokens from '@contentful/f36-tokens';
 import { SortMenu } from './SortMenu';
 
+function toggleFieldInFilter(
+  field: ContentTypeField,
+  currentValues: FieldFilterValue[]
+): FieldFilterValue[] {
+  if (currentValues.some((f) => f.fieldUniqueId === field.uniqueId)) {
+    return currentValues.filter((f) => f.fieldUniqueId !== field.uniqueId);
+  }
+  return [
+    ...currentValues,
+    {
+      fieldUniqueId: field.uniqueId,
+      operator: 'in',
+      value: '',
+      contentTypeField: field,
+    },
+  ];
+}
+
 interface SearchBarProps {
   searchQuery: string;
   onSearchChange: (query: string, fieldFilterValues: FieldFilterValue[]) => void;
@@ -79,9 +97,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   return (
     <Flex flexDirection="column" gap="spacingXs" className={styles.container}>
-      {/* <Text fontSize="fontSizeM" fontWeight="fontWeightMedium">
-        Search entries
-      </Text> */}
       <Flex flexDirection="row" alignItems="center" gap="spacingS">
         <SortMenu
           sortOption={sortOption}
@@ -128,7 +143,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             </Menu.Item>
             {fields.map((field) => (
               <Menu.Item
-                // isActive={fieldFilterValues.some((f) => f.fieldUniqueId === field.uniqueId)}
                 icon={
                   fieldFilterValues.some((f) => f.fieldUniqueId === field.uniqueId) ? (
                     <CheckIcon />
@@ -137,21 +151,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   )
                 }
                 onClick={() => {
-                  if (fieldFilterValues.some((f) => f.fieldUniqueId === field.uniqueId)) {
-                    setFieldFilterValues(
-                      fieldFilterValues.filter((f) => f.fieldUniqueId !== field.uniqueId)
-                    );
-                  } else {
-                    setFieldFilterValues([
-                      ...fieldFilterValues,
-                      {
-                        fieldUniqueId: field.uniqueId,
-                        operator: 'in',
-                        value: '',
-                        contentTypeField: field,
-                      },
-                    ]);
-                  }
+                  setFieldFilterValues(toggleFieldInFilter(field, fieldFilterValues));
                 }}
                 key={field.uniqueId}>
                 {field.name}

@@ -12,8 +12,6 @@ export const tableStyles = {
     background: tokens.gray100,
   },
   tableContainer: {
-    // marginTop: tokens.spacingM,
-    // maxHeight: '600px',
     width: '100%',
     overflow: 'auto',
     flex: 1,

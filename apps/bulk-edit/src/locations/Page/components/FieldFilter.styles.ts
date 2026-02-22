@@ -139,5 +139,10 @@ export const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    '& svg': {
+      width: 12,
+      height: 12,
+      color: tokens.red500,
+    },
   }),
 };

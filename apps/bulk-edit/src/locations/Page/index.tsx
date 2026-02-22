@@ -34,7 +34,6 @@ import { ErrorNote } from './components/ErrorNote';
 import { EmptyEntryBanner } from './components/EmptyEntryBanner';
 import { buildQuery, fieldFilterValuesToQuery } from './utils/contentfulQueryUtils';
 import { FieldVisibiltyMenu } from './components/FieldVisibiltyMenu';
-import tokens from '@contentful/f36-tokens';
 
 const getFieldsMapped = (fields: ContentTypeField[]) => {
   return fields.map((field) => ({
@@ -79,7 +78,6 @@ const Page = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchFieldFilterValues, setSearchFieldFilterValues] = useState<FieldFilterValue[]>([]);
   const [searchFieldFilterArgs, setSearchFieldFilterArgs] = useState<string>('');
-  // const [initialTotal, setInitialTotal] = useState(0);
   // Used to force a re-render of the table when the selection changes
   const [tableKey, setTableKey] = useState(0);
 
@@ -252,7 +250,6 @@ const Page = () => {
     currentContentType,
     selectedStatuses,
     searchQuery,
-    // searchFieldFilterValues,
     searchFieldFilterArgs,
     fields,
   ]);

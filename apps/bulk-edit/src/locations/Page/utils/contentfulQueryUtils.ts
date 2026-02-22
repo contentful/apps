@@ -37,7 +37,6 @@ export const buildQuery = (
   displayField: string | null,
   statusLabels: string[],
   selectedContentTypeId: string | undefined,
-  // needsClientFiltering: boolean,
   activePage: number,
   itemsPerPage: number,
   searchFieldFilterValues: FieldFilterValue[],
@@ -46,8 +45,6 @@ export const buildQuery = (
   const query: QueryOptions = {
     content_type: selectedContentTypeId,
     order: getOrder(sortOption, displayField),
-    // skip: needsClientFiltering ? 0 : activePage * itemsPerPage,
-    // limit: needsClientFiltering ? 1000 : itemsPerPage,
     skip: activePage * itemsPerPage,
     limit: itemsPerPage,
     ...getStatusFilter(statusLabels),
@@ -73,12 +70,10 @@ export const fieldFilterValuesToQuery = (
   const queryString: string[] = [];
   sortedFieldFilterValues.map((fieldFilterValue) => {
     if (!fieldFilterValue.value) {
-      return;
+      return null;
     }
     let key, value;
     const operator = fieldFilterValue.operator;
-
-    console.log('fieldFilterValue', fieldFilterValue);
 
     if (
       fieldFilterValue.contentTypeField.type === 'Symbol' ||

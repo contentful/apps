@@ -7,7 +7,6 @@ import { ContentTypeField, FieldFilterValue } from '../types';
 import { styles } from './FieldFilter.styles';
 import { Asset, Entry } from 'contentful-management';
 import * as icons from '@contentful/f36-icons';
-import tokens from '@contentful/f36-tokens';
 
 const FILTER_OPERATORS: Array<{ value: FieldFilterValue['operator']; label: string }> = [
   { value: 'in', label: 'is' },
@@ -20,7 +19,6 @@ const FILTER_OPERATORS: Array<{ value: FieldFilterValue['operator']; label: stri
 const LINK_FILTER_OPERATORS: Array<{ value: FieldFilterValue['operator']; label: string }> = [
   { value: 'in', label: 'is' },
   { value: 'ne', label: 'is not' },
-  // { value: 'match', label: 'matches' },
   { value: 'exists', label: 'is not empty' },
   { value: 'not exists', label: 'is empty' },
 ];
@@ -50,7 +48,7 @@ const RICH_TEXT_FILTER_OPERATORS: Array<{ value: FieldFilterValue['operator']; l
   { value: 'not exists', label: 'is empty' },
 ];
 
-const isObjectField = (field: ContentTypeField) => {
+const isLinkField = (field: ContentTypeField) => {
   return field.type === 'Link';
 };
 const isArrayField = (field: ContentTypeField) => {
@@ -64,7 +62,7 @@ const isRichTextField = (field: ContentTypeField) => {
 };
 
 const getFilterOperators = (field: ContentTypeField) => {
-  if (isObjectField(field)) {
+  if (isLinkField(field)) {
     return LINK_FILTER_OPERATORS;
   }
   if (isArrayField(field)) {
@@ -109,14 +107,14 @@ export const FieldFilter = ({ field, setFieldFilterValues }: FieldFilterProps) =
 
   const isEntrySelector =
     field.type === 'Link' && field.fieldControl?.widgetId === 'entryLinkEditor';
-  const isEntrysSelector =
+  const isEntriesSelector =
     field.type === 'Array' && field.fieldControl?.widgetId === 'entryLinksEditor';
   const isAssetSelector =
     field.type === 'Link' && field.fieldControl?.widgetId === 'assetLinkEditor';
   const isAssetsSelector =
     field.type === 'Array' && field.fieldControl?.widgetId === 'assetLinksEditor';
 
-  const isInput = !isEntrySelector && !isEntrysSelector && !isAssetSelector;
+  const isInput = !isEntrySelector && !isEntriesSelector && !isAssetSelector;
 
   const showValueInput = selectedOperator !== 'exists' && selectedOperator !== 'not exists';
 
@@ -147,16 +145,7 @@ export const FieldFilter = ({ field, setFieldFilterValues }: FieldFilterProps) =
         return [...prev, newFilterValue];
       }
     });
-  }, [
-    selectedOperator,
-    debouncedInputValue,
-    // triggering multiple events...input should be enough
-    // selectedEntry,
-    // selectedEntries,
-    // selectedAsset,
-    field.uniqueId,
-    setFieldFilterValues,
-  ]);
+  }, [selectedOperator, debouncedInputValue, field.uniqueId, setFieldFilterValues]);
 
   // -----------------------------
   // Entry selection
@@ -272,7 +261,7 @@ export const FieldFilter = ({ field, setFieldFilterValues }: FieldFilterProps) =
               {selectedEntry ? `${selectedEntry.substring(0, 8)}...` : 'Select Entry'}
             </button>
           )}
-          {isEntrysSelector && (
+          {isEntriesSelector && (
             <button className={styles.inputButton} onClick={handleSelectEntries}>
               {selectedEntries.length > 0
                 ? `${selectedEntries.length} Entries selected`
@@ -308,7 +297,6 @@ export const FieldFilter = ({ field, setFieldFilterValues }: FieldFilterProps) =
       <div id="closeButton" className={styles.closeButton}>
         <icons.XIcon
           size="small"
-          style={{ width: 12, height: 12, color: tokens.red500 }}
           onClick={() =>
             setFieldFilterValues((prev) => prev.filter((f) => f.fieldUniqueId !== field.uniqueId))
           }

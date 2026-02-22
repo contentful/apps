@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, Flex } from '@contentful/f36-components';
+import { Text, Flex, Box } from '@contentful/f36-components';
 import { NavList } from '@contentful/f36-navlist';
 import { ContentTypeProps } from 'contentful-management';
 import { styles } from './ContentTypeSidebar.styles';
@@ -20,8 +20,8 @@ export const ContentTypeSidebar: React.FC<ContentTypeSidebarProps> = ({
   return (
     <Flex style={styles.sidebar}>
       <Text style={styles.sidebarTitle}>Content types</Text>
-      <div style={styles.sidebarContent}>
-        <div style={styles.sidebarList}>
+      <Box style={styles.sidebarContent}>
+        <Box style={styles.sidebarList}>
           <NavList aria-label="Content types" testId="content-types-nav">
             {contentTypes.length === 0 ? (
               <Text style={styles.noContentTypeText}>No content types found.</Text>
@@ -39,8 +39,8 @@ export const ContentTypeSidebar: React.FC<ContentTypeSidebarProps> = ({
               ))
             )}
           </NavList>
-        </div>
-      </div>
+        </Box>
+      </Box>
     </Flex>
   );
 };

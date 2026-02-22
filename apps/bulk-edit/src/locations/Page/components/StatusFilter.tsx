@@ -1,10 +1,9 @@
-import { Button, Flex, IconButton, Menu } from '@contentful/f36-components';
+import { Button, Flex, Menu } from '@contentful/f36-components';
 import { useMemo } from 'react';
 import { FilterOption } from '../types';
 import * as icons from '@contentful/f36-icons';
 
 interface StatusFilterProps {
-  id?: string;
   options: FilterOption[];
   selectedItems: FilterOption[];
   setSelectedItems: (items: FilterOption[]) => void;
@@ -13,7 +12,6 @@ interface StatusFilterProps {
 }
 
 const StatusFilter = ({
-  id,
   options,
   selectedItems,
   setSelectedItems,

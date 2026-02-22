@@ -4,32 +4,12 @@ import { emptyEntryBannerStyles } from './EmptyEntryBanner.styles';
 
 interface EmptyStateProps {
   hasEntries: boolean;
-  // hasInitialEntries: boolean;
 }
 
-export const EmptyEntryBanner: React.FC<EmptyStateProps> = ({
-  hasEntries,
-  // hasInitialEntries
-}) => {
+export const EmptyEntryBanner: React.FC<EmptyStateProps> = ({ hasEntries }) => {
   if (hasEntries) {
     return null;
   }
-
-  // if (!hasInitialEntries) {
-  //   return (
-  //     <Flex
-  //       alignItems="center"
-  //       justifyContent="center"
-  //       flexDirection="column"
-  //       padding="spacing2Xl"
-  //       className={emptyEntryBannerStyles.container}>
-  //       <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold">
-  //         No entries found.
-  //       </Text>
-  //     </Flex>
-  //   );
-  // }
-
   return (
     <Flex className={emptyEntryBannerStyles.container}>
       <Text fontSize="fontSizeL" fontWeight="fontWeightDemiBold">
