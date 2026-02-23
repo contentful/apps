@@ -124,7 +124,7 @@ export const fetchEntries = async (
     mainEntryContentType
   );
 
-  const referencedEntriesData: ReferencedEntryData[] = referencesToProcess.map(
+  const referencedEntriesData: ReferencedEntryData[] = referencesToProcess.flatMap(
     ({ referenceEntryId, field }) => {
       if (referenceEntryId === entryId) {
         return {
@@ -137,6 +137,10 @@ export const fetchEntries = async (
       }
 
       const referenceEntry = entryMap[referenceEntryId];
+      if (!referenceEntry) {
+        return [];
+      }
+
       const referenceContentType = contentTypeMap[referenceEntry.sys.contentType.sys.id];
 
       return {
