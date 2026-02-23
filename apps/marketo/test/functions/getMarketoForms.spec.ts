@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { handler } from '../../functions/getMarketoForms';
+import { handler as originalHandler, MarketoFormsResponse } from '../../functions/getMarketoForms';
 import {
   AppActionRequest,
   FunctionEventContext,
@@ -7,7 +7,16 @@ import {
 } from '@contentful/node-apps-toolkit';
 import { MarketoAuthenticationError, MarketoApiError } from '../../functions/exceptions';
 
-global.fetch = vi.fn();
+globalThis.fetch = vi.fn();
+
+type HandlerResponse = {
+  contentBlocks: MarketoFormsResponse;
+};
+
+const handler: (
+  event: AppActionRequest<'Custom'>,
+  context: FunctionEventContext
+) => Promise<HandlerResponse> = originalHandler as any;
 
 describe('getMarketoForms handler', () => {
   beforeEach(() => {
@@ -20,15 +29,15 @@ describe('getMarketoForms handler', () => {
       clientSecret: 'test-client-secret',
       munchkinId: 'test-munchkin',
     },
-    cmaClientOptions: {},
     spaceId: 'test-space',
     environmentId: 'test-env',
-  } as FunctionEventContext;
+  };
 
   const mockEvent: AppActionRequest<'Custom'> = {
     type: FunctionTypeEnum.AppActionCall,
+    headers: {},
     body: {},
-  } as AppActionRequest<'Custom'>;
+  };
 
   it('should successfully fetch and return Marketo forms', async () => {
     const mockAuthResponse = {

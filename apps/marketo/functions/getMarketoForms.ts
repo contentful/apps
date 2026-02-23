@@ -12,10 +12,14 @@ type AppInstallationParameters = {
   munchkinId: string;
 };
 
+export type MarketoFormsResponse = {
+  forms: { id: number; url: string; name: string }[];
+};
+
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
-  event: AppActionRequest<'Custom'>,
+  _event: AppActionRequest<'Custom'>,
   context: FunctionEventContext
-) => {
+): Promise<MarketoFormsResponse> => {
   const { clientId, clientSecret, munchkinId } =
     context.appInstallationParameters as AppInstallationParameters;
 
