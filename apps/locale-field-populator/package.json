@@ -1,5 +1,5 @@
 {
-  "name": "field-populator",
+  "name": "locale-field-populator",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
