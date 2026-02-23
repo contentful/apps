@@ -9,24 +9,18 @@ import {
 } from '@contentful/f36-components';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import type { FormObject, MarketoFormsResponse } from '../types';
+import { GET_FORMS_APP_ACTION_ID } from '../const';
 
-export type FormObject = {
-  id: string;
-  url: string;
-  name: string;
-};
-
-interface ErrorState {
+type ErrorState = {
   error: boolean;
   message: string;
-}
-
-interface MarketoFormsResponse {
-  result?: FormObject[];
-}
+};
 
 const EMPTY_FORM: FormObject = { id: '', name: '', url: '' };
 const DROPDOWN_EXPANDED_HEIGHT = 240;
+const FORM_ERROR_MESSAGE =
+  'Could not load Marketo forms. Please try again or contact a space admin.';
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
@@ -90,35 +84,33 @@ const Field = () => {
   useEffect(() => {
     const loadForms = async () => {
       try {
-        // TODO: Replace fetch with Contentful Functions. This was added as part of the original implementation.
-        const fetchResponse = await fetch('dummy-endpoint', {
-          method: 'POST',
-          body: JSON.stringify(sdk.parameters.installation),
-          headers: {
-            'Access-Control-Request-Method': 'POST',
-            'Content-Type': 'application/json',
+        const { response } = await sdk.cma.appActionCall.createWithResponse(
+          {
+            appDefinitionId: sdk.ids.app!,
+            appActionId: GET_FORMS_APP_ACTION_ID,
           },
-        });
+          {
+            parameters: {},
+          }
+        );
 
-        //Check if needed to parse the response
-        const response = (await fetchResponse.json()) as MarketoFormsResponse;
+        const result = JSON.parse(response.body) as MarketoFormsResponse;
 
-        if (!response.result) {
+        if (!result.forms) {
           updateError({
             error: true,
-            message:
-              'Something is wrong with the Marketo App. Please ask a space admin to check the configuration.',
+            message: FORM_ERROR_MESSAGE,
           });
           setLoadingStatus(false);
           return;
         }
 
-        setForms(response.result);
-        setFilteredForms(response.result);
+        setForms(result.forms);
+        setFilteredForms(result.forms);
 
         const fieldValue = sdk.field.getValue();
         if (fieldValue?.id) {
-          const preselectedForm = response.result.find((item) => item.id === fieldValue.id);
+          const preselectedForm = result.forms.find((form) => form.id === fieldValue.id);
           setSelectedForm(preselectedForm || EMPTY_FORM);
         }
 
@@ -126,7 +118,7 @@ const Field = () => {
       } catch {
         updateError({
           error: true,
-          message: 'Could not load Marketo forms. Please try again or contact a space admin.',
+          message: FORM_ERROR_MESSAGE,
         });
         setLoadingStatus(false);
       }

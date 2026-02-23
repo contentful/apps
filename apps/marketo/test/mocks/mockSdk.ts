@@ -18,6 +18,11 @@ const createMockSdk = (overrides?: Record<string, unknown>) => {
     parameters: {
       installation: {},
     },
+    cma: {
+      appActionCall: {
+        createWithResponse: vi.fn(),
+      },
+    },
     ids: {
       app: 'test-app',
     },

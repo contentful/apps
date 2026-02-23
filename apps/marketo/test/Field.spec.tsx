@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { createMockSdk } from './mocks';
 import Field from '../src/locations/Field';
-import type { FormObject } from '../src/locations/Field';
+import type { FormObject } from '../src/types';
 
 const mockForms: FormObject[] = [
   { id: 'form-1', url: 'https://marketo.example.com/form-1', name: 'Newsletter Signup' },
@@ -18,26 +18,25 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useAutoResizer: vi.fn(),
 }));
 
-// Mocks for fetch requests. This will change when we use contentful functions.
-const mockFetchSuccess = (forms: FormObject[] = mockForms) => {
-  vi.spyOn(globalThis, 'fetch').mockResolvedValue({
-    json: () => Promise.resolve({ result: forms }),
-  } as Response);
+const mockActionCallSuccess = (forms: FormObject[] = mockForms) => {
+  mockSdk.cma.appActionCall.createWithResponse.mockResolvedValue({
+    response: { body: JSON.stringify({ forms }) },
+  });
 };
 
-const mockFetchNoResult = () => {
-  vi.spyOn(globalThis, 'fetch').mockResolvedValue({
-    json: () => Promise.resolve({}),
-  } as Response);
+const mockActionCallNoResult = () => {
+  mockSdk.cma.appActionCall.createWithResponse.mockResolvedValue({
+    response: { body: JSON.stringify({}) },
+  });
 };
 
-const mockFetchError = () => {
-  vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Network error'));
+const mockActionCallError = () => {
+  mockSdk.cma.appActionCall.createWithResponse.mockRejectedValue(new Error('Network error'));
 };
 
-const mockFetchPending = () => {
-  vi.spyOn(globalThis, 'fetch').mockImplementation(
-    () => new Promise(() => undefined) as unknown as ReturnType<typeof fetch>
+const mockActionCallPending = () => {
+  mockSdk.cma.appActionCall.createWithResponse.mockImplementation(
+    () => new Promise(() => undefined)
   );
 };
 
@@ -75,7 +74,7 @@ describe('Field component', () => {
 
   describe('rendering', () => {
     it('should show loading text and spinner while forms are loading', () => {
-      mockFetchPending();
+      mockActionCallPending();
 
       render(<Field />);
 
@@ -83,7 +82,7 @@ describe('Field component', () => {
     });
 
     it('should render without the autocomplete when forms list is empty', async () => {
-      mockFetchSuccess([]);
+      mockActionCallSuccess([]);
 
       render(<Field />);
 
@@ -96,7 +95,7 @@ describe('Field component', () => {
 
     it('should update the field value when a form is selected', async () => {
       const user = userEvent.setup();
-      mockFetchSuccess();
+      mockActionCallSuccess();
 
       render(<Field />);
 
@@ -115,7 +114,7 @@ describe('Field component', () => {
         id: 'form-2',
         url: 'https://marketo.example.com/form-2',
       });
-      mockFetchSuccess();
+      mockActionCallSuccess();
 
       render(<Field />);
 
@@ -126,14 +125,14 @@ describe('Field component', () => {
 
   describe('Error states', () => {
     it('should show configuration error when response has no result', async () => {
-      mockFetchNoResult();
+      mockActionCallNoResult();
 
       render(<Field />);
 
       await waitFor(() => {
         expect(
           screen.getByText(
-            'Something is wrong with the Marketo App. Please ask a space admin to check the configuration.'
+            'Could not load Marketo forms. Please try again or contact a space admin.'
           )
         ).toBeInTheDocument();
       });
@@ -142,7 +141,7 @@ describe('Field component', () => {
     });
 
     it('should show generic error when fetch fails', async () => {
-      mockFetchError();
+      mockActionCallError();
 
       render(<Field />);
 
@@ -161,7 +160,7 @@ describe('Field component', () => {
   describe('Form selection', () => {
     it('should exclude the selected form from the dropdown list', async () => {
       const user = userEvent.setup();
-      mockFetchSuccess();
+      mockActionCallSuccess();
 
       render(<Field />);
 
@@ -178,7 +177,7 @@ describe('Field component', () => {
 
     it('should filter forms case-insensitively when typing', async () => {
       const user = userEvent.setup();
-      mockFetchSuccess();
+      mockActionCallSuccess();
 
       render(<Field />);
 
@@ -198,7 +197,7 @@ describe('Field component', () => {
   describe('Remove form', () => {
     it('should clear the field value and restore all forms in the dropdown when input is cleared', async () => {
       const user = userEvent.setup();
-      mockFetchSuccess();
+      mockActionCallSuccess();
 
       render(<Field />);
 

@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { handler as originalHandler, MarketoFormsResponse } from '../../functions/getMarketoForms';
+import { handler as originalHandler } from '../../functions/getMarketoForms';
 import {
   AppActionRequest,
   FunctionEventContext,
   FunctionTypeEnum,
 } from '@contentful/node-apps-toolkit';
 import { MarketoAuthenticationError, MarketoApiError } from '../../functions/exceptions';
+import type { MarketoFormsResponse } from '../../src/types';
 
 globalThis.fetch = vi.fn();
 
@@ -94,12 +95,12 @@ describe('getMarketoForms handler', () => {
 
     expect(mockFetch).toHaveBeenNthCalledWith(
       1,
-      'test-munchkin.mktorest.com/identity/oauth/token?grant_type=client_credentials&client_id=test-client-id&client_secret=test-client-secret'
+      'https://test-munchkin.mktorest.com/identity/oauth/token?grant_type=client_credentials&client_id=test-client-id&client_secret=test-client-secret'
     );
 
     expect(mockFetch).toHaveBeenNthCalledWith(
       2,
-      'test-munchkin.mktorest.com/rest/asset/v1/forms.json?maxReturn=200',
+      'https://test-munchkin.mktorest.com/rest/asset/v1/forms.json?maxReturn=200',
       {
         method: 'GET',
         headers: {
