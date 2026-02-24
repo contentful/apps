@@ -17,7 +17,7 @@ import {
   Image,
 } from '@contentful/f36-components';
 import demoVideo from '../assets/hubspot.mp4';
-import { ChevronDownIcon, ChevronUpIcon, ExternalLinkIcon } from '@contentful/f36-icons';
+import { CaretDownIcon, CaretUpIcon, ArrowSquareOutIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Splitter, ContentTypeMultiSelect } from 'contentful-app-components';
@@ -160,7 +160,7 @@ const ConfigScreen = () => {
             <IconButton
               variant="transparent"
               aria-label={isExpanded ? 'Collapse instructions' : 'Expand instructions'}
-              icon={isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
+              icon={isExpanded ? <CaretUpIcon /> : <CaretDownIcon />}
               onClick={() => setIsExpanded((v) => !v)}
               size="small"
             />
@@ -181,7 +181,7 @@ const ConfigScreen = () => {
                 href={HUBSPOT_PRIVATE_APPS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                icon={<ExternalLinkIcon />}
+                icon={<ArrowSquareOutIcon />}
                 alignIcon="end">
                 Read about creating private apps in Hubspot.
               </TextLink>

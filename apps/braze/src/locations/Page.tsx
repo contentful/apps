@@ -30,7 +30,7 @@ import {
   localizeFieldId,
   updateConfig,
 } from '../utils';
-import WarningOctagonIcon from '../components/WarningOctagonIcon';
+import { WarningOctagonIcon } from '@contentful/f36-icons';
 
 const getStatusBadge = (status: string) => {
   if (status.toLowerCase() === 'published') {

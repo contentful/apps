@@ -7,13 +7,14 @@ export function useContentTypes(contentTypeIds?: string[]): {
   isLoading: boolean;
 } {
   const sdk = useSDK();
-  const allContentTypes: ContentTypeProps[] = [];
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchContentTypes = async () => {
       setIsLoading(true);
+      const allContentTypes: ContentTypeProps[] = [];
+
       if (contentTypeIds && contentTypeIds.length > 0) {
         const fetchPromises = contentTypeIds.map((id) =>
           sdk.cma.contentType

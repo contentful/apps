@@ -10,15 +10,12 @@ import {
   Subheading,
   Select,
   Note,
-  Stack,
-  Autocomplete,
   Paragraph,
-  Pill,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
 import { styles } from './ConfigScreen.styles';
-import { Splitter } from 'contentful-app-components';
+import { ContentTypeMultiSelect, Splitter } from 'contentful-app-components';
 import {
   AppInstallationParameters,
   BRAZE_APP_DOCUMENTATION,
@@ -31,7 +28,6 @@ import {
   CONTENT_TYPE_DOCUMENTATION,
 } from '../utils';
 import InformationWithLink from '../components/InformationWithLink';
-import { ContentTypeProps, PlainClientAPI } from 'contentful-management';
 
 export async function callTo(url: string, newApiKey: string) {
   return await fetch(url, {
@@ -52,9 +48,7 @@ const ConfigScreen = () => {
     brazeApiKey: '',
     brazeEndpoint: '',
   });
-  const [selectedContentTypes, setSelectedContentTypes] = useState<{ id: string; name: string }[]>(
-    []
-  );
+  const [selectedContentTypesIds, setSelectedContentTypesIds] = useState<string[]>([]);
   const sdk = useSDK<ConfigAppSDK>();
   const spaceId = sdk.ids.space;
 
@@ -99,25 +93,23 @@ const ConfigScreen = () => {
       sdk.notifier.error('Error creating content type for configuration');
       return false;
     }
-    await addAppToSidebar(
-      sdk,
-      selectedContentTypes.map((contentType) => contentType.id)
-    );
+    await addAppToSidebar(sdk, selectedContentTypesIds);
 
-    const editorInterface = selectedContentTypes.reduce((acc, contentType) => {
-      return {
+    const editorInterface = selectedContentTypesIds.reduce(
+      (acc, contentTypeId) => ({
         ...acc,
-        [contentType.id]: {
+        [contentTypeId]: {
           sidebar: { position: 0 },
         },
-      };
-    }, {});
+      }),
+      {} as Record<string, { sidebar: { position: number } }>
+    );
 
     return {
       parameters,
       targetState: { EditorInterface: { ...currentState?.EditorInterface, ...editorInterface } },
     };
-  }, [parameters, sdk, selectedContentTypes]);
+  }, [parameters, sdk, selectedContentTypesIds]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -131,6 +123,14 @@ const ConfigScreen = () => {
 
       if (currentParameters) {
         setParameters(currentParameters);
+      }
+
+      const currentState = await sdk.app.getCurrentState();
+      const editorInterfaceIds = Object.keys(currentState?.EditorInterface || {});
+      if (editorInterfaceIds.length > 0) {
+        setSelectedContentTypesIds(
+          editorInterfaceIds.filter((id) => id !== CONFIG_CONTENT_TYPE_ID)
+        );
       }
 
       sdk.app.setReady();
@@ -155,9 +155,8 @@ const ConfigScreen = () => {
         </Box>
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
         <ContentTypeSection
-          selectedContentTypes={selectedContentTypes}
-          setSelectedContentTypes={setSelectedContentTypes}
-          sdk={sdk}
+          selectedContentTypesIds={selectedContentTypesIds}
+          setSelectedContentTypesIds={setSelectedContentTypesIds}
         />
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
         <ConnectedContentSection
@@ -274,83 +273,10 @@ function ConnectedContentSection(props: {
 }
 
 function ContentTypeSection(props: {
-  selectedContentTypes: { id: string; name: string }[];
-  setSelectedContentTypes: (contentTypes: { id: string; name: string }[]) => void;
-  sdk: ConfigAppSDK;
+  selectedContentTypesIds: string[];
+  setSelectedContentTypesIds: (contentTypesIds: string[]) => void;
 }) {
-  const { selectedContentTypes, setSelectedContentTypes, sdk } = props;
-  const [availableContentTypes, setAvailableContentTypes] = useState<
-    { id: string; name: string }[]
-  >([]);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const fetchAllContentTypes = async (): Promise<ContentTypeProps[]> => {
-    let allContentTypes: ContentTypeProps[] = [];
-    let skip = 0;
-    const limit = 1000;
-    let areMoreContentTypes = true;
-
-    while (areMoreContentTypes) {
-      const response = await sdk.cma.contentType.getMany({
-        query: { skip, limit },
-      });
-      if (response.items) {
-        allContentTypes = allContentTypes.concat(response.items as ContentTypeProps[]);
-        areMoreContentTypes = response.items.length === limit;
-      } else {
-        areMoreContentTypes = false;
-      }
-      skip += limit;
-    }
-
-    return allContentTypes;
-  };
-
-  useEffect(() => {
-    (async () => {
-      const currentState = await sdk.app.getCurrentState();
-      const currentContentTypesIds = Object.keys(currentState?.EditorInterface || {});
-      const excludedContentTypesIds = [CONFIG_CONTENT_TYPE_ID];
-
-      const allContentTypes = await fetchAllContentTypes();
-
-      const newAvailableContentTypes = allContentTypes
-        .filter((ct) => !excludedContentTypesIds.includes(ct.sys.id))
-        .map((ct) => ({
-          id: ct.sys.id,
-          name: ct.name,
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name));
-
-      setAvailableContentTypes(newAvailableContentTypes);
-
-      // If we have current content types, set them as selected
-      if (currentContentTypesIds.length > 0) {
-        const currentContentTypes = allContentTypes
-          .filter((ct) => currentContentTypesIds.includes(ct.sys.id))
-          .map((ct) => ({ id: ct.sys.id, name: ct.name }));
-        setSelectedContentTypes(currentContentTypes);
-      }
-    })();
-  }, []);
-
-  const filteredContentTypes = availableContentTypes.filter(
-    (contentType) =>
-      !selectedContentTypes.some((selected) => selected.id === contentType.id) &&
-      contentType.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleSelectItem = (item: { id: string; name: string }) => {
-    setSelectedContentTypes([...selectedContentTypes, item]);
-  };
-
-  const handleUnselectItem = (item: { id: string; name: string }) => {
-    setSelectedContentTypes(
-      selectedContentTypes.filter((contentType) => contentType.id !== item.id)
-    );
-  };
-
-  const isAllSelected = selectedContentTypes.length === availableContentTypes.length;
+  const { selectedContentTypesIds, setSelectedContentTypesIds } = props;
 
   return (
     <>
@@ -364,37 +290,10 @@ function ContentTypeSection(props: {
         adjusting the settings in the content type menu under the Sidebar tab. Learn more about
         configuring your content type
       </InformationWithLink>
-      <Stack flexDirection="column" alignItems="start">
-        <Autocomplete<{ id: string; name: string }>
-          items={filteredContentTypes}
-          onInputValueChange={setSearchQuery}
-          onSelectItem={handleSelectItem}
-          placeholder={isAllSelected ? 'All content types have been selected' : 'Search'}
-          isDisabled={isAllSelected}
-          itemToString={(item) => item.name}
-          renderItem={(item) => <Text fontWeight="fontWeightDemiBold">{item.name}</Text>}
-          textOnAfterSelect="clear"
-          closeAfterSelect={false}
-          listWidth="full"
-        />
-
-        {selectedContentTypes.length > 0 && (
-          <Box width="full" overflow="auto">
-            <Paragraph>Selected content types:</Paragraph>
-            <Flex flexDirection="row" gap="spacing2Xs" flexWrap="wrap">
-              {selectedContentTypes.map((contentType, index) => (
-                <Pill
-                  key={index}
-                  label={contentType.name}
-                  isDraggable={false}
-                  onClose={() => handleUnselectItem(contentType)}
-                  data-testid={`pill-${contentType.id}`}
-                />
-              ))}
-            </Flex>
-          </Box>
-        )}
-      </Stack>
+      <ContentTypeMultiSelect
+        selectedContentTypesIds={selectedContentTypesIds}
+        setSelectedContentTypesIds={setSelectedContentTypesIds}
+      />
     </>
   );
 }
