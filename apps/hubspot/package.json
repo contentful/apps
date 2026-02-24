@@ -10,7 +10,6 @@
     "@contentful/field-editor-json": "^3.3.38",
     "@contentful/react-apps-toolkit": "1.2.16",
     "@contentful/rich-text-html-renderer": "^17.0.1",
-    "contentful-app-components": "file:../../packages/contentful-app-components",
     "@testing-library/user-event": "^14.6.1",
     "contentful-management": "^11.52.0",
     "dotenv": "^17.2.1",

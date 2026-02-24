@@ -2,6 +2,10 @@
 
 Shared React components and hooks for Contentful Apps built with the App Framework.
 
+This is a **source-only** package. It has no build step and no dependencies of its own.
+Consuming apps import the TypeScript source files directly via a Vite alias, and all
+dependencies are resolved from the consuming app's `node_modules`.
+
 ## Exports
 
 | Export | Type | Description |
@@ -11,84 +15,125 @@ Shared React components and hooks for Contentful Apps built with the App Framewo
 | `useContentTypes` | Hook | Fetches content types via the CMA (all or by ID list) |
 | `useInstallationParameters` | Hook | Reads and refreshes app installation parameters from the CMA |
 
-## Requirements
+## Required dependencies
 
-### Peer dependencies
+The consuming app must have the following packages installed. These are the libraries
+imported by the shared source files -- since this package has no `node_modules`, they
+are resolved from the app at build time.
 
-All peer dependencies must be installed by the consuming app:
-
-| Package | Required version | Notes |
+| Package | Minimum version | Used by |
 | --- | --- | --- |
-| `react` | `^18.0.0 \|\| ^19.0.0` | `@types/react` >= 18.3.0 required (see below) |
-| `react-dom` | `^18.0.0 \|\| ^19.0.0` | |
-| `@contentful/f36-components` | **`^5.1.0`** | Forma 36 **v5.1+** only; v4 is not supported (see below) |
-| `@contentful/f36-tokens` | `^5.1.0` | |
-| `@contentful/app-sdk` | `^4.20.0` | 4.20.0 introduced `BaseAppSDK.cma`, used by the hooks |
-| `@contentful/react-apps-toolkit` | `^1.2.16` | |
-| `@emotion/css` | `^11.0.0` | The legacy `emotion` v10 package is **not** supported |
-| `contentful-management` | `^11.0.0` | Types (`ContentTypeProps`, `KeyValueMap`, etc.) are used in the public API |
+| `react` | `^18.0.0` | All components and hooks |
+| `react-dom` | `^18.0.0` | Peer of React |
+| `@contentful/f36-components` | `^5.1.0` | `Splitter`, `ContentTypeMultiSelect` |
+| `@contentful/f36-tokens` | `^5.0.0` | `Splitter` |
+| `@contentful/app-sdk` | `^4.20.0` | `useInstallationParameters` (`BaseAppSDK` type) |
+| `@contentful/react-apps-toolkit` | `^1.2.16` | `useContentTypes` (`useSDK` hook) |
+| `@emotion/css` | `^11.0.0` | `Splitter` (`css`, `cx`) |
+| `contentful-management` | `^11.0.0` | `useContentTypes`, `useInstallationParameters` (types) |
 
 ### Forma 36 v5.1+
 
-This package requires Forma 36 v5.1 or later. The `ContentTypeMultiSelect` component imports
-`@contentful/f36-multiselect`, which was added to `@contentful/f36-components` in v5.1.0.
-Apps still on Forma 36 v4 must upgrade before using this package.
+`ContentTypeMultiSelect` imports `Multiselect` from `@contentful/f36-components`, which
+was added in v5.1.0. Apps on Forma 36 v4 must upgrade before using this component.
 
-### TypeScript and `@types/react`
+### `@types/react`
 
-The package is compiled with TypeScript ~5.1. Consuming apps should use TypeScript **5.1 or
-later** to avoid issues parsing the emitted declaration files.
-
-`@types/react` must be **18.3.0 or later**. Earlier 18.x type definitions have a `ReactNode`
-incompatibility with Forma 36 components that causes "cannot be used as a JSX component" build
-errors.
+`@types/react` must be **18.3.0 or later**. Earlier 18.x type definitions have a
+`ReactNode` incompatibility with Forma 36 components that causes build errors.
 
 ### Emotion
 
-The `Splitter` component uses `css` and `cx` from `@emotion/css` v11. The deprecated `emotion`
-v10 package is not compatible. If your app still uses `emotion` v10 for its own code, both
-packages can coexist — they are independent npm packages with separate style caches.
+The `Splitter` component uses `css` and `cx` from `@emotion/css` v11. The deprecated
+`emotion` v10 package is not compatible.
 
-## Build
+## How it works
 
-The package entry point is `lib/index.js` (compiled output). The `lib/` directory is **not
-committed to version control**, so you must build the package before consuming apps can resolve
-their imports:
+### Vite alias
 
-```bash
-cd packages/contentful-app-components
-npm install
-npm run build
+Each consuming app maps the `contentful-app-components` import to the source entry point
+in its `vite.config`:
+
+```typescript
+resolve: {
+  alias: {
+    'contentful-app-components': fileURLToPath(
+      new URL('../../packages/contentful-app-components/index.ts', import.meta.url)
+    ),
+  },
+},
 ```
 
-After modifying source files, re-run `npm run build` to update `lib/`.
+### Dependency resolution plugin
 
-## Dependency version policy
+Because the source files live outside the app's directory tree, Vite cannot resolve their
+bare module imports (`react`, `@contentful/f36-components`, etc.) through the standard
+Node algorithm. A small Vite plugin redirects those resolutions to the consuming app's
+`node_modules`:
 
-The `devDependencies` are intentionally pinned to the **minimum supported versions** of each
-peer dependency (where possible) so that the build and test suite verify compatibility with the
-oldest version a consuming app is allowed to use. Notable exceptions:
+```typescript
+function resolveSharedDeps(): Plugin {
+  return {
+    name: 'resolve-shared-deps',
+    async resolveId(source, importer, options) {
+      if (
+        importer?.includes('packages/contentful-app-components/') &&
+        !source.startsWith('.') &&
+        !source.startsWith('/')
+      ) {
+        return this.resolve(source, localImporter, { ...options, skipSelf: true });
+      }
+    },
+  };
+}
+```
 
-- **`react` / `react-dom`**: pinned to `18.3.1` (not 18.0.0) because React requires a single
-  runtime instance in a monorepo, and all consuming apps currently use 18.3.1. Testing against
-  18.0.0 would cause "multiple copies of React" errors due to workspace hoisting.
-- **`@types/react`**: pinned to `18.3.0` — the earliest version compatible with Forma 36 v5
-  type declarations.
+### TypeScript paths
 
-When adding a new peer dependency or raising a floor version, update the corresponding
-`devDependency` to match the new floor and verify that both `npm run build` and
-`npm run test:ci` pass.
+Each consuming app adds a `paths` mapping in its `tsconfig.json` so the IDE can resolve
+types:
+
+```json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "contentful-app-components": ["../../packages/contentful-app-components/index.ts"]
+    }
+  }
+}
+```
+
+## Tests
+
+Tests for this package live in a separate project at
+`packages/contentful-app-components-tests/`. That project has its own `package.json` with
+the necessary test dependencies and uses the same Vite alias + plugin setup to import
+the shared source files.
+
+```bash
+cd packages/contentful-app-components-tests
+npm install
+npm run test:ci
+```
 
 ## Usage assumptions
 
-- **SDK context required**: `useContentTypes` calls `useSDK()` internally, so the consuming app
-  must render an `SDKProvider` ancestor (from `@contentful/react-apps-toolkit`) before using this
-  hook or the `ContentTypeMultiSelect` component.
+- **SDK context required**: `useContentTypes` calls `useSDK()` internally, so the
+  consuming app must render an `SDKProvider` ancestor (from `@contentful/react-apps-toolkit`)
+  before using this hook or the `ContentTypeMultiSelect` component.
 
 - **CMA access**: Both `useContentTypes` and `useInstallationParameters` make CMA calls
-  (`contentType.get`, `contentType.getMany`, `appInstallation.getForOrganization`). The SDK
-  instance must have the necessary permissions.
+  (`contentType.get`, `contentType.getMany`, `appInstallation.getForOrganization`). The
+  SDK instance must have the necessary permissions.
 
-- **Monorepo consumption**: Apps in this repository reference the package via
-  `"contentful-app-components": "file:../../packages/contentful-app-components"`. Ensure the
-  package is built before running or building the consuming app.
+- **No build step**: Source files are consumed directly. Changes to the shared code are
+  picked up immediately by the consuming app on the next Vite build or HMR refresh.
+
+## Adding a new app as consumer
+
+To use this package from a new app:
+
+1. Add the Vite alias and `resolveSharedDeps()` plugin to the app's Vite config.
+2. Add the TypeScript `paths` mapping to the app's `tsconfig.json`.
+3. Ensure all required dependencies listed above are installed in the app.

@@ -2,9 +2,9 @@ import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig, Plugin } from 'vite';
 
-const sharedPkgPath = '../../packages/contentful-app-components/';
+const sharedPkgPath = '../contentful-app-components/';
 const sharedPkgAlias = fileURLToPath(new URL(`${sharedPkgPath}index.ts`, import.meta.url));
-const localImporter = fileURLToPath(new URL('./src/index.tsx', import.meta.url));
+const localImporter = fileURLToPath(new URL('./test/Splitter.test.tsx', import.meta.url));
 
 function resolveSharedDeps(): Plugin {
   return {
@@ -22,10 +22,6 @@ function resolveSharedDeps(): Plugin {
 }
 
 export default defineConfig(() => ({
-  base: '', // relative paths
-  server: {
-    port: 3000,
-  },
   plugins: [react(), resolveSharedDeps()],
   resolve: {
     alias: {
@@ -33,6 +29,8 @@ export default defineConfig(() => ({
     },
   },
   test: {
+    globals: true,
     environment: 'happy-dom',
+    setupFiles: ['./setupTests.ts'],
   },
 }));

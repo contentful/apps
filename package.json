@@ -2,12 +2,6 @@
   "name": "@contentful/apps",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "apps/braze",
-    "apps/homebase",
-    "apps/hubspot",
-    "packages/contentful-app-components"
-  ],
   "engines": {
     "node": ">=16.0.0",
     "npm": ">=8.0.0"

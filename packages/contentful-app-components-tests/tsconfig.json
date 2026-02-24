@@ -13,19 +13,13 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "outDir": "./lib",
-    "rootDir": "./",
-    "declaration": true,
+    "noEmit": true,
     "jsx": "react-jsx",
     "types": ["vitest/globals"],
+    "baseUrl": ".",
+    "paths": {
+      "contentful-app-components": ["../contentful-app-components/index.ts"]
+    }
   },
-  "files": [
-    "./index.ts",
-  ]
+  "include": ["test"]
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { ContentTypeProps } from 'contentful-management';
-import { useContentTypes } from '../hooks/useContentTypes';
+import { useContentTypes } from 'contentful-app-components';
 import { mockSdk } from './mocks/mockSdk';
 import { mockCma } from './mocks/mockCma';
 
@@ -98,7 +98,6 @@ describe('useContentTypes', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    // Should only include the successfully fetched content type
     expect(result.current.contentTypes).toEqual([mockBlogPost]);
     expect(result.current.isLoading).toBe(false);
   });
