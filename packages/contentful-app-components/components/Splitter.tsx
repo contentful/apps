@@ -1,5 +1,5 @@
 import { Box, CommonProps, MarginProps, PaddingProps } from '@contentful/f36-components';
-import { cx, css } from 'emotion';
+import { cx, css } from '@emotion/css';
 import tokens from '@contentful/f36-tokens';
 
 export interface SplitterProps extends CommonProps, MarginProps, PaddingProps {}
