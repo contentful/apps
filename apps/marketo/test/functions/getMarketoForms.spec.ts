@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { handler as originalHandler, MarketoFormsResponse } from '../../functions/getMarketoForms';
+import { handler as originalHandler } from '../../functions/getMarketoForms';
 import {
   AppActionRequest,
   FunctionEventContext,
   FunctionTypeEnum,
 } from '@contentful/node-apps-toolkit';
 import { MarketoAuthenticationError, MarketoApiError } from '../../functions/exceptions';
+import type { MarketoFormsResponse } from '../../src/types';
 
 globalThis.fetch = vi.fn();
 

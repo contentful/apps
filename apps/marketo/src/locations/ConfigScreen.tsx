@@ -140,7 +140,7 @@ const ConfigScreen = () => {
 
   useEffect(() => {
     (async () => {
-      const currentParameters = await sdk.app.getParameters();
+      const currentParameters = (await sdk.app.getParameters()) as AppInstallationParameters;
 
       if (currentParameters) {
         setParameters(currentParameters);
