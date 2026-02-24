@@ -1,6 +1,6 @@
-import { fileURLToPath, URL } from 'node:url';
-import { defineConfig, Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import { fileURLToPath, URL } from 'node:url';
+import { defineConfig, loadEnv, Plugin } from 'vite';
 
 const sharedPkgPath = '../../packages/contentful-app-components/';
 const sharedPkgAlias = fileURLToPath(new URL(`${sharedPkgPath}index.ts`, import.meta.url));
@@ -21,19 +21,21 @@ function resolveSharedDeps(): Plugin {
   };
 }
 
-export default defineConfig({
-  plugins: [react(), resolveSharedDeps()],
-  base: '',
-  build: {
-    outDir: 'build',
-  },
+export default defineConfig(() => ({
+  base: '', // relative paths
   server: {
-    host: 'localhost',
     port: 3000,
   },
+  plugins: [react(), resolveSharedDeps()],
   resolve: {
     alias: {
       'contentful-app-components': sharedPkgAlias,
     },
   },
-});
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/setupTests.ts'],
+    env: loadEnv('test', process.cwd(), ''),
+  },
+}));
