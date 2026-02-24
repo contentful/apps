@@ -6,6 +6,7 @@ import {
   FunctionTypeEnum,
 } from '@contentful/node-apps-toolkit';
 import { AppParameters } from '../../src/locations/ConfigScreen';
+import { NO_ACCESS_TOKEN_RESPONSE, VALID_CREDENTIALS_RESPONSE } from '../../src/const';
 
 globalThis.fetch = vi.fn();
 
@@ -48,7 +49,7 @@ describe('validateMarketoCredentials handler', () => {
 
     expect(result).toEqual({
       valid: true,
-      message: 'Connection successful. Your Marketo credentials are valid.',
+      message: VALID_CREDENTIALS_RESPONSE,
     });
     expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(mockFetch).toHaveBeenCalledWith(
@@ -56,21 +57,21 @@ describe('validateMarketoCredentials handler', () => {
     );
   });
 
-  it('should return valid: false with message when auth fails', async () => {
+  it('should allow custom message from marketo when auth fails', async () => {
     const mockFetch = vi.mocked(fetch);
 
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 401,
       statusText: 'Unauthorized',
-      json: async () => ({ error: 'invalid_client', error_description: 'Invalid credentials' }),
+      json: async () => ({ error: 'invalid_client', error_description: 'Bad client credentials' }),
     } as Response);
 
     const result = await handler(mockEvent as Parameters<typeof handler>[0], mockContext);
 
     expect(result).toEqual({
       valid: false,
-      message: 'Marketo authentication failed: Unauthorized',
+      message: 'Marketo authentication failed: Bad client credentials',
     });
   });
 
@@ -86,7 +87,7 @@ describe('validateMarketoCredentials handler', () => {
 
     expect(result).toEqual({
       valid: false,
-      message: 'Marketo did not return an access token.',
+      message: NO_ACCESS_TOKEN_RESPONSE,
     });
   });
 

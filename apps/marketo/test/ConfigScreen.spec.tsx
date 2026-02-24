@@ -3,6 +3,13 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { mockCma, mockSdk } from './mocks';
 import ConfigScreen from '../src/locations/ConfigScreen';
+import {
+  CONFIG_SAVE_REQUIRED_FIELDS_MESSAGE,
+  INSTALL_APP_FIRST_MESSAGE,
+  INVALID_CLIENT_RESPONSE,
+  TEST_CONNECTION_REQUIRED_FIELDS_MESSAGE,
+  VALID_CREDENTIALS_RESPONSE,
+} from '../src/const';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => ({ ...mockSdk, cma: mockCma }),
@@ -45,7 +52,9 @@ describe('ConfigScreen', () => {
     mockSdk.app.getCurrentState.mockResolvedValue(null);
     mockSdk.app.isInstalled.mockResolvedValue(true);
     mockCma.appActionCall.createWithResponse.mockResolvedValue({
-      response: { body: JSON.stringify({ valid: true }) },
+      response: {
+        body: JSON.stringify({ valid: true, message: 'Your Marketo credentials are valid.' }),
+      },
     });
     mockSdk.notifier.error.mockClear();
   });
@@ -96,9 +105,7 @@ describe('ConfigScreen', () => {
     const result = await runOnConfigure();
 
     expect(result).toBe(false);
-    expect(mockSdk.notifier.error).toHaveBeenCalledWith(
-      'Please fill in all required fields with valid values before saving.'
-    );
+    expect(mockSdk.notifier.error).toHaveBeenCalledWith(CONFIG_SAVE_REQUIRED_FIELDS_MESSAGE);
     expect(screen.getByText('Enter a valid Client ID')).toBeInTheDocument();
     expect(screen.getByText('Enter a valid Client Secret')).toBeInTheDocument();
     expect(screen.getByText('Enter a valid Munchkin ID')).toBeInTheDocument();
@@ -110,9 +117,7 @@ describe('ConfigScreen', () => {
     const testButton = screen.getByRole('button', { name: /test marketo connection/i });
     await userEvent.click(testButton);
 
-    expect(mockSdk.notifier.error).toHaveBeenCalledWith(
-      'Please fill in all required fields before testing the connection.'
-    );
+    expect(mockSdk.notifier.error).toHaveBeenCalledWith(TEST_CONNECTION_REQUIRED_FIELDS_MESSAGE);
     expect(mockCma.appActionCall.createWithResponse).not.toHaveBeenCalled();
   });
 
@@ -124,7 +129,7 @@ describe('ConfigScreen', () => {
     const testButton = screen.getByRole('button', { name: /test marketo connection/i });
     await userEvent.click(testButton);
 
-    expect(mockSdk.notifier.error).toHaveBeenCalledWith('Please install the app first.');
+    expect(mockSdk.notifier.error).toHaveBeenCalledWith(INSTALL_APP_FIRST_MESSAGE);
     expect(mockCma.appActionCall.createWithResponse).not.toHaveBeenCalled();
   });
 
@@ -150,9 +155,7 @@ describe('ConfigScreen', () => {
       );
     });
     await waitFor(() => {
-      expect(
-        screen.getByText(/Connection successful. Your Marketo credentials are valid./)
-      ).toBeInTheDocument();
+      expect(screen.getByText(VALID_CREDENTIALS_RESPONSE)).toBeInTheDocument();
     });
     expect(mockSdk.notifier.error).not.toHaveBeenCalled();
   });
@@ -162,7 +165,7 @@ describe('ConfigScreen', () => {
       response: {
         body: JSON.stringify({
           valid: false,
-          message: 'Connection failed. Please check your credentials.',
+          message: INVALID_CLIENT_RESPONSE,
         }),
       },
     });
@@ -175,13 +178,11 @@ describe('ConfigScreen', () => {
     });
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/Connection failed. Please check your credentials./)
-      ).toBeInTheDocument();
+      expect(screen.getByText(INVALID_CLIENT_RESPONSE)).toBeInTheDocument();
     });
   });
 
-  it('test connection shows error note when app action throws', async () => {
+  it('test connection shows error note when app action throws error', async () => {
     mockCma.appActionCall.createWithResponse.mockRejectedValue(new Error('Network error'));
     await renderAndWaitReady();
     await fillCredentials()();
@@ -192,11 +193,7 @@ describe('ConfigScreen', () => {
     });
 
     await waitFor(() => {
-      expect(
-        screen.getByText(
-          /Connection failed. Please check your Client ID, Client Secret and Munchkin ID and try again./
-        )
-      ).toBeInTheDocument();
+      expect(screen.getByText('Network error')).toBeInTheDocument();
     });
   });
 });

@@ -4,6 +4,11 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
+import {
+  INVALID_CLIENT_RESPONSE,
+  NO_ACCESS_TOKEN_RESPONSE,
+  VALID_CREDENTIALS_RESPONSE,
+} from '../src/const';
 
 type AppParameters = {
   clientId: string;
@@ -44,9 +49,24 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   const authResponse = await fetch(authUrl);
 
   if (!authResponse.ok) {
+    let message = INVALID_CLIENT_RESPONSE;
+
+    try {
+      const errorBody = (await authResponse.json()) as {
+        error?: string;
+        error_description?: string;
+      };
+
+      if (errorBody?.error_description) {
+        message = `Marketo authentication failed: ${errorBody.error_description}`;
+      }
+    } catch {
+      // If munchkin id is invalid it returns {}
+    }
+
     return {
       valid: false,
-      message: `Marketo authentication failed: ${authResponse.statusText}`,
+      message,
     };
   }
 
@@ -54,9 +74,9 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   if (!auth.access_token) {
     return {
       valid: false,
-      message: 'Marketo did not return an access token.',
+      message: NO_ACCESS_TOKEN_RESPONSE,
     };
   }
 
-  return { valid: true, message: 'Connection successful. Your Marketo credentials are valid.' };
+  return { valid: true, message: VALID_CREDENTIALS_RESPONSE };
 };

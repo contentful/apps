@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import { VALID_CREDENTIALS_RESPONSE } from '../../src/const';
 
 const mockCma: any = {
   contentType: {
@@ -6,7 +7,7 @@ const mockCma: any = {
   },
   appActionCall: {
     createWithResponse: vi.fn().mockResolvedValue({
-      response: { body: JSON.stringify({ valid: true }) },
+      response: { body: JSON.stringify({ valid: true, message: VALID_CREDENTIALS_RESPONSE }) },
     }),
   },
 };

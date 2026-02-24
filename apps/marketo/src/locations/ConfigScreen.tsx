@@ -18,6 +18,13 @@ import { styles } from './ConfigScreen.styles';
 import ContentTypeFieldMultiSelect from '../components/ContentTypeFieldMultiSelect';
 import { ContentTypeInfo, TargetState } from '../utils';
 import { ValidateCredentialsResponse } from '../../functions/validateMarketoCredentials';
+import {
+  CONFIG_SAVE_FAILED_MESSAGE,
+  CONFIG_SAVE_REQUIRED_FIELDS_MESSAGE,
+  INSTALL_APP_FIRST_MESSAGE,
+  INVALID_CLIENT_RESPONSE,
+  TEST_CONNECTION_REQUIRED_FIELDS_MESSAGE,
+} from '../const';
 
 export interface AppParameters {
   clientId?: string;
@@ -71,16 +78,10 @@ const ConfigScreen = () => {
         const data = JSON.parse(response.response.body) as ValidateCredentialsResponse;
 
         setConnectionStatus(data.valid ? ConnectionStatus.Success : ConnectionStatus.Error);
-        setConnectionMessage(
-          data.valid
-            ? data.message ?? 'Connection successful. Your Marketo credentials are valid.'
-            : data.message ?? 'Unexpected response from Marketo.'
-        );
-      } catch {
+        setConnectionMessage(data.message);
+      } catch (error) {
         setConnectionStatus(ConnectionStatus.Error);
-        setConnectionMessage(
-          'Connection failed. Please check your Client ID, Client Secret and Munchkin ID and try again.'
-        );
+        setConnectionMessage(error instanceof Error ? error.message : INVALID_CLIENT_RESPONSE);
       }
     },
     [sdk]
@@ -99,7 +100,7 @@ const ConfigScreen = () => {
 
   const onConfigure = useCallback(async () => {
     if (!validateCredentials()) {
-      sdk.notifier.error('Please fill in all required fields with valid values before saving.');
+      sdk.notifier.error(CONFIG_SAVE_REQUIRED_FIELDS_MESSAGE);
       return false;
     }
 
@@ -125,7 +126,7 @@ const ConfigScreen = () => {
   const onConfigurationCompleted = useCallback(
     async (error: { message: string } | null) => {
       if (error) {
-        sdk.notifier.error('Configuration could not be saved.');
+        sdk.notifier.error(CONFIG_SAVE_FAILED_MESSAGE);
         return;
       }
       await callValidateCredentials();
@@ -140,7 +141,7 @@ const ConfigScreen = () => {
 
   useEffect(() => {
     (async () => {
-      const currentParameters = (await sdk.app.getParameters()) as AppInstallationParameters;
+      const currentParameters = (await sdk.app.getParameters()) as AppParameters;
 
       if (currentParameters) {
         setParameters(currentParameters);
@@ -172,13 +173,13 @@ const ConfigScreen = () => {
 
   const testConnection = async (): Promise<void> => {
     if (!validateCredentials()) {
-      sdk.notifier.error('Please fill in all required fields before testing the connection.');
+      sdk.notifier.error(TEST_CONNECTION_REQUIRED_FIELDS_MESSAGE);
       return;
     }
 
     const isInstalled = await sdk.app.isInstalled();
     if (!isInstalled) {
-      sdk.notifier.error('Please install the app first.');
+      sdk.notifier.error(INSTALL_APP_FIRST_MESSAGE);
       return;
     }
 
