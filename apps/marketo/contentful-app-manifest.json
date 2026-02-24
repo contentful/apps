@@ -4,10 +4,14 @@
       "id": "getMarketoFormsFunction",
       "name": "Get Marketo forms",
       "description": "Function to get Marketo forms from an App Action",
-      "path": "functions/getMarketoForms.ts",
-      "entryFile": "functions/getMarketoForms.ts",
-      "allowNetworks": ["https://*.mktorest.com"],
-      "accepts": ["appaction.call"]
+      "path": "functions/getMarketoForms.js",
+      "entryFile": "functions/getMarketoForms.js",
+      "allowNetworks": [
+        "https://*.mktorest.com"
+      ],
+      "accepts": [
+        "appaction.call"
+      ]
     }
   ],
   "actions": [
@@ -17,7 +21,7 @@
       "type": "function-invocation",
       "functionId": "getMarketoFormsFunction",
       "category": "Custom",
-      "parametersSchema": {},
+      "parameters": [],
       "resultSchema": {
         "type": "object",
         "properties": {

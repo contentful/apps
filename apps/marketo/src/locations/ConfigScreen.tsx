@@ -16,12 +16,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { styles } from './ConfigScreen.styles';
 import ContentTypeFieldMultiSelect from '../components/ContentTypeFieldMultiSelect';
 import { ContentTypeInfo, TargetState } from '../utils';
-
-export interface AppInstallationParameters {
-  clientId?: string;
-  clientSecret?: string;
-  munchkinId?: string;
-}
+import type { AppInstallationParameters } from '../types';
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({
@@ -79,7 +74,7 @@ const ConfigScreen = () => {
 
   useEffect(() => {
     (async () => {
-      const currentParameters = await sdk.app.getParameters();
+      const currentParameters = (await sdk.app.getParameters()) as AppInstallationParameters;
 
       if (currentParameters) {
         setParameters(currentParameters);

@@ -5,16 +5,7 @@ import type {
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
 import { MarketoAuthenticationError, MarketoApiError } from './exceptions';
-
-type AppInstallationParameters = {
-  clientId: string;
-  clientSecret: string;
-  munchkinId: string;
-};
-
-export type MarketoFormsResponse = {
-  forms: { id: number; url: string; name: string }[];
-};
+import type { AppInstallationParameters, MarketoFormsResponse } from '../src/types';
 
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
   _event: AppActionRequest<'Custom'>,
@@ -23,8 +14,10 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   const { clientId, clientSecret, munchkinId } =
     context.appInstallationParameters as AppInstallationParameters;
 
+  const baseUrl = `https://${munchkinId}.mktorest.com`;
+
   const authResponse = await fetch(
-    `${munchkinId}.mktorest.com/identity/oauth/token?grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`
+    `${baseUrl}/identity/oauth/token?grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`
   );
 
   if (!authResponse.ok) {
@@ -35,16 +28,13 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
 
   const auth = await authResponse.json();
 
-  const response = await fetch(
-    `${munchkinId}.mktorest.com/rest/asset/v1/forms.json?maxReturn=200`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${auth.access_token}`,
-      },
-    }
-  );
+  const response = await fetch(`${baseUrl}/rest/asset/v1/forms.json?maxReturn=200`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${auth.access_token}`,
+    },
+  });
 
   const formsResponse = await response.json();
 
