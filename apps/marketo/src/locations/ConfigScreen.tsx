@@ -6,6 +6,7 @@ import {
   Form,
   FormControl,
   Heading,
+  Note,
   Paragraph,
   Subheading,
   TextInput,
@@ -16,40 +17,88 @@ import { useCallback, useEffect, useState } from 'react';
 import { styles } from './ConfigScreen.styles';
 import ContentTypeFieldMultiSelect from '../components/ContentTypeFieldMultiSelect';
 import { ContentTypeInfo, TargetState } from '../utils';
+import { ValidateCredentialsResponse } from '../../functions/validateMarketoCredentials';
 
-export interface AppInstallationParameters {
+export interface AppParameters {
   clientId?: string;
   clientSecret?: string;
   munchkinId?: string;
 }
 
+const CREDENTIAL_VALIDATION: { id: keyof AppParameters; message: string }[] = [
+  { id: 'clientId', message: 'Enter a valid Client ID' },
+  { id: 'clientSecret', message: 'Enter a valid Client Secret' },
+  { id: 'munchkinId', message: 'Enter a valid Munchkin ID' },
+];
+
+enum ConnectionStatus {
+  None = 'none',
+  Testing = 'testing',
+  Success = 'success',
+  Error = 'error',
+}
+
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>({
+  const [parameters, setParameters] = useState<AppParameters>({
     clientId: '',
     clientSecret: '',
     munchkinId: '',
   });
   const [selectedContentTypes, setSelectedContentTypes] = useState<ContentTypeInfo[]>([]);
-  const [loading] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>(ConnectionStatus.None);
+  const [connectionMessage, setConnectionMessage] = useState<string>('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const sdk = useSDK<ConfigAppSDK>();
 
-  const validateInput = (errors: Record<string, string>, id: string, value?: string): void => {
-    if (!value?.trim()) {
-      errors[id] = `Input is required`;
-    }
-  };
+  const callValidateCredentials = useCallback(
+    async (params?: AppParameters) => {
+      let parameters = {};
 
-  const onConfigure = useCallback(async () => {
+      if (params?.clientId?.trim() && params?.clientSecret?.trim() && params?.munchkinId?.trim()) {
+        parameters = {
+          clientId: params?.clientId,
+          clientSecret: params?.clientSecret,
+          munchkinId: params?.munchkinId,
+        };
+      }
+
+      try {
+        const response = await sdk.cma.appActionCall.createWithResponse(
+          { appDefinitionId: sdk.ids.app!, appActionId: 'validateMarketoCredentialsAction' },
+          { parameters }
+        );
+
+        const data = JSON.parse(response.response.body) as ValidateCredentialsResponse;
+
+        setConnectionStatus(data.valid ? ConnectionStatus.Success : ConnectionStatus.Error);
+        setConnectionMessage(
+          data.valid
+            ? data.message ?? 'Connection successful. Your Marketo credentials are valid.'
+            : data.message ?? 'Unexpected response from Marketo.'
+        );
+      } catch {
+        setConnectionStatus(ConnectionStatus.Error);
+        setConnectionMessage(
+          'Connection failed. Please check your Client ID, Client Secret and Munchkin ID and try again.'
+        );
+      }
+    },
+    [sdk]
+  );
+
+  const validateCredentials = useCallback((): boolean => {
     const newErrors: Record<string, string> = {};
-    validateInput(newErrors, 'clientId', parameters.clientId);
-    validateInput(newErrors, 'clientSecret', parameters.clientSecret);
-    validateInput(newErrors, 'munchkinId', parameters.munchkinId);
+    for (const { id, message } of CREDENTIAL_VALIDATION) {
+      if (!parameters[id]?.trim()) newErrors[id] = message;
+    }
 
-    const isValid = Object.keys(newErrors).length === 0;
     setErrors(newErrors);
 
-    if (!isValid) {
+    return Object.keys(newErrors).length === 0;
+  }, [parameters.clientId, parameters.clientSecret, parameters.munchkinId]);
+
+  const onConfigure = useCallback(async () => {
+    if (!validateCredentials()) {
       sdk.notifier.error('Please fill in all required fields with valid values before saving.');
       return false;
     }
@@ -71,11 +120,23 @@ const ConfigScreen = () => {
       parameters,
       targetState,
     };
-  }, [parameters, selectedContentTypes, sdk]);
+  }, [parameters, selectedContentTypes, sdk, validateCredentials]);
+
+  const onConfigurationCompleted = useCallback(
+    async (error: { message: string } | null) => {
+      if (error) {
+        sdk.notifier.error('Configuration could not be saved.');
+        return;
+      }
+      await callValidateCredentials();
+    },
+    [sdk, callValidateCredentials]
+  );
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
-  }, [sdk, onConfigure]);
+    sdk.app.onConfigurationCompleted((err) => onConfigurationCompleted(err));
+  }, [sdk, onConfigure, onConfigurationCompleted]);
 
   useEffect(() => {
     (async () => {
@@ -97,7 +158,7 @@ const ConfigScreen = () => {
 
     setParameters((prev) => ({ ...prev, [id]: value }));
 
-    // Clear error when user starts typing
+    // Clear error and status
     if (errors[id]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -105,10 +166,29 @@ const ConfigScreen = () => {
         return newErrors;
       });
     }
+    setConnectionStatus(ConnectionStatus.None);
+    setConnectionMessage('');
   };
 
   const testConnection = async (): Promise<void> => {
-    // TODO : IMPLEMENT
+    if (!validateCredentials()) {
+      sdk.notifier.error('Please fill in all required fields before testing the connection.');
+      return;
+    }
+
+    const isInstalled = await sdk.app.isInstalled();
+    if (!isInstalled) {
+      sdk.notifier.error('Please install the app first.');
+      return;
+    }
+
+    setConnectionStatus(ConnectionStatus.Testing);
+
+    await callValidateCredentials({
+      clientId: parameters.clientId,
+      clientSecret: parameters.clientSecret,
+      munchkinId: parameters.munchkinId,
+    });
   };
 
   return (
@@ -202,9 +282,26 @@ const ConfigScreen = () => {
             </FormControl>
 
             <Box marginTop="spacingXl">
-              <Button onClick={testConnection} isLoading={loading}>
+              <Button
+                onClick={testConnection}
+                isLoading={connectionStatus === ConnectionStatus.Testing}
+                isDisabled={connectionStatus === ConnectionStatus.Testing}>
                 Test marketo connection
               </Button>
+              {connectionStatus === ConnectionStatus.Success && connectionMessage && (
+                <Box marginTop="spacingM">
+                  <Note variant="positive" title="Connection successful">
+                    {connectionMessage}
+                  </Note>
+                </Box>
+              )}
+              {connectionStatus === ConnectionStatus.Error && connectionMessage && (
+                <Box marginTop="spacingM">
+                  <Note variant="negative" title="Connection failed">
+                    {connectionMessage}
+                  </Note>
+                </Box>
+              )}
             </Box>
           </Box>
 

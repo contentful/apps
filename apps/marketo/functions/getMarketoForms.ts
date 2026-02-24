@@ -23,9 +23,13 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   const { clientId, clientSecret, munchkinId } =
     context.appInstallationParameters as AppInstallationParameters;
 
-  const authResponse = await fetch(
-    `${munchkinId}.mktorest.com/identity/oauth/token?grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`
-  );
+  const authUrl = `https://${munchkinId}.mktorest.com/identity/oauth/token?${new URLSearchParams({
+    grant_type: 'client_credentials',
+    client_id: clientId,
+    client_secret: clientSecret,
+  }).toString()}`;
+
+  const authResponse = await fetch(authUrl);
 
   if (!authResponse.ok) {
     throw new MarketoAuthenticationError(
@@ -36,7 +40,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   const auth = await authResponse.json();
 
   const response = await fetch(
-    `${munchkinId}.mktorest.com/rest/asset/v1/forms.json?maxReturn=200`,
+    `https://${munchkinId}.mktorest.com/rest/asset/v1/forms.json?maxReturn=200`,
     {
       method: 'GET',
       headers: {
