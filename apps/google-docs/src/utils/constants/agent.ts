@@ -1,8 +1,10 @@
 export const AGENT_ID = 'google-docs-agent';
 
+export const AGENT_ANALYZER_ID = 'google-docs-mapping-agent';
+
 export const POLL_INTERVAL_MS = 10000; // 10 seconds
 
-const MAX_POLL_TIME_MS = 5 * 60 * 1000; // 5 minutes
+const MAX_POLL_TIME_MS = 5 * 60 * 1000 * 10; // 50 minutes
 
 export const MAX_POLL_ATTEMPTS = Math.floor(MAX_POLL_TIME_MS / POLL_INTERVAL_MS);
 

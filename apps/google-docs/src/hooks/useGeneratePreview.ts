@@ -216,8 +216,9 @@ const pollAgentRun = async (
       if (!response.ok) {
         throw new Error(`Failed to poll agent run: ${response.status} ${response.statusText}`);
       }
-
-      runData = (await response.json()) as AgentRunData;
+      const responseData = await response.json();
+      console.log('responseData', responseData);
+      runData = responseData as AgentRunData;
     } else {
       try {
         runData = (await sdk.cma.agentRun.get({
@@ -233,8 +234,9 @@ const pollAgentRun = async (
         throw error;
       }
     }
-
-    if (getAgentPayload(runData)) {
+    const assistantTextContent = getAgentPayload(runData);
+    if (assistantTextContent) {
+      console.log('[Agent Polling] Success - Assistant text content:\n\n' + assistantTextContent);
       return parseAgentResponse(runData);
     }
 
@@ -301,6 +303,9 @@ export const useGeneratePreview = ({
       setSuccessMessage(null);
       cancelPollingRef.current = false;
 
+      const startTime = Date.now();
+      console.log('[GeneratePreview] Start:', new Date(startTime).toISOString());
+
       try {
         const runId = startAgentRun(sdk, {
           spaceId: sdk.ids.space,
@@ -327,7 +332,20 @@ export const useGeneratePreview = ({
 
         setPreviewEntries(previewEntriesWithTitles);
         setAssets(agentAssets);
+
+        const endTime = Date.now();
+        const durationMs = endTime - startTime;
+        const durationSec = (durationMs / 1000).toFixed(2);
+        const durationMin = (durationMs / 60000).toFixed(2);
+        console.log('[GeneratePreview] End:', new Date(endTime).toISOString());
+        console.log(`[GeneratePreview] Duration: ${durationSec}s (${durationMin} min)`);
       } catch (err) {
+        const endTime = Date.now();
+        const durationMs = endTime - startTime;
+        const durationSec = (durationMs / 1000).toFixed(2);
+        console.log('[GeneratePreview] End (error):', new Date(endTime).toISOString());
+        console.log(`[GeneratePreview] Duration: ${durationSec}s`);
+
         if (err instanceof Error && err.message === 'Polling cancelled') {
           return;
         }

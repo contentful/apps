@@ -3,6 +3,7 @@ import { useState } from 'react';
 interface ModalStates {
   isUploadModalOpen: boolean;
   isContentTypePickerOpen: boolean;
+  isConfirmPromptModalOpen: boolean;
   isConfirmCancelModalOpen: boolean;
   isPreviewModalOpen: boolean;
   isErrorPreviewModalOpen: boolean;
@@ -13,6 +14,7 @@ interface ModalStates {
 interface ModalSetters {
   setIsUploadModalOpen: (value: boolean) => void;
   setIsContentTypePickerOpen: (value: boolean) => void;
+  setIsConfirmPromptModalOpen: (value: boolean) => void;
   setIsConfirmCancelModalOpen: (value: boolean) => void;
   setIsPreviewModalOpen: (value: boolean) => void;
   setIsErrorPreviewModalOpen: (value: boolean) => void;
@@ -23,6 +25,7 @@ interface ModalSetters {
 export enum ModalType {
   UPLOAD = 'upload',
   CONTENT_TYPE_PICKER = 'contentTypePicker',
+  CONFIRM_PROMPT = 'confirmPrompt',
   CONFIRM_CANCEL = 'confirmCancel',
   PREVIEW = 'preview',
   ERROR_PREVIEW = 'errorPreview',
@@ -33,6 +36,7 @@ export enum ModalType {
 export const useModalManagement = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
   const [isContentTypePickerOpen, setIsContentTypePickerOpen] = useState<boolean>(false);
+  const [isConfirmPromptModalOpen, setIsConfirmPromptModalOpen] = useState<boolean>(false);
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState<boolean>(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState<boolean>(false);
   const [isErrorPreviewModalOpen, setIsErrorPreviewModalOpen] = useState<boolean>(false);
@@ -46,6 +50,9 @@ export const useModalManagement = () => {
         break;
       case ModalType.CONTENT_TYPE_PICKER:
         setIsContentTypePickerOpen(true);
+        break;
+      case ModalType.CONFIRM_PROMPT:
+        setIsConfirmPromptModalOpen(true);
         break;
       case ModalType.CONFIRM_CANCEL:
         setIsConfirmCancelModalOpen(true);
@@ -73,6 +80,9 @@ export const useModalManagement = () => {
       case ModalType.CONTENT_TYPE_PICKER:
         setIsContentTypePickerOpen(false);
         break;
+      case ModalType.CONFIRM_PROMPT:
+        setIsConfirmPromptModalOpen(false);
+        break;
       case ModalType.CONFIRM_CANCEL:
         setIsConfirmCancelModalOpen(false);
         break;
@@ -95,6 +105,7 @@ export const useModalManagement = () => {
     modalStates: {
       isUploadModalOpen,
       isContentTypePickerOpen,
+      isConfirmPromptModalOpen,
       isConfirmCancelModalOpen,
       isPreviewModalOpen,
       isErrorPreviewModalOpen,
@@ -104,6 +115,7 @@ export const useModalManagement = () => {
     setModalStates: {
       setIsUploadModalOpen,
       setIsContentTypePickerOpen,
+      setIsConfirmPromptModalOpen,
       setIsConfirmCancelModalOpen,
       setIsPreviewModalOpen,
       setIsErrorPreviewModalOpen,
