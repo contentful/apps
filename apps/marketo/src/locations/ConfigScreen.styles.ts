@@ -10,7 +10,10 @@ export const styles = {
     marginTop: tokens.spacingXs,
   }),
   connectionCard: css({
-    padding: tokens.spacingXs,
+    paddingTop: tokens.spacingXs,
+    paddingBottom: tokens.spacingXs,
+    paddingLeft: tokens.spacingS,
+    paddingRight: tokens.spacingS,
     borderRadius: tokens.borderRadiusSmall,
   }),
 };

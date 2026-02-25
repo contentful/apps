@@ -311,9 +311,7 @@ const ConfigScreen = () => {
                         <Badge variant="positive">Connected</Badge>
                       )}
                       {parameters.connectionStatus === ConnectionStatus.Error && (
-                        <Badge variant="warning" size="small">
-                          Connection failed
-                        </Badge>
+                        <Badge variant="warning">Connection failed</Badge>
                       )}
                       <Button
                         variant="secondary"
