@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { PageAppSDK } from '@contentful/app-sdk';
 import {
-  AGENT_ANALYZER_ID,
+  WORKFLOW_AGENT_ID,
   POLL_INTERVAL_MS,
   MAX_POLL_ATTEMPTS,
   USE_LOCAL_AGENTS_API,
@@ -139,7 +139,7 @@ export const useAnalyzePrompt = ({
 
       const spaceId = sdk.ids.space;
       const environmentId = sdk.ids.environment;
-      const threadId = [crypto.randomUUID(), AGENT_ANALYZER_ID].join('-');
+      const threadId = [crypto.randomUUID(), WORKFLOW_AGENT_ID].join('-');
 
       const payload = {
         messages: [
@@ -168,7 +168,7 @@ export const useAnalyzePrompt = ({
 
         if (USE_LOCAL_AGENTS_API) {
           fetch(
-            `http://localhost:4111/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${AGENT_ANALYZER_ID}/generate`,
+            `http://localhost:4111/spaces/${spaceId}/environments/${environmentId}/ai_agents/agents/${WORKFLOW_AGENT_ID}/generate`,
             {
               method: 'POST',
               headers: {
@@ -182,7 +182,7 @@ export const useAnalyzePrompt = ({
           });
         } else {
           sdk.cma.agent
-            .generate({ agentId: AGENT_ANALYZER_ID, spaceId, environmentId }, payload)
+            .generate({ agentId: WORKFLOW_AGENT_ID, spaceId, environmentId }, payload)
             .catch((err: unknown) => {
               console.error('Failed to start analyzer agent run:', err);
             });
