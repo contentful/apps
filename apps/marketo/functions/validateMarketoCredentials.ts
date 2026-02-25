@@ -4,17 +4,9 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import {
-  INVALID_CLIENT_RESPONSE,
-  NO_ACCESS_TOKEN_RESPONSE,
-  VALID_CREDENTIALS_RESPONSE,
-} from '../src/const';
-
-type AppParameters = {
-  clientId: string;
-  clientSecret: string;
-  munchkinId: string;
-};
+import { INVALID_CLIENT_RESPONSE, VALID_CREDENTIALS_RESPONSE } from '../src/const';
+import type { AppInstallationParameters } from '../src/types';
+import { getMarketoToken } from './getMarketoToken';
 
 export type ValidateCredentialsResponse = {
   valid: boolean;
@@ -24,13 +16,13 @@ export type ValidateCredentialsResponse = {
 function getCredentials(
   event: AppActionRequest<'Custom'>,
   context: FunctionEventContext
-): AppParameters {
-  const body = event.body as AppParameters;
+): AppInstallationParameters {
+  const body = event.body as unknown as AppInstallationParameters;
   if (body?.clientId?.trim() && body?.clientSecret?.trim() && body?.munchkinId?.trim()) {
-    return body as AppParameters;
+    return body as AppInstallationParameters;
   }
 
-  return context.appInstallationParameters as AppParameters;
+  return context.appInstallationParameters as AppInstallationParameters;
 }
 
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
@@ -40,43 +32,11 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   const creds = getCredentials(event, context);
   const { clientId, clientSecret, munchkinId } = creds;
 
-  const authUrl = `https://${munchkinId}.mktorest.com/identity/oauth/token?${new URLSearchParams({
-    grant_type: 'client_credentials',
-    client_id: clientId,
-    client_secret: clientSecret,
-  }).toString()}`;
-
-  const authResponse = await fetch(authUrl);
-
-  if (!authResponse.ok) {
-    let message = INVALID_CLIENT_RESPONSE;
-
-    try {
-      const errorBody = (await authResponse.json()) as {
-        error?: string;
-        error_description?: string;
-      };
-
-      if (errorBody?.error_description) {
-        message = `Marketo authentication failed: ${errorBody.error_description}`;
-      }
-    } catch {
-      // If munchkin id is invalid it returns {}
-    }
-
-    return {
-      valid: false,
-      message,
-    };
+  try {
+    await getMarketoToken(clientId, clientSecret, munchkinId);
+    return { valid: true, message: VALID_CREDENTIALS_RESPONSE };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : INVALID_CLIENT_RESPONSE;
+    return { valid: false, message: errorMessage };
   }
-
-  const auth = await authResponse.json();
-  if (!auth.access_token) {
-    return {
-      valid: false,
-      message: NO_ACCESS_TOKEN_RESPONSE,
-    };
-  }
-
-  return { valid: true, message: VALID_CREDENTIALS_RESPONSE };
 };

@@ -6,7 +6,7 @@ import {
   FunctionTypeEnum,
 } from '@contentful/node-apps-toolkit';
 import { AppInstallationParameters } from '../../src/types';
-import { NO_ACCESS_TOKEN_RESPONSE, VALID_CREDENTIALS_RESPONSE } from '../../src/const';
+import { INVALID_CLIENT_RESPONSE, VALID_CREDENTIALS_RESPONSE } from '../../src/const';
 
 globalThis.fetch = vi.fn();
 
@@ -87,7 +87,7 @@ describe('validateMarketoCredentials handler', () => {
 
     expect(result).toEqual({
       valid: false,
-      message: NO_ACCESS_TOKEN_RESPONSE,
+      message: INVALID_CLIENT_RESPONSE,
     });
   });
 
