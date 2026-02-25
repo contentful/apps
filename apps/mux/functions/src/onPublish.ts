@@ -1,4 +1,10 @@
 import * as contentful from 'contentful-management';
+import { muxFetch } from './helpers/muxClient';
+
+function getCredentials(context: any) {
+  const { muxAccessTokenId, muxAccessTokenSecret } = context.appInstallationParameters;
+  return { tokenId: muxAccessTokenId, tokenSecret: muxAccessTokenSecret };
+}
 
 async function deleteMuxResource({
   assetId,
@@ -13,26 +19,19 @@ async function deleteMuxResource({
   resourceType: string;
   logLabel: string;
 }) {
-  const { muxAccessTokenId, muxAccessTokenSecret } = context.appInstallationParameters;
-  const credentials = btoa(`${muxAccessTokenId}:${muxAccessTokenSecret}`);
-
-  let endpoint = `https://api.mux.com/video/v1/assets/${assetId}`;
+  let path = `/video/v1/assets/${assetId}`;
   if (resourceType) {
-    endpoint += `/${resourceType}`;
-    if (resourceId) endpoint += `/${resourceId}`;
+    path += `/${resourceType}`;
+    if (resourceId) path += `/${resourceId}`;
   }
 
   console.log(`Deleting ${logLabel} ${resourceId || ''} for assetId ${assetId}`);
-  const deleteRes = await fetch(endpoint, {
-    method: 'DELETE',
-    headers: {
-      Authorization: `Basic ${credentials}`,
-      'Content-Type': 'application/json',
-    },
-  });
+  const deleteRes = await muxFetch(getCredentials(context), 'DELETE', path);
   if (!deleteRes.ok) {
     const error = await deleteRes.json();
-    throw new Error(`Error deleting ${logLabel}: ${error.error?.messages?.[0] || 'Unknown error'}`);
+    throw new Error(
+      `Error deleting ${logLabel}: ${error.error?.messages?.[0] || 'Unknown error'}`
+    );
   }
 }
 
@@ -237,15 +236,7 @@ async function runPendingActionsFromEntry(
 }
 
 async function fetchMuxAsset(assetId: string, context: any) {
-  const { muxAccessTokenId, muxAccessTokenSecret } = context.appInstallationParameters;
-  const credentials = btoa(`${muxAccessTokenId}:${muxAccessTokenSecret}`);
-  const res = await fetch(`https://api.mux.com/video/v1/assets/${assetId}`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Basic ${credentials}`,
-      'Content-Type': 'application/json',
-    },
-  });
+  const res = await muxFetch(getCredentials(context), 'GET', `/video/v1/assets/${assetId}`);
   if (res.status === 404) {
     return undefined;
   }
@@ -402,32 +393,28 @@ function findPendingActionsInMuxFields(fields: any): Record<string, any> {
 
 async function createMuxPlaybackId(assetId: string, policy: string, context: any) {
   console.log(`Creating playbackId for assetId ${assetId} with policy ${policy}`);
-  const { muxAccessTokenId, muxAccessTokenSecret, muxDRMConfigurationId } =
-    context.appInstallationParameters;
-  const credentials = btoa(`${muxAccessTokenId}:${muxAccessTokenSecret}`);
+  const { muxDRMConfigurationId } = context.appInstallationParameters;
 
   const body: any = { policy };
   if (policy === 'drm') {
     body.drm_configuration_id = muxDRMConfigurationId;
   }
-  const createRes = await fetch(`https://api.mux.com/video/v1/assets/${assetId}/playback-ids`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Basic ${credentials}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
+  const createRes = await muxFetch(
+    getCredentials(context),
+    'POST',
+    `/video/v1/assets/${assetId}/playback-ids`,
+    JSON.stringify(body)
+  );
   if (!createRes.ok) {
     const error = await createRes.json();
-    throw new Error(`Error creating playbackId: ${error.error?.messages?.[0] || 'Unknown error'}`);
+    throw new Error(
+      `Error creating playbackId: ${error.error?.messages?.[0] || 'Unknown error'}`
+    );
   }
 }
 
 async function updateMuxAsset(assetId: string, data: any, context: any) {
   console.log(`Updating Mux asset for assetId ${assetId} with data ${data}`);
-  const { muxAccessTokenId, muxAccessTokenSecret } = context.appInstallationParameters;
-  const credentials = btoa(`${muxAccessTokenId}:${muxAccessTokenSecret}`);
 
   const requestBody = JSON.stringify({
     meta: {
@@ -435,18 +422,17 @@ async function updateMuxAsset(assetId: string, data: any, context: any) {
     },
   });
 
-  const updateRes = await fetch(`https://api.mux.com/video/v1/assets/${assetId}`, {
-    method: 'PATCH',
-    headers: {
-      Authorization: `Basic ${credentials}`,
-      'Content-Type': 'application/json',
-    },
-    body: requestBody,
-  });
-
+  const updateRes = await muxFetch(
+    getCredentials(context),
+    'PATCH',
+    `/video/v1/assets/${assetId}`,
+    requestBody
+  );
   if (!updateRes.ok) {
     const error = await updateRes.json();
-    throw new Error(`Error updating Mux asset: ${error.error?.messages?.[0] || 'Unknown error'}`);
+    throw new Error(
+      `Error updating Mux asset: ${error.error?.messages?.[0] || 'Unknown error'}`
+    );
   }
 }
 

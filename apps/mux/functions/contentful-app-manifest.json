@@ -11,11 +11,110 @@
     },
     {
       "id": "getSignedUrlTokens",
-      "name": "Get signed URL tokens",
+      "name": "getSignedUrlTokens",
       "description": "This action returns signed JWT tokens for securing Mux video playback.",
       "path": "src/getSignedUrlTokens.js",
       "entryFile": "src/getSignedUrlTokens.ts",
       "allowNetworks": ["api.contentful.com", "https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "getAsset",
+      "name": "getAsset",
+      "description": "Fetches a Mux asset by ID.",
+      "path": "src/getAsset.js",
+      "entryFile": "src/getAsset.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "createAsset",
+      "name": "createAsset",
+      "description": "Creates a new Mux asset from a URL or upload settings.",
+      "path": "src/createAsset.js",
+      "entryFile": "src/createAsset.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "createUpload",
+      "name": "createUpload",
+      "description": "Creates a Mux direct upload URL.",
+      "path": "src/createUpload.js",
+      "entryFile": "src/createUpload.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "getUpload",
+      "name": "getUpload",
+      "description": "Fetches a Mux upload by ID to check its status.",
+      "path": "src/getUpload.js",
+      "entryFile": "src/getUpload.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "deleteStaticRendition",
+      "name": "deleteStaticRendition",
+      "description": "Deletes a static MP4 rendition from a Mux asset.",
+      "path": "src/deleteStaticRendition.js",
+      "entryFile": "src/deleteStaticRendition.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "createStaticRendition",
+      "name": "createStaticRendition",
+      "description": "Creates a static MP4 rendition for a Mux asset.",
+      "path": "src/createStaticRendition.js",
+      "entryFile": "src/createStaticRendition.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "createTrack",
+      "name": "createTrack",
+      "description": "Adds a caption or audio track to a Mux asset.",
+      "path": "src/createTrack.js",
+      "entryFile": "src/createTrack.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "deleteTrack",
+      "name": "deleteTrack",
+      "description": "Deletes a track from a Mux asset.",
+      "path": "src/deleteTrack.js",
+      "entryFile": "src/deleteTrack.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "generateSubtitles",
+      "name": "generateSubtitles",
+      "description": "Generates auto-captions for a Mux asset track.",
+      "path": "src/generateSubtitles.js",
+      "entryFile": "src/generateSubtitles.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "getSigningKey",
+      "name": "getSigningKey",
+      "description": "Validates that a Mux signing key exists.",
+      "path": "src/getSigningKey.js",
+      "entryFile": "src/getSigningKey.ts",
+      "allowNetworks": ["https://api.mux.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "createSigningKey",
+      "name": "createSigningKey",
+      "description": "Creates a new Mux signing key for signed URLs.",
+      "path": "src/createSigningKey.js",
+      "entryFile": "src/createSigningKey.ts",
+      "allowNetworks": ["https://api.mux.com"],
       "accepts": ["appaction.call"]
     }
   ]
