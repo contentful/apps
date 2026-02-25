@@ -3,7 +3,7 @@ import { Button, ButtonGroup, Flex } from '@contentful/f36-components';
 import { ChevronDownIcon, CloseIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { css } from 'emotion';
+import { css, cx } from 'emotion';
 import { forwardRef, Ref } from 'react';
 import { Color } from '../types';
 import { ColorBox } from './ColorBox';
@@ -21,8 +21,17 @@ const styles = {
     justifyContent: 'stretch',
   }),
   pickerButton: css({
+    display: 'flex',
+    justifyContent: 'flex-start',
     maxWidth: '100%',
     flexGrow: 1,
+    border: `1px solid ${tokens.gray200}`,
+  }),
+  pickerButtonNoClearButton: css({
+    justifyContent: 'space-between',
+  }),
+  clearButton: css({
+    border: `1px solid ${tokens.gray200}`,
   }),
 };
 
@@ -39,12 +48,15 @@ function _SelectColorButton(
   ref: Ref<HTMLButtonElement>
 ) {
   const sdk = useSDK<FieldExtensionSDK>();
-
+  const isClearButtonVisible = !sdk.field.required && value !== undefined;
   return (
     <ButtonGroup withDivider className={styles.buttonGroup}>
       <Button
         endIcon={showChevron ? <ChevronDownIcon /> : undefined}
-        className={styles.pickerButton}
+        className={cx(
+          styles.pickerButton,
+          !isClearButtonVisible ? styles.pickerButtonNoClearButton : undefined
+        )}
         onClick={onClick}
         ref={ref}>
         <Flex alignItems="center" gap="spacingXs">
@@ -57,8 +69,12 @@ function _SelectColorButton(
           </Flex>
         </Flex>
       </Button>
-      {!sdk.field.required && value !== undefined && (
-        <Button variant="secondary" startIcon={<CloseIcon />} onClick={onClearClick}>
+      {isClearButtonVisible && (
+        <Button
+          variant="secondary"
+          startIcon={<CloseIcon />}
+          onClick={onClearClick}
+          className={styles.clearButton}>
           Clear
         </Button>
       )}

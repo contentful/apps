@@ -46,25 +46,30 @@ export class AppView extends Component {
 
   state = {
     isInstalled: false,
+    allContentTypes: [],
     allContentTypesIds: [],
     contentTypeId: camelCase('Image with Focal Point'),
     contentTypeName: 'Image with Focal Point',
     isContentTypeIdPristine: true,
+    useExistingContentType: false,
+    selectedExistingContentTypeId: '',
+    selectedFocalPointFieldId: '',
+    selectedImageFieldId: '',
   };
 
   async componentDidMount() {
     const { space, app } = this.props.sdk;
 
-    const [isInstalled, allContentTypes] = await Promise.all([
+    const [isInstalled, allContentTypesResponse] = await Promise.all([
       app.isInstalled(),
       space.getContentTypes(),
     ]);
 
-    const allContentTypesIds = allContentTypes.items.map(({ sys: { id } }) => id);
+    const allContentTypes = allContentTypesResponse.items;
+    const allContentTypesIds = allContentTypes.map(({ sys: { id } }) => id);
 
-    // Following eslint error is caused due to using async/await
     // eslint-disable-next-line react/no-did-mount-set-state
-    this.setState({ isInstalled, allContentTypesIds }, () => app.setReady());
+    this.setState({ isInstalled, allContentTypes, allContentTypesIds }, () => app.setReady());
 
     app.onConfigure(this.installApp);
     app.onConfigurationCompleted((err) => {
@@ -74,15 +79,68 @@ export class AppView extends Component {
     });
   }
 
+  // Filter content types to only those with both a JSON Object field and an Asset field
+  getEligibleContentTypes = () => {
+    const { allContentTypes } = this.state;
+    return allContentTypes.filter((ct) => {
+      const hasObjectField = ct.fields.some((field) => field.type === 'Object');
+      const hasAssetField = ct.fields.some(
+        (field) => field.type === 'Link' && field.linkType === 'Asset'
+      );
+      return hasObjectField && hasAssetField;
+    });
+  };
+
   installApp = async () => {
     const { sdk } = this.props;
-    const { isInstalled, allContentTypesIds, contentTypeId, contentTypeName } = this.state;
+    const {
+      isInstalled,
+      allContentTypesIds,
+      contentTypeId,
+      contentTypeName,
+      useExistingContentType,
+      selectedExistingContentTypeId,
+      selectedFocalPointFieldId,
+      selectedImageFieldId,
+    } = this.state;
 
     if (isInstalled) {
       sdk.notifier.success('The app is already fully configured.');
       return false;
     }
 
+    // Using an existing content type
+    if (useExistingContentType) {
+      if (!selectedExistingContentTypeId) {
+        sdk.notifier.error('Please select a content type.');
+        return false;
+      }
+
+      if (!selectedFocalPointFieldId) {
+        sdk.notifier.error('Please select a focal point field.');
+        return false;
+      }
+
+      if (!selectedImageFieldId) {
+        sdk.notifier.error('Please select an image field.');
+        return false;
+      }
+
+      return {
+        parameters: {
+          imageFieldId: selectedImageFieldId,
+        },
+        targetState: {
+          EditorInterface: {
+            [selectedExistingContentTypeId]: {
+              controls: [{ fieldId: selectedFocalPointFieldId }],
+            },
+          },
+        },
+      };
+    }
+
+    // Creating a new content type
     if (!contentTypeName) {
       sdk.notifier.error('Provide a name for the content type.');
       return false;
@@ -136,8 +194,42 @@ export class AppView extends Component {
       contentTypeId: value,
     });
 
+  onUseExistingContentTypeChange = (useExisting) =>
+    this.setState({
+      useExistingContentType: useExisting,
+      selectedExistingContentTypeId: '',
+      selectedFocalPointFieldId: '',
+      selectedImageFieldId: '',
+    });
+
+  onSelectedExistingContentTypeChange = (contentTypeId) =>
+    this.setState({
+      selectedExistingContentTypeId: contentTypeId,
+      selectedFocalPointFieldId: '',
+      selectedImageFieldId: '',
+    });
+
+  onSelectedFocalPointFieldChange = (fieldId) =>
+    this.setState({
+      selectedFocalPointFieldId: fieldId,
+    });
+
+  onSelectedImageFieldChange = (fieldId) =>
+    this.setState({
+      selectedImageFieldId: fieldId,
+    });
+
   render() {
-    const { isInstalled, allContentTypesIds, contentTypeId, contentTypeName } = this.state;
+    const {
+      isInstalled,
+      allContentTypesIds,
+      contentTypeId,
+      contentTypeName,
+      useExistingContentType,
+      selectedExistingContentTypeId,
+      selectedFocalPointFieldId,
+      selectedImageFieldId,
+    } = this.state;
 
     return (
       <>
@@ -158,6 +250,15 @@ export class AppView extends Component {
                 contentTypeName={contentTypeName}
                 onContentTypeNameChange={this.onContentTypeNameChange}
                 onContentTypeIdChange={this.onContentTypeIdChange}
+                useExistingContentType={useExistingContentType}
+                onUseExistingContentTypeChange={this.onUseExistingContentTypeChange}
+                eligibleContentTypes={this.getEligibleContentTypes()}
+                selectedExistingContentTypeId={selectedExistingContentTypeId}
+                onSelectedExistingContentTypeChange={this.onSelectedExistingContentTypeChange}
+                selectedFocalPointFieldId={selectedFocalPointFieldId}
+                onSelectedFocalPointFieldChange={this.onSelectedFocalPointFieldChange}
+                selectedImageFieldId={selectedImageFieldId}
+                onSelectedImageFieldChange={this.onSelectedImageFieldChange}
               />
             )}
           </>
