@@ -7,7 +7,6 @@ import {
   CONFIG_SAVE_REQUIRED_FIELDS_MESSAGE,
   INVALID_CLIENT_RESPONSE,
   TEST_CONNECTION_REQUIRED_FIELDS_MESSAGE,
-  VALID_CREDENTIALS_RESPONSE,
 } from '../src/const';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
@@ -69,7 +68,7 @@ describe('ConfigScreen', () => {
     expect(getByLabelText(/Marketo Client ID/)).toBeInTheDocument();
     expect(getByLabelText(/Marketo Client Secret/)).toBeInTheDocument();
     expect(getByLabelText(/Marketo Munchkin Id/)).toBeInTheDocument();
-    expect(getByRole('button', { name: /test marketo connection/i })).toBeInTheDocument();
+    expect(getByRole('button', { name: 'Test' })).toBeInTheDocument();
   });
 
   it('onConfigure returns parameters and targetState when all required fields are valid', async () => {
@@ -113,7 +112,7 @@ describe('ConfigScreen', () => {
   it('test connection shows error and does not call app action when required fields are empty', async () => {
     await renderAndWaitReady();
 
-    const testButton = screen.getByRole('button', { name: /test marketo connection/i });
+    const testButton = screen.getByRole('button', { name: 'Test' });
     await userEvent.click(testButton);
 
     expect(mockSdk.notifier.error).toHaveBeenCalledWith(TEST_CONNECTION_REQUIRED_FIELDS_MESSAGE);
@@ -125,9 +124,7 @@ describe('ConfigScreen', () => {
     await renderAndWaitReady();
     await fillCredentials()();
 
-    expect(
-      screen.queryByRole('button', { name: /test marketo connection/i })
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Test' })).not.toBeInTheDocument();
   });
 
   it('shows test connection button when app is installed', async () => {
@@ -135,13 +132,13 @@ describe('ConfigScreen', () => {
     await renderAndWaitReady();
     await fillCredentials()();
 
-    expect(screen.getByRole('button', { name: /test marketo connection/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Test' })).toBeInTheDocument();
   });
 
-  it('test connection calls app action with credentials and shows success note when response is valid', async () => {
+  it('test connection calls app action with credentials and shows Connected badge when response is valid', async () => {
     await renderAndWaitReady();
     await fillCredentials()();
-    const testButton = screen.getByRole('button', { name: /test marketo connection/i });
+    const testButton = screen.getByRole('button', { name: 'Test' });
 
     await userEvent.click(testButton);
 
@@ -158,7 +155,7 @@ describe('ConfigScreen', () => {
       );
     });
     await waitFor(() => {
-      expect(screen.getByText(VALID_CREDENTIALS_RESPONSE)).toBeInTheDocument();
+      expect(screen.getByText('Connected')).toBeInTheDocument();
     });
     expect(mockSdk.notifier.error).not.toHaveBeenCalled();
   });
@@ -174,7 +171,7 @@ describe('ConfigScreen', () => {
     });
     await renderAndWaitReady();
     await fillCredentials()();
-    const testButton = screen.getByRole('button', { name: /test marketo connection/i });
+    const testButton = screen.getByRole('button', { name: 'Test' });
 
     await userEvent.click(testButton);
 
@@ -187,7 +184,7 @@ describe('ConfigScreen', () => {
     mockCma.appActionCall.createWithResponse.mockRejectedValue(new Error('Network error'));
     await renderAndWaitReady();
     await fillCredentials()();
-    const testButton = screen.getByRole('button', { name: /test marketo connection/i });
+    const testButton = screen.getByRole('button', { name: 'Test' });
 
     await userEvent.click(testButton);
 

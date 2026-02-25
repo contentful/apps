@@ -9,4 +9,8 @@ export const styles = {
   textLinkContainer: css({
     marginTop: tokens.spacingXs,
   }),
+  connectionCard: css({
+    padding: tokens.spacingXs,
+    borderRadius: tokens.borderRadiusSmall,
+  }),
 };

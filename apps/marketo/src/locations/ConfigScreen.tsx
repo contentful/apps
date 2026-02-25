@@ -1,7 +1,9 @@
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
+  Badge,
   Box,
   Button,
+  Card,
   Flex,
   Form,
   FormControl,
@@ -9,6 +11,7 @@ import {
   Note,
   Paragraph,
   Subheading,
+  Text,
   TextInput,
   TextLink,
 } from '@contentful/f36-components';
@@ -298,32 +301,43 @@ const ConfigScreen = () => {
 
             {isInstalled && (
               <Box marginTop="spacingXl">
-                <Button
-                  onClick={testConnection}
-                  isLoading={parameters.connectionStatus === ConnectionStatus.Testing}
-                  isDisabled={parameters.connectionStatus === ConnectionStatus.Testing}>
-                  Test Marketo connection
-                </Button>
+                <Card marginBottom="spacingS" className={styles.connectionCard}>
+                  <Flex justifyContent="space-between" alignItems="center" gap="spacingM">
+                    <Text fontWeight="fontWeightDemiBold" fontColor="gray800">
+                      Marketo Connection
+                    </Text>
+                    <Flex alignItems="center" gap="spacingS">
+                      {parameters.connectionStatus === ConnectionStatus.Success && (
+                        <Badge variant="positive">Connected</Badge>
+                      )}
+                      {parameters.connectionStatus === ConnectionStatus.Error && (
+                        <Badge variant="warning" size="small">
+                          Connection failed
+                        </Badge>
+                      )}
+                      <Button
+                        variant="secondary"
+                        size="small"
+                        onClick={testConnection}
+                        isDisabled={parameters.connectionStatus === ConnectionStatus.Testing}
+                        isLoading={parameters.connectionStatus === ConnectionStatus.Testing}>
+                        Test
+                      </Button>
+                    </Flex>
+                  </Flex>
+                  {parameters.connectionStatus === ConnectionStatus.Error &&
+                    parameters.connectionMessage && (
+                      <Box marginTop="spacingS">
+                        <Note variant="warning" title="Connection failed">
+                          {parameters.connectionMessage}
+                        </Note>
+                      </Box>
+                    )}
+                </Card>
                 <FormControl.HelpText marginTop="spacingS">
                   After testing the connection, click <strong>Save</strong> to store your Marketo
                   credentials.
                 </FormControl.HelpText>
-                {parameters.connectionStatus === ConnectionStatus.Success &&
-                  parameters.connectionMessage && (
-                    <Box marginTop="spacingM">
-                      <Note variant="positive" title="Connection successful">
-                        {parameters.connectionMessage}
-                      </Note>
-                    </Box>
-                  )}
-                {parameters.connectionStatus === ConnectionStatus.Error &&
-                  parameters.connectionMessage && (
-                    <Box marginTop="spacingM">
-                      <Note variant="negative" title="Connection failed">
-                        {parameters.connectionMessage}
-                      </Note>
-                    </Box>
-                  )}
               </Box>
             )}
           </Box>
