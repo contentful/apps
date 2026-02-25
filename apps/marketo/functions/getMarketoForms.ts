@@ -4,7 +4,8 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { MarketoAuthenticationError, MarketoApiError } from './exceptions';
+import { MarketoApiError } from './exceptions';
+import { getMarketoToken } from './getMarketoToken';
 import type { AppInstallationParameters, MarketoFormsResponse } from '../src/types';
 
 export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = async (
@@ -14,19 +15,8 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
   const { clientId, clientSecret, munchkinId } =
     context.appInstallationParameters as AppInstallationParameters;
 
+  const auth = await getMarketoToken(clientId, clientSecret, munchkinId);
   const baseUrl = `https://${munchkinId}.mktorest.com`;
-
-  const authResponse = await fetch(
-    `${baseUrl}/identity/oauth/token?grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`
-  );
-
-  if (!authResponse.ok) {
-    throw new MarketoAuthenticationError(
-      `Marketo authentication failed: ${authResponse.status} ${authResponse.statusText}`
-    );
-  }
-
-  const auth = await authResponse.json();
 
   const response = await fetch(`${baseUrl}/rest/asset/v1/forms.json?maxReturn=200`, {
     method: 'GET',

@@ -4,9 +4,11 @@ const createMockSdk = (overrides?: Record<string, unknown>) => {
   const baseMockSdk = {
     app: {
       onConfigure: vi.fn(),
+      onConfigurationCompleted: vi.fn(),
       getParameters: vi.fn().mockResolvedValue(null),
       setReady: vi.fn(),
       getCurrentState: vi.fn().mockResolvedValue(null),
+      isInstalled: vi.fn().mockResolvedValue(true),
     },
     notifier: {
       error: vi.fn(),
@@ -25,6 +27,8 @@ const createMockSdk = (overrides?: Record<string, unknown>) => {
     },
     ids: {
       app: 'test-app',
+      environment: 'test-env',
+      space: 'test-space',
     },
     window: {
       startAutoResizer: vi.fn(),

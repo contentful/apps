@@ -1,13 +1,17 @@
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
+  Badge,
   Box,
   Button,
+  Card,
   Flex,
   Form,
   FormControl,
   Heading,
+  Note,
   Paragraph,
   Subheading,
+  Text,
   TextInput,
   TextLink,
 } from '@contentful/f36-components';
@@ -16,36 +20,88 @@ import { useCallback, useEffect, useState } from 'react';
 import { styles } from './ConfigScreen.styles';
 import ContentTypeFieldMultiSelect from '../components/ContentTypeFieldMultiSelect';
 import { ContentTypeInfo, TargetState } from '../utils';
-import type { AppInstallationParameters } from '../types';
+import { ValidateCredentialsResponse } from '../../functions/validateMarketoCredentials';
+import {
+  CONFIG_SAVE_FAILED_MESSAGE,
+  CONFIG_SAVE_REQUIRED_FIELDS_MESSAGE,
+  CREDENTIAL_VALIDATION,
+  INSTALL_APP_FIRST_MESSAGE,
+  INVALID_CREDENTIALS_RESPONSE,
+  TEST_CONNECTION_REQUIRED_FIELDS_MESSAGE,
+} from '../const';
+import { AppInstallationParameters, ConnectionStatus } from '../types';
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     clientId: '',
     clientSecret: '',
     munchkinId: '',
+    connectionStatus: ConnectionStatus.None,
+    connectionMessage: '',
   });
   const [selectedContentTypes, setSelectedContentTypes] = useState<ContentTypeInfo[]>([]);
-  const [loading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
   const sdk = useSDK<ConfigAppSDK>();
 
-  const validateInput = (errors: Record<string, string>, id: string, value?: string): void => {
-    if (!value?.trim()) {
-      errors[id] = `Input is required`;
-    }
+  const setConnectionParameters = (status: ConnectionStatus, message: string) => {
+    setParameters((prev) => ({
+      ...prev,
+      connectionStatus: status,
+      connectionMessage: message,
+    }));
   };
 
-  const onConfigure = useCallback(async () => {
-    const newErrors: Record<string, string> = {};
-    validateInput(newErrors, 'clientId', parameters.clientId);
-    validateInput(newErrors, 'clientSecret', parameters.clientSecret);
-    validateInput(newErrors, 'munchkinId', parameters.munchkinId);
+  const callValidateCredentials = useCallback(
+    async (params?: AppInstallationParameters): Promise<ValidateCredentialsResponse> => {
+      let parameters = {};
 
-    const isValid = Object.keys(newErrors).length === 0;
+      if (params?.clientId?.trim() && params?.clientSecret?.trim() && params?.munchkinId?.trim()) {
+        parameters = {
+          clientId: params?.clientId,
+          clientSecret: params?.clientSecret,
+          munchkinId: params?.munchkinId,
+        };
+      }
+
+      try {
+        const response = await sdk.cma.appActionCall.createWithResponse(
+          { appDefinitionId: sdk.ids.app!, appActionId: 'validateMarketoCredentialsAction' },
+          { parameters }
+        );
+
+        const data = JSON.parse(response.response.body) as ValidateCredentialsResponse;
+
+        const status = data.valid ? ConnectionStatus.Success : ConnectionStatus.Error;
+        setConnectionParameters(status, data.message);
+
+        return data;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : INVALID_CREDENTIALS_RESPONSE;
+        setConnectionParameters(ConnectionStatus.Error, message);
+
+        return { valid: false, message };
+      }
+    },
+    [sdk]
+  );
+
+  const validateRequiredFields = useCallback((): boolean => {
+    const newErrors: Record<string, string> = {};
+    for (const credential of CREDENTIAL_VALIDATION) {
+      const id = credential.id as keyof AppInstallationParameters;
+      const message = credential.message;
+      if (!parameters[id]?.trim()) newErrors[id] = message;
+    }
+
     setErrors(newErrors);
 
-    if (!isValid) {
-      sdk.notifier.error('Please fill in all required fields with valid values before saving.');
+    return Object.keys(newErrors).length === 0;
+  }, [parameters.clientId, parameters.clientSecret, parameters.munchkinId]);
+
+  const onConfigure = useCallback(async () => {
+    if (!validateRequiredFields()) {
+      sdk.notifier.error(CONFIG_SAVE_REQUIRED_FIELDS_MESSAGE);
       return false;
     }
 
@@ -66,20 +122,42 @@ const ConfigScreen = () => {
       parameters,
       targetState,
     };
-  }, [parameters, selectedContentTypes, sdk]);
+  }, [parameters, selectedContentTypes, sdk, validateRequiredFields]);
+
+  const onConfigurationCompleted = useCallback(
+    async (error: { message: string } | null) => {
+      if (error) {
+        sdk.notifier.error(CONFIG_SAVE_FAILED_MESSAGE);
+        return;
+      }
+      const data = await callValidateCredentials();
+      if (data.valid) {
+        sdk.notifier.success(data.message);
+      } else {
+        sdk.notifier.error(data.message);
+      }
+      setIsInstalled(true);
+    },
+    [sdk, callValidateCredentials]
+  );
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
-  }, [sdk, onConfigure]);
+    sdk.app.onConfigurationCompleted((err) => onConfigurationCompleted(err));
+  }, [sdk, onConfigure, onConfigurationCompleted]);
 
   useEffect(() => {
     (async () => {
-      const currentParameters = (await sdk.app.getParameters()) as AppInstallationParameters;
+      const [currentParameters, installed] = await Promise.all([
+        sdk.app.getParameters() as Promise<AppInstallationParameters | null>,
+        sdk.app.isInstalled(),
+      ]);
 
       if (currentParameters) {
         setParameters(currentParameters);
       }
 
+      setIsInstalled(installed);
       sdk.app.setReady();
     })();
   }, [sdk]);
@@ -90,9 +168,14 @@ const ConfigScreen = () => {
     const id = event.target.id;
     const value = event.target.value;
 
-    setParameters((prev) => ({ ...prev, [id]: value }));
+    setParameters((prev) => ({
+      ...prev,
+      [id]: value,
+      connectionStatus: ConnectionStatus.None,
+      connectionMessage: '',
+    }));
 
-    // Clear error when user starts typing
+    // Clear error
     if (errors[id]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -103,7 +186,24 @@ const ConfigScreen = () => {
   };
 
   const testConnection = async (): Promise<void> => {
-    // TODO : IMPLEMENT
+    if (!validateRequiredFields()) {
+      sdk.notifier.error(TEST_CONNECTION_REQUIRED_FIELDS_MESSAGE);
+      return;
+    }
+
+    const isInstalled = await sdk.app.isInstalled();
+    if (!isInstalled) {
+      sdk.notifier.error(INSTALL_APP_FIRST_MESSAGE);
+      return;
+    }
+
+    setConnectionParameters(ConnectionStatus.Testing, '');
+
+    await callValidateCredentials({
+      clientId: parameters.clientId,
+      clientSecret: parameters.clientSecret,
+      munchkinId: parameters.munchkinId,
+    });
   };
 
   return (
@@ -124,6 +224,7 @@ const ConfigScreen = () => {
               <TextInput
                 id="clientId"
                 name="clientId"
+                type="password"
                 value={parameters.clientId}
                 onChange={handleFieldChange}
                 isInvalid={!!errors.clientId}
@@ -145,6 +246,7 @@ const ConfigScreen = () => {
               <TextInput
                 id="clientSecret"
                 name="clientSecret"
+                type="password"
                 value={parameters.clientSecret}
                 onChange={handleFieldChange}
                 isInvalid={!!errors.clientSecret}
@@ -166,6 +268,7 @@ const ConfigScreen = () => {
               <TextInput
                 id="munchkinId"
                 name="munchkinId"
+                type="password"
                 value={parameters.munchkinId}
                 onChange={handleFieldChange}
                 isInvalid={!!errors.munchkinId}
@@ -196,14 +299,48 @@ const ConfigScreen = () => {
               </TextLink>
             </FormControl>
 
-            <Box marginTop="spacingXl">
-              <Button onClick={testConnection} isLoading={loading}>
-                Test marketo connection
-              </Button>
-            </Box>
+            {isInstalled && (
+              <Box marginTop="spacingXl">
+                <Card marginBottom="spacingS" className={styles.connectionCard}>
+                  <Flex justifyContent="space-between" alignItems="center" gap="spacingM">
+                    <Text fontWeight="fontWeightDemiBold" fontColor="gray800">
+                      Marketo Connection
+                    </Text>
+                    <Flex alignItems="center" gap="spacingS">
+                      {parameters.connectionStatus === ConnectionStatus.Success && (
+                        <Badge variant="positive">Connected</Badge>
+                      )}
+                      {parameters.connectionStatus === ConnectionStatus.Error && (
+                        <Badge variant="warning">Connection failed</Badge>
+                      )}
+                      <Button
+                        variant="secondary"
+                        size="small"
+                        onClick={testConnection}
+                        isDisabled={parameters.connectionStatus === ConnectionStatus.Testing}
+                        isLoading={parameters.connectionStatus === ConnectionStatus.Testing}>
+                        Test
+                      </Button>
+                    </Flex>
+                  </Flex>
+                  {parameters.connectionStatus === ConnectionStatus.Error &&
+                    parameters.connectionMessage && (
+                      <Box marginTop="spacingS">
+                        <Note variant="warning" title="Connection failed">
+                          {parameters.connectionMessage}
+                        </Note>
+                      </Box>
+                    )}
+                </Card>
+                <FormControl.HelpText marginTop="spacingS">
+                  After testing the connection, click <strong>Save</strong> to store your Marketo
+                  credentials.
+                </FormControl.HelpText>
+              </Box>
+            )}
           </Box>
 
-          <Box>
+          <Box marginBottom="spacing4Xl">
             <Subheading marginBottom="spacingM">Assign content types</Subheading>
             <Paragraph marginBottom="spacingL">
               Select the content type(s) you want to use with the Marketo app. You can change this
