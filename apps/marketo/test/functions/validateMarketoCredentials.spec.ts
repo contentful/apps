@@ -5,7 +5,7 @@ import {
   FunctionEventContext,
   FunctionTypeEnum,
 } from '@contentful/node-apps-toolkit';
-import { AppParameters } from '../../src/locations/ConfigScreen';
+import { AppInstallationParameters } from '../../src/types';
 import { NO_ACCESS_TOKEN_RESPONSE, VALID_CREDENTIALS_RESPONSE } from '../../src/const';
 
 globalThis.fetch = vi.fn();
@@ -106,7 +106,7 @@ describe('validateMarketoCredentials handler', () => {
           clientId: 'body-id',
           clientSecret: 'body-secret',
           munchkinId: 'body-munchkin',
-        } as AppParameters,
+        } as AppInstallationParameters,
       } as Parameters<typeof handler>[0],
       mockContext
     );

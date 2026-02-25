@@ -5,7 +5,6 @@ import { mockCma, mockSdk } from './mocks';
 import ConfigScreen from '../src/locations/ConfigScreen';
 import {
   CONFIG_SAVE_REQUIRED_FIELDS_MESSAGE,
-  INSTALL_APP_FIRST_MESSAGE,
   INVALID_CLIENT_RESPONSE,
   TEST_CONNECTION_REQUIRED_FIELDS_MESSAGE,
   VALID_CREDENTIALS_RESPONSE,
@@ -121,16 +120,22 @@ describe('ConfigScreen', () => {
     expect(mockCma.appActionCall.createWithResponse).not.toHaveBeenCalled();
   });
 
-  it('test connection shows error and does not call app action when app is not installed', async () => {
+  it('does not show test connection button when app is not installed', async () => {
     mockSdk.app.isInstalled.mockResolvedValue(false);
     await renderAndWaitReady();
     await fillCredentials()();
 
-    const testButton = screen.getByRole('button', { name: /test marketo connection/i });
-    await userEvent.click(testButton);
+    expect(
+      screen.queryByRole('button', { name: /test marketo connection/i })
+    ).not.toBeInTheDocument();
+  });
 
-    expect(mockSdk.notifier.error).toHaveBeenCalledWith(INSTALL_APP_FIRST_MESSAGE);
-    expect(mockCma.appActionCall.createWithResponse).not.toHaveBeenCalled();
+  it('shows test connection button when app is installed', async () => {
+    mockSdk.app.isInstalled.mockResolvedValue(true);
+    await renderAndWaitReady();
+    await fillCredentials()();
+
+    expect(screen.getByRole('button', { name: /test marketo connection/i })).toBeInTheDocument();
   });
 
   it('test connection calls app action with credentials and shows success note when response is valid', async () => {
@@ -138,9 +143,7 @@ describe('ConfigScreen', () => {
     await fillCredentials()();
     const testButton = screen.getByRole('button', { name: /test marketo connection/i });
 
-    await act(async () => {
-      await userEvent.click(testButton);
-    });
+    await userEvent.click(testButton);
 
     await waitFor(() => {
       expect(mockCma.appActionCall.createWithResponse).toHaveBeenCalledWith(
@@ -173,9 +176,7 @@ describe('ConfigScreen', () => {
     await fillCredentials()();
     const testButton = screen.getByRole('button', { name: /test marketo connection/i });
 
-    await act(async () => {
-      await userEvent.click(testButton);
-    });
+    await userEvent.click(testButton);
 
     await waitFor(() => {
       expect(screen.getByText(INVALID_CLIENT_RESPONSE)).toBeInTheDocument();
@@ -188,9 +189,7 @@ describe('ConfigScreen', () => {
     await fillCredentials()();
     const testButton = screen.getByRole('button', { name: /test marketo connection/i });
 
-    await act(async () => {
-      await userEvent.click(testButton);
-    });
+    await userEvent.click(testButton);
 
     await waitFor(() => {
       expect(screen.getByText('Network error')).toBeInTheDocument();

@@ -6,12 +6,8 @@
       "description": "Validates Marketo client ID, secret and Munchkin ID via identity endpoint",
       "path": "functions/validateMarketoCredentials.js",
       "entryFile": "functions/validateMarketoCredentials.ts",
-      "allowNetworks": [
-        "https://*.mktorest.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["https://*.mktorest.com"],
+      "accepts": ["appaction.call"]
     },
     {
       "id": "getMarketoFormsFunction",
@@ -19,12 +15,8 @@
       "description": "Function to get Marketo forms from an App Action",
       "path": "functions/getMarketoForms.js",
       "entryFile": "functions/getMarketoForms.js",
-      "allowNetworks": [
-        "https://*.mktorest.com"
-      ],
-      "accepts": [
-        "appaction.call"
-      ]
+      "allowNetworks": ["https://*.mktorest.com"],
+      "accepts": ["appaction.call"]
     }
   ],
   "actions": [
