@@ -5,7 +5,7 @@ import { mockCma, mockSdk } from './mocks';
 import ConfigScreen from '../src/locations/ConfigScreen';
 import {
   CONFIG_SAVE_REQUIRED_FIELDS_MESSAGE,
-  INVALID_CLIENT_RESPONSE,
+  INVALID_CREDENTIALS_RESPONSE,
   TEST_CONNECTION_REQUIRED_FIELDS_MESSAGE,
 } from '../src/const';
 
@@ -165,7 +165,7 @@ describe('ConfigScreen', () => {
       response: {
         body: JSON.stringify({
           valid: false,
-          message: INVALID_CLIENT_RESPONSE,
+          message: INVALID_CREDENTIALS_RESPONSE,
         }),
       },
     });
@@ -176,7 +176,7 @@ describe('ConfigScreen', () => {
     await userEvent.click(testButton);
 
     await waitFor(() => {
-      expect(screen.getByText(INVALID_CLIENT_RESPONSE)).toBeInTheDocument();
+      expect(screen.getByText(INVALID_CREDENTIALS_RESPONSE)).toBeInTheDocument();
     });
   });
 

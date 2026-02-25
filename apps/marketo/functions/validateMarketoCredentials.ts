@@ -4,7 +4,7 @@ import type {
   FunctionTypeEnum,
   AppActionRequest,
 } from '@contentful/node-apps-toolkit';
-import { INVALID_CLIENT_RESPONSE, VALID_CREDENTIALS_RESPONSE } from '../src/const';
+import { INVALID_CREDENTIALS_RESPONSE, VALID_CREDENTIALS_RESPONSE } from '../src/const';
 import type { AppInstallationParameters } from '../src/types';
 import { getMarketoToken } from './getMarketoToken';
 
@@ -36,7 +36,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppActionCall> = asy
     await getMarketoToken(clientId, clientSecret, munchkinId);
     return { valid: true, message: VALID_CREDENTIALS_RESPONSE };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : INVALID_CLIENT_RESPONSE;
+    const errorMessage = error instanceof Error ? error.message : INVALID_CREDENTIALS_RESPONSE;
     return { valid: false, message: errorMessage };
   }
 };

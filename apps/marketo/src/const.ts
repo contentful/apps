@@ -6,8 +6,10 @@ export const CREDENTIAL_VALIDATION: { id: string; message: string }[] = [
 
 export const GET_FORMS_APP_ACTION_ID = 'getMarketoFormsAction';
 
-export const INVALID_CLIENT_RESPONSE =
+export const INVALID_CREDENTIALS_RESPONSE =
   'Marketo authentication failed, check your credentials and try again.';
+
+export const INVALID_MUNCHKIN_RESPONSE = 'Check your Marketo Munchkin ID.';
 
 export const VALID_CREDENTIALS_RESPONSE = 'Your Marketo credentials are valid.';
 

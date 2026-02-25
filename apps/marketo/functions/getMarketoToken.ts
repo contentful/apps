@@ -1,5 +1,5 @@
 import { MarketoAuthenticationError } from './exceptions';
-import { INVALID_CLIENT_RESPONSE } from '../src/const';
+import { INVALID_CREDENTIALS_RESPONSE, INVALID_MUNCHKIN_RESPONSE } from '../src/const';
 
 export type MarketoAuthResponse = {
   access_token: string;
@@ -21,7 +21,7 @@ export async function getMarketoToken(
   const authResponse = await fetch(authUrl);
 
   if (!authResponse.ok) {
-    let message = INVALID_CLIENT_RESPONSE;
+    let message = INVALID_CREDENTIALS_RESPONSE;
 
     try {
       const errorBody = (await authResponse.json()) as {
@@ -34,7 +34,7 @@ export async function getMarketoToken(
       }
     } catch {
       // if the munchkin id is invalid, the response will not be parsed as JSON
-      message = INVALID_CLIENT_RESPONSE;
+      message = INVALID_MUNCHKIN_RESPONSE;
     }
 
     throw new MarketoAuthenticationError(message);
@@ -43,7 +43,7 @@ export async function getMarketoToken(
   const auth = (await authResponse.json()) as MarketoAuthResponse;
 
   if (!auth.access_token) {
-    throw new MarketoAuthenticationError(INVALID_CLIENT_RESPONSE);
+    throw new MarketoAuthenticationError(INVALID_CREDENTIALS_RESPONSE);
   }
 
   return auth;

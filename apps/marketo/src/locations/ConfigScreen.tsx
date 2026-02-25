@@ -26,7 +26,7 @@ import {
   CONFIG_SAVE_REQUIRED_FIELDS_MESSAGE,
   CREDENTIAL_VALIDATION,
   INSTALL_APP_FIRST_MESSAGE,
-  INVALID_CLIENT_RESPONSE,
+  INVALID_CREDENTIALS_RESPONSE,
   TEST_CONNECTION_REQUIRED_FIELDS_MESSAGE,
 } from '../const';
 import { AppInstallationParameters, ConnectionStatus } from '../types';
@@ -77,7 +77,7 @@ const ConfigScreen = () => {
 
         return data;
       } catch (error) {
-        const message = error instanceof Error ? error.message : INVALID_CLIENT_RESPONSE;
+        const message = error instanceof Error ? error.message : INVALID_CREDENTIALS_RESPONSE;
         setConnectionParameters(ConnectionStatus.Error, message);
 
         return { valid: false, message };
