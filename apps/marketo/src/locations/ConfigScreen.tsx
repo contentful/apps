@@ -128,7 +128,11 @@ const ConfigScreen = () => {
         return;
       }
       const data = await callValidateCredentials();
-      data.valid ? sdk.notifier.success(data.message) : sdk.notifier.error(data.message);
+      if (data.valid) {
+        sdk.notifier.success(data.message);
+      } else {
+        sdk.notifier.error(data.message);
+      }
       setIsInstalled(true);
     },
     [sdk, callValidateCredentials]
