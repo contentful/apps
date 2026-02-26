@@ -42,7 +42,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "rimraf": "3.0.2",
-    "storybook": "^7.2.3",
+    "storybook": "^10.2.10",
     "ts-jest": "27.1.5",
     "typedoc": "0.26.6",
     "typedoc-plugin-markdown": "3.17.1",
