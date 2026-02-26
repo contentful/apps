@@ -20,6 +20,7 @@ const Sidebar = () => {
   useAutoResizer();
 
   const space = sdk.ids.space;
+  const environment = sdk.ids.environmentAlias ?? sdk.ids.environment;
   const apiKey = sdk.parameters.installation.contentfulApiKey;
   const entryId = sdk.ids.entry;
   const localization = sdk.locales.available.length > 1 ? `&locale=*` : '';
@@ -28,7 +29,7 @@ const Sidebar = () => {
 
   const link = hasError
     ? ''
-    : `https://cdn.contentful.com/spaces/${space}/environments/master/entries/${sdk.ids.entry}?access_token=${apiKey}${localization}`;
+    : `https://cdn.contentful.com/spaces/${space}/environments/${environment}/entries/${sdk.ids.entry}?access_token=${apiKey}${localization}`;
 
   return (
     <Flex flexDirection="column">
