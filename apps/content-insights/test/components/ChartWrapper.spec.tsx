@@ -109,7 +109,7 @@ describe('ChartWrapper component', () => {
     it('legend shows all linesLegends items', () => {
       render(<ChartWrapper data={mockData} xAxisDataKey="date" legendTitle="Content Types:" />);
 
-      expect(screen.getByText('New Content')).toBeInTheDocument();
+      expect(screen.getByText('New content')).toBeInTheDocument();
     });
 
     it('legend has correct title text', () => {

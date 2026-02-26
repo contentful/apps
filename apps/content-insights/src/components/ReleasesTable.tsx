@@ -28,7 +28,7 @@ export const ReleasesTable = () => {
       },
       {
         id: 'scheduledDate',
-        label: 'Scheduled Date & Time',
+        label: 'Scheduled date & time',
         style: styles.dateCell,
         render: (item) =>
           formatDateTimeWithTimezone(item.scheduledFor.datetime, item.scheduledFor.timezone),
@@ -41,13 +41,13 @@ export const ReleasesTable = () => {
       },
       {
         id: 'updatedAt',
-        label: 'Last Updated',
+        label: 'Last updated',
         style: styles.updatedCell,
         render: (item) => formatDateTimeWithTimezone(item.updatedAt),
       },
       {
         id: 'updatedBy',
-        label: 'Last Updated By',
+        label: 'Last updated by',
         style: styles.userCell,
         render: (item) => formatUserName(item.updatedBy),
       },

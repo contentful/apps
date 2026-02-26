@@ -72,8 +72,8 @@ describe('NeedsUpdateTable component', () => {
 
       expect(screen.getByText('Title')).toBeInTheDocument();
       expect(screen.getByText('Age')).toBeInTheDocument();
-      expect(screen.getByText('Published Date')).toBeInTheDocument();
-      expect(screen.getByText('Content Type')).toBeInTheDocument();
+      expect(screen.getByText('Published date')).toBeInTheDocument();
+      expect(screen.getByText('Content type')).toBeInTheDocument();
       expect(screen.getByText('Creator')).toBeInTheDocument();
     });
 
