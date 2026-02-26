@@ -52,13 +52,13 @@ export const RecentlyPublishedTable = ({
       },
       {
         id: 'publishedDate',
-        label: 'Published Date',
+        label: 'Published date',
         style: styles.publishedDateCell,
         render: (item) => formatDateTimeWithTimezone(item.publishedDate || undefined),
       },
       {
         id: 'contentType',
-        label: 'Content Type',
+        label: 'Content type',
         style: styles.contentTypeCell,
         render: (item) => item.contentType,
       },

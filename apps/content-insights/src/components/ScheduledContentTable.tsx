@@ -64,14 +64,14 @@ export const ScheduledContentTable = ({
       },
       {
         id: 'scheduledDate',
-        label: 'Scheduled Date',
+        label: 'Scheduled date',
         style: styles.scheduledDateCell,
         render: (item) =>
           formatDateTimeWithTimezone(item.scheduledFor.datetime, item.scheduledFor.timezone),
       },
       {
         id: 'publishedDate',
-        label: 'Published Date',
+        label: 'Published date',
         style: styles.publishedDateCell,
         render: (item) => formatDateTimeWithTimezone(item.publishedDate || ''),
       },
@@ -83,7 +83,7 @@ export const ScheduledContentTable = ({
       },
       {
         id: 'contentType',
-        label: 'Content Type',
+        label: 'Content type',
         style: styles.contentTypeCell,
         render: (item) => item.contentType,
       },

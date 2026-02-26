@@ -123,7 +123,7 @@ describe('ChartWrapper component', () => {
         />
       );
 
-      expect(screen.getByText('New Content')).toBeInTheDocument();
+      expect(screen.getByText('New content')).toBeInTheDocument();
     });
 
     it('legend has correct title text', () => {
