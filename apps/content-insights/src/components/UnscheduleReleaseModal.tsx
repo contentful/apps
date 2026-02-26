@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Modal, Button, Flex, Text } from '@contentful/f36-components';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import type { ReleaseWithScheduledAction } from '../utils/fetchReleases';
-import { getEnvironmentId } from '../utils/sdkUtils';
 
 interface CancelReleaseModalProps {
   isShown: boolean;
