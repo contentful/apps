@@ -30,6 +30,8 @@
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "upsert-actions": "contentful-app-scripts upsert-actions --ci --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "build:functions": "contentful-app-scripts build-functions --ci",
+    "lint": "eslint .",
+    "lint:write": "eslint . --fix",
     "deploy:dev": "source .env && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id \"$DEFINITIONS_ORG_ID\" --definition-id gWLhC7MnK2rgcvifgE4do --token \"$CONTENTFUL_CMA_TOKEN\"",
     "upload-ci:dev": "source .env && contentful-app-scripts upload --ci --bundle-dir ./build --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\"",
     "upsert-actions:dev": "source .env && contentful-app-scripts upsert-actions --ci --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\"",

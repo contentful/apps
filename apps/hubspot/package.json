@@ -35,7 +35,9 @@
     "upsert-actions": "contentful-app-scripts upsert-actions --ci --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "build:functions": "contentful-app-scripts build-functions --ci",
     "upsert-actions:dev": "source .env && contentful-app-scripts upsert-actions --ci --organization-id \"$CONTENTFUL_ORG_ID\" --definition-id \"$CONTENTFUL_APP_DEF_ID\" --token \"$CONTENTFUL_ACCESS_TOKEN\"",
-    "upsert-events": "tsx -r dotenv/config src/scripts/createAppEventSubscription.ts"
+    "upsert-events": "tsx -r dotenv/config src/scripts/createAppEventSubscription.ts",
+    "lint": "eslint .",
+    "lint:write": "eslint . --fix"
   },
   "eslintConfig": {
     "extends": "react-app"

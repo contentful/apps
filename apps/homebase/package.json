@@ -28,24 +28,19 @@
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id GKgzLlXl7oRMOmTr9XYQy --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id ${STAGING_APP_ID} --token ${TEST_CMA_TOKEN}",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:write": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
+    "lint": "eslint .",
+    "lint:write": "eslint . --fix"
   },
   "devDependencies": {
     "@contentful/app-scripts": "^2.5.6",
-    "@eslint/js": "^9.37.0",
     "@testing-library/react": "16.3.0",
     "@types/node": "24.7.0",
     "@types/react": "18.3.1",
     "@types/react-dom": "18.3.0",
     "@vitejs/plugin-react": "5.0.4",
-    "eslint": "^9.37.0",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-unused-imports": "^4.2.0",
     "globals": "^16.4.0",
     "jiti": "^2.6.1",
     "typescript": "5.9.3",
-    "typescript-eslint": "^8.46.1",
     "vite": "7.2.2",
     "vitest": "3.2.4"
   }
