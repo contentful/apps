@@ -1,5 +1,4 @@
-import type { BaseAppSDK } from '@contentful/app-sdk';
-import type { Redirect } from '../components/RedirectsTable';
+import type { Redirect } from '../utils/types';
 
 export interface FetchRedirectsResult {
   redirects: Redirect[];
@@ -7,7 +6,7 @@ export interface FetchRedirectsResult {
   fetchedAt: Date;
 }
 
-export const fetchRedirects = async (_sdk: BaseAppSDK): Promise<FetchRedirectsResult> => {
+export const fetchRedirects = async (): Promise<FetchRedirectsResult> => {
   const mockRedirects: Redirect[] = [
     {
       id: 'entry-1',
