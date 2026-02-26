@@ -20,7 +20,7 @@ describe('useInstallationParameters', () => {
   });
 
   describe('Successful parameter fetch', () => {
-    it('should fetch and return fresh parameters from CMA when installation matches space', async () => {
+    it('should fetch and return fresh parameters from CMA when installation matches space and environment', async () => {
       const freshParameters = {
         testParameter: 'fresh-parameter',
       };
@@ -33,6 +33,11 @@ describe('useInstallationParameters', () => {
               id: 'test-space',
               type: 'Link',
               linkType: 'Space',
+            },
+          },
+          environment: {
+            sys: {
+              id: 'test-environment',
             },
           },
         },
@@ -55,7 +60,7 @@ describe('useInstallationParameters', () => {
       });
     });
 
-    it('should return sdk parameters when no installation matches the space', async () => {
+    it('should return sdk parameters when no installation matches the space and environment', async () => {
       const mockInstallation = {
         sys: {
           id: 'installation-1',
@@ -64,6 +69,11 @@ describe('useInstallationParameters', () => {
               id: 'other-space',
               type: 'Link',
               linkType: 'Space',
+            },
+          },
+          environment: {
+            sys: {
+              id: 'test-environment',
             },
           },
         },

@@ -28,7 +28,7 @@ export const useInstallationParameters = (
 
 const fetchParameters = async (sdk: BaseAppSDK): Promise<KeyValueMap> => {
   try {
-    if (!sdk.ids.organization || !sdk.ids.app || !sdk.ids.space) {
+    if (!sdk.ids.organization || !sdk.ids.app || !sdk.ids.space || !sdk.ids.environment) {
       throw new Error('Required SDK IDs not available');
     }
 
@@ -38,7 +38,9 @@ const fetchParameters = async (sdk: BaseAppSDK): Promise<KeyValueMap> => {
     });
 
     const currentInstallation = appInstallation.items.find(
-      (installation: AppInstallationProps) => installation.sys.space.sys.id === sdk.ids.space
+      (installation: AppInstallationProps) =>
+        installation.sys.space.sys.id === sdk.ids.space &&
+        installation.sys.environment.sys.id === sdk.ids.environment
     );
 
     if (currentInstallation?.parameters) {
