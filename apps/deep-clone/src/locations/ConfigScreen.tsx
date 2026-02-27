@@ -15,13 +15,16 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { AppParameters } from '../vite-env';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { styles } from './ConfigScreen.styles';
-import ContentTypeMultiSelect, { ContentType } from '../components/ContentTypeMultiSelect';
+import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
+import ReferenceOnlyMultiSelect from '../components/ReferenceOnlyMultiSelect';
+import { ContentType } from '../types';
 
 function ConfigScreen() {
   const [parameters, setParameters] = useState<AppParameters>({
     cloneText: 'Copy',
     cloneTextBefore: true,
     automaticRedirect: true,
+    referenceOnlyComponents: [],
   });
   const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
   const sdk = useSDK<ConfigAppSDK>();
@@ -60,6 +63,10 @@ function ConfigScreen() {
     sdk.app.onConfigure(onConfigure);
   }, [sdk, onConfigure]);
 
+  const setReferenceOnlyComponents = (referenceOnlyComponents: ContentType[]) => {
+    setParameters({ ...parameters, referenceOnlyComponents: referenceOnlyComponents });
+  };
+
   return (
     <Flex justifyContent="center" alignItems="center">
       <Box marginBottom="spacing2Xl" marginTop="spacing2Xl" className={styles.body}>
@@ -82,6 +89,20 @@ function ConfigScreen() {
         <ContentTypeMultiSelect
           selectedContentTypes={selectedContentTypes}
           setSelectedContentTypes={setSelectedContentTypes}
+          sdk={sdk}
+          cma={sdk.cma}
+        />
+
+        <Subheading marginTop="spacingXl" marginBottom="spacing2Xs">
+          Components can not be cloned
+        </Subheading>
+        <Paragraph marginBottom="spacingM">
+          Checked components will be treated as reference-only and will not be selectable on Select
+          Component Tree while using clone feature.
+        </Paragraph>
+        <ReferenceOnlyMultiSelect
+          selectedContentTypes={parameters.referenceOnlyComponents}
+          setSelectedContentTypes={setReferenceOnlyComponents}
           sdk={sdk}
           cma={sdk.cma}
         />
