@@ -106,6 +106,27 @@ vi.mock('./jiraClient', async () => {
           },
         ],
       });
+    static getMyself = vi.fn(() =>
+      Promise.resolve({ error: false, user: { displayName: 'Test User' } })
+    );
+    static getProjectById = vi.fn(() =>
+      Promise.resolve({
+        error: false,
+        project: {
+          id: '10000',
+          key: 'extensibility',
+          name: 'Project name 2',
+          avatarUrls: {},
+          expand: '',
+          isPrivate: false,
+          projectTypeKey: 'software',
+          properties: {},
+          self: '',
+          simplified: false,
+          style: 'classic',
+        },
+      })
+    );
   };
   return {
     default: jiraClient,
