@@ -13,6 +13,7 @@ import { PreviewModal } from '../modals/step_3/PreviewModal';
 import { LoadingModal } from '../modals/LoadingModal';
 import { ContentTypeProps } from 'contentful-management';
 import { ERROR_MESSAGES } from '../../../../utils/constants/messages';
+import { PreviewEntry } from '../modals/step_3/types';
 
 export interface ModalOrchestratorHandle {
   startFlow: () => void;
@@ -27,7 +28,9 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
   ({ sdk, oauthToken }, ref) => {
     const { modalStates, openModal, closeModal } = useModalManagement();
     const [isCreatingEntries, setIsCreatingEntries] = useState<boolean>(false);
+    const [selectedEntriesCount, setSelectedEntriesCount] = useState<number>(0);
     const [createdEntries, setCreatedEntries] = useState<EntryCreationResult['createdEntries']>([]);
+    const [contentTypeNamesMap, setContentTypeNamesMap] = useState<Record<string, string>>({});
     const {
       documentId,
       setDocumentId,
@@ -120,16 +123,26 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
       await submit(ids);
     };
 
-    const handlePreviewModalConfirm = async (contentTypeIds: string[]) => {
-      if (!previewEntries || previewEntries.length === 0) {
+    const handlePreviewModalConfirm = async (selectedEntries: PreviewEntry[]) => {
+      if (!selectedEntries || selectedEntries.length === 0) {
         sdk.notifier.error('No entries to create');
         return;
       }
 
+      setSelectedEntriesCount(selectedEntries.length);
+
+      // Build a map of contentTypeId -> contentTypeName from selected entries to use in the review modal
+      const namesMap: Record<string, string> = {};
+      selectedEntries.forEach((previewEntry) => {
+        namesMap[previewEntry.entry.contentTypeId] = previewEntry.contentTypeName;
+      });
+      setContentTypeNamesMap(namesMap);
+
       closeModal(ModalType.PREVIEW);
       setIsCreatingEntries(true);
       try {
-        const entries = previewEntries.map((p) => p.entry);
+        const entries = selectedEntries.map((p) => p.entry);
+        const contentTypeIds = selectedEntries.map((entry) => entry.entry.contentTypeId);
         const entryResult: EntryCreationResult = await createEntriesFromPreview(
           sdk,
           entries,
@@ -191,13 +204,9 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
         // Check if there was an error during submission
         if (error) {
           openModal(ModalType.ERROR_PREVIEW);
-        } else if (previewEntries) {
-          console.log('Document processing completed, previewEntries:', previewEntries);
-
+        } else if (previewEntries && previewEntries.length > 0) {
           // Open preview modal if we have entries
-          if (previewEntries.length > 0) {
-            openModal(ModalType.PREVIEW);
-          }
+          openModal(ModalType.PREVIEW);
         }
       }
 
@@ -231,15 +240,14 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           isOpen={isSubmitting}
           step="reviewingContentTypes"
           title="Preparing your preview"
+          contentTypeCount={selectedContentTypes.length}
         />
 
         <PreviewModal
           isOpen={modalStates.isPreviewModalOpen}
           onClose={() => closeModal(ModalType.PREVIEW)}
           previewEntries={previewEntries}
-          onCreateEntries={() =>
-            handlePreviewModalConfirm(selectedContentTypes.map((ct) => ct.sys.id))
-          }
+          onCreateEntries={handlePreviewModalConfirm}
           isLoading={isSubmitting}
           isCreatingEntries={isCreatingEntries}
         />
@@ -248,7 +256,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           isOpen={isCreatingEntries}
           step="creatingEntries"
           title="Create entries"
-          entriesCount={previewEntries?.length}
+          entriesCount={selectedEntriesCount}
         />
 
         <ErrorModal
@@ -263,6 +271,7 @@ export const ModalOrchestrator = forwardRef<ModalOrchestratorHandle, ModalOrches
           isOpen={modalStates.isReviewModalOpen}
           onClose={() => closeModal(ModalType.REVIEW)}
           createdEntries={createdEntries}
+          contentTypeNamesMap={contentTypeNamesMap}
           spaceId={sdk.ids.space}
           defaultLocale={sdk.locales.default}
         />

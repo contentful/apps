@@ -1,5 +1,6 @@
 import { ContentType, PageAppSDK } from '@contentful/app-sdk';
 import { EntryToCreate } from '../../functions/agents/documentParserAgent/schema';
+import { EntryProps } from 'contentful-management';
 
 /**
  * Gets the title of an entry by fetching its content type's display field
@@ -45,4 +46,26 @@ export const getContentType = async ({
   return await sdk.cma.contentType.get({
     contentTypeId,
   });
+};
+
+export const getEntryDisplayName = (entry: EntryProps, defaultLocale: string): string => {
+  // Try to find a 'title' field first
+  if (entry.fields.title) {
+    const titleValue = entry.fields.title[defaultLocale] || Object.values(entry.fields.title)[0];
+    if (titleValue && typeof titleValue === 'string') {
+      return titleValue;
+    }
+  }
+
+  // Fall back to the first text/Symbol field
+  for (const localizedValue of Object.values(entry.fields)) {
+    if (localizedValue && typeof localizedValue === 'object') {
+      const value = localizedValue[defaultLocale] || Object.values(localizedValue)[0];
+      if (value && typeof value === 'string' && value.trim().length > 0) {
+        return value;
+      }
+    }
+  }
+
+  return 'Untitled';
 };
