@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Card, Collapse, Flex, IconButton, TextLink } from '@contentful/f36-components';
-import { CloseIcon } from '@contentful/f36-icons';
+import { XIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import { DragEndEvent, UniqueIdentifier } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -221,7 +221,7 @@ const SortableItem = ({
       {!disabled && (
         <IconButton
           variant="transparent"
-          icon={<CloseIcon variant="muted" />}
+          icon={<XIcon variant="muted" />}
           aria-label="Close"
           onClick={onDelete}
           className={styles.remove}

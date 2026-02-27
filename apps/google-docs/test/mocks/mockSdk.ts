@@ -22,6 +22,16 @@ export const createMockSDK = (
     info: vi.fn(),
   };
 
+  const mockNavigator = {
+    openCurrentAppPage: vi.fn().mockResolvedValue({ navigated: true, path: '' }),
+    openPageExtension: vi.fn().mockResolvedValue({ navigated: true, path: '' }),
+    openEntry: vi.fn(),
+    openAsset: vi.fn(),
+    openNewEntry: vi.fn(),
+    openNewAsset: vi.fn(),
+    openAppConfig: vi.fn(),
+  };
+
   return {
     cma: mockCMA as any,
     ids: {
@@ -32,6 +42,7 @@ export const createMockSDK = (
     },
     app: mockApp as any,
     notifier: mockNotifier as any,
+    navigator: mockNavigator as any,
     ...overrides,
   } as unknown as PageAppSDK | ConfigAppSDK;
 };

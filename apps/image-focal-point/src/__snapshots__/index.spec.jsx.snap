@@ -8,16 +8,16 @@ exports[`App > #render > should render the extension field view 1`] = `
     <input
       aria-describedby="focal-point-validation"
       aria-invalid="true"
-      class="css-x6c9ie css-93644d"
+      class="css-r283cc css-93644d"
       data-test-id="focal-point"
+      disabled=""
       id="focal-point"
       type="text"
       value="Focal point not set"
       width="large"
     />
     <button
-      buttontype="muted"
-      class="css-ndrb9n css-dp0f2t"
+      class="css-127ixdm css-dp0f2t"
       data-test-id="cf-ui-button"
       type="button"
     >
@@ -27,10 +27,10 @@ exports[`App > #render > should render the extension field view 1`] = `
         Set focal point
       </span>
     </button>
-    <a
-      class="css-1wm2dh8"
+    <button
+      class="css-1ulo0xy"
       data-test-id="cf-ui-text-link"
-      linktype="primary"
+      type="button"
     >
       <span
         class="css-x1sij0"
@@ -39,7 +39,7 @@ exports[`App > #render > should render the extension field view 1`] = `
           Reset focal point
         </span>
       </span>
-    </a>
+    </button>
   </div>
 </div>
 `;
