@@ -91,6 +91,7 @@ describe('Field component', () => {
       });
 
       expect(screen.queryByPlaceholderText('Select a form')).not.toBeInTheDocument();
+      expect(screen.getByText(/No Marketo forms found/i)).toBeInTheDocument();
     });
 
     it('should update the field value when a form is selected', async () => {

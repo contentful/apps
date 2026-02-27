@@ -8,7 +8,7 @@ import {
   Note,
 } from '@contentful/f36-components';
 import { FieldAppSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import type { FormObject, MarketoFormsResponse } from '../types';
 import { GET_FORMS_APP_ACTION_ID } from '../const';
 
@@ -24,15 +24,12 @@ const FORM_ERROR_MESSAGE =
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
+  useAutoResizer();
   const [forms, setForms] = useState<FormObject[] | null>(null);
   const [filteredForms, setFilteredForms] = useState<FormObject[]>([]);
   const [selectedForm, setSelectedForm] = useState<FormObject>(EMPTY_FORM);
   const [loadingData, setLoadingStatus] = useState(true);
   const [error, updateError] = useState<ErrorState>({ error: false, message: '' });
-
-  useEffect(() => {
-    sdk.window.startAutoResizer();
-  }, []);
 
   const handleDropdownOpen = () => {
     sdk.window.stopAutoResizer();
@@ -138,6 +135,10 @@ const Field = () => {
 
   if (error.error) {
     return <Note variant="negative">{error.message}</Note>;
+  }
+
+  if (forms && forms.length === 0) {
+    return <Note variant="warning">No Marketo forms found</Note>;
   }
 
   return (

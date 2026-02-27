@@ -287,7 +287,7 @@ const ConfigScreen = () => {
                 .
               </FormControl.HelpText>
               <FormControl.HelpText marginTop="none">
-                For instance, for the url &quot;https://123-ABC-456.mktorest.com/identitity&quot;,
+                For instance, for the url &quot;https://123-ABC-456.mktorest.com/identity&quot;,
                 &quot;064-CCJ-768&quot; would be the Munchkin ID.
               </FormControl.HelpText>
               <TextLink
