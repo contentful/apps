@@ -35,7 +35,7 @@ const TableHeader = <T,>({ columns }: { columns: TableColumn<T>[] }) => {
   );
 };
 
-export function ContentTable<T extends { id: string }>({
+export function ContentTable<T extends { sys: { id: string } }>({
   items,
   total,
   isFetching,
@@ -89,7 +89,7 @@ export function ContentTable<T extends { id: string }>({
           <TableHeader columns={columns} />
           <Table.Body testId={testId}>
             {items.map((item) => (
-              <Table.Row key={item.id}>
+              <Table.Row key={item.sys.id}>
                 {columns.map((column) => (
                   <Table.Cell key={column.id} style={column.style}>
                     {column.render(item)}

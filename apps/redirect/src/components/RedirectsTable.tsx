@@ -8,6 +8,7 @@ import { ContentTable } from './ContentTable';
 import { useRedirects } from '../hooks/useRedirects';
 import { ITEMS_PER_PAGE } from '../utils/consts';
 import { Redirect, TableColumn } from '../utils/types';
+import { EntryProps } from 'contentful-management';
 
 export const RedirectsTable = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -21,11 +22,13 @@ export const RedirectsTable = () => {
       sdk.ids.space
     }/environments/${sdk.ids.environment}/entries/${entryId}`;
 
-  const handleEdit = (item: Redirect) => {
-    console.log(item);
+  const handleEdit = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    // todo: open edit modal
   };
 
-  const columns = useMemo<TableColumn<Redirect>[]>(
+  const defaultLocaleValue = sdk.locales.default || 'en-US';
+
+  const columns = useMemo<TableColumn<EntryProps>[]>(
     () => [
       {
         id: 'source',
@@ -34,12 +37,12 @@ export const RedirectsTable = () => {
         render: (item) => (
           <Flex flexDirection="column" alignItems="start" gap="spacing2Xs">
             <TextLink
-              href={getEntryUrl(sdk, item.source.sys.id)}
+              href={getEntryUrl(sdk, item.fields.redirectFrom[defaultLocaleValue].sys.id)}
               icon={<ArrowSquareOutIcon />}
               alignIcon="end">
-              {item.source.sys.id}
+              {item.fields.redirectFrom[defaultLocaleValue].sys.title ?? 'Untitled'}
             </TextLink>
-            <Text fontColor="gray500">/{item.source.fields?.slug?.value ?? '—'}</Text>
+            <Text fontColor="gray500">/slug</Text>
           </Flex>
         ),
       },
@@ -50,12 +53,12 @@ export const RedirectsTable = () => {
         render: (item) => (
           <Flex flexDirection="column" alignItems="start" gap="spacing2Xs">
             <TextLink
-              href={getEntryUrl(sdk, item.destination.sys.id)}
+              href={getEntryUrl(sdk, item.fields.redirectTo[defaultLocaleValue].sys.id)}
               icon={<ArrowSquareOutIcon />}
               alignIcon="end">
-              {item.destination.sys.id}
+              {item.fields.redirectTo[defaultLocaleValue].sys.title ?? 'Untitled'}
             </TextLink>
-            <Text fontColor="gray500">/{item.destination.fields?.slug?.value ?? '—'}</Text>
+            <Text fontColor="gray500">/slug</Text>
           </Flex>
         ),
       },
@@ -63,34 +66,36 @@ export const RedirectsTable = () => {
         id: 'reason',
         label: 'Reason',
         style: styles.reasonColumn,
-        render: (item) => item.reason,
+        render: (item) => item.fields.reason[defaultLocaleValue] ?? '—',
       },
       {
         id: 'type',
         label: 'Type',
         style: styles.typeColumn,
-        render: (item) => item.type,
+        render: (item) => item.fields.redirectType[defaultLocaleValue] ?? '—',
       },
       {
         id: 'status',
         label: 'Status',
         style: styles.statusColumn,
         render: (item) => (
-          <Badge variant={item.status === 'active' ? 'positive' : 'warning'}>{item.status}</Badge>
+          <Badge variant={item.fields.active[defaultLocaleValue] ? 'positive' : 'warning'}>
+            {item.fields.active[defaultLocaleValue].value ? 'Active' : 'Inactive'}
+          </Badge>
         ),
       },
       {
         id: 'createdAt',
         label: 'Created',
         style: styles.createdColumn,
-        render: (item) => <RelativeDateTime date={new Date(item.createdAt)} />,
+        render: (item) => <RelativeDateTime date={new Date(item.sys.createdAt)} />,
       },
       {
         id: 'actions',
         label: '',
         style: styles.actionsColumn,
         render: (item) => (
-          <TextLink style={styles.linkStyles} onClick={() => handleEdit(item)}>
+          <TextLink style={styles.linkStyles} onClick={handleEdit}>
             Edit
           </TextLink>
         ),
