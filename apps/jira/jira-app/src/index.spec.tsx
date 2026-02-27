@@ -388,7 +388,7 @@ describe('The Jira App Components', () => {
     it('should show an empty list when the resource returns nothing', async () => {
       // overwrite the default mock value to return nothing
       fetchMock.get(
-        'https://api.atlassian.com/ex/jira/cloud-id/rest/api/2/search?jql=issue.property%5BcontentfulLink%5D.records%20%3D%20%22ctf%3Atest-space%3Amaster%3Aundefined%22',
+        'https://api.atlassian.com/ex/jira/cloud-id/rest/api/3/search/jql?jql=issue.property%5BcontentfulLink%5D.records%20%3D%20%22ctf%3Atest-space%3Amaster%3Aundefined%22&fields=summary%2Cpriority%2Cassignee%2Cstatus%2Cissuetype',
         { issues: [] },
         {
           overwriteRoutes: true,
@@ -427,7 +427,7 @@ describe('The Jira App Components', () => {
     it('should show an unauthorized message when given a 403', async () => {
       // overwrite the default mock value to return nothing
       fetchMock.get(
-        'https://api.atlassian.com/ex/jira/cloud-id/rest/api/2/search?jql=issue.property%5BcontentfulLink%5D.records%20%3D%20%22ctf%3Atest-space%3Amaster%3Aundefined%22',
+        'https://api.atlassian.com/ex/jira/cloud-id/rest/api/3/search/jql?jql=issue.property%5BcontentfulLink%5D.records%20%3D%20%22ctf%3Atest-space%3Amaster%3Aundefined%22&fields=summary%2Cpriority%2Cassignee%2Cstatus%2Cissuetype',
         403,
         {
           overwriteRoutes: true,
