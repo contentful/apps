@@ -1,6 +1,6 @@
 import * as React from 'react';
 import tokens from '@contentful/f36-tokens';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { SortableComponent } from './SortableComponent';
 import {
@@ -14,7 +14,7 @@ import {
 
 import { Button, Note, TextLink } from '@contentful/f36-components';
 
-import { AssetIcon } from '@contentful/f36-icons';
+import { FileImageIcon } from '@contentful/f36-icons';
 
 interface Props {
   sdk: FieldAppSDK;
@@ -147,7 +147,7 @@ export default class Field extends React.Component<Props, State> {
         <div className={styles.container}>
           <img src={this.props.logo} alt="Logo" className={styles.logo} />
           <Button
-            startIcon={<AssetIcon />}
+            startIcon={<FileImageIcon />}
             variant="secondary"
             size="small"
             onClick={this.onDialogOpen}

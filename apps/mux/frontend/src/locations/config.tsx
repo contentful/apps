@@ -41,6 +41,8 @@ interface IParameters {
   muxSigningKeyPrivate?: string;
   muxEnableAudioNormalize?: boolean;
   muxDomain?: string;
+  muxEnableDRM?: boolean;
+  muxDRMConfigurationId?: string;
 }
 
 interface IState {
@@ -220,6 +222,8 @@ class Config extends React.Component<ConfigProps, IState> {
         muxSigningKeyId,
         muxEnableAudioNormalize,
         muxDomain,
+        muxEnableDRM,
+        muxDRMConfigurationId,
       },
       contentTypes,
       compatibleFields,
@@ -359,6 +363,62 @@ class Config extends React.Component<ConfigProps, IState> {
                 content in the Contentful UI. You should generate a different key to use in your
                 application server.
               </Paragraph>
+            )}
+          </Form>
+          <hr className="config-splitter" />
+          <Form>
+            <Heading marginBottom="none">Advanced: DRM </Heading>
+            <Box marginTop="spacingM" paddingBottom="spacingM">
+              <Note variant="warning" title="This is an advanced feature">
+                DRM provides the highest level of content protection using industry-standard
+                encryption. To use DRM, you must first request access in your Mux dashboard under
+                Settings → Digital Rights Management. Once approved, you'll receive a DRM
+                Configuration ID.{' '}
+                <TextLink
+                  href="https://www.mux.com/blog/protect-your-video-content-with-drm-now-ga"
+                  rel="noopener noreferrer"
+                  target="_blank">
+                  Learn more about DRM
+                </TextLink>
+                .
+              </Note>
+            </Box>
+            <Checkbox
+              id="mux-enable-drm"
+              helpText=""
+              isDisabled={!this.haveApiCredentials()}
+              name="mux-enable-drm"
+              isChecked={muxEnableDRM}
+              onChange={(e) =>
+                this.setState({
+                  parameters: {
+                    ...this.state.parameters,
+                    muxEnableDRM: (e.target as HTMLInputElement).checked,
+                  },
+                })
+              }>
+              Enable DRM
+            </Checkbox>
+            {muxEnableDRM && (
+              <FormControl id="mux-drm-configuration-id" marginTop="spacingM">
+                <FormControl.Label>DRM Configuration ID</FormControl.Label>
+                <TextInput
+                  name="mux-drm-configuration-id"
+                  value={muxDRMConfigurationId || ''}
+                  onChange={(e) =>
+                    this.setState({
+                      parameters: {
+                        ...this.state.parameters,
+                        muxDRMConfigurationId: (e.target as HTMLTextAreaElement).value,
+                      },
+                    })
+                  }
+                  placeholder="Enter your DRM Configuration ID from Mux dashboard"
+                />
+                <FormControl.HelpText>
+                  This ID is provided by Mux after DRM access is approved.
+                </FormControl.HelpText>
+              </FormControl>
             )}
           </Form>
           <hr className="config-splitter" />

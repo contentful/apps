@@ -150,7 +150,7 @@ export const ContentTypePickerModal = ({
       {() => (
         <>
           <Modal.Header title="Select content type(s)" />
-          <Modal.Content className={css({ paddingBottom: '160px' })}>
+          <Modal.Content className={css({ minHeight: '300px' })}>
             <Paragraph marginBottom="spacingM" color="gray700">
               Select the content type(s) you would like to use with this document.
             </Paragraph>

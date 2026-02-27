@@ -4,7 +4,7 @@ import { Button, TextInput, TextLink } from '@contentful/f36-components';
 
 import { styles } from './styles';
 
-const FocalPointView = ({ focalPoint, showFocalPointDialog, resetFocalPoint }) => {
+const FocalPointView = ({ focalPoint = { x: 0, y: 0 }, showFocalPointDialog, resetFocalPoint }) => {
   const value = focalPoint ? `x: ${focalPoint.x}px / y: ${focalPoint.y}px` : 'Focal point not set';
   return (
     <div className={styles.container}>
@@ -16,12 +16,12 @@ const FocalPointView = ({ focalPoint, showFocalPointDialog, resetFocalPoint }) =
         testId="focal-point"
         value={value}
         isInvalid={!focalPoint}
-        disabled
+        isDisabled
       />
-      <Button className={styles.button} buttonType="muted" onClick={showFocalPointDialog}>
+      <Button className={styles.button} variant="secondary" onClick={showFocalPointDialog}>
         Set focal point
       </Button>
-      <TextLink linkType="primary" onClick={() => resetFocalPoint()}>
+      <TextLink as="button" variant="primary" onClick={() => resetFocalPoint()}>
         Reset focal point
       </TextLink>
     </div>
@@ -35,13 +35,6 @@ FocalPointView.propTypes = {
   }),
   showFocalPointDialog: PropTypes.func.isRequired,
   resetFocalPoint: PropTypes.func.isRequired,
-};
-
-FocalPointView.defaultProps = {
-  focalPoint: {
-    x: 0,
-    y: 0,
-  },
 };
 
 export { FocalPointView };

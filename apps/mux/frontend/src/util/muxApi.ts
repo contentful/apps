@@ -5,7 +5,11 @@ import { InstallationParams, ResolutionType, AddByURLConfig } from './types';
 
 export interface AssetSettings {
   passthrough?: string;
-  playback_policies: string[];
+  playback_policies?: string[];
+  advanced_playback_policies?: Array<{
+    policy: string;
+    drm_configuration_id?: string;
+  }>;
   video_quality: string;
   meta?: {
     title?: string;
@@ -40,12 +44,24 @@ interface AssetInput {
   name?: string;
 }
 
-function buildAssetSettings(options: ModalData): AssetSettings {
+function buildAssetSettings(options: ModalData, drmConfigurationId?: string): AssetSettings {
+  const selectedPolicy = options.playbackPolicies[0];
+  const hasDRM = selectedPolicy === 'drm';
   const settings: AssetSettings = {
-    playback_policies: options.playbackPolicies,
     video_quality: options.videoQuality,
     inputs: [],
   };
+
+  if (hasDRM && drmConfigurationId) {
+    settings.advanced_playback_policies = [
+      {
+        policy: 'drm',
+        drm_configuration_id: drmConfigurationId,
+      },
+    ];
+  } else if (!hasDRM) {
+    settings.playback_policies = [selectedPolicy];
+  }
 
   // Metadata case
   if (options.metadataConfig.standardMetadata) {
@@ -107,7 +123,15 @@ export async function addByURL({
   setAssetError,
   pollForAssetDetails,
 }: AddByURLConfig) {
-  const settings = buildAssetSettings(options);
+  const { muxDRMConfigurationId } = sdk.parameters.installation as InstallationParams;
+
+  // Validate DRM configuration if DRM is selected
+  if (options.playbackPolicies.includes('drm') && !muxDRMConfigurationId) {
+    setAssetError('DRM is selected but DRM Configuration ID is not set in app configuration.');
+    return;
+  }
+
+  const settings = buildAssetSettings(options, muxDRMConfigurationId);
 
   const requestBody = {
     ...settings,
@@ -162,15 +186,26 @@ export async function getUploadUrl(
   options: ModalData,
   responseCheck: (res: Response) => boolean | Promise<boolean>
 ) {
-  const { muxEnableAudioNormalize } = sdk.parameters.installation as InstallationParams;
-  const settings = buildAssetSettings(options);
+  const { muxEnableAudioNormalize, muxDRMConfigurationId } = sdk.parameters
+    .installation as InstallationParams;
+
+  // Validate DRM configuration if DRM is selected
+  if (options.playbackPolicies.includes('drm') && !muxDRMConfigurationId) {
+    const errorMsg = 'DRM is selected but DRM Configuration ID is not set in app configuration.';
+    sdk.notifier.error(errorMsg);
+    return;
+  }
+
+  const settings = buildAssetSettings(options, muxDRMConfigurationId);
+
+  const newAssetSettings = {
+    ...settings,
+    normalize_audio: muxEnableAudioNormalize || false,
+  };
 
   const requestBody = {
     cors_origin: window.location.origin,
-    new_asset_settings: {
-      ...settings,
-      normalize_audio: muxEnableAudioNormalize || false,
-    },
+    new_asset_settings: newAssetSettings,
   };
 
   const res = await apiClient.post('/video/v1/uploads', JSON.stringify(requestBody));
