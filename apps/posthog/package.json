@@ -1,0 +1,43 @@
+{
+  "name": "posthog",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@contentful/app-sdk": "4.25.0",
+    "@contentful/f36-components": "4.65.4",
+    "@contentful/f36-tokens": "4.0.2",
+    "@contentful/react-apps-toolkit": "1.2.16",
+    "contentful-management": "11.48.3",
+    "emotion": "^10.0.27",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "tsc && vite build --outDir build && npm run build:functions",
+    "test": "vitest",
+    "test:ci": "vitest run",
+    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "upload": "contentful-app-scripts upload --bundle-dir ./build",
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
+    "upsert-actions": "contentful-app-scripts upsert-actions --ci --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
+    "build:functions": "contentful-app-scripts build-functions --ci"
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "^2.3.0",
+    "@contentful/node-apps-toolkit": "^3.11.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "16.2.0",
+    "@tsconfig/recommended": "^1.0.8",
+    "@types/node": "22.13.13",
+    "@types/react": "18.3.1",
+    "@types/react-dom": "18.3.0",
+    "@vitejs/plugin-react": "4.3.4",
+    "happy-dom": "^20.0.2",
+    "jsdom": "^26.0.0",
+    "typescript": "5.1.6",
+    "vite": "6.4.1",
+    "vitest": "3.0.9"
+  }
+}
