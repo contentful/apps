@@ -110,7 +110,7 @@ export class MetricsCalculator {
     const avg = count === 0 ? undefined : sumDays / count;
 
     return {
-      title: 'Average Time to Publish',
+      title: 'Average time from draft to first publish',
       value: avg === undefined ? '—' : `${avg.toFixed(1)} days`,
       subtitle:
         count === 0
