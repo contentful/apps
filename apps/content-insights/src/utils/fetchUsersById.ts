@@ -8,7 +8,7 @@ export async function fetchUsersById(sdk: BaseAppSDK, userIds: string[]): Promis
 
   const uniqueIds = Array.from(new Set(userIds));
 
-  const users = await Promise.all(
+  const results = await Promise.allSettled(
     uniqueIds.map((id) =>
       sdk.cma.user.getForSpace({
         spaceId: sdk.ids.space,
@@ -17,5 +17,27 @@ export async function fetchUsersById(sdk: BaseAppSDK, userIds: string[]): Promis
     )
   );
 
-  return users;
+  const successfulUsers: UserProps[] = [];
+  const errors: unknown[] = [];
+
+  results.forEach((result) => {
+    if (result.status === 'fulfilled') {
+      successfulUsers.push(result.value);
+    } else {
+      errors.push(result.reason);
+    }
+  });
+
+  if (successfulUsers.length === 0 && errors.length > 0) {
+    const firstError = errors[0] as { message?: string } | undefined;
+    const errorMessage =
+      firstError && firstError.message ? firstError.message : 'Error fetching users';
+    throw new Error(errorMessage);
+  }
+
+  if (errors.length > 0) {
+    console.error('Some users failed to fetch:', errors);
+  }
+
+  return successfulUsers;
 }

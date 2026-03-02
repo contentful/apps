@@ -78,6 +78,7 @@ export const RecentlyPublishedTable = ({
       currentPage={currentPage}
       onPageChange={setCurrentPage}
       testId="recently-published-table"
+      errorMessage="Failed to load recently published content"
       skeletonColumnCount={5}
     />
   );

@@ -103,6 +103,7 @@ export const ScheduledContentTable = ({
       currentPage={currentPage}
       onPageChange={setCurrentPage}
       testId="scheduled-content-table"
+      errorMessage="Failed to load scheduled content"
       skeletonColumnCount={5}
     />
   );

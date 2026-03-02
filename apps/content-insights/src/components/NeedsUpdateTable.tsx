@@ -71,7 +71,7 @@ export const NeedsUpdateTable = ({
       currentPage={currentPage}
       onPageChange={setCurrentPage}
       testId="needs-update-table"
-      errorMessage="Failed to load content that needs update"
+      errorMessage="Failed to load content that needs updating"
       skeletonColumnCount={5}
     />
   );
