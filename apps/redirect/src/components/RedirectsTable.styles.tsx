@@ -25,4 +25,10 @@ export const redirectsTableStyles = {
     color: tokens.colorBlack,
     textDecoration: 'none',
   },
+  select: {
+    minWidth: '150px',
+  },
+  filtersRow: {
+    width: '100%',
+  },
 };
