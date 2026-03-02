@@ -111,13 +111,10 @@ export const RedirectsTable = () => {
 
   return (
     <>
-      <Flex
-        justifyContent="space-between"
-        alignItems="flex-end"
-        marginBottom="spacingM"
-        gap="spacingS">
+      <Flex style={styles.filtersRow} alignItems="flex-end" marginBottom="spacingM" gap="spacingS">
         <Select
           value={typeFilter}
+          style={styles.select}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
             setCurrentPage(0);
             setTypeFilter(e.target.value);
@@ -128,6 +125,7 @@ export const RedirectsTable = () => {
         </Select>
         <Select
           value={statusFilter}
+          style={styles.select}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
             const value = e.target.value as '' | 'active' | 'inactive';
             setCurrentPage(0);

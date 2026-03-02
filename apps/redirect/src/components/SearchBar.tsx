@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Flex, Text, TextInput } from '@contentful/f36-components';
+import React, { useState, useEffect, useRef, CSSProperties } from 'react';
+import { Flex, TextInput } from '@contentful/f36-components';
 import { MagnifyingGlassIcon } from '@contentful/f36-icons';
 import { useDebounce } from 'use-debounce';
 import { styles } from './SearchBar.styles';
