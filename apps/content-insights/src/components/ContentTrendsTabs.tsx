@@ -151,6 +151,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
                   <ChartWrapper
                     data={newEntries}
                     xAxisDataKey="date"
+                    chartLines={['New Content']}
                     legendTitle="Content:"
                     inNewEntriesTab
                   />
@@ -178,6 +179,8 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
                   <ChartWrapper
                     data={contentTypeData.data}
                     xAxisDataKey="date"
+                    chartLines={Array.from(contentTypeData.processedContentTypes.keys())}
+                    chartLinesLabels={Array.from(contentTypeData.processedContentTypes.values())}
                     processedContentTypes={contentTypeData.processedContentTypes}
                     legendTitle="Content Types:"
                   />
@@ -227,6 +230,7 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
                 ) : (
                   <ChartWrapper
                     data={visibleCreatorData.data}
+                    chartLines={visibleCreatorData.creators}
                     xAxisDataKey="date"
                     legendTitle="Creators:"
                   />
