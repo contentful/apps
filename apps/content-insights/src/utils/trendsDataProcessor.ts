@@ -319,7 +319,7 @@ function buildNewEntriesDataPoint(
 ): ChartDataPoint {
   const dataPoint: ChartDataPoint = {
     date: formatMonthYearDisplay(monthYear),
-    'New content': currentMetrics.newContent,
+    'New Content': currentMetrics.newContent,
   };
 
   if (currentMetrics.avgTimeToPublish !== undefined) {

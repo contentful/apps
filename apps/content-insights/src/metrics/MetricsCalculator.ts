@@ -80,7 +80,7 @@ export class MetricsCalculator {
     const { text, isNegative } = this.calculatePublishingChangeText(current, previous);
 
     return {
-      title: 'Total published',
+      title: 'Total Published',
       value: String(current),
       subtitle: text,
       isNegative,
@@ -110,7 +110,7 @@ export class MetricsCalculator {
     const avg = count === 0 ? undefined : sumDays / count;
 
     return {
-      title: 'Average time to publish',
+      title: 'Average Time to Publish',
       value: avg === undefined ? '—' : `${avg.toFixed(1)} days`,
       subtitle:
         count === 0
@@ -153,7 +153,7 @@ export class MetricsCalculator {
     }
 
     return {
-      title: 'Recently published',
+      title: 'Recently Published',
       value: String(count),
       subtitle: `In the last ${this.recentlyPublishedDays} days`,
       isNegative: false,
@@ -173,7 +173,7 @@ export class MetricsCalculator {
     }
 
     return {
-      title: 'Needs update',
+      title: 'Needs Update',
       value: String(count),
       subtitle: `Content older than ${this.needsUpdateMonths} months`,
       isNegative: false,

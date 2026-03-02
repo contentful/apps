@@ -129,9 +129,9 @@ export const ContentTrendsTabs: React.FC<ContentTrendsTabsProps> = ({
     <Box data-testid="content-trends-tabs">
       <Tabs defaultTab={selectedTab} onTabChange={handleTabChange}>
         <Tabs.List variant="horizontal-divider">
-          <Tabs.Tab panelId="newEntries">New entries</Tabs.Tab>
-          <Tabs.Tab panelId="byContentType">By content type</Tabs.Tab>
-          <Tabs.Tab panelId="byCreator">By creator</Tabs.Tab>
+          <Tabs.Tab panelId="newEntries">New Entries</Tabs.Tab>
+          <Tabs.Tab panelId="byContentType">By Content Type</Tabs.Tab>
+          <Tabs.Tab panelId="byCreator">By Creator</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel id="newEntries">

@@ -82,7 +82,7 @@ const createWrapper = () => {
   return TestWrapper;
 };
 
-describe('ScheduledContentTable component', () => {
+describe('ContentTrendsTabs component', () => {
   const mockEntries: EntryProps[] = [
     createMockEntry({ id: 'entry-1', contentTypeId: 'blogPost', createdById: 'user-1' }),
     createMockEntry({ id: 'entry-2', contentTypeId: 'article', createdById: 'user-2' }),
@@ -90,8 +90,8 @@ describe('ScheduledContentTable component', () => {
   ];
 
   const mockNewEntriesData = [
-    { date: 'Jan 2024', 'New content': 5 },
-    { date: 'Feb 2024', 'New content': 8 },
+    { date: 'Jan 2024', 'New Content': 5 },
+    { date: 'Feb 2024', 'New Content': 8 },
   ];
 
   const mockContentTypeData = {
@@ -193,9 +193,9 @@ describe('ScheduledContentTable component', () => {
         { wrapper: createWrapper() }
       );
 
-      expect(screen.getByText('New entries')).toBeInTheDocument();
-      expect(screen.getByText('By content type')).toBeInTheDocument();
-      expect(screen.getByText('By creator')).toBeInTheDocument();
+      expect(screen.getByText('New Entries')).toBeInTheDocument();
+      expect(screen.getByText('By Content Type')).toBeInTheDocument();
+      expect(screen.getByText('By Creator')).toBeInTheDocument();
     });
 
     it('default tab is "newEntries"', async () => {
@@ -212,7 +212,7 @@ describe('ScheduledContentTable component', () => {
       );
 
       expect(screen.getByText('Content:')).toBeInTheDocument();
-      expect(screen.getByText('New content')).toBeInTheDocument();
+      expect(screen.getByText('New Content')).toBeInTheDocument();
     });
   });
 
@@ -238,7 +238,7 @@ describe('ScheduledContentTable component', () => {
         );
       });
       expect(screen.getByText('Content:')).toBeInTheDocument();
-      expect(screen.getByText('New content')).toBeInTheDocument();
+      expect(screen.getByText('New Content')).toBeInTheDocument();
     });
 
     it('calls generateNewEntriesChartData with filteredEntries and timeRange', async () => {
@@ -283,7 +283,7 @@ describe('ScheduledContentTable component', () => {
         { wrapper: createWrapper() }
       );
 
-      const contentTypeTab = screen.getByText('By content type');
+      const contentTypeTab = screen.getByText('By Content Type');
       await user.click(contentTypeTab);
 
       expect(screen.getByText('Loading…')).toBeInTheDocument();
@@ -308,7 +308,7 @@ describe('ScheduledContentTable component', () => {
         { wrapper: createWrapper() }
       );
 
-      const contentTypeTab = screen.getByText('By content type');
+      const contentTypeTab = screen.getByText('By Content Type');
       await user.click(contentTypeTab);
 
       await waitFor(() => {
@@ -333,7 +333,7 @@ describe('ScheduledContentTable component', () => {
         { wrapper: createWrapper() }
       );
 
-      const contentTypeTab = screen.getByText('By content type');
+      const contentTypeTab = screen.getByText('By Content Type');
       await user.click(contentTypeTab);
 
       await waitFor(() => {
@@ -362,7 +362,7 @@ describe('ScheduledContentTable component', () => {
         { wrapper: createWrapper() }
       );
 
-      const contentTypeTab = screen.getByText('By content type');
+      const contentTypeTab = screen.getByText('By Content Type');
       await user.click(contentTypeTab);
 
       await waitFor(() => {
@@ -390,7 +390,7 @@ describe('ScheduledContentTable component', () => {
         { wrapper: createWrapper() }
       );
 
-      const creatorTab = screen.getByText('By creator');
+      const creatorTab = screen.getByText('By Creator');
       await user.click(creatorTab);
 
       await waitFor(() => {
@@ -413,7 +413,7 @@ describe('ScheduledContentTable component', () => {
         { wrapper: createWrapper() }
       );
 
-      const creatorTab = screen.getByText('By creator');
+      const creatorTab = screen.getByText('By Creator');
       await user.click(creatorTab);
 
       await waitFor(() => {
@@ -442,7 +442,7 @@ describe('ScheduledContentTable component', () => {
         { wrapper: createWrapper() }
       );
 
-      const creatorTab = screen.getByText('By creator');
+      const creatorTab = screen.getByText('By Creator');
       await user.click(creatorTab);
 
       expect(screen.getByText('Loading…')).toBeInTheDocument();
@@ -468,7 +468,7 @@ describe('ScheduledContentTable component', () => {
         { wrapper: createWrapper() }
       );
 
-      const creatorTab = screen.getByText('By creator');
+      const creatorTab = screen.getByText('By Creator');
       await user.click(creatorTab);
 
       await waitFor(() => {
@@ -495,7 +495,7 @@ describe('ScheduledContentTable component', () => {
         { wrapper: createWrapper() }
       );
 
-      const creatorTab = screen.getByText('By creator');
+      const creatorTab = screen.getByText('By Creator');
       await user.click(creatorTab);
 
       await waitFor(() => {
@@ -528,14 +528,14 @@ describe('ScheduledContentTable component', () => {
       expect(screen.getByText('Content types')).toBeInTheDocument();
 
       const user = userEvent.setup();
-      const contentTypeTab = screen.getByText('By content type');
+      const contentTypeTab = screen.getByText('By Content Type');
       await user.click(contentTypeTab);
 
       await waitFor(() => {
         expect(screen.getByText('Content types')).toBeInTheDocument();
       });
 
-      const creatorTab = screen.getByText('By creator');
+      const creatorTab = screen.getByText('By Creator');
       await user.click(creatorTab);
 
       await waitFor(() => {
