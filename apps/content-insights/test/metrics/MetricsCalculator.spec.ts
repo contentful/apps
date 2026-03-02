@@ -27,7 +27,9 @@ describe('MetricsCalculator', () => {
       const metrics = calculator.getAllMetrics();
       const needsUpdateMetric = metrics.find((m) => m.title === 'Needs update');
       const recentlyPublishedMetric = metrics.find((m) => m.title === 'Recently published');
-      const avgTimeMetric = metrics.find((m) => m.title === 'Average time to publish');
+      const avgTimeMetric = metrics.find(
+        (m) => m.title === 'Average time from draft to first publish'
+      );
 
       expect(needsUpdateMetric?.subtitle).toContain(`${NEEDS_UPDATE_MONTHS_RANGE.min} months`);
       expect(recentlyPublishedMetric?.subtitle).toContain(
@@ -45,7 +47,9 @@ describe('MetricsCalculator', () => {
       const metrics = calculator.getAllMetrics();
       const needsUpdateMetric = metrics.find((m) => m.title === 'Needs update');
       const recentlyPublishedMetric = metrics.find((m) => m.title === 'Recently published');
-      const avgTimeMetric = metrics.find((m) => m.title === 'Average time to publish');
+      const avgTimeMetric = metrics.find(
+        (m) => m.title === 'Average time from draft to first publish'
+      );
 
       expect(needsUpdateMetric?.subtitle).toContain('12 months');
       expect(recentlyPublishedMetric?.subtitle).toContain('14 days');
@@ -121,7 +125,9 @@ describe('MetricsCalculator', () => {
       const calculator = new MetricsCalculator(entries, [], {
         timeToPublishDays: 30,
       });
-      const metric = calculator.getAllMetrics().find((m) => m.title === 'Average time to publish');
+      const metric = calculator
+        .getAllMetrics()
+        .find((m) => m.title === 'Average time from draft to first publish');
 
       expect(metric?.value).toBe('7.5 days');
     });
@@ -139,7 +145,9 @@ describe('MetricsCalculator', () => {
       const calculator = new MetricsCalculator(entries, [], {
         timeToPublishDays: 30,
       });
-      const metric = calculator.getAllMetrics().find((m) => m.title === 'Average time to publish');
+      const metric = calculator
+        .getAllMetrics()
+        .find((m) => m.title === 'Average time from draft to first publish');
 
       expect(metric?.value).toBe('—');
       expect(metric?.subtitle).toContain('No entries published');

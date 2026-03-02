@@ -78,7 +78,7 @@ describe('ChartWrapper component', () => {
         <ChartWrapper
           data={mockData}
           xAxisDataKey="date"
-          chartLines={['New Content']}
+          chartLines={['New content']}
           height={500}
           legendTitle="Content:"
         />
@@ -118,7 +118,7 @@ describe('ChartWrapper component', () => {
         <ChartWrapper
           data={mockData}
           xAxisDataKey="date"
-          chartLines={['New Content']}
+          chartLines={['New content']}
           legendTitle="Content Types:"
         />
       );
@@ -131,7 +131,7 @@ describe('ChartWrapper component', () => {
         <ChartWrapper
           data={mockData}
           xAxisDataKey="date"
-          chartLines={['New Content']}
+          chartLines={['New content']}
           legendTitle="Content Types:"
         />
       );
@@ -146,7 +146,7 @@ describe('ChartWrapper component', () => {
         <ChartWrapper
           data={[]}
           xAxisDataKey="date"
-          chartLines={['New Content']}
+          chartLines={['New content']}
           legendTitle="Content:"
         />
       );
@@ -161,7 +161,7 @@ describe('ChartWrapper component', () => {
         <ChartWrapper
           data={mockData}
           xAxisDataKey="date"
-          chartLines={['New Content']}
+          chartLines={['New content']}
           legendTitle="Content:"
         />
       );

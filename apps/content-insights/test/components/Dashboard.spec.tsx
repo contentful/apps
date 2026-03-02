@@ -116,7 +116,7 @@ describe('Dashboard component', () => {
     await renderWithAct(<Dashboard />, { wrapper: createWrapper() });
 
     expect(screen.getByText('Total published')).toBeInTheDocument();
-    expect(screen.getByText('Average time to publish')).toBeInTheDocument();
+    expect(screen.getByText('Average time from draft to first publish')).toBeInTheDocument();
   });
 
   it('calls refetchEntries, refetchScheduledActions, and refetchContentTypes when refresh button is clicked', async () => {
