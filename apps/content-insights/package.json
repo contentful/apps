@@ -48,7 +48,6 @@
     "@vitejs/plugin-react": "5.1.1",
     "dotenv": "^17.2.2",
     "globals": "^16.4.0",
-    "jiti": "^2.6.1",
     "tsx": "^4.8.1",
     "typescript": "5.1.6",
     "vite": "^7.2.6",
