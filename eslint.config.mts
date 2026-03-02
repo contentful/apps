@@ -6,7 +6,7 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 import unusedImports from 'eslint-plugin-unused-imports';
 
 export default defineConfig([
-  globalIgnores(['**/build/']),
+  globalIgnores(['**/build/', '**/dist/']),
   {
     settings: {
       react: {

@@ -54,7 +54,7 @@ class EntryCloner {
     let entry;
     try {
       entry = await this.cma.entry.get({ entryId: entryId });
-    } catch (_error) {
+    } catch {
       // Deleted entries are not found
     }
 

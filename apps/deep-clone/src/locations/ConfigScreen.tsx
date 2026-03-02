@@ -110,7 +110,7 @@ function ConfigScreen() {
 
         <FormControl isInvalid={!parameters.cloneTextBefore}>
           <FormControl.Label className={styles.textInputLabel} marginBottom="spacingM">
-            Display "clone text" before or after the cloned entry's name?
+            Display &quot;clone text&quot; before or after the cloned entry&apos;s name?
           </FormControl.Label>
 
           <Stack flexDirection="column" alignItems="start" spacing="spacingXs">
