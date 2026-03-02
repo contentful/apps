@@ -10,6 +10,7 @@ import { EntryStatus, ScheduledContentItem } from '../utils/types';
 import { useScheduledContent } from '../hooks/useScheduledContent';
 import { EntryProps, ScheduledActionProps, ContentTypeProps } from 'contentful-management';
 import { ContentTable, TableColumn } from './ContentTable';
+import { getEnvironmentId } from '../utils/sdkUtils';
 
 enum BadgeVariant {
   Primary = 'primary',
@@ -53,7 +54,10 @@ export const ScheduledContentTable = ({
         label: 'Title',
         style: styles.titleCell,
         render: (item) => (
-          <EntryLink entryId={item.id} spaceId={sdk.ids.space}>
+          <EntryLink
+            entryId={item.id}
+            spaceId={sdk.ids.space}
+            environmentId={getEnvironmentId(sdk)}>
             {item.title}
           </EntryLink>
         ),
