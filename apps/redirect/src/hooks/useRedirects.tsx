@@ -20,22 +20,33 @@ export interface UseRedirectsResult {
 
 export function useRedirects(
   page: number = 0,
-  itemsPerPage: number = ITEMS_PER_PAGE
+  itemsPerPage: number = ITEMS_PER_PAGE,
+  searchQuery: string = '',
+  typeFilter: string = '',
+  statusFilter: '' | 'active' | 'inactive' = ''
 ): UseRedirectsResult {
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const skip = page * itemsPerPage;
 
   const { data, isFetching, error, refetch } = useQuery<FetchRedirectsResult, Error>({
-    queryKey: ['redirects', sdk.ids.space, getEnvironmentId(sdk)],
-    queryFn: () => fetchRedirects(sdk),
-    select: (data: FetchRedirectsResult) => {
-      const paginatedRedirects = data.redirects.slice(skip, skip + itemsPerPage);
-      return {
-        redirects: paginatedRedirects,
-        total: data.total,
-        fetchedAt: data.fetchedAt,
-      };
-    },
+    queryKey: [
+      'redirects',
+      sdk.ids.space,
+      getEnvironmentId(sdk),
+      itemsPerPage,
+      skip,
+      searchQuery,
+      typeFilter,
+      statusFilter,
+    ],
+    queryFn: () =>
+      fetchRedirects(sdk, {
+        searchQuery,
+        typeFilter,
+        statusFilter,
+        limit: itemsPerPage,
+        skip,
+      }),
   });
 
   return {

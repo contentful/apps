@@ -1,4 +1,4 @@
-import { EntryProps } from 'contentful-management';
+import { EntryProps, QueryOptions } from 'contentful-management';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { REDIRECT_CONTENT_TYPE_ID } from './consts';
 
@@ -8,19 +8,45 @@ export interface FetchRedirectsResult {
   fetchedAt: Date;
 }
 
+export interface FetchRedirectsParams {
+  searchQuery?: string;
+  typeFilter?: string;
+  statusFilter?: '' | 'active' | 'inactive';
+  limit?: number;
+  skip?: number;
+}
+
 export const fetchRedirects = async (
-  sdk: HomeAppSDK | PageAppSDK
+  sdk: HomeAppSDK | PageAppSDK,
+  { searchQuery = '', typeFilter = '', statusFilter = '', limit, skip }: FetchRedirectsParams = {}
 ): Promise<FetchRedirectsResult> => {
   try {
-    const response = await sdk.cma.entry.getMany({
-      query: {
-        limit: 100,
-        skip: 0,
-        content_type: REDIRECT_CONTENT_TYPE_ID,
-      },
-    });
-
     const defaultLocaleValue = sdk.locales.default || 'en-US';
+
+    const query: QueryOptions & Record<string, unknown> = {
+      limit,
+      skip,
+      content_type: REDIRECT_CONTENT_TYPE_ID,
+      locale: defaultLocaleValue,
+    };
+
+    const trimmedQuery = searchQuery.trim();
+    if (trimmedQuery) {
+      query.query = trimmedQuery;
+    }
+
+    if (typeFilter) {
+      query['fields.redirectType'] = typeFilter;
+    }
+
+    if (statusFilter === 'active' || statusFilter === 'inactive') {
+      const isActive = statusFilter === 'active';
+      query['fields.active'] = isActive;
+    }
+
+    const response = await sdk.cma.entry.getMany({
+      query,
+    });
 
     const redirects = await Promise.all(
       response.items.map(async (item) => {
