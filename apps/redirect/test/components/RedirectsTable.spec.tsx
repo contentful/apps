@@ -41,4 +41,31 @@ describe('RedirectsTable component', () => {
 
     expect((mockSdk as any).navigator.openEntry).toHaveBeenCalledWith('to-test-id-0');
   });
+
+  it('renders type and status filters and search input', () => {
+    render(<RedirectsTable />);
+
+    expect(screen.getByText('Filter by type')).toBeInTheDocument();
+    expect(screen.getByText('Filter by status')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Search by title, slug or reason')).toBeInTheDocument();
+  });
+
+  it('updates type filter select value when changed', () => {
+    render(<RedirectsTable />);
+
+    const typeSelect = screen.getByDisplayValue('Filter by type');
+
+    fireEvent.change(typeSelect, { target: { value: 'Permanent (301)' } });
+
+    expect(screen.getByDisplayValue('Permanent (301)')).toBeInTheDocument();
+  });
+
+  it('updates status filter select value when changed', () => {
+    render(<RedirectsTable />);
+    const statusSelect = screen.getByDisplayValue('Filter by status');
+
+    fireEvent.change(statusSelect, { target: { value: 'active' } });
+
+    expect(screen.getByDisplayValue('Active')).toBeInTheDocument();
+  });
 });
