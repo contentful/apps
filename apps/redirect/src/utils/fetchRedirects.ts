@@ -24,8 +24,8 @@ export const fetchRedirects = async (
     const defaultLocaleValue = sdk.locales.default || 'en-US';
 
     const query: QueryOptions & Record<string, unknown> = {
-      limit,
-      skip,
+      limit: limit ?? 100,
+      skip: skip ?? 0,
       content_type: REDIRECT_CONTENT_TYPE_ID,
       locale: defaultLocaleValue,
     };

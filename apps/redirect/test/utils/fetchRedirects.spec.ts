@@ -27,6 +27,7 @@ describe('fetchRedirects', () => {
         limit: 100,
         skip: 0,
         content_type: REDIRECT_CONTENT_TYPE_ID,
+        locale: 'en-US',
       },
     });
   });
@@ -70,5 +71,61 @@ describe('fetchRedirects', () => {
     expect(result.redirects).toEqual([]);
     expect(result.total).toBe(0);
     expect(result.fetchedAt).toBeInstanceOf(Date);
+  });
+
+  it('builds CMA query with search, type filter and active status', async () => {
+    mockCma.entry.getMany.mockResolvedValue({
+      items: [],
+      total: 0,
+      limit: 5,
+      skip: 10,
+      sys: { type: 'Array' },
+    });
+
+    await fetchRedirects(mockSdk, {
+      searchQuery: 'homepage',
+      typeFilter: 'Permanent (301)',
+      statusFilter: 'active',
+      limit: 5,
+      skip: 10,
+    });
+
+    expect(mockCma.entry.getMany).toHaveBeenCalledWith({
+      query: {
+        limit: 5,
+        skip: 10,
+        content_type: REDIRECT_CONTENT_TYPE_ID,
+        locale: 'en-US',
+        query: 'homepage',
+        'fields.redirectType': 'Permanent (301)',
+        'fields.active': true,
+      },
+    });
+  });
+
+  it('builds CMA query with inactive status filter', async () => {
+    mockCma.entry.getMany.mockResolvedValue({
+      items: [],
+      total: 0,
+      limit: 10,
+      skip: 0,
+      sys: { type: 'Array' },
+    });
+
+    await fetchRedirects(mockSdk, {
+      statusFilter: 'inactive',
+      limit: 10,
+      skip: 0,
+    });
+
+    expect(mockCma.entry.getMany).toHaveBeenCalledWith({
+      query: {
+        limit: 10,
+        skip: 0,
+        content_type: REDIRECT_CONTENT_TYPE_ID,
+        locale: 'en-US',
+        'fields.active': false,
+      },
+    });
   });
 });
