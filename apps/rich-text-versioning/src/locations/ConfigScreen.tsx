@@ -134,8 +134,8 @@ const ConfigScreen = () => {
             </Heading>
             <Paragraph marginBottom="spacingL">
               Select the content type(s) you want to use with Rich Text Versioning. You can change
-              this anytime by clicking 'Edit' on the rich text field type and adjust the Appearance
-              settings in your content type.
+              this anytime by clicking &apos;Edit&apos; on the rich text field type and adjust the
+              Appearance settings in your content type.
             </Paragraph>
             <FormControl id="richTextFields">
               <FormControl.Label>Rich text fields</FormControl.Label>
