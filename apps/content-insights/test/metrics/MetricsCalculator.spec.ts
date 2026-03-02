@@ -107,13 +107,13 @@ describe('MetricsCalculator', () => {
         {
           sys: {
             createdAt: daysAgo(20),
-            publishedAt: daysAgo(10), // 10 days to publish
+            firstPublishedAt: daysAgo(10), // 10 days to publish
           },
         } as EntryProps,
         {
           sys: {
             createdAt: daysAgo(15),
-            publishedAt: daysAgo(10), // 5 days to publish
+            firstPublishedAt: daysAgo(10), // 5 days to publish
           },
         } as EntryProps,
       ];

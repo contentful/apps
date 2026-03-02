@@ -93,7 +93,7 @@ export class MetricsCalculator {
     let sumDays = 0;
     let count = 0;
     for (const entry of this.entries) {
-      const publishedAt = parseDate(entry?.sys?.publishedAt);
+      const publishedAt = parseDate(entry?.sys?.firstPublishedAt);
       if (!publishedAt) continue;
       if (!isWithin(publishedAt, startThisPeriod, this.now)) continue;
 
