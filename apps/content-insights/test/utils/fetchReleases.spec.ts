@@ -111,7 +111,7 @@ describe('fetchReleases', () => {
         title: 'My Launch Release',
         action: 'publish',
         itemsCount: 10,
-        viewUrl: `https://launch.contentful.com/spaces/${spaceId}/environments/${environmentId}/releases/launch-release-1`,
+        viewUrl: `https://launch.contentful.com/spaces/${spaceId}/releases/launch-release-1`,
         updatedBy: {
           id: 'user-1',
           firstName: 'John',
@@ -143,7 +143,7 @@ describe('fetchReleases', () => {
         id: 'timeline-release-1',
         title: 'My Timeline Release',
         itemsCount: 15,
-        viewUrl: `https://app.contentful.com/spaces/${spaceId}/environments/${environmentId}/views/entries?release=timeline-release-1`,
+        viewUrl: `https://app.contentful.com/spaces/${spaceId}/views/entries?release=timeline-release-1`,
       });
     });
   });

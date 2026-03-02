@@ -8,7 +8,6 @@ import { formatDateTimeWithTimezone } from '../utils/dateUtils';
 import { formatUserName } from '../utils/UserUtils';
 import { EntryProps, ContentTypeProps } from 'contentful-management';
 import { ContentTable, TableColumn } from './ContentTable';
-import { getEnvironmentId } from '../utils/sdkUtils';
 
 export const NeedsUpdateTable = ({
   entries,
@@ -28,10 +27,7 @@ export const NeedsUpdateTable = ({
         label: 'Title',
         style: styles.titleCell,
         render: (item) => (
-          <EntryLink
-            entryId={item.id}
-            spaceId={sdk.ids.space}
-            environmentId={getEnvironmentId(sdk)}>
+          <EntryLink entryId={item.id} spaceId={sdk.ids.space}>
             {item.title}
           </EntryLink>
         ),

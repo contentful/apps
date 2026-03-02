@@ -3,7 +3,6 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { useQuery } from '@tanstack/react-query';
 import { ContentTypeProps } from 'contentful-management';
 import { fetchContentTypes, FetchContentTypesResult } from '../utils/fetchContentTypes';
-import { getEnvironmentId } from '../utils/sdkUtils';
 
 export interface UseContentTypesResult {
   contentTypes: Map<string, ContentTypeProps>;
@@ -17,7 +16,7 @@ export function useContentTypes(contentTypeIds?: string[]): UseContentTypesResul
   const sdk = useSDK<PageAppSDK>();
 
   const { data, isFetching, error, refetch } = useQuery<FetchContentTypesResult, Error>({
-    queryKey: ['contentTypes', sdk.ids.space, getEnvironmentId(sdk), contentTypeIds],
+    queryKey: ['contentTypes', sdk.ids.space, sdk.ids.environment, contentTypeIds],
     queryFn: () => fetchContentTypes(sdk, contentTypeIds),
   });
 

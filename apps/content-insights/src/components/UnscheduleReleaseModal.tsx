@@ -29,6 +29,7 @@ export const UnscheduleReleaseModal = ({
 
     try {
       await sdk.cma.scheduledActions.delete({
+        spaceId: sdk.ids.space,
         scheduledActionId: release.scheduledActionId,
       });
 

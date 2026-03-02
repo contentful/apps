@@ -17,6 +17,7 @@ export async function fetchContentTypes(
       sdk.cma.contentType
         .get({
           contentTypeId: id,
+          spaceId: sdk.ids.space,
           query: {
             fields: ['name', 'displayField'],
           },
@@ -37,6 +38,8 @@ export async function fetchContentTypes(
 
     while (areMoreContentTypes) {
       const response = await sdk.cma.contentType.getMany({
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
         query: { skip, limit },
       });
 

@@ -5,7 +5,6 @@ import type { ReleaseWithScheduledAction } from '../utils/fetchReleases';
 import { Datepicker } from '@contentful/f36-datepicker';
 import { Validator } from '../utils/Validator';
 import { formatTimeTo12Hour, parse12HourTimeToDate } from '../utils/dateUtils';
-import { getEnvironmentId } from '../utils/sdkUtils';
 
 interface RescheduleModalProps {
   isShown: boolean;
@@ -157,7 +156,7 @@ export const RescheduleModal = ({
       const scheduledAction = await sdk.cma.scheduledActions.get({
         scheduledActionId: release.scheduledActionId,
         spaceId: sdk.ids.space,
-        environmentId: getEnvironmentId(sdk),
+        environmentId: sdk.ids.environment,
       });
 
       const isoDate = parse12HourTimeToDate(date, time).toISOString();

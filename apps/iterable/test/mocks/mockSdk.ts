@@ -21,7 +21,6 @@ const defaultMockSdk = {
   ids: {
     space: 'space-id',
     entry: 'entry-id',
-    environment: 'environment-id',
   },
   parameters: {
     installation: {
