@@ -26,7 +26,7 @@
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 41ggGmfuNUErRXQhTdGlpu --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:staging": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id 1wVW4ZwkUP7kYaf8Q49jUH --token ${TEST_CMA_TOKEN}"
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 1wVW4ZwkUP7kYaf8Q49jUH --token ${TEST_CMA_TOKEN}"
   },
   "browserslist": {
     "production": [
