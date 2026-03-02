@@ -7,6 +7,9 @@ const mockCma: any = {
     createWithId: vi.fn().mockResolvedValue({ sys: { id: 'test', version: 1 } }),
     publish: vi.fn().mockResolvedValue({}),
   },
+  entry: {
+    getMany: vi.fn(),
+  },
 };
 
 export { mockCma };

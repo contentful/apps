@@ -8,6 +8,9 @@ const mockSdk: any = {
     setReady: vi.fn(),
     getCurrentState: vi.fn().mockResolvedValue({}),
   },
+  locales: {
+    default: 'en-US',
+  },
   ids: {
     app: 'test-app',
     space: 'test-space',

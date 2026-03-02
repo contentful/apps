@@ -14,13 +14,13 @@ export const cellWithWidth = (width: string, style?: CSSProperties): CSSProperti
 });
 
 export const redirectsTableStyles = {
-  sourceColumn: cellWithWidth('22%', { padding: tokens.spacingXs }),
-  destinationColumn: cellWithWidth('22%', { padding: tokens.spacingXs }),
-  reasonColumn: cellWithWidth('24%', { padding: tokens.spacingXs }),
-  typeColumn: cellWithWidth('12%', { padding: tokens.spacingXs }),
-  statusColumn: cellWithWidth('10%', { padding: tokens.spacingXs }),
-  createdColumn: cellWithWidth('10%', { padding: tokens.spacingXs }),
-  actionsColumn: cellWithWidth('10%', { padding: tokens.spacingXs }),
+  sourceColumn: cellWithWidth('21%', { padding: tokens.spacingXs }),
+  destinationColumn: cellWithWidth('21%', { padding: tokens.spacingXs }),
+  reasonColumn: cellWithWidth('25%', { padding: tokens.spacingXs }),
+  typeColumn: cellWithWidth('10%', { padding: tokens.spacingXs }),
+  statusColumn: cellWithWidth('8%', { padding: tokens.spacingXs }),
+  createdColumn: cellWithWidth('11%', { padding: tokens.spacingXs }),
+  actionsColumn: cellWithWidth('12%', { padding: tokens.spacingXs }),
   linkStyles: {
     color: tokens.colorBlack,
     textDecoration: 'none',

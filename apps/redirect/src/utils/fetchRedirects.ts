@@ -1,5 +1,6 @@
 import { EntryProps } from 'contentful-management';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
+import { REDIRECT_CONTENT_TYPE_ID } from './consts';
 
 export interface FetchRedirectsResult {
   redirects: EntryProps[];
@@ -14,7 +15,7 @@ export const fetchRedirects = async (
     query: {
       limit: 100,
       skip: 0,
-      content_type: 'duplicatedRedirect',
+      content_type: REDIRECT_CONTENT_TYPE_ID,
     },
   });
 

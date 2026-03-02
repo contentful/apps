@@ -7,8 +7,9 @@ import { redirectsTableStyles as styles } from './RedirectsTable.styles';
 import { ContentTable } from './ContentTable';
 import { useRedirects } from '../hooks/useRedirects';
 import { ITEMS_PER_PAGE } from '../utils/consts';
-import { Redirect, TableColumn } from '../utils/types';
+import { TableColumn } from '../utils/types';
 import { EntryProps } from 'contentful-management';
+import { truncateText } from '../utils/utils';
 
 export const RedirectsTable = () => {
   const sdk = useSDK<PageAppSDK>();
@@ -17,12 +18,7 @@ export const RedirectsTable = () => {
   const { redirects, total, isFetchingRedirects, fetchingRedirectsError, refetchRedirects } =
     useRedirects(currentPage, itemsPerPage);
 
-  const getEntryUrl = (sdk: PageAppSDK, entryId: string): string =>
-    `${sdk.hostnames?.webapp ?? 'https://app.contentful.com'}/spaces/${
-      sdk.ids.space
-    }/environments/${sdk.ids.environment}/entries/${entryId}`;
-
-  const handleEdit = (event: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleEdit = () => {
     // todo: open edit modal
   };
 
@@ -37,10 +33,17 @@ export const RedirectsTable = () => {
         render: (item) => (
           <Flex flexDirection="column" alignItems="start" gap="spacing2Xs">
             <TextLink
-              href={getEntryUrl(sdk, item.fields.redirectFrom[defaultLocaleValue].sys.id)}
+              onClick={() =>
+                sdk.navigator.openEntry(
+                  item.fields.redirectFromContentTypes[defaultLocaleValue].sys.id
+                )
+              }
               icon={<ArrowSquareOutIcon />}
               alignIcon="end">
-              {item.fields.redirectFrom[defaultLocaleValue].sys.title ?? 'Untitled'}
+              {truncateText(
+                item.fields.redirectFromContentTypes[defaultLocaleValue].sys.title ?? 'Untitled',
+                50
+              )}
             </TextLink>
             <Text fontColor="gray500">/slug</Text>
           </Flex>
@@ -53,10 +56,15 @@ export const RedirectsTable = () => {
         render: (item) => (
           <Flex flexDirection="column" alignItems="start" gap="spacing2Xs">
             <TextLink
-              href={getEntryUrl(sdk, item.fields.redirectTo[defaultLocaleValue].sys.id)}
-              icon={<ArrowSquareOutIcon />}
-              alignIcon="end">
-              {item.fields.redirectTo[defaultLocaleValue].sys.title ?? 'Untitled'}
+              onClick={() =>
+                sdk.navigator.openEntry(
+                  item.fields.redirectToContentTypes[defaultLocaleValue].sys.id
+                )
+              }>
+              {truncateText(
+                item.fields.redirectToContentTypes[defaultLocaleValue].sys.title ?? 'Untitled',
+                50
+              )}
             </TextLink>
             <Text fontColor="gray500">/slug</Text>
           </Flex>
@@ -66,7 +74,7 @@ export const RedirectsTable = () => {
         id: 'reason',
         label: 'Reason',
         style: styles.reasonColumn,
-        render: (item) => item.fields.reason[defaultLocaleValue] ?? '—',
+        render: (item) => truncateText(item.fields.reason[defaultLocaleValue] ?? '—', 180),
       },
       {
         id: 'type',
@@ -80,7 +88,7 @@ export const RedirectsTable = () => {
         style: styles.statusColumn,
         render: (item) => (
           <Badge variant={item.fields.active[defaultLocaleValue] ? 'positive' : 'warning'}>
-            {item.fields.active[defaultLocaleValue].value ? 'Active' : 'Inactive'}
+            {item.fields.active[defaultLocaleValue] ? 'Active' : 'Inactive'}
           </Badge>
         ),
       },
@@ -94,7 +102,7 @@ export const RedirectsTable = () => {
         id: 'actions',
         label: '',
         style: styles.actionsColumn,
-        render: (item) => (
+        render: () => (
           <TextLink style={styles.linkStyles} onClick={handleEdit}>
             Edit
           </TextLink>

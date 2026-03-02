@@ -23,7 +23,7 @@ const Page = () => {
         </Button>
       </Flex>
 
-      <Box padding="spacingL" marginTop="spacingXl">
+      <Box padding="spacingL">
         <RedirectsTable />
       </Box>
     </Flex>

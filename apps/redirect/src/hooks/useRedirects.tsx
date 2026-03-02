@@ -26,7 +26,7 @@ export function useRedirects(
   const skip = page * itemsPerPage;
 
   const { data, isFetching, error, refetch } = useQuery<FetchRedirectsResult, Error>({
-    queryKey: ['releases', sdk.ids.space, getEnvironmentId(sdk)],
+    queryKey: ['redirects', sdk.ids.space, getEnvironmentId(sdk)],
     queryFn: () => fetchRedirects(sdk),
     select: (data: FetchRedirectsResult) => {
       const paginatedRedirects = data.redirects.slice(skip, skip + itemsPerPage);

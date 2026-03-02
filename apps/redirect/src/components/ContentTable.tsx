@@ -84,7 +84,7 @@ export function ContentTable<T extends { sys: { id: string } }>({
 
   return (
     <>
-      <Box style={tableContainerStyles}>
+      <Box>
         <Table>
           <TableHeader columns={columns} />
           <Table.Body testId={testId}>

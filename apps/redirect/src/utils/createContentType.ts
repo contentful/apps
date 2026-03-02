@@ -1,7 +1,8 @@
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { CreateContentTypeProps } from 'contentful-management';
+import { REDIRECT_CONTENT_TYPE_ID } from './consts';
 
-export const REDIRECT_CONTENT_TYPE_ID = 'redirectAppRedirect';
+export { REDIRECT_CONTENT_TYPE_ID };
 export const VANITY_URL_CONTENT_TYPE_ID = 'redirectAppVanityUrl';
 
 const redirectContentTypeBody: CreateContentTypeProps = {
@@ -21,22 +22,16 @@ const redirectContentTypeBody: CreateContentTypeProps = {
       name: 'Redirect From',
       required: true,
       localized: false,
-      type: 'Array',
-      items: {
-        type: 'Link',
-        linkType: 'Entry',
-      },
+      type: 'Link',
+      linkType: 'Entry',
     },
     {
       id: 'redirectToContentTypes',
       name: 'Redirect To',
       required: true,
       localized: false,
-      type: 'Array',
-      items: {
-        type: 'Link',
-        linkType: 'Entry',
-      },
+      type: 'Link',
+      linkType: 'Entry',
     },
     {
       id: 'redirectType',
