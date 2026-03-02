@@ -39,6 +39,6 @@ describe('RedirectsTable component', () => {
     const destinationLink = await screen.findByText('Field to title 0');
     fireEvent.click(destinationLink);
 
-    expect((mockSdk as any).navigator.openEntry).toHaveBeenCalledWith('test-id-0');
+    expect((mockSdk as any).navigator.openEntry).toHaveBeenCalledWith('to-test-id-0');
   });
 });

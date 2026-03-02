@@ -11,6 +11,17 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useCMA: () => mockCma,
 }));
 
+vi.mock('../../src/hooks/useRedirects', () => ({
+  useRedirects: () => ({
+    redirects: mockRedirects,
+    total: mockRedirects.length,
+    isFetchingRedirects: false,
+    fetchingRedirectsError: null,
+    refetchRedirects: vi.fn(),
+    fetchedAt: new Date(),
+  }),
+}));
+
 const mockRedirectsCount = 5;
 const mockRedirects: EntryProps[] = Array.from({ length: mockRedirectsCount }, (_, index) =>
   createMockRedirectForPage(index)
@@ -19,10 +30,6 @@ const mockRedirects: EntryProps[] = Array.from({ length: mockRedirectsCount }, (
 describe('Page component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSdk.cma.entry.getMany.mockResolvedValue({
-      items: mockRedirects,
-      total: mockRedirects.length,
-    });
   });
 
   afterEach(() => {
@@ -38,7 +45,6 @@ describe('Page component', () => {
 
     expect(screen.getByText('Redirects manager')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'App configuration' })).toBeInTheDocument();
-    expect(screen.getByTestId('redirects-table-skeleton')).toBeInTheDocument();
   });
 
   it('calls sdk.navigator.openAppConfig when clicking the configuration button', () => {

@@ -9,6 +9,7 @@ const mockCma: any = {
   },
   entry: {
     getMany: vi.fn(),
+    get: vi.fn(),
   },
 };
 

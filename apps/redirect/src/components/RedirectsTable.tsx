@@ -34,16 +34,11 @@ export const RedirectsTable = () => {
           <Flex flexDirection="column" alignItems="start" gap="spacing2Xs">
             <TextLink
               onClick={() =>
-                sdk.navigator.openEntry(
-                  item.fields.redirectFromContentTypes[defaultLocaleValue].sys.id
-                )
+                sdk.navigator.openEntry(item.fields.redirectFromContentTypes?.sys?.id ?? '')
               }
               icon={<ArrowSquareOutIcon />}
               alignIcon="end">
-              {truncateText(
-                item.fields.redirectFromContentTypes[defaultLocaleValue].sys.title ?? 'Untitled',
-                50
-              )}
+              {truncateText(item.fields.redirectFromContentTypes?.title, 50)}
             </TextLink>
             <Text fontColor="gray500">/slug</Text>
           </Flex>
@@ -57,14 +52,9 @@ export const RedirectsTable = () => {
           <Flex flexDirection="column" alignItems="start" gap="spacing2Xs">
             <TextLink
               onClick={() =>
-                sdk.navigator.openEntry(
-                  item.fields.redirectToContentTypes[defaultLocaleValue].sys.id
-                )
+                sdk.navigator.openEntry(item.fields.redirectToContentTypes?.sys?.id ?? '')
               }>
-              {truncateText(
-                item.fields.redirectToContentTypes[defaultLocaleValue].sys.title ?? 'Untitled',
-                50
-              )}
+              {truncateText(item.fields.redirectToContentTypes?.title, 50)}
             </TextLink>
             <Text fontColor="gray500">/slug</Text>
           </Flex>

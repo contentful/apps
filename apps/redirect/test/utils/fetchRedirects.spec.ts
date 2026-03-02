@@ -33,7 +33,7 @@ describe('fetchRedirects', () => {
 
   it('returns redirects, total, and fetchedAt from response', async () => {
     const items: EntryProps[] = [createMockEntry('entry-1'), createMockEntry('entry-2')];
-    mockCma.entry.getMany.mockResolvedValue({
+    mockCma.entry.getMany.mockResolvedValueOnce({
       items,
       total: 2,
       limit: 100,
@@ -41,12 +41,15 @@ describe('fetchRedirects', () => {
       sys: { type: 'Array' },
     });
 
+    (mockCma.entry.get as any).mockResolvedValue({
+      fields: {
+        title: { 'en-US': 'Resolved title' },
+      },
+    });
+
     const result = await fetchRedirects(mockSdk);
 
-    expect(result).toMatchObject({
-      redirects: items,
-      total: 2,
-    });
+    expect(result.total).toBe(2);
     expect(result.fetchedAt).toBeInstanceOf(Date);
     expect(result.redirects).toHaveLength(2);
     expect(result.redirects[0].sys.id).toBe('entry-1');
