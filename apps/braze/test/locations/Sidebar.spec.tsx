@@ -256,7 +256,7 @@ describe('Sidebar component', () => {
       };
       (useSDK as any).mockReturnValue(sdkWithIncompleteConfig);
 
-      const { getByText, getByRole } = render(<Sidebar />);
+      const { getByRole } = render(<Sidebar />);
       const generateButton = getByRole('button', {
         name: SIDEBAR_GENERATE_BUTTON_TEXT,
       }) as HTMLButtonElement;

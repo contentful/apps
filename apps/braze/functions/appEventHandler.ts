@@ -47,7 +47,7 @@ export const handler: FunctionEventHandler<FunctionTypeEnum.AppEventHandler> = a
       cma,
       entryId
     ));
-  } catch (error) {
+  } catch (_error) {
     return;
   }
 
@@ -96,7 +96,7 @@ const entrySavedHandler = async (
   for (const connectedField of entryConnectedFields) {
     const field = body.fields[connectedField.fieldId];
     const locale = connectedField.locale || Object.keys(field)[0];
-    let fieldValue = field[locale];
+    const fieldValue = field[locale];
     const fieldInfo = contentType.fields.find((f) => f.id === connectedField.fieldId);
 
     if (!fieldValue || !fieldInfo) {
@@ -156,16 +156,16 @@ async function callAndRetry(fn: () => Promise<any>): Promise<void> {
 async function deleteConfigEntry(cma: PlainClientAPI) {
   try {
     await cma.entry.unpublish({ entryId: CONFIG_ENTRY_ID });
-  } catch (e) {}
+  } catch (_e) {}
   try {
     await cma.entry.delete({ entryId: CONFIG_ENTRY_ID });
-  } catch (e) {}
+  } catch (_e) {}
   try {
     await cma.contentType.unpublish({ contentTypeId: CONFIG_CONTENT_TYPE_ID });
-  } catch (e) {}
+  } catch (_e) {}
   try {
     await cma.contentType.delete({ contentTypeId: CONFIG_CONTENT_TYPE_ID });
-  } catch (e) {}
+  } catch (_e) {}
 }
 
 async function updateContentBlock(
@@ -188,10 +188,7 @@ async function updateContentBlock(
 
   if (!response.ok) {
     const body = await response.json();
-    throw new CustomError(
-      `Failed to update content block: ${body.message}` || 'Unknown error',
-      response.status
-    );
+    throw new CustomError(`Failed to update content block: ${body.message}`, response.status);
   }
 }
 

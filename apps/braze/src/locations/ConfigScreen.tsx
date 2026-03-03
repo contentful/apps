@@ -31,7 +31,7 @@ import {
   CONTENT_TYPE_DOCUMENTATION,
 } from '../utils';
 import InformationWithLink from '../components/InformationWithLink';
-import { ContentTypeProps, PlainClientAPI } from 'contentful-management';
+import { ContentTypeProps } from 'contentful-management';
 
 export async function callTo(url: string, newApiKey: string) {
   return await fetch(url, {
@@ -149,8 +149,8 @@ const ConfigScreen = () => {
         </InformationWithLink>
         <Box marginTop="spacingL" marginBottom="spacingL">
           <Note variant="neutral">
-            The Braze app will create a content type labeled "brazeConfig". Do not delete or modify
-            manually.
+            The Braze app will create a content type labeled &quot;brazeConfig&quot;. Do not delete
+            or modify manually.
           </Note>
         </Box>
         <Splitter marginTop="spacingL" marginBottom="spacingL" />
@@ -184,7 +184,7 @@ async function createContentType(sdk: ConfigAppSDK) {
       contentTypeId: CONFIG_CONTENT_TYPE_ID,
     });
     return;
-  } catch (e) {}
+  } catch (_e) {}
 
   const contentTypeBody = {
     name: CONFIG_CONTENT_TYPE_ID,
@@ -230,7 +230,7 @@ async function addAppToSidebar(sdk: ConfigAppSDK, contentTypesId: string[]) {
           sidebar: updatedSidebar,
         }
       );
-    } catch (e) {
+    } catch {
       sdk.notifier.error(`Failed to add app to sidebar for content type ${contentTypeId}`);
     }
   }

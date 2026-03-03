@@ -356,7 +356,7 @@ const Page = () => {
         config
       );
       setEntries(entries);
-    } catch (error) {
+    } catch {
       setError('Error loading connected entries');
     } finally {
       setLoading(false);

@@ -28,7 +28,7 @@ export class ExternalResourceField extends Field {
     throw new Error('External resource not supported');
   }
 
-  generateLiquidTagForType(template: string): string[] {
+  generateLiquidTagForType(_template: string): string[] {
     throw new Error('External resource not supported');
   }
 

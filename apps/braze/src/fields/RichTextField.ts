@@ -29,7 +29,7 @@ export class RichTextField extends Field {
     throw new Error('Rich text not supported');
   }
 
-  generateLiquidTagForType(template: string): string[] {
+  generateLiquidTagForType(_template: string): string[] {
     throw new Error('Rich text not supported');
   }
 

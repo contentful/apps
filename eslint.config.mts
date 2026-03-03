@@ -33,16 +33,15 @@ export default defineConfig([
     rules: {
       'react/jsx-uses-react': 'off',
       'react/react-in-jsx-scope': 'off',
-      'no-unused-vars': 'off',
       'unused-imports/no-unused-imports': 'error',
       '@typescript-eslint/no-explicit-any': 'off',
-      'unused-imports/no-unused-vars': [
-        'warn',
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
         {
-          vars: 'all',
           varsIgnorePattern: '^_',
-          args: 'after-used',
           argsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
         },
       ],
     },

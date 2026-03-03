@@ -16,7 +16,7 @@ export type InvocationParams = {
   title: string;
   selectedFields?: string[];
   selectedLocales?: string[];
-  serializedEntry?: {};
+  serializedEntry?: object;
   mode: string;
 };
 

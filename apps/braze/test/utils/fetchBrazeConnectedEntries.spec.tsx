@@ -3,11 +3,7 @@ import { cleanup } from '@testing-library/react';
 import { fetchBrazeConnectedEntries } from '../../src/utils/fetchBrazeConnectedEntries';
 import { Entry } from '../../src/fields/Entry';
 import { BasicField } from '../../src/fields/BasicField';
-import {
-  mockConfigEntryWithLocalizedFields,
-  mockConnectedFields,
-  mockSingleConnectedField,
-} from '../mocks/connectedFields';
+import { mockConnectedFields, mockSingleConnectedField } from '../mocks/connectedFields';
 import { createContentTypeResponse } from '../mocks/contentTypeResponse';
 import {
   createConfigEntry,
