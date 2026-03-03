@@ -73,7 +73,7 @@ const ConfigScreen = () => {
     try {
       const configService = new ConfigEntryService(sdk.cma, sdk.locales.default);
       await configService.createConfig();
-    } catch (e) {
+    } catch (_e) {
       sdk.notifier.error('The app configuration was not saved. Please try again.');
       return false;
     }
@@ -118,14 +118,14 @@ const ConfigScreen = () => {
         </Paragraph>
         <Box marginTop="spacingS" marginBottom="spacing2Xl">
           <Note variant="neutral">
-            The Hubspot app will create a content type labeled "hubspotConfig". Do not delete or
-            modify manually.
+            The Hubspot app will create a content type labeled &quot;hubspotConfig&quot;. Do not
+            delete or modify manually.
           </Note>
         </Box>
         <Box marginTop="spacingXl" marginBottom="spacingXs">
           <Subheading marginBottom="spacingXs">Configure access</Subheading>
           <Paragraph marginBottom="spacingL">
-            To connect your organization's Hubspot account, enter the private app access token.
+            To connect your organization&apos;s Hubspot account, enter the private app access token.
           </Paragraph>
           <Form>
             <FormControl isRequired marginBottom="none">

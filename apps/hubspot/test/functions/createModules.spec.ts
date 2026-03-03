@@ -883,7 +883,7 @@ describe('createModules', () => {
     vi.useRealTimers();
   });
 
-  it('lala', async () => {
+  it('should append new connected field to existing connected fields when entryId is provided', async () => {
     // Mock successful fetch responses
     const mockFetch = mockedFetch();
 
@@ -943,11 +943,6 @@ describe('createModules', () => {
 
     // Verify fetch was called 3 times
     expect(mockFetch).toHaveBeenCalledTimes(3);
-
-    // Verify the file contents being sent
-    mockFetch.mock.calls[0];
-    mockFetch.mock.calls[1];
-    mockFetch.mock.calls[2];
 
     const expectedConnectedField: EntryConnectedFields = [
       {

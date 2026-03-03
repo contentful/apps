@@ -121,7 +121,7 @@ export const getFiles = (type: string, value: any): { fieldsFile: string; module
       if (value) fieldsFile[0].default = value;
       moduleFile = NUMBER_MODULE_TEMPLATE;
       break;
-    case 'Date':
+    case 'Date': {
       const stringValue = value as string;
       if (!stringValue || stringValue.includes('T')) {
         fieldsFile = structuredClone(DATETIME_FIELD_TEMPLATE);
@@ -132,6 +132,7 @@ export const getFiles = (type: string, value: any): { fieldsFile: string; module
       }
       fieldsFile[0].default = new Date(stringValue).getTime();
       break;
+    }
     case 'Location':
       fieldsFile = structuredClone(TEXT_FIELD_TEMPLATE);
       if (value) fieldsFile[0].default = `lat:${value.lat}, long:${value.lon}`;

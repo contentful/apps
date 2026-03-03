@@ -44,6 +44,7 @@ export default defineConfig([
           caughtErrorsIgnorePattern: '^_',
         },
       ],
+      'no-empty': ['error', { allowEmptyCatch: true }],
     },
   },
 ]);

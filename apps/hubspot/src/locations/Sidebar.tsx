@@ -17,7 +17,7 @@ const Sidebar = () => {
   const [showTokenError, setShowTokenError] = useState(false);
 
   const getEntryTitle = (): string => {
-    let displayFieldId = sdk.contentType.displayField;
+    const displayFieldId = sdk.contentType.displayField;
     if (!displayFieldId) return 'Untitled';
 
     const value = sdk.entry.fields[displayFieldId].getValue();
@@ -56,7 +56,7 @@ const Sidebar = () => {
           sdk.locales.default
         ).getEntryConnectedFields(sdk.ids.entry);
         setConnectedFields(entryConnectedFields);
-      } catch (error) {}
+      } catch (_error) {}
     };
     getConfig();
   }, []);

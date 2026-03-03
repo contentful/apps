@@ -176,7 +176,6 @@ describe('Hubspot Config Screen ', () => {
     it('blocks saving and shows error if the access token is empty', async () => {
       render(<ConfigScreen />);
       expect(await screen.findByPlaceholderText(/Enter your access token/i)).toBeTruthy();
-      const user = userEvent.setup();
 
       const result = await act(async () => {
         return await saveAppInstallation();

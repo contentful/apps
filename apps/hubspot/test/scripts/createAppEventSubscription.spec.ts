@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { AppEventSubscriptionProps, createClient, PlainClientAPI } from 'contentful-management';
+import { createClient, PlainClientAPI } from 'contentful-management';
 import { createAppEventSubscription } from '../../src/scripts/createAppEventSubscription';
 import dotenv from 'dotenv';
-import path from 'path';
 
 // Mock contentful-management
 vi.mock('contentful-management', () => ({

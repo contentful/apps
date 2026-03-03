@@ -139,7 +139,7 @@ class ConfigEntryService {
         const locales = await this.cma.locale.getMany({ query: { limit: 1000 } });
         const defaultLocale = locales.items.find((locale) => locale.default);
         this.defaultLocale = defaultLocale?.code || fallbackLocale;
-      } catch (error) {
+      } catch (_error) {
         this.defaultLocale = fallbackLocale;
       }
     }
