@@ -22,8 +22,8 @@ export function useRedirects(
   page: number = 0,
   itemsPerPage: number = ITEMS_PER_PAGE,
   searchQuery: string = '',
-  typeFilter: string = '',
-  statusFilter: '' | 'active' | 'inactive' = ''
+  typeFilter: string[] = [],
+  statusFilter: string[] = []
 ): UseRedirectsResult {
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const skip = page * itemsPerPage;

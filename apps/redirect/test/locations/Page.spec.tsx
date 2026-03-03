@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { mockCma, mockSdk } from '../../test/mocks';
 import { QueryProvider } from '../../src/providers/QueryProvider';
@@ -43,8 +43,10 @@ describe('Page component', () => {
       </QueryProvider>
     );
 
-    expect(screen.getByText('Redirects manager')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'App configuration' })).toBeInTheDocument();
+    waitFor(() => {
+      expect(screen.getByText('Redirects manager')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'App configuration' })).toBeInTheDocument();
+    });
   });
 
   it('calls sdk.navigator.openAppConfig when clicking the configuration button', () => {

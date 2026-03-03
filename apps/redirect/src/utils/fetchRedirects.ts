@@ -10,15 +10,15 @@ export interface FetchRedirectsResult {
 
 export interface FetchRedirectsParams {
   searchQuery?: string;
-  typeFilter?: string;
-  statusFilter?: '' | 'active' | 'inactive';
+  typeFilter?: string[];
+  statusFilter?: string[];
   limit?: number;
   skip?: number;
 }
 
 export const fetchRedirects = async (
   sdk: HomeAppSDK | PageAppSDK,
-  { searchQuery = '', typeFilter = '', statusFilter = '', limit, skip }: FetchRedirectsParams = {}
+  { searchQuery = '', typeFilter = [], statusFilter = [], limit, skip }: FetchRedirectsParams = {}
 ): Promise<FetchRedirectsResult> => {
   try {
     const defaultLocaleValue = sdk.locales.default || 'en-US';
@@ -35,14 +35,15 @@ export const fetchRedirects = async (
       query.query = trimmedQuery;
     }
 
-    if (typeFilter) {
-      query['fields.redirectType'] = typeFilter;
+    if (typeFilter.length === 1) {
+      query['fields.redirectType'] = typeFilter[0];
     }
 
-    if (statusFilter === 'active' || statusFilter === 'inactive') {
-      const isActive = statusFilter === 'active';
-      query['fields.active'] = isActive;
+    if (statusFilter.length === 1) {
+      query['fields.active'] = statusFilter[0] === 'Active' ? true : false;
     }
+    // If both 'active' and 'inactive' or Temporary (302) and Permanent (301) are selected we intentionally do not
+    // add any status filter so that all redirects are returned.
 
     const response = await sdk.cma.entry.getMany({
       query,

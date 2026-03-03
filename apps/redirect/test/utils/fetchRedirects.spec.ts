@@ -84,8 +84,8 @@ describe('fetchRedirects', () => {
 
     await fetchRedirects(mockSdk, {
       searchQuery: 'homepage',
-      typeFilter: 'Permanent (301)',
-      statusFilter: 'active',
+      typeFilter: ['Permanent (301)'],
+      statusFilter: ['Active'],
       limit: 5,
       skip: 10,
     });
@@ -113,7 +113,7 @@ describe('fetchRedirects', () => {
     });
 
     await fetchRedirects(mockSdk, {
-      statusFilter: 'inactive',
+      statusFilter: ['Inactive'],
       limit: 10,
       skip: 0,
     });
@@ -125,6 +125,31 @@ describe('fetchRedirects', () => {
         content_type: REDIRECT_CONTENT_TYPE_ID,
         locale: 'en-US',
         'fields.active': false,
+      },
+    });
+  });
+
+  it('does not add type filter when all types are selected', async () => {
+    mockCma.entry.getMany.mockResolvedValue({
+      items: [],
+      total: 0,
+      limit: 100,
+      skip: 0,
+      sys: { type: 'Array' },
+    });
+
+    await fetchRedirects(mockSdk, {
+      typeFilter: ['Permanent (301)', 'Temporary (302)'],
+      limit: 100,
+      skip: 0,
+    });
+
+    expect(mockCma.entry.getMany).toHaveBeenCalledWith({
+      query: {
+        limit: 100,
+        skip: 0,
+        content_type: REDIRECT_CONTENT_TYPE_ID,
+        locale: 'en-US',
       },
     });
   });
