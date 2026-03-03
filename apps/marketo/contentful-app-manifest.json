@@ -1,0 +1,84 @@
+{
+  "functions": [
+    {
+      "id": "validateMarketoCredentialsFunction",
+      "name": "Validate Marketo credentials",
+      "description": "Validates Marketo client ID, secret and Munchkin ID via identity endpoint",
+      "path": "functions/validateMarketoCredentials.js",
+      "entryFile": "functions/validateMarketoCredentials.ts",
+      "allowNetworks": ["https://*.mktorest.com"],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "getMarketoFormsFunction",
+      "name": "Get Marketo forms",
+      "description": "Function to get Marketo forms from an App Action",
+      "path": "functions/getMarketoForms.js",
+      "entryFile": "functions/getMarketoForms.ts",
+      "allowNetworks": ["https://*.mktorest.com"],
+      "accepts": ["appaction.call"]
+    }
+  ],
+  "actions": [
+    {
+      "id": "validateMarketoCredentialsAction",
+      "name": "Validate Marketo credentials",
+      "type": "function-invocation",
+      "functionId": "validateMarketoCredentialsFunction",
+      "category": "Custom",
+      "parameters": [
+        {
+          "id": "clientId",
+          "name": "Client ID",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "clientSecret",
+          "name": "Client Secret",
+          "type": "Symbol",
+          "required": false
+        },
+        {
+          "id": "munchkinId",
+          "name": "Munchkin ID",
+          "type": "Symbol",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "getMarketoFormsAction",
+      "name": "Get Marketo forms",
+      "type": "function-invocation",
+      "functionId": "getMarketoFormsFunction",
+      "category": "Custom",
+      "parameters": [],
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "forms": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The ID of the form"
+                },
+                "url": {
+                  "type": "string",
+                  "description": "The URL of the form"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The name of the form"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
