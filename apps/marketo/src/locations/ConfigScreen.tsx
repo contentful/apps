@@ -210,7 +210,7 @@ const ConfigScreen = () => {
     <Flex fullWidth justifyContent="center">
       <Box className={styles.container}>
         <Form>
-          <Heading marginBottom="spacingS">Set up the Marketo App</Heading>
+          <Heading marginBottom="spacingS">Set up the Adobe Marketo Form Selector App</Heading>
           <Paragraph marginBottom="spacingL">
             The Marketo app fetches available form IDs and titles directly from your account, making
             it easy for editors to select the right form from a dropdown in Contentful.

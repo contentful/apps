@@ -64,7 +64,7 @@ describe('ConfigScreen', () => {
       expect(mockSdk.app.setReady).toHaveBeenCalled();
     });
 
-    expect(getByText('Set up the Marketo App')).toBeInTheDocument();
+    expect(getByText('Set up the Adobe Marketo Form Selector App')).toBeInTheDocument();
     expect(getByLabelText(/Marketo Client ID/)).toBeInTheDocument();
     expect(getByLabelText(/Marketo Client Secret/)).toBeInTheDocument();
     expect(getByLabelText(/Marketo Munchkin Id/)).toBeInTheDocument();
