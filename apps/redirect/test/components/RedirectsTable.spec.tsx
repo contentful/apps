@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { mockSdk } from '../mocks';
 import { createMockRedirectForPage } from '../utils/testUtils';
@@ -45,27 +45,34 @@ describe('RedirectsTable component', () => {
   it('renders type and status filters and search input', () => {
     render(<RedirectsTable />);
 
-    expect(screen.getByText('Filter by type')).toBeInTheDocument();
-    expect(screen.getByText('Filter by status')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Search by title, slug or reason')).toBeInTheDocument();
+    waitFor(() => {
+      expect(screen.getByText('Filter by type')).toBeInTheDocument();
+      expect(screen.getByText('Filter by status')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Search by title, slug or reason')).toBeInTheDocument();
+    });
   });
 
-  it('updates type filter select value when changed', () => {
+  it('updates type filter label when an option is selected', async () => {
     render(<RedirectsTable />);
 
-    const typeSelect = screen.getByDisplayValue('Filter by type');
+    const typeButton = await screen.findByText('Filter by type');
+    fireEvent.click(typeButton);
 
-    fireEvent.change(typeSelect, { target: { value: 'Permanent (301)' } });
+    const permanentOption = await screen.findByText('Permanent (301)');
+    fireEvent.click(permanentOption);
 
-    expect(screen.getByDisplayValue('Permanent (301)')).toBeInTheDocument();
+    expect(screen.getByTestId('type-pill-Permanent (301)')).toBeInTheDocument();
   });
 
-  it('updates status filter select value when changed', () => {
+  it('updates status filter label when an option is selected', async () => {
     render(<RedirectsTable />);
-    const statusSelect = screen.getByDisplayValue('Filter by status');
 
-    fireEvent.change(statusSelect, { target: { value: 'active' } });
+    const statusButton = await screen.findByText('Filter by status');
+    fireEvent.click(statusButton);
 
-    expect(screen.getByDisplayValue('Active')).toBeInTheDocument();
+    const activeOption = screen.getByText('Active');
+    fireEvent.click(activeOption);
+
+    expect(screen.getByTestId('status-pill-Active')).toBeInTheDocument();
   });
 });
