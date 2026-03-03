@@ -43,7 +43,9 @@
     "deploy:staging": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id 75CMBc0rQykFfUPGGrECFF --token ${TEST_CMA_TOKEN}",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "generate-entries": "tsx src/scripts/generateEntries.ts",
-    "delete-entries": "tsx src/scripts/deleteEntries.ts"
+    "delete-entries": "tsx src/scripts/deleteEntries.ts",
+    "lint": "eslint .",
+    "lint:write": "eslint . --fix"
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -44,7 +44,7 @@ const Page: React.FC = () => {
         );
 
         setEntriesWithContentType(fetchEntriesWithContentType);
-      } catch (e) {
+      } catch (_e) {
         setEntriesWithContentType([]);
         setError(
           'The app cannot load content. Try refreshing, or reviewing your app configuration.'
@@ -108,7 +108,7 @@ const Page: React.FC = () => {
           ? 'Field disconnected successfully.'
           : `${selectedFieldIds.length} fields disconnected successfully.`
       );
-    } catch (e) {
+    } catch (_e) {
       sdk.notifier.error('Failed to disconnect field(s). Please try again.');
     }
   }

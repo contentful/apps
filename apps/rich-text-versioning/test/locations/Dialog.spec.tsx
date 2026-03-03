@@ -1,6 +1,6 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { mockCma, mockSdk } from '../mocks';
+import { mockSdk } from '../mocks';
 import Dialog from '../../src/locations/Dialog';
 import { BLOCKS, INLINES } from '@contentful/rich-text-types';
 import { useSDK } from '@contentful/react-apps-toolkit';

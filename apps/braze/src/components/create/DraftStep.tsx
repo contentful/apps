@@ -19,10 +19,10 @@ const DraftStep = ({
   return (
     <>
       <Subheading fontWeight="fontWeightDemiBold" fontSize="fontSizeXl" lineHeight="lineHeightL">
-        This entry is in a "Draft" state.
+        This entry is in a &quot;Draft&quot; state.
       </Subheading>
       <Paragraph marginBottom="spacing2Xs">
-        This entry has not yet been published, and it's content may not have passed your
+        This entry has not yet been published, and it&apos;s content may not have passed your
         organizations review standards yet. Are you sure you want to send to Braze?
       </Paragraph>
       <WizardFooter>

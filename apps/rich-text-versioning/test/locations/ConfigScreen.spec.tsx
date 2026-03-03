@@ -1,6 +1,6 @@
 import { act, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach, beforeAll } from 'vitest';
-import { mockCma, mockSdk } from '../mocks';
+import { mockSdk } from '../mocks';
 import ConfigScreen from '../../src/locations/ConfigScreen';
 import { OnConfigureHandlerReturn } from '@contentful/app-sdk';
 

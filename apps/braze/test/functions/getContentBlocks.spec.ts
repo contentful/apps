@@ -9,11 +9,7 @@ import {
   FunctionEventContext,
   FunctionTypeEnum,
 } from '@contentful/node-apps-toolkit';
-import {
-  AppInstallationParameters,
-  ConnectedField,
-  SidebarContentBlockInfo,
-} from '../../src/utils';
+import { ConnectedField, SidebarContentBlockInfo } from '../../src/utils';
 import { AppActionParameters } from '../../functions/createContentBlocks';
 import { mockContext } from '../mocks/mocksForFunctions';
 

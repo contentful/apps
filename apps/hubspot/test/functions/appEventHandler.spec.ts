@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { handler } from '../../functions/appEventHandler';
 import ConfigEntryService from '../../src/utils/ConfigEntryService';
-import { RICH_TEXT_FIELD_TEMPLATE, TEXT_FIELD_TEMPLATE } from '../../functions/templates';
+import { RICH_TEXT_FIELD_TEMPLATE } from '../../functions/templates';
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import { BLOCKS, Document } from '@contentful/rich-text-types';
 import * as common from '../../functions/common';

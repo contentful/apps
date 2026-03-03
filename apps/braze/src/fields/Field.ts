@@ -63,14 +63,14 @@ export abstract class Field {
   }
 
   uniqueId(): string {
-    return !!this.parent ? `${this.parent.uniqueId()}.${this.id}` : this.id;
+    return this.parent ? `${this.parent.uniqueId()}.${this.id}` : this.id;
   }
 
   getChildren(): Field[] {
     return [];
   }
 
-  childToggled(selected: boolean) {}
+  childToggled(_selected: boolean) {}
 
   isEnabledForGenerate(): boolean {
     return true;

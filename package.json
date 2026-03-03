@@ -9,10 +9,15 @@
   "devDependencies": {
     "@sentry/cli": "^2.14.4",
     "@types/node": "^24.0.13",
-    "eslint": "^7.32.0",
+    "eslint": "^9.39.1",
     "husky": "^8.0.0",
     "lint-staged": "^13.0.0",
-    "prettier": "^2.8.8"
+    "prettier": "^2.8.8",
+    "@eslint/js": "^9.39.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "typescript-eslint": "^8.46.3",
+    "jiti": "^2.6.1"
   },
   "scripts": {
     "bootstrap": "lerna bootstrap --no-ci --since master --include-dependencies",

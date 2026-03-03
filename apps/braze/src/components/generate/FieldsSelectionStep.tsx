@@ -45,7 +45,11 @@ const FieldsSelectionStep = (props: FieldsSelectionStepProps) => {
     selectedFields: Set<string>,
     id: string
   ): void => {
-    checked ? selectedFields.add(id) : selectedFields.delete(id);
+    if (checked) {
+      selectedFields.add(id);
+    } else {
+      selectedFields.delete(id);
+    }
   };
 
   const toggleNestedFields = (field: any, checked: boolean, selectedFields: Set<string>): void => {

@@ -1,13 +1,4 @@
-import {
-  CopyButton,
-  Flex,
-  Paragraph,
-  TextInput,
-  TextLink,
-  Text,
-  IconButton,
-  Skeleton,
-} from '@contentful/f36-components';
+import { CopyButton, Flex, Paragraph, TextInput, TextLink, Text } from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { ExternalLinkIcon } from '@contentful/f36-icons';

@@ -6,7 +6,7 @@ import type {
 } from '@contentful/node-apps-toolkit';
 import { AppInstallationParameters } from '../src/utils';
 import { initContentfulManagementClient, stringifyFieldValue } from './common';
-import { ContentTypeProps, EntryProps, ContentFields } from 'contentful-management';
+import { ContentTypeProps, EntryProps } from 'contentful-management';
 import { KeyValueMap } from 'contentful-management';
 
 export type AppActionParameters = {

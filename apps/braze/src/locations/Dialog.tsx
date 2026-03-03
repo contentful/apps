@@ -1,4 +1,4 @@
-import { DialogAppSDK } from '@contentful/app-sdk';
+import { DialogAppSDK, SerializedJSONValue } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { Skeleton } from '@contentful/f36-components';
 import { useEffect, useRef, useState } from 'react';
@@ -16,7 +16,7 @@ export type InvocationParams = {
   title: string;
   selectedFields?: string[];
   selectedLocales?: string[];
-  serializedEntry?: {};
+  serializedEntry?: SerializedJSONValue;
   mode: string;
 };
 

@@ -2,20 +2,11 @@ import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import pluginReact from 'eslint-plugin-react';
-import { defineConfig } from 'eslint/config';
+import { defineConfig, globalIgnores } from 'eslint/config';
 import unusedImports from 'eslint-plugin-unused-imports';
 
 export default defineConfig([
-  {
-    ignores: [
-      'build/**',
-      'dist/**',
-      'node_modules/**',
-      'coverage/**',
-      '*.config.{js,ts,mjs,cjs}',
-      'vite.config.ts',
-    ],
-  },
+  globalIgnores(['**/build/', '**/dist/']),
   {
     settings: {
       react: {
@@ -42,18 +33,18 @@ export default defineConfig([
     rules: {
       'react/jsx-uses-react': 'off',
       'react/react-in-jsx-scope': 'off',
-      'no-unused-vars': 'off',
       'unused-imports/no-unused-imports': 'error',
       '@typescript-eslint/no-explicit-any': 'off',
-      'unused-imports/no-unused-vars': [
-        'warn',
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
         {
-          vars: 'all',
           varsIgnorePattern: '^_',
-          args: 'after-used',
           argsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
         },
       ],
+      'no-empty': ['error', { allowEmptyCatch: true }],
     },
   },
 ]);

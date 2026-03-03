@@ -58,7 +58,7 @@ const ConfigScreen = () => {
             </Heading>
             <Paragraph marginBottom="spacingL">
               Select the content type(s) you want to use with Closest Preview. You can change this
-              anytime by navigating to the 'Sidebar' tab in your content model.
+              anytime by navigating to the &apos;Sidebar&apos; tab in your content model.
             </Paragraph>
             <FormControl id="contentTypes">
               <FormControl.Label>Content types</FormControl.Label>
@@ -72,8 +72,8 @@ const ConfigScreen = () => {
           </Box>
           <Note variant="neutral">
             This app assumes that all content types with Live Preview enabled include a field whose
-            id is 'slug'. If that field is missing or uses a different id, the app will not function
-            correctly.
+            id is &apos;slug&apos;. If that field is missing or uses a different id, the app will
+            not function correctly.
           </Note>
         </Form>
       </Box>

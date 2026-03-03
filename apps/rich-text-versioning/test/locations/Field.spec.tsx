@@ -5,9 +5,7 @@ import Field from '../../src/locations/Field';
 import { Document, BLOCKS } from '@contentful/rich-text-types';
 
 vi.mock('@contentful/field-editor-rich-text', () => ({
-  RichTextEditor: ({ sdk }: { sdk: any }) => (
-    <div data-testid="rich-text-editor">Rich Text Editor</div>
-  ),
+  RichTextEditor: () => <div data-testid="rich-text-editor">Rich Text Editor</div>,
 }));
 
 const mockOpenCurrentApp = vi.fn();
