@@ -32,6 +32,7 @@ export async function fetchUsersById(sdk: BaseAppSDK, userIds: string[]): Promis
     const firstError = errors[0] as { message?: string } | undefined;
     const errorMessage =
       firstError && firstError.message ? firstError.message : 'Error fetching users';
+    console.error('All users failed to fetch:', errorMessage);
     throw new Error(errorMessage);
   }
 
