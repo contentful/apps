@@ -5,10 +5,6 @@ import { fetchRedirects, FetchRedirectsResult } from '../utils/fetchRedirects';
 import { ITEMS_PER_PAGE } from '../utils/consts';
 import { EntryProps } from 'contentful-management';
 
-export function getEnvironmentId(sdk: BaseAppSDK): string {
-  return sdk.ids.environmentAlias ?? sdk.ids.environment;
-}
-
 export interface UseRedirectsResult {
   redirects: EntryProps[];
   total: number;
@@ -26,7 +22,7 @@ export function useRedirects(
   const skip = page * itemsPerPage;
 
   const { data, isFetching, error, refetch } = useQuery<FetchRedirectsResult, Error>({
-    queryKey: ['redirects', sdk.ids.space, getEnvironmentId(sdk)],
+    queryKey: ['redirects', sdk.ids.space, sdk.ids.environmentAlias ?? sdk.ids.environment],
     queryFn: () => fetchRedirects(sdk),
     select: (data: FetchRedirectsResult) => {
       const paginatedRedirects = data.redirects.slice(skip, skip + itemsPerPage);

@@ -3,11 +3,19 @@ import { fetchRedirects, FetchRedirectsResult } from '../../src/utils/fetchRedir
 import { REDIRECT_CONTENT_TYPE_ID } from '../../src/utils/consts';
 import { EntryProps } from 'contentful-management';
 import { mockCma, mockSdk } from '../mocks';
-import { createMockEntry } from './testUtils';
+
+import {
+  createMockContentType,
+  createMockEditorInterface,
+  createMockReferencedEntry,
+} from './testUtils';
 
 describe('fetchRedirects', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    mockCma.contentType.getMany.mockResolvedValue({ items: [] });
+    mockCma.editorInterface.getMany.mockResolvedValue({ items: [] });
   });
 
   it('calls sdk.cma.entry.getMany with correct query', async () => {
@@ -32,20 +40,37 @@ describe('fetchRedirects', () => {
   });
 
   it('returns redirects, total, and fetchedAt from response', async () => {
-    const items: EntryProps[] = [createMockEntry('entry-1'), createMockEntry('entry-2')];
-    mockCma.entry.getMany.mockResolvedValueOnce({
-      items,
-      total: 2,
-      limit: 100,
-      skip: 0,
-      sys: { type: 'Array' },
-    });
-
-    (mockCma.entry.get as any).mockResolvedValue({
-      fields: {
-        title: { 'en-US': 'Resolved title' },
+    const redirectFields = {
+      redirectFromContentTypes: {
+        'en-US': { sys: { type: 'Link', linkType: 'Entry', id: 'from-1' } },
       },
-    });
+      redirectToContentTypes: { 'en-US': { sys: { type: 'Link', linkType: 'Entry', id: 'to-1' } } },
+    };
+    const items: EntryProps[] = [
+      createMockReferencedEntry('entry-1', REDIRECT_CONTENT_TYPE_ID, redirectFields),
+      createMockReferencedEntry('entry-2', REDIRECT_CONTENT_TYPE_ID, redirectFields),
+    ];
+
+    const referencedEntries = [
+      createMockReferencedEntry('from-1', 'page', {}),
+      createMockReferencedEntry('to-1', 'page', {}),
+    ];
+
+    mockCma.entry.getMany
+      .mockResolvedValueOnce({
+        items,
+        total: 2,
+        limit: 100,
+        skip: 0,
+        sys: { type: 'Array' },
+      })
+      .mockResolvedValueOnce({
+        items: referencedEntries,
+        total: referencedEntries.length,
+        limit: referencedEntries.length,
+        skip: 0,
+        sys: { type: 'Array' },
+      });
 
     const result = await fetchRedirects(mockSdk);
 
@@ -70,5 +95,116 @@ describe('fetchRedirects', () => {
     expect(result.redirects).toEqual([]);
     expect(result.total).toBe(0);
     expect(result.fetchedAt).toBeInstanceOf(Date);
+  });
+
+  it('populates titles and slugs from referenced entries when content types and editor interface are available', async () => {
+    const redirectFields = {
+      redirectFromContentTypes: {
+        'en-US': { sys: { type: 'Link', linkType: 'Entry', id: 'from-1' } },
+      },
+      redirectToContentTypes: { 'en-US': { sys: { type: 'Link', linkType: 'Entry', id: 'to-1' } } },
+    };
+    const items = [createMockReferencedEntry('entry-1', REDIRECT_CONTENT_TYPE_ID, redirectFields)];
+
+    const referencedEntries = [
+      createMockReferencedEntry('from-1', 'page', {
+        title: { 'en-US': 'From entry title' },
+        pageSlug: { 'en-US': 'from-entry-slug-from-appearance' },
+        slug: { 'en-US': 'from-entry-slug-field' },
+      }),
+      createMockReferencedEntry('to-1', 'page', {
+        title: { 'en-US': 'To entry title' },
+        pageSlug: { 'en-US': 'to-entry-slug-from-appearance' },
+        slug: { 'en-US': 'to-entry-slug-field' },
+      }),
+    ];
+
+    const contentTypes = [createMockContentType('page', 'title')];
+    const editorInterfaces = [createMockEditorInterface('page', 'pageSlug')];
+
+    mockCma.entry.getMany
+      .mockResolvedValueOnce({
+        items,
+        total: items.length,
+        limit: 100,
+        skip: 0,
+        sys: { type: 'Array' },
+      })
+      .mockResolvedValueOnce({
+        items: referencedEntries,
+        total: referencedEntries.length,
+        limit: referencedEntries.length,
+        skip: 0,
+        sys: { type: 'Array' },
+      });
+
+    mockCma.contentType.getMany.mockResolvedValueOnce({
+      items: contentTypes,
+    });
+
+    mockCma.editorInterface.getMany.mockResolvedValueOnce({
+      items: editorInterfaces,
+    });
+
+    const result = await fetchRedirects(mockSdk);
+    const redirectedEntry = result.redirects[0];
+
+    expect(redirectedEntry.fields.redirectFromContentTypes.title).toBe('From entry title');
+    expect(redirectedEntry.fields.redirectToContentTypes.title).toBe('To entry title');
+    expect(redirectedEntry.fields.redirectFromContentTypes.slug).toBe(
+      'from-entry-slug-from-appearance'
+    );
+    expect(redirectedEntry.fields.redirectToContentTypes.slug).toBe(
+      'to-entry-slug-from-appearance'
+    );
+  });
+
+  it('falls back to slug field id when no slug editor is configured', async () => {
+    const redirectFields = {
+      redirectFromContentTypes: {
+        'en-US': { sys: { type: 'Link', linkType: 'Entry', id: 'from-1' } },
+      },
+      redirectToContentTypes: { 'en-US': { sys: { type: 'Link', linkType: 'Entry', id: 'to-1' } } },
+    };
+    const items = [createMockReferencedEntry('entry-1', REDIRECT_CONTENT_TYPE_ID, redirectFields)];
+
+    const referencedEntries = [
+      createMockReferencedEntry('from-1', 'page', {
+        title: { 'en-US': 'From entry title' },
+        slug: { 'en-US': 'from-entry-slug-field' },
+      }),
+      createMockReferencedEntry('to-1', 'page', {
+        title: { 'en-US': 'To entry title' },
+        slug: { 'en-US': 'to-entry-slug-field' },
+      }),
+    ];
+
+    const contentTypes = [createMockContentType('page', 'title')];
+
+    mockCma.entry.getMany
+      .mockResolvedValueOnce({
+        items,
+        total: items.length,
+        limit: 100,
+        skip: 0,
+        sys: { type: 'Array' },
+      })
+      .mockResolvedValueOnce({
+        items: referencedEntries,
+        total: referencedEntries.length,
+        limit: referencedEntries.length,
+        skip: 0,
+        sys: { type: 'Array' },
+      });
+
+    mockCma.contentType.getMany.mockResolvedValueOnce({
+      items: contentTypes,
+    });
+
+    const result = await fetchRedirects(mockSdk);
+    const redirectedEntry = result.redirects[0];
+
+    expect(redirectedEntry.fields.redirectFromContentTypes.slug).toBe('from-entry-slug-field');
+    expect(redirectedEntry.fields.redirectToContentTypes.slug).toBe('to-entry-slug-field');
   });
 });

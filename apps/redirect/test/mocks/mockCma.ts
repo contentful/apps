@@ -11,6 +11,9 @@ const mockCma: any = {
     getMany: vi.fn(),
     get: vi.fn(),
   },
+  editorInterface: {
+    getMany: vi.fn().mockResolvedValue({ items: [] }),
+  },
 };
 
 export { mockCma };

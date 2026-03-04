@@ -22,8 +22,6 @@ export const RedirectsTable = () => {
     // todo: open edit modal
   };
 
-  const defaultLocaleValue = sdk.locales.default || 'en-US';
-
   const columns = useMemo<TableColumn<EntryProps>[]>(
     () => [
       {
@@ -64,21 +62,21 @@ export const RedirectsTable = () => {
         id: 'reason',
         label: 'Reason',
         style: styles.reasonColumn,
-        render: (item) => truncateText(item.fields.reason[defaultLocaleValue] ?? '—', 180),
+        render: (item) => truncateText(item.fields.reason[sdk.locales.default] ?? '—', 180),
       },
       {
         id: 'type',
         label: 'Type',
         style: styles.typeColumn,
-        render: (item) => item.fields.redirectType[defaultLocaleValue] ?? '—',
+        render: (item) => item.fields.redirectType[sdk.locales.default] ?? '—',
       },
       {
         id: 'status',
         label: 'Status',
         style: styles.statusColumn,
         render: (item) => (
-          <Badge variant={item.fields.active[defaultLocaleValue] ? 'positive' : 'warning'}>
-            {item.fields.active[defaultLocaleValue] ? 'Active' : 'Inactive'}
+          <Badge variant={item.fields.active[sdk.locales.default] ? 'positive' : 'warning'}>
+            {item.fields.active[sdk.locales.default] ? 'Active' : 'Inactive'}
           </Badge>
         ),
       },
