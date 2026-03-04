@@ -42,6 +42,7 @@ This file lists who provides support for each app in this repository. When addin
 | locale-field-populator | Locale Field Populator | Contentful | |
 | microsoft-teams | Microsoft Teams | Contentful | |
 | mux | Mux | Contentful | |
+| marketo | Marketo | Contentful | |
 | netlify | Netlify | Contentful | |
 | optimizely | Optimizely | Contentful | |
 | remote-mcp | Remote MCP | Contentful | |
