@@ -1,4 +1,4 @@
-import { BaseAppSDK, HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
+import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useQuery } from '@tanstack/react-query';
 import { fetchRedirects, FetchRedirectsResult } from '../utils/fetchRedirects';
