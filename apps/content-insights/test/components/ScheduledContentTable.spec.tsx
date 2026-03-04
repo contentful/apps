@@ -75,10 +75,10 @@ describe('ScheduledContentTable component', () => {
       );
 
       expect(screen.getByText('Title')).toBeInTheDocument();
-      expect(screen.getByText('Scheduled Date')).toBeInTheDocument();
-      expect(screen.getByText('Published Date')).toBeInTheDocument();
+      expect(screen.getByText('Scheduled date')).toBeInTheDocument();
+      expect(screen.getByText('Published date')).toBeInTheDocument();
       expect(screen.getByText('Status')).toBeInTheDocument();
-      expect(screen.getByText('Content Type')).toBeInTheDocument();
+      expect(screen.getByText('Content type')).toBeInTheDocument();
       expect(screen.getByText('Creator')).toBeInTheDocument();
     });
 
@@ -265,7 +265,7 @@ describe('ScheduledContentTable component', () => {
       const link = screen.getByText('My Entry').closest('a');
       expect(link).toHaveAttribute(
         'href',
-        'https://app.contentful.com/spaces/test-space/entries/entry-123'
+        'https://app.contentful.com/spaces/test-space/environments/test-environment/entries/entry-123'
       );
       expect(link).toHaveAttribute('target', '_blank');
       expect(link).toHaveAttribute('rel', 'noopener noreferrer');

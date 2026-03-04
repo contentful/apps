@@ -6,16 +6,31 @@ export async function fetchUsersById(sdk: BaseAppSDK, userIds: string[]): Promis
     return [];
   }
 
-  const uniqueIds = Array.from(new Set(userIds));
+  const allUsers: UserProps[] = [];
+  const limit = 100;
+  let skip = 0;
+  let total = 0;
 
-  const users = await Promise.all(
-    uniqueIds.map((id) =>
-      sdk.cma.user.getForSpace({
+  try {
+    do {
+      const response = await sdk.cma.user.getManyForSpace({
         spaceId: sdk.ids.space,
-        userId: id,
-      })
-    )
-  );
+        query: {
+          limit,
+          skip,
+        },
+      });
 
-  return users;
+      allUsers.push(...response.items);
+      total = response.total;
+      skip += response.items.length;
+    } while (allUsers.length < total);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    throw error;
+  }
+
+  const idSet = new Set(userIds);
+  const filteredUsers = allUsers.filter((user) => idSet.has(user.sys.id));
+  return filteredUsers;
 }

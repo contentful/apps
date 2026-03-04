@@ -75,7 +75,13 @@ describe('ChartWrapper component', () => {
   describe('Rendering', () => {
     it('renders ResponsiveContainer with correct width and height', () => {
       render(
-        <ChartWrapper data={mockData} xAxisDataKey="date" height={500} legendTitle="Content:" />
+        <ChartWrapper
+          data={mockData}
+          xAxisDataKey="date"
+          chartLines={['New content']}
+          height={500}
+          legendTitle="Content:"
+        />
       );
 
       const container = screen.getByTestId('responsive-container');
@@ -88,6 +94,7 @@ describe('ChartWrapper component', () => {
         <ChartWrapper
           data={mockData}
           xAxisDataKey="date"
+          chartLines={['Article', 'Blog Post', 'Page']}
           processedContentTypes={
             new Map([
               ['Article', 'Article'],
@@ -107,13 +114,27 @@ describe('ChartWrapper component', () => {
 
   describe('Legend', () => {
     it('legend shows all linesLegends items', () => {
-      render(<ChartWrapper data={mockData} xAxisDataKey="date" legendTitle="Content Types:" />);
+      render(
+        <ChartWrapper
+          data={mockData}
+          xAxisDataKey="date"
+          chartLines={['New content']}
+          legendTitle="Content Types:"
+        />
+      );
 
-      expect(screen.getByText('New Content')).toBeInTheDocument();
+      expect(screen.getByText('New content')).toBeInTheDocument();
     });
 
     it('legend has correct title text', () => {
-      render(<ChartWrapper data={mockData} xAxisDataKey="date" legendTitle="Content Types:" />);
+      render(
+        <ChartWrapper
+          data={mockData}
+          xAxisDataKey="date"
+          chartLines={['New content']}
+          legendTitle="Content Types:"
+        />
+      );
 
       expect(screen.getByText('Content Types:')).toBeInTheDocument();
     });
@@ -121,7 +142,14 @@ describe('ChartWrapper component', () => {
 
   describe('Data Handling', () => {
     it('handles empty data array', () => {
-      render(<ChartWrapper data={[]} xAxisDataKey="date" legendTitle="Content:" />);
+      render(
+        <ChartWrapper
+          data={[]}
+          xAxisDataKey="date"
+          chartLines={['New content']}
+          legendTitle="Content:"
+        />
+      );
 
       const lineChart = screen.getByTestId('line-chart');
       expect(lineChart).toHaveAttribute('data-points', '0');
@@ -129,7 +157,14 @@ describe('ChartWrapper component', () => {
     });
 
     it('handles data with multiple data points', () => {
-      render(<ChartWrapper data={mockData} xAxisDataKey="date" legendTitle="Content:" />);
+      render(
+        <ChartWrapper
+          data={mockData}
+          xAxisDataKey="date"
+          chartLines={['New content']}
+          legendTitle="Content:"
+        />
+      );
 
       const lineChart = screen.getByTestId('line-chart');
       expect(lineChart).toHaveAttribute('data-points', mockData.length.toString());

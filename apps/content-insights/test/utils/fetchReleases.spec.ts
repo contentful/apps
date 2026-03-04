@@ -39,11 +39,17 @@ describe('fetchReleases', () => {
           .filter((id): id is string => id !== null)
       ),
     ];
+
     if (userIds.length > 0) {
-      // Mock getForSpace for each user ID (fetchUsersById calls it for each ID)
-      userIds.forEach((userId) => {
-        const user = users.find((u) => u.sys.id === userId) || createMockUser({ id: userId });
-        mockCma.user.getForSpace.mockResolvedValueOnce(user);
+      // Mock getManyForSpace once, returning all users that could exist in the space.
+      const usersForMock =
+        users.length > 0
+          ? users
+          : userIds.map((userId) => createMockUser({ id: userId }) as UserProps);
+
+      mockCma.user.getManyForSpace.mockResolvedValueOnce({
+        items: usersForMock,
+        total: usersForMock.length,
       });
     }
   };
@@ -81,7 +87,7 @@ describe('fetchReleases', () => {
       expect(result.fetchedAt).toBeInstanceOf(Date);
       expect(mockCma.scheduledActions.getMany).toHaveBeenCalledTimes(1);
       expect(mockCma.release.query).not.toHaveBeenCalled();
-      expect(mockCma.user.getForSpace).not.toHaveBeenCalled();
+      expect(mockCma.user.getManyForSpace).not.toHaveBeenCalled();
     });
   });
 
@@ -111,7 +117,7 @@ describe('fetchReleases', () => {
         title: 'My Launch Release',
         action: 'publish',
         itemsCount: 10,
-        viewUrl: `https://launch.contentful.com/spaces/${spaceId}/releases/launch-release-1`,
+        viewUrl: `https://launch.contentful.com/spaces/${spaceId}/environments/${environmentId}/releases/launch-release-1`,
         updatedBy: {
           id: 'user-1',
           firstName: 'John',
@@ -143,7 +149,7 @@ describe('fetchReleases', () => {
         id: 'timeline-release-1',
         title: 'My Timeline Release',
         itemsCount: 15,
-        viewUrl: `https://app.contentful.com/spaces/${spaceId}/views/entries?release=timeline-release-1`,
+        viewUrl: `https://app.contentful.com/spaces/${spaceId}/environments/${environmentId}/views/entries?release=timeline-release-1`,
       });
     });
   });

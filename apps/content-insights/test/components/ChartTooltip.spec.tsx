@@ -30,14 +30,14 @@ describe('ChartTooltip', () => {
   const mockNewEntriesData: ChartDataPoint[] = [
     {
       date: 'Dec 2024',
-      'New Content': 10,
+      'New content': 10,
       avgTimeToPublish: 5.5,
       newContentChange: 25.0,
       avgTimeToPublishChange: -10.0,
     },
     {
       date: 'Jan 2025',
-      'New Content': 15,
+      'New content': 15,
       avgTimeToPublish: 4.0,
       newContentChange: 50.0,
       avgTimeToPublishChange: -27.3,
@@ -87,7 +87,7 @@ describe('ChartTooltip', () => {
           active={true}
           label="Dec 2024"
           data={mockNewEntriesData}
-          valueKey="New Content"
+          valueKey="New content"
           inNewEntriesTab={true}
         />
       );
@@ -104,7 +104,7 @@ describe('ChartTooltip', () => {
       const dataWithoutChanges: ChartDataPoint[] = [
         {
           date: 'Dec 2024',
-          'New Content': 10,
+          'New content': 10,
           avgTimeToPublish: 5.5,
         },
       ];
@@ -114,7 +114,7 @@ describe('ChartTooltip', () => {
           active={true}
           label="Dec 2024"
           data={dataWithoutChanges}
-          valueKey="New Content"
+          valueKey="New content"
           inNewEntriesTab={true}
         />
       );
@@ -129,7 +129,7 @@ describe('ChartTooltip', () => {
           active={false}
           label="Dec 2024"
           data={mockNewEntriesData}
-          valueKey="New Content"
+          valueKey="New content"
           inNewEntriesTab={true}
         />
       );
@@ -142,7 +142,7 @@ describe('ChartTooltip', () => {
         <ChartTooltip
           active={true}
           data={mockNewEntriesData}
-          valueKey="New Content"
+          valueKey="New content"
           inNewEntriesTab={true}
         />
       );

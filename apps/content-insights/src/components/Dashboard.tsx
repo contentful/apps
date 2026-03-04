@@ -17,11 +17,11 @@ import { ScheduledContentTabs } from './ScheduledContentTabs';
 import { styles } from './Dashboard.styles';
 
 const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
-  { value: TimeRange.Month, label: 'Past Month' },
-  { value: TimeRange.ThreeMonths, label: 'Past 3 Months' },
-  { value: TimeRange.SixMonths, label: 'Past 6 Months' },
-  { value: TimeRange.Year, label: 'Past Year' },
-  { value: TimeRange.YearToDate, label: 'Year to Date' },
+  { value: TimeRange.Month, label: 'Past month' },
+  { value: TimeRange.ThreeMonths, label: 'Past 3 months' },
+  { value: TimeRange.SixMonths, label: 'Past 6 months' },
+  { value: TimeRange.Year, label: 'Past year' },
+  { value: TimeRange.YearToDate, label: 'Year to date' },
 ];
 
 const Dashboard = () => {
@@ -99,7 +99,7 @@ const Dashboard = () => {
 
           <Box marginTop="spacingL" style={styles.sectionContainer}>
             <Flex flexDirection="row" justifyContent="space-between" alignItems="center">
-              <Subheading>Content Publishing Trends</Subheading>
+              <Subheading>Content publishing trends</Subheading>
               <Select value={timeRange} size="medium" onChange={handleTimeRangeChange}>
                 {TIME_RANGE_OPTIONS.map((option) => (
                   <Select.Option key={option.value} value={option.value}>
@@ -124,7 +124,7 @@ const Dashboard = () => {
             {installation.showUpcomingReleases && (
               <Box padding="spacingL" style={styles.releasesTableContainer}>
                 <Heading as="h2" marginBottom="spacingM">
-                  Upcoming Scheduled Releases
+                  Upcoming scheduled releases
                 </Heading>
                 <ReleasesTable />
               </Box>
