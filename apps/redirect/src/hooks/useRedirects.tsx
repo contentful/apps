@@ -1,6 +1,6 @@
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { fetchRedirects, FetchRedirectsResult } from '../utils/fetchRedirects';
 import { ITEMS_PER_PAGE } from '../utils/consts';
 import { EntryProps } from 'contentful-management';
@@ -42,9 +42,10 @@ export function useRedirects(
     load();
   }, [load]);
 
-  const paginatedRedirects: EntryProps[] = allData
-    ? allData.redirects.slice(skip, skip + itemsPerPage)
-    : [];
+  const paginatedRedirects = useMemo<EntryProps[]>(
+    () => (allData ? allData.redirects.slice(skip, skip + itemsPerPage) : []),
+    [allData, skip, itemsPerPage]
+  );
 
   return {
     redirects: paginatedRedirects,

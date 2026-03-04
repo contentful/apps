@@ -29,8 +29,41 @@ export const RedirectsTable = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
-  const { redirects, total, isFetchingRedirects, fetchingRedirectsError, refetchRedirects } =
-    useRedirects(currentPage, itemsPerPage);
+  const { redirects, isFetchingRedirects, fetchingRedirectsError, refetchRedirects } = useRedirects(
+    currentPage,
+    itemsPerPage
+  );
+
+  const filteredRedirects = useMemo<EntryProps[]>(() => {
+    let result: EntryProps[] = redirects;
+    const locale = sdk.locales.default;
+    const lowerQuery = searchQuery.toLowerCase();
+
+    if (searchQuery.length > 0) {
+      result = result.filter(
+        (redirect) =>
+          redirect.fields.redirectFromContentTypes?.title?.toLowerCase().includes(lowerQuery) ||
+          redirect.fields.redirectToContentTypes?.title?.toLowerCase().includes(lowerQuery) ||
+          redirect.fields.reason[locale]?.toLowerCase().includes(lowerQuery) ||
+          redirect.fields.redirectFromContentTypes?.slug?.toLowerCase().includes(lowerQuery) ||
+          redirect.fields.redirectToContentTypes?.slug?.toLowerCase().includes(lowerQuery)
+      );
+    }
+
+    if (typeFilter.length > 0) {
+      result = result.filter((redirect) =>
+        typeFilter.includes(redirect.fields.redirectType[locale])
+      );
+    }
+
+    if (statusFilter.length > 0) {
+      result = result.filter((redirect) =>
+        statusFilter.includes(redirect.fields.active[locale] ? 'Active' : 'Inactive')
+      );
+    }
+
+    return result;
+  }, [redirects, searchQuery, sdk.locales.default, typeFilter, statusFilter]);
 
   const handleEdit = () => {
     // todo: open edit modal
@@ -116,7 +149,7 @@ export const RedirectsTable = () => {
         ),
       },
     ],
-    [sdk, refetchRedirects]
+    [sdk]
   );
 
   const handleToggleFilter = (
@@ -178,8 +211,8 @@ export const RedirectsTable = () => {
         </Box>
       )}
       <ContentTable
-        items={redirects}
-        total={total}
+        items={filteredRedirects}
+        total={filteredRedirects.length}
         isFetching={isFetchingRedirects}
         error={fetchingRedirectsError}
         columns={columns}
