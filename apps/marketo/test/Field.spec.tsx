@@ -78,7 +78,7 @@ describe('Field component', () => {
 
       render(<Field />);
 
-      expect(screen.getByText(/Loading Marketo data/i)).toBeInTheDocument();
+      expect(screen.getByText(/Loading Marketo forms/i)).toBeInTheDocument();
     });
 
     it('should render without the autocomplete when forms list is empty', async () => {

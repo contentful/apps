@@ -127,7 +127,7 @@ const Field = () => {
   if (loadingData) {
     return (
       <Flex alignItems="center" gap="spacingXs">
-        <Paragraph marginBottom="none">Loading Marketo data</Paragraph>
+        <Paragraph marginBottom="none">Loading Marketo forms</Paragraph>
         <Spinner color="primary" />
       </Flex>
     );
