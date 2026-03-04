@@ -5,7 +5,7 @@ import { createMockRedirect, createMockRedirectForPage } from '../utils/testUtil
 import { RedirectsTable } from '../../src/components/RedirectsTable';
 import { EntryProps } from 'contentful-management';
 
-let mockRedirects: EntryProps[] = [createMockRedirectForPage(0) as EntryProps];
+let mockRedirects: EntryProps[] = [createMockRedirectForPage(0)];
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,

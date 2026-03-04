@@ -1,5 +1,6 @@
 import { ContentTypeProps, EditorInterfaceProps, EntryProps } from 'contentful-management';
 import { REDIRECT_CONTENT_TYPE_ID } from '../../src/utils/consts';
+import { RedirectEntry } from '../../src/utils/types';
 
 export function createMockReferencedEntry(
   id: string,
@@ -89,7 +90,7 @@ export function createMockRedirect(id: string, fields: MockRedirectFields = {}):
   } as EntryProps;
 }
 
-export function createMockRedirectForPage(count: number): EntryProps {
+export function createMockRedirectForPage(count: number): RedirectEntry {
   const id = `test-id-${count}`;
 
   return {
@@ -97,16 +98,18 @@ export function createMockRedirectForPage(count: number): EntryProps {
     fields: {
       title: { 'en-US': `Redirect title ${count}` },
       redirectFromContentTypes: {
-        sys: { id: `from-${id}` },
+        sys: { type: 'Link', linkType: 'Entry', id: `from-${id}` },
         title: `Field from title ${count}`,
+        slug: `/from-${id}`,
       },
       redirectToContentTypes: {
-        sys: { id: `to-${id}` },
+        sys: { type: 'Link', linkType: 'Entry', id: `to-${id}` },
         title: `Field to title ${count}`,
+        slug: `/to-${id}`,
       },
       redirectType: { 'en-US': `Redirect type ${count}` },
       active: { 'en-US': false },
       reason: { 'en-US': `Redirect reason ${count}` },
     },
-  } as EntryProps;
+  } as unknown as RedirectEntry;
 }

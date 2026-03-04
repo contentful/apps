@@ -39,6 +39,43 @@ describe('fetchRedirects', () => {
     });
   });
 
+  it('paginates when total exceeds page size', async () => {
+    const page1Items: EntryProps[] = Array.from({ length: 100 }, (_, i) =>
+      createMockReferencedEntry(`entry-${i}`, REDIRECT_CONTENT_TYPE_ID, {})
+    );
+    const page2Items: EntryProps[] = Array.from({ length: 30 }, (_, i) =>
+      createMockReferencedEntry(`entry-${100 + i}`, REDIRECT_CONTENT_TYPE_ID, {})
+    );
+
+    mockCma.entry.getMany
+      .mockResolvedValueOnce({
+        items: page1Items,
+        total: 130,
+        limit: 100,
+        skip: 0,
+        sys: { type: 'Array' },
+      })
+      .mockResolvedValueOnce({
+        items: page2Items,
+        total: 130,
+        limit: 100,
+        skip: 100,
+        sys: { type: 'Array' },
+      });
+
+    const result = await fetchRedirects(mockSdk);
+
+    expect(mockCma.entry.getMany).toHaveBeenCalledTimes(2);
+    expect(mockCma.entry.getMany).toHaveBeenNthCalledWith(1, {
+      query: { limit: 100, skip: 0, content_type: REDIRECT_CONTENT_TYPE_ID },
+    });
+    expect(mockCma.entry.getMany).toHaveBeenNthCalledWith(2, {
+      query: { limit: 100, skip: 100, content_type: REDIRECT_CONTENT_TYPE_ID },
+    });
+    expect(result.total).toBe(130);
+    expect(result.redirects).toHaveLength(130);
+  });
+
   it('returns redirects, total, and fetchedAt from response', async () => {
     const redirectFields = {
       redirectFromContentTypes: {

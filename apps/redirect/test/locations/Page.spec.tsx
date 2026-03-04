@@ -2,8 +2,8 @@ import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/re
 import { describe, expect, it, vi } from 'vitest';
 import { mockCma, mockSdk } from '../../test/mocks';
 import Page from '../../src/locations/Page';
-import { EntryProps } from 'contentful-management';
 import { createMockRedirectForPage } from '../utils/testUtils';
+import { RedirectEntry } from '../../src/utils/types';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -22,7 +22,7 @@ vi.mock('../../src/hooks/useRedirects', () => ({
 }));
 
 const mockRedirectsCount = 5;
-const mockRedirects: EntryProps[] = Array.from({ length: mockRedirectsCount }, (_, index) =>
+const mockRedirects: RedirectEntry[] = Array.from({ length: mockRedirectsCount }, (_, index) =>
   createMockRedirectForPage(index)
 );
 

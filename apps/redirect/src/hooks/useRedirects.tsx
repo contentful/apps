@@ -3,10 +3,10 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { fetchRedirects, FetchRedirectsResult } from '../utils/fetchRedirects';
 import { ITEMS_PER_PAGE } from '../utils/consts';
-import { EntryProps } from 'contentful-management';
+import { RedirectEntry } from '../utils/types';
 
 export interface UseRedirectsResult {
-  redirects: EntryProps[];
+  redirects: RedirectEntry[];
   total: number;
   isFetchingRedirects: boolean;
   fetchingRedirectsError: Error | null;

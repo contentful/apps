@@ -16,8 +16,8 @@ import { redirectsTableStyles as styles } from './RedirectsTable.styles';
 import { ContentTable } from './ContentTable';
 import { useRedirects } from '../hooks/useRedirects';
 import { ITEMS_PER_PAGE, STATUS_FILTER_OPTIONS, TYPE_FILTER_OPTIONS } from '../utils/consts';
-import { TableColumn } from '../utils/types';
 import { EntryProps } from 'contentful-management';
+import { TableColumn, RedirectEntry } from '../utils/types';
 import { truncateText } from '../utils/utils';
 import { SearchBar } from './SearchBar';
 import FilterMultiselect from './FilterMultiselect';
@@ -74,7 +74,7 @@ export const RedirectsTable = () => {
     setSearchQuery(query);
   };
 
-  const columns = useMemo<TableColumn<EntryProps>[]>(
+  const columns = useMemo<TableColumn<RedirectEntry>[]>(
     () => [
       {
         id: 'source',
