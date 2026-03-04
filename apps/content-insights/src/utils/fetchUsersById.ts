@@ -6,39 +6,31 @@ export async function fetchUsersById(sdk: BaseAppSDK, userIds: string[]): Promis
     return [];
   }
 
-  const uniqueIds = Array.from(new Set(userIds));
+  const allUsers: UserProps[] = [];
+  const limit = 100;
+  let skip = 0;
+  let total = 0;
 
-  const results = await Promise.allSettled(
-    uniqueIds.map((id) =>
-      sdk.cma.user.getForSpace({
+  try {
+    do {
+      const response = await sdk.cma.user.getManyForSpace({
         spaceId: sdk.ids.space,
-        userId: id,
-      })
-    )
-  );
+        query: {
+          limit,
+          skip,
+        },
+      });
 
-  const successfulUsers: UserProps[] = [];
-  const errors: unknown[] = [];
-
-  results.forEach((result) => {
-    if (result.status === 'fulfilled') {
-      successfulUsers.push(result.value);
-    } else {
-      errors.push(result.reason);
-    }
-  });
-
-  if (successfulUsers.length === 0 && errors.length > 0) {
-    const firstError = errors[0] as { message?: string } | undefined;
-    const errorMessage =
-      firstError && firstError.message ? firstError.message : 'Error fetching users';
-    console.error('All users failed to fetch:', errorMessage);
-    throw new Error(errorMessage);
+      allUsers.push(...response.items);
+      total = response.total;
+      skip += response.items.length;
+    } while (allUsers.length < total);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    throw error;
   }
 
-  if (errors.length > 0) {
-    console.error('Some users failed to fetch:', errors);
-  }
-
-  return successfulUsers;
+  const idSet = new Set(userIds);
+  const filteredUsers = allUsers.filter((user) => idSet.has(user.sys.id));
+  return filteredUsers;
 }
