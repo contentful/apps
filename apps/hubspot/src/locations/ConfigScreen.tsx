@@ -17,18 +17,16 @@ import {
   Image,
 } from '@contentful/f36-components';
 import demoVideo from '../assets/hubspot.mp4';
-import { ChevronDownIcon, ChevronUpIcon, ExternalLinkIcon } from '@contentful/f36-icons';
+import { CaretDownIcon, CaretUpIcon, ArrowSquareOutIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import Splitter from '../components/Splitter';
+import { Splitter, ContentTypeMultiSelect } from 'contentful-app-components';
 import { IMAGE_HEIGHT, IMAGE_WIDTH, styles } from './ConfigScreen.styles';
 import {
   AppInstallationParameters,
   CONFIG_SCREEN_INSTRUCTIONS,
-  ContentType,
   HUBSPOT_PRIVATE_APPS_URL,
 } from '../utils/utils';
-import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 import ConfigEntryService from '../utils/ConfigEntryService';
 import sidebarExample from '../assets/sidebar-example.png';
 import pageTableExample from '../assets/page-table-example.png';
@@ -43,7 +41,7 @@ const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     hubspotAccessToken: '',
   });
-  const [selectedContentTypes, setSelectedContentTypes] = useState<ContentType[]>([]);
+  const [selectedContentTypesIds, setSelectedContentTypesIds] = useState<string[]>([]);
 
   function checkIfHasValue(value: string) {
     return !!value?.trim();
@@ -78,10 +76,10 @@ const ConfigScreen = () => {
       return false;
     }
 
-    const editorInterface = selectedContentTypes.reduce((acc, contentType) => {
+    const editorInterface = selectedContentTypesIds.reduce((acc, contentTypeId) => {
       return {
         ...acc,
-        [contentType.id]: {
+        [contentTypeId]: {
           sidebar: { position: 0 },
         },
       };
@@ -91,7 +89,7 @@ const ConfigScreen = () => {
       parameters,
       targetState: { EditorInterface: { ...editorInterface } },
     };
-  }, [parameters, sdk, selectedContentTypes]);
+  }, [parameters, sdk, selectedContentTypesIds]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -100,6 +98,12 @@ const ConfigScreen = () => {
   useEffect(() => {
     (async () => {
       const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
+      const currentState = await sdk.app.getCurrentState();
+      const currentContentTypesIds = Object.keys(currentState?.EditorInterface || {});
+
+      if (currentContentTypesIds.length > 0) {
+        setSelectedContentTypesIds(currentContentTypesIds);
+      }
 
       if (currentParameters && currentParameters.hubspotAccessToken) {
         setParameters(currentParameters);
@@ -156,7 +160,7 @@ const ConfigScreen = () => {
             <IconButton
               variant="transparent"
               aria-label={isExpanded ? 'Collapse instructions' : 'Expand instructions'}
-              icon={isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
+              icon={isExpanded ? <CaretUpIcon /> : <CaretDownIcon />}
               onClick={() => setIsExpanded((v) => !v)}
               size="small"
             />
@@ -177,7 +181,7 @@ const ConfigScreen = () => {
                 href={HUBSPOT_PRIVATE_APPS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                icon={<ExternalLinkIcon />}
+                icon={<ArrowSquareOutIcon />}
                 alignIcon="end">
                 Read about creating private apps in Hubspot.
               </TextLink>
@@ -195,9 +199,8 @@ const ConfigScreen = () => {
         </Paragraph>
         <Text fontWeight="fontWeightDemiBold">Content types</Text>
         <ContentTypeMultiSelect
-          selectedContentTypes={selectedContentTypes}
-          setSelectedContentTypes={setSelectedContentTypes}
-          sdk={sdk}
+          selectedContentTypesIds={selectedContentTypesIds}
+          setSelectedContentTypesIds={setSelectedContentTypesIds}
         />
         <Subheading marginTop="spacing2Xl" marginBottom="spacingS">
           Getting started

@@ -1,5 +1,5 @@
 import { Button, FormControl, Paragraph } from '@contentful/f36-components';
-import { Multiselect } from '@contentful/f36-multiselect';
+import { Multiselect } from '@contentful/f36-components';
 import { Entry } from '../../fields/Entry';
 import WizardFooter from '../WizardFooter';
 import React from 'react';

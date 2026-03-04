@@ -12,7 +12,11 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals"],
+    "baseUrl": ".",
+    "paths": {
+      "contentful-app-components": ["../../packages/contentful-app-components/index.ts"]
+    }
   },
   "include": ["src", "test"],
   "exclude": ["actions", "functions"]
