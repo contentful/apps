@@ -3,9 +3,9 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { mockSdk } from '../mocks';
 import { createMockRedirect, createMockRedirectForPage } from '../utils/testUtils';
 import { RedirectsTable } from '../../src/components/RedirectsTable';
-import { EntryProps } from 'contentful-management';
+import { RedirectEntry } from '../../src/utils/types';
 
-let mockRedirects: EntryProps[] = [createMockRedirectForPage(0)];
+let mockRedirects: RedirectEntry[] = [createMockRedirectForPage(0)];
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -103,7 +103,7 @@ describe('RedirectsTable component', () => {
     });
 
     afterEach(() => {
-      mockRedirects = [createMockRedirectForPage(0) as EntryProps];
+      mockRedirects = [createMockRedirectForPage(0)];
     });
 
     describe('search', () => {

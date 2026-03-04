@@ -42,7 +42,7 @@ export function useRedirects(
     load();
   }, [load]);
 
-  const paginatedRedirects = useMemo<EntryProps[]>(
+  const paginatedRedirects = useMemo<RedirectEntry[]>(
     () => (allData ? allData.redirects.slice(skip, skip + itemsPerPage) : []),
     [allData, skip, itemsPerPage]
   );

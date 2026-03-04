@@ -69,7 +69,7 @@ interface MockRedirectFields {
   active?: boolean;
 }
 
-export function createMockRedirect(id: string, fields: MockRedirectFields = {}): EntryProps {
+export function createMockRedirect(id: string, fields: MockRedirectFields = {}): RedirectEntry {
   const {
     fromTitle = 'Source',
     toTitle = 'Destination',
@@ -87,7 +87,7 @@ export function createMockRedirect(id: string, fields: MockRedirectFields = {}):
       redirectType: { 'en-US': type },
       active: { 'en-US': active },
     },
-  } as EntryProps;
+  } as unknown as RedirectEntry;
 }
 
 export function createMockRedirectForPage(count: number): RedirectEntry {
