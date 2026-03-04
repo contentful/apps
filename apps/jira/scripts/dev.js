@@ -36,7 +36,7 @@ function startApp(url) {
 
   console.log(`> Lambda base URL: ${url}`);
   console.log('> Frontend: http://localhost:' + (process.env.PORT || '1234'));
-  console.log('> In Atlassian OAuth callback URL use: ' + process.env.OAUTH_REDIRECT_URI);
+  console.log('> In Atlassian OAuth callback URL use: ' + url + '/test/auth');
   console.log('> First time? Run npm run setup for a guided checklist.');
 
   childProcess = spawn('npm', ['run', 'start'], {
