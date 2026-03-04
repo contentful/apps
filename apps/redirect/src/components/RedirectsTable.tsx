@@ -22,6 +22,14 @@ import { truncateText } from '../utils/utils';
 import { SearchBar } from './SearchBar';
 import FilterMultiselect from './FilterMultiselect';
 
+const getSearchableFields = (redirect: RedirectEntry, locale: string): (string | undefined)[] => [
+  redirect.fields.redirectFromContentTypes?.title,
+  redirect.fields.redirectToContentTypes?.title,
+  redirect.fields.reason[locale],
+  redirect.fields.redirectFromContentTypes?.slug,
+  redirect.fields.redirectToContentTypes?.slug,
+];
+
 export const RedirectsTable = () => {
   const sdk = useSDK<PageAppSDK>();
   const [currentPage, setCurrentPage] = useState(0);
@@ -34,35 +42,31 @@ export const RedirectsTable = () => {
     itemsPerPage
   );
 
-  const filteredRedirects = useMemo<EntryProps[]>(() => {
-    let result: EntryProps[] = redirects;
+  const filteredRedirects = useMemo<RedirectEntry[]>(() => {
     const locale = sdk.locales.default;
     const lowerQuery = searchQuery.toLowerCase();
 
+    const filters: Array<(redirect: RedirectEntry) => boolean> = [];
+
     if (searchQuery.length > 0) {
-      result = result.filter(
-        (redirect) =>
-          redirect.fields.redirectFromContentTypes?.title?.toLowerCase().includes(lowerQuery) ||
-          redirect.fields.redirectToContentTypes?.title?.toLowerCase().includes(lowerQuery) ||
-          redirect.fields.reason[locale]?.toLowerCase().includes(lowerQuery) ||
-          redirect.fields.redirectFromContentTypes?.slug?.toLowerCase().includes(lowerQuery) ||
-          redirect.fields.redirectToContentTypes?.slug?.toLowerCase().includes(lowerQuery)
+      filters.push((redirect) =>
+        getSearchableFields(redirect, locale).some((field) =>
+          field?.toLowerCase().includes(lowerQuery)
+        )
       );
     }
 
     if (typeFilter.length > 0) {
-      result = result.filter((redirect) =>
-        typeFilter.includes(redirect.fields.redirectType[locale])
-      );
+      filters.push((redirect) => typeFilter.includes(redirect.fields.redirectType[locale]));
     }
 
     if (statusFilter.length > 0) {
-      result = result.filter((redirect) =>
+      filters.push((redirect) =>
         statusFilter.includes(redirect.fields.active[locale] ? 'Active' : 'Inactive')
       );
     }
 
-    return result;
+    return redirects.filter((redirect) => filters.every((filter) => filter(redirect)));
   }, [redirects, searchQuery, sdk.locales.default, typeFilter, statusFilter]);
 
   const handleEdit = () => {
