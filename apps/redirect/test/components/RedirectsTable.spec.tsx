@@ -3,15 +3,13 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { mockSdk } from '../mocks';
 import { createMockRedirectForPage } from '../utils/testUtils';
 import { RedirectsTable } from '../../src/components/RedirectsTable';
-import { EntryProps } from 'contentful-management';
-
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
 vi.mock('../../src/hooks/useRedirects', () => ({
   useRedirects: () => ({
-    redirects: [createMockRedirectForPage(0) as EntryProps],
+    redirects: [createMockRedirectForPage(0)],
     total: 1,
     isFetchingRedirects: false,
     fetchingRedirectsError: null,

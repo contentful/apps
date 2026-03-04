@@ -18,24 +18,24 @@ export type TableColumn<T> = {
   render: (item: T) => ReactNode;
 };
 
-export type RedirectEntry = {
-  sys: {
-    id: string;
-  };
-  fields: {
-    id: { value: string };
-    title: { value: string };
-    slug: { value: string };
-  };
+type RedirectEntryRef = {
+  sys?: { type: string; linkType: string; id: string };
+  title: string;
+  slug: string | undefined;
 };
 
-export type Redirect = {
-  id: string;
-  title: string;
-  source: RedirectEntry;
-  destination: RedirectEntry;
-  reason: string;
-  type: string;
-  status: string;
-  createdAt: string;
-};
+export interface RedirectEntry {
+  sys: {
+    id: string;
+    createdAt: string;
+  };
+  fields: {
+    redirectFromContentTypes: RedirectEntryRef;
+    redirectToContentTypes: RedirectEntryRef;
+    redirectFrom?: Record<string, string>;
+    redirectTo?: Record<string, string>;
+    reason: Record<string, string>;
+    redirectType: Record<string, string>;
+    active: Record<string, boolean>;
+  };
+}

@@ -7,8 +7,7 @@ import { redirectsTableStyles as styles } from './RedirectsTable.styles';
 import { ContentTable } from './ContentTable';
 import { useRedirects } from '../hooks/useRedirects';
 import { ITEMS_PER_PAGE } from '../utils/consts';
-import { TableColumn } from '../utils/types';
-import { EntryProps } from 'contentful-management';
+import { TableColumn, RedirectEntry } from '../utils/types';
 import { truncateText } from '../utils/utils';
 
 export const RedirectsTable = () => {
@@ -22,7 +21,7 @@ export const RedirectsTable = () => {
     // todo: open edit modal
   };
 
-  const columns = useMemo<TableColumn<EntryProps>[]>(
+  const columns = useMemo<TableColumn<RedirectEntry>[]>(
     () => [
       {
         id: 'source',

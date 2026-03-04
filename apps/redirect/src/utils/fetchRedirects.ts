@@ -1,9 +1,10 @@
 import { CollectionProp, ContentTypeProps, EntryProps } from 'contentful-management';
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
-import { REDIRECT_CONTENT_TYPE_ID } from './consts';
+import { PAGE_SIZE, REDIRECT_CONTENT_TYPE_ID, SLUG_FIELD_FALLBACKS } from './consts';
+import { RedirectEntry } from './types';
 
 export interface FetchRedirectsResult {
-  redirects: EntryProps[];
+  redirects: RedirectEntry[];
   total: number;
   fetchedAt: Date;
 }
@@ -22,19 +23,37 @@ export const fetchRedirects = async (
   sdk: HomeAppSDK | PageAppSDK
 ): Promise<FetchRedirectsResult> => {
   try {
-    const response = await sdk.cma.entry.getMany({
-      query: {
-        limit: 100,
-        skip: 0,
-        content_type: REDIRECT_CONTENT_TYPE_ID,
-      },
-    });
+    const allItems: EntryProps[] = [];
+    let skip = 0;
+    let total = 0;
+
+    do {
+      const response = await sdk.cma.entry.getMany({
+        query: {
+          limit: PAGE_SIZE,
+          skip,
+          content_type: REDIRECT_CONTENT_TYPE_ID,
+        },
+      });
+
+      total = response.total;
+      allItems.push(...response.items);
+      skip += response.items.length;
+    } while (skip < total);
+
+    const fakeCollection: CollectionProp<EntryProps> = {
+      sys: { type: 'Array' },
+      total,
+      skip: 0,
+      limit: PAGE_SIZE,
+      items: allItems,
+    };
 
     const { referencedEntriesById, contentTypesById, slugFieldIdsByContentTypeId } =
-      await getReferencedEntriesAndContentTypes(sdk, sdk.locales.default, response);
+      await getReferencedEntriesAndContentTypes(sdk, sdk.locales.default, fakeCollection);
 
     const redirects = buildStructure(
-      response.items as EntryProps[],
+      allItems,
       sdk.locales.default,
       referencedEntriesById,
       contentTypesById,
@@ -43,7 +62,7 @@ export const fetchRedirects = async (
 
     return {
       redirects,
-      total: response.total,
+      total,
       fetchedAt: new Date(),
     };
   } catch (error) {
@@ -200,7 +219,7 @@ const buildStructure = (
   referencedEntriesById: Map<string, EntryProps>,
   contentTypesById: Map<string, ContentTypeProps>,
   slugFieldIdsByContentTypeId: Map<string, string>
-): EntryProps[] => {
+): RedirectEntry[] => {
   return items.map((item) => {
     const redirectFromField = item.fields.redirectFromContentTypes?.[defaultLocale];
     const redirectToField = item.fields.redirectToContentTypes?.[defaultLocale];
@@ -253,7 +272,7 @@ const buildStructure = (
           slug: redirectToSlug,
         },
       },
-    };
+    } as unknown as RedirectEntry;
   });
 };
 
@@ -300,7 +319,10 @@ const getSlugValue = (
     }
   }
 
-  const slug = fields.slug?.[defaultLocale];
+  for (const fieldId of SLUG_FIELD_FALLBACKS) {
+    const value = fields[fieldId]?.[defaultLocale];
+    if (typeof value === 'string') return value;
+  }
 
-  return typeof slug === 'string' ? slug : undefined;
+  return undefined;
 };

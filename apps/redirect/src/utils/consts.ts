@@ -2,7 +2,11 @@ export const REDIRECT_CONTENT_TYPE_ID = 'redirectAppRedirect';
 
 export const ITEMS_PER_PAGE = 5;
 
+export const PAGE_SIZE = 100;
+
 export const PAGE_SIZE_OPTIONS = [25, 50, 100];
+
+export const SLUG_FIELD_FALLBACKS = ['slug', 'urlSlug', 'path'];
 
 // Cache configuration constants
 export const CACHE_CONFIG = {
