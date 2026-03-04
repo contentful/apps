@@ -1,7 +1,6 @@
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { mockCma, mockSdk } from '../../test/mocks';
-import { QueryProvider } from '../../src/providers/QueryProvider';
 import Page from '../../src/locations/Page';
 import { EntryProps } from 'contentful-management';
 import { createMockRedirectForPage } from '../utils/testUtils';
@@ -37,11 +36,7 @@ describe('Page component', () => {
   });
 
   it('renders heading, configuration button and redirects table', () => {
-    render(
-      <QueryProvider>
-        <Page />
-      </QueryProvider>
-    );
+    render(<Page />);
 
     waitFor(() => {
       expect(screen.getByText('Redirects manager')).toBeInTheDocument();
@@ -53,11 +48,7 @@ describe('Page component', () => {
     const openAppConfig = vi.fn();
     (mockSdk as any).navigator = { openAppConfig };
 
-    render(
-      <QueryProvider>
-        <Page />
-      </QueryProvider>
-    );
+    render(<Page />);
 
     const button = screen.getByRole('button', { name: 'App configuration' });
     fireEvent.click(button);
@@ -66,11 +57,7 @@ describe('Page component', () => {
   });
 
   it('renders redirects table with data', async () => {
-    render(
-      <QueryProvider>
-        <Page />
-      </QueryProvider>
-    );
+    render(<Page />);
 
     await screen.findByTestId('redirects-table');
     expect(screen.getByText(`Field from title ${mockRedirectsCount - 1}`)).toBeInTheDocument();

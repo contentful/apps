@@ -1,6 +1,6 @@
 import { HomeAppSDK, PageAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { useQuery } from '@tanstack/react-query';
+import { useCallback, useEffect, useState } from 'react';
 import { fetchRedirects, FetchRedirectsResult } from '../utils/fetchRedirects';
 import { ITEMS_PER_PAGE } from '../utils/consts';
 import { EntryProps } from 'contentful-management';
@@ -21,25 +21,37 @@ export function useRedirects(
   const sdk = useSDK<HomeAppSDK | PageAppSDK>();
   const skip = page * itemsPerPage;
 
-  const { data, isFetching, error, refetch } = useQuery<FetchRedirectsResult, Error>({
-    queryKey: ['redirects', sdk.ids.space, sdk.ids.environmentAlias ?? sdk.ids.environment],
-    queryFn: () => fetchRedirects(sdk),
-    select: (data: FetchRedirectsResult) => {
-      const paginatedRedirects = data.redirects.slice(skip, skip + itemsPerPage);
-      return {
-        redirects: paginatedRedirects,
-        total: data.total,
-        fetchedAt: data.fetchedAt,
-      };
-    },
-  });
+  const [allData, setAllData] = useState<FetchRedirectsResult | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const load = useCallback(async () => {
+    setIsFetching(true);
+    setError(null);
+    try {
+      const result = await fetchRedirects(sdk);
+      setAllData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error(String(err)));
+    } finally {
+      setIsFetching(false);
+    }
+  }, [sdk]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const paginatedRedirects: EntryProps[] = allData
+    ? allData.redirects.slice(skip, skip + itemsPerPage)
+    : [];
 
   return {
-    redirects: data?.redirects || [],
-    total: data?.total || 0,
+    redirects: paginatedRedirects,
+    total: allData?.total ?? 0,
     isFetchingRedirects: isFetching,
     fetchingRedirectsError: error,
-    refetchRedirects: refetch,
-    fetchedAt: data?.fetchedAt,
+    refetchRedirects: load,
+    fetchedAt: allData?.fetchedAt,
   };
 }
