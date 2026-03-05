@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import ConfigScreen from './locations/ConfigScreen';
 import Page from './locations/Page';
 import Sidebar from './locations/Sidebar';
+import { QueryProvider } from './providers/QueryProvider';
 
 const ComponentLocationSettings = {
   [locations.LOCATION_APP_CONFIG]: ConfigScreen,
@@ -22,7 +23,7 @@ const App = () => {
     }
   }, [sdk.location]);
 
-  return Component ? <Component /> : null;
+  return <QueryProvider>{Component ? <Component /> : null}</QueryProvider>;
 };
 
 export default App;
