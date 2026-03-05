@@ -7,6 +7,7 @@ import { RedirectEntry } from '../utils/types';
 
 export interface UseRedirectsResult {
   redirects: RedirectEntry[];
+  allRedirects: RedirectEntry[];
   total: number;
   isFetchingRedirects: boolean;
   fetchingRedirectsError: Error | null;
@@ -49,6 +50,7 @@ export function useRedirects(
 
   return {
     redirects: paginatedRedirects,
+    allRedirects: allData?.redirects ?? [],
     total: allData?.total ?? 0,
     isFetchingRedirects: isFetching,
     fetchingRedirectsError: error,

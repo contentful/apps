@@ -16,11 +16,8 @@ import { useCallback, useEffect, useState } from 'react';
 import ContentTypeMultiSelect from '../components/ContentTypeMultiSelect';
 import { AppInstallationParameters } from '../utils/types';
 import tokens from '@contentful/f36-tokens';
-import {
-  createContentTypes as createConfigurationContentTypes,
-  REDIRECT_CONTENT_TYPE_ID,
-  VANITY_URL_CONTENT_TYPE_ID,
-} from '../utils/createContentType';
+import { createContentTypes as createConfigurationContentTypes } from '../utils/createContentType';
+import { REDIRECT_CONTENT_TYPE_ID, VANITY_URL_CONTENT_TYPE_ID } from '../utils/consts';
 import { styles } from './ConfigScreen.styles';
 
 const EXCLUDED_CONTENT_TYPE_IDS: string[] = [REDIRECT_CONTENT_TYPE_ID, VANITY_URL_CONTENT_TYPE_ID];

@@ -14,12 +14,22 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { PageAppSDK } from '@contentful/app-sdk';
 import { redirectsTableStyles as styles } from './RedirectsTable.styles';
 import { ContentTable } from './ContentTable';
-import { useRedirects } from '../hooks/useRedirects';
-import { ITEMS_PER_PAGE, STATUS_FILTER_OPTIONS, TYPE_FILTER_OPTIONS } from '../utils/consts';
+import { STATUS_FILTER_OPTIONS, TYPE_FILTER_OPTIONS } from '../utils/consts';
 import { TableColumn, RedirectEntry } from '../utils/types';
 import { truncateText } from '../utils/utils';
 import { SearchBar } from './SearchBar';
 import FilterMultiselect from './FilterMultiselect';
+
+interface RedirectsTableProps {
+  redirects: RedirectEntry[];
+  isFetchingRedirects: boolean;
+  fetchingRedirectsError: Error | null;
+  refetchRedirects: () => void;
+  currentPage: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
+  onItemsPerPageChange: (itemsPerPage: number) => void;
+}
 
 const getSearchableFields = (redirect: RedirectEntry, locale: string): (string | undefined)[] => [
   redirect.fields.redirectFromContentTypes?.title,
@@ -29,17 +39,20 @@ const getSearchableFields = (redirect: RedirectEntry, locale: string): (string |
   redirect.fields.redirectToContentTypes?.slug,
 ];
 
-export const RedirectsTable = () => {
+export const RedirectsTable = ({
+  redirects,
+  isFetchingRedirects,
+  fetchingRedirectsError,
+  refetchRedirects,
+  currentPage,
+  itemsPerPage,
+  onPageChange,
+  onItemsPerPageChange,
+}: RedirectsTableProps) => {
   const sdk = useSDK<PageAppSDK>();
-  const [currentPage, setCurrentPage] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
-  const { redirects, isFetchingRedirects, fetchingRedirectsError, refetchRedirects } = useRedirects(
-    currentPage,
-    itemsPerPage
-  );
 
   const filteredRedirects = useMemo<RedirectEntry[]>(() => {
     const locale = sdk.locales.default;
@@ -73,7 +86,7 @@ export const RedirectsTable = () => {
   };
 
   const handleSearchChange = (query: string) => {
-    setCurrentPage(0);
+    onPageChange(0);
     setSearchQuery(query);
   };
 
@@ -160,7 +173,7 @@ export const RedirectsTable = () => {
     checked: boolean,
     setFilter: (value: SetStateAction<string[]>) => void
   ) => {
-    setCurrentPage(0);
+    onPageChange(0);
     setFilter((prev) =>
       checked ? [...prev, value] : prev.filter((filterValue) => filterValue !== value)
     );
@@ -221,10 +234,10 @@ export const RedirectsTable = () => {
         columns={columns}
         itemsPerPage={itemsPerPage}
         currentPage={currentPage}
-        onPageChange={setCurrentPage}
-        onViewPerPageChange={(itemsPerPage) => {
-          setCurrentPage(0);
-          setItemsPerPage(itemsPerPage);
+        onPageChange={onPageChange}
+        onViewPerPageChange={(newItemsPerPage) => {
+          onPageChange(0);
+          onItemsPerPageChange(newItemsPerPage);
           refetchRedirects();
         }}
         testId="redirects-table"
